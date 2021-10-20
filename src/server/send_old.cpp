@@ -341,7 +341,7 @@ static qboolean compress_message(client_t *client, int flags)
         return false;
 
     // compress only sufficiently large layouts
-    if (msg_write.currentSize < client->netchan->maxPacketLength / 2)
+    if (msg_write.currentSize < client->netchan->maximumPacketLength / 2)
         return false;
 
     deflateReset(&svs.z);
@@ -591,7 +591,7 @@ FRAME UPDATES - OLD NETCHAN
 static void add_message_old(client_t *client, byte *data,
                             size_t len, qboolean reliable)
 {
-    if (len > client->netchan->maxPacketLength) {
+    if (len > client->netchan->maximumPacketLength) {
         if (reliable) {
             SV_DropClient(client, "oversize reliable message");
         } else {
@@ -693,7 +693,7 @@ static void write_datagram_old(client_t *client)
     size_t maximumSize, currentSize;
 
     // determine how much space is left for unreliable data
-    maximumSize = client->netchan->maxPacketLength;
+    maximumSize = client->netchan->maximumPacketLength;
     if (client->netchan->reliableLength) {
         // there is still unacked reliable message pending
         maximumSize -= client->netchan->reliableLength;
@@ -727,7 +727,7 @@ static void write_datagram_old(client_t *client)
     }
 
     // write at least one reliable message
-    write_reliables_old(client, client->netchan->maxPacketLength - msg_write.currentSize);
+    write_reliables_old(client, client->netchan->maximumPacketLength - msg_write.currentSize);
 
     // send the datagram
     currentSize = Netchan_Transmit(client->netchan,
@@ -902,10 +902,10 @@ static void write_pending_download(client_t *client)
         return;
 
     buf = &client->netchan->message;
-    if (buf->currentSize > client->netchan->maxPacketLength)
+    if (buf->currentSize > client->netchan->maximumPacketLength)
         return;
 
-    remaining = client->netchan->maxPacketLength - buf->currentSize;
+    remaining = client->netchan->maximumPacketLength - buf->currentSize;
     if (remaining <= 4)
         return;
 
@@ -977,7 +977,7 @@ void SV_SendAsyncPackets(void)
 
         // just update reliable if needed
         //if (netchan->type == NETCHAN_OLD) {
-        //    write_reliables_old(client, netchan->maxPacketLength);
+        //    write_reliables_old(client, netchan->maximumPacketLength);
         //}
 
         // now fill up remaining buffer space with download

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MSG_H
 
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 
 //===========================================================================//
 // Q3 MSG Style.

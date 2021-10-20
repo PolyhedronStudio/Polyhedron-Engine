@@ -49,7 +49,7 @@ int _wrp_GetServerProtocol(void) {
     return cls.serverProtocol;
 }
 int _wrp_GetProtocolVersion(void) {
-    return cls.protocolVersion;
+    return cls.protocolMajorVersion;
 }
 int _wrp_GetServerState(void) {
     return cl.serverState;
@@ -879,9 +879,9 @@ void CL_GM_EndServerMessage () {
 // Called by the client to check for prediction errors.
 //===============
 //
-void CL_GM_CheckPredictionError(ClientMoveCommand *clientMoveCommand) {
+void CL_GM_CheckPredictionError(ClientMoveCommand *moveCommand) {
     if (cge && cge->prediction)
-        cge->prediction->CheckPredictionError(clientMoveCommand);
+        cge->prediction->CheckPredictionError(moveCommand);
 }
 
 //

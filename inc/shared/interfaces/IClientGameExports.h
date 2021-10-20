@@ -103,7 +103,7 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportPrediction {
 public:
-    virtual void CheckPredictionError(ClientMoveCommand* clientMoveCommand) = 0;
+    virtual void CheckPredictionError(ClientMoveCommand* moveCommand) = 0;
     virtual void PredictAngles() = 0;
     virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
 };

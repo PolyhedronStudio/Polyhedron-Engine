@@ -342,7 +342,7 @@ static qboolean compress_message(client_t *client, int flags)
         return false;
 
     // compress only sufficiently large layouts
-    if (msg_write.currentSize < client->netchan->maxPacketLength / 2)
+    if (msg_write.currentSize < client->netchan->maximumPacketLength / 2)
         return false;
 
     deflateReset(&svs.z);
@@ -741,10 +741,10 @@ static void write_pending_download(client_t *client)
         return;
 
     buf = &client->netchan->message;
-    if (buf->currentSize > client->netchan->maxPacketLength)
+    if (buf->currentSize > client->netchan->maximumPacketLength)
         return;
 
-    remaining = client->netchan->maxPacketLength - buf->currentSize;
+    remaining = client->netchan->maximumPacketLength - buf->currentSize;
     if (remaining <= 4)
         return;
 
@@ -816,7 +816,7 @@ void SV_SendAsyncPackets(void)
 
         // just update reliable if needed
         //if (netchan->type == NETCHAN_OLD) {
-        //    write_reliables_old(client, netchan->maxPacketLength);
+        //    write_reliables_old(client, netchan->maximumPacketLength);
         //}
 
         // now fill up remaining buffer space with download

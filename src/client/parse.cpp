@@ -231,7 +231,7 @@ static void CL_ParseFrame(int extrabits)
     frame.number = currentframe;
     frame.delta = deltaframe;
 
-    if (cls.netchan && cls.netchan->dropped) {
+    if (cls.netchannel && cls.netchannel->deltaFramePacketDrops) {
         cl.frameFlags |= FF_SERVERDROP;
     }
 
@@ -325,8 +325,8 @@ static void CL_ParseFrame(int extrabits)
 #ifdef _DEBUG
     if (cl_shownet->integer > 2) {
         int rtt = 0;
-        if (cls.netchan) {
-            int seq = cls.netchan->incomingAcknowledged & CMD_MASK;
+        if (cls.netchannel) {
+            int seq = cls.netchannel->incomingAcknowledged & CMD_MASK;
             rtt = cls.realtime - cl.clientCommandHistory[seq].timeSent;
         }
         Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
@@ -496,16 +496,17 @@ static void CL_ParseServerData(void)
     cl.serverState = ServerState::Game;
 
     // MSG: !! Removed: PROTOCOL_VERSION_NAC
-    //if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
+    //if (cls.serverProtocol != PROTOCOL_VERSION_NAC) {
     i = MSG_ReadShort();
-    if (!NAC_PROTOCOL_SUPPORTED(i)) {
+    if (!NAC_PROTOCOL_SUPPORTED(protocol)) {
         Com_Error(ERR_DROP,
                     "NaC server reports unsupported protocol version %d.\n"
-                    "Current client version is %d.", i, PROTOCOL_VERSION_NAC_CURRENT);
+                    "Current server/client version is %d.", protocol, PROTOCOL_VERSION_NAC_CURRENT);
     }
-    Com_DPrintf("Using minor NaC protocol version %d\n", i);
-    cls.protocolVersion = i;
-    
+        
+    Com_DPrintf("Using minor NaC protocol version %d\n", protocol);
+    cls.protocolMajorVersion = protocol;
+            
     // Parse N&C server state.
     i = MSG_ReadByte();
     Com_DPrintf("NaC server state %d\n", i);
@@ -605,9 +606,9 @@ static void CL_ParseReconnect(void)
 
     // free netchan now to prevent `disconnect'
     // message from being sent to server
-    if (cls.netchan) {
-        Netchan_Close(cls.netchan);
-        cls.netchan = NULL;
+    if (cls.netchannel) {
+        Netchan_Close(cls.netchannel);
+        cls.netchannel = NULL;
     }
 
     CL_Disconnect(ERR_RECONNECT);

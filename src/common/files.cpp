@@ -3561,7 +3561,7 @@ static void setup_game_paths(void)
 
     if (fs_game->string[0]) {
         // add system path first
-        add_game_dir(FS_PATH_GAME, "%s/%s", sys_basedir->string, fs_game->string);
+        add_game_dir(FS_PATH_GAME, "%s/mods/%s", sys_basedir->string, fs_game->string);
 
         // home paths override system paths
         if (sys_homedir->string[0]) {

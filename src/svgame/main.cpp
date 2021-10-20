@@ -66,7 +66,7 @@ cvar_t  *timelimit;
 cvar_t  *password;
 cvar_t  *spectator_password;
 cvar_t  *needpass;
-cvar_t  *maxClients;
+cvar_t  *maximumClients;
 cvar_t  *maxspectators;
 cvar_t  *maxEntities;
 cvar_t  *g_select_empty;
@@ -298,7 +298,7 @@ void SVG_InitializeCVars() {
     gi.cvar("gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_LATCH);
     gi.cvar("gamedate", __DATE__, CVAR_SERVERINFO | CVAR_LATCH);
 
-    maxClients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+    maximumClients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
     maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
     deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
     coop = gi.cvar("coop", "0", CVAR_LATCH);
@@ -343,7 +343,7 @@ void SVG_InitializeCVars() {
 void SVG_InitializeServerEntities() {
     // Initialize all entities for this "game", aka map that is being played.
     game.maxEntities = MAX_EDICTS;
-    game.maxEntities = Clampi(game.maxEntities, (int)maxClients->value + 1, MAX_EDICTS);
+    game.maxEntities = Clampi(game.maxEntities, (int)maximumClients->value + 1, MAX_EDICTS);
     globals.entities = g_entities;
     globals.maxEntities = game.maxEntities;
 
@@ -363,9 +363,9 @@ void SVG_InitializeServerEntities() {
 //
 void SVG_AllocateGameClients() {
     // Initialize all clients for this game
-    game.maxClients = maxClients->value;
-    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    globals.numberOfEntities = game.maxClients + 1;
+    game.maximumClients = maximumClients->value;
+    game.clients = (GameClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    globals.numberOfEntities = game.maximumClients + 1;
 }
 
 //
@@ -378,10 +378,10 @@ void SVG_AllocateGameClients() {
 //
 void SVG_AllocateGamePlayerClientEntities() {
     // Loop over the number of clients.
-    int32_t maxClients = game.maxClients;
+    int32_t maximumClients = game.maximumClients;
 
     // Allocate a classentity for each client in existence.
-    for (int32_t i = 1; i < maxClients + 1; i++) {
+    for (int32_t i = 1; i < maximumClients + 1; i++) {
         // Fetch server entity.
         Entity* serverEntity = &g_entities[i];
 
@@ -459,7 +459,7 @@ void SVG_ClientEndServerFrames(void)
     // Go through each client and calculate their final view for the state.
     // (This happens here, so we can take into consideration objects that have
     // pushed the player. And of course, because damage has been added.)
-    for (int32_t i = 0; i < maxClients->value; i++) {
+    for (int32_t i = 0; i < maximumClients->value; i++) {
         // First, fetch entity state number.
         int32_t stateNumber = g_entities[1 + i].state.number;
 
@@ -588,7 +588,7 @@ void SVG_CheckDMRules(void)
     }
 
     if (fraglimit->value) {
-        for (i = 0 ; i < maxClients->value ; i++) {
+        for (i = 0 ; i < maximumClients->value ; i++) {
             cl = game.clients + i;
             if (!g_entities[i + 1].inUse)
                 continue;
@@ -679,7 +679,7 @@ void SVG_RunFrame(void)
         }
 
         // Time to begin a server frame for all of our clients. (This has to ha
-        if (i > 0 && i <= maxClients->value) {
+        if (i > 0 && i <= maximumClients->value) {
             // Ensure the entity actually is owned by a client. 
             if (entity->GetClient())
                 game.gameMode->ClientBeginServerFrame((PlayerClient*)entity);

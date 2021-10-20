@@ -9,7 +9,7 @@
 #include "common/enet/enetchan.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 #include "common/zone.h"
 #include "system/system.h"
 

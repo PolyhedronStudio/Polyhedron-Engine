@@ -31,10 +31,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //#include "common/pmove.h"
 #include "common/msg.h"
 #include "common/enet/enetchan.h"
+#include "common/enet/enet.h"
 #include "common/net/net.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 #include "common/zone.h"
 
 #include "system/system.h"
@@ -168,9 +169,9 @@ struct ClientStatic {
 
     int         quakePort;          // a 16 bit value that allows quake servers
                                     // to work around address translating routers
-    NetChannel* netchan;
+    NetChannel* netchannel;
     int         serverProtocol;     // in case we are doing some kind of version hack
-    int         protocolVersion;    // minor version
+    int         protocolMajorVersion;    // minor version
 
     int         challenge;          // from the server to use for connecting
 
@@ -355,7 +356,7 @@ typedef struct console_s {
 
     chatMode_t chat;
     consoleMode_t mode;
-    netadr_t remoteAddress;
+    netadr_t remoteNetAddress;
     char *remotePassword;
 
     LoadState loadstate;

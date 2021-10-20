@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/enet/enetchan.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 #include "common/zone.h"
 #include "system/system.h"
 #include <enet.h>
@@ -39,18 +39,18 @@ packet header
 16  qport
 
 The remote connection never knows if it missed a reliable message, the
-local side detects that it has been dropped by seeing a sequence acknowledge
+local side detects that it has been deltaFramePacketDrops by seeing a sequence acknowledge
 higher thatn the last reliable sequence, but without the correct evon/odd
 bit for the reliable set.
 
-If the sender notices that a reliable message has been dropped, it will be
+If the sender notices that a reliable message has been deltaFramePacketDrops, it will be
 retransmitted.  It will not be retransmitted again until a message after
 the retransmit has been acknowledged and the reliable still failed to get theref.
 
 if the sequence number is -1, the packet should be handled without a netcon
 
 The reliable message can be added to at any time by doing
-MSG_Write* (&netchan->message, <data>).
+MSG_Write* (&netchannel->message, <data>).
 
 If the message buffer is overflowed, either by a single message, or by
 multiple frames worth piling up while the last reliable transmit goes
@@ -62,7 +62,7 @@ message is included if there is sufficient room.
 To the receiver, there is no distinction between the reliable and unreliable
 parts of the message, they are just processed out as a single larger message.
 
-Illogical packet sequence numbers cause the packet to be dropped, but do
+Illogical packet sequence numbers cause the packet to be deltaFramePacketDrops, but do
 not kill the connection.  This, combined with the tight window of valid
 reliable acknowledgement numbers provides protection against malicious
 address spoofing.
@@ -168,7 +168,7 @@ void Netchan_OutOfBand(NetSource sock, const netadr_t* address,
 Netchan_TransmitNextFragment
 ================
 */
-size_t Netchan_TransmitNextFragment(NetChannel* netchan) {
+size_t Netchan_TransmitNextFragment(NetChannel* netchannel) {
     SizeBuffer   send;
     byte        send_buf[MAX_PACKETLEN];
     qboolean    send_reliable;
@@ -178,13 +178,13 @@ size_t Netchan_TransmitNextFragment(NetChannel* netchan) {
     qboolean    more_fragments;
 
     // Should we send a reliable message, or not?
-    send_reliable = netchan->reliableLength ? true : false;
+    send_reliable = netchannel->reliableLength ? true : false;
 
     // Write the packet header
-    w1 = (netchan->outgoingSequence & 0x3FFFFFFF) | (1 << 30) |
+    w1 = (netchannel->outgoingSequence & 0x3FFFFFFF) | (1 << 30) |
         (send_reliable << 31);
-    w2 = (netchan->incomingSequence & 0x3FFFFFFF) | (0 << 30) |
-        (netchan->incomingReliableSequence << 31);
+    w2 = (netchannel->incomingSequence & 0x3FFFFFFF) | (0 << 30) |
+        (netchannel->incomingReliableSequence << 31);
 
     SZ_TagInit(&send, send_buf, sizeof(send_buf), SZ_NC_SEND_FRG);
 
@@ -193,61 +193,61 @@ size_t Netchan_TransmitNextFragment(NetChannel* netchan) {
 
 #if USE_CLIENT
     // Send the qport if we are a client
-    if (netchan->netSource == NS_CLIENT && netchan->qport) {
-        SZ_WriteByte(&send, netchan->qport);
+    if (netchannel->netSource == NS_CLIENT && netchannel->remoteQPort) {
+        SZ_WriteByte(&send, netchannel->remoteQPort);
     }
 #endif
 
     // Calculate Fragment length based on how much has been read so far.
     // Ensure we do not exceed the max packet length.
-    fragment_length = netchan->outFragment.currentSize - netchan->outFragment.readCount;
-    if (fragment_length > netchan->maxPacketLength) {
-        fragment_length = netchan->maxPacketLength;
+    fragment_length = netchannel->outFragment.currentSize - netchannel->outFragment.readCount;
+    if (fragment_length > netchannel->maximumPacketLength) {
+        fragment_length = netchannel->maximumPacketLength;
     }
 
     // More 
     more_fragments = true;
-    if (netchan->outFragment.readCount + fragment_length ==
-        netchan->outFragment.currentSize) {
+    if (netchannel->outFragment.readCount + fragment_length ==
+        netchannel->outFragment.currentSize) {
         more_fragments = false;
     }
 
     // Write fragment offset
-    offset = (netchan->outFragment.readCount & 0x7FFF) |
+    offset = (netchannel->outFragment.readCount & 0x7FFF) |
         (more_fragments << 15);
     SZ_WriteShort(&send, offset);
 
     // Write fragment contents
-    SZ_Write(&send, netchan->outFragment.data + netchan->outFragment.readCount,
+    SZ_Write(&send, netchannel->outFragment.data + netchannel->outFragment.readCount,
         fragment_length);
 
     SHOWPACKET("send %4" PRIz " : s=%d ack=%d rack=%d "
         "fragment_offset=%" PRIz " more_fragments=%d",
         send.currentSize,
-        netchan->outgoingSequence,
-        netchan->incomingSequence,
-        netchan->incomingReliableSequence,
-        netchan->outFragment.readCount,
+        netchannel->outgoingSequence,
+        netchannel->incomingSequence,
+        netchannel->incomingReliableSequence,
+        netchannel->outFragment.readCount,
         more_fragments);
     if (send_reliable) {
-        SHOWPACKET(" reliable=%i ", netchan->reliableSequence);
+        SHOWPACKET(" reliable=%i ", netchannel->reliableSequence);
     }
     SHOWPACKET("\n");
 
     // Increment read count with fragment length and store whether one more is pending or not.
-    netchan->outFragment.readCount += fragment_length;
-    netchan->fragmentPending = more_fragments;
+    netchannel->outFragment.readCount += fragment_length;
+    netchannel->fragmentPending = more_fragments;
 
     // If the message has been sent completely, clear the fragment buffer
-    if (!netchan->fragmentPending) {
-        netchan->outgoingSequence++;
-        netchan->lastSentTime = com_localTime;
-        SZ_Clear(&netchan->outFragment);
+    if (!netchannel->fragmentPending) {
+        netchannel->outgoingSequence++;
+        netchannel->lastSentTime = com_localTime;
+        SZ_Clear(&netchannel->outFragment);
     }
 
     // Send the datagram
-    NET_SendPacket(netchan->netSource, send.data, send.currentSize,
-        &netchan->remoteAddress);
+    NET_SendPacket(netchannel->netSource, send.data, send.currentSize,
+        &netchannel->remoteNetAddress);
 
     return send.currentSize;
 }
@@ -257,7 +257,7 @@ size_t Netchan_TransmitNextFragment(NetChannel* netchan) {
 Netchan_Transmit
 ================
 */
-size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, int numpackets) {
+size_t Netchan_Transmit(NetChannel* netchannel, size_t length, const void* data, int numpackets) {
     SizeBuffer   send;
     byte        send_buf[MAX_PACKETLEN];
     qboolean    send_reliable;
@@ -265,55 +265,55 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
     int         i;
 
     // check for message overflow
-    if (netchan->message.overflowed) {
-        netchan->fatalError = true;
+    if (netchannel->message.overflowed) {
+        netchannel->fatalError = true;
         Com_WPrintf("%s: outgoing message overflow\n",
-            NET_AdrToString(&netchan->remoteAddress));
+            NET_AdrToString(&netchannel->remoteNetAddress));
         return 0;
     }
 
-    if (netchan->fragmentPending) {
-        return Netchan_TransmitNextFragment(netchan);
+    if (netchannel->fragmentPending) {
+        return Netchan_TransmitNextFragment(netchannel);
     }
 
     send_reliable = false;
 
-    // if the remote side dropped the last reliable message, resend it
-    if (netchan->incomingAcknowledged > netchan->lastReliableSequence &&
-        netchan->incomingReliableAcknowledged != netchan->reliableSequence) {
+    // if the remote side deltaFramePacketDrops the last reliable message, resend it
+    if (netchannel->incomingAcknowledged > netchannel->lastReliableSequence &&
+        netchannel->incomingReliableAcknowledged != netchannel->reliableSequence) {
         send_reliable = true;
     }
 
     // if the reliable transmit buffer is empty, copy the current message out
-    if (!netchan->reliableLength && netchan->message.currentSize) {
+    if (!netchannel->reliableLength && netchannel->message.currentSize) {
         send_reliable = true;
-        memcpy(netchan->reliableBuffer, netchan->messageBuffer,
-            netchan->message.currentSize);
-        netchan->reliableLength = netchan->message.currentSize;
-        netchan->message.currentSize = 0;
-        netchan->reliableSequence ^= 1;
+        memcpy(netchannel->reliableBuffer, netchannel->messageBuffer,
+            netchannel->message.currentSize);
+        netchannel->reliableLength = netchannel->message.currentSize;
+        netchannel->message.currentSize = 0;
+        netchannel->reliableSequence ^= 1;
     }
 
-    if (length > netchan->maxPacketLength || (send_reliable &&
-        (netchan->reliableLength + length > netchan->maxPacketLength))) {
+    if (length > netchannel->maximumPacketLength || (send_reliable &&
+                                           (netchannel->reliableLength + length > netchannel->maximumPacketLength))) {
         if (send_reliable) {
-            netchan->lastReliableSequence = netchan->outgoingSequence;
-            SZ_Write(&netchan->outFragment, netchan->reliableBuffer,
-                netchan->reliableLength);
+            netchannel->lastReliableSequence = netchannel->outgoingSequence;
+            SZ_Write(&netchannel->outFragment, netchannel->reliableBuffer,
+                netchannel->reliableLength);
         }
         // add the unreliable part if space is available
-        if (netchan->outFragment.maximumSize - netchan->outFragment.currentSize >= length)
-            SZ_Write(&netchan->outFragment, data, length);
+        if (netchannel->outFragment.maximumSize - netchannel->outFragment.currentSize >= length)
+            SZ_Write(&netchannel->outFragment, data, length);
         else
             Com_WPrintf("%s: dumped unreliable\n",
-                NET_AdrToString(&netchan->remoteAddress));
-        return Netchan_TransmitNextFragment(netchan);
+                NET_AdrToString(&netchannel->remoteNetAddress));
+        return Netchan_TransmitNextFragment(netchannel);
     }
 
     // write the packet header
-    w1 = (netchan->outgoingSequence & 0x3FFFFFFF) | (send_reliable << 31);
-    w2 = (netchan->incomingSequence & 0x3FFFFFFF) |
-        (netchan->incomingReliableSequence << 31);
+    w1 = (netchannel->outgoingSequence & 0x3FFFFFFF) | (send_reliable << 31);
+    w2 = (netchannel->incomingSequence & 0x3FFFFFFF) |
+        (netchannel->incomingReliableSequence << 31);
 
     SZ_TagInit(&send, send_buf, sizeof(send_buf), SZ_NC_SEND_NEW);
 
@@ -322,15 +322,15 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
 
 #if USE_CLIENT
     // send the qport if we are a client
-    if (netchan->netSource == NS_CLIENT && netchan->qport) {
-        SZ_WriteByte(&send, netchan->qport);
+    if (netchannel->netSource == NS_CLIENT && netchannel->remoteQPort) {
+        SZ_WriteByte(&send, netchannel->remoteQPort);
     }
 #endif
 
     // copy the reliable message to the packet first
     if (send_reliable) {
-        netchan->lastReliableSequence = netchan->outgoingSequence;
-        SZ_Write(&send, netchan->reliableBuffer, netchan->reliableLength);
+        netchannel->lastReliableSequence = netchannel->outgoingSequence;
+        SZ_Write(&send, netchannel->reliableBuffer, netchannel->reliableLength);
     }
 
     // add the unreliable part
@@ -338,23 +338,23 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
 
     SHOWPACKET("send %4" PRIz " : s=%d ack=%d rack=%d",
         send.currentSize,
-        netchan->outgoingSequence,
-        netchan->incomingSequence,
-        netchan->incomingReliableSequence);
+        netchannel->outgoingSequence,
+        netchannel->incomingSequence,
+        netchannel->incomingReliableSequence);
     if (send_reliable) {
-        SHOWPACKET(" reliable=%d", netchan->reliableSequence);
+        SHOWPACKET(" reliable=%d", netchannel->reliableSequence);
     }
     SHOWPACKET("\n");
 
     // send the datagram
     for (i = 0; i < numpackets; i++) {
-        NET_SendPacket(netchan->netSource, send.data, send.currentSize,
-            &netchan->remoteAddress);
+        NET_SendPacket(netchannel->netSource, send.data, send.currentSize,
+            &netchannel->remoteNetAddress);
     }
 
-    netchan->outgoingSequence++;
-    netchan->reliableAckPending = false;
-    netchan->lastSentTime = com_localTime;
+    netchannel->outgoingSequence++;
+    netchannel->reliableAckPending = false;
+    netchannel->lastSentTime = com_localTime;
 
     return send.currentSize * numpackets;
 }
@@ -364,7 +364,7 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
 Netchan_Process
 =================
 */
-qboolean Netchan_Process(NetChannel* netchan) {
+qboolean Netchan_Process(NetChannel* netchannel) {
     uint32_t    sequence, sequence_ack, reliable_ack;
     qboolean    reliable_message, fragmented_message, more_fragments;
     uint16_t    fragment_offset;
@@ -377,9 +377,9 @@ qboolean Netchan_Process(NetChannel* netchan) {
 
     // read the qport if we are a server
 #if USE_CLIENT
-    if (netchan->netSource == NS_SERVER)
+    if (netchannel->netSource == NS_SERVER)
 #endif
-        if (netchan->qport) {
+        if (netchannel->remoteQPort) {
             MSG_ReadByte();
         }
 
@@ -405,37 +405,37 @@ qboolean Netchan_Process(NetChannel* netchan) {
             fragment_offset, more_fragments);
     }
     if (reliable_message) {
-        SHOWPACKET(" reliable=%d", netchan->incomingReliableSequence ^ 1);
+        SHOWPACKET(" reliable=%d", netchannel->incomingReliableSequence ^ 1);
     }
     SHOWPACKET("\n");
 
     //
     // discard stale or duplicated packets
     //
-    if (sequence <= netchan->incomingSequence) {
+    if (sequence <= netchannel->incomingSequence) {
         SHOWDROP("%s: out of order packet %i at %i\n",
-            NET_AdrToString(&netchan->remoteAddress),
-            sequence, netchan->incomingSequence);
+            NET_AdrToString(&netchannel->remoteNetAddress),
+            sequence, netchannel->incomingSequence);
         return false;
     }
 
     //
-    // dropped packets don't keep the message from being used
+    // deltaFramePacketDrops packets don't keep the message from being used
     //
-    netchan->dropped = sequence - (netchan->incomingSequence + 1);
-    if (netchan->dropped > 0) {
-        SHOWDROP("%s: dropped %i packets at %i\n",
-            NET_AdrToString(&netchan->remoteAddress),
-            netchan->dropped, sequence);
+    netchannel->deltaFramePacketDrops = sequence - (netchannel->incomingSequence + 1);
+    if (netchannel->deltaFramePacketDrops > 0) {
+        SHOWDROP("%s: deltaFramePacketDrops %i packets at %i\n",
+            NET_AdrToString(&netchannel->remoteNetAddress),
+            netchannel->deltaFramePacketDrops, sequence);
     }
 
     //
     // if the current outgoing reliable message has been acknowledged
     // clear the buffer to make way for the next
     //
-    netchan->incomingReliableAcknowledged = reliable_ack;
-    if (reliable_ack == netchan->reliableSequence) {
-        netchan->reliableLength = 0;   // it has been received
+    netchannel->incomingReliableAcknowledged = reliable_ack;
+    if (reliable_ack == netchannel->reliableSequence) {
+        netchannel->reliableLength = 0;   // it has been received
     }
 
 
@@ -443,32 +443,32 @@ qboolean Netchan_Process(NetChannel* netchan) {
     // parse fragment header, if any
     //
     if (fragmented_message) {
-        if (netchan->fragmentSequence != sequence) {
+        if (netchannel->fragmentSequence != sequence) {
             // start new receive sequence
-            netchan->fragmentSequence = sequence;
-            SZ_Clear(&netchan->inFragment);
+            netchannel->fragmentSequence = sequence;
+            SZ_Clear(&netchannel->inFragment);
         }
 
-        if (fragment_offset < netchan->inFragment.currentSize) {
+        if (fragment_offset < netchannel->inFragment.currentSize) {
             SHOWDROP("%s: out of order fragment at %i\n",
-                NET_AdrToString(&netchan->remoteAddress), sequence);
+                NET_AdrToString(&netchannel->remoteNetAddress), sequence);
             return false;
         }
 
-        if (fragment_offset > netchan->inFragment.currentSize) {
-            SHOWDROP("%s: dropped fragment(s) at %i\n",
-                NET_AdrToString(&netchan->remoteAddress), sequence);
+        if (fragment_offset > netchannel->inFragment.currentSize) {
+            SHOWDROP("%s: deltaFramePacketDrops fragment(s) at %i\n",
+                NET_AdrToString(&netchannel->remoteNetAddress), sequence);
             return false;
         }
 
         length = msg_read.currentSize - msg_read.readCount;
-        if (netchan->inFragment.currentSize + length > netchan->inFragment.maximumSize) {
+        if (netchannel->inFragment.currentSize + length > netchannel->inFragment.maximumSize) {
             SHOWDROP("%s: oversize fragment at %i\n",
-                NET_AdrToString(&netchan->remoteAddress), sequence);
+                NET_AdrToString(&netchannel->remoteNetAddress), sequence);
             return false;
         }
 
-        SZ_Write(&netchan->inFragment, msg_read.data +
+        SZ_Write(&netchannel->inFragment, msg_read.data +
             msg_read.readCount, length);
         if (more_fragments) {
             return false;
@@ -476,29 +476,29 @@ qboolean Netchan_Process(NetChannel* netchan) {
 
         // message has been sucessfully assembled
         SZ_Clear(&msg_read);
-        SZ_Write(&msg_read, netchan->inFragment.data,
-            netchan->inFragment.currentSize);
-        SZ_Clear(&netchan->inFragment);
+        SZ_Write(&msg_read, netchannel->inFragment.data,
+            netchannel->inFragment.currentSize);
+        SZ_Clear(&netchannel->inFragment);
     }
 
-    netchan->incomingSequence = sequence;
-    netchan->incomingAcknowledged = sequence_ack;
+    netchannel->incomingSequence = sequence;
+    netchannel->incomingAcknowledged = sequence_ack;
 
     //
     // if this message contains a reliable message, bump incomingReliableSequence
     //
     if (reliable_message) {
-        netchan->reliableAckPending = true;
-        netchan->incomingReliableSequence ^= 1;
+        netchannel->reliableAckPending = true;
+        netchannel->incomingReliableSequence ^= 1;
     }
 
     //
     // the message can now be read from the current message pointer
     //
-    netchan->lastReceivedTime = com_localTime;
+    netchannel->lastReceivedTime = com_localTime;
 
-    netchan->totalDropped += netchan->dropped;
-    netchan->totalReceived += netchan->dropped + 1;
+    netchannel->totalDropped += netchannel->deltaFramePacketDrops;
+    netchannel->totalReceived += netchannel->deltaFramePacketDrops + 1;
 
     return true;
 }
@@ -508,13 +508,13 @@ qboolean Netchan_Process(NetChannel* netchan) {
 Netchan_ShouldUpdate
 ==============
 */
-qboolean Netchan_ShouldUpdate(NetChannel* netchan) {
-    NetChannel* chan = (NetChannel*)netchan;
+qboolean Netchan_ShouldUpdate(NetChannel* netchannel) {
+    NetChannel* channel = (NetChannel*)netchannel;
 
-    if (netchan->message.currentSize ||
-        netchan->reliableAckPending ||
-        chan->outFragment.currentSize ||
-        com_localTime - netchan->lastSentTime > 1000) {
+    if (netchannel->message.currentSize ||
+        netchannel->reliableAckPending ||
+        channel->outFragment.currentSize ||
+        com_localTime - netchannel->lastSentTime > 1000) {
         return true;
     }
 
@@ -526,33 +526,91 @@ qboolean Netchan_ShouldUpdate(NetChannel* netchan) {
 Netchan_Setup
 ==============
 */
-NetChannel* Netchan_Setup(NetSource sock, const netadr_t* adr, int qport, size_t maxPacketLength, int protocol) {
-    NetChannel* netchan;
+NetChannel* ENetchan_Setup(NetSource netSource, const std::string &host, int32_t qport, size_t maxPacketLength, int32_t protocolMajorVersion) {
+    NetChannel* netchannel;
 
     clamp(maxPacketLength, MIN_PACKETLEN, MAX_PACKETLEN_WRITABLE);
 
-    netchan = (NetChannel*)Z_TagMallocz(sizeof(*netchan), // CPP: Cast
-        sock == NS_SERVER ? TAG_SERVER : TAG_GENERAL);
-    netchan->netSource = sock;
-    netchan->remoteAddress = *adr;
-    netchan->qport = qport;
-    netchan->maxPacketLength = maxPacketLength;
-    netchan->lastReceivedTime = com_localTime;
-    netchan->lastSentTime = com_localTime;
-    netchan->incomingSequence = 0;
-    netchan->outgoingSequence = 1;
+    // Temporarily still here so the OG code can still work.
+    // For now we want to test ENet itself only for OOB.
+    netadr_t netadr;
+    NET_StringToAdr(host.c_str(), &netadr, 27910);
 
-    SZ_Init(&netchan->message, netchan->messageBuffer,
-        sizeof(netchan->messageBuffer));
-    SZ_TagInit(&netchan->inFragment, netchan->inFragmentBuffer,
-        sizeof(netchan->inFragmentBuffer), SZ_NC_FRG_IN);
-    SZ_TagInit(&netchan->outFragment, netchan->outFragmentBuffer,
-        sizeof(netchan->outFragmentBuffer), SZ_NC_FRG_OUT);
+    netchannel = (NetChannel*)Z_TagMallocz(sizeof(*netchannel), // CPP: Cast
+        netSource == NS_SERVER ? TAG_SERVER : TAG_GENERAL);
+    netchannel->netSource = netSource;
+    netchannel->remoteNetAddress = netadr;
+    netchannel->remoteQPort = qport;
+    netchannel->maximumPacketLength = maxPacketLength;
+    netchannel->lastReceivedTime = com_localTime;
+    netchannel->lastSentTime = com_localTime;
+    netchannel->incomingSequence = 0;
+    netchannel->outgoingSequence = 1;
 
-    netchan->protocol = protocol;
+    // Create our netchannel host.
+    ENetAddress eHostAddress = ENetAddress{
+        .host = ENET_HOST_ANY,
+        .port = ENET_PORT_ANY
+    };
+    netchannel->eHost = enet_host_create(&eHostAddress,
+        32, 4, 0, 0);
 
-    return netchan;
+    // Generate the connect address struct.
+    ENetAddress eConnectAddress = {};
 
+    // First try general host IPs.
+    if (enet_address_set_host_new(&eConnectAddress, host.c_str()) < 0) {
+        // If that fails, we try general host URLs.
+        if (enet_address_set_host_ip_new(&eConnectAddress, host.c_str()) < 0) {
+            Com_Error(ERR_DROP, "NetChannel[%s] failed to connect to host address: %s\n", host.c_str());
+        }
+    }
+    
+    netchannel->ePeer = enet_host_connect(netchannel->eHost, &eConnectAddress, 4, 0);
+
+    // Run the host for 33ms (About a frame.)
+    SZ_Init(&netchannel->message, netchannel->messageBuffer,
+        sizeof(netchannel->messageBuffer));
+    SZ_TagInit(&netchannel->inFragment, netchannel->inFragmentBuffer,
+        sizeof(netchannel->inFragmentBuffer), SZ_NC_FRG_IN);
+    SZ_TagInit(&netchannel->outFragment, netchannel->outFragmentBuffer,
+        sizeof(netchannel->outFragmentBuffer), SZ_NC_FRG_OUT);
+
+    netchannel->protocolMajorVersion = protocolMajorVersion;
+
+    return netchannel;
+
+}
+
+NetChannel* Netchan_Setup(NetSource netSource, const netadr_t* adr, int qport, size_t maximumPacketLength, int protocol) {
+    NetChannel* netchannel;
+
+    clamp(maximumPacketLength, MIN_PACKETLEN, MAX_PACKETLEN_WRITABLE);
+
+    // Temporarily still here so the OG code can still work.
+    // For now we want to test ENet itself only for OOB.
+    netchannel = (NetChannel*)Z_TagMallocz(sizeof(*netchannel), // CPP: Cast
+        netSource == NS_SERVER ? TAG_SERVER : TAG_GENERAL);
+    netchannel->netSource = netSource;
+    netchannel->remoteNetAddress = *adr;
+    netchannel->remoteQPort = qport;
+    netchannel->maximumPacketLength = maximumPacketLength;
+    netchannel->lastReceivedTime = com_localTime;
+    netchannel->lastSentTime = com_localTime;
+    netchannel->incomingSequence = 0;
+    netchannel->outgoingSequence = 1;
+
+    // Run the host for 33ms (About a frame.)
+    SZ_Init(&netchannel->message, netchannel->messageBuffer,
+        sizeof(netchannel->messageBuffer));
+    SZ_TagInit(&netchannel->inFragment, netchannel->inFragmentBuffer,
+        sizeof(netchannel->inFragmentBuffer), SZ_NC_FRG_IN);
+    SZ_TagInit(&netchannel->outFragment, netchannel->outFragmentBuffer,
+        sizeof(netchannel->outFragmentBuffer), SZ_NC_FRG_OUT);
+
+    netchannel->protocolMajorVersion = protocol;
+
+    return netchannel;
 }
 
 /*
@@ -560,7 +618,7 @@ NetChannel* Netchan_Setup(NetSource sock, const netadr_t* adr, int qport, size_t
 Netchan_Close
 ==============
 */
-void Netchan_Close(NetChannel* netchan) {
-    Z_Free(netchan);
+void Netchan_Close(NetChannel* netchannel) {
+    Z_Free(netchannel);
 }
 

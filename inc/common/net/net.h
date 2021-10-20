@@ -48,7 +48,7 @@ typedef intptr_t qsocket_t;
 typedef int qsocket_t;
 #endif
 
-typedef struct {
+struct ioentry_t {
 #ifdef _WIN32
     qsocket_t fd;
 #endif
@@ -59,49 +59,49 @@ typedef struct {
     qboolean wantread: 1;
     qboolean wantwrite: 1;
     qboolean wantexcept: 1;
-} ioentry_t;
+};
 
-typedef enum {
+enum NetAddressType {
     NA_UNSPECIFIED,
     NA_LOOPBACK,
     NA_BROADCAST,
     NA_IP,
     NA_IP6
-} NetAddressType;
+};
 
-typedef enum {
+enum NetSource {
     NS_CLIENT,
     NS_SERVER,
     NS_COUNT
-} NetSource;
+};
 
-typedef enum {
+enum NetFlag {
     NET_NONE    = 0,
     NET_CLIENT  = (1 << 0),
     NET_SERVER  = (1 << 1)
-} NetFlag;
+};
 
-typedef union {
+union netadrip_t {
     uint8_t u8[16];
     uint16_t u16[8];
     uint32_t u32[4];
     uint64_t u64[2];
-} netadrip_t;
+};
 
-typedef struct netadr_s {
+struct netadr_t {
     NetAddressType type;
     netadrip_t ip;
     uint16_t port;
     uint32_t scope_id;  // IPv6 crap
-} netadr_t;
+};
 
-typedef enum netstate_e {
+enum NetState {
     NS_DISCONNECTED,// no socket opened
     NS_CONNECTING,  // connect() not yet completed
     NS_CONNECTED,   // may transmit data
     NS_CLOSED,      // peer has preformed orderly shutdown
     NS_BROKEN       // fatal error has been signaled
-} NetState;
+};
 
 static inline qboolean NET_IsEqualAdr(const netadr_t *a, const netadr_t *b)
 {

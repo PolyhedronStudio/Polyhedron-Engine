@@ -78,7 +78,7 @@ qboolean DeathMatchGameMode::ClientCanConnect(Entity* serverEntity, char* userIn
     }
 
     // Count total spectators.
-    for (i = numspec = 0; i < maxClients->value; i++)
+    for (i = numspec = 0; i < maximumClients->value; i++)
         if (g_entities[i + 1].inUse && g_entities[i + 1].client->persistent.isSpectator)
             numspec++;
 

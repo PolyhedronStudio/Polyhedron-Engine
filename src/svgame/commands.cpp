@@ -631,7 +631,7 @@ void Cmd_Players_f(Entity *ent)
     int     index[256];
 
     count = 0;
-    for (i = 0 ; i < maxClients->value ; i++)
+    for (i = 0 ; i < maximumClients->value ; i++)
         if (game.clients[i].persistent.isConnected) {
             index[count] = i;
             count++;
@@ -778,7 +778,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
     if (dedicated->value)
         gi.CPrintf(NULL, PRINT_CHAT, "%s", text);
 
-    for (j = 1; j <= game.maxClients; j++) {
+    for (j = 1; j <= game.maximumClients; j++) {
         other = &g_entities[j];
         if (!other->inUse)
             continue;
@@ -801,7 +801,7 @@ void Cmd_PlayerList_f(Entity *ent)
 
     // connect time, ping, score, name
     *text = 0;
-    for (i = 0, e2 = g_entities + 1; i < maxClients->value; i++, e2++) {
+    for (i = 0, e2 = g_entities + 1; i < maximumClients->value; i++, e2++) {
         if (!e2->inUse)
             continue;
 

@@ -3,7 +3,7 @@
 License here.
 */
 #include <enet.h>
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 
 //==============================================================================================
 //

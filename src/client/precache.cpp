@@ -146,7 +146,7 @@ void CL_UpdateConfigstring(int index)
     }
 
     if (index == ConfigStrings::MaxClients) {
-        cl.maxClients = atoi(s);
+        cl.maximumClients = atoi(s);
         return;
     }
 

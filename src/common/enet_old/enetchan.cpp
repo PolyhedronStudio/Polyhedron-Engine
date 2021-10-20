@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/enet/enetchan.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 #include "common/zone.h"
 #include "system/system.h"
 #include <enet.h>
@@ -193,16 +193,16 @@ size_t Netchan_TransmitNextFragment(NetChannel* netchan) {
 
 #if USE_CLIENT
     // Send the qport if we are a client
-    if (netchan->netSource == NS_CLIENT && netchan->qport) {
-        SZ_WriteByte(&send, netchan->qport);
+    if (netchan->netSource == NS_CLIENT && netchan->remoteQPort) {
+        SZ_WriteByte(&send, netchan->remoteQPort);
     }
 #endif
 
     // Calculate Fragment length based on how much has been read so far.
     // Ensure we do not exceed the max packet length.
     fragment_length = netchan->outFragment.currentSize - netchan->outFragment.readCount;
-    if (fragment_length > netchan->maxPacketLength) {
-        fragment_length = netchan->maxPacketLength;
+    if (fragment_length > netchan->maximumPacketLength) {
+        fragment_length = netchan->maximumPacketLength;
     }
 
     // More 
@@ -247,7 +247,7 @@ size_t Netchan_TransmitNextFragment(NetChannel* netchan) {
 
     // Send the datagram
     NET_SendPacket(netchan->netSource, send.data, send.currentSize,
-        &netchan->remoteAddress);
+        &netchan->remoteNetAddress);
 
     return send.currentSize;
 }
@@ -268,7 +268,7 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
     if (netchan->message.overflowed) {
         netchan->fatalError = true;
         Com_WPrintf("%s: outgoing message overflow\n",
-            NET_AdrToString(&netchan->remoteAddress));
+            NET_AdrToString(&netchan->remoteNetAddress));
         return 0;
     }
 
@@ -294,8 +294,8 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
         netchan->reliableSequence ^= 1;
     }
 
-    if (length > netchan->maxPacketLength || (send_reliable &&
-        (netchan->reliableLength + length > netchan->maxPacketLength))) {
+    if (length > netchan->maximumPacketLength || (send_reliable &&
+        (netchan->reliableLength + length > netchan->maximumPacketLength))) {
         if (send_reliable) {
             netchan->lastReliableSequence = netchan->outgoingSequence;
             SZ_Write(&netchan->outFragment, netchan->reliableBuffer,
@@ -306,7 +306,7 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
             SZ_Write(&netchan->outFragment, data, length);
         else
             Com_WPrintf("%s: dumped unreliable\n",
-                NET_AdrToString(&netchan->remoteAddress));
+                NET_AdrToString(&netchan->remoteNetAddress));
         return Netchan_TransmitNextFragment(netchan);
     }
 
@@ -322,8 +322,8 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
 
 #if USE_CLIENT
     // send the qport if we are a client
-    if (netchan->netSource == NS_CLIENT && netchan->qport) {
-        SZ_WriteByte(&send, netchan->qport);
+    if (netchan->netSource == NS_CLIENT && netchan->remoteQPort) {
+        SZ_WriteByte(&send, netchan->remoteQPort);
     }
 #endif
 
@@ -349,7 +349,7 @@ size_t Netchan_Transmit(NetChannel* netchan, size_t length, const void* data, in
     // send the datagram
     for (i = 0; i < numpackets; i++) {
         NET_SendPacket(netchan->netSource, send.data, send.currentSize,
-            &netchan->remoteAddress);
+            &netchan->remoteNetAddress);
     }
 
     netchan->outgoingSequence++;
@@ -379,7 +379,7 @@ qboolean Netchan_Process(NetChannel* netchan) {
 #if USE_CLIENT
     if (netchan->netSource == NS_SERVER)
 #endif
-        if (netchan->qport) {
+        if (netchan->remoteQPort) {
             MSG_ReadByte();
         }
 
@@ -414,7 +414,7 @@ qboolean Netchan_Process(NetChannel* netchan) {
     //
     if (sequence <= netchan->incomingSequence) {
         SHOWDROP("%s: out of order packet %i at %i\n",
-            NET_AdrToString(&netchan->remoteAddress),
+            NET_AdrToString(&netchan->remoteNetAddress),
             sequence, netchan->incomingSequence);
         return false;
     }
@@ -422,11 +422,11 @@ qboolean Netchan_Process(NetChannel* netchan) {
     //
     // dropped packets don't keep the message from being used
     //
-    netchan->dropped = sequence - (netchan->incomingSequence + 1);
-    if (netchan->dropped > 0) {
+    netchan->deltaFramePacketDrops = sequence - (netchan->incomingSequence + 1);
+    if (netchan->deltaFramePacketDrops > 0) {
         SHOWDROP("%s: dropped %i packets at %i\n",
-            NET_AdrToString(&netchan->remoteAddress),
-            netchan->dropped, sequence);
+            NET_AdrToString(&netchan->remoteNetAddress),
+            netchan->deltaFramePacketDrops, sequence);
     }
 
     //
@@ -451,20 +451,20 @@ qboolean Netchan_Process(NetChannel* netchan) {
 
         if (fragment_offset < netchan->inFragment.currentSize) {
             SHOWDROP("%s: out of order fragment at %i\n",
-                NET_AdrToString(&netchan->remoteAddress), sequence);
+                NET_AdrToString(&netchan->remoteNetAddress), sequence);
             return false;
         }
 
         if (fragment_offset > netchan->inFragment.currentSize) {
             SHOWDROP("%s: dropped fragment(s) at %i\n",
-                NET_AdrToString(&netchan->remoteAddress), sequence);
+                NET_AdrToString(&netchan->remoteNetAddress), sequence);
             return false;
         }
 
         length = msg_read.currentSize - msg_read.readCount;
         if (netchan->inFragment.currentSize + length > netchan->inFragment.maximumSize) {
             SHOWDROP("%s: oversize fragment at %i\n",
-                NET_AdrToString(&netchan->remoteAddress), sequence);
+                NET_AdrToString(&netchan->remoteNetAddress), sequence);
             return false;
         }
 
@@ -497,8 +497,8 @@ qboolean Netchan_Process(NetChannel* netchan) {
     //
     netchan->lastReceivedTime = com_localTime;
 
-    netchan->totalDropped += netchan->dropped;
-    netchan->totalReceived += netchan->dropped + 1;
+    netchan->totalDropped += netchan->deltaFramePacketDrops;
+    netchan->totalReceived += netchan->deltaFramePacketDrops + 1;
 
     return true;
 }
@@ -534,9 +534,9 @@ NetChannel* Netchan_Setup(NetSource sock, const netadr_t* adr, int qport, size_t
     netchan = (NetChannel*)Z_TagMallocz(sizeof(*netchan), // CPP: Cast
         sock == NS_SERVER ? TAG_SERVER : TAG_GENERAL);
     netchan->netSource = sock;
-    netchan->remoteAddress = *adr;
-    netchan->qport = qport;
-    netchan->maxPacketLength = maxPacketLength;
+    netchan->remoteNetAddress = *adr;
+    netchan->remoteQPort = qport;
+    netchan->maximumPacketLength = maxPacketLength;
     netchan->lastReceivedTime = com_localTime;
     netchan->lastSentTime = com_localTime;
     netchan->incomingSequence = 0;
@@ -549,7 +549,7 @@ NetChannel* Netchan_Setup(NetSource sock, const netadr_t* adr, int qport, size_t
     SZ_TagInit(&netchan->outFragment, netchan->outFragmentBuffer,
         sizeof(netchan->outFragmentBuffer), SZ_NC_FRG_OUT);
 
-    netchan->protocol = protocol;
+    netchan->protocolMajorVersion = protocol;
 
     return netchan;
 

@@ -502,9 +502,11 @@ SET(HEADERS_GL
 ###################### Shared Game Folder.
 SET(HEADERS_SHAREDGAME
 	../inc/sharedgame/pmove.h 
+	../inc/sharedgame/protocol.h 
+	../inc/sharedgame/sharedgame.h 
 )
 SET(SRC_SHAREDGAME
-	sharedgame/pmove.cpp
+	../src/sharedgame/pmove.cpp
 )
 
 ###################### Shared Folder.

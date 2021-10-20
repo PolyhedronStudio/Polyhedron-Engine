@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 void CL_CheckPredictionError(void)
 {
-    if (!cls.netchan) {
+    if (!cls.netchannel) {
         return;
     }
 
@@ -42,8 +42,8 @@ void CL_CheckPredictionError(void)
         return;
 
     // If we are too far out of date, just freeze in place
-    const uint32_t last = cls.netchan->outgoingSequence;
-    uint32_t ack = cls.netchan->incomingAcknowledged;
+    const uint32_t last = cls.netchannel->outgoingSequence;
+    uint32_t ack = cls.netchannel->incomingAcknowledged;
 
     if (last - ack >= CMD_BACKUP) {
         Com_DPrintf("Exceeded CMD_BACKUP\n");
@@ -51,7 +51,7 @@ void CL_CheckPredictionError(void)
     }
 
     // Calculate the last ClientMoveCommand we sent that the server has processed
-    uint32_t frame = cls.netchan->incomingAcknowledged & CMD_MASK;
+    uint32_t frame = cls.netchannel->incomingAcknowledged & CMD_MASK;
     uint32_t commandNumber = cl.clientCommandHistory[frame].commandNumber;
 
     ClientMoveCommand* cmd = &cl.clientUserCommands[commandNumber & CMD_MASK];
@@ -90,7 +90,7 @@ void CL_PredictMovement(void)
     }
 
     // Fetch acknowledged command and frame.
-    uint32_t ack = cl.clientCommandHistory[cls.netchan->incomingAcknowledged & CMD_MASK].commandNumber;
+    uint32_t ack = cl.clientCommandHistory[cls.netchannel->incomingAcknowledged & CMD_MASK].commandNumber;
     uint32_t currentFrameIndex = cl.currentClientCommandNumber;
 
     // If we are too far out of date, just freeze
@@ -100,7 +100,7 @@ void CL_PredictMovement(void)
     }
 
     // Ensure we had moved.
-    if (!cl.clientMoveCommand.moveInput.msec && currentFrameIndex == ack) {
+    if (!cl.moveCommand.input.msec && currentFrameIndex == ack) {
         SHOWMISS("%i: not moved\n", cl.frame.number);
         return;
     }

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/huffman.h"
 #include "common/msg.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 #include "sharedgame/protocol.h"
 
 //===========================================================================//
@@ -716,48 +716,48 @@ int MSG_WriteDeltaUsercmd(const ClientMoveCommand* from, const ClientMoveCommand
     //
     int32_t bits = 0;
 
-    if (cmd->moveInput.viewAngles[0] != from->moveInput.viewAngles[0])
+    if (cmd->input.viewAngles[0] != from->input.viewAngles[0])
         bits |= CM_ANGLE1;
-    if (cmd->moveInput.viewAngles[1] != from->moveInput.viewAngles[1])
+    if (cmd->input.viewAngles[1] != from->input.viewAngles[1])
         bits |= CM_ANGLE2;
-    if (cmd->moveInput.viewAngles[2] != from->moveInput.viewAngles[2])
+    if (cmd->input.viewAngles[2] != from->input.viewAngles[2])
         bits |= CM_ANGLE3;
-    if (cmd->moveInput.forwardMove != from->moveInput.forwardMove)
+    if (cmd->input.forwardMove != from->input.forwardMove)
         bits |= CM_FORWARD;
-    if (cmd->moveInput.rightMove != from->moveInput.rightMove)
+    if (cmd->input.rightMove != from->input.rightMove)
         bits |= CM_SIDE;
-    if (cmd->moveInput.upMove != from->moveInput.upMove)
+    if (cmd->input.upMove != from->input.upMove)
         bits |= CM_UP;
-    if (cmd->moveInput.buttons != from->moveInput.buttons)
+    if (cmd->input.buttons != from->input.buttons)
         bits |= CM_BUTTONS;
-    if (cmd->moveInput.impulse != from->moveInput.impulse)
+    if (cmd->input.impulse != from->input.impulse)
         bits |= CM_IMPULSE;
 
     // Write out the changed bits.
     MSG_WriteByte(bits);
 
     if (bits & CM_ANGLE1)
-        MSG_WriteFloat(cmd->moveInput.viewAngles[0]);
+        MSG_WriteFloat(cmd->input.viewAngles[0]);
     if (bits & CM_ANGLE2)
-        MSG_WriteFloat(cmd->moveInput.viewAngles[1]);
+        MSG_WriteFloat(cmd->input.viewAngles[1]);
     if (bits & CM_ANGLE3)
-        MSG_WriteFloat(cmd->moveInput.viewAngles[2]);
+        MSG_WriteFloat(cmd->input.viewAngles[2]);
 
     if (bits & CM_FORWARD)
-        MSG_WriteShort(cmd->moveInput.forwardMove);
+        MSG_WriteShort(cmd->input.forwardMove);
     if (bits & CM_SIDE)
-        MSG_WriteShort(cmd->moveInput.rightMove);
+        MSG_WriteShort(cmd->input.rightMove);
     if (bits & CM_UP)
-        MSG_WriteShort(cmd->moveInput.upMove);
+        MSG_WriteShort(cmd->input.upMove);
 
     if (bits & CM_BUTTONS)
-        MSG_WriteByte(cmd->moveInput.buttons);
+        MSG_WriteByte(cmd->input.buttons);
 
     if (bits & CM_IMPULSE)
-        MSG_WriteByte(cmd->moveInput.impulse);
+        MSG_WriteByte(cmd->input.impulse);
 
-    MSG_WriteByte(cmd->moveInput.msec);
-    MSG_WriteByte(cmd->moveInput.lightLevel);
+    MSG_WriteByte(cmd->input.msec);
+    MSG_WriteByte(cmd->input.lightLevel);
 
     // (Returned bits isn't used anywhere, but might as well keep it around.)
     return bits;
@@ -1451,32 +1451,32 @@ void MSG_ReadDeltaUsercmd(const ClientMoveCommand* from, ClientMoveCommand* to)
 
     // read current angles
     if (bits & CM_ANGLE1)
-        to->moveInput.viewAngles[0] = MSG_ReadFloat();
+        to->input.viewAngles[0] = MSG_ReadFloat();
     if (bits & CM_ANGLE2)
-        to->moveInput.viewAngles[1] = MSG_ReadFloat();
+        to->input.viewAngles[1] = MSG_ReadFloat();
     if (bits & CM_ANGLE3)
-        to->moveInput.viewAngles[2] = MSG_ReadFloat();
+        to->input.viewAngles[2] = MSG_ReadFloat();
 
     // read movement
     if (bits & CM_FORWARD)
-        to->moveInput.forwardMove = MSG_ReadShort();
+        to->input.forwardMove = MSG_ReadShort();
     if (bits & CM_SIDE)
-        to->moveInput.rightMove = MSG_ReadShort();
+        to->input.rightMove = MSG_ReadShort();
     if (bits & CM_UP)
-        to->moveInput.upMove = MSG_ReadShort();
+        to->input.upMove = MSG_ReadShort();
 
     // read buttons
     if (bits & CM_BUTTONS)
-        to->moveInput.buttons = MSG_ReadByte();
+        to->input.buttons = MSG_ReadByte();
 
     if (bits & CM_IMPULSE)
-        to->moveInput.impulse = MSG_ReadByte();
+        to->input.impulse = MSG_ReadByte();
 
     // read time to run command
-    to->moveInput.msec = MSG_ReadByte();
+    to->input.msec = MSG_ReadByte();
 
     // read the light level
-    to->moveInput.lightLevel = MSG_ReadByte();
+    to->input.lightLevel = MSG_ReadByte();
 }
 
 #if USE_CLIENT

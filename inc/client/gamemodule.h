@@ -58,7 +58,7 @@ void CL_GM_FinalizeFrameMoveCommand(void);
 //
 // Predict
 //
-void		CL_GM_CheckPredictionError(ClientMoveCommand* clientMoveCommand);
+void		CL_GM_CheckPredictionError(ClientMoveCommand* moveCommand);
 void		CL_GM_PredictAngles(void);
 void		CL_GM_PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex);
 

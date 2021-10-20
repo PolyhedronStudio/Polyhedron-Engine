@@ -361,7 +361,7 @@ static const save_field_t clientfields[] = {
 
 static const save_field_t gamefields[] = {
 #define _OFS GLOFS
-    I(maxClients),
+    I(maximumClients),
     I(maxEntities),
 
     I(serverflags),
@@ -502,7 +502,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_index(f, *(void **)p, sizeof(Entity), g_entities, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
-        write_index(f, *(void **)p, sizeof(GameClient), game.clients, game.maxClients - 1);
+        write_index(f, *(void **)p, sizeof(GameClient), game.clients, game.maximumClients - 1);
         break;
     case F_ITEM:
         write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.numberOfItems - 1);
@@ -687,7 +687,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         *(Entity **)p = (Entity*)read_index(f, sizeof(Entity), g_entities, game.maxEntities - 1); // CPP: Cast
         break;
     case F_CLIENT:
-        *(GameClient **)p = (GameClient*)read_index(f, sizeof(GameClient), game.clients, game.maxClients - 1); // CPP: Cast
+        *(GameClient **)p = (GameClient*)read_index(f, sizeof(GameClient), game.clients, game.maximumClients - 1); // CPP: Cast
         break;
     case F_ITEM:
         *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.numberOfItems - 1); // CPP: Cast
@@ -753,7 +753,7 @@ void SVG_WriteGame(const char *filename, qboolean autosave)
     write_fields(f, gamefields, &game);
     game.autoSaved = false;
 
-    for (i = 0; i < game.maxClients; i++) {
+    for (i = 0; i < game.maximumClients; i++) {
         write_fields(f, clientfields, &game.clients[i]);
     }
 
@@ -786,11 +786,11 @@ void SVG_ReadGame(const char *filename)
     read_fields(f, gamefields, &game);
 
     // should agree with server's version
-    if (game.maxClients != (int)maxClients->value) {
+    if (game.maximumClients != (int)maximumClients->value) {
         fclose(f);
-        gi.Error("Savegame has bad maxClients");
+        gi.Error("Savegame has bad maximumClients");
     }
-    if (game.maxEntities <= game.maxClients || game.maxEntities > MAX_EDICTS) {
+    if (game.maxEntities <= game.maximumClients || game.maxEntities > MAX_EDICTS) {
         fclose(f);
         gi.Error("Savegame has bad maxEntities");
     }
@@ -798,8 +798,8 @@ void SVG_ReadGame(const char *filename)
     globals.entities = g_entities;
     globals.maxEntities = game.maxEntities;
 
-    game.clients = (GameClient*)gi.TagMalloc(game.maxClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    for (i = 0; i < game.maxClients; i++) {
+    game.clients = (GameClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    for (i = 0; i < game.maximumClients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
 
@@ -882,8 +882,8 @@ void SVG_ReadLevel(const char *filename)
     }
     //memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0]));
 
-    // Set the number of edicts to be maxClients + 1. (They are soon to be in-use after all)
-    globals.numberOfEntities = maxClients->value + 1;
+    // Set the number of edicts to be maximumClients + 1. (They are soon to be in-use after all)
+    globals.numberOfEntities = maximumClients->value + 1;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -924,7 +924,7 @@ void SVG_ReadLevel(const char *filename)
     fclose(f);
 
     // mark all clients as unconnected
-    for (i = 0 ; i < maxClients->value ; i++) {
+    for (i = 0 ; i < maximumClients->value ; i++) {
         ent = &g_entities[i + 1];
         ent->client = game.clients + i;
         ent->client->persistent.isConnected = false;

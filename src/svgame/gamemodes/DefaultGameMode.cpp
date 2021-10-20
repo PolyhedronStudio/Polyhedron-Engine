@@ -472,7 +472,7 @@ void DefaultGameMode::SpawnClientCorpse(SVGBaseEntity* ent) {
     ent->UnlinkEntity();
 
     // Grab a body from the queue, and cycle to the next one.
-    Entity *bodyEntity = &g_entities[game.maxClients + level.bodyQue + 1];
+    Entity *bodyEntity = &g_entities[game.maximumClients + level.bodyQue + 1];
     level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
 
     // Send an effect on this body, in case it already has a model index.
@@ -715,7 +715,7 @@ qboolean DefaultGameMode::ClientCanConnect(Entity* serverEntity, char* userInfo)
 //===============
 void DefaultGameMode::ClientConnect(Entity* serverEntity) {
     // This is default behaviour for this function.
-    if (game.maxClients > 1)
+    if (game.maximumClients > 1)
         gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
 }
 
@@ -744,7 +744,7 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         HUD_MoveClientToIntermission(serverEntity);
     } else {
         // send effect if in a multiplayer game
-        if (game.maxClients > 1) {
+        if (game.maximumClients > 1) {
             gi.WriteByte(SVG_CMD_MUZZLEFLASH);
             //gi.WriteShort(ent - g_entities);
             gi.WriteShort(serverEntity->state.number);

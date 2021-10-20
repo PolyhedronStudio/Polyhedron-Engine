@@ -118,7 +118,7 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
             MSG_PackEntity(&oldpack, oldent);
             MSG_PackEntity(&newpack, newent);
             MSG_WriteDeltaEntity(&oldpack, &newpack,
-                                 (EntityStateMessageFlags)(newent->number <= cl.maxClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
+                                 (EntityStateMessageFlags)(newent->number <= cl.maximumClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
             oldindex++;
             newindex++;
             continue;

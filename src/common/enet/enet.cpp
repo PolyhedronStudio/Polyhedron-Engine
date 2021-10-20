@@ -9,7 +9,7 @@
 #include "common/enet/enetchan.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 #include "common/zone.h"
 #include "system/system.h"
 
@@ -199,22 +199,22 @@ void ENET_Connect(const std::string& hostAddress) {
         Sys_Error("Could not allocate peer for ENet connection, aborting\n");
 
     // Create our new netchan socket.
-    NetChannel sock{};
-    sock.connectTime = enetNetTime;
-    sock.peer = peer;
-    sock.host = enetClientHost;
-    sock.lastMessageTime = enetNetTime;
+    NetChannel netChannel{};
+    netChannel.connectTime = enetNetTime;
+    netChannel.ePeer = peer;
+    netChannel.eHost = enetClientHost;
+    netChannel.lastMessageTime = enetNetTime;
 
     char addressBuffer[256];
     if (enet_address_get_host_new(&peer->address, addressBuffer, 256) == 0)
-        sock.address = addressBuffer;
+        netChannel.remoteAddress = addressBuffer;
     else if (enet_address_get_host_ip_new(&peer->address, addressBuffer, 256) == 0)
-        sock.address = addressBuffer;
+        netChannel.remoteAddress = addressBuffer;
     else
-        sock.address = "<unknown>";
+        netChannel.remoteAddress = "<unknown>";
 
     // From here on, we'll be polling the connection process.
-    enetConnectingSockets.push_back(sock);
+    enetConnectingSockets.push_back(netChannel);
 }
 #endif
 
@@ -241,16 +241,16 @@ void ENET_Close(int32_t socketID, qboolean closeNow) {
     NetChannel& socket = enetActiveSockets[socketID];
 
     // Disconnect from the peer in case we have one actively going.
-    if (socket.peer) {
+    if (socket.ePeer) {
         if (closeNow) {
             // Force a disconnection from a peer.
-            enet_peer_disconnect_now(socket.peer, 0); // WID: TODO: Perhaps pass some data along?
+            enet_peer_disconnect_now(socket.ePeer, 0); // WID: TODO: Perhaps pass some data along?
 
             // Forcefully disconnect the peer.
-            enet_peer_reset(socket.peer);
+            enet_peer_reset(socket.ePeer);
         } else {
             // Just a regular disconnect request.
-            enet_peer_disconnect(socket.peer, 0); // WID: TODO: Perhaps pass some data along?
+            enet_peer_disconnect(socket.ePeer, 0); // WID: TODO: Perhaps pass some data along?
 
             // Add a copy of the socket to the disconnecting queue.
             enetDisconnectingSockets.push_back(socket);
@@ -318,5 +318,5 @@ void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, SizeBuffer* destDataBuffer,
 //---------------
 // Return the string of the socket ID address.
 const std::string& ENET_GetSocketIDAddress(int32_t socketID) {
-    return enetActiveSockets[socketID].address;
+    return enetActiveSockets[socketID].remoteAddress;
 }

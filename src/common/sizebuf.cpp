@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 
 void SZ_TagInit(SizeBuffer *buf, void *data, size_t size, uint32_t tag)
 {

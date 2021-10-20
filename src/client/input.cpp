@@ -374,7 +374,7 @@ static inline qboolean ready_to_send(void)
     if (cl.sendPacketNow) {
         return true;
     }
-    if (cls.netchan->message.currentSize || cls.netchan->reliableAckPending) {
+    if (cls.netchannel->message.currentSize || cls.netchannel->reliableAckPending) {
         return true;
     }
     if (!cl_maxpackets->integer) {
@@ -421,7 +421,7 @@ static void CL_SendUserCommand(void)
     ClientUserCommandHistory*history;
 
     // archive this packet
-    history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
+    history = &cl.clientCommandHistory[cls.netchannel->outgoingSequence & CMD_MASK];
     history->commandNumber = cl.currentClientCommandNumber;
     history->timeSent = cls.realtime;    // for ping calculation
     history->timeReceived = 0;
@@ -430,7 +430,7 @@ static void CL_SendUserCommand(void)
 
     // see if we are ready to send this packet
     if (!ready_to_send_hacked()) {
-        cls.netchan->outgoingSequence++; // just drop the packet
+        cls.netchannel->outgoingSequence++; // just drop the packet
         return;
     }
 
@@ -469,7 +469,7 @@ static void CL_SendUserCommand(void)
     //
     // deliver the message
     //
-    currentSize = Netchan_Transmit(cls.netchan, msg_write.currentSize, msg_write.data, 1);
+    currentSize = Netchan_Transmit(cls.netchannel, msg_write.currentSize, msg_write.data, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize); // C++20: String concat fix.
@@ -485,7 +485,7 @@ static void CL_SendKeepAlive(void)
     size_t currentSize q_unused;
 
     // archive this packet
-    history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
+    history = &cl.clientCommandHistory[cls.netchannel->outgoingSequence & CMD_MASK];
     history->commandNumber = cl.currentClientCommandNumber;
     history->timeSent = cls.realtime;    // for ping calculation
     history->timeReceived = 0;
@@ -494,7 +494,7 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
     cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
-    currentSize = Netchan_Transmit(cls.netchan, 0, NULL, 1);
+    currentSize = Netchan_Transmit(cls.netchannel, 0, NULL, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize);
@@ -517,7 +517,7 @@ static void CL_SendUserinfo(void)
         Com_DDPrintf("%s: %u: full update\n", __func__, com_framenum);
         MSG_WriteByte(clc_userinfo);
         MSG_WriteData(userinfo, len + 1);
-        MSG_FlushTo(&cls.netchan->message);
+        MSG_FlushTo(&cls.netchannel->message);
     } else if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
         Com_DDPrintf("%s: %u: %d updates\n", __func__, com_framenum,
                      cls.userinfo_modified);
@@ -532,7 +532,7 @@ static void CL_SendUserinfo(void)
                 MSG_WriteString(NULL);
             }
         }
-        MSG_FlushTo(&cls.netchan->message);
+        MSG_FlushTo(&cls.netchannel->message);
     } else {
         Com_WPrintf("%s: update count is %d, should never happen.\n",
                     __func__, cls.userinfo_modified);
@@ -549,7 +549,7 @@ void CL_SendCmd(void)
 
     // generate usercmds while playing a demo,
     // but do not send them
-    if (!cls.netchan) {
+    if (!cls.netchannel) {
         return;
     }
 
@@ -558,7 +558,7 @@ void CL_SendCmd(void)
         CL_SendUserinfo();
 
         // just keepalive or update reliable
-        if (Netchan_ShouldUpdate(cls.netchan)) {
+        if (Netchan_ShouldUpdate(cls.netchannel)) {
             CL_SendKeepAlive();
         }
 

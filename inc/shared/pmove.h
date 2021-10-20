@@ -68,7 +68,7 @@ struct PlayerMoveInput {
 // ClientMoveCommand is sent to the server each client frame
 //-----------------
 struct ClientMoveCommand {
-    PlayerMoveInput moveInput;       // the movement command
+    PlayerMoveInput input;       // the movement command
 
     uint32_t timeSent;      // Time sent, for calculating pings
     uint32_t timeReceived;  // Time rcvd, for calculating pings

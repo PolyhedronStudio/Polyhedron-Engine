@@ -288,8 +288,8 @@ typedef struct client_s {
 
     // protocol stuff
     int32_t challenge;  // Challenge of this user, randomly generated
-    int32_t protocol;   // Major version
-    int32_t version;    // Minor version
+    int32_t protocolMajorVersion;   // Major version
+    int32_t protocolMinorVersion;    // Minor version
 
     EntityStateMessageFlags esFlags; // Entity protocol flags
 
@@ -311,7 +311,7 @@ typedef struct client_s {
     cm_t *cm;
     int32_t slot;
     int32_t spawncount;
-    int32_t maxClients;
+    int32_t maximumClients;
 
     // netchan type dependent methods
     void (*AddMessage)(struct client_s *, byte *, size_t, qboolean);
@@ -410,9 +410,9 @@ typedef struct server_static_s {
     qboolean    initialized;        // sv_init has completed
     unsigned    realtime;           // always increasing, no clamping, etc
 
-    client_t    *client_pool;       // [maxClients]
+    client_t    *client_pool;       // [maximumClients]
 
-    unsigned        num_entities;   // maxClients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
+    unsigned        num_entities;   // maximumClients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
     PackedEntity    *entities;      // [num_entities]
 

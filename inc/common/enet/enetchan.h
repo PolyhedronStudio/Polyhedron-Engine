@@ -22,31 +22,37 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/msg.h"
 #include "common/enet/enet.h"
 #include "common/net/net.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 
 struct NetChannel {
-    int         protocol;
-    size_t      maxPacketLength;
+public:
+    int32_t     protocolMajorVersion;
+    size_t      maximumPacketLength;
 
-    qboolean    fatalError;
+    qboolean    fatalError;         // True in case we ran into a major error.
 
-    NetSource   netSource;
+    NetSource   netSource;          // The source this channel is from: Client, or Server.
 
-    int         dropped;            // Between last packet and previous.
-    unsigned    totalDropped;       // for statistics.
-    unsigned    totalReceived;
+    int         deltaFramePacketDrops;  // Between last packet and previous.
+    uint32_t    totalDropped;           // For statistics.
+    uint32_t    totalReceived;
 
-    unsigned    lastReceivedTime;   // For timeouts.
-    unsigned    lastSentTime;       // For retransmits.
+    uint32_t    lastReceivedTime;   // For timeouts.
+    uint32_t    lastSentTime;       // For retransmits.
 
-    netadr_t    remoteAddress;
-    int         qport;              // qport value to write when transmitting
+    netadr_t    remoteNetAddress;   // NetChan settled to the remote ahost.
+    std::string remoteAddress;      // Textual address.
+    int32_t     remoteQPort;        // qport value to write when transmitting
 
     size_t      reliableLength;
 
+    // ENet host and peer connection.
+    ENetHost* eHost;
+    ENetPeer* ePeer;
+
     // Pending states.
-    qboolean    reliableAckPending; // set to true each time reliable is received
-    qboolean    fragmentPending;
+    qboolean    reliableAckPending; // Set to true each time reliable is received
+    qboolean    fragmentPending;    // Set to true when there is still a fragment pending.
 
     // sequencing variables
     int         incomingSequence;
@@ -84,10 +90,7 @@ struct NetChannel {
 
     bool disconnected;
 
-    ENetPeer* peer;
-    ENetHost* host;
 
-    std::string address;
 };
 
 extern cvar_t* net_qport;

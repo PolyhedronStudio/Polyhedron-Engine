@@ -29,8 +29,8 @@ constexpr uint32_t MAX_MSGLEN = 0x8000;
 constexpr int32_t   PROTOCOL_VERSION_UNKNOWN = -1;
 
 // The DEFAULT version is the minimum allowed for connecting.
-constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 101;
-constexpr uint32_t  PROTOCOL_VERSION_NAC     = 101;
+constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 1340;
+constexpr uint32_t  PROTOCOL_VERSION_NAC     = 1340;
 
 // Minimum required "MINOR" protocol version for this client to be compatible to.
 constexpr uint32_t PROTOCOL_VERSION_NAC_MINIMUM = 1337;
@@ -40,10 +40,10 @@ constexpr uint32_t PROTOCOL_VERSION_NAC_FIRST   = 1337;
 
 // EXAMPLE of what an update would then resemble in our code. Ofc, We then also change
 // the PROTOCOL_VERSION_NAC_CURRENT to accomodate.
-constexpr uint32_t PROTOCOL_VERSION_NAC_FEATURE_UPDATE = 1338;
+constexpr uint32_t PROTOCOL_VERSION_NAC_FEATURE_UPDATE = 1341;
 
 // Current actual protocol version that is in use.
-constexpr uint32_t PROTOCOL_VERSION_NAC_CURRENT = PROTOCOL_VERSION_NAC_FIRST;
+constexpr uint32_t PROTOCOL_VERSION_NAC_CURRENT = 1340;
 
 // This is used to ensure that the protocols in use match up, and support each other.
 qboolean static inline NAC_PROTOCOL_SUPPORTED(uint32_t x) {

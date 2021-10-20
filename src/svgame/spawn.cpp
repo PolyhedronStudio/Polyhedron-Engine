@@ -443,7 +443,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
     // Set client fields on player ents
-    for (i = 0 ; i < game.maxClients ; i++)
+    for (i = 0 ; i < game.maximumClients ; i++)
         g_entities[i + 1].client = game.clients + i;
 
     ent = NULL;

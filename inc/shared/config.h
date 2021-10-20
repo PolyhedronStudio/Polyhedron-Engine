@@ -26,7 +26,7 @@
 #endif
 
 #define BASEGAME "basenac"
-#define DEFGAME ""
+#define DEFGAME "basenac"
 
 #define USE_ICMP 1
 #define USE_ZLIB 1

@@ -188,7 +188,7 @@ CL_ClientCommand
 */
 void CL_ClientCommand(const char *string)
 {
-    if (!cls.netchan) {
+    if (!cls.netchannel) {
         return;
     }
 
@@ -196,7 +196,7 @@ void CL_ClientCommand(const char *string)
 
     MSG_WriteByte(clc_stringcmd);
     MSG_WriteString(string);
-    MSG_FlushTo(&cls.netchan->message);
+    MSG_FlushTo(&cls.netchannel->message);
 }
 
 /*
@@ -442,7 +442,7 @@ static void CL_EConnect_f(void) {
 
     cls.serverAddress = address;
     cls.serverProtocol = protocol;
-    cls.protocolVersion = 0;
+    cls.protocolMajorVersion = 0;
     cls.passive = false;
     cls.connectionState = ClientConnectionState::Challenging;
     cls.timeOfInitialConnect -= CONNECT_FAST;
@@ -515,7 +515,7 @@ usage:
 
     cls.serverAddress = address;
     cls.serverProtocol = protocol;
-    cls.protocolVersion = 0;
+    cls.protocolMajorVersion = 0;
     cls.passive = false;
     cls.connectionState = ClientConnectionState::Challenging;
     cls.timeOfInitialConnect -= CONNECT_FAST;
@@ -614,7 +614,7 @@ static void CL_Rcon_f(void)
         return;
     }
 
-    if (!cls.netchan) {
+    if (!cls.netchannel) {
         if (!rcon_address->string[0]) {
             Com_Printf("You must either be connected, "
                        "or set the 'rcon_address' cvar "
@@ -626,7 +626,7 @@ static void CL_Rcon_f(void)
             return;
         }
     } else {
-        address = cls.netchan->remoteAddress;
+        address = cls.netchannel->remoteNetAddress;
     }
 
     CL_SendRcon(&address, rcon_password->string, Cmd_RawArgs());
@@ -749,17 +749,17 @@ void CL_Disconnect(ErrorType type)
     cls.errorReceived = false;
 #endif
 
-    if (cls.netchan) {
+    if (cls.netchannel) {
         // send a disconnect message to the server
         MSG_WriteByte(clc_stringcmd);
         MSG_WriteData("disconnect", 11);
 
-        Netchan_Transmit(cls.netchan, msg_write.currentSize, msg_write.data, 3);
+        Netchan_Transmit(cls.netchannel, msg_write.currentSize, msg_write.data, 3);
 
         SZ_Clear(&msg_write);
 
-        Netchan_Close(cls.netchan);
-        cls.netchan = NULL;
+        Netchan_Close(cls.netchannel);
+        cls.netchannel = NULL;
     }
 
     // stop playback and/or recording
@@ -819,11 +819,11 @@ static void CL_ServerStatus_f(void)
     neterr_t    ret;
 
     if (Cmd_Argc() < 2) {
-        if (!cls.netchan) {
+        if (!cls.netchannel) {
             Com_Printf("Usage: %s [address]\n", Cmd_Argv(0));
             return;
         }
-        adr = cls.netchan->remoteAddress;
+        adr = cls.netchannel->remoteNetAddress;
     } else {
         s = Cmd_Argv(1);
         if (!NET_StringToAdr(s, &adr, PORT_SERVER)) {
@@ -1380,11 +1380,11 @@ static void CL_ConnectionlessPacket(void)
 
         Com_Printf("Connected to %s (protocol %d).\n",
                    NET_AdrToString(&cls.serverAddress), cls.serverProtocol);
-        if (cls.netchan) {
+        if (cls.netchannel) {
             // this may happen after svc_reconnect
-            Netchan_Close(cls.netchan);
+            Netchan_Close(cls.netchannel);
         }
-        cls.netchan = Netchan_Setup(NS_CLIENT, &cls.serverAddress,
+        cls.netchannel = Netchan_Setup(NS_CLIENT, &cls.serverAddress,
                                     cls.quakePort, 1024, cls.serverProtocol);
 
         CL_ClientCommand("new");
@@ -1449,7 +1449,7 @@ static void CL_PacketEvent(void)
         return;
     }
 
-    if (!cls.netchan) {
+    if (!cls.netchannel) {
         return;     // dump it if not connected
     }
 
@@ -1461,13 +1461,13 @@ static void CL_PacketEvent(void)
     //
     // packet from server
     //
-    if (!NET_IsEqualAdr(&net_from, &cls.netchan->remoteAddress)) {
+    if (!NET_IsEqualAdr(&net_from, &cls.netchannel->remoteNetAddress)) {
         Com_DPrintf("%s: sequenced packet without connection\n",
                     NET_AdrToString(&net_from));
         return;
     }
 
-    if (!Netchan_Process(cls.netchan))
+    if (!Netchan_Process(cls.netchannel))
         return;     // wasn't accepted for some reason
 
 #if USE_ICMP
@@ -1481,7 +1481,7 @@ static void CL_PacketEvent(void)
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
 
-    if (!cls.netchan)
+    if (!cls.netchannel)
         return;     // might have disconnected
 
 #ifdef _DEBUG
@@ -1502,13 +1502,13 @@ void CL_ErrorEvent(netadr_t *from)
     if (cls.connectionState < ClientConnectionState::Connected) {
         return;
     }
-    if (!cls.netchan) {
+    if (!cls.netchannel) {
         return;     // dump it if not connected
     }
-    if (!NET_IsEqualBaseAdr(from, &cls.netchan->remoteAddress)) {
+    if (!NET_IsEqualBaseAdr(from, &cls.netchannel->remoteNetAddress)) {
         return;
     }
-    if (from->port && from->port != cls.netchan->remoteAddress.port) {
+    if (from->port && from->port != cls.netchannel->remoteNetAddress.port) {
         return;
     }
 
@@ -1522,7 +1522,7 @@ void CL_ErrorEvent(netadr_t *from)
 void CL_UpdateUserinfo(cvar_t *var, from_t from)
 {
     int i;
-    if (!cls.netchan) {
+    if (!cls.netchannel) {
         return;
     }
 
@@ -2168,9 +2168,9 @@ static size_t CL_Ping_m(char *buffer, size_t size)
 
 static size_t CL_Lag_m(char *buffer, size_t size)
 {
-    return Q_scnprintf(buffer, size, "%.2f%%", cls.netchan ?
-                       ((float)cls.netchan->totalDropped /
-                        cls.netchan->totalReceived) * 100.0f : 0);
+    return Q_scnprintf(buffer, size, "%.2f%%", cls.netchannel ?
+                       ((float)cls.netchannel->totalDropped /
+                        cls.netchannel->totalReceived) * 100.0f : 0);
 }
 
 static size_t CL_Cluster_m(char* buffer, size_t size) {
@@ -2618,7 +2618,7 @@ static void CL_InitLocal(void)
     cl_changemapcmd = Cvar_Get("cl_changemapcmd", "", 0);
     cl_beginmapcmd = Cvar_Get("cl_beginmapcmd", "", 0);
 
-    cl_protocol = Cvar_Get("cl_protocol", "0", 0);
+    cl_protocol = Cvar_Get("cl_protocol", std::to_string(PROTOCOL_VERSION_NAC).c_str(), 0);
 
     cl_cinematics = Cvar_Get("cl_cinematics", "1", CVAR_ARCHIVE);
 
@@ -2690,7 +2690,7 @@ qboolean CL_CheatsOK(void)
         return true;
 
     // single player can cheat
-    if (cls.connectionState > ClientConnectionState::Connected && cl.maxClients == 1)
+    if (cls.connectionState > ClientConnectionState::Connected && cl.maximumClients == 1)
         return true;
 
     return false;
@@ -2752,8 +2752,8 @@ static void CL_MeasureStats(void)
     }
 
     // measure average ping
-    if (cls.netchan) {
-        int ack = cls.netchan->incomingAcknowledged;
+    if (cls.netchannel) {
+        int ack = cls.netchannel->incomingAcknowledged;
         int ping = 0;
         int j, k = 0;
 
@@ -2802,21 +2802,21 @@ static void CL_CheckTimeout(void)
 {
     unsigned delta;
 
-    if (NET_IsLocalAddress(&cls.netchan->remoteAddress)) {
+    if (NET_IsLocalAddress(&cls.netchannel->remoteNetAddress)) {
         return;
     }
 
 #if USE_ICMP
     if (cls.errorReceived) {
         delta = 5000;
-        if (com_localTime - cls.netchan->lastReceivedTime > delta)  {
+        if (com_localTime - cls.netchannel->lastReceivedTime > delta)  {
             Com_Error(ERR_DISCONNECT, "Server connection was reset.");
         }
     }
 #endif
 
     delta = cl_timeout->value * 1000;
-    if (delta && com_localTime - cls.netchan->lastReceivedTime > delta)  {
+    if (delta && com_localTime - cls.netchannel->lastReceivedTime > delta)  {
         // timeoutcount saves debugger
         if (++cl.timeoutCount > 5) {
             Com_Error(ERR_DISCONNECT, "Server connection timed out.");
@@ -3122,7 +3122,7 @@ run_fx:
     }
 
     // Check connection timeout
-    if (cls.netchan)
+    if (cls.netchannel)
         CL_CheckTimeout();
 
     C_FRAMES++;

@@ -177,7 +177,7 @@ void SVG_FreeEntity(Entity* ent)
     gi.UnlinkEntity(ent);        // unlink from world
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
-    if ((ent - g_entities) <= (maxClients->value + BODY_QUEUE_SIZE)) {
+    if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
         //      gi.DPrintf("tried to free special edict\n");
         return;
     }
@@ -381,8 +381,8 @@ Entity* SVG_Spawn(void)
     Entity *serverEntity = nullptr;
     int32_t i = 0;
     // Acquire a pointer to the entity we'll check for.
-    serverEntity = &g_entities[game.maxClients + 1];
-    for (i = game.maxClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
+    serverEntity = &g_entities[game.maximumClients + 1];
+    for (i = game.maximumClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!serverEntity->inUse && (serverEntity->freeTime < 2 || level.time - serverEntity->freeTime > 0.5)) {

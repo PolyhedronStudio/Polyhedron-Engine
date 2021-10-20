@@ -120,7 +120,7 @@ extern "C" {
     //    //---------------------------------------------------------------------
     //    // Predict Movement (Client Side)
     //    //---------------------------------------------------------------------
-    //    void		(*CheckPredictionError) (ClientMoveCommand* clientMoveCommand);
+    //    void		(*CheckPredictionError) (ClientMoveCommand* moveCommand);
     //    void		(*PredictAngles) (void);
     //    void        (*PredictMovement) (unsigned int acknowledgedCommandIndex, unsigned int currentCommandIndex);
 

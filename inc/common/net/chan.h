@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "common/msg.h"
 #include "common/net/net.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 
 struct NetChannel {
     int         protocol;
@@ -38,7 +38,7 @@ struct NetChannel {
     unsigned    lastReceivedTime;      // for timeouts
     unsigned    lastSentTime;          // for retransmits
 
-    netadr_t    remoteAddress;
+    netadr_t    remoteNetAddress;
     int         qport;              // qport value to write when transmitting
 
     size_t      reliableLength;

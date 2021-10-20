@@ -38,7 +38,7 @@ void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
     }
 
     // Add to milliseconds of time to apply the move
-    cl->clientMoveCommand.moveInput.msec += miliseconds;
+    cl->moveCommand.input.msec += miliseconds;
 
     // Adjust viewAngles
     CLG_AdjustAngles(miliseconds);
@@ -58,9 +58,9 @@ void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
 
     CLG_ClampPitch();
 
-    cl->clientMoveCommand.moveInput.viewAngles[0] = cl->viewAngles[0];
-    cl->clientMoveCommand.moveInput.viewAngles[1] = cl->viewAngles[1];
-    cl->clientMoveCommand.moveInput.viewAngles[2] = cl->viewAngles[2];
+    cl->moveCommand.input.viewAngles[0] = cl->viewAngles[0];
+    cl->moveCommand.input.viewAngles[1] = cl->viewAngles[1];
+    cl->moveCommand.input.viewAngles[2] = cl->viewAngles[2];
 }
 
 //---------------
@@ -80,10 +80,10 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     // figure button bits
     //
     if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->clientMoveCommand.moveInput.buttons |= BUTTON_ATTACK;
+        cl->moveCommand.input.buttons |= BUTTON_ATTACK;
 
     if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->clientMoveCommand.moveInput.buttons |= BUTTON_USE;
+        cl->moveCommand.input.buttons |= BUTTON_USE;
 
     // Undo the button_state_down for the next frame, it needs a repress for
     // that to be re-enabled.
@@ -93,22 +93,22 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     // Whether to run or not, depends on whether auto-run is on or off.
     if (cl_run->value) {
         if (in_speed.state & BUTTON_STATE_HELD) {
-            cl->clientMoveCommand.moveInput.buttons |= BUTTON_WALK;
+            cl->moveCommand.input.buttons |= BUTTON_WALK;
         }
     }
     else {
         if (!(in_speed.state & BUTTON_STATE_HELD)) {
-            cl->clientMoveCommand.moveInput.buttons |= BUTTON_WALK;
+            cl->moveCommand.input.buttons |= BUTTON_WALK;
         }
     }
 
     // Always send in case any button was down at all in-game.
     if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
-        cl->clientMoveCommand.moveInput.buttons |= BUTTON_ANY;
+        cl->moveCommand.input.buttons |= BUTTON_ANY;
     }
 
-    if (cl->clientMoveCommand.moveInput.msec > 250) {
-        cl->clientMoveCommand.moveInput.msec = 100;        // time was unreasonable
+    if (cl->moveCommand.input.msec > 250) {
+        cl->moveCommand.input.msec = 100;        // time was unreasonable
     }
 
     // Rebuild the movement vector
@@ -125,20 +125,20 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     move = CLG_ClampSpeed(move);
 
     // Store the movement vector
-    cl->clientMoveCommand.moveInput.forwardMove = move[0];
-    cl->clientMoveCommand.moveInput.rightMove = move[1];
-    cl->clientMoveCommand.moveInput.upMove = move[2];
+    cl->moveCommand.input.forwardMove = move[0];
+    cl->moveCommand.input.rightMove = move[1];
+    cl->moveCommand.input.upMove = move[2];
 
     // Clear all states
     cl->mousemove[0] = 0;
     cl->mousemove[1] = 0;
 
-    cl->clientMoveCommand.moveInput.impulse = in_impulse;
+    cl->moveCommand.input.impulse = in_impulse;
     in_impulse = 0;
 
     // Save this command off for prediction
     cl->currentClientCommandNumber++;
-    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->clientMoveCommand;
+    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->moveCommand;
 
     CLG_KeyClear(&in_right);
     CLG_KeyClear(&in_left);
@@ -157,5 +157,5 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
 
 
     // Clear pending cmd
-    cl->clientMoveCommand = {};
+    cl->moveCommand = {};
 }
