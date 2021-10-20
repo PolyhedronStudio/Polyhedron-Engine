@@ -188,7 +188,7 @@ CL_ClientCommand
 */
 void CL_ClientCommand(const char *string)
 {
-    if (!cls.netchannel) {
+    if (!cls.netChannel) {
         return;
     }
 
@@ -196,7 +196,7 @@ void CL_ClientCommand(const char *string)
 
     MSG_WriteByte(clc_stringcmd);
     MSG_WriteString(string);
-    MSG_FlushTo(&cls.netchannel->message);
+    MSG_FlushTo(&cls.netChannel->message);
 }
 
 /*
@@ -614,7 +614,7 @@ static void CL_Rcon_f(void)
         return;
     }
 
-    if (!cls.netchannel) {
+    if (!cls.netChannel) {
         if (!rcon_address->string[0]) {
             Com_Printf("You must either be connected, "
                        "or set the 'rcon_address' cvar "
@@ -626,7 +626,7 @@ static void CL_Rcon_f(void)
             return;
         }
     } else {
-        address = cls.netchannel->remoteNetAddress;
+        address = cls.netChannel->remoteNetAddress;
     }
 
     CL_SendRcon(&address, rcon_password->string, Cmd_RawArgs());
@@ -749,17 +749,17 @@ void CL_Disconnect(ErrorType type)
     cls.errorReceived = false;
 #endif
 
-    if (cls.netchannel) {
+    if (cls.netChannel) {
         // send a disconnect message to the server
         MSG_WriteByte(clc_stringcmd);
         MSG_WriteData("disconnect", 11);
 
-        Netchan_Transmit(cls.netchannel, msg_write.currentSize, msg_write.data, 3);
+        Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3);
 
         SZ_Clear(&msg_write);
 
-        Netchan_Close(cls.netchannel);
-        cls.netchannel = NULL;
+        Netchan_Close(cls.netChannel);
+        cls.netChannel = NULL;
     }
 
     // stop playback and/or recording
@@ -819,11 +819,11 @@ static void CL_ServerStatus_f(void)
     neterr_t    ret;
 
     if (Cmd_Argc() < 2) {
-        if (!cls.netchannel) {
+        if (!cls.netChannel) {
             Com_Printf("Usage: %s [address]\n", Cmd_Argv(0));
             return;
         }
-        adr = cls.netchannel->remoteNetAddress;
+        adr = cls.netChannel->remoteNetAddress;
     } else {
         s = Cmd_Argv(1);
         if (!NET_StringToAdr(s, &adr, PORT_SERVER)) {
@@ -1380,11 +1380,11 @@ static void CL_ConnectionlessPacket(void)
 
         Com_Printf("Connected to %s (protocol %d).\n",
                    NET_AdrToString(&cls.serverAddress), cls.serverProtocol);
-        if (cls.netchannel) {
+        if (cls.netChannel) {
             // this may happen after svc_reconnect
-            Netchan_Close(cls.netchannel);
+            Netchan_Close(cls.netChannel);
         }
-        cls.netchannel = Netchan_Setup(NS_CLIENT, &cls.serverAddress,
+        cls.netChannel = Netchan_Setup(NS_CLIENT, &cls.serverAddress,
                                     cls.quakePort, 1024, cls.serverProtocol);
 
         CL_ClientCommand("new");
@@ -1449,7 +1449,7 @@ static void CL_PacketEvent(void)
         return;
     }
 
-    if (!cls.netchannel) {
+    if (!cls.netChannel) {
         return;     // dump it if not connected
     }
 
@@ -1461,13 +1461,13 @@ static void CL_PacketEvent(void)
     //
     // packet from server
     //
-    if (!NET_IsEqualAdr(&net_from, &cls.netchannel->remoteNetAddress)) {
+    if (!NET_IsEqualAdr(&net_from, &cls.netChannel->remoteNetAddress)) {
         Com_DPrintf("%s: sequenced packet without connection\n",
                     NET_AdrToString(&net_from));
         return;
     }
 
-    if (!Netchan_Process(cls.netchannel))
+    if (!Netchan_Process(cls.netChannel))
         return;     // wasn't accepted for some reason
 
 #if USE_ICMP
@@ -1481,7 +1481,7 @@ static void CL_PacketEvent(void)
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
 
-    if (!cls.netchannel)
+    if (!cls.netChannel)
         return;     // might have disconnected
 
 #ifdef _DEBUG
@@ -1502,13 +1502,13 @@ void CL_ErrorEvent(netadr_t *from)
     if (cls.connectionState < ClientConnectionState::Connected) {
         return;
     }
-    if (!cls.netchannel) {
+    if (!cls.netChannel) {
         return;     // dump it if not connected
     }
-    if (!NET_IsEqualBaseAdr(from, &cls.netchannel->remoteNetAddress)) {
+    if (!NET_IsEqualBaseAdr(from, &cls.netChannel->remoteNetAddress)) {
         return;
     }
-    if (from->port && from->port != cls.netchannel->remoteNetAddress.port) {
+    if (from->port && from->port != cls.netChannel->remoteNetAddress.port) {
         return;
     }
 
@@ -1522,7 +1522,7 @@ void CL_ErrorEvent(netadr_t *from)
 void CL_UpdateUserinfo(cvar_t *var, from_t from)
 {
     int i;
-    if (!cls.netchannel) {
+    if (!cls.netChannel) {
         return;
     }
 
@@ -2168,9 +2168,9 @@ static size_t CL_Ping_m(char *buffer, size_t size)
 
 static size_t CL_Lag_m(char *buffer, size_t size)
 {
-    return Q_scnprintf(buffer, size, "%.2f%%", cls.netchannel ?
-                       ((float)cls.netchannel->totalDropped /
-                        cls.netchannel->totalReceived) * 100.0f : 0);
+    return Q_scnprintf(buffer, size, "%.2f%%", cls.netChannel ?
+                       ((float)cls.netChannel->totalDropped /
+                        cls.netChannel->totalReceived) * 100.0f : 0);
 }
 
 static size_t CL_Cluster_m(char* buffer, size_t size) {
@@ -2752,8 +2752,8 @@ static void CL_MeasureStats(void)
     }
 
     // measure average ping
-    if (cls.netchannel) {
-        int ack = cls.netchannel->incomingAcknowledged;
+    if (cls.netChannel) {
+        int ack = cls.netChannel->incomingAcknowledged;
         int ping = 0;
         int j, k = 0;
 
@@ -2802,21 +2802,21 @@ static void CL_CheckTimeout(void)
 {
     unsigned delta;
 
-    if (NET_IsLocalAddress(&cls.netchannel->remoteNetAddress)) {
+    if (NET_IsLocalAddress(&cls.netChannel->remoteNetAddress)) {
         return;
     }
 
 #if USE_ICMP
     if (cls.errorReceived) {
         delta = 5000;
-        if (com_localTime - cls.netchannel->lastReceivedTime > delta)  {
+        if (com_localTime - cls.netChannel->lastReceivedTime > delta)  {
             Com_Error(ERR_DISCONNECT, "Server connection was reset.");
         }
     }
 #endif
 
     delta = cl_timeout->value * 1000;
-    if (delta && com_localTime - cls.netchannel->lastReceivedTime > delta)  {
+    if (delta && com_localTime - cls.netChannel->lastReceivedTime > delta)  {
         // timeoutcount saves debugger
         if (++cl.timeoutCount > 5) {
             Com_Error(ERR_DISCONNECT, "Server connection timed out.");
@@ -3122,7 +3122,7 @@ run_fx:
     }
 
     // Check connection timeout
-    if (cls.netchannel)
+    if (cls.netChannel)
         CL_CheckTimeout();
 
     C_FRAMES++;

@@ -431,6 +431,8 @@ SET(SRC_COMMON
 
 	common/enet/enetchan.cpp
 	common/enet/enet.cpp
+	
+	common/hashes/crc32.cpp
 
 	#common/net/chan.cpp
 	common/net/net.cpp
@@ -447,6 +449,8 @@ SET(HEADERS_COMMON
 	common/enet/enet.h
 	common/enet/enetchan.h
 	
+	common/hashes/crc32.h
+
 	#common/enet/enetchan.h
 	common/net/net.h
 

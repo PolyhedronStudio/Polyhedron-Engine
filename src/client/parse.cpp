@@ -231,7 +231,7 @@ static void CL_ParseFrame(int extrabits)
     frame.number = currentframe;
     frame.delta = deltaframe;
 
-    if (cls.netchannel && cls.netchannel->deltaFramePacketDrops) {
+    if (cls.netChannel && cls.netChannel->deltaFramePacketDrops) {
         cl.frameFlags |= FF_SERVERDROP;
     }
 
@@ -325,8 +325,8 @@ static void CL_ParseFrame(int extrabits)
 #ifdef _DEBUG
     if (cl_shownet->integer > 2) {
         int rtt = 0;
-        if (cls.netchannel) {
-            int seq = cls.netchannel->incomingAcknowledged & CMD_MASK;
+        if (cls.netChannel) {
+            int seq = cls.netChannel->incomingAcknowledged & CMD_MASK;
             rtt = cls.realtime - cl.clientCommandHistory[seq].timeSent;
         }
         Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
@@ -606,9 +606,9 @@ static void CL_ParseReconnect(void)
 
     // free netchan now to prevent `disconnect'
     // message from being sent to server
-    if (cls.netchannel) {
-        Netchan_Close(cls.netchannel);
-        cls.netchannel = NULL;
+    if (cls.netChannel) {
+        Netchan_Close(cls.netChannel);
+        cls.netChannel = NULL;
     }
 
     CL_Disconnect(ERR_RECONNECT);

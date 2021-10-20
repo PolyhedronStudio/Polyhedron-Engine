@@ -265,7 +265,7 @@ static void IN_UseDown(void)
 {
     CLG_KeyDown(&in_use);
 
-    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls.netchannel) {
+    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls.netChannel) {
         cl->sendPacketNow = true;
     }
 }

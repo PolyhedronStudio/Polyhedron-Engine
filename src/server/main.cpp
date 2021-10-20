@@ -1302,11 +1302,11 @@ static void SV_GiveMsec(void)
 {
     client_t    *cl;
 
-    if (sv.frameNumber % (16 * SV_FRAMEDIV))
+    if (sv.frameNumber % (int)(BASE_FRAMETIME * SV_FRAMEDIV)) // WID: This was: (16 * SV_FRAMEDIV)
         return;
 
     FOR_EACH_CLIENT(cl) {
-        cl->clientUserCommandMiliseconds = 1800; // 1600 + some slop
+        cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100); // WID: This was: 1800; // 1600 + some slop
     }
 }
 

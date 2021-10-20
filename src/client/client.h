@@ -56,6 +56,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <zlib.h>
 #endif
 
+
 //=============================================================================
 
 // N&C: Most structures related to the client have been moved over here.
@@ -169,7 +170,7 @@ struct ClientStatic {
 
     int         quakePort;          // a 16 bit value that allows quake servers
                                     // to work around address translating routers
-    NetChannel* netchannel;
+    NetChannel* netChannel;
     int         serverProtocol;     // in case we are doing some kind of version hack
     int         protocolMajorVersion;    // minor version
 
