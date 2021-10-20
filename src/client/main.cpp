@@ -375,6 +375,84 @@ static void CL_Connect_c(genctx_t *ctx, int argnum)
     }
 }
 
+//-----------------------------------------------------------------------------------------------------
+// WID: This function is here to not break shit instantly, and try and use ENet to do the OOB
+// sending and reading of.
+//
+// After that, the challenging and/or get going into the game.
+//-----------------------------------------------------------------------------------------------------
+/*
+================
+CL_EConnect_f
+
+================
+*/
+static void CL_EConnect_f(void) {
+    const char* server;// , * p; // C++20: STRING: Added const to char*
+    char* p;
+    netadr_t    address;
+    int protocol;
+    int argc = Cmd_Argc();
+
+    if (argc < 2) {
+    usage:
+        Com_Printf("Usage: %s <server> [34|35|36]\n", Cmd_Argv(0));
+        return;
+    }
+
+    if (argc > 2) {
+        protocol = atoi(Cmd_Argv(2));
+        if (protocol < PROTOCOL_VERSION_DEFAULT ||
+            protocol > PROTOCOL_VERSION_NAC) {
+            goto usage;
+        }
+    } else {
+        protocol = cl_protocol->integer;
+        if (!protocol) {
+            protocol = PROTOCOL_VERSION_NAC;
+        }
+    }
+
+    server = Cmd_Argv(1);
+
+    // support quake2://<address>[/] scheme
+    if (!Q_strncasecmp(server, "quake2://", 9)) {
+        server += 9;
+        if ((p = (char*)strchr(server, '/')) != NULL) {
+            *p = 0;
+        }
+    }
+
+    if (!NET_StringToAdr(server, &address, PORT_SERVER)) {
+        Com_Printf("Bad server address\n");
+        return;
+    }
+
+    // copy early to avoid potential cmd_argv[1] clobbering
+    Q_strlcpy(cls.servername, server, sizeof(cls.servername));
+
+    // if running a local server, kill it and reissue
+    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+
+    NET_Config(NET_CLIENT);
+
+    CL_Disconnect(ERR_RECONNECT);
+
+    cls.serverAddress = address;
+    cls.serverProtocol = protocol;
+    cls.protocolVersion = 0;
+    cls.passive = false;
+    cls.connectionState = ClientConnectionState::Challenging;
+    cls.timeOfInitialConnect -= CONNECT_FAST;
+    cls.connect_count = 0;
+
+    Con_Popup(true);
+
+    CL_CheckForResend();
+
+    Cvar_Set("timedemo", "0");
+}
+
 /*
 ================
 CL_Connect_f
@@ -388,12 +466,6 @@ static void CL_Connect_f(void)
     netadr_t    address;
     int protocol;
     int argc = Cmd_Argc();
-
-	if (fs_shareware->integer)
-	{
-		Com_EPrintf("Multiplayer is not supported in the shareware version of the game.\n");
-		return;
-	}
 
     if (argc < 2) {
 usage:

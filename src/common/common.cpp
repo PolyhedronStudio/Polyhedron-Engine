@@ -1060,15 +1060,6 @@ void Qcommon_Init(int argc, char **argv)
     }
     Com_LPrintf(PRINT_NOTICE, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
 
-	if (fs_shareware->integer)
-	{
-		char* newgame = Cmd_AliasCommand("newgame");
-		if (!strstr(newgame, "demo1"))
-		{
-		//	Com_WPrintf("\nWARNING: It looks like you have mixed game data files (.pak) from the shareware demo and the full game. The game might not function properly.\n\n");
-		}
-	}
-
     time(&com_startTime);
 
     com_eventTime = Sys_Milliseconds();
