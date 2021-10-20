@@ -856,7 +856,7 @@ static client_t *redirect(const char *addr)
     MSG_WriteByte(svc_stufftext);
     MSG_WriteString(va("connect %s\n", addr));
 
-    NET_SendPacket(NS_SERVER, msg_write.data, msg_write.cursize, &net_from);
+    NET_SendPacket(NS_SERVER, msg_write.data, msg_write.currentSize, &net_from);
     SZ_Clear(&msg_write);
     return NULL;
 }
@@ -1319,7 +1319,7 @@ SV_PacketEvent
 static void SV_PacketEvent(void)
 {
     client_t    *client;
-    netchan_t   *netchan;
+    NetChannel   *netchan;
     int         qport;
 
     // check for connectionless packet (0xffffffff) first
@@ -1391,7 +1391,7 @@ static void SV_PacketEvent(void)
 // Total 64 bytes of headers is assumed.
 static void update_client_mtu(client_t *client, int ee_info)
 {
-    netchan_t *netchan = client->netchan;
+    NetChannel *netchan = client->netchan;
     size_t newpacketlen;
 
     // sanity check discovered MTU
@@ -1409,12 +1409,12 @@ static void update_client_mtu(client_t *client, int ee_info)
         return;
 
     newpacketlen = ee_info - 64;
-    if (newpacketlen >= netchan->maxpacketlen)
+    if (newpacketlen >= netchan->maxPacketLength)
         return;
 
     Com_Printf("Fixing up maxmsglen for %s: %" PRIz " --> %" PRIz "\n",
-               client->name, netchan->maxpacketlen, newpacketlen);
-    netchan->maxpacketlen = newpacketlen;
+               client->name, netchan->maxPacketLength, newpacketlen);
+    netchan->maxPacketLength = newpacketlen;
 }
 #endif
 
@@ -1427,7 +1427,7 @@ SV_ErrorEvent
 void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info)
 {
     client_t    *client;
-    netchan_t   *netchan;
+    NetChannel   *netchan;
 
     if (!svs.initialized) {
         return;
@@ -1602,10 +1602,10 @@ static void SV_RunGameFrame(void)
         time_after_game = Sys_Milliseconds();
 #endif
 
-    if (msg_write.cursize) {
+    if (msg_write.currentSize) {
         Com_WPrintf("Game left %" PRIz " bytes "
                     "in multicast buffer, cleared.\n",
-                    msg_write.cursize);
+                    msg_write.currentSize);
         SZ_Clear(&msg_write);
     }
 }
@@ -2024,7 +2024,7 @@ Also resposible for freeing all clients.
 static void SV_FinalMessage(const char *message, ErrorType type)
 {
     client_t    *client;
-    netchan_t   *netchan;
+    NetChannel   *netchan;
     int         i;
 
     if (LIST_EMPTY(&sv_clientlist))
@@ -2052,7 +2052,7 @@ static void SV_FinalMessage(const char *message, ErrorType type)
             while (netchan->fragmentPending) {
                 Netchan_TransmitNextFragment(netchan);
             }
-            Netchan_Transmit(netchan, msg_write.cursize, msg_write.data, 1);
+            Netchan_Transmit(netchan, msg_write.currentSize, msg_write.data, 1);
         }
     }
 

@@ -43,7 +43,7 @@ void Q3MSG_Init(msg_t* buf, byte* data, int32_t length) {
     }
     std::memset(buf, 0, sizeof(*buf));
     buf->data = data;
-    buf->maxsize = length;
+    buf->maximumSize = length;
 }
 
 void Q3MSG_InitOOB(msg_t* buf, byte* data, int32_t length) {
@@ -53,12 +53,12 @@ void Q3MSG_InitOOB(msg_t* buf, byte* data, int32_t length) {
     std::memset(buf, 0, sizeof(*buf));
 
     buf->data = data;
-    buf->maxsize = length;
+    buf->maximumSize = length;
     buf->oob = true;
 }
 
 void Q3MSG_Clear(msg_t* buf) {
-    buf->cursize = 0;
+    buf->currentSize = 0;
     buf->overflowed = false;
     buf->bit = 0;					//<- in bits
 }
@@ -68,24 +68,24 @@ void Q3MSG_Bitstream(msg_t* buf) {
 }
 
 void Q3MSG_BeginReading(msg_t* msg) {
-    msg->readcount = 0;
+    msg->readCount = 0;
     msg->bit = 0;
     msg->oob = false;
 }
 
 void Q3MSG_BeginReadingOOB(msg_t* msg) {
-    msg->readcount = 0;
+    msg->readCount = 0;
     msg->bit = 0;
     msg->oob = true;
 }
 
 void Q3MSG_Copy(msg_t* buf, byte* data, int length, msg_t* src) {
-    if (length < src->cursize) {
+    if (length < src->currentSize) {
         Com_Error(ERR_DROP, "Q3MSG_Copy: can't copy into a smaller msg_t buffer");
     }
     std::memcpy(buf, src, sizeof(msg_t));
     buf->data = data;
-    std::memcpy(buf->data, src->data, src->cursize);
+    std::memcpy(buf->data, src->data, src->currentSize);
 }
 
 /*
@@ -106,7 +106,7 @@ void Q3MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits) {
     Q3MSGOldSize += bits;
 
     // this isn't an exact overflow check, but close enough
-    if (msg->maxsize - msg->cursize < 4) {
+    if (msg->maximumSize - msg->currentSize < 4) {
         msg->overflowed = true;
         return;
     }
@@ -136,18 +136,18 @@ void Q3MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits) {
     }
     if (msg->oob) {
         if (bits == 8) {
-            msg->data[msg->cursize] = value;
-            msg->cursize += 1;
+            msg->data[msg->currentSize] = value;
+            msg->currentSize += 1;
             msg->bit += 8;
         } else if (bits == 16) {
-            unsigned short* sp = (unsigned short*)&msg->data[msg->cursize];
+            unsigned short* sp = (unsigned short*)&msg->data[msg->currentSize];
             *sp = LittleShort(value);
-            msg->cursize += 2;
+            msg->currentSize += 2;
             msg->bit += 16;
         } else if (bits == 32) {
-            unsigned int* ip = (unsigned int*)&msg->data[msg->cursize];
+            unsigned int* ip = (unsigned int*)&msg->data[msg->currentSize];
             *ip = LittleLong(value);
-            msg->cursize += 4;
+            msg->currentSize += 4;
             msg->bit += 8;
         } else {
             Com_Error(ERR_DROP, "can't read %d bits\n", bits);
@@ -171,7 +171,7 @@ void Q3MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits) {
                 value = (value >> 8);
             }
         }
-        msg->cursize = (msg->bit >> 3) + 1;
+        msg->currentSize = (msg->bit >> 3) + 1;
         //		fclose(fp);
     }
 }
@@ -194,18 +194,18 @@ int Q3MSG_ReadBits(msg_t* msg, int bits) {
 
     if (msg->oob) {
         if (bits == 8) {
-            value = msg->data[msg->readcount];
-            msg->readcount += 1;
+            value = msg->data[msg->readCount];
+            msg->readCount += 1;
             msg->bit += 8;
         } else if (bits == 16) {
-            unsigned short* sp = (unsigned short*)&msg->data[msg->readcount];
+            unsigned short* sp = (unsigned short*)&msg->data[msg->readCount];
             value = LittleShort(*sp);
-            msg->readcount += 2;
+            msg->readCount += 2;
             msg->bit += 16;
         } else if (bits == 32) {
-            unsigned int* ip = (unsigned int*)&msg->data[msg->readcount];
+            unsigned int* ip = (unsigned int*)&msg->data[msg->readCount];
             value = LittleLong(*ip);
-            msg->readcount += 4;
+            msg->readCount += 4;
             msg->bit += 32;
         } else {
             Com_Error(ERR_DROP, "can't read %d bits\n", bits);
@@ -228,7 +228,7 @@ int Q3MSG_ReadBits(msg_t* msg, int bits) {
             }
             //			fclose(fp);
         }
-        msg->readcount = (msg->bit >> 3) + 1;
+        msg->readCount = (msg->bit >> 3) + 1;
     }
     if (sgn) {
         if (value & (1 << (bits - 1))) {
@@ -364,7 +364,7 @@ int Q3MSG_ReadChar(msg_t* msg) {
     int	c;
 
     c = (signed char)Q3MSG_ReadBits(msg, 8);
-    if (msg->readcount > msg->cursize) {
+    if (msg->readCount > msg->currentSize) {
         c = -1;
     }
 
@@ -375,7 +375,7 @@ int Q3MSG_ReadByte(msg_t* msg) {
     int	c;
 
     c = (unsigned char)Q3MSG_ReadBits(msg, 8);
-    if (msg->readcount > msg->cursize) {
+    if (msg->readCount > msg->currentSize) {
         c = -1;
     }
     return c;
@@ -385,7 +385,7 @@ int Q3MSG_ReadShort(msg_t* msg) {
     int	c;
 
     c = (short)Q3MSG_ReadBits(msg, 16);
-    if (msg->readcount > msg->cursize) {
+    if (msg->readCount > msg->currentSize) {
         c = -1;
     }
 
@@ -396,7 +396,7 @@ int Q3MSG_ReadLong(msg_t* msg) {
     int	c;
 
     c = Q3MSG_ReadBits(msg, 32);
-    if (msg->readcount > msg->cursize) {
+    if (msg->readCount > msg->currentSize) {
         c = -1;
     }
 
@@ -411,7 +411,7 @@ float Q3MSG_ReadFloat(msg_t* msg) {
     } dat;
 
     dat.l = Q3MSG_ReadBits(msg, 32);
-    if (msg->readcount > msg->cursize) {
+    if (msg->readCount > msg->currentSize) {
         dat.f = -1;
     }
 
@@ -518,10 +518,10 @@ Handles byte ordering and avoids alignment errors
 ==============================================================================
 */
 
-sizebuf_t   msg_write;
+SizeBuffer   msg_write;
 byte        msg_write_buffer[MAX_MSGLEN];
 
-sizebuf_t   msg_read;
+SizeBuffer   msg_read;
 byte        msg_read_buffer[MAX_MSGLEN];
 
 const PackedEntity   nullEntityState = {};
@@ -563,8 +563,8 @@ MSG_BeginWriting
 */
 void MSG_BeginWriting(void)
 {
-    msg_write.cursize = 0;
-    msg_write.bitpos = 0;
+    msg_write.currentSize = 0;
+    msg_write.bitPosition = 0;
     msg_write.overflowed = false;
 }
 
@@ -1273,19 +1273,19 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFla
 
 void MSG_BeginReading(void)
 {
-    msg_read.readcount = 0;
-    msg_read.bitpos = 0;
+    msg_read.readCount = 0;
+    msg_read.bitPosition = 0;
 }
 
 byte* MSG_ReadData(size_t len)
 {
-    byte* buf = msg_read.data + msg_read.readcount;
+    byte* buf = msg_read.data + msg_read.readCount;
 
-    msg_read.readcount += len;
-    msg_read.bitpos = msg_read.readcount << 3;
+    msg_read.readCount += len;
+    msg_read.bitPosition = msg_read.readCount << 3;
 
-    if (msg_read.readcount > msg_read.cursize) {
-        if (!msg_read.allowunderflow) {
+    if (msg_read.readCount > msg_read.currentSize) {
+        if (!msg_read.allowUnderflow) {
             Com_Error(ERR_DROP, "%s: read past end of message", __func__);
         }
         return NULL;

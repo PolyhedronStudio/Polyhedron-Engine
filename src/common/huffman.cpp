@@ -328,7 +328,7 @@ void Huff_Decompress(msg_t* mbuf, int32_t offset) {
 	byte* buffer;
 	huff_t		huff;
 
-	size = mbuf->cursize - offset;
+	size = mbuf->currentSize - offset;
 	buffer = mbuf->data + offset;
 
 	if (size <= 0) {
@@ -345,8 +345,8 @@ void Huff_Decompress(msg_t* mbuf, int32_t offset) {
 
 	cch = buffer[0] * 256 + buffer[1];
 	// don't overflow with bad messages
-	if (cch > mbuf->maxsize - offset) {
-		cch = mbuf->maxsize - offset;
+	if (cch > mbuf->maximumSize - offset) {
+		cch = mbuf->maximumSize - offset;
 	}
 	bloc = 16;
 
@@ -370,7 +370,7 @@ void Huff_Decompress(msg_t* mbuf, int32_t offset) {
 
 		Huff_addRef(&huff, (byte)ch);								/* Increment node */
 	}
-	mbuf->cursize = cch + offset;
+	mbuf->currentSize = cch + offset;
 	std::memcpy(mbuf->data + offset, seq, cch);
 }
 
@@ -382,7 +382,7 @@ void Huff_Compress(msg_t* mbuf, int32_t offset) {
 	byte* buffer;
 	huff_t		huff;
 
-	size = mbuf->cursize - offset;
+	size = mbuf->currentSize - offset;
 	buffer = mbuf->data + +offset;
 
 	if (size <= 0) {
@@ -411,7 +411,7 @@ void Huff_Compress(msg_t* mbuf, int32_t offset) {
 
 	bloc += 8;												// next byte
 
-	mbuf->cursize = (bloc >> 3) + offset;
+	mbuf->currentSize = (bloc >> 3) + offset;
 	std::memcpy(mbuf->data + offset, seq, (bloc >> 3));
 }
 

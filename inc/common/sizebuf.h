@@ -27,27 +27,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SZ_NC_FRG_IN        MakeRawLong('n', 'c', '2', 'i')
 #define SZ_NC_FRG_OUT       MakeRawLong('n', 'c', '2', 'o')
 
-typedef struct {
+struct SizeBuffer {
     uint32_t    tag;
-    qboolean    allowoverflow;
-    qboolean    allowunderflow;
+    qboolean    allowOverflow;
+    qboolean    allowUnderflow;
     qboolean    overflowed;     // set to true if the buffer size failed
     byte        *data;
-    size_t      maxsize;
-    size_t      cursize;
-    size_t      readcount;
-    size_t      bitpos;
-} sizebuf_t;
+    size_t      maximumSize;
+    size_t      currentSize;
+    size_t      readCount;
+    size_t      bitPosition;
+};
 
-void SZ_Init(sizebuf_t *buf, void *data, size_t size);
-void SZ_TagInit(sizebuf_t *buf, void *data, size_t size, uint32_t tag);
-void SZ_Clear(sizebuf_t *buf);
-void *SZ_GetSpace(sizebuf_t *buf, size_t len);
-void SZ_WriteByte(sizebuf_t *sb, int c);
-void SZ_WriteShort(sizebuf_t *sb, int c);
-void SZ_WriteLong(sizebuf_t *sb, int c);
+void SZ_Init(SizeBuffer *buf, void *data, size_t size);
+void SZ_TagInit(SizeBuffer *buf, void *data, size_t size, uint32_t tag);
+void SZ_Clear(SizeBuffer *buf);
+void *SZ_GetSpace(SizeBuffer *buf, size_t len);
+void SZ_WriteByte(SizeBuffer *sb, int c);
+void SZ_WriteShort(SizeBuffer *sb, int c);
+void SZ_WriteLong(SizeBuffer *sb, int c);
 
-static inline void *SZ_Write(sizebuf_t *buf, const void *data, size_t len)
+static inline void *SZ_Write(SizeBuffer *buf, const void *data, size_t len)
 {
     return memcpy(SZ_GetSpace(buf, len), data, len);
 }

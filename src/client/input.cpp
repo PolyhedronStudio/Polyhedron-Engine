@@ -374,7 +374,7 @@ static inline qboolean ready_to_send(void)
     if (cl.sendPacketNow) {
         return true;
     }
-    if (cls.netchan->message.cursize || cls.netchan->reliableAckPending) {
+    if (cls.netchan->message.currentSize || cls.netchan->reliableAckPending) {
         return true;
     }
     if (!cl_maxpackets->integer) {
@@ -416,7 +416,7 @@ CL_SendUserCommand
 */
 static void CL_SendUserCommand(void)
 {
-    size_t cursize q_unused, checksumIndex;
+    size_t currentSize q_unused, checksumIndex;
     ClientUserCommand *cmd, *oldcmd;
     ClientUserCommandHistory*history;
 
@@ -469,10 +469,10 @@ static void CL_SendUserCommand(void)
     //
     // deliver the message
     //
-    cursize = Netchan_Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
+    currentSize = Netchan_Transmit(cls.netchan, msg_write.currentSize, msg_write.data, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
-        Com_Printf("%" PRIz " ", cursize); // C++20: String concat fix.
+        Com_Printf("%" PRIz " ", currentSize); // C++20: String concat fix.
     }
 #endif
 
@@ -482,7 +482,7 @@ static void CL_SendUserCommand(void)
 static void CL_SendKeepAlive(void)
 {
     ClientUserCommandHistory *history;
-    size_t cursize q_unused;
+    size_t currentSize q_unused;
 
     // archive this packet
     history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
@@ -494,10 +494,10 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
     cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
-    cursize = Netchan_Transmit(cls.netchan, 0, NULL, 1);
+    currentSize = Netchan_Transmit(cls.netchan, 0, NULL, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
-        Com_Printf("%" PRIz " ", cursize);
+        Com_Printf("%" PRIz " ", currentSize);
     }
 #endif
 }

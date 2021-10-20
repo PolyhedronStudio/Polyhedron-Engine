@@ -112,7 +112,7 @@ static cvar_t   *net_enable_ipv6;
 static cvar_t   *net_ignore_icmp;
 #endif
 
-static netflag_t    net_active;
+static NetFlag    net_active;
 static int          net_error;
 
 static qsocket_t    udp_sockets[NS_COUNT] = { -1, -1 };
@@ -547,7 +547,7 @@ static size_t NET_DnRate_m(char *buffer, size_t size)
 
 #if USE_CLIENT
 
-static void NET_GetLoopPackets(netsrc_t sock, void (*packet_cb)(void))
+static void NET_GetLoopPackets(NetSource sock, void (*packet_cb)(void))
 {
     loopback_t *loop;
     loopmsg_t *loopmsg;
@@ -574,13 +574,13 @@ static void NET_GetLoopPackets(netsrc_t sock, void (*packet_cb)(void))
         }
 
         SZ_Init(&msg_read, msg_read_buffer, sizeof(msg_read_buffer));
-        msg_read.cursize = loopmsg->datalen;
+        msg_read.currentSize = loopmsg->datalen;
 
         (*packet_cb)();
     }
 }
 
-static qboolean NET_SendLoopPacket(netsrc_t sock, const void *data,
+static qboolean NET_SendLoopPacket(NetSource sock, const void *data,
                                    size_t len, const netadr_t *to)
 {
     loopback_t *loop;
@@ -810,7 +810,7 @@ static void NET_GetUdpPackets(qsocket_t sock, void (*packet_cb)(void))
         net_packets_rcvd++;
 
         SZ_Init(&msg_read, msg_read_buffer, sizeof(msg_read_buffer));
-        msg_read.cursize = ret;
+        msg_read.currentSize = ret;
 
         (*packet_cb)();
     }
@@ -824,7 +824,7 @@ Fills msg_read_buffer with packet contents,
 net_from variable receives source address.
 =============
 */
-void NET_GetPackets(netsrc_t sock, void (*packet_cb)(void))
+void NET_GetPackets(NetSource sock, void (*packet_cb)(void))
 {
 #if USE_CLIENT
     memset(&net_from, 0, sizeof(net_from));
@@ -847,7 +847,7 @@ NET_SendPacket
 
 =============
 */
-qboolean NET_SendPacket(netsrc_t sock, const void *data,
+qboolean NET_SendPacket(NetSource sock, const void *data,
                         size_t len, const netadr_t *to)
 {
     ssize_t ret;
@@ -1030,7 +1030,7 @@ static qsocket_t UDP_OpenSocket(const char *iface, int port, int family)
     return newsocket;
 }
 
-static qsocket_t TCP_OpenSocket(const char *iface, int port, int family, netsrc_t who)
+static qsocket_t TCP_OpenSocket(const char *iface, int port, int family, NetSource who)
 {
     qsocket_t s, newsocket;
     struct addrinfo hints, *res, *rp;
@@ -1241,9 +1241,9 @@ static void NET_OpenClient6(void)
 NET_Config
 ====================
 */
-void NET_Config(netflag_t flag)
+void NET_Config(NetFlag flag)
 {
-    netsrc_t sock;
+    NetSource sock;
 
     if (flag == net_active) {
         return;
@@ -1251,7 +1251,7 @@ void NET_Config(netflag_t flag)
 
     if (flag == NET_NONE) {
         // shut down any existing sockets
-        for (sock = (netsrc_t)0; sock < NS_COUNT; sock = (netsrc_t)(sock + 1)) { // CPP: Cast for loop
+        for (sock = (NetSource)0; sock < NS_COUNT; sock = (NetSource)(sock + 1)) { // CPP: Cast for loop
             if (udp_sockets[sock] != -1) {
                 NET_RemoveFd(udp_sockets[sock]);
                 os_closesocket(udp_sockets[sock]);
@@ -1279,7 +1279,7 @@ void NET_Config(netflag_t flag)
         NET_OpenServer6();
     }
 
-    net_active = (netflag_t)(net_active | flag); // CPP: Cast
+    net_active = (NetFlag)(net_active | flag); // CPP: Cast
 }
 
 /*
@@ -1287,7 +1287,7 @@ void NET_Config(netflag_t flag)
 NET_GetAddress
 ====================
 */
-qboolean NET_GetAddress(netsrc_t sock, netadr_t *adr)
+qboolean NET_GetAddress(NetSource sock, netadr_t *adr)
 {
     if (udp_sockets[sock] == -1)
         return false;
@@ -1544,7 +1544,7 @@ NET_Restart_f
 */
 static void NET_Restart_f(void)
 {
-    netflag_t flag = net_active;
+    NetFlag flag = net_active;
     qboolean listen4 = (tcp_socket != -1);
     qboolean listen6 = (tcp6_socket != -1);
 

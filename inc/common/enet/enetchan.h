@@ -24,20 +24,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/net/net.h"
 #include "common/sizebuf.h"
 
-struct netchan_t {
+struct NetChannel {
     int         protocol;
-    size_t      maxpacketlen;
+    size_t      maxPacketLength;
 
-    qboolean    fatal_error;
+    qboolean    fatalError;
 
-    netsrc_t    sock;
+    NetSource   netSource;
 
-    int         dropped;            // between last packet and previous
-    unsigned    totalDropped;      // for statistics
+    int         dropped;            // Between last packet and previous.
+    unsigned    totalDropped;       // for statistics.
     unsigned    totalReceived;
 
-    unsigned    lastReceived;      // for timeouts
-    unsigned    lastSent;          // for retransmits
+    unsigned    lastReceivedTime;   // For timeouts.
+    unsigned    lastSentTime;       // For retransmits.
 
     netadr_t    remoteAddress;
     int         qport;              // qport value to write when transmitting
@@ -45,7 +45,7 @@ struct netchan_t {
     size_t      reliableLength;
 
     // Pending states.
-    qboolean    reliableAckPending;   // set to true each time reliable is received
+    qboolean    reliableAckPending; // set to true each time reliable is received
     qboolean    fragmentPending;
 
     // sequencing variables
@@ -54,24 +54,24 @@ struct netchan_t {
     int         outgoingSequence;
 
     // sequencing variables
-    int         incomingReliableAcknowledged; // single bit
-    int         incomingReliableSequence;     // single bit, maintained local
-    int         reliableSequence;              // single bit
-    int         lastReliableSequence;         // sequence number of last send
+    int         incomingReliableAcknowledged;   // single bit
+    int         incomingReliableSequence;       // single bit, maintained local
+    int         reliableSequence;               // single bit
+    int         lastReliableSequence;           // sequence number of last send
     int         fragmentSequence;
 
-    // reliable staging and holding areas
-    sizebuf_t   message;                        // writing buffer for reliable data
-    byte        messageBuffer[MAX_MSGLEN];        // leave space for header
+    // Reliable staging and holding areas
+    SizeBuffer   message;                    // writing buffer for reliable data
+    byte        messageBuffer[MAX_MSGLEN];  // leave space for header
 
-// message is copied to this buffer when it is first transfered
-    sizebuf_t   reliable;
+    // Message is copied to this buffer when it is first transfered
+    SizeBuffer   reliable;
     byte        reliableBuffer[MAX_MSGLEN];   // unacked reliable message
 
-    sizebuf_t   inFragment;
+    SizeBuffer   inFragment;
     byte        inFragmentBuffer[MAX_MSGLEN];
 
-    sizebuf_t   outFragment;
+    SizeBuffer   outFragment;
     byte        outFragmentBuffer[MAX_MSGLEN];
 
 //--------------------------------
@@ -95,15 +95,15 @@ extern cvar_t* net_maxmsglen;
 extern cvar_t* net_chantype;
 
 void Netchan_Init(void);
-void Netchan_OutOfBand(netsrc_t sock, const netadr_t* adr, const char* format, ...) q_printf(3, 4);
-netchan_t* Netchan_Setup(netsrc_t sock, const netadr_t* adr, int qport, size_t maxpacketlen, int protocol);
+void Netchan_OutOfBand(NetSource sock, const netadr_t* adr, const char* format, ...) q_printf(3, 4);
+NetChannel* Netchan_Setup(NetSource sock, const netadr_t* adr, int qport, size_t maxPacketLength, int protocol);
 
-size_t      Netchan_Transmit(netchan_t*, size_t, const void*, int);
-size_t      Netchan_TransmitNextFragment(netchan_t*);
-qboolean    Netchan_Process(netchan_t*);
-qboolean    Netchan_ShouldUpdate(netchan_t*);
+size_t      Netchan_Transmit(NetChannel*, size_t, const void*, int);
+size_t      Netchan_TransmitNextFragment(NetChannel*);
+qboolean    Netchan_Process(NetChannel*);
+qboolean    Netchan_ShouldUpdate(NetChannel*);
 
-void Netchan_Close(netchan_t* netchan);
+void Netchan_Close(NetChannel* netchan);
 
 #define OOB_PRINT(sock, addr, data) \
     NET_SendPacket(sock, CONST_STR_LEN("\xff\xff\xff\xff" data), addr)

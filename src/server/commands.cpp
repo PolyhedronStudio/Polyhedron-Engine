@@ -460,7 +460,7 @@ static void SV_DumpEnts_f(void)
 
 //===============================================================
 
-static void make_mask(netadr_t *mask, netadrtype_t type, int bits);
+static void make_mask(netadr_t *mask, NetAddressType type, int bits);
 
 /*
 ==================
@@ -643,7 +643,7 @@ static void dump_protocols(void)
     FOR_EACH_CLIENT(cl) {
         Com_Printf("%3i %-15.15s %5d %5d %6" PRIz "  %s  %s\n",
                    cl->number, cl->name, cl->protocol, cl->version,
-                   cl->netchan->maxpacketlen,
+                   cl->netchan->maxPacketLength,
                    cl->has_zlib ? "yes" : "no ",
                    "1");
     }
@@ -753,7 +753,7 @@ void SV_PrintMiscInfo(void)
                sv_client->versionString ? sv_client->versionString : "-");
     Com_Printf("protocol (maj/min)   %d/%d\n",
                sv_client->protocol, sv_client->version);
-    Com_Printf("maxmsglen            %" PRIz "\n", sv_client->netchan->maxpacketlen);
+    Com_Printf("maxmsglen            %" PRIz "\n", sv_client->netchan->maxPacketLength);
     Com_Printf("zlib support         %s\n", sv_client->has_zlib ? "yes" : "no");
     Com_Printf("netchan type         %s\n", "1");
     Com_Printf("ping                 %d\n", sv_client->ping);
@@ -968,7 +968,7 @@ static void SV_SVG_ServerCommand_f(void)
     ge->ServerCommand();
 }
 
-static void make_mask(netadr_t *mask, netadrtype_t type, int bits)
+static void make_mask(netadr_t *mask, NetAddressType type, int bits)
 {
     memset(mask, 0, sizeof(*mask));
     mask->type = type;

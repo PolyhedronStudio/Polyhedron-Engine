@@ -111,7 +111,7 @@ ssize_t _wrp_FS_FPrintf(qhandle_t f, const char *format, ...) {
 }
 
 // NETWORKING
-void _trp_MSG_FlushTo(sizebuf_t *buf) {
+void _trp_MSG_FlushTo(SizeBuffer *buf) {
     MSG_FlushTo(buf);
 }
 

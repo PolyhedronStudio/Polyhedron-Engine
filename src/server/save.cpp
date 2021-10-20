@@ -65,7 +65,7 @@ static int write_server_file(qboolean autosave)
 
     // write server state
 	Q_snprintf(name, MAX_OSPATH, "%s/%s/server.ssv", sv_savedir->string, SAVE_CURRENT);
-    ret = FS_WriteFile(name, msg_write.data, msg_write.cursize);
+    ret = FS_WriteFile(name, msg_write.data, msg_write.currentSize);
 
     SZ_Clear(&msg_write);
 
@@ -119,7 +119,7 @@ static int write_level_file(void)
     if (len >= MAX_QPATH)
         ret = -1;
     else
-        ret = FS_WriteFile(name, msg_write.data, msg_write.cursize);
+        ret = FS_WriteFile(name, msg_write.data, msg_write.currentSize);
 
     SZ_Clear(&msg_write);
 
@@ -247,7 +247,7 @@ static int read_binary_file(const char *name)
         goto fail;
 
     SZ_Init(&msg_read, msg_read_buffer, len);
-    msg_read.cursize = len;
+    msg_read.currentSize = len;
 
     FS_FCloseFile(f);
     return 0;
@@ -359,7 +359,7 @@ static int read_server_file(void)
     SV_Shutdown("Server restarted\n", ERR_RECONNECT);
 
     // the rest can't underflow
-    msg_read.allowunderflow = false;
+    msg_read.allowUnderflow = false;
 
     // read all CVAR_LATCH cvars
     // these will be things like coop, skill, deathmatch, etc
@@ -418,7 +418,7 @@ static int read_level_file(void)
     // any error will drop from this point
 
     // the rest can't underflow
-    msg_read.allowunderflow = false;
+    msg_read.allowUnderflow = false;
 
     // read all configstrings
     while (1) {

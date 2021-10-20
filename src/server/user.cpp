@@ -130,7 +130,7 @@ static void write_plain_configstrings(void)
             length = MAX_QPATH;
         }
         // check if this configstring will overflow
-        if (msg_write.cursize + length + 64 > sv_client->netchan->maxpacketlen) {
+        if (msg_write.currentSize + length + 64 > sv_client->netchan->maxPacketLength) {
             SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
         }
 
@@ -164,7 +164,7 @@ static void write_plain_baselines(void)
         for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
             if (base->number) {
                 // check if this baseline will overflow
-                if (msg_write.cursize + 64 > sv_client->netchan->maxpacketlen) {
+                if (msg_write.currentSize + 64 > sv_client->netchan->maxPacketLength) {
                     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
                 }
 
@@ -182,7 +182,7 @@ static void write_plain_baselines(void)
 
 static void write_compressed_gamestate(void)
 {
-    sizebuf_t   *buf = &sv_client->netchan->message;
+    SizeBuffer   *buf = &sv_client->netchan->message;
     PackedEntity  *base;
     int         i, j;
     size_t      length;
@@ -203,7 +203,7 @@ static void write_compressed_gamestate(void)
         }
 
         //// MSGFRAG: !! Check if this configstring will overflow
-        //if (msg_write.cursize + length + 64 > sv_client->netchan->maxpacketlen) {
+        //if (msg_write.currentSize + length + 64 > sv_client->netchan->maxPacketLength) {
         //    SV_ClientAddMessage(sv_client, 0);
         //}
 
@@ -220,7 +220,7 @@ static void write_compressed_gamestate(void)
             continue;
         }
         //// MSGFRAG: !! Check if this baseline will overflow
-        //if (msg_write.cursize + 64 > sv_client->netchan->maxpacketlen) {
+        //if (msg_write.currentSize + 64 > sv_client->netchan->maxPacketLength) {
         //    SV_ClientAddMessage(sv_client, 0);
         //}
         for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
@@ -234,13 +234,13 @@ static void write_compressed_gamestate(void)
 
     SZ_WriteByte(buf, svc_zpacket);
     patch = (uint8_t*)SZ_GetSpace(buf, 2); // CPP: Cast
-    SZ_WriteShort(buf, msg_write.cursize);
+    SZ_WriteShort(buf, msg_write.currentSize);
 
     deflateReset(&svs.z);
     svs.z.next_in = msg_write.data;
-    svs.z.avail_in = (uInt)msg_write.cursize;
-    svs.z.next_out = buf->data + buf->cursize;
-    svs.z.avail_out = (uInt)(buf->maxsize - buf->cursize);
+    svs.z.avail_in = (uInt)msg_write.currentSize;
+    svs.z.next_out = buf->data + buf->currentSize;
+    svs.z.avail_out = (uInt)(buf->maximumSize - buf->currentSize);
     SZ_Clear(&msg_write);
 
     if (deflate(&svs.z, Z_FINISH) != Z_STREAM_END) {
@@ -253,7 +253,7 @@ static void write_compressed_gamestate(void)
 
     patch[0] = svs.z.total_out & 255;
     patch[1] = (svs.z.total_out >> 8) & 255;
-    buf->cursize += svs.z.total_out;
+    buf->currentSize += svs.z.total_out;
     
     //// MSGFRAG: !! Add final send.
     //SV_ClientAddMessage(sv_client, 0);
@@ -285,7 +285,7 @@ static inline void z_reset(byte *buffer)
 {
     deflateReset(&svs.z);
     svs.z.next_out = buffer;
-    svs.z.avail_out = (uInt)(sv_client->netchan->maxpacketlen - 5);
+    svs.z.avail_out = (uInt)(sv_client->netchan->maxPacketLength - 5);
 }
 
 static void write_compressed_configstrings(void)
@@ -323,7 +323,7 @@ static void write_compressed_configstrings(void)
         MSG_WriteByte(0);
 
         svs.z.next_in = msg_write.data;
-        svs.z.avail_in = (uInt)msg_write.cursize;
+        svs.z.avail_in = (uInt)msg_write.currentSize;
         SZ_Clear(&msg_write);
 
         if (deflate(&svs.z, Z_SYNC_FLUSH) != Z_OK) {
@@ -1247,13 +1247,13 @@ static void SV_ParseDeltaUserinfo(void)
             Com_DPrintf("Too many userinfos from %s\n", sv_client->name);
         }
 
-        if (msg_read.readcount >= msg_read.cursize)
+        if (msg_read.readCount >= msg_read.currentSize)
             break; // end of message
 
-        if (msg_read.data[msg_read.readcount] != clc_userinfo_delta)
+        if (msg_read.data[msg_read.readCount] != clc_userinfo_delta)
             break; // not delta userinfo
 
-        msg_read.readcount++;
+        msg_read.readCount++;
     }
 
     SV_UpdateUserinfo();
@@ -1302,7 +1302,7 @@ void SV_ExecuteClientMessage(client_t *client)
     userinfoUpdateCount = 0;
 
     while (1) {
-        if (msg_read.readcount > msg_read.cursize) {
+        if (msg_read.readCount > msg_read.currentSize) {
             SV_DropClient(client, "read past end of message");
             break;
         }

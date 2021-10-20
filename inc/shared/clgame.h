@@ -535,7 +535,7 @@ extern "C" {
         // Writes a position over the network.
         void        (*MSG_WriteVector3) (const vec3_t &pos);
         // Flushes message.
-        void        (*MSG_FlushTo) (sizebuf_t *buf);
+        void        (*MSG_FlushTo) (SizeBuffer *buf);
         
         //---------------------------------------------------------------------
         // Registering.

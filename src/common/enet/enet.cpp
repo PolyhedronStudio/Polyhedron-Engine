@@ -55,11 +55,11 @@ double ENET_SetNetTime() {
 }
 
 // Unordered map, based on socket indexes which contain the netchannels that are active.
-std::unordered_map<uint32_t, netchan_t> enetActiveSockets;
+std::unordered_map<uint32_t, NetChannel> enetActiveSockets;
 // Vector containing the netchannels that are currently in a connection process.
-std::vector<netchan_t> enetConnectingSockets;
+std::vector<NetChannel> enetConnectingSockets;
 // Vector containing the netchannels that are currently in a disconnection process.
-std::vector<netchan_t> enetDisconnectingSockets;
+std::vector<NetChannel> enetDisconnectingSockets;
 
 //---------------
 // ENET_Init
@@ -199,7 +199,7 @@ void ENET_Connect(const std::string& hostAddress) {
         Sys_Error("Could not allocate peer for ENet connection, aborting\n");
 
     // Create our new netchan socket.
-    netchan_t sock{};
+    NetChannel sock{};
     sock.connectTime = enetNetTime;
     sock.peer = peer;
     sock.host = enetClientHost;
@@ -238,7 +238,7 @@ void ENET_Close(int32_t socketID, qboolean closeNow) {
     }
 
     // Fetch a reference to the active socket.
-    netchan_t& socket = enetActiveSockets[socketID];
+    NetChannel& socket = enetActiveSockets[socketID];
 
     // Disconnect from the peer in case we have one actively going.
     if (socket.peer) {
@@ -274,10 +274,10 @@ void ENET_Close(int32_t socketID, qboolean closeNow) {
 //    ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT - packet will be fragmented using unreliable(instead of reliable) sends if it exceeds the MTU
 //    ENET_PACKET_FLAG_SENT - whether the packet has been sent from all queues it has been entered into
 //---------------
-qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, sizebuf_t* dataBuffer, int32_t flags) {
+qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, SizeBuffer* dataBuffer, int32_t flags) {
 
     // Create the actual packet.
-    ENetPacket* packet = enet_packet_create(dataBuffer->data, dataBuffer->cursize, flags);
+    ENetPacket* packet = enet_packet_create(dataBuffer->data, dataBuffer->currentSize, flags);
     if (!packet) {
         return false;
     }
@@ -300,7 +300,7 @@ qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, sizebuf_t* data
 // Clear the given buffer and write over the packet data into the buffer.
 // Optionally can be told NOT to destroy the packet instantly after doing so.
 //---------------
-void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, sizebuf_t* destDataBuffer, qboolean destroyPacket) {
+void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, SizeBuffer* destDataBuffer, qboolean destroyPacket) {
     // Clear.
     SZ_Clear(destDataBuffer);
 

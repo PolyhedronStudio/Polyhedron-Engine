@@ -680,7 +680,7 @@ void CL_Disconnect(ErrorType type)
         MSG_WriteByte(clc_stringcmd);
         MSG_WriteData("disconnect", 11);
 
-        Netchan_Transmit(cls.netchan, msg_write.cursize, msg_write.data, 3);
+        Netchan_Transmit(cls.netchan, msg_write.currentSize, msg_write.data, 3);
 
         SZ_Clear(&msg_write);
 
@@ -1379,7 +1379,7 @@ static void CL_PacketEvent(void)
         return;     // dump it if not connected
     }
 
-    if (msg_read.cursize < 8) {
+    if (msg_read.currentSize < 8) {
         Com_DPrintf("%s: runt packet\n", NET_AdrToString(&net_from));
         return;
     }
@@ -2735,14 +2735,14 @@ static void CL_CheckTimeout(void)
 #if USE_ICMP
     if (cls.errorReceived) {
         delta = 5000;
-        if (com_localTime - cls.netchan->lastReceived > delta)  {
+        if (com_localTime - cls.netchan->lastReceivedTime > delta)  {
             Com_Error(ERR_DISCONNECT, "Server connection was reset.");
         }
     }
 #endif
 
     delta = cl_timeout->value * 1000;
-    if (delta && com_localTime - cls.netchan->lastReceived > delta)  {
+    if (delta && com_localTime - cls.netchan->lastReceivedTime > delta)  {
         // timeoutcount saves debugger
         if (++cl.timeoutCount > 5) {
             Com_Error(ERR_DISCONNECT, "Server connection timed out.");
@@ -3143,7 +3143,7 @@ void CL_Init(void)
 
     cl_cmdbuf.from = FROM_STUFFTEXT;
     cl_cmdbuf.text = cl_cmdbuf_text;
-    cl_cmdbuf.maxsize = sizeof(cl_cmdbuf_text);
+    cl_cmdbuf.maximumSize = sizeof(cl_cmdbuf_text);
     cl_cmdbuf.exec = exec_server_string;
 
     Cvar_Set("cl_running", "1");

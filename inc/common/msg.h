@@ -29,15 +29,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Taken straight from Quake III Source. (And modified cuz typedef structs? Piss off.)
 //---------------
 struct msg_t {
-    qboolean allowoverflow;	// If false, do a Com_Error
-    qboolean overflowed;    // Set to true if the buffer size failed (with allowoverflow set)
-    qboolean oob;			// Set to true if the buffer size failed (with allowoverflow set)
+    qboolean allowOverflow;	// If false, do a Com_Error
+    qboolean overflowed;    // Set to true if the buffer size failed (with allowOverflow set)
+    qboolean oob;			// Set to true if the buffer size failed (with allowOverflow set)
    
     byte    *data;
 
-    int32_t maxsize;
-    int32_t cursize;
-    int32_t readcount;
+    int32_t maximumSize;
+    int32_t currentSize;
+    int32_t readCount;
     int32_t	bit;            // For bitwise reads and writes
 };
 
@@ -151,10 +151,10 @@ typedef enum msgEsFlags_s {
 //    MSG_ES_REMOVE = (1 << 7)
 } EntityStateMessageFlags;
 
-extern sizebuf_t    msg_write;
+extern SizeBuffer    msg_write;
 extern byte         msg_write_buffer[MAX_MSGLEN];
 
-extern sizebuf_t    msg_read;
+extern SizeBuffer    msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
 extern const PackedEntity    nullEntityState;
@@ -184,9 +184,9 @@ static inline void* MSG_WriteData(const void* data, size_t len)
     return memcpy(SZ_GetSpace(&msg_write, len), data, len);
 }
 
-static inline void MSG_FlushTo(sizebuf_t* buf)
+static inline void MSG_FlushTo(SizeBuffer* buf)
 {
-    SZ_Write(buf, msg_write.data, msg_write.cursize);
+    SZ_Write(buf, msg_write.data, msg_write.currentSize);
     SZ_Clear(&msg_write);
 }
 
@@ -221,7 +221,7 @@ void    MSG_ShowDeltaEntityBits(int bits);
 void    MSG_ShowDeltaPlayerstateBits_Packet(int flags);
 const char* MSG_ServerCommandString(int cmd);
 #define MSG_ShowSVC(cmd) \
-    Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readcount - 1, \
+    Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readCount - 1, \
         MSG_ServerCommandString(cmd))
 #endif // USE_CLIENT
 #endif // _DEBUG

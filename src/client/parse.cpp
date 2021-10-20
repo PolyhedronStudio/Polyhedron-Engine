@@ -95,7 +95,7 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
             Com_Error(ERR_DROP, "%s: bad number: %d", __func__, newnum);
         }
 
-        if (msg_read.readcount > msg_read.cursize) {
+        if (msg_read.readCount > msg_read.currentSize) {
             Com_Error(ERR_DROP, "%s: read past end of message", __func__);
         }
 
@@ -277,14 +277,14 @@ static void CL_ParseFrame(int extrabits)
     // read areaBits
     length = MSG_ReadByte();
     if (length) {
-        if (length < 0 || msg_read.readcount + length > msg_read.cursize) {
+        if (length < 0 || msg_read.readCount + length > msg_read.currentSize) {
             Com_Error(ERR_DROP, "%s: read past end of message", __func__);
         }
         if (length > sizeof(frame.areaBits)) {
             Com_Error(ERR_DROP, "%s: invalid areaBits length", __func__);
         }
-        memcpy(frame.areaBits, msg_read.data + msg_read.readcount, length);
-        msg_read.readcount += length;
+        memcpy(frame.areaBits, msg_read.data + msg_read.readCount, length);
+        msg_read.readCount += length;
         frame.areaBytes = length;
     } else {
         frame.areaBytes = 0;
@@ -297,7 +297,7 @@ static void CL_ParseFrame(int extrabits)
     //    }
     //}
 
-    SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readcount - 1);
+    SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readCount - 1);
 
     // parse playerstate
     bits = MSG_ReadShort();
@@ -315,7 +315,7 @@ static void CL_ParseFrame(int extrabits)
         frame.clientNumber = oldframe->clientNumber;
     }
 
-    SHOWNET(2, "%3" PRIz ":packetentities\n", msg_read.readcount - 1);
+    SHOWNET(2, "%3" PRIz ":packetentities\n", msg_read.readCount - 1);
 
     CL_ParsePacketEntities(oldframe, &frame);
 
@@ -330,7 +330,7 @@ static void CL_ParseFrame(int extrabits)
             rtt = cls.realtime - cl.clientCommandHistory[seq].timeSent;
         }
         Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
-                    msg_read.readcount - 1, frame.number, frame.delta, rtt);
+                    msg_read.readCount - 1, frame.number, frame.delta, rtt);
     }
 #endif
 
@@ -418,7 +418,7 @@ static void CL_ParseGamestate(void)
 {
     int        index, bits;
 
-    while (msg_read.readcount < msg_read.cursize) {
+    while (msg_read.readCount < msg_read.currentSize) {
         index = MSG_ReadShort();
         if (index == ConfigStrings::MaxConfigStrings) {
             break;
@@ -426,7 +426,7 @@ static void CL_ParseGamestate(void)
         CL_ParseConfigstring(index);
     }
 
-    while (msg_read.readcount < msg_read.cursize) {
+    while (msg_read.readCount < msg_read.currentSize) {
         index = MSG_ParseEntityBits(&bits);
         if (!index) {
             break;
@@ -726,12 +726,12 @@ static void CL_ParseDownload(int cmd)
         Com_Error(ERR_DROP, "%s: bad size: %d", __func__, size);
     }
 
-    if (msg_read.readcount + size > msg_read.cursize) {
+    if (msg_read.readCount + size > msg_read.currentSize) {
         Com_Error(ERR_DROP, "%s: read past end of message", __func__);
     }
 
-    data = msg_read.data + msg_read.readcount;
-    msg_read.readcount += size;
+    data = msg_read.data + msg_read.readCount;
+    msg_read.readCount += size;
 
     CL_HandleDownload(data, size, percent, compressed);
 }
@@ -739,7 +739,7 @@ static void CL_ParseDownload(int cmd)
 static void CL_ParseZPacket(void)
 {
 #if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
-    sizebuf_t   temp;
+    SizeBuffer   temp;
     byte        buffer[MAX_MSGLEN];
     int         inlen, outlen;
 
@@ -750,7 +750,7 @@ static void CL_ParseZPacket(void)
     inlen = MSG_ReadWord();
     outlen = MSG_ReadWord();
 
-    if (inlen == -1 || outlen == -1 || msg_read.readcount + inlen > msg_read.cursize) {
+    if (inlen == -1 || outlen == -1 || msg_read.readCount + inlen > msg_read.currentSize) {
         Com_Error(ERR_DROP, "%s: read past end of message", __func__);
     }
 
@@ -760,7 +760,7 @@ static void CL_ParseZPacket(void)
 
     inflateReset(&cls.z);
 
-    cls.z.next_in = msg_read.data + msg_read.readcount;
+    cls.z.next_in = msg_read.data + msg_read.readCount;
     cls.z.avail_in = (uInt)inlen;
     cls.z.next_out = buffer;
     cls.z.avail_out = (uInt)outlen;
@@ -768,11 +768,11 @@ static void CL_ParseZPacket(void)
         Com_Error(ERR_DROP, "%s: inflate() failed: %s", __func__, cls.z.msg);
     }
 
-    msg_read.readcount += inlen;
+    msg_read.readCount += inlen;
 
     temp = msg_read;
     SZ_Init(&msg_read, buffer, outlen);
-    msg_read.cursize = outlen;
+    msg_read.currentSize = outlen;
 
     CL_ParseServerMessage();
 
@@ -808,12 +808,12 @@ CL_ParseServerMessage
 void CL_ParseServerMessage(void)
 {
     int         cmd, extrabits;
-    size_t      readcount;
+    size_t      readCount;
     int         index, bits;
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.cursize); // CPP: String concat.
+        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.currentSize); // CPP: String concat.
     } else if (cl_shownet->integer > 1) {
         Com_LPrintf(PRINT_DEVELOPER, "------------------\n");
     }
@@ -826,14 +826,14 @@ void CL_ParseServerMessage(void)
     CL_GM_StartServerMessage();
 
     while (1) {
-        if (msg_read.readcount > msg_read.cursize) {
+        if (msg_read.readCount > msg_read.currentSize) {
             Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
         }
 
-        readcount = msg_read.readcount;
+        readCount = msg_read.readCount;
 
         if ((cmd = MSG_ReadByte()) == -1) {
-            SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readcount - 1);
+            SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readCount - 1);
             break;
         }
 
@@ -920,13 +920,13 @@ badbyte:
 
         // if recording demos, copy off protocol invariant stuff
         if (cls.demo.recording && !cls.demo.paused) {
-            size_t len = msg_read.readcount - readcount;
+            size_t len = msg_read.readCount - readCount;
 
             // it is very easy to overflow standard 1390 bytes
             // demo frame with modern servers... attempt to preserve
             // reliable messages at least, assuming they come first
-            if (cls.demo.buffer.cursize + len < cls.demo.buffer.maxsize) {
-                SZ_Write(&cls.demo.buffer, msg_read.data + readcount, len);
+            if (cls.demo.buffer.currentSize + len < cls.demo.buffer.maximumSize) {
+                SZ_Write(&cls.demo.buffer, msg_read.data + readCount, len);
             } else {
                 cls.demo.others_dropped++;
             }
@@ -952,7 +952,7 @@ void CL_SeekDemoMessage(void)
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.cursize); // CPP: String concat.
+        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.currentSize); // CPP: String concat.
     } else if (cl_shownet->integer > 1) {
         Com_LPrintf(PRINT_DEVELOPER, "------------------\n");
     }
@@ -962,12 +962,12 @@ void CL_SeekDemoMessage(void)
 // parse the message
 //
     while (1) {
-        if (msg_read.readcount > msg_read.cursize) {
+        if (msg_read.readCount > msg_read.currentSize) {
             Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
         }
 
         if ((cmd = MSG_ReadByte()) == -1) {
-            SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readcount - 1);
+            SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readCount - 1);
             break;
         }
 

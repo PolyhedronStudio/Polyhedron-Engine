@@ -41,8 +41,8 @@ enum from_t : int32_t {
 struct cmdbuf_t {
     from_t      from;
     char* text; // may not be NULL terminated
-    size_t      cursize;
-    size_t      maxsize;
+    size_t      currentSize;
+    size_t      maximumSize;
     int         waitCount;
     int         aliasCount; // for detecting runaway loops
     void        (*exec)(struct cmdbuf_t*, const char*);

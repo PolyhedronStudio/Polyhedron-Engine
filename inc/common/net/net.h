@@ -67,19 +67,19 @@ typedef enum {
     NA_BROADCAST,
     NA_IP,
     NA_IP6
-} netadrtype_t;
+} NetAddressType;
 
 typedef enum {
     NS_CLIENT,
     NS_SERVER,
     NS_COUNT
-} netsrc_t;
+} NetSource;
 
 typedef enum {
     NET_NONE    = 0,
     NET_CLIENT  = (1 << 0),
     NET_SERVER  = (1 << 1)
-} netflag_t;
+} NetFlag;
 
 typedef union {
     uint8_t u8[16];
@@ -89,7 +89,7 @@ typedef union {
 } netadrip_t;
 
 typedef struct netadr_s {
-    netadrtype_t type;
+    NetAddressType type;
     netadrip_t ip;
     uint16_t port;
     uint32_t scope_id;  // IPv6 crap
@@ -101,15 +101,7 @@ typedef enum netstate_e {
     NS_CONNECTED,   // may transmit data
     NS_CLOSED,      // peer has preformed orderly shutdown
     NS_BROKEN       // fatal error has been signaled
-} netstate_t;
-
-typedef struct netstream_s {
-    qsocket_t   socket;
-    netadr_t    address;
-    netstate_t  state;
-    fifo_t      recv;
-    fifo_t      send;
-} netstream_t;
+} NetState;
 
 static inline qboolean NET_IsEqualAdr(const netadr_t *a, const netadr_t *b)
 {
@@ -231,12 +223,12 @@ static inline qboolean NET_IsLocalAddress(const netadr_t *adr)
 
 void        NET_Init(void);
 void        NET_Shutdown(void);
-void        NET_Config(netflag_t flag);
+void        NET_Config(NetFlag flag);
 void        NET_UpdateStats(void);
 
-qboolean    NET_GetAddress(netsrc_t sock, netadr_t *adr);
-void        NET_GetPackets(netsrc_t sock, void (*packet_cb)(void));
-qboolean    NET_SendPacket(netsrc_t sock, const void *data,
+qboolean    NET_GetAddress(NetSource sock, netadr_t *adr);
+void        NET_GetPackets(NetSource sock, void (*packet_cb)(void));
+qboolean    NET_SendPacket(NetSource sock, const void *data,
                            size_t len, const netadr_t *to);
 
 const char *NET_AdrToString(const netadr_t *a);

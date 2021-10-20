@@ -168,7 +168,7 @@ struct ClientStatic {
 
     int         quakePort;          // a 16 bit value that allows quake servers
                                     // to work around address translating routers
-    netchan_t* netchan;
+    NetChannel* netchan;
     int         serverProtocol;     // in case we are doing some kind of version hack
     int         protocolVersion;    // minor version
 
@@ -213,7 +213,7 @@ struct ClientStatic {
         int         file_size;
         int         file_offset;
         int         file_percent;
-        sizebuf_t   buffer;
+        SizeBuffer   buffer;
         list_t      snapshots;
         qboolean    paused;
         qboolean    seeking;
@@ -487,7 +487,7 @@ void CL_CheckPredictionError(void);
 void CL_InitDemos(void);
 void CL_CleanupDemos(void);
 void CL_DemoFrame(int msec);
-qboolean CL_WriteDemoMessage(sizebuf_t *buf);
+qboolean CL_WriteDemoMessage(SizeBuffer *buf);
 void CL_EmitDemoFrame(void);
 void CL_EmitDemoSnapshot(void);
 void CL_FirstDemoFrame(void);

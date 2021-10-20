@@ -95,7 +95,7 @@ void ENET_Close(int32_t socketID, qboolean closeNow = false);
 //    ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT - packet will be fragmented using unreliable(instead of reliable) sends if it exceeds the MTU
 //    ENET_PACKET_FLAG_SENT - whether the packet has been sent from all queues it has been entered into
 //---------------
-qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, sizebuf_t* dataBuffer, int32_t flags = 0);
+qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, SizeBuffer* dataBuffer, int32_t flags = 0);
 
 //---------------
 // ENET_ConvertPacketToBuffer
@@ -103,7 +103,7 @@ qboolean ENET_SendBufferToPeer(ENetPeer* ePeer, ENetHost* eHost, sizebuf_t* data
 // Clear the given buffer and write over the packet data into the buffer.
 // Optionally can be told NOT to destroy the packet instantly after doing so.
 //---------------
-void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, sizebuf_t* destDataBuffer, qboolean destroyPacket = true);
+void ENET_ConvertPacketToBuffer(ENetPacket* ePacket, SizeBuffer* destDataBuffer, qboolean destroyPacket = true);
 
 
 //=============================================================================

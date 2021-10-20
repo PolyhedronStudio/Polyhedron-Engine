@@ -99,7 +99,7 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
         goto clear;
     }
 
-    if (!msg_write.cursize) {
+    if (!msg_write.currentSize) {
         Com_DPrintf("%s with empty data\n", __func__);
         goto clear;
     }
@@ -616,7 +616,7 @@ static void PF_StartSound(Entity *edict, int channel,
 
         msg = LIST_FIRST(MessagePacket, &client->msg_free_list, entry);
 
-        msg->cursize = 0;
+        msg->currentSize = 0;
         msg->flags = flags;
         msg->index = soundindex;
         msg->volume = volume * 255;

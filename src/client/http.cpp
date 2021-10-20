@@ -749,7 +749,7 @@ static qboolean finish_download(void)
     double      sec, bytes;
     char        size[16], speed[16];
     char        temp[MAX_OSPATH];
-    qboolean    fatal_error = false;
+    qboolean    fatalError = false;
     const char  *err;
     PrintType level;
 
@@ -800,7 +800,7 @@ static qboolean finish_download(void)
             //not marking download as done since
             //we are falling back to UDP
             level = PRINT_ERROR;
-            fatal_error = true;
+            fatalError = true;
             goto fail2;
 
         case CURLE_COULDNT_RESOLVE_HOST:
@@ -809,7 +809,7 @@ static qboolean finish_download(void)
             //connection problems are fatal
             err = curl_easy_strerror(result);
             level = PRINT_ERROR;
-            fatal_error = true;
+            fatalError = true;
             goto fail2;
 
         default:
@@ -875,13 +875,13 @@ fail2:
                 CL_RestartFilesystem(false);
                 rescan_queue();
             }
-        } else if (!fatal_error) {
+        } else if (!fatalError) {
             parse_file_list(dl);
         }
     } while (msgs_in_queue > 0);
 
     //fatal error occured, disable HTTP
-    if (fatal_error) {
+    if (fatalError) {
         abort_downloads();
         return false;
     }

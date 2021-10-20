@@ -171,7 +171,7 @@ constexpr uint32_t MAX_SOUND_PACKET = 14;
 //-----------------
 typedef struct {
     list_t              entry;
-    uint16_t            cursize;    // Zero means sound packet
+    uint16_t            currentSize;    // Zero means sound packet
     union {
         uint8_t         data[MSG_TRESHOLD];
         struct {
@@ -319,7 +319,7 @@ typedef struct client_s {
     void (*WriteDatagram)(struct client_s *);
 
     // netchan
-    netchan_t *netchan;
+    NetChannel *netchan;
     int32_t numpackets; // for that nasty packetdup hack
 
     // misc
