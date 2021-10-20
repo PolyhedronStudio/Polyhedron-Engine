@@ -1258,7 +1258,7 @@ static void SV_CalcPings(void)
     }
 
     // update avg ping and fps every 10 seconds
-    res = sv.frameNumber % (10 * SV_FRAMERATE);
+    res = sv.frameNumber % (16 * (BASE_FRAMERATE / 10));
 
     FOR_EACH_CLIENT(cl) {
         if (cl->connectionState == ConnectionState::Spawned) {
@@ -1302,7 +1302,7 @@ static void SV_GiveMsec(void)
 {
     client_t    *cl;
 
-    if (sv.frameNumber % (int)(BASE_FRAMETIME * SV_FRAMEDIV)) // WID: This was: (16 * SV_FRAMEDIV)
+    if (sv.frameNumber % (int)(BASE_FRAMETIME * (BASE_FRAMERATE / 10))) // WID: This was: (16 * SV_FRAMEDIV)
         return;
 
     FOR_EACH_CLIENT(cl) {
