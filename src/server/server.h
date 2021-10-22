@@ -157,7 +157,7 @@ struct ConnectionState {
     static constexpr int32_t Spawned = 5;   // Client is fully in game
 };
 
-constexpr uint32_t MSG_POOLSIZE = 1024;
+constexpr uint32_t MSG_POOLSIZE = 8192;
 constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
 
 constexpr uint32_t MSG_RELIABLE = 1;
@@ -187,7 +187,7 @@ typedef struct {
 } MessagePacket;
 
 // This is best to match the actual server game frame rate.
-static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 20;
+static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 10;
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
