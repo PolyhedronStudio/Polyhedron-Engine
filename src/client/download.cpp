@@ -849,7 +849,7 @@ void CL_RequestNextDownload(void)
                 check_player(name);
             }
         }
-
+        
         if (allow_download_textures->integer) {
             static const char env_suf[6][3] = {
                 "rt", "bk", "lf", "ft", "up", "dn"
@@ -876,7 +876,7 @@ void CL_RequestNextDownload(void)
 
         if (allow_download_textures->integer) {
             for (i = 0; i < cl.bsp->numtexinfo; i++) {
-                len = Q_concat(fn, sizeof(fn), "textures/", cl.bsp->texinfo[i].name, ".wal", NULL);
+                len = Q_concat(fn, sizeof(fn), "textures/", cl.bsp->texinfo[i].name, ".tga", NULL);
                 check_file_len(fn, len, DL_OTHER);
             }
         }
