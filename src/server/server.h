@@ -187,8 +187,13 @@ typedef struct {
 } MessagePacket;
 
 // This is best to match the actual server game frame rate.
-static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 60;
-static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE_DIVISOR;
+static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;    // Was: 10, later on 20, then 60, now just matches the fps.
+
+// Used to divide for rate calculating.
+static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 60 / 10 = 6.
+
+// Used to multiply for rate user input drop calculating.
+static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 60 / 10 = 6.
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
@@ -239,14 +244,14 @@ typedef struct client_s {
     int32_t consoleQueries;
 
     // usercmd stuff
-    uint32_t lastMessage;    // svs.realTime when packet was last received
-    uint32_t lastActivity;   // svs.realTime when user activity was last seen
-    int32_t lastFrame;      // for delta compression
+    uint32_t    lastMessage;    // svs.realTime when packet was last received
+    uint32_t    lastActivity;   // svs.realTime when user activity was last seen
+    int32_t     lastFrame;      // for delta compression
     ClientMoveCommand lastClientUserCommand;        // for filling in big drops
     int32_t clientUserCommandMiliseconds;   // every seconds this is reset, if user
-                                    // commands exhaust it, assume time cheating
+                                            // commands exhaust it, assume time cheating
     int32_t numberOfMoves;      // reset every 10 seconds
-    int32_t movesPerSecond;  // average movement FPS
+    int32_t movesPerSecond;     // average movement FPS
 
     // Networking PING.
     int32_t ping;
