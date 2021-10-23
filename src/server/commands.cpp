@@ -545,7 +545,7 @@ static void dump_clients(void)
         Com_Printf("%-21s ", NET_AdrToString(
                        &client->netchan->remoteNetAddress));
         Com_Printf("%5" PRIz " ", client->rate);
-        Com_Printf("%2i ", client->protocolMajorVersion);
+        Com_Printf("%2i ", client->protocolVersion);
         Com_Printf("%3i ", client->movesPerSecond);
         Com_Printf("\n");
     }
@@ -642,7 +642,7 @@ static void dump_protocols(void)
 
     FOR_EACH_CLIENT(cl) {
         Com_Printf("%3i %-15.15s %5d %5d %6" PRIz "  %s  %s\n",
-                   cl->number, cl->name, cl->protocolMajorVersion, cl->protocolMinorVersion,
+                   cl->number, cl->name, cl->protocolVersion, cl->protocolMinorVersion,
                    cl->netchan->maximumPacketLength,
                    cl->has_zlib ? "yes" : "no ",
                    "1");
@@ -752,7 +752,7 @@ void SV_PrintMiscInfo(void)
     Com_Printf("version              %s\n",
                sv_client->versionString ? sv_client->versionString : "-");
     Com_Printf("protocol (maj/min)   %d/%d\n",
-               sv_client->protocolMajorVersion, sv_client->protocolMinorVersion);
+               sv_client->protocolVersion, sv_client->protocolMinorVersion);
     Com_Printf("maxmsglen            %" PRIz "\n", sv_client->netchan->maximumPacketLength);
     Com_Printf("zlib support         %s\n", sv_client->has_zlib ? "yes" : "no");
     Com_Printf("netchan type         %s\n", "1");

@@ -16,17 +16,67 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef ENET_CHAN_H
-#define ENET_CHAN_H
+#ifndef NET_CHAN_H
+#define NET_CHAN_H
 
 #include "common/msg.h"
-#include "common/enet/enet.h"
 #include "common/net/net.h"
 #include "common/sizebuffer.h"
 
+//struct NetChannel {
+//    int         protocol;
+//    size_t      maxPacketLength;
+//
+//    qboolean    fatalError;
+//
+//    NetSource    sock;
+//
+//    int         dropped;            // between last packet and previous
+//    unsigned    totalDropped;      // for statistics
+//    unsigned    totalReceived;
+//
+//    unsigned    lastReceivedTime;      // for timeouts
+//    unsigned    lastSentTime;          // for retransmits
+//
+//    netadr_t    remoteNetAddress;
+//    int         qport;              // qport value to write when transmitting
+//
+//    size_t      reliableLength;
+//
+//    // Pending states.
+//    qboolean    reliableAckPending;   // set to true each time reliable is received
+//    qboolean    fragmentPending;
+//
+//    // sequencing variables
+//    int         incomingSequence;
+//    int         incomingAcknowledged;
+//    int         outgoingSequence;
+//
+//    // sequencing variables
+//    int         incomingReliableAcknowledged; // single bit
+//    int         incomingReliableSequence;     // single bit, maintained local
+//    int         reliableSequence;              // single bit
+//    int         lastReliableSequence;         // sequence number of last send
+//    int         fragmentSequence;
+//
+//    // reliable staging and holding areas
+//    SizeBuffer   message;                        // writing buffer for reliable data
+//    byte        messageBuffer[MAX_MSGLEN];        // leave space for header
+//
+//// message is copied to this buffer when it is first transfered
+//    SizeBuffer   reliable;
+//    byte        reliableBuffer[MAX_MSGLEN];   // unacked reliable message
+//
+//    SizeBuffer   inFragment;
+//    byte        inFragmentBuffer[MAX_MSGLEN];
+//
+//    SizeBuffer   outFragment;
+//    byte        outFragmentBuffer[MAX_MSGLEN];
+//};
+
 struct NetChannel {
 public:
-    int32_t     protocolMajorVersion;
+    int32_t     protocolVersion;
     size_t      maximumPacketLength;
 
     qboolean    fatalError;         // True in case we ran into a major error.
@@ -45,10 +95,6 @@ public:
     int32_t     remoteQPort;        // qport value to write when transmitting
 
     size_t      reliableLength;
-
-    // ENet host and peer connection.
-    ENetHost* eHost;
-    ENetPeer* ePeer;
 
     // Pending states.
     qboolean    reliableAckPending; // Set to true each time reliable is received
@@ -79,38 +125,26 @@ public:
 
     SizeBuffer   outFragment;
     byte        outFragmentBuffer[MAX_MSGLEN];
-
-//--------------------------------
-// ENet
-//--------------------------------
-    double connectTime;
-    double disconnectTime;
-    double lastMessageTime;
-    double lastSendTime;
-
-    bool disconnected;
-
-
 };
 
-extern cvar_t* net_qport;
-extern cvar_t* net_maxmsglen;
-extern cvar_t* net_chantype;
+extern cvar_t       *net_qport;
+extern cvar_t       *net_maxmsglen;
+extern cvar_t       *net_chantype;
 
 void Netchan_Init(void);
-void Netchan_OutOfBand(NetSource sock, const netadr_t* adr, const char* format, ...) q_printf(3, 4);
-NetChannel* Netchan_Setup(NetSource sock, const netadr_t* adr, int qport, size_t maxPacketLength, int protocol);
+void Netchan_OutOfBand(NetSource sock, const netadr_t *adr, const char *format, ...) q_printf(3, 4);
+NetChannel *Netchan_Setup(NetSource sock, const netadr_t *adr, int qport, size_t maxPacketLength, int protocol);
 
 size_t      Netchan_Transmit(NetChannel*, size_t, const void*, int);
 size_t      Netchan_TransmitNextFragment(NetChannel*);
 qboolean    Netchan_Process(NetChannel*);
 qboolean    Netchan_ShouldUpdate(NetChannel*);
 
-void Netchan_Close(NetChannel* netchan);
+void Netchan_Close(NetChannel*netchan);
 
 #define OOB_PRINT(sock, addr, data) \
     NET_SendPacket(sock, CONST_STR_LEN("\xff\xff\xff\xff" data), addr)
 
 //============================================================================
 
-#endif // ENET_CHAN_H
+#endif // NET_CHAN_H

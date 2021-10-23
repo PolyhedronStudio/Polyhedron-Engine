@@ -455,15 +455,15 @@ static void CL_SendUserCommand(void)
     // send this and the previous clientUserCommands in the message, so
     // if the last packet was dropped, it can be recovered
     cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 2) & CMD_MASK];
-    MSG_WriteDeltaUsercmd(NULL, cmd);
+    MSG_WriteDeltaClientMoveCommand(NULL, cmd);
     oldcmd = cmd;
 
     cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 1) & CMD_MASK];
-    MSG_WriteDeltaUsercmd(oldcmd, cmd);
+    MSG_WriteDeltaClientMoveCommand(oldcmd, cmd);
     oldcmd = cmd;
 
     cmd = &cl.clientUserCommands[cl.currentClientCommandNumber & CMD_MASK];
-    MSG_WriteDeltaUsercmd(oldcmd, cmd);
+    MSG_WriteDeltaClientMoveCommand(oldcmd, cmd);
 
     P_FRAMES++;
 

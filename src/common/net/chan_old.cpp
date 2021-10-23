@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/msg.h"
-#include "common/enet/enetchan.h"
+#include "common/enet/netchan.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
 #include "common/sizebuffer.h"
@@ -556,7 +556,7 @@ NetChannel *Netchan_Setup(NetSource sock, const netadr_t *adr, int qport, size_t
     SZ_TagInit(&netchan->outFragment, netchan->outFragmentBuffer,
         sizeof(netchan->outFragmentBuffer), SZ_NC_FRG_OUT);
 
-    netchan->protocolMajorVersion = protocol;
+    netchan->protocolVersion = protocol;
 
     return netchan;
 

@@ -600,7 +600,7 @@ A connection request that did not come from the master
 */
 
 typedef struct {
-    int         protocolMajorVersion; // major version
+    int         protocolVersion; // major version
     int         protocolMinorVersion; // minor version
     int         qport;
     int         challenge;
@@ -623,17 +623,17 @@ typedef struct {
 
 static qboolean parse_basic_params(conn_params_t *p)
 {
-    p->protocolMajorVersion = atoi(Cmd_Argv(1));
+    p->protocolVersion = atoi(Cmd_Argv(1));
     p->qport = atoi(Cmd_Argv(2)) ;
     p->challenge = atoi(Cmd_Argv(3));
 
     // check for invalid protocol version
-    if (p->protocolMajorVersion != PROTOCOL_VERSION_NAC)
-        return reject("Unsupported protocol version %d.\n", p->protocolMajorVersion);
+    if (p->protocolVersion != PROTOCOL_VERSION_NAC)
+        return reject("Unsupported protocol version %d.\n", p->protocolVersion);
 
     // check for valid, but outdated protocol version
-    if (p->protocolMajorVersion < PROTOCOL_VERSION_DEFAULT)
-        return reject("Unsupported protocol version %i, You need protocol version (%i) or higher.\n", p->protocolMajorVersion, PROTOCOL_VERSION_DEFAULT);
+    if (p->protocolVersion < PROTOCOL_VERSION_DEFAULT)
+        return reject("Unsupported protocol version %i, You need protocol version (%i) or higher.\n", p->protocolVersion, PROTOCOL_VERSION_DEFAULT);
 
     return true;
 }
@@ -769,12 +769,12 @@ static qboolean parse_enhanced_params(conn_params_t *p)
     // set minor protocol version
     s = Cmd_Argv(8);
     if (*s) {
-        p->protocolMajorVersion = atoi(s);
-        clamp(p->protocolMajorVersion,
+        p->protocolVersion = atoi(s);
+        clamp(p->protocolVersion,
                 PROTOCOL_VERSION_NAC_MINIMUM,
                 PROTOCOL_VERSION_NAC_CURRENT);
     } else {
-        p->protocolMajorVersion = PROTOCOL_VERSION_NAC_MINIMUM;
+        p->protocolVersion = PROTOCOL_VERSION_NAC_MINIMUM;
     }
 
     return true;
@@ -947,7 +947,7 @@ static void append_extra_userinfo(conn_params_t *params, char *userinfo)
                "\\major\\%d\\minor\\%d\\netchan\\%d"
                "\\packetlen\\%d\\qport\\%d\\zlib\\%d",
                params->challenge, userinfo_ip_string(),
-               params->protocolMajorVersion, params->protocolMinorVersion, params->nctype,
+               params->protocolVersion, params->protocolMinorVersion, params->nctype,
                params->maxlength, params->qport, params->has_zlib);
 }
 
@@ -987,7 +987,7 @@ static void SVC_DirectConnect(void)
     memset(newcl, 0, sizeof(*newcl));
     newcl->number = newcl->slot = number;
     newcl->challenge = params.challenge; // save challenge for checksumming
-    newcl->protocolMajorVersion = params.protocolMajorVersion;
+    newcl->protocolVersion = params.protocolVersion;
     newcl->protocolMinorVersion = params.protocolMinorVersion;
     newcl->has_zlib = params.has_zlib;
     newcl->edict = EDICT_NUM(number + 1);
@@ -1023,7 +1023,7 @@ static void SVC_DirectConnect(void)
     }
 
     // setup netchan
-    newcl->netchan = Netchan_Setup(NS_SERVER, &net_from, params.qport, params.maxlength, params.protocolMajorVersion);
+    newcl->netchan = Netchan_Setup(NS_SERVER, &net_from, params.qport, params.maxlength, params.protocolVersion);
     newcl->numpackets = 1;
 
     // parse some info from the info strings
@@ -1038,7 +1038,7 @@ static void SVC_DirectConnect(void)
     SV_InitClientSend(newcl);
 
     // MSG: !!
-    //if (newcl->protocolMajorVersion == PROTOCOL_VERSION_DEFAULT) {
+    //if (newcl->protocolVersion == PROTOCOL_VERSION_DEFAULT) {
     //    newcl->WriteFrame = __OLD_SV_WriteFrameToClient_Default;
     //} else {
         newcl->WriteFrame = SV_WriteFrameToClient;
@@ -1343,7 +1343,7 @@ static void SV_PacketEvent(void)
         // read the qport out of the message so we can fix up
         // stupid address translating routers
         // MSG: !!
-/*        if (client->protocolMajorVersion == PROTOCOL_VERSION_DEFAULT) {
+/*        if (client->protocolVersion == PROTOCOL_VERSION_DEFAULT) {
             qport = msg_read.data[8] | (msg_read.data[9] << 8);
             if (netchan->remoteQPort != qport) {
                 continue;

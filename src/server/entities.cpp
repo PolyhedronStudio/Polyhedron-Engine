@@ -170,7 +170,7 @@ void SV_WriteFrameToClient(client_t *client)
     uint32_t        extraflags;
     int             delta, suppressed;
     byte            *b1, *b2;
-    msgPsFlags_t    psFlags;
+    PlayerStateMessageFlags    psFlags;
     int             clientEntityNum;
 
     // this is the frame we are creating
@@ -199,14 +199,14 @@ void SV_WriteFrameToClient(client_t *client)
     MSG_WriteData(frame->areaBits, frame->areaBytes);
 
     // ignore some parts of playerstate if not recording demo
-    psFlags = (msgPsFlags_t)0; // CPP: Cast
+    psFlags = (PlayerStateMessageFlags)0; // CPP: Cast
     if (frame->playerState.pmove.type < EnginePlayerMoveType::Dead) {
         if (!(frame->playerState.pmove.flags & PMF_NO_PREDICTION)) {
-            psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
+            psFlags = (PlayerStateMessageFlags)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
         }
     } else {
         // lying dead on a rotating platform?
-        psFlags = (msgPsFlags_t)(psFlags | MSG_PS_IGNORE_DELTAANGLES);  // CPP: Cast
+        psFlags = (PlayerStateMessageFlags)(psFlags | MSG_PS_IGNORE_DELTAANGLES);  // CPP: Cast
     }
 
     // Fetch client entity number.

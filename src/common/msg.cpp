@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "shared/shared.h"
-#include "common/huffman.h"
 #include "common/msg.h"
 #include "common/protocol.h"
 #include "common/sizebuffer.h"
@@ -218,11 +217,11 @@ void MSG_WriteVector3(const vec3_t& pos)
 
 //
 //===============
-// MSG_WriteDeltaUsercmd
+// MSG_WriteDeltaClientMoveCommand
 // 
 //===============
 //
-int MSG_WriteDeltaUsercmd(const ClientMoveCommand* from, const ClientMoveCommand* cmd)
+int MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd)
 {
     // Send a null message in case we had none.
     if (!from) {
@@ -546,7 +545,7 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     }
 }
 
-int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, msgPsFlags_t flags)
+int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags)
 {
     int     i;
     int     pflags, eflags;
@@ -954,7 +953,7 @@ vec3_t MSG_ReadVector3(void) {
     };
 }
 
-void MSG_ReadDeltaUsercmd(const ClientMoveCommand* from, ClientMoveCommand* to)
+void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCommand* to)
 {
     int bits;
 

@@ -610,7 +610,7 @@ static void PF_StartSound(Entity *edict, int channel,
 
         // default client doesn't know that bmodels have weird origins
         // MSG: !! Removed: PROTOCOL_VERSION_DEFAULT
-        //if (edict->solid == Solid::BSP && client->protocolMajorVersion == PROTOCOL_VERSION_DEFAULT) {
+        //if (edict->solid == Solid::BSP && client->protocolVersion == PROTOCOL_VERSION_DEFAULT) {
         //    flags |= SND_POS;
         //}
 

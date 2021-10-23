@@ -442,7 +442,7 @@ static void CL_EConnect_f(void) {
 
     cls.serverAddress = address;
     cls.serverProtocol = protocol;
-    cls.protocolMajorVersion = 0;
+    cls.protocolVersion = 0;
     cls.passive = false;
     cls.connectionState = ClientConnectionState::Challenging;
     cls.timeOfInitialConnect -= CONNECT_FAST;
@@ -515,7 +515,7 @@ usage:
 
     cls.serverAddress = address;
     cls.serverProtocol = protocol;
-    cls.protocolMajorVersion = 0;
+    cls.protocolVersion = 0;
     cls.passive = false;
     cls.connectionState = ClientConnectionState::Challenging;
     cls.timeOfInitialConnect -= CONNECT_FAST;
