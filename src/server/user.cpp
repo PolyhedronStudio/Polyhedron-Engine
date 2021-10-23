@@ -1117,7 +1117,7 @@ static void SV_ExecuteMove(void)
         sv_client->frameFlags |= FF_CLIENTPRED;
     }
 
-    if (net_drop < 20) {
+    if (net_drop < 20 * SERVER_RATE_MULTIPLIER) {
         // Run last client user command multiple times if no backups are available
         while (net_drop > 2) {
             SV_ClientThink(&sv_client->lastClientUserCommand);

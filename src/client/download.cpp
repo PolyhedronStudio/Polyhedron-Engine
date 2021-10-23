@@ -34,8 +34,8 @@ typedef enum {
 } precache_t;
 
 static precache_t precache_check;
-static int precache_sexed_sounds[MAX_SOUNDS];
-static int precache_sexed_total;
+static int precache_player_sounds[MAX_SOUNDS];
+static int precache_player_sounds_total;
 
 /*
 ===============
@@ -699,9 +699,9 @@ static void check_player(const char *name)
     len = Q_concat(fn, sizeof(fn), "players/", model, "/", skin, "_i.pcx", NULL);
     check_file_len(fn, len, DL_OTHER);
 
-    // sexed sounds
-    for (i = 0; i < precache_sexed_total; i++) {
-        j = precache_sexed_sounds[i];
+    // Player sounds
+    for (i = 0; i < precache_player_sounds_total; i++) {
+        j = precache_player_sounds[i];
         p = cl.configstrings[ConfigStrings::Sounds+ j];
 
         if (*p == '*') {
@@ -834,10 +834,10 @@ void CL_RequestNextDownload(void)
 
         if (allow_download_players->integer) {
             // find sexed sounds
-            precache_sexed_total = 0;
+            precache_player_sounds_total = 0;
             for (i = 1; i < MAX_SOUNDS; i++) {
                 if (cl.configstrings[ConfigStrings::Sounds+ i][0] == '*') {
-                    precache_sexed_sounds[precache_sexed_total++] = i;
+                    precache_player_sounds[precache_player_sounds_total++] = i;
                 }
             }
 
