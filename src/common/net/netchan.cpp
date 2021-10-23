@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/msg.h"
-#include "common/enet/enetchan.h"
+#include "common/net/netchan.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
 #include "common/sizebuffer.h"

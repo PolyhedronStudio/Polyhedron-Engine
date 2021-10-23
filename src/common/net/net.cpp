@@ -28,7 +28,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/files.h"
 #endif
 #include "common/msg.h"
-#include "common/enet/enet.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
 #include "common/zone.h"
@@ -1590,7 +1589,6 @@ NET_Init
 void NET_Init(void)
 {
     os_net_init();
-    ENET_Init();
 
     net_ip = Cvar_Get("net_ip", "", 0);
     net_ip->changed = net_udp_param_changed;
@@ -1650,7 +1648,6 @@ void NET_Shutdown(void)
     NET_Listen(false);
     NET_Config(NET_NONE);
     os_net_shutdown();
-    ENET_Shutdown();
 
     Cmd_RemoveCommand("net_restart");
     Cmd_RemoveCommand("net_stats");

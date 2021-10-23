@@ -429,12 +429,9 @@ SET(SRC_COMMON
 	common/utils.cpp
 	common/zone.cpp
 
-	common/enet/enetchan.cpp
-	common/enet/enet.cpp
-	
 	common/hashes/crc32.cpp
 
-	#common/net/chan.cpp
+	common/net/netchan.cpp
 	common/net/net.cpp
 
 	# These might have to go some day.
@@ -446,12 +443,9 @@ SET(HEADERS_COMMON
 	common/net/inet_pton.h
 	common/net/win.h
 	
-	common/enet/enet.h
-	common/enet/enetchan.h
-	
 	common/hashes/crc32.h
 
-	#common/enet/enetchan.h
+	common/enet/netchan.h
 	common/net/net.h
 
 	# These might have to go some day.

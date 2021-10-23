@@ -27,11 +27,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/error.h"
-#include "common/enet/enet.h"
 #include "common/files.h"
 #include "common/msg.h"
 #include "common/net/net.h"
-#include "common/enet/enetchan.h"
+#include "common/net/netchan.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
 #include "common/zone.h"
@@ -81,7 +80,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //=============================================================================
 // Master/heartbeat settings.
 static constexpr uint32_t MAX_MASTERS = 8;       // max recipients for heartbeat packets
-static constexpr int32_t HEARTBEAT_SECONDS = 300;
+static constexpr int32_t  HEARTBEAT_SECONDS = 300;
 
 // Baseline settings per packet.
 static constexpr uint32_t SV_BASELINES_SHIFT = 6;

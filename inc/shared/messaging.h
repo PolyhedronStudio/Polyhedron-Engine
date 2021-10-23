@@ -4,7 +4,7 @@
 //
 // messaging.h
 //
-// Contains qstring related inlined funcs and declarations.
+// Contains messaging related structures.
 //
 */
 #ifndef __SHARED__MESSAGING_H__
@@ -79,26 +79,26 @@ struct EntityEvent {
 // in an update message about entities that the client will
 // need to render in some way
 //-----------------
-typedef struct entity_state_s {
+struct EntityState {
     int32_t number;         // Entity index
 
     vec3_t origin;
     vec3_t angles;
-    vec3_t oldOrigin;     // For lerping
+    vec3_t oldOrigin;       // For lerping
     int32_t modelIndex;
     int32_t modelIndex2, modelIndex3, modelIndex4;  // Weapons, CTF flags, etc
     int32_t frame;
     int32_t skinNumber;
-    uint32_t effects;        // PGM - we're filling it, so it needs to be unsigned
+    uint32_t effects;       // PGM - we're filling it, so it needs to be unsigned
     int32_t renderEffects;
     int32_t solid;          // For client side prediction, 8*(bits 0-4) is x/y radius
                             // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
                             // gi.LinkEntity sets this properly
     int32_t sound;          // For looping sounds, to guarantee shutoff
-    int32_t eventID;          // Impulse events -- muzzle flashes, footsteps, etc
+    int32_t eventID;        // Impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they
                             // are automatically cleared each frame
-} EntityState;
+};
 
 //-----------------
 // PlayerState is the information needed in addition to PlayerMoveState
@@ -109,7 +109,7 @@ typedef struct entity_state_s {
 // Maximum amount of stats available to the player state.
 #define MAX_STATS               32
 
-typedef struct {
+struct PlayerState {
     PlayerMoveState   pmove;         // For prediction
 
     // These fields do not need to be communicated bit-precise
@@ -128,6 +128,6 @@ typedef struct {
     int         rdflags;        // Refdef flags
 
     short       stats[MAX_STATS]; // Fast status bar updates
-} PlayerState; 
+}; 
 
 #endif // __SHARED__MESSAGING_H__
