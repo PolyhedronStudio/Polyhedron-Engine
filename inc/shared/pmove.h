@@ -31,7 +31,7 @@ constexpr int32_t PMF_GAME = (PMF_ENGINE << 3);// Game flags start from here.
 // If any part of the game code modifies this struct, it will result in a 
 // prediction error of some degree.
 //-----------------
-typedef struct {
+struct PlayerMoveState {
     uint32_t    type;
 
     vec3_t      origin;
@@ -50,26 +50,25 @@ typedef struct {
 
     // Step offset, used for stair interpolations.
     float stepOffset;
-
-} PlayerMoveState;
+};
 
 //-----------------
-// PlayerMoveCommand is part of each client user cmd.
+// PlayerMoveInput is part of each client user cmd.
 //-----------------
-typedef struct {
+struct PlayerMoveInput {
     uint8_t msec;   // Duration of the command, in milliseconds
     vec3_t viewAngles;  // The final view angles for this command
     int16_t forwardMove, rightMove, upMove; // Directional intentions
     uint8_t buttons;    // Bit mask of buttons down
     uint8_t impulse;    // Impulse cmd.
     uint8_t lightLevel; // Lightlevel.
-} PlayerMoveCommand;
+};
 
 //-----------------
-// ClientUserCommand is sent to the server each client frame
+// ClientMoveCommand is sent to the server each client frame
 //-----------------
-typedef struct {
-    PlayerMoveCommand moveCommand;       // the movement command
+struct ClientMoveCommand {
+    PlayerMoveInput input;       // the movement command
 
     uint32_t timeSent;      // Time sent, for calculating pings
     uint32_t timeReceived;  // Time rcvd, for calculating pings
@@ -80,6 +79,6 @@ typedef struct {
         vec3_t origin;  // The predicted origin for this command
         vec3_t error;   // The prediction error for this command
     } prediction;
-} ClientUserCommand;
+};
 
 #endif // #ifndef __SHARED__PMOVE_H__

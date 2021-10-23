@@ -70,7 +70,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 //     chatMode_t chat;
 //     consoleMode_t mode;
-//     netadr_t remoteAddress;
+//     netadr_t remoteNetAddress;
 //     char *remotePassword;
 
 //     LoadState loadstate;
@@ -349,7 +349,7 @@ static void Con_RemoteMode_f(void)
         con.chat = CHAT_NONE;
     }
 
-    con.remoteAddress = adr;
+    con.remoteNetAddress = adr;
     if (con.remotePassword) {
         Z_Free(con.remotePassword);
     }
@@ -1083,7 +1083,7 @@ static void Con_Action(void)
         Cbuf_AddText(&cmd_buffer, "\n");
     } else {
         if (con.mode == CON_REMOTE) {
-            CL_SendRcon(&con.remoteAddress, con.remotePassword, cmd);
+            CL_SendRcon(&con.remoteNetAddress, con.remotePassword, cmd);
         } else if (cls.connectionState == ClientConnectionState::Active && con.mode == CON_CHAT) {
             Con_Say(cmd);
         } else {

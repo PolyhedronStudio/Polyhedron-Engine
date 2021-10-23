@@ -99,7 +99,7 @@ void MiscExplosionBox::Spawn() {
         SetMass(400);
     }
     if (!GetHealth()) {
-        SetHealth(10);
+        SetHealth(80);
     }
     if (!GetDamage()) {
         SetDamage(150);
@@ -198,6 +198,12 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
     if (trace.fraction == 1 || trace.allSolid)
         return;
 
+    // Return if the traced ent has no server entity, we need this to operate with.
+    if (trace.ent && !trace.ent->GetServerEntity()) {
+        gi.DPrintf("Entity '%s' #%i - Has no server entity", trace.ent->GetTypeInfo()->className, trace.ent->GetNumber());
+        return;
+    }
+
     // Set new entity origin.
     SetOrigin(trace.endPosition);
 
@@ -274,7 +280,8 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
         SVG_BecomeExplosion1(this);
 
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetThinkCallback(nullptr);
+    SetNextThinkTime(level.time + 2 * FRAMETIME);
+    SetThinkCallback(&MiscExplosionBox::SVGBaseEntityThinkFree);
 }
 
 //
@@ -286,7 +293,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 //
 void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
-    SetTakeDamage(TakeDamage::No);
+    SetTakeDamage(TakeDamage::Yes);
     
     // Attacker becomes this entity its "activator".
     if (attacker)

@@ -237,28 +237,6 @@ static int entitycmpfnc(const void *_a, const void *_b)
 }
 
 
-/*
-====================
-V_CalcFOV
-====================
-*/
-float V_CalcFOV(float fov_x, float width, float height)
-{
-    float    a;
-    float    x;
-
-    if (fov_x < 1.f || fov_x > 179.f)
-        Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fov_x);
-
-    x = width / tan(fov_x / 360.f * M_PI);
-
-    a = atan(height / x);
-    a = a * 360.f / M_PI;
-
-    return a;
-}
-
-
 //
 //===============
 // V_RenderView
@@ -284,29 +262,12 @@ void V_RenderView(void)
         // Add CG Module entities.
         CL_GM_RenderView();
 
-#ifdef _DEBUG
-        if (cl_testparticles->integer)
-            V_TestParticles();
-        if (cl_testentities->integer)
-            V_TestEntities();
-#if USE_DLIGHTS
-        if (cl_testlights->integer)
-            V_TestLights();
-#endif
-        if (cl_testblend->integer) {
-            cl.refdef.blend[0] = 1;
-            cl.refdef.blend[1] = 0.5;
-            cl.refdef.blend[2] = 0.25;
-            cl.refdef.blend[3] = 0.5;
-        }
-#endif
-
         // never let it sit exactly on a node line, because a water plane can
         // dissapear when viewed with the eye exactly on it.
         // the server protocol only specifies to 1/8 pixel, so add 1/16 in each axis
-        cl.refdef.vieworg[0] += 1.0 / 16;
-        cl.refdef.vieworg[1] += 1.0 / 16;
-        cl.refdef.vieworg[2] += 1.0 / 16;
+        cl.refdef.vieworg[0] += 1.0 / 32;
+        cl.refdef.vieworg[1] += 1.0 / 32;
+        cl.refdef.vieworg[2] += 1.0 / 32;
 
         cl.refdef.x = scr_vrect.x;
         cl.refdef.y = scr_vrect.y;
@@ -322,7 +283,7 @@ void V_RenderView(void)
             cl.refdef.fov_y = CL_GM_CalcFOV(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
         }
 
-        cl.refdef.time = cl.time * 0.001;
+        cl.refdef.time = cl.time * 0.001f;
 
         if (cl.frame.areaBytes) {
             cl.refdef.areaBits = cl.frame.areaBits;
@@ -358,6 +319,7 @@ void V_RenderView(void)
 #endif
 #endif
 
+    // 
     CL_GM_PostRenderView();
 }
 

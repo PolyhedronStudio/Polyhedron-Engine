@@ -29,8 +29,8 @@ constexpr uint32_t MAX_MSGLEN = 0x8000;
 constexpr int32_t   PROTOCOL_VERSION_UNKNOWN = -1;
 
 // The DEFAULT version is the minimum allowed for connecting.
-constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 101;
-constexpr uint32_t  PROTOCOL_VERSION_NAC     = 101;
+constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 1340;
+constexpr uint32_t  PROTOCOL_VERSION_NAC     = 1340;
 
 // Minimum required "MINOR" protocol version for this client to be compatible to.
 constexpr uint32_t PROTOCOL_VERSION_NAC_MINIMUM = 1337;
@@ -40,10 +40,10 @@ constexpr uint32_t PROTOCOL_VERSION_NAC_FIRST   = 1337;
 
 // EXAMPLE of what an update would then resemble in our code. Ofc, We then also change
 // the PROTOCOL_VERSION_NAC_CURRENT to accomodate.
-constexpr uint32_t PROTOCOL_VERSION_NAC_FEATURE_UPDATE = 1338;
+constexpr uint32_t PROTOCOL_VERSION_NAC_FEATURE_UPDATE = 1341;
 
 // Current actual protocol version that is in use.
-constexpr uint32_t PROTOCOL_VERSION_NAC_CURRENT = PROTOCOL_VERSION_NAC_FIRST;
+constexpr uint32_t PROTOCOL_VERSION_NAC_CURRENT = 1340;
 
 // This is used to ensure that the protocols in use match up, and support each other.
 qboolean static inline NAC_PROTOCOL_SUPPORTED(uint32_t x) {
@@ -56,11 +56,11 @@ qboolean static inline NAC_PROTOCOL_SUPPORTED(uint32_t x) {
 // Protocol Configuration.
 //
 // Number of copies of EntityState to keep buffered.
-constexpr int32_t UPDATE_BACKUP = 64;  // Must be Power Of Two. 
+constexpr int32_t UPDATE_BACKUP = 256;  // Must be Power Of Two. 
 constexpr int32_t UPDATE_MASK = (UPDATE_BACKUP - 1);
 
 // Allow a lot of command backups for very fast systems, used to be 64.
-constexpr int32_t CMD_BACKUP = 512; 
+constexpr int32_t CMD_BACKUP = 256; 
 constexpr int32_t CMD_MASK = (CMD_BACKUP - 1);
 
 
@@ -73,7 +73,7 @@ constexpr int32_t FRAMENUM_MASK = ((1 << FRAMENUM_BITS) - 1);
 constexpr int32_t SUPPRESSCOUNT_BITS = 4;
 constexpr int32_t SUPPRESSCOUNT_MASK = ((1 << SUPPRESSCOUNT_BITS) - 1);
 
-constexpr int32_t MAX_PACKET_ENTITIES = 1024;
+constexpr int32_t MAX_PACKET_ENTITIES = 2048;
 constexpr int32_t MAX_PARSE_ENTITIES = (MAX_PACKET_ENTITIES * UPDATE_BACKUP);
 constexpr int32_t PARSE_ENTITIES_MASK = (MAX_PARSE_ENTITIES - 1);
 
@@ -137,7 +137,7 @@ typedef enum {
 typedef enum {
     clc_bad,
     clc_nop,
-    clc_move,               // [ClientUserCommand]
+    clc_move,               // [ClientMoveCommand]
     clc_userinfo,           // [userinfo string]
     clc_stringcmd,          // [string] message
 
@@ -222,19 +222,19 @@ typedef enum {
 // EntityState communication
 
 // Try to pack the common update flags into the first byte
-#define U_ORIGIN_X   (1<<0)        // was named: U_ORIGIN_X
-#define U_ORIGIN_Y   (1<<1)        // was named: U_ORIGIN_Y
-#define U_ANGLE_Y    (1<<2)        // was named: U_ANGLE_Y
-#define U_ANGLE_Z    (1<<3)        // was named: U_ANGLE_Z
-#define U_FRAME8    (1<<4)        // frame is a byte
+#define U_ORIGIN_X   (1<<0)         // was named: U_ORIGIN_X
+#define U_ORIGIN_Y   (1<<1)         // was named: U_ORIGIN_Y
+#define U_ANGLE_Y    (1<<2)         // was named: U_ANGLE_Y
+#define U_ANGLE_Z    (1<<3)         // was named: U_ANGLE_Z
+#define U_FRAME8    (1<<4)          // frame is a byte
 #define U_EVENT     (1<<5)
-#define U_REMOVE    (1<<6)        // REMOVE this entity, don't add it
-#define U_MOREBITS1 (1<<7)        // read one additional byte
+#define U_REMOVE    (1<<6)          // REMOVE this entity, don't add it
+#define U_MOREBITS1 (1<<7)          // read one additional byte
 
 // Second byte
-#define U_NUMBER16  (1<<8)        // NUMBER8 is implicit if not set
-#define U_ORIGIN_Z   (1<<9)          // was named: U_ORIGIN_Z
-#define U_ANGLE_X    (1<<10)         // was named: U_ANGLE_X
+#define U_NUMBER16  (1<<8)          // NUMBER8 is implicit if not set
+#define U_ORIGIN_Z   (1<<9)         // was named: U_ORIGIN_Z
+#define U_ANGLE_X    (1<<10)        // was named: U_ANGLE_X
 #define U_MODEL     (1<<11)
 #define U_RENDERFX8 (1<<12)        // fullbright, etc
 //#define U_ANGLE16   (1<<13)

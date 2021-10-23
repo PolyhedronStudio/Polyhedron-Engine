@@ -41,7 +41,7 @@ Dumps the current demo message, prefixed by the length.
 Stops demo recording and returns false on write error.
 ====================
 */
-qboolean CL_WriteDemoMessage(sizebuf_t *buf)
+qboolean CL_WriteDemoMessage(SizeBuffer *buf)
 {
     uint32_t msglen;
     ssize_t ret;
@@ -52,18 +52,18 @@ qboolean CL_WriteDemoMessage(sizebuf_t *buf)
         return true;
     }
 
-    if (!buf->cursize)
+    if (!buf->currentSize)
         return true;
 
-    msglen = LittleLong(buf->cursize);
+    msglen = LittleLong(buf->currentSize);
     ret = FS_Write(&msglen, 4, cls.demo.recording);
     if (ret != 4)
         goto fail;
-    ret = FS_Write(buf->data, buf->cursize, cls.demo.recording);
-    if (ret != buf->cursize)
+    ret = FS_Write(buf->data, buf->currentSize, cls.demo.recording);
+    if (ret != buf->currentSize)
         goto fail;
 
-    Com_DDPrintf("%s: wrote %" PRIz " bytes\n", __func__, buf->cursize);
+    Com_DDPrintf("%s: wrote %" PRIz " bytes\n", __func__, buf->currentSize);
 
     SZ_Clear(buf);
     return true;
@@ -118,7 +118,7 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
             MSG_PackEntity(&oldpack, oldent);
             MSG_PackEntity(&newpack, newent);
             MSG_WriteDeltaEntity(&oldpack, &newpack,
-                                 (EntityStateMessageFlags)(newent->number <= cl.maxClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
+                                 (EntityStateMessageFlags)(newent->number <= cl.maximumClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
             oldindex++;
             newindex++;
             continue;
@@ -213,18 +213,18 @@ void CL_EmitDemoFrame(void)
     // emit and flush frame
     emit_delta_frame(oldframe, &cl.frame, lastFrame, FRAME_CUR);
 
-    if (cls.demo.buffer.cursize + msg_write.cursize > cls.demo.buffer.maxsize) {
+    if (cls.demo.buffer.currentSize + msg_write.currentSize > cls.demo.buffer.maximumSize) {
         Com_DPrintf("Demo frame overflowed (% " PRIz " + %" PRIz " > %" PRIz ")\n",
-                    cls.demo.buffer.cursize, msg_write.cursize, cls.demo.buffer.maxsize);
+                    cls.demo.buffer.currentSize, msg_write.currentSize, cls.demo.buffer.maximumSize);
         cls.demo.frames_dropped++;
 
         // warn the user if drop rate is too high
         if (cls.demo.frames_written < 10 && cls.demo.frames_dropped == 50)
             Com_WPrintf("Too many demo frames don't fit into %" PRIz " bytes.\n"
                         "Try to increase 'cl_demomsglen' value and restart recording.\n",
-                        cls.demo.buffer.maxsize);
+                        cls.demo.buffer.maximumSize);
     } else {
-        SZ_Write(&cls.demo.buffer, msg_write.data, msg_write.cursize);
+        SZ_Write(&cls.demo.buffer, msg_write.data, msg_write.currentSize);
         cls.demo.last_server_frame = cl.frame.number;
         cls.demo.frames_written++;
     }
@@ -412,7 +412,7 @@ static void CL_Record_f(void)
         if (len > MAX_QPATH)
             len = MAX_QPATH;
 
-        if (msg_write.cursize + len + 4 > size) {
+        if (msg_write.currentSize + len + 4 > size) {
             if (!CL_WriteDemoMessage(&msg_write))
                 return;
         }
@@ -429,7 +429,7 @@ static void CL_Record_f(void)
         if (!ent->number)
             continue;
 
-        if (msg_write.cursize + 64 > size) {
+        if (msg_write.currentSize + 64 > size) {
             if (!CL_WriteDemoMessage(&msg_write))
                 return;
         }
@@ -472,7 +472,7 @@ static void resume_record(void)
             if (len > MAX_QPATH)
                 len = MAX_QPATH;
 
-            if (cls.demo.buffer.cursize + len + 4 > cls.demo.buffer.maxsize) {
+            if (cls.demo.buffer.currentSize + len + 4 > cls.demo.buffer.maximumSize) {
                 if (!CL_WriteDemoMessage(&cls.demo.buffer))
                     return;
                 // multiple packets = not seamless
@@ -573,7 +573,7 @@ static int read_first_message(qhandle_t f)
     }
 
     SZ_Init(&msg_read, msg_read_buffer, sizeof(msg_read_buffer));
-    msg_read.cursize = msglen;
+    msg_read.currentSize = msglen;
 
     // read packet data
     read = FS_Read(msg_read.data, msglen, f);
@@ -606,7 +606,7 @@ static int read_next_message(qhandle_t f)
     }
 
     SZ_Init(&msg_read, msg_read_buffer, sizeof(msg_read_buffer));
-    msg_read.cursize = msglen;
+    msg_read.currentSize = msglen;
 
     // read packet data
     read = FS_Read(msg_read.data, msglen, f);
@@ -830,14 +830,14 @@ void CL_EmitDemoSnapshot(void)
     MSG_WriteString(cl.layout);
 
     // CPP: Cast void* to demosnap_t *
-    snap = (demosnap_t*)Z_Malloc(sizeof(*snap) + msg_write.cursize - 1);
+    snap = (demosnap_t*)Z_Malloc(sizeof(*snap) + msg_write.currentSize - 1);
     snap->frameNumber = cls.demo.frames_read;
     snap->filepos = pos;
-    snap->msglen = msg_write.cursize;
-    memcpy(snap->data, msg_write.data, msg_write.cursize);
+    snap->msglen = msg_write.currentSize;
+    memcpy(snap->data, msg_write.data, msg_write.currentSize);
     List_Append(&cls.demo.snapshots, &snap->entry);
 
-    Com_DPrintf("[%d] snaplen %" PRIz "\n", cls.demo.frames_read, msg_write.cursize); // CPP: WARNING: String concat
+    Com_DPrintf("[%d] snaplen %" PRIz "\n", cls.demo.frames_read, msg_write.currentSize); // CPP: WARNING: String concat
 
     SZ_Clear(&msg_write);
 
@@ -983,7 +983,7 @@ static void CL_Seek_f(void)
             }
 
             SZ_Init(&msg_read, snap->data, snap->msglen);
-            msg_read.cursize = snap->msglen;
+            msg_read.currentSize = snap->msglen;
 
             CL_SeekDemoMessage();
             cls.demo.frames_read = snap->frameNumber;

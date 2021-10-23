@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CRC_INIT_VALUE  0xffff
 #define CRC_XOR_VALUE   0x0000
 
-static const uint16_t crctable[256] = {
+static const uint16_t crc16table[256] = {
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5, 0x60c6, 0x70e7,
     0x8108, 0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad, 0xe1ce, 0xf1ef,
     0x1231, 0x0210, 0x3273, 0x2252, 0x52b5, 0x4294, 0x72f7, 0x62d6,
@@ -66,7 +66,7 @@ static uint16_t CRC_Block(byte *start, size_t count)
     uint16_t    crc = CRC_INIT_VALUE;
 
     while (count--)
-        crc = (crc << 8) ^ crctable[(crc >> 8) ^ *start++];
+        crc = (crc << 8) ^ crc16table[(crc >> 8) ^ *start++];
 
     return crc;
 }

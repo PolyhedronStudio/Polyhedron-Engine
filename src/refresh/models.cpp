@@ -114,7 +114,7 @@ void MOD_FreeUnused(void)
 		}
 		if (model->registration_sequence == registration_sequence) {
 			// make sure it is paged in
-			Com_PageInMemory(model->hunk.base, model->hunk.cursize);
+			Com_PageInMemory(model->hunk.base, model->hunk.currentSize);
 		}
 		else {
 			// don't need this model

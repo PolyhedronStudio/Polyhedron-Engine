@@ -30,11 +30,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/files.h"
 //#include "common/pmove.h"
 #include "common/msg.h"
-#include "common/net/chan.h"
+#include "common/enet/enetchan.h"
+#include "common/enet/enet.h"
 #include "common/net/net.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 #include "common/zone.h"
 
 #include "system/system.h"
@@ -55,6 +56,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <zlib.h>
 #endif
 
+
 //=============================================================================
 
 // N&C: Most structures related to the client have been moved over here.
@@ -72,15 +74,13 @@ extern cl_entity_t    cl_entities[MAX_EDICTS];
 #define FF_OLDENT       (1<<7)
 #define FF_NODELTA      (1<<8)
 
-
-
 extern    ClientState    cl;
 extern    ClientShared   cs;
 
 /*
 ==================================================================
 
-the client_static_t structure is persistant through an arbitrary number
+the ClientStatic structure is persistant through an arbitrary number
 of server connections
 
 ==================================================================
@@ -92,19 +92,7 @@ of server connections
 #define CONNECT_INSTANT     CONNECT_DELAY
 #define CONNECT_FAST        (CONNECT_DELAY - 1000u)
 
-// Moved to shared/shared.h
-// typedef enum {
-//     ClientConnectionState::Uninitialized,
-//     ClientConnectionState::Disconnected,    // not talking to a server
-//     ClientConnectionState::Challenging,     // sending getchallenge packets to the server
-//     ClientConnectionState::Connecting,      // sending connect packets to the server
-//     ClientConnectionState::Connected,       // netchan_t established, waiting for svc_serverdata
-//     ClientConnectionState::Loading,         // loading level data
-//     ClientConnectionState::Precached,       // loaded level data, waiting for svc_frame
-//     ClientConnectionState::Active,          // game views should be displayed
-//     ClientConnectionState::Cinematic        // running a cinematic
-// } ClientConnectionState;
-
+// Silly macros for download Queue.
 #define FOR_EACH_DLQ(q) \
     LIST_FOR_EACH(dlqueue_t, q, &cls.download.queue, entry)
 #define FOR_EACH_DLQ_SAFE(q, n) \
@@ -135,7 +123,7 @@ typedef struct {
     char        path[1];
 } dlqueue_t;
 
-typedef struct client_static_s {
+struct ClientStatic {
     int32_t    connectionState;
     keydest_t   key_dest;
 
@@ -145,9 +133,9 @@ typedef struct client_static_s {
     unsigned    disable_screen;
 
     int         userinfo_modified;
-    cvar_t      *userinfo_updates[MAX_PACKET_USERINFOS];
-// this is set each time a CVAR_USERINFO variable is changed
-// so that the client knows to send it to the server
+    cvar_t* userinfo_updates[MAX_PACKET_USERINFOS];
+    // this is set each time a CVAR_USERINFO variable is changed
+    // so that the client knows to send it to the server
 
     int         framecount;
     unsigned    realtime;           // always increasing, no clamping, etc
@@ -169,7 +157,7 @@ typedef struct client_static_s {
         int         ping;
     } measure;
 
-// connection information
+    // connection information
     netadr_t    serverAddress;
     char        servername[MAX_OSPATH]; // name of server from original connect
     unsigned    timeOfInitialConnect;           // for connection retransmits
@@ -182,9 +170,9 @@ typedef struct client_static_s {
 
     int         quakePort;          // a 16 bit value that allows quake servers
                                     // to work around address translating routers
-    netchan_t   *netchan;
+    NetChannel* netChannel;
     int         serverProtocol;     // in case we are doing some kind of version hack
-    int         protocolVersion;    // minor version
+    int         protocolMajorVersion;    // minor version
 
     int         challenge;          // from the server to use for connecting
 
@@ -201,7 +189,7 @@ typedef struct client_static_s {
     struct {
         list_t      queue;              // queue of paths we need
         int         pending;            // number of non-finished entries in queue
-        dlqueue_t   *current;           // path being downloaded
+        dlqueue_t* current;           // path being downloaded
         int         percent;            // how much downloaded
         int         position;           // how much downloaded (in bytes)
         qhandle_t   file;               // UDP file transfer from server
@@ -209,10 +197,10 @@ typedef struct client_static_s {
 #if USE_ZLIB
         z_stream    z;                  // UDP download zlib stream
 #endif
-        string_entry_t  *ignores;       // list of ignored paths
+        string_entry_t* ignores;       // list of ignored paths
     } download;
 
-// demo recording info must be here, so it isn't cleared on level change
+    // demo recording info must be here, so it isn't cleared on level change
     struct {
         qhandle_t   playback;
         qhandle_t   recording;
@@ -227,17 +215,17 @@ typedef struct client_static_s {
         int         file_size;
         int         file_offset;
         int         file_percent;
-        sizebuf_t   buffer;
+        SizeBuffer   buffer;
         list_t      snapshots;
         qboolean    paused;
         qboolean    seeking;
         qboolean    eof;
-		char		file_name[MAX_OSPATH];
+        char		file_name[MAX_OSPATH];
     } demo;
 
-} client_static_t;
+};
 
-extern client_static_t    cls;
+extern ClientStatic    cls;
 extern cmdbuf_t    cl_cmdbuf;
 extern char        cl_cmdbuf_text[MAX_STRING_CHARS];
 
@@ -369,7 +357,7 @@ typedef struct console_s {
 
     chatMode_t chat;
     consoleMode_t mode;
-    netadr_t remoteAddress;
+    netadr_t remoteNetAddress;
     char *remotePassword;
 
     LoadState loadstate;
@@ -391,19 +379,17 @@ void CL_RestartFilesystem(qboolean total);
 void CL_RestartRefresh(qboolean total);
 void CL_ClientCommand(const char *string);
 void CL_SendRcon(const netadr_t *adr, const char *pass, const char *cmd);
-const char *CL_Server_g(const char *partial, int argnum, int state);
 void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
-qboolean CL_CheckForIgnore(const char *s);
+qboolean CL_CheckForIgnore(const char* s);
 void CL_WriteConfig(void);
-uint32_t    CL_GetConnectionState (void);                     // WATISDEZE Added for CG Module.
-void        CL_SetConnectionState (uint32_t state);        // WATISDEZE Added for CG Module.
-void        CL_SetLoadState (LoadState state);   // WATISDEZE Added for CG Module.
+uint32_t    CL_GetConnectionState (void);               // WATISDEZE Added for CG Module.
+void        CL_SetConnectionState (uint32_t state);     // WATISDEZE Added for CG Module.
+void        CL_SetLoadState (LoadState state);          // WATISDEZE Added for CG Module.
 
 //
 // precache.c
 //
-
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
 void CL_LoadState(LoadState state);
 void CL_RegisterBspModels(void);
@@ -503,7 +489,7 @@ void CL_CheckPredictionError(void);
 void CL_InitDemos(void);
 void CL_CleanupDemos(void);
 void CL_DemoFrame(int msec);
-qboolean CL_WriteDemoMessage(sizebuf_t *buf);
+qboolean CL_WriteDemoMessage(SizeBuffer *buf);
 void CL_EmitDemoFrame(void);
 void CL_EmitDemoSnapshot(void);
 void CL_FirstDemoFrame(void);

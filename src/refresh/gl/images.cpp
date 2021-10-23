@@ -497,10 +497,10 @@ static int GL_UpscaleLevel(int width, int height, imagetype_t type, imageflags_t
 
     maxlevel = Cvar_ClampInteger(gl_upscale_pcx, 0, 2);
     while (maxlevel) {
-        int maxsize = gl_config.maxTextureSize >> maxlevel;
+        int maximumSize = gl_config.maxTextureSize >> maxlevel;
 
         // don't bother upscaling larger than max texture size
-        if (width <= maxsize && height <= maxsize)
+        if (width <= maximumSize && height <= maximumSize)
             break;
 
         maxlevel--;

@@ -69,6 +69,25 @@ static inline int Q_charascii(int c) {
     return '.'; // don't output control chars, etc
 }
 
+/*
+=============
+Q_strncpyz
+
+Safe strncpy that ensures a trailing zero
+=============
+*/
+inline void Q_strncpyz(char* dest, const char* src, int32_t destsize) {
+    if (!src) {
+        Com_Error(ERR_FATAL, "Q_strncpyz: NULL src");
+    }
+    if (destsize < 1) {
+        Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1");
+    }
+
+    strncpy(dest, src, destsize - 1);
+    dest[destsize - 1] = 0;
+}
+
 // portable case insensitive compare
 int Q_strcasecmp(const char* s1, const char* s2);
 int Q_strncasecmp(const char* s1, const char* s2, size_t n);

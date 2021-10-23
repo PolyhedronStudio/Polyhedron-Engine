@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/files.h"
 #endif
 #include "common/msg.h"
+#include "common/enet/enet.h"
 #include "common/net/net.h"
 #include "common/protocol.h"
 #include "common/zone.h"
@@ -61,13 +62,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif // __linux__
 #endif // !_WIN32
 
+
+
+//--------------------------------
+// LoopBack
+//--------------------------------
 // prevents infinite retry loops caused by broken TCP/IP stacks
 #define MAX_ERROR_RETRIES   64
 
 #if USE_CLIENT
-
 #define MAX_LOOPBACK    4
-
 typedef struct {
     byte    data[MAX_PACKETLEN];
     size_t  datalen;
@@ -80,9 +84,11 @@ typedef struct {
 } loopback_t;
 
 static loopback_t   loopbacks[NS_COUNT];
-
 #endif // USE_CLIENT
 
+//--------------------------------
+// CVars
+//--------------------------------
 cvar_t          *net_ip;
 cvar_t          *net_ip6;
 cvar_t          *net_port;
@@ -106,7 +112,7 @@ static cvar_t   *net_enable_ipv6;
 static cvar_t   *net_ignore_icmp;
 #endif
 
-static netflag_t    net_active;
+static NetFlag    net_active;
 static int          net_error;
 
 static qsocket_t    udp_sockets[NS_COUNT] = { -1, -1 };
@@ -254,7 +260,7 @@ char *NET_BaseAdrToString(const netadr_t *a)
 NET_AdrToString
 ===================
 */
-char *NET_AdrToString(const netadr_t *a)
+const char *NET_AdrToString(const netadr_t *a)
 {
     static char s[MAX_QPATH];
 
@@ -541,7 +547,7 @@ static size_t NET_DnRate_m(char *buffer, size_t size)
 
 #if USE_CLIENT
 
-static void NET_GetLoopPackets(netsrc_t sock, void (*packet_cb)(void))
+static void NET_GetLoopPackets(NetSource sock, void (*packet_cb)(void))
 {
     loopback_t *loop;
     loopmsg_t *loopmsg;
@@ -568,13 +574,13 @@ static void NET_GetLoopPackets(netsrc_t sock, void (*packet_cb)(void))
         }
 
         SZ_Init(&msg_read, msg_read_buffer, sizeof(msg_read_buffer));
-        msg_read.cursize = loopmsg->datalen;
+        msg_read.currentSize = loopmsg->datalen;
 
         (*packet_cb)();
     }
 }
 
-static qboolean NET_SendLoopPacket(netsrc_t sock, const void *data,
+static qboolean NET_SendLoopPacket(NetSource sock, const void *data,
                                    size_t len, const netadr_t *to)
 {
     loopback_t *loop;
@@ -804,7 +810,7 @@ static void NET_GetUdpPackets(qsocket_t sock, void (*packet_cb)(void))
         net_packets_rcvd++;
 
         SZ_Init(&msg_read, msg_read_buffer, sizeof(msg_read_buffer));
-        msg_read.cursize = ret;
+        msg_read.currentSize = ret;
 
         (*packet_cb)();
     }
@@ -818,7 +824,7 @@ Fills msg_read_buffer with packet contents,
 net_from variable receives source address.
 =============
 */
-void NET_GetPackets(netsrc_t sock, void (*packet_cb)(void))
+void NET_GetPackets(NetSource sock, void (*packet_cb)(void))
 {
 #if USE_CLIENT
     memset(&net_from, 0, sizeof(net_from));
@@ -841,7 +847,7 @@ NET_SendPacket
 
 =============
 */
-qboolean NET_SendPacket(netsrc_t sock, const void *data,
+qboolean NET_SendPacket(NetSource sock, const void *data,
                         size_t len, const netadr_t *to)
 {
     ssize_t ret;
@@ -1024,7 +1030,7 @@ static qsocket_t UDP_OpenSocket(const char *iface, int port, int family)
     return newsocket;
 }
 
-static qsocket_t TCP_OpenSocket(const char *iface, int port, int family, netsrc_t who)
+static qsocket_t TCP_OpenSocket(const char *iface, int port, int family, NetSource who)
 {
     qsocket_t s, newsocket;
     struct addrinfo hints, *res, *rp;
@@ -1235,9 +1241,9 @@ static void NET_OpenClient6(void)
 NET_Config
 ====================
 */
-void NET_Config(netflag_t flag)
+void NET_Config(NetFlag flag)
 {
-    netsrc_t sock;
+    NetSource sock;
 
     if (flag == net_active) {
         return;
@@ -1245,7 +1251,7 @@ void NET_Config(netflag_t flag)
 
     if (flag == NET_NONE) {
         // shut down any existing sockets
-        for (sock = (netsrc_t)0; sock < NS_COUNT; sock = (netsrc_t)(sock + 1)) { // CPP: Cast for loop
+        for (sock = (NetSource)0; sock < NS_COUNT; sock = (NetSource)(sock + 1)) { // CPP: Cast for loop
             if (udp_sockets[sock] != -1) {
                 NET_RemoveFd(udp_sockets[sock]);
                 os_closesocket(udp_sockets[sock]);
@@ -1273,7 +1279,7 @@ void NET_Config(netflag_t flag)
         NET_OpenServer6();
     }
 
-    net_active = (netflag_t)(net_active | flag); // CPP: Cast
+    net_active = (NetFlag)(net_active | flag); // CPP: Cast
 }
 
 /*
@@ -1281,7 +1287,7 @@ void NET_Config(netflag_t flag)
 NET_GetAddress
 ====================
 */
-qboolean NET_GetAddress(netsrc_t sock, netadr_t *adr)
+qboolean NET_GetAddress(NetSource sock, netadr_t *adr)
 {
     if (udp_sockets[sock] == -1)
         return false;
@@ -1293,18 +1299,6 @@ qboolean NET_GetAddress(netsrc_t sock, netadr_t *adr)
 }
 
 //=============================================================================
-
-void NET_CloseStream(netstream_t *s)
-{
-    if (!s->state) {
-        return;
-    }
-
-    NET_RemoveFd(s->socket);
-    os_closesocket(s->socket);
-    s->socket = -1;
-    s->state = NS_DISCONNECTED;
-}
 
 static neterr_t NET_Listen4(qboolean arg)
 {
@@ -1403,269 +1397,6 @@ neterr_t NET_Listen(qboolean arg)
         return NET_ERROR;
 
     return NET_AGAIN;
-}
-
-static neterr_t NET_AcceptSocket(netstream_t *s, qsocket_t sock)
-{
-    ioentry_t *e;
-    qsocket_t newsocket;
-    neterr_t ret;
-
-    if (sock == -1) {
-        return NET_AGAIN;
-    }
-
-    e = os_get_io(sock);
-    if (!e->canread) {
-        return NET_AGAIN;
-    }
-
-    ret = os_accept(sock, &newsocket, &net_from);
-    if (ret) {
-        e->canread = false;
-        return ret;
-    }
-
-    // make it non-blocking
-    ret = os_make_nonblock(newsocket, 1);
-    if (ret) {
-        os_closesocket(newsocket);
-        return ret;
-    }
-
-    // initialize stream
-    memset(s, 0, sizeof(*s));
-    s->socket = newsocket;
-    s->address = net_from;
-    s->state = NS_CONNECTED;
-
-    // initialize io entry
-    e = NET_AddFd(newsocket);
-    //e->wantwrite = true;
-    e->wantread = true;
-
-    return NET_OK;
-}
-
-// net_from variable receives source address
-neterr_t NET_Accept(netstream_t *s)
-{
-    neterr_t ret;
-
-    ret = NET_AcceptSocket(s, tcp_socket);
-    if (ret == NET_AGAIN)
-        ret = NET_AcceptSocket(s, tcp6_socket);
-
-    return ret;
-}
-
-neterr_t NET_Connect(const netadr_t *peer, netstream_t *s)
-{
-    qsocket_t socket;
-    ioentry_t *e;
-    neterr_t ret;
-
-    // always bind to `net_ip' for outgoing TCP connections
-    // to avoid problems with AC or MVD/GTV auth on a multi IP system
-    switch (peer->type) {
-    case NA_IP:
-        socket = TCP_OpenSocket(net_ip->string, PORT_ANY, AF_INET, NS_CLIENT);
-        break;
-    case NA_IP6:
-        socket = TCP_OpenSocket(net_ip6->string, PORT_ANY, AF_INET6, NS_CLIENT);
-        break;
-    default:
-        return NET_ERROR;
-    }
-
-    if (socket == -1) {
-        return NET_ERROR;
-    }
-
-    ret = os_connect(socket, peer);
-    if (ret) {
-        os_closesocket(socket);
-        return NET_ERROR;
-    }
-
-    // initialize stream
-    memset(s, 0, sizeof(*s));
-    s->state = NS_CONNECTING;
-    s->address = *peer;
-    s->socket = socket;
-
-    // initialize io entry
-    e = NET_AddFd(socket);
-    e->wantwrite = true;
-#ifdef _WIN32
-    e->wantexcept = true;
-#endif
-
-    return NET_OK;
-}
-
-neterr_t NET_RunConnect(netstream_t *s)
-{
-    ioentry_t *e;
-    neterr_t ret;
-    int err;
-
-    if (s->state != NS_CONNECTING) {
-        return NET_AGAIN;
-    }
-
-    e = os_get_io(s->socket);
-    if (!e->canwrite
-#ifdef _WIN32
-        && !e->canexcept
-#endif
-       ) {
-        return NET_AGAIN;
-    }
-
-    ret = os_getsockopt(s->socket, SOL_SOCKET, SO_ERROR, &err);
-    if (ret) {
-        goto fail;
-    }
-    if (err) {
-        net_error = err;
-        goto fail;
-    }
-
-    s->state = NS_CONNECTED;
-    e->wantwrite = false;
-    e->wantread = true;
-#ifdef _WIN32
-    e->wantexcept = false;
-#endif
-    return NET_OK;
-
-fail:
-    s->state = NS_BROKEN;
-    e->wantwrite = false;
-    e->wantread = false;
-#ifdef _WIN32
-    e->wantexcept = false;
-#endif
-    return NET_ERROR;
-}
-
-// updates wantread/wantwrite
-void NET_UpdateStream(netstream_t *s)
-{
-    size_t len;
-    ioentry_t *e;
-
-    if (s->state != NS_CONNECTED) {
-        return;
-    }
-
-    e = os_get_io(s->socket);
-
-    FIFO_Reserve(&s->recv, &len);
-    e->wantread = len ? true : false;
-
-    FIFO_Peek(&s->send, &len);
-    e->wantwrite = len ? true : false;
-}
-
-// returns NET_OK only when there was some data read
-neterr_t NET_RunStream(netstream_t *s)
-{
-    ssize_t ret;
-    size_t len;
-    void *data;
-    neterr_t result = NET_AGAIN;
-    ioentry_t *e;
-
-    if (s->state != NS_CONNECTED) {
-        return result;
-    }
-
-    e = os_get_io(s->socket);
-    if (e->wantread && e->canread) {
-        // read as much as we can
-        data = FIFO_Reserve(&s->recv, &len);
-        if (len) {
-            ret = os_recv(s->socket, data, len, 0);
-            if (!ret) {
-                goto closed;
-            }
-            if (ret == NET_ERROR) {
-                goto error;
-            }
-            if (ret == NET_AGAIN) {
-                // wouldblock is silent
-                e->canread = false;
-            } else {
-                FIFO_Commit(&s->recv, ret);
-#if _DEBUG
-                if (net_log_enable->integer) {
-                    NET_LogPacket(&s->address, "TCP recv", (const byte*)data, ret); // CPP: Cast
-                }
-#endif
-                net_rate_rcvd += ret;
-                net_bytes_rcvd += ret;
-
-                result = NET_OK;
-
-                // now see if there's more space to read
-                FIFO_Reserve(&s->recv, &len);
-                if (!len) {
-                    e->wantread = false;
-                }
-            }
-        }
-    }
-
-    if (e->wantwrite && e->canwrite) {
-        // write as much as we can
-        data = FIFO_Peek(&s->send, &len);
-        if (len) {
-            ret = os_send(s->socket, data, len, 0);
-            if (!ret) {
-                goto closed;
-            }
-            if (ret == NET_ERROR) {
-                goto error;
-            }
-            if (ret == NET_AGAIN) {
-                // wouldblock is silent
-                e->canwrite = false;
-            } else {
-                FIFO_Decommit(&s->send, ret);
-#if _DEBUG
-                if (net_log_enable->integer) {
-                    NET_LogPacket(&s->address, "TCP send", (const byte*)data, ret); // CPP: Cast
-                }
-#endif
-                net_rate_sent += ret;
-                net_bytes_sent += ret;
-
-                //result = NET_OK;
-
-                // now see if there's more data to write
-                FIFO_Peek(&s->send, &len);
-                if (!len) {
-                    e->wantwrite = false;
-                }
-
-            }
-        }
-    }
-
-    return result;
-
-closed:
-    s->state = NS_CLOSED;
-    e->wantread = false;
-    return NET_CLOSED;
-
-error:
-    s->state = NS_BROKEN;
-    e->wantread = false;
-    e->wantwrite = false;
-    return NET_ERROR;
 }
 
 //===================================================================
@@ -1813,7 +1544,7 @@ NET_Restart_f
 */
 static void NET_Restart_f(void)
 {
-    netflag_t flag = net_active;
+    NetFlag flag = net_active;
     qboolean listen4 = (tcp_socket != -1);
     qboolean listen6 = (tcp6_socket != -1);
 
@@ -1859,6 +1590,7 @@ NET_Init
 void NET_Init(void)
 {
     os_net_init();
+    ENET_Init();
 
     net_ip = Cvar_Get("net_ip", "", 0);
     net_ip->changed = net_udp_param_changed;
@@ -1918,6 +1650,7 @@ void NET_Shutdown(void)
     NET_Listen(false);
     NET_Config(NET_NONE);
     os_net_shutdown();
+    ENET_Shutdown();
 
     Cmd_RemoveCommand("net_restart");
     Cmd_RemoveCommand("net_stats");

@@ -81,7 +81,7 @@ void Cbuf_Init(void)
     memset(&cmd_buffer, 0, sizeof(cmd_buffer));
     cmd_buffer.from = FROM_CONSOLE;
     cmd_buffer.text = cmd_buffer_text;
-    cmd_buffer.maxsize = sizeof(cmd_buffer_text);
+    cmd_buffer.maximumSize = sizeof(cmd_buffer_text);
     cmd_buffer.exec = Cmd_ExecuteString;
 }
 
@@ -96,23 +96,23 @@ void Cbuf_AddText(cmdbuf_t *buf, const char *text)
 {
     size_t l = strlen(text);
 
-    if (buf->cursize + l > buf->maxsize) {
+    if (buf->currentSize + l > buf->maximumSize) {
         Com_WPrintf("%s: overflow\n", __func__);
         return;
     }
-    memcpy(buf->text + buf->cursize, text, l);
-    buf->cursize += l;
+    memcpy(buf->text + buf->currentSize, text, l);
+    buf->currentSize += l;
 }
 
 char *Cbuf_Alloc(cmdbuf_t *buf, size_t len)
 {
     char *text;
 
-    if (buf->cursize + len > buf->maxsize) {
+    if (buf->currentSize + len > buf->maximumSize) {
         return NULL;
     }
-    text = buf->text + buf->cursize;
-    buf->cursize += len;
+    text = buf->text + buf->currentSize;
+    buf->currentSize += len;
 
     return text;
 }
@@ -133,15 +133,15 @@ void Cbuf_InsertText(cmdbuf_t *buf, const char *text)
     if (!l) {
         return;
     }
-    if (buf->cursize + l + 1 > buf->maxsize) {
+    if (buf->currentSize + l + 1 > buf->maximumSize) {
         Com_WPrintf("%s: overflow\n", __func__);
         return;
     }
 
-    memmove(buf->text + l + 1, buf->text, buf->cursize);
+    memmove(buf->text + l + 1, buf->text, buf->currentSize);
     memcpy(buf->text, text, l);
     buf->text[l] = '\n';
-    buf->cursize += l + 1;
+    buf->currentSize += l + 1;
 }
 
 /*
@@ -156,7 +156,7 @@ void Cbuf_Execute(cmdbuf_t *buf)
     char    line[MAX_STRING_CHARS];
     int     quotes;
 
-    while (buf->cursize) {
+    while (buf->currentSize) {
         if (buf->waitCount > 0) {
             // skip out while text still remains in buffer, leaving it
             // for next frame (counter is decremented externally now)
@@ -167,7 +167,7 @@ void Cbuf_Execute(cmdbuf_t *buf)
         text = buf->text;
 
         quotes = 0;
-        for (i = 0; i < buf->cursize; i++) {
+        for (i = 0; i < buf->currentSize; i++) {
             if (text[i] == '"')
                 quotes++;
             if (!(quotes & 1) && text[i] == ';')
@@ -187,12 +187,12 @@ void Cbuf_Execute(cmdbuf_t *buf)
 // delete the text from the command buffer and move remaining commands down
 // this is necessary because commands (exec, alias) can insert data at the
 // beginning of the text buffer
-        if (i == buf->cursize) {
-            buf->cursize = 0;
+        if (i == buf->currentSize) {
+            buf->currentSize = 0;
         } else {
             i++;
-            buf->cursize -= i;
-            memmove(text, text + i, buf->cursize);
+            buf->currentSize -= i;
+            memmove(text, text + i, buf->currentSize);
         }
 
 // execute the command line
@@ -1743,7 +1743,7 @@ qerror_t Cmd_ExecuteFile(const char *path, unsigned flags)
     }
 
     // check for overflow
-    if (buf->cursize + len + 1 > buf->maxsize) {
+    if (buf->currentSize + len + 1 > buf->maximumSize) {
         ret = Q_ERR_STRING_TRUNCATED;
         goto finish;
     }

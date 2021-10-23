@@ -130,7 +130,7 @@ static void write_plain_configstrings(void)
             length = MAX_QPATH;
         }
         // check if this configstring will overflow
-        if (msg_write.cursize + length + 64 > sv_client->netchan->maxpacketlen) {
+        if (msg_write.currentSize + length + 64 > sv_client->netchan->maximumPacketLength) {
             SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
         }
 
@@ -164,7 +164,7 @@ static void write_plain_baselines(void)
         for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
             if (base->number) {
                 // check if this baseline will overflow
-                if (msg_write.cursize + 64 > sv_client->netchan->maxpacketlen) {
+                if (msg_write.currentSize + 64 > sv_client->netchan->maximumPacketLength) {
                     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
                 }
 
@@ -182,7 +182,7 @@ static void write_plain_baselines(void)
 
 static void write_compressed_gamestate(void)
 {
-    sizebuf_t   *buf = &sv_client->netchan->message;
+    SizeBuffer   *buf = &sv_client->netchan->message;
     PackedEntity  *base;
     int         i, j;
     size_t      length;
@@ -203,7 +203,7 @@ static void write_compressed_gamestate(void)
         }
 
         //// MSGFRAG: !! Check if this configstring will overflow
-        //if (msg_write.cursize + length + 64 > sv_client->netchan->maxpacketlen) {
+        //if (msg_write.currentSize + length + 64 > sv_client->netchan->maximumPacketLength) {
         //    SV_ClientAddMessage(sv_client, 0);
         //}
 
@@ -220,7 +220,7 @@ static void write_compressed_gamestate(void)
             continue;
         }
         //// MSGFRAG: !! Check if this baseline will overflow
-        //if (msg_write.cursize + 64 > sv_client->netchan->maxpacketlen) {
+        //if (msg_write.currentSize + 64 > sv_client->netchan->maximumPacketLength) {
         //    SV_ClientAddMessage(sv_client, 0);
         //}
         for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
@@ -234,13 +234,13 @@ static void write_compressed_gamestate(void)
 
     SZ_WriteByte(buf, svc_zpacket);
     patch = (uint8_t*)SZ_GetSpace(buf, 2); // CPP: Cast
-    SZ_WriteShort(buf, msg_write.cursize);
+    SZ_WriteShort(buf, msg_write.currentSize);
 
     deflateReset(&svs.z);
     svs.z.next_in = msg_write.data;
-    svs.z.avail_in = (uInt)msg_write.cursize;
-    svs.z.next_out = buf->data + buf->cursize;
-    svs.z.avail_out = (uInt)(buf->maxsize - buf->cursize);
+    svs.z.avail_in = (uInt)msg_write.currentSize;
+    svs.z.next_out = buf->data + buf->currentSize;
+    svs.z.avail_out = (uInt)(buf->maximumSize - buf->currentSize);
     SZ_Clear(&msg_write);
 
     if (deflate(&svs.z, Z_FINISH) != Z_STREAM_END) {
@@ -253,7 +253,7 @@ static void write_compressed_gamestate(void)
 
     patch[0] = svs.z.total_out & 255;
     patch[1] = (svs.z.total_out >> 8) & 255;
-    buf->cursize += svs.z.total_out;
+    buf->currentSize += svs.z.total_out;
     
     //// MSGFRAG: !! Add final send.
     //SV_ClientAddMessage(sv_client, 0);
@@ -285,7 +285,7 @@ static inline void z_reset(byte *buffer)
 {
     deflateReset(&svs.z);
     svs.z.next_out = buffer;
-    svs.z.avail_out = (uInt)(sv_client->netchan->maxpacketlen - 5);
+    svs.z.avail_out = (uInt)(sv_client->netchan->maximumPacketLength - 5);
 }
 
 static void write_compressed_configstrings(void)
@@ -323,7 +323,7 @@ static void write_compressed_configstrings(void)
         MSG_WriteByte(0);
 
         svs.z.next_in = msg_write.data;
-        svs.z.avail_in = (uInt)msg_write.cursize;
+        svs.z.avail_in = (uInt)msg_write.currentSize;
         SZ_Clear(&msg_write);
 
         if (deflate(&svs.z, Z_SYNC_FLUSH) != Z_OK) {
@@ -417,7 +417,7 @@ void SV_New_f(void)
 
     // stuff some junk, drop them and expect them to be back soon
     if (sv_force_reconnect->string[0] && !sv_client->reconnectKey[0] &&
-        !NET_IsLocalAddress(&sv_client->netchan->remoteAddress)) {
+        !NET_IsLocalAddress(&sv_client->netchan->remoteNetAddress)) {
         stuff_junk();
         SV_DropClient(sv_client, NULL);
         return;
@@ -435,7 +435,7 @@ void SV_New_f(void)
 
     // send the serverdata
     MSG_WriteByte(svc_serverdata);
-    MSG_WriteLong(sv_client->protocol);
+    MSG_WriteLong(sv_client->protocolMajorVersion);
     // WID: This value was unset here, so it defaulted to the int64 max or so.
     sv_client->spawncount = 0;
     MSG_WriteLong(sv_client->spawncount);
@@ -447,7 +447,7 @@ void SV_New_f(void)
         MSG_WriteShort(sv_client->slot);
     MSG_WriteString(&sv_client->configstrings[ConfigStrings::Name * MAX_QPATH]);
 
-    MSG_WriteShort(sv_client->version);
+    MSG_WriteShort(sv_client->protocolMinorVersion);
     MSG_WriteByte(sv.serverState);
 
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
@@ -887,7 +887,7 @@ static void SV_CvarResult_f(void)
             v = (char*)Cmd_RawArgsFrom(2); // C++20: Added a cast.
             if (COM_DEDICATED) {
                 Com_Printf("%s[%s]: %s\n", sv_client->name,
-                           NET_AdrToString(&sv_client->netchan->remoteAddress), v);
+                           NET_AdrToString(&sv_client->netchan->remoteNetAddress), v);
             }
             sv_client->versionString = SV_CopyString(v);
         }
@@ -900,14 +900,14 @@ static void SV_CvarResult_f(void)
     } else if (!strcmp(c, "console")) {
         if (sv_client->consoleQueries > 0) {
             Com_Printf("%s[%s]: \"%s\" is \"%s\"\n", sv_client->name,
-                       NET_AdrToString(&sv_client->netchan->remoteAddress),
+                       NET_AdrToString(&sv_client->netchan->remoteNetAddress),
                        Cmd_Argv(2), Cmd_RawArgsFrom(3));
             sv_client->consoleQueries--;
         }
     }
 }
 
-static const ucmd_t ucmds[] = {
+static const UserCommand userCommands[] = {
     // auto issued
     { "new", SV_New_f },
     { "begin", SV_Begin_f },
@@ -969,7 +969,7 @@ SV_ExecuteUserCommand
 */
 static void SV_ExecuteUserCommand(const char *s)
 {
-    const ucmd_t *u;
+    const UserCommand *u;
     FilterCommand *filter;
     const char *c;
 
@@ -981,7 +981,7 @@ static void SV_ExecuteUserCommand(const char *s)
         return;
     }
 
-    if ((u = Com_Find(ucmds, c)) != NULL) {
+    if ((u = Com_Find(userCommands, c)) != NULL) {
         if (u->func) {
             u->func();
         }
@@ -1028,11 +1028,11 @@ static int         userinfoUpdateCount;
 SV_ClientThink
 ==================
 */
-static inline void SV_ClientThink(ClientUserCommand *cmd)
+static inline void SV_ClientThink(ClientMoveCommand *cmd)
 {
-    ClientUserCommand *old = &sv_client->lastClientUserCommand;
+    ClientMoveCommand *old = &sv_client->lastClientUserCommand;
 
-    sv_client->clientUserCommandMiliseconds -= cmd->moveCommand.msec;
+    sv_client->clientUserCommandMiliseconds -= cmd->input.msec;
     sv_client->numberOfMoves++;
 
     if (sv_client->clientUserCommandMiliseconds < 0 && sv_enforcetime->integer) {
@@ -1041,10 +1041,10 @@ static inline void SV_ClientThink(ClientUserCommand *cmd)
         return;
     }
 
-    if (cmd->moveCommand.buttons != old->moveCommand.buttons
-        || cmd->moveCommand.forwardMove != old->moveCommand.forwardMove
-        || cmd->moveCommand.rightMove != old->moveCommand.rightMove
-        || cmd->moveCommand.upMove != old->moveCommand.upMove) {
+    if (cmd->input.buttons != old->input.buttons
+        || cmd->input.forwardMove != old->input.forwardMove
+        || cmd->input.rightMove != old->input.rightMove
+        || cmd->input.upMove != old->input.upMove) {
         // don't timeout
         sv_client->lastActivity = svs.realtime;
     }
@@ -1087,7 +1087,7 @@ SV_ExecuteMove
 */
 static void SV_ExecuteMove(void)
 {
-    ClientUserCommand   oldest, oldcmd, newcmd;
+    ClientMoveCommand   oldest, oldcmd, newcmd;
     int         lastFrame;
     int         net_drop;
 
@@ -1112,7 +1112,7 @@ static void SV_ExecuteMove(void)
     SV_SetLastFrame(lastFrame);
     
     // Determine drop rate, on whether we should be predicting or not.
-    net_drop = sv_client->netchan->dropped;
+    net_drop = sv_client->netchan->deltaFramePacketDrops;
     if (net_drop > 2) {
         sv_client->frameFlags |= FF_CLIENTPRED;
     }
@@ -1247,13 +1247,13 @@ static void SV_ParseDeltaUserinfo(void)
             Com_DPrintf("Too many userinfos from %s\n", sv_client->name);
         }
 
-        if (msg_read.readcount >= msg_read.cursize)
+        if (msg_read.readCount >= msg_read.currentSize)
             break; // end of message
 
-        if (msg_read.data[msg_read.readcount] != clc_userinfo_delta)
+        if (msg_read.data[msg_read.readCount] != clc_userinfo_delta)
             break; // not delta userinfo
 
-        msg_read.readcount++;
+        msg_read.readCount++;
     }
 
     SV_UpdateUserinfo();
@@ -1302,7 +1302,7 @@ void SV_ExecuteClientMessage(client_t *client)
     userinfoUpdateCount = 0;
 
     while (1) {
-        if (msg_read.readcount > msg_read.cursize) {
+        if (msg_read.readCount > msg_read.currentSize) {
             SV_DropClient(client, "read past end of message");
             break;
         }

@@ -47,7 +47,7 @@ void trigger_key_use(Entity* self, Entity* other, Entity* activator)
             for (cube = 0; cube < 8; cube++)
                 if (activator->client->persistent.powerCubes & (1 << cube))
                     break;
-            for (player = 1; player <= game.maxClients; player++) {
+            for (player = 1; player <= game.maximumClients; player++) {
                 ent = &g_entities[player];
                 if (!ent->inUse)
                     continue;
@@ -60,7 +60,7 @@ void trigger_key_use(Entity* self, Entity* other, Entity* activator)
             }
         }
         else {
-            for (player = 1; player <= game.maxClients; player++) {
+            for (player = 1; player <= game.maximumClients; player++) {
                 ent = &g_entities[player];
                 if (!ent->inUse)
                     continue;

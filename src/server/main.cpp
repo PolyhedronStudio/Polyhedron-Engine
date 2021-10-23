@@ -188,7 +188,7 @@ static void print_drop_reason(client_t *client, const char *reason, int32_t oldC
     // print to server console
     if (COM_DEDICATED && client->netchan)
         Com_Printf("%s[%s]%s%s\n", client->name,
-                   NET_AdrToString(&client->netchan->remoteAddress),
+                   NET_AdrToString(&client->netchan->remoteNetAddress),
                    prefix, reason);
 }
 
@@ -600,8 +600,8 @@ A connection request that did not come from the master
 */
 
 typedef struct {
-    int         protocol;   // major version
-    int         version;    // minor version
+    int         protocolMajorVersion; // major version
+    int         protocolMinorVersion; // minor version
     int         qport;
     int         challenge;
 
@@ -623,17 +623,17 @@ typedef struct {
 
 static qboolean parse_basic_params(conn_params_t *p)
 {
-    p->protocol = atoi(Cmd_Argv(1));
+    p->protocolMajorVersion = atoi(Cmd_Argv(1));
     p->qport = atoi(Cmd_Argv(2)) ;
     p->challenge = atoi(Cmd_Argv(3));
 
     // check for invalid protocol version
-    if (p->protocol != PROTOCOL_VERSION_NAC)
-        return reject("Unsupported protocol version %d.\n", p->protocol);
+    if (p->protocolMajorVersion != PROTOCOL_VERSION_NAC)
+        return reject("Unsupported protocol version %d.\n", p->protocolMajorVersion);
 
     // check for valid, but outdated protocol version
-    if (p->protocol < PROTOCOL_VERSION_DEFAULT)
-        return reject("Unsupported protocol version %i, You need protocol version (%i) or higher.\n", p->protocol, PROTOCOL_VERSION_DEFAULT);
+    if (p->protocolMajorVersion < PROTOCOL_VERSION_DEFAULT)
+        return reject("Unsupported protocol version %i, You need protocol version (%i) or higher.\n", p->protocolMajorVersion, PROTOCOL_VERSION_DEFAULT);
 
     return true;
 }
@@ -688,7 +688,7 @@ static qboolean permit_connection(conn_params_t *p)
     if (sv_iplimit->integer > 0) {
         count = 0;
         FOR_EACH_CLIENT(cl) {
-            netadr_t *adr = &cl->netchan->remoteAddress;
+            netadr_t *adr = &cl->netchan->remoteNetAddress;
 
             if (net_from.type != adr->type)
                 continue;
@@ -769,18 +769,18 @@ static qboolean parse_enhanced_params(conn_params_t *p)
     // set minor protocol version
     s = Cmd_Argv(8);
     if (*s) {
-        p->version = atoi(s);
-        clamp(p->version,
+        p->protocolMajorVersion = atoi(s);
+        clamp(p->protocolMajorVersion,
                 PROTOCOL_VERSION_NAC_MINIMUM,
                 PROTOCOL_VERSION_NAC_CURRENT);
     } else {
-        p->version = PROTOCOL_VERSION_NAC_MINIMUM;
+        p->protocolMajorVersion = PROTOCOL_VERSION_NAC_MINIMUM;
     }
 
     return true;
 }
 
-static char *userinfo_ip_string(void)
+static const char *userinfo_ip_string(void)
 {
     static char s[MAX_QPATH];
 
@@ -856,7 +856,7 @@ static client_t *redirect(const char *addr)
     MSG_WriteByte(svc_stufftext);
     MSG_WriteString(va("connect %s\n", addr));
 
-    NET_SendPacket(NS_SERVER, msg_write.data, msg_write.cursize, &net_from);
+    NET_SendPacket(NS_SERVER, msg_write.data, msg_write.currentSize, &net_from);
     SZ_Clear(&msg_write);
     return NULL;
 }
@@ -869,7 +869,7 @@ static client_t *find_client_slot(conn_params_t *params)
 
     // if there is already a slot for this ip, reuse it
     FOR_EACH_CLIENT(cl) {
-        if (NET_IsEqualAdr(&net_from, &cl->netchan->remoteAddress)) {
+        if (NET_IsEqualAdr(&net_from, &cl->netchan->remoteNetAddress)) {
             if (cl->connectionState == ConnectionState::Zombie) {
                 strcpy(params->reconnectKey, cl->reconnectKey);
                 strcpy(params->reconnectValue, cl->reconnectValue);
@@ -947,7 +947,7 @@ static void append_extra_userinfo(conn_params_t *params, char *userinfo)
                "\\major\\%d\\minor\\%d\\netchan\\%d"
                "\\packetlen\\%d\\qport\\%d\\zlib\\%d",
                params->challenge, userinfo_ip_string(),
-               params->protocol, params->version, params->nctype,
+               params->protocolMajorVersion, params->protocolMinorVersion, params->nctype,
                params->maxlength, params->qport, params->has_zlib);
 }
 
@@ -987,8 +987,8 @@ static void SVC_DirectConnect(void)
     memset(newcl, 0, sizeof(*newcl));
     newcl->number = newcl->slot = number;
     newcl->challenge = params.challenge; // save challenge for checksumming
-    newcl->protocol = params.protocol;
-    newcl->version = params.version;
+    newcl->protocolMajorVersion = params.protocolMajorVersion;
+    newcl->protocolMinorVersion = params.protocolMinorVersion;
     newcl->has_zlib = params.has_zlib;
     newcl->edict = EDICT_NUM(number + 1);
     newcl->gamedir = fs_game->string;
@@ -997,7 +997,7 @@ static void SVC_DirectConnect(void)
     newcl->pool = (EntityPool*)&ge->entities; // N&C: Edict_pool_t change
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
-    newcl->maxClients = sv_maxclients->integer;
+    newcl->maximumClients = sv_maxclients->integer;
 	newcl->lastValidCluster = -1;
     strcpy(newcl->reconnectKey, params.reconnectKey);
     strcpy(newcl->reconnectValue, params.reconnectValue);
@@ -1023,7 +1023,7 @@ static void SVC_DirectConnect(void)
     }
 
     // setup netchan
-    newcl->netchan = Netchan_Setup(NS_SERVER, &net_from, params.qport, params.maxlength, params.protocol);
+    newcl->netchan = Netchan_Setup(NS_SERVER, &net_from, params.qport, params.maxlength, params.protocolMajorVersion);
     newcl->numpackets = 1;
 
     // parse some info from the info strings
@@ -1038,7 +1038,7 @@ static void SVC_DirectConnect(void)
     SV_InitClientSend(newcl);
 
     // MSG: !!
-    //if (newcl->protocol == PROTOCOL_VERSION_DEFAULT) {
+    //if (newcl->protocolMajorVersion == PROTOCOL_VERSION_DEFAULT) {
     //    newcl->WriteFrame = __OLD_SV_WriteFrameToClient_Default;
     //} else {
         newcl->WriteFrame = SV_WriteFrameToClient;
@@ -1112,7 +1112,7 @@ static void SVC_RemoteCommand(void)
     Com_EndRedirect();
 }
 
-static const ucmd_t svcmds[] = {
+static const UserCommand svcmds[] = {
     { "ping",           SVC_Ping          },
     { "ack",            SVC_Ack           },
     { "status",         SVC_Status        },
@@ -1258,7 +1258,7 @@ static void SV_CalcPings(void)
     }
 
     // update avg ping and fps every 10 seconds
-    res = sv.frameNumber % (10 * SV_FRAMERATE);
+    res = sv.frameNumber % (16 * (BASE_FRAMERATE / 10));
 
     FOR_EACH_CLIENT(cl) {
         if (cl->connectionState == ConnectionState::Spawned) {
@@ -1302,11 +1302,11 @@ static void SV_GiveMsec(void)
 {
     client_t    *cl;
 
-    if (sv.frameNumber % (16 * SV_FRAMEDIV))
+    if (sv.frameNumber % (int)(BASE_FRAMETIME * (BASE_FRAMERATE / 10))) // WID: This was: (16 * SV_FRAMEDIV)
         return;
 
     FOR_EACH_CLIENT(cl) {
-        cl->clientUserCommandMiliseconds = 1800; // 1600 + some slop
+        cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100); // WID: This was: 1800; // 1600 + some slop
     }
 }
 
@@ -1319,7 +1319,7 @@ SV_PacketEvent
 static void SV_PacketEvent(void)
 {
     client_t    *client;
-    netchan_t   *netchan;
+    NetChannel   *netchan;
     int         qport;
 
     // check for connectionless packet (0xffffffff) first
@@ -1336,34 +1336,34 @@ static void SV_PacketEvent(void)
     // check for packets from connected clients
     FOR_EACH_CLIENT(client) {
         netchan = client->netchan;
-        if (!NET_IsEqualBaseAdr(&net_from, &netchan->remoteAddress)) {
+        if (!NET_IsEqualBaseAdr(&net_from, &netchan->remoteNetAddress)) {
             continue;
         }
 
         // read the qport out of the message so we can fix up
         // stupid address translating routers
         // MSG: !!
-/*        if (client->protocol == PROTOCOL_VERSION_DEFAULT) {
+/*        if (client->protocolMajorVersion == PROTOCOL_VERSION_DEFAULT) {
             qport = msg_read.data[8] | (msg_read.data[9] << 8);
-            if (netchan->qport != qport) {
+            if (netchan->remoteQPort != qport) {
                 continue;
             }
         } else */
-        if (netchan->qport) {
+        if (netchan->remoteQPort) {
             qport = msg_read.data[8];
-            if (netchan->qport != qport) {
+            if (netchan->remoteQPort != qport) {
                 continue;
             }
         } else {
-            if (netchan->remoteAddress.port != net_from.port) {
+            if (netchan->remoteNetAddress.port != net_from.port) {
                 continue;
             }
         }
 
-        if (netchan->remoteAddress.port != net_from.port) {
+        if (netchan->remoteNetAddress.port != net_from.port) {
             Com_DPrintf("Fixing up a translated port for %s: %d --> %d\n",
-                        client->name, netchan->remoteAddress.port, net_from.port);
-            netchan->remoteAddress.port = net_from.port;
+                        client->name, netchan->remoteNetAddress.port, net_from.port);
+            netchan->remoteNetAddress.port = net_from.port;
         }
 
         if (!Netchan_Process(netchan))
@@ -1377,7 +1377,7 @@ static void SV_PacketEvent(void)
 #if USE_ICMP
         client->unreachable = false; // don't drop
 #endif
-        if (netchan->dropped > 0)
+        if (netchan->deltaFramePacketDrops > 0)
             client->frameFlags |= FF_CLIENTDROP;
 
         SV_ExecuteClientMessage(client);
@@ -1391,7 +1391,7 @@ static void SV_PacketEvent(void)
 // Total 64 bytes of headers is assumed.
 static void update_client_mtu(client_t *client, int ee_info)
 {
-    netchan_t *netchan = client->netchan;
+    NetChannel *netchan = client->netchan;
     size_t newpacketlen;
 
     // sanity check discovered MTU
@@ -1409,12 +1409,12 @@ static void update_client_mtu(client_t *client, int ee_info)
         return;
 
     newpacketlen = ee_info - 64;
-    if (newpacketlen >= netchan->maxpacketlen)
+    if (newpacketlen >= netchan->maximumPacketLength)
         return;
 
     Com_Printf("Fixing up maxmsglen for %s: %" PRIz " --> %" PRIz "\n",
-               client->name, netchan->maxpacketlen, newpacketlen);
-    netchan->maxpacketlen = newpacketlen;
+               client->name, netchan->maximumPacketLength, newpacketlen);
+    netchan->maximumPacketLength = newpacketlen;
 }
 #endif
 
@@ -1427,7 +1427,7 @@ SV_ErrorEvent
 void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info)
 {
     client_t    *client;
-    netchan_t   *netchan;
+    NetChannel   *netchan;
 
     if (!svs.initialized) {
         return;
@@ -1439,10 +1439,10 @@ void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info)
             continue; // already a zombie
         }
         netchan = client->netchan;
-        if (!NET_IsEqualBaseAdr(from, &netchan->remoteAddress)) {
+        if (!NET_IsEqualBaseAdr(from, &netchan->remoteNetAddress)) {
             continue;
         }
-        if (from->port && netchan->remoteAddress.port != from->port) {
+        if (from->port && netchan->remoteNetAddress.port != from->port) {
             continue;
         }
 #if USE_PMTUDISC
@@ -1481,7 +1481,7 @@ static void SV_CheckTimeouts(void)
 
     FOR_EACH_CLIENT(client) {
         // never timeout local clients
-        if (NET_IsLocalAddress(&client->netchan->remoteAddress)) {
+        if (NET_IsLocalAddress(&client->netchan->remoteNetAddress)) {
             continue;
         }
         // NOTE: delta calculated this way is not sensitive to overflow
@@ -1602,10 +1602,10 @@ static void SV_RunGameFrame(void)
         time_after_game = Sys_Milliseconds();
 #endif
 
-    if (msg_write.cursize) {
+    if (msg_write.currentSize) {
         Com_WPrintf("Game left %" PRIz " bytes "
                     "in multicast buffer, cleared.\n",
-                    msg_write.cursize);
+                    msg_write.currentSize);
         SZ_Clear(&msg_write);
     }
 }
@@ -1802,7 +1802,7 @@ void SV_UserinfoChanged(client_t *cl)
     if (cl->name[0] && strcmp(cl->name, name)) {
         if (COM_DEDICATED) {
             Com_Printf("%s[%s] changed name to %s\n", cl->name,
-                       NET_AdrToString(&cl->netchan->remoteAddress), name);
+                       NET_AdrToString(&cl->netchan->remoteNetAddress), name);
         }
 
         if (sv_show_name_changes->integer) {
@@ -1822,13 +1822,13 @@ void SV_UserinfoChanged(client_t *cl)
     }
 
     // never drop over the loopback
-    if (NET_IsLocalAddress(&cl->netchan->remoteAddress)) {
+    if (NET_IsLocalAddress(&cl->netchan->remoteNetAddress)) {
         cl->rate = 0;
     }
 
     // don't drop over LAN connections
     if (sv_lan_force_rate->integer &&
-        NET_IsLanAddress(&cl->netchan->remoteAddress)) {
+        NET_IsLanAddress(&cl->netchan->remoteNetAddress)) {
         cl->rate = 0;
     }
 
@@ -2024,7 +2024,7 @@ Also resposible for freeing all clients.
 static void SV_FinalMessage(const char *message, ErrorType type)
 {
     client_t    *client;
-    netchan_t   *netchan;
+    NetChannel   *netchan;
     int         i;
 
     if (LIST_EMPTY(&sv_clientlist))
@@ -2052,7 +2052,7 @@ static void SV_FinalMessage(const char *message, ErrorType type)
             while (netchan->fragmentPending) {
                 Netchan_TransmitNextFragment(netchan);
             }
-            Netchan_Transmit(netchan, msg_write.cursize, msg_write.data, 1);
+            Netchan_Transmit(netchan, msg_write.currentSize, msg_write.data, 1);
         }
     }
 

@@ -215,7 +215,7 @@ void SV_SpawnServer(MapCommand *cmd)
     ge->RunFrame(); sv.frameNumber++;
     ge->RunFrame(); sv.frameNumber++;
 
-    // make sure maxClients string is correct
+    // make sure maximumClients string is correct
     sprintf(sv.configstrings[ConfigStrings::MaxClients], "%d", sv_maxclients->integer);
 
     // check for a savegame
@@ -347,7 +347,7 @@ void SV_InitGame()
 
     }
 
-    // get any latched variable changes (maxClients, etc)
+    // get any latched variable changes (maximumClients, etc)
     Cvar_GetLatchedVars();
 
 #if !USE_CLIENT

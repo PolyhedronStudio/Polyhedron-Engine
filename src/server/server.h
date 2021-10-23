@@ -27,10 +27,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/error.h"
+#include "common/enet/enet.h"
 #include "common/files.h"
 #include "common/msg.h"
 #include "common/net/net.h"
-#include "common/net/chan.h"
+#include "common/enet/enetchan.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
 #include "common/zone.h"
@@ -126,19 +127,19 @@ typedef struct {
 // Main server structure.
 //-----------------
 typedef struct {
-    int32_t serverState;      // precache commands are only valid during load
-    int32_t spawncount; // random number generated each server spawn
+    int32_t serverState;    // precache commands are only valid during load
+    int32_t spawncount;     // random number generated each server spawn
 
     int32_t  frameNumber;
     uint32_t frameResidual;
 
-    char        mapcmd[MAX_QPATH];          // ie: *intro.cin+base
+    char    mapcmd[MAX_QPATH];          // ie: *intro.cin+base
 
-    char        name[MAX_QPATH];            // map name, or cinematic name
-    cm_t        cm;
-    char        *entityString;
+    char    name[MAX_QPATH];            // map name, or cinematic name
+    cm_t    cm;
+    char    *entityString;
 
-    char        configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
+    char    configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
 
     server_entity_t entities[MAX_EDICTS];
 
@@ -156,7 +157,7 @@ struct ConnectionState {
     static constexpr int32_t Spawned = 5;   // Client is fully in game
 };
 
-constexpr uint32_t MSG_POOLSIZE = 1024;
+constexpr uint32_t MSG_POOLSIZE = 8192;
 constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
 
 constexpr uint32_t MSG_RELIABLE = 1;
@@ -170,7 +171,7 @@ constexpr uint32_t MAX_SOUND_PACKET = 14;
 //-----------------
 typedef struct {
     list_t              entry;
-    uint16_t            cursize;    // Zero means sound packet
+    uint16_t            currentSize;    // Zero means sound packet
     union {
         uint8_t         data[MSG_TRESHOLD];
         struct {
@@ -186,7 +187,8 @@ typedef struct {
 } MessagePacket;
 
 // This is best to match the actual server game frame rate.
-static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 20;
+static constexpr uint32_t SERVER_MESSAGES_TICKRATE = 60;
+static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE_DIVISOR;
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
@@ -240,7 +242,7 @@ typedef struct client_s {
     uint32_t lastMessage;    // svs.realTime when packet was last received
     uint32_t lastActivity;   // svs.realTime when user activity was last seen
     int32_t lastFrame;      // for delta compression
-    ClientUserCommand lastClientUserCommand;        // for filling in big drops
+    ClientMoveCommand lastClientUserCommand;        // for filling in big drops
     int32_t clientUserCommandMiliseconds;   // every seconds this is reset, if user
                                     // commands exhaust it, assume time cheating
     int32_t numberOfMoves;      // reset every 10 seconds
@@ -287,8 +289,8 @@ typedef struct client_s {
 
     // protocol stuff
     int32_t challenge;  // Challenge of this user, randomly generated
-    int32_t protocol;   // Major version
-    int32_t version;    // Minor version
+    int32_t protocolMajorVersion;   // Major version
+    int32_t protocolMinorVersion;    // Minor version
 
     EntityStateMessageFlags esFlags; // Entity protocol flags
 
@@ -310,7 +312,7 @@ typedef struct client_s {
     cm_t *cm;
     int32_t slot;
     int32_t spawncount;
-    int32_t maxClients;
+    int32_t maximumClients;
 
     // netchan type dependent methods
     void (*AddMessage)(struct client_s *, byte *, size_t, qboolean);
@@ -318,12 +320,14 @@ typedef struct client_s {
     void (*WriteDatagram)(struct client_s *);
 
     // netchan
-    netchan_t *netchan;
+    NetChannel *netchan;
     int32_t numpackets; // for that nasty packetdup hack
 
     // misc
     time_t timeOfInitialConnect; // time of initial connect
 	int32_t lastValidCluster;
+
+
 } client_t;
 
 // a client can leave the server in one of four ways:
@@ -369,14 +373,14 @@ typedef enum {
     FA_MAX
 } FilterAction;
 
-typedef struct {
+struct FilterCommand {
     list_t entry;
     
     FilterAction action;
 
     char *comment;
     char  string[1];
-} FilterCommand;
+};
 
 typedef struct {
     list_t entry;
@@ -407,11 +411,11 @@ typedef struct server_static_s {
     qboolean    initialized;        // sv_init has completed
     unsigned    realtime;           // always increasing, no clamping, etc
 
-    client_t    *client_pool;   // [maxClients]
+    client_t    *client_pool;       // [maximumClients]
 
-    unsigned        num_entities;   // maxClients*UPDATE_BACKUP*MAX_PACKET_ENTITIES
+    unsigned        num_entities;   // maximumClients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
-    PackedEntity *entities;      // [num_entities]
+    PackedEntity    *entities;      // [num_entities]
 
 #if USE_ZLIB
     z_stream        z;  // for compressing messages at once
@@ -483,7 +487,7 @@ extern cvar_t       *sv_zombietime;
 extern cvar_t       *sv_ghostime;
 
 extern client_t     *sv_client;
-extern Entity      *sv_player;
+extern Entity       *sv_player;
 
 extern qboolean     sv_pending_autosave;
 

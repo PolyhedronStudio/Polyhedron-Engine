@@ -53,12 +53,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __STRINGIFY(x)  #x
 #define STRINGIFY(x)    __STRINGIFY(x)
 
-typedef struct {
+struct UserCommand {
     const char *name;
     void (* const func)(void);
-} ucmd_t;
+};
 
-static inline const ucmd_t *Com_Find(const ucmd_t *u, const char *c)
+static inline const UserCommand *Com_Find(const UserCommand *u, const char *c)
 {
     for (; u->name; u++) {
         if (!strcmp(c, u->name)) {

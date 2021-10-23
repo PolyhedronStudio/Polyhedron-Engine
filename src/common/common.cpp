@@ -34,8 +34,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/files.h"
 #include "common/mdfour.h"
 #include "common/msg.h"
+#include "common/enet/enet.h"
 #include "common/net/net.h"
-#include "common/net/chan.h"
+#include "common/enet/enetchan.h"
 //#include "common/pmove.h"
 #include "common/prompt.h"
 #include "common/protocol.h"
@@ -1058,15 +1059,6 @@ void Qcommon_Init(int argc, char **argv)
         Com_Printf("====== " PRODUCT " - Dedicated Server Initialized ======\n\n");
     }
     Com_LPrintf(PRINT_NOTICE, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
-
-	if (fs_shareware->integer)
-	{
-		char* newgame = Cmd_AliasCommand("newgame");
-		if (!strstr(newgame, "demo1"))
-		{
-		//	Com_WPrintf("\nWARNING: It looks like you have mixed game data files (.pak) from the shareware demo and the full game. The game might not function properly.\n\n");
-		}
-	}
 
     time(&com_startTime);
 

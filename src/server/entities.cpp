@@ -77,7 +77,7 @@ static void SV_EmitPacketEntities(client_t         *client,
             // this updates their oldOrigin always and prevents warping in case
             // of packet loss.
             flags = client->esFlags;
-            if (newnum <= client->maxClients) {
+            if (newnum <= client->maximumClients) {
                 flags = (EntityStateMessageFlags)(flags | MSG_ES_NEWENTITY);
             }
             if (newnum == clientEntityNum) {

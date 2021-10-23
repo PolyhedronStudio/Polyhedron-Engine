@@ -360,7 +360,7 @@ class IClientGameImportMessage {
 	// Writes a position over the network.
 	virtual int32_t WriteVector3(const vec3_t& vectorValue) = 0;
 	// Flushes message.
-	virtual int32_t FlushTo(sizebuf_t* buffer) = 0;
+	virtual int32_t FlushTo(SizeBuffer* buffer) = 0;
 };
 
 //---------------------------------------------------------------------

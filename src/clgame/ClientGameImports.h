@@ -194,7 +194,7 @@ class ClientGameImportMessage : public IClientGameImportMessage {
 	int32_t WriteLong(int32_t longValue);
 	int32_t WriteString(const char* stringValue);
 	int32_t WriteVector3(const vec3_t& vectorValue);
-	int32_t FlushTo(sizebuf_t* buffer);
+	int32_t FlushTo(SizeBuffer* buffer);
 };
 
 //---------------------------------------------------------------------

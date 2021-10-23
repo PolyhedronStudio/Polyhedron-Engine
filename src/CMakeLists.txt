@@ -421,19 +421,43 @@ SET(SRC_COMMON
 	common/field.cpp
 	common/fifo.cpp
 	common/files.cpp
+	common/huffman.cpp
 	common/mdfour.cpp
 	common/msg.cpp
 	common/prompt.cpp
 	common/sizebuf.cpp
 	common/utils.cpp
 	common/zone.cpp
-	common/net/chan.cpp
+
+	common/enet/enetchan.cpp
+	common/enet/enet.cpp
+	
+	common/hashes/crc32.cpp
+
+	#common/net/chan.cpp
 	common/net/net.cpp
+
+	# These might have to go some day.
+	#common/netq3/netchan.cpp
+	#common/netq3/net.cpp
 )
 SET(HEADERS_COMMON
 	common/net/inet_ntop.h
 	common/net/inet_pton.h
 	common/net/win.h
+	
+	common/enet/enet.h
+	common/enet/enetchan.h
+	
+	common/hashes/crc32.h
+
+	#common/enet/enetchan.h
+	common/net/net.h
+
+	# These might have to go some day.
+	common/netq3/netchan.h
+	common/netq3/net.h
+	common/huffman.h
 )
 
 ###################### Format.
@@ -482,9 +506,11 @@ SET(HEADERS_GL
 ###################### Shared Game Folder.
 SET(HEADERS_SHAREDGAME
 	../inc/sharedgame/pmove.h 
+	../inc/sharedgame/protocol.h 
+	../inc/sharedgame/sharedgame.h 
 )
 SET(SRC_SHAREDGAME
-	sharedgame/pmove.cpp
+	../src/sharedgame/pmove.cpp
 )
 
 ###################### Shared Folder.
@@ -800,6 +826,8 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(client stb)
 TARGET_LINK_LIBRARIES(client tinyobjloader)
+TARGET_LINK_LIBRARIES(client enet)
+TARGET_LINK_LIBRARIES(server enet)
 
 SOURCE_GROUP("common" FILES ${SRC_COMMON})
 SOURCE_GROUP("common" FILES ${HEADERS_COMMON})

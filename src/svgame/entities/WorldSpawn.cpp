@@ -290,7 +290,7 @@ void WorldSpawn::Spawn() {
     // set configstrings for items
     SVG_SetItemNames();
 
-    SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maxClients->value)));
+    SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maximumClients->value)));
 
     // status bar program
     if (deathmatch->value)

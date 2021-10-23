@@ -20,8 +20,74 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MSG_H
 
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 
+//===========================================================================//
+// Q3 MSG Style.
+//===========================================================================//
+//---------------
+// Taken straight from Quake III Source. (And modified cuz typedef structs? Piss off.)
+//---------------
+struct msg_t {
+    qboolean allowOverflow;	// If false, do a Com_Error
+    qboolean overflowed;    // Set to true if the buffer size failed (with allowOverflow set)
+    qboolean oob;			// Set to true if the buffer size failed (with allowOverflow set)
+   
+    byte    *data;
+
+    int32_t maximumSize;
+    int32_t currentSize;
+    int32_t readCount;
+    int32_t	bit;            // For bitwise reads and writes
+};
+
+//---------------
+// Message Buffer Init, Clear, Write, Copy, and Set to Bitstream functions.
+//---------------
+void Q3MSG_Init(msg_t* buf, byte* data, int32_t length);
+void Q3MSG_InitOOB(msg_t* buf, byte* data, int32_t length);
+void Q3MSG_Clear(msg_t* buf);
+void Q3MSG_WriteData(msg_t* buf, const void* data, int32_t length);
+void Q3MSG_Bitstream(msg_t* buf);
+void Q3MSG_Copy(msg_t* buf, byte* data, int32_t length, msg_t* src);
+
+//---------------
+// Message Buffer Write functions.
+//---------------
+void Q3MSG_WriteBits(msg_t* msg, int32_t value, int32_t bits);
+void Q3MSG_WriteChar(msg_t* sb, int32_t c);
+void Q3MSG_WriteByte(msg_t* sb, int32_t c);
+void Q3MSG_WriteShort(msg_t* sb, int32_t c);
+void Q3MSG_WriteLong(msg_t* sb, int32_t c);
+void Q3MSG_WriteFloat(msg_t* sb, float f);
+void Q3MSG_WriteString(msg_t* sb, const char* s);
+void Q3MSG_WriteBigString(msg_t* sb, const char* s);
+void Q3MSG_WriteAngle16(msg_t* sb, float f);
+
+//---------------
+// Message Buffer Read functions.
+//---------------
+void    Q3MSG_BeginReading(msg_t* sb);
+void    Q3MSG_BeginReadingOOB(msg_t* sb);
+
+int32_t Q3MSG_ReadBits(msg_t* msg, int32_t bits);
+
+int32_t Q3MSG_ReadChar(msg_t* sb);
+int32_t Q3MSG_ReadByte(msg_t* sb);
+int32_t Q3MSG_ReadShort(msg_t* sb);
+int32_t Q3MSG_ReadLong(msg_t* sb);
+float   Q3MSG_ReadFloat(msg_t* sb);
+char*   Q3MSG_ReadString(msg_t* sb);
+char*   Q3MSG_ReadBigString(msg_t* sb);
+char*   Q3MSG_ReadStringLine(msg_t* sb);
+float   Q3MSG_ReadAngle16(msg_t* sb);
+void    Q3MSG_ReadData(msg_t* sb, void* buffer, int32_t size);
+
+
+
+//===========================================================================//
+// (Antique) Q2-Pro MSG Style.
+//===========================================================================//
 //---------------
 // A trick taken from Quetoo. Use an int32_t and a float in an union to
 // simplify the networking of a float.
@@ -85,15 +151,15 @@ typedef enum msgEsFlags_s {
 //    MSG_ES_REMOVE = (1 << 7)
 } EntityStateMessageFlags;
 
-extern sizebuf_t    msg_write;
+extern SizeBuffer    msg_write;
 extern byte         msg_write_buffer[MAX_MSGLEN];
 
-extern sizebuf_t    msg_read;
+extern SizeBuffer    msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
 extern const PackedEntity    nullEntityState;
 extern const PlayerState     nullPlayerState;
-extern const ClientUserCommand          nullUserCmd;
+extern const ClientMoveCommand          nullUserCmd;
 
 void    MSG_Init(void);
 
@@ -107,7 +173,7 @@ void    MSG_WriteString(const char* s);
 void    MSG_WriteVector3(const vec3_t& pos);
 #if USE_CLIENT
 void    MSG_WriteBits(int value, int bits);
-int     MSG_WriteDeltaUsercmd(const ClientUserCommand* from, const ClientUserCommand* cmd);
+int     MSG_WriteDeltaUsercmd(const ClientMoveCommand* from, const ClientMoveCommand* cmd);
 #endif
 void    MSG_PackEntity(PackedEntity* out, const EntityState* in);
 void    MSG_WriteDeltaEntity(const PackedEntity* from, const PackedEntity* to, EntityStateMessageFlags flags);
@@ -118,9 +184,9 @@ static inline void* MSG_WriteData(const void* data, size_t len)
     return memcpy(SZ_GetSpace(&msg_write, len), data, len);
 }
 
-static inline void MSG_FlushTo(sizebuf_t* buf)
+static inline void MSG_FlushTo(SizeBuffer* buf)
 {
-    SZ_Write(buf, msg_write.data, msg_write.cursize);
+    SZ_Write(buf, msg_write.data, msg_write.currentSize);
     SZ_Clear(&msg_write);
 }
 
@@ -138,7 +204,7 @@ size_t  MSG_ReadStringLine(char* dest, size_t size);
 vec3_t  MSG_ReadVector3(void);
 vec3_t  MSG_ReadVector3(void);
 #endif
-void    MSG_ReadDeltaUsercmd(const ClientUserCommand* from, ClientUserCommand* cmd);
+void    MSG_ReadDeltaUsercmd(const ClientMoveCommand* from, ClientMoveCommand* cmd);
 int     MSG_ParseEntityBits(int* bits);
 void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags);
 #if USE_CLIENT
@@ -155,7 +221,7 @@ void    MSG_ShowDeltaEntityBits(int bits);
 void    MSG_ShowDeltaPlayerstateBits_Packet(int flags);
 const char* MSG_ServerCommandString(int cmd);
 #define MSG_ShowSVC(cmd) \
-    Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readcount - 1, \
+    Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readCount - 1, \
         MSG_ServerCommandString(cmd))
 #endif // USE_CLIENT
 #endif // _DEBUG

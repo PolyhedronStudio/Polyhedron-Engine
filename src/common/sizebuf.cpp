@@ -18,53 +18,53 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 #include "common/protocol.h"
-#include "common/sizebuf.h"
+#include "common/sizebuffer.h"
 
-void SZ_TagInit(sizebuf_t *buf, void *data, size_t size, uint32_t tag)
+void SZ_TagInit(SizeBuffer *buf, void *data, size_t size, uint32_t tag)
 {
     memset(buf, 0, sizeof(*buf));
     buf->data = (byte*)data; // CPP: Cast
-    buf->maxsize = size;
+    buf->maximumSize = size;
     buf->tag = tag;
 }
 
-void SZ_Init(sizebuf_t *buf, void *data, size_t size)
+void SZ_Init(SizeBuffer *buf, void *data, size_t size)
 {
     memset(buf, 0, sizeof(*buf));
     buf->data = (byte*)data; // CPP: Cast
-    buf->maxsize = size;
-    buf->allowoverflow = true;
-    buf->allowunderflow = true;
+    buf->maximumSize = size;
+    buf->allowOverflow = true;
+    buf->allowUnderflow = true;
 }
 
-void SZ_Clear(sizebuf_t *buf)
+void SZ_Clear(SizeBuffer *buf)
 {
-    buf->cursize = 0;
-    buf->readcount = 0;
-    buf->bitpos = 0;
+    buf->currentSize = 0;
+    buf->readCount = 0;
+    buf->bitPosition = 0;
     buf->overflowed = false;
 }
 
-void *SZ_GetSpace(sizebuf_t *buf, size_t len)
+void *SZ_GetSpace(SizeBuffer *buf, size_t len)
 {
     void    *data;
 
-    if (buf->cursize > buf->maxsize) {
+    if (buf->currentSize > buf->maximumSize) {
         Com_Error(ERR_FATAL,
                   "%s: %#x: already overflowed",
                   __func__, buf->tag);
     }
 
-    if (len > buf->maxsize - buf->cursize) {
-        if (len > buf->maxsize) {
+    if (len > buf->maximumSize - buf->currentSize) {
+        if (len > buf->maximumSize) {
             Com_Error(ERR_FATAL,
                       "%s: %#x: %" PRIz " is > full buffer size %" PRIz "", // CPP: Cast
-                      __func__, buf->tag, len, buf->maxsize);
+                      __func__, buf->tag, len, buf->maximumSize);
         }
 
-        if (!buf->allowoverflow) {
+        if (!buf->allowOverflow) {
             Com_Error(ERR_FATAL,
-                      "%s: %#x: overflow without allowoverflow set",
+                      "%s: %#x: overflow without allowOverflow set",
                       __func__, buf->tag);
         }
 
@@ -73,13 +73,13 @@ void *SZ_GetSpace(sizebuf_t *buf, size_t len)
         buf->overflowed = true;
     }
 
-    data = buf->data + buf->cursize;
-    buf->cursize += len;
-    buf->bitpos = buf->cursize << 3;
+    data = buf->data + buf->currentSize;
+    buf->currentSize += len;
+    buf->bitPosition = buf->currentSize << 3;
     return data;
 }
 
-void SZ_WriteByte(sizebuf_t *sb, int c)
+void SZ_WriteByte(SizeBuffer *sb, int c)
 {
     byte    *buf;
 
@@ -87,7 +87,7 @@ void SZ_WriteByte(sizebuf_t *sb, int c)
     buf[0] = c;
 }
 
-void SZ_WriteShort(sizebuf_t *sb, int c)
+void SZ_WriteShort(SizeBuffer *sb, int c)
 {
     byte    *buf;
 
@@ -96,7 +96,7 @@ void SZ_WriteShort(sizebuf_t *sb, int c)
     buf[1] = c >> 8;
 }
 
-void SZ_WriteLong(sizebuf_t *sb, int c)
+void SZ_WriteLong(SizeBuffer *sb, int c)
 {
     byte    *buf;
 

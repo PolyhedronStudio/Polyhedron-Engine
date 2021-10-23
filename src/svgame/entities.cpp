@@ -63,6 +63,7 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 //===================================================================
 //
 // Testing...
+#ifdef DEBUG_SHIT_FOR_ENTITIES_LULZ
 #include "entities/info/InfoPlayerStart.h"
 void DebugShitForEntitiesLulz() {
     gi.DPrintf("Entities - ===========================================\n");
@@ -93,6 +94,7 @@ void DebugShitForEntitiesLulz() {
         gi.DPrintf("Filtered out the base entity #%i: %s\n", baseEntity->GetNumber(), baseEntity->GetClassName());
     }
 }
+#endif
 //===============
 // SVG_SpawnClassEntity
 //
@@ -139,13 +141,12 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 // classEntities too.
 //=================
 void SVG_FreeClassEntity(Entity* ent) {
-    // Only proceed if it has a classEntity.
-    if (!ent->classEntity)
-        return;
-
-    // Remove the classEntity reference
-    ent->classEntity->SetServerEntity( nullptr );
-    ent->classEntity = nullptr;
+    // Special class entity handling IF it still has one.
+    if (ent->classEntity) {
+        // Remove the classEntity reference
+        ent->classEntity->SetServerEntity(nullptr);
+        ent->classEntity = nullptr;
+    }
 
     // Fetch entity number.
     int32_t entityNumber = ent->state.number;
@@ -176,7 +177,7 @@ void SVG_FreeEntity(Entity* ent)
     gi.UnlinkEntity(ent);        // unlink from world
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
-    if ((ent - g_entities) <= (maxClients->value + BODY_QUEUE_SIZE)) {
+    if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
         //      gi.DPrintf("tried to free special edict\n");
         return;
     }
@@ -196,6 +197,9 @@ void SVG_FreeEntity(Entity* ent)
 
     // Last but not least, since it isn't in use anymore, let it be known.
     ent->inUse = false;
+
+    // Reset serverFlags.
+    ent->serverFlags = 0;
 }
 
 //===============
@@ -377,8 +381,8 @@ Entity* SVG_Spawn(void)
     Entity *serverEntity = nullptr;
     int32_t i = 0;
     // Acquire a pointer to the entity we'll check for.
-    serverEntity = &g_entities[game.maxClients + 1];
-    for (i = game.maxClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
+    serverEntity = &g_entities[game.maximumClients + 1];
+    for (i = game.maximumClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!serverEntity->inUse && (serverEntity->freeTime < 2 || level.time - serverEntity->freeTime > 0.5)) {

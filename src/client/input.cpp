@@ -374,15 +374,16 @@ static inline qboolean ready_to_send(void)
     if (cl.sendPacketNow) {
         return true;
     }
-    if (cls.netchan->message.cursize || cls.netchan->reliableAckPending) {
+    if (cls.netChannel->message.currentSize || cls.netChannel->reliableAckPending) {
         return true;
     }
     if (!cl_maxpackets->integer) {
         return true;
     }
 
-    if (cl_maxpackets->integer < 10) {
-        Cvar_Set("cl_maxpackets", "10");
+    // Used to be 10, but since we upgrade the base framerate.... 
+    if (cl_maxpackets->integer < BASE_FRAMERATE) {
+        Cvar_Set("cl_maxpackets", std::to_string(BASE_FRAMERATE).c_str());
     }
 
     msec = 1000 / cl_maxpackets->integer;
@@ -416,12 +417,12 @@ CL_SendUserCommand
 */
 static void CL_SendUserCommand(void)
 {
-    size_t cursize q_unused, checksumIndex;
-    ClientUserCommand *cmd, *oldcmd;
+    size_t currentSize q_unused, checksumIndex;
+    ClientMoveCommand *cmd, *oldcmd;
     ClientUserCommandHistory*history;
 
     // archive this packet
-    history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
+    history = &cl.clientCommandHistory[cls.netChannel->outgoingSequence & CMD_MASK];
     history->commandNumber = cl.currentClientCommandNumber;
     history->timeSent = cls.realtime;    // for ping calculation
     history->timeReceived = 0;
@@ -430,7 +431,7 @@ static void CL_SendUserCommand(void)
 
     // see if we are ready to send this packet
     if (!ready_to_send_hacked()) {
-        cls.netchan->outgoingSequence++; // just drop the packet
+        cls.netChannel->outgoingSequence++; // just drop the packet
         return;
     }
 
@@ -469,10 +470,10 @@ static void CL_SendUserCommand(void)
     //
     // deliver the message
     //
-    cursize = Netchan_Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
+    currentSize = Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
-        Com_Printf("%" PRIz " ", cursize); // C++20: String concat fix.
+        Com_Printf("%" PRIz " ", currentSize); // C++20: String concat fix.
     }
 #endif
 
@@ -482,10 +483,10 @@ static void CL_SendUserCommand(void)
 static void CL_SendKeepAlive(void)
 {
     ClientUserCommandHistory *history;
-    size_t cursize q_unused;
+    size_t currentSize q_unused;
 
     // archive this packet
-    history = &cl.clientCommandHistory[cls.netchan->outgoingSequence & CMD_MASK];
+    history = &cl.clientCommandHistory[cls.netChannel->outgoingSequence & CMD_MASK];
     history->commandNumber = cl.currentClientCommandNumber;
     history->timeSent = cls.realtime;    // for ping calculation
     history->timeReceived = 0;
@@ -494,10 +495,10 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
     cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
-    cursize = Netchan_Transmit(cls.netchan, 0, NULL, 1);
+    currentSize = Netchan_Transmit(cls.netChannel, 0, NULL, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
-        Com_Printf("%" PRIz " ", cursize);
+        Com_Printf("%" PRIz " ", currentSize);
     }
 #endif
 }
@@ -517,7 +518,7 @@ static void CL_SendUserinfo(void)
         Com_DDPrintf("%s: %u: full update\n", __func__, com_framenum);
         MSG_WriteByte(clc_userinfo);
         MSG_WriteData(userinfo, len + 1);
-        MSG_FlushTo(&cls.netchan->message);
+        MSG_FlushTo(&cls.netChannel->message);
     } else if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
         Com_DDPrintf("%s: %u: %d updates\n", __func__, com_framenum,
                      cls.userinfo_modified);
@@ -532,7 +533,7 @@ static void CL_SendUserinfo(void)
                 MSG_WriteString(NULL);
             }
         }
-        MSG_FlushTo(&cls.netchan->message);
+        MSG_FlushTo(&cls.netChannel->message);
     } else {
         Com_WPrintf("%s: update count is %d, should never happen.\n",
                     __func__, cls.userinfo_modified);
@@ -549,7 +550,7 @@ void CL_SendCmd(void)
 
     // generate usercmds while playing a demo,
     // but do not send them
-    if (!cls.netchan) {
+    if (!cls.netChannel) {
         return;
     }
 
@@ -558,7 +559,7 @@ void CL_SendCmd(void)
         CL_SendUserinfo();
 
         // just keepalive or update reliable
-        if (Netchan_ShouldUpdate(cls.netchan)) {
+        if (Netchan_ShouldUpdate(cls.netChannel)) {
             CL_SendKeepAlive();
         }
 

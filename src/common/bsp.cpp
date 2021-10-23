@@ -1472,7 +1472,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
         return Q_ERR_NOENT;
 
     if ((bsp = BSP_Find(name)) != NULL) {
-        Com_PageInMemory(bsp->hunk.base, bsp->hunk.cursize);
+        Com_PageInMemory(bsp->hunk.base, bsp->hunk.currentSize);
         bsp->refcount++;
         *bsp_p = bsp;
         return Q_ERR_SUCCESS;

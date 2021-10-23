@@ -168,7 +168,7 @@ void SVG_SaveClientData(void)
     int     i;
     Entity *ent;
 
-    for (i = 0 ; i < game.maxClients ; i++) {
+    for (i = 0 ; i < game.maximumClients ; i++) {
         ent = &g_entities[1 + i];
         if (!ent->inUse)
             continue;
@@ -318,7 +318,7 @@ void spectator_respawn(Entity *ent)
         }
 
         // Count actual active spectators
-        for (i = 1, numspec = 0; i <= maxClients->value; i++)
+        for (i = 1, numspec = 0; i <= maximumClients->value; i++)
             if (g_entities[i].inUse && g_entities[i].client->persistent.isSpectator)
                 numspec++;
 
@@ -787,8 +787,8 @@ void PrintPMove(PlayerMove *pm)
     unsigned    c1, c2;
 
     c1 = CheckBlock(&pm->state, sizeof(pm->state));
-    c2 = CheckBlock(&pm->clientUserCommand, sizeof(pm->clientUserCommand));
-    Com_Printf("sv %3i:%i %i\n", pm->clientUserCommand.moveCommand.impulse, c1, c2);
+    c2 = CheckBlock(&pm->moveCommand, sizeof(pm->moveCommand));
+    Com_Printf("sv %3i:%i %i\n", pm->moveCommand.input.impulse, c1, c2);
 }
 
 /*
@@ -799,7 +799,7 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
-void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
+void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 {
     GameClient* client = nullptr;
     PlayerClient *classEntity = nullptr;
@@ -831,7 +831,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
         client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
         // can exit intermission after five seconds
         if (level.time > level.intermission.time + 5.0
-            && (clientUserCommand->moveCommand.buttons & BUTTON_ANY))
+            && (moveCommand->input.buttons & BUTTON_ANY))
             level.intermission.exitIntermission = true;
         return;
     }
@@ -840,9 +840,9 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
 
     if (client->chaseTarget) {
         // Angles are fetched from the client we are chasing.
-        client->respawn.commandViewAngles[0] = clientUserCommand->moveCommand.viewAngles[0];
-        client->respawn.commandViewAngles[1] = clientUserCommand->moveCommand.viewAngles[1];
-        client->respawn.commandViewAngles[2] = clientUserCommand->moveCommand.viewAngles[2];
+        client->respawn.commandViewAngles[0] = moveCommand->input.viewAngles[0];
+        client->respawn.commandViewAngles[1] = moveCommand->input.viewAngles[1];
+        client->respawn.commandViewAngles[2] = moveCommand->input.viewAngles[2];
     } else {
 
         // set up for pmove
@@ -867,7 +867,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
         // Move over entity state values into the player move state so it is up to date.
         pm.state.origin = classEntity->GetOrigin();
         pm.state.velocity = classEntity->GetVelocity();
-        pm.clientUserCommand = *clientUserCommand;
+        pm.moveCommand = *moveCommand;
         if (classEntity->GetGroundEntity())
             pm.groundEntityPtr = classEntity->GetGroundEntity()->GetServerEntity();
         else
@@ -892,7 +892,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
         classEntity->SetWaterType(pm.waterType);
 
         // Check for jumping sound.
-        if (classEntity->GetGroundEntity() && !pm.groundEntityPtr && (pm.clientUserCommand.moveCommand.upMove >= 10) && (pm.waterLevel == 0)) {
+        if (classEntity->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
             gi.Sound(serverEntity, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
             SVG_PlayerNoise(classEntity, classEntity->GetOrigin(), PNOISE_SELF);
         }
@@ -904,9 +904,9 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
 
         // Copy over the user command angles so they are stored for respawns.
         // (Used when going into a new map etc.)
-        client->respawn.commandViewAngles[0] = clientUserCommand->moveCommand.viewAngles[0];
-        client->respawn.commandViewAngles[1] = clientUserCommand->moveCommand.viewAngles[1];
-        client->respawn.commandViewAngles[2] = clientUserCommand->moveCommand.viewAngles[2];
+        client->respawn.commandViewAngles[0] = moveCommand->input.viewAngles[0];
+        client->respawn.commandViewAngles[1] = moveCommand->input.viewAngles[1];
+        client->respawn.commandViewAngles[2] = moveCommand->input.viewAngles[2];
 
         // Store entity link count in case we have a ground entity pointer.
         if (pm.groundEntityPtr)
@@ -951,12 +951,12 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
     }
 
     client->oldButtons = client->buttons;
-    client->buttons = clientUserCommand->moveCommand.buttons;
+    client->buttons = moveCommand->input.buttons;
     client->latchedButtons |= client->buttons & ~client->oldButtons;
 
     // save light level the player is standing on for
     // monster sighting AI
-    //ent->lightLevel = clientUserCommand->moveCommand.lightLevel;
+    //ent->lightLevel = moveCommand->input.lightLevel;
 
     // fire weapon from final position if needed
     if (client->latchedButtons & BUTTON_ATTACK) {
@@ -977,7 +977,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
     }
 
     if (client->respawn.isSpectator) {
-        if (clientUserCommand->moveCommand.upMove >= 10) {
+        if (moveCommand->input.upMove >= 10) {
             if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
                 if (client->chaseTarget)
@@ -990,7 +990,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientUserCommand *clientUserCommand)
     }
 
     // update chase cam if being followed
-    for (int i = 1; i <= maxClients->value; i++) {
+    for (int i = 1; i <= maximumClients->value; i++) {
         other = g_entities + i;
         if (other->inUse && other->client->chaseTarget == serverEntity)
             SVG_UpdateChaseCam(classEntity);

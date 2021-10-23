@@ -105,19 +105,19 @@ void Sys_AddDefaultConfig(void)
 
     if (fstat(fileno(fp), &st) == 0) {
         len = st.st_size;
-        if (len >= cmd_buffer.maxsize) {
-            len = cmd_buffer.maxsize - 1;
+        if (len >= cmd_buffer.maximumSize) {
+            len = cmd_buffer.maximumSize - 1;
         }
 
         r = fread(cmd_buffer.text, 1, len, fp);
         cmd_buffer.text[r] = 0;
 
-        cmd_buffer.cursize = COM_Compress(cmd_buffer.text);
+        cmd_buffer.currentSize = COM_Compress(cmd_buffer.text);
     }
 
     fclose(fp);
 
-    if (cmd_buffer.cursize) {
+    if (cmd_buffer.currentSize) {
         Com_Printf("Execing %s\n", SYS_SITE_CFG);
         Cbuf_Execute(&cmd_buffer);
     }

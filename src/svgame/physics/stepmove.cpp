@@ -126,12 +126,15 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
     //  ent->groundentity_linkcount = trace.ent->linkcount;
     //  if (!trace.startsolid && !trace.allsolid)
     //      VectorCopy (trace.endpos, ent->s.origin);
-    if (!trace.startSolid && !trace.allSolid) {
+    if ((!trace.startSolid && !trace.allSolid) &&
+        (trace.ent && trace.ent->GetServerEntity())) {
         ent->SetOrigin(trace.endPosition);
         ent->SetGroundEntity(trace.ent);
         ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
         vec3_t velocity = ent->GetVelocity();
         ent->SetVelocity({ velocity.x, velocity.y, 0 });
+    } else {
+        Com_WPrintf("Entity found in trace without serverEntity");
     }
 }
 

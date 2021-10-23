@@ -30,7 +30,7 @@ PLAYER CONFIG MENU
 */
 
 #define ID_MODEL 103
-#define ID_SKIN    104
+#define ID_SKIN  104
 
 typedef struct m_player_s {
     menuFrameWork_t     menu;
@@ -69,30 +69,30 @@ static const char *viewmodes[] = {
 };
 
 // CPP: Converted to C++
-static rdlight_t dlights[] = {
-    {
-        { -120.f, -80.f, 80.f },    // Origin
-        {1.f, 1.f, 1.f},            // Color
-#if USE_REF == REF_GL
-    { 0.f, 0.f, 0.f },
-#endif
-        200.f,  // Intensity // MATHLIB: Had to change.
-        20.f                        // Radius
-    },
-    {
-        { 100.f, 80.f, 20.f },      // Origin
-        {0.5f, 0.5f, 1.f},          // Color
-#if USE_REF == REF_GL
-    { 0.f, 0.f, 0.f },
-#endif
-        200.f,  // Intensity // MATHLIB: Had to change.
-        20.f                        // Radius
-    }
-};
 //static rdlight_t dlights[] = {
-//	{.origin = { -120.f, -80.f, 80.f },.color = {1.f, 1.f, 1.f},.intensity = 200.f,.radius = 20.f },
-//	{.origin = { 100.f, 80.f, 20.f },.color = {0.5f, 0.5f, 1.f},.intensity = 200.f,.radius = 20.f }
+//    {
+//        { -120.f, -80.f, 80.f },    // Origin
+//        {1.f, 1.f, 1.f},            // Color
+//#if USE_REF == REF_GL
+//    { 0.f, 0.f, 0.f },
+//#endif
+//        200.f,  // Intensity // MATHLIB: Had to change.
+//        20.f                        // Radius
+//    },
+//    {
+//        { 100.f, 80.f, 20.f },      // Origin
+//        {0.5f, 0.5f, 1.f},          // Color
+//#if USE_REF == REF_GL
+//    { 0.f, 0.f, 0.f },
+//#endif
+//        200.f,  // Intensity // MATHLIB: Had to change.
+//        20.f                        // Radius
+//    }
 //};
+static rdlight_t dlights[] = {
+	{.origin = { -120.f, -80.f, 80.f },.color = {1.f, 1.f, 1.f},.intensity = 200.f,.radius = 20.f },
+	{.origin = { 100.f, 80.f, 20.f },.color = {0.5f, 0.5f, 1.f},.intensity = 200.f,.radius = 20.f }
+};
 
 static void ReloadMedia(void)
 {

@@ -337,7 +337,7 @@ struct GameLocals {
     char spawnpoint[512];    // needed for coop respawns
 
     // Store latched cvars here that we want to get at often
-    int32_t maxClients;
+    int32_t maximumClients;
     int32_t maxEntities;
 
     // Cross level triggers
@@ -537,7 +537,7 @@ extern  cvar_t  *bob_pitch;
 extern  cvar_t  *bob_roll;
 
 extern  cvar_t  *sv_cheats;
-extern  cvar_t  *maxClients;
+extern  cvar_t  *maximumClients;
 extern  cvar_t  *maxspectators;
 
 extern  cvar_t  *flood_msgs;

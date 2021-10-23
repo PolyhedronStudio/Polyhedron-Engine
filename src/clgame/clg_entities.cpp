@@ -737,7 +737,6 @@ void CLG_UpdateOrigin(void)
 
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
-
     // Update the client's listener origin values.
     clgi.UpdateListenerOrigin();
 }

@@ -21,12 +21,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 typedef struct {
     void    *base;
-    size_t  maxsize;
-    size_t  cursize;
+    size_t  maximumSize;
+    size_t  currentSize;
     size_t  mapped;
 } memhunk_t;
 
-void    Hunk_Begin(memhunk_t *hunk, size_t maxsize);
+void    Hunk_Begin(memhunk_t *hunk, size_t maximumSize);
 void    *Hunk_Alloc(memhunk_t *hunk, size_t size);
 void    Hunk_End(memhunk_t *hunk);
 void    Hunk_Free(memhunk_t *hunk);

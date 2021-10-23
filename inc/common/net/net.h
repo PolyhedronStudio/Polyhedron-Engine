@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifndef NET_H
 #define NET_H
-
+#include <enet.h>
 #include "common/fifo.h"
 
 // net.h -- quake's interface to the networking layer
@@ -48,7 +48,7 @@ typedef intptr_t qsocket_t;
 typedef int qsocket_t;
 #endif
 
-typedef struct {
+struct ioentry_t {
 #ifdef _WIN32
     qsocket_t fd;
 #endif
@@ -59,57 +59,49 @@ typedef struct {
     qboolean wantread: 1;
     qboolean wantwrite: 1;
     qboolean wantexcept: 1;
-} ioentry_t;
+};
 
-typedef enum {
+enum NetAddressType {
     NA_UNSPECIFIED,
     NA_LOOPBACK,
     NA_BROADCAST,
     NA_IP,
     NA_IP6
-} netadrtype_t;
+};
 
-typedef enum {
+enum NetSource {
     NS_CLIENT,
     NS_SERVER,
     NS_COUNT
-} netsrc_t;
+};
 
-typedef enum {
+enum NetFlag {
     NET_NONE    = 0,
     NET_CLIENT  = (1 << 0),
     NET_SERVER  = (1 << 1)
-} netflag_t;
+};
 
-typedef union {
+union netadrip_t {
     uint8_t u8[16];
     uint16_t u16[8];
     uint32_t u32[4];
     uint64_t u64[2];
-} netadrip_t;
+};
 
-typedef struct netadr_s {
-    netadrtype_t type;
+struct netadr_t {
+    NetAddressType type;
     netadrip_t ip;
     uint16_t port;
     uint32_t scope_id;  // IPv6 crap
-} netadr_t;
+};
 
-typedef enum netstate_e {
+enum NetState {
     NS_DISCONNECTED,// no socket opened
     NS_CONNECTING,  // connect() not yet completed
     NS_CONNECTED,   // may transmit data
     NS_CLOSED,      // peer has preformed orderly shutdown
     NS_BROKEN       // fatal error has been signaled
-} netstate_t;
-
-typedef struct netstream_s {
-    qsocket_t   socket;
-    netadr_t    address;
-    netstate_t  state;
-    fifo_t      recv;
-    fifo_t      send;
-} netstream_t;
+};
 
 static inline qboolean NET_IsEqualAdr(const netadr_t *a, const netadr_t *b)
 {
@@ -231,15 +223,15 @@ static inline qboolean NET_IsLocalAddress(const netadr_t *adr)
 
 void        NET_Init(void);
 void        NET_Shutdown(void);
-void        NET_Config(netflag_t flag);
+void        NET_Config(NetFlag flag);
 void        NET_UpdateStats(void);
 
-qboolean    NET_GetAddress(netsrc_t sock, netadr_t *adr);
-void        NET_GetPackets(netsrc_t sock, void (*packet_cb)(void));
-qboolean    NET_SendPacket(netsrc_t sock, const void *data,
+qboolean    NET_GetAddress(NetSource sock, netadr_t *adr);
+void        NET_GetPackets(NetSource sock, void (*packet_cb)(void));
+qboolean    NET_SendPacket(NetSource sock, const void *data,
                            size_t len, const netadr_t *to);
 
-char        *NET_AdrToString(const netadr_t *a);
+const char *NET_AdrToString(const netadr_t *a);
 qboolean    NET_StringToAdr(const char *s, netadr_t *a, int default_port);
 qboolean    NET_StringPairToAdr(const char *host, const char *port, netadr_t *a);
 
@@ -248,13 +240,7 @@ char        *NET_BaseAdrToString(const netadr_t *a);
 
 const char  *NET_ErrorString(void);
 
-void        NET_CloseStream(netstream_t *s);
 neterr_t    NET_Listen(qboolean listen);
-neterr_t    NET_Accept(netstream_t *s);
-neterr_t    NET_Connect(const netadr_t *peer, netstream_t *s);
-neterr_t    NET_RunConnect(netstream_t *s);
-neterr_t    NET_RunStream(netstream_t *s);
-void        NET_UpdateStream(netstream_t *s);
 
 ioentry_t   *NET_AddFd(qsocket_t fd);
 void        NET_RemoveFd(qsocket_t fd);

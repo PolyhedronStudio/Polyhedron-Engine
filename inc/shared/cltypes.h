@@ -292,9 +292,9 @@ struct ClientState {
     qboolean    sendPacketNow;
 
     // Actual current client user command.
-    ClientUserCommand    clientUserCommand;
+    ClientMoveCommand    moveCommand;
     // Actual current client user command list.
-    ClientUserCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
+    ClientMoveCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
     // Current command number.
     uint32_t     currentClientCommandNumber;
     // History book of time sent, received, and command number.
@@ -377,18 +377,18 @@ struct ClientState {
     // Client Rendering Variables.
     //
     refdef_t refdef;
-    float    fov_x;      // Interpolated
-    float    fov_y;      // Derived from fov_x assuming 4/3 aspect ratio
-    int32_t  lightLevel;
+    float fov_x;      // Interpolated
+    float fov_y;      // Derived from fov_x assuming 4/3 aspect ratio
+    int32_t lightLevel;
 
     // Updated in CLG_UpdateOrigin.
     vec3_t v_forward, v_right, v_up;    
 
-    qboolean    thirdPersonView;
+    qboolean thirdPersonView;
 
     // Predicted values, used for smooth player entity movement in thirdperson view
-    vec3_t      playerEntityOrigin;
-    vec3_t      playerEntityAngles;
+    vec3_t playerEntityOrigin;
+    vec3_t playerEntityAngles;
     
     //
     // transient data from server
@@ -402,8 +402,8 @@ struct ClientState {
     int32_t serverState;    // ss_* constants
     int32_t serverCount;    // server identification for prespawns
     
-    int32_t clientNumber;            // never changed during gameplay, set by serverdata packet
-    int32_t maxClients;
+    int32_t clientNumber;   // never changed during gameplay, set by serverdata packet
+    int32_t maximumClients;
 
     char gamedir[MAX_QPATH];
     char mapName[MAX_QPATH]; // short format - q2dm1, etc
