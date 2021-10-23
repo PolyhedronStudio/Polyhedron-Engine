@@ -56,22 +56,22 @@ bandwidth estimation and should not be sent another packet
 */
 static qboolean SV_RateDrop(client_t *client)
 {
-    size_t  total;
-    int     i;
-
     // never drop over the loopback
     if (!client->rate) {
         return false;
     }
 
-    total = 0;
-    for (i = 0; i < SERVER_MESSAGES_TICKRATE; i++) {
-        total += client->messageSizes[i];
+    size_t totalRate = 0;
+    for (uint32_t i = 0; i < SERVER_MESSAGES_TICKRATE; i++) {
+        totalRate += client->messageSizes[i];
     }
 
-    if (total > client->rate) {
+    // Divide the total by rate divisor.
+    totalRate /= SERVER_RATE_DIVISOR;
+
+    if (totalRate > client->rate) {
         SV_DPrintf(0, "Frame %d suppressed for %s (total = %" PRIz ")\n",
-                   client->frameNumber, client->name, total);
+                   client->frameNumber, client->name, totalRate);
         client->frameFlags |= FF_SUPPRESSED;
         client->suppressCount++;
         client->messageSizes[client->frameNumber % SERVER_MESSAGES_TICKRATE] = 0;

@@ -214,6 +214,9 @@ static constexpr uint32_t BASE_FRAMERATE =  10;
 static constexpr double BASE_FRAMETIME = 100;
 static constexpr double BASE_1_FRAMETIME = 0.01f;   // 1/BASE_FRAMETIME
 static constexpr double BASE_FRAMETIME_1000 =0.1f;    // BASE_FRAMETIME/1000
+
+// Used for calculating RATE DROPS.
+static constexpr uint32_t BASE_FRAMERATE_DIVISOR = 1;
 #endif
 
 //-----------------
@@ -224,6 +227,9 @@ static constexpr uint32_t BASE_FRAMERATE = 20; //10
 static constexpr float BASE_FRAMETIME = 50.0f; //100
 static constexpr float BASE_1_FRAMETIME = 0.02f; //0.01f   // 1/BASE_FRAMETIME
 static constexpr float BASE_FRAMETIME_1000 = 0.05f; //0.1f    // BASE_FRAMETIME/1000
+
+// Used for calculating RATE DROPS.
+static constexpr uint32_t BASE_FRAMERATE_DIVISOR = 2;
 #endif
 //-----------------
 //N&C 30hz tick
@@ -233,6 +239,9 @@ static constexpr uint32_t BASE_FRAMERATE = 30; //10
 static constexpr float BASE_FRAMETIME = 33.3333333333; //100
 static constexpr float BASE_1_FRAMETIME = 0.03; //0.01f   // 1/BASE_FRAMETIME
 static constexpr float BASE_FRAMETIME_1000 = 0.03333333333; //0.1f    // BASE_FRAMETIME/1000
+
+// Used for calculating RATE DROPS.
+static constexpr uint32_t BASE_FRAMERATE_DIVISOR = 3;
 #endif
 //-----------------
 //N&C 40hz tick
@@ -242,6 +251,9 @@ static constexpr uint32_t BASE_FRAMERATE = 40; //10
 static constexpr float BASE_FRAMETIME = 25.0f; //100
 static constexpr float BASE_1_FRAMETIME = 0.04f; //0.01f   // 1/BASE_FRAMETIME
 static constexpr float BASE_FRAMETIME_1000 = 0.025f; //0.1f    // BASE_FRAMETIME/1000
+
+// Used for calculating RATE DROPS.
+static constexpr uint32_t BASE_FRAMERATE_DIVISOR = 4;
 #endif
 //-----------------
 //N&C 60hz tick
@@ -251,10 +263,10 @@ static constexpr uint32_t BASE_FRAMERATE = 60; //10
 static constexpr float BASE_FRAMETIME = 16.6666666667; //100
 static constexpr float BASE_1_FRAMETIME = 0.05999999999; //0.01f   // 1/BASE_FRAMETIME
 static constexpr float BASE_FRAMETIME_1000 = 0.01666666666; //0.1f    // BASE_FRAMETIME/1000
-#endif
 
-// maximum variable FPS factor
-static constexpr uint32_t MAX_FRAMEDIV = 6;
+// Used for calculating RATE DROPS.
+static constexpr uint32_t BASE_FRAMERATE_DIVISOR = 6;
+#endif
 
 //-----------------
 // Client FPS
