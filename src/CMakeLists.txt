@@ -421,7 +421,6 @@ SET(SRC_COMMON
 	common/field.cpp
 	common/fifo.cpp
 	common/files.cpp
-	common/huffman.cpp
 	common/mdfour.cpp
 	common/msg.cpp
 	common/prompt.cpp
@@ -451,7 +450,6 @@ SET(HEADERS_COMMON
 	# These might have to go some day.
 	common/netq3/netchan.h
 	common/netq3/net.h
-	common/huffman.h
 )
 
 ###################### Format.

@@ -74,7 +74,6 @@ If the base part of the net address matches and the qport matches, then the
 channel matches even if the IP port differs.  The IP port should be updated
 to the new value before sending out any replies.
 
-
 If there is no information that needs to be transfered on a given frame,
 such as during the connection stage while waiting for the client to load,
 then a packet only needs to be delivered if there is something in the
@@ -556,10 +555,9 @@ NetChannel *Netchan_Setup(NetSource sock, const netadr_t *adr, int qport, size_t
     SZ_TagInit(&netchan->outFragment, netchan->outFragmentBuffer,
         sizeof(netchan->outFragmentBuffer), SZ_NC_FRG_OUT);
 
-    netchan->protocolMajorVersion = protocol;
+    netchan->protocolVersion = protocol;
 
     return netchan;
-
 }
 
 /*

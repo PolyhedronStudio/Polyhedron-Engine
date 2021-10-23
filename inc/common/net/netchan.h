@@ -76,7 +76,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct NetChannel {
 public:
-    int32_t     protocolMajorVersion;
+    int32_t     protocolVersion;
     size_t      maximumPacketLength;
 
     qboolean    fatalError;         // True in case we ran into a major error.

@@ -171,7 +171,7 @@ struct ClientStatic {
                                     // to work around address translating routers
     NetChannel* netChannel;
     int         serverProtocol;     // in case we are doing some kind of version hack
-    int         protocolMajorVersion;    // minor version
+    int         protocolVersion;    // minor version
 
     int         challenge;          // from the server to use for connecting
 

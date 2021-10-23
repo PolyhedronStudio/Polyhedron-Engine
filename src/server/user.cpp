@@ -435,7 +435,7 @@ void SV_New_f(void)
 
     // send the serverdata
     MSG_WriteByte(svc_serverdata);
-    MSG_WriteLong(sv_client->protocolMajorVersion);
+    MSG_WriteLong(sv_client->protocolVersion);
     // WID: This value was unset here, so it defaulted to the int64 max or so.
     sv_client->spawncount = 0;
     MSG_WriteLong(sv_client->spawncount);
@@ -1100,9 +1100,9 @@ static void SV_ExecuteMove(void)
 
     lastFrame = MSG_ReadLong();
 
-    MSG_ReadDeltaUsercmd(NULL, &oldest);
-    MSG_ReadDeltaUsercmd(&oldest, &oldcmd);
-    MSG_ReadDeltaUsercmd(&oldcmd, &newcmd);
+    MSG_ReadDeltaClientMoveCommand(NULL, &oldest);
+    MSG_ReadDeltaClientMoveCommand(&oldest, &oldcmd);
+    MSG_ReadDeltaClientMoveCommand(&oldcmd, &newcmd);
 
     if (sv_client->connectionState != ConnectionState::Spawned) {
         SV_SetLastFrame(-1);

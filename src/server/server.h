@@ -292,9 +292,9 @@ typedef struct client_s {
     } download;
 
     // protocol stuff
-    int32_t challenge;  // Challenge of this user, randomly generated
-    int32_t protocolMajorVersion;   // Major version
-    int32_t protocolMinorVersion;    // Minor version
+    int32_t challenge;              // Challenge of this user, randomly generated
+    int32_t protocolVersion;        // Major version
+    int32_t protocolMinorVersion;   // Minor version
 
     EntityStateMessageFlags esFlags; // Entity protocol flags
 

@@ -556,7 +556,7 @@ NetChannel *Netchan_Setup(NetSource sock, const netadr_t *adr, int qport, size_t
     SZ_TagInit(&netchan->outFragment, netchan->outFragmentBuffer,
         sizeof(netchan->outFragmentBuffer), SZ_NC_FRG_OUT);
 
-    netchan->protocolMajorVersion = protocol;
+    netchan->protocolVersion = protocol;
 
     return netchan;
 

@@ -49,7 +49,7 @@ int _wrp_GetServerProtocol(void) {
     return cls.serverProtocol;
 }
 int _wrp_GetProtocolVersion(void) {
-    return cls.protocolMajorVersion;
+    return cls.protocolVersion;
 }
 int _wrp_GetServerState(void) {
     return cl.serverState;

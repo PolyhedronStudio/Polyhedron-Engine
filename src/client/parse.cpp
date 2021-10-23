@@ -505,7 +505,7 @@ static void CL_ParseServerData(void)
     }
         
     Com_DPrintf("Using minor NaC protocol version %d\n", protocol);
-    cls.protocolMajorVersion = protocol;
+    cls.protocolVersion = protocol;
             
     // Parse N&C server state.
     i = MSG_ReadByte();
