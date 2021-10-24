@@ -70,6 +70,13 @@ typedef struct {
 } mvertex_t;
 
 typedef struct {
+    // indices into the bsp->basisvectors array
+    uint32_t normal;
+    uint32_t tangent;
+    uint32_t bitangent;
+} mbasis_t;
+
+typedef struct {
     mvertex_t   *v[2];
 #if USE_REF == REF_SOFT
     uintptr_t   cachededgeoffset;
@@ -116,6 +123,7 @@ typedef struct mface_s {
     struct surfcache_s    *cachespots[MIPLEVELS]; // surface generation data
 #endif
 
+    int             firstbasis;
     int             drawframe;
 
 #if USE_DLIGHTS
@@ -286,6 +294,12 @@ typedef struct bsp_s {
 
     int             numsurfedges;
     msurfedge_t     *surfedges;
+
+    int             numbasisvectors;
+    vec3_t          *basisvectors;
+
+    int             numbases;
+    mbasis_t        *bases;
 #endif
 
     byte            *pvs_matrix;

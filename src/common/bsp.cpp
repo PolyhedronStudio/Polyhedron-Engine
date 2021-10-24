@@ -1443,6 +1443,93 @@ qboolean BSP_SavePatchedPVS(bsp_t* bsp) {
         return false;
 }
 
+static qboolean BSP_FindBspxLump(dheader_t* header, size_t file_size, const char* name, const void** pLump, size_t* pLumpSize) {
+    // Find the end of the last BSP lump
+    size_t max_bsp_lump = 0;
+    for (uint32_t i = 0; i < HEADER_LUMPS; i++) 	{
+        size_t end_of_lump = header->lumps[i].fileofs + header->lumps[i].filelen;
+        max_bsp_lump = max(max_bsp_lump, end_of_lump);
+    }
+
+    // Align to 4 bytes
+    max_bsp_lump = (max_bsp_lump + 3) & ~3ull;
+
+    // See if the BSPX header still fits in the file after the last BSP lump
+    if (max_bsp_lump + sizeof(bspx_header_t) > file_size)
+        return false;
+
+    // Validate the BSPX header
+    const bspx_header_t* bspx = (bspx_header_t*)((uint8_t*)header + max_bsp_lump);
+    if (bspx->id[0] != 'B' || bspx->id[1] != 'S' || bspx->id[2] != 'P' || bspx->id[3] != 'X')
+        return false;
+    if (max_bsp_lump + sizeof(bspx_header_t) + sizeof(bspx_lump_t) * bspx->numlumps > file_size)
+        return false;
+
+    // Go over the BSPX lumps and find one with the right name
+    for (uint32_t i = 0; i < bspx->numlumps; i++) 	{
+        const bspx_lump_t* lump = (const bspx_lump_t*)(bspx + 1) + i;
+        if (strncmp(name, lump->lumpname, sizeof(lump->lumpname) - 1) == 0) 		{
+            // See if the lump as declared fits in the file
+            if (lump->fileofs + lump->filelen > file_size) 			{
+                Com_WPrintf("Malformed BSPX file: lump '%s' points at data past the end of file\n", name);
+                return false;
+            }
+
+            // Found a valid lump, return it
+            *pLump = (uint8_t*)header + lump->fileofs;
+            *pLumpSize = lump->filelen;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+#if USE_REF
+static void BSP_LoadBspxNormals(bsp_t* bsp, const void* data, size_t data_size) {
+    if (data_size < sizeof(bspx_facenormals_header_t))
+        return;
+
+    // Count the total number of face-vertices in the BSP
+    uint32_t total_vertices = 0;
+    for (int i = 0; i < bsp->numfaces; i++) 	{
+        mface_t* face = bsp->faces + i;
+        total_vertices += face->numsurfedges;
+    }
+
+    // Validate the header and that all data fits into the lump
+    const bspx_facenormals_header_t* header = (const bspx_facenormals_header_t*)data;
+    size_t expected_data_size =
+        sizeof(bspx_facenormals_header_t) +
+        sizeof(vec3_t) * header->num_vectors +    // vectors
+        sizeof(uint32_t) * 3 * total_vertices;    // indices
+    if (data_size < expected_data_size)
+        return;
+
+    // Allocate the storage arrays
+    bsp->basisvectors = (vec3_t*)ALLOC(sizeof(vec3_t) * header->num_vectors);
+    bsp->numbasisvectors = header->num_vectors;
+    bsp->bases = (mbasis_t*)ALLOC(sizeof(mbasis_t) * total_vertices);
+    bsp->numbases = total_vertices;
+
+    // Copy the vectors data
+    const float* vectors = (const float*)((const bspx_facenormals_header_t*)data + 1);
+    memcpy(bsp->basisvectors, vectors, sizeof(vec3_t) * header->num_vectors);
+
+    // Copy the indices data
+    const uint32_t* indices = (const uint32_t*)(vectors + header->num_vectors * 3);
+    memcpy(bsp->bases, indices, sizeof(uint32_t) * 3 * total_vertices);
+
+    // Add basis indexing
+    int basis_offset = 0;
+    for (int i = 0; i < bsp->numfaces; i++) 	{
+        mface_t* face = bsp->faces + i;
+        face->firstbasis = basis_offset;
+        basis_offset += face->numsurfedges;
+    }
+}
+#endif
+
 /*
 ==================
 BSP_Load
@@ -1462,6 +1549,11 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
     size_t          lumpcount[HEADER_LUMPS];
     size_t          memsize;
     const lump_info_t* lumps;
+
+#if USE_REF
+    const void* normal_lump_data = NULL;
+    size_t normal_lump_size = 0;
+#endif
 
     if (!name || !bsp_p)
         Com_Error(ERR_FATAL, "%s: NULL", __func__);
@@ -1500,6 +1592,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
     }
 
     lumps = LittleLong(header->ident) == IDBSPHEADER ? bsp_lumps : qbsp_lumps;
+
     // byte swap and validate all lumps
     memsize = 0;
     for (info = lumps; info->load; info++) {
@@ -1525,6 +1618,16 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 
         memsize += count * info->memsize;
     }
+
+#if USE_REF
+    // Declaring these Moved up, cuz yeah, this is hated by labels in C++
+    // 
+    normal_lump_data = NULL;
+    normal_lump_size = 0;
+    if (BSP_FindBspxLump(header, filelen, "FACENORMALS", &normal_lump_data, &normal_lump_size))     {
+        memsize += normal_lump_size;
+    }
+#endif
 
     // load into hunk
     len = strlen(name);
@@ -1566,6 +1669,11 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 	{
 		bsp->pvs_patched = true;
 	}
+#if USE_REF
+    if (normal_lump_size) {
+        BSP_LoadBspxNormals(bsp, normal_lump_data, normal_lump_size);
+    }
+#endif
 
     Hunk_End(&bsp->hunk);
 

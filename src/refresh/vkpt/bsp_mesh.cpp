@@ -34,7 +34,7 @@ extern cvar_t* cvar_pt_bsp_radiance_scale;
 extern cvar_t* cvar_pt_bsp_sky_lights;
 
 static void
-remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices) {
+remove_collinear_edges(float* positions, float* tex_coords, mbasis_t* bases, int* num_vertices) {
 	int num_vertices_local = *num_vertices;
 
 	for (int i = 1; i < num_vertices_local;) 	{
@@ -69,6 +69,12 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices) {
 					float* t2 = tex_coords + ((i + 1) % num_vertices_local) * 2;
 					memcpy(t1, t2, (num_vertices_local - i - 1) * 2 * sizeof(float));
 				}
+
+				if (bases) {
+					mbasis_t* b1 = bases + (i % num_vertices_local);
+					mbasis_t* b2 = bases + ((i + 1) % num_vertices_local);
+					memcpy(b1, b2, (num_vertices_local - i - 1) * sizeof(mbasis_t));
+				}
 			}
 
 			num_vertices_local--;
@@ -80,6 +86,31 @@ remove_collinear_edges(float* positions, float* tex_coords, int* num_vertices) {
 	*num_vertices = num_vertices_local;
 }
 
+// direct port of the encode_normal function from utils.glsl
+static uint32_t
+encode_normal(const vec3_t normal) {
+	float invL1Norm = 1.0f / (fabsf(normal[0]) + fabsf(normal[1]) + fabsf(normal[2]));
+
+	vec2_t p = {normal[0] * invL1Norm, normal[1] * invL1Norm};
+	vec2_t pp = {p[0], p[1]};
+
+	if (normal[2] < 0.f) 	{
+		pp[0] = (1.f - fabsf(p[1])) * ((p[0] >= 0.f) ? 1.f : -1.f);
+		pp[1] = (1.f - fabsf(p[0])) * ((p[1] >= 0.f) ? 1.f : -1.f);
+	}
+
+	pp[0] = pp[0] * 0.5f + 0.5f;
+	pp[1] = pp[1] * 0.5f + 0.5f;
+
+	clamp(pp[0], 0.f, 1.f);
+	clamp(pp[1], 0.f, 1.f);
+
+	uint32_t ux = (uint32_t)(pp[0] * 0xffffu);
+	uint32_t uy = (uint32_t)(pp[1] * 0xffffu);
+
+	return ux | (uy << 16);
+}
+
 #define DUMP_WORLD_MESH_TO_OBJ 0
 #if DUMP_WORLD_MESH_TO_OBJ
 static FILE* obj_dump_file = NULL;
@@ -88,15 +119,19 @@ static int obj_vertex_num = 0;
 
 static int
 create_poly(
+	const bsp_t* bsp,
 	const mface_t* surf,
 	uint32_t  material_id,
 	float* positions_out,
 	float* tex_coord_out,
+	uint32_t* normals_out,
+	uint32_t* tangents_out,
 	uint32_t* material_out,
 	float* emissive_factors_out) {
 	static const int max_vertices = 32;
 	float positions[3 * /*max_vertices*/ 32];
 	float tex_coords[2 * /*max_vertices*/ 32];
+	mbasis_t bases[    /*max_vertices*/ 32];
 	mtexinfo_t* texinfo = surf->texinfo;
 	assert(surf->numsurfedges < max_vertices);
 
@@ -129,6 +164,9 @@ create_poly(
 		t[0] = (DotProduct(p, texinfo->axis[0]) + texinfo->offset[0]) * sc[0];
 		t[1] = (DotProduct(p, texinfo->axis[1]) + texinfo->offset[1]) * sc[1];
 
+		if (bsp->basisvectors) 		{
+			bases[i] = *(bsp->bases + surf->firstbasis + i);
+		}
 #if DUMP_WORLD_MESH_TO_OBJ
 		if (obj_dump_file) 		{
 			fprintf(obj_dump_file, "v %.3f %.3f %.3f\n", src_vert->point[0], src_vert->point[1], src_vert->point[2]);
@@ -147,12 +185,27 @@ create_poly(
 	}
 #endif
 
-	pos_center[0] /= (float)surf->numsurfedges;
-	pos_center[1] /= (float)surf->numsurfedges;
-	pos_center[2] /= (float)surf->numsurfedges;
+	float inv_edges = 1.f / (float)surf->numsurfedges;
+	VectorScale(pos_center, inv_edges, pos_center);
 
 	tc_center[0] = (DotProduct(pos_center, texinfo->axis[0]) + texinfo->offset[0]) * sc[0];
 	tc_center[1] = (DotProduct(pos_center, texinfo->axis[1]) + texinfo->offset[1]) * sc[1];
+
+	if (bsp->basisvectors) 	{
+		// Check the handedness using the basis of the first vertex
+
+		const vec3_t* normal = bsp->basisvectors + bases->normal;
+		const vec3_t* tangent = bsp->basisvectors + bases->tangent;
+		const vec3_t* bitangent = bsp->basisvectors + bases->bitangent;
+
+		vec3_t cross;
+		CrossProduct(*normal, *tangent, cross);
+		float dot = DotProduct(cross, *bitangent);
+
+		if (dot < 0.0f) 		{
+			material_id |= MATERIAL_FLAG_HANDEDNESS;
+		}
+	}
 
 	int num_vertices = surf->numsurfedges;
 
@@ -160,7 +213,7 @@ create_poly(
 	if (is_sky) 	{
 		// process skybox geometry in the same way as we process it for analytic light generation
 		// to avoid mismatches between lights and geometry
-		remove_collinear_edges(positions, tex_coords, &num_vertices);
+		remove_collinear_edges(positions, tex_coords, bases, &num_vertices);
 	}
 
 #define CP_V(idx, src) \
@@ -178,9 +231,12 @@ create_poly(
     } while(0)
 
 	int k = 0;
-	/* switch between triangle fan around center or first vertex */
+	// Switch between triangle fan around center or first vertex.
+	// Can't use the center-based fan if normals/tangents are provided
+	// because it's not trivial to compute the normal and tangent at the center
+	// of the polygon.
 	//int tess_center = 0;
-	int tess_center = num_vertices > 4 && !is_sky;
+	int tess_center = num_vertices > 4 && !is_sky && !bsp->basisvectors;
 
 	const int num_triangles = tess_center
 		? num_vertices
@@ -190,20 +246,43 @@ create_poly(
 		? (float)texinfo->radiance * cvar_pt_bsp_radiance_scale->value
 		: 1.f;
 
+	qboolean write_normals = bsp->basisvectors && (normals_out || tangents_out);
+
 	for (int i = 0; i < num_triangles; i++) 	{
 		int i1 = (i + 2 - tess_center) % num_vertices;
 		int i2 = (i + 1 - tess_center) % num_vertices;
 
 		CP_V(k, tess_center ? pos_center : positions);
 		CP_T(k, tess_center ? tc_center : tex_coords);
+		if (write_normals) 		{
+			const mbasis_t* basis = bases;
+			const vec3_t* normal = bsp->basisvectors + basis->normal;
+			const vec3_t* tangent = bsp->basisvectors + basis->tangent;
+			if (normals_out) normals_out[k] = encode_normal(*normal);
+			if (tangents_out) tangents_out[k] = encode_normal(*tangent);
+		}
 		k++;
 
 		CP_V(k, positions + i1 * 3);
 		CP_T(k, tex_coords + i1 * 2);
+		if (write_normals) 		{
+			const mbasis_t* basis = bases + i1;
+			const vec3_t* normal = bsp->basisvectors + basis->normal;
+			const vec3_t* tangent = bsp->basisvectors + basis->tangent;
+			if (normals_out) normals_out[k] = encode_normal(*normal);
+			if (tangents_out) tangents_out[k] = encode_normal(*tangent);
+		}
 		k++;
 
 		CP_V(k, positions + i2 * 3);
 		CP_T(k, tex_coords + i2 * 2);
+		if (write_normals) 		{
+			const mbasis_t* basis = bases + i2;
+			const vec3_t* normal = bsp->basisvectors + basis->normal;
+			const vec3_t* tangent = bsp->basisvectors + basis->tangent;
+			if (normals_out) normals_out[k] = encode_normal(*normal);
+			if (tangents_out) tangents_out[k] = encode_normal(*tangent);
+		}
 		k++;
 
 		if (material_out) {
@@ -511,13 +590,15 @@ collect_surfaces(int* idx_ctr, bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int (*
 			material_id = (material_id & ~MATERIAL_LIGHT_STYLE_MASK) | ((camera_id << MATERIAL_LIGHT_STYLE_SHIFT) & MATERIAL_LIGHT_STYLE_MASK);
 		}
 
-		if (*idx_ctr + create_poly(surf, material_id, NULL, NULL, NULL, NULL) >= MAX_VERT_BSP) {
+		if (*idx_ctr + create_poly(bsp, surf, material_id, NULL, NULL, NULL, NULL, NULL, NULL) >= MAX_VERT_BSP) {
 			Com_Error(ERR_FATAL, "error: exceeding max vertex limit\n");
 		}
 
-		int cnt = create_poly(surf, material_id,
+		int cnt = create_poly(bsp, surf, material_id,
 			&wm->positions[*idx_ctr * 3],
 			&wm->tex_coords[*idx_ctr * 2],
+			&wm->normals[*idx_ctr],
+			&wm->tangents[*idx_ctr],
 			&wm->materials[*idx_ctr / 3],
 			&wm->emissive_factors[*idx_ctr / 3]);
 
@@ -730,7 +811,7 @@ collect_one_light_poly_entire_texture(bsp_t* bsp, mface_t* surf, mtexinfo_t* tex
 	}
 
 	int num_vertices = surf->numsurfedges;
-	remove_collinear_edges(positions, NULL, &num_vertices);
+	remove_collinear_edges(positions, NULL, NULL, &num_vertices);
 
 	const int num_triangles = surf->numsurfedges - 2;
 
@@ -1057,7 +1138,7 @@ collect_sky_and_lava_light_polys(bsp_mesh_t* wm, bsp_t* bsp) {
 		}
 
 		int num_vertices = surf->numsurfedges;
-		remove_collinear_edges(positions, NULL, &num_vertices);
+		remove_collinear_edges(positions, NULL, NULL, &num_vertices);
 
 		const int num_triangles = num_vertices - 2;
 
@@ -1128,33 +1209,6 @@ is_model_masked(bsp_mesh_t* wm, bsp_model_t* model) {
 	return false;
 }
 
-// direct port of the encode_normal function from utils.glsl
-uint32_t
-encode_normal(vec3_t normal) {
-	float invL1Norm = 1.0f / (fabsf(normal[0]) + fabsf(normal[1]) + fabsf(normal[2]));
-
-	vec2_t p = {normal[0] * invL1Norm, normal[1] * invL1Norm};
-	vec2_t pp = {p[0], p[1]};
-
-	if (normal[2] < 0.f)     {
-		pp[0] = (1.f - fabsf(p[1])) * ((p[0] >= 0.f) ? 1.f : -1.f);
-		pp[1] = (1.f - fabsf(p[0])) * ((p[1] >= 0.f) ? 1.f : -1.f);
-	}
-
-	pp[0] = pp[0] * 0.5f + 0.5f;
-	pp[1] = pp[1] * 0.5f + 0.5f;
-
-	//clamp(pp[0], 0.f, 1.f);
-	//clamp(pp[1], 0.f, 1.f);
-	pp[0] = Clampf(pp[0], 0.f, 1.f);
-	pp[1] = Clampf(pp[1], 0.f, 1.f);
-
-	uint32_t ux = (uint32_t)(pp[0] * 0xffffu);
-	uint32_t uy = (uint32_t)(pp[1] * 0xffffu);
-
-	return ux | (uy << 16);
-}
-
 void
 compute_aabb(const float* positions, int numvert, float* aabb_min, float* aabb_max) {
 	VectorSet(aabb_min, FLT_MAX, FLT_MAX, FLT_MAX);
@@ -1174,13 +1228,10 @@ compute_aabb(const float* positions, int numvert, float* aabb_min, float* aabb_m
 }
 
 void
-compute_world_tangents(bsp_mesh_t* wm) {
+compute_world_tangents(bsp_t* bsp, bsp_mesh_t* wm) {
 	// compute tangent space
 	uint32_t ntriangles = wm->num_indices / 3;
 
-	// tangent space is co-planar to triangle : only need to compute
-	// 1 vertex because all 3 verts share the same tangent space
-	wm->tangents = (uint32_t*)Z_Malloc(MAX_VERT_BSP * sizeof(uint32_t) / 3);
 	wm->texel_density = (float*)Z_Malloc(MAX_VERT_BSP * sizeof(float) / 3);
 
 	for (int idx_tri = 0; idx_tri < ntriangles; ++idx_tri) 	{
@@ -1204,37 +1255,47 @@ compute_world_tangents(bsp_mesh_t* wm) {
 		Vector2Subtract(tB, tA, dt0);
 		Vector2Subtract(tC, tA, dt1);
 
-		float r = 1.f / (dt0[0] * dt1[1] - dt1[0] * dt0[1]);
+		if (!bsp->basisvectors) 		{
+			float r = 1.f / (dt0[0] * dt1[1] - dt1[0] * dt0[1]);
 
-		vec3_t sdir = {
-			(dt1[1] * dP0[0] - dt0[1] * dP1[0]) * r,
-			(dt1[1] * dP0[1] - dt0[1] * dP1[1]) * r,
-			(dt1[1] * dP0[2] - dt0[1] * dP1[2]) * r};
+			vec3_t sdir = {
+				(dt1[1] * dP0[0] - dt0[1] * dP1[0]) * r,
+				(dt1[1] * dP0[1] - dt0[1] * dP1[1]) * r,
+				(dt1[1] * dP0[2] - dt0[1] * dP1[2]) * r};
 
-		vec3_t tdir = {
-			(dt0[0] * dP1[0] - dt1[0] * dP0[0]) * r,
-			(dt0[0] * dP1[1] - dt1[0] * dP0[1]) * r,
-			(dt0[0] * dP1[2] - dt1[0] * dP0[2]) * r};
+			vec3_t tdir = {
+				(dt0[0] * dP1[0] - dt1[0] * dP0[0]) * r,
+				(dt0[0] * dP1[1] - dt1[0] * dP0[1]) * r,
+				(dt0[0] * dP1[2] - dt1[0] * dP0[2]) * r};
 
-		vec3_t normal;
-		CrossProduct(dP0, dP1, normal);
-		VectorNormalize(normal);
+			vec3_t normal;
+			CrossProduct(dP0, dP1, normal);
+			VectorNormalize(normal);
 
-		vec3_t tangent;
+			uint32_t encoded_normal = encode_normal(normal);
+			wm->normals[idx_tri * 3 + 0] = encoded_normal;
+			wm->normals[idx_tri * 3 + 1] = encoded_normal;
+			wm->normals[idx_tri * 3 + 2] = encoded_normal;
 
-		vec3_t t;
-		VectorScale(normal, DotProduct(normal, sdir), t);
-		VectorSubtract(sdir, t, t);
-		VectorNormalize2(t, tangent); // Graham-Schmidt : t = normalize(t - n * (n.t))
+			vec3_t tangent;
 
-		wm->tangents[idx_tri] = encode_normal(tangent);
+			vec3_t t;
+			VectorScale(normal, DotProduct(normal, sdir), t);
+			VectorSubtract(sdir, t, t);
+			VectorNormalize2(t, tangent); // Graham-Schmidt : t = normalize(t - n * (n.t))
 
-		vec3_t cross;
-		CrossProduct(normal, t, cross);
-		float dot = DotProduct(cross, tdir);
+			uint32_t encoded_tangent = encode_normal(tangent);
+			wm->tangents[idx_tri * 3 + 0] = encoded_tangent;
+			wm->tangents[idx_tri * 3 + 1] = encoded_tangent;
+			wm->tangents[idx_tri * 3 + 2] = encoded_tangent;
 
-		if (dot < 0.0f) 		{
-			wm->materials[idx_tri] |= MATERIAL_FLAG_HANDEDNESS;
+			vec3_t cross;
+			CrossProduct(normal, t, cross);
+			float dot = DotProduct(cross, tdir);
+
+			if (dot < 0.0f) 			{
+				wm->materials[idx_tri] |= MATERIAL_FLAG_HANDEDNESS;
+			}
 		}
 
 		float texel_density = 0.f;
@@ -1645,6 +1706,8 @@ bsp_mesh_create_from_bsp(bsp_mesh_t* wm, bsp_t* bsp, const char* map_name) {
 	wm->num_indices = 0;
 	wm->positions = (float*)Z_Malloc(MAX_VERT_BSP * 3 * sizeof(*wm->positions));
 	wm->tex_coords = (float*)Z_Malloc(MAX_VERT_BSP * 2 * sizeof(*wm->tex_coords));
+	wm->normals = (uint32_t*)Z_Malloc(MAX_VERT_BSP * sizeof(uint32_t));
+	wm->tangents = (uint32_t*)Z_Malloc(MAX_VERT_BSP * sizeof(uint32_t));
 	wm->materials = (uint32_t*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->materials));
 	wm->clusters = (int*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->clusters));
 	wm->emissive_factors = (float*)Z_Malloc(MAX_VERT_BSP / 3 * sizeof(*wm->emissive_factors));
@@ -1713,7 +1776,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t* wm, bsp_t* bsp, const char* map_name) {
 	for (int i = 0; i < wm->num_vertices; i++)
 		wm->indices[i] = i;
 
-	compute_world_tangents(wm);
+	compute_world_tangents(bsp, wm);
 
 	if (wm->num_vertices >= MAX_VERT_BSP) {
 		Com_Error(ERR_FATAL, "The BSP model has too many vertices (%d)", wm->num_vertices);
@@ -1763,6 +1826,7 @@ bsp_mesh_destroy(bsp_mesh_t* wm) {
 
 	Z_Free(wm->positions);
 	Z_Free(wm->tex_coords);
+	Z_Free(wm->normals);
 	Z_Free(wm->tangents);
 	Z_Free(wm->indices);
 	Z_Free(wm->clusters);
