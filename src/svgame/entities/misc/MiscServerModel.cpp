@@ -122,12 +122,12 @@ void MiscServerModel::Spawn() {
     }
 
     // Set entity to allow taking damage.
-    //SetTakeDamage(TakeDamage::Yes);
+    SetTakeDamage(TakeDamage::Yes);
 
     //// Setup our MiscServerModel callbacks.
     //SetUseCallback(&MiscServerModel::MiscServerModelUse);
     SetThinkCallback(&MiscServerModel::MiscServerModelThink);
-    //SetDieCallback(&MiscServerModel::MiscServerModelDie);
+    SetDieCallback(&MiscServerModel::MiscServerModelDie);
     //SetTouchCallback(&MiscServerModel::MiscServerModelTouch);
 
     // Setup the next think time.
@@ -170,7 +170,7 @@ void MiscServerModel::Think() {
 
     // Continue the animation on a per frame basis.
     int32_t currentFrame = GetFrame();
-
+    
     if (currentFrame >= endFrame) {
         SetFrame(startFrame);
     } else {
@@ -221,7 +221,7 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
 //void MiscServerModel::MiscServerModelUse(SVGBaseEntity* caller, SVGBaseEntity* activator) {
 //    MiscServerModelDie(caller, activator, 999, GetOrigin());
 //}
-//
+
 
 //===============
 // MiscServerModel::MiscServerModelThink
@@ -230,38 +230,38 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
 //===============
 void MiscServerModel::MiscServerModelThink(void) {
     // First, ensure our origin is +1 off the floor.
-    vec3_t newOrigin = GetOrigin() + vec3_t{
-        0.f, 0.f, 1.f
-    };
+    //vec3_t newOrigin = GetOrigin() + vec3_t{
+    //    0.f, 0.f, 1.f
+    //};
 //
-//    SetOrigin(newOrigin);
+    SetOrigin(GetOrigin());
 //
-//    // Calculate the end origin to use for tracing.
+////    // Calculate the end origin to use for tracing.
 //    vec3_t end = newOrigin + vec3_t{
 //        0, 0, -256.f
 //    };
 //
 //    // Exceute the trace.
 //    SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-//
-//    // Return in case we hit anything.
+////
+////    // Return in case we hit anything.
 //    if (trace.fraction == 1 || trace.allSolid)
 //        return;
-//
-//    // Set new entity origin.
+////
+////    // Set new entity origin.
 //    SetOrigin(trace.endPosition);
 //
 //    // Link entity back in.
-//    LinkEntity();
+    LinkEntity();
 //
 //    // Check for ground.
-//    SVG_StepMove_CheckGround(this);
+    //SVG_StepMove_CheckGround(this);
 //
 //    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(FRAMETIME);
+    SetNextThinkTime(0.8f);
 //
 //    //// Do a check ground for the step move of this pusher.
-//    //SVG_StepMove_CheckGround(this);
+    //SVG_StepMove_CheckGround(this);
 //    //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
 //    // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
 //    // Not important for this one atm.
@@ -333,20 +333,33 @@ void MiscServerModel::MiscServerModelThink(void) {
 //// 'Die' callback, the explosion box has been damaged too much.
 ////===============
 ////
-//void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
-//    // Entity is dying, it can't take any more damage.
-//    SetTakeDamage(TakeDamage::No);
-//
-//    // Attacker becomes this entity its "activator".
-//    if (attacker)
-//        SetActivator(attacker);
-//
-//    // Setup the next think and think time.
-//    SetNextThinkTime(level.time + 2 * FRAMETIME);
-//
-//    // Set think function.
-//    SetThinkCallback(&MiscServerModel::MiscServerModelExplode);
-//}
+void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+    // Entity is dying, it can't take any more damage.
+    SetTakeDamage(TakeDamage::No);
+
+    // Attacker becomes this entity its "activator".
+    if (attacker)
+        SetActivator(attacker);
+
+    // Setup the next think and think time.
+    SetNextThinkTime(level.time + 2 * FRAMETIME);
+    
+    // Play a nasty gib sound, yughh :)
+    SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+
+    // Throw some gibs around, true horror oh boy.
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    //SVG_ThrowClientHead(this, damage);
+
+    // Can't take damage if we're already busted.
+    SetTakeDamage(TakeDamage::No);
+
+    // Set think function.
+    SetThinkCallback(&MiscServerModel::SVGBaseEntityThinkFree);
+}
 //
 ////
 ////===============
