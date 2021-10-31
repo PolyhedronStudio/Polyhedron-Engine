@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Quake II RTX
-GenericName=Quake 2 client
-Exec=q2rtx
-Icon=q2rtx
-Terminal=false
-Type=Application
-Categories=Game;ActionGame;

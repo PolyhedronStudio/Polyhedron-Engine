@@ -117,38 +117,21 @@ Converting skyboxes to local lights provides two benefits:
 // ========================================================================== //
 */
 
-#ifdef NV_RAY_TRACING
+#ifndef PATH_TRACER_H_
+#define PATH_TRACER_H_
 
-#extension GL_NV_ray_tracing : require
-#define rt_accelerationStructure accelerationStructureNV
-#define rt_hitAttribute hitAttributeNV
-#define rt_HitT gl_HitTNV
-#define rt_ignoreIntersection ignoreIntersectionNV()
-#define rt_InstanceCustomIndex gl_InstanceCustomIndexNV
-#define rt_LaunchID gl_LaunchIDNV
-#define rt_rayPayload rayPayloadNV
-#define rt_rayPayloadIn rayPayloadInNV
-#define rt_traceRay traceNV
-#define rt_WorldRayDirection gl_WorldRayDirectionNV
-
+#ifdef KHR_RAY_QUERY
+#extension GL_EXT_ray_query : enable
+#define rt_LaunchID gl_GlobalInvocationID
 #else
-
-#extension GL_EXT_ray_tracing : require
-#define rt_accelerationStructure accelerationStructureEXT
-#define rt_hitAttribute hitAttributeEXT
-#define rt_HitT gl_HitTEXT
-#define rt_ignoreIntersection ignoreIntersectionEXT
-#define rt_InstanceCustomIndex gl_InstanceCustomIndexEXT
 #define rt_LaunchID gl_LaunchIDEXT
-#define rt_rayPayload rayPayloadEXT
-#define rt_rayPayloadIn rayPayloadInEXT
-#define rt_traceRay traceRayEXT
-#define rt_WorldRayDirection gl_WorldRayDirectionEXT
-
 #endif
 
+#extension GL_EXT_ray_tracing             : require
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_EXT_nonuniform_qualifier    : enable
+
+#define gl_RayFlagsSkipProceduralPrimitives 0x200 // not defined in GLSL
 
 #define INSTANCE_DYNAMIC_FLAG        (1u << 31)
 #define INSTANCE_SKY_FLAG            (1u << 30)
@@ -163,16 +146,23 @@ layout (push_constant) uniform push_constant_block {
     int bounce_index;
 } push_constants;
 
-struct RayPayload {
+struct RayPayloadGeometry {
 	vec2 barycentric;
 	uint instance_prim;
 	float hit_distance;
-	uvec2 transparency; // half4x16
-	float max_transparent_distance;
 };
 
-struct RayPayloadShadow {
-	int missed;
+struct RayPayloadEffects {
+   uvec2 transparency; // half4x16
+   uint distances; // half2x16 - min and max
+   uvec4 fog1; // half8x16: .xy = color.rgba; .z = t_min, t_max; .w = density: a and b for (a*t + b)
+   uvec4 fog2; // same as fog1 but for a fog volume further away
 };
+
+struct HitAttributeBeam {
+	uint fade_and_thickness; // half2x16
+};
+
+#endif // PATH_TRACER_H_
 
 // vim: shiftwidth=4 noexpandtab tabstop=4 cindent

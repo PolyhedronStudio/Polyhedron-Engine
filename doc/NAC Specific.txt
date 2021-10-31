@@ -13,7 +13,7 @@ fxlt aligned y axis
 
 vrty prefix = full rotation sprite
 
-Demo prerendering feature via `game`` and cl_renderdemo_fps. Playing a demo with cl_renderdemo 1 will essentially "render" a sequence of accumulated frames (according to pt_accumulation_rendering_framenum cvar) at the framerate of cl_renderdemo_fps to your game/screenshots folder (eg baseq2/screenshots) with demoname_framenumber syntax. This sequence of images can then be imported to video editor of your choice to be compiled to a movie. To capture sound you need to do a separate run without demo rendering enabled whilst maintaining same target framerate (so RTX off is recommended and framerate lock via r_maxfps should be used) and record the audio with external software of your choice.
+Demo prerendering feature via `game`` and cl_renderdemo_fps. Playing a demo with cl_renderdemo 1 will essentially "render" a sequence of accumulated frames (according to pt_accumulation_rendering_framenum cvar) at the framerate of cl_renderdemo_fps to your game/screenshots folder (eg basenac/screenshots) with demoname_framenumber syntax. This sequence of images can then be imported to video editor of your choice to be compiled to a movie. To capture sound you need to do a separate run without demo rendering enabled whilst maintaining same target framerate (so RTX off is recommended and framerate lock via r_maxfps should be used) and record the audio with external software of your choice.
 
 Mode0 Exp based fog t = T * T * T
 Mode1 Exp2 based fog t = T * T

@@ -36,13 +36,13 @@ typedef enum {
 extern const char *const colorNames[10];
 
 qboolean Com_WildCmpEx(const char *filter, const char *string, int term, qboolean ignorecase);
-#define Com_WildCmp(filter, string)  Com_WildCmpEx(filter, string, 0, qfalse)
+#define Com_WildCmp(filter, string)  Com_WildCmpEx(filter, string, 0, false)
 
-#if USE_CLIENT || USE_MVD_CLIENT
+#if USE_CLIENT
 qboolean Com_ParseTimespec(const char *s, int *frames);
 #endif
 
-void Com_PlayerToEntityState(const player_state_t *ps, entity_state_t *es);
+void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es);
 
 unsigned Com_HashString(const char *s, unsigned size);
 unsigned Com_HashStringLen(const char *s, size_t len, unsigned size);

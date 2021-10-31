@@ -26,20 +26,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // common.h -- definitions common between client and server, but not game.dll
 //
 
-#define PRODUCT         "Quake II RTX"
+#define PRODUCT         "Nail & Crescent"
 
 #if USE_CLIENT
-#define APPLICATION     "q2rtx"
+#define APPLICATION     "nac"
 #else
-#define APPLICATION     "q2rtxded"
+#define APPLICATION     "nacded"
 #endif
 
 #define COM_DEFAULT_CFG     "default.cfg"
-#define COM_Q2RTX_CFG       "q2rtx.cfg"
+#define COM_NAC_CFG         "nac.cfg"
 #define COM_AUTOEXEC_CFG    "autoexec.cfg"
 #define COM_POSTEXEC_CFG    "postexec.cfg"
 #define COM_POSTINIT_CFG    "postinit.cfg"
-#define COM_CONFIG_CFG      "q2config.cfg"
+#define COM_CONFIG_CFG      "nacconfig.cfg"
 
 // FIXME: rename these
 #define COM_HISTORYFILE_NAME    ".conhistory"
@@ -53,12 +53,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __STRINGIFY(x)  #x
 #define STRINGIFY(x)    __STRINGIFY(x)
 
-typedef struct {
+struct UserCommand {
     const char *name;
     void (* const func)(void);
-} ucmd_t;
+};
 
-static inline const ucmd_t *Com_Find(const ucmd_t *u, const char *c)
+static inline const UserCommand *Com_Find(const UserCommand *u, const char *c)
 {
     for (; u->name; u++) {
         if (!strcmp(c, u->name)) {
@@ -87,7 +87,7 @@ void        Com_AbortFrame(void);
 char        *Com_GetLastError(void);
 void        Com_SetLastError(const char *msg);
 
-void        Com_Quit(const char *reason, error_type_t type) q_noreturn;
+void        Com_Quit(const char *reason, ErrorType type) q_noreturn;
 
 void        Com_SetColor(color_index_t color);
 

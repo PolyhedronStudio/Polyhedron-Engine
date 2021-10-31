@@ -26,12 +26,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_LISTED_FILES    2048
 #define MAX_LISTED_DEPTH    8
 
-typedef struct file_info_s {
-    size_t  size;
-    time_t  ctime;
-    time_t  mtime;
-    char    name[1];
-} file_info_t;
+// moved to shared/shared.h
+// typedef struct file_info_s {
+//     size_t  size;
+//     time_t  ctime;
+//     time_t  mtime;
+//     char    name[1];
+// } file_info_t;
 
 // bits 0 - 1, enum
 #define FS_MODE_APPEND          0x00000000
@@ -74,6 +75,11 @@ typedef struct file_info_s {
 #define FS_FLAG_TEXT            0x00000400
 #define FS_FLAG_DEFLATE         0x00000800
 
+// N&C: These are for FS_SeekEx
+#define FS_SEEK_CUR         0
+#define FS_SEEK_SET         1
+#define FS_SEEK_END         2
+
 //
 // Limit the maximum file size FS_LoadFile can handle, as a protection from
 // malicious paks causing memory exhaustion.
@@ -87,6 +93,8 @@ typedef struct file_info_s {
 #define FS_Mallocz(size)        Z_TagMallocz(size, TAG_FILESYSTEM)
 #define FS_CopyString(string)   Z_TagCopyString(string, TAG_FILESYSTEM)
 #define FS_LoadFile(path, buf)  FS_LoadFileEx(path, buf, 0, TAG_FILESYSTEM)
+#define FS_LoadFileFlags(path, buf, flags)  \
+                                FS_LoadFileEx(path, buf, (flags), TAG_FILESYSTEM)
 #define FS_FreeFile(buf)        Z_Free(buf)
 
 // just regular malloc for now
@@ -152,6 +160,7 @@ void    FS_Flush(qhandle_t f);
 
 ssize_t FS_Tell(qhandle_t f);
 qerror_t FS_Seek(qhandle_t f, off_t offset);
+qerror_t FS_SeekEx(qhandle_t f, off_t offset, int method);
 
 ssize_t  FS_Length(qhandle_t f);
 

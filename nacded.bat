@@ -1,0 +1,1 @@
+nacded.exe +set game basenac +exec configs/server.cfg 

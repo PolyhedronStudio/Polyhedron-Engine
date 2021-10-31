@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/files.h"
-#include "common/math.h"
 #include "client/video.h"
 #include "client/client.h"
 #include "refresh/refresh.h"
@@ -89,7 +88,7 @@ typedef struct {
     int             viewcluster1;
     int             viewcluster2;
     cplane_t        frustumPlanes[4];
-    entity_t        *ent;
+    r_entity_t        *ent;
     qboolean        entrotated;
     vec3_t          entaxis[3];
     GLfloat         entmatrix[16];
@@ -128,7 +127,7 @@ extern glStatic_t gl_static;
 extern glConfig_t gl_config;
 extern glRefdef_t glr;
 
-extern entity_t gl_world;
+extern r_entity_t gl_world;
 
 typedef struct {
     int nodesVisible;
@@ -199,7 +198,7 @@ glCullResult_t GL_CullLocalBox(const vec3_t origin, vec3_t bounds[2]);
 
 //void GL_DrawBox(const vec3_t origin, vec3_t bounds[2]);
 
-qboolean GL_AllocBlock(int width, int height, int *inuse,
+qboolean GL_AllocBlock(int width, int height, int *inUse,
                        int w, int h, int *s, int *t);
 
 void GL_MultMatrix(GLfloat *out, const GLfloat *a, const GLfloat *b);
@@ -251,12 +250,12 @@ typedef struct maliasmesh_s {
 #define LIGHT_STYLE(surf, i) \
     &glr.fd.lightstyles[gl_static.lightstylemap[(surf)->styles[i]]]
 
-#define LM_MAX_LIGHTMAPS    32
+#define LM_MAX_LIGHTMAPS    256
 #define LM_BLOCK_WIDTH      256
 #define LM_BLOCK_HEIGHT     256
 
 typedef struct {
-    int         inuse[LM_BLOCK_WIDTH];
+    int         inUse[LM_BLOCK_WIDTH];
     byte        buffer[LM_BLOCK_WIDTH * LM_BLOCK_HEIGHT * 4];
     qboolean    dirty;
     int         comp;
@@ -267,7 +266,7 @@ typedef struct {
 
 extern lightmap_builder_t lm;
 
-void GL_AdjustColor(vec3_t color);
+void GL_AdjustColor(vec3_t &color);
 void GL_PushLights(mface_t *surf);
 
 void GL_RebuildLighting(void);
@@ -456,7 +455,8 @@ byte *IMG_ReadPixels_GL(int *width, int *height, int *rowbytes);
  * gl_tess.c
  *
  */
-#define TESS_MAX_VERTICES   4096
+// N&C: Increase limits.
+#define TESS_MAX_VERTICES   8192 // 4096
 #define TESS_MAX_INDICES    (3 * TESS_MAX_VERTICES)
 
 typedef struct {
@@ -491,9 +491,9 @@ void GL_ClearSolidFaces(void);
  */
 void GL_DrawBspModel(mmodel_t *model);
 void GL_DrawWorld(void);
-void GL_SampleLightPoint(vec3_t color);
-void GL_LightPoint(vec3_t origin, vec3_t color);
-void R_LightPoint_GL(vec3_t origin, vec3_t color);
+void GL_SampleLightPoint(vec3_t &color);
+void GL_LightPoint(const vec3_t &origin, vec3_t &color);
+void R_LightPoint_GL(const vec3_t &origin, vec3_t &color);
 
 /*
  * gl_sky.c
@@ -502,7 +502,7 @@ void R_LightPoint_GL(vec3_t origin, vec3_t color);
 void R_AddSkySurface(mface_t *surf);
 void R_ClearSkyBox(void);
 void R_DrawSkyBox(void);
-void R_SetSky_GL(const char *name, float rotate, vec3_t axis);
+void R_SetSky_GL(const char *name, float rotate, vec3_t &axis);
 
 /*
  * gl_mesh.c
@@ -520,6 +520,6 @@ void HQ2x_Init(void);
 
 /* models.c */
 
-qerror_t MOD_LoadMD2_GL(model_t *model, const void *rawdata, size_t length);
-qerror_t MOD_LoadMD3_GL(model_t *model, const void *rawdata, size_t length);
+qerror_t MOD_LoadMD2_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD3_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
 void MOD_Reference_GL(model_t *model);

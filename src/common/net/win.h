@@ -113,7 +113,7 @@ static ssize_t os_udp_recv(qsocket_t sock, void *data,
     for (tries = 0; tries < MAX_ERROR_RETRIES; tries++) {
         memset(&addr, 0, sizeof(addr));
         addrlen = sizeof(addr);
-        ret = recvfrom(sock, data, len, 0,
+        ret = recvfrom(sock, (char*)data, len, 0, // CPP: Cast
                        (struct sockaddr *)&addr, &addrlen);
 
         NET_SockadrToNetadr(&addr, from);
@@ -151,7 +151,7 @@ static ssize_t os_udp_send(qsocket_t sock, const void *data,
 
     addrlen = NET_NetadrToSockadr(to, &addr);
 
-    ret = sendto(sock, data, len, 0,
+    ret = sendto(sock, (const char*)data, len, 0, // CPP: Cast
                  (struct sockaddr *)&addr, addrlen);
 
     if (ret != SOCKET_ERROR)
@@ -181,7 +181,7 @@ static neterr_t os_get_error(void)
 
 static ssize_t os_recv(qsocket_t sock, void *data, size_t len, int flags)
 {
-    int ret = recv(sock, data, len, flags);
+    int ret = recv(sock, (char*)data, len, flags); // CPP: Cast
 
     if (ret == SOCKET_ERROR)
         return os_get_error();
@@ -191,7 +191,7 @@ static ssize_t os_recv(qsocket_t sock, void *data, size_t len, int flags)
 
 static ssize_t os_send(qsocket_t sock, const void *data, size_t len, int flags)
 {
-    int ret = send(sock, data, len, flags);
+    int ret = send(sock, (const char*)data, len, flags); // CPP: Cast
 
     if (ret == SOCKET_ERROR)
         return os_get_error();
@@ -335,7 +335,7 @@ static ioentry_t *os_add_io(qsocket_t fd)
     int i;
 
     for (i = 0, e = io_entries; i < io_numfds; i++, e++) {
-        if (!e->inuse)
+        if (!e->inUse)
             break;
     }
 
@@ -354,7 +354,7 @@ static ioentry_t *os_get_io(qsocket_t fd)
     int i;
 
     for (i = 0, e = io_entries; i < io_numfds; i++, e++) {
-        if (!e->inuse)
+        if (!e->inUse)
             continue;
         if (e->fd == fd)
             return e;

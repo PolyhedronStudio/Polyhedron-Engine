@@ -103,19 +103,19 @@ size_t FIFO_Write(fifo_t *fifo, const void *buffer, size_t len);
 static inline qboolean FIFO_TryRead(fifo_t *fifo, void *buffer, size_t len)
 {
     if (FIFO_Read(fifo, NULL, len) < len) {
-        return qfalse;
+        return false;
     }
     FIFO_Read(fifo, buffer, len);
-    return qtrue;
+    return true;
 }
 
 static inline qboolean FIFO_TryWrite(fifo_t *fifo, void *buffer, size_t len)
 {
     if (FIFO_Write(fifo, NULL, len) < len) {
-        return qfalse;
+        return false;
     }
     FIFO_Write(fifo, buffer, len);
-    return qtrue;
+    return true;
 }
 
 qboolean FIFO_ReadMessage(fifo_t *fifo, size_t msglen);

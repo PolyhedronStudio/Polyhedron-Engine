@@ -94,9 +94,6 @@ typedef struct {
     byte    *data;
 } wavinfo_t;
 
-extern qboolean snd_is_underwater;
-extern qboolean snd_is_underwater_enabled;
-
 /*
 ====================================================================
 
@@ -191,6 +188,6 @@ void S_IssuePlaysound(playsound_t *ps);
 void S_BuildSoundList(int *sounds);
 #if USE_SNDDMA
 void S_InitScaletable(void);
-void S_PaintChannels(int endtime);
+void S_PaintChannels(int endTime);
 #endif
 

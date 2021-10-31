@@ -1,5 +1,5 @@
 //
-// Q2PRO configuration file for MSVC
+// Nail & Crescent configuration file for MSVC
 //
 
 // expand to generate version string
@@ -14,6 +14,9 @@
 #elif  _WIN32
 #define CPUSTRING "x86"
 #define BUILDSTRING "Win32"
+#elif __aarch64__
+#define CPUSTRING "aarch64"
+#define BUILDSTRING "Linux"
 #elif __x86_64__
 #define CPUSTRING "x86_64"
 #define BUILDSTRING "Linux"
@@ -22,16 +25,18 @@
 #define BUILDSTRING "Linux"
 #endif
 
-#define BASEGAME "baseq2"
-#define DEFGAME ""
+#define BASEGAME "basenac"
+#define DEFGAME "basenac"
 
 #define USE_ICMP 1
 #define USE_ZLIB 1
+#define USE_ZLIB_PACKET_COMPRESSION 1
 #define USE_SYSCON 1
 #define USE_DBGHELP 1
 #define USE_MAPCHECKSUM 1
+#define USE_SMOOTH_DELTA_ANGLES 1
 
-#if USE_CLIENT
+#if USE_CLIENT || CGAME_INCLUDE
 //#define VID_REF "gl"
 #define VID_MODELIST "640x480 800x600 1024x768 1280x720"
 #define VID_GEOMETRY "1280x720"
@@ -50,19 +55,16 @@
 #define USE_SNDDMA 1
 //#define USE_CURL 0
 #define USE_AUTOREPLY 1
-#define USE_CLIENT_GTV 1
 #endif
 
 #if USE_SERVER
-#define USE_AC_SERVER !USE_CLIENT
-#define USE_MVD_SERVER 1
-#define USE_MVD_CLIENT 1
 #define USE_PACKETDUP 1
 #define USE_WINSVC !USE_CLIENT
 #endif
 
 #define _USE_MATH_DEFINES
-#define inline __inline
+// C++
+//#define inline __inline
 #define __func__ __FUNCTION__
 
 #ifdef _WIN64

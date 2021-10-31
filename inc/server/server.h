@@ -21,32 +21,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "common/net/net.h"
 
-typedef enum {
-    ss_dead,            // no map loaded
-    ss_loading,         // spawning level edicts
-    ss_game,            // actively running
-    ss_pic,             // showing static picture
-    ss_broadcast,       // running MVD client
-    ss_cinematic,
-} server_state_t;
-
 #if USE_ICMP
 void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info);
 #endif
 void SV_Init(void);
-void SV_Shutdown(const char *finalmsg, error_type_t type);
+void SV_Shutdown(const char *finalmsg, ErrorType type);
 unsigned SV_Frame(unsigned msec);
 #if USE_SYSCON
 void SV_SetConsoleTitle(void);
 #endif
 //void SV_ConsoleOutput(const char *msg);
-
-#if USE_MVD_CLIENT && USE_CLIENT
-int MVD_GetDemoPercent(qboolean *paused, int *framenum);
-#endif
+uint32_t		SV_GetServerState (void);                 // WATISDEZE: Added for client game dll
+void            SV_SetServerState (uint32_t serverSate); // WATISDEZE: Added for client game dll
 
 #if USE_CLIENT
 char *SV_GetSaveInfo(const char *dir);
 #endif
+
+// svgame.c
+
+
+// user.c
+void SV_PreRunCmd(void);
+void SV_RunCmdCleanup(void);
 
 #endif // SERVER_H

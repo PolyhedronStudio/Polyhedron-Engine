@@ -20,97 +20,86 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROTOCOL_H
 
 //
-// protocol.h -- communications protocols
+// Protocol Configuration.
 //
+// The maximum length of a message on the network: 32k.
+constexpr uint32_t MAX_MSGLEN = 0x8000;
 
-#define MAX_MSGLEN  0x8000  // max length of a message, 32k
+// Used to refer when during a connection challenge the protocols differ.
+constexpr int32_t   PROTOCOL_VERSION_UNKNOWN = -1;
 
-#define PROTOCOL_VERSION_OLD        26
-#define PROTOCOL_VERSION_DEFAULT    34
-#define PROTOCOL_VERSION_R1Q2       35
-#define PROTOCOL_VERSION_Q2PRO      36
-#define PROTOCOL_VERSION_MVD        37 // not used for UDP connections
+// The DEFAULT version is the minimum allowed for connecting.
+constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 1340;
+constexpr uint32_t  PROTOCOL_VERSION_NAC     = 1340;
 
-#define PROTOCOL_VERSION_R1Q2_MINIMUM           1903    // b6377
-#define PROTOCOL_VERSION_R1Q2_UCMD              1904    // b7387
-#define PROTOCOL_VERSION_R1Q2_LONG_SOLID        1905    // b7759
-#define PROTOCOL_VERSION_R1Q2_CURRENT           1905    // b7759
+// Minimum required "MINOR" protocol version for this client to be compatible to.
+constexpr uint32_t PROTOCOL_VERSION_NAC_MINIMUM = 1337;
 
-#define PROTOCOL_VERSION_Q2PRO_MINIMUM          1011    // r161
-#define PROTOCOL_VERSION_Q2PRO_UCMD             1012    // r179
-#define PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX    1013    // r226
-#define PROTOCOL_VERSION_Q2PRO_LONG_SOLID       1014    // r243
-#define PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK   1015    // r335
-#define PROTOCOL_VERSION_Q2PRO_RESERVED         1016    // r364
-#define PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN      1017    // r1037-8
-#define PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES     1018    // r1037-44
-#define PROTOCOL_VERSION_Q2PRO_SERVER_STATE     1019    // r1302
-#define PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT  1020    // r1354
-#define PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS   1021    // r1358
-#define PROTOCOL_VERSION_Q2PRO_CURRENT          1021    // r1358
+// The "FIRST" protocol version we ever had for Nail & Crescent.
+constexpr uint32_t PROTOCOL_VERSION_NAC_FIRST   = 1337;
 
-#define PROTOCOL_VERSION_MVD_MINIMUM            2009    // r168
-#define PROTOCOL_VERSION_MVD_CURRENT            2010    // r177
+// EXAMPLE of what an update would then resemble in our code. Ofc, We then also change
+// the PROTOCOL_VERSION_NAC_CURRENT to accomodate.
+constexpr uint32_t PROTOCOL_VERSION_NAC_FEATURE_UPDATE = 1341;
 
-#define R1Q2_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_R1Q2_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_R1Q2_CURRENT)
+// Current actual protocol version that is in use.
+constexpr uint32_t PROTOCOL_VERSION_NAC_CURRENT = 1340;
 
-#define Q2PRO_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_Q2PRO_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_Q2PRO_CURRENT)
+// This is used to ensure that the protocols in use match up, and support each other.
+qboolean static inline NAC_PROTOCOL_SUPPORTED(uint32_t x) {
+    return x >= PROTOCOL_VERSION_NAC_MINIMUM && x <= PROTOCOL_VERSION_NAC_CURRENT;
+}
 
-#define MVD_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_MVD_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_MVD_CURRENT)
-
-//=========================================
-
-#define UPDATE_BACKUP   16  // copies of entity_state_t to keep buffered
-                            // must be power of two
-#define UPDATE_MASK     (UPDATE_BACKUP - 1)
-
-#define CMD_BACKUP      128 // allow a lot of command backups for very fast systems
-                            // increased from 64
-#define CMD_MASK        (CMD_BACKUP - 1)
-
-
-#define SVCMD_BITS              5
-#define SVCMD_MASK              ((1 << SVCMD_BITS) - 1)
-
-#define FRAMENUM_BITS           27
-#define FRAMENUM_MASK           ((1 << FRAMENUM_BITS) - 1)
-
-#define SUPPRESSCOUNT_BITS      4
-#define SUPPRESSCOUNT_MASK      ((1 << SUPPRESSCOUNT_BITS) - 1)
-
-#define MAX_PACKET_ENTITIES     1024
-#define MAX_PARSE_ENTITIES      (MAX_PACKET_ENTITIES * UPDATE_BACKUP)
-#define PARSE_ENTITIES_MASK     (MAX_PARSE_ENTITIES - 1)
-
-#define MAX_PACKET_USERCMDS     32
-#define MAX_PACKET_FRAMES       4
-
-#define MAX_PACKET_STRINGCMDS   8
-#define MAX_PACKET_USERINFOS    8
-
-#define CS_BITMAP_BYTES         (MAX_CONFIGSTRINGS / 8) // 260
-#define CS_BITMAP_LONGS         (CS_BITMAP_BYTES / 4)
-
-#define MVD_MAGIC               MakeRawLong('M','V','D','2')
+//==============================================
 
 //
-// server to client
+// Protocol Configuration.
+//
+// Number of copies of EntityState to keep buffered.
+constexpr int32_t UPDATE_BACKUP = 256;  // Must be Power Of Two. 
+constexpr int32_t UPDATE_MASK = (UPDATE_BACKUP - 1);
+
+// Allow a lot of command backups for very fast systems, used to be 64.
+constexpr int32_t CMD_BACKUP = 512; 
+constexpr int32_t CMD_MASK = (CMD_BACKUP - 1);
+
+
+constexpr int32_t SVCMD_BITS = 5;
+constexpr int32_t SVCMD_MASK = ((1 << SVCMD_BITS) - 1);
+
+constexpr int32_t FRAMENUM_BITS = 27;
+constexpr int32_t FRAMENUM_MASK = ((1 << FRAMENUM_BITS) - 1);
+
+constexpr int32_t SUPPRESSCOUNT_BITS = 4;
+constexpr int32_t SUPPRESSCOUNT_MASK = ((1 << SUPPRESSCOUNT_BITS) - 1);
+
+constexpr int32_t MAX_PACKET_ENTITIES = 2048;
+constexpr int32_t MAX_PARSE_ENTITIES = (MAX_PACKET_ENTITIES * UPDATE_BACKUP);
+constexpr int32_t PARSE_ENTITIES_MASK = (MAX_PARSE_ENTITIES - 1);
+
+constexpr int32_t MAX_PACKET_USERCMDS = 32;
+constexpr int32_t MAX_PACKET_FRAMES = 4;
+
+constexpr int32_t MAX_PACKET_STRINGCMDS = 8;
+constexpr int32_t MAX_PACKET_USERINFOS = 8;
+
+constexpr int32_t CS_BITMAP_BYTES = (ConfigStrings::MaxConfigStrings/ 8); // 260
+constexpr int32_t CS_BITMAP_LONGS = (CS_BITMAP_BYTES / 4);
+
+//==============================================
+
+//
+// Server to Client commands.
 //
 typedef enum {
     svc_bad,
 
     // these ops are known to the game dll
-    svc_muzzleflash,
-    svc_muzzleflash2,
-    svc_temp_entity,
-    svc_layout,
-    svc_inventory,
+    //SVG_CMD_MUZZLEFLASH,
+    //SVG_CMD_MUZZLEFLASH2,
+    //SVG_CMD_TEMP_ENTITY,
+    //SVG_CMD_LAYOUT,
+    //SVG_CMD_INVENTORY,
 
     // the rest are private to the client and server
     svc_nop,
@@ -136,86 +125,46 @@ typedef enum {
     svc_gamestate, // q2pro specific, means svc_playerupdate in r1q2
     svc_setting,
 
-    svc_num_types
+    // This determines the maximum amount of types we can have.
+    svc_num_types = 255
 } svc_ops_t;
-
-// MVD protocol specific operations
-typedef enum {
-    mvd_bad,
-    mvd_nop,
-    mvd_disconnect,     // reserved
-    mvd_reconnect,      // reserved
-    mvd_serverdata,
-    mvd_configstring,
-    mvd_frame,
-    mvd_frame_nodelta,  // reserved
-    mvd_unicast,
-    mvd_unicast_r,
-
-    // must match multicast_t order!!!
-    mvd_multicast_all,
-    mvd_multicast_phs,
-    mvd_multicast_pvs,
-    mvd_multicast_all_r,
-    mvd_multicast_phs_r,
-    mvd_multicast_pvs_r,
-
-    mvd_sound,
-    mvd_print,
-    mvd_stufftext,      // reserved
-
-    mvd_num_types
-} mvd_ops_t;
-
-// MVD stream flags (only 3 bits can be used)
-typedef enum {
-    MVF_NOMSGS      = 1,
-    MVF_SINGLEPOV   = 2,
-    MVF_RESERVED2   = 4
-} mvd_flags_t;
 
 //==============================================
 
 //
-// client to server
+// Client to Server commands.
 //
 typedef enum {
     clc_bad,
     clc_nop,
-    clc_move,               // [usercmd_t]
+    clc_move,               // [ClientMoveCommand]
     clc_userinfo,           // [userinfo string]
     clc_stringcmd,          // [string] message
 
-    // r1q2 specific operations
-    clc_setting,
-
     // q2pro specific operations
-    clc_move_nodelta = 10,
-    clc_move_batched,
     clc_userinfo_delta
 } clc_ops_t;
 
 //==============================================
 
-// player_state_t communication
+// PlayerState communication
+#define PS_PM_TYPE				(1 << 0)
+#define PS_PM_ORIGIN			(1 << 1)
+#define PS_PM_VELOCITY			(1 << 2)
+#define PS_PM_FLAGS				(1 << 3)
+#define PS_PM_TIME				(1 << 4)
+#define PS_PM_GRAVITY			(1 << 5)
+#define PS_PM_VIEW_OFFSET		(1 << 6)
+#define PS_PM_VIEW_ANGLES		(1 << 7)
+#define PS_PM_DELTA_ANGLES		(1 << 8)
+#define PS_PM_STEP_OFFSET		(1 << 9)
 
-#define PS_M_TYPE           (1<<0)
-#define PS_M_ORIGIN         (1<<1)
-#define PS_M_VELOCITY       (1<<2)
-#define PS_M_TIME           (1<<3)
-#define PS_M_FLAGS          (1<<4)
-#define PS_M_GRAVITY        (1<<5)
-#define PS_M_DELTA_ANGLES   (1<<6)
-
-#define PS_VIEWOFFSET       (1<<7)
-#define PS_VIEWANGLES       (1<<8)
-#define PS_KICKANGLES       (1<<9)
-#define PS_BLEND            (1<<10)
-#define PS_FOV              (1<<11)
-#define PS_WEAPONINDEX      (1<<12)
-#define PS_WEAPONFRAME      (1<<13)
-#define PS_RDFLAGS          (1<<14)
-#define PS_RESERVED         (1<<15)
+#define PS_KICKANGLES       (1 << 10)
+#define PS_BLEND            (1 << 11)
+#define PS_FOV              (1 << 12)
+#define PS_WEAPONINDEX      (1 << 13)
+#define PS_WEAPONFRAME      (1 << 14)
+#define PS_RDFLAGS          (1 << 15)
 
 #define PS_BITS             16
 #define PS_MASK             ((1<<PS_BITS)-1)
@@ -233,32 +182,6 @@ typedef enum {
 
 #define EPS_BITS            7
 #define EPS_MASK            ((1<<EPS_BITS)-1)
-
-//==============================================
-
-// packetized player_state_t communication (MVD specific)
-
-#define PPS_M_TYPE          (1<<0)
-#define PPS_M_ORIGIN        (1<<1)
-#define PPS_M_ORIGIN2       (1<<2)
-
-#define PPS_VIEWOFFSET      (1<<3)
-#define PPS_VIEWANGLES      (1<<4)
-#define PPS_VIEWANGLE2      (1<<5)
-#define PPS_KICKANGLES      (1<<6)
-#define PPS_BLEND           (1<<7)
-#define PPS_FOV             (1<<8)
-#define PPS_WEAPONINDEX     (1<<9)
-#define PPS_WEAPONFRAME     (1<<10)
-#define PPS_GUNOFFSET       (1<<11)
-#define PPS_GUNANGLES       (1<<12)
-#define PPS_RDFLAGS         (1<<13)
-#define PPS_STATS           (1<<14)
-#define PPS_REMOVE          (1<<15)
-
-// this is just a small hack to store inuse flag
-// in a field left otherwise unused by MVD code
-#define PPS_INUSE(ps)       (ps)->pmove.pm_time
 
 //==============================================
 
@@ -296,29 +219,29 @@ typedef enum {
 
 //==============================================
 
-// entity_state_t communication
+// EntityState communication
 
-// try to pack the common update flags into the first byte
-#define U_ORIGIN1   (1<<0)
-#define U_ORIGIN2   (1<<1)
-#define U_ANGLE2    (1<<2)
-#define U_ANGLE3    (1<<3)
-#define U_FRAME8    (1<<4)        // frame is a byte
+// Try to pack the common update flags into the first byte
+#define U_ORIGIN_X   (1<<0)         // was named: U_ORIGIN_X
+#define U_ORIGIN_Y   (1<<1)         // was named: U_ORIGIN_Y
+#define U_ANGLE_Y    (1<<2)         // was named: U_ANGLE_Y
+#define U_ANGLE_Z    (1<<3)         // was named: U_ANGLE_Z
+#define U_FRAME8    (1<<4)          // frame is a byte
 #define U_EVENT     (1<<5)
-#define U_REMOVE    (1<<6)        // REMOVE this entity, don't add it
-#define U_MOREBITS1 (1<<7)        // read one additional byte
+#define U_REMOVE    (1<<6)          // REMOVE this entity, don't add it
+#define U_MOREBITS1 (1<<7)          // read one additional byte
 
-// second byte
-#define U_NUMBER16  (1<<8)        // NUMBER8 is implicit if not set
-#define U_ORIGIN3   (1<<9)
-#define U_ANGLE1    (1<<10)
+// Second byte
+#define U_NUMBER16  (1<<8)          // NUMBER8 is implicit if not set
+#define U_ORIGIN_Z   (1<<9)         // was named: U_ORIGIN_Z
+#define U_ANGLE_X    (1<<10)        // was named: U_ANGLE_X
 #define U_MODEL     (1<<11)
 #define U_RENDERFX8 (1<<12)        // fullbright, etc
-#define U_ANGLE16   (1<<13)
+//#define U_ANGLE16   (1<<13)
 #define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
 #define U_MOREBITS2 (1<<15)        // read one additional byte
 
-// third byte
+// Third byte
 #define U_SKIN8         (1<<16)
 #define U_FRAME16       (1<<17)     // frame is a short
 #define U_RENDERFX16    (1<<18)     // 8 + 16 = 32
@@ -339,25 +262,19 @@ typedef enum {
 #define CLIENTNUM_NONE        (MAX_CLIENTS - 1)
 #define CLIENTNUM_RESERVED    (MAX_CLIENTS - 1)
 
-// a SOLID_BBOX will never create this value
+// a Solid::BoundingBox will never create this value
 #define PACKED_BSP      31
 
+//
+// Client Settings that can be communicated to servers.
+//
 typedef enum {
-    // r1q2 specific
-    CLS_NOGUN,
-    CLS_NOBLEND,
-    CLS_RECORDING,
-    CLS_PLAYERUPDATES,
-    CLS_FPS,
-
-    // q2pro specific
-    CLS_NOGIBS            = 10,
-    CLS_NOFOOTSTEPS,
-    CLS_NOPREDICT,
-
     CLS_MAX
 } clientSetting_t;
 
+//
+// Server Settings that can be communicated to clients.
+//
 typedef enum {
     // r1q2 specific
     SVS_PLAYERUPDATES,

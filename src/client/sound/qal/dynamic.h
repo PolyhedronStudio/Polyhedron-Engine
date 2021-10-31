@@ -125,5 +125,5 @@ typedef struct micsample_s {
 	byte      *buffer;
 	ALint      sample;
 } micsample_t;
-ALCdevice *inputdevice;
+extern ALCdevice *inputdevice; // CPP: CAST: DANGER: WARNING: Moved elsewhere to dynamic.c
 micsample_t HandleMic(void);

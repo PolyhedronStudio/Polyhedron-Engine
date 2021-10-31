@@ -23,9 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/net/net.h"
 #include "common/utils.h"
 
-#define CHAR_WIDTH  8
-#define CHAR_HEIGHT 8
-
 #if USE_CLIENT
 
 #define MAX_LOCAL_SERVERS   16
@@ -60,16 +57,18 @@ qboolean CL_ProcessEvents(void);
 void CL_ErrorEvent(netadr_t *from);
 #endif
 void CL_Init(void);
-void CL_Disconnect(error_type_t type);
+void CL_InitGameModule(void);
+void CL_Disconnect(ErrorType type);
 void CL_Shutdown(void);
 unsigned CL_Frame(unsigned msec);
+void CL_UpdateListenerOrigin(void);
 void CL_RestartFilesystem(qboolean total);
 void CL_Activate(active_t active);
-void CL_UpdateUserinfo(cvar_t *var, from_t from);
+void CL_UpdateUserinfo(cvar_t* var, from_t from);
 void CL_SendStatusRequest(const netadr_t *address);
+void CL_CheckForIP(const char* s);
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
 qboolean CL_CheatsOK(void);
-void CL_SetSky(void);
 
 #if USE_CURL
 ssize_t HTTP_FetchFile(const char *url, void **data);
@@ -93,34 +92,10 @@ void SCR_EndLoadingPlaque(void);
 void SCR_ModeChanged(void);
 void SCR_UpdateScreen(void);
 
-#define U32_BLACK   MakeColor(  0,   0,   0, 255)
-#define U32_RED     MakeColor(255,   0,   0, 255)
-#define U32_GREEN   MakeColor(  0, 255,   0, 255)
-#define U32_YELLOW  MakeColor(255, 255,   0, 255)
-#define U32_BLUE    MakeColor(  0,   0, 255, 255)
-#define U32_CYAN    MakeColor(  0, 255, 255, 255)
-#define U32_MAGENTA MakeColor(255,   0, 255, 255)
-#define U32_WHITE   MakeColor(255, 255, 255, 255)
-
-#define UI_LEFT             0x00000001
-#define UI_RIGHT            0x00000002
-#define UI_CENTER           (UI_LEFT | UI_RIGHT)
-#define UI_BOTTOM           0x00000004
-#define UI_TOP              0x00000008
-#define UI_MIDDLE           (UI_BOTTOM | UI_TOP)
-#define UI_DROPSHADOW       0x00000010
-#define UI_ALTCOLOR         0x00000020
-#define UI_IGNORECOLOR      0x00000040
-#define UI_XORCOLOR         0x00000080
-#define UI_AUTOWRAP         0x00000100
-#define UI_MULTILINE        0x00000200
-#define UI_DRAWCURSOR       0x00000400
-
 extern const uint32_t   colorTable[8];
 
 qboolean SCR_ParseColor(const char *s, color_t *color);
 
-float V_CalcFov(float fov_x, float width, float height);
 
 #else // USE_CLIENT
 
@@ -130,7 +105,7 @@ float V_CalcFov(float fov_x, float width, float height);
 #define CL_UpdateUserinfo(var, from)    (void)0
 #define CL_ErrorEvent(from)             (void)0
 #define CL_RestartFilesystem(total)     FS_Restart(total)
-#define CL_ForwardToServer()            qfalse
+#define CL_ForwardToServer()            false
 #define CL_CheatsOK()                   (!!Cvar_VariableInteger("cheats"))
 
 #define Con_Init()                      (void)0

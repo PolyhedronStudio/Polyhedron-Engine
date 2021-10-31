@@ -1,152 +1,55 @@
-# Quake II RTX
+# Nail & Crescent - Development Branch
 
-**Quake II RTX** is NVIDIA's attempt at implementing a fully functional 
-version of Id Software's 1997 hit game **Quake II** with RTX path-traced 
-global illumination.
-
-**Quake II RTX** builds upon the [Q2VKPT](http://brechpunkt.de/q2vkpt) 
-branch of the Quake II open source engine. Q2VKPT was created by former 
-NVIDIA intern Christoph Schied, a Ph.D. student at the Karlsruhe Institute 
-of Technology in Germany.
-
-Q2VKPT, in turn, builds upon [Q2PRO](https://skuller.net/q2pro/), which is a 
-modernized version of the Quake II engine. Consequently, many of the settings 
-and console variables that work for Q2PRO also work for Quake II RTX.
-
-## License
-
-**Quake II RTX** is licensed under the terms of the **GPL v.2** (GNU General Public License).
-You can find the entire license in the [license.txt](license.txt) file.
-
-The **Quake II** game data files remain copyrighted and licensed under the
-original id Software terms, so you cannot redistribute the pak files from the
-original game.
-
-## Features
-
-**Quake II RTX** introduces the following features:
-  - Caustics approximation and coloring of light that passes through tinted glass
-  - Cutting-edge denoising technology
-  - Cylindrical projection mode
-  - Dynamic lighting for items such as blinking lights, signs, switches, elevators and moving objects
-  - Dynamic real-time "time of day" lighting
-  - Flare gun and other high-detail weapons
-  - High-quality screenshot mode
-  - Multi-GPU (SLI) support
-  - Multiplayer modes (deathmatch and cooperative)
-  - Optional two-bounce indirect illumination
-  - Particles, laser beams, and new explosion sprites
-  - Physically based materials, including roughness, metallic, emissive, and normal maps
-  - Player avatar (casting shadows, visible in reflections)
-  - Recursive reflections and refractions on water and glass, mirror, and screen surfaces
-  - Procedural environments (sky, mountains, clouds that react to lighting; also space)
-  - "Shader balls" as a way to experiment with materials and see how they look in different environments
-  - Sunlight with direct and indirect illumination
-  - Volumetric lighting (god-rays)
-
-You can download functional builds of the game from [NVIDIA](https://www.geforce.com/quakeiirtx/)
-or [Steam](https://store.steampowered.com/app/1089130/Quake_II_RTX/).
-
-## Additional Information
-
-  * [Announcement Article](https://www.nvidia.com/en-us/geforce/news/quake-ii-rtx-ray-tracing-vulkan-vkray-geforce-rtx/)
-  * [Ray-Tracing Deep Dive](https://www.nvidia.com/en-us/geforce/news/geforce-gtx-dxr-ray-tracing-available-now/)
-  * [Launch Trailer Video](https://www.youtube.com/watch?v=unGtBbhaPeU)
-  * [Path Tracer Overview Video](https://www.youtube.com/watch?v=BOltWXdV2XY)
-  * [GDC 2019 Presentation](https://www.gdcvault.com/play/1026185/)
-  * [Client Manual](doc/client.md)
-  * [Server Manual](doc/server.md)
-
-Also, some source files have comments that explain various parts of the renderer:
-
-  * [asvgf.glsl](src/refresh/vkpt/shader/asvgf.glsl) explains the denoiser filters
-  * [checkerboard_interleave.comp](src/refresh/vkpt/shader/checkerboard_interleave.comp) shows how checkerboarded rendering facilitates path tracing on multiple GPUs and helps with water and glass surfaces
-  * [path_tracer.h](src/refresh/vkpt/shader/path_tracer.h) gives an overview of the path tracer
-  * [tone_mapping_histogram.comp](src/refresh/vkpt/shader/tone_mapping_histogram.comp) explains the tone mapping solution 
-
-
-## Support and Feedback
-
-  * [GeForce.com Forums](https://forums.geforce.com/default/topic/1119082/geforce-rtx-20-series/quake-ii-rtx-installation-guide/)
-  * [Steam Community Hub](https://steamcommunity.com/app/1089130)
-  * [GitHub Issue Tracker](https://github.com/NVIDIA/Q2RTX/issues)
-
-## System Requirements
-
-In order to build **Quake II RTX** you will need the following software
-installed on your computer (with at least the specified versions or more 
-recent ones).
-
-### Operating System
-
-|             | Windows    | Linux        |
-|-------------|------------|--------------|
-| Min Version | Win 7 x64  | Ubuntu 16.04 |
-
-Note: only the Windows 10 version has been extensively tested.
-
-Note: distributions that are binary compatible with Ubuntu 16.04 should work as well.
-
-### Software
-
-|                                                     | Min Version |
-|-----------------------------------------------------|-------------|
-| NVIDIA driver <br> https://www.geforce.com/drivers  | 430         |
-| git <br> https://git-scm.com/downloads              | 2.15        |
-| CMake <br> https://cmake.org/download/              | 3.8         |
-| Vulkan SDK <br> https://www.lunarg.com/vulkan-sdk/  | 1.1.92      |
+## Scratchpad - Things to do or not forget:
+ - Items are obviously broken.
+ - Physics.cpp needs more work, revising. Probably best done after moving more edict_t stuff to SVGBaseEntity.
+ - ViewBobbing probably breaks because of a lack of physics.cpp data._
 
 ## Submodules
 
-* [zlib](https://github.com/madler/zlib)
-* [curl](https://github.com/curl/curl)
-* [SDL2](https://github.com/spurious/SDL-mirror)
+* [N&C SDL2](https://github.com/WatIsDeze/NaC-SDL)
+* [N&C RmlUi](https://github.com/WatIsDeze/Nac-RmlUi)
+* [N&C curl](https://github.com/WatIsDeze/NaC-curl)
+* [N&C tinyobjloader-c](https://github.com/WatIsDeze/nac-tinyobjloader-c)
 * [stb](https://github.com/nothings/stb)
-* [tinyobjloader-c](https://github.com/syoyo/tinyobjloader-c)
+* [zlib](https://github.com/madler/zlib)
 * [Vulkan-Headers](https://github.com/KhronosGroup/Vulkan-Headers)
 
 ## Build Instructions
+The following build instructions apply to VS2019, which is the standard being used in the team right now.
+Although Linux support exists, and will be returning back soonly, as of right now it has been untested for
+2 months and may need some extra work. If you are feeling jolly, and want to lend us a hand, please contact
+us in our discord.
+
+### Windows 10 - VS2019
 
   1. Clone the repository and its submodules from git :
+     `git clone --branch Engine-0.2 --recursive https://github.com/WatIsDeze/Nail-Crescent `
 
-     `git clone --recursive https://github.com/NVIDIA/Q2RTX.git `
+  2. Start VS2019, and use the "Open Folder" method to open the project, as one normally would when using CMake projects.  
 
-  2. Create a build folder named `build` under the repository root (`Q2RTX/build`)     
+  3. Ensure you have vcpkg installed, and that it is setup properly. Install the following packages:
+  - freetype:x64-windows
+  - lua:x64-windows
 
-     Note: this is required by the shader build rules.
+  4. That should be all. Generate the CMake Cache if VS2019 isn't doing so already, and build the project.
+  5. For resource files, please reach out to us on our [Discord](https://discord.gg/5tadZ96cvY).
 
-  3. Copy (or create a symbolic link) to the game assets folder (`Q2RTX/baseq2`) 
+### Linux
 
-     Note: the asset packages are required for the engine to run.
-     Specifically, the `blue_noise.pkz` and `q2rtx_media.pkz` files or their extracted contents.
-     The package files can be found in the [GitHub releases](https://github.com/NVIDIA/Q2RTX/releases) or in the published builds of Quake II RTX.
+  1. Clone the repository and its submodules from git:
+  `git clone --branch Engine-0.2 --recursive https://github.com/WatIsDeze/Nail-Crescent `
 
-  4. Configure CMake with either the GUI or the command line and point the build at the `build` folder
-     created in step 2.
+  2. Create a build folder inside your <PROJECT_ROOT> directory. Open a terminal in this location, and enter the following:
+  `cmake ../src && make`
 
-     `cd build`  
-     `cmake ..`
+  3. If all goes well, you will now have a nac, nacded, basenac/clgame.so, and basenac/svgame.so. If not, we're still looking for help in this department. Feel free to reach out to us on our [Discord](https://discord.gg/5tadZ96cvY) if interested.
 
-     **Note**: only 64-bit builds are supported, so make sure to select a 64-bit generator during the initial configuration of CMake.
-     
-     Note 2: when CMake is configuring `curl`, it will print warnings like `Found no *nroff program`. These can be ignored.
+## Demo Recording/Photo Mode
 
-  5. Build with Visual Studio on Windows, make on Linux, or the CMake command
-     line:
-
-     `cmake --build . `
-
-## Music Playback Support
-
-Quake II RTX supports music playback from OGG files, if they can be located. To enable music playback, copy the CD tracks into a `music` folder either next to the executable, or inside the game directory, such as `baseq2/music`. The files should use one of these two naming schemes:
-  - `music/02.ogg` for music copied directly from a game CD;
-  - `music/Track02.ogg` for music from the version of Quake II downloaded from [GOG](https://www.gog.com/game/quake_ii_quad_damage).
-
-In the game, music playback is enabled when console variable `ogg_enable` is set to 1. Music volume is controlled by console varaible `ogg_volume`. Playback controls, such as selecting the track or putting it on pause, are available through the `ogg` command.
-
-Music playback support is using code adapted from the [Yamagi Quake 2](https://www.yamagi.org/quake2/) engine.
-
-## Photo Mode
+Due to protocol changes being required, while Quake 2 Pro by default still records demo in the old vanilla protocol, this feature is of now broken.
+It'll likely make it back on a rainy day. For now, perfect must never be the enemy of good, and get in the way with our priorities. Which are making a fun game, and a kickass engine. 
+Feel free to help us out, fork our project, and hack away. In case of any questions related to this, please reach out to us on [Discord](https://discord.gg/5tadZ96cvY)
 
 When a single player game or demo playback is paused, normally with the `pause` key, the photo mode activates. 
 In this mode, denoisers and some other real-time rendering approximations are disabled, and the image is produced
@@ -172,14 +75,14 @@ Settings for all these features can be found in the game menu. To adjust the set
 
 ## MIDI Controller Support
 
-The Quake II console can be remote operated through a UDP connection, which
+The N&C console can be remote operated through a UDP connection, which
 allows users to control in-game effects from input peripherals such as MIDI controllers. This is 
 useful for tuning various graphics parameters such as position of the sun, intensities of lights, 
 material parameters, filter settings, etc.
 
 You can find a compatible MIDI controller driver [here](https://github.com/NVIDIA/korgi)
 
-To enable remote access to your Quake II RTX client, you will need to set the following 
+To enable remote access to your N&C client, you will need to set the following 
 console variables _before_ starting the game, i.e. in the config file or through the command line:
 ```
  rcon_password "<password>"
@@ -190,12 +93,3 @@ Note: the password set here should match the password specified in the korgi con
 
 Note 2: enabling the rcon backdoor allows other people to issue console commands to your game from 
 other computers, so choose a good password.
-
-## Shader Balls Feature
-
-The engine includes support for placing a set of material sampling balls in any location. Follow these steps to use this feature:
-
-  - Download the `shader_balls.pkz` package from the [Releases](https://github.com/NVIDIA/Q2RTX/releases) page.
-  - Place or extract that package into your `baseq2` folder.
-  - Run the game with `cl_shaderballs` set to 1, either from command line or from console before loading a map.
-  - Use the `drop_balls` command to place the balls at the current player location.

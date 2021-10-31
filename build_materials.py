@@ -32,7 +32,7 @@ def scan_textures(q2_path, paks_path):
             filename = os.path.splitext(filename)[0]
             bsp_tex.add(filename)
 
-    # scan model textures in both base paks & expanded baseq2 folders
+    # scan model textures in both base paks & expanded basenac folders
     # to catch added md2 / md3 items & weapons
     model_tex = set()
     for path in [paks_path, q2_path]:
