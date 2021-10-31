@@ -134,13 +134,13 @@ SET( SRC_SVGAME
 	#svgame/entities/trigger/TriggerKey.cpp
 	#svgame/entities/trigger/TriggerMonsterjump.cpp
 	#svgame/entities/trigger/TriggerPush.cpp
-	#svgame/entities/trigger/TriggerRelay.cpp
 	svgame/entities/trigger/TriggerAlways.cpp
 	svgame/entities/trigger/TriggerAutoDoor.cpp
 	svgame/entities/trigger/TriggerDelayedUse.cpp
 	svgame/entities/trigger/TriggerHurt.cpp
 	svgame/entities/trigger/TriggerMultiple.cpp
 	svgame/entities/trigger/TriggerOnce.cpp
+	svgame/entities/trigger/TriggerRelay.cpp
 	svgame/entities/weaponry/BlasterBolt.cpp
 	svgame/entities/Light.cpp
 	svgame/entities/WorldSpawn.cpp
@@ -199,6 +199,7 @@ SET ( HEADERS_SVGAME
 	svgame/entities/trigger/TriggerHurt.h
 	svgame/entities/trigger/TriggerMultiple.h
 	svgame/entities/trigger/TriggerOnce.h
+	svgame/entities/trigger/TriggerRelay.h
 	svgame/entities/weaponry/BlasterBolt.h
 	svgame/entities/Light.h
 	svgame/entities/WorldSpawn.h
