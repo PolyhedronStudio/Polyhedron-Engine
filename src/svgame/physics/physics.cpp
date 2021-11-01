@@ -105,6 +105,7 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
 
     ent->SetNextThinkTime(0);
 
+    #if _DEBUG
     if ( !ent->HasThinkCallback() ) {
         // Write the index, programmers may look at that thing first
         std::string errorString = "entity (index ";
@@ -125,8 +126,9 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
         
         gi.Error( errorString.c_str() );
     }
-
-    ent->Think();
+    #else
+        ent->Think();
+    #endif
 
     return false;
 }

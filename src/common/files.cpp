@@ -3712,7 +3712,7 @@ static void fs_game_changed(cvar_t *self)
 
     // check for the first time startup
     if (!fs_base_searchpaths) {
-        // start up with basenac by default
+        // start up with basepoly by default
         setup_base_paths();
 
         // check for game override

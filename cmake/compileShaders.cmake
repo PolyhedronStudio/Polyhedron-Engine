@@ -65,7 +65,7 @@ function(compile_shader)
     
     set_source_files_properties(${src_file} PROPERTIES VS_TOOL_OVERRIDE "None")
 
-    set (out_dir "${CMAKE_SOURCE_DIR}/basenac/shader_vkpt")
+    set (out_dir "${CMAKE_SOURCE_DIR}/bin/basepoly/shader_vkpt")
     set (out_file "${out_dir}/${output_file_name}.spv")
     
     set(glslang_command_line
