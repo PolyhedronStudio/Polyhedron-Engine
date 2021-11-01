@@ -249,7 +249,7 @@ void UI_StatusEvent(const serverStatus_t *status)
 
     mod = Info_ValueForKey(info, "game");
     if (COM_IsWhite(mod)) {
-        mod = "basenac";
+        mod = "basepoly";
     }
 
     map = Info_ValueForKey(info, "mapName");

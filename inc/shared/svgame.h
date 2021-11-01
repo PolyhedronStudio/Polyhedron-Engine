@@ -110,7 +110,7 @@ typedef struct {
     // CMake at the time of building the engine/game(dll/so) binaries.
     // 
     // In an ideal world, we comply to proper version releasing rules.
-    // For Nail & Crescent, the general following rules apply:
+    // For Polyhedron FPS, the general following rules apply:
     // --------------------------------------------------------------------
     // MAJOR: Ground breaking new features, you can expect anything to be 
     // incompatible at that.
@@ -221,7 +221,7 @@ typedef struct {
     // CMake at the time of building the engine/game(dll/so) binaries.
     // 
     // In an ideal world, we comply to proper version releasing rules.
-    // For Nail & Crescent, the general following rules apply:
+    // For Polyhedron FPS, the general following rules apply:
     // --------------------------------------------------------------------
     // MAJOR: Ground breaking new features, you can expect anything to be 
     // incompatible at that.

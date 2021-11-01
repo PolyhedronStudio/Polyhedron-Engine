@@ -52,6 +52,10 @@ void Light::Spawn() {
         else
             SVG_SetConfigString(ConfigStrings::Lights + style, GetCustomLightStyle());
     }
+
+    // Set default callbacks
+    SetThinkCallback(&Light::LightThink);
+    SetNextThinkTime(level.time + FRAMETIME);
 }
 void Light::PostSpawn() {
     // Parent class PostSpawn.
@@ -115,4 +119,11 @@ void Light::SpawnKey(const std::string& key, const std::string& value) {
     else {
         SVGBaseEntity::SpawnKey(key, value);
     }
+}
+
+//
+// Callback functions.
+//
+void Light::LightThink(void) {
+
 }

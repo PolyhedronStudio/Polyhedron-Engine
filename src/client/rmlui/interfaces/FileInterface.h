@@ -4,7 +4,7 @@
 // client/rmlui/interfaces/FileInterface.h
 //
 //
-// RmlUI N&C File Interface implementation.
+// RmlUI Polyhedron File Interface implementation.
 //
 #ifndef __CLIENT_RMLUI_INTERFACES_FILEINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_FILEINTERFACE_H__
@@ -14,7 +14,7 @@
 #include "shared/shared.h"
 
 //
-// Simple Nac System Interface to Rml
+// Simple Polyhedron System Interface to Rml
 //
 class RmlUIFileInterface : public Rml::FileInterface
 {

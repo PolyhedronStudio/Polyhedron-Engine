@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/protocol.h"
 
 // the "gameversion" client command will print32_t this plus compile date
-#define GAMEVERSION "basenac"
+#define GAMEVERSION "basepoly"
 
 
 //-------------------

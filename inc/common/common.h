@@ -26,20 +26,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // common.h -- definitions common between client and server, but not game.dll
 //
 
-#define PRODUCT         "Nail & Crescent"
+#define PRODUCT         "Polyhedron Engine"
 
 #if USE_CLIENT
-#define APPLICATION     "nac"
+#define APPLICATION     "Polyhedron Client"
 #else
-#define APPLICATION     "nacded"
+#define APPLICATION     "Polyhedron Dedicated Server"
 #endif
 
 #define COM_DEFAULT_CFG     "default.cfg"
-#define COM_NAC_CFG         "nac.cfg"
+#define COM_NAC_CFG         "poly.cfg"
 #define COM_AUTOEXEC_CFG    "autoexec.cfg"
 #define COM_POSTEXEC_CFG    "postexec.cfg"
 #define COM_POSTINIT_CFG    "postinit.cfg"
-#define COM_CONFIG_CFG      "nacconfig.cfg"
+#define COM_CONFIG_CFG      "polyconfig.cfg"
 
 // FIXME: rename these
 #define COM_HISTORYFILE_NAME    ".conhistory"

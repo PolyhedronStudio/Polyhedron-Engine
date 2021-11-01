@@ -519,7 +519,7 @@ static void SVC_Info(void)
         return; // ignore in single player
 
     version = atoi(Cmd_Argv(1));
-    if (version != PROTOCOL_VERSION_NAC)
+    if (version != PROTOCOL_VERSION_POLYHEDRON)
         return; // ignore invalid versions
 
     len = Q_scnprintf(buffer, sizeof(buffer),
@@ -588,7 +588,7 @@ static void SVC_GetChallenge(void)
 
     // send it back
     Netchan_OutOfBand(NS_SERVER, &net_from,
-                      "challenge %i p=%i", challenge, PROTOCOL_VERSION_NAC);
+                      "challenge %i p=%i", challenge, PROTOCOL_VERSION_POLYHEDRON);
 }
 
 /*
@@ -628,7 +628,7 @@ static qboolean parse_basic_params(conn_params_t *p)
     p->challenge = atoi(Cmd_Argv(3));
 
     // check for invalid protocol version
-    if (p->protocolVersion != PROTOCOL_VERSION_NAC)
+    if (p->protocolVersion != PROTOCOL_VERSION_POLYHEDRON)
         return reject("Unsupported protocol version %d.\n", p->protocolVersion);
 
     // check for valid, but outdated protocol version
@@ -771,10 +771,10 @@ static qboolean parse_enhanced_params(conn_params_t *p)
     if (*s) {
         p->protocolVersion = atoi(s);
         clamp(p->protocolVersion,
-                PROTOCOL_VERSION_NAC_MINIMUM,
-                PROTOCOL_VERSION_NAC_CURRENT);
+                PROTOCOL_VERSION_POLYHEDRON_MINIMUM,
+                PROTOCOL_VERSION_POLYHEDRON_CURRENT);
     } else {
-        p->protocolVersion = PROTOCOL_VERSION_NAC_MINIMUM;
+        p->protocolVersion = PROTOCOL_VERSION_POLYHEDRON_MINIMUM;
     }
 
     return true;
@@ -831,7 +831,7 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
 	if (sv_restrict_rtx->integer)
 	{
 		s = Info_ValueForKey(info, "version");
-		if (strncmp(s, "nac", 3) != 0)
+		if (strncmp(s, "Polyhedron", 10) != 0)
 		{
 			return reject("This server is only available to Q2RTX clients.\n");
 		}
@@ -922,7 +922,7 @@ static void send_connect_packet(client_t *newcl, int nctype)
     const char *dlstring1   = "";
     const char *dlstring2   = "";
 
-    // MSG: !! Removed: PROTOCOL_VERSION_NAC - TODO: NETCHAN_NEW?
+    // MSG: !! Removed: PROTOCOL_VERSION_POLYHEDRON - TODO: NETCHAN_NEW?
     //if (nctype == NETCHAN_NEW)
         ncstring = " nc=1";
     //else

@@ -37,7 +37,7 @@ FRAME PARSING
 
 static inline qboolean entity_optimized(const EntityState *state)
 {
-    if (cls.serverProtocol != PROTOCOL_VERSION_NAC)
+    if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON)
         return false;
 
     if (state->number != cl.frame.clientNumber + 1)

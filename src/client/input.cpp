@@ -519,7 +519,7 @@ static void CL_SendUserinfo(void)
         MSG_WriteByte(clc_userinfo);
         MSG_WriteData(userinfo, len + 1);
         MSG_FlushTo(&cls.netChannel->message);
-    } else if (cls.serverProtocol == PROTOCOL_VERSION_NAC) {
+    } else if (cls.serverProtocol == PROTOCOL_VERSION_POLYHEDRON) {
         Com_DDPrintf("%s: %u: %d updates\n", __func__, com_framenum,
                      cls.userinfo_modified);
         for (i = 0; i < cls.userinfo_modified; i++) {
