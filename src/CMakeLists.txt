@@ -122,7 +122,7 @@ SET( SRC_SVGAME
 	#svgame/entities/target/TargetChangelevel.cpp
 	#svgame/entities/target/TargetCrosslevel_target.cpp
 	#svgame/entities/target/TargetCrosslevel_trigger.cpp
-	#svgame/entities/target/TargetExplosion.cpp
+	svgame/entities/target/TargetExplosion.cpp
 	#svgame/entities/target/TargetLightramp.cpp
 	#svgame/entities/target/TargetSpawner.cpp
 	#svgame/entities/target/TargetSpeaker.cpp
@@ -160,9 +160,9 @@ SET( SRC_SVGAME
 	svgame/weapons/shotgun.cpp
 	svgame/weapons/supershotgun.cpp
     svgame/svgame.def
-)
-
-SET ( HEADERS_SVGAME
+    )
+    
+    SET ( HEADERS_SVGAME
 	svgame/g_local.h
 	svgame/brushfuncs.h
 	svgame/chasecamera.h
@@ -180,7 +180,6 @@ SET ( HEADERS_SVGAME
 	svgame/entities/base/DebrisEntity.h
 	svgame/entities/base/GibEntity.h
 	svgame/entities/base/PlayerClient.h
-	svgame/entities/func/func_door.h
 	svgame/entities/func/FuncAreaportal.h
 	svgame/entities/func/FuncButton.h
 	svgame/entities/func/FuncDoor.h
@@ -194,6 +193,7 @@ SET ( HEADERS_SVGAME
 	svgame/entities/misc/MiscExplosionBox.h
 	svgame/entities/misc/MiscServerModel.h
 	svgame/entities/path/PathCorner.h
+	svgame/entities/target/TargetExplosion.h
 	svgame/entities/trigger/TriggerAlways.h
 	svgame/entities/trigger/TriggerAutoDoor.h
 	svgame/entities/trigger/TriggerDelayedUse.h
