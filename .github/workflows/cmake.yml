@@ -26,10 +26,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+      
     - name: Checkout submodules
       run: git submodule update --init --recursive
+      
     - name: Checkout and build glsLangValidator
-      run: git clone https://github.com/KhronosGroup/glslang extern/glslang | cd glslang | cmake .
+      run: git clone https://github.com/KhronosGroup/glslang extern/glslang
       
     - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
