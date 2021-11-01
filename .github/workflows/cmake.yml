@@ -30,8 +30,11 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
       
-    - name: Checkout and build glsLangValidator
+    - name: Checkout and Build glsLangValidator
       run: git clone https://github.com/KhronosGroup/glslang extern/glslang | cmake .
+      
+    - name: Build SDL out of source.
+      run: mkdir build | ${{github.workspace}}/extern/NaC-SDL | cmake ../sdlbuild
       
     - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
