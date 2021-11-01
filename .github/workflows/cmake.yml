@@ -34,7 +34,7 @@ jobs:
       run: git clone https://github.com/KhronosGroup/glslang extern/glslang | cmake .
       
     - name: Build SDL out of source.
-      run: ${{github.workspace}}/extern/NaC-SDL | cmake  ${{github.workspace}}/build
+      run: mkdir build | cd  ${{github.workspace}}/build/ | cmake ${{github.workspace}}/extern/SDL2-NaC
       
     - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
