@@ -31,7 +31,7 @@ jobs:
       run: git submodule update --init --recursive
       
     - name: Checkout and Build glsLangValidator
-      run: git clone https://github.com/KhronosGroup/glslang extern/glslang | cmake .
+      run: git clone https://github.com/KhronosGroup/glslang extern/glslang | cmake . | cmake --build
       
     - name: Build SDL out of source.
       run: mkdir build | cd  ${{github.workspace}}/build/ | cmake ${{github.workspace}}/extern/SDL2-NaC
