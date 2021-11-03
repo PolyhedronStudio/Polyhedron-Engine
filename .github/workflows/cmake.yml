@@ -30,20 +30,23 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
       
-    - name: Checkout and Build glsLangValidator
-      run: git clone https://github.com/KhronosGroup/glslang extern/glslang | cmake . | cmake --build
+    - name: Checkedout and build VCPKG and  build glsLangValidator
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: git clone https://github.com/Microsoft/vcpkg.git \
+cd vcpkg \
+./bootstrap-vcpkg.sh \
+./vcpkg integrate install \
+./vcpkg install glslang
       
     - name: Build SDL out of source.
       run: mkdir build | cd  ${{github.workspace}}/build/ | cmake ${{github.workspace}}/extern/SDL2-NaC
-      
-    - name: Configure CMake
-        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: sudo apt install vulkan-tools
 
     - name: Build
         # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: mkdir build \
+      cd build \
+      cmake .. --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Test
       working-directory: ${{github.workspace}}/build
