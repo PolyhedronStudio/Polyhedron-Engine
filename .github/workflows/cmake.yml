@@ -35,7 +35,7 @@ jobs:
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: git clone https://github.com/Microsoft/vcpkg.git \
 cd vcpkg \
-./bootstrap-vcpkg.sh \
+./bootstrap-vcpkg.bat \
 ./vcpkg integrate install \
 ./vcpkg install glslang
       
