@@ -35,9 +35,9 @@ jobs:
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: git clone https://github.com/Microsoft/vcpkg.git \
 cd vcpkg \
-./bootstrap-vcpkg.bat \
-./vcpkg integrate install \
-./vcpkg install glslang
+bootstrap-vcpkg.bat \
+vcpkg integrate install \
+vcpkg install glslang
       
     - name: Build SDL out of source.
       run: mkdir build | cd  ${{github.workspace}}/build/ | cmake ${{github.workspace}}/extern/SDL2-NaC
