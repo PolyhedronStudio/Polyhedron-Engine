@@ -134,7 +134,7 @@ SET( SRC_SVGAME
 	svgame/entities/trigger/TriggerGravity.cpp
 	#svgame/entities/trigger/TriggerKey.cpp
 	#svgame/entities/trigger/TriggerMonsterjump.cpp
-	#svgame/entities/trigger/TriggerPush.cpp
+	svgame/entities/trigger/TriggerPush.cpp
 	svgame/entities/trigger/TriggerAlways.cpp
 	svgame/entities/trigger/TriggerAutoDoor.cpp
 	svgame/entities/trigger/TriggerDelayedUse.cpp
@@ -206,6 +206,7 @@ SET( SRC_SVGAME
 	svgame/entities/trigger/TriggerGravity.h
 	svgame/entities/trigger/TriggerMultiple.h
 	svgame/entities/trigger/TriggerOnce.h
+	svgame/entities/trigger/TriggerPush.h
 	svgame/entities/trigger/TriggerRelay.h
 	svgame/entities/weaponry/BlasterBolt.h
 	svgame/entities/Light.h
