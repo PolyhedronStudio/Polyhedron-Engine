@@ -131,7 +131,7 @@ SET( SRC_SVGAME
 	svgame/entities/target/TargetTempEntity.cpp
 	#svgame/entities/trigger/TriggerCounter.cpp
 	#svgame/entities/trigger/TriggerElevator.cpp
-	#svgame/entities/trigger/TriggerGravity.cpp
+	svgame/entities/trigger/TriggerGravity.cpp
 	#svgame/entities/trigger/TriggerKey.cpp
 	#svgame/entities/trigger/TriggerMonsterjump.cpp
 	#svgame/entities/trigger/TriggerPush.cpp
@@ -202,6 +202,7 @@ SET( SRC_SVGAME
 	svgame/entities/trigger/TriggerAutoDoor.h
 	svgame/entities/trigger/TriggerDelayedUse.h
 	svgame/entities/trigger/TriggerHurt.h
+	svgame/entities/trigger/TriggerGravity.h
 	svgame/entities/trigger/TriggerMultiple.h
 	svgame/entities/trigger/TriggerOnce.h
 	svgame/entities/trigger/TriggerRelay.h
@@ -222,9 +223,9 @@ SET( SRC_SVGAME
 	svgame/weapons/shotgun.h
 	svgame/weapons/supershotgun.h
     svgame/svgame.def
-)
-
-###################### Client.
+    )
+    
+    ###################### Client.
 SET(SRC_CLIENT
 	client/ascii.cpp
 	client/console.cpp
