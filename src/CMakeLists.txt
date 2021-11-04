@@ -129,7 +129,7 @@ SET( SRC_SVGAME
 	svgame/entities/target/TargetSpeaker.cpp
 	#svgame/entities/target/TargetSplash.cpp
 	svgame/entities/target/TargetTempEntity.cpp
-	#svgame/entities/trigger/TriggerCounter.cpp
+	svgame/entities/trigger/TriggerCounter.cpp
 	#svgame/entities/trigger/TriggerElevator.cpp
 	svgame/entities/trigger/TriggerGravity.cpp
 	#svgame/entities/trigger/TriggerKey.cpp
@@ -200,6 +200,7 @@ SET( SRC_SVGAME
 	svgame/entities/target/TargetTempEntity.h
 	svgame/entities/trigger/TriggerAlways.h
 	svgame/entities/trigger/TriggerAutoDoor.h
+	svgame/entities/trigger/TriggerCounter.h
 	svgame/entities/trigger/TriggerDelayedUse.h
 	svgame/entities/trigger/TriggerHurt.h
 	svgame/entities/trigger/TriggerGravity.h
