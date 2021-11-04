@@ -25,7 +25,7 @@ TargetSpeaker::TargetSpeaker( Entity* entity )
 //===============
 void TargetSpeaker::Spawn() {
     if ( soundFile.empty() ) {
-        gi.DPrintf( "target_speaker with no sound set at %s\n", vec3_to_str(GetOrigin()).c_str() );
+        gi.DPrintf( "target_speaker with no sound set at %s\n", vec3_to_cstr(GetOrigin()) );
         return;
     }
 

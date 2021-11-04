@@ -27,7 +27,7 @@ TriggerGravity::TriggerGravity( Entity* entity )
 //===============
 void TriggerGravity::Spawn() {
     if ( GetGravity() == 0.0f ) {
-        gi.DPrintf( "trigger_gravity without gravity set at %s\n", vec3_to_str( GetOrigin() ).c_str() );
+        gi.DPrintf( "trigger_gravity without gravity set at %s\n", vec3_to_cstr( GetOrigin() ) );
         Remove();
         return;
     }

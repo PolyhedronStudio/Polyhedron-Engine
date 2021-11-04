@@ -26,7 +26,7 @@ TargetEarthquake::TargetEarthquake( Entity* entity )
 //===============
 void TargetEarthquake::Spawn() {
     if ( targetNameStr.empty() ) {
-        gi.DPrintf( "Untargeted target_earthquake at %s\n", vec3_to_str( GetOrigin() ).c_str() );
+        gi.DPrintf( "Untargeted target_earthquake at %s\n", vec3_to_cstr( GetOrigin() ) );
     }
 
     SetServerFlags( EntityServerFlags::NoClient );
