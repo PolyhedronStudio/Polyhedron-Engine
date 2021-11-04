@@ -96,10 +96,10 @@ void CLG_AddPacketEntities(void)
     unsigned int        effects, renderEffects;
 
     // bonus items rotate at a fixed rate
-    autorotate = AngleMod(cl->time * 0.1f);
+    autorotate = AngleMod(cl->time * BASE_1_FRAMETIME);
 
     // brush models can auto animate their frames
-    autoanim = 20 * cl->time / 1000;
+    autoanim = 20 * cl->time / BASE_FRAMETIME_1000;
 
     memset(&ent, 0, sizeof(ent));
 
