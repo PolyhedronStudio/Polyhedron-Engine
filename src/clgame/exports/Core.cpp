@@ -249,5 +249,5 @@ void ClientGameCore::Initialize() {
 //
 //---------------
 void ClientGameCore::Shutdown() {
-
+    clgi.Cmd_Unregister(cmd_cgmodule);
 }

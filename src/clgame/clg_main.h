@@ -15,7 +15,6 @@ extern ClientGameImport clgi;
 // Static export variable, lives as long as the client game dll lives.
 extern IClientGameExports* clge;
 
-void CLG_Init();
 void CLG_Shutdown(void);
 
 void CLG_ClientDeltaFrame(void);

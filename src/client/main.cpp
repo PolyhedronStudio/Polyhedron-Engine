@@ -82,6 +82,7 @@ cvar_t  *info_fov;
 cvar_t  *info_msg;
 cvar_t  *info_hand;
 cvar_t  *info_uf;
+cvar_t  *info_in_mainmenu;
 
 // N&C: Developer utilities.
 cvar_t* dev_map;
