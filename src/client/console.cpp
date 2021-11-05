@@ -293,6 +293,10 @@ Con_MessageMode_f
 */
 static void start_message_mode(chatMode_t mode)
 {
+    // Not allowed in mainmenu
+    if (info_in_bspmenu->integer) 
+        return;
+
     if (cls.connectionState != ClientConnectionState::Active || cls.demo.playback) {
         Com_Printf("You must be in a level to chat.\n");
         return;

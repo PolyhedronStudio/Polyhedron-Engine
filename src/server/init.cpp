@@ -304,19 +304,12 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
     else {
         len = Q_concat(expanded, sizeof(expanded), "maps/", s, ".bsp", NULL);
 
-        // A check for BSPMainMenu.
+        // A check for BSP MainMenu.
         if (!strcmp(s, "mainmenu")) {
             Cvar_SetEx("in_bspmenu", "1", FROM_CODE);
-            
         } else {
             Cvar_SetEx("in_bspmenu", "0", FROM_CODE);
         }
-
-        char serverinfo[MAX_INFO_STRING];
-        Cvar_BitInfo(serverinfo, CVAR_SERVERINFO);
-        //Com_DPrintf("Set in_bspmenu to %s", Info_ValueForKey(serverinfo, "in_bspmenu"));
-        //Com_DPrintf("Server info settings:\n");
-        Info_Print(serverinfo);
  
         if (len >= sizeof(expanded)) {
             ret = Q_ERR_NAMETOOLONG;

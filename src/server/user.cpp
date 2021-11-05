@@ -801,7 +801,10 @@ static void SV_NextServer_f(void)
 
 // the client is going to disconnect, so remove the connection immediately
 static void SV_Disconnect_f(void)
-{
+{   
+    if (sv_in_bspmenu)
+        return;
+
     SV_DropClient(sv_client, "!?disconnected");
     SV_RemoveClient(sv_client);   // don't bother with zombie state
 }
@@ -987,6 +990,9 @@ static void SV_ExecuteUserCommand(const char *s)
         }
         return;
     }
+
+    if (sv_in_bspmenu->integer)
+        return; 
 
     if (sv.serverState == ServerState::Pic || sv.serverState == ServerState::Cinematic) {
         return;

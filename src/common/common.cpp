@@ -495,6 +495,15 @@ void Com_Error(ErrorType code, const char *fmt, ...)
     va_list         argptr;
     size_t          len;
 
+    // Prevent disconnecting to a black menu etc.
+    #if CLIENT
+    if(code == ERR_DISCONNECT) {
+        // Let's go haha.
+        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
+        CL_ForwardToServer();
+    }
+    #endif
+
     // may not be entered recursively
     if (com_errorEntered) {
 #ifdef _DEBUG

@@ -737,10 +737,11 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
 //
 // if not a consolekey, send to the interpreter no matter what mode is
 //
-    if ((cls.key_dest == KEY_GAME) ||
+    if (info_in_bspmenu->integer != 1 && (cls.key_dest == KEY_GAME) ||
         ((cls.key_dest & KEY_CONSOLE) && !Q_IsBitSet(consolekeys, key)) ||
         ((cls.key_dest & KEY_MENU) && (key >= K_F1 && key <= K_F12)) ||
         (!down && Q_IsBitSet(buttondown, key))) {
+
 //
 // Key up events only generate commands if the game key binding is a button
 // command (leading + sign). These will occur even in console mode, to keep the

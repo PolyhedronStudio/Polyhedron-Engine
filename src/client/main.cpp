@@ -365,10 +365,10 @@ static void CL_Connect_c(genctx_t *ctx, int argnum)
         CL_RecentIP_g(ctx);
         Com_Address_g(ctx);
     } else if (argnum == 2) {
-        if (!ctx->partial[0] || (ctx->partial[0] == '3' && !ctx->partial[1])) {
-            Prompt_AddMatch(ctx, "34");
-            Prompt_AddMatch(ctx, "35");
-            Prompt_AddMatch(ctx, "36");
+        if (!ctx->partial[0] || (ctx->partial[0] == '1' && ctx->partial[1] == '3')) {
+            Prompt_AddMatch(ctx, "1337");
+            Prompt_AddMatch(ctx, "1340");
+            Prompt_AddMatch(ctx, "1341");
         }
     }
 }
@@ -726,9 +726,9 @@ void CL_Disconnect(ErrorType type)
     }
 
     // We don't want to be able to disconnect ourselves from this place.
-    //if (info_in_bspmenu->integer) {
-    //    return;
-    //}
+    if (info_in_bspmenu->integer) {
+        return;
+    }
 
     //cvar_t *info_in_bspmenu = Info_SetValueForKey("in_bspmenu")
     SCR_EndLoadingPlaque(); // get rid of loading plaque
@@ -782,7 +782,10 @@ void CL_Disconnect(ErrorType type)
     cls.userinfo_modified = 0;
 
     if (type == ERR_DISCONNECT) {
-        UI_OpenMenu(UIMENU_DEFAULT);
+        //UI_OpenMenu(UIMENU_DEFAULT);
+        //Cmd_ExecuteCommand(&cl_cmdbuf);
+        // Return to mainmenu map.
+        Cmd_ExecuteString(&cl_cmdbuf,"map mainmenu");
     } else {
         UI_OpenMenu(UIMENU_NONE);
     }
@@ -799,6 +802,11 @@ CL_Disconnect_f
 */
 static void CL_Disconnect_f(void)
 {
+    // No disconnecting from our bsp mainmenu.
+    if (info_in_bspmenu->integer == 1) {
+        return;
+    }
+
     if (cls.connectionState > ClientConnectionState::Disconnected) {
         Com_Error(ERR_DISCONNECT, "Disconnected from server");
     }
@@ -2304,7 +2312,8 @@ void CL_RestartFilesystem(qboolean total)
     }
 
     if (clientConnectionState == ClientConnectionState::Disconnected) {
-        UI_OpenMenu(UIMENU_DEFAULT);
+        
+        //UI_OpenMenu(UIMENU_DEFAULT);
     } else if (clientConnectionState >= ClientConnectionState::Loading && clientConnectionState <= ClientConnectionState::Active) {
         CL_LoadState(LOAD_MAP);
         CL_PrepareMedia();
@@ -2849,7 +2858,7 @@ void CL_CheckForPause(void)
 
     if (cls.key_dest & (KEY_CONSOLE | KEY_MENU)) {
         // only pause in single player
-        if (cl_paused->integer == 0 && cl_autopause->integer) {
+        if (cl_paused->integer == 0 && cl_autopause->integer && info_in_bspmenu->integer == 0) {
             Cvar_Set("cl_paused", "1");
 			OGG_TogglePlayback();
         }
@@ -3216,8 +3225,6 @@ void CL_Init(void)
     // Initialize RMLUI
     RMLUI_Init();
 
-    UI_OpenMenu(UIMENU_DEFAULT);
-
     Con_PostInit();
     Con_RunConsole();
 
@@ -3228,6 +3235,8 @@ void CL_Init(void)
 
     Cvar_Set("cl_running", "1");
 
+    // Open mainmenu map.
+    Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
 }
 
 /*

@@ -50,6 +50,8 @@ cvar_t  *sv_airaccelerate;
 cvar_t  *sv_qwmod;              // atu QW Physics modificator
 cvar_t  *sv_novis;
 
+cvar_t* sv_in_bspmenu;
+
 cvar_t  *sv_maxclients;
 cvar_t  *sv_reserved_slots;
 cvar_t  *sv_showclamp;
@@ -1927,7 +1929,7 @@ void SV_Init(void)
     Cvar_Get("gamemodeflags", "16", CVAR_SERVERINFO); // 16 = DF_INSTANT_ITEMS
     Cvar_Get("fraglimit", "0", CVAR_SERVERINFO);
     Cvar_Get("timelimit", "0", CVAR_SERVERINFO);
-    Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
+    sv_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
 
     sv_maxclients = Cvar_Get("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
     sv_reserved_slots = Cvar_Get("sv_reserved_slots", "0", CVAR_LATCH);

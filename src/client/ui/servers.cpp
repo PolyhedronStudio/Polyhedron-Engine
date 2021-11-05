@@ -698,9 +698,17 @@ UI_Frame
 
 =================
 */
+extern cvar_t *info_in_bspmenu;
 void UI_Frame(int msec)
 {
     serverslot_t *slot;
+
+    // Is our cvar in_bspmenu 1?
+    if (!uis.activeMenu) {
+        if (info_in_bspmenu->integer == 1) {
+            UI_OpenMenu(UIMENU_GAME);
+        }
+    }
 
     if (!m_servers.pingstage)
         return;
