@@ -2634,7 +2634,7 @@ static void CL_InitLocal(void)
     // userinfo
     //
     info_rate = Cvar_Get("rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_USERINFO);
+    info_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
 
     // N&C: Developer utilities.
     dev_map = Cvar_Get("dev_map", "", CVAR_ARCHIVE);
