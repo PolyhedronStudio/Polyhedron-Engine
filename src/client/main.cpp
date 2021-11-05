@@ -73,28 +73,25 @@ cvar_t  *cl_cinematics;
 //
 // userinfo
 //
-cvar_t  *info_password;
-cvar_t  *info_spectator;
-cvar_t  *info_name;
-cvar_t  *info_skin;
-cvar_t  *info_rate;
-cvar_t  *info_fov;
-cvar_t  *info_msg;
-cvar_t  *info_hand;
-cvar_t  *info_uf;
-cvar_t  *info_in_mainmenu;
+cvar_t  *info_password      = nullptr;
+cvar_t  *info_spectator     = nullptr;
+cvar_t  *info_name          = nullptr;
+cvar_t  *info_skin          = nullptr;
+cvar_t  *info_rate          = nullptr;
+cvar_t  *info_fov           = nullptr;
+cvar_t  *info_msg           = nullptr;
+cvar_t  *info_hand          = nullptr;
+cvar_t  *info_uf            = nullptr;
+cvar_t  *info_in_bspmenu    = nullptr;
 
 // N&C: Developer utilities.
 cvar_t* dev_map;
-//cvar_t* dev_maplist;
-
 #if USE_REF == REF_GL
 extern cvar_t *gl_modulate_world;
 extern cvar_t *gl_modulate_entities;
 extern cvar_t *gl_brightness;
 #endif
 
-extern cvar_t *fs_shareware;
 
 extern cvar_t *cl_renderdemo;
 extern cvar_t *cl_renderdemo_fps;
@@ -728,6 +725,12 @@ void CL_Disconnect(ErrorType type)
         return;
     }
 
+    // We don't want to be able to disconnect ourselves from this place.
+    //if (info_in_bspmenu->integer) {
+    //    return;
+    //}
+
+    //cvar_t *info_in_bspmenu = Info_SetValueForKey("in_bspmenu")
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
     // N&C: Call into the CG Module to inform that we're disconnected.
@@ -735,6 +738,7 @@ void CL_Disconnect(ErrorType type)
 
     if (cls.connectionState > ClientConnectionState::Disconnected && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);
+        //Cbuf_AddText(&cmd_buffer, "bspmainmenu");
     }
 
 #if 0
@@ -2630,6 +2634,7 @@ static void CL_InitLocal(void)
     // userinfo
     //
     info_rate = Cvar_Get("rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_USERINFO);
 
     // N&C: Developer utilities.
     dev_map = Cvar_Get("dev_map", "", CVAR_ARCHIVE);

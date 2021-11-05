@@ -303,6 +303,12 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
     }
     else {
         len = Q_concat(expanded, sizeof(expanded), "maps/", s, ".bsp", NULL);
+
+        // A check for BSPMainMenu.
+        //if (!strcmp(s, "mainmenu") {
+        //    Info_SetValueForKey(NULL, "in_bspmainmenu", "1");
+        //}
+
         if (len >= sizeof(expanded)) {
             ret = Q_ERR_NAMETOOLONG;
         } else {

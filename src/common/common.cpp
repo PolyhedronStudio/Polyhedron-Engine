@@ -111,8 +111,6 @@ cvar_t  *allow_download_others;
 
 cvar_t  *rcon_password;
 
-extern cvar_t *fs_shareware;
-
 const char  com_version_string[] =
     APPLICATION " " VERSION_STRING " " __DATE__ " " BUILDSTRING " " CPUSTRING;
 

@@ -28,9 +28,9 @@ LIST_DECL(sv_filterlist);
 LIST_DECL(sv_clientlist);   // linked list of non-free clients
 
 client_t    *sv_client;         // current client
-Entity     *sv_player;         // current client edict
+Entity      *sv_player;         // current client edict
 
-qboolean     sv_pending_autosave = 0;
+qboolean    sv_pending_autosave = 0;
 
 cvar_t  *sv_enforcetime;
 cvar_t  *sv_allow_nodelta;
@@ -833,7 +833,7 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
 		s = Info_ValueForKey(info, "version");
 		if (strncmp(s, "Polyhedron", 10) != 0)
 		{
-			return reject("This server is only available to Q2RTX clients.\n");
+			return reject("This server is only available to Polyhedron clients.\n");
 		}
 	}
 

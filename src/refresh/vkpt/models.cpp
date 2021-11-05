@@ -690,6 +690,22 @@ qerror_t MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, con
 	model->nummeshes = (int)model->iqmData->num_meshes;
 	model->numframes = 1; // these are baked frames, so that the VBO uploader will only make one copy of the vertices
 
+	// Strip the .iqm extension and replace it with .mat of course!
+	char mat_name[MAX_QPATH];			// Material name.
+	char mod_name_no_ext[MAX_QPATH];	// Model name without extension.
+	COM_StripExtension(mod_name, mod_name_no_ext, MAX_QPATH);
+	Q_snprintf(mat_name, sizeof(mat_name), "%s.mat", mod_name_no_ext);
+
+	// Load the IQM model .mat file that belongs to the model itself.
+	// Always found in the same folder as the model.
+	// 
+	// Ensure to avoid name duplicates etc that your name for the textures are like:
+	// "/models/poly/poly_glow"
+	// "/models/poly/poly_chrome"
+	//
+	// For the unobvious, without them quotes yes.
+	MAT_LoadFromFile(mat_name);
+
 	for (unsigned model_idx = 0; model_idx < model->iqmData->num_meshes; model_idx++) 	{
 		iqm_mesh_t* iqm_mesh = &model->iqmData->meshes[model_idx];
 		maliasmesh_t* mesh = &model->meshes[model_idx];
@@ -717,9 +733,12 @@ qerror_t MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, con
 			mesh->indices[triangle_idx * 3 + 1] = tri[1] - (int)iqm_mesh->first_vertex;
 			mesh->indices[triangle_idx * 3 + 2] = tri[0] - (int)iqm_mesh->first_vertex;
 		}
-
+		
+		// Generate precise file name to "search for".
 		char filename[MAX_QPATH];
 		Q_snprintf(filename, sizeof(filename), "%s/%s.pcx", base_path, iqm_mesh->material);
+
+		// Find the specific matterial in our list.
 		pbr_material_t* mat = MAT_Find(filename, IT_SKIN, IF_NONE);
 		assert(mat); // it's either found or created
 

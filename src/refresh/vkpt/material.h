@@ -77,6 +77,15 @@ void MAT_ChangeMap(const char* map_name);
 // all available textures will be initialized in the returned material
 pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags);
 
+// Loads the materials from a file path example: models/logo/poly_logo.mat
+void MAT_LoadFromFile(const char* path);
+
+// Loads the material files in the given folder.
+// All textures will be initialized as well.
+// Example: models/homes/
+// Each and every .mat file in that folder will be loaded.
+void MAT_LoadFromFolder(const char* folder);
+
 // registration sequence: update registration sequence of images used by the material
 void MAT_UpdateRegistration(pbr_material_t* mat);
 
