@@ -26,15 +26,15 @@ In order to acquire the sauce, one has to do a recursive submodules checkout, ot
 Nothing more than using cmake on the Sauce root folder, or using Visual Studio's "Open Folder" which'll use CMake from there.
 ### Windows 10 - VS2019
 
-  1. Clone the repository and its submodules from git :
-     `git clone --branch Engine-0.2 --recursive https://github.com/PalmliXStudios/Polyhedron-Engine `
+  1. Clone the repository and its submodules from git:
+     `git clone --recursive https://github.com/PalmliXStudios/Polyhedron-Engine `
 
   2. Start VS2019, and use the "Open Folder" method to open the project, as one normally would when using CMake projects.  
 
 ### Linux
 
   1. Clone the repository and its submodules from git:
-  `git clone--recursive https://github.com/PalmliXStudios/Polyhedron-Engine `
+  `git clone --recursive https://github.com/PalmliXStudios/Polyhedron-Engine `
 
   2. Create a build folder inside your <PROJECT_ROOT> directory. Open a terminal in this location, and enter the following:
   `cmake ../src && make`
