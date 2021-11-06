@@ -258,6 +258,9 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
     qerror_t    ret;
     size_t      len;
 
+    // Backup this serverinfo string
+    qboolean is_in_bspmenu = (Cvar_Get("in_bspmenu", "0", CVAR_LATCH | CVAR_ROM)->integer != 0 ? true : false);
+
     s = cmd->buffer;
 
     // skip the end-of-unit flag if necessary
@@ -304,13 +307,6 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
     else {
         len = Q_concat(expanded, sizeof(expanded), "maps/", s, ".bsp", NULL);
 
-        // A check for BSP MainMenu.
-        if (!strcmp(s, "mainmenu")) {
-            Cvar_SetEx("in_bspmenu", "1", FROM_CODE);
-        } else {
-            Cvar_SetEx("in_bspmenu", "0", FROM_CODE);
-        }
- 
         if (len >= sizeof(expanded)) {
             ret = Q_ERR_NAMETOOLONG;
         } else {
@@ -322,6 +318,11 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
     if (ret < 0) {
         Com_Printf("Couldn't load %s: %s\n", expanded, Q_ErrorString(ret));
         return false;
+    }
+
+    // A check for BSP MainMenu.
+    if (!strcmp(s, "mainmenu")) {
+        Cvar_SetEx("in_bspmenu", "1", FROM_CODE);
     }
 
     return true;
