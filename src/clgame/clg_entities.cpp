@@ -393,6 +393,11 @@ void CLG_AddViewWeapon(void)
     r_entity_t    gun;        // view model
     int         i, shell_flags = 0;
 
+    // Hidden in bsp menu mode.
+    if (info_in_bspmenu->integer) {
+        return;
+    }
+
     // allow the gun to be completely removed
     if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED) {
         return;
