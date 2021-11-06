@@ -109,8 +109,13 @@ char        cl_cmdbuf_text[MAX_STRING_CHARS];
 
 //======================================================================
 // Opens the mainmenu only if a map has serverinfo var "in_bspmenu" set to 1
-qboolean CL_InBSPMenuMap() {
-    if (info_in_bspmenu->integer == 1) {
+qboolean CL_InBSPMenu() {
+    char serverinfo[MAX_INFO_STRING];
+    Cvar_BitInfo(serverinfo, CVAR_SERVERINFO);
+
+    int in_bspmenu = atoi(Info_ValueForKey(serverinfo, "in_bspmenu"));
+
+    if (in_bspmenu == 1 && cls.connectionState >= ClientConnectionState::Active) {
         return true;
     } else {
         return false;
@@ -118,8 +123,14 @@ qboolean CL_InBSPMenuMap() {
 }
 
 void CL_OpenBSPMenu() {
-    if (CL_InBSPMenuMap()) {
+    if (CL_InBSPMenu()) {
         UI_OpenMenu(UIMENU_GAME);
+    }
+}
+
+void CL_CloseBSPMenu() {
+    if (!CL_InBSPMenu()) {
+        UI_OpenMenu(UIMENU_NONE);
     }
 }
 
@@ -322,7 +333,6 @@ void CL_CheckForResend(void)
         cls.passive = false;
 
         Con_Popup(true);
-        UI_OpenMenu(UIMENU_NONE);
     }
 
     // resend if we haven't gotten a reply yet
@@ -495,7 +505,7 @@ static void CL_Connect_f(void)
 
     if (argc < 2) {
 usage:
-        Com_Printf("Usage: %s <server> [34|35|36]\n", Cmd_Argv(0));
+        Com_Printf("Usage: %s <server> [1337|1340|1341]\n", Cmd_Argv(0));
         return;
     }
 
@@ -751,11 +761,6 @@ void CL_Disconnect(ErrorType type)
         return;
     }
 
-    // We don't want to be able to disconnect ourselves from this place.
-    if (CL_InBSPMenuMap()) {
-        return;
-    }
-
     //cvar_t *info_in_bspmenu = Info_SetValueForKey("in_bspmenu")
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
@@ -807,13 +812,18 @@ void CL_Disconnect(ErrorType type)
 
     cls.userinfo_modified = 0;
 
-    if (type == ERR_DISCONNECT) {
+    if (type == ERR_DISCONNECT || type == ERR_DROP) {
         //UI_OpenMenu(UIMENU_DEFAULT);
-        //Cmd_ExecuteCommand(&cl_cmdbuf);
+        Cmd_ExecuteCommand(&cl_cmdbuf);
+
         // Return to mainmenu map.
-        CL_OpenBSPMenu();
+        if (!CL_InBSPMenu()) {
+            CL_LoadBSPMenuMap();
+            CL_OpenBSPMenu();
+        }
     } else {
-        UI_OpenMenu(UIMENU_NONE);
+        Cvar_SetEx("in_bspmenu", "0", FROM_CODE);
+        CL_CloseBSPMenu();
     }
 
     CL_CheckForPause();
@@ -829,7 +839,7 @@ CL_Disconnect_f
 static void CL_Disconnect_f(void)
 {
     // No disconnecting from our bsp mainmenu.
-    if (CL_InBSPMenuMap()) {
+    if (CL_InBSPMenu()) {
         return;
     }
 
@@ -2884,7 +2894,7 @@ void CL_CheckForPause(void)
 
     if (cls.key_dest & (KEY_CONSOLE | KEY_MENU)) {
         // only pause in single player
-        if (cl_paused->integer == 0 && (!CL_InBSPMenuMap())) {
+        if (cl_paused->integer == 0 && (!CL_InBSPMenu())) {
             Cvar_Set("cl_paused", "1");
 			OGG_TogglePlayback();
         }

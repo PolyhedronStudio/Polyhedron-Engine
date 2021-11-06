@@ -137,7 +137,7 @@ void UI_ForceMenuOff(void)
     //    }
     //}
     for (i = uis.menuDepth; i > 0; i--) {
-        if (i >= 1 && CL_InBSPMenuMap()) {
+        if (i >= 1 && CL_InBSPMenu()) {
             return;
         }
 
@@ -168,7 +168,7 @@ void UI_PopMenu(void)
     if (uis.menuDepth < 1)
         Com_Error(ERR_FATAL, "UI_PopMenu: depth < 1");
 
-    if (uis.menuDepth == 1 && CL_InBSPMenuMap()) {
+    if (uis.menuDepth == 1 && CL_InBSPMenu()) {
         return;
     }
 

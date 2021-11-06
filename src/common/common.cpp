@@ -497,11 +497,11 @@ void Com_Error(ErrorType code, const char *fmt, ...)
 
     // Prevent disconnecting to a black menu etc.
     #if CLIENT
-    if(code == ERR_DISCONNECT) {
-        // Let's go haha.
-        CL_OpenBSPMenu(true);
-        CL_ForwardToServer();
-    }
+    //if(code == ERR_DISCONNECT) {
+    //    // Let's go haha.
+    //    CL_OpenBSPMenu(true);
+    //    CL_ForwardToServer();
+    //}
     #endif
 
     // may not be entered recursively

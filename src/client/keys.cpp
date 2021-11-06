@@ -737,7 +737,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
 //
 // if not a consolekey, send to the interpreter no matter what mode is
 //
-    if (!CL_InBSPMenuMap() && (cls.key_dest == KEY_GAME) ||
+    if (!CL_InBSPMenu() && (cls.key_dest == KEY_GAME) ||
         ((cls.key_dest & KEY_CONSOLE) && !Q_IsBitSet(consolekeys, key)) ||
         ((cls.key_dest & KEY_MENU) && (key >= K_F1 && key <= K_F12)) ||
         (!down && Q_IsBitSet(buttondown, key))) {
