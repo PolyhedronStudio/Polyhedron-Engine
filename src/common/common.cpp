@@ -111,8 +111,6 @@ cvar_t  *allow_download_others;
 
 cvar_t  *rcon_password;
 
-extern cvar_t *fs_shareware;
-
 const char  com_version_string[] =
     APPLICATION " " VERSION_STRING " " __DATE__ " " BUILDSTRING " " CPUSTRING;
 
@@ -496,6 +494,15 @@ void Com_Error(ErrorType code, const char *fmt, ...)
     char            msg[MAXERRORMSG];
     va_list         argptr;
     size_t          len;
+
+    // Prevent disconnecting to a black menu etc.
+    #if CLIENT
+    if(code == ERR_DISCONNECT) {
+        // Let's go haha.
+        CL_OpenBSPMenu(true);
+        CL_ForwardToServer();
+    }
+    #endif
 
     // may not be entered recursively
     if (com_errorEntered) {

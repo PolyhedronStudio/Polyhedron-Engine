@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "rmlui/rmlui.h"
 
 #include "client.h"
+#include "client/ui/ui.h"
 #include "client/sound/vorbis.h"
 #include "client/gamemodule.h"
 
@@ -73,27 +74,25 @@ cvar_t  *cl_cinematics;
 //
 // userinfo
 //
-cvar_t  *info_password;
-cvar_t  *info_spectator;
-cvar_t  *info_name;
-cvar_t  *info_skin;
-cvar_t  *info_rate;
-cvar_t  *info_fov;
-cvar_t  *info_msg;
-cvar_t  *info_hand;
-cvar_t  *info_uf;
+cvar_t  *info_password      = nullptr;
+cvar_t  *info_spectator     = nullptr;
+cvar_t  *info_name          = nullptr;
+cvar_t  *info_skin          = nullptr;
+cvar_t  *info_rate          = nullptr;
+cvar_t  *info_fov           = nullptr;
+cvar_t  *info_msg           = nullptr;
+cvar_t  *info_hand          = nullptr;
+cvar_t  *info_uf            = nullptr;
+cvar_t  *info_in_bspmenu    = nullptr;
 
 // N&C: Developer utilities.
 cvar_t* dev_map;
-//cvar_t* dev_maplist;
-
 #if USE_REF == REF_GL
 extern cvar_t *gl_modulate_world;
 extern cvar_t *gl_modulate_entities;
 extern cvar_t *gl_brightness;
 #endif
 
-extern cvar_t *fs_shareware;
 
 extern cvar_t *cl_renderdemo;
 extern cvar_t *cl_renderdemo_fps;
@@ -107,6 +106,31 @@ ClientShared cs;
 // used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
 char        cl_cmdbuf_text[MAX_STRING_CHARS];
+
+//======================================================================
+// Opens the mainmenu only if a map has serverinfo var "in_bspmenu" set to 1
+qboolean CL_InBSPMenuMap() {
+    if (info_in_bspmenu->integer == 1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void CL_OpenBSPMenu() {
+    if (CL_InBSPMenuMap()) {
+        UI_OpenMenu(UIMENU_GAME);
+    }
+}
+
+void CL_LoadBSPMenuMap(qboolean force = false) {
+    // Open mainmenu map.
+    if (force == false) {
+        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
+    } else {
+        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
+    }
+}
 
 //======================================================================
 
@@ -367,10 +391,10 @@ static void CL_Connect_c(genctx_t *ctx, int argnum)
         CL_RecentIP_g(ctx);
         Com_Address_g(ctx);
     } else if (argnum == 2) {
-        if (!ctx->partial[0] || (ctx->partial[0] == '3' && !ctx->partial[1])) {
-            Prompt_AddMatch(ctx, "34");
-            Prompt_AddMatch(ctx, "35");
-            Prompt_AddMatch(ctx, "36");
+        if (!ctx->partial[0] || (ctx->partial[0] == '1' && ctx->partial[1] == '3')) {
+            Prompt_AddMatch(ctx, "1337");
+            Prompt_AddMatch(ctx, "1340");
+            Prompt_AddMatch(ctx, "1341");
         }
     }
 }
@@ -727,6 +751,12 @@ void CL_Disconnect(ErrorType type)
         return;
     }
 
+    // We don't want to be able to disconnect ourselves from this place.
+    if (CL_InBSPMenuMap()) {
+        return;
+    }
+
+    //cvar_t *info_in_bspmenu = Info_SetValueForKey("in_bspmenu")
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
     // N&C: Call into the CG Module to inform that we're disconnected.
@@ -734,6 +764,7 @@ void CL_Disconnect(ErrorType type)
 
     if (cls.connectionState > ClientConnectionState::Disconnected && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);
+        //Cbuf_AddText(&cmd_buffer, "bspmainmenu");
     }
 
 #if 0
@@ -777,7 +808,10 @@ void CL_Disconnect(ErrorType type)
     cls.userinfo_modified = 0;
 
     if (type == ERR_DISCONNECT) {
-        UI_OpenMenu(UIMENU_DEFAULT);
+        //UI_OpenMenu(UIMENU_DEFAULT);
+        //Cmd_ExecuteCommand(&cl_cmdbuf);
+        // Return to mainmenu map.
+        CL_OpenBSPMenu();
     } else {
         UI_OpenMenu(UIMENU_NONE);
     }
@@ -794,6 +828,11 @@ CL_Disconnect_f
 */
 static void CL_Disconnect_f(void)
 {
+    // No disconnecting from our bsp mainmenu.
+    if (CL_InBSPMenuMap()) {
+        return;
+    }
+
     if (cls.connectionState > ClientConnectionState::Disconnected) {
         Com_Error(ERR_DISCONNECT, "Disconnected from server");
     }
@@ -2299,7 +2338,8 @@ void CL_RestartFilesystem(qboolean total)
     }
 
     if (clientConnectionState == ClientConnectionState::Disconnected) {
-        UI_OpenMenu(UIMENU_DEFAULT);
+        
+        //UI_OpenMenu(UIMENU_DEFAULT);
     } else if (clientConnectionState >= ClientConnectionState::Loading && clientConnectionState <= ClientConnectionState::Active) {
         CL_LoadState(LOAD_MAP);
         CL_PrepareMedia();
@@ -2629,6 +2669,7 @@ static void CL_InitLocal(void)
     // userinfo
     //
     info_rate = Cvar_Get("rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
 
     // N&C: Developer utilities.
     dev_map = Cvar_Get("dev_map", "", CVAR_ARCHIVE);
@@ -2843,7 +2884,7 @@ void CL_CheckForPause(void)
 
     if (cls.key_dest & (KEY_CONSOLE | KEY_MENU)) {
         // only pause in single player
-        if (cl_paused->integer == 0 && cl_autopause->integer) {
+        if (cl_paused->integer == 0 && (!CL_InBSPMenuMap())) {
             Cvar_Set("cl_paused", "1");
 			OGG_TogglePlayback();
         }
@@ -3210,8 +3251,6 @@ void CL_Init(void)
     // Initialize RMLUI
     RMLUI_Init();
 
-    UI_OpenMenu(UIMENU_DEFAULT);
-
     Con_PostInit();
     Con_RunConsole();
 
@@ -3222,6 +3261,8 @@ void CL_Init(void)
 
     Cvar_Set("cl_running", "1");
 
+    // Open mainmenu map.
+    CL_LoadBSPMenuMap();
 }
 
 /*

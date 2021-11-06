@@ -722,6 +722,49 @@ static void load_material_image(image_t** image, const char* filename, pbr_mater
 	}
 }
 
+void MAT_LoadFromFile(const char* path) {
+	int mat_slots_available = MAX_PBR_MATERIALS - num_global_materials;
+	if (mat_slots_available > 0) {
+		uint32_t count = load_material_file(path, r_global_materials + num_global_materials,
+			mat_slots_available);
+		num_global_materials += count;
+
+		Com_Printf("Loaded %d materials from %s\n", count, path);
+	} else {
+		Com_WPrintf("Coundn't load materials from %s: no free slots.\n", path);
+	}
+
+	sort_and_deduplicate_materials(r_global_materials, &num_global_materials);
+}
+
+void MAT_LoadFromFolder(const char* folder) {
+	// find all *.mat files in the root
+	int num_files;
+	void** list = FS_ListFiles(folder, ".mat", 0, &num_files);
+
+	for (int i = 0; i < num_files; i++) {
+		char* file_name = (char*)list[i];
+		char buffer[MAX_QPATH];
+		Q_concat(buffer, sizeof(buffer), folder, "/", file_name, NULL);
+
+		int mat_slots_available = MAX_PBR_MATERIALS - num_global_materials;
+		if (mat_slots_available > 0) {
+			uint32_t count = load_material_file(buffer, r_global_materials + num_global_materials,
+				mat_slots_available);
+			num_global_materials += count;
+
+			Com_Printf("Loaded %d materials from %s\n", count, buffer);
+		} else {
+			Com_WPrintf("Coundn't load materials from %s: no free slots.\n", buffer);
+		}
+
+		Z_Free(file_name);
+	}
+	Z_Free(list);
+
+	sort_and_deduplicate_materials(r_global_materials, &num_global_materials);
+}
+
 pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags) {
 	char mat_name_no_ext[MAX_QPATH];
 	truncate_extension(name, mat_name_no_ext);
@@ -763,7 +806,7 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 				if (mat->image_base == R_NOTEXTURE) {
 					mat->image_base = NULL;
 				}
-			} 			else 			{
+			} else {
 				IMG_GetDimensions(name, &mat->image_base->width, &mat->image_base->height);
 			}
 		}
@@ -791,7 +834,7 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 				mat->image_mask = NULL;
 			}
 		}
-	} 	else 	{
+	} else {
 		MAT_Reset(mat);
 		Q_strlcpy(mat->name, mat_name_no_ext, sizeof(mat->name));
 
@@ -818,7 +861,7 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 			Q_strlcpy(mat->filename_emissive, mat->image_emissive->filepath, sizeof(mat->filename_emissive));
 
 		// If there is no normals/metalness image, assume that the material is a basic diffuse one.
-		if (!mat->image_normals) 		{
+		if (!mat->image_normals) {
 			mat->specular_factor = 0.f;
 			mat->metalness_factor = 0.f;
 		}

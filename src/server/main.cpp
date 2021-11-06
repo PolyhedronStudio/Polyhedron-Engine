@@ -28,9 +28,9 @@ LIST_DECL(sv_filterlist);
 LIST_DECL(sv_clientlist);   // linked list of non-free clients
 
 client_t    *sv_client;         // current client
-Entity     *sv_player;         // current client edict
+Entity      *sv_player;         // current client edict
 
-qboolean     sv_pending_autosave = 0;
+qboolean    sv_pending_autosave = 0;
 
 cvar_t  *sv_enforcetime;
 cvar_t  *sv_allow_nodelta;
@@ -49,6 +49,8 @@ cvar_t  *sv_show_name_changes;
 cvar_t  *sv_airaccelerate;
 cvar_t  *sv_qwmod;              // atu QW Physics modificator
 cvar_t  *sv_novis;
+
+cvar_t* sv_in_bspmenu;
 
 cvar_t  *sv_maxclients;
 cvar_t  *sv_reserved_slots;
@@ -833,7 +835,7 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
 		s = Info_ValueForKey(info, "version");
 		if (strncmp(s, "Polyhedron", 10) != 0)
 		{
-			return reject("This server is only available to Q2RTX clients.\n");
+			return reject("This server is only available to Polyhedron clients.\n");
 		}
 	}
 
@@ -1920,7 +1922,6 @@ void SV_Init(void)
     SV_RegisterSavegames();
 
     Cvar_Get("protocol", STRINGIFY(PROTOCOL_VERSION_DEFAULT), CVAR_SERVERINFO | CVAR_ROM);
-
     Cvar_Get("skill", "1", CVAR_LATCH);
     Cvar_Get("deathmatch", "1", CVAR_SERVERINFO | CVAR_LATCH);
     Cvar_Get("coop", "0", /*CVAR_SERVERINFO|*/CVAR_LATCH);
@@ -1928,6 +1929,7 @@ void SV_Init(void)
     Cvar_Get("gamemodeflags", "16", CVAR_SERVERINFO); // 16 = DF_INSTANT_ITEMS
     Cvar_Get("fraglimit", "0", CVAR_SERVERINFO);
     Cvar_Get("timelimit", "0", CVAR_SERVERINFO);
+    sv_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
 
     sv_maxclients = Cvar_Get("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
     sv_reserved_slots = Cvar_Get("sv_reserved_slots", "0", CVAR_LATCH);

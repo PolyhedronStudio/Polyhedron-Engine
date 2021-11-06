@@ -58,6 +58,16 @@ public:
         return this->startFrame;
     }
 
+    // Get the 'boundingboxMaxs' value.
+    inline const vec3_t& GetBoundingBoxMaxs() {
+        return this->boundingBoxMaxs;
+    }
+
+    // Get the 'boundingboxMins' value.
+    inline const vec3_t& GetBoundingBoxMins() {
+        return this->boundingBoxMins;
+    }
+
     //
     // Callback Functions.
     //

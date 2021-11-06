@@ -447,6 +447,7 @@ extern list_t      sv_clientlist; // linked list of non-free clients
 extern ServerStatic  svs;        // persistant server info
 extern server_t      sv;         // local server
 
+extern cvar_t       *sv_in_bspmenu;
 extern cvar_t       *sv_hostname;
 extern cvar_t       *sv_maxclients;
 extern cvar_t       *sv_password;

@@ -167,7 +167,8 @@ extern cvar_t* info_password;
 extern cvar_t* info_skin;
 extern cvar_t* info_spectator;
 extern cvar_t* info_uf;
-
+extern cvar_t* info_in_bspmenu;     // Is set to 1  at boot time when loading mainmenu.bsp, and is set 
+                                    // to 1 when disconnecting from a server hence, once again, loading mainmenu.bsp
 // Video.
 extern cvar_t* vid_rtx;     // 1 if we're in RTX mode, 0 if not.
 

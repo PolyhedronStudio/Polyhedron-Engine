@@ -122,9 +122,10 @@ static void cl_vwep_changed(cvar_t* self) {
     if (clgi.GetClienState() < ClientConnectionState::Loading) {
         return;
     }
+
     // Register view weapon models again.
     CLG_RegisterVWepModels();
-    //cl_noskins_changed(self);
+    cl_noskins_changed(self);
 }
 
 
@@ -210,7 +211,7 @@ void ClientGameCore::Initialize() {
     info_hand = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
     info_skin = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
     info_uf = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
-
+    info_in_bspmenu = clgi.Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
     // TODO: not sure what this is for, don't see it used anywhere.
     info_msg = clgi.Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
     info_password = clgi.Cvar_Get("password", "", CVAR_USERINFO);
@@ -249,5 +250,5 @@ void ClientGameCore::Initialize() {
 //
 //---------------
 void ClientGameCore::Shutdown() {
-
+    clgi.Cmd_Unregister(cmd_cgmodule);
 }

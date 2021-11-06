@@ -50,41 +50,43 @@ clientgame_t clg;
 //
 // CVar.
 //
-cvar_t *cl_chat_notify  = NULL;
-cvar_t *cl_chat_sound   = NULL;
-cvar_t *cl_chat_filter  = NULL;
-cvar_t *cl_disable_particles    = NULL;
-cvar_t *cl_disable_explosions   = NULL;
-cvar_t *cl_explosion_sprites    = NULL;
-cvar_t *cl_explosion_frametime  = NULL;
-cvar_t *cl_footsteps    = NULL;
-cvar_t *cl_gunalpha     = NULL;
-cvar_t *cl_kickangles   = NULL;
-cvar_t *cl_monsterfootsteps = NULL;
-cvar_t *cl_noglow   = NULL;
-cvar_t *cl_noskins  = NULL;
-cvar_t *cl_player_model = NULL;
-cvar_t *cl_predict  = NULL;
-cvar_t *cl_rollhack = NULL;
-cvar_t *cl_thirdperson_angle    = NULL;
-cvar_t *cl_thirdperson_range    = NULL;
-cvar_t *cl_vwep     = NULL;
+cvar_t *cl_chat_notify          = nullptr;
+cvar_t *cl_chat_sound           = nullptr;
+cvar_t *cl_chat_filter          = nullptr;
+cvar_t *cl_disable_particles    = nullptr;
+cvar_t *cl_disable_explosions   = nullptr;
+cvar_t *cl_explosion_sprites    = nullptr;
+cvar_t *cl_explosion_frametime  = nullptr;
+cvar_t *cl_footsteps            = nullptr;
+cvar_t *cl_gunalpha             = nullptr;
+cvar_t *cl_kickangles           = nullptr;
+cvar_t *cl_monsterfootsteps     = nullptr;
+cvar_t *cl_noglow               = nullptr;
+cvar_t *cl_noskins              = nullptr;
+cvar_t *cl_player_model         = nullptr;
+cvar_t *cl_predict              = nullptr;
+cvar_t *cl_rollhack             = nullptr;
+cvar_t *cl_thirdperson_angle    = nullptr;
+cvar_t *cl_thirdperson_range    = nullptr;
+cvar_t *cl_vwep                 = nullptr;
 
 // Refresh.
-cvar_t* cvar_pt_beam_lights = NULL;
+cvar_t* cvar_pt_beam_lights     = nullptr;
 
 // Server.
-cvar_t *sv_paused   = NULL;
+cvar_t *sv_paused   = nullptr;
 
 // User Info.
-cvar_t *info_fov        = NULL;
-cvar_t *info_hand       = NULL;
-cvar_t *info_msg        = NULL;
-cvar_t *info_name       = NULL;
-cvar_t *info_password   = NULL;
-cvar_t *info_skin       = NULL;
-cvar_t *info_spectator  = NULL;
-cvar_t *info_uf         = NULL;
+cvar_t *info_fov        = nullptr;
+cvar_t *info_hand       = nullptr;
+cvar_t *info_msg        = nullptr;
+cvar_t *info_name       = nullptr;
+cvar_t *info_password   = nullptr;
+cvar_t *info_skin       = nullptr;
+cvar_t *info_spectator  = nullptr;
+cvar_t *info_uf         = nullptr;
+cvar_t *info_in_bspmenu = nullptr; // Is set to 1  at boot time when loading mainmenu.bsp, and is set 
+                                // to 1 when disconnecting from a server hence, once again, loading mainmenu.bsp
 
 // Video.
 cvar_t* vid_rtx = NULL;
@@ -390,97 +392,7 @@ static void cl_vwep_changed(cvar_t* self)
     }
     // Register view weapon models again.
     CLG_RegisterVWepModels();
-    //cl_noskins_changed(self);
-}
-
-//
-//===============
-// CLG_Init
-// 
-// Handles the initialisation of the CG Module.
-//===============
-//
-void CLG_Init() {
-    // Begin init log.
-    Com_Print("\n%s\n", "==== InitCLGame ====");
-
-    // Register user input.
-    CLG_RegisterInput();
-
-    // Here we fetch cvars that were created by the client.
-    // These are nescessary for certain CG Module functionalities.
-    cl_kickangles            = clgi.Cvar_Get("cl_kickangles", NULL, 0);
-    cl_noglow                = clgi.Cvar_Get("cl_noglow", NULL, 0);
-    cl_noskins               = clgi.Cvar_Get("cl_noskins", "0", 0);
-    cl_noskins->changed      = cl_noskins_changed;
-    cl_predict               = clgi.Cvar_Get("cl_predict", NULL, 0);
-    cl_rollhack              = clgi.Cvar_Get("cl_rollhack", NULL, 0);
-    sv_paused                = clgi.Cvar_Get("sv_paused", NULL, 0);
-
-    // Create the CG Module its own cvars here.
-    cl_footsteps             = clgi.Cvar_Get("cl_footsteps", "1", 0);
-    cl_gunalpha              = clgi.Cvar_Get("cl_gunalpha", "1", 0);
-    // TODO: This one was never implemented at all!!
-    cl_monsterfootsteps      = clgi.Cvar_Get("cl_monsterfootsteps", "1", 0);
-    cl_player_model          = clgi.Cvar_Get("cl_player_model", va("%d", CL_PLAYER_MODEL_FIRST_PERSON), CVAR_ARCHIVE);
-    cl_player_model->changed = cl_player_model_changed;
-    cl_thirdperson_angle     = clgi.Cvar_Get("cl_thirdperson_angle", "0", 0);
-    cl_thirdperson_range     = clgi.Cvar_Get("cl_thirdperson_range", "60", 0);
-
-    cl_chat_notify           = clgi.Cvar_Get("cl_chat_notify", "1", 0);
-    cl_chat_sound            = clgi.Cvar_Get("cl_chat_sound", "1", 0);
-    cl_chat_sound->changed   = cl_chat_sound_changed;
-    cl_chat_sound_changed(cl_chat_sound);
-    cl_chat_filter           = clgi.Cvar_Get("cl_chat_filter", "0", 0);
-
-    cl_disable_particles     = clgi.Cvar_Get("cl_disable_particles", "0", 0);
-    cl_disable_explosions    = clgi.Cvar_Get("cl_disable_explosions", "0", 0);
-    cl_explosion_sprites     = clgi.Cvar_Get("cl_explosion_sprites", "1", 0);
-    cl_explosion_frametime   = clgi.Cvar_Get("cl_explosion_frametime", "20", 0);
-    cl_vwep                  = clgi.Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
-    cl_vwep->changed         = cl_vwep_changed;
-
-    //
-    // User Info.
-    //
-    info_name               = clgi.Cvar_Get("name", "Player", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_fov                = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_hand               = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_skin               = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_uf                 = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
-    
-    // TODO: not sure what this is for, don't see it used anywhere.
-    info_msg                = clgi.Cvar_Get("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_password           = clgi.Cvar_Get("password", "", CVAR_USERINFO);
-    info_spectator          = clgi.Cvar_Get("spectator", "0", CVAR_USERINFO);
-
-    // Video.
-    vid_rtx                 = clgi.Cvar_Get("vid_rtx", NULL, 0);
-
-    // Register our macros.
-    clgi.Cmd_AddMacro("cl_health", CL_Health_m);
-    clgi.Cmd_AddMacro("cl_ammo", CL_Ammo_m);
-    clgi.Cmd_AddMacro("cl_armor", CL_Armor_m);
-    clgi.Cmd_AddMacro("cl_weaponmodel", CL_WeaponModel_m);
-
-    // Register our commands.
-    clgi.Cmd_Register(cmd_cgmodule);
-
-    // Generate a random user name to avoid new users being kicked out of MP servers.
-    // The default N&C config files set the user name to "Player", same as the cvar initialization above.
-    if (Q_strcasecmp(info_name->string, "Player") == 0)
-    {
-        int random_number = rand() % 10000;
-        char buf[MAX_CLIENT_NAME];
-        Q_snprintf(buf, sizeof(buf), "n00b-%04d", random_number);
-        clgi.Cvar_Set("name", buf);
-    }
-
-    // Initialize effects.
-    CLG_EffectsInit();
-
-    // Initialize temporary entities.
-    CLG_InitTempEntities();
+    cl_noskins_changed(self);
 }
 
 //
@@ -569,18 +481,6 @@ void CLG_DemoSeek(void) {
     CLG_ClearEffects();
     // Clear Temp Entities.
     CLG_ClearTempEntities();
-}
-
-//
-//===============
-// CLG_Shutdown
-// 
-// Handles the shutdown of the CG Module.
-// ===============
-//
-void CLG_Shutdown(void) {
-    // Deregister commands.
-    clgi.Cmd_Unregister(cmd_cgmodule);
 }
 
 //

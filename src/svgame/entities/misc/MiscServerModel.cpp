@@ -80,7 +80,7 @@ void MiscServerModel::Spawn() {
     SetMoveType(MoveType::None);
 
     // Since this is a "monster", after all...
-    //SetFlags(EntityServerFlags::Monster);
+    SetFlags(EntityServerFlags::Monster);
 
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -189,8 +189,17 @@ void MiscServerModel::Think() {
 //
 //===============
 void MiscServerModel::SpawnKey(const std::string& key, const std::string& value) {
+
     if (key == "model") {
         ParseStringKeyValue(key, value, model);
+    } else if (key == "boundingboxmins") {
+        vec3_t bbMins = { 40,  40, 16}; // Defaults..
+        ParseVector3KeyValue(key, value, bbMins);
+        SetBoundingBox(bbMins, GetBoundingBoxMaxs());
+    } else if (key == "boundingboxmaxs") {
+        vec3_t bbMaxs = { -40, -40, 0 }; // Defaults..
+        ParseVector3KeyValue(key, value, bbMaxs);
+        SetBoundingBox(GetBoundingBoxMins(), bbMaxs);
     } else if (key == "endframe") {
         ParseIntegerKeyValue(key, value, endFrame);
     } else if (key == "startframe") {
@@ -199,6 +208,10 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
         uint32_t parsedEffects = 0;
         ParseUnsignedIntegerKeyValue(key, value, parsedEffects);
         SetEffects(parsedEffects);
+    } else if (key == "rendereffects") {
+        uint32_t parsedRenderEffects = 0;
+        ParseUnsignedIntegerKeyValue(key, value, parsedRenderEffects);
+        SetRenderEffects(parsedRenderEffects);
     } else if (key == "noise") {
         std::string parsedNoisePath = "";
 

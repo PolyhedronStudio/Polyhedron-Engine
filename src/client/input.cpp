@@ -95,8 +95,14 @@ static qboolean IN_GetCurrentGrab(void)
             return false;  // isSpectator mode
     }
 
-    if (in_grab->integer >= 1)
-        return true;   // regular playing mode
+    if (in_grab->integer >= 1) {
+        // We don't want the mouse to fire a weapon etc in this mainmenu mode.
+        if (CL_InBSPMenuMap()) {
+            return false;
+        } else {
+            return true;   // regular playing mode
+        }
+    }
 
     return false;
 }
@@ -420,7 +426,7 @@ static void CL_SendUserCommand(void)
     size_t currentSize q_unused, checksumIndex;
     ClientMoveCommand *cmd, *oldcmd;
     ClientUserCommandHistory*history;
-
+    
     // archive this packet
     history = &cl.clientCommandHistory[cls.netChannel->outgoingSequence & CMD_MASK];
     history->commandNumber = cl.currentClientCommandNumber;
@@ -455,14 +461,23 @@ static void CL_SendUserCommand(void)
     // send this and the previous clientUserCommands in the message, so
     // if the last packet was dropped, it can be recovered
     cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 2) & CMD_MASK];
+    // Ugly hack, but otherwise the player can shoot if he opens the cnsole in mainmenu.
+    if (CL_InBSPMenuMap())
+        cmd->input.buttons = 0;
     MSG_WriteDeltaClientMoveCommand(NULL, cmd);
     oldcmd = cmd;
 
     cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 1) & CMD_MASK];
+    // Ugly hack, but otherwise the player can shoot if he opens the cnsole in mainmenu.
+    if (CL_InBSPMenuMap())
+        cmd->input.buttons = 0;
     MSG_WriteDeltaClientMoveCommand(oldcmd, cmd);
     oldcmd = cmd;
 
     cmd = &cl.clientUserCommands[cl.currentClientCommandNumber & CMD_MASK];
+    // Ugly hack, but otherwise the player can shoot if he opens the cnsole in mainmenu.
+    if (CL_InBSPMenuMap())
+        cmd->input.buttons = 0;
     MSG_WriteDeltaClientMoveCommand(oldcmd, cmd);
 
     P_FRAMES++;
