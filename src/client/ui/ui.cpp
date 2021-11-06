@@ -31,6 +31,14 @@ static cvar_t    *ui_scale;
 
 // ===========================================================================
 
+qboolean UI_IsMenuOpen() {
+    if (!uis.activeMenu || uis.menuDepth <= 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /*
 =================
 UI_PushMenu
@@ -119,12 +127,22 @@ UI_ForceMenuOff
 */
 void UI_ForceMenuOff(void)
 {
-    menuFrameWork_t *menu;
+    menuFrameWork_t* menu;
     int i;
 
-    for (i = 0; i < uis.menuDepth; i++) {
+    //for (i = 0; i < uis.menuDepth; i++) {
+    //    menu = uis.layers[i];
+    //    if (menu->pop) {
+    //        menu->pop(menu);
+    //    }
+    //}
+    for (i = uis.menuDepth; i > 0; i--) {
+        if (i >= 1 && CL_InBSPMenuMap()) {
+            return;
+        }
+
         menu = uis.layers[i];
-        if (menu->pop) {
+        if (menu && menu->pop) {
             menu->pop(menu);
         }
     }
@@ -133,8 +151,9 @@ void UI_ForceMenuOff(void)
     Key_SetDest((keydest_t)(Key_GetDest() & ~KEY_MENU));
     uis.menuDepth = 0;
     uis.activeMenu = NULL;
-    uis.mouseTracker = NULL;
+    uis.mouseTracker = NULL;    
     uis.transparent = false;
+
 }
 
 /*
@@ -144,10 +163,14 @@ UI_PopMenu
 */
 void UI_PopMenu(void)
 {
-    menuFrameWork_t *menu;
+    menuFrameWork_t* menu;
 
     if (uis.menuDepth < 1)
         Com_Error(ERR_FATAL, "UI_PopMenu: depth < 1");
+
+    if (uis.menuDepth == 1 && CL_InBSPMenuMap()) {
+        return;
+    }
 
     menu = uis.layers[--uis.menuDepth];
     if (menu->pop) {
@@ -157,10 +180,10 @@ void UI_PopMenu(void)
     if (!uis.menuDepth) {
         UI_ForceMenuOff();
 
-		// Save the config file if the user closes the menu while in-game
-		if (cls.connectionState >= ClientConnectionState::Active) {
-			CL_WriteConfig();
-		}
+        // Save the config file if the user closes the menu while in-game
+        if (cls.connectionState >= ClientConnectionState::Active) {
+            CL_WriteConfig();
+        }
 
         return;
     }

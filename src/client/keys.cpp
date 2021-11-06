@@ -692,7 +692,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
 
         if (cls.key_dest & KEY_CONSOLE) {
             if (cls.connectionState < ClientConnectionState::Active && !(cls.key_dest & KEY_MENU)) {
-                UI_OpenMenu(UIMENU_MAIN);
+                CL_OpenBSPMenu();
             } else {
                 Con_Close(true);
             }
@@ -703,7 +703,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
         } else if (cls.connectionState >= ClientConnectionState::Active) {
             UI_OpenMenu(UIMENU_GAME);
         } else {
-            UI_OpenMenu(UIMENU_MAIN);
+            CL_OpenBSPMenu();
         }
         return;
     }
@@ -737,7 +737,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
 //
 // if not a consolekey, send to the interpreter no matter what mode is
 //
-    if (info_in_bspmenu->integer != 1 && (cls.key_dest == KEY_GAME) ||
+    if (!CL_InBSPMenuMap() && (cls.key_dest == KEY_GAME) ||
         ((cls.key_dest & KEY_CONSOLE) && !Q_IsBitSet(consolekeys, key)) ||
         ((cls.key_dest & KEY_MENU) && (key >= K_F1 && key <= K_F12)) ||
         (!down && Q_IsBitSet(buttondown, key))) {

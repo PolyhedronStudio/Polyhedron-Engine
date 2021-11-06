@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "rmlui/rmlui.h"
 
 #include "client.h"
+#include "client/ui/ui.h"
 #include "client/sound/vorbis.h"
 #include "client/gamemodule.h"
 
@@ -105,6 +106,31 @@ ClientShared cs;
 // used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
 char        cl_cmdbuf_text[MAX_STRING_CHARS];
+
+//======================================================================
+// Opens the mainmenu only if a map has serverinfo var "in_bspmenu" set to 1
+qboolean CL_InBSPMenuMap() {
+    if (info_in_bspmenu->integer == 1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void CL_OpenBSPMenu() {
+    if (CL_InBSPMenuMap()) {
+        UI_OpenMenu(UIMENU_GAME);
+    }
+}
+
+void CL_LoadBSPMenuMap(qboolean force = false) {
+    // Open mainmenu map.
+    if (force == false) {
+        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
+    } else {
+        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
+    }
+}
 
 //======================================================================
 
@@ -726,7 +752,7 @@ void CL_Disconnect(ErrorType type)
     }
 
     // We don't want to be able to disconnect ourselves from this place.
-    if (info_in_bspmenu->integer) {
+    if (CL_InBSPMenuMap()) {
         return;
     }
 
@@ -785,7 +811,7 @@ void CL_Disconnect(ErrorType type)
         //UI_OpenMenu(UIMENU_DEFAULT);
         //Cmd_ExecuteCommand(&cl_cmdbuf);
         // Return to mainmenu map.
-        Cmd_ExecuteString(&cl_cmdbuf,"map mainmenu");
+        CL_OpenBSPMenu();
     } else {
         UI_OpenMenu(UIMENU_NONE);
     }
@@ -803,7 +829,7 @@ CL_Disconnect_f
 static void CL_Disconnect_f(void)
 {
     // No disconnecting from our bsp mainmenu.
-    if (info_in_bspmenu->integer == 1) {
+    if (CL_InBSPMenuMap()) {
         return;
     }
 
@@ -2858,7 +2884,7 @@ void CL_CheckForPause(void)
 
     if (cls.key_dest & (KEY_CONSOLE | KEY_MENU)) {
         // only pause in single player
-        if (cl_paused->integer == 0 && cl_autopause->integer && info_in_bspmenu->integer == 0) {
+        if (cl_paused->integer == 0 && (!CL_InBSPMenuMap())) {
             Cvar_Set("cl_paused", "1");
 			OGG_TogglePlayback();
         }
@@ -3236,7 +3262,7 @@ void CL_Init(void)
     Cvar_Set("cl_running", "1");
 
     // Open mainmenu map.
-    Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
+    CL_LoadBSPMenuMap();
 }
 
 /*

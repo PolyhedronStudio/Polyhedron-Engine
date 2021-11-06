@@ -387,6 +387,10 @@ uint32_t    CL_GetConnectionState (void);               // WATISDEZE Added for C
 void        CL_SetConnectionState (uint32_t state);     // WATISDEZE Added for CG Module.
 void        CL_SetLoadState (LoadState state);          // WATISDEZE Added for CG Module.
 
+qboolean      CL_InBSPMenuMap();
+void          CL_LoadBSPMenuMap(qboolean force);
+void          CL_OpenBSPMenu();
+
 //
 // precache.c
 //

@@ -183,6 +183,7 @@ static void extract_model_lights(model_t* model) {
 					light->emissive_factor =
 						(mat->image_emissive->max_light_texcoord[0] - mat->image_emissive->min_light_texcoord[0]) *
 						(mat->image_emissive->max_light_texcoord[1] - mat->image_emissive->min_light_texcoord[1]);
+	
 				} else {
 					light->emissive_factor = 1.f;
 				}

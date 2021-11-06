@@ -499,7 +499,7 @@ void Com_Error(ErrorType code, const char *fmt, ...)
     #if CLIENT
     if(code == ERR_DISCONNECT) {
         // Let's go haha.
-        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
+        CL_OpenBSPMenu(true);
         CL_ForwardToServer();
     }
     #endif

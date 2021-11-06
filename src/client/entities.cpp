@@ -205,6 +205,9 @@ static void set_active_state(void)
     SCR_LagClear();
     Con_Close(false);          // get rid of connection screen
 
+    // Open the menu here iafter we're done loading the map properly.
+    CL_OpenBSPMenu();
+
     CL_CheckForPause();
 
     CL_UpdateFrameTimes();
