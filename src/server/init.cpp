@@ -123,7 +123,7 @@ void SV_SpawnServer(MapCommand *cmd)
     const char        *entityString;
 
     SCR_BeginLoadingPlaque();           // for local system
-
+    
     Com_Printf("------- Server Initialization -------\n");
     Com_Printf("SpawnServer: %s\n", cmd->server);
 
@@ -257,10 +257,6 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
     char        *s, *ch;
     qerror_t    ret;
     size_t      len;
-
-    // Backup this serverinfo string
-    qboolean is_in_bspmenu = (Cvar_Get("in_bspmenu", "0", CVAR_LATCH | CVAR_ROM)->integer != 0 ? true : false);
-
     s = cmd->buffer;
 
     // skip the end-of-unit flag if necessary
@@ -318,11 +314,6 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
     if (ret < 0) {
         Com_Printf("Couldn't load %s: %s\n", expanded, Q_ErrorString(ret));
         return false;
-    }
-
-    // A check for BSP MainMenu.
-    if (!strcmp(s, "mainmenu")) {
-        Cvar_SetEx("in_bspmenu", "1", FROM_CODE);
     }
 
     return true;
