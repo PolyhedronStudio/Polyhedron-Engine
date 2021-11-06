@@ -97,7 +97,7 @@ static qboolean IN_GetCurrentGrab(void)
 
     if (in_grab->integer >= 1) {
         // We don't want the mouse to fire a weapon etc in this mainmenu mode.
-        if (CL_InBSPMenuMap()) {
+        if (CL_InBSPMenu()) {
             return false;
         } else {
             return true;   // regular playing mode
@@ -462,21 +462,21 @@ static void CL_SendUserCommand(void)
     // if the last packet was dropped, it can be recovered
     cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 2) & CMD_MASK];
     // Ugly hack, but otherwise the player can shoot if he opens the cnsole in mainmenu.
-    if (CL_InBSPMenuMap())
+    if (CL_InBSPMenu())
         cmd->input.buttons = 0;
     MSG_WriteDeltaClientMoveCommand(NULL, cmd);
     oldcmd = cmd;
 
     cmd = &cl.clientUserCommands[(cl.currentClientCommandNumber - 1) & CMD_MASK];
     // Ugly hack, but otherwise the player can shoot if he opens the cnsole in mainmenu.
-    if (CL_InBSPMenuMap())
+    if (CL_InBSPMenu())
         cmd->input.buttons = 0;
     MSG_WriteDeltaClientMoveCommand(oldcmd, cmd);
     oldcmd = cmd;
 
     cmd = &cl.clientUserCommands[cl.currentClientCommandNumber & CMD_MASK];
     // Ugly hack, but otherwise the player can shoot if he opens the cnsole in mainmenu.
-    if (CL_InBSPMenuMap())
+    if (CL_InBSPMenu())
         cmd->input.buttons = 0;
     MSG_WriteDeltaClientMoveCommand(oldcmd, cmd);
 

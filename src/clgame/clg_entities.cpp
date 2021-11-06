@@ -496,10 +496,6 @@ void CLG_AddViewWeapon(void)
         gun.flags |= shell_flags;
     }
 
-    model_t* model = clgi.MOD_ForHandle(gun.model);
-    if (model && strstr(model->name, "v_flareg"))
-        gun.scale = 0.3f;
-
     V_AddEntity(&gun);
 
     // separate entity in non-rtx mode

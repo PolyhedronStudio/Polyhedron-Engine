@@ -199,6 +199,15 @@ void SV_SpawnServer(MapCommand *cmd)
     // clear physics interaction links
     //
     SV_ClearWorld();
+    
+    //
+    // Ensure to set whether this is a "in_bspmenu" or not map.
+    //
+    if (!strcmp(cmd->buffer, "mainmenu")) {
+        SV_InfoSet("in_bspmenu", "1");
+    } else {
+        SV_InfoSet("in_bspmenu", "0");
+    }
 
     //
     // spawn the rest of the entities on the map
@@ -227,6 +236,7 @@ void SV_SpawnServer(MapCommand *cmd)
     // set serverinfo variable
     SV_InfoSet("mapName", sv.name);
     SV_InfoSet("port", net_port->string);
+    
 
     Cvar_SetInteger(sv_running, sv.serverState, FROM_CODE);
     Cvar_Set("sv_paused", "0");
