@@ -311,6 +311,12 @@ static void SV_Map(qboolean restart)
 		sv_pending_autosave = false;
 		SV_AutoSaveEnd();
 	}
+
+    if (!strcmp(cmd.buffer, "mainmenu")) {
+        Cvar_SetEx("in_bspmenu", "1", FROM_CODE);
+    } else {
+        Cvar_SetEx("in_bspmenu", "0", FROM_CODE);
+    }
 }
 
 /*
