@@ -38,7 +38,7 @@ void FuncTimer::Spawn() {
 
 	if ( randomTime >= waitTime ) {
 		randomTime = waitTime - FRAMETIME;
-		gi.DPrintf( "func_timer at %s has random >= wait\n", vec3_to_str( GetOrigin() ).c_str() );
+		gi.DPrintf( "func_timer at %s has random >= wait\n", vec3_to_cstr( GetOrigin() ) );
 	}
 
 	if ( spawnFlags & SF_StartOn ) {

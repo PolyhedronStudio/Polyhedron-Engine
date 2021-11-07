@@ -24,7 +24,7 @@ void PathCorner::Spawn() {
     Base::Spawn();
 
     if ( targetNameStr.empty() ) {
-        gi.DPrintf( "path_corner with no targetname at %s\n", vec3_to_str( GetOrigin() ).c_str() );
+        gi.DPrintf( "path_corner with no targetname at %s\n", vec3_to_cstr( GetOrigin() ) );
         return Remove();
     }
 

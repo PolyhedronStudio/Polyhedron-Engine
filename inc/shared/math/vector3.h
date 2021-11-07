@@ -776,11 +776,23 @@ inline const std::string vec3_to_str(const vec3_t& v, qboolean rounded = true)
     std::ostringstream sstream;
 
     if (rounded)
-        sstream << "(" << (int)v.x << " " << (int)v.y << " " << (int)v.z << ")";
+        sstream << "(" << static_cast<int>(v.x) << " " << static_cast<int>(v.y) << " " << static_cast<int>(v.z) << ")";
     else
         sstream << "(" << v.x << " " << v.y << " " << v.z << ")";
 
     return sstream.str();
+}
+
+//
+//===============
+// vec3_to_cstr
+//
+// Converts a vec3 into a C string
+//===============
+//
+inline const char* vec3_to_cstr( const vec3_t& v, qboolean rounded = true )
+{
+    return vec3_to_str( v, rounded ).c_str();
 }
 
 
