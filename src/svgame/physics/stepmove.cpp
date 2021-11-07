@@ -44,11 +44,11 @@ qboolean SVG_StepMove_CheckBottom(SVGBaseEntity* ent)
 
     vec3_t mins = ent->GetOrigin() - ent->GetMins(); //VectorAdd(ent->state.origin, ent->mins, mins);
     vec3_t maxs = ent->GetOrigin() - ent->GetMaxs(); //VectorAdd(ent->state.origin, ent->maxs, maxs);
-    
 
-    // if all of the points under the corners are solid world, don't bother
-    // with the tougher checks
-    // the corners must be within 16 of the midpoint
+
+                                                     // if all of the points under the corners are solid world, don't bother
+                                                     // with the tougher checks
+                                                     // the corners must be within 16 of the midpoint
     start[2] = mins[2] - 1;
     for (x = 0; x <= 1; x++)
         for (y = 0; y <= 1; y++) {
@@ -133,8 +133,6 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
         ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
         vec3_t velocity = ent->GetVelocity();
         ent->SetVelocity({ velocity.x, velocity.y, 0 });
-    } else {
-        Com_WPrintf("Entity found in trace without serverEntity");
     }
 }
 
@@ -235,8 +233,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
     }
 
     // Push down from a step height above the wished position
-//    if (!(ent->monsterInfo.aiflags & AI_NOSTEP))
-        stepsize = STEPSIZE;
+    //    if (!(ent->monsterInfo.aiflags & AI_NOSTEP))
+    stepsize = STEPSIZE;
     //else
     //    stepsize = 1;
 
@@ -331,7 +329,7 @@ static void SVG_CalculateYawAngle (Entity* ent)
     float   speed;
 
     current = AngleMod(ent->state.angles[vec3_t::Yaw]);
-    
+
     if (ent->classEntity)
         ideal = ent->classEntity->GetIdealYawAngle();
     else
@@ -391,7 +389,7 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
 
     oldOrigin = ent->GetOrigin();
 
-//    VectorCopy(ent->state.origin, oldorigin);
+    //    VectorCopy(ent->state.origin, oldorigin);
     if (SVG_MoveStep(ent, move, false)) {
         delta = ent->GetServerEntity()->state.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
         if (delta > 45 && delta < 315) {

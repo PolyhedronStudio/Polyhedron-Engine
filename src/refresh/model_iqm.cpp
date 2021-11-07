@@ -31,8 +31,8 @@ static qboolean IQM_CheckRange(const iqmHeader_t* header, uint32_t offset, uint3
 	// return true if the range specified by offset, count and size
 	// doesn't fit into the file
 	return (count == 0 ||
-		offset > header->filesize ||
-		offset + count * size > header->filesize);
+			offset > header->filesize ||
+			offset + count * size > header->filesize);
 }
 
 // "multiply" 3x4 matrices, these are assumed to be the top 3 rows
@@ -203,7 +203,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 
 	if (header->version != IQM_VERSION) 	{
 		Com_WPrintf("R_LoadIQM: %s is a unsupported IQM version (%d), only version %d is supported.\n",
-			mod_name, header->version, IQM_VERSION);
+					mod_name, header->version, IQM_VERSION);
 		return Q_ERR_UNKNOWN_FORMAT;
 	}
 
@@ -214,7 +214,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 	// check ioq3 joint limit
 	if (header->num_joints > IQM_MAX_JOINTS) 	{
 		Com_WPrintf("R_LoadIQM: %s has more than %d joints (%d).\n",
-			mod_name, IQM_MAX_JOINTS, header->num_joints);
+					mod_name, IQM_MAX_JOINTS, header->num_joints);
 		return Q_ERR_INVALID_FORMAT;
 	}
 
@@ -282,14 +282,14 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 				break;
 			case IQM_BLENDINDEXES:
 				if ((vertexarray->format != IQM_INT &&
-					vertexarray->format != IQM_UBYTE) ||
+					 vertexarray->format != IQM_UBYTE) ||
 					vertexarray->size != 4) 				{
 					return Q_ERR_INVALID_FORMAT;
 				}
 				break;
 			case IQM_BLENDWEIGHTS:
 				if ((vertexarray->format != IQM_FLOAT &&
-					vertexarray->format != IQM_UBYTE) ||
+					 vertexarray->format != IQM_UBYTE) ||
 					vertexarray->size != 4) 				{
 					return Q_ERR_INVALID_FORMAT;
 				}
@@ -362,7 +362,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 
 	if (header->num_poses != header->num_joints && header->num_poses != 0) 	{
 		Com_WPrintf("R_LoadIQM: %s has %d poses and %d joints, must have the same number or 0 poses\n",
-			mod_name, header->num_poses, header->num_joints);
+					mod_name, header->num_poses, header->num_joints);
 		return Q_ERR_INVALID_FORMAT;
 	}
 
@@ -382,7 +382,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 				return Q_ERR_INVALID_FORMAT;
 			}
 			joint_names += strlen((const char*)header + header->ofs_text +
-				joint->name) + 1;
+								  joint->name) + 1;
 		}
 	}
 
@@ -472,13 +472,13 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 			Q_strlwr(surface->name); // lowercase the surface name so skin compares are faster
 			strncpy(surface->material, str + mesh->material, sizeof(surface->material) - 1);
 			Q_strlwr(surface->material);
-			
+
 			surface->data = iqmData;
 			surface->first_vertex = mesh->first_vertex;
 			surface->num_vertexes = mesh->num_vertexes;
 			surface->first_triangle = mesh->first_triangle;
 			surface->num_triangles = mesh->num_triangles;
-		
+
 			Com_DPrintf("surface->name = '%s', surface->material='%s\n", surface->name, surface->material);
 		}
 
@@ -504,23 +504,23 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 			switch (vertexarray->type) 			{
 			case IQM_POSITION:
 				memcpy(iqmData->positions,
-					(const byte*)header + vertexarray->offset,
-					n * sizeof(float));
+					   (const byte*)header + vertexarray->offset,
+					   n * sizeof(float));
 				break;
 			case IQM_NORMAL:
 				memcpy(iqmData->normals,
-					(const byte*)header + vertexarray->offset,
-					n * sizeof(float));
+					   (const byte*)header + vertexarray->offset,
+					   n * sizeof(float));
 				break;
 			case IQM_TANGENT:
 				memcpy(iqmData->tangents,
-					(const byte*)header + vertexarray->offset,
-					n * sizeof(float));
+					   (const byte*)header + vertexarray->offset,
+					   n * sizeof(float));
 				break;
 			case IQM_TEXCOORD:
 				memcpy(iqmData->texcoords,
-					(const byte*)header + vertexarray->offset,
-					n * sizeof(float));
+					   (const byte*)header + vertexarray->offset,
+					   n * sizeof(float));
 				break;
 			case IQM_BLENDINDEXES:
 				memcpy(iqmData->blend_indices, (const byte*)header + vertexarray->offset, n * sizeof(float));
@@ -528,8 +528,8 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 			case IQM_BLENDWEIGHTS:
 				if (vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_FLOAT) 				{
 					memcpy(iqmData->blend_weights,
-						(const byte*)header + vertexarray->offset,
-						n * sizeof(float));
+						   (const byte*)header + vertexarray->offset,
+						   n * sizeof(float));
 				} else {
 					// convert blend weights from byte to float
 					for (uint32_t vertex_idx = 0; vertex_idx < 4 * header->num_vertexes; vertex_idx++) 					{
@@ -659,6 +659,7 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 
 			dst->first_frame = src->first_frame;
 			dst->num_frames = src->num_frames;
+			//dst->framerate = src->framerate;
 			dst->loop = (src->flags & IQM_LOOP) != 0;
 		}
 	}

@@ -201,7 +201,7 @@ const char* const colorNames[10] = {
     "alt", "none"
 };
 
-typedef enum {
+enum color_index_t {
     COLOR_BLACK,
     COLOR_RED,
     COLOR_GREEN,
@@ -213,7 +213,7 @@ typedef enum {
 
     COLOR_ALT,
     COLOR_NONE
-} color_index_t;
+};
 
 //
 //===============

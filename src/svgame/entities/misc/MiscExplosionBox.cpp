@@ -92,7 +92,8 @@ void MiscExplosionBox::Spawn() {
         {
             16, 16, 40
         }
-    );
+        );
+
     //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
@@ -140,7 +141,7 @@ void MiscExplosionBox::Respawn() {
 void MiscExplosionBox::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
-	//gi.DPrintf("MiscExplosionBox::PostSpawn();");
+    //gi.DPrintf("MiscExplosionBox::PostSpawn();");
 }
 
 //
@@ -153,7 +154,7 @@ void MiscExplosionBox::Think() {
     // Always call parent class method.
     Base::Think();
 
-	//gi.DPrintf("MiscExplosionBox::Think();");
+    //gi.DPrintf("MiscExplosionBox::Think();");
 }
 
 
@@ -185,37 +186,34 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
     };
 
     SetOrigin(newOrigin);
-
-    // Calculate the end origin to use for tracing.
+    //
+    ////    // Calculate the end origin to use for tracing.
     vec3_t end = newOrigin + vec3_t{
         0, 0, -256.f
     };
-
-    // Exceute the trace.
-    SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-
-    // Return in case we hit anything.
+    //
+    //    // Exceute the trace.
+    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+    ////
+    ////    // Return in case we hit anything.
     if (trace.fraction == 1 || trace.allSolid)
         return;
-
-    // Return if the traced ent has no server entity, we need this to operate with.
-    if (trace.ent && !trace.ent->GetServerEntity()) {
-        gi.DPrintf("Entity '%s' #%i - Has no server entity", trace.ent->GetTypeInfo()->className, trace.ent->GetNumber());
-        return;
-    }
-
-    // Set new entity origin.
+    ////
+    ////    // Set new entity origin.
     SetOrigin(trace.endPosition);
-
-    // Link entity back in.
+    //
+    //    // Link entity back in.
     LinkEntity();
-
-    // Check for ground.
+    //
+    //    // Check for ground.
     SVG_StepMove_CheckGround(this);
+    //
+    //    // Setup its next think time, for a frame ahead.
+    SetNextThinkTime(level.time + FRAMETIME);
+    //
+    //    //// Do a check ground for the step move of this pusher.
+    //SVG_StepMove_CheckGround(this);
 
-    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(FRAMETIME);
- 
     //// Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
     //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
@@ -269,7 +267,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
     SpawnDebris2Chunk();
     SpawnDebris2Chunk();
     SpawnDebris2Chunk();
-    
+
     // Reset origin to saved origin.
     SetOrigin(save);
 
@@ -294,7 +292,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::Yes);
-    
+
     // Attacker becomes this entity its "activator".
     if (attacker)
         SetActivator(attacker);
@@ -330,7 +328,7 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
 
     // Calculate ratio to use.
     float ratio = (float)other->GetMass() / (float)GetMass();
-    
+
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
 
@@ -379,7 +377,7 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
 void MiscExplosionBox::SpawnDebris2Chunk() {
     // Speed to throw debris at.
     float speed = 2.f * GetDamage() / 200.f;
-    
+
     // Calculate random direction vector.
     vec3_t randomDirection = { 
         crandom(), 

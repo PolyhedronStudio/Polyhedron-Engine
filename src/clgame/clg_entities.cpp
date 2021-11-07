@@ -99,7 +99,7 @@ void CLG_AddPacketEntities(void)
     autorotate = AngleMod(cl->time * BASE_1_FRAMETIME);
 
     // brush models can auto animate their frames
-    autoanim = 20 * cl->time / BASE_FRAMETIME_1000;
+    autoanim = BASE_FRAMERATE * cl->time / BASE_FRAMETIME_1000;
 
     memset(&ent, 0, sizeof(ent));
 

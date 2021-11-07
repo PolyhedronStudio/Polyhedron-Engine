@@ -178,10 +178,10 @@ BaseEntityVector DefaultGameMode::FindBaseEnitiesWithinRadius(const vec3_t& orig
 
     // Iterate over all entities, see who is nearby, and who is not.
     for (auto* radiusBaseEntity : GetBaseEntityRange<0, MAX_EDICTS>()
-        | bef::IsValidPointer
-        | bef::HasServerEntity
-        | bef::InUse
-        | bef::WithinRadius(origin, radius, excludeSolidFlags)) {
+         | bef::IsValidPointer
+         | bef::HasServerEntity
+         | bef::InUse
+         | bef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
         // Push radiusEntity result item to the list.
         baseEntityList.push_back(radiusBaseEntity);
@@ -209,14 +209,14 @@ void DefaultGameMode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflict
     if ((target->GetServerFlags() & EntityServerFlags::Monster) && (target->GetDeadFlag() != DEAD_DEAD)) {
         target->SetServerFlags(target->GetServerFlags() | EntityServerFlags::DeadMonster);   // Now treat as a different content type
 
-//        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
-//            level.killedMonsters++;
-//            if (coop->value && attacker->client)
-//                attacker->client->respawn.score++;
-//            // medics won't heal monsters that they kill themselves
-//            if (strcmp(attacker->className, "monster_medic") == 0)
-//                targ->owner = attacker;
-//        }
+                                                                                             //        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
+                                                                                             //            level.killedMonsters++;
+                                                                                             //            if (coop->value && attacker->client)
+                                                                                             //                attacker->client->respawn.score++;
+                                                                                             //            // medics won't heal monsters that they kill themselves
+                                                                                             //            if (strcmp(attacker->className, "monster_medic") == 0)
+                                                                                             //                targ->owner = attacker;
+                                                                                             //        }
     }
 
     if (target->GetMoveType() == MoveType::Push || target->GetMoveType() == MoveType::Stop || target->GetMoveType() == MoveType::None) {
@@ -246,7 +246,7 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     int32_t damageTaken = 0;   // Damage taken.
     int32_t damageSaved = 0;   // Damaged saved, from being taken.
 
-    // Best be save than sorry.
+                               // Best be save than sorry.
     if (!target || !inflictor || !attacker) {
         return;
     }
@@ -291,7 +291,7 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
             vec3_t  kvel = { 0.f, 0.f, 0.f };
             float   mass = 50; // Defaults to 50, otherwise... issues, this is the OG code style btw.
 
-            // Based on mass, if it is below 50, we wanna hook it to being 50. Otherwise...
+                               // Based on mass, if it is below 50, we wanna hook it to being 50. Otherwise...
             if (target->GetMass() > 50)
                 mass = target->GetMass();
 
@@ -310,7 +310,7 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     damageTaken = damage;       // Damage taken.
     damageSaved = 0;            // Damaged saved, from being taken.
 
-    // check for godmode
+                                // check for godmode
     if ((target->GetFlags() & EntityFlags::GodMode) && !(damageFlags & DamageFlags::IgnoreProtection)) {
         damageTaken = 0;
         damageSaved = damage;
@@ -362,7 +362,7 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
         //// nightmare mode monsters don't go into pain frames often
         //if (skill->value == 3)
         //    targ->debouncePainTime = level.time + 5;
-    //}
+        //}
     } else {
         if (client) {
             //if (!(targ->flags & EntityFlags::GodMode) && (take))
@@ -491,7 +491,7 @@ void DefaultGameMode::SpawnClientCorpse(SVGBaseEntity* ent) {
 
     // Unlink the body entity, in case it was linked before.
     bodyClassEntity->UnlinkEntity();
-    
+
     // Copy over the bodies state of the current entity into the body entity.
     bodyClassEntity->SetState(ent->GetState());
     // Change its number so it is accurately set to the one belonging to bodyEntity.
@@ -661,10 +661,10 @@ void DefaultGameMode::ClientBeginServerFrame(PlayerClient* player) {
             // In old code, the need to hit a key was only set in DM mode.
             // I figured, let's keep it like this instead.
             //if (deathmatch->value)
-                buttonMask = BUTTON_ATTACK;
+            buttonMask = BUTTON_ATTACK;
             //else
             //buttonMask = -1;
-            
+
             if ((client->latchedButtons & buttonMask) ||
                 (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::ForceRespawn))) {
                 SVG_RespawnClient(player->GetServerEntity());
@@ -703,7 +703,7 @@ qboolean DefaultGameMode::ClientCanConnect(Entity* serverEntity, char* userInfo)
         Info_SetValueForKey(userInfo, "rejmsg", "Password required or incorrect.");
         return false;
     }
-    
+
     // Return true, client is allowed to connect.
     return true;
 }
@@ -714,6 +714,11 @@ qboolean DefaultGameMode::ClientCanConnect(Entity* serverEntity, char* userInfo)
 // Client is connecting, what do? :)
 //===============
 void DefaultGameMode::ClientConnect(Entity* serverEntity) {
+    if (!serverEntity) {
+        gi.DPrintf("ClientConnect executed with invalid (nullptr) serverEntity");
+        return;
+    }
+
     // This is default behaviour for this function.
     if (game.maximumClients > 1)
         gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
@@ -725,6 +730,10 @@ void DefaultGameMode::ClientConnect(Entity* serverEntity) {
 // Called when a client is ready to be placed in the game after connecting.
 //===============
 void DefaultGameMode::ClientBegin(Entity* serverEntity) {
+    if (!serverEntity) {
+        gi.DPrintf("ClientBegin executed with invalid (nullptr) serverEntity");
+        return;
+    }
     // If there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
     if (serverEntity->inUse == true) {
@@ -808,55 +817,55 @@ void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
 void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
     std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
-    
-    // Goes to COOP GAME MODE.
-    //if (coop->value && attacker->GetClient())
-    //    meansOfDeath |= MeansOfDeath::FriendlyFire;
+
+                                      // Goes to COOP GAME MODE.
+                                      //if (coop->value && attacker->GetClient())
+                                      //    meansOfDeath |= MeansOfDeath::FriendlyFire;
 
     qboolean friendlyFire = meansOfDeath & MeansOfDeath::FriendlyFire;
     int32_t finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire;
 
     switch (finalMeansOfDeath) {
-        case MeansOfDeath::Suicide:
-            message = "suicides";
-            break;
-        case MeansOfDeath::Falling:
-            message = "cratered";
-            break;
-        case MeansOfDeath::Crush:
-            message = "was squished";
-            break;
-        case MeansOfDeath::Water:
-            message = "sank like a rock";
-            break;
-        case MeansOfDeath::Slime:
-            message = "melted";
-            break;
-        case MeansOfDeath::Lava:
-            message = "does a back flip into the lava";
-            break;
-        case MeansOfDeath::Explosive:
-        case MeansOfDeath::Barrel:
-            message = "blew up";
-            break;
-        case MeansOfDeath::Exit:
-            message = "found a way out";
-            break;
-        case MeansOfDeath::Splash:
-        case MeansOfDeath::TriggerHurt:
-            message = "was in the wrong place";
-            break;
+    case MeansOfDeath::Suicide:
+        message = "suicides";
+        break;
+    case MeansOfDeath::Falling:
+        message = "cratered";
+        break;
+    case MeansOfDeath::Crush:
+        message = "was squished";
+        break;
+    case MeansOfDeath::Water:
+        message = "sank like a rock";
+        break;
+    case MeansOfDeath::Slime:
+        message = "melted";
+        break;
+    case MeansOfDeath::Lava:
+        message = "does a back flip into the lava";
+        break;
+    case MeansOfDeath::Explosive:
+    case MeansOfDeath::Barrel:
+        message = "blew up";
+        break;
+    case MeansOfDeath::Exit:
+        message = "found a way out";
+        break;
+    case MeansOfDeath::Splash:
+    case MeansOfDeath::TriggerHurt:
+        message = "was in the wrong place";
+        break;
     }
     if (attacker == self) {
         switch (finalMeansOfDeath) {
         case MeansOfDeath::GrenadeSplash:
-                message = "tripped on his own grenade";
+            message = "tripped on his own grenade";
             break;
         case MeansOfDeath::RocketSplash:
-                message = "blew himself up";
+            message = "blew himself up";
             break;
         default:
-                message = "killed himself";
+            message = "killed himself";
             break;
         }
     }
@@ -942,7 +951,7 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
 
     // 
     gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->GetClient()->persistent.netname);
-    
+
     // WID: We can uncomment these in case we end up making a SinglePlayerMode after all.
     //if (deathmatch->value)
     //    self->GetClient()->respawn.score--;

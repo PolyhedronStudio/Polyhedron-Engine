@@ -34,14 +34,14 @@ static cvar_t    *cl_instantpacket;
 static cvar_t    *cl_batchcmds;
 
 static cvar_t    *m_filter;
-       cvar_t    *m_accel;
-       cvar_t    *m_autosens;
+cvar_t    *m_accel;
+cvar_t    *m_autosens;
 
-       cvar_t    *sensitivity;
+cvar_t    *sensitivity;
 
-       cvar_t    *m_pitch;
-       cvar_t    *m_invert;
-       cvar_t    *m_yaw;
+cvar_t    *m_pitch;
+cvar_t    *m_invert;
+cvar_t    *m_yaw;
 static cvar_t    *m_forward;
 static cvar_t    *m_side;
 
@@ -70,7 +70,7 @@ static cvar_t    *in_grab;
 
 const inputAPI_t* IN_GetAPI()
 {
-	return &input.api;
+    return &input.api;
 }
 
 static qboolean IN_GetCurrentGrab(void)
@@ -274,7 +274,7 @@ state bit 2 is edge triggered on the down to up transition
 
 Key_Event (int key, qboolean down, unsigned time);
 
-  +mlook src time
++mlook src time
 
 ===============================================================================
 */
@@ -327,7 +327,7 @@ void CL_RegisterInput(void)
     Cmd_AddCommand("in_restart", IN_Restart_f);
 
     cl_nodelta = Cvar_Get("cl_nodelta", "0", 0);
-    cl_maxpackets = Cvar_Get("cl_maxpackets", "30", 0);
+    cl_maxpackets = Cvar_Get("cl_maxpackets",  std::to_string(BASE_FRAMERATE).c_str(), 0);
     cl_fuzzhack = Cvar_Get("cl_fuzzhack", "0", 0);
     cl_packetdup = Cvar_Get("cl_packetdup", "1", 0);
 #ifdef _DEBUG
@@ -378,27 +378,36 @@ static inline qboolean ready_to_send(void)
     unsigned msec;
 
     if (cl.sendPacketNow) {
+        Com_DPrintf("NET: if cl.sendPacketNow\n");
         return true;
     }
     if (cls.netChannel->message.currentSize || cls.netChannel->reliableAckPending) {
+        Com_DPrintf("NET: if cls.netChannel->message.currentSize[%i] || cls.netChannel->reliableAckPending[%i]\n", cls.netChannel->message.currentSize, cls.netChannel->reliableAckPending);
         return true;
     }
     if (!cl_maxpackets->integer) {
+        Com_DPrintf("NET: if !cl_maxpackets->integer - return true\n");
         return true;
     }
 
     // Used to be 10, but since we upgrade the base framerate.... 
     if (cl_maxpackets->integer < BASE_FRAMERATE) {
         Cvar_Set("cl_maxpackets", std::to_string(BASE_FRAMERATE).c_str());
+        Com_DPrintf("NET: cl_maxpackets->integer[%i] < BASE_FRAMERATE[%i]\n", cl_maxpackets->integer, BASE_FRAMERATE);
     }
 
     msec = 1000 / cl_maxpackets->integer;
     if (msec) {
+        int oldmsec = msec;
         msec = 100 / (100 / msec);
+        Com_DPrintf("NET: if msec { oldmsec[%i], msec[%i] return true\n", oldmsec, msec);
     }
     if (cls.realtime - cl.lastTransmitTime < msec) {
+        Com_DPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return falses\n", cls.realtime, cl.lastTransmitTime, msec);
         return false;
     }
+
+    Com_DPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return true;\n", cls.realtime, cl.lastTransmitTime, msec);
 
     return true;
 }
@@ -426,7 +435,7 @@ static void CL_SendUserCommand(void)
     size_t currentSize q_unused, checksumIndex;
     ClientMoveCommand *cmd, *oldcmd;
     ClientUserCommandHistory*history;
-    
+
     // archive this packet
     history = &cl.clientCommandHistory[cls.netChannel->outgoingSequence & CMD_MASK];
     history->commandNumber = cl.currentClientCommandNumber;

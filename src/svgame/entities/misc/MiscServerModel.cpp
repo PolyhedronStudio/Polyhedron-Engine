@@ -80,7 +80,7 @@ void MiscServerModel::Spawn() {
     SetMoveType(MoveType::None);
 
     // Since this is a "monster", after all...
-    SetFlags(EntityServerFlags::Monster);
+    SetFlags(EntityServerFlags::DeadMonster);
 
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -170,13 +170,14 @@ void MiscServerModel::Think() {
 
     // Continue the animation on a per frame basis.
     int32_t currentFrame = GetFrame();
-    
-    if (currentFrame >= endFrame) {
+
+    if (currentFrame > endFrame) {
         SetFrame(startFrame);
     } else {
         SetFrame(currentFrame + 1);
     }
 
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
     //if (GetNoiseIndex()) {
     //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
     //}
@@ -189,21 +190,27 @@ void MiscServerModel::Think() {
 //
 //===============
 void MiscServerModel::SpawnKey(const std::string& key, const std::string& value) {
-
     if (key == "model") {
         ParseStringKeyValue(key, value, model);
     } else if (key == "boundingboxmins") {
-        vec3_t bbMins = { 40,  40, 16}; // Defaults..
-        ParseVector3KeyValue(key, value, bbMins);
-        SetBoundingBox(bbMins, GetBoundingBoxMaxs());
+        ParseVector3KeyValue(key, value, boundingBoxMins);
+        SetMins(boundingBoxMins);
     } else if (key == "boundingboxmaxs") {
-        vec3_t bbMaxs = { -40, -40, 0 }; // Defaults..
-        ParseVector3KeyValue(key, value, bbMaxs);
-        SetBoundingBox(GetBoundingBoxMins(), bbMaxs);
+        ParseVector3KeyValue(key, value, boundingBoxMaxs);
+        SetMaxs(boundingBoxMaxs);
     } else if (key == "endframe") {
         ParseIntegerKeyValue(key, value, endFrame);
     } else if (key == "startframe") {
         ParseIntegerKeyValue(key, value, startFrame);
+    } else if (key == "mass") {
+        uint32_t parsedMass = 0;
+        ParseUnsignedIntegerKeyValue(key, value, parsedMass);
+        SetMass(parsedMass);
+    } else if (key == "health") {
+        uint32_t parsedHealth = 0;
+        ParseUnsignedIntegerKeyValue(key, value, parsedHealth);
+        SetMaxHealth(parsedHealth);
+        SetHealth(parsedHealth);
     } else if (key == "effects") {
         uint32_t parsedEffects = 0;
         ParseUnsignedIntegerKeyValue(key, value, parsedEffects);
@@ -243,41 +250,41 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
 //===============
 void MiscServerModel::MiscServerModelThink(void) {
     // First, ensure our origin is +1 off the floor.
-    //vec3_t newOrigin = GetOrigin() + vec3_t{
-    //    0.f, 0.f, 1.f
-    //};
-//
-    SetOrigin(GetOrigin());
-//
-////    // Calculate the end origin to use for tracing.
-//    vec3_t end = newOrigin + vec3_t{
-//        0, 0, -256.f
-//    };
-//
-//    // Exceute the trace.
-//    SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-////
-////    // Return in case we hit anything.
-//    if (trace.fraction == 1 || trace.allSolid)
-//        return;
-////
-////    // Set new entity origin.
-//    SetOrigin(trace.endPosition);
-//
-//    // Link entity back in.
+    vec3_t newOrigin = GetOrigin() + vec3_t{
+        0.f, 0.f, 1.f
+    };
+
+    SetOrigin(newOrigin);
+    //
+    ////    // Calculate the end origin to use for tracing.
+    vec3_t end = newOrigin + vec3_t{
+        0, 0, -256.f
+    };
+    //
+    //    // Exceute the trace.
+    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+    ////
+    ////    // Return in case we hit anything.
+    if (trace.fraction == 1 || trace.allSolid)
+        return;
+    ////
+    ////    // Set new entity origin.
+    SetOrigin(trace.endPosition);
+    //
+    //    // Link entity back in.
     LinkEntity();
-//
-//    // Check for ground.
+    //
+    //    // Check for ground.
+    SVG_StepMove_CheckGround(this);
+    //
+    //    // Setup its next think time, for a frame ahead.
+    SetNextThinkTime(level.time + FRAMETIME);
+    //
+    //    //// Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
-//
-//    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(0.8f);
-//
-//    //// Do a check ground for the step move of this pusher.
-    //SVG_StepMove_CheckGround(this);
-//    //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
-//    // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
-//    // Not important for this one atm.
+    //    //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
+    //    // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
+    //    // Not important for this one atm.
 }
 //
 ////
@@ -355,8 +362,8 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
         SetActivator(attacker);
 
     // Setup the next think and think time.
-    SetNextThinkTime(level.time + 2 * FRAMETIME);
-    
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
+
     // Play a nasty gib sound, yughh :)
     SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
@@ -366,10 +373,6 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     //SVG_ThrowClientHead(this, damage);
-
-    // Can't take damage if we're already busted.
-    SetTakeDamage(TakeDamage::No);
-
     // Set think function.
     SetThinkCallback(&MiscServerModel::SVGBaseEntityThinkFree);
 }
