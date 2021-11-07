@@ -525,6 +525,9 @@ void SV_Begin_f(void)
         return;
     }
 
+    // Fetch serverinfo  to detect whether this is a mainmenu server or not.
+
+
     Com_DPrintf("Going from ConnectionState::Primed to ConnectionState::Spawned for %s\n",
                 sv_client->name);
     sv_client->connectionState = ConnectionState::Spawned;
@@ -801,7 +804,7 @@ static void SV_NextServer_f(void)
 
 // the client is going to disconnect, so remove the connection immediately
 static void SV_Disconnect_f(void)
-{
+{   
     SV_DropClient(sv_client, "!?disconnected");
     SV_RemoveClient(sv_client);   // don't bother with zombie state
 }
@@ -987,6 +990,13 @@ static void SV_ExecuteUserCommand(const char *s)
         }
         return;
     }
+
+    char serverinfo[MAX_INFO_STRING];
+    Cvar_BitInfo(serverinfo, CVAR_SERVERINFO);
+    sv_in_bspmenu->integer = atoi(Info_ValueForKey(serverinfo, "in_bspmenu"));
+
+    if (sv_in_bspmenu->integer)
+        return; 
 
     if (sv.serverState == ServerState::Pic || sv.serverState == ServerState::Cinematic) {
         return;

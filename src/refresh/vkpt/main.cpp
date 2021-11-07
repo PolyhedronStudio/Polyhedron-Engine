@@ -415,9 +415,9 @@ const char* vk_requested_device_extensions_debug[] = {
 
 static const VkApplicationInfo vk_app_info = {
 	.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-	.pApplicationName   = "quake 2 pathtracing",
+	.pApplicationName   = "Polyhedron PathTracing (Q2RTX Fork)", //"quake 2 pathtracing",
 	.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-	.pEngineName        = "vkpt",
+	.pEngineName        = "Polyhedron", // "vkpt"
 	.engineVersion      = VK_MAKE_VERSION(1, 0, 0),
 	.apiVersion         = VK_API_VERSION_1_2,
 };

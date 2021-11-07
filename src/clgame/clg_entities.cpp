@@ -96,10 +96,10 @@ void CLG_AddPacketEntities(void)
     unsigned int        effects, renderEffects;
 
     // bonus items rotate at a fixed rate
-    autorotate = AngleMod(cl->time * 0.1f);
+    autorotate = AngleMod(cl->time * BASE_1_FRAMETIME);
 
     // brush models can auto animate their frames
-    autoanim = 20 * cl->time / 1000;
+    autoanim = 20 * cl->time / BASE_FRAMETIME_1000;
 
     memset(&ent, 0, sizeof(ent));
 
@@ -393,6 +393,11 @@ void CLG_AddViewWeapon(void)
     r_entity_t    gun;        // view model
     int         i, shell_flags = 0;
 
+    // Hidden in bsp menu mode.
+    if (info_in_bspmenu->integer) {
+        return;
+    }
+
     // allow the gun to be completely removed
     if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED) {
         return;
@@ -490,10 +495,6 @@ void CLG_AddViewWeapon(void)
     if (vid_rtx->integer) {
         gun.flags |= shell_flags;
     }
-
-    model_t* model = clgi.MOD_ForHandle(gun.model);
-    if (model && strstr(model->name, "v_flareg"))
-        gun.scale = 0.3f;
 
     V_AddEntity(&gun);
 

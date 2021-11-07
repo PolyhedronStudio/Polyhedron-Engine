@@ -849,12 +849,12 @@ void SV_InitGameProgs(void)
     if (sys_forcegamelib->string[0])
         entry = (ServerGameExports * (*)(ServerGameImports*))_SV_LoadGameLibrary(sys_forcegamelib->string); // CPP: DANGER: WARNING: Is this cast ok?
 
-    // try game first
+    // try game first (Mod)
     if (!entry && fs_game->string[0]) {
         entry = (ServerGameExports * (*)(ServerGameImports*))SV_LoadGameLibrary(fs_game->string, ""); // CPP: DANGER: WARNING: Is this cast ok?
     }
 
-    // then try basenac
+    // then try basepoly
     if (!entry) {
         entry = (ServerGameExports * (*)(ServerGameImports*))SV_LoadGameLibrary(BASEGAME, ""); // CPP: DANGER: WARNING: Is this cast ok?
     }

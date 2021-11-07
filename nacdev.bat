@@ -1,1 +1,0 @@
-nac.exe +set developer 2 +connect 160.20.147.121

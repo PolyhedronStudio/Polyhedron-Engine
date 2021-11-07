@@ -39,8 +39,8 @@ public:
     // Get/Set
     // 
     // 'customLightStyle'.
-    const std::string& GetCustomLightStyle() {
-        return this->customLightStyle;
+    inline const char *GetCustomLightStyle() {
+        return customLightStyle.c_str();
     }
     void SetCustomLightStyle(const std::string& lightStyle) {
         this->customLightStyle = lightStyle;
@@ -50,6 +50,7 @@ public:
     // Callback functions.
     //
     void LightUse(SVGBaseEntity* other, SVGBaseEntity* activator);
+    void LightThink(void);
 
 private:
     // Custom lightstyle string.
@@ -57,6 +58,37 @@ private:
 
     // Light State flags. (Is it currently off, or triggered?)
     uint32_t lightState;
+};
+
+
+#pragma once
+
+class SVGBaseEntity;
+
+class PathCorner : public SVGBaseEntity {
+public:
+    PathCorner(Entity* entity);
+    virtual ~PathCorner() = default;
+
+    DefineMapClass("path_corner", PathCorner, SVGBaseEntity);
+
+    const vec3_t	BboxSize = vec3_t(8.0f, 8.0f, 8.0f);
+
+    // Spawnflags
+    static constexpr int32_t SF_Teleport = 1 << 0;
+
+    void			Spawn() override;
+    void			SpawnKey(const std::string& key, const std::string& value) override;
+
+    // For AI
+    virtual void	OnReachedCorner(SVGBaseEntity* traveler);
+
+    inline const char* GetPathTarget() override {
+        return pathTarget.c_str();
+    }
+
+private:
+    std::string		pathTarget;
 };
 
 #endif // __SVGAME_ENTITIES_LIGHT_H__

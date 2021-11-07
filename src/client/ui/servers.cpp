@@ -249,7 +249,7 @@ void UI_StatusEvent(const serverStatus_t *status)
 
     mod = Info_ValueForKey(info, "game");
     if (COM_IsWhite(mod)) {
-        mod = "basenac";
+        mod = "basepoly";
     }
 
     map = Info_ValueForKey(info, "mapName");
@@ -698,9 +698,17 @@ UI_Frame
 
 =================
 */
+//extern cvar_t *info_in_bspmenu;
 void UI_Frame(int msec)
 {
     serverslot_t *slot;
+
+    // Is our cvar in_bspmenu 1?
+    //if (!uis.activeMenu) {
+    //    if (info_in_bspmenu->integer == 1 cls.connectionState) {
+    //        UI_OpenMenu(UIMENU_GAME);
+    //    }
+    //}
 
     if (!m_servers.pingstage)
         return;

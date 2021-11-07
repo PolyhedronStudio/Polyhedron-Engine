@@ -3712,7 +3712,7 @@ static void fs_game_changed(cvar_t *self)
 
     // check for the first time startup
     if (!fs_base_searchpaths) {
-        // start up with basenac by default
+        // start up with basepoly by default
         setup_base_paths();
 
         // check for game override
@@ -3739,7 +3739,7 @@ static void fs_game_changed(cvar_t *self)
     // otherwise, restart the filesystem
     CL_RestartFilesystem(false);
 
-    Com_AddConfigFile(COM_DEFAULT_CFG, FS_PATH_GAME);
+    Com_AddConfigFile(COM_DEFAULT_CFG, FS_TYPE_REAL);
     Com_AddConfigFile(COM_NAC_CFG, 0);
     Com_AddConfigFile(COM_CONFIG_CFG, FS_TYPE_REAL | FS_PATH_GAME);
 

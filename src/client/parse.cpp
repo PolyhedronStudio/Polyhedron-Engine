@@ -495,21 +495,21 @@ static void CL_ParseServerData(void)
     // setup default server state
     cl.serverState = ServerState::Game;
 
-    // MSG: !! Removed: PROTOCOL_VERSION_NAC
-    //if (cls.serverProtocol != PROTOCOL_VERSION_NAC) {
+    // MSG: !! Removed: PROTOCOL_VERSION_POLYHEDRON
+    //if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON) {
     i = MSG_ReadShort();
     if (!NAC_PROTOCOL_SUPPORTED(protocol)) {
         Com_Error(ERR_DROP,
-                    "NaC server reports unsupported protocol version %d.\n"
-                    "Current server/client version is %d.", protocol, PROTOCOL_VERSION_NAC_CURRENT);
+                    "Polyhedron server reports unsupported protocol version %d.\n"
+                    "Current server/client version is %d.", protocol, PROTOCOL_VERSION_POLYHEDRON_CURRENT);
     }
         
-    Com_DPrintf("Using minor NaC protocol version %d\n", protocol);
+    Com_DPrintf("Using minor Polyhedron protocol version %d\n", protocol);
     cls.protocolVersion = protocol;
             
     // Parse N&C server state.
     i = MSG_ReadByte();
-    Com_DPrintf("NaC server state %d\n", i);
+    Com_DPrintf("Polyhedron server state %d\n", i);
     cl.serverState = i;
 
 

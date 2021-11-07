@@ -381,12 +381,12 @@ void CL_InitGameProgs(void)
     if (sys_forcecgamelib->string[0])
         entry = (IClientGameExports * (*)(ClientGameImport*))_CL_LoadGameLibrary(sys_forcecgamelib->string); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
 
-    // try game first
+    // try game first (Mod)
     if (!entry && fs_game->string[0]) {
         entry = (IClientGameExports * (*)(ClientGameImport*))CL_LoadGameLibrary(fs_game->string, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }
 
-    // then try basenac
+    // then try basepoly
     if (!entry) {
         entry = (IClientGameExports * (*)(ClientGameImport*))CL_LoadGameLibrary(BASEGAME, ""); // CPP: WARNING: IMPORTANT: Is this cast valid? lol.
     }

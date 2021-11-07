@@ -37,7 +37,7 @@ FRAME PARSING
 
 static inline qboolean entity_optimized(const EntityState *state)
 {
-    if (cls.serverProtocol != PROTOCOL_VERSION_NAC)
+    if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON)
         return false;
 
     if (state->number != cl.frame.clientNumber + 1)
@@ -204,6 +204,9 @@ static void set_active_state(void)
     SCR_EndLoadingPlaque();     // get rid of loading plaque
     SCR_LagClear();
     Con_Close(false);          // get rid of connection screen
+
+    // Open the menu here iafter we're done loading the map properly.
+    CL_OpenBSPMenu();
 
     CL_CheckForPause();
 

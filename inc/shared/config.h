@@ -1,5 +1,5 @@
 //
-// Nail & Crescent configuration file for MSVC
+// Polyhedron FPS configuration file for MSVC
 //
 
 // expand to generate version string
@@ -25,8 +25,8 @@
 #define BUILDSTRING "Linux"
 #endif
 
-#define BASEGAME "basenac"
-#define DEFGAME "basenac"
+#define BASEGAME "basepoly"
+#define DEFGAME "basepoly"
 
 #define USE_ICMP 1
 #define USE_ZLIB 1

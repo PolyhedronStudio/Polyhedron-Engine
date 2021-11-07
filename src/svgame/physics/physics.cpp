@@ -105,28 +105,31 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
 
     ent->SetNextThinkTime(0);
 
-    if ( !ent->HasThinkCallback() ) {
-        // Write the index, programmers may look at that thing first
-        std::string errorString = "entity (index ";
-        errorString += std::to_string( ent->GetNumber() );
+    //#if _DEBUG
+    //if ( !ent->HasThinkCallback() ) {
+    //    // Write the index, programmers may look at that thing first
+    //    std::string errorString = "entity (index ";
+    //    errorString += std::to_string( ent->GetNumber() );
 
-        // Write the targetname as well, if it exists
-        if ( !ent->GetTargetName().empty() ) {
-            errorString += ", name '" + ent->GetTargetName() + "'";
-        }
+    //    // Write the targetname as well, if it exists
+    //    if ( !ent->GetTargetName().empty() ) {
+    //        errorString += ", name '" + ent->GetTargetName() + "'";
+    //    }
 
-        // Write down the C++ class name too
-        errorString += ", class '";
-        errorString += ent->GetTypeInfo()->className;
-        errorString += "'";
+    //    // Write down the C++ class name too
+    //    errorString += ", class '";
+    //    errorString += ent->GetTypeInfo()->className;
+    //    errorString += "'";
 
-        // Close it off and state what's actually going on
-        errorString += ") has a nullptr think callback";
-        
-        gi.Error( errorString.c_str() );
-    }
+    //    // Close it off and state what's actually going on
+    //    errorString += ") has a nullptr think callback" \n;
+    //    
+    //    gi.Error( errorString.c_str() );
+    //}
+    //#endif
 
     ent->Think();
+
 
     return false;
 }

@@ -1,5 +1,5 @@
 .config*
-.basenac/
+.basepoly/
 .vs/
 
 *.swp
@@ -16,15 +16,15 @@ build/
 
 
 
-basenac
-basenac/
-basenac/*
-basenac/*.dll
-basenac/*.so
-basenac/*.pkz
+bin/basepoly/
+bin/basepoly/
+bin/basepoly/*
+bin/basepoly/*.dll
+bin/basepoly/*.so
+bin/basepoly/*.pkz
 music/
 
-basenac/maps/*
+bin/basepoly/maps/*
 
 CMakeFiles
 CMakeCache.txt
@@ -33,36 +33,25 @@ cmake_install.cmake
 
 src/CMakeSettings.json
 
-nac
-nacded 
-
-q2rtx
-q2rtxded
+bin/Polyhedron
+bin/Polyhedron_Dedicated
 
 out
 out/
 out/*
 
 
-basenac/game*
-basenac/env
-basenac/ext_data
-basenac/models
-basenac/overrides
-basenac/pics
-basenac/players
-basenac/sound
-basenac/sprites
-basenac/textures
+bin/basepoly/game*
+bin/basepoly/env/*
+bin/basepoly/ext_data/*
+bin/basepoly/models/*
+bin/basepoly/overrides/*
+bin/basepoly/pics/*
+bin/basepoly/players/*
+bin/basepoly/sound/*
+bin/basepoly/sprites/*
+bin/basepoly/textures/*
 
-
-/pmove-new-0.2.rar
-/pmove-new-0.4.1.rar
-/pmove-new-0.5.0.rar
-/pmove-new-0.5.1.rar
-/pmove-new-0.5.3.rar
-/pmove-new-0.5.4.rar
-/Nail-Crescent.rar
-*.rar
-/NAC_CrashReportXX00xt
-/t_miscservermodel.log
+!bin/basepoly/
+!bin/basepoly/default.cfg
+!bin/basepoly/polyconfig.cfg

@@ -16,5 +16,8 @@ public:
 
 	// Shuts down the client game.
 	void Shutdown() final;
+
+private:
+
 };
 

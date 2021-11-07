@@ -325,6 +325,7 @@ extern list_t       ui_menus;
 
 extern cvar_t       *ui_debug;
 
+qboolean    UI_IsMenuOpen();
 void        UI_PushMenu(menuFrameWork_t *menu);
 void        UI_ForceMenuOff(void);
 void        UI_PopMenu(void);

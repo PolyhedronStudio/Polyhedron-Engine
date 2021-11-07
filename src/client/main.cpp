@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "rmlui/rmlui.h"
 
 #include "client.h"
+#include "client/ui/ui.h"
 #include "client/sound/vorbis.h"
 #include "client/gamemodule.h"
 
@@ -73,27 +74,25 @@ cvar_t  *cl_cinematics;
 //
 // userinfo
 //
-cvar_t  *info_password;
-cvar_t  *info_spectator;
-cvar_t  *info_name;
-cvar_t  *info_skin;
-cvar_t  *info_rate;
-cvar_t  *info_fov;
-cvar_t  *info_msg;
-cvar_t  *info_hand;
-cvar_t  *info_uf;
+cvar_t  *info_password      = nullptr;
+cvar_t  *info_spectator     = nullptr;
+cvar_t  *info_name          = nullptr;
+cvar_t  *info_skin          = nullptr;
+cvar_t  *info_rate          = nullptr;
+cvar_t  *info_fov           = nullptr;
+cvar_t  *info_msg           = nullptr;
+cvar_t  *info_hand          = nullptr;
+cvar_t  *info_uf            = nullptr;
+cvar_t  *info_in_bspmenu    = nullptr;
 
 // N&C: Developer utilities.
 cvar_t* dev_map;
-//cvar_t* dev_maplist;
-
 #if USE_REF == REF_GL
 extern cvar_t *gl_modulate_world;
 extern cvar_t *gl_modulate_entities;
 extern cvar_t *gl_brightness;
 #endif
 
-extern cvar_t *fs_shareware;
 
 extern cvar_t *cl_renderdemo;
 extern cvar_t *cl_renderdemo_fps;
@@ -107,6 +106,42 @@ ClientShared cs;
 // used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
 char        cl_cmdbuf_text[MAX_STRING_CHARS];
+
+//======================================================================
+// Opens the mainmenu only if a map has serverinfo var "in_bspmenu" set to 1
+qboolean CL_InBSPMenu() {
+    char serverinfo[MAX_INFO_STRING];
+    Cvar_BitInfo(serverinfo, CVAR_SERVERINFO);
+
+    int in_bspmenu = atoi(Info_ValueForKey(serverinfo, "in_bspmenu"));
+
+    if (in_bspmenu == 1 && cls.connectionState >= ClientConnectionState::Active) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void CL_OpenBSPMenu() {
+    if (CL_InBSPMenu()) {
+        UI_OpenMenu(UIMENU_GAME);
+    }
+}
+
+void CL_CloseBSPMenu() {
+    if (!CL_InBSPMenu()) {
+        UI_OpenMenu(UIMENU_NONE);
+    }
+}
+
+void CL_LoadBSPMenuMap(qboolean force = false) {
+    // Open mainmenu map.
+    if (force == false) {
+        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
+    } else {
+        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
+    }
+}
 
 //======================================================================
 
@@ -286,8 +321,8 @@ void CL_CheckForResend(void)
         cls.serverAddress.type = NA_LOOPBACK;
         cls.serverProtocol = cl_protocol->integer;
         if (cls.serverProtocol < PROTOCOL_VERSION_DEFAULT ||
-            cls.serverProtocol > PROTOCOL_VERSION_NAC) {
-            cls.serverProtocol = PROTOCOL_VERSION_NAC;
+            cls.serverProtocol > PROTOCOL_VERSION_POLYHEDRON) {
+            cls.serverProtocol = PROTOCOL_VERSION_POLYHEDRON;
         }
 
         // we don't need a challenge on the localhost
@@ -298,7 +333,6 @@ void CL_CheckForResend(void)
         cls.passive = false;
 
         Con_Popup(true);
-        UI_OpenMenu(UIMENU_NONE);
     }
 
     // resend if we haven't gotten a reply yet
@@ -335,7 +369,7 @@ void CL_CheckForResend(void)
     // add protocol dependent stuff
     Q_snprintf(tail, sizeof(tail), " %d %d %d %d",
                 maxmsglen, net_chantype->integer, USE_ZLIB_PACKET_COMPRESSION, // MSG: !! Changed from USE_ZLIB,
-                PROTOCOL_VERSION_NAC_CURRENT);
+                PROTOCOL_VERSION_POLYHEDRON_CURRENT);
     cls.quakePort = net_qport->integer & 0xff;
 
     Cvar_BitInfo(userinfo, CVAR_USERINFO);
@@ -367,10 +401,10 @@ static void CL_Connect_c(genctx_t *ctx, int argnum)
         CL_RecentIP_g(ctx);
         Com_Address_g(ctx);
     } else if (argnum == 2) {
-        if (!ctx->partial[0] || (ctx->partial[0] == '3' && !ctx->partial[1])) {
-            Prompt_AddMatch(ctx, "34");
-            Prompt_AddMatch(ctx, "35");
-            Prompt_AddMatch(ctx, "36");
+        if (!ctx->partial[0] || (ctx->partial[0] == '1' && ctx->partial[1] == '3')) {
+            Prompt_AddMatch(ctx, "1337");
+            Prompt_AddMatch(ctx, "1340");
+            Prompt_AddMatch(ctx, "1341");
         }
     }
 }
@@ -403,13 +437,13 @@ static void CL_EConnect_f(void) {
     if (argc > 2) {
         protocol = atoi(Cmd_Argv(2));
         if (protocol < PROTOCOL_VERSION_DEFAULT ||
-            protocol > PROTOCOL_VERSION_NAC) {
+            protocol > PROTOCOL_VERSION_POLYHEDRON) {
             goto usage;
         }
     } else {
         protocol = cl_protocol->integer;
         if (!protocol) {
-            protocol = PROTOCOL_VERSION_NAC;
+            protocol = PROTOCOL_VERSION_POLYHEDRON;
         }
     }
 
@@ -471,20 +505,20 @@ static void CL_Connect_f(void)
 
     if (argc < 2) {
 usage:
-        Com_Printf("Usage: %s <server> [34|35|36]\n", Cmd_Argv(0));
+        Com_Printf("Usage: %s <server> [1337|1340|1341]\n", Cmd_Argv(0));
         return;
     }
 
     if (argc > 2) {
         protocol = atoi(Cmd_Argv(2));
         if (protocol < PROTOCOL_VERSION_DEFAULT ||
-            protocol > PROTOCOL_VERSION_NAC) {
+            protocol > PROTOCOL_VERSION_POLYHEDRON) {
             goto usage;
         }
     } else {
         protocol = cl_protocol->integer;
         if (!protocol) {
-            protocol = PROTOCOL_VERSION_NAC;
+            protocol = PROTOCOL_VERSION_POLYHEDRON;
         }
     }
 
@@ -727,6 +761,7 @@ void CL_Disconnect(ErrorType type)
         return;
     }
 
+    //cvar_t *info_in_bspmenu = Info_SetValueForKey("in_bspmenu")
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
     // N&C: Call into the CG Module to inform that we're disconnected.
@@ -734,6 +769,7 @@ void CL_Disconnect(ErrorType type)
 
     if (cls.connectionState > ClientConnectionState::Disconnected && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);
+        //Cbuf_AddText(&cmd_buffer, "bspmainmenu");
     }
 
 #if 0
@@ -776,10 +812,18 @@ void CL_Disconnect(ErrorType type)
 
     cls.userinfo_modified = 0;
 
-    if (type == ERR_DISCONNECT) {
-        UI_OpenMenu(UIMENU_DEFAULT);
+    if (type == ERR_DISCONNECT || type == ERR_DROP) {
+        //UI_OpenMenu(UIMENU_DEFAULT);
+        Cmd_ExecuteCommand(&cl_cmdbuf);
+
+        // Return to mainmenu map.
+        if (!CL_InBSPMenu()) {
+            CL_LoadBSPMenuMap();
+            CL_OpenBSPMenu();
+        }
     } else {
-        UI_OpenMenu(UIMENU_NONE);
+        Cvar_SetEx("in_bspmenu", "0", FROM_CODE);
+        CL_CloseBSPMenu();
     }
 
     CL_CheckForPause();
@@ -794,6 +838,11 @@ CL_Disconnect_f
 */
 static void CL_Disconnect_f(void)
 {
+    // No disconnecting from our bsp mainmenu.
+    if (CL_InBSPMenu()) {
+        return;
+    }
+
     if (cls.connectionState > ClientConnectionState::Disconnected) {
         Com_Error(ERR_DISCONNECT, "Disconnected from server");
     }
@@ -1291,13 +1340,13 @@ static void CL_ConnectionlessPacket(void)
                 s += 2;
                 k = strtoul(s, NULL, 10);
                 Com_DPrintf("p=======%i", k);
-                if (k == PROTOCOL_VERSION_NAC) {
+                if (k == PROTOCOL_VERSION_POLYHEDRON) {
                     protocolFound = k;
                     break;
                 }
                 //while (*s) {
                 //    k = strtoul(s, (char**)&s, 10);
-                //    if (k == PROTOCOL_VERSION_NAC) {
+                //    if (k == PROTOCOL_VERSION_POLYHEDRON) {
                 //        protocolFound = true;
                 //    }
                 //    s = strchr(s, ',');
@@ -1310,13 +1359,13 @@ static void CL_ConnectionlessPacket(void)
         }
 
         // Inform in case the protocol was not found, or not equal to our own.
-        if (protocolFound != PROTOCOL_VERSION_NAC) {
-            Com_EPrintf("Challenging protocol: p=%i did not equal PROTOCOL_VERSION_NAC(%i)\n", protocolFound, PROTOCOL_VERSION_NAC);
+        if (protocolFound != PROTOCOL_VERSION_POLYHEDRON) {
+            Com_EPrintf("Challenging protocol: p=%i did not equal PROTOCOL_VERSION_POLYHEDRON(%i)\n", protocolFound, PROTOCOL_VERSION_POLYHEDRON);
         }
 
         // Setup to use our own protocol. However, if needed later on, here is a shot to change it.
         // This might be useful for backward compatibilities etc.
-        cls.serverProtocol = PROTOCOL_VERSION_NAC;
+        cls.serverProtocol = PROTOCOL_VERSION_POLYHEDRON;
 
         Com_DPrintf("Selected protocol %d\n", cls.serverProtocol);
 
@@ -1526,7 +1575,7 @@ void CL_UpdateUserinfo(cvar_t *var, from_t from)
         return;
     }
 
-    if (cls.serverProtocol != PROTOCOL_VERSION_NAC) {
+    if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON) {
         // transmit at next oportunity
         cls.userinfo_modified = MAX_PACKET_USERINFOS;
         goto done;
@@ -2053,7 +2102,7 @@ static void CL_WriteConfig_f(void)
         return;
     }
 
-    FS_FPrintf(f, "// generated by Nail & Crescent\n");
+    FS_FPrintf(f, "// generated by " APPLICATION "\n");
 
     if (bindings) {
         FS_FPrintf(f, "\n// key bindings\n");
@@ -2299,7 +2348,8 @@ void CL_RestartFilesystem(qboolean total)
     }
 
     if (clientConnectionState == ClientConnectionState::Disconnected) {
-        UI_OpenMenu(UIMENU_DEFAULT);
+        
+        //UI_OpenMenu(UIMENU_DEFAULT);
     } else if (clientConnectionState >= ClientConnectionState::Loading && clientConnectionState <= ClientConnectionState::Active) {
         CL_LoadState(LOAD_MAP);
         CL_PrepareMedia();
@@ -2618,7 +2668,7 @@ static void CL_InitLocal(void)
     cl_changemapcmd = Cvar_Get("cl_changemapcmd", "", 0);
     cl_beginmapcmd = Cvar_Get("cl_beginmapcmd", "", 0);
 
-    cl_protocol = Cvar_Get("cl_protocol", std::to_string(PROTOCOL_VERSION_NAC).c_str(), 0);
+    cl_protocol = Cvar_Get("cl_protocol", std::to_string(PROTOCOL_VERSION_POLYHEDRON).c_str(), 0);
 
     cl_cinematics = Cvar_Get("cl_cinematics", "1", CVAR_ARCHIVE);
 
@@ -2629,6 +2679,7 @@ static void CL_InitLocal(void)
     // userinfo
     //
     info_rate = Cvar_Get("rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
 
     // N&C: Developer utilities.
     dev_map = Cvar_Get("dev_map", "", CVAR_ARCHIVE);
@@ -2843,7 +2894,7 @@ void CL_CheckForPause(void)
 
     if (cls.key_dest & (KEY_CONSOLE | KEY_MENU)) {
         // only pause in single player
-        if (cl_paused->integer == 0 && cl_autopause->integer) {
+        if (cl_paused->integer == 0 && (!CL_InBSPMenu())) {
             Cvar_Set("cl_paused", "1");
 			OGG_TogglePlayback();
         }
@@ -3210,8 +3261,6 @@ void CL_Init(void)
     // Initialize RMLUI
     RMLUI_Init();
 
-    UI_OpenMenu(UIMENU_DEFAULT);
-
     Con_PostInit();
     Con_RunConsole();
 
@@ -3222,6 +3271,8 @@ void CL_Init(void)
 
     Cvar_Set("cl_running", "1");
 
+    // Open mainmenu map.
+    CL_LoadBSPMenuMap();
 }
 
 /*

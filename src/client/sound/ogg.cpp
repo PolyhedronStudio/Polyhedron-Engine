@@ -60,7 +60,7 @@ static int ogg_maxfileindex;
 
 
 enum GameType {
-	other, // incl. basenac
+	other, // incl. basepoly
 	xatrix,
 	rogue
 };

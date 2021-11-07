@@ -4,7 +4,7 @@
 // client/rmlui/interfaces/SystemInterface.h
 //
 //
-// RmlUI N&C System Interface implementation.
+// RmlUI Polyhedron System Interface implementation.
 //
 #ifndef __CLIENT_RMLUI_INTERFACES_SYSTEMINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_SYSTEMINTERFACE_H__
@@ -13,7 +13,7 @@
 #include <SDL.h>
 
 //
-// Simple Nac System Interface to Rml
+// Simple Polyhedron System Interface to Rml
 //
 class RmlUISystemInterface : public Rml::SystemInterface
 {
