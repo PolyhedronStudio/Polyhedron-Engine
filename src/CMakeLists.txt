@@ -61,7 +61,9 @@ SET(HEADERS_CLGAME
 	clgame/clg_view.h
 )
 
-SET( SRC_SVGAME_MAIN 
+# Server game DLL
+# Throw all sources in here, but group them elsewhere
+SET( SRC_SVGAME 
 	svgame/brushfuncs.cpp
 	svgame/chasecamera.cpp
 	svgame/commands.cpp
@@ -77,16 +79,9 @@ SET( SRC_SVGAME_MAIN
 	svgame/spawn.cpp
 	svgame/svcmds.cpp
 	svgame/trigger.cpp
-	
 	svgame/utils.cpp
-	svgame/weapons.cpp
-)
-
-SET( SRC_SVGAME_ENTITIES_AI 
+	svgame/weapons.cpp 
 	svgame/ai/MonsterAI.cpp
-)
-
-SET( SRC_SVGAME_ENTITIES_BASE 
 	svgame/entities/base/SVGBaseEntity.cpp
 	svgame/entities/base/SVGBaseTrigger.cpp
 	svgame/entities/base/SVGBaseMover.cpp
@@ -94,35 +89,26 @@ SET( SRC_SVGAME_ENTITIES_BASE
 	svgame/entities/base/DebrisEntity.cpp
 	svgame/entities/base/GibEntity.cpp
 	svgame/entities/base/PlayerClient.cpp
-)
-
-SET( SRC_SVGAME_ENTITIES_INFO 
 	#svgame/entities/info/InfoNotNull.cpp
 	svgame/entities/info/InfoNull.cpp
 	#svgame/entities/info/InfoPlayerCoop.cpp
 	#svgame/entities/info/InfoPlayerDeathmatch.cpp
 	#svgame/entities/info/InfoPlayerIntermission.cpp
 	svgame/entities/info/InfoPlayerStart.cpp
-)
-
-SET( SRC_SVGAME_ENTITIES_FUNC 
 	svgame/entities/func/FuncAreaportal.cpp
 	svgame/entities/func/FuncButton.cpp
 	#svgame/entities/func/FuncConveyor.cpp
 	svgame/entities/func/FuncDoor.cpp 
 	svgame/entities/func/FuncDoorRotating.cpp
-	#svgame/entities/func/FuncExplosive.cpp 
+	svgame/entities/func/FuncExplosive.cpp 
 	#svgame/entities/func/FuncKillbox.cpp
 	#svgame/entities/func/FuncObject.cpp
 	#svgame/entities/func/FuncPlat.cpp
-	#svgame/entities/func/FuncRotating.cpp
+	svgame/entities/func/FuncRotating.cpp
 	svgame/entities/func/FuncTimer.cpp
 	svgame/entities/func/FuncTrain.cpp 
-	#svgame/entities/func/FuncWall.cpp
+	svgame/entities/func/FuncWall.cpp
 	#svgame/entities/func/FuncWater.cpp
-)
-
-SET ( SRC_SVGAME_ENTITIES_MISC 
 	#svgame/entities/misc/MiscExplobox.cpp
 	#svgame/entities/misc/MiscGibArm.cpp 
 	#svgame/entities/misc/MiscGibLeg.cpp 
@@ -131,98 +117,53 @@ SET ( SRC_SVGAME_ENTITIES_MISC
 	svgame/entities/misc/MiscServerModel.cpp
 	#svgame/entities/misc/MiscTeleporter.cpp
 	#svgame/entities/misc/MiscTeleporterDest.cpp
-)
-
-SET ( SRC_SVGAME_ENTITIES_PATH 
 	svgame/entities/path/PathCorner.cpp
-)
-
-SET ( SRC_SVGAME_ENTITIES_TARGET 
 	#svgame/entities/target/TargetBlaster.cpp
 	#svgame/entities/target/TargetChangelevel.cpp
 	#svgame/entities/target/TargetCrosslevel_target.cpp
 	#svgame/entities/target/TargetCrosslevel_trigger.cpp
-	#svgame/entities/target/TargetExplosion.cpp
+	svgame/entities/target/TargetEarthquake.cpp
+	svgame/entities/target/TargetExplosion.cpp
 	#svgame/entities/target/TargetLightramp.cpp
 	#svgame/entities/target/TargetSpawner.cpp
-	#svgame/entities/target/TargetSpeaker.cpp
+	svgame/entities/target/TargetSpeaker.cpp
 	#svgame/entities/target/TargetSplash.cpp
-	#svgame/entities/target/TargetTempEntity.cpp
-)
-
-SET ( SRC_SVGAME_ENTITIES_TRIGGER 
-	#svgame/entities/trigger/TriggerCounter.cpp
+	svgame/entities/target/TargetTempEntity.cpp
+	svgame/entities/trigger/TriggerCounter.cpp
 	#svgame/entities/trigger/TriggerElevator.cpp
-	#svgame/entities/trigger/TriggerGravity.cpp
+	svgame/entities/trigger/TriggerGravity.cpp
 	#svgame/entities/trigger/TriggerKey.cpp
 	#svgame/entities/trigger/TriggerMonsterjump.cpp
-	#svgame/entities/trigger/TriggerPush.cpp
-	#svgame/entities/trigger/TriggerRelay.cpp
+	svgame/entities/trigger/TriggerPush.cpp
 	svgame/entities/trigger/TriggerAlways.cpp
 	svgame/entities/trigger/TriggerAutoDoor.cpp
 	svgame/entities/trigger/TriggerDelayedUse.cpp
 	svgame/entities/trigger/TriggerHurt.cpp
 	svgame/entities/trigger/TriggerMultiple.cpp
 	svgame/entities/trigger/TriggerOnce.cpp
-)
-
-SET ( SRC_SVGAME_ENTITIES_WEAPONRY 
+	svgame/entities/trigger/TriggerRelay.cpp
 	svgame/entities/weaponry/BlasterBolt.cpp
-)
-
-SET ( SRC_SVGAME_ENTITIES 
 	svgame/entities/Light.cpp
 	svgame/entities/WorldSpawn.cpp
-)
-
-SET ( SRC_SVGAME_GAMEMODES 
 	svgame/gamemodes/DefaultGameMode.cpp
 	svgame/gamemodes/CoopGameMode.cpp
 	svgame/gamemodes/DeathMatchGameMode.cpp
-)
-
-SET ( SRC_SVGAME_PHYSICS 
 	svgame/physics/physics.cpp
 	svgame/physics/stepmove.cpp
-)
-
-SET ( SRC_SVGAME_PLAYER 
 	svgame/player/client.cpp
 	svgame/player/hud.cpp
 	svgame/player/trail.cpp
 	svgame/player/player.cpp
 	svgame/player/view.cpp
 	svgame/player/weapons.cpp
-)
-
-SET ( SRC_SVGAME_WEAPONS 
 	svgame/weapons/blaster.cpp
 	svgame/weapons/machinegun.cpp
 	svgame/weapons/shotgun.cpp
 	svgame/weapons/supershotgun.cpp
-)
-
-# Server game DLL
-# Throw all sources in here, but group them elsewhere
-SET(SRC_SVGAME
-	${SRC_SVGAME_MAIN}
-	${SRC_SVGAME_ENTITIES_AI}
-	${SRC_SVGAME_ENTITIES_BASE}
-	${SRC_SVGAME_ENTITIES_INFO}
-	${SRC_SVGAME_ENTITIES_FUNC}
-	${SRC_SVGAME_ENTITIES_MISC}
-	${SRC_SVGAME_ENTITIES_PATH}
-	${SRC_SVGAME_ENTITIES_TARGET}
-	${SRC_SVGAME_ENTITIES_TRIGGER}
-	${SRC_SVGAME_ENTITIES_WEAPONRY}
-	${SRC_SVGAME_ENTITIES}
-	${SRC_SVGAME_GAMEMODES}
-	${SRC_SVGAME_PHYSICS}
-	${SRC_SVGAME_PLAYER}
-	${SRC_SVGAME_WEAPONS}
-)
-
-SET ( HEADERS_SVGAME_MAIN 
+    svgame/svgame.def
+    )
+    
+    SET ( HEADERS_SVGAME
 	svgame/g_local.h
 	svgame/brushfuncs.h
 	svgame/chasecamera.h
@@ -232,12 +173,7 @@ SET ( HEADERS_SVGAME_MAIN
 	svgame/trigger.h
 	svgame/TypeInfo.h
 	svgame/utils.h
-)
-SET ( HEADERS_SVGAME_AI 
 	svgame/ai/MonsterAI.h
-)
-
-SET ( HEADERS_SVGAME_ENTITIES_BASE 
 	svgame/entities/base/SVGBaseEntity.h
 	svgame/entities/base/SVGBaseTrigger.h
 	svgame/entities/base/SVGBaseMover.h
@@ -245,79 +181,53 @@ SET ( HEADERS_SVGAME_ENTITIES_BASE
 	svgame/entities/base/DebrisEntity.h
 	svgame/entities/base/GibEntity.h
 	svgame/entities/base/PlayerClient.h
-)
-SET ( HEADERS_SVGAME_ENTITIES_FUNC
-	svgame/entities/func/func_door.h
 	svgame/entities/func/FuncAreaportal.h
 	svgame/entities/func/FuncButton.h
 	svgame/entities/func/FuncDoor.h
 	svgame/entities/func/FuncDoorRotating.h
+	svgame/entities/func/FuncExplosive.h
+	svgame/entities/func/FuncRotating.h
 	svgame/entities/func/FuncTimer.h
 	svgame/entities/func/FuncTrain.h
-)
-SET ( HEADERS_SVGAME_ENTITIES_INFO 
+	svgame/entities/func/FuncWall.h
 	svgame/entities/info/InfoPlayerStart.h
-)
-SET ( HEADERS_SVGAME_ENTITIES_MISC 
 	svgame/entities/misc/MiscExplosionBox.h
 	svgame/entities/misc/MiscServerModel.h
-)
-SET ( HEADERS_SVGAME_ENTITIES_PATH 
 	svgame/entities/path/PathCorner.h
-)
-SET ( HEADERS_SVGAME_ENTITIES_TRIGGER 
+	svgame/entities/target/TargetEarthquake.h
+	svgame/entities/target/TargetExplosion.h
+	svgame/entities/target/TargetSpeaker.h
+	svgame/entities/target/TargetTempEntity.h
 	svgame/entities/trigger/TriggerAlways.h
 	svgame/entities/trigger/TriggerAutoDoor.h
+	svgame/entities/trigger/TriggerCounter.h
 	svgame/entities/trigger/TriggerDelayedUse.h
 	svgame/entities/trigger/TriggerHurt.h
+	svgame/entities/trigger/TriggerGravity.h
 	svgame/entities/trigger/TriggerMultiple.h
 	svgame/entities/trigger/TriggerOnce.h
-)
-SET ( HEADERS_SVGAME_ENTITIES_WEAPONRY
+	svgame/entities/trigger/TriggerPush.h
+	svgame/entities/trigger/TriggerRelay.h
 	svgame/entities/weaponry/BlasterBolt.h
-)
-SET ( HEADERS_SVGAME_ENTITIES 
 	svgame/entities/Light.h
 	svgame/entities/WorldSpawn.h
-)
-SET ( HEADERS_SVGAME_GAMEMODES 
 	svgame/gamemodes/DefaultGameMode.h
 	svgame/gamemodes/CoopGameMode.h
 	svgame/gamemodes/DeathMatchGameMode.h
 	svgame/gamemodes/IGameMode.h
-)
-SET ( HEADERS_SVGAME_PLAYER 
 	svgame/player/animations.h
 	svgame/player/client.h
 	svgame/player/player.h
 	svgame/player/view.h
 	svgame/player/weapons.h
-)
-SET ( HEADERS_SVGAME_WEAPONS 
 	svgame/weapons/blaster.h
 	svgame/weapons/machinegun.h
 	svgame/weapons/shotgun.h
 	svgame/weapons/supershotgun.h
-)
-
-SET(HEADERS_SVGAME
-	svgame/svgame.def
-
-	${HEADERS_SVGAME_MAIN}
-	${HEADERS_SVGAME_ENTITIES_BASE}
-	${HEADERS_SVGAME_ENTITIES_FUNC}
-	${HEADERS_SVGAME_ENTITIES_INFO}
-	${HEADERS_SVGAME_ENTITIES_MISC}
-	${HEADERS_SVGAME_ENTITIES_PATH}
-	${HEADERS_SVGAME_ENTITIES_TRIGGER} 
-	${HEADERS_SVGAME_ENTITIES_WEAPONRY}
-	${HEADERS_SVGAME_ENTITIES}
-	${HEADERS_SVGAME_GAMEMODES}
-	${HEADERS_SVGAME_PLAYER}
-	${HEADERS_SVGAME_WEAPONS}
-)
-
-###################### Client.
+    svgame/svgame.def
+    )
+    
+    ###################### Client.
 SET(SRC_CLIENT
 	client/ascii.cpp
 	client/console.cpp
@@ -811,61 +721,36 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(client stb)
 TARGET_LINK_LIBRARIES(client tinyobjloader)
+#TARGET_LINK_LIBRARIES(server enet)
 
-SOURCE_GROUP("common" FILES ${SRC_COMMON})
-SOURCE_GROUP("common" FILES ${HEADERS_COMMON})
-SOURCE_GROUP("client" FILES ${SRC_CLIENT})
-SOURCE_GROUP("client" FILES ${HEADERS_CLIENT})
-SOURCE_GROUP("server" FILES ${SRC_SERVER})
-SOURCE_GROUP("server" FILES ${HEADERS_SERVER})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_COMMON})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_COMMON})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_CLIENT})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_CLIENT})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SERVER})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SERVER})
 
 # Old SVGame source grouping - it just bundled *everything* into svgame/sources and svgame/headers, eugh -Admer
 #SOURCE_GROUP("svgame" FILES ${SRC_SVGAME})
 #SOURCE_GROUP("svgame" FILES ${HEADERS_SVGAME})
 
-# SVGame source groups
-SOURCE_GROUP("source"						FILES ${SRC_SVGAME_MAIN})
-SOURCE_GROUP("source\\entities"				FILES ${SRC_SVGAME_ENTITIES} )
-SOURCE_GROUP("source\\entities\\ai"			FILES ${SRC_SVGAME_ENTITIES_AI} )
-SOURCE_GROUP("source\\entities\\base"		FILES ${SRC_SVGAME_ENTITIES_BASE} )
-SOURCE_GROUP("source\\entities\\info"		FILES ${SRC_SVGAME_ENTITIES_INFO} )
-SOURCE_GROUP("source\\entities\\func"		FILES ${SRC_SVGAME_ENTITIES_FUNC} )
-SOURCE_GROUP("source\\entities\\misc"		FILES ${SRC_SVGAME_ENTITIES_MISC} )
-SOURCE_GROUP("source\\entities\\path"		FILES ${SRC_SVGAME_ENTITIES_PATH} )
-SOURCE_GROUP("source\\entities\\target"		FILES ${SRC_SVGAME_ENTITIES_TARGET} )
-SOURCE_GROUP("source\\entities\\trigger"	FILES ${SRC_SVGAME_ENTITIES_TRIGGER} )
-SOURCE_GROUP("source\\entities\\weaponry"	FILES ${SRC_SVGAME_ENTITIES_WEAPONRY} )
-SOURCE_GROUP("source\\gamemodes"			FILES ${SRC_SVGAME_GAMEMODES} )
-SOURCE_GROUP("source\\physics"				FILES ${SRC_SVGAME_PHYSICS} )
-SOURCE_GROUP("source\\player"				FILES ${SRC_SVGAME_PLAYER} )
-SOURCE_GROUP("source\\weapons"				FILES ${SRC_SVGAME_WEAPONS} )
-# SVGame header groups
-SOURCE_GROUP("source"						FILES ${HEADERS_SVGAME_MAIN})
-SOURCE_GROUP("source\\entities"				FILES ${HEADERS_SVGAME_ENTITIES} )
-SOURCE_GROUP("source\\entities\\ai"			FILES ${HEADERS_SVGAME_ENTITIES_AI} )
-SOURCE_GROUP("source\\entities\\base"		FILES ${HEADERS_SVGAME_ENTITIES_BASE} )
-SOURCE_GROUP("source\\entities\\func"		FILES ${HEADERS_SVGAME_ENTITIES_FUNC} )
-SOURCE_GROUP("source\\entities\\info"		FILES ${HEADERS_SVGAME_ENTITIES_INFO} )
-SOURCE_GROUP("source\\entities\\misc"		FILES ${HEADERS_SVGAME_ENTITIES_MISC} )
-SOURCE_GROUP("source\\entities\\path"		FILES ${HEADERS_SVGAME_ENTITIES_PATH} )
-SOURCE_GROUP("source\\entities\\trigger"	FILES ${HEADERS_SVGAME_ENTITIES_TRIGGER} )
-SOURCE_GROUP("source\\entities\\weaponry"	FILES ${HEADERS_SVGAME_ENTITIES_WEAPONRY} )
-SOURCE_GROUP("source\\gamemodes"			FILES ${HEADERS_SVGAME_GAMEMODES} )
-SOURCE_GROUP("source\\player"				FILES ${HEADERS_SVGAME_PLAYER} )
-SOURCE_GROUP("source\\weapons"				FILES ${HEADERS_SVGAME_WEAPONS} )
+# Source and header groups
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SVGAME} )
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SVGAME} )
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHAREDGAME} )
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SHAREDGAME} )
 
-SOURCE_GROUP("sharedgame" FILES ${SRC_SHAREDGAME} )
-SOURCE_GROUP("sharedgame" FILES ${HEADERS_SHAREDGAME} )
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_REFRESH} ${SRC_VKPT})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_VKPT})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHADERS})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHARED})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SHARED})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_WINDOWS})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_WINDOWS})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_UNIX})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_UNIX})
 
-SOURCE_GROUP("refresh" FILES ${SRC_REFRESH} ${SRC_VKPT})
-SOURCE_GROUP("refresh" FILES ${HEADERS_VKPT})
-SOURCE_GROUP("refresh" FILES ${SRC_SHADERS})
-SOURCE_GROUP("shared" FILES ${SRC_SHARED})
-SOURCE_GROUP("shared" FILES ${HEADERS_SHARED})
-SOURCE_GROUP("os\\windows" FILES ${SRC_WINDOWS})
-SOURCE_GROUP("os\\windows" FILES ${HEADERS_WINDOWS})
-SOURCE_GROUP("os\\unix" FILES ${SRC_UNIX})
-SOURCE_GROUP("os\\unix" FILES ${HEADERS_UNIX})
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES client/null.cpp )
 
 IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../VC/inc)
@@ -884,6 +769,11 @@ IF (WIN32)
 	target_compile_options(client PRIVATE /wd4005 /wd4996)
 	target_compile_options(server PRIVATE /wd4005 /wd4996)
 	target_compile_options(svgame PRIVATE /wd4005 /wd4996)
+
+    ## Group the resource files too, so they don't end up in the ugly "Source Files" folder in VS
+    SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES 
+        os/res/nac.rc 
+        os/res/nacded.rc )
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)

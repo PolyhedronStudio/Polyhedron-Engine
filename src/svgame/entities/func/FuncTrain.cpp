@@ -50,7 +50,7 @@ void FuncTrain::Spawn() {
 	LinkEntity();
 
 	if ( targetStr.empty() ) {
-		gi.DPrintf( "func_train without a target at %s\n", vec3_to_str( GetAbsoluteCenter() ).c_str() );
+		gi.DPrintf( "func_train without a target at %s\n", vec3_to_cstr( GetAbsoluteCenter() ) );
 	}
 }
 
@@ -163,7 +163,7 @@ void FuncTrain::NextCornerThink() {
 
 		if ( entity->GetSpawnFlags() & PathCorner::SF_Teleport ) {
 			if ( !first ) {
-				gi.DPrintf( "Connected teleport path_corners, see '%s' at '%s'\n", entity->GetTypeInfo()->mapClass, vec3_to_str( entity->GetOrigin() ).c_str() );
+				gi.DPrintf( "Connected teleport path_corners, see '%s' at '%s'\n", entity->GetTypeInfo()->mapClass, vec3_to_cstr( entity->GetOrigin() ) );
 				return;
 			}
 
