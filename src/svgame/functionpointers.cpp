@@ -62,7 +62,7 @@ extern void Think_Delay(Entity* self);
 extern void Think_SpawnDoorTrigger(Entity* self);
 extern void train_next(Entity* self);
 extern void trigger_elevator_init(Entity* self);
-extern void blaster_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
+//extern void blaster_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
 extern void button_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
 extern void door_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
 extern void drop_temp_touch(Entity* self, Entity* other, cplane_t* plane, csurface_t* surf);
