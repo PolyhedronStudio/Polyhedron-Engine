@@ -813,11 +813,11 @@ struct ClientPersistantData {
 //-------------------
 struct ClientRespawnData {
     ClientPersistantData persistentCoopRespawn;   // What to set client->persistent to on a respawn
-    int32_t enterGameFrameNumber;         // level.frameNumber the client entered the game
-    int32_t score;              // frags, etc
-    vec3_t commandViewAngles;         // angles sent over in the last command
+    int32_t enterGameFrameNumber;       // level.frameNumber the client entered the game
+    int32_t score;                      // frags, etc
+    vec3_t commandViewAngles;           // angles sent over in the last command
 
-    qboolean isSpectator;          // client is a isSpectator
+    qboolean isSpectator;               // client is a isSpectator
 };
 
 
@@ -895,8 +895,8 @@ struct gclient_s {
 
     // animation vars
     struct {
-        int32_t         endFrame;
-        int32_t         priorityAnimation;
+        int32_t     endFrame;
+        int32_t     priorityAnimation;
         qboolean    isDucking;
         qboolean    isRunning;
     } animation;
@@ -952,6 +952,7 @@ struct entity_s {
     // If numClusters is -1, use headNodew instead.
     int32_t numClusters;       // if -1, use headNode instead
     int32_t clusterNumbers[MAX_ENT_CLUSTERS];
+
     // Only use this instead of numClusters if numClusters == -1
     int32_t headNode;           
     int32_t areaNumber;
@@ -965,10 +966,10 @@ struct entity_s {
     int32_t clipMask;
     Entity *owner;
 
-
-    // DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
-    // EXPECTS THE FIELDS IN THAT ORDER!
-
+    // !!!!!!!!!!!!!!!!!
+    // !! DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
+    // !! EXPECTS THE FIELDS IN THAT ORDER!
+    // !!!!!!!!!!!!!!!!!
     //================================
     // Pointer to the actual game class entity belonging to this server entity.
     SVGBaseEntity* classEntity;

@@ -198,78 +198,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //	Engine Tick Rate Settings.
 //
 //=============================================================================
-// Set here how fast you want the tick rate to be.
-// 1 = 10hz
-// 2 = 20hz
-// 3 = 30hz
-// 4 = 40hz
-// 5 = 60hz
-#define TICK_RATE_STYLE 5
-
-//-----------------
-// N&C 10hz tick
-//-----------------
-#if TICK_RATE_STYLE == 1
-static constexpr uint32_t   BASE_FRAMERATE =  10;
-static constexpr double     BASE_FRAMETIME = 100;
-static constexpr double     BASE_1_FRAMETIME = 0.01;   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 =0.1;    // BASE_FRAMETIME/1000
-#endif
-
-//-----------------
-//N&C 20hz tick
-//-----------------
-#if TICK_RATE_STYLE == 2
-static constexpr uint32_t   BASE_FRAMERATE = 20; //10
-static constexpr double     BASE_FRAMETIME = 50.0; //100
-static constexpr double     BASE_1_FRAMETIME = 0.02; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.05; //0.1f    // BASE_FRAMETIME/1000
-#endif
-//-----------------
-//N&C 30hz tick
-//-----------------
-#if TICK_RATE_STYLE == 3
-static constexpr uint32_t   BASE_FRAMERATE = 30; //10
-static constexpr double     BASE_FRAMETIME = 33.3333333333; //100
-static constexpr double     BASE_1_FRAMETIME = 0.03; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.03333333333; //0.1f    // BASE_FRAMETIME/1000
-#endif
-//-----------------
-//N&C 40hz tick
-//-----------------
-#if TICK_RATE_STYLE == 4
-static constexpr uint32_t   BASE_FRAMERATE = 40; //10
-static constexpr double     BASE_FRAMETIME = 25.0; //100
-static constexpr double     BASE_1_FRAMETIME = 0.04; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.025; //0.1f    // BASE_FRAMETIME/1000
-#endif
-//-----------------
-//N&C 60hz tick
-//-----------------
-#if TICK_RATE_STYLE == 5
-static constexpr uint32_t   BASE_FRAMERATE = 60; //10
-static constexpr double     BASE_FRAMETIME = 16.6666666667; //100
-static constexpr double     BASE_1_FRAMETIME = 0.05999999999; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.01666666666; //0.1f    // BASE_FRAMETIME/1000
-#endif
-
-//-----------------
-// Client FPS
-//-----------------
-// N&C: Moved here instead of client.h, for CG Module.
-#define CL_FRAMETIME    BASE_FRAMETIME
-#define CL_1_FRAMETIME  BASE_1_FRAMETIME
-#define CL_FRAMEDIV     1
-#define CL_FRAMESYNC    1
-#if CGAME_INCLUDE
-#define CL_KEYPS        &cl->frame.playerState
-#define CL_OLDKEYPS     &cl->oldframe.playerState
-#define CL_KEYLERPFRAC  cl->lerpFraction
-#else
-#define CL_KEYPS        &cl.frame.playerState
-#define CL_OLDKEYPS     &cl.oldframe.playerState
-#define CL_KEYLERPFRAC  cl.lerpFraction
-#endif
+#include "shared/tickrate.h"
 
 
 //
@@ -279,7 +208,7 @@ static constexpr double     BASE_FRAMETIME_1000 = 0.01666666666; //0.1f    // BA
 //
 //=============================================================================
 //
-typedef enum {
+typedef enum ErrorType{
     ERR_FATAL,          // exit the entire game with a popup window
     ERR_DROP,           // print to console and disconnect from game
     ERR_DISCONNECT,     // like drop, but not an error

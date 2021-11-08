@@ -2893,7 +2893,7 @@ void CL_CheckForPause(void)
     }
 
     if (cls.key_dest & (KEY_CONSOLE | KEY_MENU)) {
-        // only pause in single player
+        // only pause in single player and not in our mainmenu.bsp mode.
         if (cl_paused->integer == 0 && (!CL_InBSPMenu())) {
             Cvar_Set("cl_paused", "1");
 			OGG_TogglePlayback();

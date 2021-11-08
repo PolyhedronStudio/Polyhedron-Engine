@@ -239,19 +239,18 @@ void V_SetLightLevel(void)
 //
 static void CLG_SetupFirstPersonView(void)
 {
-    PlayerState* ps, * ops;
     vec3_t kickangles;
-    float lerp;
 
     // add kick angles
     if (cl_kickangles->integer) {
-        ps = CL_KEYPS;
-        ops = CL_OLDKEYPS;
+        PlayerState *playerState = &cl->frame.playerState;
+        PlayerState *oldPlayerState = &cl->oldframe.playerState;
 
-        lerp = CL_KEYLERPFRAC;
+        double lerp = cl->lerpFraction;
 
-        LerpAngles(ops->kickAngles, ps->kickAngles, lerp, kickangles);
-        VectorAdd(cl->refdef.viewAngles, kickangles, cl->refdef.viewAngles);
+        vec3_t kickAngles = vec3_mix_euler(oldPlayerState->kickAngles, playerState->kickAngles, cl->lerpFraction);
+        cl->refdef.viewAngles += kickAngles;
+        //VectorAdd(cl->refdef.viewAngles, kickangles, cl->refdef.viewAngles);
     }
 
     // add the weapon

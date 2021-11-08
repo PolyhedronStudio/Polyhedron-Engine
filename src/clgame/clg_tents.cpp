@@ -665,12 +665,12 @@ static void CLG_AddPlayerBeams(void)
 		// if coming from the player, update the start position
 		if (b->entity == cl->frame.clientNumber + 1) {
 			// set up gun position
-			ps = CL_KEYPS;
-			ops = CL_OLDKEYPS;
+			ps = &cl->frame.playerState;
+			ops = &cl->oldframe.playerState;
 
 			for (j = 0; j < 3; j++)
 				b->start[j] = cl->refdef.vieworg[j] + ops->gunOffset[j] +
-				CL_KEYLERPFRAC * (ps->gunOffset[j] - ops->gunOffset[j]);
+				cl->lerpFraction * (ps->gunOffset[j] - ops->gunOffset[j]);
 
 			VectorMA(b->start, (hand_multiplier * b->offset[0]), cl->v_right, org);
 			VectorMA(org, b->offset[1], cl->v_forward, org);

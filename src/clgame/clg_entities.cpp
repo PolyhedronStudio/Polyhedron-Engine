@@ -389,53 +389,50 @@ CLG_AddViewWeapon
 */
 void CLG_AddViewWeapon(void)
 {
-    PlayerState* ps, * ops;
-    r_entity_t    gun;        // view model
-    int         i, shell_flags = 0;
+    
+    int  shell_flags = 0;
 
     // Hidden in bsp menu mode.
     if (info_in_bspmenu->integer) {
         return;
     }
 
-    // allow the gun to be completely removed
+    // No need to render the gun in this case.
     if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED) {
         return;
     }
 
+    //Neither in this case.
     if (info_hand->integer == 2) {
         return;
     }
 
     // find states to interpolate between
-    ps = CL_KEYPS;
-    ops = CL_OLDKEYPS;
+    PlayerState *currentPlayerState = &cl->frame.playerState;
+    PlayerState *oldPlayerState= &cl->oldframe.playerState;
 
-    memset(&gun, 0, sizeof(gun));
+    // Gun ViewModel.
+    r_entity_t gun = {
+        .model = (gun_model ? gun_model : 
+        (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0)),
+        .id = RESERVED_ENTITIY_GUN,
+    };
 
-    if (gun_model) {
-        gun.model = gun_model;  // development tool
-    }
-    else {
-        gun.model = cl->drawModels[ps->gunIndex];
-    }
     if (!gun.model) {
         return;
     }
 
-    gun.id = RESERVED_ENTITIY_GUN;
-
-    // set up gun position
-    for (i = 0; i < 3; i++) {
-        gun.origin[i] = cl->refdef.vieworg[i] + ops->gunOffset[i] +
-            CL_KEYLERPFRAC * (ps->gunOffset[i] - ops->gunOffset[i]);
-        gun.angles[i] = cl->refdef.viewAngles[i] + LerpAngle(ops->gunAngles[i],
-            ps->gunAngles[i], CL_KEYLERPFRAC);
+    // Set up gun position
+    for (int32_t i = 0; i < 3; i++) {
+        gun.origin[i] = cl->refdef.vieworg[i] + oldPlayerState->gunOffset[i] +
+            cl->lerpFraction * (currentPlayerState->gunOffset[i] - oldPlayerState->gunOffset[i]);
+        gun.angles = cl->refdef.viewAngles + vec3_mix_euler(oldPlayerState->gunAngles,
+            currentPlayerState->gunAngles, cl->lerpFraction);
     }
 
-    // adjust for high fov
-    if (ps->fov > 90) {
-        vec_t ofs = (90 - ps->fov) * 0.2f;
+    // Adjust for high fov
+    if (currentPlayerState->fov > 90) {
+        vec_t ofs = (90 - currentPlayerState->fov) * 0.2f;
         VectorMA(gun.origin, ofs, cl->v_forward, gun.origin);
     }
 
@@ -471,13 +468,13 @@ void CLG_AddViewWeapon(void)
         gun.oldframe = gun_frame;   // development tool
     }
     else {
-        gun.frame = ps->gunFrame;
+        gun.frame = currentPlayerState->gunFrame;
         if (gun.frame == 0) {
             gun.oldframe = 0;   // just changed weapons, don't lerp from old
         }
         else {
-            gun.oldframe = ops->gunFrame;
-            gun.backlerp = 1.0f - CL_KEYLERPFRAC;
+            gun.oldframe = oldPlayerState->gunFrame;
+            gun.backlerp = 1.0f - cl->lerpFraction;
         }
     }
 

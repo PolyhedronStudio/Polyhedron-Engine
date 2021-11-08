@@ -232,7 +232,7 @@ static void SVG_CalculateViewOffset(PlayerClient *ent)
         vec3_t newKickAngles = currentProcessingClient->playerState.kickAngles = currentProcessingClient->kickAngles; //ent->client->playerState.kickAngles;
 
         // Add pitch(X) and roll(Z) angles based on damage kick
-        ratio = (currentProcessingClient->viewDamage.time - level.time) / DAMAGE_TIME;
+        ratio = ((currentProcessingClient->viewDamage.time - level.time) / DAMAGE_TIME) * FRAMETIME;
         if (ratio < 0) {
             ratio = currentProcessingClient->viewDamage.pitch = currentProcessingClient->viewDamage.roll = 0;
         }
@@ -240,20 +240,20 @@ static void SVG_CalculateViewOffset(PlayerClient *ent)
         newKickAngles[vec3_t::Roll] += ratio * currentProcessingClient->viewDamage.roll;
 
         // Add pitch based on fall kick
-        ratio = (currentProcessingClient->fallTime - level.time) / FALL_TIME;
+        ratio = ((currentProcessingClient->fallTime - level.time) / FALL_TIME) * FRAMETIME;;
         if (ratio < 0)
             ratio = 0;
         newKickAngles[vec3_t::Pitch] += ratio * currentProcessingClient->fallValue;
 
         // Add angles based on velocity
-        delta = vec3_dot(ent->GetVelocity(), forward);
+        delta = vec3_dot(ent->GetVelocity(), forward) * FRAMETIME;;
         newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
 
-        delta = vec3_dot(ent->GetVelocity(), right);
+        delta = vec3_dot(ent->GetVelocity(), right) * FRAMETIME;;
         newKickAngles[vec3_t::Roll] += delta * run_roll->value;
 
         // Add angles based on bob
-        delta = bobFracsin * bob_pitch->value * XYSpeed;
+        delta = bobFracsin * bob_pitch->value * XYSpeed * FRAMETIME;;
         if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
         newKickAngles[vec3_t::Pitch] += delta;
@@ -285,7 +285,7 @@ static void SVG_CalculateViewOffset(PlayerClient *ent)
     newViewOffset.z -= ratio * currentProcessingClient->fallValue * 0.4f;
 
     // Add bob height.
-    bob = bobFracsin * XYSpeed * bob_up->value;
+    bob = bobFracsin * XYSpeed * bob_up->value * FRAMETIME;;
     if (bob > 6)
         bob = 6;
     newViewOffset.z += bob;
@@ -507,7 +507,7 @@ static void SVG_Player_CheckWorldEffects(void)
         return;
 
     if (currentProcessingPlayer->GetMoveType() == MoveType::NoClip || currentProcessingPlayer->GetMoveType() == MoveType::Spectator) {
-        currentProcessingPlayer->SetAirFinishedTime(level.time + 12); // don't need air
+        currentProcessingPlayer->SetAirFinishedTime(level.time + 12 * FRAMETIME); // don't need air
         return;
     }
 
@@ -530,7 +530,7 @@ static void SVG_Player_CheckWorldEffects(void)
         currentProcessingPlayer->SetFlags(currentProcessingPlayer->GetFlags() | EntityFlags::InWater);
 
         // clear damage_debounce, so the pain sound will play immediately
-        currentProcessingPlayer->SetDebounceDamageTime(level.time - 1);
+        currentProcessingPlayer->SetDebounceDamageTime(level.time - 1 * FRAMETIME);
     }
 
     //
@@ -557,7 +557,7 @@ static void SVG_Player_CheckWorldEffects(void)
             // gasp for air
             SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
             SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
-        } else  if (currentProcessingPlayer->GetAirFinishedTime() < level.time + 11) {
+        } else  if (currentProcessingPlayer->GetAirFinishedTime() < level.time + 11 * FRAMETIME) {
             // just break surface
             SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
         }
@@ -593,7 +593,7 @@ static void SVG_Player_CheckWorldEffects(void)
             }
         }
     } else {
-        currentProcessingPlayer->SetAirFinishedTime(level.time + 12);
+        currentProcessingPlayer->SetAirFinishedTime(level.time + 12 * FRAMETIME);
         currentProcessingPlayer->SetDamage(2);
     }
 
@@ -608,7 +608,7 @@ static void SVG_Player_CheckWorldEffects(void)
                     SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
                 else
                     SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
-                currentProcessingPlayer->SetDebouncePainTime(level.time + 1);
+                currentProcessingPlayer->SetDebouncePainTime(level.time + 1 * FRAMETIME);
             }
 
             SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
@@ -875,8 +875,8 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
         bobTime *= 2;   // N&C: Footstep tweak.
 
-    bobCycle = bobTime * FRAMETIME;
-    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI)) * FRAMETIME;
+    bobCycle = (int)bobTime;
+    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
     SVG_Player_CheckFallingDamage(ent);
