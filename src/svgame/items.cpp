@@ -401,7 +401,7 @@ SVG_TouchItem
 */
 void SVG_TouchItem(SVGBaseEntity *ent, SVGBaseEntity *other, cplane_t *plane, csurface_t *surf)
 {
-    qboolean    taken;
+    //qboolean    taken;
 
     if (!other->GetClient())
         return;

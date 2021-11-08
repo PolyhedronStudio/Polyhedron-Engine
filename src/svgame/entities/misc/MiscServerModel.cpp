@@ -80,7 +80,7 @@ void MiscServerModel::Spawn() {
     SetMoveType(MoveType::None);
 
     // Since this is a "monster", after all...
-    SetFlags(EntityServerFlags::DeadMonster);
+    SetFlags(EntityServerFlags::Monster);
 
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -100,15 +100,15 @@ void MiscServerModel::Spawn() {
     }
 
     // Set the bounding box.
-    SetBoundingBox(boundingBoxMins, boundingBoxMaxs);
+    SetBoundingBox(GetMins(), GetMaxs());
 
     //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
-        SetMass(400);
+        SetMass(40);
     }
     if (!GetHealth()) {
-        SetHealth(10);
+        SetHealth(200);
     }
     if (!GetDamage()) {
         SetDamage(150);
@@ -271,14 +271,15 @@ void MiscServerModel::MiscServerModelThink(void) {
     ////    // Set new entity origin.
     SetOrigin(trace.endPosition);
     //
-    //    // Link entity back in.
-    LinkEntity();
-    //
+    //     //
     //    // Check for ground.
     SVG_StepMove_CheckGround(this);
     //
     //    // Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + FRAMETIME);
+    //    // Link entity back in.
+    LinkEntity();
+
     //
     //    //// Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
@@ -358,11 +359,7 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SetTakeDamage(TakeDamage::No);
 
     // Attacker becomes this entity its "activator".
-    if (attacker)
-        SetActivator(attacker);
-
-    // Setup the next think and think time.
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
+    SetActivator(attacker);
 
     // Play a nasty gib sound, yughh :)
     SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
@@ -373,6 +370,10 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     //SVG_ThrowClientHead(this, damage);
+    
+    // Setup the next think and think time.
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
+
     // Set think function.
     SetThinkCallback(&MiscServerModel::SVGBaseEntityThinkFree);
 }

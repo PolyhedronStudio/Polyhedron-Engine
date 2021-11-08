@@ -54,7 +54,7 @@ typedef enum {
 
 qboolean CL_ProcessEvents(void);
 #if USE_ICMP
-void CL_ErrorEvent(netadr_t *from);
+void CL_ErrorEvent(NetAdr *from);
 #endif
 void CL_Init(void);
 void CL_InitGameModule(void);
@@ -65,7 +65,7 @@ void CL_UpdateListenerOrigin(void);
 void CL_RestartFilesystem(qboolean total);
 void CL_Activate(active_t active);
 void CL_UpdateUserinfo(cvar_t* var, from_t from);
-void CL_SendStatusRequest(const netadr_t *address);
+void CL_SendStatusRequest(const NetAdr *address);
 void CL_CheckForIP(const char* s);
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
 qboolean CL_CheatsOK(void);

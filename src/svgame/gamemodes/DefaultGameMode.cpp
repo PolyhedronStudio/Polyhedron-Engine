@@ -969,4 +969,5 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
 //===============
 void DefaultGameMode::PutClientInServer(PlayerClient *ent) {
     // Find a spawn point for this client to be "placed"/"put" at.
+
 }

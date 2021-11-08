@@ -38,4 +38,6 @@ typedef enum {
     CLG_CMD_NUM_TYPES = 13,
 } ClientGameCommands;
 
+
+
 #endif

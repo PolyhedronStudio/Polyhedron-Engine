@@ -69,10 +69,9 @@ void TargetEarthquake::QuakeThink() {
         lastQuakeTime = level.time + 0.5f;
     }
 
-    for ( SVGBaseEntity* entity : GetBaseEntityRange<0UL, MAX_EDICTS>() 
-        | BaseEntityFilters::InUse
-        | BaseEntityFilters::HasClient
-        | BaseEntityFilters::HasServerEntity ) {
+    for ( auto * entity : g_baseEntities
+         | bef::BaseCheck | bef::HasClient | bef::HasGroundEntity ) 
+    {
         if ( nullptr == entity->GetGroundEntity() ) {
             continue;
         }
@@ -89,6 +88,6 @@ void TargetEarthquake::QuakeThink() {
     }
 
     if ( level.time < timeStamp ) {
-        SetNextThinkTime( level.time + FRAMETIME );
+        SetNextThinkTime( level.time + 1 * FRAMETIME );
     }
 }

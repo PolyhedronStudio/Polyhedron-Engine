@@ -433,6 +433,7 @@ SET(HEADERS_SHARED
 	../inc/shared/clgame.h
 	../inc/shared/cltypes.h
 	../inc/shared/collision.h
+	../inc/shared/common.h
 	../inc/shared/config.h
 	../inc/shared/endian.h 
 	../inc/shared/svgame.h 
@@ -445,6 +446,7 @@ SET(HEADERS_SHARED
 	../inc/shared/qstring.h 
 	../inc/shared/strings.h
 	../inc/shared/shared.h 
+	../inc/shared/tickrate.h 
 	../inc/shared/ui.h 
 )
 SET(SRC_SHARED

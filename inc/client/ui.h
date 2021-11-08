@@ -39,7 +39,7 @@ void        UI_Draw(int realtime);
 void        UI_OpenMenu(uiMenu_t menu);
 void        UI_Frame(int msec);
 void        UI_StatusEvent(const serverStatus_t *status);
-void        UI_ErrorEvent(netadr_t *from);
+void        UI_ErrorEvent(NetAdr *from);
 void        UI_MouseEvent(int x, int y);
 qboolean    UI_IsTransparent(void);
 #else

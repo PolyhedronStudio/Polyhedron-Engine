@@ -33,6 +33,8 @@ namespace EntityFilterFunctions {
 
     // Returns true in case the (server-)Entity has a client attached to it.
     inline bool BaseEntityHasClient(SVGBaseEntity* ent) { return ent->GetClient(); }
+    // Returns true in case the BaseEntity has a ground entity set to it.
+    inline bool BaseEntityHasGroundEntity(SVGBaseEntity* ent) { return ent->GetGroundEntity(); }
     // Returns true in case the BaseEntity is properly linked to a server entity.
     inline bool BaseEntityHasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
     // Returns true if the BaseEntity contains the sought for targetname.
@@ -92,11 +94,13 @@ namespace ef = EntityFilters; // Shortcut, lesser typing.
 namespace BaseEntityFilters {
     using namespace std::views;
 
+    // BaseEntity Filters to employ by pipelining. Very nice and easy method of doing loops.
     inline auto IsValidPointer = std::views::filter( &EntityFilterFunctions::BaseEntityIsValidPointer );
     inline auto HasServerEntity = std::views::filter( &EntityFilterFunctions::BaseEntityHasServerEntity);
+    inline auto HasGroundEntity = std::views::filter( &EntityFilterFunctions::BaseEntityHasGroundEntity);
     inline auto InUse = std::views::filter( &EntityFilterFunctions::BaseEntityInUse );
     inline auto HasClient = std::views::filter ( &EntityFilterFunctions::BaseEntityHasClient );
-    
+
     // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
     // be referred to from here. However, I am unsure how to do that as of yet.
     inline auto HasClassName(const std::string& classname) {
@@ -153,6 +157,12 @@ namespace BaseEntityFilters {
             }
         );
     }
+
+    //
+    // Summed up pipelines to simplify life with.
+    //
+    inline auto BaseCheck = (IsValidPointer | HasServerEntity | InUse);
+
 };
 namespace bef = BaseEntityFilters; // Shortcut, lesser typing.
 

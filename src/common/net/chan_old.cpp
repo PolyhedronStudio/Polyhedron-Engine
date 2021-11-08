@@ -137,7 +137,7 @@ Netchan_OutOfBand
 Sends a text message in an out-of-band datagram
 ================
 */
-void Netchan_OutOfBand(NetSource sock, const netadr_t *address,
+void Netchan_OutOfBand(NetSource sock, const NetAdr *address,
                        const char *format, ...)
 {
     va_list     argptr;
@@ -532,7 +532,7 @@ qboolean Netchan_ShouldUpdate(NetChannel *netchan)
 Netchan_Setup
 ==============
 */
-NetChannel *Netchan_Setup(NetSource sock, const netadr_t *adr, int qport, size_t maxPacketLength, int protocol)
+NetChannel *Netchan_Setup(NetSource sock, const NetAdr *adr, int qport, size_t maxPacketLength, int protocol)
 {
     NetChannel *netchan;
 

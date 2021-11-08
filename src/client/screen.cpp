@@ -437,7 +437,7 @@ void SCR_LagSample(void)
         lag.head++;
     }
 
-    if (cl.frameFlags & FF_SUPPRESSED) {
+    if (cl.frameFlags & FrameFlags::Suppressed) {
         ping |= LAG_WARN_BIT;
     }
     lag.samples[lag.head % LAG_WIDTH] = ping;
@@ -529,23 +529,23 @@ static void SCR_DrawTurtle(void)
     y = scr.hud_height - 11 * CHAR_HEIGHT;
 
 #define DF(f) \
-    if (cl.frameFlags & FF_##f) { \
+    if (cl.frameFlags & ##f) { \
         SCR_DrawString(x, y, UI_ALTCOLOR, #f); \
         y += CHAR_HEIGHT; \
     }
 
     if (scr_showturtle->integer > 1) {
-        DF(SUPPRESSED)
+        DF(FrameFlags::Suppressed)
     }
-    DF(CLIENTPRED)
+    DF(FrameFlags::ClientPredict)
     if (scr_showturtle->integer > 1) {
-        DF(CLIENTDROP)
-        DF(SERVERDROP)
+        DF(FrameFlags::ClientDrop)
+        DF(FrameFlags::ServerDrop)
     }
-    DF(BADFRAME)
-    DF(OLDFRAME)
-    DF(OLDENT)
-    DF(NODELTA)
+    DF(FrameFlags::BadFrame)
+    DF(FrameFlags::OldFrame)
+    DF(FrameFlags::OldEntity)
+    DF(FrameFlags::NoDeltaFrame)
 
 #undef DF
 }

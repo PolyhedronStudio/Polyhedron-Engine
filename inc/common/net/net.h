@@ -81,29 +81,31 @@ enum NetFlag {
     NET_SERVER  = (1 << 1)
 };
 
-union netadrip_t {
-    uint8_t u8[16];
-    uint16_t u16[8];
-    uint32_t u32[4];
-    uint64_t u64[2];
+// Also include in shared.h but not every file that includes net.h has that included, so we do it here, again.
+#include <array>
+union NetAdrIP {
+    std::array<uint8_t, 16> u8;
+    std::array<uint16_t, 8> u16;
+    std::array<uint32_t, 4> u32;
+    std::array<uint64_t, 2> u64;
 };
 
-struct netadr_t {
+struct NetAdr {
     NetAddressType type;
-    netadrip_t ip;
+    NetAdrIP ip;
     uint16_t port;
     uint32_t scope_id;  // IPv6 crap
 };
 
-enum NetState {
-    NS_DISCONNECTED,// no socket opened
-    NS_CONNECTING,  // connect() not yet completed
-    NS_CONNECTED,   // may transmit data
-    NS_CLOSED,      // peer has preformed orderly shutdown
-    NS_BROKEN       // fatal error has been signaled
+struct NetState {
+    static constexpr int32_t Disconnected = 0;  // No socket opened
+    static constexpr int32_t Connecting = 1;    // Connect() not yet completed
+    static constexpr int32_t Connected = 2;     // May transmit data
+    static constexpr int32_t Closed = 3;        // Peer has preformed orderly shutdown
+    static constexpr int32_t Broken = 4;        // Fatal error has been signaled
 };
 
-static inline qboolean NET_IsEqualAdr(const netadr_t *a, const netadr_t *b)
+static inline qboolean NET_IsEqualAdr(const NetAdr *a, const NetAdr *b)
 {
     if (a->type != b->type) {
         return false;
@@ -119,7 +121,7 @@ static inline qboolean NET_IsEqualAdr(const netadr_t *a, const netadr_t *b)
         }
         return false;
     case NA_IP6:
-        if (memcmp(a->ip.u8, b->ip.u8, 16) == 0 && a->port == b->port) {
+        if (memcmp(a->ip.u8.data(), b->ip.u8.data(), 16) == 0 && a->port == b->port) {
             return true;
         }
         return false;
@@ -130,7 +132,7 @@ static inline qboolean NET_IsEqualAdr(const netadr_t *a, const netadr_t *b)
     return false;
 }
 
-static inline qboolean NET_IsEqualBaseAdr(const netadr_t *a, const netadr_t *b)
+static inline qboolean NET_IsEqualBaseAdr(const NetAdr *a, const NetAdr *b)
 {
     if (a->type != b->type) {
         return false;
@@ -146,7 +148,7 @@ static inline qboolean NET_IsEqualBaseAdr(const netadr_t *a, const netadr_t *b)
         }
         return false;
     case NA_IP6:
-        if (memcmp(a->ip.u8, b->ip.u8, 16) == 0) {
+        if (a->ip.u8 == b->ip.u8) {
             return true;
         }
         return false;
@@ -157,9 +159,9 @@ static inline qboolean NET_IsEqualBaseAdr(const netadr_t *a, const netadr_t *b)
     return false;
 }
 
-static inline qboolean NET_IsEqualBaseAdrMask(const netadr_t *a,
-                                              const netadr_t *b,
-                                              const netadr_t *m)
+static inline qboolean NET_IsEqualBaseAdrMask(const NetAdr *a,
+                                              const NetAdr *b,
+                                              const NetAdr *m)
 {
     if (a->type != b->type) {
         return false;
@@ -185,7 +187,7 @@ static inline qboolean NET_IsEqualBaseAdrMask(const netadr_t *a,
     return false;
 }
 
-static inline qboolean NET_IsLanAddress(const netadr_t *adr)
+static inline qboolean NET_IsLanAddress(const NetAdr *adr)
 {
     switch (adr->type) {
     case NA_LOOPBACK:
@@ -212,7 +214,7 @@ static inline qboolean NET_IsLanAddress(const netadr_t *adr)
     return false;
 }
 
-static inline qboolean NET_IsLocalAddress(const netadr_t *adr)
+static inline qboolean NET_IsLocalAddress(const NetAdr *adr)
 {
 #if USE_CLIENT && USE_SERVER
     if (adr->type == NA_LOOPBACK)
@@ -226,16 +228,16 @@ void        NET_Shutdown(void);
 void        NET_Config(NetFlag flag);
 void        NET_UpdateStats(void);
 
-qboolean    NET_GetAddress(NetSource sock, netadr_t *adr);
+qboolean    NET_GetAddress(NetSource sock, NetAdr *adr);
 void        NET_GetPackets(NetSource sock, void (*packet_cb)(void));
 qboolean    NET_SendPacket(NetSource sock, const void *data,
-                           size_t len, const netadr_t *to);
+                           size_t len, const NetAdr *to);
 
-const char *NET_AdrToString(const netadr_t *a);
-qboolean    NET_StringToAdr(const char *s, netadr_t *a, int default_port);
-qboolean    NET_StringPairToAdr(const char *host, const char *port, netadr_t *a);
+const char *NET_AdrToString(const NetAdr *a);
+qboolean    NET_StringToAdr(const char *s, NetAdr *a, int default_port);
+qboolean    NET_StringPairToAdr(const char *host, const char *port, NetAdr *a);
 
-char        *NET_BaseAdrToString(const netadr_t *a);
+char        *NET_BaseAdrToString(const NetAdr *a);
 #define     NET_StringToBaseAdr(s, a)   NET_StringPairToAdr(s, NULL, a)
 
 const char  *NET_ErrorString(void);
@@ -249,6 +251,6 @@ int         NET_Sleep(int msec);
 extern cvar_t       *net_ip;
 extern cvar_t       *net_port;
 
-extern netadr_t     net_from;
+extern NetAdr     net_from;
 
 #endif // NET_H

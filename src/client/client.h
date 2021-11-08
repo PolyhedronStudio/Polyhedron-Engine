@@ -64,17 +64,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // N&C: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern explosion_t  cl_explosions[MAX_EXPLOSIONS];
-extern cl_entity_t    cl_entities[MAX_EDICTS];
-
-// locally calculated frame flags for debug display
-#define FF_SERVERDROP   (1<<4)
-#define FF_BADFRAME     (1<<5)
-#define FF_OLDFRAME     (1<<6)
-#define FF_OLDENT       (1<<7)
-#define FF_NODELTA      (1<<8)
+extern cl_entity_t  cl_entities[MAX_EDICTS];
 
 extern    ClientState    cl;
 extern    ClientShared   cs;
+
+//=============================================================================
+// 
+// Client Specific FPS
+// 
+//=============================================================================
+static constexpr double CL_FRAMETIME = BASE_FRAMETIME;
+static constexpr double CL_1_FRAMETIME = BASE_1_FRAMETIME;
+static constexpr int32_t CL_FRAMEDIV = BASE_FRAMERATE / 10.0;
+inline qboolean CL_FRAMESYNC() {
+    return !(cl.frame.number % CL_FRAMEDIV);
+}
 
 /*
 ==================================================================
@@ -157,7 +162,7 @@ struct ClientStatic {
     } measure;
 
     // connection information
-    netadr_t    serverAddress;
+    NetAdr    serverAddress;
     char        servername[MAX_OSPATH]; // name of server from original connect
     unsigned    timeOfInitialConnect;           // for connection retransmits
     int         connect_count;
@@ -182,7 +187,7 @@ struct ClientStatic {
 #define RECENT_ADDR 4
 #define RECENT_MASK (RECENT_ADDR - 1)
 
-    netadr_t    recent_addr[RECENT_ADDR];
+    NetAdr    recent_addr[RECENT_ADDR];
     int         recent_head;
 
     struct {
@@ -357,7 +362,7 @@ typedef struct console_s {
 
     chatMode_t chat;
     consoleMode_t mode;
-    netadr_t remoteNetAddress;
+    NetAdr remoteNetAddress;
     char *remotePassword;
 
     LoadState loadstate;
@@ -378,7 +383,7 @@ void CL_ClearState(void);
 void CL_RestartFilesystem(qboolean total);
 void CL_RestartRefresh(qboolean total);
 void CL_ClientCommand(const char *string);
-void CL_SendRcon(const netadr_t *adr, const char *pass, const char *cmd);
+void CL_SendRcon(const NetAdr *adr, const char *pass, const char *cmd);
 void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
 qboolean CL_CheckForIgnore(const char* s);

@@ -97,10 +97,10 @@ void MiscExplosionBox::Spawn() {
     //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
-        SetMass(400);
+        SetMass(40);
     }
     if (!GetHealth()) {
-        SetHealth(80);
+        SetHealth(150);
     }
     if (!GetDamage()) {
         SetDamage(150);
@@ -201,10 +201,11 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
     ////
     ////    // Set new entity origin.
     SetOrigin(trace.endPosition);
-    //
+
     //    // Link entity back in.
     LinkEntity();
     //
+    //     //
     //    // Check for ground.
     SVG_StepMove_CheckGround(this);
     //

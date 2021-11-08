@@ -53,7 +53,7 @@ typedef struct {
         SLOT_VALID
     } status;
 
-    netadr_t    address;
+    NetAdr    address;
     char        *hostname; // original domain name, only used for favorites
     int         numRules;
     char        *rules[MAX_STATUS_RULES];
@@ -167,7 +167,7 @@ static void FreeSlot(serverslot_t *slot)
     Z_Free(slot);
 }
 
-static serverslot_t *FindSlot(const netadr_t *search, int *index_p)
+static serverslot_t *FindSlot(const NetAdr *search, int *index_p)
 {
     serverslot_t *slot, *found = NULL;
     int i;
@@ -326,10 +326,10 @@ UI_ErrorEvent
 An ICMP destination-unreachable error has been received.
 =================
 */
-void UI_ErrorEvent(netadr_t *from)
+void UI_ErrorEvent(NetAdr *from)
 {
     serverslot_t *slot;
-    netadr_t address;
+    NetAdr address;
     char *hostname;
     unsigned timeStamp, ping;
     int i;
@@ -409,7 +409,7 @@ static menuSound_t CopyAddress(void)
 static menuSound_t PingSelected(void)
 {
     serverslot_t *slot;
-    netadr_t address;
+    NetAdr address;
     char *hostname;
 
     if (!m_servers.list.numItems)
@@ -443,9 +443,9 @@ static menuSound_t PingSelected(void)
     return QMS_SILENT;
 }
 
-static void AddServer(const netadr_t *address, const char *hostname)
+static void AddServer(const NetAdr *address, const char *hostname)
 {
-    netadr_t tmp;
+    NetAdr tmp;
     serverslot_t *slot;
 
     if (m_servers.list.numItems >= MAX_STATUS_SERVERS)
@@ -519,7 +519,7 @@ static void ParsePlain(void *data, size_t len, size_t chunk)
 
 static void ParseBinary(void *data, size_t len, size_t chunk)
 {
-    netadr_t address;
+    NetAdr address;
     byte *ptr;
 
     if (!data)
@@ -531,7 +531,7 @@ static void ParseBinary(void *data, size_t len, size_t chunk)
     // CPP: Cast from void* to byte*
     ptr = (byte*)data;
     while (len >= chunk) {
-        memcpy(address.ip.u8, ptr, 4);
+        memcpy(address.ip.u8.data(), ptr, 4);
         memcpy(&address.port, ptr + 4, 2);
         ptr += chunk;
         len -= chunk;
@@ -555,7 +555,7 @@ static void ParseAddressBook(void)
     }
 }
 
-static void ParseMasterArgs(netadr_t *broadcast)
+static void ParseMasterArgs(NetAdr *broadcast)
 {
     void *data;
     ssize_t len;
@@ -742,7 +742,7 @@ void UI_Frame(int msec)
 
 static void PingServers(void)
 {
-    netadr_t broadcast;
+    NetAdr broadcast;
 
     S_StopAllSounds();
 
@@ -776,7 +776,7 @@ static void PingServers(void)
     CalcPingRate();
 }
 
-static int statuscmp(serverslot_t *s1, serverslot_t *s2)
+static int CompareStatus(serverslot_t *s1, serverslot_t *s2)
 {
     if (s1->status == s2->status)
         return 0;
@@ -789,7 +789,7 @@ static int statuscmp(serverslot_t *s1, serverslot_t *s2)
     return 0;
 }
 
-static int namecmp(serverslot_t *s1, serverslot_t *s2, int col)
+static int CompareName(serverslot_t *s1, serverslot_t *s2, int col)
 {
     char *n1 = UI_GetColumn(s1->name, col);
     char *n2 = UI_GetColumn(s2->name, col);
@@ -797,7 +797,7 @@ static int namecmp(serverslot_t *s1, serverslot_t *s2, int col)
     return Q_stricmp(n1, n2) * m_servers.list.sortdir;
 }
 
-static int pingcmp(serverslot_t *s1, serverslot_t *s2)
+static int ComparePing(serverslot_t *s1, serverslot_t *s2)
 {
     int n1 = atoi(UI_GetColumn(s1->name, COL_RTT));
     int n2 = atoi(UI_GetColumn(s2->name, COL_RTT));
@@ -805,12 +805,12 @@ static int pingcmp(serverslot_t *s1, serverslot_t *s2)
     return (n1 - n2) * m_servers.list.sortdir;
 }
 
-static int playercmp(serverslot_t *s1, serverslot_t *s2)
+static int ComparePlayers(serverslot_t *s1, serverslot_t *s2)
 {
     return (s2->numPlayers - s1->numPlayers) * m_servers.list.sortdir;
 }
 
-static int addresscmp(serverslot_t *s1, serverslot_t *s2)
+static int CompareAddress(serverslot_t *s1, serverslot_t *s2)
 {
     if (s1->address.ip.u32 > s2->address.ip.u32) // warning C5056: operator '>': deprecated for array types
         return 1;
@@ -823,14 +823,14 @@ static int addresscmp(serverslot_t *s1, serverslot_t *s2)
     return 0;
 }
 
-static int slotcmp(const void *p1, const void *p2)
+static int CompareSlot(const void *p1, const void *p2)
 {
     serverslot_t *s1 = *(serverslot_t **)p1;
     serverslot_t *s2 = *(serverslot_t **)p2;
     int r;
 
     // sort by validity
-    r = statuscmp(s1, s2);
+    r = CompareStatus(s1, s2);
     if (r)
         return r;
 
@@ -839,32 +839,32 @@ static int slotcmp(const void *p1, const void *p2)
     case COL_NAME:
         break;
     case COL_MOD:
-        r = namecmp(s1, s2, COL_MOD);
+        r = CompareName(s1, s2, COL_MOD);
         break;
     case COL_MAP:
-        r = namecmp(s1, s2, COL_MAP);
+        r = CompareName(s1, s2, COL_MAP);
         break;
     case COL_PLAYERS:
-        r = playercmp(s1, s2);
+        r = ComparePlayers(s1, s2);
         break;
     case COL_RTT:
-        r = pingcmp(s1, s2);
+        r = ComparePing(s1, s2);
         break;
     }
     if (r)
         return r;
 
     // stabilize sort
-    r = namecmp(s1, s2, COL_NAME);
+    r = CompareName(s1, s2, COL_NAME);
     if (r)
         return r;
 
-    return addresscmp(s1, s2);
+    return CompareAddress(s1, s2);
 }
 
 static menuSound_t Sort(menuList_t *self)
 {
-    MenuList_Sort(&m_servers.list, 0, slotcmp);
+    MenuList_Sort(&m_servers.list, 0, CompareSlot);
     return QMS_SILENT;
 }
 

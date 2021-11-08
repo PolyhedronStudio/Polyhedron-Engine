@@ -70,7 +70,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 //     chatMode_t chat;
 //     consoleMode_t mode;
-//     netadr_t remoteNetAddress;
+//     NetAdr remoteNetAddress;
 //     char *remotePassword;
 
 //     LoadState loadstate;
@@ -330,7 +330,7 @@ Con_RemoteMode_f
 */
 static void Con_RemoteMode_f(void)
 {
-    netadr_t adr;
+    NetAdr adr;
     const char *s; // C++20: STRING: Added const to char*
 
     if (Cmd_Argc() != 3) {

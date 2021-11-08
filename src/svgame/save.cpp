@@ -444,8 +444,8 @@ static void write_index(FILE *f, void *p, size_t size, void *start, int max_inde
 
 static void write_pointer(FILE *f, void *p, ptr_type_t type)
 {
-    const save_ptr_t *ptr;
-    int i;
+    //const save_ptr_t *ptr;
+    //int i;
 
     if (!p) {
         write_int(f, -1);

@@ -155,7 +155,7 @@ enum RequestType {
 
 struct Request {
     RequestType type;
-    netadr_t adr;
+    NetAdr adr;
     unsigned time;
 };
 
@@ -165,7 +165,7 @@ struct Request {
 static Request    clientRequests[MAX_REQUESTS];
 static unsigned     nextRequest;
 
-static Request *CL_AddRequest(const netadr_t *adr, RequestType type)
+static Request *CL_AddRequest(const NetAdr *adr, RequestType type)
 {
     Request *r;
 
@@ -380,7 +380,7 @@ void CL_CheckForResend(void)
 
 static void CL_RecentIP_g(genctx_t *ctx)
 {
-    netadr_t *a;
+    NetAdr *a;
     int i, j;
 
     j = cls.recent_head - RECENT_ADDR;
@@ -424,7 +424,7 @@ CL_EConnect_f
 static void CL_EConnect_f(void) {
     const char* server;// , * p; // C++20: STRING: Added const to char*
     char* p;
-    netadr_t    address;
+    NetAdr    address;
     int protocol;
     int argc = Cmd_Argc();
 
@@ -499,7 +499,7 @@ static void CL_Connect_f(void)
 {
     const char* server;// , * p; // C++20: STRING: Added const to char*
     char* p;
-    netadr_t    address;
+    NetAdr    address;
     int protocol;
     int argc = Cmd_Argc();
 
@@ -564,7 +564,7 @@ usage:
 
 static void CL_FollowIP_f(void)
 {
-    netadr_t *a;
+    NetAdr *a;
     int i, j;
 
     if (Cmd_Argc() > 1) {
@@ -591,7 +591,7 @@ static void CL_FollowIP_f(void)
 
 static void CL_PassiveConnect_f(void)
 {
-    netadr_t address;
+    NetAdr address;
 
     if (cls.passive) {
         cls.passive = false;
@@ -615,7 +615,7 @@ static void CL_PassiveConnect_f(void)
                NET_AdrToString(&address));
 }
 
-void CL_SendRcon(const netadr_t *adr, const char *pass, const char *cmd)
+void CL_SendRcon(const NetAdr *adr, const char *pass, const char *cmd)
 {
     NET_Config(NET_CLIENT);
 
@@ -635,7 +635,7 @@ CL_Rcon_f
 */
 static void CL_Rcon_f(void)
 {
-    netadr_t    address;
+    NetAdr    address;
 
     if (Cmd_Argc() < 2) {
         Com_Printf("Usage: %s <command>\n", Cmd_Argv(0));
@@ -864,7 +864,7 @@ CL_ServerStatus_f
 static void CL_ServerStatus_f(void)
 {
     const char        *s; // C++20: STRING: Added const to char*
-    netadr_t    adr;
+    NetAdr    adr;
     neterr_t    ret;
 
     if (Cmd_Argc() < 2) {
@@ -1057,7 +1057,7 @@ void CL_Packet_f (void)
     char    send[2048];
     int     i, l;
     char    *in, *out;
-    netadr_t    adr;
+    NetAdr    adr;
 
     if (Cmd_Argc() != 3)
     {
@@ -1200,7 +1200,7 @@ static void CL_Reconnect_f(void)
 CL_SendStatusRequest
 =================
 */
-void CL_SendStatusRequest(const netadr_t *address)
+void CL_SendStatusRequest(const NetAdr *address)
 {
     NET_Config(NET_CLIENT);
 
@@ -1217,7 +1217,7 @@ CL_PingServers_f
 */
 static void CL_PingServers_f(void)
 {
-    netadr_t address;
+    NetAdr address;
     cvar_t *var;
     int i;
 
@@ -1526,7 +1526,7 @@ static void CL_PacketEvent(void)
     CL_ParseServerMessage();
 
     // if recording demo, write the message out
-    if (cls.demo.recording && !cls.demo.paused && CL_FRAMESYNC) {
+    if (cls.demo.recording && !cls.demo.paused && CL_FRAMESYNC()) {
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
 
@@ -1541,7 +1541,7 @@ static void CL_PacketEvent(void)
 }
 
 #if USE_ICMP
-void CL_ErrorEvent(netadr_t *from)
+void CL_ErrorEvent(NetAdr *from)
 {
     UI_ErrorEvent(from);
 

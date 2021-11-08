@@ -36,7 +36,7 @@ Specify a list of master servers
 */
 static void SV_SetMaster_f(void)
 {
-    netadr_t adr;
+    NetAdr adr;
     int     i, total;
     const char    *s;
     master_t *m, *n;
@@ -460,7 +460,7 @@ static void SV_DumpEnts_f(void)
 
 //===============================================================
 
-static void make_mask(netadr_t *mask, NetAddressType type, int bits);
+static void make_mask(NetAdr *mask, NetAddressType type, int bits);
 
 /*
 ==================
@@ -489,7 +489,7 @@ static void SV_Kick_f(void)
 
     // optionally ban their IP address
     if (!strcmp(Cmd_Argv(0), "kickban")) {
-        netadr_t *addr = &sv_client->netchan->remoteNetAddress;
+        NetAdr *addr = &sv_client->netchan->remoteNetAddress;
         if (addr->type == NA_IP || addr->type == NA_IP6) {
             AddressMatch *match = (AddressMatch*)Z_Malloc(sizeof(*match)); // CPP: Cast
             match->addr = *addr;
@@ -904,7 +904,7 @@ static void SV_StuffCvar_f(void)
 static void SV_PickClient_f(void)
 {
     const char *s;
-    netadr_t address;
+    NetAdr address;
 
     if (!svs.initialized) {
         Com_Printf("No server running.\n");
@@ -968,17 +968,17 @@ static void SV_SVG_ServerCommand_f(void)
     ge->ServerCommand();
 }
 
-static void make_mask(netadr_t *mask, NetAddressType type, int bits)
+static void make_mask(NetAdr *mask, NetAddressType type, int bits)
 {
     memset(mask, 0, sizeof(*mask));
     mask->type = type;
-    memset(mask->ip.u8, 0xff, bits >> 3);
+    memset(mask->ip.u8.data(), 0xff, bits >> 3);
     if (bits & 7) {
         mask->ip.u8[bits >> 3] = ~((1 << (8 - (bits & 7))) - 1);
     }
 }
 
-static qboolean parse_mask(char *s, netadr_t *addr, netadr_t *mask)
+static qboolean parse_mask(char *s, NetAdr *addr, NetAdr *mask)
 {
     int bits, size;
     char *p;
@@ -1052,7 +1052,7 @@ void SV_AddMatch_f(list_t *list)
     const char* s;
     char buf[MAX_QPATH];
     AddressMatch *match;
-    netadr_t addr, mask;
+    NetAdr addr, mask;
     size_t len;
 
     if (Cmd_Argc() < 2) {
@@ -1089,7 +1089,7 @@ void SV_DelMatch_f(list_t *list)
 {
     const char *s;
     AddressMatch *match, *next;
-    netadr_t addr, mask;
+    NetAdr addr, mask;
     int i;
 
     if (Cmd_Argc() < 2) {

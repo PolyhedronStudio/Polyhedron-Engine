@@ -17,11 +17,3 @@ static constexpr double     BASE_FRAMETIME_1000 = BASE_FRAMETIME / 1000.0;
 
 // Used for old-school hardcoded values.
 static constexpr int32_t    BASE_FRAMEDIVIDER = (int32_t)BASE_FRAMERATE / 10.0;
-
-//-----------------
-// Client Specific FPS
-//-----------------
-static constexpr double CL_FRAMETIME = BASE_FRAMETIME;
-static constexpr double CL_1_FRAMETIME = BASE_1_FRAMETIME;
-static constexpr int32_t CL_FRAMEDIV = BASE_FRAMERATE / 10.0;
-static constexpr int32_t CL_FRAMESYNC = 1;

@@ -1124,7 +1124,7 @@ static void SV_ExecuteMove(void)
     // Determine drop rate, on whether we should be predicting or not.
     net_drop = sv_client->netchan->deltaFramePacketDrops;
     if (net_drop > 2) {
-        sv_client->frameFlags |= FF_CLIENTPRED;
+        sv_client->frameFlags |= FrameFlags::ClientPredict;
     }
 
     if (net_drop < 20 * SERVER_RATE_MULTIPLIER) {

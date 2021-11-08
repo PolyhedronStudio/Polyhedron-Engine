@@ -26,7 +26,7 @@ void ClientGameEntities::Event(int32_t number) {
     cl_entity_t* cent = &cs->entities[number];
 
     // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((cent->current.effects & EntityEffectType::Teleporter) && CL_FRAMESYNC) {
+    if ((cent->current.effects & EntityEffectType::Teleporter) && CLG_FRAMESYNC) {
         CLG_TeleporterParticles(cent->current.origin);
     }
 

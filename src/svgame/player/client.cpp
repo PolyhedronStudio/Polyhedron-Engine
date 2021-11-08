@@ -215,31 +215,31 @@ Chooses a player start, deathmatch start, coop start, etc
 */
 void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
 {
-    SVGBaseEntity *spot = nullptr;
+    //SVGBaseEntity *spot = nullptr;
 
-    // Find a single player start spot
-    if (!spot) {
-        //while ((spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot)) != nullptr) {
-        //    if (!game.spawnpoint[0] && spot->GetTargetName().empty())
-        //        break;
+    //// Find a single player start spot
+    //if (!spot) {
+    //    //while ((spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot)) != nullptr) {
+    //    //    if (!game.szpawnpoint[0] && spot->GetTargetName().empty())
+    //    //        break;
 
-        //    if (!game.spawnpoint[0] || spot->GetTargetName().empty())
-        //        continue;
+    //    //    if (!game.spawnpoint[0] || spot->GetTargetName().empty())
+    //    //        continue;
 
-        //    //if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
-        //    if (spot->GetTargetName() == game.spawnpoint)
-        //        break;
-        //}
+    //    //    //if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
+    //    //    if (spot->GetTargetName() == game.spawnpoint)
+    //    //        break;
+    //    //}
 
-        if (!spot) {
-            if (!game.spawnpoint[0]) {
-                // there wasn't a spawnpoint without a target, so use any
-                spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot);
-            }
-            if (!spot)
-                gi.Error("Couldn't find spawn point %s", game.spawnpoint);
-        }
-    }
+    //    if (!spot) {
+    //        if (!game.spawnpoint[0]) {
+    //            // there wasn't a spawnpoint without a target, so use any
+    //            spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot);
+    //        }
+    //        if (!spot)
+    //            gi.Error("Couldn't find spawn point %s", game.spawnpoint);
+    //    }
+    //}
 
     if (spot) {
         origin = spot->GetOrigin();

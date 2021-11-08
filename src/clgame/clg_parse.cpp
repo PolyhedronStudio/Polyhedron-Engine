@@ -241,7 +241,7 @@ void CLG_ParsePrint(void)
     clgi.Con_SkipNotify(false);
 
     SCR_AddToChatHUD(s);
-
+    
     // N&C: We don't need this stuff anymore..
     //// silence MVD isSpectator chat
     //if (cl.serverState == SERVERSTATE_BROADCAST && !strncmp(s, "[MVD] ", 6))

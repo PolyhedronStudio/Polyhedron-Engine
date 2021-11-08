@@ -356,7 +356,7 @@ void SV_RateInit(RateLimit *r, const char *s)
     r->cost = rate2credits(rate);
 }
 
-AddressMatch *SV_MatchAddress(list_t *list, netadr_t *addr)
+AddressMatch *SV_MatchAddress(list_t *list, NetAdr *addr)
 {
     AddressMatch *match;
 
@@ -690,13 +690,13 @@ static qboolean permit_connection(conn_params_t *p)
     if (sv_iplimit->integer > 0) {
         count = 0;
         FOR_EACH_CLIENT(cl) {
-            netadr_t *adr = &cl->netchan->remoteNetAddress;
+            NetAdr *adr = &cl->netchan->remoteNetAddress;
 
             if (net_from.type != adr->type)
                 continue;
             if (net_from.type == NA_IP && net_from.ip.u32[0] != adr->ip.u32[0])
                 continue;
-            if (net_from.type == NA_IP6 && memcmp(net_from.ip.u8, adr->ip.u8, 48 / CHAR_BIT))
+            if (net_from.type == NA_IP6 && memcmp(net_from.ip.u8.data(), adr->ip.u8.data(), 48 / CHAR_BIT))
                 continue;
 
             if (cl->connectionState == ConnectionState::Zombie)
@@ -1380,7 +1380,7 @@ static void SV_PacketEvent(void)
         client->unreachable = false; // don't drop
 #endif
         if (netchan->deltaFramePacketDrops > 0)
-            client->frameFlags |= FF_CLIENTDROP;
+            client->frameFlags |= FrameFlags::ClientDrop;
 
         SV_ExecuteClientMessage(client);
         break;
@@ -1426,7 +1426,7 @@ static void update_client_mtu(client_t *client, int ee_info)
 SV_ErrorEvent
 =================
 */
-void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info)
+void SV_ErrorEvent(NetAdr *from, int ee_errno, int ee_info)
 {
     client_t    *client;
     NetChannel   *netchan;

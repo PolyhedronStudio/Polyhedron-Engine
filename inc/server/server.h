@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/net/net.h"
 
 #if USE_ICMP
-void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info);
+void SV_ErrorEvent(NetAdr *from, int ee_errno, int ee_info);
 #endif
 void SV_Init(void);
 void SV_Shutdown(const char *finalmsg, ErrorType type);
