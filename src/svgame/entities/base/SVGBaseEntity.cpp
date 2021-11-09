@@ -201,11 +201,11 @@ qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::
 	vectorValue = vec3_zero();
 	int32_t i = 0;
 	for (auto& str : vectorFields) {
-		if (i > 2)
-			break;
-
 		vectorValue[i] = std::stof(str);
 		i++;
+
+		if (i > 2)
+			break;
 	}
 
 	return true;

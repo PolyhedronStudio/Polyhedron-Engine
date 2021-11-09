@@ -2,21 +2,22 @@
 // LICENSE HERE.
 
 //
-// InfoPlayerStart.h
+// InfoPlayerIntermission.h
 //
 //
 */
 #pragma once
 
 class SVGBaseEntity;
+class InfoPlayerStart;
 
-class InfoPlayerStart : public SVGBaseEntity {
+class InfoPlayerIntermission : public InfoPlayerStart {
 public:
     // Constructor/Deconstructor.
-    InfoPlayerStart(Entity* svEntity);
-    virtual ~InfoPlayerStart();
+    InfoPlayerIntermission(Entity* svEntity);
+    virtual ~InfoPlayerIntermission();
 
-    DefineMapClass( "info_player_start", InfoPlayerStart, SVGBaseEntity );
+    DefineMapClass( "info_player_intermission", InfoPlayerIntermission, InfoPlayerStart );
 
     // Interface functions. 
     void Precache();    // Precaches data.

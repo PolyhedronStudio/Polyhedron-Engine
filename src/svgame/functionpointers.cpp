@@ -135,9 +135,9 @@ extern void train_wait(Entity* self);
 //{ P_die, func_explosive_explode },
 //
 //{ P_die, gib_die },
-//{ P_die, SVG_Player_Die },
+//{ P_die, SVG_Client_Die },
 //
-//{ P_pain, SVG_Player_Pain },
+//{ P_pain, SVG_Client_Pain },
 //
 //{ P_think, Brush_AngleMove_Begin },
 //{ P_think, Brush_AngleMove_Done },

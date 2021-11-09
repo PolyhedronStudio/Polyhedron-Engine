@@ -66,12 +66,12 @@ static float SVG_CalcRoll(const vec3_t &angles, const vec3_t &velocity)
 
 //
 //===============
-// SVG_Player_ApplyDamageFeedback
+// SVG_Client_ApplyDamageFeedback
 // 
 // Handles color blends and view kicks
 //===============
 //
-static void SVG_Player_ApplyDamageFeedback(PlayerClient *ent)
+static void SVG_Client_ApplyDamageFeedback(PlayerClient *ent)
 {
     float   side;
     float   realcount, count, kick;
@@ -423,11 +423,11 @@ static void SVG_CalculateBlend(PlayerClient *ent)
 
 //
 //===============
-// SVG_Player_CheckFallingDamage
+// SVG_Client_CheckFallingDamage
 // 
 //===============
 //
-static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
+void SVG_Client_CheckFallingDamage(PlayerClient *ent)
 {
     float   delta;
     int     damage;
@@ -495,11 +495,11 @@ static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
 
 //
 //===============
-// SVG_Player_CheckWorldEffects
+// SVG_Client_CheckWorldEffects
 // 
 //===============
 //
-static void SVG_Player_CheckWorldEffects(void)
+static void SVG_Client_CheckWorldEffects(void)
 {
     int         waterlevel, oldWaterLevel;
 
@@ -622,11 +622,11 @@ static void SVG_Player_CheckWorldEffects(void)
 
 //
 //===============
-// SVG_SetClientEffects
+// SVG_Client_SetEffects
 // 
 //===============
 //
-static void SVG_SetClientEffects(PlayerClient *ent)
+static void SVG_Client_SetEffects(PlayerClient *ent)
 {
     ent->SetEffects(0);
     ent->SetRenderEffects(0);
@@ -642,11 +642,11 @@ static void SVG_SetClientEffects(PlayerClient *ent)
 
 //
 //===============
-// SVG_SetClientEvent
+// SVG_Client_SetEvent
 // 
 //===============
 //
-static void SVG_SetClientEvent(PlayerClient *ent)
+static void SVG_Client_SetEvent(PlayerClient *ent)
 {
     if (ent->GetEventID())
         return;
@@ -659,11 +659,11 @@ static void SVG_SetClientEvent(PlayerClient *ent)
 
 //
 //===============
-// SVG_SetClientSound
+// SVG_Client_SetSound
 // 
 //===============
 //
-static void SVG_SetClientSound(PlayerClient *ent)
+static void SVG_Client_SetSound(PlayerClient *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
@@ -686,11 +686,11 @@ static void SVG_SetClientSound(PlayerClient *ent)
 
 //
 //===============
-// SVG_SetClientAnimationFrame
+// SVG_Client_SetAnimationFrame
 // 
 //===============
 //
-static void SVG_SetClientAnimationFrame(PlayerClient *ent)
+static void SVG_Client_SetAnimationFrame(PlayerClient *ent)
 {
     qboolean isDucking = false;
     qboolean isRunning = false;
@@ -820,7 +820,7 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     vec3_vectors(currentProcessingClient->aimAngles, &forward, &right, &up);
 
     // Burn from lava, etc
-    SVG_Player_CheckWorldEffects();
+    SVG_Client_CheckWorldEffects();
 
     //
     // Set model angles from view angles so other things in
@@ -879,10 +879,10 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     bobFracsin = std::fabsf(std::sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
-    SVG_Player_CheckFallingDamage(ent);
+    SVG_Client_CheckFallingDamage(ent);
 
     // Apply all other the damage taken this frame
-    SVG_Player_ApplyDamageFeedback(ent);
+    SVG_Client_ApplyDamageFeedback(ent);
 
     // Determine the new frame's view offsets
     SVG_CalculateViewOffset(ent);
@@ -905,13 +905,13 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
 
     SVG_HUD_CheckChaseStats(ent->GetServerEntity());
 
-    SVG_SetClientEvent(ent);
+    SVG_Client_SetEvent(ent);
 
-    SVG_SetClientEffects(ent);
+    SVG_Client_SetEffects(ent);
 
-    SVG_SetClientSound(ent);
+    SVG_Client_SetSound(ent);
 
-    SVG_SetClientAnimationFrame(ent);
+    SVG_Client_SetAnimationFrame(ent);
 
     // Store velocity and view angles.
     currentProcessingClient->oldVelocity = ent->GetVelocity();

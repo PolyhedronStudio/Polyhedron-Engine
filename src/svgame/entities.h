@@ -141,6 +141,15 @@ namespace BaseEntityFilters {
         );
     }
 
+    template <typename ClassType>
+    auto IsSubclassOf() {
+        return std::ranges::views::filter(
+            [](SVGBaseEntity* ent) {
+                return ent->IsSubclassOf<ClassType>();
+            }
+        );
+    }
+
     // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
     // be referred to from here. However, I am unsure how to do that as of yet.
     inline auto WithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags) {

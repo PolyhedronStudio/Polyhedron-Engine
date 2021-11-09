@@ -8,14 +8,15 @@
 */
 #include "../../g_local.h"              // SVGame.
 #include "../base/SVGBaseEntity.h"      // BaseEntity.
-#include "InfoPlayerStart.h"            // Class.
+#include "InfoPlayerStart.h"
+#include "InfoPlayerCoop.h"     // Class.
 
 // Constructor/Deconstructor.
-InfoPlayerStart::InfoPlayerStart(Entity* svEntity) 
-    : SVGBaseEntity(svEntity) {
+InfoPlayerCoop::InfoPlayerCoop(Entity* svEntity) 
+    : InfoPlayerStart(svEntity) {
 
 }
-InfoPlayerStart::~InfoPlayerStart() {
+InfoPlayerCoop::~InfoPlayerCoop() {
 
 }
 
@@ -24,7 +25,7 @@ InfoPlayerStart::~InfoPlayerStart() {
 // InfoPlayerStart::Precache
 //
 //===============
-void InfoPlayerStart::Precache() {
+void InfoPlayerCoop::Precache() {
     Base::Precache();
 }
 
@@ -32,31 +33,31 @@ void InfoPlayerStart::Precache() {
 // InfoPlayerStart::Spawn
 //
 //===============
-void InfoPlayerStart::Spawn() {
+void InfoPlayerCoop::Spawn() {
     Base::Spawn();
 }
 
 //===============
-// InfoPlayerStart::PostSpawn
+// InfoPlayerCoop::PostSpawn
 //
 //===============
-void InfoPlayerStart::PostSpawn() {
+void InfoPlayerCoop::PostSpawn() {
     Base::PostSpawn();
 }
 
 //===============
-// InfoPlayerStart::Think
+// InfoPlayerCoop::Think
 //
 //===============
-void InfoPlayerStart::Think() {
+void InfoPlayerCoop::Think() {
     // Parent think.
     Base::Think();
 }
 
 //===============
-// InfoPlayerStart::SpawnKey
+// InfoPlayerCoop::SpawnKey
 //
 //===============
-void InfoPlayerStart::SpawnKey(const std::string& key, const std::string& value) {
+void InfoPlayerCoop::SpawnKey(const std::string& key, const std::string& value) {
     Base::SpawnKey(key, value);
 }

@@ -22,11 +22,15 @@ public:
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
-    // MP has its own damage regulation logic.
+    // DeathMatch unique function implementations.
+    virtual void PutClientInServer(Entity* ent) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
-    // MP Does special "ClientBegin" rules for clients.
     virtual void ClientBegin(Entity* serverEntity) override;
-    // DeathMatch has its own Obituary madness.
+    virtual void ClientBeginServerFrame(Entity* serverEntity) override;
+    
+    virtual void RespawnClient(PlayerClient* ent) override;
+    virtual void RespawnSpectator(PlayerClient* ent);
+
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
 private:

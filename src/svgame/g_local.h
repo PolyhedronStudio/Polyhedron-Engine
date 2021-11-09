@@ -655,8 +655,8 @@ Entity *SVG_PlayerTrail_LastSpot(void);
 //
 // g_player.c
 //
-void SVG_Player_Pain(Entity *self, Entity *other, float kick, int32_t damage);
-void SVG_Player_Die(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t& point);
+void SVG_Client_Pain(Entity *self, Entity *other, float kick, int32_t damage);
+void SVG_Client_Die(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t& point);
 
 //
 // g_svcmds.c

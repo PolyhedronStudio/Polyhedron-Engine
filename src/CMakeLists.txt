@@ -91,9 +91,9 @@ SET( SRC_SVGAME
 	svgame/entities/base/PlayerClient.cpp
 	#svgame/entities/info/InfoNotNull.cpp
 	svgame/entities/info/InfoNull.cpp
-	#svgame/entities/info/InfoPlayerCoop.cpp
-	#svgame/entities/info/InfoPlayerDeathmatch.cpp
-	#svgame/entities/info/InfoPlayerIntermission.cpp
+	svgame/entities/info/InfoPlayerCoop.cpp
+	svgame/entities/info/InfoPlayerDeathmatch.cpp
+	svgame/entities/info/InfoPlayerIntermission.cpp
 	svgame/entities/info/InfoPlayerStart.cpp
 	svgame/entities/func/FuncAreaportal.cpp
 	svgame/entities/func/FuncButton.cpp

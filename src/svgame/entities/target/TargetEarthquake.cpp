@@ -72,10 +72,6 @@ void TargetEarthquake::QuakeThink() {
     for ( auto * entity : g_baseEntities
          | bef::Standard | bef::HasClient | bef::HasGroundEntity ) 
     {
-        if ( nullptr == entity->GetGroundEntity() ) {
-            continue;
-        }
-
         entity->SetGroundEntity( nullptr );
         vec3_t newVelocity{
             crandom() * 150.0f,

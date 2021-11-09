@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "animations.h"
 
 // The actual current player entity that this C++ unit is acting on.
-static PlayerClient *currentProcessingPlayer;
+static PlayerClient *ent;
 
 // The current client belonging to the player.
 static GameClient   *currentProcessingClient;
@@ -43,7 +43,7 @@ static float   bobFracsin;     // sin(bobfrac*M_PI)
 //
 //===============
 //
-static float SVG_CalcRoll(const vec3_t &angles, const vec3_t &velocity)
+float SVG_Client_CalcRoll(const vec3_t &angles, const vec3_t &velocity)
 {
     float   sign;
     float   side;
@@ -66,12 +66,12 @@ static float SVG_CalcRoll(const vec3_t &angles, const vec3_t &velocity)
 
 //
 //===============
-// SVG_Player_ApplyDamageFeedback
+// SVG_Client_ApplyDamageFeedback
 // 
 // Handles color blends and view kicks
 //===============
 //
-static void SVG_Player_ApplyDamageFeedback(PlayerClient *ent)
+void SVG_Client_ApplyDamageFeedback(PlayerClient *ent)
 {
     float   side;
     float   realcount, count, kick;
@@ -81,42 +81,49 @@ static void SVG_Player_ApplyDamageFeedback(PlayerClient *ent)
     static  vec3_t  acolor = {1.0f, 1.0f, 1.0f};
     static  vec3_t  bcolor = {1.0f, 0.0f, 0.0f};
 
-    //client = player->client;
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
 
     // flash the backgrounds behind the status numbers
-    currentProcessingClient->playerState.stats[STAT_FLASHES] = 0;
-    if (currentProcessingClient->damages.blood)
-        currentProcessingClient->playerState.stats[STAT_FLASHES] |= 1;
-    if (currentProcessingClient->damages.armor && !(ent->GetFlags() & EntityFlags::GodMode))
-        currentProcessingClient->playerState.stats[STAT_FLASHES] |= 2;
+    client->playerState.stats[STAT_FLASHES] = 0;
+    if (client->damages.blood)
+        client->playerState.stats[STAT_FLASHES] |= 1;
+    if (client->damages.armor && !(ent->GetFlags() & EntityFlags::GodMode))
+        client->playerState.stats[STAT_FLASHES] |= 2;
 
     // total points of damage shot at the player this frame
-    count = (currentProcessingClient->damages.blood + currentProcessingClient->damages.armor + currentProcessingClient->damages.powerArmor);
+    count = (client->damages.blood + client->damages.armor + client->damages.powerArmor);
     if (count == 0)
         return;     // didn't take any damage
 
     // start a pain animation if still in the player model
-    if (currentProcessingClient->animation.priorityAnimation < PlayerAnimation::Pain && ent->GetModelIndex() == 255) {
+    if (client->animation.priorityAnimation < PlayerAnimation::Pain && ent->GetModelIndex() == 255) {
         static int      i;
 
-        currentProcessingClient->animation.priorityAnimation = PlayerAnimation::Pain;
-        if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED) {
+        client->animation.priorityAnimation = PlayerAnimation::Pain;
+        if (client->playerState.pmove.flags & PMF_DUCKED) {
             ent->SetFrame(FRAME_crpain1 - 1);
-            currentProcessingClient->animation.endFrame = FRAME_crpain4;
+            client->animation.endFrame = FRAME_crpain4;
         } else {
             i = (i + 1) % 3;
             switch (i) {
             case 0:
                 ent->SetFrame(FRAME_pain101 - 1);
-                currentProcessingClient->animation.endFrame = FRAME_pain104;
+                client->animation.endFrame = FRAME_pain104;
                 break;
             case 1:
                 ent->SetFrame(FRAME_pain201 - 1);
-                currentProcessingClient->animation.endFrame = FRAME_pain204;
+                client->animation.endFrame = FRAME_pain204;
                 break;
             case 2:
                 ent->SetFrame(FRAME_pain301 - 1);
-                currentProcessingClient->animation.endFrame = FRAME_pain304;
+                client->animation.endFrame = FRAME_pain304;
                 break;
             }
         }
@@ -142,30 +149,30 @@ static void SVG_Player_ApplyDamageFeedback(PlayerClient *ent)
     }
 
     // The total alpha of the blend is always proportional to count.
-    if (currentProcessingClient->damageAlpha < 0.f)
-        currentProcessingClient->damageAlpha = 0.f;
-    currentProcessingClient->damageAlpha += count * 0.01f;
-    if (currentProcessingClient->damageAlpha < 0.2f)
-        currentProcessingClient->damageAlpha = 0.2f;
-    if (currentProcessingClient->damageAlpha > 0.6f)
-        currentProcessingClient->damageAlpha = 0.6f;     // don't go too saturated
+    if (client->damageAlpha < 0.f)
+        client->damageAlpha = 0.f;
+    client->damageAlpha += count * 0.01f;
+    if (client->damageAlpha < 0.2f)
+        client->damageAlpha = 0.2f;
+    if (client->damageAlpha > 0.6f)
+        client->damageAlpha = 0.6f;     // don't go too saturated
 
     // The color of the blend will vary based on how much was absorbed
     // by different armors.
     vec3_t blendColor = vec3_zero();
-    if (currentProcessingClient->damages.powerArmor)
-        blendColor = vec3_fmaf(blendColor, (float)currentProcessingClient->damages.powerArmor / realcount, power_color);
-    if (currentProcessingClient->damages.armor)
-        blendColor = vec3_fmaf(blendColor, (float)currentProcessingClient->damages.armor / realcount, acolor);
-    if (currentProcessingClient->damages.blood)
-        blendColor = vec3_fmaf(blendColor, (float)currentProcessingClient->damages.blood / realcount, bcolor);
-    currentProcessingClient->damageBlend = blendColor;
+    if (client->damages.powerArmor)
+        blendColor = vec3_fmaf(blendColor, (float)client->damages.powerArmor / realcount, power_color);
+    if (client->damages.armor)
+        blendColor = vec3_fmaf(blendColor, (float)client->damages.armor / realcount, acolor);
+    if (client->damages.blood)
+        blendColor = vec3_fmaf(blendColor, (float)client->damages.blood / realcount, bcolor);
+    client->damageBlend = blendColor;
 
 
     //
     // Calculate view angle kicks
     //
-    kick = abs(currentProcessingClient->damages.knockBack);
+    kick = abs(client->damages.knockBack);
     if (kick && ent->GetHealth() > 0) { // kick of 0 means no view adjust at all
         kick = kick * 100 / ent->GetHealth();
 
@@ -174,25 +181,25 @@ static void SVG_Player_ApplyDamageFeedback(PlayerClient *ent)
         if (kick > 50)
             kick = 50;
 
-        vec3_t kickVec = currentProcessingClient->damages.from - ent->GetOrigin();
+        vec3_t kickVec = client->damages.from - ent->GetOrigin();
         kickVec = vec3_normalize(kickVec);
 
         side = vec3_dot(kickVec, right);
-        currentProcessingClient->viewDamage.roll = kick * side * 0.3f;
+        client->viewDamage.roll = kick * side * 0.3f;
 
         side = -vec3_dot(kickVec, forward);
-        currentProcessingClient->viewDamage.pitch = kick * side * 0.3f;
+        client->viewDamage.pitch = kick * side * 0.3f;
 
-        currentProcessingClient->viewDamage.time = level.time + DAMAGE_TIME;
+        client->viewDamage.time = level.time + DAMAGE_TIME;
     }
 
     //
     // clear totals
     //
-    currentProcessingClient->damages.blood = 0;
-    currentProcessingClient->damages.armor = 0;
-    currentProcessingClient->damages.powerArmor = 0;
-    currentProcessingClient->damages.knockBack = 0;
+    client->damages.blood = 0;
+    client->damages.armor = 0;
+    client->damages.powerArmor = 0;
+    client->damages.knockBack = 0;
 }
 
 //
@@ -211,61 +218,70 @@ static void SVG_Player_ApplyDamageFeedback(PlayerClient *ent)
 // 
 //===============
 //
-static void SVG_CalculateViewOffset(PlayerClient *ent)
+void SVG_Client_CalculateViewOffset(PlayerClient *ent)
 {
     float       bob;
     float       ratio;
     float       delta;
+
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
 
     //
     // Calculate new kick angle vales. (
     // 
     // If dead, set a fixed angle and don't add any kick
     if (ent->GetDeadFlag()) {
-        currentProcessingClient->playerState.kickAngles = vec3_zero();
+        client->playerState.kickAngles = vec3_zero();
 
-        currentProcessingClient->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
-        currentProcessingClient->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
-        currentProcessingClient->playerState.pmove.viewAngles[vec3_t::Yaw] = currentProcessingClient->killerYaw;
+        client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+        client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+        client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
     } else {
         // Fetch client kick angles.
-        vec3_t newKickAngles = currentProcessingClient->playerState.kickAngles = currentProcessingClient->kickAngles; //ent->client->playerState.kickAngles;
+        vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
 
-        // Add pitch(X) and roll(Z) angles based on damage kick
-        ratio = (currentProcessingClient->viewDamage.time - level.time) / DAMAGE_TIME;
+                                                                                    // Add pitch(X) and roll(Z) angles based on damage kick
+        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME) * FRAMETIME;
         if (ratio < 0) {
-            ratio = currentProcessingClient->viewDamage.pitch = currentProcessingClient->viewDamage.roll = 0;
+            ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
         }
-        newKickAngles[vec3_t::Pitch] += ratio * currentProcessingClient->viewDamage.pitch;
-        newKickAngles[vec3_t::Roll] += ratio * currentProcessingClient->viewDamage.roll;
+        newKickAngles[vec3_t::Pitch] += ratio * client->viewDamage.pitch;
+        newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
 
         // Add pitch based on fall kick
-        ratio = (currentProcessingClient->fallTime - level.time) / FALL_TIME;
+        ratio = ((client->fallTime - level.time) / FALL_TIME) * FRAMETIME;;
         if (ratio < 0)
             ratio = 0;
-        newKickAngles[vec3_t::Pitch] += ratio * currentProcessingClient->fallValue;
+        newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
 
         // Add angles based on velocity
-        delta = vec3_dot(ent->GetVelocity(), forward);
+        delta = vec3_dot(ent->GetVelocity(), forward) * FRAMETIME;;
         newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
 
-        delta = vec3_dot(ent->GetVelocity(), right);
+        delta = vec3_dot(ent->GetVelocity(), right) * FRAMETIME;;
         newKickAngles[vec3_t::Roll] += delta * run_roll->value;
 
         // Add angles based on bob
-        delta = bobFracsin * bob_pitch->value * XYSpeed;
-        if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
+        delta = bobFracsin * bob_pitch->value * XYSpeed * FRAMETIME;;
+        if (client->playerState.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
         newKickAngles[vec3_t::Pitch] += delta;
         delta = bobFracsin * bob_roll->value * XYSpeed;
-        if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
+        if (client->playerState.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
         if (bobCycle & 1)
             delta = -delta;
         newKickAngles[vec3_t::Roll] += delta;
 
         // Last but not least, assign new kickangles to player state.
-        currentProcessingClient->playerState.kickAngles = newKickAngles;
+        client->playerState.kickAngles = newKickAngles;
     }
 
     //
@@ -277,26 +293,26 @@ static void SVG_CalculateViewOffset(PlayerClient *ent)
         0.f,
         (float)ent->GetViewHeight()
     };
-        
+
     // Add fall impact view punch height.
-    ratio = (currentProcessingClient->fallTime - level.time) / FALL_TIME;
+    ratio = (client->fallTime - level.time) / FALL_TIME;
     if (ratio < 0)
         ratio = 0;
-    newViewOffset.z -= ratio * currentProcessingClient->fallValue * 0.4f;
+    newViewOffset.z -= ratio * client->fallValue * 0.4f;
 
     // Add bob height.
-    bob = bobFracsin * XYSpeed * bob_up->value;
+    bob = bobFracsin * XYSpeed * bob_up->value ;
     if (bob > 6)
         bob = 6;
     newViewOffset.z += bob;
 
     // Add kick offset
-    newViewOffset += currentProcessingClient->kickOrigin;
+    newViewOffset += client->kickOrigin;
 
     // Clamp the new view offsets, and finally assign them to the player state.
     // Clamping ensures that they never exceed the non visible, but physically 
     // there, player bounding box.
-    currentProcessingClient->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
+    client->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
         //{ -14, -14, -22 },
         //{ 14,  14, 30 }
         ent->GetMins(),
@@ -306,28 +322,37 @@ static void SVG_CalculateViewOffset(PlayerClient *ent)
 
 //
 //===============
-// SVG_CalculateGunOffset
+// SVG_Client_CalculateGunOffset
 // 
 //===============
 //
-static void SVG_CalculateGunOffset(PlayerClient *ent)
+void SVG_Client_CalculateGunOffset(PlayerClient *ent)
 {
     int     i;
     float   delta;
 
-    // gun angles from bobbing
-    currentProcessingClient->playerState.gunAngles[vec3_t::Roll] = XYSpeed * bobFracsin * 0.005;
-    currentProcessingClient->playerState.gunAngles[vec3_t::Yaw]  = XYSpeed * bobFracsin * 0.01;
-    if (bobCycle & 1) {
-        currentProcessingClient->playerState.gunAngles[vec3_t::Roll] = -currentProcessingClient->playerState.gunAngles[vec3_t::Roll];
-        currentProcessingClient->playerState.gunAngles[vec3_t::Yaw]  = -currentProcessingClient->playerState.gunAngles[vec3_t::Yaw];
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
+        return;
     }
 
-    currentProcessingClient->playerState.gunAngles[vec3_t::Pitch] = XYSpeed * bobFracsin * 0.005;
+    // gun angles from bobbing
+    client->playerState.gunAngles[vec3_t::Roll] = XYSpeed * bobFracsin * 0.005;
+    client->playerState.gunAngles[vec3_t::Yaw]  = XYSpeed * bobFracsin * 0.01;
+    if (bobCycle & 1) {
+        client->playerState.gunAngles[vec3_t::Roll] = -client->playerState.gunAngles[vec3_t::Roll];
+        client->playerState.gunAngles[vec3_t::Yaw]  = -client->playerState.gunAngles[vec3_t::Yaw];
+    }
+
+    client->playerState.gunAngles[vec3_t::Pitch] = XYSpeed * bobFracsin * 0.005;
 
     // gun angles from delta movement
     for (i = 0 ; i < 3 ; i++) {
-        delta = currentProcessingClient->oldViewAngles[i] - currentProcessingClient->playerState.pmove.viewAngles[i];
+        delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
         if (delta > 180)
             delta -= 360;
         if (delta < -180)
@@ -337,19 +362,19 @@ static void SVG_CalculateGunOffset(PlayerClient *ent)
         if (delta < -45)
             delta = -45;
         if (i == vec3_t::Yaw)
-            currentProcessingClient->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
-        currentProcessingClient->playerState.gunAngles[i] += 0.2 * delta;
+            client->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
+        client->playerState.gunAngles[i] += 0.2 * delta;
     }
 
     // gun height
-    currentProcessingClient->playerState.gunOffset = vec3_zero();
+    client->playerState.gunOffset = vec3_zero();
 //  ent->playerState->gunorigin[2] += bob;
 
     // gun_x / gun_y / gun_z are development tools
     for (i = 0 ; i < 3 ; i++) {
-        currentProcessingClient->playerState.gunOffset[i] += forward[i] * (gun_y->value);
-        currentProcessingClient->playerState.gunOffset[i] += right[i] * gun_x->value;
-        currentProcessingClient->playerState.gunOffset[i] += up[i] * (-gun_z->value);
+        client->playerState.gunOffset[i] += forward[i] * (gun_y->value);
+        client->playerState.gunOffset[i] += right[i] * gun_x->value;
+        client->playerState.gunOffset[i] += up[i] * (-gun_z->value);
     }
 }
 
@@ -380,58 +405,76 @@ static void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
 // 
 //===============
 //
-static void SVG_CalculateBlend(PlayerClient *ent)
+void SVG_Client_CalculateBlend(PlayerClient *ent)
 {
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
+
     // Clear blend values.
-    currentProcessingClient->playerState.blend[0] = currentProcessingClient->playerState.blend[1] =
-        currentProcessingClient->playerState.blend[2] = currentProcessingClient->playerState.blend[3] = 0;
+    client->playerState.blend[0] = client->playerState.blend[1] =
+        client->playerState.blend[2] = client->playerState.blend[3] = 0;
 
     // Calculate view origin to use for PointContents.
-    vec3_t viewOrigin = ent->GetOrigin() + currentProcessingClient->playerState.pmove.viewOffset;
+    vec3_t viewOrigin = ent->GetOrigin() + client->playerState.pmove.viewOffset;
     int32_t contents = gi.PointContents(viewOrigin);
 
 	if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA))
-        currentProcessingClient->playerState.rdflags |= RDF_UNDERWATER;
+        client->playerState.rdflags |= RDF_UNDERWATER;
     else
-        currentProcessingClient->playerState.rdflags &= ~RDF_UNDERWATER;
+        client->playerState.rdflags &= ~RDF_UNDERWATER;
 
     if (contents & (CONTENTS_SOLID | CONTENTS_LAVA))
-        SV_AddBlend(1.0, 0.3, 0.0, 0.6, currentProcessingClient->playerState.blend);
+        SV_AddBlend(1.0, 0.3, 0.0, 0.6, client->playerState.blend);
     else if (contents & CONTENTS_SLIME)
-        SV_AddBlend(0.0, 0.1, 0.05, 0.6, currentProcessingClient->playerState.blend);
+        SV_AddBlend(0.0, 0.1, 0.05, 0.6, client->playerState.blend);
     else if (contents & CONTENTS_WATER)
-        SV_AddBlend(0.5, 0.3, 0.2, 0.4, currentProcessingClient->playerState.blend);
+        SV_AddBlend(0.5, 0.3, 0.2, 0.4, client->playerState.blend);
 
     // add for damage
-    if (currentProcessingClient->damageAlpha > 0)
-        SV_AddBlend(currentProcessingClient->damageBlend[0], currentProcessingClient->damageBlend[1]
-                    , currentProcessingClient->damageBlend[2], currentProcessingClient->damageAlpha, currentProcessingClient->playerState.blend);
+    if (client->damageAlpha > 0)
+        SV_AddBlend(client->damageBlend[0], client->damageBlend[1]
+                    , client->damageBlend[2], client->damageAlpha, client->playerState.blend);
 
-    if (currentProcessingClient->bonusAlpha > 0)
-        SV_AddBlend(0.85, 0.7, 0.3, currentProcessingClient->bonusAlpha, currentProcessingClient->playerState.blend);
+    if (client->bonusAlpha > 0)
+        SV_AddBlend(0.85, 0.7, 0.3, client->bonusAlpha, client->playerState.blend);
 
     // drop the damage value
-    currentProcessingClient->damageAlpha -= 0.06;
-    if (currentProcessingClient->damageAlpha < 0)
-        currentProcessingClient->damageAlpha = 0;
+    client->damageAlpha -= 0.06;
+    if (client->damageAlpha < 0)
+        client->damageAlpha = 0;
 
     // drop the bonus value
-    currentProcessingClient->bonusAlpha -= 0.1;
-    if (currentProcessingClient->bonusAlpha < 0)
-        currentProcessingClient->bonusAlpha = 0;
+    client->bonusAlpha -= 0.1;
+    if (client->bonusAlpha < 0)
+        client->bonusAlpha = 0;
 }
 
 //
 //===============
-// SVG_Player_CheckFallingDamage
+// SVG_Client_CheckFallingDamage
 // 
 //===============
 //
-static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
+void SVG_Client_CheckFallingDamage(PlayerClient *ent)
 {
     float   delta;
     int     damage;
     vec3_t  dir;
+
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
 
     if (ent->GetModelIndex() != 255)
         return;     // not in the player model
@@ -442,12 +485,12 @@ static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
     // Calculate delta velocity.
     vec3_t velocity = ent->GetVelocity();
 
-    if ((currentProcessingClient->oldVelocity[2] < 0) && (velocity[2] > currentProcessingClient->oldVelocity[2]) && (!ent->GetGroundEntity())) {
-        delta = currentProcessingClient->oldVelocity[2];
+    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!ent->GetGroundEntity())) {
+        delta = client->oldVelocity[2];
     } else {
         if (!ent->GetGroundEntity())
             return;
-        delta = velocity[2] - currentProcessingClient->oldVelocity[2];
+        delta = velocity[2] - client->oldVelocity[2];
     }
     delta = delta * delta * 0.0001;
 
@@ -467,10 +510,10 @@ static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
         return;
     }
 
-    currentProcessingClient->fallValue = delta * 0.5;
-    if (currentProcessingClient->fallValue > 40)
-        currentProcessingClient->fallValue = 40;
-    currentProcessingClient->fallTime = level.time + FALL_TIME;
+    client->fallValue = delta * 0.5;
+    if (client->fallValue > 40)
+        client->fallValue = 40;
+    client->fallTime = level.time + FALL_TIME;
 
     if (delta > 30) {
         if (ent->GetHealth() > 0) {
@@ -495,71 +538,77 @@ static void SVG_Player_CheckFallingDamage(PlayerClient *ent)
 
 //
 //===============
-// SVG_Player_CheckWorldEffects
+// SVG_Client_CheckWorldEffects
 // 
 //===============
 //
-static void SVG_Player_CheckWorldEffects(void)
+void SVG_Client_CheckWorldEffects(PlayerClient *ent)
 {
     int         waterlevel, oldWaterLevel;
 
-    if (!currentProcessingPlayer)
-        return;
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
 
-    if (currentProcessingPlayer->GetMoveType() == MoveType::NoClip || currentProcessingPlayer->GetMoveType() == MoveType::Spectator) {
-        currentProcessingPlayer->SetAirFinishedTime(level.time + 12); // don't need air
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
+
+    if (ent->GetMoveType() == MoveType::NoClip || ent->GetMoveType() == MoveType::Spectator) {
+        ent->SetAirFinishedTime(level.time + 12); // don't need air
         return;
     }
 
     // Retreive waterlevel.
-    waterlevel = currentProcessingPlayer->GetWaterLevel();
-    oldWaterLevel = currentProcessingClient->oldWaterLevel;
-    currentProcessingClient->oldWaterLevel = waterlevel;
+    waterlevel = ent->GetWaterLevel();
+    oldWaterLevel = client->oldWaterLevel;
+    client->oldWaterLevel = waterlevel;
 
     //
     // if just entered a water volume, play a sound
     //
     if (!oldWaterLevel && waterlevel) {
-        SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
-        if (currentProcessingPlayer->GetWaterType() & CONTENTS_LAVA)
-            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
-        else if (currentProcessingPlayer->GetWaterType() & CONTENTS_SLIME)
-            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-        else if (currentProcessingPlayer->GetWaterType() & CONTENTS_WATER)
-            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-        currentProcessingPlayer->SetFlags(currentProcessingPlayer->GetFlags() | EntityFlags::InWater);
+        SVG_PlayerNoise(ent, ent->GetOrigin(), PNOISE_SELF);
+        if (ent->GetWaterType() & CONTENTS_LAVA)
+            SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
+        else if (ent->GetWaterType() & CONTENTS_SLIME)
+            SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+        else if (ent->GetWaterType() & CONTENTS_WATER)
+            SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+        ent->SetFlags(ent->GetFlags() | EntityFlags::InWater);
 
         // clear damage_debounce, so the pain sound will play immediately
-        currentProcessingPlayer->SetDebounceDamageTime(level.time - 1);
+        ent->SetDebounceDamageTime(level.time - 1);
     }
 
     //
     // if just completely exited a water volume, play a sound
     //
     if (oldWaterLevel && ! waterlevel) {
-        SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
-        SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
-        currentProcessingPlayer->SetFlags(currentProcessingPlayer->GetFlags() & ~EntityFlags::InWater);
+        SVG_PlayerNoise(ent, ent->GetOrigin(), PNOISE_SELF);
+        SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
+        ent->SetFlags(ent->GetFlags() & ~EntityFlags::InWater);
     }
 
     //
     // check for head just going under water
     //
     if (oldWaterLevel != 3 && waterlevel == 3) {
-        SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
+        SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
     }
 
     //
     // check for head just coming out of water
     //
     if (oldWaterLevel == 3 && waterlevel != 3) {
-        if (currentProcessingPlayer->GetAirFinishedTime() < level.time) {
+        if (ent->GetAirFinishedTime() < level.time) {
             // gasp for air
-            SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
-        } else  if (currentProcessingPlayer->GetAirFinishedTime() < level.time + 11) {
+            SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
+            SVG_PlayerNoise(ent, ent->GetOrigin(), PNOISE_SELF);
+        } else  if (ent->GetAirFinishedTime() < level.time + 11) {
             // just break surface
-            SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
+            SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
         }
     }
 
@@ -568,66 +617,70 @@ static void SVG_Player_CheckWorldEffects(void)
     //
     if (waterlevel == 3) {
         // if out of air, start drowning
-        if (currentProcessingPlayer->GetAirFinishedTime() < level.time) {
+        if (ent->GetAirFinishedTime() < level.time) {
             // drown!
-            if (currentProcessingPlayer->GetNextDrownTime() < level.time
-                && currentProcessingPlayer->GetHealth() > 0) {
-                currentProcessingPlayer->SetNextDrownTime(level.time + 1);
+            if (ent->GetNextDrownTime() < level.time
+                && ent->GetHealth() > 0) {
+                ent->SetNextDrownTime(level.time + 1);
 
                 // take more damage the longer underwater
-                currentProcessingPlayer->SetDamage(currentProcessingPlayer->GetDamage() + 2);
-                if (currentProcessingPlayer->GetDamage() > 15)
-                    currentProcessingPlayer->SetDamage(15);
+                ent->SetDamage(ent->GetDamage() + 2);
+                if (ent->GetDamage() > 15)
+                    ent->SetDamage(15);
 
                 // play a gurp sound instead of a normal pain sound
-                if (currentProcessingPlayer->GetHealth() <= currentProcessingPlayer->GetDamage())
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
+                if (ent->GetHealth() <= ent->GetDamage())
+                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
                 else if (rand() & 1)
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
+                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
                 else
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
+                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
 
-                currentProcessingPlayer->SetDebouncePainTime(level.time);
+                ent->SetDebouncePainTime(level.time);
 
-                SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), currentProcessingPlayer->GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), ent->GetOrigin(), vec3_zero(), ent->GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
-        currentProcessingPlayer->SetAirFinishedTime(level.time + 12);
-        currentProcessingPlayer->SetDamage(2);
+        ent->SetAirFinishedTime(level.time + 12);
+        ent->SetDamage(2);
     }
 
     //
     // check for sizzle damage
     //
-    if (waterlevel && (currentProcessingPlayer->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
-        if (currentProcessingPlayer->GetWaterType() & CONTENTS_LAVA) {
-            if (currentProcessingPlayer->GetHealth() > 0
-                && currentProcessingPlayer->GetDebouncePainTime() <= level.time) {
+    if (waterlevel && (ent->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
+        if (ent->GetWaterType() & CONTENTS_LAVA) {
+            if (ent->GetHealth() > 0
+                && ent->GetDebouncePainTime() <= level.time) {
                 if (rand() & 1)
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
+                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
                 else
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
-                currentProcessingPlayer->SetDebouncePainTime(level.time + 1);
+                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
+                ent->SetDebouncePainTime(level.time + 1);
             }
 
-            SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
+            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), ent->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
         }
 
-        if (currentProcessingPlayer->GetWaterType() & CONTENTS_SLIME) {
-            SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
+        if (ent->GetWaterType() & CONTENTS_SLIME) {
+            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), ent->GetOrigin(), vec3_zero(), 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }
 
 //
 //===============
-// SVG_SetClientEffects
+// SVG_Client_SetEffects
 // 
 //===============
 //
-static void SVG_SetClientEffects(PlayerClient *ent)
+void SVG_Client_SetEffects(PlayerClient *ent)
 {
+    if (!ent || !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
+
     ent->SetEffects(0);
     ent->SetRenderEffects(0);
 
@@ -642,12 +695,16 @@ static void SVG_SetClientEffects(PlayerClient *ent)
 
 //
 //===============
-// SVG_SetClientEvent
+// SVG_Client_SetEvent
 // 
 //===============
 //
-static void SVG_SetClientEvent(PlayerClient *ent)
+void SVG_Client_SetEvent(PlayerClient *ent)
 {
+    if (!ent || !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
+
     if (ent->GetEventID())
         return;
 
@@ -659,16 +716,25 @@ static void SVG_SetClientEvent(PlayerClient *ent)
 
 //
 //===============
-// SVG_SetClientSound
+// SVG_Client_SetSound
 // 
 //===============
 //
-static void SVG_SetClientSound(PlayerClient *ent)
+void SVG_Client_SetSound(PlayerClient *ent)
 {
     const char    *weap; // C++20: STRING: Added const to char*
 
-    if (currentProcessingClient->persistent.activeWeapon)
-        weap = currentProcessingClient->persistent.activeWeapon->className;
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
+
+    if (client->persistent.activeWeapon)
+        weap = client->persistent.activeWeapon->className;
     else
         weap = "";
 
@@ -678,32 +744,38 @@ static void SVG_SetClientSound(PlayerClient *ent)
         ent->SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
     else if (strcmp(weap, "weapon_bfg") == 0)
         ent->SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
-    else if (currentProcessingClient->weaponSound)
-        ent->SetSound(currentProcessingClient->weaponSound);
+    else if (client->weaponSound)
+        ent->SetSound(client->weaponSound);
     else
         ent->SetSound(0);
 }
 
 //
 //===============
-// SVG_SetClientAnimationFrame
+// SVG_Client_SetAnimationFrame
 // 
 //===============
 //
-static void SVG_SetClientAnimationFrame(PlayerClient *ent)
+void SVG_Client_SetAnimationFrame(PlayerClient *ent)
 {
     qboolean isDucking = false;
     qboolean isRunning = false;
 
-    if (!ent)
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
         return;
+    }
 
     if (ent->GetModelIndex() != 255)
         return;     // not in the player model
 
     //client = ent->client;
 
-    if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
+    if (client->playerState.pmove.flags & PMF_DUCKED)
         isDucking = true;
     else
         isDucking = false;
@@ -713,63 +785,63 @@ static void SVG_SetClientAnimationFrame(PlayerClient *ent)
         isRunning = false;
 
     // check for stand/duck and stop/go transitions
-    if (isDucking != currentProcessingClient->animation.isDucking && currentProcessingClient->animation.priorityAnimation < PlayerAnimation::Death)
+    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death)
         goto newanim;
-    if (isRunning != currentProcessingClient->animation.isRunning && currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Basic)
+    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic)
         goto newanim;
-    if (!ent->GetGroundEntity() && currentProcessingClient->animation.priorityAnimation <= PlayerAnimation::Wave)
+    if (!ent->GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave)
         goto newanim;
 
-    if (currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Reverse) {
-        if (ent->GetFrame() > currentProcessingClient->animation.endFrame) {
+    if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
+        if (ent->GetFrame() > client->animation.endFrame) {
             ent->SetFrame(ent->GetFrame() - 1);
             return;
         }
-    } else if (ent->GetFrame() < currentProcessingClient->animation.endFrame) {
+    } else if (ent->GetFrame() < client->animation.endFrame) {
         // continue an animation
         ent->SetFrame(ent->GetFrame() + 1);
         return;
     }
 
-    if (currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Death)
+    if (client->animation.priorityAnimation == PlayerAnimation::Death)
         return;     // stay there
-    if (currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Jump) {
+    if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
         if (!ent->GetGroundEntity())
             return;     // stay there
-        currentProcessingClient->animation.priorityAnimation = PlayerAnimation::Wave;
+        client->animation.priorityAnimation = PlayerAnimation::Wave;
         ent->SetFrame(FRAME_jump3);
-        currentProcessingClient->animation.endFrame = FRAME_jump6;
+        client->animation.endFrame = FRAME_jump6;
         return;
     }
 
 newanim:
     // return to either a running or standing frame
-    currentProcessingClient->animation.priorityAnimation = PlayerAnimation::Basic;
-    currentProcessingClient->animation.isDucking = isDucking;
-    currentProcessingClient->animation.isRunning = isRunning;
+    client->animation.priorityAnimation = PlayerAnimation::Basic;
+    client->animation.isDucking = isDucking;
+    client->animation.isRunning = isRunning;
 
     if (!ent->GetGroundEntity()) {
-        currentProcessingClient->animation.priorityAnimation = PlayerAnimation::Jump;
+        client->animation.priorityAnimation = PlayerAnimation::Jump;
         if (ent->GetFrame() != FRAME_jump2)
             ent->SetFrame(FRAME_jump1);
-        currentProcessingClient->animation.endFrame = FRAME_jump2;
+        client->animation.endFrame = FRAME_jump2;
     } else if (isRunning) {
         // running
         if (isDucking) {
             ent->SetFrame(FRAME_crwalk1);
-            currentProcessingClient->animation.endFrame = FRAME_crwalk6;
+            client->animation.endFrame = FRAME_crwalk6;
         } else {
             ent->SetFrame(FRAME_run1);
-            currentProcessingClient->animation.endFrame = FRAME_run6;
+            client->animation.endFrame = FRAME_run6;
         }
     } else {
         // standing
         if (isDucking) {
             ent->SetFrame(FRAME_crstnd01);
-            currentProcessingClient->animation.endFrame = FRAME_crstnd19;
+            client->animation.endFrame = FRAME_crstnd19;
         } else {
             ent->SetFrame(FRAME_stand01);
-            currentProcessingClient->animation.endFrame = FRAME_stand40;
+            client->animation.endFrame = FRAME_stand40;
         }
     }
 }
@@ -797,13 +869,18 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
 {
     float   bobTime;
 
-    if (!ent || !ent->GetClient()) {
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!ent || !(client = ent->GetClient()) ||
+        !ent->IsSubclassOf<PlayerClient>()) {
         return;
     }
 
     // Setup the current player and entity being processed.
-    currentProcessingPlayer = ent;
-    currentProcessingClient = ent->GetClient();
+    ent = ent;
+    client = ent->GetClient();
 
     //
     // If the origin or velocity have changed since ClientThink(),
@@ -813,8 +890,8 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     // If it wasn't updated here, the view position would lag a frame
     // behind the body position when pushed -- "sinking into plats"
     //
-    currentProcessingClient->playerState.pmove.origin = ent->GetOrigin();
-    currentProcessingClient->playerState.pmove.velocity = ent->GetVelocity();
+    client->playerState.pmove.origin = ent->GetOrigin();
+    client->playerState.pmove.velocity = ent->GetVelocity();
 
     //
     // If the end of unit layout is displayed, don't give
@@ -822,33 +899,33 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     //
     if (level.intermission.time) {
         // FIXME: add view drifting here?
-        currentProcessingClient->playerState.blend[3] = 0;
-        currentProcessingClient->playerState.fov = 90;
+        client->playerState.blend[3] = 0;
+        client->playerState.fov = 90;
         SVG_HUD_SetClientStats(ent->GetServerEntity());
         return;
     }
 
-    vec3_vectors(currentProcessingClient->aimAngles, &forward, &right, &up);
+    vec3_vectors(client->aimAngles, &forward, &right, &up);
 
     // Burn from lava, etc
-    SVG_Player_CheckWorldEffects();
+    SVG_Client_CheckWorldEffects(ent);
 
     //
     // Set model angles from view angles so other things in
     // the world can tell which direction you are looking
     //
-    vec3_t newPlayerAngles = currentProcessingPlayer->GetAngles();
+    vec3_t newPlayerAngles = ent->GetAngles();
 
-    if (currentProcessingClient->aimAngles[vec3_t::Pitch] > 180)
-        newPlayerAngles[vec3_t::Pitch] = (-360 + currentProcessingClient->aimAngles[vec3_t::Pitch]) / 3;
+    if (client->aimAngles[vec3_t::Pitch] > 180)
+        newPlayerAngles[vec3_t::Pitch] = (-360 + client->aimAngles[vec3_t::Pitch]) / 3;
     else
-        newPlayerAngles[vec3_t::Pitch] = currentProcessingClient->aimAngles[vec3_t::Pitch] / 3;
-    newPlayerAngles[vec3_t::Yaw] = currentProcessingClient->aimAngles[vec3_t::Yaw];
+        newPlayerAngles[vec3_t::Pitch] = client->aimAngles[vec3_t::Pitch] / 3;
+    newPlayerAngles[vec3_t::Yaw] = client->aimAngles[vec3_t::Yaw];
     newPlayerAngles[vec3_t::Roll] = 0;
-    newPlayerAngles[vec3_t::Roll] = SVG_CalcRoll(newPlayerAngles, ent->GetVelocity()) * 4;
+    newPlayerAngles[vec3_t::Roll] = SVG_Client_CalcRoll(newPlayerAngles, ent->GetVelocity()) * 4;
 
     // Last but not least, after having calculated the Pitch, Yaw, and Roll, set the new angles.
-    currentProcessingPlayer->SetAngles(newPlayerAngles);
+    ent->SetAngles(newPlayerAngles);
 
     //
     // Calculate the player its X Y axis' speed and calculate the cycle for
@@ -857,12 +934,12 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     vec3_t playerVelocity = ent->GetVelocity();
     XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
-    if (XYSpeed < 5 || !(currentProcessingClient->playerState.pmove.flags & PMF_ON_GROUND)) {
+    if (XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
         // Special handling for when not on ground.
         bobMove = 0;
 
         // Start at beginning of cycle again (See the else if statement.)
-        currentProcessingClient->bobTime = 0;
+        client->bobTime = 0;
     } else if (ent->GetGroundEntity() || ent->GetWaterLevel() == 2) {
         // So bobbing only cycles when on ground.
         if (XYSpeed > 450)
@@ -880,60 +957,60 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     }
 
     // Generate bob time.
-    currentProcessingClient->bobTime += bobMove;
-    bobTime = currentProcessingClient->bobTime;
+    client->bobTime += bobMove;
+    bobTime = client->bobTime;
 
-    if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
+    if (client->playerState.pmove.flags & PMF_DUCKED)
         bobTime *= 2;   // N&C: Footstep tweak.
 
     bobCycle = bobTime * FRAMETIME;
     bobFracsin = std::fabsf(std::sinf(bobTime * M_PI)) * FRAMETIME;
 
     // Detect hitting the floor, and apply damage appropriately.
-    SVG_Player_CheckFallingDamage(ent);
+    SVG_Client_CheckFallingDamage(ent);
 
     // Apply all other the damage taken this frame
-    SVG_Player_ApplyDamageFeedback(ent);
+    SVG_Client_ApplyDamageFeedback(ent);
 
     // Determine the new frame's view offsets
-    SVG_CalculateViewOffset(ent);
+    SVG_Client_CalculateViewOffset(ent);
 
     // Determine the gun offsets
-    SVG_CalculateGunOffset(ent);
+    SVG_Client_CalculateGunOffset(ent);
 
     // Determine the full screen color blend
     // must be after viewOffset, so eye contents can be
     // accurately determined
     // FIXME: with client prediction, the contents
     // should be determined by the client
-    SVG_CalculateBlend(ent);
+    SVG_Client_CalculateBlend(ent);
 
     // Set the stats to display for this client (one of the chase isSpectator stats or...)
-    if (currentProcessingClient->respawn.isSpectator)
+    if (client->respawn.isSpectator)
         SVG_HUD_SetSpectatorStats(ent->GetServerEntity());
     else
         SVG_HUD_SetClientStats(ent->GetServerEntity());
 
     SVG_HUD_CheckChaseStats(ent->GetServerEntity());
 
-    SVG_SetClientEvent(ent);
+    SVG_Client_SetEvent(ent);
 
-    SVG_SetClientEffects(ent);
+    SVG_Client_SetEffects(ent);
 
-    SVG_SetClientSound(ent);
+    SVG_Client_SetSound(ent);
 
-    SVG_SetClientAnimationFrame(ent);
+    SVG_Client_SetAnimationFrame(ent);
 
     // Store velocity and view angles.
-    currentProcessingClient->oldVelocity = ent->GetVelocity();
-    currentProcessingClient->oldViewAngles = currentProcessingClient->playerState.pmove.viewAngles;
+    client->oldVelocity = ent->GetVelocity();
+    client->oldViewAngles = client->playerState.pmove.viewAngles;
 
     // Reset weapon kicks to zer0.
-    currentProcessingClient->kickOrigin = vec3_zero();
-    currentProcessingClient->kickAngles = vec3_zero();
+    client->kickOrigin = vec3_zero();
+    client->kickAngles = vec3_zero();
 
     // if the scoreboard is up, update it
-    if (currentProcessingClient->showScores && !(level.frameNumber & 31)) {
+    if (client->showScores && !(level.frameNumber & 31)) {
         SVG_HUD_GenerateDMScoreboardLayout(ent, ent->GetEnemy());
         gi.Unicast(ent->GetServerEntity(), false);
     }
