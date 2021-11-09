@@ -41,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 class SVGBaseEntity;
 class PlayerClient;
 class IGameMode;
+struct entity_s;
 
 //==================================================================
 

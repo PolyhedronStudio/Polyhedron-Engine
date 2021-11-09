@@ -101,10 +101,10 @@ void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
     // Be sure to initialize the entity.
     SVG_InitEntity(serverEntity);
 
-    SVG_InitClientRespawn(serverEntity->client);
+    InitializeClientRespawnData(serverEntity->client);
 
     // locate ent at a spawn point
-    SVG_PutClientInServer(serverEntity);
+    PutClientInServer((PlayerClient*)serverEntity->classEntity);
 
     if (level.intermission.time) {
         HUD_MoveClientToIntermission(serverEntity);
@@ -120,7 +120,7 @@ void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
     gi.BPrintf(PRINT_HIGH, "%s entered the game\n", serverEntity->client->persistent.netname);
 
     // make sure all view stuff is valid
-    SVG_ClientEndServerFrame((PlayerClient*)serverEntity->classEntity);
+    ClientEndServerFrame(serverEntity);
 }
 
 //===============

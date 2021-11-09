@@ -70,7 +70,7 @@ void TargetEarthquake::QuakeThink() {
     }
 
     for ( auto * entity : g_baseEntities
-         | bef::BaseCheck | bef::HasClient | bef::HasGroundEntity ) 
+         | bef::Standard | bef::HasClient | bef::HasGroundEntity ) 
     {
         if ( nullptr == entity->GetGroundEntity() ) {
             continue;

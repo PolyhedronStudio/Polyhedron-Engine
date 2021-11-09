@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
 
+#include "../gamemodes/IGameMode.h"
+
 #include "client.h"     // Include Player Client header.
 #include "hud.h"        // Include HUD header.
 
@@ -112,7 +114,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
             continue;
         }
         if (client->classEntity->GetHealth() <= 0) {
-            SVG_RespawnClient(client);
+            game.gameMode->RespawnClient((PlayerClient*)client->classEntity);
         }
     }
 

@@ -464,16 +464,15 @@ void SVG_ClientEndServerFrames(void)
         int32_t stateNumber = g_entities[1 + i].state.number;
 
         // Now, let's go wild. (Purposely, do not assume the pointer is a PlayerClient.)
-        SVGBaseEntity *entity = g_baseEntities[stateNumber]; // WID: 1 +, because 0 == WorldSpawn.
+        Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == WorldSpawn.
 
-        // See if we're good to go, if not, continue for the next. 
-        if ((entity == nullptr && !entity->GetServerEntity()) && 
-            (!entity->IsInUse() || !entity->GetClient()))
+        // See if we're gooszsd to go, if not, continue for the next. 
+        if (!entity || !entity->inUse || !entity->client)
             continue;
 
         // Ugly cast, yes, but at this point we know we can do this. And that, to do it, matters more than
         // ethics, because our morals say otherwise :D
-        SVG_ClientEndServerFrame((PlayerClient*)entity);
+        game.gameMode->ClientEndServerFrame(&g_entities[stateNumber]);
     }
 
 }
@@ -682,7 +681,7 @@ void SVG_RunFrame(void)
         if (i > 0 && i <= maximumClients->value) {
             // Ensure the entity actually is owned by a client. 
             if (entity->GetClient())
-                game.gameMode->ClientBeginServerFrame((PlayerClient*)entity);
+                game.gameMode->ClientBeginServerFrame(entity->GetServerEntity());
             continue;
         }
 

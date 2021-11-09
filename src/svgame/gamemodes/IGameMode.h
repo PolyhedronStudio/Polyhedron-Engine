@@ -51,10 +51,18 @@ public:
     virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
-    virtual void ClientBeginServerFrame(PlayerClient* ent) = 0;
+    virtual void ClientBeginServerFrame(Entity* serverEntity) = 0;
+    // Called for each player at the end of the server frame and right 
+    // after spawning.
+    virtual void ClientEndServerFrame(Entity *serverEntity) = 0;
     // Called when a client disconnects. This does not get called between
     // load games.
     virtual void ClientDisconnect(PlayerClient* ent) = 0;
+    //called whenever the player updates a userinfo variable.
+
+    // The game can override any of the settings in place
+    // (forcing skins or names, etc) before copying it off.
+    virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) = 0;
     // Called in order to process "obituary" updates, aka with what weapon did this client
     // or did other clients, kill any other client/entity.
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
@@ -64,14 +72,25 @@ public:
     // Client related functions/utilities.
     // Mainly used by the Client callbacks.
     //
+
+    // This is only called when the game first initializes in single player,
+    // but is called after each death and level change in deathmatch
+    virtual void InitializeClientPersistentData(Entity* ent) = 0;
+    // This is only called when the game first initializes in single player,
+    // but is called after each death and level change in deathmatch
+    virtual void InitializeClientRespawnData(GameClient *client) = 0;
     // Can be used to legit respawn a client at a spawn point.
     // For SinglePlayer you want to take it a bit easy with this function.
     // For Multiplayer games however, you definitely want to use this function.
     //
-    // SP games: Use it once... (or at load time)
-    // MP games: Use it every respawn.
+    // Called when a player connects to a server or respawns in
+    // a deathmatch.
     virtual void PutClientInServer(PlayerClient* ent) = 0;
-
+    // Respawns a client (if that is what the game mode wants).
+    virtual void RespawnClient(PlayerClient* ent) = 0;
+    // Checks if the world has any influence (effects) on the player.
+    // Drowning or being on fire by lava etc.
+    virtual void CheckClientWorldEffects(PlayerClient* ent) = 0;
 
     //
     // Combat GameRules checks.
@@ -152,6 +171,8 @@ public:
 
 
 protected:
+
+
     // Means of Death, for the current client that is being processed this frame.
     int32_t meansOfDeath;
 };

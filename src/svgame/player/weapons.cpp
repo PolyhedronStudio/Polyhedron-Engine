@@ -215,7 +215,13 @@ Called by ClientBeginServerFrame and ClientThink
 */
 void SVG_ThinkWeapon(PlayerClient *ent)
 {
+    if (!ent)
+        return;
+
     GameClient* client = ent->GetClient();
+
+    if (!client)
+        return;
 
     // if just died, put the weapon away
     if (ent->GetHealth() < 1) {

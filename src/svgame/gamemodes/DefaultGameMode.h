@@ -53,14 +53,21 @@ public:
     virtual qboolean ClientCanConnect(Entity* serverEntity, char* userInfo) override;
     virtual void ClientConnect(Entity* serverEntity) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(PlayerClient* ent) override;
+    virtual void ClientBeginServerFrame(Entity *serverEntity) override;
+    virtual void ClientEndServerFrame(Entity *serverEntity) override;
     virtual void ClientDisconnect(PlayerClient* ent) override;
+    virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
     //
     // Client related functions/utilities.
     // 
+    virtual void InitializeClientPersistentData(Entity* ent) override;
+    virtual void InitializeClientRespawnData(GameClient *client) override;
     virtual void PutClientInServer(PlayerClient* ent) override;
+    virtual void RespawnClient(PlayerClient* ent) override;
+    virtual void CheckClientWorldEffects(PlayerClient* ent) override;
+
 
 private:
 

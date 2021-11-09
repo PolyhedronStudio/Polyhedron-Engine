@@ -780,6 +780,17 @@ newanim:
 //
 // Called for each player at the end of the server frame and right 
 // after spawning.
+// 
+// Used to make ends meet, prevent us from sinking into platforms or other
+// objects in case we have received a knockback.
+// 
+// Check for intermission, if so, act on it. 
+// 
+// Setup the entity player model direction settings
+// so others in the world can see it that way too.
+// 
+// Further: Calculate bobcycle, any specific events, viewoffset additions,
+// sound, effects, animations, you name it.
 //===============
 //
 void SVG_ClientEndServerFrame(PlayerClient *ent)
@@ -922,9 +933,9 @@ void SVG_ClientEndServerFrame(PlayerClient *ent)
     currentProcessingClient->kickAngles = vec3_zero();
 
     // if the scoreboard is up, update it
-    /*if (currentProcessingClient->showScores && !(level.frameNumber & 31)) {
+    if (currentProcessingClient->showScores && !(level.frameNumber & 31)) {
         SVG_HUD_GenerateDMScoreboardLayout(ent, ent->GetEnemy());
         gi.Unicast(ent->GetServerEntity(), false);
-    }*/
+    }
 }
 

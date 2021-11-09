@@ -7,10 +7,11 @@
 // All entity related functionality resides here. Need to allocate a class?
 // Find an entity? Anything else? You've hit the right spot.
 //
-// A "ClassEntity", or a CE, is always a member of a "ServerEntity", aka a SE.
+// A "ClassEntity", or a CE, is always a member of a "ServerEntity", aka an SE.
 //
 // The actual game logic implementation thus goes in ClassEntities. An SE is
-// merely a binding layer between SVGame and server.
+// merely a POD binding layer between SVGame and the server. (Important for
+// networking.)
 //
 */
 #ifndef __SVGAME_ENTITIES_H__
@@ -161,7 +162,8 @@ namespace BaseEntityFilters {
     //
     // Summed up pipelines to simplify life with.
     //
-    inline auto BaseCheck = (IsValidPointer | HasServerEntity | InUse);
+    // A wrapper for the most likely 3 widely used, and if forgotten, error prone filters.
+    inline auto Standard = (IsValidPointer | HasServerEntity | InUse);
 
 };
 namespace bef = BaseEntityFilters; // Shortcut, lesser typing.
