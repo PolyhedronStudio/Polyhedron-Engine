@@ -53,7 +53,7 @@
 //#define USE_DSOUND 1
 #define USE_OPENAL 1
 #define USE_SNDDMA 1
-//#define USE_CURL 0
+#define USE_CURL 1
 #define USE_AUTOREPLY 1
 #endif
 

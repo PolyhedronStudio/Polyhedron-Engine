@@ -771,10 +771,10 @@ struct PlayerAnimation {
 };
 
 //-------------------
-// The ClientPersistantData struct manages data that has to stay persistent
+// The ClientPersistentData struct manages data that has to stay persistent
 // across level changes.
 //-------------------
-struct ClientPersistantData {
+struct ClientPersistentData {
     char userinfo[MAX_INFO_STRING];
     char netname[16];
     int32_t hand;
@@ -813,7 +813,7 @@ struct ClientPersistantData {
 // persistent during mapchanges/respawns in a coop game.
 //-------------------
 struct ClientRespawnData {
-    ClientPersistantData persistentCoopRespawn;   // What to set client->persistent to on a respawn
+    ClientPersistentData persistentCoopRespawn;   // What to set client->persistent to on a respawn
     int32_t enterGameFrameNumber;       // level.frameNumber the client entered the game
     int32_t score;                      // frags, etc
     vec3_t commandViewAngles;           // angles sent over in the last command
@@ -836,7 +836,7 @@ struct gclient_s {
     int32_t ping;
 
     // private to game
-    ClientPersistantData persistent;
+    ClientPersistentData persistent;
     ClientRespawnData respawn;
 
     qboolean showScores;         // set layout stat

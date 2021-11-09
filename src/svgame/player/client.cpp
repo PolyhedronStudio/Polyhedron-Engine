@@ -294,7 +294,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.gameMode->PutClientInServer((PlayerClient*)ent);
+    game.gameMode->PutClientInServer(ent);
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -329,27 +329,27 @@ deathmatch mode, so clear everything out before starting them.
 */
 void SVG_ClientBeginDeathmatch(Entity *ent)
 {
-    SVG_InitEntity(ent);
+    //SVG_InitEntity(ent);
 
-    game.gameMode->InitializeClientRespawnData(ent->client);
+    //game.gameMode->InitializeClientRespawnData(ent->client);
 
-    // locate ent at a spawn point
-    game.gameMode->PutClientInServer((PlayerClient*)ent);
+    //// locate ent at a spawn point
+    //game.gameMode->PutClientInServer(ent);
 
-    if (level.intermission.time) {
-        HUD_MoveClientToIntermission(ent);
-    } else {
-        // send effect
-        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-        gi.WriteShort(ent - g_entities);
-        gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(ent->state.origin, MultiCast::PVS);
-    }
+    //if (level.intermission.time) {
+    //    HUD_MoveClientToIntermission(ent);
+    //} else {
+    //    // send effect
+    //    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    //    gi.WriteShort(ent - g_entities);
+    //    gi.WriteByte(MuzzleFlashType::Login);
+    //    gi.Multicast(ent->state.origin, MultiCast::PVS);
+    //}
 
-    gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
+    //gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
 
-    // make sure all view stuff is valid
-    game.gameMode->ClientEndServerFrame(ent);
+    //// make sure all view stuff is valid
+    //game.gameMode->ClientEndServerFrame(ent);
 }
 
 
@@ -388,32 +388,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    // Check if the game mode allows for this specific client to connect to it.
-    if (!game.gameMode->ClientCanConnect(ent, userinfo))
-        return false;
-
-    // If we reached this point, game mode states that they can connect.
-    // As such, we assign the client to this server entity.
-    ent->client = game.clients + (ent - g_entities - 1);
-
-    // If there is already a body waiting for us (a loadgame), just
-    // take it, otherwise spawn one from scratch
-    if (ent->inUse == false) {
-        // Clear the respawning variables
-        game.gameMode->InitializeClientRespawnData(ent->client);
-        if (!game.autoSaved || !ent->client->persistent.activeWeapon)
-            game.gameMode->InitializeClientPersistentData(ent);
-    }
-
-    // Check for changed user info.
-    game.gameMode->ClientUserinfoChanged(ent, userinfo);
-
-    // Inform the game mode about it.
-    game.gameMode->ClientConnect(ent);
-
-    ent->serverFlags = 0; // make sure we start with known default
-    ent->client->persistent.isConnected = true;
-    return true;
+    return game.gameMode->ClientConnect(ent, userinfo);
 }
 
 /*

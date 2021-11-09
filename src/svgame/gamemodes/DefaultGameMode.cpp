@@ -15,6 +15,7 @@
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/BodyCorpse.h"
 #include "../entities/base/PlayerClient.h"
+#include "../entities/info/InfoPlayerStart.h"
 
 // Weapons.h
 #include "../player/client.h"
@@ -1307,7 +1308,7 @@ static void SVG_SetClientEvent(PlayerClient *ent)
     if (ent->GetEventID())
         return;
 
-    if (ent->GetGroundEntity() && XYSpeed > 225) {
+    if (ent->GetGroundEntity() && XYSpeed > 225 * FRAMETIME) {
         if ((int)(currentProcessingClient->bobTime + bobMove) != bobCycle)
             ent->SetEventID(EntityEvent::Footstep);
     }
@@ -1319,25 +1320,25 @@ static void SVG_SetClientEvent(PlayerClient *ent)
 // 
 //===============
 //
-static void SVG_SetClientSound(PlayerClient *ent)
-{
-    const char    *weap; // C++20: STRING: Added const to char*
+static void SVG_SetClientSound(PlayerClient* ent) {
+    std::string aciveWeapon; // C++20: STRING: Added const to char*
 
     if (currentProcessingClient->persistent.activeWeapon)
-        weap = currentProcessingClient->persistent.activeWeapon->className;
+        aciveWeapon = currentProcessingClient->persistent.activeWeapon->className;
     else
-        weap = "";
+        aciveWeapon = "";
 
-    if (ent->GetWaterLevel() && (ent->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME)))
+    if (ent->GetWaterLevel() && (ent->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
         ent->SetSound(snd_fry);
-    else if (strcmp(weap, "weapon_railgun") == 0)
+    } else if (aciveWeapon == "weapon_railgun") {
         ent->SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
-    else if (strcmp(weap, "weapon_bfg") == 0)
+    } else if (aciveWeapon == "weapon_bfg") {
         ent->SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
-    else if (currentProcessingClient->weaponSound)
-        ent->SetSound(currentProcessingClient->weaponSound);
-    else
+    } else if (ent->GetClient()->weaponSound) {
+        ent->SetSound(ent->GetClient()->weaponSound);
+    } else {
         ent->SetSound(0);
+    }
 }
 
 //
@@ -1350,16 +1351,19 @@ static void SVG_SetClientAnimationFrame(PlayerClient *ent)
 {
     qboolean isDucking = false;
     qboolean isRunning = false;
-
+    GameClient* client = nullptr;
+    
     if (!ent)
         return;
 
     if (ent->GetModelIndex() != 255)
         return;     // not in the player model
 
-                    //client = ent->client;
+    client = ent->GetClient();
+    if (!client)
+        return;
 
-    if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
+    if (client->playerState.pmove.flags & PMF_DUCKED)
         isDucking = true;
     else
         isDucking = false;
@@ -1369,63 +1373,63 @@ static void SVG_SetClientAnimationFrame(PlayerClient *ent)
         isRunning = false;
 
     // check for stand/duck and stop/go transitions
-    if (isDucking != currentProcessingClient->animation.isDucking && currentProcessingClient->animation.priorityAnimation < PlayerAnimation::Death)
+    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death)
         goto newanim;
-    if (isRunning != currentProcessingClient->animation.isRunning && currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Basic)
+    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic)
         goto newanim;
-    if (!ent->GetGroundEntity() && currentProcessingClient->animation.priorityAnimation <= PlayerAnimation::Wave)
+    if (!ent->GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave)
         goto newanim;
 
-    if (currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Reverse) {
-        if (ent->GetFrame() > currentProcessingClient->animation.endFrame) {
+    if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
+        if (ent->GetFrame() > client->animation.endFrame) {
             ent->SetFrame(ent->GetFrame() - 1);
             return;
         }
-    } else if (ent->GetFrame() < currentProcessingClient->animation.endFrame) {
+    } else if (ent->GetFrame() < client->animation.endFrame) {
         // continue an animation
         ent->SetFrame(ent->GetFrame() + 1);
         return;
     }
 
-    if (currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Death)
+    if (client->animation.priorityAnimation == PlayerAnimation::Death)
         return;     // stay there
-    if (currentProcessingClient->animation.priorityAnimation == PlayerAnimation::Jump) {
+    if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
         if (!ent->GetGroundEntity())
             return;     // stay there
-        currentProcessingClient->animation.priorityAnimation = PlayerAnimation::Wave;
+        client->animation.priorityAnimation = PlayerAnimation::Wave;
         ent->SetFrame(FRAME_jump3);
-        currentProcessingClient->animation.endFrame = FRAME_jump6;
+        client->animation.endFrame = FRAME_jump6;
         return;
     }
 
 newanim:
     // return to either a running or standing frame
-    currentProcessingClient->animation.priorityAnimation = PlayerAnimation::Basic;
-    currentProcessingClient->animation.isDucking = isDucking;
-    currentProcessingClient->animation.isRunning = isRunning;
+    client->animation.priorityAnimation = PlayerAnimation::Basic;
+    client->animation.isDucking = isDucking;
+    client->animation.isRunning = isRunning;
 
     if (!ent->GetGroundEntity()) {
-        currentProcessingClient->animation.priorityAnimation = PlayerAnimation::Jump;
+        client->animation.priorityAnimation = PlayerAnimation::Jump;
         if (ent->GetFrame() != FRAME_jump2)
             ent->SetFrame(FRAME_jump1);
-        currentProcessingClient->animation.endFrame = FRAME_jump2;
+        client->animation.endFrame = FRAME_jump2;
     } else if (isRunning) {
         // running
         if (isDucking) {
             ent->SetFrame(FRAME_crwalk1);
-            currentProcessingClient->animation.endFrame = FRAME_crwalk6;
+            client->animation.endFrame = FRAME_crwalk6;
         } else {
             ent->SetFrame(FRAME_run1);
-            currentProcessingClient->animation.endFrame = FRAME_run6;
+            client->animation.endFrame = FRAME_run6;
         }
     } else {
         // standing
         if (isDucking) {
             ent->SetFrame(FRAME_crstnd01);
-            currentProcessingClient->animation.endFrame = FRAME_crstnd19;
+            client->animation.endFrame = FRAME_crstnd19;
         } else {
             ent->SetFrame(FRAME_stand01);
-            currentProcessingClient->animation.endFrame = FRAME_stand40;
+            client->animation.endFrame = FRAME_stand40;
         }
     }
 }
@@ -1449,6 +1453,9 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     // Setup the current player and entity being processed.
     currentProcessingPlayer = (PlayerClient*)serverEntity->classEntity;
     currentProcessingClient = serverEntity->client;
+
+    // Used for in this function, the classEntity of the given serverEntity.
+    PlayerClient* classEntity = (PlayerClient*)serverEntity->classEntity;
 
     //
     // If the origin or velocity have changed since ClientThink(),
@@ -1485,15 +1492,15 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     vec3_t newPlayerAngles = serverEntity->state.angles;
 
     if (currentProcessingClient->aimAngles[vec3_t::Pitch] > 180)
-        newPlayerAngles[vec3_t::Pitch] = (-360 + currentProcessingClient->aimAngles[vec3_t::Pitch]) / 3;
+        newPlayerAngles[vec3_t::Pitch] = (-360 + classEntity->GetClient()->aimAngles[vec3_t::Pitch]) / 3;
     else
-        newPlayerAngles[vec3_t::Pitch] = currentProcessingClient->aimAngles[vec3_t::Pitch] / 3;
-    newPlayerAngles[vec3_t::Yaw] = currentProcessingClient->aimAngles[vec3_t::Yaw];
+        newPlayerAngles[vec3_t::Pitch] = classEntity->GetClient()->aimAngles[vec3_t::Pitch] / 3;
+    newPlayerAngles[vec3_t::Yaw] = classEntity->GetClient()->aimAngles[vec3_t::Yaw];
     newPlayerAngles[vec3_t::Roll] = 0;
-    newPlayerAngles[vec3_t::Roll] = SVG_CalcRoll(newPlayerAngles, serverEntity->classEntity->GetVelocity()) * 4;
+    newPlayerAngles[vec3_t::Roll] = SVG_CalcRoll(newPlayerAngles, classEntity->GetVelocity()) * 4;
 
     // Last but not least, after having calculated the Pitch, Yaw, and Roll, set the new angles.
-    serverEntity->classEntity->SetAngles(newPlayerAngles);
+    classEntity->SetAngles(newPlayerAngles);
 
     //
     // Calculate the player its X Y axis' speed and calculate the cycle for
@@ -1526,11 +1533,11 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     }
 
     // Generate bob time.
-    currentProcessingClient->bobTime += bobMove * FRAMETIME;
-    bobTime = currentProcessingClient->bobTime;
+    bobTime = (currentProcessingClient->bobTime += (bobMove * FRAMETIME));
 
+    //currentProcessingClient->bobTime += bobMove * FRAMETIME;
     if (currentProcessingClient->playerState.pmove.flags & PMF_DUCKED)
-        bobTime *= 2* FRAMETIME;   // N&C: Footstep tweak.
+        bobTime *= 4 * FRAMETIME;   // N&C: Footstep tweak.
 
     bobCycle = (int)bobTime;
     bobFracsin = std::fabsf(std::sinf(bobTime * M_PI)) * FRAMETIME;
@@ -1586,44 +1593,78 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
 }
 
 //===============
-// DefaultGameMode::ClientCanConnect
-// 
-// Checks for whether it is OK for a client to connect go here.
-//===============
-qboolean DefaultGameMode::ClientCanConnect(Entity* serverEntity, char* userInfo) {
-    // Check to see if they are on the banned IP list
-    char *value = Info_ValueForKey(userInfo, "ip");
-    if (SVG_FilterPacket(value)) {
-        Info_SetValueForKey(userInfo, "rejmsg", "Banned.");
-        return false;
-    }
-
-    // Check for a password, and if there is one, does it match?
-    value = Info_ValueForKey(userInfo, "password");
-    if (*password->string && strcmp(password->string, "none") &&
-        strcmp(password->string, value)) {
-        Info_SetValueForKey(userInfo, "rejmsg", "Password required or incorrect.");
-        return false;
-    }
-
-    // Return true, client is allowed to connect.
-    return true;
-}
-
-//===============
 // DefaultGameMode::ClientConnect
 // 
 // Client is connecting, what do? :)
 //===============
-void DefaultGameMode::ClientConnect(Entity* serverEntity) {
+qboolean DefaultGameMode::ClientConnect(Entity* serverEntity, char *userinfo) {
     if (!serverEntity) {
         gi.DPrintf("ClientConnect executed with invalid (nullptr) serverEntity");
-        return;
+        return false;
     }
+    char    *value;
+
+    // check to see if they are on the banned IP list
+    value = Info_ValueForKey(userinfo, "ip");
+    if (SVG_FilterPacket(value)) {
+        Info_SetValueForKey(userinfo, "rejmsg", "Banned.");
+        return false;
+    }
+
+    // check for a spectator
+    //value = Info_ValueForKey(userinfo, "spectator");
+    //if (deathmatch->value && *value && strcmp(value, "0")) {
+    //    int i, numspec;
+
+    //    if (*spectator_password->string &&
+    //        strcmp(spectator_password->string, "none") &&
+    //        strcmp(spectator_password->string, value)) {
+    //        Info_SetValueForKey(userinfo, "rejmsg", "Spectator password required or incorrect.");
+    //        return qfalse;
+    //    }
+
+    //    // count spectators
+    //    for (i = numspec = 0; i < maxclients->value; i++)
+    //        if (g_edicts[i + 1].inuse && g_edicts[i + 1].client->pers.spectator)
+    //            numspec++;
+
+    //    if (numspec >= maxspectators->value) {
+    //        Info_SetValueForKey(userinfo, "rejmsg", "Server spectator limit is full.");
+    //        return qfalse;
+    //    }
+    //} else {
+        // check for a password
+        value = Info_ValueForKey(userinfo, "password");
+        if (*password->string && strcmp(password->string, "none") &&
+            strcmp(password->string, value)) {
+            Info_SetValueForKey(userinfo, "rejmsg", "Password required or incorrect.");
+            return false;
+        }
+    //}
+    
+    // they can connect
+    serverEntity->client = game.clients + (serverEntity - g_entities - 1);
+
+    // if there is already a body waiting for us (a loadgame), just
+    // take it, otherwise spawn one from scratch
+    if (serverEntity->inUse == false) {
+        // clear the respawning variables
+        InitializeClientRespawnData(serverEntity->client);
+        if (!game.autoSaved || !serverEntity->client->persistent.activeWeapon)
+            InitializeClientPersistentData(serverEntity->client);
+    }
+
+    ClientUserinfoChanged(serverEntity, userinfo);
 
     // This is default behaviour for this function.
     if (game.maximumClients > 1)
         gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
+
+    // Make sure we start with clean serverFlags.
+    serverEntity->serverFlags = 0;
+    serverEntity->client->persistent.isConnected = true;
+
+    return true;
 }
 
 //===============
@@ -1640,6 +1681,12 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
     // Setup the client for the server entity.
     serverEntity->client = game.clients + (serverEntity - g_entities - 1);
 
+    // We got our own deathmatch mode class, it should copy this function and modify it to tis needs.
+    //if (deathmatch->value) {
+    //    ClientBeginDeathmatch(ent);
+    //    return;
+    //}
+
     // If there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
     if (serverEntity->inUse == true) {
@@ -1650,9 +1697,20 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         for (int32_t i = 0; i < 3; i++)
             serverEntity->client->playerState.pmove.deltaAngles[i] = serverEntity->client->playerState.pmove.viewAngles[i];
     } else {
+        // Initialize a clean serverEntity.
+        SVG_InitEntity(serverEntity);
+        
+        // Delete previous classentity, if existent (older client perhaps).
+        SVG_FreeClassEntity(serverEntity);
+
+        // Recreate class PlayerClient entity.
+        serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false);
+
+        // Initialize client respawn data.
         InitializeClientRespawnData(serverEntity->client);
-        PutClientInServer((PlayerClient*)serverEntity);
-        //serverEntity->classEntity->Respawn();
+
+        // Put into our server and blast away! (Takes care of spawning classEntity).
+        PutClientInServer(serverEntity);
     }
 
     if (level.intermission.time) {
@@ -1661,8 +1719,7 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         // send effect if in a multiplayer game
         if (game.maximumClients > 1) {
             gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-            //gi.WriteShort(ent - g_entities);
-            gi.WriteShort(serverEntity->state.number);
+            gi.WriteShort(serverEntity - g_entities);
             gi.WriteByte(MuzzleFlashType::Login);
             gi.Multicast(serverEntity->state.origin, MultiCast::PVS);
 
@@ -1922,13 +1979,11 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
 }
 
 
-void DefaultGameMode::InitializeClientPersistentData(Entity* ent) {
+void DefaultGameMode::InitializeClientPersistentData(GameClient* client) {
     gitem_t     *item = NULL;
 
-    if (!ent || !ent->client)
+    if (!client)
         return;
-
-    GameClient* client = ent->client;
 
     //memset(&client->persistent, 0, sizeof(client->persistent));
     client->persistent = {};
@@ -1962,18 +2017,231 @@ void DefaultGameMode::InitializeClientRespawnData(GameClient* client) {
 }
 
 //===============
+// DefaultGameMode::SelectClientSpawnPoint
+//
+// Choose any info_player_start or its derivates, it'll do a subclassof check, so the only valid classnames are
+// those who have inherited from info_player_start. (info_player_deathmatch, etc).
+//===============
+void DefaultGameMode::SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string& classname) {
+    SVGBaseEntity *spawnPoint = nullptr;
+
+    //// Find a single player start spot
+    if (!spawnPoint) {
+        // Find a spawnpoint that has a target:
+        for (auto* result : g_baseEntities | bef::Standard | bef::IsClassOf<InfoPlayerStart>()) {
+            // Continue in case there is no comparison to it with the possible target
+            // of the InfoPlayerStart
+            if (!game.spawnpoint[0])
+                continue;
+
+            if (result->GetTargetName() == game.spawnpoint) {
+                spawnPoint = result;
+                break;
+            }
+        }
+    }
+
+    // Since we still haven't found one with a target, do it again, but this time without
+    // a target requirement.
+    if (!spawnPoint) {
+        for (auto* result : g_baseEntities | bef::Standard | bef::IsClassOf<InfoPlayerStart>()) {
+            if (result) {
+                spawnPoint = result;
+                break;
+            }
+        }
+    }
+
+    // Setup player origin and angles, also raise him 9 units above the ground to be sure it fits.
+    if (spawnPoint) {
+        origin = spawnPoint->GetOrigin();
+        origin.z += 9;
+        angles = spawnPoint->GetAngles();
+    } else {
+        gi.Error("Couldn't find spawn point %s", game.spawnpoint);
+    }
+}
+
+//===============
 // DefaultGameMode::PutClientInServer
 // 
-// Can be used to legit respawn a client at a spawn point.
-// For SinglePlayer you want to take it a bit easy with this function.
-// For Multiplayer games however, you definitely want to use this function.
-//
-// SP games: Use it once... (or at load time)
-// MP games: Use it every respawn.
+// Called when a player connects to a single and multiplayer. 
+// 
+// #1. In the case of a SP mode death, the loadmenu pops up and selecting a load game
+// will restart the server.
+// #2. In thecase of a MP mode death however, after a small intermission time, it'll
+// call this function again to respawn our player.
 //===============
-void DefaultGameMode::PutClientInServer(PlayerClient *ent) {
+void DefaultGameMode::PutClientInServer(Entity *ent) {
     // Find a spawn point for this client to be "placed"/"put" at.
+    vec3_t  mins = PM_MINS;
+    vec3_t  maxs = PM_MAXS;
+    
+    ClientPersistentData persistentData; // Saved data from 
+    ClientRespawnData respawnData;
 
+    // Find a spawn point
+    // Do it before setting health back up, so farthest
+    // ranging doesn't count this client
+    vec3_t  spawnOrigin = vec3_zero();
+    vec3_t  spawnAngles = vec3_zero();
+
+    SelectClientSpawnPoint(ent, spawnOrigin, spawnAngles, "info_player_start");
+
+    // Fetch the entity index, and the client right off the bat.
+    int32_t index = ent - g_entities - 1;
+    GameClient* client = ent->client;
+
+    // Deathmatch wipes most client data every spawn
+    //-----------------------------------------------------------------------
+    //if (deathmatch->value) {
+    //    char        userinfo[MAX_INFO_STRING];
+
+    //    respawnData = client->respawn;
+    //    memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
+    //    InitializeClientPersistentData(client);
+    //    ClientUserinfoChanged(ent, userinfo);
+    //} else {
+    //-----------------------------------------------------------------------
+    //      int         n;
+    char        userinfo[MAX_INFO_STRING];
+
+    respawnData = client->respawn;
+    memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
+    // this is kind of ugly, but it's how we want to handle keys in coop
+    //      for (n = 0; n < game.num_items; n++)
+    //      {
+    //          if (itemlist[n].flags & IT_KEY)
+    //              resp.coop_respawn.inventory[n] = client->pers.inventory[n];
+    //      }
+    //respawnData.persistentCoopRespawn.game_helpchanged = client->pers.game_helpchanged;
+    //respawnData.persistentCoopRespawn.helpchanged = client->pers.helpchanged;
+    client->persistent = respawnData.persistentCoopRespawn;
+    ClientUserinfoChanged(ent, userinfo);
+    if (respawnData.score > client->persistent.score)
+        client->persistent.score = respawnData.score;
+    //}
+    //-------------------------------------------------------------------------------
+
+    // Clear everything but the persistant data
+    persistentData = client->persistent;
+    memset(client, 0, sizeof(*client));
+    client->persistent = persistentData;
+    if (client->persistent.health <= 0)
+    InitializeClientPersistentData(client);
+    client->respawn = respawnData;
+
+    // Copy some data from the client to the entity
+    FetchClientEntityData(ent);
+
+    // clear entity values
+    PlayerClient* playerClient = (PlayerClient*)ent->classEntity;
+    playerClient->SetGroundEntity(nullptr);
+    playerClient->SetClient(&game.clients[index]);
+    playerClient->SetTakeDamage(TakeDamage::Aim);
+    playerClient->SetMoveType(MoveType::Walk);
+    playerClient->SetViewHeight(22);
+    playerClient->SetInUse(true);
+    playerClient->SetClassName("player");
+    playerClient->SetSolid(Solid::BoundingBox);
+    playerClient->SetDeadFlag(DEAD_NO);
+    playerClient->SetAirFinishedTime(level.time + 12);
+    playerClient->SetClipMask(CONTENTS_MASK_PLAYERSOLID);
+    playerClient->SetModel("players/male/tris.md2");
+    //playerClient->SetTakeDamageCallback(&PlayerClient::PlayerClientTakeDamage);
+    playerClient->SetDieCallback(&PlayerClient::PlayerClientDie);
+    /*ent->pain = player_pain;*/
+    playerClient->SetWaterLevel(0);
+    playerClient->SetWaterType(0);
+    playerClient->SetFlags(playerClient->GetFlags() & ~EntityFlags::NoKnockBack);
+    playerClient->SetServerFlags(playerClient->GetServerFlags() & ~EntityServerFlags::DeadMonster);
+    playerClient->SetMins(mins);
+    playerClient->SetMaxs(maxs);
+    playerClient->SetVelocity(vec3_zero());
+
+    // Clear playerstate values
+    memset(&ent->client->playerState, 0, sizeof(client->playerState));
+
+    // Setup player move origin to spawnpoint origin.
+    client->playerState.pmove.origin = spawnOrigin;
+
+    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
+        client->playerState.fov = 90;
+    } else {
+        client->playerState.fov = atoi(Info_ValueForKey(client->persistent.userinfo, "fov"));
+    if (client->playerState.fov < 1)
+        client->playerState.fov = 90;
+    else if (client->playerState.fov > 160)
+        client->playerState.fov = 160;
+    }
+
+    // Set gun index to whichever was persistent in (if any) previous map.
+    client->playerState.gunIndex = gi.ModelIndex(client->persistent.activeWeapon->viewModel);
+
+    // clear entity state values
+    ent->state.effects = 0;
+    ent->state.modelIndex = 255;        // will use the skin specified model
+    ent->state.modelIndex2 = 255;       // custom gun model
+    // sknum is player num and weapon number
+    // weapon number will be added in changeweapon
+    ent->state.skinNumber = ent - g_entities - 1;
+
+    ent->state.frame = 0;
+    ent->state.origin = spawnOrigin;
+    ent->state.origin.z += 1;  // Mmake sure entity is off the ground
+
+    // Set old Origin to current, because hell, we are here now spawning.
+    ent->state.oldOrigin = ent->state.origin;
+
+    // set the delta angle
+    client->playerState.pmove.deltaAngles = spawnAngles - client->respawn.commandViewAngles;
+
+    ent->state.angles[vec3_t::Pitch] = 0;
+    ent->state.angles[vec3_t::Yaw] = spawnAngles[vec3_t::Yaw];
+    ent->state.angles[vec3_t::Roll] = 0;
+
+    client->playerState.pmove.viewAngles = ent->state.angles;
+    client->aimAngles = ent->state.angles;
+    //VectorCopy(ent->s.angles, client->ps.viewangles);
+    //VectorCopy(ent->s.angles, client->v_angle);
+
+    // spawn a spectator in case the client was/is one.
+    if (client->persistent.isSpectator) {
+        // Nodefault chase target.
+        client->chaseTarget = nullptr;
+
+        // Well we knew this but store it in respawn data too.
+        client->respawn.isSpectator = true;
+
+        // Movement type is the obvious noclip
+        playerClient->SetMoveType(MoveType::NoClip);
+
+        // No solid.
+        ent->solid = Solid::Not;
+
+        // NoClient flag, aka, do not send this entity to other clients. It is invisible to them.
+        ent->serverFlags |= EntityServerFlags::NoClient;
+
+        // Obviously no gun index.
+        ent->client->playerState.gunIndex = 0;
+
+        // Last but not least link our entity.
+        gi.LinkEntity(ent);
+        
+        return;
+    } else {
+        client->respawn.isSpectator = false;
+    }
+
+    if (!SVG_KillBox(playerClient)) {
+    // could't spawn in?
+    }
+
+    gi.LinkEntity(ent);
+
+    // force the current weapon up
+    client->newWeapon = client->persistent.activeWeapon;
+    SVG_ChangeWeapon(playerClient);
 }
 
 //===============
@@ -2012,5 +2280,165 @@ void DefaultGameMode::RespawnClient(PlayerClient* ent) {
 }
 
 void DefaultGameMode::CheckClientWorldEffects(PlayerClient* ent) {
+    int         waterlevel, oldWaterLevel;
 
+    if (!currentProcessingPlayer)
+        return;
+
+    if (currentProcessingPlayer->GetMoveType() == MoveType::NoClip || currentProcessingPlayer->GetMoveType() == MoveType::Spectator) {
+        currentProcessingPlayer->SetAirFinishedTime(level.time + 12); // don't need air
+        return;
+    }
+
+    // Retreive waterlevel.
+    waterlevel = currentProcessingPlayer->GetWaterLevel();
+    oldWaterLevel = currentProcessingClient->oldWaterLevel;
+    currentProcessingClient->oldWaterLevel = waterlevel;
+
+    //
+    // if just entered a water volume, play a sound
+    //
+    if (!oldWaterLevel && waterlevel) {
+        SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
+        if (currentProcessingPlayer->GetWaterType() & CONTENTS_LAVA)
+            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
+        else if (currentProcessingPlayer->GetWaterType() & CONTENTS_SLIME)
+            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+        else if (currentProcessingPlayer->GetWaterType() & CONTENTS_WATER)
+            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+        currentProcessingPlayer->SetFlags(currentProcessingPlayer->GetFlags() | EntityFlags::InWater);
+
+        // clear damage_debounce, so the pain sound will play immediately
+        currentProcessingPlayer->SetDebounceDamageTime(level.time - 1);
+    }
+
+    //
+    // if just completely exited a water volume, play a sound
+    //
+    if (oldWaterLevel && ! waterlevel) {
+        SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
+        SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
+        currentProcessingPlayer->SetFlags(currentProcessingPlayer->GetFlags() & ~EntityFlags::InWater);
+    }
+
+    //
+    // check for head just going under water
+    //
+    if (oldWaterLevel != 3 && waterlevel == 3) {
+        SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
+    }
+
+    //
+    // check for head just coming out of water
+    //
+    if (oldWaterLevel == 3 && waterlevel != 3) {
+        if (currentProcessingPlayer->GetAirFinishedTime() < level.time) {
+            // gasp for air
+            SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
+            SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
+        } else  if (currentProcessingPlayer->GetAirFinishedTime() < level.time + 11) {
+            // just break surface
+            SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
+        }
+    }
+
+    //
+    // check for drowning
+    //
+    if (waterlevel == 3) {
+        // if out of air, start drowning
+        if (currentProcessingPlayer->GetAirFinishedTime() < level.time) {
+            // drown!
+            if (currentProcessingPlayer->GetNextDrownTime() < level.time
+                && currentProcessingPlayer->GetHealth() > 0) {
+                currentProcessingPlayer->SetNextDrownTime(level.time + 1);
+
+                // take more damage the longer underwater
+                currentProcessingPlayer->SetDamage(currentProcessingPlayer->GetDamage() + 2);
+                if (currentProcessingPlayer->GetDamage() > 15)
+                    currentProcessingPlayer->SetDamage(15);
+
+                // play a gurp sound instead of a normal pain sound
+                if (currentProcessingPlayer->GetHealth() <= currentProcessingPlayer->GetDamage())
+                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
+                else if (rand() & 1)
+                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
+                else
+                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
+
+                currentProcessingPlayer->SetDebouncePainTime(level.time);
+
+                SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), currentProcessingPlayer->GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+            }
+        }
+    } else {
+        currentProcessingPlayer->SetAirFinishedTime(level.time + 12);
+        currentProcessingPlayer->SetDamage(2);
+    }
+
+    //
+    // check for sizzle damage
+    //
+    if (waterlevel && (currentProcessingPlayer->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
+        if (currentProcessingPlayer->GetWaterType() & CONTENTS_LAVA) {
+            if (currentProcessingPlayer->GetHealth() > 0
+                && currentProcessingPlayer->GetDebouncePainTime() <= level.time) {
+                if (rand() & 1)
+                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
+                else
+                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
+                currentProcessingPlayer->SetDebouncePainTime(level.time + 1);
+            }
+
+            SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
+        }
+
+        if (currentProcessingPlayer->GetWaterType() & CONTENTS_SLIME) {
+            SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
+        }
+    }
+}
+
+//===============
+// DefaultGameMode::SaveClientEntityData
+// 
+// Some information that should be persistant, like health,
+// is still stored in the edict structure, so it needs to
+// be mirrored out to the client structure before all the
+// edicts are wiped.
+//===============
+void DefaultGameMode::SaveClientEntityData(void) {
+    Entity *ent;
+
+    for (int32_t i = 0 ; i < game.maximumClients ; i++) {
+        ent = &g_entities[1 + i];
+        if (!ent->inUse)
+            continue;
+        if (!ent->classEntity)
+            continue;
+        game.clients[i].persistent.health = ent->classEntity->GetHealth();
+        game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
+        game.clients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
+        if (coop->value && ent->client)
+            game.clients[i].persistent.score = ent->client->respawn.score;
+    }
+}
+
+//===============
+// DefaultGameMode::RespawnClient
+// 
+// // Fetch client data that was stored between previous entity wipe session
+//===============
+void DefaultGameMode::FetchClientEntityData(Entity* ent) {
+    if (!ent)
+        return;
+
+    if (!ent->classEntity)
+        return;
+
+    ent->classEntity->SetHealth(ent->client->persistent.health);
+    ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
+    ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
+    if (coop->value && ent->client)
+        ent->client->respawn.score = ent->client->persistent.score;
 }
