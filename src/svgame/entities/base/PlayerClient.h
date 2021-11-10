@@ -17,7 +17,7 @@ public:
     PlayerClient(Entity* svEntity);
     virtual ~PlayerClient();
 
-    DefineMapClass("PlayerClient", PlayerClient, SVGBaseEntity );
+    DefineMapClass("PlayerClient", PlayerClient, SVGBaseEntity);
 
     //
     // Interface functions. 
@@ -39,10 +39,10 @@ public:
     // Get/Set
     //
     // Active Weapon.
-    inline gitem_t *GetActiveWeapon() {
+    inline gitem_t* GetActiveWeapon() {
         return GetClient()->persistent.activeWeapon;
     }
-    inline void GetActiveWeapon(gitem_t *weapon) {
+    inline void GetActiveWeapon(gitem_t* weapon) {
         GetClient()->persistent.activeWeapon = weapon;
     }
 
@@ -64,7 +64,7 @@ public:
 
     // Client.
     // Sets the 'client' pointer.
-    void SetClient(gclient_s *client) {
+    void SetClient(gclient_s* client) {
         serverEntity->client = client;
     }
 
@@ -128,7 +128,7 @@ public:
     inline const int32_t GetPriorityAnimation() {
         return GetClient()->animation.priorityAnimation;
     }
-    inline void SetPriorityAnimation(const int32_t &priorityAnimation) {
+    inline void SetPriorityAnimation(const int32_t& priorityAnimation) {
         GetClient()->animation.priorityAnimation = priorityAnimation;
     }
 
@@ -169,14 +169,20 @@ public:
         int cycle;
         // Calculated as: // sin(bobfrac*M_PI)
         float fracSin;
-    } bobMoveCycle;
+    } bobMove;
 
-    // CalculateRoll
-    virtual float CalculateRoll(const vec3_t& angles, const vec3_t& velocity) override;
+    // Calculates the roll value that can be used for the view, 
+    virtual float CalculateRoll(const vec3_t& angles, const vec3_t& velocity);
+
+    // Handles color blends and view kicks, and applies them to this PlayerClient
+    virtual void ApplyDamageFeedback();
+
+    // Calculate
+    virtual void CalculateViewOffset();
 
     // Reference to BobMoveCycle.
     BobMoveCycle &GetBobMoveCycle() {
-        return bobMoveCycle;
+        return bobMove;
     }
 
 private:

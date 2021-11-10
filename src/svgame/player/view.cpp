@@ -23,179 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "hud.h"
 #include "animations.h"
 
-// The actual current player entity that this C++ unit is acting on.
-//static PlayerClient *ent;
-
-// The current client belonging to the player.
-//static GameClient   *currentProcessingClient;
-
-
-
-//
-//===============
-// SVG_CalcRoll
-// 
-//
-//===============
-//
-float SVG_PlayerClient_CalculateRoll(PlayerClient *pc, const vec3_t &angles, const vec3_t &velocity)
-{
-    float   sign;
-    float   side;
-    float   value;
-
-    side = vec3_dot(velocity, bobMove.right);
-    sign = side < 0 ? -1 : 1;
-    side = fabs(side);
-
-    value = sv_rollangle->value;
-
-    if (side < sv_rollspeed->value)
-        side = side * value / sv_rollspeed->value;
-    else
-        side = value;
-
-    return side * sign;
-
-}
-
-//
-//===============
-// SVG_Client_ApplyDamageFeedback
-// 
-// Handles color blends and view kicks
-//===============
-//
-void SVG_Client_ApplyDamageFeedback(PlayerClient *ent)
-{
-    float   side;
-    float   realcount, count, kick;
-    vec3_t  v;
-    int     r, l;
-    static  vec3_t  power_color = {0.0f, 1.0f, 0.0f};
-    static  vec3_t  acolor = {1.0f, 1.0f, 1.0f};
-    static  vec3_t  bcolor = {1.0f, 0.0f, 0.0f};
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
-
-    // flash the backgrounds behind the status numbers
-    client->playerState.stats[STAT_FLASHES] = 0;
-    if (client->damages.blood)
-        client->playerState.stats[STAT_FLASHES] |= 1;
-    if (client->damages.armor && !(ent->GetFlags() & EntityFlags::GodMode))
-        client->playerState.stats[STAT_FLASHES] |= 2;
-
-    // total points of damage shot at the player this frame
-    count = (client->damages.blood + client->damages.armor + client->damages.powerArmor);
-    if (count == 0)
-        return;     // didn't take any damage
-
-    // start a pain animation if still in the player model
-    if (client->animation.priorityAnimation < PlayerAnimation::Pain && ent->GetModelIndex() == 255) {
-        static int      i;
-
-        client->animation.priorityAnimation = PlayerAnimation::Pain;
-        if (client->playerState.pmove.flags & PMF_DUCKED) {
-            ent->SetFrame(FRAME_crpain1 - 1);
-            client->animation.endFrame = FRAME_crpain4;
-        } else {
-            i = (i + 1) % 3;
-            switch (i) {
-            case 0:
-                ent->SetFrame(FRAME_pain101 - 1);
-                client->animation.endFrame = FRAME_pain104;
-                break;
-            case 1:
-                ent->SetFrame(FRAME_pain201 - 1);
-                client->animation.endFrame = FRAME_pain204;
-                break;
-            case 2:
-                ent->SetFrame(FRAME_pain301 - 1);
-                client->animation.endFrame = FRAME_pain304;
-                break;
-            }
-        }
-    }
-
-    realcount = count;
-    if (count < 10)
-        count = 10; // always make a visible effect
-
-    // Play an apropriate pain sound
-    if ((level.time > ent->GetDebouncePainTime()) && !(ent->GetFlags() & EntityFlags::GodMode)) {
-        r = 1 + (rand() & 1);
-        ent->SetDebouncePainTime(level.time + 0.7f);
-        if (ent->GetHealth() < 25)
-            l = 25;
-        else if (ent->GetHealth() < 50)
-            l = 50;
-        else if (ent->GetHealth() < 75)
-            l = 75;
-        else
-            l = 100;
-        SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex(va("*pain%i_%i.wav", l, r)), 1, ATTN_NORM, 0);
-    }
-
-    // The total alpha of the blend is always proportional to count.
-    if (client->damageAlpha < 0.f)
-        client->damageAlpha = 0.f;
-    client->damageAlpha += count * 0.01f;
-    if (client->damageAlpha < 0.2f)
-        client->damageAlpha = 0.2f;
-    if (client->damageAlpha > 0.6f)
-        client->damageAlpha = 0.6f;     // don't go too saturated
-
-    // The color of the blend will vary based on how much was absorbed
-    // by different armors.
-    vec3_t blendColor = vec3_zero();
-    if (client->damages.powerArmor)
-        blendColor = vec3_fmaf(blendColor, (float)client->damages.powerArmor / realcount, power_color);
-    if (client->damages.armor)
-        blendColor = vec3_fmaf(blendColor, (float)client->damages.armor / realcount, acolor);
-    if (client->damages.blood)
-        blendColor = vec3_fmaf(blendColor, (float)client->damages.blood / realcount, bcolor);
-    client->damageBlend = blendColor;
-
-
-    //
-    // Calculate view angle kicks
-    //
-    kick = abs(client->damages.knockBack);
-    if (kick && ent->GetHealth() > 0) { // kick of 0 means no view adjust at all
-        kick = kick * 100 / ent->GetHealth();
-
-        if (kick < count * 0.5f)
-            kick = count * 0.5f;
-        if (kick > 50)
-            kick = 50;
-
-        vec3_t kickVec = client->damages.from - ent->GetOrigin();
-        kickVec = vec3_normalize(kickVec);
-
-        side = vec3_dot(kickVec, right);
-        client->viewDamage.roll = kick * side * 0.3f;
-
-        side = -vec3_dot(kickVec, forward);
-        client->viewDamage.pitch = kick * side * 0.3f;
-
-        client->viewDamage.time = level.time + DAMAGE_TIME;
-    }
-
-    //
-    // clear totals
-    //
-    client->damages.blood = 0;
-    client->damages.armor = 0;
-    client->damages.powerArmor = 0;
-    client->damages.knockBack = 0;
-}
 
 //
 //===============
@@ -213,106 +40,106 @@ void SVG_Client_ApplyDamageFeedback(PlayerClient *ent)
 // 
 //===============
 //
-void SVG_Client_CalculateViewOffset(PlayerClient *ent)
-{
-    float       bob;
-    float       ratio;
-    float       delta;
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()))
-        return;
-    }
-
-    //
-    // Calculate new kick angle vales. (
-    // 
-    // If dead, set a fixed angle and don't add any kick
-    if (ent->GetDeadFlag()) {
-        client->playerState.kickAngles = vec3_zero();
-
-        client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
-        client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
-        client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
-    } else {
-        // Fetch client kick angles.
-        vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
-
-                                                                                    // Add pitch(X) and roll(Z) angles based on damage kick
-        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
-        if (ratio < 0) {
-            ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
-        }
-        newKickAngles[vec3_t::Pitch] += ratio * client->viewDamage.pitch;
-        newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
-
-        // Add pitch based on fall kick
-        ratio = ((client->fallTime - level.time) / FALL_TIME);
-        if (ratio < 0)
-            ratio = 0;
-        newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
-
-        // Add angles based on velocity
-        delta = vec3_dot(ent->GetVelocity(), ent->bobforward);
-        newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
-
-        delta = vec3_dot(ent->GetVelocity(), right);
-        newKickAngles[vec3_t::Roll] += delta * run_roll->value;
-
-        // Add angles based on bob
-        delta = bobFracsin * bob_pitch->value * XYSpeed;
-        if (client->playerState.pmove.flags & PMF_DUCKED)
-            delta *= 6;     // crouching
-        newKickAngles[vec3_t::Pitch] += delta;
-        delta = bobFracsin * bob_roll->value * XYSpeed;
-        if (client->playerState.pmove.flags & PMF_DUCKED)
-            delta *= 6;     // crouching
-        if (bobCycle & 1)
-            delta = -delta;
-        newKickAngles[vec3_t::Roll] += delta;
-
-        // Last but not least, assign new kickangles to player state.
-        client->playerState.kickAngles = newKickAngles;
-    }
-
-    //
-    // Calculate new view offset.
-    //
-    // Start off with the base entity viewheight. (Set by Player Move code.)
-    vec3_t newViewOffset = {
-        0.f,
-        0.f,
-        (float)ent->GetViewHeight()
-    };
-
-    // Add fall impact view punch height.
-    ratio = (client->fallTime - level.time) / FALL_TIME;
-    if (ratio < 0)
-        ratio = 0;
-    newViewOffset.z -= ratio * client->fallValue * 0.4f;
-
-    // Add bob height.
-    bob = bobFracsin * XYSpeed * bob_up->value ;
-    if (bob > 6)
-        bob = 6;
-    newViewOffset.z += bob;
-
-    // Add kick offset
-    newViewOffset += client->kickOrigin;
-
-    // Clamp the new view offsets, and finally assign them to the player state.
-    // Clamping ensures that they never exceed the non visible, but physically 
-    // there, player bounding box.
-    client->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
-        //{ -14, -14, -22 },
-        //{ 14,  14, 30 }
-        ent->GetMins(),
-        ent->GetMaxs()
-    );
-}
+//void SVG_Client_CalculateViewOffset(PlayerClient *ent)
+//{
+//    float       bob;
+//    float       ratio;
+//    float       delta;
+//
+//    // Check whether ent is valid, and a PlayerClient hooked up 
+//    // to a valid client.
+//    GameClient* client = nullptr;
+//
+//    if (!ent || !(client = ent->GetClient()))
+//        return;
+//    }
+//
+//    //
+//    // Calculate new kick angle vales. (
+//    // 
+//    // If dead, set a fixed angle and don't add any kick
+//    if (ent->GetDeadFlag()) {
+//        client->playerState.kickAngles = vec3_zero();
+//
+//        client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+//        client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+//        client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
+//    } else {
+//        // Fetch client kick angles.
+//        vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
+//
+//                                                                                    // Add pitch(X) and roll(Z) angles based on damage kick
+//        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
+//        if (ratio < 0) {
+//            ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
+//        }
+//        newKickAngles[vec3_t::Pitch] += ratio * client->viewDamage.pitch;
+//        newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
+//
+//        // Add pitch based on fall kick
+//        ratio = ((client->fallTime - level.time) / FALL_TIME);
+//        if (ratio < 0)
+//            ratio = 0;
+//        newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
+//
+//        // Add angles based on velocity
+//        delta = vec3_dot(ent->GetVelocity(), ent->bobforward);
+//        newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
+//
+//        delta = vec3_dot(ent->GetVelocity(), right);
+//        newKickAngles[vec3_t::Roll] += delta * run_roll->value;
+//
+//        // Add angles based on bob
+//        delta = bobFracsin * bob_pitch->value * XYSpeed;
+//        if (client->playerState.pmove.flags & PMF_DUCKED)
+//            delta *= 6;     // crouching
+//        newKickAngles[vec3_t::Pitch] += delta;
+//        delta = bobFracsin * bob_roll->value * XYSpeed;
+//        if (client->playerState.pmove.flags & PMF_DUCKED)
+//            delta *= 6;     // crouching
+//        if (bobCycle & 1)
+//            delta = -delta;
+//        newKickAngles[vec3_t::Roll] += delta;
+//
+//        // Last but not least, assign new kickangles to player state.
+//        client->playerState.kickAngles = newKickAngles;
+//    }
+//
+//    //
+//    // Calculate new view offset.
+//    //
+//    // Start off with the base entity viewheight. (Set by Player Move code.)
+//    vec3_t newViewOffset = {
+//        0.f,
+//        0.f,
+//        (float)ent->GetViewHeight()
+//    };
+//
+//    // Add fall impact view punch height.
+//    ratio = (client->fallTime - level.time) / FALL_TIME;
+//    if (ratio < 0)
+//        ratio = 0;
+//    newViewOffset.z -= ratio * client->fallValue * 0.4f;
+//
+//    // Add bob height.
+//    bob = bobFracsin * XYSpeed * bob_up->value ;
+//    if (bob > 6)
+//        bob = 6;
+//    newViewOffset.z += bob;
+//
+//    // Add kick offset
+//    newViewOffset += client->kickOrigin;
+//
+//    // Clamp the new view offsets, and finally assign them to the player state.
+//    // Clamping ensures that they never exceed the non visible, but physically 
+//    // there, player bounding box.
+//    client->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
+//        //{ -14, -14, -22 },
+//        //{ 14,  14, 30 }
+//        ent->GetMins(),
+//        ent->GetMaxs()
+//    );
+//}
 
 //
 //===============
