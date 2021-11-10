@@ -174,11 +174,22 @@ public:
     // Calculates the roll value that can be used for the view, 
     virtual float CalculateRoll(const vec3_t& angles, const vec3_t& velocity);
 
-    // Handles color blends and view kicks, and applies them to this PlayerClient
+    // Check for which waterlevel (drowning), lava(burning) etc needs to
+    // happen, if any.
+    virtual void CheckWorldEffects();
+
+    // Detect hitting the floor, and apply damage appropriately.
+    virtual void CheckFallingDamage();
+
+    // Apply all other the damage taken this frame
     virtual void ApplyDamageFeedback();
 
-    // Calculate
+    // Determine the new frame's view offsets
     virtual void CalculateViewOffset();
+
+    // Determine the gun offsets
+    virtual void CalculateGunOffset();
+
 
     // Reference to BobMoveCycle.
     BobMoveCycle &GetBobMoveCycle() {

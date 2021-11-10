@@ -64,7 +64,7 @@ void PlayerClient::Spawn() {
     SetClipMask(CONTENTS_MASK_PLAYERSOLID);
     SetModel("players/male/tris.md2");
 
-    // Setup WaterLevel and Type.
+    // Setup waterLevel and Type.
     SetWaterLevel(WaterLevel::None);
     SetWaterType(0);
 
@@ -313,6 +313,220 @@ float PlayerClient::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) 
 }
 
 //===============
+// PlayerClient::CheckFallingDamage
+//
+//===============
+void PlayerClient::CheckFallingDamage()
+{
+    float   delta;
+    int     damage;
+    vec3_t  dir;
+
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = GetClient();
+
+    if (!client) {
+        return;
+    }
+
+    if (GetModelIndex() != 255)
+        return;     // not in the player model
+
+    if (GetMoveType() == MoveType::NoClip || GetMoveType() == MoveType::Spectator)
+        return;
+
+    // Calculate delta velocity.
+    vec3_t velocity = GetVelocity();
+
+    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!GetGroundEntity())) {
+        delta = client->oldVelocity[2];
+    } else {
+        if (!GetGroundEntity())
+            return;
+        delta = velocity[2] - client->oldVelocity[2];
+    }
+    delta = delta * delta * 0.0001;
+
+    // never take falling damage if completely underwater
+    if (GetWaterLevel() == 3)
+        return;
+    if (GetWaterLevel() == 2)
+        delta *= 0.25;
+    if (GetWaterLevel() == 1)
+        delta *= 0.5;
+
+    if (delta < 1)
+        return;
+
+    if (delta < 15) {
+        SetEventID(EntityEvent::Footstep);
+        return;
+    }
+
+    client->fallValue = delta * 0.5;
+    if (client->fallValue > 40)
+        client->fallValue = 40;
+    client->fallTime = level.time + FALL_TIME;
+
+    if (delta > 30) {
+        if (GetHealth() > 0) {
+            if (delta >= 55)
+                SetEventID(EntityEvent::FallFar);
+            else
+                SetEventID(EntityEvent::Fall);
+        }
+        SetDebouncePainTime(level.time);   // no normal pain sound
+        damage = (delta - 30) / 2;
+        if (damage < 1)
+            damage = 1;
+        dir = { 0.f, 0.f, 1.f };
+
+        //if (!deathmatch->value || 
+        if (!((int)gamemodeflags->value & GameModeFlags::NoFalling)) {
+            SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
+        }
+    } else {
+        SetEventID(EntityEvent::FallShort);
+        return;
+    }
+}
+
+//
+//===============
+// PlayerClient::CheckWorldEffects
+// 
+//===============
+//
+void PlayerClient::CheckWorldEffects()
+{
+    int32_t waterLevel, oldWaterLevel;
+
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = GetClient();
+
+    if (!client)
+        return;
+
+    if (GetMoveType() == MoveType::NoClip || GetMoveType() == MoveType::Spectator) {
+        SetAirFinishedTime(level.time + 12); // don't need air
+        return;
+    }
+
+    // Retreive waterLevel.
+    waterLevel = GetWaterLevel();
+    oldWaterLevel = client->oldWaterLevel;
+    client->oldWaterLevel = waterLevel;
+
+    //
+    // if just entered a water volume, play a sound
+    //
+    if (!oldWaterLevel && waterLevel) {
+        SVG_PlayerNoise(this, GetOrigin(), PNOISE_SELF);
+        if (GetWaterType() & CONTENTS_LAVA) {
+            SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
+        } else if (GetWaterType() & CONTENTS_SLIME) {
+            SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+        } else if (GetWaterType() & CONTENTS_WATER) {
+            SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+        }
+        
+        SetFlags(GetFlags() | EntityFlags::InWater);
+
+        // clear damage_debounce, so the pain sound will play immediately
+        SetDebounceDamageTime(level.time - 1);
+    }
+
+    //
+    // if just completely exited a water volume, play a sound
+    //
+    if (oldWaterLevel && ! waterLevel) {
+        SVG_PlayerNoise(this, GetOrigin(), PNOISE_SELF);
+        SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
+        SetFlags(GetFlags() & ~EntityFlags::InWater);
+    }
+
+    //
+    // check for head just going under water
+    //
+    if (oldWaterLevel != 3 && waterLevel == 3) {
+        SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
+    }
+
+    //
+    // check for head just coming out of water
+    //
+    if (oldWaterLevel == 3 && waterLevel != 3) {
+        if (GetAirFinishedTime() < level.time) {
+            // gasp for air
+            SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
+            SVG_PlayerNoise(this, GetOrigin(), PNOISE_SELF);
+        } else  if (GetAirFinishedTime() < level.time + 11) {
+            // just break surface
+            SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
+        }
+    }
+
+    //
+    // check for drowning
+    //
+    if (waterLevel == 3) {
+        // if out of air, start drowning
+        if (GetAirFinishedTime() < level.time) {
+            // drown!
+            if (GetNextDrownTime() < level.time
+                && GetHealth() > 0) {
+                SetNextDrownTime(level.time + 1);
+
+                // take more damage the longer underwater
+                SetDamage(GetDamage() + 2);
+                if (GetDamage() > 15)
+                    SetDamage(15);
+
+                // play a gurp sound instead of a normal pain sound
+                if (GetHealth() <= GetDamage())
+                    SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
+                else if (rand() & 1)
+                    SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
+                else
+                    SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
+
+                SetDebouncePainTime(level.time);
+
+                SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(),   GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+            }
+        }
+    } else {
+        SetAirFinishedTime(level.time + 12);
+        SetDamage(2);
+    }
+
+    //
+    // check for sizzle damage
+    //
+    if (waterLevel && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
+        if (GetWaterType() & CONTENTS_LAVA) {
+            if (GetHealth() > 0
+                && GetDebouncePainTime() <= level.time) {
+                if (rand() & 1)
+                    SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
+                else
+                    SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
+                SetDebouncePainTime(level.time + 1);
+            }
+
+            SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
+        }
+
+        if (GetWaterType() & CONTENTS_SLIME) {
+            SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
+        }
+    }
+}
+
+
+//===============
 // PlayerClient::ApplyDamageFeedback
 //
 //===============
@@ -556,4 +770,54 @@ void PlayerClient::CalculateViewOffset()
         GetMins(),        //{ -14, -14, -22 },
         GetMaxs()        //{ 14,  14, 30 }
     );
+}
+
+void PlayerClient::CalculateGunOffset() {
+    int     i;
+    float   delta;
+
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = GetClient();
+
+    if (!client) {
+        return;
+    }
+
+    // gun angles from bobbing
+    client->playerState.gunAngles[vec3_t::Roll] = bobMove.XYSpeed * bobMove.fracSin * 0.005;
+    client->playerState.gunAngles[vec3_t::Yaw]  = bobMove.XYSpeed * bobMove.fracSin * 0.01;
+    if (bobMove.cycle & 1) {
+        client->playerState.gunAngles[vec3_t::Roll] = -client->playerState.gunAngles[vec3_t::Roll];
+        client->playerState.gunAngles[vec3_t::Yaw]  = -client->playerState.gunAngles[vec3_t::Yaw];
+    }
+
+    client->playerState.gunAngles[vec3_t::Pitch] = bobMove.XYSpeed * bobMove.fracSin * 0.005;
+
+    // gun angles from delta movement
+    for (i = 0 ; i < 3 ; i++) {
+        delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
+        if (delta > 180)
+            delta -= 360;
+        if (delta < -180)
+            delta += 360;
+        if (delta > 45)
+            delta = 45;
+        if (delta < -45)
+            delta = -45;
+        if (i == vec3_t::Yaw)
+            client->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
+        client->playerState.gunAngles[i] += 0.2 * delta;
+    }
+
+    // gun height
+    client->playerState.gunOffset = vec3_zero();
+    //  ent->playerState->gunorigin[2] += bob;
+
+    // gun_x / gun_y / gun_z are development tools
+    for (i = 0 ; i < 3 ; i++) {
+        client->playerState.gunOffset[i] += bobMove.forward[i] * (gun_y->value);
+        client->playerState.gunOffset[i] += bobMove.right[i] * gun_x->value;
+        client->playerState.gunOffset[i] += bobMove.up[i] * (-gun_z->value);
+    }
 }

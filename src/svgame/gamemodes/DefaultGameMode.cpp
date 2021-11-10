@@ -701,6 +701,9 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     // Used for in this function, the classEntity of the given serverEntity.
     PlayerClient* classEntity = (PlayerClient*)serverEntity->classEntity;
 
+    // Fetch the bobMove in use for classEntity.
+    PlayerClient::BobMoveCycle &bobMove = classEntity->GetBobMoveCycle();
+
     //
     // If the origin or velocity have changed since ClientThink(),
     // update the pmove values.  This will happen when the client
@@ -724,10 +727,10 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
         return;
     }
 
-    vec3_vectors(client->aimAngles, &forward, &right, &up);
+    vec3_vectors(client->aimAngles, &classEntity->GetBobMoveCycle().forward, &classEntity->GetBobMoveCycle().right, &classEntity->GetBobMoveCycle().up);
 
     // Burn from lava, etc
-    SVG_Client_CheckWorldEffects(classEntity);
+    classEntity->CheckWorldEffects();
 
     //
     // Set model angles from view angles so other things in
@@ -741,7 +744,7 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
         newPlayerAngles[vec3_t::Pitch] = classEntity->GetClient()->aimAngles[vec3_t::Pitch] / 3;
     newPlayerAngles[vec3_t::Yaw] = classEntity->GetClient()->aimAngles[vec3_t::Yaw];
     newPlayerAngles[vec3_t::Roll] = 0;
-    newPlayerAngles[vec3_t::Roll] = SVG_Client_CalcRoll(newPlayerAngles, classEntity->GetVelocity()) * 4;
+    newPlayerAngles[vec3_t::Roll] = classEntity->CalculateRoll(newPlayerAngles, classEntity->GetVelocity()) * 4;
 
     // Last but not least, after having calculated the Pitch, Yaw, and Roll, set the new angles.
     classEntity->SetAngles(newPlayerAngles);
@@ -752,51 +755,51 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     //
     vec3_t playerVelocity = classEntity->GetVelocity();
     // Without * FRAMETIME = XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
-    XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+    bobMove.XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
-    if (XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
+    if (bobMove.XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
         // Special handling for when not on ground.
-        bobMove = 0;
+        bobMove.move = 0;
 
         // Start at beginning of cycle again (See the else if statement.)
         client->bobTime = 0;
     } else if (classEntity->GetGroundEntity() || classEntity->GetWaterLevel() == 2) {
         // So bobbing only cycles when on ground.
-        if (XYSpeed > 450)
-            bobMove = 0.25;
-        else if (XYSpeed > 210)
-            bobMove = 0.125;
+        if (bobMove.XYSpeed > 450)
+            bobMove.move = 0.25;
+        else if (bobMove.XYSpeed > 210)
+            bobMove.move = 0.125;
         else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2 && XYSpeed > 100)
-            bobMove = 0.225;
-        else if (XYSpeed > 100)
-            bobMove = 0.0825;
+            bobMove.move = 0.225;
+        else if (bobMove.XYSpeed > 100)
+            bobMove.move = 0.0825;
         else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2)
-            bobMove = 0.1625;
+            bobMove.move = 0.1625;
         else
-            bobMove = 0.03125;
+            bobMove.move = 0.03125;
     }
 
     // Generate bob time.
-    bobTime = (client->bobTime += (bobMove / 6));
+    bobTime = (client->bobTime += (bobMove.move / 6));
 
     //client->bobTime += bobMove * FRAMETIME;
     if (client->playerState.pmove.flags & PMF_DUCKED)
         bobTime *= 4;   // N&C: Footstep tweak.
-
-    bobCycle = (int)bobTime;
-    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI));
+    
+    bobMove.cycle = (int)bobTime;
+    bobMove.fracSin = std::fabsf(std::sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
-    SVG_Client_CheckFallingDamage(classEntity);
+    classEntity->CheckFallingDamage();
 
     // Apply all other the damage taken this frame
-    SVG_Client_ApplyDamageFeedback(classEntity);
+    classEntity->ApplyDamageFeedback();
 
     // Determine the new frame's view offsets
-    SVG_Client_CalculateViewOffset(classEntity);
+    classEntity->CalculateViewOffset();
 
     // Determine the gun offsets
-    SVG_Client_CalculateGunOffset(classEntity);
+    classEntity->CalculateGunOffset();
 
     // Determine the full screen color blend
     // must be after viewOffset, so eye contents can be
@@ -831,8 +834,8 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
 
     // if the scoreboard is up, update it
     if (client->showScores && !(level.frameNumber & 31)) {
-    SVG_HUD_GenerateDMScoreboardLayout(classEntity, classEntity->GetEnemy());
-    gi.Unicast(serverEntity, false);
+        SVG_HUD_GenerateDMScoreboardLayout(classEntity, classEntity->GetEnemy());
+        gi.Unicast(serverEntity, false);
     }
 }
 
