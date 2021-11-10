@@ -140,7 +140,6 @@ public:
         GetClient()->respawnTime = time;
     }
 
-
 protected:
     // The level.time when the "air" state finished. 
     float airFinishedTime;
@@ -190,6 +189,16 @@ public:
     // Determine the gun offsets
     virtual void CalculateGunOffset();
 
+    // Determine the full screen color blend
+    // must be after viewOffset, so eye contents can be
+    // accurately determined
+    // FIXME: with client prediction, the contents
+    // should be determined by the client
+    virtual void CalculateScreenBlend();
+
+    virtual void SetEvent();
+    virtual void SetEffects();
+    virtual void SetSound();
 
     // Reference to BobMoveCycle.
     BobMoveCycle &GetBobMoveCycle() {
@@ -201,6 +210,22 @@ private:
     // Private utility functions.
     //
     void LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker);
+
+    //Adds the specific blend of colors on top of each other.
+    static void AddScreenBlend(float r, float g, float b, float a, float *v_blend)
+    {
+        float   a2, a3;
+
+        if (a <= 0)
+            return;
+        a2 = v_blend[3] + (1 - v_blend[3]) * a; // new total alpha
+        a3 = v_blend[3] / a2;   // fraction of color from old
+
+        v_blend[0] = v_blend[0] * a3 + r * (1 - a3);
+        v_blend[1] = v_blend[1] * a3 + g * (1 - a3);
+        v_blend[2] = v_blend[2] * a3 + b * (1 - a3);
+        v_blend[3] = a2;
+    }
 };
 
 #endif // __SVGAME_ENTITIES_MISC_PLAYERCLIENT_H__

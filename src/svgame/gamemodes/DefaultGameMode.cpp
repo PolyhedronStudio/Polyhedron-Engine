@@ -769,7 +769,7 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
             bobMove.move = 0.25;
         else if (bobMove.XYSpeed > 210)
             bobMove.move = 0.125;
-        else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2 && XYSpeed > 100)
+        else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2 && bobMove.XYSpeed > 100)
             bobMove.move = 0.225;
         else if (bobMove.XYSpeed > 100)
             bobMove.move = 0.0825;
@@ -1008,9 +1008,9 @@ void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
     // and ensure it is not in use anymore, also change its classname.
     player->UnlinkEntity();
     player->SetModelIndex(0);
-    player->SetSound(0);
+    player->Base::SetSound(0);
     player->SetEventID(0);
-    player->SetEffects(0);
+    player->Base::SetEffects(0);
     player->SetSolid(Solid::Not);
     player->SetInUse(false);
     player->SetClassName("disconnected");
@@ -1526,122 +1526,6 @@ void DefaultGameMode::RespawnClient(PlayerClient* ent) {
     gi.AddCommandString("pushmenu loadgame\n");
 }
 
-void DefaultGameMode::CheckClientWorldEffects(PlayerClient* ent) {
-    int         waterlevel, oldWaterLevel;
-
-    if (currentProcessingPlayer->GetMoveType() == MoveType::NoClip || currentProcessingPlayer->GetMoveType() == MoveType::Spectator) {
-        currentProcessingPlayer->SetAirFinishedTime(level.time + 12); // don't need air
-        return;
-    }
-
-    // Retreive waterlevel.
-    waterlevel = currentProcessingPlayer->GetWaterLevel();
-    oldWaterLevel = client->oldWaterLevel;
-    client->oldWaterLevel = waterlevel;
-
-    //
-    // if just entered a water volume, play a sound
-    //
-    if (!oldWaterLevel && waterlevel) {
-        SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
-        if (currentProcessingPlayer->GetWaterType() & CONTENTS_LAVA)
-            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
-        else if (currentProcessingPlayer->GetWaterType() & CONTENTS_SLIME)
-            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-        else if (currentProcessingPlayer->GetWaterType() & CONTENTS_WATER)
-            SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-        currentProcessingPlayer->SetFlags(currentProcessingPlayer->GetFlags() | EntityFlags::InWater);
-
-        // clear damage_debounce, so the pain sound will play immediately
-        currentProcessingPlayer->SetDebounceDamageTime(level.time - 1);
-    }
-
-    //
-    // if just completely exited a water volume, play a sound
-    //
-    if (oldWaterLevel && ! waterlevel) {
-        SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
-        SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
-        currentProcessingPlayer->SetFlags(currentProcessingPlayer->GetFlags() & ~EntityFlags::InWater);
-    }
-
-    //
-    // check for head just going under water
-    //
-    if (oldWaterLevel != 3 && waterlevel == 3) {
-        SVG_Sound(currentProcessingPlayer, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
-    }
-
-    //
-    // check for head just coming out of water
-    //
-    if (oldWaterLevel == 3 && waterlevel != 3) {
-        if (currentProcessingPlayer->GetAirFinishedTime() < level.time) {
-            // gasp for air
-            SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(currentProcessingPlayer, currentProcessingPlayer->GetOrigin(), PNOISE_SELF);
-        } else  if (currentProcessingPlayer->GetAirFinishedTime() < level.time + 11) {
-            // just break surface
-            SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
-        }
-    }
-
-    //
-    // check for drowning
-    //
-    if (waterlevel == 3) {
-        // if out of air, start drowning
-        if (currentProcessingPlayer->GetAirFinishedTime() < level.time) {
-            // drown!
-            if (currentProcessingPlayer->GetNextDrownTime() < level.time
-                && currentProcessingPlayer->GetHealth() > 0) {
-                currentProcessingPlayer->SetNextDrownTime(level.time + 1);
-
-                // take more damage the longer underwater
-                currentProcessingPlayer->SetDamage(currentProcessingPlayer->GetDamage() + 2);
-                if (currentProcessingPlayer->GetDamage() > 15)
-                    currentProcessingPlayer->SetDamage(15);
-
-                // play a gurp sound instead of a normal pain sound
-                if (currentProcessingPlayer->GetHealth() <= currentProcessingPlayer->GetDamage())
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
-                else if (rand() & 1)
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
-                else
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
-
-                currentProcessingPlayer->SetDebouncePainTime(level.time);
-
-                SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), currentProcessingPlayer->GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
-            }
-        }
-    } else {
-        currentProcessingPlayer->SetAirFinishedTime(level.time + 12);
-        currentProcessingPlayer->SetDamage(2);
-    }
-
-    //
-    // check for sizzle damage
-    //
-    if (waterlevel && (currentProcessingPlayer->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
-        if (currentProcessingPlayer->GetWaterType() & CONTENTS_LAVA) {
-            if (currentProcessingPlayer->GetHealth() > 0
-                && currentProcessingPlayer->GetDebouncePainTime() <= level.time) {
-                if (rand() & 1)
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
-                else
-                    SVG_Sound(currentProcessingPlayer, CHAN_VOICE, gi.SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
-                currentProcessingPlayer->SetDebouncePainTime(level.time + 1);
-            }
-
-            SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
-        }
-
-        if (currentProcessingPlayer->GetWaterType() & CONTENTS_SLIME) {
-            SVG_InflictDamage(currentProcessingPlayer, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), currentProcessingPlayer->GetOrigin(), vec3_zero(), 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
-        }
-    }
-}
 
 //===============
 // DefaultGameMode::SaveClientEntityData

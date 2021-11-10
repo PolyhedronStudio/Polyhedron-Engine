@@ -86,11 +86,7 @@ public:
     // Respawns a client (if that is what the game mode wants).
     virtual void RespawnClient(PlayerClient* ent) = 0;
 
-    // Checks if the world has any influence (effects) on the player.
-    // Drowning or being on fire by lava etc.
-    virtual void CheckClientWorldEffects(PlayerClient* ent) = 0;
-
-    // Some information that should be persistant, like health,
+     // Some information that should be persistant, like health,
     // is still stored in the edict structure, so it needs to
     // be mirrored out to the client structure before all the
     // edicts are wiped.

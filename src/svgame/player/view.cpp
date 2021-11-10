@@ -23,183 +23,180 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "hud.h"
 #include "animations.h"
 
-z
-}
-
+////
+////===============
+//// SVG_CalculateViewOffset
+//// 
+//// Calculates t
+////
+//// fall from 128 : 400 = 160000
+//// fall from 256 : 580 = 336400
+//// fall from 384 : 720 = 518400
+//// fall from 512 : 800 = 640000
+//// fall from 640 : 960 =
+////
+//// damage = deltavelocity * deltavelocity * 0.0001
+//// 
+////===============
+////
+//void SVG_Client_CalculateViewOffset(PlayerClient *ent)
+//{
+//    float       bob;
+//    float       ratio;
+//    float       delta;
 //
-//===============
-// SVG_CalculateViewOffset
-// 
-// Calculates t
+//    // Check whether ent is valid, and a PlayerClient hooked up 
+//    // to a valid client.
+//    GameClient* client = nullptr;
 //
-// fall from 128 : 400 = 160000
-// fall from 256 : 580 = 336400
-// fall from 384 : 720 = 518400
-// fall from 512 : 800 = 640000
-// fall from 640 : 960 =
+//    if (!ent || !(client = ent->GetClient())) {
+//        return;
+//    }
 //
-// damage = deltavelocity * deltavelocity * 0.0001
-// 
-//===============
+//    //
+//    // Calculate new kick angle vales. (
+//    // 
+//    // If dead, set a fixed angle and don't add any kick
+//    if (ent->GetDeadFlag()) {
+//        client->playerState.kickAngles = vec3_zero();
 //
-void SVG_Client_CalculateViewOffset(PlayerClient *ent)
-{
-    float       bob;
-    float       ratio;
-    float       delta;
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()))
-        return;
-    }
-
-    //
-    // Calculate new kick angle vales. (
-    // 
-    // If dead, set a fixed angle and don't add any kick
-    if (ent->GetDeadFlag()) {
-        client->playerState.kickAngles = vec3_zero();
-
-        client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
-        client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
-        client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
-    } else {
-        // Fetch client kick angles.
-        vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
-
-                                                                                    // Add pitch(X) and roll(Z) angles based on damage kick
-        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
-        if (ratio < 0) {
-            ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
-        }
-        newKickAngles[vec3_t::Pitch] += ratio * client->viewDamage.pitch;
-        newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
-
-        // Add pitch based on fall kick
-        ratio = ((client->fallTime - level.time) / FALL_TIME);
-        if (ratio < 0)
-            ratio = 0;
-        newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
-
-        // Add angles based on velocity
-        delta = vec3_dot(ent->GetVelocity(), ent->bobforward);
-        newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
-
-        delta = vec3_dot(ent->GetVelocity(), right);
-        newKickAngles[vec3_t::Roll] += delta * run_roll->value;
-
-        // Add angles based on bob
-        delta = bobFracsin * bob_pitch->value * XYSpeed;
-        if (client->playerState.pmove.flags & PMF_DUCKED)
-            delta *= 6;     // crouching
-        newKickAngles[vec3_t::Pitch] += delta;
-        delta = bobFracsin * bob_roll->value * XYSpeed;
-        if (client->playerState.pmove.flags & PMF_DUCKED)
-            delta *= 6;     // crouching
-        if (bobCycle & 1)
-            delta = -delta;
-        newKickAngles[vec3_t::Roll] += delta;
-
-        // Last but not least, assign new kickangles to player state.
-        client->playerState.kickAngles = newKickAngles;
-    }
-
-    //
-    // Calculate new view offset.
-    //
-    // Start off with the base entity viewheight. (Set by Player Move code.)
-    vec3_t newViewOffset = {
-        0.f,
-        0.f,
-        (float)ent->GetViewHeight()
-    };
-
-    // Add fall impact view punch height.
-    ratio = (client->fallTime - level.time) / FALL_TIME;
-    if (ratio < 0)
-        ratio = 0;
-    newViewOffset.z -= ratio * client->fallValue * 0.4f;
-
-    // Add bob height.
-    bob = bobFracsin * XYSpeed * bob_up->value ;
-    if (bob > 6)
-        bob = 6;
-    newViewOffset.z += bob;
-
-    // Add kick offset
-    newViewOffset += client->kickOrigin;
-
-    // Clamp the new view offsets, and finally assign them to the player state.
-    // Clamping ensures that they never exceed the non visible, but physically 
-    // there, player bounding box.
-    client->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
-        //{ -14, -14, -22 },
-        //{ 14,  14, 30 }
-        ent->GetMins(),
-        ent->GetMaxs()
-    );
-}
-
+//        client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+//        client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+//        client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
+//    } else {
+//        // Fetch client kick angles.
+//        vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
 //
-//===============
-// SVG_Client_CalculateGunOffset
-// 
-//===============
+//                                                                                    // Add pitch(X) and roll(Z) angles based on damage kick
+//        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
+//        if (ratio < 0) {
+//            ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
+//        }
+//        newKickAngles[vec3_t::Pitch] += ratio * client->viewDamage.pitch;
+//        newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
 //
-void SVG_Client_CalculateGunOffset(PlayerClient *ent)
-{
-    int     i;
-    float   delta;
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
-
-    // gun angles from bobbing
-    client->playerState.gunAngles[vec3_t::Roll] = XYSpeed * bobFracsin * 0.005;
-    client->playerState.gunAngles[vec3_t::Yaw]  = XYSpeed * bobFracsin * 0.01;
-    if (bobCycle & 1) {
-        client->playerState.gunAngles[vec3_t::Roll] = -client->playerState.gunAngles[vec3_t::Roll];
-        client->playerState.gunAngles[vec3_t::Yaw]  = -client->playerState.gunAngles[vec3_t::Yaw];
-    }
-
-    client->playerState.gunAngles[vec3_t::Pitch] = XYSpeed * bobFracsin * 0.005;
-
-    // gun angles from delta movement
-    for (i = 0 ; i < 3 ; i++) {
-        delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
-        if (delta > 180)
-            delta -= 360;
-        if (delta < -180)
-            delta += 360;
-        if (delta > 45)
-            delta = 45;
-        if (delta < -45)
-            delta = -45;
-        if (i == vec3_t::Yaw)
-            client->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
-        client->playerState.gunAngles[i] += 0.2 * delta;
-    }
-
-    // gun height
-    client->playerState.gunOffset = vec3_zero();
-//  ent->playerState->gunorigin[2] += bob;
-
-    // gun_x / gun_y / gun_z are development tools
-    for (i = 0 ; i < 3 ; i++) {
-        client->playerState.gunOffset[i] += forward[i] * (gun_y->value);
-        client->playerState.gunOffset[i] += right[i] * gun_x->value;
-        client->playerState.gunOffset[i] += up[i] * (-gun_z->value);
-    }
-}
+//        // Add pitch based on fall kick
+//        ratio = ((client->fallTime - level.time) / FALL_TIME);
+//        if (ratio < 0)
+//            ratio = 0;
+//        newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
+//
+//        // Add angles based on velocity
+//        delta = vec3_dot(ent->GetVelocity(), ent->bobforward);
+//        newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
+//
+//        delta = vec3_dot(ent->GetVelocity(), right);
+//        newKickAngles[vec3_t::Roll] += delta * run_roll->value;
+//
+//        // Add angles based on bob
+//        delta = bobFracsin * bob_pitch->value * XYSpeed;
+//        if (client->playerState.pmove.flags & PMF_DUCKED)
+//            delta *= 6;     // crouching
+//        newKickAngles[vec3_t::Pitch] += delta;
+//        delta = bobFracsin * bob_roll->value * XYSpeed;
+//        if (client->playerState.pmove.flags & PMF_DUCKED)
+//            delta *= 6;     // crouching
+//        if (bobCycle & 1)
+//            delta = -delta;
+//        newKickAngles[vec3_t::Roll] += delta;
+//
+//        // Last but not least, assign new kickangles to player state.
+//        client->playerState.kickAngles = newKickAngles;
+//    }
+//
+//    //
+//    // Calculate new view offset.
+//    //
+//    // Start off with the base entity viewheight. (Set by Player Move code.)
+//    vec3_t newViewOffset = {
+//        0.f,
+//        0.f,
+//        (float)ent->GetViewHeight()
+//    };
+//
+//    // Add fall impact view punch height.
+//    ratio = (client->fallTime - level.time) / FALL_TIME;
+//    if (ratio < 0)
+//        ratio = 0;
+//    newViewOffset.z -= ratio * client->fallValue * 0.4f;
+//
+//    // Add bob height.
+//    bob = bobFracsin * XYSpeed * bob_up->value ;
+//    if (bob > 6)
+//        bob = 6;
+//    newViewOffset.z += bob;
+//
+//    // Add kick offset
+//    newViewOffset += client->kickOrigin;
+//
+//    // Clamp the new view offsets, and finally assign them to the player state.
+//    // Clamping ensures that they never exceed the non visible, but physically 
+//    // there, player bounding box.
+//    client->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
+//        //{ -14, -14, -22 },
+//        //{ 14,  14, 30 }
+//        ent->GetMins(),
+//        ent->GetMaxs()
+//    );
+//}
+//
+////
+////===============
+//// SVG_Client_CalculateGunOffset
+//// 
+////===============
+////
+//void SVG_Client_CalculateGunOffset(PlayerClient *ent)
+//{
+//    int     i;
+//    float   delta;
+//
+//    // Check whether ent is valid, and a PlayerClient hooked up 
+//    // to a valid client.
+//    GameClient* client = nullptr;
+//
+//    if (!ent || !(client = ent->GetClient()) ||
+//        !ent->IsSubclassOf<PlayerClient>()) {
+//        return;
+//    }
+//
+//    // gun angles from bobbing
+//    client->playerState.gunAngles[vec3_t::Roll] = XYSpeed * bobFracsin * 0.005;
+//    client->playerState.gunAngles[vec3_t::Yaw]  = XYSpeed * bobFracsin * 0.01;
+//    if (bobCycle & 1) {
+//        client->playerState.gunAngles[vec3_t::Roll] = -client->playerState.gunAngles[vec3_t::Roll];
+//        client->playerState.gunAngles[vec3_t::Yaw]  = -client->playerState.gunAngles[vec3_t::Yaw];
+//    }
+//
+//    client->playerState.gunAngles[vec3_t::Pitch] = XYSpeed * bobFracsin * 0.005;
+//
+//    // gun angles from delta movement
+//    for (i = 0 ; i < 3 ; i++) {
+//        delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
+//        if (delta > 180)
+//            delta -= 360;
+//        if (delta < -180)
+//            delta += 360;
+//        if (delta > 45)
+//            delta = 45;
+//        if (delta < -45)
+//            delta = -45;
+//        if (i == vec3_t::Yaw)
+//            client->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
+//        client->playerState.gunAngles[i] += 0.2 * delta;
+//    }
+//
+//    // gun height
+//    client->playerState.gunOffset = vec3_zero();
+////  ent->playerState->gunorigin[2] += bob;
+//
+//    // gun_x / gun_y / gun_z are development tools
+//    for (i = 0 ; i < 3 ; i++) {
+//        client->playerState.gunOffset[i] += forward[i] * (gun_y->value);
+//        client->playerState.gunOffset[i] += right[i] * gun_x->value;
+//        client->playerState.gunOffset[i] += up[i] * (-gun_z->value);
+//    }
+//}
 
 //
 //===============
@@ -492,6 +489,29 @@ void SVG_Client_CheckWorldEffects(PlayerClient *ent)
     }
 }
 
+
+
+//
+//===============
+// SVG_Client_SetEvent
+// 
+//===============
+//
+void SVG_Client_SetEvent(PlayerClient* ent) {
+    //if (!ent || !ent->GetClient()) {
+    //    return;
+    //}
+
+    //if (ent->GetEventID())
+    //    return;
+
+    //if (ent->GetGroundEntity() && bobMove.XYSpeed > 225) {
+    //    if ((int)(ent->bobTime + bobMove) != bobCycle)
+    //        ent->SetEventID(EntityEvent::Footstep);
+    //}
+}
+
+
 //
 //===============
 // SVG_Client_SetEffects
@@ -500,41 +520,20 @@ void SVG_Client_CheckWorldEffects(PlayerClient *ent)
 //
 void SVG_Client_SetEffects(PlayerClient *ent)
 {
-    if (!ent || !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
+    //if (!ent || !ent->IsSubclassOf<PlayerClient>()) {
+    //    return;
+    //}
 
-    ent->SetEffects(0);
-    ent->SetRenderEffects(0);
+    //ent->SetEffects(0);
+    //ent->SetRenderEffects(0);
 
-    if (ent->GetHealth() <= 0 || level.intermission.time)
-        return;
+    //if (ent->GetHealth() <= 0 || level.intermission.time)
+    //    return;
 
-    // show cheaters!!!
-    if (ent->GetFlags() & EntityFlags::GodMode) {
-        ent->SetRenderEffects(ent->GetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
-    }
-}
-
-//
-//===============
-// SVG_Client_SetEvent
-// 
-//===============
-//
-void SVG_Client_SetEvent(PlayerClient *ent)
-{
-    if (!ent || !ent->GetClient()) {
-        return;
-    }
-
-    if (ent->GetEventID())
-        return;
-
-    if (ent->GetGroundEntity() && XYSpeed > 225) {
-        if ((int)(ent->bobTime + bobMove) != bobCycle)
-            ent->SetEventID(EntityEvent::Footstep);
-    }
+    //// show cheaters!!!
+    //if (ent->GetFlags() & EntityFlags::GodMode) {
+    //    ent->SetRenderEffects(ent->GetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
+    //}
 }
 
 //
@@ -545,32 +544,32 @@ void SVG_Client_SetEvent(PlayerClient *ent)
 //
 void SVG_Client_SetSound(PlayerClient *ent)
 {
-    const char    *weap; // C++20: STRING: Added const to char*
+    //const char    *weap; // C++20: STRING: Added const to char*
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
+    //// Check whether ent is valid, and a PlayerClient hooked up 
+    //// to a valid client.
+    //GameClient* client = nullptr;
 
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
+    //if (!ent || !(client = ent->GetClient()) ||
+    //    !ent->IsSubclassOf<PlayerClient>()) {
+    //    return;
+    //}
 
-    if (client->persistent.activeWeapon)
-        weap = client->persistent.activeWeapon->className;
-    else
-        weap = "";
+    //if (client->persistent.activeWeapon)
+    //    weap = client->persistent.activeWeapon->className;
+    //else
+    //    weap = "";
 
-    if (ent->GetWaterLevel() && (ent->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME)))
-        ent->SetSound(snd_fry);
-    else if (strcmp(weap, "weapon_railgun") == 0)
-        ent->SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
-    else if (strcmp(weap, "weapon_bfg") == 0)
-        ent->SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
-    else if (client->weaponSound)
-        ent->SetSound(client->weaponSound);
-    else
-        ent->SetSound(0);
+    //if (ent->GetWaterLevel() && (ent->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME)))
+    //    ent->SetSound(snd_fry);
+    //else if (strcmp(weap, "weapon_railgun") == 0)
+    //    ent->SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
+    //else if (strcmp(weap, "weapon_bfg") == 0)
+    //    ent->SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
+    //else if (client->weaponSound)
+    //    ent->SetSound(client->weaponSound);
+    //else
+    //    ent->SetSound(0);
 }
 
 //
@@ -602,7 +601,7 @@ void SVG_Client_SetAnimationFrame(PlayerClient *ent)
         isDucking = true;
     else
         isDucking = false;
-    if (XYSpeed)
+    if (ent->bobMove.XYSpeed)
         isRunning = true;
     else
         isRunning = false;

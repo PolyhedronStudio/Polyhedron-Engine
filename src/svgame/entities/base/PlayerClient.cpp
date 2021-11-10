@@ -156,13 +156,13 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
     SetModelIndex2(0);
 
     // Our effect type is now: CORPSE. Beautiful dead corpse :P
-    SetEffects(EntityEffectType::Corpse);
+    Base::SetEffects(EntityEffectType::Corpse);
 
     // Fetch angles, only maintain the yaw, reset the others.
     SetAngles(vec3_t{ 0.f, GetAngles()[vec3_t::PYR::Yaw], 0.f });
 
     // Ensure our client entity is playing no sounds anymore.
-    SetSound(0);
+    Base::SetSound(0);
     client->weaponSound = 0;
 
     // Retreive maxes, adjust height (z)
@@ -256,6 +256,82 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 
     // Link our entity back in for collision purposes.
     LinkEntity();
+}
+
+//===============
+// SVG_Client_SetEvent
+// 
+//===============
+void PlayerClient::SetEvent() {
+    GameClient* client = GetClient();
+
+    if (!client) {
+        return;
+    }
+
+    // There already is an active event ID at work.
+    if (GetEventID()) {
+        return;
+    }
+
+    // Are we on-ground and "speeding" hard enough?
+    if (GetGroundEntity() && bobMove.XYSpeed > 225) {
+        // Do a footstep, from left, to right, left, to right.
+        // Do the Bob!
+        if ((int)(client->bobTime + bobMove.move) != bobMove.cycle) {
+            SetEventID(EntityEvent::Footstep);
+        }
+    }
+}
+
+//===============
+// PlayerClient::SetEffects
+// 
+//===============
+void PlayerClient::SetEffects()
+{
+    Base::SetEffects(0);
+    Base::SetRenderEffects(0);
+
+    if (GetHealth() <= 0 || level.intermission.time)
+        return;
+
+    // show cheaters!!!
+    if (GetFlags() & EntityFlags::GodMode) {
+        Base::SetRenderEffects(GetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
+    }
+}
+
+//
+//===============
+// PlayerClient::SetSound
+//
+//===============
+void PlayerClient::SetSound() {
+    const char    *weap; // C++20: STRING: Added const to char*
+
+    // Check whether the PlayerClient is hooked up to a valid client.
+    GameClient* client = GetClient();
+
+    if (!client) {
+        return;
+    }
+
+    if (client->persistent.activeWeapon)
+        weap = client->persistent.activeWeapon->className;
+    else
+        weap = "";
+
+    if (GetWaterLevel() && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME)))
+        Base::SetSound(snd_fry);
+    else if (strcmp(weap, "weapon_railgun") == 0)
+        Base::SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
+    else if (strcmp(weap, "weapon_bfg") == 0)
+        Base::SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
+    else if (client->weaponSound)
+        Base::SetSound(client->weaponSound);
+    else
+        Base::SetSound(0);
 }
 
 //
@@ -820,4 +896,56 @@ void PlayerClient::CalculateGunOffset() {
         client->playerState.gunOffset[i] += bobMove.right[i] * gun_x->value;
         client->playerState.gunOffset[i] += bobMove.up[i] * (-gun_z->value);
     }
+}
+
+//
+//===============
+// PlayerClient::CalculateScreenBlend
+// 
+//===============
+//
+void PlayerClient::CalculateScreenBlend() {
+        GameClient* client = GetClient();
+
+    if (!client) {
+        return;
+    }
+
+    // Clear blend values.
+    client->playerState.blend[0] = client->playerState.blend[1] =
+        client->playerState.blend[2] = client->playerState.blend[3] = 0;
+
+    // Calculate view origin to use for PointContents.
+    vec3_t viewOrigin = GetOrigin() + client->playerState.pmove.viewOffset;
+    int32_t contents = gi.PointContents(viewOrigin);
+
+    if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA))
+        client->playerState.rdflags |= RDF_UNDERWATER;
+    else
+        client->playerState.rdflags &= ~RDF_UNDERWATER;
+
+    if (contents & (CONTENTS_SOLID | CONTENTS_LAVA))
+        AddScreenBlend(1.0, 0.3, 0.0, 0.6, client->playerState.blend);
+    else if (contents & CONTENTS_SLIME)
+        AddScreenBlend(0.0, 0.1, 0.05, 0.6, client->playerState.blend);
+    else if (contents & CONTENTS_WATER)
+        AddScreenBlend(0.5, 0.3, 0.2, 0.4, client->playerState.blend);
+
+    // add for damage
+    if (client->damageAlpha > 0)
+        AddScreenBlend(client->damageBlend[0], client->damageBlend[1]
+                    , client->damageBlend[2], client->damageAlpha, client->playerState.blend);
+
+    if (client->bonusAlpha > 0)
+        AddScreenBlend(0.85, 0.7, 0.3, client->bonusAlpha, client->playerState.blend);
+
+    // drop the damage value
+    client->damageAlpha -= 0.06;
+    if (client->damageAlpha < 0)
+        client->damageAlpha = 0;
+
+    // drop the bonus value
+    client->bonusAlpha -= 0.1;
+    if (client->bonusAlpha < 0)
+        client->bonusAlpha = 0;
 }

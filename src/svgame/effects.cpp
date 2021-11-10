@@ -140,8 +140,8 @@ void SVG_ThrowClientHead(PlayerClient* self, int damage) {
 
     // Other properties.
     self->SetTakeDamage(TakeDamage::No);
-    self->SetEffects(EntityEffectType::Gib);
-    self->SetSound(0);
+    self->Base::SetEffects(EntityEffectType::Gib);
+    self->Base::SetSound(0);
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.

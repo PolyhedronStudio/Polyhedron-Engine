@@ -68,8 +68,6 @@ public:
     virtual void PutClientInServer(Entity *ent) override;
     virtual void RespawnClient(PlayerClient* ent) override;
 
-    virtual void CheckClientWorldEffects(PlayerClient* ent) override;
-
     // Some information that should be persistant, like health,
     // is still stored in the edict structure, so it needs to
     // be mirrored out to the client structure before all the
