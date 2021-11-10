@@ -40,6 +40,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
+
+//===============
+// ClientUserInfoChanged
+//
+// called whenever the player updates a userinfo variable.
+//
+// The game can override any of the settings in place
+// (forcing skins or names, etc) before copying it off.
+//================
 void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     if (!ent)
         return;

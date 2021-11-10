@@ -679,21 +679,6 @@ void DefaultGameMode::ClientBeginServerFrame(Entity* serverEntity) {
     client->latchedButtons = 0;
 }
 
-// The actual current player entity that this C++ unit is acting on.
-static PlayerClient *currentProcessingPlayer;
-
-// The current client belonging to the player (class-)entity
-static GameClient   *client;
-
-// Direction and speed vectors.
-static vec3_t  forward, right, up;
-static float   XYSpeed;
-
-// Bobbing for movement.
-static float   bobMove;
-static int     bobCycle;       // odd cycles are right foot going forward
-static float   bobFracsin;     // sin(bobfrac*M_PI)
-
 
 //===============
 // DefaultGameMode::ClientEndServerFrame
@@ -767,9 +752,9 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     //
     vec3_t playerVelocity = classEntity->GetVelocity();
     // Without * FRAMETIME = XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
-    XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]) * FRAMETIME;
+    XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
-    if (XYSpeed < 5. * FRAMETIME || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
+    if (XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
         // Special handling for when not on ground.
         bobMove = 0;
 
@@ -777,13 +762,13 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
         client->bobTime = 0;
     } else if (classEntity->GetGroundEntity() || classEntity->GetWaterLevel() == 2) {
         // So bobbing only cycles when on ground.
-        if (XYSpeed > 450 * FRAMETIME)
+        if (XYSpeed > 450)
             bobMove = 0.25;
-        else if (XYSpeed > 210 * FRAMETIME)
+        else if (XYSpeed > 210)
             bobMove = 0.125;
-        else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2 && XYSpeed > 100 * FRAMETIME)
+        else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2 && XYSpeed > 100)
             bobMove = 0.225;
-        else if (XYSpeed > 100 * FRAMETIME)
+        else if (XYSpeed > 100)
             bobMove = 0.0825;
         else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2)
             bobMove = 0.1625;
@@ -792,14 +777,14 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     }
 
     // Generate bob time.
-    bobTime = (client->bobTime += (bobMove * FRAMETIME));
+    bobTime = (client->bobTime += (bobMove / 6));
 
     //client->bobTime += bobMove * FRAMETIME;
     if (client->playerState.pmove.flags & PMF_DUCKED)
-        bobTime *= 4 * FRAMETIME;   // N&C: Footstep tweak.
+        bobTime *= 4;   // N&C: Footstep tweak.
 
     bobCycle = (int)bobTime;
-    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI)) * FRAMETIME;
+    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
     SVG_Client_CheckFallingDamage(classEntity);

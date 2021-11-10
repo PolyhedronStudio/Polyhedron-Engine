@@ -341,7 +341,7 @@ void SVG_HUD_SetClientStats(Entity* ent)
     gitem_t* item;
 
     // Ensure ent is valid.
-    if (!ent) {
+    if (!ent || !ent->client) {
         return;
     }
 

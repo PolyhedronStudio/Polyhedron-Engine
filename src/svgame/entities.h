@@ -85,6 +85,8 @@ namespace EntityFilters {
             }
         );
     }
+
+    inline auto Standard = (InUse);
 };
 namespace ef = EntityFilters; // Shortcut, lesser typing.
 
@@ -173,7 +175,6 @@ namespace BaseEntityFilters {
     //
     // A wrapper for the most likely 3 widely used, and if forgotten, error prone filters.
     inline auto Standard = (IsValidPointer | HasServerEntity | InUse);
-
 };
 namespace bef = BaseEntityFilters; // Shortcut, lesser typing.
 

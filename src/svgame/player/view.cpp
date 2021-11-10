@@ -24,17 +24,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "animations.h"
 
 // The actual current player entity that this C++ unit is acting on.
-static PlayerClient *ent;
+//static PlayerClient *ent;
 
 // The current client belonging to the player.
-static GameClient   *currentProcessingClient;
+//static GameClient   *currentProcessingClient;
 
-static vec3_t  forward, right, up;
-static float   XYSpeed;
 
-static float   bobMove;
-static int     bobCycle;       // odd cycles are right foot going forward
-static float   bobFracsin;     // sin(bobfrac*M_PI)
 
 //
 //===============
@@ -43,13 +38,13 @@ static float   bobFracsin;     // sin(bobfrac*M_PI)
 //
 //===============
 //
-float SVG_Client_CalcRoll(const vec3_t &angles, const vec3_t &velocity)
+float SVG_PlayerClient_CalculateRoll(PlayerClient *pc, const vec3_t &angles, const vec3_t &velocity)
 {
     float   sign;
     float   side;
     float   value;
 
-    side = vec3_dot(velocity, right);
+    side = vec3_dot(velocity, bobMove.right);
     sign = side < 0 ? -1 : 1;
     side = fabs(side);
 
@@ -228,8 +223,7 @@ void SVG_Client_CalculateViewOffset(PlayerClient *ent)
     // to a valid client.
     GameClient* client = nullptr;
 
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
+    if (!ent || !(client = ent->GetClient()))
         return;
     }
 
@@ -248,7 +242,7 @@ void SVG_Client_CalculateViewOffset(PlayerClient *ent)
         vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
 
                                                                                     // Add pitch(X) and roll(Z) angles based on damage kick
-        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME) * FRAMETIME;
+        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
         if (ratio < 0) {
             ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
         }
@@ -256,20 +250,20 @@ void SVG_Client_CalculateViewOffset(PlayerClient *ent)
         newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
 
         // Add pitch based on fall kick
-        ratio = ((client->fallTime - level.time) / FALL_TIME) * FRAMETIME;;
+        ratio = ((client->fallTime - level.time) / FALL_TIME);
         if (ratio < 0)
             ratio = 0;
         newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
 
         // Add angles based on velocity
-        delta = vec3_dot(ent->GetVelocity(), forward) * FRAMETIME;;
+        delta = vec3_dot(ent->GetVelocity(), ent->bobforward);
         newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
 
-        delta = vec3_dot(ent->GetVelocity(), right) * FRAMETIME;;
+        delta = vec3_dot(ent->GetVelocity(), right);
         newKickAngles[vec3_t::Roll] += delta * run_roll->value;
 
         // Add angles based on bob
-        delta = bobFracsin * bob_pitch->value * XYSpeed * FRAMETIME;;
+        delta = bobFracsin * bob_pitch->value * XYSpeed;
         if (client->playerState.pmove.flags & PMF_DUCKED)
             delta *= 6;     // crouching
         newKickAngles[vec3_t::Pitch] += delta;
@@ -701,7 +695,7 @@ void SVG_Client_SetEffects(PlayerClient *ent)
 //
 void SVG_Client_SetEvent(PlayerClient *ent)
 {
-    if (!ent || !ent->IsSubclassOf<PlayerClient>()) {
+    if (!ent || !ent->GetClient()) {
         return;
     }
 
@@ -709,7 +703,7 @@ void SVG_Client_SetEvent(PlayerClient *ent)
         return;
 
     if (ent->GetGroundEntity() && XYSpeed > 225) {
-        if ((int)(currentProcessingClient->bobTime + bobMove) != bobCycle)
+        if ((int)(ent->bobTime + bobMove) != bobCycle)
             ent->SetEventID(EntityEvent::Footstep);
     }
 }
@@ -865,154 +859,155 @@ newanim:
 // sound, effects, animations, you name it.
 //===============
 //
-void SVG_ClientEndServerFrame(PlayerClient *ent)
-{
-    float   bobTime;
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
-
-    // Setup the current player and entity being processed.
-    ent = ent;
-    client = ent->GetClient();
-
-    //
-    // If the origin or velocity have changed since ClientThink(),
-    // update the pmove values.  This will happen when the client
-    // is pushed by a bmodel or kicked by an explosion.
-    //
-    // If it wasn't updated here, the view position would lag a frame
-    // behind the body position when pushed -- "sinking into plats"
-    //
-    client->playerState.pmove.origin = ent->GetOrigin();
-    client->playerState.pmove.velocity = ent->GetVelocity();
-
-    //
-    // If the end of unit layout is displayed, don't give
-    // the player any normal movement attributes
-    //
-    if (level.intermission.time) {
-        // FIXME: add view drifting here?
-        client->playerState.blend[3] = 0;
-        client->playerState.fov = 90;
-        SVG_HUD_SetClientStats(ent->GetServerEntity());
-        return;
-    }
-
-    vec3_vectors(client->aimAngles, &forward, &right, &up);
-
-    // Burn from lava, etc
-    SVG_Client_CheckWorldEffects(ent);
-
-    //
-    // Set model angles from view angles so other things in
-    // the world can tell which direction you are looking
-    //
-    vec3_t newPlayerAngles = ent->GetAngles();
-
-    if (client->aimAngles[vec3_t::Pitch] > 180)
-        newPlayerAngles[vec3_t::Pitch] = (-360 + client->aimAngles[vec3_t::Pitch]) / 3;
-    else
-        newPlayerAngles[vec3_t::Pitch] = client->aimAngles[vec3_t::Pitch] / 3;
-    newPlayerAngles[vec3_t::Yaw] = client->aimAngles[vec3_t::Yaw];
-    newPlayerAngles[vec3_t::Roll] = 0;
-    newPlayerAngles[vec3_t::Roll] = SVG_Client_CalcRoll(newPlayerAngles, ent->GetVelocity()) * 4;
-
-    // Last but not least, after having calculated the Pitch, Yaw, and Roll, set the new angles.
-    ent->SetAngles(newPlayerAngles);
-
-    //
-    // Calculate the player its X Y axis' speed and calculate the cycle for
-    // bobbing based on that.
-    //
-    vec3_t playerVelocity = ent->GetVelocity();
-    XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
-
-    if (XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
-        // Special handling for when not on ground.
-        bobMove = 0;
-
-        // Start at beginning of cycle again (See the else if statement.)
-        client->bobTime = 0;
-    } else if (ent->GetGroundEntity() || ent->GetWaterLevel() == 2) {
-        // So bobbing only cycles when on ground.
-        if (XYSpeed > 450)
-            bobMove = 0.25;
-        else if (XYSpeed > 210)
-            bobMove = 0.125;
-        else if (!ent->GetGroundEntity() && ent->GetWaterLevel() == 2 && XYSpeed > 100)
-            bobMove = 0.225;
-        else if (XYSpeed > 100)
-            bobMove = 0.0825;
-        else if (!ent->GetGroundEntity() && ent->GetWaterLevel() == 2)
-            bobMove = 0.1625;
-        else
-            bobMove = 0.03125;
-    }
-
-    // Generate bob time.
-    client->bobTime += bobMove;
-    bobTime = client->bobTime;
-
-    if (client->playerState.pmove.flags & PMF_DUCKED)
-        bobTime *= 2;   // N&C: Footstep tweak.
-
-    bobCycle = bobTime * FRAMETIME;
-    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI)) * FRAMETIME;
-
-    // Detect hitting the floor, and apply damage appropriately.
-    SVG_Client_CheckFallingDamage(ent);
-
-    // Apply all other the damage taken this frame
-    SVG_Client_ApplyDamageFeedback(ent);
-
-    // Determine the new frame's view offsets
-    SVG_Client_CalculateViewOffset(ent);
-
-    // Determine the gun offsets
-    SVG_Client_CalculateGunOffset(ent);
-
-    // Determine the full screen color blend
-    // must be after viewOffset, so eye contents can be
-    // accurately determined
-    // FIXME: with client prediction, the contents
-    // should be determined by the client
-    SVG_Client_CalculateBlend(ent);
-
-    // Set the stats to display for this client (one of the chase isSpectator stats or...)
-    if (client->respawn.isSpectator)
-        SVG_HUD_SetSpectatorStats(ent->GetServerEntity());
-    else
-        SVG_HUD_SetClientStats(ent->GetServerEntity());
-
-    SVG_HUD_CheckChaseStats(ent->GetServerEntity());
-
-    SVG_Client_SetEvent(ent);
-
-    SVG_Client_SetEffects(ent);
-
-    SVG_Client_SetSound(ent);
-
-    SVG_Client_SetAnimationFrame(ent);
-
-    // Store velocity and view angles.
-    client->oldVelocity = ent->GetVelocity();
-    client->oldViewAngles = client->playerState.pmove.viewAngles;
-
-    // Reset weapon kicks to zer0.
-    client->kickOrigin = vec3_zero();
-    client->kickAngles = vec3_zero();
-
-    // if the scoreboard is up, update it
-    if (client->showScores && !(level.frameNumber & 31)) {
-        SVG_HUD_GenerateDMScoreboardLayout(ent, ent->GetEnemy());
-        gi.Unicast(ent->GetServerEntity(), false);
-    }
-}
+//void SVG_ClientEndServerFrame(PlayerClient *ent)
+//{
+//    float   bobTime;
+//
+//    // Check whether ent is valid, and a PlayerClient hooked up 
+//    // to a valid client.
+//    GameClient* client = nullptr;
+//
+//    if (!ent || !(client = ent->GetClient()) ||
+//        !ent->IsSubclassOf<PlayerClient>()) {
+//        return;
+//    }
+//
+//    // Setup the current player and entity being processed.
+//    ent = ent;
+//    client = ent->GetClient();
+//
+//    //
+//    // If the origin or velocity have changed since ClientThink(),
+//    // update the pmove values.  This will happen when the client
+//    // is pushed by a bmodel or kicked by an explosion.
+//    //
+//    // If it wasn't updated here, the view position would lag a frame
+//    // behind the body position when pushed -- "sinking into plats"
+//    //
+//    client->playerState.pmove.origin = ent->GetOrigin();
+//    client->playerState.pmove.velocity = ent->GetVelocity();
+//
+//    //
+//    // If the end of unit layout is displayed, don't give
+//    // the player any normal movement attributes
+//    //
+//    if (level.intermission.time) {
+//        // FIXME: add view drifting here?
+//        client->playerState.blend[3] = 0;
+//        client->playerState.fov = 90;
+//        SVG_HUD_SetClientStats(ent->GetServerEntity());
+//        return;
+//    }
+//
+//    vec3_vectors(client->aimAngles, &forward, &right, &up);
+//
+//    // Burn from lava, etc
+//    SVG_Client_CheckWorldEffects(ent);
+//
+//    //
+//    // Set model angles from view angles so other things in
+//    // the world can tell which direction you are looking
+//    //
+//    vec3_t newPlayerAngles = ent->GetAngles();
+//
+//    if (client->aimAngles[vec3_t::Pitch] > 180)
+//        newPlayerAngles[vec3_t::Pitch] = (-360 + client->aimAngles[vec3_t::Pitch]) / 3;
+//    else
+//        newPlayerAngles[vec3_t::Pitch] = client->aimAngles[vec3_t::Pitch] / 3;
+//    newPlayerAngles[vec3_t::Yaw] = client->aimAngles[vec3_t::Yaw];
+//    newPlayerAngles[vec3_t::Roll] = 0;
+//    newPlayerAngles[vec3_t::Roll] = SVG_Client_CalcRoll(newPlayerAngles, ent->GetVelocity()) * 4;
+//
+//    // Last but not least, after having calculated the Pitch, Yaw, and Roll, set the new angles.
+//    ent->SetAngles(newPlayerAngles);
+//
+//    //
+//    // Calculate the player its X Y axis' speed and calculate the cycle for
+//    // bobbing based on that.
+//    //
+//    vec3_t playerVelocity = ent->GetVelocity();
+//    XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+//
+//    if (XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
+//        // Special handling for when not on ground.
+//        bobMove = 0;
+//
+//        // Start at beginning of cycle again (See the else if statement.)
+//        client->bobTime = 0;
+//    } else if (ent->GetGroundEntity() || ent->GetWaterLevel() == 2) {
+//        // So bobbing only cycles when on ground.
+//        if (XYSpeed > 450)
+//            bobMove = 0.25;
+//        else if (XYSpeed > 210)
+//            bobMove = 0.125;
+//        else if (!ent->GetGroundEntity() && ent->GetWaterLevel() == 2 && XYSpeed > 100)
+//            bobMove = 0.225;
+//        else if (XYSpeed > 100)
+//            bobMove = 0.0825;
+//        else if (!ent->GetGroundEntity() && ent->GetWaterLevel() == 2)
+//            bobMove = 0.1625;
+//        else
+//            bobMove = 0.03125;
+//    }
+//
+//    // Generate bob time.
+//    client->bobTime += bobMove;
+//    bobTime = client->bobTime;
+//
+//    bobTime /= 6;
+//    if (client->playerState.pmove.flags & PMF_DUCKED)
+//        bobTime *= 2;   // N&C: Footstep tweak.
+//
+//    bobCycle = bobTime;
+//    bobFracsin = std::fabsf(std::sinf(bobTime * M_PI));
+//
+//    // Detect hitting the floor, and apply damage appropriately.
+//    SVG_Client_CheckFallingDamage(ent);
+//
+//    // Apply all other the damage taken this frame
+//    SVG_Client_ApplyDamageFeedback(ent);
+//
+//    // Determine the new frame's view offsets
+//    SVG_Client_CalculateViewOffset(ent);
+//
+//    // Determine the gun offsets
+//    SVG_Client_CalculateGunOffset(ent);
+//
+//    // Determine the full screen color blend
+//    // must be after viewOffset, so eye contents can be
+//    // accurately determined
+//    // FIXME: with client prediction, the contents
+//    // should be determined by the client
+//    SVG_Client_CalculateBlend(ent);
+//
+//    // Set the stats to display for this client (one of the chase isSpectator stats or...)
+//    if (client->respawn.isSpectator)
+//        SVG_HUD_SetSpectatorStats(ent->GetServerEntity());
+//    else
+//        SVG_HUD_SetClientStats(ent->GetServerEntity());
+//
+//    SVG_HUD_CheckChaseStats(ent->GetServerEntity());
+//
+//    SVG_Client_SetEvent(ent);
+//
+//    SVG_Client_SetEffects(ent);
+//
+//    SVG_Client_SetSound(ent);
+//
+//    SVG_Client_SetAnimationFrame(ent);
+//
+//    // Store velocity and view angles.
+//    client->oldVelocity = ent->GetVelocity();
+//    client->oldViewAngles = client->playerState.pmove.viewAngles;
+//
+//    // Reset weapon kicks to zer0.
+//    client->kickOrigin = vec3_zero();
+//    client->kickAngles = vec3_zero();
+//
+//    // if the scoreboard is up, update it
+//    if (client->showScores && !(level.frameNumber & 31)) {
+//        SVG_HUD_GenerateDMScoreboardLayout(ent, ent->GetEnemy());
+//        gi.Unicast(ent->GetServerEntity(), false);
+//    }
+//}
 

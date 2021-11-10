@@ -284,3 +284,27 @@ void PlayerClient::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacke
         return;
     }
 }
+
+
+//
+// View/BobMove Functionality.
+//
+// CalculateRoll
+float PlayerClient::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) {
+    float   sign;
+    float   side;
+    float   value;
+
+    side = vec3_dot(velocity, bobMoveCycle.right);
+    sign = side < 0 ? -1 : 1;
+    side = fabs(side);
+
+    value = sv_rollangle->value;
+
+    if (side < sv_rollspeed->value)
+        side = side * value / sv_rollspeed->value;
+    else
+        side = value;
+
+    return side * sign;
+}

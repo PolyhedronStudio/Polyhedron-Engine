@@ -94,6 +94,7 @@ void MiscExplosionBox::Spawn() {
         }
         );
 
+    SetFlags(EntityFlags::PowerArmor);
     //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
@@ -129,7 +130,7 @@ void MiscExplosionBox::Spawn() {
 //===============
 //
 void MiscExplosionBox::Respawn() {
-    //gi.DPrintf("MiscExplosionBox::Respawn();");
+    Base::Respawn();
 }
 
 //
@@ -141,7 +142,6 @@ void MiscExplosionBox::Respawn() {
 void MiscExplosionBox::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
-    //gi.DPrintf("MiscExplosionBox::PostSpawn();");
 }
 
 //
@@ -153,8 +153,6 @@ void MiscExplosionBox::PostSpawn() {
 void MiscExplosionBox::Think() {
     // Always call parent class method.
     Base::Think();
-
-    //gi.DPrintf("MiscExplosionBox::Think();");
 }
 
 
@@ -201,16 +199,17 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
     ////
     ////    // Set new entity origin.
     SetOrigin(trace.endPosition);
-
-    //    // Link entity back in.
-    LinkEntity();
-    //
-    //     //
+    
     //    // Check for ground.
     SVG_StepMove_CheckGround(this);
     //
     //    // Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + FRAMETIME);
+
+    //    // Link entity back in.
+    LinkEntity();
+    //
+    //     //
     //
     //    //// Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
@@ -273,13 +272,36 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
     SetOrigin(save);
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
-    if (GetGroundEntity())
-        SVG_BecomeExplosion2(this);
-    else
-        SVG_BecomeExplosion1(this);
+    if (GetGroundEntity()) {
+        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(TempEntityEvent::Explosion1);
+        gi.WriteVector3(GetOrigin());
+        gi.Multicast(GetOrigin(), MultiCast::PHS);
+
+        SVG_InflictRadiusDamage(this, activator, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+
+        float save;
+        save = GetDelayTime();
+        SetDelayTime(0.0f);
+        UseTargets(GetActivator());
+        SetDelayTime(save);
+    } else {
+        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(TempEntityEvent::Explosion2);
+        gi.WriteVector3(GetOrigin());
+        gi.Multicast(GetOrigin(), MultiCast::PHS);
+
+        SVG_InflictRadiusDamage(this, activator, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+
+        float save;
+        save = GetDelayTime();
+        SetDelayTime(0.0f);
+        UseTargets(GetActivator());
+        SetDelayTime(save);
+    }
 
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetNextThinkTime(level.time + 2 * FRAMETIME);
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::SVGBaseEntityThinkFree);
 }
 
@@ -299,7 +321,7 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
         SetActivator(attacker);
 
     // Setup the next think and think time.
-    SetNextThinkTime(level.time + 2 * FRAMETIME);
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
 
     // Set think function.
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxExplode);
@@ -337,7 +359,7 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
     float yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
+    SVG_StepMove_Walk(this, yaw, 40 * ratio );
     //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 

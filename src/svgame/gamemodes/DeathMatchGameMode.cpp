@@ -335,7 +335,7 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
     qboolean friendlyFire = false;
     // Quickly remove it from meansOfDeath again, our bool is set. This prevents it from 
     // sticking around when we process the next entity/client.
-    int32_t finalMeansOfDeath = meansOfDeath & ~MeansOfDeath::FriendlyFire; // Sum of things, final means of death.
+    int32_t finalMeansOfDeath = meansOfDeath;// &~MeansOfDeath::FriendlyFire; // Sum of things, final means of death.
 
     // Determine the means of death.
     switch (finalMeansOfDeath) {
@@ -436,7 +436,7 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
         }
 
         // In case we have a message, proceed.
-        if (message != "") {
+        if (!message.empty()) {
             // Print it.
             gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s.\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
             
@@ -456,24 +456,24 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
         // aka if (attacker->classname == "monster_1337h4x0r")
         // Then we do...
         // Also we gotta adjust that ->classname thing, but this is a template, cheers :)
-        //if (!message.empty()) {
-        //    gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassName(), messageAddition.c_str());
-        //    if (deathmatch->value) {
-        //        if (friendlyFire)
-        //            attacker->GetClient()->respawn.score--;
-        //        else
-        //            attacker->GetClient()->respawn.score++;
-        //    }
-        //    return;
-        //}
+        if (!message.empty()) {
+            gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassName(), messageAddition.c_str());
+            if (deathmatch->value) {
+                if (friendlyFire)
+                    attacker->GetClient()->respawn.score--;
+                else
+                    attacker->GetClient()->respawn.score++;
+            }
+            return;
+        }
     }
 
-    // Inform the client died.
-    gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->GetClient()->persistent.netname);
+    //// Inform the client died.
+    //gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->GetClient()->persistent.netname);
 
-    // WID: This was an old piece of code, keeping it so people know what..// if (deathmatch->value)
-    // Get the client, and change its current score.
-    self->GetClient()->respawn.score--;
+    //// WID: This was an old piece of code, keeping it so people know what..// if (deathmatch->value)
+    //// Get the client, and change its current score.
+    //self->GetClient()->respawn.score--;
 }
 
 //===============

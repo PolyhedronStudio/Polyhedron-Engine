@@ -11,8 +11,8 @@
 //
 // Client view utility functions.
 // 
-// FIXME: Some of this stuff should move right into an actual PlayerClient class.
-//
+// FIXME: Some of this stuff should move right into 
+// an actual PlayerClient or Worldclass instead.
 void SVG_Client_CheckFallingDamage(PlayerClient* ent);
 void SVG_Client_ApplyDamageFeedback(PlayerClient* ent);
 

@@ -140,6 +140,7 @@ public:
         GetClient()->respawnTime = time;
     }
 
+
 protected:
     // The level.time when the "air" state finished. 
     float airFinishedTime;
@@ -149,6 +150,34 @@ protected:
     float debouncePainTime;
     float debounceDamageTime;
     float debounceSoundTime;
+
+    //
+    // View/BobMove Functionality.
+    //
+public:
+    // BobMoveCycle is used for view bobbing,
+    // where the player FPS view looks like he is
+    // walking instead of floating around.
+    struct BobMoveCycle {
+        // Forward, right, and up vectors.
+        vec3_t  forward, right, up;
+        // Speed squared over the X/Y axis.
+        float XYSpeed;
+        // bobMove counter.
+        float move;
+        // Cycles are caculated over bobMove, uneven cycles = right foot.
+        int cycle;
+        // Calculated as: // sin(bobfrac*M_PI)
+        float fracSin;
+    } bobMoveCycle;
+
+    // CalculateRoll
+    virtual float CalculateRoll(const vec3_t& angles, const vec3_t& velocity) override;
+
+    // Reference to BobMoveCycle.
+    BobMoveCycle &GetBobMoveCycle() {
+        return bobMoveCycle;
+    }
 
 private:
     //

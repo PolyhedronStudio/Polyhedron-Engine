@@ -163,8 +163,8 @@ static ClientFrame *get_last_frame(client_t *client)
 SV_WriteFrameToClient_Enhanced
 ==================
 */
-void SV_WriteFrameToClient(client_t *client)
-{
+void SV_WriteFrameToClient(client_t *client) {
+ 
     ClientFrame  *frame, *oldframe;
     PlayerState *oldPlayerState;
     uint32_t        extraflags;
@@ -239,6 +239,7 @@ void SV_WriteFrameToClient(client_t *client)
     // delta encode the entities
     SV_EmitPacketEntities(client, oldframe, frame, clientEntityNum);
 }
+
 
 /*
 =============================================================================
