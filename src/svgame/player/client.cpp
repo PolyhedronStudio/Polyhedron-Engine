@@ -164,63 +164,6 @@ void SVG_FetchClientData(Entity *ent)
         ent->client->respawn.score = ent->client->persistent.score;
 }
 
-
-
-/*
-=======================================================================
-
-SelectSpawnPoint
-
-=======================================================================
-*/
-/*
-===========
-SelectSpawnPoint
-
-Chooses a player start, deathmatch start, coop start, etc
-============
-*/
-void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
-{
-    SVGBaseEntity *spawnPoint = nullptr;
-
-    //// Find a single player start spot
-    if (!spawnPoint) {
-        // Find a spawnpoint that has a target:
-        for (auto* result : g_baseEntities | bef::Standard | bef::IsClassOf<InfoPlayerStart>()) {
-            // Continue in case there is no comparison to it with the possible target
-            // of the InfoPlayerStart
-            if (!game.spawnpoint[0])
-                continue;
-
-            if (result->GetTargetName() == game.spawnpoint) {
-                spawnPoint = result;
-                break;
-            }
-        }
-    }
-
-    // Since we still haven't found one with a target, do it again, but this time without
-    // a target requirement.
-    if (!spawnPoint) {
-        for (auto* result : g_baseEntities | bef::Standard | bef::IsClassOf<InfoPlayerStart>()) {
-            if (result) {
-                spawnPoint = result;
-                break;
-            }
-        }
-    }
-
-    // Setup player origin and angles, also raise him 9 units above the ground to be sure it fits.
-    if (spawnPoint) {
-        origin = spawnPoint->GetOrigin();
-        origin.z += 9;
-        angles = spawnPoint->GetAngles();
-    } else {
-        gi.Error("Couldn't find spawn point %s", game.spawnpoint);
-    }
-}
-
 //======================================================================
 
 void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
@@ -379,7 +322,7 @@ void SVG_ClientBegin(Entity *ent)
 
     // Let the game mode decide from here on out.
     game.gameMode->ClientBegin(ent);
-    game.gameMode->ClientEndServerFrame(ent);
+    //game.gameMode->ClientEndServerFrame(ent);
 }
 
 

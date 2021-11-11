@@ -825,7 +825,7 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     classEntity->SetAnimationFrame();
 
     // Store velocity and view angles.
-    client->oldVelocity = serverEntity->classEntity->GetVelocity();
+    client->oldVelocity = classEntity->GetVelocity();
     client->oldViewAngles = client->playerState.pmove.viewAngles;
 
     // Reset weapon kicks to zer0.
