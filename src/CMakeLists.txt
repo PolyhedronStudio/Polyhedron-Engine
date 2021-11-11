@@ -519,6 +519,17 @@ SET(HEADERS_VKPT
 	refresh/vkpt/fsr/ffx_a.h
 	refresh/vkpt/fsr/ffx_fsr1.h
 
+    refresh/vkpt/shader/constants.h
+    refresh/vkpt/shader/global_textures.h
+    refresh/vkpt/shader/global_ubo.h
+    refresh/vkpt/shader/god_rays_shared.h
+    refresh/vkpt/shader/light_lists.h
+    refresh/vkpt/shader/path_tracer_hit_shaders.h
+    refresh/vkpt/shader/path_tracer_rgen.h
+    refresh/vkpt/shader/path_tracer.h
+    refresh/vkpt/shader/sky.h
+    refresh/vkpt/shader/vertex_buffer.h
+
 	refresh/vkpt/vkpt.h
 	refresh/vkpt/vk_util.h
 	refresh/vkpt/buddy_allocator.h
