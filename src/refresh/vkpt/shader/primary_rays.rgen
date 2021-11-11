@@ -444,6 +444,16 @@ main()
 	// Start the transparency accumulation from the primary surface emissive component, with zero alpha
 	vec4 transparent = vec4(primary_emissive * throughput, 0);
 
+    // Global wireframe
+    if(global_ubo.pt_showtris != 0)
+    {
+        // Show edges
+        if(any(lessThan(bary, vec3(0.01))))
+        {
+            transparent = alpha_blend(vec4(0.33,1,0.33,0.1), transparent);
+        }
+    }
+
 	if(global_ubo.pt_show_sky != 0 && is_sky(ray_payload_geometry))
 	{
 		// show additional information about sky boxes: triangle edges...
