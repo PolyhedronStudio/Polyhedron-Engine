@@ -113,17 +113,17 @@ public:
     int         fragmentSequence;
 
     // Reliable staging and holding areas
-    SizeBuffer   message;                    // writing buffer for reliable data
+    SizeBuffer  message;                    // writing buffer for reliable data
     byte        messageBuffer[MAX_MSGLEN];  // leave space for header
 
     // Message is copied to this buffer when it is first transfered
-    SizeBuffer   reliable;
+    SizeBuffer  reliable;
     byte        reliableBuffer[MAX_MSGLEN];   // unacked reliable message
 
-    SizeBuffer   inFragment;
+    SizeBuffer  inFragment;
     byte        inFragmentBuffer[MAX_MSGLEN];
 
-    SizeBuffer   outFragment;
+    SizeBuffer  outFragment;
     byte        outFragmentBuffer[MAX_MSGLEN];
 };
 

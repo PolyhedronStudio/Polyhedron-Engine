@@ -107,7 +107,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
             PMove(&pm);
 
             // Update player move client side audio effects.
-            CLG_UpdateClientSoundSpecialEffects(&pm);
+            UpdateClientSoundSpecialEffects(&pm);
         }
 
         // Save for error detection
@@ -126,7 +126,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         PMove(&pm);
 
         // Update player move client side audio effects.
-        CLG_UpdateClientSoundSpecialEffects(&pm);
+        UpdateClientSoundSpecialEffects(&pm);
 
         // Save for error detection
         cl->moveCommand.prediction.origin = pm.state.origin;
@@ -140,4 +140,42 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     cl->predictedState.viewAngles = pm.viewAngles;
 
     cl->predictedState.groundEntityPtr = pm.groundEntityPtr;
+}
+
+//
+//================
+// PM_UpdateClientSoundSpecialEffects
+//
+// Can be called by either the server or the client
+//================
+//
+void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
+{
+    static int underwater;
+
+    // Ensure that cl != NULL, it'd be odd but hey..
+    if (cl == NULL) {
+        return;
+    }
+
+    if ((pm->waterLevel == 3) && !underwater) {
+        underwater = 1;
+        cl->snd_is_underwater = 1; // OAL: snd_is_underwater moved to client struct.
+                                   // TODO: DO!
+#ifdef USE_OPENAL
+        if (cl->snd_is_underwater_enabled)
+            clgi.SFX_Underwater_Enable();
+#endif
+    }
+
+    if ((pm->waterLevel < 3) && underwater) {
+        underwater = 0;
+        cl->snd_is_underwater = 0; // OAL: snd_is_underwater moved to client struct.
+
+                                   // TODO: DO!
+#ifdef USE_OPENAL
+        if (cl->snd_is_underwater_enabled)
+            clgi.SFX_Underwater_Disable();
+#endif
+    }
 }

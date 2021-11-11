@@ -281,215 +281,80 @@ void SVG_Client_CalculateBlend(PlayerClient *ent)
 // 
 //===============
 //
-void SVG_Client_CheckFallingDamage(PlayerClient *ent)
-{
-    float   delta;
-    int     damage;
-    vec3_t  dir;
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
-
-    if (ent->GetModelIndex() != 255)
-        return;     // not in the player model
-
-    if (ent->GetMoveType() == MoveType::NoClip || ent->GetMoveType() == MoveType::Spectator)
-        return;
-
-    // Calculate delta velocity.
-    vec3_t velocity = ent->GetVelocity();
-
-    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!ent->GetGroundEntity())) {
-        delta = client->oldVelocity[2];
-    } else {
-        if (!ent->GetGroundEntity())
-            return;
-        delta = velocity[2] - client->oldVelocity[2];
-    }
-    delta = delta * delta * 0.0001;
-
-    // never take falling damage if completely underwater
-    if (ent->GetWaterLevel() == 3)
-        return;
-    if (ent->GetWaterLevel() == 2)
-        delta *= 0.25;
-    if (ent->GetWaterLevel() == 1)
-        delta *= 0.5;
-
-    if (delta < 1)
-        return;
-
-    if (delta < 15) {
-        ent->SetEventID(EntityEvent::Footstep);
-        return;
-    }
-
-    client->fallValue = delta * 0.5;
-    if (client->fallValue > 40)
-        client->fallValue = 40;
-    client->fallTime = level.time + FALL_TIME;
-
-    if (delta > 30) {
-        if (ent->GetHealth() > 0) {
-            if (delta >= 55)
-                ent->SetEventID(EntityEvent::FallFar);
-            else
-                ent->SetEventID(EntityEvent::Fall);
-        }
-        ent->SetDebouncePainTime(level.time);   // no normal pain sound
-        damage = (delta - 30) / 2;
-        if (damage < 1)
-            damage = 1;
-        dir = { 0.f, 0.f, 1.f };
-
-        if (!deathmatch->value || !((int)gamemodeflags->value & GameModeFlags::NoFalling))
-            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
-    } else {
-        ent->SetEventID(EntityEvent::FallShort);
-        return;
-    }
-}
-
+//void SVG_Client_CheckFallingDamage(PlayerClient *ent)
+//{
+//    float   delta;
+//    int     damage;
+//    vec3_t  dir;
 //
-//===============
-// SVG_Client_CheckWorldEffects
-// 
-//===============
+//    // Check whether ent is valid, and a PlayerClient hooked up 
+//    // to a valid client.
+//    GameClient* client = nullptr;
 //
-void SVG_Client_CheckWorldEffects(PlayerClient *ent)
-{
-    int         waterlevel, oldWaterLevel;
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
-
-    if (ent->GetMoveType() == MoveType::NoClip || ent->GetMoveType() == MoveType::Spectator) {
-        ent->SetAirFinishedTime(level.time + 12); // don't need air
-        return;
-    }
-
-    // Retreive waterlevel.
-    waterlevel = ent->GetWaterLevel();
-    oldWaterLevel = client->oldWaterLevel;
-    client->oldWaterLevel = waterlevel;
-
-    //
-    // if just entered a water volume, play a sound
-    //
-    if (!oldWaterLevel && waterlevel) {
-        SVG_PlayerNoise(ent, ent->GetOrigin(), PNOISE_SELF);
-        if (ent->GetWaterType() & CONTENTS_LAVA)
-            SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
-        else if (ent->GetWaterType() & CONTENTS_SLIME)
-            SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-        else if (ent->GetWaterType() & CONTENTS_WATER)
-            SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
-        ent->SetFlags(ent->GetFlags() | EntityFlags::InWater);
-
-        // clear damage_debounce, so the pain sound will play immediately
-        ent->SetDebounceDamageTime(level.time - 1);
-    }
-
-    //
-    // if just completely exited a water volume, play a sound
-    //
-    if (oldWaterLevel && ! waterlevel) {
-        SVG_PlayerNoise(ent, ent->GetOrigin(), PNOISE_SELF);
-        SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
-        ent->SetFlags(ent->GetFlags() & ~EntityFlags::InWater);
-    }
-
-    //
-    // check for head just going under water
-    //
-    if (oldWaterLevel != 3 && waterlevel == 3) {
-        SVG_Sound(ent, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
-    }
-
-    //
-    // check for head just coming out of water
-    //
-    if (oldWaterLevel == 3 && waterlevel != 3) {
-        if (ent->GetAirFinishedTime() < level.time) {
-            // gasp for air
-            SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(ent, ent->GetOrigin(), PNOISE_SELF);
-        } else  if (ent->GetAirFinishedTime() < level.time + 11) {
-            // just break surface
-            SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
-        }
-    }
-
-    //
-    // check for drowning
-    //
-    if (waterlevel == 3) {
-        // if out of air, start drowning
-        if (ent->GetAirFinishedTime() < level.time) {
-            // drown!
-            if (ent->GetNextDrownTime() < level.time
-                && ent->GetHealth() > 0) {
-                ent->SetNextDrownTime(level.time + 1);
-
-                // take more damage the longer underwater
-                ent->SetDamage(ent->GetDamage() + 2);
-                if (ent->GetDamage() > 15)
-                    ent->SetDamage(15);
-
-                // play a gurp sound instead of a normal pain sound
-                if (ent->GetHealth() <= ent->GetDamage())
-                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
-                else if (rand() & 1)
-                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
-                else
-                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
-
-                ent->SetDebouncePainTime(level.time);
-
-                SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), ent->GetOrigin(), vec3_zero(), ent->GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
-            }
-        }
-    } else {
-        ent->SetAirFinishedTime(level.time + 12);
-        ent->SetDamage(2);
-    }
-
-    //
-    // check for sizzle damage
-    //
-    if (waterlevel && (ent->GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
-        if (ent->GetWaterType() & CONTENTS_LAVA) {
-            if (ent->GetHealth() > 0
-                && ent->GetDebouncePainTime() <= level.time) {
-                if (rand() & 1)
-                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
-                else
-                    SVG_Sound(ent, CHAN_VOICE, gi.SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
-                ent->SetDebouncePainTime(level.time + 1);
-            }
-
-            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), ent->GetOrigin(), vec3_zero(), 3 * waterlevel, 0, 0, MeansOfDeath::Lava);
-        }
-
-        if (ent->GetWaterType() & CONTENTS_SLIME) {
-            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), ent->GetOrigin(), vec3_zero(), 1 * waterlevel, 0, 0, MeansOfDeath::Slime);
-        }
-    }
-}
-
-
+//    if (!ent || !(client = ent->GetClient()) ||
+//        !ent->IsSubclassOf<PlayerClient>()) {
+//        return;
+//    }
+//
+//    if (ent->GetModelIndex() != 255)
+//        return;     // not in the player model
+//
+//    if (ent->GetMoveType() == MoveType::NoClip || ent->GetMoveType() == MoveType::Spectator)
+//        return;
+//
+//    // Calculate delta velocity.
+//    vec3_t velocity = ent->GetVelocity();
+//
+//    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!ent->GetGroundEntity())) {
+//        delta = client->oldVelocity[2];
+//    } else {
+//        if (!ent->GetGroundEntity())
+//            return;
+//        delta = velocity[2] - client->oldVelocity[2];
+//    }
+//    delta = delta * delta * 0.0001;
+//
+//    // never take falling damage if completely underwater
+//    if (ent->GetWaterLevel() == 3)
+//        return;
+//    if (ent->GetWaterLevel() == 2)
+//        delta *= 0.25;
+//    if (ent->GetWaterLevel() == 1)
+//        delta *= 0.5;
+//
+//    if (delta < 1)
+//        return;
+//
+//    if (delta < 15) {
+//        ent->SetEventID(EntityEvent::Footstep);
+//        return;
+//    }
+//
+//    client->fallValue = delta * 0.5;
+//    if (client->fallValue > 40)
+//        client->fallValue = 40;
+//    client->fallTime = level.time + FALL_TIME;
+//
+//    if (delta > 30) {
+//        if (ent->GetHealth() > 0) {
+//            if (delta >= 55)
+//                ent->SetEventID(EntityEvent::FallFar);
+//            else
+//                ent->SetEventID(EntityEvent::Fall);
+//        }
+//        ent->SetDebouncePainTime(level.time);   // no normal pain sound
+//        damage = (delta - 30) / 2;
+//        if (damage < 1)
+//            damage = 1;
+//        dir = { 0.f, 0.f, 1.f };
+//
+//        if (!deathmatch->value || !((int)gamemodeflags->value & GameModeFlags::NoFalling))
+//            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
+//    } else {
+//        ent->SetEventID(EntityEvent::FallShort);
+//        return;
+//    }
+//}
 
 //
 //===============

@@ -14,5 +14,7 @@ public:
     void CheckPredictionError(ClientMoveCommand* moveCommand) final;
     void PredictAngles() final;
     void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) final;
+
+    void UpdateClientSoundSpecialEffects(PlayerMove* pm) final;
 };
 

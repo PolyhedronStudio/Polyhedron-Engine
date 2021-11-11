@@ -265,23 +265,6 @@ typedef enum {
 // a Solid::BoundingBox will never create this value
 #define PACKED_BSP      31
 
-//
-// Client Settings that can be communicated to servers.
-//
-typedef enum {
-    CLS_MAX
-} clientSetting_t;
-
-//
-// Server Settings that can be communicated to clients.
-//
-typedef enum {
-    // r1q2 specific
-    SVS_PLAYERUPDATES,
-    SVS_FPS,
-
-    SVS_MAX
-} serverSetting_t;
 
 // q2pro frame flags sent by the server
 // only SUPPRESSCOUNT_BITS can be used

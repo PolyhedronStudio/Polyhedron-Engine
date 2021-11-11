@@ -2654,8 +2654,8 @@ static void CL_InitLocal(void)
     warn_on_fps_rounding(r_maxfps);
 
 #ifdef _DEBUG
-    cl_shownet = Cvar_Get("cl_shownet", "0", 0);
-    cl_showmiss = Cvar_Get("cl_showmiss", "0", 0);
+    cl_shownet = Cvar_Get("cl_shownet", "1", 0);
+    cl_showmiss = Cvar_Get("cl_showmiss", "1", 0);
     cl_showclamp = Cvar_Get("showclamp", "0", 0);
 #endif
 
@@ -2678,11 +2678,8 @@ static void CL_InitLocal(void)
     //
     // userinfo
     //
-    info_rate = Cvar_Get("rate", "5000", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_rate = Cvar_Get("rate", "30000", CVAR_USERINFO | CVAR_ARCHIVE);
     info_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
-
-    // N&C: Developer utilities.
-    dev_map = Cvar_Get("dev_map", "", CVAR_ARCHIVE);
     //dev_maplist = Cvar_Get("dev_maplist", "dev_map_0 dev_map_1 dev_map_2 dev_map_3", CVAR_ARCHIVE);
 
     //

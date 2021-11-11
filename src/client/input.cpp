@@ -26,7 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static cvar_t    *cl_nodelta;
 static cvar_t    *cl_maxpackets;
 static cvar_t    *cl_packetdup;
-static cvar_t    *cl_fuzzhack;
 #ifdef _DEBUG
 static cvar_t    *cl_showpackets;
 #endif
@@ -328,7 +327,6 @@ void CL_RegisterInput(void)
 
     cl_nodelta = Cvar_Get("cl_nodelta", "0", 0);
     cl_maxpackets = Cvar_Get("cl_maxpackets",  std::to_string(BASE_FRAMERATE).c_str(), 0);
-    cl_fuzzhack = Cvar_Get("cl_fuzzhack", "0", 0);
     cl_packetdup = Cvar_Get("cl_packetdup", "1", 0);
 #ifdef _DEBUG
     cl_showpackets = Cvar_Get("cl_showpackets", "0", 0);
@@ -414,10 +412,6 @@ static inline qboolean ready_to_send(void)
 
 static inline qboolean ready_to_send_hacked(void)
 {
-    if (!cl_fuzzhack->integer) {
-        return true; // packet drop hack disabled
-    }
-
     if (cl.currentClientCommandNumber - cl.lastTransmitCmdNumberReal > 2) {
         return true; // can't drop more than 2 clientUserCommands
     }

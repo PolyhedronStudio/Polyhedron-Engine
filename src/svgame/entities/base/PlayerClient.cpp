@@ -278,8 +278,10 @@ void PlayerClient::SetEvent() {
     if (GetGroundEntity() && bobMove.XYSpeed > 225) {
         // Do a footstep, from left, to right, left, to right.
         // Do the Bob!
-        if ((int)(client->bobTime + bobMove.move) != bobMove.cycle) {
+        if ((int)(client->bobTime + bobMove.move) != bobMove.cycle ) {
             SetEventID(EntityEvent::Footstep);
+        } else {
+            Com_DPrintf("client->bobTime + bobMove[%i]\nbobMove.cycle[%i]\n-----------------\n");
         }
     }
 }
@@ -422,7 +424,7 @@ void PlayerClient::CheckFallingDamage()
             return;
         delta = velocity[2] - client->oldVelocity[2];
     }
-    delta = delta * delta * 0.0001;
+    delta = (delta * delta * 0.0001);
 
     // never take falling damage if completely underwater
     if (GetWaterLevel() == 3)
@@ -435,7 +437,7 @@ void PlayerClient::CheckFallingDamage()
     if (delta < 1)
         return;
 
-    if (delta < 15) {
+    if (delta < 15 / 6) {
         SetEventID(EntityEvent::Footstep);
         return;
     }
@@ -948,4 +950,89 @@ void PlayerClient::CalculateScreenBlend() {
     client->bonusAlpha -= 0.1;
     if (client->bonusAlpha < 0)
         client->bonusAlpha = 0;
+}
+
+void PlayerClient::SetAnimationFrame() {
+    qboolean isDucking = false;
+    qboolean isRunning = false;
+
+    // Check whether ent is valid, and a PlayerClient hooked up 
+    // to a valid client.
+    GameClient* client = nullptr;
+
+    if (!client)
+        return;
+
+    if (GetModelIndex() != 255)
+        return;     // not in the player model
+
+    if (client->playerState.pmove.flags & PMF_DUCKED)
+        isDucking = true;
+    else
+        isDucking = false;
+    if (bobMove.XYSpeed)
+        isRunning = true;
+    else
+        isRunning = false;
+
+    // check for stand/duck and stop/go transitions
+    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death)
+        goto newanim;
+    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic)
+        goto newanim;
+    if (!GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave)
+        goto newanim;
+
+    if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
+        if (GetFrame() > client->animation.endFrame) {
+            SetFrame(GetFrame() - 1);
+            return;
+        }
+    } else if (GetFrame() < client->animation.endFrame) {
+        // continue an animation
+        SetFrame(GetFrame() + 1);
+        return;
+    }
+
+    if (client->animation.priorityAnimation == PlayerAnimation::Death)
+        return;     // stay there
+    if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
+        if (!GetGroundEntity())
+            return;     // stay there
+        client->animation.priorityAnimation = PlayerAnimation::Wave;
+        SetFrame(FRAME_jump3);
+        client->animation.endFrame = FRAME_jump6;
+        return;
+    }
+
+newanim:
+    // return to either a running or standing frame
+    client->animation.priorityAnimation = PlayerAnimation::Basic;
+    client->animation.isDucking = isDucking;
+    client->animation.isRunning = isRunning;
+
+    if (!GetGroundEntity()) {
+        client->animation.priorityAnimation = PlayerAnimation::Jump;
+        if (GetFrame() != FRAME_jump2)
+            SetFrame(FRAME_jump1);
+        client->animation.endFrame = FRAME_jump2;
+    } else if (isRunning) {
+        // running
+        if (isDucking) {
+            SetFrame(FRAME_crwalk1);
+            client->animation.endFrame = FRAME_crwalk6;
+        } else {
+            SetFrame(FRAME_run1);
+            client->animation.endFrame = FRAME_run6;
+        }
+    } else {
+        // standing
+        if (isDucking) {
+            SetFrame(FRAME_crstnd01);
+            client->animation.endFrame = FRAME_crstnd19;
+        } else {
+            SetFrame(FRAME_stand01);
+            client->animation.endFrame = FRAME_stand40;
+        }
+    }
 }

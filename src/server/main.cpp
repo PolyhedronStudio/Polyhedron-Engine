@@ -241,7 +241,7 @@ void SV_DropClient(client_t *client, const char *reason)
 #define CREDITS_PER_SEC     (CREDITS_PER_MSEC * 1000)
 
 // allows rates up to 10,000 hits per second
-#define RATE_LIMIT_SCALE    10000
+#define RATE_LIMIT_SCALE    30000
 
 /*
 ===============
@@ -1818,9 +1818,9 @@ void SV_UserinfoChanged(client_t *cl)
     val = Info_ValueForKey(cl->userinfo, "rate");
     if (*val) {
         cl->rate = atoi(val);
-        clamp(cl->rate, 100, 15000);
+        clamp(cl->rate, 600, 30000);
     } else {
-        cl->rate = 5000;
+        cl->rate = 30000;
     }
 
     // never drop over the loopback

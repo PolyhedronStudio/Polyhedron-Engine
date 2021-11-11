@@ -293,30 +293,30 @@ void CLG_ParseCenterPrint(void)
 // and lets the client work it out.
 //===============
 //
-qboolean CLG_UpdateConfigString(int index, const char *str) {
-    if (index == ConfigStrings::AirAcceleration) {
-        return true;
-    }
-
-#if USE_LIGHTSTYLES
-    if (index >= ConfigStrings::Lights&& index < ConfigStrings::Lights+ MAX_LIGHTSTYLES) {
-        CLG_SetLightStyle(index - ConfigStrings::Lights, str);
-        return true;
-    }
-#endif
-    // In case we aren't precaching, but got updated configstrings by the
-    // server, we reload them.
-    if (clgi.GetClienState() < ClientConnectionState::Precached) {
-        return false;
-    }
-    
-    if (index >= ConfigStrings::PlayerSkins && index < ConfigStrings::PlayerSkins + MAX_CLIENTS) {
-        CLG_LoadClientInfo(&cl->clientInfo[index - ConfigStrings::PlayerSkins], str);
-        return true;
-    }
-
-    return false;
-}
+//qboolean CLG_UpdateConfigString(int index, const char *str) {
+//    if (index == ConfigStrings::AirAcceleration) {
+//        return true;
+//    }
+//
+//#if USE_LIGHTSTYLES
+//    if (index >= ConfigStrings::Lights&& index < ConfigStrings::Lights+ MAX_LIGHTSTYLES) {
+//        CLG_SetLightStyle(index - ConfigStrings::Lights, str);
+//        return true;
+//    }
+//#endif
+//    // In case we aren't precaching, but got updated configstrings by the
+//    // server, we reload them.
+//    if (clgi.GetClienState() < ClientConnectionState::Precached) {
+//        return false;
+//    }
+//    
+//    if (index >= ConfigStrings::PlayerSkins && index < ConfigStrings::PlayerSkins + MAX_CLIENTS) {
+//        CLG_LoadClientInfo(&cl->clientInfo[index - ConfigStrings::PlayerSkins], str);
+//        return true;
+//    }
+//
+//    return false;
+//}
 
 //
 //===============
@@ -325,9 +325,9 @@ qboolean CLG_UpdateConfigString(int index, const char *str) {
 // Called when a server message comes in.
 //===============
 //
-void CLG_StartServerMessage (void) {
-
-}
+//void CLG_StartServerMessage (void) {
+//
+//}
 
 //
 //===============
@@ -339,58 +339,58 @@ void CLG_StartServerMessage (void) {
 // When returning false, the client will notify about the error.
 //===============
 //
-qboolean CLG_ParseServerMessage (int serverCommand) {
-    // Switch cmd.
-    switch (serverCommand) {
-
-        // Client Print Messages.
-        case svc_print:
-            CLG_ParsePrint();
-            return true;
-            break;
-
-        // Client Center Screen Print messages.
-        case svc_centerprint:
-            CLG_ParseCenterPrint();
-            return true;
-            break;
-
-        // Client temporary entities. (Particles, etc.)
-        case SVG_CMD_TEMP_ENTITY:
-            CLG_ParseTempEntitiesPacket();
-            CLG_ParseTempEntity();
-            return true;
-        break;
-
-        // Client Muzzle Flash.
-        case SVG_CMD_MUZZLEFLASH:
-            CLG_ParseMuzzleFlashPacket(0);
-            CLG_MuzzleFlash();
-            return true;
-        break;
-        // Entity Muzzle Flash.
-        case SVG_CMD_MUZZLEFLASH2:
-            CLG_ParseMuzzleFlashPacket(0);
-            CLG_MuzzleFlash2();
-            return true;
-        break;
-
-        // Client inventory updates.
-        case SVG_CMD_INVENTORY:
-            CLG_ParseInventory();
-            return true;
-        break;
-
-        // Client layout (Cruel, limited, ugly UI...) updates
-        case SVG_CMD_LAYOUT:
-            CLG_ParseLayout();
-            return true;
-        break;
-    // Fail by default.
-    default:
-        return false;
-    }
-}
+//qboolean CLG_ParseServerMessage (int serverCommand) {
+//    // Switch cmd.
+//    switch (serverCommand) {
+//
+//        // Client Print Messages.
+//        case svc_print:
+//            CLG_ParsePrint();
+//            return true;
+//            break;
+//
+//        // Client Center Screen Print messages.
+//        case svc_centerprint:
+//            CLG_ParseCenterPrint();
+//            return true;
+//            break;
+//
+//        // Client temporary entities. (Particles, etc.)
+//        case SVG_CMD_TEMP_ENTITY:
+//            CLG_ParseTempEntitiesPacket();
+//            CLG_ParseTempEntity();
+//            return true;
+//        break;
+//
+//        // Client Muzzle Flash.
+//        case SVG_CMD_MUZZLEFLASH:
+//            CLG_ParseMuzzleFlashPacket(0);
+//            CLG_MuzzleFlash();
+//            return true;
+//        break;
+//        // Entity Muzzle Flash.
+//        case SVG_CMD_MUZZLEFLASH2:
+//            CLG_ParseMuzzleFlashPacket(0);
+//            CLG_MuzzleFlash2();
+//            return true;
+//        break;
+//
+//        // Client inventory updates.
+//        case SVG_CMD_INVENTORY:
+//            CLG_ParseInventory();
+//            return true;
+//        break;
+//
+//        // Client layout (Cruel, limited, ugly UI...) updates
+//        case SVG_CMD_LAYOUT:
+//            CLG_ParseLayout();
+//            return true;
+//        break;
+//    // Fail by default.
+//    default:
+//        return false;
+//    }
+//}
 
 //
 //===============
@@ -404,22 +404,22 @@ qboolean CLG_ParseServerMessage (int serverCommand) {
 // just to name a few examples.
 //===============
 //
-qboolean CLG_SeekDemoMessage(int demoCommand) {
-    // Switch cmd.
-    switch (demoCommand) {
-    case SVG_CMD_INVENTORY:
-        CLG_ParseInventory();
-        return true;
-        break;
-    case SVG_CMD_LAYOUT:
-        CLG_ParseLayout();
-        return true;
-        break;
-    // Return false for failure in case we've reached this checkpoint.
-    default:
-        return false;
-    }
-}
+//qboolean CLG_SeekDemoMessage(int demoCommand) {
+//    // Switch cmd.
+//    switch (demoCommand) {
+//    case SVG_CMD_INVENTORY:
+//        CLG_ParseInventory();
+//        return true;
+//        break;
+//    case SVG_CMD_LAYOUT:
+//        CLG_ParseLayout();
+//        return true;
+//        break;
+//    // Return false for failure in case we've reached this checkpoint.
+//    default:
+//        return false;
+//    }
+//}
 
 //
 //===============
@@ -428,6 +428,6 @@ qboolean CLG_SeekDemoMessage(int demoCommand) {
 // Called when the end of parsing a server message has been reached.
 //===============
 //
-void CLG_EndServerMessage (int realTime) {
-
-}
+//void CLG_EndServerMessage (int realTime) {
+//
+//}

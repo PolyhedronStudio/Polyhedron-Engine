@@ -806,7 +806,7 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     // accurately determined
     // FIXME: with client prediction, the contents
     // should be determined by the client
-    SVG_Client_CalculateBlend(classEntity);
+    classEntity->CalculateScreenBlend();
 
     // Set the stats to display for this client (one of the chase isSpectator stats or...)
     if (client->respawn.isSpectator)
@@ -816,13 +816,13 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
 
     SVG_HUD_CheckChaseStats(serverEntity);
 
-    SVG_Client_SetEvent(classEntity);
+    classEntity->SetEvent();
 
-    SVG_Client_SetEffects(classEntity);
+    classEntity->SetEffects();
 
-    SVG_Client_SetSound(classEntity);
+    classEntity->SetSound();
 
-    SVG_Client_SetAnimationFrame(classEntity);
+    classEntity->SetAnimationFrame();
 
     // Store velocity and view angles.
     client->oldVelocity = serverEntity->classEntity->GetVelocity();

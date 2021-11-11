@@ -199,6 +199,7 @@ public:
     virtual void SetEvent();
     virtual void SetEffects();
     virtual void SetSound();
+    virtual void SetAnimationFrame();
 
     // Reference to BobMoveCycle.
     BobMoveCycle &GetBobMoveCycle() {
