@@ -106,6 +106,8 @@ public:
     virtual void CheckPredictionError(ClientMoveCommand* moveCommand) = 0;
     virtual void PredictAngles() = 0;
     virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
+
+    virtual void UpdateClientSoundSpecialEffects(PlayerMove* pm) = 0;
 };
 
 //---------------------------------------------------------------------

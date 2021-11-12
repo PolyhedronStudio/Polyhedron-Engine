@@ -38,6 +38,15 @@
 #include "shared/cltypes.h"
 #include "shared/clgame.h"
 
+// "Shared" cl frametime.
+// WID: TODO: Make these part of the ClientGameImports instead.
+static constexpr double CLG_FRAMETIME = BASE_FRAMETIME;
+static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
+static constexpr int32_t CLG_FRAMEDIV = BASE_FRAMERATE / 10.0;
+inline qboolean CLG_FRAMESYNC() {
+    extern ClientState *cl;
+    return !(cl->frame.number % CLG_FRAMEDIV);
+}
 
 //
 //=============================================================================

@@ -41,7 +41,7 @@ void weapon_shotgun_fire(PlayerClient * ent)
     int         damage = 4;
     int         kick = 8;
 
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     if (client->playerState.gunFrame == 9) {
         client->playerState.gunFrame++;

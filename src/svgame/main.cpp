@@ -357,14 +357,14 @@ void SVG_InitializeServerEntities() {
 //=====================
 // SVG_AllocateGameClients
 //
-// Allocates the "GameClient", aligned to the ServerClient data type array properly for
+// Allocates the "ServersClient", aligned to the ServerClient data type array properly for
 // the current game at play.
 //=====================
 //
 void SVG_AllocateGameClients() {
     // Initialize all clients for this game
     game.maximumClients = maximumClients->value;
-    game.clients = (GameClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    game.clients = (ServersClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     globals.numberOfEntities = game.maximumClients + 1;
 }
 
@@ -464,16 +464,15 @@ void SVG_ClientEndServerFrames(void)
         int32_t stateNumber = g_entities[1 + i].state.number;
 
         // Now, let's go wild. (Purposely, do not assume the pointer is a PlayerClient.)
-        SVGBaseEntity *entity = g_baseEntities[stateNumber]; // WID: 1 +, because 0 == WorldSpawn.
+        Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == WorldSpawn.
 
-        // See if we're good to go, if not, continue for the next. 
-        if ((entity == nullptr && !entity->GetServerEntity()) && 
-            (!entity->IsInUse() || !entity->GetClient()))
+        // See if we're gooszsd to go, if not, continue for the next. 
+        if (!entity || !entity->inUse || !entity->client)
             continue;
 
         // Ugly cast, yes, but at this point we know we can do this. And that, to do it, matters more than
         // ethics, because our morals say otherwise :D
-        SVG_ClientEndServerFrame((PlayerClient*)entity);
+        game.gameMode->ClientEndServerFrame(&g_entities[stateNumber]);
     }
 
 }
@@ -571,7 +570,7 @@ SVG_CheckDMRules
 void SVG_CheckDMRules(void)
 {
     int         i;
-    GameClient   *cl;
+    ServersClient   *cl;
 
     if (level.intermission.time)
         return;
@@ -682,7 +681,7 @@ void SVG_RunFrame(void)
         if (i > 0 && i <= maximumClients->value) {
             // Ensure the entity actually is owned by a client. 
             if (entity->GetClient())
-                game.gameMode->ClientBeginServerFrame((PlayerClient*)entity);
+                game.gameMode->ClientBeginServerFrame(entity->GetServerEntity());
             continue;
         }
 

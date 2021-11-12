@@ -17,7 +17,7 @@ public:
     PlayerClient(Entity* svEntity);
     virtual ~PlayerClient();
 
-    DefineMapClass("PlayerClient", PlayerClient, SVGBaseEntity );
+    DefineMapClass("PlayerClient", PlayerClient, SVGBaseEntity);
 
     //
     // Interface functions. 
@@ -39,10 +39,10 @@ public:
     // Get/Set
     //
     // Active Weapon.
-    inline gitem_t *GetActiveWeapon() {
+    inline gitem_t* GetActiveWeapon() {
         return GetClient()->persistent.activeWeapon;
     }
-    inline void GetActiveWeapon(gitem_t *weapon) {
+    inline void GetActiveWeapon(gitem_t* weapon) {
         GetClient()->persistent.activeWeapon = weapon;
     }
 
@@ -64,7 +64,7 @@ public:
 
     // Client.
     // Sets the 'client' pointer.
-    void SetClient(gclient_s *client) {
+    void SetClient(gclient_s* client) {
         serverEntity->client = client;
     }
 
@@ -128,7 +128,7 @@ public:
     inline const int32_t GetPriorityAnimation() {
         return GetClient()->animation.priorityAnimation;
     }
-    inline void SetPriorityAnimation(const int32_t &priorityAnimation) {
+    inline void SetPriorityAnimation(const int32_t& priorityAnimation) {
         GetClient()->animation.priorityAnimation = priorityAnimation;
     }
 
@@ -150,11 +150,83 @@ protected:
     float debounceDamageTime;
     float debounceSoundTime;
 
+    //
+    // View/BobMove Functionality.
+    //
+public:
+    // BobMoveCycle is used for view bobbing,
+    // where the player FPS view looks like he is
+    // walking instead of floating around.
+    struct BobMoveCycle {
+        // Forward, right, and up vectors.
+        vec3_t  forward, right, up;
+        // Speed squared over the X/Y axis.
+        float XYSpeed;
+        // bobMove counter.
+        float move;
+        // Cycles are caculated over bobMove, uneven cycles = right foot.
+        int cycle;
+        // Calculated as: // sin(bobfrac*M_PI)
+        float fracSin;
+    } bobMove;
+
+    // Calculates the roll value that can be used for the view, 
+    virtual float CalculateRoll(const vec3_t& angles, const vec3_t& velocity);
+
+    // Check for which waterlevel (drowning), lava(burning) etc needs to
+    // happen, if any.
+    virtual void CheckWorldEffects();
+
+    // Detect hitting the floor, and apply damage appropriately.
+    virtual void CheckFallingDamage();
+
+    // Apply all other the damage taken this frame
+    virtual void ApplyDamageFeedback();
+
+    // Determine the new frame's view offsets
+    virtual void CalculateViewOffset();
+
+    // Determine the gun offsets
+    virtual void CalculateGunOffset();
+
+    // Determine the full screen color blend
+    // must be after viewOffset, so eye contents can be
+    // accurately determined
+    // FIXME: with client prediction, the contents
+    // should be determined by the client
+    virtual void CalculateScreenBlend();
+
+    virtual void SetEvent();
+    virtual void SetEffects();
+    virtual void SetSound();
+    virtual void SetAnimationFrame();
+
+    // Reference to BobMoveCycle.
+    BobMoveCycle &GetBobMoveCycle() {
+        return bobMove;
+    }
+
 private:
     //
     // Private utility functions.
     //
     void LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker);
+
+    //Adds the specific blend of colors on top of each other.
+    static void AddScreenBlend(float r, float g, float b, float a, float *v_blend)
+    {
+        float   a2, a3;
+
+        if (a <= 0)
+            return;
+        a2 = v_blend[3] + (1 - v_blend[3]) * a; // new total alpha
+        a3 = v_blend[3] / a2;   // fraction of color from old
+
+        v_blend[0] = v_blend[0] * a3 + r * (1 - a3);
+        v_blend[1] = v_blend[1] * a3 + g * (1 - a3);
+        v_blend[2] = v_blend[2] * a3 + b * (1 - a3);
+        v_blend[3] = a2;
+    }
 };
 
 #endif // __SVGAME_ENTITIES_MISC_PLAYERCLIENT_H__

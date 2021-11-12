@@ -51,19 +51,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // C++ STL
 //-----------------
-#include <numbers>
 #include <string>
 #include <numbers>
 #include <iostream>
 #include <sstream>
-#include <map>
+#include <array>
 #include <vector>
 #include <list>
+#include <map>
+#include <unordered_map>
 #include <set>
+#include <unordered_set>
 #include <span>
 #include <ranges>
-#include <unordered_map>
-#include <unordered_set>
 
 //-----------------
 // System Endian include, if needed. 
@@ -198,78 +198,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //	Engine Tick Rate Settings.
 //
 //=============================================================================
-// Set here how fast you want the tick rate to be.
-// 1 = 10hz
-// 2 = 20hz
-// 3 = 30hz
-// 4 = 40hz
-// 5 = 60hz
-#define TICK_RATE_STYLE 5
-
-//-----------------
-// N&C 10hz tick
-//-----------------
-#if TICK_RATE_STYLE == 1
-static constexpr uint32_t   BASE_FRAMERATE =  10;
-static constexpr double     BASE_FRAMETIME = 100;
-static constexpr double     BASE_1_FRAMETIME = 0.01;   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 =0.1;    // BASE_FRAMETIME/1000
-#endif
-
-//-----------------
-//N&C 20hz tick
-//-----------------
-#if TICK_RATE_STYLE == 2
-static constexpr uint32_t   BASE_FRAMERATE = 20; //10
-static constexpr double     BASE_FRAMETIME = 50.0; //100
-static constexpr double     BASE_1_FRAMETIME = 0.02; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.05; //0.1f    // BASE_FRAMETIME/1000
-#endif
-//-----------------
-//N&C 30hz tick
-//-----------------
-#if TICK_RATE_STYLE == 3
-static constexpr uint32_t   BASE_FRAMERATE = 30; //10
-static constexpr double     BASE_FRAMETIME = 33.3333333333; //100
-static constexpr double     BASE_1_FRAMETIME = 0.03; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.03333333333; //0.1f    // BASE_FRAMETIME/1000
-#endif
-//-----------------
-//N&C 40hz tick
-//-----------------
-#if TICK_RATE_STYLE == 4
-static constexpr uint32_t   BASE_FRAMERATE = 40; //10
-static constexpr double     BASE_FRAMETIME = 25.0; //100
-static constexpr double     BASE_1_FRAMETIME = 0.04; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.025; //0.1f    // BASE_FRAMETIME/1000
-#endif
-//-----------------
-//N&C 60hz tick
-//-----------------
-#if TICK_RATE_STYLE == 5
-static constexpr uint32_t   BASE_FRAMERATE = 60; //10
-static constexpr double     BASE_FRAMETIME = 16.6666666667; //100
-static constexpr double     BASE_1_FRAMETIME = 0.05999999999; //0.01f   // 1/BASE_FRAMETIME
-static constexpr double     BASE_FRAMETIME_1000 = 0.01666666666; //0.1f    // BASE_FRAMETIME/1000
-#endif
-
-//-----------------
-// Client FPS
-//-----------------
-// N&C: Moved here instead of client.h, for CG Module.
-#define CL_FRAMETIME    BASE_FRAMETIME
-#define CL_1_FRAMETIME  BASE_1_FRAMETIME
-#define CL_FRAMEDIV     1
-#define CL_FRAMESYNC    1
-#if CGAME_INCLUDE
-#define CL_KEYPS        &cl->frame.playerState
-#define CL_OLDKEYPS     &cl->oldframe.playerState
-#define CL_KEYLERPFRAC  cl->lerpFraction
-#else
-#define CL_KEYPS        &cl.frame.playerState
-#define CL_OLDKEYPS     &cl.oldframe.playerState
-#define CL_KEYLERPFRAC  cl.lerpFraction
-#endif
+#include "shared/tickrate.h"
 
 
 //
@@ -279,55 +208,9 @@ static constexpr double     BASE_FRAMETIME_1000 = 0.01666666666; //0.1f    // BA
 //
 //=============================================================================
 //
-typedef enum {
-    ERR_FATAL,          // exit the entire game with a popup window
-    ERR_DROP,           // print to console and disconnect from game
-    ERR_DISCONNECT,     // like drop, but not an error
-    ERR_RECONNECT       // make server broadcast 'reconnect' message
-} ErrorType;
-
-typedef enum {
-    PRINT_ALL,          // general messages
-    PRINT_TALK,         // print in green color
-    PRINT_DEVELOPER,    // only print when "developer 1"
-    PRINT_WARNING,      // print in yellow color
-    PRINT_ERROR,        // print in red color
-    PRINT_NOTICE        // print in cyan color
-} PrintType;
-
-//
-// Contains the client load states, clg_local.h can expand upon it with custom
-// states. They can send a text name for the loading state to show in display.
-//
-typedef enum {
-    LOAD_NONE,
-    LOAD_MAP,
-    LOAD_MODELS,
-    LOAD_IMAGES,
-    LOAD_CLIENTS,
-    LOAD_SOUNDS
-} LoadState;
+#include "shared/common.h"
 
 
-//-----------------
-// WATISDEZE: We don't want these defined in clgame.h
-//-----------------
-void    Com_Error(ErrorType code, const char* fmt, ...)
-q_noreturn q_printf(2, 3);
-#ifndef CGAME_INCLUDE
-void    Com_LPrintf(PrintType type, const char* fmt, ...)
-q_printf(2, 3);
-#define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
-#define Com_DPrintf(...) Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
-#define Com_WPrintf(...) Com_LPrintf(PRINT_WARNING, __VA_ARGS__)
-#define Com_EPrintf(...) Com_LPrintf(PRINT_ERROR, __VA_ARGS__)
-#endif // CGAME_INCLUDE
-
-// game print flags
-#define PRINT_LOW           0       // pickup messages
-#define PRINT_MEDIUM        1       // death messages
-#define PRINT_HIGH          2       // critical messages
-#define PRINT_CHAT          3       // chat messages    
 
 //-----------------
 // Memory tags to allow dynamic memory to be cleaned up

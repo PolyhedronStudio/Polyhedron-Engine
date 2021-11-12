@@ -69,14 +69,9 @@ void TargetEarthquake::QuakeThink() {
         lastQuakeTime = level.time + 0.5f;
     }
 
-    for ( SVGBaseEntity* entity : GetBaseEntityRange<0UL, MAX_EDICTS>() 
-        | BaseEntityFilters::InUse
-        | BaseEntityFilters::HasClient
-        | BaseEntityFilters::HasServerEntity ) {
-        if ( nullptr == entity->GetGroundEntity() ) {
-            continue;
-        }
-
+    for ( auto * entity : g_baseEntities
+         | bef::Standard | bef::HasClient | bef::HasGroundEntity ) 
+    {
         entity->SetGroundEntity( nullptr );
         vec3_t newVelocity{
             crandom() * 150.0f,
@@ -89,6 +84,6 @@ void TargetEarthquake::QuakeThink() {
     }
 
     if ( level.time < timeStamp ) {
-        SetNextThinkTime( level.time + FRAMETIME );
+        SetNextThinkTime( level.time + 1 * FRAMETIME );
     }
 }

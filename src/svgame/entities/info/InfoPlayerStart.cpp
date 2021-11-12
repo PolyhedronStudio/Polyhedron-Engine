@@ -7,9 +7,7 @@
 //
 */
 #include "../../g_local.h"              // SVGame.
-
 #include "../base/SVGBaseEntity.h"      // BaseEntity.
-
 #include "InfoPlayerStart.h"            // Class.
 
 // Constructor/Deconstructor.

@@ -41,7 +41,7 @@ void TriggerPush::Spawn() {
 //===============
 void TriggerPush::SpawnKey( const std::string& key, const std::string& value ) {
 	if ( key == "speed" ) {
-		pushForce = std::stof( value );
+        ParseFloatKeyValue(key, value, pushForce);
 	} else if ( key == "movedir" ) {
         ParseVector3KeyValue( key, value, pushDirection );
 	} else {
@@ -53,7 +53,7 @@ void TriggerPush::SpawnKey( const std::string& key, const std::string& value ) {
 // TriggerPush::PushTouch
 //===============
 void TriggerPush::PushTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
-    vec3_t newVelocity = vec3_scale( pushDirection, pushForce * 10.0f );
+    vec3_t newVelocity = vec3_scale( pushDirection, pushForce * 10.0f);
     
     /* TODO:
     if ( other == grenade ) {
@@ -69,8 +69,8 @@ void TriggerPush::PushTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t
             // Don't take fall damage immediately from this
             player->GetClient()->oldVelocity = other->GetVelocity();
             if ( player->GetDebounceSoundTime() < level.time ) {
-                player->SetDebounceSoundTime( level.time + 1.5f );
-                gi.Sound( player->GetServerEntity(), CHAN_AUTO, WindSound, 1.0f, ATTN_NORM, 0.0f );
+                player->SetDebounceSoundTime( level.time + 1.5f);
+                SVG_Sound( player, CHAN_AUTO, WindSound, 1.0f, ATTN_NORM, 0.0f );
             }
         }
     }

@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef UTILS_H
 #define UTILS_H
 
-typedef enum {
+enum color_index_t {
     COLOR_BLACK,
     COLOR_RED,
     COLOR_GREEN,
@@ -31,7 +31,7 @@ typedef enum {
 
     COLOR_ALT,
     COLOR_NONE
-} color_index_t;
+};
 
 extern const char *const colorNames[10];
 

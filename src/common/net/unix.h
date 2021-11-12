@@ -26,7 +26,7 @@ static const char *os_error_string(int err)
 }
 
 // returns true if failed socket operation should be retried.
-static qboolean process_error_queue(qsocket_t sock, const netadr_t *to)
+static qboolean process_error_queue(qsocket_t sock, const NetAdr *to)
 {
 #ifdef IP_RECVERR
     byte buffer[1024];
@@ -34,7 +34,7 @@ static qboolean process_error_queue(qsocket_t sock, const netadr_t *to)
     struct msghdr msg;
     struct cmsghdr *cmsg;
     struct sock_extended_err *ee;
-    netadr_t from;
+    NetAdr from;
     int tries;
     qboolean found = false;
 
@@ -103,7 +103,7 @@ static qboolean process_error_queue(qsocket_t sock, const netadr_t *to)
 }
 
 static ssize_t os_udp_recv(qsocket_t sock, void *data,
-                           size_t len, netadr_t *from)
+                           size_t len, NetAdr *from)
 {
     struct sockaddr_storage addr;
     socklen_t addrlen;
@@ -135,7 +135,7 @@ static ssize_t os_udp_recv(qsocket_t sock, void *data,
 }
 
 static ssize_t os_udp_send(qsocket_t sock, const void *data,
-                           size_t len, const netadr_t *to)
+                           size_t len, const NetAdr *to)
 {
     struct sockaddr_storage addr;
     socklen_t addrlen;
@@ -202,7 +202,7 @@ static neterr_t os_listen(qsocket_t sock, int backlog)
     return NET_OK;
 }
 
-static neterr_t os_accept(qsocket_t sock, qsocket_t *newsock, netadr_t *from)
+static neterr_t os_accept(qsocket_t sock, qsocket_t *newsock, NetAdr *from)
 {
     struct sockaddr_storage addr;
     socklen_t addrlen;
@@ -223,7 +223,7 @@ static neterr_t os_accept(qsocket_t sock, qsocket_t *newsock, netadr_t *from)
     return NET_OK;
 }
 
-static neterr_t os_connect(qsocket_t sock, const netadr_t *to)
+static neterr_t os_connect(qsocket_t sock, const NetAdr *to)
 {
     struct sockaddr_storage addr;
     socklen_t addrlen;
@@ -283,7 +283,7 @@ static neterr_t os_bind(qsocket_t sock, const struct sockaddr *addr, size_t addr
     return NET_OK;
 }
 
-static neterr_t os_getsockname(qsocket_t sock, netadr_t *name)
+static neterr_t os_getsockname(qsocket_t sock, NetAdr *name)
 {
     struct sockaddr_storage addr;
     socklen_t addrlen;

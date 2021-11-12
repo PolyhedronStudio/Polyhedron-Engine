@@ -53,12 +53,12 @@
 //#define USE_DSOUND 1
 #define USE_OPENAL 1
 #define USE_SNDDMA 1
-//#define USE_CURL 0
-#define USE_AUTOREPLY 1
+#define USE_CURL 1
+#define USE_AUTOREPLY 0
 #endif
 
 #if USE_SERVER
-#define USE_PACKETDUP 1
+#define USE_PACKETDUP 0
 #define USE_WINSVC !USE_CLIENT
 #endif
 

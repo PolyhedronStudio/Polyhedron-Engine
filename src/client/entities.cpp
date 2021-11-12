@@ -314,7 +314,7 @@ void CL_DeltaFrame(void)
         entity_event(state->number);
     }
 
-    if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking && CL_FRAMESYNC) {
+    if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking && CL_FRAMESYNC()) {
         CL_EmitDemoFrame();
     }
 

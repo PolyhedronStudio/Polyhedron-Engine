@@ -7,10 +7,11 @@
 // All entity related functionality resides here. Need to allocate a class?
 // Find an entity? Anything else? You've hit the right spot.
 //
-// A "ClassEntity", or a CE, is always a member of a "ServerEntity", aka a SE.
+// A "ClassEntity", or a CE, is always a member of a "ServerEntity", aka an SE.
 //
 // The actual game logic implementation thus goes in ClassEntities. An SE is
-// merely a binding layer between SVGame and server.
+// merely a POD binding layer between SVGame and the server. (Important for
+// networking.)
 //
 */
 #ifndef __SVGAME_ENTITIES_H__
@@ -33,6 +34,8 @@ namespace EntityFilterFunctions {
 
     // Returns true in case the (server-)Entity has a client attached to it.
     inline bool BaseEntityHasClient(SVGBaseEntity* ent) { return ent->GetClient(); }
+    // Returns true in case the BaseEntity has a ground entity set to it.
+    inline bool BaseEntityHasGroundEntity(SVGBaseEntity* ent) { return ent->GetGroundEntity(); }
     // Returns true in case the BaseEntity is properly linked to a server entity.
     inline bool BaseEntityHasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
     // Returns true if the BaseEntity contains the sought for targetname.
@@ -82,6 +85,8 @@ namespace EntityFilters {
             }
         );
     }
+
+    inline auto Standard = (InUse);
 };
 namespace ef = EntityFilters; // Shortcut, lesser typing.
 
@@ -92,11 +97,13 @@ namespace ef = EntityFilters; // Shortcut, lesser typing.
 namespace BaseEntityFilters {
     using namespace std::views;
 
+    // BaseEntity Filters to employ by pipelining. Very nice and easy method of doing loops.
     inline auto IsValidPointer = std::views::filter( &EntityFilterFunctions::BaseEntityIsValidPointer );
     inline auto HasServerEntity = std::views::filter( &EntityFilterFunctions::BaseEntityHasServerEntity);
+    inline auto HasGroundEntity = std::views::filter( &EntityFilterFunctions::BaseEntityHasGroundEntity);
     inline auto InUse = std::views::filter( &EntityFilterFunctions::BaseEntityInUse );
     inline auto HasClient = std::views::filter ( &EntityFilterFunctions::BaseEntityHasClient );
-    
+
     // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
     // be referred to from here. However, I am unsure how to do that as of yet.
     inline auto HasClassName(const std::string& classname) {
@@ -136,6 +143,15 @@ namespace BaseEntityFilters {
         );
     }
 
+    template <typename ClassType>
+    auto IsSubclassOf() {
+        return std::ranges::views::filter(
+            [](SVGBaseEntity* ent) {
+                return ent->IsSubclassOf<ClassType>();
+            }
+        );
+    }
+
     // WID: TODO: This one actually has to move into EntityFilterFunctions, and then
     // be referred to from here. However, I am unsure how to do that as of yet.
     inline auto WithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags) {
@@ -153,6 +169,12 @@ namespace BaseEntityFilters {
             }
         );
     }
+
+    //
+    // Summed up pipelines to simplify life with.
+    //
+    // A wrapper for the most likely 3 widely used, and if forgotten, error prone filters.
+    inline auto Standard = (IsValidPointer | HasServerEntity | InUse);
 };
 namespace bef = BaseEntityFilters; // Shortcut, lesser typing.
 

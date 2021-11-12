@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
 
+#include "../gamemodes/IGameMode.h"
+
 #include "client.h"     // Include Player Client header.
 #include "hud.h"        // Include HUD header.
 
@@ -112,7 +114,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
             continue;
         }
         if (client->classEntity->GetHealth() <= 0) {
-            SVG_RespawnClient(client);
+            game.gameMode->RespawnClient((PlayerClient*)client->classEntity);
         }
     }
 
@@ -197,7 +199,7 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
     int     sortedscores[MAX_CLIENTS];
     int     score, total;
     int     x, y;
-    GameClient   *cl;
+    ServersClient   *cl;
     Entity     *cl_ent;
     const char    *tag; // C++20: STRING: Added const to char*
 
@@ -302,7 +304,7 @@ void SVG_Command_Score_f(SVGBaseEntity*ent)
     if (!ent)
         return;
     
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     // We obviously should not continue, for some reason it has no client...
     if (!client)
@@ -339,7 +341,7 @@ void SVG_HUD_SetClientStats(Entity* ent)
     gitem_t* item;
 
     // Ensure ent is valid.
-    if (!ent) {
+    if (!ent || !ent->client) {
         return;
     }
 
@@ -445,7 +447,7 @@ void SVG_HUD_CheckChaseStats(Entity *ent)
     }
 
     for (i = 1; i <= maximumClients->value; i++) {
-        GameClient* cl;
+        ServersClient* cl;
 
         cl = g_entities[i].client;
 
@@ -469,7 +471,7 @@ void SVG_HUD_SetSpectatorStats(Entity *ent)
         return;
     }
 
-    GameClient* cl = ent->client;
+    ServersClient* cl = ent->client;
 
     if (!cl->chaseTarget) {
         SVG_HUD_SetClientStats(ent);

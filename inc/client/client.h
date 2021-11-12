@@ -54,7 +54,7 @@ typedef enum {
 
 qboolean CL_ProcessEvents(void);
 #if USE_ICMP
-void CL_ErrorEvent(netadr_t *from);
+void CL_ErrorEvent(NetAdr *from);
 #endif
 void CL_Init(void);
 void CL_InitGameModule(void);
@@ -65,7 +65,7 @@ void CL_UpdateListenerOrigin(void);
 void CL_RestartFilesystem(qboolean total);
 void CL_Activate(active_t active);
 void CL_UpdateUserinfo(cvar_t* var, from_t from);
-void CL_SendStatusRequest(const netadr_t *address);
+void CL_SendStatusRequest(const NetAdr *address);
 void CL_CheckForIP(const char* s);
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
 qboolean CL_CheatsOK(void);
@@ -74,10 +74,10 @@ qboolean CL_CheatsOK(void);
 ssize_t HTTP_FetchFile(const char *url, void **data);
 #endif
 
-qboolean CL_ForwardToServer(void);
 // adds the current command line as a clc_stringcmd to the client message.
 // things like godmode, noclip, etc, are commands directed to the server,
 // so when they are typed in at the console, they will need to be forwarded.
+qboolean CL_ForwardToServer(void);
 
 void Con_Init(void);
 void Con_SetColor(color_index_t color);

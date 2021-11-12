@@ -348,15 +348,15 @@ typedef struct client_s {
 static constexpr uint32_t    MAX_CHALLENGES = 1024;
 
 typedef struct {
-    netadr_t adr;
+    NetAdr adr;
     uint32_t challenge;
     uint32_t time;
 } Challenge;
 
 typedef struct {
     list_t      entry;
-    netadr_t    addr;
-    netadr_t    mask;
+    NetAdr    addr;
+    NetAdr    mask;
     uint32_t    hits;
     time_t      time;   // time of the last hit
     char        comment[1];
@@ -388,7 +388,7 @@ struct FilterCommand {
 
 typedef struct {
     list_t entry;
-    netadr_t adr;
+    NetAdr adr;
 
     uint32_t last_ack;
     time_t last_resolved;
@@ -514,7 +514,7 @@ qboolean SV_RateLimited(RateLimit *r);
 void SV_RateRecharge(RateLimit *r);
 void SV_RateInit(RateLimit *r, const char *s);
 
-AddressMatch *SV_MatchAddress(list_t *list, netadr_t *address);
+AddressMatch *SV_MatchAddress(list_t *list, NetAdr *address);
 
 int SV_CountClients(void);
 

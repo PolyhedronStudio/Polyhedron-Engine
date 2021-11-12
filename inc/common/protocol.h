@@ -265,29 +265,34 @@ typedef enum {
 // a Solid::BoundingBox will never create this value
 #define PACKED_BSP      31
 
-//
-// Client Settings that can be communicated to servers.
-//
-typedef enum {
-    CLS_MAX
-} clientSetting_t;
-
-//
-// Server Settings that can be communicated to clients.
-//
-typedef enum {
-    // r1q2 specific
-    SVS_PLAYERUPDATES,
-    SVS_FPS,
-
-    SVS_MAX
-} serverSetting_t;
 
 // q2pro frame flags sent by the server
 // only SUPPRESSCOUNT_BITS can be used
-#define FF_SUPPRESSED   (1<<0)
-#define FF_CLIENTDROP   (1<<1)
-#define FF_CLIENTPRED   (1<<2)
-#define FF_RESERVED     (1<<3)
+struct FrameFlags {
+    // Server surpressed packets to client because rate limit was exceeded.
+    static constexpr int32_t Suppressed = (1 << 0);
+    // A few packets from client to server were dropped by the network.
+    // Server recovered player's movement using backup commands.
+    static constexpr int32_t ClientDrop = (1 << 1);
+    // Many packets from client to server were dropped by the network.
+    // Server ran out of backup commands and had to predict player's movement.
+    static constexpr int32_t ClientPredict = (1 << 2);
+    // Unused, reserved for future reasons perhaps.
+    static constexpr int32_t Reserved = (1 << 3);
+
+    // Packets from server to client were dropped by the network.
+    static constexpr int32_t ServerDrop = (1 << 4);
+    // Server sent an invalid delta compressed frame.
+    static constexpr int32_t BadFrame = (1 << 5);
+    // Server sent a delta compressed frame that is too old and
+    // can't be recovered.
+    static constexpr int32_t OldFrame = (1 << 6);
+    // Server sent a delta compressed frame whose entities are too
+    // old and can't be recovered.
+    static constexpr int32_t OldEntity = (1 << 7);
+    // Server sent an uncompressed frame. Typically occurs during
+    // a heavy lag, when a lot of packets are dropped by the network.
+    static constexpr int32_t NoDeltaFrame = (1 << 8);
+};
 
 #endif // PROTOCOL_H

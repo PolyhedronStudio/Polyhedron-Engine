@@ -92,7 +92,7 @@ cvar_t          *net_ip;
 cvar_t          *net_ip6;
 cvar_t          *net_port;
 
-netadr_t        net_from;
+NetAdr        net_from;
 
 #if USE_CLIENT
 static cvar_t   *net_clientport;
@@ -147,7 +147,7 @@ static uint64_t     net_packets_sent;
 
 //=============================================================================
 
-static size_t NET_NetadrToSockadr(const netadr_t *a, struct sockaddr_storage *s)
+static size_t NET_NetadrToSockadr(const NetAdr *a, struct sockaddr_storage *s)
 {
     struct sockaddr_in  *s4 = (struct sockaddr_in  *)s;
     struct sockaddr_in6 *s6 = (struct sockaddr_in6 *)s;
@@ -178,7 +178,7 @@ static size_t NET_NetadrToSockadr(const netadr_t *a, struct sockaddr_storage *s)
     return 0;
 }
 
-static void NET_SockadrToNetadr(const struct sockaddr_storage *s, netadr_t *a)
+static void NET_SockadrToNetadr(const struct sockaddr_storage *s, NetAdr *a)
 {
     const struct sockaddr_in  *s4 = (const struct sockaddr_in  *)s;
     const struct sockaddr_in6 *s6 = (const struct sockaddr_in6 *)s;
@@ -218,7 +218,7 @@ static void NET_SockadrToNetadr(const struct sockaddr_storage *s, netadr_t *a)
 #define os_inet_pton    inet_pton
 #endif
 
-char *NET_BaseAdrToString(const netadr_t *a)
+char *NET_BaseAdrToString(const NetAdr *a)
 {
     static char s[MAX_QPATH];
 
@@ -259,7 +259,7 @@ char *NET_BaseAdrToString(const netadr_t *a)
 NET_AdrToString
 ===================
 */
-const char *NET_AdrToString(const netadr_t *a)
+const char *NET_AdrToString(const NetAdr *a)
 {
     static char s[MAX_QPATH];
 
@@ -286,7 +286,7 @@ static struct addrinfo *NET_SearchAdrrInfo(struct addrinfo *rp, int family)
     return NULL;
 }
 
-qboolean NET_StringPairToAdr(const char *host, const char *port, netadr_t *a)
+qboolean NET_StringPairToAdr(const char *host, const char *port, NetAdr *a)
 {
     byte buf[128];
     struct addrinfo hints, *res, *rp;
@@ -334,7 +334,7 @@ idnewt:28000
 192.246.40.70:28000
 =============
 */
-qboolean NET_StringToAdr(const char *s, netadr_t *a, int default_port)
+qboolean NET_StringToAdr(const char *s, NetAdr *a, int default_port)
 {
     char copy[MAX_STRING_CHARS], *h, *p;
     size_t len;
@@ -430,7 +430,7 @@ static void net_log_param_changed(cvar_t *self)
 NET_LogPacket
 =============
 */
-static void NET_LogPacket(const netadr_t *address, const char *prefix,
+static void NET_LogPacket(const NetAdr *address, const char *prefix,
                           const byte *data, size_t length)
 {
     int numRows;
@@ -580,7 +580,7 @@ static void NET_GetLoopPackets(NetSource sock, void (*packet_cb)(void))
 }
 
 static qboolean NET_SendLoopPacket(NetSource sock, const void *data,
-                                   size_t len, const netadr_t *to)
+                                   size_t len, const NetAdr *to)
 {
     loopback_t *loop;
     loopmsg_t *msg;
@@ -617,7 +617,7 @@ static qboolean NET_SendLoopPacket(NetSource sock, const void *data,
 
 static const char *os_error_string(int err);
 
-static void NET_ErrorEvent(qsocket_t sock, netadr_t *from,
+static void NET_ErrorEvent(qsocket_t sock, NetAdr *from,
                            int ee_errno, int ee_info)
 {
     if (net_ignore_icmp->integer > 0) {
@@ -847,7 +847,7 @@ NET_SendPacket
 =============
 */
 qboolean NET_SendPacket(NetSource sock, const void *data,
-                        size_t len, const netadr_t *to)
+                        size_t len, const NetAdr *to)
 {
     ssize_t ret;
     qsocket_t s;
@@ -1183,7 +1183,7 @@ static void NET_OpenClient(void)
 {
     ioentry_t *e;
     qsocket_t s;
-    netadr_t adr;
+    NetAdr adr;
 
     if (udp_sockets[NS_CLIENT] != -1)
         return;
@@ -1286,7 +1286,7 @@ void NET_Config(NetFlag flag)
 NET_GetAddress
 ====================
 */
-qboolean NET_GetAddress(NetSource sock, netadr_t *adr)
+qboolean NET_GetAddress(NetSource sock, NetAdr *adr)
 {
     if (udp_sockets[sock] == -1)
         return false;
@@ -1416,7 +1416,7 @@ static void dump_addrinfo(struct addrinfo *ai)
 
 static void dump_socket(qsocket_t s, const char *s1, const char *s2)
 {
-    netadr_t adr;
+    NetAdr adr;
 
     if (s == -1)
         return;

@@ -92,14 +92,16 @@ void MiscExplosionBox::Spawn() {
         {
             16, 16, 40
         }
-    );
+        );
+
+    SetFlags(EntityFlags::PowerArmor);
     //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
-        SetMass(400);
+        SetMass(40);
     }
     if (!GetHealth()) {
-        SetHealth(80);
+        SetHealth(150);
     }
     if (!GetDamage()) {
         SetDamage(150);
@@ -128,7 +130,7 @@ void MiscExplosionBox::Spawn() {
 //===============
 //
 void MiscExplosionBox::Respawn() {
-    //gi.DPrintf("MiscExplosionBox::Respawn();");
+    Base::Respawn();
 }
 
 //
@@ -140,7 +142,6 @@ void MiscExplosionBox::Respawn() {
 void MiscExplosionBox::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
-	//gi.DPrintf("MiscExplosionBox::PostSpawn();");
 }
 
 //
@@ -152,8 +153,6 @@ void MiscExplosionBox::PostSpawn() {
 void MiscExplosionBox::Think() {
     // Always call parent class method.
     Base::Think();
-
-	//gi.DPrintf("MiscExplosionBox::Think();");
 }
 
 
@@ -185,37 +184,36 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
     };
 
     SetOrigin(newOrigin);
-
-    // Calculate the end origin to use for tracing.
+    //
+    ////    // Calculate the end origin to use for tracing.
     vec3_t end = newOrigin + vec3_t{
         0, 0, -256.f
     };
-
-    // Exceute the trace.
-    SVGTrace trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-
-    // Return in case we hit anything.
+    //
+    //    // Exceute the trace.
+    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+    ////
+    ////    // Return in case we hit anything.
     if (trace.fraction == 1 || trace.allSolid)
         return;
-
-    // Return if the traced ent has no server entity, we need this to operate with.
-    if (trace.ent && !trace.ent->GetServerEntity()) {
-        gi.DPrintf("Entity '%s' #%i - Has no server entity", trace.ent->GetTypeInfo()->className, trace.ent->GetNumber());
-        return;
-    }
-
-    // Set new entity origin.
+    ////
+    ////    // Set new entity origin.
     SetOrigin(trace.endPosition);
-
-    // Link entity back in.
-    LinkEntity();
-
-    // Check for ground.
+    
+    //    // Check for ground.
     SVG_StepMove_CheckGround(this);
+    //
+    //    // Setup its next think time, for a frame ahead.
+    SetNextThinkTime(level.time + FRAMETIME);
 
-    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(FRAMETIME);
- 
+    //    // Link entity back in.
+    LinkEntity();
+    //
+    //     //
+    //
+    //    //// Do a check ground for the step move of this pusher.
+    //SVG_StepMove_CheckGround(this);
+
     //// Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
     //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
@@ -269,18 +267,41 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
     SpawnDebris2Chunk();
     SpawnDebris2Chunk();
     SpawnDebris2Chunk();
-    
+
     // Reset origin to saved origin.
     SetOrigin(save);
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
-    if (GetGroundEntity())
-        SVG_BecomeExplosion2(this);
-    else
-        SVG_BecomeExplosion1(this);
+    if (GetGroundEntity()) {
+        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(TempEntityEvent::Explosion1);
+        gi.WriteVector3(GetOrigin());
+        gi.Multicast(GetOrigin(), MultiCast::PHS);
+
+        SVG_InflictRadiusDamage(this, activator, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+
+        float save;
+        save = GetDelayTime();
+        SetDelayTime(0.0f);
+        UseTargets(GetActivator());
+        SetDelayTime(save);
+    } else {
+        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(TempEntityEvent::Explosion2);
+        gi.WriteVector3(GetOrigin());
+        gi.Multicast(GetOrigin(), MultiCast::PHS);
+
+        SVG_InflictRadiusDamage(this, activator, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+
+        float save;
+        save = GetDelayTime();
+        SetDelayTime(0.0f);
+        UseTargets(GetActivator());
+        SetDelayTime(save);
+    }
 
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetNextThinkTime(level.time + 2 * FRAMETIME);
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::SVGBaseEntityThinkFree);
 }
 
@@ -294,13 +315,13 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::Yes);
-    
+
     // Attacker becomes this entity its "activator".
     if (attacker)
         SetActivator(attacker);
 
     // Setup the next think and think time.
-    SetNextThinkTime(level.time + 2 * FRAMETIME);
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
 
     // Set think function.
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxExplode);
@@ -330,7 +351,7 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
 
     // Calculate ratio to use.
     float ratio = (float)other->GetMass() / (float)GetMass();
-    
+
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
 
@@ -338,7 +359,7 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
     float yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
+    SVG_StepMove_Walk(this, yaw, 40 * ratio );
     //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 
@@ -379,7 +400,7 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
 void MiscExplosionBox::SpawnDebris2Chunk() {
     // Speed to throw debris at.
     float speed = 2.f * GetDamage() / 200.f;
-    
+
     // Calculate random direction vector.
     vec3_t randomDirection = { 
         crandom(), 

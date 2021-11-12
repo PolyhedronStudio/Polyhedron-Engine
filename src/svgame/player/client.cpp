@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // ClassEntities.
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
+#include "../entities/info/InfoPlayerStart.h"
 
 // Game modes.
 #include "../gamemodes/IGameMode.h"
@@ -39,7 +40,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 
-void SVG_ClientUserinfoChanged(Entity *ent, char *userinfo);
+
+//===============
+// ClientUserInfoChanged
+//
+// called whenever the player updates a userinfo variable.
+//
+// The game can override any of the settings in place
+// (forcing skins or names, etc) before copying it off.
+//================
+void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
+    if (!ent)
+        return;
+
+    game.gameMode->ClientUserinfoChanged(ent, userinfo);
+}
 
 
 //
@@ -70,7 +85,7 @@ void SP_FixCoopSpots(Entity *self)
         d = self->state.origin - spot->state.origin;
         if (vec3_length(d) < 384) {
             if ((!self->targetName) || Q_stricmp(self->targetName, spot->targetName) != 0) {
-//              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->className, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
+                //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->className, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
                 self->targetName = spot->targetName;
             }
             return;
@@ -104,54 +119,6 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
 }
 
 //=======================================================================
-
-/*
-==============
-SVG_InitClientPersistant
-
-This is only called when the game first initializes in single player,
-but is called after each death and level change in deathmatch
-==============
-*/
-void SVG_InitClientPersistant(GameClient *client)
-{
-	gitem_t     *item = NULL;
-
-    if (!client)
-        return;
-
-	//memset(&client->persistent, 0, sizeof(client->persistent));
-    client->persistent = {};
-
-	item = SVG_FindItemByPickupName("Blaster");
-	client->persistent.selectedItem = ITEM_INDEX(item);
-	client->persistent.inventory[client->persistent.selectedItem] = 1;
-
-	client->persistent.activeWeapon = item;
-
-    client->persistent.health         = 100;
-    client->persistent.maxHealth     = 100;
-
-    client->persistent.maxBullets    = 200;
-    client->persistent.maxShells     = 100;
-    client->persistent.maxRockets    = 50;
-    client->persistent.maxGrenades   = 50;
-    client->persistent.maxCells      = 200;
-    client->persistent.maxSlugs      = 50;
-
-    client->persistent.isConnected = true;
-}
-
-
-void SVG_InitClientRespawn(GameClient *client)
-{
-    if (!client)
-        return;
-
-    client->respawn = {};
-    client->respawn.enterGameFrameNumber = level.frameNumber;
-    client->respawn.persistentCoopRespawn = client->persistent;
-}
 
 /*
 ==================
@@ -197,57 +164,6 @@ void SVG_FetchClientData(Entity *ent)
         ent->client->respawn.score = ent->client->persistent.score;
 }
 
-
-
-/*
-=======================================================================
-
-  SelectSpawnPoint
-
-=======================================================================
-*/
-/*
-===========
-SelectSpawnPoint
-
-Chooses a player start, deathmatch start, coop start, etc
-============
-*/
-void SelectSpawnPoint(Entity *ent, vec3_t &origin, vec3_t &angles)
-{
-    SVGBaseEntity *spot = nullptr;
-
-    // Find a single player start spot
-    if (!spot) {
-        //while ((spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot)) != nullptr) {
-        //    if (!game.spawnpoint[0] && spot->GetTargetName().empty())
-        //        break;
-
-        //    if (!game.spawnpoint[0] || spot->GetTargetName().empty())
-        //        continue;
-
-        //    //if (Q_stricmp(game.spawnpoint, spot->GetTargetName()) == 0)
-        //    if (spot->GetTargetName() == game.spawnpoint)
-        //        break;
-        //}
-
-        if (!spot) {
-            if (!game.spawnpoint[0]) {
-                // there wasn't a spawnpoint without a target, so use any
-                spot = SVG_FindEntityByKeyValue("classname", "info_player_start", spot);
-            }
-            if (!spot)
-                gi.Error("Couldn't find spawn point %s", game.spawnpoint);
-        }
-    }
-
-    if (spot) {
-        origin = spot->GetOrigin();
-        origin.z += 9;
-        angles = spot->GetAngles();
-    }
-}
-
 //======================================================================
 
 void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
@@ -264,36 +180,10 @@ void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, con
     //}
 }
 
-void SVG_RespawnClient(Entity *self)
-{
-    if (deathmatch->value || coop->value) {
-        // Spectator's don't leave bodies
-        if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-            game.gameMode->SpawnClientCorpse(self->classEntity);
-
-        self->serverFlags &= ~EntityServerFlags::NoClient;
-        SVG_PutClientInServer(self);
-
-        // add a teleportation effect
-        self->state.eventID = EntityEvent::PlayerTeleport;
-
-        // hold in place briefly
-        self->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
-        self->client->playerState.pmove.time = 14;
-
-        self->client->respawnTime = level.time;
-
-        return;
-    }
-
-    // restart the entire server
-    gi.AddCommandString("pushmenu loadgame\n");
-}
-
 /*
- * only called when persistent.isSpectator changes
- * note that resp.isSpectator should be the opposite of persistent.isSpectator here
- */
+* only called when persistent.isSpectator changes
+* note that resp.isSpectator should be the opposite of persistent.isSpectator here
+*/
 void spectator_respawn(Entity *ent)
 {
     int i, numspec;
@@ -302,7 +192,7 @@ void spectator_respawn(Entity *ent)
     // exceed max_spectators
     if (ent->client->persistent.isSpectator) {
         // Test if the isSpectator password was correct, if not, error and return.
-        char *value = Info_ValueForKey(ent->client->persistent.userinfo, "isSpectator");
+        char *value = Info_ValueForKey(ent->client->persistent.userinfo, "isspectator");
         if (*spectator_password->string &&
             strcmp(spectator_password->string, "none") &&
             strcmp(spectator_password->string, value)) {
@@ -313,7 +203,7 @@ void spectator_respawn(Entity *ent)
             ent->client->persistent.isSpectator = false;
 
             // Let the client go out of its isSpectator mode by using a StuffCmd.
-            gi.StuffCmd(ent, "isSpectator 0\n");
+            gi.StuffCmd(ent, "isspectator 0\n");
             return;
         }
 
@@ -330,7 +220,7 @@ void spectator_respawn(Entity *ent)
             ent->client->persistent.isSpectator = false;
 
             // Let the client go out of its isSpectator mode by using a StuffCmd.
-            gi.StuffCmd(ent, "isSpectator 0\n");
+            gi.StuffCmd(ent, "isspectator 0\n");
             return;
         }
     } else {
@@ -347,7 +237,7 @@ void spectator_respawn(Entity *ent)
             ent->client->persistent.isSpectator = true;
 
             // Let the client go in its isSpectator mode by using a StuffCmd.
-            gi.StuffCmd(ent, "isSpectator 1\n");
+            gi.StuffCmd(ent, "isspectator 1\n");
             return;
         }
     }
@@ -356,7 +246,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    SVG_PutClientInServer(ent);
+    game.gameMode->PutClientInServer(ent);
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -381,197 +271,6 @@ void spectator_respawn(Entity *ent)
 
 //==============================================================
 
-
-/*
-===========
-SVG_PutClientInServer
-
-Called when a player connects to a server or respawns in
-a deathmatch.
-============
-*/
-void SVG_PutClientInServer(Entity *ent)
-{
-    int     index;
-    vec3_t  spawn_origin, spawn_angles;
-    GameClient   *client;
-    int     i;
-
-    ClientRespawnData    resp;
-
-    // find a spawn point
-    // do it before setting health back up, so farthest
-    // ranging doesn't count this client
-    SelectSpawnPoint(ent, spawn_origin, spawn_angles);
-
-    index = ent - g_entities - 1;
-    client = ent->client;
-
-    // deathmatch wipes most client data every spawn
-    if (deathmatch->value) {
-        char        userinfo[MAX_INFO_STRING];
-
-        // Store the respawn values.
-        resp = client->respawn;
-
-        // Store user info.
-        memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
-
-        // Initialize a fresh client persistent state.
-        SVG_InitClientPersistant(client);
-
-        // Check for changed user info.
-        SVG_ClientUserinfoChanged(ent, userinfo);
-//    } else if (coop->value) {
-////      int         n;
-//        char        userinfo[MAX_INFO_STRING];
-//
-//        resp = client->respawn;
-//        memcpy(userinfo, client->persistent.userinfo, sizeof(userinfo));
-//        // this is kind of ugly, but it's how we want to handle keys in coop
-////      for (n = 0; n < game.numberOfItems; n++)
-////      {
-////          if (itemlist[n].flags & ItemFlags::IsKey)
-////              resp.persistentCoopRespawn.inventory[n] = client->persistent.inventory[n];
-////      }
-//        client->persistent = resp.persistentCoopRespawn;
-//        SVG_ClientUserinfoChanged(ent, userinfo);
-//        if (resp.score > client->persistent.score)
-//            client->persistent.score = resp.score;
-    } else {
-        resp = {};
-    }
-
-    // Store persistent client data.
-    ClientPersistantData saved = client->persistent;
-
-    // Reset the client data.
-    *client = {};
-
-    // Restore persistent client data.
-    client->persistent = saved;
-
-    // In case of death, initialize a fresh client persistent data.
-    if (client->persistent.health <= 0)
-        SVG_InitClientPersistant(client);
-
-    // Last but not least, respawn.
-    client->respawn = resp;
-
-    //
-    // Spawn client class entity.
-    //
-//    SVG_FreeClassEntity(ent);
-
-    //ent->className = "PlayerClient";
-    PlayerClient* playerClientEntity = (PlayerClient*)(ent->classEntity);
-    playerClientEntity->SetClient(&game.clients[index]);
-    playerClientEntity->Precache();
-    playerClientEntity->Spawn();
-    playerClientEntity->PostSpawn();
-
-    // copy some data from the client to the entity
-    SVG_FetchClientData(ent);
-
-    //
-    // clear entity values
-    //
-    //ent->groundEntityPtr = NULL;
-    //ent->client = &game.clients[index];
-    //ent->takeDamage = TakeDamage::Aim;
-    //ent->classEntity->SetMoveType(MoveType::Walk);
-    //ent->viewHeight = 22;
-    //ent->inUse = true;
-    //ent->className = "PlayerClient";
-    //ent->mass = 200;
-    //ent->solid = Solid::BoundingBox;
-    //ent->deadFlag = DEAD_NO;
-    //ent->airFinishedTime = level.time + 12;
-    //ent->clipMask = CONTENTS_MASK_PLAYERSOLID;
-    //ent->model = "players/male/tris.md2";
-    ////ent->Pain = SVG_Player_Pain;
-    ////ent->Die = SVG_Player_Die;
-    //ent->waterLevel = 0;
-    //ent->waterType = 0;
-    //ent->flags &= ~EntityFlags::NoKnockBack;
-    //ent->serverFlags &= ~EntityServerFlags::DeadMonster;
-
-    //ent->mins = vec3_scale(PM_MINS, PM_SCALE);
-    //ent->maxs = vec3_scale(PM_MAXS, PM_SCALE);
-    //ent->velocity = vec3_zero();
-
-    // Clear playerstate values
-    //memset(&ent->client->playerState, 0, sizeof(client->playerState));
-    client->playerState = {};
-
-    // Assign spawn origin to player state origin.
-    client->playerState.pmove.origin = spawn_origin;
-    
-    // Assign spawn origin to the entity state origin, ensure that it is off-ground.
-    ent->state.origin = ent->state.oldOrigin = spawn_origin + vec3_t{ 0.f, 0.f, 1.f };
-
-    // Set FOV, fixed, or custom.
-    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
-        client->playerState.fov = 90;
-    } else {
-        client->playerState.fov = atoi(Info_ValueForKey(client->persistent.userinfo, "fov"));
-        if (client->playerState.fov < 1)
-            client->playerState.fov = 90;
-        else if (client->playerState.fov > 160)
-            client->playerState.fov = 160;
-    }
-
-    client->playerState.gunIndex = gi.ModelIndex(client->persistent.activeWeapon->viewModel);
-
-    // Clear certain entity state values
-    ent->state.effects = 0;
-    ent->state.modelIndex = 255;        // Will use the skin specified model
-    ent->state.modelIndex2 = 255;       // Custom gun model
-    // sknum is player num and weapon number
-    // weapon number will be added in changeweapon
-    ent->state.skinNumber = ent - g_entities - 1;
-
-    ent->state.frame = 0;
-
-    // set the delta angle
-    for (i = 0 ; i < 3 ; i++) {
-        client->playerState.pmove.deltaAngles[i] = spawn_angles[i] - client->respawn.commandViewAngles[i];
-    }
-
-    ent->state.angles[vec3_t::Pitch] = 0;
-    ent->state.angles[vec3_t::Yaw] = spawn_angles[vec3_t::Yaw];
-    ent->state.angles[vec3_t::Roll] = 0;
-
-    // Setup angles for playerstate and client aim.
-    client->playerState.pmove.viewAngles = ent->state.angles; // VectorCopy(ent->state.angles, client->playerState.pmove.viewAngles);
-    client->aimAngles = ent->state.angles; //VectorCopy(ent->state.angles, client->aimAngles);
-
-    // spawn a isSpectator
-    if (client->persistent.isSpectator) {
-        client->chaseTarget = NULL;
-
-        client->respawn.isSpectator = true;
-
-        ent->classEntity->SetMoveType(MoveType::Spectator);
-        ent->solid = Solid::Not;
-        ent->serverFlags |= EntityServerFlags::NoClient;
-        ent->client->playerState.gunIndex = 0;
-        gi.LinkEntity(ent);
-        return;
-    } else
-        client->respawn.isSpectator = false;
-
-    if (!SVG_KillBox(ent->classEntity)) {
-        // could't spawn in?
-    }
-
-    gi.LinkEntity(ent);
-
-    // force the current weapon up
-    client->newWeapon = client->persistent.activeWeapon;
-    SVG_ChangeWeapon((PlayerClient*)ent->classEntity);
-}
-
 /*
 =====================
 ClientBeginDeathmatch
@@ -582,27 +281,27 @@ deathmatch mode, so clear everything out before starting them.
 */
 void SVG_ClientBeginDeathmatch(Entity *ent)
 {
-    SVG_InitEntity(ent);
+    //SVG_InitEntity(ent);
 
-    SVG_InitClientRespawn(ent->client);
+    //game.gameMode->InitializeClientRespawnData(ent->client);
 
-    // locate ent at a spawn point
-    SVG_PutClientInServer(ent);
+    //// locate ent at a spawn point
+    //game.gameMode->PutClientInServer(ent);
 
-    if (level.intermission.time) {
-        HUD_MoveClientToIntermission(ent);
-    } else {
-        // send effect
-        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-        gi.WriteShort(ent - g_entities);
-        gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(ent->state.origin, MultiCast::PVS);
-    }
+    //if (level.intermission.time) {
+    //    HUD_MoveClientToIntermission(ent);
+    //} else {
+    //    // send effect
+    //    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    //    gi.WriteShort(ent - g_entities);
+    //    gi.WriteByte(MuzzleFlashType::Login);
+    //    gi.Multicast(ent->state.origin, MultiCast::PVS);
+    //}
 
-    gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
+    //gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
 
-    // make sure all view stuff is valid
-    SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
+    //// make sure all view stuff is valid
+    //game.gameMode->ClientEndServerFrame(ent);
 }
 
 
@@ -623,70 +322,7 @@ void SVG_ClientBegin(Entity *ent)
 
     // Let the game mode decide from here on out.
     game.gameMode->ClientBegin(ent);
-
-    // Called to make sure all view stuff is valid
-    SVG_ClientEndServerFrame((PlayerClient*)ent->classEntity);
-}
-
-/*
-===========
-SVG_ClientUserinfoChanged
-
-called whenever the player updates a userinfo variable.
-
-The game can override any of the settings in place
-(forcing skins or names, etc) before copying it off.
-============
-*/
-void SVG_ClientUserinfoChanged(Entity *ent, char *userinfo)
-{
-    char    *s;
-    int     playernum;
-
-    // check for malformed or illegal info strings
-    if (!Info_Validate(userinfo)) {
-        strcpy(userinfo, "\\name\\badinfo\\skin\\male/grunt");
-    }
-
-    // set name
-    s = Info_ValueForKey(userinfo, "name");
-    strncpy(ent->client->persistent.netname, s, sizeof(ent->client->persistent.netname) - 1);
-
-    // set isSpectator
-    s = Info_ValueForKey(userinfo, "isSpectator");
-    // spectators are only supported in deathmatch
-    if (deathmatch->value && *s && strcmp(s, "0"))
-        ent->client->persistent.isSpectator = true;
-    else
-        ent->client->persistent.isSpectator = false;
-
-    // set skin
-    s = Info_ValueForKey(userinfo, "skin");
-
-    playernum = ent - g_entities - 1;
-
-    // combine name and skin into a configstring
-    gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
-
-    // fov
-    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
-        ent->client->playerState.fov = 90;
-    } else {
-        ent->client->playerState.fov = atoi(Info_ValueForKey(userinfo, "fov"));
-        if (ent->client->playerState.fov < 1)
-            ent->client->playerState.fov = 90;
-        else if (ent->client->playerState.fov > 160)
-            ent->client->playerState.fov = 160;
-    }
-
-    // handedness
-    s = Info_ValueForKey(userinfo, "hand");
-    if (strlen(s)) {
-        ent->client->persistent.hand = atoi(s);
-    }
-
-    // save off the userinfo in case we want to check something later
-    strncpy(ent->client->persistent.userinfo, userinfo, sizeof(ent->client->persistent.userinfo) - 1);
+    //game.gameMode->ClientEndServerFrame(ent);
 }
 
 
@@ -704,32 +340,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    // Check if the game mode allows for this specific client to connect to it.
-    if (!game.gameMode->ClientCanConnect(ent, userinfo))
-        return false;
-
-    // If we reached this point, game mode states that they can connect.
-    // As such, we assign the client to this server entity.
-    ent->client = game.clients + (ent - g_entities - 1);
-
-    // If there is already a body waiting for us (a loadgame), just
-    // take it, otherwise spawn one from scratch
-    if (ent->inUse == false) {
-        // Clear the respawning variables
-        SVG_InitClientRespawn(ent->client);
-        if (!game.autoSaved || !ent->client->persistent.activeWeapon)
-            SVG_InitClientPersistant(ent->client);
-    }
-
-    // Check for changed user info.
-    SVG_ClientUserinfoChanged(ent, userinfo);
-
-    // Inform the game mode about it.
-    game.gameMode->ClientConnect(ent);
-
-    ent->serverFlags = 0; // make sure we start with known default
-    ent->client->persistent.isConnected = true;
-    return true;
+    return game.gameMode->ClientConnect(ent, userinfo);
 }
 
 /*
@@ -801,13 +412,13 @@ usually be a couple times for each server frame.
 */
 void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 {
-    GameClient* client = nullptr;
+    ServersClient* client = nullptr;
     PlayerClient *classEntity = nullptr;
     Entity* other = nullptr;
 
 
     PlayerMove pm = {};
-    
+
     // Sanity checks.
     if (!serverEntity) {
         Com_Error(ErrorType::ERR_DROP, "%s: has a NULL *ent!\n", __FUNCTION__);
@@ -860,7 +471,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
             client->playerState.pmove.type = PlayerMoveType::Normal;
 
         client->playerState.pmove.gravity = sv_gravity->value;
-        
+
         // Copy over the latest playerstate its pmove state.
         pm.state = client->playerState.pmove;
 
@@ -940,9 +551,9 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
                     break;
             if (j != i)
                 continue;   // duplicated
-            //if (!other->Touch)
-            //    continue;
-            //other->Touch(other, ent, NULL, NULL);
+                            //if (!other->Touch)
+                            //    continue;
+                            //other->Touch(other, ent, NULL, NULL);
             if (!other->classEntity)
                 continue;
             other->classEntity->Touch(other->classEntity, classEntity, NULL, NULL);

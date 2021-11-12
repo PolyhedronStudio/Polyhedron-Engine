@@ -38,7 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //    unsigned    lastReceivedTime;      // for timeouts
 //    unsigned    lastSentTime;          // for retransmits
 //
-//    netadr_t    remoteNetAddress;
+//    NetAdr    remoteNetAddress;
 //    int         qport;              // qport value to write when transmitting
 //
 //    size_t      reliableLength;
@@ -90,7 +90,7 @@ public:
     uint32_t    lastReceivedTime;   // For timeouts.
     uint32_t    lastSentTime;       // For retransmits.
 
-    netadr_t    remoteNetAddress;   // NetChan settled to the remote ahost.
+    NetAdr    remoteNetAddress;   // NetChan settled to the remote ahost.
     std::string remoteAddress;      // Textual address.
     int32_t     remoteQPort;        // qport value to write when transmitting
 
@@ -113,17 +113,17 @@ public:
     int         fragmentSequence;
 
     // Reliable staging and holding areas
-    SizeBuffer   message;                    // writing buffer for reliable data
+    SizeBuffer  message;                    // writing buffer for reliable data
     byte        messageBuffer[MAX_MSGLEN];  // leave space for header
 
     // Message is copied to this buffer when it is first transfered
-    SizeBuffer   reliable;
+    SizeBuffer  reliable;
     byte        reliableBuffer[MAX_MSGLEN];   // unacked reliable message
 
-    SizeBuffer   inFragment;
+    SizeBuffer  inFragment;
     byte        inFragmentBuffer[MAX_MSGLEN];
 
-    SizeBuffer   outFragment;
+    SizeBuffer  outFragment;
     byte        outFragmentBuffer[MAX_MSGLEN];
 };
 
@@ -132,8 +132,8 @@ extern cvar_t       *net_maxmsglen;
 extern cvar_t       *net_chantype;
 
 void Netchan_Init(void);
-void Netchan_OutOfBand(NetSource sock, const netadr_t *adr, const char *format, ...) q_printf(3, 4);
-NetChannel *Netchan_Setup(NetSource sock, const netadr_t *adr, int qport, size_t maxPacketLength, int protocol);
+void Netchan_OutOfBand(NetSource sock, const NetAdr *adr, const char *format, ...) q_printf(3, 4);
+NetChannel *Netchan_Setup(NetSource sock, const NetAdr *adr, int qport, size_t maxPacketLength, int protocol);
 
 size_t      Netchan_Transmit(NetChannel*, size_t, const void*, int);
 size_t      Netchan_TransmitNextFragment(NetChannel*);

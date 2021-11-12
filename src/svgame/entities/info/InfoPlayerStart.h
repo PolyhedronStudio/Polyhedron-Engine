@@ -6,8 +6,7 @@
 //
 //
 */
-#ifndef __SVGAME_ENTITIES_INFO_INFOPLAYERSTART_H__
-#define __SVGAME_ENTITIES_INFO_INFOPLAYERSTART_H__
+#pragma once
 
 class SVGBaseEntity;
 
@@ -30,5 +29,3 @@ public:
 private:
 
 };
-
-#endif // __SVGAME_ENTITIES_INFO_INFOPLAYERSTART_H__

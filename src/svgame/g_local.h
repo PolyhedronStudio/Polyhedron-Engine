@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/list.h"
 
 // define GAME_INCLUDE so that game.h does not define the
-// short, server-visible GameClient and Entity structures,
+// short, server-visible ServersClient and Entity structures,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
 #include "shared/svgame.h"
@@ -41,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 class SVGBaseEntity;
 class PlayerClient;
 class IGameMode;
+struct entity_s;
 
 //==================================================================
 
@@ -76,7 +77,7 @@ struct EntityFlags {
     static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
 };
 
-constexpr float FRAMETIME = BASE_FRAMETIME_1000; // With the game set to run at 20 ticks, this means FRAMETIME = 0.05f;
+constexpr float FRAMETIME = BASE_FRAMETIME_1000; // Adjusts to the game's tick level.
 
 // memory tags to allow dynamic memory to be cleaned up
 constexpr int32_t TAG_GAME = 765;     // clear when unloading the dll
@@ -330,7 +331,7 @@ struct GameLocals {
     IGameMode* gameMode;
 
     // List of clients, based on sv_maxclients, or rather in the game dll: maxclients cvar.
-    GameClient *clients;
+    ServersClient *clients;
 
     // Can't store spawnpoint32_t in level, because
     // it would get overwritten by the savegame restore
@@ -499,7 +500,7 @@ extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 #define STOFS(x) q_offsetof(TemporarySpawnFields, x)
 #define LLOFS(x) q_offsetof(LevelLocals, x)
 #define GLOFS(x) q_offsetof(GameLocals, x)
-#define CLOFS(x) q_offsetof(GameClient, x)
+#define CLOFS(x) q_offsetof(ServersClient, x)
 
 // Very ugly macros, need to rid ourselves and inline func them at the least.
 // Also, there should be alternatives in our utils for math lib as is.
@@ -654,8 +655,8 @@ Entity *SVG_PlayerTrail_LastSpot(void);
 //
 // g_player.c
 //
-void SVG_Player_Pain(Entity *self, Entity *other, float kick, int32_t damage);
-void SVG_Player_Die(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t& point);
+void SVG_Client_Pain(Entity *self, Entity *other, float kick, int32_t damage);
+void SVG_Client_Die(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t& point);
 
 //
 // g_svcmds.c
@@ -770,10 +771,10 @@ struct PlayerAnimation {
 };
 
 //-------------------
-// The ClientPersistantData struct manages data that has to stay persistent
+// The ClientPersistentData struct manages data that has to stay persistent
 // across level changes.
 //-------------------
-struct ClientPersistantData {
+struct ClientPersistentData {
     char userinfo[MAX_INFO_STRING];
     char netname[16];
     int32_t hand;
@@ -812,12 +813,12 @@ struct ClientPersistantData {
 // persistent during mapchanges/respawns in a coop game.
 //-------------------
 struct ClientRespawnData {
-    ClientPersistantData persistentCoopRespawn;   // What to set client->persistent to on a respawn
-    int32_t enterGameFrameNumber;         // level.frameNumber the client entered the game
-    int32_t score;              // frags, etc
-    vec3_t commandViewAngles;         // angles sent over in the last command
+    ClientPersistentData persistentCoopRespawn;   // What to set client->persistent to on a respawn
+    int32_t enterGameFrameNumber;       // level.frameNumber the client entered the game
+    int32_t score;                      // frags, etc
+    vec3_t commandViewAngles;           // angles sent over in the last command
 
-    qboolean isSpectator;          // client is a isSpectator
+    qboolean isSpectator;               // client is a isSpectator
 };
 
 
@@ -835,7 +836,7 @@ struct gclient_s {
     int32_t ping;
 
     // private to game
-    ClientPersistantData persistent;
+    ClientPersistentData persistent;
     ClientRespawnData respawn;
 
     qboolean showScores;         // set layout stat
@@ -895,8 +896,8 @@ struct gclient_s {
 
     // animation vars
     struct {
-        int32_t         endFrame;
-        int32_t         priorityAnimation;
+        int32_t     endFrame;
+        int32_t     priorityAnimation;
         qboolean    isDucking;
         qboolean    isRunning;
     } animation;
@@ -952,6 +953,7 @@ struct entity_s {
     // If numClusters is -1, use headNodew instead.
     int32_t numClusters;       // if -1, use headNode instead
     int32_t clusterNumbers[MAX_ENT_CLUSTERS];
+
     // Only use this instead of numClusters if numClusters == -1
     int32_t headNode;           
     int32_t areaNumber;
@@ -965,10 +967,10 @@ struct entity_s {
     int32_t clipMask;
     Entity *owner;
 
-
-    // DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
-    // EXPECTS THE FIELDS IN THAT ORDER!
-
+    // !!!!!!!!!!!!!!!!!
+    // !! DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
+    // !! EXPECTS THE FIELDS IN THAT ORDER!
+    // !!!!!!!!!!!!!!!!!
     //================================
     // Pointer to the actual game class entity belonging to this server entity.
     SVGBaseEntity* classEntity;

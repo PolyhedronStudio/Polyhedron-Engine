@@ -14,19 +14,10 @@ class PlayerClient;
 qboolean SVG_ClientConnect(Entity* ent, char* userinfo);
 void SVG_ClientDisconnect(Entity* ent);
 
-void SVG_PutClientInServer(Entity* ent);
-void SVG_InitClientPersistant(GameClient* client);
-void SVG_InitClientRespawn(GameClient* client);
 void SVG_HUD_BeginIntermission(Entity* targ);
-
-// Respawns the actual client.
-void SVG_RespawnClient(Entity* ent);
 
 // Tosses the client weapon.
 void SVG_TossClientWeapon(PlayerClient* playerClient);
-
-// Updates the client obituary.
-void SVG_ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker);
 
 void SVG_ClientBegin(Entity* ent);
 void SVG_ClientCommand(Entity* ent);

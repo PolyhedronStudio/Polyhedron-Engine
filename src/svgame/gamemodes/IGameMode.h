@@ -23,8 +23,7 @@ public:
     //
     IGameMode() {};
     virtual ~IGameMode() {};
-
-
+    
     //
     // Map related, also known as the "current game".
     // 
@@ -39,38 +38,61 @@ public:
     // Game modes have the ability to implement their own, this can be of use
     // for specific game modes. They like to have control over this.
     //
-    // Determines whether a client is allowed to connect at all.
-    // Returns false in case a client is allowed to connect.
-    virtual qboolean ClientCanConnect(Entity* serverEntity, char* userInfo) = 0;
     // Called when a client connects. This does not get called between
     // load games, of course. A client is still connected to the current
     // game session in that case.
-    virtual void ClientConnect(Entity* serverEntity) = 0;
+    virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) = 0;
     // Called when a client has finished connecting, and is ready
     // to be placed into the game.This will happen every map load.
     virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
-    virtual void ClientBeginServerFrame(PlayerClient* ent) = 0;
+    virtual void ClientBeginServerFrame(Entity* serverEntity) = 0;
+    // Called for each player at the end of the server frame and right 
+    // after spawning.
+    virtual void ClientEndServerFrame(Entity *serverEntity) = 0;
     // Called when a client disconnects. This does not get called between
     // load games.
     virtual void ClientDisconnect(PlayerClient* ent) = 0;
+    //called whenever the player updates a userinfo variable.
+
+    // The game can override any of the settings in place
+    // (forcing skins or names, etc) before copying it off.
+    virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) = 0;
     // Called in order to process "obituary" updates, aka with what weapon did this client
     // or did other clients, kill any other client/entity.
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
     
 
     //
-    // Client related functions/utilities.
-    // Mainly used by the Client callbacks.
+    // Client related faciliated functions.
     //
-    // Can be used to legit respawn a client at a spawn point.
-    // For SinglePlayer you want to take it a bit easy with this function.
-    // For Multiplayer games however, you definitely want to use this function.
-    //
-    // SP games: Use it once... (or at load time)
-    // MP games: Use it every respawn.
-    virtual void PutClientInServer(PlayerClient* ent) = 0;
+    // This is only called when the game first initializes in single player,
+    // but is called after each death and level change in deathmatch
+    virtual void InitializeClientPersistentData(ServersClient* client) = 0;
+    // This is only called when the game first initializes in single player,
+    // but is called after each death and level change in deathmatch
+    virtual void InitializeClientRespawnData(ServersClient *client) = 0;
+
+    // Choose any info_player_start or its derivates, it'll do a subclassof check, so the only valid classnames are
+    // those who have inherited from info_player_start. (info_player_deathmatch, etc).
+    virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) = 0;
+    // Called when a player connects to a single and multiplayer. 
+    // In the case of a SP mode death, the loadmenu pops up and selecting a load game
+    // will restart the server.
+    // In thecase of a MP mode death however, after a small intermission time, it'll
+    // call this function again to respawn our player.
+    virtual void PutClientInServer(Entity* ent) = 0;
+    // Respawns a client (if that is what the game mode wants).
+    virtual void RespawnClient(PlayerClient* ent) = 0;
+
+     // Some information that should be persistant, like health,
+    // is still stored in the edict structure, so it needs to
+    // be mirrored out to the client structure before all the
+    // edicts are wiped.
+    virtual void SaveClientEntityData(void) = 0;
+    // Fetch client data that was stored between previous entity wipe session.
+    virtual void FetchClientEntityData(Entity* ent) = 0;
 
 
     //
@@ -86,6 +108,7 @@ public:
     // Returns the entities found within a radius. Great for game mode fun times,
     // and that is why it resides here. Allows for customization.
     virtual BaseEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
+
 
     //
     // Combat GameMode actions.
@@ -125,9 +148,9 @@ public:
     // Retrieves the current means of death for whichever client/entity is being processed.
     virtual const int32_t& GetCurrentMeansOfDeath() = 0;
 
+
     //
-    // Specific random gameplay related functionality. 
-    // (Spawning gibs, checking velocity damage etc.)
+    // Random Gameplay Utility Functions. s(Spawning gibs, checking velocity damage etc.)
     //
     // Spawns a temporary entity for a client, this is best suited to be in game mode.
     // Allows for all modes to customize that when wished for.
@@ -152,6 +175,8 @@ public:
 
 
 protected:
+
+
     // Means of Death, for the current client that is being processed this frame.
     int32_t meansOfDeath;
 };

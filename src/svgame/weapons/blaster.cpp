@@ -34,7 +34,7 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
     vec3_t  forward, right;
     vec3_t  start;
 
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
     if (is_quad)
         damage *= 4;
     AngleVectors(client->aimAngles, &forward, &right, NULL);

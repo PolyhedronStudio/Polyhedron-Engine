@@ -283,64 +283,6 @@ void SVG_FireShotgun(SVGBaseEntity* self, const vec3_t &start, const vec3_t &aim
 //
 //===============
 // SVG_FireBlaster
-// 
-// Fires a single blaster bolt.  Used by the blaster and hyper blaster.
-//===============
-//
-void blaster_touch(Entity *self, Entity *other, cplane_t *plane, csurface_t *surf)
-{
-    int mod;
-
-    // N&C: From Yamagi Q2, this seems to resolve our random crashes at times.
-    if (!self || !other) // Plane and Surf can be NULL
-    {
-        SVG_FreeEntity(self);
-        return;
-    }
-
-    if (other == self->owner)
-        return;
-
-    if (surf && (surf->flags & SURF_SKY)) {
-        SVG_FreeEntity(self);
-        return;
-    }
-
-//    if (self->owner->client)
-//        SVG_PlayerNoise(self->owner, self->state.origin, PNOISE_IMPACT);
-
-    //if (other->takeDamage) {
-    //    mod = MeansOfDeath::Blaster;
-
-    //    // N&C: Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
-    //    if (plane)
-    //    {
-    //        //SVG_InflictDamage(other, self, self->owner, self->velocity, self->state.origin,
-    //        //    plane->normal, self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
-    //    }
-    //    else
-    //    {
-    //        //SVG_InflictDamage(other, self, self->owner, self->velocity, self->state.origin,
-    //        //    vec3_zero(), self->damage, 1, DamageFlags::EnergyBasedWeapon, mod);
-    //    }
-
-    //} else {
-    //    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
-    //    gi.WriteByte(TempEntityEvent::Blaster);
-    //    gi.WriteVector3(self->state.origin);
-    //    if (!plane)
-    //        gi.WriteVector3(vec3_zero());
-    //    else
-    //        gi.WriteVector3(plane->normal);
-    //    gi.Multicast(&self->state.origin, MultiCast::PVS);
-    //}
-
-    SVG_FreeEntity(self);
-}
-
-//
-//===============
-// SVG_FireBlaster
 //
 // Fire projectiles as deadmonsters, so that if prediction is used against 
 // the objects the player isn't solid clipped against it. 

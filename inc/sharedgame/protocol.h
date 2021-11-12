@@ -18,7 +18,6 @@
 // The enum starts at 22, and has room up to 32 for custom commands.
 //-------------------
 typedef enum {
-
     SVG_CMD_MUZZLEFLASH = 22,
     SVG_CMD_MUZZLEFLASH2,
     SVG_CMD_TEMP_ENTITY,
@@ -37,5 +36,7 @@ typedef enum {
 typedef enum {
     CLG_CMD_NUM_TYPES = 13,
 } ClientGameCommands;
+
+
 
 #endif

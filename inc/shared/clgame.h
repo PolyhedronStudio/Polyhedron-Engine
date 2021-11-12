@@ -222,11 +222,6 @@ extern "C" {
         // values.
         void            (*UpdateListenerOrigin) (void);
 
-        // Tells the client to update a setting. In return, it'll be
-        // networked to the server to notify it about the specific
-        // client setting.
-        void            (*UpdateSetting) (clientSetting_t setting, int value);
-
         //
         // Client state.
         // Sets the client load state.
