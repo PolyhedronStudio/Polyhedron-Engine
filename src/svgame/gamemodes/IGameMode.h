@@ -69,10 +69,10 @@ public:
     //
     // This is only called when the game first initializes in single player,
     // but is called after each death and level change in deathmatch
-    virtual void InitializeClientPersistentData(GameClient* client) = 0;
+    virtual void InitializeClientPersistentData(ServersClient* client) = 0;
     // This is only called when the game first initializes in single player,
     // but is called after each death and level change in deathmatch
-    virtual void InitializeClientRespawnData(GameClient *client) = 0;
+    virtual void InitializeClientRespawnData(ServersClient *client) = 0;
 
     // Choose any info_player_start or its derivates, it'll do a subclassof check, so the only valid classnames are
     // those who have inherited from info_player_start. (info_player_deathmatch, etc).

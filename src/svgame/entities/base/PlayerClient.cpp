@@ -93,6 +93,7 @@ void PlayerClient::Spawn() {
 //===============
 //
 void PlayerClient::Respawn() {
+    Base::Respawn();
     gi.DPrintf("PlayerClient::Respawn();");
 }
 
@@ -263,7 +264,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 // 
 //===============
 void PlayerClient::SetEvent() {
-    GameClient* client = GetClient();
+    ServersClient* client = GetClient();
 
     if (!client) {
         return;
@@ -313,7 +314,7 @@ void PlayerClient::SetSound() {
     const char    *weap; // C++20: STRING: Added const to char*
 
     // Check whether the PlayerClient is hooked up to a valid client.
-    GameClient* client = GetClient();
+    ServersClient* client = GetClient();
 
     if (!client) {
         return;
@@ -402,7 +403,7 @@ void PlayerClient::CheckFallingDamage()
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    GameClient* client = GetClient();
+    ServersClient* client = GetClient();
 
     if (!client) {
         return;
@@ -482,7 +483,7 @@ void PlayerClient::CheckWorldEffects()
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    GameClient* client = GetClient();
+    ServersClient* client = GetClient();
 
     if (!client)
         return;
@@ -619,7 +620,7 @@ void PlayerClient::ApplyDamageFeedback() {
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    GameClient* client = GetClient();
+    ServersClient* client = GetClient();
     if (!client)
         return;
 
@@ -759,7 +760,7 @@ void PlayerClient::CalculateViewOffset()
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    GameClient* client = GetClient();
+    ServersClient* client = GetClient();
 
     if (!client) {
         return;
@@ -856,7 +857,7 @@ void PlayerClient::CalculateGunOffset() {
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    GameClient* client = GetClient();
+    ServersClient* client = GetClient();
 
     if (!client) {
         return;
@@ -907,7 +908,7 @@ void PlayerClient::CalculateGunOffset() {
 //===============
 //
 void PlayerClient::CalculateScreenBlend() {
-        GameClient* client = GetClient();
+        ServersClient* client = GetClient();
 
     if (!client) {
         return;
@@ -958,13 +959,15 @@ void PlayerClient::SetAnimationFrame() {
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    GameClient* client = nullptr;
+    ServersClient* client = GetClient();
 
-    if (!client)
+    if (!client) {
         return;
+    }
 
-    if (GetModelIndex() != 255)
+    if (GetModelIndex() != 255) {
         return;     // not in the player model
+    }
 
     if (client->playerState.pmove.flags & PMF_DUCKED)
         isDucking = true;

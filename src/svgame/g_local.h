@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/list.h"
 
 // define GAME_INCLUDE so that game.h does not define the
-// short, server-visible GameClient and Entity structures,
+// short, server-visible ServersClient and Entity structures,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
 #include "shared/svgame.h"
@@ -331,7 +331,7 @@ struct GameLocals {
     IGameMode* gameMode;
 
     // List of clients, based on sv_maxclients, or rather in the game dll: maxclients cvar.
-    GameClient *clients;
+    ServersClient *clients;
 
     // Can't store spawnpoint32_t in level, because
     // it would get overwritten by the savegame restore
@@ -500,7 +500,7 @@ extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 #define STOFS(x) q_offsetof(TemporarySpawnFields, x)
 #define LLOFS(x) q_offsetof(LevelLocals, x)
 #define GLOFS(x) q_offsetof(GameLocals, x)
-#define CLOFS(x) q_offsetof(GameClient, x)
+#define CLOFS(x) q_offsetof(ServersClient, x)
 
 // Very ugly macros, need to rid ourselves and inline func them at the least.
 // Also, there should be alternatives in our utils for math lib as is.

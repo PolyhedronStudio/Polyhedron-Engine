@@ -277,7 +277,7 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     SetCurrentMeansOfDeath(mod);
 
     // Fetch client.
-    GameClient* client = target->GetClient();
+    ServersClient* client = target->GetClient();
 
     // Lame thing, regarding the sparks to use. Ancient code, keeping it for now.
     int32_t te_sparks = TempEntityEvent::Sparks;
@@ -630,7 +630,7 @@ void DefaultGameMode::ClientBeginServerFrame(Entity* serverEntity) {
         return;
 
     // Fetch the client.
-    GameClient* client = serverEntity->client;
+    ServersClient* client = serverEntity->client;
     PlayerClient* player = (PlayerClient*)serverEntity->classEntity;
     // This has to go ofc.... lol. What it simply does though, is determine whether there is 
     // a need to respawn as spectator.
@@ -696,13 +696,13 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     }
 
     // Setup the current player and entity being processed.
-    GameClient *client = serverEntity->client;
+    ServersClient *client = serverEntity->client;
 
     // Used for in this function, the classEntity of the given serverEntity.
     PlayerClient* classEntity = (PlayerClient*)serverEntity->classEntity;
 
     // Fetch the bobMove in use for classEntity.
-    PlayerClient::BobMoveCycle &bobMove = classEntity->GetBobMoveCycle();
+    PlayerClient::BobMoveCycle& bobMoveCycle = classEntity->GetBobMoveCycle();
 
     //
     // If the origin or velocity have changed since ClientThink(),
@@ -755,39 +755,49 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
     //
     vec3_t playerVelocity = classEntity->GetVelocity();
     // Without * FRAMETIME = XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
-    bobMove.XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+    bobMoveCycle.XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
-    if (bobMove.XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
+    if (bobMoveCycle.XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
         // Special handling for when not on ground.
-        bobMove.move = 0;
+        bobMoveCycle.move = 0;
 
         // Start at beginning of cycle again (See the else if statement.)
         client->bobTime = 0;
     } else if (classEntity->GetGroundEntity() || classEntity->GetWaterLevel() == 2) {
         // So bobbing only cycles when on ground.
-        if (bobMove.XYSpeed > 450)
-            bobMove.move = 0.25;
-        else if (bobMove.XYSpeed > 210)
-            bobMove.move = 0.125;
-        else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2 && bobMove.XYSpeed > 100)
-            bobMove.move = 0.225;
-        else if (bobMove.XYSpeed > 100)
-            bobMove.move = 0.0825;
+        if (bobMoveCycle.XYSpeed > 450)
+            bobMoveCycle.move = 0.25;
+        else if (bobMoveCycle.XYSpeed > 210)
+            bobMoveCycle.move = 0.125;
+        else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100)
+            bobMoveCycle.move = 0.225;
+        else if (bobMoveCycle.XYSpeed > 100)
+            bobMoveCycle.move = 0.0825;
         else if (!classEntity->GetGroundEntity() && classEntity->GetWaterLevel() == 2)
-            bobMove.move = 0.1625;
+            bobMoveCycle.move = 0.1625;
         else
-            bobMove.move = 0.03125;
+            bobMoveCycle.move = 0.03125;
     }
 
     // Generate bob time.
-    bobTime = (client->bobTime += (bobMove.move / 6));
+    bobMoveCycle.move /= 3.5;
+    bobTime = (client->bobTime += bobMoveCycle.move);
 
-    //client->bobTime += bobMove * FRAMETIME;
     if (client->playerState.pmove.flags & PMF_DUCKED)
-        bobTime *= 4;   // N&C: Footstep tweak.
-    
-    bobMove.cycle = (int)bobTime;
-    bobMove.fracSin = std::fabsf(std::sinf(bobTime * M_PI));
+        bobTime *= 1.5;
+
+    bobMoveCycle.cycle = (int)bobTime;
+    bobMoveCycle.fracSin = fabs(sin(bobTime * M_PI));
+    //   bobTime = (client->bobTime += (bobMove.move /= 4));
+
+ //   //client->bobTime += bobMove * FRAMETIME;
+ //   if (client->playerState.pmove.flags & PMF_DUCKED)
+ //       bobTime *= 4;   // N&C: Footstep tweak.
+ ///*   else if (client->playerState.pmove.flags & PMF_ON_GROUND)
+ //       bobTime *= 2;*/
+ //   
+ //   bobMove.cycle = (int)bobTime;
+ //   bobMove.fracSin = std::fabsf(std::sinf(bobTime * M_PI));
 
     // Detect hitting the floor, and apply damage appropriately.
     classEntity->CheckFallingDamage();
@@ -989,7 +999,7 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
 //===============
 void DefaultGameMode::ClientDisconnect(PlayerClient* player) {
     // Fetch the client.
-    GameClient* client = player->GetClient();
+    ServersClient* client = player->GetClient();
 
     // Print who disconnected.
     gi.BPrintf(PRINT_HIGH, "%s disconnected\n", client->persistent.netname);
@@ -1226,7 +1236,7 @@ void DefaultGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
 }
 
 
-void DefaultGameMode::InitializeClientPersistentData(GameClient* client) {
+void DefaultGameMode::InitializeClientPersistentData(ServersClient* client) {
     gitem_t     *item = NULL;
 
     if (!client)
@@ -1254,7 +1264,7 @@ void DefaultGameMode::InitializeClientPersistentData(GameClient* client) {
     client->persistent.isConnected = true;
 }
 
-void DefaultGameMode::InitializeClientRespawnData(GameClient* client) {
+void DefaultGameMode::InitializeClientRespawnData(ServersClient* client) {
     if (!client)
         return;
 
@@ -1337,7 +1347,7 @@ void DefaultGameMode::PutClientInServer(Entity *ent) {
 
     // Fetch the entity index, and the client right off the bat.
     int32_t index = ent - g_entities - 1;
-    GameClient* client = ent->client;
+    ServersClient* client = ent->client;
 
     // Deathmatch wipes most client data every spawn
     //-----------------------------------------------------------------------

@@ -147,7 +147,7 @@ void SVG_ChangeWeapon(PlayerClient*ent)
     if (!ent)
         return;
 
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     client->persistent.lastWeapon = client->persistent.activeWeapon;
     client->persistent.activeWeapon = client->newWeapon;
@@ -196,7 +196,7 @@ NoAmmoWeaponChange
 */
 void NoAmmoWeaponChange(PlayerClient *ent)
 {
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     if (client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("bullets"))]
         &&  client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("machinegun"))]) {
@@ -218,7 +218,7 @@ void SVG_ThinkWeapon(PlayerClient *ent)
     if (!ent)
         return;
 
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     if (!client)
         return;
@@ -247,7 +247,7 @@ void Use_Weapon(PlayerClient *ent, gitem_t* item)
 {
     int         ammoIndex;
     gitem_t     *ammo_item;
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     // see if we're already using it
     if (item == client->persistent.activeWeapon)
@@ -286,7 +286,7 @@ void Drop_Weapon(PlayerClient *ent, gitem_t *item)
     if ((int)(gamemodeflags->value) & GameModeFlags::WeaponsStay)
         return;
 
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
     index = ITEM_INDEX(item);
     // see if we're already using it
     if (((item == client->persistent.activeWeapon) || (item == client->newWeapon)) && (client->persistent.inventory[index] == 1)) {
@@ -318,7 +318,7 @@ void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_L
         return;
     }
 
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     if (client->weaponState == WeaponState::Dropping) {
         if (client->playerState.gunFrame == FRAME_DEACTIVATE_LAST) {

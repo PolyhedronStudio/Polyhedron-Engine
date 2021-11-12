@@ -47,7 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 //    // Check whether ent is valid, and a PlayerClient hooked up 
 //    // to a valid client.
-//    GameClient* client = nullptr;
+//    ServersClient* client = nullptr;
 //
 //    if (!ent || !(client = ent->GetClient())) {
 //        return;
@@ -153,7 +153,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 //    // Check whether ent is valid, and a PlayerClient hooked up 
 //    // to a valid client.
-//    GameClient* client = nullptr;
+//    ServersClient* client = nullptr;
 //
 //    if (!ent || !(client = ent->GetClient()) ||
 //        !ent->IsSubclassOf<PlayerClient>()) {
@@ -229,7 +229,7 @@ void SVG_Client_CalculateBlend(PlayerClient *ent)
 {
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    GameClient* client = nullptr;
+    ServersClient* client = nullptr;
 
     if (!ent || !(client = ent->GetClient()) ||
         !ent->IsSubclassOf<PlayerClient>()) {
@@ -289,7 +289,7 @@ void SVG_Client_CalculateBlend(PlayerClient *ent)
 //
 //    // Check whether ent is valid, and a PlayerClient hooked up 
 //    // to a valid client.
-//    GameClient* client = nullptr;
+//    ServersClient* client = nullptr;
 //
 //    if (!ent || !(client = ent->GetClient()) ||
 //        !ent->IsSubclassOf<PlayerClient>()) {
@@ -413,7 +413,7 @@ void SVG_Client_SetSound(PlayerClient *ent)
 
     //// Check whether ent is valid, and a PlayerClient hooked up 
     //// to a valid client.
-    //GameClient* client = nullptr;
+    //ServersClient* client = nullptr;
 
     //if (!ent || !(client = ent->GetClient()) ||
     //    !ent->IsSubclassOf<PlayerClient>()) {
@@ -443,95 +443,95 @@ void SVG_Client_SetSound(PlayerClient *ent)
 // 
 //===============
 //
-void SVG_Client_SetAnimationFrame(PlayerClient *ent)
-{
-    qboolean isDucking = false;
-    qboolean isRunning = false;
-
-    // Check whether ent is valid, and a PlayerClient hooked up 
-    // to a valid client.
-    GameClient* client = nullptr;
-
-    if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
-        return;
-    }
-
-    if (ent->GetModelIndex() != 255)
-        return;     // not in the player model
-
-    //client = ent->client;
-
-    if (client->playerState.pmove.flags & PMF_DUCKED)
-        isDucking = true;
-    else
-        isDucking = false;
-    if (ent->bobMove.XYSpeed)
-        isRunning = true;
-    else
-        isRunning = false;
-
-    // check for stand/duck and stop/go transitions
-    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death)
-        goto newanim;
-    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic)
-        goto newanim;
-    if (!ent->GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave)
-        goto newanim;
-
-    if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
-        if (ent->GetFrame() > client->animation.endFrame) {
-            ent->SetFrame(ent->GetFrame() - 1);
-            return;
-        }
-    } else if (ent->GetFrame() < client->animation.endFrame) {
-        // continue an animation
-        ent->SetFrame(ent->GetFrame() + 1);
-        return;
-    }
-
-    if (client->animation.priorityAnimation == PlayerAnimation::Death)
-        return;     // stay there
-    if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
-        if (!ent->GetGroundEntity())
-            return;     // stay there
-        client->animation.priorityAnimation = PlayerAnimation::Wave;
-        ent->SetFrame(FRAME_jump3);
-        client->animation.endFrame = FRAME_jump6;
-        return;
-    }
-
-newanim:
-    // return to either a running or standing frame
-    client->animation.priorityAnimation = PlayerAnimation::Basic;
-    client->animation.isDucking = isDucking;
-    client->animation.isRunning = isRunning;
-
-    if (!ent->GetGroundEntity()) {
-        client->animation.priorityAnimation = PlayerAnimation::Jump;
-        if (ent->GetFrame() != FRAME_jump2)
-            ent->SetFrame(FRAME_jump1);
-        client->animation.endFrame = FRAME_jump2;
-    } else if (isRunning) {
-        // running
-        if (isDucking) {
-            ent->SetFrame(FRAME_crwalk1);
-            client->animation.endFrame = FRAME_crwalk6;
-        } else {
-            ent->SetFrame(FRAME_run1);
-            client->animation.endFrame = FRAME_run6;
-        }
-    } else {
-        // standing
-        if (isDucking) {
-            ent->SetFrame(FRAME_crstnd01);
-            client->animation.endFrame = FRAME_crstnd19;
-        } else {
-            ent->SetFrame(FRAME_stand01);
-            client->animation.endFrame = FRAME_stand40;
-        }
-    }
-}
+//void SVG_Client_SetAnimationFrame(PlayerClient *ent)
+//{
+//    qboolean isDucking = false;
+//    qboolean isRunning = false;
+//
+//    // Check whether ent is valid, and a PlayerClient hooked up 
+//    // to a valid client.
+//    ServersClient* client = nullptr;
+//
+//    if (!ent || !(client = ent->GetClient()) ||
+//        !ent->IsSubclassOf<PlayerClient>()) {
+//        return;
+//    }
+//
+//    if (ent->GetModelIndex() != 255)
+//        return;     // not in the player model
+//
+//    //client = ent->client;
+//
+//    if (client->playerState.pmove.flags & PMF_DUCKED)
+//        isDucking = true;
+//    else
+//        isDucking = false;
+//    if (ent->bobMove.XYSpeed)
+//        isRunning = true;
+//    else
+//        isRunning = false;
+//
+//    // check for stand/duck and stop/go transitions
+//    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death)
+//        goto newanim;
+//    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic)
+//        goto newanim;
+//    if (!ent->GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave)
+//        goto newanim;
+//
+//    if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
+//        if (ent->GetFrame() > client->animation.endFrame) {
+//            ent->SetFrame(ent->GetFrame() - 1);
+//            return;
+//        }
+//    } else if (ent->GetFrame() < client->animation.endFrame) {
+//        // continue an animation
+//        ent->SetFrame(ent->GetFrame() + 1);
+//        return;
+//    }
+//
+//    if (client->animation.priorityAnimation == PlayerAnimation::Death)
+//        return;     // stay there
+//    if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
+//        if (!ent->GetGroundEntity())
+//            return;     // stay there
+//        client->animation.priorityAnimation = PlayerAnimation::Wave;
+//        ent->SetFrame(FRAME_jump3);
+//        client->animation.endFrame = FRAME_jump6;
+//        return;
+//    }
+//
+//newanim:
+//    // return to either a running or standing frame
+//    client->animation.priorityAnimation = PlayerAnimation::Basic;
+//    client->animation.isDucking = isDucking;
+//    client->animation.isRunning = isRunning;
+//
+//    if (!ent->GetGroundEntity()) {
+//        client->animation.priorityAnimation = PlayerAnimation::Jump;
+//        if (ent->GetFrame() != FRAME_jump2)
+//            ent->SetFrame(FRAME_jump1);
+//        client->animation.endFrame = FRAME_jump2;
+//    } else if (isRunning) {
+//        // running
+//        if (isDucking) {
+//            ent->SetFrame(FRAME_crwalk1);
+//            client->animation.endFrame = FRAME_crwalk6;
+//        } else {
+//            ent->SetFrame(FRAME_run1);
+//            client->animation.endFrame = FRAME_run6;
+//        }
+//    } else {
+//        // standing
+//        if (isDucking) {
+//            ent->SetFrame(FRAME_crstnd01);
+//            client->animation.endFrame = FRAME_crstnd19;
+//        } else {
+//            ent->SetFrame(FRAME_stand01);
+//            client->animation.endFrame = FRAME_stand40;
+//        }
+//    }
+//}
 
 //
 //===============
@@ -558,7 +558,7 @@ newanim:
 //
 //    // Check whether ent is valid, and a PlayerClient hooked up 
 //    // to a valid client.
-//    GameClient* client = nullptr;
+//    ServersClient* client = nullptr;
 //
 //    if (!ent || !(client = ent->GetClient()) ||
 //        !ent->IsSubclassOf<PlayerClient>()) {

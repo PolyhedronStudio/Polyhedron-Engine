@@ -412,7 +412,7 @@ usually be a couple times for each server frame.
 */
 void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 {
-    GameClient* client = nullptr;
+    ServersClient* client = nullptr;
     PlayerClient *classEntity = nullptr;
     Entity* other = nullptr;
 

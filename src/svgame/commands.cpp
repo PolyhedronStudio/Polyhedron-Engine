@@ -70,7 +70,7 @@ qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2)
 
 void SelectNextItem(PlayerClient *ent, int itflags)
 {
-    GameClient   *cl;
+    ServersClient   *cl;
     int         i, index;
     gitem_t     *it;
 
@@ -101,7 +101,7 @@ void SelectNextItem(PlayerClient *ent, int itflags)
 
 void SelectPrevItem(Entity *ent, int itflags)
 {
-    GameClient   *cl;
+    ServersClient   *cl;
     int         i, index;
     gitem_t     *it;
 
@@ -137,7 +137,7 @@ void HUD_ValidateSelectedItem(PlayerClient *ent)
         return;
     }
 
-    GameClient* cl = ent->GetClient();
+    ServersClient* cl = ent->GetClient();
 
     if (cl->persistent.inventory[cl->persistent.selectedItem])
         return;     // valid
@@ -407,7 +407,7 @@ Cmd_Inven_f
 void Cmd_Inven_f(Entity *ent)
 {
     int         i;
-    GameClient   *cl;
+    ServersClient   *cl;
 
     cl = ent->client;
 
@@ -458,7 +458,7 @@ Cmd_WeapPrev_f
 */
 void Cmd_WeapPrev_f(PlayerClient *ent)
 {
-    GameClient   *cl;
+    ServersClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
@@ -493,7 +493,7 @@ Cmd_WeapNext_f
 */
 void Cmd_WeapNext_f(PlayerClient *ent)
 {
-    GameClient   *cl;
+    ServersClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
@@ -528,7 +528,7 @@ Cmd_WeapLast_f
 */
 void Cmd_WeapLast_f(PlayerClient *ent)
 {
-    GameClient   *cl;
+    ServersClient   *cl;
     int         index;
     gitem_t     *it;
 
@@ -719,7 +719,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
     Entity *other;
     char    *p; // C++20: Removed const.
     char    text[2048];
-    GameClient *cl;
+    ServersClient *cl;
 
     if (gi.argc() < 2 && !arg0)
         return;

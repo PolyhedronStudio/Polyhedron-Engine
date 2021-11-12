@@ -357,14 +357,14 @@ void SVG_InitializeServerEntities() {
 //=====================
 // SVG_AllocateGameClients
 //
-// Allocates the "GameClient", aligned to the ServerClient data type array properly for
+// Allocates the "ServersClient", aligned to the ServerClient data type array properly for
 // the current game at play.
 //=====================
 //
 void SVG_AllocateGameClients() {
     // Initialize all clients for this game
     game.maximumClients = maximumClients->value;
-    game.clients = (GameClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    game.clients = (ServersClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     globals.numberOfEntities = game.maximumClients + 1;
 }
 
@@ -570,7 +570,7 @@ SVG_CheckDMRules
 void SVG_CheckDMRules(void)
 {
     int         i;
-    GameClient   *cl;
+    ServersClient   *cl;
 
     if (level.intermission.time)
         return;

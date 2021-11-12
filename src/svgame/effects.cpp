@@ -151,7 +151,7 @@ void SVG_ThrowClientHead(PlayerClient* self, int damage) {
     self->SetVelocity(self->GetVelocity() + velocityDamage);
 
     // Bodies in the queue don't have a client anymore.
-    GameClient* client = self->GetClient();
+    ServersClient* client = self->GetClient();
     if (client) {
         client->animation.priorityAnimation = PlayerAnimation::Death;
         client->animation.endFrame = self->GetFrame();

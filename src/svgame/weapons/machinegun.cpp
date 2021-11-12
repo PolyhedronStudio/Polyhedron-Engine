@@ -42,7 +42,7 @@ void Machinegun_Fire(PlayerClient* ent)
 
 
     // Get the client.
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     if (!(client->buttons & BUTTON_ATTACK)) {
         client->machinegunShots = 0;

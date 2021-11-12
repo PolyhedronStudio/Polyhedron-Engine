@@ -118,7 +118,7 @@ void DeathMatchGameMode::PutClientInServer(Entity *ent) {
 
     // Fetch the entity index, and the client right off the bat.
     int32_t index = ent - g_entities - 1;
-    GameClient* client = ent->client;
+    ServersClient* client = ent->client;
 
     // Deathmatch wipes most client data every spawn
     //-----------------------------------------------------------------------
@@ -270,7 +270,7 @@ void DeathMatchGameMode::ClientBeginServerFrame(Entity* serverEntity) {
         return;
 
     // Fetch the client.
-    GameClient* client = serverEntity->client;
+    ServersClient* client = serverEntity->client;
     PlayerClient* player = (PlayerClient*)serverEntity->classEntity;
     // This has to go ofc.... lol. What it simply does though, is determine whether there is 
     // a need to respawn as spectator.
@@ -493,7 +493,7 @@ void DeathMatchGameMode::RespawnClient(PlayerClient* ent) {
     ent->SetEventID(EntityEvent::PlayerTeleport);
 
     // hold in place briefly
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     client->playerState.pmove.flags = PMF_TIME_TELEPORT;
     client->playerState.pmove.time = 14;
@@ -518,7 +518,7 @@ void DeathMatchGameMode::RespawnSpectator(PlayerClient* ent) {
     ent->SetEventID(EntityEvent::PlayerTeleport);
 
     // hold in place briefly
-    GameClient* client = ent->GetClient();
+    ServersClient* client = ent->GetClient();
 
     client->playerState.pmove.flags = PMF_TIME_TELEPORT;
     client->playerState.pmove.time = 14;

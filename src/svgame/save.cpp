@@ -502,7 +502,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_index(f, *(void **)p, sizeof(Entity), g_entities, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
-        write_index(f, *(void **)p, sizeof(GameClient), game.clients, game.maximumClients - 1);
+        write_index(f, *(void **)p, sizeof(ServersClient), game.clients, game.maximumClients - 1);
         break;
     case F_ITEM:
         write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.numberOfItems - 1);
@@ -687,7 +687,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         *(Entity **)p = (Entity*)read_index(f, sizeof(Entity), g_entities, game.maxEntities - 1); // CPP: Cast
         break;
     case F_CLIENT:
-        *(GameClient **)p = (GameClient*)read_index(f, sizeof(GameClient), game.clients, game.maximumClients - 1); // CPP: Cast
+        *(ServersClient **)p = (ServersClient*)read_index(f, sizeof(ServersClient), game.clients, game.maximumClients - 1); // CPP: Cast
         break;
     case F_ITEM:
         *(gitem_t **)p = (gitem_t*)read_index(f, sizeof(gitem_t), itemlist, game.numberOfItems - 1); // CPP: Cast
@@ -798,7 +798,7 @@ void SVG_ReadGame(const char *filename)
     globals.entities = g_entities;
     globals.maxEntities = game.maxEntities;
 
-    game.clients = (GameClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    game.clients = (ServersClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
     for (i = 0; i < game.maximumClients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
