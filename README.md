@@ -27,9 +27,12 @@ Nothing more than using cmake on the Sauce root folder, or using Visual Studio's
 ### Windows 10 - VS2019
 
   1. Clone the repository and its submodules from git :
-     `git clone --branch Engine-0.2 --recursive https://github.com/PalmliXStudios/Polyhedron-Engine `
+     `git clone --recursive https://github.com/PalmliXStudios/Polyhedron-Engine `
+     Or in case you'd be interested in merely a single specific branch, take per example:
+     `git clone --branch Engine-0.3.1 --recursive https://github.com/PalmliXStudios/Polyhedron-Engine `
 
   2. Start VS2019, and use the "Open Folder" method to open the project, as one normally would when using CMake projects.  
+  3. If you are using VS:Code, then the steps from here are alike to those in Linux, depending on which plugins you got for CMake support etc.
 
 ### Linux
 
