@@ -891,7 +891,7 @@ void PlayerClient::CalculateGunOffset() {
 
     // gun height
     client->playerState.gunOffset = vec3_zero();
-    //  ent->playerState->gunorigin[2] += bob;
+
 
     // gun_x / gun_y / gun_z are development tools
     for (i = 0 ; i < 3 ; i++) {

@@ -326,7 +326,7 @@ void CL_RegisterInput(void)
     Cmd_AddCommand("in_restart", IN_Restart_f);
 
     cl_nodelta = Cvar_Get("cl_nodelta", "0", 0);
-    cl_maxpackets = Cvar_Get("cl_maxpackets",  std::to_string(BASE_FRAMERATE).c_str(), 0);
+    cl_maxpackets = Cvar_Get("cl_maxpackets",  std::to_string(BASE_FRAMERATE * 3).c_str(), 0);
     cl_packetdup = Cvar_Get("cl_packetdup", "1", 0);
 #ifdef _DEBUG
     cl_showpackets = Cvar_Get("cl_showpackets", "0", 0);
@@ -403,9 +403,9 @@ static inline qboolean ready_to_send(void)
     if (cls.realtime - cl.lastTransmitTime < msec) {
         Com_DPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return falses\n", cls.realtime, cl.lastTransmitTime, msec);
         return false;
+    } else {
+        Com_DPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return true;\n", cls.realtime, cl.lastTransmitTime, msec);
     }
-
-    Com_DPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return true;\n", cls.realtime, cl.lastTransmitTime, msec);
 
     return true;
 }

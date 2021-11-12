@@ -77,7 +77,7 @@ struct EntityFlags {
     static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
 };
 
-constexpr float FRAMETIME = BASE_FRAMETIME_1000; // With the game set to run at 20 ticks, this means FRAMETIME = 0.05f;
+constexpr float FRAMETIME = BASE_FRAMETIME_1000; // Adjusts to the game's tick level.
 
 // memory tags to allow dynamic memory to be cleaned up
 constexpr int32_t TAG_GAME = 765;     // clear when unloading the dll

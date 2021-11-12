@@ -436,10 +436,10 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
     } else {
         switch (type) {
         case PRINT_TALK:
-            Com_SetColor(COLOR_ALT);
+            Com_SetColor(COLOR_NONE);
             break;
         case PRINT_DEVELOPER:
-            Com_SetColor(COLOR_BLUE);
+            Com_SetColor(COLOR_ALT);
             break;
         case PRINT_WARNING:
             Com_SetColor(COLOR_YELLOW);
