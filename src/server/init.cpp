@@ -220,9 +220,11 @@ void SV_SpawnServer(MapCommand *cmd)
     // load and spawn all other entities
     ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
 
-    // run two frames to allow everything to settle
-    ge->RunFrame(); sv.frameNumber++;
-    ge->RunFrame(); sv.frameNumber++;
+    // Run 2 frames times SERVER_RATE_MULTIPLIER to allow everything to settle.
+    for (int32_t i = 0; i < SERVER_RATE_MULTIPLIER; i++) {
+        ge->RunFrame(); sv.frameNumber++;
+        ge->RunFrame(); sv.frameNumber++;
+    }
 
     // make sure maximumClients string is correct
     sprintf(sv.configstrings[ConfigStrings::MaxClients], "%d", sv_maxclients->integer);

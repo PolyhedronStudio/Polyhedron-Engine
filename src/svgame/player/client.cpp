@@ -416,7 +416,6 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
     PlayerClient *classEntity = nullptr;
     Entity* other = nullptr;
 
-
     PlayerMove pm = {};
 
     // Sanity checks.
