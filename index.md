@@ -1,5 +1,5 @@
 ## Polyhedron - A Q2RTX Fork
-A fork of the famous Q2RTX project by NVidia that strives to improve all the other factors of what once upon a time was called Quake 2. Upgrading it bit by bit, in order to modernize the engine to more up to date standards. It'll come with clean slate base game dlls, with only the mere basics (thus also serving as examples) to start off making your own games.
+A fork of the famous Q2RTX project by NVidia that strives to improve all of its other factors of what was once upon a time called Quake 2. The goal? Upgrading it bit by bit, in order to make it a more modern and modable engine than the original was before. It's nearly 2022, while the original was written in 1997. Such a nice and great renderer deserves a better and more improved game back-end. 
 
 ### What does it have so far?
 - The code is now converted to compile using a C++(20) compiler instead of a C compiler.
