@@ -2653,11 +2653,11 @@ static void CL_InitLocal(void)
     warn_on_fps_rounding(cl_maxfps);
     warn_on_fps_rounding(r_maxfps);
 
-#ifdef _DEBUG
-    cl_shownet = Cvar_Get("cl_shownet", "1", 0);
-    cl_showmiss = Cvar_Get("cl_showmiss", "1", 0);
+//#ifdef _DEBUG
+    cl_shownet = Cvar_Get("cl_shownet", "0", 0);
+    cl_showmiss = Cvar_Get("cl_showmiss", "0", 0);
     cl_showclamp = Cvar_Get("showclamp", "0", 0);
-#endif
+//#endif
 
     cl_timeout = Cvar_Get("cl_timeout", "120", 0);
 
