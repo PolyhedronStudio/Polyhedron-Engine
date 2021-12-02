@@ -1,5 +1,5 @@
 ## Polyhedron - A Q2RTX Fork
-A fork of the famous Q2RTX project by NVidia that strives to improve all of its other factors of what was once upon a time called Quake 2. The goal? Upgrading it bit by bit, in order to make it a more modern and modable engine than the original was before. It's nearly 2022, while the original was written in 1997. Such a nice and great renderer deserves a better and more improved game back-end. 
+A fork of the famous Q2RTX project by NVIDIA™ that strives to improve all of its other factors of what was once upon a time called Quake 2. The goal? Upgrading it bit by bit, in order to make it a more modern and modable engine than the original was before. It's nearly 2022, while the original was written in 1997. Such a nice and great renderer deserves a better and more improved game back-end. 
 
 ### What does it have so far?
 - The code is now converted to compile using a C++(20) compiler instead of a C compiler.
@@ -19,7 +19,7 @@ vec3_t c = a + b;
 - And way more things that you'll see for yourself if you check out the sauce!
 
 ### Acquiring the Sauce
-In order to acquire the sauce, one has to do a recursive submodules checkout, otherwise one is going to find himself in a land full of wonderful error warnings that share misery and pain. Keep in mind that the engine is currently still undergoing full development. We promote interested people to check out the code, and join on our [Discord](https://discord.gg/bHm4yBwtZg) if you have any interests in joining forces.
+In order to acquire the sauce, one has to do a recursive submodules checkout, otherwise one is going to find himself in a land full of wonderful error warnings that share misery and pain. Keep in mind that the engine is currently still undergoing full development. We promote interested people to check out the code, and join on our [Discord](https://discord.gg/TfnH5buTq7) if you have any interests in joining forces.
 
 ### Building the Sauce
 Nothing more than using cmake on the Sauce root folder, or using Visual Studio's "Open Folder" which'll use CMake from there.
