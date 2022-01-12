@@ -211,8 +211,8 @@ static void NET_SockadrToNetadr(const struct sockaddr_storage *s, NetAdr *a)
 #define NS_INT16SZ      2
 #define NS_INADDRSZ     4
 #define NS_IN6ADDRSZ    16
-#include "inet_ntop.h"
-#include "inet_pton.h"
+#include "INetNToP.h"
+#include "INetPToN.h"
 #else
 #define os_inet_ntop    inet_ntop
 #define os_inet_pton    inet_pton
