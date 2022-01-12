@@ -64,167 +64,167 @@ SET(HEADERS_CLGAME
 # Server game DLL
 # Throw all sources in here, but group them elsewhere
 SET( SRC_SVGAME 
-	svgame/brushfuncs.cpp
-	svgame/chasecamera.cpp
-	svgame/commands.cpp
-	svgame/combat.cpp
-	svgame/effects.cpp
-	svgame/entities.cpp
-	svgame/functionpointers.cpp
-	svgame/items.cpp
-	svgame/ImportsWrapper.cpp
-	svgame/main.cpp
-	svgame/effects.cpp
-	svgame/save.cpp
-	svgame/spawn.cpp
-	svgame/svcmds.cpp
-	svgame/trigger.cpp
-	svgame/utils.cpp
-	svgame/weapons.cpp 
-	svgame/ai/MonsterAI.cpp
-	svgame/entities/base/SVGBaseEntity.cpp
-	svgame/entities/base/SVGBaseTrigger.cpp
-	svgame/entities/base/SVGBaseMover.cpp
-	svgame/entities/base/BodyCorpse.cpp
-	svgame/entities/base/DebrisEntity.cpp
-	svgame/entities/base/GibEntity.cpp
-	svgame/entities/base/PlayerClient.cpp
-	#svgame/entities/info/InfoNotNull.cpp
-	svgame/entities/info/InfoNull.cpp
-	svgame/entities/info/InfoPlayerCoop.cpp
-	svgame/entities/info/InfoPlayerDeathmatch.cpp
-	svgame/entities/info/InfoPlayerIntermission.cpp
-	svgame/entities/info/InfoPlayerStart.cpp
-	svgame/entities/func/FuncAreaportal.cpp
-	svgame/entities/func/FuncButton.cpp
-	#svgame/entities/func/FuncConveyor.cpp
-	svgame/entities/func/FuncDoor.cpp 
-	svgame/entities/func/FuncDoorRotating.cpp
-	svgame/entities/func/FuncExplosive.cpp 
-	#svgame/entities/func/FuncKillbox.cpp
-	#svgame/entities/func/FuncObject.cpp
-	#svgame/entities/func/FuncPlat.cpp
-	svgame/entities/func/FuncRotating.cpp
-	svgame/entities/func/FuncTimer.cpp
-	svgame/entities/func/FuncTrain.cpp 
-	svgame/entities/func/FuncWall.cpp
-	#svgame/entities/func/FuncWater.cpp
-	#svgame/entities/misc/MiscExplobox.cpp
-	#svgame/entities/misc/MiscGibArm.cpp 
-	#svgame/entities/misc/MiscGibLeg.cpp 
-	#svgame/entities/misc/MiscGibHead.cpp 
-	svgame/entities/misc/MiscExplosionBox.cpp
-	svgame/entities/misc/MiscServerModel.cpp
-	#svgame/entities/misc/MiscTeleporter.cpp
-	#svgame/entities/misc/MiscTeleporterDest.cpp
-	svgame/entities/path/PathCorner.cpp
-	#svgame/entities/target/TargetBlaster.cpp
-	#svgame/entities/target/TargetChangelevel.cpp
-	#svgame/entities/target/TargetCrosslevel_target.cpp
-	#svgame/entities/target/TargetCrosslevel_trigger.cpp
-	svgame/entities/target/TargetEarthquake.cpp
-	svgame/entities/target/TargetExplosion.cpp
-	#svgame/entities/target/TargetLightramp.cpp
-	#svgame/entities/target/TargetSpawner.cpp
-	svgame/entities/target/TargetSpeaker.cpp
-	#svgame/entities/target/TargetSplash.cpp
-	svgame/entities/target/TargetTempEntity.cpp
-	svgame/entities/trigger/TriggerCounter.cpp
-	#svgame/entities/trigger/TriggerElevator.cpp
-	svgame/entities/trigger/TriggerGravity.cpp
-	#svgame/entities/trigger/TriggerKey.cpp
-	#svgame/entities/trigger/TriggerMonsterjump.cpp
-	svgame/entities/trigger/TriggerPush.cpp
-	svgame/entities/trigger/TriggerAlways.cpp
-	svgame/entities/trigger/TriggerAutoDoor.cpp
-	svgame/entities/trigger/TriggerDelayedUse.cpp
-	svgame/entities/trigger/TriggerHurt.cpp
-	svgame/entities/trigger/TriggerMultiple.cpp
-	svgame/entities/trigger/TriggerOnce.cpp
-	svgame/entities/trigger/TriggerRelay.cpp
-	svgame/entities/weaponry/BlasterBolt.cpp
-	svgame/entities/Light.cpp
-	svgame/entities/WorldSpawn.cpp
-	svgame/gamemodes/DefaultGameMode.cpp
-	svgame/gamemodes/CoopGameMode.cpp
-	svgame/gamemodes/DeathMatchGameMode.cpp
-	svgame/physics/physics.cpp
-	svgame/physics/stepmove.cpp
-	svgame/player/client.cpp
-	svgame/player/hud.cpp
-	svgame/player/trail.cpp
-	svgame/player/player.cpp
-	svgame/player/view.cpp
-	svgame/player/weapons.cpp
-	svgame/weapons/blaster.cpp
-	svgame/weapons/machinegun.cpp
-	svgame/weapons/shotgun.cpp
-	svgame/weapons/supershotgun.cpp
-    svgame/svgame.def
+	SVGame/BrushFunctions.cpp
+	SVGame/ChaseCamera.cpp
+	SVGame/Commands.cpp
+	SVGame/Combat.cpp
+	SVGame/Effects.cpp
+	SVGame/Entities.cpp
+	SVGame/FunctionPointers.cpp
+	SVGame/Items.cpp
+	SVGame/ImportsWrapper.cpp
+	SVGame/Main.cpp
+	SVGame/Effects.cpp
+	SVGame/Save.cpp
+	SVGame/Spawn.cpp
+	SVGame/SVCommands.cpp
+	SVGame/Trigger.cpp
+	SVGame/Utilities.cpp
+	SVGame/Weapons.cpp 
+	SVGame/ai/MonsterAI.cpp
+	SVGame/Entities/Base/SVGBaseEntity.cpp
+	SVGame/Entities/Base/SVGBaseTrigger.cpp
+	SVGame/Entities/Base/SVGBaseMover.cpp
+	SVGame/Entities/Base/BodyCorpse.cpp
+	SVGame/Entities/Base/DebrisEntity.cpp
+	SVGame/Entities/Base/GibEntity.cpp
+	SVGame/Entities/Base/PlayerClient.cpp
+	#SVGame/Entities/Info/InfoNotNull.cpp
+	SVGame/Entities/Info/InfoNull.cpp
+	SVGame/Entities/Info/InfoPlayerCoop.cpp
+	SVGame/Entities/Info/InfoPlayerDeathmatch.cpp
+	SVGame/Entities/Info/InfoPlayerIntermission.cpp
+	SVGame/Entities/Info/InfoPlayerStart.cpp
+	SVGame/Entities/Func/FuncAreaportal.cpp
+	SVGame/Entities/Func/FuncButton.cpp
+	#SVGame/Entities/Func/FuncConveyor.cpp
+	SVGame/Entities/Func/FuncDoor.cpp 
+	SVGame/Entities/Func/FuncDoorRotating.cpp
+	SVGame/Entities/Func/FuncExplosive.cpp 
+	#SVGame/Entities/Func/FuncKillbox.cpp
+	#SVGame/Entities/Func/FuncObject.cpp
+	#SVGame/Entities/Func/FuncPlat.cpp
+	SVGame/Entities/Func/FuncRotating.cpp
+	SVGame/Entities/Func/FuncTimer.cpp
+	SVGame/Entities/Func/FuncTrain.cpp 
+	SVGame/Entities/Func/FuncWall.cpp
+	#SVGame/Entities/Func/FuncWater.cpp
+	#SVGame/Entities/Misc/MiscExplobox.cpp
+	#SVGame/Entities/Misc/MiscGibArm.cpp 
+	#SVGame/Entities/Misc/MiscGibLeg.cpp 
+	#SVGame/Entities/Misc/MiscGibHead.cpp 
+	SVGame/Entities/Misc/MiscExplosionBox.cpp
+	SVGame/Entities/Misc/MiscServerModel.cpp
+	#SVGame/Entities/Misc/MiscTeleporter.cpp
+	#SVGame/Entities/Misc/MiscTeleporterDest.cpp
+	SVGame/Entities/Path/PathCorner.cpp
+	#SVGame/Entities/Target/TargetBlaster.cpp
+	#SVGame/Entities/Target/TargetChangelevel.cpp
+	#SVGame/Entities/Target/TargetCrosslevel_target.cpp
+	#SVGame/Entities/Target/TargetCrosslevel_trigger.cpp
+	SVGame/Entities/Target/TargetEarthquake.cpp
+	SVGame/Entities/Target/TargetExplosion.cpp
+	#SVGame/Entities/Target/TargetLightramp.cpp
+	#SVGame/Entities/Target/TargetSpawner.cpp
+	SVGame/Entities/Target/TargetSpeaker.cpp
+	#SVGame/Entities/Target/TargetSplash.cpp
+	SVGame/Entities/Target/TargetTempEntity.cpp
+	SVGame/Entities/Trigger/TriggerCounter.cpp
+	#SVGame/Entities/Trigger/TriggerElevator.cpp
+	SVGame/Entities/Trigger/TriggerGravity.cpp
+	#SVGame/Entities/Trigger/TriggerKey.cpp
+	#SVGame/Entities/Trigger/TriggerMonsterjump.cpp
+	SVGame/Entities/Trigger/TriggerPush.cpp
+	SVGame/Entities/Trigger/TriggerAlways.cpp
+	SVGame/Entities/Trigger/TriggerAutoDoor.cpp
+	SVGame/Entities/Trigger/TriggerDelayedUse.cpp
+	SVGame/Entities/Trigger/TriggerHurt.cpp
+	SVGame/Entities/Trigger/TriggerMultiple.cpp
+	SVGame/Entities/Trigger/TriggerOnce.cpp
+	SVGame/Entities/Trigger/TriggerRelay.cpp
+	SVGame/Entities/Weaponry/BlasterBolt.cpp
+	SVGame/Entities/Light.cpp
+	SVGame/Entities/WorldSpawn.cpp
+	SVGame/GameModes/DefaultGameMode.cpp
+	SVGame/GameModes/CoopGameMode.cpp
+	SVGame/GameModes/DeathMatchGameMode.cpp
+	SVGame/Physics/Physics.cpp
+	SVGame/Physics/StepMove.cpp
+	SVGame/Player/Client.cpp
+	SVGame/Player/Hud.cpp
+	SVGame/Player/Trail.cpp
+	SVGame/Player/Player.cpp
+	SVGame/Player/View.cpp
+	SVGame/Player/Weapons.cpp
+	SVGame/Weapons/Blaster.cpp
+	SVGame/Weapons/Machinegun.cpp
+	SVGame/Weapons/Shotgun.cpp
+	SVGame/Weapons/SuperShotgun.cpp
+    SVGame/svgame.def
     )
     
     SET ( HEADERS_SVGAME
-	svgame/g_local.h
-	svgame/brushfuncs.h
-	svgame/chasecamera.h
-	svgame/effects.h
-	svgame/entities.h
-	svgame/functionpointers.h
-	svgame/trigger.h
-	svgame/TypeInfo.h
-	svgame/utils.h
-	svgame/ai/MonsterAI.h
-	svgame/entities/base/SVGBaseEntity.h
-	svgame/entities/base/SVGBaseTrigger.h
-	svgame/entities/base/SVGBaseMover.h
-	svgame/entities/base/BodyCorpse.h
-	svgame/entities/base/DebrisEntity.h
-	svgame/entities/base/GibEntity.h
-	svgame/entities/base/PlayerClient.h
-	svgame/entities/func/FuncAreaportal.h
-	svgame/entities/func/FuncButton.h
-	svgame/entities/func/FuncDoor.h
-	svgame/entities/func/FuncDoorRotating.h
-	svgame/entities/func/FuncExplosive.h
-	svgame/entities/func/FuncRotating.h
-	svgame/entities/func/FuncTimer.h
-	svgame/entities/func/FuncTrain.h
-	svgame/entities/func/FuncWall.h
-	svgame/entities/info/InfoPlayerStart.h
-	svgame/entities/misc/MiscExplosionBox.h
-	svgame/entities/misc/MiscServerModel.h
-	svgame/entities/path/PathCorner.h
-	svgame/entities/target/TargetEarthquake.h
-	svgame/entities/target/TargetExplosion.h
-	svgame/entities/target/TargetSpeaker.h
-	svgame/entities/target/TargetTempEntity.h
-	svgame/entities/trigger/TriggerAlways.h
-	svgame/entities/trigger/TriggerAutoDoor.h
-	svgame/entities/trigger/TriggerCounter.h
-	svgame/entities/trigger/TriggerDelayedUse.h
-	svgame/entities/trigger/TriggerHurt.h
-	svgame/entities/trigger/TriggerGravity.h
-	svgame/entities/trigger/TriggerMultiple.h
-	svgame/entities/trigger/TriggerOnce.h
-	svgame/entities/trigger/TriggerPush.h
-	svgame/entities/trigger/TriggerRelay.h
-	svgame/entities/weaponry/BlasterBolt.h
-	svgame/entities/Light.h
-	svgame/entities/WorldSpawn.h
-	svgame/gamemodes/DefaultGameMode.h
-	svgame/gamemodes/CoopGameMode.h
-	svgame/gamemodes/DeathMatchGameMode.h
-	svgame/gamemodes/IGameMode.h
-	svgame/player/animations.h
-	svgame/player/client.h
-	svgame/player/player.h
-	svgame/player/view.h
-	svgame/player/weapons.h
-	svgame/weapons/blaster.h
-	svgame/weapons/machinegun.h
-	svgame/weapons/shotgun.h
-	svgame/weapons/supershotgun.h
-    svgame/svgame.def
+	SVGame/ServerGameLocal.h
+	SVGame/BrushFunctions.h
+	SVGame/ChaseCamera.h
+	SVGame/Effects.h
+	SVGame/Entities.h
+	SVGame/FunctionPointers.h
+	SVGame/Trigger.h
+	SVGame/TypeInfo.h
+	SVGame/Utilities.h
+	SVGame/AI/MonsterAI.h
+	SVGame/Entities/Base/SVGBaseEntity.h
+	SVGame/Entities/Base/SVGBaseTrigger.h
+	SVGame/Entities/Base/SVGBaseMover.h
+	SVGame/Entities/Base/BodyCorpse.h
+	SVGame/Entities/Base/DebrisEntity.h
+	SVGame/Entities/Base/GibEntity.h
+	SVGame/Entities/Base/PlayerClient.h
+	SVGame/Entities/Func/FuncAreaportal.h
+	SVGame/Entities/Func/FuncButton.h
+	SVGame/Entities/Func/FuncDoor.h
+	SVGame/Entities/Func/FuncDoorRotating.h
+	SVGame/Entities/Func/FuncExplosive.h
+	SVGame/Entities/Func/FuncRotating.h
+	SVGame/Entities/Func/FuncTimer.h
+	SVGame/Entities/Func/FuncTrain.h
+	SVGame/Entities/Func/FuncWall.h
+	SVGame/Entities/Info/InfoPlayerStart.h
+	SVGame/Entities/Misc/MiscExplosionBox.h
+	SVGame/Entities/Misc/MiscServerModel.h
+	SVGame/Entities/Path/PathCorner.h
+	SVGame/Entities/Target/TargetEarthquake.h
+	SVGame/Entities/Target/TargetExplosion.h
+	SVGame/Entities/Target/TargetSpeaker.h
+	SVGame/Entities/Target/TargetTempEntity.h
+	SVGame/Entities/Trigger/TriggerAlways.h
+	SVGame/Entities/Trigger/TriggerAutoDoor.h
+	SVGame/Entities/Trigger/TriggerCounter.h
+	SVGame/Entities/Trigger/TriggerDelayedUse.h
+	SVGame/Entities/Trigger/TriggerHurt.h
+	SVGame/Entities/Trigger/TriggerGravity.h
+	SVGame/Entities/Trigger/TriggerMultiple.h
+	SVGame/Entities/Trigger/TriggerOnce.h
+	SVGame/Entities/Trigger/TriggerPush.h
+	SVGame/Entities/Trigger/TriggerRelay.h
+	SVGame/Entities/weaponry/BlasterBolt.h
+	SVGame/Entities/Light.h
+	SVGame/Entities/WorldSpawn.h
+	SVGame/GameModes/DefaultGameMode.h
+	SVGame/GameModes/CoopGameMode.h
+	SVGame/GameModes/DeathMatchGameMode.h
+	SVGame/GameModes/IGameMode.h
+	SVGame/Player/Animations.h
+	SVGame/Player/Client.h
+	SVGame/Player/Player.h
+	SVGame/Player/View.h
+	SVGame/Player/Weapons.h
+	SVGame/Weapons/Blaster.h
+	SVGame/Weapons/Machinegun.h
+	SVGame/Weapons/Shotgun.h
+	SVGame/Weapons/SuperShotgun.h
+    SVGame/svgame.def
     )
     
     ###################### Client.
@@ -302,293 +302,293 @@ SET(HEADERS_CLIENT
 
 ###################### Client.
 SET(SRC_SERVER
-	server/commands.cpp
-	server/entities.cpp
-	server/svgame.cpp
-	server/init.cpp
-	server/main.cpp
+	Server/Commands.cpp
+	Server/Entities.cpp
+	Server/SVGame.cpp
+	Server/Init.cpp
+	Server/Main.cpp
 
-	server/send.cpp
-	server/user.cpp
-	server/world.cpp
+	Server/Send.cpp
+	Server/User.cpp
+	Server/World.cpp
 
-	server/save.cpp
+	Server/Save.cpp
 )
 SET(HEADERS_SERVER
-	server/server.h
+	Server/Server.h
 )
 
 ###################### Common.
 SET(SRC_COMMON
-	common/bsp.cpp
-	common/cmd.cpp
-	common/cmodel.cpp
-	common/common.cpp
-	common/cvar.cpp
-	common/error.cpp
-	common/field.cpp
-	common/fifo.cpp
-	common/files.cpp
-	common/mdfour.cpp
-	common/msg.cpp
-	common/prompt.cpp
-	common/sizebuf.cpp
-	common/utils.cpp
-	common/zone.cpp
+	Common/Bsp.cpp
+	Common/Cmd.cpp
+	Common/CModel.cpp
+	Common/Common.cpp
+	Common/CVar.cpp
+	Common/Error.cpp
+	Common/Field.cpp
+	Common/Fifo.cpp
+	Common/Files.cpp
+	Common/MDFour.cpp
+	Common/Msg.cpp
+	Common/Prompt.cpp
+	Common/SizeBuffer.cpp
+	Common/Utilities.cpp
+	Common/Zone.cpp
 
-	common/hashes/crc32.cpp
+	Common/Hashes/Crc32.cpp
 
-	common/net/netchan.cpp
-	common/net/net.cpp
+	Common/Net/NetChan.cpp
+	Common/Net/Net.cpp
 
 	# These might have to go some day.
-	#common/netq3/netchan.cpp
-	#common/netq3/net.cpp
+	#Common/netq3/netchan.cpp
+	#Common/netq3/net.cpp
 )
 SET(HEADERS_COMMON
-	common/net/inet_ntop.h
-	common/net/inet_pton.h
-	common/net/win.h
+	Common/Net/INetNToP.h
+	Common/Net/INetPToN.h
+	Common/Net/Win.h
 	
-	common/hashes/crc32.h
+	Common/Hashes/Crc32.h
 )
 
 ###################### Format.
 #SET(SRC_FORMAT
 #)
 SET(HEADERS_COMMON
-	../inc/format/bsp.h
-	../inc/format/iqm.h
-	../inc/format/md2.h
-	../inc/format/md3.h
-	../inc/format/pak.h
-	../inc/format/pcx.h
-	../inc/format/sp2.h
-	../inc/format/wal.h
+	../inc/Format/bsp.h
+	../inc/Format/iqm.h
+	../inc/Format/md2.h
+	../inc/Format/md3.h
+	../inc/Format/pak.h
+	../inc/Format/pcx.h
+	../inc/Format/sp2.h
+	../inc/Format/wal.h
 )
 
 ###################### Refresh.
 SET(SRC_REFRESH
-	refresh/images.cpp
-	refresh/models.cpp
-	refresh/model_iqm.cpp
-	refresh/stb/stb.cpp
+	Refresh/images.cpp
+	Refresh/models.cpp
+	Refresh/model_iqm.cpp
+	Refresh/stb/stb.cpp
 )
 
 ###################### GL.
 SET(SRC_GL
-	refresh/gl/draw.cpp
-	refresh/gl/hq2x.cpp
-	refresh/gl/images.cpp
-	refresh/gl/main.cpp
-	refresh/gl/mesh.cpp
-	refresh/gl/models.cpp
-	refresh/gl/sky.cpp
-	refresh/gl/state.cpp
-	refresh/gl/surf.cpp
-	refresh/gl/tess.cpp
-	refresh/gl/world.cpp
-	refresh/gl/qgl/dynamic.cpp
-#	refresh/gl/qgl/fixed.c
+	Refresh/gl/draw.cpp
+	Refresh/gl/hq2x.cpp
+	Refresh/gl/images.cpp
+	Refresh/gl/main.cpp
+	Refresh/gl/mesh.cpp
+	Refresh/gl/models.cpp
+	Refresh/gl/sky.cpp
+	Refresh/gl/state.cpp
+	Refresh/gl/surf.cpp
+	Refresh/gl/tess.cpp
+	Refresh/gl/world.cpp
+	Refresh/gl/qgl/dynamic.cpp
+#	Refresh/gl/qgl/fixed.c
 )
 SET(HEADERS_GL
-	refresh/gl/arbfp.h
-	refresh/gl/gl.h
+	Refresh/gl/arbfp.h
+	Refresh/gl/gl.h
 )
 
 ###################### Shared Game Folder.
 SET(HEADERS_SHAREDGAME
-	../inc/sharedgame/pmove.h 
-	../inc/sharedgame/protocol.h 
-	../inc/sharedgame/sharedgame.h 
+	../inc/SharedGame/pmove.h 
+	../inc/SharedGame/protocol.h 
+	../inc/SharedGame/sharedgame.h 
 )
 SET(SRC_SHAREDGAME
-	../src/sharedgame/pmove.cpp
+	../src/SharedGame/pmove.cpp
 )
 
 ###################### Shared Folder.
 SET(HEADERS_SHARED
 	# Container lib.
-	../inc/shared/containers/IterableCArray.h
+	../inc/Shared/Containers/IterableCArray.h
 
 	# Interfaces
-	../inc/shared/interfaces/IClientGameExports.h
-	../inc/shared/interfaces/IClientGameImports.h
+	../inc/Shared/Interfaces/IClientGameExports.h
+	../inc/Shared/Interfaces/IClientGameImports.h
 
 	# Math lib.
-	../inc/shared/math/color.h
-	../inc/shared/math/matrix3.h
-	../inc/shared/math/matrix4.h
-	../inc/shared/math/plane.h
-	../inc/shared/math/rectangle.h
-	../inc/shared/math/utilities.h
-	../inc/shared/math/vector2.h
-	../inc/shared/math/vector3.h
-	../inc/shared/math/vector4.h
-	../inc/shared/math/vector5.h
+	../inc/Shared/Math/color.h
+	../inc/Shared/Math/matrix3.h
+	../inc/Shared/Math/matrix4.h
+	../inc/Shared/Math/plane.h
+	../inc/Shared/Math/rectangle.h
+	../inc/Shared/Math/utilities.h
+	../inc/Shared/Math/vector2.h
+	../inc/Shared/Math/vector3.h
+	../inc/Shared/Math/vector4.h
+	../inc/Shared/Math/vector5.h
 	
 	# Other shared lib functionalities.
-	../inc/shared/CLGame.h
-	../inc/shared/cltypes.h
-	../inc/shared/collision.h
-	../inc/shared/common.h
-	../inc/shared/config.h
-	../inc/shared/endian.h 
-	../inc/shared/svgame.h 
-	../inc/shared/keys.h 
-	../inc/shared/list.h 
-	../inc/shared/math.h 
-	../inc/shared/messaging.h 
-	../inc/shared/platform.h
-	../inc/shared/refresh.h 
-	../inc/shared/qstring.h 
-	../inc/shared/strings.h
-	../inc/shared/shared.h 
-	../inc/shared/tickrate.h 
-	../inc/shared/ui.h 
+	../inc/Shared/CLGame.h
+	../inc/Shared/cltypes.h
+	../inc/Shared/collision.h
+	../inc/Shared/common.h
+	../inc/Shared/config.h
+	../inc/Shared/endian.h 
+	../inc/Shared/svgame.h 
+	../inc/Shared/keys.h 
+	../inc/Shared/list.h 
+	../inc/Shared/math.h 
+	../inc/Shared/messaging.h 
+	../inc/Shared/platform.h
+	../inc/Shared/refresh.h 
+	../inc/Shared/qstring.h 
+	../inc/Shared/strings.h
+	../inc/Shared/shared.h 
+	../inc/Shared/tickrate.h 
+	../inc/Shared/ui.h 
 )
 SET(SRC_SHARED
-	shared/math/plane.cpp
-	shared/math/vector3.cpp
+	Shared/Math/plane.cpp
+	Shared/Math/vector3.cpp
 
-	shared/math.cpp
-	shared/shared.cpp
+	Shared/math.cpp
+	Shared/shared.cpp
 )
 
 ###################### UNIX Client Specific.
 SET(SRC_UNIX
-	os/unix/hunk.cpp
-	os/unix/system.cpp
-	os/unix/tty.cpp
+	OS/Unix/Hunk.cpp
+	OS/Unix/System.cpp
+	OS/Unix/TTY.cpp
 )
 SET(SRC_UNIX_CLIENT
-	os/sdl2/sound.cpp
-	os/sdl2/video.cpp
-	os/sdl2/time.cpp
+	OS/SDL2/Sound.cpp
+	OS/SDL2/Video.cpp
+	OS/SDL2/Time.cpp
 )
 
 ###################### Windows Client Specific.
 SET(SRC_WINDOWS
-	os/windows/debug.cpp
-	os/windows/hunk.cpp
-	os/windows/system.cpp
+	OS/Windows/Debug.cpp
+	OS/Windows/Hunk.cpp
+	OS/Windows/System.cpp
 )
 SET(SRC_WINDOWS_CLIENT
-	os/windows/wave.cpp
-	os/sdl2/video.cpp
-	os/sdl2/time.cpp
+	OS/Windows/Wave.cpp
+	OS/SDL2/Video.cpp
+	OS/SDL2/Time.cpp
 )
 SET(HEADERS_WINDOWS
-	os/windows/wgl.h
-	os/windows/glimp.h
-	os/windows/client.h
-	os/windows/threads/threads.h
+	OS/Windows/WGL.h
+	OS/Windows/GLImp.h
+	OS/Windows/Client.h
+	OS/Windows/Threads/Threads.h
 )
 
 ###################### VKPT.
 SET(SRC_VKPT
-	refresh/vkpt/asvgf.cpp
-	refresh/vkpt/bloom.cpp
-	refresh/vkpt/bsp_mesh.cpp
-	refresh/vkpt/conversion.cpp
-	refresh/vkpt/draw.cpp
-	refresh/vkpt/freecam.cpp
-	refresh/vkpt/fog.cpp
-	refresh/vkpt/fsr.cpp
-	refresh/vkpt/main.cpp
-	refresh/vkpt/material.cpp
-	refresh/vkpt/matrix.cpp
-	refresh/vkpt/mgpu.cpp
-	refresh/vkpt/models.cpp
-	refresh/vkpt/path_tracer.cpp
-	refresh/vkpt/physical_sky.cpp
-	refresh/vkpt/precomputed_sky.cpp
-	refresh/vkpt/profiler.cpp
-	refresh/vkpt/shadow_map.cpp
-	refresh/vkpt/textures.cpp
-	refresh/vkpt/tone_mapping.cpp
-	refresh/vkpt/transparency.cpp
-	refresh/vkpt/uniform_buffer.cpp
-	refresh/vkpt/vertex_buffer.cpp
-	refresh/vkpt/vk_util.cpp
-	refresh/vkpt/buddy_allocator.cpp
-	refresh/vkpt/device_memory_allocator.cpp
-	refresh/vkpt/god_rays.cpp
+	Refresh/vkpt/asvgf.cpp
+	Refresh/vkpt/bloom.cpp
+	Refresh/vkpt/bsp_mesh.cpp
+	Refresh/vkpt/conversion.cpp
+	Refresh/vkpt/draw.cpp
+	Refresh/vkpt/freecam.cpp
+	Refresh/vkpt/fog.cpp
+	Refresh/vkpt/fsr.cpp
+	Refresh/vkpt/main.cpp
+	Refresh/vkpt/material.cpp
+	Refresh/vkpt/matrix.cpp
+	Refresh/vkpt/mgpu.cpp
+	Refresh/vkpt/models.cpp
+	Refresh/vkpt/path_tracer.cpp
+	Refresh/vkpt/physical_sky.cpp
+	Refresh/vkpt/precomputed_sky.cpp
+	Refresh/vkpt/profiler.cpp
+	Refresh/vkpt/shadow_map.cpp
+	Refresh/vkpt/textures.cpp
+	Refresh/vkpt/tone_mapping.cpp
+	Refresh/vkpt/transparency.cpp
+	Refresh/vkpt/uniform_buffer.cpp
+	Refresh/vkpt/vertex_buffer.cpp
+	Refresh/vkpt/vk_util.cpp
+	Refresh/vkpt/buddy_allocator.cpp
+	Refresh/vkpt/device_memory_allocator.cpp
+	Refresh/vkpt/god_rays.cpp
 )
 SET(HEADERS_VKPT
-	refresh/vkpt/fsr/ffx_a.h
-	refresh/vkpt/fsr/ffx_fsr1.h
+	Refresh/vkpt/fsr/ffx_a.h
+	Refresh/vkpt/fsr/ffx_fsr1.h
 
-    refresh/vkpt/shader/constants.h
-    refresh/vkpt/shader/global_textures.h
-    refresh/vkpt/shader/global_ubo.h
-    refresh/vkpt/shader/god_rays_shared.h
-    refresh/vkpt/shader/light_lists.h
-    refresh/vkpt/shader/path_tracer_hit_shaders.h
-    refresh/vkpt/shader/path_tracer_rgen.h
-    refresh/vkpt/shader/path_tracer.h
-    refresh/vkpt/shader/sky.h
-    refresh/vkpt/shader/vertex_buffer.h
+    Refresh/vkpt/shader/constants.h
+    Refresh/vkpt/shader/global_textures.h
+    Refresh/vkpt/shader/global_ubo.h
+    Refresh/vkpt/shader/god_rays_shared.h
+    Refresh/vkpt/shader/light_lists.h
+    Refresh/vkpt/shader/path_tracer_hit_shaders.h
+    Refresh/vkpt/shader/path_tracer_rgen.h
+    Refresh/vkpt/shader/path_tracer.h
+    Refresh/vkpt/shader/sky.h
+    Refresh/vkpt/shader/vertex_buffer.h
 
-	refresh/vkpt/vkpt.h
-	refresh/vkpt/vk_util.h
-	refresh/vkpt/buddy_allocator.h
-	refresh/vkpt/conversion.h
-	refresh/vkpt/device_memory_allocator.h
-	refresh/vkpt/fog.h
-	refresh/vkpt/material.h
-	refresh/vkpt/physical_sky.h
-	refresh/vkpt/precomputed_sky.h
+	Refresh/vkpt/vkpt.h
+	Refresh/vkpt/vk_util.h
+	Refresh/vkpt/buddy_allocator.h
+	Refresh/vkpt/conversion.h
+	Refresh/vkpt/device_memory_allocator.h
+	Refresh/vkpt/fog.h
+	Refresh/vkpt/material.h
+	Refresh/vkpt/physical_sky.h
+	Refresh/vkpt/precomputed_sky.h
 )
 
 ###################### Vulkan Shaders.
 set(SRC_SHADERS
-	refresh/vkpt/shader/animate_materials.comp
-	refresh/vkpt/shader/god_rays_filter.comp
-	refresh/vkpt/shader/god_rays.comp
-	refresh/vkpt/shader/bloom_composite.comp
-	refresh/vkpt/shader/bloom_blur.comp
-	refresh/vkpt/shader/bloom_downscale.comp
-	refresh/vkpt/shader/compositing.comp
-	refresh/vkpt/shader/checkerboard_interleave.comp
-	refresh/vkpt/shader/asvgf_atrous.comp
-	refresh/vkpt/shader/asvgf_gradient_atrous.comp
-	refresh/vkpt/shader/asvgf_gradient_img.comp
-	refresh/vkpt/shader/asvgf_gradient_reproject.comp
-	refresh/vkpt/shader/asvgf_lf.comp
-	refresh/vkpt/shader/asvgf_taau.comp
-	refresh/vkpt/shader/asvgf_temporal.comp
-	refresh/vkpt/shader/instance_geometry.comp
-	refresh/vkpt/shader/tone_mapping_histogram.comp
-	refresh/vkpt/shader/tone_mapping_curve.comp
-    refresh/vkpt/shader/tone_mapping_apply.comp
-	refresh/vkpt/shader/physical_sky.comp
-	refresh/vkpt/shader/physical_sky_space.comp
-	refresh/vkpt/shader/shadow_map.vert
-	refresh/vkpt/shader/sky_buffer_resolve.comp
-	refresh/vkpt/shader/stretch_pic.frag
-	refresh/vkpt/shader/stretch_pic.vert
-	refresh/vkpt/shader/final_blit_lanczos.frag
-	refresh/vkpt/shader/final_blit.vert
-	refresh/vkpt/shader/fsr_easu_fp16.comp
-	refresh/vkpt/shader/fsr_easu_fp32.comp
-	refresh/vkpt/shader/fsr_rcas_fp16.comp
-	refresh/vkpt/shader/fsr_rcas_fp32.comp
+	Refresh/vkpt/shader/animate_materials.comp
+	Refresh/vkpt/shader/god_rays_filter.comp
+	Refresh/vkpt/shader/god_rays.comp
+	Refresh/vkpt/shader/bloom_composite.comp
+	Refresh/vkpt/shader/bloom_blur.comp
+	Refresh/vkpt/shader/bloom_downscale.comp
+	Refresh/vkpt/shader/compositing.comp
+	Refresh/vkpt/shader/checkerboard_interleave.comp
+	Refresh/vkpt/shader/asvgf_atrous.comp
+	Refresh/vkpt/shader/asvgf_gradient_atrous.comp
+	Refresh/vkpt/shader/asvgf_gradient_img.comp
+	Refresh/vkpt/shader/asvgf_gradient_reproject.comp
+	Refresh/vkpt/shader/asvgf_lf.comp
+	Refresh/vkpt/shader/asvgf_taau.comp
+	Refresh/vkpt/shader/asvgf_temporal.comp
+	Refresh/vkpt/shader/instance_geometry.comp
+	Refresh/vkpt/shader/tone_mapping_histogram.comp
+	Refresh/vkpt/shader/tone_mapping_curve.comp
+    Refresh/vkpt/shader/tone_mapping_apply.comp
+	Refresh/vkpt/shader/physical_sky.comp
+	Refresh/vkpt/shader/physical_sky_space.comp
+	Refresh/vkpt/shader/shadow_map.vert
+	Refresh/vkpt/shader/sky_buffer_resolve.comp
+	Refresh/vkpt/shader/stretch_pic.frag
+	Refresh/vkpt/shader/stretch_pic.vert
+	Refresh/vkpt/shader/final_blit_lanczos.frag
+	Refresh/vkpt/shader/final_blit.vert
+	Refresh/vkpt/shader/fsr_easu_fp16.comp
+	Refresh/vkpt/shader/fsr_easu_fp32.comp
+	Refresh/vkpt/shader/fsr_rcas_fp16.comp
+	Refresh/vkpt/shader/fsr_rcas_fp32.comp
 )
 
 set(SRC_RT_SHADERS
-	refresh/vkpt/shader/primary_rays.rgen
-	refresh/vkpt/shader/direct_lighting.rgen
-	refresh/vkpt/shader/indirect_lighting.rgen
-	refresh/vkpt/shader/path_tracer.rchit
-	refresh/vkpt/shader/path_tracer.rmiss
-	refresh/vkpt/shader/path_tracer_masked.rahit
-	refresh/vkpt/shader/path_tracer_particle.rahit
-	refresh/vkpt/shader/path_tracer_sprite.rahit
-	refresh/vkpt/shader/path_tracer_beam.rahit
-	refresh/vkpt/shader/path_tracer_beam.rint
-	refresh/vkpt/shader/path_tracer_explosion.rahit
-	refresh/vkpt/shader/reflect_refract.rgen
+	Refresh/vkpt/shader/primary_rays.rgen
+	Refresh/vkpt/shader/direct_lighting.rgen
+	Refresh/vkpt/shader/indirect_lighting.rgen
+	Refresh/vkpt/shader/path_tracer.rchit
+	Refresh/vkpt/shader/path_tracer.rmiss
+	Refresh/vkpt/shader/path_tracer_masked.rahit
+	Refresh/vkpt/shader/path_tracer_particle.rahit
+	Refresh/vkpt/shader/path_tracer_sprite.rahit
+	Refresh/vkpt/shader/path_tracer_beam.rahit
+	Refresh/vkpt/shader/path_tracer_beam.rint
+	Refresh/vkpt/shader/path_tracer_explosion.rahit
+	Refresh/vkpt/shader/reflect_refract.rgen
 )
 
 # Check for a shader compiler.
@@ -606,7 +606,7 @@ if (CONFIG_VKPT_RENDERER)
 		endforeach()
 
 		foreach(s ${SRC_SHADERS})
-			compile_shader(SOURCE_FILE ${s} INCLUDES "-I${CMAKE_CURRENT_SOURCE_DIR}/refresh/vkpt/fsr" OUTPUT_FILE_LIST shader_bytecode)
+			compile_shader(SOURCE_FILE ${s} INCLUDES "-I${CMAKE_CURRENT_SOURCE_DIR}/Refresh/vkpt/fsr" OUTPUT_FILE_LIST shader_bytecode)
 		endforeach()
 
 		add_custom_target(shaders DEPENDS ${shader_bytecode})
@@ -653,7 +653,7 @@ ADD_EXECUTABLE(client WIN32
 	${SRC_SHARED} ${HEADERS_SHARED}
 	${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
 	${SRC_SERVER} ${HEADERS_SERVER}
-	os/res/polyhedron.rc
+	OS/Resources/polyhedron.rc
 )
 ADD_EXECUTABLE(server 
 	${SRC_COMMON} ${HEADERS_COMMON} 
@@ -661,8 +661,8 @@ ADD_EXECUTABLE(server
 	${SRC_WINDOWS} ${HEADERS_WINDOWS}
 	${SRC_SERVER} ${HEADERS_SERVER}
 	client/null.cpp
-	#os/sdl2/time.cpp
-	os/res/polyhedron_dedicated.rc
+	#OS/sdl2/time.cpp
+	OS/Resources/polyhedron_dedicated.rc
 )
 ELSE()
 ADD_EXECUTABLE(client
@@ -741,7 +741,7 @@ SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_CLIENT})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SERVER})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SERVER})
 
-# Old SVGame source grouping - it just bundled *everything* into svgame/sources and svgame/headers, eugh -Admer
+# Old SVGame source grouping - it just bundled *everything* into SVGame/sources and SVGame/headers, eugh -Admer
 #SOURCE_GROUP("svgame" FILES ${SRC_SVGAME})
 #SOURCE_GROUP("svgame" FILES ${HEADERS_SVGAME})
 
@@ -767,8 +767,8 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../VC/inc)
-	TARGET_SOURCES(svgame PRIVATE os/res/basepoly_sv.rc)
-	TARGET_SOURCES(CLGame PRIVATE os/res/basepoly_cl.rc)
+	TARGET_SOURCES(svgame PRIVATE OS/Resources/basepoly_sv.rc)
+	TARGET_SOURCES(CLGame PRIVATE OS/Resources/basepoly_cl.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -783,8 +783,8 @@ IF (WIN32)
 
     ## Group the resource files too, so they don't end up in the ugly "Source Files" folder in VS
     SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES 
-        os/res/nac.rc 
-        os/res/nacded.rc )
+        OS/Resources/nac.rc 
+        OS/Resources/nacded.rc )
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)

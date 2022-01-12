@@ -8,7 +8,7 @@
 //
 
 // Include local game header.
-#include "../g_local.h"
+#include "../ServerGameLocal.h"
 
 // Include class entities.
 #include "../entities/base/SVGBaseEntity.h"

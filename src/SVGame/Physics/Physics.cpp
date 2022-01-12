@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_phys.c
 
-#include "../g_local.h"
-#include "../utils.h"
+#include "../ServerGameLocal.h"
+#include "../Utilities.h"
 #include "stepmove.h"
 
 #include "../entities/base/SVGBaseEntity.h"

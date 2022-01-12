@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __SVGAME_G_LOCAL_H__
 #define __SVGAME_G_LOCAL_H__
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "shared/list.h"
 
 // define GAME_INCLUDE so that game.h does not define the
@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
 #include "shared/svgame.h"
-#include "sharedgame/sharedgame.h" // Include SG Base.
+#include "SharedGame/SharedGame.h" // Include SG Base.
 #include "sharedgame/protocol.h"
 
 // the "gameversion" client command will print32_t this plus compile date

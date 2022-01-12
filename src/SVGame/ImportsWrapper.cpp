@@ -10,8 +10,8 @@
 // This is to wrap it up nicely.
 //
 */
-#include "g_local.h"          // Include SVGame header.
-#include "entities.h"
+#include "ServerGameLocal.h"          // Include SVGame header.
+#include "Entities.h"
 #include "entities/base/SVGBaseEntity.h"
 
 //

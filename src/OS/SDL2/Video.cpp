@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // video.c
 //
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "common/cvar.h"
 #include "common/common.h"
 #include "common/files.h"
@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/video.h"
 #include "refresh/refresh.h"
 #include "system/system.h"
-#include "../res/q2pro.xbm"
+#include "../Resources/q2pro.xbm"
 #include <SDL.h>
 
 // RMLUI.

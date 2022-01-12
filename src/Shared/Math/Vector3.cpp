@@ -3,7 +3,7 @@
 //
 // shared/math/vector3.cpp
 //
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 
 /*
 ==================

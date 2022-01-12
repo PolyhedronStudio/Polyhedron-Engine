@@ -4,12 +4,12 @@
 // FuncTrain.cpp
 */
 
-#include "../../g_local.h"
-#include "../../entities.h"
-#include "../../effects.h"
+#include "../../ServerGameLocal.h"
+#include "../../Entities.h"
+#include "../../Effects.h"
 
-#include "../base/SVGBaseTrigger.h"
-#include "../base/SVGBaseMover.h"
+#include "../Base/SVGBaseTrigger.h"
+#include "../Base/SVGBaseMover.h"
 
 #include "../path/PathCorner.h"
 #include "FuncTrain.h"

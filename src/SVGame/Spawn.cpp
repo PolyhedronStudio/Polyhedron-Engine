@@ -17,9 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "g_local.h"          // Include SVGame header.
-#include "entities.h"         // Entities.
-#include "player/client.h"    // Include Player Client header.
+#include "ServerGameLocal.h"          // Include SVGame header.
+#include "Entities.h"         // Entities.
+#include "Player/Client.h"    // Include Player Client header.
 
 typedef struct {
     const char    *name; // C++20: STRING: Added const

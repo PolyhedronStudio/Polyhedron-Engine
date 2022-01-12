@@ -4,12 +4,12 @@
 // TargetEarthquake.cpp
 */
 
-#include "../../g_local.h"
-#include "../../effects.h"
-#include "../../entities.h"
-#include "../../utils.h"
+#include "../../ServerGameLocal.h"
+#include "../../Effects.h"
+#include "../../Entities.h"
+#include "../../Utilities.h"
 
-#include "../base/SVGBaseEntity.h"
+#include "../Base/SVGBaseEntity.h"
 
 #include "TargetEarthquake.h"
 

@@ -6,14 +6,14 @@
 //
 //
 */
-#include "../../g_local.h"          // SVGame.
-#include "../../effects.h"          // Effects.
-#include "../../utils.h"            // Util funcs.
-#include "../../physics/stepmove.h" // Stepmove funcs.
+#include "../../ServerGameLocal.h"          // SVGame.
+#include "../../Effects.h"          // Effects.
+#include "../../Utilities.h"            // Util funcs.
+#include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Server Game Base Entity.
-#include "../base/SVGBaseEntity.h"
-#include "../base/SVGBaseTrigger.h"
+#include "../Base/SVGBaseEntity.h"
+#include "../Base/SVGBaseTrigger.h"
 
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"

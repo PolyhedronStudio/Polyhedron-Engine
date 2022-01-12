@@ -19,7 +19,7 @@
 //
 
 // Include local game header.
-#include "g_local.h"
+#include "ServerGameLocal.h"
 
 //=====================================================
 

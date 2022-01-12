@@ -5,7 +5,7 @@
 //
 // N&C SVGame: Player pain, and die, callback code.
 // 
-#include "../g_local.h" // Include SVGame header.
+#include "../ServerGameLocal.h" // Include SVGame header.
 #include "../effects.h" // Include Effects header.
 #include "client.h"     // Include Player Client header.
 

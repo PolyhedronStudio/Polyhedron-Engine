@@ -13,7 +13,7 @@
 #include <SDL.h>
 
 // Include shared headers.
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 
 // Initializes RMLUI.
 void RMLUI_Init(void);

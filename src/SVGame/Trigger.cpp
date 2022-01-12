@@ -15,9 +15,9 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "g_local.h"
-#include "utils.h"
-#include "trigger.h"
+#include "ServerGameLocal.h"
+#include "Utilities.h"
+#include "Trigger.h"
 
 void InitTrigger(Entity *self)
 {

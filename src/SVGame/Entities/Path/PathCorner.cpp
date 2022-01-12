@@ -4,8 +4,8 @@
 // PathCorner.cpp
 */
 
-#include "../../g_local.h"
-#include "../../entities.h"
+#include "../../ServerGameLocal.h"
+#include "../../Entities.h"
 
 #include "PathCorner.h"
 

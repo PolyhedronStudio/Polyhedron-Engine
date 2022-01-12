@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // Core.
-#include "g_local.h"          // Include SVGame header.
+#include "ServerGameLocal.h"          // Include SVGame header.
 
 // Entities.
-#include "entities.h"
+#include "Entities.h"
 #include "entities/base/SVGBaseEntity.h"
 #include "entities/base/PlayerClient.h"
 
@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gamemodes/DeathMatchGameMode.h"
 
 // Player related.
-#include "player/client.h"      // Include Player Client header.
+#include "Player/Client.h"      // Include Player Client header.
 #include "player/view.h"        // Include Player View header.
 
 // Physics related.

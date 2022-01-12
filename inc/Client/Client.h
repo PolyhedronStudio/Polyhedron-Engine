@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "common/cmd.h"
 #include "common/net/net.h"
-#include "common/utils.h"
+#include "Common/Utilities.h"
 
 #if USE_CLIENT
 

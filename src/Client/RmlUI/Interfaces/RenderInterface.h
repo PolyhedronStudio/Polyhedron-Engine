@@ -37,7 +37,7 @@
 #ifndef __CLIENT_RMLUI_INTERFACES_RENDERINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_RENDERINTERFACE_H__
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 
  /**
 	N&C Quake RML Render Interface.

@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include <assert.h>
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "vkpt.h"
 #include "vk_util.h"
 #include "conversion.h"

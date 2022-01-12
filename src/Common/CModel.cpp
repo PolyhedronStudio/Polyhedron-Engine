@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // cmodel.c -- model loading
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "common/bsp.h"
 #include "common/cmd.h"
 #include "common/cmodel.h"

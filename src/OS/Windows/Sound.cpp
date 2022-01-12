@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // snd_sdl.c
 //
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "common/zone.h"
 #include "client/sound/dma.h"
 #include "SDL.h"

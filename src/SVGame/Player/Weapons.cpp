@@ -17,13 +17,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_weapon.c
 
-#include "../g_local.h"
+#include "../ServerGameLocal.h"
 #include "animations.h"
 
 #include "../entities/base/SVGBaseEntity.h"
 #include "../entities/base/PlayerClient.h"
 
-#include "sharedgame/sharedgame.h" // Include SG Base.
+#include "SharedGame/SharedGame.h" // Include SG Base.
 
 qboolean is_quad;
 byte     is_silenced;

@@ -7,7 +7,7 @@
 // SDL2 Time function implementations.
 //
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "system/system.h"
 #include <SDL.h>
 

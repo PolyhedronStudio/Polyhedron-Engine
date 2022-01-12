@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SHAREDGAME_PMOVE_H
 
 // Shared include, we need it :)
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 
 //
 //==============================================================

@@ -11,7 +11,7 @@
 
 // Required include here to prevent collisions.
 #include <map>
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 
 //
 // Simple Polyhedron System Interface to Rml

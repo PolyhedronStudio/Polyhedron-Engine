@@ -6,7 +6,7 @@
 //
 //
 */
-#include "../g_local.h"              // SVGame.
+#include "../ServerGameLocal.h"              // SVGame.
 
 #include "base/SVGBaseEntity.h"
 #include "base/SVGBaseTrigger.h"

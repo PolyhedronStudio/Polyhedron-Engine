@@ -6,16 +6,16 @@
 //
 //
 */
-#include "../../g_local.h"              // SVGame.
-#include "../../effects.h"              // Effects.
-#include "../../entities.h"             // Entities.
+#include "../../ServerGameLocal.h"              // SVGame.
+#include "../../Effects.h"              // Effects.
+#include "../../Entities.h"             // Entities.
 #include "../../player/client.h"        // Player Client functions.
 #include "../../player/animations.h"    // Include Player Client Animations.
 #include "../../player/view.h"          // Include Player View functions..
-#include "../../utils.h"                // Util funcs.
+#include "../../Utilities.h"                // Util funcs.
 
 // Class Entities.
-#include "../base/SVGBaseEntity.h"
+#include "../Base/SVGBaseEntity.h"
 #include "GibEntity.h"
 
 // Constructor/Deconstructor.

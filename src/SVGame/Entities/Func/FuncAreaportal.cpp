@@ -4,14 +4,14 @@
 // FuncAreaportal.cpp
 */
 
-#include "../../g_local.h"
-#include "../../effects.h"
-#include "../../entities.h"
-#include "../../utils.h"
-#include "../../physics/stepmove.h"
-#include "../../brushfuncs.h"
+#include "../../ServerGameLocal.h"
+#include "../../Effects.h"
+#include "../../Entities.h"
+#include "../../Utilities.h"
+#include "../../Physics/StepMove.h"
+#include "../../BrushFunctions.h"
 
-#include "../base/SVGBaseEntity.h"
+#include "../Base/SVGBaseEntity.h"
 
 #include "FuncAreaportal.h"
 

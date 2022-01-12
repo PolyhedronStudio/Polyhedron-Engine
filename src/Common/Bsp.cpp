@@ -20,14 +20,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // bsp.c -- model loading
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "shared/list.h"
 #include "common/cvar.h"
 #include "common/cmd.h"
 #include "common/common.h"
 #include "common/files.h"
 #include "common/bsp.h"
-#include "common/utils.h"
+#include "Common/Utilities.h"
 #include "common/mdfour.h"
 #include "system/hunk.h"
 

@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "vk_util.h"
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "common/bsp.h"
 #include "common/cmd.h"
 #include "common/common.h"

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define COMMON_H
 
 #include "common/cmd.h"
-#include "common/utils.h"
+#include "Common/Utilities.h"
 
 //
 // common.h -- definitions common between client and server, but not game.dll

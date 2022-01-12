@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include "common/utils.h"
+#include "Common/Utilities.h"
 
 // loads the dll and returns entry pointer
 void    *Sys_LoadLibrary(const char *path, const char *sym, void **handle);

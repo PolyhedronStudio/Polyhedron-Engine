@@ -6,9 +6,9 @@
 //
 //
 */
-#include "g_local.h"			// Include SVGame header.
-#include "entities.h"			// Entities header.
-#include "player/client.h"		// Include Player Client header.
+#include "ServerGameLocal.h"    // Include SVGame header.
+#include "Entities.h"			// Entities header.
+#include "Player/Client.h"		// Include Player Client header.
 
 
 
@@ -16,12 +16,12 @@
 // SVG_SpawnClassEntity
 //
 //
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/SVGBaseTrigger.h"
-#include "entities/base/SVGBaseMover.h"
-#include "entities/base/PlayerClient.h"
-#include "entities/info/InfoPlayerStart.h"
-#include "entities/Worldspawn.h"
+#include "Entities/Base/SVGBaseEntity.h"
+#include "Entities/Base/SVGBaseTrigger.h"
+#include "Entities/Base/SVGBaseMover.h"
+#include "Entities/Base/PlayerClient.h"
+#include "Entities/Info/InfoPlayerStart.h"
+#include "Entities/Worldspawn.h"
 
 #include <ranges>
 

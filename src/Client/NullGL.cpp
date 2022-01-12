@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_null.c -- this file can stub out the entire client system
 // for pure dedicated servers
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "common/cvar.h"
 #include "common/bsp.h"
 #include "Client/Client.h"

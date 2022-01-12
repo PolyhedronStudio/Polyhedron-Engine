@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // m_move.c -- monster movement
 
-#include "../g_local.h"      // SVGame funcs.
-#include "../utils.h"        // Util funcs.
+#include "../ServerGameLocal.h"      // SVGame funcs.
+#include "../Utilities.h"        // Util funcs.
 
 #include "../entities/base/SVGBaseEntity.h"
 

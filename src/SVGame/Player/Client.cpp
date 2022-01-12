@@ -17,11 +17,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // General.
-#include "../g_local.h"     // SVGame.
+#include "../ServerGameLocal.h"     // SVGame.
 #include "../chasecamera.h" // Chase Camera.
 #include "../effects.h"     // Effects.
 #include "../entities.h"    // Entities.
-#include "../utils.h"       // Util funcs.
+#include "../Utilities.h"       // Util funcs.
 #include "client.h"         // Include Player Client header.
 #include "hud.h"            // Include HUD header.
 #include "view.h"           // View header.
@@ -36,7 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../gamemodes/IGameMode.h"
 
 // Shared Game.
-#include "sharedgame/sharedgame.h" // Include SG Base.
+#include "SharedGame/SharedGame.h" // Include SG Base.
 #include "sharedgame/pmove.h"   // Include SG PMove.
 #include "animations.h"         // Include Player Client Animations.
 

@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "refresh/refresh.h"
 #include "Client/Client.h"
 #include "refresh/images.h"

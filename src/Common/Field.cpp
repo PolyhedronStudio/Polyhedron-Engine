@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // field.c
 //
 
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "common/common.h"
 #include "common/field.h"
 #include "client/client.h"

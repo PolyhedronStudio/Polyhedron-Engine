@@ -19,7 +19,7 @@
 #define CGAME_INCLUDE 1
 
 // Shared.
-#include "shared/shared.h"
+#include "Shared/Shared.h"
 #include "shared/list.h"
 #include "shared/refresh.h"
 
@@ -30,7 +30,7 @@
 #include "common/protocol.h"
 
 // Shared Game Headers.
-#include "sharedgame/sharedgame.h" // Include SG Base.
+#include "SharedGame/SharedGame.h" // Include SG Base.
 #include "sharedgame/pmove.h"
 #include "sharedgame/protocol.h"
 

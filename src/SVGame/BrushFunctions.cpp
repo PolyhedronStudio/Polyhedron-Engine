@@ -8,9 +8,9 @@
 //
 
 // Include local game header.
-#include "g_local.h"
-#include "entities/base/SVGBaseEntity.h"
-#include "brushfuncs.h"
+#include "ServerGameLocal.h"
+#include "Entities/Base/SVGBaseEntity.h"
+#include "BrushFunctions.h"
 
 //=====================================================
 

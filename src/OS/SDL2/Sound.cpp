@@ -20,9 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // snd_sdl.c
 //
 
-#include "shared/shared.h"
-#include "common/zone.h"
-#include "client/sound/dma.h"
+#include "Shared/Shared.h"
+#include "Common/Zone.h"
+#include "Client/Sound/DirectMemoryAccess.h"
 #include "SDL.h"
 
 static void Filler(void *userdata, Uint8 *stream, int len)
@@ -115,7 +115,7 @@ static sndinitstat_t Init(void)
     dma.samples = 0x8000 * obtained.channels;
     dma.submission_chunk = 1;
     dma.samplebits = 16;
-    dma.buffer = Z_Mallocz(dma.samples * 2);
+    dma.buffer = (byte*)Z_Mallocz(dma.samples * 2);
     dma.samplepos = 0;
 
     Com_Printf("Using SDL audio driver: %s\n", SDL_GetCurrentAudioDriver());

@@ -4,14 +4,14 @@
 // TriggerPush.cpp
 */
 
-#include "../../g_local.h"
-#include "../../effects.h"
-#include "../../entities.h"
-#include "../../utils.h"
+#include "../../ServerGameLocal.h"
+#include "../../Effects.h"
+#include "../../Entities.h"
+#include "../../Utilities.h"
 
-#include "../base/SVGBaseEntity.h"
-#include "../base/SVGBaseTrigger.h"
-#include "../base/PlayerClient.h"
+#include "../Base/SVGBaseEntity.h"
+#include "../Base/SVGBaseTrigger.h"
+#include "../Base/PlayerClient.h"
 
 #include "TriggerPush.h"
 
