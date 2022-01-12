@@ -6,10 +6,10 @@
 //
 // Takes care of entity management.
 //
-#include "clg_local.h"
-#include "clg_effects.h"
-#include "clg_entities.h"
-#include "clg_view.h"
+#include "ClientGameLocal.h"
+#include "Effects.h"
+#include "Entities.h"
+#include "View.h"
 
 extern qhandle_t cl_mod_powerscreen;
 extern qhandle_t cl_mod_laser;

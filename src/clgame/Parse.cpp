@@ -6,14 +6,14 @@
 //
 // Handles parsing of the Server Messages.
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_effects.h"
-#include "clg_main.h"
-#include "clg_media.h"
-#include "clg_parse.h"
-#include "clg_screen.h"
-#include "clg_tents.h"
+#include "Effects.h"
+#include "Main.h"
+#include "Media.h"
+#include "Parse.h"
+#include "Screen.h"
+#include "TemporaryEntities.h"
 
 //
 //=============================================================================

@@ -6,13 +6,13 @@
 //
 // View handling on a per frame basis.
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_effects.h"
-#include "clg_entities.h"
-#include "clg_main.h"
-#include "clg_tents.h"
-#include "clg_view.h"
+#include "Effects.h"
+#include "Entities.h"
+#include "Main.h"
+#include "TemporaryEntities.h"
+#include "View.h"
 
 clg_view_t  view;
 //=============

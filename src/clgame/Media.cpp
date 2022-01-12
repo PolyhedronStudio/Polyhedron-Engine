@@ -7,14 +7,14 @@
 // Media load handling, usually happens when the renderer initializes, or
 // restarts (Think about changing screen mode, or other settings).
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_effects.h"
-#include "clg_media.h"
-#include "clg_main.h"
-#include "clg_screen.h"
-#include "clg_tents.h"
-#include "clg_view.h"
+#include "Effects.h"
+#include "Media.h"
+#include "Main.h"
+#include "Screen.h"
+#include "TemporaryEntities.h"
+#include "View.h"
 
 //
 //===============

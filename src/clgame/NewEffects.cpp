@@ -9,10 +9,10 @@
 //
 // This is just a guess though :)
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_effects.h"
-#include "clg_main.h"
+#include "Effects.h"
+#include "Main.h"
 
 #if USE_DLIGHTS
 void CLG_Flashlight(int ent, vec3_t pos)

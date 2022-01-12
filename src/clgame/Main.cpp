@@ -6,18 +6,19 @@
 //
 // Handles the main initialisation of the client game dll.
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_effects.h"
-#include "clg_entities.h"
-#include "clg_input.h"
-#include "clg_main.h"
-#include "clg_media.h"
-#include "clg_parse.h"
-#include "clg_predict.h"
-#include "clg_screen.h"
-#include "clg_tents.h"
-#include "clg_view.h"
+// ClientGame implementations.
+#include "Effects.h"
+#include "Entities.h"
+#include "Input.h"
+#include "Main.h"
+#include "Media.h"
+#include "Parse.h"
+#include "Predict.h"
+#include "Screen.h"
+#include "TemporaryEntities.h"
+#include "View.h"
 
 // ClientGameExports interface implementations.
 #include "ClientGameExports.h"

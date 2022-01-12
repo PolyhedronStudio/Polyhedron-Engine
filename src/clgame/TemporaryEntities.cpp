@@ -6,13 +6,13 @@
 //
 // Handles the temporary entities. Explions, Beams, etc.
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_effects.h"
-#include "clg_main.h"
-#include "clg_newfx.h"
-#include "clg_tents.h"
-#include "clg_view.h"
+#include "Effects.h"
+#include "Main.h"
+#include "NewEffects.h"
+#include "TemporaryEntities.h"
+#include "View.h"
 
 //
 // CVars.

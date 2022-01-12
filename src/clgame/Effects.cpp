@@ -7,13 +7,13 @@
 // Contains code for all special effects, simple steam leaking particles to
 // awesome big banging explosions!
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_effects.h"
-#include "clg_main.h"
-#include "clg_newfx.h"
-#include "clg_tents.h"
-#include "clg_view.h"
+#include "Effects.h"
+#include "Main.h"
+#include "NewEffects.h"
+#include "TemporaryEntities.h"
+#include "View.h"
 
 static void CLG_LogoutEffect(vec3_t org, int type);
 

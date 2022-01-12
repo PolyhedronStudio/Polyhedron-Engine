@@ -6,11 +6,11 @@
 //
 // Client Screen Implementation.
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_main.h"
-#include "clg_media.h"
-#include "clg_screen.h"
+#include "Main.h"
+#include "Media.h"
+#include "Screen.h"
 
 RenderScreenData scr;
 

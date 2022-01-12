@@ -6,9 +6,9 @@
 //
 // Movement prediction implementation for the client side.
 //
-#include "clg_local.h"
+#include "ClientGameLocal.h"
 
-#include "clg_main.h"
+#include "Main.h"
 
 // Distance that is allowed to be taken as a delta before we reset it.
 #define MAX_DELTA_ORIGIN (2400.f * (1.0f / BASE_FRAMERATE))
