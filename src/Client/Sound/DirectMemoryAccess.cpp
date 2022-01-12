@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // snd_dma.c -- main control for any streaming sound output device
 
-#include "sound.h"
+#include "Sound.h"
 
 dma_t       dma;
 

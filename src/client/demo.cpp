@@ -20,8 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_demo.c - demo recording and playback
 //
 
-#include "client.h"
-#include "client/gamemodule.h"
+#include "Client.h"
+#include "Client/GameModule.h"
 
 static byte     demo_buffer[MAX_PACKETLEN];
 

@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "vkpt.h"
-#include "../../client/client.h"
+#include "../../Client/Client.h"
 
 /*
 The FreeCam system activates when the user pauses the game.

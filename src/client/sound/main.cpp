@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 #include "sound.h"
-#include "client/sound/vorbis.h"
+#include "Client/Sound/Vorbis.h"
 
 // =======================================================================
 // Internal sound data & structures

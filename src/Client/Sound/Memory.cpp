@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // snd_mem.c: sound caching
 
-#include "sound.h"
+#include "Sound.h"
 
 wavinfo_t s_info;
 

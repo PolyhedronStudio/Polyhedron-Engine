@@ -18,8 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // cl_ents.c -- entity parsing and management
 
-#include "client.h"
-#include "client/gamemodule.h"
+#include "Client.h"
+#include "Client/GameModule.h"
 #include "refresh/models.h"
 
 extern qhandle_t cl_mod_powerscreen;

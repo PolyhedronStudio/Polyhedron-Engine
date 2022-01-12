@@ -229,77 +229,75 @@ SET( SRC_SVGAME
     
     ###################### Client.
 SET(SRC_CLIENT
-	client/ascii.cpp
-	client/console.cpp
-	client/cin.cpp
-	client/clgame.cpp
-	client/crc.cpp
-	client/demo.cpp
-	client/download.cpp
-	#client/effects.cpp
-	client/entities.cpp
-	#client/gtv.cpp
-	client/input.cpp
-	client/keys.cpp
-	client/locs.cpp
-	client/main.cpp
-	client/parse.cpp
-	client/precache.cpp
-	client/predict.cpp
-	client/refresh.cpp
-	client/screen.cpp
-	client/view.cpp
-	client/ui/demos.cpp
-	client/ui/menu.cpp
-	client/ui/playerconfig.cpp
-	client/ui/playermodels.cpp
-	client/ui/script.cpp
-	client/ui/servers.cpp
-	client/ui/ui.cpp
-	client/sound/dma.cpp
-	client/sound/al.cpp
-	client/sound/main.cpp
-	client/sound/mem.cpp
-	client/sound/mix.cpp
-	client/sound/ogg.cpp
-#	client/sound/qal/fixed.c
-	client/sound/qal/dynamic.cpp
+	Client/ASCII.cpp
+	Client/Console.cpp
+	Client/Cinematic.cpp
+	Client/ClientGame.cpp
+	Client/CRC.cpp
+	Client/Demo.cpp
+	Client/Download.cpp
+	Client/Entities.cpp
+	Client/input.cpp
+	Client/Keys.cpp
+	Client/Locations.cpp
+	Client/Main.cpp
+	Client/Parse.cpp
+	Client/Precache.cpp
+	Client/Predict.cpp
+	Client/Refresh.cpp
+	Client/Screen.cpp
+	Client/View.cpp
+	Client/UI/Demos.cpp
+	Client/UI/Menu.cpp
+	Client/UI/PlayerConfig.cpp
+	Client/UI/PlayerModels.cpp
+	Client/UI/Script.cpp
+	Client/UI/Servers.cpp
+	Client/UI/UI.cpp
+	Client/Sound/DirectMemoryAccess.cpp
+	Client/Sound/OpenAL.cpp
+	Client/Sound/Main.cpp
+	Client/Sound/Memory.cpp
+	Client/Sound/Mix.cpp
+	Client/Sound/OGG.cpp
+#	Client/Sound/QAL/fixed.c
+	Client/Sound/QAL/Dynamic.cpp
 )
 # Required as a placeholder for certain Vulkan only related features.
 if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
 	set(SRC_CLIENT 
 		${SRC_CLIENT}
-		client/null_gl.cpp
+		Client/NullGL.cpp
 	)
 endif()
 
 if (CONFIG_ENABLE_RMLUI)
 SET(SRC_CLIENT_RMLUI
-	client/rmlui/interfaces/FileInterface.cpp
-	client/rmlui/interfaces/FileInterface.h
-	client/rmlui/interfaces/RenderInterface.cpp
-	client/rmlui/interfaces/RenderInterface.h
-	client/rmlui/interfaces/SystemInterface.cpp
-	client/rmlui/interfaces/SystemInterface.h
-	client/rmlui/rmlui.cpp
-	client/rmlui/rmlui.h
+	Client/RmlUI/Interfaces/FileInterface.cpp
+	Client/RmlUI/Interfaces/FileInterface.h
+	Client/RmlUI/Interfaces/RenderInterface.cpp
+	Client/RmlUI/Interfaces/RenderInterface.h
+	Client/RmlUI/Interfaces/SystemInterface.cpp
+	Client/RmlUI/Interfaces/SystemInterface.h
+	Client/RmlUI/RmlUI.cpp
+	Client/RmlUI/RmlUI.h
 )
 else()
 SET(SRC_CLIENT_RMLUI
-	client/rmlui/rmlui_null.cpp
-	client/rmlui/rmlui.h
+	Client/RmlUI/RmlUINull.cpp
+	Client/RmlUI/RmlUI.h
 )
 endif()
 
 SET(SRC_CLIENT_HTTP
-	client/http.cpp
+	Client/HTTP.cpp
 )
 SET(HEADERS_CLIENT
-	client/client.h
-	client/ui/ui.h
-	client/sound/sound.h
-	client/sound/qal/dynamic.h
-	client/sound/qal/fixed.h
+	Client/Client.h
+	Client/UI/UI.h
+	Client/Sound/Sound.h
+	Client/Sound/QAL/Dynamic.h
+	Client/Sound/QAL/fixed.h
 )
 
 ###################### Client.

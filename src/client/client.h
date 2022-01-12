@@ -41,12 +41,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "refresh/refresh.h"
 #include "server/server.h"
 
-#include "client/client.h"
-#include "client/input.h"
-#include "client/keys.h"
-#include "client/sound/sound.h"
-#include "client/ui.h"
-#include "client/video.h"
+#include "Client/Client.h"
+#include "Client/Input.h"
+#include "Client/Keys.h"
+#include "Client/Sound/Sound.h"
+#include "Client/UI.h"
+#include "Client/Video.h"
 
 // Shared Game includes.
 #include "sharedgame/protocol.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.

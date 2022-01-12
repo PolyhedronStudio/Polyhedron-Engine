@@ -22,16 +22,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/shared.h"
 #include "common/cvar.h"
 #include "common/bsp.h"
-#include "client/client.h"
+#include "Client/Client.h"
 
 // This varialbe is actually defined in /src/refresh/vkpt/transperancy.c
 // However since we aren't compiling this file, unless we build without VK
 // it is save to define it here.
 cvar_t* cvar_pt_beam_lights = NULL;
-
-void SetFogByMap(const char* name) 
-{
-}
 
 static void Key_Bind_Null_f(void)
 {

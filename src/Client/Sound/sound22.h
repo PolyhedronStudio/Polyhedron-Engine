@@ -18,10 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // sound.h -- private sound functions
 
-#include "../client.h"
+#include "../Client.h"
 
 #if USE_SNDDMA
-#include "client/sound/dma.h"
+#include "Client/Sound/DirectMemoryAccess.h"
 #endif
 
 // !!! if this is changed, the asm code must change !!!

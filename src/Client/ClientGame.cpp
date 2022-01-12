@@ -19,12 +19,12 @@
 // This way, we can remove the _wrp_ functions from this file and have 
 // the function pointers point to the actual functions.
 //
-#include "client.h"
+#include "Client.h"
 #include "server/server.h"
 #include "refresh/models.h"
 
 // (Client/Game) related.
-#include "client/gamemodule.h"   // TODO: How come it can find client.h??
+#include "Client/GameModule.h"   // TODO: How come it can find client.h??
 #include "shared/cltypes.h"
 #include "shared/clgame.h"
 

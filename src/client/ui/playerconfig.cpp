@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "ui.h"
+#include "UI.h"
 
 // N&C: Lame hack, but it needs access to it...
 extern float CL_GM_CalcFOV(float fov_x, float width, float height);

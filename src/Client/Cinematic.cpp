@@ -18,9 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "client.h"
-#include "client/sound/sound.h"
-#include "client/sound/vorbis.h"
+#include "Client.h"
+#include "Client/Sound/Sound.h"
+#include "Client/Sound/Vorbis.h"
 #include "common/files.h"
 #include "refresh/images.h"
 

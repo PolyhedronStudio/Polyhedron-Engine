@@ -37,8 +37,8 @@
 #include <errno.h>
 
 #include "shared/shared.h"
-#include "sound.h"
-#include "client/sound/vorbis.h"
+#include "Sound.h"
+#include "Client/Sound/Vorbis.h"
 
 #define STB_VORBIS_NO_PUSHDATA_API
 #include "stb_vorbis.c"

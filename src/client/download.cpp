@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_download.c -- queue manager and UDP downloads
 //
 
-#include "client.h"
+#include "Client.h"
 #include "format/md2.h"
 #include "format/sp2.h"
 

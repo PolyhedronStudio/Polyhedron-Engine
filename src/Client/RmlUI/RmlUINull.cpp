@@ -8,12 +8,12 @@
 //
 
 // Client includes.
-#include "../client.h"
-#include "client/sound/vorbis.h"
-#include "client/gamemodule.h"
+#include "../Client.h"
+#include "Client/Sound/Vorbis.h"
+#include "Client/GameModule.h"
 
 // RmlUI includes.
-#include "rmlui.h"
+#include "RmlUI.h"
 
 //
 //=============================================================================

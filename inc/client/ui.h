@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define UI_H
 
 #include "common/net/net.h"
-#include "client/client.h"
+#include "Client/Client.h"
 
 typedef enum {
     UIMENU_NONE,

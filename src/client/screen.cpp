@@ -16,10 +16,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // cl_scrn.c -- master for refresh, status bar, console, chat, notify, etc
-#include "rmlui/rmlui.h"
+#include "RmlUI/RmlUI.h"
 
-#include "client.h"
-#include "client/gamemodule.h"
+#include "Client.h"
+#include "Client/GameModule.h"
 #include "refresh/images.h"
 
 #define STAT_PICS       11

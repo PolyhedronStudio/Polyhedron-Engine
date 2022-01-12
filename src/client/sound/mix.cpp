@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // snd_mix.c -- portable code to mix sounds for snd_dma.c
 
-#include "sound.h"
+#include "Sound.h"
 
 #define    PAINTBUFFER_SIZE    2048
 

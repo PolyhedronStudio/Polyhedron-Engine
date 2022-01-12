@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "client.h"
-#include "client/sound/dma.h"
+#include "Client.h"
+#include "Client/Sound/DirectMemoryAccess.h"
 #include <mmsystem.h>
 
 // 64K is > 1 second at 16-bit, 22050 Hz

@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // console.c
 
-#include "client.h"
-#include "client/gamemodule.h"
+#include "Client.h"
+#include "Client/GameModule.h"
 
 // #define CON_TIMES       16
 // #define CON_TIMES_MASK  (CON_TIMES - 1)

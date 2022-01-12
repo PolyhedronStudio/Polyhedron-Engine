@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 #include "refresh/refresh.h"
-#include "client/client.h"
+#include "Client/Client.h"
 #include "refresh/images.h"
 
 #include <assert.h>

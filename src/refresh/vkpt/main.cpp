@@ -23,8 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/files.h"
-#include "client/video.h"
-#include "client/client.h"
+#include "Client/Video.h"
+#include "Client/Client.h"
 #include "refresh/refresh.h"
 #include "refresh/images.h"
 #include "refresh/models.h"
@@ -33,8 +33,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "material.h"
 #include "fog.h"
 #include "physical_sky.h"
-#include "../../client/client.h"
-#include "../../client/ui/ui.h"
+#include "../../Client/Client.h"
+#include "../../Client/UI/UI.h"
 
 #include "shader/vertex_buffer.h"
 

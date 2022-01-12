@@ -24,8 +24,8 @@
 #include <RmlUi/Debugger.h>
 
 // RmlUI Engine GLUE Interfaces.
-#include "interfaces/FileInterface.h"
-#include "interfaces/RenderInterface.h"
-#include "interfaces/SystemInterface.h"
+#include "Interfaces/FileInterface.h"
+#include "Interfaces/RenderInterface.h"
+#include "Interfaces/SystemInterface.h"
 
 #endif // __CLIENT_RMLUI_X_RMLUI_H__

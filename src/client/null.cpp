@@ -22,10 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/shared.h"
 #include "common/cvar.h"
 #include "common/bsp.h"
-#include "client/client.h"
-void SetFogByMap(const char* name) 
-{
-}
+#include "Client/Client.h"
 
 static void Key_Bind_Null_f(void)
 {

@@ -18,8 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // cl_view.c -- player rendering positioning
 
-#include "client.h"
-#include "client/gamemodule.h"
+#include "Client.h"
+#include "Client/GameModule.h"
 
 //=============
 //

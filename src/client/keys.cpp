@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "client.h"
+#include "Client.h"
 
 static keywaitcb_t  key_wait_cb;
 static void         *key_wait_arg;

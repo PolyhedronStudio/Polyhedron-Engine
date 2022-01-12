@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // cl.input.c  -- builds an intended movement command to send to the server
 
-#include "client.h"
-#include "client/gamemodule.h"
+#include "Client.h"
+#include "Client/GameModule.h"
 #include "shared/clgame.h"
 #include "sharedgame/sharedgame.h"
 #include "system/lirc.h"

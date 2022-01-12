@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 #include "vk_util.h"
 #include "shader/vertex_buffer.h"
-#include "../../client/client.h"
+#include "../../Client/Client.h"
 
 #include <assert.h>
 

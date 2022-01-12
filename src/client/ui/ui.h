@@ -24,10 +24,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/cvar.h"
 #include "common/field.h"
 #include "common/zone.h"
-#include "client/keys.h"
-#include "client/sound/sound.h"
-#include "client/client.h"
-#include "client/ui.h"
+#include "Client/Keys.h"
+#include "Client/Sound/Sound.h"
+#include "Client/Client.h"
+#include "Client/UI.h"
 #include "refresh/refresh.h"
 
 #define UI_Malloc(s)        Z_TagMalloc(s, TAG_UI)

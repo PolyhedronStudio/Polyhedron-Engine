@@ -16,13 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "sound.h"
-#include "qal/AL/efx-presets.h"
+#include "Sound.h"
+#include "QAL/AL/efx-presets.h"
 
 #if USE_FIXED_LIBAL
-#include "qal/fixed.h"
+#include "QAL/Fixed.h"
 #else
-#include "qal/dynamic.h"
+#include "QAL/Dynamic.h"
 #endif
 
 // CPP: WATISDEZE: Declared here, C didn't require it somehow...
