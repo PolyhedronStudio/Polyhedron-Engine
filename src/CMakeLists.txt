@@ -19,17 +19,17 @@ SET(SRC_CLGAME
 	clgame/exports/ServerMessage.cpp
 	clgame/exports/View.cpp
 
-	clgame/clg_effects.cpp
-	clgame/clg_entities.cpp
-	clgame/clg_input.cpp
-	clgame/clg_main.cpp
-	clgame/clg_media.cpp
-	clgame/clg_newfx.cpp
-	clgame/clg_parse.cpp
-	clgame/clg_predict.cpp
-	clgame/clg_screen.cpp
-	clgame/clg_tents.cpp
-	clgame/clg_view.cpp
+	clgame/Effects.cpp
+	clgame/Entities.cpp
+	clgame/Input.cpp
+	clgame/Main.cpp
+	clgame/Media.cpp
+	clgame/NewEffects.cpp
+	clgame/Parse.cpp
+	clgame/Predict.cpp
+	clgame/Screen.cpp
+	clgame/TemporaryEntities.cpp
+	clgame/View.cpp
 
 	clgame/clgame.def
 )
@@ -47,18 +47,18 @@ SET(HEADERS_CLGAME
 	clgame/exports/ServerMessage.h
 	clgame/exports/View.h
 
-	clgame/clg_effects.h
-	clgame/clg_entities.h
-	clgame/clg_input.h
-	clgame/clg_local.h
-	clgame/clg_main.h
-	clgame/clg_media.h
-	clgame/clg_newfx.h
-	clgame/clg_parse.h
-	clgame/clg_predict.h
-	clgame/clg_screen.h
-	clgame/clg_tents.h
-	clgame/clg_view.h
+	clgame/Effects.h
+	clgame/Entities.h
+	clgame/Input.h
+	clgame/ClientGameLocal.h
+	clgame/Main.h
+	clgame/Media.h
+	clgame/NewEffects.h
+	clgame/Parse.h
+	clgame/Predict.h
+	clgame/Screen.h
+	clgame/TemporaryEntities.h
+	clgame/View.h
 )
 
 # Server game DLL
