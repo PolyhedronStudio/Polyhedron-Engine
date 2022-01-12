@@ -48,7 +48,7 @@ void FuncDoor::Precache() {
 void FuncDoor::Spawn() {
     Base::Spawn();
 
-    SetMoveDirection( GetAngles()/*, resetAngles = true*/ );
+    SetMoveDirection( GetAngles(), true);
     SetMoveType( MoveType::Push );
     SetSolid( Solid::BSP );
     SetModel( GetModel() );
@@ -82,6 +82,7 @@ void FuncDoor::Spawn() {
     // Calculate the end position, with the assumption that start pos = origin
     SetStartPosition( GetOrigin() );
     SetEndPosition( CalculateEndPosition() );
+
     // This should never happen
     if ( GetStartPosition() == GetEndPosition() ) {
         gi.DPrintf( "WARNING: func_door has same start & end position\n" );

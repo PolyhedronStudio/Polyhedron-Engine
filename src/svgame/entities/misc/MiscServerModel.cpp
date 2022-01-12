@@ -177,7 +177,7 @@ void MiscServerModel::Think() {
         SetFrame(currentFrame + 1);
     }
 
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
+    SetNextThinkTime(level.time + 1 * BASE_1_FRAMETIME);
     //if (GetNoiseIndex()) {
     //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
     //}
@@ -276,7 +276,7 @@ void MiscServerModel::MiscServerModelThink(void) {
     SVG_StepMove_CheckGround(this);
     //
     //    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + 1 * BASE_1_FRAMETIME);
     //    // Link entity back in.
     LinkEntity();
 

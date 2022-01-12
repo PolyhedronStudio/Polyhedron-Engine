@@ -87,7 +87,7 @@ struct EntityState {
     vec3_t oldOrigin;       // For lerping
     int32_t modelIndex;
     int32_t modelIndex2, modelIndex3, modelIndex4;  // Weapons, CTF flags, etc
-    int32_t frame;
+    float frame;
     int32_t skinNumber;
     uint32_t effects;       // PGM - we're filling it, so it needs to be unsigned
     int32_t renderEffects;

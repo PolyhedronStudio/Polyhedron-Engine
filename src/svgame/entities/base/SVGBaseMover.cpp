@@ -122,20 +122,20 @@ void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
 //
 //===============
 //
-void SVGBaseMover::SetMoveDirection(const vec3_t& angles) {
-	const vec3_t VEC_UP = { 0, -1, 0 };
-	const vec3_t MOVEDIR_UP = { 0, 0, 1 };
-	const vec3_t VEC_DOWN = { 0, -2, 0 };
-	const vec3_t MOVEDIR_DOWN = { 0, 0, -1 };
+void SVGBaseMover::SetMoveDirection(const vec3_t& angles, const qboolean resetAngles) {
+	const vec3_t VEC_UP = { 0, -1.f, 0 };
+	const vec3_t MOVEDIR_UP = { 0, 0, 1.f };
+	const vec3_t VEC_DOWN = { 0, -2.f, 0 };
+	const vec3_t MOVEDIR_DOWN = { 0, 0, -1.f };
 
 	const vec3_t AnglesUp[] = { 
-		{ 90, 0, 0 }, 
-		{ -270, 0, 0 } 
+		{ 90.f, 0, 0 }, 
+		{ -270.f, 0, 0 } 
 	};
 	
 	const vec3_t AnglesDown[] = { 
-		{ 270, 0, 0 }, 
-		{ -90, 0, 0 } 
+		{ 270.f, 0, 0 }, 
+		{ -90.f, 0, 0 } 
 	};
 
 	if (vec3_equal(angles, VEC_UP) || vec3_equal(angles, AnglesUp[0]) || vec3_equal(angles, AnglesUp[1])) {
@@ -150,7 +150,9 @@ void SVGBaseMover::SetMoveDirection(const vec3_t& angles) {
 	// and align it directly with the movement direction.
 	// I suggest we add a bool parameter to this method, 'resetAngles',
 	// which will zero the entity's angles if true
-	SetAngles(vec3_zero());
+	if (resetAngles == true) {
+		SetAngles(vec3_zero());
+	}
 }
 
 //===============

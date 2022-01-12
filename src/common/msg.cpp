@@ -379,11 +379,8 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
             bits |= U_SKIN8;
     }
 
-    if (to->frame != from->frame) {
-        if (to->frame & 0xff00)
-            bits |= U_FRAME16;
-        else
-            bits |= U_FRAME8;
+    if (!EqualEpsilonf(to->frame, from->frame)) {
+        bits |= U_FRAME;
     }
 
     if (to->effects != from->effects) {
@@ -487,7 +484,7 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
     if (bits & U_MODEL4)
         MSG_WriteByte(to->modelIndex4);
 
-    if (bits & U_FRAME8)
+    if (bits & U_FRAME)
         MSG_WriteByte(to->frame);
     else if (bits & U_FRAME16)
         MSG_WriteShort(to->frame);
@@ -1080,7 +1077,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
     }
 
     // Frame.
-    if (bits & U_FRAME8)
+    if (bits & U_FRAME)
         to->frame = MSG_ReadByte();
     if (bits & U_FRAME16)
         to->frame = MSG_ReadShort();
@@ -1372,7 +1369,7 @@ void MSG_ShowDeltaEntityBits(int bits)
     S(MODEL3, "modelIndex3");
     S(MODEL4, "modelIndex4");
 
-    if (bits & U_FRAME8)
+    if (bits & U_FRAME)
         SHOWBITS("frame8");
     if (bits & U_FRAME16)
         SHOWBITS("frame16");

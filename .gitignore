@@ -15,7 +15,7 @@ shader_vkpt
 build/
 
 
-
+bin/*
 bin/basepoly/
 bin/basepoly/
 bin/basepoly/*

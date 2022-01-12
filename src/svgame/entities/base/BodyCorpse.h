@@ -5,7 +5,7 @@
 // BodyCorpse.h
 //
 // Class entity to accommodate body corpses with.
-// These serve for client entities when they die, and go into the body queue.
+// These serve for client entities when they die, and get pushed into the body queue.
 //
 */
 #ifndef __SVGAME_ENTITIES_BASE_BODYCORPSE_H__

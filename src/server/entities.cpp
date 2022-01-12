@@ -31,7 +31,7 @@ Encode a client frame onto the network channel
 =============
 SV_EmitPacketEntities
 
-Writes a delta update of an PackedEntity list to the message.
+Writes a delta update of a PackedEntity list to the message.
 =============
 */
 static void SV_EmitPacketEntities(client_t         *client,

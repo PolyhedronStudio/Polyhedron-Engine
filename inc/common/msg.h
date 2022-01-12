@@ -58,7 +58,7 @@ typedef struct {
     uint32_t    effects;
     uint32_t    renderEffects;
     uint32_t    solid;
-    uint16_t    frame;
+    float       frame;
 
     // Sound ID, and Event ID.
     uint8_t     sound;
