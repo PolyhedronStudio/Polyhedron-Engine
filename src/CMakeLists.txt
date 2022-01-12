@@ -7,58 +7,58 @@ cmake_minimum_required (VERSION 3.8)
 ###############################################################################
 ###################### CLIENT GAME
 SET(SRC_CLGAME
-	clgame/ClientGameExports.cpp
-	clgame/ClientGameImports.cpp
+	CLGame/ClientGameExports.cpp
+	CLGame/ClientGameImports.cpp
 
-	clgame/Exports/Core.cpp
-	clgame/Exports/Entities.cpp
-	clgame/Exports/Media.cpp
-	clgame/Exports/Movement.cpp
-	clgame/Exports/Prediction.cpp
-	clgame/Exports/Screen.cpp
-	clgame/Exports/ServerMessage.cpp
-	clgame/Exports/View.cpp
+	CLGame/Exports/Core.cpp
+	CLGame/Exports/Entities.cpp
+	CLGame/Exports/Media.cpp
+	CLGame/Exports/Movement.cpp
+	CLGame/Exports/Prediction.cpp
+	CLGame/Exports/Screen.cpp
+	CLGame/Exports/ServerMessage.cpp
+	CLGame/Exports/View.cpp
 
-	clgame/Effects.cpp
-	clgame/Entities.cpp
-	clgame/Input.cpp
-	clgame/Main.cpp
-	clgame/Media.cpp
-	clgame/NewEffects.cpp
-	clgame/Parse.cpp
-	clgame/Predict.cpp
-	clgame/Screen.cpp
-	clgame/TemporaryEntities.cpp
-	clgame/View.cpp
+	CLGame/Effects.cpp
+	CLGame/Entities.cpp
+	CLGame/Input.cpp
+	CLGame/Main.cpp
+	CLGame/Media.cpp
+	CLGame/NewEffects.cpp
+	CLGame/Parse.cpp
+	CLGame/Predict.cpp
+	CLGame/Screen.cpp
+	CLGame/TemporaryEntities.cpp
+	CLGame/View.cpp
 
-	clgame/clgame.def
+	CLGame/CLGame.def
 )
 
 SET(HEADERS_CLGAME
-	clgame/ClientGameExports.h
-	clgame/ClientGameImports.h
+	CLGame/ClientGameExports.h
+	CLGame/ClientGameImports.h
 
-	clgame/Exports/Core.h
-	clgame/Exports/Entities.h
-	clgame/Exports/Media.h
-	clgame/Exports/Movement.h
-	clgame/Exports/Prediction.h
-	clgame/Exports/Screen.h
-	clgame/Exports/ServerMessage.h
-	clgame/Exports/View.h
+	CLGame/Exports/Core.h
+	CLGame/Exports/Entities.h
+	CLGame/Exports/Media.h
+	CLGame/Exports/Movement.h
+	CLGame/Exports/Prediction.h
+	CLGame/Exports/Screen.h
+	CLGame/Exports/ServerMessage.h
+	CLGame/Exports/View.h
 
-	clgame/Effects.h
-	clgame/Entities.h
-	clgame/Input.h
-	clgame/ClientGameLocal.h
-	clgame/Main.h
-	clgame/Media.h
-	clgame/NewEffects.h
-	clgame/Parse.h
-	clgame/Predict.h
-	clgame/Screen.h
-	clgame/TemporaryEntities.h
-	clgame/View.h
+	CLGame/Effects.h
+	CLGame/Entities.h
+	CLGame/Input.h
+	CLGame/ClientGameLocal.h
+	CLGame/Main.h
+	CLGame/Media.h
+	CLGame/NewEffects.h
+	CLGame/Parse.h
+	CLGame/Predict.h
+	CLGame/Screen.h
+	CLGame/TemporaryEntities.h
+	CLGame/View.h
 )
 
 # Server game DLL
@@ -428,7 +428,7 @@ SET(HEADERS_SHARED
 	../inc/shared/math/vector5.h
 	
 	# Other shared lib functionalities.
-	../inc/shared/clgame.h
+	../inc/shared/CLGame.h
 	../inc/shared/cltypes.h
 	../inc/shared/collision.h
 	../inc/shared/common.h
@@ -642,7 +642,7 @@ if (CONFIG_BUILD_CL_GAME)
 	# Used for sharedgame code(such as pmove), so we can ifdef certain parts specific to client or server.	
 	ADD_DEFINITIONS(-DSHAREDGAME_CLIENT=1)
 	# Add library.
-	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	ADD_LIBRARY(CLGame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 endif()
 
 IF(WIN32)
@@ -768,7 +768,7 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../VC/inc)
 	TARGET_SOURCES(svgame PRIVATE os/res/basepoly_sv.rc)
-	TARGET_SOURCES(clgame PRIVATE os/res/basepoly_cl.rc)
+	TARGET_SOURCES(CLGame PRIVATE os/res/basepoly_cl.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -788,7 +788,7 @@ IF (WIN32)
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)
-TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(CLGame PRIVATE ../inc)
 
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
@@ -834,7 +834,7 @@ SET_TARGET_PROPERTIES(server
 # Client Game
 if (CONFIG_BUILD_CL_GAME)
 	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-	SET_TARGET_PROPERTIES(clgame
+	SET_TARGET_PROPERTIES(CLGame
 		PROPERTIES
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
 		LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
