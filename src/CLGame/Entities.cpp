@@ -389,8 +389,7 @@ CLG_AddViewWeapon
 */
 void CLG_AddViewWeapon(void)
 {
-    
-    int  shell_flags = 0;
+    int32_t  shell_flags = 0;
 
     // Hidden in bsp menu mode.
     if (info_in_bspmenu->integer) {
