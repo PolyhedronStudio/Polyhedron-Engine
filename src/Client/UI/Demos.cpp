@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "UI.h"
-#include "common/files.h"
-#include "common/mdfour.h"
+#include "Common/Files.h"
+#include "Common/MDFour.h"
 
 /*
 =======================================================================

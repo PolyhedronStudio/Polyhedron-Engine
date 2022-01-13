@@ -16,16 +16,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "ServerGameLocal.h"
-#include "chasecamera.h"
+#include "ChaseCamera.h"
 #include "Entities.h"
-#include "player/animations.h"
+#include "Player/Animations.h"
 
 // Class Entities.
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
+#include "Entities/Base/PlayerClient.h"
 
 // Game Modes.
-#include "gamemodes/IGameMode.h"
+#include "GameModes/IGameMode.h"
 
 char *ClientTeam(SVGBaseEntity *ent)
 {

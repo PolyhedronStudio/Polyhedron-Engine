@@ -11,7 +11,7 @@
 #include "../TemporaryEntities.h"
 #include "../View.h"
 
-#include "shared/interfaces/IClientGameExports.h"
+#include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 #include "ServerMessage.h"
 

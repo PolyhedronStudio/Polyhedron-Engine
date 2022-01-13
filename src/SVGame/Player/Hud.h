@@ -3,7 +3,7 @@
 //
 // svgame/player/hud.h
 //
-// N&C SVGame: HUD Header
+// Polyhedron: HUD Header
 // 
 //
 #ifndef __SVGAME_PLAYER_HUD_H__

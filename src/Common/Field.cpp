@@ -21,11 +21,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/field.h"
-#include "client/client.h"
-#include "client/keys.h"
-#include "client/video.h"
+#include "Common/Common.h"
+#include "Common/Field.h"
+#include "Client/Client.h"
+#include "Client/Keys.h"
+#include "Client/Video.h"
 #include "refresh/refresh.h"
 
 /*

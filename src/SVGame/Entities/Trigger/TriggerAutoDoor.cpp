@@ -4,6 +4,7 @@
 // TriggerAutoDoor.cpp
 */
 
+// Core.
 #include "../../ServerGameLocal.h"
 #include "../../Effects.h"
 #include "../../Entities.h"
@@ -11,7 +12,7 @@
 #include "../../Physics/StepMove.h"
 #include "../../BrushFunctions.h"
 
-#include "../Base/SVGBaseEntity.h"
+// Entities.
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
 

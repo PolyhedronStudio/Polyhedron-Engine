@@ -4,7 +4,7 @@
 // ClientGameScreen implementation.
 #pragma once
 
-#include "shared/interfaces/IClientGameExports.h"
+#include "Shared/Interfaces/IClientGameExports.h"
 
 //---------------------------------------------------------------------
 // Client Game Screen IMPLEMENTATION.

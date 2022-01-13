@@ -20,12 +20,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef REFRESH_H
 #define REFRESH_H
 
-#include "common/cvar.h"
-#include "common/error.h"
+#include "Common/CVar.h"
+#include "Common/Error.h"
 
 // WATISDEZE: Moved most to shared, since cgame needs to know about the structs and defines,
 // thus making this part of the shared folder.
-#include "shared/refresh.h"
+#include "Shared/refresh.h"
 
 // called when the library is loaded
 extern qboolean    (*R_Init)(qboolean total);

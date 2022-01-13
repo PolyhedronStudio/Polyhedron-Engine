@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "ServerGameLocal.h"
-#include "functionpointers.h"
+#include "FunctionPointers.h"
 
 //#define _DEBUG
 typedef struct {

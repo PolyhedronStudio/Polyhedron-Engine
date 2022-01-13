@@ -6,9 +6,12 @@
 //
 //
 */
+
+// Core.
 #include "../ServerGameLocal.h"              // SVGame.
 
-#include "base/SVGBaseEntity.h"
+// Entities.
+#include "../Entities.h"
 #include "WorldSpawn.h"
 
 static const char single_statusbar[] =

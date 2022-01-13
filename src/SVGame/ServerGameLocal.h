@@ -21,15 +21,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __SVGAME_G_LOCAL_H__
 
 #include "Shared/Shared.h"
-#include "shared/list.h"
+#include "Shared/list.h"
 
 // define GAME_INCLUDE so that game.h does not define the
 // short, server-visible ServersClient and Entity structures,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
-#include "shared/svgame.h"
+#include "Shared/SVGame.h"
 #include "SharedGame/SharedGame.h" // Include SG Base.
-#include "sharedgame/protocol.h"
+#include "SharedGame/Protocol.h"
 
 // the "gameversion" client command will print32_t this plus compile date
 #define GAMEVERSION "basepoly"

@@ -17,28 +17,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // General.
-#include "../ServerGameLocal.h"     // SVGame.
-#include "../chasecamera.h" // Chase Camera.
-#include "../effects.h"     // Effects.
-#include "../entities.h"    // Entities.
+#include "../ServerGameLocal.h" // SVGame.
+#include "../ChaseCamera.h"     // Chase Camera.
+#include "../Effects.h"         // Effects.
+#include "../Entities.h"        // Entities.
 #include "../Utilities.h"       // Util funcs.
-#include "client.h"         // Include Player Client header.
-#include "hud.h"            // Include HUD header.
-#include "view.h"           // View header.
-#include "weapons.h"
+#include "Client.h"             // Include Player Client header.
+#include "Hud.h"                // Include HUD header.
+#include "View.h"               // View header.
+#include "Weapons.h"
 
 // ClassEntities.
-#include "../entities/base/SVGBaseEntity.h"
-#include "../entities/base/PlayerClient.h"
-#include "../entities/info/InfoPlayerStart.h"
+#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Info/InfoPlayerStart.h"
 
 // Game modes.
-#include "../gamemodes/IGameMode.h"
+#include "../GameModes/IGameMode.h"
 
 // Shared Game.
 #include "SharedGame/SharedGame.h" // Include SG Base.
-#include "sharedgame/pmove.h"   // Include SG PMove.
-#include "animations.h"         // Include Player Client Animations.
+#include "SharedGame/PMove.h"   // Include SG PMove.
+#include "Animations.h"         // Include Player Client Animations.
 
 
 //===============
@@ -98,7 +97,7 @@ void SP_FixCoopSpots(Entity *self)
 void SVG_TossClientWeapon(PlayerClient *playerClient)
 {
     gitem_t     *item;
-    Entity     *drop;
+    Entity      *drop;
     float       spread = 1.5f;
 
     if (!deathmatch->value)
@@ -353,8 +352,6 @@ Will not be called between levels.
 */
 void SVG_ClientDisconnect(Entity *ent)
 {
-    //int     playernum;
-
     // Ensure this entity has a client.
     if (!ent->client)
         return;
@@ -366,7 +363,7 @@ void SVG_ClientDisconnect(Entity *ent)
     game.gameMode->ClientDisconnect((PlayerClient*)ent->classEntity);
 
     // FIXME: don't break skins on corpses, etc
-    //playernum = ent-g_entities-1;
+    //int32_t playernum = ent-g_entities-1;
     //gi.configstring (ConfigStrings::PlayerSkins+playernum, "");
 }
 

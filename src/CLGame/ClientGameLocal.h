@@ -13,30 +13,30 @@
 #define __CLGAME_LOCAL_H__
 
 // Define CGAME_INCLUDE so that files such as:
-// common/cmodel.h
-// common/cmd.h
+// Common/cmodel.h
+// Common/cmd.h
 //
 #define CGAME_INCLUDE 1
 
 // Shared.
 #include "Shared/Shared.h"
-#include "shared/list.h"
-#include "shared/refresh.h"
+#include "Shared/list.h"
+#include "Shared/refresh.h"
 
 // Common.
-#include "common/cmodel.h"
-#include "common/cmd.h"
-#include "common/msg.h"
-#include "common/protocol.h"
+#include "Common/CModel.h"
+#include "Common/Cmd.h"
+#include "Common/Msg.h"
+#include "Common/Protocol.h"
 
 // Shared Game Headers.
 #include "SharedGame/SharedGame.h" // Include SG Base.
-#include "sharedgame/pmove.h"
-#include "sharedgame/protocol.h"
+#include "SharedGame/PMove.h"
+#include "SharedGame/Protocol.h"
 
 // Shared Client Game Headers.
-#include "shared/cltypes.h"
-#include "shared/clgame.h"
+#include "Shared/cltypes.h"
+#include "Shared/CLGame.h"
 
 // "Shared" cl frametime.
 // WID: TODO: Make these part of the ClientGameImports instead.

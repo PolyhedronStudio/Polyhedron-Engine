@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "system/hunk.h"
+#include "System/Hunk.h"
 #include <sys/mman.h>
 #include <errno.h>
 

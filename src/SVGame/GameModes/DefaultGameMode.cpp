@@ -7,22 +7,21 @@
 //
 */
 #include "../ServerGameLocal.h"          // SVGame.
-#include "../effects.h"     // Effects.
-#include "../entities.h"    // Entities.
+#include "../Effects.h"     // Effects.
+#include "../Entities.h"    // Entities.
 #include "../Utilities.h"       // Util funcs.
 
 // Server Game Base Entity.
-#include "../entities/base/SVGBaseEntity.h"
-#include "../entities/base/BodyCorpse.h"
-#include "../entities/base/PlayerClient.h"
-#include "../entities/info/InfoPlayerStart.h"
+#include "../Entities/Base/BodyCorpse.h"
+#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Info/InfoPlayerStart.h"
 
 // Weapons.h
-#include "../player/client.h"
-#include "../player/hud.h"
-#include "../player/weapons.h"
-#include "../player/view.h"
-#include "../player/animations.h"
+#include "../Player/Client.h"
+#include "../Player/Hud.h"
+#include "../Player/Weapons.h"
+#include "../Player/View.h"
+#include "../Player/Animations.h"
 
 // Game Mode.
 #include "DefaultGameMode.h"

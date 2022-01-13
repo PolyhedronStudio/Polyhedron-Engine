@@ -19,27 +19,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // client.h -- primary header for client
 
 #include "Shared/Shared.h"
-#include "shared/list.h"
+#include "Shared/list.h"
 
-#include "common/bsp.h"
-#include "common/cmd.h"
-#include "common/cmodel.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/field.h"
-#include "common/files.h"
-//#include "common/pmove.h"
-#include "common/msg.h"
-#include "common/net/netchan.h"
-#include "common/net/net.h"
-#include "common/prompt.h"
-#include "common/protocol.h"
-#include "common/sizebuffer.h"
-#include "common/zone.h"
+#include "Common/Bsp.h"
+#include "Common/Cmd.h"
+#include "Common/CModel.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Field.h"
+#include "Common/Files.h"
+//#include "Common/pmove.h"
+#include "Common/Msg.h"
+#include "Common/Net/NetChan.h"
+#include "Common/Net/Net.h"
+#include "Common/Prompt.h"
+#include "Common/Protocol.h"
+#include "Common/SizeBuffer.h"
+#include "Common/Zone.h"
 
-#include "system/system.h"
+#include "System/System.h"
 #include "refresh/refresh.h"
-#include "server/server.h"
+#include "Server/Server.h"
 
 #include "Client/Client.h"
 #include "Client/Input.h"
@@ -49,7 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Video.h"
 
 // Shared Game includes.
-#include "sharedgame/protocol.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
+#include "SharedGame/Protocol.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
 
 #if USE_ZLIB
 #include <zlib.h>
@@ -60,7 +60,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // N&C: Most structures related to the client have been moved over here.
 // They are shared to the client game dll, since it is tightly coupled.
-#include "shared/cltypes.h"
+#include "Shared/cltypes.h"
 
 // N&C: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern explosion_t  cl_explosions[MAX_EXPLOSIONS];

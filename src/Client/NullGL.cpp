@@ -20,8 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // for pure dedicated servers
 
 #include "Shared/Shared.h"
-#include "common/cvar.h"
-#include "common/bsp.h"
+#include "Common/CVar.h"
+#include "Common/Bsp.h"
 #include "Client/Client.h"
 
 // This varialbe is actually defined in /src/refresh/vkpt/transperancy.c

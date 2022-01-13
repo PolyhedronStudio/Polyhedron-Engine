@@ -22,41 +22,41 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // Utilities
 //-----------------
-#include "shared/math/utilities.h"
+#include "Shared/Math/Utilities.h"
 
 //-----------------
 // Vectors
 //-----------------
-#include "shared/math/vector2.h"
-#include "shared/math/vector3.h"
-#include "shared/math/vector4.h"
-#include "shared/math/vector5.h"
+#include "Shared/Math/Vector2.h"
+#include "Shared/Math/Vector3.h"
+#include "Shared/Math/Vector4.h"
+#include "Shared/Math/Vector5.h"
 
 //-----------------
 // Matrixes
 //-----------------
-#include "shared/math/matrix3.h"
-#include "shared/math/matrix4.h"
+#include "Shared/Math/Matrix3.h"
+#include "Shared/Math/Matrix4.h"
 
 //-----------------
 // Plane
 //-----------------
-#include "shared/math/plane.h"
+#include "Shared/Math/Plane.h"
 
 //-----------------
 // Colors
 //-----------------
-#include "shared/math/color.h"
+#include "Shared/Math/Color.h"
 
 //-----------------
 // Rectangles.
 //-----------------
-#include "shared/math/rectangle.h"
+#include "Shared/Math/Rectangle.h"
 
 //-----------------
 // Quaternion.
 //-----------------
-#include "shared/math/quaternion.h"
+#include "Shared/Math/Quaternion.h"
 
 //-----------------
 // TODO: These should ultimately be removed and/or replaced.

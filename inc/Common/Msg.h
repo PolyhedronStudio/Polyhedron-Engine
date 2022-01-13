@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef MSG_H
 #define MSG_H
 
-#include "common/protocol.h"
-#include "common/sizebuffer.h"
+#include "Common/Protocol.h"
+#include "Common/SizeBuffer.h"
 
 //===========================================================================//
 // (Antique) Q2-Pro MSG Style.

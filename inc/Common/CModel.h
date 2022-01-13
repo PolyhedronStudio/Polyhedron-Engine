@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CMODEL_H
 #define CMODEL_H
 
-#include "common/bsp.h"
+#include "Common/Bsp.h"
 
 // bitmasks communicated by server
 #define MAX_MAP_AREA_BYTES      (MAX_MAP_AREAS / 8)

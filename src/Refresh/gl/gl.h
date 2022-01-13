@@ -17,17 +17,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/bsp.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/files.h"
+#include "Common/Bsp.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Files.h"
 #include "Client/Video.h"
 #include "Client/Client.h"
 #include "refresh/refresh.h"
 #include "refresh/images.h"
 #include "refresh/models.h"
-#include "system/hunk.h"
+#include "System/Hunk.h"
 
 #if USE_FIXED_LIBGL
 #include "QGL/Fixed.h"

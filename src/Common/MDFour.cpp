@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/mdfour.h"
+#include "Common/MDFour.h"
 
 #if SIZEOF_INT > 4
 #define LARGE_INT32

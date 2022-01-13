@@ -18,15 +18,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ServerGameLocal.h"         // Include SVGame funcs.
 #include "Entities.h"        // Entities.
 #include "Utilities.h"           // Include Utilities funcs.
-#include "player/hud.h"      // Include HUD funcs.
+#include "Player/Hud.h"      // Include HUD funcs.
 
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
+// Entities.
+#include "Entities/Base/PlayerClient.h"
 
-#include "weapons/blaster.h"
-#include "weapons/machinegun.h"
-#include "weapons/shotgun.h"
-#include "weapons/supershotgun.h"
+// Weapons.
+#include "Weapons/Blaster.h"
+#include "Weapons/Machinegun.h"
+#include "Weapons/Shotgun.h"
+#include "Weapons/SuperShotgun.h"
 
 qboolean    Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other);
 void        Use_Weapon(PlayerClient *ent, gitem_t *inv);

@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// shared/refresh.h
+// Shared/refresh.h
 //
 //
 // Contains all definitions of refresh.h that are shared to
@@ -13,7 +13,7 @@
 #ifndef __SHARED_REFRESH_H__
 #define __SHARED_REFRESH_H__
 
-#include "system/hunk.h"
+#include "System/Hunk.h"
 
 #define MAX_DLIGHTS     32
 #define MAX_ENTITIES    2048     // == MAX_PACKET_ENTITIES * 2

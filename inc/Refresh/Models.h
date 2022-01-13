@@ -24,16 +24,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 // models.h -- common models manager
 //
-#include "shared/refresh.h"
-#include "system/hunk.h"
-#include "common/error.h"
+#include "Shared/refresh.h"
+#include "System/Hunk.h"
+#include "Common/Error.h"
 
 #define MOD_Malloc(size)    Hunk_Alloc(&model->hunk, size)
 
 #define MAX_ALIAS_SKINS     32
 #define MAX_ALIAS_VERTS     4096
 
-// WATISDEZE: Moved over to shared/refresh.h since client game dll 
+// WATISDEZE: Moved over to Shared/refresh.h since client game dll 
 // needs to know about these.
 // typedef struct mspriteframe_s {
 //     int             width, height;

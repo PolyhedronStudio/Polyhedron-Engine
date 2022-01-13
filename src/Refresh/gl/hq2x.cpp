@@ -26,7 +26,7 @@ written by Maxim Stepin (MaxSt). it is not 100% identical, but very similar.
 */
 
 #include "Shared/Shared.h"
-#include "common/cvar.h"
+#include "Common/CVar.h"
 #include "refresh/images.h"
 
 static const uint8_t hqTable[256] = {

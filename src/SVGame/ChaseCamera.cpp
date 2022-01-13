@@ -15,11 +15,13 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+// Core.
 #include "ServerGameLocal.h"
-#include "chasecamera.h"
+#include "ChaseCamera.h"
 
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
+// Entities.
+#include "Entities.h"
+#include "Entities/Base/PlayerClient.h"
 
 void SVG_UpdateChaseCam(PlayerClient *ent)
 {

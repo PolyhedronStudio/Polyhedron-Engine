@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// client/rmlui/interfaces/FileInterface.cpp
+// client/rmlui/Interfaces/FileInterface.cpp
 //
 //
 // RmlUI N&C File Interface implementation.

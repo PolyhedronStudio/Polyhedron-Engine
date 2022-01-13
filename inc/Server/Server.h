@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "common/net/net.h"
+#include "Common/Net/Net.h"
 
 #if USE_ICMP
 void SV_ErrorEvent(NetAdr *from, int ee_errno, int ee_info);

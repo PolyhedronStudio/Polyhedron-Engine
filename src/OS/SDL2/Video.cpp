@@ -22,22 +22,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Shared/Shared.h"
-#include "common/cvar.h"
-#include "common/common.h"
-#include "common/files.h"
-#include "common/zone.h"
-#include "client/client.h"
-#include "client/input.h"
-#include "client/keys.h"
+#include "Common/CVar.h"
+#include "Common/Common.h"
+#include "Common/Files.h"
+#include "Common/Zone.h"
+#include "Client/Client.h"
+#include "Client/Input.h"
+#include "Client/Keys.h"
 #include "client/ui.h"
-#include "client/video.h"
+#include "Client/Video.h"
 #include "refresh/refresh.h"
-#include "system/system.h"
+#include "System/System.h"
 #include "../Resources/q2pro.xbm"
 #include <SDL.h>
 
 // RMLUI.
-#include "client/rmlui/rmlui.h"
+#include "Client/RmlUI/RmlUI.h"
 
 #ifdef _WINDOWS
 #include <ShellScalingAPI.h>

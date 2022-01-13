@@ -17,16 +17,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // m_move.c -- monster movement
 
-#include "../ServerGameLocal.h"      // SVGame funcs.
-#include "../Utilities.h"        // Util funcs.
+// Core.
+#include "../ServerGameLocal.h"
+#include "../Entities.h"
+#include "../Utilities.h"
 
-#include "../entities/base/SVGBaseEntity.h"
-
+// UP-STEP height in "Quake Units". This is used commonly all over for each stepmove entity.
+// TODO: In the future it is likely one would want to be able to set this property to a custom
+// value for each entity type.
 #define STEPSIZE    18
 
 /*
 =============
-M_CheckBottom
+SVG_StepMove_CheckBottom
 
 Returns false if any part of the bottom of the entity is off an edge that
 is not a staircase.
@@ -138,7 +141,7 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
 
 /*
 =============
-SVG_movestep
+SVG_MoveStep
 
 Called by monster program code.
 The move will be adjusted for slopes and stairs, but if the move isn't

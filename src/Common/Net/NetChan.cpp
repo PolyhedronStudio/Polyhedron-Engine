@@ -17,15 +17,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/msg.h"
-#include "common/net/netchan.h"
-#include "common/net/net.h"
-#include "common/protocol.h"
-#include "common/sizebuffer.h"
-#include "common/zone.h"
-#include "system/system.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Msg.h"
+#include "Common/Net/NetChan.h"
+#include "Common/Net/Net.h"
+#include "Common/Protocol.h"
+#include "Common/SizeBuffer.h"
+#include "Common/Zone.h"
+#include "System/System.h"
 
 /*
 

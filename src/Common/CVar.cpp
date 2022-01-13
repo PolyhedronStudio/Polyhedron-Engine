@@ -18,14 +18,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cvar.c -- dynamic variable tracking
 
 #include "Shared/Shared.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/files.h"
-#include "common/prompt.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Files.h"
+#include "Common/Prompt.h"
 #include "Common/Utilities.h"
-#include "common/zone.h"
-#include "client/client.h"
+#include "Common/Zone.h"
+#include "Client/Client.h"
 
 cvar_t  *cvar_vars;
 

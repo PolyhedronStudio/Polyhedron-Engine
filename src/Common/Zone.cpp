@@ -20,8 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <intrin.h>
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/zone.h"
+#include "Common/Common.h"
+#include "Common/Zone.h"
 
 #define Z_MAGIC     0x1d0d
 #define Z_TAIL      0x5b7b

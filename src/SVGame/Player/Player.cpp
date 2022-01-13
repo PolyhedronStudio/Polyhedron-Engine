@@ -3,11 +3,11 @@
 //
 // svgame/player/player.cpp
 //
-// N&C SVGame: Player pain, and die, callback code.
+// Polyhedron SVGame: Player pain, and die, callback code.
 // 
 #include "../ServerGameLocal.h" // Include SVGame header.
-#include "../effects.h" // Include Effects header.
-#include "client.h"     // Include Player Client header.
+#include "../Effects.h" // Include Effects header.
+#include "Client.h"     // Include Player Client header.
 
-#include "sharedgame/pmove.h"   // Include SG PMove.
-#include "animations.h"         // Include Player Client Animations.
+#include "SharedGame/PMove.h"   // Include SG PMove.
+#include "Animations.h"         // Include Player Client Animations.

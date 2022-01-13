@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/msg.h"
-#include "common/protocol.h"
-#include "common/sizebuffer.h"
-#include "sharedgame/protocol.h"
+#include "Common/Msg.h"
+#include "Common/Protocol.h"
+#include "Common/SizeBuffer.h"
+#include "SharedGame/Protocol.h"
 
 
 

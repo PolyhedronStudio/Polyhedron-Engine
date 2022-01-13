@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/vector3.cpp
+// Shared/Math/vector3.cpp
 //
 #include "Shared/Shared.h"
 

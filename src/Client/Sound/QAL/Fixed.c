@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/cvar.h"
-#include "common/common.h"
+#include "Common/CVar.h"
+#include "Common/Common.h"
 #include "fixed.h"
 #include <AL/alc.h>
 

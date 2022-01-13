@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "physical_sky.h"
 #include "precomputed_sky.h"
-#include "system/system.h"
+#include "System/System.h"
 #include "../../Client/Client.h"
 #include <time.h>
 

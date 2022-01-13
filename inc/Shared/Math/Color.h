@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/color.h
+// Shared/Math/color.h
 //
 // N&C Math Library: Color
 //

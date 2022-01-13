@@ -21,18 +21,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/files.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Files.h"
 #if USE_CLIENT
-#include "client/client.h"
-#include "client/input.h"
-#include "client/keys.h"
+#include "Client/Client.h"
+#include "Client/Input.h"
+#include "Client/Keys.h"
 #include "client/ui.h"
-#include "client/video.h"
+#include "Client/Video.h"
 #include "refresh/refresh.h"
 #endif
-#include "system/system.h"
+#include "System/System.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

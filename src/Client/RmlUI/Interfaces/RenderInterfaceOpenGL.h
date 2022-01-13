@@ -29,7 +29,7 @@
 // LICENSE HERE.
 
 //
-// client/rmlui/interfaces/RenderInterface.h
+// client/rmlui/Interfaces/RenderInterface.h
 //
 //
 // RmlUI N&C Render Interface implementation.

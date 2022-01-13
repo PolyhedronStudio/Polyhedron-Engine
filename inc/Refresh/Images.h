@@ -25,10 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // images.h -- common image manager
 //
 
-#include "shared/list.h"
-#include "common/files.h"
-#include "common/zone.h"
-#include "common/error.h"
+#include "Shared/list.h"
+#include "Common/Files.h"
+#include "Common/Zone.h"
+#include "Common/Error.h"
 #include "refresh/refresh.h"
 
 #define R_Malloc(size)      Z_TagMalloc(size, TAG_RENDERER)

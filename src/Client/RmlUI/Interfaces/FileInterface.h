@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// client/rmlui/interfaces/FileInterface.h
+// client/rmlui/Interfaces/FileInterface.h
 //
 //
 // RmlUI Polyhedron File Interface implementation.

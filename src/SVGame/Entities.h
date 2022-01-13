@@ -18,7 +18,7 @@
 #define __SVGAME_ENTITIES_H__
 
 // Include this guy here, gotta do so to make it work.
-#include "entities/base/SVGBaseEntity.h"
+#include "Entities/Base/SVGBaseEntity.h"
 
 
 //

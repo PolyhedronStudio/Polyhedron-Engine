@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/matrix4.h
+// Shared/Math/matrix4.h
 //
 // N&C Math Library: Matrix4
 //

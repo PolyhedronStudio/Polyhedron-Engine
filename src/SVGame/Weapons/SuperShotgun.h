@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// svgame/weapons/supershotgun.h
+// SVGame/Weapons/SuperShotgun.h
 //
 //
 // Contains supershotgun declarations.

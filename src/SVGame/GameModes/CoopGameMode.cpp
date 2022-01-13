@@ -6,13 +6,10 @@
 //
 //
 */
-#include "../ServerGameLocal.h"          // SVGame.
-#include "../effects.h"     // Effects.
-#include "../entities.h"    // Entities.
-#include "../Utilities.h"       // Util funcs.
-
-// Server Game Base Entity.
-#include "../entities/base/SVGBaseEntity.h"
+#include "../ServerGameLocal.h"
+#include "../Effects.h"
+#include "../Entities.h"
+#include "../Utilities.h"
 
 // Game Mode.
 #include "CoopGameMode.h"

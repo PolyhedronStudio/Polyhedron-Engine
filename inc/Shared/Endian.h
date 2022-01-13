@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/endian.h
+// Shared/Math/endian.h
 //
 // Endian swapping related code.
 //

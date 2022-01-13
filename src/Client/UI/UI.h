@@ -18,12 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "shared/list.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/field.h"
-#include "common/zone.h"
+#include "Shared/list.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Field.h"
+#include "Common/Zone.h"
 #include "Client/Keys.h"
 #include "Client/Sound/Sound.h"
 #include "Client/Client.h"

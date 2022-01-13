@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "client.h"
-#include "client/sound/dma.h"
+#include "Client/Sound/DirectMemoryAccess.h"
 #include <mmsystem.h>
 #include <dsound.h>
 

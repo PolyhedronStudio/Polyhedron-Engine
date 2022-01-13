@@ -3,7 +3,7 @@
 //
 // svgame/player/client.h
 //
-// N&C SVGame: Client Header
+// Polyhedron: Client Header
 // 
 //
 #ifndef __SVGAME_PLAYER_CLIENT_H__

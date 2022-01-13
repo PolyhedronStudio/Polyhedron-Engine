@@ -17,15 +17,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/files.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Files.h"
 #if USE_REF
-#include "client/video.h"
+#include "Client/Video.h"
 #endif
-#include "system/system.h"
-#include "tty.h"
+#include "System/System.h"
+#include "TTY.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -17,14 +17,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/field.h"
-#include "common/net/net.h"
-#include "common/prompt.h"
-#include "system/system.h"
-#include "tty.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Field.h"
+#include "Common/Net/Net.h"
+#include "Common/Prompt.h"
+#include "System/System.h"
+#include "TTY.h"
 
 #include <sys/time.h>
 #include <sys/types.h>

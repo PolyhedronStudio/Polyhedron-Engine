@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include <shared/shared.h>
-#include <format/iqm.h>
+#include <Shared/shared.h>
+#include <Format/Iqm.h>
 #include <refresh/models.h>
 #include <refresh/refresh.h>
 

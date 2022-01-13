@@ -17,13 +17,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/bsp.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/files.h"
-#include "common/tests.h"
+#include "Common/Bsp.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/Files.h"
+#include "Common/tests.h"
 #include "refresh/refresh.h"
-#include "system/system.h"
+#include "System/System.h"
 
 // test error shutdown procedures
 static void Com_Error_f(void)

@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// svgame/weapons/blaster.h
+// SVGame/Trigger.h
 //
 //
 // Contains blaster declarations.

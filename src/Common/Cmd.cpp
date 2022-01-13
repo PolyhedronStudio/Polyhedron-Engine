@@ -18,15 +18,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cmd.c -- Quake script command processing module
 
 #include "Shared/Shared.h"
-#include "shared/list.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/error.h"
-#include "common/files.h"
-#include "common/prompt.h"
+#include "Shared/list.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Error.h"
+#include "Common/Files.h"
+#include "Common/Prompt.h"
 #include "Common/Utilities.h"
-#include "client/client.h"
+#include "Client/Client.h"
 
 #ifdef _WINDOWS
 #include <Windows.h>

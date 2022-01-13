@@ -12,7 +12,7 @@
 // LICENSE HERE.
 
 //
-// svgame/brushfuncs.c
+// SVGame/BrushFunctions.cpp
 //
 //
 // Brush utility functionality implementation.
@@ -21,7 +21,6 @@
 // Include local game header.
 #include "ServerGameLocal.h"
 
-//=====================================================
 
 //
 //=========================================================

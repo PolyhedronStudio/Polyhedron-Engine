@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CVAR_H
 #define CVAR_H
 
-#include "common/cmd.h"
+#include "Common/Cmd.h"
 
 /*
 cvar_t variables are used to hold scalar or string variables that can be
@@ -33,7 +33,7 @@ set r_draworder 0    as above, but creates the cvar if not present
 Cvars are restricted from having the same names as commands to keep this
 interface from being ambiguous.
 */
-// WatIsDeze: Moved to shared/shared.h
+// WatIsDeze: Moved to Shared/shared.h
 // #define CVAR_CHEAT          (1 << 5)  // can't be changed when connected
 // #define CVAR_PRIVATE        (1 << 6)  // never macro expanded or saved to config
 // #define CVAR_ROM            (1 << 7)  // can't be changed even from cmdline

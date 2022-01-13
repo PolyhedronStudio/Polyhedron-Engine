@@ -21,19 +21,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/fifo.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Fifo.h"
 #ifdef _DEBUG
-#include "common/files.h"
+#include "Common/Files.h"
 #endif
-#include "common/msg.h"
-#include "common/net/net.h"
-#include "common/protocol.h"
-#include "common/zone.h"
-#include "client/client.h"
-#include "server/server.h"
-#include "system/system.h"
+#include "Common/Msg.h"
+#include "Common/Net/Net.h"
+#include "Common/Protocol.h"
+#include "Common/Zone.h"
+#include "Client/Client.h"
+#include "Server/Server.h"
+#include "System/System.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN

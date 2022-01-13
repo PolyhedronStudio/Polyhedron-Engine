@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/vector5.h
+// Shared/Math/vector5.h
 //
 // N&C Math Library: Vector5
 //

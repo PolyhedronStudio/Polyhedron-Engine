@@ -22,10 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Utilities.h"           // Include Utilities funcs.
 
 // Game Mode interface.
-#include "gamemodes/IGameMode.h"
-
-// Class Entities.
-#include "entities/base/SVGBaseEntity.h"
+#include "GameModes/IGameMode.h"
 
 //
 //===============

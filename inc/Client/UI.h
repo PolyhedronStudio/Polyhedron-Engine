@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef UI_H
 #define UI_H
 
-#include "common/net/net.h"
+#include "Common/Net/Net.h"
 #include "Client/Client.h"
 
 typedef enum {

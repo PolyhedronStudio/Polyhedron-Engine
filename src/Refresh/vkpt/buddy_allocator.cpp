@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/zone.h"
+#include "Common/Zone.h"
 #include "buddy_allocator.h"
 #include <assert.h>
 

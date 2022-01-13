@@ -12,7 +12,6 @@
 #include "../../Utilities.h"		// Util funcs.
 
 // Class Entities.
-#include "SVGBaseEntity.h"
 #include "SVGBaseTrigger.h"
 
 // Included for delayed use.

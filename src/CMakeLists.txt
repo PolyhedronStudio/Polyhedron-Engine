@@ -357,14 +357,14 @@ SET(HEADERS_COMMON
 #SET(SRC_FORMAT
 #)
 SET(HEADERS_COMMON
-	../inc/Format/bsp.h
-	../inc/Format/iqm.h
-	../inc/Format/md2.h
-	../inc/Format/md3.h
-	../inc/Format/pak.h
-	../inc/Format/pcx.h
-	../inc/Format/sp2.h
-	../inc/Format/wal.h
+	../inc/Format/Bsp.h
+	../inc/Format/Iqm.h
+	../inc/Format/Md2.h
+	../inc/Format/Md3.h
+	../inc/Format/Pak.h
+	../inc/Format/Pcx.h
+	../inc/Format/Sp2.h
+	../inc/Format/Wal.h
 )
 
 ###################### Refresh.
@@ -437,7 +437,7 @@ SET(HEADERS_SHARED
 	../inc/Shared/svgame.h 
 	../inc/Shared/keys.h 
 	../inc/Shared/list.h 
-	../inc/Shared/math.h 
+	../inc/Shared/Math.h 
 	../inc/Shared/messaging.h 
 	../inc/Shared/platform.h
 	../inc/Shared/refresh.h 
@@ -451,7 +451,7 @@ SET(SRC_SHARED
 	Shared/Math/plane.cpp
 	Shared/Math/vector3.cpp
 
-	Shared/math.cpp
+	Shared/Math.cpp
 	Shared/shared.cpp
 )
 

@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/plane.h
+// Shared/Math/plane.h
 //
 // Plane math library implementation.
 //
@@ -46,7 +46,7 @@ typedef struct cplane_s {
 #define CPLANE_PAD1             19
 
 //-----------------
-// Defined in shared/math/plane.cpp
+// Defined in Shared/Math/plane.cpp
 //-----------------
 void SetPlaneType(cplane_t* plane);
 void SetPlaneSignbits(cplane_t* plane);

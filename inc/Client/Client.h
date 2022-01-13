@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "common/cmd.h"
-#include "common/net/net.h"
+#include "Common/Cmd.h"
+#include "Common/Net/Net.h"
 #include "Common/Utilities.h"
 
 #if USE_CLIENT

@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// sharedgame/sharedgame.h
+// SharedGame/sharedgame.h
 //
 //
 // Contains the definitions of the import, and export API structs.

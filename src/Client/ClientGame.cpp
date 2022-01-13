@@ -20,13 +20,13 @@
 // the function pointers point to the actual functions.
 //
 #include "Client.h"
-#include "server/server.h"
+#include "Server/Server.h"
 #include "refresh/models.h"
 
 // (Client/Game) related.
 #include "Client/GameModule.h"   // TODO: How come it can find client.h??
-#include "shared/cltypes.h"
-#include "shared/clgame.h"
+#include "Shared/cltypes.h"
+#include "Shared/CLGame.h"
 
 // Contains the functions being exported to client game dll.
 IClientGameExports *cge;

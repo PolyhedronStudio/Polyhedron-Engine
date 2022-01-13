@@ -3,7 +3,7 @@
 //
 // svgame/utils.h
 //
-// N&C SVGame: UTILS Header
+// Polyhedron: UTILS Header
 // 
 //
 #ifndef __SVGAME_UTILS_H__

@@ -19,16 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "shared/list.h"
-#include "common/common.h"
-#include "common/files.h"
-#include "system/hunk.h"
-#include "format/md2.h"
+#include "Shared/list.h"
+#include "Common/Common.h"
+#include "Common/Files.h"
+#include "System/Hunk.h"
+#include "Format/Md2.h"
 #if USE_MD3
-#include "format/md3.h"
+#include "Format/Md3.h"
 #endif
-#include "format/sp2.h"
-#include "format/iqm.h"
+#include "Format/Sp2.h"
+#include "Format/Iqm.h"
 #include "refresh/images.h"
 #include "refresh/models.h"
 

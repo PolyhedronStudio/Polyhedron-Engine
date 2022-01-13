@@ -17,13 +17,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "shared/list.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/zone.h"
-#include "client/keys.h"
-#include "client/input.h"
-#include "client/client.h"
+#include "Shared/list.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Zone.h"
+#include "Client/Keys.h"
+#include "Client/Input.h"
+#include "Client/Client.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

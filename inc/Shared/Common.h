@@ -31,7 +31,7 @@ enum LoadState {
 };
 
 //-----------------
-// WATISDEZE: We don't want these defined in clgame.h
+// WATISDEZE: We don't want these defined in CLGame.h
 //-----------------
 void    Com_Error(ErrorType code, const char* fmt, ...)
 q_noreturn q_printf(2, 3);

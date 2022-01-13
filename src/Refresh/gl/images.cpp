@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "gl.h"
-#include "common/prompt.h"
+#include "Common/Prompt.h"
 
 static int gl_filter_min;
 static int gl_filter_max;

@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/cvar.h"
-#include "client/sound/dma.h"
+#include "Common/CVar.h"
+#include "Client/Sound/DirectMemoryAccess.h"
 
 #include <unistd.h>
 #include <fcntl.h>

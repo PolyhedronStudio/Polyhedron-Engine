@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// sharedgame/protocol.h
+// SharedGame/protocol.h
 //
 // The server game module gets a chance to define its own commands to send to
 // the client here.

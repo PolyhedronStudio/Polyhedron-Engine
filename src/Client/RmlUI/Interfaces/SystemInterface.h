@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// client/rmlui/interfaces/SystemInterface.h
+// client/rmlui/Interfaces/SystemInterface.h
 //
 //
 // RmlUI Polyhedron System Interface implementation.

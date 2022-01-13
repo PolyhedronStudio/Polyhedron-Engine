@@ -17,9 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "client.h"
-#include "common/cvar.h"
-#include "common/field.h"
-#include "common/prompt.h"
+#include "Common/CVar.h"
+#include "Common/Field.h"
+#include "Common/Prompt.h"
 #include <mmsystem.h>
 #if USE_WINSVC
 #include <winsvc.h>

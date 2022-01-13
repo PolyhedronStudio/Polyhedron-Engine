@@ -21,21 +21,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "Entities.h"
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
+#include "Entities/Base/PlayerClient.h"
 
 // Gamemodes.
-#include "gamemodes/IGameMode.h"
-#include "gamemodes/DefaultGameMode.h"
-#include "gamemodes/CoopGameMode.h"
-#include "gamemodes/DeathMatchGameMode.h"
+#include "GameModes/IGameMode.h"
+#include "GameModes/DefaultGameMode.h"
+#include "GameModes/CoopGameMode.h"
+#include "GameModes/DeathMatchGameMode.h"
 
 // Player related.
 #include "Player/Client.h"      // Include Player Client header.
-#include "player/view.h"        // Include Player View header.
+#include "Player/View.h"        // Include Player View header.
 
 // Physics related.
-#include "physics/stepmove.h"
+#include "Physics/StepMove.h"
 
 
 //-----------------

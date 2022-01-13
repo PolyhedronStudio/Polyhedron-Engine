@@ -6,9 +6,12 @@
 //
 //
 */
-#include "../ServerGameLocal.h"              // SVGame.
 
-#include "base/SVGBaseEntity.h"
+// Core.
+#include "../ServerGameLocal.h"              // SVGame.
+#include "../Entities.h"
+
+// Entities.
 #include "base/SVGBaseTrigger.h"
 #include "Light.h"
 
@@ -17,7 +20,7 @@
 #define TRIGGERABLE 2
 
 // Constructor/Deconstructor.
-Light::Light(Entity* svEntity) : SVGBaseTrigger(svEntity) {
+Light::Light(Entity* svEntity) : SVGBaseTrigger(svEntity), lightState(0) {
 
 }
 Light::~Light() {

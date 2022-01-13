@@ -4,12 +4,13 @@
 // TriggerCounter.cpp
 */
 
+// Core.
 #include "../../ServerGameLocal.h"
 #include "../../Effects.h"
 #include "../../Entities.h"
 #include "../../Utilities.h"
 
-#include "../Base/SVGBaseEntity.h"
+// Entities.
 #include "../Base/SVGBaseTrigger.h"
 
 #include "TriggerCounter.h"

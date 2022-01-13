@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/containers/IterableCArray.h
+// Shared/containers/IterableCArray.h
 //
 // N&C Container Library: IterableCArray
 // 

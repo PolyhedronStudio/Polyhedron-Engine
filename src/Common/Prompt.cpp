@@ -21,11 +21,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/field.h"
-#include "common/files.h"
-#include "common/prompt.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Field.h"
+#include "Common/Files.h"
+#include "Common/Prompt.h"
 
 static cvar_t   *com_completion_mode;
 static cvar_t   *com_completion_treshold;

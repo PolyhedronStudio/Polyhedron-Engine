@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/utilities.h
+// Shared/Math/utilities.h
 //
 // N&C Math Library: Utilities
 // 

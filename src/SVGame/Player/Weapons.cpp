@@ -15,15 +15,19 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-// g_weapon.c
 
+// Core.
 #include "../ServerGameLocal.h"
-#include "animations.h"
 
-#include "../entities/base/SVGBaseEntity.h"
+// Entities.
+#include "../Entities.h"
 #include "../entities/base/PlayerClient.h"
 
-#include "SharedGame/SharedGame.h" // Include SG Base.
+// SharedGame.
+#include "SharedGame/SharedGame.h"
+
+// Player Animations Header.
+#include "Animations.h"
 
 qboolean is_quad;
 byte     is_silenced;

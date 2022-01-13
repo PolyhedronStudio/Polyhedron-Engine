@@ -18,8 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/zone.h"
+#include "Common/Common.h"
+#include "Common/Zone.h"
 
 #define STBI_MALLOC(sz)           Z_Malloc(sz)
 #define STBI_REALLOC(p,newsz)     Z_Realloc(p,newsz)

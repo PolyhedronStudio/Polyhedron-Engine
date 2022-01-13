@@ -11,15 +11,15 @@
 #include "../ServerGameLocal.h"
 
 // Include class entities.
-#include "../entities/base/SVGBaseEntity.h"
-#include "../entities/base/PlayerClient.h"
+#include "../Entities/Base/SVGBaseEntity.h"
+#include "../Entities/Base/PlayerClient.h"
 
 // Include player headers.
-#include "../player/animations.h"
-#include "../player/weapons.h"
+#include "../Player/Animations.h"
+#include "../Player/Weapons.h"
 
 // Include weapon header.
-#include "blaster.h"
+#include "Blaster.h"
 
 //
 //======================================================================

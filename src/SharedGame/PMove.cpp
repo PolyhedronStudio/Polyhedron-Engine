@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 #include "Shared/Shared.h"
 #include "SharedGame/SharedGame.h"
-#include "sharedgame/pmove.h"
+#include "SharedGame/PMove.h"
 
 //--------------------------------------------------
 // Player Movement configuration.

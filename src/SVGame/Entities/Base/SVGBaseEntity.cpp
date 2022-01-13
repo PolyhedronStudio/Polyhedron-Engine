@@ -10,7 +10,6 @@
 #include "../../Effects.h"		// Effects.
 #include "../../Entities.h"		// Entities.
 #include "../../Utilities.h"		// Util funcs.
-#include "SVGBaseEntity.h"
 
 #include "SVGBaseTrigger.h"
 #include "../trigger/TriggerDelayedUse.h"

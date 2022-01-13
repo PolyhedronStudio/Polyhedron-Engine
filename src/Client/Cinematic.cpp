@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Client.h"
 #include "Client/Sound/Sound.h"
 #include "Client/Sound/Vorbis.h"
-#include "common/files.h"
+#include "Common/Files.h"
 #include "refresh/images.h"
 
 typedef struct
@@ -102,7 +102,7 @@ SCR_FinishCinematic
 Called when either the cinematic completes, or it is aborted
 ====================
 */
-// CPP: Declared in sound.h, but now here too...
+// CPP: Declared in Sound.h, but now here too...
 void AL_UnqueueRawSamples();
 void SCR_FinishCinematic(void)
 {

@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "vkpt.h"
-#include "system/system.h"
+#include "System/System.h"
 
 enum {
 	BLUR,

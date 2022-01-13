@@ -19,14 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef FILES_H
 #define FILES_H
 
-#include "common/cmd.h"
-#include "common/error.h"
-#include "common/zone.h"
+#include "Common/Cmd.h"
+#include "Common/Error.h"
+#include "Common/Zone.h"
 
 #define MAX_LISTED_FILES    2048
 #define MAX_LISTED_DEPTH    8
 
-// moved to shared/shared.h
+// moved to Shared/shared.h
 // typedef struct file_info_s {
 //     size_t  size;
 //     time_t  ctime;

@@ -9,13 +9,12 @@
 #include "../../ServerGameLocal.h"              // SVGame.
 #include "../../Effects.h"              // Effects.
 #include "../../Entities.h"             // Entities.
-#include "../../player/client.h"        // Player Client functions.
-#include "../../player/animations.h"    // Include Player Client Animations.
-#include "../../player/view.h"          // Include Player View functions..
+#include "../../Player/Client.h"        // Player Client functions.
+#include "../../Player/Animations.h"    // Include Player Client Animations.
+#include "../../Player/View.h"          // Include Player View functions..
 #include "../../Utilities.h"                // Util funcs.
 
 // Class Entities.
-#include "../Base/SVGBaseEntity.h"
 #include "BodyCorpse.h"
 
 // Constructor/Deconstructor.

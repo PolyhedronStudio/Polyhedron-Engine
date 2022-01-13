@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// client/rmlui/interfaces/SystemInterface.cpp
+// client/rmlui/Interfaces/SystemInterface.cpp
 //
 //
 // RmlUI N&C System Interface implementation.

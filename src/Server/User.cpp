@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // sv_user.c -- server code for moving users
 
-#include "server.h"
+#include "Server.h"
 
 /*
 ============================================================

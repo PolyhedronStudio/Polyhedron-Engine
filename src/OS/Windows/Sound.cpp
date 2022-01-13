@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Shared/Shared.h"
-#include "common/zone.h"
-#include "client/sound/dma.h"
+#include "Common/Zone.h"
+#include "Client/Sound/DirectMemoryAccess.h"
 #include "SDL.h"
 
 static void Filler(void *userdata, Uint8 *stream, int len)

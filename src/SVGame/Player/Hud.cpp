@@ -15,15 +15,19 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+// Core.
 #include "../ServerGameLocal.h" // Include SVGame header.
-#include "../entities.h"
-#include "../entities/base/SVGBaseEntity.h"
-#include "../entities/base/PlayerClient.h"
 
-#include "../gamemodes/IGameMode.h"
+// Entities.
+#include "../Entities.h"
+#include "../Entities/Base/PlayerClient.h"
 
-#include "client.h"     // Include Player Client header.
-#include "hud.h"        // Include HUD header.
+// Game Mode interface.
+#include "../GameModes/IGameMode.h"
+
+// Player Client & Hud Header.
+#include "Client.h"     // Include Player Client header.
+#include "Hud.h"        // Include HUD header.
 
 
 /*

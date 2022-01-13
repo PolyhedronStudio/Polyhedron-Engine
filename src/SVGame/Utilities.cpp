@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ServerGameLocal.h"
 #include "Entities.h"
 #include "Utilities.h"
-#include "entities/base/SVGBaseEntity.h"
 
 vec3_t SVG_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
 {

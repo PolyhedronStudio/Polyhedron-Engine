@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef PROMPT_H
 #define PROMPT_H
 
-#include "common/field.h"
-#include "common/cmd.h"
+#include "Common/Field.h"
+#include "Common/Cmd.h"
 
 #define HISTORY_SIZE    128
 #define HISTORY_MASK    (HISTORY_SIZE - 1)

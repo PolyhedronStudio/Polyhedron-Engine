@@ -17,14 +17,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/cmd.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/net/net.h"
-#include "client/input.h"
-#include "client/keys.h"
-#include "system/lirc.h"
-#include "system/system.h"
+#include "Common/Cmd.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Net/Net.h"
+#include "Client/Input.h"
+#include "Client/Keys.h"
+#include "system/Lirc.h"
+#include "System/System.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

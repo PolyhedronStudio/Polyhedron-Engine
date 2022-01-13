@@ -75,7 +75,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // Platform specific includes.
 //-----------------
-#include "shared/platform.h"
+#include "Shared/platform.h"
 
 
 //
@@ -179,7 +179,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //
 //=============================================================================
 //
-#include "shared/endian.h"
+#include "Shared/endian.h"
 
 
 //
@@ -189,7 +189,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //
 //=============================================================================
 //
-#include "shared/math.h"
+#include "Shared/Math.h"
 
 
 //
@@ -198,7 +198,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //	Engine Tick Rate Settings.
 //
 //=============================================================================
-#include "shared/tickrate.h"
+#include "Shared/tickrate.h"
 
 
 //
@@ -208,7 +208,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //
 //=============================================================================
 //
-#include "shared/common.h"
+#include "Shared/Common.h"
 
 
 
@@ -264,7 +264,7 @@ void    Info_Print(const char* infostring);
 //
 //=============================================================================
 //
-#include "shared/keys.h"
+#include "Shared/keys.h"
 
 
 
@@ -275,7 +275,7 @@ void    Info_Print(const char* infostring);
 //
 //=============================================================================
 //
-#include "shared/ui.h"
+#include "Shared/ui.h"
 
 //-----------------
 // Color defines, modify these as you please for custom colors.
@@ -432,7 +432,7 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 //
 //=============================================================================
 //
-#include "shared/pmove.h"
+#include "Shared/pmove.h"
 
 
 
@@ -443,7 +443,7 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 //
 //=============================================================================
 //
-#include "shared/messaging.h"
+#include "Shared/messaging.h"
 
 
 //
@@ -471,8 +471,8 @@ typedef struct file_info_s {
 //
 //=============================================================================
 //
-#include "shared/qstring.h"
-#include "shared/strings.h"
+#include "Shared/qstring.h"
+#include "Shared/strings.h"
 
 
 //
@@ -482,7 +482,7 @@ typedef struct file_info_s {
 //
 //=============================================================================
 //
-#include "shared/collision.h"
+#include "Shared/collision.h"
 
 
 //

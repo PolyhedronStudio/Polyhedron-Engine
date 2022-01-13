@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // sv_game.c -- interface to the game dll
 
-#include "server.h"
+#include "Server.h"
 
 ServerGameExports    *ge;
 

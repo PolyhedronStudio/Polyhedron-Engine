@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "common/error.h"
+#include "Common/Error.h"
 
 static const char *const error_table[] = {
     "Unspecified error",

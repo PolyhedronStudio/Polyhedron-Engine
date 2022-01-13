@@ -19,9 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __INC_SHARED__SVGAME_H__
 #define __INC_SHARED__SVGAME_H__
 
-#include "shared/list.h"
-#include "sharedgame/pmove.h"
-#include "sharedgame/protocol.h"
+#include "Shared/list.h"
+#include "SharedGame/PMove.h"
+#include "SharedGame/Protocol.h"
 
 //
 // game.h -- game dll information visible to server

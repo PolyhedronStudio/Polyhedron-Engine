@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/matrix3.h
+// Shared/Math/matrix3.h
 //
 // N&C Math Library: Matrix3
 // 

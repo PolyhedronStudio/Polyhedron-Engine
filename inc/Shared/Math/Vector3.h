@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// shared/math/vector3.h
+// Shared/Math/vector3.h
 //
 // N&C Math Library: Vector3
 // 

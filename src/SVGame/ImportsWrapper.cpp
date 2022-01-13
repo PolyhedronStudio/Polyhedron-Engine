@@ -12,7 +12,6 @@
 */
 #include "ServerGameLocal.h"          // Include SVGame header.
 #include "Entities.h"
-#include "entities/base/SVGBaseEntity.h"
 
 //
 //===============

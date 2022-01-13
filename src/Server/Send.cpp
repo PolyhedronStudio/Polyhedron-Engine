@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // sv_send.c
 
-#include "server.h"
+#include "Server.h"
 
 /*
 =============================================================================

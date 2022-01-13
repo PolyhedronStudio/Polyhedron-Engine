@@ -23,12 +23,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Shared/Shared.h"
-#include "common/common.h"
-#include "common/cvar.h"
-#include "common/files.h"
+#include "Common/Common.h"
+#include "Common/CVar.h"
+#include "Common/Files.h"
 #include "refresh/images.h"
-#include "format/pcx.h"
-#include "format/wal.h"
+#include "Format/Pcx.h"
+#include "Format/Wal.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
 

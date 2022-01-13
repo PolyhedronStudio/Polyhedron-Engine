@@ -10,16 +10,15 @@
 #include "ServerGameLocal.h"         // Include SVGame funcs.
 #include "Entities.h"
 #include "Utilities.h"           // Include Utilities funcs.
-#include "effects.h"
+#include "Effects.h"
 
 // Game Mode interface.
-#include "gamemodes/IGameMode.h"
+#include "GameModes/IGameMode.h"
 
 // Class Entities.
-#include "entities/base/SVGBaseEntity.h"
-#include "entities/base/PlayerClient.h"
-#include "entities/base/DebrisEntity.h"
-#include "entities/base/GibEntity.h"
+#include "Entities/Base/PlayerClient.h"
+#include "Entities/Base/DebrisEntity.h"
+#include "Entities/Base/GibEntity.h"
 
 
 //=================

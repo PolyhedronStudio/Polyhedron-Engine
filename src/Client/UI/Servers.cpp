@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "UI.h"
-#include "common/files.h"
-#include "common/net/net.h"
+#include "Common/Files.h"
+#include "Common/Net/Net.h"
 #include "Client/Video.h"
-#include "system/system.h"
+#include "System/System.h"
 
 /*
 =============================================================================

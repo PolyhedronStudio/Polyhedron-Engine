@@ -19,9 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef NET_CHAN_H
 #define NET_CHAN_H
 
-#include "common/msg.h"
-#include "common/net/net.h"
-#include "common/sizebuffer.h"
+#include "Common/Msg.h"
+#include "Common/Net/Net.h"
+#include "Common/SizeBuffer.h"
 
 //struct NetChannel {
 //    int         protocol;

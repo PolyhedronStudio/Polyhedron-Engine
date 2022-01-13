@@ -9,20 +9,20 @@
 #include "../../ServerGameLocal.h"              // SVGame.
 #include "../../Effects.h"              // Effects.
 #include "../../Entities.h"             // Entities.
-#include "../../player/client.h"        // Player Client functions.
-#include "../../player/animations.h"    // Include Player Client Animations.
-#include "../../player/view.h"          // Include Player View functions..
+#include "../../Player/Client.h"        // Player Client functions.
+#include "../../Player/Animations.h"    // Include Player Client Animations.
+#include "../../Player/View.h"          // Include Player View functions..
 #include "../../Utilities.h"                // Util funcs.
 
 // Game Mode interface.
-#include "../../gamemodes/IGameMode.h"
+#include "../../GameModes/IGameMode.h"
 
 // Class Entities.
-#include "../Base/SVGBaseEntity.h"
 #include "PlayerClient.h"
 
 // Constructor/Deconstructor.
-PlayerClient::PlayerClient(Entity* svEntity) : SVGBaseEntity(svEntity) {
+PlayerClient::PlayerClient(Entity* svEntity) : SVGBaseEntity(svEntity), 
+    airFinishedTime(0.f), debounceDamageTime(0.f), debouncePainTime(0.f), debounceSoundTime(0.f), debounceTouchTime(0.f) {
 
 }
 PlayerClient::~PlayerClient() {

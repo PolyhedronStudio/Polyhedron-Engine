@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef NET_H
 #define NET_H
 
-#include "common/fifo.h"
+#include "Common/Fifo.h"
 
 // net.h -- quake's interface to the networking layer
 

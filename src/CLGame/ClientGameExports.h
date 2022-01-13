@@ -4,7 +4,7 @@
 // ClientGameExports implementation.
 #pragma once
 
-#include "shared/interfaces/IClientGameExports.h"
+#include "Shared/Interfaces/IClientGameExports.h"
 
 //---------------------------------------------------------------------
 // MAIN interface to implement. It holds pointers to actual sub interfaces,

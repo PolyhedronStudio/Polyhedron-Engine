@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "server.h"
-#include "client/input.h"
+#include "Server.h"
+#include "Client/Input.h"
 
 LIST_DECL(sv_masterlist);   // address of group servers
 LIST_DECL(sv_banlist);
