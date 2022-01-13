@@ -42,7 +42,7 @@ void ClientGameView::ClearScene() {
 //---------------
 void ClientGameView::RenderView() {
     // Calculate client view values.
-    CLG_UpdateOrigin();
+    clge->ClientUpdateOrigin();
 
     // Finish calculating view values.
     CLG_FinishViewValues();

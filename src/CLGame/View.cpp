@@ -341,34 +341,6 @@ first:
 }
 
 //
-//===============
-// CLG_AddEntities
-// 
-// Adds all the CG Module entities to tthe current frame scene.
-//===============
-//
-static void CLG_AddEntities (void) {
-    // Calculate client view values.
-    CLG_UpdateOrigin();
-
-    // Finish calculating view values.
-    CLG_FinishViewValues();
-
-    // Add entities here.
-    CLG_AddPacketEntities();
-    CLG_AddTempEntities();
-    CLG_AddParticles();
-
-#if USE_DLIGHTS
-    CLG_AddDLights();
-#endif
-#if USE_LIGHTSTYLES
-    CLG_AddLightStyles();
-#endif
-    //LOC_AddLocationsToScene();
-}
-
-//
 //=============================================================================
 //
 // CLIENT MODULE VIEW ENTRY FUNCTIONS.
@@ -426,33 +398,6 @@ void CLG_ClearScene(void)
     view.num_entities = 0;
     view.num_particles = 0;
 }
-
-//
-//===============
-// CLG_RenderView
-// 
-// Called whenever the engine wants to render a newly parsed valid frame.
-// Fill the scene with entities you want rendered to the client here.
-//===============
-//
-void CLG_RenderView (void) {
-    // Add our view entities.
-    CLG_AddEntities();
-
-    // Last but not least, pass our array over to the client.
-    cl->refdef.num_entities     = view.num_entities;
-    cl->refdef.entities         = view.entities;
-    cl->refdef.num_particles    = view.num_particles;
-    cl->refdef.particles        = view.particles;
-#if USE_DLIGHTS
-    cl->refdef.num_dlights      = view.num_dlights;
-    cl->refdef.dlights          = view.dlights;
-#endif
-#if USE_LIGHTSTYLES
-    cl->refdef.lightstyles      = view.lightstyles;
-#endif
-}
-
 
 //
 //===============

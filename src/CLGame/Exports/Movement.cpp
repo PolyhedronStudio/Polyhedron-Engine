@@ -31,8 +31,10 @@ extern cvar_t* cl_run;
 //
 //---------------
 void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
+    // Reset for this frame.
     cl->localmove = vec3_zero();
 
+    // In case of a pause, return. (There won't be any user input being fetched for movement.)
     if (sv_paused->integer) {
         return;
     }
@@ -56,8 +58,10 @@ void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
     // Clamp to server defined max speed
     cl->localmove = CLG_ClampSpeed(cl->localmove);
 
+    // Clamp the pitch.
     CLG_ClampPitch();
 
+    // Assign view angles to move command user input.
     cl->moveCommand.input.viewAngles[0] = cl->viewAngles[0];
     cl->moveCommand.input.viewAngles[1] = cl->viewAngles[1];
     cl->moveCommand.input.viewAngles[2] = cl->viewAngles[2];
@@ -107,8 +111,9 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
         cl->moveCommand.input.buttons |= BUTTON_ANY;
     }
 
+    // Set a 'normal' time, since anything over 250 is unreasonable
     if (cl->moveCommand.input.msec > 250) {
-        cl->moveCommand.input.msec = 100;        // time was unreasonable
+        cl->moveCommand.input.msec = 100;
     }
 
     // Rebuild the movement vector
@@ -133,13 +138,15 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     cl->mousemove[0] = 0;
     cl->mousemove[1] = 0;
 
+    // Assign current impulse, and reset the input for the next frame.
     cl->moveCommand.input.impulse = in_impulse;
     in_impulse = 0;
 
-    // Save this command off for prediction
+    // Save this command off for client move prediction.
     cl->currentClientCommandNumber++;
     cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->moveCommand;
 
+    // Clear keys that need clearing for the next frame.
     CLG_KeyClear(&in_right);
     CLG_KeyClear(&in_left);
 
@@ -156,6 +163,6 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     CLG_KeyClear(&in_lookdown);
 
 
-    // Clear pending cmd
+    // Clear the pending cmd for the next frame.
     cl->moveCommand = {};
 }

@@ -65,6 +65,7 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
 //
 //---------------
 void ClientGamePrediction::PredictAngles() {
+    // Add delta predicted angles to our view angles. (Allows for doors and other objects to push the player properly.)
     cl->predictedState.viewAngles[0] = cl->viewAngles[0] + cl->frame.playerState.pmove.deltaAngles[0];
     cl->predictedState.viewAngles[1] = cl->viewAngles[1] + cl->frame.playerState.pmove.deltaAngles[1];
     cl->predictedState.viewAngles[2] = cl->viewAngles[2] + cl->frame.playerState.pmove.deltaAngles[2];
@@ -75,8 +76,10 @@ void ClientGamePrediction::PredictAngles() {
 //
 //---------------
 void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) {
-    PlayerMove   pm = {};
+    // Player Move object.
+    PlayerMove pm = {};
 
+    // Only continue if there is an acknowledged command index, or a current command index.
     if (!acknowledgedCommandIndex || !currentCommandIndex)
         return;
 

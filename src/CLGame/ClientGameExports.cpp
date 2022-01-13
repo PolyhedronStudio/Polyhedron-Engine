@@ -110,11 +110,10 @@ void ClientGameExports::ClientUpdateOrigin() {
         LerpAngles(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction, cl->refdef.viewAngles);
     }
 
-#if USE_SMOOTH_DELTA_ANGLES
+    // Lerp between previous and current frame delta angles.
     cl->deltaAngles[0] = LerpAngle(previousPlayerState->pmove.deltaAngles[0], currentPlayerState->pmove.deltaAngles[0], lerpFraction);
     cl->deltaAngles[1] = LerpAngle(previousPlayerState->pmove.deltaAngles[1], currentPlayerState->pmove.deltaAngles[1], lerpFraction);
     cl->deltaAngles[2] = LerpAngle(previousPlayerState->pmove.deltaAngles[2], currentPlayerState->pmove.deltaAngles[2], lerpFraction);
-#endif
 
     // don't interpolate blend color
     Vector4Copy(currentPlayerState->blend, cl->refdef.blend);
@@ -130,14 +129,14 @@ void ClientGameExports::ClientUpdateOrigin() {
     cl->playerEntityOrigin = cl->refdef.vieworg;
     cl->playerEntityAngles = cl->refdef.viewAngles;
 
+    // Keep it properly within range.
     if (cl->playerEntityAngles[vec3_t::Pitch] > 180) {
         cl->playerEntityAngles[vec3_t::Pitch] -= 360;
     }
-
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
-
-    // Update the client's listener origin values.
+    // Update the client's listener origin values. This is a nescessity for the game in order
+    // to properly play sound effects.
     clgi.UpdateListenerOrigin();
 }
 

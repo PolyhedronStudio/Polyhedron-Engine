@@ -381,7 +381,7 @@ struct ClientState {
     float fov_y;      // Derived from fov_x assuming 4/3 aspect ratio
     int32_t lightLevel;
 
-    // Updated in CLG_UpdateOrigin.
+    // Updated in ClientGameExports::ClientUpdateOrigin.
     vec3_t v_forward, v_right, v_up;    
 
     qboolean thirdPersonView;

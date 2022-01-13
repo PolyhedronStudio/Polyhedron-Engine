@@ -415,29 +415,6 @@ static int adjust_shell_fx(int renderEffects)
 
 /*
 ===============
-CL_AddEntities
-
-Emits all entities, particles, and lights to the refresh
-===============
-*/
-void CL_AddEntities(void)
-{
-    // CL_UpdateOrigin(); // N&C: Moved to V_RenderView so CG Module can use these too.
-   // CL_FinishViewValues();
-    //CL_AddPacketEntities();
-   // CL_AddTEnts();
-//   // CL_AddParticles();
-//#if USE_DLIGHTS
-//    CL_AddDLights();
-//#endif
-//#if USE_LIGHTSTYLES
-//    CL_AddLightStyles();
-//#endif
-    LOC_AddLocationsToScene();
-}
-
-/*
-===============
 CL_GetEntitySoundOrigin
 
 Called to get the sound spatialization origin
