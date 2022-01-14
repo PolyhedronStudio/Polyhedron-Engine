@@ -14,11 +14,11 @@ void CLG_EffectsInit(void);
 
 cparticle_t* CLG_AllocParticle(void);
 void CLG_AddParticles(void);
-#if USE_DLIGHTS
+
 cdlight_t* CLG_AllocDLight(int key);
 void CLG_AddDLights(void);
 void CLG_RunDLights(void);
-#endif
+
 #if USE_LIGHTSTYLES
 void CLG_ClearLightStyles(void);
 void CLG_AddLightStyles(void);

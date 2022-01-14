@@ -25,10 +25,10 @@ static cparticle_t  particles[MAX_PARTICLES];
 static const int    cl_numparticles = MAX_PARTICLES;
 
 static void CLG_ClearParticles(void);
-#if USE_DLIGHTS
+
 static cdlight_t       clg_dlights[MAX_DLIGHTS];
 static void CLG_ClearDLights(void);
-#endif
+
 uint32_t d_8to24table[256];
 
 cvar_t* cvar_pt_particle_emissive = NULL;
@@ -67,9 +67,7 @@ void CLG_EffectsInit(void)
 void CLG_ClearEffects(void)
 {
     CLG_ClearParticles();
-#if USE_DLIGHTS
     CLG_ClearDLights();
-#endif
 }
 
 
@@ -198,7 +196,6 @@ void CLG_AddLightStyles(void)
 //=============================================================================
 //
 
-#if USE_DLIGHTS
 static cdlight_t       cl_dlights[MAX_DLIGHTS];
 
 static void CLG_ClearDLights(void)
@@ -281,7 +278,7 @@ void CLG_RunDLights(void)
         if (dl->radius < 0)
             dl->radius = 0;
 
-        VectorMA(dl->origin, clgi.GetFrameTime(), dl->velosity, dl->origin);
+        VectorMA(dl->origin, clgi.GetFrameTime(), dl->velocity, dl->origin);
     }
 }
 
@@ -306,7 +303,6 @@ void CLG_AddDLights(void)
     }
 }
 
-#endif
 
 
 //
@@ -324,10 +320,8 @@ void CLG_AddDLights(void)
 //===============
 //
 void CLG_MuzzleFlash() {
-#if USE_DLIGHTS
     vec3_t      fv, rv;
     cdlight_t* dl;
-#endif
     cl_entity_t* pl;
     float       volume;
     char        soundname[MAX_QPATH];
@@ -339,7 +333,6 @@ void CLG_MuzzleFlash() {
 
     pl = &cs->entities[mzParameters.entity];
 
-#if USE_DLIGHTS
     dl = CLG_AllocDLight(mzParameters.entity);
     VectorCopy(pl->current.origin, dl->origin);
     AngleVectors(pl->current.angles, &fv, &rv, NULL);
@@ -354,11 +347,6 @@ void CLG_MuzzleFlash() {
 #define DL_COLOR(r, g, b)   VectorSet(dl->color, r, g, b)
 #define DL_RADIUS(r)        (dl->radius = r)
 #define DL_DIE(t)           (dl->die = cl->time + t)
-#else
-#define DL_COLOR(r, g, b)
-#define DL_RADIUS(r)
-#define DL_DIE(t)
-#endif
 
     if (mzParameters.silenced)
         volume = 0.2;
@@ -422,9 +410,7 @@ void CLG_MuzzleFlash2() {
     cl_entity_t* ent;
     vec3_t      origin;
     const vec_t* ofs;
-#if USE_DLIGHTS
     cdlight_t* dl;
-#endif
     vec3_t      forward, right;
 
     // locate the origin
@@ -435,13 +421,11 @@ void CLG_MuzzleFlash2() {
     origin[1] = ent->current.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
     origin[2] = ent->current.origin[2] + forward[2] * ofs[0] + right[2] * ofs[1] + ofs[2];
 
-#if USE_DLIGHTS
     dl = CLG_AllocDLight(mzParameters.entity);
     VectorCopy(origin, dl->origin);
     dl->radius = 200 + (rand() & 31);
     //dl->minlight = 32;
     dl->die = cl->time;  // + 0.1;
-#endif
 
     switch (mzParameters.weapon) {
     case MZ2_SOLDIER_MACHINEGUN_1:

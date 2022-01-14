@@ -25,19 +25,19 @@ qhandle_t   gun_model;
 //=============
 
 static cvar_t* cl_add_particles;
-#if USE_DLIGHTS
+
 static cvar_t* cl_add_lights;
 static cvar_t* cl_show_lights;
-#endif
+
 static cvar_t* cl_add_entities;
 static cvar_t* cl_add_blend;
 
 #ifdef _DEBUG
 static cvar_t* cl_testparticles;
 static cvar_t* cl_testentities;
-#if USE_DLIGHTS
+
 static cvar_t* cl_testlights;
-#endif
+
 static cvar_t* cl_testblend;
 
 static cvar_t* cl_stats;
@@ -90,7 +90,7 @@ void V_AddParticle(rparticle_t *p)
     view.particles[view.num_particles++] = *p;
 }
 
-#if USE_DLIGHTS
+
 //
 //===============
 // V_AddLight
@@ -133,7 +133,6 @@ void V_AddLight(const vec3_t& org, float intensity, float r, float g, float b)
 {
 	V_AddLightEx(org, intensity, r, g, b, 10.f);
 }
-#endif
 
 #if USE_LIGHTSTYLES
 //
@@ -169,10 +168,10 @@ void V_AddLightStyle(int style, const vec4_t &value)
 //
 void V_Init(void)
 {
-#if USE_DLIGHTS
+
     cl_add_lights       = clgi.Cvar_Get("cl_lights", "1", 0);
     cl_show_lights      = clgi.Cvar_Get("cl_show_lights", "0", 0);
-#endif
+
     cl_add_particles    = clgi.Cvar_Get("cl_particles", "1", 0);
     cl_add_entities     = clgi.Cvar_Get("cl_entities", "1", 0);
     cl_add_blend        = clgi.Cvar_Get("cl_blend", "1", 0);
@@ -282,9 +281,7 @@ void CLG_PreRenderView (void) {
 //
 void CLG_ClearScene(void)
 {
-#if USE_DLIGHTS
     view.num_dlights = 0;
-#endif
     view.num_entities = 0;
     view.num_particles = 0;
 }

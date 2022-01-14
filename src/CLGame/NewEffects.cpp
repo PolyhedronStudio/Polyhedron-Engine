@@ -14,7 +14,6 @@
 #include "Effects.h"
 #include "Main.h"
 
-#if USE_DLIGHTS
 void CLG_Flashlight(int ent, vec3_t pos)
 {
     cdlight_t* dl;
@@ -47,7 +46,6 @@ void CLG_ColorFlash(vec3_t pos, int ent, int intensity, float r, float g, float 
     dl->color[1] = g;
     dl->color[2] = b;
 }
-#endif
 
 
 /*

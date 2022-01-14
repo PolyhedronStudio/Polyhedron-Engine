@@ -28,10 +28,7 @@ void ClientGameView::PreRenderView() {
 //
 //---------------
 void ClientGameView::ClearScene() {
-// WID: TODO: Ifdef... remove... ? hehe
-#if USE_DLIGHTS
     view.num_dlights = 0;
-#endif
     view.num_entities = 0;
     view.num_particles = 0;
 }
@@ -51,10 +48,7 @@ void ClientGameView::RenderView() {
     clge->entities->AddPacketEntities();
     CLG_AddTempEntities();
     CLG_AddParticles();
-
-#if USE_DLIGHTS
     CLG_AddDLights();
-#endif
 #if USE_LIGHTSTYLES
     CLG_AddLightStyles();
 #endif
@@ -64,10 +58,8 @@ void ClientGameView::RenderView() {
     cl->refdef.entities = view.entities;
     cl->refdef.num_particles = view.num_particles;
     cl->refdef.particles = view.particles;
-#if USE_DLIGHTS
     cl->refdef.num_dlights = view.num_dlights;
     cl->refdef.dlights = view.dlights;
-#endif
 #if USE_LIGHTSTYLES
     cl->refdef.lightstyles = view.lightstyles;
 #endif

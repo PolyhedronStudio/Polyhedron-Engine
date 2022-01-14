@@ -174,9 +174,7 @@ void ClientGameExports::ClientDeltaFrame() {
 //---------------
 void ClientGameExports::ClientFrame() {
     // Advance local effects.
-#if USE_DLIGHTS
     CLG_RunDLights();
-#endif
 #if USE_LIGHTSTYLES
     CLG_RunLightStyles();
 #endif

@@ -62,17 +62,15 @@ static inline qboolean CLG_FRAMESYNC() {
 typedef struct clg_view_s {
     // Stores the entities.
     r_entity_t entities[MAX_ENTITIES];
-    int num_entities;
+    int32_t num_entities;
 
     // Holds all the dynamic lights currently in the view frame.
-#if USE_DLIGHTS
     rdlight_t dlights[MAX_DLIGHTS];
-    int num_dlights;
-#endif
+    int32_t num_dlights;
 
     // Holds all the particles currently in the view frame.
     rparticle_t particles[MAX_PARTICLES];
-    int num_particles;
+    int32_t num_particles;
 
     // Holds all the explosions currently in the view frame.
     explosion_t  explosions[MAX_EXPLOSIONS];

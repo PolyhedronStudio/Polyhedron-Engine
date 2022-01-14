@@ -178,7 +178,6 @@ typedef struct cparticle_s {
 //
 // Client DLight structure.
 //
-#if USE_DLIGHTS
 typedef struct cdlight_s {
     int32_t     key;        // so entities can reuse same entry
     vec3_t  color;
@@ -186,15 +185,14 @@ typedef struct cdlight_s {
     float   radius;
     float   die;        // stop lighting after this time
     float   decay;      // drop this each second
-	vec3_t  velosity;     // move this far each second
+	vec3_t  velocity;     // move this far each second
     //float   minlight;   // don't add when contributing less
 } cdlight_t;
-#endif
 
 //
 // Maximum amount of weapon models allowed.
 //
-#define MAX_CLIENTWEAPONMODELS        20        // PGM -- upped from 16 to fit the chainfist vwep
+static constexpr int32_t MAX_CLIENTWEAPONMODELS = 20;        // PGM -- upped from 16 to fit the chainfist vwep
 
 //
 // Contains all the info about a client we need to know.

@@ -923,7 +923,7 @@ static void CLG_RailLights(color_t color)
 		dl->radius = 400;
 		dl->decay = 400;
 		dl->die = cl->time + 1000;
-		VectorScale(vec, segment_size * 0.5f, dl->velosity);
+		VectorScale(vec, segment_size * 0.5f, dl->velocity);
 	}
 }
 

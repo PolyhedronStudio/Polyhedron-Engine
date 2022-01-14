@@ -31,19 +31,19 @@ qhandle_t   gun_model;
 //=============
 
 static cvar_t   *cl_add_particles;
-#if USE_DLIGHTS
+
 static cvar_t   *cl_add_lights;
 static cvar_t   *cl_show_lights;
-#endif
+
 static cvar_t   *cl_add_entities;
 static cvar_t   *cl_add_blend;
 
 #ifdef _DEBUG
 static cvar_t   *cl_testparticles;
 static cvar_t   *cl_testentities;
-#if USE_DLIGHTS
+
 static cvar_t   *cl_testlights;
-#endif
+
 static cvar_t   *cl_testblend;
 
 static cvar_t   *cl_stats;
@@ -51,10 +51,10 @@ static cvar_t   *cl_stats;
 
 static cvar_t   *cl_adjustfov;
 
-#if USE_DLIGHTS
+
 int         r_numdlights;
 rdlight_t    r_dlights[MAX_DLIGHTS];
-#endif
+
 
 int         r_numentities;
 r_entity_t    r_entities[MAX_ENTITIES];
@@ -76,9 +76,7 @@ Specifies the model that will be used as the world
 */
 static void V_ClearScene(void)
 {
-#if USE_DLIGHTS
     r_numdlights = 0;
-#endif
     r_numentities = 0;
     r_numparticles = 0;
 }
@@ -144,7 +142,7 @@ static void V_TestEntities(void)
     }
 }
 
-#if USE_DLIGHTS
+
 /*
 ================
 V_TestLights
@@ -191,7 +189,6 @@ static void V_TestLights(void)
 }
 #endif
 
-#endif
 
 //============================================================================
 
@@ -295,10 +292,10 @@ void V_RenderView(void)
             r_numentities = 0;
         if (!cl_add_particles->integer)
             r_numparticles = 0;
-#if USE_DLIGHTS
+
         if (!cl_add_lights->integer)
             r_numdlights = 0;
-#endif
+
         if (!cl_add_blend->integer)
             Vector4Clear(cl.refdef.blend);
 
@@ -312,11 +309,7 @@ void V_RenderView(void)
     R_RenderFrame(&cl.refdef);
 #ifdef _DEBUG
     if (cl_stats->integer)
-#if USE_DLIGHTS
         Com_Printf("ent:%i  lt:%i  part:%i\n", r_numentities, r_numdlights, r_numparticles);
-#else
-        Com_Printf("ent:%i  part:%i\n", r_numentities, r_numparticles);
-#endif
 #endif
 
     // 
@@ -356,17 +349,15 @@ void V_Init(void)
     cl_testblend = Cvar_Get("cl_testblend", "0", 0);
     cl_testparticles = Cvar_Get("cl_testparticles", "0", 0);
     cl_testentities = Cvar_Get("cl_testentities", "0", 0);
-#if USE_DLIGHTS
     cl_testlights = Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
-#endif
 
     cl_stats = Cvar_Get("cl_stats", "0", 0);
 #endif
 
-#if USE_DLIGHTS
+
     cl_add_lights = Cvar_Get("cl_lights", "1", 0);
 	cl_show_lights = Cvar_Get("cl_show_lights", "0", 0);
-#endif
+
     cl_add_particles = Cvar_Get("cl_particles", "1", 0);
     cl_add_entities = Cvar_Get("cl_entities", "1", 0);
     cl_add_blend = Cvar_Get("cl_blend", "1", 0);
