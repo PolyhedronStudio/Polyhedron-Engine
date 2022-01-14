@@ -4,6 +4,7 @@
 // ClientGameServerMessage implementation.
 #pragma once
 
+// Client Game Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
 //---------------------------------------------------------------------

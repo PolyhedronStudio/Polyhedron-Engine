@@ -51,6 +51,10 @@ class IClientGameExportEntities {
 public:
     // Executed whenever an entity event is receieved.
     virtual void Event(int32_t number) = 0;
+
+    // Parse the server frame for server entities to add to our client view.
+    // Also applies special rendering effects to them where desired.
+    virtual void AddPacketEntities() = 0;
 };
 
 //---------------------------------------------------------------------

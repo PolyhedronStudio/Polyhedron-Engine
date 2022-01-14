@@ -429,7 +429,7 @@ SET(HEADERS_SHARED
 	
 	# Other shared lib functionalities.
 	../inc/Shared/CLGame.h
-	../inc/Shared/cltypes.h
+	../inc/Shared/CLTypes.h
 	../inc/Shared/collision.h
 	../inc/Shared/common.h
 	../inc/Shared/config.h

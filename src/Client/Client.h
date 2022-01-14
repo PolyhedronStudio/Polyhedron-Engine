@@ -60,7 +60,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // N&C: Most structures related to the client have been moved over here.
 // They are shared to the client game dll, since it is tightly coupled.
-#include "Shared/cltypes.h"
+#include "Shared/CLTypes.h"
 
 // N&C: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern explosion_t  cl_explosions[MAX_EXPLOSIONS];

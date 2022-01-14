@@ -35,7 +35,7 @@
 #include "SharedGame/Protocol.h"
 
 // Shared Client Game Headers.
-#include "Shared/cltypes.h"
+#include "Shared/CLTypes.h"
 #include "Shared/CLGame.h"
 
 // "Shared" cl frametime.
@@ -43,7 +43,7 @@
 static constexpr double CLG_FRAMETIME = BASE_FRAMETIME;
 static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
 static constexpr int32_t CLG_FRAMEDIV = BASE_FRAMERATE / 10.0;
-inline qboolean CLG_FRAMESYNC() {
+static inline qboolean CLG_FRAMESYNC() {
     extern ClientState *cl;
     return !(cl->frame.number % CLG_FRAMEDIV);
 }

@@ -48,7 +48,8 @@ void ClientGameView::RenderView() {
     CLG_FinishViewValues();
 
     // Add entities here.
-    CLG_AddPacketEntities();
+    //CLG_AddPacketEntities();
+    clge->entities->AddPacketEntities();
     CLG_AddTempEntities();
     CLG_AddParticles();
 
