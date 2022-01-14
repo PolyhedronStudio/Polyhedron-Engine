@@ -47,8 +47,7 @@ void ClientGameView::RenderView() {
     // Finish calculating view values.
     FinalizeViewValues();
 
-    // Add entities here.
-    //CLG_AddPacketEntities();
+    // Add all entities of the current server frame to the renderers view.
     clge->entities->AddPacketEntities();
     CLG_AddTempEntities();
     CLG_AddParticles();
@@ -79,7 +78,7 @@ void ClientGameView::RenderView() {
 //
 //---------------
 void ClientGameView::PostRenderView() {
-    V_SetLightLevel();
+    SetLightLevel();
 }
 
 //---------------
@@ -197,4 +196,37 @@ void ClientGameView::SetupThirdpersonView() {
 
     // Last but not least, let it be known we are in thirdperson view.
     cl->thirdPersonView = true;
+}
+
+//---------------
+// ClientGameView::SetLightLevel
+//
+// TODO: If this feature gets to stay-alive, it should be moved over to the server.
+// Technically this is rather impossible to do given that we have no pre-baked data anymore.
+// And even if we do, it won't align to the real time RTX data that is made use of.
+//---------------
+void ClientGameView::SetLightLevel() {   
+    // The obvious part is that in RTX mode, the code below won't work.
+    // Why? Because there is no way to fetch the actual light point that
+    // the client is located at.
+    
+    // Save off light value for server to look at (BIG HACK!)
+    vec3_t shadelight;
+    clgi.R_LightPoint(cl->refdef.vieworg, shadelight);
+
+    // Pick the greatest component, which should be the same
+    // as the mono value returned by software
+    if (shadelight[0] > shadelight[1]) {
+        if (shadelight[0] > shadelight[2]) {
+            cl->lightLevel = 150.0f * shadelight[0];
+        } else {
+            cl->lightLevel = 150.0f * shadelight[2];
+        }
+    } else {
+        if (shadelight[1] > shadelight[2]) {
+            cl->lightLevel = 150.0f * shadelight[1];
+        } else {
+            cl->lightLevel = 150.0f * shadelight[2];
+        }
+    }
 }
