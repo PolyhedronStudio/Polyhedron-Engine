@@ -55,6 +55,10 @@ public:
     // Parse the server frame for server entities to add to our client view.
     // Also applies special rendering effects to them where desired.
     virtual void AddPacketEntities() = 0;
+
+    // Add the view weapon render entity to the screen. Can also be used for
+    // other scenarios where a depth hack is required.
+    virtual void AddViewEntities() = 0;
 };
 
 //---------------------------------------------------------------------

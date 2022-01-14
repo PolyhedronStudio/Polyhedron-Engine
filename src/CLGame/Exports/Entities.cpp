@@ -351,25 +351,29 @@ void ClientGameEntities::AddPacketEntities() {
             if (entityState->modelIndex2 == 255) {
                 // Custom weapon
                 clientInfo = &cl->clientInfo[entityState->skinNumber & 0xff];
+                
+                // Determine skinIndex.
                 int32_t skinIndex = (entityState->skinNumber >> 8); // 0 is default weapon model
-                if (skinIndex < 0 || skinIndex > cl->numWeaponModels - 1)
+                if (skinIndex < 0 || skinIndex > cl->numWeaponModels - 1) {
                     skinIndex = 0;
-                renderEntity.model = clientInfo->weaponmodel[skinIndex];
-                if (!renderEntity.model) {
-                    if (skinIndex != 0)
-                        renderEntity.model = clientInfo->weaponmodel[0];
-                    if (!renderEntity.model)
-                        renderEntity.model = cl->baseClientInfo.weaponmodel[0];
                 }
-            }
-            else
-                renderEntity.model = cl->drawModels[entityState->modelIndex2];
 
-            // PMM - check for the defender sphere shell .. make it translucent
-            if (!Q_strcasecmp(cl->configstrings[ConfigStrings::Models+ (entityState->modelIndex2)], "models/items/shell/tris.md2")) {
-                renderEntity.alpha = 0.32;
-                renderEntity.flags = RenderEffects::Translucent;
+                // Fetch weapon model.
+                renderEntity.model = clientInfo->weaponmodel[skinIndex];
+
+                // If invalid, use defaults.
+                if (!renderEntity.model) {
+                    if (skinIndex != 0) {
+                        renderEntity.model = clientInfo->weaponmodel[0];
+                    }
+                    if (!renderEntity.model) {
+                        renderEntity.model = cl->baseClientInfo.weaponmodel[0];
+                    }
+                }
+            } else {
+                renderEntity.model = cl->drawModels[entityState->modelIndex2];
             }
+
 
             if ((effects & EntityEffectType::ColorShell) && vid_rtx->integer) {
                 renderEntity.flags |= renderEffects;
@@ -429,6 +433,137 @@ void ClientGameEntities::AddPacketEntities() {
     skip:
         // Assign renderEntity origin to currentEntity lerp origin in the case of a skip.
         currentEntity->lerpOrigin = renderEntity.origin;
+    }
+}
+
+//---------------
+// ClientGameEntities::AddViewEntities
+//
+// Currently is only used for rendering the view weapon, however it can be
+// used to render other models in a similar fashion if wished for.
+//---------------
+void ClientGameEntities::AddViewEntities() {
+    int32_t  shellFlags = 0;
+
+    // Hidden in bsp menu mode.
+    if (info_in_bspmenu->integer) {
+        return;
+    }
+
+    // No need to render the gunRenderEntity in this case.
+    if (cl_player_model->integer == CL_PLAYER_MODEL_DISABLED) {
+        return;
+    }
+
+    // Neither in this case.
+    if (info_hand->integer == 2) {
+        return;
+    }
+
+    // Find states to between frames to interpolate between.
+    PlayerState *currentPlayerState = &cl->frame.playerState;
+    PlayerState *oldPlayerState= &cl->oldframe.playerState;
+
+    // Gun ViewModel.
+    r_entity_t gunRenderEntity = {
+        .model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0)),
+        .id = RESERVED_ENTITIY_GUN,
+    };
+
+    // If there is no model to render, there is no need to continue.
+    if (!gunRenderEntity.model) {
+        return;
+    }
+
+    // Set up gunRenderEntity position
+    for (int32_t i = 0; i < 3; i++) {
+        gunRenderEntity.origin[i] = cl->refdef.vieworg[i] + oldPlayerState->gunOffset[i] +
+            cl->lerpFraction * (currentPlayerState->gunOffset[i] - oldPlayerState->gunOffset[i]);
+        gunRenderEntity.angles = cl->refdef.viewAngles + vec3_mix_euler(oldPlayerState->gunAngles,
+                                                            currentPlayerState->gunAngles, cl->lerpFraction);
+    }
+
+    // Adjust for high fov.
+    if (currentPlayerState->fov > 90) {
+        vec_t ofs = (90 - currentPlayerState->fov) * 0.2f;
+        gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, ofs, cl->v_forward);
+    }
+
+    // Adjust the gunRenderEntity origin so that the gunRenderEntity doesn't intersect with walls
+    {
+        vec3_t view_dir, right_dir, up_dir;
+        vec3_t gun_real_pos, gun_tip;
+        constexpr float gun_length = 28.f;
+        constexpr float gun_right = 10.f;
+        constexpr float gun_up = -5.f;
+        trace_t trace;
+        static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
+
+        AngleVectors(cl->refdef.viewAngles, &view_dir, &right_dir, &up_dir);
+        gun_real_pos = vec3_fmaf(gunRenderEntity.origin, gun_right, right_dir);
+        gun_real_pos = vec3_fmaf(gun_real_pos, gun_up, up_dir);
+        gun_tip = vec3_fmaf(gun_real_pos, gun_length, view_dir);
+        //VectorMA(gunRenderEntity.origin, gun_right, right_dir, gun_real_pos);
+        //VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
+        //VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
+
+        // Execute the trace for the view model weapon.
+        clgi.CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
+
+        // In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
+        if (trace.fraction != 1.0f)
+        {
+            //VectorMA(trace.endPosition, -gun_length, view_dir, gunRenderEntity.origin);
+            //VectorMA(gunRenderEntity.origin, -gun_right, right_dir, gunRenderEntity.origin);
+            //VectorMA(gunRenderEntity.origin, -gun_up, up_dir, gunRenderEntity.origin);
+            gunRenderEntity.origin = vec3_fmaf(trace.endPosition, -gun_length, view_dir);
+            gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_right, right_dir);
+            gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_up, up_dir);
+        }
+    }
+
+    // Do not lerp the origin at all.
+    gunRenderEntity.oldorigin = gunRenderEntity.origin;
+    //VectorCopy(gunRenderEntity.origin, gunRenderEntity.oldorigin);      // don't lerp at all
+
+    if (gun_frame) {
+        gunRenderEntity.frame = gun_frame;      // Development tool
+        gunRenderEntity.oldframe = gun_frame;   // Development tool
+    } else {
+        gunRenderEntity.frame = currentPlayerState->gunFrame;
+        if (gunRenderEntity.frame == 0) {
+            gunRenderEntity.oldframe = 0;   // just changed weapons, don't lerp from old
+        } else {
+            gunRenderEntity.oldframe = oldPlayerState->gunFrame;
+            gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
+        }
+    }
+
+    // Setup basic render entity flags for our view weapon.
+    gunRenderEntity.flags = RenderEffects::MinimalLight | RenderEffects::DepthHack | RenderEffects::WeaponModel;
+    if (info_hand->integer == 1) {
+        gunRenderEntity.flags |= RF_LEFTHAND;
+    }
+
+    // Apply translucency render effect to the render entity and clamp its alpha value if nescessary.
+    if (cl_gunalpha->value != 1) {
+        gunRenderEntity.alpha = clgi.Cvar_ClampValue(cl_gunalpha, 0.1f, 1.0f);
+        gunRenderEntity.flags |= RenderEffects::Translucent;
+    }
+
+    // Apply shell effects to the same entity in rtx mode.
+    if (vid_rtx->integer) {
+        gunRenderEntity.flags |= shellFlags;
+    }
+
+    // Add the gun render entity to the current render frame.
+    V_AddEntity(&gunRenderEntity);
+
+    // Render a separate shell entity in non-rtx mode.
+    if (shellFlags && !vid_rtx->integer) {
+        gunRenderEntity.alpha = 0.30f * cl_gunalpha->value;
+        gunRenderEntity.flags |= shellFlags | RenderEffects::Translucent;
+        V_AddEntity(&gunRenderEntity);
     }
 }
 

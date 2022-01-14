@@ -21,4 +21,14 @@ public:
     // Called right after the engine renders the scene, and prepares to
     // finish up its current frame loop iteration.
     void PostRenderView() final;
+
+private:
+    // Finalizes the view values, aka render first or third person specific view data.
+    void FinalizeViewValues();
+
+    // Sets up a firstperson view mode.
+    void SetupFirstpersonView();
+
+    // Sets up a thirdperson view mode.
+    void SetupThirdpersonView();
 };

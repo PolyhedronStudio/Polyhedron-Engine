@@ -19,6 +19,10 @@ public:
 	// Also applies special rendering effects to them where desired.
 	void AddPacketEntities() final;
 
+	// Add the view weapon render entity to the screen. Can also be used for
+	// other scenarios where a depth hack is required.
+	void AddViewEntities() final;
+
 private:
 	// Gives the opportunity to adjust render effects where desired.
 	int32_t ApplyRenderEffects(int32_t renderEffects);
