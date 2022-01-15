@@ -42,7 +42,7 @@ void ClientGameEntities::Event(int32_t number) {
     }
 
     // Fetch the client entity.
-    cl_entity_t* currentEntity = &cs->entities[number];
+    ClientEntity* currentEntity = &cs->entities[number];
 
     // EF_TELEPORTER acts like an event, but is not cleared each frame
     if ((currentEntity->current.effects & EntityEffectType::Teleporter) && CLG_FRAMESYNC()) {
@@ -85,7 +85,7 @@ void ClientGameEntities::AddPacketEntities() {
     // State of the current entity.
     EntityState* entityState = nullptr;
     // Current processing client entity ptr.
-    cl_entity_t* currentEntity = nullptr;
+    ClientEntity* currentEntity = nullptr;
     // Client Info.
     ClientInfo*  clientInfo = nullptr;
     // Entity specific effects. (Such as whether to rotate or not.)
@@ -151,33 +151,20 @@ void ClientGameEntities::AddPacketEntities() {
             // Step origin discretely, because the model frames do the animation properly.
             renderEntity.origin = currentEntity->current.origin;
             renderEntity.oldorigin = currentEntity->current.oldOrigin;
-            //VectorCopy(currentEntity->current.origin, renderEntity.origin);
-            //VectorCopy(currentEntity->current.oldOrigin, renderEntity.oldorigin);  // FIXME
         } else if (renderEffects & RenderEffects::Beam) {
             // Interpolate start and end points for beams
             renderEntity.origin = vec3_mix(currentEntity->prev.origin, currentEntity->current.origin, cl->lerpFraction);
             renderEntity.oldorigin = vec3_mix(currentEntity->prev.oldOrigin, currentEntity->current.oldOrigin, cl->lerpFraction);
-            //LerpVector(currentEntity->prev.origin, currentEntity->current.origin,
-            //           cl->lerpFraction, renderEntity.origin);
-            //LerpVector(currentEntity->prev.oldOrigin, currentEntity->current.oldOrigin,
-            //           cl->lerpFraction, renderEntity.oldorigin);
         } else {
             if (entityState->number == cl->frame.clientNumber + 1) {
                 // In case of this being our actual client entity, we use the predicted origin.
                 renderEntity.origin = cl->playerEntityOrigin;
                 renderEntity.oldorigin = cl->playerEntityOrigin;
-                //// use predicted origin
-                //VectorCopy(cl->playerEntityOrigin, renderEntity.origin);
-                //VectorCopy(cl->playerEntityOrigin, renderEntity.oldorigin);
             } else {
                 // Ohterwise, just neatly interpolate the origin.
                 renderEntity.origin = vec3_mix(currentEntity->prev.origin, currentEntity->current.origin, cl->lerpFraction);
                 // Neatly copy it as the renderEntity's oldorigin.
                 renderEntity.oldorigin = renderEntity.origin;
-                // Interpolate origin
-                //LerpVector(currentEntity->prev.origin, currentEntity->current.origin,
-                //           cl->lerpFraction, renderEntity.origin);
-                //VectorCopy(renderEntity.origin, renderEntity.oldorigin);
             }
         }
 
@@ -249,12 +236,9 @@ void ClientGameEntities::AddPacketEntities() {
         } else if (entityState->number == cl->frame.clientNumber + 1) {
             // Predicted angles for client entities.
             renderEntity.angles = cl->playerEntityAngles;
-            //VectorCopy(cl->playerEntityAngles, renderEntity.angles);      // use predicted angles
         } else {
             // Otherwise, lerp angles by default.
             renderEntity.angles = vec3_mix(currentEntity->prev.angles, currentEntity->current.angles, cl->lerpFraction);
-            //LerpAngles(currentEntity->prev.angles, currentEntity->current.angles,
-            //           cl->lerpFraction, renderEntity.angles);
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (entityState->modelIndex == 255 && cl_rollhack->integer) {
@@ -285,8 +269,6 @@ void ClientGameEntities::AddPacketEntities() {
             AngleVectors(angles, &forward, NULL, NULL);
             renderEntity.origin = vec3_fmaf(renderEntity.origin, offset, forward);
             renderEntity.oldorigin = vec3_fmaf(renderEntity.oldorigin, offset, forward);
-            //VectorMA(renderEntity.origin, offset, forward, renderEntity.origin);
-            //VectorMA(renderEntity.oldorigin, offset, forward, renderEntity.oldorigin);
         }
 
         // If set to invisible, skip
@@ -332,7 +314,7 @@ void ClientGameEntities::AddPacketEntities() {
         // (Use the settings of the already rendered model, and apply translucency to it.
         if ((effects & EntityEffectType::ColorShell) && !vid_rtx->integer) {
             renderEffects = ApplyRenderEffects(renderEffects);
-            renderEntity.flags = renderEffects | RenderEffects::Translucent | baseEntityFlags;
+            renderEntity.flags = renderEffects | baseEntityFlags | RenderEffects::Translucent;
             renderEntity.alpha = 0.30;
             V_AddEntity(&renderEntity);
         }
@@ -425,8 +407,6 @@ void ClientGameEntities::AddPacketEntities() {
                 };
 
                 V_AddLightEx(origin, 25.f, 1.0f * brightness, 0.425f * brightness, 0.1f * brightness, 3.6f);
-
-                //V_AddLight(renderEntity.origin, 200 * RandomRangef(0.65, 1.0f), 0.8f, 0.4f, 0.12f);
             }
         }
 
@@ -503,9 +483,6 @@ void ClientGameEntities::AddViewEntities() {
         gun_real_pos = vec3_fmaf(gunRenderEntity.origin, gun_right, right_dir);
         gun_real_pos = vec3_fmaf(gun_real_pos, gun_up, up_dir);
         gun_tip = vec3_fmaf(gun_real_pos, gun_length, view_dir);
-        //VectorMA(gunRenderEntity.origin, gun_right, right_dir, gun_real_pos);
-        //VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
-        //VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
 
         // Execute the trace for the view model weapon.
         clgi.CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
@@ -513,9 +490,6 @@ void ClientGameEntities::AddViewEntities() {
         // In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
         if (trace.fraction != 1.0f)
         {
-            //VectorMA(trace.endPosition, -gun_length, view_dir, gunRenderEntity.origin);
-            //VectorMA(gunRenderEntity.origin, -gun_right, right_dir, gunRenderEntity.origin);
-            //VectorMA(gunRenderEntity.origin, -gun_up, up_dir, gunRenderEntity.origin);
             gunRenderEntity.origin = vec3_fmaf(trace.endPosition, -gun_length, view_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_right, right_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_up, up_dir);
@@ -524,7 +498,6 @@ void ClientGameEntities::AddViewEntities() {
 
     // Do not lerp the origin at all.
     gunRenderEntity.oldorigin = gunRenderEntity.origin;
-    //VectorCopy(gunRenderEntity.origin, gunRenderEntity.oldorigin);      // don't lerp at all
 
     if (gun_frame) {
         gunRenderEntity.frame = gun_frame;      // Development tool

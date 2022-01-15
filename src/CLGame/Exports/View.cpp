@@ -79,7 +79,7 @@ void ClientGameView::PostRenderView() {
 //---------------
 void ClientGameView::FinalizeViewValues() {
     // For fetching the clientEntity pointer.
-    cl_entity_t* clientEntity = nullptr;
+    ClientEntity* clientEntity = nullptr;
 
     // If cl_player_model isn't set to thirdperson, jump to firstperson label.
     if (cl_player_model->integer != CL_PLAYER_MODEL_THIRD_PERSON)

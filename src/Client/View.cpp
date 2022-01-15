@@ -104,7 +104,7 @@ static void V_TestParticles(void)
 
         for (j = 0; j < 3; j++)
             p->origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j] * d +
-                           cl.v_right[j] * r + cl.v_up[j] * u;
+            cl.v_right[j] * r + cl.v_up[j] * u;
 
         p->color = 8;
         p->alpha = cl_testparticles->value;
@@ -135,7 +135,7 @@ static void V_TestEntities(void)
 
         for (j = 0; j < 3; j++)
             ent->origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j] * f +
-                             cl.v_right[j] * r;
+            cl.v_right[j] * r;
 
         ent->model = cl.baseClientInfo.model;
         ent->skin = cl.baseClientInfo.skin;
@@ -180,7 +180,7 @@ static void V_TestLights(void)
 
         for (j = 0; j < 3; j++)
             dl->origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j] * f +
-                            cl.v_right[j] * r;
+            cl.v_right[j] * r;
         dl->color[0] = ((i % 6) + 1) & 1;
         dl->color[1] = (((i % 6) + 1) & 2) >> 1;
         dl->color[2] = (((i % 6) + 1) & 4) >> 2;
@@ -356,7 +356,7 @@ void V_Init(void)
 
 
     cl_add_lights = Cvar_Get("cl_lights", "1", 0);
-	cl_show_lights = Cvar_Get("cl_show_lights", "0", 0);
+    cl_show_lights = Cvar_Get("cl_show_lights", "0", 0);
 
     cl_add_particles = Cvar_Get("cl_particles", "1", 0);
     cl_add_entities = Cvar_Get("cl_entities", "1", 0);

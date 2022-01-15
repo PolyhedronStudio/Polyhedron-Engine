@@ -54,13 +54,13 @@ typedef struct {
 		ex_flare
 	} type;
 
-	r_entity_t    ent;
-	int         frames;
+	r_entity_t  ent;
+	int32_t     frames;
 	float       light;
 	vec3_t      lightcolor;
 	float       start;
-	int         baseFrame;
-	int         frameTime; /* in milliseconds */
+	int32_t     baseFrame;
+	int32_t     frameTime; /* in milliseconds */
 } explosion_t;
 
 // Maximum amount of explosions.
@@ -80,78 +80,78 @@ constexpr uint32_t NOEXP_ROCKET = 2;
 //
 // Local client entity structure, temporary entities.
 //
-typedef struct cl_entity_s {
+struct ClientEntity {
     EntityState    current;
-    EntityState    prev;            // will always be valid, but might just be a copy of current
+    EntityState    prev;        // will always be valid, but might just be a copy of current
 
     vec3_t          mins, maxs;
 
-    int             serverFrame;        // if not current, this ent isn't in the frame
+    int32_t         serverFrame;// if not current, this ent isn't in the frame
 
-    int             trailcount;         // for diminishing grenade trails
-    vec3_t          lerpOrigin;        // for trails (variable hz)
+    int32_t         trailcount; // for diminishing grenade trails
+    vec3_t          lerpOrigin; // for trails (variable hz)
 
-    int             id;
-} cl_entity_t;
+    int32_t         id;
+};
 
 //
 // Temporarl Entity parameters.
 // Used for parsing EFFECTS in the client.
 //
-typedef struct {
-    int type;
+struct tent_params_t {
+    int32_t type;
     vec3_t position1;
     vec3_t position2;
     vec3_t offset;
     vec3_t dir;
-    int count;
-    int color;
-    int entity1;
-    int entity2;
-    int time;
-} tent_params_t;
+    int32_t count;
+    int32_t color;
+    int32_t entity1;
+    int32_t entity2;
+    int32_t time;
+};
 
 //
 // MuzzleFlash parameters.
 // Used for parsing MUZZLEFLASHE messages in the client.
 //
-typedef struct {
-    int entity;
-    int weapon;
-    int silenced;
-} mz_params_t;
+struct mz_params_t {
+    int32_t entity;
+    int32_t weapon;
+    int32_t silenced;
+};
 
 //
 // Sound parameters.
 // Used for parsing SOUND messages in the client.
 //
-typedef struct {
-    int     flags;
-    int     index;
-    int     entity;
-    int     channel;
+struct snd_params_t {
+    int32_t flags;
+    int32_t index;
+    int32_t entity;
+    int32_t channel;
     vec3_t  pos;
     float   volume;
     float   attenuation;
     float   timeofs;
-} snd_params_t;
+};
 
 //
 // Client Sustain structure.
 //
-typedef struct cl_sustain_s {
-    int     id;
-    int     type;
-    int     endTime;
-    int     nextThinkTime;
-    int     thinkinterval;
+struct cl_sustain_t {
+    int32_t id;
+    int32_t type;
+    int32_t endTime;
+    int32_t nextThinkTime;
+    int32_t thinkinterval;
     vec3_t  org;
     vec3_t  dir;
-    int     color;
-    int     count;
-    int     magnitude;
-    void    (*Think)(struct cl_sustain_s *self);
-} cl_sustain_t;
+    int32_t color;
+    int32_t count;
+    int32_t magnitude;
+    void    (*Think)(cl_sustain_t *self);
+};
 
 //
 // Client Particle Structure.
@@ -160,25 +160,25 @@ typedef struct cl_sustain_s {
 #define BLASTER_PARTICLE_COLOR  0xe0
 #define INSTANT_PARTICLE    -10000.0
 
-typedef struct cparticle_s {
-    struct cparticle_s    *next;
+struct cparticle_t {
+    cparticle_t    *next;
 
     float   time;
 
     vec3_t  org;
     vec3_t  vel;
     vec3_t  acceleration;
-    int     color;      // -1 => use rgba
+    int32_t color;      // -1 => use rgba
     float   alpha;
     float   alphavel;
     color_t rgba;
 	float   brightness;
-} cparticle_t;
+};
 
 //
 // Client DLight structure.
 //
-typedef struct cdlight_s {
+struct cdlight_t {
     int32_t     key;        // so entities can reuse same entry
     vec3_t  color;
     vec3_t  origin;
@@ -187,7 +187,7 @@ typedef struct cdlight_s {
     float   decay;      // drop this each second
 	vec3_t  velocity;     // move this far each second
     //float   minlight;   // don't add when contributing less
-} cdlight_t;
+};
 
 //
 // Maximum amount of weapon models allowed.
@@ -197,7 +197,7 @@ static constexpr int32_t MAX_CLIENTWEAPONMODELS = 20;        // PGM -- upped fro
 //
 // Contains all the info about a client we need to know.
 //
-typedef struct clientinfo_s {
+struct ClientInfo {
     char name[MAX_QPATH];           // The client name.
     char model_name[MAX_QPATH];     // The model name.
     char skin_name[MAX_QPATH];      // The skin name.
@@ -207,22 +207,22 @@ typedef struct clientinfo_s {
     qhandle_t model;                // Model handle.
 
     qhandle_t weaponmodel[MAX_CLIENTWEAPONMODELS];  // The weapon model handles.
-} ClientInfo;
+};
 
 //
 // Used for storing client input commands.
 //
-typedef struct {
+struct ClientUserCommandHistory {
     uint32_t timeSent;           // time sent, for calculating pings
     uint32_t timeReceived;           // time rcvd, for calculating pings
     uint32_t commandNumber;      // current commandNumber for this frame
-} ClientUserCommandHistory;
+};
 
 //
 // The server frame structure contains information about the frame
 // being sent from the server.
 //
-typedef struct {
+struct ServerFrame {
     qboolean valid; // False if delta parsing failed.
 
     int32_t number; // Sequential identifier, used for delta.
@@ -236,14 +236,14 @@ typedef struct {
 
     int32_t numEntities;    // The number of entities in the frame.
     int32_t firstEntity;    // The first entity in the frame.
-} ServerFrame;
+};
 
 //
 // This structure contains all (persistent)shared data with the client.
 //
 struct ClientShared {
     // Stores the entities.
-    cl_entity_t entities[MAX_ENTITIES];
+    ClientEntity entities[MAX_ENTITIES];
     int num_entities;
 };
 
@@ -308,7 +308,7 @@ struct ClientState {
     // Entity States.
     // 
     // Solid Entities, these are REBUILT during EACH FRAME.
-    cl_entity_t *solidEntities[MAX_PACKET_ENTITIES];
+    ClientEntity *solidEntities[MAX_PACKET_ENTITIES];
     int32_t numSolidEntities;
 
     // Entity Baseline States. These are where to start working from.

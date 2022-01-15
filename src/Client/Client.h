@@ -64,7 +64,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // N&C: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern explosion_t  cl_explosions[MAX_EXPLOSIONS];
-extern cl_entity_t  cl_entities[MAX_EDICTS];
+extern ClientEntity  cl_entities[MAX_EDICTS];
 
 extern    ClientState    cl;
 extern    ClientShared   cs;

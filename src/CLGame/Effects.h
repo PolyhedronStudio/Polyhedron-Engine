@@ -33,7 +33,7 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end);
 void CLG_BlasterParticles(vec3_t org, vec3_t dir);
 void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count);
 void CLG_BubbleTrail(vec3_t start, vec3_t end);
-void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags);
+void CLG_DiminishingTrail(vec3_t start, vec3_t end, ClientEntity* old, int flags);
 void CLG_ExplosionParticles(vec3_t org);
 void CLG_ItemRespawnParticles(vec3_t org);
 void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count);

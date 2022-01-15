@@ -50,7 +50,7 @@ static inline qboolean entity_optimized(const EntityState *state)
 }
 
 static inline void
-entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origin)
+entity_update_new(ClientEntity *ent, const EntityState *state, const vec_t *origin)
 {
     static int entity_ctr;
     ent->id = ++entity_ctr;
@@ -74,7 +74,7 @@ entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origi
 }
 
 static inline void
-entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origin)
+entity_update_old(ClientEntity *ent, const EntityState *state, const vec_t *origin)
 {
     int eventID = state->eventID;
 
@@ -103,7 +103,7 @@ entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origi
     ent->prev = ent->current;
 }
 
-static inline qboolean entity_new(const cl_entity_t *ent)
+static inline qboolean entity_new(const ClientEntity *ent)
 {
     if (!cl.oldframe.valid)
         return true;   // last received frame was invalid
@@ -125,7 +125,7 @@ static inline qboolean entity_new(const cl_entity_t *ent)
 
 static void entity_update(const EntityState *state)
 {
-    cl_entity_t *ent = &cs.entities[state->number];
+    ClientEntity *ent = &cs.entities[state->number];
     const vec_t *origin;
     vec3_t origin_v;
 
@@ -222,7 +222,7 @@ static void
 player_update(ServerFrame *oldframe, ServerFrame *frame, int framediv)
 {
     PlayerState *ps, *ops;
-    cl_entity_t *ent;
+    ClientEntity *ent;
     int oldnum;
 
     // find states to interpolate between
@@ -280,7 +280,7 @@ A valid frame has been parsed.
 */
 void CL_DeltaFrame(void)
 {
-    cl_entity_t           *ent;
+    ClientEntity           *ent;
     EntityState      *state;
     int                 i, j;
     int                 frameNumber;
@@ -340,7 +340,7 @@ void CL_DeltaFrame(void)
 // for debugging problems when out-of-date entity origin is referenced
 void CL_CheckEntityPresent(int entnum, const char *what)
 {
-    cl_entity_t *e;
+    ClientEntity *e;
 
     if (entnum == cl.frame.clientNumber + 1) {
         return; // player entity = current
@@ -422,7 +422,7 @@ Called to get the sound spatialization origin
 */
 vec3_t CL_GetEntitySoundOrigin(int entnum) {
     // Pointers.
-    cl_entity_t   *ent;
+    ClientEntity   *ent;
     mmodel_t    *cm;
 
     // Vectors.
@@ -464,7 +464,7 @@ vec3_t CL_GetViewVelocity(void)
 
 vec3_t CL_GetEntitySoundVelocity(int ent)
 {
-	cl_entity_t *old;
+	ClientEntity *old;
     vec3_t vel = vec3_zero();
 	if ((ent < 0) || (ent >= MAX_EDICTS))
 	{

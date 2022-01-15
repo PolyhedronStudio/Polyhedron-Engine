@@ -322,7 +322,7 @@ void CLG_AddDLights(void)
 void CLG_MuzzleFlash() {
     vec3_t      fv, rv;
     cdlight_t* dl;
-    cl_entity_t* pl;
+    ClientEntity* pl;
     float       volume;
     char        soundname[MAX_QPATH];
 
@@ -407,7 +407,7 @@ void CLG_MuzzleFlash() {
 //===============
 //
 void CLG_MuzzleFlash2() {
-    cl_entity_t* ent;
+    ClientEntity* ent;
     vec3_t      origin;
     const vec_t* ofs;
     cdlight_t* dl;
@@ -1041,7 +1041,7 @@ CLG_DiminishingTrail
 
 ===============
 */
-void CLG_DiminishingTrail(vec3_t start, vec3_t end, cl_entity_t* old, int flags)
+void CLG_DiminishingTrail(vec3_t start, vec3_t end, ClientEntity* old, int flags)
 {
     vec3_t      move;
     vec3_t      vec;

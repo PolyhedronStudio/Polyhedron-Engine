@@ -348,7 +348,7 @@ void CL_InitRefresh(void)
 #elif REF_VKPT
 	R_RegisterFunctionsRTX();
 #else
-#error "REF_GL and REF_VKPT are both disabled, at least one has to be enableds"
+#error "REF_GL and REF_VKPT are both disabled, at least one has to be enabled"
 #endif
 
     if (!R_Init(true)) {

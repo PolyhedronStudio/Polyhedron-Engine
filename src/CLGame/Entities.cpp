@@ -161,7 +161,7 @@ CLG_AddViewWeapon
 // Returns the entity that is bound to the client's view.
 //===============
 //
-cl_entity_t* CLG_GetClientViewEntity(void) {
+ClientEntity* CLG_GetClientViewEntity(void) {
     // Fetch clientnumber by default.
     int32_t index = cl->clientNumber;
 
@@ -180,7 +180,7 @@ cl_entity_t* CLG_GetClientViewEntity(void) {
 // Returns true if the specified entity is bound to the local client's view.
 //===============
 //
-qboolean CLG_IsClientViewEntity(const cl_entity_t* ent) {
+qboolean CLG_IsClientViewEntity(const ClientEntity* ent) {
     // If the entity number matches, then we're good.
     if (ent->current.number == cl->clientNumber + 1) {
         return true;

@@ -82,7 +82,7 @@ static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, cons
     int         i;
     trace_t     trace;
     mnode_t* headNode;
-    cl_entity_t* ent;
+    ClientEntity* ent;
     mmodel_t* cmodel;
 
     for (i = 0; i < cl->numSolidEntities; i++) {
@@ -133,7 +133,7 @@ trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_
 int CLG_PointContents(const vec3_t &point)
 {
     int         i;
-    cl_entity_t* ent;
+    ClientEntity* ent;
     mmodel_t* cmodel;
     int         contents;
 
