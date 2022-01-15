@@ -86,16 +86,16 @@ typedef struct clightstyle_s {
     int     length;
     vec4_t  value;
     float   map[MAX_QPATH];
-} clightstyle_t;
+} ClientLightstyle;
 
-static clightstyle_t    cl_lightstyles[MAX_LIGHTSTYLES];
+static ClientLightstyle    cl_lightstyles[MAX_LIGHTSTYLES];
 static LIST_DECL(cl_lightlist);
 static int          cl_lastofs;
 
 void CLG_ClearLightStyles(void)
 {
     int     i;
-    clightstyle_t* ls;
+    ClientLightstyle* ls;
 
     for (i = 0, ls = cl_lightstyles; i < MAX_LIGHTSTYLES; i++, ls++) {
         List_Init(&ls->entry);
@@ -118,14 +118,14 @@ CLG_RunLightStyles
 void CLG_RunLightStyles(void)
 {
     int     ofs;
-    clightstyle_t* ls;
+    ClientLightstyle* ls;
 
     ofs = cl->time / 50;
     if (ofs == cl_lastofs)
         return;
     cl_lastofs = ofs;
 
-    LIST_FOR_EACH(clightstyle_t, ls, &cl_lightlist, entry) {
+    LIST_FOR_EACH(ClientLightstyle, ls, &cl_lightlist, entry) {
         ls->value[0] =
             ls->value[1] =
             ls->value[2] =
@@ -136,7 +136,7 @@ void CLG_RunLightStyles(void)
 void CLG_SetLightStyle(int index, const char* s)
 {
     int     i;
-    clightstyle_t* ls;
+    ClientLightstyle* ls;
 
     ls = &cl_lightstyles[index];
     ls->length = strlen(s);
@@ -179,7 +179,7 @@ CLG_AddLightStyles
 void CLG_AddLightStyles(void)
 {
     int     i;
-    clightstyle_t* ls;
+    ClientLightstyle* ls;
 
     for (i = 0, ls = cl_lightstyles; i < MAX_LIGHTSTYLES; i++, ls++)
         V_AddLightStyle(i, ls->value);

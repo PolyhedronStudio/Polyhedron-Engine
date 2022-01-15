@@ -336,7 +336,7 @@ vkpt_light_buffer_upload_to_staging(qboolean render_world, bsp_mesh_t* bsp_mesh,
 		typedef struct clightstyle_s {
 			...
 			float   map[MAX_QPATH];
-		} clightstyle_t;
+		} ClientLightstyle;
 	*/
 
 	// materials
