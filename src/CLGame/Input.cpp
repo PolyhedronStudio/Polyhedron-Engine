@@ -537,7 +537,7 @@ void CLG_RegisterInput(void)
 //
 void CLG_BuildFrameMoveCommand(int msec)
 {
-    cl->localmove = vec3_zero();
+    cl->localMove = vec3_zero();
 
     if (sv_paused->integer) {
         return;
@@ -550,17 +550,17 @@ void CLG_BuildFrameMoveCommand(int msec)
     CLG_AdjustAngles(msec);
 
     // Get basic movement from keyboard
-    cl->localmove = CLG_BaseMove(cl->localmove);
+    cl->localMove = CLG_BaseMove(cl->localMove);
 
     // Allow mice to add to the move
     CLG_MouseMove();
 
     // Add accumulated mouse forward/side movement
-    cl->localmove[0] += cl->mousemove[0];
-    cl->localmove[1] += cl->mousemove[1];
+    cl->localMove[0] += cl->mouseMove[0];
+    cl->localMove[1] += cl->mouseMove[1];
 
     // Clamp to server defined max speed
-    cl->localmove = CLG_ClampSpeed(cl->localmove);
+    cl->localMove = CLG_ClampSpeed(cl->localMove);
 
     CLG_ClampPitch();
 
@@ -629,8 +629,8 @@ void CLG_FinalizeFrameMoveCommand(void)
     move = CLG_BaseMove(move);
 
     // Add mouse forward/side movement
-    move[0] += cl->mousemove[0];
-    move[1] += cl->mousemove[1];
+    move[0] += cl->mouseMove[0];
+    move[1] += cl->mouseMove[1];
 
     // Clamp to server defined max speed
     move = CLG_ClampSpeed(move);
@@ -641,8 +641,8 @@ void CLG_FinalizeFrameMoveCommand(void)
     cl->moveCommand.input.upMove = move[2];
 
     // Clear all states
-    cl->mousemove[0] = 0;
-    cl->mousemove[1] = 0;
+    cl->mouseMove[0] = 0;
+    cl->mouseMove[1] = 0;
     
     cl->moveCommand.input.impulse = in_impulse;
     in_impulse = 0;

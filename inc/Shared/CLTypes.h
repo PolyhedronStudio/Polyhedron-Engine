@@ -345,11 +345,11 @@ struct ClientState {
 
     // interpolated movement vector used for local prediction,
     // never sent to server, rebuilt each client frame
-    vec3_t      localmove;
+    vec3_t      localMove;
 
     // accumulated mouse forward/side movement, added to both
-    // localmove and pending cmd, cleared each time cmd is finalized
-    vec2_t      mousemove;
+    // localMove and pending cmd, cleared each time cmd is finalized
+    vec2_t      mouseMove;
 
     int32_t         time;           // this is the time value that the client
                                 // is rendering at.  always <= cl.serverTime

@@ -197,38 +197,6 @@ void V_Shutdown(void)
     // ...
 }
 
-
-//
-//===============
-// V_SetLightLevel
-// 
-// Set the lightLevel of the client.
-//===============
-//
-void V_SetLightLevel(void)
-{
-    vec3_t shadelight;
-
-    // save off light value for server to look at (BIG HACK!)
-    clgi.R_LightPoint(cl->refdef.vieworg, shadelight);
-
-    // pick the greatest component, which should be the same
-    // as the mono value returned by software
-    if (shadelight[0] > shadelight[1]) {
-        if (shadelight[0] > shadelight[2]) {
-            cl->lightLevel = 150.0f * shadelight[0];
-        } else {
-            cl->lightLevel = 150.0f * shadelight[2];
-        }
-    } else {
-        if (shadelight[1] > shadelight[2]) {
-            cl->lightLevel = 150.0f * shadelight[1];
-        } else {
-            cl->lightLevel = 150.0f * shadelight[2];
-        }
-    }
-}
-
 //
 //=============================================================================
 //
@@ -236,64 +204,3 @@ void V_SetLightLevel(void)
 //
 //=============================================================================
 //
-
-//
-//===============
-// CLG_CalculateFOV
-// 
-// Calculates the Field Of View.
-//===============
-//
-float CLG_CalculateFOV(float fov_x, float width, float height)
-{
-    float    a;
-    float    x;
-
-    if (fov_x < 1.f || fov_x > 179.f)
-        Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fov_x);
-
-    x = width / tan(fov_x / 360.f * M_PI);
-
-    a = atan(height / x);
-    a = a * 360.f / M_PI;
-
-    return a;
-}
-
-//
-//===============
-// CLG_PreRenderView
-// 
-// Called right after the engine clears the scene, and begins a new one.
-//===============
-//
-void CLG_PreRenderView (void) {
-
-}
-
-//
-//===============
-// CLG_ClearScene
-// 
-// Called when the engine wants to clear the frame.
-// It also specifies the model that will be used as the world.
-//===============
-//
-void CLG_ClearScene(void)
-{
-    view.num_dlights = 0;
-    view.num_entities = 0;
-    view.num_particles = 0;
-}
-
-//
-//===============
-// CLG_PostRenderView
-// 
-// Called right after the engine renders the scene, and prepares to
-// finish up its current frame loop iteration.
-//===============
-//
-void CLG_PostRenderView (void) {
-    V_SetLightLevel();
-}

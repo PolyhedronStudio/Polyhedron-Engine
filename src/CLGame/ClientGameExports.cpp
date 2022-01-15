@@ -120,7 +120,7 @@ void ClientGameExports::ClientUpdateOrigin() {
 
     // Interpolate field of view
     cl->fov_x = LerpFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
-    cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
+    cl->fov_y = ClientCalculateFieldOfView(cl->fov_x, 4, 3);
 
     // Calculate new client forward, right, and up vectors.
     vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);

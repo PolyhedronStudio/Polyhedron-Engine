@@ -249,9 +249,9 @@ int CLG_PointContents(const vec3_t &point)
 //        cl->moveCommand.prediction.simulationTime = clgi.GetRealTime();
 //
 //        pm.moveCommand = cl->moveCommand;
-//        pm.moveCommand.input.forwardMove = cl->localmove[0];
-//        pm.moveCommand.input.rightMove = cl->localmove[1];
-//        pm.moveCommand.input.upMove = cl->localmove[2];
+//        pm.moveCommand.input.forwardMove = cl->localMove[0];
+//        pm.moveCommand.input.rightMove = cl->localMove[1];
+//        pm.moveCommand.input.upMove = cl->localMove[2];
 //        PMove(&pm);
 //
 //        // Update player move client side audio effects.

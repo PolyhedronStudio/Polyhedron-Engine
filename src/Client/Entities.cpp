@@ -22,10 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/GameModule.h"
 #include "refresh/models.h"
 
-extern qhandle_t cl_mod_powerscreen;
-extern qhandle_t cl_mod_laser;
-extern qhandle_t cl_mod_dmspot;
-extern qhandle_t cl_sfx_footsteps[4];
 
 /*
 =========================================================================
@@ -280,11 +276,11 @@ A valid frame has been parsed.
 */
 void CL_DeltaFrame(void)
 {
-    ClientEntity           *ent;
-    EntityState      *state;
-    int                 i, j;
-    int                 frameNumber;
-    int                 prevstate = cls.connectionState;
+    ClientEntity    *ent;
+    EntityState     *state;
+    int32_t i, j;
+    int32_t frameNumber;
+    int32_t prevstate = cls.connectionState;
 
     // getting a valid frame message ends the connection process
     if (cls.connectionState == ClientConnectionState::Precached)
@@ -372,46 +368,6 @@ INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 ==========================================================================
 */
 
-// Use a static entity ID on some things because the renderer relies on eid to match between meshes
-// on the current and previous frames.
-#define RESERVED_ENTITIY_GUN 1
-#define RESERVED_ENTITIY_SHADERBALLS 2
-#define RESERVED_ENTITIY_COUNT 3
-
-static int adjust_shell_fx(int renderEffects)
-{
-	// PMM - at this point, all of the shells have been handled
-	// if we're in the rogue pack, set up the custom mixing, otherwise just
-	// keep going
-	if (!strcmp(fs_game->string, "rogue")) {
-		// all of the solo colors are fine.  we need to catch any of the combinations that look bad
-		// (double & half) and turn them into the appropriate color, and make double/quad something special
-		if (renderEffects & RenderEffects::HalfDamShell) {
-			// ditch the half damage shell if any of red, blue, or double are on
-			if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
-				renderEffects &= ~RenderEffects::HalfDamShell;
-		}
-
-		if (renderEffects & RenderEffects::DoubleShell) {
-			// lose the yellow shell if we have a red, blue, or green shell
-			if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
-				renderEffects &= ~RenderEffects::DoubleShell;
-			// if we have a red shell, turn it to purple by adding blue
-			if (renderEffects & RenderEffects::RedShell)
-				renderEffects |= RenderEffects::BlueShell;
-			// if we have a blue shell (and not a red shell), turn it to cyan by adding green
-			else if (renderEffects & RenderEffects::BlueShell) {
-				// go to green if it's on already, otherwise do cyan (flash green)
-				if (renderEffects & RenderEffects::GreenShell)
-					renderEffects &= ~RenderEffects::BlueShell;
-				else
-					renderEffects |= RenderEffects::GreenShell;
-			}
-		}
-	}
-
-	return renderEffects;
-}
 
 /*
 ===============
@@ -422,8 +378,8 @@ Called to get the sound spatialization origin
 */
 vec3_t CL_GetEntitySoundOrigin(int entnum) {
     // Pointers.
-    ClientEntity   *ent;
-    mmodel_t    *cm;
+    ClientEntity    *ent;
+    mmodel_t        *cm;
 
     // Vectors.
     vec3_t mid = vec3_zero();

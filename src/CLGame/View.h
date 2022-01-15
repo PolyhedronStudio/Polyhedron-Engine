@@ -18,16 +18,6 @@ void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b,
 void V_AddLightStyle(int style, const vec4_t& value);
 void V_AddParticle(rparticle_t* p);
 
-float CLG_CalculateFOV(float fov_x, float width, float height);
-
-void CLG_PreRenderView(void);
-void CLG_ClearScene(void);
-void CLG_PostRenderView(void);
-
-// WID: TODO: ...
-void CLG_FinishViewValues(void);
-void V_SetLightLevel(void);
-
 // Externs. Debugging reasons.
 extern int         gun_frame;
 extern qhandle_t   gun_model;
