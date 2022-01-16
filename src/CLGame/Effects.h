@@ -9,6 +9,9 @@
 #ifndef __CLGAME_EFFECTS_H__
 #define __CLGAME_EFFECTS_H__
 
+static constexpr int32_t PARTICLE_GRAVITY = 120;
+static constexpr float INSTANT_PARTICLE = -10000.f;
+
 void CLG_ClearEffects(void);
 void CLG_EffectsInit(void);
 

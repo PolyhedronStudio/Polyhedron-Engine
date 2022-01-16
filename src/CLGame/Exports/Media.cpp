@@ -16,6 +16,34 @@
 #include "Media.h"
 
 //---------------
+// ClientGameMedia::Initialize
+//
+//---------------
+void ClientGameMedia::Initialize() {
+    // Initialize FX Data.
+    CLG_EffectsInit();
+
+    // Initialize View Data.
+    V_Init();
+
+    // Initialize the Screen Data.
+    SCR_Init();
+}
+
+
+//---------------
+// ClientGameMedia::Shutdown
+//
+//---------------
+void ClientGameMedia::Shutdown() {
+    // Shutdown View Data.
+    V_Shutdown();
+
+    // Shutdown Screen Data.
+    SCR_Shutdown();
+}
+
+//---------------
 // CLG_LoadClientModels
 // 
 // Load client models media here.
@@ -77,7 +105,7 @@ void ClientGameMedia::LoadWorld() {
     //
     clgi.SetClientLoadState(LOAD_MODELS);
     // Load Client Models.
-    CLG_LoadClientModels();
+    LoadModels();
     // Load World Models passed from server.
     for (i = 2; i < MAX_MODELS; i++) {
         // Fetch string (filename).
@@ -100,7 +128,7 @@ void ClientGameMedia::LoadWorld() {
     // Load Image passed from server.
     clgi.SetClientLoadState(LOAD_IMAGES);
     // Load client images here.
-    CLG_LoadClientImages();
+    LoadImages();
     for (i = 1; i < MAX_IMAGES; i++) {
         // Fetch string (filename).
         filename = cl->configstrings[ConfigStrings::Images + i];
@@ -117,7 +145,7 @@ void ClientGameMedia::LoadWorld() {
     //
     clgi.SetClientLoadState(LOAD_SOUNDS);
     // Load client sounds here.
-    CLG_LoadClientSounds();
+    LoadSounds();
     // Load sounds passed from the server.
     for (i = 1; i < MAX_SOUNDS; i++) {
         // Fetch string (filename).
@@ -129,7 +157,7 @@ void ClientGameMedia::LoadWorld() {
         cl->precaches.sounds[i] = clgi.S_RegisterSound(filename);
     }
 
-    // Load in all client infos.
+    // Load in all player client infos. (This thus includes their player models and skins.)
     clgi.SetClientLoadState(LOAD_CLIENTS);
     for (i = 0; i < MAX_CLIENTS; i++) {
         filename = cl->configstrings[ConfigStrings::PlayerSkins + i];
@@ -139,7 +167,7 @@ void ClientGameMedia::LoadWorld() {
         CLG_LoadClientInfo(&cl->clientInfo[i], filename);
     }
 
-    // Load in our base client (the actual player)
+    // Load in our base client (the actual player its model and skin.)
     CLG_LoadClientInfo(&cl->baseClientInfo, "unnamed\\male/grunt");
 
     // Last but not least, set the sky.
@@ -147,29 +175,30 @@ void ClientGameMedia::LoadWorld() {
 }
 
 //---------------
-// ClientGameMedia::Initialize
+// ClientGameMedia::LoadModels
 //
 //---------------
-void ClientGameMedia::Initialize() {
-    // Initialize FX Data.
-    CLG_EffectsInit();
+void ClientGameMedia::LoadModels() {
+    // Register view weapon models.
+    CLG_RegisterVWepModels();
 
-    // Initialize View Data.
-    V_Init();
-
-    // Initialize the Screen Data.
-    SCR_Init();
+    // Register Temp Entity models.
+    CLG_RegisterTempEntityModels();
 }
 
-
 //---------------
-// ClientGameMedia::Shutdown
+// ClientGameMedia::LoadImages
 //
 //---------------
-void ClientGameMedia::Shutdown() {
-    // Shutdown View Data.
-    V_Shutdown();
+void ClientGameMedia::LoadImages() {
 
-    // Shutdown Screen Data.
-    SCR_Shutdown();
+}
+
+//---------------
+// ClientGameMedia::LoadSounds
+//
+//---------------
+void ClientGameMedia::LoadSounds() {
+    // Register temp entity sounds.
+    CLG_RegisterTempEntitySounds();
 }

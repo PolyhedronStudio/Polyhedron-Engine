@@ -156,10 +156,6 @@ struct cl_sustain_t {
 //
 // Client Particle Structure.
 //
-#define PARTICLE_GRAVITY        120
-#define BLASTER_PARTICLE_COLOR  0xe0
-#define INSTANT_PARTICLE    -10000.0
-
 struct cparticle_t {
     cparticle_t    *next;
 
@@ -213,9 +209,9 @@ struct ClientInfo {
 // Used for storing client input commands.
 //
 struct ClientUserCommandHistory {
-    uint32_t timeSent;           // time sent, for calculating pings
-    uint32_t timeReceived;           // time rcvd, for calculating pings
-    uint32_t commandNumber;      // current commandNumber for this frame
+    uint32_t timeSent;      // Time sent, for calculating pings.
+    uint32_t timeReceived;  // Time received, for calculating pings.
+    uint32_t commandNumber; // Current commandNumber for this frame,
 };
 
 //
@@ -228,11 +224,11 @@ struct ServerFrame {
     int32_t number; // Sequential identifier, used for delta.
     int32_t delta;  // Delta between frames.
 
-    byte areaBits[MAX_MAP_AREA_BYTES]; // Area bits of this frame.
-    int32_t areaBytes;                 // Area bytes.
+    byte    areaBits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
+    int32_t areaBytes;                      // Area bytes.
 
-    PlayerState  playerState;   // The player state.
-    int32_t clientNumber;       // The client number.
+    PlayerState playerState;    // The player state.
+    int32_t     clientNumber;   // The client number.
 
     int32_t numEntities;    // The number of entities in the frame.
     int32_t firstEntity;    // The first entity in the frame.

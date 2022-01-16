@@ -81,12 +81,12 @@ void CLG_ClearEffects(void)
 
 #if USE_LIGHTSTYLES
 
-typedef struct clightstyle_s {
+struct ClientLightstyle {
     list_t  entry;
     int     length;
     vec4_t  value;
     float   map[MAX_QPATH];
-} ClientLightstyle;
+};
 
 static ClientLightstyle    cl_lightstyles[MAX_LIGHTSTYLES];
 static LIST_DECL(cl_lightlist);
@@ -278,7 +278,7 @@ void CLG_RunDLights(void)
         if (dl->radius < 0)
             dl->radius = 0;
 
-        VectorMA(dl->origin, clgi.GetFrameTime(), dl->velocity, dl->origin);
+        dl->origin = vec3_fmaf(dl->origin, clgi.GetFrameTime(), dl->velocity);
     }
 }
 
@@ -334,19 +334,16 @@ void CLG_MuzzleFlash() {
     pl = &cs->entities[mzParameters.entity];
 
     dl = CLG_AllocDLight(mzParameters.entity);
-    VectorCopy(pl->current.origin, dl->origin);
+    dl->origin = pl->current.origin, dl->origin;
     AngleVectors(pl->current.angles, &fv, &rv, NULL);
-    VectorMA(dl->origin, 18, fv, dl->origin);
-    VectorMA(dl->origin, 16, rv, dl->origin);
+    dl->origin = vec3_fmaf(dl->origin, 18, fv);
+    dl->origin = vec3_fmaf(dl->origin, 16, rv);
     if (mzParameters.silenced)
         dl->radius = 100 + (rand() & 31);
     else
         dl->radius = 200 + (rand() & 31);
     //dl->minlight = 32;
     dl->die = cl->time; // + 0.1;
-#define DL_COLOR(r, g, b)   VectorSet(dl->color, r, g, b)
-#define DL_RADIUS(r)        (dl->radius = r)
-#define DL_DIE(t)           (dl->die = cl->time + t)
 
     if (mzParameters.silenced)
         volume = 0.2;
@@ -355,38 +352,38 @@ void CLG_MuzzleFlash() {
 
     switch (mzParameters.weapon) {
     case MuzzleFlashType::Blaster:
-        DL_COLOR(1, 1, 0);
+        dl->color = vec3_t{1, 1, 0};
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
         break;
     case MuzzleFlashType::MachineGun:
-        DL_COLOR(1, 1, 0);
+        dl->color = vec3_t{1, 1, 0};
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
         break;
     case MuzzleFlashType::Shotgun:
-        DL_COLOR(1, 1, 0);
+        dl->color = vec3_t{1, 1, 0};
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0);
         //  S_StartSound(NULL, mzParameters.entity, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1);
         break;
     case MuzzleFlashType::SuperShotgun:
-        DL_COLOR(1, 1, 0);
+        dl->color = vec3_t{1, 1, 0};
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/sshotf1b.wav"), volume, ATTN_NORM, 0);
         break;
     case MuzzleFlashType::Login:
-        DL_COLOR(0, 1, 0);
-        DL_DIE(1.0);
+        dl->color = vec3_t{0, 1, 0};
+        dl->die = cl->time + 1.0f;
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Logout:
-        DL_COLOR(1, 0, 0);
-        DL_DIE(1.0);
+        dl->color = vec3_t{1, 0, 0};
+        dl->die = cl->time + 1.0f;
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Respawn:
-        DL_COLOR(1, 1, 0);
-        DL_DIE(1.0);
+        dl->color = vec3_t{1, 1, 0};
+        dl->die = cl->time + 1.0f;
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
@@ -395,7 +392,7 @@ void CLG_MuzzleFlash() {
     if (vid_rtx->integer)
     {
         // don't add muzzle flashes in RTX mode
-        DL_RADIUS(0.f);
+        dl->radius = 0.f;
     }
 }
 
@@ -422,7 +419,7 @@ void CLG_MuzzleFlash2() {
     origin[2] = ent->current.origin[2] + forward[2] * ofs[0] + right[2] * ofs[1] + ofs[2];
 
     dl = CLG_AllocDLight(mzParameters.entity);
-    VectorCopy(origin, dl->origin);
+    dl->origin = origin, dl->origin;
     dl->radius = 200 + (rand() & 31);
     //dl->minlight = 32;
     dl->die = cl->time;  // + 0.1;
@@ -436,7 +433,7 @@ void CLG_MuzzleFlash2() {
     case MZ2_SOLDIER_MACHINEGUN_6:
     case MZ2_SOLDIER_MACHINEGUN_7:
     case MZ2_SOLDIER_MACHINEGUN_8:
-        DL_COLOR(1, 1, 0);
+        dl->color = vec3_t{1, 1, 0};
         CLG_ParticleEffect(origin, forward, 0, 40);
         CLG_SmokeAndFlash(origin);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck3.wav"), 1, ATTN_NORM, 0);
@@ -450,7 +447,7 @@ void CLG_MuzzleFlash2() {
     case MZ2_SOLDIER_BLASTER_6:
     case MZ2_SOLDIER_BLASTER_7:
     case MZ2_SOLDIER_BLASTER_8:
-        DL_COLOR(1, 1, 0);
+        dl->color = vec3_t{1, 1, 0};
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck2.wav"), 1, ATTN_NORM, 0);
         break;
 
@@ -462,7 +459,7 @@ void CLG_MuzzleFlash2() {
     case MZ2_SOLDIER_SHOTGUN_6:
     case MZ2_SOLDIER_SHOTGUN_7:
     case MZ2_SOLDIER_SHOTGUN_8:
-        DL_COLOR(1, 1, 0);
+        dl->color = vec3_t{1, 1, 0};
         CLG_SmokeAndFlash(origin);
         clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck1.wav"), 1, ATTN_NORM, 0);
         break;
@@ -526,14 +523,12 @@ cparticle_t* CLG_AllocParticle(void)
 //
 void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
 {
-    vec3_t oy;
-    VectorSet(oy, 0.0f, 1.0f, 0.0f);
-    if (fabs(DotProduct(oy, dir)) > 0.95f)
-        VectorSet(oy, 1.0f, 0.0f, 0.0f);
+    vec3_t oy = {0.f, 1.f, 0.f};
+    if (fabs(vec3_dot(oy, dir)) > 0.95f)
+        oy = vec3_t{1.0f, 0.0f, 0.0f};
 
-    vec3_t ox;
-    CrossProduct(oy, dir, ox);
-
+    vec3_t ox = vec3_cross(oy, dir);
+    
     count *= cl_particle_num_factor->value;
     const int spark_count = count / 10;
 
@@ -557,17 +552,16 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->color = color + (rand() & 7);
         p->brightness = 0.5f;
 
-        vec3_t origin;
-        VectorCopy(org, origin);
-        VectorMA(origin, dirt_horizontal_spread * crand(), ox, origin);
-        VectorMA(origin, dirt_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, dirt_vertical_spread * frand() + 1.0f, dir, origin);
-        VectorCopy(origin, p->org);
+        vec3_t origin = org;
+        origin = vec3_fmaf(origin, dirt_horizontal_spread * crand(), ox);
+        origin = vec3_fmaf(origin, dirt_horizontal_spread * crand(), oy);
+        origin = vec3_fmaf(origin, dirt_vertical_spread * frand() + 1.0f, dir);
+        p->org = origin;
 
         vec3_t velocity;
-        VectorSubtract(origin, org, velocity);
+        velocity = origin - org;
         VectorNormalize(velocity);
-        VectorScale(velocity, dirt_base_velocity + frand() * dirt_rand_velocity, p->vel);
+        p->vel = vec3_scale(velocity, dirt_base_velocity + frand() * dirt_rand_velocity);
 
         p->acceleration[0] = p->acceleration[1] = 0;
         p->acceleration[2] = -PARTICLE_GRAVITY;
@@ -586,17 +580,16 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->color = 0xe0 + (rand() & 7);
         p->brightness = cvar_pt_particle_emissive->value;
 
-        vec3_t origin;
-        VectorCopy(org, origin);
-        VectorMA(origin, spark_horizontal_spread * crand(), ox, origin);
-        VectorMA(origin, spark_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, spark_vertical_spread * frand() + 1.0f, dir, origin);
-        VectorCopy(origin, p->org);
+        vec3_t origin = org;
+        origin = vec3_fmaf(origin, spark_horizontal_spread * crand(), ox);
+        origin = vec3_fmaf(origin, spark_horizontal_spread * crand(), oy);
+        origin = vec3_fmaf(origin, spark_vertical_spread * frand() + 1.0f, dir);
+        p->org = origin;
 
         vec3_t velocity;
-        VectorSubtract(origin, org, velocity);
+        velocity = origin - org;
         VectorNormalize(velocity);
-        VectorScale(velocity, spark_base_velocity + powf(frand(), 2.0f) * spark_rand_velocity, p->vel);
+        p->vel = vec3_scale(velocity, spark_base_velocity + powf(frand(), 2.0f) * spark_rand_velocity);
 
         p->acceleration[0] = p->acceleration[1] = 0;
         p->acceleration[2] = -PARTICLE_GRAVITY;
@@ -608,13 +601,11 @@ void CLG_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
 
 void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count)
 {
-    vec3_t oy;
-    VectorSet(oy, 0.0f, 1.0f, 0.0f);
-    if (fabs(DotProduct(oy, dir)) > 0.95f)
-        VectorSet(oy, 1.0f, 0.0f, 0.0f);
+    vec3_t oy = vec3_t{0.f, 1.f, 0.f};
+    if (fabs(vec3_dot(oy, dir)) > 0.95f)
+        oy = vec3_t{1.0f, 0.0f, 0.0f};
 
-    vec3_t ox;
-    CrossProduct(oy, dir, ox);
+    vec3_t ox = vec3_cross(oy, dir);
 
     count *= cl_particle_num_factor->value;
 
@@ -633,17 +624,16 @@ void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count)
         p->color = color + (rand() & 7);
         p->brightness = 1.0f;
 
-        vec3_t origin;
-        VectorCopy(org, origin);
-        VectorMA(origin, water_horizontal_spread * crand(), ox, origin);
-        VectorMA(origin, water_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, water_vertical_spread * frand() + 1.0f, dir, origin);
-        VectorCopy(origin, p->org);
+        vec3_t origin = org;
+        origin = vec3_fmaf(origin, water_horizontal_spread * crand(), ox);
+        origin = vec3_fmaf(origin, water_horizontal_spread * crand(), oy);
+        origin = vec3_fmaf(origin, water_vertical_spread * frand() + 1.0f, dir);
+        p->org = origin;
 
         vec3_t velocity;
-        VectorSubtract(origin, org, velocity);
+        velocity = origin - org;
         VectorNormalize(velocity);
-        VectorScale(velocity, water_base_velocity + frand() * water_rand_velocity, p->vel);
+        p->vel = vec3_scale(velocity, water_base_velocity + frand() * water_rand_velocity);
 
         p->acceleration[0] = p->acceleration[1] = 0;
         p->acceleration[2] = -PARTICLE_GRAVITY;
@@ -1015,7 +1005,7 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
         p = CLG_AllocParticle();
         if (!p)
             return;
-        VectorClear(p->acceleration);
+        p->acceleration = vec3_zero();
 
         p->time = cl->time;
 
@@ -1031,7 +1021,7 @@ void CLG_BlasterTrail(vec3_t start, vec3_t end)
             p->acceleration[j] = 0;
         }
 
-        VectorAdd(move, vec, move);
+        move += vec;
     }
 }
 
@@ -1052,12 +1042,12 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, ClientEntity* old, int flags
     float       orgscale;
     float       velscale;
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    move = start;
+    vec = end - start;
     len = VectorNormalize(vec);
 
     dec = 0.5;
-    VectorScale(vec, dec, vec);
+    vec = vec3_scale(vec, dec);
 
     if (old->trailcount > 900) {
         orgscale = 4;
@@ -1115,7 +1105,7 @@ void CLG_DiminishingTrail(vec3_t start, vec3_t end, ClientEntity* old, int flags
         old->trailcount -= 5;
         if (old->trailcount < 100)
             old->trailcount = 100;
-        VectorAdd(move, vec, move);
+        move += vec;
     }
 }
 
@@ -1134,19 +1124,19 @@ void CLG_BubbleTrail(vec3_t start, vec3_t end)
     cparticle_t* p;
     float       dec;
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
+    move = start;
+    vec = end - start;
     len = VectorNormalize(vec);
 
     dec = 32;
-    VectorScale(vec, dec, vec);
+    vec = vec3_scale(vec, dec);
 
     for (i = 0; i < len; i += dec) {
         p = CLG_AllocParticle();
         if (!p)
             return;
 
-        VectorClear(p->acceleration);
+        p->acceleration = vec3_zero();
         p->time = cl->time;
 
         p->alpha = 1.0;
@@ -1161,7 +1151,7 @@ void CLG_BubbleTrail(vec3_t start, vec3_t end)
         }
         p->vel[2] += 6;
 
-        VectorAdd(move, vec, move);
+        move += vec;
     }
 }
 
@@ -1204,7 +1194,7 @@ void CLG_TeleportParticles(vec3_t org)
 
                 VectorNormalize(dir);
                 vel = 50 + (rand() & 63);
-                VectorScale(dir, vel, p->vel);
+                p->vel = vec3_scale(dir, vel);
 
                 p->acceleration[0] = p->acceleration[1] = 0;
                 p->acceleration[2] = -PARTICLE_GRAVITY;

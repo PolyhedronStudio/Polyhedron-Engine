@@ -114,10 +114,10 @@ typedef enum {
 //-------------------
 // Client player model settings.
 //-------------------
-#define CL_PLAYER_MODEL_DISABLED     0
-#define CL_PLAYER_MODEL_ONLY_GUN     1
-#define CL_PLAYER_MODEL_FIRST_PERSON 2
-#define CL_PLAYER_MODEL_THIRD_PERSON 3
+static constexpr int32_t CL_PLAYER_MODEL_DISABLED       = 0;
+static constexpr int32_t CL_PLAYER_MODEL_ONLY_GUN       = 1;
+static constexpr int32_t CL_PLAYER_MODEL_FIRST_PERSON   = 2;
+static constexpr int32_t CL_PLAYER_MODEL_THIRD_PERSON   = 3;
 
 //-------------------
 // Core - Used to access the client's internals.
