@@ -29,8 +29,8 @@ public:
 
     // This is called when the client spawns into a server,
     //
-    // It should register world related media here, such as particles that are
-    // used in-game, or view models, or sounds, etc.
+    // It should register world related media here, such as:
+    // Particles, (View-)Models, and Sounds.
     void LoadWorld() final;
 
 private:

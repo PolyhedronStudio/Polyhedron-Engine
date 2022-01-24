@@ -263,18 +263,3 @@ void CLG_SetSky(void)
 //
 //=============================================================================
 //
-
-//
-//===============
-// CLG_LoadScreenMedia
-// 
-// This is called when the client starts, but also when the renderer has had
-// modified settings.
-//
-// It should register the basic screen media, 2D icons etc.
-//===============
-//
-void CLG_LoadScreenMedia(void)
-{
-    SCR_RegisterMedia();
-}

@@ -12,7 +12,9 @@
 //---------------------------------------------------------------------
 class IClientGameExportCore {
 public:
-	//---------------------------------------------------------------------
+    virtual ~IClientGameExportCore() = default;
+    
+    //---------------------------------------------------------------------
 	// API Version.
 	// 
 	// The version numbers will always be equal to those that were set in 
@@ -49,6 +51,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportEntities {
 public:
+    virtual ~IClientGameExportEntities()  = default;
+
     // Executed whenever an entity event is receieved.
     virtual void Event(int32_t number) = 0;
 
@@ -66,6 +70,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportMedia {
 public:
+    virtual ~IClientGameExportMedia() = default;
+
     // Called when the client wants to know the name of a custom load state.
     virtual std::string GetLoadStateName(LoadState loadState) = 0;
 
@@ -98,6 +104,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportMovement {
 public:
+    virtual ~IClientGameExportMovement() = default;
+
     // Called when the movement command needs to be build for the given
     // client networking frame.
     virtual void BuildFrameMovementCommand(int32_t miliseconds) = 0;
@@ -111,6 +119,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportPrediction {
 public:
+    virtual ~IClientGameExportPrediction() = default;
+
     virtual void CheckPredictionError(ClientMoveCommand* moveCommand) = 0;
     virtual void PredictAngles() = 0;
     virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
@@ -123,6 +133,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportScreen {
 public:
+    virtual ~IClientGameExportScreen() = default;
+
     // Called when the engine decides to render the 2D display.
     virtual void RenderScreen() = 0;
     // Called when the screen mode has changed.
@@ -138,6 +150,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportServerMessage {
 public:
+    virtual ~IClientGameExportServerMessage() = default;
+
     // Breaks up playerskin into name(optional), modeland skin components.
     // If model or skin are found to be invalid, replaces them with sane defaults.
     virtual qboolean ParsePlayerSkin(char* name, char* model, char* skin, const char* str) = 0;
@@ -162,6 +176,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportView {
 public:
+    virtual ~IClientGameExportView() = default;
+
     // Called right after the engine clears the scene, and begins a new one.
     virtual void PreRenderView() = 0;
     // Called whenever the engine wants to clear the scene.
@@ -179,6 +195,8 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExports {
 public:
+    virtual ~IClientGameExports() = default;
+
 	// WID: TODO: Normally we'd use a Get, should we do that and make these private?
 	// Perhaps not.
 	IClientGameExportCore* core;
