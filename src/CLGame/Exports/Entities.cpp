@@ -262,13 +262,21 @@ void ClientGameEntities::AddPacketEntities() {
             // Don't tilt the model - looks weird
             renderEntity.angles[0] = 0.f;
 
+            //
+            // TODO: This needs to be fixed properly for the shadow to render.
+            // 
             // Offset the model back a bit to make the view point located in front of the head
-            constexpr float offset = -15.f;
-            vec3_t angles = { 0.f, renderEntity.angles[1], 0.f };
-            vec3_t forward;
-            AngleVectors(angles, &forward, NULL, NULL);
-            renderEntity.origin = vec3_fmaf(renderEntity.origin, offset, forward);
-            renderEntity.oldorigin = vec3_fmaf(renderEntity.oldorigin, offset, forward);
+            //constexpr float offset = -15.f;
+            //constexpr float offset = 8.f;// 0.0f;
+            //vec3_t angles = { 0.f, renderEntity.angles[1], 0.f };
+            //vec3_t forward;
+            //AngleVectors(angles, &forward, NULL, NULL);
+            //renderEntity.origin = vec3_fmaf(renderEntity.origin, offset, forward);
+            //renderEntity.oldorigin = vec3_fmaf(renderEntity.oldorigin, offset, forward);
+
+            // Temporary fix, not quite perfect though.
+            renderEntity.origin = cl->predictedState.viewOrigin;
+            renderEntity.oldorigin = cl->predictedState.viewOrigin;
         }
 
         // If set to invisible, skip

@@ -348,7 +348,16 @@ BOX TRACING
 // 1/32 epsilon to keep floating point happy
 // N&C: FF Precision.
 //#define DIST_EPSILON    (0.03125)
-#define DIST_EPSILON    0.125
+//#define DIST_EPSILON    0.125
+static constexpr float DIST_EPSILON = 1.0f / 32.0f;
+
+//There is a possible fix here related to slopes, and walls. Try it in pmove bruh!
+//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
+//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
+//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
+//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
+//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
+//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
 
 static vec3_t   trace_start, trace_end;
 static vec3_t   trace_mins, trace_maxs;

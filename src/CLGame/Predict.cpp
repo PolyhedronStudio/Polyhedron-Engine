@@ -10,9 +10,6 @@
 
 #include "Main.h"
 
-// Distance that is allowed to be taken as a delta before we reset it.
-#define MAX_DELTA_ORIGIN (2400.f * (1.0f / BASE_FRAMERATE))
-
 //
 //===============
 // CLG_CheckPredictionError

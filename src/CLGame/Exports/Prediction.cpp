@@ -136,7 +136,11 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     }
 
     // Copy results out for rendering
-    cl->predictedState.viewOrigin = pm.state.origin;
+    // TODO: This isn't really the nicest way of preventing these "do not get stuck" budges.
+    // Perhaps take another look at pmove to correct this in the future.
+    if (vec3_distance(cl->predictedState.viewOrigin, pm.state.origin) > 0.03125f) {
+        cl->predictedState.viewOrigin = pm.state.origin;
+    }
     //cl->predictedState.velocity    = pm.state.velocity;
     cl->predictedState.viewOffset = pm.state.viewOffset;
     cl->predictedState.stepOffset = pm.state.stepOffset;
