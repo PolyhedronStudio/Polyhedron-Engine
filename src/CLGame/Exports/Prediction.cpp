@@ -72,6 +72,17 @@ void ClientGamePrediction::PredictAngles() {
 }
 
 //---------------
+// Client Side PMove trace.
+//---------------
+static trace_t PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
+    trace_t cmTrace;
+    
+    cmTrace = clgi.Trace(start, mins, maxs, end, 0, CONTENTS_MASK_PLAYERSOLID);
+
+    return cmTrace;
+}
+
+//---------------
 // ClientGamePrediction::CheckPredictionError
 //
 //---------------
@@ -84,7 +95,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         return;
 
     // Setup base trace calls.
-    pm.Trace = CLG_Trace;
+    pm.Trace = PM_Trace;
     pm.PointContents = CLG_PointContents;
 
     // Restore ground entity for this frame.

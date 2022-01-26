@@ -74,57 +74,114 @@
 // 
 //================
 //
-static void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, trace_t* tr)
-{
+void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask, trace_t *cmDstTrace) {
     int         i;
-    trace_t     trace;
-    mnode_t* headNode;
-    ClientEntity* ent;
-    mmodel_t* cmodel;
+    // Destination cmTrace for 
+    trace_t         cmSrcTrace;
+    mnode_t*        headNode;
+    ClientEntity*   clientEntity;
+    mmodel_t*       cmodel;
+
+    vec3_t traceStart = start;
+    vec3_t traceAngles = vec3_zero();
 
     for (i = 0; i < cl->numSolidEntities; i++) {
-        ent = cl->solidEntities[i];
+        // Fetch client entity.
+        clientEntity = cl->solidEntities[i];
 
-        if (ent->current.solid == PACKED_BSP) {
+        // This check is likely redundent but let's make sure it is there anyway for possible future changes.
+        if (clientEntity == nullptr) {
+            continue;
+        }
+
+        // Should we skip it?
+        if (skipEntity != nullptr && skipEntity->current.number == clientEntity->current.number) {
+            continue;
+        }
+
+        if (clientEntity->current.solid == PACKED_BSP) {
             // special value for bmodel
-            cmodel = cl->clipModels[ent->current.modelIndex];
+            cmodel = cl->clipModels[clientEntity->current.modelIndex];
             if (!cmodel)
                 continue;
             headNode = cmodel->headNode;
+
+            traceAngles = clientEntity->current.angles;
+        } else {
+            vec3_t entityMins = {0.f, 0.f, 0.f};
+            vec3_t entityMaxs = {0.f, 0.f, 0.f};
+            MSG_UnpackSolid32(clientEntity->current.solid, entityMins, entityMaxs);
+            LerpVector(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction, traceStart);
+
+            headNode = clgi.CM_HeadnodeForBox(entityMins, entityMaxs);
         }
-        else {
-            headNode = clgi.CM_HeadnodeForBox(ent->mins, ent->maxs);
-        }
 
-        if (tr->allSolid)
-            return;
+        // TODO: probably need to add a skip entityt or so,
+        //if (srcTrace->allSolid)
+        //    return;
 
-        clgi.CM_TransformedBoxTrace(&trace, start, end,
-            mins, maxs, headNode, CONTENTS_MASK_PLAYERSOLID,
-            ent->current.origin, ent->current.angles);
+        clgi.CM_TransformedBoxTrace(&cmSrcTrace, start, end,
+                                    mins, maxs, headNode, CONTENTS_MASK_PLAYERSOLID,
+                                    traceStart, traceAngles);
 
-        clgi.CM_ClipEntity(tr, &trace, (struct entity_s*)ent);
+        clgi.CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)clientEntity);
     }
 }
 
 /*
 ================
-CL_PMTrace
+CLG_Trace
 ================
 */
-trace_t q_gameabi CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
-{
-    trace_t    t;
+CLGTrace CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask = 0) {
+    // Collision Model trace result.
+    trace_t cmTrace;
 
-    // check against world
-    clgi.CM_BoxTrace(&t, start, end, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
-    if (t.fraction < 1.0)
-        t.ent = (struct entity_s*)1;
+    // Client Game Trace result, to stay uniform.
+    CLGTrace clgTrace;
 
-    // check all other solid models
-    CLG_ClipMoveToEntities(start, mins, maxs, end, &t);
+    //// Ensure we can pull of a proper trace.
+    //if (!cl->bsp || !cl->bsp->nodes) {
+    //    Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+    //}
 
-    return t;
+    //// Execute box trace.
+    //clgi.CM_BoxTrace(&cmTrace, start, end, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
+    //
+    //if (cmTrace.fraction == 0) {
+    //    
+    //}
+    //if (cmTrace.fraction < 1.0) {
+    //    cmTrace.ent = (struct entity_s*)1;
+    //}
+
+    //// check all other solid models
+    //CLG_ClipMoveToEntities(start, mins, maxs, end, skipEntity, contentMask, &cmTrace);
+    cmTrace = clgi.Trace(start, mins, maxs, end, (struct entity_s*)skipEntity, contentMask);
+
+    // Setup the client game trace.
+    clgTrace.allSolid = cmTrace.allSolid;
+    clgTrace.contents = cmTrace.contents;
+    clgTrace.endPosition = cmTrace.endPosition;
+    if (cmTrace.ent) {
+        clgTrace.ent = (ClientEntity*)cmTrace.ent;
+    } else {
+        clgTrace.ent = nullptr;
+    }
+    clgTrace.fraction = cmTrace.fraction;
+    clgTrace.offsets[0] = cmTrace.offsets[0];
+    clgTrace.offsets[1] = cmTrace.offsets[1];
+    clgTrace.offsets[2] = cmTrace.offsets[2];
+    clgTrace.offsets[3] = cmTrace.offsets[3];
+    clgTrace.offsets[4] = cmTrace.offsets[4];
+    clgTrace.offsets[5] = cmTrace.offsets[5];
+    clgTrace.offsets[6] = cmTrace.offsets[6];
+    clgTrace.offsets[7] = cmTrace.offsets[7];
+    clgTrace.plane = cmTrace.plane;
+    clgTrace.startSolid = cmTrace.startSolid;
+    clgTrace.surface = cmTrace.surface;
+
+    return clgTrace;
 }
 
 int CLG_PointContents(const vec3_t &point)

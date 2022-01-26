@@ -234,6 +234,9 @@ extern "C" {
         // Add scanned out IP address to circular array of recent addresses.
         void            (*CheckForIP) (const char* s);
 
+        // Executes a client side trace.
+        trace_t         (*Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
+
         //---------------------------------------------------------------------
         // Command Buffer.
         //---------------------------------------------------------------------

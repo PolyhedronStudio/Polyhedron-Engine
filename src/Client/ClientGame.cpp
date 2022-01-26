@@ -68,6 +68,89 @@ qboolean _wrp_IsDemoPlayback(void) {
     return cls.demo.playback;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask, trace_t *cmDstTrace) {
+    // CM Source Trace.
+    trace_t         cmSrcTrace;
+    // Head Node used for testing.
+    mnode_t*        headNode = nullptr;
+    // Collision model for entity.
+    mmodel_t*       cmodel = nullptr;
+    // Client side entity.
+    ClientEntity*   clientEntity = nullptr;
+
+    // Actual start point of the trace. May modify during the loop.
+    vec3_t traceOrigin = vec3_zero();
+    // Actual angles for the trace. May modify during the loop.
+    vec3_t traceAngles = vec3_zero();
+
+    for (uint32_t i = 0; i < cl.numSolidEntities; i++) {
+        // Fetch client entity.
+        clientEntity = cl.solidEntities[i];
+
+        // This check is likely redundent but let's make sure it is there anyway for possible future changes.
+        if (clientEntity == nullptr) {
+            continue;
+        }
+
+        // Should we skip it?
+        if (skipEntity != nullptr && skipEntity->current.number == clientEntity->current.number) {
+            continue;
+        }
+
+        if (clientEntity->current.solid == PACKED_BSP) {
+            // special value for bmodel
+            cmodel = cl.clipModels[clientEntity->current.modelIndex];
+            if (!cmodel)
+                continue;
+            headNode = cmodel->headNode;
+
+//            traceStart = start;
+            traceAngles = clientEntity->current.angles;
+        } else {
+            vec3_t entityMins = {0.f, 0.f, 0.f};
+            vec3_t entityMaxs = {0.f, 0.f, 0.f};
+            MSG_UnpackSolid32(clientEntity->current.solid, entityMins, entityMaxs);
+            headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
+            traceAngles = vec3_zero();
+        }
+        
+        traceOrigin = vec3_mix(clientEntity->current.origin, clientEntity->prev.origin, cl.lerpFraction);
+
+        // TODO: probably need to add a skip entityt or so,
+        if (cmDstTrace->allSolid)
+            return;
+
+        CM_TransformedBoxTrace(&cmSrcTrace, start, end,
+                                    mins, maxs, headNode, contentMask,
+                                    traceOrigin, traceAngles);
+
+        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)clientEntity);
+    }
+}
+
+trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask) {
+    trace_t trace;
+
+    // Ensure we can pull of a proper trace.
+    if (!cl.bsp || !cl.bsp->nodes) {
+        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        return trace;
+    }
+
+    // Execute trace.
+    CM_BoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask);
+
+    // Set trace entity.
+    trace.ent = (struct entity_s*)&cl.solidEntities[0];
+
+    // Clip to other solid entities.
+    CL_ClipMoveToEntities(start, mins, maxs, end, (ClientEntity*)skipEntity, contentMask, &trace);
+
+    return trace;
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+
 // CBUF_
 void _wrp_Cbuf_AddText(char *text) {
 	Cbuf_AddText(&cmd_buffer, text);
@@ -428,6 +511,8 @@ void CL_InitGameProgs(void)
 
     importAPI.CheckForIgnore = CL_CheckForIgnore;
     importAPI.CheckForIP = CL_CheckForIP;
+
+    importAPI.Trace = CL_Trace;
 
     // Command Buffer.
     importAPI.Cbuf_AddText = _wrp_Cbuf_AddText;

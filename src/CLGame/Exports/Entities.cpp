@@ -274,9 +274,9 @@ void ClientGameEntities::AddPacketEntities() {
             //renderEntity.origin = vec3_fmaf(renderEntity.origin, offset, forward);
             //renderEntity.oldorigin = vec3_fmaf(renderEntity.oldorigin, offset, forward);
 
-            // Temporary fix, not quite perfect though.
-            renderEntity.origin = cl->predictedState.viewOrigin;
-            renderEntity.oldorigin = cl->predictedState.viewOrigin;
+            // Temporary fix, not quite perfect though. Add some z offset so the shadow isn't too dark under the feet.
+            renderEntity.origin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
+            renderEntity.oldorigin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
         }
 
         // If set to invisible, skip
@@ -484,8 +484,8 @@ void ClientGameEntities::AddViewEntities() {
         constexpr float gun_length = 28.f;
         constexpr float gun_right = 10.f;
         constexpr float gun_up = -5.f;
-        trace_t trace;
-        static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
+        CLGTrace trace;
+        static vec3_t mins = { -4, -2, -12 }, maxs = { 4, 8, 12 };
 
         AngleVectors(cl->refdef.viewAngles, &view_dir, &right_dir, &up_dir);
         gun_real_pos = vec3_fmaf(gunRenderEntity.origin, gun_right, right_dir);
@@ -493,15 +493,20 @@ void ClientGameEntities::AddViewEntities() {
         gun_tip = vec3_fmaf(gun_real_pos, gun_length, view_dir);
 
         // Execute the trace for the view model weapon.
-        clgi.CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
+
+        // Add mask support and perhaps a skip...
+        // Add mask support and perhaps a skip...
+        // Add mask support and perhaps a skip...
+        // Add mask support and perhaps a skip...
+        trace = CLG_Trace(gun_real_pos, mins, maxs, gun_tip, 0, CONTENTS_MASK_PLAYERSOLID); 
 
         // In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
-        if (trace.fraction != 1.0f)
-        {
+        //if (trace.fraction != 1.0f || trace.ent != nullptr)
+        //{
             gunRenderEntity.origin = vec3_fmaf(trace.endPosition, -gun_length, view_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_right, right_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_up, up_dir);
-        }
+//        }
     }
 
     // Do not lerp the origin at all.

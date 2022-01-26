@@ -351,7 +351,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins,
     // M_CheckGround function instead. (Seems related to a -0.25f).
     // 
     // And otherwise, we got this solution below, which... is seemingly slow in certain cases...
-#if 0
+#if 1
     return pm->Trace(start, mins, maxs, end);
 #else
     const vec3_t offsets = { 0.f, 1.f, -1.f };

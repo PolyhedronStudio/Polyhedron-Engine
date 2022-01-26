@@ -54,6 +54,58 @@ static inline qboolean CLG_FRAMESYNC() {
 //	Client Game structures and definitions.
 //
 //=============================================================================
+// 
+//
+// Custom client game trace struct, stores ClientEntity* instead.
+//
+struct CLGTrace {
+    CLGTrace() {
+        allSolid = false;
+        startSolid = false;
+        fraction = 0.f;
+        endPosition = vec3_zero();
+        surface = nullptr;
+        contents = 0;
+        ent = nullptr;
+        offsets[0] = vec3_zero();
+        offsets[1] = vec3_zero();
+        offsets[2] = vec3_zero();
+        offsets[3] = vec3_zero();
+        offsets[4] = vec3_zero();
+        offsets[5] = vec3_zero();
+        offsets[6] = vec3_zero();
+        offsets[7] = vec3_zero();
+    }
+
+    // If true, the trace startedand ended within the same solid.
+    qboolean    allSolid;
+    // If true, the trace started within a solid, but exited it.
+    qboolean    startSolid;
+    // The fraction of the desired distance traveled(0.0 - 1.0).If
+    // 1.0, no plane was impacted.
+    float       fraction;
+    // The destination position.
+    vec3_t      endPosition;
+    // [signbits][x] = either size[0][x] or size[1][x]
+    vec3_t		offsets[8];
+
+    
+    // The impacted plane, or empty. Note that a copy of the plane is returned, rather than a pointer.This is because the plane may belong to
+    // an inline BSP model or the box hull of a solid entity, in which case it must be 
+    // transformed by the entity's current position.
+    cplane_t    plane;
+    // The impacted surface, or nullptr.
+    csurface_t* surface;
+    // The contents mask of the impacted brush, or 0.
+    int32_t     contents;
+    // The impacted entity, or nullptr.
+    ClientEntity *ent;
+};
+
+//CLGTrace CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity* passent, const int32_t& contentMask);
+
+//std::vector<ClientEntity*> CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AREA_SOLID);
+
 //-------------------
 // Client View structure.
 //

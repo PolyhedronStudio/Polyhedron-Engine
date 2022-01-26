@@ -539,15 +539,15 @@ trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t
     }
 
     // work around game bugs
-    if (++sv.tracecount > 10000) {
-        Com_EPrintf("%s: runaway loop avoided\n", __func__);
-        memset(&trace, 0, sizeof(trace));
-        trace.fraction = 1;
-        trace.ent = ge->entities;
-        VectorCopy(end, trace.endPosition);
-        sv.tracecount = 0;
-        return trace;
-    }
+    //if (++sv.tracecount > 10000) {
+    //    Com_EPrintf("%s: runaway loop avoided\n", __func__);
+    //    memset(&trace, 0, sizeof(trace));
+    //    trace.fraction = 1;
+    //    trace.ent = ge->entities;
+    //    VectorCopy(end, trace.endPosition);
+    //    sv.tracecount = 0;
+    //    return trace;
+    //}
 
     // clip to world
     CM_BoxTrace(&trace, start, end, mins, maxs, sv.cm.cache->nodes, contentmask);
