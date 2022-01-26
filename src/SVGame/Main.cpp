@@ -654,7 +654,13 @@ void SVG_RunFrame(void)
 
         // Admer: entity was marked for removal at the previous tick
         if (entity->GetServerFlags() & EntityServerFlags::Remove) {
+            // Free server entity.
             SVG_FreeEntity(entity->GetServerEntity());
+
+            // Be sure to unset the server entity on this SVGBaseEntity.
+            entity->SetServerEntity(nullptr);
+
+            // Skip further processing of this entity, it's removed.
             continue;
         }
 
