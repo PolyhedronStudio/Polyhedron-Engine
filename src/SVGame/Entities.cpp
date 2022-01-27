@@ -140,15 +140,21 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 // classEntities too.
 //=================
 void SVG_FreeClassEntity(Entity* ent) {
+    // Ensure it is a valid entity.
+    if (!ent) {
+        gi.DPrintf("WARNING: tried to %s on a nullptr entity.", __func__);
+        return;
+    }
+
+    // Fetch entity number.
+    int32_t entityNumber = ent->state.number;
+
     // Special class entity handling IF it still has one.
     if (ent->classEntity) {
         // Remove the classEntity reference
         ent->classEntity->SetServerEntity(nullptr);
         ent->classEntity = nullptr;
     }
-
-    // Fetch entity number.
-    int32_t entityNumber = ent->state.number;
 
     // In case it exists in our base entitys, get rid of it, assign nullptr.
     if (g_baseEntities[entityNumber]) {
@@ -199,6 +205,9 @@ void SVG_FreeEntity(Entity* ent)
 
     // Reset serverFlags.
     ent->serverFlags = 0;
+
+    // Ensure the class entity is nullified.
+    ent->classEntity = nullptr;
 }
 
 //===============

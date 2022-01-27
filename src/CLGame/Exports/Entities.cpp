@@ -484,7 +484,6 @@ void ClientGameEntities::AddViewEntities() {
         constexpr float gun_length = 28.f;
         constexpr float gun_right = 10.f;
         constexpr float gun_up = -5.f;
-        CLGTrace trace;
         static vec3_t mins = { -4, -2, -12 }, maxs = { 4, 8, 12 };
 
         AngleVectors(cl->refdef.viewAngles, &view_dir, &right_dir, &up_dir);
@@ -498,7 +497,7 @@ void ClientGameEntities::AddViewEntities() {
         // Add mask support and perhaps a skip...
         // Add mask support and perhaps a skip...
         // Add mask support and perhaps a skip...
-        trace = CLG_Trace(gun_real_pos, mins, maxs, gun_tip, 0, CONTENTS_MASK_PLAYERSOLID); 
+        CLGTrace trace = CLG_Trace(gun_real_pos, mins, maxs, gun_tip, 0, CONTENTS_MASK_PLAYERSOLID); 
 
         // In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
         //if (trace.fraction != 1.0f || trace.ent != nullptr)

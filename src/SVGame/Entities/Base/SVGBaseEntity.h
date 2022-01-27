@@ -99,10 +99,10 @@ public:
     virtual inline float GetAcceleration() {
         return 0.f;
     }
-    // Get the activator of this entity
-    inline SVGBaseEntity* GetActivator() {
-        return activator;
-    }
+    // Placeholder, implemented by SVGBaseTrigger, and derivates of that class.
+    //inline SVGBaseEntity* GetActivator() {
+    //    return nullptr;
+    //}
     // Return the 'angles' value.
     inline const vec3_t& GetAngles() {
         return serverEntity->state.angles;
@@ -186,7 +186,7 @@ public:
     }
 
     // Return the 'frame' value.
-    inline const int32_t GetFrame() {
+    inline const float GetFrame() {
         return serverEntity->state.frame;
     }
 
@@ -236,7 +236,7 @@ public:
 
     // Return the 'mass' value.
     inline const int32_t GetMass() {
-        return mass;
+        return this->mass;
     }
 
     // Return the 'maxHealth' value.
@@ -508,8 +508,8 @@ public:
     }
 
     // Set the 'frame' value.
-    inline void SetFrame(const int32_t &frame) {
-        serverEntity->state.frame = frame;;
+    inline void SetFrame(const float &frame) {
+        serverEntity->state.frame = frame;
     }
 
     // Set the 'gravity' value.
@@ -555,7 +555,7 @@ public:
     }
 
     // Set the 'mass' value.
-    inline void SetMass(const int32_t &mass) {
+    inline void SetMass(const int32_t mass) {
         this->mass = mass;
     }
 
@@ -791,88 +791,88 @@ protected:
     //---------------------------------
     // -- Flags
     // Entity flags, general flags, flags... :) 
-    int32_t flags;
+    int32_t flags = 0;
     // Entity spawn flags (Such as, is this a dropped item?)
-    int32_t spawnFlags;
+    int32_t spawnFlags = 0;
 
     //---------------------------------
     // -- Strings.
     // Entity MODEL filename.
-    std::string model;
+    std::string model = "";
     // Trigger kill target string.
-    std::string killTargetStr;
+    std::string killTargetStr = "";
     // Trigger target string.
-    std::string targetStr;
+    std::string targetStr = "";
     // Trigger its own targetname string.
-    std::string targetNameStr;
+    std::string targetNameStr = "";
     // Trigger its message string.
-    std::string messageStr;
+    std::string messageStr = "";
 
     //---------------------------------
     // -- Types (Move, Water, what have ya? Add in here.)
     // Move Type. (MoveType::xxx)
-    int32_t moveType;
+    int32_t moveType = MoveType::None;
     // WaterType::xxxx
-    int32_t waterType;
+    int32_t waterType = 0; // TODO: Introduce WaterType "enum".
     // WaterLevel::xxxx
-    int32_t waterLevel;
+    int32_t waterLevel = WaterLevel::None;
 
     //---------------------------------
     // -- Physics
     // Angle direction: Set in Trenchbroom -1 = up -2 = down.
     //float angle;
     // Velocity.
-    vec3_t velocity;
+    vec3_t velocity = vec3_zero();
     // Angular Velocity.
-    vec3_t angularVelocity;
+    vec3_t angularVelocity = vec3_zero();
     // Mass
-    int32_t mass;
+    int32_t mass = 0;
     // Per entity gravity multiplier (1.0 is normal). TIP: Use for lowgrav artifact, flares
-    float gravity;
+    float gravity = 1.0f;
     
     //-----------------------------------
     // -- Pointers.
     // Goal Entity.
-    Entity* goalEntityPtr;
+    Entity* goalEntityPtr = nullptr;
     // Move Target Entity.
-    Entity* moveTargetPtr;
+    Entity* moveTargetPtr = nullptr;
     // The entity that activated this
-    SVGBaseEntity* activator;
+    SVGBaseEntity* activator = nullptr;
     
     // Yaw Speed. (Should be for monsters...)
-    float yawSpeed;
+    float yawSpeed = 0.f;
     // Ideal Yaw Angle. (Should be for monsters...)
-    float idealYawAngle;
+    float idealYawAngle = 0.f;
 
     //------------------------------------
     // Timing.
     // The next 'think' time, determines when to call the 'think' callback.
-    float nextThinkTime;
+    float nextThinkTime = 0.f;
     // Delay before calling trigger execution.
-    float delayTime;
+    float delayTime = 0.f;
     // Wait time before triggering at all, in case it was set to auto.
-    float waitTime;
+    float waitTime = 0.f;
 
     // Ground Entity link count. (To keep track if it is linked or not.)
-    int32_t groundEntityLinkCount;
+    int32_t groundEntityLinkCount = 0;
 
     //------------------------------------
     // Entity Status.
     // Current health.
-    int32_t health;
+    int32_t health = 0;
     // Maximum health.
-    int32_t maxHealth;
+    int32_t maxHealth = 0;
 
     //------------------------------------
     // Entity GAME settings.
     // The height above the origin, this is where EYE SIGHT comes from. Ok?
-    int32_t viewHeight;
+    int32_t viewHeight = 0;
     // Determines how to interpret, take damage like a man or like a ... ? Yeah, pick up soap.
-    int32_t takeDamage;
+    int32_t takeDamage = 0;
     // Actual damage it does if encountered or fucked around with.
-    int32_t damage;
+    int32_t damage = 0;
     // Dead Flag. (Are we dead, dying or...?)
-    int32_t deadFlag;
+    int32_t deadFlag = 0;
 
     //
     // This one resides here... for now.
@@ -883,19 +883,19 @@ protected:
     // Entity pointers.
     // 
     // Current active enemy, NULL if not any.    
-    SVGBaseEntity *enemyEntity;
+    SVGBaseEntity *enemyEntity = nullptr;
     // Ground entity we're standing on.
-    SVGBaseEntity *groundEntity;
+    SVGBaseEntity *groundEntity = nullptr;
     // Old enemy, NULL if not any.
-    SVGBaseEntity *oldEnemyEntity;
+    SVGBaseEntity *oldEnemyEntity = nullptr;
 
     // Owner pointer. (Such as, did the player fire a blaster bolt? If so, the owner is...)
-    SVGBaseEntity* ownerEntity;
+    SVGBaseEntity* ownerEntity = nullptr;
 
     // Team Chain Pointer.
-    SVGBaseEntity* teamChainEntity;
+    SVGBaseEntity* teamChainEntity = nullptr;
     // Master Pointer.
-    SVGBaseEntity* teamMasterEntity;
+    SVGBaseEntity* teamMasterEntity = nullptr;
     
 public:
     //
@@ -957,12 +957,12 @@ protected:
     //
     // Callback function pointers.
     //
-    ThinkCallbackPointer        thinkFunction;
-    UseCallbackPointer          useFunction;
-    TouchCallbackPointer        touchFunction;
-    BlockedCallbackPointer      blockedFunction;
-    TakeDamageCallbackPointer   takeDamageFunction;
-    DieCallbackPointer          dieFunction;
+    ThinkCallbackPointer        thinkFunction = nullptr;
+    UseCallbackPointer          useFunction = nullptr;
+    TouchCallbackPointer        touchFunction = nullptr;
+    BlockedCallbackPointer      blockedFunction = nullptr;
+    TakeDamageCallbackPointer   takeDamageFunction = nullptr;
+    DieCallbackPointer          dieFunction = nullptr;
 
 public:
     //

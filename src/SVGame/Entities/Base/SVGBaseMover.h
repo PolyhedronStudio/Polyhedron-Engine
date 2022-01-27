@@ -31,30 +31,30 @@ struct MoverState
 //-------------------
 struct PushMoveInfo {
     // fixed data
-    vec3_t startOrigin;
-    vec3_t startAngles;
-    vec3_t endOrigin;
-    vec3_t endAngles;
+    vec3_t startOrigin = vec3_zero();
+    vec3_t startAngles = vec3_zero();
+    vec3_t endOrigin = vec3_zero();
+    vec3_t endAngles = vec3_zero();
 
-    int32_t startSoundIndex;
-    int32_t middleSoundIndex;
-    int32_t endSoundIndex;
+    int32_t startSoundIndex = 0;
+    int32_t middleSoundIndex = 0;
+    int32_t endSoundIndex = 0;
 
-    float acceleration;
-    float speed;
-    float deceleration;
-    float distance;
+    float acceleration = 0.f;
+    float speed = 0.f;
+    float deceleration = 0.f;
+    float distance = 0.f;
 
-    float wait;
+    float wait = 0.f;
 
     // state data
-    int32_t state;
-    vec3_t dir;
-    float currentSpeed;
-    float moveSpeed;
-    float nextSpeed;
-    float remainingDistance;
-    float deceleratedDistance;
+    int32_t state = 0;
+    vec3_t dir = vec3_zero();
+    float currentSpeed = 0.f;
+    float moveSpeed = 0.f;
+    float nextSpeed = 0.f;
+    float remainingDistance = 0.f;
+    float deceleratedDistance = 0.f;
     //void (*OnEndFunction)(Entity *);
     PushMoveEndFunction* OnEndFunction;
 };
@@ -65,7 +65,7 @@ public:
     // Constructor/Deconstructor.
     //
     SVGBaseMover(Entity* svEntity);
-    virtual ~SVGBaseMover();
+    virtual ~SVGBaseMover() = default;
 
     DefineAbstractClass( SVGBaseMover, SVGBaseTrigger );
 
@@ -172,19 +172,19 @@ protected:
     // Other base entity members. (These were old fields in edict_T back in the day.)
     //
     // The speed that this objects travels at.     
-    float speed;
+    float speed = 0.f;
     // Acceleration speed.
-    float acceleration;
+    float acceleration = 0.f;
     // Deceleration speed.
-    float deceleration;
+    float deceleration = 0.f;
     // Direction of which to head down to when moving.
-    vec3_t moveDirection;
+    vec3_t moveDirection = vec3_zero();
     // Well, positions...
     //vec3_t position1, position2;
     // Position at where to start moving this thing from.
-    vec3_t startPosition;
+    vec3_t startPosition = vec3_zero();
     // Position at where to end this thing from moving at all.
-    vec3_t endPosition;
+    vec3_t endPosition = vec3_zero();
     // BaseMover moveInfo.
     PushMoveInfo moveInfo;
     // How far away to stop, from the destination

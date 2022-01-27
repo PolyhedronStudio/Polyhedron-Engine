@@ -57,7 +57,7 @@ void PlayerClient::Spawn() {
     SetMoveType(MoveType::Walk);
     SetViewHeight(22);
     SetInUse(true);
-    SetMass(200);
+    Base::SetMass(200);
     SetSolid(Solid::BoundingBox);
     SetDeadFlag(DEAD_NO);
     SetAirFinishedTime(level.time + 12 * FRAMETIME);
@@ -294,14 +294,14 @@ void PlayerClient::SetEvent() {
 void PlayerClient::SetEffects()
 {
     Base::SetEffects(0);
-    Base::SetRenderEffects(0);
+    SetRenderEffects(0);
 
     if (GetHealth() <= 0 || level.intermission.time)
         return;
 
     // show cheaters!!!
     if (GetFlags() & EntityFlags::GodMode) {
-        Base::SetRenderEffects(GetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
+        SetRenderEffects(GetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
     }
 }
 
@@ -311,7 +311,7 @@ void PlayerClient::SetEffects()
 //
 //===============
 void PlayerClient::SetSound() {
-    const char    *weap; // C++20: STRING: Added const to char*
+    //const char    *weap; // C++20: STRING: Added const to char*
 
     // Check whether the PlayerClient is hooked up to a valid client.
     ServersClient* client = GetClient();
@@ -320,21 +320,22 @@ void PlayerClient::SetSound() {
         return;
     }
 
-    if (client->persistent.activeWeapon)
-        weap = client->persistent.activeWeapon->className;
-    else
-        weap = "";
+    //if (client->persistent.activeWeapon)
+    //    weap = client->persistent.activeWeapon->className;
+    //else
+    //    weap = "";
 
-    if (GetWaterLevel() && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME)))
+    if (GetWaterLevel() && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
         Base::SetSound(snd_fry);
-    else if (strcmp(weap, "weapon_railgun") == 0)
-        Base::SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
-    else if (strcmp(weap, "weapon_bfg") == 0)
-        Base::SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
-    else if (client->weaponSound)
+        //else if (strcmp(weap, "weapon_railgun") == 0)
+        //    Base::SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
+        //else if (strcmp(weap, "weapon_bfg") == 0)
+        //    Base::SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
+    } else if (client->weaponSound) {
         Base::SetSound(client->weaponSound);
-    else
+    } else {
         Base::SetSound(0);
+    }
 }
 
 //
@@ -373,15 +374,11 @@ void PlayerClient::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacke
 //
 //===============
 float PlayerClient::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) {
-    float   sign;
-    float   side;
-    float   value;
-
-    side = vec3_dot(velocity, bobMove.right);
-    sign = side < 0 ? -1 : 1;
+    float side = vec3_dot(velocity, bobMove.right);
+    float sign = side < 0 ? -1 : 1;
     side = fabs(side);
 
-    value = sv_rollangle->value;
+    float value = sv_rollangle->value;
 
     if (side < sv_rollspeed->value)
         side = side * value / sv_rollspeed->value;

@@ -19,17 +19,16 @@
 //
 //---------------
 float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) {
-    float    a;
-    float    x;
-
-    if (fieldOfViewX < 1.f || fieldOfViewX > 179.f)
+    // Ensure field of view is within valid ranges.
+    if (fieldOfViewX <= 0 || fieldOfViewX > 179)
         Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fieldOfViewX);
 
-    x = width / tan(fieldOfViewX / 360.f * M_PI);
-
-    a = atan(height / x);
+    // Calculate proper fov value.
+    float x = width / tan(fieldOfViewX / 360.f * M_PI);
+    float a = atan(height / x);
     a = a * 360.f / M_PI;
 
+    // Return fov value.
     return a;
 }
 

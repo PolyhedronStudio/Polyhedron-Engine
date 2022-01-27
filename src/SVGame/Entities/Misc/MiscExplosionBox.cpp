@@ -24,7 +24,7 @@
 // Constructor/Deconstructor.
 //
 MiscExplosionBox::MiscExplosionBox(Entity* svEntity) 
-    : SVGBaseTrigger(svEntity) {
+    : Base(svEntity) {
 
 }
 MiscExplosionBox::~MiscExplosionBox() {
@@ -85,16 +85,12 @@ void MiscExplosionBox::Spawn() {
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
-        {
-            -16, -16, 0
-        },
+        { -16.f, -16.f, 0.f },
         // Maxs.
-        {
-            16, 16, 40
-        }
-        );
+        { 16.f, 16.f, 40.f }
+    );
 
-    SetFlags(EntityFlags::PowerArmor);
+    //SetFlags(EntityFlags::PowerArmor);
     //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
@@ -182,39 +178,36 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
     vec3_t newOrigin = GetOrigin() + vec3_t{
         0.f, 0.f, 1.f
     };
-
-    SetOrigin(newOrigin);
-    //
-    ////    // Calculate the end origin to use for tracing.
+        
+    // Calculate the end origin to use for tracing.
     vec3_t end = newOrigin + vec3_t{
         0, 0, -256.f
     };
-    //
-    //    // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-    ////
-    ////    // Return in case we hit anything.
-    if (trace.fraction == 1 || trace.allSolid)
+    
+    // Exceute the trace.
+    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, NULL, CONTENTS_MASK_MONSTERSOLID);
+    
+    // Return in case we hit anything.
+    if (trace.fraction == 1.f || trace.allSolid)
         return;
-    ////
-    ////    // Set new entity origin.
+    
+    // Unlink.
+    UnlinkEntity();
+
+    // Set new entity origin.
     SetOrigin(trace.endPosition);
     
-    //    // Check for ground.
-    SVG_StepMove_CheckGround(this);
-    //
-    //    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + FRAMETIME);
-
-    //    // Link entity back in.
-    LinkEntity();
-    //
-    //     //
-    //
-    //    //// Do a check ground for the step move of this pusher.
-    //SVG_StepMove_CheckGround(this);
-
     //// Do a check ground for the step move of this pusher.
+    SVG_StepMove_CheckGround(this);
+
+    // Link entity back in.
+    LinkEntity();
+
+    // Setup its next think time, for a frame ahead.
+    SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+
+    // Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
     //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
     // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
@@ -229,8 +222,7 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
 // (Has died due to taking damage.)
 //===============
 //
-void MiscExplosionBox::MiscExplosionBoxExplode(void)
-{
+void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     // Execute radius damage.
     SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
@@ -278,7 +270,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
         gi.WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), MultiCast::PHS);
 
-        SVG_InflictRadiusDamage(this, activator, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+        SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         float save;
         save = GetDelayTime();
@@ -291,7 +283,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
         gi.WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), MultiCast::PHS);
 
-        SVG_InflictRadiusDamage(this, activator, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+        SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         float save;
         save = GetDelayTime();
@@ -301,7 +293,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
     }
 
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::SVGBaseEntityThinkFree);
 }
 
@@ -314,14 +306,14 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void)
 //
 void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
-    SetTakeDamage(TakeDamage::Yes);
+    SetTakeDamage(TakeDamage::No);
 
     // Attacker becomes this entity its "activator".
-    if (attacker)
+    //if (attacker)
         SetActivator(attacker);
 
     // Setup the next think and think time.
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
+    SetNextThinkTime(level.time + 2 * FRAMETIME);
 
     // Set think function.
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxExplode);
@@ -342,15 +334,16 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
         return;
     // TODO: Move elsewhere in baseentity, I guess?
     // Prevent this entity from touching itself.
-    if (this == other)
+    if (self == other)
         return;
 
     // Ground entity checks.
-    if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == this))
+    if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == self))
         return;
 
     // Calculate ratio to use.
-    float ratio = (float)other->GetMass() / (float)GetMass();
+    other->SetMass(200);
+    float ratio = (float)other->GetMass() / (float)self->GetMass();
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
@@ -359,7 +352,7 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
     float yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, 40 * ratio );
+    SVG_StepMove_Walk(self, yaw, (0.1f / BASE_FRAMEDIVIDER) * ratio);
     //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 

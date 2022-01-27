@@ -204,7 +204,7 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
         //#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
-#define DEBUG_SERVER_PMOVE 1
+#define DEBUG_SERVER_PMOVE 0
 #if DEBUG_SERVER_PMOVE == 1
 static void SVGPM_Debug(const char* func, const char* fmt, ...) {
     char buffer[MAX_STRING_CHARS];

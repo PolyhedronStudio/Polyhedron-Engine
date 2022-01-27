@@ -451,8 +451,10 @@ void CL_SeekDemoMessage(void);
 
 
 //
-// entities.c
+// entities.cpp
 //
+void CL_ClipMoveToEntities(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, ClientEntity* skipEntity, const int32_t contentMask, trace_t* cmDstTrace);
+trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
 void CL_DeltaFrame(void);
 
 #ifdef _DEBUG

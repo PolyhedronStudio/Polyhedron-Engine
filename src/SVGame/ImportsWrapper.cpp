@@ -59,7 +59,7 @@ std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& ma
     }
 
     // Box the entities.
-    int32_t numEntities = gi.BoxEntities(mins, maxs, boxedServerEntities, MAX_EDICTS, AREA_SOLID);
+    int32_t numEntities = gi.BoxEntities(mins, maxs, boxedServerEntities, listCount, areaType);
 
     // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
     for (int32_t i = 0; i < numEntities; i++) {
