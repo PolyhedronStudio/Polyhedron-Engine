@@ -298,14 +298,13 @@ static void PM_TouchEntity(struct entity_s* ent) {
 //===============
 //
 static bool PM_CheckStep(const trace_t * trace) {
-
     if (!trace->allSolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
-            if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
+            //if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
                 return true;
 
-                PM_Debug("PM_CheckStep: true");
-            }
+                // KEEP AROUND - //PM_Debug("PM_CheckStep: true");
+            //}
         }
     }
 
@@ -320,11 +319,19 @@ static bool PM_CheckStep(const trace_t * trace) {
 //===============
 //
 static void PM_StepDown(const trace_t * trace) {
-    // Calculate step height.
+    // Set current origin to the trace end position.
     pm->state.origin = trace->endPosition;
-    pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
 
-    PM_Debug("PM_StepDown");
+    // Calculate step height.
+    const float stepHeight = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
+
+    // Set step variable in case the absolute value of stepHeight is equal or heigher than PM_STEP_HEIGHT_MIN.
+    if (fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN) {
+        pm->step = stepHeight;
+        PM_Debug("Set pm->step to %f", pm->step);
+    } else {
+        PM_Debug("Did not set pm->step");
+    }
 }
 
 //
@@ -344,7 +351,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins,
     // M_CheckGround function instead. (Seems related to a -0.25f).
     // 
     // And otherwise, we got this solution below, which... is seemingly slow in certain cases...
-#if 0
+#if 1
     return pm->Trace(start, mins, maxs, end);
 #else
     const vec3_t offsets = { 0.f, 1.f, -1.f };
@@ -366,18 +373,18 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins,
                 if (!trace.allSolid) {
 
                     if (i != 0 || j != 0 || k != 0) {
-                        PM_Debug("Fixed all-solid");
+                        // KEEP AROUND - // PM_Debug("Fixed all-solid");
                     }
 
                     return trace;
                 } else {
-                    PM_Debug("No fixed solids, aka !trace.AllSolid == FALSE");
+                    // KEEP AROUND - //PM_Debug("No fixed solids, aka !trace.AllSolid == FALSE");
                 }
             }
         }
     }
 
-    PM_Debug("No good position");
+    // KEEP AROUND - //PM_Debug("No good position");
     return pm->Trace(start, mins, maxs, end);
 #endif
 }
@@ -411,8 +418,9 @@ static bool PM_ImpactPlane(vec3_t * planes, int32_t num_planes, const vec3_t & p
 // Modifies the pml velocity and origin if succesful.
 //===============
 //
-#define MIN_STEP_NORMAL 0.7     // can't step up onto very steep slopes
-#define MAX_CLIP_PLANES 6
+static constexpr float      MIN_STEP_NORMAL = 0.7;      // Can't step up onto very steep slopes.
+static constexpr int32_t    MAX_CLIP_PLANES = 6;        // Maximum amount of planes to clip to.
+
 static qboolean PM_StepSlideMove_(void)
 {
     const int32_t numBumps = MAX_CLIP_PLANES - 2;
@@ -471,8 +479,7 @@ static qboolean PM_StepSlideMove_(void)
         if (PM_ImpactPlane(planes, numPlanes, trace.plane.normal)) {
             planes[numPlanes] = trace.plane.normal;
             numPlanes++;
-        }
-        else {
+        } else {
             // if we've seen this plane before, nudge our velocity out along it
             pm->state.velocity += trace.plane.normal;
             continue;
@@ -592,8 +599,7 @@ static void PM_StepSlideMove(void)
             // Quake2 trick jump secret sauce
             if ((pm->state.flags & PMF_ON_GROUND) || vel0.z < PM_SPEED_UP) {
                 PM_StepDown(&downTrace);
-            }
-            else {
+            } else {
                 pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
             }
 
@@ -643,7 +649,7 @@ static qboolean PM_CheckTrickJump(void) {
 //===============
 //
 static qboolean PM_CheckJump(void) {
-    PM_Debug("PM_CheckJump");
+    // KEEP AROUND - //PM_Debug("PM_CheckJump");
 
     // Before allowing a new jump:
     // 1. Wait for landing damage to subside.
@@ -660,7 +666,7 @@ static qboolean PM_CheckJump(void) {
 
     // 3. Check if, they didn't ask to jump.
     if (pm->moveCommand.input.upMove < 1) {
-        PM_Debug("PM_CheckJump - UPMOVE");
+        PM_Debug("PM_CheckJump - UPMOVE < 1");
         return false;
     }
 
@@ -679,9 +685,9 @@ static qboolean PM_CheckJump(void) {
         pm->state.flags &= ~PMF_TIME_TRICK_JUMP;
         pm->state.time = 0;
 
-        PM_Debug("Trick jump: %i", pm->moveCommand.input.upMove);
+        // KEEP AROUND - //PM_Debug("Trick jump: %i", pm->moveCommand.input.upMove);
     } else {
-        PM_Debug("Jump: %i", pm->moveCommand.input.upMove);
+        // KEEP AROUND - //PM_Debug("Jump: %i", pm->moveCommand.input.upMove);
     }
 
     if (pm->state.velocity.z < 0.0f) {
@@ -749,8 +755,8 @@ static void PM_CheckDuck(void) {
             // A nice view height value.
             const float targetViewHeight = pm->mins.z + height * 0.5f;
 
-            // LERP it.
-            if (pm->state.viewOffset.z > targetViewHeight) { // go down
+            // Go down. This gets LERP-ed.
+            if (pm->state.viewOffset.z > targetViewHeight) {
                 pm->state.viewOffset.z -= playerMoveLocals.frameTime * PM_SPEED_DUCK_STAND;
             }
 
@@ -906,7 +912,7 @@ static void PM_CheckWater(void) {
 
     // Are we in liquid? Hallelujah!
     if (contents & CONTENTS_MASK_LIQUID) {
-        // Watertype is whichever ocntents type we are in with at least our feet.
+        // Watertype is whichever contents type we are in with at least our feet.
         pm->waterType = contents;
         pm->waterLevel = WaterLevel::Feet;
 
@@ -1001,7 +1007,6 @@ static void PM_CheckGround(void) {
         // Sink down to it if not trick jumping
         if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
             pm->state.origin = trace.endPosition;
-
             pm->state.velocity = PM_ClipVelocity(pm->state.velocity, trace.plane.normal, PM_CLIP_BOUNCE);
         }
     } else {
@@ -1359,7 +1364,7 @@ static void PM_WaterMove(void) {
 //
 static void PM_AirMove(void) {
 
-    //PM_Debug("%s", Vec3ToString(pm->state.origin));
+    PM_Debug("{%s}", Vec3ToString(pm->state.origin));
 
     PM_Friction();
 
@@ -1404,6 +1409,8 @@ static void PM_AirMove(void) {
 //===============
 //
 static void PM_WalkMove(void) {
+    PM_Debug("{%s}", Vec3ToString(pm->state.origin));
+
     // Check for beginning of a jump
     if (PM_CheckJump()) {
         PM_AirMove();
@@ -1745,23 +1752,18 @@ void PMove(PlayerMove * pmove)
 
     if (pm->state.flags & PMF_TIME_TELEPORT) {
         // pause in place briefly
-    }
-    else if (pm->state.flags & PMF_TIME_WATER_JUMP) {
+    } else if (pm->state.flags & PMF_TIME_WATER_JUMP) {
         PM_WaterJumpMove();
-    }
-    else if (pm->state.flags & PMF_ON_LADDER) {
+    } else if (pm->state.flags & PMF_ON_LADDER) {
         PM_LadderMove();
-    }
-    else if (pm->state.flags & PMF_ON_GROUND) {
+    } else if (pm->state.flags & PMF_ON_GROUND) {
         PM_WalkMove();
-        PM_Debug("Onground");
-    }
-    else if (pm->waterLevel > WaterLevel::Feet) {
+        // KEEP AROUND - //PM_Debug("Onground");
+    } else if (pm->waterLevel > WaterLevel::Feet) {
         PM_WaterMove();
-    }
-    else {
+    } else {
         PM_AirMove();
-        PM_Debug("Airmove");
+        // KEEP AROUND - //PM_Debug("Airmove");
     }
 
     // Check for ground at new spot.

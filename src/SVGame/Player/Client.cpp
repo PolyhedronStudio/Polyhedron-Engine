@@ -537,7 +537,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
         if (classEntity->GetMoveType() != MoveType::NoClip && classEntity->GetMoveType() != MoveType::Spectator)
             UTIL_TouchTriggers(classEntity);
 
-        // touch other objects
+        // Touch other objects
         int32_t i = 0;
         int32_t j = 0;
         for (i = 0 ; i < pm.numTouchedEntities; i++) {

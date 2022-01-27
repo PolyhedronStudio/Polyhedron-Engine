@@ -429,7 +429,7 @@ SET(HEADERS_SHARED
 	
 	# Other shared lib functionalities.
 	../inc/Shared/CLGame.h
-	../inc/Shared/cltypes.h
+	../inc/Shared/CLTypes.h
 	../inc/Shared/collision.h
 	../inc/Shared/common.h
 	../inc/Shared/config.h
@@ -642,7 +642,7 @@ if (CONFIG_BUILD_CL_GAME)
 	# Used for sharedgame code(such as pmove), so we can ifdef certain parts specific to client or server.	
 	ADD_DEFINITIONS(-DSHAREDGAME_CLIENT=1)
 	# Add library.
-	ADD_LIBRARY(CLGame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 endif()
 
 IF(WIN32)
@@ -768,7 +768,7 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../VC/inc)
 	TARGET_SOURCES(svgame PRIVATE OS/Resources/basepoly_sv.rc)
-	TARGET_SOURCES(CLGame PRIVATE OS/Resources/basepoly_cl.rc)
+	TARGET_SOURCES(clgame PRIVATE OS/Resources/basepoly_cl.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -788,7 +788,7 @@ IF (WIN32)
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)
-TARGET_INCLUDE_DIRECTORIES(CLGame PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../inc)
 
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
@@ -834,7 +834,7 @@ SET_TARGET_PROPERTIES(server
 # Client Game
 if (CONFIG_BUILD_CL_GAME)
 	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-	SET_TARGET_PROPERTIES(CLGame
+	SET_TARGET_PROPERTIES(clgame
 		PROPERTIES
 		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
 		LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"

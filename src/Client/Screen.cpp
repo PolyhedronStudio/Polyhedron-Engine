@@ -726,8 +726,6 @@ void SCR_RegisterMedia(void)
         for (j = 0; j < STAT_PICS; j++)
             scr.sb_pics[i][j] = R_RegisterPic(sb_nums[i][j]);
 
-    // N&C: Isn't used anywhere, why was this here by default?
-//    scr.backtile_pic = R_RegisterImage("backtile", IT_PIC, IF_PERMANENT | IF_REPEAT, NULL);
     scr.net_pic = R_RegisterPic("net");
     scr.font_pic = R_RegisterFont(scr_font->string);
 }

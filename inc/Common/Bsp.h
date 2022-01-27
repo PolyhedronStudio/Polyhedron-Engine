@@ -37,11 +37,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define VIS_FAST_LONGS(bsp) \
     (((bsp)->visrowsize + sizeof(uint_fast32_t) - 1) / sizeof(uint_fast32_t))
 
-
-// for lightmap block calculation
-#define S_MAX(surf) (((surf)->extents[0] >> 4) + 1)
-#define T_MAX(surf) (((surf)->extents[1] >> 4) + 1)
-
 typedef struct mtexinfo_s {  // used internally due to name len probs //ZOID
     csurface_t          c;
     char                name[MAX_TEXNAME];
@@ -126,10 +121,9 @@ typedef struct mface_s {
     int             firstbasis;
     int             drawframe;
 
-#if USE_DLIGHTS
     int             dlightframe;
     int             dlightbits;
-#endif
+
     struct mface_s  *next;
 } mface_t;
 #endif

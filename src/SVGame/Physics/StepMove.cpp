@@ -312,6 +312,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
         ent->LinkEntity();
         UTIL_TouchTriggers(ent);
     }
+
     return true;
 }
 

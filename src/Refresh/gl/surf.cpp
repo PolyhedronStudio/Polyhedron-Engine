@@ -111,7 +111,6 @@ DYNAMIC BLOCKLIGHTS
 
 static float blocklights[MAX_BLOCKLIGHTS * 3];
 
-#if USE_DLIGHTS
 static void add_dynamic_lights(mface_t *surf)
 {
     rdlight_t    *light;
@@ -172,7 +171,6 @@ static void add_dynamic_lights(mface_t *surf)
         }
     }
 }
-#endif
 
 static void add_light_styles(mface_t *surf, int size)
 {
@@ -242,14 +240,12 @@ static void update_dynamic_lightmap(mface_t *surf)
     // add all the lightmaps
     add_light_styles(surf, size);
 
-#if USE_DLIGHTS
     // add all the dynamic lights
     if (surf->dlightframe == glr.dlightframe) {
         add_dynamic_lights(surf);
     } else {
         surf->dlightframe = 0;
     }
-#endif
 
     // put into texture format
     bl = blocklights;
@@ -283,13 +279,11 @@ void GL_PushLights(mface_t *surf)
         return;
     }
 
-#if USE_DLIGHTS
     // dynamic this frame or dynamic previously
     if (surf->dlightframe) {
         update_dynamic_lightmap(surf);
         return;
     }
-#endif
 
     // check for light style updates
     for (i = 0; i < surf->numstyles; i++) {
@@ -406,9 +400,7 @@ static void build_primary_lightmap(mface_t *surf)
     // add all the lightmaps
     add_light_styles(surf, size);
 
-#if USE_DLIGHTS
     surf->dlightframe = 0;
-#endif
 
     // put into texture format
     bl = blocklights;

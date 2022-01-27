@@ -9,10 +9,8 @@
 #ifndef __CLGAME_NEWFX_H__
 #define __CLGAME_NEWFX_H__
 
-#if USE_DLIGHTS
 void CLG_Flashlight(int ent, vec3_t pos);
 void CLG_ColorFlash(vec3_t pos, int ent, int intensity, float r, float g, float b);
-#endif
 void CLG_DebugTrail(vec3_t start, vec3_t end);
 void CLG_SmokeTrail(vec3_t start, vec3_t end, int colorStart, int colorRun, int spacing);
 void CLG_ForceWall(vec3_t start, vec3_t end, int color);

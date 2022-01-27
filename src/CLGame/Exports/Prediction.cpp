@@ -65,9 +65,21 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
 //
 //---------------
 void ClientGamePrediction::PredictAngles() {
+    // Add delta predicted angles to our view angles. (Allows for doors and other objects to push the player properly.)
     cl->predictedState.viewAngles[0] = cl->viewAngles[0] + cl->frame.playerState.pmove.deltaAngles[0];
     cl->predictedState.viewAngles[1] = cl->viewAngles[1] + cl->frame.playerState.pmove.deltaAngles[1];
     cl->predictedState.viewAngles[2] = cl->viewAngles[2] + cl->frame.playerState.pmove.deltaAngles[2];
+}
+
+//---------------
+// Client Side PMove trace.
+//---------------
+static trace_t PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
+    trace_t cmTrace;
+    
+    cmTrace = clgi.Trace(start, mins, maxs, end, 0, CONTENTS_MASK_PLAYERSOLID);
+
+    return cmTrace;
 }
 
 //---------------
@@ -75,13 +87,15 @@ void ClientGamePrediction::PredictAngles() {
 //
 //---------------
 void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) {
-    PlayerMove   pm = {};
+    // Player Move object.
+    PlayerMove pm = {};
 
+    // Only continue if there is an acknowledged command index, or a current command index.
     if (!acknowledgedCommandIndex || !currentCommandIndex)
         return;
 
     // Setup base trace calls.
-    pm.Trace = CLG_Trace;
+    pm.Trace = PM_Trace;
     pm.PointContents = CLG_PointContents;
 
     // Restore ground entity for this frame.
@@ -120,9 +134,9 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         cl->moveCommand.prediction.simulationTime = clgi.GetRealTime();
 
         pm.moveCommand = cl->moveCommand;
-        pm.moveCommand.input.forwardMove = cl->localmove[0];
-        pm.moveCommand.input.rightMove = cl->localmove[1];
-        pm.moveCommand.input.upMove = cl->localmove[2];
+        pm.moveCommand.input.forwardMove = cl->localMove[0];
+        pm.moveCommand.input.rightMove = cl->localMove[1];
+        pm.moveCommand.input.upMove = cl->localMove[2];
         PMove(&pm);
 
         // Update player move client side audio effects.
@@ -133,7 +147,11 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     }
 
     // Copy results out for rendering
-    cl->predictedState.viewOrigin = pm.state.origin;
+    // TODO: This isn't really the nicest way of preventing these "do not get stuck" budges.
+    // Perhaps take another look at pmove to correct this in the future.
+    if (vec3_distance(cl->predictedState.viewOrigin, pm.state.origin) > 0.03125f) {
+        cl->predictedState.viewOrigin = pm.state.origin;
+    }
     //cl->predictedState.velocity    = pm.state.velocity;
     cl->predictedState.viewOffset = pm.state.viewOffset;
     cl->predictedState.stepOffset = pm.state.stepOffset;

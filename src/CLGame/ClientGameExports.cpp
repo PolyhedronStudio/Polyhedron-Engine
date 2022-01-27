@@ -19,17 +19,16 @@
 //
 //---------------
 float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) {
-    float    a;
-    float    x;
-
-    if (fieldOfViewX < 1.f || fieldOfViewX > 179.f)
+    // Ensure field of view is within valid ranges.
+    if (fieldOfViewX <= 0 || fieldOfViewX > 179)
         Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fieldOfViewX);
 
-    x = width / tan(fieldOfViewX / 360.f * M_PI);
-
-    a = atan(height / x);
+    // Calculate proper fov value.
+    float x = width / tan(fieldOfViewX / 360.f * M_PI);
+    float a = atan(height / x);
     a = a * 360.f / M_PI;
 
+    // Return fov value.
     return a;
 }
 
@@ -110,18 +109,17 @@ void ClientGameExports::ClientUpdateOrigin() {
         LerpAngles(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction, cl->refdef.viewAngles);
     }
 
-#if USE_SMOOTH_DELTA_ANGLES
+    // Lerp between previous and current frame delta angles.
     cl->deltaAngles[0] = LerpAngle(previousPlayerState->pmove.deltaAngles[0], currentPlayerState->pmove.deltaAngles[0], lerpFraction);
     cl->deltaAngles[1] = LerpAngle(previousPlayerState->pmove.deltaAngles[1], currentPlayerState->pmove.deltaAngles[1], lerpFraction);
     cl->deltaAngles[2] = LerpAngle(previousPlayerState->pmove.deltaAngles[2], currentPlayerState->pmove.deltaAngles[2], lerpFraction);
-#endif
 
     // don't interpolate blend color
     Vector4Copy(currentPlayerState->blend, cl->refdef.blend);
 
     // Interpolate field of view
     cl->fov_x = LerpFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
-    cl->fov_y = CLG_CalculateFOV(cl->fov_x, 4, 3);
+    cl->fov_y = ClientCalculateFieldOfView(cl->fov_x, 4, 3);
 
     // Calculate new client forward, right, and up vectors.
     vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
@@ -130,14 +128,14 @@ void ClientGameExports::ClientUpdateOrigin() {
     cl->playerEntityOrigin = cl->refdef.vieworg;
     cl->playerEntityAngles = cl->refdef.viewAngles;
 
+    // Keep it properly within range.
     if (cl->playerEntityAngles[vec3_t::Pitch] > 180) {
         cl->playerEntityAngles[vec3_t::Pitch] -= 360;
     }
-
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
-
-    // Update the client's listener origin values.
+    // Update the client's listener origin values. This is a nescessity for the game in order
+    // to properly play sound effects.
     clgi.UpdateListenerOrigin();
 }
 
@@ -175,9 +173,7 @@ void ClientGameExports::ClientDeltaFrame() {
 //---------------
 void ClientGameExports::ClientFrame() {
     // Advance local effects.
-#if USE_DLIGHTS
     CLG_RunDLights();
-#endif
 #if USE_LIGHTSTYLES
     CLG_RunLightStyles();
 #endif

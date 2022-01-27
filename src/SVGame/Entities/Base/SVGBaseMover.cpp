@@ -16,33 +16,7 @@
 #include "SVGBaseMover.h"
 
 // Constructor/Deconstructor.
-SVGBaseMover::SVGBaseMover(Entity* svEntity) : SVGBaseTrigger(svEntity) {
-	//
-	// All callback functions best be nullptr.
-	//
-	//thinkFunction = nullptr;
-
-
-	//
-	// Set all entity pointer references to nullptr.
-	//
-	//activatorEntity = nullptr;
-	//enemyEntity = nullptr;
-	//groundEntity = nullptr;
-	//oldEnemyEntity = nullptr;
-	//teamChainEntity = nullptr;
-	//teamMasterEntity = nullptr;
-
-	//
-	// Default values for members.
-	//
-	acceleration = 0;
-	deceleration = 0;
-	speed = 0;
-	startPosition = { 0.f, 0.f, 0.f };
-	endPosition = { 0.f, 0.f, 0.f };
-}
-SVGBaseMover::~SVGBaseMover() {
+SVGBaseMover::SVGBaseMover(Entity* svEntity) : Base(svEntity) {
 
 }
 

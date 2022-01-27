@@ -654,7 +654,13 @@ void SVG_RunFrame(void)
 
         // Admer: entity was marked for removal at the previous tick
         if (entity->GetServerFlags() & EntityServerFlags::Remove) {
+            // Free server entity.
             SVG_FreeEntity(entity->GetServerEntity());
+
+            // Be sure to unset the server entity on this SVGBaseEntity.
+            entity->SetServerEntity(nullptr);
+
+            // Skip further processing of this entity, it's removed.
             continue;
         }
 
@@ -672,6 +678,7 @@ void SVG_RunFrame(void)
 
             // Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
             if (!(entity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (entity->GetServerFlags() & EntityServerFlags::Monster)) {
+                // Check for a new ground entity that resides below this entity.
                 SVG_StepMove_CheckGround(entity);
             }
         }

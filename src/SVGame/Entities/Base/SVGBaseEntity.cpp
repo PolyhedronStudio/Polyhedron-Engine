@@ -16,46 +16,63 @@
 
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
-	//
-	// All callback functions best be nullptr.
-	//
-	thinkFunction = nullptr;
-	useFunction = nullptr;
-	touchFunction = nullptr;
-	blockedFunction = nullptr;
-	takeDamageFunction = nullptr;
-	dieFunction = nullptr;
+	////
+	//// All callback functions best be nullptr.
+	////
+	//thinkFunction = nullptr;
+	//useFunction = nullptr;
+	//touchFunction = nullptr;
+	//blockedFunction = nullptr;
+	//takeDamageFunction = nullptr;
+	//dieFunction = nullptr;
 
-	//
-	// Set all entity pointer references to nullptr.
-	//
-	enemyEntity = nullptr;
-	groundEntity = nullptr;
-	oldEnemyEntity = nullptr;
-	teamChainEntity = nullptr;
-	teamMasterEntity = nullptr;
+	////
+	//// Set all entity pointer references to nullptr.
+	////
+	//enemyEntity = nullptr;
+	//groundEntity = nullptr;
+	//oldEnemyEntity = nullptr;
+	//teamChainEntity = nullptr;
+	//teamMasterEntity = nullptr;
 
-	//
-	// Default values for members.
-	//
-	moveType = MoveType::None;
+	////
+	//// Default values for members.
+	////
+	//moveType = MoveType::None;
 
-	// Velocity.
-	delayTime = 0;
-	waitTime = 0;
-
-	flags = 0;
-	spawnFlags = 0;
-	velocity = vec3_zero();
-	angularVelocity = vec3_zero();
-	mass = 0;
-	gravity = 1.f;
-	yawSpeed = 0.f;
-	idealYawAngle = 0.f;
-	groundEntityLinkCount = 0;
-	health = 0;
-	maxHealth = 0;
-	deadFlag = DEAD_NO;
+	//// Velocity.
+	//angularVelocity = vec3_zero();
+	//damage = 0;
+	//deadFlag = DEAD_NO;
+	//delayTime = 0;
+	//enemyEntity = nullptr;
+	//flags = 0;
+	//gravity = 0;
+	//groundEntity = nullptr;
+	//groundEntityLinkCount = 0;
+	//health = 0;
+	//idealYawAngle = 0.f;
+	//killTargetStr = "";
+	//mass = 0;
+	//maxHealth = 0;
+	//messageStr = "";
+	//model = "";
+	//moveType = MoveType::None;
+	//nextThinkTime = 0;
+	//oldEnemyEntity = nullptr;
+	//ownerEntity = nullptr;
+	//spawnFlags = 0;
+	//takeDamage = TakeDamage::No;
+	//targetStr = "";
+	//targetNameStr = "";
+	//teamChainEntity = nullptr;
+	//teamMasterEntity = nullptr;
+	//viewHeight = 0;
+	//velocity = vec3_zero();
+	//waitTime = 0.f;
+	//waterLevel = 0;
+	//waterType = 0;
+	//yawSpeed = 0.f;
 }
 SVGBaseEntity::~SVGBaseEntity() {
 

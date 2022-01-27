@@ -25,7 +25,7 @@
 
 // (Client/Game) related.
 #include "Client/GameModule.h"   // TODO: How come it can find client.h??
-#include "Shared/cltypes.h"
+#include "Shared/CLTypes.h"
 #include "Shared/CLGame.h"
 
 // Contains the functions being exported to client game dll.
@@ -428,6 +428,8 @@ void CL_InitGameProgs(void)
 
     importAPI.CheckForIgnore = CL_CheckForIgnore;
     importAPI.CheckForIP = CL_CheckForIP;
+
+    importAPI.Trace = CL_Trace;
 
     // Command Buffer.
     importAPI.Cbuf_AddText = _wrp_Cbuf_AddText;

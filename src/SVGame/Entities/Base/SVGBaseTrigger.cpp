@@ -28,7 +28,7 @@ SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : SVGBaseEntity(svEntity) {
 	//
 	// Set all entity pointer references to nullptr.
 	//
-	activatorEntity = nullptr;
+	//activatorEntity = nullptr;
 	//activatorEntity = nullptr;
 	//enemyEntity = nullptr;
 	//groundEntity = nullptr;
@@ -51,9 +51,6 @@ SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : SVGBaseEntity(svEntity) {
 	//health = 0;
 	//maxHealth = 0;
 	//deadFlag = DEAD_NO;
-}
-SVGBaseTrigger::~SVGBaseTrigger() {
-
 }
 
 // Interface functions. 

@@ -4,6 +4,7 @@
 // ClientGameEntities implementation.
 #pragma once
 
+// Client Game Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
 //---------------------------------------------------------------------
@@ -13,5 +14,17 @@ class ClientGameEntities : public IClientGameExportEntities {
 public:
 	// Executed whenever an entity event is receieved.
 	void Event(int32_t number) final;
+
+	// Parse the server frame for server entities to add to our client view.
+	// Also applies special rendering effects to them where desired.
+	void AddPacketEntities() final;
+
+	// Add the view weapon render entity to the screen. Can also be used for
+	// other scenarios where a depth hack is required.
+	void AddViewEntities() final;
+
+private:
+	// Gives the opportunity to adjust render effects where desired.
+	int32_t ApplyRenderEffects(int32_t renderEffects);
 };
 

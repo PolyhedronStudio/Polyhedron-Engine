@@ -31,8 +31,10 @@ extern cvar_t* cl_run;
 //
 //---------------
 void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
-    cl->localmove = vec3_zero();
+    // Reset for this frame.
+    cl->localMove = vec3_zero();
 
+    // In case of a pause, return. (There won't be any user input being fetched for movement.)
     if (sv_paused->integer) {
         return;
     }
@@ -44,20 +46,22 @@ void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
     CLG_AdjustAngles(miliseconds);
 
     // Get basic movement from keyboard
-    cl->localmove = CLG_BaseMove(cl->localmove);
+    cl->localMove = CLG_BaseMove(cl->localMove);
 
     // Allow mice to add to the move
     CLG_MouseMove();
 
     // Add accumulated mouse forward/side movement
-    cl->localmove[0] += cl->mousemove[0];
-    cl->localmove[1] += cl->mousemove[1];
+    cl->localMove[0] += cl->mouseMove[0];
+    cl->localMove[1] += cl->mouseMove[1];
 
     // Clamp to server defined max speed
-    cl->localmove = CLG_ClampSpeed(cl->localmove);
+    cl->localMove = CLG_ClampSpeed(cl->localMove);
 
+    // Clamp the pitch.
     CLG_ClampPitch();
 
+    // Assign view angles to move command user input.
     cl->moveCommand.input.viewAngles[0] = cl->viewAngles[0];
     cl->moveCommand.input.viewAngles[1] = cl->viewAngles[1];
     cl->moveCommand.input.viewAngles[2] = cl->viewAngles[2];
@@ -107,8 +111,9 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
         cl->moveCommand.input.buttons |= BUTTON_ANY;
     }
 
+    // Set a 'normal' time, since anything over 250 is unreasonable
     if (cl->moveCommand.input.msec > 250) {
-        cl->moveCommand.input.msec = 100;        // time was unreasonable
+        cl->moveCommand.input.msec = 100;
     }
 
     // Rebuild the movement vector
@@ -118,8 +123,8 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     move = CLG_BaseMove(move);
 
     // Add mouse forward/side movement
-    move[0] += cl->mousemove[0];
-    move[1] += cl->mousemove[1];
+    move[0] += cl->mouseMove[0];
+    move[1] += cl->mouseMove[1];
 
     // Clamp to server defined max speed
     move = CLG_ClampSpeed(move);
@@ -130,16 +135,18 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     cl->moveCommand.input.upMove = move[2];
 
     // Clear all states
-    cl->mousemove[0] = 0;
-    cl->mousemove[1] = 0;
+    cl->mouseMove[0] = 0;
+    cl->mouseMove[1] = 0;
 
+    // Assign current impulse, and reset the input for the next frame.
     cl->moveCommand.input.impulse = in_impulse;
     in_impulse = 0;
 
-    // Save this command off for prediction
+    // Save this command off for client move prediction.
     cl->currentClientCommandNumber++;
     cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->moveCommand;
 
+    // Clear keys that need clearing for the next frame.
     CLG_KeyClear(&in_right);
     CLG_KeyClear(&in_left);
 
@@ -156,6 +163,6 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     CLG_KeyClear(&in_lookdown);
 
 
-    // Clear pending cmd
+    // Clear the pending cmd for the next frame.
     cl->moveCommand = {};
 }

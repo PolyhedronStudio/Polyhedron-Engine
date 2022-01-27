@@ -2,19 +2,19 @@
 #pragma once
 
 enum ErrorType{
-    ERR_FATAL,          // exit the entire game with a popup window
-    ERR_DROP,           // print to console and disconnect from game
-    ERR_DISCONNECT,     // like drop, but not an error
-    ERR_RECONNECT       // make server broadcast 'reconnect' message
+    ERR_FATAL,          // Exit the entire game with a popup window
+    ERR_DROP,           // Print to console and disconnect from game
+    ERR_DISCONNECT,     // Like drop, but not an error
+    ERR_RECONNECT       // Make server broadcast 'reconnect' message
 };
 
 enum PrintType{
-    PRINT_ALL,          // general messages
-    PRINT_TALK,         // print in green color
-    PRINT_DEVELOPER,    // only print when "developer 1"
-    PRINT_WARNING,      // print in yellow color
-    PRINT_ERROR,        // print in red color
-    PRINT_NOTICE        // print in cyan color
+    PRINT_ALL,          // General messages
+    PRINT_TALK,         // Print in green color
+    PRINT_DEVELOPER,    // Only print when "developer 1"
+    PRINT_WARNING,      // Print in yellow color
+    PRINT_ERROR,        // Print in red color
+    PRINT_NOTICE        // Print in cyan color
 };
 
 //

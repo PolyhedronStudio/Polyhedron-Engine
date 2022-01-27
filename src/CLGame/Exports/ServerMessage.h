@@ -11,6 +11,8 @@
 //---------------------------------------------------------------------
 class ClientGameServerMessage : public IClientGameExportServerMessage {
 public:
+    virtual ~ClientGameServerMessage() = default;
+
     // Breaks up playerskin into name(optional), modeland skin components.
     // If model or skin are found to be invalid, replaces them with sane defaults.
     qboolean ParsePlayerSkin(char* name, char* model, char* skin, const char* str) final;

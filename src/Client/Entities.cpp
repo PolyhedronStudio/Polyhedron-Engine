@@ -22,10 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/GameModule.h"
 #include "refresh/models.h"
 
-extern qhandle_t cl_mod_powerscreen;
-extern qhandle_t cl_mod_laser;
-extern qhandle_t cl_mod_dmspot;
-extern qhandle_t cl_sfx_footsteps[4];
 
 /*
 =========================================================================
@@ -50,7 +46,7 @@ static inline qboolean entity_optimized(const EntityState *state)
 }
 
 static inline void
-entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origin)
+entity_update_new(ClientEntity *ent, const EntityState *state, const vec_t *origin)
 {
     static int entity_ctr;
     ent->id = ++entity_ctr;
@@ -74,7 +70,7 @@ entity_update_new(cl_entity_t *ent, const EntityState *state, const vec_t *origi
 }
 
 static inline void
-entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origin)
+entity_update_old(ClientEntity *ent, const EntityState *state, const vec_t *origin)
 {
     int eventID = state->eventID;
 
@@ -103,7 +99,7 @@ entity_update_old(cl_entity_t *ent, const EntityState *state, const vec_t *origi
     ent->prev = ent->current;
 }
 
-static inline qboolean entity_new(const cl_entity_t *ent)
+static inline qboolean entity_new(const ClientEntity *ent)
 {
     if (!cl.oldframe.valid)
         return true;   // last received frame was invalid
@@ -125,7 +121,7 @@ static inline qboolean entity_new(const cl_entity_t *ent)
 
 static void entity_update(const EntityState *state)
 {
-    cl_entity_t *ent = &cs.entities[state->number];
+    ClientEntity *ent = &cs.entities[state->number];
     const vec_t *origin;
     vec3_t origin_v;
 
@@ -203,10 +199,11 @@ static void set_active_state(void)
 
     SCR_EndLoadingPlaque();     // get rid of loading plaque
     SCR_LagClear();
-    Con_Close(false);          // get rid of connection screen
+
 
     // Open the menu here iafter we're done loading the map properly.
     CL_OpenBSPMenu();
+    Con_Close(false);          // get rid of connection screen
 
     CL_CheckForPause();
 
@@ -222,7 +219,7 @@ static void
 player_update(ServerFrame *oldframe, ServerFrame *frame, int framediv)
 {
     PlayerState *ps, *ops;
-    cl_entity_t *ent;
+    ClientEntity *ent;
     int oldnum;
 
     // find states to interpolate between
@@ -280,11 +277,11 @@ A valid frame has been parsed.
 */
 void CL_DeltaFrame(void)
 {
-    cl_entity_t           *ent;
-    EntityState      *state;
-    int                 i, j;
-    int                 frameNumber;
-    int                 prevstate = cls.connectionState;
+    ClientEntity    *ent;
+    EntityState     *state;
+    int32_t i, j;
+    int32_t frameNumber;
+    int32_t prevstate = cls.connectionState;
 
     // getting a valid frame message ends the connection process
     if (cls.connectionState == ClientConnectionState::Precached)
@@ -340,7 +337,7 @@ void CL_DeltaFrame(void)
 // for debugging problems when out-of-date entity origin is referenced
 void CL_CheckEntityPresent(int entnum, const char *what)
 {
-    cl_entity_t *e;
+    ClientEntity *e;
 
     if (entnum == cl.frame.clientNumber + 1) {
         return; // player entity = current
@@ -363,6 +360,112 @@ void CL_CheckEntityPresent(int entnum, const char *what)
 }
 #endif
 
+/*
+==========================================================================
+
+CLIENT ENTITY TRACING FUNCTIONALITY.
+
+==========================================================================
+*/
+
+/*
+===============
+CL_ClipMoveToEntities
+
+Clips the trace against all entities resulting in a final trace result.
+===============
+*/
+void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask, trace_t *cmDstTrace) {
+    // CM Source Trace.
+    trace_t         cmSrcTrace;
+    // Head Node used for testing.
+    mnode_t*        headNode = nullptr;
+    // Collision model for entity.
+    mmodel_t*       cmodel = nullptr;
+    // Client side entity.
+    ClientEntity*   clientEntity = nullptr;
+
+    // Actual start point of the trace. May modify during the loop.
+    vec3_t traceOrigin = vec3_zero();
+    // Actual angles for the trace. May modify during the loop.
+    vec3_t traceAngles = vec3_zero();
+
+    for (uint32_t i = 0; i < cl.numSolidEntities; i++) {
+        // Fetch client entity.
+        clientEntity = cl.solidEntities[i];
+
+        // This check is likely redundent but let's make sure it is there anyway for possible future changes.
+        if (clientEntity == nullptr) {
+            continue;
+        }
+
+        // Should we skip it?
+        if (skipEntity != nullptr && skipEntity->current.number == clientEntity->current.number) {
+            continue;
+        }
+
+        if (clientEntity->current.solid == PACKED_BSP) {
+            // special value for bmodel
+            cmodel = cl.clipModels[clientEntity->current.modelIndex];
+            if (!cmodel)
+                continue;
+            headNode = cmodel->headNode;
+
+            //            traceStart = start;
+            traceAngles = clientEntity->current.angles;
+        } else {
+            vec3_t entityMins = {0.f, 0.f, 0.f};
+            vec3_t entityMaxs = {0.f, 0.f, 0.f};
+            MSG_UnpackSolid32(clientEntity->current.solid, entityMins, entityMaxs);
+            headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
+            traceAngles = vec3_zero();
+        }
+        traceOrigin = clientEntity->current.origin;
+
+        vec3_t traceOrigin2 = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl.lerpFraction);
+
+        if (clientEntity->current.number == 17)
+            Com_Printf("entID %i: traceOrigin = %s, traceOrigin2 = %s\n", clientEntity->current.number, vec3_to_str(traceOrigin).c_str(), vec3_to_str(traceOrigin2).c_str());
+        // TODO: probably need to add a skip entityt or so,
+        if (cmDstTrace->allSolid)
+            return;
+
+        CM_TransformedBoxTrace(&cmSrcTrace, start, end,
+                               mins, maxs, headNode, contentMask,
+                               clientEntity->current.origin, traceAngles);
+
+        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)clientEntity);
+    }
+}
+
+/*
+===============
+CL_Trace
+
+Executes a client side trace on the world and its entities using the given contentMask.
+Optionally one can pass a pointer to an entity in order to skip(ignore) it.
+===============
+*/
+trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask) {
+    trace_t trace;
+
+    // Ensure we can pull of a proper trace.
+    if (!cl.bsp || !cl.bsp->nodes) {
+        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        return trace;
+    }
+
+    // Execute trace.
+    CM_BoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask);
+
+    // Set trace entity.
+    trace.ent = (struct entity_s*)&cl.solidEntities[0];
+
+    // Clip to other solid entities.
+    CL_ClipMoveToEntities(start, mins, maxs, end, (ClientEntity*)skipEntity, contentMask, &trace);
+
+    return trace;
+}
 
 /*
 ==========================================================================
@@ -372,69 +475,6 @@ INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 ==========================================================================
 */
 
-// Use a static entity ID on some things because the renderer relies on eid to match between meshes
-// on the current and previous frames.
-#define RESERVED_ENTITIY_GUN 1
-#define RESERVED_ENTITIY_SHADERBALLS 2
-#define RESERVED_ENTITIY_COUNT 3
-
-static int adjust_shell_fx(int renderEffects)
-{
-	// PMM - at this point, all of the shells have been handled
-	// if we're in the rogue pack, set up the custom mixing, otherwise just
-	// keep going
-	if (!strcmp(fs_game->string, "rogue")) {
-		// all of the solo colors are fine.  we need to catch any of the combinations that look bad
-		// (double & half) and turn them into the appropriate color, and make double/quad something special
-		if (renderEffects & RenderEffects::HalfDamShell) {
-			// ditch the half damage shell if any of red, blue, or double are on
-			if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::DoubleShell))
-				renderEffects &= ~RenderEffects::HalfDamShell;
-		}
-
-		if (renderEffects & RenderEffects::DoubleShell) {
-			// lose the yellow shell if we have a red, blue, or green shell
-			if (renderEffects & (RenderEffects::RedShell | RenderEffects::BlueShell | RenderEffects::GreenShell))
-				renderEffects &= ~RenderEffects::DoubleShell;
-			// if we have a red shell, turn it to purple by adding blue
-			if (renderEffects & RenderEffects::RedShell)
-				renderEffects |= RenderEffects::BlueShell;
-			// if we have a blue shell (and not a red shell), turn it to cyan by adding green
-			else if (renderEffects & RenderEffects::BlueShell) {
-				// go to green if it's on already, otherwise do cyan (flash green)
-				if (renderEffects & RenderEffects::GreenShell)
-					renderEffects &= ~RenderEffects::BlueShell;
-				else
-					renderEffects |= RenderEffects::GreenShell;
-			}
-		}
-	}
-
-	return renderEffects;
-}
-
-/*
-===============
-CL_AddEntities
-
-Emits all entities, particles, and lights to the refresh
-===============
-*/
-void CL_AddEntities(void)
-{
-    // CL_UpdateOrigin(); // N&C: Moved to V_RenderView so CG Module can use these too.
-   // CL_FinishViewValues();
-    //CL_AddPacketEntities();
-   // CL_AddTEnts();
-//   // CL_AddParticles();
-//#if USE_DLIGHTS
-//    CL_AddDLights();
-//#endif
-//#if USE_LIGHTSTYLES
-//    CL_AddLightStyles();
-//#endif
-    LOC_AddLocationsToScene();
-}
 
 /*
 ===============
@@ -445,8 +485,8 @@ Called to get the sound spatialization origin
 */
 vec3_t CL_GetEntitySoundOrigin(int entnum) {
     // Pointers.
-    cl_entity_t   *ent;
-    mmodel_t    *cm;
+    ClientEntity    *ent;
+    mmodel_t        *cm;
 
     // Vectors.
     vec3_t mid = vec3_zero();
@@ -487,7 +527,7 @@ vec3_t CL_GetViewVelocity(void)
 
 vec3_t CL_GetEntitySoundVelocity(int ent)
 {
-	cl_entity_t *old;
+	ClientEntity *old;
     vec3_t vel = vec3_zero();
 	if ((ent < 0) || (ent >= MAX_EDICTS))
 	{

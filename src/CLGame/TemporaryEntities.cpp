@@ -67,22 +67,24 @@ qhandle_t   cl_mod_explo4_big;
 
 extern cvar_t* cvar_pt_particle_emissive;
 
+extern qboolean SCR_ParseColor(const char* s, color_t* color);
+
 static void cl_railcore_color_changed(cvar_t* self)
 {
-	//if (!SCR_ParseColor(self->string, &railcore_color)) {
-	//	Com_WPrintf("Invalid value '%s' for '%s'\n", self->string, self->name);
-	//	Cvar_Reset(self);
-	//	railcore_color.u32 = U32_RED;
-	//}
+	if (!SCR_ParseColor(self->string, &railcore_color)) {
+		Com_WPrint("Invalid value '%s' for '%s'\n", self->string, self->name);
+		clgi.Cvar_Reset(self);
+		railcore_color.u32 = U32_RED;
+	}
 }
 
 static void cl_railspiral_color_changed(cvar_t* self)
 {
-	//if (!SCR_ParseColor(self->string, &railspiral_color)) {
-	//	Com_WPrintf("Invalid value '%s' for '%s'\n", self->string, self->name);
-	//	Cvar_Reset(self);
-	//	railspiral_color.u32 = U32_BLUE;
-	//}
+	if (!SCR_ParseColor(self->string, &railspiral_color)) {
+		Com_WPrint("Invalid value '%s' for '%s'\n", self->string, self->name);
+		clgi. Cvar_Reset(self);
+		railspiral_color.u32 = U32_BLUE;
+	}
 }
 
 //
@@ -923,7 +925,7 @@ static void CLG_RailLights(color_t color)
 		dl->radius = 400;
 		dl->decay = 400;
 		dl->die = cl->time + 1000;
-		VectorScale(vec, segment_size * 0.5f, dl->velosity);
+		VectorScale(vec, segment_size * 0.5f, dl->velocity);
 	}
 }
 

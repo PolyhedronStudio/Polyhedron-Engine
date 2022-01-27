@@ -441,9 +441,7 @@ void CLG_ClientDisconnect(void) {
 //
 void CLG_ClientFrame() {
     // Advance local effects.
-#if USE_DLIGHTS
     CLG_RunDLights();
-#endif
 #if USE_LIGHTSTYLES
     CLG_RunLightStyles();
 #endif

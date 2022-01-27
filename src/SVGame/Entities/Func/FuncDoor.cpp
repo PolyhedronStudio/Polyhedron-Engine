@@ -226,7 +226,7 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
         if ( moveInfo.state == MoverState::Down ) {
             for ( ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity() ) {
                 if ( ent->IsSubclassOf<FuncDoor>() ) {
-                    static_cast<FuncDoor*>( ent )->DoorGoUp( ent->GetActivator() );
+                    static_cast<FuncDoor*>( ent )->DoorGoUp( static_cast<FuncDoor*>( ent )->GetActivator() );
                 }
             }
         } else {

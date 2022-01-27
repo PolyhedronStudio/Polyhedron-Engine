@@ -16,7 +16,7 @@ public:
     // Constructor/Deconstructor.
     //
     SVGBaseTrigger(Entity* svEntity);
-    virtual ~SVGBaseTrigger();
+    virtual ~SVGBaseTrigger() = default;
 
     DefineAbstractClass( SVGBaseTrigger, SVGBaseEntity );
 
@@ -87,7 +87,7 @@ protected:
     // Entity pointers.
     // 
     //// Entity that activated this entity, NULL if none.
-    SVGBaseEntity* activatorEntity;
+    SVGBaseEntity* activatorEntity = nullptr;
     //// Current active enemy, NULL if not any.    
     //SVGBaseEntity* enemyEntity;
     //// Ground entity we're standing on.

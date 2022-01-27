@@ -1437,17 +1437,17 @@ static void SCR_Sky_f(void)
     }
 
     if (argc > 2)
-        rotate = atof(clgi.Cmd_Argv(2));
+        rotate = std::atof(clgi.Cmd_Argv(2));
     else
         rotate = 0;
 
     if (argc == 6) {
-        axis[0] = atof(clgi.Cmd_Argv(3));
-        axis[1] = atof(clgi.Cmd_Argv(4));
-        axis[2] = atof(clgi.Cmd_Argv(5));
+        axis[0] = std::atof(clgi.Cmd_Argv(3));
+        axis[1] = std::atof(clgi.Cmd_Argv(4));
+        axis[2] = std::atof(clgi.Cmd_Argv(5));
+    } else {
+        axis = vec3_t{0.f, 0.f, 1.f};
     }
-    else
-        VectorSet(axis, 0, 0, 1);
 
     clgi.R_SetSky(name, rotate, axis);
 }
@@ -1615,12 +1615,10 @@ void CLG_RenderScreen(void) {
 //================
 //
 void CLG_DrawLoadScreen(void) {
-    int x, y;
-
     clgi.R_SetScale(scr.hud_scale);
 
-    x = (cl->refdef.width * scr.hud_scale - scr.loading_width) / 2; //x = (r_config.width * scr.hud_scale - scr.loading_width) / 2;
-    y = (cl->refdef.height * scr.hud_scale - scr.loading_height) / 2; //y = (r_config.height * scr.hud_scale - scr.loading_height) / 2;
+    int32_t x = (cl->refdef.width * scr.hud_scale - scr.loading_width) / 2; //x = (r_config.width * scr.hud_scale - scr.loading_width) / 2;
+    int32_t y = (cl->refdef.height * scr.hud_scale - scr.loading_height) / 2; //y = (r_config.height * scr.hud_scale - scr.loading_height) / 2;
 
     clgi.R_DrawPic(x, y, scr.loading_pic);
     clgi.R_SetScale(1.0f);
@@ -1634,10 +1632,8 @@ void CLG_DrawLoadScreen(void) {
 //================
 //
 void CLG_DrawPauseScreen(void) {
-    int x, y;
-
-    x = (scr.hud_width - scr.pause_width) / 2;
-    y = (scr.hud_height - scr.pause_height) / 2;
+    int32_t x = (scr.hud_width - scr.pause_width) / 2;
+    int32_t y = (scr.hud_height - scr.pause_height) / 2;
 
     clgi.R_DrawPic(x, y, scr.pause_pic);
 }

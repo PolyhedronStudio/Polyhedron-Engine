@@ -950,8 +950,9 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         // connecting to the server, which is different than the
         // state when the game is saved, so we need to compensate
         // with deltaangles
-        for (int32_t i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++) {
             serverEntity->client->playerState.pmove.deltaAngles[i] = serverEntity->client->playerState.pmove.viewAngles[i];
+        }
     } else {
         // Initialize a clean serverEntity.
         SVG_InitEntity(serverEntity);

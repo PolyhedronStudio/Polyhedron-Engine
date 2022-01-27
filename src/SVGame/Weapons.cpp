@@ -113,19 +113,29 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
     point = vec3_fmaf(point, aim[2], up);
     dir = point - self->GetEnemy()->GetOrigin();
 
-    // do the damage
+    // Do the damage
     SVG_InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
         return false;
 
-    // do our special form of knockback here
-    v = vec3_fmaf(self->GetEnemy()->GetAbsoluteMin(), 0.5, self->GetEnemy()->GetSize());
-    v = v - point;
-    v = vec3_normalize(v);
-    self->GetEnemy()->SetVelocity(vec3_fmaf(self->GetEnemy()->GetVelocity(), kick, v));
-    if (self->GetEnemy()->GetVelocity().z > 0)
-        self->GetEnemy()->SetGroundEntity(nullptr);
+    // Do our special form of knockback here
+    SVGBaseEntity* enemyEntity = self->GetEnemy();
+
+    // Calculate knockback velocity based on hit point.
+    vec3_t knockbackVelocity = vec3_fmaf(enemyEntity->GetAbsoluteMin(), 0.5, enemyEntity->GetSize());
+    knockbackVelocity = vec3_normalize(knockbackVelocity - point);
+    
+    // Add knockback velocity to the current entity velocity.
+    knockbackVelocity = vec3_fmaf(enemyEntity->GetVelocity(), kick, knockbackVelocity);
+    
+    // Last but not least, set the knockback velocity as the actual velocity of the enemy entity.
+    enemyEntity->SetVelocity(knockbackVelocity);
+
+    // Ensure there is no ground entity set anymore in case velocity is UPWARDS.
+    if (enemyEntity->GetVelocity().z > 0)
+        enemyEntity->SetGroundEntity(nullptr);
+
     return true;
 }
 

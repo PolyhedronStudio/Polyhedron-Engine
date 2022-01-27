@@ -35,7 +35,7 @@
 #include "SharedGame/Protocol.h"
 
 // Shared Client Game Headers.
-#include "Shared/cltypes.h"
+#include "Shared/CLTypes.h"
 #include "Shared/CLGame.h"
 
 // "Shared" cl frametime.
@@ -43,7 +43,7 @@
 static constexpr double CLG_FRAMETIME = BASE_FRAMETIME;
 static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
 static constexpr int32_t CLG_FRAMEDIV = BASE_FRAMERATE / 10.0;
-inline qboolean CLG_FRAMESYNC() {
+static inline qboolean CLG_FRAMESYNC() {
     extern ClientState *cl;
     return !(cl->frame.number % CLG_FRAMEDIV);
 }
@@ -54,6 +54,58 @@ inline qboolean CLG_FRAMESYNC() {
 //	Client Game structures and definitions.
 //
 //=============================================================================
+// 
+//
+// Custom client game trace struct, stores ClientEntity* instead.
+//
+struct CLGTrace {
+    CLGTrace() {
+        allSolid = false;
+        startSolid = false;
+        fraction = 0.f;
+        endPosition = vec3_zero();
+        surface = nullptr;
+        contents = 0;
+        ent = nullptr;
+        offsets[0] = vec3_zero();
+        offsets[1] = vec3_zero();
+        offsets[2] = vec3_zero();
+        offsets[3] = vec3_zero();
+        offsets[4] = vec3_zero();
+        offsets[5] = vec3_zero();
+        offsets[6] = vec3_zero();
+        offsets[7] = vec3_zero();
+    }
+
+    // If true, the trace startedand ended within the same solid.
+    qboolean    allSolid;
+    // If true, the trace started within a solid, but exited it.
+    qboolean    startSolid;
+    // The fraction of the desired distance traveled(0.0 - 1.0).If
+    // 1.0, no plane was impacted.
+    float       fraction;
+    // The destination position.
+    vec3_t      endPosition;
+    // [signbits][x] = either size[0][x] or size[1][x]
+    vec3_t		offsets[8];
+
+    
+    // The impacted plane, or empty. Note that a copy of the plane is returned, rather than a pointer.This is because the plane may belong to
+    // an inline BSP model or the box hull of a solid entity, in which case it must be 
+    // transformed by the entity's current position.
+    cplane_t    plane;
+    // The impacted surface, or nullptr.
+    csurface_t* surface;
+    // The contents mask of the impacted brush, or 0.
+    int32_t     contents;
+    // The impacted entity, or nullptr.
+    ClientEntity *ent;
+};
+
+//CLGTrace CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity* passent, const int32_t& contentMask);
+
+//std::vector<ClientEntity*> CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AREA_SOLID);
+
 //-------------------
 // Client View structure.
 //
@@ -62,17 +114,15 @@ inline qboolean CLG_FRAMESYNC() {
 typedef struct clg_view_s {
     // Stores the entities.
     r_entity_t entities[MAX_ENTITIES];
-    int num_entities;
+    int32_t num_entities;
 
     // Holds all the dynamic lights currently in the view frame.
-#if USE_DLIGHTS
     rdlight_t dlights[MAX_DLIGHTS];
-    int num_dlights;
-#endif
+    int32_t num_dlights;
 
     // Holds all the particles currently in the view frame.
     rparticle_t particles[MAX_PARTICLES];
-    int num_particles;
+    int32_t num_particles;
 
     // Holds all the explosions currently in the view frame.
     explosion_t  explosions[MAX_EXPLOSIONS];
@@ -116,10 +166,10 @@ typedef enum {
 //-------------------
 // Client player model settings.
 //-------------------
-#define CL_PLAYER_MODEL_DISABLED     0
-#define CL_PLAYER_MODEL_ONLY_GUN     1
-#define CL_PLAYER_MODEL_FIRST_PERSON 2
-#define CL_PLAYER_MODEL_THIRD_PERSON 3
+static constexpr int32_t CL_PLAYER_MODEL_DISABLED       = 0;
+static constexpr int32_t CL_PLAYER_MODEL_ONLY_GUN       = 1;
+static constexpr int32_t CL_PLAYER_MODEL_FIRST_PERSON   = 2;
+static constexpr int32_t CL_PLAYER_MODEL_THIRD_PERSON   = 3;
 
 //-------------------
 // Core - Used to access the client's internals.
