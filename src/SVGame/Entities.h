@@ -265,6 +265,6 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
 //
 SVGBaseEntity* SVG_GetWorldClassEntity();
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className);
-void SVG_FreeClassEntity(Entity* ent);
+void SVG_FreeClassEntity(SVGBaseEntity* ent);
 
 #endif // __SVGAME_ENTITIES_H__

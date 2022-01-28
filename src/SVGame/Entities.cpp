@@ -101,7 +101,7 @@ void DebugShitForEntitiesLulz() {
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     // Start with a nice nullptr.
     SVGBaseEntity* spawnEntity = nullptr;
-    if ( nullptr == ent ) {
+    if ( ent == nullptr ) {
         return nullptr;
     }
 
@@ -111,8 +111,8 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
     // New type info-based spawning system, to replace endless string comparisons
     // First find it by the map name
     TypeInfo* info = TypeInfo::GetInfoByMapName( className.c_str() );
-    if ( nullptr == info ) { // Then try finding it by the C++ class name
-        if ( nullptr == (info = TypeInfo::GetInfoByName( className.c_str() )) ) { 
+    if ( info == nullptr ) { // Then try finding it by the C++ class name
+        if ( (info = TypeInfo::GetInfoByName(className.c_str())) == nullptr ) { 
             gi.DPrintf( "WARNING: unknown entity '%s'\n", className.c_str() );
             return nullptr; // Bail out, we didn't find one
         }
@@ -139,31 +139,35 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 // look for SVG_FreeEntity instead. It automatically takes care of 
 // classEntities too.
 //=================
-void SVG_FreeClassEntity(Entity* ent) {
+void SVG_FreeClassEntity(SVGBaseEntity* classEntity) {
     // Ensure it is a valid entity.
-    if (!ent) {
-        gi.DPrintf("WARNING: tried to %s on a nullptr entity.", __func__);
+    if (!classEntity) {
+        gi.DPrintf("WARNING: tried to %s on a nullptr classEntity.", __func__);
         return;
     }
 
-    // Fetch entity number.
-    int32_t entityNumber = ent->state.number;
+    // If the class entity already has no server entity anymore, take a different path
+    // of freeing him.
+    if (classEntity->GetServerEntity()) {
+        // Fetch entity number in case the entity is in use.
+        int32_t entityNumber = classEntity->GetNumber();
 
-    // Special class entity handling IF it still has one.
-    if (ent->classEntity) {
         // Remove the classEntity reference
-        ent->classEntity->SetGroundEntity(nullptr);
-        ent->classEntity->SetLinkCount(0);
-        ent->classEntity->SetGroundEntityLinkCount(0);
-        ent->classEntity->SetServerEntity(nullptr);
-        ent->classEntity = nullptr;
+        classEntity->SetGroundEntity(nullptr);
+        classEntity->SetLinkCount(0);
+        classEntity->SetGroundEntityLinkCount(0);
+        classEntity->SetServerEntity(nullptr);
+
+        // In case it exists in our base entitys, get rid of it, assign nullptr.
+        if (g_baseEntities[entityNumber]) {
+            delete g_baseEntities[entityNumber];
+            g_baseEntities[entityNumber] = nullptr;
+        }
+    } else {
+        // Just a simple delete should suffice.
+        delete classEntity;
     }
 
-    // In case it exists in our base entitys, get rid of it, assign nullptr.
-    if (g_baseEntities[entityNumber]) {
-        delete g_baseEntities[entityNumber];
-        g_baseEntities[entityNumber] = nullptr;
-    }
 }
 
 
@@ -173,25 +177,27 @@ void SVG_FreeClassEntity(Entity* ent) {
 // Will remove the class entity, if it exists. Continues to then mark the
 // entity as "freed". (inUse = false)
 //=================
-void SVG_FreeEntity(Entity* ent)
-{
-    if (!ent)
+void SVG_FreeEntity(Entity* ent) {
+    // Make sure it is a valid pointer.
+    if (!ent) {
         return;
-
-    // Fetch entity number.
-    int32_t entityNumber = ent->state.number;
+    }
 
     // First of all, unlink the entity from this world.
     gi.UnlinkEntity(ent);        // unlink from world
+    
+    // Fetch entity number.
+    int32_t entityNumber = ent->state.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
-    if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
-        gi.DPrintf("Tried to free special edict: %i\n", ent - g_entities);
+    //if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
+    if (entityNumber <= maximumClients->value + BODY_QUEUE_SIZE) {
+        gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
         return;
     }
 
     // Delete the actual entity pointer.
-    SVG_FreeClassEntity(ent);
+    SVG_FreeClassEntity(ent->classEntity);
 
     // Clear the struct.
     *ent = {};

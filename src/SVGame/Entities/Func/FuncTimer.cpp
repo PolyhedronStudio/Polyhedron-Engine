@@ -43,7 +43,7 @@ void FuncTimer::Spawn() {
 
 	if ( spawnFlags & SF_StartOn ) {
 		nextThinkTime = level.time + 1.0f + st.pausetime + delayTime + waitTime + crandom() * randomTime;
-		activator = this;
+		SetActivator(this);
 	}
 
 	serverEntity->serverFlags = EntityServerFlags::NoClient;
@@ -75,7 +75,7 @@ void FuncTimer::TimerThink() {
 // FuncTimer::TimerUse
 //===============
 void FuncTimer::TimerUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-	this->activator = activator;
+	SetActivator(activator);
 
 	// If on, turn it off
 	if ( nextThinkTime ) {

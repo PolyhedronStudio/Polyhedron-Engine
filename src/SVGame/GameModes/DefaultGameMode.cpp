@@ -956,7 +956,9 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         SVG_InitEntity(serverEntity);
         
         // Delete previous classentity, if existent (older client perhaps).
-        SVG_FreeClassEntity(serverEntity);
+        if (serverEntity->classEntity) {
+            SVG_FreeClassEntity(serverEntity->classEntity);
+        }
 
         // Recreate class PlayerClient entity.
         serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false);

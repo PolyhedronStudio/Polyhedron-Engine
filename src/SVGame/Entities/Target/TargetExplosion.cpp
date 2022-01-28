@@ -33,7 +33,7 @@ void TargetExplosion::Spawn() {
 // TargetExplosion::ExplosionUse
 //===============
 void TargetExplosion::ExplosionUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-	this->activator = activator;
+	SetActivator(activator);
 
 	if ( !GetDelayTime() ) {
 		ExplosionThink();
@@ -53,10 +53,9 @@ void TargetExplosion::ExplosionThink() {
 	gi.WriteVector3( GetOrigin() );
 	gi.Multicast( GetOrigin(), MultiCast::PHS );
 
-	SVG_InflictRadiusDamage( this, activator, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive );
+	SVG_InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
-	float save;
-	save = GetDelayTime();
+	float save = GetDelayTime();
 	SetDelayTime( 0.0f );
 	UseTargets();
 	SetDelayTime( save );

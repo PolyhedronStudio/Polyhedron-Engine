@@ -53,7 +53,7 @@ void TargetEarthquake::SpawnKey( const std::string& key, const std::string& valu
 // TargetEarthquake::QuakeUse
 //===============
 void TargetEarthquake::QuakeUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-    this->activator = activator;
+    SetActivator(activator);
     
     lastQuakeTime = 0.0f;
     timeStamp = level.time + duration;

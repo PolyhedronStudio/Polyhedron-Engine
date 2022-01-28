@@ -455,19 +455,18 @@ void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 //===============
 void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 {
-	if ( nullptr == activatorOverride )
-	{
-		activatorOverride = activator;
+	// If activatorOverride is null, use our default activator.
+	if (activatorOverride == nullptr) {
+		activatorOverride = activatorEntityPtr;
 	}
 
-	if ( nullptr == activator )
-	{
+	// If we have no activator at all, then it is this entity itself doing it.
+	if (GetActivator() == nullptr) {
 		activatorOverride = this;
 	}
 
 	// Create a temporary DelayedUse entity in case this entity has a trigger delay
-	if ( GetDelayTime() )
-	{
+	if ( GetDelayTime() ) {
 		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
 		// allocates one such entity and accepts activator, message, target etc. as parameters
 		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'
@@ -483,68 +482,100 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 	}
 
 	// Print the "message"
-	if ( GetMessage().length() && !(activator->GetServerFlags() & EntityServerFlags::Monster) ) 
-	{
+	if ( !GetMessage().empty() && !(activatorOverride->GetServerFlags() & EntityServerFlags::Monster) ) {
 		// Get the message sound
-		int32_t messageSound = GetNoiseIndex();
+		const int32_t messageSound = GetNoiseIndex();
 		
 		// Print the message.
-		SVG_CenterPrint( activator, GetMessage() );
+		SVG_CenterPrint(activatorOverride, GetMessage());
 
 		// Play the message sound
-		if ( messageSound ) 
-		{
+		if ( messageSound ) {
 			SVG_Sound( activatorOverride, CHAN_AUTO, messageSound, 1, ATTN_NORM, 0 );
-		}
-		else 
-		{
-			SVG_Sound( activatorOverride, CHAN_AUTO, gi.SoundIndex( "misc/talk1.wav" ), 1, ATTN_NORM, 0 );
+		} else {
+			SVG_Sound( activatorOverride, CHAN_AUTO, SVG_PrecacheSound( "misc/talk1.wav" ), 1, ATTN_NORM, 0 );
 		}
 	}
 
 	// Remove all entities that qualify as our killtargets
-	if ( GetKillTarget().length() )
-	{
-		SVGBaseEntity* victim = nullptr;
-		while ( victim = SVG_FindEntityByKeyValue( "targetname", GetKillTarget(), victim ) )
-		{	// It is going to die, free it.
-			SVG_FreeEntity( victim->GetServerEntity() );
+	if ( !GetKillTarget().empty() ) {
+		//SVGBaseEntity* victim = nullptr;
+		//while ( victim = SVG_FindEntityByKeyValue( "targetname", GetKillTarget(), victim ) ) {	// It is going to die, free it.
+		//	//SVG_FreeEntity( victim->GetServerEntity() );
+		//	if ( !victim->IsInUse() ) {
+		//		gi.DPrintf( "entity was removed while using killtargets\n" );
+		//		continue;
+		//	}
+
+		//	victim->Remove();
+		//}
+		qboolean foundKillTarget = false;
+
+		for (auto* killtargetEntity: GetBaseEntityRange<0, MAX_EDICTS>()
+			| bef::IsValidPointer
+			| bef::HasServerEntity
+			| bef::InUse
+			| bef::HasKeyValue("targetname", GetKillTarget())) {
+
+			// We found a killtarget entity.
+			foundKillTarget = true;
+
+			// Remove our killtarget entity.
+			killtargetEntity->Remove();
 		}
 
-		if ( !IsInUse() ) 
-		{
-			gi.DPrintf( "entity was removed while using killtargets\n" );
-			return;
+		// Inform that we haven't found the killtarget entity.
+		if (!foundKillTarget) {
+			gi.DPrintf("Warning: killtarget entity '%s' couldn't be found.\n", GetKillTarget().c_str());
 		}
 	}
 
 	// Actually fire the targets
-	if ( GetTarget().length() ) 
-	{
-		SVGBaseEntity* targetEntity = nullptr;
-		while ( (targetEntity = SVG_FindEntityByKeyValue( "targetname", GetTarget(), targetEntity )) )
-		{
-			// Doors fire area portals in a special way, so skip those
-			if ( targetEntity->GetClassName() == "func_areaportal"
-				 && (GetClassName() == "func_door" || GetClassName() == "func_door_rotating") ) 
-			{
+	if ( !GetTarget().empty() ) {
+		//SVGBaseEntity* targetEntity = nullptr;
+		//while (( targetEntity = SVG_FindEntityByKeyValue( "targetname", GetTarget(), targetEntity) )) { 
+		//	// Doors fire area portals in a special way, so skip those
+		//	if ( targetEntity->GetClassName() == "func_areaportal"
+		//		 && (GetClassName() == "func_door" || GetClassName() == "func_door_rotating") ) {
+		//		continue;
+		//	}
+		//	
+		//	// Make sure it is in use
+		//	if ( !targetEntity->IsInUse() ) {
+		//		gi.DPrintf( "WARNING: Entity #%i was removed while using targets\n", GetServerEntity()->state.number );
+		//		continue;
+		//	}
+
+		//	if ( targetEntity == this ) {
+		//		gi.DPrintf( "WARNING: Entity #%i used itself.\n", GetServerEntity()->state.number );
+		//	} else {
+		//		targetEntity->Use( this, activatorOverride );
+		//	}
+		//}
+		qboolean foundTarget = false;
+		for (auto* triggerEntity : GetBaseEntityRange<0, MAX_EDICTS>()
+			| bef::IsValidPointer
+			| bef::HasServerEntity
+			| bef::InUse
+			| bef::HasKeyValue("targetname", GetTarget())) {
+
+			// Make sure it is in use, if not, debug.
+			if (!triggerEntity->IsInUse()) {
+				gi.DPrintf("Warning: Target entity{#(%i):%s} is not in use.\n", GetState().number, GetTarget());
 				continue;
 			}
 
-			if ( targetEntity == this ) 
-			{
-				gi.DPrintf( "WARNING: Entity #%i used itself.\n", GetServerEntity()->state.number );
-			}
-			else 
-			{
-				targetEntity->Use( this, activatorOverride );
+			// Doors fire area portals in a special way. So we skip those.
+			if (triggerEntity->GetClassName() == "func_areaportal"
+				&& (GetClassName() == "func_door" || GetClassName() == "func_door_rotating")) {
+				continue;
 			}
 
-			// Make sure it is in use
-			if ( !targetEntity->IsInUse() ) 
-			{
-				gi.DPrintf( "WARNING: Entity #%i was removed while using targets\n", GetServerEntity()->state.number );
-				return;
+			// Do NOT ALLOW an entity to USE ITSELF. :)
+			if (triggerEntity == this) {
+				gi.DPrintf("Warning: Target entity{#(%i):%s} can't trigger itself.\n", GetState().number, GetTarget().c_str());
+			} else {
+				triggerEntity->Use(this, activatorOverride);
 			}
 		}
 	}

@@ -86,7 +86,7 @@ void FuncTrain::PostSpawn() {
 	if ( spawnFlags & SF_StartOn ) {
 		SetNextThinkTime( level.time + FRAMETIME );
 		SetThinkCallback( &FuncTrain::NextCornerThink );
-		activator = this;
+		SetActivator(this);
 	}
 }
 
@@ -107,7 +107,7 @@ void FuncTrain::SpawnKey( const std::string& key, const std::string& value ) {
 // FuncTrain::TrainUse
 //===============
 void FuncTrain::TrainUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-	this->activator = activator;
+	SetActivator(activator);
 
 	if ( spawnFlags & SF_StartOn ) {
 		if ( ~spawnFlags & SF_Toggled ) {
@@ -211,7 +211,7 @@ void FuncTrain::WaitAtCorner() {
 		// Temporarily swap target and pathTarget
 		std::string nextCorner = currentPathEntity->GetTarget();
 		currentPathEntity->SetTarget( currentPathEntity->GetPathTarget() );
-		currentPathEntity->UseTargets( activator );
+		currentPathEntity->UseTargets( GetActivator() );
 		currentPathEntity->SetTarget( nextCorner );
 
 		// Do not proceed if we got killed by a killtarget

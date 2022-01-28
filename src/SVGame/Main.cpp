@@ -458,19 +458,18 @@ void SVG_ClientEndServerFrames(void)
     // Go through each client and calculate their final view for the state.
     // (This happens here, so we can take into consideration objects that have
     // pushed the player. And of course, because damage has been added.)
-    for (int32_t i = 0; i < maximumClients->value; i++) {
+    for (int32_t i = 1; i < maximumClients->value; i++) {
         // First, fetch entity state number.
-        int32_t stateNumber = g_entities[1 + i].state.number;
+        int32_t stateNumber = g_entities[0 + i].state.number;
 
         // Now, let's go wild. (Purposely, do not assume the pointer is a PlayerClient.)
-        Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == WorldSpawn.
+        Entity *entity = &g_entities[stateNumber];
 
-        // See if we're gooszsd to go, if not, continue for the next. 
+        // See if we're good to go, if not, continue for the next. 
         if (!entity || !entity->inUse || !entity->client)
             continue;
 
-        // Ugly cast, yes, but at this point we know we can do this. And that, to do it, matters more than
-        // ethics, because our morals say otherwise :D
+        // End server frame for this client.
         game.gameMode->ClientEndServerFrame(&g_entities[stateNumber]);
     }
 
@@ -605,11 +604,10 @@ void SVG_CheckDMRules(void)
 ================
 SVG_RunFrame
 
-Advances the world by 0.05(FRAMETIME) seconds
+Advances the world by FRAMETIME(for 50hz=0.019) seconds
 ================
 */
-void SVG_RunFrame(void)
-{
+void SVG_RunFrame(void) {
     // We're moving the game a frame forward.
     level.frameNumber++;
 
@@ -641,6 +639,9 @@ void SVG_RunFrame(void)
         // Fetch the corresponding base entity.
         SVGBaseEntity* entity = g_baseEntities[stateNumber];
 
+        // Reset level current entity.
+        level.currentEntity = nullptr;
+
         // Is it even valid?
         if (entity == nullptr)
             continue;
@@ -663,7 +664,7 @@ void SVG_RunFrame(void)
             //entity->SetGroundEntity(nullptr);
             //entity->SetLinkCount(0);
             //entity->SetGroundEntityLinkCount(0);
-            //entity->SetServerEntity(nullptr);
+            entity->SetServerEntity(nullptr);
 
             // Skip further processing of this entity, it's removed.
             continue;

@@ -68,7 +68,7 @@ void TriggerCounter::CounterUse( SVGBaseEntity* other, SVGBaseEntity* activator 
 		gi.Sound( activator->GetServerEntity(), CHAN_AUTO, gi.SoundIndex( "misc/talk1.wav" ), 1.0f, ATTN_NORM, 0.0f );
 	}
 
-	this->activator = activator;
+	SetActivator(activator);
 
 	// Mike made a funny decision to put using targets *only* into SVGBaseTrigger
 	// which doesn't really make sense when you think about it, so now we have

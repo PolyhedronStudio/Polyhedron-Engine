@@ -493,8 +493,18 @@ void FuncDoor::UseAreaportals( bool open ) const {
 // Light::SpawnKey
 //===============
 void FuncDoor::SpawnKey(const std::string& key, const std::string& value) {
+    if (key == "lip") {
+        // Parsed int.
+        int32_t parsedInteger = 0;
+
+        // Parse.
+        ParseIntegerKeyValue(key, value, parsedInteger);
+
+        // Assign.
+        SetLip(parsedInteger);
+    }
     // Speed value.
-    if (key == "speed") {
+    else if (key == "speed") {
         // Parsed int.
         int32_t parsedInteger = 0;
 

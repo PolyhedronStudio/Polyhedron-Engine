@@ -100,9 +100,9 @@ public:
         return 0.f;
     }
     // Placeholder, implemented by SVGBaseTrigger, and derivates of that class.
-    //inline SVGBaseEntity* GetActivator() {
-    //    return nullptr;
-    //}
+    virtual inline SVGBaseEntity* GetActivator() {
+        return activatorEntityPtr;
+    }
     // Return the 'angles' value.
     inline const vec3_t& GetAngles() {
         return serverEntity->state.angles;
@@ -441,17 +441,22 @@ public:
     //
     // Entity Set Functions.
     //  
-    // Return the bounding box absolute 'min' value.
+    // Set the bounding box absolute 'min' value.
     inline void SetAbsoluteMin(const vec3_t &absMin) {
         serverEntity->absMin = absMin;
     }
 
-    // Return the bounding box absolute 'max' value.
+    // Set the bounding box absolute 'max' value.
     inline void SetAbsoluteMax(const vec3_t &absMax) {
         serverEntity->absMax = absMax;
     }
 
-    // Return the 'angles' value.
+    // Set the 'activatorEntity' pointer.
+    inline void SetActivator(SVGBaseEntity* activator) {
+        this->activatorEntityPtr = activator;
+    }
+
+    // Set the 'angles' value.
     inline void SetAngles(const vec3_t& angles) {
         serverEntity->state.angles = angles;
     }
@@ -844,7 +849,7 @@ protected:
     // Move Target Entity.
     Entity* moveTargetPtr = nullptr;
     // The entity that activated this
-    SVGBaseEntity* activator = nullptr;
+    SVGBaseEntity* activatorEntityPtr = nullptr;
     
     // Yaw Speed. (Should be for monsters...)
     float yawSpeed = 0.f;

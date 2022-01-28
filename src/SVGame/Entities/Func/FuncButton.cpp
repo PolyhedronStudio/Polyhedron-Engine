@@ -187,7 +187,7 @@ void FuncButton::ButtonFire() {
 // FuncButton::ButtonUse
 //===============
 void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-	this->activator = activator;
+	SetActivator(activator);
 	ButtonFire();
 }
 
@@ -199,7 +199,7 @@ void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_
 		return;
 	}
 
-	activator = other;
+	SetActivator(other);
 	ButtonFire();
 }
 
@@ -207,7 +207,7 @@ void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_
 // FuncButton::ButtonDie
 //===============
 void FuncButton::ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point ) {
-	activator = attacker;
+	SetActivator(attacker);
 	SetHealth( GetMaxHealth() );
 	SetTakeDamage( TakeDamage::No );
 }
