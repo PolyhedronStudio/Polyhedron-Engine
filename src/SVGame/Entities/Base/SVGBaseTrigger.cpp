@@ -115,7 +115,7 @@ void SVGBaseTrigger::InitBrushTrigger() {
 	SetMoveType(MoveType::None);
 	SetSolid(Solid::Trigger);
 	
-	//SetServerFlags(EntityServerFlags::NoClient);
+	SetServerFlags(EntityServerFlags::NoClient);
 }
 
 //

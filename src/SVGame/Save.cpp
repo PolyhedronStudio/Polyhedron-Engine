@@ -175,13 +175,13 @@ static const save_field_t entityfields[] = {
 //    I(waterType),
 //    I(waterLevel),
 
-    V(moveOrigin),
-    V(moveAngles),
+    //V(moveOrigin),
+    //V(moveAngles),
 
     I(lightLevel),
 
-    I(style),
-    L(customLightStyle),
+    //I(style),
+    //L(customLightStyle),
 
     T(item),
 

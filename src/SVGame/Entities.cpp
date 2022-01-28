@@ -152,6 +152,9 @@ void SVG_FreeClassEntity(Entity* ent) {
     // Special class entity handling IF it still has one.
     if (ent->classEntity) {
         // Remove the classEntity reference
+        ent->classEntity->SetGroundEntity(nullptr);
+        ent->classEntity->SetLinkCount(0);
+        ent->classEntity->SetGroundEntityLinkCount(0);
         ent->classEntity->SetServerEntity(nullptr);
         ent->classEntity = nullptr;
     }
@@ -183,7 +186,7 @@ void SVG_FreeEntity(Entity* ent)
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
     if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
-        //      gi.DPrintf("tried to free special edict\n");
+        gi.DPrintf("Tried to free special edict: %i\n", ent - g_entities);
         return;
     }
 

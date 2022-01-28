@@ -372,7 +372,7 @@ public:
     }
     // Return the 'style' value.
     inline const int32_t GetStyle() {
-        return serverEntity->style;
+        return style;
     }
 
     // Return the 'sound' value.
@@ -686,7 +686,7 @@ public:
 
     // Set the 'style' value.
     inline void SetStyle(const int32_t &style) {
-        serverEntity->style = style;
+        this->style = style;
     }
 
     // Set the 'takeDamage' value.
@@ -880,6 +880,8 @@ protected:
     int32_t damage = 0;
     // Dead Flag. (Are we dead, dying or...?)
     int32_t deadFlag = 0;
+    // Style/AreaPortal
+    int32_t style = 0;
 
     //
     // This one resides here... for now.

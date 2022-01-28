@@ -1031,16 +1031,16 @@ struct entity_s {
 
 
 
-    vec3_t moveOrigin;
-    vec3_t moveAngles;
+//    vec3_t moveOrigin;
+//    vec3_t moveAngles;
 
     // move this to clientInfo?
     int32_t lightLevel;
 
-    int32_t style;          // also used as areaportal number
+    //int32_t style;          // also used as areaportal number
 
     // Custom lightstyle.
-    char *customLightStyle;
+    //char *customLightStyle;
 
     gitem_t *item;          // for bonus items
 };

@@ -970,7 +970,7 @@ void SP_item_health_small(Entity *self)
 //    self->model = "models/items/healing/stimpack/tris.md2";
     self->count = 2;
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
-    self->style = HEALTH_IGNORE_MAX;
+    //self->style = HEALTH_IGNORE_MAX;
     gi.SoundIndex("items/s_health.wav");
 }
 
@@ -1002,7 +1002,7 @@ void SP_item_health_mega(Entity *self)
     self->count = 100;
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/m_health.wav");
-    self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
+    //self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
 }
 
 

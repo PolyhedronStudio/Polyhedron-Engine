@@ -35,7 +35,14 @@ void FuncAreaportal::Spawn() {
 //===============
 void FuncAreaportal::SpawnKey( const std::string& key, const std::string& value ) {
 	if ( key == "style" ) {
-		ParseIntegerKeyValue( key, value, serverEntity->style );
+		// Parsed integer.
+		int32_t parsedInteger = 0;
+
+		// Parse.
+		ParseIntegerKeyValue( key, value, parsedInteger);
+
+		// Set style.
+		SetStyle(parsedInteger);
 	} else {
 		Base::SpawnKey( key, value );
 	}

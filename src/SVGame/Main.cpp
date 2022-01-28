@@ -628,15 +628,15 @@ void SVG_RunFrame(void)
     // "even the world gets a chance to Think", it does.
     //
     // Fetch the WorldSpawn entity number.
-    int32_t stateNumber = g_entities[0].state.number;
+    //int32_t stateNumber = g_entities[0].state.number;
 
     // Fetch the corresponding base entity.
-    SVGBaseEntity* entity = g_baseEntities[stateNumber];
+    //SVGBaseEntity* entity = g_baseEntities[stateNumber];
 
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < globals.numberOfEntities; i++) {
         // Acquire state number.
-        stateNumber = g_entities[i].state.number;
+        int32_t stateNumber = g_entities[i].state.number;
 
         // Fetch the corresponding base entity.
         SVGBaseEntity* entity = g_baseEntities[stateNumber];
@@ -644,12 +644,13 @@ void SVG_RunFrame(void)
         // Is it even valid?
         if (entity == nullptr)
             continue;
+        
+        // Does it have a server entity?
+        if (!entity->GetServerEntity())
+            continue;
 
         // Don't go on if it isn't in use.
         if (!entity->IsInUse())
-            continue;
-
-        if (!entity->GetServerEntity())
             continue;
 
         // Admer: entity was marked for removal at the previous tick
@@ -658,7 +659,11 @@ void SVG_RunFrame(void)
             SVG_FreeEntity(entity->GetServerEntity());
 
             // Be sure to unset the server entity on this SVGBaseEntity.
-            entity->SetServerEntity(nullptr);
+            //entity->UnlinkEntity();
+            //entity->SetGroundEntity(nullptr);
+            //entity->SetLinkCount(0);
+            //entity->SetGroundEntityLinkCount(0);
+            //entity->SetServerEntity(nullptr);
 
             // Skip further processing of this entity, it's removed.
             continue;
@@ -671,8 +676,8 @@ void SVG_RunFrame(void)
         entity->SetOldOrigin(entity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-        if ((entity->GetGroundEntity() && entity->GetGroundEntity()->GetServerEntity())
-            && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
+        if ((entity->GetServerEntity() && entity->GetGroundEntity() && entity->GetGroundEntity()->GetServerEntity())
+            && (entity->GetServerEntity() && entity->GetGroundEntity() && entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             entity->SetGroundEntity(nullptr);
 
