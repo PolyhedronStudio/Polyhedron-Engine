@@ -22,7 +22,7 @@ public:
     // Constructor/Deconstructor.
     //
     IGameMode() {};
-    virtual ~IGameMode() {};
+    virtual ~IGameMode() = default;
     
     //
     // Map related, also known as the "current game".
@@ -175,10 +175,8 @@ public:
 
 
 protected:
-
-
     // Means of Death, for the current client that is being processed this frame.
-    int32_t meansOfDeath;
+    int32_t meansOfDeath = 0;
 };
 
 #endif // __SVGAME_GAMEMODES_IGAMEMODE_H__

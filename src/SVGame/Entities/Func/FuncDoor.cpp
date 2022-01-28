@@ -95,14 +95,16 @@ void FuncDoor::Spawn() {
     }
 
     moveInfo.state = MoverState::Bottom;
-
+    
     // If the mapper specified health, then make this door
-    // openable by shooting it
+    // openable by shooting it.
     if ( GetHealth() ) {
         SetTakeDamage( TakeDamage::Yes );
         SetDieCallback( &FuncDoor::DoorShotOpen );
         SetMaxHealth( GetHealth() );
-    } else if ( nullptr == serverEntity->targetName ) {
+    } else if ( GetTargetName().empty() ) {
+    // If the mapper did NOT specify a targetname, then make this 
+    // door openable by touching it.
         gi.SoundIndex( MessageSoundPath );
         SetTouchCallback( &FuncDoor::DoorTouch );
     }
@@ -124,7 +126,7 @@ void FuncDoor::Spawn() {
     }
 
     // To simplify logic elsewhere, make non-teamed doors into a team of one
-    if ( !GetTeam() ) {
+    if ( GetTeam().empty() ) {
         SetTeamMasterEntity( this );
     }
 
@@ -140,7 +142,7 @@ void FuncDoor::Spawn() {
 // it'd spawn a door trigger around itself
 //===============
 void FuncDoor::PostSpawn() {
-    if ( GetHealth() || !targetNameStr.empty() ) {
+    if ( GetHealth() || !GetTargetName().empty()) {
         CalculateMoveSpeed();
     } else {
         SpawnDoorTrigger();
@@ -243,10 +245,12 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
 // FuncDoor::DoorTouch
 //===============
 void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
-    if ( nullptr == other->GetClient() ) {
+    // Clients only.
+    if (other->GetClient() == nullptr) {
         return; // Players only; should we have special flags for monsters et al?
     }
 
+    // Ensure we wait till debounce time is over.
     if ( level.time < debounceTouchTime ) {
         return;
     }
@@ -257,6 +261,8 @@ void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
         gi.CenterPrintf( other->GetServerEntity(), "%s", messageStr.c_str() );
         gi.Sound( other->GetServerEntity(), CHAN_AUTO, gi.SoundIndex( MessageSoundPath ), 1.0f, ATTN_NORM, 0.0f );
     }
+
+    Use(GetOwner(), other);
 }
 
 //===============
@@ -471,7 +477,7 @@ void FuncDoor::SpawnDoorTrigger() {
 // FuncDoor::UseAreaportals
 //===============
 void FuncDoor::UseAreaportals( bool open ) const {
-    if ( targetStr.empty() ) {
+    if ( targetStr.empty()) {
         return;
     }
 
@@ -480,5 +486,37 @@ void FuncDoor::UseAreaportals( bool open ) const {
         if ( ent->IsClass<FuncAreaportal>() ) {
             static_cast<FuncAreaportal*>(ent)->ActivatePortal( open );
         }
+    }
+}
+
+//===============
+// Light::SpawnKey
+//===============
+void FuncDoor::SpawnKey(const std::string& key, const std::string& value) {
+    // Speed value.
+    if (key == "speed") {
+        // Parsed int.
+        int32_t parsedInteger = 0;
+
+        // Parse.
+        ParseIntegerKeyValue(key, value, parsedInteger);
+
+        // Assign.
+        SetSpeed(parsedInteger);
+    }
+    // Team value.
+    else if (key == "team") {
+        // Parsed int.
+        std::string parsedString = "";
+
+        // Parse.
+        ParseStringKeyValue(key, value, parsedString);
+
+        // Assign.
+        //SetTeam(parsedString);
+    }
+    // Parent class spawnkey.
+    else {
+        SVGBaseEntity::SpawnKey(key, value);
     }
 }

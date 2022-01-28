@@ -6,9 +6,9 @@
 //
 //
 */
-#include "../../ServerGameLocal.h"		// SVGame.
-#include "../../Effects.h"		// Effects.
-#include "../../Entities.h"		// Entities.
+#include "../../ServerGameLocal.h"	// SVGame.
+#include "../../Effects.h"			// Effects.
+#include "../../Entities.h"			// Entities.
 #include "../../Utilities.h"		// Util funcs.
 
 // Class Entities.
@@ -18,7 +18,7 @@
 #include "../Trigger/TriggerDelayedUse.h"
 
 // Constructor/Deconstructor.
-SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : SVGBaseEntity(svEntity) {
+SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : Base(svEntity) {
 	//
 	// All callback functions best be nullptr.
 	//
@@ -115,7 +115,7 @@ void SVGBaseTrigger::InitBrushTrigger() {
 	SetMoveType(MoveType::None);
 	SetSolid(Solid::Trigger);
 	
-	SetServerFlags(EntityServerFlags::NoClient);
+	//SetServerFlags(EntityServerFlags::NoClient);
 }
 
 //

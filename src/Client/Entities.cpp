@@ -411,28 +411,25 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
                 continue;
             headNode = cmodel->headNode;
 
-            //            traceStart = start;
+            // Setup angles and origin for our trace.
             traceAngles = clientEntity->current.angles;
+            traceOrigin = clientEntity->current.origin;
         } else {
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
             MSG_UnpackSolid32(clientEntity->current.solid, entityMins, entityMaxs);
             headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
             traceAngles = vec3_zero();
+            traceOrigin = clientEntity->current.origin;
         }
-        traceOrigin = clientEntity->current.origin;
 
-        vec3_t traceOrigin2 = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl.lerpFraction);
-
-        if (clientEntity->current.number == 17)
-            Com_Printf("entID %i: traceOrigin = %s, traceOrigin2 = %s\n", clientEntity->current.number, vec3_to_str(traceOrigin).c_str(), vec3_to_str(traceOrigin2).c_str());
-        // TODO: probably need to add a skip entityt or so,
+        // We're done clipping against entities if we reached an allSolid aka world.
         if (cmDstTrace->allSolid)
             return;
 
         CM_TransformedBoxTrace(&cmSrcTrace, start, end,
                                mins, maxs, headNode, contentMask,
-                               clientEntity->current.origin, traceAngles);
+                               traceOrigin, traceAngles);
 
         CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)clientEntity);
     }

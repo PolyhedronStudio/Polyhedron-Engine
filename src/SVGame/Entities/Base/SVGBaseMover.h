@@ -56,7 +56,7 @@ struct PushMoveInfo {
     float remainingDistance = 0.f;
     float deceleratedDistance = 0.f;
     //void (*OnEndFunction)(Entity *);
-    PushMoveEndFunction* OnEndFunction;
+    PushMoveEndFunction* OnEndFunction = nullptr;
 };
 
 class SVGBaseMover : public SVGBaseTrigger {

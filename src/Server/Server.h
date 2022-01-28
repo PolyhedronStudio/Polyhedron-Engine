@@ -186,13 +186,13 @@ typedef struct {
 } MessagePacket;
 
 // This is best to match the actual server game frame rate.
-static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;    // Was: 10, later on 20, then 60, now just matches the fps.
+static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;
 
 // Used to divide for rate calculating.
-static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 60 / 10 = 6.
+static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
 // Used to multiply for rate user input drop calculating.
-static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 60 / 10 = 6.
+static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)

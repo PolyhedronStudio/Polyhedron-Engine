@@ -30,8 +30,7 @@
 // Constructor/Deconstructor.
 //
 DefaultGameMode::DefaultGameMode() {
-    // Defaults.
-    meansOfDeath = 0;
+
 }
 DefaultGameMode::~DefaultGameMode() {
 
@@ -278,10 +277,10 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // Fetch client.
     ServersClient* client = target->GetClient();
 
-    // Lame thing, regarding the sparks to use. Ancient code, keeping it for now.
-    int32_t te_sparks = TempEntityEvent::Sparks;
+    // Determine which temp entity event to use.
+    int32_t tempEntityEvent = TempEntityEvent::Sparks;
     if (damageFlags & DamageFlags::Bullet)
-        te_sparks = TempEntityEvent::BulletSparks;
+        tempEntityEvent = TempEntityEvent::BulletSparks;
 
     // Retrieve normalized direction.
     vec3_t dir = vec3_normalize(dmgDir);
@@ -293,21 +292,21 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // Figure out the momentum to add in case KnockBacks are off. 
     if (!(damageFlags & DamageFlags::NoKnockBack)) {
         if ((knockBack) && (target->GetMoveType() != MoveType::None) && (target->GetMoveType() != MoveType::Bounce) && (target->GetMoveType() != MoveType::Push) && (target->GetMoveType() != MoveType::Stop)) {
-            vec3_t  kvel = { 0.f, 0.f, 0.f };
-            float   mass = 50; // Defaults to 50, otherwise... issues, this is the OG code style btw.
+            vec3_t  kickbackVelocity = { 0.f, 0.f, 0.f };
+            float   targetMass = 50; // Defaults to 50, otherwise... issues, this is the OG code style btw.
 
-                               // Based on mass, if it is below 50, we wanna hook it to being 50. Otherwise...
+            // Based on mass, if it is below 50, we wanna hook it to being 50. Otherwise...
             if (target->GetMass() > 50)
-                mass = target->GetMass();
+                targetMass = target->GetMass();
 
             // Determine whether attacker == target, and the client itself, that means we gotta jump back hard.
             if (target->GetClient() && attacker == target)
-                kvel = vec3_scale(dir, 1600.0 * (float)knockBack / mass); // ROCKET JUMP HACK IS HERE BRUH <--
+                kickbackVelocity = vec3_scale(dir, 1600.0 * (float)knockBack / targetMass); // ROCKET JUMP HACK IS HERE BRUH <--
             else
-                kvel = vec3_scale(dir, 500 * (float)knockBack / mass);
+                kickbackVelocity = vec3_scale(dir, 500 * (float)knockBack / targetMass);
 
             // Assign the new velocity, since yeah, it's bound to knock the fuck out of us.
-            target->SetVelocity(target->GetVelocity() + kvel);
+            target->SetVelocity(target->GetVelocity() + kickbackVelocity);
         }
     }
 
@@ -315,13 +314,13 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     damageTaken = damage;       // Damage taken.
     damageSaved = 0;            // Damaged saved, from being taken.
 
-                                // check for godmode
+    // Check for godmode.
     if ((target->GetFlags() & EntityFlags::GodMode) && !(damageFlags & DamageFlags::IgnoreProtection)) {
         damageTaken = 0;
         damageSaved = damage;
 
         // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
-        SpawnTempDamageEntity(te_sparks, point, normal, damageSaved);
+        SpawnTempDamageEntity(tempEntityEvent, point, normal, damageSaved);
     }
 
     // Team damage avoidance
@@ -338,7 +337,7 @@ void DefaultGameMode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
             SpawnTempDamageEntity(TempEntityEvent::Blood, point, dir, damageTaken);
         } else {
             // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
-            SpawnTempDamageEntity(te_sparks, point, normal, damageTaken);
+            SpawnTempDamageEntity(tempEntityEvent, point, normal, damageTaken);
         }
 
         // Adjust health based on calculated damage to take.
@@ -688,8 +687,7 @@ void DefaultGameMode::ClientBeginServerFrame(Entity* serverEntity) {
 // Used to set the latest view offsets
 //===============
 void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
-    float   bobTime;
-
+    // Ensure this entity is valid.
     if (!serverEntity || !serverEntity->client || !serverEntity->classEntity) {
         return;
     }
@@ -780,7 +778,7 @@ void DefaultGameMode::ClientEndServerFrame(Entity *serverEntity) {
 
     // Generate bob time.
     bobMoveCycle.move /= 3.5;
-    bobTime = (client->bobTime += bobMoveCycle.move);
+    float bobTime = (client->bobTime += bobMoveCycle.move);
 
     if (client->playerState.pmove.flags & PMF_DUCKED)
         bobTime *= 1.5;

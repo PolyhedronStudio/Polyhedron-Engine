@@ -19,5 +19,5 @@ protected:
 	void DoGoDown() override;
 
 protected:
-	float distance{};
+	float distance = 0.f;
 };

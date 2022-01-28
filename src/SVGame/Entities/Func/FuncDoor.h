@@ -26,7 +26,7 @@ public:
     void		Precache() override;
 	virtual void Spawn() override;
     void        PostSpawn() override;
-	//void		SpawnKey( const std::string& key, const std::string& value ) override;
+	void		SpawnKey( const std::string& key, const std::string& value ) override;
 
 protected:
     void        DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator );

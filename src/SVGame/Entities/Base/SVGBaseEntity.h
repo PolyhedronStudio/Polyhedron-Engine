@@ -395,8 +395,8 @@ public:
     }
 
     // Return the 'team' entity value.
-    inline char* GetTeam() {
-        return serverEntity->team;
+    inline const std::string &GetTeam() {
+        return teamStr;
     }
 
     // Return the 'teamChain' entity value.
@@ -703,6 +703,11 @@ public:
         this->targetNameStr = targetName;
     }
 
+    // Set the 'team' index value.
+    inline void SetTeam(const std::string &team) {
+        this->teamStr = team;
+    }
+
     // Set the 'teamChain' entity value.
     inline void SetTeamChainEntity(SVGBaseEntity* entity) {
         teamChainEntity = entity;
@@ -782,7 +787,7 @@ protected:
     //
     // The actual entity this class is a member of.
     //
-    Entity *serverEntity;
+    Entity *serverEntity = nullptr;
 
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)
@@ -801,12 +806,14 @@ protected:
     std::string model = "";
     // Trigger kill target string.
     std::string killTargetStr = "";
+    // Trigger its message string.
+    std::string messageStr = "";
     // Trigger target string.
     std::string targetStr = "";
     // Trigger its own targetname string.
     std::string targetNameStr = "";
-    // Trigger its message string.
-    std::string messageStr = "";
+    // Team string.
+    std::string teamStr = "";
 
     //---------------------------------
     // -- Types (Move, Water, what have ya? Add in here.)
@@ -877,11 +884,13 @@ protected:
     //
     // This one resides here... for now.
     //
+    //------------------------------------
     //float delay;
 
     //
     // Entity pointers.
     // 
+    //------------------------------------
     // Current active enemy, NULL if not any.    
     SVGBaseEntity *enemyEntity = nullptr;
     // Ground entity we're standing on.

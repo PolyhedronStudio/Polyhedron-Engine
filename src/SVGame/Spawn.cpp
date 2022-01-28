@@ -357,7 +357,7 @@ void SVG_FindTeams(void)
 
         if (!classEntity->IsInUse())
             continue;
-        if (!classEntity->GetTeam())
+        if (classEntity->GetTeam().empty())
             continue;
         if (classEntity->GetFlags() & EntityFlags::TeamSlave)
             continue;
@@ -374,11 +374,11 @@ void SVG_FindTeams(void)
 
             if (!classEntity2->IsInUse())
                 continue;
-            if (!classEntity2->GetTeam())
+            if (classEntity2->GetTeam().empty())
                 continue;
             if (classEntity2->GetFlags() & EntityFlags::TeamSlave)
                 continue;
-            if (!strcmp(classEntity->GetTeam(), classEntity2->GetTeam())) {
+            if (classEntity->GetTeam() == classEntity2->GetTeam()) {
                 c2++;
                 chain->SetTeamChainEntity(classEntity2);
                 classEntity2->SetTeamMasterEntity(classEntity);

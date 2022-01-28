@@ -140,6 +140,7 @@ vec3_t SVGBaseMover::CalculateEndPosition() {
 	};
 	
 	float distance = (absoluteDir.x * size.x) + (absoluteDir.y * size.y) + (absoluteDir.z * size.z) - GetLip();
+	moveInfo.distance = distance;
 	return vec3_fmaf( GetStartPosition(), distance, moveDirection );
 }
 
@@ -174,7 +175,7 @@ void SVGBaseMover::BrushMoveFinal() {
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushMoveDone );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + 1.f * FRAMETIME );
 }
 
 //===============
@@ -222,14 +223,14 @@ void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 			BrushMoveBegin();
 		} else {
 			SetThinkCallback( &SVGBaseMover::BrushMoveBegin );
-			SetNextThinkTime( level.time + FRAMETIME );
+			SetNextThinkTime( level.time + 1.f * FRAMETIME );
 		}
 	} else {
 		// Accelerative movement
 		mi.currentSpeed = 0;
 
 		SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
-		SetNextThinkTime( level.time + FRAMETIME );
+		SetNextThinkTime( level.time + 1.f * FRAMETIME );
 	}
 }
 
@@ -261,7 +262,7 @@ void SVGBaseMover::BrushAngleMoveFinal() {
 	SetAngularVelocity( vec3_scale( move, 1.0f / FRAMETIME ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushAngleMoveDone );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + 1.f * FRAMETIME );
 }
 
 //===============
@@ -307,7 +308,7 @@ void SVGBaseMover::BrushAngleMoveCalc( PushMoveEndFunction* function ) {
 		BrushAngleMoveBegin();
 	} else {
 		SetThinkCallback( &SVGBaseMover::BrushAngleMoveBegin );
-		SetNextThinkTime( level.time + FRAMETIME );
+		SetNextThinkTime( level.time + 1.f * FRAMETIME );
 	}
 }
 
@@ -425,7 +426,7 @@ void SVGBaseMover::BrushAccelerateThink() {
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * 10.0f ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + 1.f * FRAMETIME );
 }
 
 //===============

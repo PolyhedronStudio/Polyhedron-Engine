@@ -34,7 +34,7 @@ FuncDoorRotating::FuncDoorRotating( Entity* entity )
 void FuncDoorRotating::Spawn() {
 	Base::Spawn();
 
-	SetAngles( vec3_zero() );
+	//SetAngles( vec3_zero() );
 
 	// Set the axis of rotation
 	moveDirection = vec3_zero();
@@ -52,7 +52,7 @@ void FuncDoorRotating::Spawn() {
 	}
 
 	if ( !distance ) {
-		gi.DPrintf( "%s with no distance set\n", GetClassName() );
+		gi.DPrintf( "entity: %i:%s with no distance set\n", GetNumber(), GetClassName() );
 		distance = 90.0f;
 	}
 
