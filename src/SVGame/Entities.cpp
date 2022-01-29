@@ -133,41 +133,50 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 }
 
 //===============
-// SVG_FreeClassEntity
+// SVG_FreeClassFromEntity
 // 
 // Will remove the class entity, if it exists. For fully freeing an entity,
 // look for SVG_FreeEntity instead. It automatically takes care of 
 // classEntities too.
+// 
+// Returns true if a class entity was found, and freed.
 //=================
-void SVG_FreeClassEntity(SVGBaseEntity* classEntity) {
+qboolean SVG_FreeClassFromEntity(Entity* ent) {
     // Ensure it is a valid entity.
-    if (!classEntity) {
-        gi.DPrintf("WARNING: tried to %s on a nullptr classEntity.", __func__);
-        return;
+    if (!ent) {
+        gi.DPrintf("WARNING: tried to %s on a nullptr entity.", __func__);
+        return false;
     }
 
-    // If the class entity already has no server entity anymore, take a different path
-    // of freeing him.
-    if (classEntity->GetServerEntity()) {
-        // Fetch entity number in case the entity is in use.
-        int32_t entityNumber = classEntity->GetNumber();
+    // Used as return value.
+    qboolean freedClassEntity = false;
 
+    // Fetch entity number.
+    int32_t entityNumber = ent->state.number;
+
+    // Special class entity handling IF it still has one.
+    if (ent->classEntity) {
         // Remove the classEntity reference
-        classEntity->SetGroundEntity(nullptr);
-        classEntity->SetLinkCount(0);
-        classEntity->SetGroundEntityLinkCount(0);
-        classEntity->SetServerEntity(nullptr);
-
-        // In case it exists in our base entitys, get rid of it, assign nullptr.
-        if (g_baseEntities[entityNumber]) {
-            delete g_baseEntities[entityNumber];
-            g_baseEntities[entityNumber] = nullptr;
-        }
-    } else {
-        // Just a simple delete should suffice.
-        delete classEntity;
+        ent->classEntity->SetGroundEntity(nullptr);
+        ent->classEntity->SetLinkCount(0);
+        ent->classEntity->SetGroundEntityLinkCount(0);
+        ent->classEntity->SetServerEntity(nullptr);
+        ent->classEntity = nullptr;
     }
 
+    // For whichever faulty reason the entity might not have had a classentity,
+    // so we do an extra delete here just in case.
+    if (g_baseEntities[entityNumber] != nullptr) {
+        // Free it.
+        delete g_baseEntities[entityNumber];
+        g_baseEntities[entityNumber] = nullptr;
+
+        // Freed class entity.
+        return freedClassEntity = true;
+    }
+
+    // Return result.
+    return freedClassEntity;
 }
 
 
@@ -197,7 +206,7 @@ void SVG_FreeEntity(Entity* ent) {
     }
 
     // Delete the actual entity pointer.
-    SVG_FreeClassEntity(ent->classEntity);
+    SVG_FreeClassFromEntity(ent);
 
     // Clear the struct.
     *ent = {};

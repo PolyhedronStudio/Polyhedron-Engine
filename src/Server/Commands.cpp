@@ -264,8 +264,7 @@ static void abort_func(void *arg)
     CM_FreeMap((cm_t*)arg); // CPP: Cast
 }
 
-static void SV_Map(qboolean restart)
-{
+static void SV_Map(qboolean restart) {
     MapCommand    cmd;
     size_t      len;
 
@@ -290,8 +289,23 @@ static void SV_Map(qboolean restart)
     SV_AutoSaveBegin(&cmd);
 
     // any error will drop from this point
-    if ((sv.serverState != ServerState::Game && sv.serverState != ServerState::Pic && sv.serverState != ServerState::Cinematic) || restart)
+    if ((sv.serverState != ServerState::Game && sv.serverState != ServerState::Pic && sv.serverState != ServerState::Cinematic) || restart) {
         SV_InitGame();    // the game is just starting
+    } /*else {
+        extern cvar_t* sv_maxclients;
+        Entity *ent;
+        client_t *client;
+        int32_t i = 0;
+        int32_t entnum = 0;
+        for (i = 0; i < sv_maxclients->integer; i++) {
+            client = svs.client_pool + i;
+            entnum = i + 1;
+            ent = EDICT_NUM(entnum);
+            ent->state.number = entnum;
+            client->edict = ent;
+            client->number = entnum;
+        }
+    }*/
 
     // clear pending CM
     Com_AbortFunc(NULL, NULL);

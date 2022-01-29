@@ -24,7 +24,7 @@
 // Constructor/Deconstructor.
 //
 MiscServerModel::MiscServerModel(Entity* svEntity)
-    : SVGBaseTrigger(svEntity) {
+    : Base(svEntity) {
 
 }
 MiscServerModel::~MiscServerModel() {
@@ -81,7 +81,7 @@ void MiscServerModel::Spawn() {
 
     // Since this is a "monster", after all...
     SetFlags(EntityServerFlags::Monster);
-
+    
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
 
@@ -174,10 +174,10 @@ void MiscServerModel::Think() {
     if (currentFrame > endFrame) {
         SetFrame(startFrame);
     } else {
-        SetFrame(currentFrame + 1);
+        SetFrame(currentFrame + 1 * FRAMETIME);
     }
 
-    SetNextThinkTime(level.time + 1 * BASE_1_FRAMETIME);
+    SetNextThinkTime(level.time + 1 * FRAMETIME);
     //if (GetNoiseIndex()) {
     //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
     //}
@@ -249,36 +249,36 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MiscServerModel::MiscServerModelThink(void) {
-    // First, ensure our origin is +1 off the floor.
-    vec3_t newOrigin = GetOrigin() + vec3_t{
-        0.f, 0.f, 1.f
-    };
+    //// First, ensure our origin is +1 off the floor.
+    //vec3_t newOrigin = GetOrigin() + vec3_t{
+    //    0.f, 0.f, 1.f
+    //};
 
-    SetOrigin(newOrigin);
-    //
-    ////    // Calculate the end origin to use for tracing.
-    vec3_t end = newOrigin + vec3_t{
-        0, 0, -256.f
-    };
-    //
-    //    // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+    //SetOrigin(newOrigin);
     ////
-    ////    // Return in case we hit anything.
-    if (trace.fraction == 1 || trace.allSolid)
-        return;
+    //////    // Calculate the end origin to use for tracing.
+    //vec3_t end = newOrigin + vec3_t{
+    //    0, 0, -256.f
+    //};
     ////
-    ////    // Set new entity origin.
-    SetOrigin(trace.endPosition);
-    //
-    //     //
-    //    // Check for ground.
-    SVG_StepMove_CheckGround(this);
-    //
-    //    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + 1 * BASE_1_FRAMETIME);
-    //    // Link entity back in.
-    LinkEntity();
+    ////    // Exceute the trace.
+    //SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+    //////
+    //////    // Return in case we hit anything.
+    //if (trace.fraction == 1 || trace.allSolid)
+    //    return;
+    //////
+    //////    // Set new entity origin.
+    //SetOrigin(trace.endPosition);
+    ////
+    ////     //
+    ////    // Check for ground.
+    //SVG_StepMove_CheckGround(this);
+    ////
+    ////    // Setup its next think time, for a frame ahead.
+    //SetNextThinkTime(level.time + 1 * FRAMETIME);
+    ////    // Link entity back in.
+    //LinkEntity();
 
     //
     //    //// Do a check ground for the step move of this pusher.

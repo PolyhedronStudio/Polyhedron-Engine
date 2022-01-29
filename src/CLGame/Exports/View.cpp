@@ -168,6 +168,7 @@ void ClientGameView::SetupThirdpersonView() {
     // Execute a box trace to see if we collide with the world.
     CLGTrace trace = CLG_Trace(cl->playerEntityOrigin,
                      mins, maxs, cl->refdef.vieworg, nullptr, CONTENTS_MASK_PLAYERSOLID);
+
     if (trace.fraction != 1.0f) {
         // We've collided with the world, let's adjust our view origin.
         cl->refdef.vieworg = trace.endPosition;

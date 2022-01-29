@@ -73,9 +73,7 @@ void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
     SVG_InitEntity(serverEntity);
 
     // Delete previous classentity, if existent (older client perhaps).
-    if (serverEntity->classEntity) {
-        SVG_FreeClassEntity(serverEntity->classEntity);
-    }
+    SVG_FreeClassFromEntity(serverEntity);
 
     // Recreate class PlayerClient entity.
     serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false);

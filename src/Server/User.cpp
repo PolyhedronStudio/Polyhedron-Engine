@@ -525,9 +525,6 @@ void SV_Begin_f(void)
         return;
     }
 
-    // Fetch serverinfo  to detect whether this is a mainmenu server or not.
-
-
     Com_DPrintf("Going from ConnectionState::Primed to ConnectionState::Spawned for %s\n",
                 sv_client->name);
     sv_client->connectionState = ConnectionState::Spawned;

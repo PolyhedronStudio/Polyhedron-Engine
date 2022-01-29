@@ -250,6 +250,7 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
         entity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(edict)); // Entities that aren't in the type info system will error out here
         edict->className = entity->GetTypeInfo()->className;
         edict->classEntity = entity;
+
         if (nullptr == g_baseEntities[edict->state.number]) {
             g_baseEntities[edict->state.number] = entity;
         } else {
@@ -265,6 +266,6 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
 //
 SVGBaseEntity* SVG_GetWorldClassEntity();
 SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className);
-void SVG_FreeClassEntity(SVGBaseEntity* ent);
+qboolean SVG_FreeClassFromEntity(Entity* ent);
 
 #endif // __SVGAME_ENTITIES_H__

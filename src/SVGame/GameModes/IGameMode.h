@@ -39,11 +39,11 @@ public:
     // for specific game modes. They like to have control over this.
     //
     // Called when a client connects. This does not get called between
-    // load games, of course. A client is still connected to the current
-    // game session in that case.
+    // load games. A client is still connected to the current game session 
+    // in that case.
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) = 0;
     // Called when a client has finished connecting, and is ready
-    // to be placed into the game.This will happen every map load.
+    // to be placed into the game. This will happen every map load.
     virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.

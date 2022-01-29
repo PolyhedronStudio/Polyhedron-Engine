@@ -771,7 +771,7 @@ public:
         return serverEntity;
     }
 
-    // Used only in SVG_FreeEntity
+    // Used only in SVG_FreeEntity and SVG_CreateClassEntity
     inline void SetServerEntity( Entity* svEntity )
     {
         serverEntity = svEntity;
