@@ -124,9 +124,9 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
 SVG_SaveClientData
 
 Some information that should be persistant, like health,
-is still stored in the edict structure, so it needs to
+is still stored in the entity structure, so it needs to
 be mirrored out to the client structure before all the
-edicts are wiped.
+entities are wiped.
 ==================
 */
 void SVG_SaveClientData(void)

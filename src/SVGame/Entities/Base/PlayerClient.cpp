@@ -962,7 +962,7 @@ void PlayerClient::SetAnimationFrame() {
         return;
     }
 
-    if (GetModelIndex() != 255) {
+    if (GetModelIndex() != 255) { 
         return;     // not in the player model
     }
 
@@ -985,12 +985,12 @@ void PlayerClient::SetAnimationFrame() {
 
     if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
         if (GetFrame() > client->animation.endFrame) {
-            SetFrame(GetFrame() - 1);
+            SetFrame(GetFrame() - 0.2f);
             return;
         }
     } else if (GetFrame() < client->animation.endFrame) {
         // continue an animation
-        SetFrame(GetFrame() + 1);
+        SetFrame(GetFrame() + 0.2f);
         return;
     }
 

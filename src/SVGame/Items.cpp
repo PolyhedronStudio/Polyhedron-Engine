@@ -1006,7 +1006,7 @@ void SP_item_health_mega(Entity *self)
 }
 
 
-void SVG_InitItems(void)
+void SVG_InitializeItems(void)
 {
     game.numberOfItems = sizeof(itemlist) / sizeof(itemlist[0]) - 1;
 }

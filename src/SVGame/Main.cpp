@@ -107,7 +107,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 void SVG_InitializeServerEntities();
 void SVG_InitializeGameMode();
 void SVG_AllocateGameClients();
-void SVG_AllocateGamePlayerClientEntities();
+void SVG_CreatePlayerClientEntities();
 void SVG_InitializeCVars();
 
 void SVG_RunEntity(SVGBaseEntity *ent);
@@ -145,7 +145,7 @@ void SVG_InitGame(void)
 
     // Initialize and allocate core objects for this "games" map 'round'.
     SVG_InitializeCVars();
-    SVG_InitItems();
+    SVG_InitializeItems();
     SVG_InitializeServerEntities();
     SVG_AllocateGameClients();
     // WID: You'd expect PlayerClient allocation for the entities here.
@@ -371,15 +371,15 @@ void SVG_AllocateGameClients() {
 
 //
 //=====================
-// SVG_AllocateGamePlayerClientEntities
+// SVG_CreatePlayerClientEntities
 //
 // Allocate the client player class entities before hand. No need to redo this all over,
 // that'd just be messy and complicate things more.
 //=====================
 //
-void SVG_AllocateGamePlayerClientEntities() {
+void SVG_CreatePlayerClientEntities() {
     // Loop over the number of clients.
-    int32_t maximumClients = game.maximumClients;
+    const int32_t maximumClients = game.maximumClients;
 
     // Allocate a classentity for each client in existence.
     for (int32_t i = 1; i < maximumClients + 1; i++) {
@@ -389,17 +389,17 @@ void SVG_AllocateGamePlayerClientEntities() {
         // Initialize entity.
         SVG_InitEntity(serverEntity);
 
-        // Allocate their class entities appropriately.
-        serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        // Allocate player client class entity 
+        PlayerClient *playerClientEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
         
         // Be sure to reset their inuse, after all, they aren't in use.
-        serverEntity->classEntity->SetInUse(false);
+        playerClientEntity->SetInUse(false);
 
         // Fetch client index.
         const int32_t clientIndex = i - 1; // Same as the older: serverEntity - g_entities - 1;
 
         // Assign the designated client to this PlayerClient entity.
-        ((PlayerClient*)serverEntity->classEntity)->SetClient(&game.clients[clientIndex]);
+        playerClientEntity->SetClient(&game.clients[clientIndex]);
     }
 }
 

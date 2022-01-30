@@ -281,10 +281,10 @@ void    Info_Print(const char* infostring);
 // Color defines, modify these as you please for custom colors.
 //-----------------
 #define U32_BLACK   MakeColor(  0,   0,   0, 255)
-#define U32_RED     MakeColor(255,   0,   0, 255)
-#define U32_GREEN   MakeColor(  0, 255,   0, 255)
+#define U32_RED     MakeColor(215,  83,  65, 255)
+#define U32_GREEN   MakeColor( 41, 171, 135, 255)
 #define U32_YELLOW  MakeColor(255, 255,   0, 255)
-#define U32_BLUE    MakeColor(  0,   0, 255, 255)
+#define U32_ORANGE  MakeColor(255, 165,   0, 255)//#define U32_BLUE    MakeColor(  0,   0, 255, 255)
 #define U32_CYAN    MakeColor(  0, 255, 255, 255)
 #define U32_MAGENTA MakeColor(255,   0, 255, 255)
 #define U32_WHITE   MakeColor(255, 255, 255, 255)

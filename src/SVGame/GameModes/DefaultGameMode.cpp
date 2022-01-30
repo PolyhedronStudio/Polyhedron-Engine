@@ -932,7 +932,21 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         return;
     }
 
-    gi.DPrintf("ClientBegin executed with entity: %i client: %i\n", serverEntity->state.number, (serverEntity - g_entities - 1));
+    if (serverEntity->client) {
+        int32_t entityIndex = serverEntity - g_entities;
+        int32_t stateNumber = serverEntity->state.number;
+
+        if (serverEntity == g_entities) {
+            gi.DPrintf("serverEntity == g_entities!!!\n");
+        }
+        gi.DPrintf("ClientBegin - serverEntity#: %i has a client#: %i\n", serverEntity->state.number, serverEntity->client - game.clients);
+    } else {
+        int32_t entityIndex = serverEntity - g_entities;
+        int32_t stateNumber = serverEntity->state.number;
+
+        gi.DPrintf("ClientBegin - serverEntity#: %i has no client.\n", serverEntity->state.number, serverEntity->client - game.clients);
+    }
+//    gi.DPrintf("ClientBegin executed with entity: %i client: %i\n", serverEntity->state.number, (serverEntity - g_entities - 1));
     // Setup the client for the server entity.
     serverEntity->client = game.clients + (serverEntity - g_entities - 1);
 
@@ -957,7 +971,7 @@ void DefaultGameMode::ClientBegin(Entity* serverEntity) {
         SVG_InitEntity(serverEntity);
         
         // Delete previous classentity, if existent (older client perhaps).
-        SVG_FreeClassFromEntity(serverEntity);
+        qboolean foundClassEntity = SVG_FreeClassFromEntity(serverEntity);
 
         // Recreate class PlayerClient entity.
         serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false);

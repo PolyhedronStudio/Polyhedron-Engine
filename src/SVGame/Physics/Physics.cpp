@@ -436,7 +436,7 @@ typedef struct {
 } pushed_t;
 pushed_t    pushed[MAX_EDICTS], *pushed_p;
 
-SVGBaseEntity *obstacle;
+SVGBaseEntity *obstacle = nullptr;
 
 
 //
@@ -655,9 +655,9 @@ void SVG_Physics_Pusher(SVGBaseEntity *ent)
 
         // if the pusher has a "Blocked" function, call it
         // otherwise, just stay in place until the obstacle is gone
-        //if (obstacle) {
+        if (obstacle) {
             part->Blocked(obstacle);
-        //}
+        }
 
         //if (part->Blocked)
         //    part->Blocked(part, obstacle);

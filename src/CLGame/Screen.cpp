@@ -67,7 +67,7 @@ static const char* const sb_nums[2][STAT_PICS] = {
 // Color table containing actual color codes that match their string names.
 const uint32_t colorTable[8] = {
     U32_BLACK, U32_RED, U32_GREEN, U32_YELLOW,
-    U32_BLUE, U32_CYAN, U32_MAGENTA, U32_WHITE
+    U32_ORANGE, U32_CYAN, U32_MAGENTA, U32_WHITE
 };
 
 //
@@ -195,9 +195,15 @@ float SCR_FadeAlpha(unsigned startTime, unsigned visTime, unsigned fadeTime)
 //
 //=============================================================================
 // 
+// Before adding color orange.
+//const char* const colorNames[10] = {
+//    "black", "red", "green", "yellow",
+//    "blue", "cyan", "magenta", "white",
+//    "alt", "none"
+//};
 const char* const colorNames[10] = {
     "black", "red", "green", "yellow",
-    "blue", "cyan", "magenta", "white",
+    "orange", "cyan", "magenta", "white",
     "alt", "none"
 };
 
@@ -206,9 +212,9 @@ enum color_index_t {
     COLOR_RED,
     COLOR_GREEN,
     COLOR_YELLOW,
-    COLOR_BLUE,
+    COLOR_ORANGE, // COLOR_BLUE
     COLOR_CYAN,
-    COLOR_MAGENTA,
+    COLOR_MAGENTA, // COLOR_...
     COLOR_WHITE,
 
     COLOR_ALT,

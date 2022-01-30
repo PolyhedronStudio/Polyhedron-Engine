@@ -91,7 +91,7 @@ static const char *const sb_nums[2][STAT_PICS] = {
 
 const uint32_t colorTable[8] = {
     U32_BLACK, U32_RED, U32_GREEN, U32_YELLOW,
-    U32_BLUE, U32_CYAN, U32_MAGENTA, U32_WHITE
+    U32_ORANGE, U32_CYAN, U32_MAGENTA, U32_WHITE
 };
 
 /*

@@ -83,7 +83,7 @@ static void cl_railspiral_color_changed(cvar_t* self)
 	if (!SCR_ParseColor(self->string, &railspiral_color)) {
 		Com_WPrint("Invalid value '%s' for '%s'\n", self->string, self->name);
 		clgi. Cvar_Reset(self);
-		railspiral_color.u32 = U32_BLUE;
+		railspiral_color.u32 = U32_ORANGE;
 	}
 }
 

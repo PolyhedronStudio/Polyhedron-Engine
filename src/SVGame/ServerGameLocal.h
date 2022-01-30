@@ -600,7 +600,7 @@ void SVG_Command_Score_f(SVGBaseEntity *ent);
 // g_items.c
 //
 void SVG_PrecacheItem(gitem_t *it);
-void SVG_InitItems(void);
+void SVG_InitializeItems(void);
 void SVG_SetItemNames(void);
 gitem_t *SVG_FindItemByPickupName(const char *pickup_name);
 gitem_t *SVG_FindItemByClassname(const char *className);
@@ -896,8 +896,8 @@ struct gclient_s {
 
     // animation vars
     struct {
-        int32_t     endFrame;
-        int32_t     priorityAnimation;
+        float     endFrame;
+        float priorityAnimation;
         qboolean    isDucking;
         qboolean    isRunning;
     } animation;

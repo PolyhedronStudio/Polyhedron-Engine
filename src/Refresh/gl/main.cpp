@@ -391,7 +391,7 @@ static void GL_DrawNullModel(void)
     static const uint32_t colors[6] = {
         U32_RED, U32_RED,
         U32_GREEN, U32_GREEN,
-        U32_BLUE, U32_BLUE
+        U32_ORANGE, U32_ORANGE
     };
     r_entity_t *e = glr.ent;
     vec3_t points[6];

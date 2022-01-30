@@ -172,7 +172,7 @@ qboolean SVG_FreeClassFromEntity(Entity* ent) {
         g_baseEntities[entityNumber] = nullptr;
 
         // Freed class entity.
-        return freedClassEntity = true;
+        freedClassEntity = true;
     }
 
     // Return result.
