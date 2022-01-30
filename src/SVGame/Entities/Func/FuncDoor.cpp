@@ -169,7 +169,9 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
             for ( SVGBaseEntity* ent = this; nullptr != ent; ent = ent->GetTeamChainEntity() ) {
                 if ( ent->IsSubclassOf<FuncDoor>() ) {
                     ent->SetMessage( "" );
-                    ent->SetTouchCallback( nullptr );
+
+                    // WID: TODO: Add a flag for whether to unset touch callbacks after being used for the first time.
+                    //ent->SetTouchCallback( nullptr );
                     static_cast<FuncDoor*>( ent )->DoorGoDown();
                 }
             }
@@ -182,7 +184,8 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
     for ( SVGBaseEntity* ent = this; nullptr != ent; ent = ent->GetTeamChainEntity() ) {
         if ( ent->IsSubclassOf<FuncDoor>() ) {
             ent->SetMessage( "" );
-            ent->SetTouchCallback( nullptr );
+            // WID: TODO: Add a flag for whether to unset touch callbacks after being used for the first time.
+            //ent->SetTouchCallback( nullptr );
             static_cast<FuncDoor*>( ent )->DoorGoUp( activator );
         }
     }

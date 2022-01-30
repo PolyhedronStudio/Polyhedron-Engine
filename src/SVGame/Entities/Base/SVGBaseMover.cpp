@@ -15,6 +15,9 @@
 #include "SVGBaseTrigger.h"
 #include "SVGBaseMover.h"
 
+// Epsilon used for comparing floats.
+static constexpr float BASEMOVER_EPSILON = 0.03125;
+
 // Constructor/Deconstructor.
 SVGBaseMover::SVGBaseMover(Entity* svEntity) : Base(svEntity) {
 
@@ -139,9 +142,9 @@ vec3_t SVGBaseMover::CalculateEndPosition() {
 		fabsf( moveDirection.z ) 
 	};
 	
-	float distance = (absoluteDir.x * size.x) + (absoluteDir.y * size.y) + (absoluteDir.z * size.z) - GetLip();
-	moveInfo.distance = distance;
-	return vec3_fmaf( GetStartPosition(), distance, moveDirection );
+	moveInfo.distance = (absoluteDir.x * size.x) + (absoluteDir.y * size.y) + (absoluteDir.z * size.z) - GetLip();
+
+	return vec3_fmaf( GetStartPosition(), moveInfo.distance, moveDirection );
 }
 
 //===============
@@ -200,14 +203,6 @@ void SVGBaseMover::BrushMoveBegin() {
 }
 
 //===============
-// AreSame
-// Checks if two floats are basically the same with an epsilon
-//===============
-bool AreSame( float a, float b, float epsilon = 0.1f ) {
-	return fabs( a - b ) < epsilon;
-}
-
-//===============
 // SVGBaseMover::BrushMoveCalc
 //===============
 void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function ) {
@@ -218,7 +213,7 @@ void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 	mi.remainingDistance = VectorNormalize( moveInfo.dir );
 	mi.OnEndFunction = function;
 
-	if ( AreSame( mi.speed, mi.acceleration ) && AreSame( mi.speed, mi.deceleration ) ) {
+	if ( EqualEpsilonf( mi.speed, mi.acceleration, BASEMOVER_EPSILON ) && EqualEpsilonf( mi.speed, mi.deceleration, BASEMOVER_EPSILON  ) ) {
 		if ( level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this) ) {
 			BrushMoveBegin();
 		} else {

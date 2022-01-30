@@ -32,9 +32,19 @@ FuncDoorRotating::FuncDoorRotating( Entity* entity )
 // FuncDoorRotating::Spawn
 //===============
 void FuncDoorRotating::Spawn() {
-	Base::Spawn();
 
-	//SetAngles( vec3_zero() );
+	// Be sure to set angles first before calling Base::Spawn.
+	SetAngles( vec3_zero() );
+
+	if (!GetAcceleration()) {
+		SetAcceleration(GetSpeed());
+	}
+	if (!GetDeceleration()) {
+		SetDeceleration(GetSpeed());
+	}
+
+	// FuncDoor spawn.
+	Base::Spawn();
 
 	// Set the axis of rotation
 	moveDirection = vec3_zero();
@@ -66,6 +76,12 @@ void FuncDoorRotating::Spawn() {
 		moveDirection = vec3_negate( moveDirection );
 	}
 
+	moveInfo.state = MoverState::Bottom;
+
+	moveInfo.speed = GetSpeed();
+	moveInfo.acceleration = GetAcceleration();
+	moveInfo.deceleration = GetDeceleration();
+	moveInfo.wait = GetWaitTime();
 	moveInfo.startOrigin = GetOrigin();
 	moveInfo.endOrigin = GetOrigin();
 	moveInfo.startAngles = GetStartPosition();
@@ -80,7 +96,13 @@ void FuncDoorRotating::Spawn() {
 //===============
 void FuncDoorRotating::SpawnKey( const std::string& key, const std::string& value ) {
 	if ( key == "distance" ) {
-		ParseFloatKeyValue( key, value, distance );
+		// Distance value.
+		float parsedFloat = 0;
+
+		// Parse.
+		ParseFloatKeyValue( key, value, parsedFloat);
+
+		distance = parsedFloat;
 	} else {
 		Base::SpawnKey( key, value );
 	}

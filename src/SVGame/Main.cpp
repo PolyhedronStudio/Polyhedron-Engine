@@ -639,7 +639,8 @@ void SVG_RunFrame(void) {
         int32_t stateNumber = g_entities[i].state.number;
 
         // Fetch the corresponding base entity.
-        SVGBaseEntity* entity = g_baseEntities[stateNumber];
+        //SVGBaseEntity* entity = g_baseEntities[stateNumber];
+        SVGBaseEntity* entity = g_entities[i].classEntity;
 
         // Reset level current entity.
         level.currentEntity = nullptr;
@@ -694,13 +695,18 @@ void SVG_RunFrame(void) {
         if (i > 0 && i <= maximumClients->value) {
             // Ensure the entity is in posession of a client that controls it.
             ServersClient* client = entity->GetClient();
-            if (!client)
+            if (!client) {
                 continue;
-
-            // If the entity is a PlayerClient (sub-)class, begin its serverframe. 
-            if (entity->GetTypeInfo()->IsClass(PlayerClient::ClassInfo) || entity->GetTypeInfo()->IsSubclassOf(PlayerClient::ClassInfo)) {
-                game.gameMode->ClientBeginServerFrame(dynamic_cast<PlayerClient*>(entity), client);
             }
+
+            // If the entity is NOT a PlayerClient (sub-)class, skip.
+            if (!entity->GetTypeInfo()->IsSubclassOf(PlayerClient::ClassInfo)) {
+                continue;
+            }
+
+            // Last but not least, begin its server frame.
+            game.gameMode->ClientBeginServerFrame(dynamic_cast<PlayerClient*>(entity), client);
+
             continue;
         }
 
