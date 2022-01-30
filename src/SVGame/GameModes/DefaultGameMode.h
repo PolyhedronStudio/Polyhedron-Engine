@@ -52,7 +52,7 @@ public:
     // 
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(Entity *serverEntity) override;
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) override;
     virtual void ClientEndServerFrame(Entity *serverEntity) override;
     virtual void ClientDisconnect(PlayerClient* ent) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;

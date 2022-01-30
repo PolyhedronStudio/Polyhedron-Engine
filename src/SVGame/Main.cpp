@@ -661,11 +661,10 @@ void SVG_RunFrame(void) {
             // Free server entity.
             SVG_FreeEntity(entity->GetServerEntity());
 
-            // Be sure to unset the server entity on this SVGBaseEntity.
-            //entity->UnlinkEntity();
-            //entity->SetGroundEntity(nullptr);
-            //entity->SetLinkCount(0);
-            //entity->SetGroundEntityLinkCount(0);
+            // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
+            // 
+            // Other entities may wish to point at this entity for the current tick. By unsetting
+            // the server entity we can prevent malicious situations from happening.
             entity->SetServerEntity(nullptr);
 
             // Skip further processing of this entity, it's removed.
@@ -680,7 +679,7 @@ void SVG_RunFrame(void) {
 
         // If the ground entity moved, make sure we are still on it
         if ((entity->GetServerEntity() && entity->GetGroundEntity() && entity->GetGroundEntity()->GetServerEntity())
-            && (entity->GetServerEntity() && entity->GetGroundEntity() && entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
+            && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             entity->SetGroundEntity(nullptr);
 
@@ -693,9 +692,15 @@ void SVG_RunFrame(void) {
 
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= maximumClients->value) {
-            // Ensure the entity actually is owned by a client. 
-            if (entity->GetClient())
-                game.gameMode->ClientBeginServerFrame(entity->GetServerEntity());
+            // Ensure the entity is in posession of a client that controls it.
+            ServersClient* client = entity->GetClient();
+            if (!client)
+                continue;
+
+            // If the entity is a PlayerClient (sub-)class, begin its serverframe. 
+            if (entity->GetTypeInfo()->IsClass(PlayerClient::ClassInfo) || entity->GetTypeInfo()->IsSubclassOf(PlayerClient::ClassInfo)) {
+                game.gameMode->ClientBeginServerFrame(dynamic_cast<PlayerClient*>(entity), client);
+            }
             continue;
         }
 

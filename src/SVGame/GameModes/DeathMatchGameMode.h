@@ -26,7 +26,7 @@ public:
     virtual void PutClientInServer(Entity* ent) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(Entity* serverEntity) override;
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) override;
     
     virtual void RespawnClient(PlayerClient* ent) override;
     virtual void RespawnSpectator(PlayerClient* ent);

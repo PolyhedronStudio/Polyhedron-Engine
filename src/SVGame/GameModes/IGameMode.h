@@ -47,7 +47,7 @@ public:
     virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
-    virtual void ClientBeginServerFrame(Entity* serverEntity) = 0;
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) = 0;
     // Called for each player at the end of the server frame and right 
     // after spawning.
     virtual void ClientEndServerFrame(Entity *serverEntity) = 0;

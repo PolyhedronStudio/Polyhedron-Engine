@@ -622,14 +622,11 @@ void DefaultGameMode::OnLevelExit() {
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
 //===============
-void DefaultGameMode::ClientBeginServerFrame(Entity* serverEntity) {
+void DefaultGameMode::ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) {
     // Ensure we aren't in an intermission time.
     if (level.intermission.time)
         return;
 
-    // Fetch the client.
-    ServersClient* client = serverEntity->client;
-    PlayerClient* player = (PlayerClient*)serverEntity->classEntity;
     // This has to go ofc.... lol. What it simply does though, is determine whether there is 
     // a need to respawn as spectator.
     //if (deathmatch->value &&
@@ -642,14 +639,14 @@ void DefaultGameMode::ClientBeginServerFrame(Entity* serverEntity) {
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
     if (!client->weaponThunk && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(player);
+        SVG_ThinkWeapon(dynamic_cast<PlayerClient*>(entity));
     else
         client->weaponThunk = false;
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.
     int32_t buttonMask = 0;
-    if (player->GetDeadFlag()) {
+    if (entity->GetDeadFlag()) {
         // Wait for any button just going down
         if (level.time > client->respawnTime) {
             // In old code, the need to hit a key was only set in DM mode.
@@ -661,7 +658,7 @@ void DefaultGameMode::ClientBeginServerFrame(Entity* serverEntity) {
 
             if ((client->latchedButtons & buttonMask) ||
                 (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::ForceRespawn))) {
-                game.gameMode->RespawnClient((PlayerClient*)player->GetServerEntity());
+                game.gameMode->RespawnClient(dynamic_cast<PlayerClient*>(entity));
                 client->latchedButtons = 0;
             }
         }
