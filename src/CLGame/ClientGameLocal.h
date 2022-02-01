@@ -86,7 +86,7 @@ struct CLGTrace {
     float       fraction;
     // The destination position.
     vec3_t      endPosition;
-    // [signbits][x] = either size[0][x] or size[1][x]
+    // [signBits][x] = either size[0][x] or size[1][x]
     vec3_t		offsets[8];
 
     

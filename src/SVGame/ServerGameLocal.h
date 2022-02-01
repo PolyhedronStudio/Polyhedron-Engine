@@ -733,7 +733,7 @@ struct SVGTrace {
     SVGBaseEntity *ent;   // Not set by CM_*() functions
 
     // N&C: Custom added.
-    vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
+    vec3_t		offsets[8];	// [signBits][x] = either size[0][x] or size[1][x]
 };
 
 SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);

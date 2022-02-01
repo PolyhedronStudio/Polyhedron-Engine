@@ -43,12 +43,10 @@ solid_edge items only clip against bsp models.
 */
 
 
-//
 //===============
 // SVG_TestEntityPosition
 //
 //===============
-//
 SVGBaseEntity *SVG_TestEntityPosition(SVGBaseEntity *ent)
 {
     SVGTrace trace;
@@ -61,20 +59,16 @@ SVGBaseEntity *SVG_TestEntityPosition(SVGBaseEntity *ent)
     trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, mask);
 
     if (trace.startSolid)
-        return g_baseEntities[0];
+        return SVG_GetWorldClassEntity();
 
-    return NULL;
+    return nullptr;
 }
 
-
-
-//
 //===============
 // SVG_BoundVelocity
 //
 // Keeps an entity its velocity within max boundaries. (-sv_maxvelocity, sv_maxvelocity)
 //===============
-//
 void SVG_BoundVelocity(SVGBaseEntity *ent)
 {
     vec3_t velocity = ent->GetVelocity();
@@ -86,24 +80,27 @@ void SVG_BoundVelocity(SVGBaseEntity *ent)
     });
 }
 
-
-//
 //===============
 // SVG_RunThink
 //
 // Runs entity thinking code for this frame if necessary
 //===============
-//
 qboolean SVG_RunThink(SVGBaseEntity *ent)
 {
-    float   thinktime;
+    if (!ent) {
+        gi.DPrintf("Tried to run SVG_RunThink with a nullptr entity!\n");
+        return false;
+    }
 
-    thinktime = ent->GetNextThinkTime();
-    if (thinktime <= 0)
+    // Fetch think time.
+    const float thinkTime = ent->GetNextThinkTime();
+
+    if (thinkTime <= 0)
         return true;
-    if (thinktime > level.time + 0.001)
+    if (thinkTime > level.time + 0.001)
         return true;
 
+    // Reset think time.
     ent->SetNextThinkTime(0);
 
     #if _DEBUG
@@ -130,39 +127,49 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
         errorString += ") has a nullptr think callback \n";
     //    
         gi.Error( errorString.c_str() );
+
+        // Return true.
+        return true;
     }
     #endif
 
+    // Last but not least, let the entity execute its think behavior callback.
     ent->Think();
 
 
     return false;
 }
 
-//
 //===============
 // SVG_Impact
 //
 // Two entities have touched, so run their touch functions
 //===============
-//
-void SVG_Impact(SVGBaseEntity *e1, SVGTrace *trace)
+void SVG_Impact(SVGBaseEntity *entityA, SVGTrace *trace)
 {
-    SVGBaseEntity *e2 = nullptr;
+    SVGBaseEntity* entityB = nullptr;
 //  cplane_t    backplane;
 
+    // Return in case there is no entity to to test with (invalid pointer.)
+    if (!entityA) {
+        gi.DPrintf("Warning: Tried to call SVG_Impact with a nullptr entity!\n");
+    }
+
+    // If the impact came from a trace, set entityB to this ent.
     if (trace) {
-        e2 = trace->ent;
+        entityB = trace->ent;
     }
 
-    if (e1->GetSolid() != Solid::Not) {
+    // Execute touch functionality for entityA if its solid is not a Solid::Not.
+    if (entityA->GetSolid() != Solid::Not) {
         //e1->Touch(e1, e2, &trace->plane, trace->surface);
-        e1->Touch(e1, e2, &trace->plane, trace->surface);
+        entityA->Touch(entityA, entityB, &trace->plane, trace->surface);
     }
 
-    if (e2 != nullptr && e2->GetSolid() != Solid::Not) {
+    // Execute touch functionality for entityB exists, and is not a Solid::Not.
+    if (entityB != nullptr && entityB->GetSolid() != Solid::Not) {
         //e2->Touch(e2, e1, NULL, NULL);
-        e2->Touch(e2, e1, NULL, NULL);
+        entityB->Touch(entityB, entityA, nullptr, nullptr);
     }
 }
 

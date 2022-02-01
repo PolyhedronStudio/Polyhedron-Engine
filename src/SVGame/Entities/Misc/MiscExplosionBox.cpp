@@ -307,8 +307,7 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
     SetTakeDamage(TakeDamage::No);
 
     // Attacker becomes this entity its "activator".
-    //if (attacker)
-        SetActivator(attacker);
+    SetActivator(attacker);
 
     // Setup the next think and think time.
     SetNextThinkTime(level.time + 2 * FRAMETIME);
@@ -340,7 +339,6 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
         return;
 
     // Calculate ratio to use.
-    other->SetMass(200);
     float ratio = (float)other->GetMass() / (float)self->GetMass();
 
     // Calculate direction.

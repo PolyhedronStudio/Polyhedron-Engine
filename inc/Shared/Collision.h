@@ -109,7 +109,7 @@ typedef struct {
     struct entity_s* ent;   // Not set by CM_*() functions
 
     // PH: Custom added.
-    vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
+    vec3_t		offsets[8];	// [signBits][x] = either size[0][x] or size[1][x]
 } trace_t;
 
 #endif // __SHARED__COLLISION_H__

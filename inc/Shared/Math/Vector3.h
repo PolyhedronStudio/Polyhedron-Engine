@@ -902,7 +902,9 @@ void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up);
 inline void AnglesToAxis(const vec3_t& angles, vec3_t* axis)
 {
     AngleVectors(angles, &axis[0], &axis[1], &axis[2]);
-    VectorInverse(axis[1]);
+    //VectorInverse(axis[1]);
+    axis[1] = vec3_negate(axis[1]);
+    //vec3_negate()
 }
 
 //
@@ -940,10 +942,9 @@ inline void RotatePoint(vec3_t& point, vec3_t* axis)
 {
     vec3_t temp = point;
 
-    VectorCopy(point, temp);
-    point.xyz[0] = DotProduct(temp, axis[0]);
-    point.xyz[1] = DotProduct(temp, axis[1]);
-    point.xyz[2] = DotProduct(temp, axis[2]);
+    point.x = vec3_dot(temp, axis[0]);
+    point.y = vec3_dot(temp, axis[1]);
+    point.z = vec3_dot(temp, axis[2]);
 }
 
 #endif // __INC__SHARED__MATH__VECTOR3_H__
