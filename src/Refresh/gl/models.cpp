@@ -423,6 +423,89 @@ fail:
 }
 #endif
 
+qerror_t MOD_LoadIQM_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name) {
+    Hunk_Begin(&model->hunk, 0x4000000);
+    model->type = model_t::MOD_ALIAS;
+
+    qerror_t res = MOD_LoadIQM_Base(model, rawdata, length, mod_name);
+
+    if (res != Q_ERR_SUCCESS) 	{
+        Hunk_Free(&model->hunk);
+        return res;
+    }
+
+    char base_path[MAX_QPATH];
+    COM_FilePath(mod_name, base_path, sizeof(base_path));
+
+    model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t) * model->iqmData->num_meshes);
+    model->nummeshes = (int)model->iqmData->num_meshes;
+    model->numframes = 1; // these are baked frames, so that the VBO uploader will only make one copy of the vertices
+
+                          // Strip the .iqm extension and replace it with .mat of course!
+    char mat_name[MAX_QPATH];			// Material name.
+    char mod_name_no_ext[MAX_QPATH];	// Model name without extension.
+    COM_StripExtension(mod_name, mod_name_no_ext, MAX_QPATH);
+    Q_snprintf(mat_name, sizeof(mat_name), "%s.mat", mod_name_no_ext);
+
+    // Load the IQM model .mat file that belongs to the model itself.
+    // Always found in the same folder as the model.
+    // 
+    // Ensure to avoid name duplicates etc that your name for the textures are like:
+    // "/models/poly/poly_glow"
+    // "/models/poly/poly_chrome"
+    //
+    // For the unobvious, without them quotes yes.
+    //MAT_LoadFromFile(mat_name);
+
+    for (unsigned model_idx = 0; model_idx < model->iqmData->num_meshes; model_idx++) 	{
+        iqm_mesh_t* iqm_mesh = &model->iqmData->meshes[model_idx];
+        maliasmesh_t* mesh = &model->meshes[model_idx];
+
+        mesh->indices = (GLuint*)iqm_mesh->data->indices ? iqm_mesh->data->indices + iqm_mesh->first_triangle * 3 : NULL;
+        mesh->positions = iqm_mesh->data->positions ? (vec3_t*)(iqm_mesh->data->positions + iqm_mesh->first_vertex * 3) : NULL;
+        mesh->normals = iqm_mesh->data->normals ? (vec3_t*)(iqm_mesh->data->normals + iqm_mesh->first_vertex * 3) : NULL;
+        mesh->tex_coords = iqm_mesh->data->texcoords ? (vec2_t*)(iqm_mesh->data->texcoords + iqm_mesh->first_vertex * 2) : NULL;
+        mesh->tangents = iqm_mesh->data->tangents ? (vec3_t*)(iqm_mesh->data->tangents + iqm_mesh->first_vertex * 3) : NULL;
+        mesh->blend_indices = iqm_mesh->data->blend_indices ? (uint32_t*)(iqm_mesh->data->blend_indices + iqm_mesh->first_vertex * 4) : NULL;
+        mesh->blend_weights = iqm_mesh->data->blend_weights ? (vec4_t*)(iqm_mesh->data->blend_weights + iqm_mesh->first_vertex * 4) : NULL;
+
+        mesh->numindices = (int)(iqm_mesh->num_triangles * 3);
+        mesh->numverts = (int)iqm_mesh->num_vertexes;
+        mesh->numtris = (int)iqm_mesh->num_triangles;
+
+        // convert the indices from IQM global space to mesh-local space; fix winding order.
+        for (unsigned triangle_idx = 0; triangle_idx < iqm_mesh->num_triangles; triangle_idx++) 		{
+            int tri[3];
+            tri[0] = mesh->indices[triangle_idx * 3 + 0];
+            tri[1] = mesh->indices[triangle_idx * 3 + 1];
+            tri[2] = mesh->indices[triangle_idx * 3 + 2];
+
+            mesh->indices[triangle_idx * 3 + 0] = tri[2] - (int)iqm_mesh->first_vertex;
+            mesh->indices[triangle_idx * 3 + 1] = tri[1] - (int)iqm_mesh->first_vertex;
+            mesh->indices[triangle_idx * 3 + 2] = tri[0] - (int)iqm_mesh->first_vertex;
+        }
+
+        // Generate precise file name to "search for".
+        char filename[MAX_QPATH];
+        Q_snprintf(filename, sizeof(filename), "%s/%s.pcx", base_path, iqm_mesh->material);
+
+        // Find the specific matterial in our list.
+        //pbr_material_t* mat = MAT_Find(filename, IT_SKIN, IF_NONE);
+        //assert(mat); // it's either found or created
+        for (int32_t i = 0; i < model->iqmData->num_meshes; i++) {
+            mesh->skins[i] = IMG_Find(filename, IT_SKIN, IF_NONE);
+        }
+        //mesh->materials[0] = mat;
+        mesh->numskins = 1; // looks like IQM only supports one skin?
+    }
+
+    //extract_model_lights(model);
+
+    Hunk_End(&model->hunk);
+
+    return Q_ERR_SUCCESS;
+}
+
 void MOD_Reference_GL(model_t *model)
 {
     int i, j;

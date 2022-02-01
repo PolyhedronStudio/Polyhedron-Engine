@@ -25,7 +25,7 @@ TargetEarthquake::TargetEarthquake( Entity* entity )
 // TargetEarthquake::Spawn
 //===============
 void TargetEarthquake::Spawn() {
-    if ( targetNameStr.empty() ) {
+    if ( GetTargetName().empty()) {
         gi.DPrintf( "Untargeted target_earthquake at %s\n", vec3_to_cstr( GetOrigin() ) );
     }
 
@@ -65,7 +65,7 @@ void TargetEarthquake::QuakeUse( SVGBaseEntity* other, SVGBaseEntity* activator 
 //===============
 void TargetEarthquake::QuakeThink() {
     if ( lastQuakeTime < level.time ) {
-        gi.PositionedSound( GetOrigin(), serverEntity, CHAN_AUTO, GetNoiseIndex(), 1.0f, ATTN_NONE, 0.0f );
+        gi.PositionedSound( GetOrigin(), GetServerEntity(), CHAN_AUTO, GetNoiseIndex(), 1.0f, ATTN_NONE, 0.0f);
         lastQuakeTime = level.time + 0.5f;
     }
 

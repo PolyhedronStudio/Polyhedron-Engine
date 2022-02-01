@@ -785,7 +785,7 @@ gitem_t itemlist[] = {
         Weapon_Blaster,
         "misc/w_pkup.wav",
         NULL, 0,
-        "models/weapons/v_blast/tris.md2",
+        "models/weapons/v_blast/tris.md2", // "models/weapons/v_mark23/tris.iqm",
         /* icon */      "w_blaster",
         /* pickup */    "Blaster",
         0,

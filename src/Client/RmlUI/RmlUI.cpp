@@ -82,7 +82,7 @@ void RMLUI_Init(void) {
 		Rml::Shutdown();
 		return;
 	}
-	//document->Show();
+	document->Show();
 	//document->Hide();
 }
 

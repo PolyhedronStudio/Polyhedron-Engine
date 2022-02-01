@@ -35,6 +35,11 @@ static drawStatic_t draw = {
 	.alpha_scale = 1.0f
 };
 
+//struct DrawPicUniformBufferObject {
+//	// Transform matrix.
+//	mat4_t transform;
+//};
+
 static int num_stretch_pics = 0;
 typedef struct {
 	float x, y, w,   h;

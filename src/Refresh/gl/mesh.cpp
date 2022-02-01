@@ -259,6 +259,9 @@ static glCullResult_t cull_static_model(model_t *model)
     vec3_t bounds[2];
     glCullResult_t cull;
 
+    if (!newframe)
+        return CULL_OUT;
+
     if (glr.entrotated) {
         cull = GL_CullSphere(origin, newframe->radius);
         if (cull == CULL_OUT) {
