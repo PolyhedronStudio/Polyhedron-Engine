@@ -71,7 +71,7 @@ void MiscExplosionBox::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
+    SetMoveType(MoveType::Toss);
 
     // Since this is a "monster", after all...
     SetFlags(EntityServerFlags::Monster);
@@ -96,9 +96,10 @@ void MiscExplosionBox::Spawn() {
     if (!GetMass()) {
         SetMass(40);
     }
-    if (!GetHealth()) {
-        SetHealth(150);
-    }
+    //if (!GetHealth()) {
+    //    SetHealth(150);
+    //}
+    SetHealth(999);
     if (!GetDamage()) {
         SetDamage(150);
     }
@@ -175,33 +176,30 @@ void MiscExplosionBox::ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* ac
 //
 void MiscExplosionBox::ExplosionBoxThink(void) {
     // First, ensure our origin is +1 off the floor.
-    vec3_t newOrigin = GetOrigin() + vec3_t{
+    vec3_t traceStart = GetOrigin() + vec3_t{
         0.f, 0.f, 1.f
     };
         
     // Calculate the end origin to use for tracing.
-    vec3_t end = newOrigin + vec3_t{
+    vec3_t traceEnd = traceStart + vec3_t{
         0, 0, -256.f
     };
     
     // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, NULL, CONTENTS_MASK_MONSTERSOLID);
+    SVGTrace trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, NULL, CONTENTS_MASK_MONSTERSOLID);
     
     // Return in case we hit anything.
-    if (trace.fraction == 1.f || trace.allSolid)
+    if (trace.fraction == 1.f || trace.allSolid || (trace.fraction != 1.f && trace.ent != 0))
         return;
     
-    // Unlink.
-    UnlinkEntity();
-
     // Set new entity origin.
     SetOrigin(trace.endPosition);
     
-    //// Do a check ground for the step move of this pusher.
-    SVG_StepMove_CheckGround(this);
-
     // Link entity back in.
     LinkEntity();
+
+    // Do a check ground for the step move of this pusher.
+    SVG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
     SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);

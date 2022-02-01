@@ -75,7 +75,7 @@ void FuncTrain::PostSpawn() {
 
 	SetUseCallback( &FuncTrain::TrainUse );
 
-	serverEntity->state.origin = ent->GetOrigin() - GetMins();
+	SetOrigin(ent->GetOrigin() - GetMins());
 	LinkEntity();
 
 	// This train has no name, trigger it immediately
@@ -96,11 +96,11 @@ void FuncTrain::PostSpawn() {
 // I've put this here in case we add new KVs
 //===============
 void FuncTrain::SpawnKey( const std::string& key, const std::string& value ) {
-	if ( key == "speed" ) {
-		ParseFloatKeyValue( key, value, speed );
-	} else {
+	//if ( key == "speed" ) {
+	//	ParseFloatKeyValue( key, value, speed );
+	//} else {
 		return Base::SpawnKey( key, value );
-	}
+//	}
 }
 
 //===============

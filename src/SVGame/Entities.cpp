@@ -356,9 +356,9 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
 //===============
 BaseEntityVector SVG_FindEntitiesWithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags)
 {
-    BaseEntityVector entityList;
+    BaseEntityVector entities;
 
-    // Iterate over all entities, see who is nearby, and who is not.
+    // Iterate over all entities, and push those that are within range(radius) on the list.
     for (auto* radiusEntity : GetBaseEntityRange<0, MAX_EDICTS>()
         | bef::IsValidPointer
         | bef::HasServerEntity
@@ -366,11 +366,11 @@ BaseEntityVector SVG_FindEntitiesWithinRadius(vec3_t origin, float radius, uint3
         | bef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
         // Push radiusEntity result item to the list.
-        entityList.push_back(radiusEntity);
+        entities.push_back(radiusEntity);
     }
 
     // The list might be empty, ensure to check for that ;-)
-    return entityList;
+    return entities;
 }
 
 //===============

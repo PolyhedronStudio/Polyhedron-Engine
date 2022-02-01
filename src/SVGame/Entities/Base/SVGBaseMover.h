@@ -114,8 +114,12 @@ public:
     }
 
     //
-    // Entity Set Functions.
+    // Get/Set.
     //
+    inline PushMoveInfo* GetPushMoveInfo() {
+        return &moveInfo;
+    }
+
     // Set the 'acceleration' float value.
     inline void SetAcceleration(const float& acceleration) {
         this->acceleration = acceleration;
@@ -124,13 +128,13 @@ public:
     inline void SetDeceleration(const float& deceleration) {
         this->deceleration = deceleration;
     }
-    // Set the 'speed' float value.
-    inline void SetSpeed(const float &speed) {
-        this->speed = speed;
-    }
     // Set the 'endPosition' vec3_t value.
     inline void SetEndPosition(const vec3_t& endPosition) {
         this->endPosition = endPosition;
+    }
+    // Set the 'speed' float value.
+    inline void SetSpeed(const float &speed) {
+        this->speed = speed;
     }
     // Set the 'startPosition' vec3_t value.
     inline void SetStartPosition(const vec3_t& startPosition) {

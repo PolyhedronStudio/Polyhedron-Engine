@@ -467,7 +467,7 @@ void FuncDoor::SpawnDoorTrigger() {
     maxs += HullExpand;
 
     // Spawn the auto door trigger
-    trigger = TriggerAutoDoor::Create( this, maxs, mins );
+    trigger = TriggerAutoDoor::Create( this, mins, maxs );
     
     if ( GetSpawnFlags() & FuncDoor::SF_StartOpen ) {
         UseAreaportals( true );
@@ -530,6 +530,6 @@ void FuncDoor::SpawnKey(const std::string& key, const std::string& value) {
     }
     // Parent class spawnkey.
     else {
-        SVGBaseEntity::SpawnKey(key, value);
+        Base::SpawnKey(key, value);
     }
 }

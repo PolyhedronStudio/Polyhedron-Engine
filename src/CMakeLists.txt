@@ -103,7 +103,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Func/FuncExplosive.cpp 
 	#SVGame/Entities/Func/FuncKillbox.cpp
 	#SVGame/Entities/Func/FuncObject.cpp
-	#SVGame/Entities/Func/FuncPlat.cpp
+	SVGame/Entities/Func/FuncPlat.cpp
 	SVGame/Entities/Func/FuncRotating.cpp
 	SVGame/Entities/Func/FuncTimer.cpp
 	SVGame/Entities/Func/FuncTrain.cpp 
@@ -137,6 +137,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Trigger/TriggerPush.cpp
 	SVGame/Entities/Trigger/TriggerAlways.cpp
 	SVGame/Entities/Trigger/TriggerAutoDoor.cpp
+	SVGame/Entities/Trigger/TriggerAutoPlatform.cpp
 	SVGame/Entities/Trigger/TriggerDelayedUse.cpp
 	SVGame/Entities/Trigger/TriggerHurt.cpp
 	SVGame/Entities/Trigger/TriggerMultiple.cpp
@@ -186,6 +187,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Func/FuncDoor.h
 	SVGame/Entities/Func/FuncDoorRotating.h
 	SVGame/Entities/Func/FuncExplosive.h
+	SVGame/Entities/Func/FuncPlat.h
 	SVGame/Entities/Func/FuncRotating.h
 	SVGame/Entities/Func/FuncTimer.h
 	SVGame/Entities/Func/FuncTrain.h
@@ -200,6 +202,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Target/TargetTempEntity.h
 	SVGame/Entities/Trigger/TriggerAlways.h
 	SVGame/Entities/Trigger/TriggerAutoDoor.h
+	SVGame/Entities/Trigger/TriggerAutoPlatform.h
 	SVGame/Entities/Trigger/TriggerCounter.h
 	SVGame/Entities/Trigger/TriggerDelayedUse.h
 	SVGame/Entities/Trigger/TriggerHurt.h

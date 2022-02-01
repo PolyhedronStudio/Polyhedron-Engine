@@ -120,7 +120,8 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
     trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), point, ent, CONTENTS_MASK_MONSTERSOLID);
 
     // check steepness
-    if (trace.plane.normal[2] < 0.7 && !trace.startSolid) {
+    //if ((trace.plane.normal[2] < 0.7 && !trace.allSolid)
+    if ((trace.plane.normal[2] < 0.7 && !trace.allSolid) || (!trace.ent)) {
         ent->SetGroundEntity(nullptr);
         return;
     }

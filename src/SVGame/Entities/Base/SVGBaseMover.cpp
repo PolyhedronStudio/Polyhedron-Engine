@@ -42,8 +42,6 @@ void SVGBaseMover::Precache() {
 //
 void SVGBaseMover::Spawn() {
 	Base::Spawn();
-
-
 }
 
 //
@@ -83,10 +81,50 @@ void SVGBaseMover::Think() {
 //===============
 //
 void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
-	if (key == "wait") {
-		ParseFloatKeyValue(key, value, waitTime);
-	} else if ( key == "lip" ) {
-		ParseFloatKeyValue( key, value, lip );
+	// Accel.
+	if (key == "accel") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set acceleration.
+		SetAcceleration(parsedFloat);
+	}
+	// Accel.
+	else if (key == "decel") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set deceleration.
+		SetDeceleration(parsedFloat);
+	}
+	// Lip.
+	else if (key == "lip") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set lip.
+		SetLip(parsedFloat);
+	}
+	// Speed.
+	else if (key == "speed") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set speed.
+		SetSpeed(parsedFloat);
+	}
+	// Wait.
+	else if (key == "wait") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set wait.
+		SetWaitTime(parsedFloat);
 	} else {
 		Base::SpawnKey(key, value);
 	}
