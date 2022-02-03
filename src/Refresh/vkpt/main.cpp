@@ -1644,7 +1644,7 @@ static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int*
 
 	world_entity_ids[entity_frame_num][current_bsp_mesh_index] = entity->id;
 
-	float transform[16];
+	mat4_t transform;
 	create_entity_matrix(transform, (r_entity_t*)entity, false);
 	BspMeshInstance* ubo_instance_info = uniform_instance_buffer->bsp_mesh_instances + current_bsp_mesh_index;
 	memcpy(&ubo_instance_info->M, transform, sizeof(transform));
@@ -1734,7 +1734,7 @@ static void process_regular_entity(
 	uint32_t* ubo_model_idx_offset = (uint32_t*)uniform_instance_buffer->model_idx_offset;
 	uint32_t* ubo_model_cluster_id = (uint32_t*)uniform_instance_buffer->model_cluster_id;
 
-	float transform[16];
+	mat4_t transform;
 	create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
 
 	int current_model_instance_index = *model_instance_idx;
@@ -1831,7 +1831,8 @@ static void process_regular_entity(
 
 		mult_matrix_vector(begin, transform, offset1);
 		mult_matrix_vector(end, transform, offset2);
-		VectorSet(color, 0.25f, 0.5f, 0.07f);
+		//VectorSet(color, 0.25f, 0.5f, 0.07f);
+		color.x = 0.25f; color.y = 0.5f; color.z = 0.07f;
 
 		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, vec3_t{begin.x, begin.y, begin.z}, vec3_t{end.x, end.y, end.z}, vec3_t
 			{color.x, color.y, color.z
@@ -1922,7 +1923,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 			}
 
 			if (model->num_light_polys > 0) 			{
-				float transform[16];
+				mat4_t transform;
 				const qboolean is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
 				create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
 
@@ -2394,8 +2395,8 @@ prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
 
 static void
 prepare_ubo(refdef_t* fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, const vec3_t sky_matrix[3], qboolean render_world) {
-	float P[16];
-	float V[16];
+	mat4_t P;
+	mat4_t V;
 
 	QVKUniformBuffer_t* ubo = &vkpt_refdef.uniform_buffer;
 	memcpy(ubo->V_prev, ubo->V, sizeof(float) * 16);
@@ -2406,7 +2407,7 @@ prepare_ubo(refdef_t* fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	ubo->prev_taa_output_height = ubo->taa_output_height;
 
 	{
-		float raw_proj[16];
+		mat4_t raw_proj;
 		create_projection_matrix(raw_proj, vkpt_refdef.z_near, vkpt_refdef.z_far, fd->fov_x, fd->fov_y);
 
 		// In some cases (ex.: player setup), 'fd' will describe a viewport that is not full screen.
@@ -4030,6 +4031,7 @@ void R_RegisterFunctionsRTX()
 	R_SetAlphaScale = R_SetAlphaScale_RTX;
 	R_SetColor = R_SetColor_RTX;
 	R_SetClipRect = R_SetClipRect_RTX;
+	R_DrawSetTransform = R_DrawSetTransform_RTX;
 	R_SetScale = R_SetScale_RTX;
 	R_DrawChar = R_DrawChar_RTX;
 	R_DrawString = R_DrawString_RTX;

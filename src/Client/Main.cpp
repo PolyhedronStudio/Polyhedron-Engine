@@ -2152,9 +2152,7 @@ static size_t CL_Ups_m(char *buffer, size_t size)
         cl_predict->integer) {
         vel = cl.predictedState.velocity;
     } else {
-        // N&C: FF Precision.
-        VectorCopy(cl.predictedState.velocity, vel);
-       // VectorScale(cl.frame.playerState.pmove.velocity, 0.125f, vel);
+        vel = cl.predictedState.velocity;
     }
 
     return Q_scnprintf(buffer, size, "%d", (int)VectorLength(vel));

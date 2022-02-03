@@ -47,6 +47,10 @@ typedef struct {
 	uint32_t color, tex_handle;
 } StretchPic_t;
 
+static mat4_t model_matrix;
+static mat4_t view_matrix;
+static mat4_t projection_matrix;
+
 static clipRect_t clip_rect;
 static qboolean clip_enable = false;
 
@@ -652,6 +656,10 @@ void R_SetClipRect_RTX(const clipRect_t *clip)
 	{
 		clip_enable = false;
 	}
+}
+
+void R_DrawSetTransform_RTX(float* matrix) {
+	model_matrix = matrix;
 }
 
 void

@@ -459,7 +459,7 @@ void SCR_SetCrosshairColor(void)
 
     health = cl->frame.playerState.stats[STAT_HEALTH];
     if (health <= 0) {
-        VectorSet(scr.crosshair_color.u8, 0, 0, 0);
+        scr.crosshair_color.u8[0] = 0; scr.crosshair_color.u8[1] = 0; scr.crosshair_color.u8[2] = 0;
         return;
     }
 

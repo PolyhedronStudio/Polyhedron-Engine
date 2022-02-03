@@ -786,8 +786,8 @@ IF (WIN32)
 
     ## Group the resource files too, so they don't end up in the ugly "Source Files" folder in VS
     SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES 
-        OS/Resources/nac.rc 
-        OS/Resources/nacded.rc )
+        OS/Resources/polyhedron.rc 
+        OS/Resources/polyhedron.rc )
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)

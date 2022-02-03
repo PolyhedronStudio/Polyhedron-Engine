@@ -168,6 +168,10 @@ void R_SetScale_GL(float scale)
     draw.scale = scale;
 }
 
+void R_DrawSetTransform_GL(float* matrix) {
+
+}
+
 void R_DrawStretchPic_GL(int x, int y, int w, int h, qhandle_t pic)
 {
     image_t *image = IMG_ForHandle(pic);

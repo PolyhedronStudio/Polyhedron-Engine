@@ -139,24 +139,10 @@ void RmlUiRenderInterface::EnableScissorRegion(bool enable)
 		
 		R_SetClipRect(&clipRect);
 	} else {
-		R_SetClipRect(NULL);
+		R_SetClipRect(nullptr);
 	}
 
 	scissorEnabled = enable;
-	//if (enable) {
-	//	if (!m_transform_enabled) {
-	//		qglEnable(GL_SCISSOR_TEST);
-	//		qglDisable(GL_STENCIL_TEST);
-	//	}
-	//	else {
-	//		qglDisable(GL_SCISSOR_TEST);
-	//		qglEnable(GL_STENCIL_TEST);
-	//	}
-	//}
-	//else {
-	//	qglDisable(GL_SCISSOR_TEST);
-	//	qglDisable(GL_STENCIL_TEST);
-	//}
 }
 
 //
@@ -184,71 +170,7 @@ void RmlUiRenderInterface::SetScissorRegion(int x, int y, int width, int height)
 				
 		R_SetClipRect(&clipRect);
 	}
-
-	//qglScissor(rc.left,
-	//	r_config.height - rc.bottom,
-	//	rc.right - rc.left,
-	//	rc.bottom - rc.top);
-
-	//if (!m_transform_enabled) {
-	//	qglScissor(x, r_config.height - (y + height), width, height);
-	//}
-	//else {
-	//	// clear the stencil buffer
-	//	qglStencilMask(GLuint(-1));
-	//	qglClear(GL_STENCIL_BUFFER_BIT);
-
-	//	// fill the stencil buffer
-	//	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	//	qglDepthMask(GL_FALSE);
-	//	qglStencilFunc(GL_NEVER, 1, GLuint(-1));
-	//	qglStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
-
-	//	float fx = (float)x;
-	//	float fy = (float)y;
-	//	float fwidth = (float)width;
-	//	float fheight = (float)height;
-
-	//	// draw transformed quad
-	//	GLfloat vertices[] = {
-	//		fx, fy, 0,
-	//		fx, fy + fheight, 0,
-	//		fx + fwidth, fy + fheight, 0,
-	//		fx + fwidth, fy, 0
-	//	};
-	//	qglDisableClientState(GL_COLOR_ARRAY);
-	//	qglVertexPointer(3, GL_FLOAT, 0, vertices);
-	//	GLushort indices[] = { 1, 2, 0, 3 };
-	//	qglDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, indices);
-	//	qglEnableClientState(GL_COLOR_ARRAY);
-
-	//	// prepare for drawing the real thing
-	//	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	//	qglDepthMask(GL_TRUE);
-	//	qglStencilMask(0);
-	//	qglStencilFunc(GL_EQUAL, 1, GLuint(-1));
-	//}
 }
-
-// Set to byte packing, or the compiler will expand our struct, which means it won't read correctly from file
-#pragma pack(1) 
-struct TGAHeader
-{
-	char  idLength;
-	char  colourMapType;
-	char  dataType;
-	short int colourMapOrigin;
-	short int colourMapLength;
-	char  colourMapDepth;
-	short int xOrigin;
-	short int yOrigin;
-	short int width;
-	short int height;
-	char  bitsPerPixel;
-	char  imageDescriptor;
-};
-// Restore packing
-#pragma pack()
 
 //
 //=============================================================================
@@ -259,79 +181,24 @@ struct TGAHeader
 //
 bool RmlUiRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source)
 {
-	//Rml::FileInterface* file_interface = Rml::GetFileInterface();
-	//Rml::FileHandle file_handle = file_interface->Open(source);
-	//if (!file_handle)
-	//{
-	//	return false;
-	//}
+	// Load pic and fetch width+height.
+	qhandle_t picHandle = R_RegisterPic2(source.c_str());
 
-	//file_interface->Seek(file_handle, 0, SEEK_END);
-	//size_t buffer_size = file_interface->Tell(file_handle);
-	//file_interface->Seek(file_handle, 0, SEEK_SET);
+	// If no handle was returned, return false.
+	if (!picHandle) {
+		Rml::Log::Message(Rml::Log::LT_ERROR, "Couildn't find pic: \"%s\"", source.c_str());
+		return false;
+	}
 
-	//RMLUI_ASSERTMSG(buffer_size > sizeof(TGAHeader), "Texture file size is smaller than TGAHeader, file must be corrupt or otherwise invalid");
-	//if (buffer_size <= sizeof(TGAHeader))
-	//{
-	//	file_interface->Close(file_handle);
-	//	return false;
-	//}
 
-	//char* buffer = new char[buffer_size];
-	//file_interface->Read(buffer, buffer_size, file_handle);
-	//file_interface->Close(file_handle);
+	R_GetPicSize(picWidth, picHeight, picHandle);
+	
+	// Pass over information to RmlUI.
+	texture_dimensions.x = width;
+	texture_dimensions.y = height;
+	texture_handle = picHandle;
 
-	//TGAHeader header;
-	//memcpy(&header, buffer, sizeof(TGAHeader));
-
-	//int color_mode = header.bitsPerPixel / 8;
-	//int image_size = header.width * header.height * 4; // We always make 32bit textures 
-
-	//if (header.dataType != 2)
-	//{
-	//	Rml::Log::Message(Rml::Log::LT_ERROR, "Only 24/32bit uncompressed TGAs are supported.");
-	//	return false;
-	//}
-
-	//// Ensure we have at least 3 colors
-	//if (color_mode < 3)
-	//{
-	//	Rml::Log::Message(Rml::Log::LT_ERROR, "Only 24 and 32bit textures are supported");
-	//	return false;
-	//}
-
-	//const char* image_src = buffer + sizeof(TGAHeader);
-	//unsigned char* image_dest = new unsigned char[image_size];
-
-	//// Targa is BGR, swap to RGB and flip Y axis
-	//for (long y = 0; y < header.height; y++)
-	//{
-	//	long read_index = y * header.width * color_mode;
-	//	long write_index = ((header.imageDescriptor & 32) != 0) ? read_index : (header.height - y - 1) * header.width * color_mode;
-	//	for (long x = 0; x < header.width; x++)
-	//	{
-	//		image_dest[write_index] = image_src[read_index + 2];
-	//		image_dest[write_index + 1] = image_src[read_index + 1];
-	//		image_dest[write_index + 2] = image_src[read_index];
-	//		if (color_mode == 4)
-	//			image_dest[write_index + 3] = image_src[read_index + 3];
-	//		else
-	//			image_dest[write_index + 3] = 255;
-
-	//		write_index += 4;
-	//		read_index += color_mode;
-	//	}
-	//}
-
-	//texture_dimensions.x = header.width;
-	//texture_dimensions.y = header.height;
-
-	//bool success = GenerateTexture(texture_handle, image_dest, texture_dimensions);
-
-	//delete[] image_dest;
-	//delete[] buffer;
-
-	//return success;
+	// Success.
 	return true;
 }
 
@@ -345,26 +212,16 @@ bool RmlUiRenderInterface::LoadTexture(Rml::TextureHandle& texture_handle, Rml::
 //
 bool RmlUiRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source, const Rml::Vector2i& source_dimensions)
 {
-	//GLuint texture_id = 0;
-	//qglGenTextures(1, &texture_id);
-	//if (texture_id == 0)
-	//{
-	//	printf("Failed to generate textures\n");
-	//	return false;
-	//}
+	// I know using this is a cheap method to generate names with but it'll have to do for now.
+	static int32_t imageID = 0;
+	Rml::String imageName = "rmlui_image_" + imageID;
 
-	//qglBindTexture(GL_TEXTURE_2D, texture_id);
+	// Register image data, use nearest filtering.
+	R_RegisterRawImage(imageName.c_str(), source_dimensions.x, source_dimensions.y, source, IF_SRGB, IF_NEAREST);
 
-	//qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, source_dimensions.x, source_dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, source);
-	//qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Increase imageID.
+	imageID++;
 
-	//qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	//texture_handle = (Rml::TextureHandle)texture_id;
-
-	//return true;
 	return true;
 }
 
@@ -377,7 +234,8 @@ bool RmlUiRenderInterface::GenerateTexture(Rml::TextureHandle& texture_handle, c
 //
 void RmlUiRenderInterface::ReleaseTexture(Rml::TextureHandle texture_handle)
 {
-//	qglDeleteTextures(1, (GLuint*)&texture_handle);
+	// Unregister handle, simple as that.
+	R_UnregisterImage(texture_handle);
 }
 
 //poly_t* RmlUiRenderInterface::GenerateRefreshGeometry(bool temp, Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture) {
@@ -429,17 +287,19 @@ void RmlUiRenderInterface::ReleaseTexture(Rml::TextureHandle texture_handle)
 //
 void RmlUiRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 {
-	//m_transform_enabled = (bool)transform;
+	// Enable/Disable transform.
+	m_transform_enabled = (bool)transform;
 
-	//if (transform)
-	//{
-	//	if (std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value)
-	//		qglLoadMatrixf(transform->data());
-	//	else if (std::is_same<Rml::Matrix4f, Rml::RowMajorMatrix4f>::value)
-	//		qglLoadMatrixf(transform->Transpose().data());
-	//}
-	//else
-	//	qglLoadIdentity();
+	if (transform) {
+		// Transpose matrix in case it is a row major mat.
+		if (std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value) {
+			R_DrawSetTransform(transform->data());
+		} else if (std::is_same<Rml::Matrix4f, Rml::RowMajorMatrix4f>::value) {
+			R_DrawSetTransform(transform->Transpose().data());
+		}
+	} else {
+		R_DrawSetTransform(mat4_identity());
+	}
 }
 
 //
@@ -452,25 +312,6 @@ void RmlUiRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 RmlUiRenderInterface::Image RmlUiRenderInterface::CaptureScreen()
 {
 	Image image;
-	//image.num_components = 3;
-	//image.width = r_config.width;
-	//image.height = r_config.height;
-
-	//const int byte_size = image.width * image.height * image.num_components;
-	//image.data = Rml::UniquePtr<Rml::byte[]>(new Rml::byte[byte_size]);
-
-	//qglReadPixels(0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.data.get());
-
-	//bool result = true;
-	//GLenum err;
-	//while ((err = qglGetError()) != GL_NO_ERROR)
-	//{
-	//	result = false;
-	//	Rml::Log::Message(Rml::Log::LT_ERROR, "Could not capture screenshot, got GL error: 0x%x", err);
-	//}
-
-	//if (!result)
-	//	return Image();
 
 	return image;
 }

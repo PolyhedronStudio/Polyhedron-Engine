@@ -549,8 +549,8 @@ create_centered_orthographic_matrix(float matrix[16], float xmin, float xmax,
 
 void UpdateTerrainShadowMapView(vec3_t forward)
 {
-	float Proj[16];
-	float View[16];
+	mat4_t Proj;
+	mat4_t View;
 
 	float BoundingOffset = ShadowmapWorldSize * 0.75f;
 	create_centered_orthographic_matrix(Proj, -BoundingOffset, BoundingOffset, -BoundingOffset, BoundingOffset, -ShadowmapWorldSize * 0.75f, ShadowmapWorldSize * 0.75f);

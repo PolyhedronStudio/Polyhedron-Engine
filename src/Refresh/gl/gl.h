@@ -430,6 +430,7 @@ void R_SetColor_GL(uint32_t color);
 void R_SetClipRect_GL(const clipRect_t *clip);
 float R_ClampScaleGL(cvar_t *var);
 void R_SetScale_GL(float scale);
+void R_DrawSetTransform_GL(float* matrix);
 void R_DrawStretchPic_GL(int x, int y, int w, int h, qhandle_t pic);
 void R_DrawPic_GL(int x, int y, qhandle_t pic);
 void R_TileClear_GL(int x, int y, int w, int h, qhandle_t pic);

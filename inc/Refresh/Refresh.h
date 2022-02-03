@@ -70,6 +70,7 @@ extern void    (*R_SetAlpha)(float clpha);
 extern void    (*R_SetAlphaScale)(float alpha);
 extern void    (*R_SetColor)(uint32_t color);
 extern void    (*R_SetClipRect)(const clipRect_t *clip);
+extern void    (*R_DrawSetTransform)(float *matrix);
 float   R_ClampScale(cvar_t *var);
 extern void    (*R_SetScale)(float scale);
 extern void    (*R_DrawChar)(int x, int y, int flags, int ch, qhandle_t font);

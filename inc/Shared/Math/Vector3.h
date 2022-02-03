@@ -733,7 +733,7 @@ inline float vec3_distance(const vec3_t &a, const vec3_t &b) {
 
 //
 //===============
-// vec3_distance_squared
+// vec3_vectors
 //
 // Returns the forward, right and up vectors for the euler angles in radians.
 //===============
@@ -804,31 +804,42 @@ inline const char* vec3_to_cstr( const vec3_t& v, qboolean rounded = true )
 //=============================================================================
 //
 #define DotProduct(x,y)         ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
+//#define DotProduct(x,y) vec3_dot(x, y)
 #define CrossProduct(v1,v2,cross) \
         ((cross)[0]=(v1)[1]*(v2)[2]-(v1)[2]*(v2)[1], \
          (cross)[1]=(v1)[2]*(v2)[0]-(v1)[0]*(v2)[2], \
          (cross)[2]=(v1)[0]*(v2)[1]-(v1)[1]*(v2)[0])
+//#define CrossProduct(v1,v2,cross) cross = vec3_cross(v1, v2)
 #define VectorSubtract(a,b,c) \
         ((c)[0]=(a)[0]-(b)[0], \
          (c)[1]=(a)[1]-(b)[1], \
          (c)[2]=(a)[2]-(b)[2])
+//#define VectorSubtract(a,b,c) c = a - b
 #define VectorAdd(a,b,c) \
         ((c)[0]=(a)[0]+(b)[0], \
          (c)[1]=(a)[1]+(b)[1], \
          (c)[2]=(a)[2]+(b)[2])
-#define VectorAdd3(a,b,c,d) \
-        ((d)[0]=(a)[0]+(b)[0]+(c)[0], \
-         (d)[1]=(a)[1]+(b)[1]+(c)[1], \
-         (d)[2]=(a)[2]+(b)[2]+(c)[2])
+//#define VectorAdd(a,b,c) c = a + b
+//#define VectorAdd3(a,b,c,d) \
+//        ((d)[0]=(a)[0]+(b)[0]+(c)[0], \
+//         (d)[1]=(a)[1]+(b)[1]+(c)[1], \
+//         (d)[2]=(a)[2]+(b)[2]+(c)[2])
+#define VectorAdd3(a,b,c,d) d = a + b + c
 #define VectorCopy(a,b)     ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
-#define VectorClear(a)      ((a)[0]=(a)[1]=(a)[2]=0)
-#define VectorNegate(a,b)   ((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
-#define VectorInverse(a)    ((a)[0]=-(a)[0],(a)[1]=-(a)[1],(a)[2]=-(a)[2])
-#define VectorSet(v, x, y, z)   ((v)[0]=(x),(v)[1]=(y),(v)[2]=(z))
-#define VectorAverage(a,b,c) \
-        ((c)[0]=((a)[0]+(b)[0])*0.5f, \
-         (c)[1]=((a)[1]+(b)[1])*0.5f, \
-         (c)[2]=((a)[2]+(b)[2])*0.5f)
+//#define VectorCopy(a,b)     b = a
+//#define VectorClear(a)      ((a)[0]=(a)[1]=(a)[2]=0)
+#define VectorClear(a)      a = vec3_zero()
+//#define VectorNegate(a,b)   ((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
+#define VectorNegate(a,b)   b = vec3_negate(a)
+//#define VectorInverse(a)    ((a)[0]=-(a)[0],(a)[1]=-(a)[1],(a)[2]=-(a)[2])
+#define VectorInverse(a)    a = vec3_negate(a);
+//#define VectorSet(v, x, y, z)   ((v)[0]=(x),(v)[1]=(y),(v)[2]=(z))
+#define VectorSet(v, x, y, z) v = vec3_t{x, y, z}
+//#define VectorAverage(a,b,c) \
+//        ((c)[0]=((a)[0]+(b)[0])*0.5f, \
+//         (c)[1]=((a)[1]+(b)[1])*0.5f, \
+//         (c)[2]=((a)[2]+(b)[2])*0.5f)
+#define VectorAverage(a,b,c) c = vec3_scale(a + b, 0.5f)
 #define VectorMA(a,b,c,d) \
         ((d)[0]=(a)[0]+(b)*(c)[0], \
          (d)[1]=(a)[1]+(b)*(c)[1], \
@@ -837,14 +848,16 @@ inline const char* vec3_to_cstr( const vec3_t& v, qboolean rounded = true )
         ((d)[0]=(a)[0]+(b)[0]*(c)[0], \
          (d)[1]=(a)[1]+(b)[1]*(c)[1], \
          (d)[2]=(a)[2]+(b)[2]*(c)[2])
-#define VectorEmpty(v) ((v)[0]==0&&(v)[1]==0&&(v)[2]==0)
-#define VectorCompare(v1,v2)    ((v1)[0]==(v2)[0]&&(v1)[1]==(v2)[1]&&(v1)[2]==(v2)[2])
-#define VectorLength(v)     (std::sqrtf(DotProduct((v),(v))))
-#define VectorLengthSquared(v)      (DotProduct((v),(v)))
+//#define VectorMA(a,b,c,d) d=vec3_fmaf(a,b,c)
+#define VectorEmpty(v) v=vec3_zero() //((v)[0]==0&&(v)[1]==0&&(v)[2]==0)
+#define VectorCompare(v1,v2) vec3_equal(v1, v2) //((v1)[0]==(v2)[0]&&(v1)[1]==(v2)[1]&&(v1)[2]==(v2)[2])
+#define VectorLength(v) vec3_length(v)    //(std::sqrtf(DotProduct((v),(v))))
+#define VectorLengthSquared(v) vec3_length_squared(v)     //(DotProduct((v),(v)))
 #define VectorScale(in,scale,out) \
         ((out)[0]=(in)[0]*(scale), \
          (out)[1]=(in)[1]*(scale), \
          (out)[2]=(in)[2]*(scale))
+//#define VectorScale(in, scale, out) out = vec3_scale(in, scale)
 #define VectorVectorScale(in,scale,out) \
         ((out)[0]=(in)[0]*(scale)[0], \
          (out)[1]=(in)[1]*(scale)[1], \
@@ -854,19 +867,22 @@ inline const char* vec3_to_cstr( const vec3_t& v, qboolean rounded = true )
         ((v1)[1]-(v2)[1])*((v1)[1]-(v2)[1])+ \
         ((v1)[2]-(v2)[2])*((v1)[2]-(v2)[2]))
 #define Distance(v1,v2) (std::sqrtf(DistanceSquared(v1,v2)))
-#define LerpAngles(a,b,c,d) \
-        ((d)[0]=LerpAngle((a)[0],(b)[0],c), \
-         (d)[1]=LerpAngle((a)[1],(b)[1],c), \
-         (d)[2]=LerpAngle((a)[2],(b)[2],c))
-#define LerpVector(a,b,c,d) \
-    ((d)[0]=(a)[0]+(c)*((b)[0]-(a)[0]), \
-     (d)[1]=(a)[1]+(c)*((b)[1]-(a)[1]), \
-     (d)[2]=(a)[2]+(c)*((b)[2]-(a)[2]))
+//#define LerpAngles(a,b,c,d) \
+//        ((d)[0]=LerpAngle((a)[0],(b)[0],c), \
+//         (d)[1]=LerpAngle((a)[1],(b)[1],c), \
+//         (d)[2]=LerpAngle((a)[2],(b)[2],c))
+#define LerpAngles(a, b, c, d) d = vec3_mix_euler(a, b, c)
+
+//#define LerpVector(a,b,c,d) \
+//    ((d)[0]=(a)[0]+(c)*((b)[0]-(a)[0]), \
+//     (d)[1]=(a)[1]+(c)*((b)[1]-(a)[1]), \
+//     (d)[2]=(a)[2]+(c)*((b)[2]-(a)[2]))
+#define LerpVector(a,b,c,d) d = vec3_mix(a, b, c)
 #define LerpVector2(a,b,c,d,e) \
     ((e)[0]=(a)[0]*(c)+(b)[0]*(d), \
      (e)[1]=(a)[1]*(c)+(b)[1]*(d), \
      (e)[2]=(a)[2]*(c)+(b)[2]*(d))
-#define PlaneDiff(v,p)   (DotProduct(v,(p)->normal)-(p)->dist)
+#define PlaneDiff(v,p)   vec3_dot(v, p->normal) - p->dist // #define PlaneDiff(v, p) (DotProduct(v,(p)->normal)-(p)->dist)
 
 #define Vector2Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1])
 #define Vector2Add(a,b,c)       ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1])
