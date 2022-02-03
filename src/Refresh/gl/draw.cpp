@@ -37,11 +37,13 @@ static inline void _GL_StretchPic(
 
     tess.texnum[0] = texnum;
 
+#define SetVertex(v, a, b, c, d) ((v)[0]=(a),(v)[1]=(b),(v)[2]=(c),(v)[3]=(d))
     dst_vert = tess.vertices + tess.numverts * 4;
-    Vector4Set(dst_vert,      x,     y,     s1, t1);
-    Vector4Set(dst_vert +  4, x + w, y,     s2, t1);
-    Vector4Set(dst_vert +  8, x + w, y + h, s2, t2);
-    Vector4Set(dst_vert + 12, x,     y + h, s1, t2);
+    SetVertex(dst_vert,      x,     y,     s1, t1);
+    SetVertex(dst_vert +  4, x + w, y,     s2, t1);
+    SetVertex(dst_vert +  8, x + w, y + h, s2, t2);
+    SetVertex(dst_vert + 12, x,     y + h, s1, t2);
+#undef SetVertex
 
     dst_color = (uint32_t *)tess.colors + tess.numverts;
     dst_color[0] = color;

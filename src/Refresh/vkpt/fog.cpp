@@ -248,7 +248,7 @@ void vkpt_fog_upload(struct ShaderFogVolume* dst) {
 			dst->density[3] = b;
 		} 		else 		{
 			// No density gradient, just store the density with 0 spatial coefficinents
-			Vector4Set(dst->density, 0.f, 0.f, 0.f, density);
+			dst->density = vec4_t{0.f, 0.f, 0.f, density};
 		}
 
 		dst->is_active = 1;
