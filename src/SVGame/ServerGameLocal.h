@@ -40,7 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-------------------
 class SVGBaseEntity;
 class PlayerClient;
-class IGameMode;
+class IGamemode;
 struct entity_s;
 
 //==================================================================
@@ -273,7 +273,7 @@ constexpr int32_t WEAP_SUPERSHOTGUN = 4;
 //-------------------
 typedef struct gitem_s {
     // Spawning classname.
-    const char *className;
+    const char *classname;
 
     // Function callbacks.
     qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
@@ -328,7 +328,7 @@ typedef struct gitem_s {
 //-------------------
 struct GameLocals {
     // Game Mode interface, always assigned to whichever game mode we are running.
-    IGameMode* gameMode;
+    IGamemode* gameMode;
 
     // List of clients, based on sv_maxclients, or rather in the game dll: maxclients cvar.
     ServersClient *clients;
@@ -603,7 +603,7 @@ void SVG_PrecacheItem(gitem_t *it);
 void SVG_InitializeItems(void);
 void SVG_SetItemNames(void);
 gitem_t *SVG_FindItemByPickupName(const char *pickup_name);
-gitem_t *SVG_FindItemByClassname(const char *className);
+gitem_t *SVG_FindItemByClassname(const char *classname);
 #define ITEM_INDEX(x) ((x)-itemlist)
 Entity *SVG_DropItem(Entity *ent, gitem_t *item);
 void SVG_SetRespawn(Entity *ent, float delay);
@@ -985,7 +985,7 @@ struct entity_s {
     // only used locally in game, not by server
     //
     const char *message;     // C++20: STRING: Added const to char *
-    const char *className;   // C++20: STRING: Made const.
+    const char *classname;   // C++20: STRING: Made const.
     
     float timeStamp;
 
@@ -1008,13 +1008,6 @@ struct entity_s {
     Entity *moveTargetPtr;
 
     const char *map;           // target_changelevel // C++20: STRING: Added const to char *
-    int32_t count;
-
-    // Chain, enemy, old enemy, and activator entity pointers.
-    Entity *chain;
-    
-    // Ground pointers.
-    Entity *groundEntityPtr;
 
     Entity *myNoisePtr;       // can go in client only
     Entity *myNoise2Ptr;

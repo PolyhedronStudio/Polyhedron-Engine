@@ -260,8 +260,8 @@ void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) 
 //			}
 //
 //			// Doors fire area portals in a special way. So we skip those.
-//			if (triggerEntity->GetClassName() == "func_areaportal"
-//				&& (GetClassName() == "func_door" || GetClassName() == "func_door_rotating")) {
+//			if (triggerEntity->GetClassname() == "func_areaportal"
+//				&& (GetClassname() == "func_door" || GetClassname() == "func_door_rotating")) {
 //				continue;
 //			}
 //

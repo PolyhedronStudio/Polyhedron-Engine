@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Base/PlayerClient.h"
 
 // Game Mode interface.
-#include "../GameModes/IGameMode.h"
+#include "../Gamemodes/IGamemode.h"
 
 // Player Client & Hud Header.
 #include "Client.h"     // Include Player Client header.
@@ -150,20 +150,20 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     level.intermission.exitIntermission = 0;
 
     // Fetch an intermission entity.
-    Entity *intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_intermission");
+    Entity *intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_intermission");
     if (!intermissionEntity) {
         // the map creator forgot to put in an intermission point...
-        intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_start");
+        intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_start");
         if (!intermissionEntity) {
-            intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_deathmatch");
+            intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_deathmatch");
         }
     } else {
         // chose one of four spots
         i = rand() & 3;
         while (i--) {
-            intermissionEntity = SVG_Find(intermissionEntity, FOFS(className), "info_player_intermission");
+            intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
             if (!intermissionEntity) {  // wrap around the list 
-                intermissionEntity = SVG_Find(intermissionEntity, FOFS(className), "info_player_intermission");
+                intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
             }
         }
     }

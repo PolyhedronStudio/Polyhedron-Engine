@@ -57,7 +57,7 @@ void SVG_PlayerTrail_Init(void)
 
     //for (n = 0; n < TRAIL_LENGTH; n++) {
     //    trail[n] = SVG_Spawn();
-    //    trail[n]->className = "player_trail";
+    //    trail[n]->classname = "player_trail";
     //}
 
     //trail_head = 0;

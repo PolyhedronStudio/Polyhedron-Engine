@@ -217,11 +217,11 @@ begin railtrail
     range "core width" cl_railcore_width 1 6 1
     range "spiral radius" cl_railspiral_radius 1 6 1
     pairs "core color" cl_railcore_color \
-        black black red red green green yellow yellow \
-        blue blue cyan cyan magenta magenta white white
+        black orange red red green green yellow yellow \
+        orange orange cyan cyan magenta magenta white white
     pairs "spiral color" cl_railspiral_color \
         black black red red green green yellow yellow \
-        blue blue cyan cyan magenta magenta white white
+        orange orange cyan cyan magenta magenta white white
 end
 
 begin effects

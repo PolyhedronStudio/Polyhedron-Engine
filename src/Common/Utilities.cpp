@@ -189,7 +189,7 @@ qboolean Com_WildCmpEx(const char *filter, const char *string,
 
 const char *const colorNames[10] = {
     "black", "red", "green", "yellow",
-    "blue", "cyan", "magenta", "white",
+    "orange", "cyan", "magenta", "white",
     "alt", "none"
 };
 

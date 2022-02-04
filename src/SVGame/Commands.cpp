@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Entities/Base/PlayerClient.h"
 
 // Game Modes.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 char *ClientTeam(SVGBaseEntity *ent)
 {
@@ -41,7 +41,7 @@ char *ClientTeam(SVGBaseEntity *ent)
     if (!p)
         return value;
 
-    if ((int)(gamemodeflags->value) & GameModeFlags::ModelTeams) {
+    if ((int)(gamemodeflags->value) & GamemodeFlags::ModelTeams) {
         *p = 0;
         return value;
     }
@@ -55,7 +55,7 @@ qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2)
     char    ent1Team [512];
     char    ent2Team [512];
 
-    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
+    if (!((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams)))
         return false;
 
     strcpy(ent1Team, ClientTeam(ent1));
@@ -251,7 +251,7 @@ void Cmd_Give_f(Entity *ent)
             ent->client->persistent.inventory[index] += it->quantity;
     } else {
         it_ent = SVG_Spawn();
-        it_ent->className = it->className;
+        it_ent->classname = it->classname;
         SVG_SpawnItem(it_ent, it);
 //        SVG_TouchItem(it_ent, ent, NULL, NULL); Items..
         if (it_ent->inUse)
@@ -723,7 +723,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
     if (gi.argc() < 2 && !arg0)
         return;
 
-    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
+    if (!((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams)))
         team = false;
 
     if (team)

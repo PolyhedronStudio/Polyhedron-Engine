@@ -24,10 +24,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Entities/Base/PlayerClient.h"
 
 // Gamemodes.
-#include "GameModes/IGameMode.h"
-#include "GameModes/DefaultGameMode.h"
-#include "GameModes/CoopGameMode.h"
-#include "GameModes/DeathMatchGameMode.h"
+#include "Gamemodes/IGamemode.h"
+#include "Gamemodes/DefaultGamemode.h"
+#include "Gamemodes/CoopGamemode.h"
+#include "Gamemodes/DeathmatchGamemode.h"
 
 // Player related.
 #include "Player/Client.h"      // Include Player Client header.
@@ -105,7 +105,7 @@ cvar_t  *cl_monsterfootsteps;
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 
 void SVG_InitializeServerEntities();
-void SVG_InitializeGameMode();
+void SVG_InitializeGamemode();
 void SVG_AllocateGameClients();
 void SVG_CreatePlayerClientEntities();
 void SVG_InitializeCVars();
@@ -151,7 +151,7 @@ void SVG_InitGame(void)
     // WID: You'd expect PlayerClient allocation for the entities here.
     // that won't work with the structure of things.
     // Therefor, it now resides in SVG_SpawnEntities.
-    SVG_InitializeGameMode();
+    SVG_InitializeGamemode();
 }
 
 //
@@ -390,7 +390,7 @@ void SVG_CreatePlayerClientEntities() {
         SVG_InitEntity(serverEntity);
 
         // Allocate player client class entity 
-        PlayerClient *playerClientEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        PlayerClient *playerClientEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->classname);
         
         // Be sure to reset their inuse, after all, they aren't in use.
         playerClientEntity->SetInUse(false);
@@ -406,12 +406,12 @@ void SVG_CreatePlayerClientEntities() {
 
 //
 //===============
-// SVG_InitializeGameMode
+// SVG_InitializeGamemode
 //
 // Allocate AND initialize the proper gamemode that is set for this "game".
 //===============
 //
-void SVG_InitializeGameMode(void) {
+void SVG_InitializeGamemode(void) {
     // Game mode is determined on... various factors.
     // Eventually, I'd prefer it to be a numberic index but hey...
     // Now we check for whichever the ID we got (ha, see what I did there?)
@@ -426,13 +426,13 @@ void SVG_InitializeGameMode(void) {
     // Detect which game mode to allocate for this game round.
     switch(gameModeID) {
     case 1:
-        game.gameMode = new DeathMatchGameMode();
+        game.gameMode = new DeathmatchGamemode();
         break;
     case 2:
-        game.gameMode = new CoopGameMode();
+        game.gameMode = new CoopGamemode();
         break;
     default:
-        game.gameMode = new DefaultGameMode();
+        game.gameMode = new DefaultGamemode();
     }
 
     //// Inform our gamemodes about the gist of it.
@@ -491,7 +491,7 @@ void SVG_EndDMLevel(void)
     static const char *seps = " ,\n\r";
 
     // stay on same level flag
-    if ((int)gamemodeflags->value & GameModeFlags::SameLevel) {
+    if ((int)gamemodeflags->value & GamemodeFlags::SameLevel) {
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
         return;
     }
@@ -525,7 +525,7 @@ void SVG_EndDMLevel(void)
     if (level.nextMap[0]) // go to a specific map
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.nextMap));
     else {  // search for a changelevel
-        ent = SVG_Find(NULL, FOFS(className), "target_changelevel");
+        ent = SVG_Find(NULL, FOFS(classname), "target_changelevel");
         if (!ent) {
             // the map designer didn't include a changelevel,
             // so create a fake ent that goes back to the same level

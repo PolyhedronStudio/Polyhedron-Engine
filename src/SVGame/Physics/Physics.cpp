@@ -95,12 +95,13 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
     // Fetch think time.
     const float thinkTime = ent->GetNextThinkTime();
 
-    if (thinkTime <= 0)
+    if (thinkTime <= 0) {
         return true;
-    if (thinkTime > level.time + 0.001)
+    } else if (thinkTime > level.time + 0.001) {// Used to be: if (thinkTime > level.time + 0.001)
         return true;
+    }
 
-    // Reset think time.
+    // Reset think time before thinking.
     ent->SetNextThinkTime(0);
 
     #if _DEBUG
@@ -120,7 +121,7 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
 
         // Write down the C++ class name too
         errorString += ", class '";
-        errorString += ent->GetTypeInfo()->className;
+        errorString += ent->GetTypeInfo()->classname;
         errorString += "'";
 
         // Close it off and state what's actually going on

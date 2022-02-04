@@ -62,8 +62,8 @@ Allocates the proper server game entity class. Then spawns the entity.
 void ED_CallSpawn(Entity *ent)
 {
     auto dictionary = ent->entityDictionary;
-    ent->className = ED_NewString( ent->entityDictionary["classname"].c_str() );
-    ent->classEntity = SVG_SpawnClassEntity( ent, ent->className );
+    ent->classname = ED_NewString( ent->entityDictionary["classname"].c_str() );
+    ent->classEntity = SVG_SpawnClassEntity( ent, ent->classname );
     // If we did not find the classname, then give up
     if ( nullptr == ent->classEntity ) {
         SVG_FreeEntity( ent );
@@ -269,7 +269,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
         ED_ParseEntity(&entities, ent);
 
         //// yet another map hack
-        //if (!Q_stricmp(level.mapName, "command") && !Q_stricmp(ent->className, "trigger_once") && !Q_stricmp(ent->model, "*27"))
+        //if (!Q_stricmp(level.mapName, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27"))
         //    ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
 
         //// remove things (except the world) from different skill levels or deathmatch

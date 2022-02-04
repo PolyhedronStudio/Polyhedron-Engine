@@ -83,6 +83,7 @@ SET( SRC_SVGAME
 	SVGame/Weapons.cpp 
 	SVGame/ai/MonsterAI.cpp
 	SVGame/Entities/Base/SVGBaseEntity.cpp
+	SVGame/Entities/Base/SVGBaseItem.cpp
 	SVGame/Entities/Base/SVGBaseTrigger.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
@@ -95,6 +96,11 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerDeathmatch.cpp
 	SVGame/Entities/Info/InfoPlayerIntermission.cpp
 	SVGame/Entities/Info/InfoPlayerStart.cpp
+	SVGame/Entities/Items/ItemHealthMega.cpp
+	SVGame/Entities/Items/ItemWeaponBlaster.cpp
+	SVGame/Entities/Items/ItemWeaponMachinegun.cpp
+	SVGame/Entities/Items/ItemWeaponShotgun.cpp
+	SVGame/Entities/Items/ItemWeaponSuperShotgun.cpp
 	SVGame/Entities/Func/FuncAreaportal.cpp
 	SVGame/Entities/Func/FuncButton.cpp
 	#SVGame/Entities/Func/FuncConveyor.cpp
@@ -146,9 +152,9 @@ SET( SRC_SVGAME
 	SVGame/Entities/Weaponry/BlasterBolt.cpp
 	SVGame/Entities/Light.cpp
 	SVGame/Entities/WorldSpawn.cpp
-	SVGame/GameModes/DefaultGameMode.cpp
-	SVGame/GameModes/CoopGameMode.cpp
-	SVGame/GameModes/DeathMatchGameMode.cpp
+	SVGame/Gamemodes/DefaultGamemode.cpp
+	SVGame/Gamemodes/CoopGamemode.cpp
+	SVGame/Gamemodes/DeathmatchGamemode.cpp
 	SVGame/Physics/Physics.cpp
 	SVGame/Physics/StepMove.cpp
 	SVGame/Player/Client.cpp
@@ -176,6 +182,7 @@ SET( SRC_SVGAME
 	SVGame/Utilities.h
 	SVGame/AI/MonsterAI.h
 	SVGame/Entities/Base/SVGBaseEntity.h
+	SVGame/Entities/Base/SVGBaseItem.h
 	SVGame/Entities/Base/SVGBaseTrigger.h
 	SVGame/Entities/Base/SVGBaseMover.h
 	SVGame/Entities/Base/BodyCorpse.h
@@ -192,7 +199,16 @@ SET( SRC_SVGAME
 	SVGame/Entities/Func/FuncTimer.h
 	SVGame/Entities/Func/FuncTrain.h
 	SVGame/Entities/Func/FuncWall.h
+	#SVGame/Entities/Info/InfoNull.h - Only has a .cpp file.
+	SVGame/Entities/Info/InfoPlayerCoop.h
+	SVGame/Entities/Info/InfoPlayerDeathmatch.h
+	SVGame/Entities/Info/InfoPlayerIntermission.h
 	SVGame/Entities/Info/InfoPlayerStart.h
+	SVGame/Entities/Items/ItemHealthMega.h
+	SVGame/Entities/Items/ItemWeaponBlaster.h
+	SVGame/Entities/Items/ItemWeaponMachinegun.h
+	SVGame/Entities/Items/ItemWeaponShotgun.h
+	SVGame/Entities/Items/ItemWeaponSuperShotgun.h
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h
 	SVGame/Entities/Path/PathCorner.h
@@ -214,10 +230,10 @@ SET( SRC_SVGAME
 	SVGame/Entities/weaponry/BlasterBolt.h
 	SVGame/Entities/Light.h
 	SVGame/Entities/WorldSpawn.h
-	SVGame/GameModes/DefaultGameMode.h
-	SVGame/GameModes/CoopGameMode.h
-	SVGame/GameModes/DeathMatchGameMode.h
-	SVGame/GameModes/IGameMode.h
+	SVGame/Gamemodes/DefaultGamemode.h
+	SVGame/Gamemodes/CoopGamemode.h
+	SVGame/Gamemodes/DeathmatchGamemode.h
+	SVGame/Gamemodes/IGamemode.h
 	SVGame/Player/Animations.h
 	SVGame/Player/Client.h
 	SVGame/Player/Player.h

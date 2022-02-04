@@ -15,7 +15,7 @@
 #include "../../Utilities.h"                // Util funcs.
 
 // Game Mode interface.
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 
 // Class Entities.
 #include "PlayerClient.h"
@@ -321,7 +321,7 @@ void PlayerClient::SetSound() {
     }
 
     //if (client->persistent.activeWeapon)
-    //    weap = client->persistent.activeWeapon->className;
+    //    weap = client->persistent.activeWeapon->classname;
     //else
     //    weap = "";
 
@@ -459,7 +459,7 @@ void PlayerClient::CheckFallingDamage()
         dir = { 0.f, 0.f, 1.f };
 
         //if (!deathmatch->value || 
-        if (!((int)gamemodeflags->value & GameModeFlags::NoFalling)) {
+        if (!((int)gamemodeflags->value & GamemodeFlags::NoFalling)) {
             SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
         }
     } else {

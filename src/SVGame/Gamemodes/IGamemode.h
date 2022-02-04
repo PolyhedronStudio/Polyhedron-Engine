@@ -2,28 +2,49 @@
 // LICENSE HERE.
 
 //
-// IGameMode.h
+// IGamemode.h
 //
-// GameMode interface class. Need a custom new gamemode? Implement this interface,
+// Gamemode interface class. Need a custom new gamemode? Implement this interface,
 // and you did yourself a pleasure. :)
 //
 */
-#ifndef __SVGAME_GAMEMODES_IGAMEMODE_H__
-#define __SVGAME_GAMEMODES_IGAMEMODE_H__
+#pragma once
+
+// It makes sense to include TypeInfo in SVGBaseEntity.h, 
+// because this class absolutely requires it
+#include "../TypeInfo.h"
 
 class SVGBaseEntity;
 class PlayerClient;
 
 using BaseEntityVector = std::vector<SVGBaseEntity*>;
 
-class IGameMode {
+class IGamemode {
 public:
     //
     // Constructor/Deconstructor.
     //
-    IGameMode() {};
-    virtual ~IGameMode() = default;
+    IGamemode() {};
+    virtual ~IGamemode() = default;
     
+    //
+    // Define as top abstract class.
+    //
+    DefineTopAbstractClass(IGamemode);
+
+    // Checks if this gamemode class is exactly the given class
+    // @param gamemodeClass: a gamemode class which must inherint from IGamemode
+    template<typename gamemodeClass>
+    bool IsClass() const { // every gamemode has a ClassInfo, thanks to the DefineXYZ macro
+        return GetTypeInfo()->IsClass( gamemodeClass::ClassInfo );
+    }
+
+    // Checks if this gamemode class is a subclass of another, or is the same class
+    // @param gamemodeClass: an entity class which must inherint from IGamemode
+    template<typename gamemodeClass>
+    bool IsSubclassOf() const {
+        return GetTypeInfo()->IsSubclassOf( gamemodeClass::ClassInfo );
+    }
     //
     // Map related, also known as the "current game".
     // 
@@ -111,7 +132,7 @@ public:
 
 
     //
-    // Combat GameMode actions.
+    // Combat Gamemode actions.
     //
     // Called when an entity is killed, or at least, about to be.
     // Determine how to deal with it, usually resides in a callback to Die.
@@ -155,7 +176,7 @@ public:
     // Spawns a temporary entity for a client, this is best suited to be in game mode.
     // Allows for all modes to customize that when wished for.
     //
-    // When implementing this interface, it is suggested to just take DefaultGameMode,
+    // When implementing this interface, it is suggested to just take DefaultGamemode,
     // or base yours off of that anyhow.
     // Used for spawning "Temporary Entities", on the client, that for example do particles.
     // In this case, it gets called when an entity gets damaged.
@@ -178,5 +199,3 @@ protected:
     // Means of Death, for the current client that is being processed this frame.
     int32_t meansOfDeath = 0;
 };
-
-#endif // __SVGAME_GAMEMODES_IGAMEMODE_H__

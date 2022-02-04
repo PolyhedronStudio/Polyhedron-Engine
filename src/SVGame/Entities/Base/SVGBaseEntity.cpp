@@ -16,63 +16,7 @@
 
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
-	////
-	//// All callback functions best be nullptr.
-	////
-	//thinkFunction = nullptr;
-	//useFunction = nullptr;
-	//touchFunction = nullptr;
-	//blockedFunction = nullptr;
-	//takeDamageFunction = nullptr;
-	//dieFunction = nullptr;
 
-	////
-	//// Set all entity pointer references to nullptr.
-	////
-	//enemyEntity = nullptr;
-	//groundEntity = nullptr;
-	//oldEnemyEntity = nullptr;
-	//teamChainEntity = nullptr;
-	//teamMasterEntity = nullptr;
-
-	////
-	//// Default values for members.
-	////
-	//moveType = MoveType::None;
-
-	//// Velocity.
-	//angularVelocity = vec3_zero();
-	//damage = 0;
-	//deadFlag = DEAD_NO;
-	//delayTime = 0;
-	//enemyEntity = nullptr;
-	//flags = 0;
-	//gravity = 0;
-	//groundEntity = nullptr;
-	//groundEntityLinkCount = 0;
-	//health = 0;
-	//idealYawAngle = 0.f;
-	//killTargetStr = "";
-	//mass = 0;
-	//maxHealth = 0;
-	//messageStr = "";
-	//model = "";
-	//moveType = MoveType::None;
-	//nextThinkTime = 0;
-	//oldEnemyEntity = nullptr;
-	//ownerEntity = nullptr;
-	//spawnFlags = 0;
-	//takeDamage = TakeDamage::No;
-	//targetStr = "";
-	//targetNameStr = "";
-	//teamChainEntity = nullptr;
-	//teamMasterEntity = nullptr;
-	//viewHeight = 0;
-	//velocity = vec3_zero();
-	//waitTime = 0.f;
-	//waterLevel = 0;
-	//waterType = 0;
-	//yawSpeed = 0.f;
 }
 SVGBaseEntity::~SVGBaseEntity() {
 
@@ -87,7 +31,6 @@ SVGBaseEntity::~SVGBaseEntity() {
 //===============
 //
 void SVGBaseEntity::Precache() {
-	//gi.DPrintf("SVGBaseEntity::Precache();");
 }
 
 //
@@ -99,10 +42,6 @@ void SVGBaseEntity::Precache() {
 //===============
 //
 void SVGBaseEntity::Spawn() {
-	//gi.DPrintf("SVGBaseEntity::Spawn();");
-
-	// Set default movetype to none.
-	//SetMoveType(MoveType::None);
 }
 
 //
@@ -114,7 +53,6 @@ void SVGBaseEntity::Spawn() {
 //===============
 //
 void SVGBaseEntity::Respawn() {
-	//gi.DPrintf("SVGBaseEntity::Respawn();");
 }
 
 //
@@ -127,7 +65,6 @@ void SVGBaseEntity::Respawn() {
 //===============
 //
 void SVGBaseEntity::PostSpawn() {
-	//gi.DPrintf("SVGBaseEntity::PostSpawn();");
 }
 
 //
@@ -255,7 +192,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	// STOOOOOOOP WITH THE GOD DAMN WARNINGS IN THE CONSOLE ABOUT CLASSNAME
 	// RAAAAAAAAHHHHH
 	if ( key == "classname" ) {
-		SetClassName( value.c_str() );
+		SetClassname( value.c_str() );
 	}
 	// Angle.
 	else if (key == "angle") {
@@ -364,7 +301,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		// Set SpawnFlags.
 		SetSpawnFlags(parsedSpawnFlags);
 	} else {
-		gi.DPrintf("Entity ID: %i - classname: %s has unknown Key/Value['%s','%s']\n", GetServerEntity()->state.number, GetServerEntity()->className, key.c_str(), value.c_str());
+		gi.DPrintf("Entity ID: %i - classname: %s has unknown Key/Value['%s','%s']\n", GetServerEntity()->state.number, GetServerEntity()->classname, key.c_str(), value.c_str());
 	}
 }
 
@@ -535,8 +472,8 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 		//SVGBaseEntity* targetEntity = nullptr;
 		//while (( targetEntity = SVG_FindEntityByKeyValue( "targetname", GetTarget(), targetEntity) )) { 
 		//	// Doors fire area portals in a special way, so skip those
-		//	if ( targetEntity->GetClassName() == "func_areaportal"
-		//		 && (GetClassName() == "func_door" || GetClassName() == "func_door_rotating") ) {
+		//	if ( targetEntity->GetClassname() == "func_areaportal"
+		//		 && (GetClassname() == "func_door" || GetClassname() == "func_door_rotating") ) {
 		//		continue;
 		//	}
 		//	
@@ -566,8 +503,8 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 			}
 
 			// Doors fire area portals in a special way. So we skip those.
-			if (triggerEntity->GetClassName() == "func_areaportal"
-				&& (GetClassName() == "func_door" || GetClassName() == "func_door_rotating")) {
+			if (triggerEntity->GetClassname() == "func_areaportal"
+				&& (GetClassname() == "func_door" || GetClassname() == "func_door_rotating")) {
 				continue;
 			}
 

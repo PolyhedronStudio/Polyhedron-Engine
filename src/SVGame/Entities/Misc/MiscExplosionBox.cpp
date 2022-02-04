@@ -366,9 +366,9 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
 
     // Calculate random direction vector.
     vec3_t randomDirection = {
-        crandom(),
-        crandom(),
-        crandom()
+        RandomRangef(2.f, 0.f), //crandom(),
+        RandomRangef(2.f, 0.f),//crandom(),
+        RandomRangef(2.f, 0.f),//crandom()      
     };
 
     // Calculate origin to spawn them at.
@@ -391,10 +391,10 @@ void MiscExplosionBox::SpawnDebris2Chunk() {
     float speed = 2.f * GetDamage() / 200.f;
 
     // Calculate random direction vector.
-    vec3_t randomDirection = { 
-        crandom(), 
-        crandom(), 
-        crandom() 
+    vec3_t randomDirection = {
+        RandomRangef(2.f, 0.f), //crandom(),
+        RandomRangef(2.f, 0.f),//crandom(),
+        RandomRangef(2.f, 0.f),//crandom()      
     };
 
     // Calculate origin to spawn them at.

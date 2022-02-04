@@ -13,7 +13,7 @@
 #include "Effects.h"
 
 // Game Mode interface.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 // Class Entities.
 #include "Entities/Base/PlayerClient.h"

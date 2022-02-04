@@ -117,14 +117,14 @@ public:
         return vec3_scale( GetMaxs() + GetMins(), 0.5f );
     }
 
-    // Return the 'className' value.
-    inline const char* GetClassName() {
-        return serverEntity->className;
+    // Return the 'classname' value.
+    inline const char* GetClassname() {
+        return serverEntity->classname;
     }
 
-    // Set the 'className' value.
-    inline void SetClassName(const char* className) {
-        serverEntity->className = className;
+    // Set the 'classname' value.
+    inline void SetClassname(const char* classname) {
+        serverEntity->classname = classname;
     }
 
     // Return the 'client' pointer.
@@ -135,6 +135,11 @@ public:
     // Return the 'clipmask' value.
     inline const int32_t GetClipMask() {
         return serverEntity->clipMask;
+    }
+
+    // Return the 'count' value.
+    inline const int32_t GetCount() {
+        return count;
     }
 
     // Return the 'damage' value.
@@ -472,11 +477,15 @@ public:
         serverEntity->maxs = maxs;
     }
 
-    // Return the 'clipmask' value.
+    // Set the 'clipmask' value.
     inline void SetClipMask(const int32_t &clipMask) {
         serverEntity->clipMask = clipMask;
     }
 
+    // Set the 'count' value.
+    inline void SetCount(const int32_t& count) {
+        this->count = count;
+    }
     // Set the 'damage' value.
     inline void SetDamage(const int32_t &damage) {
         this->damage = damage;
@@ -885,6 +894,8 @@ protected:
     int32_t damage = 0;
     // Dead Flag. (Are we dead, dying or...?)
     int32_t deadFlag = 0;
+    // Count (usually used for SVGBaseItem)
+    int32_t count = 0;
     // Style/AreaPortal
     int32_t style = 0;
 

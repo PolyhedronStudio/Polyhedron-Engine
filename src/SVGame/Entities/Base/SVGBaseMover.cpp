@@ -468,7 +468,7 @@ void SVGBaseMover::BrushAccelerateThink() {
 float SVGBaseMover::CalculateAccelerationDistance( float targetSpeed, float accelerationRate ) {
 	if ( accelerationRate == 0.0f ) {
 		gi.DPrintf( "%s '%s': accelerationRate was 0!\n", 
-					GetTypeInfo()->className, 
+					GetTypeInfo()->classname, 
 					GetTargetName().empty() ? "unnamed" : GetTargetName().c_str() );
 		return 0.0f;
 	}

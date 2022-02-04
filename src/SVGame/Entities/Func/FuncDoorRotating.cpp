@@ -62,7 +62,7 @@ void FuncDoorRotating::Spawn() {
 	}
 
 	if ( !distance ) {
-		gi.DPrintf( "entity: %i:%s with no distance set\n", GetNumber(), GetClassName() );
+		gi.DPrintf( "entity: %i:%s with no distance set\n", GetNumber(), GetClassname() );
 		distance = 90.0f;
 	}
 

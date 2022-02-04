@@ -22,14 +22,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Utilities.h"           // Include Utilities funcs.
 
 // Game Mode interface.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 //
 //===============
 // SVG_InflictDamage
 //
 // Inflicts actual damage on the targeted entity, the rest speaks for itself.
-// Calls into the GameMode of course, to ensure whether things are solid to do at all.
+// Calls into the Gamemode of course, to ensure whether things are solid to do at all.
 // 
 // If you'd like the old info...
 // targ        entity that is being damaged

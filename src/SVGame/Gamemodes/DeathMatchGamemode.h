@@ -2,22 +2,28 @@
 // LICENSE HERE.
 
 //
-// DeathMatchGameMode.h
+// DeathmatchGamemode.h
 //
-// Default game mode to run, allows for all sorts of stuff.
+// Deathmatch game mode.
 //
 */
-#ifndef __SVGAME_GAMEMODES_DEATHMATCHGAMEMODE_H__
-#define __SVGAME_GAMEMODES_DEATHMATCHGAMEMODE_H__
+#pragma once
 
-#include "IGameMode.h"
-#include "DefaultGameMode.h"
+#include "IGamemode.h"
+#include "DefaultGamemode.h"
 
-class DeathMatchGameMode : public DefaultGameMode {
+class DeathmatchGamemode : public DefaultGamemode {
 public:
+    //
     // Constructor/Deconstructor.
-    DeathMatchGameMode();
-    virtual ~DeathMatchGameMode() override;
+    //
+    DeathmatchGamemode();
+    virtual ~DeathmatchGamemode() override;
+
+    //
+    // Define as abstract class in our type system.
+    //
+    DefineAbstractClass("DeathmatchGamemode", DeathmatchGamemode);
 
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
@@ -36,5 +42,3 @@ public:
 private:
 
 };
-
-#endif // __SVGAME_GAMEMODES_DEATHMATCHGAMEMODE_H__

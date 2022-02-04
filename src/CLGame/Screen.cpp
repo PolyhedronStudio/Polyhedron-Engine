@@ -212,7 +212,7 @@ enum color_index_t {
     COLOR_RED,
     COLOR_GREEN,
     COLOR_YELLOW,
-    COLOR_ORANGE, // COLOR_BLUE
+    COLOR_ORANGE, // Used to be: COLOR_BLUE
     COLOR_CYAN,
     COLOR_MAGENTA, // COLOR_...
     COLOR_WHITE,
@@ -254,7 +254,7 @@ color_index_t SCR_ParseColorIndex(const char* s, color_index_t last)
 // SCR_ParseColor
 // 
 // Accepts as input a 12 bit hexadecimal color value, or one of the following
-// string color names: black, red, green, yellow, blue, cyan, magenta, white,
+// string color names: black, red, green, yellow, orange, cyan, magenta, white,
 // alt, none.
 //
 // If the color string is invalid, it returns false. If it is valid, it will

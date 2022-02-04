@@ -60,7 +60,7 @@ void FuncDoor::Spawn() {
     if ( !GetSpeed() ) {
         SetSpeed( 100.0f );
     }
-    //if ( game.gameMode->IsClass( GameModeDeathmatch::ClassInfo ) ) {
+    //if ( game.gameMode->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
     //    SetSpeed( GetSpeed() * 2.0f );
     //}
     if ( !GetAcceleration() ) {

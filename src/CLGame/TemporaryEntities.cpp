@@ -1313,7 +1313,7 @@ void CLG_InitTempEntities(void)
 	//cl_railcore_color->generator = Com_Color_g;
 	cl_railcore_color_changed(cl_railcore_color);
 	cl_railcore_width = clgi.Cvar_Get("cl_railcore_width", "2", 0);
-	cl_railspiral_color = clgi.Cvar_Get("cl_railspiral_color", "blue", 0);
+	cl_railspiral_color = clgi.Cvar_Get("cl_railspiral_color", "orange", 0);
 	cl_railspiral_color->changed = cl_railspiral_color_changed;
 	//cl_railspiral_color->generator = Com_Color_g;
 	cl_railspiral_color_changed(cl_railspiral_color);

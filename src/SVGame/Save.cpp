@@ -86,7 +86,7 @@ static const save_field_t entityfields[] = {
     F(freeTime),
 
     L(message),
-    L(className),
+    L(classname),
 //    I(spawnFlags),
 
     F(timeStamp),
@@ -147,9 +147,9 @@ static const save_field_t entityfields[] = {
     //I(radiusDamage),
     //F(damageRadius),
     //I(sounds),
-    I(count),
+//    I(count),
 
-    E(chain),
+//    E(chain),
     //E(enemy),
     //E(oldEnemyPtr),
     //E(activator),
@@ -938,8 +938,8 @@ void SVG_ReadLevel(const char *filename)
             continue;
 
         // fire any cross-level triggers
-        //if (ent->className)
-        //    if (strcmp(ent->className, "target_crosslevel_target") == 0)
+        //if (ent->classname)
+        //    if (strcmp(ent->classname, "target_crosslevel_target") == 0)
         //        ent->nextThinkTime = level.time + ent->delay;
 
         //if (ent->Think == func_clock_think || ent->Use == func_clock_use) {

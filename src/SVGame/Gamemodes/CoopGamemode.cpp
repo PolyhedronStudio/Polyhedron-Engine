@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// CoopGameMode.cpp
+// CoopGamemode.cpp
 //
 //
 */
@@ -12,15 +12,15 @@
 #include "../Utilities.h"
 
 // Game Mode.
-#include "CoopGameMode.h"
+#include "CoopGamemode.h"
 
 //
 // Constructor/Deconstructor.
 //
-CoopGameMode::CoopGameMode() : DefaultGameMode() {
+CoopGamemode::CoopGamemode() : DefaultGamemode() {
 
 }
-CoopGameMode::~CoopGameMode() {
+CoopGamemode::~CoopGamemode() {
 
 }
 
@@ -31,21 +31,21 @@ CoopGameMode::~CoopGameMode() {
 
 //
 //===============
-// CoopGameMode::CanDamage
+// CoopGamemode::CanDamage
 //
 // Template function serves as an example atm.
 //===============
 //
-qboolean CoopGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
-    // Let it be to DefaultGameMode. :)
-    return DefaultGameMode::CanDamage(target, inflictor);
+qboolean CoopGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
+    // Let it be to DefaultGamemode. :)
+    return DefaultGamemode::CanDamage(target, inflictor);
 }
 
 //===============
-// CoopGameMode::ClientUpdateObituary.
+// CoopGamemode::ClientUpdateObituary.
 // 
 //===============
-void CoopGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
+void CoopGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
     std::string message; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
 
@@ -179,7 +179,7 @@ void CoopGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
         // Then we do...
         // Also we gotta adjust that ->classname thing, but this is a template, cheers :)
         //if (!message.empty()) {
-        //    gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassName(), messageAddition.c_str());
+        //    gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassname(), messageAddition.c_str());
         //    if (deathmatch->value) {
         //        if (friendlyFire)
         //            attacker->GetClient()->respawn.score--;

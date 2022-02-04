@@ -78,7 +78,7 @@ void weapon_shotgun_fire(PlayerClient * ent)
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
-    if (!((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo))
+    if (!((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo))
         client->persistent.inventory[client->ammoIndex]--;
 }
 

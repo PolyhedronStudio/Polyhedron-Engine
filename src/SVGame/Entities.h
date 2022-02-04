@@ -46,7 +46,7 @@ namespace EntityFilterFunctions {
     inline bool BaseEntityIsValidPointer(SVGBaseEntity* ent) { return ent != nullptr; }
 
     // Returns true in case the BaseEntity has the queried for classname.
-    //inline bool BaseEntityHasClass(SVGBaseEntity* ent, std::string classname) { return ent->GetClassName() == classname; }
+    //inline bool BaseEntityHasClass(SVGBaseEntity* ent, std::string classname) { return ent->GetClassname() == classname; }
 };
 
 
@@ -64,7 +64,7 @@ namespace EntityFilters {
     inline auto HasClassName(const std::string& classname) {
         return std::ranges::views::filter(
             [classname /*need a copy!*/](Entity &ent) {
-                return classname == ent.className;
+                return classname == ent.classname;
             }
         );
     }
@@ -109,7 +109,7 @@ namespace BaseEntityFilters {
     inline auto HasClassName(const std::string& classname) {
         return std::ranges::views::filter(
             [classname /*need a copy!*/](SVGBaseEntity* ent) {
-                return ent->GetClassName() == classname;
+                return ent->GetClassname() == classname;
             }
         );
     }
@@ -248,7 +248,7 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
     // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
     if (entityClass::ClassInfo.AllocateInstance) {
         entity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(edict)); // Entities that aren't in the type info system will error out here
-        edict->className = entity->GetTypeInfo()->className;
+        edict->classname = entity->GetTypeInfo()->classname;
         edict->classEntity = entity;
 
         if (nullptr == g_baseEntities[edict->state.number]) {
@@ -265,7 +265,7 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
 // ClassEntity handling.
 //
 SVGBaseEntity* SVG_GetWorldClassEntity();
-SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className);
+SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& classname);
 qboolean SVG_FreeClassFromEntity(Entity* ent);
 
 #endif // __SVGAME_ENTITIES_H__

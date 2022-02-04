@@ -2,21 +2,25 @@
 // LICENSE HERE.
 
 //
-// DefaultGameMode.h
+// DefaultGamemode.h
 //
 // Default game mode to run, allows for all sorts of stuff.
 //
 */
-#ifndef __SVGAME_GAMEMODES_DEFAULTGAMEMODE_H__
-#define __SVGAME_GAMEMODES_DEFAULTGAMEMODE_H__
+#pragma once
 
-#include "IGameMode.h"
+#include "IGamemode.h"
 
-class DefaultGameMode : public IGameMode {
+class DefaultGamemode : public IGamemode {
 public:
     // Constructor/Deconstructor.
-    DefaultGameMode();
-    virtual ~DefaultGameMode() override;
+    DefaultGamemode();
+    virtual ~DefaultGamemode() override;
+
+    //
+    // Define as abstract class in our type system.
+    //
+    DefineAbstractClass("DefaultGamemode", DefaultGamemode);
 
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
@@ -32,7 +36,7 @@ public:
     virtual BaseEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
 
     //
-    // Combat GameMode actions.
+    // Combat Gamemode actions.
     //
     virtual void EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int32_t damage, vec3_t point) override;
     virtual void InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t dflags, int32_t mod) override;
@@ -79,5 +83,3 @@ public:
 private:
 
 };
-
-#endif // __SVGAME_GAMEMODES_DEFAULTGAMEMODE_H__

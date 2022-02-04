@@ -287,7 +287,7 @@ void WorldSpawn::Spawn() {
     level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
         Entity* ent = SVG_Spawn();
-        ent->className = "bodyque";
+        ent->classname = "bodyque";
     }
 
     // set configstrings for items

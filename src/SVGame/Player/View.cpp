@@ -352,7 +352,7 @@ void SVG_Client_CalculateBlend(PlayerClient *ent)
 //            damage = 1;
 //        dir = { 0.f, 0.f, 1.f };
 //
-//        if (!deathmatch->value || !((int)gamemodeflags->value & GameModeFlags::NoFalling))
+//        if (!deathmatch->value || !((int)gamemodeflags->value & GamemodeFlags::NoFalling))
 //            SVG_InflictDamage(ent, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, ent->GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
 //    } else {
 //        ent->SetEventID(EntityEvent::FallShort);
@@ -425,7 +425,7 @@ void SVG_Client_SetSound(PlayerClient *ent)
     //}
 
     //if (client->persistent.activeWeapon)
-    //    weap = client->persistent.activeWeapon->className;
+    //    weap = client->persistent.activeWeapon->classname;
     //else
     //    weap = "";
 

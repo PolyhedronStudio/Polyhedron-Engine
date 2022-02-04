@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Info/InfoPlayerStart.h"
 
 // Game modes.
-#include "../GameModes/IGameMode.h"
+#include "../Gamemodes/IGamemode.h"
 
 // Shared Game.
 #include "SharedGame/SharedGame.h" // Include SG Base.
@@ -76,7 +76,7 @@ void SP_FixCoopSpots(Entity *self)
     spot = NULL;
 
     while (1) {
-        spot = SVG_Find(spot, FOFS(className), "info_player_start");
+        spot = SVG_Find(spot, FOFS(classname), "info_player_start");
         if (!spot)
             return;
         if (!spot->targetName)
@@ -84,7 +84,7 @@ void SP_FixCoopSpots(Entity *self)
         d = self->state.origin - spot->state.origin;
         if (vec3_length(d) < 384) {
             if ((!self->targetName) || Q_stricmp(self->targetName, spot->targetName) != 0) {
-                //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->className, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
+                //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
                 self->targetName = spot->targetName;
             }
             return;

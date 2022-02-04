@@ -423,7 +423,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     //bolt = SVG_Spawn();
 
     //// Setup basic entity attributes.
-    //bolt->className = "bolt";   // Classname.
+    //bolt->classname = "bolt";   // Classname.
     //bolt->owner = self;         // Setup owner.
     //bolt->damage = damage;         // Setup damage.
     //if (hyper)                  // Hyperblaster?

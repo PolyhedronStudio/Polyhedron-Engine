@@ -2,22 +2,26 @@
 // LICENSE HERE.
 
 //
-// CoopGameMode.h
+// CoopGamemode.h
 //
-// Default game mode to run, allows for all sorts of stuff.
+// Coop game mode to run, same as default mode but with coop rules.
 //
 */
-#ifndef __SVGAME_GAMEMODES_COOPGAMEMODE_H__
-#define __SVGAME_GAMEMODES_COOPGAMEMODE_H__
+#include "IGamemode.h"
+#include "DefaultGamemode.h"
 
-#include "IGameMode.h"
-#include "DefaultGameMode.h"
-
-class CoopGameMode : public DefaultGameMode {
+class CoopGamemode : public DefaultGamemode {
 public:
+    //
     // Constructor/Deconstructor.
-    CoopGameMode();
-    virtual ~CoopGameMode() override;
+    //
+    CoopGamemode();
+    virtual ~CoopGamemode() override;
+
+    //
+    // Define as abstract class in our type system.
+    //
+    DefineAbstractClass("CoopGamemode", CoopGamemode);
 
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
@@ -29,5 +33,3 @@ public:
 private:
 
 };
-
-#endif // __SVGAME_GAMEMODES_COOPGAMEMODE_H__
