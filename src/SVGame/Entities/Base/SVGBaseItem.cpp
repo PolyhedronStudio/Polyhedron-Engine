@@ -18,6 +18,7 @@
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
+#include "../Base/PlayerClient.h"
 
 // Misc Explosion Box Entity.
 #include "SVGBaseItem.h"
@@ -190,17 +191,89 @@ void SVGBaseItem::BaseItemDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker,
 //
 void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
-    if (!self)
-        return;
-    if (!other)
-        return;
-    // TODO: Move elsewhere in baseentity, I guess?
-    // Prevent this entity from touching itself.
-    if (self == other)
+    if (!self || !other || self == other)
         return;
 
-    // Call actual pickup function if we have any.
-    if (HasPickupCallback()) {
-        (this->*pickupFunction)(other);
+    // TODO: Move elsewhere in baseentity, I guess?
+    // Prevent this entity from touching itself.
+    //if (self == other)
+    //    return;
+
+    // We need an active client.
+    if (!other->GetClient()) {
+        return;
     }
+
+    // Dead players can't pick up items.
+    if (other->GetHealth() < 1) {
+        return;
+    }
+
+    // Ensure it is a (sub-)class of PlayerClient
+    if (!other->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
+
+    // Last but not least, ensure we got a pickup callback to dispatch.
+    if (!HasPickupCallback()) {
+        return;
+    }
+    // Cast it.
+    PlayerClient* playerEntity = dynamic_cast<PlayerClient*>(other);
+
+    // Pick up the item.
+    qboolean tookItem = (this->*pickupFunction)(other);
+
+    if (tookItem) {
+        // Flash the screen.
+        ServersClient* client = playerEntity->GetClient();
+        client->bonusAlpha = 0.25f;
+
+        // Show icon and name on status bar.
+        //other->GetClient->playerState.stats[STAT_PICKUP_ICON] = SVG_PrecacheImage(GetIcon());
+        //other->GetClient->playerState.stats[STAT_PICKUP_ICON] = SVG_PrecacheImage(GetIcon());
+        //other->client->pickupMessageTime = level.time + 3.0;
+
+        // change selected item
+        //if (ent->item->Use)
+        //    other->client->persistent.selectedItem = other->client->playerState.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
+    }
+
+    // Check for whether the item has used its trigger targets.
+    if (!(GetSpawnFlags() & ItemSpawnFlags::TargetsUsed)) {
+        // It hasn't triggered targets yet, do so now.
+        UseTargets();
+
+        // Add flag that it has used its targets.
+        SetSpawnFlags(ItemSpawnFlags::TargetsUsed);
+    }
+
+    // If we didn't take the item, return.
+    if (!tookItem)
+        return;
+
+    // If we did...
+    if (GetFlags() & EntityFlags::Respawn) {
+        SetFlags(GetFlags() & ~EntityFlags::Respawn);
+    } else {
+        Remove();
+    }
+
+    //if (!(ent->spawnFlags & ItemSpawnFlags::TargetsUsed)) {
+    //    UTIL_UseTargets(ent->classEntity, other->classEntity);
+    //    ent->spawnFlags |= ItemSpawnFlags::TargetsUsed;
+    //}
+
+    //if (!taken)
+    //    return;
+
+    //if (!((coop->value) && (ent->item->flags & ItemFlags::StayInCoop)) || (ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem))) {
+    //    if (ent->flags & EntityFlags::Respawn)
+    //        ent->flags &= ~EntityFlags::Respawn;
+    //    else
+    //        SVG_FreeEntity(ent);
+    //}
+
+    // Call actual pickup function if we have any.
+
 }

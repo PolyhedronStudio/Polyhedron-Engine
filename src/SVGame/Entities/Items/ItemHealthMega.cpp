@@ -57,7 +57,7 @@ void ItemHealthMega::Precache() {
     // Precache sounds & model.
     SVG_PrecacheSound("items/pkup.wav");
     SVG_PrecacheSound("items/m_health.wav");
-    SVG_PrecacheModel("models/items/healing/large/tris.md3");
+    SVG_PrecacheModel("models/items/healing/medium/tris.md2");
 }
 
 //
@@ -76,21 +76,20 @@ void ItemHealthMega::Spawn() {
     // Set move type.
     SetMoveType(MoveType::Toss);
 
-    // Set the barrel model, and model index.
-    SetModel("models/items/healing/large/tris.md3");
+    // Set the health model.
+    SetModel("models/objects/debris1/tris.md2");
 
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
-        { -16.f, -16.f, 0.f },
+        { -16.f, -16.f, -16.f },
         // Maxs.
         { 16.f, 16.f, 16.f }
     );
 
     // Set render effects to be glowy.
-    SetRenderEffects(GetRenderEffects() | RenderEffects::Glow);
+    //SetRenderEffects(GetRenderEffects() | RenderEffects::Glow);
     //SetFlags(EntityFlags::PowerArmor);
-
     // Set default values in case we have none.
     if (!GetMass()) {
         SetMass(40);
@@ -111,7 +110,7 @@ void ItemHealthMega::Spawn() {
 
     // Start thinking after other entities have spawned. This allows for items to safely
     // drop on platforms etc.
-    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime(level.time + 2.1f * FRAMETIME);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -202,8 +201,13 @@ qboolean ItemHealthMega::HealthMegaPickup(SVGBaseEntity* other) {
         }
     }
 
+    // Play sound.
+    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("items/m_health.wav"), 1, ATTN_NORM, 0);
+
     // Let it be known we picked the fucker up.
     SVG_CenterPrint(other, std::string("Picked up: %s") + GetClassname());
+
+    return true;
 }
 
 //
