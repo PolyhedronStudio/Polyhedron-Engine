@@ -67,9 +67,6 @@ void SVGBaseItem::Spawn() {
     // Set move type.
     SetMoveType(MoveType::Toss);
 
-    // Set the barrel model, and model index.
-    SetModel("models/objects/barrels/tris.md2");
-
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
@@ -78,32 +75,22 @@ void SVGBaseItem::Spawn() {
         { 16.f, 16.f, 16.f }
     );
 
-    //SetFlags(EntityFlags::PowerArmor);
-
     // Set default values in case we have none.
     if (!GetMass()) {
         SetMass(40);
     }
-    //if (!GetHealth()) {
-    //    SetHealth(150);
-    //}
-//    SetHealth(999);
-//    if (!GetDamage()) {
-//        SetDamage(150);
-//    }
 
     // Set entity to allow taking damage (can't explode otherwise.)
     SetTakeDamage(TakeDamage::No);
 
     // Setup our SVGBaseItem callbacks.
     SetUseCallback(&SVGBaseItem::BaseItemUse);
-    SetThinkCallback(&SVGBaseItem::BaseItemThink);
-    SetDieCallback(&SVGBaseItem::BaseItemDie);
     SetTouchCallback(&SVGBaseItem::BaseItemTouch);
 
     // Start thinking after other entities have spawned. This allows for items to safely
     // drop on platforms etc.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetThinkCallback(&SVGBaseItem::BaseItemDropToFloor);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -113,10 +100,57 @@ void SVGBaseItem::Spawn() {
 //===============
 // SVGBaseItem::Respawn
 //
+// In order for an item to respawn we first check if it is a member of a team, if it is
+// then we'll go and look for a random entity in the list to respawn.
 //===============
 //
 void SVGBaseItem::Respawn() {
     Base::Respawn();
+
+    // Fetch team entity.
+//    SVGBaseEntity *teamMaster = GetTeamMasterEntity();
+    SVGBaseEntity* slaveEntity = this;
+
+    //// Count and random index.
+    //if (!GetTeam().empty()) {
+    //    int32_t slaveCount = 0;
+    //    uint32_t slaveChoice = 0;
+
+    //    for (count = 0, slaveEntity = teamMaster; teamMaster; slaveEntity = teamMaster->GetTeamChainEntity(), count++) {
+    //        // Generate random index within range of the counted amount of team entities.
+    //        slaveChoice = RandomRangeui(0, count);
+
+    //        // Fetch the entity we had sought for.
+    //        for (count = 0, slaveEntity = teamMasterEntity; count < slaveChoice; slaveEntity = slaveEntity->GetTeamChainEntity(), count++) {
+
+    //        }
+    //    }
+    //}
+
+    // Time to respawn the entity.
+    if (slaveEntity) {
+        // Remove NoClient flag so the clients can see this entity again.
+        slaveEntity->SetServerFlags(slaveEntity->GetServerFlags() & ~EntityServerFlags::NoClient);
+
+        // Remove no client flag.
+        slaveEntity->SetFlags(slaveEntity->GetFlags() & ~EntityServerFlags::NoClient);
+
+        // Reset the entity to SOlid::Trigger so clients can pick it up again.
+        slaveEntity->SetSolid(Solid::Trigger);
+
+        // Attach a respawn effect event to the entity.
+        slaveEntity->SetEventID(EntityEvent::ItemRespawn);
+
+        // Link it back in.
+        slaveEntity->LinkEntity();
+
+        gi.DPrintf("BaseItem::Respawn");
+
+        // Set think callback to fall to floor (just in case).
+        SetThinkCallback(&SVGBaseItem::BaseItemDropToFloor);
+    } else {
+        gi.DPrintf("No slaveEntity found...");
+    }
 }
 
 //
@@ -143,52 +177,100 @@ void SVGBaseItem::Think() {
 
 
 //
+// Entity functions.
+//
+//===============
+// SVGBaseItem::SetRespawn
+// 
+//===============
+void SVGBaseItem::SetRespawn(const float delay) {
+    // Ensure that for the time being the item doesn't appear to clients.
+    SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
+
+    // Ensure it isn't solid so client's can't receive another pickup.
+    SetSolid(Solid::Not);
+
+    // Set the next think callback to dispatch when the delay is over with.
+    SetNextThinkTime(level.time + delay);
+    SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
+
+    // Relink entity.
+    LinkEntity();
+}
+
+
+//
 // Callback Functions.
 //
-
 //===============
 // SVGBaseItem::BaseItemUse
-// 
 // 
 //===============
 void SVGBaseItem::BaseItemUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
 {
-    BaseItemDie( caller, activator, 999, GetOrigin() );
+    //BaseItemDie( caller, activator, 999, GetOrigin() );
 }
 
-//
 //===============
-// SVGBaseItem::BaseItemThink
+// SVGBaseItem::BaseItemDropToFloor
 //
-// 
+// 'DropToFloor' callback ensures the item falls on top of whichever entity is below it. (World or others)
 //===============
-//
-void SVGBaseItem::BaseItemThink(void) {
+void SVGBaseItem::BaseItemDropToFloor() {
+    SVGTrace trace;
+    vec3_t destination = vec3_zero();
 
+    // Calculate trace destination.
+    vec3_t traceDestination = GetOrigin() + vec3_t{0.f, 0.f, -128.f};
 
-    // Setup its next think time, for a frame ahead.
-    SetThinkCallback(&SVGBaseItem::BaseItemThink);
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    // Execute trace.
+    trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), traceDestination, this, CONTENTS_MASK_SOLID);
+
+    // Remove the item entity in case it started inside of a solid.
+    if (trace.startSolid) {
+        gi.DPrintf("SVGBaseItem::BaseItemDropToFloor: %s startsolid at %s\n", GetClassname(), vec3_to_str(GetOrigin()).c_str());
+        Remove();
+        return;
+    }
+
+    // Set trace end position as the item's newly found origin.
+    SetOrigin(trace.endPosition);
+
+    // If the entity has a team...
+    //if (!GetTeam().empty()) {
+    //    SetFlags(GetFlags() & ~EntityFlags::TeamSlave);
+    //    SVGBaseEntity *teamChainEntity = GetTeamChainEntity();
+    //    SetTeamChainEntity(nullptr);
+    //    SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
+    //    SetSolid(Solid::Not);
+    //    if (this == GetTeamMasterEntity()) {
+    //        SetNextThinkTime(level.time + FRAMETIME);
+    //        SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
+    //    }
+    //}
+
+    // Unset think callback.
+    SetThinkCallback(nullptr);
+
+    // Relink entity.
+    LinkEntity();
 }
 
-//
 //===============
-// SVGBaseItem::BaseItemDie
+// SVGBaseItem::BaseItemDoRespawn
 //
-// 'Die' callback, the explosion box has been damaged too much.
+// 'DoRespawn' callback calls the entity item's Respawn function.
 //===============
-//
-void SVGBaseItem::BaseItemDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
-
+void SVGBaseItem::BaseItemDoRespawn() {
+    Respawn();
 }
 
-//
+
 //===============
 // SVGBaseItem::BaseItemTouch
 //
-// 'Touch' callback, to calculate the direction to move into.
+// 'Touch' callback, triggers a pickup event if the entity is allowed to pick up this item.
 //===============
-//
 void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
     if (!self || !other || self == other)
@@ -218,6 +300,7 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
     if (!HasPickupCallback()) {
         return;
     }
+
     // Cast it.
     PlayerClient* playerEntity = dynamic_cast<PlayerClient*>(other);
 
@@ -226,7 +309,7 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
 
     if (tookItem) {
         // Flash the screen.
-        ServersClient* client = playerEntity->GetClient();
+        ServerClient* client = playerEntity->GetClient();
         client->bonusAlpha = 0.25f;
 
         // Show icon and name on status bar.
@@ -252,28 +335,10 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
     if (!tookItem)
         return;
 
-    // If we did...
+    // If the respawn spawnflag is set, let it respawn.
     if (GetFlags() & EntityFlags::Respawn) {
-        SetFlags(GetFlags() & ~EntityFlags::Respawn);
+        SetRespawn(2);
     } else {
         Remove();
     }
-
-    //if (!(ent->spawnFlags & ItemSpawnFlags::TargetsUsed)) {
-    //    UTIL_UseTargets(ent->classEntity, other->classEntity);
-    //    ent->spawnFlags |= ItemSpawnFlags::TargetsUsed;
-    //}
-
-    //if (!taken)
-    //    return;
-
-    //if (!((coop->value) && (ent->item->flags & ItemFlags::StayInCoop)) || (ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem))) {
-    //    if (ent->flags & EntityFlags::Respawn)
-    //        ent->flags &= ~EntityFlags::Respawn;
-    //    else
-    //        SVG_FreeEntity(ent);
-    //}
-
-    // Call actual pickup function if we have any.
-
 }

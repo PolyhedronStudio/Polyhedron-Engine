@@ -30,6 +30,19 @@ public:
     // Coop has its own Obituary madness.
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
+    // Respawn clients in Coop mode.
+    virtual void RespawnClient(PlayerClient* playerClient) override;
+    virtual void RespawnAllClients() override;
+    virtual void ClientDeath(PlayerClient* clientEntity) override;
+
+    // Some information that should be persistant, like health,
+    // is still stored in the edict structure, so it needs to
+    // be mirrored out to the client structure before all the
+    // edicts are wiped.
+    virtual void SaveClientEntityData(void) override;
+    // Fetch client data that was stored between previous entity wipe session.
+    virtual void FetchClientEntityData(Entity* ent) override;
+
 private:
 
 };

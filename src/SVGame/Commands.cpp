@@ -69,7 +69,7 @@ qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2)
 
 void SelectNextItem(PlayerClient *ent, int itflags)
 {
-    ServersClient   *cl;
+    ServerClient   *cl;
     int         i, index;
     gitem_t     *it;
 
@@ -100,7 +100,7 @@ void SelectNextItem(PlayerClient *ent, int itflags)
 
 void SelectPrevItem(Entity *ent, int itflags)
 {
-    ServersClient   *cl;
+    ServerClient   *cl;
     int         i, index;
     gitem_t     *it;
 
@@ -136,7 +136,7 @@ void HUD_ValidateSelectedItem(PlayerClient *ent)
         return;
     }
 
-    ServersClient* cl = ent->GetClient();
+    ServerClient* cl = ent->GetClient();
 
     if (cl->persistent.inventory[cl->persistent.selectedItem])
         return;     // valid
@@ -168,10 +168,10 @@ void Cmd_Give_f(Entity *ent)
         return;
     }
 
-    if (deathmatch->value && !sv_cheats->value) {
-        gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
-        return;
-    }
+    //if (deathmatch->value && !sv_cheats->value) {
+    //    gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+    //    return;
+    //}
 
     name = gi.args(); // C++20: Added cast.
 
@@ -271,10 +271,10 @@ argv(0) god
 */
 void Cmd_God_f(SVGBaseEntity *ent)
 {
-    if (deathmatch->value && !sv_cheats->value) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
-        return;
-    }
+    //if (deathmatch->value && !sv_cheats->value) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+    //    return;
+    //}
 
     ent->SetFlags(ent->GetFlags() ^ EntityFlags::GodMode);
     if (!(ent->GetFlags() & EntityFlags::GodMode))
@@ -295,10 +295,10 @@ argv(0) notarget
 */
 void Cmd_Notarget_f(SVGBaseEntity *ent)
 {
-    if (deathmatch->value && !sv_cheats->value) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
-        return;
-    }
+    //if (deathmatch->value && !sv_cheats->value) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+    //    return;
+    //}
 
     ent->SetFlags(ent->GetFlags() ^ EntityFlags::NoTarget);
     if (!(ent->GetFlags() & EntityFlags::NoTarget))
@@ -317,10 +317,10 @@ argv(0) noclip
 */
 void Cmd_Noclip_f(SVGBaseEntity *ent)
 {
-    if (deathmatch->value && !sv_cheats->value) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
-        return;
-    }
+    //if (deathmatch->value && !sv_cheats->value) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+    //    return;
+    //}
 
     if (ent->GetMoveType() == MoveType::NoClip) {
         ent->SetMoveType(MoveType::Walk);
@@ -406,7 +406,7 @@ Cmd_Inven_f
 void Cmd_Inven_f(Entity *ent)
 {
     int         i;
-    ServersClient   *cl;
+    ServerClient   *cl;
 
     cl = ent->client;
 
@@ -457,7 +457,7 @@ Cmd_WeapPrev_f
 */
 void Cmd_WeapPrev_f(PlayerClient *ent)
 {
-    ServersClient   *cl;
+    ServerClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
@@ -492,7 +492,7 @@ Cmd_WeapNext_f
 */
 void Cmd_WeapNext_f(PlayerClient *ent)
 {
-    ServersClient   *cl;
+    ServerClient   *cl;
     int         i, index;
     gitem_t     *it;
     int         selected_weapon;
@@ -527,7 +527,7 @@ Cmd_WeapLast_f
 */
 void Cmd_WeapLast_f(PlayerClient *ent)
 {
-    ServersClient   *cl;
+    ServerClient   *cl;
     int         index;
     gitem_t     *it;
 
@@ -718,7 +718,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
     Entity *other;
     char    *p; // C++20: Removed const.
     char    text[2048];
-    ServersClient *cl;
+    ServerClient *cl;
 
     if (gi.argc() < 2 && !arg0)
         return;
@@ -854,7 +854,6 @@ void SVG_ClientCommand(Entity *serverEntity)
         return;
     }
     if (Q_stricmp(cmd, "score") == 0) {
-            gi.DPrintf("YO YOU ARE DEBUGGING SCORES");
         SVG_Command_Score_f(ent);
         return;
     }

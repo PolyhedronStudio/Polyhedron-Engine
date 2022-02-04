@@ -32,13 +32,15 @@ public:
     virtual void PutClientInServer(Entity* ent) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) override;
-    
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) override;
+    virtual void ClientUserinfoChanged(Entity* ent, char* userinfo) override;
+
     virtual void RespawnClient(PlayerClient* ent) override;
-    virtual void RespawnSpectator(PlayerClient* ent);
+    virtual void RespawnAllClients() override;
+    virtual void ClientDeath(PlayerClient* clientEntity) override;
 
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
 private:
-
+    virtual void RespawnSpectator(PlayerClient* ent);
 };

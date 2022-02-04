@@ -68,7 +68,7 @@ public:
     virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
-    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) = 0;
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) = 0;
     // Called for each player at the end of the server frame and right 
     // after spawning.
     virtual void ClientEndServerFrame(Entity *serverEntity) = 0;
@@ -83,31 +83,34 @@ public:
     // Called in order to process "obituary" updates, aka with what weapon did this client
     // or did other clients, kill any other client/entity.
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
-    
+
+    // Called in order to clear a client's inventory if the game mode deems this to be fit.
+    virtual void ClientDeath(PlayerClient *clientEntity) = 0;
 
     //
-    // Client related faciliated functions.
+    // Client related facility functions.
     //
     // This is only called when the game first initializes in single player,
     // but is called after each death and level change in deathmatch
-    virtual void InitializeClientPersistentData(ServersClient* client) = 0;
+    virtual void InitializeClientPersistentData(ServerClient* client) = 0;
     // This is only called when the game first initializes in single player,
     // but is called after each death and level change in deathmatch
-    virtual void InitializeClientRespawnData(ServersClient *client) = 0;
+    virtual void InitializeClientRespawnData(ServerClient *client) = 0;
 
     // Choose any info_player_start or its derivates, it'll do a subclassof check, so the only valid classnames are
     // those who have inherited from info_player_start. (info_player_deathmatch, etc).
     virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) = 0;
-    // Called when a player connects to a single and multiplayer. 
-    // In the case of a SP mode death, the loadmenu pops up and selecting a load game
-    // will restart the server.
-    // In thecase of a MP mode death however, after a small intermission time, it'll
-    // call this function again to respawn our player.
+    
+    // Called when a player connects to a game (whether it be single or multi -player).
+    // For a SP mode death, the loadmenu pops up and the player gets to select a load game (If there are none, there is always the autosaved one.)
+    // For a MP mode death, the game waits for intermission time to pass before it'll call this function again to respawn our player.
     virtual void PutClientInServer(Entity* ent) = 0;
     // Respawns a client (if that is what the game mode wants).
     virtual void RespawnClient(PlayerClient* ent) = 0;
+    // Respawns all clients if the game mode allows so. (See RespawnClient)
+    virtual void RespawnAllClients() = 0;
 
-     // Some information that should be persistant, like health,
+    // Some information that should be persistant, like health,
     // is still stored in the edict structure, so it needs to
     // be mirrored out to the client structure before all the
     // edicts are wiped.

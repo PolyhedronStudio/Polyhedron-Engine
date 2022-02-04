@@ -56,7 +56,7 @@ public:
     // 
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) override;
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) override;
     virtual void ClientEndServerFrame(Entity *serverEntity) override;
     virtual void ClientDisconnect(PlayerClient* ent) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
@@ -65,12 +65,15 @@ public:
     //
     // Client related functions/utilities.
     // 
-    virtual void InitializeClientPersistentData(ServersClient* client) override;
-    virtual void InitializeClientRespawnData(ServersClient *client) override;
+    virtual void InitializeClientPersistentData(ServerClient* client) override;
+    virtual void InitializeClientRespawnData(ServerClient *client) override;
 
     virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) override;
     virtual void PutClientInServer(Entity *ent) override;
     virtual void RespawnClient(PlayerClient* ent) override;
+    virtual void RespawnAllClients() override;
+
+    virtual void ClientDeath(PlayerClient *clientEntity) override;
 
     // Some information that should be persistant, like health,
     // is still stored in the edict structure, so it needs to

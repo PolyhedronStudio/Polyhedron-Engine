@@ -11,6 +11,10 @@
 #include "../Entities.h"
 #include "../Utilities.h"
 
+// Entities.
+#include "../Entities/Base/SVGBaseEntity.h"
+#include "../Entities/Base/PlayerClient.h"
+
 // Game Mode.
 #include "CoopGamemode.h"
 
@@ -196,4 +200,119 @@ void CoopGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
     // WID: This was an old piece of code, keeping it so people know what..// if (deathmatch->value)
     // Get the client, and change its current score.
     self->GetClient()->respawn.score--;
+}
+
+//===============
+// CoopGamemode::RespawnClient
+// 
+// Respawns a client after intermission and hitting a button.
+//===============
+void CoopGamemode::RespawnClient(PlayerClient* ent) {
+    // Spectator's don't leave bodies
+    if (ent->GetMoveType() != MoveType::NoClip)
+        SpawnClientCorpse(ent);
+
+    ent->SetServerFlags(ent->GetServerFlags() & ~EntityServerFlags::NoClient);
+    PutClientInServer(ent->GetServerEntity());
+
+    // Add a teleportation effect
+    ent->SetEventID(EntityEvent::PlayerTeleport);
+
+    // Hold in place briefly
+    ServerClient* serverClient = ent->GetClient();
+
+    // Hold in place for 14 frames and set pmove flags to teleport so the player can
+    // respawn somewhere safe without it interpolating its positions.
+    serverClient->playerState.pmove.flags = PMF_TIME_TELEPORT;
+    serverClient->playerState.pmove.time = 14;
+
+    // Setup respawn time.
+    serverClient->respawnTime = level.time;
+}
+
+//===============
+// CoopGamemode::RespawnAllClients
+//
+// Respawn all valid client entities who's health is < 0.
+//===============
+void CoopGamemode::RespawnAllClients() {
+    // Respawn all valid client entities who's health is < 0.
+    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<PlayerClient>()) {
+        if (clientEntity->GetHealth() < 0) {
+            RespawnClient(dynamic_cast<PlayerClient*>(clientEntity));
+        }
+    }
+}
+
+//===============
+// CoopGamemode::ClientDeath
+// 
+// Does nothing for this game mode.
+//===============
+void CoopGamemode::ClientDeath(PlayerClient *clientEntity) {
+    // Ensure the client is valid.
+    if (!clientEntity) {
+        return;
+    }
+    // Ensure it is PlayerClient or a sub-class thereof.
+    if (!clientEntity->IsSubclassOf<PlayerClient>()) {
+        return;
+    }
+
+    // Fetch server client.
+    ServerClient* client = clientEntity->GetClient();
+    if (!client) {
+        return;
+    }
+
+    // Clear inventory this is kind of ugly, but it's how we want to handle keys in coop
+    for (int32_t i = 0; i < game.numberOfItems; i++) {
+        if (itemlist[i].flags & ItemFlags::IsKey)
+            client->respawn.persistentCoopRespawn.inventory[i] = client->persistent.inventory[i];
+        client->persistent.inventory[i] = 0;
+    }
+}
+
+//===============
+// CoopGamemode::SaveClientEntityData
+// 
+// Some information that should be persistant, like health,
+// is still stored in the edict structure, so it needs to
+// be mirrored out to the client structure before all the
+// edicts are wiped.
+//===============
+void CoopGamemode::SaveClientEntityData(void) {
+    Entity *ent;
+
+    for (int32_t i = 0 ; i < game.maximumClients ; i++) {
+        ent = &g_entities[1 + i];
+        if (!ent->inUse)
+            continue;
+        if (!ent->classEntity)
+            continue;
+        game.clients[i].persistent.health = ent->classEntity->GetHealth();
+        game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
+        game.clients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
+        if (ent->client)
+            game.clients[i].persistent.score = ent->client->respawn.score;
+    }
+}
+
+//===============
+// CoopGamemode::RespawnClient
+// 
+// // Fetch client data that was stored between previous entity wipe session
+//===============
+void CoopGamemode::FetchClientEntityData(Entity* ent) {
+    if (!ent)
+        return;
+
+    if (!ent->classEntity)
+        return;
+
+    ent->classEntity->SetHealth(ent->client->persistent.health);
+    ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
+    ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
+    if (ent->client)
+        ent->client->respawn.score = ent->client->persistent.score;
 }

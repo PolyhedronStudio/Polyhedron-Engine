@@ -117,7 +117,7 @@ void DeathmatchGamemode::PutClientInServer(Entity *ent) {
 
     // Fetch the entity index, and the client right off the bat.
     int32_t index = ent - g_entities - 1;
-    ServersClient* client = ent->client;
+    ServerClient* client = ent->client;
 
     // Deathmatch wipes most client data every spawn
     //-----------------------------------------------------------------------
@@ -255,6 +255,60 @@ void DeathmatchGamemode::PutClientInServer(Entity *ent) {
 }
 
 //===============
+// DeathmatchGamemode::ClientUserinfoChanged
+// 
+//===============
+void DeathmatchGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
+    char    *s;
+    int     playernum;
+
+    // check for malformed or illegal info strings
+    if (!Info_Validate(userinfo)) {
+        strcpy(userinfo, "\\name\\badinfo\\skin\\male/grunt");
+    }
+
+    // set name
+    s = Info_ValueForKey(userinfo, "name");
+    strncpy(ent->client->persistent.netname, s, sizeof(ent->client->persistent.netname) - 1);
+
+    // set spectator
+    s = Info_ValueForKey(userinfo, "spectator");
+    // spectators are only supported in deathmatch
+    if (*s && strcmp(s, "0"))
+        ent->client->persistent.isSpectator = true;
+    else
+        ent->client->persistent.isSpectator = false;
+
+    // set skin
+    s = Info_ValueForKey(userinfo, "skin");
+
+    playernum = ent - g_entities - 1;
+
+    // combine name and skin into a configstring
+    gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
+
+    // fov
+    if (((int)gamemodeflags->value & GamemodeFlags::FixedFOV)) {
+        ent->client->playerState.fov = 90;
+    } else {
+        ent->client->playerState.fov = atoi(Info_ValueForKey(userinfo, "fov"));
+        if (ent->client->playerState.fov < 1)
+            ent->client->playerState.fov = 90;
+        else if (ent->client->playerState.fov > 160)
+            ent->client->playerState.fov = 160;
+    }
+
+    // handedness
+    s = Info_ValueForKey(userinfo, "hand");
+    if (strlen(s)) {
+        ent->client->persistent.hand = atoi(s);
+    }
+
+    // save off the userinfo in case we want to check something later
+    strncpy(ent->client->persistent.userinfo, userinfo, sizeof(ent->client->persistent.userinfo));
+}
+
+//===============
 // DefaultGamemode::ClientBeginServerFrame
 // 
 // Does logic checking for a client's start of a server frame. In case there
@@ -263,7 +317,7 @@ void DeathmatchGamemode::PutClientInServer(Entity *ent) {
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
 //===============
-void DeathmatchGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) {
+void DeathmatchGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) {
     // Ensure we aren't in an intermission time.
     if (level.intermission.time)
         return;
@@ -454,12 +508,12 @@ void DeathmatchGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
         // Also we gotta adjust that ->classname thing, but this is a template, cheers :)
         if (!message.empty()) {
             gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassname(), messageAddition.c_str());
-            if (deathmatch->value) {
-                if (friendlyFire)
-                    attacker->GetClient()->respawn.score--;
-                else
-                    attacker->GetClient()->respawn.score++;
+            if (friendlyFire) {
+                attacker->GetClient()->respawn.score--;
+            } else {
+                attacker->GetClient()->respawn.score++;
             }
+
             return;
         }
     }
@@ -485,16 +539,42 @@ void DeathmatchGamemode::RespawnClient(PlayerClient* ent) {
     ent->SetServerFlags(ent->GetServerFlags() & ~EntityServerFlags::NoClient);
     PutClientInServer(ent->GetServerEntity());
 
-    // add a teleportation effect
+    // Add a teleportation effect
     ent->SetEventID(EntityEvent::PlayerTeleport);
 
-    // hold in place briefly
-    ServersClient* client = ent->GetClient();
+    // Hold in place briefly
+    ServerClient* serverClient = ent->GetClient();
 
-    client->playerState.pmove.flags = PMF_TIME_TELEPORT;
-    client->playerState.pmove.time = 14;
+    // Hold in place for 14 frames and set pmove flags to teleport so the player can
+    // respawn somewhere safe without it interpolating its positions.
+    serverClient->playerState.pmove.flags = PMF_TIME_TELEPORT;
+    serverClient->playerState.pmove.time = 14;
 
-    client->respawnTime = level.time;
+    // Setup respawn time.
+    serverClient->respawnTime = level.time;
+}
+
+//===============
+// DeathmatchGamemode::RespawnAllClients
+//
+// Respawn all valid client entities who's health is < 0.
+//===============
+void DeathmatchGamemode::RespawnAllClients() {
+
+    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<PlayerClient>()) {
+        if (clientEntity->GetHealth() < 0) {
+            RespawnClient(dynamic_cast<PlayerClient*>(clientEntity));
+        }
+    }
+}
+
+//===============
+// DeathmatchGamemode::ClientDeath
+// 
+// Does nothing for this game mode.
+//===============
+void DeathmatchGamemode::ClientDeath(PlayerClient *clientEntity) {
+
 }
 
 //===============
@@ -514,7 +594,7 @@ void DeathmatchGamemode::RespawnSpectator(PlayerClient* ent) {
     ent->SetEventID(EntityEvent::PlayerTeleport);
 
     // hold in place briefly
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     client->playerState.pmove.flags = PMF_TIME_TELEPORT;
     client->playerState.pmove.time = 14;

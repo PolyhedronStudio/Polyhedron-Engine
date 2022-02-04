@@ -925,6 +925,8 @@ void Qcommon_Init(int argc, char **argv)
     host_speeds = Cvar_Get("host_speeds", "0", 0);
 #endif
 #ifdef _DEBUG
+    developer = Cvar_Get("developer", "1", 0);
+#else
     developer = Cvar_Get("developer", "0", 0);
 #endif
     timescale = Cvar_Get("timescale", "1", CVAR_CHEAT);

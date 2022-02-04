@@ -18,6 +18,10 @@
 #include "../Player/Animations.h"
 #include "../Player/Weapons.h"
 
+// Game modes.
+#include "../Gamemodes/IGameMode.h"
+#include "../Gamemodes/DeathMatchGamemode.h"
+
 // Include weapon header.
 #include "Blaster.h"
 
@@ -34,7 +38,7 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
     vec3_t  forward, right;
     vec3_t  start;
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
     if (is_quad)
         damage *= 4;
     AngleVectors(client->aimAngles, &forward, &right, NULL);
@@ -64,7 +68,7 @@ void Weapon_Blaster_Fire(PlayerClient *ent)
 {
     int     damage;
 
-    if (deathmatch->value)
+    if (game.gameMode->IsClass<DeathmatchGamemode>())
         damage = 15;
     else
         damage = 10;

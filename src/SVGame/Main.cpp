@@ -52,12 +52,15 @@ TemporarySpawnFields    st;
 int sm_meat_index;
 int snd_fry;
 
+//-----------------
+// Const Expressions.
+//-----------------
+static constexpr const char* defaultGameMode = "singleplayer";
 
 //-----------------
 // CVars.
 //-----------------
-cvar_t  *deathmatch;
-cvar_t  *coop;
+cvar_t  *gamemode;      // Stores the gamemode string: "singleplayer", "deathmatch", "coop"
 cvar_t  *gamemodeflags;
 cvar_t  *skill;
 cvar_t  *fraglimit;
@@ -299,9 +302,11 @@ void SVG_InitializeCVars() {
 
     maximumClients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
     maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
-    deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
-    coop = gi.cvar("coop", "0", CVAR_LATCH);
-    skill = gi.cvar("skill", "1", CVAR_LATCH);
+    gamemode = gi.cvar("gamemode", 0, 0);
+    
+    //deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
+    //coop = gi.cvar("coop", "0", CVAR_LATCH);
+    skill = gi.cvar("skill", "1", CVAR_SERVERINFO | CVAR_LATCH);
 
     // Change anytime vars
     gamemodeflags = gi.cvar("gamemodeflags", "0", CVAR_SERVERINFO);
@@ -356,14 +361,14 @@ void SVG_InitializeServerEntities() {
 //=====================
 // SVG_AllocateGameClients
 //
-// Allocates the "ServersClient", aligned to the ServerClient data type array properly for
+// Allocates the "ServerClient", aligned to the ServerClient data type array properly for
 // the current game at play.
 //=====================
 //
 void SVG_AllocateGameClients() {
     // Initialize all clients for this game
     game.maximumClients = maximumClients->value;
-    game.clients = (ServersClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
+    game.clients = (ServerClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
 
     // Total number of entities = world + maximum clients.
     globals.numberOfEntities = game.maximumClients + 1;
@@ -412,26 +417,18 @@ void SVG_CreatePlayerClientEntities() {
 //===============
 //
 void SVG_InitializeGamemode(void) {
-    // Game mode is determined on... various factors.
-    // Eventually, I'd prefer it to be a numberic index but hey...
-    // Now we check for whichever the ID we got (ha, see what I did there?)
-    int32_t gameModeID = 0; // <-- default mode index.
-
-    // Check.
-    if (deathmatch->integer && !coop->integer)
-        gameModeID = 1;
-    else if (!deathmatch->integer && coop->integer)
-        gameModeID = 2;
+    // Fetch gamemode as std::string
+    std::string gamemodeStr = gamemode->string;
 
     // Detect which game mode to allocate for this game round.
-    switch(gameModeID) {
-    case 1:
+    if (gamemodeStr == "deathmatch") {
+        // Deathmatch gameplay mode.
         game.gameMode = new DeathmatchGamemode();
-        break;
-    case 2:
+    } else if (gamemodeStr == "coop") {
+        // Cooperative gameplay mode.
         game.gameMode = new CoopGamemode();
-        break;
-    default:
+    } else {
+        // Acts as a singleplayer game mode.
         game.gameMode = new DefaultGamemode();
     }
 
@@ -570,13 +567,13 @@ SVG_CheckDMRules
 void SVG_CheckDMRules(void)
 {
     int         i;
-    ServersClient   *cl;
+    ServerClient   *cl;
 
     if (level.intermission.time)
         return;
 
-    if (!deathmatch->value)
-        return;
+    //if (!deathmatch->value)
+    //    return;
 
     if (timelimit->value) {
         if (level.time >= timelimit->value * 60) {
@@ -694,7 +691,7 @@ void SVG_RunFrame(void) {
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= maximumClients->value) {
             // Ensure the entity is in posession of a client that controls it.
-            ServersClient* client = entity->GetClient();
+            ServerClient* client = entity->GetClient();
             if (!client) {
                 continue;
             }

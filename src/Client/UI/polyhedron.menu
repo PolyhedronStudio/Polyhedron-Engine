@@ -347,22 +347,23 @@ begin development
     style --compact
     title "Developer Menu"
     blank
-    /*
-    forcemenuoff; is required, otherwise the cvars aren't stored for later usage in the list here. 
-
-    This command is placed on top so we can easily enter through the main menu :)
-    */ 
-    action "Launch Map" "forcemenuoff; disconnect; skill $dev_skill; deathmatch 0; coop 0; maxclients $dev_maxclients; echo $dev_map; map $dev_map force"
+    /* forcemenuoff; is required, otherwise the cvars aren't stored for later usage in this menu.*/ 
+    action "Launch Map" "disconnect; skill $dev_skill; gamemode $dev_gamemode; maxclients $dev_maxclients; forcemenuoff; echo $gamemode; echo $dev_map; map $dev_map force;"
     field --width 32 "map" dev_map
     blank
-    field --numeric --width 1 "skill" dev_skill
-    field --numeric --width 2 "max clients" dev_maxclients
-    /*
-    Deathmatch is 1 by default, and I'm not in a mood to spend more time on this men uatm.
-    But with some puzzling around, we could add these settings too.
-    toggle "Deathmatch" deathmatch
-    toggle "Coop" coop
-    */
+/*
+    values "Gamemode: " dev_gamemode \
+        singleplayer \
+        deathmatch \
+        coop
+*/
+    pairs "Gamemode: " dev_gamemode \
+        Singleplayer singleplayer \
+        Deathmatch deathmatch \
+        Cooperative coop
+    field --numeric --width 32 "skill" dev_skill
+    field --numeric --width 32 "max clients" dev_maxclients
+
     blank
 end
 
@@ -374,10 +375,10 @@ begin singleplayer
     ifeq developer 1
         action development pushmenu development
     endif
-    action "Map: func_plat" "skill 0; deathmatch 0; coop 0; maxclients 1; map func_plat force"
-    action "Map: func_doors" "skill 0; deathmatch 0; coop 0; maxclients 1; map func_doors force"
-    action "Map: testbed" "skill 0; deathmatch 0; coop 0; maxclients 1; map testbed force"
-    action "Map: base1" "skill 0; deathmatch 0; coop 0; maxclients 1; map base1 force"
+    action "Map: func_plat" "skill 0; gamemode singleplayer; maxclients 1; map func_plat force"
+    action "Map: func_doors" "skill 0; gamemode singleplayer; maxclients 1; map func_doors force"
+    action "Map: testbed" "skill 0; gamemode singleplayer; maxclients 1; map testbed force"
+    action "Map: base1" "skill 0; gamemode singleplayer; maxclients 1; map base1 force"
     //action easy "skill 0; deathmatch 0; coop 0; maxclients 1; map testbed force"
     //action medium "skill 1; deathmatch 0; coop 0; maxclients 1; map base1_stepmove force"
     //action hard "skill 2; deathmatch 0; coop 0; maxclients 1; map test_stepmove force"

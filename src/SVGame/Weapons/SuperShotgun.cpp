@@ -41,7 +41,7 @@ void weapon_supershotgun_fire(PlayerClient * ent)
     int         damage = 6;
     int         kick = 12;
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     vec3_vectors(client->aimAngles, &forward, &right, NULL);
 

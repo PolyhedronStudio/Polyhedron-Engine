@@ -275,7 +275,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     SetCurrentMeansOfDeath(mod);
 
     // Fetch client.
-    ServersClient* client = target->GetClient();
+    ServerClient* client = target->GetClient();
 
     // Determine which temp entity event to use.
     int32_t tempEntityEvent = TempEntityEvent::Sparks;
@@ -622,7 +622,7 @@ void DefaultGamemode::OnLevelExit() {
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
 //===============
-void DefaultGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServersClient *client) {
+void DefaultGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) {
     // Ensure we aren't in an intermission time.
     if (level.intermission.time)
         return;
@@ -656,8 +656,9 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServersClien
             //else
             //buttonMask = -1;
 
-            if ((client->latchedButtons & buttonMask) ||
-                (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn))) {
+            if (client->latchedButtons & buttonMask) 
+                // || (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn))) {
+            {
                 game.gameMode->RespawnClient(dynamic_cast<PlayerClient*>(entity));
                 client->latchedButtons = 0;
             }
@@ -665,7 +666,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServersClien
         return;
     }
 
-    //// add player trail so monsters can follow
+    // add player trail so monsters can follow
     //if (!deathmatch->value)
     //    if (!visible(ent, SVG_PlayerTrail_LastSpot()))
     //        SVG_PlayerTrail_Add(ent->state.oldOrigin);
@@ -690,7 +691,7 @@ void DefaultGamemode::ClientEndServerFrame(Entity *serverEntity) {
     }
 
     // Setup the current player and entity being processed.
-    ServersClient *client = serverEntity->client;
+    ServerClient *client = serverEntity->client;
 
     // Used for in this function, the classEntity of the given serverEntity.
     PlayerClient* classEntity = (PlayerClient*)serverEntity->classEntity;
@@ -1009,7 +1010,7 @@ void DefaultGamemode::ClientBegin(Entity* serverEntity) {
 //===============
 void DefaultGamemode::ClientDisconnect(PlayerClient* player) {
     // Fetch the client.
-    ServersClient* client = player->GetClient();
+    ServerClient* client = player->GetClient();
 
     // Print who disconnected.
     gi.BPrintf(PRINT_HIGH, "%s disconnected\n", client->persistent.netname);
@@ -1060,13 +1061,8 @@ void DefaultGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
     s = Info_ValueForKey(userinfo, "name");
     strncpy(ent->client->persistent.netname, s, sizeof(ent->client->persistent.netname) - 1);
 
-    // set spectator
-    s = Info_ValueForKey(userinfo, "spectator");
-    // spectators are only supported in deathmatch
-    if (deathmatch->value && *s && strcmp(s, "0"))
-        ent->client->persistent.isSpectator = true;
-    else
-        ent->client->persistent.isSpectator = false;
+    // Set spectator to false.
+    ent->client->persistent.isSpectator = false;
 
     // set skin
     s = Info_ValueForKey(userinfo, "skin");
@@ -1077,7 +1073,7 @@ void DefaultGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
     gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
 
     // fov
-    if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::FixedFOV)) {
+    if (((int)gamemodeflags->value & GamemodeFlags::FixedFOV)) {
         ent->client->playerState.fov = 90;
     } else {
         ent->client->playerState.fov = atoi(Info_ValueForKey(userinfo, "fov"));
@@ -1246,7 +1242,7 @@ void DefaultGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
 }
 
 
-void DefaultGamemode::InitializeClientPersistentData(ServersClient* client) {
+void DefaultGamemode::InitializeClientPersistentData(ServerClient* client) {
     gitem_t     *item = NULL;
 
     if (!client)
@@ -1274,7 +1270,7 @@ void DefaultGamemode::InitializeClientPersistentData(ServersClient* client) {
     client->persistent.isConnected = true;
 }
 
-void DefaultGamemode::InitializeClientRespawnData(ServersClient* client) {
+void DefaultGamemode::InitializeClientRespawnData(ServerClient* client) {
     if (!client)
         return;
 
@@ -1357,7 +1353,7 @@ void DefaultGamemode::PutClientInServer(Entity *ent) {
 
     // Fetch the entity index, and the client right off the bat.
     int32_t index = ent - g_entities - 1;
-    ServersClient* client = ent->client;
+    ServerClient* client = ent->client;
 
     // Deathmatch wipes most client data every spawn
     //-----------------------------------------------------------------------
@@ -1432,7 +1428,7 @@ void DefaultGamemode::PutClientInServer(Entity *ent) {
     // Setup player move origin to spawnpoint origin.
     client->playerState.pmove.origin = spawnOrigin;
 
-    if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::FixedFOV)) {
+    if (((int)gamemodeflags->value & GamemodeFlags::FixedFOV)) {
         client->playerState.fov = 90;
     } else {
         client->playerState.fov = atoi(Info_ValueForKey(client->persistent.userinfo, "fov"));
@@ -1514,7 +1510,8 @@ void DefaultGamemode::PutClientInServer(Entity *ent) {
 //===============
 // DefaultGamemode::RespawnClient
 // 
-// Respawns a client (if that is what the game mode wants).
+// Since the default game mode is intended to be a single player mode,
+// there is no respawning and we show a loadgame menu instead.
 //===============
 void DefaultGamemode::RespawnClient(PlayerClient* ent) {
     // Kept around here to port later to other gamemodes.
@@ -1546,6 +1543,22 @@ void DefaultGamemode::RespawnClient(PlayerClient* ent) {
     gi.AddCommandString("pushmenu loadgame\n");
 }
 
+//===============
+// DefaultGamemode::RespawnAllClients
+//
+//===============
+void DefaultGamemode::RespawnAllClients() {
+    // Do nothing for default game mode.
+}
+
+//===============
+// DefaultGamemode::ClientDeath
+// 
+// Does nothing for this game mode.
+//===============
+void DefaultGamemode::ClientDeath(PlayerClient *clientEntity) {
+
+}
 
 //===============
 // DefaultGamemode::SaveClientEntityData
@@ -1567,8 +1580,6 @@ void DefaultGamemode::SaveClientEntityData(void) {
         game.clients[i].persistent.health = ent->classEntity->GetHealth();
         game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
         game.clients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
-        if (coop->value && ent->client)
-            game.clients[i].persistent.score = ent->client->respawn.score;
     }
 }
 
@@ -1587,6 +1598,4 @@ void DefaultGamemode::FetchClientEntityData(Entity* ent) {
     ent->classEntity->SetHealth(ent->client->persistent.health);
     ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
     ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
-    if (coop->value && ent->client)
-        ent->client->respawn.score = ent->client->persistent.score;
 }

@@ -787,10 +787,11 @@ static void SV_NextServer_f(void)
 
     if (!nextserver[0])
     {
-        if (Cvar_VariableInteger("coop"))
-            Cbuf_AddText(&cmd_buffer, "gamemap \"*nacstart\"\n");
-        else
+        if (Cvar_VariableString("gamemode") == "coop") {
+            Cbuf_AddText(&cmd_buffer, "gamemap \"*phcm_start\"\n");
+        } else {
             Cbuf_AddText(&cmd_buffer, "killserver\n");
+        }
     }
     else
     {

@@ -404,7 +404,7 @@ struct ConfigStrings {
     static constexpr uint32_t SkyRotate         = 4;
     static constexpr uint32_t StatusBar         = 5;       // display program string
 
-    static constexpr uint32_t AirAcceleration   = 29;      // air acceleration control
+    static constexpr uint32_t Unused            = 29;      // Unused now, in the past it was the air acceleration control config string.
     static constexpr uint32_t MaxClients        = 30;
     static constexpr uint32_t MapCheckSum       = 31;      // for catching cheater maps
 
@@ -418,10 +418,10 @@ struct ConfigStrings {
     static constexpr uint32_t MaxConfigStrings  = (ConfigStrings::General+ MAX_GENERAL);
 };
 
-// Some mods actually exploit ConfigStrings::StatusBar to take space up to ConfigStrings::AirAcceleration
+// Some mods actually exploit ConfigStrings::StatusBar to take space up to ConfigStrings::Unused
 inline static uint32_t CS_SIZE(uint32_t cs) {
-    return ((cs) >= ConfigStrings::StatusBar && (cs) < ConfigStrings::AirAcceleration? \
-        MAX_QPATH * (ConfigStrings::AirAcceleration- (cs)) : MAX_QPATH);
+    return ((cs) >= ConfigStrings::StatusBar && (cs) < ConfigStrings::Unused ? \
+        MAX_QPATH * (ConfigStrings::Unused - (cs)) : MAX_QPATH);
 }
 
 

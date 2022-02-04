@@ -94,14 +94,16 @@ void SP_FixCoopSpots(Entity *self)
 
 //=======================================================================
 
+// TODO: Move into game mode.
 void SVG_TossClientWeapon(PlayerClient *playerClient)
 {
     gitem_t     *item;
     Entity      *drop;
     float       spread = 1.5f;
 
-    if (!deathmatch->value)
-        return;
+    // Always allow.
+    //if (!deathmatch->value)
+    //    return;
 
     item = playerClient->GetActiveWeapon();
     if (!playerClient->GetClient()->persistent.inventory[playerClient->GetClient()->ammoIndex])
@@ -118,50 +120,6 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
 }
 
 //=======================================================================
-
-/*
-==================
-SVG_SaveClientData
-
-Some information that should be persistant, like health,
-is still stored in the entity structure, so it needs to
-be mirrored out to the client structure before all the
-entities are wiped.
-==================
-*/
-void SVG_SaveClientData(void)
-{
-    int     i;
-    Entity *ent;
-
-    for (i = 0 ; i < game.maximumClients ; i++) {
-        ent = &g_entities[1 + i];
-        if (!ent->inUse)
-            continue;
-        if (!ent->classEntity)
-            continue;
-        game.clients[i].persistent.health = ent->classEntity->GetHealth();
-        game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
-        game.clients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
-        if (coop->value && ent->client)
-            game.clients[i].persistent.score = ent->client->respawn.score;
-    }
-}
-
-void SVG_FetchClientData(Entity *ent)
-{
-    if (!ent)
-        return;
-
-    if (!ent->classEntity)
-        return;
-
-    ent->classEntity->SetHealth(ent->client->persistent.health);
-    ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
-    ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
-    if (coop->value && ent->client)
-        ent->client->respawn.score = ent->client->persistent.score;
-}
 
 //======================================================================
 
@@ -271,40 +229,6 @@ void spectator_respawn(Entity *ent)
 //==============================================================
 
 /*
-=====================
-ClientBeginDeathmatch
-
-A client has just connected to the server in
-deathmatch mode, so clear everything out before starting them.
-=====================
-*/
-void SVG_ClientBeginDeathmatch(Entity *ent)
-{
-    //SVG_InitEntity(ent);
-
-    //game.gameMode->InitializeClientRespawnData(ent->client);
-
-    //// locate ent at a spawn point
-    //game.gameMode->PutClientInServer(ent);
-
-    //if (level.intermission.time) {
-    //    HUD_MoveClientToIntermission(ent);
-    //} else {
-    //    // send effect
-    //    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    //    gi.WriteShort(ent - g_entities);
-    //    gi.WriteByte(MuzzleFlashType::Login);
-    //    gi.Multicast(ent->state.origin, MultiCast::PVS);
-    //}
-
-    //gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
-
-    //// make sure all view stuff is valid
-    //game.gameMode->ClientEndServerFrame(ent);
-}
-
-
-/*
 ===========
 ClientBegin
 
@@ -409,7 +333,7 @@ usually be a couple times for each server frame.
 */
 void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 {
-    ServersClient* client = nullptr;
+    ServerClient* client = nullptr;
     PlayerClient *classEntity = nullptr;
     Entity* other = nullptr;
 

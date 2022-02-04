@@ -90,16 +90,13 @@ void MiscExplosionBox::Spawn() {
         { 16.f, 16.f, 40.f }
     );
 
-    //SetFlags(EntityFlags::PowerArmor);
-    //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
         SetMass(40);
     }
-    //if (!GetHealth()) {
-    //    SetHealth(150);
-    //}
-    SetHealth(999);
+    if (!GetHealth()) {
+        SetHealth(150);
+    }
     if (!GetDamage()) {
         SetDamage(150);
     }
@@ -109,12 +106,13 @@ void MiscExplosionBox::Spawn() {
 
     // Setup our MiscExplosionBox callbacks.
     SetUseCallback(&MiscExplosionBox::ExplosionBoxUse);
-    SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);
+
     SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -189,7 +187,7 @@ void MiscExplosionBox::ExplosionBoxThink(void) {
     SVGTrace trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, NULL, CONTENTS_MASK_MONSTERSOLID);
     
     // Return in case we hit anything.
-    if (trace.fraction == 1.f || trace.allSolid || (trace.fraction != 1.f && trace.ent != 0))
+    if (trace.fraction == 1.f || trace.allSolid)
         return;
     
     // Set new entity origin.

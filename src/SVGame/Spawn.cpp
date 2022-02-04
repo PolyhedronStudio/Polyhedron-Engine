@@ -18,10 +18,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "ServerGameLocal.h"          // Include SVGame header.
-#include "Entities.h"         // Entities.
-#include "Player/Client.h"    // Include Player Client header.
 
+// Entities.
+#include "Entities.h"
 #include "entities/base/SVGBaseEntity.h"
+
+// Gamemodes.
+#include "Gamemodes/IGameMode.h"
+
+// Player Client header.
+#include "Player/Client.h"
+
+
 
 /*
 =============
@@ -220,7 +228,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
         gi.cvar_forceset("skill", va("%f", skill_level));
 
     // Save client data.
-    SVG_SaveClientData();
+    game.gameMode->SaveClientEntityData();
 
     // Free level tag allocated data.
     gi.FreeTags(TAG_LEVEL);

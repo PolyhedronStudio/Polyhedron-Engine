@@ -53,7 +53,7 @@ struct Solid {
 
 
 typedef struct entity_s Entity;
-typedef struct gclient_s ServersClient;
+typedef struct gclient_s ServerClient;
 
 
 #ifndef GAME_INCLUDE

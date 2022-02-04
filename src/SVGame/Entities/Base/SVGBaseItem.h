@@ -39,12 +39,19 @@ public:
     virtual void Think() override;       // General entity thinking routine.
 
     //
+    // Entity functions.
+    //
+    virtual void SetRespawn(const float delay);  // Sets the item in respawn mode.
+
+    //
     // Callback Functions.
     //
     void BaseItemUse( SVGBaseEntity* caller, SVGBaseEntity* activator );
-    void BaseItemThink(void);
-    void BaseItemDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+
+    void BaseItemDropToFloor(void);
+    void BaseItemDoRespawn(void);
+
 
 public:
     //

@@ -85,8 +85,11 @@ cvar_t  *info_hand          = nullptr;
 cvar_t  *info_uf            = nullptr;
 cvar_t  *info_in_bspmenu    = nullptr;
 
-// N&C: Developer utilities.
+#ifdef _DEBUG
+// Polyhedron: Developer utilities.
 cvar_t* dev_map;
+cvar_t* dev_gamemode;
+#endif
 #if USE_REF == REF_GL
 extern cvar_t *gl_modulate_world;
 extern cvar_t *gl_modulate_entities;
@@ -2643,6 +2646,11 @@ static void CL_InitLocal(void)
     cl_rollhack = Cvar_Get("cl_rollhack", "1", 0);
     cl_noglow = Cvar_Get("cl_noglow", "0", 0);
     cl_nolerp = Cvar_Get("cl_nolerp", "0", 0);
+
+#ifdef _DEBUG
+    dev_map = Cvar_Get("dev_map", "base1", CVAR_ARCHIVE);
+    dev_gamemode = Cvar_Get("dev_gamemode", "singleplayer", CVAR_ARCHIVE);
+#endif
 
     // hack for timedemo
     com_timedemo->changed = cl_sync_changed;

@@ -14,6 +14,10 @@
 #include "../Entities.h"
 #include "WorldSpawn.h"
 
+// Gamemodes.
+#include "../Gamemodes/IGameMode.h"
+#include "../Gamemodes/DeathMatchGamemode.h"
+
 static const char single_statusbar[] =
 "yb -24 "
 
@@ -296,10 +300,11 @@ void WorldSpawn::Spawn() {
     SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maximumClients->value)));
 
     // status bar program
-    if (deathmatch->value)
+    if (game.gameMode->IsClass<DeathmatchGamemode>()) {
         SVG_SetConfigString(ConfigStrings::StatusBar, dm_statusbar);
-    else
+    } else {
         SVG_SetConfigString(ConfigStrings::StatusBar, single_statusbar);
+    }
 
     //---------------
 

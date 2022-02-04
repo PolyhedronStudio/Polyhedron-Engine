@@ -154,15 +154,17 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
     if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
         return false;
 
-    if ((coop->value) && (ent->item->flags & ItemFlags::StayInCoop) && (quantity > 0))
-        return false;
+    // TODO: Move into gamemode whether it can be picked up.
+    //if ((coop->value) && (ent->item->flags & ItemFlags::StayInCoop) && (quantity > 0))
+    //    return false;
 
     other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
 
-    if (deathmatch->value) {
+    // TODO: Move to gamemode whether it can be respawned after dropping or not.
+    //if (deathmatch->value) {
         //if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem))
         //    SVG_SetRespawn(ent, ent->item->quantity);
-    }
+    //}
 
     return true;
 }
@@ -469,10 +471,10 @@ void drop_temp_touch(Entity *ent, Entity *other, cplane_t *plane, csurface_t *su
 void drop_make_touchable(Entity *ent)
 {
 //    ent->Touch = SVG_TouchItem;
-    if (deathmatch->value) {
-//        ent->nextThinkTime = level.time + 29;
-//        ent->Think = SVG_FreeEntity;
-    }
+//    if (deathmatch->value) {
+////        ent->nextThinkTime = level.time + 29;
+////        ent->Think = SVG_FreeEntity;
+//    }
 }
 
 Entity *SVG_DropItem(Entity *ent, gitem_t *item)
@@ -717,15 +719,16 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     //    }
     //}
 
-    if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0)) {
-//        ent->spawnFlags |= (1 << (8 + level.powerCubes));
-        level.powerCubes++;
-    }
+//    if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0)) {
+////        ent->spawnFlags |= (1 << (8 + level.powerCubes));
+//        level.powerCubes++;
+//    }
 
+    // TODO: Move over to gamemode.
     // don't let them drop items that stay in a coop game
-    if ((coop->value) && (item->flags & ItemFlags::StayInCoop)) {
-        item->Drop = NULL;
-    }
+    //if ((coop->value) && (item->flags & ItemFlags::StayInCoop)) {
+    //    item->Drop = NULL;
+    //}
 
     ent->item = item;
 //    ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
@@ -992,10 +995,11 @@ gitem_t itemlist[] = {
 */
 void SP_item_health(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/healing/medium/tris.md2";
     //self->SetCount(10);
@@ -1007,10 +1011,11 @@ void SP_item_health(Entity *self)
 */
 void SP_item_health_small(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/healing/stimpack/tris.md2";
     //self->SetCount(2);
@@ -1023,10 +1028,11 @@ void SP_item_health_small(Entity *self)
 */
 void SP_item_health_large(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/healing/large/tris.md2";
     //self->SetCount(25);
@@ -1038,10 +1044,11 @@ void SP_item_health_large(Entity *self)
 */
 void SP_item_health_mega(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/mega_h/tris.md2";
     //self->SetCount(100);
