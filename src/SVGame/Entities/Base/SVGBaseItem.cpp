@@ -218,7 +218,6 @@ void SVGBaseItem::BaseItemUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
 //===============
 void SVGBaseItem::BaseItemDropToFloor() {
     SVGTrace trace;
-    vec3_t destination = vec3_zero();
 
     // Calculate trace destination.
     vec3_t traceDestination = GetOrigin() + vec3_t{0.f, 0.f, -128.f};
@@ -275,11 +274,6 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
     // Safety checks.
     if (!self || !other || self == other)
         return;
-
-    // TODO: Move elsewhere in baseentity, I guess?
-    // Prevent this entity from touching itself.
-    //if (self == other)
-    //    return;
 
     // We need an active client.
     if (!other->GetClient()) {

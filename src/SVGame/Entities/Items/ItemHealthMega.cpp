@@ -138,9 +138,6 @@ void ItemHealthMega::PostSpawn() {
 void ItemHealthMega::Think() {
     // Always call parent class method.
     Base::Think();
-
-    // Prevent the owner from picking up the item
-
 }
 
 
@@ -186,7 +183,7 @@ qboolean ItemHealthMega::HealthMegaPickup(SVGBaseEntity* other) {
 
     // Set a respawn think for after 2 seconds.
     if (!game.gameMode->IsClass<DefaultGamemode>()) {
-        SetThinkCallback(&ItemHealthMega::BaseItemDoRespawn);
+        SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
         SetNextThinkTime(level.time + 2);
     }
 

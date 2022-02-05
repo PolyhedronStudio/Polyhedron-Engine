@@ -46,12 +46,15 @@ public:
     //
     // Callback Functions.
     //
-    void BaseItemUse( SVGBaseEntity* caller, SVGBaseEntity* activator );
+    void BaseItemUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
     void BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
 
     void BaseItemDropToFloor(void);
     void BaseItemDoRespawn(void);
 
+private:
+    // Respawn wait time.
+    float respawnWaitTime = 0.f;
 
 public:
     //

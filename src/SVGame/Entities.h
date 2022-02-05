@@ -95,7 +95,7 @@ namespace ef = EntityFilters; // Shortcut, lesser typing.
 // Actual filters to use with GetEntityRange, ..., ... TODO: What other functions?
 //
 namespace BaseEntityFilters {
-    using namespace std::views;
+    using namespace std::ranges::views;
 
     // BaseEntity Filters to employ by pipelining. Very nice and easy method of doing loops.
     inline auto IsValidPointer = std::views::filter( &EntityFilterFunctions::BaseEntityIsValidPointer );
