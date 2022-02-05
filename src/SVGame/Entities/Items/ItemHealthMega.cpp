@@ -64,7 +64,7 @@ void ItemHealthMega::Precache() {
     // Precache sounds & model.
     SVG_PrecacheSound("items/pkup.wav");
     SVG_PrecacheSound("items/m_health.wav");
-    SVG_PrecacheModel("items/healing/large/tris.md2");
+    SVG_PrecacheModel("models/items/healing/large/tris.md3");
 }
 
 //
@@ -78,19 +78,16 @@ void ItemHealthMega::Spawn() {
     Base::Spawn();
 
     // Set the health model.
-    SetModel("items/health/large/tris.md2");
+    SetModel("models/items/healing/large/tris.md3");
+    //SetModelIndex(SVG_PrecacheModel("models/items/healing/large/tris.md3"));
 
     // Set render effects to be glowy.
-    //SetRenderEffects(GetRenderEffects() | RenderEffects::Glow);
+    SetRenderEffects(GetRenderEffects() | RenderEffects::Glow | RenderEffects::DebugBoundingBox);
 
     // Set default values in case we have none.
     if (!GetMass()) {
         SetMass(40);
     }
-    
-    SetOrigin(GetOrigin() + vec3_t{
-        0.f, 0.f, 32.f
-    });
     
     // Set the count for the amount of health this item will give.
     SetCount(100);

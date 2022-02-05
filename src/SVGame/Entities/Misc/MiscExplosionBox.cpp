@@ -90,6 +90,8 @@ void MiscExplosionBox::Spawn() {
         { 16.f, 16.f, 40.f }
     );
 
+    SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
+
     // Set default values in case we have none.
     if (!GetMass()) {
         SetMass(40);
@@ -175,7 +177,7 @@ void MiscExplosionBox::ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* ac
 void MiscExplosionBox::ExplosionBoxThink(void) {
     // First, ensure our origin is +1 off the floor.
     vec3_t traceStart = GetOrigin() + vec3_t{
-        0.f, 0.f, 1.f
+        0.f, 0.f, -1.f
     };
         
     // Calculate the end origin to use for tracing.

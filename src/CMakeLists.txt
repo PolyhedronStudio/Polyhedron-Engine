@@ -19,6 +19,7 @@ SET(SRC_CLGAME
 	CLGame/Exports/ServerMessage.cpp
 	CLGame/Exports/View.cpp
 
+	CLGame/Debug.cpp
 	CLGame/Effects.cpp
 	CLGame/Entities.cpp
 	CLGame/Input.cpp
@@ -47,6 +48,7 @@ SET(HEADERS_CLGAME
 	CLGame/Exports/ServerMessage.h
 	CLGame/Exports/View.h
 
+	CLGame/Debug.h
 	CLGame/Effects.h
 	CLGame/Entities.h
 	CLGame/Input.h

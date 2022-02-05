@@ -70,9 +70,9 @@ void SVGBaseItem::Spawn() {
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
-        { -16.f, -16.f, 0.f },
+        { -16.f, -16.f, -16.f },
         // Maxs.
-        { 16.f, 16.f, 16.f }
+        { 16.f, 16.f, 16 }
     );
 
     // Set default values in case we have none.
@@ -89,7 +89,7 @@ void SVGBaseItem::Spawn() {
 
     // Start thinking after other entities have spawned. This allows for items to safely
     // drop on platforms etc.
-    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime(level.time + 2.5f * FRAMETIME);
     SetThinkCallback(&SVGBaseItem::BaseItemDropToFloor);
 
     // Link the entity to world, for collision testing.
@@ -131,9 +131,6 @@ void SVGBaseItem::Respawn() {
     if (slaveEntity) {
         // Remove NoClient flag so the clients can see this entity again.
         slaveEntity->SetServerFlags(slaveEntity->GetServerFlags() & ~EntityServerFlags::NoClient);
-
-        // Remove no client flag.
-        slaveEntity->SetFlags(slaveEntity->GetFlags() & ~EntityServerFlags::NoClient);
 
         // Reset the entity to SOlid::Trigger so clients can pick it up again.
         slaveEntity->SetSolid(Solid::Trigger);
@@ -217,23 +214,27 @@ void SVGBaseItem::BaseItemUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
 // 'DropToFloor' callback ensures the item falls on top of whichever entity is below it. (World or others)
 //===============
 void SVGBaseItem::BaseItemDropToFloor() {
-    SVGTrace trace;
+    // First, ensure our origin is +1 off the floor.
+    vec3_t newOrigin = GetOrigin() + vec3_t { 0.f, 0.f, 1 };
 
-    // Calculate trace destination.
-    vec3_t traceDestination = GetOrigin() + vec3_t{0.f, 0.f, -128.f};
-
-    // Execute trace.
-    trace = SVG_Trace(GetOrigin(), GetMins(), GetMaxs(), traceDestination, this, CONTENTS_MASK_SOLID);
-
-    // Remove the item entity in case it started inside of a solid.
-    if (trace.startSolid) {
-        gi.DPrintf("SVGBaseItem::BaseItemDropToFloor: %s startsolid at %s\n", GetClassname(), vec3_to_str(GetOrigin()).c_str());
-        Remove();
-        return;
+    SetOrigin(newOrigin);
+    
+    // Calculate the end origin to use for tracing.
+    vec3_t end = newOrigin + vec3_t { 0, 0, -256.f };
+    
+    // Exceute the trace.
+    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_PLAYERSOLID);
+    
+    // Return in case we hit anything.
+    if (trace.fraction == 1 || trace.allSolid) {
+	    return;
     }
-
-    // Set trace end position as the item's newly found origin.
+    
+    // Set new entity origin.
     SetOrigin(trace.endPosition);
+    
+    // Check for ground.
+    SVG_StepMove_CheckGround(this);
 
     // If the entity has a team...
     //if (!GetTeam().empty()) {

@@ -523,6 +523,8 @@ typedef enum {
     DoubleShell     = (1 << 14),    // Double shell rendering.
     HalfDamShell    = (1 << 15),    // Half dam shell.
     UseDisguise     = (1 << 16),    // Use disguise.
+
+    DebugBoundingBox = (1 << 17),   // Renders a debug bounding box using particles.
 } RenderEffects;
 
 // PlayerState->refdef flags
