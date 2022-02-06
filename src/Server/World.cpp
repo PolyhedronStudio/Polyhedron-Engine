@@ -292,8 +292,8 @@ void PF_LinkEntity(Entity *ent)
             ent->state.solid = 0;
             sent->solid32 = 0;
         } else {
-            ent->state.solid = MSG_PackSolid32(ent->mins, ent->maxs);
-            sent->solid32 = MSG_PackSolid32(ent->mins, ent->maxs);
+            ent->state.solid = MSG_PackBoundingBox32(ent->mins, ent->maxs);
+            sent->solid32 = MSG_PackBoundingBox32(ent->mins, ent->maxs);
         }
         break;
     case Solid::BSP:

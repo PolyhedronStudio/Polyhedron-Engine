@@ -547,6 +547,8 @@ static void emit_snd(client_t *client, MessagePacket *msg)
     if (flags & SND_POS) {
         MSG_WriteVector3(msg->pos);
     }
+
+
 }
 
 static inline void write_snd(client_t *client, MessagePacket *msg, size_t maximumSize)
