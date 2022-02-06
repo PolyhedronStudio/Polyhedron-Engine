@@ -6,13 +6,21 @@
 //
 //
 */
+
 #include "../../ServerGameLocal.h"		// SVGame.
+
+//
+// EntityBridge.
+//
+#include "SharedGame/Entities/EntityBridge.h"
+
 #include "../../Effects.h"		// Effects.
 #include "../../Entities.h"		// Entities.
 #include "../../Utilities.h"		// Util funcs.
 
 #include "SVGBaseTrigger.h"
 #include "../trigger/TriggerDelayedUse.h"
+
 
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {

@@ -59,8 +59,6 @@ void MiscServerModel::Precache() {
     if (!noisePath.empty()) {
         precachedNoiseIndex = SVG_PrecacheSound(noisePath);
     }
-
-    //sprites / torchflame1_1.sp2
 }
 
 //
@@ -102,7 +100,6 @@ void MiscServerModel::Spawn() {
     // Set the bounding box.
     SetBoundingBox(GetMins(), GetMaxs());
 
-    //SetFlags(EntityFlags::Swim);
     // Set default values in case we have none.
     if (!GetMass()) {
         SetMass(40);
@@ -125,10 +122,8 @@ void MiscServerModel::Spawn() {
     SetTakeDamage(TakeDamage::Yes);
 
     //// Setup our MiscServerModel callbacks.
-    //SetUseCallback(&MiscServerModel::MiscServerModelUse);
     SetThinkCallback(&MiscServerModel::MiscServerModelThink);
     SetDieCallback(&MiscServerModel::MiscServerModelDie);
-    //SetTouchCallback(&MiscServerModel::MiscServerModelTouch);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
@@ -145,7 +140,6 @@ void MiscServerModel::Spawn() {
 //
 void MiscServerModel::Respawn() {
     Base::Respawn();
-    //gi.DPrintf("MiscServerModel::Respawn();");
 }
 
 //
@@ -157,7 +151,6 @@ void MiscServerModel::Respawn() {
 void MiscServerModel::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
-    //gi.DPrintf("MiscServerModel::PostSpawn();");
 }
 
 //===============
@@ -229,20 +222,6 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
     }
 }
 
-//
-// Callback Functions.
-//
-
-//// ==============
-//// MiscServerModel::MiscServerModelUse
-//// 
-//// So that mappers can trigger this entity in order to blow it up
-//// ==============
-//void MiscServerModel::MiscServerModelUse(SVGBaseEntity* caller, SVGBaseEntity* activator) {
-//    MiscServerModelDie(caller, activator, 999, GetOrigin());
-//}
-
-
 //===============
 // MiscServerModel::MiscServerModelThink
 //
@@ -255,105 +234,39 @@ void MiscServerModel::MiscServerModelThink(void) {
     };
 
     SetOrigin(newOrigin);
-    //
-    ////    // Calculate the end origin to use for tracing.
+    
+    // Calculate the end origin to use for tracing.
     vec3_t end = newOrigin + vec3_t{
         0, 0, -256.f
     };
-    //
-    //    // Exceute the trace.
+    
+    
+    // Exceute the trace.
     SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-    ////
-    ////    // Return in case we hit anything.
+    
+    // Return in case we hit anything.
     if (trace.fraction == 1 || trace.allSolid)
         return;
-    ////
-    ////    // Set new entity origin.
+    
+    // Set new entity origin.
     SetOrigin(trace.endPosition);
-    //
-    //     //
-    //    // Check for ground.
+    
+    
+    // Check for ground.
     SVG_StepMove_CheckGround(this);
-    //
-    //    // Setup its next think time, for a frame ahead.
+    
+    // Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + 1 * FRAMETIME);
-    //    // Link entity back in.
+    // Link entity back in.
     LinkEntity();
-
-    //
-    //    //// Do a check ground for the step move of this pusher.
-    //SVG_StepMove_CheckGround(this);
-    //    //M_CatagorizePosition(ent); <-- This shit, has to be moved to SVG_Stepmove_CheckGround.
-    //    // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
-    //    // Not important for this one atm.
 }
+
+//===============
+// MiscServerModel::MiscServerModelDie
 //
-////
-////===============
-//// MiscServerModel::MiscServerModelExplode
-////
-//// 'Think' callback that is set when the explosion box is exploding.
-//// (Has died due to taking damage.)
-////===============
-////
-//void MiscServerModel::MiscServerModelExplode(void) {
-//    // Execute radius damage.
-//    SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
+// 'Die' callback, the explosion box has been damaged too much.
+//===============
 //
-//    // Retrieve origin.
-//    vec3_t save = GetOrigin();
-//
-//    // Set the new origin.
-//    SetOrigin(vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize()));
-//
-//    // Throw several "debris1/tris.md2" chunks.
-//    SpawnDebris1Chunk();
-//    SpawnDebris1Chunk();
-//
-//    // Bottom corners
-//    vec3_t origin = GetAbsoluteMin();
-//    SpawnDebris3Chunk(origin);
-//    origin = GetAbsoluteMin();
-//    origin.x += GetSize().x;
-//    SpawnDebris3Chunk(origin);
-//    origin = GetAbsoluteMin();
-//    origin.y += GetSize().y;
-//    SpawnDebris3Chunk(origin);
-//    origin = GetAbsoluteMin();
-//    origin.x += GetSize().x;
-//    origin.y += GetSize().y;
-//    SpawnDebris3Chunk(origin);
-//
-//    // Spawn 8 "debris2/tris.md2" chunks.
-//    SpawnDebris2Chunk();
-//    SpawnDebris2Chunk();
-//    SpawnDebris2Chunk();
-//    SpawnDebris2Chunk();
-//    SpawnDebris2Chunk();
-//    SpawnDebris2Chunk();
-//    SpawnDebris2Chunk();
-//    SpawnDebris2Chunk();
-//
-//    // Reset origin to saved origin.
-//    SetOrigin(save);
-//
-//    // Depending on whether we have a ground entity or not, we determine which explosion to use.
-//    if (GetGroundEntity())
-//        SVG_BecomeExplosion2(this);
-//    else
-//        SVG_BecomeExplosion1(this);
-//
-//    // Ensure we have no more think callback pointer set when this entity has "died"
-//    SetThinkCallback(nullptr);
-//}
-//
-////
-////===============
-//// MiscServerModel::MiscServerModelDie
-////
-//// 'Die' callback, the explosion box has been damaged too much.
-////===============
-////
 void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
@@ -377,39 +290,3 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     // Set think function.
     SetThinkCallback(&MiscServerModel::SVGBaseEntityThinkFree);
 }
-//
-////
-////===============
-//// MiscServerModel::MiscServerModelTouch
-////
-//// 'Touch' callback, to calculate the direction to move into.
-////===============
-////
-//void MiscServerModel::MiscServerModelTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
-//    // Safety checks.
-//    if (!self)
-//        return;
-//    if (!other)
-//        return;
-//    // TODO: Move elsewhere in baseentity, I guess?
-//    // Prevent this entity from touching itself.
-//    if (this == other)
-//        return;
-//
-//    // Ground entity checks.
-//    if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == this))
-//        return;
-//
-//    // Calculate ratio to use.
-//    float ratio = (float)other->GetMass() / (float)GetMass();
-//
-//    // Calculate direction.
-//    vec3_t dir = GetOrigin() - other->GetOrigin();
-//
-//    // Calculate yaw to use based on direction.
-//    float yaw = vec3_to_yaw(dir);
-//
-//    // Last but not least, move a step ahead.
-//    SVG_StepMove_Walk(this, yaw, 40 * ratio * FRAMETIME);
-//    //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
-//}

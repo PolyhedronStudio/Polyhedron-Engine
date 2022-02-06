@@ -419,11 +419,21 @@ SET(HEADERS_GL
 
 ###################### Shared Game Folder.
 SET(HEADERS_SHAREDGAME
+	../inc/SharedGame/Entities/SGBaseEntity.h
+	../inc/SharedGame/Entities/SGEntityBridge.h
+
+	../inc/SharedGame/World/SGGameWorld.h
+
 	../inc/SharedGame/pmove.h 
 	../inc/SharedGame/protocol.h 
 	../inc/SharedGame/sharedgame.h 
 )
 SET(SRC_SHAREDGAME
+	../src/SharedGame/Entities/SGBaseEntity.cpp
+	../src/SharedGame/Entities/SGEntityBridge.cpp
+
+	../src/SharedGame/World/SGGameWorld.cpp
+
 	../src/SharedGame/pmove.cpp
 )
 

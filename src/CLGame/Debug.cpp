@@ -1,13 +1,12 @@
-//-----------------------------------------------------------------------------
-// License here.
-//-----------------------------------------------------------------------------
-// Debug.cpp
-//-----------------------------------------------------------------------------
-//
-// Contains the implementations for debug rendering client information.
-//
-//
-//-----------------------------------------------------------------------------
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Contains the implementations for debug rendering client information.
+*
+***/
 #include "ClientGameLocal.h"
 
 #include "Effects.h"
