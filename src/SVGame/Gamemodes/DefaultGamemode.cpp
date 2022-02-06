@@ -592,7 +592,7 @@ void DefaultGamemode::OnLevelExit() {
     SVG_ClientEndServerFrames();
 
     // Loop through the server entities, and run the base entity frame if any exists.
-    for (int32_t i = 0; i < maximumClients->value; i++) {
+    for (int32_t i = 0; i < maximumclients->value; i++) {
         // Fetch the WorldSpawn entity number.
         Entity *serverEntity = &g_entities[i];
 

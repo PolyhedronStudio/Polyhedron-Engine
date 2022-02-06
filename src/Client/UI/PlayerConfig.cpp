@@ -291,11 +291,11 @@ static qboolean Push(menuFrameWork_t *self)
 
     for (i = 0; i < uis.numPlayerModels; i++) {
         m_player.pmnames[i] = uis.pmi[i].directory;
-        if (Q_stricmp(uis.pmi[i].directory, currentdirectory) == 0) {
+        if (PH_StringCompare(uis.pmi[i].directory, currentdirectory) == 0) {
             currentdirectoryindex = i;
 
             for (j = 0; j < uis.pmi[i].nskins; j++) {
-                if (Q_stricmp(uis.pmi[i].skindisplaynames[j], currentskin) == 0) {
+                if (PH_StringCompare(uis.pmi[i].skindisplaynames[j], currentskin) == 0) {
                     currentskinindex = j;
                     break;
                 }

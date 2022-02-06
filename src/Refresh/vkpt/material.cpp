@@ -190,7 +190,7 @@ static int nMaterialKinds = sizeof(materialKinds) / sizeof(struct MaterialKind);
 
 static uint32_t getMaterialKind(const char* kindname) {
 	for (int i = 0; i < nMaterialKinds; ++i)
-		if (Q_stricmp(kindname, materialKinds[i].name) == 0)
+		if (PH_StringCompare(kindname, materialKinds[i].name) == 0)
 			return materialKinds[i].flag;
 	return MATERIAL_KIND_REGULAR;
 }
@@ -735,7 +735,7 @@ void MAT_LoadFromFolder(const char* folder) {
 pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags) {
 	char mat_name_no_ext[MAX_QPATH];
 	truncate_extension(name, mat_name_no_ext);
-	Q_strlwr(mat_name_no_ext);
+	PH_StringLower(mat_name_no_ext);
 
 	uint32_t hash = Com_HashString(mat_name_no_ext, RMATERIALS_HASH);
 

@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "ServerGameLocal.h"         // Include SVGame funcs.
-#include "Entities.h"        // Entities.
-#include "Utilities.h"           // Include Utilities funcs.
-#include "Player/Hud.h"      // Include HUD funcs.
+#include "ServerGameLocal.h"// Include SVGame funcs.
+#include "Entities.h"       // Entities.
+#include "Utilities.h"      // Include Utilities funcs.
+#include "Player/Hud.h"     // Include HUD funcs.
 
 // Entities.
 #include "Entities/Base/PlayerClient.h"
@@ -32,8 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 qboolean    Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other);
 void        Use_Weapon(PlayerClient *ent, gitem_t *inv);
 void        Drop_Weapon(PlayerClient *ent, gitem_t *inv);
-
-gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ArmorType::Body};
 
 static int  body_armor_index;
 #define HEALTH_IGNORE_MAX   1
@@ -70,7 +68,7 @@ gitem_t *SVG_FindItemByClassname(const char *classname)
     for (i = 0 ; i < game.numberOfItems ; i++, it++) {
         if (!it->classname)
             continue;
-        if (!Q_stricmp(it->classname, classname))
+        if (!PH_StringCompare(it->classname, classname))
             return it;
     }
 
@@ -92,7 +90,7 @@ gitem_t *SVG_FindItemByPickupName(const char *pickup_name) // C++20: STRING: Add
     for (i = 0 ; i < game.numberOfItems ; i++, it++) {
         if (!it->pickupName)
             continue;
-        if (!Q_stricmp(it->pickupName, pickup_name))
+        if (!PH_StringCompare(it->pickupName, pickup_name))
             return it;
     }
 
@@ -797,26 +795,26 @@ gitem_t itemlist[] = {
 
     /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
-        "item_armor_body",
-        Pickup_Armor,
-        NULL,
-        NULL,
-        NULL,
-        "misc/ar1_pkup.wav",
-        "models/items/armor/body/tris.md2", EntityEffectType::Rotate,
-        NULL,
-        /* icon */      "i_bodyarmor",
-        /* pickup */    "Body Armor",
-        /* width */     3,
-        0,
-        NULL,
-        ItemFlags::IsArmor,
-        0,
-        &bodyarmor_info,
-        ArmorType::Body,
-        /* precache */ ""
-    },
+    //{
+    //    "item_armor_body",
+    //    Pickup_Armor,
+    //    NULL,
+    //    NULL,
+    //    NULL,
+    //    "misc/ar1_pkup.wav",
+    //    "models/items/armor/body/tris.md2", EntityEffectType::Rotate,
+    //    NULL,
+    //    /* icon */      "i_bodyarmor",
+    //    /* pickup */    "Body Armor",
+    //    /* width */     3,
+    //    0,
+    //    NULL,
+    //    ItemFlags::IsArmor,
+    //    0,
+    //    &bodyarmor_info,
+    //    ArmorType::Body,
+    //    /* precache */ ""
+    //},
 
     //
     // WEAPONS

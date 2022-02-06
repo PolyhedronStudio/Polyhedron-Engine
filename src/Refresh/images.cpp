@@ -886,9 +886,9 @@ qerror_t IMG_GetDimensions(const char* name, int* width, int* height) {
         return Q_ERR_NAMETOOSHORT;
 
     imageformat_t format;
-    if (Q_stricmp(name + len - 4, ".wal") == 0)
+    if (PH_StringCompare(name + len - 4, ".wal") == 0)
         format = IM_WAL;
-    else if (Q_stricmp(name + len - 4, ".pcx") == 0)
+    else if (PH_StringCompare(name + len - 4, ".pcx") == 0)
         format = IM_PCX;
     else
         return Q_ERR_INVALID_FORMAT;
@@ -997,7 +997,7 @@ load_img(const char *name, image_t *image)
 
     // find out original extension
     for (fmt = (imageformat_t)0; fmt < IM_MAX; fmt = (imageformat_t)(fmt + 1)) {
-        if (!Q_stricmp(image->name + image->baselen + 1, img_loaders[fmt].ext)) {
+        if (!PH_StringCompare(image->name + image->baselen + 1, img_loaders[fmt].ext)) {
             break;
         }
     }
@@ -1006,7 +1006,7 @@ load_img(const char *name, image_t *image)
     pic = NULL;
 
     // Always prefer images from the game dir, even if format might be 'inferior'
-    for (int try_location = Q_stricmp(fs_game->string, BASEGAME) ? TRY_IMAGE_SRC_GAME : TRY_IMAGE_SRC_BASE;
+    for (int try_location = PH_StringCompare(fs_game->string, BASEGAME) ? TRY_IMAGE_SRC_GAME : TRY_IMAGE_SRC_BASE;
         try_location >= TRY_IMAGE_SRC_BASE;
         try_location--)     {
         int location_flag = try_location == TRY_IMAGE_SRC_GAME ? IF_SRC_GAME : IF_SRC_MASK;
@@ -1053,7 +1053,7 @@ static qerror_t try_load_image_candidate(image_t* image, const char* orig_name, 
     //imageformat_t fmt; WID: This used to be that, but C++ needs int32 or so for this.
     int32_t fmt;
     for (fmt = 0; fmt < IM_MAX; fmt++)     {
-        if (!Q_stricmp(image->name + image->baselen + 1, img_loaders[fmt].ext))         {
+        if (!PH_StringCompare(image->name + image->baselen + 1, img_loaders[fmt].ext))         {
             break;
         }
     }

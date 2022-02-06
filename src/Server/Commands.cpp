@@ -172,10 +172,10 @@ client_t *SV_GetPlayer(const char *s, qboolean partial)
         if (other->connectionState <= ConnectionState::Zombie) {
             continue;
         }
-        if (!Q_stricmp(other->name, s)) {
+        if (!PH_StringCompare(other->name, s)) {
             return other; // exact match
         }
-        if (Q_stristr(other->name, s)) {
+        if (PH_StringiString(other->name, s)) {
             match = other; // partial match
             count++;
         }
@@ -1367,7 +1367,7 @@ usage:
 
     s = Cmd_Argv(1); // C++20: Added cast.
     LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
-        if (!Q_stricmp(filter->string, s)) {
+        if (!PH_StringCompare(filter->string, s)) {
             Com_Printf("Filtercmd already exists: %s\n", s);
             return;
         }
@@ -1429,7 +1429,7 @@ static void SV_DelFilterCmd_f(void)
         }
     } else {
         LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
-            if (!Q_stricmp(filter->string, s)) {
+            if (!PH_StringCompare(filter->string, s)) {
                 goto remove;
             }
         }

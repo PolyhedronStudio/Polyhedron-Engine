@@ -792,9 +792,9 @@ void SVG_ReadGame(const char *filename)
     read_fields(f, gamefields, &game);
 
     // should agree with server's version
-    if (game.maximumClients != (int)maximumClients->value) {
+    if (game.maximumClients != (int)maximumclients->value) {
         fclose(f);
-        gi.Error("Savegame has bad maximumClients");
+        gi.Error("Savegame has bad maximumclients");
     }
     if (game.maxEntities <= game.maximumClients || game.maxEntities > MAX_EDICTS) {
         fclose(f);
@@ -888,8 +888,8 @@ void SVG_ReadLevel(const char *filename)
     }
     //memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0]));
 
-    // Set the number of edicts to be maximumClients + 1. (They are soon to be in-use after all)
-    globals.numberOfEntities = maximumClients->value + 1;
+    // Set the number of edicts to be maximumclients + 1. (They are soon to be in-use after all)
+    globals.numberOfEntities = maximumclients->value + 1;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -930,7 +930,7 @@ void SVG_ReadLevel(const char *filename)
     fclose(f);
 
     // mark all clients as unconnected
-    for (i = 0 ; i < maximumClients->value ; i++) {
+    for (i = 0 ; i < maximumclients->value ; i++) {
         ent = &g_entities[i + 1];
         ent->client = game.clients + i;
         ent->client->persistent.isConnected = false;

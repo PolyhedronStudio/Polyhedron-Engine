@@ -170,10 +170,10 @@ public:
 	}
     
 private:
-	// Actual pointer referring to the server entity.
+	//! Actual pointer referring to the server entity.
 	Entity *serverEntity = nullptr;
 
-	// Stores the server entity's number(ID). Used to determine whether the
-	// currently stored classentity pointer is still pointing to a valid entity.
+	//! Stores the server entity's number(ID). Used to determine whether the
+	//! currently stored classentity pointer is still pointing to a valid entity.
 	uint32_t entityID = 0;
 };

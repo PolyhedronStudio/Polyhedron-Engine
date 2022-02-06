@@ -277,15 +277,15 @@ void    SVG_ServerCommand(void)
     const char    *cmd; // C++20: Added const to char*
 
     cmd = gi.argv(1);
-    if (Q_stricmp(cmd, "test") == 0)
+    if (PH_StringCompare(cmd, "test") == 0)
         Svcmd_Test_f();
-    else if (Q_stricmp(cmd, "addip") == 0)
+    else if (PH_StringCompare(cmd, "addip") == 0)
         SVCmd_AddIP_f();
-    else if (Q_stricmp(cmd, "removeip") == 0)
+    else if (PH_StringCompare(cmd, "removeip") == 0)
         SVCmd_RemoveIP_f();
-    else if (Q_stricmp(cmd, "listip") == 0)
+    else if (PH_StringCompare(cmd, "listip") == 0)
         SVCmd_ListIP_f();
-    else if (Q_stricmp(cmd, "writeip") == 0)
+    else if (PH_StringCompare(cmd, "writeip") == 0)
         SVCmd_WriteIP_f();
     else
         gi.CPrintf(NULL, PRINT_HIGH, "Unknown server command \"%s\"\n", cmd);

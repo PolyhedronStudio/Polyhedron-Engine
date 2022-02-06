@@ -453,7 +453,7 @@ static void CL_EConnect_f(void) {
     server = Cmd_Argv(1);
 
     // support quake2://<address>[/] scheme
-    if (!Q_strncasecmp(server, "quake2://", 9)) {
+    if (!PH_StringNumberCaseCompare(server, "quake2://", 9)) {
         server += 9;
         if ((p = (char*)strchr(server, '/')) != NULL) {
             *p = 0;
@@ -528,7 +528,7 @@ usage:
     server = Cmd_Argv(1);
 
     // support quake2://<address>[/] scheme
-    if (!Q_strncasecmp(server, "quake2://", 9)) {
+    if (!PH_StringNumberCaseCompare(server, "quake2://", 9)) {
         server += 9;
         if ((p = (char*)strchr(server, '/')) != NULL) {
             *p = 0;
@@ -919,7 +919,7 @@ static void CL_ParseStatusResponse(serverStatus_t *status, const char *string)
     size_t infolen;
 
     // Parse '\n' terminated infostring
-    s = Q_strchrnul(string, '\n');
+    s = PH_StringCharNul(string, '\n');
 
     // Due to off-by-one error in the original version of Info_SetValueForKey,
     // some servers produce infostrings up to 512 characters long. work this
@@ -1904,7 +1904,7 @@ static size_t parse_ignore_nick(int argnum, char *buffer)
             *p++ = '\\';
             *p++ = '\\';
             len += 2;
-        } else if (Q_isprint(c)) {
+        } else if (PH_IsPrint(c)) {
             *p++ = c;
             len++;
         }
@@ -2546,9 +2546,9 @@ static void cl_chat_sound_changed(cvar_t *self)
 {
     if (!*self->string)
         self->integer = 0;
-    else if (!Q_stricmp(self->string, "misc/talk.wav"))
+    else if (!PH_StringCompare(self->string, "misc/talk.wav"))
         self->integer = 1;
-    else if (!Q_stricmp(self->string, "misc/talk1.wav"))
+    else if (!PH_StringCompare(self->string, "misc/talk1.wav"))
         self->integer = 2;
     else if (!self->integer && !COM_IsUint(self->string))
         self->integer = 1;

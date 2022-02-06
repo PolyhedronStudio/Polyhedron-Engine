@@ -381,7 +381,7 @@ qboolean COM_IsFloat(const char* s)
         if (c == dot) {
             dot = 0;
         }
-        else if (!Q_isdigit(c)) {
+        else if (!PH_IsDigit(c)) {
             return false;
         }
     } while (*s);
@@ -399,7 +399,7 @@ qboolean COM_IsUint(const char* s)
 
     do {
         c = *s++;
-        if (!Q_isdigit(c)) {
+        if (!PH_IsDigit(c)) {
             return false;
         }
     } while (*s);
@@ -417,7 +417,7 @@ qboolean COM_IsPath(const char* s)
 
     do {
         c = *s++;
-        if (!Q_ispath(c)) {
+        if (!PH_IsPath(c)) {
             return false;
         }
     } while (*s);
@@ -431,7 +431,7 @@ qboolean COM_IsWhite(const char* s)
 
     while (*s) {
         c = *s++;
-        if (Q_isgraph(c)) {
+        if (PH_IsGraph(c)) {
             return false;
         }
     }
@@ -446,7 +446,7 @@ int SortStrcmp(const void* p1, const void* p2)
 
 int SortStricmp(const void* p1, const void* p2)
 {
-    return Q_stricmp(*(const char**)p1, *(const char**)p2);
+    return PH_StringCompare(*(const char**)p1, *(const char**)p2);
 }
 
 /*
@@ -468,7 +468,7 @@ size_t COM_strclr(char* s)
     while (*s) {
         c = *s++;
         c &= 127;
-        if (Q_isprint(c)) {
+        if (PH_IsPrint(c)) {
             *p++ = c;
             len++;
         }
@@ -701,7 +701,7 @@ finish:
 ============================================================================
 */
 
-int Q_strncasecmp(const char* s1, const char* s2, size_t n)
+int PH_StringNumberCaseCompare(const char* s1, const char* s2, size_t n)
 {
     int        c1, c2;
 
@@ -713,8 +713,8 @@ int Q_strncasecmp(const char* s1, const char* s2, size_t n)
             return 0;        /* strings are equal until end point */
 
         if (c1 != c2) {
-            c1 = Q_tolower(c1);
-            c2 = Q_tolower(c2);
+            c1 = PH_ToLower(c1);
+            c2 = PH_ToLower(c2);
             if (c1 < c2)
                 return -1;
             if (c1 > c2)
@@ -725,7 +725,7 @@ int Q_strncasecmp(const char* s1, const char* s2, size_t n)
     return 0;        /* strings are equal */
 }
 
-int Q_strcasecmp(const char* s1, const char* s2)
+int PH_StringCaseCompare(const char* s1, const char* s2)
 {
     int        c1, c2;
 
@@ -734,8 +734,8 @@ int Q_strcasecmp(const char* s1, const char* s2)
         c2 = *s2++;
 
         if (c1 != c2) {
-            c1 = Q_tolower(c1);
-            c2 = Q_tolower(c2);
+            c1 = PH_ToLower(c1);
+            c2 = PH_ToLower(c2);
             if (c1 < c2)
                 return -1;
             if (c1 > c2)
@@ -746,7 +746,7 @@ int Q_strcasecmp(const char* s1, const char* s2)
     return 0;        /* strings are equal */
 }
 
-char* Q_strcasestr(const char* s1, const char* s2)
+char* PH_StringCaseString(const char* s1, const char* s2)
 {
     size_t l1, l2;
 
@@ -758,7 +758,7 @@ char* Q_strcasestr(const char* s1, const char* s2)
     l1 = strlen(s1);
     while (l1 >= l2) {
         l1--;
-        if (!Q_strncasecmp(s1, s2, l2)) {
+        if (!PH_StringNumberCaseCompare(s1, s2, l2)) {
             return (char*)s1;
         }
         s1++;
@@ -939,7 +939,7 @@ size_t Q_scnprintf(char* dest, size_t size, const char* fmt, ...)
     return ret;
 }
 
-char* Q_strchrnul(const char* s, int c)
+char* PH_StringCharNul(const char* s, int c)
 {
     while (*s && *s != c) {
         s++;
@@ -1123,7 +1123,7 @@ qboolean Info_Validate(const char* s)
         len = 0;
         while (*s != '\\') {
             c = *s++;
-            if (!Q_isprint(c) || c == '\"' || c == ';') {
+            if (!PH_IsPrint(c) || c == '\"' || c == ';') {
                 return false;    // illegal characters
             }
             if (++len == MAX_INFO_KEY) {
@@ -1150,7 +1150,7 @@ qboolean Info_Validate(const char* s)
         len = 0;
         while (*s != '\\') {
             c = *s++;
-            if (!Q_isprint(c) || c == '\"' || c == ';') {
+            if (!PH_IsPrint(c) || c == '\"' || c == ';') {
                 return false;    // illegal characters
             }
             if (++len == MAX_INFO_VALUE) {
@@ -1237,7 +1237,7 @@ qboolean Info_SetValueForKey(char* s, const char* key, const char* value)
     while (*v) {
         c = *v++;
         c &= 127;        // strip high bits
-        if (Q_isprint(c))
+        if (PH_IsPrint(c))
             *s++ = c;
     }
     *s = 0;

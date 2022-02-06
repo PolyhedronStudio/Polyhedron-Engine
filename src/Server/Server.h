@@ -415,9 +415,9 @@ typedef struct server_static_s {
     qboolean    initialized;        // sv_init has completed
     unsigned    realtime;           // always increasing, no clamping, etc
 
-    client_t    *client_pool;       // [maximumClients]
+    client_t    *client_pool;       // [maximumclients]
 
-    unsigned        num_entities;   // maximumClients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
+    unsigned        num_entities;   // maximumclients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
     PackedEntity    *entities;      // [num_entities]
 

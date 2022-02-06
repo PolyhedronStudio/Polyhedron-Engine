@@ -277,7 +277,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
         ED_ParseEntity(&entities, ent);
 
         //// yet another map hack
-        //if (!Q_stricmp(level.mapName, "command") && !Q_stricmp(ent->classname, "trigger_once") && !Q_stricmp(ent->model, "*27"))
+        //if (!PH_StringCompare(level.mapName, "command") && !PH_StringCompare(ent->classname, "trigger_once") && !PH_StringCompare(ent->model, "*27"))
         //    ent->spawnFlags &= ~EntitySpawnFlags::NotHard;
 
         //// remove things (except the world) from different skill levels or deathmatch

@@ -297,7 +297,7 @@ void WorldSpawn::Spawn() {
     // set configstrings for items
     SVG_SetItemNames();
 
-    SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maximumClients->value)));
+    SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maximumclients->value)));
 
     // status bar program
     if (game.gameMode->IsClass<DeathmatchGamemode>()) {

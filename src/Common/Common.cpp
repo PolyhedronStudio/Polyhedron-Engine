@@ -330,7 +330,7 @@ static void logfile_write(PrintType type, const char *s)
         if (c == '\n') {
             com_logNewline = true;
         } else {
-            c = Q_charascii(c);
+            c = PH_CharASCII(c);
         }
 
         *p++ = c;

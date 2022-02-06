@@ -432,7 +432,7 @@ char *Z_CvarCopyString(const char *in)
 
     if (!in[0]) {
         i = 10;
-    } else if (!in[1] && Q_isdigit(in[0])) {
+    } else if (!in[1] && PH_IsDigit(in[0])) {
         i = in[0] - '0';
     } else {
         len = strlen(in) + 1;

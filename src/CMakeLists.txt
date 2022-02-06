@@ -169,6 +169,7 @@ SET( SRC_SVGAME
 	SVGame/Weapons/Machinegun.cpp
 	SVGame/Weapons/Shotgun.cpp
 	SVGame/Weapons/SuperShotgun.cpp
+	SVGame/World/GameWorld.cpp
     SVGame/svgame.def
     )
     
@@ -245,6 +246,7 @@ SET( SRC_SVGAME
 	SVGame/Weapons/Machinegun.h
 	SVGame/Weapons/Shotgun.h
 	SVGame/Weapons/SuperShotgun.h
+	SVGame/World/GameWorld.h
     SVGame/svgame.def
     )
     
@@ -422,8 +424,6 @@ SET(HEADERS_SHAREDGAME
 	../inc/SharedGame/Entities/SGBaseEntity.h
 	../inc/SharedGame/Entities/SGEntityBridge.h
 
-	../inc/SharedGame/World/SGGameWorld.h
-
 	../inc/SharedGame/pmove.h 
 	../inc/SharedGame/protocol.h 
 	../inc/SharedGame/sharedgame.h 
@@ -431,8 +431,6 @@ SET(HEADERS_SHAREDGAME
 SET(SRC_SHAREDGAME
 	../src/SharedGame/Entities/SGBaseEntity.cpp
 	../src/SharedGame/Entities/SGEntityBridge.cpp
-
-	../src/SharedGame/World/SGGameWorld.cpp
 
 	../src/SharedGame/pmove.cpp
 )
@@ -647,6 +645,7 @@ if (CONFIG_VKPT_RENDERER)
 		endif()
 	ENDIF()
 endif()
+
 # Embed version number
 ADD_DEFINITIONS(-DVERSION_MAJOR=${POLYHEDRON_VERSION_MAJOR})
 ADD_DEFINITIONS(-DVERSION_MINOR=${POLYHEDRON_VERSION_MINOR})
@@ -666,6 +665,8 @@ if (CONFIG_BUILD_SV_GAME)
 	ADD_DEFINITIONS(-DSHAREDGAME_SERVER=1)
 	# Add library.
 	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	# Add shared game include directory.
+	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ${HEADERS_SHAREDGAME}/)
 endif()
 
 # Optional build target.
@@ -674,6 +675,8 @@ if (CONFIG_BUILD_CL_GAME)
 	ADD_DEFINITIONS(-DSHAREDGAME_CLIENT=1)
 	# Add library.
 	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	# Add shared game include directory.
+	TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ${HEADERS_SHAREDGAME}/)
 endif()
 
 IF(WIN32)

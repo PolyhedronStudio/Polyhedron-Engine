@@ -301,7 +301,7 @@ static void write_console_output(const char *text)
         if (!c) {
             break;
         }
-        buf[len] = Q_charascii(c);
+        buf[len] = PH_CharASCII(c);
     }
 
     write_console_data(buf, len);

@@ -554,11 +554,11 @@ OGG_Cmd(void)
 		return;
 	}
 
-	if (Q_stricmp(Cmd_Argv(1), "info") == 0)
+	if (PH_StringCompare(Cmd_Argv(1), "info") == 0)
 	{
 		OGG_Info();
 	}
-	else if (Q_stricmp(Cmd_Argv(1), "play") == 0)
+	else if (PH_StringCompare(Cmd_Argv(1), "play") == 0)
 	{
 		if (Cmd_Argc() != 3)
 		{
@@ -578,11 +578,11 @@ OGG_Cmd(void)
 			OGG_PlayTrack(track);
 		}
 	}
-	else if (Q_stricmp(Cmd_Argv(1), "stop") == 0)
+	else if (PH_StringCompare(Cmd_Argv(1), "stop") == 0)
 	{
 		OGG_Stop();
 	}
-	else if (Q_stricmp(Cmd_Argv(1), "toggle") == 0)
+	else if (PH_StringCompare(Cmd_Argv(1), "toggle") == 0)
 	{
 		OGG_TogglePlayback();
 	}

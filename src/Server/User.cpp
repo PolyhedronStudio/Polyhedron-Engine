@@ -622,9 +622,9 @@ static void SV_BeginDownload_f(void)
         // don't allow anything with .. path
         || strstr(name, "..")
         // leading dots, slashes, etc are no good
-        || !Q_ispath(name[0])
+        || !PH_IsPath(name[0])
         // trailing dots, slashes, etc are no good
-        || !Q_ispath(name[len - 1])
+        || !PH_IsPath(name[len - 1])
         // MUST be in a subdirectory
         || !strchr(name, '/')) {
         Com_DPrintf("Refusing download of %s to %s\n", name, sv_client->name);
@@ -1005,7 +1005,7 @@ static void SV_ExecuteUserCommand(const char *s)
     }
 
     LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
-        if (!Q_stricmp(filter->string, c)) {
+        if (!PH_StringCompare(filter->string, c)) {
             handle_filtercmd(filter);
             return;
         }

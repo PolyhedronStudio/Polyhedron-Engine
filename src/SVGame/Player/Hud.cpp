@@ -129,7 +129,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     // 
     if (strstr(level.intermission.changeMap, "*")) {
         if (!game.gameMode->IsClass<CoopGamemode>()) {
-            for (i = 0 ; i < maximumClients->value ; i++) {
+            for (i = 0 ; i < maximumclients->value ; i++) {
                 client = g_entities + 1 + i;
                 if (!client->inUse) {
                     continue;
@@ -176,7 +176,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
-    for (i = 0 ; i < maximumClients->value ; i++) {
+    for (i = 0 ; i < maximumclients->value ; i++) {
         // Fetch client.
         client = g_entities + 1 + i;
 
@@ -459,7 +459,7 @@ void SVG_HUD_CheckChaseStats(Entity *ent)
         return;
     }
 
-    for (i = 1; i <= maximumClients->value; i++) {
+    for (i = 1; i <= maximumclients->value; i++) {
         ServerClient* cl;
 
         cl = g_entities[i].client;

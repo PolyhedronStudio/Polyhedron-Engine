@@ -68,7 +68,7 @@ cvar_t  *timelimit;
 cvar_t  *password;
 cvar_t  *spectator_password;
 cvar_t  *needpass;
-cvar_t  *maximumClients;
+cvar_t  *maximumclients;
 cvar_t  *maxspectators;
 cvar_t  *maxEntities;
 cvar_t  *g_select_empty;
@@ -300,7 +300,7 @@ void SVG_InitializeCVars() {
     gi.cvar("gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_LATCH);
     gi.cvar("gamedate", __DATE__, CVAR_SERVERINFO | CVAR_LATCH);
 
-    maximumClients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+    maximumclients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
     maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
     gamemode = gi.cvar("gamemode", 0, 0);
     
@@ -347,7 +347,7 @@ void SVG_InitializeCVars() {
 void SVG_InitializeServerEntities() {
     // Initialize all entities for this "game", aka map that is being played.
     game.maxEntities = MAX_EDICTS;
-    game.maxEntities = Clampi(game.maxEntities, (int)maximumClients->value + 1, MAX_EDICTS);
+    game.maxEntities = Clampi(game.maxEntities, (int)maximumclients->value + 1, MAX_EDICTS);
     globals.entities = g_entities;
     globals.maxEntities = game.maxEntities;
 
@@ -367,7 +367,7 @@ void SVG_InitializeServerEntities() {
 //
 void SVG_AllocateGameClients() {
     // Initialize all clients for this game
-    game.maximumClients = maximumClients->value;
+    game.maximumClients = maximumclients->value;
     game.clients = (ServerClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
 
     // Total number of entities = world + maximum clients.
@@ -457,7 +457,7 @@ void SVG_ClientEndServerFrames(void)
     // Go through each client and calculate their final view for the state.
     // (This happens here, so we can take into consideration objects that have
     // pushed the player. And of course, because damage has been added.)
-    for (int32_t clientIndex = 0; clientIndex < maximumClients->value; clientIndex++) {
+    for (int32_t clientIndex = 0; clientIndex < maximumclients->value; clientIndex++) {
         // First, fetch entity state number.
         int32_t stateNumber = g_entities[1 + clientIndex].state.number;
 
@@ -499,7 +499,7 @@ void SVG_EndDMLevel(void)
         f = NULL;
         t = strtok(s, seps);
         while (t != NULL) {
-            if (Q_stricmp(t, level.mapName) == 0) {
+            if (PH_StringCompare(t, level.mapName) == 0) {
                 // it's in the list, go to the next one
                 t = strtok(NULL, seps);
                 if (t == NULL) { // end of list, go to first one
@@ -550,9 +550,9 @@ void SVG_CheckNeedPass(void)
 
         need = 0;
 
-        if (*password->string && Q_stricmp(password->string, "none"))
+        if (*password->string && PH_StringCompare(password->string, "none"))
             need |= 1;
-        if (*spectator_password->string && Q_stricmp(spectator_password->string, "none"))
+        if (*spectator_password->string && PH_StringCompare(spectator_password->string, "none"))
             need |= 2;
 
         gi.cvar_set("needpass", va("%d", need));
@@ -584,7 +584,7 @@ void SVG_CheckDMRules(void)
     }
 
     if (fraglimit->value) {
-        for (i = 0 ; i < maximumClients->value ; i++) {
+        for (i = 0 ; i < maximumclients->value ; i++) {
             cl = game.clients + i;
             if (!g_entities[i + 1].inUse)
                 continue;
@@ -689,7 +689,7 @@ void SVG_RunFrame(void) {
         }
 
         // Time to begin a server frame for all of our clients. (This has to ha
-        if (i > 0 && i <= maximumClients->value) {
+        if (i > 0 && i <= maximumclients->value) {
             // Ensure the entity is in posession of a client that controls it.
             ServerClient* client = entity->GetClient();
             if (!client) {

@@ -327,8 +327,8 @@ static int LoadGL(const char *driver)
     int ret;
 
     // figure out if we're running on a minidriver or not
-    if (!Q_stricmp(driver, "opengl32") ||
-        !Q_stricmp(driver, "opengl32.dll")) {
+    if (!PH_StringCompare(driver, "opengl32") ||
+        !PH_StringCompare(driver, "opengl32.dll")) {
         glw.minidriver = false;
     } else {
         Com_Printf("...running a minidriver: %s\n", driver);
@@ -408,9 +408,9 @@ static void gl_swapinterval_changed(cvar_t *self)
 
 static void gl_drawbuffer_changed(cvar_t *self)
 {
-    if (!Q_stricmp(self->string, "GL_FRONT")) {
+    if (!PH_StringCompare(self->string, "GL_FRONT")) {
         glw.drawbuffer = GL_FRONT;
-    } else if (!Q_stricmp(self->string, "GL_BACK")) {
+    } else if (!PH_StringCompare(self->string, "GL_BACK")) {
         glw.drawbuffer = GL_BACK;
     } else {
         Cvar_Reset(self);

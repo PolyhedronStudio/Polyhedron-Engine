@@ -134,7 +134,7 @@ static void tty_write_output(const char *text)
         if (!c) {
             break;
         }
-        buf[len] = Q_charascii(c);
+        buf[len] = PH_CharASCII(c);
     }
 
     tty_stdout_write(buf, len);
@@ -411,7 +411,7 @@ void Sys_SetConsoleTitle(const char *title)
         if (!c) {
             break;
         }
-        buf[len] = Q_charascii(c);
+        buf[len] = PH_CharASCII(c);
     }
 
     buf[len++] = '\007';

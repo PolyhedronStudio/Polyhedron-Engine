@@ -83,7 +83,7 @@ void SP_FixCoopSpots(Entity *self)
             continue;
         d = self->state.origin - spot->state.origin;
         if (vec3_length(d) < 384) {
-            if ((!self->targetName) || Q_stricmp(self->targetName, spot->targetName) != 0) {
+            if ((!self->targetName) || PH_StringCompare(self->targetName, spot->targetName) != 0) {
                 //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
                 self->targetName = spot->targetName;
             }
@@ -165,7 +165,7 @@ void spectator_respawn(Entity *ent)
         }
 
         // Count actual active spectators
-        for (i = 1, numspec = 0; i <= maximumClients->value; i++)
+        for (i = 1, numspec = 0; i <= maximumclients->value; i++)
             if (g_entities[i].inUse && g_entities[i].client->persistent.isSpectator)
                 numspec++;
 
@@ -521,7 +521,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
     }
 
     // update chase cam if being followed
-    for (int i = 1; i <= maximumClients->value; i++) {
+    for (int i = 1; i <= maximumclients->value; i++) {
         other = g_entities + i;
         if (other->inUse && other->client->chaseTarget == serverEntity)
             SVG_UpdateChaseCam(classEntity);

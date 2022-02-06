@@ -199,7 +199,7 @@ qboolean SCR_ParseColor(const char *s, color_t *color)
             if (i == 8) {
                 return false;
             }
-            c[i] = Q_charhex(s[i]);
+            c[i] = PH_CharHex(s[i]);
             if (c[i] == -1) {
                 return false;
             }

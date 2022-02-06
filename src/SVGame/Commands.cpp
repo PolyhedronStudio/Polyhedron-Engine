@@ -175,12 +175,12 @@ void Cmd_Give_f(Entity *ent)
 
     name = gi.args(); // C++20: Added cast.
 
-    if (Q_stricmp(name, "all") == 0)
+    if (PH_StringCompare(name, "all") == 0)
         give_all = true;
     else
         give_all = false;
 
-    if (give_all || Q_stricmp(gi.argv(1), "health") == 0) {
+    if (give_all || PH_StringCompare(gi.argv(1), "health") == 0) {
         if (gi.argc() == 3)
             ent->classEntity->SetHealth(atoi(gi.argv(2)));
         else
@@ -189,7 +189,7 @@ void Cmd_Give_f(Entity *ent)
             return;
     }
 
-    if (give_all || Q_stricmp(name, "weapons") == 0) {
+    if (give_all || PH_StringCompare(name, "weapons") == 0) {
         for (i = 0 ; i < game.numberOfItems ; i++) {
             it = itemlist + i;
             if (!it->Pickup)
@@ -202,7 +202,7 @@ void Cmd_Give_f(Entity *ent)
             return;
     }
 
-    if (give_all || Q_stricmp(name, "ammo") == 0) {
+    if (give_all || PH_StringCompare(name, "ammo") == 0) {
         for (i = 0 ; i < game.numberOfItems ; i++) {
             it = itemlist + i;
             if (!it->Pickup)
@@ -630,7 +630,7 @@ void Cmd_Players_f(Entity *ent)
     int     index[256];
 
     count = 0;
-    for (i = 0 ; i < maximumClients->value ; i++)
+    for (i = 0 ; i < maximumclients->value ; i++)
         if (game.clients[i].persistent.isConnected) {
             index[count] = i;
             count++;
@@ -800,7 +800,7 @@ void Cmd_PlayerList_f(Entity *ent)
 
     // connect time, ping, score, name
     *text = 0;
-    for (i = 0, e2 = g_entities + 1; i < maximumClients->value; i++, e2++) {
+    for (i = 0, e2 = g_entities + 1; i < maximumclients->value; i++, e2++) {
         if (!e2->inUse)
             continue;
 
@@ -841,19 +841,19 @@ void SVG_ClientCommand(Entity *serverEntity)
     // Fetch cmd.
     cmd = gi.argv(0);
 
-    if (Q_stricmp(cmd, "players") == 0) {
+    if (PH_StringCompare(cmd, "players") == 0) {
         Cmd_Players_f(serverEntity);
         return;
     }
-    if (Q_stricmp(cmd, "say") == 0) {
+    if (PH_StringCompare(cmd, "say") == 0) {
         Cmd_Say_f(serverEntity, false, false);
         return;
     }
-    if (Q_stricmp(cmd, "say_team") == 0) {
+    if (PH_StringCompare(cmd, "say_team") == 0) {
         Cmd_Say_f(serverEntity, true, false);
         return;
     }
-    if (Q_stricmp(cmd, "score") == 0) {
+    if (PH_StringCompare(cmd, "score") == 0) {
         SVG_Command_Score_f(ent);
         return;
     }
@@ -861,49 +861,49 @@ void SVG_ClientCommand(Entity *serverEntity)
     if (level.intermission.time)
         return;
 
-    if (Q_stricmp(cmd, "use") == 0)
+    if (PH_StringCompare(cmd, "use") == 0)
         Cmd_Use_f(ent);
-    else if (Q_stricmp(cmd, "drop") == 0)
+    else if (PH_StringCompare(cmd, "drop") == 0)
         Cmd_Drop_f(ent);
-    else if (Q_stricmp(cmd, "give") == 0)
+    else if (PH_StringCompare(cmd, "give") == 0)
         Cmd_Give_f(ent->GetServerEntity());
-    else if (Q_stricmp(cmd, "god") == 0)
+    else if (PH_StringCompare(cmd, "god") == 0)
         Cmd_God_f(ent);
-    else if (Q_stricmp(cmd, "notarget") == 0)
+    else if (PH_StringCompare(cmd, "notarget") == 0)
         Cmd_Notarget_f(ent);
-    else if (Q_stricmp(cmd, "noclip") == 0)
+    else if (PH_StringCompare(cmd, "noclip") == 0)
         Cmd_Noclip_f(ent);
-    else if (Q_stricmp(cmd, "inven") == 0)
+    else if (PH_StringCompare(cmd, "inven") == 0)
         Cmd_Inven_f(ent->GetServerEntity());
-    else if (Q_stricmp(cmd, "invnext") == 0)
+    else if (PH_StringCompare(cmd, "invnext") == 0)
         SelectNextItem(ent, -1);
-    else if (Q_stricmp(cmd, "invprev") == 0)
+    else if (PH_StringCompare(cmd, "invprev") == 0)
         SelectPrevItem(serverEntity, -1);
-    else if (Q_stricmp(cmd, "invnextw") == 0)
+    else if (PH_StringCompare(cmd, "invnextw") == 0)
         SelectNextItem(ent, ItemFlags::IsWeapon);
-    else if (Q_stricmp(cmd, "invprevw") == 0)
+    else if (PH_StringCompare(cmd, "invprevw") == 0)
         SelectPrevItem(serverEntity, ItemFlags::IsWeapon);
-    else if (Q_stricmp(cmd, "invnextp") == 0)
+    else if (PH_StringCompare(cmd, "invnextp") == 0)
         SelectNextItem(ent, ItemFlags::IsPowerUp);
-    else if (Q_stricmp(cmd, "invprevp") == 0)
+    else if (PH_StringCompare(cmd, "invprevp") == 0)
         SelectPrevItem(serverEntity, ItemFlags::IsPowerUp);
-    else if (Q_stricmp(cmd, "invuse") == 0)
+    else if (PH_StringCompare(cmd, "invuse") == 0)
         Cmd_InvUse_f(ent);
-    else if (Q_stricmp(cmd, "invdrop") == 0)
+    else if (PH_StringCompare(cmd, "invdrop") == 0)
         Cmd_InvDrop_f(ent);
-    else if (Q_stricmp(cmd, "weapprev") == 0)
+    else if (PH_StringCompare(cmd, "weapprev") == 0)
         Cmd_WeapPrev_f(ent);
-    else if (Q_stricmp(cmd, "weapnext") == 0)
+    else if (PH_StringCompare(cmd, "weapnext") == 0)
         Cmd_WeapNext_f(ent);
-    else if (Q_stricmp(cmd, "weaplast") == 0)
+    else if (PH_StringCompare(cmd, "weaplast") == 0)
         Cmd_WeapLast_f(ent);
-    else if (Q_stricmp(cmd, "kill") == 0)
+    else if (PH_StringCompare(cmd, "kill") == 0)
         Cmd_Kill_f(ent);
-    else if (Q_stricmp(cmd, "putaway") == 0)
+    else if (PH_StringCompare(cmd, "putaway") == 0)
         Cmd_PutAway_f(serverEntity);
-    else if (Q_stricmp(cmd, "wave") == 0)
+    else if (PH_StringCompare(cmd, "wave") == 0)
         Cmd_Wave_f(serverEntity);
-    else if (Q_stricmp(cmd, "playerlist") == 0)
+    else if (PH_StringCompare(cmd, "playerlist") == 0)
         Cmd_PlayerList_f(serverEntity);
     else    // anything that doesn't match a command will be a chat
         Cmd_Say_f(serverEntity, false, true);

@@ -538,7 +538,7 @@ static void Cmd_UnTrigger_f(void)
     }
 
     if (Cmd_Argc() == 2) {
-        if (!Q_stricmp(Cmd_Argv(1), "all")) {
+        if (!PH_StringCompare(Cmd_Argv(1), "all")) {
             int count = 0;
 
             FOR_EACH_TRIGGER_SAFE(trigger, next) {
@@ -641,18 +641,18 @@ error:
         if (!numeric)
             goto error;
         matched = atof(a) >= atof(b);
-    } else if (!Q_stricmp(op, "isin")) {
+    } else if (!PH_StringCompare(op, "isin")) {
         matched = strstr(b, a) != NULL;
-    } else if (!Q_stricmp(op, "!isin")) {
+    } else if (!PH_StringCompare(op, "!isin")) {
         matched = strstr(b, a) == NULL;
-    } else if (!Q_stricmp(op, "isini")) {
-        matched = Q_stristr(b, a) != NULL;
-    } else if (!Q_stricmp(op, "!isini")) {
-        matched = Q_stristr(b, a) == NULL;
-    } else if (!Q_stricmp(op, "eq")) {
-        matched = !Q_stricmp(a, b);
-    } else if (!Q_stricmp(op, "ne")) {
-        matched = Q_stricmp(a, b);
+    } else if (!PH_StringCompare(op, "isini")) {
+        matched = PH_StringiString(b, a) != NULL;
+    } else if (!PH_StringCompare(op, "!isini")) {
+        matched = PH_StringiString(b, a) == NULL;
+    } else if (!PH_StringCompare(op, "eq")) {
+        matched = !PH_StringCompare(a, b);
+    } else if (!PH_StringCompare(op, "ne")) {
+        matched = PH_StringCompare(a, b);
     } else {
         Com_Printf("Unknown operator '%s'\n", op);
         Com_Printf("Valid are: ==, != or <>, <, <=, >, >=, [!]isin[i], eq, ne\n");
@@ -661,13 +661,13 @@ error:
 
     // skip over optional 'then'
     i = 4;
-    if (!Q_stricmp(Cmd_Argv(i), "then")) {
+    if (!PH_StringCompare(Cmd_Argv(i), "then")) {
         i++;
     }
 
     // scan out branch 1 argument range
     for (j = i; i < Cmd_Argc(); i++) {
-        if (!Q_stricmp(Cmd_Argv(i), "else")) {
+        if (!PH_StringCompare(Cmd_Argv(i), "else")) {
             break;
         }
     }
@@ -699,7 +699,7 @@ static void Cmd_OpenURL_f(void)
 	}
 
 	const char* url = Cmd_Argv(1);
-	if (Q_stricmpn(url, "http://", 7) && Q_stricmpn(url, "https://", 8))
+	if (PH_StringCompareN(url, "http://", 7) && PH_StringCompareN(url, "https://", 8))
 	{
 		Com_Printf("the URL must start with http:// or https://");
 		return;
@@ -1856,10 +1856,10 @@ static char *unescape_string(char *dst, const char *src)
             case 'r': *p++ = '\r'; break;
             case '\\': *p++ = '\\'; break;
             case 'x':
-                if ((c1 = Q_charhex(src[2])) == -1) {
+                if ((c1 = PH_CharHex(src[2])) == -1) {
                     break;
                 }
-                if ((c2 = Q_charhex(src[3])) == -1) {
+                if ((c2 = PH_CharHex(src[3])) == -1) {
                     break;
                 }
                 *p++ = (c1 << 4) | c2;

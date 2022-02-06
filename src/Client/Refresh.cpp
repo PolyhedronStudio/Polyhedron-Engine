@@ -83,7 +83,7 @@ qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p)
         return false;
 
     s = vid_modelist->string;
-    while (Q_isspace(*s))
+    while (PH_IsSpace(*s))
         s++;
     if (!*s)
         return false;
@@ -92,7 +92,7 @@ qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p)
     while (1) {
         if (!strncmp(s, "desktop", 7)) {
             s += 7;
-            if (*s && !Q_isspace(*s)) {
+            if (*s && !PH_IsSpace(*s)) {
                 Com_DPrintf("Mode %d is malformed\n", mode);
                 return false;
             }
@@ -120,7 +120,7 @@ qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p)
         if (mode == vid_fullscreen->integer) {
             break;
         }
-        while (Q_isspace(*s))
+        while (PH_IsSpace(*s))
             s++;
         if (!*s) {
             Com_DPrintf("Mode %d not found\n", vid_fullscreen->integer);

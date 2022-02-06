@@ -123,7 +123,7 @@ void SVG_ChaseNext(PlayerClient *ent)
     i = client->chaseTarget - g_entities;
     do {
         i++;
-        if (i > maximumClients->value)
+        if (i > maximumclients->value)
             i = 1;
         e = g_entities + i;
         if (!e->inUse)
@@ -149,7 +149,7 @@ void SVG_ChasePrev(PlayerClient*ent)
     do {
         i--;
         if (i < 1)
-            i = maximumClients->value;
+            i = maximumclients->value;
         e = g_entities + i;
         if (!e->inUse)
             continue;
@@ -167,7 +167,7 @@ void SVG_GetChaseTarget(PlayerClient *ent)
     Entity *other;
     ServerClient* client = ent->GetClient();
 
-    for (i = 1; i <= maximumClients->value; i++) {
+    for (i = 1; i <= maximumclients->value; i++) {
         other = g_entities + i;
         if (other->inUse && !other->client->respawn.isSpectator) {
             client->chaseTarget = other;

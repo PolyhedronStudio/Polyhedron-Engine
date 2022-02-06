@@ -235,19 +235,6 @@ struct MoveType {
     static constexpr int32_t Bounce        = 15;
 };
 
-
-//-------------------
-// Armor item description.
-//-------------------
-struct gitem_armor_t {
-    int32_t     baseCount;
-    int32_t     maxCount;
-    float   normalProtection;
-    float   energyProtection;
-    int32_t     armor;
-};
-
-
 //-------------------
 // Item flags.
 //-------------------
@@ -539,7 +526,7 @@ extern  cvar_t  *bob_pitch;
 extern  cvar_t  *bob_roll;
 
 extern  cvar_t  *sv_cheats;
-extern  cvar_t  *maximumClients;
+extern  cvar_t  *maximumclients;
 extern  cvar_t  *maxspectators;
 
 extern  cvar_t  *flood_msgs;

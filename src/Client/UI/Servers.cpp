@@ -196,7 +196,7 @@ static uint32_t ColorForStatus(const serverStatus_t *status)
     if (atoi(Info_ValueForKey(status->infostring, "anticheat")) >= 2)
         return uis.color.disabled.u32;
 
-    if (Q_stricmp(Info_ValueForKey(status->infostring, "NoFake"), "ENABLED") == 0)
+    if (PH_StringCompare(Info_ValueForKey(status->infostring, "NoFake"), "ENABLED") == 0)
         return uis.color.disabled.u32;
 
     return U32_WHITE;
@@ -794,7 +794,7 @@ static int CompareName(serverslot_t *s1, serverslot_t *s2, int col)
     char *n1 = UI_GetColumn(s1->name, col);
     char *n2 = UI_GetColumn(s2->name, col);
 
-    return Q_stricmp(n1, n2) * m_servers.list.sortdir;
+    return PH_StringCompare(n1, n2) * m_servers.list.sortdir;
 }
 
 static int ComparePing(serverslot_t *s1, serverslot_t *s2)

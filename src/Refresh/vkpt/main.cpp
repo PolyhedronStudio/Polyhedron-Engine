@@ -958,17 +958,17 @@ init_vulkan()
 
 	int picked_device = -1;
 
-	if (!Q_strcasecmp(cvar_ray_tracing_api->string, "query") && picked_device_with_ray_query >= 0) 	{
+	if (!PH_StringCaseCompare(cvar_ray_tracing_api->string, "query") && picked_device_with_ray_query >= 0) 	{
 		qvk.use_ray_query = true;
 		picked_device = picked_device_with_ray_query;
 	}
-	else if (!Q_strcasecmp(cvar_ray_tracing_api->string, "pipeline") && picked_device_with_ray_pipeline >= 0) 	{
+	else if (!PH_StringCaseCompare(cvar_ray_tracing_api->string, "pipeline") && picked_device_with_ray_pipeline >= 0) 	{
 		qvk.use_ray_query = false;
 		picked_device = picked_device_with_ray_pipeline;
 	}
 
 	if (picked_device < 0) 	{
-		if (Q_strcasecmp(cvar_ray_tracing_api->string, "auto")) 		{
+		if (PH_StringCaseCompare(cvar_ray_tracing_api->string, "auto")) 		{
 			Com_WPrintf("Requested Ray Tracing API (%s) is not available, switching to automatic selection.\n", cvar_ray_tracing_api->string);
 		}
 

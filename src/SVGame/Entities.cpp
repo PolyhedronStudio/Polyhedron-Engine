@@ -200,7 +200,7 @@ void SVG_FreeEntity(Entity* ent) {
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
     //if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
-    if (entityNumber <= maximumClients->value + BODY_QUEUE_SIZE) {
+    if (entityNumber <= maximumclients->value + BODY_QUEUE_SIZE) {
         gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
         return;
     }
@@ -301,7 +301,7 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
         s = *(char**)((byte*)from + fieldofs);
         if (!s)
             continue;
-        if (!Q_stricmp(s, match))
+        if (!PH_StringCompare(s, match))
             return from;
     }
 

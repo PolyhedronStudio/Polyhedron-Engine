@@ -36,7 +36,7 @@ static qboolean IconOfSkinExists(char *skin, char **pcxfiles, int npcxfiles)
     Q_strlcat(scratch, "_i.pcx", sizeof(scratch));
 
     for (i = 0; i < npcxfiles; i++) {
-        if (Q_stricmp(pcxfiles[i], scratch) == 0)
+        if (PH_StringCompare(pcxfiles[i], scratch) == 0)
             return true;
     }
 
