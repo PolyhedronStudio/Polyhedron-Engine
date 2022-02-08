@@ -4,7 +4,7 @@
 *
 *	@file
 *
-*	EntityBridge implementation.
+*	EntityHandle declaration.
 *
 ***/
 #pragma once
@@ -16,19 +16,25 @@ class SVGEntityHandle;
 /**
 *	Helper function to cast from an entity handle pointer to a SVGBaseEntity pointer.
 **/
-template<typename T> static inline T CastBridge(SVGEntityHandle& bridge) { return static_cast<T>( static_cast<SVGBaseEntity*>(bridge) ); }
-template<typename T> static inline T CastBridge(const SVGEntityHandle& bridge) { return static_cast<T>(static_cast<SVGBaseEntity*>(bridge)); }
+template<typename T> static inline T CastHandle(SVGEntityHandle& bridge) { return static_cast<T>( static_cast<SVGBaseEntity*>(bridge) ); }
+template<typename T> static inline T CastHandle(const SVGEntityHandle& bridge) { return static_cast<T>(static_cast<SVGBaseEntity*>(bridge)); }
 
 /**
 *	@brief A bridge between class entity and server entity.
 * 
-*	@details An Entity "Bridge" is used to link a "Classentity" to a "ServerEntity".
-*	It is used as a handle to acquire the class, and server entity pointers with.
+*	@details An entity handle is used to link a "Classentity" to a "ServerEntity".
+*	The handle stores a pointer to the server entity and its index number.
 *
-*	By storing the entity number and a pointer to a classentity it is capable of
-*	acting like a safe handle. If the entity number does not match with the one
-*	of the currently pointing to classentity, the * operator will kindly return
-*	us a nullptr.
+*	By storing the entity index number and a pointer to the server entity it is 
+*   capable of acting like a safe handle. The -> operator returns a pointer to an
+*   SVGBaseEntity if, and only if, the server entity isn't 0 and the entity index
+*   number is equal to the one of the server entity's classentity pointer. In order
+*   to assign the pointer to an SVGBaseEntity use the * operator. Using the * operator
+*   also allows for us to do boolean checks such as:
+*   if (*someEntity->GetGroundEntity()) { ... } Where GetGroundEntity returns an 
+*   EntityHandle.
+* 
+*   
 * 
 *	It can be constructed in the following manners:
 *		- By passing a SVGBaseEntity pointer.
@@ -38,14 +44,24 @@ template<typename T> static inline T CastBridge(const SVGEntityHandle& bridge) {
 class SVGEntityHandle {
 public:
     /**
-	*	@brief Simple constructor of an entity bridge that will accept a
+    *   @brief Empty handle constructor.
+    **/
+    SVGEntityHandle() = default;
+
+    /**
+	*	@brief Simple constructor of an entity handle that will accept a
 	*	class entity.
 	**/
     SVGEntityHandle(SVGBaseEntity* baseEntity);
 
     /**
-	*	@brief Simple constructor that will accept an other bridge entity.
-	**/
+    *	@brief Simple constructor that will accept a reference to another handle entity.
+    **/
+    SVGEntityHandle(SVGEntityHandle& other);
+
+    /**
+    *	@brief Simple constructor that will accept a const reference to another handle entity.
+    **/
     SVGEntityHandle(const SVGEntityHandle& other);
 
     /**
@@ -76,7 +92,7 @@ public:
     Entity* Set(Entity* entity);
 
     /**
-	*	@return	The entityID stored in this "bridge" handle.
+	*	@return	The entityID stored in this handle.
 	**/
     const uint32_t ID();
 
@@ -92,11 +108,25 @@ public:
 	*			this current handle to nullptr and entityID = 0.
 	**/
     SVGBaseEntity* operator=(SVGBaseEntity* baseEntity);
+
+    /**
+    *	@brief	Used to access the base class entity its methods.
+    **/
     SVGBaseEntity* operator->() const;
 
+    /**
+    *   @brief  Comparison check for whether this handle points to the same entity as 
+    *           the SVGBaseEntity pointer does.
+    * 
+    *   @return Returns true if SVGBaseEntity* != nullptr, its serverEntity pointer 
+    *           != nullptr, and their entity index number matches.
+    **/
     bool operator==(const SVGBaseEntity*);
 
-    operator bool() { return serverEntity != 0 ; }
+    /**
+    *   @brief Used to check whether this entity handle has a valid server entity.
+    **/
+    operator bool();
 
 private:
     //! Actual pointer referring to the server entity.

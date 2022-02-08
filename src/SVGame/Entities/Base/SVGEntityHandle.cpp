@@ -1,18 +1,16 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	EntityHandle implementation.
+*
+***/
+#include "../../ServerGameLocal.h"	// SVGame.
+#include "../../Entities.h"			// Entities.
 
-//
-// SVGBaseEntity.cpp
-//
-//
-*/
 
-#include "../../ServerGameLocal.h"		// SVGame.
-
-//
-// EntityBridge.
-//
-#include "../../Entities.h"		// Entities.
 
 /**
 *	@brief	Helper function to acquire the SVGBaseEntity pointer from a server entity.
@@ -37,7 +35,7 @@ static inline SVGBaseEntity* GetBaseClassentity(Entity* serverEntity) {
 
 
 /**
-*	@brief Simple constructor of an entity bridge that will accept a
+*	@brief Simple constructor of an entity handle that will accept a
 *	class entity.
 **/
 SVGEntityHandle::SVGEntityHandle(SVGBaseEntity* baseEntity) : serverEntity(nullptr), entityID(0) {
@@ -46,7 +44,13 @@ SVGEntityHandle::SVGEntityHandle(SVGBaseEntity* baseEntity) : serverEntity(nullp
 }
 
 /**
-*	@brief Simple constructor that will accept an other bridge entity.
+*	@brief Simple constructor that will accept a reference to another handle entity.
+**/
+SVGEntityHandle::SVGEntityHandle(SVGEntityHandle& other) : serverEntity(other.serverEntity), entityID(other.entityID) { }
+
+
+/**
+*	@brief Simple constructor that will accept a const reference to another handle entity.
 **/
 SVGEntityHandle::SVGEntityHandle(const SVGEntityHandle& other) : serverEntity(other.serverEntity), entityID(other.entityID) { }
 
@@ -96,7 +100,7 @@ Entity* SVGEntityHandle::Set(Entity* entity) {
 }
 
 /**
-*	@return	The entityID stored in this "bridge" handle.
+*	@return	The entityID stored in this handle.
 **/
 const uint32_t SVGEntityHandle::ID() { return entityID; }
 
@@ -105,23 +109,6 @@ const uint32_t SVGEntityHandle::ID() { return entityID; }
 **/
 SVGBaseEntity *SVGEntityHandle::operator*() { return (SVGBaseEntity*)GetBaseClassentity(Get()); }
 const SVGBaseEntity* SVGEntityHandle::operator*() const { return (SVGBaseEntity*)GetBaseClassentity(Get()); }
-
-bool SVGEntityHandle::operator==(const SVGBaseEntity* baseEntity) { 
-    if (!baseEntity)
-        return false;
-
-    Entity* serverEntity = const_cast<SVGBaseEntity*>(baseEntity)->GetServerEntity();
-
-    if (!serverEntity) {
-        return false;
-    }
-
-    if (serverEntity->state.number != entityID) {
-        return false;
-    }
-
-    return true;
-}
 
 /**
 *	@brief	Assigns the SVGBaseEntity to this handle if it has a valid server entity.
@@ -139,7 +126,7 @@ SVGBaseEntity* SVGEntityHandle::operator=(SVGBaseEntity* baseEntity) {
 			entityID = serverEntity->state.number;
 		}
 	} else {
-		// No valid SVGBaseEntity pointer, so reset this bridge handle.
+		// No valid SVGBaseEntity pointer, so reset this entity handle.
 		serverEntity = nullptr;
 		entityID = 0;
 	}
@@ -148,6 +135,38 @@ SVGBaseEntity* SVGEntityHandle::operator=(SVGBaseEntity* baseEntity) {
 	return baseEntity;
 }
 
-SVGBaseEntity* SVGEntityHandle::operator->() const { 
-	return (SVGBaseEntity*)GetBaseClassentity(Get()); 
+
+/**
+*	@brief	Used to access the base class entity its methods.
+**/
+SVGBaseEntity* SVGEntityHandle::operator->() const { return (SVGBaseEntity*)GetBaseClassentity(Get()); }
+
+/**
+*   @brief  Comparison check for whether this handle points to the same entity as 
+*           the SVGBaseEntity pointer does.
+* 
+*   @return Returns true if SVGBaseEntity* != nullptr, its serverEntity pointer 
+*           != nullptr, and their entity index number matches.
+**/
+bool SVGEntityHandle::operator==(const SVGBaseEntity* baseEntity) {
+    if (!baseEntity) {
+	    return false;
+    }
+
+    Entity* serverEntity = const_cast<SVGBaseEntity*>(baseEntity)->GetServerEntity();
+
+    if (!serverEntity) {
+		return false;
+    }
+
+    if (serverEntity->state.number != entityID) {
+		return false;
+    }
+
+    return true;
 }
+
+/**
+*   @brief Used to check whether this entity handle has a valid server entity.
+**/
+SVGEntityHandle::operator bool() { return (serverEntity != nullptr); }

@@ -26,24 +26,19 @@ public:
     //
     IGamemode() {};
     virtual ~IGamemode() = default;
-    
-    //
-    // Define as top abstract class.
-    //
-    DefineTopAbstractClass(IGamemode);
 
     // Checks if this gamemode class is exactly the given class
     // @param gamemodeClass: a gamemode class which must inherint from IGamemode
     template<typename gamemodeClass>
     bool IsClass() const { // every gamemode has a ClassInfo, thanks to the DefineXYZ macro
-        return GetTypeInfo()->IsClass( gamemodeClass::ClassInfo );
+	    return typeid(*this) == typeid(gamemodeClass);		     //GetTypeInfo()->IsClass( gamemodeClass::ClassInfo );
     }
 
     // Checks if this gamemode class is a subclass of another, or is the same class
     // @param gamemodeClass: an entity class which must inherint from IGamemode
     template<typename gamemodeClass>
     bool IsSubclassOf() const {
-        return GetTypeInfo()->IsSubclassOf( gamemodeClass::ClassInfo );
+	    return dynamic_cast<gamemodeClass>(*this) != nullptr;  //GetTypeInfo()->IsSubclassOf( gamemodeClass::ClassInfo );
     }
     //
     // Map related, also known as the "current game".

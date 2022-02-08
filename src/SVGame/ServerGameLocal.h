@@ -630,7 +630,7 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int32_t type);
 //
 // g_phys.c
 //
-void SVG_RunEntity(SVGBaseEntity *ent);
+void SVG_RunEntity(SVGEntityHandle &entityHandle);
 
 //
 // g_main.c

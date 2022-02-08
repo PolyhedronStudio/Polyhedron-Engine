@@ -19,11 +19,6 @@ public:
     virtual ~CoopGamemode() override;
 
     //
-    // Define as abstract class in our type system.
-    //
-    DefineAbstractClass("CoopGamemode", CoopGamemode);
-
-    //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;

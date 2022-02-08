@@ -21,11 +21,6 @@ public:
     virtual ~DeathmatchGamemode() override;
 
     //
-    // Define as abstract class in our type system.
-    //
-    DefineAbstractClass("DeathmatchGamemode", DeathmatchGamemode);
-
-    //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     // DeathMatch unique function implementations.

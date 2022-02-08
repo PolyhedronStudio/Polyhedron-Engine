@@ -18,11 +18,6 @@ public:
     virtual ~DefaultGamemode() override;
 
     //
-    // Define as abstract class in our type system.
-    //
-    DefineAbstractClass("DefaultGamemode", DefaultGamemode);
-
-    //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     virtual void OnLevelExit() override;

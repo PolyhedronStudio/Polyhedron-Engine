@@ -62,46 +62,54 @@ int snd_fry;
 //-----------------
 // CVars.
 //-----------------
-cvar_t  *gamemode;      // Stores the gamemode string: "singleplayer", "deathmatch", "coop"
-cvar_t  *gamemodeflags;
-cvar_t  *skill;
-cvar_t  *fraglimit;
-cvar_t  *timelimit;
-cvar_t  *password;
-cvar_t  *spectator_password;
-cvar_t  *needpass;
-cvar_t  *maximumclients;
-cvar_t  *maxspectators;
-cvar_t  *maxEntities;
-cvar_t  *g_select_empty;
-cvar_t  *dedicated;
+// Gamemode and Server settings.
+cvar_t* gamemode = nullptr;  // Stores the gamemode string: "singleplayer", "deathmatch", "coop"
+cvar_t* gamemodeflags = nullptr;
+cvar_t* skill = nullptr;
+cvar_t* fraglimit = nullptr;
+cvar_t* timelimit = nullptr;
+cvar_t* password = nullptr;
+cvar_t* spectator_password = nullptr;
+cvar_t* needpass = nullptr;
+cvar_t* filterban = nullptr;
 
-cvar_t  *filterban;
+cvar_t* maximumclients = nullptr;
+cvar_t* maxspectators = nullptr;
+cvar_t* maxEntities = nullptr;
 
-cvar_t  *sv_maxvelocity;
-cvar_t  *sv_gravity;
+cvar_t* g_select_empty = nullptr;
+cvar_t* dedicated = nullptr;
 
-cvar_t  *sv_rollspeed;
-cvar_t  *sv_rollangle;
-cvar_t  *gun_x;
-cvar_t  *gun_y;
-cvar_t  *gun_z;
+cvar_t* flood_msgs = nullptr;
+cvar_t* flood_persecond = nullptr;
+cvar_t* flood_waitdelay = nullptr;
 
-cvar_t  *run_pitch;
-cvar_t  *run_roll;
-cvar_t  *bob_up;
-cvar_t  *bob_pitch;
-cvar_t  *bob_roll;
+cvar_t* sv_cheats = nullptr;
+cvar_t* sv_maplist = nullptr;
 
-cvar_t  *sv_cheats;
+// Physics settings.
+cvar_t* sv_maxvelocity = nullptr;
+cvar_t* sv_gravity = nullptr;
+cvar_t* sv_rollspeed = nullptr;
+cvar_t* sv_rollangle = nullptr;
 
-cvar_t  *flood_msgs;
-cvar_t  *flood_persecond;
-cvar_t  *flood_waitdelay;
+// View/User Control settings.
+cvar_t*	 run_pitch = nullptr;
+cvar_t*	 run_roll = nullptr;
+cvar_t*	 bob_up = nullptr;
+cvar_t*	 bob_pitch = nullptr;
+cvar_t*	 bob_roll = nullptr;
 
-cvar_t  *sv_maplist;
+// Client related. (Are monster footsteps on?)
+cvar_t* cl_monsterfootsteps = nullptr;
 
-cvar_t  *cl_monsterfootsteps;
+
+// Developer related.
+cvar_t* gun_x = nullptr;
+cvar_t* gun_y = nullptr;
+cvar_t* gun_z = nullptr;
+
+cvar_t* dev_show_physwarnings = nullptr;
 
 //-----------------
 // Funcs used locally.
@@ -110,7 +118,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 void SVG_CreatePlayerClientEntities();
 static void SVG_SetupCVars();
 
-void SVG_RunEntity(SVGBaseEntity *ent);
+void SVG_RunEntity(SVGEntityHandle &entityHandle);
 void SVG_WriteGame(const char *filename, qboolean autosave);
 void SVG_ReadGame(const char *filename);
 void SVG_WriteLevel(const char *filename);
@@ -247,10 +255,11 @@ void Com_Error(ErrorType type, const char *fmt, ...)
 *   @brief  Sets up all server game cvars and/or fetches those belonging to the engine.
 **/
 static void SVG_SetupCVars() {
-    // Debug weapon vars.
+    // Developer cvars.
     gun_x = gi.cvar("gun_x", "0", 0);
     gun_y = gi.cvar("gun_y", "0", 0);
     gun_z = gi.cvar("gun_z", "0", 0);
+    dev_show_physwarnings = gi.cvar("dev_show_physwarnings", "1", 0);
 
     //FIXME: sv_ prefix is wrong for these
     sv_rollspeed = gi.cvar("sv_rollspeed", "200", 0);
@@ -549,18 +558,24 @@ void SVG_RunFrame(void) {
 
         // Fetch the corresponding base entity.
         //SVGBaseEntity* entity = g_baseEntities[stateNumber];
-        SVGBaseEntity* entity = g_entities[i].classEntity;
+        //SVGBaseEntity* entity = g_entities[i].classEntity;
 
-        // Reset level current entity.
-        level.currentEntity = nullptr;
+        //// Reset level current entity.
+        //level.currentEntity = nullptr;
 
-        // Is it even valid?
-        if (entity == nullptr)
+        //// Is it even valid?
+        //if (entity == nullptr)
+        //    continue;
+        //
+        //// Does it have a server entity?
+        //if (!entity->GetServerEntity())
+        //    continue;
+	    SVGEntityHandle entityHandle = g_baseEntities[i];
+        SVGBaseEntity *entity = *entityHandle;
+
+        if (!entity) {
             continue;
-        
-        // Does it have a server entity?
-        if (!entity->GetServerEntity())
-            continue;
+        }
 
         // Don't go on if it isn't in use.
         if (!entity->IsInUse())
@@ -588,8 +603,8 @@ void SVG_RunFrame(void) {
         entity->SetOldOrigin(entity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-        if ((entity->GetServerEntity() && entity->GetGroundEntity() && entity->GetGroundEntity()->GetServerEntity())
-            && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
+	    SVGBaseEntity* groundEntity = *entity->GetGroundEntity();
+        if (groundEntity && (groundEntity->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             entity->SetGroundEntity(nullptr);
 
@@ -620,7 +635,7 @@ void SVG_RunFrame(void) {
         }
 
         // Last but not least, "run" process the entity.
-        SVG_RunEntity(entity);
+	    SVG_RunEntity(entityHandle);
     }
 
     // See if it is time to end a deathmatch.
