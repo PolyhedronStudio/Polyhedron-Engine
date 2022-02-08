@@ -109,35 +109,35 @@ typedef float vec_t;
 //-----------------
 // Max String limits.
 //-----------------
-constexpr int32_t MAX_STRING_CHARS  = 4096;  // max length of a string passed to Cmd_TokenizeString
-constexpr int32_t MAX_STRING_TOKENS = 256;  // max tokens resulting from Cmd_TokenizeString
-constexpr int32_t MAX_TOKEN_CHARS   = 1024;   // max length of an individual token
-constexpr int32_t MAX_NET_STRING    = 2048;    // max length of a string used in network protocol
+constexpr int32_t MAX_STRING_CHARS  = 4096; // Maximum length of a string passed to Cmd_TokenizeString.
+constexpr int32_t MAX_STRING_TOKENS = 256;  // Maximum tokens resulting from Cmd_TokenizeString.
+constexpr int32_t MAX_TOKEN_CHARS   = 1024; // Maximum length of an individual token.
+constexpr int32_t MAX_NET_STRING    = 2048; // Maximum length of a string used in network protocol.
 
-constexpr int32_t MAX_QPATH     = 64;  // max length of a quake game pathname
-constexpr int32_t MAX_OSPATH    = 256; // max length of a filesystem pathname
+constexpr int32_t MAX_QPATH     = 64;  // Maximum length of a quake game pathname.
+constexpr int32_t MAX_OSPATH    = 256; // Maximum length of a filesystem pathname.
 
 //-----------------
 // Per-level limits
 //-----------------
-constexpr int32_t MAX_CLIENTS   = 256;   // absolute limit
-constexpr int32_t MAX_EDICTS    = 1024; // N&C: POOL: Was 1024 // must change protocol to increase more
+constexpr int32_t MAX_CLIENTS       = 256;  // Absolute limit.
+constexpr int32_t MAX_EDICTS        = 1024; // Maximum amount of entities we can handle.
 constexpr int32_t MAX_LIGHTSTYLES   = 256;
-constexpr int32_t MAX_MODELS    = 256; // these are sent over the net as bytes
-constexpr int32_t MAX_SOUNDS    = 256;// so they cannot be blindly increased
-constexpr int32_t MAX_IMAGES    = 256;
-constexpr int32_t MAX_ITEMS     = 256;
-constexpr int32_t MAX_GENERAL   = (MAX_CLIENTS * 2);// general config strings
+constexpr int32_t MAX_MODELS        = 256;  // These are sent over the net as bytes.
+constexpr int32_t MAX_SOUNDS        = 256;  // So they cannot be blindly increased.
+constexpr int32_t MAX_IMAGES        = 256;
+constexpr int32_t MAX_ITEMS         = 256;
+constexpr int32_t MAX_GENERAL       = (MAX_CLIENTS * 2); // General config strings.
 
-constexpr int32_t MAX_CLIENT_NAME = 16;
+constexpr int32_t MAX_CLIENT_NAME = 16;     // Maximum length of a client's in-game name.
 
 //-----------------
 // Max World Size.
 //-----------------
-constexpr int32_t MAX_WORLD_COORD = (16384);
-constexpr int32_t MIN_WORLD_COORD = (-16384);
+constexpr int32_t MAX_WORLD_COORD = (16384);    // Maximum positive world coordinate.
+constexpr int32_t MIN_WORLD_COORD = (-16384);   // Maximum negative world coordinates.
 
-constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
+constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD); // Max - Min = 16384.
 
 //-----------------
 // General Utility Macros.

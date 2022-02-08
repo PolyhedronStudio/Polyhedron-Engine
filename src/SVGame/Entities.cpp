@@ -16,7 +16,6 @@
 // SVG_SpawnClassEntity
 //
 //
-#include "Entities/Base/SVGBaseEntity.h"
 #include "Entities/Base/SVGBaseTrigger.h"
 #include "Entities/Base/SVGBaseMover.h"
 #include "Entities/Base/PlayerClient.h"
@@ -407,8 +406,8 @@ Entity* SVG_Spawn(void)
     Entity *serverEntity = nullptr;
     int32_t i = 0;
     // Acquire a pointer to the entity we'll check for.
-    serverEntity = &g_entities[game.maximumClients + 1];
-    for (i = game.maximumClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
+    serverEntity = &g_entities[game.GetMaxClients() + 1];
+    for (i = game.GetMaxClients() + 1; i < globals.numberOfEntities; i++, serverEntity++) {
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!serverEntity->inUse && (serverEntity->freeTime < 2 || level.time - serverEntity->freeTime > 0.5)) {

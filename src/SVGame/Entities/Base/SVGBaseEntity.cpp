@@ -12,9 +12,6 @@
 //
 // EntityBridge.
 //
-#include "SharedGame/Entities/SGBaseEntity.h"
-#include "SharedGame/Entities/SGEntityBridge.h"
-
 #include "../../Effects.h"		// Effects.
 #include "../../Entities.h"		// Entities.
 #include "../../Utilities.h"		// Util funcs.

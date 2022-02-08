@@ -75,7 +75,7 @@ void SVG_ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     }
 
     // Comment later...
-    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.GetCurrentGamemode()->CalculateDamageVelocity(damage);
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then 
     // adding it on to 'velocityDamage' its old value.
@@ -144,7 +144,7 @@ void SVG_ThrowClientHead(PlayerClient* self, int damage) {
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.GetCurrentGamemode()->CalculateDamageVelocity(damage);
 
     // Add the velocityDamage up to the current velocity.
     self->SetVelocity(self->GetVelocity() + velocityDamage);

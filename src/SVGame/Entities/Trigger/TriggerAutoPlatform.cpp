@@ -10,7 +10,6 @@
 #include "../../Entities.h"
 #include "../../Utilities.h"
 #include "../../Physics/StepMove.h"
-#include "../../BrushFunctions.h"
 
 // Entities.
 #include "../Base/SVGBaseTrigger.h"

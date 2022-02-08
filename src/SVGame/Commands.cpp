@@ -583,7 +583,7 @@ void Cmd_Kill_f(PlayerClient *ent)
 
     ent->SetFlags(ent->GetFlags() & ~EntityFlags::GodMode);
     ent->SetHealth(0);
-    game.gameMode->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
+    game.GetCurrentGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
     ent->Die(ent, ent, 100000, vec3_zero());
 }
 
@@ -777,7 +777,7 @@ void Cmd_Say_f(Entity *ent, qboolean team, qboolean arg0)
     if (dedicated->value)
         gi.CPrintf(NULL, PRINT_CHAT, "%s", text);
 
-    for (j = 1; j <= game.maximumClients; j++) {
+    for (j = 1; j <= game.GetMaxClients(); j++) {
         other = &g_entities[j];
         if (!other->inUse)
             continue;

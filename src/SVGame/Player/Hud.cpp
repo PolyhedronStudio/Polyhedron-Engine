@@ -120,7 +120,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     game.autoSaved = false;
 
     // Respawn any dead clients.
-    game.gameMode->RespawnAllClients();
+    game.GetCurrentGamemode()->RespawnAllClients();
 
     // Set intermission time and the map to change to.
     level.intermission.time = level.time;
@@ -128,7 +128,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     // 
     if (strstr(level.intermission.changeMap, "*")) {
-        if (!game.gameMode->IsClass<CoopGamemode>()) {
+        if (!game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
             for (i = 0 ; i < maximumclients->value ; i++) {
                 client = g_entities + 1 + i;
                 if (!client->inUse) {
@@ -143,7 +143,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
             }
         }
     } else {
-        if (!game.gameMode->IsClass<DeathmatchGamemode>()) {
+        if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
             level.intermission.exitIntermission = 1;     // go immediately to the next level
             return;
         }
@@ -212,7 +212,7 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
 
     // sort the clients by score
     total = 0;
-    for (i = 0 ; i < game.maximumClients ; i++) {
+    for (i = 0 ; i < game.GetMaxClients() ; i++) {
         cl_ent = g_entities + 1 + i;
         if (!cl_ent->inUse || game.clients[i].respawn.isSpectator)
             continue;
@@ -321,7 +321,7 @@ void SVG_Command_Score_f(SVGBaseEntity*ent)
     client->showInventory = false;
 
     // Don't show scores if not in one of the following game modes.
-    if (!game.gameMode->IsClass<DeathmatchGamemode>() && !game.gameMode->IsClass<CoopGamemode>()) {
+    if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>() && !game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
         return;
     }
 
@@ -412,7 +412,7 @@ void SVG_HUD_SetClientStats(Entity* ent)
     ent->client->playerState.stats[STAT_LAYOUTS] = 0;
 
     // Special layout for deathmatch.
-    if (game.gameMode->IsClass<DeathmatchGamemode>()) {
+    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
         if (ent->client->persistent.health <= 0 || level.intermission.time
             || ent->client->showScores)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;

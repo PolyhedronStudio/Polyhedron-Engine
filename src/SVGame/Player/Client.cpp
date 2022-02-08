@@ -52,7 +52,7 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     if (!ent)
         return;
 
-    game.gameMode->ClientUserinfoChanged(ent, userinfo);
+    game.GetCurrentGamemode()->ClientUserinfoChanged(ent, userinfo);
 }
 
 
@@ -203,7 +203,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.gameMode->PutClientInServer(ent);
+    game.GetCurrentGamemode()->PutClientInServer(ent);
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -244,8 +244,8 @@ void SVG_ClientBegin(Entity *ent)
     ent->client = game.clients + (ent - g_entities - 1);
 
     // Let the game mode decide from here on out.
-    game.gameMode->ClientBegin(ent);
-    //game.gameMode->ClientEndServerFrame(ent);
+    game.GetCurrentGamemode()->ClientBegin(ent);
+    //game.GetCurrentGamemode()->ClientEndServerFrame(ent);
 }
 
 
@@ -263,7 +263,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    return game.gameMode->ClientConnect(ent, userinfo);
+    return game.GetCurrentGamemode()->ClientConnect(ent, userinfo);
 }
 
 /*
@@ -284,7 +284,7 @@ void SVG_ClientDisconnect(Entity *ent)
         return;
 
     // Since it does, we pass it on to the game mode.
-    game.gameMode->ClientDisconnect((PlayerClient*)ent->classEntity);
+    game.GetCurrentGamemode()->ClientDisconnect((PlayerClient*)ent->classEntity);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;

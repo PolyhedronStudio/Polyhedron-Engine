@@ -30,7 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Player/Client.h"
 
 
-
 /*
 =============
 ED_NewString
@@ -72,15 +71,18 @@ void ED_CallSpawn(Entity *ent)
     auto dictionary = ent->entityDictionary;
     ent->classname = ED_NewString( ent->entityDictionary["classname"].c_str() );
     ent->classEntity = SVG_SpawnClassEntity( ent, ent->classname );
+
     // If we did not find the classname, then give up
     if ( nullptr == ent->classEntity ) {
         SVG_FreeEntity( ent );
         return;
     }
+
     // Initialise the entity with its respected keyvalue properties
     for ( const auto& keyValueEntry : ent->entityDictionary ) {
         ent->classEntity->SpawnKey( keyValueEntry.first, keyValueEntry.second );
     }
+
     // Precache and spawn, to set the entity up
     ent->classEntity->Precache();
     ent->classEntity->Spawn();
@@ -99,7 +101,6 @@ void ED_ParseEntity(const char** data, Entity* ent) {
     char* key, * value;
 
     init = false;
-    st = {};
 
     // go through all the dictionary pairs
     while (1) {
@@ -126,11 +127,6 @@ void ED_ParseEntity(const char** data, Entity* ent) {
             continue;
 
         ent->entityDictionary[key] = value;
-        //if (!ED_ParseField(spawn_fields, key, value, (byte *)ent)) {
-        //    if (!ED_ParseField(temp_fields, key, value, (byte *)&st)) {
-        //        gi.DPrintf("%s: %s is not a field\n", __func__, key);
-        //    }
-        //}
     }
 
     if (!init)
@@ -228,7 +224,9 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
         gi.cvar_forceset("skill", va("%f", skill_level));
 
     // Save client data.
-    game.gameMode->SaveClientEntityData();
+    if (game.GetCurrentGamemode()) {
+        game.GetCurrentGamemode()->SaveClientEntityData();
+    }
 
     // Free level tag allocated data.
     gi.FreeTags(TAG_LEVEL);
@@ -251,7 +249,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
     // Set client fields on player ents
-    for (i = 0 ; i < game.maximumClients ; i++)
+    for (i = 0 ; i < game.GetMaxClients() ; i++)
         g_entities[i + 1].client = game.clients + i;
 
     ent = NULL;
@@ -313,8 +311,6 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
         if (g_baseEntities[i])
             g_baseEntities[i]->PostSpawn();
     }
-
-
 
     gi.DPrintf("%i entities inhibited\n", inhibit);
 

@@ -8,12 +8,16 @@
 // one way or the other :)
 //
 */
-#ifndef __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
-#define __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
+#pragma once
 
 // It makes sense to include TypeInfo in SVGBaseEntity.h, 
 // because this class absolutely requires it
 #include "../../TypeInfo.h"
+
+// Forward declare.
+class SVGEntityHandle;
+
+#include "SVGEntityHandle.h"
 
 class SVGBaseEntity {
 public:
@@ -201,7 +205,7 @@ public:
     }
 
     // Return the 'groundEntitPtr' entity.
-    inline SVGBaseEntity* GetGroundEntity() {
+    inline SVGEntityHandle GetGroundEntity() {
         return groundEntity;
     }
 
@@ -999,5 +1003,3 @@ public:
     // "No" thinking
     void SVGBaseEntityThinkNull() { }
 };
-
-#endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__

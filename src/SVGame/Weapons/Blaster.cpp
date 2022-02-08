@@ -68,7 +68,7 @@ void Weapon_Blaster_Fire(PlayerClient *ent)
 {
     int     damage;
 
-    if (game.gameMode->IsClass<DeathmatchGamemode>())
+    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>())
         damage = 15;
     else
         damage = 10;

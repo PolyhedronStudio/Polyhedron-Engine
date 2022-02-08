@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Game Mode interface.
 #include "Gamemodes/IGamemode.h"
 
+// GameLocals.
+#include "GameLocals.h"
+
 //
 //===============
 // SVG_InflictDamage
@@ -54,7 +57,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockBack, int dflags, int mod)
 {
-    game.gameMode->InflictDamage(targ, inflictor, attacker, dmgDir, point, normal, damage, knockBack, dflags, mod);
+    game.GetCurrentGamemode()->InflictDamage(targ, inflictor, attacker, dmgDir, point, normal, damage, knockBack, dflags, mod);
 }
 
 
@@ -68,5 +71,5 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
 //
 void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
 {
-    game.gameMode->InflictRadiusDamage(inflictor, attacker, damage, ignore, radius, mod);
+    game.GetCurrentGamemode()->InflictRadiusDamage(inflictor, attacker, damage, ignore, radius, mod);
 }

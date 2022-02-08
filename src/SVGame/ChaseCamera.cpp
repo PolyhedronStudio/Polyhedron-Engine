@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // Core.
 #include "ServerGameLocal.h"
+#include "Entities.h"
 #include "ChaseCamera.h"
 
 // Entities.
-#include "Entities.h"
 #include "Entities/Base/PlayerClient.h"
 
 void SVG_UpdateChaseCam(PlayerClient *ent)

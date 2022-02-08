@@ -284,7 +284,7 @@ void CoopGamemode::ClientDeath(PlayerClient *clientEntity) {
 void CoopGamemode::SaveClientEntityData(void) {
     Entity *ent;
 
-    for (int32_t i = 0 ; i < game.maximumClients ; i++) {
+    for (int32_t i = 0 ; i < game.GetMaxClients() ; i++) {
         ent = &g_entities[1 + i];
         if (!ent->inUse)
             continue;

@@ -2,27 +2,25 @@
 // LICENSE HERE.
 
 //
-// WorldSpawn.h
+// Worldspawn.h
 //
-// WorldSpawn entity definition.
+// Worldspawn entity definition.
 //
 */
-#ifndef __SVGAME_ENTITIES_WORLDSPAWN_H__
-#define __SVGAME_ENTITIES_WORLDSPAWN_H__
+#pragma once
 
 class SVGBaseEntity;
 
-class WorldSpawn : public SVGBaseEntity {
+class Worldspawn : public SVGBaseEntity {
 public:
-    // Constructor/Deconstructor.
-    WorldSpawn(Entity* svEntity);
-    virtual ~WorldSpawn();
+    //! Constructor/Deconstructor.
+    Worldspawn(Entity* svEntity);
+    virtual ~Worldspawn() = default;
 
-    DefineMapClass( "worldspawn", WorldSpawn, SVGBaseEntity );
+    //! Register worldspawn class as a map entity.
+    DefineMapClass( "worldspawn", Worldspawn, SVGBaseEntity );
 
-    //
-    // Interface functions. 
-    //
+    //! Interface functions. 
     void Precache() override;    // Precaches data.
     void Spawn() override;       // Spawns the entity.
     void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
@@ -30,13 +28,10 @@ public:
 
     void SpawnKey(const std::string& key, const std::string& value) override;
 
-    //
-    // Callback functions.
-    //
-    void WorldSpawnThink(void);
+    //! Callback functions.
+    void WorldspawnThink(void);
 
 private:
-
+    //! Default gravity constant.
+    static constexpr int32_t DEFAULT_GRAVITY = 750;
 };
-
-#endif // __SVGAME_ENTITIES_WORLDSPAWN_H__

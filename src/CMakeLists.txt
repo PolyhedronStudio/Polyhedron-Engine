@@ -66,13 +66,12 @@ SET(HEADERS_CLGAME
 # Server game DLL
 # Throw all sources in here, but group them elsewhere
 SET( SRC_SVGAME 
-	SVGame/BrushFunctions.cpp
 	SVGame/ChaseCamera.cpp
 	SVGame/Commands.cpp
 	SVGame/Combat.cpp
 	SVGame/Effects.cpp
 	SVGame/Entities.cpp
-	SVGame/FunctionPointers.cpp
+	SVGame/GameLocals.cpp
 	SVGame/Items.cpp
 	SVGame/ImportsWrapper.cpp
 	SVGame/Main.cpp
@@ -80,7 +79,6 @@ SET( SRC_SVGAME
 	SVGame/Save.cpp
 	SVGame/Spawn.cpp
 	SVGame/SVCommands.cpp
-	SVGame/Trigger.cpp
 	SVGame/Utilities.cpp
 	SVGame/Weapons.cpp 
 	SVGame/ai/MonsterAI.cpp
@@ -88,6 +86,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseItem.cpp
 	SVGame/Entities/Base/SVGBaseTrigger.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
+	SVGame/Entities/Base/SVGEntityHandle.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
 	SVGame/Entities/Base/DebrisEntity.cpp
 	SVGame/Entities/Base/GibEntity.cpp
@@ -153,7 +152,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Trigger/TriggerRelay.cpp
 	SVGame/Entities/Weaponry/BlasterBolt.cpp
 	SVGame/Entities/Light.cpp
-	SVGame/Entities/WorldSpawn.cpp
+	SVGame/Entities/Worldspawn.cpp
 	SVGame/Gamemodes/DefaultGamemode.cpp
 	SVGame/Gamemodes/CoopGamemode.cpp
 	SVGame/Gamemodes/DeathmatchGamemode.cpp
@@ -175,12 +174,10 @@ SET( SRC_SVGAME
     
     SET ( HEADERS_SVGAME
 	SVGame/ServerGameLocal.h
-	SVGame/BrushFunctions.h
 	SVGame/ChaseCamera.h
 	SVGame/Effects.h
 	SVGame/Entities.h
-	SVGame/FunctionPointers.h
-	SVGame/Trigger.h
+	SVGame/GameLocals.h
 	SVGame/TypeInfo.h
 	SVGame/Utilities.h
 	SVGame/AI/MonsterAI.h
@@ -188,6 +185,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseItem.h
 	SVGame/Entities/Base/SVGBaseTrigger.h
 	SVGame/Entities/Base/SVGBaseMover.h
+	SVGame/Entities/Base/SVGEntityHandle.h
 	SVGame/Entities/Base/BodyCorpse.h
 	SVGame/Entities/Base/DebrisEntity.h
 	SVGame/Entities/Base/GibEntity.h
@@ -232,7 +230,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Trigger/TriggerRelay.h
 	SVGame/Entities/weaponry/BlasterBolt.h
 	SVGame/Entities/Light.h
-	SVGame/Entities/WorldSpawn.h
+	SVGame/Entities/Worldspawn.h
 	SVGame/Gamemodes/DefaultGamemode.h
 	SVGame/Gamemodes/CoopGamemode.h
 	SVGame/Gamemodes/DeathmatchGamemode.h
@@ -421,17 +419,11 @@ SET(HEADERS_GL
 
 ###################### Shared Game Folder.
 SET(HEADERS_SHAREDGAME
-	../inc/SharedGame/Entities/SGBaseEntity.h
-	../inc/SharedGame/Entities/SGEntityBridge.h
-
 	../inc/SharedGame/pmove.h 
 	../inc/SharedGame/protocol.h 
 	../inc/SharedGame/sharedgame.h 
 )
 SET(SRC_SHAREDGAME
-	../src/SharedGame/Entities/SGBaseEntity.cpp
-	../src/SharedGame/Entities/SGEntityBridge.cpp
-
 	../src/SharedGame/pmove.cpp
 )
 

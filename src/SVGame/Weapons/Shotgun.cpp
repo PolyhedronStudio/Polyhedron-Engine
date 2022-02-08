@@ -70,7 +70,7 @@ void weapon_shotgun_fire(PlayerClient * ent)
     }
 
     // Use a different count for shotgun mode.
-    if (game.gameMode->IsClass<DeathmatchGamemode>()) {
+    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
         SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEATHMATCH, MeansOfDeath::Shotgun);
     } else {
         SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEFAULT, MeansOfDeath::Shotgun);

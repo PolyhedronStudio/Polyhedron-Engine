@@ -184,7 +184,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         SetPlayerMoveType(EnginePlayerMoveType::Dead);
 
         // Update the obituary.
-        game.gameMode->ClientUpdateObituary(this, inflictor, attacker);
+        game.GetCurrentGamemode()->ClientUpdateObituary(this, inflictor, attacker);
 
         // Toss our weapon, assuming we had any.
         SVG_TossClientWeapon(this);
@@ -195,7 +195,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         SVG_Command_Score_f(this);
 
         // Let the gamemode know this client died.
-        game.gameMode->ClientDeath(this);
+        game.GetCurrentGamemode()->ClientDeath(this);
     }
 
     // Remove powerups.
@@ -257,7 +257,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 }
 
 //===============
-// SVG_Client_SetEvent
+// PlayerClient::SetEvent
 // 
 //===============
 void PlayerClient::SetEvent() {

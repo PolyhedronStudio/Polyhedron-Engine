@@ -116,6 +116,9 @@ void MiscExplosionBox::Spawn() {
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);
 
+    gi.DPrintf("===============================\n");
+    gi.DPrintf("Server Side misc_explobox number=%i\n", GetNumber());
+
     // Link the entity to world, for collision testing.
     LinkEntity();
 }
@@ -339,7 +342,7 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
         return;
 
     // Calculate ratio to use.
-    float ratio = (float)other->GetMass() / (float)self->GetMass();
+    float ratio = 150 / 40;(float)other->GetMass() / (float)self->GetMass();
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();

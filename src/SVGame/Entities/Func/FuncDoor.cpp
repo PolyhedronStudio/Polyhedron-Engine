@@ -9,7 +9,6 @@
 #include "../../Entities.h"
 #include "../../Utilities.h"
 #include "../../Physics/StepMove.h"
-#include "../../BrushFunctions.h"
 
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
@@ -60,7 +59,7 @@ void FuncDoor::Spawn() {
     if ( !GetSpeed() ) {
         SetSpeed( 100.0f );
     }
-    //if ( game.gameMode->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
+    //if ( game.GetCurrentGamemode()->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
     //    SetSpeed( GetSpeed() * 2.0f );
     //}
     if ( !GetAcceleration() ) {

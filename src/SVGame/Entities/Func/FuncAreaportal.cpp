@@ -9,7 +9,6 @@
 #include "../../Entities.h"
 #include "../../Utilities.h"
 #include "../../Physics/StepMove.h"
-#include "../../BrushFunctions.h"
 
 #include "../Base/SVGBaseEntity.h"
 

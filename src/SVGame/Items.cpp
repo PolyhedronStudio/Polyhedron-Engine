@@ -988,6 +988,10 @@ gitem_t itemlist[] = {
     {NULL}
 };
 
+/**
+*   @brief Counts the length of our items array so the game is aware of the total of items.
+**/
+void GameLocals::PrepareItems() { numberOfItems = Q_COUNTOF(itemlist) - 1; }
 
 /*QUAKED item_health (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
@@ -1054,14 +1058,6 @@ void SP_item_health_mega(Entity *self)
     gi.SoundIndex("items/m_health.wav");
     //self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
 }
-
-
-void SVG_InitializeItems(void)
-{
-    game.numberOfItems = sizeof(itemlist) / sizeof(itemlist[0]) - 1;
-}
-
-
 
 /*
 ===============

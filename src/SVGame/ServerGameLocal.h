@@ -17,8 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_local.h -- local definitions for game module
 
-#ifndef __SVGAME_G_LOCAL_H__
-#define __SVGAME_G_LOCAL_H__
+#pragma once
 
 #include "Shared/Shared.h"
 #include "Shared/list.h"
@@ -40,12 +39,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-------------------
 class SVGBaseEntity;
 class PlayerClient;
+class Gameworld;
 class IGamemode;
 struct entity_s;
 
 //==================================================================
 
-// View pitching times
+//! Time it takes to go over a frame. 
+constexpr float FRAMETIME = BASE_FRAMETIME_1000;
+
+//! Memory tags to allow dynamic memory to be cleaned up
+constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll
+constexpr int32_t TAG_LEVEL = 766;  // clear when loading a new level
+
+//! View pitching times
 constexpr float DAMAGE_TIME = 0.5f;
 constexpr float FALL_TIME = 0.3f;
 
@@ -78,11 +85,6 @@ struct EntityFlags {
     static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
 };
 
-constexpr float FRAMETIME = BASE_FRAMETIME_1000; // Adjusts to the game's tick level.
-
-// memory tags to allow dynamic memory to be cleaned up
-constexpr int32_t TAG_GAME = 765;     // clear when unloading the dll
-constexpr int32_t TAG_LEVEL = 766;     // clear when loading a new level
 
 
 constexpr int32_t MELEE_DISTANCE = 80;
@@ -227,12 +229,13 @@ struct MoveType {
     static constexpr int32_t Push = 3;      // No clip to world, push on box contact
     static constexpr int32_t Stop = 4;      // No clip to world, stops on box contact
 
-    static constexpr int32_t Walk          = 10;    // Gravity. (Player Movement entities use this.)
-    static constexpr int32_t Step          = 11;    // Gravity, fixed distance, and special edge handling if wished for.
-    static constexpr int32_t Fly           = 12;    // 
-    static constexpr int32_t Toss          = 13;    // Gravity
-    static constexpr int32_t FlyMissile    = 14;    // Extra size to monsters
-    static constexpr int32_t Bounce        = 15;
+    static constexpr int32_t Walk       = 10;    // Gravity. (Player Movement entities use this.)
+    static constexpr int32_t Step       = 11;    // Gravity, fixed distance, and special edge handling if wished for.
+    static constexpr int32_t Fly        = 12;    // 
+    static constexpr int32_t FlyMissile = 13;	 // Extra size to monsters
+    static constexpr int32_t Toss       = 14;    // Gravity
+    static constexpr int32_t TossSlide  = 15;    // 
+    static constexpr int32_t Bounce     = 16;
 };
 
 //-------------------
@@ -306,39 +309,6 @@ typedef struct gitem_s {
     // An actual string of all models, sounds, and images this item will use
     const char  *precaches;     
 } gitem_t;
-
-
-
-//-------------------
-// This structure is left intact through an entire game
-// it should be initialized at dll load time, and read/written to
-// the server.ssv file for savegames
-//-------------------
-struct GameLocals {
-    // Game Mode interface, always assigned to whichever game mode we are running.
-    IGamemode* gameMode;
-
-    // List of clients, based on sv_maxclients, or rather in the game dll: maxclients cvar.
-    ServerClient *clients;
-
-    // Can't store spawnpoint32_t in level, because
-    // it would get overwritten by the savegame restore
-    char spawnpoint[512];    // needed for coop respawns
-
-    // Store latched cvars here that we want to get at often
-    int32_t maximumClients;
-    int32_t maxEntities;
-
-    // Cross level triggers
-    int32_t serverflags;
-
-    // Items
-    int32_t numberOfItems;
-
-    // Did we autosave?
-    qboolean autoSaved;
-};
-
 
 //-------------------
 // Stores level locals, from current time, to which entities are sighted.
@@ -430,6 +400,7 @@ struct TemporarySpawnFields {
 // SVG_GetGameLocals
 // SVG_GetLevelLocals
 // 
+#include "GameLocals.h"
 extern  GameLocals   game;
 extern  LevelLocals  level;
 extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
@@ -588,7 +559,6 @@ void SVG_Command_Score_f(SVGBaseEntity *ent);
 // g_items.c
 //
 void SVG_PrecacheItem(gitem_t *it);
-void SVG_InitializeItems(void);
 void SVG_SetItemNames(void);
 gitem_t *SVG_FindItemByPickupName(const char *pickup_name);
 gitem_t *SVG_FindItemByClassname(const char *classname);
@@ -1022,5 +992,3 @@ struct entity_s {
 
     gitem_t *item;          // for bonus items
 };
-
-#endif

@@ -264,7 +264,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockBack still occurs
     //if ((targ != attacker) && ((deathmatch->value && ((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams))) || coop->value)) {
-    //    if (game.gameMode->OnSameTeam(targ, attacker)) {
+    //    if (game.GetCurrentGamemode()->OnSameTeam(targ, attacker)) {
     //        if ((int)(gamemodeflags->value) & GamemodeFlags::NoFriendlyFire)
     //            damage = 0;
     //        else
@@ -324,7 +324,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     }
 
     // Team damage avoidance
-    if (!(damageFlags & DamageFlags::IgnoreProtection) && game.gameMode->OnSameTeam(target, attacker))
+    if (!(damageFlags & DamageFlags::IgnoreProtection) && game.GetCurrentGamemode()->OnSameTeam(target, attacker))
         return;
 
     // Inflict the actual damage, in case we got to deciding to do so based on the above.
@@ -476,7 +476,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     ent->UnlinkEntity();
 
     // Grab a body from the queue, and cycle to the next one.
-    Entity *bodyEntity = &g_entities[game.maximumClients + level.bodyQue + 1];
+    Entity *bodyEntity = &g_entities[game.GetMaxClients() + level.bodyQue + 1];
     level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
 
     // Send an effect on this body, in case it already has a model index.
@@ -517,7 +517,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     bodyClassEntity->SetClipMask(ent->GetClipMask());
     bodyClassEntity->SetOwner(ent->GetOwner());
     bodyClassEntity->SetMoveType(ent->GetMoveType());
-    bodyClassEntity->SetGroundEntity(ent->GetGroundEntity());
+    //bodyClassEntity->SetGroundEntity(ent->GetGroundEntity());
 
     // Set the die callback, and set its take damage.
     bodyClassEntity->SetDieCallback(&BodyCorpse::BodyCorpseDie);
@@ -593,7 +593,7 @@ void DefaultGamemode::OnLevelExit() {
 
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < maximumclients->value; i++) {
-        // Fetch the WorldSpawn entity number.
+        // Fetch the Worldspawn entity number.
         Entity *serverEntity = &g_entities[i];
 
         if (!serverEntity)
@@ -659,7 +659,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient
             if (client->latchedButtons & buttonMask) 
                 // || (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn))) {
             {
-                game.gameMode->RespawnClient(dynamic_cast<PlayerClient*>(entity));
+                game.GetCurrentGamemode()->RespawnClient(dynamic_cast<PlayerClient*>(entity));
                 client->latchedButtons = 0;
             }
         }
@@ -909,7 +909,7 @@ qboolean DefaultGamemode::ClientConnect(Entity* serverEntity, char *userinfo) {
     ClientUserinfoChanged(serverEntity, userinfo);
 
     // This is default behaviour for this function.
-    if (game.maximumClients > 1)
+    if (game.GetMaxClients() > 1)
         gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
 
     // Make sure we start with clean serverFlags.
@@ -985,7 +985,7 @@ void DefaultGamemode::ClientBegin(Entity* serverEntity) {
         HUD_MoveClientToIntermission(serverEntity);
     } else {
         // send effect if in a multiplayer game
-        if (game.maximumClients > 1) {
+        if (game.GetMaxClients() > 1) {
             gi.WriteByte(SVG_CMD_MUZZLEFLASH);
             gi.WriteShort(serverEntity - g_entities);
             gi.WriteByte(MuzzleFlashType::Login);
@@ -1518,10 +1518,10 @@ void DefaultGamemode::RespawnClient(PlayerClient* ent) {
     //if (deathmatch->value || coop->value) {
     //    // Spectator's don't leave bodies
     //    if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-    //        game.gameMode->SpawnClientCorpse(self->classEntity);
+    //        game.GetCurrentGamemode()->SpawnClientCorpse(self->classEntity);
 
     //    self->serverFlags &= ~EntityServerFlags::NoClient;
-    //    game.gameMode->PutClientInServer((PlayerClient*)self->classEntity);
+    //    game.GetCurrentGamemode()->PutClientInServer((PlayerClient*)self->classEntity);
 
     //    // add a teleportation effect
     //    self->state.eventID = EntityEvent::PlayerTeleport;
@@ -1571,7 +1571,7 @@ void DefaultGamemode::ClientDeath(PlayerClient *clientEntity) {
 void DefaultGamemode::SaveClientEntityData(void) {
     Entity *ent;
 
-    for (int32_t i = 0 ; i < game.maximumClients ; i++) {
+    for (int32_t i = 0 ; i < game.GetMaxClients() ; i++) {
         ent = &g_entities[1 + i];
         if (!ent->inUse)
             continue;

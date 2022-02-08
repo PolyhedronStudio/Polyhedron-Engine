@@ -732,8 +732,14 @@ void SVG_Physics_Noclip(SVGBaseEntity *ent)
 // Toss, bounce, and fly movement.  When onground, do nothing.
 //===============
 //
-void SVG_Physics_Toss(SVGBaseEntity *ent)
+void SVG_Physics_Toss(SVGEntityHandle bEnt)
 {
+
+    SVGBaseEntity *ent = *bEnt;
+
+    if (!ent)
+        return;
+
     // Regular thinking
     SVG_RunThink(ent);
     
@@ -750,14 +756,14 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
     }
 
     // Check for the groundEntity going away
-    if (ent->GetGroundEntity()) {
+    if (*ent->GetGroundEntity()) {
         if (!ent->GetGroundEntity()->IsInUse()) {
             ent->SetGroundEntity(nullptr);
         }
     }
 
     // If onground, return without moving
-    if (ent->GetGroundEntity()) {
+    if (*ent->GetGroundEntity()) {
         return;
     }
 
@@ -904,7 +910,11 @@ void SVG_Physics_Step(SVGBaseEntity *ent)
     }
 
     // Fetch ground entity pointer. (This can be the newly found entity ofc.)
-    SVGBaseEntity* groundEntity = ent->GetGroundEntity();
+    auto groundEntity = ent->GetGroundEntity();
+
+    //if (!groundEntity) {
+    //    return;
+    //}
 
     // Store whether we had a ground entity at all.
     qboolean wasOnGround = (groundEntity ? true : false);
