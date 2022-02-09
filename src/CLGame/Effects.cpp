@@ -353,7 +353,8 @@ void CLG_MuzzleFlash() {
     switch (mzParameters.weapon) {
     case MuzzleFlashType::Blaster:
         dl->color = vec3_t{1, 1, 0};
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
+        //clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
+	    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/v_mark23/fire0.wav"), volume, ATTN_NORM, 0);
         break;
     case MuzzleFlashType::MachineGun:
         dl->color = vec3_t{1, 1, 0};
@@ -607,11 +608,11 @@ void CLG_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count)
 
     vec3_t ox = vec3_cross(oy, dir);
 
-    count *= cl_particle_num_factor->value;
+    count *= cl_particle_num_factor->value * 4;
 
-    const float water_horizontal_spread = 0.25f;
-    const float water_vertical_spread = 1.0f;
-    const float water_base_velocity = 80.0f;
+    const float water_horizontal_spread = 0.35f;
+    const float water_vertical_spread = 2.0f;
+    const float water_base_velocity = 95.0f;
     const float water_rand_velocity = 150.0f;
 
     for (int i = 0; i < count; i++) {
@@ -682,8 +683,8 @@ void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         d = (rand() & 31) * 10.0f;
         for (j = 0; j < 3; j++) {
             p->org[j] = org[j] + ((rand() & 7) - 4) + d * (dir[j]
-                + a[j] * 0.5f * ((rand() & 31) / 32.0f - .5f)
-                + b[j] * 0.5f * ((rand() & 31) / 32.0f - .5f));
+                + a[j] * 0.5f * ((rand() & 31) / 64.0f - .5f)
+                + b[j] * 0.5f * ((rand() & 31) / 64.0f - .5f));
 
             p->vel[j] = 10.0f * dir[j] + crand() * 20;
         }

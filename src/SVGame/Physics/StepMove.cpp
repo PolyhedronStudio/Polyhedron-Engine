@@ -45,8 +45,8 @@ qboolean SVG_StepMove_CheckBottom(SVGBaseEntity* ent)
     int32_t x, y;
     float   mid, bottom;
 
-    vec3_t mins = ent->GetOrigin() - ent->GetMins(); //VectorAdd(ent->state.origin, ent->mins, mins);
-    vec3_t maxs = ent->GetOrigin() - ent->GetMaxs(); //VectorAdd(ent->state.origin, ent->maxs, maxs);
+    vec3_t mins = ent->GetOrigin() + ent->GetMins(); //VectorAdd(ent->state.origin, ent->mins, mins);
+    vec3_t maxs = ent->GetOrigin() + ent->GetMaxs(); //VectorAdd(ent->state.origin, ent->maxs, maxs);
 
 
                                                      // if all of the points under the corners are solid world, don't bother

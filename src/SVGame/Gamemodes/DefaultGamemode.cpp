@@ -277,7 +277,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // Fetch client.
     ServerClient* client = target->GetClient();
 
-    // Determine which temp entity event to use.
+    // Determine which temp entity event to use by default.
     int32_t tempEntityEvent = TempEntityEvent::Sparks;
     if (damageFlags & DamageFlags::Bullet)
         tempEntityEvent = TempEntityEvent::BulletSparks;
@@ -331,10 +331,10 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     if (damageTaken) {
         // Check if monster, or client, in which case, we spawn blood.
         // If not... :)... Do not.
-        if ((target->GetServerFlags() & EntityServerFlags::Monster) || (client)) {
+        if (target->GetServerFlags() & EntityServerFlags::Monster || client) {
             // SpawnTempDamageEntity(TempEntityEvent::Blood, point, normal, take);
             // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
-            SpawnTempDamageEntity(TempEntityEvent::Blood, point, dir, damageTaken);
+	        SpawnTempDamageEntity(TempEntityEvent::Blood, point, dir, damageTaken);
         } else {
             // Leave it for the game mode to move on and spawn this temp entity (if allowed.)
             SpawnTempDamageEntity(tempEntityEvent, point, normal, damageTaken);

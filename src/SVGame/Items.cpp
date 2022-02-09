@@ -831,7 +831,7 @@ gitem_t itemlist[] = {
         Weapon_Blaster,
         "misc/w_pkup.wav",
         NULL, 0,
-        "models/weapons/v_blast/tris.md2", // "models/weapons/v_mark23/tris.iqm",
+	    "models/weapons/v_mark23/tris.iqm",  //"models/weapons/v_blast/tris.md2", // "models/weapons/v_mark23/tris.iqm",
         /* icon */      "w_blaster",
         /* pickup */    "Blaster",
         0,
@@ -841,7 +841,7 @@ gitem_t itemlist[] = {
         WEAP_BLASTER,
         NULL,
         0,
-        /* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
+        /* precache */ "weapons/v_mark23/fire0.wav"// misc/lasfly.wav"
     },
 
     /*QUAKED weapon_machinegun (.3 .3 1) (-16 -16 -16) (16 16 16)

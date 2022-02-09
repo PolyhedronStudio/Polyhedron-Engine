@@ -33,7 +33,7 @@ public:
     // Callback Functions.
     //
     void ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator );
-    void ExplosionBoxThink(void);
+    void ExplosionBoxDropToFloor(void);
     void ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     void ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
 

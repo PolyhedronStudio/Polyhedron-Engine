@@ -75,10 +75,10 @@ void MiscServerModel::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::None);
+    SetMoveType(MoveType::Step);
 
     // Since this is a "monster", after all...
-    SetFlags(EntityServerFlags::Monster);
+    SetServerFlags(EntityServerFlags::Monster);
     
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);

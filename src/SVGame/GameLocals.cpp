@@ -43,14 +43,8 @@ void GameLocals::Initialize() {
 *	@brief Shutsdown the gamelocal.
 **/
 void GameLocals::Shutdown() {
-    // Give the gameworld a chance to finalize anything.
-    if (world) { 
-        world->Shutdown();
-
-        // Delete game world from memory.
-        delete world;
-        world = nullptr;
-    }
+    // Uninitialize world and destroy its object.
+    DestroyWorld();
 }
 
 
@@ -83,6 +77,7 @@ void GameLocals::PrepareClients() {
     globals.numberOfEntities = maxClients + 1;
 }
 
+
 /**
 *   @brief Create the world member object and initialize it.
 **/
@@ -92,4 +87,18 @@ void GameLocals::CreateWorld() {
 
     // Initialize it.
     world->Initialize();
+}
+
+/**
+*   @brief De-initialize the world and destroy it.
+**/
+void GameLocals::DestroyWorld() {
+    // Give the gameworld a chance to finalize anything.
+    if (world) { 
+        world->Shutdown();
+
+        // Delete game world from memory.
+        delete world;
+        world = nullptr;
+    }
 }

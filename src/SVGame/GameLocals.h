@@ -18,8 +18,9 @@ class Gameworld;
 class IGamemode;
 #include "World/GameWorld.h"
 //
-// TODO: Inherit GameLocals from IGameExports. (IGameExports has yet to be created and serves as the exports class to a server.)
+// TODO:    Inherit GameLocals from IGameExports. (IGameExports has yet to be created and serves as the exports class to a server.)
 //
+//          Add a SetMaxEntities, SetMaxClients, and Allocate functions that are friendly to several other objects.
 
 /**
 *	@brief GameLocal is the main server game class.
@@ -53,19 +54,21 @@ public:
     *   @return A pointer to the gameworld object.
     **/
     inline Gameworld* GetGameworld() { return world; }
-
     /**
     *   @return A pointer to the gameworld its current gamemode object.
     **/
     inline IGamemode* GetCurrentGamemode() { return world->GetCurrentGamemode(); }
+    /**
+    *   @return A pointer to the clients array.
+    **/
+    inline ServerClient* GetClients() { return clients; }
 
     /**
-    *   @return A pointer to the gameworld its current gamemode object.
+    *   @return The number of maximum allowed clients.
     **/
     inline int32_t GetMaxClients() { return maxClients; }
-
     /**
-    *   @return A pointer to the gameworld its current gamemode object.
+    *   @return The number of maximum allowed entities.
     **/
     inline int32_t GetMaxEntities() { return maxEntities; }
 
@@ -94,6 +97,10 @@ private:
     *   @brief Create the world member object and initialize it.
     **/
     void CreateWorld();
+    /**
+    *   @brief De-initialize the world and destroy it.
+    **/
+    void DestroyWorld();
 
 
     // TODO: Add Get methods and privatize the members below.
