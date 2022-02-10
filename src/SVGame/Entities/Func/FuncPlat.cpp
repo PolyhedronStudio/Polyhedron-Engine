@@ -44,13 +44,14 @@ void FuncPlat::Precache() {
 // FuncPlat::Spawn
 //===============
 void FuncPlat::Spawn() {
-    Base::Spawn();
-
-    // Zero out angles.
+    // Zero out angles here for SetMoveDirection in Base::Spawn.
     SetAngles(vec3_zero());
 
+    // Spawn base class.
+    Base::Spawn();
+
     // Basic properties.
-    SetMoveDirection(GetAngles(), true);
+    //SetMoveDirection(GetAngles(), true);
     SetMoveType(MoveType::Push);
     SetSolid(Solid::BSP);
     SetModel(GetModel());
@@ -81,20 +82,16 @@ void FuncPlat::Spawn() {
     if (!GetLip()) {
         SetLip(8);
     }
-    SetSpeed(20);
-    SetAcceleration(5);
-    SetDeceleration(5);
 
-    LinkEntity();
-
-    // Set start and end positions.
+    // Set start and end positions to origin.
     SetStartPosition(GetOrigin());
     SetEndPosition(GetOrigin());
 
-    // Adjust endposition according to height.
     if (GetHeight()) {
+	    // Adjust endposition according to keyvalue set height.
         SetEndPosition(GetEndPosition() - vec3_t{0.f, 0.f, GetHeight()});
     } else {
+        // Adjust endposition based on own calculated height.
         SetEndPosition(GetEndPosition() - vec3_t{0.f, 0.f, (GetMaxs().z - GetMins().z) - GetLip()});
         height = GetEndPosition().z;
     }
@@ -141,17 +138,6 @@ void FuncPlat::Spawn() {
     //    moveInfo.state = MoverState::Bottom;
     //}
 
-    // Setup move info.
-    moveInfo.speed = GetSpeed();
-    moveInfo.acceleration = GetAcceleration();
-    moveInfo.deceleration = GetDeceleration();
-  //  moveInfo.wait = GetWaitTime();
-    moveInfo.distance = height + 120;
-    moveInfo.startOrigin = GetStartPosition();
-    moveInfo.startAngles = GetAngles();
-    moveInfo.endOrigin = GetEndPosition();
-    moveInfo.endAngles = GetAngles();
-
     //// To simplify logic elsewhere, make non-teamed doors into a team of one
     if ( GetTeam().empty() ) {
         SetTeamMasterEntity( this );
@@ -167,24 +153,40 @@ void FuncPlat::PostSpawn() {
     // We spawn this in post spawn so all other calculations have been prepared.
     SpawnPlatformTrigger();
 
+    // Calculate movement speed to use.
     CalculateMoveSpeed();
-    // We set origin here.
+
+    // The way how plats work is that they need to be triggered by an other
+    // trigger of sorts in case they got a platform name. This means that
+    // by default the trigger starts in its up state.
+    //
+    // Otherwise position it in its endposition and set state to bottom.
     if (!GetTargetName().empty()) {
         moveInfo.state = MoverState::Up;
     } else {
         SetOrigin(GetEndPosition());
         moveInfo.state = MoverState::Bottom;
     }
+    
+    // Setup move info.
+    moveInfo.speed = GetSpeed();
+    moveInfo.acceleration = GetAcceleration();
+    moveInfo.deceleration = GetDeceleration();
+    moveInfo.wait = GetWaitTime();
+    moveInfo.distance = height + 120;
+    moveInfo.startOrigin = GetStartPosition();
+    moveInfo.startAngles = GetAngles();
+    moveInfo.endOrigin = GetEndPosition();
+    moveInfo.endAngles = GetAngles();
 
+    // Link it.
     LinkEntity();
-
 }
 
 //===============
 // FuncPlat::PlatformUse
 //===============
 void FuncPlat::PlatformUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-    gi.DPrintf("PlatformUse\n");
     if (HasThinkCallback()) {
         gi.DPrintf("FuncPlat already has a think callback! - returning!!\n");
         return;
@@ -196,8 +198,9 @@ void FuncPlat::PlatformUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 // FuncPlat::PlatformBlocked
 //===============
 void FuncPlat::PlatformBlocked( SVGBaseEntity* other ) {
-    gi.DPrintf("PlatformBlocked\n");
-    SVGBaseEntity* ent;
+    if (!other) {
+        return;
+    }
 
     if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
         // Give it a chance to go away on its own terms (like gibs)
@@ -210,62 +213,22 @@ void FuncPlat::PlatformBlocked( SVGBaseEntity* other ) {
 
     SVG_InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 
-    //if ( GetSpawnFlags() & SF_Crusher ) {
-    //    return;
-    //}
-
-    if (moveInfo.wait >= 0) {
-        if (moveInfo.state == MoverState::Down) {
-            for (ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity()) {
-                if (ent->IsSubclassOf<FuncPlat>()) {
-                    static_cast<FuncPlat*>(ent)->PlatformGoUp(static_cast<FuncPlat*>(ent)->GetActivator());
-                }
-            }
-        } else if (moveInfo.state == MoverState::Up) {
-            for (ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity()) {
-                if (ent->IsSubclassOf<FuncPlat>()) {
-                    static_cast<FuncPlat*>(ent)->PlatformGoDown();
-                }
-            }
-        }
+    if (moveInfo.state == MoverState::Down) {
+	    PlatformGoUp( );
+    } else {
+	    PlatformGoDown();
     }
-}
-
-//===============
-// FuncPlat::PlatformTouch
-//===============
-void FuncPlat::PlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
-    gi.DPrintf("PlatformTouch\n");
-    // Clients only.
-    if (other->GetClient() == nullptr) {
-        return; // Players only; should we have special flags for monsters et al?
-    }
-
-    //// Ensure we wait till debounce time is over.
-    if ( level.time < debounceTouchTime ) {
-        return;
-    }
-
-    debounceTouchTime = level.time + 5.0f;
-
-    if ( !messageStr.empty() ) {
-        gi.CenterPrintf( other->GetServerEntity(), "%s", messageStr.c_str() );
-        gi.Sound( other->GetServerEntity(), CHAN_AUTO, gi.SoundIndex( MessageSoundPath ), 1.0f, ATTN_NORM, 0.0f );
-    }
-
-    Use(GetOwner(), other);
 }
 
 //===============
 // FuncPlat::PlatformGoUp
 //===============
-void FuncPlat::PlatformGoUp( SVGBaseEntity* activator ) {
-    gi.DPrintf("PlatformGoUp\n");
-    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
-        if ( moveInfo.startSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0.0f );
-        }
-        SetSound( moveInfo.middleSoundIndex );
+void FuncPlat::PlatformGoUp(  ) {
+    if (!(GetFlags() & EntityFlags::TeamSlave)) {
+	    if (moveInfo.startSoundIndex) {
+	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0.0f);
+	    }
+	    SetSound(moveInfo.startSoundIndex);
     }
 
     DoGoUp();
@@ -275,12 +238,11 @@ void FuncPlat::PlatformGoUp( SVGBaseEntity* activator ) {
 // FuncPlat::PlatformGoDown
 //===============
 void FuncPlat::PlatformGoDown() {
-    gi.DPrintf("PlatformGoDown\n");
-    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
-        if ( moveInfo.startSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0 );
-        }
-        SetSound( moveInfo.middleSoundIndex );
+    if (!(GetFlags() & EntityFlags::TeamSlave)) {
+	    if (moveInfo.startSoundIndex) {
+	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0.0f);
+	    }
+	    SetSound(moveInfo.startSoundIndex);
     }
     
     DoGoDown();
@@ -290,6 +252,12 @@ void FuncPlat::PlatformGoDown() {
 // FuncPlat::DoGoUp
 //===============
 void FuncPlat::DoGoUp() {
+    if (!(GetFlags() & EntityFlags::TeamSlave)) {
+	    if (moveInfo.middleSoundIndex) {
+	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.middleSoundIndex, 1, ATTN_STATIC, 0.0f);
+	    }
+	    SetSound(moveInfo.middleSoundIndex);
+    }
     moveInfo.state = MoverState::Up;
     BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
 }
@@ -298,6 +266,13 @@ void FuncPlat::DoGoUp() {
 // FuncPlat::DoGoDown
 //===============
 void FuncPlat::DoGoDown() {
+    if (!(GetFlags() & EntityFlags::TeamSlave)) {
+	    if (moveInfo.middleSoundIndex) {
+	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.middleSoundIndex, 1, ATTN_STATIC, 0.0f);
+	    }
+	    SetSound(moveInfo.middleSoundIndex);
+    }
+
     moveInfo.state = MoverState::Down;
     BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
 }
@@ -306,10 +281,9 @@ void FuncPlat::DoGoDown() {
 // FuncPlat::HitTop
 //===============
 void FuncPlat::HitTop() {
-    gi.DPrintf("HitTop\n");
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.endSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+            SVG_Sound( this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
         }
         SetSound( 0 );
     }
@@ -317,17 +291,16 @@ void FuncPlat::HitTop() {
     moveInfo.state = MoverState::Top;
 
     SetThinkCallback( &FuncPlat::PlatformGoDown );
-    SetNextThinkTime( level.time + 3 );
+    SetNextThinkTime( level.time + 3);
 }
 
 //===============
 // FuncPlat::HitBottom
 //===============
 void FuncPlat::HitBottom() {
-    gi.DPrintf("HitBottom\n");
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.endSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+            SVG_Sound( this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
         }
         SetSound( 0 );
     }
@@ -338,21 +311,29 @@ void FuncPlat::HitBottom() {
 //===============
 // FuncPlat::OnPlatformHitTop
 //===============
-void FuncPlat::OnPlatformHitTop( Entity* self ) {
-    gi.DPrintf("OnPlatformHitTop\n");
-    if ( self->classEntity->IsSubclassOf<FuncPlat>() ) {
-        static_cast<FuncPlat*>( self->classEntity )->HitTop();
+void FuncPlat::OnPlatformHitTop( SVGBaseEntity* self ) {
+    if (!self->IsSubclassOf<FuncPlat>()) {
+	    gi.DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
+        return;
     }
+    
+    // Cast.
+    FuncPlat* platEntity = static_cast<FuncPlat*>(self);
+	platEntity->HitTop();
 }
 
 //===============
 // FuncPlat::OnPlatformHitBottom
 //===============
-void FuncPlat::OnPlatformHitBottom( Entity* self ) {
-    gi.DPrintf("OnPlatformHitBottom\n");
-    if ( self->classEntity->IsSubclassOf<FuncPlat>() ) {
-        static_cast<FuncPlat*>(self->classEntity)->HitBottom();
+void FuncPlat::OnPlatformHitBottom( SVGBaseEntity* self ) {
+    if (!self->IsSubclassOf<FuncPlat>()) {
+	    gi.DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
+        return;
     }
+    
+    // Cast.
+    FuncPlat* platEntity = static_cast<FuncPlat*>(self);
+	platEntity->HitBottom();
 }
 
 //===============
@@ -364,46 +345,47 @@ void FuncPlat::CalculateMoveSpeed() {
     //}
 
     //FuncPlat* ent = nullptr;
-    //float min = 0.f;
-    //float time = 0.f;
-    //float newSpeed = 0.f;
-    //float ratio = 0.f;
-    //float distance = 0.f;
+    float min = 0.f;
+    float time = 0.f;
+    float newSpeed = 0.f;
+    float ratio = 0.f;
+    float distance = 0.f;
+    FuncPlat *ent = nullptr;
 
-    //// Find the smallest distance any member of the team will be moving
-    //min = fabsf( moveInfo.distance );
-    //for ( ent = dynamic_cast<FuncPlat*>( GetTeamChainEntity() ); ent; ent = dynamic_cast<FuncPlat*>( ent->GetTeamChainEntity() ) ) {
-    //    distance = fabsf( ent->moveInfo.distance );
-    //    if ( distance < min ) {
-    //        min = distance;
-    //    }
-    //}
-    //distance *= 2;
-    //time = min / GetSpeed();
+    // Find the smallest distance any member of the team will be moving
+    min = fabsf( moveInfo.distance );
+    for (ent = dynamic_cast<FuncPlat*>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat*>(ent->GetTeamChainEntity())) {
+        distance = fabsf( ent->moveInfo.distance );
+        if ( distance < min ) {
+            min = distance;
+        }
+    }
 
-    //// Adjust speeds so they will all complete at the same time
-    //for ( ent = this; ent; ent = dynamic_cast<FuncPlat*>(ent->GetTeamChainEntity()) ) {
-    //    newSpeed = fabsf( ent->moveInfo.distance ) / time;
-    //    ratio = newSpeed / ent->moveInfo.speed;
+    time = min / GetSpeed();
 
-    //    if ( ent->moveInfo.acceleration == ent->moveInfo.speed ) {
-    //        ent->moveInfo.acceleration = newSpeed;
-    //    } else {
-    //        ent->moveInfo.acceleration *= ratio;
-    //    }
+    // Adjust speeds so they will all complete at the same time
+    for (ent = dynamic_cast<FuncPlat*>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat*>(ent->GetTeamChainEntity())) {
+        newSpeed = fabsf( ent->moveInfo.distance ) / time;
+        ratio = newSpeed / ent->moveInfo.speed;
 
-    //    if ( ent->moveInfo.deceleration == ent->moveInfo.speed ) {
-    //        ent->moveInfo.deceleration = ent->moveInfo.speed;
-    //    } else {
-    //        ent->moveInfo.deceleration *= ratio;
-    //    }
+        if ( ent->moveInfo.acceleration == ent->moveInfo.speed ) {
+            ent->moveInfo.acceleration = newSpeed;
+        } else {
+            ent->moveInfo.acceleration *= ratio;
+        }
 
-    //    // Update moveInfo variables and class member variables
-    //    ent->SetAcceleration( ent->moveInfo.acceleration );
-    //    ent->SetDeceleration( ent->moveInfo.deceleration );
-    //    ent->moveInfo.speed = newSpeed;
-    //    ent->SetSpeed( newSpeed );
-    //}
+        if ( ent->moveInfo.deceleration == ent->moveInfo.speed ) {
+            ent->moveInfo.deceleration = newSpeed;
+        } else {
+            ent->moveInfo.deceleration *= ratio;
+        }
+
+        // Update moveInfo variables and class member variables
+        ent->SetAcceleration( ent->moveInfo.acceleration );
+        ent->SetDeceleration( ent->moveInfo.deceleration );
+        ent->moveInfo.speed = newSpeed;
+        ent->SetSpeed( newSpeed );
+    }
 }
 
 //===============
@@ -415,25 +397,16 @@ void FuncPlat::CalculateMoveSpeed() {
 // This bad boy spawns it, so keep that in mind if you're running out of edict slots.
 //===============
 void FuncPlat::SpawnPlatformTrigger() {
-    // Create the trigger.
+    // Get mins and max.
     vec3_t mins = GetMins();
     vec3_t maxs = GetMaxs();
 
-    // Trigger hull mins/maxs.
-    static const vec3_t hullMinsExpand = { 25.f, 25.f, 0.0f };
-    static const vec3_t hullMaxsExpand = { -25.f, -25.f, 8.0f };
-
-    FuncPlat* teamMember = nullptr;
-    for ( teamMember = dynamic_cast<FuncPlat*>(GetTeamChainEntity()); teamMember; teamMember = dynamic_cast<FuncPlat*>(teamMember->GetTeamChainEntity()) ) {
-        AddPointToBounds( teamMember->GetAbsoluteMin(), mins, maxs );
-        AddPointToBounds( teamMember->GetAbsoluteMax(), mins, maxs );
-    }
     // Start calculation of the new trigger mins/maxs.
-    vec3_t triggerMins = mins - hullMinsExpand;
-    vec3_t triggerMaxs = maxs + hullMaxsExpand;
+    vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
+    vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
 
-    const vec3_t &startPosition = GetStartPosition();
-    const vec3_t &endPosition = GetEndPosition();
+    const vec3_t startPosition = GetStartPosition();
+    const vec3_t endPosition = GetEndPosition();
     const float& lip = GetLip();
 
     // Calculate a slightly larger box.
@@ -463,28 +436,25 @@ void FuncPlat::SpawnPlatformTrigger() {
         triggerMaxs.y = triggerMins.y + 1;
     }
 
+    FuncPlat* teamMember = nullptr;
+    vec3_t    teamMins = GetMins();
+    vec3_t    teamMaxs = GetMaxs();
+    
+    // Add points to the generated bounding box for the trigger.
+    for (SVGBaseEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+	    // Check it is a derivate of base mover, if not, break out of this loop.
+	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
+	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+	        break;
+	    }
+
+        AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
+	    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+    }
+    
     // At last, create platform trigger entity.
     SVGBaseEntity *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
-
-    // Calculate move speeds.
-    //CalculateMoveSpeed();
 }
-
-////===============
-//// FuncPlat::UseAreaportals
-////===============
-//void FuncPlat::UseAreaportals( bool open ) const {
-//    if ( targetStr.empty()) {
-//        return;
-//    }
-//
-//    SVGBaseEntity* ent = nullptr;
-//    while ( ent = SVG_FindEntityByKeyValue( "targetname", targetStr, ent ) ) {
-//        if ( ent->IsClass<FuncAreaportal>() ) {
-//            static_cast<FuncAreaportal*>(ent)->ActivatePortal( open );
-//        }
-//    }
-//}
 
 //===============
 // Light::SpawnKey

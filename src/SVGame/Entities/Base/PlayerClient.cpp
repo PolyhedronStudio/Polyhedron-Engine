@@ -21,7 +21,7 @@
 #include "PlayerClient.h"
 
 // Constructor/Deconstructor.
-PlayerClient::PlayerClient(Entity* svEntity) : SVGBaseEntity(svEntity), 
+PlayerClient::PlayerClient(Entity* svEntity) : Base(svEntity), 
     airFinishedTime(0.f), debounceDamageTime(0.f), debouncePainTime(0.f), debounceSoundTime(0.f), debounceTouchTime(0.f) {
 
 }

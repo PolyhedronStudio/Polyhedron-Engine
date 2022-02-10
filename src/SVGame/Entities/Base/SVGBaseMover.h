@@ -11,18 +11,20 @@
 #ifndef __SVGAME_ENTITIES_BASE_SVGBASEPUSHER_H__
 #define __SVGAME_ENTITIES_BASE_SVGBASEPUSHER_H__
 
+// Forward declare.
 class SVGBaseTrigger;
 
-using PushMoveEndFunction = void(Entity*);
+// Callbacks used at the end of a pushmove action.
+using PushMoveEndFunction = void(SVGBaseEntity*);
 
-
-constexpr uint32_t PlatLowTrigger = 1U;
 struct MoverState
 {
     static constexpr uint32_t Top = 0U;
     static constexpr uint32_t Bottom = 1U;
     static constexpr uint32_t Up = 2U;
     static constexpr uint32_t Down = 3U;
+
+
 };
 
 //-------------------
@@ -30,24 +32,25 @@ struct MoverState
 // (In other words, entities that aren't a: Client or AI Player.
 //-------------------
 struct PushMoveInfo {
-    // fixed data
+    // Fixed data calculated at the spawn of a  basemover.
     vec3_t startOrigin = vec3_zero();
     vec3_t startAngles = vec3_zero();
     vec3_t endOrigin = vec3_zero();
     vec3_t endAngles = vec3_zero();
 
+    // Mover sound indices.
     int32_t startSoundIndex = 0;
     int32_t middleSoundIndex = 0;
     int32_t endSoundIndex = 0;
 
+    // Mover configuration.
     float acceleration = 0.f;
     float speed = 0.f;
     float deceleration = 0.f;
     float distance = 0.f;
-
     float wait = 0.f;
 
-    // state data
+    // State data
     int32_t state = 0;
     vec3_t dir = vec3_zero();
     float currentSpeed = 0.f;
@@ -55,7 +58,8 @@ struct PushMoveInfo {
     float nextSpeed = 0.f;
     float remainingDistance = 0.f;
     float deceleratedDistance = 0.f;
-    //void (*OnEndFunction)(Entity *);
+
+    // Callback function to use when the move has ended.
     PushMoveEndFunction* OnEndFunction = nullptr;
 };
 
@@ -89,27 +93,27 @@ public:
     // Get/Set
     //
     // Return the 'acceleration' float value.
-    inline float GetAcceleration() override {
+    virtual inline float GetAcceleration() override {
         return acceleration;
     }
     // Return the 'deceleration' float value.
-    inline float GetDeceleration() override {
+    virtual inline float GetDeceleration() override {
         return deceleration;
     }
     // Return the 'speed' float value.
-    inline float GetSpeed() override {
+    virtual inline float GetSpeed() override {
         return speed;
     }
     // Return the 'endPosition' vec3_t value.
-    const inline vec3_t& GetEndPosition() override {
+    virtual const inline vec3_t& GetEndPosition() override {
         return endPosition;
     }
     // Return the 'startPosition' vec3_t value.
-    const inline vec3_t& GetStartPosition() override {
+    virtual const inline vec3_t& GetStartPosition() override {
         return startPosition;
     }
     // Gets the lip
-    const inline float& GetLip() {
+    virtual const inline float& GetLip() {
         return lip;
     }
 
@@ -121,27 +125,27 @@ public:
     }
 
     // Set the 'acceleration' float value.
-    inline void SetAcceleration(const float& acceleration) {
+    virtual inline void SetAcceleration(const float& acceleration) {
         this->acceleration = acceleration;
     }
     // Set the 'deceleration' float value.
-    inline void SetDeceleration(const float& deceleration) {
+    virtual inline void SetDeceleration(const float& deceleration) {
         this->deceleration = deceleration;
     }
     // Set the 'endPosition' vec3_t value.
-    inline void SetEndPosition(const vec3_t& endPosition) {
+    virtual inline void SetEndPosition(const vec3_t& endPosition) {
         this->endPosition = endPosition;
     }
     // Set the 'speed' float value.
-    inline void SetSpeed(const float &speed) {
+    virtual inline void SetSpeed(const float& speed) {
         this->speed = speed;
     }
     // Set the 'startPosition' vec3_t value.
-    inline void SetStartPosition(const vec3_t& startPosition) {
+    virtual inline void SetStartPosition(const vec3_t& startPosition) {
         this->startPosition = startPosition;
     }
     // Sets the lip
-    inline void SetLip( const float& lip ) {
+    virtual inline void SetLip(const float& lip) {
         this->lip = lip;
     }
 

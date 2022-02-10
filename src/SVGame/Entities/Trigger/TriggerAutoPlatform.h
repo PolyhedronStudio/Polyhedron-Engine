@@ -13,6 +13,7 @@ public:
 	DefineClass( TriggerAutoPlatform, SVGBaseTrigger );
 
 	void					Spawn() override;
+
 	// Responds to players touching this trigger
 	void					AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
 	// Creates an automatic platform trigger and sets everything up for it

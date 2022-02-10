@@ -31,7 +31,9 @@ public:
     //! Callback functions.
     void WorldspawnThink(void);
 
-private:
     //! Default gravity constant.
-    static constexpr int32_t DEFAULT_GRAVITY = 750;
+    static constexpr int32_t DEFAULT_GRAVITY = 875;
+private:
+    //! Parsed gravity from key/values. (Named globalGravity to prevent collision with baseentity gravity var.)
+    int32_t globalGravity = 0;
 };

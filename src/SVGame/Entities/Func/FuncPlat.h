@@ -53,11 +53,9 @@ protected:
     // Callbacks for FuncPlat.
     //
     void        PlatformUse( SVGBaseEntity* other, SVGBaseEntity* activator );
-    //void        DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point );
     void        PlatformBlocked( SVGBaseEntity* other );
-    void        PlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
-
-    void        PlatformGoUp( SVGBaseEntity* activator );
+    
+    void        PlatformGoUp();
     void        PlatformGoDown();
 
     //
@@ -74,8 +72,8 @@ protected:
     // 
     // These are leftovers from the legacy brush movement functions
     // Soon, we'll have a... better way... of doing this
-    static void OnPlatformHitTop( Entity* self );
-    static void OnPlatformHitBottom( Entity* self );
+    static void OnPlatformHitTop( SVGBaseEntity* self );
+    static void OnPlatformHitBottom( SVGBaseEntity* self );
 
     //
     // Private Utilities.
@@ -87,7 +85,7 @@ protected:
     // Member Variables.
     //
     // Waiting time until it can be triggered again.
-    float debounceTouchTime{ 0.0f };
+    float debounceTouchTime = 0.0f;
     // Height distance for travelling.
     float height = 0.f;
 

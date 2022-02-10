@@ -199,7 +199,7 @@ void SVGBaseMover::SwapPositions() {
 // =========================
 void SVGBaseMover::BrushMoveDone() {
 	SetVelocity( vec3_zero() );
-	moveInfo.OnEndFunction( serverEntity );
+	moveInfo.OnEndFunction( this );
 }
 
 //===============
@@ -272,7 +272,7 @@ void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 //===============
 void SVGBaseMover::BrushAngleMoveDone() {
 	SetAngularVelocity( vec3_zero() );
-	moveInfo.OnEndFunction( GetServerEntity() );
+	moveInfo.OnEndFunction( this );
 }
 
 //===============
@@ -442,12 +442,15 @@ void SVGBaseMover::BrushAccelerate() {
 // so change the speed for the next frame
 //===============
 void SVGBaseMover::BrushAccelerateThink() {
+	// Calculate remaining distance.
 	moveInfo.remainingDistance -= moveInfo.currentSpeed;
 
-	if ( moveInfo.currentSpeed == 0 ) { // Happens when starting or blocked
+	// In case of a start or blockade speed == 0 so recalculate acceleration.
+	if ( moveInfo.currentSpeed == 0 ) {
 		BrushAccelerateCalc();
 	}
 
+	// Accelerate.
 	BrushAccelerate();
 
 	// Will the entire move complete on the next frame
@@ -456,7 +459,7 @@ void SVGBaseMover::BrushAccelerateThink() {
 		return;
 	}
 
-	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * 10.0f ) );
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * BASE_FRAMERATE ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
 	SetNextThinkTime( level.time + 1.f * FRAMETIME );

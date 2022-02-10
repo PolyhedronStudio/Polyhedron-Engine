@@ -1403,6 +1403,7 @@ void DefaultGamemode::PutClientInServer(Entity *ent) {
     playerClient->SetClient(&game.clients[index]);
     playerClient->SetTakeDamage(TakeDamage::Aim);
     playerClient->SetMoveType(MoveType::Walk);
+    playerClient->SetMass(200);
     playerClient->SetViewHeight(22);
     playerClient->SetInUse(true);
     playerClient->SetClassname("player");

@@ -50,7 +50,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 	bool isMonster = other->GetServerFlags() & EntityServerFlags::Monster;
 	// Alternatively, when we have a BaseMonster class:
 	// isMonster = other->IsSubclassOf<BaseMonster>();
-	gi.DPrintf("TOUCHED PLATFORM TRIGGER11111111111111\n");
+
 	// Only activate if we are a client.
 	if (!other->GetClient()) {
 		return;
@@ -61,6 +61,14 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 		return;
 	}
 
+	// Wait till it can be triggered again.
+	if (level.time < debounceTouchTime) {
+	    return;
+	}
+
+	// Set new debounce time.
+	debounceTouchTime = level.time + 3.0f;
+
 	// Ensure that the owner is a func_plat.
 	SVGBaseEntity* ownerEntity = GetEnemy();
 
@@ -69,6 +77,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 		return;
 	}
 	gi.DPrintf("TOUCHED PLATFORM TRIGGER22222222\n");
+
 	// It is save to cast the pointer.
 	FuncPlat* platformEntity = dynamic_cast<FuncPlat*>(ownerEntity);
 	
@@ -77,30 +86,26 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 	
 	// Action is determined by move state.
 	if (moveInfo->state == MoverState::Bottom) {
-		platformEntity->PlatformGoUp(self);
+		platformEntity->PlatformGoUp();
 	} else if (moveInfo->state == MoverState::Top) {
-		platformEntity->SetNextThinkTime(level.time + 1);
+		platformEntity->SetNextThinkTime(level.time + 1 * FRAMETIME);
 	}
 
-	if ( other->GetHealth() <= 0 ) {
-		return; // If you're dead, you can't pass
-	}
-	// Only players and monsters are allowed
-	if ( !(isMonster) && (!other->GetClient()) ) {
-		return;
-	}
-	////// Unless the no monster flag is set
-	////if ( (GetOwner()->GetSpawnFlags() & FuncPlat::SF_NoMonsters) && (isMonster) ) {
-	////	return;
-	////}
-	//// If it's not the time to activate the platform yet, then don't
-	if ( level.time < debounceTouchTime ) {
-		return;
-	}
+	//if ( other->GetHealth() <= 0 ) {
+	//	return; // If you're dead, you can't pass
+	//}
+	//// Only players and monsters are allowed
+	//if ( !(isMonster) && (!other->GetClient()) ) {
+	//	return;
+	//}
+	//////// Unless the no monster flag is set
+	//////if ( (GetOwner()->GetSpawnFlags() & FuncPlat::SF_NoMonsters) && (isMonster) ) {
+	//////	return;
+	//////}
+	////// If it's not the time to activate the platform yet, then don't
 
-	debounceTouchTime = level.time + 1.0f;
 	// Trigger our platform
-	GetOwner()->Use( other, other );
+	GetOwner()->Use( other, GetActivator() );
 }
 
 //===============
@@ -108,9 +113,10 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 //===============
 TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
 	TriggerAutoPlatform* autoPlatform = SVG_CreateClassEntity<TriggerAutoPlatform>();
+    autoPlatform->SetOrigin(ownerEntity->GetEndPosition());
+	autoPlatform->LinkEntity();
 	autoPlatform->Spawn();
 	autoPlatform->SetSolid(Solid::Trigger);
-	//autoPlatform->SetOrigin(ownerEntity->GetEndPosition());
 	autoPlatform->SetMins( ownerMins );
 	autoPlatform->SetMaxs( ownerMaxs );
 	autoPlatform->SetOwner( ownerEntity );

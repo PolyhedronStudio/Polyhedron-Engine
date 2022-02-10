@@ -200,6 +200,10 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	if ( key == "classname" ) {
 		SetClassname( value.c_str() );
 	}
+	// Stop mapversion from causing warnings.
+	else if (key == "mapversion") {
+		
+	}
 	// Angle.
 	else if (key == "angle") {
 		// Parse angle.
@@ -231,8 +235,6 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "delay") {
 		// Parsed float.
 		float parsedFloat = 0.f;
-
-		// Parse.
 		ParseFloatKeyValue(key, value, parsedFloat);
 
 		// Assign.
@@ -242,19 +244,24 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "killtarget") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetKillTarget(parsedString);
 	}
+	// Mass.
+	else if (key == "mass") {
+	    // Parsed string.
+	    int32_t parsedInteger = 0;
+	    ParseIntegerKeyValue(key, value, parsedInteger);
+
+	    // Assign.
+	    SetMass(parsedInteger);
+	} 
 	// Message.
 	else if (key == "message") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
@@ -281,8 +288,6 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else if (key == "target") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
@@ -291,8 +296,6 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else 	if (key == "targetname") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
@@ -307,7 +310,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		// Set SpawnFlags.
 		SetSpawnFlags(parsedSpawnFlags);
 	} else {
-		gi.DPrintf("Entity ID: %i - classname: %s has unknown Key/Value['%s','%s']\n", GetServerEntity()->state.number, GetServerEntity()->classname, key.c_str(), value.c_str());
+	    gi.DPrintf("Warning: Entity[#%i:%s] has unknown Key/Value['%s','%s']\n", GetNumber(), GetClassname(), key.c_str(), value.c_str());
 	}
 }
 
@@ -442,16 +445,6 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 
 	// Remove all entities that qualify as our killtargets
 	if ( !GetKillTarget().empty() ) {
-		//SVGBaseEntity* victim = nullptr;
-		//while ( victim = SVG_FindEntityByKeyValue( "targetname", GetKillTarget(), victim ) ) {	// It is going to die, free it.
-		//	//SVG_FreeEntity( victim->GetServerEntity() );
-		//	if ( !victim->IsInUse() ) {
-		//		gi.DPrintf( "entity was removed while using killtargets\n" );
-		//		continue;
-		//	}
-
-		//	victim->Remove();
-		//}
 		qboolean foundKillTarget = false;
 
 		for (auto* killtargetEntity: GetBaseEntityRange<0, MAX_EDICTS>()
@@ -475,26 +468,6 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 
 	// Actually fire the targets
 	if ( !GetTarget().empty() ) {
-		//SVGBaseEntity* targetEntity = nullptr;
-		//while (( targetEntity = SVG_FindEntityByKeyValue( "targetname", GetTarget(), targetEntity) )) { 
-		//	// Doors fire area portals in a special way, so skip those
-		//	if ( targetEntity->GetClassname() == "func_areaportal"
-		//		 && (GetClassname() == "func_door" || GetClassname() == "func_door_rotating") ) {
-		//		continue;
-		//	}
-		//	
-		//	// Make sure it is in use
-		//	if ( !targetEntity->IsInUse() ) {
-		//		gi.DPrintf( "WARNING: Entity #%i was removed while using targets\n", GetServerEntity()->state.number );
-		//		continue;
-		//	}
-
-		//	if ( targetEntity == this ) {
-		//		gi.DPrintf( "WARNING: Entity #%i used itself.\n", GetServerEntity()->state.number );
-		//	} else {
-		//		targetEntity->Use( this, activatorOverride );
-		//	}
-		//}
 		qboolean foundTarget = false;
 		for (auto* triggerEntity : GetBaseEntityRange<0, MAX_EDICTS>()
 			| bef::IsValidPointer

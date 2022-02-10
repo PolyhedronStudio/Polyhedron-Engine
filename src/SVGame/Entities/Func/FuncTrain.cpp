@@ -245,9 +245,9 @@ void FuncTrain::WaitAtCorner() {
 //===============
 // FuncTrain::OnWaitAtCorner
 //===============
-void FuncTrain::OnWaitAtCorner( Entity* ent ) {
-	if ( ent->classEntity->IsSubclassOf<FuncTrain>() ) {
-		static_cast<FuncTrain*>( ent->classEntity )->WaitAtCorner();
+void FuncTrain::OnWaitAtCorner( SVGBaseEntity* ent) {
+	if ( ent->IsSubclassOf<FuncTrain>() ) {
+		dynamic_cast<FuncTrain*>( ent )->WaitAtCorner();
 	}
 }
 

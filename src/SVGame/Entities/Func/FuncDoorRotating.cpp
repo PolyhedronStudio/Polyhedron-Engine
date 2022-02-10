@@ -31,13 +31,15 @@ FuncDoorRotating::FuncDoorRotating( Entity* entity )
 // FuncDoorRotating::Spawn
 //===============
 void FuncDoorRotating::Spawn() {
-
-	// Be sure to set angles first before calling Base::Spawn.
+	// Be sure to set angles first before calling Base::Spawn because
+	// a func_door already does SetMoveAngles for us.
 	SetAngles( vec3_zero() );
 
+	// Set acceleration to speed in case it isn't set.
 	if (!GetAcceleration()) {
 		SetAcceleration(GetSpeed());
 	}
+	// Set deceleration to speed in case it isn't set.
 	if (!GetDeceleration()) {
 		SetDeceleration(GetSpeed());
 	}
@@ -60,6 +62,7 @@ void FuncDoorRotating::Spawn() {
 		moveDirection = vec3_negate( moveDirection );
 	}
 
+	// Set a default distance.
 	if ( !distance ) {
 		gi.DPrintf( "entity: %i:%s with no distance set\n", GetNumber(), GetClassname() );
 		distance = 90.0f;
@@ -75,8 +78,8 @@ void FuncDoorRotating::Spawn() {
 		moveDirection = vec3_negate( moveDirection );
 	}
 
+	// Setup our moveInfo.
 	moveInfo.state = MoverState::Bottom;
-
 	moveInfo.speed = GetSpeed();
 	moveInfo.acceleration = GetAcceleration();
 	moveInfo.deceleration = GetDeceleration();
@@ -87,6 +90,7 @@ void FuncDoorRotating::Spawn() {
 	moveInfo.endAngles = GetEndPosition();
 	moveInfo.dir = moveDirection;
 
+	// Link door.
 	LinkEntity();
 }
 

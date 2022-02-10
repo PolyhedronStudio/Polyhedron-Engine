@@ -199,7 +199,7 @@ void SVG_Impact(SVGBaseEntity *entityA, SVGTrace *trace)
     }
 
     // If the impact came from a trace, set entityB to this ent.
-    if (trace) {
+    if (trace && trace->ent) {
         entityB = trace->ent;
     }
 
@@ -753,8 +753,6 @@ void SVG_Physics_Pusher(SVGEntityHandle &entityHandle)
             part->Blocked(obstacle);
         }
 
-        //if (part->Blocked)
-        //    part->Blocked(part, obstacle);
 #if 0
         // if the pushed entity went away and the pusher is still there
         if (!obstacle->inUse && part->inUse)

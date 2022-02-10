@@ -51,6 +51,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // C++ STL
 //-----------------
+// For std ranges and view support.
+//#ifdef __clang__
+//#undef _HAS_CXX23
+//#define _HAS_CXX23 1
+//#endif
+
 #include <string>
 #include <numbers>
 #include <iostream>

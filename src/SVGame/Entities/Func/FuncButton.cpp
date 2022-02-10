@@ -114,8 +114,15 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value ) {
 //===============
 // FuncButton::OnButtonDone
 //===============
-void FuncButton::OnButtonDone( Entity* self ) {
-	FuncButton* button = static_cast<FuncButton*>(self->classEntity);
+void FuncButton::OnButtonDone(SVGBaseEntity* self) {
+	// Chances are nihil of this happening, but let's be sure to check so we can assist ourselves and other devs.
+    if (!self->IsSubclassOf<FuncButton>()) { 
+		gi.DPrintf("Warning: In function %s, base entity #%i is not of type %s\n", __func__, self->GetNumber());
+		return;
+	}
+
+	// Cast and execute.
+	FuncButton* button = static_cast<FuncButton*>(self);
 	button->ButtonDone();
 }
 
@@ -144,8 +151,15 @@ void FuncButton::ButtonReturn() {
 //===============
 // FuncButton::OnButtonWait
 //===============
-void FuncButton::OnButtonWait( Entity* self ) {
-	FuncButton* button = static_cast<FuncButton*>(self->classEntity);
+void FuncButton::OnButtonWait(SVGBaseEntity* self) {
+	// Chances are nihil of this happening, but let's be sure to check so we can assist ourselves and other devs.
+    if (!self->IsSubclassOf<FuncButton>()) { 
+		gi.DPrintf("Warning: In function %s, base entity #%i is not of type %s\n", __func__, self->GetNumber());
+		return;
+	}
+
+	// Cast and execute.
+	FuncButton* button = static_cast<FuncButton*>(self);
 	button->ButtonWait();
 }
 

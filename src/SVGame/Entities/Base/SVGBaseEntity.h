@@ -244,8 +244,8 @@ public:
     }
 
     // Return the 'mass' value.
-    inline const int32_t GetMass() {
-        return this->mass;
+    inline int32_t GetMass() {
+        return mass;
     }
 
     // Return the 'maxHealth' value.
@@ -573,8 +573,8 @@ public:
     }
 
     // Set the 'mass' value.
-    inline void SetMass(const int32_t mass) {
-        this->mass = mass;
+    inline void SetMass(const int32_t &_mass) {
+        this->mass = _mass;
     }
 
     // Set the 'maxHealth' value.

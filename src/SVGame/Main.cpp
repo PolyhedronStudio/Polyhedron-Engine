@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "Entities.h"
+#include "Entities/Worldspawn.h"
 //#include "Entities/Base/SVGEntityHandle.h"
 #include "Entities/Base/PlayerClient.h"
 
@@ -265,7 +266,7 @@ static void SVG_SetupCVars() {
     sv_rollspeed = gi.cvar("sv_rollspeed", "200", 0);
     sv_rollangle = gi.cvar("sv_rollangle", "2", 0);
     sv_maxvelocity = gi.cvar("sv_maxvelocity", "2000", 0);
-    sv_gravity = gi.cvar("sv_gravity", "750", 0);
+    sv_gravity = gi.cvar("sv_gravity", std::to_string(Worldspawn::DEFAULT_GRAVITY).c_str(), 0);
 
     // Noset vars
     dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);

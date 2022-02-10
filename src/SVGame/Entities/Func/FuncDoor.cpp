@@ -164,9 +164,17 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 
     if ( GetSpawnFlags() & SF_Toggle ) {
         if ( moveInfo.state == MoverState::Up || moveInfo.state == MoverState::Top ) {
-            // Trigger all paired doors
-            for ( SVGBaseEntity* ent = this; nullptr != ent; ent = ent->GetTeamChainEntity() ) {
+            // Trigger all paired movers.
+	        for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+		        // Check it is a derivate of base mover, if not, break out of this loop.
+		        if (!ent->IsSubclassOf<SVGBaseMover>()) {
+		            gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+		            break;
+		        }
+
+                // Ensure it is a subclass of a door otherwise we can't tell it to go down.
                 if ( ent->IsSubclassOf<FuncDoor>() ) {
+                    // Unset message so it triggers its display only once.
                     ent->SetMessage( "" );
 
                     // WID: TODO: Add a flag for whether to unset touch callbacks after being used for the first time.
@@ -175,17 +183,24 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
                 }
             }
 
+            // Escape out of this function.
             return;
         }
     }
 
-    // Trigger all paired doors
-    for ( SVGBaseEntity* ent = this; nullptr != ent; ent = ent->GetTeamChainEntity() ) {
+    // Trigger all paired movers.
+    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+        // Check it is a derivate of base mover, if not, break out of this loop.
+        if (!ent->IsSubclassOf<SVGBaseMover>()) {
+	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+            break;
+        }
+
         if ( ent->IsSubclassOf<FuncDoor>() ) {
             ent->SetMessage( "" );
             // WID: TODO: Add a flag for whether to unset touch callbacks after being used for the first time.
             //ent->SetTouchCallback( nullptr );
-            static_cast<FuncDoor*>( ent )->DoorGoUp( activator );
+	        static_cast<FuncDoor*>(ent)->DoorGoUp(activator);
         }
     }
 }
@@ -194,8 +209,13 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 // FuncDoor::DoorShotOpen
 //===============
 void FuncDoor::DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point ) {
-    SVGBaseEntity* ent;
-    for ( ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity() ) {
+    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+	    // Check it is a derivate of base mover, if not, break out of this loop.
+	    if (!ent->IsSubclassOf<SVGBaseMover>()) {
+	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+	        break;
+	    }
+
         ent->SetHealth( GetMaxHealth() );
         ent->SetTakeDamage( TakeDamage::No );
     }
@@ -207,11 +227,11 @@ void FuncDoor::DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, 
 // FuncDoor::DoorBlocked
 //===============
 void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
-    SVGBaseEntity* ent;
-    
+
     if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
         // Give it a chance to go away on its own terms (like gibs)
         SVG_InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
+
         // If it's still there, nuke it
         if ( other->GetHealth() > 0 || other->GetSolid() != Solid::Not ) {
             SVG_BecomeExplosion1( other );
@@ -228,13 +248,27 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
     // so let it just squash the object to death real fast
     if ( moveInfo.wait >= 0 ) {
         if ( moveInfo.state == MoverState::Down ) {
-            for ( ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity() ) {
+	        for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+		        // Check it is a derivate of base mover, if not, break out of this loop.
+		        if (!ent->IsSubclassOf<SVGBaseMover>()) {
+		            gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+		            break;
+		        }
+
+                // Execute go up.
                 if ( ent->IsSubclassOf<FuncDoor>() ) {
                     static_cast<FuncDoor*>( ent )->DoorGoUp( static_cast<FuncDoor*>( ent )->GetActivator() );
                 }
             }
         } else {
-            for ( ent = GetTeamMasterEntity(); nullptr != ent; ent = GetTeamChainEntity() ) {
+	        for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+		        // Check it is a derivate of base mover, if not, break out of this loop.
+		        if (!ent->IsSubclassOf<SVGBaseMover>()) {
+		            gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+		            break;
+		        }
+
+                // Execute go down.
                 if ( ent->IsSubclassOf<FuncDoor>() ) {
                     static_cast<FuncDoor*>( ent )->DoorGoDown();
                 }
@@ -371,18 +405,18 @@ void FuncDoor::HitBottom() {
 //===============
 // FuncDoor::OnDoorHitTop
 //===============
-void FuncDoor::OnDoorHitTop( Entity* self ) {
-    if ( self->classEntity->IsSubclassOf<FuncDoor>() ) {
-        static_cast<FuncDoor*>( self->classEntity )->HitTop();
+void FuncDoor::OnDoorHitTop( SVGBaseEntity* self ) {
+    if ( self->IsSubclassOf<FuncDoor>() ) {
+        static_cast<FuncDoor*>( self )->HitTop();
     }
 }
 
 //===============
 // FuncDoor::OnDoorHitBottom
 //===============
-void FuncDoor::OnDoorHitBottom( Entity* self ) {
-    if ( self->classEntity->IsSubclassOf<FuncDoor>() ) {
-        static_cast<FuncDoor*>(self->classEntity)->HitBottom();
+void FuncDoor::OnDoorHitBottom( SVGBaseEntity* self ) {
+    if ( self->IsSubclassOf<FuncDoor>() ) {
+        static_cast<FuncDoor*>(self)->HitBottom();
     }
 }
 
@@ -394,46 +428,67 @@ void FuncDoor::CalculateMoveSpeed() {
         return; // Only the team master does this
     }
 
-    FuncDoor* ent = nullptr;
-    float min;
-    float time;
-    float newSpeed;
-    float ratio;
-    float distance;
+    float min = 0.f;
+    float time = 0.f;
+    float newSpeed = 0.f;
+    float ratio = 0.f;
+    float distance = 0.f;
     
     // Find the smallest distance any member of the team will be moving
     min = fabsf( moveInfo.distance );
-    for ( ent = dynamic_cast<FuncDoor*>( GetTeamChainEntity() ); ent; ent = dynamic_cast<FuncDoor*>( ent->GetTeamChainEntity() ) ) {
-        distance = fabsf( ent->moveInfo.distance );
+    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+	    // Check it is a derivate of base mover, if not, break out of this loop.
+	    if (!ent->IsSubclassOf<SVGBaseMover>()) {
+	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+	        break;
+	    }
+
+        // Cast to base mover and fetch moveinfo.
+        SVGBaseMover* moverEntity = static_cast<SVGBaseMover*>(ent);
+	    PushMoveInfo* moveInfo = moverEntity->GetPushMoveInfo();
+
+        // Calculate distance.
+        distance = fabsf( moveInfo->distance );
         if ( distance < min ) {
             min = distance;
         }
     }
 
+    // Calculate time.
     time = min / GetSpeed();
 
     // Adjust speeds so they will all complete at the same time
-    for ( ent = this; ent; ent = dynamic_cast<FuncDoor*>(ent->GetTeamChainEntity()) ) {
-        newSpeed = fabsf( ent->moveInfo.distance ) / time;
-        ratio = newSpeed / ent->moveInfo.speed;
+    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+	    // Check it is a derivate of base mover, if not, break out of this loop.
+	    if (!ent->IsSubclassOf<SVGBaseMover>()) {
+	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+	        break;
+	    }
 
-        if ( ent->moveInfo.acceleration == ent->moveInfo.speed ) {
-            ent->moveInfo.acceleration = newSpeed;
+	    // Cast to base mover and fetch moveinfo.
+	    SVGBaseMover* moverEntity = static_cast<SVGBaseMover*>(ent);
+	    PushMoveInfo* moveInfo = moverEntity->GetPushMoveInfo();
+
+        newSpeed = fabsf( moveInfo->distance ) / time;
+        ratio = newSpeed / moveInfo->speed;
+
+        if ( moveInfo->acceleration == moveInfo->speed ) {
+            moveInfo->acceleration = newSpeed;
         } else {
-            ent->moveInfo.acceleration *= ratio;
+            moveInfo->acceleration *= ratio;
         }
 
-        if ( ent->moveInfo.deceleration == ent->moveInfo.speed ) {
-            ent->moveInfo.deceleration = ent->moveInfo.speed;
+        if ( moveInfo->deceleration == moveInfo->speed ) {
+            moveInfo->deceleration = moveInfo->speed;
         } else {
-            ent->moveInfo.deceleration *= ratio;
+            moveInfo->deceleration *= ratio;
         }
 
         // Update moveInfo variables and class member variables
-        ent->SetAcceleration( ent->moveInfo.acceleration );
-        ent->SetDeceleration( ent->moveInfo.deceleration );
-        ent->moveInfo.speed = newSpeed;
-        ent->SetSpeed( newSpeed );
+        moverEntity->SetAcceleration( moveInfo->acceleration );
+        moverEntity->SetDeceleration( moveInfo->deceleration );
+        moveInfo->speed = newSpeed;
+        moverEntity->SetSpeed( newSpeed );
     }
 }
 
@@ -446,7 +501,7 @@ void FuncDoor::CalculateMoveSpeed() {
 // This bad boy spawns it, so keep that in mind if you're running out of edict slots.
 //===============
 void FuncDoor::SpawnDoorTrigger() {
-    FuncDoor* teamMember = nullptr;
+    SVGBaseMover*  teamMember = nullptr;
     SVGBaseEntity* trigger = nullptr;
     vec3_t mins = GetMins();
     vec3_t maxs = GetMaxs();
@@ -455,7 +510,13 @@ void FuncDoor::SpawnDoorTrigger() {
         return; // Only the team leader spawns a trigger
     }
     
-    for ( teamMember = dynamic_cast<FuncDoor*>(GetTeamChainEntity()); teamMember; teamMember = dynamic_cast<FuncDoor*>(teamMember->GetTeamChainEntity()) ) {
+    for (SVGBaseEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+	    // Check it is a derivate of base mover, if not, break out of this loop.
+	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
+	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+	        break;
+	    }
+
         AddPointToBounds( teamMember->GetAbsoluteMin(), mins, maxs );
         AddPointToBounds( teamMember->GetAbsoluteMax(), mins, maxs );
     }

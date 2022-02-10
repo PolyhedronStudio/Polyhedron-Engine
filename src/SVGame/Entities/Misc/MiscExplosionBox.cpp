@@ -53,8 +53,6 @@ void MiscExplosionBox::Precache() {
     SVG_PrecacheModel("models/objects/debris1/tris.md2");
     SVG_PrecacheModel("models/objects/debris2/tris.md2");
     SVG_PrecacheModel("models/objects/debris3/tris.md2");
-
-    //gi.DPrintf("MiscExplosionBox::Precache();");
 }
 
 //
@@ -72,9 +70,6 @@ void MiscExplosionBox::Spawn() {
 
     // Set move type.
     SetMoveType(MoveType::Toss);
-
-    // Since this is a "monster", after all...
-    SetServerFlags(EntityServerFlags::Monster);
 
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -152,6 +147,14 @@ void MiscExplosionBox::Think() {
     Base::Think();
 }
 
+//===============
+// MiscExplosionBox::SpawnKey
+//
+//===============
+void MiscExplosionBox::SpawnKey(const std::string& key, const std::string& value) {
+	Base::SpawnKey(key, value);
+}
+
 
 //
 // Callback Functions.
@@ -177,9 +180,11 @@ void MiscExplosionBox::ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* ac
 void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     // First, ensure our origin is +1 off the floor.
     vec3_t traceStart = GetOrigin() + vec3_t{
-        0.f, 0.f, +1.f
+        0.f, 0.f, 1.f
     };
-        
+    
+    SetOrigin(traceStart);
+
     // Calculate the end origin to use for tracing.
     vec3_t traceEnd = traceStart + vec3_t{
         0, 0, -256.f
@@ -326,26 +331,31 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
 //
 void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
-    if (!self) {
-	    return;
-    }
+    //if (!self || !other) {
+	   // return;
+    //}
     if (!other) {
 	    return;
     }
 
     // TODO: Move elsewhere in baseentity, I guess?
     // Prevent this entity from touching itself.
-    if (self == other) {
+    //if (self == other) {
+    //    return;
+    //}
+    if (this == other) {
+	    gi.DPrintf("This == other\n");
         return;
     }
 
     // Ground entity checks.
-    if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == self)) {
+    if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
+	    gi.DPrintf("GroundEntity = OTHER\n");
 	    return;
     }
 
     // Calculate ratio to use.
-    float ratio = (float)self->GetMass() / (float) other->GetMass();
+    float ratio = ((float)other->GetMass()) / ((float) GetMass());
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
@@ -353,8 +363,9 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
     // Calculate yaw to use based on direction.
     float yaw = vec3_to_yaw(dir);
 
+    gi.DPrintf("RATIO=======%f  SELF->MASS=======%i  OTHER->MASS========%i\n OTHER->classname=%s\n", ratio, GetMass(), other->GetMass(), other->GetClassname());
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(self, yaw, (20 / BASE_FRAMEDIVIDER) * ratio * FRAMETIME);
+    SVG_StepMove_Walk(this, yaw, (20.f / BASE_FRAMEDIVIDER) * ratio * FRAMETIME);
     //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 

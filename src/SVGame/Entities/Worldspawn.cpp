@@ -177,15 +177,14 @@ void Worldspawn::Precache() {
     SVG_PrecacheImage("help");
     SVG_PrecacheImage("field_3");
 
-    if (!st.gravity)
-        gi.cvar_set("sv_gravity", "750");
+    if (!globalGravity)
+        gi.cvar_set("sv_gravity", std::to_string(DEFAULT_GRAVITY).c_str());
     else
-        gi.cvar_set("sv_gravity", st.gravity);
+        gi.cvar_set("sv_gravity", std::to_string(globalGravity).c_str());
 
     snd_fry = SVG_PrecacheSound("player/fry.wav");  // standing in lava / slime
 
     SVG_PrecacheItem(SVG_FindItemByPickupName("Blaster"));
-    gi.DPrintf("Worldspawn::Spawn();\n");
 
     SVG_PrecacheSound("player/lava1.wav");
     SVG_PrecacheSound("player/lava2.wav");
@@ -353,11 +352,8 @@ void Worldspawn::SpawnKey(const std::string& key, const std::string& value) {
         int32_t parsedInteger = 0;
         ParseIntegerKeyValue(key, value, parsedInteger);
         
-        // Set gravity to default if parsing failed.
-        if (!parsedInteger)
-            gi.cvar_set("sv_gravity", std::to_string(Worldspawn::DEFAULT_GRAVITY).c_str());
-        else
-            gi.cvar_set("sv_gravity", std::to_string(parsedInteger).c_str());
+        // Assign.
+        globalGravity = parsedInteger;
     } else if (key == "message") {
         // Parse message.
         std::string message = "";
