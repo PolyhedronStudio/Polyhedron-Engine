@@ -248,14 +248,17 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
     trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, CONTENTS_MASK_MONSTERSOLID);
 
+    // TODO: Make a flag for whether this stepmove entity should check for steps.
     if (trace.allSolid)
         return false;
 
     if (trace.startSolid) {
         newOrigin[2] -= stepsize;
         trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, CONTENTS_MASK_MONSTERSOLID);
-        if (trace.allSolid || trace.startSolid)
-            return false;
+
+        // TODO: Make a flag for whether this stepmove entity should check for steps.
+        //if (trace.allSolid || trace.startSolid)
+        //    return false;
     }
 
 
@@ -282,7 +285,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
             return true;
         }
 
-        return false;       // walked off an edge
+	    // TODO: Make a flag for whether this stepmove entity should check for steps.
+        //return false;       // walked off an edge
     }
 
     // check point traces down for dangling corners
@@ -298,8 +302,8 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
             }
             return true;
         }
-        ent->SetOrigin(oldOrigin);
-        return false;
+        //ent->SetOrigin(oldOrigin);
+        //return false;
     }
 
     if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {

@@ -56,7 +56,7 @@ void FuncPlat::Spawn() {
     SetSolid(Solid::BSP);
     SetModel(GetModel());
 
-    SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
+    //SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
     SetBlockedCallback(&FuncPlat::PlatformBlocked);
     SetUseCallback(&FuncPlat::PlatformUse);
 
@@ -173,7 +173,7 @@ void FuncPlat::PostSpawn() {
     moveInfo.acceleration = GetAcceleration();
     moveInfo.deceleration = GetDeceleration();
     moveInfo.wait = GetWaitTime();
-    moveInfo.distance = height + 120;
+    //moveInfo.distance = height + 120;
     moveInfo.startOrigin = GetStartPosition();
     moveInfo.startAngles = GetAngles();
     moveInfo.endOrigin = GetEndPosition();
@@ -398,8 +398,8 @@ void FuncPlat::CalculateMoveSpeed() {
 //===============
 void FuncPlat::SpawnPlatformTrigger() {
     // Get mins and max.
-    vec3_t mins = GetMins();
-    vec3_t maxs = GetMaxs();
+    const vec3_t mins = GetMins();
+    const vec3_t maxs = GetMaxs();
 
     // Start calculation of the new trigger mins/maxs.
     vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
@@ -436,10 +436,6 @@ void FuncPlat::SpawnPlatformTrigger() {
         triggerMaxs.y = triggerMins.y + 1;
     }
 
-    FuncPlat* teamMember = nullptr;
-    vec3_t    teamMins = GetMins();
-    vec3_t    teamMaxs = GetMaxs();
-    
     // Add points to the generated bounding box for the trigger.
     for (SVGBaseEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.

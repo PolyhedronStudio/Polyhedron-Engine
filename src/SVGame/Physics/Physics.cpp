@@ -855,7 +855,7 @@ void SVG_Physics_Toss(SVGEntityHandle& entityHandle) {
     }
 
     // If onground, return without moving
-    if (*ent->GetGroundEntity()) {
+    if (*ent->GetGroundEntity() && ent->GetMoveType() != MoveType::TossSlide) {
         return;
     }
 
@@ -892,7 +892,7 @@ void SVG_Physics_Toss(SVGEntityHandle& entityHandle) {
 
         // Stop if on ground
         if (trace.plane.normal[2] > 0.7f) {
-	        if (ent->GetVelocity().z < 60.f || (ent->GetMoveType() != MoveType::Bounce || ent->GetMoveType() == MoveType::TossSlide)) {
+	        if (ent->GetVelocity().z < 60.f || (ent->GetMoveType() != MoveType::Bounce)) {
                 ent->SetGroundEntity(trace.ent);
                 ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
                 ent->SetVelocity(vec3_zero());
@@ -1179,6 +1179,7 @@ void SVG_RunEntity(SVGEntityHandle &entityHandle)
             SVG_Physics_Step(entityHandle);
         break;
         case MoveType::Toss:
+	    case MoveType::TossSlide:
         case MoveType::Bounce:
         case MoveType::Fly:
         case MoveType::FlyMissile:

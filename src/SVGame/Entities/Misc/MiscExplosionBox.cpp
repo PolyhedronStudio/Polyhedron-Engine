@@ -69,7 +69,7 @@ void MiscExplosionBox::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::Toss);
+    SetMoveType(MoveType::TossSlide);
 
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -331,26 +331,12 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
 //
 void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
-    //if (!self || !other) {
-	   // return;
-    //}
-    if (!other) {
+    if (!other || other == this) {
 	    return;
-    }
-
-    // TODO: Move elsewhere in baseentity, I guess?
-    // Prevent this entity from touching itself.
-    //if (self == other) {
-    //    return;
-    //}
-    if (this == other) {
-	    gi.DPrintf("This == other\n");
-        return;
     }
 
     // Ground entity checks.
     if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
-	    gi.DPrintf("GroundEntity = OTHER\n");
 	    return;
     }
 
@@ -363,10 +349,8 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
     // Calculate yaw to use based on direction.
     float yaw = vec3_to_yaw(dir);
 
-    gi.DPrintf("RATIO=======%f  SELF->MASS=======%i  OTHER->MASS========%i\n OTHER->classname=%s\n", ratio, GetMass(), other->GetMass(), other->GetClassname());
     // Last but not least, move a step ahead.
     SVG_StepMove_Walk(this, yaw, (20.f / BASE_FRAMEDIVIDER) * ratio * FRAMETIME);
-    //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
 }
 
 
