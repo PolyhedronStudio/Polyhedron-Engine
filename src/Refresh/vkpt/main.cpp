@@ -4031,7 +4031,7 @@ void R_RegisterFunctionsRTX()
 	R_SetAlphaScale = R_SetAlphaScale_RTX;
 	R_SetColor = R_SetColor_RTX;
 	R_SetClipRect = R_SetClipRect_RTX;
-	R_DrawSetTransform = R_DrawSetTransform_RTX;
+	R_Set2DTransform = R_DrawSetTransform_RTX;
 	R_SetScale = R_SetScale_RTX;
 	R_DrawChar = R_DrawChar_RTX;
 	R_DrawString = R_DrawString_RTX;

@@ -1157,7 +1157,7 @@ void R_RegisterFunctionsGL()
 	R_SetColor = R_SetColor_GL;
 	R_SetClipRect = R_SetClipRect_GL;
 	R_SetScale = R_SetScale_GL;
-    R_DrawSetTransform = R_DrawSetTransform_GL;
+    R_Set2DTransform = R_DrawSetTransform_GL;
 	R_DrawChar = R_DrawChar_GL;
 	R_DrawString = R_DrawString_GL;
 	R_DrawPic = R_DrawPic_GL;

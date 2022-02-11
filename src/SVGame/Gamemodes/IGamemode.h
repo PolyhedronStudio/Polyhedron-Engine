@@ -27,24 +27,39 @@ public:
     IGamemode() {};
     virtual ~IGamemode() = default;
 
-    // Checks if this gamemode class is exactly the given class
-    // @param gamemodeClass: a gamemode class which must inherint from IGamemode
-    template<typename gamemodeClass>
-    bool IsClass() const { // every gamemode has a ClassInfo, thanks to the DefineXYZ macro
-	    return typeid(*this) == typeid(gamemodeClass);		     //GetTypeInfo()->IsClass( gamemodeClass::ClassInfo );
-    }
 
-    // Checks if this gamemode class is a subclass of another, or is the same class
-    // @param gamemodeClass: an entity class which must inherint from IGamemode
+    // Gamemode specific class checking. Best practice is to try and write code
+    // that does not depend on checking a game mode class type too much.
+    //
+    // Instead try to facilitate the game mode itself instead where possible.
+    /**
+    *   @brief  Checks if this gamemode class is exactly the given class.
+    *   @param  gamemodeClass A gamemode class which must inherint from IGamemode.
+    *   @return True if the game mode class is the same class type or a derivate of gamemodeClass.
+    **/
+    template<typename gamemodeClass>
+    bool IsClass() const {
+	    return typeid(*this) == typeid(gamemodeClass);
+    }
+    
+    /**
+    *   @brief  Checks if this gamemode class is a subclass of another, or is the same class
+    *   @param  gamemodeClass A gamemode class which must inherint from IGamemode.
+    *   @return True if the game mode class is the same, or a derivate of gamemodeClass.
+    **/
     template<typename gamemodeClass>
     bool IsSubclassOf() const {
-	    return dynamic_cast<gamemodeClass>(*this) != nullptr;  //GetTypeInfo()->IsSubclassOf( gamemodeClass::ClassInfo );
+	    return dynamic_cast<gamemodeClass>(*this) != nullptr;
     }
+
+
     //
     // Map related, also known as the "current game".
     // 
-    // Gets called at the moment the level exits, this gives the gamemode one last
-    // shot to finish off any last wishes before it gets destroyed.
+    /**
+    *   @brief  Gets called at the moment the level exits, this gives the gamemode one last
+    *           shot to finish off any last wishes before it gets destroyed.
+    **/
     virtual void OnLevelExit() = 0;
 
 

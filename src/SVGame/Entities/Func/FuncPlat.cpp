@@ -157,7 +157,7 @@ void FuncPlat::PostSpawn() {
     CalculateMoveSpeed();
 
     // The way how plats work is that they need to be triggered by an other
-    // trigger of sorts in case they got a platform name. This means that
+    // trigger of sorts in case they got a targetname. This means that
     // by default the trigger starts in its up state.
     //
     // Otherwise position it in its endposition and set state to bottom.
@@ -173,7 +173,6 @@ void FuncPlat::PostSpawn() {
     moveInfo.acceleration = GetAcceleration();
     moveInfo.deceleration = GetDeceleration();
     moveInfo.wait = GetWaitTime();
-    //moveInfo.distance = height + 120;
     moveInfo.startOrigin = GetStartPosition();
     moveInfo.startAngles = GetAngles();
     moveInfo.endOrigin = GetEndPosition();

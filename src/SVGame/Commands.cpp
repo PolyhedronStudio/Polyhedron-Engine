@@ -168,6 +168,7 @@ void Cmd_Give_f(Entity *ent)
         return;
     }
 
+    //
     //if (deathmatch->value && !sv_cheats->value) {
     //    gi.CPrintf(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;

@@ -63,8 +63,6 @@ void PlayerClient::Spawn() {
     SetAirFinishedTime(level.time + 12 * FRAMETIME);
     SetClipMask(CONTENTS_MASK_PLAYERSOLID);
     SetModel("players/male/tris.md2");
-
-    // Setup waterLevel and Type.
     SetWaterLevel(WaterLevel::None);
     SetWaterType(0);
 

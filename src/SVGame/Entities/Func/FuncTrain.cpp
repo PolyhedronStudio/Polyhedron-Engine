@@ -25,32 +25,53 @@ FuncTrain::FuncTrain( Entity* entity )
 //===============
 // FuncTrain::Spawn
 //===============
+void FuncTrain::Precache() {
+
+}
+
+//===============
+// FuncTrain::Spawn
+//===============
 void FuncTrain::Spawn() {
+    // Set angles here.
+	SetAngles(vec3_zero());
+
+	// Spawn base.
 	Base::Spawn();
 
+	// Re-ensure proper move and solid type.
 	SetMoveType( MoveType::Push );
 	SetSolid( Solid::BSP );
-	SetAngles( vec3_zero() );
+	SetModel(GetModel());
 
-	if ( spawnFlags & SF_StopWhenBlocked ) {
-		damage = 0;
-	} else if ( !damage ) {
-		damage = 100;
+	// Use trigger callback.
+	SetUseCallback(&FuncTrain::TrainUse);
+
+	// Undo damage value, otherwise it'd kill an object at a stop, looks a bit odd.
+	if (GetSpawnFlags() & SF_StopWhenBlocked) {
+	    SetDamage(0);
+	} else if (!GetDamage()) {
+	    SetDamage(100);
 	}
 
-	SetModel( GetModel() );
-
-	if ( !GetSpeed() ) {
-		SetSpeed( 100.0f );
+	// Ensure we got speed. lol.
+	if (!GetSpeed()) {
+	    SetSpeed(100.0f);
 	}
 
+	// Set initial moveinfo state.
+	moveInfo.speed = GetSpeed();
 	moveInfo.acceleration = GetSpeed();
 	moveInfo.deceleration = GetSpeed();
 
+	// Link it.
 	LinkEntity();
 
-	if ( targetStr.empty() ) {
-		gi.DPrintf( "func_train without a target at %s\n", vec3_to_cstr( GetAbsoluteCenter() ) );
+	if (!GetTarget().empty()) {
+	    SetNextThinkTime(level.time + 1.0f * FRAMETIME);
+	    SetThinkCallback(&FuncTrain::FindNextTarget);
+	} else {
+	    gi.DPrintf("func_train without a target at %s\n", vec3_to_cstr(GetAbsoluteCenter()));
 	}
 }
 
@@ -58,35 +79,75 @@ void FuncTrain::Spawn() {
 // FuncTrain::PostSpawn
 //===============
 void FuncTrain::PostSpawn() {
-	if ( targetStr.empty() ) {
+ //   if (GetTargetName().empty()) {
+	//	return;
+	//}
+
+	//SVGBaseEntity* ent = SVG_FindEntityByKeyValue( "targetname", targetStr );
+	//if ( nullptr == ent ) {
+	//	gi.DPrintf( "FuncTrain: target '%s' not found, maybe you made a typo?\n", targetStr.c_str() );
+	//	return;
+	//}
+
+	//if ( !ent->IsSubclassOf<PathCorner>() ) {
+	//	gi.DPrintf( "FuncTrain: target '%s' is not a path entity\n", targetStr.c_str() );
+	//	return;
+	//}
+
+	//SetOrigin(ent->GetOrigin() - GetMins());
+	//LinkEntity();
+
+	//// This train has no name, trigger it immediately
+	//if ( targetNameStr.empty() ) {
+	//	spawnFlags |= SF_StartOn;
+	//}
+
+	//if ( spawnFlags & SF_StartOn ) {
+	//	SetNextThinkTime( level.time + FRAMETIME );
+	//	SetThinkCallback( &FuncTrain::NextCornerThink );
+	//	SetActivator(this);
+	//}
+}
+
+//===============
+// FuncTrain::FindNextTarget
+// 
+//===============
+void FuncTrain::FindNextTarget() {
+    if (GetTarget().empty()) {
+		gi.DPrintf("FuncTrain: no target!\n");
 		return;
 	}
 
-	SVGBaseEntity* ent = SVG_FindEntityByKeyValue( "targetname", targetStr );
-	if ( nullptr == ent ) {
-		gi.DPrintf( "FuncTrain: target '%s' not found, maybe you made a typo?\n", targetStr.c_str() );
-		return;
-	}
+	// Find target.
+	auto targetEntities = GetBaseEntityRange<0, MAX_EDICTS>() | bef::IsValidPointer | bef::HasServerEntity | bef::InUse | bef::HasKeyValue("targetname", GetTarget());
 
-	if ( !ent->IsSubclassOf<PathCorner>() ) {
-		gi.DPrintf( "FuncTrain: target '%s' is not a path entity\n", targetStr.c_str() );
-		return;
-	}
+	if (targetEntities.front() != nullptr && targetEntities.front()->IsSubclassOf<PathCorner>()) {
+	    PathCorner* pathCorner = dynamic_cast<PathCorner*>(targetEntities.front());
 
-	SetUseCallback( &FuncTrain::TrainUse );
+		//if ( !ent->IsSubclassOf<PathCorner>() ) {
+		//	gi.DPrintf( "FuncTrain: target '%s' is not a path entity\n", targetStr.c_str() );
+		//	return;
+		//}
+		// Set target to path corner.
+	    SetTarget(pathCorner->GetTarget());
 
-	SetOrigin(ent->GetOrigin() - GetMins());
-	LinkEntity();
 
-	// This train has no name, trigger it immediately
-	if ( targetNameStr.empty() ) {
-		spawnFlags |= SF_StartOn;
-	}
+		SetOrigin(pathCorner->GetOrigin() - GetMins());
+		LinkEntity();
 
-	if ( spawnFlags & SF_StartOn ) {
-		SetNextThinkTime( level.time + FRAMETIME );
-		SetThinkCallback( &FuncTrain::NextCornerThink );
-		SetActivator(this);
+		// This train has no name, trigger it immediately
+		if (GetTargetName().empty()) {
+		    SetSpawnFlags(GetSpawnFlags() | SF_StartOn);
+		}
+
+		if (GetSpawnFlags() & SF_StartOn) {
+			SetNextThinkTime( level.time + 1.0f * FRAMETIME );
+			SetThinkCallback( &FuncTrain::NextCornerThink );
+			SetActivator(this);
+		}
+	} else {
+	    gi.DPrintf("FuncTrain: target '%s' not found, maybe you made a typo?\n", targetStr.c_str());
 	}
 }
 
@@ -109,18 +170,23 @@ void FuncTrain::SpawnKey( const std::string& key, const std::string& value ) {
 void FuncTrain::TrainUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 	SetActivator(activator);
 
-	if ( spawnFlags & SF_StartOn ) {
-		if ( ~spawnFlags & SF_Toggled ) {
+	if (GetSpawnFlags()  & SF_StartOn) {
+		// Toggling system. On/Off
+	    if (~GetSpawnFlags() & SF_Toggled) {
 			return;
 		}
 
-		spawnFlags &= ~SF_StartOn;
+		SetSpawnFlags(GetSpawnFlags() & ~SF_StartOn);
 		SetVelocity( vec3_zero() );
 		SetNextThinkTime( 0.0f );
 	} else {
+		// Resume path in case we werer traveling along one.
 		if ( nullptr != currentPathEntity ) {
 			ResumePath();
 		} else {
+			// Go to next path_corner.
+		    SetNextThinkTime(level.time + 1 * FRAMETIME);
+		    SetThinkCallback(&FuncTrain::NextCornerThink);
 			NextCornerThink();
 		}
 	}
@@ -131,8 +197,8 @@ void FuncTrain::TrainUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 // FuncTrain::NextCornerThink
 //===============
 void FuncTrain::NextCornerThink() {
-	SVGBaseEntity* entity = nullptr;
-	vec3_t destination;
+    vec3_t destination = vec3_zero();
+    PathCorner* pathCornerEntity = nullptr;
 	bool first = true;
 	bool again = true;
 
@@ -142,50 +208,53 @@ void FuncTrain::NextCornerThink() {
 	{
 		again = false;
 
-		if ( targetStr.empty() ) {
+		if (GetTarget().empty()) {
 			return;
 		}
 
-		entity = SVG_FindEntityByKeyValue( "targetname", GetTarget() );
-		if ( nullptr == entity ) {
-			gi.DPrintf( "FuncTrain::NextCornerThink: Target '%s' doesn't exist\n", GetTarget().c_str() );
-			return;
-		}
-		
-		// QUESTIONABLE: Are mappers gonna use non-path_corner ents?
-		// We'll probably be rewriting this logic anyway someday...
-		if ( !entity->IsClass<PathCorner>() ) {
-			gi.DPrintf( "FuncTrain::NextCornerThink: Target '%s' isn't a path_corner\n", GetTarget().c_str() );
-			return;
-		}
-		
-		SetTarget( entity->GetTarget() );
+		// TODO: Add a find single entity by targetname to gameworld including other utility classes?
 
-		if ( entity->GetSpawnFlags() & PathCorner::SF_Teleport ) {
-			if ( !first ) {
-				gi.DPrintf( "Connected teleport path_corners, see '%s' at '%s'\n", entity->GetTypeInfo()->mapClass, vec3_to_cstr( entity->GetOrigin() ) );
+		// Find target.
+		auto targetEntities = GetBaseEntityRange<0, MAX_EDICTS>() | bef::IsValidPointer | bef::HasServerEntity | bef::InUse | bef::HasKeyValue("targetname", GetTarget());
+
+		if (targetEntities.front() != nullptr && targetEntities.front()->IsSubclassOf<PathCorner>()) {
+		    pathCornerEntity = dynamic_cast<PathCorner*>(targetEntities.front());
+		    // QUESTIONABLE: Are mappers gonna use non-path_corner ents?
+
+			// We'll probably be rewriting this logic anyway someday...
+		    if (!pathCornerEntity->IsSubclassOf<PathCorner>()) {
+				gi.DPrintf( "FuncTrain::NextCornerThink: Target '%s' isn't a path_corner\n", GetTarget().c_str() );
 				return;
 			}
+		
+			SetTarget(pathCornerEntity->GetTarget());
 
-			first = false;
-			again = true; // loop it
-			SetOrigin( entity->GetOrigin() - GetMins() );
-			SetOldOrigin( GetOrigin() );
-			SetEventID( EntityEvent::OtherTeleport );
-			LinkEntity();
+			if (pathCornerEntity->GetSpawnFlags() & PathCorner::SF_Teleport) {
+				if ( !first ) {
+					gi.DPrintf("Connected teleport path_corners, see '%s' at '%s'\n", pathCornerEntity->GetTypeInfo()->mapClass, vec3_to_cstr(pathCornerEntity->GetOrigin()));
+					return;
+				}
+
+				first = false;
+				again = true; // loop it
+				SetOrigin(pathCornerEntity->GetOrigin() - GetMins());
+				SetOldOrigin( GetOrigin() );
+				SetEventID( EntityEvent::OtherTeleport );
+				LinkEntity();
+			}
 		}
 	}
 
-	moveInfo.wait = entity->GetWaitTime();
-	currentPathEntity = static_cast<PathCorner*>(entity);
+	moveInfo.wait = pathCornerEntity->GetWaitTime();
+	currentPathEntity = static_cast<PathCorner*>(pathCornerEntity);
 
-	destination = entity->GetOrigin() - GetMins();
+	destination = pathCornerEntity->GetOrigin() - GetMins();
 	moveInfo.state = MoverState::Top;
 	moveInfo.startOrigin = GetOrigin();
 	moveInfo.endAngles = destination;
 
 	BrushMoveCalc( destination, &FuncTrain::OnWaitAtCorner );
-	spawnFlags |= SF_StartOn;
+	SetSpawnFlags(GetSpawnFlags() | SF_StartOn);
 }
 
 //===============
@@ -199,7 +268,7 @@ void FuncTrain::ResumePath() {
 	moveInfo.endOrigin = destination;
 
 	BrushMoveCalc( destination, &FuncTrain::OnWaitAtCorner );
-	spawnFlags |= SF_StartOn;
+	SetSpawnFlags(GetSpawnFlags() | SF_StartOn);
 }
 
 //===============
@@ -226,7 +295,7 @@ void FuncTrain::WaitAtCorner() {
 			SetThinkCallback( &FuncTrain::NextCornerThink );
 		} else if ( GetSpawnFlags() & SF_Toggled ) {
 			NextCornerThink();
-			spawnFlags &= ~SF_StartOn;
+		    SetSpawnFlags(GetSpawnFlags() & ~SF_StartOn);
 			SetVelocity( vec3_zero() );
 			SetNextThinkTime( 0.0f );
 		}

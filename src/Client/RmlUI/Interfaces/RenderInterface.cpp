@@ -293,12 +293,12 @@ void RmlUiRenderInterface::SetTransform(const Rml::Matrix4f* transform)
 	if (transform) {
 		// Transpose matrix in case it is a row major mat.
 		if (std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value) {
-			R_DrawSetTransform(transform->data());
+			R_Set2DTransform(transform->data());
 		} else if (std::is_same<Rml::Matrix4f, Rml::RowMajorMatrix4f>::value) {
-			R_DrawSetTransform(transform->Transpose().data());
+			R_Set2DTransform(transform->Transpose().data());
 		}
 	} else {
-		R_DrawSetTransform(mat4_identity());
+		R_Set2DTransform(mat4_identity());
 	}
 }
 

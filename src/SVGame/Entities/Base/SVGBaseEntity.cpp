@@ -178,25 +178,7 @@ qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::
 //===============
 //
 void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
-	//{"lip", STOFS(lip), F_INT},
-	//{ "distance", STOFS(distance), F_INT },
-	//{ "height", STOFS(height), F_INT },
-	//{ "noise", STOFS(noise), F_LSTRING },
-	//{ "pausetime", STOFS(pausetime), F_FLOAT },
-	//{ "item", STOFS(item), F_LSTRING },
-
-	//{ "gravity", STOFS(gravity), F_LSTRING },
-	//{ "sky", STOFS(sky), F_LSTRING },
-	//{ "skyrotate", STOFS(skyrotate), F_FLOAT },
-	//{ "skyaxis", STOFS(skyaxis), F_VECTOR },
-	//{ "minyaw", STOFS(minyaw), F_FLOAT },
-	//{ "maxyaw", STOFS(maxyaw), F_FLOAT },
-	//{ "minpitch", STOFS(minpitch), F_FLOAT },
-	//{ "maxpitch", STOFS(maxpitch), F_FLOAT },
-	//{ "nextmap", STOFS(nextMap), F_LSTRING },
-	
-	// STOOOOOOOP WITH THE GOD DAMN WARNINGS IN THE CONSOLE ABOUT CLASSNAME
-	// RAAAAAAAAHHHHH
+    // Stop mapversion from causing warnings.
 	if ( key == "classname" ) {
 		SetClassname( value.c_str() );
 	}
