@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef MATERIAL_H_
-#define MATERIAL_H_
+#ifndef CONVERSION_H_
+#define CONVERSION_H_
 
 #include <stdint.h>
 
