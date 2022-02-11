@@ -432,7 +432,7 @@ typedef struct sun_light_s {
 } sun_light_t;
 
 void mult_matrix_matrix(float* p, const mat4_t &a, const mat4_t &b);
-void mult_matrix_vector(float* p, const mat4_t &a, const vec4_t &b);
+void mult_matrix_vector(float* v, const mat4_t &a, const vec4_t &b);
 mat4_t mult_matrix_matrix(const mat4_t &a, const mat4_t &b);
 mat4_t mult_matrix_vector(const mat4_t &a, const vec4_t &b);
 void create_entity_matrix(mat4_t &matrix, r_entity_t* e, qboolean enable_left_hand);
