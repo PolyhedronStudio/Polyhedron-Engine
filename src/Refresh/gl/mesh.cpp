@@ -259,6 +259,9 @@ static glCullResult_t cull_static_model(model_t *model)
     vec3_t bounds[2];
     glCullResult_t cull;
 
+    if (!newframe)
+        return CULL_OUT;
+
     if (glr.entrotated) {
         cull = GL_CullSphere(origin, newframe->radius);
         if (cull == CULL_OUT) {
@@ -341,7 +344,7 @@ static void setup_color(void)
     memset(&glr.lightpoint, 0, sizeof(glr.lightpoint));
 
     if (flags & RF_SHELL_MASK) {
-        VectorClear(color);
+        color = vec4_zero();
         if (flags & RenderEffects::HalfDamShell) {
             color[0] = 0.56f;
             color[1] = 0.59f;
@@ -361,9 +364,9 @@ static void setup_color(void)
             color[2] = 1;
         }
     } else if (flags & RenderEffects::FullBright) {
-        VectorSet(color, 1, 1, 1);
+        color.x = 1.f; color.y = 1.f; color.z = 1.f;
     } else if ((flags & RenderEffects::InfraRedVisible) && (glr.fd.rdflags & RDF_IRGOGGLES)) {
-        VectorSet(color, 1, 0, 0);
+        color.x = 1.f; color.y = 0.f; color.z = 0.f;
     } else {
         // MATHLIB: Quick workaround.
         vec3_t tempColor = { color[0], color[1], color[2] };
@@ -379,7 +382,8 @@ static void setup_color(void)
                 }
             }
             if (i == 3) {
-                VectorSet(color, 0.1f, 0.1f, 0.1f);
+                //VectorSet(color, 0.1f, 0.1f, 0.1f);
+                color.x = 0.1f; color.y = 0.1f; color.z = 0.1f;
             }
         }
 

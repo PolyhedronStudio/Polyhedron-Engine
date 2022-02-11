@@ -81,17 +81,17 @@ constexpr uint32_t NOEXP_ROCKET = 2;
 // Local client entity structure, temporary entities.
 //
 struct ClientEntity {
-    EntityState    current;
-    EntityState    prev;        // will always be valid, but might just be a copy of current
+    EntityState current;
+    EntityState prev;        // will always be valid, but might just be a copy of current
 
-    vec3_t          mins, maxs;
+    vec3_t      mins, maxs;
 
-    int32_t         serverFrame;// if not current, this ent isn't in the frame
+    int32_t     serverFrame;// if not current, this ent isn't in the frame
 
-    int32_t         trailcount; // for diminishing grenade trails
-    vec3_t          lerpOrigin; // for trails (variable hz)
+    int32_t     trailcount; // for diminishing grenade trails
+    vec3_t      lerpOrigin; // for trails (variable hz)
 
-    int32_t         id;
+    int32_t id;
 };
 
 //

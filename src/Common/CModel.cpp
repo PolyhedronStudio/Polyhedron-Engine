@@ -63,9 +63,8 @@ Loads in the map and all submodels
 qerror_t CM_LoadMap(cm_t *cm, const char *name)
 {
     bsp_t *cache;
-    qerror_t ret;
 
-    ret = BSP_Load(name, &cache);
+    qerror_t ret = BSP_Load(name, &cache);
     if (!cache) {
         return ret;
     }
@@ -127,12 +126,6 @@ can just be stored out and get a proper clipping hull structure.
 */
 static void CM_InitBoxHull(void)
 {
-    int         i;
-    int         side;
-    mnode_t     *c;
-    cplane_t    *p;
-    mbrushside_t    *s;
-
     box_headnode = &box_nodes[0];
 
     box_brush.numsides = 6;
@@ -145,35 +138,35 @@ static void CM_InitBoxHull(void)
 
     box_leafbrush = &box_brush;
 
-    for (i = 0; i < 6; i++) {
-        side = i & 1;
+    for (int32_t i = 0; i < 6; i++) {
+        int32_t side = i & 1;
 
         // brush sides
-        s = &box_brushsides[i];
-        s->plane = &box_planes[i * 2 + side];
-        s->texinfo = &nulltexinfo;
+        mbrushside_t *brushSide = &box_brushsides[i];
+        brushSide->plane = &box_planes[i * 2 + side];
+        brushSide->texinfo = &nulltexinfo;
 
         // nodes
-        c = &box_nodes[i];
-        c->plane = &box_planes[i * 2];
-        c->children[side] = (mnode_t *)&box_emptyleaf;
+        mnode_t *node = &box_nodes[i];
+        node->plane = &box_planes[i * 2];
+        node->children[side] = (mnode_t *)&box_emptyleaf;
         if (i != 5)
-            c->children[side ^ 1] = &box_nodes[i + 1];
+            node->children[side ^ 1] = &box_nodes[i + 1];
         else
-            c->children[side ^ 1] = (mnode_t *)&box_leaf;
+            node->children[side ^ 1] = (mnode_t *)&box_leaf;
 
         // planes
-        p = &box_planes[i * 2];
-        p->type = i >> 1;
-        p->signbits = 0;
-        VectorClear(p->normal);
-        p->normal[i >> 1] = 1;
+        cplane_t *plane = &box_planes[i * 2];
+        plane->type = i >> 1;
+        plane->signBits = 0;
+        plane->normal = vec3_zero();
+        plane->normal[i >> 1] = 1;
 
-        p = &box_planes[i * 2 + 1];
-        p->type = 3 + (i >> 1);
-        p->signbits = 0;
-        VectorClear(p->normal);
-        p->normal[i >> 1] = -1;
+        plane = &box_planes[i * 2 + 1];
+        plane->type = 3 + (i >> 1);
+        plane->signBits = 0;
+        plane->normal = vec3_zero();
+        plane->normal[i >> 1] = -1;
     }
 }
 
@@ -227,10 +220,8 @@ static mnode_t  *leaf_topnode;
 
 static void CM_BoxLeafs_r(mnode_t *node)
 {
-    int     s;
-
     while (node->plane) {
-        s = BoxOnPlaneSideFast(leaf_mins, leaf_maxs, node->plane);
+        int32_t s = BoxOnPlaneSideFast(leaf_mins, leaf_maxs, node->plane);
         if (s == 1) {
             node = node->children[0];
         } else if (s == 2) {
@@ -287,13 +278,11 @@ CM_PointContents
 */
 int CM_PointContents(const vec3_t &p, mnode_t *headNode)
 {
-    mleaf_t     *leaf;
-
     if (!headNode) {
         return 0;
     }
 
-    leaf = BSP_PointLeaf(headNode, p);
+    mleaf_t *leaf = BSP_PointLeaf(headNode, p);
 
     return leaf->contents;
 }
@@ -308,30 +297,28 @@ rotating entities
 */
 int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t& origin, const vec3_t& angles)
 {
-    vec3_t      p_l;
-    vec3_t      temp;
-    vec3_t      forward, right, up;
-    mleaf_t     *leaf;
+    vec3_t temp = vec3_zero();
+    vec3_t forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
 
     if (!headNode) {
         return 0;
     }
 
     // subtract origin offset
-    VectorSubtract(p, origin, p_l);
+    vec3_t p_l = p - origin;
 
     // rotate start and end into the models frame of reference
     if (headNode != box_headnode &&
         (angles[0] || angles[1] || angles[2])) {
         AngleVectors(angles, &forward, &right, &up);
 
-        VectorCopy(p_l, temp);
-        p_l[0] = DotProduct(temp, forward);
-        p_l[1] = -DotProduct(temp, right);
-        p_l[2] = DotProduct(temp, up);
+        temp = p_l;
+        p_l[0] = vec3_dot(temp, forward);
+        p_l[1] = -vec3_dot(temp, right);
+        p_l[2] = vec3_dot(temp, up);
     }
 
-    leaf = BSP_PointLeaf(headNode, p_l);
+    mleaf_t *leaf = BSP_PointLeaf(headNode, p_l);
 
     return leaf->contents;
 }
@@ -375,30 +362,25 @@ CM_ClipBoxToBrush
 static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
                               trace_t *trace, mbrush_t *brush)
 {
-    int         i, j;
-    cplane_t    *plane, *clipplane;
-    float       dist;
-    float       enterfrac, leavefrac;
-    vec3_t      ofs;
-    float       d1, d2;
-    qboolean    getout, startout;
-    float       f;
-    mbrushside_t    *side, *leadside;
-
-    enterfrac = -1;
-    leavefrac = 1;
-    clipplane = NULL;
-
     if (!brush->numsides)
         return;
+    
+    qboolean getout = false;
+    qboolean startout = false;
 
-    getout = false;
-    startout = false;
-    leadside = NULL;
+    vec3_t offset = vec3_zero();
+    float dist = 0.f;
+    float fraction = 0.f;
 
-    side = brush->firstbrushside;
-    for (i = 0; i < brush->numsides; i++, side++) {
-        plane = side->plane;
+    float enterFraction = -1.f;
+    float leaveFraction = 1.f;
+
+    cplane_t    *clipPlane = nullptr;
+    mbrushside_t *leadside = nullptr;
+    mbrushside_t *side = brush->firstbrushside;
+
+    for (int32_t i = 0; i < brush->numsides; i++, side++) {
+        cplane_t *plane = side->plane;
 
         // FIXME: special case for axial
 
@@ -407,22 +389,22 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
             // push the plane out apropriately for mins/maxs
 
-            // FIXME: use signbits into 8 way lookup for each mins/maxs
-            for (j = 0; j < 3; j++) {
+            // FIXME: use signBits into 8 way lookup for each mins/maxs
+            for (int32_t j = 0; j < 3; j++) {
                 if (plane->normal[j] < 0)
-                    ofs[j] = maxs[j];
+                    offset[j] = maxs[j];
                 else
-                    ofs[j] = mins[j];
+                    offset[j] = mins[j];
             }
-            dist = DotProduct(ofs, plane->normal);
+            dist = vec3_dot(offset, plane->normal);
             dist = plane->dist - dist;
         } else {
             // special point case
             dist = plane->dist;
         }
 
-        d1 = DotProduct(p1, plane->normal) - dist;
-        d2 = DotProduct(p2, plane->normal) - dist;
+        const float d1 = vec3_dot(p1, plane->normal) - dist;
+        const float d2 = vec3_dot(p2, plane->normal) - dist;
 
         if (d2 > 0)
             getout = true; // endpoint is not in solid
@@ -439,17 +421,17 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
         // crosses face
         if (d1 > d2) {
             // enter
-            f = (d1 - DIST_EPSILON) / (d1 - d2);
-            if (f > enterfrac) {
-                enterfrac = f;
-                clipplane = plane;
+            fraction = (d1 - DIST_EPSILON) / (d1 - d2);
+            if (fraction > enterFraction) {
+                enterFraction = fraction;
+                clipPlane = plane;
                 leadside = side;
             }
         } else {
             // leave
-            f = (d1 + DIST_EPSILON) / (d1 - d2);
-            if (f < leavefrac)
-                leavefrac = f;
+            fraction = (d1 + DIST_EPSILON) / (d1 - d2);
+            if (fraction < leaveFraction)
+                leaveFraction = fraction;
         }
     }
 
@@ -466,12 +448,12 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
         }
         return;
     }
-    if (enterfrac < leavefrac) {
-        if (enterfrac > -1 && enterfrac < trace->fraction) {
-            if (enterfrac < 0)
-                enterfrac = 0;
-            trace->fraction = enterfrac;
-            trace->plane = *clipplane;
+    if (enterFraction < leaveFraction) {
+        if (enterFraction > -1 && enterFraction < trace->fraction) {
+            if (enterFraction < 0)
+                enterFraction = 0;
+            trace->fraction = enterFraction;
+            trace->plane = *clipPlane;
             trace->surface = &(leadside->texinfo->c);
             trace->contents = brush->contents;
         }
@@ -486,48 +468,16 @@ CM_TestBoxInBrush
 static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1,
                               trace_t *trace, mbrush_t *brush)
 {
-    int         i, j;
-    cplane_t    *plane;
-    float       dist;
-    vec3_t      ofs;
-    float       d1;
-    mbrushside_t    *side;
 
     if (!brush->numsides)
         return;
 
-    // N&C: FF Precision. Fixes (hopefully) float movement from blocking in brushes..
-    // special test for axial
-    //if (trace->bounds[0][0] > trace->bounds[1][0]
-    //    || trace->bounds[0][1] > trace->bounds[1][1]
-    //    || trace->bounds[0][2] > trace->bounds[1][2]
-    //    || trace->bounds[1][0] < trace->bounds[0][0]
-    //    || trace->bounds[1][1] < trace->bounds[0][1]
-    //    || trace->bounds[1][2] < trace->bounds[0][2]
-    //    ) {
-    //    return;
-    //}
-    // The first six planes are the axial planes, so we only
-    // need to test the remainder
-    //for (i = 6; i < brush->numsides; i++) {
-    //    side = brush->firstbrushside + i;
-    //    plane = side->plane;
+    vec3_t offset = vec3_zero();
 
-    //    // adjust the plane distance appropriately for mins/maxs
-    //    dist = plane->dist - DotProduct(trace->offsets[plane->signbits], plane->normal);
+    mbrushside_t *brushSide = brush->firstbrushside;
 
-    //    d1 = DotProduct(p1, plane->normal) - dist;
-
-    //    // if completely in front of face, no intersection
-    //    if (d1 > 0) {
-    //        return;
-    //    }
-    //}
-
-    // N&C: FF Precision. This was the old code.
-    side = brush->firstbrushside;
-    for (i = 0; i < brush->numsides; i++, side++) {
-        plane = side->plane;
+    for (int32_t i = 0; i < brush->numsides; i++, brushSide++) {
+        cplane_t *plane = brushSide->plane;
 
         // FIXME: special case for axial
 
@@ -535,17 +485,17 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
         // push the plane out apropriately for mins/maxs
 
-        // FIXME: use signbits into 8 way lookup for each mins/maxs
-        for (j = 0; j < 3; j++) {
+        // FIXME: use signBits into 8 way lookup for each mins/maxs
+        for (int32_t j = 0; j < 3; j++) {
             if (plane->normal[j] < 0)
-                ofs[j] = maxs[j];
+                offset[j] = maxs[j];
             else
-                ofs[j] = mins[j];
+                offset[j] = mins[j];
         }
-        dist = DotProduct(ofs, plane->normal);
+        float dist = vec3_dot(offset, plane->normal);
         dist = plane->dist - dist;
 
-        d1 = DotProduct(p1, plane->normal) - dist;
+        float d1 = vec3_dot(p1, plane->normal) - dist;
 
         // if completely in front of face, no intersection
         if (d1 > 0)
@@ -567,22 +517,25 @@ CM_TraceToLeaf
 */
 static void CM_TraceToLeaf(mleaf_t *leaf)
 {
-    int         k;
-    mbrush_t    *b, **leafbrush;
-
     if (!(leaf->contents & trace_contents))
         return;
-    // trace line against all brushes in the leaf
-    leafbrush = leaf->firstleafbrush;
-    for (k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
-        b = *leafbrush;
+
+    // Trace line against all brushes in the leaf
+    mbrush_t **leafbrush = leaf->firstleafbrush;
+
+    for (int32_t k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
+        mbrush_t *b = *leafbrush;
+
         if (b->checkcount == checkcount)
-            continue;   // already checked this brush in another leaf
+            continue;   // Already checked this brush in another leaf
+        
         b->checkcount = checkcount;
 
         if (!(b->contents & trace_contents))
             continue;
+        
         CM_ClipBoxToBrush(trace_mins, trace_maxs, trace_start, trace_end, trace_trace, b);
+        
         if (!trace_trace->fraction)
             return;
     }
@@ -597,22 +550,25 @@ CM_TestInLeaf
 */
 static void CM_TestInLeaf(mleaf_t *leaf)
 {
-    int         k;
-    mbrush_t    *b, **leafbrush;
-
     if (!(leaf->contents & trace_contents))
         return;
-    // trace line against all brushes in the leaf
-    leafbrush = leaf->firstleafbrush;
-    for (k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
-        b = *leafbrush;
+    
+    // Trace line against all brushes in the leaf
+    mbrush_t **leafbrush = leaf->firstleafbrush;
+
+    for (int32_t k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
+        mbrush_t *b = *leafbrush;
+        
         if (b->checkcount == checkcount)
-            continue;   // already checked this brush in another leaf
+            continue;   // Already checked this brush in another leaf
+        
         b->checkcount = checkcount;
 
         if (!(b->contents & trace_contents))
             continue;
+        
         CM_TestBoxInBrush(trace_mins, trace_maxs, trace_start, trace_trace, b);
+        
         if (!trace_trace->fraction)
             return;
     }
@@ -628,7 +584,7 @@ CM_RecursiveHullCheck
 */
 static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec3_t &p1, const vec3_t &p2)
 {
-    cplane_t    *plane;
+    cplane_t    *plane = nullptr;
     float       t1, t2, offset;
     float       frac, frac2;
     float       idist;
@@ -695,18 +651,18 @@ recheck:
     }
 
     // move up to the node
-    clamp(frac, 0, 1);
+    frac = Clampf(frac);//clamp(frac, 0, 1);
 
     midf = p1f + (p2f - p1f) * frac;
-    LerpVector(p1, p2, frac, mid);
+    mid = vec3_mix(p1, p2, frac);//LerpVector(p1, p2, frac, mid);
 
     CM_RecursiveHullCheck(node->children[side], p1f, midf, p1, mid);
 
     // go past the node
-    clamp(frac2, 0, 1);
+    frac2 = Clampf(frac2);//clamp(frac2, 0, 1);
 
     midf = p1f + (p2f - p1f) * frac2;
-    LerpVector(p1, p2, frac2, mid);
+    mid = vec3_mix(p1, p2, frac2); //LerpVector(p1, p2, frac2, mid);
 
     CM_RecursiveHullCheck(node->children[side ^ 1], midf, p2f, mid, p2);
 }
@@ -737,33 +693,30 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
     }
 
     trace_contents = brushmask;
-    VectorCopy(start, trace_start);
-    VectorCopy(end, trace_end);
-    VectorCopy(mins, trace_mins);
-    VectorCopy(maxs, trace_maxs);
+    trace_start = start; //VectorCopy(start, trace_start);
+    trace_end = end; // VectorCopy(end, trace_end);
+    trace_mins = mins; // VectorCopy(mins, trace_mins);
+    trace_maxs = maxs; // VectorCopy(maxs, trace_maxs);
 
     //
     // check for position test special case
     //
     if (start[0] == end[0] && start[1] == end[1] && start[2] == end[2]) {
-        mleaf_t     *leafs[1024];
-        int     i, numleafs;
-        vec3_t  c1, c2;
-
-        VectorAdd(start, mins, c1);
-        VectorAdd(start, maxs, c2);
-        for (i = 0; i < 3; i++) {
+        mleaf_t *leafs[1024];
+        vec3_t c1 = start + mins;  //VectorAdd(start, mins, c1);
+        vec3_t c2 = start + maxs; // VectorAdd(start, maxs, c2);
+        for (int32_t i = 0; i < 3; i++) {
             c1[i] -= 1;
             c2[i] += 1;
         }
 
-        numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, 1024, headNode, NULL);
-        for (i = 0; i < numleafs; i++) {
+        int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, 1024, headNode, NULL);
+        for (int32_t i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
             if (trace_trace->allSolid)
                 break;
         }
-        VectorCopy(start, trace_trace->endPosition);
+        trace_trace->endPosition = start; //VectorCopy(start, trace_trace->endPosition);
         return;
     }
 
@@ -772,8 +725,8 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
     //
     if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0
         && maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0) {
-        trace_ispoint = true;
-        VectorClear(trace_extents);
+            trace_ispoint = true;
+            trace_extents = vec3_zero();// VectorClear(trace_extents);
     } else {
         trace_ispoint = false;
         trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
@@ -781,7 +734,7 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
         trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
 
         // N&C: Q3 - FF Precision. Hopefully...
-        VectorCopy(maxs, trace_trace->offsets[0]);
+        trace_trace->offsets[0] = maxs;//VectorCopy(maxs, trace_trace->offsets[0]);
 
         trace_trace->offsets[1][0] = maxs[0];
         trace_trace->offsets[1][1] = mins[1];
@@ -807,7 +760,7 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
         trace_trace->offsets[6][1] = maxs[1];
         trace_trace->offsets[6][2] = maxs[2];
 
-        VectorCopy(maxs, trace_trace->offsets[7]);
+        trace_trace->offsets[7] = maxs; // VectorCopy(maxs, trace_trace->offsets[7]);
 //        trace_trace->offsets[7] = maxs0;
     }
 
@@ -817,9 +770,9 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
     CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
     if (trace_trace->fraction == 1)
-        VectorCopy(end, trace_trace->endPosition);
+        trace_trace->endPosition = end; // VectorCopy(end, trace_trace->endPosition);
     else
-        LerpVector(start, end, trace_trace->fraction, trace_trace->endPosition);
+        trace_trace->endPosition = vec3_mix(start, end, trace_trace->fraction); //LerpVector(start, end, trace_trace->fraction, trace_trace->endPosition);
 }
 
 
@@ -836,13 +789,12 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
                             mnode_t *headNode, int brushmask,
                             const vec3_t &origin, const vec3_t &angles)
 {
-    vec3_t      start_l, end_l;
     vec3_t      axis[3];
     qboolean    rotated;
 
     // subtract origin offset
-    VectorSubtract(start, origin, start_l);
-    VectorSubtract(end, origin, end_l);
+    vec3_t start_l = start - origin; // VectorSubtract(start, origin, start_l);
+    vec3_t end_l = end - origin; // VectorSubtract(end, origin, end_l);
 
     // rotate start and end into the models frame of reference
     if (headNode != box_headnode &&
@@ -867,8 +819,7 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
     }
 
     // FIXME: offset plane distance?
-
-    LerpVector(start, end, trace->fraction, trace->endPosition);
+    trace->endPosition = vec3_mix(start, end, trace->fraction); // LerpVector(start, end, trace->fraction, trace->endPosition);
 }
 
 void CM_ClipEntity(trace_t *dst, const trace_t *src, struct entity_s *ent)
@@ -877,7 +828,7 @@ void CM_ClipEntity(trace_t *dst, const trace_t *src, struct entity_s *ent)
     dst->startSolid |= src->startSolid;
     if (src->fraction < dst->fraction) {
         dst->fraction = src->fraction;
-        VectorCopy(src->endPosition, dst->endPosition);
+        dst->endPosition = src->endPosition; //VectorCopy(src->endPosition, dst->endPosition);
         dst->plane = src->plane;
         dst->surface = src->surface;
         dst->contents |= src->contents;
@@ -918,16 +869,14 @@ static void FloodArea_r(cm_t *cm, int number, int floodnum)
 
 static void FloodAreaConnections(cm_t *cm)
 {
-    int     i;
     marea_t *area;
-    int     floodnum;
 
-    // all current floods are now invalid
+    // All current floods are now invalid
     floodvalid++;
-    floodnum = 0;
+    int32_t floodnum = 0;
 
-    // area 0 is not used
-    for (i = 1; i < cm->cache->numareas; i++) {
+    // Area 0 is not used
+    for (int32_t i = 1; i < cm->cache->numareas; i++) {
         area = &cm->cache->areas[i];
         if (area->floodvalid == floodvalid)
             continue;       // already flooded into
@@ -994,16 +943,13 @@ This is used by the client refreshes to cull visibility
 */
 int CM_WriteAreaBits(cm_t *cm, byte *buffer, int area)
 {
-    bsp_t   *cache = cm->cache;
-    int     i;
-    int     floodnum;
-    int     bytes;
+    bsp_t *cache = cm->cache;
 
     if (!cache) {
         return 0;
     }
 
-    bytes = (cache->numareas + 7) >> 3;
+    int32_t bytes = (cache->numareas + 7) >> 3;
 
     if (map_noareas->integer || !area) {
         // for debugging, send everything
@@ -1011,8 +957,8 @@ int CM_WriteAreaBits(cm_t *cm, byte *buffer, int area)
     } else {
         memset(buffer, 0, bytes);
 
-        floodnum = cm->floodnums[area];
-        for (i = 0; i < cache->numareas; i++) {
+        int32_t floodnum = cm->floodnums[area];
+        for (int32_t i = 0; i < cache->numareas; i++) {
             if (cm->floodnums[i] == floodnum) {
                 Q_SetBit(buffer, i);
             }
@@ -1024,13 +970,11 @@ int CM_WriteAreaBits(cm_t *cm, byte *buffer, int area)
 
 int CM_WritePortalBits(cm_t *cm, byte *buffer)
 {
-    int     i, bytes, numportals;
-
     if (!cm->cache) {
         return 0;
     }
 
-    numportals = cm->cache->lastareaportal + 1;
+    int32_t numportals = cm->cache->lastareaportal + 1;
     if (numportals > MAX_MAP_AREAS) {
         /* HACK: use the same array size as areaBytes!
          * It is nonsense for a map to have > 256 areaportals anyway. */
@@ -1038,9 +982,9 @@ int CM_WritePortalBits(cm_t *cm, byte *buffer)
         numportals = MAX_MAP_AREAS;
     }
 
-    bytes = (numportals + 7) >> 3;
+    int32_t bytes = (numportals + 7) >> 3;
     memset(buffer, 0, bytes);
-    for (i = 0; i < numportals; i++) {
+    for (int32_t i = 0; i < numportals; i++) {
         if (cm->portalopen[i]) {
             Q_SetBit(buffer, i);
         }
@@ -1051,22 +995,20 @@ int CM_WritePortalBits(cm_t *cm, byte *buffer)
 
 void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
 {
-    int     i, numportals;
-
     if (!cm->cache) {
         return;
     }
 
     if (!bytes) {
-        for (i = 0; i <= cm->cache->lastareaportal; i++) {
+        for (int32_t i = 0; i <= cm->cache->lastareaportal; i++) {
             cm->portalopen[i] = true;
         }
     } else {
-        numportals = bytes << 3;
+        int32_t numportals = bytes << 3;
         if (numportals > cm->cache->lastareaportal + 1) {
             numportals = cm->cache->lastareaportal + 1;
         }
-        for (i = 0; i < numportals; i++) {
+        for (int32_t i = 0; i < numportals; i++) {
             cm->portalopen[i] = Q_IsBitSet(buffer, i);
         }
     }
@@ -1085,17 +1027,14 @@ is potentially visible
 */
 qboolean CM_HeadnodeVisible(mnode_t *node, byte *visbits)
 {
-    mleaf_t *leaf;
-    int     cluster;
-
     while (node->plane) {
         if (CM_HeadnodeVisible(node->children[0], visbits))
             return true;
         node = node->children[1];
     }
 
-    leaf = (mleaf_t *)node;
-    cluster = leaf->cluster;
+    mleaf_t *leaf = (mleaf_t *)node;
+    int32_t cluster = leaf->cluster;
     if (cluster == -1)
         return false;
     if (Q_IsBitSet(visbits, cluster))
@@ -1117,7 +1056,6 @@ byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis)
     static byte    temp[VIS_MAX_BYTES];
     mleaf_t *leafs[64];
     int     clusters[64];
-    int     i, j, count, longs;
     uint_fast32_t *src, *dst;
     vec3_t  mins, maxs;
 
@@ -1128,33 +1066,33 @@ byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis)
         return (byte*)memset(mask, 0xff, VIS_MAX_BYTES); // CPP: Cast
     }
 
-    for (i = 0; i < 3; i++) {
+    for (int32_t i = 0; i < 3; i++) {
         mins[i] = org[i] - 8;
         maxs[i] = org[i] + 8;
     }
 
-    count = CM_BoxLeafs(cm, mins, maxs, leafs, 64, NULL);
+    int32_t count = CM_BoxLeafs(cm, mins, maxs, leafs, 64, NULL);
     if (count < 1)
         Com_Error(ERR_DROP, "CM_FatPVS: leaf count < 1");
-    longs = VIS_FAST_LONGS(cm->cache);
+    int32_t longs = VIS_FAST_LONGS(cm->cache);
 
     // convert leafs to clusters
-    for (i = 0; i < count; i++) {
+    for (int32_t i = 0; i < count; i++) {
         clusters[i] = leafs[i]->cluster;
     }
 
     BSP_ClusterVis(cm->cache, mask, clusters[0], vis);
 
     // or in all the other leaf bits
-    for (i = 1; i < count; i++) {
-        for (j = 0; j < i; j++) {
+    for (int32_t i = 1; i < count; i++) {
+        for (int32_t j = 0; j < i; j++) {
             if (clusters[i] == clusters[j]) {
                 goto nextleaf; // already have the cluster we want
             }
         }
         src = (uint_fast32_t *)BSP_ClusterVis(cm->cache, temp, clusters[i], vis);
         dst = (uint_fast32_t *)mask;
-        for (j = 0; j < longs; j++) {
+        for (int32_t j = 0; j < longs; j++) {
             *dst++ |= *src++;
         }
 

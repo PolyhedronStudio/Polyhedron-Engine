@@ -59,7 +59,7 @@ color selection #0f90eb64
 color disabled #7f7f7f
 
 begin environment
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     pairs "sky type" physical_sky "original env.map" 0 earth 1 stroggos 2
     range -f "%+.1f EV" "sun and sky brightness" physical_sky_brightness -10 2 0.1
@@ -77,7 +77,7 @@ begin environment
 end
 
 begin resolution
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
 	toggle "dynamic resolution scaling" drs_enable
 	blank
@@ -89,7 +89,7 @@ begin resolution
 end
 
 begin photomode
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Photo Mode Settings"
     blank
@@ -107,7 +107,7 @@ end
 
 begin video
    //title "Video Setup"
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     banner m_banner_video
 	pairs "renderer" vid_rtx opengl 0 rtx 1
@@ -166,7 +166,7 @@ end
 
 begin options
     //title "Options"
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     banner m_banner_options
     ifeq vid_rtx 1
@@ -184,12 +184,14 @@ begin options
     blank
     action "effects setup" pushmenu effects
     action "screen setup" pushmenu screen
-    action "download options" pushmenu downloads
-    action "address book" pushmenu addressbook
+    ifeq fs_shareware 0
+        action "download options" pushmenu downloads
+        action "address book" pushmenu addressbook
+    endif
 end
 
 begin sound
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Sound Setup"
     blank
@@ -205,7 +207,7 @@ begin sound
 end
 
 begin railtrail
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Railgun Trail Setup"
     blank
@@ -215,15 +217,15 @@ begin railtrail
     range "core width" cl_railcore_width 1 6 1
     range "spiral radius" cl_railspiral_radius 1 6 1
     pairs "core color" cl_railcore_color \
-        black black red red green green yellow yellow \
-        blue blue cyan cyan magenta magenta white white
+        black orange red red green green yellow yellow \
+        orange orange cyan cyan magenta magenta white white
     pairs "spiral color" cl_railspiral_color \
         black black red red green green yellow yellow \
-        blue blue cyan cyan magenta magenta white white
+        orange orange cyan cyan magenta magenta white white
 end
 
 begin effects
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Effects Setup"
     blank
@@ -242,7 +244,7 @@ begin effects
 end
 
 begin crosshair
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Crosshair Setup"
     blank
@@ -256,7 +258,7 @@ begin crosshair
 end
 
 begin screen
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Screen Setup"
     blank
@@ -275,7 +277,7 @@ begin screen
 end
 
 begin downloads
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Download Options"
     blank
@@ -291,7 +293,7 @@ begin downloads
 end
 
 begin gameflags
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Deathmatch Flags"
     blank
@@ -310,7 +312,7 @@ begin gameflags
 end
 
 begin startserver
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     //title "Start Server"
     banner m_banner_start_server
@@ -325,59 +327,69 @@ begin startserver
 end
 
 begin multiplayer
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     banner m_banner_multiplayer
-    action "browse q2servers.com" pushmenu servers "+http://q2servers.com/?raw=2"
-    action "browse address book" pushmenu servers "favorites://" "file:///servers.lst" "broadcast://"
-    action "browse demos" pushmenu demos
-    action "start server" pushmenu startserver
-    action "player setup" pushmenu players
-    action "disconnect" disconnect
+    ifeq fs_shareware 0
+        action "browse q2servers.com" pushmenu servers "+http://q2servers.com/?raw=2"
+        action "browse address book" pushmenu servers "favorites://" "file:///servers.lst" "broadcast://"
+        action "browse demos" pushmenu demos
+        action "start server" pushmenu startserver
+        action "player setup" pushmenu players
+        ifeq info_in_bspmenu 0
+            action "disconnect" disconnect
+        endif
+    endif
 end
 
 begin development
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Developer Menu"
     blank
-    /*
-    forcemenuoff; is required, otherwise the cvars aren't stored for later usage in the list here. 
-
-    This command is placed on top so we can easily enter through the main menu :)
-    */ 
-    action "Launch Map" "forcemenuoff; disconnect; skill $dev_skill; deathmatch 0; coop 0; maxclients $dev_maxclients; echo $dev_map; map $dev_map force"
+    /* forcemenuoff; is required, otherwise the cvars aren't stored for later usage in this menu.*/ 
+    action "Launch Map" "disconnect; skill $dev_skill; gamemode $dev_gamemode; maxclients $dev_maxclients; forcemenuoff; echo $gamemode; echo $dev_map; map $dev_map force;"
     field --width 32 "map" dev_map
     blank
-    field --numeric --width 1 "skill" dev_skill
-    field --numeric --width 2 "max clients" dev_maxclients
-    /*
-    Deathmatch is 1 by default, and I'm not in a mood to spend more time on this men uatm.
-    But with some puzzling around, we could add these settings too.
-    toggle "Deathmatch" deathmatch
-    toggle "Coop" coop
-    */
+/*
+    values "Gamemode: " dev_gamemode \
+        singleplayer \
+        deathmatch \
+        coop
+*/
+    pairs "Gamemode: " dev_gamemode \
+        Singleplayer singleplayer \
+        Deathmatch deathmatch \
+        Cooperative coop
+    field --numeric --width 32 "skill" dev_skill
+    field --numeric --width 32 "max clients" dev_maxclients
+
     blank
 end
 
 begin singleplayer
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
-    banner m_banner_game
+    title "SinglePlayer"
+    //banner m_banner_game
     ifeq developer 1
         action development pushmenu development
     endif
-    action easy "skill 0; deathmatch 0; coop 0; maxclients 1; map abc"
-    action medium "skill 1; deathmatch 0; coop 0; maxclients 1; map abc"
-    action hard "skill 2; deathmatch 0; coop 0; maxclients 1; map abc"
-    action nightmare "skill 3; deathmatch 0; coop 0; maxclients 1; map abc"
+    action "Map: func_plat" "skill 0; gamemode singleplayer; maxclients 1; map func_plat force"
+    action "Map: func_doors" "skill 0; gamemode singleplayer; maxclients 1; map func_doors force"
+    action "Map: testbed" "skill 0; gamemode singleplayer; maxclients 1; map testbed force"
+    action "Map: base1" "skill 0; gamemode singleplayer; maxclients 1; map base1 force"
+    //action easy "skill 0; deathmatch 0; coop 0; maxclients 1; map testbed force"
+    //action medium "skill 1; deathmatch 0; coop 0; maxclients 1; map base1_stepmove force"
+    //action hard "skill 2; deathmatch 0; coop 0; maxclients 1; map test_stepmove force"
+    //action nightmare "skill 3; deathmatch 0; coop 0; maxclients 1; map test_stepmove force"
     blank
     action "load game..." pushmenu loadgame
     action "save game..." pushmenu savegame
 end
 
 begin loadgame
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     banner m_banner_load_game
     loadgame save0
@@ -402,7 +414,7 @@ begin loadgame
 end
 
 begin savegame
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     banner m_banner_save_game
     savegame save1
@@ -422,24 +434,40 @@ begin savegame
 end
 
 begin quit
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     action "quit game" quit
     action "cancel" popmenu
 end
 
-begin main
-//    title "Main Menu"
-    plaque m_main_plaque m_main_logo
-    bitmap m_main_game pushmenu singleplayer
-    bitmap m_main_multiplayer pushmenu multiplayer
-    bitmap m_main_options pushmenu options
-    bitmap m_main_video pushmenu video
-    bitmap m_main_quit pushmenu quit
+begin main 40 360 286 240 
+    background #6b7d69d0
+    title "Main Menu"
+    action "Singleplayer" pushmenu singleplayer
+    action "Multiplayer" pushmenu multiplayer
+    action "Options" pushmenu options
+    action "Video" pushmenu video
+    action "Quit" pushmenu quit
+/*    //plaque m_main_plaque m_main_logo
+    //bitmap m_main_game pushmenu singleplayer
+    //bitmap m_main_multiplayer pushmenu multiplayer
+    //bitmap m_main_options pushmenu options
+    //bitmap m_main_video pushmenu video
+    //bitmap m_main_quit pushmenu quit*/
 end
 
 begin game
-    background #212F3CD0
+    background #6b7d69d0
+    style --compact
+    title "Main Menu"
+    action "Singleplayer" pushmenu singleplayer
+    action "Multiplayer" pushmenu multiplayer
+    action "Options" pushmenu options
+    action "Video" pushmenu video
+    action "Quit" pushmenu quit
+end
+/*begin game
+    background #6b7d69d0
     style --compact
     plaque m_main_plaque m_main_logo
     bitmap m_main_game pushmenu singleplayer
@@ -447,10 +475,10 @@ begin game
     bitmap m_main_options pushmenu options
     bitmap m_main_video pushmenu video
     bitmap m_main_quit pushmenu quit
-end
+end*/
 
 begin addressbook
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     //title "Address Book"
     banner m_banner_addressbook
@@ -473,7 +501,7 @@ begin addressbook
 end
 
 begin input
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Input Setup"
     blank
@@ -486,7 +514,7 @@ begin input
 end
 
 begin keys
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Action Key Bindings"
     blank
@@ -516,7 +544,7 @@ begin keys
 end
 
 begin keys_function
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Function Key Bindings"
     blank
@@ -540,7 +568,7 @@ begin keys_function
 end
 
 begin weapons
-    background #212F3CD0
+    background #6b7d69d0
     style --compact
     title "Weapon and Item Bindings"
     blank

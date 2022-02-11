@@ -22,14 +22,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Utilities.h"           // Include Utilities funcs.
 
 // Game Mode interface.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
+
+// GameLocals.
+#include "GameLocals.h"
 
 //
 //===============
 // SVG_InflictDamage
 //
 // Inflicts actual damage on the targeted entity, the rest speaks for itself.
-// Calls into the GameMode of course, to ensure whether things are solid to do at all.
+// Calls into the Gamemode of course, to ensure whether things are solid to do at all.
 // 
 // If you'd like the old info...
 // targ        entity that is being damaged
@@ -54,7 +57,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockBack, int dflags, int mod)
 {
-    game.gameMode->InflictDamage(targ, inflictor, attacker, dmgDir, point, normal, damage, knockBack, dflags, mod);
+    game.GetCurrentGamemode()->InflictDamage(targ, inflictor, attacker, dmgDir, point, normal, damage, knockBack, dflags, mod);
 }
 
 
@@ -68,5 +71,5 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
 //
 void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
 {
-    game.gameMode->InflictRadiusDamage(inflictor, attacker, damage, ignore, radius, mod);
+    game.GetCurrentGamemode()->InflictRadiusDamage(inflictor, attacker, damage, ignore, radius, mod);
 }

@@ -506,7 +506,7 @@ qboolean CL_CheckDownloadExtension(const char *ext)
     int i;
 
     for (i = 0; i < Q_COUNTOF(allowed); i++)
-        if (!Q_stricmp(ext, allowed[i]))
+        if (!PH_StringCompare(ext, allowed[i]))
             return true;
 
     return false;
@@ -534,8 +534,8 @@ static qerror_t check_file_len(const char *path, size_t len, dltype_t type)
 
     // check path
     if (valid == PATH_INVALID
-        || !Q_ispath(buffer[0])
-        || !Q_ispath(buffer[len - 1])
+        || !PH_IsPath(buffer[0])
+        || !PH_IsPath(buffer[len - 1])
         || strstr(buffer, "..")
         || !strchr(buffer, '/')) {
         // some of these checks are too conservative or even redundant
@@ -556,7 +556,7 @@ static qerror_t check_file_len(const char *path, size_t len, dltype_t type)
 
     if (valid == PATH_MIXED_CASE)
         // convert to lower case to make download server happy
-        Q_strlwr(buffer);
+        PH_StringLower(buffer);
 
     if (CL_IgnoreDownload(buffer))
         return Q_ERR_PERM;

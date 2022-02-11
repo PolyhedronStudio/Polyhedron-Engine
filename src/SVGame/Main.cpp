@@ -21,13 +21,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "Entities.h"
+#include "Entities/Worldspawn.h"
+//#include "Entities/Base/SVGEntityHandle.h"
 #include "Entities/Base/PlayerClient.h"
 
 // Gamemodes.
-#include "GameModes/IGameMode.h"
-#include "GameModes/DefaultGameMode.h"
-#include "GameModes/CoopGameMode.h"
-#include "GameModes/DeathMatchGameMode.h"
+#include "Gamemodes/IGamemode.h"
+#include "Gamemodes/DefaultGamemode.h"
+#include "Gamemodes/CoopGamemode.h"
+#include "Gamemodes/DeathmatchGamemode.h"
+
+// Gameworld.
+#include "World/GameWorld.h"
+
+// GameLocals.
+#include "GameLocals.h"
 
 // Player related.
 #include "Player/Client.h"      // Include Player Client header.
@@ -43,74 +51,75 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // These are used all throughout the code. To store game state related
 // information, and callbacks to the engine server game API.
 //-----------------
-GameLocals   game;
-LevelLocals  level;
-ServerGameImports   gi;       // CLEANUP: These were game_import_t and game_export_t
-ServerGameExports   globals;  // CLEANUP: These were game_import_t and game_export_t
-TemporarySpawnFields    st;
+GameLocals game;
+LevelLocals level;
+ServerGameImports gi;       // CLEANUP: These were game_import_t and game_export_t
+ServerGameExports globals;  // CLEANUP: These were game_import_t and game_export_t
+TemporarySpawnFields st;
 
 int sm_meat_index;
 int snd_fry;
 
-
 //-----------------
 // CVars.
 //-----------------
-cvar_t  *deathmatch;
-cvar_t  *coop;
-cvar_t  *gamemodeflags;
-cvar_t  *skill;
-cvar_t  *fraglimit;
-cvar_t  *timelimit;
-cvar_t  *password;
-cvar_t  *spectator_password;
-cvar_t  *needpass;
-cvar_t  *maximumClients;
-cvar_t  *maxspectators;
-cvar_t  *maxEntities;
-cvar_t  *g_select_empty;
-cvar_t  *dedicated;
+// Gamemode and Server settings.
+cvar_t* gamemode = nullptr;  // Stores the gamemode string: "singleplayer", "deathmatch", "coop"
+cvar_t* gamemodeflags = nullptr;
+cvar_t* skill = nullptr;
+cvar_t* fraglimit = nullptr;
+cvar_t* timelimit = nullptr;
+cvar_t* password = nullptr;
+cvar_t* spectator_password = nullptr;
+cvar_t* needpass = nullptr;
+cvar_t* filterban = nullptr;
 
-cvar_t  *filterban;
+cvar_t* maximumclients = nullptr;
+cvar_t* maxspectators = nullptr;
+cvar_t* maxEntities = nullptr;
 
-cvar_t  *sv_maxvelocity;
-cvar_t  *sv_gravity;
+cvar_t* g_select_empty = nullptr;
+cvar_t* dedicated = nullptr;
 
-cvar_t  *sv_rollspeed;
-cvar_t  *sv_rollangle;
-cvar_t  *gun_x;
-cvar_t  *gun_y;
-cvar_t  *gun_z;
+cvar_t* flood_msgs = nullptr;
+cvar_t* flood_persecond = nullptr;
+cvar_t* flood_waitdelay = nullptr;
 
-cvar_t  *run_pitch;
-cvar_t  *run_roll;
-cvar_t  *bob_up;
-cvar_t  *bob_pitch;
-cvar_t  *bob_roll;
+cvar_t* sv_cheats = nullptr;
+cvar_t* sv_maplist = nullptr;
 
-cvar_t  *sv_cheats;
+// Physics settings.
+cvar_t* sv_maxvelocity = nullptr;
+cvar_t* sv_gravity = nullptr;
+cvar_t* sv_rollspeed = nullptr;
+cvar_t* sv_rollangle = nullptr;
 
-cvar_t  *flood_msgs;
-cvar_t  *flood_persecond;
-cvar_t  *flood_waitdelay;
+// View/User Control settings.
+cvar_t*	 run_pitch = nullptr;
+cvar_t*	 run_roll = nullptr;
+cvar_t*	 bob_up = nullptr;
+cvar_t*	 bob_pitch = nullptr;
+cvar_t*	 bob_roll = nullptr;
 
-cvar_t  *sv_maplist;
+// Client related. (Are monster footsteps on?)
+cvar_t* cl_monsterfootsteps = nullptr;
 
-cvar_t  *cl_monsterfootsteps;
 
+// Developer related.
+cvar_t* gun_x = nullptr;
+cvar_t* gun_y = nullptr;
+cvar_t* gun_z = nullptr;
+
+cvar_t* dev_show_physwarnings = nullptr;
 
 //-----------------
 // Funcs used locally.
 //-----------------
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
+void SVG_CreatePlayerClientEntities();
+static void SVG_SetupCVars();
 
-void SVG_InitializeServerEntities();
-void SVG_InitializeGameMode();
-void SVG_AllocateGameClients();
-void SVG_AllocateGamePlayerClientEntities();
-void SVG_InitializeCVars();
-
-void SVG_RunEntity(SVGBaseEntity *ent);
+void SVG_RunEntity(SVGEntityHandle &entityHandle);
 void SVG_WriteGame(const char *filename, qboolean autosave);
 void SVG_ReadGame(const char *filename);
 void SVG_WriteLevel(const char *filename);
@@ -118,72 +127,51 @@ void SVG_ReadLevel(const char *filename);
 void SVG_InitGame(void);
 void SVG_RunFrame(void);
 
-
-//
 //=============================================================================
 //
 //	SVGame Core API entry points.
 //
 //=============================================================================
-//
-//
-//===============
-// SVG_InitGame
-//
-// This will be called when the dll is first loaded, which
-// only happens when a new game is started or a save game
-// is loaded.
-//===============
-//
+
+/**
+*   @brief  This will be called when the dll is initialize. This happens 
+*           when a new game is started or a save game is loaded.
+**/
 void SVG_InitGame(void)
 {
-    // WID: Informed consent. One has to know, right? :D
     gi.DPrintf("==== InitServerGame ====\n");
 
     // Initialise the type info system
     TypeInfo::SetupSuperClasses();
 
-    // Initialize and allocate core objects for this "games" map 'round'.
-    SVG_InitializeCVars();
-    SVG_InitItems();
-    SVG_InitializeServerEntities();
-    SVG_AllocateGameClients();
-    // WID: You'd expect PlayerClient allocation for the entities here.
-    // that won't work with the structure of things.
-    // Therefor, it now resides in SVG_SpawnEntities.
-    SVG_InitializeGameMode();
+    // Setup CVars that we'll be working with.
+    SVG_SetupCVars();
+
+    // Setup our game locals object.
+    game.Initialize();
 }
 
-//
 //===============
 // SVG_ShutdownGame
 //
 // Whenever a "game" or aka a "match" ends, this gets called.
 //===============
-//
 void SVG_ShutdownGame(void) {
-    // Informed consent, as always. We appreciate that, dang!
     gi.DPrintf("==== SVG_ShutdownGame ====\n");
 
-    // Aight, delete C++ vars yo. (I know this check is not required, but I like it.)
-    if (game.gameMode) {
-        delete game.gameMode;
-        game.gameMode = nullptr;
-    }
+    // Notify game object about the shutdown so it can let its members fire
+    // their last act for cleaning up.
+    game.Shutdown();
 
-    // These old school CVars gotta be deleted from their stash. 
+    // Free all memory that was tagged with TAG_LEVEL or TAG_GAME.
     gi.FreeTags(TAG_LEVEL);
     gi.FreeTags(TAG_GAME);
 }
 
-//
-//===============
-//GetServerGameAPI
-//
-// Returns a pointer to the structure with all entry points
-// and global variables
-//===============
-//
+/**
+*   @brief  Returns a pointer to the structure with all entry points
+*           and global variables.
+**/
 ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 {
     gi = *import;
@@ -220,9 +208,6 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
     return &globals;
 }
 
-
-
-//
 //=============================================================================
 //
 //	SVGame Wrappers, these are here so that functions in q_shared.cpp can do
@@ -230,7 +215,6 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 //  .lib instead, that signifies the "core" utility.
 //
 //=============================================================================
-//
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c can link
 void Com_LPrintf(PrintType type, const char *fmt, ...)
@@ -263,31 +247,26 @@ void Com_Error(ErrorType type, const char *fmt, ...)
 #endif
 
 
-//
 //=============================================================================
 //
 //	Initialization utility functions.
 //
 //=============================================================================
-//
-//
-//=====================
-// SVG_InitializeCVars
-//
-// Initializes all server game cvars and/or fetches those belonging to the engine.
-//=====================
-//
-void SVG_InitializeCVars() {
-    // Debug weapon vars.
+/**
+*   @brief  Sets up all server game cvars and/or fetches those belonging to the engine.
+**/
+static void SVG_SetupCVars() {
+    // Developer cvars.
     gun_x = gi.cvar("gun_x", "0", 0);
     gun_y = gi.cvar("gun_y", "0", 0);
     gun_z = gi.cvar("gun_z", "0", 0);
+    dev_show_physwarnings = gi.cvar("dev_show_physwarnings", "0", 0);
 
     //FIXME: sv_ prefix is wrong for these
     sv_rollspeed = gi.cvar("sv_rollspeed", "200", 0);
     sv_rollangle = gi.cvar("sv_rollangle", "2", 0);
     sv_maxvelocity = gi.cvar("sv_maxvelocity", "2000", 0);
-    sv_gravity = gi.cvar("sv_gravity", "750", 0);
+    sv_gravity = gi.cvar("sv_gravity", std::to_string(Worldspawn::DEFAULT_GRAVITY).c_str(), 0);
 
     // Noset vars
     dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);
@@ -297,11 +276,13 @@ void SVG_InitializeCVars() {
     gi.cvar("gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_LATCH);
     gi.cvar("gamedate", __DATE__, CVAR_SERVERINFO | CVAR_LATCH);
 
-    maximumClients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+    maximumclients = gi.cvar("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
     maxspectators = gi.cvar("maxspectators", "4", CVAR_SERVERINFO);
-    deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
-    coop = gi.cvar("coop", "0", CVAR_LATCH);
-    skill = gi.cvar("skill", "1", CVAR_LATCH);
+    gamemode = gi.cvar("gamemode", 0, 0);
+    
+    //deathmatch = gi.cvar("deathmatch", "0", CVAR_LATCH);
+    //coop = gi.cvar("coop", "0", CVAR_LATCH);
+    skill = gi.cvar("skill", "1", CVAR_SERVERINFO | CVAR_LATCH);
 
     // Change anytime vars
     gamemodeflags = gi.cvar("gamemodeflags", "0", CVAR_SERVERINFO);
@@ -334,50 +315,15 @@ void SVG_InitializeCVars() {
 
 //
 //=====================
-// SVG_InitializeServerEntities
-//
-// Sets up the server entity aligned array.
-//=====================
-//
-void SVG_InitializeServerEntities() {
-    // Initialize all entities for this "game", aka map that is being played.
-    game.maxEntities = MAX_EDICTS;
-    game.maxEntities = Clampi(game.maxEntities, (int)maximumClients->value + 1, MAX_EDICTS);
-    globals.entities = g_entities;
-    globals.maxEntities = game.maxEntities;
-
-    // Ensure, all base entities are nullptrs. Just to be save.
-    for (int32_t i = 0; i < MAX_EDICTS; i++) {
-        g_baseEntities[i] = nullptr;
-    }
-}
-
-//
-//=====================
-// SVG_AllocateGameClients
-//
-// Allocates the "ServersClient", aligned to the ServerClient data type array properly for
-// the current game at play.
-//=====================
-//
-void SVG_AllocateGameClients() {
-    // Initialize all clients for this game
-    game.maximumClients = maximumClients->value;
-    game.clients = (ServersClient*)gi.TagMalloc(game.maximumClients * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    globals.numberOfEntities = game.maximumClients + 1;
-}
-
-//
-//=====================
-// SVG_AllocateGamePlayerClientEntities
+// SVG_CreatePlayerClientEntities
 //
 // Allocate the client player class entities before hand. No need to redo this all over,
 // that'd just be messy and complicate things more.
 //=====================
 //
-void SVG_AllocateGamePlayerClientEntities() {
+void SVG_CreatePlayerClientEntities() {
     // Loop over the number of clients.
-    int32_t maximumClients = game.maximumClients;
+    const int32_t maximumClients = game.maxClients;
 
     // Allocate a classentity for each client in existence.
     for (int32_t i = 1; i < maximumClients + 1; i++) {
@@ -387,54 +333,35 @@ void SVG_AllocateGamePlayerClientEntities() {
         // Initialize entity.
         SVG_InitEntity(serverEntity);
 
-        // Allocate their class entities appropriately.
-        serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->className);
+        // Allocate player client class entity 
+        PlayerClient *playerClientEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->classname);
         
         // Be sure to reset their inuse, after all, they aren't in use.
-        serverEntity->classEntity->SetInUse(false);
+        playerClientEntity->SetInUse(false);
 
         // Fetch client index.
         const int32_t clientIndex = i - 1; // Same as the older: serverEntity - g_entities - 1;
 
         // Assign the designated client to this PlayerClient entity.
-        ((PlayerClient*)serverEntity->classEntity)->SetClient(&game.clients[clientIndex]);
-    }
-}
-
-
-//
-//===============
-// SVG_InitializeGameMode
-//
-// Allocate AND initialize the proper gamemode that is set for this "game".
-//===============
-//
-void SVG_InitializeGameMode(void) {
-    // Game mode is determined on... various factors.
-    // Eventually, I'd prefer it to be a numberic index but hey...
-    // Now we check for whichever the ID we got (ha, see what I did there?)
-    int32_t gameModeID = 0; // <-- default mode index.
-
-    // Check.
-    if (deathmatch->integer && !coop->integer)
-        gameModeID = 1;
-    else if (!deathmatch->integer && coop->integer)
-        gameModeID = 2;
-
-    // Detect which game mode to allocate for this game round.
-    switch(gameModeID) {
-    case 1:
-        game.gameMode = new DeathMatchGameMode();
-        break;
-    case 2:
-        game.gameMode = new CoopGameMode();
-        break;
-    default:
-        game.gameMode = new DefaultGameMode();
+        playerClientEntity->SetClient(&game.clients[clientIndex]);
     }
 
-    //// Inform our gamemodes about the gist of it.
-    //game.gameMode.Start();
+    SVGEntityHandle bridgeA = g_baseEntities[1];
+    Entity *playerEnt = bridgeA.Get();
+    auto baseClientPlayer = bridgeA;
+    gi.DPrintf("=====================================================================\n");
+    gi.DPrintf("=====================================================================\n");
+    gi.DPrintf("=====================================================================\n");
+
+    if (baseClientPlayer) {
+	    gi.DPrintf("Found basePlayer: %s\n", baseClientPlayer->GetClassname());
+    }
+    if (playerEnt) {
+	    gi.DPrintf("Found player entity: %i\n", playerEnt->state.number);
+    }
+    gi.DPrintf("=====================================================================\n");
+    gi.DPrintf("=====================================================================\n");
+    gi.DPrintf("=====================================================================\n");
 }
 
 
@@ -458,22 +385,21 @@ void SVG_ClientEndServerFrames(void)
     // Go through each client and calculate their final view for the state.
     // (This happens here, so we can take into consideration objects that have
     // pushed the player. And of course, because damage has been added.)
-    for (int32_t i = 0; i < maximumClients->value; i++) {
+    for (int32_t clientIndex = 0; clientIndex < game.maxClients; clientIndex++) {
         // First, fetch entity state number.
-        int32_t stateNumber = g_entities[1 + i].state.number;
+        int32_t stateNumber = g_entities[1 + clientIndex].state.number;
 
         // Now, let's go wild. (Purposely, do not assume the pointer is a PlayerClient.)
-        Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == WorldSpawn.
-
-        // See if we're gooszsd to go, if not, continue for the next. 
+        Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
+        //Entity* entity = g_entities + 1 + clientIndex;
+                                                   // See if we're gooszsd to go, if not, continue for the next. 
         if (!entity || !entity->inUse || !entity->client)
             continue;
 
         // Ugly cast, yes, but at this point we know we can do this. And that, to do it, matters more than
         // ethics, because our morals say otherwise :D
-        game.gameMode->ClientEndServerFrame(&g_entities[stateNumber]);
+        game.GetCurrentGamemode()->ClientEndServerFrame(entity);
     }
-
 }
 
 /*
@@ -490,7 +416,7 @@ void SVG_EndDMLevel(void)
     static const char *seps = " ,\n\r";
 
     // stay on same level flag
-    if ((int)gamemodeflags->value & GameModeFlags::SameLevel) {
+    if ((int)gamemodeflags->value & GamemodeFlags::SameLevel) {
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
         return;
     }
@@ -501,7 +427,7 @@ void SVG_EndDMLevel(void)
         f = NULL;
         t = strtok(s, seps);
         while (t != NULL) {
-            if (Q_stricmp(t, level.mapName) == 0) {
+            if (PH_StringCompare(t, level.mapName) == 0) {
                 // it's in the list, go to the next one
                 t = strtok(NULL, seps);
                 if (t == NULL) { // end of list, go to first one
@@ -524,7 +450,7 @@ void SVG_EndDMLevel(void)
     if (level.nextMap[0]) // go to a specific map
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.nextMap));
     else {  // search for a changelevel
-        ent = SVG_Find(NULL, FOFS(className), "target_changelevel");
+        ent = SVG_Find(NULL, FOFS(classname), "target_changelevel");
         if (!ent) {
             // the map designer didn't include a changelevel,
             // so create a fake ent that goes back to the same level
@@ -552,9 +478,9 @@ void SVG_CheckNeedPass(void)
 
         need = 0;
 
-        if (*password->string && Q_stricmp(password->string, "none"))
+        if (*password->string && PH_StringCompare(password->string, "none"))
             need |= 1;
-        if (*spectator_password->string && Q_stricmp(spectator_password->string, "none"))
+        if (*spectator_password->string && PH_StringCompare(spectator_password->string, "none"))
             need |= 2;
 
         gi.cvar_set("needpass", va("%d", need));
@@ -569,13 +495,13 @@ SVG_CheckDMRules
 void SVG_CheckDMRules(void)
 {
     int         i;
-    ServersClient   *cl;
+    ServerClient   *cl;
 
     if (level.intermission.time)
         return;
 
-    if (!deathmatch->value)
-        return;
+    //if (!deathmatch->value)
+    //    return;
 
     if (timelimit->value) {
         if (level.time >= timelimit->value * 60) {
@@ -586,7 +512,7 @@ void SVG_CheckDMRules(void)
     }
 
     if (fraglimit->value) {
-        for (i = 0 ; i < maximumClients->value ; i++) {
+        for (i = 0 ; i < maximumclients->value ; i++) {
             cl = game.clients + i;
             if (!g_entities[i + 1].inUse)
                 continue;
@@ -605,11 +531,10 @@ void SVG_CheckDMRules(void)
 ================
 SVG_RunFrame
 
-Advances the world by 0.05(FRAMETIME) seconds
+Advances the world by FRAMETIME(for 50hz=0.019) seconds
 ================
 */
-void SVG_RunFrame(void)
-{
+void SVG_RunFrame(void) {
     // We're moving the game a frame forward.
     level.frameNumber++;
 
@@ -619,7 +544,7 @@ void SVG_RunFrame(void)
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
         //SVG_ExitLevel();
-        game.gameMode->OnLevelExit();
+        game.GetCurrentGamemode()->OnLevelExit();
         return;
     }
 
@@ -627,29 +552,34 @@ void SVG_RunFrame(void)
     // Treat each object in turn
     // "even the world gets a chance to Think", it does.
     //
-    // Fetch the WorldSpawn entity number.
-    int32_t stateNumber = g_entities[0].state.number;
-
-    // Fetch the corresponding base entity.
-    SVGBaseEntity* entity = g_baseEntities[stateNumber];
-
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < globals.numberOfEntities; i++) {
         // Acquire state number.
-        stateNumber = g_entities[i].state.number;
+        int32_t stateNumber = g_entities[i].state.number;
 
         // Fetch the corresponding base entity.
-        SVGBaseEntity* entity = g_baseEntities[stateNumber];
+        //SVGBaseEntity* entity = g_baseEntities[stateNumber];
+        //SVGBaseEntity* entity = g_entities[i].classEntity;
 
-        // Is it even valid?
-        if (entity == nullptr)
+        //// Reset level current entity.
+        //level.currentEntity = nullptr;
+
+        //// Is it even valid?
+        //if (entity == nullptr)
+        //    continue;
+        //
+        //// Does it have a server entity?
+        //if (!entity->GetServerEntity())
+        //    continue;
+	    SVGEntityHandle entityHandle = g_baseEntities[i];
+        SVGBaseEntity *entity = *entityHandle;
+
+        if (!entity) {
             continue;
+        }
 
         // Don't go on if it isn't in use.
         if (!entity->IsInUse())
-            continue;
-
-        if (!entity->GetServerEntity())
             continue;
 
         // Admer: entity was marked for removal at the previous tick
@@ -657,7 +587,10 @@ void SVG_RunFrame(void)
             // Free server entity.
             SVG_FreeEntity(entity->GetServerEntity());
 
-            // Be sure to unset the server entity on this SVGBaseEntity.
+            // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
+            // 
+            // Other entities may wish to point at this entity for the current tick. By unsetting
+            // the server entity we can prevent malicious situations from happening.
             entity->SetServerEntity(nullptr);
 
             // Skip further processing of this entity, it's removed.
@@ -671,8 +604,8 @@ void SVG_RunFrame(void)
         entity->SetOldOrigin(entity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-        if ((entity->GetGroundEntity() && entity->GetGroundEntity()->GetServerEntity())
-            && (entity->GetGroundEntity()->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
+	    SVGBaseEntity* groundEntity = *entity->GetGroundEntity();
+        if (groundEntity && (groundEntity->GetLinkCount() != entity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             entity->SetGroundEntity(nullptr);
 
@@ -684,15 +617,26 @@ void SVG_RunFrame(void)
         }
 
         // Time to begin a server frame for all of our clients. (This has to ha
-        if (i > 0 && i <= maximumClients->value) {
-            // Ensure the entity actually is owned by a client. 
-            if (entity->GetClient())
-                game.gameMode->ClientBeginServerFrame(entity->GetServerEntity());
+        if (i > 0 && i <= maximumclients->value) {
+            // Ensure the entity is in posession of a client that controls it.
+            ServerClient* client = entity->GetClient();
+            if (!client) {
+                continue;
+            }
+
+            // If the entity is NOT a PlayerClient (sub-)class, skip.
+            if (!entity->GetTypeInfo()->IsSubclassOf(PlayerClient::ClassInfo)) {
+                continue;
+            }
+
+            // Last but not least, begin its server frame.
+            game.GetCurrentGamemode()->ClientBeginServerFrame(dynamic_cast<PlayerClient*>(entity), client);
+
             continue;
         }
 
         // Last but not least, "run" process the entity.
-        SVG_RunEntity(entity);
+	    SVG_RunEntity(entityHandle);
     }
 
     // See if it is time to end a deathmatch.

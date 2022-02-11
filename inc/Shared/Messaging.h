@@ -119,7 +119,7 @@ struct PlayerState {
     vec3_t      gunAngles;
     vec3_t      gunOffset;
     int         gunIndex;
-    int         gunFrame;
+    float       gunFrame;
 
     float       blend[4];       // RGBA full screen effect
 

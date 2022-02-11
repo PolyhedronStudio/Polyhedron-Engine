@@ -36,7 +36,7 @@ typedef union {
 
 //---------------
 // This is the actual packed entity data that is transferred over the network.
-// It is bit precise, sensitive, and any change here would required changes elsewhere.
+// It is bit precise, sensitive, and any change here would require changes elsewhere.
 // 
 // Be careful, and only touch this if you know what you are doing.
 //---------------
@@ -69,11 +69,11 @@ typedef struct {
 // Player state messaging flags.
 //---------------
 enum PlayerStateMessageFlags {
-    MSG_PS_IGNORE_VIEWANGLES = (1 << 0),
-    MSG_PS_IGNORE_DELTAANGLES = (1 << 1),
-    MSG_PS_IGNORE_PREDICTION = (1 << 2),      // mutually exclusive with IGNORE_VIEWANGLES
-    MSG_PS_FORCE = (1 << 3),
-    MSG_PS_REMOVE = (1 << 4)
+    MSG_PS_IGNORE_VIEWANGLES    = (1 << 0),
+    MSG_PS_IGNORE_DELTAANGLES   = (1 << 1),
+    MSG_PS_IGNORE_PREDICTION    = (1 << 2), // Mutually exclusive with IGNORE_VIEWANGLES
+    MSG_PS_FORCE    = (1 << 3),
+    MSG_PS_REMOVE   = (1 << 4)
 };
 
 //---------------
@@ -166,28 +166,21 @@ const char* MSG_ServerCommandString(int cmd);
 
 //============================================================================
 
-static inline int MSG_PackSolid16(const vec3_t &mins, const vec3_t &maxs)
+/**
+*   @brief Packs a bounding box by encoding it in a 32 bit unsigned int.
+*   
+*   Mainly used for client side prediction, 
+*       8*(bits 0-4) is x/y radius
+*       8*(bits 5-9) is z down distance, 8(bits10-15) is z up
+*       
+*       LinkEntity sets this properly
+* 
+*   @param[in]  mins The mins of the bounding box to pack.
+*   @param[in]  maxs The maxs of the bounding box to pack.
+**/
+static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
 {
-    int x, zd, zu;
-
-    // assume that x/y are equal and symetric
-    x = maxs[0] / 8;
-    clamp(x, 1, 31);
-
-    // z is not symetric
-    zd = -mins[2] / 8;
-    clamp(zd, 1, 31);
-
-    // and z maxs can be negative...
-    zu = (maxs[2] + 32) / 8;
-    clamp(zu, 1, 63);
-
-    return (zu << 10) | (zd << 5) | x;
-}
-
-static inline int MSG_PackSolid32(const vec3_t &mins, const vec3_t &maxs)
-{
-    int x, zd, zu;
+    int32_t x, zd, zu;
 
     // assume that x/y are equal and symetric
     x = maxs[0];
@@ -204,23 +197,16 @@ static inline int MSG_PackSolid32(const vec3_t &mins, const vec3_t &maxs)
     return (zu << 16) | (zd << 8) | x;
 }
 
-static inline void MSG_UnpackSolid16(int solid, vec3_t &mins, vec3_t &maxs)
+/**
+*   @brief Unpacks the bounding box into the given mins & maxs vectors.
+*
+*   @param[in] solid The actual integer to unpack.
+*   @param[out/in]  mins The mins of the bounding box to set after unpacking.
+*   @param[out/in]  maxs The maxs of the bounding box to set after unpacking.
+**/
+static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& maxs)
 {
-    int x, zd, zu;
-
-    x = 8 * (solid & 31);
-    zd = 8 * ((solid >> 5) & 31);
-    zu = 8 * ((solid >> 10) & 63) - 32;
-
-    mins[0] = mins[1] = -x;
-    maxs[0] = maxs[1] = x;
-    mins[2] = -zd;
-    maxs[2] = zu;
-}
-
-static inline void MSG_UnpackSolid32(int solid, vec3_t& mins, vec3_t& maxs)
-{
-    int x, zd, zu;
+    int32_t x, zd, zu;
 
     x = solid & 255;
     zd = (solid >> 8) & 255;
@@ -231,5 +217,44 @@ static inline void MSG_UnpackSolid32(int solid, vec3_t& mins, vec3_t& maxs)
     mins[2] = -zd;
     maxs[2] = zu;
 }
+
+//
+// UNUSED
+//
+//static inline int MSG_PackBoundingBox16(const vec3_t &mins, const vec3_t &maxs)
+//{
+//    int x, zd, zu;
+//
+//    // assume that x/y are equal and symetric
+//    x = maxs[0] / 8;
+//    clamp(x, 1, 31);
+//
+//    // z is not symetric
+//    zd = -mins[2] / 8;
+//    clamp(zd, 1, 31);
+//
+//    // and z maxs can be negative...
+//    zu = (maxs[2] + 32) / 8;
+//    clamp(zu, 1, 63);
+//
+//    return (zu << 10) | (zd << 5) | x;
+//}
+
+//
+// UNUSED.
+//
+//static inline void MSG_UnpackBoundingBox16(int solid, vec3_t &mins, vec3_t &maxs)
+//{
+//    int x, zd, zu;
+//
+//    x = 8 * (solid & 31);
+//    zd = 8 * ((solid >> 5) & 31);
+//    zu = 8 * ((solid >> 10) & 63) - 32;
+//
+//    mins[0] = mins[1] = -x;
+//    maxs[0] = maxs[1] = x;
+//    mins[2] = -zd;
+//    maxs[2] = zu;
+//}
 
 #endif // MSG_H

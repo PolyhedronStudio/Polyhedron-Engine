@@ -1,0 +1,16 @@
+// Game: Polyhedron
+// Format: Quake2
+// entity 0
+{
+"classname" "worldspawn"
+"_tb_textures" "textures"
+// brush 0
+{
+( -64 -64 -32 ) ( -64 -63 -32 ) ( -64 -64 -31 ) __TB_empty 0 0 0 1 1
+( -64 -64 -32 ) ( -64 -64 -31 ) ( -63 -64 -32 ) __TB_empty 0 0 0 1 1
+( -64 -64 -32 ) ( -63 -64 -32 ) ( -64 -63 -32 ) __TB_empty 0 0 0 1 1
+( 64 64 0 ) ( 64 65 0 ) ( 65 64 0 ) __TB_empty 0 0 0 1 1
+( 64 64 0 ) ( 65 64 0 ) ( 64 64 1 ) __TB_empty 0 0 0 1 1
+( 64 64 0 ) ( 64 64 1 ) ( 64 65 0 ) __TB_empty 0 0 0 1 1
+}
+}

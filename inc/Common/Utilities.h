@@ -24,7 +24,7 @@ enum color_index_t {
     COLOR_RED,
     COLOR_GREEN,
     COLOR_YELLOW,
-    COLOR_BLUE,
+    COLOR_ORANGE, // Used to be: COLOR_BLUE
     COLOR_CYAN,
     COLOR_MAGENTA,
     COLOR_WHITE,

@@ -330,7 +330,7 @@ static void logfile_write(PrintType type, const char *s)
         if (c == '\n') {
             com_logNewline = true;
         } else {
-            c = Q_charascii(c);
+            c = PH_CharASCII(c);
         }
 
         *p++ = c;
@@ -440,9 +440,10 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
             break;
         case PRINT_DEVELOPER:
             Com_SetColor(COLOR_ALT);
+            Com_SetColor(COLOR_ORANGE);
             break;
         case PRINT_WARNING:
-            Com_SetColor(COLOR_YELLOW);
+            Com_SetColor(COLOR_ORANGE);
             break;
         case PRINT_ERROR:
             Com_SetColor(COLOR_RED);
@@ -924,6 +925,8 @@ void Qcommon_Init(int argc, char **argv)
     host_speeds = Cvar_Get("host_speeds", "0", 0);
 #endif
 #ifdef _DEBUG
+    developer = Cvar_Get("developer", "1", 0);
+#else
     developer = Cvar_Get("developer", "0", 0);
 #endif
     timescale = Cvar_Get("timescale", "1", CVAR_CHEAT);

@@ -164,11 +164,11 @@ void ClientGameView::SetupThirdpersonView() {
     cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, -range * rscale, cl->v_right);
     //VectorMA(cl->refdef.vieworg, -range * fscale, cl->v_forward, cl->refdef.vieworg);
     //VectorMA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
-
+    
     // Execute a box trace to see if we collide with the world.
-    trace_t trace;
-    clgi.CM_BoxTrace(&trace, cl->playerEntityOrigin, cl->refdef.vieworg,
-                     mins, maxs, cl->bsp->nodes, CONTENTS_MASK_SOLID);
+    CLGTrace trace = CLG_Trace(cl->playerEntityOrigin,
+                     mins, maxs, cl->refdef.vieworg, nullptr, CONTENTS_MASK_PLAYERSOLID);
+
     if (trace.fraction != 1.0f) {
         // We've collided with the world, let's adjust our view origin.
         cl->refdef.vieworg = trace.endPosition;

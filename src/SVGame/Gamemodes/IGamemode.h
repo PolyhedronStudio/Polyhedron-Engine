@@ -2,33 +2,64 @@
 // LICENSE HERE.
 
 //
-// IGameMode.h
+// IGamemode.h
 //
-// GameMode interface class. Need a custom new gamemode? Implement this interface,
+// Gamemode interface class. Need a custom new gamemode? Implement this interface,
 // and you did yourself a pleasure. :)
 //
 */
-#ifndef __SVGAME_GAMEMODES_IGAMEMODE_H__
-#define __SVGAME_GAMEMODES_IGAMEMODE_H__
+#pragma once
+
+// It makes sense to include TypeInfo in SVGBaseEntity.h, 
+// because this class absolutely requires it
+#include "../TypeInfo.h"
 
 class SVGBaseEntity;
 class PlayerClient;
 
 using BaseEntityVector = std::vector<SVGBaseEntity*>;
 
-class IGameMode {
+class IGamemode {
 public:
     //
     // Constructor/Deconstructor.
     //
-    IGameMode() {};
-    virtual ~IGameMode() {};
+    IGamemode() {};
+    virtual ~IGamemode() = default;
+
+
+    // Gamemode specific class checking. Best practice is to try and write code
+    // that does not depend on checking a game mode class type too much.
+    //
+    // Instead try to facilitate the game mode itself instead where possible.
+    /**
+    *   @brief  Checks if this gamemode class is exactly the given class.
+    *   @param  gamemodeClass A gamemode class which must inherint from IGamemode.
+    *   @return True if the game mode class is the same class type or a derivate of gamemodeClass.
+    **/
+    template<typename gamemodeClass>
+    bool IsClass() const {
+	    return typeid(*this) == typeid(gamemodeClass);
+    }
     
+    /**
+    *   @brief  Checks if this gamemode class is a subclass of another, or is the same class
+    *   @param  gamemodeClass A gamemode class which must inherint from IGamemode.
+    *   @return True if the game mode class is the same, or a derivate of gamemodeClass.
+    **/
+    template<typename gamemodeClass>
+    bool IsSubclassOf() const {
+	    return dynamic_cast<gamemodeClass>(*this) != nullptr;
+    }
+
+
     //
     // Map related, also known as the "current game".
     // 
-    // Gets called at the moment the level exits, this gives the gamemode one last
-    // shot to finish off any last wishes before it gets destroyed.
+    /**
+    *   @brief  Gets called at the moment the level exits, this gives the gamemode one last
+    *           shot to finish off any last wishes before it gets destroyed.
+    **/
     virtual void OnLevelExit() = 0;
 
 
@@ -39,15 +70,15 @@ public:
     // for specific game modes. They like to have control over this.
     //
     // Called when a client connects. This does not get called between
-    // load games, of course. A client is still connected to the current
-    // game session in that case.
+    // load games. A client is still connected to the current game session 
+    // in that case.
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) = 0;
     // Called when a client has finished connecting, and is ready
-    // to be placed into the game.This will happen every map load.
+    // to be placed into the game. This will happen every map load.
     virtual void ClientBegin(Entity* serverEntity) = 0;
     // This will be called once for all clients at the start of each server 
     // frame. Before running any other entities in the world.
-    virtual void ClientBeginServerFrame(Entity* serverEntity) = 0;
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) = 0;
     // Called for each player at the end of the server frame and right 
     // after spawning.
     virtual void ClientEndServerFrame(Entity *serverEntity) = 0;
@@ -62,31 +93,34 @@ public:
     // Called in order to process "obituary" updates, aka with what weapon did this client
     // or did other clients, kill any other client/entity.
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
-    
+
+    // Called in order to clear a client's inventory if the game mode deems this to be fit.
+    virtual void ClientDeath(PlayerClient *clientEntity) = 0;
 
     //
-    // Client related faciliated functions.
+    // Client related facility functions.
     //
     // This is only called when the game first initializes in single player,
     // but is called after each death and level change in deathmatch
-    virtual void InitializeClientPersistentData(ServersClient* client) = 0;
+    virtual void InitializeClientPersistentData(ServerClient* client) = 0;
     // This is only called when the game first initializes in single player,
     // but is called after each death and level change in deathmatch
-    virtual void InitializeClientRespawnData(ServersClient *client) = 0;
+    virtual void InitializeClientRespawnData(ServerClient *client) = 0;
 
     // Choose any info_player_start or its derivates, it'll do a subclassof check, so the only valid classnames are
     // those who have inherited from info_player_start. (info_player_deathmatch, etc).
     virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) = 0;
-    // Called when a player connects to a single and multiplayer. 
-    // In the case of a SP mode death, the loadmenu pops up and selecting a load game
-    // will restart the server.
-    // In thecase of a MP mode death however, after a small intermission time, it'll
-    // call this function again to respawn our player.
+    
+    // Called when a player connects to a game (whether it be single or multi -player).
+    // For a SP mode death, the loadmenu pops up and the player gets to select a load game (If there are none, there is always the autosaved one.)
+    // For a MP mode death, the game waits for intermission time to pass before it'll call this function again to respawn our player.
     virtual void PutClientInServer(Entity* ent) = 0;
     // Respawns a client (if that is what the game mode wants).
     virtual void RespawnClient(PlayerClient* ent) = 0;
+    // Respawns all clients if the game mode allows so. (See RespawnClient)
+    virtual void RespawnAllClients() = 0;
 
-     // Some information that should be persistant, like health,
+    // Some information that should be persistant, like health,
     // is still stored in the edict structure, so it needs to
     // be mirrored out to the client structure before all the
     // edicts are wiped.
@@ -111,7 +145,7 @@ public:
 
 
     //
-    // Combat GameMode actions.
+    // Combat Gamemode actions.
     //
     // Called when an entity is killed, or at least, about to be.
     // Determine how to deal with it, usually resides in a callback to Die.
@@ -155,7 +189,7 @@ public:
     // Spawns a temporary entity for a client, this is best suited to be in game mode.
     // Allows for all modes to customize that when wished for.
     //
-    // When implementing this interface, it is suggested to just take DefaultGameMode,
+    // When implementing this interface, it is suggested to just take DefaultGamemode,
     // or base yours off of that anyhow.
     // Used for spawning "Temporary Entities", on the client, that for example do particles.
     // In this case, it gets called when an entity gets damaged.
@@ -175,10 +209,6 @@ public:
 
 
 protected:
-
-
     // Means of Death, for the current client that is being processed this frame.
-    int32_t meansOfDeath;
+    int32_t meansOfDeath = 0;
 };
-
-#endif // __SVGAME_GAMEMODES_IGAMEMODE_H__

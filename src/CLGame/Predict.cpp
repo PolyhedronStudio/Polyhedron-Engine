@@ -110,8 +110,8 @@ void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_
         } else {
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
-            MSG_UnpackSolid32(clientEntity->current.solid, entityMins, entityMaxs);
-            LerpVector(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction, traceStart);
+            MSG_UnpackBoundingBox32(clientEntity->current.solid, entityMins, entityMaxs);
+            traceStart = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
 
             headNode = clgi.CM_HeadnodeForBox(entityMins, entityMaxs);
         }

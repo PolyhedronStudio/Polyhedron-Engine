@@ -415,11 +415,14 @@ vec3_t CLG_ClampSpeed(const vec3_t& inMove)
 {
     vec3_t outMove = inMove;
 
-    //float speed = cl_forwardspeed->value; // TODO: FIX PM_ //pmoveParams->maxspeed;
+    // If movement ever starts feeling wrong after all, then move this code out of it.
+#if 1
+    float speed = cl_forwardspeed->value; // TODO: FIX PM_ //pmoveParams->maxspeed;
 
-    //outMove[0] = Clampf(outMove[0], -speed, speed);
-    //outMove[1] = Clampf(outMove[1], -speed, speed);
-    //outMove[2] = Clampf(outMove[2], -speed, speed);
+    outMove[0] = Clampf(outMove[0], -speed, speed);
+    outMove[1] = Clampf(outMove[1], -speed, speed);
+    outMove[2] = Clampf(outMove[2], -speed, speed);
+#endif
 
     return outMove;
 }

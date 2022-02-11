@@ -135,7 +135,7 @@ static qboolean find_dup(genctx_t *ctx, const char *s)
 
     for (i = 0; i < ctx->count; i++) {
         if (ctx->ignorecase)
-            r = Q_strcasecmp(ctx->matches[i], s);
+            r = PH_StringCaseCompare(ctx->matches[i], s);
         else
             r = strcmp(ctx->matches[i], s);
 
@@ -154,7 +154,7 @@ qboolean Prompt_AddMatch(genctx_t *ctx, const char *s)
         return false;
 
     if (ctx->ignorecase)
-        r = Q_strncasecmp(ctx->partial, s, ctx->length);
+        r = PH_StringNumberCaseCompare(ctx->partial, s, ctx->length);
     else
         r = strncmp(ctx->partial, s, ctx->length);
 
@@ -174,7 +174,7 @@ static qboolean needs_quotes(const char *s)
 
     while (*s) {
         c = *s++;
-        if (c == '$' || c == ';' || !Q_isgraph(c)) {
+        if (c == '$' || c == ';' || !PH_IsGraph(c)) {
             return true;
         }
     }
@@ -323,7 +323,7 @@ void Prompt_CompleteCommand(commandPrompt_t *prompt, qboolean backslash)
     len = 0;
     do {
         if (*first != *last) {
-            if (!ctx.ignorecase || Q_tolower(*first) != Q_tolower(*last)) {
+            if (!ctx.ignorecase || PH_ToLower(*first) != PH_ToLower(*last)) {
                 break;
             }
         }

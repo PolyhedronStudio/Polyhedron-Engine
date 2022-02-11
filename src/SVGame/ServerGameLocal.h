@@ -17,14 +17,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_local.h -- local definitions for game module
 
-#ifndef __SVGAME_G_LOCAL_H__
-#define __SVGAME_G_LOCAL_H__
+#pragma once
 
 #include "Shared/Shared.h"
 #include "Shared/list.h"
 
 // define GAME_INCLUDE so that game.h does not define the
-// short, server-visible ServersClient and Entity structures,
+// short, server-visible ServerClient and Entity structures,
 // because we define the full size ones in this file
 #define GAME_INCLUDE
 #include "Shared/SVGame.h"
@@ -40,17 +39,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-------------------
 class SVGBaseEntity;
 class PlayerClient;
-class IGameMode;
+class Gameworld;
+class IGamemode;
 struct entity_s;
 
 //==================================================================
 
-// view pitching times
+//! Time it takes to go over a frame. 
+constexpr float FRAMETIME = BASE_FRAMETIME_1000;
+
+//! Memory tags to allow dynamic memory to be cleaned up
+constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll
+constexpr int32_t TAG_LEVEL = 766;  // clear when loading a new level
+
+//! View pitching times
 constexpr float DAMAGE_TIME = 0.5f;
 constexpr float FALL_TIME = 0.3f;
 
 // entity->spawnFlags
-// these are set with checkboxes on each entity in the map editor
+// These are set with checkboxes on each entity in the map editor
 struct EntitySpawnFlags {
     static constexpr int32_t NotEasy = 0x00000100;
     static constexpr int32_t NotMedium = 0x00000200;
@@ -60,6 +67,7 @@ struct EntitySpawnFlags {
 };
 
 // entity->flags
+// These flags are set during game-play and are unlike spawnflags not set in any editor.
 struct EntityFlags {
     static constexpr int32_t Fly = 1;
     static constexpr int32_t Swim = 2; // Implied immunity to drowining
@@ -77,11 +85,6 @@ struct EntityFlags {
     static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
 };
 
-constexpr float FRAMETIME = BASE_FRAMETIME_1000; // Adjusts to the game's tick level.
-
-// memory tags to allow dynamic memory to be cleaned up
-constexpr int32_t TAG_GAME = 765;     // clear when unloading the dll
-constexpr int32_t TAG_LEVEL = 766;     // clear when loading a new level
 
 
 constexpr int32_t MELEE_DISTANCE = 80;
@@ -226,26 +229,14 @@ struct MoveType {
     static constexpr int32_t Push = 3;      // No clip to world, push on box contact
     static constexpr int32_t Stop = 4;      // No clip to world, stops on box contact
 
-    static constexpr int32_t Walk          = 10;    // Gravity. (Player Movement entities use this.)
-    static constexpr int32_t Step          = 11;    // Gravity, fixed distance, and special edge handling if wished for.
-    static constexpr int32_t Fly           = 12;    // 
-    static constexpr int32_t Toss          = 13;    // Gravity
-    static constexpr int32_t FlyMissile    = 14;    // Extra size to monsters
-    static constexpr int32_t Bounce        = 15;
+    static constexpr int32_t Walk       = 10;    // Gravity. (Player Movement entities use this.)
+    static constexpr int32_t Step       = 11;    // Gravity, fixed distance, and special edge handling if wished for.
+    static constexpr int32_t Fly        = 12;    // 
+    static constexpr int32_t FlyMissile = 13;	 // Extra size to monsters
+    static constexpr int32_t Toss       = 14;    // Gravity
+    static constexpr int32_t TossSlide  = 15;    // 
+    static constexpr int32_t Bounce     = 16;
 };
-
-
-//-------------------
-// Armor item description.
-//-------------------
-struct gitem_armor_t {
-    int32_t     baseCount;
-    int32_t     maxCount;
-    float   normalProtection;
-    float   energyProtection;
-    int32_t     armor;
-};
-
 
 //-------------------
 // Item flags.
@@ -273,7 +264,7 @@ constexpr int32_t WEAP_SUPERSHOTGUN = 4;
 //-------------------
 typedef struct gitem_s {
     // Spawning classname.
-    const char *className;
+    const char *classname;
 
     // Function callbacks.
     qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
@@ -318,39 +309,6 @@ typedef struct gitem_s {
     // An actual string of all models, sounds, and images this item will use
     const char  *precaches;     
 } gitem_t;
-
-
-
-//-------------------
-// This structure is left intact through an entire game
-// it should be initialized at dll load time, and read/written to
-// the server.ssv file for savegames
-//-------------------
-struct GameLocals {
-    // Game Mode interface, always assigned to whichever game mode we are running.
-    IGameMode* gameMode;
-
-    // List of clients, based on sv_maxclients, or rather in the game dll: maxclients cvar.
-    ServersClient *clients;
-
-    // Can't store spawnpoint32_t in level, because
-    // it would get overwritten by the savegame restore
-    char spawnpoint[512];    // needed for coop respawns
-
-    // Store latched cvars here that we want to get at often
-    int32_t maximumClients;
-    int32_t maxEntities;
-
-    // Cross level triggers
-    int32_t serverflags;
-
-    // Items
-    int32_t numberOfItems;
-
-    // Did we autosave?
-    qboolean autoSaved;
-};
-
 
 //-------------------
 // Stores level locals, from current time, to which entities are sighted.
@@ -442,6 +400,7 @@ struct TemporarySpawnFields {
 // SVG_GetGameLocals
 // SVG_GetLevelLocals
 // 
+#include "GameLocals.h"
 extern  GameLocals   game;
 extern  LevelLocals  level;
 extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
@@ -500,7 +459,7 @@ extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 #define STOFS(x) q_offsetof(TemporarySpawnFields, x)
 #define LLOFS(x) q_offsetof(LevelLocals, x)
 #define GLOFS(x) q_offsetof(GameLocals, x)
-#define CLOFS(x) q_offsetof(ServersClient, x)
+#define CLOFS(x) q_offsetof(ServerClient, x)
 
 // Very ugly macros, need to rid ourselves and inline func them at the least.
 // Also, there should be alternatives in our utils for math lib as is.
@@ -538,7 +497,7 @@ extern  cvar_t  *bob_pitch;
 extern  cvar_t  *bob_roll;
 
 extern  cvar_t  *sv_cheats;
-extern  cvar_t  *maximumClients;
+extern  cvar_t  *maximumclients;
 extern  cvar_t  *maxspectators;
 
 extern  cvar_t  *flood_msgs;
@@ -600,10 +559,9 @@ void SVG_Command_Score_f(SVGBaseEntity *ent);
 // g_items.c
 //
 void SVG_PrecacheItem(gitem_t *it);
-void SVG_InitItems(void);
 void SVG_SetItemNames(void);
 gitem_t *SVG_FindItemByPickupName(const char *pickup_name);
-gitem_t *SVG_FindItemByClassname(const char *className);
+gitem_t *SVG_FindItemByClassname(const char *classname);
 #define ITEM_INDEX(x) ((x)-itemlist)
 Entity *SVG_DropItem(Entity *ent, gitem_t *item);
 void SVG_SetRespawn(Entity *ent, float delay);
@@ -672,15 +630,12 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int32_t type);
 //
 // g_phys.c
 //
-void SVG_RunEntity(SVGBaseEntity *ent);
+void SVG_RunEntity(SVGEntityHandle &entityHandle);
 
 //
 // g_main.c
 //
 //-----------------------------------------------------------------------------------------------------------
-void SVG_SaveClientData(void);
-void SVG_FetchClientData(Entity *ent);
-
 Entity* SVG_Spawn(void);
 
 // TODO: All these go elsewhere, sometime, as does most...
@@ -733,7 +688,7 @@ struct SVGTrace {
     SVGBaseEntity *ent;   // Not set by CM_*() functions
 
     // N&C: Custom added.
-    vec3_t		offsets[8];	// [signbits][x] = either size[0][x] or size[1][x]
+    vec3_t		offsets[8];	// [signBits][x] = either size[0][x] or size[1][x]
 };
 
 SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);
@@ -896,8 +851,8 @@ struct gclient_s {
 
     // animation vars
     struct {
-        int32_t     endFrame;
-        int32_t     priorityAnimation;
+        float     endFrame;
+        float priorityAnimation;
         qboolean    isDucking;
         qboolean    isRunning;
     } animation;
@@ -985,7 +940,7 @@ struct entity_s {
     // only used locally in game, not by server
     //
     const char *message;     // C++20: STRING: Added const to char *
-    const char *className;   // C++20: STRING: Made const.
+    const char *classname;   // C++20: STRING: Made const.
     
     float timeStamp;
 
@@ -1008,13 +963,6 @@ struct entity_s {
     Entity *moveTargetPtr;
 
     const char *map;           // target_changelevel // C++20: STRING: Added const to char *
-    int32_t count;
-
-    // Chain, enemy, old enemy, and activator entity pointers.
-    Entity *chain;
-    
-    // Ground pointers.
-    Entity *groundEntityPtr;
 
     Entity *myNoisePtr;       // can go in client only
     Entity *myNoise2Ptr;
@@ -1031,18 +979,16 @@ struct entity_s {
 
 
 
-    vec3_t moveOrigin;
-    vec3_t moveAngles;
+//    vec3_t moveOrigin;
+//    vec3_t moveAngles;
 
     // move this to clientInfo?
     int32_t lightLevel;
 
-    int32_t style;          // also used as areaportal number
+    //int32_t style;          // also used as areaportal number
 
     // Custom lightstyle.
-    char *customLightStyle;
+    //char *customLightStyle;
 
     gitem_t *item;          // for bonus items
 };
-
-#endif

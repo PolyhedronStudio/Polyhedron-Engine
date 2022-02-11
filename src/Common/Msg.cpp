@@ -485,9 +485,9 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         MSG_WriteByte(to->modelIndex4);
 
     if (bits & U_FRAME)
-        MSG_WriteByte(to->frame);
+        MSG_WriteFloat(to->frame);
     else if (bits & U_FRAME16)
-        MSG_WriteShort(to->frame);
+        MSG_WriteFloat(to->frame);
 
     if ((bits & (U_SKIN8 | U_SKIN16)) == (U_SKIN8 | U_SKIN16))  //used for laser colors
         MSG_WriteLong(to->skinNumber);
@@ -647,7 +647,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
     if (to->gunIndex != from->gunIndex)
         pflags |= PS_WEAPONINDEX;
 
-    if (to->gunFrame != from->gunFrame)
+    if (!EqualEpsilonf(to->gunFrame, from->gunFrame))
         pflags |= PS_WEAPONFRAME;
 
     if (from->gunOffset[0] != to->gunOffset[0] ||
@@ -739,7 +739,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
         MSG_WriteByte(to->gunIndex);
 
     if (pflags & PS_WEAPONFRAME)
-        MSG_WriteLong(to->gunFrame);
+        MSG_WriteFloat(to->gunFrame);
 
     if (eflags & EPS_GUNOFFSET) {
         MSG_WriteFloat(to->gunOffset[0]);
@@ -1078,9 +1078,9 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // Frame.
     if (bits & U_FRAME)
-        to->frame = MSG_ReadByte();
+        to->frame = MSG_ReadFloat();
     if (bits & U_FRAME16)
-        to->frame = MSG_ReadShort();
+        to->frame = MSG_ReadFloat();
 
     // Skinnum.
     if ((bits & (U_SKIN8 | U_SKIN16)) == (U_SKIN8 | U_SKIN16))  //used for laser colors
@@ -1249,7 +1249,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int fla
 
     // Weapon Frame.
     if (flags & PS_WEAPONFRAME) {
-        to->gunFrame = MSG_ReadLong();
+        to->gunFrame = MSG_ReadFloat();
     }
 
     // Gun Offset.

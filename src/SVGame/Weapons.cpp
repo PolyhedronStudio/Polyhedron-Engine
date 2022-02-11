@@ -224,7 +224,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     }
 
     // send gun puff / flash
-    if (!((tr.surface) && (tr.surface->flags & SURF_SKY))) {
+    if ( !(tr.surface && tr.surface->flags & SURF_SKY) ) {
         if (tr.fraction < 1.0) {
             if (tr.ent->GetTakeDamage()) {
                 SVG_InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
@@ -423,7 +423,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     //bolt = SVG_Spawn();
 
     //// Setup basic entity attributes.
-    //bolt->className = "bolt";   // Classname.
+    //bolt->classname = "bolt";   // Classname.
     //bolt->owner = self;         // Setup owner.
     //bolt->damage = damage;         // Setup damage.
     //if (hyper)                  // Hyperblaster?

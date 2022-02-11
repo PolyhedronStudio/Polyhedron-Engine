@@ -15,13 +15,13 @@
 #include "../../Utilities.h"                // Util funcs.
 
 // Game Mode interface.
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 
 // Class Entities.
 #include "PlayerClient.h"
 
 // Constructor/Deconstructor.
-PlayerClient::PlayerClient(Entity* svEntity) : SVGBaseEntity(svEntity), 
+PlayerClient::PlayerClient(Entity* svEntity) : Base(svEntity), 
     airFinishedTime(0.f), debounceDamageTime(0.f), debouncePainTime(0.f), debounceSoundTime(0.f), debounceTouchTime(0.f) {
 
 }
@@ -63,8 +63,6 @@ void PlayerClient::Spawn() {
     SetAirFinishedTime(level.time + 12 * FRAMETIME);
     SetClipMask(CONTENTS_MASK_PLAYERSOLID);
     SetModel("players/male/tris.md2");
-
-    // Setup waterLevel and Type.
     SetWaterLevel(WaterLevel::None);
     SetWaterType(0);
 
@@ -184,21 +182,18 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         SetPlayerMoveType(EnginePlayerMoveType::Dead);
 
         // Update the obituary.
-        game.gameMode->ClientUpdateObituary(this, inflictor, attacker);
+        game.GetCurrentGamemode()->ClientUpdateObituary(this, inflictor, attacker);
 
         // Toss our weapon, assuming we had any.
         SVG_TossClientWeapon(this);
 
         // Show the scoreboard in case of a deathmatch mode.
-        if (deathmatch->value)
-            SVG_Command_Score_f(this);
+        //if (deathmatch->value)
+        // TODO: Let it be determined by game mode.
+        SVG_Command_Score_f(this);
 
-        // Clear inventory this is kind of ugly, but it's how we want to handle keys in coop
-        for (int32_t i = 0; i < game.numberOfItems; i++) {
-            if (coop->value && itemlist[i].flags & ItemFlags::IsKey)
-                client->respawn.persistentCoopRespawn.inventory[i] = client->persistent.inventory[i];
-            client->persistent.inventory[i] = 0;
-        }
+        // Let the gamemode know this client died.
+        game.GetCurrentGamemode()->ClientDeath(this);
     }
 
     // Remove powerups.
@@ -260,11 +255,11 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 }
 
 //===============
-// SVG_Client_SetEvent
+// PlayerClient::SetEvent
 // 
 //===============
 void PlayerClient::SetEvent() {
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;
@@ -314,14 +309,14 @@ void PlayerClient::SetSound() {
     //const char    *weap; // C++20: STRING: Added const to char*
 
     // Check whether the PlayerClient is hooked up to a valid client.
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;
     }
 
     //if (client->persistent.activeWeapon)
-    //    weap = client->persistent.activeWeapon->className;
+    //    weap = client->persistent.activeWeapon->classname;
     //else
     //    weap = "";
 
@@ -400,7 +395,7 @@ void PlayerClient::CheckFallingDamage()
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;
@@ -459,7 +454,7 @@ void PlayerClient::CheckFallingDamage()
         dir = { 0.f, 0.f, 1.f };
 
         //if (!deathmatch->value || 
-        if (!((int)gamemodeflags->value & GameModeFlags::NoFalling)) {
+        if (!((int)gamemodeflags->value & GamemodeFlags::NoFalling)) {
             SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
         }
     } else {
@@ -480,7 +475,7 @@ void PlayerClient::CheckWorldEffects()
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client)
         return;
@@ -617,7 +612,7 @@ void PlayerClient::ApplyDamageFeedback() {
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
     if (!client)
         return;
 
@@ -757,7 +752,7 @@ void PlayerClient::CalculateViewOffset()
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;
@@ -854,7 +849,7 @@ void PlayerClient::CalculateGunOffset() {
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;
@@ -905,7 +900,7 @@ void PlayerClient::CalculateGunOffset() {
 //===============
 //
 void PlayerClient::CalculateScreenBlend() {
-        ServersClient* client = GetClient();
+        ServerClient* client = GetClient();
 
     if (!client) {
         return;
@@ -956,13 +951,13 @@ void PlayerClient::SetAnimationFrame() {
 
     // Check whether ent is valid, and a PlayerClient hooked up 
     // to a valid client.
-    ServersClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;
     }
 
-    if (GetModelIndex() != 255) {
+    if (GetModelIndex() != 255) { 
         return;     // not in the player model
     }
 
@@ -985,12 +980,12 @@ void PlayerClient::SetAnimationFrame() {
 
     if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
         if (GetFrame() > client->animation.endFrame) {
-            SetFrame(GetFrame() - 1);
+            SetFrame(GetFrame() - 0.2f);
             return;
         }
     } else if (GetFrame() < client->animation.endFrame) {
         // continue an animation
-        SetFrame(GetFrame() + 1);
+        SetFrame(GetFrame() + 0.2f);
         return;
     }
 

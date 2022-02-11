@@ -196,9 +196,9 @@ struct SplashType {
 };
 
 //-----------------
-// Deathmatch GameMode Setting Flags
+// Deathmatch Gamemode Setting Flags
 //-----------------
-struct GameModeFlags {
+struct GamemodeFlags {
     static constexpr int16_t NoHealth       = (1 << 0);
     static constexpr int16_t NoItems        = (1 << 1);
     static constexpr int16_t WeaponsStay    = (1 << 2);

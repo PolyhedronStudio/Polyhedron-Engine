@@ -2,22 +2,23 @@
 // LICENSE HERE.
 
 //
-// DeathMatchGameMode.h
+// DeathmatchGamemode.h
 //
-// Default game mode to run, allows for all sorts of stuff.
+// Deathmatch game mode.
 //
 */
-#ifndef __SVGAME_GAMEMODES_DEATHMATCHGAMEMODE_H__
-#define __SVGAME_GAMEMODES_DEATHMATCHGAMEMODE_H__
+#pragma once
 
-#include "IGameMode.h"
-#include "DefaultGameMode.h"
+#include "IGamemode.h"
+#include "DefaultGamemode.h"
 
-class DeathMatchGameMode : public DefaultGameMode {
+class DeathmatchGamemode : public DefaultGamemode {
 public:
+    //
     // Constructor/Deconstructor.
-    DeathMatchGameMode();
-    virtual ~DeathMatchGameMode() override;
+    //
+    DeathmatchGamemode();
+    virtual ~DeathmatchGamemode() override;
 
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
@@ -26,15 +27,15 @@ public:
     virtual void PutClientInServer(Entity* ent) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(Entity* serverEntity) override;
-    
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) override;
+    virtual void ClientUserinfoChanged(Entity* ent, char* userinfo) override;
+
     virtual void RespawnClient(PlayerClient* ent) override;
-    virtual void RespawnSpectator(PlayerClient* ent);
+    virtual void RespawnAllClients() override;
+    virtual void ClientDeath(PlayerClient* clientEntity) override;
 
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
 private:
-
+    virtual void RespawnSpectator(PlayerClient* ent);
 };
-
-#endif // __SVGAME_GAMEMODES_DEATHMATCHGAMEMODE_H__

@@ -17,7 +17,7 @@ public:
     PlayerClient(Entity* svEntity);
     virtual ~PlayerClient();
 
-    DefineMapClass("PlayerClient", PlayerClient, SVGBaseEntity);
+    DefineClass(PlayerClient, SVGBaseEntity);
 
     //
     // Interface functions. 
@@ -55,10 +55,10 @@ public:
     }
 
     // Animation EndFrame.
-    inline const int32_t GetAnimationEndFrame() {
+    inline const float GetAnimationEndFrame() {
         return GetClient()->animation.endFrame;
     }
-    inline void SetAnimationEndFrame(const int32_t& endFrame) {
+    inline void SetAnimationEndFrame(const float& endFrame) {
         GetClient()->animation.endFrame = endFrame;
     }
 
@@ -125,10 +125,10 @@ public:
     }
 
     // Priority animation.
-    inline const int32_t GetPriorityAnimation() {
+    inline const float GetPriorityAnimation() {
         return GetClient()->animation.priorityAnimation;
     }
-    inline void SetPriorityAnimation(const int32_t& priorityAnimation) {
+    inline void SetPriorityAnimation(const float& priorityAnimation) {
         GetClient()->animation.priorityAnimation = priorityAnimation;
     }
 

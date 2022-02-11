@@ -1,0 +1,21 @@
+# Format Style Options - Created with Clang Power Tools
+---
+AlignConsecutiveDeclarations: Consecutive
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+AllowShortEnumsOnASingleLine: true
+BasedOnStyle: WebKit
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Attach
+BreakConstructorInitializers: BeforeColon
+ColumnLimit: 250
+EmptyLineBeforeAccessModifier: Leave
+IndentCaseLabels: true
+MaxEmptyLinesToKeep: 2
+ReflowComments: false
+SortIncludes: false
+SpaceAfterTemplateKeyword: false
+SpacesBeforeTrailingComments: 2
+SpacesInConditionalStatement: false
+UseTab: Always
+...

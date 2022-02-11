@@ -34,7 +34,8 @@ void SV_ClientReset(client_t *client)
     client->framesNoDelta = 0;
     client->sendDelta = 0;
     client->suppressCount = 0;
-    memset(&client->lastClientUserCommand, 0, sizeof(client->lastClientUserCommand));
+    //memset(&client->lastClientUserCommand, 0, sizeof(client->lastClientUserCommand));
+    client->lastClientUserCommand = {};
 }
 
 static void resolve_masters(void)
@@ -150,8 +151,9 @@ void SV_SpawnServer(MapCommand *cmd)
     CM_FreeMap(&sv.cm);
     SV_FreeFile(sv.entityString);
 
-    // wipe the entire per-level structure
-    memset(&sv, 0, sizeof(sv));
+    // Wipe the entire per-level structure
+    //memset(&sv, 0, sizeof(sv));
+    sv = {};
     sv.spawncount = (rand() | (rand() << 16)) ^ Sys_Milliseconds();
     sv.spawncount &= 0x7FFFFFFF;
 
@@ -160,20 +162,15 @@ void SV_SpawnServer(MapCommand *cmd)
         client->spawncount = sv.spawncount;
     }
 
-    // reset entity counter
+    // Reset entity counter
     svs.next_entity = 0;
 
-    // save name for levels that don't set message
+    // Save name for levels that don't set message
     Q_strlcpy(sv.configstrings[ConfigStrings::Name], cmd->server, MAX_QPATH);
     Q_strlcpy(sv.name, cmd->server, sizeof(sv.name));
     Q_strlcpy(sv.mapcmd, cmd->buffer, sizeof(sv.mapcmd));
 
-    if (Cvar_VariableInteger("deathmatch")) {
-        sprintf(sv.configstrings[ConfigStrings::AirAcceleration], "%d", sv_airaccelerate->integer);
-    } else {
-        strcpy(sv.configstrings[ConfigStrings::AirAcceleration], "0");
-    }
-
+    // Resolve master servers.
     resolve_masters();
 
     if (cmd->serverState == ServerState::Game) {
@@ -226,9 +223,15 @@ void SV_SpawnServer(MapCommand *cmd)
         ge->RunFrame(); sv.frameNumber++;
     }
 
-    // make sure maximumClients string is correct
+    // make sure maximumclients string is correct
     sprintf(sv.configstrings[ConfigStrings::MaxClients], "%d", sv_maxclients->integer);
 
+    //
+    //
+    // TODO: We should likely inquire to spawn class entities in the game module right here.
+    //
+    // 
+    
     // check for a savegame
     SV_CheckForSavegame(cmd);
 
@@ -336,7 +339,6 @@ qboolean SV_ParseMapCmd(MapCommand *cmd)
 SV_InitGame
 
 A brand new game has been started.
-If mvd_spawn is non-zero, load the built-in MVD game module.
 ==============
 */
 void SV_InitGame()
@@ -359,38 +361,63 @@ void SV_InitGame()
 
     }
 
-    // get any latched variable changes (maximumClients, etc)
+    // get any latched variable changes (maximumclients, etc)
     Cvar_GetLatchedVars();
 
 #if !USE_CLIENT
     Cvar_Reset(sv_recycle);
 #endif
 
-    if (Cvar_VariableInteger("coop") &&
-        Cvar_VariableInteger("deathmatch")) {
-        Com_Printf("Deathmatch and Coop both set, disabling Coop\n");
-        Cvar_Set("coop", "0");
+    //if (Cvar_VariableInteger("coop") &&
+    //    Cvar_VariableInteger("deathmatch")) {
+    //    Com_Printf("Deathmatch and Coop both set, disabling Coop\n");
+    //    Cvar_Set("coop", "0");
+    //}
+    cvar_t *gm = Cvar_Get("gamemode", 0, 0);
+    std::string gamemode = gm->string;
+    Com_DPrintf("\n\n GAMEMODE =========== %s\n\n", gamemode.c_str());
+    if (gamemode != "singleplayer" &&
+        gamemode != "deathmatch" && 
+        gamemode != "coop") {
+        Cvar_SetEx("gamemode", "singleplayer", FROM_CODE);
+        Com_DPrintf("\n\nSet GAMEMODE to SINGLEPLAYER!\n\n");
     }
 
     // dedicated servers can't be single player and are usually DM
     // so unless they explicity set coop, force it to deathmatch
     if (COM_DEDICATED) {
-        if (!Cvar_VariableInteger("coop"))
-            Cvar_Set("deathmatch", "1");
+        //if (!Cvar_VariableInteger("coop"))
+        //    Cvar_Set("deathmatch", "1");
+        if (gamemode == "singleplayer") {
+            Cvar_SetEx("gamemode", "deathmatch", FROM_CODE);
+            Com_DPrintf("\n\nSet GAMEMODE to DEATHMATCH!\n\n");
+        }
     }
 
     // init clients
-    if (Cvar_VariableInteger("deathmatch")) {
-        if (sv_maxclients->integer <= 1) {
-            Cvar_SetInteger(sv_maxclients, 8, FROM_CODE);
-        } else if (sv_maxclients->integer > CLIENTNUM_RESERVED) {
-            Cvar_SetInteger(sv_maxclients, CLIENTNUM_RESERVED, FROM_CODE);
-        }
-    } else if (Cvar_VariableInteger("coop")) {
-        if (sv_maxclients->integer <= 1 || sv_maxclients->integer > 4)
-            Cvar_Set("maxclients", "4");
-    } else {    // non-deathmatch, non-coop is one player
-        Cvar_FullSet("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
+    // TODO: Let this be dependent on game mode, sadly it is only initialized 
+    // later on after initializing the server game module so this needs
+    // some thought.
+    //if (Cvar_VariableInteger("deathmatch")) {
+    //    if (sv_maxclients->integer <= 1) {
+    //        Cvar_SetInteger(sv_maxclients, 8, FROM_CODE);
+    //    } else if (sv_maxclients->integer > CLIENTNUM_RESERVED) {
+    //        Cvar_SetInteger(sv_maxclients, CLIENTNUM_RESERVED, FROM_CODE);
+    //    }
+    //} else if (Cvar_VariableInteger("coop")) {
+    //    if (sv_maxclients->integer <= 1 || sv_maxclients->integer > 4)
+    //        Cvar_Set("maxclients", "4");
+    //} else {    // non-deathmatch, non-coop is one player
+    //    Cvar_FullSet("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
+    //}
+
+    if (sv_maxclients->integer < 1) {
+        Cvar_SetInteger(sv_maxclients, 8, FROM_CODE);
+        //Cvar_FullSet("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
+    } else if (sv_maxclients->integer > CLIENTNUM_RESERVED) {
+        std::string sv_maxclients_strvalue = std::to_string(CLIENTNUM_RESERVED);
+        Cvar_SetInteger(sv_maxclients, CLIENTNUM_RESERVED, FROM_CODE);
+        //Cvar_FullSet("maxclients", sv_maxclients_strvalue.c_str(), CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
     }
 
     // enable networking

@@ -34,23 +34,23 @@ public:
     //
     // Trigger functions.
     //
-    void UseTargets(SVGBaseEntity* activator);
+    //void UseTargets(SVGBaseEntity* activator);
 
     //
     // Get/Set
     // 
     // Return the 'activatorEntity' entity pointer.
-    SVGBaseEntity* GetActivator() {
-        return activatorEntity;
-    }
+    //SVGBaseEntity* GetActivator() {
+    //    return activatorEntity;
+    //}
 
     //
     // Entity Set Functions.
     //
-    // Set the 'activatorEntity' pointer.
-    inline void SetActivator(SVGBaseEntity* activator) {
-        this->activatorEntity = activator;
-    }
+    //// Set the 'activatorEntity' pointer.
+    //inline void SetActivator(SVGBaseEntity* activator) {
+    //    this->activatorEntityPtr = activator;
+    //}
 
 protected:
     /* legacy trigger architecture */
@@ -87,7 +87,7 @@ protected:
     // Entity pointers.
     // 
     //// Entity that activated this entity, NULL if none.
-    SVGBaseEntity* activatorEntity = nullptr;
+    //SVGBaseEntity* activatorEntity = nullptr;
     //// Current active enemy, NULL if not any.    
     //SVGBaseEntity* enemyEntity;
     //// Ground entity we're standing on.

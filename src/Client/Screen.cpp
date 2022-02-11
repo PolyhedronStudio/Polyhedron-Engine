@@ -91,7 +91,7 @@ static const char *const sb_nums[2][STAT_PICS] = {
 
 const uint32_t colorTable[8] = {
     U32_BLACK, U32_RED, U32_GREEN, U32_YELLOW,
-    U32_BLUE, U32_CYAN, U32_MAGENTA, U32_WHITE
+    U32_ORANGE, U32_CYAN, U32_MAGENTA, U32_WHITE
 };
 
 /*
@@ -199,7 +199,7 @@ qboolean SCR_ParseColor(const char *s, color_t *color)
             if (i == 8) {
                 return false;
             }
-            c[i] = Q_charhex(s[i]);
+            c[i] = PH_CharHex(s[i]);
             if (c[i] == -1) {
                 return false;
             }

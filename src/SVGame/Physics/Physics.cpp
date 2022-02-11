@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 pushmove objects do not obey gravity, and do not interact with each other or trigger fields, but block normal movement and push normal objects when they move.
 
-onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects
+onground is set for toss objects when they come to a complete rest. It is set for steping or walking objects
 
 doors, plats, etc are Solid::BSP, and MoveType::Push
 bonus items are Solid::Trigger touch, and MoveType::Toss
@@ -42,39 +42,75 @@ solid_edge items only clip against bsp models.
 
 */
 
+void SVG_PhysicsEntityWPrint(const std::string &functionName, const std::string &functionSector, const std::string& message) {
+    // Only continue if developer warnings for physics are enabled.
+    extern cvar_t* dev_show_physwarnings;
+    if (!dev_show_physwarnings->integer) {
+        return;
+    }
 
-//
+    // Show warning.
+    std::string warning = "Physics warning occured in: ";
+    warning += functionName;
+    warning += " ";
+    warning += functionSector;
+    warning += " ";
+    warning += message;
+    warning += "\n";
+    gi.DPrintf(warning.c_str());
+ //   // Write the index, programmers may look at that thing first
+ //   std::string errorString = "";
+ //   if (ent->GetServerEntity()) {
+	//errorString += "entity (index " + std::to_string(ent->GetNumber());
+ //   } else {
+	//errorString += "entity has no ServerEntity ";
+ //   }
+
+ //   // Write the targetname as well, if it exists
+ //   if (!ent->GetTargetName().empty()) {
+	//errorString += ", name '" + ent->GetTargetName() + "'";
+ //   }
+
+ //   // Write down the C++ class name too
+ //   errorString += ", class '";
+ //   errorString += ent->GetTypeInfo()->classname;
+ //   errorString += "'";
+
+ //   // Close it off and state what's actually going on
+ //   errorString += ") has a nullptr think callback \n";
+ //   //
+ //   gi.Error(errorString.c_str());
+}
+
 //===============
 // SVG_TestEntityPosition
 //
 //===============
-//
 SVGBaseEntity *SVG_TestEntityPosition(SVGBaseEntity *ent)
 {
     SVGTrace trace;
-    int     mask;
+    int32_t clipMask = 0;
 
-    if (ent->GetClipMask())
-        mask = ent->GetClipMask();
-    else
-        mask = CONTENTS_MASK_SOLID;
-    trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, mask);
+    if (ent->GetClipMask()) {
+	    clipMask = ent->GetClipMask();
+    } else {
+        clipMask = CONTENTS_MASK_SOLID;
+    }
 
-    if (trace.startSolid)
-        return g_baseEntities[0];
+    trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
 
-    return NULL;
+    if (trace.startSolid) {
+	    return SVG_GetWorldClassEntity();
+    }
+
+    return nullptr;
 }
 
-
-
-//
 //===============
 // SVG_BoundVelocity
 //
 // Keeps an entity its velocity within max boundaries. (-sv_maxvelocity, sv_maxvelocity)
 //===============
-//
 void SVG_BoundVelocity(SVGBaseEntity *ent)
 {
     vec3_t velocity = ent->GetVelocity();
@@ -86,27 +122,31 @@ void SVG_BoundVelocity(SVGBaseEntity *ent)
     });
 }
 
-
-//
 //===============
 // SVG_RunThink
 //
 // Runs entity thinking code for this frame if necessary
 //===============
-//
 qboolean SVG_RunThink(SVGBaseEntity *ent)
 {
-    float   thinktime;
+    if (!ent) {
+	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
+        return false;
+    }
 
-    thinktime = ent->GetNextThinkTime();
-    if (thinktime <= 0)
-        return true;
-    if (thinktime > level.time + 0.001)
-        return true;
+    // Fetch think time.
+    const float thinkTime = ent->GetNextThinkTime();
 
+    if (thinkTime <= 0) {
+        return true;
+    } else if (thinkTime > level.time + 0.001) {// Used to be: if (thinkTime > level.time + 0.001)
+        return true;
+    }
+
+    // Reset think time before thinking.
     ent->SetNextThinkTime(0);
 
-    #if _DEBUG
+#if _DEBUG
     if ( !ent->HasThinkCallback() ) {
         // Write the index, programmers may look at that thing first
         std::string errorString = "";
@@ -123,46 +163,56 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
 
         // Write down the C++ class name too
         errorString += ", class '";
-        errorString += ent->GetTypeInfo()->className;
+        errorString += ent->GetTypeInfo()->classname;
         errorString += "'";
 
         // Close it off and state what's actually going on
         errorString += ") has a nullptr think callback \n";
     //    
         gi.Error( errorString.c_str() );
-    }
-    #endif
 
+        // Return true.
+        return true;
+    }
+#endif
+
+    // Last but not least, let the entity execute its think behavior callback.
     ent->Think();
 
 
     return false;
 }
 
-//
 //===============
 // SVG_Impact
 //
 // Two entities have touched, so run their touch functions
 //===============
-//
-void SVG_Impact(SVGBaseEntity *e1, SVGTrace *trace)
+void SVG_Impact(SVGBaseEntity *entityA, SVGTrace *trace)
 {
-    SVGBaseEntity *e2 = nullptr;
+    SVGBaseEntity* entityB = nullptr;
 //  cplane_t    backplane;
 
-    if (trace) {
-        e2 = trace->ent;
+    // Return in case there is no entity to to test with (invalid pointer.)
+    if (!entityA) {
+        gi.DPrintf("Warning: Tried to call SVG_Impact with a nullptr entity!\n");
     }
 
-    if (e1->GetSolid() != Solid::Not) {
+    // If the impact came from a trace, set entityB to this ent.
+    if (trace && trace->ent) {
+        entityB = trace->ent;
+    }
+
+    // Execute touch functionality for entityA if its solid is not a Solid::Not.
+    if (entityA->GetSolid() != Solid::Not) {
         //e1->Touch(e1, e2, &trace->plane, trace->surface);
-        e1->Touch(e1, e2, &trace->plane, trace->surface);
+        entityA->Touch(entityA, entityB, &trace->plane, trace->surface);
     }
 
-    if (e2 != nullptr && e2->GetSolid() != Solid::Not) {
+    // Execute touch functionality for entityB exists, and is not a Solid::Not.
+    if (entityB != nullptr && entityB->GetSolid() != Solid::Not) {
         //e2->Touch(e2, e1, NULL, NULL);
-        e2->Touch(e2, e1, NULL, NULL);
+        entityB->Touch(entityB, entityA, nullptr, nullptr);
     }
 }
 
@@ -427,7 +477,7 @@ retry:
 
 
 typedef struct {
-    SVGBaseEntity *ent;
+    SVGEntityHandle ent;
     vec3_t  origin;
     vec3_t  angles;
 #if USE_SMOOTH_DELTA_ANGLES
@@ -436,7 +486,7 @@ typedef struct {
 } pushed_t;
 pushed_t    pushed[MAX_EDICTS], *pushed_p;
 
-SVGBaseEntity *obstacle;
+SVGBaseEntity *obstacle = nullptr;
 
 
 //
@@ -447,13 +497,22 @@ SVGBaseEntity *obstacle;
 // otherwise riders would continue to slide.
 //===============
 //
-qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
+qboolean SVG_Push(SVGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 {
     int e;
     SVGBaseEntity* check = NULL;
     SVGBaseEntity* block = NULL;
     pushed_t    *p = NULL;
     vec3_t      org, org2, move2, forward, right, up;
+
+    // Assign handle to base entity.
+    SVGBaseEntity* pusher = *entityHandle;
+
+    // Ensure it is a valid entity.
+    if (!pusher) {
+	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "called with an invalid entity handle!\n");
+	    return false;
+    }
 
     // Find the bounding box
     vec3_t mins = pusher->GetAbsoluteMin() + move;
@@ -483,10 +542,16 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 // see if any solid entities are inside the final position
     for (e = 1; e < globals.numberOfEntities; e++) {
         // Fetch the base entity and ensure it is valid.
-        check = g_baseEntities[e];
+        //check = g_baseEntities[e];
+	    SVGEntityHandle checkHandle = g_baseEntities[e];
 
-        if (!check)
-            continue;
+        if (!checkHandle) {
+    		SVG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");
+		    continue;
+	    }
+
+        // Acquire base entity pointer.
+        SVGBaseEntity *check = *checkHandle;
 
         // Fetch its properties to work with.
         qboolean isInUse = check->IsInUse();
@@ -582,6 +647,15 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
         // go backwards, so if the same entity was pushed
         // twice, it goes back to the original position
         for (p = pushed_p - 1 ; p >= pushed ; p--) {
+	        // Fetch pusher's base entity.
+            SVGBaseEntity* pusherEntity = *p->ent;
+
+            // Ensure we are dealing with a valid pusher entity.
+            if (!pusherEntity) {
+    		    SVG_PhysicsEntityWPrint(__func__, "[move back loop]", "got an invalid entity handle!\n");
+                continue;
+            }
+
             p->ent->SetOrigin(p->origin);
             p->ent->SetAngles(p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
@@ -596,8 +670,18 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 
 //FIXME: is there a better way to handle this?
     // see if anything we moved has touched a trigger
-    for (p = pushed_p - 1 ; p >= pushed ; p--)
-        UTIL_TouchTriggers(p->ent);
+    for (p = pushed_p - 1; p >= pushed; p--) {
+        // Fetch pusher's base entity.
+        SVGBaseEntity* pusherEntity = *p->ent;
+
+        // Ensure we are dealing with a valid pusher entity.
+	    if (!pusherEntity) {
+		    SVG_PhysicsEntityWPrint(__func__, "[was moved loop] ", "got an invalid entity handle!\n");
+            continue;
+	    }
+
+	    UTIL_TouchTriggers(*p->ent);
+    }
 
     return true;
 }
@@ -611,10 +695,19 @@ qboolean SVG_Push(SVGBaseEntity *pusher, vec3_t move, vec3_t amove)
 // push all box objects
 //===============
 //
-void SVG_Physics_Pusher(SVGBaseEntity *ent)
+void SVG_Physics_Pusher(SVGEntityHandle &entityHandle)
 {
     vec3_t      move, amove;
     SVGBaseEntity     *part, *mv;
+
+    // Assign handle to base entity.
+    SVGBaseEntity* ent = *entityHandle;
+
+    // Ensure it is a valid entity.
+    if (!ent) {
+    	SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
 
     // if not a team captain, so movement will be handled elsewhere
     if (ent->GetFlags() & EntityFlags::TeamSlave)
@@ -633,13 +726,14 @@ void SVG_Physics_Pusher(SVGBaseEntity *ent)
         vec3_t partAngularVelocity = part->GetAngularVelocity();
 
         if (partVelocity.x || partVelocity.y || partVelocity.z ||
-            partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z
-            ) {
+            partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
+        {
             // object is moving
             move = vec3_scale(part->GetVelocity(), FRAMETIME);
             amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME);
 
-            if (!SVG_Push(part, move, amove))
+            SVGEntityHandle partHandle(part);
+            if (!SVG_Push(partHandle, move, amove))
                 break;  // move was Blocked
         }
     }
@@ -655,12 +749,10 @@ void SVG_Physics_Pusher(SVGBaseEntity *ent)
 
         // if the pusher has a "Blocked" function, call it
         // otherwise, just stay in place until the obstacle is gone
-        //if (obstacle) {
+        if (obstacle) {
             part->Blocked(obstacle);
-        //}
+        }
 
-        //if (part->Blocked)
-        //    part->Blocked(part, obstacle);
 #if 0
         // if the pushed entity went away and the pusher is still there
         if (!obstacle->inUse && part->inUse)
@@ -676,28 +768,39 @@ void SVG_Physics_Pusher(SVGBaseEntity *ent)
 
 //==================================================================
 
-//
-//===============
-// SVG_Physics_None
-//
-// Non moving objects can only Think
-//===============
-//
-void SVG_Physics_None(SVGBaseEntity *ent)
-{
+/**
+*   @brief  Executes MoveType::None behavior for said entity. Meaning it
+*           only gets a chance to think.
+**/
+void SVG_Physics_None(SVGEntityHandle& entityHandle) {
+    // Assign handle to base entity.
+    SVGBaseEntity* ent = *entityHandle;
+
+    // Ensure it is a valid entity.
+    if (!ent) {
+	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // Run think method.
     SVG_RunThink(ent);
 }
 
-//
-//===============
-// SVG_Physics_Noclip
-//
-// A moving object that doesn't obey physics
-//===============
-//
-void SVG_Physics_Noclip(SVGBaseEntity *ent)
-{
-// regular thinking
+/**
+*   @brief  Executes MoveType::Noclip, behavior on said entity meaning it
+*           does not clip to world, or respond to other entities.
+**/
+void SVG_Physics_Noclip(SVGEntityHandle &entityHandle) {
+    // Assign handle to base entity.
+    SVGBaseEntity* ent = *entityHandle;
+
+    // Ensure it is a valid entity.
+    if (!ent) {
+	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // regular thinking
     if (!SVG_RunThink(ent))
         return;
     if (!ent->IsInUse())
@@ -709,23 +812,26 @@ void SVG_Physics_Noclip(SVGBaseEntity *ent)
     ent->LinkEntity();
 }
 
-//
+
 //=============================================================================
 //
 //	TOSS / BOUNCE
 //
 //=============================================================================
-//
+/**
+*   @brief  Executes MoveType::Toss, TossSlide, Bounce and Fly movement behaviors on
+*           said entity.
+**/
+void SVG_Physics_Toss(SVGEntityHandle& entityHandle) {
+    // Assign handle to base entity.
+    SVGBaseEntity* ent = *entityHandle;
 
-//
-//===============
-// SVG_Physics_Toss
-//
-// Toss, bounce, and fly movement.  When onground, do nothing.
-//===============
-//
-void SVG_Physics_Toss(SVGBaseEntity *ent)
-{
+    // Ensure it is a valid entity.
+    if (!ent) {
+    	SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
     // Regular thinking
     SVG_RunThink(ent);
     
@@ -742,14 +848,14 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
     }
 
     // Check for the groundEntity going away
-    if (ent->GetGroundEntity()) {
+    if (*ent->GetGroundEntity()) {
         if (!ent->GetGroundEntity()->IsInUse()) {
             ent->SetGroundEntity(nullptr);
         }
     }
 
     // If onground, return without moving
-    if (ent->GetGroundEntity()) {
+    if (*ent->GetGroundEntity() && ent->GetMoveType() != MoveType::TossSlide) {
         return;
     }
 
@@ -786,7 +892,7 @@ void SVG_Physics_Toss(SVGBaseEntity *ent)
 
         // Stop if on ground
         if (trace.plane.normal[2] > 0.7f) {
-            if (ent->GetVelocity().z < 60.f || ent->GetMoveType() != MoveType::Bounce) {
+	        if (ent->GetVelocity().z < 60.f || (ent->GetMoveType() != MoveType::Bounce)) {
                 ent->SetGroundEntity(trace.ent);
                 ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
                 ent->SetVelocity(vec3_zero());
@@ -843,8 +949,16 @@ constexpr float STEPMOVE_WATERFRICTION = 1.f;
 // Does what it says it does.
 //===============
 //
-void SVG_AddRotationalFriction(SVGBaseEntity *ent)
-{ 
+void SVG_AddRotationalFriction(SVGEntityHandle entityHandle) { 
+    // Assign handle to base entity.
+    SVGBaseEntity *ent = *entityHandle;
+
+    // Ensure it is a valid entity.
+    if (!ent) {
+	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
     // Acquire the rotational velocity first.
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
@@ -884,19 +998,31 @@ void SVG_AddRotationalFriction(SVGBaseEntity *ent)
 // FIXME: is this true ?
 //===============
 //
-void SVG_Physics_Step(SVGBaseEntity *ent)
+void SVG_Physics_Step(SVGEntityHandle &entityHandle)
 {
     // Stores whether to play a "surface hit" sound.
     qboolean    hitSound = false;
 
+    // Check if handle is valid.    
+    SVGBaseEntity *ent = *entityHandle;
+
+    if (!ent) {
+	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // Retrieve ground entity.
+    SVGBaseEntity* groundEntity = *ent->GetGroundEntity();
+
     // If we have no ground entity.
-    if (!ent->GetGroundEntity()) {
+    if (!groundEntity) {
         // Ensure we check if we aren't on one in this frame already.
         SVG_StepMove_CheckGround(ent);
     }
 
-    // Fetch ground entity pointer. (This can be the newly found entity ofc.)
-    SVGBaseEntity* groundEntity = ent->GetGroundEntity();
+    //if (!groundEntity) {
+    //    return;
+    //}
 
     // Store whether we had a ground entity at all.
     qboolean wasOnGround = (groundEntity ? true : false);
@@ -1025,32 +1151,39 @@ void SVG_Physics_Step(SVGBaseEntity *ent)
 // Determines what kind of run/thinking method to execute.
 //===============
 //
-void SVG_RunEntity(SVGBaseEntity *ent)
+void SVG_RunEntity(SVGEntityHandle &entityHandle)
 {
-    //if (ent->PreThink)
-    //    ent->PreThink(ent);
+    SVGBaseEntity *ent = *entityHandle;
+
+    if (!ent) {
+	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // Execute the proper physics that belong to its movetype.
     int32_t moveType = ent->GetMoveType();
 
     switch (moveType) {
-    case MoveType::Push:
-    case MoveType::Stop:
-        SVG_Physics_Pusher(ent);
+        case MoveType::Push:
+        case MoveType::Stop:
+	        SVG_Physics_Pusher(entityHandle);
         break;
-    case MoveType::None:
-        SVG_Physics_None(ent);
+        case MoveType::None:
+	        SVG_Physics_None(entityHandle);
         break;
-    case MoveType::NoClip:
-    case MoveType::Spectator:
-        SVG_Physics_Noclip(ent);
+        case MoveType::NoClip:
+        case MoveType::Spectator:
+	        SVG_Physics_Noclip(entityHandle);
         break;
-    case MoveType::Step:
-        SVG_Physics_Step(ent);
+        case MoveType::Step:
+            SVG_Physics_Step(entityHandle);
         break;
-    case MoveType::Toss:
-    case MoveType::Bounce:
-    case MoveType::Fly:
-    case MoveType::FlyMissile:
-        SVG_Physics_Toss(ent);
+        case MoveType::Toss:
+	    case MoveType::TossSlide:
+        case MoveType::Bounce:
+        case MoveType::Fly:
+        case MoveType::FlyMissile:
+	        SVG_Physics_Toss(entityHandle);
         break;
     default:
         gi.Error("SV_Physics: bad moveType %i", ent->GetMoveType());

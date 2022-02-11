@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// WorldSpawn.cpp
+// Worldspawn.cpp
 //
 //
 */
@@ -12,7 +12,11 @@
 
 // Entities.
 #include "../Entities.h"
-#include "WorldSpawn.h"
+#include "Worldspawn.h"
+
+// Gamemodes.
+#include "../Gamemodes/IGameMode.h"
+#include "../Gamemodes/DeathMatchGamemode.h"
 
 static const char single_statusbar[] =
 "yb -24 "
@@ -152,21 +156,18 @@ static const char dm_statusbar[] =
 ;
 
 // Constructor/Deconstructor.
-WorldSpawn::WorldSpawn(Entity* svEntity) : SVGBaseEntity(svEntity) {
-
-}
-WorldSpawn::~WorldSpawn() {
+Worldspawn::Worldspawn(Entity* svEntity) : Base(svEntity) {
 
 }
 
 //
 //===============
-// WorldSpawn::Precache
+// Worldspawn::Precache
 //
 // You can precache all game related data here.
 //===============
 //
-void WorldSpawn::Precache() {
+void Worldspawn::Precache() {
     // Parent class precache.
     Base::Precache();
 
@@ -176,15 +177,14 @@ void WorldSpawn::Precache() {
     SVG_PrecacheImage("help");
     SVG_PrecacheImage("field_3");
 
-    if (!st.gravity)
-        gi.cvar_set("sv_gravity", "750");
+    if (!globalGravity)
+        gi.cvar_set("sv_gravity", std::to_string(DEFAULT_GRAVITY).c_str());
     else
-        gi.cvar_set("sv_gravity", st.gravity);
+        gi.cvar_set("sv_gravity", std::to_string(globalGravity).c_str());
 
     snd_fry = SVG_PrecacheSound("player/fry.wav");  // standing in lava / slime
 
     SVG_PrecacheItem(SVG_FindItemByPickupName("Blaster"));
-    gi.DPrintf("WorldSpawn::Spawn();\n");
 
     SVG_PrecacheSound("player/lava1.wav");
     SVG_PrecacheSound("player/lava2.wav");
@@ -266,20 +266,20 @@ void WorldSpawn::Precache() {
 
 //
 //===============
-// WorldSpawn::Spawn
+// Worldspawn::Spawn
 //
 // Sets Worldspawn related properties. Nice right?
 //===============
 //
-void WorldSpawn::Spawn() {
+void Worldspawn::Spawn() {
     // Parent class spawn.
     Base::Spawn();
 
-    // Set WorldSpawn specific properties.
+    // Set Worldspawn specific properties.
     SetMoveType(MoveType::Push);
     SetSolid(Solid::BSP);
-    SetInUse(true);          // since the world doesn't use SVG_Spawn()
-    SetModelIndex(1);      // world model is always index 1
+    SetInUse(true);                 // Since the world doesn't use SVG_Spawn()
+    SetModelIndex(1);               // World model is always index 1
     SetClipMask(0);
     //---------------
 
@@ -287,117 +287,73 @@ void WorldSpawn::Spawn() {
     level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
         Entity* ent = SVG_Spawn();
-        ent->className = "bodyque";
+        ent->classname = "bodyque";
     }
 
-    // set configstrings for items
+    // Configure item name configstrings.
     SVG_SetItemNames();
 
-    SVG_SetConfigString(ConfigStrings::MaxClients, va("%i", (int)(maximumClients->value)));
+    // Setup max client config strings.
+    SVG_SetConfigString(ConfigStrings::MaxClients, std::to_string(maximumclients->integer));
 
-    // status bar program
-    if (deathmatch->value)
+    // Status bar program
+    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
         SVG_SetConfigString(ConfigStrings::StatusBar, dm_statusbar);
-    else
+    } else {
         SVG_SetConfigString(ConfigStrings::StatusBar, single_statusbar);
+    }
 
     //---------------
-
-    //
     // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.
-    //
+    SVG_SetConfigString(ConfigStrings::Lights + 0, "m"); // 0 normal.
+    SVG_SetConfigString(ConfigStrings::Lights + 1, "mmnmmommommnonmmonqnmmo"); // 1 FLICKER (first variety).
+    SVG_SetConfigString(ConfigStrings::Lights + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba"); // 2 SLOW STRONG PULSE.
+    SVG_SetConfigString(ConfigStrings::Lights + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg"); // 3 CANDLE (first variety).
+    SVG_SetConfigString(ConfigStrings::Lights + 4, "mamamamamama"); // 4 FAST STROBE.
+    SVG_SetConfigString(ConfigStrings::Lights + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj"); // 5 GENTLE PULSE 1.
+    SVG_SetConfigString(ConfigStrings::Lights + 6, "nmonqnmomnmomomno"); // 6 FLICKER (second variety).
+    SVG_SetConfigString(ConfigStrings::Lights + 7, "mmmaaaabcdefgmmmmaaaammmaamm"); // 7 CANDLE (second variety).
+    SVG_SetConfigString(ConfigStrings::Lights + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa"); // 8 CANDLE (third variety).
+    SVG_SetConfigString(ConfigStrings::Lights + 9, "aaaaaaaazzzzzzzz"); // 9 SLOW STROBE (fourth variety).
+    SVG_SetConfigString(ConfigStrings::Lights + 10, "mmamammmmammamamaaamammma"); // 10 FLUORESCENT FLICKER.
+    SVG_SetConfigString(ConfigStrings::Lights + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba"); // 11 SLOW PULSE NOT FADE TO BLACK.
 
-        // 0 normal
-    SVG_SetConfigString(ConfigStrings::Lights + 0, "m");
-
-    // 1 FLICKER (first variety)
-    SVG_SetConfigString(ConfigStrings::Lights + 1, "mmnmmommommnonmmonqnmmo");
-
-    // 2 SLOW STRONG PULSE
-    SVG_SetConfigString(ConfigStrings::Lights + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
-
-    // 3 CANDLE (first variety)
-    SVG_SetConfigString(ConfigStrings::Lights + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
-
-    // 4 FAST STROBE
-    SVG_SetConfigString(ConfigStrings::Lights + 4, "mamamamamama");
-
-    // 5 GENTLE PULSE 1
-    SVG_SetConfigString(ConfigStrings::Lights + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
-
-    // 6 FLICKER (second variety)
-    SVG_SetConfigString(ConfigStrings::Lights + 6, "nmonqnmomnmomomno");
-
-    // 7 CANDLE (second variety)
-    SVG_SetConfigString(ConfigStrings::Lights + 7, "mmmaaaabcdefgmmmmaaaammmaamm");
-
-    // 8 CANDLE (third variety)
-    SVG_SetConfigString(ConfigStrings::Lights + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
-
-    // 9 SLOW STROBE (fourth variety)
-    SVG_SetConfigString(ConfigStrings::Lights + 9, "aaaaaaaazzzzzzzz");
-
-    // 10 FLUORESCENT FLICKER
-    SVG_SetConfigString(ConfigStrings::Lights + 10, "mmamammmmammamamaaamammma");
-
-    // 11 SLOW PULSE NOT FADE TO BLACK
-    SVG_SetConfigString(ConfigStrings::Lights + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-
-    // styles 32-62 are assigned by the light program for switchable lights
-
-    // 63 testing
-    SVG_SetConfigString(ConfigStrings::Lights + 63, "a");
-
-    // Set think function.
-    //SetThinkCallback()
-    //SetThinkCallback(&WorldSpawn::WorldSpawnThink);
-    //SetNextThinkTime(level.time + 0.1f);
+    // Styles starting at 32 and up to 62 are assigned by the light program for switchable lights.
 }
 
-//
 //===============
-// WorldSpawn::PostSpawn
+// Worldspawn::PostSpawn
 //
 // Placeholder, can be used though.
 //===============
-//
-void WorldSpawn::PostSpawn() {
+void Worldspawn::PostSpawn() {
     // Parent class PostSpawn.
     Base::PostSpawn();
 }
 
-//
 //===============
-// WorldSpawn::Think
+// Worldspawn::Think
 //
 // Placeholder, can be used though.
 //===============
-//
-void WorldSpawn::Think() {
+void Worldspawn::Think() {
     // Parent class think.
     Base::Think();
 }
 
-//
 //===============
-// WorldSpawn::SpawnKey
+// Worldspawn::SpawnKey
 //
 // This function can be overrided, to allow for custom entity key:value parsing.
 //===============
-//
-void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
-/*    if (key == "origin") {
-
-    }else */if (key == "gravity") {
+void Worldspawn::SpawnKey(const std::string& key, const std::string& value) {
+    if (key == "gravity") {
         // Parse Gravity.
-        int32_t gravity = 0;
-        ParseIntegerKeyValue(key, value, gravity);
+        int32_t parsedInteger = 0;
+        ParseIntegerKeyValue(key, value, parsedInteger);
         
-        // Set gravity to default if parsing failed.
-        if (!gravity)
-            gi.cvar_set("sv_gravity", "750");
-        else
-            gi.cvar_set("sv_gravity", std::to_string(gravity).c_str());
+        // Assign.
+        globalGravity = parsedInteger;
     } else if (key == "message") {
         // Parse message.
         std::string message = "";
@@ -411,45 +367,45 @@ void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
         }
     } else if (key == "nextmap") {
         // Parse message.
-        std::string nextmap = "";
-        ParseStringKeyValue(key, value, nextmap);
+        std::string parsedString = "";
+        ParseStringKeyValue(key, value, parsedString);
 
         // Assign.
-        if (nextmap != "") {
-            strcpy(level.nextMap, nextmap.c_str());
+	    if (!parsedString.empty()) {
+            strcpy(level.nextMap, parsedString.c_str());
         }
     } else if (key == "sky") {
         // Parse message.
-        std::string sky = "";
-        ParseStringKeyValue(key, value, sky);
+        std::string parsedString = "";
+        ParseStringKeyValue(key, value, parsedString);
 
         // Assign.
-        if (sky != "")
-            SVG_SetConfigString(ConfigStrings::Sky, sky.c_str());
+        if (!parsedString.empty())
+            SVG_SetConfigString(ConfigStrings::Sky, parsedString.c_str());
         else
             SVG_SetConfigString(ConfigStrings::Sky, "unit1_");
     } else if (key == "skyrotate") {
         // Parse skyrotate.
-        float skyrotate = 0.f;
-        ParseFloatKeyValue(key, value, skyrotate);
+        float parsedFloat = 0.f;
+        ParseFloatKeyValue(key, value, parsedFloat);
 
         // Assign.
-        SVG_SetConfigString(ConfigStrings::SkyRotate, va("%f", skyrotate));
+        SVG_SetConfigString(ConfigStrings::SkyRotate, va("%f", parsedFloat));
 
     } else if (key == "skyaxis") {
         // Parse skyaxis.
-        vec3_t skyaxis = vec3_zero();
-        ParseVector3KeyValue(key, value, skyaxis);
+        vec3_t parsedVector = vec3_zero();
+        ParseVector3KeyValue(key, value, parsedVector);
 
         // Assign.
-        SVG_SetConfigString(ConfigStrings::SkyAxis, va("%f %f %f", skyaxis.x, skyaxis.y, skyaxis.z));
+        SVG_SetConfigString(ConfigStrings::SkyAxis, va("%f %f %f", parsedVector.x, parsedVector.y, parsedVector.z));
     } else if (key == "sounds") {
         // Parse sounds.
-        int32_t sounds = 0;
-        ParseIntegerKeyValue(key, value, sounds);
+        int32_t parsedInteger = 0;
+        ParseIntegerKeyValue(key, value, parsedInteger);
 
         // Assign.
-        SVG_SetConfigString(ConfigStrings::CdTrack, va("%i", sounds));
+        SVG_SetConfigString(ConfigStrings::CdTrack, std::to_string(parsedInteger));
     } else {
         // Pass it on.
         Base::SpawnKey(key, value);
@@ -458,12 +414,12 @@ void WorldSpawn::SpawnKey(const std::string& key, const std::string& value) {
 
 //
 //===============
-// WorldSpawn::WorldSpawnThink
+// Worldspawn::WorldSpawnThink
 //
 // 'Think' callback placeholder, can be used though.
 //===============
 //
-void WorldSpawn::WorldSpawnThink(void) {
-    //SetThinkCallback(&WorldSpawn::WorldSpawnThink);
+void Worldspawn::WorldspawnThink(void) {
+    //SetThinkCallback(&Worldspawn::WorldSpawnThink);
     //SetNextThinkTime(level.time + 0.1f);
 }

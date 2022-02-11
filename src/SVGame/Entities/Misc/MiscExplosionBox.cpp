@@ -53,8 +53,6 @@ void MiscExplosionBox::Precache() {
     SVG_PrecacheModel("models/objects/debris1/tris.md2");
     SVG_PrecacheModel("models/objects/debris2/tris.md2");
     SVG_PrecacheModel("models/objects/debris3/tris.md2");
-
-    //gi.DPrintf("MiscExplosionBox::Precache();");
 }
 
 //
@@ -71,10 +69,7 @@ void MiscExplosionBox::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
-
-    // Since this is a "monster", after all...
-    SetFlags(EntityServerFlags::Monster);
+    SetMoveType(MoveType::TossSlide);
 
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -90,30 +85,31 @@ void MiscExplosionBox::Spawn() {
         { 16.f, 16.f, 40.f }
     );
 
-    //SetFlags(EntityFlags::PowerArmor);
-    //SetFlags(EntityFlags::Swim);
+    //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
+
     // Set default values in case we have none.
     if (!GetMass()) {
-        SetMass(40);
+        SetMass(100);
     }
     if (!GetHealth()) {
-        SetHealth(150);
+        SetHealth(80);
     }
     if (!GetDamage()) {
         SetDamage(150);
     }
 
-    // Set entity to allow taking damage (can't explode otherwise.)
+    // We need it to take damage in case we want it to explode.
     SetTakeDamage(TakeDamage::Yes);
 
     // Setup our MiscExplosionBox callbacks.
     SetUseCallback(&MiscExplosionBox::ExplosionBoxUse);
-    SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);
+
     SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -151,6 +147,14 @@ void MiscExplosionBox::Think() {
     Base::Think();
 }
 
+//===============
+// MiscExplosionBox::SpawnKey
+//
+//===============
+void MiscExplosionBox::SpawnKey(const std::string& key, const std::string& value) {
+	Base::SpawnKey(key, value);
+}
+
 
 //
 // Callback Functions.
@@ -168,44 +172,44 @@ void MiscExplosionBox::ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* ac
 
 //
 //===============
-// MiscExplosionBox::ExplosionBoxThink
+// MiscExplosionBox::ExplosionBoxDropToFloor
 //
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 //
-void MiscExplosionBox::ExplosionBoxThink(void) {
+void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     // First, ensure our origin is +1 off the floor.
-    vec3_t newOrigin = GetOrigin() + vec3_t{
+    vec3_t traceStart = GetOrigin() + vec3_t{
         0.f, 0.f, 1.f
     };
-        
+    
+    SetOrigin(traceStart);
+
     // Calculate the end origin to use for tracing.
-    vec3_t end = newOrigin + vec3_t{
+    vec3_t traceEnd = traceStart + vec3_t{
         0, 0, -256.f
     };
     
     // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, NULL, CONTENTS_MASK_MONSTERSOLID);
+    SVGTrace trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, CONTENTS_MASK_MONSTERSOLID);
     
     // Return in case we hit anything.
-    if (trace.fraction == 1.f || trace.allSolid)
-        return;
+    if (trace.fraction == 1.f || trace.allSolid) {
+	    return;
+    }
     
-    // Unlink.
-    UnlinkEntity();
-
     // Set new entity origin.
     SetOrigin(trace.endPosition);
     
-    //// Do a check ground for the step move of this pusher.
-    SVG_StepMove_CheckGround(this);
-
     // Link entity back in.
     LinkEntity();
 
+    // Do a check ground for the step move of this pusher.
+    SVG_StepMove_CheckGround(this);
+
     // Setup its next think time, for a frame ahead.
-    SetThinkCallback(&MiscExplosionBox::ExplosionBoxThink);
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
+    //SetNextThinkTime(level.time + 1.f * FRAMETIME);
 
     // Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
@@ -309,8 +313,7 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
     SetTakeDamage(TakeDamage::No);
 
     // Attacker becomes this entity its "activator".
-    //if (attacker)
-        SetActivator(attacker);
+    SetActivator(attacker);
 
     // Setup the next think and think time.
     SetNextThinkTime(level.time + 2 * FRAMETIME);
@@ -328,22 +331,17 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
 //
 void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
-    if (!self)
-        return;
-    if (!other)
-        return;
-    // TODO: Move elsewhere in baseentity, I guess?
-    // Prevent this entity from touching itself.
-    if (self == other)
-        return;
+    if (!other || other == this) {
+	    return;
+    }
 
     // Ground entity checks.
-    if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == self))
-        return;
+    if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
+	    return;
+    }
 
     // Calculate ratio to use.
-    other->SetMass(200);
-    float ratio = (float)other->GetMass() / (float)self->GetMass();
+    float ratio = ((float)other->GetMass()) / ((float) GetMass());
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
@@ -352,8 +350,7 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
     float yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(self, yaw, (0.1f / BASE_FRAMEDIVIDER) * ratio);
-    //gi.DPrintf("self: '%i' is TOUCHING other: '%i'\n", self->GetServerEntity()->state.number, other->GetServerEntity()->state.number);
+    SVG_StepMove_Walk(this, yaw, (20.f / BASE_FRAMEDIVIDER) * ratio * FRAMETIME);
 }
 
 
@@ -370,9 +367,9 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
 
     // Calculate random direction vector.
     vec3_t randomDirection = {
-        crandom(),
-        crandom(),
-        crandom()
+        RandomRangef(2.f, 0.f), //crandom(),
+        RandomRangef(2.f, 0.f),//crandom(),
+        RandomRangef(2.f, 0.f),//crandom()      
     };
 
     // Calculate origin to spawn them at.
@@ -395,10 +392,10 @@ void MiscExplosionBox::SpawnDebris2Chunk() {
     float speed = 2.f * GetDamage() / 200.f;
 
     // Calculate random direction vector.
-    vec3_t randomDirection = { 
-        crandom(), 
-        crandom(), 
-        crandom() 
+    vec3_t randomDirection = {
+        RandomRangef(2.f, 0.f), //crandom(),
+        RandomRangef(2.f, 0.f),//crandom(),
+        RandomRangef(2.f, 0.f),//crandom()      
     };
 
     // Calculate origin to spawn them at.

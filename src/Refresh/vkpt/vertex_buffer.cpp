@@ -489,7 +489,7 @@ vkpt_vertex_buffer_upload_models()
 						memcpy(vtx->blend_weights, m->blend_weights + nvert, sizeof(vec4_t));
 					} 					else 					{
 						vtx->blend_indices = 0;
-						Vector4Set(vtx->blend_weights, 0.f, 0.f, 0.f, 0.f);
+						vtx->blend_weights = vec4_t{0.f, 0.f, 0.f, 0.f};
 					}
 				}
 

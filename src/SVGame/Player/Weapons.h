@@ -17,7 +17,7 @@ class SVGBaseEntity;
 class PlayerClient;
 
 // Player project source.
-vec3_t SVG_PlayerProjectSource(ServersClient* client, const vec3_t &point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right);
+vec3_t SVG_PlayerProjectSource(ServerClient* client, const vec3_t &point, const vec3_t& distance, const vec3_t& forward, const vec3_t& right);
 
 void SVG_PlayerNoise(SVGBaseEntity* who, vec3_t where, int type);
 
@@ -27,6 +27,8 @@ void        NoAmmoWeaponChange(PlayerClient* ent);
 void        SVG_ThinkWeapon(PlayerClient* ent);
 void        Use_Weapon(PlayerClient *ent, gitem_t* item);
 void        Drop_Weapon(PlayerClient *ent, gitem_t* item);
-void        Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int* pause_frames, int* fire_frames, void (*fire)(PlayerClient* ent));
+void        _Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int* pause_frames, int* fire_frames, void (*fire)(PlayerClient* ent));
+void Weapon_Generic(PlayerClient* ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_FIRST, int FRAME_FIRE_LAST, int FRAME_IDLE_FIRST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_FIRST, int FRAME_DEACTIVATE_LAST, int* pause_frames,
+    int* fire_frames, void (*fire)(PlayerClient* ent));
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__

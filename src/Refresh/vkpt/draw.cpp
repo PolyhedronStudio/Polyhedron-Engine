@@ -35,12 +35,21 @@ static drawStatic_t draw = {
 	.alpha_scale = 1.0f
 };
 
+//struct DrawPicUniformBufferObject {
+//	// Transform matrix.
+//	mat4_t transform;
+//};
+
 static int num_stretch_pics = 0;
 typedef struct {
 	float x, y, w,   h;
 	float s, t, w_s, h_t;
 	uint32_t color, tex_handle;
 } StretchPic_t;
+
+static mat4_t model_matrix;
+static mat4_t view_matrix;
+static mat4_t projection_matrix;
 
 static clipRect_t clip_rect;
 static qboolean clip_enable = false;
@@ -647,6 +656,10 @@ void R_SetClipRect_RTX(const clipRect_t *clip)
 	{
 		clip_enable = false;
 	}
+}
+
+void R_DrawSetTransform_RTX(float* matrix) {
+	model_matrix = matrix;
 }
 
 void

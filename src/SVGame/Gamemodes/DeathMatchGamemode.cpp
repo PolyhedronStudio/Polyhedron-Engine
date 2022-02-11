@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// DeathMatchGameMode.cpp
+// DeathmatchGamemode.cpp
 //
 //
 */
@@ -21,15 +21,15 @@
 #include "../Player/View.h"
 
 // Game Mode.
-#include "DeathMatchGameMode.h"
+#include "DeathmatchGamemode.h"
 
 //
 // Constructor/Deconstructor.
 //
-DeathMatchGameMode::DeathMatchGameMode() : DefaultGameMode() {
+DeathmatchGamemode::DeathmatchGamemode() : DefaultGamemode() {
 
 }
-DeathMatchGameMode::~DeathMatchGameMode() {
+DeathmatchGamemode::~DeathmatchGamemode() {
 
 }
 
@@ -40,22 +40,22 @@ DeathMatchGameMode::~DeathMatchGameMode() {
 
 //
 //===============
-// DeathMatchGameMode::CanDamage
+// DeathmatchGamemode::CanDamage
 //
 // Template function serves as an example atm.
 //===============
 //
-qboolean DeathMatchGameMode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
-    // Let it be to DefaultGameMode. :)
-    return DefaultGameMode::CanDamage(target, inflictor);
+qboolean DeathmatchGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
+    // Let it be to DefaultGamemode. :)
+    return DefaultGamemode::CanDamage(target, inflictor);
 }
 
 //===============
-// DeathMatchGameMode::ClientBegin
+// DeathmatchGamemode::ClientBegin
 // 
 // Called when a client is ready to be placed in the game after connecting.
 //===============
-void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
+void DeathmatchGamemode::ClientBegin(Entity* serverEntity) {
     if (!serverEntity) {
         gi.DPrintf("ClientBegin executed with invalid (nullptr) serverEntity");
         return;
@@ -73,7 +73,7 @@ void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
     SVG_InitEntity(serverEntity);
 
     // Delete previous classentity, if existent (older client perhaps).
-    SVG_FreeClassEntity(serverEntity);
+    SVG_FreeClassFromEntity(serverEntity);
 
     // Recreate class PlayerClient entity.
     serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false);
@@ -99,7 +99,7 @@ void DeathMatchGameMode::ClientBegin(Entity* serverEntity) {
     ClientEndServerFrame(serverEntity);
 }
 
-void DeathMatchGameMode::PutClientInServer(Entity *ent) {
+void DeathmatchGamemode::PutClientInServer(Entity *ent) {
     // Find a spawn point for this client to be "placed"/"put" at.
     vec3_t  mins = PM_MINS;
     vec3_t  maxs = PM_MAXS;
@@ -113,11 +113,11 @@ void DeathMatchGameMode::PutClientInServer(Entity *ent) {
     vec3_t  spawnOrigin = vec3_zero();
     vec3_t  spawnAngles = vec3_zero();
 
-    DefaultGameMode::SelectClientSpawnPoint(ent, spawnOrigin, spawnAngles, "info_player_deathmatch");
+    DefaultGamemode::SelectClientSpawnPoint(ent, spawnOrigin, spawnAngles, "info_player_deathmatch");
 
     // Fetch the entity index, and the client right off the bat.
     int32_t index = ent - g_entities - 1;
-    ServersClient* client = ent->client;
+    ServerClient* client = ent->client;
 
     // Deathmatch wipes most client data every spawn
     //-----------------------------------------------------------------------
@@ -150,9 +150,10 @@ void DeathMatchGameMode::PutClientInServer(Entity *ent) {
     playerClient->SetClient(&game.clients[index]);
     playerClient->SetTakeDamage(TakeDamage::Aim);
     playerClient->SetMoveType(MoveType::Walk);
+    playerClient->SetMass(200);
     playerClient->SetViewHeight(22);
     playerClient->SetInUse(true);
-    playerClient->SetClassName("player");
+    playerClient->SetClassname("player");
     playerClient->SetSolid(Solid::BoundingBox);
     playerClient->SetDeadFlag(DEAD_NO);
     playerClient->SetAirFinishedTime(level.time + 12);
@@ -175,7 +176,7 @@ void DeathMatchGameMode::PutClientInServer(Entity *ent) {
     // Setup player move origin to spawnpoint origin.
     client->playerState.pmove.origin = spawnOrigin;
 
-    if ((int)gamemodeflags->value & GameModeFlags::FixedFOV) {
+    if ((int)gamemodeflags->value & GamemodeFlags::FixedFOV) {
         client->playerState.fov = 90;
     } else {
         client->playerState.fov = atoi(Info_ValueForKey(client->persistent.userinfo, "fov"));
@@ -255,7 +256,61 @@ void DeathMatchGameMode::PutClientInServer(Entity *ent) {
 }
 
 //===============
-// DefaultGameMode::ClientBeginServerFrame
+// DeathmatchGamemode::ClientUserinfoChanged
+// 
+//===============
+void DeathmatchGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
+    char    *s;
+    int     playernum;
+
+    // check for malformed or illegal info strings
+    if (!Info_Validate(userinfo)) {
+        strcpy(userinfo, "\\name\\badinfo\\skin\\male/grunt");
+    }
+
+    // set name
+    s = Info_ValueForKey(userinfo, "name");
+    strncpy(ent->client->persistent.netname, s, sizeof(ent->client->persistent.netname) - 1);
+
+    // set spectator
+    s = Info_ValueForKey(userinfo, "spectator");
+    // spectators are only supported in deathmatch
+    if (*s && strcmp(s, "0"))
+        ent->client->persistent.isSpectator = true;
+    else
+        ent->client->persistent.isSpectator = false;
+
+    // set skin
+    s = Info_ValueForKey(userinfo, "skin");
+
+    playernum = ent - g_entities - 1;
+
+    // combine name and skin into a configstring
+    gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
+
+    // fov
+    if (((int)gamemodeflags->value & GamemodeFlags::FixedFOV)) {
+        ent->client->playerState.fov = 90;
+    } else {
+        ent->client->playerState.fov = atoi(Info_ValueForKey(userinfo, "fov"));
+        if (ent->client->playerState.fov < 1)
+            ent->client->playerState.fov = 90;
+        else if (ent->client->playerState.fov > 160)
+            ent->client->playerState.fov = 160;
+    }
+
+    // handedness
+    s = Info_ValueForKey(userinfo, "hand");
+    if (strlen(s)) {
+        ent->client->persistent.hand = atoi(s);
+    }
+
+    // save off the userinfo in case we want to check something later
+    strncpy(ent->client->persistent.userinfo, userinfo, sizeof(ent->client->persistent.userinfo));
+}
+
+//===============
+// DefaultGamemode::ClientBeginServerFrame
 // 
 // Does logic checking for a client's start of a server frame. In case there
 // is a "level.intermission.time" set, it'll flat out return.
@@ -263,33 +318,30 @@ void DeathMatchGameMode::PutClientInServer(Entity *ent) {
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
 //===============
-void DeathMatchGameMode::ClientBeginServerFrame(Entity* serverEntity) {
+void DeathmatchGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) {
     // Ensure we aren't in an intermission time.
     if (level.intermission.time)
         return;
 
-    // Fetch the client.
-    ServersClient* client = serverEntity->client;
-    PlayerClient* player = (PlayerClient*)serverEntity->classEntity;
     // This has to go ofc.... lol. What it simply does though, is determine whether there is 
     // a need to respawn as spectator.
     if (client->persistent.isSpectator != client->respawn.isSpectator &&
         (level.time - client->respawnTime) >= 5) {
-        RespawnSpectator(player);
+        RespawnSpectator(dynamic_cast<PlayerClient*>(entity));
         return;
     }
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
     if (!client->weaponThunk && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(player);
+        SVG_ThinkWeapon(dynamic_cast<PlayerClient*>(entity));
     else
         client->weaponThunk = false;
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.
     int32_t buttonMask = 0;
-    if (player->GetDeadFlag()) {
+    if (entity->GetDeadFlag()) {
         // Wait for any button just going down
         if (level.time > client->respawnTime) {
             // In old code, the need to hit a key was only set in DM mode.
@@ -300,8 +352,8 @@ void DeathMatchGameMode::ClientBeginServerFrame(Entity* serverEntity) {
             //buttonMask = -1;
 
             if ((client->latchedButtons & buttonMask) ||
-                 ((int)gamemodeflags->value & GameModeFlags::ForceRespawn)) {
-                RespawnClient(player);
+                 ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn)) {
+                RespawnClient(dynamic_cast<PlayerClient*>(entity));
                 client->latchedButtons = 0;
             }
         }
@@ -318,10 +370,10 @@ void DeathMatchGameMode::ClientBeginServerFrame(Entity* serverEntity) {
 }
 
 //===============
-// DeathMatchGameMode::ClientUpdateObituary.
+// DeathmatchGamemode::ClientUpdateObituary.
 // 
 //===============
-void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
+void DeathmatchGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
     std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
 
@@ -456,13 +508,13 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
         // Then we do...
         // Also we gotta adjust that ->classname thing, but this is a template, cheers :)
         if (!message.empty()) {
-            gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassName(), messageAddition.c_str());
-            if (deathmatch->value) {
-                if (friendlyFire)
-                    attacker->GetClient()->respawn.score--;
-                else
-                    attacker->GetClient()->respawn.score++;
+            gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassname(), messageAddition.c_str());
+            if (friendlyFire) {
+                attacker->GetClient()->respawn.score--;
+            } else {
+                attacker->GetClient()->respawn.score++;
             }
+
             return;
         }
     }
@@ -476,11 +528,11 @@ void DeathMatchGameMode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
 }
 
 //===============
-// DeathMatchGameMode::RespawnClient
+// DeathmatchGamemode::RespawnClient
 // 
 // Respawns a client after intermission and hitting a button.
 //===============
-void DeathMatchGameMode::RespawnClient(PlayerClient* ent) {
+void DeathmatchGamemode::RespawnClient(PlayerClient* ent) {
     // Spectator's don't leave bodies
     if (ent->GetMoveType() != MoveType::NoClip)
         SpawnClientCorpse(ent);
@@ -488,24 +540,50 @@ void DeathMatchGameMode::RespawnClient(PlayerClient* ent) {
     ent->SetServerFlags(ent->GetServerFlags() & ~EntityServerFlags::NoClient);
     PutClientInServer(ent->GetServerEntity());
 
-    // add a teleportation effect
+    // Add a teleportation effect
     ent->SetEventID(EntityEvent::PlayerTeleport);
 
-    // hold in place briefly
-    ServersClient* client = ent->GetClient();
+    // Hold in place briefly
+    ServerClient* serverClient = ent->GetClient();
 
-    client->playerState.pmove.flags = PMF_TIME_TELEPORT;
-    client->playerState.pmove.time = 14;
+    // Hold in place for 14 frames and set pmove flags to teleport so the player can
+    // respawn somewhere safe without it interpolating its positions.
+    serverClient->playerState.pmove.flags = PMF_TIME_TELEPORT;
+    serverClient->playerState.pmove.time = 14;
 
-    client->respawnTime = level.time;
+    // Setup respawn time.
+    serverClient->respawnTime = level.time;
 }
 
 //===============
-// DeathMatchGameMode::RespawnSpectator
+// DeathmatchGamemode::RespawnAllClients
+//
+// Respawn all valid client entities who's health is < 0.
+//===============
+void DeathmatchGamemode::RespawnAllClients() {
+
+    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<PlayerClient>()) {
+        if (clientEntity->GetHealth() < 0) {
+            RespawnClient(dynamic_cast<PlayerClient*>(clientEntity));
+        }
+    }
+}
+
+//===============
+// DeathmatchGamemode::ClientDeath
+// 
+// Does nothing for this game mode.
+//===============
+void DeathmatchGamemode::ClientDeath(PlayerClient *clientEntity) {
+
+}
+
+//===============
+// DeathmatchGamemode::RespawnSpectator
 // 
 // Respawns a spectator after intermission and hitting a button.
 //===============
-void DeathMatchGameMode::RespawnSpectator(PlayerClient* ent) {
+void DeathmatchGamemode::RespawnSpectator(PlayerClient* ent) {
     // Spectator's don't leave bodies
     if (ent->GetMoveType() != MoveType::NoClip)
         SpawnClientCorpse(ent);
@@ -517,7 +595,7 @@ void DeathMatchGameMode::RespawnSpectator(PlayerClient* ent) {
     ent->SetEventID(EntityEvent::PlayerTeleport);
 
     // hold in place briefly
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     client->playerState.pmove.flags = PMF_TIME_TELEPORT;
     client->playerState.pmove.time = 14;

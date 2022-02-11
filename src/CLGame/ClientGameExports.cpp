@@ -115,7 +115,7 @@ void ClientGameExports::ClientUpdateOrigin() {
     cl->deltaAngles[2] = LerpAngle(previousPlayerState->pmove.deltaAngles[2], currentPlayerState->pmove.deltaAngles[2], lerpFraction);
 
     // don't interpolate blend color
-    Vector4Copy(currentPlayerState->blend, cl->refdef.blend);
+    cl->refdef.blend = currentPlayerState->blend;
 
     // Interpolate field of view
     cl->fov_x = LerpFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);

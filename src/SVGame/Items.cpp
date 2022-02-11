@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "ServerGameLocal.h"         // Include SVGame funcs.
-#include "Entities.h"        // Entities.
-#include "Utilities.h"           // Include Utilities funcs.
-#include "Player/Hud.h"      // Include HUD funcs.
+#include "ServerGameLocal.h"// Include SVGame funcs.
+#include "Entities.h"       // Entities.
+#include "Utilities.h"      // Include Utilities funcs.
+#include "Player/Hud.h"     // Include HUD funcs.
 
 // Entities.
 #include "Entities/Base/PlayerClient.h"
@@ -32,8 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 qboolean    Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other);
 void        Use_Weapon(PlayerClient *ent, gitem_t *inv);
 void        Drop_Weapon(PlayerClient *ent, gitem_t *inv);
-
-gitem_armor_t bodyarmor_info    = {100, 200, .80f, .60f, ArmorType::Body};
 
 static int  body_armor_index;
 #define HEALTH_IGNORE_MAX   1
@@ -61,16 +59,16 @@ SVG_FindItemByClassname
 
 ===============
 */
-gitem_t *SVG_FindItemByClassname(const char *className)
+gitem_t *SVG_FindItemByClassname(const char *classname)
 {
     int     i;
     gitem_t *it;
 
     it = itemlist;
     for (i = 0 ; i < game.numberOfItems ; i++, it++) {
-        if (!it->className)
+        if (!it->classname)
             continue;
-        if (!Q_stricmp(it->className, className))
+        if (!PH_StringCompare(it->classname, classname))
             return it;
     }
 
@@ -92,7 +90,7 @@ gitem_t *SVG_FindItemByPickupName(const char *pickup_name) // C++20: STRING: Add
     for (i = 0 ; i < game.numberOfItems ; i++, it++) {
         if (!it->pickupName)
             continue;
-        if (!Q_stricmp(it->pickupName, pickup_name))
+        if (!PH_StringCompare(it->pickupName, pickup_name))
             return it;
     }
 
@@ -154,15 +152,17 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
     if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
         return false;
 
-    if ((coop->value) && (ent->item->flags & ItemFlags::StayInCoop) && (quantity > 0))
-        return false;
+    // TODO: Move into gamemode whether it can be picked up.
+    //if ((coop->value) && (ent->item->flags & ItemFlags::StayInCoop) && (quantity > 0))
+    //    return false;
 
     other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
 
-    if (deathmatch->value) {
+    // TODO: Move to gamemode whether it can be respawned after dropping or not.
+    //if (deathmatch->value) {
         //if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem))
         //    SVG_SetRespawn(ent, ent->item->quantity);
-    }
+    //}
 
     return true;
 }
@@ -222,7 +222,7 @@ qboolean Pickup_Ammo(SVGBaseEntity *ent, PlayerClient*other)
     //qboolean    weapon;
 
     //weapon = (ent->item->flags & ItemFlags::IsWeapon);
-    //if ((weapon) && ((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo))
+    //if ((weapon) && ((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo))
     //    count = 1000;
     //else if (ent->count)
     //    count = ent->count;
@@ -469,10 +469,10 @@ void drop_temp_touch(Entity *ent, Entity *other, cplane_t *plane, csurface_t *su
 void drop_make_touchable(Entity *ent)
 {
 //    ent->Touch = SVG_TouchItem;
-    if (deathmatch->value) {
-//        ent->nextThinkTime = level.time + 29;
-//        ent->Think = SVG_FreeEntity;
-    }
+//    if (deathmatch->value) {
+////        ent->nextThinkTime = level.time + 29;
+////        ent->Think = SVG_FreeEntity;
+//    }
 }
 
 Entity *SVG_DropItem(Entity *ent, gitem_t *item)
@@ -484,7 +484,7 @@ Entity *SVG_DropItem(Entity *ent, gitem_t *item)
 //
 //    dropped = SVG_Spawn();
 //
-//    dropped->className = item->className;
+//    dropped->classname = item->classname;
 //    dropped->item = item;
 //    dropped->spawnFlags = ItemSpawnFlags::DroppedItem;
 //    dropped->state.effects = item->worldModelFlags;
@@ -566,7 +566,7 @@ void droptofloor(Entity *ent)
 //
 //    tr = gi.Trace(ent->state.origin, ent->mins, ent->maxs, dest, ent, CONTENTS_MASK_SOLID);
 //    if (tr.startSolid) {
-//        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->className, Vec3ToString(ent->state.origin));
+//        gi.DPrintf("droptofloor: %s startsolid at %s\n", ent->classname, Vec3ToString(ent->state.origin));
 //        SVG_FreeEntity(ent);
 //        return;
 //    }
@@ -650,7 +650,7 @@ void SVG_PrecacheItem(gitem_t *it)
 
         len = s - start;
         if (len >= MAX_QPATH || len < 5)
-            gi.Error("SVG_PrecacheItem: %s has bad precache string", it->className);
+            gi.Error("SVG_PrecacheItem: %s has bad precache string", it->classname);
         memcpy(data, start, len);
         data[len] = 0;
         if (*s)
@@ -683,33 +683,33 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     SVG_PrecacheItem(item);
 
     //if (ent->spawnFlags) {
-    //    if (strcmp(ent->className, "key_power_cube") != 0) {
+    //    if (strcmp(ent->classname, "key_power_cube") != 0) {
     //        ent->spawnFlags = 0;
-    //        gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->className, Vec3ToString(ent->state.origin));
+    //        gi.DPrintf("%s at %s has invalid spawnFlags set\n", ent->classname, Vec3ToString(ent->state.origin));
     //    }
     //}
 
     //// some items will be prevented in deathmatch
     //if (deathmatch->value) {
-    //    if ((int)gamemodeflags->value & GameModeFlags::NoArmor) {
+    //    if ((int)gamemodeflags->value & GamemodeFlags::NoArmor) {
     //        if (item->Pickup == Pickup_Armor) {
     //            SVG_FreeEntity(ent);
     //            return;
     //        }
     //    }
-    //    if ((int)gamemodeflags->value & GameModeFlags::NoItems) {
+    //    if ((int)gamemodeflags->value & GamemodeFlags::NoItems) {
     //        if (item->Pickup == Pickup_Powerup) {
     //            SVG_FreeEntity(ent);
     //            return;
     //        }
     //    }
-    //    if ((int)gamemodeflags->value & GameModeFlags::NoHealth) {
+    //    if ((int)gamemodeflags->value & GamemodeFlags::NoHealth) {
     //        if (item->Pickup == Pickup_Health) {
     //            SVG_FreeEntity(ent);
     //            return;
     //        }
     //    }
-    //    if ((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo) {
+    //    if ((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo) {
     //        if ((item->flags == ItemFlags::IsAmmo)) {
     //            SVG_FreeEntity(ent);
     //            return;
@@ -717,15 +717,16 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     //    }
     //}
 
-    if (coop->value && (strcmp(ent->className, "key_power_cube") == 0)) {
-//        ent->spawnFlags |= (1 << (8 + level.powerCubes));
-        level.powerCubes++;
-    }
+//    if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0)) {
+////        ent->spawnFlags |= (1 << (8 + level.powerCubes));
+//        level.powerCubes++;
+//    }
 
+    // TODO: Move over to gamemode.
     // don't let them drop items that stay in a coop game
-    if ((coop->value) && (item->flags & ItemFlags::StayInCoop)) {
-        item->Drop = NULL;
-    }
+    //if ((coop->value) && (item->flags & ItemFlags::StayInCoop)) {
+    //    item->Drop = NULL;
+    //}
 
     ent->item = item;
 //    ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
@@ -738,6 +739,51 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 
 //======================================================================
 
+//// Spawning classname.
+//const char *classname;
+//
+//// Function callbacks.
+//qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
+//void (*Use)(PlayerClient *ent, struct gitem_s *item);
+//void (*Drop)(PlayerClient *ent, struct gitem_s *item);
+//void (*WeaponThink)(PlayerClient *ent);
+//
+//// Sound used when being picked up.
+//const char *pickupSound;
+//
+//// Actual world model used to display.
+//const char *worldModel;
+//
+//// Specific worldmodel flags.
+//int32_t worldModelFlags;
+//
+//// Item view model. (Used for weapons, weapons are items.)
+//const char        *viewModel;
+//
+//// Client side infe.
+//const char  *icon;
+//const char  *pickupName;    // for printing on pickup
+//int32_t countWidth;             // number of digits to display by icon
+//
+//                                // For ammo items this value dictates how much ammo to gain.
+//                                // For weapon items, this value dictates how much ammo is used on a per shot basis.
+//int32_t quantity;
+//
+//// Ammo string for weapons.
+//const char  *ammo;
+//
+//// IT_* flags
+//int32_t flags;          
+//
+//// Weaponmodel index.
+//int32_t weaponModelIndex;      // weapon model index (for weapons)
+//
+//                               // Info string & Tag.
+//void *info;
+//int32_t tag;
+//
+//// An actual string of all models, sounds, and images this item will use
+//const char  *precaches;     
 gitem_t itemlist[] = {
     {
         NULL
@@ -749,26 +795,26 @@ gitem_t itemlist[] = {
 
     /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
-        "item_armor_body",
-        Pickup_Armor,
-        NULL,
-        NULL,
-        NULL,
-        "misc/ar1_pkup.wav",
-        "models/items/armor/body/tris.md2", EntityEffectType::Rotate,
-        NULL,
-        /* icon */      "i_bodyarmor",
-        /* pickup */    "Body Armor",
-        /* width */     3,
-        0,
-        NULL,
-        ItemFlags::IsArmor,
-        0,
-        &bodyarmor_info,
-        ArmorType::Body,
-        /* precache */ ""
-    },
+    //{
+    //    "item_armor_body",
+    //    Pickup_Armor,
+    //    NULL,
+    //    NULL,
+    //    NULL,
+    //    "misc/ar1_pkup.wav",
+    //    "models/items/armor/body/tris.md2", EntityEffectType::Rotate,
+    //    NULL,
+    //    /* icon */      "i_bodyarmor",
+    //    /* pickup */    "Body Armor",
+    //    /* width */     3,
+    //    0,
+    //    NULL,
+    //    ItemFlags::IsArmor,
+    //    0,
+    //    &bodyarmor_info,
+    //    ArmorType::Body,
+    //    /* precache */ ""
+    //},
 
     //
     // WEAPONS
@@ -785,7 +831,7 @@ gitem_t itemlist[] = {
         Weapon_Blaster,
         "misc/w_pkup.wav",
         NULL, 0,
-        "models/weapons/v_blast/tris.md2",
+	    "models/weapons/v_mark23/tris.iqm",  //"models/weapons/v_blast/tris.md2", // "models/weapons/v_mark23/tris.iqm",
         /* icon */      "w_blaster",
         /* pickup */    "Blaster",
         0,
@@ -795,7 +841,7 @@ gitem_t itemlist[] = {
         WEAP_BLASTER,
         NULL,
         0,
-        /* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
+        /* precache */ "weapons/v_mark23/fire0.wav"// misc/lasfly.wav"
     },
 
     /*QUAKED weapon_machinegun (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -942,18 +988,23 @@ gitem_t itemlist[] = {
     {NULL}
 };
 
+/**
+*   @brief Counts the length of our items array so the game is aware of the total of items.
+**/
+void GameLocals::PrepareItems() { numberOfItems = Q_COUNTOF(itemlist) - 1; }
 
 /*QUAKED item_health (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 void SP_item_health(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/healing/medium/tris.md2";
-    self->count = 10;
+    //self->SetCount(10);
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/n_health.wav");
 }
@@ -962,15 +1013,16 @@ void SP_item_health(Entity *self)
 */
 void SP_item_health_small(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/healing/stimpack/tris.md2";
-    self->count = 2;
+    //self->SetCount(2);
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
-    self->style = HEALTH_IGNORE_MAX;
+    //self->style = HEALTH_IGNORE_MAX;
     gi.SoundIndex("items/s_health.wav");
 }
 
@@ -978,13 +1030,14 @@ void SP_item_health_small(Entity *self)
 */
 void SP_item_health_large(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/healing/large/tris.md2";
-    self->count = 25;
+    //self->SetCount(25);
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/l_health.wav");
 }
@@ -993,25 +1046,18 @@ void SP_item_health_large(Entity *self)
 */
 void SP_item_health_mega(Entity *self)
 {
-    if (deathmatch->value && ((int)gamemodeflags->value & GameModeFlags::NoHealth)) {
-        SVG_FreeEntity(self);
-        return;
-    }
+    // TODO: Move these sorts of things over to gamemode.
+    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
+    //    SVG_FreeEntity(self);
+    //    return;
+    //}
 
 //    self->model = "models/items/mega_h/tris.md2";
-    self->count = 100;
+    //self->SetCount(100);
     SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
     gi.SoundIndex("items/m_health.wav");
-    self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
+    //self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
 }
-
-
-void SVG_InitItems(void)
-{
-    game.numberOfItems = sizeof(itemlist) / sizeof(itemlist[0]) - 1;
-}
-
-
 
 /*
 ===============

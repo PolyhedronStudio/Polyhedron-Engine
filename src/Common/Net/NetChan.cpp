@@ -374,18 +374,21 @@ qboolean Netchan_Process(NetChannel *netchan)
     uint16_t    fragment_offset;
     size_t      length;
 
-// get sequence numbers
+    // get sequence numbers
     MSG_BeginReading();
     sequence = MSG_ReadLong();
     sequence_ack = MSG_ReadLong();
 
     // read the qport if we are a server
 #if USE_CLIENT
-    if (netchan->netSource == NS_SERVER)
+    if (netchan->netSource == NS_SERVER) {
 #endif
         if (netchan->remoteQPort) {
             MSG_ReadByte();
         }
+#if USE_CLIENT
+    }
+#endif
 
     reliable_message = sequence >> 31;
     reliable_ack = sequence_ack >> 31;

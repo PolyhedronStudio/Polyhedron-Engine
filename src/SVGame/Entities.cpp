@@ -16,7 +16,6 @@
 // SVG_SpawnClassEntity
 //
 //
-#include "Entities/Base/SVGBaseEntity.h"
 #include "Entities/Base/SVGBaseTrigger.h"
 #include "Entities/Base/SVGBaseMover.h"
 #include "Entities/Base/PlayerClient.h"
@@ -67,11 +66,11 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 void DebugShitForEntitiesLulz() {
     gi.DPrintf("Entities - ===========================================\n");
     for (auto& entity : g_entities | EntityFilters::InUse) {
-        gi.DPrintf("%s\n", entity.className);
+        gi.DPrintf("%s\n", entity.classname);
     }
     gi.DPrintf("BaseEntities - ===========================================\n");
     for (auto* baseEntity : g_baseEntities | BaseEntityFilters::IsValidPointer | BaseEntityFilters::HasServerEntity | BaseEntityFilters::InUse) {
-        gi.DPrintf("%s\n", baseEntity->GetClassName());
+        gi.DPrintf("%s\n", baseEntity->GetClassname());
     }
 
     gi.DPrintf("Entity - info_player_start filter - ===========================================\n");
@@ -80,7 +79,7 @@ void DebugShitForEntitiesLulz() {
         | ef::HasClassEntity
         | ef::InUse
         | ef::HasClassName("info_player_start")) {
-        gi.DPrintf("Filtered out the entity #%i: %s\n", entity.state.number, entity.className);
+        gi.DPrintf("Filtered out the entity #%i: %s\n", entity.state.number, entity.classname);
     }
 
     gi.DPrintf("BaseEntity - info_player_start filter - ===========================================\n");
@@ -90,7 +89,7 @@ void DebugShitForEntitiesLulz() {
         | bef::HasServerEntity
         | bef::InUse
         | bef::IsClassOf<InfoPlayerStart>()) {
-        gi.DPrintf("Filtered out the base entity #%i: %s\n", baseEntity->GetNumber(), baseEntity->GetClassName());
+        gi.DPrintf("Filtered out the base entity #%i: %s\n", baseEntity->GetNumber(), baseEntity->GetClassname());
     }
 }
 #endif
@@ -98,10 +97,10 @@ void DebugShitForEntitiesLulz() {
 // SVG_SpawnClassEntity
 //
 //=================
-SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
+SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& classname) {
     // Start with a nice nullptr.
     SVGBaseEntity* spawnEntity = nullptr;
-    if ( nullptr == ent ) {
+    if ( ent == nullptr ) {
         return nullptr;
     }
 
@@ -110,10 +109,10 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
 
     // New type info-based spawning system, to replace endless string comparisons
     // First find it by the map name
-    TypeInfo* info = TypeInfo::GetInfoByMapName( className.c_str() );
-    if ( nullptr == info ) { // Then try finding it by the C++ class name
-        if ( nullptr == (info = TypeInfo::GetInfoByName( className.c_str() )) ) { 
-            gi.DPrintf( "WARNING: unknown entity '%s'\n", className.c_str() );
+    TypeInfo* info = TypeInfo::GetInfoByMapName( classname.c_str() );
+    if ( info == nullptr ) { // Then try finding it by the C++ class name
+        if ( (info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr ) { 
+            gi.DPrintf( "WARNING: unknown entity '%s'\n", classname.c_str() );
             return nullptr; // Bail out, we didn't find one
         }
     }
@@ -124,27 +123,32 @@ SVGBaseEntity* SVG_SpawnClassEntity(Entity* ent, const std::string& className) {
         return (g_baseEntities[entityNumber] = info->AllocateInstance( ent ));
     } else {
         if ( info->IsAbstract() ) {
-            gi.DPrintf( "WARNING: tried to allocate an abstract class '%s'\n", info->className );
+            gi.DPrintf( "WARNING: tried to allocate an abstract class '%s'\n", info->classname );
         } else if ( !info->IsMapSpawnable() ) {
-            gi.DPrintf( "WARNING: tried to allocate a code-only class '%s'\n", info->className );
+            gi.DPrintf( "WARNING: tried to allocate a code-only class '%s'\n", info->classname );
         }
         return nullptr;
     }
 }
 
 //===============
-// SVG_FreeClassEntity
+// SVG_FreeClassFromEntity
 // 
 // Will remove the class entity, if it exists. For fully freeing an entity,
 // look for SVG_FreeEntity instead. It automatically takes care of 
 // classEntities too.
+// 
+// Returns true if a class entity was found, and freed.
 //=================
-void SVG_FreeClassEntity(Entity* ent) {
+qboolean SVG_FreeClassFromEntity(Entity* ent) {
     // Ensure it is a valid entity.
     if (!ent) {
         gi.DPrintf("WARNING: tried to %s on a nullptr entity.", __func__);
-        return;
+        return false;
     }
+
+    // Used as return value.
+    qboolean freedClassEntity = false;
 
     // Fetch entity number.
     int32_t entityNumber = ent->state.number;
@@ -152,15 +156,26 @@ void SVG_FreeClassEntity(Entity* ent) {
     // Special class entity handling IF it still has one.
     if (ent->classEntity) {
         // Remove the classEntity reference
+        ent->classEntity->SetGroundEntity(nullptr);
+        ent->classEntity->SetLinkCount(0);
+        ent->classEntity->SetGroundEntityLinkCount(0);
         ent->classEntity->SetServerEntity(nullptr);
         ent->classEntity = nullptr;
     }
 
-    // In case it exists in our base entitys, get rid of it, assign nullptr.
-    if (g_baseEntities[entityNumber]) {
+    // For whichever faulty reason the entity might not have had a classentity,
+    // so we do an extra delete here just in case.
+    if (g_baseEntities[entityNumber] != nullptr) {
+        // Free it.
         delete g_baseEntities[entityNumber];
         g_baseEntities[entityNumber] = nullptr;
+
+        // Freed class entity.
+        freedClassEntity = true;
     }
+
+    // Return result.
+    return freedClassEntity;
 }
 
 
@@ -170,31 +185,33 @@ void SVG_FreeClassEntity(Entity* ent) {
 // Will remove the class entity, if it exists. Continues to then mark the
 // entity as "freed". (inUse = false)
 //=================
-void SVG_FreeEntity(Entity* ent)
-{
-    if (!ent)
+void SVG_FreeEntity(Entity* ent) {
+    // Make sure it is a valid pointer.
+    if (!ent) {
         return;
-
-    // Fetch entity number.
-    int32_t entityNumber = ent->state.number;
+    }
 
     // First of all, unlink the entity from this world.
     gi.UnlinkEntity(ent);        // unlink from world
+    
+    // Fetch entity number.
+    int32_t entityNumber = ent->state.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
-    if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
-        //      gi.DPrintf("tried to free special edict\n");
+    //if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
+    if (entityNumber <= maximumclients->value + BODY_QUEUE_SIZE) {
+        gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
         return;
     }
 
     // Delete the actual entity pointer.
-    SVG_FreeClassEntity(ent);
+    SVG_FreeClassFromEntity(ent);
 
     // Clear the struct.
     *ent = {};
     
     // Reset classname to "freed" (It is, freed...)
-    ent->className = "freed";
+    ent->classname = "freed";
 
     // Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
     // If we don't, we can expect client side LERP horror.
@@ -283,7 +300,7 @@ Entity* SVG_Find(Entity* from, int fieldofs, const char* match)
         s = *(char**)((byte*)from + fieldofs);
         if (!s)
             continue;
-        if (!Q_stricmp(s, match))
+        if (!PH_StringCompare(s, match))
             return from;
     }
 
@@ -338,9 +355,9 @@ SVGBaseEntity* SVG_FindEntityByKeyValue(const std::string& fieldKey, const std::
 //===============
 BaseEntityVector SVG_FindEntitiesWithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags)
 {
-    BaseEntityVector entityList;
+    BaseEntityVector entities;
 
-    // Iterate over all entities, see who is nearby, and who is not.
+    // Iterate over all entities, and push those that are within range(radius) on the list.
     for (auto* radiusEntity : GetBaseEntityRange<0, MAX_EDICTS>()
         | bef::IsValidPointer
         | bef::HasServerEntity
@@ -348,11 +365,11 @@ BaseEntityVector SVG_FindEntitiesWithinRadius(vec3_t origin, float radius, uint3
         | bef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
         // Push radiusEntity result item to the list.
-        entityList.push_back(radiusEntity);
+        entities.push_back(radiusEntity);
     }
 
     // The list might be empty, ensure to check for that ;-)
-    return entityList;
+    return entities;
 }
 
 //===============
@@ -366,7 +383,7 @@ void SVG_InitEntity(Entity* e)
     e->inUse = true;
 
     // Set classname to "noclass", because it is.
-    e->className = "noclass";
+    e->classname = "noclass";
 
     // Reset gravity.
     //s->gravity = 1.0;
@@ -389,8 +406,8 @@ Entity* SVG_Spawn(void)
     Entity *serverEntity = nullptr;
     int32_t i = 0;
     // Acquire a pointer to the entity we'll check for.
-    serverEntity = &g_entities[game.maximumClients + 1];
-    for (i = game.maximumClients + 1; i < globals.numberOfEntities; i++, serverEntity++) {
+    serverEntity = &g_entities[game.GetMaxClients() + 1];
+    for (i = game.GetMaxClients() + 1; i < globals.numberOfEntities; i++, serverEntity++) {
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!serverEntity->inUse && (serverEntity->freeTime < 2 || level.time - serverEntity->freeTime > 0.5)) {
@@ -419,7 +436,7 @@ Entity* SVG_CreateTargetChangeLevel(char* map) {
     Entity* ent;
 
     ent = SVG_Spawn();
-    ent->className = (char*)"target_changelevel"; // C++20: Added a cast.
+    ent->classname = (char*)"target_changelevel"; // C++20: Added a cast.
     Q_snprintf(level.nextMap, sizeof(level.nextMap), "%s", map);
     ent->map = level.nextMap;
     return ent;

@@ -250,7 +250,7 @@ char *FS_ReplaceSeparators(char *s, int separator)
 
 static inline qboolean validate_char(int c)
 {
-    if (!Q_isprint(c))
+    if (!PH_IsPrint(c))
         return false;
 
 #ifdef _WIN32
@@ -276,7 +276,7 @@ int FS_ValidatePath(const char *s)
         if (!validate_char(*s))
             return PATH_INVALID;
 
-        if (Q_isupper(*s))
+        if (PH_IsUpper(*s))
             res = PATH_MIXED_CASE;
     }
 
@@ -1496,7 +1496,7 @@ static ssize_t open_file_read(file_t *file, const char *normalized, size_t namel
             if (valid == PATH_MIXED_CASE) {
                 // convert to lower case and retry
                 FS_COUNT_STRLWR;
-                Q_strlwr(fullpath + strlen(search->filename) + 1);
+                PH_StringLower(fullpath + strlen(search->filename) + 1);
                 ret = open_from_disk(file, fullpath);
                 if (ret != Q_ERR_NOENT)
                     return ret;
@@ -2538,8 +2538,8 @@ static int pakcmp(const void *p1, const void *p2)
     char *s1 = *(char **)p1;
     char *s2 = *(char **)p2;
 
-    if (!Q_stricmpn(s1, "pak", 3)) {
-        if (!Q_stricmpn(s2, "pak", 3)) {
+    if (!PH_StringCompareN(s1, "pak", 3)) {
+        if (!PH_StringCompareN(s2, "pak", 3)) {
             unsigned long n1 = strtoul(s1 + 3, &s1, 10);
             unsigned long n2 = strtoul(s2 + 3, &s2, 10);
             if (n1 > n2) {
@@ -2552,12 +2552,12 @@ static int pakcmp(const void *p1, const void *p2)
         }
         return -1;
     }
-    if (!Q_stricmpn(s2, "pak", 3)) {
+    if (!PH_StringCompareN(s2, "pak", 3)) {
         return 1;
     }
 
 alphacmp:
-    return Q_stricmp(s1, s2);
+    return PH_StringCompare(s1, s2);
 }
 
 // sets fs_gamedir, adds the directory to the head of the path,
@@ -2610,7 +2610,7 @@ static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
         }
 #if USE_ZLIB
         // FIXME: guess packfile type by contents instead?
-        if (len > 4 && !Q_stricmp(path + len - 4, ".pkz"))
+        if (len > 4 && !PH_StringCompare(path + len - 4, ".pkz"))
             pack = load_zip_file(path);
         else
 #endif
@@ -2721,8 +2721,8 @@ rescan:
         }
 
         if (c1 != c2) {
-            c1 = Q_tolower(c1);
-            c2 = Q_tolower(c2);
+            c1 = PH_ToLower(c1);
+            c2 = PH_ToLower(c2);
             if (c1 != c2) {
                 while (e > ext) {
                     c1 = *e--;
@@ -3218,7 +3218,7 @@ recheck:
 
 #ifndef _WIN32
             if (ret == Q_ERR_NOENT && valid == PATH_MIXED_CASE) {
-                Q_strlwr(fullpath + strlen(search->filename) + 1);
+                PH_StringLower(fullpath + strlen(search->filename) + 1);
                 ret = get_path_info(fullpath, &info);
                 if (ret == Q_ERR_SUCCESS)
                     Com_Printf("Physical path found after converting to lower case.\n");
@@ -3702,7 +3702,7 @@ static void fs_game_changed(cvar_t *self)
 
     // validate it
     if (*s) {
-        if (!Q_stricmp(s, BASEGAME)) {
+        if (!PH_StringCompare(s, BASEGAME)) {
             Cvar_Reset(self);
         } else if (!COM_IsPath(s)) {
             Com_Printf("'%s' should contain characters [A-Za-z0-9_-] only.\n", self->name);
@@ -3746,7 +3746,7 @@ static void fs_game_changed(cvar_t *self)
     // If baseq2/autoexec.cfg exists exec it again after default.cfg and config.cfg.
     // Assumes user prefers to do configuration via autoexec.cfg and hopefully
     // settings and binds will be restored to their preference whenever gamedir changes after startup.
-    if (Q_stricmp(s, BASEGAME) && FS_FileExistsEx(COM_AUTOEXEC_CFG, FS_TYPE_REAL | FS_PATH_BASE)) {
+    if (PH_StringCompare(s, BASEGAME) && FS_FileExistsEx(COM_AUTOEXEC_CFG, FS_TYPE_REAL | FS_PATH_BASE)) {
         Com_AddConfigFile(COM_AUTOEXEC_CFG, FS_TYPE_REAL | FS_PATH_BASE);
     }
 

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 
 void
-create_entity_matrix(mat4_t matrix, r_entity_t* e, qboolean enable_left_hand)
+create_entity_matrix(mat4_t &matrix, r_entity_t* e, qboolean enable_left_hand)
 {
 	vec3_t axis[3];
 	vec3_t origin;
@@ -60,7 +60,7 @@ create_entity_matrix(mat4_t matrix, r_entity_t* e, qboolean enable_left_hand)
 }
 
 void
-create_projection_matrix(mat4_t matrix, float znear, float zfar, float fov_x, float fov_y)
+create_projection_matrix(mat4_t &matrix, float znear, float zfar, float fov_x, float fov_y)
 {
 	float xmin, xmax, ymin, ymax;
 	float width, height, depth;
@@ -97,7 +97,38 @@ create_projection_matrix(mat4_t matrix, float znear, float zfar, float fov_x, fl
 }
 
 void
-create_orthographic_matrix(mat4_t matrix, float xmin, float xmax,
+create_orthographic_matrix(float *matrix, float xmin, float xmax,
+						   float ymin, float ymax, float znear, float zfar)
+{
+	float width, height, depth;
+
+	width = xmax - xmin;
+	height = ymax - ymin;
+	depth = zfar - znear;
+
+	matrix[0] = 2 / width;
+	matrix[4] = 0;
+	matrix[8] = 0;
+	matrix[12] = -(xmax + xmin) / width;
+
+	matrix[1] = 0;
+	matrix[5] = 2 / height;
+	matrix[9] = 0;
+	matrix[13] = -(ymax + ymin) / height;
+
+	matrix[2] = 0;
+	matrix[6] = 0;
+	matrix[10] = 1 / depth;
+	matrix[14] = -znear / depth;
+
+	matrix[3] = 0;
+	matrix[7] = 0;
+	matrix[11] = 0;
+	matrix[15] = 1;
+}
+
+void
+create_orthographic_matrix(mat4_t &matrix, float xmin, float xmax,
 	float ymin, float ymax, float znear, float zfar)
 {
 	float width, height, depth;
@@ -128,7 +159,7 @@ create_orthographic_matrix(mat4_t matrix, float xmin, float xmax,
 }
 
 void
-create_view_matrix(mat4_t matrix, refdef_t* fd)
+create_view_matrix(mat4_t &matrix, refdef_t* fd)
 {
 	vec3_t viewaxis[3];
 	AnglesToAxis(fd->viewAngles, viewaxis);
@@ -155,7 +186,7 @@ create_view_matrix(mat4_t matrix, refdef_t* fd)
 }
 
 void
-inverse(const mat4_t m, mat4_t inv)
+inverse(const mat4_t &m, mat4_t &inv)
 {
 	inv[0] = m[5]  * m[10] * m[15] -
 	         m[5]  * m[11] * m[14] -
@@ -277,11 +308,29 @@ inverse(const mat4_t m, mat4_t inv)
 		inv[i] = inv[i] * det;
 }
 
-void
-mult_matrix_matrix(mat4_t p, const mat4_t a, const mat4_t b)
+mat4_t
+mult_matrix_matrix(const mat4_t &a, const mat4_t &b)
 {
+	mat4_t p = mat4_identity();
+
 	for(int i = 0; i < 4; i++) {
 		for(int j = 0; j < 4; j++) {
+			p[i * 4 + j] =
+				a[0 * 4 + j] * b[i * 4 + 0] +
+				a[1 * 4 + j] * b[i * 4 + 1] +
+				a[2 * 4 + j] * b[i * 4 + 2] +
+				a[3 * 4 + j] * b[i * 4 + 3];
+		}
+	}
+
+	return p;
+}
+
+void
+mult_matrix_matrix(float *p, const mat4_t &a, const mat4_t &b)
+{
+	for(int32_t i = 0; i < 4; i++) {
+		for(int32_t j = 0; j < 4; j++) {
 			p[i * 4 + j] =
 				a[0 * 4 + j] * b[i * 4 + 0] +
 				a[1 * 4 + j] * b[i * 4 + 1] +
@@ -292,15 +341,30 @@ mult_matrix_matrix(mat4_t p, const mat4_t a, const mat4_t b)
 }
 
 void
-mult_matrix_vector(mat4_t p, const mat4_t a, const vec4_t b)
+mult_matrix_vector(float* p, const mat4_t &a, const vec4_t &b)
 {
-	int j;
-	for (j = 0; j < 4; j++) {
+	for (int32_t j = 0; j < 4; j++) {
 		p[j] =
 			a[0 * 4 + j] * b[0] +
 			a[1 * 4 + j] * b[1] +
 			a[2 * 4 + j] * b[2] +
 			a[3 * 4 + j] * b[3];
 	}
+}
+
+mat4_t
+mult_matrix_vector(const mat4_t &a, const vec4_t &b)
+{
+	mat4_t p = mat4_identity();
+
+	for (int32_t j = 0; j < 4; j++) {
+		p[j] =
+			a[0 * 4 + j] * b[0] +
+			a[1 * 4 + j] * b[1] +
+			a[2 * 4 + j] * b[2] +
+			a[3 * 4 + j] * b[3];
+	}
+
+	return p;
 }
 

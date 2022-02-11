@@ -554,6 +554,14 @@ void SV_CheckForSavegame(MapCommand *cmd)
     }
 
     if (cmd->loadgame) {
+        // 
+        //
+        // TODO: Call a ge->RespawnEntities here??!?!
+        // 
+        // Otherwise it'll crash in the first frame that runs because of 
+        // there being no classentity for the client (and other entities.)
+        // 
+        
         // called from SV_Loadgame_f
         ge->RunFrame();
         ge->RunFrame();

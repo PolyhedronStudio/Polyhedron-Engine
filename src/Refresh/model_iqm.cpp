@@ -469,9 +469,9 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 		const char* str = (const char*)header + header->ofs_text;
 		for (uint32_t mesh_idx = 0; mesh_idx < header->num_meshes; mesh_idx++, mesh++, surface++) {
 			strncpy(surface->name, str + mesh->name, sizeof(surface->name) - 1);
-			Q_strlwr(surface->name); // lowercase the surface name so skin compares are faster
+			PH_StringLower(surface->name); // lowercase the surface name so skin compares are faster
 			strncpy(surface->material, str + mesh->material, sizeof(surface->material) - 1);
-			Q_strlwr(surface->material);
+			PH_StringLower(surface->material);
 
 			surface->data = iqmData;
 			surface->first_vertex = mesh->first_vertex;

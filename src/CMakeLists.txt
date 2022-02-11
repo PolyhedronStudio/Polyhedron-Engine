@@ -19,6 +19,7 @@ SET(SRC_CLGAME
 	CLGame/Exports/ServerMessage.cpp
 	CLGame/Exports/View.cpp
 
+	CLGame/Debug.cpp
 	CLGame/Effects.cpp
 	CLGame/Entities.cpp
 	CLGame/Input.cpp
@@ -47,6 +48,7 @@ SET(HEADERS_CLGAME
 	CLGame/Exports/ServerMessage.h
 	CLGame/Exports/View.h
 
+	CLGame/Debug.h
 	CLGame/Effects.h
 	CLGame/Entities.h
 	CLGame/Input.h
@@ -64,13 +66,12 @@ SET(HEADERS_CLGAME
 # Server game DLL
 # Throw all sources in here, but group them elsewhere
 SET( SRC_SVGAME 
-	SVGame/BrushFunctions.cpp
 	SVGame/ChaseCamera.cpp
 	SVGame/Commands.cpp
 	SVGame/Combat.cpp
 	SVGame/Effects.cpp
 	SVGame/Entities.cpp
-	SVGame/FunctionPointers.cpp
+	SVGame/GameLocals.cpp
 	SVGame/Items.cpp
 	SVGame/ImportsWrapper.cpp
 	SVGame/Main.cpp
@@ -78,13 +79,14 @@ SET( SRC_SVGAME
 	SVGame/Save.cpp
 	SVGame/Spawn.cpp
 	SVGame/SVCommands.cpp
-	SVGame/Trigger.cpp
 	SVGame/Utilities.cpp
 	SVGame/Weapons.cpp 
 	SVGame/ai/MonsterAI.cpp
 	SVGame/Entities/Base/SVGBaseEntity.cpp
+	SVGame/Entities/Base/SVGBaseItem.cpp
 	SVGame/Entities/Base/SVGBaseTrigger.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
+	SVGame/Entities/Base/SVGEntityHandle.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
 	SVGame/Entities/Base/DebrisEntity.cpp
 	SVGame/Entities/Base/GibEntity.cpp
@@ -95,6 +97,11 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerDeathmatch.cpp
 	SVGame/Entities/Info/InfoPlayerIntermission.cpp
 	SVGame/Entities/Info/InfoPlayerStart.cpp
+	SVGame/Entities/Items/ItemHealthMega.cpp
+	SVGame/Entities/Items/ItemWeaponBlaster.cpp
+	SVGame/Entities/Items/ItemWeaponMachinegun.cpp
+	SVGame/Entities/Items/ItemWeaponShotgun.cpp
+	SVGame/Entities/Items/ItemWeaponSuperShotgun.cpp
 	SVGame/Entities/Func/FuncAreaportal.cpp
 	SVGame/Entities/Func/FuncButton.cpp
 	#SVGame/Entities/Func/FuncConveyor.cpp
@@ -103,7 +110,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Func/FuncExplosive.cpp 
 	#SVGame/Entities/Func/FuncKillbox.cpp
 	#SVGame/Entities/Func/FuncObject.cpp
-	#SVGame/Entities/Func/FuncPlat.cpp
+	SVGame/Entities/Func/FuncPlat.cpp
 	SVGame/Entities/Func/FuncRotating.cpp
 	SVGame/Entities/Func/FuncTimer.cpp
 	SVGame/Entities/Func/FuncTrain.cpp 
@@ -137,6 +144,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Trigger/TriggerPush.cpp
 	SVGame/Entities/Trigger/TriggerAlways.cpp
 	SVGame/Entities/Trigger/TriggerAutoDoor.cpp
+	SVGame/Entities/Trigger/TriggerAutoPlatform.cpp
 	SVGame/Entities/Trigger/TriggerDelayedUse.cpp
 	SVGame/Entities/Trigger/TriggerHurt.cpp
 	SVGame/Entities/Trigger/TriggerMultiple.cpp
@@ -144,10 +152,10 @@ SET( SRC_SVGAME
 	SVGame/Entities/Trigger/TriggerRelay.cpp
 	SVGame/Entities/Weaponry/BlasterBolt.cpp
 	SVGame/Entities/Light.cpp
-	SVGame/Entities/WorldSpawn.cpp
-	SVGame/GameModes/DefaultGameMode.cpp
-	SVGame/GameModes/CoopGameMode.cpp
-	SVGame/GameModes/DeathMatchGameMode.cpp
+	SVGame/Entities/Worldspawn.cpp
+	SVGame/Gamemodes/DefaultGamemode.cpp
+	SVGame/Gamemodes/CoopGamemode.cpp
+	SVGame/Gamemodes/DeathmatchGamemode.cpp
 	SVGame/Physics/Physics.cpp
 	SVGame/Physics/StepMove.cpp
 	SVGame/Player/Client.cpp
@@ -160,23 +168,24 @@ SET( SRC_SVGAME
 	SVGame/Weapons/Machinegun.cpp
 	SVGame/Weapons/Shotgun.cpp
 	SVGame/Weapons/SuperShotgun.cpp
+	SVGame/World/GameWorld.cpp
     SVGame/svgame.def
     )
     
     SET ( HEADERS_SVGAME
 	SVGame/ServerGameLocal.h
-	SVGame/BrushFunctions.h
 	SVGame/ChaseCamera.h
 	SVGame/Effects.h
 	SVGame/Entities.h
-	SVGame/FunctionPointers.h
-	SVGame/Trigger.h
+	SVGame/GameLocals.h
 	SVGame/TypeInfo.h
 	SVGame/Utilities.h
 	SVGame/AI/MonsterAI.h
 	SVGame/Entities/Base/SVGBaseEntity.h
+	SVGame/Entities/Base/SVGBaseItem.h
 	SVGame/Entities/Base/SVGBaseTrigger.h
 	SVGame/Entities/Base/SVGBaseMover.h
+	SVGame/Entities/Base/SVGEntityHandle.h
 	SVGame/Entities/Base/BodyCorpse.h
 	SVGame/Entities/Base/DebrisEntity.h
 	SVGame/Entities/Base/GibEntity.h
@@ -186,11 +195,21 @@ SET( SRC_SVGAME
 	SVGame/Entities/Func/FuncDoor.h
 	SVGame/Entities/Func/FuncDoorRotating.h
 	SVGame/Entities/Func/FuncExplosive.h
+	SVGame/Entities/Func/FuncPlat.h
 	SVGame/Entities/Func/FuncRotating.h
 	SVGame/Entities/Func/FuncTimer.h
 	SVGame/Entities/Func/FuncTrain.h
 	SVGame/Entities/Func/FuncWall.h
+	#SVGame/Entities/Info/InfoNull.h - Only has a .cpp file.
+	SVGame/Entities/Info/InfoPlayerCoop.h
+	SVGame/Entities/Info/InfoPlayerDeathmatch.h
+	SVGame/Entities/Info/InfoPlayerIntermission.h
 	SVGame/Entities/Info/InfoPlayerStart.h
+	SVGame/Entities/Items/ItemHealthMega.h
+	SVGame/Entities/Items/ItemWeaponBlaster.h
+	SVGame/Entities/Items/ItemWeaponMachinegun.h
+	SVGame/Entities/Items/ItemWeaponShotgun.h
+	SVGame/Entities/Items/ItemWeaponSuperShotgun.h
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h
 	SVGame/Entities/Path/PathCorner.h
@@ -200,6 +219,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Target/TargetTempEntity.h
 	SVGame/Entities/Trigger/TriggerAlways.h
 	SVGame/Entities/Trigger/TriggerAutoDoor.h
+	SVGame/Entities/Trigger/TriggerAutoPlatform.h
 	SVGame/Entities/Trigger/TriggerCounter.h
 	SVGame/Entities/Trigger/TriggerDelayedUse.h
 	SVGame/Entities/Trigger/TriggerHurt.h
@@ -210,11 +230,11 @@ SET( SRC_SVGAME
 	SVGame/Entities/Trigger/TriggerRelay.h
 	SVGame/Entities/weaponry/BlasterBolt.h
 	SVGame/Entities/Light.h
-	SVGame/Entities/WorldSpawn.h
-	SVGame/GameModes/DefaultGameMode.h
-	SVGame/GameModes/CoopGameMode.h
-	SVGame/GameModes/DeathMatchGameMode.h
-	SVGame/GameModes/IGameMode.h
+	SVGame/Entities/Worldspawn.h
+	SVGame/Gamemodes/DefaultGamemode.h
+	SVGame/Gamemodes/CoopGamemode.h
+	SVGame/Gamemodes/DeathmatchGamemode.h
+	SVGame/Gamemodes/IGamemode.h
 	SVGame/Player/Animations.h
 	SVGame/Player/Client.h
 	SVGame/Player/Player.h
@@ -224,6 +244,7 @@ SET( SRC_SVGAME
 	SVGame/Weapons/Machinegun.h
 	SVGame/Weapons/Shotgun.h
 	SVGame/Weapons/SuperShotgun.h
+	SVGame/World/GameWorld.h
     SVGame/svgame.def
     )
     
@@ -616,6 +637,7 @@ if (CONFIG_VKPT_RENDERER)
 		endif()
 	ENDIF()
 endif()
+
 # Embed version number
 ADD_DEFINITIONS(-DVERSION_MAJOR=${POLYHEDRON_VERSION_MAJOR})
 ADD_DEFINITIONS(-DVERSION_MINOR=${POLYHEDRON_VERSION_MINOR})
@@ -635,6 +657,8 @@ if (CONFIG_BUILD_SV_GAME)
 	ADD_DEFINITIONS(-DSHAREDGAME_SERVER=1)
 	# Add library.
 	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	# Add shared game include directory.
+	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ${HEADERS_SHAREDGAME}/)
 endif()
 
 # Optional build target.
@@ -643,6 +667,8 @@ if (CONFIG_BUILD_CL_GAME)
 	ADD_DEFINITIONS(-DSHAREDGAME_CLIENT=1)
 	# Add library.
 	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	# Add shared game include directory.
+	TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ${HEADERS_SHAREDGAME}/)
 endif()
 
 IF(WIN32)
@@ -783,8 +809,8 @@ IF (WIN32)
 
     ## Group the resource files too, so they don't end up in the ugly "Source Files" folder in VS
     SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES 
-        OS/Resources/nac.rc 
-        OS/Resources/nacded.rc )
+        OS/Resources/polyhedron.rc 
+        OS/Resources/polyhedron.rc )
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)

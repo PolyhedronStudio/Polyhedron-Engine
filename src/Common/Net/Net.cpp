@@ -457,7 +457,7 @@ static void NET_LogPacket(const NetAdr *address, const char *prefix,
         for (j = 0; j < 16; j++) {
             if (i * 16 + j < length) {
                 c = data[i * 16 + j];
-                FS_FPrintf(net_logFile, "%c", Q_isprint(c) ? c : '.');
+                FS_FPrintf(net_logFile, "%c", PH_IsPrint(c) ? c : '.');
             } else {
                 FS_FPrintf(net_logFile, " ");
             }

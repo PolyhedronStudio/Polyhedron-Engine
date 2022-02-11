@@ -437,7 +437,9 @@ static void write_beam_geometry(const r_entity_t* entities, int entity_num)
 		world_to_beam[14] = -DotProduct(begin, norm_dir);
 		world_to_beam[15] = 1;
 
+#define Vector4Copy(a, b) ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
 		Vector4Copy((world_to_beam + 12), (float*)(beam_infos));
+#undef Vector4Copy
 		// First three columns are normals, so it's fine to pack them to half floats
 		packHalf4x16(beam_infos + 4, world_to_beam);
 		packHalf4x16(beam_infos + 6, world_to_beam + 4);
