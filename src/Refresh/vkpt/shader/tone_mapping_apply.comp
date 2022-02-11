@@ -66,13 +66,13 @@ layout(push_constant, std430) uniform PushConstants {
 // computed tone mapping curve.
 vec4 show_bar_chart(ivec2 pos, bool is_curve)
 {
-    const float scale = float(global_ubo.screen_image_height) / float(global_ubo.unscaled_height);
+    const float scale = float(global_ubo.taa_output_height) / float(global_ubo.unscaled_height);
     const float bin_width = 2 * scale;
     ivec2 size = ivec2(HISTOGRAM_BINS * bin_width, 100 * scale);
 
     ivec2 TL, BR;
     TL.x = int(10 * scale);
-    BR.y = global_ubo.screen_image_height - int(10 * scale);
+    BR.y = global_ubo.taa_output_height - int(22 * scale);
     TL.y = BR.y - size.y - 1;
     BR.x = TL.x + size.x + 1;
     
@@ -200,15 +200,20 @@ void main()
     else
     {
         // HDR: map colors such that values at EV 0 map to a display brightness of 'tm_hdr_peak_nits'
-        const float nits_factor = (global_ubo.tm_hdr_peak_nits / 80); // an scRGB luminance of 1.0 is defined as 80 nits
-        mapped_color *= nits_factor;
+        const float nits_factor = global_ubo.tm_hdr_peak_nits / 80; // an scRGB luminance of 1.0 is defined as 80 nits
+        const float nits_factor_ui = global_ubo.ui_hdr_nits / 80;
+        float color_scale = mix(nits_factor, min(nits_factor, nits_factor_ui), global_ubo.tonemap_hdr_clamp_strength); // clamps color in menu mode, ensures it's legible
+        mapped_color *= color_scale;
     }
-
 
     // Show tonemapping curve if enabled:
     if(global_ubo.tm_debug != 0)
     {
-        const vec4 bar_chart_overlay = show_bar_chart(ipos, global_ubo.tm_debug == 2);
+        vec4 bar_chart_overlay = show_bar_chart(ipos, global_ubo.tm_debug == 2);
+        if(spec_tone_mapping_hdr != 0)
+        {
+            bar_chart_overlay *= vec4(vec3(global_ubo.ui_hdr_nits / 80), 1);
+        }
         mapped_color = mix(mapped_color.rgb, bar_chart_overlay.rgb, bar_chart_overlay.a);
     }
 
