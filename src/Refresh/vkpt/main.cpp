@@ -33,6 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "material.h"
 #include "fog.h"
 #include "physical_sky.h"
+#include "conversion.h"
 #include "../../Client/Client.h"
 #include "../../Client/UI/UI.h"
 
@@ -3391,6 +3392,7 @@ R_Init_RTX(qboolean total)
 	cvar_profiler_scale = Cvar_Get("profiler_scale", "1", CVAR_ARCHIVE);
 	cvar_vsync = Cvar_Get("vid_vsync", "0", CVAR_REFRESH | CVAR_ARCHIVE);
 	cvar_vsync->changed = NULL; // in case the GL renderer has set it
+	cvar_hdr = Cvar_Get("vid_hdr", "0", CVAR_ARCHIVE);
 	cvar_pt_caustics = Cvar_Get("pt_caustics", "1", CVAR_ARCHIVE);
 	cvar_pt_enable_nodraw = Cvar_Get("pt_enable_nodraw", "0", 0);
 
@@ -3713,6 +3715,115 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	*width = qvk.extent_unscaled.width;
 	*height = qvk.extent_unscaled.height;
 	*rowbytes = pitch;
+	return pixels;
+}
+
+float *
+IMG_ReadPixelsHDR_RTX(int *width, int *height)
+{
+	if (qvk.surf_format.format != VK_FORMAT_R16G16B16A16_SFLOAT)
+	{
+		Com_EPrintf("IMG_ReadPixelsHDR: unsupported swap chain format (%d)!\n", qvk.surf_format.format);
+		return NULL;
+	}
+
+	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
+
+	VkImage swap_chain_image = qvk.swap_chain_images[qvk.current_swap_chain_image_index];
+
+	VkImageSubresourceRange subresource_range = {
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.baseMipLevel = 0,
+		.levelCount = 1,
+		.baseArrayLayer = 0,
+		.layerCount = 1
+	};
+		
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
+	});
+
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
+	});
+
+	VkImageCopy img_copy_region = {
+		.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
+		.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
+		.extent = { qvk.extent_unscaled.width, qvk.extent_unscaled.height, 1 }
+	};
+
+	vkCmdCopyImage(cmd_buf,
+		swap_chain_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		qvk.screenshot_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1, &img_copy_region);
+
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+		.dstAccessMask = 0,
+		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
+    });
+
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
+	});
+
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, false);
+	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
+
+	VkImageSubresource subresource = {
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+	    .mipLevel = 0,
+		.arrayLayer = 0,
+	};
+
+	VkSubresourceLayout subresource_layout;
+	vkGetImageSubresourceLayout(qvk.device, qvk.screenshot_image, &subresource, &subresource_layout);
+
+	void *device_data;
+	_VK(vkMapMemory(qvk.device, qvk.screenshot_image_memory, 0, qvk.screenshot_image_memory_size, 0, &device_data));
+	
+	int pitch = qvk.extent_unscaled.width * 3;
+	float *pixels = (float*)FS_AllocTempMem(pitch * qvk.extent_unscaled.height * sizeof(float));
+
+	for (int row = 0; row < qvk.extent_unscaled.height; row++)
+	{
+		uint16_t* src_row = (uint16_t*)((byte*)device_data + subresource_layout.rowPitch * row);
+		float* dst_row = pixels + pitch * (qvk.extent_unscaled.height - row - 1);
+
+		for (int col = 0; col < qvk.extent_unscaled.width; col++)
+		{
+			dst_row[0] = halfToFloat(src_row[0]);
+			dst_row[1] = halfToFloat(src_row[1]);
+			dst_row[2] = halfToFloat(src_row[2]);
+
+			src_row += 4;
+			dst_row += 3;
+		}
+	}
+
+	vkUnmapMemory(qvk.device, qvk.screenshot_image_memory);
+
+	*width = qvk.extent_unscaled.width;
+	*height = qvk.extent_unscaled.height;
 	return pixels;
 }
 
