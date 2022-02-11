@@ -1146,15 +1146,26 @@ init_vulkan()
 		.accelerationStructure = VK_TRUE,
 	};
 
+	VkPhysicalDeviceBufferDeviceAddressFeatures physical_device_address_features = { 
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES, 
+		.pNext = &physical_device_as_features, 
+		.bufferDeviceAddress = VK_TRUE 
+	};
+#ifdef VKPT_DEVICE_GROUPS
+	if (qvk.device_count > 1) {
+	    physical_device_address_features.bufferDeviceAddressMultiDevice = VK_TRUE;
+	}
+#endif
+
 	VkPhysicalDeviceRayTracingPipelineFeaturesKHR physical_device_rt_pipeline_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
-		.pNext = &physical_device_as_features,
+		.pNext = &physical_device_address_features,
 		.rayTracingPipeline = VK_TRUE
 	};
 
 	VkPhysicalDeviceRayQueryFeaturesKHR physical_device_ray_query_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR,
-		.pNext = &physical_device_as_features,
+		.pNext = &physical_device_address_features,
 		.rayQuery = VK_TRUE
 	};
 
