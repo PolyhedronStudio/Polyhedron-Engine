@@ -1,4 +1,6 @@
 ## Polyhedron - A Q2RTX Fork
+[![Build Status](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml/badge.svg)](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml)
+
 A fork of the famous Q2RTX project by NVIDIA™ that strives to improve all of its other factors of what was once upon a time called Quake 2. The goal? Upgrading it bit by bit, in order to make it a more modern and modable engine than the original was before. It's nearly 2022, while the original was written in 1997. Such a nice and great renderer deserves a better and more improved game back-end. 
 
 ### What does it have so far?
