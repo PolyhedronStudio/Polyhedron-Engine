@@ -27,8 +27,9 @@ static uint64_t query_pool_results[NUM_PROFILER_QUERIES_PER_FRAME * 2];
 // causing vkGetQueryPoolResults to stop writing the results halfway through 
 // the buffer if it's properly sized.
 
+extern cvar_t *cvar_profiler_scale;
 extern cvar_t *cvar_pt_reflect_refract;
-extern cvar_t* cvar_flt_fsr_enable;
+extern cvar_t *cvar_flt_fsr_enable;
 
 static qboolean profiler_queries_used[NUM_PROFILER_QUERIES_PER_FRAME * MAX_FRAMES_IN_FLIGHT] = { 0 };
 
@@ -147,14 +148,15 @@ draw_query(int x, int y, qhandle_t font, const char *enum_name, int idx)
 void
 draw_profiler(int enable_asvgf)
 {
-	int x = 500;
-	int y = 100;
+    float profiler_scale = R_ClampScale(cvar_profiler_scale);
+    int	  x = 500 * profiler_scale;
+    int	  y = 100 * profiler_scale;
 
 	qhandle_t font;
 	font = R_RegisterFont("conchars");
 	if(!font)
 		return;
-
+	R_SetScale(profiler_scale);
 #define PROFILER_DO(name, indent) \
 	draw_query(x, y, font, &#name[9], name); y += 10;
 
@@ -193,12 +195,14 @@ draw_profiler(int enable_asvgf)
 	PROFILER_DO(PROFILER_INTERLEAVE, 1);
 	PROFILER_DO(PROFILER_BLOOM, 1);
 	PROFILER_DO(PROFILER_TONE_MAPPING, 2);
-	if (cvar_flt_fsr_enable->integer != 0) 	{
-		PROFILER_DO(PROFILER_FSR, 1);
-		PROFILER_DO(PROFILER_FSR_EASU, 2);
-		PROFILER_DO(PROFILER_FSR_RCAS, 2);
+	if (cvar_flt_fsr_enable->integer != 0) {
+	    PROFILER_DO(PROFILER_FSR, 1);
+	    PROFILER_DO(PROFILER_FSR_EASU, 2);
+	    PROFILER_DO(PROFILER_FSR_RCAS, 2);
 	}
 #undef PROFILER_DO
+
+	R_SetScale(1.0f);
 }
 
 double vkpt_get_profiler_result(int idx)

@@ -119,6 +119,7 @@ typedef struct mface_s {
 #endif
 
     int             firstbasis;
+
     int             drawframe;
 
     int             dlightframe;
