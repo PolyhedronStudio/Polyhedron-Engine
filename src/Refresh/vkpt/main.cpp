@@ -574,8 +574,12 @@ create_swapchain()
 	if (cvar_hdr->integer != 0) {
 	    surface_format_found = pick_surface_format_hdr(&qvk.surf_format, avail_surface_formats, num_formats);
 	    qvk.surf_is_hdr = surface_format_found;
-	    if (!surface_format_found)
-		Com_WPrintf("HDR was requested but no supported surface format was found.");
+	    if (!surface_format_found) {
+			Com_WPrintf("HDR was requested but no supported surface format was found.\n");
+			Cvar_SetByVar(cvar_hdr, "0", FROM_CODE);
+	    } else {
+			qvk.surf_is_hdr = false;
+	    }
 	}
 	if (!surface_format_found) {
 	    // HDR disabled, or fallback to SDR
@@ -2709,7 +2713,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	evaluate_reference_mode(&ref_mode);
 	evaluate_taa_settings(&ref_mode);
 	
-	qboolean menu_mode = cl_paused->integer == 1 && uis.menuDepth > 0 && render_world;
+	qvk.frame_menu_mode = cl_paused->integer == 1 && uis.menuDepth > 0 && render_world;
 
 	int new_world_anim_frame = (int)(fd->time * 2);
 	qboolean update_world_animations = (new_world_anim_frame != world_anim_frame);
@@ -2733,7 +2737,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		ubo->fs_blend_color = vec4_zero();
 
 	vkpt_physical_sky_update_ubo(ubo, &sun_light, render_world);
-	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, menu_mode);
+	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, qvk.frame_menu_mode);
 
 	if (update_world_animations)
 		bsp_mesh_animate_light_polys(&vkpt_refdef.bsp_mesh_world);
@@ -2931,7 +2935,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		vkpt_taa(post_cmd_buf);
 
 		BEGIN_PERF_MARKER(post_cmd_buf, PROFILER_BLOOM);
-		if (cvar_bloom_enable->integer != 0 || menu_mode)
+		if (cvar_bloom_enable->integer != 0 || qvk.frame_menu_mode)
 		{
 			vkpt_bloom_record_cmd_buffer(post_cmd_buf);
 		}
@@ -2951,8 +2955,9 @@ R_RenderFrame_RTX(refdef_t *fd)
 		}
 		END_PERF_MARKER(post_cmd_buf, PROFILER_TONE_MAPPING);
 
-		if (vkpt_fsr_is_enabled()) 		{
-			vkpt_fsr_do(post_cmd_buf);
+		// Skip FSR (upscaling) if image is going to be heavily blurred anyway (menu mode)
+		if (vkpt_fsr_is_enabled() && !qvk.frame_menu_mode) {
+		    vkpt_fsr_do(post_cmd_buf);
 		}
 
 		{
@@ -3146,7 +3151,7 @@ R_BeginFrame_RTX(void)
 	
 	VkExtent2D extent_screen_images = get_screen_image_extent();
 
-	if(!extents_equal(extent_screen_images, qvk.extent_screen_images))
+	if(!extents_equal(extent_screen_images, qvk.extent_screen_images) || (!!cvar_hdr->value != qvk.surf_is_hdr))
 	{
 		qvk.extent_screen_images = extent_screen_images;
 		recreate_swapchain();
@@ -3229,7 +3234,7 @@ R_EndFrame_RTX(void)
 
 	if (frame_ready)
 	{
-		if (vkpt_fsr_is_enabled()) {
+	    if (vkpt_fsr_is_enabled() && !qvk.frame_menu_mode) {
 			vkpt_fsr_final_blit(cmd_buf);
 		} else if (qvk.effective_aa_mode == AA_MODE_UPSCALE) {
 			vkpt_final_blit_simple(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT], qvk.extent_taa_output);

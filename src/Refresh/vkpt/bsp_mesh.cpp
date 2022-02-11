@@ -1442,16 +1442,18 @@ compute_sky_visibility(bsp_mesh_t* wm, bsp_t* bsp) {
 
 	memset(clusters_with_sky, 0, VIS_MAX_BYTES);
 
-	for (int i = 0; i < (wm->world_sky_count + wm->world_custom_sky_count) / 3; i++) 	{
+	for (int i = 0; i < (wm->world_sky_count + wm->world_custom_sky_count) / 3; i++) {
 		int prim = wm->world_sky_offset / 3 + i;
 
 		int cluster = wm->clusters[prim];
+		if (cluster < 0)
+		    continue;
 		if ((cluster >> 3) < VIS_MAX_BYTES)
 			clusters_with_sky[cluster >> 3] |= (1 << (cluster & 7));
 	}
 
-	for (int cluster = 0; cluster < numclusters; cluster++) 	{
-		if (clusters_with_sky[cluster >> 3] & (1 << (cluster & 7))) 		{
+	for (int cluster = 0; cluster < numclusters; cluster++) {
+		if (clusters_with_sky[cluster >> 3] & (1 << (cluster & 7))) {
 			byte* mask = BSP_GetPvs(bsp, cluster);
 
 			for (int i = 0; i < bsp->visrowsize; i++)
