@@ -29,6 +29,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Player Animations Header.
 #include "Animations.h"
 
+// Gamemodes.
+#include "../Gamemodes/IGameMode.h"
+#include "../Gamemodes/DeathMatchGamemode.h"
+
 qboolean is_quad;
 byte     is_silenced;
 
@@ -48,8 +52,11 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
 {
     Entity     *noise;
 
-    if (deathmatch->value)
+    //if (deathmatch->value)
+    //    return;
+    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
         return;
+    }
 
     if (who->GetFlags() & EntityFlags::NoTarget)
         return;
@@ -57,7 +64,7 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
 
     if (!who->GetServerEntity()->myNoisePtr) {
         noise = SVG_Spawn();
-        noise->className = "player_noise";
+        noise->classname = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who->GetServerEntity();
@@ -65,7 +72,7 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
         who->GetServerEntity()->myNoisePtr = noise;
 
         noise = SVG_Spawn();
-        noise->className = "player_noise";
+        noise->classname = "player_noise";
         VectorSet(noise->mins, -8, -8, -8);
         VectorSet(noise->maxs, 8, 8, 8);
         noise->owner = who->GetServerEntity();
@@ -98,7 +105,7 @@ qboolean Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other)
 
     //index = ITEM_INDEX(ent->item);
 
-    //if ((((int)(gamemodeflags->value) & GameModeFlags::WeaponsStay) || coop->value)
+    //if ((((int)(gamemodeflags->value) & GamemodeFlags::WeaponsStay) || coop->value)
     //    && other->client->persistent.inventory[index]) {
     //    if (!(ent->spawnFlags & (ItemSpawnFlags::DroppedItem | ItemSpawnFlags::DroppedPlayerItem)))
     //        return false;   // leave the weapon for others to pickup
@@ -109,14 +116,14 @@ qboolean Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other)
     //if (!(ent->spawnFlags & ItemSpawnFlags::DroppedItem)) {
     //    // give them some ammo with it
     //    ammo = SVG_FindItemByPickupName(ent->item->ammo);
-    //    if ((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo)
+    //    if ((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo)
     //        SVG_AddAmmo(other, ammo, 1000);
     //    else
     //        SVG_AddAmmo(other, ammo, ammo->quantity);
 
     //    if (!(ent->spawnFlags & ItemSpawnFlags::DroppedPlayerItem)) {
     //        if (deathmatch->value) {
-    //            if ((int)(gamemodeflags->value) & GameModeFlags::WeaponsStay)
+    //            if ((int)(gamemodeflags->value) & GamemodeFlags::WeaponsStay)
     //                ent->flags |= EntityFlags::Respawn;
     //            else
     //                SVG_SetRespawn(ent, 30);
@@ -151,7 +158,7 @@ void SVG_ChangeWeapon(PlayerClient*ent)
     if (!ent)
         return;
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     client->persistent.lastWeapon = client->persistent.activeWeapon;
     client->persistent.activeWeapon = client->newWeapon;
@@ -200,7 +207,7 @@ NoAmmoWeaponChange
 */
 void NoAmmoWeaponChange(PlayerClient *ent)
 {
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     if (client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("bullets"))]
         &&  client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("machinegun"))]) {
@@ -222,7 +229,7 @@ void SVG_ThinkWeapon(PlayerClient *ent)
     if (!ent)
         return;
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     if (!client)
         return;
@@ -251,7 +258,7 @@ void Use_Weapon(PlayerClient *ent, gitem_t* item)
 {
     int         ammoIndex;
     gitem_t     *ammo_item;
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     // see if we're already using it
     if (item == client->persistent.activeWeapon)
@@ -287,10 +294,10 @@ void Drop_Weapon(PlayerClient *ent, gitem_t *item)
 {
     int     index;
 
-    if ((int)(gamemodeflags->value) & GameModeFlags::WeaponsStay)
+    if ((int)(gamemodeflags->value) & GamemodeFlags::WeaponsStay)
         return;
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
     index = ITEM_INDEX(item);
     // see if we're already using it
     if (((item == client->persistent.activeWeapon) || (item == client->newWeapon)) && (client->persistent.inventory[index] == 1)) {
@@ -310,11 +317,131 @@ Weapon_Generic
 A generic function to handle the basics of weapon thinking
 ================
 */
-#define FRAME_FIRE_FIRST        (FRAME_ACTIVATE_LAST + 1)
-#define FRAME_IDLE_FIRST        (FRAME_FIRE_LAST + 1)
-#define FRAME_DEACTIVATE_FIRST  (FRAME_IDLE_LAST + 1)
+void _Weapon_Generic(PlayerClient* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int* pause_frames,
+#define FRAME_FIRE_FIRST (FRAME_ACTIVATE_LAST + 1)
+#define FRAME_IDLE_FIRST (FRAME_FIRE_LAST + 1)
+#define FRAME_DEACTIVATE_FIRST (FRAME_IDLE_LAST + 1)
 
-void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(PlayerClient *ent))
+    int* fire_frames, void (*fire)(PlayerClient* ent)) {
+    int n;
+
+    if (ent->GetDeadFlag() || ent->GetModelIndex() != 255) {  // VWep animations screw up corpses
+	return;
+    }
+
+    ServerClient* client = ent->GetClient();
+
+    if (client->weaponState == WeaponState::Dropping) {
+	if (client->playerState.gunFrame == FRAME_DEACTIVATE_LAST) {
+	    SVG_ChangeWeapon(ent);
+	    return;
+	} else if ((FRAME_DEACTIVATE_LAST - client->playerState.gunFrame) == 4) {
+	    client->animation.priorityAnimation = PlayerAnimation::Reverse;
+	    if (client->playerState.pmove.flags & PMF_DUCKED) {
+		ent->SetFrame(FRAME_crpain4 + 1);
+		client->animation.endFrame = FRAME_crpain1;
+	    } else {
+		ent->SetFrame(FRAME_pain304 + 1);
+		client->animation.endFrame = FRAME_pain301;
+	    }
+	}
+
+	client->playerState.gunFrame++;
+	return;
+    }
+
+    if (client->weaponState == WeaponState::Activating) {
+	if (client->playerState.gunFrame == FRAME_ACTIVATE_LAST) {
+	    client->weaponState = WeaponState::Ready;
+	    client->playerState.gunFrame = FRAME_IDLE_FIRST;
+	    return;
+	}
+
+	client->playerState.gunFrame++;
+	return;
+    }
+
+    if ((client->newWeapon) && (client->weaponState != WeaponState::Firing)) {
+	client->weaponState = WeaponState::Dropping;
+	client->playerState.gunFrame = FRAME_DEACTIVATE_FIRST;
+
+	if ((FRAME_DEACTIVATE_LAST - FRAME_DEACTIVATE_FIRST) < 4) {
+	    client->animation.priorityAnimation = PlayerAnimation::Reverse;
+	    if (client->playerState.pmove.flags & PMF_DUCKED) {
+		ent->SetFrame(FRAME_crpain4 + 1);
+		client->animation.endFrame = FRAME_crpain1;
+	    } else {
+		ent->SetFrame(FRAME_pain304 + 1);
+		client->animation.endFrame = FRAME_pain301;
+	    }
+	}
+	return;
+    }
+
+    if (client->weaponState == WeaponState::Ready) {
+	if (((client->latchedButtons | client->buttons) & BUTTON_ATTACK)) {
+	    client->latchedButtons &= ~BUTTON_ATTACK;
+	    if ((!client->ammoIndex) || (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
+		client->playerState.gunFrame = FRAME_FIRE_FIRST;
+		client->weaponState = WeaponState::Firing;
+
+		// start the animation
+		client->animation.priorityAnimation = PlayerAnimation::Attack;
+		if (client->playerState.pmove.flags & PMF_DUCKED) {
+		    ent->SetFrame(FRAME_crattak1 - 1);
+		    client->animation.endFrame = FRAME_crattak9;
+		} else {
+		    ent->SetFrame(FRAME_attack1 - 1);
+		    client->animation.endFrame = FRAME_attack8;
+		}
+	    } else {
+		if (level.time >= ent->GetDebouncePainTime()) {
+		    gi.Sound(ent->GetServerEntity(), CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+		    ent->SetDebouncePainTime(level.time + 1);
+		}
+		NoAmmoWeaponChange(ent);
+	    }
+	} else {
+	    if (client->playerState.gunFrame == FRAME_IDLE_LAST) {
+		client->playerState.gunFrame = FRAME_IDLE_FIRST;
+		return;
+	    }
+
+	    if (pause_frames) {
+		for (n = 0; pause_frames[n]; n++) {
+		    if (client->playerState.gunFrame == pause_frames[n]) {
+			if (rand() & 15)
+			    return;
+		    }
+		}
+	    }
+
+	    client->playerState.gunFrame++;
+	    return;
+	}
+    }
+
+    if (client->weaponState == WeaponState::Firing) {
+	for (n = 0; fire_frames[n]; n++) {
+	    if (client->playerState.gunFrame == fire_frames[n]) {
+		fire(ent);
+		break;
+	    }
+	}
+
+	if (!fire_frames[n])
+	    client->playerState.gunFrame++;
+
+	if (client->playerState.gunFrame == FRAME_IDLE_FIRST + 1)
+	    client->weaponState = WeaponState::Ready;
+    }
+
+    #undef FRAME_FIRE_FIRST
+    #undef FRAME_IDLE_FIRST
+    #undef FRAME_DEACTIVATE_FIRST
+}
+
+void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_FIRST, int FRAME_FIRE_LAST, int FRAME_IDLE_FIRST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_FIRST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(PlayerClient *ent))
 {
     int     n;
 
@@ -322,7 +449,7 @@ void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_L
         return;
     }
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     if (client->weaponState == WeaponState::Dropping) {
         if (client->playerState.gunFrame == FRAME_DEACTIVATE_LAST) {

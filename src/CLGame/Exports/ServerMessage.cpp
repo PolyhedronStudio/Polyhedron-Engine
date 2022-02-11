@@ -79,7 +79,8 @@ qboolean ClientGameServerMessage::ParsePlayerSkin(char* name, char* model, char*
 //
 //---------------
 qboolean ClientGameServerMessage::UpdateConfigString(int32_t index, const char* str) {
-    if (index == ConfigStrings::AirAcceleration) {
+    // This used to be the unused AirAcceleration config string index.
+    if (index == ConfigStrings::Unused) {
         return true;
     }
 

@@ -17,10 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // Core.
 #include "ServerGameLocal.h"
+#include "Entities.h"
 #include "ChaseCamera.h"
 
 // Entities.
-#include "Entities.h"
 #include "Entities/Base/PlayerClient.h"
 
 void SVG_UpdateChaseCam(PlayerClient *ent)
@@ -61,7 +61,7 @@ void SVG_UpdateChaseCam(PlayerClient *ent)
         o[2] = targ->state.origin[2] + 20;
 
     // jump animation lifts
-    if (!targ->groundEntityPtr)
+    if (!targ->classEntity->GetGroundEntity())
         o[2] += 16;
 
     trace = gi.Trace(ownerv, vec3_zero(), vec3_zero(), o, targ, CONTENTS_MASK_SOLID);
@@ -115,7 +115,7 @@ void SVG_ChaseNext(PlayerClient *ent)
 {
     int i;
     Entity *e;
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     if (!client->chaseTarget)
         return;
@@ -123,7 +123,7 @@ void SVG_ChaseNext(PlayerClient *ent)
     i = client->chaseTarget - g_entities;
     do {
         i++;
-        if (i > maximumClients->value)
+        if (i > maximumclients->value)
             i = 1;
         e = g_entities + i;
         if (!e->inUse)
@@ -140,7 +140,7 @@ void SVG_ChasePrev(PlayerClient*ent)
 {
     int i;
     Entity *e;
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     if (!client->chaseTarget)
         return;
@@ -149,7 +149,7 @@ void SVG_ChasePrev(PlayerClient*ent)
     do {
         i--;
         if (i < 1)
-            i = maximumClients->value;
+            i = maximumclients->value;
         e = g_entities + i;
         if (!e->inUse)
             continue;
@@ -165,9 +165,9 @@ void SVG_GetChaseTarget(PlayerClient *ent)
 {
     int i;
     Entity *other;
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
-    for (i = 1; i <= maximumClients->value; i++) {
+    for (i = 1; i <= maximumclients->value; i++) {
         other = g_entities + i;
         if (other->inUse && !other->client->respawn.isSpectator) {
             client->chaseTarget = other;

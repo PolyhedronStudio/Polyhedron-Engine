@@ -15,6 +15,9 @@
 #include "SVGBaseTrigger.h"
 #include "SVGBaseMover.h"
 
+// Epsilon used for comparing floats.
+static constexpr float BASEMOVER_EPSILON = 0.03125;
+
 // Constructor/Deconstructor.
 SVGBaseMover::SVGBaseMover(Entity* svEntity) : Base(svEntity) {
 
@@ -39,8 +42,6 @@ void SVGBaseMover::Precache() {
 //
 void SVGBaseMover::Spawn() {
 	Base::Spawn();
-
-
 }
 
 //
@@ -80,10 +81,50 @@ void SVGBaseMover::Think() {
 //===============
 //
 void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
-	if (key == "wait") {
-		ParseFloatKeyValue(key, value, waitTime);
-	} else if ( key == "lip" ) {
-		ParseFloatKeyValue( key, value, lip );
+	// Accel.
+	if (key == "accel") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set acceleration.
+		SetAcceleration(parsedFloat);
+	}
+	// Accel.
+	else if (key == "decel") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set deceleration.
+		SetDeceleration(parsedFloat);
+	}
+	// Lip.
+	else if (key == "lip") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set lip.
+		SetLip(parsedFloat);
+	}
+	// Speed.
+	else if (key == "speed") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set speed.
+		SetSpeed(parsedFloat);
+	}
+	// Wait.
+	else if (key == "wait") {
+		// Parse float.
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue(key, value, parsedFloat);
+
+		// Set wait.
+		SetWaitTime(parsedFloat);
 	} else {
 		Base::SpawnKey(key, value);
 	}
@@ -139,8 +180,9 @@ vec3_t SVGBaseMover::CalculateEndPosition() {
 		fabsf( moveDirection.z ) 
 	};
 	
-	float distance = (absoluteDir.x * size.x) + (absoluteDir.y * size.y) + (absoluteDir.z * size.z) - GetLip();
-	return vec3_fmaf( GetStartPosition(), distance, moveDirection );
+	moveInfo.distance = (absoluteDir.x * size.x) + (absoluteDir.y * size.y) + (absoluteDir.z * size.z) - GetLip();
+
+	return vec3_fmaf( GetStartPosition(), moveInfo.distance, moveDirection );
 }
 
 //===============
@@ -157,7 +199,7 @@ void SVGBaseMover::SwapPositions() {
 // =========================
 void SVGBaseMover::BrushMoveDone() {
 	SetVelocity( vec3_zero() );
-	moveInfo.OnEndFunction( serverEntity );
+	moveInfo.OnEndFunction( this );
 }
 
 //===============
@@ -174,7 +216,7 @@ void SVGBaseMover::BrushMoveFinal() {
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushMoveDone );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + 1.f * FRAMETIME );
 }
 
 //===============
@@ -199,14 +241,6 @@ void SVGBaseMover::BrushMoveBegin() {
 }
 
 //===============
-// AreSame
-// Checks if two floats are basically the same with an epsilon
-//===============
-bool AreSame( float a, float b, float epsilon = 0.1f ) {
-	return fabs( a - b ) < epsilon;
-}
-
-//===============
 // SVGBaseMover::BrushMoveCalc
 //===============
 void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction* function ) {
@@ -217,19 +251,19 @@ void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 	mi.remainingDistance = VectorNormalize( moveInfo.dir );
 	mi.OnEndFunction = function;
 
-	if ( AreSame( mi.speed, mi.acceleration ) && AreSame( mi.speed, mi.deceleration ) ) {
+	if ( EqualEpsilonf( mi.speed, mi.acceleration, BASEMOVER_EPSILON ) && EqualEpsilonf( mi.speed, mi.deceleration, BASEMOVER_EPSILON  ) ) {
 		if ( level.currentEntity == ((GetFlags() & EntityFlags::TeamSlave) ? GetTeamMasterEntity() : this) ) {
 			BrushMoveBegin();
 		} else {
 			SetThinkCallback( &SVGBaseMover::BrushMoveBegin );
-			SetNextThinkTime( level.time + FRAMETIME );
+			SetNextThinkTime( level.time + 1.f * FRAMETIME );
 		}
 	} else {
 		// Accelerative movement
 		mi.currentSpeed = 0;
 
 		SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
-		SetNextThinkTime( level.time + FRAMETIME );
+		SetNextThinkTime( level.time + 1.f * FRAMETIME );
 	}
 }
 
@@ -238,7 +272,7 @@ void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 //===============
 void SVGBaseMover::BrushAngleMoveDone() {
 	SetAngularVelocity( vec3_zero() );
-	moveInfo.OnEndFunction( GetServerEntity() );
+	moveInfo.OnEndFunction( this );
 }
 
 //===============
@@ -261,7 +295,7 @@ void SVGBaseMover::BrushAngleMoveFinal() {
 	SetAngularVelocity( vec3_scale( move, 1.0f / FRAMETIME ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushAngleMoveDone );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + 1.f * FRAMETIME );
 }
 
 //===============
@@ -307,7 +341,7 @@ void SVGBaseMover::BrushAngleMoveCalc( PushMoveEndFunction* function ) {
 		BrushAngleMoveBegin();
 	} else {
 		SetThinkCallback( &SVGBaseMover::BrushAngleMoveBegin );
-		SetNextThinkTime( level.time + FRAMETIME );
+		SetNextThinkTime( level.time + 1.f * FRAMETIME );
 	}
 }
 
@@ -408,12 +442,15 @@ void SVGBaseMover::BrushAccelerate() {
 // so change the speed for the next frame
 //===============
 void SVGBaseMover::BrushAccelerateThink() {
+	// Calculate remaining distance.
 	moveInfo.remainingDistance -= moveInfo.currentSpeed;
 
-	if ( moveInfo.currentSpeed == 0 ) { // Happens when starting or blocked
+	// In case of a start or blockade speed == 0 so recalculate acceleration.
+	if ( moveInfo.currentSpeed == 0 ) {
 		BrushAccelerateCalc();
 	}
 
+	// Accelerate.
 	BrushAccelerate();
 
 	// Will the entire move complete on the next frame
@@ -422,10 +459,10 @@ void SVGBaseMover::BrushAccelerateThink() {
 		return;
 	}
 
-	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * 10.0f ) );
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * BASE_FRAMERATE ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + 1.f * FRAMETIME );
 }
 
 //===============
@@ -434,7 +471,7 @@ void SVGBaseMover::BrushAccelerateThink() {
 float SVGBaseMover::CalculateAccelerationDistance( float targetSpeed, float accelerationRate ) {
 	if ( accelerationRate == 0.0f ) {
 		gi.DPrintf( "%s '%s': accelerationRate was 0!\n", 
-					GetTypeInfo()->className, 
+					GetTypeInfo()->classname, 
 					GetTargetName().empty() ? "unnamed" : GetTargetName().c_str() );
 		return 0.0f;
 	}

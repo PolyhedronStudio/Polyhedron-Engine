@@ -88,9 +88,9 @@ static void CL_Skins_f(void) {
 static void cl_chat_sound_changed(cvar_t* self) {
     if (!*self->string)
         self->integer = 0;
-    else if (!Q_stricmp(self->string, "misc/talk.wav"))
+    else if (!PH_StringCompare(self->string, "misc/talk.wav"))
         self->integer = 1;
-    else if (!Q_stricmp(self->string, "misc/talk1.wav"))
+    else if (!PH_StringCompare(self->string, "misc/talk1.wav"))
         self->integer = 2;
     else if (!self->integer && !COM_IsUint(self->string))
         self->integer = 1;
@@ -235,7 +235,7 @@ void ClientGameCore::Initialize() {
 
     // Generate a random user name to avoid new users being kicked out of MP servers.
     // The default N&C config files set the user name to "Player", same as the cvar initialization above.
-    if (Q_strcasecmp(info_name->string, "Player") == 0)     {
+    if (PH_StringCaseCompare(info_name->string, "Player") == 0)     {
         int random_number = rand() % 10000;
         char buf[MAX_CLIENT_NAME];
         Q_snprintf(buf, sizeof(buf), "n00b-%04d", random_number);

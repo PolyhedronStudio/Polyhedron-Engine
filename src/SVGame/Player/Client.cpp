@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Info/InfoPlayerStart.h"
 
 // Game modes.
-#include "../GameModes/IGameMode.h"
+#include "../Gamemodes/IGamemode.h"
 
 // Shared Game.
 #include "SharedGame/SharedGame.h" // Include SG Base.
@@ -52,7 +52,7 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     if (!ent)
         return;
 
-    game.gameMode->ClientUserinfoChanged(ent, userinfo);
+    game.GetCurrentGamemode()->ClientUserinfoChanged(ent, userinfo);
 }
 
 
@@ -76,15 +76,15 @@ void SP_FixCoopSpots(Entity *self)
     spot = NULL;
 
     while (1) {
-        spot = SVG_Find(spot, FOFS(className), "info_player_start");
+        spot = SVG_Find(spot, FOFS(classname), "info_player_start");
         if (!spot)
             return;
         if (!spot->targetName)
             continue;
         d = self->state.origin - spot->state.origin;
         if (vec3_length(d) < 384) {
-            if ((!self->targetName) || Q_stricmp(self->targetName, spot->targetName) != 0) {
-                //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->className, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
+            if ((!self->targetName) || PH_StringCompare(self->targetName, spot->targetName) != 0) {
+                //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
                 self->targetName = spot->targetName;
             }
             return;
@@ -94,14 +94,16 @@ void SP_FixCoopSpots(Entity *self)
 
 //=======================================================================
 
+// TODO: Move into game mode.
 void SVG_TossClientWeapon(PlayerClient *playerClient)
 {
     gitem_t     *item;
     Entity      *drop;
     float       spread = 1.5f;
 
-    if (!deathmatch->value)
-        return;
+    // Always allow.
+    //if (!deathmatch->value)
+    //    return;
 
     item = playerClient->GetActiveWeapon();
     if (!playerClient->GetClient()->persistent.inventory[playerClient->GetClient()->ammoIndex])
@@ -118,50 +120,6 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
 }
 
 //=======================================================================
-
-/*
-==================
-SVG_SaveClientData
-
-Some information that should be persistant, like health,
-is still stored in the edict structure, so it needs to
-be mirrored out to the client structure before all the
-edicts are wiped.
-==================
-*/
-void SVG_SaveClientData(void)
-{
-    int     i;
-    Entity *ent;
-
-    for (i = 0 ; i < game.maximumClients ; i++) {
-        ent = &g_entities[1 + i];
-        if (!ent->inUse)
-            continue;
-        if (!ent->classEntity)
-            continue;
-        game.clients[i].persistent.health = ent->classEntity->GetHealth();
-        game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
-        game.clients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
-        if (coop->value && ent->client)
-            game.clients[i].persistent.score = ent->client->respawn.score;
-    }
-}
-
-void SVG_FetchClientData(Entity *ent)
-{
-    if (!ent)
-        return;
-
-    if (!ent->classEntity)
-        return;
-
-    ent->classEntity->SetHealth(ent->client->persistent.health);
-    ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
-    ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
-    if (coop->value && ent->client)
-        ent->client->respawn.score = ent->client->persistent.score;
-}
 
 //======================================================================
 
@@ -207,7 +165,7 @@ void spectator_respawn(Entity *ent)
         }
 
         // Count actual active spectators
-        for (i = 1, numspec = 0; i <= maximumClients->value; i++)
+        for (i = 1, numspec = 0; i <= maximumclients->value; i++)
             if (g_entities[i].inUse && g_entities[i].client->persistent.isSpectator)
                 numspec++;
 
@@ -245,7 +203,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.gameMode->PutClientInServer(ent);
+    game.GetCurrentGamemode()->PutClientInServer(ent);
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -271,40 +229,6 @@ void spectator_respawn(Entity *ent)
 //==============================================================
 
 /*
-=====================
-ClientBeginDeathmatch
-
-A client has just connected to the server in
-deathmatch mode, so clear everything out before starting them.
-=====================
-*/
-void SVG_ClientBeginDeathmatch(Entity *ent)
-{
-    //SVG_InitEntity(ent);
-
-    //game.gameMode->InitializeClientRespawnData(ent->client);
-
-    //// locate ent at a spawn point
-    //game.gameMode->PutClientInServer(ent);
-
-    //if (level.intermission.time) {
-    //    HUD_MoveClientToIntermission(ent);
-    //} else {
-    //    // send effect
-    //    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    //    gi.WriteShort(ent - g_entities);
-    //    gi.WriteByte(MuzzleFlashType::Login);
-    //    gi.Multicast(ent->state.origin, MultiCast::PVS);
-    //}
-
-    //gi.BPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->persistent.netname);
-
-    //// make sure all view stuff is valid
-    //game.gameMode->ClientEndServerFrame(ent);
-}
-
-
-/*
 ===========
 ClientBegin
 
@@ -320,8 +244,8 @@ void SVG_ClientBegin(Entity *ent)
     ent->client = game.clients + (ent - g_entities - 1);
 
     // Let the game mode decide from here on out.
-    game.gameMode->ClientBegin(ent);
-    //game.gameMode->ClientEndServerFrame(ent);
+    game.GetCurrentGamemode()->ClientBegin(ent);
+    //game.GetCurrentGamemode()->ClientEndServerFrame(ent);
 }
 
 
@@ -339,7 +263,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    return game.gameMode->ClientConnect(ent, userinfo);
+    return game.GetCurrentGamemode()->ClientConnect(ent, userinfo);
 }
 
 /*
@@ -360,7 +284,7 @@ void SVG_ClientDisconnect(Entity *ent)
         return;
 
     // Since it does, we pass it on to the game mode.
-    game.gameMode->ClientDisconnect((PlayerClient*)ent->classEntity);
+    game.GetCurrentGamemode()->ClientDisconnect((PlayerClient*)ent->classEntity);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;
@@ -409,7 +333,7 @@ usually be a couple times for each server frame.
 */
 void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 {
-    ServersClient* client = nullptr;
+    ServerClient* client = nullptr;
     PlayerClient *classEntity = nullptr;
     Entity* other = nullptr;
 
@@ -597,7 +521,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
     }
 
     // update chase cam if being followed
-    for (int i = 1; i <= maximumClients->value; i++) {
+    for (int i = 1; i <= maximumclients->value; i++) {
         other = g_entities + i;
         if (other->inUse && other->client->chaseTarget == serverEntity)
             SVG_UpdateChaseCam(classEntity);

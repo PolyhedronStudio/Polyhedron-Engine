@@ -391,7 +391,7 @@ static void GL_DrawNullModel(void)
     static const uint32_t colors[6] = {
         U32_RED, U32_RED,
         U32_GREEN, U32_GREEN,
-        U32_BLUE, U32_BLUE
+        U32_ORANGE, U32_ORANGE
     };
     r_entity_t *e = glr.ent;
     vec3_t points[6];
@@ -1157,6 +1157,7 @@ void R_RegisterFunctionsGL()
 	R_SetColor = R_SetColor_GL;
 	R_SetClipRect = R_SetClipRect_GL;
 	R_SetScale = R_SetScale_GL;
+    R_Set2DTransform = R_DrawSetTransform_GL;
 	R_DrawChar = R_DrawChar_GL;
 	R_DrawString = R_DrawString_GL;
 	R_DrawPic = R_DrawPic_GL;
@@ -1174,6 +1175,6 @@ void R_RegisterFunctionsGL()
 	IMG_ReadPixels = IMG_ReadPixels_GL;
 	MOD_LoadMD2 = MOD_LoadMD2_GL;
 	MOD_LoadMD3 = MOD_LoadMD3_GL;
-    MOD_LoadIQM = NULL;
+    MOD_LoadIQM = MOD_LoadIQM_GL;
 	MOD_Reference = MOD_Reference_GL;
 }

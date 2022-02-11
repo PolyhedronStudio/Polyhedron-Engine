@@ -102,8 +102,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FS_FreeTempMem(buf)     Z_Free(buf)
 
 // just regular caseless string comparsion
-#define FS_pathcmp      Q_strcasecmp
-#define FS_pathcmpn     Q_strncasecmp
+#define FS_pathcmp      PH_StringCaseCompare
+#define FS_pathcmpn     PH_StringNumberCaseCompare
 
 #define FS_HashPath(s, size)            Com_HashStringLen(s, SIZE_MAX, size)
 #define FS_HashPathLen(s, len, size)    Com_HashStringLen(s, len, size)

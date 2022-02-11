@@ -431,13 +431,18 @@ typedef struct sun_light_s {
 	qboolean visible;
 } sun_light_t;
 
-void mult_matrix_matrix(mat4_t p, const mat4_t a, const mat4_t b);
-void mult_matrix_vector(mat4_t p, const mat4_t a, const vec4_t b);
-void create_entity_matrix(mat4_t matrix, r_entity_t* e, qboolean enable_left_hand);
-void create_projection_matrix(mat4_t matrix, float znear, float zfar, float fov_x, float fov_y);
-void create_view_matrix(mat4_t matrix, refdef_t* fd);
-void inverse(const mat4_t m, mat4_t inv);
-void create_orthographic_matrix(mat4_t matrix, float xmin, float xmax,
+void mult_matrix_matrix(float* p, const mat4_t &a, const mat4_t &b);
+void mult_matrix_vector(float* p, const mat4_t &a, const vec4_t &b);
+mat4_t mult_matrix_matrix(const mat4_t &a, const mat4_t &b);
+mat4_t mult_matrix_vector(const mat4_t &a, const vec4_t &b);
+void create_entity_matrix(mat4_t &matrix, r_entity_t* e, qboolean enable_left_hand);
+void create_projection_matrix(mat4_t &matrix, float znear, float zfar, float fov_x, float fov_y);
+void create_view_matrix(mat4_t &matrix, refdef_t* fd);
+void inverse(const mat4_t &m, mat4_t &inv);
+
+void create_orthographic_matrix(float *matrix, float xmin, float xmax,
+								float ymin, float ymax, float znear, float zfar);
+void create_orthographic_matrix(mat4_t &matrix, float xmin, float xmax,
 	float ymin, float ymax, float znear, float zfar);
 
 #define PROFILER_LIST \
@@ -798,6 +803,7 @@ void R_SetScale_RTX(float scale);
 void R_DrawStretchPic_RTX(int x, int y, int w, int h, qhandle_t pic);
 void R_DrawPic_RTX(int x, int y, qhandle_t pic);
 void R_TileClear_RTX(int x, int y, int w, int h, qhandle_t pic);
+void R_DrawSetTransform_RTX(float* matrix);
 void R_DrawFill8_RTX(int x, int y, int w, int h, int c);
 void R_DrawFill32_RTX(int x, int y, int w, int h, uint32_t color);
 void R_DrawChar_RTX(int x, int y, int flags, int c, qhandle_t font);

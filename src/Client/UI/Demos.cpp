@@ -180,8 +180,8 @@ static char *LoadCache(void **list)
     }
 
     for (i = 0; i < 16; i++) {
-        int c1 = Q_charhex(cache[i * 2 + 0]);
-        int c2 = Q_charhex(cache[i * 2 + 1]);
+        int c1 = PH_CharHex(cache[i * 2 + 0]);
+        int c2 = PH_CharHex(cache[i * 2 + 1]);
         hash[i] = (c1 << 4) | c2;
     }
 
@@ -512,7 +512,7 @@ static int namecmp(const void *p1, const void *p2)
     char *s1 = UI_GetColumn(e1->name, m_demos.list.sortcol);
     char *s2 = UI_GetColumn(e2->name, m_demos.list.sortcol);
 
-    return Q_stricmp(s1, s2) * m_demos.list.sortdir;
+    return PH_StringCompare(s1, s2) * m_demos.list.sortdir;
 }
 
 static menuSound_t Sort(menuList_t *self)

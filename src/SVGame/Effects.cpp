@@ -13,7 +13,7 @@
 #include "Effects.h"
 
 // Game Mode interface.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 // Class Entities.
 #include "Entities/Base/PlayerClient.h"
@@ -75,7 +75,7 @@ void SVG_ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     }
 
     // Comment later...
-    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.GetCurrentGamemode()->CalculateDamageVelocity(damage);
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then 
     // adding it on to 'velocityDamage' its old value.
@@ -144,13 +144,13 @@ void SVG_ThrowClientHead(PlayerClient* self, int damage) {
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityDamage = game.gameMode->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.GetCurrentGamemode()->CalculateDamageVelocity(damage);
 
     // Add the velocityDamage up to the current velocity.
     self->SetVelocity(self->GetVelocity() + velocityDamage);
 
     // Bodies in the queue don't have a client anymore.
-    ServersClient* client = self->GetClient();
+    ServerClient* client = self->GetClient();
     if (client) {
         client->animation.priorityAnimation = PlayerAnimation::Death;
         client->animation.endFrame = self->GetFrame();

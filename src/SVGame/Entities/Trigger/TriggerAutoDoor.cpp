@@ -10,7 +10,6 @@
 #include "../../Entities.h"
 #include "../../Utilities.h"
 #include "../../Physics/StepMove.h"
-#include "../../BrushFunctions.h"
 
 // Entities.
 #include "../Base/SVGBaseTrigger.h"
@@ -24,7 +23,7 @@
 // TriggerAutoDoor::ctor
 //===============
 TriggerAutoDoor::TriggerAutoDoor( Entity* entity )
-	: SVGBaseTrigger( entity ) {
+	: Base( entity ) {
 	debounceTouchTime = 0.0f;
 }
 
@@ -71,7 +70,7 @@ void TriggerAutoDoor::AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, 
 //===============
 // TriggerAutoDoor::Create
 //===============
-TriggerAutoDoor* TriggerAutoDoor::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMaxs, vec3_t ownerMins ) {
+TriggerAutoDoor* TriggerAutoDoor::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
 	TriggerAutoDoor* autoDoor = SVG_CreateClassEntity<TriggerAutoDoor>();
 	autoDoor->SetOwner( ownerEntity );
 	autoDoor->SetMaxs( ownerMaxs );

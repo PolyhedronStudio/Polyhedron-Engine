@@ -18,6 +18,12 @@
 #include "../Player/Animations.h"
 #include "../Player/Weapons.h"
 
+// Gamemodes.
+#include "../Gamemodes/IGamemode.h"
+//#include "../Gamemodes/DefaultGamemode.h"
+//#include "../Gamemodes/CoopGamemode.h"
+#include "../Gamemodes/DeathmatchGamemode.h"
+
 // Include shotgun weapon header.
 #include "Shotgun.h"
 
@@ -41,7 +47,7 @@ void weapon_shotgun_fire(PlayerClient * ent)
     int         damage = 4;
     int         kick = 8;
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     if (client->playerState.gunFrame == 9) {
         client->playerState.gunFrame++;
@@ -63,10 +69,12 @@ void weapon_shotgun_fire(PlayerClient * ent)
         kick *= 4;
     }
 
-    if (deathmatch->value)
+    // Use a different count for shotgun mode.
+    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
         SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEATHMATCH, MeansOfDeath::Shotgun);
-    else
+    } else {
         SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEFAULT, MeansOfDeath::Shotgun);
+    }
 
     // send muzzle flash
     gi.WriteByte(SVG_CMD_MUZZLEFLASH);
@@ -78,7 +86,7 @@ void weapon_shotgun_fire(PlayerClient * ent)
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
-    if (!((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo))
+    if (!((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo))
         client->persistent.inventory[client->ammoIndex]--;
 }
 
@@ -87,5 +95,5 @@ void Weapon_Shotgun(PlayerClient* ent)
     static int  pause_frames[] = { 22, 28, 34, 0 };
     static int  fire_frames[] = { 8, 9, 0 };
 
-    Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+    _Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
 }

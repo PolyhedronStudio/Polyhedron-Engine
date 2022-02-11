@@ -67,7 +67,7 @@ static const char* const sb_nums[2][STAT_PICS] = {
 // Color table containing actual color codes that match their string names.
 const uint32_t colorTable[8] = {
     U32_BLACK, U32_RED, U32_GREEN, U32_YELLOW,
-    U32_BLUE, U32_CYAN, U32_MAGENTA, U32_WHITE
+    U32_ORANGE, U32_CYAN, U32_MAGENTA, U32_WHITE
 };
 
 //
@@ -195,9 +195,15 @@ float SCR_FadeAlpha(unsigned startTime, unsigned visTime, unsigned fadeTime)
 //
 //=============================================================================
 // 
+// Before adding color orange.
+//const char* const colorNames[10] = {
+//    "black", "red", "green", "yellow",
+//    "blue", "cyan", "magenta", "white",
+//    "alt", "none"
+//};
 const char* const colorNames[10] = {
     "black", "red", "green", "yellow",
-    "blue", "cyan", "magenta", "white",
+    "orange", "cyan", "magenta", "white",
     "alt", "none"
 };
 
@@ -206,9 +212,9 @@ enum color_index_t {
     COLOR_RED,
     COLOR_GREEN,
     COLOR_YELLOW,
-    COLOR_BLUE,
+    COLOR_ORANGE, // Used to be: COLOR_BLUE
     COLOR_CYAN,
-    COLOR_MAGENTA,
+    COLOR_MAGENTA, // COLOR_...
     COLOR_WHITE,
 
     COLOR_ALT,
@@ -248,7 +254,7 @@ color_index_t SCR_ParseColorIndex(const char* s, color_index_t last)
 // SCR_ParseColor
 // 
 // Accepts as input a 12 bit hexadecimal color value, or one of the following
-// string color names: black, red, green, yellow, blue, cyan, magenta, white,
+// string color names: black, red, green, yellow, orange, cyan, magenta, white,
 // alt, none.
 //
 // If the color string is invalid, it returns false. If it is valid, it will
@@ -267,7 +273,7 @@ qboolean SCR_ParseColor(const char* s, color_t* color)
             if (i == 8) {
                 return false;
             }
-            c[i] = Q_charhex(s[i]);
+            c[i] = PH_CharHex(s[i]);
             if (c[i] == -1) {
                 return false;
             }
@@ -453,7 +459,7 @@ void SCR_SetCrosshairColor(void)
 
     health = cl->frame.playerState.stats[STAT_HEALTH];
     if (health <= 0) {
-        VectorSet(scr.crosshair_color.u8, 0, 0, 0);
+        scr.crosshair_color.u8[0] = 0; scr.crosshair_color.u8[1] = 0; scr.crosshair_color.u8[2] = 0;
         return;
     }
 

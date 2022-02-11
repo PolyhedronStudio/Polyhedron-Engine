@@ -23,7 +23,7 @@ PathCorner::PathCorner( Entity* entity )
 void PathCorner::Spawn() {
     Base::Spawn();
 
-    if ( targetNameStr.empty() ) {
+    if ( GetTargetName().empty()) {
         gi.DPrintf( "path_corner with no targetname at %s\n", vec3_to_cstr( GetOrigin() ) );
         return Remove();
     }
@@ -31,7 +31,7 @@ void PathCorner::Spawn() {
     SetSolid( Solid::Trigger );
     SetMaxs( BboxSize );
     SetMins( vec3_negate( BboxSize ) );
-    serverEntity->serverFlags |= EntityServerFlags::NoClient;
+    SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
     LinkEntity();
 }
 

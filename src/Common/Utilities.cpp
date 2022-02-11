@@ -35,11 +35,11 @@ static qboolean match_raw(int c1, int c2, qboolean ignorecase)
         }
 #ifdef _WIN32
         // ugly hack for file listing
-        c1 = c1 == '\\' ? '/' : Q_tolower(c1);
-        c2 = c2 == '\\' ? '/' : Q_tolower(c2);
+        c1 = c1 == '\\' ? '/' : PH_ToLower(c1);
+        c2 = c2 == '\\' ? '/' : PH_ToLower(c2);
 #else
-        c1 = Q_tolower(c1);
-        c2 = Q_tolower(c2);
+        c1 = PH_ToLower(c1);
+        c2 = PH_ToLower(c2);
 #endif
         if (c1 != c2) {
             return false;
@@ -189,7 +189,7 @@ qboolean Com_WildCmpEx(const char *filter, const char *string,
 
 const char *const colorNames[10] = {
     "black", "red", "green", "yellow",
-    "blue", "cyan", "magenta", "white",
+    "orange", "cyan", "magenta", "white",
     "alt", "none"
 };
 
@@ -240,7 +240,7 @@ unsigned Com_ParseExtensionString(const char *s, const char *const extnames[])
 
     mask = 0;
     while (*s) {
-        p = Q_strchrnul(s, ' ');
+        p = PH_StringCharNul(s, ' ');
         l1 = p - s;
         for (i = 0; extnames[i]; i++) {
             l2 = strlen(extnames[i]);
@@ -366,7 +366,7 @@ unsigned Com_HashStringLen(const char *s, size_t len, unsigned size)
 
     hash = 0;
     while (*s && len--) {
-        c = Q_tolower(*s++);
+        c = PH_ToLower(*s++);
         hash = 127 * hash + c;
     }
 

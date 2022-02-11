@@ -41,7 +41,7 @@ void weapon_supershotgun_fire(PlayerClient * ent)
     int         damage = 6;
     int         kick = 12;
 
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     vec3_vectors(client->aimAngles, &forward, &right, NULL);
 
@@ -77,7 +77,7 @@ void weapon_supershotgun_fire(PlayerClient * ent)
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
-    if (!((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo))
+    if (!((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo))
         client->persistent.inventory[client->ammoIndex] -= 2;
 }
 
@@ -86,5 +86,5 @@ void Weapon_SuperShotgun(PlayerClient* ent)
     static int  pause_frames[] = { 29, 42, 57, 0 };
     static int  fire_frames[] = { 7, 0 };
 
-    Weapon_Generic(ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
+//    Weapon_Generic(ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
 }

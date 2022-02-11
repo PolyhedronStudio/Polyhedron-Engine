@@ -2,43 +2,43 @@
 #ifndef __SHARED__QSTRING_H__
 #define __SHARED__QSTRING_H__
 
-static inline int Q_tolower(int c) {
-    if (Q_isupper(c)) {
+static inline int PH_ToLower(int c) {
+    if (PH_IsUpper(c)) {
         c += ('a' - 'A');
     }
     return c;
 }
 
-static inline int Q_toupper(int c) {
-    if (Q_islower(c)) {
+static inline int PH_ToUpper(int c) {
+    if (PH_IsLower(c)) {
         c -= ('a' - 'A');
     }
     return c;
 }
 
-static inline char* Q_strlwr(char* s) {
+static inline char* PH_StringLower(char* s) {
     char* p = s;
 
     while (*p) {
-        *p = Q_tolower(*p);
+        *p = PH_ToLower(*p);
         p++;
     }
 
     return s;
 }
 
-static inline char* Q_strupr(char* s) {
+static inline char* PH_StringUpper(char* s) {
     char* p = s;
 
     while (*p) {
-        *p = Q_toupper(*p);
+        *p = PH_ToUpper(*p);
         p++;
     }
 
     return s;
 }
 
-static inline int Q_charhex(int c) {
+static inline int PH_CharHex(int c) {
     if (c >= 'A' && c <= 'F') {
         return 10 + (c - 'A');
     }
@@ -52,13 +52,13 @@ static inline int Q_charhex(int c) {
 }
 
 // converts quake char to ASCII equivalent
-static inline int Q_charascii(int c) {
-    if (Q_isspace(c)) {
+static inline int PH_CharASCII(int c) {
+    if (PH_IsSpace(c)) {
         // white-space chars are output as-is
         return c;
     }
     c &= 127; // strip high bits
-    if (Q_isprint(c)) {
+    if (PH_IsPrint(c)) {
         return c;
     }
     switch (c) {
@@ -71,17 +71,17 @@ static inline int Q_charascii(int c) {
 
 /*
 =============
-Q_strncpyz
+PH_StringCopyZ
 
 Safe strncpy that ensures a trailing zero
 =============
 */
-inline void Q_strncpyz(char* dest, const char* src, int32_t destsize) {
+inline void PH_StringCopyZ(char* dest, const char* src, int32_t destsize) {
     if (!src) {
-        Com_Error(ERR_FATAL, "Q_strncpyz: NULL src");
+        Com_Error(ERR_FATAL, "PH_StringCopyZ: NULL src");
     }
     if (destsize < 1) {
-        Com_Error(ERR_FATAL, "Q_strncpyz: destsize < 1");
+        Com_Error(ERR_FATAL, "PH_StringCopyZ: destsize < 1");
     }
 
     strncpy(dest, src, destsize - 1);
@@ -89,15 +89,17 @@ inline void Q_strncpyz(char* dest, const char* src, int32_t destsize) {
 }
 
 // portable case insensitive compare
-int Q_strcasecmp(const char* s1, const char* s2);
-int Q_strncasecmp(const char* s1, const char* s2, size_t n);
-char* Q_strcasestr(const char* s1, const char* s2);
+int PH_StringCaseCompare(const char* s1, const char* s2);
+int PH_StringNumberCaseCompare(const char* s1, const char* s2, size_t n);
+char* PH_StringCaseString(const char* s1, const char* s2);
 
-#define Q_stricmp   Q_strcasecmp
-#define Q_stricmpn  Q_strncasecmp
-#define Q_stristr   Q_strcasestr
 
-char* Q_strchrnul(const char* s, int c);
+static inline const int PH_StringCompare(const char* s1, const char* s2) { return PH_StringCaseCompare(s1, s2); }
+static inline const int PH_StringCompareN(const char* s1, const char* s2, size_t n) { return PH_StringNumberCaseCompare(s1, s2, n); }
+static inline char* PH_StringiString(const char* s1, const char* s2) { return PH_StringCaseString(s1, s2); }
+
+
+char* PH_StringCharNul(const char* s, int c);
 void* Q_memccpy(void* dst, const void* src, int c, size_t size);
 void Q_setenv(const char* name, const char* value);
 
@@ -108,8 +110,9 @@ void COM_FilePath(const char* in, char* out, size_t size);
 size_t COM_DefaultExtension(char* path, const char* ext, size_t size);
 char* COM_FileExtension(const char* in);
 
-#define COM_CompareExtension(in, ext) \
-    Q_strcasecmp(COM_FileExtension(in), ext)
+//#define COM_CompareExtension(in, ext) \
+//    PH_StringCaseCompare(COM_FileExtension(in), ext)
+static inline int COM_CompareExtension(const char* in, const char* ext) { return PH_StringCaseCompare(COM_FileExtension(in), ext); }
 
 qboolean COM_IsFloat(const char* s);
 qboolean COM_IsUint(const char* s);

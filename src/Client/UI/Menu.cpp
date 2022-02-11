@@ -453,10 +453,10 @@ static void Field_Draw(menuField_t *f)
 static qboolean Field_TestKey(menuField_t *f, int key)
 {
     if (f->generic.flags & QMF_NUMBERSONLY) {
-        return Q_isdigit(key) || key == '+' || key == '-' || key == '.';
+        return PH_IsDigit(key) || key == '+' || key == '-' || key == '.';
     }
 
-    return Q_isprint(key);
+    return PH_IsPrint(key);
 }
 
 /*
@@ -695,7 +695,7 @@ static void Pairs_Push(menuSpinControl_t *s)
     int i;
 
     for (i = 0; i < s->numItems; i++) {
-        if (!Q_stricmp(s->itemvalues[i], s->cvar->string)) {
+        if (!PH_StringCompare(s->itemvalues[i], s->cvar->string)) {
             s->curvalue = i;
             return;
         }
@@ -738,7 +738,7 @@ static void Strings_Push(menuSpinControl_t *s)
     int i;
 
     for (i = 0; i < s->numItems; i++) {
-        if (!Q_stricmp(s->itemnames[i], s->cvar->string)) {
+        if (!PH_StringCompare(s->itemnames[i], s->cvar->string)) {
             s->curvalue = i;
             return;
         }
@@ -1106,7 +1106,7 @@ static menuSound_t MenuList_Key(menuList_t *l, int key)
         return QMS_NOTHANDLED;
     }
 
-    if (Key_IsDown(K_ALT) && Q_isdigit(key)) {
+    if (Key_IsDown(K_ALT) && PH_IsDigit(key)) {
         return MenuList_FindColumn(l, key - '0');
     }
 
@@ -1126,13 +1126,13 @@ static menuSound_t MenuList_Key(menuList_t *l, int key)
 
         //l->scratchTime = uis.realtime;
 
-        if (!Q_stricmpn(UI_GetColumn((char *)l->items[l->curvalue] + l->extrasize, l->sortcol),
+        if (!PH_StringCompareN(UI_GetColumn((char *)l->items[l->curvalue] + l->extrasize, l->sortcol),
                         l->scratch, l->scratchCount)) {
             return QMS_NOTHANDLED;
         }
 
         for (i = 0; i < l->numItems; i++) {
-            if (!Q_stricmpn(UI_GetColumn((char *)l->items[i] + l->extrasize, l->sortcol), l->scratch, l->scratchCount)) {
+            if (!PH_StringCompareN(UI_GetColumn((char *)l->items[i] + l->extrasize, l->sortcol), l->scratch, l->scratchCount)) {
                 MenuList_SetValue(l, i);
                 return QMS_SILENT;
             }

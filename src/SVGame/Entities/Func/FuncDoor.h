@@ -26,7 +26,7 @@ public:
     void		Precache() override;
 	virtual void Spawn() override;
     void        PostSpawn() override;
-	//void		SpawnKey( const std::string& key, const std::string& value ) override;
+	void		SpawnKey( const std::string& key, const std::string& value ) override;
 
 protected:
     void        DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator );
@@ -46,8 +46,8 @@ protected:
 
     // These are leftovers from the legacy brush movement functions
     // Soon, we'll have a... better way... of doing this
-    static void OnDoorHitTop( Entity* self );
-    static void OnDoorHitBottom( Entity* self );
+    static void OnDoorHitTop( SVGBaseEntity* self );
+    static void OnDoorHitBottom( SVGBaseEntity* self );
 
     // Admer: some of these could be moved to SVGBaseMover
     void        CalculateMoveSpeed();

@@ -17,6 +17,7 @@ public:
 	static constexpr int32_t SF_Toggled = 1 << 1;
 	static constexpr int32_t SF_StopWhenBlocked = 1 << 2;
 
+	void			Precache() override;
 	void			Spawn() override;
 	// Find the initial path_corner and teleport to it
 	void			PostSpawn() override;
@@ -24,6 +25,8 @@ public:
 
 	void			TrainUse( SVGBaseEntity* other, SVGBaseEntity* activator );
 
+	// Finds the next path corner target, if any.
+	void			FindNextTarget();
 	// Travels to the next path_corner
 	void			NextCornerThink();
 	// Resumes the path when the train is used but was stopped before
@@ -31,7 +34,7 @@ public:
 	// Waits at the arrived path_corner
 	void			WaitAtCorner();
 	// Callback for the brush movement code
-	static void		OnWaitAtCorner( Entity* ent );
+	static void		OnWaitAtCorner( SVGBaseEntity* ent );
 	// The train has been blocked by an obstacle, damage it or stop?
 	void			TrainBlocked( SVGBaseEntity* other );
 

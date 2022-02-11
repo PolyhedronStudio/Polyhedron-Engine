@@ -9,7 +9,6 @@
 #include "../../Entities.h"
 #include "../../Utilities.h"
 #include "../../Physics/StepMove.h"
-#include "../../BrushFunctions.h"
 
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
@@ -32,9 +31,21 @@ FuncDoorRotating::FuncDoorRotating( Entity* entity )
 // FuncDoorRotating::Spawn
 //===============
 void FuncDoorRotating::Spawn() {
-	Base::Spawn();
-
+	// Be sure to set angles first before calling Base::Spawn because
+	// a func_door already does SetMoveAngles for us.
 	SetAngles( vec3_zero() );
+
+	// Set acceleration to speed in case it isn't set.
+	if (!GetAcceleration()) {
+		SetAcceleration(GetSpeed());
+	}
+	// Set deceleration to speed in case it isn't set.
+	if (!GetDeceleration()) {
+		SetDeceleration(GetSpeed());
+	}
+
+	// FuncDoor spawn.
+	Base::Spawn();
 
 	// Set the axis of rotation
 	moveDirection = vec3_zero();
@@ -51,8 +62,9 @@ void FuncDoorRotating::Spawn() {
 		moveDirection = vec3_negate( moveDirection );
 	}
 
+	// Set a default distance.
 	if ( !distance ) {
-		gi.DPrintf( "%s with no distance set\n", GetClassName() );
+		gi.DPrintf( "entity: %i:%s with no distance set\n", GetNumber(), GetClassname() );
 		distance = 90.0f;
 	}
 
@@ -66,12 +78,19 @@ void FuncDoorRotating::Spawn() {
 		moveDirection = vec3_negate( moveDirection );
 	}
 
+	// Setup our moveInfo.
+	moveInfo.state = MoverState::Bottom;
+	moveInfo.speed = GetSpeed();
+	moveInfo.acceleration = GetAcceleration();
+	moveInfo.deceleration = GetDeceleration();
+	moveInfo.wait = GetWaitTime();
 	moveInfo.startOrigin = GetOrigin();
 	moveInfo.endOrigin = GetOrigin();
 	moveInfo.startAngles = GetStartPosition();
 	moveInfo.endAngles = GetEndPosition();
 	moveInfo.dir = moveDirection;
 
+	// Link door.
 	LinkEntity();
 }
 
@@ -80,7 +99,13 @@ void FuncDoorRotating::Spawn() {
 //===============
 void FuncDoorRotating::SpawnKey( const std::string& key, const std::string& value ) {
 	if ( key == "distance" ) {
-		ParseFloatKeyValue( key, value, distance );
+		// Distance value.
+		float parsedFloat = 0;
+
+		// Parse.
+		ParseFloatKeyValue( key, value, parsedFloat);
+
+		distance = parsedFloat;
 	} else {
 		Base::SpawnKey( key, value );
 	}

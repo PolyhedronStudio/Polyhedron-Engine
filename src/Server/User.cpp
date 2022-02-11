@@ -525,9 +525,6 @@ void SV_Begin_f(void)
         return;
     }
 
-    // Fetch serverinfo  to detect whether this is a mainmenu server or not.
-
-
     Com_DPrintf("Going from ConnectionState::Primed to ConnectionState::Spawned for %s\n",
                 sv_client->name);
     sv_client->connectionState = ConnectionState::Spawned;
@@ -625,9 +622,9 @@ static void SV_BeginDownload_f(void)
         // don't allow anything with .. path
         || strstr(name, "..")
         // leading dots, slashes, etc are no good
-        || !Q_ispath(name[0])
+        || !PH_IsPath(name[0])
         // trailing dots, slashes, etc are no good
-        || !Q_ispath(name[len - 1])
+        || !PH_IsPath(name[len - 1])
         // MUST be in a subdirectory
         || !strchr(name, '/')) {
         Com_DPrintf("Refusing download of %s to %s\n", name, sv_client->name);
@@ -790,10 +787,11 @@ static void SV_NextServer_f(void)
 
     if (!nextserver[0])
     {
-        if (Cvar_VariableInteger("coop"))
-            Cbuf_AddText(&cmd_buffer, "gamemap \"*nacstart\"\n");
-        else
+        if (Cvar_VariableString("gamemode") == "coop") {
+            Cbuf_AddText(&cmd_buffer, "gamemap \"*phcm_start\"\n");
+        } else {
             Cbuf_AddText(&cmd_buffer, "killserver\n");
+        }
     }
     else
     {
@@ -1007,7 +1005,7 @@ static void SV_ExecuteUserCommand(const char *s)
     }
 
     LIST_FOR_EACH(FilterCommand, filter, &sv_filterlist, entry) {
-        if (!Q_stricmp(filter->string, c)) {
+        if (!PH_StringCompare(filter->string, c)) {
             handle_filtercmd(filter);
             return;
         }

@@ -46,13 +46,12 @@ cvar_t  *sv_reserved_password;
 cvar_t  *sv_force_reconnect;
 cvar_t  *sv_show_name_changes;
 
-cvar_t  *sv_airaccelerate;
-cvar_t  *sv_qwmod;              // atu QW Physics modificator
 cvar_t  *sv_novis;
 
 cvar_t* sv_in_bspmenu;
 
 cvar_t  *sv_maxclients;
+cvar_t  *sv_gamemode;
 cvar_t  *sv_reserved_slots;
 cvar_t  *sv_showclamp;
 cvar_t  *sv_locked;
@@ -1931,7 +1930,8 @@ void SV_Init(void)
     Cvar_Get("timelimit", "0", CVAR_SERVERINFO);
     sv_in_bspmenu = Cvar_Get("in_bspmenu", "0", CVAR_SERVERINFO | CVAR_ROM);
 
-    sv_maxclients = Cvar_Get("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
+    sv_maxclients = Cvar_Get("maxclients", "8", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_LATCH);
+    sv_gamemode = Cvar_Get("gamemode", "singleplayer", CVAR_SERVERINFO | CVAR_LATCH);
     sv_reserved_slots = Cvar_Get("sv_reserved_slots", "0", CVAR_LATCH);
     sv_hostname = Cvar_Get("hostname", "noname", CVAR_SERVERINFO | CVAR_ARCHIVE);
 #if USE_SYSCON
@@ -1948,8 +1948,6 @@ void SV_Init(void)
     sv_force_reconnect = Cvar_Get("sv_force_reconnect", "", CVAR_LATCH);
     sv_show_name_changes = Cvar_Get("sv_show_name_changes", "0", 0);
 
-    sv_airaccelerate = Cvar_Get("sv_airaccelerate", "0", CVAR_LATCH);
-    sv_qwmod = Cvar_Get("sv_qwmod", "1", CVAR_LATCH);   //atu QWMod
     sv_public = Cvar_Get("public", "0", CVAR_LATCH);
     sv_password = Cvar_Get("sv_password", "", CVAR_PRIVATE);
     sv_reserved_password = Cvar_Get("sv_reserved_password", "", CVAR_PRIVATE);

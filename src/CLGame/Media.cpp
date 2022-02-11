@@ -116,7 +116,7 @@ static void CLG_ParsePlayerSkin(char* name, char* model, char* skin, const char*
     return;
 
 default_skin:
-    if (!Q_stricmp(model, "female")) {
+    if (!PH_StringCompare(model, "female")) {
         strcpy(model, "female");
         strcpy(skin, "athena");
     }
@@ -156,7 +156,7 @@ void CLG_LoadClientInfo(ClientInfo* ci, const char* str)
     Q_concat(model_filename, sizeof(model_filename),
         "players/", model_name, "/tris.md2", NULL);
     ci->model = clgi.R_RegisterModel(model_filename);
-    if (!ci->model && Q_stricmp(model_name, "male")) {
+    if (!ci->model && PH_StringCompare(model_name, "male")) {
         strcpy(model_name, "male");
         strcpy(model_filename, "players/male/tris.md2");
         ci->model = clgi.R_RegisterModel(model_filename);
@@ -169,7 +169,7 @@ void CLG_LoadClientInfo(ClientInfo* ci, const char* str)
 
     // if we don't have the skin and the model was female,
     // see if athena skin exists
-    if (!ci->skin && !Q_stricmp(model_name, "female")) {
+    if (!ci->skin && !PH_StringCompare(model_name, "female")) {
         strcpy(skin_name, "athena");
         strcpy(skin_filename, "players/female/athena.pcx");
         ci->skin = clgi.R_RegisterSkin(skin_filename);
@@ -177,7 +177,7 @@ void CLG_LoadClientInfo(ClientInfo* ci, const char* str)
 
     // if we don't have the skin and the model wasn't male,
     // see if the male has it (this is for CTF's skins)
-    if (!ci->skin && Q_stricmp(model_name, "male")) {
+    if (!ci->skin && PH_StringCompare(model_name, "male")) {
         // change model to male
         strcpy(model_name, "male");
         strcpy(model_filename, "players/male/tris.md2");
@@ -203,7 +203,7 @@ void CLG_LoadClientInfo(ClientInfo* ci, const char* str)
         Q_concat(weapon_filename, sizeof(weapon_filename),
             "players/", model_name, "/", cl->weaponModels[i], NULL);
         ci->weaponmodel[i] = clgi.R_RegisterModel(weapon_filename);
-        if (!ci->weaponmodel[i] && !Q_stricmp(model_name, "cyborg")) {
+        if (!ci->weaponmodel[i] && !PH_StringCompare(model_name, "cyborg")) {
             // try male
             Q_concat(weapon_filename, sizeof(weapon_filename),
                 "players/male/", cl->weaponModels[i], NULL);

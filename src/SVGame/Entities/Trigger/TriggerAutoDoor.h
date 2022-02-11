@@ -16,7 +16,7 @@ public:
 	// Responds to players touching this trigger
 	void					AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
 	// Creates an automatic door trigger and sets everything up for it
-	static TriggerAutoDoor* Create( SVGBaseEntity* ownerEntity, vec3_t ownerMaxs, vec3_t ownerMins );
+	static TriggerAutoDoor* Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs );
 
 protected:
 	float					debounceTouchTime;

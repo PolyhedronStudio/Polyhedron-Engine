@@ -2,21 +2,20 @@
 // LICENSE HERE.
 
 //
-// DefaultGameMode.h
+// DefaultGamemode.h
 //
 // Default game mode to run, allows for all sorts of stuff.
 //
 */
-#ifndef __SVGAME_GAMEMODES_DEFAULTGAMEMODE_H__
-#define __SVGAME_GAMEMODES_DEFAULTGAMEMODE_H__
+#pragma once
 
-#include "IGameMode.h"
+#include "IGamemode.h"
 
-class DefaultGameMode : public IGameMode {
+class DefaultGamemode : public IGamemode {
 public:
     // Constructor/Deconstructor.
-    DefaultGameMode();
-    virtual ~DefaultGameMode() override;
+    DefaultGamemode();
+    virtual ~DefaultGamemode() override;
 
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
@@ -32,7 +31,7 @@ public:
     virtual BaseEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
 
     //
-    // Combat GameMode actions.
+    // Combat Gamemode actions.
     //
     virtual void EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int32_t damage, vec3_t point) override;
     virtual void InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t dflags, int32_t mod) override;
@@ -52,7 +51,7 @@ public:
     // 
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(Entity *serverEntity) override;
+    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) override;
     virtual void ClientEndServerFrame(Entity *serverEntity) override;
     virtual void ClientDisconnect(PlayerClient* ent) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
@@ -61,12 +60,15 @@ public:
     //
     // Client related functions/utilities.
     // 
-    virtual void InitializeClientPersistentData(ServersClient* client) override;
-    virtual void InitializeClientRespawnData(ServersClient *client) override;
+    virtual void InitializeClientPersistentData(ServerClient* client) override;
+    virtual void InitializeClientRespawnData(ServerClient *client) override;
 
     virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) override;
     virtual void PutClientInServer(Entity *ent) override;
     virtual void RespawnClient(PlayerClient* ent) override;
+    virtual void RespawnAllClients() override;
+
+    virtual void ClientDeath(PlayerClient *clientEntity) override;
 
     // Some information that should be persistant, like health,
     // is still stored in the edict structure, so it needs to
@@ -79,5 +81,3 @@ public:
 private:
 
 };
-
-#endif // __SVGAME_GAMEMODES_DEFAULTGAMEMODE_H__

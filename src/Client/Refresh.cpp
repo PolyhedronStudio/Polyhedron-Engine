@@ -83,7 +83,7 @@ qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p)
         return false;
 
     s = vid_modelist->string;
-    while (Q_isspace(*s))
+    while (PH_IsSpace(*s))
         s++;
     if (!*s)
         return false;
@@ -92,7 +92,7 @@ qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p)
     while (1) {
         if (!strncmp(s, "desktop", 7)) {
             s += 7;
-            if (*s && !Q_isspace(*s)) {
+            if (*s && !PH_IsSpace(*s)) {
                 Com_DPrintf("Mode %d is malformed\n", mode);
                 return false;
             }
@@ -120,7 +120,7 @@ qboolean VID_GetFullscreen(rect_t *rc, int *freq_p, int *depth_p)
         if (mode == vid_fullscreen->integer) {
             break;
         }
-        while (Q_isspace(*s))
+        while (PH_IsSpace(*s))
             s++;
         if (!*s) {
             Com_DPrintf("Mode %d not found\n", vid_fullscreen->integer);
@@ -441,6 +441,7 @@ void(*R_DrawStretchPic)(int x, int y, int w, int h, qhandle_t pic) = NULL;
 void(*R_TileClear)(int x, int y, int w, int h, qhandle_t pic) = NULL;
 void(*R_DrawFill8)(int x, int y, int w, int h, int c) = NULL;
 void(*R_DrawFill32)(int x, int y, int w, int h, uint32_t color) = NULL;
+void(*R_Set2DTransform)(float *matrix) = NULL;
 void(*R_BeginFrame)(void) = NULL;
 void(*R_EndFrame)(void) = NULL;
 void(*R_ModeChanged)(int width, int height, int flags, int rowbytes, void *pixels) = NULL;

@@ -18,6 +18,12 @@
 #include "../Player/Animations.h"
 #include "../Player/Weapons.h"
 
+// Gamemodes.
+#include "../Gamemodes/IGamemode.h"
+//#include "../Gamemodes/DefaultGamemode.h"
+//#include "../Gamemodes/CoopGamemode.h"
+#include "../Gamemodes/DeathmatchGamemode.h"
+
 // Include machinegun weapon header.
 #include "Machinegun.h"
 
@@ -42,7 +48,7 @@ void Machinegun_Fire(PlayerClient* ent)
 
 
     // Get the client.
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     if (!(client->buttons & BUTTON_ATTACK)) {
         client->machinegunShots = 0;
@@ -77,8 +83,8 @@ void Machinegun_Fire(PlayerClient* ent)
     client->kickOrigin[0] = crandom() * 0.35;
     client->kickAngles[0] = client->machinegunShots * -1.5;
 
-    // raise the gun as it is firing
-    if (!deathmatch->value) {
+    // raise the gun as it is firing if not in deathmatch mode.
+    if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
         client->machinegunShots++;
         if (client->machinegunShots > 9)
             client->machinegunShots = 9;
@@ -101,7 +107,7 @@ void Machinegun_Fire(PlayerClient* ent)
 
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
-    if (!((int)gamemodeflags->value & GameModeFlags::InfiniteAmmo))
+    if (!((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo))
         client->persistent.inventory[client->ammoIndex]--;
 
     client->animation.priorityAnimation = PlayerAnimation::Attack;
@@ -120,5 +126,5 @@ void Weapon_Machinegun(PlayerClient* ent)
     static int  pause_frames[] = { 23, 45, 0 };
     static int  fire_frames[] = { 4, 5, 0 };
 
-    Weapon_Generic(ent, 3, 5, 45, 49, pause_frames, fire_frames, Machinegun_Fire);
+//    Weapon_Generic(ent, 3, 5, 45, 49, pause_frames, fire_frames, Machinegun_Fire);
 }

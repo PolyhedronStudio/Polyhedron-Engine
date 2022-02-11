@@ -13,4 +13,4 @@ typedef struct rect_s {
     int32_t x, y, width, height;
 } rect_t;
 
-#endif // __INC_SHARED_MATH_MATRIX4_H__
+#endif // __INC_SHARED_MATH_RECTANGLE_H__

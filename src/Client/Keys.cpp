@@ -239,10 +239,10 @@ int Key_StringToKeynum(const char *str)
     if (!str || !str[0])
         return -1;
     if (!str[1])
-        return Q_tolower(str[0]);
+        return PH_ToLower(str[0]);
 
     for (kn = keynames; kn->name; kn++) {
-        if (!Q_stricmp(str, kn->name))
+        if (!PH_StringCompare(str, kn->name))
             return kn->keynum;
     }
     return -1;
@@ -292,7 +292,7 @@ const char *Key_GetBinding(const char *binding)
 
     for (key = 0; key < 256; key++) {
         if (keybindings[key]) {
-            if (!Q_stricmp(keybindings[key], binding)) {
+            if (!PH_StringCompare(keybindings[key], binding)) {
                 return Key_KeynumToString(key);
             }
         }
@@ -325,7 +325,7 @@ int Key_EnumBindings(int key, const char *binding)
     }
     for (; key < 256; key++) {
         if (keybindings[key]) {
-            if (!Q_stricmp(keybindings[key], binding)) {
+            if (!PH_StringCompare(keybindings[key], binding)) {
                 return key;
             }
         }

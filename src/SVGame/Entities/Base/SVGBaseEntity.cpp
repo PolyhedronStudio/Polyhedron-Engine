@@ -6,7 +6,12 @@
 //
 //
 */
+
 #include "../../ServerGameLocal.h"		// SVGame.
+
+//
+// EntityBridge.
+//
 #include "../../Effects.h"		// Effects.
 #include "../../Entities.h"		// Entities.
 #include "../../Utilities.h"		// Util funcs.
@@ -14,65 +19,10 @@
 #include "SVGBaseTrigger.h"
 #include "../trigger/TriggerDelayedUse.h"
 
+
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
-	////
-	//// All callback functions best be nullptr.
-	////
-	//thinkFunction = nullptr;
-	//useFunction = nullptr;
-	//touchFunction = nullptr;
-	//blockedFunction = nullptr;
-	//takeDamageFunction = nullptr;
-	//dieFunction = nullptr;
 
-	////
-	//// Set all entity pointer references to nullptr.
-	////
-	//enemyEntity = nullptr;
-	//groundEntity = nullptr;
-	//oldEnemyEntity = nullptr;
-	//teamChainEntity = nullptr;
-	//teamMasterEntity = nullptr;
-
-	////
-	//// Default values for members.
-	////
-	//moveType = MoveType::None;
-
-	//// Velocity.
-	//angularVelocity = vec3_zero();
-	//damage = 0;
-	//deadFlag = DEAD_NO;
-	//delayTime = 0;
-	//enemyEntity = nullptr;
-	//flags = 0;
-	//gravity = 0;
-	//groundEntity = nullptr;
-	//groundEntityLinkCount = 0;
-	//health = 0;
-	//idealYawAngle = 0.f;
-	//killTargetStr = "";
-	//mass = 0;
-	//maxHealth = 0;
-	//messageStr = "";
-	//model = "";
-	//moveType = MoveType::None;
-	//nextThinkTime = 0;
-	//oldEnemyEntity = nullptr;
-	//ownerEntity = nullptr;
-	//spawnFlags = 0;
-	//takeDamage = TakeDamage::No;
-	//targetStr = "";
-	//targetNameStr = "";
-	//teamChainEntity = nullptr;
-	//teamMasterEntity = nullptr;
-	//viewHeight = 0;
-	//velocity = vec3_zero();
-	//waitTime = 0.f;
-	//waterLevel = 0;
-	//waterType = 0;
-	//yawSpeed = 0.f;
 }
 SVGBaseEntity::~SVGBaseEntity() {
 
@@ -87,7 +37,6 @@ SVGBaseEntity::~SVGBaseEntity() {
 //===============
 //
 void SVGBaseEntity::Precache() {
-	//gi.DPrintf("SVGBaseEntity::Precache();");
 }
 
 //
@@ -99,10 +48,6 @@ void SVGBaseEntity::Precache() {
 //===============
 //
 void SVGBaseEntity::Spawn() {
-	//gi.DPrintf("SVGBaseEntity::Spawn();");
-
-	// Set default movetype to none.
-	//SetMoveType(MoveType::None);
 }
 
 //
@@ -114,7 +59,6 @@ void SVGBaseEntity::Spawn() {
 //===============
 //
 void SVGBaseEntity::Respawn() {
-	//gi.DPrintf("SVGBaseEntity::Respawn();");
 }
 
 //
@@ -127,7 +71,6 @@ void SVGBaseEntity::Respawn() {
 //===============
 //
 void SVGBaseEntity::PostSpawn() {
-	//gi.DPrintf("SVGBaseEntity::PostSpawn();");
 }
 
 //
@@ -235,27 +178,13 @@ qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::
 //===============
 //
 void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
-	//{"lip", STOFS(lip), F_INT},
-	//{ "distance", STOFS(distance), F_INT },
-	//{ "height", STOFS(height), F_INT },
-	//{ "noise", STOFS(noise), F_LSTRING },
-	//{ "pausetime", STOFS(pausetime), F_FLOAT },
-	//{ "item", STOFS(item), F_LSTRING },
-
-	//{ "gravity", STOFS(gravity), F_LSTRING },
-	//{ "sky", STOFS(sky), F_LSTRING },
-	//{ "skyrotate", STOFS(skyrotate), F_FLOAT },
-	//{ "skyaxis", STOFS(skyaxis), F_VECTOR },
-	//{ "minyaw", STOFS(minyaw), F_FLOAT },
-	//{ "maxyaw", STOFS(maxyaw), F_FLOAT },
-	//{ "minpitch", STOFS(minpitch), F_FLOAT },
-	//{ "maxpitch", STOFS(maxpitch), F_FLOAT },
-	//{ "nextmap", STOFS(nextMap), F_LSTRING },
-	
-	// STOOOOOOOP WITH THE GOD DAMN WARNINGS IN THE CONSOLE ABOUT CLASSNAME
-	// RAAAAAAAAHHHHH
+    // Stop mapversion from causing warnings.
 	if ( key == "classname" ) {
-		SetClassName( value.c_str() );
+		SetClassname( value.c_str() );
+	}
+	// Stop mapversion from causing warnings.
+	else if (key == "mapversion") {
+		
 	}
 	// Angle.
 	else if (key == "angle") {
@@ -288,8 +217,6 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "delay") {
 		// Parsed float.
 		float parsedFloat = 0.f;
-
-		// Parse.
 		ParseFloatKeyValue(key, value, parsedFloat);
 
 		// Assign.
@@ -299,19 +226,24 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "killtarget") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetKillTarget(parsedString);
 	}
+	// Mass.
+	else if (key == "mass") {
+	    // Parsed string.
+	    int32_t parsedInteger = 0;
+	    ParseIntegerKeyValue(key, value, parsedInteger);
+
+	    // Assign.
+	    SetMass(parsedInteger);
+	} 
 	// Message.
 	else if (key == "message") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
@@ -338,8 +270,6 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else if (key == "target") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
@@ -348,8 +278,6 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else 	if (key == "targetname") {
 		// Parsed string.
 		std::string parsedString = "";
-
-		// Parse.
 		ParseStringKeyValue(key, value, parsedString);
 
 		// Assign.
@@ -364,7 +292,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		// Set SpawnFlags.
 		SetSpawnFlags(parsedSpawnFlags);
 	} else {
-		gi.DPrintf("Entity ID: %i - classname: %s has unknown Key/Value['%s','%s']\n", GetServerEntity()->state.number, GetServerEntity()->className, key.c_str(), value.c_str());
+	    gi.DPrintf("Warning: Entity[#%i:%s] has unknown Key/Value['%s','%s']\n", GetNumber(), GetClassname(), key.c_str(), value.c_str());
 	}
 }
 
@@ -455,19 +383,18 @@ void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 //===============
 void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 {
-	if ( nullptr == activatorOverride )
-	{
-		activatorOverride = activator;
+	// If activatorOverride is null, use our default activator.
+	if (activatorOverride == nullptr) {
+		activatorOverride = activatorEntityPtr;
 	}
 
-	if ( nullptr == activator )
-	{
+	// If we have no activator at all, then it is this entity itself doing it.
+	if (GetActivator() == nullptr) {
 		activatorOverride = this;
 	}
 
 	// Create a temporary DelayedUse entity in case this entity has a trigger delay
-	if ( GetDelayTime() )
-	{
+	if ( GetDelayTime() ) {
 		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
 		// allocates one such entity and accepts activator, message, target etc. as parameters
 		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'
@@ -483,68 +410,70 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 	}
 
 	// Print the "message"
-	if ( GetMessage().length() && !(activator->GetServerFlags() & EntityServerFlags::Monster) ) 
-	{
+	if ( !GetMessage().empty() && !(activatorOverride->GetServerFlags() & EntityServerFlags::Monster) ) {
 		// Get the message sound
-		int32_t messageSound = GetNoiseIndex();
+		const int32_t messageSound = GetNoiseIndex();
 		
 		// Print the message.
-		SVG_CenterPrint( activator, GetMessage() );
+		SVG_CenterPrint(activatorOverride, GetMessage());
 
 		// Play the message sound
-		if ( messageSound ) 
-		{
+		if ( messageSound ) {
 			SVG_Sound( activatorOverride, CHAN_AUTO, messageSound, 1, ATTN_NORM, 0 );
-		}
-		else 
-		{
-			SVG_Sound( activatorOverride, CHAN_AUTO, gi.SoundIndex( "misc/talk1.wav" ), 1, ATTN_NORM, 0 );
+		} else {
+			SVG_Sound( activatorOverride, CHAN_AUTO, SVG_PrecacheSound( "misc/talk1.wav" ), 1, ATTN_NORM, 0 );
 		}
 	}
 
 	// Remove all entities that qualify as our killtargets
-	if ( GetKillTarget().length() )
-	{
-		SVGBaseEntity* victim = nullptr;
-		while ( victim = SVG_FindEntityByKeyValue( "targetname", GetKillTarget(), victim ) )
-		{	// It is going to die, free it.
-			SVG_FreeEntity( victim->GetServerEntity() );
+	if ( !GetKillTarget().empty() ) {
+		qboolean foundKillTarget = false;
+
+		for (auto* killtargetEntity: GetBaseEntityRange<0, MAX_EDICTS>()
+			| bef::IsValidPointer
+			| bef::HasServerEntity
+			| bef::InUse
+			| bef::HasKeyValue("targetname", GetKillTarget())) {
+
+			// We found a killtarget entity.
+			foundKillTarget = true;
+
+			// Remove our killtarget entity.
+			killtargetEntity->Remove();
 		}
 
-		if ( !IsInUse() ) 
-		{
-			gi.DPrintf( "entity was removed while using killtargets\n" );
-			return;
+		// Inform that we haven't found the killtarget entity.
+		if (!foundKillTarget) {
+			gi.DPrintf("Warning: killtarget entity '%s' couldn't be found.\n", GetKillTarget().c_str());
 		}
 	}
 
 	// Actually fire the targets
-	if ( GetTarget().length() ) 
-	{
-		SVGBaseEntity* targetEntity = nullptr;
-		while ( (targetEntity = SVG_FindEntityByKeyValue( "targetname", GetTarget(), targetEntity )) )
-		{
-			// Doors fire area portals in a special way, so skip those
-			if ( targetEntity->GetClassName() == "func_areaportal"
-				 && (GetClassName() == "func_door" || GetClassName() == "func_door_rotating") ) 
-			{
+	if ( !GetTarget().empty() ) {
+		qboolean foundTarget = false;
+		for (auto* triggerEntity : GetBaseEntityRange<0, MAX_EDICTS>()
+			| bef::IsValidPointer
+			| bef::HasServerEntity
+			| bef::InUse
+			| bef::HasKeyValue("targetname", GetTarget())) {
+
+			// Make sure it is in use, if not, debug.
+			if (!triggerEntity->IsInUse()) {
+				gi.DPrintf("Warning: Target entity{#(%i):%s} is not in use.\n", GetState().number, GetTarget());
 				continue;
 			}
 
-			if ( targetEntity == this ) 
-			{
-				gi.DPrintf( "WARNING: Entity #%i used itself.\n", GetServerEntity()->state.number );
-			}
-			else 
-			{
-				targetEntity->Use( this, activatorOverride );
+			// Doors fire area portals in a special way. So we skip those.
+			if (triggerEntity->GetClassname() == "func_areaportal"
+				&& (GetClassname() == "func_door" || GetClassname() == "func_door_rotating")) {
+				continue;
 			}
 
-			// Make sure it is in use
-			if ( !targetEntity->IsInUse() ) 
-			{
-				gi.DPrintf( "WARNING: Entity #%i was removed while using targets\n", GetServerEntity()->state.number );
-				return;
+			// Do NOT ALLOW an entity to USE ITSELF. :)
+			if (triggerEntity == this) {
+				gi.DPrintf("Warning: Target entity{#(%i):%s} can't trigger itself.\n", GetState().number, GetTarget().c_str());
+			} else {
+				triggerEntity->Use(this, activatorOverride);
 			}
 		}
 	}

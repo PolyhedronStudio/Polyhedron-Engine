@@ -233,8 +233,17 @@ typedef struct maliasmesh_s {
     int             numtris;
     int             numindices;
     QGL_INDEX_TYPE  *indices;
-    maliasvert_t    *verts;
-    maliastc_t      *tcoords;
+    maliasvert_t    *verts; // iqm only
+    maliastc_t      *tcoords; // iqm only
+    vec3_t          *positions; // iqm only
+    vec3_t          *normals; // iqm only
+    vec2_t          *tex_coords; // iqm only
+    vec3_t* tangents;      // iqm only
+    uint32_t* blend_indices; // iqm only
+    vec4_t* blend_weights; // iqm only
+
+    // Skins are ... materials to OpenGL hehe.
+    //struct pbr_material_s *materials[MAX_ALIAS_SKINS];
     image_t         *skins[MAX_ALIAS_SKINS];
     int             numskins;
 } maliasmesh_t;
@@ -421,6 +430,7 @@ void R_SetColor_GL(uint32_t color);
 void R_SetClipRect_GL(const clipRect_t *clip);
 float R_ClampScaleGL(cvar_t *var);
 void R_SetScale_GL(float scale);
+void R_DrawSetTransform_GL(float* matrix);
 void R_DrawStretchPic_GL(int x, int y, int w, int h, qhandle_t pic);
 void R_DrawPic_GL(int x, int y, qhandle_t pic);
 void R_TileClear_GL(int x, int y, int w, int h, qhandle_t pic);
@@ -522,4 +532,5 @@ void HQ2x_Init(void);
 
 qerror_t MOD_LoadMD2_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
 qerror_t MOD_LoadMD3_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadIQM_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
 void MOD_Reference_GL(model_t *model);

@@ -1006,7 +1006,7 @@ static void Cvar_Toggle_f(void)
     }
 
     for (i = 0; i < argc - 2; i++) {
-        if (!Q_stricmp(var->string, Cmd_Argv(2 + i))) {
+        if (!PH_StringCompare(var->string, Cmd_Argv(2 + i))) {
             i = (i + 1) % (argc - 2);
             Cvar_SetByVar(var, Cmd_Argv(2 + i), Cmd_From());
             return;
@@ -1152,7 +1152,7 @@ size_t Cvar_BitInfo(char *info, int bit)
         while (*v) {
             c = *v++;
             c &= 127;        // strip high bits
-            if (Q_isprint(c))
+            if (PH_IsPrint(c))
                 info[total++] = c;
         }
     }

@@ -74,7 +74,7 @@ static void gl_texturemode_changed(cvar_t *self)
     image_t *image;
 
     for (i = 0; i < numFilterModes; i++) {
-        if (!Q_stricmp(filterModes[i].name, self->string))
+        if (!PH_StringCompare(filterModes[i].name, self->string))
             break;
     }
 

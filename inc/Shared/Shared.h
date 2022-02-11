@@ -51,6 +51,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // C++ STL
 //-----------------
+// For std ranges and view support.
+//#ifdef __clang__
+//#undef _HAS_CXX23
+//#define _HAS_CXX23 1
+//#endif
+
 #include <string>
 #include <numbers>
 #include <iostream>
@@ -75,7 +81,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 // Platform specific includes.
 //-----------------
-#include "Shared/platform.h"
+#include "Shared/Platform.h"
 
 
 //
@@ -109,35 +115,35 @@ typedef float vec_t;
 //-----------------
 // Max String limits.
 //-----------------
-constexpr int32_t MAX_STRING_CHARS  = 4096;  // max length of a string passed to Cmd_TokenizeString
-constexpr int32_t MAX_STRING_TOKENS = 256;  // max tokens resulting from Cmd_TokenizeString
-constexpr int32_t MAX_TOKEN_CHARS   = 1024;   // max length of an individual token
-constexpr int32_t MAX_NET_STRING    = 2048;    // max length of a string used in network protocol
+constexpr int32_t MAX_STRING_CHARS  = 4096; // Maximum length of a string passed to Cmd_TokenizeString.
+constexpr int32_t MAX_STRING_TOKENS = 256;  // Maximum tokens resulting from Cmd_TokenizeString.
+constexpr int32_t MAX_TOKEN_CHARS   = 1024; // Maximum length of an individual token.
+constexpr int32_t MAX_NET_STRING    = 2048; // Maximum length of a string used in network protocol.
 
-constexpr int32_t MAX_QPATH     = 64;  // max length of a quake game pathname
-constexpr int32_t MAX_OSPATH    = 256; // max length of a filesystem pathname
+constexpr int32_t MAX_QPATH     = 64;  // Maximum length of a quake game pathname.
+constexpr int32_t MAX_OSPATH    = 256; // Maximum length of a filesystem pathname.
 
 //-----------------
 // Per-level limits
 //-----------------
-constexpr int32_t MAX_CLIENTS   = 256;   // absolute limit
-constexpr int32_t MAX_EDICTS    = 1024; // N&C: POOL: Was 1024 // must change protocol to increase more
+constexpr int32_t MAX_CLIENTS       = 256;  // Absolute limit.
+constexpr int32_t MAX_EDICTS        = 1024; // Maximum amount of entities we can handle.
 constexpr int32_t MAX_LIGHTSTYLES   = 256;
-constexpr int32_t MAX_MODELS    = 256; // these are sent over the net as bytes
-constexpr int32_t MAX_SOUNDS    = 256;// so they cannot be blindly increased
-constexpr int32_t MAX_IMAGES    = 256;
-constexpr int32_t MAX_ITEMS     = 256;
-constexpr int32_t MAX_GENERAL   = (MAX_CLIENTS * 2);// general config strings
+constexpr int32_t MAX_MODELS        = 256;  // These are sent over the net as bytes.
+constexpr int32_t MAX_SOUNDS        = 256;  // So they cannot be blindly increased.
+constexpr int32_t MAX_IMAGES        = 256;
+constexpr int32_t MAX_ITEMS         = 256;
+constexpr int32_t MAX_GENERAL       = (MAX_CLIENTS * 2); // General config strings.
 
-constexpr int32_t MAX_CLIENT_NAME = 16;
+constexpr int32_t MAX_CLIENT_NAME = 16;     // Maximum length of a client's in-game name.
 
 //-----------------
 // Max World Size.
 //-----------------
-constexpr int32_t MAX_WORLD_COORD = (16384);
-constexpr int32_t MIN_WORLD_COORD = (-16384);
+constexpr int32_t MAX_WORLD_COORD = (16384);    // Maximum positive world coordinate.
+constexpr int32_t MIN_WORLD_COORD = (-16384);   // Maximum negative world coordinates.
 
-constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
+constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD); // Max - Min = 16384.
 
 //-----------------
 // General Utility Macros.
@@ -147,29 +153,29 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 #define Q_COUNTOF(a)        (sizeof(a) / sizeof(a[0]))
 
 // Converts a floating point value to short, this brings certain limits with itself,
-// such as losing precision, and a value limit of -4096/+4096
-#define ANGLE2SHORT(x)  ((int)((x)*65536/360) & 65535)
+// such as losing precision, and a range limit value of -4096/+4096
+static inline const short Angle2Short(const float& f) { return ((int)((f) * 65536/360) & 65535); }
 
 // Reversed of the above, converts a short to float.
-#define SHORT2ANGLE(x)  ((x)*(360.0/65536))
+static inline const float ShortToAngle(const short& s) { return ((s) * (360.0f / 65536)); }
 
 //-----------------
-// Fast "C" String Macros
+// Used to be 'Old "C" String Macros'. Renamed, but sticking around for legacy 
+// compatibility reasons over the entire code base.
 //-----------------
-#define Q_isupper(c)    ((c) >= 'A' && (c) <= 'Z')
-#define Q_islower(c)    ((c) >= 'a' && (c) <= 'z')
-#define Q_isdigit(c)    ((c) >= '0' && (c) <= '9')
-#define Q_isalpha(c)    (Q_isupper(c) || Q_islower(c))
-#define Q_isalnum(c)    (Q_isalpha(c) || Q_isdigit(c))
-#define Q_isprint(c)    ((c) >= 32 && (c) < 127)
-#define Q_isgraph(c)    ((c) > 32 && (c) < 127)
-#define Q_isspace(c)    (c == ' ' || c == '\f' || c == '\n' || \
-                         c == '\r' || c == '\t' || c == '\v')
-// Tests if specified character is valid quake path character
-#define Q_ispath(c)     (Q_isalnum(c) || (c) == '_' || (c) == '-')
-// Tests if specified character has special meaning to quake console
-#define Q_isspecial(c)  ((c) == '\r' || (c) == '\n' || (c) == 127)
+static inline bool PH_IsUpper(const char c) { return (c >= 'A' && c <= 'Z'); }
+static inline bool PH_IsLower(const char c) { return (c >= 'a' && c <= 'z'); }
+static inline bool PH_IsDigit(const char c) { return (c >= '0' && c <= '9'); }
+static inline bool PH_IsAlpha(const char c) { return (PH_IsUpper(c) | PH_IsLower(c)); }
+static inline bool PH_IsLetterOrNUmber(const char c) { return (PH_IsAlpha(c) == true || PH_IsDigit(c) == true); }
+static inline bool PH_IsPrint(const char c) { return (c >= 32 && c < 127); }
+static inline bool PH_IsGraph(const char c) { return (c > 32 && c < 127); }
+static inline bool PH_IsSpace(const char c) { return (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v'); }
 
+// Tests if specified character is valid Polyhedron path character
+static inline bool PH_IsPath(const char c) { return (PH_IsLetterOrNUmber(c) || c == '_' || c == '-'); }
+// Tests if specified character has special meaning to Polyhedron console
+static inline bool PH_IsSpecial(const char c) { return (c == '\r' || c == '\n' || c == 127); }
 
 
 //
@@ -179,7 +185,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //
 //=============================================================================
 //
-#include "Shared/endian.h"
+#include "Shared/Endian.h"
 
 
 //
@@ -198,7 +204,7 @@ constexpr int32_t WORLD_SIZE = (MAX_WORLD_COORD - MIN_WORLD_COORD);
 //	Engine Tick Rate Settings.
 //
 //=============================================================================
-#include "Shared/tickrate.h"
+#include "Shared/TickRate.h"
 
 
 //
@@ -243,18 +249,7 @@ typedef enum {
 //
 //=============================================================================
 //
-constexpr uint32_t MAX_INFO_KEY = 64;
-constexpr uint32_t MAX_INFO_VALUE = 64; 
-constexpr uint32_t MAX_INFO_STRING = 512;
-
-char* Info_ValueForKey(const char* s, const char* key);
-void    Info_RemoveKey(char* s, const char* key);
-qboolean    Info_SetValueForKey(char* s, const char* key, const char* value);
-qboolean    Info_Validate(const char* s);
-size_t  Info_SubValidate(const char* s);
-void    Info_NextPair(const char** string, char* key, char* value);
-void    Info_Print(const char* infostring);
-
+#include "KeyValue.h"
 
 
 //
@@ -264,8 +259,7 @@ void    Info_Print(const char* infostring);
 //
 //=============================================================================
 //
-#include "Shared/keys.h"
-
+#include "Shared/Keys.h"
 
 
 //
@@ -275,16 +269,17 @@ void    Info_Print(const char* infostring);
 //
 //=============================================================================
 //
-#include "Shared/ui.h"
+#include "Shared/UI.h"
+
 
 //-----------------
 // Color defines, modify these as you please for custom colors.
 //-----------------
 #define U32_BLACK   MakeColor(  0,   0,   0, 255)
-#define U32_RED     MakeColor(255,   0,   0, 255)
-#define U32_GREEN   MakeColor(  0, 255,   0, 255)
+#define U32_RED     MakeColor(215,  83,  65, 255)
+#define U32_GREEN   MakeColor( 41, 171, 135, 255)
 #define U32_YELLOW  MakeColor(255, 255,   0, 255)
-#define U32_BLUE    MakeColor(  0,   0, 255, 255)
+#define U32_ORANGE  MakeColor(255, 165,   0, 255) // Used to be: U32_BLUE    MakeColor(  0,   0, 255, 255)
 #define U32_CYAN    MakeColor(  0, 255, 255, 255)
 #define U32_MAGENTA MakeColor(255,   0, 255, 255)
 #define U32_WHITE   MakeColor(255, 255, 255, 255)
@@ -404,7 +399,7 @@ struct ConfigStrings {
     static constexpr uint32_t SkyRotate         = 4;
     static constexpr uint32_t StatusBar         = 5;       // display program string
 
-    static constexpr uint32_t AirAcceleration   = 29;      // air acceleration control
+    static constexpr uint32_t Unused            = 29;      // Unused now, in the past it was the air acceleration control config string.
     static constexpr uint32_t MaxClients        = 30;
     static constexpr uint32_t MapCheckSum       = 31;      // for catching cheater maps
 
@@ -418,10 +413,10 @@ struct ConfigStrings {
     static constexpr uint32_t MaxConfigStrings  = (ConfigStrings::General+ MAX_GENERAL);
 };
 
-// Some mods actually exploit ConfigStrings::StatusBar to take space up to ConfigStrings::AirAcceleration
+// Some mods actually exploit ConfigStrings::StatusBar to take space up to ConfigStrings::Unused
 inline static uint32_t CS_SIZE(uint32_t cs) {
-    return ((cs) >= ConfigStrings::StatusBar && (cs) < ConfigStrings::AirAcceleration? \
-        MAX_QPATH * (ConfigStrings::AirAcceleration- (cs)) : MAX_QPATH);
+    return ((cs) >= ConfigStrings::StatusBar && (cs) < ConfigStrings::Unused ? \
+        MAX_QPATH * (ConfigStrings::Unused - (cs)) : MAX_QPATH);
 }
 
 
@@ -432,7 +427,7 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 //
 //=============================================================================
 //
-#include "Shared/pmove.h"
+#include "Shared/PMove.h"
 
 
 
@@ -443,7 +438,7 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 //
 //=============================================================================
 //
-#include "Shared/messaging.h"
+#include "Shared/Messaging.h"
 
 
 //
@@ -471,8 +466,8 @@ typedef struct file_info_s {
 //
 //=============================================================================
 //
-#include "Shared/qstring.h"
-#include "Shared/strings.h"
+#include "Shared/QString.h"
+#include "Shared/Strings.h"
 
 
 //
@@ -482,7 +477,7 @@ typedef struct file_info_s {
 //
 //=============================================================================
 //
-#include "Shared/collision.h"
+#include "Shared/Collision.h"
 
 
 //
@@ -523,6 +518,8 @@ typedef enum {
     DoubleShell     = (1 << 14),    // Double shell rendering.
     HalfDamShell    = (1 << 15),    // Half dam shell.
     UseDisguise     = (1 << 16),    // Use disguise.
+
+    DebugBoundingBox = (1 << 17),   // Renders a debug bounding box using particles.
 } RenderEffects;
 
 // PlayerState->refdef flags

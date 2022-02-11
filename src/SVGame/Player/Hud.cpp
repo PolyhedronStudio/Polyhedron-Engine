@@ -22,8 +22,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities.h"
 #include "../Entities/Base/PlayerClient.h"
 
-// Game Mode interface.
-#include "../GameModes/IGameMode.h"
+// Gamemodes.
+#include "../Gamemodes/IGamemode.h"
+//#include "../Gamemodes/DefaultGamemode.h"
+#include "../Gamemodes/CoopGamemode.h"
+#include "../Gamemodes/DeathmatchGamemode.h"
 
 // Player Client & Hud Header.
 #include "Client.h"     // Include Player Client header.
@@ -88,46 +91,45 @@ void HUD_MoveClientToIntermission(Entity *ent)
 
 }
 
-//
 //===============
 // HUD_BeginIntermission
 // 
 // Begins an intermission process for the given target entity.
 //================
-//
 void SVG_HUD_BeginIntermission(Entity *targ)
 {
     int     i, n;
     Entity *client = nullptr;
 
+    //
+    // 
+    // TODO: Move entire intermission stuff into gamemodes.
+    // 
+    // 
     // Ensure targ is valid.
     if (!targ) {
         return;
     }
 
+    // If it's already activate there is no use in executing this function again.
     if (level.intermission.time) {
-        return;     // already activated
+        return;
     }
 
+    // Let the game know we didn't autosave.
     game.autoSaved = false;
 
-    // respawn any dead clients
-    for (i = 0 ; i < maximumClients->value ; i++) {
-        client = g_entities + 1 + i;
-        if (!client->inUse) {
-            continue;
-        }
-        if (client->classEntity->GetHealth() <= 0) {
-            game.gameMode->RespawnClient((PlayerClient*)client->classEntity);
-        }
-    }
+    // Respawn any dead clients.
+    game.GetCurrentGamemode()->RespawnAllClients();
 
+    // Set intermission time and the map to change to.
     level.intermission.time = level.time;
     level.intermission.changeMap = targ->map;
 
+    // 
     if (strstr(level.intermission.changeMap, "*")) {
-        if (coop->value) {
-            for (i = 0 ; i < maximumClients->value ; i++) {
+        if (!game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
+            for (i = 0 ; i < maximumclients->value ; i++) {
                 client = g_entities + 1 + i;
                 if (!client->inUse) {
                     continue;
@@ -141,7 +143,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
             }
         }
     } else {
-        if (!deathmatch->value) {
+        if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
             level.intermission.exitIntermission = 1;     // go immediately to the next level
             return;
         }
@@ -150,30 +152,31 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     level.intermission.exitIntermission = 0;
 
     // Fetch an intermission entity.
-    Entity *intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_intermission");
+    Entity *intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_intermission");
     if (!intermissionEntity) {
         // the map creator forgot to put in an intermission point...
-        intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_start");
+        intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_start");
         if (!intermissionEntity) {
-            intermissionEntity = SVG_Find(NULL, FOFS(className), "info_player_deathmatch");
+            intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_deathmatch");
         }
     } else {
         // chose one of four spots
         i = rand() & 3;
         while (i--) {
-            intermissionEntity = SVG_Find(intermissionEntity, FOFS(className), "info_player_intermission");
+            intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
             if (!intermissionEntity) {  // wrap around the list 
-                intermissionEntity = SVG_Find(intermissionEntity, FOFS(className), "info_player_intermission");
+                intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
             }
         }
     }
 
+    // Setup intermission origin and view angle.
     level.intermission.origin = intermissionEntity->state.origin, level.intermission.origin;
     level.intermission.viewAngle = intermissionEntity->state.angles;
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
-    for (i = 0 ; i < maximumClients->value ; i++) {
+    for (i = 0 ; i < maximumclients->value ; i++) {
         // Fetch client.
         client = g_entities + 1 + i;
 
@@ -203,13 +206,13 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
     int     sortedscores[MAX_CLIENTS];
     int     score, total;
     int     x, y;
-    ServersClient   *cl;
+    ServerClient   *cl;
     Entity     *cl_ent;
     const char    *tag; // C++20: STRING: Added const to char*
 
     // sort the clients by score
     total = 0;
-    for (i = 0 ; i < game.maximumClients ; i++) {
+    for (i = 0 ; i < game.GetMaxClients() ; i++) {
         cl_ent = g_entities + 1 + i;
         if (!cl_ent->inUse || game.clients[i].respawn.isSpectator)
             continue;
@@ -308,22 +311,27 @@ void SVG_Command_Score_f(SVGBaseEntity*ent)
     if (!ent)
         return;
     
-    ServersClient* client = ent->GetClient();
+    ServerClient* client = ent->GetClient();
 
     // We obviously should not continue, for some reason it has no client...
     if (!client)
         return;
     
+    // Hide inventory display.
     client->showInventory = false;
 
-    if (!deathmatch->value && !coop->value)
+    // Don't show scores if not in one of the following game modes.
+    if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>() && !game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
         return;
+    }
 
+    // If score display was up, hide it and terminate this function to prevent another display of scores.
     if (client->showScores) {
         client->showScores = false;
         return;
     }
 
+    // Show score display.
     client->showScores = true;
     HUD_SendDMScoreboardMessage(ent);
 }
@@ -403,7 +411,8 @@ void SVG_HUD_SetClientStats(Entity* ent)
     //
     ent->client->playerState.stats[STAT_LAYOUTS] = 0;
 
-    if (deathmatch->value) {
+    // Special layout for deathmatch.
+    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
         if (ent->client->persistent.health <= 0 || level.intermission.time
             || ent->client->showScores)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
@@ -450,8 +459,8 @@ void SVG_HUD_CheckChaseStats(Entity *ent)
         return;
     }
 
-    for (i = 1; i <= maximumClients->value; i++) {
-        ServersClient* cl;
+    for (i = 1; i <= maximumclients->value; i++) {
+        ServerClient* cl;
 
         cl = g_entities[i].client;
 
@@ -475,7 +484,7 @@ void SVG_HUD_SetSpectatorStats(Entity *ent)
         return;
     }
 
-    ServersClient* cl = ent->client;
+    ServerClient* cl = ent->client;
 
     if (!cl->chaseTarget) {
         SVG_HUD_SetClientStats(ent);

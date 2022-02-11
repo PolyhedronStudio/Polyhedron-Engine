@@ -186,13 +186,13 @@ typedef struct {
 } MessagePacket;
 
 // This is best to match the actual server game frame rate.
-static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;    // Was: 10, later on 20, then 60, now just matches the fps.
+static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;
 
 // Used to divide for rate calculating.
-static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 60 / 10 = 6.
+static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
 // Used to multiply for rate user input drop calculating.
-static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 60 / 10 = 6.
+static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
@@ -415,9 +415,9 @@ typedef struct server_static_s {
     qboolean    initialized;        // sv_init has completed
     unsigned    realtime;           // always increasing, no clamping, etc
 
-    client_t    *client_pool;       // [maximumClients]
+    client_t    *client_pool;       // [maximumclients]
 
-    unsigned        num_entities;   // maximumClients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
+    unsigned        num_entities;   // maximumclients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
     PackedEntity    *entities;      // [num_entities]
 
@@ -452,8 +452,6 @@ extern cvar_t       *sv_hostname;
 extern cvar_t       *sv_maxclients;
 extern cvar_t       *sv_password;
 extern cvar_t       *sv_reserved_slots;
-extern cvar_t       *sv_airaccelerate;        // development tool
-extern cvar_t       *sv_qwmod;                // atu QW Physics modificator
 extern cvar_t       *sv_enforcetime;
 
 extern cvar_t       *sv_force_reconnect;

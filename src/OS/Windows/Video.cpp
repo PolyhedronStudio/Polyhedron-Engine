@@ -87,7 +87,7 @@ static qboolean VID_SDL_GL_LoadLibrary(void)
         // check and enforce `gl_driver' cvar to `opengl32', unaware
         // of other systems than Windows
         s = gl_driver->string;
-        if (!Q_stricmp(s, "opengl32") || !Q_stricmp(s, "opengl32.dll")) {
+        if (!PH_StringCompare(s, "opengl32") || !PH_StringCompare(s, "opengl32.dll")) {
             Com_Printf("...attempting to load %s instead of %s\n",
                        gl_driver->default_string, s);
             s = gl_driver->default_string;

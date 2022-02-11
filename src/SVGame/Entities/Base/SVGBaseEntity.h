@@ -8,12 +8,16 @@
 // one way or the other :)
 //
 */
-#ifndef __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
-#define __SVGAME_ENTITIES_BASE_SVGBASEENTITY_H__
+#pragma once
 
 // It makes sense to include TypeInfo in SVGBaseEntity.h, 
 // because this class absolutely requires it
 #include "../../TypeInfo.h"
+
+// Forward declare.
+class SVGEntityHandle;
+
+#include "SVGEntityHandle.h"
 
 class SVGBaseEntity {
 public:
@@ -100,9 +104,9 @@ public:
         return 0.f;
     }
     // Placeholder, implemented by SVGBaseTrigger, and derivates of that class.
-    //inline SVGBaseEntity* GetActivator() {
-    //    return nullptr;
-    //}
+    virtual inline SVGBaseEntity* GetActivator() {
+        return activatorEntityPtr;
+    }
     // Return the 'angles' value.
     inline const vec3_t& GetAngles() {
         return serverEntity->state.angles;
@@ -117,14 +121,14 @@ public:
         return vec3_scale( GetMaxs() + GetMins(), 0.5f );
     }
 
-    // Return the 'className' value.
-    inline const char* GetClassName() {
-        return serverEntity->className;
+    // Return the 'classname' value.
+    inline const char* GetClassname() {
+        return serverEntity->classname;
     }
 
-    // Set the 'className' value.
-    inline void SetClassName(const char* className) {
-        serverEntity->className = className;
+    // Set the 'classname' value.
+    inline void SetClassname(const char* classname) {
+        serverEntity->classname = classname;
     }
 
     // Return the 'client' pointer.
@@ -135,6 +139,11 @@ public:
     // Return the 'clipmask' value.
     inline const int32_t GetClipMask() {
         return serverEntity->clipMask;
+    }
+
+    // Return the 'count' value.
+    inline const int32_t GetCount() {
+        return count;
     }
 
     // Return the 'damage' value.
@@ -196,7 +205,7 @@ public:
     }
 
     // Return the 'groundEntitPtr' entity.
-    inline SVGBaseEntity* GetGroundEntity() {
+    inline SVGEntityHandle GetGroundEntity() {
         return groundEntity;
     }
 
@@ -235,8 +244,8 @@ public:
     }
 
     // Return the 'mass' value.
-    inline const int32_t GetMass() {
-        return this->mass;
+    inline int32_t GetMass() {
+        return mass;
     }
 
     // Return the 'maxHealth' value.
@@ -372,7 +381,7 @@ public:
     }
     // Return the 'style' value.
     inline const int32_t GetStyle() {
-        return serverEntity->style;
+        return style;
     }
 
     // Return the 'sound' value.
@@ -395,8 +404,8 @@ public:
     }
 
     // Return the 'team' entity value.
-    inline char* GetTeam() {
-        return serverEntity->team;
+    inline const std::string &GetTeam() {
+        return teamStr;
     }
 
     // Return the 'teamChain' entity value.
@@ -441,17 +450,22 @@ public:
     //
     // Entity Set Functions.
     //  
-    // Return the bounding box absolute 'min' value.
+    // Set the bounding box absolute 'min' value.
     inline void SetAbsoluteMin(const vec3_t &absMin) {
         serverEntity->absMin = absMin;
     }
 
-    // Return the bounding box absolute 'max' value.
+    // Set the bounding box absolute 'max' value.
     inline void SetAbsoluteMax(const vec3_t &absMax) {
         serverEntity->absMax = absMax;
     }
 
-    // Return the 'angles' value.
+    // Set the 'activatorEntity' pointer.
+    inline void SetActivator(SVGBaseEntity* activator) {
+        this->activatorEntityPtr = activator;
+    }
+
+    // Set the 'angles' value.
     inline void SetAngles(const vec3_t& angles) {
         serverEntity->state.angles = angles;
     }
@@ -467,11 +481,15 @@ public:
         serverEntity->maxs = maxs;
     }
 
-    // Return the 'clipmask' value.
+    // Set the 'clipmask' value.
     inline void SetClipMask(const int32_t &clipMask) {
         serverEntity->clipMask = clipMask;
     }
 
+    // Set the 'count' value.
+    inline void SetCount(const int32_t& count) {
+        this->count = count;
+    }
     // Set the 'damage' value.
     inline void SetDamage(const int32_t &damage) {
         this->damage = damage;
@@ -555,8 +573,8 @@ public:
     }
 
     // Set the 'mass' value.
-    inline void SetMass(const int32_t mass) {
-        this->mass = mass;
+    inline void SetMass(const int32_t &_mass) {
+        this->mass = _mass;
     }
 
     // Set the 'maxHealth' value.
@@ -686,7 +704,7 @@ public:
 
     // Set the 'style' value.
     inline void SetStyle(const int32_t &style) {
-        serverEntity->style = style;
+        this->style = style;
     }
 
     // Set the 'takeDamage' value.
@@ -701,6 +719,11 @@ public:
     // Set the 'targetName' entity value.
     inline void SetTargetName(const std::string& targetName) {
         this->targetNameStr = targetName;
+    }
+
+    // Set the 'team' index value.
+    inline void SetTeam(const std::string &team) {
+        this->teamStr = team;
     }
 
     // Set the 'teamChain' entity value.
@@ -761,7 +784,7 @@ public:
         return serverEntity;
     }
 
-    // Used only in SVG_FreeEntity
+    // Used only in SVG_FreeEntity and SVG_CreateClassEntity
     inline void SetServerEntity( Entity* svEntity )
     {
         serverEntity = svEntity;
@@ -782,7 +805,7 @@ protected:
     //
     // The actual entity this class is a member of.
     //
-    Entity *serverEntity;
+    Entity *serverEntity = nullptr;
 
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)
@@ -801,12 +824,14 @@ protected:
     std::string model = "";
     // Trigger kill target string.
     std::string killTargetStr = "";
+    // Trigger its message string.
+    std::string messageStr = "";
     // Trigger target string.
     std::string targetStr = "";
     // Trigger its own targetname string.
     std::string targetNameStr = "";
-    // Trigger its message string.
-    std::string messageStr = "";
+    // Team string.
+    std::string teamStr = "";
 
     //---------------------------------
     // -- Types (Move, Water, what have ya? Add in here.)
@@ -837,7 +862,7 @@ protected:
     // Move Target Entity.
     Entity* moveTargetPtr = nullptr;
     // The entity that activated this
-    SVGBaseEntity* activator = nullptr;
+    SVGBaseEntity* activatorEntityPtr = nullptr;
     
     // Yaw Speed. (Should be for monsters...)
     float yawSpeed = 0.f;
@@ -873,15 +898,21 @@ protected:
     int32_t damage = 0;
     // Dead Flag. (Are we dead, dying or...?)
     int32_t deadFlag = 0;
+    // Count (usually used for SVGBaseItem)
+    int32_t count = 0;
+    // Style/AreaPortal
+    int32_t style = 0;
 
     //
     // This one resides here... for now.
     //
+    //------------------------------------
     //float delay;
 
     //
     // Entity pointers.
     // 
+    //------------------------------------
     // Current active enemy, NULL if not any.    
     SVGBaseEntity *enemyEntity = nullptr;
     // Ground entity we're standing on.
@@ -972,5 +1003,3 @@ public:
     // "No" thinking
     void SVGBaseEntityThinkNull() { }
 };
-
-#endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__

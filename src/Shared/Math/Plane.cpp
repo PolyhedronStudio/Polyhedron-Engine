@@ -40,7 +40,7 @@ void SetPlaneSignbits(cplane_t* plane)
         bits |= 4;
     }
 
-    plane->signbits = bits;
+    plane->signBits = bits;
 }
 
 /*
@@ -53,9 +53,9 @@ Returns 1, 2, or 1 + 2
 int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p)
 {
     const vec_t* bounds[2] = { emins, emaxs };
-    int     i = p->signbits & 1;
-    int     j = (p->signbits >> 1) & 1;
-    int     k = (p->signbits >> 2) & 1;
+    int     i = p->signBits & 1;
+    int     j = (p->signBits >> 1) & 1;
+    int     k = (p->signBits >> 2) & 1;
 
 #define P(i, j, k) \
     p->normal[0] * bounds[i][0] + \

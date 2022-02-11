@@ -96,9 +96,13 @@ void Light::LightUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
 //===============
 //
 void Light::SpawnKey(const std::string& key, const std::string& value) {
-    // Wait.
-    if (key == "style") {
-        // Parsed float.
+    // Light value.
+    if (key == "light") {
+        // Just here to prevent debug warnings about it not having a "light" key.
+    }
+    // Style Index #.
+    else if (key == "style") {
+        // Parsed int.
         int32_t parsedInteger = 0;
 
         // Parse.
@@ -109,7 +113,7 @@ void Light::SpawnKey(const std::string& key, const std::string& value) {
     } 
     // Style.
     else if (key == "customLightStyle") {
-        // Parsed float.
+        // Parsed string.
         std::string parsedString;
 
         // Parse.

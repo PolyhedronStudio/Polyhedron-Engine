@@ -158,7 +158,7 @@ static void escape_path(const char *path, char *escaped)
     p = escaped;
     while (*path) {
         c = *path++;
-        if (!Q_isalnum(c) && !strchr(allowed, c)) {
+        if (!PH_IsLetterOrNUmber(c) && !strchr(allowed, c)) {
             sprintf(p, "%%%02x", c);
             p += 3;
         } else {
@@ -564,7 +564,7 @@ qerror_t HTTP_QueueDownload(const char *path, dltype_t type)
 
     //special case for map file lists, i really wanted a server-push mechanism for this, but oh well
     len = strlen(path);
-    if (len > 4 && !Q_stricmp(path + len - 4, ".bsp")) {
+    if (len > 4 && !PH_StringCompare(path + len - 4, ".bsp")) {
         len = Q_snprintf(temp, sizeof(temp), "%s/%s", http_gamedir(), path);
         if (len < sizeof(temp) - 5) {
             memcpy(temp + len - 4, ".filelist", 10);
@@ -596,7 +596,7 @@ static void check_and_queue_download(char *path)
     if (!ext[0])
         return;
 
-    Q_strlwr(ext);
+    PH_StringLower(ext);
 
     if (!strcmp(ext, "pak") || !strcmp(ext, "pkz")) {
         Com_Printf("[HTTP] Filelist is requesting a .%s file '%s'\n", ext, path);
@@ -631,8 +631,8 @@ static void check_and_queue_download(char *path)
     valid = FS_ValidatePath(path);
 
     if (valid == PATH_INVALID ||
-        !Q_ispath(path[0]) ||
-        !Q_ispath(path[len - 1]) ||
+        !PH_IsPath(path[0]) ||
+        !PH_IsPath(path[len - 1]) ||
         strstr(path, "..") ||
         (type == DL_OTHER && !strchr(path, '/')) ||
         (type == DL_PAK && strchr(path, '/'))) {
@@ -644,7 +644,7 @@ static void check_and_queue_download(char *path)
         return;
 
     if (valid == PATH_MIXED_CASE)
-        Q_strlwr(path);
+        PH_StringLower(path);
 
     if (CL_IgnoreDownload(path))
         return;

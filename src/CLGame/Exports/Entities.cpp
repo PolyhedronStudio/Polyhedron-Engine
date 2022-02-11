@@ -2,6 +2,7 @@
 #include "../ClientGameLocal.h"
 
 // Base Client Game Functionality.
+#include "../Debug.h"
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Input.h"
@@ -168,7 +169,10 @@ void ClientGameEntities::AddPacketEntities() {
             }
         }
 
-        // create a new entity
+	    // Draw debug bounding box for client entity.
+	    if (renderEffects & RenderEffects::DebugBoundingBox) {
+	        CLG_DrawDebugBoundingBox(currentEntity->lerpOrigin, currentEntity->mins, currentEntity->maxs);
+	    }
 
         // tweak the color of beams
         if (renderEffects & RenderEffects::Beam) {
