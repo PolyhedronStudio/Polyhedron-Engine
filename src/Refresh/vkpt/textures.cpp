@@ -35,6 +35,7 @@ typedef struct UnusedResources
 {
 	VkImage         images[MAX_RIMAGES];
 	VkImageView     image_views[MAX_RIMAGES];
+	VkImageView		image_views_mip0[MAX_RIMAGES];
 	DeviceMemory    image_memory[MAX_RIMAGES];
 	uint32_t        image_num;
 	VkBuffer        buffers[MAX_RBUFFERS];
@@ -51,9 +52,10 @@ typedef struct TextureSystem
 
 static TextureSystem texture_system = { 0 };
 
-static VkImage          tex_images     [MAX_RIMAGES] = { 0 }; // todo: rename to make consistent
-static VkImageView      tex_image_views[MAX_RIMAGES] = { 0 }; // todo: rename to make consistent
-static VkDeviceMemory   mem_blue_noise, mem_envmap; // todo: rename to make consistent
+static VkImage          tex_images[MAX_RIMAGES] = { };
+static VkImageView      tex_image_views[MAX_RIMAGES] = { };
+static VkImageView      tex_image_views_mip0[MAX_RIMAGES] = { };
+static VkDeviceMemory   mem_blue_noise, mem_envmap;
 static VkImage          img_blue_noise;
 static VkImageView      imv_blue_noise;
 static VkImage          img_envmap;
@@ -62,13 +64,26 @@ static VkDescriptorPool desc_pool_textures;
 
 static VkImage          tex_invalid_texture_image = VK_NULL_HANDLE;
 static VkImageView      tex_invalid_texture_image_view = VK_NULL_HANDLE;
-static DeviceMemory     tex_invalid_texture_image_memory = { 0 };
+static DeviceMemory     tex_invalid_texture_image_memory = { };
 
 static VkDeviceMemory mem_images[NUM_VKPT_IMAGES];
 
 static DeviceMemory            tex_image_memory[MAX_RIMAGES] = { };
 static VkBindImageMemoryInfo   tex_bind_image_info[MAX_RIMAGES] = { };
 static DeviceMemoryAllocator*  tex_device_memory_allocator = NULL;
+
+// Resources for the normal map normalization pass that runs on texture upload
+static VkDescriptorSetLayout normalize_desc_set_layout = NULL;
+static VkPipelineLayout	     normalize_pipeline_layout = NULL;
+static VkPipeline			 normalize_pipeline = NULL;
+static VkDescriptorSet	     normalize_descriptor_sets[MAX_FRAMES_IN_FLIGHT] = { };
+
+// Array for tracking when the textures have been uploaded.
+// On frame N (which is modulo MAX_FRAMES_IN_FLIGHT), a texture is uploaded, and that writes N into this array.
+// At the same time, its storage image descriptor is created in normalize_descriptor_sets[N], and the texture
+// is normalized using the normalize_pipeline. When vkpt_textures_end_registration() runs on the next frame
+// with the same N, it sees the texture again, and deletes its descriptor from that descriptor set.
+static uint32_t tex_upload_frames[MAX_RIMAGES] = { };
 
 static int image_loading_dirty_flag = 0;
 static uint8_t descriptor_set_dirty_flags[MAX_FRAMES_IN_FLIGHT] = { }; // initialized in vkpt_textures_initialize
@@ -112,11 +127,14 @@ static void textures_destroy_unused_set(uint32_t set_index)
 		if (unused_resources->image_views[i] != VK_NULL_HANDLE)
 			vkDestroyImageView(qvk.device, unused_resources->image_views[i], NULL);
 
+		if (unused_resources->image_views_mip0[i] != VK_NULL_HANDLE)
+		    vkDestroyImageView(qvk.device, unused_resources->image_views_mip0[i], NULL);
+
 		if(unused_resources->images[i] != VK_NULL_HANDLE)
-		vkDestroyImage(qvk.device, unused_resources->images[i], NULL);
+			vkDestroyImage(qvk.device, unused_resources->images[i], NULL);
 
 		if(unused_resources->image_memory[i].memory != VK_NULL_HANDLE)
-		free_device_memory(tex_device_memory_allocator, &unused_resources->image_memory[i]);
+			free_device_memory(tex_device_memory_allocator, &unused_resources->image_memory[i]);
 	}
 	unused_resources->image_num = 0;
 
@@ -507,18 +525,6 @@ static inline byte encode_srgb(float x)
     else
         x = 1.055f * powf(x, 1.f / 2.4f) - 0.055f;
      
-    x = max(0.f, min(1.f, x));
-
-    return (byte)roundf(x * 255.f);
-}
-
-static inline float decode_linear(byte pix)
-{
-    return (float)pix / 255.f;
-}
-
-static inline byte encode_linear(float x)
-{
     x = max(0.f, min(1.f, x));
 
     return (byte)roundf(x * 255.f);
@@ -935,46 +941,6 @@ vkpt_extract_emissive_texture_info(image_t *image)
 }
 
 void
-vkpt_normalize_normal_map(image_t *image)
-{
-    int w = image->upload_width;
-    int h = image->upload_height;
-
-    byte* current_pixel = image->pix_data;
-
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) 
-        {
-            vec3_t color;
-            color[0] = decode_linear(current_pixel[0]);
-            color[1] = decode_linear(current_pixel[1]);
-            color[2] = decode_linear(current_pixel[2]);
-
-            color[0] = color[0] * 2.f - 1.f;
-            color[1] = color[1] * 2.f - 1.f;
-
-            if (VectorNormalize(color) == 0.f)
-            {
-                color[0] = 0.f;
-                color[1] = 0.f;
-                color[2] = 1.f;
-            }
-
-            color[0] = color[0] * 0.5f + 0.5f;
-            color[1] = color[1] * 0.5f + 0.5f;
-            
-            current_pixel[0] = encode_linear(color[0]);
-            current_pixel[1] = encode_linear(color[1]);
-            current_pixel[2] = encode_linear(color[2]);
-
-            current_pixel += 4;
-        }
-    }
-
-    image->processing_complete = true;
-}
-
-void
 IMG_Load_RTX(image_t *image, byte *pic)
 {
 	image->pix_data = pic;
@@ -1000,9 +966,12 @@ IMG_Unload_RTX(image_t *image)
 		unused_resources->images[unused_index] = tex_images[index];
 		unused_resources->image_memory[unused_index] = tex_image_memory[index];
 		unused_resources->image_views[unused_index] = tex_image_views[index];
+		unused_resources->image_views_mip0[unused_index] = tex_image_views_mip0[index];
 
 		tex_images[index] = VK_NULL_HANDLE;
 		tex_image_views[index] = VK_NULL_HANDLE;
+		tex_image_views_mip0[index] = VK_NULL_HANDLE;
+		tex_upload_frames[index] = 0;
 
 		vkpt_invalidate_texture_descriptors();
 	}
@@ -1050,7 +1019,7 @@ void IMG_ReloadAll(void)
 
             if (strstr(filepath, "_n."))
             {
-                vkpt_normalize_normal_map(image);
+                image->flags = (imageflags_t)(image->flags | IF_NORMAL_MAP);
             }
 			if (image->flags & IF_FAKE_EMISSIVE)             {
 				apply_fake_emissive_threshold(image, (image->flags >> IF_FAKE_EMISSIVE_THRESH_SHIFT) & 0xff);
@@ -1065,6 +1034,10 @@ void IMG_ReloadAll(void)
             if (tex_image_views[i]) {
                 vkDestroyImageView(qvk.device, tex_image_views[i], NULL);
                 tex_image_views[i] = VK_NULL_HANDLE;
+            }
+			if (tex_image_views_mip0[i]) {
+                vkDestroyImageView(qvk.device, tex_image_views_mip0[i], NULL);
+                tex_image_views_mip0[i] = VK_NULL_HANDLE;
             }
             if (tex_images[i]) {
                 vkDestroyImage(qvk.device, tex_images[i], NULL);
@@ -1091,7 +1064,7 @@ void create_invalid_texture()
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
 		.tiling = VK_IMAGE_TILING_OPTIMAL,
-		.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+		.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
 	};
@@ -1146,7 +1119,7 @@ void create_invalid_texture()
 		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
 		.image = tex_invalid_texture_image,
 		.subresourceRange = subresource_range,
 	});
@@ -1161,6 +1134,99 @@ void destroy_invalid_texture()
 	vkDestroyImage(qvk.device, tex_invalid_texture_image, NULL);
 	vkDestroyImageView(qvk.device, tex_invalid_texture_image_view, NULL);
 	free_device_memory(tex_device_memory_allocator, &tex_invalid_texture_image_memory);
+}
+
+static void normalize_write_descriptor(uint32_t frame, uint32_t index, VkImageView image_view)
+{
+	VkDescriptorImageInfo image_info = {
+		.imageView = image_view,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+	};
+
+	VkWriteDescriptorSet write_info = {
+		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+		.dstSet = normalize_descriptor_sets[frame],
+		.dstBinding = 0,
+		.dstArrayElement = index,
+	    .descriptorCount = 1,
+		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+		.pImageInfo = &image_info
+	};
+
+	vkUpdateDescriptorSets(qvk.device, 1, &write_info, 0, NULL);
+}
+
+static void normalize_init()
+{
+	VkDescriptorSetLayoutBinding binding = {
+		.binding = 0,
+		.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+		.descriptorCount = MAX_RIMAGES,
+		.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
+	};
+
+	VkDescriptorSetLayoutCreateInfo dsl_info = {
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+		.bindingCount = 1,
+		.pBindings = &binding
+	};
+
+	_VK(vkCreateDescriptorSetLayout(qvk.device, &dsl_info, NULL, &normalize_desc_set_layout));
+
+	VkPushConstantRange push_range = {
+	    .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+		.size = sizeof(uint32_t),
+	};
+
+	VkPipelineLayoutCreateInfo pl_info = {
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+		.setLayoutCount = 1,
+		.pSetLayouts = &normalize_desc_set_layout,
+		.pushConstantRangeCount = 1,
+		.pPushConstantRanges = &push_range
+	};
+
+	_VK(vkCreatePipelineLayout(qvk.device, &pl_info, NULL, &normalize_pipeline_layout));
+
+	VkComputePipelineCreateInfo pipeline_info = {
+		.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+	    .stage = SHADER_STAGE(QVK_MOD_NORMALIZE_NORMAL_MAP_COMP, VK_SHADER_STAGE_COMPUTE_BIT),
+		.layout = normalize_pipeline_layout,
+	};
+
+	_VK(vkCreateComputePipelines(qvk.device, NULL, 1, &pipeline_info, NULL, &normalize_pipeline));
+
+	VkDescriptorSetAllocateInfo alloc_info = {
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+		.descriptorPool = desc_pool_textures,
+		.descriptorSetCount = 1,
+		.pSetLayouts = &normalize_desc_set_layout
+	};
+
+	for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++)
+	{
+		_VK(vkAllocateDescriptorSets(qvk.device, &alloc_info, &normalize_descriptor_sets[frame]));
+		ATTACH_LABEL_VARIABLE(normalize_descriptor_sets[frame], DESCRIPTOR_SET);
+
+		for (int i = 0; i < MAX_RIMAGES; i++)
+		{
+			normalize_write_descriptor(frame, i, tex_invalid_texture_image_view);
+		}
+	}
+}
+
+static void normalize_destroy()
+{
+	vkDestroyPipeline(qvk.device, normalize_pipeline, NULL);
+	normalize_pipeline = NULL;
+
+	vkDestroyPipelineLayout(qvk.device, normalize_pipeline_layout, NULL);
+	normalize_pipeline_layout = NULL;
+
+	vkDestroyDescriptorSetLayout(qvk.device, normalize_desc_set_layout, NULL);
+	normalize_desc_set_layout = NULL;
+	
+	memset(normalize_descriptor_sets, 0, sizeof(normalize_descriptor_sets));
 }
 
 VkResult
@@ -1348,16 +1414,23 @@ vkpt_textures_initialize()
 
 	_VK(vkCreateDescriptorSetLayout(qvk.device, &layout_info, NULL, &qvk.desc_set_layout_textures));
 	ATTACH_LABEL_VARIABLE(qvk.desc_set_layout_textures, DESCRIPTOR_SET_LAYOUT);
-	VkDescriptorPoolSize pool_size = {
-		.type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-		.descriptorCount = 2 * (MAX_RIMAGES + 2 * NUM_VKPT_IMAGES) + 128,
+
+	VkDescriptorPoolSize pool_sizes[] = {
+		{
+			.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = MAX_FRAMES_IN_FLIGHT * (MAX_RIMAGES + 2 * NUM_VKPT_IMAGES) + 128,
+		},
+		{
+			.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+			.descriptorCount = MAX_FRAMES_IN_FLIGHT * MAX_RIMAGES
+		}
 	};
 
 	VkDescriptorPoolCreateInfo pool_info = {
-		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		.maxSets = 2,
-		.poolSizeCount = 1,
-		.pPoolSizes    = &pool_size,
+		.sType			= VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+	    .maxSets		= MAX_FRAMES_IN_FLIGHT * 2,
+	    .poolSizeCount	= LENGTH(pool_sizes),
+		.pPoolSizes		= pool_sizes,
 	};
 
 	_VK(vkCreateDescriptorPool(qvk.device, &pool_info, NULL, &desc_pool_textures));
@@ -1376,6 +1449,8 @@ vkpt_textures_initialize()
 	ATTACH_LABEL_VARIABLE(qvk.desc_set_textures_even, DESCRIPTOR_SET);
 	ATTACH_LABEL_VARIABLE(qvk.desc_set_textures_odd, DESCRIPTOR_SET);
 
+	normalize_init();
+
 	if(load_blue_noise() != VK_SUCCESS)
 		return VK_ERROR_INITIALIZATION_FAILED;
 
@@ -1390,6 +1465,10 @@ destroy_tex_images()
 		if(tex_image_views[i]) {
 			vkDestroyImageView(qvk.device, tex_image_views[i], NULL);
 			tex_image_views[i] = VK_NULL_HANDLE;
+		}
+		if (tex_image_views_mip0[i]) {
+		    vkDestroyImageView(qvk.device, tex_image_views_mip0[i], NULL);
+		    tex_image_views_mip0[i] = VK_NULL_HANDLE;
 		}
 		if(tex_images[i]) {
 			vkDestroyImage(qvk.device, tex_images[i], NULL);
@@ -1435,6 +1514,8 @@ vkpt_textures_destroy()
 	destroy_invalid_texture();
 	destroy_device_memory_allocator(tex_device_memory_allocator);
 	tex_device_memory_allocator = NULL;
+
+	normalize_destroy();
 
 	LOG_FUNC();
 	return VK_SUCCESS;
@@ -1499,11 +1580,20 @@ vkpt_textures_end_registration()
 		mem_alloc_flags_broadcast.deviceMask = (1 << qvk.device_count) - 1;
 	}
 #endif
+	// Phase 1: Create the new texture objects, count the memory required to upload them all.
+	// Also, delete any storage image descriptors that may exist for previously uploaded textures.
 
 	uint32_t new_image_num = 0;
 	size_t   total_size = 0;
-	for(int i = 0; i < MAX_RIMAGES; i++) {
+	for(int i = 0; i < MAX_RIMAGES; i++)
+	{
 		image_t *q_img = r_images + i;
+
+		if (tex_upload_frames[i] == qvk.current_frame_index + 1)
+		{
+			normalize_write_descriptor(qvk.current_frame_index, i, tex_invalid_texture_image_view);
+			tex_upload_frames[i] = 0;
+		}
 
 		if (tex_images[i] != VK_NULL_HANDLE || !q_img->registration_sequence || q_img->pix_data == NULL)
 			continue;
@@ -1512,9 +1602,15 @@ vkpt_textures_end_registration()
 		img_info.extent.height = q_img->upload_height;
 		img_info.mipLevels = get_num_miplevels(q_img->upload_width, q_img->upload_height);
 		img_info.format = q_img->is_srgb ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM;
+		if (!q_img->is_srgb)
+		    img_info.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+		else
+		    img_info.usage &= ~VK_IMAGE_USAGE_STORAGE_BIT;
 
 		_VK(vkCreateImage(qvk.device, &img_info, NULL, tex_images + i));
-		ATTACH_LABEL_VARIABLE(tex_images[i], IMAGE);
+		ATTACH_LABEL_VARIABLE_NAME(tex_images[i], IMAGE, q_img->name);
+
+		tex_upload_frames[i] = qvk.current_frame_index + 1;
 
 		VkMemoryRequirements mem_req;
 		vkGetImageMemoryRequirements(qvk.device, tex_images[i], &mem_req);
@@ -1547,7 +1643,35 @@ vkpt_textures_end_registration()
 
 	if (new_image_num == 0)
 		return VK_SUCCESS;
+
+	// Phase 2: Bind the image memory, create the views, create the storage image descriptors where appropriate.
+
 	vkBindImageMemory2(qvk.device, new_image_num, tex_bind_image_info);
+
+	for (int i = 0; i < MAX_RIMAGES; i++) {
+	    if (tex_upload_frames[i] != qvk.current_frame_index + 1)
+		continue;
+
+	    image_t* q_img = r_images + i;
+
+	    int num_mip_levels = get_num_miplevels(q_img->upload_width, q_img->upload_height);
+
+	    img_view_info.image = tex_images[i];
+	    img_view_info.subresourceRange.levelCount = num_mip_levels;
+	    img_view_info.format = q_img->is_srgb ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM;
+	    _VK(vkCreateImageView(qvk.device, &img_view_info, NULL, tex_image_views + i));
+	    ATTACH_LABEL_VARIABLE(tex_image_views[i], IMAGE_VIEW);
+
+	    if (!q_img->is_srgb) {
+		img_view_info.subresourceRange.levelCount = 1;
+		_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, tex_image_views_mip0 + i));
+		ATTACH_LABEL_VARIABLE(tex_image_views_mip0[i], IMAGE_VIEW);
+
+		normalize_write_descriptor(qvk.current_frame_index, i, tex_image_views_mip0[i]);
+	    }
+	}
+
+	// Phase 3: Upload the image data.
 
 	BufferResource_t buf_img_upload;
 	buffer_create(&buf_img_upload, total_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -1558,10 +1682,11 @@ vkpt_textures_end_registration()
 	char *staging_buffer = (char*)buffer_map(&buf_img_upload);
 
 	size_t offset = 0;
-	for(int i = 0; i < MAX_RIMAGES; i++) {
+	for (int i = 0; i < MAX_RIMAGES; i++)
+	{
 		image_t *q_img = r_images + i;
 
-		if (tex_images[i] == VK_NULL_HANDLE || tex_image_views[i] != VK_NULL_HANDLE)
+		if (tex_upload_frames[i] != qvk.current_frame_index + 1)
 			continue;
 
 		int num_mip_levels = get_num_miplevels(q_img->upload_width, q_img->upload_height);
@@ -1573,8 +1698,8 @@ vkpt_textures_end_registration()
 		offset += mem_req.alignment - 1;
 		offset &= ~(mem_req.alignment - 1);
 
-		uint32_t wd = q_img->upload_width;
-		uint32_t ht = q_img->upload_height;
+		int wd = q_img->upload_width;
+		int ht = q_img->upload_height;
 
 		VkImageSubresourceRange subresource_range = {
 			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -1593,7 +1718,7 @@ vkpt_textures_end_registration()
 			.subresourceRange = subresource_range,
 		});
 
-		{
+		
 			memcpy(staging_buffer + offset, q_img->pix_data, wd * ht * 4);
 
 			VkBufferImageCopy cpy_info = {
@@ -1605,23 +1730,87 @@ vkpt_textures_end_registration()
 					.layerCount     = 1,
 				},
 				.imageOffset    = { 0, 0, 0 },
-				.imageExtent    = { wd, ht, 1 }
+				.imageExtent    = { (uint32_t)wd, (uint32_t)ht, 1 }
 			};
 
 			vkCmdCopyBufferToImage(cmd_buf, buf_img_upload.buffer, tex_images[i],
 				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &cpy_info);
+		
+		// Transition mip 0 to VK_IMAGE_LAYOUT_GENERAL for use in the next command list.
+
+		subresource_range.baseMipLevel = 0;
+		subresource_range.levelCount = 1;
+
+		IMAGE_BARRIER(cmd_buf, {
+			.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+			.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.image = tex_images[i],
+			.subresourceRange = subresource_range,
+		});
+
+		offset += mem_req.size;
+	}
+
+	buffer_unmap(&buf_img_upload);
+	staging_buffer = NULL;
+
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
+
+	// Phase 4: Process the normal maps using a compute shader, generate mipmaps.
+	// This phase executes in a separate command buffer because Vulkan thinks that
+	// the normalization pass may access all descriptors in the set, even those which
+	// are not yet transitioned from LAYOUT_UNDEFINED to LAYOUT_GENERAL. So the
+	// transitions happen in the previous phase command buffer.
+
+	cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
+
+	for (int i = 0; i < MAX_RIMAGES; i++)
+	{
+		image_t* q_img = r_images + i;
+
+		if (tex_upload_frames[i] != qvk.current_frame_index + 1)
+			continue;
+
+		VkImageSubresourceRange subresource_range = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		};
+
+		bool normalize = (q_img->flags & IF_NORMAL_MAP) && !q_img->is_srgb;
+
+		if (normalize)
+		{
+			vkCmdBindPipeline(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, normalize_pipeline);
+
+			vkCmdBindDescriptorSets(cmd_buf, VK_PIPELINE_BIND_POINT_COMPUTE, normalize_pipeline_layout,
+				0, 1, &normalize_descriptor_sets[qvk.current_frame_index], 0, NULL);
+
+			// Push constant: image index.
+			vkCmdPushConstants(cmd_buf, normalize_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(uint32_t), &i);
+
+			vkCmdDispatch(cmd_buf, 
+				(q_img->upload_width + 15) / 16, 
+				(q_img->upload_height + 15) / 16, 1);
 		}
 
-		subresource_range.levelCount = 1;
+		int num_mip_levels = get_num_miplevels(q_img->upload_width, q_img->upload_height);
+
+		int wd = q_img->upload_width;
+		int ht = q_img->upload_height;
 
 		for (int mip = 1; mip < num_mip_levels; mip++) 
 		{
 			subresource_range.baseMipLevel = mip - 1;
 
 			IMAGE_BARRIER(cmd_buf, {
-				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+				.srcAccessMask = (normalize && mip == 1) ? (VkAccessFlags)VK_ACCESS_SHADER_WRITE_BIT : (VkAccessFlags)VK_ACCESS_TRANSFER_WRITE_BIT,
 				.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
-				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.oldLayout = (mip == 1) ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				.image = tex_images[i],
 				.subresourceRange = subresource_range,
@@ -1664,13 +1853,11 @@ vkpt_textures_end_registration()
 				1, &region, 
 				VK_FILTER_LINEAR);
 
-			subresource_range.baseMipLevel = mip - 1;
-
 			IMAGE_BARRIER(cmd_buf, {
 				.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
 				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
 				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				.newLayout = VK_IMAGE_LAYOUT_GENERAL,
 				.image = tex_images[i],
 				.subresourceRange = subresource_range,
 			});
@@ -1682,28 +1869,18 @@ vkpt_textures_end_registration()
 		subresource_range.baseMipLevel = num_mip_levels - 1;
 
 		IMAGE_BARRIER(cmd_buf, {
-			.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
-			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-			.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.image = tex_images[i],
-			.subresourceRange = subresource_range,
+				.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+				.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+				.image = tex_images[i],
+				.subresourceRange = subresource_range,
 		});
-
-		img_view_info.image = tex_images[i];
-		img_view_info.subresourceRange.levelCount = num_mip_levels;
-		img_view_info.format = q_img->is_srgb ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM;
-		_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, tex_image_views + i));
-		ATTACH_LABEL_VARIABLE(tex_image_views[i], IMAGE_VIEW);
-
-		offset += mem_req.size;
 	}
 
-	buffer_unmap(&buf_img_upload);
-	staging_buffer = NULL; 
-
 	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, true);
-	
+
+	// Schedule the upload buffer for delayed destruction.
 
 	const uint32_t destroy_frame_index = (qvk.frame_counter + MAX_FRAMES_IN_FLIGHT) % DESTROY_LATENCY;
 	UnusedResources* unused_resources = texture_system.unused_resources + destroy_frame_index;
@@ -1749,7 +1926,7 @@ void vkpt_textures_update_descriptor_set()
 		VkDescriptorImageInfo img_info = {
 			.sampler = sampler,
 			.imageView = image_view,
-			.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 		};
 
 		if (i >= VKPT_IMG_BLOOM_HBLUR &&

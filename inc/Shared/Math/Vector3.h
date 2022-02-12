@@ -353,7 +353,7 @@ inline const vec3_t vec3_euler(const vec3_t &dir) {
 //===============
 // vec3_to_yaw
 //
-// Returns the yaw angles, in in degrees for the directional vector.
+// Returns the yaw angles, in degrees for the directional vector.
 //===============
 //
 inline const float vec3_to_yaw(const vec3_t& dir) {

@@ -580,6 +580,7 @@ set(SRC_SHADERS
 	Refresh/vkpt/shader/asvgf_taau.comp
 	Refresh/vkpt/shader/asvgf_temporal.comp
 	Refresh/vkpt/shader/instance_geometry.comp
+	refresh/vkpt/shader/normalize_normal_map.comp
 	Refresh/vkpt/shader/tone_mapping_histogram.comp
 	Refresh/vkpt/shader/tone_mapping_curve.comp
     Refresh/vkpt/shader/tone_mapping_apply.comp
