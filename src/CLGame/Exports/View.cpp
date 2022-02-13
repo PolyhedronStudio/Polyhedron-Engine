@@ -162,12 +162,16 @@ void ClientGameView::SetupThirdpersonView() {
     float rscale = std::sinf(angle);
     cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, -range * fscale, cl->v_forward);
     cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, -range * rscale, cl->v_right);
-    //VectorMA(cl->refdef.vieworg, -range * fscale, cl->v_forward, cl->refdef.vieworg);
-    //VectorMA(cl->refdef.vieworg, -range * rscale, cl->v_right, cl->refdef.vieworg);
+
+    // TODO: Uncomment when I get back to work on thirdperson camera.
+    // This is the start of having a camera that is nice third person wise.
+    // 
+    // Likely needs a sphere instead of box collide in order to work properly though.
+    // Experimenting with a side third person view.
+    //cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, 24, cl->v_right);
     
     // Execute a box trace to see if we collide with the world.
-    CLGTrace trace = CLG_Trace(cl->playerEntityOrigin,
-                     mins, maxs, cl->refdef.vieworg, nullptr, CONTENTS_MASK_PLAYERSOLID);
+    CLGTrace trace = CLG_Trace(cl->playerEntityOrigin, vec3_zero(), vec3_zero(), cl->refdef.vieworg, nullptr, CONTENTS_MASK_PLAYERSOLID);
 
     if (trace.fraction != 1.0f) {
         // We've collided with the world, let's adjust our view origin.
