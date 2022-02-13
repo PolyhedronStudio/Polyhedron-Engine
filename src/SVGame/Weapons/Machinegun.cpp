@@ -99,7 +99,7 @@ void Machinegun_Fire(PlayerClient* ent)
     start = SVG_PlayerProjectSource(client, ent->GetOrigin(), offset, forward, right);
     SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
-    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    gi.WriteByte(ServerGameCommands::MuzzleFlash);
     gi.WriteShort(ent->GetServerEntity() - g_entities);
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
     vec3_t origin = ent->GetOrigin();

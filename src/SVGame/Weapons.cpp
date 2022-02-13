@@ -199,7 +199,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     color = SplashType::Unknown;
 
                 if (color != SplashType::Unknown) {
-                    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+                    gi.WriteByte(ServerGameCommands::TempEntity);
                     gi.WriteByte(TempEntityEvent::Splash);
                     gi.WriteByte(8);
                     gi.WriteVector3(tr.endPosition);
@@ -230,7 +230,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                 SVG_InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
-                    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+                    gi.WriteByte(ServerGameCommands::TempEntity);
                     gi.WriteByte(te_impact);
                     gi.WriteVector3(tr.endPosition);
                     gi.WriteVector3(tr.plane.normal);
@@ -258,7 +258,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
 
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::BubbleTrail);
         gi.WriteVector3(water_start);
         gi.WriteVector3(tr.endPosition);

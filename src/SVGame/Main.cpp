@@ -415,7 +415,7 @@ void SVG_EndDMLevel(void)
     char *s, *t, *f;
     static const char *seps = " ,\n\r";
 
-    // stay on same level flag
+    // Stay on same level flag
     if ((int)gamemodeflags->value & GamemodeFlags::SameLevel) {
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
         return;

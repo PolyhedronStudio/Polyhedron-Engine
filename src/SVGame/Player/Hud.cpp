@@ -274,7 +274,7 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
         stringlength += j;
     }
 
-    gi.WriteByte(SVG_CMD_LAYOUT);
+    gi.WriteByte(ServerGameCommands::Layout);
     gi.WriteString(string);
 }
 

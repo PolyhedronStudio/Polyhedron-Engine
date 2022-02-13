@@ -1091,7 +1091,7 @@ void CLG_ParseTempEntity(void)
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;
 
-	case TempEntityEvent::NPExplosion1:
+	case TempEntityEvent::NoParticleExplosion1:
 		CLG_PlainExplosion(false);
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
 		break;

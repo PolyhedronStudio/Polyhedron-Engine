@@ -99,7 +99,7 @@ void CLG_ParseTempEntitiesPacket(void)
 
     case TempEntityEvent::Explosion2:
     case TempEntityEvent::Explosion1:
-    case TempEntityEvent::NPExplosion1:
+    case TempEntityEvent::NoParticleExplosion1:
     case TempEntityEvent::BigExplosion1:
     case TempEntityEvent::PlainExplosion:
     case TempEntityEvent::TeleportEffect:
@@ -351,33 +351,33 @@ void CLG_ParseCenterPrint(void)
 //            break;
 //
 //        // Client temporary entities. (Particles, etc.)
-//        case SVG_CMD_TEMP_ENTITY:
+//        case ServerGameCommands::TempEntity:
 //            CLG_ParseTempEntitiesPacket();
 //            CLG_ParseTempEntity();
 //            return true;
 //        break;
 //
 //        // Client Muzzle Flash.
-//        case SVG_CMD_MUZZLEFLASH:
+//        case ServerGameCommands::MuzzleFlash:
 //            CLG_ParseMuzzleFlashPacket(0);
 //            CLG_MuzzleFlash();
 //            return true;
 //        break;
 //        // Entity Muzzle Flash.
-//        case SVG_CMD_MUZZLEFLASH2:
+//        case ServerGameCommands::MuzzleFlash2:
 //            CLG_ParseMuzzleFlashPacket(0);
 //            CLG_MuzzleFlash2();
 //            return true;
 //        break;
 //
 //        // Client inventory updates.
-//        case SVG_CMD_INVENTORY:
+//        case ServerGameCommands::Inventory:
 //            CLG_ParseInventory();
 //            return true;
 //        break;
 //
 //        // Client layout (Cruel, limited, ugly UI...) updates
-//        case SVG_CMD_LAYOUT:
+//        case ServerGameCommands::Layout:
 //            CLG_ParseLayout();
 //            return true;
 //        break;
@@ -402,11 +402,11 @@ void CLG_ParseCenterPrint(void)
 //qboolean CLG_SeekDemoMessage(int demoCommand) {
 //    // Switch cmd.
 //    switch (demoCommand) {
-//    case SVG_CMD_INVENTORY:
+//    case ServerGameCommands::Inventory:
 //        CLG_ParseInventory();
 //        return true;
 //        break;
-//    case SVG_CMD_LAYOUT:
+//    case ServerGameCommands::Layout:
 //        CLG_ParseLayout();
 //        return true;
 //        break;

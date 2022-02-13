@@ -95,11 +95,11 @@ typedef enum {
     svc_bad,
 
     // these ops are known to the game dll
-    //SVG_CMD_MUZZLEFLASH,
-    //SVG_CMD_MUZZLEFLASH2,
-    //SVG_CMD_TEMP_ENTITY,
-    //SVG_CMD_LAYOUT,
-    //SVG_CMD_INVENTORY,
+    //ServerGameCommands::MuzzleFlash,
+    //ServerGameCommands::MuzzleFlash2,
+    //ServerGameCommands::TempEntity,
+    //ServerGameCommands::Layout,
+    //ServerGameCommands::Inventory,
 
     // the rest are private to the client and server
     svc_nop,

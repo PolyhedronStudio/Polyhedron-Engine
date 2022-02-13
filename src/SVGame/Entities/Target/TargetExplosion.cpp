@@ -48,7 +48,7 @@ void TargetExplosion::ExplosionUse( SVGBaseEntity* other, SVGBaseEntity* activat
 // TargetExplosion::ExplosionThink
 //===============
 void TargetExplosion::ExplosionThink() {
-	gi.WriteByte( SVG_CMD_TEMP_ENTITY );
+	gi.WriteByte( ServerGameCommands::TempEntity );
 	gi.WriteByte( TempEntityEvent::Explosion1 );
 	gi.WriteVector3( GetOrigin() );
 	gi.Multicast( GetOrigin(), MultiCast::PHS );

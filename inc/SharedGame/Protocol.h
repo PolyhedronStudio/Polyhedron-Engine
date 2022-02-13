@@ -11,32 +11,40 @@
 #ifndef __SHAREDGAME_PROTOCOL_H__
 #define __SHAREDGAME_PROTOCOL_H__
 
-//-------------------
-// These are server game commands that get send to the client game module.
-// Add your own.
-//
-// The enum starts at 22, and has room up to 32 for custom commands.
-//-------------------
-typedef enum {
-    SVG_CMD_MUZZLEFLASH = 22,
-    SVG_CMD_MUZZLEFLASH2,
-    SVG_CMD_TEMP_ENTITY,
-    SVG_CMD_LAYOUT,
-    SVG_CMD_INVENTORY,
+/**
+*   @brief  Server Game Command are a way for the server to tell a client what to do.
+*           Spawn a muzzleflash effect, or a temp entity effect, or update a client's
+*           layout string.
+*
+*           Due to protocol limitations at the time of writing, the index starts at 22
+*           and the limit is 32 extra custom types.
+**/
+struct ServerGameCommands {
+    //! First index is 22, all other slots are reserved for the server itself.
+    static constexpr int32_t MuzzleFlash = 22;
+    static constexpr int32_t MuzzleFlash2 = 23;
+    static constexpr int32_t TempEntity = 24;
+    static constexpr int32_t Layout = 25;
+    static constexpr int32_t Inventory = 26;
 
-    SVG_CMD_NUM_TYPES
-} ServerGameCommands;
+    //! Be sure to increase limit in case you modify this array.
+    static constexpr int32_t TotalNumberOfCommands = 27;
+};
 
-//-------------------
-// These are client game commands that get send to the server game module.
-// Add your own.
-//
-// The enum starts at 13, and has room up to 32 for custom commands.
-//-------------------
-typedef enum {
-    CLG_CMD_NUM_TYPES = 13,
-} ClientGameCommands;
+/**
+*   @brief  Client Game Commands are a way for the client to tell the server what to do.
+*           Currently it is not in utilized but can be used if needed.
+*
+*           Due to protocol limitations at the time of writing, the index starts at 13
+*           and the limit is 32 extra custom types.
+**/
 
+struct ClientGameCommands {
+    //! First index is 13, all other slots are reserved for the client itself. Feel free to rename this one and make it your own.
+    static constexpr int32_t FirstCommand = 13;
 
+    //! Be sure to increase limit in case you modify this array.
+    static constexpr int32_t TotalNumberOfCommands = 14;
+};
 
 #endif

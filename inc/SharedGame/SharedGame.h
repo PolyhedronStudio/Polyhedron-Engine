@@ -50,7 +50,7 @@ struct WaterLevel {
 //-----------------
 struct PlayerMoveType {
     static constexpr uint8_t Normal = 0;    // Walking, jumping, falling, swimming, etc.
-    static constexpr uint8_t Spectator= 1;  // Free-flying movement with acceleration and friction
+    static constexpr uint8_t Spectator = 1; // Free-flying movement with acceleration and friction
     static constexpr uint8_t Noclip = 2;    // Like PM_SPECTATOR, but noclips through walls
     // All slots up till 32 are free for custom game PM_ defines.
 };
@@ -87,104 +87,133 @@ struct EntityEffectType {
     static constexpr uint32_t Max = (1 << 31);
 };
 
-// PlayerState->refdef flags
-#define RDF_UNDERWATER      1       // warp the screen as apropriate
-#define RDF_NOWORLDMODEL    2       // used for player configuration screen
-//ROGUE
-#define RDF_IRGOGGLES       4
-#define RDF_UVGOGGLES       8
-//ROGUE
 
-//-----------------
-// muzzle flashes / player effects
-//-----------------
+/**
+*   @brief  Render Draw Flags for telling the client what screen effect to use.
+**/
+struct RenderDrawFlags {
+    static constexpr int32_t Underwater = 1;    // warp the screen as apropriate
+    static constexpr int32_t NoWorldModel = 2;  // used for player configuration screen
+    static constexpr int32_t InfraRedGoggles = 4;
+    static constexpr int32_t UVGoggles = 8;
+};
+
+/**
+*   @brief  Muzzle Flashes are effects applied to an entity itself and as such
+*           take place at its origin.
+**/
 struct MuzzleFlashType {
-    // These aren't weapons, but are effects displayed in the player's view.
-    // Hence, as such, they are actually treated as muzzleflashes.
+    //! Shows a respawn particle effect at the entity's origin.
     static constexpr uint8_t Respawn = 0;
+    //! Shows an item specific respawn particle effect at the entity's origin.
     static constexpr uint8_t ItemRespawn = 1;
+    //! Shows a login particle effect. (When a client connects and spawns for the first time in a game.)
     static constexpr uint8_t Login = 2;
+    //! Shows a logout particle effect. (When a client disconnects from a game.)
     static constexpr uint8_t Logout = 3;
 
-    // Weapon Muzzleflashes.
+    //! Shows a Pistol muzzleflash effect.
     static constexpr uint8_t Blaster = 16;
+    //! Shows a MachineGun muzzleflash effect.
     static constexpr uint8_t MachineGun = 17;
+    //! Shows a Shotgun muzzleflash effect.
     static constexpr uint8_t Shotgun = 18;
+    //! Shows a SuperShotgun muzzleflash effect.
     static constexpr uint8_t SuperShotgun = 19;
 };
 
 //-----------------
 // monster muzzle flashes
 //-----------------
-#define MZ2_SOLDIER_BLASTER_1           39
-#define MZ2_SOLDIER_BLASTER_2           40
-#define MZ2_SOLDIER_SHOTGUN_1           41
-#define MZ2_SOLDIER_SHOTGUN_2           42
-#define MZ2_SOLDIER_MACHINEGUN_1        43
-#define MZ2_SOLDIER_MACHINEGUN_2        44
-
-#define MZ2_SOLDIER_BLASTER_3           83
-#define MZ2_SOLDIER_SHOTGUN_3           84
-#define MZ2_SOLDIER_MACHINEGUN_3        85
-#define MZ2_SOLDIER_BLASTER_4           86
-#define MZ2_SOLDIER_SHOTGUN_4           87
-#define MZ2_SOLDIER_MACHINEGUN_4        88
-#define MZ2_SOLDIER_BLASTER_5           89
-#define MZ2_SOLDIER_SHOTGUN_5           90
-#define MZ2_SOLDIER_MACHINEGUN_5        91
-#define MZ2_SOLDIER_BLASTER_6           92
-#define MZ2_SOLDIER_SHOTGUN_6           93
-#define MZ2_SOLDIER_MACHINEGUN_6        94
-#define MZ2_SOLDIER_BLASTER_7           95
-#define MZ2_SOLDIER_SHOTGUN_7           96
-#define MZ2_SOLDIER_MACHINEGUN_7        97
-#define MZ2_SOLDIER_BLASTER_8           98
-#define MZ2_SOLDIER_SHOTGUN_8           99
-#define MZ2_SOLDIER_MACHINEGUN_8        100
-
-//-----------------
-// Temp Entity Events (TE)
+struct MonsterMuzzleFlashType {
+    
+};
+//#define MZ2_SOLDIER_BLASTER_1           39
+//#define MZ2_SOLDIER_BLASTER_2           40
+//#define MZ2_SOLDIER_SHOTGUN_1           41
+//#define MZ2_SOLDIER_SHOTGUN_2           42
+//#define MZ2_SOLDIER_MACHINEGUN_1        43
+//#define MZ2_SOLDIER_MACHINEGUN_2        44
 //
-// Temp entity events are for things that happen at a location seperate from 
-// any existing entity. Temporary entity messages are explicitly constructed
-// and broadcast.
-//-----------------
+//#define MZ2_SOLDIER_BLASTER_3           83
+//#define MZ2_SOLDIER_SHOTGUN_3           84
+//#define MZ2_SOLDIER_MACHINEGUN_3        85
+//#define MZ2_SOLDIER_BLASTER_4           86
+//#define MZ2_SOLDIER_SHOTGUN_4           87
+//#define MZ2_SOLDIER_MACHINEGUN_4        88
+//#define MZ2_SOLDIER_BLASTER_5           89
+//#define MZ2_SOLDIER_SHOTGUN_5           90
+//#define MZ2_SOLDIER_MACHINEGUN_5        91
+//#define MZ2_SOLDIER_BLASTER_6           92
+//#define MZ2_SOLDIER_SHOTGUN_6           93
+//#define MZ2_SOLDIER_MACHINEGUN_6        94
+//#define MZ2_SOLDIER_BLASTER_7           95
+//#define MZ2_SOLDIER_SHOTGUN_7           96
+//#define MZ2_SOLDIER_MACHINEGUN_7        97
+//#define MZ2_SOLDIER_BLASTER_8           98
+//#define MZ2_SOLDIER_SHOTGUN_8           99
+//#define MZ2_SOLDIER_MACHINEGUN_8        100
+
+/**
+*   @brief  Temp entity events are for things that happen at a location seperate from 
+*           any existing entity. Temporary entity messages are explicitly constructed
+*           and broadcast.
+**/
 struct TempEntityEvent {
+    //! General gunshot particle effect.
     static constexpr uint8_t Gunshot = 0;
+    //! Shotgun particle effect.
     static constexpr uint8_t Shotgun = 1;
+    //! Blaster particle effect.
     static constexpr uint8_t Blaster = 2;
+    //! Flare particle effect.
     static constexpr uint8_t Flare = 3;
+    //! Bl00d particle effect.
     static constexpr uint8_t Blood = 10;
+    //! M0r3 bl00d particle effect.
     static constexpr uint8_t MoreBlood = 11;
 
+    //! Explosion 1 sprite and particle effect.
     static constexpr uint8_t Explosion1= 20;
+    //! Explosion 2 sprite and particle effect.
     static constexpr uint8_t Explosion2 = 21;
+    //! Plain Explosion sprite and particle effect.
     static constexpr uint8_t PlainExplosion = 22;
+    //! Big Explosion sprite and particle effect.
     static constexpr uint8_t BigExplosion1 = 23;
-    static constexpr uint8_t NPExplosion1 = 24;
+    //! Same as Explosion1, but without particles.
+    static constexpr uint8_t NoParticleExplosion1 = 24;
 
+    //! General sparks particle effect.
     static constexpr uint8_t Sparks = 50;
+    //! Bullet sparks particle effect.
     static constexpr uint8_t BulletSparks = 51;
+    //! Electrical sparks particle effect.
     static constexpr uint8_t ElectricSparks = 52;
+    //! Splash particle effect.
     static constexpr uint8_t Splash = 60;
 
+    //! Bubble Trail 1 particle effect.
     static constexpr uint8_t BubbleTrail = 70;
+    //! Bubble Trail 2 particle effect.
     static constexpr uint8_t BubbleTrail2 = 71;
-    static constexpr uint8_t DebugTrail = 79;
 
+    //! Flame sprite particle effect.
     static constexpr uint8_t Flame = 80;
+    //! Steam sprite particle effect.
     static constexpr uint8_t Steam = 90; 
 
     static constexpr uint8_t ForceWall = 100;
     static constexpr uint8_t TeleportEffect  = 101;
 
+    static constexpr uint8_t DebugTrail = 254;
 
     static constexpr uint8_t Max = 255;
 };
 
-//-----------------
-// Splash Types.
-//-----------------
+/**
+*   @brief  Splash Type determining the effect to be displayed for the Flash TE.
+**/
 struct SplashType {
     static constexpr uint8_t Unknown = 0;
     static constexpr uint8_t Sparks = 1;
@@ -195,23 +224,18 @@ struct SplashType {
     static constexpr uint8_t Blood = 6;
 };
 
-//-----------------
-// Deathmatch Gamemode Setting Flags
-//-----------------
+/**
+*   @brief  Gamemode specific flags such as FixedFOV, InstantItems, No Friendly Fire etc.
+**/
 struct GamemodeFlags {
     static constexpr int16_t NoHealth       = (1 << 0);
     static constexpr int16_t NoItems        = (1 << 1);
-    static constexpr int16_t WeaponsStay    = (1 << 2);
     static constexpr int16_t NoFalling      = (1 << 3);
-    static constexpr int16_t InstantItems   = (1 << 4);
     static constexpr int16_t SameLevel      = (1 << 5);
     static constexpr int16_t SkinTeams      = (1 << 6);
     static constexpr int16_t ModelTeams     = (1 << 7);
     static constexpr int16_t NoFriendlyFire = (1 << 8);
-    static constexpr int16_t SpawnFarthest  = (1 << 9);
     static constexpr int16_t ForceRespawn   = (1 << 10);
-    static constexpr int16_t NoArmor        = (1 << 11);
-    static constexpr int16_t AllowExit      = (1 << 12);
     static constexpr int16_t InfiniteAmmo   = (1 << 13);
     static constexpr int16_t FixedFOV       = (1 << 14);
 };

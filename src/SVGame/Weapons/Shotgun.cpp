@@ -77,7 +77,7 @@ void weapon_shotgun_fire(PlayerClient * ent)
     }
 
     // send muzzle flash
-    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    gi.WriteByte(ServerGameCommands::MuzzleFlash);
     gi.WriteShort(ent->GetServerEntity() - g_entities);
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();

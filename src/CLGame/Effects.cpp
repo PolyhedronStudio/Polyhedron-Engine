@@ -405,66 +405,66 @@ void CLG_MuzzleFlash() {
 //===============
 //
 void CLG_MuzzleFlash2() {
-    ClientEntity* ent;
-    vec3_t      origin;
-    const vec_t* ofs;
-    cdlight_t* dl;
-    vec3_t      forward, right;
+    //ClientEntity* ent;
+    //vec3_t      origin;
+    //const vec_t* ofs;
+    //cdlight_t* dl;
+    //vec3_t      forward, right;
 
-    // locate the origin
-    ent = &cs->entities[mzParameters.entity];
-    AngleVectors(ent->current.angles, &forward, &right, NULL);
-    ofs = vec3_t { 10.6f * 1.2f, 7.7f * 1.2f, 7.8f * 1.2f };
-    origin[0] = ent->current.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];
-    origin[1] = ent->current.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
-    origin[2] = ent->current.origin[2] + forward[2] * ofs[0] + right[2] * ofs[1] + ofs[2];
+    //// locate the origin
+    //ent = &cs->entities[mzParameters.entity];
+    //AngleVectors(ent->current.angles, &forward, &right, NULL);
+    //ofs = vec3_t { 10.6f * 1.2f, 7.7f * 1.2f, 7.8f * 1.2f };
+    //origin[0] = ent->current.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];
+    //origin[1] = ent->current.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
+    //origin[2] = ent->current.origin[2] + forward[2] * ofs[0] + right[2] * ofs[1] + ofs[2];
 
-    dl = CLG_AllocDLight(mzParameters.entity);
-    dl->origin = origin, dl->origin;
-    dl->radius = 200 + (rand() & 31);
-    //dl->minlight = 32;
-    dl->die = cl->time;  // + 0.1;
+    //dl = CLG_AllocDLight(mzParameters.entity);
+    //dl->origin = origin, dl->origin;
+    //dl->radius = 200 + (rand() & 31);
+    ////dl->minlight = 32;
+    //dl->die = cl->time;  // + 0.1;
 
-    switch (mzParameters.weapon) {
-    case MZ2_SOLDIER_MACHINEGUN_1:
-    case MZ2_SOLDIER_MACHINEGUN_2:
-    case MZ2_SOLDIER_MACHINEGUN_3:
-    case MZ2_SOLDIER_MACHINEGUN_4:
-    case MZ2_SOLDIER_MACHINEGUN_5:
-    case MZ2_SOLDIER_MACHINEGUN_6:
-    case MZ2_SOLDIER_MACHINEGUN_7:
-    case MZ2_SOLDIER_MACHINEGUN_8:
-        dl->color = vec3_t{1, 1, 0};
-        CLG_ParticleEffect(origin, forward, 0, 40);
-        CLG_SmokeAndFlash(origin);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck3.wav"), 1, ATTN_NORM, 0);
-        break;
+    //switch (mzParameters.weapon) {
+    //case MZ2_SOLDIER_MACHINEGUN_1:
+    //case MZ2_SOLDIER_MACHINEGUN_2:
+    //case MZ2_SOLDIER_MACHINEGUN_3:
+    //case MZ2_SOLDIER_MACHINEGUN_4:
+    //case MZ2_SOLDIER_MACHINEGUN_5:
+    //case MZ2_SOLDIER_MACHINEGUN_6:
+    //case MZ2_SOLDIER_MACHINEGUN_7:
+    //case MZ2_SOLDIER_MACHINEGUN_8:
+    //    dl->color = vec3_t{1, 1, 0};
+    //    CLG_ParticleEffect(origin, forward, 0, 40);
+    //    CLG_SmokeAndFlash(origin);
+    //    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck3.wav"), 1, ATTN_NORM, 0);
+    //    break;
 
-    case MZ2_SOLDIER_BLASTER_1:
-    case MZ2_SOLDIER_BLASTER_2:
-    case MZ2_SOLDIER_BLASTER_3:
-    case MZ2_SOLDIER_BLASTER_4:
-    case MZ2_SOLDIER_BLASTER_5:
-    case MZ2_SOLDIER_BLASTER_6:
-    case MZ2_SOLDIER_BLASTER_7:
-    case MZ2_SOLDIER_BLASTER_8:
-        dl->color = vec3_t{1, 1, 0};
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck2.wav"), 1, ATTN_NORM, 0);
-        break;
+    //case MZ2_SOLDIER_BLASTER_1:
+    //case MZ2_SOLDIER_BLASTER_2:
+    //case MZ2_SOLDIER_BLASTER_3:
+    //case MZ2_SOLDIER_BLASTER_4:
+    //case MZ2_SOLDIER_BLASTER_5:
+    //case MZ2_SOLDIER_BLASTER_6:
+    //case MZ2_SOLDIER_BLASTER_7:
+    //case MZ2_SOLDIER_BLASTER_8:
+    //    dl->color = vec3_t{1, 1, 0};
+    //    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck2.wav"), 1, ATTN_NORM, 0);
+    //    break;
 
-    case MZ2_SOLDIER_SHOTGUN_1:
-    case MZ2_SOLDIER_SHOTGUN_2:
-    case MZ2_SOLDIER_SHOTGUN_3:
-    case MZ2_SOLDIER_SHOTGUN_4:
-    case MZ2_SOLDIER_SHOTGUN_5:
-    case MZ2_SOLDIER_SHOTGUN_6:
-    case MZ2_SOLDIER_SHOTGUN_7:
-    case MZ2_SOLDIER_SHOTGUN_8:
-        dl->color = vec3_t{1, 1, 0};
-        CLG_SmokeAndFlash(origin);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck1.wav"), 1, ATTN_NORM, 0);
-        break;
-    }
+    //case MZ2_SOLDIER_SHOTGUN_1:
+    //case MZ2_SOLDIER_SHOTGUN_2:
+    //case MZ2_SOLDIER_SHOTGUN_3:
+    //case MZ2_SOLDIER_SHOTGUN_4:
+    //case MZ2_SOLDIER_SHOTGUN_5:
+    //case MZ2_SOLDIER_SHOTGUN_6:
+    //case MZ2_SOLDIER_SHOTGUN_7:
+    //case MZ2_SOLDIER_SHOTGUN_8:
+    //    dl->color = vec3_t{1, 1, 0};
+    //    CLG_SmokeAndFlash(origin);
+    //    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck1.wav"), 1, ATTN_NORM, 0);
+    //    break;
+    //}
 }
 
 //

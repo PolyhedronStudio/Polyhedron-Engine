@@ -294,9 +294,6 @@ void Drop_Weapon(PlayerClient *ent, gitem_t *item)
 {
     int     index;
 
-    if ((int)(gamemodeflags->value) & GamemodeFlags::WeaponsStay)
-        return;
-
     ServerClient* client = ent->GetClient();
     index = ITEM_INDEX(item);
     // see if we're already using it

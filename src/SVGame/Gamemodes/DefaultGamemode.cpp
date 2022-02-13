@@ -483,7 +483,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     // This'll cause a body not to just "disappear", but actually play some
     // bloody particles over there.
     if (bodyEntity->state.modelIndex) {
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::Blood);
         gi.WriteVector3(bodyEntity->state.origin);
         gi.WriteVector3(vec3_zero());
@@ -539,7 +539,7 @@ void DefaultGamemode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, 
         damage = 255;
 
     // Write away.
-    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+    gi.WriteByte(ServerGameCommands::TempEntity);
     gi.WriteByte(type);
     //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
     gi.WriteVector3(origin);
@@ -986,7 +986,7 @@ void DefaultGamemode::ClientBegin(Entity* serverEntity) {
     } else {
         // send effect if in a multiplayer game
         if (game.GetMaxClients() > 1) {
-            gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+            gi.WriteByte(ServerGameCommands::MuzzleFlash);
             gi.WriteShort(serverEntity - g_entities);
             gi.WriteByte(MuzzleFlashType::Login);
             gi.Multicast(serverEntity->state.origin, MultiCast::PVS);
@@ -1017,7 +1017,7 @@ void DefaultGamemode::ClientDisconnect(PlayerClient* player) {
 
     // Send effect
     if (player->IsInUse()) {
-        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+        gi.WriteByte(ServerGameCommands::MuzzleFlash);
         //gi.WriteShort(ent - g_entities);
         gi.WriteShort(player->GetNumber());
         gi.WriteByte(MuzzleFlashType::Logout);
