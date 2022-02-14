@@ -511,6 +511,7 @@ SET(SRC_VKPT
 	Refresh/vkpt/asvgf.cpp
 	Refresh/vkpt/bloom.cpp
 	Refresh/vkpt/bsp_mesh.cpp
+	Refresh/vkpt/cameras.cpp
 	Refresh/vkpt/conversion.cpp
 	Refresh/vkpt/draw.cpp
 	Refresh/vkpt/freecam.cpp
@@ -554,6 +555,7 @@ SET(HEADERS_VKPT
 	Refresh/vkpt/vkpt.h
 	Refresh/vkpt/vk_util.h
 	Refresh/vkpt/buddy_allocator.h
+	Refresh/vkpt/cameras.h
 	Refresh/vkpt/conversion.h
 	Refresh/vkpt/device_memory_allocator.h
 	Refresh/vkpt/fog.h
