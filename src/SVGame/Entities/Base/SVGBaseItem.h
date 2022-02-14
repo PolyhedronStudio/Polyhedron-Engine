@@ -24,7 +24,7 @@ public:
     //
     // Constructor/Deconstructor.
     //
-    SVGBaseItem(Entity* svEntity);
+    SVGBaseItem(Entity* svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~SVGBaseItem();
 
     DefineAbstractClass( SVGBaseItem, SVGBaseTrigger );
@@ -37,6 +37,16 @@ public:
     virtual void Respawn() override;     // Respawns the entity.
     virtual void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     virtual void Think() override;       // General entity thinking routine.
+
+    //
+    // Getters.
+    //
+    inline uint32_t GetIdentifier() {
+        return itemIdentifier;
+    }
+    inline const std::string GetDisplayString() {
+        return displayString;
+    }
 
     //
     // Entity functions.
@@ -53,6 +63,12 @@ public:
     void BaseItemDoRespawn(void);
 
 private:
+    // Item identifier.
+    uint32_t itemIdentifier;
+
+    // Item textual display string.
+    std::string displayString;
+
     // Respawn wait time.
     float respawnWaitTime = 0.f;
 

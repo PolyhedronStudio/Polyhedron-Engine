@@ -26,43 +26,68 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Game Modes.
 #include "Gamemodes/IGamemode.h"
 
-char *ClientTeam(SVGBaseEntity *ent)
-{
-    char        *p;
-    static char value[512];
+//char *ClientTeam(SVGBaseEntity *ent)
+//{
+//    char        *p;
+//    static char value[512];
+//
+//    value[0] = 0;
+//
+//    if (!ent->GetClient())
+//        return value;
+//
+//    strcpy(value, Info_ValueForKey(ent->GetClient()->persistent.userinfo, "skin"));
+//    p = strchr(value, '/');
+//    if (!p)
+//        return value;
+//
+//    if ((int)(gamemodeflags->value) & GamemodeFlags::ModelTeams) {
+//        *p = 0;
+//        return value;
+//    }
+//
+//    // if ((int)(gamemodeflags->value) & DF_SKINTEAMS)
+//    return ++p;
+//}
 
-    value[0] = 0;
-
+static inline const std::string ClientTeam(SVGBaseEntity* ent) {
+    // No team name to return.
     if (!ent->GetClient())
-        return value;
+	    "";
 
-    strcpy(value, Info_ValueForKey(ent->GetClient()->persistent.userinfo, "skin"));
-    p = strchr(value, '/');
-    if (!p)
-        return value;
+    // Check for skin info key.
+    std::string teamName = Info_ValueForKey(ent->GetClient()->persistent.userinfo, "skin");
 
-    if ((int)(gamemodeflags->value) & GamemodeFlags::ModelTeams) {
-        *p = 0;
-        return value;
+    // Check to see if we can find a '/', in which case we had a positive match
+    // on our info key value check.
+    if (teamName.find_first_of('/') == std::string::npos) {
+        return teamName;
     }
 
-    // if ((int)(gamemodeflags->value) & DF_SKINTEAMS)
-    return ++p;
+    // Return empty team.
+    return "";
+    //if ((int)(gamemodeflags->value) & GamemodeFlags::ModelTeams) {
+    //	*p = 0;
+	   // return value;
+    //}
+
+    //// if ((int)(gamemodeflags->value) & DF_SKINTEAMS)
+    //return ++p;
 }
 
-qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2)
+qboolean SVG_OnSameTeam(SVGBaseEntity *entityA, SVGBaseEntity *entityB)
 {
-    char    ent1Team [512];
-    char    ent2Team [512];
-
+    // TODO: Check in gameworld whether 
     if (!((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams)))
         return false;
 
-    strcpy(ent1Team, ClientTeam(ent1));
-    strcpy(ent2Team, ClientTeam(ent2));
-
-    if (strcmp(ent1Team, ent2Team) == 0)
+    // Fetch teamname for each entity and compare if they're the same.
+    if (ClientTeam(entityB) == ClientTeam(entityA)) {
+        // They are the same, return true.
         return true;
+    }
+
+    // Not the same, return false.
     return false;
 }
 
@@ -81,19 +106,19 @@ void SelectNextItem(PlayerClient *ent, int itflags)
     }
 
     // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (cl->persistent.selectedItem + i) % MAX_ITEMS;
-        if (!cl->persistent.inventory[index])
-            continue;
-        it = &itemlist[index];
-        if (!it->Use)
-            continue;
-        if (!(it->flags & itflags))
-            continue;
+    //for (i = 1 ; i <= MAX_ITEMS ; i++) {
+    //    index = (cl->persistent.selectedItem + i) % MAX_ITEMS;
+    //    if (!cl->persistent.inventory[index])
+    //        continue;
+    //    it = &itemlist[index];
+    //    if (!it->Use)
+    //        continue;
+    //    if (!(it->flags & itflags))
+    //        continue;
 
-        cl->persistent.selectedItem = index;
-        return;
-    }
+    //    cl->persistent.selectedItem = index;
+    //    return;
+    //}
 
     cl->persistent.selectedItem = -1;
 }
@@ -112,19 +137,19 @@ void SelectPrevItem(Entity *ent, int itflags)
     }
 
     // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (cl->persistent.selectedItem + MAX_ITEMS - i) % MAX_ITEMS;
-        if (!cl->persistent.inventory[index])
-            continue;
-        it = &itemlist[index];
-        if (!it->Use)
-            continue;
-        if (!(it->flags & itflags))
-            continue;
+    //for (i = 1 ; i <= MAX_ITEMS ; i++) {
+    //    index = (cl->persistent.selectedItem + MAX_ITEMS - i) % MAX_ITEMS;
+    //    if (!cl->persistent.inventory[index])
+    //        continue;
+    //    it = &itemlist[index];
+    //    if (!it->Use)
+    //        continue;
+    //    if (!(it->flags & itflags))
+    //        continue;
 
-        cl->persistent.selectedItem = index;
-        return;
-    }
+    //    cl->persistent.selectedItem = index;
+    //    return;
+    //}
 
     cl->persistent.selectedItem = -1;
 }
@@ -176,88 +201,88 @@ void Cmd_Give_f(Entity *ent)
 
     name = gi.args(); // C++20: Added cast.
 
-    if (PH_StringCompare(name, "all") == 0)
-        give_all = true;
-    else
-        give_all = false;
-
-    if (give_all || PH_StringCompare(gi.argv(1), "health") == 0) {
-        if (gi.argc() == 3)
-            ent->classEntity->SetHealth(atoi(gi.argv(2)));
-        else
-            ent->classEntity->SetHealth(ent->classEntity->GetMaxHealth());
-        if (!give_all)
-            return;
-    }
-
-    if (give_all || PH_StringCompare(name, "weapons") == 0) {
-        for (i = 0 ; i < game.numberOfItems ; i++) {
-            it = itemlist + i;
-            if (!it->Pickup)
-                continue;
-            if (!(it->flags & ItemFlags::IsWeapon))
-                continue;
-            ent->client->persistent.inventory[i] += 1;
-        }
-        if (!give_all)
-            return;
-    }
-
-    if (give_all || PH_StringCompare(name, "ammo") == 0) {
-        for (i = 0 ; i < game.numberOfItems ; i++) {
-            it = itemlist + i;
-            if (!it->Pickup)
-                continue;
-            if (!(it->flags & ItemFlags::IsAmmo))
-                continue;
-            SVG_AddAmmo(ent, it, 1000);
-        }
-        if (!give_all)
-            return;
-    }
-
-    if (give_all) {
-        for (i = 0 ; i < game.numberOfItems ; i++) {
-            it = itemlist + i;
-            if (!it->Pickup)
-                continue;
-            if (it->flags & (ItemFlags::IsWeapon | ItemFlags::IsAmmo))
-                continue;
-            ent->client->persistent.inventory[i] = 1;
-        }
-        return;
-    }
-
-    it = SVG_FindItemByPickupName(name);
-    if (!it) {
-        name = gi.argv(1); // C++20: Added cast.
-        it = SVG_FindItemByPickupName(name);
-        if (!it) {
-            gi.CPrintf(ent, PRINT_HIGH, "unknown item\n");
-            return;
-        }
-    }
-
-    if (!it->Pickup) {
-        gi.CPrintf(ent, PRINT_HIGH, "non-pickup item\n");
-        return;
-    }
-
-    index = ITEM_INDEX(it);
-
-    if (it->flags & ItemFlags::IsAmmo) {
-        if (gi.argc() == 3)
-            ent->client->persistent.inventory[index] = atoi(gi.argv(2));
-        else
-            ent->client->persistent.inventory[index] += it->quantity;
-    } else {
-        it_ent = SVG_Spawn();
-        it_ent->classname = it->classname;
-        SVG_SpawnItem(it_ent, it);
-//        SVG_TouchItem(it_ent, ent, NULL, NULL); Items..
-        if (it_ent->inUse)
-            SVG_FreeEntity(it_ent);
-    }
+//    if (PH_StringCompare(name, "all") == 0)
+//        give_all = true;
+//    else
+//        give_all = false;
+//
+//    if (give_all || PH_StringCompare(gi.argv(1), "health") == 0) {
+//        if (gi.argc() == 3)
+//            ent->classEntity->SetHealth(atoi(gi.argv(2)));
+//        else
+//            ent->classEntity->SetHealth(ent->classEntity->GetMaxHealth());
+//        if (!give_all)
+//            return;
+//    }
+//
+//    if (give_all || PH_StringCompare(name, "weapons") == 0) {
+//        for (i = 0 ; i < game.numberOfItems ; i++) {
+//            it = itemlist + i;
+//            if (!it->Pickup)
+//                continue;
+//            if (!(it->flags & ItemFlags::IsWeapon))
+//                continue;
+//            ent->client->persistent.inventory[i] += 1;
+//        }
+//        if (!give_all)
+//            return;
+//    }
+//
+//    if (give_all || PH_StringCompare(name, "ammo") == 0) {
+//        for (i = 0 ; i < game.numberOfItems ; i++) {
+//            it = itemlist + i;
+//            if (!it->Pickup)
+//                continue;
+//            if (!(it->flags & ItemFlags::IsAmmo))
+//                continue;
+//            SVG_AddAmmo(ent, it, 1000);
+//        }
+//        if (!give_all)
+//            return;
+//    }
+//
+//    if (give_all) {
+//        for (i = 0 ; i < game.numberOfItems ; i++) {
+//            it = itemlist + i;
+//            if (!it->Pickup)
+//                continue;
+//            if (it->flags & (ItemFlags::IsWeapon | ItemFlags::IsAmmo))
+//                continue;
+//            ent->client->persistent.inventory[i] = 1;
+//        }
+//        return;
+//    }
+//
+//    it = SVG_FindItemByPickupName(name);
+//    if (!it) {
+//        name = gi.argv(1); // C++20: Added cast.
+//        it = SVG_FindItemByPickupName(name);
+//        if (!it) {
+//            gi.CPrintf(ent, PRINT_HIGH, "unknown item\n");
+//            return;
+//        }
+//    }
+//
+//    if (!it->Pickup) {
+//        gi.CPrintf(ent, PRINT_HIGH, "non-pickup item\n");
+//        return;
+//    }
+//
+//    index = ITEM_INDEX(it);
+//
+//    if (it->flags & ItemFlags::IsAmmo) {
+//        if (gi.argc() == 3)
+//            ent->client->persistent.inventory[index] = atoi(gi.argv(2));
+//        else
+//            ent->client->persistent.inventory[index] += it->quantity;
+//    } else {
+////        it_ent = SVG_Spawn();
+////        it_ent->classname = it->classname;
+////        SVG_SpawnItem(it_ent, it);
+//////        SVG_TouchItem(it_ent, ent, NULL, NULL); Items..
+////        if (it_ent->inUse)
+////            SVG_FreeEntity(it_ent);
+//    }
 }
 
 
@@ -343,11 +368,11 @@ Use an inventory item
 void Cmd_Use_f(PlayerClient *ent)
 {
     int         index;
-    gitem_t     *it;
+    gitem_t     *it = nullptr;
     const char        *s;
 
     s = gi.args(); // C++20: Added casts.
-    it = SVG_FindItemByPickupName(s);
+    //it = SVG_FindItemByPickupName(s);
     if (!it) {
         gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "unknown item: %s\n", s);
         return;
@@ -356,13 +381,13 @@ void Cmd_Use_f(PlayerClient *ent)
         gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not usable.\n");
         return;
     }
-    index = ITEM_INDEX(it);
+//    index = ITEM_INDEX(it);
     if (!ent->GetClient()->persistent.inventory[index]) {
         gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Out of item: %s\n", s);
         return;
     }
 
-    it->Use(ent, it);
+    //it->Use(ent, it);
 }
 
 
@@ -380,22 +405,22 @@ void Cmd_Drop_f(PlayerClient*ent)
     const char        *s;
 
     s = (const char*)gi.args(); // C++20: Added casts.
-    it = SVG_FindItemByPickupName(s);
-    if (!it) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "unknown item: %s\n", s);
-        return;
-    }
-    if (!it->Drop) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
-        return;
-    }
-    index = ITEM_INDEX(it);
-    if (!ent->GetClient()->persistent.inventory[index]) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Out of item: %s\n", s);
-        return;
-    }
+    //it = SVG_FindItemByPickupName(s);
+    //if (!it) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "unknown item: %s\n", s);
+    //    return;
+    //}
+    //if (!it->Drop) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
+    //    return;
+    //}
+//    index = ITEM_INDEX(it);
+    //if (!ent->GetClient()->persistent.inventory[index]) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Out of item: %s\n", s);
+    //    return;
+    //}
 
-    it->Drop(ent, it);
+    //it->Drop(ent, it);
 }
 
 
@@ -443,12 +468,12 @@ void Cmd_InvUse_f(PlayerClient *ent)
         return;
     }
 
-    it = &itemlist[ent->GetClient()->persistent.selectedItem];
-    if (!it->Use) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not usable.\n");
-        return;
-    }
-    it->Use(ent, it);
+    //it = &itemlist[ent->GetClient()->persistent.selectedItem];
+    //if (!it->Use) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not usable.\n");
+    //    return;
+    //}
+    //it->Use(ent, it);
 }
 
 /*
@@ -463,27 +488,27 @@ void Cmd_WeapPrev_f(PlayerClient *ent)
     gitem_t     *it;
     int         selected_weapon;
 
-    cl = ent->GetClient();
+    //cl = ent->GetClient();
 
-    if (!cl->persistent.activeWeapon)
-        return;
+    //if (!cl->persistent.activeWeapon)
+    //    return;
 
-    selected_weapon = ITEM_INDEX(cl->persistent.activeWeapon);
+    //selected_weapon = -0;// ITEM_INDEX(cl->persistent.activeWeapon);
 
-    // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (selected_weapon + i) % MAX_ITEMS;
-        if (!cl->persistent.inventory[index])
-            continue;
-        it = &itemlist[index];
-        if (!it->Use)
-            continue;
-        if (!(it->flags & ItemFlags::IsWeapon))
-            continue;
-        it->Use(ent, it);
-        if (cl->persistent.activeWeapon == it)
-            return; // successful
-    }
+    //// scan  for the next valid one
+    //for (i = 1 ; i <= MAX_ITEMS ; i++) {
+    //    index = (selected_weapon + i) % MAX_ITEMS;
+    //    if (!cl->persistent.inventory[index])
+    //        continue;
+    //    it = &itemlist[index];
+    //    if (!it->Use)
+    //        continue;
+    //    if (!(it->flags & ItemFlags::IsWeapon))
+    //        continue;
+    //    it->Use(ent, it);
+    //    if (cl->persistent.activeWeapon == it)
+    //        return; // successful
+    //}
 }
 
 /*
@@ -493,32 +518,32 @@ Cmd_WeapNext_f
 */
 void Cmd_WeapNext_f(PlayerClient *ent)
 {
-    ServerClient   *cl;
-    int         i, index;
-    gitem_t     *it;
-    int         selected_weapon;
+    //ServerClient   *cl;
+    //int         i, index;
+    //gitem_t     *it;
+    //int         selected_weapon;
 
-    cl = ent->GetClient();
+    //cl = ent->GetClient();
 
-    if (!cl->persistent.activeWeapon)
-        return;
+    //if (!cl->persistent.activeWeapon)
+    //    return;
 
-    selected_weapon = ITEM_INDEX(cl->persistent.activeWeapon);
+    //selected_weapon = ITEM_INDEX(cl->persistent.activeWeapon);
 
-    // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (selected_weapon + MAX_ITEMS - i) % MAX_ITEMS;
-        if (!cl->persistent.inventory[index])
-            continue;
-        it = &itemlist[index];
-        if (!it->Use)
-            continue;
-        if (!(it->flags & ItemFlags::IsWeapon))
-            continue;
-        it->Use(ent, it);
-        if (cl->persistent.activeWeapon == it)
-            return; // successful
-    }
+    //// scan  for the next valid one
+    //for (i = 1 ; i <= MAX_ITEMS ; i++) {
+    //    index = (selected_weapon + MAX_ITEMS - i) % MAX_ITEMS;
+    //    if (!cl->persistent.inventory[index])
+    //        continue;
+    //    it = &itemlist[index];
+    //    if (!it->Use)
+    //        continue;
+    //    if (!(it->flags & ItemFlags::IsWeapon))
+    //        continue;
+    //    it->Use(ent, it);
+    //    if (cl->persistent.activeWeapon == it)
+    //        return; // successful
+    //}
 }
 
 /*
@@ -528,24 +553,24 @@ Cmd_WeapLast_f
 */
 void Cmd_WeapLast_f(PlayerClient *ent)
 {
-    ServerClient   *cl;
-    int         index;
-    gitem_t     *it;
+    //ServerClient   *cl;
+    //int         index;
+    //gitem_t     *it;
 
-    cl = ent->GetClient();
+    //cl = ent->GetClient();
 
-    if (!cl->persistent.activeWeapon || !cl->persistent.lastWeapon)
-        return;
+    //if (!cl->persistent.activeWeapon || !cl->persistent.lastWeapon)
+    //    return;
 
-    index = ITEM_INDEX(cl->persistent.lastWeapon);
-    if (!cl->persistent.inventory[index])
-        return;
-    it = &itemlist[index];
-    if (!it->Use)
-        return;
-    if (!(it->flags & ItemFlags::IsWeapon))
-        return;
-    it->Use(ent, it);
+    //index = ITEM_INDEX(cl->persistent.lastWeapon);
+    //if (!cl->persistent.inventory[index])
+    //    return;
+    //it = &itemlist[index];
+    //if (!it->Use)
+    //    return;
+    //if (!(it->flags & ItemFlags::IsWeapon))
+    //    return;
+    //it->Use(ent, it);
 }
 
 /*
@@ -559,17 +584,17 @@ void Cmd_InvDrop_f(PlayerClient *ent)
 
     HUD_ValidateSelectedItem(ent);
 
-    if (ent->GetClient()->persistent.selectedItem == -1) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No item to drop.\n");
-        return;
-    }
+    //if (ent->GetClient()->persistent.selectedItem == -1) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No item to drop.\n");
+    //    return;
+    //}
 
-    it = &itemlist[ent->GetClient()->persistent.selectedItem];
-    if (!it->Drop) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
-        return;
-    }
-    it->Drop(ent, it);
+    //it = &itemlist[ent->GetClient()->persistent.selectedItem];
+    //if (!it->Drop) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
+    //    return;
+    //}
+    //it->Drop(ent, it);
 }
 
 /*

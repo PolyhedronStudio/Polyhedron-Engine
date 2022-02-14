@@ -187,7 +187,7 @@ void DeathmatchGamemode::PutClientInServer(Entity *ent) {
     }
 
     // Set gun index to whichever was persistent in (if any) previous map.
-    client->playerState.gunIndex = gi.ModelIndex(client->persistent.activeWeapon->viewModel);
+    client->playerState.gunIndex = gi.ModelIndex("models/weapons/v_mark23/tris.iqm");//gi.ModelIndex(client->persistent.activeWeapon->viewModel);
 
     // clear entity state values
     ent->state.effects = 0;
@@ -347,7 +347,7 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServerCli
             // In old code, the need to hit a key was only set in DM mode.
             // I figured, let's keep it like this instead.
             //if (deathmatch->value)
-            buttonMask = BUTTON_ATTACK;
+            buttonMask = ButtonBits::Attack;
             //else
             //buttonMask = -1;
 

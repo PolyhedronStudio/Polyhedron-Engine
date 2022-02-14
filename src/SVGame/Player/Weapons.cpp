@@ -62,39 +62,39 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
         return;
 
 
-    if (!who->GetServerEntity()->myNoisePtr) {
-        noise = SVG_Spawn();
-        noise->classname = "player_noise";
-        VectorSet(noise->mins, -8, -8, -8);
-        VectorSet(noise->maxs, 8, 8, 8);
-        noise->owner = who->GetServerEntity();
-        noise->serverFlags = EntityServerFlags::NoClient;
-        who->GetServerEntity()->myNoisePtr = noise;
-
-        noise = SVG_Spawn();
-        noise->classname = "player_noise";
-        VectorSet(noise->mins, -8, -8, -8);
-        VectorSet(noise->maxs, 8, 8, 8);
-        noise->owner = who->GetServerEntity();
-        noise->serverFlags = EntityServerFlags::NoClient;
-        who->GetServerEntity()->myNoise2Ptr = noise;
-    }
-
-    if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
-        noise = who->GetServerEntity()->myNoisePtr;
-        level.soundEntity = noise;
-        level.soundEntityFrameNumber = level.frameNumber;
-    } else { // type == PNOISE_IMPACT
-        noise = who->GetServerEntity()->myNoise2Ptr;
-        level.sound2Entity = noise;
-        level.sound2EntityFrameNumber = level.frameNumber;
-    }
-
-    VectorCopy(where, noise->state.origin);
-    VectorSubtract(where, noise->maxs, noise->absMin);
-    VectorAdd(where, noise->maxs, noise->absMax);
-    noise->teleportTime = level.time;
-    gi.LinkEntity(noise);
+//    if (!who->GetServerEntity()->myNoisePtr) {
+//        noise = SVG_Spawn();
+////        noise->classname = "player_noise";
+//        VectorSet(noise->mins, -8, -8, -8);
+//        VectorSet(noise->maxs, 8, 8, 8);
+//        noise->owner = who->GetServerEntity();
+//        noise->serverFlags = EntityServerFlags::NoClient;
+//        //who->GetServerEntity()->myNoisePtr = noise;
+//
+//        noise = SVG_Spawn();
+//     //   noise->classname = "player_noise";
+//        VectorSet(noise->mins, -8, -8, -8);
+//        VectorSet(noise->maxs, 8, 8, 8);
+//        noise->owner = who->GetServerEntity();
+//        noise->serverFlags = EntityServerFlags::NoClient;
+//        //who->GetServerEntity()->myNoise2Ptr = noise;
+//    }
+//
+//    if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
+//        noise = who->GetServerEntity()->myNoisePtr;
+//        level.soundEntity = noise;
+//        level.soundEntityFrameNumber = level.frameNumber;
+//    } else { // type == PNOISE_IMPACT
+//        noise = who->GetServerEntity()->myNoise2Ptr;
+//        level.sound2Entity = noise;
+//        level.sound2EntityFrameNumber = level.frameNumber;
+//    }
+//
+//    VectorCopy(where, noise->state.origin);
+//    VectorSubtract(where, noise->maxs, noise->absMin);
+//    VectorAdd(where, noise->maxs, noise->absMax);
+//    noise->teleportTime = level.time;
+//    gi.LinkEntity(noise);
 }
 
 
@@ -174,9 +174,9 @@ void SVG_ChangeWeapon(PlayerClient*ent)
         ent->SetSkinNumber((ent->GetServerEntity() - g_entities - 1) | i);
     }
 
-    if (client->persistent.activeWeapon && client->persistent.activeWeapon->ammo)
-        client->ammoIndex = ITEM_INDEX(SVG_FindItemByPickupName(client->persistent.activeWeapon->ammo));
-    else
+    //if (client->persistent.activeWeapon && client->persistent.activeWeapon->ammo)
+    //    client->ammoIndex = ITEM_INDEX(SVG_FindItemByPickupName(client->persistent.activeWeapon->ammo));
+    //else
         client->ammoIndex = 0;
 
     if (!client->persistent.activeWeapon) {
@@ -209,12 +209,12 @@ void NoAmmoWeaponChange(PlayerClient *ent)
 {
     ServerClient* client = ent->GetClient();
 
-    if (client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("bullets"))]
-        &&  client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("machinegun"))]) {
-        client->newWeapon = SVG_FindItemByPickupName("machinegun");
-        return;
-    }
-    client->newWeapon = SVG_FindItemByPickupName("blaster");
+    //if (client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("bullets"))]
+    //    &&  client->persistent.inventory[ITEM_INDEX(SVG_FindItemByPickupName("machinegun"))]) {
+    //    client->newWeapon = SVG_FindItemByPickupName("machinegun");
+    //    return;
+    //}
+    //client->newWeapon = SVG_FindItemByPickupName("blaster");
 }
 
 /*
@@ -260,27 +260,27 @@ void Use_Weapon(PlayerClient *ent, gitem_t* item)
     gitem_t     *ammo_item;
     ServerClient* client = ent->GetClient();
 
-    // see if we're already using it
-    if (item == client->persistent.activeWeapon)
-        return;
+    //// see if we're already using it
+    //if (item == client->persistent.activeWeapon)
+    //    return;
 
-    if (item->ammo && !g_select_empty->value && !(item->flags & ItemFlags::IsAmmo)) {
-        ammo_item = SVG_FindItemByPickupName(item->ammo);
-        ammoIndex = ITEM_INDEX(ammo_item);
+    //if (item->ammo && !g_select_empty->value && !(item->flags & ItemFlags::IsAmmo)) {
+    //    ammo_item = SVG_FindItemByPickupName(item->ammo);
+    //    ammoIndex = ITEM_INDEX(ammo_item);
 
-        if (!client->persistent.inventory[ammoIndex]) {
-            gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
-            return;
-        }
+    //    if (!client->persistent.inventory[ammoIndex]) {
+    //        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No %s for %s.\n", ammo_item->pickupName, item->pickupName);
+    //        return;
+    //    }
 
-        if (client->persistent.inventory[ammoIndex] < item->quantity) {
-            gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
-            return;
-        }
-    }
+    //    if (client->persistent.inventory[ammoIndex] < item->quantity) {
+    //        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickupName, item->pickupName);
+    //        return;
+    //    }
+    //}
 
-    // change to this weapon when down
-    client->newWeapon = item;
+    //// change to this weapon when down
+    //client->newWeapon = item;
 }
 
 
@@ -295,15 +295,15 @@ void Drop_Weapon(PlayerClient *ent, gitem_t *item)
     int     index;
 
     ServerClient* client = ent->GetClient();
-    index = ITEM_INDEX(item);
-    // see if we're already using it
-    if (((item == client->persistent.activeWeapon) || (item == client->newWeapon)) && (client->persistent.inventory[index] == 1)) {
-        gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Can't drop current weapon\n");
-        return;
-    }
+    //index = ITEM_INDEX(item);
+    //// see if we're already using it
+    //if (((item == client->persistent.activeWeapon) || (item == client->newWeapon)) && (client->persistent.inventory[index] == 1)) {
+    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Can't drop current weapon\n");
+    //    return;
+    //}
 
-    SVG_DropItem(ent->GetServerEntity(), item);
-    client->persistent.inventory[index]--;
+    //SVG_DropItem(ent->GetServerEntity(), item);
+    //client->persistent.inventory[index]--;
 }
 
 
@@ -358,7 +358,7 @@ void _Weapon_Generic(PlayerClient* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_
 	return;
     }
 
-    if ((client->newWeapon) && (client->weaponState != WeaponState::Firing)) {
+    if ((client->newWeapon) && (client->weaponState != WeaponState::PrimaryFiring)) {
 	client->weaponState = WeaponState::Dropping;
 	client->playerState.gunFrame = FRAME_DEACTIVATE_FIRST;
 
@@ -376,11 +376,11 @@ void _Weapon_Generic(PlayerClient* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_
     }
 
     if (client->weaponState == WeaponState::Ready) {
-	if (((client->latchedButtons | client->buttons) & BUTTON_ATTACK)) {
-	    client->latchedButtons &= ~BUTTON_ATTACK;
+	if (((client->latchedButtons | client->buttons) & ButtonBits::Attack)) {
+	    client->latchedButtons &= ~ButtonBits::Attack;
 	    if ((!client->ammoIndex) || (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
 		client->playerState.gunFrame = FRAME_FIRE_FIRST;
-		client->weaponState = WeaponState::Firing;
+		client->weaponState = WeaponState::PrimaryFiring;
 
 		// start the animation
 		client->animation.priorityAnimation = PlayerAnimation::Attack;
@@ -418,7 +418,7 @@ void _Weapon_Generic(PlayerClient* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_
 	}
     }
 
-    if (client->weaponState == WeaponState::Firing) {
+    if (client->weaponState == WeaponState::PrimaryFiring) {
 	for (n = 0; fire_frames[n]; n++) {
 	    if (client->playerState.gunFrame == fire_frames[n]) {
 		fire(ent);
@@ -479,7 +479,7 @@ void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTIV
         return;
     }
 
-    if ((client->newWeapon) && (client->weaponState != WeaponState::Firing)) {
+    if ((client->newWeapon) && (client->weaponState != WeaponState::PrimaryFiring)) {
         client->weaponState = WeaponState::Dropping;
         client->playerState.gunFrame = FRAME_DEACTIVATE_FIRST;
 
@@ -498,12 +498,12 @@ void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTIV
     }
 
     if (client->weaponState == WeaponState::Ready) {
-        if (((client->latchedButtons | client->buttons) & BUTTON_ATTACK)) {
-            client->latchedButtons &= ~BUTTON_ATTACK;
+        if (((client->latchedButtons | client->buttons) & ButtonBits::Attack)) {
+            client->latchedButtons &= ~ButtonBits::Attack;
             if ((!client->ammoIndex) ||
                 (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
                 client->playerState.gunFrame = FRAME_FIRE_FIRST;
-                client->weaponState = WeaponState::Firing;
+                client->weaponState = WeaponState::PrimaryFiring;
 
                 // start the animation
                 client->animation.priorityAnimation = PlayerAnimation::Attack;
@@ -541,7 +541,7 @@ void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTIV
         }
     }
 
-    if (client->weaponState == WeaponState::Firing) {
+    if (client->weaponState == WeaponState::PrimaryFiring) {
         for (n = 0; fire_frames[n]; n++) {
             if (client->playerState.gunFrame == fire_frames[n]) {
                 fire(ent);

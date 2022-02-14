@@ -211,7 +211,7 @@ void SVG_FreeEntity(Entity* ent) {
     *ent = {};
     
     // Reset classname to "freed" (It is, freed...)
-    ent->classname = "freed";
+    //ent->classname = "freed";
 
     // Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
     // If we don't, we can expect client side LERP horror.
@@ -241,39 +241,40 @@ void SVG_FreeEntity(Entity* ent) {
 
 Entity* SVG_PickTarget(char* targetName)
 {
-    Entity* ent = nullptr;
-    int     num_choices = 0;
-    Entity* choice[MAXCHOICES];
+    //Entity* ent = nullptr;
+    //int     num_choices = 0;
+    //Entity* choice[MAXCHOICES];
 
-    // Can't go on without a target name, can we?
-    if (!targetName) {
-        gi.DPrintf("SVG_PickTarget called with NULL targetName\n");
-        return NULL;
-    }
+    //// Can't go on without a target name, can we?
+    //if (!targetName) {
+    //    gi.DPrintf("SVG_PickTarget called with NULL targetName\n");
+    //    return NULL;
+    //}
 
-    // Try and find the given entity that matches this targetName.
-    while (1) {
-        ent = SVG_Find(ent, FOFS(targetName), targetName);
-        // If we can't find it, break out of this loop.
-        if (!ent)
-            break;
+    //// Try and find the given entity that matches this targetName.
+    //while (1) {
+    //    ent = SVG_Find(ent, FOFS(targetName), targetName);
+    //    // If we can't find it, break out of this loop.
+    //    if (!ent)
+    //        break;
 
-        // If we did find one, add it to our list of targets to choose from.
-        choice[num_choices++] = ent;
+    //    // If we did find one, add it to our list of targets to choose from.
+    //    choice[num_choices++] = ent;
 
-        // Break out in case of maximum choice limit.
-        if (num_choices == MAXCHOICES)
-            break;
-    }
+    //    // Break out in case of maximum choice limit.
+    //    if (num_choices == MAXCHOICES)
+    //        break;
+    //}
 
-    // If there is nothing to choose from, it means we never found an entity matching this targetname.
-    if (!num_choices) {
-        gi.DPrintf("SVG_PickTarget: target %s not found\n", targetName);
-        return NULL;
-    }
+    //// If there is nothing to choose from, it means we never found an entity matching this targetname.
+    //if (!num_choices) {
+    //    gi.DPrintf("SVG_PickTarget: target %s not found\n", targetName);
+    //    return NULL;
+    //}
 
-    // Return a random target use % to prevent out of bounds.
-    return choice[rand() % num_choices];
+    //// Return a random target use % to prevent out of bounds.
+    //return choice[rand() % num_choices];
+    return nullptr;
 }
 
 //===============
@@ -383,10 +384,10 @@ void SVG_InitEntity(Entity* e)
     e->inUse = true;
 
     // Set classname to "noclass", because it is.
-    e->classname = "noclass";
+//    e->classname = "noclass";
 
     // Reset gravity.
-    //s->gravity = 1.0;
+    //e->gravity = 1.0;
 
     // Last but not least, give it that ID number it so badly deserves for being initialized.
     e->state.number = e - g_entities;
@@ -436,9 +437,9 @@ Entity* SVG_CreateTargetChangeLevel(char* map) {
     Entity* ent;
 
     ent = SVG_Spawn();
-    ent->classname = (char*)"target_changelevel"; // C++20: Added a cast.
+//    ent->classname = (char*)"target_changelevel"; // C++20: Added a cast.
     Q_snprintf(level.nextMap, sizeof(level.nextMap), "%s", map);
-    ent->map = level.nextMap;
+//    ent->map = level.nextMap;
     return ent;
 }
 

@@ -198,7 +198,7 @@ typedef enum {
 #define CM_IMPULSE  (1<<7)
 
 // r1q2 button byte hacks
-#define BUTTON_MASK     (BUTTON_ATTACK|BUTTON_USE|BUTTON_ANY)
+#define BUTTON_MASK     (ButtonBits::Attack|ButtonBits::Use|ButtonBits::Any)
 #define BUTTON_FORWARD  4
 #define BUTTON_SIDE     8
 #define BUTTON_UP       16

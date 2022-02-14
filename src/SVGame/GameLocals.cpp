@@ -20,7 +20,6 @@
 
 // Extern cvars.
 extern cvar_t* gamemode;
-extern gitem_s itemlist[];
 
 /**
 *	@brief Initializes the gameworld and its member objects.

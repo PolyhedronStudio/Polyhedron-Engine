@@ -594,10 +594,10 @@ void CLG_FinalizeFrameMoveCommand(void)
     // figure button bits
     //
     if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->moveCommand.input.buttons |= BUTTON_ATTACK;
+        cl->moveCommand.input.buttons |= ButtonBits::Attack;
 
     if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->moveCommand.input.buttons |= BUTTON_USE;
+        cl->moveCommand.input.buttons |= ButtonBits::Use;
 
     // Undo the button_state_down for the next frame, it needs a repress for
     // that to be re-enabled.
@@ -607,18 +607,18 @@ void CLG_FinalizeFrameMoveCommand(void)
     // Whether to run or not, depends on whether auto-run is on or off.
     if (cl_run->value) {
         if (in_speed.state & BUTTON_STATE_HELD) {
-            cl->moveCommand.input.buttons |= BUTTON_WALK;
+            cl->moveCommand.input.buttons |= ButtonBits::Walk;
         }
     }
     else {
         if (!(in_speed.state & BUTTON_STATE_HELD)) {
-            cl->moveCommand.input.buttons |= BUTTON_WALK;
+            cl->moveCommand.input.buttons |= ButtonBits::Walk;
         }
     }
 
     // Always send in case any button was down at all in-game.
     if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
-        cl->moveCommand.input.buttons |= BUTTON_ANY;
+        cl->moveCommand.input.buttons |= ButtonBits::Any;
     }
 
     if (cl->moveCommand.input.msec > 250) {

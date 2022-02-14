@@ -450,14 +450,14 @@ void SVG_EndDMLevel(void)
     if (level.nextMap[0]) // go to a specific map
         SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.nextMap));
     else {  // search for a changelevel
-        ent = SVG_Find(NULL, FOFS(classname), "target_changelevel");
-        if (!ent) {
-            // the map designer didn't include a changelevel,
-            // so create a fake ent that goes back to the same level
-            SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
-            return;
-        }
-        SVG_HUD_BeginIntermission(ent);
+        //ent = SVG_Find(NULL, FOFS(classname), "target_changelevel");
+        //if (!ent) {
+        //    // the map designer didn't include a changelevel,
+        //    // so create a fake ent that goes back to the same level
+        //    SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
+        //    return;
+        //}
+        //SVG_HUD_BeginIntermission(ent);
     }
 }
 

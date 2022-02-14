@@ -266,7 +266,7 @@ void CL_AddNetgraph(void)
     if (!scr.initialized)
         return;
 
-    // if using the debuggraph for something else, don't
+    // If using the debuggraph for something else, don't
     // add the net lines
     if (scr_debuggraph->integer || scr_timegraph->integer)
         return;
@@ -276,13 +276,14 @@ void CL_AddNetgraph(void)
 
     //for (i=0; i<cl.suppressCount; i++)
     //  SCR_DebugGraph (30, 0xdf);
-
-    // see what the latency was on this packet
+    
+    // See what the latency was on this packet
     in = cls.netChannel->incomingAcknowledged & CMD_MASK;
     ping = cls.realtime - cl.clientCommandHistory[in].timeSent;
     ping /= 30;
     if (ping > 30)
         ping = 30;
+
     SCR_DebugGraph(ping, 0xd0);
 }
 

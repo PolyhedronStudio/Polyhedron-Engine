@@ -69,8 +69,11 @@ Allocates the proper server game entity class. Then spawns the entity.
 void ED_CallSpawn(Entity *ent)
 {
     auto dictionary = ent->entityDictionary;
-    ent->classname = ED_NewString( ent->entityDictionary["classname"].c_str() );
-    ent->classEntity = SVG_SpawnClassEntity( ent, ent->classname );
+    //ent->classname = ED_NewString( ent->entityDictionary["classname"].c_str() );
+    if (!ent->entityDictionary.contains("classname")) {
+	    return;
+    }
+    ent->classEntity = SVG_SpawnClassEntity(ent, ent->entityDictionary["classname"]);
 
     // If we did not find the classname, then give up
     if ( nullptr == ent->classEntity ) {

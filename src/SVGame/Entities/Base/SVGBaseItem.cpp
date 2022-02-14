@@ -27,8 +27,8 @@
 //
 // Constructor/Deconstructor.
 //
-SVGBaseItem::SVGBaseItem(Entity* svEntity) 
-    : Base(svEntity) {
+SVGBaseItem::SVGBaseItem(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+    : Base(svEntity), displayString(displayString), itemIdentifier(identifier) {
 
 }
 SVGBaseItem::~SVGBaseItem() {
@@ -60,6 +60,9 @@ void SVGBaseItem::Precache() {
 void SVGBaseItem::Spawn() {
     // Always call parent class method.
     Base::Spawn();
+
+    // Set the config string for this item.
+    SVG_SetConfigString(ConfigStrings::Items + itemIdentifier, displayString);
 
     // Set solid.
     SetSolid(Solid::Trigger);

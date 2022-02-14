@@ -11,34 +11,55 @@
 //---------------------------------------------------------------------
 class ClientGameMedia : public IClientGameExportMedia {
 public:
-    // Called upon initialization of the renderer.
+    /**
+    *   @brief Called upon initialization of the renderer.
+    **/
     void Initialize() final;
 
-    // This is called when the client stops the renderer.
-    // Use this to unload remaining data.
+    /**
+    *   @brief Called when the client stops the renderer.
+    * 
+    *   @details    Used to unload remaining data.
+    **/
     void Shutdown() final;
 
-    // Called when the client wants to know the name of a custom load state.
+    /**
+    *   @brief Called when the client wants to acquire the name of a load state.
+    **/
     std::string GetLoadStateName(LoadState loadState) final;
 
-    // This is called when the client starts, but also when the renderer has had
-    // modified settings.
-    //
-    // It should register the basic screen media, 2D icons etc.
+    /**
+    *   @brief  Called when the client starts or when the renderer demands so
+    *           after having modified its settings.
+    *
+    *   @details    Used to register basic screen media, 2D icons etc.
+    **/
     void LoadScreen() final;
 
-    // This is called when the client spawns into a server,
-    //
-    // It should register world related media here, such as:
-    // Particles, (View-)Models, and Sounds.
+    /**
+    *   @brief  This is called when the client spawns into a server,
+    *   
+    *   @details    Used to register world related media (particles, view models, sounds).
+    **/
     void LoadWorld() final;
 
 private:
-    // Load client models media here.
+    /**
+    *   @brief Loads up the view(-weapon) models of a client.
+    **/
+    void LoadViewModels();
+
+    /**
+    *   @brief Load client models media here.
+    **/
     void LoadModels();
-    // Load client image media here.
+    /**
+    *   @brief Load client image media here.
+    **/
     void LoadImages();
-    // Load client sound media here.
+    /**
+    *   Load client sound media here.
+    **/
     void LoadSounds();
 };
 

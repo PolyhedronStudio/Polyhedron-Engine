@@ -172,26 +172,26 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
             newOrigin = ent->GetOrigin() + move;
 
             if (i == 0 && ent->GetEnemy()) {
-                if (!ent->GetServerEntity()->goalEntityPtr)
-                    ent->GetServerEntity()->goalEntityPtr = ent->GetEnemy()->GetServerEntity();
-                dz = ent->GetServerEntity()->state.origin[2] - ent->GetServerEntity()->goalEntityPtr->state.origin[2];
-                if (ent->GetServerEntity()->goalEntityPtr->client) {
-                    if (dz > 40)
-                        newOrigin.z -= 8;
-                    if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetWaterLevel() < 2)))
-                        if (dz < 30)
-                            newOrigin.z += 8;
-                }
-                else {
-                    if (dz > 8)
-                        newOrigin.z -= 8;
-                    else if (dz > 0)
-                        newOrigin.z -= dz;
-                    else if (dz < -8)
-                        newOrigin.z += 8;
-                    else
-                        newOrigin.z += dz;
-                }
+                //if (!ent->GetServerEntity()->goalEntityPtr)
+                //    ent->GetServerEntity()->goalEntityPtr = ent->GetEnemy()->GetServerEntity();
+                //dz = ent->GetServerEntity()->state.origin[2] - ent->GetServerEntity()->goalEntityPtr->state.origin[2];
+                //if (ent->GetServerEntity()->goalEntityPtr->client) {
+                //    if (dz > 40)
+                //        newOrigin.z -= 8;
+                //    if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetWaterLevel() < 2)))
+                //        if (dz < 30)
+                //            newOrigin.z += 8;
+                //}
+                //else {
+                //    if (dz > 8)
+                //        newOrigin.z -= 8;
+                //    else if (dz > 0)
+                //        newOrigin.z -= dz;
+                //    else if (dz < -8)
+                //        newOrigin.z += 8;
+                //    else
+                //        newOrigin.z += dz;
+                //}
             }
             trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), newOrigin, ent, CONTENTS_MASK_MONSTERSOLID);
 

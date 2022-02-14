@@ -652,7 +652,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient
             // In old code, the need to hit a key was only set in DM mode.
             // I figured, let's keep it like this instead.
             //if (deathmatch->value)
-            buttonMask = BUTTON_ATTACK;
+            buttonMask = ButtonBits::Attack;
             //else
             //buttonMask = -1;
 
@@ -1252,10 +1252,10 @@ void DefaultGamemode::InitializeClientPersistentData(ServerClient* client) {
     client->persistent = {};
 
     item = SVG_FindItemByPickupName("Blaster");
-    client->persistent.selectedItem = ITEM_INDEX(item);
+    client->persistent.selectedItem = 0;//ITEM_INDEX(item);
     client->persistent.inventory[client->persistent.selectedItem] = 1;
 
-    client->persistent.activeWeapon = item;
+    client->persistent.activeWeapon = nullptr;
 
     client->persistent.health       = 100;
     client->persistent.maxHealth    = 100;

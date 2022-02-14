@@ -124,14 +124,16 @@ namespace EntityFilters {
     inline auto HasClient = std::views::filter( &EntityFilterFunctions::EntityHasClient );
     inline auto HasClassEntity = std::views::filter( &EntityFilterFunctions::EntityHasClassEntity );
 
-    // TODO: Move these functions over into EntityFilterFunctions.
-    inline auto HasClassName(const std::string& classname) {
-        return std::ranges::views::filter(
-            [classname /*need a copy!*/](Entity &ent) {
-                return classname == ent.classname;
-            }
-        );
-    }
+    ///**
+    //*   @return True in case the classname resides in 
+    //**/
+    //inline auto HasClassName(const std::string& classname) {
+    //    return std::ranges::views::filter([classname /*need a copy!*/](Entity& ent) { 
+    //            // 
+    //            return ef::HasKeyValue("classname", classname);
+    //        }
+    //    );
+    //}
     inline auto HasKeyValue(const std::string& fieldKey, const std::string &fieldValue) {
         return std::ranges::views::filter(
             [fieldKey, fieldValue /*need a copy!*/](Entity& ent) {
@@ -262,7 +264,7 @@ inline entityClass* SVG_CreateClassEntity(Entity* edict = nullptr, bool allocate
     // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
     if (entityClass::ClassInfo.AllocateInstance) {
         entity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(edict)); // Entities that aren't in the type info system will error out here
-        edict->classname = entity->GetTypeInfo()->classname;
+        //edict->classname = entity->GetTypeInfo()->classname;
         edict->classEntity = entity;
 
         if (nullptr == g_baseEntities[edict->state.number]) {

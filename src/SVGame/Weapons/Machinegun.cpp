@@ -50,7 +50,7 @@ void Machinegun_Fire(PlayerClient* ent)
     // Get the client.
     ServerClient* client = ent->GetClient();
 
-    if (!(client->buttons & BUTTON_ATTACK)) {
+    if (!(client->buttons & ButtonBits::Attack)) {
         client->machinegunShots = 0;
         client->playerState.gunFrame++;
         return;

@@ -70,26 +70,26 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
 
 void SP_FixCoopSpots(Entity *self)
 {
-    Entity *spot;
-    vec3_t  d;
+    //Entity *spot;
+    //vec3_t  d;
 
-    spot = NULL;
+    //spot = NULL;
 
-    while (1) {
-        spot = SVG_Find(spot, FOFS(classname), "info_player_start");
-        if (!spot)
-            return;
-        if (!spot->targetName)
-            continue;
-        d = self->state.origin - spot->state.origin;
-        if (vec3_length(d) < 384) {
-            if ((!self->targetName) || PH_StringCompare(self->targetName, spot->targetName) != 0) {
-                //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
-                self->targetName = spot->targetName;
-            }
-            return;
-        }
-    }
+    //while (1) {
+    //    spot = SVG_Find(spot, FOFS(classname), "info_player_start");
+    //    if (!spot)
+    //        return;
+    //    if (!spot->targetName)
+    //        continue;
+    //    d = self->state.origin - spot->state.origin;
+    //    if (vec3_length(d) < 384) {
+    //        if ((!self->targetName) || PH_StringCompare(self->targetName, spot->targetName) != 0) {
+    //            //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
+    //            self->targetName = spot->targetName;
+    //        }
+    //        return;
+    //    }
+    //}
 }
 
 //=======================================================================
@@ -362,7 +362,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
         client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
         // can exit intermission after five seconds
         if (level.time > level.intermission.time + 5.0
-            && (moveCommand->input.buttons & BUTTON_ANY))
+            && (moveCommand->input.buttons & ButtonBits::Any))
             level.intermission.exitIntermission = true;
         return;
     }
@@ -490,7 +490,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
     //ent->lightLevel = moveCommand->input.lightLevel;
 
     // fire weapon from final position if needed
-    if (client->latchedButtons & BUTTON_ATTACK) {
+    if (client->latchedButtons & ButtonBits::Attack) {
         if (client->respawn.isSpectator) {
 
             client->latchedButtons = 0;

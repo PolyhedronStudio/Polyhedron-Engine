@@ -90,25 +90,25 @@ static const save_field_t entityfields[] = {
 //    L(model),
     F(freeTime),
 
-    L(message),
-    L(classname),
+//    L(message),
+ //   L(classname),
 //    I(spawnFlags),
 
-    F(timeStamp),
+//    F(timeStamp),
 
-    L(target),
-    L(targetName),
-    L(killTarget),
-    L(team),
-    L(pathTarget),
-    E(targetEntityPtr),
+    //L(target),
+    //L(targetName),
+    //L(killTarget),
+    //L(team),
+    //L(pathTarget),
+//    E(targetEntityPtr),
 
-    F(speed),
-    F(acceleration),
-    F(deceleration),
-    V(moveDirection),
-    V(position1),
-    V(position2),
+    //F(speed),
+    //F(acceleration),
+    //F(deceleration),
+    //V(moveDirection),
+    //V(position1),
+    //V(position2),
 
 //    V(velocity),
 //    V(angularVelocity),
@@ -116,8 +116,8 @@ static const save_field_t entityfields[] = {
 //    F(airFinishedTime),
 //    F(gravity),
 
-    E(goalEntityPtr),
-    E(moveTargetPtr),
+//    E(goalEntityPtr),
+//    E(moveTargetPtr),
 //    F(yawSpeed),
  //   F(idealYawAngle),
 
@@ -144,7 +144,7 @@ static const save_field_t entityfields[] = {
 
  //   F(powerArmorTime),
 
-    L(map),
+//    L(map),
 
     //I(viewHeight),
     //I(takeDamage),
@@ -163,19 +163,19 @@ static const save_field_t entityfields[] = {
     //E(teamChainPtr),
     //E(teamMasterPtr),
 
-    E(myNoisePtr),
-    E(myNoise2Ptr),
+    //E(myNoisePtr),
+    //E(myNoise2Ptr),
 
-    I(noiseIndex),
-    I(noiseIndex2),
-    F(volume),
-    F(attenuation),
+    //I(noiseIndex),
+    //I(noiseIndex2),
+    //F(volume),
+    //F(attenuation),
 
 //    F(wait),
 //    F(delay),
-    F(random),
+    //F(random),
 
-    F(teleportTime),
+    //F(teleportTime),
 
 //    I(waterType),
 //    I(waterLevel),
@@ -188,7 +188,7 @@ static const save_field_t entityfields[] = {
     //I(style),
     //L(customLightStyle),
 
-    T(item),
+//    T(item),
 
 //    V(moveInfo.startOrigin),
     //V(moveInfo.startAngles),

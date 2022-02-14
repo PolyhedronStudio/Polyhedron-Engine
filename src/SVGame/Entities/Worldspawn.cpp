@@ -287,11 +287,11 @@ void Worldspawn::Spawn() {
     level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
         Entity* ent = SVG_Spawn();
-        ent->classname = "bodyque";
+        //ent->classname = "bodyque";
     }
 
     // Configure item name configstrings.
-    SVG_SetItemNames();
+    //SVG_SetItemNames();
 
     // Setup max client config strings.
     SVG_SetConfigString(ConfigStrings::MaxClients, std::to_string(maximumclients->integer));

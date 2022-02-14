@@ -111,7 +111,7 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
 
     //ServerClient* client = ent->GetClient();
 
-    //if (!(client->buttons & BUTTON_ATTACK)) {
+    //if (!(client->buttons & ButtonBits::Attack)) {
     //    client->machinegunShots = 0;
     //    client->playerState.gunFrame++;
     //    return;

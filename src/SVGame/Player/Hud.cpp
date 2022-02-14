@@ -124,7 +124,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     // Set intermission time and the map to change to.
     level.intermission.time = level.time;
-    level.intermission.changeMap = targ->map;
+    //level.intermission.changeMap = targ->map;
 
     // 
     if (strstr(level.intermission.changeMap, "*")) {
@@ -134,12 +134,13 @@ void SVG_HUD_BeginIntermission(Entity *targ)
                 if (!client->inUse) {
                     continue;
                 }
+
                 // strip players of all keys between units
-                for (n = 0; n < MAX_ITEMS; n++) {
-                    if (itemlist[n].flags & ItemFlags::IsKey) {
-                        client->client->persistent.inventory[n] = 0;
-                    }
-                }
+                //for (n = 0; n < MAX_ITEMS; n++) {
+                //    if (itemlist[n].flags & ItemFlags::IsKey) {
+                //        client->client->persistent.inventory[n] = 0;
+                //    }
+                //}
             }
         }
     } else {
@@ -151,28 +152,28 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     level.intermission.exitIntermission = 0;
 
-    // Fetch an intermission entity.
-    Entity *intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_intermission");
-    if (!intermissionEntity) {
-        // the map creator forgot to put in an intermission point...
-        intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_start");
-        if (!intermissionEntity) {
-            intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_deathmatch");
-        }
-    } else {
-        // chose one of four spots
-        i = rand() & 3;
-        while (i--) {
-            intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
-            if (!intermissionEntity) {  // wrap around the list 
-                intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
-            }
-        }
-    }
+    //// Fetch an intermission entity.
+    //Entity *intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_intermission");
+    //if (!intermissionEntity) {
+    //    // the map creator forgot to put in an intermission point...
+    //    intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_start");
+    //    if (!intermissionEntity) {
+    //        intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_deathmatch");
+    //    }
+    //} else {
+    //    // chose one of four spots
+    //    i = rand() & 3;
+    //    while (i--) {
+    //        intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+    //        if (!intermissionEntity) {  // wrap around the list 
+    //            intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+    //        }
+    //    }
+    //}
 
     // Setup intermission origin and view angle.
-    level.intermission.origin = intermissionEntity->state.origin, level.intermission.origin;
-    level.intermission.viewAngle = intermissionEntity->state.angles;
+    level.intermission.origin = vec3_zero();// intermissionEntity->state.origin, level.intermission.origin;
+    level.intermission.viewAngle = vec3_zero(); //intermissionEntity->state.angles;
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
@@ -371,7 +372,7 @@ void SVG_HUD_SetClientStats(Entity* ent)
         ent->client->playerState.stats[STAT_AMMO] = 0;
     }
     else {
-        item = &itemlist[ent->client->ammoIndex];
+        item = 0;// &itemlist[ent->client->ammoIndex];
         ent->client->playerState.stats[STAT_AMMO_ICON] = gi.ImageIndex(item->icon);
         ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammoIndex];
     }
@@ -402,7 +403,7 @@ void SVG_HUD_SetClientStats(Entity* ent)
     if (ent->client->persistent.selectedItem == -1)
         ent->client->playerState.stats[STAT_SELECTED_ICON] = 0;
     else
-        ent->client->playerState.stats[STAT_SELECTED_ICON] = gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
+        ent->client->playerState.stats[STAT_SELECTED_ICON] = 0;//gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
 
     ent->client->playerState.stats[STAT_SELECTED_ITEM] = ent->client->persistent.selectedItem;
 

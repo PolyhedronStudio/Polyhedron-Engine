@@ -267,8 +267,8 @@ void CoopGamemode::ClientDeath(PlayerClient *clientEntity) {
 
     // Clear inventory this is kind of ugly, but it's how we want to handle keys in coop
     for (int32_t i = 0; i < game.numberOfItems; i++) {
-        if (itemlist[i].flags & ItemFlags::IsKey)
-            client->respawn.persistentCoopRespawn.inventory[i] = client->persistent.inventory[i];
+        //if (itemlist[i].flags & ItemFlags::IsKey)
+        //    client->respawn.persistentCoopRespawn.inventory[i] = client->persistent.inventory[i];
         client->persistent.inventory[i] = 0;
     }
 }
