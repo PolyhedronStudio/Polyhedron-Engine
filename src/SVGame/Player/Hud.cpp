@@ -306,18 +306,7 @@ SVG_Command_Score_f
 Display the scoreboard
 ==================
 */
-void SVG_Command_Score_f(SVGBaseEntity*ent)
-{
-    // Entity. Make sure it is valid.
-    if (!ent)
-        return;
-    
-    ServerClient* client = ent->GetClient();
-
-    // We obviously should not continue, for some reason it has no client...
-    if (!client)
-        return;
-    
+void SVG_Command_Score_f(PlayerClient *clientEntity, ServerClient *client) {
     // Hide inventory display.
     client->showInventory = false;
 
@@ -334,7 +323,7 @@ void SVG_Command_Score_f(SVGBaseEntity*ent)
 
     // Show score display.
     client->showScores = true;
-    HUD_SendDMScoreboardMessage(ent);
+    HUD_SendDMScoreboardMessage(clientEntity);
 }
 
 

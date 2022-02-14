@@ -13,6 +13,14 @@
 #include "ServerGameLocal.h"          // Include SVGame header.
 #include "Entities.h"
 
+// Wraps up gi.CPrintf for SVGBaseEntities.
+void SVG_CPrintf(SVGBaseEntity* ent, int32_t printlevel, const std::string& str) {
+    if (!ent)
+    	return;
+
+    gi.CPrintf(ent->GetServerEntity(), printlevel, "%s", str.c_str());
+}
+
 //
 //===============
 // SVG_CenterPrint
@@ -29,7 +37,7 @@ void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str) {
 
 //
 //===============
-// SVG_CenterPrint
+// SVG_Sound
 //
 // Wraps up gi.Sound for SVGBaseEntity.
 //===============

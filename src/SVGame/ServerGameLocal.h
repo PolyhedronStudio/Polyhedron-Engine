@@ -562,7 +562,7 @@ typedef enum {
 //
 // g_cmds.c
 //
-void SVG_Command_Score_f(SVGBaseEntity *ent);
+void SVG_Command_Score_f(PlayerClient *clientEntity, ServerClient *client);
 
 //
 // g_items.c
@@ -707,6 +707,7 @@ qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);
 qhandle_t SVG_PrecacheSound(const std::string& filename);
 
+void SVG_CPrintf(SVGBaseEntity* ent, int32_t printlevel, const std::string& str);
 void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str);
 void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
 

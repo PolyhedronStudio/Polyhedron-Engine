@@ -190,7 +190,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         // Show the scoreboard in case of a deathmatch mode.
         //if (deathmatch->value)
         // TODO: Let it be determined by game mode.
-        SVG_Command_Score_f(this);
+        SVG_Command_Score_f(this, client);
 
         // Let the gamemode know this client died.
         game.GetCurrentGamemode()->ClientDeath(this);
