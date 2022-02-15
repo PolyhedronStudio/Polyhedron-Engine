@@ -213,7 +213,7 @@ void CoopGamemode::RespawnClient(PlayerClient* ent) {
         SpawnClientCorpse(ent);
 
     ent->SetServerFlags(ent->GetServerFlags() & ~EntityServerFlags::NoClient);
-    PutClientInServer(ent->GetServerEntity());
+    PlaceClientInWorld(ent->GetServerEntity());
 
     // Add a teleportation effect
     ent->SetEventID(EntityEvent::PlayerTeleport);

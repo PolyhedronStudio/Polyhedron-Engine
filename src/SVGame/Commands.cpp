@@ -26,28 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Game Modes.
 #include "Gamemodes/IGamemode.h"
 
-/**
-*   @brief Utility function so we can acquire a valid PlayerClient* pointer.
-**/
-PlayerClient* GetPlayerClientEntity(Entity* serverEntity) {
-    // Ensure the entity is valid.
-    if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
-	    return nullptr;
-    }
 
-    // Ensure that its classentity is of or derived of PlayerClient.
-    SVGBaseEntity* classEntity = serverEntity->classEntity;
-
-    if (!classEntity->IsSubclassOf<PlayerClient>()) {
-	    return nullptr;
-    }
-
-    // We can safely cast to PlayerClient now.
-    PlayerClient* clientEntity = dynamic_cast<PlayerClient*>(serverEntity->classEntity);
-
-    // Return it.
-    return clientEntity;
-}
     //char *ClientTeam(SVGBaseEntity *ent)
 //{
 //    char        *p;
@@ -890,7 +869,7 @@ void SVG_ClientCommand(Entity* serverEntity) {
     //
 
     // Fetch client entity.
-    PlayerClient* clientEntity = GetPlayerClientEntity(serverEntity);
+    PlayerClient* clientEntity = GetPlayerClientClassentity(serverEntity);
 
     // Fetch its client pointer.
     ServerClient *client = clientEntity->GetClient();

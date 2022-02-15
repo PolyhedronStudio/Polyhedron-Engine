@@ -29,7 +29,23 @@ PlayerClient::~PlayerClient() {
 
 }
 
-//
+/**
+*   @brief  Used by game modes to recreate a fresh player entity for the client.
+**/
+PlayerClient* PlayerClient::Create(Entity* svEntity) {
+    // Initialize a clean serverEntity.
+    SVG_InitEntity(svEntity);
+
+    // Delete previous classentity, if existent (older client perhaps).
+    SVG_FreeClassFromEntity(svEntity);
+
+    // Recreate class PlayerClient entity.
+    svEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(svEntity, false);
+
+    // Last but not least, return this class entity its pointer.
+    return dynamic_cast<PlayerClient*>(svEntity->classEntity);
+}
+
 //===============
 // PlayerClient::Precache
 //
@@ -51,37 +67,52 @@ void PlayerClient::Spawn() {
 
     // When spawned, we aren't on any ground, make sure of that.
     SetGroundEntity(nullptr);
-
-//    ent->client = &game.clients[index];
+    // Set up the client entity accordingly.
     SetTakeDamage(TakeDamage::Aim);
+    // Fresh movetype and solid.
     SetMoveType(MoveType::Walk);
-    SetViewHeight(22);
-    SetInUse(true);
-    Base::SetMass(200);
     SetSolid(Solid::BoundingBox);
+    // Mass.
+    SetMass(200);
+    // Undead itself.
     SetDeadFlag(DEAD_NO);
-    SetAirFinishedTime(level.time + 12 * FRAMETIME);
+    // Set air finished time so it can respawn kindly.
+    SetAirFinishedTime(level.time + 12);
+    // Clip mask this client belongs to.
     SetClipMask(CONTENTS_MASK_PLAYERSOLID);
+    // Fresh default model.
     SetModel("players/male/tris.md2");
-    SetWaterLevel(WaterLevel::None);
+    /*ent->pain = player_pain;*/
+    // Fresh water level and type.
+    SetWaterLevel(0);
     SetWaterType(0);
-
-    // Setup Flags.
+    // Fresh flags.
     SetFlags(GetFlags() & ~EntityFlags::NoKnockBack);
     SetServerFlags(GetServerFlags() & ~EntityServerFlags::DeadMonster);
-
-    // Default Player Move bounding box.
+    // Fresh player move bounding box.
     SetMins(vec3_scale(PM_MINS, PM_SCALE));
     SetMaxs(vec3_scale(PM_MAXS, PM_SCALE));
-    
-    // Zero velocity.
+    // Fresh view height.
+    SetViewHeight(22);
+    // Zero out velocity in case it had any at all.
     SetVelocity(vec3_zero());
+
+    // Fresh effects.
+    Base::SetEffects(0);
+
+    // Reset model indexes.
+    SetModelIndex(255); // Use the skin specified by its model.
+    SetModelIndex2(255);// Custom gun model.
+    SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->state.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
+    
+    // Fresh frame for animations.
+    SetFrame(0);
 
     // Set the die function.
     SetDieCallback(&PlayerClient::PlayerClientDie);
 
-    // Debug.
-    gi.DPrintf("PlayerClient::Spawn();");
+    // Let it be known this client entity is in use again.
+    SetInUse(true);
 }
 
 //

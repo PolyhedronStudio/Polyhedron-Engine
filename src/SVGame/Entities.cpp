@@ -34,6 +34,30 @@ Entity g_entities[MAX_EDICTS];
 // BaseEntity array, matches similarly index wise.
 SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 
+
+/**
+*   @brief Utility function so we can acquire a valid PlayerClient* pointer.
+**/
+PlayerClient* GetPlayerClientClassentity(Entity* serverEntity) {
+    // Ensure the entity is valid.
+    if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
+	    return nullptr;
+    }
+
+    // Ensure that its classentity is of or derived of PlayerClient.
+    SVGBaseEntity* classEntity = serverEntity->classEntity;
+
+    if (!classEntity->IsSubclassOf<PlayerClient>()) {
+	    return nullptr;
+    }
+
+    // We can safely cast to PlayerClient now.
+    PlayerClient* clientEntity = dynamic_cast<PlayerClient*>(serverEntity->classEntity);
+
+    // Return it.
+    return clientEntity;
+}
+
 //
 // This is the old method, or at least, where we started off with.
 //
@@ -198,23 +222,23 @@ void SVG_FreeEntity(Entity* ent) {
     int32_t entityNumber = ent->state.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
-    //if ((ent - g_entities) <= (maximumClients->value + BODY_QUEUE_SIZE)) {
     if (entityNumber <= maximumclients->value + BODY_QUEUE_SIZE) {
         gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
         return;
     }
 
-    // Delete the actual entity pointer.
+    // Delete the actual entity class pointer.
     SVG_FreeClassFromEntity(ent);
 
-    // Clear the struct.
+    // Reset the entities values.
     *ent = {};
     
     // Reset classname to "freed" (It is, freed...)
     //ent->classname = "freed";
 
     // Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
-    // If we don't, we can expect client side LERP horror.
+    // If we don't, we risk the chance of a client lerping between an older entity that
+    // was taking up this current slot.
     ent->freeTime = level.time;
 
     // Last but not least, since it isn't in use anymore, let it be known.
@@ -383,13 +407,7 @@ void SVG_InitEntity(Entity* e)
     // From here on this entity is in use.
     e->inUse = true;
 
-    // Set classname to "noclass", because it is.
-//    e->classname = "noclass";
-
-    // Reset gravity.
-    //e->gravity = 1.0;
-
-    // Last but not least, give it that ID number it so badly deserves for being initialized.
+    // We can fetch the number based on subtracting these two pointers.
     e->state.number = e - g_entities;
 }
 

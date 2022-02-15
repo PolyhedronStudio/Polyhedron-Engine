@@ -251,7 +251,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
-    // Set client fields on player ents
+    // Set client fields on player entities
     for (i = 0 ; i < game.GetMaxClients() ; i++)
         g_entities[i + 1].client = game.clients + i;
 
@@ -259,7 +259,6 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     inhibit = 0;
 
     // Spawn PlayerClient entities first.
-    // WID: LAME HACK...
     SVG_CreatePlayerClientEntities();
 
 // parse ents

@@ -13,15 +13,18 @@ class SVGBaseEntity;
 
 class PlayerClient : public SVGBaseEntity {
 public:
+    /**
+    *   @brief  Used by game modes to recreate a fresh player entity for the client.
+    **/
+    static PlayerClient* Create(Entity* serverEntity);
+
     // Constructor/Deconstructor.
     PlayerClient(Entity* svEntity);
     virtual ~PlayerClient();
 
     DefineClass(PlayerClient, SVGBaseEntity);
 
-    //
-    // Interface functions. 
-    //
+    // Interface functions.
     void Precache() override;    // Precaches data.
     void Spawn() override;       // Spawns the entity.
     void Respawn() override;     // Respawns the entity.
@@ -30,29 +33,22 @@ public:
 
     void SpawnKey(const std::string& key, const std::string& value)  override;
 
-    //
     // Callback functions.
-    //
     void PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
 
-    //
     // Get/Set
-    //
     // Active Weapon.
-    inline gitem_t* GetActiveWeapon() {
-        return GetClient()->persistent.activeWeapon;
-    }
-    inline void GetActiveWeapon(gitem_t* weapon) {
-        GetClient()->persistent.activeWeapon = weapon;
-    }
+    inline gitem_t* GetActiveWeapon() { return GetClient()->persistent.activeWeapon; }
+    inline void	    SetActiveWeapon(gitem_t* weapon) { GetClient()->persistent.activeWeapon = weapon; }
 
-    // airFinishedTime
-    inline const float GetAirFinishedTime() {
-        return airFinishedTime;
-    }
-    inline void SetAirFinishedTime(const float& airFinishedTime) {
-        this->airFinishedTime = airFinishedTime;
-    }
+    /**
+    *   @return Time at which air has been finished.
+    **/
+    inline const float GetAirFinishedTime() { return airFinishedTime; }
+    /**
+    *   @brief  Sets the air finished time.
+    **/
+    inline void	       SetAirFinishedTime(const float& airFinishedTime) { this->airFinishedTime = airFinishedTime; }
 
     // Animation EndFrame.
     inline const float GetAnimationEndFrame() {
@@ -150,9 +146,7 @@ protected:
     float debounceDamageTime;
     float debounceSoundTime;
 
-    //
     // View/BobMove Functionality.
-    //
 public:
     // BobMoveCycle is used for view bobbing,
     // where the player FPS view looks like he is
@@ -206,10 +200,11 @@ public:
         return bobMove;
     }
 
-private:
-    //
     // Private utility functions.
-    //
+private:
+    /**
+    *   @brief  Will ensure the player client sets it view looking at its killer.
+    **/
     void LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker);
 
     //Adds the specific blend of colors on top of each other.

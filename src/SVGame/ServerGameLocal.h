@@ -591,12 +591,12 @@ void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, 
 
 // damage flags
 struct DamageFlags {
-    static constexpr int32_t IndirectFromRadius = 0x00000001;  // damage was indirect
-    static constexpr int32_t NoArmorProtection = 0x00000002;  // armour does not protect from this damage
-    static constexpr int32_t EnergyBasedWeapon = 0x00000004;  // damage is from an energy based weapon
-    static constexpr int32_t NoKnockBack = 0x00000008;  // do not affect velocity, just view angles
-    static constexpr int32_t Bullet = 0x00000010;  // damage is from a bullet (used for ricochets)
-    static constexpr int32_t IgnoreProtection = 0x00000020;  // armor, shields, invulnerability, and godmode have no effect
+    static constexpr int32_t IndirectFromRadius = 0x00000001;  // Damage was indirect
+    static constexpr int32_t NoArmorProtection = 0x00000002;  // Armour does not protect from this damage
+    static constexpr int32_t EnergyBasedWeapon = 0x00000004;  // Damage is from an energy based weapon
+    static constexpr int32_t NoKnockBack = 0x00000008;  // Do not affect velocity, just view angles
+    static constexpr int32_t Bullet = 0x00000010;  // Damage is from a bullet (used for ricochets)
+    static constexpr int32_t IgnoreProtection = 0x00000020;  // Armor, shields, invulnerability, and godmode have no effect
 };
 
 //
@@ -789,7 +789,7 @@ struct ClientRespawnData {
 /**
 *   @brief  The Game Client structure.
 *
-*   @details    This structure is cleared whenever PutClientInServer is called,
+*   @details    This structure is cleared whenever PlaceClientInWorld is called,
 *               with the exception of all data in its persistent member variable.
 **/
 struct gclient_s {

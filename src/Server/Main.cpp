@@ -1788,7 +1788,7 @@ void SV_UserinfoChanged(client_t *cl)
     size_t  len;
     int     i;
 
-    // call prog code to allow overrides
+    // Call prog code to allow overrides
     ge->ClientUserinfoChanged(cl->edict, cl->userinfo);
 
     // name for C code

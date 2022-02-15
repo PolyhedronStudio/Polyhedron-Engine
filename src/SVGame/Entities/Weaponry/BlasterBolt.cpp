@@ -98,7 +98,6 @@ void BlasterBolt::SpawnKey(const std::string& key, const std::string& value) {
 //===============
 //
 void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
-    // N&C: From Yamagi Q2, this seems to resolve our random crashes at times.
     if (!self || !other) { // Plane and Surf can be NULL
         Remove();
         return;

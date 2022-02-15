@@ -203,7 +203,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.GetCurrentGamemode()->PutClientInServer(ent);
+    game.GetCurrentGamemode()->PlaceClientInWorld(ent);
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {

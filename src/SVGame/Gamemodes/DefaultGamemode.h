@@ -51,8 +51,8 @@ public:
     // 
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) override;
-    virtual void ClientEndServerFrame(Entity *serverEntity) override;
+    virtual void ClientBeginServerFrame(PlayerClient* entity, ServerClient *client) override;
+    virtual void ClientEndServerFrame(PlayerClient *clientEntity, ServerClient *client) override;
     virtual void ClientDisconnect(PlayerClient* ent) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
@@ -64,7 +64,7 @@ public:
     virtual void InitializeClientRespawnData(ServerClient *client) override;
 
     virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) override;
-    virtual void PutClientInServer(Entity *ent) override;
+    virtual void PlaceClientInWorld(Entity *ent) override;
     virtual void RespawnClient(PlayerClient* ent) override;
     virtual void RespawnAllClients() override;
 
