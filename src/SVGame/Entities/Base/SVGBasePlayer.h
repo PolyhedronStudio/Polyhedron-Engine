@@ -42,99 +42,106 @@ public:
     inline void	    SetActiveWeapon(gitem_t* weapon) { GetClient()->persistent.activeWeapon = weapon; }
 
     /**
+    *   @brief  Sets the server entity's client pointer.
+    **/
+    void SetClient(gclient_s* client) { serverEntity->client = client; }
+
+
+    /**
+    *   @return The killer yaw.
+    **/
+    inline const float GetKillerYaw() { return GetClient()->killerYaw; }
+    /**
+    *   @brief  Sets the killer yaw.
+    **/
+    inline void SetKillerYaw(const float& killerYaw) { GetClient()->killerYaw = killerYaw; }
+
+
+    /**
+    *   @return Current movetype of the player.
+    **/
+    inline const int32_t GetPlayerMoveType() { return GetClient()->playerState.pmove.type; }
+    /**
+    *   @brief  Sets the movetype of the player.
+    **/
+    inline void SetPlayerMoveType(const int32_t& type) { GetClient()->playerState.pmove.type = type; }
+
+
+    /**
+    *   @return The frame of when a client's animation "ends".
+    **/
+    inline const float GetAnimationEndFrame() { return GetClient()->animation.endFrame; }
+    /**
+    *   @brief  Sets the frame of when a client's animation "ends".
+    **/
+    inline void	SetAnimationEndFrame(const float& endFrame) { GetClient()->animation.endFrame = endFrame; }
+    /**
+    *   @return Current animation that is prioritized for this player.
+    **/
+    inline const float GetPriorityAnimation() { return GetClient()->animation.priorityAnimation; }
+    /**
+    *   @brief  Sets the new prioritized animation.
+    **/
+    inline void SetPriorityAnimation(const float& priorityAnimation) { GetClient()->animation.priorityAnimation = priorityAnimation; }
+
+
+    /**
     *   @return Time at which air has been finished.
     **/
     inline const float GetAirFinishedTime() { return airFinishedTime; }
     /**
     *   @brief  Sets the air finished time.
     **/
-    inline void	       SetAirFinishedTime(const float& airFinishedTime) { this->airFinishedTime = airFinishedTime; }
+    inline void SetAirFinishedTime(const float& airFinishedTime) { this->airFinishedTime = airFinishedTime; }
+    /**
+    *   @return Debounce touch time.
+    **/
+    inline const float GetDebounceTouchTime() { return debounceTouchTime; }
+    /**
+    *   @brief  Sets the debounce touch time.
+    **/
+    void SetDebounceTouchTime(const float& debounceTouchTime) { this->debounceTouchTime = debounceTouchTime; }
+    /**
+    *   @return Debounce pain time.
+    **/
+    inline const float GetDebouncePainTime() { return debouncePainTime; }
+    /**
+    *   @brief  Sets the debounce pain time.
+    **/
+    void SetDebouncePainTime(const float& debouncePainTime) { this->debouncePainTime = debouncePainTime; }
+    /**
+    *   @return Debounce damage time.
+    **/
+    inline const float GetDebounceDamageTime() { return debounceDamageTime; }
+    /**
+    *   @brief  Sets the debounce damage time.
+    **/
+    void SetDebounceDamageTime(const float& debounceDamageTime) { this->debounceDamageTime = debounceDamageTime; }
+    /**
+    *   @return Debounce sound time.
+    **/
+    inline const float GetDebounceSoundTime() { return debounceSoundTime; }
+    /**
+    *   @brief  Sets the debounce sound time.
+    **/
+    void SetDebounceSoundTime(const float& debounceSoundTime) { this->debounceSoundTime = debounceSoundTime; }
+    /**
+    *   @return The time till the next drown event.
+    **/
+    inline const float GetNextDrownTime() { return GetClient()->nextDrownTime; }
+    /**
+    *   @brief  Sets the time for the next drown event to occure.
+    **/
+    inline void SetNextDrownTime(const float& nextDrownTime) { GetClient()->nextDrownTime = nextDrownTime; }
+    /**
+    *   @return The time when this player is allowed to respawn again.
+    **/
+    inline float GetRespawnTime() { return GetClient()->respawnTime; }
+    /**
+    *   @brief  Sets the next respawn time for this player.
+    **/
+    inline void SetRespawnTime(float time) { GetClient()->respawnTime = time; }
 
-    // Animation EndFrame.
-    inline const float GetAnimationEndFrame() {
-        return GetClient()->animation.endFrame;
-    }
-    inline void SetAnimationEndFrame(const float& endFrame) {
-        GetClient()->animation.endFrame = endFrame;
-    }
-
-    // Client.
-    // Sets the 'client' pointer.
-    void SetClient(gclient_s* client) {
-        serverEntity->client = client;
-    }
-
-    // Debounce Touch Time.
-    inline const float GetDebounceTouchTime() {
-        return debounceTouchTime;
-    }
-    void SetDebounceTouchTime(const float& debounceTouchTime) {
-        this->debounceTouchTime = debounceTouchTime;
-    }
-
-    // Debounce Pain Time.
-    inline const float GetDebouncePainTime() {
-        return debouncePainTime;
-    }
-    void SetDebouncePainTime(const float& debouncePainTime) {
-        this->debouncePainTime = debouncePainTime;
-    }
-
-    // Debounce Damage Time.
-    inline const float GetDebounceDamageTime() {
-        return debounceDamageTime;
-    }
-    void SetDebounceDamageTime(const float& debounceDamageTime) {
-        this->debounceDamageTime = debounceDamageTime;
-    }
-
-    // Debounce Sound Time.
-    inline const float GetDebounceSoundTime() {
-        return debounceSoundTime;
-    }
-    void SetDebounceSoundTime(const float& debounceSoundTime) {
-        this->debounceSoundTime = debounceSoundTime;
-    }
-
-    // Killer Yaw.
-    inline void SetKillerYaw(const float& killerYaw) {
-        GetClient()->killerYaw = killerYaw;
-    }
-    inline const float GetKillerYaw() {
-        return GetClient()->killerYaw;
-    }
-
-    // NextDrawnTime.
-    inline const float GetNextDrownTime() {
-        return GetClient()->nextDrownTime;
-    }
-    inline void SetNextDrownTime(const float& nextDrownTime) {
-        GetClient()->nextDrownTime = nextDrownTime;
-    }
-
-    // Player Move Type.
-    inline const int32_t GetPlayerMoveType() {
-        return GetClient()->playerState.pmove.type;
-    }
-    inline void SetPlayerMoveType(const int32_t& type) {
-        GetClient()->playerState.pmove.type = type;
-    }
-
-    // Priority animation.
-    inline const float GetPriorityAnimation() {
-        return GetClient()->animation.priorityAnimation;
-    }
-    inline void SetPriorityAnimation(const float& priorityAnimation) {
-        GetClient()->animation.priorityAnimation = priorityAnimation;
-    }
-
-    // RespawnTime.
-    inline float GetRespawnTime() {
-        return GetClient()->respawnTime;
-    }
-    inline void SetRespawnTime(float time) {
-        GetClient()->respawnTime = time;
-    }
 
 protected:
     // The level.time when the "air" state finished. 
