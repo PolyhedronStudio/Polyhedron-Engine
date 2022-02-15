@@ -76,35 +76,35 @@ static inline void Entity_UpdateNew(ClientEntity *ent, const EntityState *state,
 /**
 *   @brief  Updates an existing entity using the newly received state for it.
 **/
-static inline void Entity_UpdateExisting(ClientEntity *clientEntity, const EntityState *state, const vec_t *origin)
+static inline void Entity_UpdateExisting(ClientEntity *player, const EntityState *state, const vec_t *origin)
 {
     // Fetch event ID.
     int32_t eventID = state->eventID;
 
-    if (state->modelIndex != clientEntity->current.modelIndex
-        || state->modelIndex2 != clientEntity->current.modelIndex2
-        || state->modelIndex3 != clientEntity->current.modelIndex3
-        || state->modelIndex4 != clientEntity->current.modelIndex4
+    if (state->modelIndex != player->current.modelIndex
+        || state->modelIndex2 != player->current.modelIndex2
+        || state->modelIndex3 != player->current.modelIndex3
+        || state->modelIndex4 != player->current.modelIndex4
         || eventID == EntityEvent::PlayerTeleport
         || eventID == EntityEvent::OtherTeleport
-        || fabsf(origin[0] - clientEntity->current.origin[0]) > 512
-        || fabsf(origin[1] - clientEntity->current.origin[1]) > 512
-        || fabsf(origin[2] - clientEntity->current.origin[2]) > 512
+        || fabsf(origin[0] - player->current.origin[0]) > 512
+        || fabsf(origin[1] - player->current.origin[1]) > 512
+        || fabsf(origin[2] - player->current.origin[2]) > 512
         || cl_nolerp->integer == 1) 
     {
         // Some data changes will force no lerping.
-        clientEntity->trailcount = 1024;     // Used for diminishing rocket / grenade trails
+        player->trailcount = 1024;     // Used for diminishing rocket / grenade trails
 
         // Duplicate the current state so lerping doesn't hurt anything
-        clientEntity->prev = *state;
+        player->prev = *state;
 
         // No lerping if teleported or morphed
-        clientEntity->lerpOrigin = origin;
+        player->lerpOrigin = origin;
         return;
     }
 
     // Shuffle the last state to previous
-    clientEntity->prev = clientEntity->current;
+    player->prev = player->current;
 }
 
 /**
@@ -113,12 +113,12 @@ static inline void Entity_UpdateExisting(ClientEntity *clientEntity, const Entit
 *   @return True if it has not been around in the previous frame. False if it
 *           has not been around in previous frames. 
 **/
-static inline qboolean Entity_IsNew(const ClientEntity *clientEntity)
+static inline qboolean Entity_IsNew(const ClientEntity *player)
 {
     if (!cl.oldframe.valid)
         return true;   // Last received frame was invalid.
 
-    if (clientEntity->serverFrame != cl.oldframe.number)
+    if (player->serverFrame != cl.oldframe.number)
         return true;   // Wasn't in last received frame.
 
     if (cl_nolerp->integer == 2)
@@ -139,17 +139,17 @@ static inline qboolean Entity_IsNew(const ClientEntity *clientEntity)
 **/
 static void Entity_UpdateState(const EntityState *state)
 {
-    ClientEntity *clientEntity = &cs.entities[state->number];
+    ClientEntity *player = &cs.entities[state->number];
     vec3_t entityOrigin = vec3_zero();
 
     // If entity its solid is PACKED_BSP, decode mins/maxs and add to the list
     if (state->solid && state->number != cl.frame.clientNumber + 1
         && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
-        cl.solidEntities[cl.numSolidEntities++] = clientEntity;
+        cl.solidEntities[cl.numSolidEntities++] = player;
 
         if (state->solid != PACKED_BSP) {
             // 32 bit encoded bbox
-            MSG_UnpackBoundingBox32(state->solid, clientEntity->mins, clientEntity->maxs);
+            MSG_UnpackBoundingBox32(state->solid, player->mins, player->maxs);
         }
     }
 
@@ -162,19 +162,19 @@ static void Entity_UpdateState(const EntityState *state)
         entityOrigin = state->origin;
     }
 
-    if (Entity_IsNew(clientEntity)) {
+    if (Entity_IsNew(player)) {
         // Wasn't in last update, so initialize some things.
-        Entity_UpdateNew(clientEntity, state, entityOrigin);
+        Entity_UpdateNew(player, state, entityOrigin);
     } else {
-        Entity_UpdateExisting(clientEntity, state, entityOrigin);
+        Entity_UpdateExisting(player, state, entityOrigin);
     }
 
-    clientEntity->serverFrame = cl.frame.number;
-    clientEntity->current = *state;
+    player->serverFrame = cl.frame.number;
+    player->current = *state;
 
     // work around Q2PRO server bandwidth optimization
     if (isOptimizedEntity) {
-        Com_PlayerToEntityState(&cl.frame.playerState, &clientEntity->current);
+        Com_PlayerToEntityState(&cl.frame.playerState, &player->current);
     }
 }
 
@@ -191,7 +191,7 @@ static void Entity_FireEvent(int number) {
 static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *currentFrame, int framediv)
 {
     PlayerState *currentPlayerState = nullptr, *previousPlayerState = nullptr;
-    ClientEntity *clientEntity = nullptr;
+    ClientEntity *player = nullptr;
     int32_t previousFrameNumber = 0;
 
     // Fetch states to interpolate between.
@@ -215,9 +215,9 @@ static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *current
         goto duplicate;
     }
     // no lerping if player entity was teleported (event check)
-    clientEntity = &cs.entities[currentFrame->clientNumber + 1];
-    if (clientEntity->serverFrame > previousFrameNumber && clientEntity->serverFrame <= currentFrame->number && 
-       (clientEntity->current.eventID == EntityEvent::PlayerTeleport || clientEntity->current.eventID == EntityEvent::OtherTeleport)) 
+    player = &cs.entities[currentFrame->clientNumber + 1];
+    if (player->serverFrame > previousFrameNumber && player->serverFrame <= currentFrame->number && 
+       (player->current.eventID == EntityEvent::PlayerTeleport || player->current.eventID == EntityEvent::OtherTeleport)) 
     {
         goto duplicate;
     }
@@ -411,7 +411,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
     // Collision model for entity.
     mmodel_t*       cmodel = nullptr;
     // Client side entity.
-    ClientEntity*   clientEntity = nullptr;
+    ClientEntity*   player = nullptr;
 
     // Actual start point of the trace. May modify during the loop.
     vec3_t traceOrigin = vec3_zero();
@@ -420,35 +420,35 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
 
     for (uint32_t i = 0; i < cl.numSolidEntities; i++) {
         // Fetch client entity.
-        clientEntity = cl.solidEntities[i];
+        player = cl.solidEntities[i];
 
         // This check is likely redundent but let's make sure it is there anyway for possible future changes.
-        if (clientEntity == nullptr) {
+        if (player == nullptr) {
             continue;
         }
 
         // Should we skip it?
-        if (skipEntity != nullptr && skipEntity->current.number == clientEntity->current.number) {
+        if (skipEntity != nullptr && skipEntity->current.number == player->current.number) {
             continue;
         }
 
-        if (clientEntity->current.solid == PACKED_BSP) {
+        if (player->current.solid == PACKED_BSP) {
             // special value for bmodel
-            cmodel = cl.clipModels[clientEntity->current.modelIndex];
+            cmodel = cl.clipModels[player->current.modelIndex];
             if (!cmodel)
                 continue;
             headNode = cmodel->headNode;
 
             // Setup angles and origin for our trace.
-            traceAngles = clientEntity->current.angles;
-            traceOrigin = clientEntity->current.origin;
+            traceAngles = player->current.angles;
+            traceOrigin = player->current.origin;
         } else {
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
-            MSG_UnpackBoundingBox32(clientEntity->current.solid, entityMins, entityMaxs);
+            MSG_UnpackBoundingBox32(player->current.solid, entityMins, entityMaxs);
             headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
             traceAngles = vec3_zero();
-            traceOrigin = clientEntity->current.origin;
+            traceOrigin = player->current.origin;
         }
 
         // We're done clipping against entities if we reached an allSolid aka world.
@@ -459,7 +459,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
                                mins, maxs, headNode, contentMask,
                                traceOrigin, traceAngles);
 
-        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)clientEntity);
+        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)player);
     }
 }
 

@@ -746,7 +746,7 @@ void SVG_WriteGame(const char *filename, qboolean autosave)
     int     i;
 
     if (!autosave)
-        game.GetCurrentGamemode()->SaveClientEntityData();
+        game.GetCurrentGamemode()->StorePlayerPersistentData();
 
     f = fopen(filename, "wb");
     if (!f)

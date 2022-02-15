@@ -197,10 +197,10 @@ public:
     // should be determined by the client
     virtual void CalculateScreenBlend();
 
-    virtual void SetEvent();
-    virtual void SetEffects();
-    virtual void SetSound();
-    virtual void SetAnimationFrame();
+    virtual void UpdateEvent();
+    virtual void UpdateEffects();
+    virtual void UpdateSound();
+    virtual void UpdateAnimationFrame();
 
     // Reference to BobMoveCycle.
     BobMoveCycle &GetBobMoveCycle() {

@@ -24,18 +24,27 @@ public:
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     // DeathMatch unique function implementations.
-    virtual void PlaceClientInWorld(Entity* ent) override;
+    virtual void PlaceClientInGame(Entity* ent) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(SVGBasePlayer* entity, ServerClient *client) override;
+    virtual void ClientBeginServerFrame(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientUserinfoChanged(Entity* ent, char* userinfo) override;
 
     virtual void RespawnClient(SVGBasePlayer* ent) override;
     virtual void RespawnAllClients() override;
-    virtual void ClientDeath(SVGBasePlayer* clientEntity) override;
+    virtual void ClientDeath(SVGBasePlayer* player) override;
 
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
 private:
-    virtual void RespawnSpectator(SVGBasePlayer* ent);
+    /**
+    *   @brief  Respawn given player as a spectator.
+    **/
+    virtual void RespawnSpectator(SVGBasePlayer* player, ServerClient* client);
+
+    /**
+    *   @brief  Sets client into intermission mode like default game mode but
+    *           also generates a scoreboard display.
+    **/
+    virtual void StartClientIntermission(SVGBasePlayer* player, ServerClient* client) override;
 };

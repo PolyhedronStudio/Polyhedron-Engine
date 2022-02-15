@@ -306,7 +306,7 @@ SVG_Command_Score_f
 Display the scoreboard
 ==================
 */
-void SVG_Command_Score_f(SVGBasePlayer *clientEntity, ServerClient *client) {
+void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client) {
     // Hide inventory display.
     client->showInventory = false;
 
@@ -323,7 +323,7 @@ void SVG_Command_Score_f(SVGBasePlayer *clientEntity, ServerClient *client) {
 
     // Show score display.
     client->showScores = true;
-    HUD_SendDMScoreboardMessage(clientEntity);
+    HUD_SendDMScoreboardMessage(player);
 }
 
 

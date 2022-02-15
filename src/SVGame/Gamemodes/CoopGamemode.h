@@ -28,15 +28,21 @@ public:
     // Respawn clients in Coop mode.
     virtual void RespawnClient(SVGBasePlayer* playerClient) override;
     virtual void RespawnAllClients() override;
-    virtual void ClientDeath(SVGBasePlayer* clientEntity) override;
+    virtual void ClientDeath(SVGBasePlayer* player) override;
 
-    // Some information that should be persistant, like health,
-    // is still stored in the edict structure, so it needs to
-    // be mirrored out to the client structure before all the
-    // edicts are wiped.
-    virtual void SaveClientEntityData(void) override;
-    // Fetch client data that was stored between previous entity wipe session.
-    virtual void FetchClientEntityData(Entity* ent) override;
+    /**
+    *   @brief Stores player entity data in the client's persistent structure..
+    * 
+    *   @details    When switching a gamemap, information that should be persistant, like health,
+    *               is still stored in the entity. This method mirrors it out to the client structure
+    *               before all entities are wiped.
+    **/
+    virtual void StorePlayerPersistentData(void) override;
+
+    /**
+    *   @brief Restores player persistent data from the client struct by assigning it to the player entity.
+    **/
+    virtual void RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) override;
 
 private:
 

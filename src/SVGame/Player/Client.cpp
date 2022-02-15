@@ -203,7 +203,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.GetCurrentGamemode()->PlaceClientInWorld(ent);
+    game.GetCurrentGamemode()->PlaceClientInGame(ent);
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -284,7 +284,7 @@ void SVG_ClientDisconnect(Entity *ent)
         return;
 
     // Since it does, we pass it on to the game mode.
-    game.GetCurrentGamemode()->ClientDisconnect((SVGBasePlayer*)ent->classEntity);
+    game.GetCurrentGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->classEntity), ent->client);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;

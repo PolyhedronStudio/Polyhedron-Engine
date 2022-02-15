@@ -228,7 +228,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
 
     // Save client data.
     if (game.GetCurrentGamemode()) {
-        game.GetCurrentGamemode()->SaveClientEntityData();
+        game.GetCurrentGamemode()->StorePlayerPersistentData();
     }
 
     // Free level tag allocated data.

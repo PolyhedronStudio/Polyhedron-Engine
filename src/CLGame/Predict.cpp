@@ -79,7 +79,7 @@ void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_
     // Destination cmTrace for 
     trace_t         cmSrcTrace;
     mnode_t*        headNode;
-    ClientEntity*   clientEntity;
+    ClientEntity*   player;
     mmodel_t*       cmodel;
 
     vec3_t traceStart = start;
@@ -87,31 +87,31 @@ void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_
 
     for (i = 0; i < cl->numSolidEntities; i++) {
         // Fetch client entity.
-        clientEntity = cl->solidEntities[i];
+        player = cl->solidEntities[i];
 
         // This check is likely redundent but let's make sure it is there anyway for possible future changes.
-        if (clientEntity == nullptr) {
+        if (player == nullptr) {
             continue;
         }
 
         // Should we skip it?
-        if (skipEntity != nullptr && skipEntity->current.number == clientEntity->current.number) {
+        if (skipEntity != nullptr && skipEntity->current.number == player->current.number) {
             continue;
         }
 
-        if (clientEntity->current.solid == PACKED_BSP) {
+        if (player->current.solid == PACKED_BSP) {
             // special value for bmodel
-            cmodel = cl->clipModels[clientEntity->current.modelIndex];
+            cmodel = cl->clipModels[player->current.modelIndex];
             if (!cmodel)
                 continue;
             headNode = cmodel->headNode;
 
-            traceAngles = clientEntity->current.angles;
+            traceAngles = player->current.angles;
         } else {
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
-            MSG_UnpackBoundingBox32(clientEntity->current.solid, entityMins, entityMaxs);
-            traceStart = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+            MSG_UnpackBoundingBox32(player->current.solid, entityMins, entityMaxs);
+            traceStart = vec3_mix(player->prev.origin, player->current.origin, cl->lerpFraction);
 
             headNode = clgi.CM_HeadnodeForBox(entityMins, entityMaxs);
         }
@@ -124,7 +124,7 @@ void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_
                                     mins, maxs, headNode, CONTENTS_MASK_PLAYERSOLID,
                                     traceStart, traceAngles);
 
-        clgi.CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)clientEntity);
+        clgi.CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)player);
     }
 }
 

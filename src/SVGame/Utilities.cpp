@@ -80,8 +80,7 @@ void UTIL_TouchTriggers(SVGBaseEntity *ent)
         return;
 
     // Fetch the boxed entities.
-    std::vector<SVGBaseEntity*> touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_TRIGGERS);
-    int32_t size = touched.size();
+    BaseEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_TRIGGERS);
 
     // Do some extra sanity checks on the touched entity list. It is possible to have 
     // an entity be removed before we get to it (kill triggered).
@@ -115,8 +114,7 @@ void G_TouchSolids(SVGBaseEntity *ent)
 	return;
 
     // Fetch the boxed entities.
-    std::vector<SVGBaseEntity*> touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_SOLID);
-    int32_t			size = touched.size();
+    BaseEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_SOLID);
 
     // Do some extra sanity checks on the touched entity list. It is possible to have
     // an entity be removed before we get to it (kill triggered).
@@ -133,59 +131,6 @@ void G_TouchSolids(SVGBaseEntity *ent)
 
 	    touchedEntity->Touch(touchedEntity, ent, NULL, NULL);
     }
-
-    //int         i, num;
-    //Entity* serverEntity = ent->GetServerEntity();
-    //Entity* touch[MAX_EDICTS], * hit;
-
-    //// dead things don't activate triggers!
-    //if ((ent->GetClient() || (ent->GetServerFlags() & EntityServerFlags::Monster)) && (ent->GetHealth() <= 0))
-    //    return;
-
-    //num = gi.BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), touch
-    //    , MAX_EDICTS, AREA_SOLID);
-
-    //// be careful, it is possible to have an entity in this
-    //// list removed before we get to it (killtriggered)
-    //for (i = 0; i < num; i++) {
-    //    hit = touch[i];
-    //    if (!hit->inUse)
-    //        continue;
-
-    //    if (!hit->classEntity)
-    //        continue;
-
-    //    ent->Touch(ent, hit->classEntity, NULL, NULL);
-    //    //if (!hit->touch)
-    //    //    continue;
-    //    //hit->touch(hit, ent, NULL, NULL);
-    //}
-    //// Fetch the boxed entities.
-    //std::vector<SVGBaseEntity*> touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AREA_SOLID);
-
-    //// be careful, it is possible to have an entity in this
-    //// list removed before we get to it (killtriggered)
-    //for (auto& touchedEntity : touched) {
-    //    if (!touchedEntity)
-    //        continue;
-    //    if (!touchedEntity->IsInUse())
-    //        continue;
-
-    //    ent->Touch(touchedEntity, ent, NULL, NULL);
-
-    //    if (!ent->IsInUse())
-    //        break;
-    //}
-
-    //for (i = 0 ; i < num ; i++) {
-    //    hit = touch[i];
-    //    if (!hit->inUse)
-    //        continue;
-    //    if (ent->classEntity)
-    //        ent->classEntity->Touch((hit->classEntity ? hit->classEntity : nullptr), (ent->classEntity ? ent->classEntity : nullptr), NULL, NULL);
-    //    if (!ent->inUse)
-    //        break;
-    //}
 }
 
 
@@ -214,17 +159,26 @@ qboolean SVG_KillBox(SVGBaseEntity *ent)
     if (!ent)
         return false;
 
-    while (1) {
-        tr = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), NULL, CONTENTS_MASK_PLAYERSOLID);
-        if (!tr.ent)
-            break;
+    // Get all entities within the entities bounding box.
+    BaseEntityVector boxEntities = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax());
 
-        // nail it
-        SVG_InflictDamage(tr.ent, ent, ent, vec3_zero(), ent->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+    // For each boxed entity ensure it isn't our test entity and inflict damage to them.
+    bool success = false;
 
-        // if we didn't kill it, fail
-        if (tr.ent->GetSolid())
+    // Iterate the boxed entities.
+    for (auto& boxedEntity : boxEntities) {
+        // Skip if this entity is the tester itself.
+        if (boxedEntity->GetNumber() == ent->GetNumber()) {
+            continue;
+        }
+
+        // Cheers.
+	    SVG_InflictDamage(tr.ent, boxedEntity, boxedEntity, vec3_zero(), boxedEntity->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+
+        // Assume it is dead by testing its solid.
+        if (tr.ent->GetSolid()) {
             return false;
+        }
     }
 
     return true;        // all clear

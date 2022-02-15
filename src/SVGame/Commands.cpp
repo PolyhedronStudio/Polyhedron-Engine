@@ -296,17 +296,17 @@ Sets client to godmode
 argv(0) god
 ==================
 */
-void Cmd_God_f(SVGBasePlayer *clientEntity, ServerClient *client) {
+void Cmd_God_f(SVGBasePlayer *player, ServerClient *client) {
     //if (deathmatch->value && !sv_cheats->value) {
     //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
     //}
 
-    clientEntity->SetFlags(clientEntity->GetFlags() ^ EntityFlags::GodMode);
-    if (!(clientEntity->GetFlags() & EntityFlags::GodMode))
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "godmode OFF\n");
+    player->SetFlags(player->GetFlags() ^ EntityFlags::GodMode);
+    if (!(player->GetFlags() & EntityFlags::GodMode))
+        SVG_CPrintf(player, PRINT_HIGH, "godmode OFF\n");
     else
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "godmode ON\n");
+        SVG_CPrintf(player, PRINT_HIGH, "godmode ON\n");
 }
 
 
@@ -319,17 +319,17 @@ Sets client to notarget
 argv(0) notarget
 ==================
 */
-void Cmd_Notarget_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_Notarget_f(SVGBasePlayer* player, ServerClient* client) {
     //if (deathmatch->value && !sv_cheats->value) {
     //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
     //}
 
-    clientEntity->SetFlags(clientEntity->GetFlags() ^ EntityFlags::NoTarget);
-    if (!(clientEntity->GetFlags() & EntityFlags::NoTarget))
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "notarget OFF\n");
+    player->SetFlags(player->GetFlags() ^ EntityFlags::NoTarget);
+    if (!(player->GetFlags() & EntityFlags::NoTarget))
+        SVG_CPrintf(player, PRINT_HIGH, "notarget OFF\n");
     else
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "notarget ON\n");
+        SVG_CPrintf(player, PRINT_HIGH, "notarget ON\n");
 }
 
 
@@ -340,18 +340,18 @@ Cmd_Noclip_f
 argv(0) noclip
 ==================
 */
-void Cmd_Noclip_f(SVGBasePlayer *clientEntity, ServerClient *client) {
+void Cmd_Noclip_f(SVGBasePlayer *player, ServerClient *client) {
     //if (deathmatch->value && !sv_cheats->value) {
     //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
     //}
 
-    if (clientEntity->GetMoveType() == MoveType::NoClip) {
-        clientEntity->SetMoveType(MoveType::Walk);
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "noclip OFF\n");
+    if (player->GetMoveType() == MoveType::NoClip) {
+        player->SetMoveType(MoveType::Walk);
+        SVG_CPrintf(player, PRINT_HIGH, "noclip OFF\n");
     } else {
-        clientEntity->SetMoveType(MoveType::NoClip);
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "noclip ON\n");
+        player->SetMoveType(MoveType::NoClip);
+        SVG_CPrintf(player, PRINT_HIGH, "noclip ON\n");
     }
 }
 
@@ -363,7 +363,7 @@ Cmd_Use_f
 Use an inventory item
 ==================
 */
-void Cmd_Use_f(SVGBasePlayer *clientEntity, ServerClient *client) {
+void Cmd_Use_f(SVGBasePlayer *player, ServerClient *client) {
     int         index;
     gitem_t     *it = nullptr;
     const char        *s;
@@ -371,16 +371,16 @@ void Cmd_Use_f(SVGBasePlayer *clientEntity, ServerClient *client) {
     s = gi.args(); // C++20: Added casts.
     //it = SVG_FindItemByPickupName(s);
     if (!it) {
-	    SVG_CPrintf(clientEntity, PRINT_HIGH, "unknown item: " + std::string(s) + "\n");
+	    SVG_CPrintf(player, PRINT_HIGH, "unknown item: " + std::string(s) + "\n");
         return;
     }
     if (!it->Use) {
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "Item is not usable.\n");
+        SVG_CPrintf(player, PRINT_HIGH, "Item is not usable.\n");
         return;
     }
 //    index = ITEM_INDEX(it);
     if (!client->persistent.inventory[index]) {
-    	SVG_CPrintf(clientEntity, PRINT_HIGH, "Out of item: " + std::string(s) + "\n");
+    	SVG_CPrintf(player, PRINT_HIGH, "Out of item: " + std::string(s) + "\n");
         return;
     }
 
@@ -454,13 +454,13 @@ void Cmd_Inven_f(Entity *ent)
 Cmd_InvUse_f
 =================
 */
-void Cmd_InvUse_f(SVGBasePlayer *clientEntity, ServerClient *client) {
+void Cmd_InvUse_f(SVGBasePlayer *player, ServerClient *client) {
     gitem_t     *it;
 
     //HUD_ValidateSelectedItem(ent);
 
     if (client->persistent.selectedItem == -1) {
-        SVG_CPrintf(clientEntity, PRINT_HIGH, "No item to use.\n");
+        SVG_CPrintf(player, PRINT_HIGH, "No item to use.\n");
         return;
     }
 
@@ -477,7 +477,7 @@ void Cmd_InvUse_f(SVGBasePlayer *clientEntity, ServerClient *client) {
 Cmd_WeapPrev_f
 =================
 */
-void Cmd_WeapPrev_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_WeapPrev_f(SVGBasePlayer* player, ServerClient* client) {
     ServerClient   *cl;
     int         i, index;
     gitem_t     *it;
@@ -511,7 +511,7 @@ void Cmd_WeapPrev_f(SVGBasePlayer* clientEntity, ServerClient* client) {
 Cmd_WeapNext_f
 =================
 */
-void Cmd_WeapNext_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_WeapNext_f(SVGBasePlayer* player, ServerClient* client) {
     //ServerClient   *cl;
     //int         i, index;
     //gitem_t     *it;
@@ -545,7 +545,7 @@ void Cmd_WeapNext_f(SVGBasePlayer* clientEntity, ServerClient* client) {
 Cmd_WeapLast_f
 =================
 */
-void Cmd_WeapLast_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_WeapLast_f(SVGBasePlayer* player, ServerClient* client) {
     //ServerClient   *cl;
     //int         index;
     //gitem_t     *it;
@@ -571,7 +571,7 @@ void Cmd_WeapLast_f(SVGBasePlayer* clientEntity, ServerClient* client) {
 Cmd_InvDrop_f
 =================
 */
-void Cmd_InvDrop_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_InvDrop_f(SVGBasePlayer* player, ServerClient* client) {
     gitem_t     *it;
 
     //HUD_ValidateSelectedItem(ent);
@@ -594,14 +594,14 @@ void Cmd_InvDrop_f(SVGBasePlayer* clientEntity, ServerClient* client) {
 Cmd_Kill_f
 =================
 */
-void Cmd_Kill_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_Kill_f(SVGBasePlayer* player, ServerClient* client) {
     if ((level.time - client->respawnTime) < 5)
         return;
 
-    clientEntity->SetFlags(clientEntity->GetFlags() & ~EntityFlags::GodMode);
-    clientEntity->SetHealth(0);
+    player->SetFlags(player->GetFlags() & ~EntityFlags::GodMode);
+    player->SetHealth(0);
     game.GetCurrentGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
-    clientEntity->Die(clientEntity, clientEntity, 100000, vec3_zero());
+    player->Die(player, player, 100000, vec3_zero());
 }
 
 /*
@@ -609,7 +609,7 @@ void Cmd_Kill_f(SVGBasePlayer* clientEntity, ServerClient* client) {
 Cmd_PutAway_f
 =================
 */
-void Cmd_PutAway_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_PutAway_f(SVGBasePlayer* player, ServerClient* client) {
     client->showScores = false;
     client->showInventory = false;
 }
@@ -637,7 +637,7 @@ int PlayerSort(void const *a, void const *b)
 Cmd_Players_f
 =================
 */
-void Cmd_Players_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
     int32_t numConnectedClients = 0;
     char    small[64];
     char    large[1280];
@@ -674,7 +674,7 @@ void Cmd_Players_f(SVGBasePlayer* clientEntity, ServerClient* client) {
         strcat(large, small);
     }
 
-    SVG_CPrintf(clientEntity, PRINT_HIGH, std::string(large) + std::string("\n") + std::to_string(numConnectedClients) + std::string(" players\n"));
+    SVG_CPrintf(player, PRINT_HIGH, std::string(large) + std::string("\n") + std::to_string(numConnectedClients) + std::string(" players\n"));
 }
 
 ///*
@@ -732,7 +732,7 @@ void Cmd_Players_f(SVGBasePlayer* clientEntity, ServerClient* client) {
 Cmd_Say_f
 ==================
 */
-void Cmd_Say_f(SVGBasePlayer *clientEntity, ServerClient *client, qboolean team, qboolean arg0)
+void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qboolean arg0)
 {
     int     i, j;
 
@@ -791,7 +791,7 @@ void Cmd_Say_f(SVGBasePlayer *clientEntity, ServerClient *client, qboolean team,
     if (flood_msgs->value) {
         // Notify client of his spamming behaviors.
         if (level.time < client->flood.lockTill) {
-	        SVG_CPrintf(clientEntity, PRINT_HIGH, "You can't talk for " + std::to_string((int)(client->flood.lockTill - level.time)) + " more seconds\n ");
+	        SVG_CPrintf(player, PRINT_HIGH, "You can't talk for " + std::to_string((int)(client->flood.lockTill - level.time)) + " more seconds\n ");
             return;
         }
 
@@ -802,7 +802,7 @@ void Cmd_Say_f(SVGBasePlayer *clientEntity, ServerClient *client, qboolean team,
 
         if (client->flood.when[i] && level.time - client->flood.when[i] < flood_persecond->value) {
             client->flood.lockTill = level.time + flood_waitdelay->value;
-    	    SVG_CPrintf(clientEntity, PRINT_CHAT, "Flood protection:  You can't talk for " + std::to_string(static_cast<int>(flood_waitdelay->value)) + " seconds.\n ");
+    	    SVG_CPrintf(player, PRINT_CHAT, "Flood protection:  You can't talk for " + std::to_string(static_cast<int>(flood_waitdelay->value)) + " seconds.\n ");
             return;
         }
 
@@ -815,17 +815,17 @@ void Cmd_Say_f(SVGBasePlayer *clientEntity, ServerClient *client, qboolean team,
         SVG_CPrintf(NULL, PRINT_CHAT, sayBuffer);
 
     // Loop over client entities.
-    for (auto& otherClientEntity : GetBaseEntityRange(1, game.GetMaxClients()) | bef::Standard | bef::HasClient) {
+    for (auto& otherplayer : GetBaseEntityRange(1, game.GetMaxClients()) | bef::Standard | bef::HasClient) {
         if (team) {
-            if (!SVG_OnSameTeam(clientEntity, otherClientEntity))
+            if (!SVG_OnSameTeam(player, otherplayer))
                 continue;
         }
 
-        SVG_CPrintf(otherClientEntity, PRINT_CHAT, sayBuffer);
+        SVG_CPrintf(otherplayer, PRINT_CHAT, sayBuffer);
     }
 }
 
-void Cmd_PlayerList_f(SVGBasePlayer* clientEntity, ServerClient* client) {
+void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
     int i;
     char st[80];
     char text[1400];
@@ -846,12 +846,12 @@ void Cmd_PlayerList_f(SVGBasePlayer* clientEntity, ServerClient* client) {
                    e2->client->respawn.isSpectator ? " (isSpectator)" : "");
         if (strlen(text) + strlen(st) > sizeof(text) - 50) {
             sprintf(text + strlen(text), "And more...\n");
-            SVG_CPrintf(clientEntity, PRINT_HIGH, text);
+            SVG_CPrintf(player, PRINT_HIGH, text);
             return;
         }
         strcat(text, st);
     }
-    SVG_CPrintf(clientEntity, PRINT_HIGH, text);
+    SVG_CPrintf(player, PRINT_HIGH, text);
 }
 
 
@@ -868,29 +868,29 @@ void SVG_ClientCommand(Entity* serverEntity) {
     //
     //
 
-    // Fetch client entity.
-    SVGBasePlayer* clientEntity = GetBasePlayerEntity(serverEntity);
+    // Fetch player entity.
+    SVGBasePlayer* player = GetBasePlayerEntity(serverEntity);
 
     // Fetch its client pointer.
-    ServerClient *client = clientEntity->GetClient();
+    ServerClient *client = player->GetClient();
 
     // Fetch cmd.
     std::string command = gi.argv(0);
 
     if (command == "players") {
-        Cmd_Players_f(clientEntity, client);
+        Cmd_Players_f(player, client);
         return;
     }
     if (command == "say") {
-        Cmd_Say_f(clientEntity, client, false, false);
+        Cmd_Say_f(player, client, false, false);
         return;
     }
     if (command == "say_team") {
-        Cmd_Say_f(clientEntity, client, true, false);
+        Cmd_Say_f(player, client, true, false);
         return;
     }
     if (command == "score") {
-        SVG_Command_Score_f(clientEntity, client);
+        SVG_Command_Score_f(player, client);
         return;
     }
 
@@ -904,11 +904,11 @@ void SVG_ClientCommand(Entity* serverEntity) {
     else if (command == "give")
         Cmd_Give_f(ent->GetServerEntity());
     else */if (command == "god")
-        Cmd_God_f(clientEntity, client);
+        Cmd_God_f(player, client);
     else if (command == "notarget")
-        Cmd_Notarget_f(clientEntity, client);
+        Cmd_Notarget_f(player, client);
     else if (command == "noclip")
-        Cmd_Noclip_f(clientEntity, client);
+        Cmd_Noclip_f(player, client);
     //else if (PH_StringCompare(cmd, "inven") == 0)
     //    Cmd_Inven_f(ent->GetServerEntity());
     //else if (PH_StringCompare(cmd, "invnext") == 0)
@@ -924,23 +924,23 @@ void SVG_ClientCommand(Entity* serverEntity) {
     //else if (PH_StringCompare(cmd, "invprevp") == 0)
     //    SelectPrevItem(serverEntity, ItemFlags::IsPowerUp);
     else if (command == "invuse")
-        Cmd_InvUse_f(clientEntity, client);
+        Cmd_InvUse_f(player, client);
     else if (command == "invdrop")
-        Cmd_InvDrop_f(clientEntity, client);
+        Cmd_InvDrop_f(player, client);
     //else if (PH_StringCompare(cmd, "weapprev") == 0)
     //    Cmd_WeapPrev_f(ent);
     //else if (PH_StringCompare(cmd, "weapnext") == 0)
     //    Cmd_WeapNext_f(ent);
     else if (command == "weaplast")
-        Cmd_WeapLast_f(clientEntity, client);
+        Cmd_WeapLast_f(player, client);
     else if (command == "kill")
-        Cmd_Kill_f(clientEntity, client);
+        Cmd_Kill_f(player, client);
     else if (command == "putaway")
-        Cmd_PutAway_f(clientEntity, client);
+        Cmd_PutAway_f(player, client);
     //else if (PH_StringCompare(cmd, "wave") == 0)
     //    Cmd_Wave_f(serverEntity);
     else if (command == "playerlist")
-        Cmd_PlayerList_f(clientEntity, client);
+        Cmd_PlayerList_f(player, client);
     else    // anything that doesn't match a command will be a chat
-        Cmd_Say_f(clientEntity, client, false, true);
+        Cmd_Say_f(player, client, false, true);
 }

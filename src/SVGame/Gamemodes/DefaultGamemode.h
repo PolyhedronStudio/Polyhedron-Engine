@@ -52,8 +52,8 @@ public:
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) override;
     virtual void ClientBegin(Entity* serverEntity) override;
     virtual void ClientBeginServerFrame(SVGBasePlayer* entity, ServerClient *client) override;
-    virtual void ClientEndServerFrame(SVGBasePlayer *clientEntity, ServerClient *client) override;
-    virtual void ClientDisconnect(SVGBasePlayer* ent) override;
+    virtual void ClientEndServerFrame(SVGBasePlayer *player, ServerClient *client) override;
+    virtual void ClientDisconnect(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
@@ -64,20 +64,31 @@ public:
     virtual void InitializeClientRespawnData(ServerClient *client) override;
 
     virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) override;
-    virtual void PlaceClientInWorld(Entity *ent) override;
+    virtual void PlaceClientInGame(Entity *ent) override;
     virtual void RespawnClient(SVGBasePlayer* ent) override;
     virtual void RespawnAllClients() override;
 
-    virtual void ClientDeath(SVGBasePlayer *clientEntity) override;
+    virtual void ClientDeath(SVGBasePlayer *player) override;
 
-    // Some information that should be persistant, like health,
-    // is still stored in the edict structure, so it needs to
-    // be mirrored out to the client structure before all the
-    // edicts are wiped.
-    virtual void SaveClientEntityData(void) override;
-    // Fetch client data that was stored between previous entity wipe session.
-    virtual void FetchClientEntityData(Entity* ent) override;
 
-private:
+    /**
+    *   @brief Stores player entity data in the client's persistent structure..
+    * 
+    *   @details    When switching a gamemap, information that should be persistant, like health,
+    *               is still stored in the entity. This method mirrors it out to the client structure
+    *               before all entities are wiped.
+    **/
+    virtual void StorePlayerPersistentData(void) override;
 
+    /**
+    *   @brief Restores player persistent data from the client struct by assigning it to the player entity.
+    **/
+    virtual void RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) override;
+
+protected:
+    /**
+    *   @brief  Sets client into intermission mode by setting movetype to freeze
+    *           and positioning the client at the intermission point.
+    **/
+    virtual void StartClientIntermission(SVGBasePlayer* player, ServerClient* client);
 };

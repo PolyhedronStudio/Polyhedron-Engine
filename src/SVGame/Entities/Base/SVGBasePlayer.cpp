@@ -289,7 +289,7 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
 // SVGBasePlayer::SetEvent
 // 
 //===============
-void SVGBasePlayer::SetEvent() {
+void SVGBasePlayer::UpdateEvent() {
     ServerClient* client = GetClient();
 
     if (!client) {
@@ -317,7 +317,7 @@ void SVGBasePlayer::SetEvent() {
 // SVGBasePlayer::SetEffects
 // 
 //===============
-void SVGBasePlayer::SetEffects()
+void SVGBasePlayer::UpdateEffects()
 {
     Base::SetEffects(0);
     SetRenderEffects(0);
@@ -336,7 +336,7 @@ void SVGBasePlayer::SetEffects()
 // SVGBasePlayer::SetSound
 //
 //===============
-void SVGBasePlayer::SetSound() {
+void SVGBasePlayer::UpdateSound() {
     //const char    *weap; // C++20: STRING: Added const to char*
 
     // Check whether the SVGBasePlayer is hooked up to a valid client.
@@ -976,7 +976,7 @@ void SVGBasePlayer::CalculateScreenBlend() {
         client->bonusAlpha = 0;
 }
 
-void SVGBasePlayer::SetAnimationFrame() {
+void SVGBasePlayer::UpdateAnimationFrame() {
     qboolean isDucking = false;
     qboolean isRunning = false;
 

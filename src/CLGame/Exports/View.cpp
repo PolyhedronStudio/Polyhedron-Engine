@@ -78,8 +78,8 @@ void ClientGameView::PostRenderView() {
 //
 //---------------
 void ClientGameView::FinalizeViewValues() {
-    // For fetching the clientEntity pointer.
-    ClientEntity* clientEntity = nullptr;
+    // For fetching the player pointer.
+    ClientEntity* player = nullptr;
 
     // If cl_player_model isn't set to thirdperson, jump to firstperson label.
     if (cl_player_model->integer != CL_PLAYER_MODEL_THIRD_PERSON)
@@ -90,12 +90,12 @@ void ClientGameView::FinalizeViewValues() {
         goto firstpersonview;
 
     // If the entity its serverframe isn't matching the client's frame number, jump to firstperson label.
-    clientEntity = &cs->entities[cl->frame.clientNumber + 1];
-    if (clientEntity->serverFrame != cl->frame.number)
+    player = &cs->entities[cl->frame.clientNumber + 1];
+    if (player->serverFrame != cl->frame.number)
         goto firstpersonview;
 
     // If there is no modelindex, jump to firstperson label.
-    if (!clientEntity ->current.modelIndex)
+    if (!player ->current.modelIndex)
         goto firstpersonview;
 
     // Setup the thirdperson view.

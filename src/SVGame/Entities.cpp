@@ -52,10 +52,10 @@ SVGBasePlayer* GetBasePlayerEntity(Entity* serverEntity) {
     }
 
     // We can safely cast to SVGBasePlayer now.
-    SVGBasePlayer* clientEntity = dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
+    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
 
     // Return it.
-    return clientEntity;
+    return player;
 }
 
 //

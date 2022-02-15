@@ -376,17 +376,17 @@ void SVG_ClientEndServerFrames(void)
         Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
         // Acquire player client entity.
-	    SVGBasePlayer* clientEntity = GetBasePlayerEntity(entity);
+	    SVGBasePlayer* player = GetBasePlayerEntity(entity);
 
         // If it is invalid, continue to the next iteration.
-        if (!clientEntity)
+        if (!player)
             continue;
 
         // Acquire server client.
-        ServerClient *client = clientEntity->GetClient();
+        ServerClient *client = player->GetClient();
 
         // Notify game mode about this client ending its server frame.
-        game.GetCurrentGamemode()->ClientEndServerFrame(clientEntity, client);
+        game.GetCurrentGamemode()->ClientEndServerFrame(player, client);
     }
 }
 

@@ -562,7 +562,7 @@ typedef enum {
 //
 // g_cmds.c
 //
-void SVG_Command_Score_f(SVGBasePlayer *clientEntity, ServerClient *client);
+void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client);
 
 //
 // g_items.c
@@ -789,7 +789,7 @@ struct ClientRespawnData {
 /**
 *   @brief  The Game Client structure.
 *
-*   @details    This structure is cleared whenever PlaceClientInWorld is called,
+*   @details    This structure is cleared whenever PlaceClientInGame is called,
 *               with the exception of all data in its persistent member variable.
 **/
 struct gclient_s {

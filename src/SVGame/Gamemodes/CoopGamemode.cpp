@@ -213,7 +213,7 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* ent) {
         SpawnClientCorpse(ent);
 
     ent->SetServerFlags(ent->GetServerFlags() & ~EntityServerFlags::NoClient);
-    PlaceClientInWorld(ent->GetServerEntity());
+    PlaceClientInGame(ent->GetServerEntity());
 
     // Add a teleportation effect
     ent->SetEventID(EntityEvent::PlayerTeleport);
@@ -237,9 +237,9 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* ent) {
 //===============
 void CoopGamemode::RespawnAllClients() {
     // Respawn all valid client entities who's health is < 0.
-    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<SVGBasePlayer>()) {
-        if (clientEntity->GetHealth() < 0) {
-            RespawnClient(dynamic_cast<SVGBasePlayer*>(clientEntity));
+    for (auto& player : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<SVGBasePlayer>()) {
+        if (player->GetHealth() < 0) {
+            RespawnClient(dynamic_cast<SVGBasePlayer*>(player));
         }
     }
 }
@@ -249,18 +249,18 @@ void CoopGamemode::RespawnAllClients() {
 // 
 // Does nothing for this game mode.
 //===============
-void CoopGamemode::ClientDeath(SVGBasePlayer *clientEntity) {
+void CoopGamemode::ClientDeath(SVGBasePlayer *player) {
     // Ensure the client is valid.
-    if (!clientEntity) {
+    if (!player) {
         return;
     }
     // Ensure it is SVGBasePlayer or a sub-class thereof.
-    if (!clientEntity->IsSubclassOf<SVGBasePlayer>()) {
+    if (!player->IsSubclassOf<SVGBasePlayer>()) {
         return;
     }
 
     // Fetch server client.
-    ServerClient* client = clientEntity->GetClient();
+    ServerClient* client = player->GetClient();
     if (!client) {
         return;
     }
@@ -274,14 +274,14 @@ void CoopGamemode::ClientDeath(SVGBasePlayer *clientEntity) {
 }
 
 //===============
-// CoopGamemode::SaveClientEntityData
+// CoopGamemode::StorePlayerPersistentData
 // 
 // Some information that should be persistant, like health,
 // is still stored in the edict structure, so it needs to
 // be mirrored out to the client structure before all the
 // edicts are wiped.
 //===============
-void CoopGamemode::SaveClientEntityData(void) {
+void CoopGamemode::StorePlayerPersistentData(void) {
     Entity *ent;
 
     for (int32_t i = 0 ; i < game.GetMaxClients() ; i++) {
@@ -303,16 +303,16 @@ void CoopGamemode::SaveClientEntityData(void) {
 // 
 // // Fetch client data that was stored between previous entity wipe session
 //===============
-void CoopGamemode::FetchClientEntityData(Entity* ent) {
-    if (!ent)
+void CoopGamemode::RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) {
+    if (!player || !client) {
         return;
+    }
 
-    if (!ent->classEntity)
-        return;
+    // Restore player entity information.
+    player->SetHealth(client->persistent.health);
+    player->SetMaxHealth(client->persistent.maxHealth);
+    player->SetFlags(player->GetFlags() | client->persistent.savedFlags);
 
-    ent->classEntity->SetHealth(ent->client->persistent.health);
-    ent->classEntity->SetMaxHealth(ent->client->persistent.maxHealth);
-    ent->classEntity->SetFlags(ent->classEntity->GetFlags() | ent->client->persistent.savedFlags);
-    if (ent->client)
-        ent->client->respawn.score = ent->client->persistent.score;
+    // Restore the score the player had stored.
+    client->respawn.score = client->persistent.score;
 }
