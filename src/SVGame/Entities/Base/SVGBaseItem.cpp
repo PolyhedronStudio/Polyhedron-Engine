@@ -18,7 +18,7 @@
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
-#include "../Base/PlayerClient.h"
+#include "../Base/SVGBasePlayer.h"
 
 // Misc Explosion Box Entity.
 #include "SVGBaseItem.h"
@@ -289,8 +289,8 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
         return;
     }
 
-    // Ensure it is a (sub-)class of PlayerClient
-    if (!other->IsSubclassOf<PlayerClient>()) {
+    // Ensure it is a (sub-)class of SVGBasePlayer
+    if (!other->IsSubclassOf<SVGBasePlayer>()) {
         return;
     }
 
@@ -300,7 +300,7 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
     }
 
     // Cast it.
-    PlayerClient* playerEntity = dynamic_cast<PlayerClient*>(other);
+    SVGBasePlayer* playerEntity = dynamic_cast<SVGBasePlayer*>(other);
 
     // Pick up the item.
     qboolean tookItem = (this->*pickupFunction)(other);

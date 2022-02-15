@@ -11,7 +11,7 @@
 
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
-#include "../Base/PlayerClient.h"
+#include "../Base/SVGBasePlayer.h"
 
 #include "TriggerPush.h"
 
@@ -63,8 +63,8 @@ void TriggerPush::PushTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t
         other->SetVelocity( newVelocity );
 
         // Play sounds on clients
-        if ( other->IsClass<PlayerClient>() ) {
-            PlayerClient* player = static_cast<PlayerClient*>(other);
+        if ( other->IsClass<SVGBasePlayer>() ) {
+            SVGBasePlayer* player = static_cast<SVGBasePlayer*>(other);
 
             // Don't take fall damage immediately from this
             player->GetClient()->oldVelocity = other->GetVelocity();

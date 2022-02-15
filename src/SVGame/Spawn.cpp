@@ -258,7 +258,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     ent = NULL;
     inhibit = 0;
 
-    // Spawn PlayerClient entities first.
+    // Spawn SVGBasePlayer entities first.
     SVG_CreatePlayerClientEntities();
 
 // parse ents

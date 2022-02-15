@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "../Entities.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Gamemodes.
 #include "../Gamemodes/IGamemode.h"
@@ -306,7 +306,7 @@ SVG_Command_Score_f
 Display the scoreboard
 ==================
 */
-void SVG_Command_Score_f(PlayerClient *clientEntity, ServerClient *client) {
+void SVG_Command_Score_f(SVGBasePlayer *clientEntity, ServerClient *client) {
     // Hide inventory display.
     client->showInventory = false;
 

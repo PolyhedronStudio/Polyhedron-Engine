@@ -15,7 +15,7 @@
 #include "../TypeInfo.h"
 
 class SVGBaseEntity;
-class PlayerClient;
+class SVGBasePlayer;
 
 using BaseEntityVector = std::vector<SVGBaseEntity*>;
 
@@ -81,17 +81,17 @@ public:
     *   @brief  This will be called once for all clients at the start of each server 
     *           frame. Before running any other entities in the world.
     **/
-    virtual void ClientBeginServerFrame(PlayerClient* entity, ServerClient *client) = 0;
+    virtual void ClientBeginServerFrame(SVGBasePlayer* entity, ServerClient *client) = 0;
     /**
     *   @brief  Called for each player at the end of the server frame and right 
     *           after spawning.
     **/
-    virtual void ClientEndServerFrame(PlayerClient* clientEntity, ServerClient* client) = 0;
+    virtual void ClientEndServerFrame(SVGBasePlayer* clientEntity, ServerClient* client) = 0;
     /**
     *   @brief  Called when a client disconnects.This does not get called between
     *           load games.
     **/
-    virtual void ClientDisconnect(PlayerClient* ent) = 0;
+    virtual void ClientDisconnect(SVGBasePlayer* ent) = 0;
     /**
     *   @brief  Called whenever the player updates a userinfo variable. The game can override any of 
     *           the settings in place (forcing skins or names, etc) before copying it off.
@@ -105,7 +105,7 @@ public:
     /**
     *   @brief  Called when a client dies, usually used to clear their inventory.
     **/
-    virtual void ClientDeath(PlayerClient *clientEntity) = 0;
+    virtual void ClientDeath(SVGBasePlayer *clientEntity) = 0;
 
 
     //////
@@ -134,7 +134,7 @@ public:
     // For a MP mode death, the game waits for intermission time to pass before it'll call this function again to respawn our player.
     virtual void PlaceClientInWorld(Entity* ent) = 0;
     // Respawns a client (if that is what the game mode wants).
-    virtual void RespawnClient(PlayerClient* ent) = 0;
+    virtual void RespawnClient(SVGBasePlayer* ent) = 0;
     // Respawns all clients if the game mode allows so. (See RespawnClient)
     virtual void RespawnAllClients() = 0;
 

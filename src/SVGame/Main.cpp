@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Entities.h"
 #include "Entities/Worldspawn.h"
 //#include "Entities/Base/SVGEntityHandle.h"
-#include "Entities/Base/PlayerClient.h"
+#include "Entities/Base/SVGBasePlayer.h"
 
 // Gamemodes.
 #include "Gamemodes/IGamemode.h"
@@ -334,7 +334,7 @@ void SVG_CreatePlayerClientEntities() {
         SVG_InitEntity(serverEntity);
 
         // Allocate player client class entity 
-        PlayerClient *playerClientEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->classname);
+        SVGBasePlayer *playerClientEntity = SVG_CreateClassEntity<SVGBasePlayer>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->classname);
         
         // Be sure to reset their inuse, after all, they aren't in use.
         playerClientEntity->SetInUse(false);
@@ -342,7 +342,7 @@ void SVG_CreatePlayerClientEntities() {
         // Fetch client index.
         const int32_t clientIndex = i - 1; // Same as the older: serverEntity - g_entities - 1;
 
-        // Assign the designated client to this PlayerClient entity.
+        // Assign the designated client to this SVGBasePlayer entity.
         playerClientEntity->SetClient(&game.clients[clientIndex]);
     }
 }
@@ -372,11 +372,11 @@ void SVG_ClientEndServerFrames(void)
         // First, fetch entity state number.
         int32_t stateNumber = g_entities[1 + clientIndex].state.number;
 
-        // Now, let's go wild. (Purposely, do not assume the pointer is a PlayerClient.)
+        // Now, let's go wild. (Purposely, do not assume the pointer is a SVGBasePlayer.)
         Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
         // Acquire player client entity.
-	    PlayerClient* clientEntity = GetPlayerClientClassentity(entity);
+	    SVGBasePlayer* clientEntity = GetPlayerClientClassentity(entity);
 
         // If it is invalid, continue to the next iteration.
         if (!clientEntity)
@@ -599,13 +599,13 @@ void SVG_RunFrame(void) {
                 continue;
             }
 
-            // If the entity is NOT a PlayerClient (sub-)class, skip.
-            if (!serverEntity->GetTypeInfo()->IsSubclassOf(PlayerClient::ClassInfo)) {
+            // If the entity is NOT a SVGBasePlayer (sub-)class, skip.
+            if (!serverEntity->GetTypeInfo()->IsSubclassOf(SVGBasePlayer::ClassInfo)) {
                 continue;
             }
 
             // Last but not least, begin its server frame.
-            game.GetCurrentGamemode()->ClientBeginServerFrame(dynamic_cast<PlayerClient*>(serverEntity), client);
+            game.GetCurrentGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(serverEntity), client);
 
             // Continue to next iteration.
             continue;

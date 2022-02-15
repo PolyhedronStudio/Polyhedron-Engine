@@ -26,9 +26,9 @@ public:
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
     // Respawn clients in Coop mode.
-    virtual void RespawnClient(PlayerClient* playerClient) override;
+    virtual void RespawnClient(SVGBasePlayer* playerClient) override;
     virtual void RespawnAllClients() override;
-    virtual void ClientDeath(PlayerClient* clientEntity) override;
+    virtual void ClientDeath(SVGBasePlayer* clientEntity) override;
 
     // Some information that should be persistant, like health,
     // is still stored in the edict structure, so it needs to

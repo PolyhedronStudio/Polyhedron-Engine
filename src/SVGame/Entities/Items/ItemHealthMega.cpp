@@ -22,7 +22,7 @@
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseItem.h"
-#include "../Base/PlayerClient.h"
+#include "../Base/SVGBasePlayer.h"
 
 // Misc Explosion Box Entity.
 #include "ItemHealthMega.h"
@@ -152,13 +152,13 @@ qboolean ItemHealthMega::HealthMegaPickup(SVGBaseEntity* other) {
         return false;
     }
 
-    // Ensure other is a subclass of PlayerClient.
-    if (!other->IsSubclassOf<PlayerClient>()) {
+    // Ensure other is a subclass of SVGBasePlayer.
+    if (!other->IsSubclassOf<SVGBasePlayer>()) {
         return false;
     }
 
-    // Cast to PlayerClient.
-    PlayerClient* playerClient = dynamic_cast<PlayerClient*>(other);
+    // Cast to SVGBasePlayer.
+    SVGBasePlayer* playerClient = dynamic_cast<SVGBasePlayer*>(other);
 
     // Increase health.
     const int32_t playerHealth = playerClient->GetHealth();

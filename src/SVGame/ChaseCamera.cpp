@@ -21,9 +21,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ChaseCamera.h"
 
 // Entities.
-#include "Entities/Base/PlayerClient.h"
+#include "Entities/Base/SVGBasePlayer.h"
 
-void SVG_UpdateChaseCam(PlayerClient *ent)
+void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 {
     vec3_t o, ownerv, goal;
     Entity *targ;
@@ -111,7 +111,7 @@ void SVG_UpdateChaseCam(PlayerClient *ent)
     ent->LinkEntity();
 }
 
-void SVG_ChaseNext(PlayerClient *ent)
+void SVG_ChaseNext(SVGBasePlayer *ent)
 {
     int i;
     Entity *e;
@@ -136,7 +136,7 @@ void SVG_ChaseNext(PlayerClient *ent)
     client->updateChase = true;
 }
 
-void SVG_ChasePrev(PlayerClient*ent)
+void SVG_ChasePrev(SVGBasePlayer*ent)
 {
     int i;
     Entity *e;
@@ -161,7 +161,7 @@ void SVG_ChasePrev(PlayerClient*ent)
     client->updateChase = true;
 }
 
-void SVG_GetChaseTarget(PlayerClient *ent)
+void SVG_GetChaseTarget(SVGBasePlayer *ent)
 {
     int i;
     Entity *other;

@@ -13,7 +13,7 @@
 
 // Entities.
 #include "../Entities/Base/SVGBaseEntity.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Game Mode.
 #include "CoopGamemode.h"
@@ -207,7 +207,7 @@ void CoopGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
 // 
 // Respawns a client after intermission and hitting a button.
 //===============
-void CoopGamemode::RespawnClient(PlayerClient* ent) {
+void CoopGamemode::RespawnClient(SVGBasePlayer* ent) {
     // Spectator's don't leave bodies
     if (ent->GetMoveType() != MoveType::NoClip)
         SpawnClientCorpse(ent);
@@ -237,9 +237,9 @@ void CoopGamemode::RespawnClient(PlayerClient* ent) {
 //===============
 void CoopGamemode::RespawnAllClients() {
     // Respawn all valid client entities who's health is < 0.
-    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<PlayerClient>()) {
+    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<SVGBasePlayer>()) {
         if (clientEntity->GetHealth() < 0) {
-            RespawnClient(dynamic_cast<PlayerClient*>(clientEntity));
+            RespawnClient(dynamic_cast<SVGBasePlayer*>(clientEntity));
         }
     }
 }
@@ -249,13 +249,13 @@ void CoopGamemode::RespawnAllClients() {
 // 
 // Does nothing for this game mode.
 //===============
-void CoopGamemode::ClientDeath(PlayerClient *clientEntity) {
+void CoopGamemode::ClientDeath(SVGBasePlayer *clientEntity) {
     // Ensure the client is valid.
     if (!clientEntity) {
         return;
     }
-    // Ensure it is PlayerClient or a sub-class thereof.
-    if (!clientEntity->IsSubclassOf<PlayerClient>()) {
+    // Ensure it is SVGBasePlayer or a sub-class thereof.
+    if (!clientEntity->IsSubclassOf<SVGBasePlayer>()) {
         return;
     }
 

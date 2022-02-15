@@ -18,7 +18,7 @@
 //
 #include "Entities/Base/SVGBaseTrigger.h"
 #include "Entities/Base/SVGBaseMover.h"
-#include "Entities/Base/PlayerClient.h"
+#include "Entities/Base/SVGBasePlayer.h"
 #include "Entities/Info/InfoPlayerStart.h"
 #include "Entities/Worldspawn.h"
 
@@ -36,23 +36,23 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 
 
 /**
-*   @brief Utility function so we can acquire a valid PlayerClient* pointer.
+*   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer.
 **/
-PlayerClient* GetPlayerClientClassentity(Entity* serverEntity) {
+SVGBasePlayer* GetPlayerClientClassentity(Entity* serverEntity) {
     // Ensure the entity is valid.
     if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
 	    return nullptr;
     }
 
-    // Ensure that its classentity is of or derived of PlayerClient.
+    // Ensure that its classentity is of or derived of SVGBasePlayer.
     SVGBaseEntity* classEntity = serverEntity->classEntity;
 
-    if (!classEntity->IsSubclassOf<PlayerClient>()) {
+    if (!classEntity->IsSubclassOf<SVGBasePlayer>()) {
 	    return nullptr;
     }
 
-    // We can safely cast to PlayerClient now.
-    PlayerClient* clientEntity = dynamic_cast<PlayerClient*>(serverEntity->classEntity);
+    // We can safely cast to SVGBasePlayer now.
+    SVGBasePlayer* clientEntity = dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
 
     // Return it.
     return clientEntity;

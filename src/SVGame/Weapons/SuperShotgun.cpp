@@ -12,7 +12,7 @@
 
 // Include class entities.
 #include "../Entities.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Include player headers.
 #include "../Player/Animations.h"
@@ -33,7 +33,7 @@ static constexpr int32_t DEFAULT_SUPERSHOTGUN_VSPREAD = 500;
 
 static constexpr int32_t DEFAULT_SUPERSHOTGUN_COUNT = 20;
 
-void weapon_supershotgun_fire(PlayerClient * ent)
+void weapon_supershotgun_fire(SVGBasePlayer * ent)
 {
     vec3_t      start;
     vec3_t      forward, right;
@@ -81,7 +81,7 @@ void weapon_supershotgun_fire(PlayerClient * ent)
         client->persistent.inventory[client->ammoIndex] -= 2;
 }
 
-void Weapon_SuperShotgun(PlayerClient* ent)
+void Weapon_SuperShotgun(SVGBasePlayer* ent)
 {
     static int  pause_frames[] = { 29, 42, 57, 0 };
     static int  fire_frames[] = { 7, 0 };

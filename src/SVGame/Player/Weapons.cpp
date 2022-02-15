@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "../Entities.h"
-#include "../entities/base/PlayerClient.h"
+#include "../entities/base/SVGBasePlayer.h"
 
 // SharedGame.
 #include "SharedGame/SharedGame.h"
@@ -98,7 +98,7 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
 }
 
 
-qboolean Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other)
+qboolean Pickup_Weapon(SVGBaseEntity *ent, SVGBasePlayer *other)
 {
     //int         index;
     //gitem_t     *ammo;
@@ -151,7 +151,7 @@ The old weapon has been dropped all the way, so make the new one
 current
 ===============
 */
-void SVG_ChangeWeapon(PlayerClient*ent)
+void SVG_ChangeWeapon(SVGBasePlayer*ent)
 {
     int i;
 
@@ -205,7 +205,7 @@ void SVG_ChangeWeapon(PlayerClient*ent)
 NoAmmoWeaponChange
 =================
 */
-void NoAmmoWeaponChange(PlayerClient *ent)
+void NoAmmoWeaponChange(SVGBasePlayer *ent)
 {
     ServerClient* client = ent->GetClient();
 
@@ -224,7 +224,7 @@ SVG_ThinkWeapon
 Called by ClientBeginServerFrame and ClientThink
 =================
 */
-void SVG_ThinkWeapon(PlayerClient *ent)
+void SVG_ThinkWeapon(SVGBasePlayer *ent)
 {
     if (!ent)
         return;
@@ -254,7 +254,7 @@ Use_Weapon
 Make the weapon ready if there is ammo
 ================
 */
-void Use_Weapon(PlayerClient *ent, gitem_t* item)
+void Use_Weapon(SVGBasePlayer *ent, gitem_t* item)
 {
     int         ammoIndex;
     gitem_t     *ammo_item;
@@ -290,7 +290,7 @@ void Use_Weapon(PlayerClient *ent, gitem_t* item)
 Drop_Weapon
 ================
 */
-void Drop_Weapon(PlayerClient *ent, gitem_t *item)
+void Drop_Weapon(SVGBasePlayer *ent, gitem_t *item)
 {
     int     index;
 
@@ -314,12 +314,12 @@ Weapon_Generic
 A generic function to handle the basics of weapon thinking
 ================
 */
-void _Weapon_Generic(PlayerClient* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int* pause_frames,
+void _Weapon_Generic(SVGBasePlayer* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int* pause_frames,
 #define FRAME_FIRE_FIRST (FRAME_ACTIVATE_LAST + 1)
 #define FRAME_IDLE_FIRST (FRAME_FIRE_LAST + 1)
 #define FRAME_DEACTIVATE_FIRST (FRAME_IDLE_LAST + 1)
 
-    int* fire_frames, void (*fire)(PlayerClient* ent)) {
+    int* fire_frames, void (*fire)(SVGBasePlayer* ent)) {
     int n;
 
     if (ent->GetDeadFlag() || ent->GetModelIndex() != 255) {  // VWep animations screw up corpses
@@ -438,7 +438,7 @@ void _Weapon_Generic(PlayerClient* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_
     #undef FRAME_DEACTIVATE_FIRST
 }
 
-void Weapon_Generic(PlayerClient *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_FIRST, int FRAME_FIRE_LAST, int FRAME_IDLE_FIRST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_FIRST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(PlayerClient *ent))
+void Weapon_Generic(SVGBasePlayer *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_FIRST, int FRAME_FIRE_LAST, int FRAME_IDLE_FIRST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_FIRST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(SVGBasePlayer *ent))
 {
     int     n;
 

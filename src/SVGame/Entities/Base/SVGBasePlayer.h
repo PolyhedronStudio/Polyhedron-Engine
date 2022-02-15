@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// SVGBasePlayer.h
+// PlayerClient.h
 //
 //
 */
@@ -11,18 +11,18 @@
 
 class SVGBaseEntity;
 
-class SVGBasePlayer : public SVGBaseEntity {
+class PlayerClient : public SVGBaseEntity {
 public:
     /**
     *   @brief  Used by game modes to recreate a fresh player entity for the client.
     **/
-    static SVGBasePlayer* Create(Entity* serverEntity);
+    static PlayerClient* Create(Entity* serverEntity);
 
     // Constructor/Deconstructor.
-    SVGBasePlayer(Entity* svEntity);
-    virtual ~SVGBasePlayer();
+    PlayerClient(Entity* svEntity);
+    virtual ~PlayerClient();
 
-    DefineClass(SVGBasePlayer, SVGBaseEntity);
+    DefineClass(PlayerClient, SVGBaseEntity);
 
     // Interface functions.
     void Precache() override;    // Precaches data.

@@ -9,7 +9,7 @@
 #ifndef __SVGAME_WEAPONS_SUPERSHOTGUN_H__
 #define __SVGAME_WEAPONS_SUPERSHOTGUN_H__
 
-void weapon_supershotgun_fire(PlayerClient* ent);
-void Weapon_SuperShotgun(PlayerClient* ent);
+void weapon_supershotgun_fire(SVGBasePlayer* ent);
+void Weapon_SuperShotgun(SVGBasePlayer* ent);
 
 #endif // __SVGAME_WEAPONS_SUPERSHOTGUN_H__

@@ -28,7 +28,7 @@ void SVG_BecomeExplosion2(SVGBaseEntity* self);
 //
 // Gibs.
 //
-void SVG_ThrowClientHead(PlayerClient* self, int damage);
+void SVG_ThrowClientHead(SVGBasePlayer* self, int damage);
 void SVG_ThrowGib(SVGBaseEntity* self, const char* gibname, int damage, int type);
 
 #endif // __SVGAME_PLAYER_WEAPONS_H__

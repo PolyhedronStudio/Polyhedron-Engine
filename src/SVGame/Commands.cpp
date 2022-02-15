@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Player/Animations.h"
 
 // Class Entities.
-#include "Entities/Base/PlayerClient.h"
+#include "Entities/Base/SVGBasePlayer.h"
 
 // Game Modes.
 #include "Gamemodes/IGamemode.h"
@@ -93,7 +93,7 @@ qboolean SVG_OnSameTeam(SVGBaseEntity *entityA, SVGBaseEntity *entityB)
 }
 
 
-void SelectNextItem(PlayerClient *ent, int itflags)
+void SelectNextItem(SVGBasePlayer *ent, int itflags)
 {
     ServerClient   *cl;
     int         i, index;
@@ -133,7 +133,7 @@ void SelectPrevItem(Entity *ent, int itflags)
     cl = ent->client;
 
     if (cl->chaseTarget) {
-        SVG_ChasePrev((PlayerClient*)ent->classEntity);
+        SVG_ChasePrev((SVGBasePlayer*)ent->classEntity);
         return;
     }
 
@@ -155,7 +155,7 @@ void SelectPrevItem(Entity *ent, int itflags)
     cl->persistent.selectedItem = -1;
 }
 
-void HUD_ValidateSelectedItem(PlayerClient *ent)
+void HUD_ValidateSelectedItem(SVGBasePlayer *ent)
 {
     // Ensure these are valid.
     if (!ent || !ent->GetClient()) {
@@ -296,7 +296,7 @@ Sets client to godmode
 argv(0) god
 ==================
 */
-void Cmd_God_f(PlayerClient *clientEntity, ServerClient *client) {
+void Cmd_God_f(SVGBasePlayer *clientEntity, ServerClient *client) {
     //if (deathmatch->value && !sv_cheats->value) {
     //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
@@ -319,7 +319,7 @@ Sets client to notarget
 argv(0) notarget
 ==================
 */
-void Cmd_Notarget_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_Notarget_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     //if (deathmatch->value && !sv_cheats->value) {
     //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
@@ -340,7 +340,7 @@ Cmd_Noclip_f
 argv(0) noclip
 ==================
 */
-void Cmd_Noclip_f(PlayerClient *clientEntity, ServerClient *client) {
+void Cmd_Noclip_f(SVGBasePlayer *clientEntity, ServerClient *client) {
     //if (deathmatch->value && !sv_cheats->value) {
     //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
@@ -363,7 +363,7 @@ Cmd_Use_f
 Use an inventory item
 ==================
 */
-void Cmd_Use_f(PlayerClient *clientEntity, ServerClient *client) {
+void Cmd_Use_f(SVGBasePlayer *clientEntity, ServerClient *client) {
     int         index;
     gitem_t     *it = nullptr;
     const char        *s;
@@ -395,7 +395,7 @@ Cmd_Drop_f
 Drop an inventory item
 ==================
 */
-void Cmd_Drop_f(PlayerClient*ent)
+void Cmd_Drop_f(SVGBasePlayer*ent)
 {
     int         index;
     gitem_t     *it;
@@ -454,7 +454,7 @@ void Cmd_Inven_f(Entity *ent)
 Cmd_InvUse_f
 =================
 */
-void Cmd_InvUse_f(PlayerClient *clientEntity, ServerClient *client) {
+void Cmd_InvUse_f(SVGBasePlayer *clientEntity, ServerClient *client) {
     gitem_t     *it;
 
     //HUD_ValidateSelectedItem(ent);
@@ -477,7 +477,7 @@ void Cmd_InvUse_f(PlayerClient *clientEntity, ServerClient *client) {
 Cmd_WeapPrev_f
 =================
 */
-void Cmd_WeapPrev_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_WeapPrev_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     ServerClient   *cl;
     int         i, index;
     gitem_t     *it;
@@ -511,7 +511,7 @@ void Cmd_WeapPrev_f(PlayerClient* clientEntity, ServerClient* client) {
 Cmd_WeapNext_f
 =================
 */
-void Cmd_WeapNext_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_WeapNext_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     //ServerClient   *cl;
     //int         i, index;
     //gitem_t     *it;
@@ -545,7 +545,7 @@ void Cmd_WeapNext_f(PlayerClient* clientEntity, ServerClient* client) {
 Cmd_WeapLast_f
 =================
 */
-void Cmd_WeapLast_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_WeapLast_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     //ServerClient   *cl;
     //int         index;
     //gitem_t     *it;
@@ -571,7 +571,7 @@ void Cmd_WeapLast_f(PlayerClient* clientEntity, ServerClient* client) {
 Cmd_InvDrop_f
 =================
 */
-void Cmd_InvDrop_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_InvDrop_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     gitem_t     *it;
 
     //HUD_ValidateSelectedItem(ent);
@@ -594,7 +594,7 @@ void Cmd_InvDrop_f(PlayerClient* clientEntity, ServerClient* client) {
 Cmd_Kill_f
 =================
 */
-void Cmd_Kill_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_Kill_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     if ((level.time - client->respawnTime) < 5)
         return;
 
@@ -609,7 +609,7 @@ void Cmd_Kill_f(PlayerClient* clientEntity, ServerClient* client) {
 Cmd_PutAway_f
 =================
 */
-void Cmd_PutAway_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_PutAway_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     client->showScores = false;
     client->showInventory = false;
 }
@@ -637,7 +637,7 @@ int PlayerSort(void const *a, void const *b)
 Cmd_Players_f
 =================
 */
-void Cmd_Players_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_Players_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     int32_t numConnectedClients = 0;
     char    small[64];
     char    large[1280];
@@ -732,7 +732,7 @@ void Cmd_Players_f(PlayerClient* clientEntity, ServerClient* client) {
 Cmd_Say_f
 ==================
 */
-void Cmd_Say_f(PlayerClient *clientEntity, ServerClient *client, qboolean team, qboolean arg0)
+void Cmd_Say_f(SVGBasePlayer *clientEntity, ServerClient *client, qboolean team, qboolean arg0)
 {
     int     i, j;
 
@@ -825,7 +825,7 @@ void Cmd_Say_f(PlayerClient *clientEntity, ServerClient *client, qboolean team, 
     }
 }
 
-void Cmd_PlayerList_f(PlayerClient* clientEntity, ServerClient* client) {
+void Cmd_PlayerList_f(SVGBasePlayer* clientEntity, ServerClient* client) {
     int i;
     char st[80];
     char text[1400];
@@ -869,7 +869,7 @@ void SVG_ClientCommand(Entity* serverEntity) {
     //
 
     // Fetch client entity.
-    PlayerClient* clientEntity = GetPlayerClientClassentity(serverEntity);
+    SVGBasePlayer* clientEntity = GetPlayerClientClassentity(serverEntity);
 
     // Fetch its client pointer.
     ServerClient *client = clientEntity->GetClient();

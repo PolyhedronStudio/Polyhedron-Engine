@@ -12,7 +12,7 @@
 
 // Include class entities.
 #include "../Entities/Base/SVGBaseEntity.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Include player headers.
 #include "../Player/Animations.h"
@@ -37,7 +37,7 @@
 static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_HSPREAD = 300;
 static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_VSPREAD = 500;
 
-void Machinegun_Fire(PlayerClient* ent)
+void Machinegun_Fire(SVGBasePlayer* ent)
 {
     int32_t i;
     vec3_t start;
@@ -121,7 +121,7 @@ void Machinegun_Fire(PlayerClient* ent)
     }
 }
 
-void Weapon_Machinegun(PlayerClient* ent)
+void Weapon_Machinegun(SVGBasePlayer* ent)
 {
     static int  pause_frames[] = { 23, 45, 0 };
     static int  fire_frames[] = { 4, 5, 0 };

@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Player/Hud.h"     // Include HUD funcs.
 
 // Entities.
-#include "Entities/Base/PlayerClient.h"
+#include "Entities/Base/SVGBasePlayer.h"
 
 // Weapons.
 #include "Weapons/Blaster.h"
@@ -29,9 +29,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Weapons/Shotgun.h"
 #include "Weapons/SuperShotgun.h"
 
-qboolean    Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other);
-void        Use_Weapon(PlayerClient *ent, gitem_t *inv);
-void        Drop_Weapon(PlayerClient *ent, gitem_t *inv);
+qboolean    Pickup_Weapon(SVGBaseEntity *ent, SVGBasePlayer *other);
+void        Use_Weapon(SVGBasePlayer *ent, gitem_t *inv);
+void        Drop_Weapon(SVGBasePlayer *ent, gitem_t *inv);
 
 static int  body_armor_index;
 #define HEALTH_IGNORE_MAX   1
@@ -172,7 +172,7 @@ void Drop_General(Entity *ent, gitem_t *item)
 {
     SVG_DropItem(ent, item);
     //ent->client->persistent.inventory[ITEM_INDEX(item)]--;
-    HUD_ValidateSelectedItem((PlayerClient*)ent->classEntity);
+    HUD_ValidateSelectedItem((SVGBasePlayer*)ent->classEntity);
 }
 
 //======================================================================
@@ -216,7 +216,7 @@ qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count)
     return true;
 }
 
-qboolean Pickup_Ammo(SVGBaseEntity *ent, PlayerClient*other)
+qboolean Pickup_Ammo(SVGBaseEntity *ent, SVGBasePlayer*other)
 {
     //int         oldcount;
     //int         count;
@@ -245,7 +245,7 @@ qboolean Pickup_Ammo(SVGBaseEntity *ent, PlayerClient*other)
     return true;
 }
 
-void Drop_Ammo(PlayerClient *ent, gitem_t *item)
+void Drop_Ammo(SVGBasePlayer *ent, gitem_t *item)
 {
     //Entity *dropped;
     //int     index;
@@ -334,7 +334,7 @@ int SVG_ArmorIndex(SVGBaseEntity *ent)
     return 0;
 }
 
-qboolean Pickup_Armor(SVGBaseEntity *ent, PlayerClient *other)
+qboolean Pickup_Armor(SVGBaseEntity *ent, SVGBasePlayer *other)
 {
     //int             old_armor_index;
     //gitem_armor_t   *oldinfo;
@@ -744,10 +744,10 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 //const char *classname;
 //
 //// Function callbacks.
-//qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
-//void (*Use)(PlayerClient *ent, struct gitem_s *item);
-//void (*Drop)(PlayerClient *ent, struct gitem_s *item);
-//void (*WeaponThink)(PlayerClient *ent);
+//qboolean (*Pickup)(SVGBaseEntity *ent, SVGBasePlayer *other);
+//void (*Use)(SVGBasePlayer *ent, struct gitem_s *item);
+//void (*Drop)(SVGBasePlayer *ent, struct gitem_s *item);
+//void (*WeaponThink)(SVGBasePlayer *ent);
 //
 //// Sound used when being picked up.
 //const char *pickupSound;

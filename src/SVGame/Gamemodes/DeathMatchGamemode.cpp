@@ -12,7 +12,7 @@
 #include "../Utilities.h"       // Util funcs.
 
 // Server Game Base Entity.
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Weapons.h
 #include "../Player/Client.h"
@@ -73,7 +73,7 @@ void DeathmatchGamemode::ClientBegin(Entity* svEntity) {
     svEntity->client  = client;
 
     // Create the player client entity.
-    PlayerClient* clientEntity = PlayerClient::Create(svEntity);
+    SVGBasePlayer* clientEntity = SVGBasePlayer::Create(svEntity);
 
     // Initialize client respawn data.
     InitializeClientRespawnData(client);
@@ -136,7 +136,7 @@ void DeathmatchGamemode::PlaceClientInWorld(Entity *ent) {
     FetchClientEntityData(ent);
 
     // Spawn the client again using spawn instead of respawn. (Respawn serves a different use.)
-    PlayerClient* clientEntity = dynamic_cast<PlayerClient*>(ent->classEntity);
+    SVGBasePlayer* clientEntity = dynamic_cast<SVGBasePlayer*>(ent->classEntity);
     clientEntity->Spawn();
 
     // Update the client pointer this entity belongs to.
@@ -282,7 +282,7 @@ void DeathmatchGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
 //===============
-void DeathmatchGamemode::ClientBeginServerFrame(PlayerClient* entity, ServerClient* client) {
+void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* entity, ServerClient* client) {
     // Ensure we aren't in an intermission time.
     if (level.intermission.time)
         return;
@@ -291,14 +291,14 @@ void DeathmatchGamemode::ClientBeginServerFrame(PlayerClient* entity, ServerClie
     // a need to respawn as spectator.
     if (client->persistent.isSpectator != client->respawn.isSpectator &&
         (level.time - client->respawnTime) >= 5) {
-        RespawnSpectator(dynamic_cast<PlayerClient*>(entity));
+        RespawnSpectator(dynamic_cast<SVGBasePlayer*>(entity));
         return;
     }
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
     if (!client->weaponThunk && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(dynamic_cast<PlayerClient*>(entity));
+        SVG_ThinkWeapon(dynamic_cast<SVGBasePlayer*>(entity));
     else
         client->weaponThunk = false;
 
@@ -317,7 +317,7 @@ void DeathmatchGamemode::ClientBeginServerFrame(PlayerClient* entity, ServerClie
 
             if ((client->latchedButtons & buttonMask) ||
                  ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn)) {
-                RespawnClient(dynamic_cast<PlayerClient*>(entity));
+                RespawnClient(dynamic_cast<SVGBasePlayer*>(entity));
                 client->latchedButtons = 0;
             }
         }
@@ -496,7 +496,7 @@ void DeathmatchGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity
 // 
 // Respawns a client after intermission and hitting a button.
 //===============
-void DeathmatchGamemode::RespawnClient(PlayerClient* ent) {
+void DeathmatchGamemode::RespawnClient(SVGBasePlayer* ent) {
     // Spectator's don't leave bodies
     if (ent->GetMoveType() != MoveType::NoClip)
         SpawnClientCorpse(ent);
@@ -526,9 +526,9 @@ void DeathmatchGamemode::RespawnClient(PlayerClient* ent) {
 //===============
 void DeathmatchGamemode::RespawnAllClients() {
 
-    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<PlayerClient>()) {
+    for (auto& clientEntity : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<SVGBasePlayer>()) {
         if (clientEntity->GetHealth() < 0) {
-            RespawnClient(dynamic_cast<PlayerClient*>(clientEntity));
+            RespawnClient(dynamic_cast<SVGBasePlayer*>(clientEntity));
         }
     }
 }
@@ -538,7 +538,7 @@ void DeathmatchGamemode::RespawnAllClients() {
 // 
 // Does nothing for this game mode.
 //===============
-void DeathmatchGamemode::ClientDeath(PlayerClient *clientEntity) {
+void DeathmatchGamemode::ClientDeath(SVGBasePlayer *clientEntity) {
 
 }
 
@@ -547,7 +547,7 @@ void DeathmatchGamemode::ClientDeath(PlayerClient *clientEntity) {
 // 
 // Respawns a spectator after intermission and hitting a button.
 //===============
-void DeathmatchGamemode::RespawnSpectator(PlayerClient* ent) {
+void DeathmatchGamemode::RespawnSpectator(SVGBasePlayer* ent) {
     // Spectator's don't leave bodies
     if (ent->GetMoveType() != MoveType::NoClip)
         SpawnClientCorpse(ent);

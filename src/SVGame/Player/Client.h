@@ -9,7 +9,7 @@
 #ifndef __SVGAME_PLAYER_CLIENT_H__
 #define __SVGAME_PLAYER_CLIENT_H__
 
-class PlayerClient;
+class SVGBasePlayer;
 
 qboolean SVG_ClientConnect(Entity* ent, char* userinfo);
 void SVG_ClientDisconnect(Entity* ent);
@@ -17,7 +17,7 @@ void SVG_ClientDisconnect(Entity* ent);
 void SVG_HUD_BeginIntermission(Entity* targ);
 
 // Tosses the client weapon.
-void SVG_TossClientWeapon(PlayerClient* playerClient);
+void SVG_TossClientWeapon(SVGBasePlayer* playerClient);
 
 void SVG_ClientBegin(Entity* ent);
 void SVG_ClientCommand(Entity* ent);

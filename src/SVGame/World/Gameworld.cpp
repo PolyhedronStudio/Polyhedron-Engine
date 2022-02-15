@@ -4,7 +4,7 @@
 // Entities.
 #include "../Entities.h"
 //#include "../Entities/Base/SVGEntityHandle.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Gamemodes.
 #include "../Gamemodes/IGamemode.h"

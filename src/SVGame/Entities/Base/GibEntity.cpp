@@ -28,7 +28,7 @@ GibEntity::~GibEntity() {
 
 //
 //===============
-// PlayerClient::Precache
+// SVGBasePlayer::Precache
 //
 //===============
 //
@@ -38,7 +38,7 @@ void GibEntity::Precache() {
 
 //
 //===============
-// PlayerClient::Spawn
+// SVGBasePlayer::Spawn
 //
 //===============
 //

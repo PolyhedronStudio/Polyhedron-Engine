@@ -28,7 +28,7 @@ BlasterBolt::~BlasterBolt() {
 
 //
 //===============
-// PlayerClient::Precache
+// SVGBasePlayer::Precache
 //
 //===============
 //
@@ -38,7 +38,7 @@ void BlasterBolt::Precache() {
 
 //
 //===============
-// PlayerClient::Spawn
+// SVGBasePlayer::Spawn
 //
 //===============
 //

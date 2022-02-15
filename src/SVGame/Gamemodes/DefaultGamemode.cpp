@@ -13,7 +13,7 @@
 
 // Server Game Base Entity.
 #include "../Entities/Base/BodyCorpse.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 #include "../Entities/Info/InfoPlayerStart.h"
 
 // Weapons.h
@@ -622,7 +622,7 @@ void DefaultGamemode::OnLevelExit() {
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
 //===============
-void DefaultGamemode::ClientBeginServerFrame(PlayerClient* entity, ServerClient *client) {
+void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* entity, ServerClient *client) {
     // Ensure we aren't in an intermission time.
     if (level.intermission.time)
         return;
@@ -639,7 +639,7 @@ void DefaultGamemode::ClientBeginServerFrame(PlayerClient* entity, ServerClient 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
     if (!client->weaponThunk && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(dynamic_cast<PlayerClient*>(entity));
+        SVG_ThinkWeapon(dynamic_cast<SVGBasePlayer*>(entity));
     else
         client->weaponThunk = false;
 
@@ -659,7 +659,7 @@ void DefaultGamemode::ClientBeginServerFrame(PlayerClient* entity, ServerClient 
             if (client->latchedButtons & buttonMask) 
                 // || (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn))) {
             {
-                game.GetCurrentGamemode()->RespawnClient(dynamic_cast<PlayerClient*>(entity));
+                game.GetCurrentGamemode()->RespawnClient(dynamic_cast<SVGBasePlayer*>(entity));
                 client->latchedButtons = 0;
             }
         }
@@ -684,11 +684,11 @@ void DefaultGamemode::ClientBeginServerFrame(PlayerClient* entity, ServerClient 
 // 
 // Used to set the latest view offsets
 //===============
-void DefaultGamemode::ClientEndServerFrame(PlayerClient* clientEntity, ServerClient* client) {
+void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* clientEntity, ServerClient* client) {
     // Acquire server entity.
     Entity* serverEntity = clientEntity->GetServerEntity();
     // Fetch the bobMove state.
-    PlayerClient::BobMoveCycle& bobMoveCycle = clientEntity->GetBobMoveCycle();
+    SVGBasePlayer::BobMoveCycle& bobMoveCycle = clientEntity->GetBobMoveCycle();
 
     //
     // If the origin or velocity have changed since ClientThink(),
@@ -952,8 +952,8 @@ void DefaultGamemode::ClientBegin(Entity* serverEntity) {
         // Delete previous classentity, if existent (older client perhaps).
         qboolean foundClassEntity = SVG_FreeClassFromEntity(serverEntity);
 
-        // Recreate class PlayerClient entity.
-        serverEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(serverEntity, false);
+        // Recreate class SVGBasePlayer entity.
+        serverEntity->classEntity = SVG_CreateClassEntity<SVGBasePlayer>(serverEntity, false);
 
         // Initialize client respawn data.
         InitializeClientRespawnData(serverEntity->client);
@@ -977,7 +977,7 @@ void DefaultGamemode::ClientBegin(Entity* serverEntity) {
     }
 
     // Call ClientEndServerFrame to update him through the beginning frame.
-    ClientEndServerFrame(dynamic_cast<PlayerClient*>(serverEntity->classEntity), serverEntity->client);
+    ClientEndServerFrame(dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity), serverEntity->client);
 }
 
 //===============
@@ -989,7 +989,7 @@ void DefaultGamemode::ClientBegin(Entity* serverEntity) {
 // This basically allows for the game to disable fetching user input that makes
 // our movement tick. And/or shoot weaponry while in intermission time.
 //===============
-void DefaultGamemode::ClientDisconnect(PlayerClient* player) {
+void DefaultGamemode::ClientDisconnect(SVGBasePlayer* player) {
     // Fetch the client.
     ServerClient* client = player->GetClient();
 
@@ -1365,7 +1365,7 @@ void DefaultGamemode::PlaceClientInWorld(Entity *ent) {
     FetchClientEntityData(ent);
 
     // Spawn the client again using spawn instead of respawn. (Respawn serves a different use.)
-    PlayerClient* clientEntity = dynamic_cast<PlayerClient*>(ent->classEntity);
+    SVGBasePlayer* clientEntity = dynamic_cast<SVGBasePlayer*>(ent->classEntity);
     clientEntity->Spawn();
 
     // Update the client pointer this entity belongs to.
@@ -1451,7 +1451,7 @@ void DefaultGamemode::PlaceClientInWorld(Entity *ent) {
 // Since the default game mode is intended to be a single player mode,
 // there is no respawning and we show a loadgame menu instead.
 //===============
-void DefaultGamemode::RespawnClient(PlayerClient* ent) {
+void DefaultGamemode::RespawnClient(SVGBasePlayer* ent) {
     // Kept around here to port later to other gamemodes.
     //if (deathmatch->value || coop->value) {
     //    // Spectator's don't leave bodies
@@ -1459,7 +1459,7 @@ void DefaultGamemode::RespawnClient(PlayerClient* ent) {
     //        game.GetCurrentGamemode()->SpawnClientCorpse(self->classEntity);
 
     //    self->serverFlags &= ~EntityServerFlags::NoClient;
-    //    game.GetCurrentGamemode()->PlaceClientInWorld((PlayerClient*)self->classEntity);
+    //    game.GetCurrentGamemode()->PlaceClientInWorld((SVGBasePlayer*)self->classEntity);
 
     //    // add a teleportation effect
     //    self->state.eventID = EntityEvent::PlayerTeleport;
@@ -1491,7 +1491,7 @@ void DefaultGamemode::RespawnAllClients() {
 // 
 // Does nothing for this game mode.
 //===============
-void DefaultGamemode::ClientDeath(PlayerClient *clientEntity) {
+void DefaultGamemode::ClientDeath(SVGBasePlayer *clientEntity) {
 
 }
 

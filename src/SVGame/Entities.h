@@ -25,9 +25,9 @@ using BaseEntitySpan = std::span<SVGBaseEntity*>;
 using BaseEntityVector = std::vector<SVGBaseEntity*>;
 
 /**
-*   @brief Utility function so we can acquire a valid PlayerClient* pointer from an Entity*
+*   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer from an Entity*
 **/
-PlayerClient* GetPlayerClientClassentity(Entity* serverEntity);
+SVGBasePlayer* GetPlayerClientClassentity(Entity* serverEntity);
 
 /**
 *   @brief Selectively acquire a list of Entity* derived objects using entity filters.

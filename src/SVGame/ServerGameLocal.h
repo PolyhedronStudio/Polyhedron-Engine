@@ -38,7 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Forward Declarations.
 //-------------------
 class SVGBaseEntity;
-class PlayerClient;
+class SVGBasePlayer;
 class Gameworld;
 class IGamemode;
 struct entity_s;
@@ -276,10 +276,10 @@ typedef struct gitem_s {
     const char *classname;
 
     // Function callbacks.
-    qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
-    void (*Use)(PlayerClient *ent, struct gitem_s *item);
-    void (*Drop)(PlayerClient *ent, struct gitem_s *item);
-    void (*WeaponThink)(PlayerClient *ent);
+    qboolean (*Pickup)(SVGBaseEntity *ent, SVGBasePlayer *other);
+    void (*Use)(SVGBasePlayer *ent, struct gitem_s *item);
+    void (*Drop)(SVGBasePlayer *ent, struct gitem_s *item);
+    void (*WeaponThink)(SVGBasePlayer *ent);
 
     // Sound used when being picked up.
     const char *pickupSound;
@@ -562,7 +562,7 @@ typedef enum {
 //
 // g_cmds.c
 //
-void SVG_Command_Score_f(PlayerClient *clientEntity, ServerClient *client);
+void SVG_Command_Score_f(SVGBasePlayer *clientEntity, ServerClient *client);
 
 //
 // g_items.c
@@ -573,7 +573,7 @@ gitem_t *SVG_FindItemByClassname(const char *classname);
 //#define ITEM_INDEX(x) ((x)-itemlist)
 Entity *SVG_DropItem(Entity *ent, gitem_t *item);
 void SVG_SetRespawn(Entity *ent, float delay);
-void SVG_ChangeWeapon(PlayerClient* ent);
+void SVG_ChangeWeapon(SVGBasePlayer* ent);
 void SVG_SpawnItem(Entity *ent, gitem_t *item);
 //void SVG_ThinkWeapon(Entity *ent);
 int32_t SVG_ArmorIndex(SVGBaseEntity *ent);

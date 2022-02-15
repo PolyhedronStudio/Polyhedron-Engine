@@ -13,7 +13,7 @@ void HUD_MoveClientToIntermission(Entity* client);
 void SVG_HUD_SetClientStats(Entity* ent);
 void SVG_HUD_SetSpectatorStats(Entity* ent);
 void SVG_HUD_CheckChaseStats(Entity* ent);
-void HUD_ValidateSelectedItem(PlayerClient* ent);
+void HUD_ValidateSelectedItem(SVGBasePlayer* ent);
 void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity* client, SVGBaseEntity* killer);
 
 #endif // __SVGAME_PLAYER_HUD_H__
