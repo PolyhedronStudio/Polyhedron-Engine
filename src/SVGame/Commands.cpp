@@ -869,7 +869,7 @@ void SVG_ClientCommand(Entity* serverEntity) {
     //
 
     // Fetch client entity.
-    SVGBasePlayer* clientEntity = GetPlayerClientClassentity(serverEntity);
+    SVGBasePlayer* clientEntity = GetBasePlayerEntity(serverEntity);
 
     // Fetch its client pointer.
     ServerClient *client = clientEntity->GetClient();

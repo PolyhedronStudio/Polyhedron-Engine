@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// PlayerClient.h
+// SVGBasePlayer.h
 //
 //
 */
@@ -11,18 +11,18 @@
 
 class SVGBaseEntity;
 
-class PlayerClient : public SVGBaseEntity {
+class SVGBasePlayer : public SVGBaseEntity {
 public:
     /**
     *   @brief  Used by game modes to recreate a fresh player entity for the client.
     **/
-    static PlayerClient* Create(Entity* serverEntity);
+    static SVGBasePlayer* Create(Entity* serverEntity);
 
     // Constructor/Deconstructor.
-    PlayerClient(Entity* svEntity);
-    virtual ~PlayerClient();
+    SVGBasePlayer(Entity* svEntity);
+    virtual ~SVGBasePlayer();
 
-    DefineClass(PlayerClient, SVGBaseEntity);
+    DefineClass(SVGBasePlayer, SVGBaseEntity);
 
     // Interface functions.
     void Precache() override;    // Precaches data.
@@ -34,7 +34,7 @@ public:
     void SpawnKey(const std::string& key, const std::string& value)  override;
 
     // Callback functions.
-    void PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    void SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
 
     // Get/Set
     // Active Weapon.

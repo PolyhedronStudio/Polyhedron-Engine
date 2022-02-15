@@ -116,7 +116,7 @@ cvar_t* dev_show_physwarnings = nullptr;
 // Funcs used locally.
 //-----------------
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
-void SVG_CreatePlayerClientEntities();
+void SVG_CreateSVGBasePlayerEntities();
 static void SVG_SetupCVars();
 
 void SVG_RunEntity(SVGEntityHandle &entityHandle);
@@ -315,13 +315,13 @@ static void SVG_SetupCVars() {
 
 //
 //=====================
-// SVG_CreatePlayerClientEntities
+// SVG_CreateSVGBasePlayerEntities
 //
 // Allocate the client player class entities before hand. No need to redo this all over,
 // that'd just be messy and complicate things more.
 //=====================
 //
-void SVG_CreatePlayerClientEntities() {
+void SVG_CreateSVGBasePlayerEntities() {
     // Loop over the number of clients.
     const int32_t maximumClients = game.maxClients;
 
@@ -376,7 +376,7 @@ void SVG_ClientEndServerFrames(void)
         Entity *entity = &g_entities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
         // Acquire player client entity.
-	    SVGBasePlayer* clientEntity = GetPlayerClientClassentity(entity);
+	    SVGBasePlayer* clientEntity = GetBasePlayerEntity(entity);
 
         // If it is invalid, continue to the next iteration.
         if (!clientEntity)

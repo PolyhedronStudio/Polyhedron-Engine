@@ -38,7 +38,7 @@ SVGBaseEntity* g_baseEntities[MAX_EDICTS];
 /**
 *   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer.
 **/
-SVGBasePlayer* GetPlayerClientClassentity(Entity* serverEntity) {
+SVGBasePlayer* GetBasePlayerEntity(Entity* serverEntity) {
     // Ensure the entity is valid.
     if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
 	    return nullptr;

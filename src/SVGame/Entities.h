@@ -27,7 +27,7 @@ using BaseEntityVector = std::vector<SVGBaseEntity*>;
 /**
 *   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer from an Entity*
 **/
-SVGBasePlayer* GetPlayerClientClassentity(Entity* serverEntity);
+SVGBasePlayer* GetBasePlayerEntity(Entity* serverEntity);
 
 /**
 *   @brief Selectively acquire a list of Entity* derived objects using entity filters.

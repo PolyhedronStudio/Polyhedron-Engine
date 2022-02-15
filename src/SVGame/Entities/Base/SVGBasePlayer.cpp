@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// PlayerClient.cpp
+// SVGBasePlayer.cpp
 //
 //
 */
@@ -18,50 +18,50 @@
 #include "../../Gamemodes/IGamemode.h"
 
 // Class Entities.
-#include "PlayerClient.h"
+#include "SVGBasePlayer.h"
 
 // Constructor/Deconstructor.
-PlayerClient::PlayerClient(Entity* svEntity) : Base(svEntity), 
+SVGBasePlayer::SVGBasePlayer(Entity* svEntity) : Base(svEntity), 
     airFinishedTime(0.f), debounceDamageTime(0.f), debouncePainTime(0.f), debounceSoundTime(0.f), debounceTouchTime(0.f) {
 
 }
-PlayerClient::~PlayerClient() {
+SVGBasePlayer::~SVGBasePlayer() {
 
 }
 
 /**
 *   @brief  Used by game modes to recreate a fresh player entity for the client.
 **/
-PlayerClient* PlayerClient::Create(Entity* svEntity) {
+SVGBasePlayer* SVGBasePlayer::Create(Entity* svEntity) {
     // Initialize a clean serverEntity.
     SVG_InitEntity(svEntity);
 
     // Delete previous classentity, if existent (older client perhaps).
     SVG_FreeClassFromEntity(svEntity);
 
-    // Recreate class PlayerClient entity.
-    svEntity->classEntity = SVG_CreateClassEntity<PlayerClient>(svEntity, false);
+    // Recreate class SVGBasePlayer entity.
+    svEntity->classEntity = SVG_CreateClassEntity<SVGBasePlayer>(svEntity, false);
 
     // Last but not least, return this class entity its pointer.
-    return dynamic_cast<PlayerClient*>(svEntity->classEntity);
+    return dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);
 }
 
 //===============
-// PlayerClient::Precache
+// SVGBasePlayer::Precache
 //
 //===============
 //
-void PlayerClient::Precache() {
+void SVGBasePlayer::Precache() {
     Base::Precache();
 }
 
 //
 //===============
-// PlayerClient::Spawn
+// SVGBasePlayer::Spawn
 //
 //===============
 //
-void PlayerClient::Spawn() {
+void SVGBasePlayer::Spawn() {
     // Spawn.
     Base::Spawn();
 
@@ -109,7 +109,7 @@ void PlayerClient::Spawn() {
     SetFrame(0);
 
     // Set the die function.
-    SetDieCallback(&PlayerClient::PlayerClientDie);
+    SetDieCallback(&SVGBasePlayer::SVGBasePlayerDie);
 
     // Let it be known this client entity is in use again.
     SetInUse(true);
@@ -117,56 +117,56 @@ void PlayerClient::Spawn() {
 
 //
 //===============
-// PlayerClient::Respawn
+// SVGBasePlayer::Respawn
 //
 //===============
 //
-void PlayerClient::Respawn() {
+void SVGBasePlayer::Respawn() {
     Base::Respawn();
-    gi.DPrintf("PlayerClient::Respawn();");
+    gi.DPrintf("SVGBasePlayer::Respawn();");
 }
 
 //
 //===============
-// PlayerClient::PostSpawn
+// SVGBasePlayer::PostSpawn
 //
 //===============
 //
-void PlayerClient::PostSpawn() {
+void SVGBasePlayer::PostSpawn() {
     Base::PostSpawn();
 }
 
 //
 //===============
-// PlayerClient::Think
+// SVGBasePlayer::Think
 //
 //===============
 //
-void PlayerClient::Think() {
+void SVGBasePlayer::Think() {
     // Parent class Think.
     Base::Think();
 }
 
 //
 //===============
-// PlayerClient::SpawnKey
+// SVGBasePlayer::SpawnKey
 //
-// PlayerClient spawn key handling.
+// SVGBasePlayer spawn key handling.
 //===============
 //
-void PlayerClient::SpawnKey(const std::string& key, const std::string& value) {
+void SVGBasePlayer::SpawnKey(const std::string& key, const std::string& value) {
     // Parent class spawnkey.
     Base::SpawnKey(key, value);
 }
 
 //
 //===============
-// PlayerClient::PlayerClientDie
+// SVGBasePlayer::SVGBasePlayerDie
 //
 // Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
 //===============
 //
-void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Fetch server entity.
     Entity* serverEntity = GetServerEntity();
 
@@ -286,10 +286,10 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
 }
 
 //===============
-// PlayerClient::SetEvent
+// SVGBasePlayer::SetEvent
 // 
 //===============
-void PlayerClient::SetEvent() {
+void SVGBasePlayer::SetEvent() {
     ServerClient* client = GetClient();
 
     if (!client) {
@@ -314,10 +314,10 @@ void PlayerClient::SetEvent() {
 }
 
 //===============
-// PlayerClient::SetEffects
+// SVGBasePlayer::SetEffects
 // 
 //===============
-void PlayerClient::SetEffects()
+void SVGBasePlayer::SetEffects()
 {
     Base::SetEffects(0);
     SetRenderEffects(0);
@@ -333,13 +333,13 @@ void PlayerClient::SetEffects()
 
 //
 //===============
-// PlayerClient::SetSound
+// SVGBasePlayer::SetSound
 //
 //===============
-void PlayerClient::SetSound() {
+void SVGBasePlayer::SetSound() {
     //const char    *weap; // C++20: STRING: Added const to char*
 
-    // Check whether the PlayerClient is hooked up to a valid client.
+    // Check whether the SVGBasePlayer is hooked up to a valid client.
     ServerClient* client = GetClient();
 
     if (!client) {
@@ -366,12 +366,12 @@ void PlayerClient::SetSound() {
 
 //
 //===============
-// PlayerClient::LookAtKiller
+// SVGBasePlayer::LookAtKiller
 //
 // Sets the clients view to look at the killer.
 //===============
 //
-void PlayerClient::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker)
+void SVGBasePlayer::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker)
 {
     // Fetch client.
     gclient_s* client = GetClient();
@@ -396,10 +396,10 @@ void PlayerClient::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacke
 // View/BobMove Functionality.
 //-------------------------------------------------------------
 //===============
-// PlayerClient::CalculateRoll
+// SVGBasePlayer::CalculateRoll
 //
 //===============
-float PlayerClient::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) {
+float SVGBasePlayer::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) {
     float side = vec3_dot(velocity, bobMove.right);
     float sign = side < 0 ? -1 : 1;
     side = fabs(side);
@@ -415,16 +415,16 @@ float PlayerClient::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) 
 }
 
 //===============
-// PlayerClient::CheckFallingDamage
+// SVGBasePlayer::CheckFallingDamage
 //
 //===============
-void PlayerClient::CheckFallingDamage()
+void SVGBasePlayer::CheckFallingDamage()
 {
     float   delta;
     int     damage;
     vec3_t  dir;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -496,15 +496,15 @@ void PlayerClient::CheckFallingDamage()
 
 //
 //===============
-// PlayerClient::CheckWorldEffects
+// SVGBasePlayer::CheckWorldEffects
 // 
 //===============
 //
-void PlayerClient::CheckWorldEffects()
+void SVGBasePlayer::CheckWorldEffects()
 {
     int32_t waterLevel, oldWaterLevel;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -629,10 +629,10 @@ void PlayerClient::CheckWorldEffects()
 
 
 //===============
-// PlayerClient::ApplyDamageFeedback
+// SVGBasePlayer::ApplyDamageFeedback
 //
 //===============
-void PlayerClient::ApplyDamageFeedback() {
+void SVGBasePlayer::ApplyDamageFeedback() {
     float   side;
     float   realcount, count, kick;
     vec3_t  v;
@@ -641,7 +641,7 @@ void PlayerClient::ApplyDamageFeedback() {
     static  vec3_t  acolor = {1.0f, 1.0f, 1.0f};
     static  vec3_t  bcolor = {1.0f, 0.0f, 0.0f};
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
     if (!client)
@@ -761,7 +761,7 @@ void PlayerClient::ApplyDamageFeedback() {
 
 //
 //===============
-// PlayerClient::CalculateViewOffset
+// SVGBasePlayer::CalculateViewOffset
 // 
 // Calculates t
 //
@@ -775,13 +775,13 @@ void PlayerClient::ApplyDamageFeedback() {
 // 
 //===============
 //
-void PlayerClient::CalculateViewOffset()
+void SVGBasePlayer::CalculateViewOffset()
 {
     float       bob;
     float       ratio;
     float       delta;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -874,11 +874,11 @@ void PlayerClient::CalculateViewOffset()
     );
 }
 
-void PlayerClient::CalculateGunOffset() {
+void SVGBasePlayer::CalculateGunOffset() {
     int     i;
     float   delta;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -926,11 +926,11 @@ void PlayerClient::CalculateGunOffset() {
 
 //
 //===============
-// PlayerClient::CalculateScreenBlend
+// SVGBasePlayer::CalculateScreenBlend
 // 
 //===============
 //
-void PlayerClient::CalculateScreenBlend() {
+void SVGBasePlayer::CalculateScreenBlend() {
         ServerClient* client = GetClient();
 
     if (!client) {
@@ -976,11 +976,11 @@ void PlayerClient::CalculateScreenBlend() {
         client->bonusAlpha = 0;
 }
 
-void PlayerClient::SetAnimationFrame() {
+void SVGBasePlayer::SetAnimationFrame() {
     qboolean isDucking = false;
     qboolean isRunning = false;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 

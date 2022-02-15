@@ -207,7 +207,7 @@ Creates a server's entity / program execution context by
 parsing textual entity definitions out of an ent file.
 ==============
 */
-extern void SVG_CreatePlayerClientEntities();
+extern void SVG_CreateSVGBasePlayerEntities();
 
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint)
 {
@@ -259,7 +259,7 @@ void SVG_SpawnEntities(const char *mapName, const char *entities, const char *sp
     inhibit = 0;
 
     // Spawn SVGBasePlayer entities first.
-    SVG_CreatePlayerClientEntities();
+    SVG_CreateSVGBasePlayerEntities();
 
 // parse ents
     while (1) {
