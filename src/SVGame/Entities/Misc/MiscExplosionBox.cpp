@@ -18,7 +18,7 @@
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
 
-
+#include "../../World/Gameworld.h"
 
 //
 // Constructor/Deconstructor.
@@ -379,7 +379,7 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Throw debris!
-    SVG_ThrowDebris(this, "models/objects/debris1/tris.md2", speed, origin);
+    gameworld->ThrowDebris(this, "models/objects/debris1/tris.md2", origin, speed);
 }
 
 
@@ -405,7 +405,7 @@ void MiscExplosionBox::SpawnDebris2Chunk() {
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Last but not least, throw debris.
-    SVG_ThrowDebris(this, "models/objects/debris2/tris.md2", speed, origin);
+    GetGameworld()->ThrowDebris(this, "models/objects/debris2/tris.md2", origin, speed);
 }
 
 //
@@ -420,5 +420,5 @@ void MiscExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
     float speed = 1.75 * (float)GetDamage() / 200.0f;
 
     // Throw debris!
-    SVG_ThrowDebris(this, "models/objects/debris3/tris.md2", speed, origin);
+    GetGameworld()->ThrowDebris(this, "models/objects/debris3/tris.md2", origin, speed);
 }

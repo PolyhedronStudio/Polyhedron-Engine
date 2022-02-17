@@ -17,6 +17,9 @@
 // Class Entities.
 #include "BodyCorpse.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
 // Constructor/Deconstructor.
 BodyCorpse::BodyCorpse(Entity* svEntity)
     : SVGBaseEntity(svEntity) {
@@ -113,7 +116,7 @@ void BodyCorpse::BodyCorpseDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker
 
         // Toss gibs.
         for (int32_t i = 0; i < 4; i++) {
-            SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+            GetGameworld()->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
         }
 
         // Ensure its origin goes -48, it is a lame hack but hey...

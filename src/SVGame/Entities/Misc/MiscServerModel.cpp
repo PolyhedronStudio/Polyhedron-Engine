@@ -309,10 +309,11 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
     // Throw some gibs around, true horror oh boy.
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    Gameworld* gameworld = GetGameworld();
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
 
     //SVG_ThrowClientHead(this, damage);
     SetEndFrame(119.f);
