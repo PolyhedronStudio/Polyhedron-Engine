@@ -362,6 +362,9 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
 //===============
 //
 void MiscExplosionBox::SpawnDebris1Chunk() {
+    // Acquire a pointer to the game world.
+    Gameworld* gameworld = GetGameworld();
+
     // Speed to throw debris at.
     float speed = 1.5 * (float)GetDamage() / 200.0f;
 

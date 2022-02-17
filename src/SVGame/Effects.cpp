@@ -20,6 +20,8 @@
 #include "Entities/Base/DebrisEntity.h"
 #include "Entities/Base/GibEntity.h"
 
+// World.
+#include "World/Gameworld.h"
 
 //=================
 // SVG_ThrowClientHead
@@ -29,7 +31,7 @@
 void SVG_ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
 {
     // Create a gib entity.
-    GibEntity* gibClassEntity = SVG_CreateClassEntity<GibEntity>();
+    GibEntity* gibClassEntity = GetGameworld()->CreateClassEntity<GibEntity>();
 
     // Set size.
     vec3_t size = vec3_scale(self->GetSize(), 0.5f);
@@ -60,7 +62,7 @@ void SVG_ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     float velocityScale = 1.f;
 
     // Is it an organic gib type?
-    if (type == GIB_ORGANIC) {
+    if (type == GibType::Organic) {
         // Then we pick a different movetype ;-)
         gibClassEntity->SetMoveType(MoveType::Toss);
 
@@ -75,7 +77,7 @@ void SVG_ThrowGib(SVGBaseEntity*self, const char *gibname, int damage, int type)
     }
 
     // Comment later...
-    vec3_t velocityDamage = game.GetCurrentGamemode()->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.GetGamemode()->CalculateDamageVelocity(damage);
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then 
     // adding it on to 'velocityDamage' its old value.
@@ -144,7 +146,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityDamage = game.GetCurrentGamemode()->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = game.GetGamemode()->CalculateDamageVelocity(damage);
 
     // Add the velocityDamage up to the current velocity.
     self->SetVelocity(self->GetVelocity() + velocityDamage);
@@ -171,7 +173,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
 void SVG_ThrowDebris(SVGBaseEntity *self, const char *modelname, float speed, const vec3_t &origin) // C++20: STRING: Added const to char*
 {
     // Chunk Entity.
-    SVGBaseEntity* chunkEntity = SVG_CreateClassEntity<DebrisEntity>();
+    SVGBaseEntity* chunkEntity = GetGameworld()->CreateClassEntity<DebrisEntity>();
 
     // Set the origin.
     chunkEntity->SetOrigin(origin);

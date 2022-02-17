@@ -55,7 +55,7 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     if (!ent)
         return;
 
-    game.GetCurrentGamemode()->ClientUserinfoChanged(ent, userinfo);
+    game.GetGamemode()->ClientUserinfoChanged(ent, userinfo);
 }
 
 
@@ -133,7 +133,7 @@ void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, con
     //if (self->classEntity && self->classEntity->GetHealth() < -40) {
     //    gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
     //    for (n = 0; n < 4; n++)
-    //        SVG_ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    //        SVG_ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     //    self->state.origin.z -= 48;
     //    SVG_ThrowClientHead(self, damage);
     //    self->takeDamage = TakeDamage::No;
@@ -206,7 +206,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.GetCurrentGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->classEntity));
+    game.GetGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->classEntity));
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -247,8 +247,8 @@ void SVG_ClientBegin(Entity *ent)
     ent->client = game.GetClients() + (ent - game.world->GetServerEntities() - 1);
 
     // Let the game mode decide from here on out.
-    game.GetCurrentGamemode()->ClientBegin(ent);
-    //game.GetCurrentGamemode()->ClientEndServerFrame(ent);
+    game.GetGamemode()->ClientBegin(ent);
+    //game.GetGamemode()->ClientEndServerFrame(ent);
 }
 
 
@@ -266,7 +266,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    return game.GetCurrentGamemode()->ClientConnect(ent, userinfo);
+    return game.GetGamemode()->ClientConnect(ent, userinfo);
 }
 
 /*
@@ -287,7 +287,7 @@ void SVG_ClientDisconnect(Entity *ent)
         return;
 
     // Since it does, we pass it on to the game mode.
-    game.GetCurrentGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->classEntity), ent->client);
+    game.GetGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->classEntity), ent->client);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;

@@ -127,7 +127,7 @@ void SVG_ChaseNext(SVGBasePlayer *ent)
     }
 
     ServerClient* client = ent->GetClient();
-    Entity*	  serverEntities = game.world->GetServerEntities();
+    Entity*	  serverEntities = GetGameworld()->GetServerEntities();
 
     if (!client->chaseTarget) {
         return;
@@ -159,7 +159,7 @@ void SVG_ChasePrev(SVGBasePlayer*ent)
     }
 
     ServerClient* client = ent->GetClient();
-    Entity* serverEntities = game.world->GetServerEntities();
+    Entity* serverEntities = GetGameworld()->GetServerEntities();
 
     // Sanity check.
     if (!client->chaseTarget) {
@@ -191,7 +191,7 @@ void SVG_GetChaseTarget(SVGBasePlayer *ent)
     }
 
     ServerClient* client = ent->GetClient();
-    Entity*	  serverEntities = game.world->GetServerEntities();
+    Entity* serverEntities = GetGameworld()->GetServerEntities();
 
     for (int32_t i = 1; i <= maximumclients->value; i++) {
         other = serverEntities + i;

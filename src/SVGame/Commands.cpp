@@ -602,7 +602,7 @@ void Cmd_Kill_f(SVGBasePlayer* player, ServerClient* client) {
 
     player->SetFlags(player->GetFlags() & ~EntityFlags::GodMode);
     player->SetHealth(0);
-    game.GetCurrentGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
+    game.GetGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
     player->Die(player, player, 100000, vec3_zero());
 }
 
@@ -822,7 +822,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
         SVG_CPrintf(NULL, PRINT_CHAT, sayBuffer);
 
     // Loop over client entities.
-    for (auto& otherplayer : game.world->GetClassEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
+    for (auto& otherplayer : GetGameworld()->GetClassEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
         if (team) {
             if (!SVG_OnSameTeam(player, otherplayer))
                 continue;
@@ -839,7 +839,7 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
     Entity *e2;
 
     // Acquire the world's server entity array pointer.
-    Entity* serverEntities = game.world->GetServerEntities();
+    Entity* serverEntities = GetGameworld()->GetServerEntities();
 
     // connect time, ping, score, name
     *text = 0;
@@ -879,7 +879,7 @@ void SVG_ClientCommand(Entity* serverEntity) {
     //
 
     // Fetch player entity.
-    SVGBasePlayer* player = game.world->GetPlayerClassEntity(serverEntity);
+    SVGBasePlayer* player = GetGameworld()->GetPlayerClassEntity(serverEntity);
 
     // Fetch its client pointer.
     ServerClient *client = player->GetClient();

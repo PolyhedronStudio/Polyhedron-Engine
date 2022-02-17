@@ -116,7 +116,6 @@ cvar_t* dev_show_physwarnings = nullptr;
 // Funcs used locally.
 //-----------------
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
-void SVG_CreateSVGBasePlayerEntities();
 static void SVG_SetupCVars();
 
 void SVG_RunEntity(SVGEntityHandle &entityHandle);
@@ -355,7 +354,8 @@ static void SVG_SetupCVars() {
 //=============================================================================
 //
 void SVG_SpawnEntities(const char* mapName, const char* entities, const char* spawnpoint) {
-    Gameworld *gameworld = game.GetGameworld();
+    // Acquire game world pointer.
+    Gameworld* gameworld = GetGameworld();
 
     // Spawn entities.
     gameworld->SpawnEntitiesFromString(mapName, entities, spawnpoint);
@@ -370,8 +370,10 @@ void SVG_SpawnEntities(const char* mapName, const char* entities, const char* sp
 //
 void SVG_ClientEndServerFrames(void)
 {
+    Gameworld* gameworld = GetGameworld();
+
     // Acquire server entities array.
-    Entity* serverEntities = game.world->GetServerEntities();
+    Entity* serverEntities = gameworld->GetServerEntities();
 
     // Go through each client and calculate their final view for the state.
     // (This happens here, so we can take into consideration objects that have
@@ -384,7 +386,7 @@ void SVG_ClientEndServerFrames(void)
         Entity *entity = &serverEntities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
         // Acquire player client entity.
-	    SVGBasePlayer* player = game.world->GetPlayerClassEntity(entity);
+	    SVGBasePlayer* player = gameworld->GetPlayerClassEntity(entity);
 
         // If it is invalid, continue to the next iteration.
         if (!player)
@@ -394,7 +396,7 @@ void SVG_ClientEndServerFrames(void)
         ServerClient *client = player->GetClient();
 
         // Notify game mode about this client ending its server frame.
-        game.GetCurrentGamemode()->ClientEndServerFrame(player, client);
+        gameworld->GetGamemode()->ClientEndServerFrame(player, client);
     }
 }
 
@@ -547,7 +549,7 @@ void SVG_RunFrame(void) {
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
         //SVG_ExitLevel();
-        game.GetCurrentGamemode()->OnLevelExit();
+        game.GetGamemode()->OnLevelExit();
         return;
     }
 
@@ -622,7 +624,7 @@ void SVG_RunFrame(void) {
             }
 
             // Last but not least, begin its server frame.
-            game.GetCurrentGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(classEntity), client);
+            game.GetGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(classEntity), client);
 
             // Continue to next iteration.
             continue;

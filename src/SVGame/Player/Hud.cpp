@@ -123,7 +123,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     game.autoSaved = false;
 
     // Respawn any dead clients.
-    game.GetCurrentGamemode()->RespawnAllClients();
+    game.GetGamemode()->RespawnAllClients();
 
     // Set intermission time and the map to change to.
     level.intermission.time = level.time;
@@ -131,7 +131,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     // 
     if (strstr(level.intermission.changeMap, "*")) {
-        if (!game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
+        if (!game.GetGamemode()->IsClass<CoopGamemode>()) {
             for (i = 0 ; i < maximumclients->value ; i++) {
                 client = game.world->GetServerEntities() + 1 + i;
                 if (!client->inUse) {
@@ -147,7 +147,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
             }
         }
     } else {
-        if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+        if (!game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
             level.intermission.exitIntermission = 1;     // go immediately to the next level
             return;
         }
@@ -316,7 +316,7 @@ void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client) {
     client->showInventory = false;
 
     // Don't show scores if not in one of the following game modes.
-    if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>() && !game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
+    if (!game.GetGamemode()->IsClass<DeathmatchGamemode>() && !game.GetGamemode()->IsClass<CoopGamemode>()) {
         return;
     }
 
@@ -407,7 +407,7 @@ void SVG_HUD_SetClientStats(Entity* ent)
     ent->client->playerState.stats[STAT_LAYOUTS] = 0;
 
     // Special layout for deathmatch.
-    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+    if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
         if (ent->client->persistent.health <= 0 || level.intermission.time
             || ent->client->showScores)
             ent->client->playerState.stats[STAT_LAYOUTS] |= 1;

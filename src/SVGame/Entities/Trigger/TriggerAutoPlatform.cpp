@@ -115,7 +115,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 // TriggerAutoPlatform::Create
 //===============
 TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
-	TriggerAutoPlatform* autoPlatform = game.world->CreateClassEntity<TriggerAutoPlatform>();
+    TriggerAutoPlatform* autoPlatform = GetGameworld()->CreateClassEntity<TriggerAutoPlatform>();
     autoPlatform->SetOrigin(ownerEntity->GetEndPosition());
 	autoPlatform->LinkEntity();
 	autoPlatform->Spawn();

@@ -14,14 +14,16 @@ class SVGBaseEntity;
 class SVGBasePlayer : public SVGBaseEntity {
 public:
     /**
-    *   @brief  Used by game modes to recreate a fresh player entity for the client.
+    *   @brief  Used by game modes to (re-)create a fresh player entity for the client.
     **/
     static SVGBasePlayer* Create(Entity* serverEntity);
 
-    // Constructor/Deconstructor.
+private:
+    //! Private constructor. Players are created using the Create function.
     SVGBasePlayer(Entity* svEntity);
     virtual ~SVGBasePlayer();
 
+public:
     DefineClass(SVGBasePlayer, SVGBaseEntity);
 
     // Interface functions.

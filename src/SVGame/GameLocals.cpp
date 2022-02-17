@@ -83,8 +83,8 @@ Gameworld* GameLocals::GetGameworld() {
 /**
 *   @return A pointer to the gameworld its current gamemode object.
 **/
-IGamemode* GameLocals::GetCurrentGamemode() { 
-    return world->GetCurrentGamemode(); 
+IGamemode* GameLocals::GetGamemode() { 
+    return world->GetGamemode(); 
 }
 
 

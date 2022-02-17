@@ -60,7 +60,7 @@ public:
     /**
     *   @return A pointer to the gameworld its current gamemode object.
     **/
-    IGamemode* GetCurrentGamemode();
+    IGamemode* GetGamemode();
 
     /**
     *   @brief  Code shortcut for accessing gameworld's client array.

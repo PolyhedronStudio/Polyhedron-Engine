@@ -74,7 +74,7 @@ void TriggerAutoDoor::AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, 
 // TriggerAutoDoor::Create
 //===============
 TriggerAutoDoor* TriggerAutoDoor::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
-    TriggerAutoDoor* autoDoor = game.world->CreateClassEntity<TriggerAutoDoor>();
+    TriggerAutoDoor* autoDoor = GetGameworld()->CreateClassEntity<TriggerAutoDoor>();
 	autoDoor->SetOwner( ownerEntity );
 	autoDoor->SetMaxs( ownerMaxs );
 	autoDoor->SetMins( ownerMins );

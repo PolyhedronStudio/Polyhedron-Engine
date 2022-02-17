@@ -111,30 +111,38 @@ qboolean DefaultGamemode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
 //
 //===============
 qboolean DefaultGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
-    vec3_t  destination;
+    // Destination.
+    vec3_t   destination = vec3_zero();
+    // Trace.
     SVGTrace trace;
 
-    // WID: Admer, why the fuck did they rush hour these comments all the time?
-    // bmodels need special checking because their origin is 0,0,0 <-- is bad.
-    //
     // Solid entities need a special check, as their origin is usually 0,0,0
     // Exception to the above: the solid entity moves or has an origin brush
     if (target->GetMoveType() == MoveType::Push) {
         // Calculate destination.
         destination = target->GetAbsoluteMin() + target->GetAbsoluteMax();
         destination = vec3_scale(destination, 0.5f);
+        
+        // Execute trace.
         trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
-        if (trace.fraction == 1.0)
-            return true;
-        if (trace.ent == target)
-            return true;
+
+        //
+        if (trace.fraction == 1.0) {
+	        return true;
+	    }
+	    if (trace.ent == target) {
+	        return true;
+	    }
+
         return false;
     }
 
     // From here on we start tracing in various directions. Look at the code yourself to figure that one out...
     trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), target->GetOrigin(), inflictor, CONTENTS_MASK_SOLID);
-    if (trace.fraction == 1.0)
+
+    if (trace.fraction == 1.0) {
         return true;
+    }
 
     destination = target->GetOrigin();
     destination[0] += 15.0;
@@ -178,19 +186,19 @@ qboolean DefaultGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 //===============
 ClassEntityVector DefaultGamemode::FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) {
     // List of base entities to return.
-    std::vector<SVGBaseEntity*> baseEntityList;
+    ClassEntityVector radiusEntities;
 
     // Iterate over all entities, see who is nearby, and who is not.
-    for (auto* radiusBaseEntity : game.world->GetClassEntityRange<0, MAX_EDICTS>()
+    for (auto* radiusEntity : game.world->GetClassEntityRange<0, MAX_EDICTS>()
          | cef::Standard
          | cef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
         // Push radiusEntity result item to the list.
-        baseEntityList.push_back(radiusBaseEntity);
+        radiusEntities.push_back(radiusEntity);
     }
 
     // The list might be empty, ensure to check for that ;-)
-    return baseEntityList;
+    return radiusEntities;
 }
 
 //===============
@@ -267,7 +275,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockBack still occurs
     //if ((targ != attacker) && ((deathmatch->value && ((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams))) || coop->value)) {
-    //    if (game.GetCurrentGamemode()->OnSameTeam(targ, attacker)) {
+    //    if (game.GetGamemode()->OnSameTeam(targ, attacker)) {
     //        if ((int)(gamemodeflags->value) & GamemodeFlags::NoFriendlyFire)
     //            damage = 0;
     //        else
@@ -327,7 +335,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     }
 
     // Team damage avoidance
-    if (!(damageFlags & DamageFlags::IgnoreProtection) && game.GetCurrentGamemode()->OnSameTeam(target, attacker))
+    if (!(damageFlags & DamageFlags::IgnoreProtection) && game.GetGamemode()->OnSameTeam(target, attacker))
         return;
 
     // Inflict the actual damage, in case we got to deciding to do so based on the above.
@@ -666,7 +674,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
             if (client->latchedButtons & buttonMask) 
                 // || (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn))) {
             {
-                game.GetCurrentGamemode()->RespawnClient(player);
+                game.GetGamemode()->RespawnClient(player);
                 client->latchedButtons = 0;
             }
         }
@@ -1496,10 +1504,10 @@ void DefaultGamemode::RespawnClient(SVGBasePlayer* ent) {
     //if (deathmatch->value || coop->value) {
     //    // Spectator's don't leave bodies
     //    if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-    //        game.GetCurrentGamemode()->SpawnClientCorpse(self->classEntity);
+    //        game.GetGamemode()->SpawnClientCorpse(self->classEntity);
 
     //    self->serverFlags &= ~EntityServerFlags::NoClient;
-    //    game.GetCurrentGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->classEntity);
+    //    game.GetGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->classEntity);
 
     //    // add a teleportation effect
     //    self->state.eventID = EntityEvent::PlayerTeleport;

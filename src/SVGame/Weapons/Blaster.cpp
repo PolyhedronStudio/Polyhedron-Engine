@@ -148,7 +148,7 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
     //client->kickAngles[0] = client->machinegunShots * -1.5;
 
     //// raise the gun as it is firing if not in deathmatch mode.
-    //if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+    //if (!game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
     //    client->machinegunShots++;
     //    if (client->machinegunShots > 9)
     //        client->machinegunShots = 9;
@@ -171,7 +171,7 @@ void Weapon_Blaster_Fire(SVGBasePlayer *ent)
 {
     int     damage;
 
-    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>())
+    if (game.GetGamemode()->IsClass<DeathmatchGamemode>())
         damage = 15;
     else
         damage = 10;

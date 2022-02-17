@@ -4,6 +4,8 @@
 // Entities.
 #include "../Entities.h"
 #include "../Entities/Base/SVGBasePlayer.h"
+#include "../Entities/Base/DebrisEntity.h"
+#include "../Entities/Base/GibEntity.h"
 
 // Gamemodes.
 #include "../Gamemodes/IGamemode.h"
@@ -121,7 +123,7 @@ void Gameworld::PreparePlayers() {
 		svEntity->state.number = svEntity - serverEntities;
 
 		// Allocate player client class entity
-		SVGBasePlayer* playerClientEntity = CreateClassEntity<SVGBasePlayer>(svEntity, false);	//SVG_SpawnClassEntity(serverEntity, serverEntity->classname);
+		SVGBasePlayer* playerClientEntity = CreateClassEntity<SVGBasePlayer>(svEntity, false);
 
 		// Be sure to reset their inuse, after all, they aren't in use.
 		playerClientEntity->SetInUse(false);
@@ -133,6 +135,8 @@ void Gameworld::PreparePlayers() {
 		playerClientEntity->SetClient(&clients[clientIndex]);
     }
 }
+
+
 
 /**
 *	@brief	Parses the 'entities' string and assigns each parsed entity to the
@@ -158,11 +162,6 @@ qboolean Gameworld::SpawnEntitiesFromString(const char* mapName, const char* ent
 	// Copy in the map name and designated spawnpoint(if any.)
     strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
     strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
-
-	//// Set client field for each reserved client entity.
-	//for (int32_t i = 0; i < game.GetMaxClients(); i++) {
-	//	serverEntities[i + 1].client = game.clients + i;
-	//}
 
 	// Spawn SVGBasePlayer classes for each reserved client entity.
     PreparePlayers();
@@ -223,123 +222,6 @@ qboolean Gameworld::SpawnEntitiesFromString(const char* mapName, const char* ent
 	// SVG_PlayerTrail_Init
 
 	return parsedSuccessfully;
-}
-
-/**
-*   @brief  Frees the given server entity and its class entity in order to recycle it again.
-*
-*   @return A pointer to the class entity on success, nullptr on failure.
-**/
-void Gameworld::FreeServerEntity(Entity* svEntity) {
-    // Sanity check.
-    if (!svEntity) {
-		return;
-    }
-
-    // Unlink entity from world.
-    gi.UnlinkEntity(svEntity);
-
-    // Get entity number.
-    int32_t entityNumber = svEntity->state.number;
-
-    // Prevent freeing "special edicts". Clients, and the dead "client body queue".
-    if (entityNumber <= game.GetMaxClients()  + BODY_QUEUE_SIZE) {
-		gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
-		return;
-    }
-
-    // Delete the actual entity class pointer.
-    FreeClassEntity(svEntity);
-
-    // Reset the entities values.
-    *svEntity = {};
-
-    // Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
-    // If we don't, we risk the chance of a client lerping between an older entity that
-    // was taking up this current slot.
-    svEntity->freeTime = level.time;
-
-    // Last but not least, since it isn't in use anymore, let it be known.
-    svEntity->inUse = false;
-
-    // Reset serverFlags.
-    svEntity->serverFlags = 0;
-
-    // Ensure the class entity is nullified.
-    svEntity->classEntity = nullptr;
-}
-
-/**
-*   @brief  Frees the given class entity.
-*
-*   @return True on success, false on failure.
-**/
-qboolean Gameworld::FreeClassEntity(Entity *svEntity) {
-    // Sanity check.
-    if (!svEntity) {
-        gi.DPrintf("WARNING: tried to %s on a nullptr entity.", __func__);
-        return false;
-    }
-
-    // Used as return value.
-    qboolean freedClassEntity = false;
-
-    // Fetch entity number.
-    int32_t entityNumber = svEntity->state.number;
-
-    // Special class entity handling IF it still has one.
-    if (svEntity->classEntity) {
-		// Get pointer to class entity.
-		SVGBaseEntity *classEntity = svEntity->classEntity;
-
-        // Remove the classEntity reference
-        classEntity->SetGroundEntity(nullptr);
-        classEntity->SetLinkCount(0);
-        classEntity->SetGroundEntityLinkCount(0);
-        classEntity->SetServerEntity(nullptr);
-        
-		// Reset server entity's class entity pointer.
-		svEntity->classEntity = nullptr;
-    }
-
-    // For whichever faulty reason the entity might not have had a classentity,
-    // so we do an extra delete here just in case.
-    if (classEntities[entityNumber] != nullptr) {
-        // Free it.
-        delete classEntities[entityNumber];
-        classEntities[entityNumber] = nullptr;
-
-        // Freed class entity.
-        freedClassEntity = true;
-    }
-
-    // Return result.
-    return freedClassEntity;
-}
-
-/**
-*   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer.
-* 
-*   @return A valid pointer to the entity's SVGBasePlayer class entity. nullptr on failure.
-**/
-SVGBasePlayer* Gameworld::GetPlayerClassEntity(Entity* serverEntity) {
-    // Ensure the entity is valid.
-    if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
-		return nullptr;
-    }
-
-    // Ensure that its classentity is of or derived of SVGBasePlayer.
-    SVGBaseEntity* classEntity = serverEntity->classEntity;
-
-    if (!classEntity->IsSubclassOf<SVGBasePlayer>()) {
-		return nullptr;
-    }
-
-    // We can safely cast to SVGBasePlayer now.
-    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
-
-    // Return it.
-    return player;
 }
 
 /**
@@ -636,4 +518,139 @@ SVGBaseEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::strin
 
 	// If we get to this point, we've triggered one warning either way.
 	return nullptr;
+}
+
+/**
+*   @brief  Frees the given server entity and its class entity in order to recycle it again.
+*
+*   @return A pointer to the class entity on success, nullptr on failure.
+**/
+void Gameworld::FreeServerEntity(Entity* svEntity) {
+    // Sanity check.
+    if (!svEntity) {
+	return;
+    }
+
+    // Unlink entity from world.
+    gi.UnlinkEntity(svEntity);
+
+    // Get entity number.
+    int32_t entityNumber = svEntity->state.number;
+
+    // Prevent freeing "special edicts". Clients, and the dead "client body queue".
+    if (entityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
+	gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
+	return;
+    }
+
+    // Delete the actual entity class pointer.
+    FreeClassEntity(svEntity);
+
+    // Reset the entities values.
+    *svEntity = {};
+
+    // Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
+    // If we don't, we risk the chance of a client lerping between an older entity that
+    // was taking up this current slot.
+    svEntity->freeTime = level.time;
+
+    // Last but not least, since it isn't in use anymore, let it be known.
+    svEntity->inUse = false;
+
+    // Reset serverFlags.
+    svEntity->serverFlags = 0;
+
+    // Ensure the class entity is nullified.
+    svEntity->classEntity = nullptr;
+}
+
+/**
+*   @brief  Frees the given class entity.
+*
+*   @return True on success, false on failure.
+**/
+qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
+    // Sanity check.
+    if (!svEntity) {
+	gi.DPrintf("WARNING: tried to %s on a nullptr entity.", __func__);
+	return false;
+    }
+
+    // Used as return value.
+    qboolean freedClassEntity = false;
+
+    // Fetch entity number.
+    int32_t entityNumber = svEntity->state.number;
+
+    // Special class entity handling IF it still has one.
+    if (svEntity->classEntity) {
+	// Get pointer to class entity.
+	SVGBaseEntity* classEntity = svEntity->classEntity;
+
+	// Remove the classEntity reference
+	classEntity->SetGroundEntity(nullptr);
+	classEntity->SetLinkCount(0);
+	classEntity->SetGroundEntityLinkCount(0);
+	classEntity->SetServerEntity(nullptr);
+
+	// Reset server entity's class entity pointer.
+	svEntity->classEntity = nullptr;
+    }
+
+    // For whichever faulty reason the entity might not have had a classentity,
+    // so we do an extra delete here just in case.
+    if (classEntities[entityNumber] != nullptr) {
+	// Free it.
+	delete classEntities[entityNumber];
+	classEntities[entityNumber] = nullptr;
+
+	// Freed class entity.
+	freedClassEntity = true;
+    }
+
+    // Return result.
+    return freedClassEntity;
+}
+
+/**
+*   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer.
+* 
+*   @return A valid pointer to the entity's SVGBasePlayer class entity. nullptr on failure.
+**/
+SVGBasePlayer* Gameworld::GetPlayerClassEntity(Entity* serverEntity) {
+    // Ensure the entity is valid.
+    if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
+	return nullptr;
+    }
+
+    // Ensure that its classentity is of or derived of SVGBasePlayer.
+    SVGBaseEntity* classEntity = serverEntity->classEntity;
+
+    if (!classEntity->IsSubclassOf<SVGBasePlayer>()) {
+	return nullptr;
+    }
+
+    // We can safely cast to SVGBasePlayer now.
+    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
+
+    // Return it.
+    return player;
+}
+
+
+
+/**
+*   @brief  Spawns a debris model entity at the given origin.
+*   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
+**/
+void Gameworld::ThrowDebris(SVGBaseEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
+	DebrisEntity::Create(debrisser, gibModel, origin, speed); 
+}
+
+/**
+*   @brief  Spawns a gib model entity flying at random velocities and directions.
+*   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
+*/
+void Gameworld::ThrowGib(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) { 
+	GibEntity::Create(gibber, gibModel, damage, gibType);
 }

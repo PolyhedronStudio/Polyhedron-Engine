@@ -43,6 +43,7 @@ class Gameworld;
 class IGamemode;
 struct entity_s;
 
+#include "GameLocals.h"
 //==================================================================
 
 //! Time it takes to go over a frame. 
@@ -121,8 +122,10 @@ constexpr int32_t  RANGE_FAR = 3;
 //-------------------
 //gib types
 //-------------------
-constexpr int32_t GIB_ORGANIC = 0;
-constexpr int32_t GIB_METALLIC = 1;
+struct GibType {
+    static constexpr int32_t Organic = 0;
+    static constexpr int32_t Metallic = 1;
+};
 
 //monster ai flags
 constexpr int32_t AI_STAND_GROUND = 0x00000001;
@@ -405,18 +408,19 @@ struct TemporarySpawnFields {
     float maxpitch;
 };
 
-// Wrap these in functions such as?:
-// SVG_GetGameLocals
-// SVG_GetLevelLocals
-// 
-#include "GameLocals.h"
+
+// Externized.
 extern  GameLocals   game;
 extern  LevelLocals  level;
 extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
 extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
 extern  TemporarySpawnFields    st;
 
-// These too need to be taken care of.
+// Static Get functions for readability.
+static inline Gameworld* GetGameworld() { return game.world; }
+static inline LevelLocals* GetLevelLocals() { return &level; }
+
+    // These too need to be taken care of.
 extern  int32_t sm_meat_index;
 extern  int32_t snd_fry;
 

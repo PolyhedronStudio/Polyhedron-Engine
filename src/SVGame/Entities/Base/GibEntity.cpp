@@ -17,14 +17,96 @@
 // Class Entities.
 #include "GibEntity.h"
 
+// Gamemode.
+#include "../../Gamemodes/IGamemode.h"
+
+// World.
+#include "../../World/Gameworld.h"
+
+
+/**
+*   @brief  Used by game modes to spawn server side gibs.
+**/
+GibEntity* GibEntity::Create(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) {
+    // Create a gib entity.
+    GibEntity* gibEntity = GetGameworld()->CreateClassEntity<GibEntity>();
+
+    // Set size.
+    vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
+    gibEntity->SetSize(size);
+
+    // Generate the origin to start from.
+    vec3_t origin = gibber->GetAbsoluteMin() + gibber->GetSize();
+
+    // Add some random values to it, so they all differ.
+    origin.x += crandom() * size.x;
+    origin.y += crandom() * size.y;
+    origin.z += crandom() * size.z;
+
+    // Set the origin.
+    gibEntity->SetOrigin(origin);
+
+    // Set the model.
+    gibEntity->SetModel(gibModel);
+
+    // Set solid and other properties.
+    gibEntity->SetSolid(Solid::Not);
+    gibEntity->SetEffects(gibEntity->GetEffects() | EntityEffectType::Gib);
+    gibEntity->SetFlags(gibEntity->GetFlags() | EntityFlags::NoKnockBack);
+    gibEntity->SetTakeDamage(TakeDamage::Yes);
+    gibEntity->SetDieCallback(&GibEntity::GibEntityDie);
+
+    // Default velocity scale for non organic materials.
+    float velocityScale = 1.f;
+
+    // Is it an organic gib type?
+    if (gibType == GibType::Organic) {
+    	// Different move type for organic gibs.
+	    gibEntity->SetMoveType(MoveType::Toss);
+
+	    // Most of all, we setup a touch callback too ofc.
+	    gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
+
+	    // Adjust the velocity scale.
+	    velocityScale = 0.5f;
+    } else {
+	    // Pick a different movetype, bouncing. No touch callback :)
+	    gibEntity->SetMoveType(MoveType::Bounce);
+    }
+
+    // Comment later...
+    vec3_t velocityDamage = game.GetGamemode()->CalculateDamageVelocity(damage);
+
+    // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
+    // adding it on to 'velocityDamage' its old value.
+    vec3_t gibVelocity = vec3_fmaf(gibber->GetVelocity(), velocityScale, velocityDamage);
+
+    // Be sure to clip our velocity, just in case.
+    gibEntity->ClipGibVelocity(velocityDamage);
+
+    // Last but not least, set our velocity.
+    gibEntity->SetVelocity(velocityDamage);
+    
+    // Generate angular velocity.
+    vec3_t angularVelocity = { Randomui() * 600.f, Randomui() * 600.f, Randomui() * 600.f };
+
+    // Set angular velocity.
+    gibEntity->SetAngularVelocity(angularVelocity);
+
+    // Setup the Gib think function and its think time.
+    gibEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
+    gibEntity->SetNextThinkTime(level.time + 10 + Randomui() * 10);
+
+    // Link entity into the world.
+    gibEntity->LinkEntity();
+
+    return gibEntity;
+}
+
+
 // Constructor/Deconstructor.
-GibEntity::GibEntity(Entity* svEntity)
-    : SVGBaseEntity(svEntity) {
-
-}
-GibEntity::~GibEntity() {
-
-}
+GibEntity::GibEntity(Entity* svEntity) : SVGBaseEntity(svEntity) { }
+GibEntity::~GibEntity() { }
 
 //
 //===============
@@ -150,7 +232,7 @@ void GibEntity::GibEntityThink() {
     // Play frames for these meshes, cut the crap at frame 10.
     if (GetFrame() == 10) {
         SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
-        SetNextThinkTime(level.time + 8 + random() * 10);
+        SetNextThinkTime(level.time + 8 + Randomui() * 10);
     }
 }
 

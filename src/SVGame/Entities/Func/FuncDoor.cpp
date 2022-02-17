@@ -61,7 +61,7 @@ void FuncDoor::Spawn() {
     if ( !GetSpeed() ) {
         SetSpeed( 100.0f );
     }
-    //if ( game.GetCurrentGamemode()->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
+    //if ( game.GetGamemode()->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
     //    SetSpeed( GetSpeed() * 2.0f );
     //}
     if ( !GetAcceleration() ) {
@@ -547,7 +547,7 @@ void FuncDoor::UseAreaportals( bool open ) const {
     }
 
     SVGBaseEntity* ent = nullptr;
-    for (auto& areaPortalEntity : game.world->GetClassEntityRange<0, MAX_EDICTS>() | 
+    for (auto& areaPortalEntity : GetGameworld()->GetClassEntityRange<0, MAX_EDICTS>() | 
         cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::IsSubclassOf<FuncAreaportal>() | cef::HasKeyValue("targetname", targetStr)) {
 	    dynamic_cast<FuncAreaportal*>(areaPortalEntity)->ActivatePortal(open);
     }

@@ -263,7 +263,7 @@ void MiscServerModel::MiscServerModelThink(void) {
         vec3_t currentMoveAngles = GetAngles();
     
         // Direction vector between player and other entity.
-        vec3_t wishMoveAngles = game.world->GetClassEntities()[1]->GetOrigin() - GetOrigin();
+        vec3_t wishMoveAngles = GetGameworld()->GetClassEntities()[1]->GetOrigin() - GetOrigin();
 
         //  
         vec3_t newModelAngles = vec3_euler(wishMoveAngles);
@@ -309,10 +309,11 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
     // Throw some gibs around, true horror oh boy.
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+
     //SVG_ThrowClientHead(this, damage);
     SetEndFrame(119.f);
     SetStartFrame(4.f);

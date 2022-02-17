@@ -173,10 +173,10 @@ qboolean SVG_KillBox(SVGBaseEntity *ent)
         }
 
         // Cheers.
-	    SVG_InflictDamage(tr.ent, boxedEntity, boxedEntity, vec3_zero(), boxedEntity->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+	    SVG_InflictDamage(boxedEntity, boxedEntity, boxedEntity, vec3_zero(), boxedEntity->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // Assume it is dead by testing its solid.
-        if (tr.ent->GetSolid()) {
+	    if (boxedEntity->GetSolid()) {
             return false;
         }
     }

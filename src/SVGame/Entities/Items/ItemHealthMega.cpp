@@ -179,7 +179,7 @@ qboolean ItemHealthMega::HealthMegaPickup(SVGBaseEntity* other) {
     SVG_CenterPrint(other, std::string("Picked up item: ") + GetClassname());
 
     // Set a respawn think for after 2 seconds.
-    if (!game.GetCurrentGamemode()->IsClass<DefaultGamemode>()) {
+    if (!game.GetGamemode()->IsClass<DefaultGamemode>()) {
         SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
         SetNextThinkTime(level.time + 2);
     }
