@@ -23,6 +23,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Entities.
 #include "Entities/Base/SVGBasePlayer.h"
 
+// Gamemodes.
+#include "Gamemodes/IGamemode.h"
+
+// Gameworld.
+#include "World/GameWorld.h"
+
 void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 {
     vec3_t o, ownerv, goal;
@@ -113,19 +119,26 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 
 void SVG_ChaseNext(SVGBasePlayer *ent)
 {
-    int i;
-    Entity *e;
+    Entity* e = nullptr;
+
+    // Sanity check.
+    if (!ent) {
+	    return;
+    }
+
     ServerClient* client = ent->GetClient();
+    Entity*	  serverEntities = game.world->GetServerEntities();
 
-    if (!client->chaseTarget)
+    if (!client->chaseTarget) {
         return;
+    }
 
-    i = client->chaseTarget - g_entities;
+    int32_t i = client->chaseTarget - serverEntities;
     do {
         i++;
         if (i > maximumclients->value)
             i = 1;
-        e = g_entities + i;
+        e = serverEntities + i;
         if (!e->inUse)
             continue;
         if (!e->client->respawn.isSpectator)
@@ -138,19 +151,27 @@ void SVG_ChaseNext(SVGBasePlayer *ent)
 
 void SVG_ChasePrev(SVGBasePlayer*ent)
 {
-    int i;
-    Entity *e;
-    ServerClient* client = ent->GetClient();
-
-    if (!client->chaseTarget)
+    Entity *e = nullptr;
+ 
+    // Sanity check.
+    if (!ent) {
         return;
+    }
 
-    i = client->chaseTarget - g_entities;
+    ServerClient* client = ent->GetClient();
+    Entity* serverEntities = game.world->GetServerEntities();
+
+    // Sanity check.
+    if (!client->chaseTarget) {
+        return;
+    }
+
+    int32_t i = client->chaseTarget - serverEntities;
     do {
         i--;
         if (i < 1)
             i = maximumclients->value;
-        e = g_entities + i;
+        e = serverEntities + i;
         if (!e->inUse)
             continue;
         if (!e->client->respawn.isSpectator)
@@ -163,12 +184,17 @@ void SVG_ChasePrev(SVGBasePlayer*ent)
 
 void SVG_GetChaseTarget(SVGBasePlayer *ent)
 {
-    int i;
-    Entity *other;
-    ServerClient* client = ent->GetClient();
+    Entity *other = nullptr;
+    // Sanity check.
+    if (!ent) {
+	    return;
+    }
 
-    for (i = 1; i <= maximumclients->value; i++) {
-        other = g_entities + i;
+    ServerClient* client = ent->GetClient();
+    Entity*	  serverEntities = game.world->GetServerEntities();
+
+    for (int32_t i = 1; i <= maximumclients->value; i++) {
+        other = serverEntities + i;
         if (other->inUse && !other->client->respawn.isSpectator) {
             client->chaseTarget = other;
             client->updateChase = true;
@@ -176,6 +202,6 @@ void SVG_GetChaseTarget(SVGBasePlayer *ent)
             return;
         }
     }
-    gi.CenterPrintf(ent->GetServerEntity(), "No other players to chase.");
+    SVG_CenterPrint(ent, "No other players to chase.");
 }
 

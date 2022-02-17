@@ -11,7 +11,13 @@
 //
 */
 #include "ServerGameLocal.h"          // Include SVGame header.
+
+// Entities.
 #include "Entities.h"
+#include "Entities/Base/SVGBasePlayer.h"
+
+// Gameworld.
+#include "World/GameWorld.h"
 
 // Wraps up gi.CPrintf for SVGBaseEntities.
 void SVG_CPrintf(SVGBaseEntity* ent, int32_t printlevel, const std::string& str) {
@@ -58,8 +64,14 @@ void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float vo
 //===============
 //
 std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
+    // Boxed server entities set by gi.BoxEntities.
     Entity* boxedServerEntities[MAX_EDICTS];
-    std::vector<SVGBaseEntity*> boxedBaseEntities;
+
+    // Vector of the boxed class entities to return.
+    std::vector<SVGBaseEntity*> boxedClassEntities;
+
+    // Acquire pointer to the class entities array.
+    SVGBaseEntity** classEntities = game.world->GetClassEntities();
 
     // Ensure the listCount can't exceed the max edicts.
     if (listCount > MAX_EDICTS) {
@@ -71,12 +83,13 @@ std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& ma
 
     // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
     for (int32_t i = 0; i < numEntities; i++) {
-        if (g_baseEntities[boxedServerEntities[i]->state.number] != nullptr)
-            boxedBaseEntities.push_back(g_baseEntities[boxedServerEntities[i]->state.number]);
+        if (classEntities[boxedServerEntities[i]->state.number] != nullptr) {
+            boxedClassEntities.push_back(classEntities[boxedServerEntities[i]->state.number]);
+        }
     }
 
     // Return our boxed base entities vector.
-    return boxedBaseEntities;
+    return boxedClassEntities;
 }
 
 //
@@ -87,6 +100,10 @@ std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& ma
 //===============
 //
 SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t& contentMask) {
+    // Acquire server and class entity array pointers.
+    Entity* serverEntities = game.world->GetServerEntities();
+    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+
     // Fetch server entity in case one was passed to us.
     Entity* serverPassEntity = (passent ? passent->GetServerEntity() : NULL);
 
@@ -115,13 +132,13 @@ SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, 
     if (trace.ent) {
         uint32_t index = trace.ent->state.number;
 
-        if (g_baseEntities[index] != NULL) {
-            svgTrace.ent = g_baseEntities[index];
+        if (classEntities[index] != NULL) {
+            svgTrace.ent = classEntities[index];
         } else {
-            svgTrace.ent = g_entities[0].classEntity;
+	        svgTrace.ent = classEntities[0];
         }
     } else {
-        svgTrace.ent = g_entities[0].classEntity;
+        svgTrace.ent = classEntities[0];
     }
 
     return svgTrace;

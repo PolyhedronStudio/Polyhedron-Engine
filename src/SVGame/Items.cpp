@@ -989,9 +989,3 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 //    {NULL}
 //};
 
-/**
-*   @brief Counts the length of our items array so the game is aware of the total of items.
-**/
-void GameLocals::PrepareItems() { 
-    //numberOfItems = Q_COUNTOF(itemlist) - 1; 
-}

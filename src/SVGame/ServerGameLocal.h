@@ -455,11 +455,6 @@ struct MeansOfDeath {
     static constexpr int32_t FriendlyFire = 27;
 };
 
-// Once again, ugly.
-extern Entity g_entities[MAX_EDICTS];
-extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
-
-
 //
 // Small macros that are used to generate a field offset with. These are used
 // in the save game system for example. Best not mess with these unless...
@@ -638,6 +633,7 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int32_t type);
 //
 // g_phys.c
 //
+class SVGEntityHandle;
 void SVG_RunEntity(SVGEntityHandle &entityHandle);
 
 //
@@ -789,7 +785,7 @@ struct ClientRespawnData {
 /**
 *   @brief  The Game Client structure.
 *
-*   @details    This structure is cleared whenever PlaceClientInGame is called,
+*   @details    This structure is cleared whenever PlacePlayerInGame is called,
 *               with the exception of all data in its persistent member variable.
 **/
 struct gclient_s {

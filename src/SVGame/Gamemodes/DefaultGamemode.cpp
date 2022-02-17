@@ -26,6 +26,9 @@
 // Game Mode.
 #include "DefaultGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 //
 // Constructor/Deconstructor.
 //
@@ -168,19 +171,19 @@ qboolean DefaultGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 //===============
 // DefaultGamemode::FindWithinRadius
 //
-// Returns a BaseEntityVector list containing the results of the found
+// Returns a ClassEntityVector list containing the results of the found
 // given entities that reside within the origin to radius. 
 // 
 // Flags can be set to determine which "solids" to exclude.
 //===============
-BaseEntityVector DefaultGamemode::FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) {
+ClassEntityVector DefaultGamemode::FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) {
     // List of base entities to return.
     std::vector<SVGBaseEntity*> baseEntityList;
 
     // Iterate over all entities, see who is nearby, and who is not.
-    for (auto* radiusBaseEntity : GetBaseEntityRange<0, MAX_EDICTS>()
-         | bef::Standard
-         | bef::WithinRadius(origin, radius, excludeSolidFlags)) {
+    for (auto* radiusBaseEntity : game.world->GetClassEntityRange<0, MAX_EDICTS>()
+         | cef::Standard
+         | cef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
         // Push radiusEntity result item to the list.
         baseEntityList.push_back(radiusBaseEntity);
@@ -406,7 +409,7 @@ void DefaultGamemode::InflictRadiusDamage(SVGBaseEntity* inflictor, SVGBaseEntit
     }
 
     // Find entities within radius.
-    BaseEntityVector radiusEntities = FindBaseEnitiesWithinRadius(inflictor->GetOrigin(), radius, Solid::Not);
+    ClassEntityVector radiusEntities = FindBaseEnitiesWithinRadius(inflictor->GetOrigin(), radius, Solid::Not);
 
     //while ((ent = SVG_FindEntitiesWithinRadius(ent, inflictor->GetOrigin(), radius)) != NULL) {
     for (auto& baseEntity : radiusEntities) {
@@ -472,11 +475,14 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     if (!ent->GetClient())
         return;
 
+    // Acquire pointer to server entities array.
+    Entity *serverEntities = game.world->GetServerEntities();
+
     // Unlink the player client entity.
     ent->UnlinkEntity();
 
     // Grab a body from the queue, and cycle to the next one.
-    Entity *bodyEntity = &g_entities[game.GetMaxClients() + level.bodyQue + 1];
+    Entity* bodyEntity = &serverEntities[game.GetMaxClients() + level.bodyQue + 1];
     level.bodyQue = (level.bodyQue + 1) % BODY_QUEUE_SIZE;
 
     // Send an effect on this body, in case it already has a model index.
@@ -491,7 +497,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     }
 
     // Create the class entity for this queued bodyEntity.
-    SVGBaseEntity *bodyClassEntity = SVG_CreateClassEntity<BodyCorpse>(bodyEntity, false);
+    SVGBaseEntity *bodyClassEntity = game.world->CreateClassEntity<BodyCorpse>(bodyEntity, false);
 
     // Unlink the body entity, in case it was linked before.
     bodyClassEntity->UnlinkEntity();
@@ -500,7 +506,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     bodyClassEntity->SetState(ent->GetState());
     // Change its number so it is accurately set to the one belonging to bodyEntity.
     // (Has to happen since we first copied over an entire entity state.)
-    bodyClassEntity->SetNumber(bodyEntity - g_entities);
+    bodyClassEntity->SetNumber(bodyEntity - serverEntities);
     // Set the event ID for this frame to OtherTeleport.
     bodyClassEntity->SetEventID(EntityEvent::OtherTeleport);
 
@@ -576,6 +582,12 @@ vec3_t DefaultGamemode::CalculateDamageVelocity(int32_t damage) {
 // Default implementation for exiting levels.
 //===============
 void DefaultGamemode::OnLevelExit() {
+    // Acquire server entities pointer.
+    Entity* serverEntities = game.world->GetServerEntities();
+    
+    // Acquire class entities pointer.
+    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+
     // Create the command to use for switching to the next game map.
     std::string command = "gamemap \"";
     command += level.intermission.changeMap;
@@ -594,7 +606,7 @@ void DefaultGamemode::OnLevelExit() {
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < maximumclients->value; i++) {
         // Fetch the Worldspawn entity number.
-        Entity *serverEntity = &g_entities[i];
+        Entity *serverEntity = &serverEntities[i];
 
         if (!serverEntity)
             continue;
@@ -605,7 +617,7 @@ void DefaultGamemode::OnLevelExit() {
         uint32_t stateNumber = serverEntity->state.number;
 
         // Fetch the corresponding base entity.
-        SVGBaseEntity* entity = g_baseEntities[stateNumber];
+        SVGBaseEntity* entity = classEntities[stateNumber];
 
         // Ensure an entity its health is reset to default.
         if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
@@ -825,72 +837,51 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 // 
 // Client is connecting, what do? :)
 //===============
-qboolean DefaultGamemode::ClientConnect(Entity* serverEntity, char *userinfo) {
-    if (!serverEntity) {
+qboolean DefaultGamemode::ClientConnect(Entity* svEntity, char *userinfo) {
+    if (!svEntity) {
         gi.DPrintf("ClientConnect executed with invalid (nullptr) serverEntity");
         return false;
     }
-    char    *value;
+
+    // Store keyValue.
+    char *keyValue = nullptr;
 
     // check to see if they are on the banned IP list
-    value = Info_ValueForKey(userinfo, "ip");
-    if (SVG_FilterPacket(value)) {
+    keyValue = Info_ValueForKey(userinfo, "ip");
+    if (SVG_FilterPacket(keyValue)) {
         Info_SetValueForKey(userinfo, "rejmsg", "Banned.");
         return false;
     }
 
-    // check for a spectator
-    //value = Info_ValueForKey(userinfo, "spectator");
-    //if (deathmatch->value && *value && strcmp(value, "0")) {
-    //    int i, numspec;
+    // check for a password
+    keyValue = Info_ValueForKey(userinfo, "keyValue");
+    if (*password->string && strcmp(password->string, "none") && strcmp(password->string, keyValue)) {
+        Info_SetValueForKey(userinfo, "rejmsg", "Password required or incorrect.");
+        return false;
+    }
 
-    //    if (*spectator_password->string &&
-    //        strcmp(spectator_password->string, "none") &&
-    //        strcmp(spectator_password->string, value)) {
-    //        Info_SetValueForKey(userinfo, "rejmsg", "Spectator password required or incorrect.");
-    //        return qfalse;
-    //    }
-
-    //    // count spectators
-    //    for (i = numspec = 0; i < maxclients->value; i++)
-    //        if (g_edicts[i + 1].inuse && g_edicts[i + 1].client->pers.spectator)
-    //            numspec++;
-
-    //    if (numspec >= maxspectators->value) {
-    //        Info_SetValueForKey(userinfo, "rejmsg", "Server spectator limit is full.");
-    //        return qfalse;
-    //    }
-    //} else {
-        // check for a password
-        value = Info_ValueForKey(userinfo, "password");
-        if (*password->string && strcmp(password->string, "none") &&
-            strcmp(password->string, value)) {
-            Info_SetValueForKey(userinfo, "rejmsg", "Password required or incorrect.");
-            return false;
-        }
-    //}
-    
     // they can connect
-    serverEntity->client = game.clients + (serverEntity - g_entities - 1);
+    ServerClient* clients = game.GetClients();
+    svEntity->client = &clients[svEntity->state.number - 1];//game.clients + (serverEntity - g_entities - 1);
 
     // if there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
-    if (serverEntity->inUse == false) {
+    if (svEntity->inUse == false) {
         // clear the respawning variables
-        InitializeClientRespawnData(serverEntity->client);
-        if (!game.autoSaved || !serverEntity->client->persistent.activeWeapon)
-            InitializeClientPersistentData(serverEntity->client);
+        InitializePlayerRespawnData(svEntity->client);
+        if (!game.autoSaved || !svEntity->client->persistent.activeWeapon)
+            InitializePlayerPersistentData(svEntity->client);
     }
 
-    ClientUserinfoChanged(serverEntity, userinfo);
+    ClientUserinfoChanged(svEntity, userinfo);
 
     // This is default behaviour for this function.
     if (game.GetMaxClients() > 1)
-        gi.DPrintf("%s connected\n", serverEntity->client->persistent.netname);
+        gi.DPrintf("%s connected\n", svEntity->client->persistent.netname);
 
     // Make sure we start with clean serverFlags.
-    serverEntity->serverFlags = 0;
-    serverEntity->client->persistent.isConnected = true;
+    svEntity->serverFlags = 0;
+    svEntity->client->persistent.isConnected = true;
 
     return true;
 }
@@ -927,7 +918,8 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
     //}
 
     // Fetch client.
-    ServerClient* client = &game.clients[svEntity->state.number - 1];  //(serverEntity - g_entities - 1);
+    ServerClient* clients = game.GetClients();
+    ServerClient* client = &clients[svEntity->state.number - 1];  //(serverEntity - g_entities - 1);
 
     // Assign  this client to the server entity.
     svEntity->client = client;
@@ -960,10 +952,10 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
         player = SVGBasePlayer::Create(svEntity);
 
         // Initialize client respawn data.
-        InitializeClientRespawnData(client);
+        InitializePlayerRespawnData(client);
  
         // Put into our server and blast away! (Takes care of spawning classEntity).
-        PlaceClientInGame(svEntity);
+        PlacePlayerInGame(player);
     }
 
     if (level.intermission.time) {
@@ -1050,7 +1042,7 @@ void DefaultGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
     // set skin
     s = Info_ValueForKey(userinfo, "skin");
 
-    playernum = ent - g_entities - 1;
+    playernum = ent - game.world->GetServerEntities() - 1;
 
     // combine name and skin into a configstring
     gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
@@ -1225,7 +1217,7 @@ void DefaultGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
 }
 
 
-void DefaultGamemode::InitializeClientPersistentData(ServerClient* client) {
+void DefaultGamemode::InitializePlayerPersistentData(ServerClient* client) {
     // Can't go on without a valid client.
     if (!client) {
         return;
@@ -1258,7 +1250,7 @@ void DefaultGamemode::InitializeClientPersistentData(ServerClient* client) {
     client->persistent.isConnected = true;
 }
 
-void DefaultGamemode::InitializeClientRespawnData(ServerClient* client) {
+void DefaultGamemode::InitializePlayerRespawnData(ServerClient* client) {
     if (!client) { 
         return;
     }
@@ -1274,48 +1266,88 @@ void DefaultGamemode::InitializeClientRespawnData(ServerClient* client) {
 // Choose any info_player_start or its derivates, it'll do a subclassof check, so the only valid classnames are
 // those who have inherited from info_player_start. (info_player_deathmatch, etc).
 //===============
-void DefaultGamemode::SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string& classname) {
+void DefaultGamemode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& origin, vec3_t& angles) {
+    // Spawn point entity pointer.
     SVGBaseEntity *spawnPoint = nullptr;
 
-    //// Find a single player start spot
-    if (!spawnPoint) {
-        // Find a spawnpoint that has a target:
-        for (auto* result : g_baseEntities | bef::Standard | bef::IsSubclassOf<InfoPlayerStart>()) {
-            // Continue in case there is no comparison to it with the possible target
-            // of the InfoPlayerStart
-            if (!game.spawnpoint[0])
-                continue;
+    // Find a spawn point that has a targetname matching game.spawnpoint.
+    auto targetSpawnPoints = game.world->GetClassEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>() | cef::HasKeyValue("targetname", game.spawnpoint);
 
-            if (result->GetTargetName() == game.spawnpoint) {
-                spawnPoint = result;
-                break;
-            }
+    // First try and find the one with the targetname.
+    for (auto& entity : targetSpawnPoints) {
+        // If the targetname matches, we've found our spawn point.
+        if (entity->GetTargetName() == game.spawnpoint) {
+            spawnPoint = entity;
+            break;
         }
     }
 
-    // Since we still haven't found one with a target, do it again, but this time without
-    // a target requirement.
+    // If we haven't found one, we'll push the spanned results to a vector and randomly select one from it.
     if (!spawnPoint) {
-        for (auto* result : g_baseEntities | bef::Standard | bef::IsSubclassOf<InfoPlayerStart>()) {
-            if (result) {
-                spawnPoint = result;
-                break;
-            }
-        }
+        // TODO: Improve this, find a method to select random from a range. (Or wrap something similar up.)
+	    std::vector<SVGBaseEntity*> spawnVector;
+        auto spawnPoints = game.world->GetClassEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>();
+        for (auto& entity : spawnPoints) { spawnVector.push_back(entity); }
+
+        // Select random spawn point.
+    	if (spawnVector.size() > 0) {
+	        uint32_t choice = RandomRangeui(0, spawnVector.size());
+		    spawnPoint = spawnVector[choice];
+	    }
     }
 
-    // Setup player origin and angles, also raise him 9 units above the ground to be sure it fits.
+    // Assign origin and raise us up 9 on the z axis to ensure we are never stuck on something.
     if (spawnPoint) {
         origin = spawnPoint->GetOrigin();
         origin.z += 9;
         angles = spawnPoint->GetAngles();
     } else {
+        // We might as well error out at this point.
         gi.Error("Couldn't find spawn point %s", game.spawnpoint);
     }
+    // 
+    //// Pointer to our spawn point to be.
+    //SVGBaseEntity *spawnPoint = nullptr;
+
+    //// Find a single player start spot
+    //if (!spawnPoint) {
+    //    // Find a spawnpoint that has a target:
+    //    for (auto* result : g_baseEntities | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>()) {
+    //        // Continue in case there is no comparison to it with the possible target
+    //        // of the InfoPlayerStart
+    //        if (!game.spawnpoint[0])
+    //            continue;
+
+    //        if (result->GetTargetName() == game.spawnpoint) {
+    //            spawnPoint = result;
+    //            break;
+    //        }
+    //    }
+    //}
+
+    //// Since we still haven't found one with a target, do it again, but this time without
+    //// a target requirement.
+    //if (!spawnPoint) {
+    //    for (auto* result : g_baseEntities | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>()) {
+    //        if (result) {
+    //            spawnPoint = result;
+    //            break;
+    //        }
+    //    }
+    //}
+
+    //// Setup player origin and angles, also raise him 9 units above the ground to be sure it fits.
+    //if (spawnPoint) {
+    //    origin = spawnPoint->GetOrigin();
+    //    origin.z += 9;
+    //    angles = spawnPoint->GetAngles();
+    //} else {
+    //    gi.Error("Couldn't find spawn point %s", game.spawnpoint);
+    //}
 }
 
 //===============
-// DefaultGamemode::PlaceClientInGame
+// DefaultGamemode::PlacePlayerInGame
 // 
 // Called when a player connects to a single and multiplayer. 
 // 
@@ -1324,16 +1356,21 @@ void DefaultGamemode::SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t
 // #2. In thecase of a MP mode death however, after a small intermission time, it'll
 // call this function again to respawn our player.
 //===============
-void DefaultGamemode::PlaceClientInGame(Entity *ent) {
+void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
+    // Acquire pointer to game clients.
+    ServerClient* gameClients = game.GetClients();
+    
     // Find a spawn point
     vec3_t  spawnOrigin = vec3_zero();
     vec3_t  spawnAngles = vec3_zero();
 
-    SelectClientSpawnPoint(ent, spawnOrigin, spawnAngles, "info_player_start");
+    SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
 
-    // Fetch the client index, and the client right off the bat.
-    int32_t clientIndex = ent - g_entities - 1;
-    ServerClient* client = ent->client;
+    // Acquire the new client index belonging to this entity.
+    int32_t clientIndex = player->GetNumber() - 1; //ent - g_entities - 1;
+
+    // Acquire pointer to the current client.
+    ServerClient* client = player->GetClient();
 
     // Client user info.
     char userinfo[MAX_INFO_STRING];
@@ -1345,7 +1382,7 @@ void DefaultGamemode::PlaceClientInGame(Entity *ent) {
     // If we had persistent coop respawn data, be sure to back it up right now.
     client->persistent = respawnData.persistentCoopRespawn;
     // Inform of a client user info change.
-    ClientUserinfoChanged(ent, userinfo);
+    ClientUserinfoChanged(player->GetServerEntity(), userinfo);
     // In case the score was higher, be sure to update it.
     if (respawnData.score > client->persistent.score) {
 	    client->persistent.score = respawnData.score;
@@ -1359,20 +1396,20 @@ void DefaultGamemode::PlaceClientInGame(Entity *ent) {
     client->persistent = persistentData;
     // In case the persistent data consists of a dead client, reinitialize it.
     if (client->persistent.health <= 0) {
-	    InitializeClientPersistentData(client);
+	    InitializePlayerPersistentData(client);
     }
     // Last but not least, set its respawn data.
     client->respawn = respawnData;
 
     // Spawn the client again using spawn instead of respawn. (Respawn serves a different use.)
-    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(ent->classEntity);
+    //SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(ent->classEntity);
     player->Spawn();
 
     // Copy some data from the client to the entity
     RestorePlayerPersistentData(player, client);
 
     // Update the client pointer this entity belongs to.
-    client = &game.clients[clientIndex];
+    client = &gameClients[clientIndex];
     player->SetClient(client);
  
     // Clear playerstate values.
@@ -1462,7 +1499,7 @@ void DefaultGamemode::RespawnClient(SVGBasePlayer* ent) {
     //        game.GetCurrentGamemode()->SpawnClientCorpse(self->classEntity);
 
     //    self->serverFlags &= ~EntityServerFlags::NoClient;
-    //    game.GetCurrentGamemode()->PlaceClientInGame((SVGBasePlayer*)self->classEntity);
+    //    game.GetCurrentGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->classEntity);
 
     //    // add a teleportation effect
     //    self->state.eventID = EntityEvent::PlayerTeleport;
@@ -1507,16 +1544,22 @@ void DefaultGamemode::ClientDeath(SVGBasePlayer *player) {
 // edicts are wiped.
 //===============
 void DefaultGamemode::StorePlayerPersistentData(void) {
+    // Acquire server entity pointer.
+    Entity* serverEntities = game.world->GetServerEntities();
+
+    // Acquire a pointer to the game's clients.
+    ServerClient* gameClients = game.GetClients();
+    
     for (int32_t i = 0 ; i < game.GetMaxClients(); i++) {
-        Entity *entity = &g_entities[1 + i];
+        Entity *entity = &serverEntities[1 + i];
         if (!entity->inUse)
             continue;
         if (!entity->classEntity)
             continue;
 
-        game.clients[i].persistent.health = entity->classEntity->GetHealth();
-        game.clients[i].persistent.maxHealth = entity->classEntity->GetMaxHealth();
-        game.clients[i].persistent.savedFlags = (entity->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
+        gameClients[i].persistent.health = entity->classEntity->GetHealth();
+        gameClients[i].persistent.maxHealth = entity->classEntity->GetMaxHealth();
+        gameClients[i].persistent.savedFlags = (entity->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
     }
 }
 

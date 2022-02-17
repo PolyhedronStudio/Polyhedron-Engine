@@ -16,9 +16,14 @@
 #include "../../Entities.h"		// Entities.
 #include "../../Utilities.h"		// Util funcs.
 
+// Entities.
 #include "SVGBaseTrigger.h"
+
+// Delayed Use Trigger.
 #include "../trigger/TriggerDelayedUse.h"
 
+// World.
+#include "../../World/Gameworld.h"
 
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
@@ -398,7 +403,7 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
 		// allocates one such entity and accepts activator, message, target etc. as parameters
 		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'
-		SVGBaseTrigger* triggerDelay = SVG_CreateClassEntity<TriggerDelayedUse>();
+	    SVGBaseTrigger* triggerDelay = game.world->CreateClassEntity<TriggerDelayedUse>();
 		triggerDelay->SetActivator( activatorOverride );
 		triggerDelay->SetMessage( GetMessage() );
 		triggerDelay->SetTarget( GetTarget() );
@@ -429,11 +434,11 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 	if ( !GetKillTarget().empty() ) {
 		qboolean foundKillTarget = false;
 
-		for (auto* killtargetEntity: GetBaseEntityRange<0, MAX_EDICTS>()
-			| bef::IsValidPointer
-			| bef::HasServerEntity
-			| bef::InUse
-			| bef::HasKeyValue("targetname", GetKillTarget())) {
+		for (auto* killtargetEntity: game.world->GetClassEntityRange<0, MAX_EDICTS>()
+			| cef::IsValidPointer
+			| cef::HasServerEntity
+			| cef::InUse
+			| cef::HasKeyValue("targetname", GetKillTarget())) {
 
 			// We found a killtarget entity.
 			foundKillTarget = true;
@@ -451,11 +456,11 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 	// Actually fire the targets
 	if ( !GetTarget().empty() ) {
 		qboolean foundTarget = false;
-		for (auto* triggerEntity : GetBaseEntityRange<0, MAX_EDICTS>()
-			| bef::IsValidPointer
-			| bef::HasServerEntity
-			| bef::InUse
-			| bef::HasKeyValue("targetname", GetTarget())) {
+		for (auto* triggerEntity : game.world->GetClassEntityRange<0, MAX_EDICTS>()
+			| cef::IsValidPointer
+			| cef::HasServerEntity
+			| cef::InUse
+			| cef::HasKeyValue("targetname", GetTarget())) {
 
 			// Make sure it is in use, if not, debug.
 			if (!triggerEntity->IsInUse()) {

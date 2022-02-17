@@ -14,9 +14,12 @@
 // Entities.
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
-
 #include "../Func/FuncPlat.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
+// Trigger Auto Platform.
 #include "TriggerAutoPlatform.h"
 
 //===============
@@ -112,7 +115,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 // TriggerAutoPlatform::Create
 //===============
 TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
-	TriggerAutoPlatform* autoPlatform = SVG_CreateClassEntity<TriggerAutoPlatform>();
+	TriggerAutoPlatform* autoPlatform = game.world->CreateClassEntity<TriggerAutoPlatform>();
     autoPlatform->SetOrigin(ownerEntity->GetEndPosition());
 	autoPlatform->LinkEntity();
 	autoPlatform->Spawn();

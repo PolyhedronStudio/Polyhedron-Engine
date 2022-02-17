@@ -24,6 +24,9 @@
 //#include "../Gamemodes/CoopGamemode.h"
 #include "../Gamemodes/DeathmatchGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 // Include shotgun weapon header.
 #include "Shotgun.h"
 
@@ -78,7 +81,7 @@ void weapon_shotgun_fire(SVGBasePlayer * ent)
 
     // send muzzle flash
     gi.WriteByte(ServerGameCommands::MuzzleFlash);
-    gi.WriteShort(ent->GetServerEntity() - g_entities);
+    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
     gi.Multicast(origin, MultiCast::PVS);

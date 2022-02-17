@@ -24,6 +24,9 @@
 //#include "../Gamemodes/CoopGamemode.h"
 #include "../Gamemodes/DeathmatchGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 // Include machinegun weapon header.
 #include "Machinegun.h"
 
@@ -100,7 +103,7 @@ void Machinegun_Fire(SVGBasePlayer* ent)
     SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
     gi.WriteByte(ServerGameCommands::MuzzleFlash);
-    gi.WriteShort(ent->GetServerEntity() - g_entities);
+    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
     vec3_t origin = ent->GetOrigin();
     gi.Multicast(origin, MultiCast::PVS);

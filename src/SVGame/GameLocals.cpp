@@ -13,7 +13,7 @@
 #include "Gamemodes/DeathmatchGamemode.h"
 
 // Gameworld.
-#include "World/GameWorld.h"
+#include "World/Gameworld.h"
 
 // GameLocals.
 #include "GameLocals.h"
@@ -25,16 +25,14 @@ extern cvar_t* gamemode;
 *	@brief Initializes the gameworld and its member objects.
 **/
 void GameLocals::Initialize() {
-    // Prepare items.
-    PrepareItems();
-
-    // Prepare entities.
-    PrepareEntities();
-
-    // Prepare clients.
-    PrepareClients();
-
-    // Create the world.
+    // Create and initialize the world object.
+    // 
+    // Since it manages entities and clients it does the following things:
+    // Allocate the clients array based on maxclients cvar.
+    // Reserve the entities for our clients.
+    // Parse the BSP entity string and allocate the class entity instances.
+    // 
+    // Precache and spawn the above.
     CreateWorld();
 }
 
@@ -46,35 +44,6 @@ void GameLocals::Shutdown() {
     DestroyWorld();
 }
 
-
-/**
-*   @brief Sets up the pointers to entities, and ensures all entities are a nullptr at start.
-**/
-void GameLocals::PrepareEntities() {
-    // Clamp it just in case.
-    maxEntities = Clampi(MAX_EDICTS, (int)maximumclients->value + 1, MAX_EDICTS);
-
-    // Setup our game globals for entities.
-    globals.entities = g_entities;
-    globals.maxEntities = maxEntities;
-
-    // Ensure, all base entities are nullptrs. Just to be save.
-    for (int32_t i = 0; i < MAX_EDICTS; i++) {
-    	g_baseEntities[i] = nullptr;
-    }
-}
-
-/**
-*   @brief Prepares the game clients array for use.
-**/
-void GameLocals::PrepareClients() {
-    // Allocate our clients array.
-    maxClients = maximumclients->value;
-    clients = (ServerClient*)gi.TagMalloc(maxClients * sizeof(clients[0]), TAG_GAME);  // CPP: Cast
-
-    // Current total number of entities in our game = world + maximum clients.
-    globals.numberOfEntities = maxClients + 1;
-}
 
 
 /**
@@ -101,3 +70,40 @@ void GameLocals::DestroyWorld() {
         world = nullptr;
     }
 }
+
+
+
+/**
+*   @return A pointer to the gameworld object.
+**/
+Gameworld* GameLocals::GetGameworld() { 
+    return world; 
+}
+
+/**
+*   @return A pointer to the gameworld its current gamemode object.
+**/
+IGamemode* GameLocals::GetCurrentGamemode() { 
+    return world->GetCurrentGamemode(); 
+}
+
+
+
+/**
+*   @brief  Code shortcut for accessing gameworld's client array.
+* 
+*   @return A pointer to the gameworld's clients array.
+**/
+ServerClient* GameLocals::GetClients() { return world->GetClients(); }
+/**
+*   @brief  Code shortcut for acquiring gameworld's maxClients.
+* 
+*   @return The maximum allowed clients in this game.
+**/
+int32_t GameLocals::GetMaxClients() { return world->GetMaxClients(); }
+/**
+*   @brief  Code shortcut for acquiring gameworld's maxEntities.
+* 
+*   @return The maximum allowed entities in this game.
+**/
+int32_t GameLocals::GetMaxEntities() { return world->GetMaxEntities(); }

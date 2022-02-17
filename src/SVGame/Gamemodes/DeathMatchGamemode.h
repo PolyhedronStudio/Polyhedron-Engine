@@ -24,17 +24,17 @@ public:
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     // DeathMatch unique function implementations.
-    virtual void PlaceClientInGame(Entity* ent) override;
+    virtual void PlacePlayerInGame(SVGBasePlayer* player) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
     virtual void ClientBegin(Entity* serverEntity) override;
     virtual void ClientBeginServerFrame(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientUserinfoChanged(Entity* ent, char* userinfo) override;
 
-    virtual void RespawnClient(SVGBasePlayer* ent) override;
+    virtual void RespawnClient(SVGBasePlayer* player) override;
     virtual void RespawnAllClients() override;
     virtual void ClientDeath(SVGBasePlayer* player) override;
 
-    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
+    virtual void ClientUpdateObituary(SVGBaseEntity* player, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
 
 private:
     /**

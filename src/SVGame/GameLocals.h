@@ -16,7 +16,7 @@
 // Pre-define.
 class Gameworld;
 class IGamemode;
-#include "World/GameWorld.h"
+
 //
 // TODO:    Inherit GameLocals from IGameExports. (IGameExports has yet to be created and serves as the exports class to a server.)
 //
@@ -50,49 +50,47 @@ public:
 	**/
     void Shutdown();
 
+
+
     /**
     *   @return A pointer to the gameworld object.
     **/
-    inline Gameworld* GetGameworld() { return world; }
-    /**
-    *   @return A pointer to the gameworld its current gamemode object.
-    **/
-    inline IGamemode* GetCurrentGamemode() { return world->GetCurrentGamemode(); }
-    /**
-    *   @return A pointer to the clients array.
-    **/
-    inline ServerClient* GetClients() { return clients; }
-
-    /**
-    *   @return The number of maximum allowed clients.
-    **/
-    inline int32_t GetMaxClients() { return maxClients; }
-    /**
-    *   @return The number of maximum allowed entities.
-    **/
-    inline int32_t GetMaxEntities() { return maxEntities; }
+    Gameworld* GetGameworld();
 
     /**
     *   @return A pointer to the gameworld its current gamemode object.
+    **/
+    IGamemode* GetCurrentGamemode();
+
+    /**
+    *   @brief  Code shortcut for accessing gameworld's client array.
+    * 
+    *   @return A pointer to the gameworld's clients array.
+    **/
+    ServerClient* GetClients();
+    /**
+    *   @brief  Code shortcut for acquiring gameworld's maxClients.
+    * 
+    *   @return The maximum allowed clients in this game.
+    **/
+    int32_t GetMaxClients();
+    /**
+    *   @brief  Code shortcut for acquiring gameworld's maxEntities.
+    * 
+    *   @return The maximum allowed entities in this game.
+    **/
+    int32_t GetMaxEntities();
+
+
+
+    /**
+    *   
     **/
     
     /**
-    *   @return A pointer to the gameworld its current gamemode object.
+    *   
     **/
 private:
-    /**
-    *   @brief Counts the length of our items array so the game is aware of the total of items.
-    **/
-    void PrepareItems();
-    /**
-    *   @brief Sets up the pointers to entities, and ensures all entities are a nullptr at start.
-    **/
-    void PrepareEntities();
-    /**
-    *   @brief Prepares the game's clients array for use.
-    **/
-    void PrepareClients();
-
     /**
     *   @brief Create the world member object and initialize it.
     **/
@@ -108,17 +106,14 @@ public:
     //! Gameworld.
     Gameworld* world = nullptr;
 
-    //! Clients pointer array.
-    ServerClient* clients = nullptr;
-
     //! needed for coop respawns
     //! Can't store spawnpoint32_t in level, because
     //! it would get overwritten by the savegame restore
     char spawnpoint[512];
 
     //! Will be set to latched cvar equivelants due to having to access them a lot.
-    int32_t maxClients = 0;
-    int32_t maxEntities = 0;
+    //int32_t maxClients = 0;
+    //int32_t maxEntities = 0;
 
     //! Used to store Cross level triggers.
     int32_t serverflags = 0;

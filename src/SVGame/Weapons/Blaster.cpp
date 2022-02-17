@@ -22,6 +22,9 @@
 #include "../Gamemodes/IGameMode.h"
 #include "../Gamemodes/DeathMatchGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 // Include weapon header.
 #include "Blaster.h"
 
@@ -90,7 +93,7 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
 
     // send muzzle flash
     gi.WriteByte(ServerGameCommands::MuzzleFlash);
-    gi.WriteShort(ent->GetServerEntity() - g_entities);
+    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     vec3_t origin = ent->GetOrigin();
     gi.Multicast(origin, MultiCast::PVS);

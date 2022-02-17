@@ -33,6 +33,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Gamemodes/IGameMode.h"
 #include "../Gamemodes/DeathMatchGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 qboolean is_quad;
 byte     is_silenced;
 
@@ -171,7 +174,7 @@ void SVG_ChangeWeapon(SVGBasePlayer*ent)
             i = ((client->persistent.activeWeapon->weaponModelIndex & 0xff) << 8);
         else
             i = 0;
-        ent->SetSkinNumber((ent->GetServerEntity() - g_entities - 1) | i);
+        ent->SetSkinNumber((ent->GetServerEntity() - game.world->GetServerEntities() - 1) | i);
     }
 
     //if (client->persistent.activeWeapon && client->persistent.activeWeapon->ammo)

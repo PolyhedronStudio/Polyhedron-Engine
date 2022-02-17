@@ -18,6 +18,9 @@
 #include "../Player/Animations.h"
 #include "../Player/Weapons.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 // Include super shotgun weapon header.
 #include "SuperShotgun.h"
 
@@ -69,7 +72,7 @@ void weapon_supershotgun_fire(SVGBasePlayer * ent)
 
     // send muzzle flash
     gi.WriteByte(ServerGameCommands::MuzzleFlash);
-    gi.WriteShort(ent->GetServerEntity() - g_entities);
+    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::SuperShotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
     gi.Multicast(origin, MultiCast::PVS);

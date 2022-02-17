@@ -15,6 +15,9 @@
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
 // Misc Server Model Entity.
 #include "MiscServerModel.h"
 
@@ -260,7 +263,7 @@ void MiscServerModel::MiscServerModelThink(void) {
         vec3_t currentMoveAngles = GetAngles();
     
         // Direction vector between player and other entity.
-        vec3_t wishMoveAngles = g_baseEntities[1]->GetOrigin() - GetOrigin();
+        vec3_t wishMoveAngles = game.world->GetClassEntities()[1]->GetOrigin() - GetOrigin();
 
         //  
         vec3_t newModelAngles = vec3_euler(wishMoveAngles);

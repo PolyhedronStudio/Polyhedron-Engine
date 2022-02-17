@@ -19,6 +19,8 @@
 // Delayed use.
 #include "TriggerDelayedUse.h"
 
+// Gameworld.
+#include "../../World/Gameworld.h"
 //
 // Spawn Flags.
 // 
@@ -127,5 +129,5 @@ void TriggerDelayedUse::TriggerDelayedUseThink() {
 	UseTargets(GetActivator());
 
 	// Free this entity.
-	SVG_FreeEntity(GetServerEntity());
+	game.world->FreeServerEntity(GetServerEntity());
 }

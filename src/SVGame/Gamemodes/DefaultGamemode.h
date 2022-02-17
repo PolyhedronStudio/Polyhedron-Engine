@@ -28,7 +28,7 @@ public:
     virtual qboolean GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) override;
     virtual qboolean OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) override;
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
-    virtual BaseEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
+    virtual ClassEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
 
     //
     // Combat Gamemode actions.
@@ -51,7 +51,7 @@ public:
     // 
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) override;
     virtual void ClientBegin(Entity* serverEntity) override;
-    virtual void ClientBeginServerFrame(SVGBasePlayer* entity, ServerClient *client) override;
+    virtual void ClientBeginServerFrame(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientEndServerFrame(SVGBasePlayer *player, ServerClient *client) override;
     virtual void ClientDisconnect(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
@@ -60,12 +60,12 @@ public:
     //
     // Client related functions/utilities.
     // 
-    virtual void InitializeClientPersistentData(ServerClient* client) override;
-    virtual void InitializeClientRespawnData(ServerClient *client) override;
+    virtual void InitializePlayerPersistentData(ServerClient* client) override;
+    virtual void InitializePlayerRespawnData(ServerClient *client) override;
 
-    virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) override;
-    virtual void PlaceClientInGame(Entity *ent) override;
-    virtual void RespawnClient(SVGBasePlayer* ent) override;
+    virtual void SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& origin, vec3_t& angles) override;
+    virtual void PlacePlayerInGame(SVGBasePlayer* player) override;
+    virtual void RespawnClient(SVGBasePlayer* player) override;
     virtual void RespawnAllClients() override;
 
     virtual void ClientDeath(SVGBasePlayer *player) override;

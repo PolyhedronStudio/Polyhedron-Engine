@@ -34,6 +34,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Game modes.
 #include "../Gamemodes/IGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 // Shared Game.
 #include "SharedGame/SharedGame.h" // Include SG Base.
 #include "SharedGame/PMove.h"   // Include SG PMove.
@@ -166,7 +169,7 @@ void spectator_respawn(Entity *ent)
 
         // Count actual active spectators
         for (i = 1, numspec = 0; i <= maximumclients->value; i++)
-            if (g_entities[i].inUse && g_entities[i].client->persistent.isSpectator)
+            if (game.world->GetServerEntities()[i].inUse && game.world->GetServerEntities()[i].client->persistent.isSpectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
@@ -203,13 +206,13 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.GetCurrentGamemode()->PlaceClientInGame(ent);
+    game.GetCurrentGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->classEntity));
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
         // send effect
         gi.WriteByte(ServerGameCommands::MuzzleFlash);
-        gi.WriteShort(ent - g_entities);
+        gi.WriteShort(ent - game.world->GetServerEntities());
         gi.WriteByte(MuzzleFlashType::Login);
         gi.Multicast(ent->state.origin, MultiCast::PVS);
 
@@ -241,7 +244,7 @@ extern void DebugShitForEntitiesLulz();
 void SVG_ClientBegin(Entity *ent)
 {
     // Fetch this entity's client.
-    ent->client = game.clients + (ent - g_entities - 1);
+    ent->client = game.GetClients() + (ent - game.world->GetServerEntities() - 1);
 
     // Let the game mode decide from here on out.
     game.GetCurrentGamemode()->ClientBegin(ent);
@@ -522,7 +525,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 
     // update chase cam if being followed
     for (int i = 1; i <= maximumclients->value; i++) {
-        other = g_entities + i;
+        other = game.world->GetServerEntities() + i;
         if (other->inUse && other->client->chaseTarget == serverEntity)
             SVG_UpdateChaseCam(classEntity);
     }

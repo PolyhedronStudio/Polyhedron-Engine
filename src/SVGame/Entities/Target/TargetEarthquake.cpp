@@ -11,6 +11,9 @@
 
 #include "../Base/SVGBaseEntity.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
 #include "TargetEarthquake.h"
 
 //===============
@@ -64,13 +67,16 @@ void TargetEarthquake::QuakeUse( SVGBaseEntity* other, SVGBaseEntity* activator 
 // TargetEarthquake::QuakeThink
 //===============
 void TargetEarthquake::QuakeThink() {
+    // Get class entities array.
+    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+
     if ( lastQuakeTime < level.time ) {
         gi.PositionedSound( GetOrigin(), GetServerEntity(), CHAN_AUTO, GetNoiseIndex(), 1.0f, ATTN_NONE, 0.0f);
         lastQuakeTime = level.time + 0.5f;
     }
 
-    for ( auto * entity : g_baseEntities
-         | bef::Standard | bef::HasClient | bef::HasGroundEntity ) 
+    for (auto& entity : game.world->GetClassEntityRange(0, MAX_EDICTS)
+         | cef::Standard | cef::HasClient | cef::HasGroundEntity ) 
     {
         entity->SetGroundEntity( nullptr );
         vec3_t newVelocity{

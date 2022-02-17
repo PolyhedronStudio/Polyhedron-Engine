@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Step Move physics.
 #include "StepMove.h"
 
+// World.
+#include "../World/Gameworld.h"
 /*
 
 
@@ -540,10 +542,11 @@ qboolean SVG_Push(SVGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
+    SVGBaseEntity** classEntities = game.world->GetClassEntities();
     for (e = 1; e < globals.numberOfEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-	    SVGEntityHandle checkHandle = g_baseEntities[e];
+	    SVGEntityHandle checkHandle = classEntities[e];
 
         if (!checkHandle) {
     		SVG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");
@@ -917,9 +920,9 @@ void SVG_Physics_Toss(SVGEntityHandle& entityHandle) {
 
     // Determine what sound to play.
     if (!wasInWater && isInWater)
-        gi.PositionedSound(oldOrigin, g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(oldOrigin, game.world->GetServerEntities(), CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
-        gi.PositionedSound(ent->GetOrigin(), g_entities, CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->GetOrigin(), game.world->GetServerEntities(), CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
     for (SVGBaseEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {

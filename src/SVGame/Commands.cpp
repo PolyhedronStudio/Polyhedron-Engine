@@ -26,6 +26,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Game Modes.
 #include "Gamemodes/IGamemode.h"
 
+// Game world.
+#include "World/Gameworld.h"
 
     //char *ClientTeam(SVGBaseEntity *ent)
 //{
@@ -622,8 +624,11 @@ int PlayerSort(void const *a, void const *b)
     anum = *(int *)a;
     bnum = *(int *)b;
 
-    anum = game.clients[anum].playerState.stats[STAT_FRAGS];
-    bnum = game.clients[bnum].playerState.stats[STAT_FRAGS];
+    Gameworld* gameworld = game.GetGameworld();
+    ServerClient* clients = gameworld->GetClients();
+
+    anum = clients[anum].playerState.stats[STAT_FRAGS];
+    bnum = clients[bnum].playerState.stats[STAT_FRAGS];
 
     if (anum < bnum)
         return -1;
@@ -643,9 +648,11 @@ void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
     char    large[1280];
     int     index[256];
 
+    ServerClient* clients = game.GetClients();
+
     // Store indices of the currently connected clients.
     for (int32_t i = 0; i < maximumclients->value; i++) { 
-        if (game.clients[i].persistent.isConnected) {
+        if (clients[i].persistent.isConnected) {
 	        index[numConnectedClients] = i;
 	        numConnectedClients++;
         }
@@ -660,8 +667,8 @@ void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
     for (int32_t i = 0; i < numConnectedClients; i++) {
         // Generate score string.
         Q_snprintf(small, sizeof(small), "%3i %s\n",
-                   game.clients[index[i]].playerState.stats[STAT_FRAGS],
-                   game.clients[index[i]].persistent.netname);
+                   clients[index[i]].playerState.stats[STAT_FRAGS],
+                   clients[index[i]].persistent.netname);
 
         // Ensure buffer doesn't overflow.
         if (strlen(small) + strlen(large) > sizeof(large) - 100) {
@@ -815,7 +822,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
         SVG_CPrintf(NULL, PRINT_CHAT, sayBuffer);
 
     // Loop over client entities.
-    for (auto& otherplayer : GetBaseEntityRange(1, game.GetMaxClients()) | bef::Standard | bef::HasClient) {
+    for (auto& otherplayer : game.world->GetClassEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
         if (team) {
             if (!SVG_OnSameTeam(player, otherplayer))
                 continue;
@@ -831,9 +838,12 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
     char text[1400];
     Entity *e2;
 
+    // Acquire the world's server entity array pointer.
+    Entity* serverEntities = game.world->GetServerEntities();
+
     // connect time, ping, score, name
     *text = 0;
-    for (i = 0, e2 = g_entities + 1; i < maximumclients->value; i++, e2++) {
+    for (i = 0, e2 = serverEntities + 1; i < maximumclients->value; i++, e2++) {
         if (!e2->inUse)
             continue;
 
@@ -869,7 +879,7 @@ void SVG_ClientCommand(Entity* serverEntity) {
     //
 
     // Fetch player entity.
-    SVGBasePlayer* player = GetBasePlayerEntity(serverEntity);
+    SVGBasePlayer* player = game.world->GetPlayerClassEntity(serverEntity);
 
     // Fetch its client pointer.
     ServerClient *client = player->GetClient();

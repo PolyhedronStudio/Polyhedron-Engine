@@ -14,9 +14,12 @@
 // Entities.
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
-
 #include "../Func/FuncDoor.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
+// Trigger Auto Door.
 #include "TriggerAutoDoor.h"
 
 //===============
@@ -71,7 +74,7 @@ void TriggerAutoDoor::AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, 
 // TriggerAutoDoor::Create
 //===============
 TriggerAutoDoor* TriggerAutoDoor::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
-	TriggerAutoDoor* autoDoor = SVG_CreateClassEntity<TriggerAutoDoor>();
+    TriggerAutoDoor* autoDoor = game.world->CreateClassEntity<TriggerAutoDoor>();
 	autoDoor->SetOwner( ownerEntity );
 	autoDoor->SetMaxs( ownerMaxs );
 	autoDoor->SetMins( ownerMins );

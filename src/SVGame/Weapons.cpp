@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Utilities.
 #include "Utilities.h"
 
+// World.
+#include "World/Gameworld.h"
+
 // Weapons.
 #include "Entities/Weaponry/BlasterBolt.h"
 
@@ -311,7 +314,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     vec3_t dir = vec3_normalize(aimdir);
  
     // Spawn the blaster bolt server entity.
-    BlasterBolt* boltEntity = SVG_CreateClassEntity<BlasterBolt>();
+    BlasterBolt* boltEntity = game.world->CreateClassEntity<BlasterBolt>();
 
     // Welp. It can happen sometimes
     if ( nullptr == boltEntity ) {

@@ -28,6 +28,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Gamemodes/CoopGamemode.h"
 #include "../Gamemodes/DeathmatchGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 // Player Client & Hud Header.
 #include "Client.h"     // Include Player Client header.
 #include "Hud.h"        // Include HUD header.
@@ -130,7 +133,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     if (strstr(level.intermission.changeMap, "*")) {
         if (!game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
             for (i = 0 ; i < maximumclients->value ; i++) {
-                client = g_entities + 1 + i;
+                client = game.world->GetServerEntities() + 1 + i;
                 if (!client->inUse) {
                     continue;
                 }
@@ -179,7 +182,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
     for (i = 0 ; i < maximumclients->value ; i++) {
         // Fetch client.
-        client = g_entities + 1 + i;
+        client = game.world->GetServerEntities() + 1 + i;
 
         // Ensure a client is in use, otherwise skip it.
         if (!client->inUse)
@@ -211,13 +214,15 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
     Entity     *cl_ent;
     const char    *tag; // C++20: STRING: Added const to char*
 
+    ServerClient* clients = game.GetClients();
+
     // sort the clients by score
     total = 0;
     for (i = 0 ; i < game.GetMaxClients() ; i++) {
-        cl_ent = g_entities + 1 + i;
-        if (!cl_ent->inUse || game.clients[i].respawn.isSpectator)
+        cl_ent = game.world->GetServerEntities() + 1 + i;
+        if (!cl_ent->inUse || clients[i].respawn.isSpectator)
             continue;
-        score = game.clients[i].respawn.score;
+        score = clients[i].respawn.score;
         for (j = 0 ; j < total ; j++) {
             if (score > sortedscores[j])
                 break;
@@ -241,8 +246,8 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
         total = 12;
 
     for (i = 0 ; i < total ; i++) {
-        cl = &game.clients[sorted[i]];
-        cl_ent = g_entities + 1 + sorted[i];
+	cl = &game.GetClients()[sorted[i]];
+        cl_ent = game.world->GetServerEntities() + 1 + sorted[i];
 
         x = (i >= 6) ? 160 : 0;
         y = 32 + 32 * (i % 6);
@@ -452,14 +457,14 @@ void SVG_HUD_CheckChaseStats(Entity *ent)
     for (i = 1; i <= maximumclients->value; i++) {
         ServerClient* cl;
 
-        cl = g_entities[i].client;
+        cl = game.world->GetServerEntities()[i].client;
 
-        if (!g_entities[i].inUse || (cl->chaseTarget != ent)) {
+        if (!game.world->GetServerEntities()[i].inUse || (cl->chaseTarget != ent)) {
             continue;
         }
 
         memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
-        SVG_HUD_SetSpectatorStats(g_entities + i);
+        SVG_HUD_SetSpectatorStats(game.world->GetServerEntities() + i);
     }
 }
 
@@ -498,7 +503,7 @@ void SVG_HUD_SetSpectatorStats(Entity *ent)
     if (cl->chaseTarget && cl->chaseTarget->inUse)
     {
         cl->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins +
-            (cl->chaseTarget - g_entities) - 1;
+            (cl->chaseTarget - game.world->GetServerEntities()) - 1;
     }
     else
     {

@@ -18,6 +18,9 @@
 // Game Mode.
 #include "CoopGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 //
 // Constructor/Deconstructor.
 //
@@ -207,19 +210,20 @@ void CoopGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
 // 
 // Respawns a client after intermission and hitting a button.
 //===============
-void CoopGamemode::RespawnClient(SVGBasePlayer* ent) {
+void CoopGamemode::RespawnClient(SVGBasePlayer* player) {
     // Spectator's don't leave bodies
-    if (ent->GetMoveType() != MoveType::NoClip)
-        SpawnClientCorpse(ent);
+    if (player->GetMoveType() != MoveType::Spectator) {
+	    SpawnClientCorpse(player);
+    }
 
-    ent->SetServerFlags(ent->GetServerFlags() & ~EntityServerFlags::NoClient);
-    PlaceClientInGame(ent->GetServerEntity());
+    player->SetServerFlags(player->GetServerFlags() & ~EntityServerFlags::NoClient);
+    PlacePlayerInGame(player);
 
     // Add a teleportation effect
-    ent->SetEventID(EntityEvent::PlayerTeleport);
+    player->SetEventID(EntityEvent::PlayerTeleport);
 
     // Hold in place briefly
-    ServerClient* serverClient = ent->GetClient();
+    ServerClient* serverClient = player->GetClient();
 
     // Hold in place for 14 frames and set pmove flags to teleport so the player can
     // respawn somewhere safe without it interpolating its positions.
@@ -236,8 +240,11 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* ent) {
 // Respawn all valid client entities who's health is < 0.
 //===============
 void CoopGamemode::RespawnAllClients() {
+    // Get class entities array.
+    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+
     // Respawn all valid client entities who's health is < 0.
-    for (auto& player : g_baseEntities | bef::Standard | bef::HasClient | bef::IsSubclassOf<SVGBasePlayer>()) {
+    for (auto& player : game.world->GetClassEntityRange(0, MAX_EDICTS) | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>()) {
         if (player->GetHealth() < 0) {
             RespawnClient(dynamic_cast<SVGBasePlayer*>(player));
         }
@@ -284,17 +291,20 @@ void CoopGamemode::ClientDeath(SVGBasePlayer *player) {
 void CoopGamemode::StorePlayerPersistentData(void) {
     Entity *ent;
 
+    ServerClient* gameClients = game.GetClients();
+    Entity*	  serverEntities = game.world->GetServerEntities();
+
     for (int32_t i = 0 ; i < game.GetMaxClients() ; i++) {
-        ent = &g_entities[1 + i];
+        ent = &serverEntities[1 + i];
         if (!ent->inUse)
             continue;
         if (!ent->classEntity)
             continue;
-        game.clients[i].persistent.health = ent->classEntity->GetHealth();
-        game.clients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
-        game.clients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
+	    gameClients[i].persistent.health = ent->classEntity->GetHealth();
+	    gameClients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
+	    gameClients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
         if (ent->client)
-            game.clients[i].persistent.score = ent->client->respawn.score;
+		    gameClients[i].persistent.score = ent->client->respawn.score;
     }
 }
 

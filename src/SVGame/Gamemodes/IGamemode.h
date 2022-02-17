@@ -17,7 +17,7 @@
 class SVGBaseEntity;
 class SVGBasePlayer;
 
-using BaseEntityVector = std::vector<SVGBaseEntity*>;
+using ClassEntityVector = std::vector<SVGBaseEntity*>;
 
 class IGamemode {
 public:
@@ -104,7 +104,7 @@ public:
     *   @brief  Called in order to process "obituary" updates, aka with what weapon did this client
     *           or did other clients, kill any other client/entity.
     **/
-    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
+    virtual void ClientUpdateObituary(SVGBaseEntity* player, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
 
     /**
     *   @brief  Called when a client dies, usually used to clear their inventory.
@@ -116,30 +116,30 @@ public:
     *   @brief  Called only once in case of a single player game.
     *           Otherwise it is called after each death and level change.
     **/
-    virtual void InitializeClientPersistentData(ServerClient* client) = 0;
+    virtual void InitializePlayerPersistentData(ServerClient* client) = 0;
 
     /**
     *   @brief  Called only once in case of a single player game.
     *           Otherwise it is called after each death and level change.
     **/
-    virtual void InitializeClientRespawnData(ServerClient* client) = 0;
+    virtual void InitializePlayerRespawnData(ServerClient* client) = 0;
 
 
     /**
     *   @brief  Choose any info_player_start or its derivates, it'll do a subclassof check, 
     *           so the only valid classnames are those who have inherited from info_player_start. 
-    *           (info_player_deathmatch, etc).
+    *           Tyoe InfoPlayerStart, map classname info_player_deathmatch, etc.
     **/
-    virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) = 0;
+    virtual void SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& origin, vec3_t& angles) = 0;
 
     
     // Called when a player connects to a game (whether it be single or multi -player).
     // For a SP mode death, the loadmenu pops up and the player gets to select a load game (If there are none, there is always the autosaved one.)
     // For a MP mode death, the game waits for intermission time to pass before it'll call this function again to respawn our player.
-    virtual void PlaceClientInGame(Entity* ent) = 0;
+    virtual void PlacePlayerInGame(SVGBasePlayer* player) = 0;
 
     // Respawns a client (if that is what the game mode wants).
-    virtual void RespawnClient(SVGBasePlayer* ent) = 0;
+    virtual void RespawnClient(SVGBasePlayer* player) = 0;
 
     // Respawns all clients if the game mode allows so. (See RespawnClient)
     virtual void RespawnAllClients() = 0;
@@ -171,7 +171,7 @@ public:
     virtual qboolean CanDamage(SVGBaseEntity * target, SVGBaseEntity * inflictor) = 0;
     // Returns the entities found within a radius. Great for game mode fun times,
     // and that is why it resides here. Allows for customization.
-    virtual BaseEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
+    virtual ClassEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
 
 
     //

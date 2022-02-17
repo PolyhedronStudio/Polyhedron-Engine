@@ -17,6 +17,9 @@
 // Game Mode interface.
 #include "../../Gamemodes/IGamemode.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
 // Class Entities.
 #include "SVGBasePlayer.h"
 
@@ -37,10 +40,10 @@ SVGBasePlayer* SVGBasePlayer::Create(Entity* svEntity) {
     SVG_InitEntity(svEntity);
 
     // Delete previous classentity, if existent (older client perhaps).
-    SVG_FreeClassFromEntity(svEntity);
+    game.world->FreeClassEntity(svEntity);
 
     // Recreate class SVGBasePlayer entity.
-    svEntity->classEntity = SVG_CreateClassEntity<SVGBasePlayer>(svEntity, false);
+    svEntity->classEntity = game.world->CreateClassEntity<SVGBasePlayer>(svEntity, false);
 
     // Last but not least, return this class entity its pointer.
     return dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);
