@@ -21,6 +21,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Player/Animations.h"
 
 // Class Entities.
+#include "Entities/Base/SVGBaseEntity.h"
+#include "Entities/Base/SVGBaseTrigger.h"
+#include "Entities/Base/SVGBaseItem.h"
+#include "Entities/Base/SVGBaseItemWeapon.h"
 #include "Entities/Base/SVGBasePlayer.h"
 
 // Game Modes.
@@ -366,25 +370,39 @@ Use an inventory item
 ==================
 */
 void Cmd_Use_f(SVGBasePlayer *player, ServerClient *client) {
-    int         index;
-    gitem_t     *it = nullptr;
-    const char        *s;
+    SVGBaseItem *itemInstance = nullptr;
+    
+    // Acquire the item lookup name that was passed as an argument (it should be.)
+    const char *s = gi.args(); // C++20: Added casts.
 
-    s = gi.args(); // C++20: Added casts.
-    //it = SVG_FindItemByPickupName(s);
-    if (!it) {
+    if (!s) {
+    	gi.DPrintf("Warning: 'use' command executed without an item lookup name.\n");
+        return;
+    }
+
+    // Lookup the item.
+    itemInstance = SVGBaseItem::GetItemInstanceByLookupString(s);
+    
+    // Check if it is known.
+    if (!itemInstance) {
 	    SVG_CPrintf(player, PRINT_HIGH, "unknown item: " + std::string(s) + "\n");
         return;
     }
-    if (!it->Use) {
-        SVG_CPrintf(player, PRINT_HIGH, "Item is not usable.\n");
+
+    // Check if it can be used at all.
+    if (!itemInstance->HasUseInstanceCallback()) {
+	    SVG_CPrintf(player, PRINT_HIGH, "Item '" + itemInstance->GetDisplayString() + "' is not usable.\n");
         return;
     }
-//    index = ITEM_INDEX(it);
-    if (!client->persistent.inventory[index]) {
-    	SVG_CPrintf(player, PRINT_HIGH, "Out of item: " + std::string(s) + "\n");
+
+    // See if it exists in the player's inventory, if not, he ran out.
+    if (!client->persistent.inventory[itemInstance->GetIdentifier()]) {
+    	SVG_CPrintf(player, PRINT_HIGH, "Out of item: " + itemInstance->GetDisplayString()  + "\n");
         return;
     }
+
+    // Call the UseItem callback that this instance item has.
+    itemInstance->UseInstance(player, itemInstance);
 
     //it->Use(ent, it);
 }
@@ -907,13 +925,14 @@ void SVG_ClientCommand(Entity* serverEntity) {
     if (level.intermission.time)
         return;
 
-/*    if (command == "use")
-        Cmd_Use_f(ent);
+    if (command == "use")
+        Cmd_Use_f(player, client);
+    /*/
     else if (command == "drop")
         Cmd_Drop_f(ent);
     else if (command == "give")
-        Cmd_Give_f(ent->GetServerEntity());
-    else */if (command == "god")
+        Cmd_Give_f(ent->GetServerEntity());*/
+    else if (command == "god")
         Cmd_God_f(player, client);
     else if (command == "notarget")
         Cmd_Notarget_f(player, client);

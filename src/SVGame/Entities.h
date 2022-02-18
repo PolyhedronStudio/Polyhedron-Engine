@@ -4,8 +4,20 @@
 *
 *	@file
 *
-*	Contains entity related utilities.
-*
+*	Contains implementations of filter functions that can be piped to the gameworld functions:
+*		- GetServerEntityRange
+*		- GetClassEntityRange
+* 
+*	They are best used whenever there is a need for acquiring, or looping, over a set range of entities.
+*	An example usage of that is:
+* 
+*	for (auto &entity : GetClassEntityRange(0, MAX_EDICTS)
+*			| cef::Standard	// This automatically checks for whether the pointer is valid, inUse = true, and whether the classEntity pointer is valid also.
+*			| cef::HasKeyValue("target", "value")) { // Filters out any entity not having a key: target, value: targetValue.
+*		// Do something with the entity... entity->Remove(); // Remove it for example.
+*	}
+* 
+*	Note that as nice as this seems, so far there is no way to acquire the size of the returned ranges.
 ***/
 #pragma once
 
@@ -15,6 +27,8 @@
 // Include our base entity.
 #include "Entities/Base/SVGBaseEntity.h"
 
+
+
 //! Span for Entity* objects.
 using ServerEntitySpan = std::span<Entity>;
 //! Vector for Entity* objects.
@@ -23,6 +37,8 @@ using ServerEntityVector = std::vector<Entity*>;
 using ClassEntitySpan = std::span<SVGBaseEntity*>;
 //! Vector for SVGBaseEntity* derived objects.
 using ClassEntityVector = std::vector<SVGBaseEntity*>;
+
+
 
 //! Namespace containing the actual filter function implementations.
 namespace EntityFilterFunctions {
@@ -74,6 +90,8 @@ namespace EntityFilterFunctions {
 	inline bool ClassEntityIsValidPointer(SVGBaseEntity* ent) { return ent != nullptr; }
 };
 
+
+
 //! Namespace containing the actual Entity filter functions to use and apply.
 namespace ServerEntityFilters {
 	using namespace std::views;
@@ -98,7 +116,10 @@ namespace ServerEntityFilters {
 	//! Wrapper of pipelined filter functions that are quite standard to apply.
 	inline auto Standard = (InUse);
 };
-namespace sef = ServerEntityFilters;  // Shortcut, lesser typing.
+//! Shorthand for ServerEntityFilters. Less typing.
+namespace sef = ServerEntityFilters;
+
+
 
 //! Namespace containing the actual Base Entity filter functions to use and apply.
 namespace ClassEntityFilters {
@@ -155,6 +176,9 @@ namespace ClassEntityFilters {
 	//! Wrapper of pipelined filter functions that are quite standard to apply.
 	inline auto Standard = (IsValidPointer | HasServerEntity | InUse);
 };
+
+//! Shorthand for ClassEntityFilters. Less typing.
 namespace cef = ClassEntityFilters;  // Shortcut, lesser typing.
 
+//// This one really has to go....
 Entity* SVG_CreateTargetChangeLevel(char* map);

@@ -17,7 +17,7 @@ public:
     ItemHealthMega(Entity* svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~ItemHealthMega();
 
-    DefineItemMapClass("Mega Health", ItemIdentifier::MegaHealth, "item_health_mega", ItemHealthMega, SVGBaseItem);
+    DefineItemMapClass("Mega Health", "megahealth", ItemIdentifier::MegaHealth, "item_health_mega", ItemHealthMega, SVGBaseItem);
 
     // Item flags
     static constexpr int32_t IF_IgnoreMaxHealth     = 1 << 0;

@@ -433,7 +433,8 @@ void SVG_HUD_SetClientStats(Entity* ent)
                 || ent->client->playerState.fov > 91)
                 && ent->client->persistent.activeWeapon) {
 
-        ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->icon);
+        //ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->GetItemIcon());
+	    ent->client->playerState.stats[STAT_HELPICON] = 0;
     } else {
         ent->client->playerState.stats[STAT_HELPICON] = 0;
     }

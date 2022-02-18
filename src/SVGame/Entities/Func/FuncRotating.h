@@ -22,6 +22,8 @@ public:
 
 	void Spawn() override;
 
+	void SpawnKey(const std::string& key, const std::string& value) override;
+
 	void RotatorBlocked( SVGBaseEntity* other );
 	void RotatorHurtTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
 	void RotatorUse( SVGBaseEntity* other, SVGBaseEntity* activator );

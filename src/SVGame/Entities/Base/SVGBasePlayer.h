@@ -38,15 +38,20 @@ public:
     // Callback functions.
     void SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
 
+
+
     // Get/Set
     // Active Weapon.
-    inline gitem_t* GetActiveWeapon() { return GetClient()->persistent.activeWeapon; }
-    inline void	    SetActiveWeapon(gitem_t* weapon) { GetClient()->persistent.activeWeapon = weapon; }
+    inline SVGBaseItemWeapon* GetActiveWeapon() { return GetClient()->persistent.activeWeapon; }
+    inline void	SetActiveWeapon(SVGBaseItemWeapon* weapon) { GetClient()->persistent.activeWeapon = weapon; }
+
+
 
     /**
     *   @brief  Sets the server entity's client pointer.
     **/
     void SetClient(gclient_s* client) { serverEntity->client = client; }
+
 
 
     /**
@@ -59,6 +64,7 @@ public:
     inline void SetKillerYaw(const float& killerYaw) { GetClient()->killerYaw = killerYaw; }
 
 
+
     /**
     *   @return Current movetype of the player.
     **/
@@ -67,6 +73,7 @@ public:
     *   @brief  Sets the movetype of the player.
     **/
     inline void SetPlayerMoveType(const int32_t& type) { GetClient()->playerState.pmove.type = type; }
+
 
 
     /**
@@ -85,6 +92,7 @@ public:
     *   @brief  Sets the new prioritized animation.
     **/
     inline void SetPriorityAnimation(const float& priorityAnimation) { GetClient()->animation.priorityAnimation = priorityAnimation; }
+
 
 
     /**
@@ -143,6 +151,7 @@ public:
     *   @brief  Sets the next respawn time for this player.
     **/
     inline void SetRespawnTime(float time) { GetClient()->respawnTime = time; }
+
 
 
 protected:

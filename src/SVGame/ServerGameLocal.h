@@ -38,6 +38,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Forward Declarations.
 //-------------------
 class SVGBaseEntity;
+class SVGBaseItem;
+class SVGBaseItemWeapon;
 class SVGBasePlayer;
 class Gameworld;
 class IGamemode;
@@ -156,33 +158,36 @@ constexpr int32_t AS_MISSILE = 4;
 struct ItemIdentifier {
     //! Unused.
     static constexpr uint32_t None      = 0;
-
     //! Pistol.
-    static constexpr uint32_t Pistol    = 1;
+    static constexpr uint32_t WeaponPistol  = 1;
     //! SMG.
-    static constexpr uint32_t SMG = 2;
+    static constexpr uint32_t SMG           = 2;
     //! Shotgun.
-    static constexpr uint32_t Shotgun = 3;
-    //! Reserved0. Intended for weaponry.
-    static constexpr uint32_t Reserved0 = 4;
+    static constexpr uint32_t Shotgun       = 3;
+    //! Maximum amount of weapons allowed.
+    static constexpr uint32_t MaxWeapons    = 64;
+
     //! Reserved1. Intended for weaponry.
-    static constexpr uint32_t Reserved1 = 5;
+    static constexpr uint32_t Reserved65 = 65;
     //! Reserved2. Intended for weaponry.
-    static constexpr uint32_t Reserved2 = 6;
+    static constexpr uint32_t Reserved66 = 66;
     //! Reserved3. Intended for weaponry.
-    static constexpr uint32_t Reserved3 = 7;
+    static constexpr uint32_t Reserved67 = 67;
     //! Reserved4. Intended for weaponry.
-    static constexpr uint32_t Reserved4 = 8;
+    static constexpr uint32_t Reserved68 = 68;
     //! Reserved5. Intended for weaponry.
-    static constexpr uint32_t Reserved5 = 9;
+    static constexpr uint32_t Reserved69 = 69;
     //! Reserved6. Intended for weaponry.
-    static constexpr uint32_t Reserved6 = 10;
+    static constexpr uint32_t Reserved70 = 70;
 
     //! Mega Health.
     static constexpr uint32_t MegaHealth = 11;
 
     //! Total amount of items.
     static constexpr uint32_t Total = 12; 
+
+    //! Maximum amount of allowed items.
+    static constexpr uint32_t Maximum = 255;
 };
 
 //-------------------
@@ -734,32 +739,32 @@ struct ClientPersistentData {
     char netname[16];
     int32_t hand;
 
-    qboolean isConnected;  // A loadgame will leave valid entities that
+    qboolean isConnected = false;  // A loadgame will leave valid entities that
                            // just don't have a connection yet
 
     // Values saved and restored from entities when changing levels
-    int32_t health;
-    int32_t maxHealth;
-    int32_t savedFlags;
+    int32_t health = 100;
+    int32_t maxHealth = 100;
+    int32_t savedFlags = 0;
 
-    int32_t selectedItem;
-    int32_t inventory[MAX_ITEMS];
+    int32_t selectedItem = 0;
+    int32_t inventory[MAX_ITEMS] = {};
 
     // Ammo capacities
-    int32_t maxBullets;
-    int32_t maxShells;
-    int32_t maxRockets;
-    int32_t maxGrenades;
-    int32_t maxCells;
-    int32_t maxSlugs;
+    int32_t maxBullets = 200;
+    int32_t maxShells = 60;
+    int32_t maxRockets = 10;
+    int32_t maxGrenades = 5;
+    int32_t maxCells = 200;
+    int32_t maxSlugs = 200;
 
-    gitem_t *activeWeapon;
-    gitem_t *lastWeapon;
+    SVGBaseItemWeapon *activeWeapon = nullptr;
+    SVGBaseItemWeapon *lastWeapon = nullptr;
 
-    int32_t powerCubes;    // Used for tracking the cubes in coop games
-    int32_t score;         // For calculating total unit score in coop games
+    int32_t powerCubes = 0;    // Used for tracking the cubes in coop games
+    int32_t score = 0;         // For calculating total unit score in coop games
 
-    qboolean isSpectator;          // client is a isSpectator
+    qboolean isSpectator = false;          // client is a isSpectator
 };
 
 /**
@@ -823,7 +828,7 @@ struct gclient_s {
     qboolean weaponThunk;
 
     //! Pointer to the new weapon.
-    gitem_t *newWeapon;
+    SVGBaseItemWeapon *newWeapon;
 
     /**
     *   @brief  Used to sum up damage over an entire frame so weapons and other

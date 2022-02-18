@@ -58,49 +58,12 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     game.GetGamemode()->ClientUserinfoChanged(ent, userinfo);
 }
 
-
-//
-// Gross, ugly, disgustuing hack section
-//
-
-// this function is an ugly as hell hack to fix some map flaws
-//
-// the coop spawn spots on some maps are SNAFU.  There are coop spots
-// with the wrong targetName as well as spots with no name at all
-//
-// we use carnal knowledge of the maps to fix the coop spot targetnames to match
-// that of the nearest named single player spot
-
-void SP_FixCoopSpots(Entity *self)
-{
-    //Entity *spot;
-    //vec3_t  d;
-
-    //spot = NULL;
-
-    //while (1) {
-    //    spot = SVG_Find(spot, FOFS(classname), "info_player_start");
-    //    if (!spot)
-    //        return;
-    //    if (!spot->targetName)
-    //        continue;
-    //    d = self->state.origin - spot->state.origin;
-    //    if (vec3_length(d) < 384) {
-    //        if ((!self->targetName) || PH_StringCompare(self->targetName, spot->targetName) != 0) {
-    //            //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
-    //            self->targetName = spot->targetName;
-    //        }
-    //        return;
-    //    }
-    //}
-}
-
 //=======================================================================
 
 // TODO: Move into game mode.
-void SVG_TossClientWeapon(SVGBasePlayer *playerClient)
+void SVG_TossClientWeapon(SVGBasePlayer *player)
 {
-    gitem_t     *item;
+    SVGBaseItemWeapon *item;
     Entity      *drop;
     float       spread = 1.5f;
 
@@ -108,11 +71,26 @@ void SVG_TossClientWeapon(SVGBasePlayer *playerClient)
     //if (!deathmatch->value)
     //    return;
 
-    item = playerClient->GetActiveWeapon();
-    if (!playerClient->GetClient()->persistent.inventory[playerClient->GetClient()->ammoIndex])
-        item = NULL;
-    if (item && (strcmp(item->pickupName, "Blaster") == 0))
-        item = NULL;
+    // Sanity check.
+    if (!player) {
+        return;
+    }
+
+    // Get client
+    ServerClient* client = player->GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return;
+    }
+
+    // Fetch active weapon, if any.
+    //item = player->GetActiveWeapon();
+
+    //if (!player->GetClient()->persistent.inventory[player->GetClient()->ammoIndex])
+    //    item = NULL;
+    //if (item && (strcmp(item->pickupName, "Blaster") == 0))
+    //    item = NULL;
 
     if (item) {
         //playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
@@ -123,22 +101,6 @@ void SVG_TossClientWeapon(SVGBasePlayer *playerClient)
 }
 
 //=======================================================================
-
-//======================================================================
-
-void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
-{
-    //int n;
-
-    //if (self->classEntity && self->classEntity->GetHealth() < -40) {
-    //    gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
-    //    for (n = 0; n < 4; n++)
-    //        SVG_ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-    //    self->state.origin.z -= 48;
-    //    SVG_ThrowClientHead(self, damage);
-    //    self->takeDamage = TakeDamage::No;
-    //}
-}
 
 /*
 * only called when persistent.isSpectator changes
@@ -296,8 +258,6 @@ void SVG_ClientDisconnect(Entity *ent)
 
 
 //==============================================================
-
-
 Entity *pm_passent;
 
 // pmove doesn't need to know about passent and contentmask
@@ -325,6 +285,7 @@ void PrintPMove(PlayerMove *pm)
     c2 = CheckBlock(&pm->moveCommand, sizeof(pm->moveCommand));
     Com_Printf("sv %3i:%i %i\n", pm->moveCommand.input.impulse, c1, c2);
 }
+//==============================================================
 
 /*
 ==============

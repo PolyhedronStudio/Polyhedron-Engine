@@ -86,6 +86,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseItem.cpp
 	SVGame/Entities/Base/SVGBaseTrigger.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
+	SVGame/Entities/Base/SVGBaseItemWeapon.cpp
 	SVGame/Entities/Base/SVGEntityHandle.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
 	SVGame/Entities/Base/DebrisEntity.cpp
@@ -98,10 +99,12 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerIntermission.cpp
 	SVGame/Entities/Info/InfoPlayerStart.cpp
 	SVGame/Entities/Items/ItemHealthMega.cpp
-	SVGame/Entities/Items/ItemWeaponBlaster.cpp
-	SVGame/Entities/Items/ItemWeaponMachinegun.cpp
-	SVGame/Entities/Items/ItemWeaponShotgun.cpp
-	SVGame/Entities/Items/ItemWeaponSuperShotgun.cpp
+	#SVGame/Entities/Items/ItemWeaponKnife.cpp
+	SVGame/Entities/Items/ItemWeaponPistol.cpp
+	SVGame/Entities/Items/ItemWeaponSMG.cpp
+	#SVGame/Entities/Items/ItemWeaponMachinegun.cpp
+	#SVGame/Entities/Items/ItemWeaponShotgun.cpp
+	#SVGame/Entities/Items/ItemWeaponSuperShotgun.cpp
 	SVGame/Entities/Func/FuncAreaportal.cpp
 	SVGame/Entities/Func/FuncButton.cpp
 	#SVGame/Entities/Func/FuncConveyor.cpp
@@ -185,6 +188,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseItem.h
 	SVGame/Entities/Base/SVGBaseTrigger.h
 	SVGame/Entities/Base/SVGBaseMover.h
+	SVGame/Entities/Base/SVGBaseItemWeapon.h
 	SVGame/Entities/Base/SVGEntityHandle.h
 	SVGame/Entities/Base/BodyCorpse.h
 	SVGame/Entities/Base/DebrisEntity.h
@@ -206,10 +210,12 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerIntermission.h
 	SVGame/Entities/Info/InfoPlayerStart.h
 	SVGame/Entities/Items/ItemHealthMega.h
-	SVGame/Entities/Items/ItemWeaponBlaster.h
-	SVGame/Entities/Items/ItemWeaponMachinegun.h
-	SVGame/Entities/Items/ItemWeaponShotgun.h
-	SVGame/Entities/Items/ItemWeaponSuperShotgun.h
+	#SVGame/Entities/Items/ItemWeaponKnife.h
+	SVGame/Entities/Items/ItemWeaponPistol.h
+	SVGame/Entities/Items/ItemWeaponSMG.h
+	#SVGame/Entities/Items/ItemWeaponMachinegun.h
+	#SVGame/Entities/Items/ItemWeaponShotgun.h
+	#SVGame/Entities/Items/ItemWeaponSuperShotgun.h
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h
 	SVGame/Entities/Path/PathCorner.h

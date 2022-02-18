@@ -21,7 +21,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "../Entities.h"
+#include "../entities/base/SVGBaseTrigger.h"
 #include "../entities/base/SVGBasePlayer.h"
+#include "../Entities/Base/SVGBaseItem.h"
+#include "../Entities/Base/SVGBaseItemWeapon.h"
 
 // SharedGame.
 #include "SharedGame/SharedGame.h"
@@ -154,27 +157,38 @@ The old weapon has been dropped all the way, so make the new one
 current
 ===============
 */
-void SVG_ChangeWeapon(SVGBasePlayer*ent)
-{
+void SVG_ChangeWeapon(SVGBasePlayer *player) {
     int i;
 
-    if (!ent)
+    // Sanity check.
+    if (!player) {
+	    return;
+    }
+
+    // Get client, sanity check.
+    ServerClient* client = player->GetClient();
+    if (!client) {
         return;
+    }
 
-    ServerClient* client = ent->GetClient();
+    // Acquire base item weapon.
+    SVGBaseItemWeapon *activeWeapon = client->persistent.activeWeapon;
+    SVGBaseItemWeapon *newWeapon = client->newWeapon;
 
-    client->persistent.lastWeapon = client->persistent.activeWeapon;
-    client->persistent.activeWeapon = client->newWeapon;
-    client->newWeapon = NULL;
-    client->machinegunShots = 0;
+    // Store activeWeapon as lastWeapon, set the active weapon to newWeapon and reset newWeapon after doing so.
+    client->persistent.lastWeapon = activeWeapon;
+    client->persistent.activeWeapon = newWeapon;
+    client->newWeapon = nullptr;
 
-    // set visible model
-    if (ent->GetModelIndex() == 255) {
-        if (client->persistent.activeWeapon)
-            i = ((client->persistent.activeWeapon->weaponModelIndex & 0xff) << 8);
-        else
-            i = 0;
-        ent->SetSkinNumber((ent->GetServerEntity() - game.world->GetServerEntities() - 1) | i);
+    // Set visible model
+    if (player->GetModelIndex() == 255) {
+	    if (client->persistent.activeWeapon) {
+	        i = ((client->persistent.activeWeapon->GetViewModelIndex() & 0xff) << 8);
+	    } else {
+		    i = 0;
+	    }
+    
+        player->SetSkinNumber((player->GetServerEntity() - GetGameworld()->GetServerEntities() - 1) | i);
     }
 
     //if (client->persistent.activeWeapon && client->persistent.activeWeapon->ammo)
@@ -190,16 +204,15 @@ void SVG_ChangeWeapon(SVGBasePlayer*ent)
 
     client->weaponState = WeaponState::Activating;
     client->playerState.gunFrame = 0;
-    client->playerState.gunIndex = gi.ModelIndex(client->persistent.activeWeapon->viewModel);
-
+    client->playerState.gunIndex = client->persistent.activeWeapon->GetViewModelIndex(); //gi.ModelIndex(client->persistent.activeWeapon->GetModel().c_str());
+    gi.DPrintf("Changing weapon to: %s\n", client->persistent.activeWeapon->GetDisplayString().c_str());
     client->animation.priorityAnimation = PlayerAnimation::Pain;
     if (client->playerState.pmove.flags & PMF_DUCKED) {
-        ent->SetFrame(FRAME_crpain1);
+        player->SetFrame(FRAME_crpain1);
         client->animation.endFrame = FRAME_crpain4;
     } else {
-        ent->SetFrame(FRAME_pain301);
+        player->SetFrame(FRAME_pain301);
         client->animation.endFrame = FRAME_pain304;
-
     }
 }
 
@@ -227,25 +240,27 @@ SVG_ThinkWeapon
 Called by ClientBeginServerFrame and ClientThink
 =================
 */
-void SVG_ThinkWeapon(SVGBasePlayer *ent)
+void SVG_ThinkWeapon(SVGBasePlayer *player)
 {
-    if (!ent)
-        return;
+    if (!player) {
+	    return;
+    }
 
-    ServerClient* client = ent->GetClient();
+    ServerClient* client = player->GetClient();
 
-    if (!client)
+    if (!client) { 
         return;
+    }
 
     // if just died, put the weapon away
-    if (ent->GetHealth() < 1) {
-        client->newWeapon = NULL;
-        SVG_ChangeWeapon(ent);
+    if (player->GetHealth() < 1) {
+        client->newWeapon = nullptr;
+        SVG_ChangeWeapon(player);
     }
 
     // call active weapon Think routine
-    if (client->persistent.activeWeapon && client->persistent.activeWeapon->WeaponThink) {
-        client->persistent.activeWeapon->WeaponThink(ent);
+    if (client->persistent.activeWeapon) {
+	    client->persistent.activeWeapon->WeaponThink(player);
     }
 }
 
@@ -351,14 +366,14 @@ void _Weapon_Generic(SVGBasePlayer* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE
     }
 
     if (client->weaponState == WeaponState::Activating) {
-	if (client->playerState.gunFrame == FRAME_ACTIVATE_LAST) {
-	    client->weaponState = WeaponState::Ready;
-	    client->playerState.gunFrame = FRAME_IDLE_FIRST;
-	    return;
-	}
+	    if (client->playerState.gunFrame == FRAME_ACTIVATE_LAST) {
+	        client->weaponState = WeaponState::Ready;
+	        client->playerState.gunFrame = FRAME_IDLE_FIRST;
+	        return;
+	    }
 
-	client->playerState.gunFrame++;
-	return;
+	    client->playerState.gunFrame++;
+	    return;
     }
 
     if ((client->newWeapon) && (client->weaponState != WeaponState::PrimaryFiring)) {
@@ -381,7 +396,7 @@ void _Weapon_Generic(SVGBasePlayer* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE
     if (client->weaponState == WeaponState::Ready) {
 	if (((client->latchedButtons | client->buttons) & ButtonBits::Attack)) {
 	    client->latchedButtons &= ~ButtonBits::Attack;
-	    if ((!client->ammoIndex) || (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
+	    if ((!client->ammoIndex)) { //|| (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
 		client->playerState.gunFrame = FRAME_FIRE_FIRST;
 		client->weaponState = WeaponState::PrimaryFiring;
 
@@ -503,8 +518,10 @@ void Weapon_Generic(SVGBasePlayer *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTI
     if (client->weaponState == WeaponState::Ready) {
         if (((client->latchedButtons | client->buttons) & ButtonBits::Attack)) {
             client->latchedButtons &= ~ButtonBits::Attack;
-            if ((!client->ammoIndex) ||
-                (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
+            //if ((!client->ammoIndex) ||
+            //    (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
+	    if ((!client->ammoIndex)) { //|| (client->persistent.inventory[client->ammoIndex] >= client->persistent.activeWeapon->quantity)) {
+
                 client->playerState.gunFrame = FRAME_FIRE_FIRST;
                 client->weaponState = WeaponState::PrimaryFiring;
 

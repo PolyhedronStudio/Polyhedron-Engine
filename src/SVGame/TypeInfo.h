@@ -188,14 +188,43 @@ __DeclareTypeInfo( mapClassName, #classname, #superClass, TypeInfo::TypeFlag_Map
 // @param mapClassName (string) - the map classname of this entity, used during entity spawning
 // @param classname (symbol) - the internal C++ class name
 // @param superClass (symbol) - the class this entity class inherits from
-#define DefineItemMapClass(itemStringName, itemIdentifier, mapClassName, classname, superClass) \
-using Base = superClass;																		\
-static SVGBaseEntity* AllocateInstance(Entity* entity) {										\
-	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);				\
-	itemEntity->SetClassname(mapClassName);														\
-	return itemEntity;																			\
-}																								\
+//#define DefineItemMapClass(itemStringName, itemIdentifier, mapClassName, classname, superClass) \
+//using Base = superClass;																		\
+//static SVGBaseEntity* AllocateInstance(Entity* entity) {										\
+//	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);				\
+//	itemEntity->SetClassname(mapClassName);														\
+//	return itemEntity;																			\
+//}																								\
+//__DeclareTypeInfo(mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapSpawn, &classname::AllocateInstance);
+
+// Declares type information the same as DefineItemClass while also creating a single instance
+// of the class in the weaponItemInstances array to use for weapon callbacks.
+// NOTE: multiple inheritance not supported
+// @param mapClassName (string) - the map classname of this entity, used during entity spawning
+// @param classname (symbol) - the internal C++ class name
+// @param superClass (symbol) - the class this entity class inherits from
+#define DefineItemMapClass(itemStringName, itemInstanceString, itemIdentifier, mapClassName, classname, superClass)       \
+using Base = superClass;                                                                                                  \
+static SVGBaseEntity* AllocateInstance(Entity* entity) {                                                                  \
+	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);                                        \
+	itemEntity->SetClassname(mapClassName);                                                                               \
+	classname *itemInstance = CreateItemInstance<classname>(itemStringName, itemInstanceString, itemIdentifier);          \
+	if (itemInstance != nullptr) {                                                                                        \
+		itemInstance->InstanceSpawn();                                                                                    \
+	}                                                                                                                     \
+	return itemEntity;                                                                                                    \
+};                                                                                                                        \
 __DeclareTypeInfo(mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapSpawn, &classname::AllocateInstance);
+
+//#define DefineItemWeaponMapClass(itemStringName, itemInstanceString, itemIdentifier, mapClassName, classname, superClass)	\
+//using Base = superClass;                                                                        \
+//static SVGBaseEntity* AllocateInstance(Entity* entity) {                                        \
+//	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);              \
+//	itemEntity->SetClassname(mapClassName);                                                     \
+//	CreatePlayerWeaponInstance<classname>(itemStringName, itemInstanceString, itemIdentifier); \
+//	return itemEntity;                                                                          \
+//};                                                                                                                                                                                                                                                    \
+//__DeclareTypeInfo(mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapSpawn, &classname::AllocateInstance);
 
 // Declares type information the same as DefineMapClass, however, it doesn't allocate anything. 
 // Used by InfoNull. Cannot be instantiated. 
