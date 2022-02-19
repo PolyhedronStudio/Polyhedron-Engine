@@ -53,7 +53,7 @@ struct PlayerWeaponID {
 **/
 struct WeaponState {
     static constexpr int32_t Ready = 0;
-    static constexpr int32_t Activating = 1; // Rename to: Drawing
+    static constexpr int32_t Drawing = 1; // Rename to: Drawing
     static constexpr int32_t Holstering = 2; // Holster weapon.
     static constexpr int32_t Dropping = 3;
     static constexpr int32_t Reloading = 4;
@@ -64,12 +64,7 @@ struct WeaponState {
 *   @brief  Types of ammo.
 **/
 struct AmmoType {
-    static constexpr int32_t Bullets = 0;
-    static constexpr int32_t Shells = 1;
-    static constexpr int32_t Rockets = 2;
-    static constexpr int32_t Grenade = 3;
-    static constexpr int32_t Cells = 4;
-    static constexpr int32_t Slugs = 5;
+    static constexpr int32_t Ammo9mm = 0;
 };
 
 

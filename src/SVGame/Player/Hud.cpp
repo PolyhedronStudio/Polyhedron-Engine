@@ -20,6 +20,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "../Entities.h"
+// Server Game Base Entity.
+#include "../Entities/Base/SVGBaseEntity.h"
+#include "../Entities/Base/SVGBaseTrigger.h"
+#include "../Entities/Base/SVGBaseItem.h"
+#include "../Entities/Base/SVGBaseItemWeapon.h"
 #include "../Entities/Base/SVGBasePlayer.h"
 
 // Gamemodes.
@@ -343,103 +348,114 @@ void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client) {
 // and audio if required.
 //================
 //
-void SVG_HUD_SetClientStats(Entity* ent)
-{
+void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     gitem_t* item;
 
     // Ensure ent is valid.
-    if (!ent || !ent->client) {
+    if (!player || !client) {
         return;
     }
 
     //
     // health
     //
-    ent->client->playerState.stats[STAT_HEALTH_ICON] = level.pic_health;
-    ent->client->playerState.stats[STAT_HEALTH] = ent->classEntity->GetHealth();
+    client->playerState.stats[STAT_HEALTH_ICON] = level.pic_health;
+    client->playerState.stats[STAT_HEALTH] = player->GetHealth();
 
     //
     // ammo
     //
-    if (!ent->client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
-        ent->client->playerState.stats[STAT_AMMO_ICON] = 0;
-        ent->client->playerState.stats[STAT_AMMO] = 0;
-    }
-    else {
-        item = 0;// &itemlist[ent->client->ammoIndex];
-        ent->client->playerState.stats[STAT_AMMO_ICON] = gi.ImageIndex(item->icon);
-        ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammoIndex];
+    //if (!ent->client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+    //    ent->client->playerState.stats[STAT_AMMO_ICON] = 0;
+    //    ent->client->playerState.stats[STAT_AMMO] = 0;
+    //}
+    //else {
+    //    item = 0;// &itemlist[ent->client->ammoIndex];
+    //    ent->client->playerState.stats[STAT_AMMO_ICON] = gi.ImageIndex(item->icon);
+    //    ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammoIndex];
+    //}
+    // Get active weapon.
+    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
+
+    // Get primary ammo identifier.
+    uint32_t primaryAmmoIdentifier = (activeWeapon ? activeWeapon->GetPrimaryAmmoIdentifier() : 0);
+    if (primaryAmmoIdentifier != 0) {
+	    client->playerState.stats[STAT_AMMO_ICON] = 1;
+        client->playerState.stats[STAT_AMMO] = client->persistent.inventory[primaryAmmoIdentifier];
+    } else {
+	    client->playerState.stats[STAT_AMMO_ICON] = 0;
+        client->playerState.stats[STAT_AMMO] = 0;
     }
 
     //
     // armor
     //
-    ent->client->playerState.stats[STAT_ARMOR_ICON] = 0;
-    ent->client->playerState.stats[STAT_ARMOR] = 0;
+    client->playerState.stats[STAT_ARMOR_ICON] = 0;
+    client->playerState.stats[STAT_ARMOR] = 0;
 
     //
     // pickup message
     //
-    if (level.time > ent->client->pickupMessageTime) {
-        ent->client->playerState.stats[STAT_PICKUP_ICON] = 0;
-        ent->client->playerState.stats[STAT_PICKUP_STRING] = 0;
+    if (level.time > client->pickupMessageTime) {
+        client->playerState.stats[STAT_PICKUP_ICON] = 0;
+        client->playerState.stats[STAT_PICKUP_STRING] = 0;
     }
 
     //
     // timers
     //
-    ent->client->playerState.stats[STAT_TIMER_ICON] = 0;
-    ent->client->playerState.stats[STAT_TIMER] = 0;
+    client->playerState.stats[STAT_TIMER_ICON] = 0;
+    client->playerState.stats[STAT_TIMER] = 0;
 
     //
     // selected item
     //
-    if (ent->client->persistent.selectedItem == -1)
-        ent->client->playerState.stats[STAT_SELECTED_ICON] = 0;
-    else
-        ent->client->playerState.stats[STAT_SELECTED_ICON] = 0;//gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
-
-    ent->client->playerState.stats[STAT_SELECTED_ITEM] = ent->client->persistent.selectedItem;
+    if (client->persistent.selectedItem == -1) {
+	    client->playerState.stats[STAT_SELECTED_ICON] = 0;
+    } else {
+    	client->playerState.stats[STAT_SELECTED_ICON] = 0;  //gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
+    }
+    
+    client->playerState.stats[STAT_SELECTED_ITEM] = client->persistent.selectedItem;
 
     //
     // layouts
     //
-    ent->client->playerState.stats[STAT_LAYOUTS] = 0;
+    client->playerState.stats[STAT_LAYOUTS] = 0;
 
     // Special layout for deathmatch.
     if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
-        if (ent->client->persistent.health <= 0 || level.intermission.time
-            || ent->client->showScores)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showInventory && ent->client->persistent.health > 0)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
-    }
-    else {
-        if (ent->client->showScores)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showInventory && ent->client->persistent.health > 0)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
+	    if (client->persistent.health <= 0 || level.intermission.time || client->showScores) {
+	        client->playerState.stats[STAT_LAYOUTS] |= 1;
+	    }
+	    if (client->showInventory && client->persistent.health > 0) { 
+            client->playerState.stats[STAT_LAYOUTS] |= 2;
+        }
+    } else {
+        if (client->showScores) {
+	        client->playerState.stats[STAT_LAYOUTS] |= 1;
+        }
+	    if (client->showInventory && client->persistent.health > 0) {
+	        client->playerState.stats[STAT_LAYOUTS] |= 2;
+	    }
     }
 
     //
     // frags
     //
-    ent->client->playerState.stats[STAT_FRAGS] = ent->client->respawn.score;
+    client->playerState.stats[STAT_FRAGS] = client->respawn.score;
 
     //
     // help icon / current weapon if not shown
     //
-    if ((ent->client->persistent.hand == CENTER_HANDED
-                || ent->client->playerState.fov > 91)
-                && ent->client->persistent.activeWeapon) {
-
+    if ((client->persistent.hand == CENTER_HANDED || client->playerState.fov > 91) && client->persistent.activeWeapon) {
         //ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->GetItemIcon());
-	    ent->client->playerState.stats[STAT_HELPICON] = 0;
+	    client->playerState.stats[STAT_HELPICON] = 0;
     } else {
-        ent->client->playerState.stats[STAT_HELPICON] = 0;
+        client->playerState.stats[STAT_HELPICON] = 0;
     }
 
-    ent->client->playerState.stats[STAT_SPECTATOR] = 0;
+    client->playerState.stats[STAT_SPECTATOR] = 0;
 }
 
 /*
@@ -449,24 +465,27 @@ SVG_HUD_CheckChaseStats
 */
 void SVG_HUD_CheckChaseStats(Entity *ent)
 {
-    int i;
+    // TODO: Iterate over class entities(client range) and use that information instead.
+    //int i;
 
-    if (!ent)    {
-        return;
-    }
+    //if (!ent)    {
+    //    return;
+    //}
 
-    for (i = 1; i <= maximumclients->value; i++) {
-        ServerClient* cl;
+    //for (i = 1; i <= maximumclients->value; i++) {
+    //    ServerClient* cl;
 
-        cl = game.world->GetServerEntities()[i].client;
+    //    cl = game.world->GetServerEntities()[i].client;
 
-        if (!game.world->GetServerEntities()[i].inUse || (cl->chaseTarget != ent)) {
-            continue;
-        }
+    //    if (!game.world->GetServerEntities()[i].inUse || (cl->chaseTarget != ent)) {
+    //        continue;
+    //    }
 
-        memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
-        SVG_HUD_SetSpectatorStats(game.world->GetServerEntities() + i);
-    }
+    //    //memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
+
+    //    // Copy the server entities client into the current spectator.
+    //    SVG_HUD_SetSpectatorStats(game.world->GetServerEntities() + i);
+    //}
 }
 
 /*
@@ -474,41 +493,37 @@ void SVG_HUD_CheckChaseStats(Entity *ent)
 SVG_HUD_SetSpectatorStats
 ===============
 */
-void SVG_HUD_SetSpectatorStats(Entity *ent)
-{
-    if (!ent) {
+void SVG_HUD_SetSpectatorStats(SVGBasePlayer *player, ServerClient *client) {
+    if (!player || !client) {
         return;
     }
 
-    ServerClient* cl = ent->client;
-
-    if (!cl->chaseTarget) {
-        SVG_HUD_SetClientStats(ent);
+    if (!client->chaseTarget) {
+        SVG_HUD_SetClientStats(player, client);
     }
 
-    cl->playerState.stats[STAT_SPECTATOR] = 1;
+    client->playerState.stats[STAT_SPECTATOR] = 1;
 
     /* layouts are independant in isSpectator */
-    cl->playerState.stats[STAT_LAYOUTS] = 0;
+    client->playerState.stats[STAT_LAYOUTS] = 0;
 
-    if ((cl->persistent.health <= 0) || level.intermission.time || cl->showScores)
+    if ((client->persistent.health <= 0) || level.intermission.time || client->showScores)
     {
-        cl->playerState.stats[STAT_LAYOUTS] |= 1;
+	    client->playerState.stats[STAT_LAYOUTS] |= 1;
     }
 
-    if (cl->showInventory && (cl->persistent.health > 0))
+    if (client->showInventory && (client->persistent.health > 0))
     {
-        cl->playerState.stats[STAT_LAYOUTS] |= 2;
+        client->playerState.stats[STAT_LAYOUTS] |= 2;
     }
 
-    if (cl->chaseTarget && cl->chaseTarget->inUse)
+    if (client->chaseTarget && client->chaseTarget->inUse)
     {
-        cl->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins +
-            (cl->chaseTarget - game.world->GetServerEntities()) - 1;
+    	client->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins + (client->chaseTarget - game.world->GetServerEntities()) - 1;
     }
     else
     {
-        cl->playerState.stats[STAT_CHASE] = 0;
+	    client->playerState.stats[STAT_CHASE] = 0;
     }
 }
 

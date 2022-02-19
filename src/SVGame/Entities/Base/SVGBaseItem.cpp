@@ -1,15 +1,12 @@
-/*
-// LICENSE HERE.
-
-//
-// SVGBaseItem.cpp
-//
-// Base class to create item entities from.
-//
-// Gives the following functionalities:
-// TODO: Explain what.
-//
-*/
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	See header for information.
+*
+***/
 #include "../../ServerGameLocal.h"  // SVGame.
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"        // Util funcs.
@@ -26,7 +23,7 @@
 
 
 //! Used to store instances that are used for player weapon callbacks.
-SVGBaseItem* SVGBaseItem::itemInstances[ItemIdentifier::MaxWeapons];
+SVGBaseItem* SVGBaseItem::itemInstances[ItemIdentifier::Maximum];
 //! Used for looking up instances by string. TODO: Improve this, it can be done more simply.
 std::map<std::string, uint32_t> SVGBaseItem::lookupStrings;
 
@@ -143,12 +140,10 @@ void SVGBaseItem::Respawn() {
         // Link it back in.
         slaveEntity->LinkEntity();
 
-        gi.DPrintf("BaseItem::Respawn");
-
         // Set think callback to fall to floor (just in case).
         SetThinkCallback(&SVGBaseItem::BaseItemDropToFloor);
     } else {
-        gi.DPrintf("No slaveEntity found...");
+    	SVG_DPrint("No slave entity found for SVGBaseItem(#" + GetState().number + std::string(") at origin: ") + vec3_to_str(GetOrigin()) + "\n");
     }
 }
 

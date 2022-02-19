@@ -15,39 +15,83 @@ class SVGBaseItem;
 
 class SVGBaseItemWeapon : public SVGBaseItem {
 public:
-    //
-    // Function pointers for item callbacks.
-    // 
-    //using PickupCallbackPointer         = qboolean(SVGBaseItem::*)(SVGBaseEntity *other);
-    //using UseItemWeaponCallbackPointer  = void(SVGBaseItem::*)(SVGBaseEntity* other);
-    //using DropCallbackPointer           = void(SVGBaseItem::*)(SVGBaseEntity* other);
-    
-    using ItemWeaponThinkCallbackPointer    = void(SVGBaseItem::*)(SVGBaseEntity* other);
+    /***
+    * 
+    *   Weapon Item callback function pointers.
+    *
+    ***/
+    using WeaponThinkCallbackPointer    = void(SVGBaseItem::*)(SVGBaseEntity* user);
 
-    //
-    // Constructor/Deconstructor.
-    //
+
+    //! Constructor/Deconstructor.
     SVGBaseItemWeapon(Entity* svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~SVGBaseItemWeapon();
 
+    //! Abstract Class TypeInfo registry.
     DefineAbstractClass(SVGBaseItemWeapon, SVGBaseItem);
 
-    //
-    // Interface functions. 
-    //
-    virtual void Precache() override;    // Precaches data.
-    virtual void Spawn() override;       // Spawns the entity.
-    virtual void Respawn() override;     // Respawns the entity.
-    virtual void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    virtual void Think() override;       // General entity thinking routine.
 
-    //
-    // Entity functions.
-    //
-    inline virtual const std::string GetViewModel() { return ""; };
-    inline virtual const uint32_t GetViewModelIndex() { return 0; };
-    inline virtual const std::string GetWorldModel() { return ""; };
-    inline virtual const uint32_t    GetWorldModelIndex() { return 0; };
+    /***
+    * 
+    *   Interface functions.
+    *
+    ***/
+    virtual void Precache() override;
+    virtual void Spawn() override;
+    virtual void Respawn() override;
+    virtual void PostSpawn() override;
+    virtual void Think() override;
+
+
+    /***
+    * 
+    *   Entity functions.
+    * 
+    *   NOTE:   For primary and secondary ammo, returning 0 means that the
+    *           primary/secondary ammo isn't in use for this weapon.
+    *
+    ***/
+    /**
+    *   @return Pointer to a weapon item instance. Does a typeinfo check to make sure. 
+    *           Returns nullptr if not found or a type mismatch occures.
+    **/
+    static SVGBaseItemWeapon* GetWeaponInstanceByID(uint32_t identifier) {
+	    // Get the regular instance.
+	    SVGBaseItem* itemInstance = GetItemInstanceByID(identifier);
+
+	    // Do a type check and return it casted to SVGBaseItemAmmo
+	    if (itemInstance->IsSubclassOf<SVGBaseItemWeapon>()) {
+	        return dynamic_cast<SVGBaseItemWeapon*>(itemInstance);
+	    } else {
+	        return nullptr;
+	    }
+    }
+
+    /**
+    *   @return The item index of the primary ammo for this weapon.
+    **/
+    inline virtual uint32_t GetPrimaryAmmoIdentifier() { return 0; }
+    /**
+    *   @return The item index of the secondary ammo for this weapon.
+    **/
+    inline virtual uint32_t GetSecondaryAmmoIdentifier() { return 0; }
+
+    /**
+    *   @return Returns the path to this weapon's view model.
+    **/
+    inline virtual const std::string    GetViewModel() { return ""; };
+    /**
+    *   @return Returns the model index of the view model.
+    **/
+    inline virtual const uint32_t       GetViewModelIndex() { return 0; };
+    /**
+    *   @return Returns the path to this weapon's vorld model.
+    **/
+    inline virtual const std::string    GetWorldModel() { return ""; };
+    /**
+    *   @return Returns the model index of the world model.
+    **/
+    inline virtual const uint32_t       GetWorldModelIndex() { return 0; };
 
     virtual void SetRespawn(const float delay) override;	 // Sets the item in respawn mode.
 
@@ -61,37 +105,6 @@ public:
 
 public:
 
-
-    //
-    // Ugly, but effective callback SET methods.
-    //
-    // Sets the 'Pickup' callback function.
-    //template<typename function>
-    //inline void SetPickupCallback(function f)
-    //{
-    //    pickupFunction = static_cast<PickupCallbackPointer>(f);
-    //}
-    //inline qboolean HasPickupCallback() {
-    //    return (pickupFunction != nullptr ? true : false);
-    //}
-    //// Sets the 'Use Item' callback function.
-    //template<typename function>
-    //inline void SetUseItemCallback(function f)
-    //{
-    //    useItemFunction = static_cast<UseItemCallbackPointer>(f);
-    //}
-    //inline qboolean HasUseItemCallback() {
-    //    return (useItemFunction != nullptr ? true : false);
-    //}
-    //// Sets the 'Drop' callback function.
-    //template<typename function>
-    //inline void SetDropCallback(function f)
-    //{
-    //    dropFunction = static_cast<DropCallbackPointer>(f);
-    //}
-    //inline qboolean HasDropCallback() {
-    //    return (dropFunction != nullptr ? true : false);
-    //}
     // Sets the 'WeaponThink' callback function.
     template<typename function>
     inline void SetWeaponThinkCallback(function f)
@@ -103,11 +116,10 @@ public:
     }
 
 protected:
-    //
-    // Item function pointers.
-    //
-    //PickupCallbackPointer       pickupFunction = nullptr;
-    //UseItemCallbackPointer      useItemFunction = nullptr;
-    //DropCallbackPointer         dropFunction = nullptr;
+    /***
+    * 
+    *   Weapon Item function pointers.
+    *
+    ***/
     WeaponThinkCallbackPointer  weaponThinkFunction = nullptr;
 };

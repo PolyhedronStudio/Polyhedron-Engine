@@ -50,6 +50,10 @@ SVGBaseItemWeapon::~SVGBaseItemWeapon() {
 void SVGBaseItemWeapon::Precache() {
     // Always call parent class method.
     Base::Precache();
+
+    // Precache view and world models for the given weapon.
+    SVG_PrecacheModel(GetViewModel());
+    SVG_PrecacheModel(GetWorldModel());
 }
 
 //
@@ -61,6 +65,9 @@ void SVGBaseItemWeapon::Precache() {
 void SVGBaseItemWeapon::Spawn() {
     // Always call parent class method.
     Base::Spawn();
+    
+    // Set the weapon item world model.
+    SetModel(GetWorldModel());
 
     // Set the config string for this item.
     SVG_SetConfigString(ConfigStrings::Items + itemIdentifier, displayString);

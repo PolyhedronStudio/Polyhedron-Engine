@@ -27,13 +27,6 @@
 // Misc Explosion Box Entity.
 #include "ItemHealthMega.h"
 
-//Added in respawn flag support for items. ( I still gotta do it by the time I read this in the morning lol )
-//
-//Create SVGBaseItem::CreateDroppedItem(...) and do similar functionality for other entities that need it.
-//
-//Investigate client side weaponry by creating them in sharedgame. Perhaps same for trigger entities, or perhaps just start creating a client entity system as a whole...
-//
-//Investigate PhysX over Bullet 3D, look at the bookmarked articles about them and character controllers. Perhaps look for some collision library out there or physics and use that instead.
 
 //
 // Constructor/Deconstructor.
@@ -48,15 +41,11 @@ ItemHealthMega::~ItemHealthMega() {
 
 
 
-//
-// Interface functions. 
-//
-//
-//===============
-// ItemHealthMega::Precache
-//
-//===============
-//
+/***
+* 
+*   Interface implementation functions.
+*
+***/
 void ItemHealthMega::Precache() {
     // Always call parent class method.
     Base::Precache();
@@ -67,12 +56,9 @@ void ItemHealthMega::Precache() {
     SVG_PrecacheModel("models/items/healing/large/tris.md3");
 }
 
-//
-//===============
-// ItemHealthMega::Spawn
-//
-//===============
-//
+/**
+*   @brief
+**/
 void ItemHealthMega::Spawn() {
     // Always call parent class method.
     Base::Spawn();
@@ -105,47 +91,38 @@ void ItemHealthMega::Spawn() {
     LinkEntity();
 }
 
-//
-//===============
-// ItemHealthMega::Respawn
-//
-//===============
-//
+/**
+*   @brief
+**/
 void ItemHealthMega::Respawn() {
     Base::Respawn();
 }
 
-//
-//===============
-// ItemHealthMega::PostSpawn
-//
-//===============
-//
+/**
+*   @brief
+**/
 void ItemHealthMega::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
 }
 
-//
-//===============
-// ItemHealthMega::Think
-//
-//===============
-//
+/**
+*   @brief
+**/
 void ItemHealthMega::Think() {
     // Always call parent class method.
     Base::Think();
 }
 
 
-//
-// Callback Functions.
-//
-//===============
-// ItemHealthMega::HealthMegaPickup
-// 
-// 
-//===============
+/**
+* 
+*   Callback functions.
+*
+***/
+/**
+*   @brief
+**/
 qboolean ItemHealthMega::HealthMegaPickup(SVGBaseEntity* other) {
     // Ensure other is a valid pointer.
     if (!other) {
@@ -186,45 +163,3 @@ qboolean ItemHealthMega::HealthMegaPickup(SVGBaseEntity* other) {
 
     return true;
 }
-
-//===============
-// ItemHealthMega::HealthMegaThink
-//
-// 
-//===============
-void ItemHealthMega::HealthMegaThink(void) {
-
-}
-
-//===============
-// ItemHealthMega::HealthMegaDie
-//
-// 'Die' callback, the explosion box has been damaged too much.
-//===============
-//void ItemHealthMega::HealthMegaDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
-//
-//}
-//
-
-////===============
-//// ItemHealthMega::HealthMegaTouch
-////
-//// 'Touch' callback, to calculate the direction to move into.
-////===============
-//void ItemHealthMega::HealthMegaTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
-//    // Safety checks.
-//    if (!self)
-//        return;
-//    if (!other)
-//        return;
-//    // TODO: Move elsewhere in baseentity, I guess?
-//    // Prevent this entity from touching itself.
-//    if (self == other)
-//        return;
-//
-//    // Ground entity checks.
-//    if ((!other->GetGroundEntity()) || (other->GetGroundEntity() == self))
-//        return;
-//
-//
-//}

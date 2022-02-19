@@ -724,7 +724,7 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
         // FIXME: add view drifting here?
         client->playerState.blend[3] = 0;
         client->playerState.fov = 90;
-        SVG_HUD_SetClientStats(serverEntity);
+        SVG_HUD_SetClientStats(player, client);
         return;
     }
 
@@ -811,9 +811,9 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 
     // Set the stats to display for this client (one of the chase isSpectator stats or...)
     if (client->respawn.isSpectator)
-        SVG_HUD_SetSpectatorStats(serverEntity);
+        SVG_HUD_SetSpectatorStats(player, client);
     else
-        SVG_HUD_SetClientStats(serverEntity);
+	    SVG_HUD_SetClientStats(player, client);
 
     SVG_HUD_CheckChaseStats(serverEntity);
 
@@ -1247,12 +1247,7 @@ void DefaultGamemode::InitializePlayerPersistentData(ServerClient* client) {
     client->persistent.maxHealth    = 100;
 
     // Reset maximum values of inventory.
-    client->persistent.maxBullets   = 200;
-    client->persistent.maxShells    = 100;
-    client->persistent.maxRockets   = 50;
-    client->persistent.maxGrenades  = 50;
-    client->persistent.maxCells     = 200;
-    client->persistent.maxSlugs     = 50;
+    client->persistent.maxAmmo9mm   = 150;
 
     // This client is connected.
     client->persistent.isConnected = true;

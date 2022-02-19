@@ -5,6 +5,14 @@
 *	@file
 *
 *	Base item class. Provides picking up, and respawn item functionalities.
+*   
+*   Each item spawns a single instance for use with the inventory system.
+*   It can implement UseItem functionality this way, and/or set callbacks for
+*   other interactivities. 
+*
+*   Weaponry makes heavy use of the above. A similar but different use case is:
+*   Create a healthkit syringe that visualizes healing a player by using the 
+*   weapon view model. The sky is the limit... :-)
 *
 ***/
 #pragma once
@@ -22,7 +30,6 @@ public:
     using PickupCallbackPointer         = qboolean(SVGBaseItem::*)(SVGBaseEntity *picker);
     using UseInstanceCallbackPointer    = void(SVGBaseItem::*)(SVGBaseEntity *user, SVGBaseItem* item);
     using DropCallbackPointer           = void(SVGBaseItem::*)(SVGBaseEntity* other);
-    using WeaponThinkCallbackPointer    = void(SVGBaseItem::*)(SVGBaseEntity* other);
 
 
     //! Constructor/Deconstructor.
@@ -52,7 +59,7 @@ public:
     **/
 protected:
     /**
-    *   @brief  Only for use by CreateIns
+    *   @brief  Only for use by CreateItemInstance. Here one can set the callbacks for the inventory instance item.
     **/
     virtual void InstanceSpawn();
 
@@ -126,6 +133,16 @@ public:
 
 
 protected:
+    //! Static array holding space for each unique item ID. These instances are
+    //! created at the start of the game and are used for callbacks. Each callback
+    //! is served a pointer to the client's player entity when being fired.
+    static SVGBaseItem* itemInstances[ItemIdentifier::Maximum];
+
+    //! A string index mapper to playerWeaponInstances.
+    //!
+    //! This could probably be done better, but this'll do for now.
+    static std::map<std::string, uint32_t> lookupStrings;
+
     //! Item identifier.
     uint32_t itemIdentifier;
 
@@ -137,16 +154,6 @@ protected:
 
 
 protected:
-    //! Static array holding space for each unique item ID. These instances are
-    //! created at the start of the game and are used for callbacks. Each callback
-    //! is served a pointer to the client's player entity when being fired.
-    static SVGBaseItem* itemInstances[ItemIdentifier::MaxWeapons]; 
-
-    //! A string index mapper to playerWeaponInstances.
-    //!
-    //! This could probably be done better, but this'll do for now.
-    static std::map<std::string, uint32_t> lookupStrings;
-
     /**
     *   @brief  Creates an instance in the itemInstances array if none exists for this item yet.
     **/
@@ -167,12 +174,13 @@ protected:
         return nullptr;
     }
 
+
 public:
     /**
     *   @return Pointer to an item instance that is meant to be used for example, weapon logic.
     **/
     static SVGBaseItem* GetItemInstanceByID(uint32_t identifier) {
-        if (identifier >= 0 && identifier <= ItemIdentifier::MaxWeapons) {
+	    if (identifier >= 0 && identifier <= ItemIdentifier::Maximum) {
 	        return itemInstances[identifier];
 	    } else {
 	        return nullptr;
@@ -187,60 +195,37 @@ public:
 
         // First look it up in the instanceString map.
         if (lookupStrings.contains(name)) {
-		    identifier = lookupStrings[name];
+		    return GetItemInstanceByID(lookupStrings[name]);
 	    } else {
 	        return nullptr;
         }
-
-        // If we found one, get to action.
-	    if (identifier >= 0 && identifier <= ItemIdentifier::Maximum) {
-	        return itemInstances[identifier];
-	    } else {
-	        return nullptr;
-	    }
     }
 
 
 public:
     // Sets the 'Pickup' callback function.
     template<typename function>
-    inline void SetPickupCallback(function f) {
-        pickupFunction = static_cast<PickupCallbackPointer>(f);
-    }
-    inline qboolean HasPickupCallback() {
-        return (pickupFunction != nullptr ? true : false);
-    }
+    inline void SetPickupCallback(function f) { pickupFunction = static_cast<PickupCallbackPointer>(f); }
+    inline qboolean HasPickupCallback() { return (pickupFunction != nullptr ? true : false); }
+
     //! Sets the 'Use Item Instance' callback function.
     template<typename function>
-    inline void SetUseInstanceCallback(function f) {
-        useInstanceFunction = static_cast<UseInstanceCallbackPointer>(f);
-        int x = 10;
-    }
-    inline qboolean HasUseInstanceCallback() {
-        return (useInstanceFunction != nullptr ? true : false);
-    }
+    inline void SetUseInstanceCallback(function f) { useInstanceFunction = static_cast<UseInstanceCallbackPointer>(f); }
+    inline qboolean HasUseInstanceCallback() { return (useInstanceFunction != nullptr ? true : false); }
+
     //! Sets the 'Drop' callback function.
     template<typename function>
-    inline void SetDropCallback(function f) {
-        dropFunction = static_cast<DropCallbackPointer>(f);
-    }
-    inline qboolean HasDropCallback() {
-        return (dropFunction != nullptr ? true : false);
-    }
-    //! Sets the 'WeaponThink' callback function.
-    template<typename function>
-    inline void SetWeaponThinkCallback(function f) {
-        weaponThinkFunction = static_cast<WeaponThinkCallbackPointer>(f);
-    }
-    inline qboolean HasWeaponThinkCallback() {
-        return (weaponThinkFunction != nullptr ? true : false);
-    }
+    inline void SetDropCallback(function f) { dropFunction = static_cast<DropCallbackPointer>(f); }
+    inline qboolean HasDropCallback() { return (dropFunction != nullptr ? true : false); }
 
 
 protected:
-    // Callback function pointers.
+    /**
+    * 
+    *   Callback function pointers.
+    *
+    ***/
     PickupCallbackPointer       pickupFunction = nullptr;
     UseInstanceCallbackPointer  useInstanceFunction = nullptr;
     DropCallbackPointer         dropFunction = nullptr;
-    WeaponThinkCallbackPointer  weaponThinkFunction = nullptr;
 };

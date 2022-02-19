@@ -188,20 +188,13 @@ qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count)
     if (!ent->client)
         return false;
 
-    if (item->tag == AmmoType::Bullets)
-        max = ent->client->persistent.maxBullets;
-    else if (item->tag == AmmoType::Shells)
-        max = ent->client->persistent.maxShells;
-    else if (item->tag == AmmoType::Rockets)
-        max = ent->client->persistent.maxRockets;
-    else if (item->tag == AmmoType::Grenade)
-        max = ent->client->persistent.maxGrenades;
-    else if (item->tag == AmmoType::Cells)
-        max = ent->client->persistent.maxCells;
-    else if (item->tag == AmmoType::Slugs)
-        max = ent->client->persistent.maxSlugs;
-    else
+    if (item->tag == AmmoType::Ammo9mm) {
+	    max = ent->client->persistent.maxAmmo9mm;
+	//    } else if (item->tag == AmmoType::Shells) {
+	//        max = ent->client->persistent.maxShells;
+    } else {
         return false;
+    }
 
 //    index = ITEM_INDEX(item);
 

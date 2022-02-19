@@ -20,11 +20,16 @@
 #include "World/GameWorld.h"
 
 // Wraps up gi.CPrintf for SVGBaseEntities.
-void SVG_CPrintf(SVGBaseEntity* ent, int32_t printlevel, const std::string& str) {
+void SVG_CPrint(SVGBaseEntity* ent, int32_t printlevel, const std::string& str) {
     if (!ent)
     	return;
 
     gi.CPrintf(ent->GetServerEntity(), printlevel, "%s", str.c_str());
+}
+
+// Wraps up gi.DPrintf
+void SVG_DPrint(const std::string& str) {
+    gi.DPrintf("%s", str.c_str());
 }
 
 //

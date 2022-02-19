@@ -300,17 +300,12 @@ static const save_field_t clientfields[] = {
     I(persistent.selectedItem),
     IA(persistent.inventory, MAX_ITEMS),
 
-    I(persistent.maxBullets),
-    I(persistent.maxShells),
-    I(persistent.maxRockets),
-    I(persistent.maxGrenades),
-    I(persistent.maxCells),
-    I(persistent.maxSlugs),
+    I(persistent.maxAmmo9mm),
 
     T(persistent.activeWeapon),
     T(persistent.lastWeapon),
 
-    I(persistent.powerCubes),
+//    I(persistent.powerCubes),
     I(persistent.score),
 
     I(persistent.isSpectator),

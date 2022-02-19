@@ -1,11 +1,12 @@
-/*
-// LICENSE HERE.
-
-//
-// ItemMegaHealth.h
-//
-//
-*/
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Simple health item class, "mega", cuz it heals you to 100%.
+*
+***/
 #pragma once
 
 class SVGBaseEntity;

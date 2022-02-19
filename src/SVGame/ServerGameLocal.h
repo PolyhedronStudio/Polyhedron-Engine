@@ -156,8 +156,11 @@ constexpr int32_t AS_MISSILE = 4;
 *   @brief Item identifiers.
 **/
 struct ItemIdentifier {
+    /***
+    * Weapon Identifiers.
+    ***/
     //! Unused.
-    static constexpr uint32_t None      = 0;
+    static constexpr uint32_t None          = 0;
     //! Pistol.
     static constexpr uint32_t WeaponPistol  = 1;
     //! SMG.
@@ -167,19 +170,25 @@ struct ItemIdentifier {
     //! Maximum amount of weapons allowed.
     static constexpr uint32_t MaxWeapons    = 64;
 
-    //! Reserved1. Intended for weaponry.
-    static constexpr uint32_t Reserved65 = 65;
+    /***
+    * Ammo Identifiers.
+    ***/
+    //! 9 millimeter ammo.
+    static constexpr uint32_t Ammo9mm       = 65;
     //! Reserved2. Intended for weaponry.
-    static constexpr uint32_t Reserved66 = 66;
+    static constexpr uint32_t Reserved66    = 66;
     //! Reserved3. Intended for weaponry.
-    static constexpr uint32_t Reserved67 = 67;
+    static constexpr uint32_t Reserved67    = 67;
     //! Reserved4. Intended for weaponry.
-    static constexpr uint32_t Reserved68 = 68;
+    static constexpr uint32_t Reserved68    = 68;
     //! Reserved5. Intended for weaponry.
-    static constexpr uint32_t Reserved69 = 69;
+    static constexpr uint32_t Reserved69    = 69;
     //! Reserved6. Intended for weaponry.
-    static constexpr uint32_t Reserved70 = 70;
+    static constexpr uint32_t Reserved70    = 70;
 
+    /***
+    * Medical Stats Items.
+    ***/
     //! Mega Health.
     static constexpr uint32_t MegaHealth = 11;
 
@@ -711,7 +720,8 @@ qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);
 qhandle_t SVG_PrecacheSound(const std::string& filename);
 
-void SVG_CPrintf(SVGBaseEntity* ent, int32_t printlevel, const std::string& str);
+void SVG_CPrint(SVGBaseEntity* ent, int32_t printlevel, const std::string& str);
+void SVG_DPrint(const std::string &str);
 void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str);
 void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
 
@@ -739,31 +749,35 @@ struct ClientPersistentData {
     char netname[16];
     int32_t hand;
 
-    qboolean isConnected = false;  // A loadgame will leave valid entities that
-                           // just don't have a connection yet
+    qboolean isConnected = false;   // A loadgame will leave valid entities that
+                                    // just don't have a connection yet
 
-    // Values saved and restored from entities when changing levels
+    /***
+    * Values saved and restored from entities when changing levels
+    ***/
+    //! Client's health.
     int32_t health = 100;
+    //! The maximum amount of health.
     int32_t maxHealth = 100;
+    //! Flags to save.
     int32_t savedFlags = 0;
-
+    //! What item was selected?
     int32_t selectedItem = 0;
+    //! Entire inventory.
     int32_t inventory[MAX_ITEMS] = {};
 
-    // Ammo capacities
-    int32_t maxBullets = 200;
-    int32_t maxShells = 60;
-    int32_t maxRockets = 10;
-    int32_t maxGrenades = 5;
-    int32_t maxCells = 200;
-    int32_t maxSlugs = 200;
+    //! Ammo capacities
+    int32_t maxAmmo9mm = 150;
 
+    //! Pointer to the active weapon item instance.
     SVGBaseItemWeapon *activeWeapon = nullptr;
+    //! Pointer to the last active weapon item instance.
     SVGBaseItemWeapon *lastWeapon = nullptr;
 
-    int32_t powerCubes = 0;    // Used for tracking the cubes in coop games
+    //int32_t powerCubes = 0;    // Used for tracking the cubes in coop games
     int32_t score = 0;         // For calculating total unit score in coop games
 
+    //! Spectator mode or not?
     qboolean isSpectator = false;          // client is a isSpectator
 };
 

@@ -26,7 +26,11 @@ private:
 public:
     DefineClass(SVGBasePlayer, SVGBaseEntity);
 
-    // Interface functions.
+    /***
+    * 
+    *   Interface implementation functions.
+    *
+    ***/
     void Precache() override;    // Precaches data.
     void Spawn() override;       // Spawns the entity.
     void Respawn() override;     // Respawns the entity.
@@ -35,24 +39,56 @@ public:
 
     void SpawnKey(const std::string& key, const std::string& value)  override;
 
-    // Callback functions.
+    /***
+    * 
+    *   Callback functions.
+    *
+    ***/
     void SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
 
 
+    /***
+    * 
+    *   Weapon functions.
+    *
+    ***/
+    /**
+    *   @brief  Adds ammo to the player's inventory.
+    *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
+    **/
+    qboolean AddAmmo(uint32_t ammoIdentifier, uint32_t amount);
+    /**
+    *   @brief  Takes ammo from the player's inventory.
+    *   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
+    **/
+    qboolean TakeAmmo(uint32_t ammoIdentifier, uint32_t amount);
 
-    // Get/Set
+    /**
+    *   @brief  Adds ammo to the player's inventory.
+    *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
+    **/
+    // ...
+
+    /***
+    * 
+    *   Get/Set
+    *
+    ***/
     // Active Weapon.
+    /**
+    *   @return A pointer to the active weapon instance item. nullptr otherwise.
+    **/
     inline SVGBaseItemWeapon* GetActiveWeapon() { return GetClient()->persistent.activeWeapon; }
+    /**
+    *   @brief  Set the active weapon.
+    *   @param  weapon  Expected to be an instance item.
+    **/
     inline void	SetActiveWeapon(SVGBaseItemWeapon* weapon) { GetClient()->persistent.activeWeapon = weapon; }
-
-
-
+    
     /**
     *   @brief  Sets the server entity's client pointer.
     **/
     void SetClient(gclient_s* client) { serverEntity->client = client; }
-
-
 
     /**
     *   @return The killer yaw.
@@ -63,8 +99,6 @@ public:
     **/
     inline void SetKillerYaw(const float& killerYaw) { GetClient()->killerYaw = killerYaw; }
 
-
-
     /**
     *   @return Current movetype of the player.
     **/
@@ -73,8 +107,6 @@ public:
     *   @brief  Sets the movetype of the player.
     **/
     inline void SetPlayerMoveType(const int32_t& type) { GetClient()->playerState.pmove.type = type; }
-
-
 
     /**
     *   @return The frame of when a client's animation "ends".
@@ -92,8 +124,6 @@ public:
     *   @brief  Sets the new prioritized animation.
     **/
     inline void SetPriorityAnimation(const float& priorityAnimation) { GetClient()->animation.priorityAnimation = priorityAnimation; }
-
-
 
     /**
     *   @return Time at which air has been finished.
@@ -143,6 +173,7 @@ public:
     *   @brief  Sets the time for the next drown event to occure.
     **/
     inline void SetNextDrownTime(const float& nextDrownTime) { GetClient()->nextDrownTime = nextDrownTime; }
+    
     /**
     *   @return The time when this player is allowed to respawn again.
     **/
@@ -151,7 +182,6 @@ public:
     *   @brief  Sets the next respawn time for this player.
     **/
     inline void SetRespawnTime(float time) { GetClient()->respawnTime = time; }
-
 
 
 protected:
@@ -164,7 +194,8 @@ protected:
     float debounceDamageTime;
     float debounceSoundTime;
 
-    // View/BobMove Functionality.
+
+    // View and BobMove functionality.
 public:
     // BobMoveCycle is used for view bobbing,
     // where the player FPS view looks like he is

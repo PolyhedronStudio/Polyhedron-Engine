@@ -182,6 +182,8 @@ static SVGBaseEntity* AllocateInstance( Entity* entity ) {		\
 }																\
 __DeclareTypeInfo( mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapSpawn, &classname::AllocateInstance );
 
+
+///////////// OLD MACRO, Kept around just in case.
 // Declares type information the same as DefineMapClass, however it also registers an item's 
 // string name and integer index.
 // NOTE: multiple inheritance not supported
@@ -216,6 +218,7 @@ static SVGBaseEntity* AllocateInstance(Entity* entity) {                        
 };                                                                                                                        \
 __DeclareTypeInfo(mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapSpawn, &classname::AllocateInstance);
 
+///////////// OLD MACRO, Kept around just in case.
 //#define DefineItemWeaponMapClass(itemStringName, itemInstanceString, itemIdentifier, mapClassName, classname, superClass)	\
 //using Base = superClass;                                                                        \
 //static SVGBaseEntity* AllocateInstance(Entity* entity) {                                        \

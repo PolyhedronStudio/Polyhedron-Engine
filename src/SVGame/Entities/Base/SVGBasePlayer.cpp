@@ -20,8 +20,13 @@
 // World.
 #include "../../World/Gameworld.h"
 
-// Class Entities.
-#include "SVGBasePlayer.h"
+// Class entities.
+#include "../Base/SVGBaseEntity.h"
+#include "../Base/SVGBaseTrigger.h"
+#include "../Base/SVGBaseItem.h"
+#include "../Base/SVGBaseItemAmmo.h"
+#include "../Base/SVGBaseItemWeapon.h"
+#include "../Base/SVGBasePlayer.h"
 
 // Constructor/Deconstructor.
 SVGBasePlayer::SVGBasePlayer(Entity* svEntity) : Base(svEntity), 
@@ -262,9 +267,7 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
     } else {
         // Ensure we aren't dead flagged already.
         if (!GetDeadFlag()) {
-            static int i;
-
-            i = (i + 1) % 3;
+            static int i = (i + 1) % 3;
 
             // start a death animation
             SetPriorityAnimation(PlayerAnimation::Death);
@@ -296,6 +299,53 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
 
     // Link our entity back in for collision purposes.
     LinkEntity();
+}
+
+/***
+* 
+*   Weapon functions.
+*
+***/
+/**
+*   @brief  Adds ammo to the player's inventory.
+*   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
+**/
+qboolean SVGBasePlayer::AddAmmo(uint32_t ammoIdentifier, uint32_t amount) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return false;
+    }
+
+    // Now we're here, acquire the item instance of the ammo type.
+    SVGBaseItemAmmo* ammoInstance = SVGBaseItemAmmo::GetAmmoInstanceByID(ammoIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!ammoInstance) {
+        return false;
+    }
+
+    // Get the cap limit for said ammo type.
+    uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
+
+    // Have we hit the cap limit for this ammo type? Return false.
+    if (client->persistent.inventory[ammoIdentifier] >= ammoCapLimit) {
+        return false;
+    }
+
+    // Add ammo amount using a clamp.
+    client->persistent.inventory[ammoIdentifier] = Clampi(client->persistent.inventory[ammoIdentifier] + amount, 0, ammoCapLimit);
+
+    return true;
+}
+/**
+*   @brief  Takes ammo from the player's inventory.
+*   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
+**/
+qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
+    return false;
 }
 
 //===============
@@ -947,7 +997,7 @@ void SVGBasePlayer::CalculateGunOffset() {
 //===============
 //
 void SVGBasePlayer::CalculateScreenBlend() {
-        ServerClient* client = GetClient();
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;

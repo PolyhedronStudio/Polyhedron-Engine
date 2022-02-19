@@ -47,15 +47,36 @@ protected:
 
 
 public:
+    /**
+    *   @return The item index of the primary ammo for this weapon.
+    **/
+    inline virtual uint32_t GetPrimaryAmmoIdentifier() { return ItemIdentifier::Ammo9mm; }
+    /**
+    *   @return The item index of the secondary ammo for this weapon.
+    **/
+    inline virtual uint32_t GetSecondaryAmmoIdentifier() { return 0; }
+
+    /**
+    *   @return Returns the path to this weapon's view model.
+    **/
     inline virtual const std::string GetViewModel() override {
         return "models/weapons/v_smg/tris.iqm"; 
     };
+    /**
+    *   @return Returns the model index of the view model.
+    **/
     inline virtual const uint32_t GetViewModelIndex() { 
         return SVG_PrecacheModel( GetViewModel() ); 
     }
+    /**
+    *   @return Returns the path to this weapon's vorld model.
+    **/
     inline virtual const std::string GetWorldModel() override { 
         return "models/weapons/w_smg/tris.iqm"; 
     };
+    /**
+    *   @return Returns the model index of the world model.
+    **/
     inline virtual const uint32_t GetWorldModelIndex() {
         return SVG_PrecacheModel(GetWorldModel()); 
     }

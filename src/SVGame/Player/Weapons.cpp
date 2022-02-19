@@ -202,10 +202,14 @@ void SVG_ChangeWeapon(SVGBasePlayer *player) {
         return;
     }
 
-    client->weaponState = WeaponState::Activating;
+    // Initiate the player's weapon to drawing.
+    client->weaponState = WeaponState::Drawing;
+
+    // Reset animation gun frame and set up our weapon model index.
     client->playerState.gunFrame = 0;
     client->playerState.gunIndex = client->persistent.activeWeapon->GetViewModelIndex(); //gi.ModelIndex(client->persistent.activeWeapon->GetModel().c_str());
-    gi.DPrintf("Changing weapon to: %s\n", client->persistent.activeWeapon->GetDisplayString().c_str());
+
+    // Set player animation. No clue why the OG code used Pain, but we'll have to live with it for now.
     client->animation.priorityAnimation = PlayerAnimation::Pain;
     if (client->playerState.pmove.flags & PMF_DUCKED) {
         player->SetFrame(FRAME_crpain1);
@@ -365,7 +369,7 @@ void _Weapon_Generic(SVGBasePlayer* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE
 	return;
     }
 
-    if (client->weaponState == WeaponState::Activating) {
+    if (client->weaponState == WeaponState::Drawing) {
 	    if (client->playerState.gunFrame == FRAME_ACTIVATE_LAST) {
 	        client->weaponState = WeaponState::Ready;
 	        client->playerState.gunFrame = FRAME_IDLE_FIRST;
@@ -486,7 +490,7 @@ void Weapon_Generic(SVGBasePlayer *ent, int FRAME_ACTIVATE_FIRST, int FRAME_ACTI
         return;
     }
 
-    if (client->weaponState == WeaponState::Activating) {
+    if (client->weaponState == WeaponState::Drawing) {
         if (client->playerState.gunFrame == FRAME_ACTIVATE_LAST) {
             client->weaponState = WeaponState::Ready;
             client->playerState.gunFrame = FRAME_IDLE_FIRST;

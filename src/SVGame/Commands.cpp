@@ -310,9 +310,9 @@ void Cmd_God_f(SVGBasePlayer *player, ServerClient *client) {
 
     player->SetFlags(player->GetFlags() ^ EntityFlags::GodMode);
     if (!(player->GetFlags() & EntityFlags::GodMode))
-        SVG_CPrintf(player, PRINT_HIGH, "godmode OFF\n");
+        SVG_CPrint(player, PRINT_HIGH, "godmode OFF\n");
     else
-        SVG_CPrintf(player, PRINT_HIGH, "godmode ON\n");
+        SVG_CPrint(player, PRINT_HIGH, "godmode ON\n");
 }
 
 
@@ -333,9 +333,9 @@ void Cmd_Notarget_f(SVGBasePlayer* player, ServerClient* client) {
 
     player->SetFlags(player->GetFlags() ^ EntityFlags::NoTarget);
     if (!(player->GetFlags() & EntityFlags::NoTarget))
-        SVG_CPrintf(player, PRINT_HIGH, "notarget OFF\n");
+        SVG_CPrint(player, PRINT_HIGH, "notarget OFF\n");
     else
-        SVG_CPrintf(player, PRINT_HIGH, "notarget ON\n");
+        SVG_CPrint(player, PRINT_HIGH, "notarget ON\n");
 }
 
 
@@ -354,10 +354,10 @@ void Cmd_Noclip_f(SVGBasePlayer *player, ServerClient *client) {
 
     if (player->GetMoveType() == MoveType::NoClip) {
         player->SetMoveType(MoveType::Walk);
-        SVG_CPrintf(player, PRINT_HIGH, "noclip OFF\n");
+        SVG_CPrint(player, PRINT_HIGH, "noclip OFF\n");
     } else {
         player->SetMoveType(MoveType::NoClip);
-        SVG_CPrintf(player, PRINT_HIGH, "noclip ON\n");
+        SVG_CPrint(player, PRINT_HIGH, "noclip ON\n");
     }
 }
 
@@ -385,19 +385,19 @@ void Cmd_Use_f(SVGBasePlayer *player, ServerClient *client) {
     
     // Check if it is known.
     if (!itemInstance) {
-	    SVG_CPrintf(player, PRINT_HIGH, "unknown item: " + std::string(s) + "\n");
+	    SVG_CPrint(player, PRINT_HIGH, "unknown item: " + std::string(s) + "\n");
         return;
     }
 
     // Check if it can be used at all.
     if (!itemInstance->HasUseInstanceCallback()) {
-	    SVG_CPrintf(player, PRINT_HIGH, "Item '" + itemInstance->GetDisplayString() + "' is not usable.\n");
+	    SVG_CPrint(player, PRINT_HIGH, "Item '" + itemInstance->GetDisplayString() + "' is not usable.\n");
         return;
     }
 
     // See if it exists in the player's inventory, if not, he ran out.
     if (!client->persistent.inventory[itemInstance->GetIdentifier()]) {
-    	SVG_CPrintf(player, PRINT_HIGH, "Out of item: " + itemInstance->GetDisplayString()  + "\n");
+    	SVG_CPrint(player, PRINT_HIGH, "Out of item: " + itemInstance->GetDisplayString()  + "\n");
         return;
     }
 
@@ -480,7 +480,7 @@ void Cmd_InvUse_f(SVGBasePlayer *player, ServerClient *client) {
     //HUD_ValidateSelectedItem(ent);
 
     if (client->persistent.selectedItem == -1) {
-        SVG_CPrintf(player, PRINT_HIGH, "No item to use.\n");
+        SVG_CPrint(player, PRINT_HIGH, "No item to use.\n");
         return;
     }
 
@@ -699,7 +699,7 @@ void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
         strcat(large, small);
     }
 
-    SVG_CPrintf(player, PRINT_HIGH, std::string(large) + std::string("\n") + std::to_string(numConnectedClients) + std::string(" players\n"));
+    SVG_CPrint(player, PRINT_HIGH, std::string(large) + std::string("\n") + std::to_string(numConnectedClients) + std::string(" players\n"));
 }
 
 ///*
@@ -816,7 +816,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
     if (flood_msgs->value) {
         // Notify client of his spamming behaviors.
         if (level.time < client->flood.lockTill) {
-	        SVG_CPrintf(player, PRINT_HIGH, "You can't talk for " + std::to_string((int)(client->flood.lockTill - level.time)) + " more seconds\n ");
+	        SVG_CPrint(player, PRINT_HIGH, "You can't talk for " + std::to_string((int)(client->flood.lockTill - level.time)) + " more seconds\n ");
             return;
         }
 
@@ -827,7 +827,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
 
         if (client->flood.when[i] && level.time - client->flood.when[i] < flood_persecond->value) {
             client->flood.lockTill = level.time + flood_waitdelay->value;
-    	    SVG_CPrintf(player, PRINT_CHAT, "Flood protection:  You can't talk for " + std::to_string(static_cast<int>(flood_waitdelay->value)) + " seconds.\n ");
+    	    SVG_CPrint(player, PRINT_CHAT, "Flood protection:  You can't talk for " + std::to_string(static_cast<int>(flood_waitdelay->value)) + " seconds.\n ");
             return;
         }
 
@@ -837,7 +837,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
     }
 
     if (dedicated->value)
-        SVG_CPrintf(NULL, PRINT_CHAT, sayBuffer);
+        SVG_CPrint(NULL, PRINT_CHAT, sayBuffer);
 
     // Loop over client entities.
     for (auto& otherplayer : GetGameworld()->GetClassEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
@@ -846,7 +846,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
                 continue;
         }
 
-        SVG_CPrintf(otherplayer, PRINT_CHAT, sayBuffer);
+        SVG_CPrint(otherplayer, PRINT_CHAT, sayBuffer);
     }
 }
 
@@ -874,12 +874,12 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
                    e2->client->respawn.isSpectator ? " (isSpectator)" : "");
         if (strlen(text) + strlen(st) > sizeof(text) - 50) {
             sprintf(text + strlen(text), "And more...\n");
-            SVG_CPrintf(player, PRINT_HIGH, text);
+            SVG_CPrint(player, PRINT_HIGH, text);
             return;
         }
         strcat(text, st);
     }
-    SVG_CPrintf(player, PRINT_HIGH, text);
+    SVG_CPrint(player, PRINT_HIGH, text);
 }
 
 

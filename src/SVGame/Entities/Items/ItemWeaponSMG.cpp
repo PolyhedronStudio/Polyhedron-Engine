@@ -79,8 +79,7 @@ void ItemWeaponSMG::Precache() {
     SVG_PrecacheSound("weapons/smg/reloadclip2.wav");
 
     // Precache world and view model.
-    SVG_PrecacheModel("models/weapons/v_smg/tris.iqm");
-    SVG_PrecacheModel("models/weapons/w_smg/tris.iqm");
+
 }
 
 //
@@ -92,9 +91,6 @@ void ItemWeaponSMG::Precache() {
 void ItemWeaponSMG::Spawn() {
     // Always call parent class method.
     Base::Spawn();
-
-    // Set the weapon world model.
-    SetModel("models/weapons/w_smg/tris.iqm");
 
     // Set render effects to be glowy.
     SetEffects(GetEffects() | EntityEffectType::Rotate);
@@ -172,49 +168,36 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
 
     // Cast to SVGBasePlayer.
     SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(other);
+    // Acquire client.
     ServerClient *client = player->GetClient();
-
-    // Acquire our identifier.
-    uint32_t id = GetIdentifier();
+    // Acquire the player's active weapon instance. (If any.)
+    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
+    // Acquire our SMG Weapon item identifier.
+    uint32_t smgWeaponIdentifier = GetIdentifier();
 
     // TODO HERE: Check whether game mode allows for picking up this tiem.
-    player->GetClient()->persistent.inventory[id]++; // If we CAN pick it up, increment inventory item index.
-
+    player->GetClient()->persistent.inventory[smgWeaponIdentifier]++;  // If we CAN pick it up, increment inventory item index.
+    
     // If this item wasn't dropped by an other player, give them some ammo to go along.
-    //if (!(GetSpawnFlags() & DROPPED_ITEM)) {
-        // TODO HERE: Add ammo of quantity to player->GetClient()->persistent.inventory[AmmoIdentifier()];
+    if (!(GetSpawnFlags() & ItemSpawnFlags::DroppedItem)) {
+    	// TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
+	    player->AddAmmo(GetPrimaryAmmoIdentifier(), 50);
+    }
 
-        // TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
-    //}
-
-    // Last but not least, set the weapon as active in case the player does not have it selected.
-    //gi.DPrintf("BEFORE: Identifier=%i, activeWeaponIdentifier=%i, inventory[%i]=%i\n", GetIdentifier(), client->persistent.activeWeapon->GetIdentifier(), id, client->persistent.inventory[id]);
-    if (client->persistent.activeWeapon != SVGBaseItemWeapon::GetItemInstanceByID(id) && client->persistent.inventory[id] >= 1) {
-	    // Ensure the item is of class smg, return false if not.
-        SVGBaseItem *itemInstance= SVGBaseItem::GetItemInstanceByID(id);
-
-        if (!itemInstance->IsClass<ItemWeaponSMG>()) {
-            return false;
-        }
-
-        // Up cast our weapon to SVGItemWeaponSMG.
-    	ItemWeaponSMG* weaponInstance = dynamic_cast<ItemWeaponSMG*>(itemInstance);
+    // Do an auto change weapon pick up in this case.
+    if (!activeWeapon || (activeWeapon->GetIdentifier() != smgWeaponIdentifier && client->persistent.inventory[smgWeaponIdentifier] >= 1)) {
+	    // Fetch weapon instance to assign for this player.
+	    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(smgWeaponIdentifier);
 
         // Set it as our new weapon.
         client->newWeapon = weaponInstance;
-    }
-    //gi.DPrintf("MID: Identifier=%i, activeWeaponIdentifier=%i, inventory[%i]=%i\n", GetIdentifier(), client->persistent.activeWeapon->GetIdentifier(), id, client->persistent.inventory[id]);
-    
-    // Activate freshly pickup weapon.
-    //SVG_ChangeWeapon(player);
 
-    //gi.DPrintf("AFTER: Identifier=%i, activeWeaponIdentifier=%i, inventory[%i]=%i\n", GetIdentifier(), client->persistent.activeWeapon->GetIdentifier(), id, client->persistent.inventory[id]);
+        // Call upon the change weapon logic.
+        SVG_ChangeWeapon(player);
+    }
 
     // Play sound.
     SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
-
-    // Let it be known we picked the fucker up.
-    SVG_CenterPrint(other, std::string("Picked up item: ") + GetClassname());
 
     // Set a respawn think for after 2 seconds.
     if (!game.GetGamemode()->IsClass<DefaultGamemode>()) {
@@ -246,22 +229,21 @@ void ItemWeaponSMG::WeaponSMGUseInstance(SVGBaseEntity* user, SVGBaseItem* item)
 
     // Cast to player.
     SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(user);
-
     // Cast to weapon.
     ItemWeaponSMG* smgItem = dynamic_cast<ItemWeaponSMG*>(item);
-
     // Get its identifier.
     uint32_t smgItemID = smgItem->GetIdentifier();
-
     // Get client.
     ServerClient* client = player->GetClient();
 
     // Prevent change weapon from happening if this weapon happens to be already active.
-    if (client->persistent.activeWeapon && client->persistent.activeWeapon->GetIdentifier() != smgItemID) {
-	    SVG_ChangeWeapon(player);
-    } else if (!client->persistent.activeWeapon) {
-	    SVG_ChangeWeapon(player);
-    }
+    client->newWeapon = smgItem;
+    SVG_ChangeWeapon(player);
+    //if (client->persistent.activeWeapon && client->persistent.activeWeapon->GetIdentifier() != smgItemID) {
+	   // SVG_ChangeWeapon(player);
+    //} else if (!client->persistent.activeWeapon) {
+	   // SVG_ChangeWeapon(player);
+    //}
 }
 //===============
 // ItemWeaponSMG::WeaponSMGDie

@@ -84,9 +84,10 @@ SET( SRC_SVGAME
 	SVGame/ai/MonsterAI.cpp
 	SVGame/Entities/Base/SVGBaseEntity.cpp
 	SVGame/Entities/Base/SVGBaseItem.cpp
+	SVGame/Entities/Base/SVGBaseItemAmmo.cpp
+	SVGame/Entities/Base/SVGBaseItemWeapon.cpp
 	SVGame/Entities/Base/SVGBaseTrigger.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
-	SVGame/Entities/Base/SVGBaseItemWeapon.cpp
 	SVGame/Entities/Base/SVGEntityHandle.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
 	SVGame/Entities/Base/DebrisEntity.cpp
@@ -98,6 +99,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerDeathmatch.cpp
 	SVGame/Entities/Info/InfoPlayerIntermission.cpp
 	SVGame/Entities/Info/InfoPlayerStart.cpp
+	SVGame/Entities/Items/ItemAmmo9mm.cpp
 	SVGame/Entities/Items/ItemHealthMega.cpp
 	#SVGame/Entities/Items/ItemWeaponKnife.cpp
 	SVGame/Entities/Items/ItemWeaponPistol.cpp
@@ -186,9 +188,10 @@ SET( SRC_SVGAME
 	SVGame/AI/MonsterAI.h
 	SVGame/Entities/Base/SVGBaseEntity.h
 	SVGame/Entities/Base/SVGBaseItem.h
+	SVGame/Entities/Base/SVGBaseItemAmmo.h
+	SVGame/Entities/Base/SVGBaseItemWeapon.h
 	SVGame/Entities/Base/SVGBaseTrigger.h
 	SVGame/Entities/Base/SVGBaseMover.h
-	SVGame/Entities/Base/SVGBaseItemWeapon.h
 	SVGame/Entities/Base/SVGEntityHandle.h
 	SVGame/Entities/Base/BodyCorpse.h
 	SVGame/Entities/Base/DebrisEntity.h
@@ -209,6 +212,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerDeathmatch.h
 	SVGame/Entities/Info/InfoPlayerIntermission.h
 	SVGame/Entities/Info/InfoPlayerStart.h
+	SVGame/Entities/Items/ItemAmmo9mm.h
 	SVGame/Entities/Items/ItemHealthMega.h
 	#SVGame/Entities/Items/ItemWeaponKnife.h
 	SVGame/Entities/Items/ItemWeaponPistol.h
