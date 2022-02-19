@@ -56,12 +56,24 @@ public:
     *   @brief  Adds ammo to the player's inventory.
     *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
     **/
-    qboolean AddAmmo(uint32_t ammoIdentifier, uint32_t amount);
+    qboolean GiveAmmo(uint32_t ammoIdentifier, uint32_t amount);
     /**
     *   @brief  Takes ammo from the player's inventory.
     *   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
     **/
     qboolean TakeAmmo(uint32_t ammoIdentifier, uint32_t amount);
+
+    /**
+    *   @brief  Gives a specific amount of weapon type to the player.
+    *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
+    **/
+    qboolean GiveWeapon(uint32_t weaponIdentifier, uint32_t amount);
+    /**
+    *   @brief  Takes away a specific amount of weapon type to the player.
+    *   @param  amount  Defaults to 1, set it to more in example: grenades.
+    *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
+    **/
+    qboolean TakeWeapon(uint32_t weaponIdentifier, uint32_t amount);
 
     /**
     *   @brief  Adds ammo to the player's inventory.

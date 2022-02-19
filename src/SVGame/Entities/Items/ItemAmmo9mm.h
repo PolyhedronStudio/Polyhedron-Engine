@@ -48,7 +48,7 @@ public:
     /**
     *   @return The maximum ammo cap limit to carry around for this ammo type.
     **/
-    virtual uint32_t GetCapLimit() { return 150; }
+    virtual uint32_t GetCapLimit() { return 144; }
 
 
     /**

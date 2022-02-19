@@ -65,6 +65,9 @@ void ItemAmmo9mm::Spawn() {
     // Set the health model.
     SetModel("models/ammo/9mmclip/tris.iqm");
 
+    // Set effects to rotate.
+    SetEffects(GetEffects() | EntityEffectType::Rotate);
+
     // Set render effects to be glowy.
     SetRenderEffects(GetRenderEffects() | RenderEffects::Glow | RenderEffects::DebugBoundingBox);
 
@@ -75,7 +78,7 @@ void ItemAmmo9mm::Spawn() {
     
     // Set the count for the amount of ammo this item will give.
     if (!GetCount()) {
-	    SetCount(50);   // I read that 50 is typical for 9mm ammo wpns, lol.
+	    SetCount(36);   // I read that 50 is typical for 9mm ammo wpns, lol.
     }
 
     // Set entity to allow taking damage (can't explode otherwise.)
@@ -111,23 +114,10 @@ qboolean ItemAmmo9mm::Ammo9mmPickup(SVGBaseEntity* other) {
     }
 
     // If the player can't add ammo, return false so this item won't get picked up.
-    if (!player->AddAmmo(GetIdentifier(), 50)) {
+    if (!player->GiveAmmo(GetIdentifier(), 36)) {
 	    SVG_CenterPrint(player, "You're already carring too much 9mm ammo.");
         return false;
     }
-
-    //// Increase ammo and ensure it won't get maxed out.
-    //uint32_t id = GetIdentifier();
-    //if (client->persistent.inventory[id] < 150) {
-    //    // Clamp it between 0 and 150.
-    //    client->persistent.inventory[id] = Clampi(client->persistent.inventory[id] + 50, 0, 150);
-    //} else {
-    //    // Notify the player that it can't carry more 9mm ammo right now.
-	   // SVG_CenterPrint(player, "You're already carring too much 9mm ammo.");
-
-    //    // Return false to notify we did NOT pick it up.
-    //    return false;
-    //}
 
     // Play sound.
     SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);

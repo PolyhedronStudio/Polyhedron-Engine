@@ -172,22 +172,21 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     ServerClient *client = player->GetClient();
     // Acquire the player's active weapon instance. (If any.)
     SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
-    // Acquire our SMG Weapon item identifier.
-    uint32_t smgWeaponIdentifier = GetIdentifier();
 
     // TODO HERE: Check whether game mode allows for picking up this tiem.
-    player->GetClient()->persistent.inventory[smgWeaponIdentifier]++;  // If we CAN pick it up, increment inventory item index.
-    
+    // Check whether the player already had an SMG or not.
+    player->GiveWeapon(ItemIdentifier::SMG, 1);
+
     // If this item wasn't dropped by an other player, give them some ammo to go along.
     if (!(GetSpawnFlags() & ItemSpawnFlags::DroppedItem)) {
     	// TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
-	    player->AddAmmo(GetPrimaryAmmoIdentifier(), 50);
+	    player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
     }
 
     // Do an auto change weapon pick up in this case.
-    if (!activeWeapon || (activeWeapon->GetIdentifier() != smgWeaponIdentifier && client->persistent.inventory[smgWeaponIdentifier] >= 1)) {
+    if (!activeWeapon || (activeWeapon->GetIdentifier() != ItemIdentifier::SMG && client->persistent.inventory[ItemIdentifier::SMG] >= 1)) {
 	    // Fetch weapon instance to assign for this player.
-	    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(smgWeaponIdentifier);
+    	SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(ItemIdentifier::SMG);
 
         // Set it as our new weapon.
         client->newWeapon = weaponInstance;

@@ -48,6 +48,11 @@ protected:
 
 public:
     /**
+    *   @return The maximum amount one is allowed to carry of this weapon.
+    **/
+    inline virtual uint32_t GetCarryLimit() { return 1; }
+
+    /**
     *   @return The item index of the primary ammo for this weapon.
     **/
     inline virtual uint32_t GetPrimaryAmmoIdentifier() { return ItemIdentifier::Ammo9mm; }

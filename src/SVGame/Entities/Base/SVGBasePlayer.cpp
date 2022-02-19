@@ -310,7 +310,7 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
 *   @brief  Adds ammo to the player's inventory.
 *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
 **/
-qboolean SVGBasePlayer::AddAmmo(uint32_t ammoIdentifier, uint32_t amount) {
+qboolean SVGBasePlayer::GiveAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     // Get client.
     ServerClient* client = GetClient();
 
@@ -340,12 +340,110 @@ qboolean SVGBasePlayer::AddAmmo(uint32_t ammoIdentifier, uint32_t amount) {
 
     return true;
 }
+
 /**
 *   @brief  Takes ammo from the player's inventory.
 *   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
 **/
 qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
-    return false;
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return false;
+    }
+
+    // Now we're here, acquire the item instance of the ammo type.
+    SVGBaseItemAmmo* ammoInstance = SVGBaseItemAmmo::GetAmmoInstanceByID(ammoIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!ammoInstance) {
+        return false;
+    }
+
+    // Have we hit the cap limit for this ammo type? Return false.
+    if (client->persistent.inventory[ammoIdentifier] <= 0) {
+        return false;
+    }
+        
+    // Get the cap limit for said ammo type.
+    uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
+
+    // Add ammo amount using a clamp.
+    client->persistent.inventory[ammoIdentifier] = Clampi(client->persistent.inventory[ammoIdentifier] - amount, 0, ammoCapLimit);
+
+    return true;
+}
+
+/**
+*   @brief  Adds weapon to the player's inventory.
+*   @return True on success, false on failure. (Meaning the player reached the maximum carrying limit.)
+**/
+qboolean SVGBasePlayer::GiveWeapon(uint32_t weaponIdentifier, uint32_t amount) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+	    return false;
+    }
+
+    // Now we're here, acquire the item instance of the weapon type.
+    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(weaponIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!weaponInstance) {
+	    return false;
+    }
+
+    // Get limited amount a player can carry of this weapon type.
+    uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
+
+    // Have we hit the cap limit for this weapon type? Return false.
+    if (client->persistent.inventory[weaponIdentifier] >= weaponCarryLimit) {
+	    return false;
+    }
+
+    // Add weapon amount using a clamp.
+    client->persistent.inventory[weaponIdentifier] = Clampi(client->persistent.inventory[weaponIdentifier] + amount, 0, weaponCarryLimit);
+
+    return true;
+}
+
+/**
+*   @brief  Takes away a specific amount of weapon type from the player's inventory.
+*   @return True on success, false on failure. (Meaning he has none left.)
+**/
+qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+	return false;
+    }
+
+    // Now we're here, acquire the item instance of the weapon type.
+    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(weaponIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!weaponInstance) {
+	    return false;
+    }
+
+    // Have we hit the cap limit for this weapon type? Return false.
+    if (client->persistent.inventory[weaponIdentifier] <= 0) {
+    	return false;
+    }
+
+    // Get limited amount a player can carry of this weapon type.
+    uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
+
+    // Add weapon amount using a clamp.
+    client->persistent.inventory[weaponIdentifier] = Clampi(client->persistent.inventory[weaponIdentifier] - amount, 0, weaponCarryLimit);
+
+    return true;
 }
 
 //===============
