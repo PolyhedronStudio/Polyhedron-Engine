@@ -101,12 +101,9 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerStart.cpp
 	SVGame/Entities/Items/ItemAmmo9mm.cpp
 	SVGame/Entities/Items/ItemHealthMega.cpp
-	#SVGame/Entities/Items/ItemWeaponKnife.cpp
-	SVGame/Entities/Items/ItemWeaponPistol.cpp
+	SVGame/Entities/Items/ItemWeaponKnife.cpp
+	SVGame/Entities/Items/ItemWeaponBeretta.cpp
 	SVGame/Entities/Items/ItemWeaponSMG.cpp
-	#SVGame/Entities/Items/ItemWeaponMachinegun.cpp
-	#SVGame/Entities/Items/ItemWeaponShotgun.cpp
-	#SVGame/Entities/Items/ItemWeaponSuperShotgun.cpp
 	SVGame/Entities/Func/FuncAreaportal.cpp
 	SVGame/Entities/Func/FuncButton.cpp
 	#SVGame/Entities/Func/FuncConveyor.cpp
@@ -212,14 +209,15 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerDeathmatch.h
 	SVGame/Entities/Info/InfoPlayerIntermission.h
 	SVGame/Entities/Info/InfoPlayerStart.h
+	
 	SVGame/Entities/Items/ItemAmmo9mm.h
+	
 	SVGame/Entities/Items/ItemHealthMega.h
-	#SVGame/Entities/Items/ItemWeaponKnife.h
-	SVGame/Entities/Items/ItemWeaponPistol.h
+	
+	SVGame/Entities/Items/ItemWeaponKnife.h
+	SVGame/Entities/Items/ItemWeaponBeretta.h
 	SVGame/Entities/Items/ItemWeaponSMG.h
-	#SVGame/Entities/Items/ItemWeaponMachinegun.h
-	#SVGame/Entities/Items/ItemWeaponShotgun.h
-	#SVGame/Entities/Items/ItemWeaponSuperShotgun.h
+
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h
 	SVGame/Entities/Path/PathCorner.h

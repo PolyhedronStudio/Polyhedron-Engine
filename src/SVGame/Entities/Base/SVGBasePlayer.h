@@ -52,6 +52,7 @@ public:
     *   Weapon functions.
     *
     ***/
+
     /**
     *   @brief  Adds ammo to the player's inventory.
     *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)

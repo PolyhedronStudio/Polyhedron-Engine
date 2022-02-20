@@ -24,6 +24,8 @@
 // Base Item Weapon.
 #include "SVGBaseItemWeapon.h"
 
+// Game world.
+#include "../../World/Gameworld.h"
 
 //
 // Constructor/Deconstructor.
@@ -108,21 +110,73 @@ void SVGBaseItemWeapon::Think() {
 //
 // Entity functions.
 //
+void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    //// Huuueeeee
+    if (!player || !client) {
+        return;
+    }
+
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponThink : %f\n", level.time);
+
+    //// Do we need to switch weapons now?
+    //SVGBaseItemWeapon* activeWeapon = client->persistent.activeWeapon;
+    //SVGBaseItemWeapon* newWeapon = client->newWeapon;
+
+    //// When a weapon's state is down, we can exchange the active weapon with the new weapon.
+    //if (newWeapon && (client->weaponState == WeaponState::Finished || client->weaponState == WeaponState::Down)) {
+    //    // Current active weapon moves into last weapon slot.
+	   // client->persistent.lastWeapon = activeWeapon;
+
+    //    // Active weapon gets set to new weapon.
+	   // client->persistent.activeWeapon = newWeapon;
+
+    //    // Reset new weapon to nullptr since we're not needing it anymore.
+	   // client->newWeapon = nullptr;
+
+	   // // Set weapon state: Draw.
+	   // client->weaponState = WeaponState::Draw;
+
+    //    // Set visible model
+    //    if (player->GetModelIndex() == 255) {
+    //        int32_t i = 0;
+	   //     if (client->persistent.activeWeapon) {
+	   //         i = ((client->persistent.activeWeapon->GetViewModelIndex() & 0xff) << 8);
+	   //     } else {
+		  //      i = 0;
+	   //     }
+    //
+    //        player->SetSkinNumber((player->GetServerEntity() - game.GetGameworld()->GetServerEntities() - 1) | i);
+    //    }
+
+    //    // Update the player state: gunIndex & ammoIndex to 0, meaning it won't display.
+    //    if (!client->persistent.activeWeapon) {
+	   //     // dead
+	   //     client->playerState.gunIndex = 0;
+	   //     client->ammoIndex = 0;
+	   //     return;
+    //    }
+
+    //    // Update the client's ammo index.
+    //    if (client->persistent.activeWeapon) {
+    //	    client->ammoIndex = client->persistent.activeWeapon->GetPrimaryAmmoIdentifier();
+    //    } else {
+    //        client->ammoIndex = 0;
+    //    }
+
+
+    //    // Update playerstate: gunFrame and gunIndex.
+    //    client->playerState.gunIndex = client->persistent.activeWeapon->GetViewModelIndex();
+    //}
+
+    //// Fire weapon callback.
+    //if (HasWeaponThinkCallback()) { 
+    //    (this->*weaponThinkFunction)(player, weapon, client);
+    //}
+}
+
 //===============
 // SVGBaseItemWeapon::SetRespawn
 //===============
 void SVGBaseItemWeapon::SetRespawn(const float delay) {
     Base::SetRespawn(delay);
 }
-
-
-//
-// Weapon activity engagement functions.
-//
-void SVGBaseItemWeapon::WeaponThink(SVGBasePlayer* player) {
-
-}
-
-//void SVGBaseItemWeapon::BaseItemWeaponUse(SVGBaseEntity* caller, SVGBaseEntity* activator) { 
-//    gi.DPrintf("USED UR WEAPON LULZ\n");
-//}

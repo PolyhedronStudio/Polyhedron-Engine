@@ -243,9 +243,9 @@ then clears the write buffer.
 
 Archived in MVD stream.
 
-MultiCast::All    same as broadcast (origin can be NULL)
-MultiCast::PVS    send to clients potentially visible from org
-MultiCast::PHS    send to clients potentially hearable from org
+Multicast::All    same as broadcast (origin can be NULL)
+Multicast::PVS    send to clients potentially visible from org
+Multicast::PHS    send to clients potentially hearable from org
 =================
 */
 void SV_Multicast(const vec3_t &origin, int32_t to)
@@ -264,25 +264,25 @@ void SV_Multicast(const vec3_t &origin, int32_t to)
     flags = 0;
 
     switch (to) {
-    case MultiCast::All_R:
+    case Multicast::All_R:
         flags |= MSG_RELIABLE;
         // intentional fallthrough
-    case MultiCast::All:
+    case Multicast::All:
         leaf1 = NULL;
         leafnum = 0;
         break;
-    case MultiCast::PHS_R:
+    case Multicast::PHS_R:
         flags |= MSG_RELIABLE;
         // intentional fallthrough
-    case MultiCast::PHS:
+    case Multicast::PHS:
         leaf1 = CM_PointLeaf(&sv.cm, origin); // MATHLIB: !! Or do *origin??
         leafnum = leaf1 - sv.cm.cache->leafs;
         BSP_ClusterVis(sv.cm.cache, mask, leaf1->cluster, DVIS_PHS);
         break;
-    case MultiCast::PVS_R:
+    case Multicast::PVS_R:
         flags |= MSG_RELIABLE;
         // intentional fallthrough
-    case MultiCast::PVS:
+    case Multicast::PVS:
         leaf1 = CM_PointLeaf(&sv.cm, origin); // MATHLIB: !! Or do *origin??
         leafnum = leaf1 - sv.cm.cache->leafs;
         BSP_ClusterVis(sv.cm.cache, mask, leaf1->cluster, DVIS_PVS2);

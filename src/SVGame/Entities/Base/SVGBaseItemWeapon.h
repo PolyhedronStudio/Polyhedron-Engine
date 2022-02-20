@@ -20,7 +20,7 @@ public:
     *   Weapon Item callback function pointers.
     *
     ***/
-    using WeaponThinkCallbackPointer    = void(SVGBaseItem::*)(SVGBaseEntity* user);
+    using WeaponThinkCallbackPointer    = void(SVGBaseItemWeapon::*)(SVGBaseEntity* user, SVGBaseItemWeapon *weapon, ServerClient *client);
 
 
     //! Constructor/Deconstructor.
@@ -51,6 +51,16 @@ public:
     *           primary/secondary ammo isn't in use for this weapon.
     *
     ***/
+    /**
+    *   @brief  Only called when allowed to think.
+    **/
+    virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+
+    ///**
+    //*   @brief  Called to execute the animation of the current weaponstate.
+    //**/
+    //virtual void InstanceWeaponAnimate(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+
     /**
     *   @return Pointer to a weapon item instance. Does a typeinfo check to make sure. 
     *           Returns nullptr if not found or a type mismatch occures.
@@ -103,12 +113,12 @@ public:
     virtual void SetRespawn(const float delay) override;	 // Sets the item in respawn mode.
 
     //
-    // The following functions look up a callback and fire it accordingly.
+    // The following function looks up a callback and will fire it accordingly.
     // This may seem a bit convoluted or unnecesarry however it allows
     // for exchanging callbacks. By doing so, weapons can have more variety
     // and we won't clutter it all with if statements.
     //
-    void WeaponThink(SVGBasePlayer* player);
+    //virtual void WeaponSMGIdle(SVGBasePlayer* player, ServerClient* client);
 
 public:
 

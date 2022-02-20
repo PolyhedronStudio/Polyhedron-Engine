@@ -35,5 +35,5 @@ void TargetTempEntity::TempEntityUse( SVGBaseEntity* other, SVGBaseEntity* activ
 	gi.WriteByte( ServerGameCommands::TempEntity );
 	gi.WriteByte( GetStyle() );
 	gi.WriteVector3( GetOrigin() );
-	gi.Multicast( GetOrigin(), MultiCast::PVS );
+	gi.Multicast( GetOrigin(), Multicast::PVS );
 }

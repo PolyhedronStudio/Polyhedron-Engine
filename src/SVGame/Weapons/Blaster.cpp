@@ -61,7 +61,7 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
     //gi.WriteShort(ent->GetServerEntity() - g_entities);
     //gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     //vec3_t origin = ent->GetOrigin();
-    //gi.Multicast(origin, MultiCast::PVS);
+    //gi.Multicast(origin, Multicast::PVS);
     static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_HSPREAD = 300;
     static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_VSPREAD = 500;
 
@@ -96,7 +96,7 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
     gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(origin, MultiCast::PVS);
+    gi.Multicast(origin, Multicast::PVS);
 
 
     //int32_t i;
@@ -185,5 +185,5 @@ void Weapon_Blaster(SVGBasePlayer* ent)
     static int  fire_frames[] = { 119 };
 
     //Weapon_Generic(ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
-    Weapon_Generic(ent, 136, 160, 114, 124, 160, 160, 124, 134, pause_frames, fire_frames, Weapon_Blaster_Fire);
+    //Weapon_Generic(ent, 136, 160, 114, 124, 160, 160, 124, 134, pause_frames, fire_frames, Weapon_Blaster_Fire);
 }

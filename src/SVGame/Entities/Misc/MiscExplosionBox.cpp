@@ -272,7 +272,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::Explosion1);
         gi.WriteVector3(GetOrigin());
-        gi.Multicast(GetOrigin(), MultiCast::PHS);
+        gi.Multicast(GetOrigin(), Multicast::PHS);
 
         SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
@@ -285,7 +285,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::Explosion2);
         gi.WriteVector3(GetOrigin());
-        gi.Multicast(GetOrigin(), MultiCast::PHS);
+        gi.Multicast(GetOrigin(), Multicast::PHS);
 
         SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 

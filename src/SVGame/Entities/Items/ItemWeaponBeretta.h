@@ -4,7 +4,7 @@
 *
 *	@file
 *
-*	Sub Machine Gun weapon.
+*	Beretta weapon.
 *
 ***/
 #pragma once
@@ -13,13 +13,13 @@ class SVGBaseEntity;
 class SVGBaseItem;
 class SVGBaseItemWeapon;
 
-class ItemWeaponSMG : public SVGBaseItemWeapon {
+class ItemWeaponBeretta : public SVGBaseItemWeapon {
 public:
     // Constructor/Deconstructor.
-    ItemWeaponSMG(Entity* svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~ItemWeaponSMG();
+    ItemWeaponBeretta(Entity* svEntity, const std::string& displayString, uint32_t identifier);
+    virtual ~ItemWeaponBeretta();
 
-    DefineItemMapClass("Sub Machine Gun", "smg", ItemIdentifier::SMG, "item_weapon_smg", ItemWeaponSMG, SVGBaseItemWeapon);
+    DefineItemMapClass("Beretta", "beretta", ItemIdentifier::Beretta, "item_weapon_beretta", ItemWeaponBeretta, SVGBaseItemWeapon);
 
     // Item flags
     //static constexpr int32_t IF_xxx = 1 << 0;
@@ -28,11 +28,11 @@ public:
     //
     // Interface functions.
     //
-    virtual void Precache() override;   // Precaches data.
-    virtual void Spawn() override;      // Spawns the entity.
+    virtual void Precache() override;	// Precaches data.
+    virtual void Spawn() override;	// Spawns the entity.
     virtual void Respawn() override;	// Respawns the entity.
     virtual void PostSpawn() override;	// PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    virtual void Think() override;      // General entity thinking routine.
+    virtual void Think() override;	// General entity thinking routine.
 
     /**
     *
@@ -64,28 +64,24 @@ public:
     /**
     *   @return Returns the path to this weapon's view model.
     **/
-    inline virtual const std::string GetViewModel() override {
-        return "models/weapons/v_smg/tris.iqm"; 
+    inline virtual const std::string GetViewModel() override { 
+        return "models/weapons/v_beretta/tris.iqm";
     };
     /**
     *   @return Returns the model index of the view model.
     **/
-    inline virtual const uint32_t GetViewModelIndex() override { 
-        return SVG_PrecacheModel( GetViewModel() ); 
-    }
+    inline virtual const uint32_t GetViewModelIndex() override { return SVG_PrecacheModel(GetViewModel()); }
 
     /**
     *   @return Returns the path to this weapon's vorld model.
     **/
     inline virtual const std::string GetWorldModel() override { 
-        return "models/weapons/w_smg/tris.iqm"; 
+        return "models/weapons/w_beretta/tris.iqm"; 
     };
     /**
     *   @return Returns the model index of the world model.
     **/
-    inline virtual const uint32_t GetWorldModelIndex() override {
-        return SVG_PrecacheModel(GetWorldModel()); 
-    }
+    inline virtual const uint32_t GetWorldModelIndex() override { return SVG_PrecacheModel(GetWorldModel()); }
 
 
     /**
@@ -123,13 +119,12 @@ public:
     *   @brief  Checks whether to add to inventory or not. In case of adding it 
     *           to the inventory it also checks whether to change weapon or not.
     **/
-    qboolean WeaponSMGPickup(SVGBaseEntity* other);
+    qboolean WeaponBerettaPickup(SVGBaseEntity* other);
 
     /**
-    *   @brief Changes the player's weapon to the SMG if it has one that is.
+    *   @brief Changes the player's weapon to the Beretta if it has one that is.
     **/
-    void InstanceWeaponSMGUse(SVGBaseEntity* user, SVGBaseItem* item);
+    void InstanceWeaponBerettaUse(SVGBaseEntity* user, SVGBaseItem* item);
 
 private:
-
 };

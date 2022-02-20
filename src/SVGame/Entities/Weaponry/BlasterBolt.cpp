@@ -143,7 +143,7 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
         }
 
         vec3_t origin = self->GetOrigin();
-        gi.Multicast(origin, MultiCast::PVS);
+        gi.Multicast(origin, Multicast::PVS);
     }
 
     // Queue the entity for removal. 

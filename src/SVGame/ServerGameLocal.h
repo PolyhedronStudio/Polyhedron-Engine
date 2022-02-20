@@ -162,7 +162,7 @@ struct ItemIdentifier {
     //! Unused.
     static constexpr uint32_t None          = 0;
     //! Pistol.
-    static constexpr uint32_t WeaponPistol  = 1;
+    static constexpr uint32_t Beretta       = 1;
     //! SMG.
     static constexpr uint32_t SMG           = 2;
     //! Shotgun.
@@ -838,10 +838,27 @@ struct gclient_s {
     //! Latched Buttons are used for single key push events.
     int32_t latchedButtons;
 
-    //! Should we execute a weapon think method?
-    qboolean weaponThunk;
+    struct ClientWeaponState {
+	    //! Should we execute a weapon think method?
+        qboolean shouldThink = false;
 
-    //! Pointer to the new weapon.
+        //! Last state, used for animation resetting.
+        int32_t lastState = WeaponState::Finished;
+
+        //! Current state the active weapon resides in.
+        int32_t currentState = WeaponState::Finished;
+
+        //! Queued weapon state to switch to after finishing the current state.
+        int32_t queuedState = -1;
+
+        // Animation start frame.
+        float startFrame = 0.f;
+
+            // Animation end frame.
+        float endFrame = 0.f;
+    } weaponState;
+
+    //! Pointer to the new weapon the client wishes to switch to.
     SVGBaseItemWeapon *newWeapon;
 
     /**
@@ -864,8 +881,7 @@ struct gclient_s {
     //! Yaw angle of where our killer is located at in case we're dead.
     float killerYaw;
 
-    //! Current state of the active weapon.
-    int32_t weaponState;
+
 
     //! Current kick angles.
     vec3_t kickAngles;

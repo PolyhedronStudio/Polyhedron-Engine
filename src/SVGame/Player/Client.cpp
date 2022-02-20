@@ -176,7 +176,7 @@ void spectator_respawn(Entity *ent)
         gi.WriteByte(ServerGameCommands::MuzzleFlash);
         gi.WriteShort(ent - game.world->GetServerEntities());
         gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(ent->state.origin, MultiCast::PVS);
+        gi.Multicast(ent->state.origin, Multicast::PVS);
 
         // hold in place briefly
         ent->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
@@ -465,10 +465,14 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
             } else
                 SVG_GetChaseTarget(classEntity);
 
-        } else if (!client->weaponThunk) {
-            client->weaponThunk = true;
+        } else {// if (!client->weaponState.shouldThink) {
+            //client->weaponState.shouldThink = true;
             SVG_ThinkWeapon(classEntity);
         }
+    } else {
+	    if (!client->respawn.isSpectator) {
+	        SVG_ThinkWeapon(classEntity);
+	    }
     }
 
     if (client->respawn.isSpectator) {

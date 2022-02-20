@@ -42,7 +42,7 @@ struct PlayerWeaponID {
     //! Barehands. Currently unused.
     static constexpr uint8_t Barehands  = 0;
     //! Pistol.
-    static constexpr uint8_t Pistol     = 1;
+    static constexpr uint8_t Baretta    = 1;
     //! SMG
     static constexpr uint8_t SMG        = 2;
     //! Shotgun
@@ -52,14 +52,26 @@ struct PlayerWeaponID {
 *   @brief  Used to determine the state a weapon is currently in.
 **/
 struct WeaponState {
-    static constexpr int32_t Ready = 0;
-    static constexpr int32_t Drawing = 1; // Rename to: Drawing
-    static constexpr int32_t Holstering = 2; // Holster weapon.
-    static constexpr int32_t Dropping = 3;
-    static constexpr int32_t Reloading = 4;
-    static constexpr int32_t PrimaryFiring = 5;
-    static constexpr int32_t SecondaryFiring = 6;
+    //! A weapon that is "Down" means it is done holstering and we're ready to draw "UP" another weapon.
+    static constexpr int32_t Down = 0;
+    //! When a weapon state is set to finished, it means it is safe to switch to another queued state.
+    static constexpr int32_t Finished = 1;
+    //! An idle weapon is ready for use. (It can move on to another state like firing or reloading.)
+    static constexpr int32_t Idle = 2; 
+    //! A weapon goes into the process of drawing when switching weapons.
+    static constexpr int32_t Draw = 3;
+    //! A weapon goes into holstering before switching weapons.
+    static constexpr int32_t Holster = 4;
+    //! A weapon goes into dropping...??? Do we need this one?
+    static constexpr int32_t Drop = 5;
+    //! A weapon goes into reloading on demand, or when firing but running out of clip ammo.
+    static constexpr int32_t Reload = 6;
+    //! Primary fire action state.
+    static constexpr int32_t PrimaryFire = 7;
+    //! Secondary fire action state, could be going into scope mode, punching with a weapon etc.
+    static constexpr int32_t SecondaryFire = 8;
 };
+
 /**
 *   @brief  Types of ammo.
 **/

@@ -84,7 +84,7 @@ void weapon_shotgun_fire(SVGBasePlayer * ent)
     gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(origin, MultiCast::PVS);
+    gi.Multicast(origin, Multicast::PVS);
 
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
@@ -98,5 +98,5 @@ void Weapon_Shotgun(SVGBasePlayer* ent)
     static int  pause_frames[] = { 22, 28, 34, 0 };
     static int  fire_frames[] = { 8, 9, 0 };
 
-    _Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+    //_Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
 }

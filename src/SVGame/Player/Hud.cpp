@@ -365,27 +365,26 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     //
     // ammo
     //
-    //if (!ent->client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
-    //    ent->client->playerState.stats[STAT_AMMO_ICON] = 0;
-    //    ent->client->playerState.stats[STAT_AMMO] = 0;
-    //}
-    //else {
-    //    item = 0;// &itemlist[ent->client->ammoIndex];
-    //    ent->client->playerState.stats[STAT_AMMO_ICON] = gi.ImageIndex(item->icon);
-    //    ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammoIndex];
-    //}
-    // Get active weapon.
-    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
-
-    // Get primary ammo identifier.
-    uint32_t primaryAmmoIdentifier = (activeWeapon ? activeWeapon->GetPrimaryAmmoIdentifier() : 0);
-    if (primaryAmmoIdentifier != 0) {
-	    client->playerState.stats[STAT_AMMO_ICON] = 1;
-        client->playerState.stats[STAT_AMMO] = client->persistent.inventory[primaryAmmoIdentifier];
+    if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+        client->playerState.stats[STAT_AMMO_ICON] = 0;
+        client->playerState.stats[STAT_AMMO_PRIMARY] = 0;
     } else {
-	    client->playerState.stats[STAT_AMMO_ICON] = 0;
-        client->playerState.stats[STAT_AMMO] = 0;
+    //    item = 0;// &itemlist[ent->client->ammoIndex];
+        client->playerState.stats[STAT_AMMO_ICON] = 1;//gi.ImageIndex(item->icon);
+        client->playerState.stats[STAT_AMMO_PRIMARY] = client->persistent.inventory[client->ammoIndex];
     }
+    // Get active weapon.
+    //SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
+
+    //// Get primary ammo identifier.
+    //uint32_t primaryAmmoIdentifier = (activeWeapon ? activeWeapon->GetPrimaryAmmoIdentifier() : 0);
+    //if (primaryAmmoIdentifier != 0) {
+	   // client->playerState.stats[STAT_AMMO_ICON] = 1;
+    //    client->playerState.stats[STAT_AMMO_PRIMARY] = client->persistent.inventory[primaryAmmoIdentifier];
+    //} else {
+	   // client->playerState.stats[STAT_AMMO_ICON] = 0;
+    //    client->playerState.stats[STAT_AMMO_PRIMARY] = 0;
+    //}
 
     //
     // armor

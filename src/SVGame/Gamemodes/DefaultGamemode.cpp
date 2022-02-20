@@ -501,7 +501,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
         gi.WriteByte(TempEntityEvent::Blood);
         gi.WriteVector3(bodyEntity->state.origin);
         gi.WriteVector3(vec3_zero());
-        gi.Multicast(bodyEntity->state.origin, MultiCast::PVS);
+        gi.Multicast(bodyEntity->state.origin, Multicast::PVS);
     }
 
     // Create the class entity for this queued bodyEntity.
@@ -558,7 +558,7 @@ void DefaultGamemode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, 
     //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
     gi.WriteVector3(origin);
     gi.WriteVector3(normal);
-    gi.Multicast(origin, MultiCast::PVS);
+    gi.Multicast(origin, Multicast::PVS);
 }
 
 //===============
@@ -654,10 +654,10 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
-    if (!client->weaponThunk && !client->respawn.isSpectator)
+    if (!client->respawn.isSpectator)  //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
         SVG_ThinkWeapon(player);
     else
-        client->weaponThunk = false;
+        client->weaponState.shouldThink = false;
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.
@@ -975,7 +975,7 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
 	        //gi.WriteShort(serverEntity - g_entities);
 	        gi.WriteShort(player->GetNumber());
 	        gi.WriteByte(MuzzleFlashType::Login);
-	        gi.Multicast(player->GetOrigin(), MultiCast::PVS);
+	        gi.Multicast(player->GetOrigin(), Multicast::PVS);
 
             gi.BPrintf(PRINT_HIGH, "%s entered the game\n", client->persistent.netname);
         }
@@ -1004,7 +1004,7 @@ void DefaultGamemode::ClientDisconnect(SVGBasePlayer* player, ServerClient *clie
         //gi.WriteShort(ent - g_entities);
         gi.WriteShort(player->GetNumber());
         gi.WriteByte(MuzzleFlashType::Logout);
-        gi.Multicast(player->GetOrigin(), MultiCast::PVS);
+        gi.Multicast(player->GetOrigin(), Multicast::PVS);
     }
 
     // Unset this entity, after all, it's about to disconnect so.

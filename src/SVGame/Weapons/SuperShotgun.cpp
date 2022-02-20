@@ -75,7 +75,7 @@ void weapon_supershotgun_fire(SVGBasePlayer * ent)
     gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::SuperShotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(origin, MultiCast::PVS);
+    gi.Multicast(origin, Multicast::PVS);
 
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);

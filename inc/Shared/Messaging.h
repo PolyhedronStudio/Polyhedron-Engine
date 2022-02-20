@@ -20,7 +20,7 @@
 //-----------------
 // Destination class for gi.Multicast()
 //-----------------
-struct MultiCast {
+struct Multicast {
     static constexpr int32_t All = 0;
     static constexpr int32_t PHS = 1;
     static constexpr int32_t PVS = 2;

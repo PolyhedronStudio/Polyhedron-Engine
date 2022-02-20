@@ -91,7 +91,7 @@ void DeathmatchGamemode::ClientBegin(Entity* svEntity) {
         //gi.WriteShort(serverEntity - g_entities);
         gi.WriteShort(player->GetNumber());
         gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(player->GetOrigin(), MultiCast::PVS);
+        gi.Multicast(player->GetOrigin(), Multicast::PVS);
     }
     
     gi.BPrintf(PRINT_HIGH, "%s entered the game\n", client->persistent.netname);
@@ -310,10 +310,10 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerCli
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
-    if (!client->weaponThunk && !client->respawn.isSpectator)
+    if (!client->respawn.isSpectator)  //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
         SVG_ThinkWeapon(player);
     else
-        client->weaponThunk = false;
+        client->weaponState.shouldThink = false;
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.
