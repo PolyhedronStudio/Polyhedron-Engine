@@ -300,8 +300,8 @@ static void CL_ParseFrame(int extrabits)
     SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readCount - 1);
 
     // parse playerstate
-    bits = MSG_ReadShort();
-    MSG_ParseDeltaPlayerstate(from, &frame.playerState, bits, extraflags);
+
+    MSG_ParseDeltaPlayerstate(from, &frame.playerState, extraflags);
 #ifdef _DEBUG
     if (cl_shownet->integer > 2 && (bits || extraflags)) {
         MSG_ShowDeltaPlayerstateBits(bits, extraflags);

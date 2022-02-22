@@ -163,10 +163,15 @@ typedef enum {
 #define PS_BLEND            (1 << 11)
 #define PS_FOV              (1 << 12)
 #define PS_WEAPONINDEX      (1 << 13)
-#define PS_WEAPONFRAME      (1 << 14)
+//#define PS_WEAPONFRAME      (1 << 14)
 #define PS_RDFLAGS          (1 << 15)
 
-#define PS_BITS             16
+// New Animation thingy.
+#define PS_GUNANIMATION_FRAME (1 << 16)
+#define PS_GUNANIMATION_FRAMERATE (1 << 17)
+#define PS_GUNANIMATION_STARTTIME (1 << 18)
+
+#define PS_BITS             19
 #define PS_MASK             ((1<<PS_BITS)-1)
 
 // r1q2 protocol specific extra flags

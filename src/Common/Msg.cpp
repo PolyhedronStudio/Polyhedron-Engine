@@ -622,7 +622,11 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
         pflags |= PS_WEAPONINDEX;
 
     if (!EqualEpsilonf(to->gunAnimationFrame, from->gunAnimationFrame))
-        pflags |= PS_WEAPONFRAME;
+        pflags |= PS_GUNANIMATION_FRAME;
+    if (!EqualEpsilonf(to->gunAnimationFramerate, from->gunAnimationFramerate))
+    	pflags |= PS_GUNANIMATION_FRAMERATE;
+    if (!EqualEpsilonf(to->gunAnimationStartTime, from->gunAnimationStartTime))
+	    pflags |= PS_GUNANIMATION_STARTTIME;
 
     if (from->gunOffset[0] != to->gunOffset[0] ||
         from->gunOffset[1] != to->gunOffset[1] ||
@@ -645,7 +649,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
     //
     // write it
     //
-    MSG_WriteShort(pflags);
+    MSG_WriteLong(pflags);
 
     //
     // write the PlayerMoveState
@@ -712,8 +716,15 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
     if (pflags & PS_WEAPONINDEX)
         MSG_WriteByte(to->gunIndex);
 
-    if (pflags & PS_WEAPONFRAME)
-        MSG_WriteFloat(to->gunAnimationFrame);
+    if (pflags & PS_GUNANIMATION_FRAME) {
+	    MSG_WriteFloat(to->gunAnimationFrame);
+    }
+    if (pflags & PS_GUNANIMATION_FRAMERATE) {
+	    MSG_WriteFloat(to->gunAnimationFramerate);
+    }
+    if (pflags & PS_GUNANIMATION_STARTTIME) {
+	    MSG_WriteFloat(to->gunAnimationStartTime);
+    }
 
     if (eflags & EPS_GUNOFFSET) {
         MSG_WriteFloat(to->gunOffset[0]);
@@ -733,7 +744,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
         MSG_WriteFloat(to->blend[2]);
         MSG_WriteFloat(to->blend[3]);
     }
-
+  
     if (pflags & PS_FOV)
         MSG_WriteFloat(to->fov);
 
@@ -1124,7 +1135,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 MSG_ParseDeltaPlayerstate_Default
 ===================
 */
-void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int flags, int extraflags) {
+void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags) {
     int         i;
     int         statbits;
 
@@ -1134,11 +1145,15 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int fla
 
     // clear to old value before delta parsing
     if (!from) {
-        memset(to, 0, sizeof(*to));
+        //memset(to, 0, sizeof(*to));
+	    *to = {};
     }
     else if (to != from) {
-        memcpy(to, from, sizeof(*to));
+        //memcpy(to, from, sizeof(*to));
+        *to = *from;
     }
+
+    int32_t flags = MSG_ReadLong();
 
     //
     // parse the PlayerMoveState
@@ -1222,9 +1237,16 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int fla
     }
 
     // Weapon Frame.
-    if (flags & PS_WEAPONFRAME) {
+    if (flags & PS_GUNANIMATION_FRAME) {
         to->gunAnimationFrame = MSG_ReadFloat();
     }
+
+    if (flags & PS_GUNANIMATION_FRAMERATE) {
+	    to->gunAnimationFramerate = MSG_ReadFloat();
+    }
+	if (flags & PS_GUNANIMATION_STARTTIME) {
+	    to->gunAnimationStartTime = MSG_ReadFloat();
+	}
 
     // Gun Offset.
     if (extraflags & EPS_GUNOFFSET) {
@@ -1301,7 +1323,9 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(PM_VIEW_ANGLES, "pmove.viewAngles");
     SP(KICKANGLES, "kickAngles");
     SP(WEAPONINDEX, "gunIndex");
-    SP(WEAPONFRAME, "gunAnimationFrame");
+    SP(GUNANIMATION_FRAME, "gunAnimationFrame");
+    SP(GUNANIMATION_FRAMERATE, "gunAnimationFrameRate");
+    SP(GUNANIMATION_STARTTIME, "gunAnimationStartTime");
     SE(GUNOFFSET, "gunOffset");
     SE(GUNANGLES, "gunAngles");
     SP(BLEND, "blend");

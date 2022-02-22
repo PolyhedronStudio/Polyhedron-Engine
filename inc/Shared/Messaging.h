@@ -140,6 +140,8 @@ struct PlayerState {
     float       gunAnimationFrame;
     //! Gun animation framerate.
     float gunAnimationFramerate;
+    //! Server Time at which the gun animation started.
+    float gunAnimationStartTime;
 
     //! RGBA Full Screen blend effect.
     float       blend[4];       // RGBA full screen effect

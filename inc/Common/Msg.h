@@ -110,7 +110,7 @@ void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMove
 int     MSG_ParseEntityBits(int* bits);
 void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags);
 #if USE_CLIENT
-void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int flags, int extraflags);
+void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags);
 #endif
 
 #ifdef _DEBUG
