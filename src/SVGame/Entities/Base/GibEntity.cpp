@@ -226,11 +226,11 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 //===============
 void GibEntity::GibEntityThink() {
     // Increase frame and set a new think time.
-    SetFrame(GetFrame() + 1);
+    SetAnimationFrame(GetAnimationFrame() + 1);
     SetNextThinkTime(level.time + FRAMETIME);
 
     // Play frames for these meshes, cut the crap at frame 10.
-    if (GetFrame() == 10) {
+    if (GetAnimationFrame() == 10) {
         SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
         SetNextThinkTime(level.time + 8 + Randomui() * 10);
     }
@@ -258,7 +258,7 @@ void GibEntity::GibEntityTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane
         vec3_t right = vec3_euler(GetState().angles);
 
         if (GetModelIndex() == sm_meat_index) {
-            SetFrame(GetFrame() + 1);
+            SetAnimationFrame(GetAnimationFrame() + 1);
             SetThinkCallback(&GibEntity::GibEntityThink);
             SetNextThinkTime(level.time + FRAMETIME);
         }

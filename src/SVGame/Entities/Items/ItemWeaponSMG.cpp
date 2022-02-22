@@ -195,17 +195,17 @@ void ItemWeaponSMG::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon*
     static constexpr float idleStartFrame = 141.f;
     static constexpr float idleEndFrame = 171.f;
 
-    // Get current gunFrame and Clamp it between start and end just to be sure.
-    float currentFrame = Clampf(client->playerState.gunFrame, idleStartFrame, idleEndFrame);
+    // Get current gunAnimationFrame and Clamp it between start and end just to be sure.
+    float currentFrame = Clampf(client->playerState.gunAnimationFrame, idleStartFrame, idleEndFrame);
 
     // Calculate the next frame to head on forward to.
     float nextFrame = currentFrame + 1.f;
 
     // Move on to the next frame until we've ended.
     if (nextFrame < idleEndFrame) {
-    	client->playerState.gunFrame = nextFrame;
+    	client->playerState.gunAnimationFrame = nextFrame;
     } else {
-    	client->playerState.gunFrame = idleStartFrame;
+    	client->playerState.gunAnimationFrame = idleStartFrame;
     }
     gi.DPrintf("ItemWeaponSMG::InstanceWeaponIdle : %f - currentState: %i - queuedState: %i\n", level.time, client->weaponState.currentState, client->weaponState.queuedState);
 }
@@ -218,15 +218,15 @@ void ItemWeaponSMG::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon*
     static constexpr float drawStartFrame = 112.f;
     static constexpr float drawEndFrame = 141.f;
 
-    // Get current gunFrame and Clamp it between start and end just to be sure.
-    float currentFrame = Clampf(client->playerState.gunFrame, drawStartFrame, drawEndFrame);
+    // Get current gunAnimationFrame and Clamp it between start and end just to be sure.
+    float currentFrame = Clampf(client->playerState.gunAnimationFrame, drawStartFrame, drawEndFrame);
 
     // Calculate the next frame to head on forward to.
     float nextFrame = currentFrame + 1.f;
 
     // Move on to the next frame until we've ended.
     if (nextFrame < drawEndFrame) {
-        client->playerState.gunFrame = nextFrame;
+        client->playerState.gunAnimationFrame = nextFrame;
     } else {
 	    client->weaponState.currentState = WeaponState::Finished;
         client->weaponState.queuedState = WeaponState::Idle;
@@ -243,15 +243,15 @@ void ItemWeaponSMG::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeap
     static constexpr float holsterStartFrame = 104.f;
     static constexpr float holsterEndFrame = 112.f;
 
-    // Get current gunFrame and Clamp it between start and end just to be sure.
-    float currentFrame = Clampf(client->playerState.gunFrame, holsterStartFrame, holsterEndFrame);
+    // Get current gunAnimationFrame and Clamp it between start and end just to be sure.
+    float currentFrame = Clampf(client->playerState.gunAnimationFrame, holsterStartFrame, holsterEndFrame);
 
     // Calculate the next frame to head on forward to.
     float nextFrame = currentFrame + 1.f;
 
     // Move on to the next frame until we've ended.
     if (nextFrame < holsterEndFrame) {
-        client->playerState.gunFrame = nextFrame;
+        client->playerState.gunAnimationFrame = nextFrame;
     } else {
 	    //client->weaponState.currentState = WeaponState::Down;
 	    client->weaponState.queuedState = WeaponState::Down;

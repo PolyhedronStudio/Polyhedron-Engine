@@ -77,7 +77,7 @@ void weapon_supershotgun_fire(SVGBasePlayer * ent)
     vec3_t origin = ent->GetOrigin();
     gi.Multicast(origin, Multicast::PVS);
 
-    client->playerState.gunFrame++;
+    client->playerState.gunAnimationFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo))

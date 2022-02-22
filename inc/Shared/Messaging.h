@@ -80,24 +80,37 @@ struct EntityEvent {
 // need to render in some way
 //-----------------
 struct EntityState {
-    int32_t number;         // Entity index
+    //! Entity index number.
+    int32_t number = 0;
 
-    vec3_t origin;
-    vec3_t angles;
-    vec3_t oldOrigin;       // For lerping
-    int32_t modelIndex;
-    int32_t modelIndex2, modelIndex3, modelIndex4;  // Weapons, CTF flags, etc
-    float frame;
-    int32_t skinNumber;
-    uint32_t effects;       // PGM - we're filling it, so it needs to be unsigned
-    int32_t renderEffects;
-    int32_t solid;          // For client side prediction, 8*(bits 0-4) is x/y radius
-                            // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
-                            // gi.LinkEntity sets this properly
-    int32_t sound;          // For looping sounds, to guarantee shutoff
-    int32_t eventID;        // Impulse events -- muzzle flashes, footsteps, etc
-                            // events only go out for a single frame, they
-                            // are automatically cleared each frame
+    //! Entity Origin.
+    vec3_t origin = vec3_zero();
+    //! Entity Angles.
+    vec3_t angles = vec3_zero();
+    //! Old entity origin, used for lerping.
+    vec3_t oldOrigin = vec3_zero();
+    //! Main entity model index.
+    int32_t modelIndex = 0;
+    //! Extended model indices.
+    int32_t modelIndex2 = 0, modelIndex3 = 0, modelIndex4 = 0;
+
+    //! Current animation frame the entity is at.
+    float animationFrame = 0.f;
+    //! Current animation playback framerate.
+    float animationFramerate = 0.f;
+
+    //! Model skin number.
+    int32_t skinNumber = 0;
+    //! Entity Effects. (Rotating etc.)
+    uint32_t effects = 0;  // PGM - we're filling it, so it needs to be unsigned
+    //! Entity Render Effects. (For Shells, Transparency etc.)
+    int32_t renderEffects = 0;
+    //! For client side prediction. 8*(bits0-4) is x/y radius. 8*(bits 5-9) is z down distance. 8(bits10-15) is z up.
+    int32_t solid = 0;	//! gi.LinkEntity sets this properly.
+    //! For looping sounds, used to guarantee a shutoff.
+    int32_t sound = 0;
+    //! Impulse events, cleared after each frame. (Muzzle flashes, footsteps, etc.)
+    int32_t eventID = 0;
 };
 
 //-----------------
@@ -110,24 +123,32 @@ struct EntityState {
 #define MAX_STATS               32
 
 struct PlayerState {
-    PlayerMoveState   pmove;         // For prediction
+    //! State of the actual movement. (Used for client side movement prediction.)
+    PlayerMoveState   pmove;
 
     // These fields do not need to be communicated bit-precise
-    vec3_t      kickAngles;     // Add to view direction to get render angles
-                                // Set by weapon kicks, pain effects, etc
+    //! Adds to view direction to get render angles. (Set by weapon kicks, pain effects, etc.)
+    vec3_t      kickAngles;
 
+    //! Gun angles.
     vec3_t      gunAngles;
+    //! Gun offset.
     vec3_t      gunOffset;
+    //! Actual gun index.
     int         gunIndex;
-    float       gunFrame;
+    //! Gun animation frame. 
+    float       gunAnimationFrame;
+    //! Gun animation framerate.
+    float gunAnimationFramerate;
 
+    //! RGBA Full Screen blend effect.
     float       blend[4];       // RGBA full screen effect
-
+    //! Field of View.
     float       fov;            // Horizontal field of view
-
+    // Refresh render flags.
     int         rdflags;        // Refdef flags
-
-    short       stats[MAX_STATS]; // Fast status bar updates
+    //! Status bar information.
+    short       stats[MAX_STATS];
 }; 
 
 #endif // __SHARED__MESSAGING_H__

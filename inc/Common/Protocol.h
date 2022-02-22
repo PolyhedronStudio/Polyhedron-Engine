@@ -222,10 +222,10 @@ typedef enum {
 // EntityState communication
 
 // Try to pack the common update flags into the first byte
-#define U_ORIGIN_X  (1<<0)         // was named: U_ORIGIN_X
-#define U_ORIGIN_Y  (1<<1)         // was named: U_ORIGIN_Y
-#define U_ANGLE_Y   (1<<2)         // was named: U_ANGLE_Y
-#define U_ANGLE_Z   (1<<3)         // was named: U_ANGLE_Z
+#define U_ORIGIN_X  (1<<0)          // was named: U_ORIGIN_X
+#define U_ORIGIN_Y  (1<<1)          // was named: U_ORIGIN_Y
+#define U_ANGLE_Y   (1<<2)          // was named: U_ANGLE_Y
+#define U_ANGLE_Z   (1<<3)          // was named: U_ANGLE_Z
 #define U_FRAME     (1<<4)          // frame is a byte
 #define U_EVENT     (1<<5)
 #define U_REMOVE    (1<<6)          // REMOVE this entity, don't add it

@@ -34,13 +34,9 @@ SV_EmitPacketEntities
 Writes a delta update of a PackedEntity list to the message.
 =============
 */
-static void SV_EmitPacketEntities(client_t         *client,
-                                  ClientFrame   *from,
-                                  ClientFrame   *to,
-                                  int              clientEntityNum)
-{
-    PackedEntity *newent;
-    const PackedEntity *oldent;
+static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientFrame *to, int clientEntityNum) {
+    EntityState *newent;
+    const EntityState *oldent;
     unsigned i, oldindex, newindex, from_num_entities;
     int oldnum, newnum;
     EntityStateMessageFlags flags;
@@ -264,7 +260,7 @@ void SV_BuildClientFrame(client_t *client)
     Entity     *ent;
     Entity     *clent;
     ClientFrame  *frame;
-    PackedEntity *state;
+    EntityState *state;
     PlayerState  *ps;
 	EntityState  es;
 	int         l;
@@ -408,7 +404,8 @@ void SV_BuildClientFrame(client_t *client)
 
         // add it to the circular client_entities array
         state = &svs.entities[svs.next_entity % svs.num_entities];
-        MSG_PackEntity(state, &es);
+        
+        *state = es;
 
         if (ent->state.eventID = EntityEvent::Footstep) {
             ent->state.eventID = 0;

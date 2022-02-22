@@ -45,7 +45,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
     self->SetOrigin(origin);
 
     // Set frame back to 0.
-    self->SetFrame(0);
+    self->SetAnimationFrame(0);
 
     // Set mins/maxs.
     self->SetMins(vec3_t{ -16.f, -16.f, 0.f });
@@ -71,7 +71,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
     ServerClient* client = self->GetClient();
     if (client) {
         client->animation.priorityAnimation = PlayerAnimation::Death;
-        client->animation.endFrame = self->GetFrame();
+        client->animation.endFrame = self->GetAnimationFrame();
     } else {
         self->SetThinkCallback(nullptr);
         self->SetNextThinkTime(0);

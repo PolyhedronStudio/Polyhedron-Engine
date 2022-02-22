@@ -116,17 +116,17 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
 
     //if (!(client->buttons & ButtonBits::Attack)) {
     //    client->machinegunShots = 0;
-    //    client->playerState.gunFrame++;
+    //    client->playerState.gunAnimationFrame++;
     //    return;
     //}
 
-    //if (client->playerState.gunFrame == 5)
-    //    client->playerState.gunFrame = 4;
+    //if (client->playerState.gunAnimationFrame == 5)
+    //    client->playerState.gunAnimationFrame = 4;
     //else
-    //    client->playerState.gunFrame = 5;
+    //    client->playerState.gunAnimationFrame = 5;
 
     //if (client->persistent.inventory[client->ammoIndex] < 1) {
-    //    client->playerState.gunFrame = 6;
+    //    client->playerState.gunAnimationFrame = 6;
     //    if (level.time >= ent->GetDebouncePainTime()) {
     //        gi.Sound(ent->GetServerEntity(), CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
     //        ent->SetDebouncePainTime(level.time + 1);
@@ -176,7 +176,7 @@ void Weapon_Blaster_Fire(SVGBasePlayer *ent)
     else
         damage = 10;
     Blaster_Fire(ent, vec3_zero(), damage, false, EntityEffectType::Blaster);
-    ent->GetClient()->playerState.gunFrame++;
+    ent->GetClient()->playerState.gunAnimationFrame++;
 }
 
 void Weapon_Blaster(SVGBasePlayer* ent)

@@ -164,7 +164,7 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     //    }
 
 
-    //    // Update playerstate: gunFrame and gunIndex.
+    //    // Update playerstate: gunAnimationFrame and gunIndex.
     //    client->playerState.gunIndex = client->persistent.activeWeapon->GetViewModelIndex();
     //}
 

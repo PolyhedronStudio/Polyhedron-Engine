@@ -195,8 +195,8 @@ public:
     }
 
     // Return the 'frame' value.
-    inline const float GetFrame() {
-        return serverEntity->state.frame;
+    inline const float GetAnimationFrame() {
+        return serverEntity->state.animationFrame;
     }
 
     // Return the 'gravity' value.
@@ -526,8 +526,8 @@ public:
     }
 
     // Set the 'frame' value.
-    inline void SetFrame(const float &frame) {
-        serverEntity->state.frame = frame;
+    inline void SetAnimationFrame(const float &frame) {
+        serverEntity->state.animationFrame = frame;
     }
 
     // Set the 'gravity' value.

@@ -85,7 +85,7 @@ void MonsterTestDummy::Spawn() {
     }
     
     // Setup the start frame to animate from.
-    SetFrame(0);
+    SetAnimationFrame(0);
     
     // Set entity to allow taking damage.
     SetTakeDamage(TakeDamage::Yes);

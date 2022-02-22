@@ -142,7 +142,7 @@ void SVG_ThinkWeapon(SVGBasePlayer *player)
     if (client->weaponState.queuedState != -1){
 	    // TODO: Add a proper state machine for these animations here.
         // Reset gun frame so animations work properly.
-        client->playerState.gunFrame = 0;
+        client->playerState.gunAnimationFrame = 0;
 
         // Switch to queued weaponstate.
 	    client->weaponState.currentState = client->weaponState.queuedState;
@@ -214,7 +214,7 @@ void SVG_ChangeWeapon(SVGBasePlayer *player) {
     }
     
     
-    // Update playerstate: gunFrame and gunIndex.
+    // Update playerstate: gunAnimationFrame and gunIndex.
     if (client->persistent.activeWeapon) { 
         client->playerState.gunIndex = client->persistent.activeWeapon->GetViewModelIndex();
 
@@ -225,10 +225,10 @@ void SVG_ChangeWeapon(SVGBasePlayer *player) {
     // Set player animation. No clue why the OG code used Pain, but we'll have to live with it for now.
     client->animation.priorityAnimation = PlayerAnimation::Pain;
     if (client->playerState.pmove.flags & PMF_DUCKED) {
-        player->SetFrame(FRAME_crpain1);
+        player->SetAnimationFrame(FRAME_crpain1);
         client->animation.endFrame = FRAME_crpain4;
     } else {
-        player->SetFrame(FRAME_pain301);
+        player->SetAnimationFrame(FRAME_pain301);
         client->animation.endFrame = FRAME_pain304;
     }
 }
@@ -291,8 +291,8 @@ void SVG_ChangeWeapon(SVGBasePlayer *player) {
 //        }
 //
 //
-//        // Update playerstate: gunFrame and gunIndex.
-//    //    client->playerState.gunFrame = 0;
+//        // Update playerstate: gunAnimationFrame and gunIndex.
+//    //    client->playerState.gunAnimationFrame = 0;
 //        client->playerState.gunIndex = client->persistent.activeWeapon->GetViewModelIndex();
 //    }
 //
@@ -306,10 +306,10 @@ void SVG_ChangeWeapon(SVGBasePlayer *player) {
 //    // Set player animation. No clue why the OG code used Pain, but we'll have to live with it for now.
 //    client->animation.priorityAnimation = PlayerAnimation::Pain;
 //    if (client->playerState.pmove.flags & PMF_DUCKED) {
-//        player->SetFrame(FRAME_crpain1);
+//        player->SetAnimationFrame(FRAME_crpain1);
 //        client->animation.endFrame = FRAME_crpain4;
 //    } else {
-//        player->SetFrame(FRAME_pain301);
+//        player->SetAnimationFrame(FRAME_pain301);
 //        client->animation.endFrame = FRAME_pain304;
 //    }
 //}
@@ -365,17 +365,17 @@ void SVG_ChangeWeapon(SVGBasePlayer *player) {
 //    // Set weapon state: Drawing.
 //    client->weaponState = WeaponState::Draw;
 //
-//    // Update playerstate: gunFrame and gunIndex.
-////    client->playerState.gunFrame = 0;
+//    // Update playerstate: gunAnimationFrame and gunIndex.
+////    client->playerState.gunAnimationFrame = 0;
 //    client->playerState.gunIndex = client->persistent.activeWeapon->GetViewModelIndex();
 //
 //    // Set player animation. No clue why the OG code used Pain, but we'll have to live with it for now.
 //    client->animation.priorityAnimation = PlayerAnimation::Pain;
 //    if (client->playerState.pmove.flags & PMF_DUCKED) {
-//        player->SetFrame(FRAME_crpain1);
+//        player->SetAnimationFrame(FRAME_crpain1);
 //        client->animation.endFrame = FRAME_crpain4;
 //    } else {
-//        player->SetFrame(FRAME_pain301);
+//        player->SetAnimationFrame(FRAME_pain301);
 //        client->animation.endFrame = FRAME_pain304;
 //    }
 //}

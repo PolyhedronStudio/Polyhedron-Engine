@@ -78,7 +78,6 @@ fail:
 // writes a delta update of an EntityState list to the message.
 static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 {
-    PackedEntity oldpack, newpack;
     EntityState *oldent, *newent;
     int     oldindex, newindex;
     int     oldnum, newnum;
@@ -115,9 +114,7 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
             // not changed at all. Note that players are always 'newentities',
             // this updates their oldOrigin always and prevents warping in case
             // of packet loss.
-            MSG_PackEntity(&oldpack, oldent);
-            MSG_PackEntity(&newpack, newent);
-            MSG_WriteDeltaEntity(&oldpack, &newpack,
+            MSG_WriteDeltaEntity(oldent, newent,
                                  (EntityStateMessageFlags)(newent->number <= cl.maximumClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
             oldindex++;
             newindex++;
@@ -126,17 +123,14 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            MSG_PackEntity(&oldpack, &cl.entityBaselines[newnum]);
-            MSG_PackEntity(&newpack, newent);
-            MSG_WriteDeltaEntity(&oldpack, &newpack, (EntityStateMessageFlags)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: EntityStateMessageFlags cast.
+            MSG_WriteDeltaEntity(&cl.entityBaselines[newnum], newent, (EntityStateMessageFlags)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: EntityStateMessageFlags cast.
             newindex++;
             continue;
         }
 
         if (newnum > oldnum) {
             // the old entity isn't present in the new message
-            MSG_PackEntity(&oldpack, oldent);
-            MSG_WriteDeltaEntity(&oldpack, NULL, MSG_ES_FORCE);
+            MSG_WriteDeltaEntity(oldent, NULL, MSG_ES_FORCE);
             oldindex++;
             continue;
         }
@@ -321,7 +315,6 @@ static void CL_Record_f(void)
     int     i, c;
     size_t  len;
     EntityState  *ent;
-    PackedEntity pack;
     char            *s;
     qhandle_t       f;
     unsigned        mode = FS_MODE_WRITE;
@@ -435,8 +428,7 @@ static void CL_Record_f(void)
         }
 
         MSG_WriteByte(svc_spawnbaseline);
-        MSG_PackEntity(&pack, ent);
-        MSG_WriteDeltaEntity(NULL, &pack, MSG_ES_FORCE);
+        MSG_WriteDeltaEntity(NULL, ent, MSG_ES_FORCE);
     }
 
     MSG_WriteByte(svc_stufftext);

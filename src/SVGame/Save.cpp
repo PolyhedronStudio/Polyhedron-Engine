@@ -67,7 +67,7 @@ static const save_field_t entityfields[] = {
     I(state.modelIndex2),
     I(state.modelIndex3),
     I(state.modelIndex4),
-    I(state.frame),
+    I(state.animationFrame),
     I(state.skinNumber),
     I(state.effects),
     I(state.renderEffects),
@@ -277,7 +277,8 @@ static const save_field_t clientfields[] = {
     V(playerState.gunAngles),
     V(playerState.gunOffset),
     I(playerState.gunIndex),
-    I(playerState.gunFrame),
+    I(playerState.gunAnimationFrame),
+    I(playerState.gunAnimationFramerate),
 
     FA(playerState.blend, 4),
 

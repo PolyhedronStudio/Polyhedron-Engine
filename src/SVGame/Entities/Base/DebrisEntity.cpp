@@ -51,7 +51,7 @@ DebrisEntity* DebrisEntity::Create(SVGBaseEntity* debrisser, const std::string& 
     debrisEntity->SetNextThinkTime(level.time + 5 + random() * 5);
 
     // Setup the other properties.
-    debrisEntity->SetFrame(0);
+    debrisEntity->SetAnimationFrame(0);
     debrisEntity->SetFlags(0);
     debrisEntity->SetTakeDamage(TakeDamage::Yes);
     debrisEntity->SetDieCallback(&DebrisEntity::DebrisEntityDie);

@@ -42,9 +42,9 @@ byte        msg_write_buffer[MAX_MSGLEN];
 SizeBuffer   msg_read;
 byte        msg_read_buffer[MAX_MSGLEN];
 
-const PackedEntity   nullEntityState = {};
-const PlayerState    nullPlayerState = {};
-const ClientMoveCommand         nullUserCmd = {};
+const EntityState       nullEntityState = {};
+const PlayerState       nullPlayerState = {};
+const ClientMoveCommand nullUserCmd = {};
 
 /*
 =============
@@ -282,35 +282,9 @@ int MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientM
 
 #endif // USE_CLIENT
 
-void MSG_PackEntity(PackedEntity* out, const EntityState* in)
-{
-    // allow 0 to accomodate empty entityBaselines
-    if (in->number < 0 || in->number >= MAX_EDICTS)
-        Com_Error(ERR_DROP, "%s: bad number: %d", __func__, in->number);
-
-    // N&C: Full float precision.
-    out->number = in->number;
-    out->origin = in->origin;
-    out->angles = in->angles;
-    out->oldOrigin = in->oldOrigin;
-    out->modelIndex = in->modelIndex;
-    out->modelIndex2 = in->modelIndex2;
-    out->modelIndex3 = in->modelIndex3;
-    out->modelIndex4 = in->modelIndex4;
-    out->skinNumber = in->skinNumber;
-    out->effects = in->effects;
-    out->renderEffects = in->renderEffects;
-    out->solid = in->solid;
-    out->frame = in->frame;
-    out->sound = in->sound;
-    out->eventID = in->eventID;
-}
-
-void MSG_WriteDeltaEntity(const PackedEntity* from,
-    const PackedEntity* to,
-    EntityStateMessageFlags          flags)
-{
-    uint32_t    bits, mask;
+void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, EntityStateMessageFlags flags) {
+    uint32_t bits = 0;
+    uint32_t mask = 0;
 
     if (!to) {
         if (!from)
@@ -319,7 +293,7 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         if (from->number < 1 || from->number >= MAX_EDICTS)
             Com_Error(ERR_DROP, "%s: bad number: %d", __func__, from->number);
 
-        bits = U_REMOVE;
+        uint32_t bits = U_REMOVE;
         if (from->number & 0xff00)
             bits |= U_NUMBER16 | U_MOREBITS1;
 
@@ -379,7 +353,7 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
             bits |= U_SKIN8;
     }
 
-    if (!EqualEpsilonf(to->frame, from->frame)) {
+    if (!EqualEpsilonf(to->animationFrame, from->animationFrame)) {
         bits |= U_FRAME;
     }
 
@@ -485,9 +459,9 @@ void MSG_WriteDeltaEntity(const PackedEntity* from,
         MSG_WriteByte(to->modelIndex4);
 
     if (bits & U_FRAME)
-        MSG_WriteFloat(to->frame);
+	    MSG_WriteFloat(to->animationFrame);
     else if (bits & U_FRAME16)
-        MSG_WriteFloat(to->frame);
+	    MSG_WriteFloat(to->animationFrame);
 
     if ((bits & (U_SKIN8 | U_SKIN16)) == (U_SKIN8 | U_SKIN16))  //used for laser colors
         MSG_WriteLong(to->skinNumber);
@@ -647,7 +621,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
     if (to->gunIndex != from->gunIndex)
         pflags |= PS_WEAPONINDEX;
 
-    if (!EqualEpsilonf(to->gunFrame, from->gunFrame))
+    if (!EqualEpsilonf(to->gunAnimationFrame, from->gunAnimationFrame))
         pflags |= PS_WEAPONFRAME;
 
     if (from->gunOffset[0] != to->gunOffset[0] ||
@@ -739,7 +713,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
         MSG_WriteByte(to->gunIndex);
 
     if (pflags & PS_WEAPONFRAME)
-        MSG_WriteFloat(to->gunFrame);
+        MSG_WriteFloat(to->gunAnimationFrame);
 
     if (eflags & EPS_GUNOFFSET) {
         MSG_WriteFloat(to->gunOffset[0]);
@@ -1078,9 +1052,9 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
 
     // Frame.
     if (bits & U_FRAME)
-        to->frame = MSG_ReadFloat();
+        to->animationFrame = MSG_ReadFloat();
     if (bits & U_FRAME16)
-        to->frame = MSG_ReadFloat();
+        to->animationFrame = MSG_ReadFloat();
 
     // Skinnum.
     if ((bits & (U_SKIN8 | U_SKIN16)) == (U_SKIN8 | U_SKIN16))  //used for laser colors
@@ -1249,7 +1223,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int fla
 
     // Weapon Frame.
     if (flags & PS_WEAPONFRAME) {
-        to->gunFrame = MSG_ReadFloat();
+        to->gunAnimationFrame = MSG_ReadFloat();
     }
 
     // Gun Offset.
@@ -1327,7 +1301,7 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(PM_VIEW_ANGLES, "pmove.viewAngles");
     SP(KICKANGLES, "kickAngles");
     SP(WEAPONINDEX, "gunIndex");
-    SP(WEAPONFRAME, "gunFrame");
+    SP(WEAPONFRAME, "gunAnimationFrame");
     SE(GUNOFFSET, "gunOffset");
     SE(GUNANGLES, "gunAngles");
     SP(BLEND, "blend");
@@ -1419,7 +1393,7 @@ void MSG_ShowDeltaPlayerstateBits_Packet(int flags)
 //    S(VIEWANGLE2, "viewAngles[2]");
 //    S(KICKANGLES, "kickAngles");
 //    S(WEAPONINDEX, "gunIndex");
-//    S(WEAPONFRAME, "gunFrame");
+//    S(WEAPONFRAME, "gunAnimationFrame");
 //    S(GUNOFFSET, "gunOffset");
 //    S(GUNANGLES, "gunAngles");
 //    S(BLEND, "blend");

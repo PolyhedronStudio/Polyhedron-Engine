@@ -119,12 +119,12 @@ CLG_AddViewWeapon
 //        gun.oldframe = gun_frame;   // development tool
 //    }
 //    else {
-//        gun.frame = currentPlayerState->gunFrame;
+//        gun.frame = currentPlayerState->gunAnimationFrame;
 //        if (gun.frame == 0) {
 //            gun.oldframe = 0;   // just changed weapons, don't lerp from old
 //        }
 //        else {
-//            gun.oldframe = oldPlayerState->gunFrame;
+//            gun.oldframe = oldPlayerState->gunAnimationFrame;
 //            gun.backlerp = 1.0f - cl->lerpFraction;
 //        }
 //    }

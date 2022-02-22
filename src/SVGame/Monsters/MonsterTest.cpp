@@ -116,9 +116,9 @@ void MiscServerModel::Spawn() {
 
     // Setup the start frame to animate from.
     if (startFrame) {
-        SetFrame(startFrame);
+        SetAnimationFrame(startFrame);
     } else {
-        SetFrame(0);
+        SetAnimationFrame(0);
     }
 
     // Set entity to allow taking damage.
@@ -244,8 +244,8 @@ void MiscServerModel::MiscServerModelThink(void) {
     //
     //// Set new entity origin.
     //SetOrigin(trace.endPosition);
-    float currentFrame = GetFrame();
-    float nextFrame = GetFrame() + 1.f;
+    float currentFrame = GetAnimationFrame();
+    float nextFrame = GetAnimationFrame() + 1.f;
 
     if (nextFrame > endFrame) {
 
@@ -254,7 +254,7 @@ void MiscServerModel::MiscServerModelThink(void) {
 	    }
     }
 
-    SetFrame(nextFrame);
+    SetAnimationFrame(nextFrame);
 
     //
     // Calculate direction.

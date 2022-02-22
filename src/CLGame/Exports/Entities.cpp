@@ -135,14 +135,14 @@ void ClientGameEntities::AddPacketEntities() {
         else if (effects & EntityEffectType::AnimCycleAll30hz)
             renderEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
         else
-            renderEntity.frame = entityState->frame;
+            renderEntity.frame = entityState->animationFrame;
 
         // Optionally remove the glowing effect.
         if (cl_noglow->integer)
             renderEffects &= ~RenderEffects::Glow;
 
         // Setup the proper lerp and model frame to render this pass.
-        renderEntity.oldframe = currentEntity->prev.frame;
+        renderEntity.oldframe = currentEntity->prev.animationFrame;
         renderEntity.backlerp = 1.0 - cl->lerpFraction;
 
         //
@@ -519,11 +519,11 @@ void ClientGameEntities::AddViewEntities() {
         gunRenderEntity.frame = gun_frame;      // Development tool
         gunRenderEntity.oldframe = gun_frame;   // Development tool
     } else {
-        gunRenderEntity.frame = currentPlayerState->gunFrame;
+        gunRenderEntity.frame = currentPlayerState->gunAnimationFrame;
         if (gunRenderEntity.frame == 0) {
             gunRenderEntity.oldframe = 0;   // just changed weapons, don't lerp from old
         } else {
-            gunRenderEntity.oldframe = oldPlayerState->gunFrame;
+            gunRenderEntity.oldframe = oldPlayerState->gunAnimationFrame;
             gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
         }
     }

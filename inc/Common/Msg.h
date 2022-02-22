@@ -35,37 +35,6 @@ typedef union {
 } msg_float;
 
 //---------------
-// This is the actual packed entity data that is transferred over the network.
-// It is bit precise, sensitive, and any change here would require changes elsewhere.
-// 
-// Be careful, and only touch this if you know what you are doing.
-//---------------
-typedef struct {
-    uint16_t    number;
-    // N&C: Full float precision for entities.
-    vec3_t      origin;
-    vec3_t      angles;
-    vec3_t      oldOrigin;
-
-    // Model indexes.
-    uint8_t     modelIndex;
-    uint8_t     modelIndex2;
-    uint8_t     modelIndex3;
-    uint8_t     modelIndex4;
-
-    // Rendering effects.
-    uint32_t    skinNumber;
-    uint32_t    effects;
-    uint32_t    renderEffects;
-    uint32_t    solid;
-    float       frame;
-
-    // Sound ID, and Event ID.
-    uint8_t     sound;
-    uint8_t     eventID;
-} PackedEntity;
-
-//---------------
 // Player state messaging flags.
 //---------------
 enum PlayerStateMessageFlags {
@@ -91,7 +60,7 @@ extern byte         msg_write_buffer[MAX_MSGLEN];
 extern SizeBuffer   msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
-extern const PackedEntity       nullEntityState;
+extern const EntityState        nullEntityState;
 extern const PlayerState        nullPlayerState;
 extern const ClientMoveCommand  nullUserCmd;
 
@@ -109,8 +78,7 @@ void    MSG_WriteVector3(const vec3_t& pos);
 void    MSG_WriteBits(int value, int bits);
 int     MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd);
 #endif
-void    MSG_PackEntity(PackedEntity* out, const EntityState* in);
-void    MSG_WriteDeltaEntity(const PackedEntity* from, const PackedEntity* to, EntityStateMessageFlags flags);
+void    MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, EntityStateMessageFlags flags);
 int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags);
 
 static inline void* MSG_WriteData(const void* data, size_t len)

@@ -123,7 +123,7 @@ void SVGBasePlayer::Spawn() {
     SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->state.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
     
     // Fresh frame for animations.
-    SetFrame(0);
+    SetAnimationFrame(0);
 
     // Set the die function.
     SetDieCallback(&SVGBasePlayer::SVGBasePlayerDie);
@@ -273,20 +273,20 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
             SetPriorityAnimation(PlayerAnimation::Death);
 
             if (client->playerState.pmove.flags & PMF_DUCKED) {
-                SetFrame(FRAME_crdeath1 - 1);
+                SetAnimationFrame(FRAME_crdeath1 - 1);
                 SetAnimationEndFrame(FRAME_crdeath5);
             }
             else switch (i) {
             case 0:
-                SetFrame(FRAME_death101 - 1);
+                SetAnimationFrame(FRAME_death101 - 1);
                 SetAnimationEndFrame(FRAME_death106);
                 break;
             case 1:
-                SetFrame(FRAME_death201 - 1);
+                SetAnimationFrame(FRAME_death201 - 1);
                 SetAnimationEndFrame(FRAME_death206);
                 break;
             case 2:
-                SetFrame(FRAME_death301 - 1);
+                SetAnimationFrame(FRAME_death301 - 1);
                 SetAnimationEndFrame(FRAME_death308);
                 break;
             }
@@ -829,21 +829,21 @@ void SVGBasePlayer::ApplyDamageFeedback() {
 
         client->animation.priorityAnimation = PlayerAnimation::Pain;
         if (client->playerState.pmove.flags & PMF_DUCKED) {
-            SetFrame(FRAME_crpain1 - 1);
+            SetAnimationFrame(FRAME_crpain1 - 1);
             client->animation.endFrame = FRAME_crpain4;
         } else {
             i = (i + 1) % 3;
             switch (i) {
             case 0:
-                SetFrame(FRAME_pain101 - 1);
+                SetAnimationFrame(FRAME_pain101 - 1);
                 client->animation.endFrame = FRAME_pain104;
                 break;
             case 1:
-                SetFrame(FRAME_pain201 - 1);
+                SetAnimationFrame(FRAME_pain201 - 1);
                 client->animation.endFrame = FRAME_pain204;
                 break;
             case 2:
-                SetFrame(FRAME_pain301 - 1);
+                SetAnimationFrame(FRAME_pain301 - 1);
                 client->animation.endFrame = FRAME_pain304;
                 break;
             }
@@ -1174,13 +1174,13 @@ void SVGBasePlayer::UpdateAnimationFrame() {
         goto newanim;
 
     if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
-        if (GetFrame() > client->animation.endFrame) {
-            SetFrame(GetFrame() - 0.2f);
+        if (GetAnimationFrame() > client->animation.endFrame) {
+            SetAnimationFrame(GetAnimationFrame() - 0.2f);
             return;
         }
-    } else if (GetFrame() < client->animation.endFrame) {
+    } else if (GetAnimationFrame() < client->animation.endFrame) {
         // continue an animation
-        SetFrame(GetFrame() + 0.2f);
+        SetAnimationFrame(GetAnimationFrame() + 0.2f);
         return;
     }
 
@@ -1190,7 +1190,7 @@ void SVGBasePlayer::UpdateAnimationFrame() {
         if (!GetGroundEntity())
             return;     // stay there
         client->animation.priorityAnimation = PlayerAnimation::Wave;
-        SetFrame(FRAME_jump3);
+        SetAnimationFrame(FRAME_jump3);
         client->animation.endFrame = FRAME_jump6;
         return;
     }
@@ -1203,25 +1203,25 @@ newanim:
 
     if (!GetGroundEntity()) {
         client->animation.priorityAnimation = PlayerAnimation::Jump;
-        if (GetFrame() != FRAME_jump2)
-            SetFrame(FRAME_jump1);
+        if (GetAnimationFrame() != FRAME_jump2)
+            SetAnimationFrame(FRAME_jump1);
         client->animation.endFrame = FRAME_jump2;
     } else if (isRunning) {
         // running
         if (isDucking) {
-            SetFrame(FRAME_crwalk1);
+            SetAnimationFrame(FRAME_crwalk1);
             client->animation.endFrame = FRAME_crwalk6;
         } else {
-            SetFrame(FRAME_run1);
+            SetAnimationFrame(FRAME_run1);
             client->animation.endFrame = FRAME_run6;
         }
     } else {
         // standing
         if (isDucking) {
-            SetFrame(FRAME_crstnd01);
+            SetAnimationFrame(FRAME_crstnd01);
             client->animation.endFrame = FRAME_crstnd19;
         } else {
-            SetFrame(FRAME_stand01);
+            SetAnimationFrame(FRAME_stand01);
             client->animation.endFrame = FRAME_stand40;
         }
     }

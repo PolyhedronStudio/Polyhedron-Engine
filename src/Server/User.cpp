@@ -77,7 +77,7 @@ static void create_baselines(void)
 {
     int        i;
     Entity    *ent;
-    PackedEntity *base, **chunk;
+    EntityState *base, **chunk;
 
     // clear entityBaselines from previous level
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
@@ -103,11 +103,11 @@ static void create_baselines(void)
 
         chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
         if (*chunk == NULL) {
-            *chunk = (PackedEntity*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
+            *chunk = (EntityState*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
         }
 
         base = *chunk + (i & SV_BASELINES_MASK);
-        MSG_PackEntity(base, &ent->state);
+        *base = ent->state;
 
         base->solid = sv.entities[i].solid32;
     }
@@ -143,7 +143,7 @@ static void write_plain_configstrings(void)
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
 }
 
-static void write_baseline(PackedEntity *base)
+static void write_baseline(EntityState *base)
 {
     EntityStateMessageFlags flags = (EntityStateMessageFlags)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
@@ -153,7 +153,7 @@ static void write_baseline(PackedEntity *base)
 static void write_plain_baselines(void)
 {
     int i, j;
-    PackedEntity *base;
+    EntityState *base;
 
     // write a packet full of data
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
@@ -183,7 +183,7 @@ static void write_plain_baselines(void)
 static void write_compressed_gamestate(void)
 {
     SizeBuffer   *buf = &sv_client->netchan->message;
-    PackedEntity  *base;
+    EntityState  *base;
     int         i, j;
     size_t      length;
     uint8_t     *patch;

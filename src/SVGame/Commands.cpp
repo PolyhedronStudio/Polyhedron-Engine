@@ -725,28 +725,28 @@ void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
 //    switch (i) {
 //    case 0:
 //        gi.CPrintf(ent, PRINT_HIGH, "flipoff\n");
-//        ent->state.frame = FRAME_flip01 - 1;
+//        ent->state.animationFrame = FRAME_flip01 - 1;
 //        ent->client->animation.endFrame = FRAME_flip12;
 //        break;
 //    case 1:
 //        gi.CPrintf(ent, PRINT_HIGH, "salute\n");
-//        ent->state.frame = FRAME_salute01 - 1;
+//        ent->state.animationFrame = FRAME_salute01 - 1;
 //        ent->client->animation.endFrame = FRAME_salute11;
 //        break;
 //    case 2:
 //        gi.CPrintf(ent, PRINT_HIGH, "taunt\n");
-//        ent->state.frame = FRAME_taunt01 - 1;
+//        ent->state.animationFrame = FRAME_taunt01 - 1;
 //        ent->client->animation.endFrame = FRAME_taunt17;
 //        break;
 //    case 3:
 //        gi.CPrintf(ent, PRINT_HIGH, "wave\n");
-//        ent->state.frame = FRAME_wave01 - 1;
+//        ent->state.animationFrame = FRAME_wave01 - 1;
 //        ent->client->animation.endFrame = FRAME_wave11;
 //        break;
 //    case 4:
 //    default:
 //        gi.CPrintf(ent, PRINT_HIGH, "point\n");
-//        ent->state.frame = FRAME_point01 - 1;
+//        ent->state.animationFrame = FRAME_point01 - 1;
 //        ent->client->animation.endFrame = FRAME_point12;
 //        break;
 //    }
