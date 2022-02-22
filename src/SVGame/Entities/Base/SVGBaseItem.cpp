@@ -72,9 +72,9 @@ void SVGBaseItem::Spawn() {
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
-        { -16.f, -16.f, -16.f },
+        { -16.f, -16.f, -8.f },
         // Maxs.
-        { 16.f, 16.f, 16 }
+        { 16.f, 16.f, 8 }
     );
 
     // Set default values in case we have none.

@@ -191,7 +191,7 @@ void ItemWeaponBeretta::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWea
     float currentFrame = Clampf(client->playerState.gunFrame, idleStartFrame, idleEndFrame);
 
     // Calculate the next frame to head on forward to.
-    float nextFrame = currentFrame + 1.f;
+    float nextFrame = currentFrame + BASE_1_FRAMETIME;
 
     // Move on to the next frame until we've ended.
     if (nextFrame < idleEndFrame) {
@@ -214,7 +214,7 @@ void ItemWeaponBeretta::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWea
     float currentFrame = Clampf(client->playerState.gunFrame, drawStartFrame, drawEndFrame);
 
     // Calculate the next frame to head on forward to.
-    float nextFrame = currentFrame + 1.f;
+    float nextFrame = currentFrame + BASE_1_FRAMETIME;
 
     // Move on to the next frame until we've ended.
     if (nextFrame < drawEndFrame) {
@@ -239,7 +239,7 @@ void ItemWeaponBeretta::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItem
     float currentFrame = Clampf(client->playerState.gunFrame, holsterStartFrame, holsterEndFrame);
 
     // Calculate the next frame to head on forward to.
-    float nextFrame = currentFrame + 1.f;
+    float nextFrame = currentFrame + BASE_1_FRAMETIME;
 
     // Move on to the next frame until we've ended.
     if (nextFrame < holsterEndFrame) {

@@ -87,12 +87,14 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseItemAmmo.cpp
 	SVGame/Entities/Base/SVGBaseItemWeapon.cpp
 	SVGame/Entities/Base/SVGBaseTrigger.cpp
+	SVGame/Entities/Base/SVGBaseMonster.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
+	SVGame/Entities/Base/SVGBasePlayer.cpp
 	SVGame/Entities/Base/SVGEntityHandle.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
 	SVGame/Entities/Base/DebrisEntity.cpp
 	SVGame/Entities/Base/GibEntity.cpp
-	SVGame/Entities/Base/SVGBasePlayer.cpp
+
 	#SVGame/Entities/Info/InfoNotNull.cpp
 	SVGame/Entities/Info/InfoNull.cpp
 	SVGame/Entities/Info/InfoPlayerCoop.cpp
@@ -126,6 +128,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Misc/MiscServerModel.cpp
 	#SVGame/Entities/Misc/MiscTeleporter.cpp
 	#SVGame/Entities/Misc/MiscTeleporterDest.cpp
+	SVGame/Entities/Monsters/MonsterTestDummy.cpp
 	SVGame/Entities/Path/PathCorner.cpp
 	#SVGame/Entities/Target/TargetBlaster.cpp
 	#SVGame/Entities/Target/TargetChangelevel.cpp
@@ -188,12 +191,13 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseItemAmmo.h
 	SVGame/Entities/Base/SVGBaseItemWeapon.h
 	SVGame/Entities/Base/SVGBaseTrigger.h
+	SVGame/Entities/Base/SVGBaseMonster.h
 	SVGame/Entities/Base/SVGBaseMover.h
+	SVGame/Entities/Base/SVGBasePlayer.h
 	SVGame/Entities/Base/SVGEntityHandle.h
 	SVGame/Entities/Base/BodyCorpse.h
 	SVGame/Entities/Base/DebrisEntity.h
 	SVGame/Entities/Base/GibEntity.h
-	SVGame/Entities/Base/SVGBasePlayer.h
 	SVGame/Entities/Func/FuncAreaportal.h
 	SVGame/Entities/Func/FuncButton.h
 	SVGame/Entities/Func/FuncDoor.h
@@ -220,6 +224,7 @@ SET( SRC_SVGAME
 
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h
+	SVGame/Entities/Monsters/MonsterTestDummy.h
 	SVGame/Entities/Path/PathCorner.h
 	SVGame/Entities/Target/TargetEarthquake.h
 	SVGame/Entities/Target/TargetExplosion.h

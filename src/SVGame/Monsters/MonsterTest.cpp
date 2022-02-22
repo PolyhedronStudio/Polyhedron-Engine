@@ -78,10 +78,10 @@ void MiscServerModel::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::None);
+    SetMoveType(MoveType::Step);
 
     // Since this is a "monster", after all...
-    //SetServerFlags(EntityServerFlags::Monster);
+    SetServerFlags(EntityServerFlags::Monster);
     
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -249,40 +249,40 @@ void MiscServerModel::MiscServerModelThink(void) {
 
     if (nextFrame > endFrame) {
 
-        //if (GetHealth() > 0) {
+        if (GetHealth() > 0) {
 	        nextFrame = startFrame;
-	    //}
+	    }
     }
 
     SetFrame(nextFrame);
 
-    ////
-    //// Calculate direction.
-    ////
-    //if (GetHealth() > 0) {
-    //    vec3_t currentMoveAngles = GetAngles();
     //
-    //    // Direction vector between player and other entity.
-    //    vec3_t wishMoveAngles = GetGameworld()->GetClassEntities()[1]->GetOrigin() - GetOrigin();
+    // Calculate direction.
+    //
+    if (GetHealth() > 0) {
+        vec3_t currentMoveAngles = GetAngles();
+    
+        // Direction vector between player and other entity.
+        vec3_t wishMoveAngles = GetGameworld()->GetClassEntities()[1]->GetOrigin() - GetOrigin();
 
-    //    //  
-    //    vec3_t newModelAngles = vec3_euler(wishMoveAngles);
-    //    newModelAngles.x = 0;
+        //  
+        vec3_t newModelAngles = vec3_euler(wishMoveAngles);
+        newModelAngles.x = 0;
 
-    //    SetAngles(newModelAngles);
+        SetAngles(newModelAngles);
 
-    //    // Calculate yaw to use based on direction.
-    //    float yaw = vec3_to_yaw(wishMoveAngles);
+        // Calculate yaw to use based on direction.
+        float yaw = vec3_to_yaw(wishMoveAngles);
 
-    //    // Last but not least, move a step ahead.
-    //    SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
-    //}
+        // Last but not least, move a step ahead.
+        SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
+    }
 
     // Link entity back in.
     LinkEntity();
     
     // Check for ground.
-    //SVG_StepMove_CheckGround(this);
+    SVG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
@@ -302,7 +302,7 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SetActivator(attacker);
     
     // Set movetype to dead, solid dead.
-    SetMoveType(MoveType::None);
+    SetMoveType(MoveType::TossSlide);
     SetSolid(Solid::Not);
     LinkEntity();
     // Play a nasty gib sound, yughh :)
