@@ -18,6 +18,9 @@
 #include "../Gamemodes/IGameMode.h"
 #include "../Gamemodes/DeathMatchGamemode.h"
 
+// World.
+#include "../World/Gameworld.h"
+
 static const char single_statusbar[] =
 "yb -24 "
 
@@ -286,18 +289,19 @@ void Worldspawn::Spawn() {
     // Reserve some spots for dead player bodies for coop / deathmatch
     level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
-        Entity* ent = SVG_Spawn();
-        ent->classname = "bodyque";
+	    Entity* ent = GetGameworld()->ObtainFreeServerEntity();
+
+        //ent->classname = "bodyque";
     }
 
     // Configure item name configstrings.
-    SVG_SetItemNames();
+    //SVG_SetItemNames();
 
     // Setup max client config strings.
     SVG_SetConfigString(ConfigStrings::MaxClients, std::to_string(maximumclients->integer));
 
     // Status bar program
-    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+    if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
         SVG_SetConfigString(ConfigStrings::StatusBar, dm_statusbar);
     } else {
         SVG_SetConfigString(ConfigStrings::StatusBar, single_statusbar);

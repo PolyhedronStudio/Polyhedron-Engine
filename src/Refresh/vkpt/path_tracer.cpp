@@ -817,8 +817,7 @@ append_blas(QvkGeometryInstance_t* instances, uint32_t* num_instances, accel_str
 
 static void
 build_tlas(VkCommandBuffer cmd_buf, accel_struct_t* as, VkDeviceAddress instance_data, uint32_t num_instances)
-
-	{
+{
 		// Build the TLAS
 		VkAccelerationStructureGeometryDataKHR geometry = {
 			.instances = {

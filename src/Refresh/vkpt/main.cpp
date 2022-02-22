@@ -32,7 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 #include "material.h"
 #include "fog.h"
+#include "cameras.h"
 #include "physical_sky.h"
+#include "conversion.h"
 #include "../../Client/Client.h"
 #include "../../Client/UI/UI.h"
 
@@ -48,6 +50,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <assert.h>
 
 cvar_t *cvar_profiler = NULL;
+cvar_t* cvar_profiler_scale = NULL;
+cvar_t* cvar_hdr = NULL;
 cvar_t *cvar_vsync = NULL;
 cvar_t *cvar_pt_caustics = NULL;
 cvar_t *cvar_pt_enable_nodraw = NULL;
@@ -509,6 +513,41 @@ qvkDestroyDebugUtilsMessengerEXT(
 	return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
+static qboolean pick_surface_format_hdr(VkSurfaceFormatKHR* format, const VkSurfaceFormatKHR avail_surface_formats[], size_t num_avail_surface_formats)
+{
+	VkSurfaceFormatKHR acceptable_formats[] = {
+		{ VK_FORMAT_R16G16B16A16_SFLOAT, VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT }
+	};
+
+	for(int i = 0; i < LENGTH(acceptable_formats); i++) {
+		for(int j = 0; j < num_avail_surface_formats; j++) {
+			if((acceptable_formats[i].format == avail_surface_formats[j].format)
+				&& (acceptable_formats[i].colorSpace == avail_surface_formats[j].colorSpace)){
+				*format = avail_surface_formats[j];
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+static qboolean pick_surface_format_sdr(VkSurfaceFormatKHR* format, const VkSurfaceFormatKHR avail_surface_formats[], size_t num_avail_surface_formats)
+{
+	VkFormat acceptable_formats[] = {
+		VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_B8G8R8A8_SRGB,
+	};
+
+	for(int i = 0; i < LENGTH(acceptable_formats); i++) {
+		for(int j = 0; j < num_avail_surface_formats; j++) {
+			if(acceptable_formats[i] == avail_surface_formats[j].format) {
+				*format = avail_surface_formats[j];
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 VkResult
 create_swapchain()
 {
@@ -532,20 +571,25 @@ create_swapchain()
 		Com_Printf("  %s\n", vk_format_to_string(avail_surface_formats[i].format)); */ 
 
 
-	VkFormat acceptable_formats[] = {
-		VK_FORMAT_R8G8B8A8_SRGB, VK_FORMAT_B8G8R8A8_SRGB,
-	};
-
-	//qvk.surf_format.format     = VK_FORMAT_R8G8B8A8_SRGB;
-	//qvk.surf_format.format     = VK_FORMAT_B8G8R8A8_SRGB;
-	for(int i = 0; i < LENGTH(acceptable_formats); i++) {
-		for(int j = 0; j < num_formats; j++)
-			if(acceptable_formats[i] == avail_surface_formats[j].format) {
-				qvk.surf_format = avail_surface_formats[j];
-				goto out;
-			}
+	qboolean surface_format_found = false;
+	if (cvar_hdr->integer != 0) {
+	    surface_format_found = pick_surface_format_hdr(&qvk.surf_format, avail_surface_formats, num_formats);
+	    qvk.surf_is_hdr = surface_format_found;
+	    if (!surface_format_found) {
+			Com_WPrintf("HDR was requested but no supported surface format was found.\n");
+			Cvar_SetByVar(cvar_hdr, "0", FROM_CODE);
+	    } else {
+			qvk.surf_is_hdr = false;
+	    }
 	}
-out:;
+	if (!surface_format_found) {
+	    // HDR disabled, or fallback to SDR
+	    surface_format_found = pick_surface_format_sdr(&qvk.surf_format, avail_surface_formats, num_formats);
+	}
+	if (!surface_format_found) {
+	    Com_EPrintf("no acceptable surface format available!\n");
+	    return (VkResult)1;
+	}
 
 	uint32_t num_present_modes = 0;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(qvk.physical_device, qvk.surface, &num_present_modes, NULL);
@@ -1146,15 +1190,26 @@ init_vulkan()
 		.accelerationStructure = VK_TRUE,
 	};
 
+	VkPhysicalDeviceBufferDeviceAddressFeatures physical_device_address_features = { 
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES, 
+		.pNext = &physical_device_as_features, 
+		.bufferDeviceAddress = VK_TRUE 
+	};
+#ifdef VKPT_DEVICE_GROUPS
+	if (qvk.device_count > 1) {
+	    physical_device_address_features.bufferDeviceAddressMultiDevice = VK_TRUE;
+	}
+#endif
+
 	VkPhysicalDeviceRayTracingPipelineFeaturesKHR physical_device_rt_pipeline_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
-		.pNext = &physical_device_as_features,
+		.pNext = &physical_device_address_features,
 		.rayTracingPipeline = VK_TRUE
 	};
 
 	VkPhysicalDeviceRayQueryFeaturesKHR physical_device_ray_query_features = {
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR,
-		.pNext = &physical_device_as_features,
+		.pNext = &physical_device_address_features,
 		.rayQuery = VK_TRUE
 	};
 
@@ -1823,7 +1878,7 @@ static void process_regular_entity(
 		current_num_instanced_vert += mesh->numtris * 3;
 	}
 
-	// add cylinder lights for wall lamps
+	// add cylinder lights for polyhedron logo, makes the mesh work nicely. Used to be for q2 wall lamps
 	if (model->model_class == MCLASS_STATIC_LIGHT) {
 		vec4_t begin, end, color;
 		vec4_t offset1 = {0.f, 0.5f, -10.f, 1.f};
@@ -1835,8 +1890,7 @@ static void process_regular_entity(
 		color.x = 0.25f; color.y = 0.5f; color.z = 0.07f;
 
 		vkpt_build_cylinder_light(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, vec3_t{begin.x, begin.y, begin.z}, vec3_t{end.x, end.y, end.z}, vec3_t
-			{color.x, color.y, color.z
-}, 1.5f);
+			{color.x, color.y, color.z}, 5.5f);
 	}
 
 	*model_instance_idx = current_model_instance_index;
@@ -2210,6 +2264,7 @@ process_render_feedback(ref_feedback_t *feedback, mleaf_t* viewleaf, qboolean* s
 		}
 
 		VectorCopy(readback.hdr_color, feedback->hdr_color);
+		feedback->adapted_luminance = readback.adapted_luminance;
 
 		*sun_visible = readback.sun_luminance > 0.f;
 		*adapted_luminance = readback.adapted_luminance;
@@ -2658,7 +2713,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	evaluate_reference_mode(&ref_mode);
 	evaluate_taa_settings(&ref_mode);
 	
-	qboolean menu_mode = cl_paused->integer == 1 && uis.menuDepth > 0 && render_world;
+	qvk.frame_menu_mode = cl_paused->integer == 1 && uis.menuDepth > 0 && render_world;
 
 	int new_world_anim_frame = (int)(fd->time * 2);
 	qboolean update_world_animations = (new_world_anim_frame != world_anim_frame);
@@ -2682,7 +2737,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		ubo->fs_blend_color = vec4_zero();
 
 	vkpt_physical_sky_update_ubo(ubo, &sun_light, render_world);
-	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, menu_mode);
+	vkpt_bloom_update(ubo, frame_time, ubo->medium != MEDIUM_NONE, qvk.frame_menu_mode);
 
 	if (update_world_animations)
 		bsp_mesh_animate_light_polys(&vkpt_refdef.bsp_mesh_world);
@@ -2880,7 +2935,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		vkpt_taa(post_cmd_buf);
 
 		BEGIN_PERF_MARKER(post_cmd_buf, PROFILER_BLOOM);
-		if (cvar_bloom_enable->integer != 0 || menu_mode)
+		if (cvar_bloom_enable->integer != 0 || qvk.frame_menu_mode)
 		{
 			vkpt_bloom_record_cmd_buffer(post_cmd_buf);
 		}
@@ -2900,8 +2955,9 @@ R_RenderFrame_RTX(refdef_t *fd)
 		}
 		END_PERF_MARKER(post_cmd_buf, PROFILER_TONE_MAPPING);
 
-		if (vkpt_fsr_is_enabled()) 		{
-			vkpt_fsr_do(post_cmd_buf);
+		// Skip FSR (upscaling) if image is going to be heavily blurred anyway (menu mode)
+		if (vkpt_fsr_is_enabled() && !qvk.frame_menu_mode) {
+		    vkpt_fsr_do(post_cmd_buf);
 		}
 
 		{
@@ -3095,7 +3151,7 @@ R_BeginFrame_RTX(void)
 	
 	VkExtent2D extent_screen_images = get_screen_image_extent();
 
-	if(!extents_equal(extent_screen_images, qvk.extent_screen_images))
+	if(!extents_equal(extent_screen_images, qvk.extent_screen_images) || (!!cvar_hdr->value != qvk.surf_is_hdr))
 	{
 		qvk.extent_screen_images = extent_screen_images;
 		recreate_swapchain();
@@ -3171,12 +3227,14 @@ R_EndFrame_RTX(void)
 
 	if(cvar_profiler->integer)
 		draw_profiler(cvar_flt_enable->integer != 0);
+	if (cvar_tm_debug->integer)
+	    vkpt_tone_mapping_draw_debug();
 
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
 	if (frame_ready)
 	{
-		if (vkpt_fsr_is_enabled()) {
+	    if (vkpt_fsr_is_enabled() && !qvk.frame_menu_mode) {
 			vkpt_fsr_final_blit(cmd_buf);
 		} else if (qvk.effective_aa_mode == AA_MODE_UPSCALE) {
 			vkpt_final_blit_simple(cmd_buf, qvk.images[VKPT_IMG_TAA_OUTPUT], qvk.extent_taa_output);
@@ -3336,8 +3394,10 @@ R_Init_RTX(qboolean total)
 	qvk.window = sdl_window;
 
 	cvar_profiler = Cvar_Get("profiler", "0", 0);
+	cvar_profiler_scale = Cvar_Get("profiler_scale", "1", CVAR_ARCHIVE);
 	cvar_vsync = Cvar_Get("vid_vsync", "0", CVAR_REFRESH | CVAR_ARCHIVE);
 	cvar_vsync->changed = NULL; // in case the GL renderer has set it
+	cvar_hdr = Cvar_Get("vid_hdr", "0", CVAR_ARCHIVE);
 	cvar_pt_caustics = Cvar_Get("pt_caustics", "1", CVAR_ARCHIVE);
 	cvar_pt_enable_nodraw = Cvar_Get("pt_enable_nodraw", "0", 0);
 
@@ -3485,6 +3545,7 @@ R_Init_RTX(qboolean total)
 #endif
 
 	vkpt_fog_init();
+	vkpt_cameras_init();
 
 	for (int i = 0; i < 256; i++) {
 		qvk.sintab[i] = sinf(i * (2 * M_PI / 255));
@@ -3520,6 +3581,7 @@ R_Shutdown_RTX(qboolean total)
 #endif
 	
 	vkpt_fog_shutdown();
+	vkpt_cameras_shutdown();
 	MAT_Shutdown();
 	IMG_FreeAll();
 	vkpt_textures_destroy_unused();
@@ -3660,6 +3722,115 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 	*width = qvk.extent_unscaled.width;
 	*height = qvk.extent_unscaled.height;
 	*rowbytes = pitch;
+	return pixels;
+}
+
+float *
+IMG_ReadPixelsHDR_RTX(int *width, int *height)
+{
+	if (qvk.surf_format.format != VK_FORMAT_R16G16B16A16_SFLOAT)
+	{
+		Com_EPrintf("IMG_ReadPixelsHDR: unsupported swap chain format (%d)!\n", qvk.surf_format.format);
+		return NULL;
+	}
+
+	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
+
+	VkImage swap_chain_image = qvk.swap_chain_images[qvk.current_swap_chain_image_index];
+
+	VkImageSubresourceRange subresource_range = {
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.baseMipLevel = 0,
+		.levelCount = 1,
+		.baseArrayLayer = 0,
+		.layerCount = 1
+	};
+		
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
+	});
+
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_HOST_READ_BIT,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
+	});
+
+	VkImageCopy img_copy_region = {
+		.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
+		.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 },
+		.extent = { qvk.extent_unscaled.width, qvk.extent_unscaled.height, 1 }
+	};
+
+	vkCmdCopyImage(cmd_buf,
+		swap_chain_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		qvk.screenshot_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1, &img_copy_region);
+
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT,
+		.dstAccessMask = 0,
+		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.image = swap_chain_image,
+		.subresourceRange = subresource_range,
+    });
+
+	IMAGE_BARRIER(cmd_buf, {
+		.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_HOST_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.image = qvk.screenshot_image,
+		.subresourceRange = subresource_range,
+	});
+
+	vkpt_submit_command_buffer_simple(cmd_buf, qvk.queue_graphics, false);
+	vkpt_wait_idle(qvk.queue_graphics, &qvk.cmd_buffers_graphics);
+
+	VkImageSubresource subresource = {
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+	    .mipLevel = 0,
+		.arrayLayer = 0,
+	};
+
+	VkSubresourceLayout subresource_layout;
+	vkGetImageSubresourceLayout(qvk.device, qvk.screenshot_image, &subresource, &subresource_layout);
+
+	void *device_data;
+	_VK(vkMapMemory(qvk.device, qvk.screenshot_image_memory, 0, qvk.screenshot_image_memory_size, 0, &device_data));
+	
+	int pitch = qvk.extent_unscaled.width * 3;
+	float *pixels = (float*)FS_AllocTempMem(pitch * qvk.extent_unscaled.height * sizeof(float));
+
+	for (int row = 0; row < qvk.extent_unscaled.height; row++)
+	{
+		uint16_t* src_row = (uint16_t*)((byte*)device_data + subresource_layout.rowPitch * row);
+		float* dst_row = pixels + pitch * (qvk.extent_unscaled.height - row - 1);
+
+		for (int col = 0; col < qvk.extent_unscaled.width; col++)
+		{
+			dst_row[0] = halfToFloat(src_row[0]);
+			dst_row[1] = halfToFloat(src_row[1]);
+			dst_row[2] = halfToFloat(src_row[2]);
+
+			src_row += 4;
+			dst_row += 3;
+		}
+	}
+
+	vkUnmapMemory(qvk.device, qvk.screenshot_image_memory);
+
+	*width = qvk.extent_unscaled.width;
+	*height = qvk.extent_unscaled.height;
 	return pixels;
 }
 

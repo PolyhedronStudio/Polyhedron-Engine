@@ -95,11 +95,11 @@ typedef enum {
     svc_bad,
 
     // these ops are known to the game dll
-    //SVG_CMD_MUZZLEFLASH,
-    //SVG_CMD_MUZZLEFLASH2,
-    //SVG_CMD_TEMP_ENTITY,
-    //SVG_CMD_LAYOUT,
-    //SVG_CMD_INVENTORY,
+    //ServerGameCommands::MuzzleFlash,
+    //ServerGameCommands::MuzzleFlash2,
+    //ServerGameCommands::TempEntity,
+    //ServerGameCommands::Layout,
+    //ServerGameCommands::Inventory,
 
     // the rest are private to the client and server
     svc_nop,
@@ -198,7 +198,7 @@ typedef enum {
 #define CM_IMPULSE  (1<<7)
 
 // r1q2 button byte hacks
-#define BUTTON_MASK     (BUTTON_ATTACK|BUTTON_USE|BUTTON_ANY)
+#define BUTTON_MASK     (ButtonBits::Attack|ButtonBits::Use|ButtonBits::Any)
 #define BUTTON_FORWARD  4
 #define BUTTON_SIDE     8
 #define BUTTON_UP       16

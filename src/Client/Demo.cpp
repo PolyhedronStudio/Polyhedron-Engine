@@ -826,7 +826,7 @@ void CL_EmitDemoSnapshot(void)
     }
 
     // write layout
-    MSG_WriteByte(SVG_CMD_LAYOUT);
+    MSG_WriteByte(ServerGameCommands::Layout);
     MSG_WriteString(cl.layout);
 
     // CPP: Cast void* to demosnap_t *

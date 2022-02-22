@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Utilities.
 #include "Utilities.h"
 
+// World.
+#include "World/Gameworld.h"
+
 // Weapons.
 #include "Entities/Weaponry/BlasterBolt.h"
 
@@ -199,13 +202,13 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     color = SplashType::Unknown;
 
                 if (color != SplashType::Unknown) {
-                    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+                    gi.WriteByte(ServerGameCommands::TempEntity);
                     gi.WriteByte(TempEntityEvent::Splash);
                     gi.WriteByte(8);
                     gi.WriteVector3(tr.endPosition);
                     gi.WriteVector3(tr.plane.normal);
                     gi.WriteByte(color);
-                    gi.Multicast(tr.endPosition, MultiCast::PVS);
+                    gi.Multicast(tr.endPosition, Multicast::PVS);
                 }
 
                 // change bullet's course when it enters water
@@ -230,11 +233,11 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                 SVG_InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
-                    gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+                    gi.WriteByte(ServerGameCommands::TempEntity);
                     gi.WriteByte(te_impact);
                     gi.WriteVector3(tr.endPosition);
                     gi.WriteVector3(tr.plane.normal);
-                    gi.Multicast(tr.endPosition, MultiCast::PVS);
+                    gi.Multicast(tr.endPosition, Multicast::PVS);
 
                     if (self->GetClient())
                         SVG_PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
@@ -258,11 +261,11 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
 
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::BubbleTrail);
         gi.WriteVector3(water_start);
         gi.WriteVector3(tr.endPosition);
-        gi.Multicast(pos, MultiCast::PVS);
+        gi.Multicast(pos, Multicast::PVS);
     }
 }
 
@@ -311,7 +314,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     vec3_t dir = vec3_normalize(aimdir);
  
     // Spawn the blaster bolt server entity.
-    BlasterBolt* boltEntity = SVG_CreateClassEntity<BlasterBolt>();
+    BlasterBolt* boltEntity = game.world->CreateClassEntity<BlasterBolt>();
 
     // Welp. It can happen sometimes
     if ( nullptr == boltEntity ) {

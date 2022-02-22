@@ -17,7 +17,7 @@
 * 
 *	@return	A valid pointer if the server entity is pointing to one. nullptr otherwise.
 **/
-static inline SVGBaseEntity* GetBaseClassentity(Entity* serverEntity) {
+static inline SVGBaseEntity* GetClassEntity(Entity* serverEntity) {
     // Reinterpret cast the classEntity pointer.
     if (serverEntity) {
 	    if (serverEntity->classEntity != nullptr) {
@@ -38,9 +38,9 @@ static inline SVGBaseEntity* GetBaseClassentity(Entity* serverEntity) {
 *	@brief Simple constructor of an entity handle that will accept a
 *	class entity.
 **/
-SVGEntityHandle::SVGEntityHandle(SVGBaseEntity* baseEntity) : serverEntity(nullptr), entityID(0) {
+SVGEntityHandle::SVGEntityHandle(SVGBaseEntity* classEntity) : serverEntity(nullptr), entityID(0) {
     // Exploits the assignment operator.
-    *this = baseEntity;
+    *this = classEntity;
 }
 
 /**
@@ -107,19 +107,19 @@ const uint32_t SVGEntityHandle::ID() { return entityID; }
 /**
 *	@brief * operator implementations.
 **/
-SVGBaseEntity *SVGEntityHandle::operator*() { return (SVGBaseEntity*)GetBaseClassentity(Get()); }
-const SVGBaseEntity* SVGEntityHandle::operator*() const { return (SVGBaseEntity*)GetBaseClassentity(Get()); }
+SVGBaseEntity* SVGEntityHandle::operator*() { return (SVGBaseEntity*)GetClassEntity(Get()); }
+const SVGBaseEntity* SVGEntityHandle::operator*() const { return (SVGBaseEntity*)GetClassEntity(Get()); }
 
 /**
 *	@brief	Assigns the SVGBaseEntity to this handle if it has a valid server entity.
 *			If no valid SVGBaseEntity and server entity pointer are passed it unsets
 *			this current handle to nullptr and entityID = 0.
 **/
-SVGBaseEntity* SVGEntityHandle::operator=(SVGBaseEntity* baseEntity) {
+SVGBaseEntity* SVGEntityHandle::operator=(SVGBaseEntity* classEntity) {
 	// Ensure SVGBaseEntity pointer is valid.
-	if (baseEntity) {
+    if (classEntity) {
 		// Acquire server entity pointer.
-		serverEntity = baseEntity->GetServerEntity();
+		serverEntity = classEntity->GetServerEntity();
 
 		// In case of a valid server entity pointer, assign entityID to its number.
 		if (serverEntity) {
@@ -132,14 +132,14 @@ SVGBaseEntity* SVGEntityHandle::operator=(SVGBaseEntity* baseEntity) {
 	}
 
 	// Last but not least, return.
-	return baseEntity;
+	return classEntity;
 }
 
 
 /**
-*	@brief	Used to access the base class entity its methods.
+*	@brief	Used to access the class entity its methods.
 **/
-SVGBaseEntity* SVGEntityHandle::operator->() const { return (SVGBaseEntity*)GetBaseClassentity(Get()); }
+SVGBaseEntity* SVGEntityHandle::operator->() const { return (SVGBaseEntity*)GetClassEntity(Get()); }
 
 /**
 *   @brief  Comparison check for whether this handle points to the same entity as 
@@ -148,12 +148,12 @@ SVGBaseEntity* SVGEntityHandle::operator->() const { return (SVGBaseEntity*)GetB
 *   @return Returns true if SVGBaseEntity* != nullptr, its serverEntity pointer 
 *           != nullptr, and their entity index number matches.
 **/
-bool SVGEntityHandle::operator==(const SVGBaseEntity* baseEntity) {
-    if (!baseEntity) {
+bool SVGEntityHandle::operator==(const SVGBaseEntity* classEntity) {
+    if (!classEntity) {
 	    return false;
     }
 
-    Entity* serverEntity = const_cast<SVGBaseEntity*>(baseEntity)->GetServerEntity();
+    Entity* serverEntity = const_cast<SVGBaseEntity*>(classEntity)->GetServerEntity();
 
     if (!serverEntity) {
 		return false;

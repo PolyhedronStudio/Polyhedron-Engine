@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 #include "shader/global_textures.h"
 #include "material.h"
+#include "cameras.h"
 
 #include <assert.h>
 #include <float.h>
@@ -1386,50 +1387,6 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name) {
 }
 
 static void
-load_cameras(bsp_mesh_t* wm, const char* map_name) {
-	wm->num_cameras = 0;
-
-	char* filebuf = NULL;
-	FS_LoadFile("cameras.txt", (void**)&filebuf);
-	if (!filebuf) 	{
-		Com_WPrintf("Couldn't read cameras.txt\n");
-		return;
-	}
-
-	char const* ptr = (char const*)filebuf;
-	char linebuf[1024];
-	qboolean found_map = false;
-
-	while (sgets(linebuf, sizeof(linebuf), &ptr)) 	{
-		{ char* t = strchr(linebuf, '#'); if (t) *t = 0; }   // remove comments
-		{ char* t = strchr(linebuf, '\n'); if (t) *t = 0; }  // remove newline
-
-
-		vec3_t pos, dir;
-		if ((linebuf[0] >= 'a' && linebuf[0] <= 'z') || (linebuf[0] >= 'A' && linebuf[0] <= 'Z')) 		{
-			const char* delimiters = " \t\r\n";
-			const char* word = strtok(linebuf, delimiters);
-			qboolean matches = strcmp(word, map_name) == 0;
-
-			if (!found_map && matches) 			{
-				found_map = true;
-			} 			else if (found_map && !matches) 			{
-				Z_Free(filebuf);
-				return;
-			}
-		} 		else if (found_map && sscanf(linebuf, "(%f, %f, %f) (%f, %f, %f)", &pos[0], &pos[1], &pos[2], &dir[0], &dir[1], &dir[2]) == 6) 		{
-			if (wm->num_cameras < MAX_CAMERAS) 			{
-				VectorCopy(pos, wm->cameras[wm->num_cameras].pos);
-				VectorCopy(dir, wm->cameras[wm->num_cameras].dir);
-				wm->num_cameras++;
-			}
-		}
-	}
-
-	Z_Free(filebuf);
-}
-
-static void
 compute_sky_visibility(bsp_mesh_t* wm, bsp_t* bsp) {
 	memset(wm->sky_visibility, 0, VIS_MAX_BYTES);
 
@@ -1442,16 +1399,18 @@ compute_sky_visibility(bsp_mesh_t* wm, bsp_t* bsp) {
 
 	memset(clusters_with_sky, 0, VIS_MAX_BYTES);
 
-	for (int i = 0; i < (wm->world_sky_count + wm->world_custom_sky_count) / 3; i++) 	{
+	for (int i = 0; i < (wm->world_sky_count + wm->world_custom_sky_count) / 3; i++) {
 		int prim = wm->world_sky_offset / 3 + i;
 
 		int cluster = wm->clusters[prim];
+		if (cluster < 0)
+		    continue;
 		if ((cluster >> 3) < VIS_MAX_BYTES)
 			clusters_with_sky[cluster >> 3] |= (1 << (cluster & 7));
 	}
 
-	for (int cluster = 0; cluster < numclusters; cluster++) 	{
-		if (clusters_with_sky[cluster >> 3] & (1 << (cluster & 7))) 		{
+	for (int cluster = 0; cluster < numclusters; cluster++) {
+		if (clusters_with_sky[cluster >> 3] & (1 << (cluster & 7))) {
 			byte* mask = BSP_GetPvs(bsp, cluster);
 
 			for (int i = 0; i < bsp->visrowsize; i++)
@@ -1690,7 +1649,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t* wm, bsp_t* bsp, const char* map_name) {
 		full_game_map_name = "base3";
 
 	load_sky_and_lava_clusters(wm, full_game_map_name);
-	load_cameras(wm, full_game_map_name);
+	vkpt_cameras_load(wm, full_game_map_name);
 
 	wm->models = (bsp_model_t*)Z_Malloc(bsp->nummodels * sizeof(bsp_model_t));
 	memset(wm->models, 0, bsp->nummodels * sizeof(bsp_model_t));

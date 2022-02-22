@@ -27,23 +27,31 @@ FuncRotating::FuncRotating( Entity* entity )
 // FuncRotating::Spawn
 //===============
 void FuncRotating::Spawn() {
-	Base::Spawn();
 
-	SetSolid( Solid::BSP );
-	
-	SetMoveType( (GetSpawnFlags() & SF_StopOnBlock) ? MoveType::Stop : MoveType::Push );
+	// Be sure to set angles first before calling Base::Spawn because
+    // a func_door already does SetMoveAngles for us.
+    SetAngles(vec3_zero());
 
+    Base::Spawn();
+
+	// TODO: Implement properly. Someone, feel free to submit a PR :)
 	// Set the axis of rotation, support custom axes as well
+    moveDirection = vec3_zero();
 	if ( GetSpawnFlags() & SF_YAxis ) {
-		moveDirection = vec3_t( 0.0f, 0.0f, 1.0f );
+	    //SetMoveDirection(vec3_t { 0.0f, 0.0f, 1.0f }, false);
+		moveDirection.z = 1.f;
 	} else if ( GetSpawnFlags() & SF_XAxis ) {
-		moveDirection = vec3_t( 1.0f, 0.0f, 0.0f );
-	} else if ( !vec3_length( moveDirection ) ) { // moveDirection can be automatically set with 
-		moveDirection = vec3_t( 0.0f, 0.0f, 1.0f ); // keyvalues, so make sure to account for that
+	    moveDirection.x = 1.f;//SetMoveDirection(vec3_t { 1.0f, 0.0f, 0.0f }, false);
+	} else {// if ( !vec3_length( moveDirection ) ) { // moveDirection can be automatically set with 
+		moveDirection.y = 1.f;//SetMoveDirection(vec3_t { 0.0f, 1.0f, 1.0f }, false);  // keyvalues, so make sure to account for that
 	}
 
+	SetSolid(Solid::BSP);
+	SetModel(GetModel());
+	SetMoveType((GetSpawnFlags() & SF_StopOnBlock) ? MoveType::Stop : MoveType::Push);
+
 	if ( GetSpawnFlags() & SF_Reverse ) {
-		moveDirection = vec3_negate( moveDirection );
+	    moveDirection = vec3_negate(moveDirection);
 	}
 
 	if ( !GetSpeed() ) {
@@ -61,12 +69,12 @@ void FuncRotating::Spawn() {
 	}
 
 	if ( GetSpawnFlags() & SF_Animated ) {
-		serverEntity->state.effects |= EntityEffectType::AnimCycleAll2hz;
+		SetEffects(GetEffects() | EntityEffectType::AnimCycleAll2hz);
 	} else if ( GetSpawnFlags() & SF_AnimatedFast ) {
-		serverEntity->state.effects |= EntityEffectType::AnimCycleAll30hz;
+		SetEffects(GetEffects() | EntityEffectType::AnimCycleAll30hz);
 	}
 
-	SetModel( GetModel() );
+
 	LinkEntity();
 }
 
@@ -90,7 +98,7 @@ void FuncRotating::RotatorHurtTouch( SVGBaseEntity* self, SVGBaseEntity* other, 
 // FuncRotating::RotatorUse
 //===============
 void FuncRotating::RotatorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-	if ( vec3_equal( GetAngularVelocity(), vec3_zero() ) ) {
+	if ( !vec3_equal( GetAngularVelocity(), vec3_zero() ) ) {
 		SetSound( 0 );
 		SetAngularVelocity( vec3_zero() );
 		SetTouchCallback( nullptr );
@@ -101,4 +109,8 @@ void FuncRotating::RotatorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) 
 			SetTouchCallback( &FuncRotating::RotatorHurtTouch );
 		}
 	}
+}
+
+void FuncRotating::SpawnKey(const std::string& key, const std::string& value) { 
+	Base::SpawnKey(key, value); 
 }

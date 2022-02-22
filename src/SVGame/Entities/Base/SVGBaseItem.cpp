@@ -1,15 +1,12 @@
-/*
-// LICENSE HERE.
-
-//
-// SVGBaseItem.cpp
-//
-// Base class to create item entities from.
-//
-// Gives the following functionalities:
-// TODO: Explain what.
-//
-*/
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	See header for information.
+*
+***/
 #include "../../ServerGameLocal.h"  // SVGame.
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"        // Util funcs.
@@ -18,17 +15,23 @@
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
-#include "../Base/PlayerClient.h"
+#include "../Base/SVGBasePlayer.h"
 
-// Misc Explosion Box Entity.
+// Item & ItemWeapon.
 #include "SVGBaseItem.h"
+#include "SVGBaseItemWeapon.h"
 
 
-//
-// Constructor/Deconstructor.
-//
-SVGBaseItem::SVGBaseItem(Entity* svEntity) 
-    : Base(svEntity) {
+//! Used to store instances that are used for player weapon callbacks.
+SVGBaseItem* SVGBaseItem::itemInstances[ItemIdentifier::Maximum];
+//! Used for looking up instances by string. TODO: Improve this, it can be done more simply.
+std::map<std::string, uint32_t> SVGBaseItem::lookupStrings;
+
+
+
+//! Constructor/Deconstructor.
+SVGBaseItem::SVGBaseItem(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+    : Base(svEntity), displayString(displayString), itemIdentifier(identifier) {
 
 }
 SVGBaseItem::~SVGBaseItem() {
@@ -37,29 +40,28 @@ SVGBaseItem::~SVGBaseItem() {
 
 
 
-//
-// Interface functions. 
-//
-//
-//===============
-// SVGBaseItem::Precache
-//
-//===============
-//
+/**
+* 
+*   Interface implementation functions.
+*
+***/
+/**
+*   @brief
+**/
 void SVGBaseItem::Precache() {
     // Always call parent class method.
     Base::Precache();
 }
 
-//
-//===============
-// SVGBaseItem::Spawn
-//
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItem::Spawn() {
     // Always call parent class method.
     Base::Spawn();
+
+    // Set the config string for this item.
+    SVG_SetConfigString(ConfigStrings::Items + itemIdentifier, displayString);
 
     // Set solid.
     SetSolid(Solid::Trigger);
@@ -70,9 +72,9 @@ void SVGBaseItem::Spawn() {
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
-        { -16.f, -16.f, -16.f },
+        { -16.f, -16.f, -8.f },
         // Maxs.
-        { 16.f, 16.f, 16 }
+        { 16.f, 16.f, 8 }
     );
 
     // Set default values in case we have none.
@@ -85,6 +87,7 @@ void SVGBaseItem::Spawn() {
 
     // Setup our SVGBaseItem callbacks.
     SetUseCallback(&SVGBaseItem::BaseItemUse);
+    SetUseInstanceCallback(&SVGBaseItem::BaseItemUseInstance);
     SetTouchCallback(&SVGBaseItem::BaseItemTouch);
 
     // Start thinking after other entities have spawned. This allows for items to safely
@@ -96,19 +99,15 @@ void SVGBaseItem::Spawn() {
     LinkEntity();
 }
 
-//
-//===============
-// SVGBaseItem::Respawn
-//
-// In order for an item to respawn we first check if it is a member of a team, if it is
-// then we'll go and look for a random entity in the list to respawn.
-//===============
-//
+/**
+*   @brief  In order for an item to respawn we first check if it is a member of a team, if it is
+*           then we'll go and look for a random entity in the list to respawn.
+**/
 void SVGBaseItem::Respawn() {
     Base::Respawn();
 
     // Fetch team entity.
-//    SVGBaseEntity *teamMaster = GetTeamMasterEntity();
+    //SVGBaseEntity *teamMaster = GetTeamMasterEntity();
     SVGBaseEntity* slaveEntity = this;
 
     //// Count and random index.
@@ -141,45 +140,50 @@ void SVGBaseItem::Respawn() {
         // Link it back in.
         slaveEntity->LinkEntity();
 
-        gi.DPrintf("BaseItem::Respawn");
-
         // Set think callback to fall to floor (just in case).
         SetThinkCallback(&SVGBaseItem::BaseItemDropToFloor);
     } else {
-        gi.DPrintf("No slaveEntity found...");
+    	SVG_DPrint("No slave entity found for SVGBaseItem(#" + GetState().number + std::string(") at origin: ") + vec3_to_str(GetOrigin()) + "\n");
     }
 }
 
-//
-//===============
-// SVGBaseItem::PostSpawn
-//
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItem::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
 }
 
-//
-//===============
-// SVGBaseItem::Think
-//
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItem::Think() {
     // Always call parent class method.
     Base::Think();
 }
 
 
-//
-// Entity functions.
-//
-//===============
-// SVGBaseItem::SetRespawn
-// 
-//===============
+
+/**
+*
+*   Instance Interface implementation functions.
+*
+**/
+void SVGBaseItem::InstanceSpawn() {
+    SetUseInstanceCallback(&SVGBaseItem::BaseItemUseInstance);
+}
+
+
+
+/**
+* 
+*   Entity functions.
+*
+***/
+/**
+*   @brief Engages this item in respawn mode waiting for the set delay to pass before respawning.
+**/
 void SVGBaseItem::SetRespawn(const float delay) {
     // Ensure that for the time being the item doesn't appear to clients.
     SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
@@ -195,82 +199,53 @@ void SVGBaseItem::SetRespawn(const float delay) {
     LinkEntity();
 }
 
+/**
+*   @brief  Use for item instances, calls their "Use Item" callback.
+* 
+*   @details    'UseInstance' is not to be confused with the general 'Use' dispatch 
+*               function for trigger callbacks.
+**/
+void SVGBaseItem::UseInstance(SVGBaseEntity* user, SVGBaseItem* item) {
+    // Safety check.
+    if (useInstanceFunction == nullptr) {
+	    return;
+    }
 
-//
-// Callback Functions.
-//
-//===============
-// SVGBaseItem::BaseItemUse
-// 
-//===============
+    // Execute 'UseITem' callback function.
+    (this->*useInstanceFunction)(user, item);
+}
+
+
+/**
+* 
+*   Base Entity interface Callbacks.
+*
+***/
+/**
+*   @brief Callback for when being triggered. Also known as "Use".
+**/
 void SVGBaseItem::BaseItemUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
 {
     //BaseItemDie( caller, activator, 999, GetOrigin() );
 }
 
-//===============
-// SVGBaseItem::BaseItemDropToFloor
-//
-// 'DropToFloor' callback ensures the item falls on top of whichever entity is below it. (World or others)
-//===============
-void SVGBaseItem::BaseItemDropToFloor() {
-    // First, ensure our origin is +1 off the floor.
-    vec3_t newOrigin = GetOrigin() + vec3_t { 0.f, 0.f, 1 };
 
-    SetOrigin(newOrigin);
-    
-    // Calculate the end origin to use for tracing.
-    vec3_t end = newOrigin + vec3_t { 0, 0, -256.f };
-    
-    // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_PLAYERSOLID);
-    
-    // Return in case we hit anything.
-    if (trace.fraction == 1 || trace.allSolid) {
-	    return;
-    }
-    
-    // Set new entity origin.
-    SetOrigin(trace.endPosition);
-    
-    // Check for ground.
-    SVG_StepMove_CheckGround(this);
 
-    // If the entity has a team...
-    //if (!GetTeam().empty()) {
-    //    SetFlags(GetFlags() & ~EntityFlags::TeamSlave);
-    //    SVGBaseEntity *teamChainEntity = GetTeamChainEntity();
-    //    SetTeamChainEntity(nullptr);
-    //    SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
-    //    SetSolid(Solid::Not);
-    //    if (this == GetTeamMasterEntity()) {
-    //        SetNextThinkTime(level.time + FRAMETIME);
-    //        SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
-    //    }
-    //}
+/**
+* 
+*   Item Entity interface Callbacks.
+*
+***/
+/**
+*   @brief Callback for item instance usage.
+**/
+void SVGBaseItem::BaseItemUseInstance(SVGBaseEntity* user, SVGBaseItem* item) {
 
-    // Unset think callback.
-    SetThinkCallback(nullptr);
-
-    // Relink entity.
-    LinkEntity();
 }
 
-//===============
-// SVGBaseItem::BaseItemDoRespawn
-//
-// 'DoRespawn' callback calls the entity item's Respawn function.
-//===============
-void SVGBaseItem::BaseItemDoRespawn() {
-    Respawn();
-}
-
-
-//===============
-// SVGBaseItem::BaseItemTouch
-//
-// 'Touch' callback, triggers a pickup event if the entity is allowed to pick up this item.
-//===============
+/**
+*   @brief Callback for when an entity touches this item.
+**/
 void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
     // Safety checks.
     if (!self || !other || self == other)
@@ -286,8 +261,8 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
         return;
     }
 
-    // Ensure it is a (sub-)class of PlayerClient
-    if (!other->IsSubclassOf<PlayerClient>()) {
+    // Ensure it is a (sub-)class of SVGBasePlayer
+    if (!other->IsSubclassOf<SVGBasePlayer>()) {
         return;
     }
 
@@ -297,7 +272,7 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
     }
 
     // Cast it.
-    PlayerClient* playerEntity = dynamic_cast<PlayerClient*>(other);
+    SVGBasePlayer* playerEntity = dynamic_cast<SVGBasePlayer*>(other);
 
     // Pick up the item.
     qboolean tookItem = (this->*pickupFunction)(other);
@@ -337,3 +312,54 @@ void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplan
         Remove();
     }
 }
+
+/**
+*   @brief Callback for executing drop to floor behavior.
+**/
+void SVGBaseItem::BaseItemDropToFloor() {
+    // First, ensure our origin is +1 off the floor.
+    vec3_t newOrigin = GetOrigin() + vec3_t { 0.f, 0.f, 1 };
+
+    SetOrigin(newOrigin);
+
+    // Calculate the end origin to use for tracing.
+    vec3_t end = newOrigin + vec3_t { 0, 0, -256.f };
+
+    // Exceute the trace.
+    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_PLAYERSOLID);
+
+    // Return in case we hit anything.
+    if (trace.fraction == 1 || trace.allSolid) {
+	return;
+    }
+
+    // Set new entity origin.
+    SetOrigin(trace.endPosition);
+
+    // Check for ground.
+    SVG_StepMove_CheckGround(this);
+
+    // If the entity has a team...
+    //if (!GetTeam().empty()) {
+    //    SetFlags(GetFlags() & ~EntityFlags::TeamSlave);
+    //    SVGBaseEntity *teamChainEntity = GetTeamChainEntity();
+    //    SetTeamChainEntity(nullptr);
+    //    SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
+    //    SetSolid(Solid::Not);
+    //    if (this == GetTeamMasterEntity()) {
+    //        SetNextThinkTime(level.time + FRAMETIME);
+    //        SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
+    //    }
+    //}
+
+    // Unset think callback.
+    SetThinkCallback(nullptr);
+
+    // Relink entity.
+    LinkEntity();
+}
+
+/**
+*   @brief Callback meant to be used by SetThink so one can delay a call to Respawn.
+**/
+void SVGBaseItem::BaseItemDoRespawn() { Respawn(); }

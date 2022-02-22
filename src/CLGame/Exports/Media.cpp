@@ -142,13 +142,45 @@ void ClientGameMedia::LoadWorld() {
     CLG_SetSky();
 }
 
-//---------------
+//-
+// 
+void ClientGameMedia::LoadViewModels() {
+    int         i;
+    char        *name;
+
+    cl->numWeaponModels = 1;
+    strcpy(cl->weaponModels[0], "weapon.md2");
+
+    // Only default model when vwep is off
+    if (!cl_vwep->integer) {
+        return;
+    }
+    
+    // Acquire the weapon model config strings. This has to go for client side weapons.
+    for (i = 2; i < MAX_MODELS; i++) {
+        name = cl->configstrings[ConfigStrings::Models+ i];
+        if (!name[0]) {
+            break;
+        }
+        if (name[0] != '#') {
+            continue;
+        }
+
+        // special player weapon model
+        strcpy(cl->weaponModels[cl->numWeaponModels++], name + 1);
+
+        if (cl->numWeaponModels == MAX_CLIENTWEAPONMODELS) {
+            break;
+        }
+    }
+}
+    //---------------
 // ClientGameMedia::LoadModels
 //
 //---------------
 void ClientGameMedia::LoadModels() {
     // Register view weapon models.
-    CLG_RegisterVWepModels();
+    LoadViewModels();
 
     // Register Temp Entity models.
     CLG_RegisterTempEntityModels();

@@ -12,11 +12,11 @@
 #define __SVGAME_CHASECAMERA_H__
 
 class SVGBaseEntity;
-class PlayerClient;
+class SVGBasePlayer;
 
-void SVG_UpdateChaseCam(PlayerClient* ent);
-void SVG_ChaseNext(PlayerClient* ent);
-void SVG_ChasePrev(PlayerClient* ent);
-void SVG_GetChaseTarget(PlayerClient* ent);
+void SVG_UpdateChaseCam(SVGBasePlayer* ent);
+void SVG_ChaseNext(SVGBasePlayer* ent);
+void SVG_ChasePrev(SVGBasePlayer* ent);
+void SVG_GetChaseTarget(SVGBasePlayer* ent);
 
 #endif

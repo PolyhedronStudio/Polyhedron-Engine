@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Gamemodes.
 #include "Gamemodes/IGameMode.h"
 
+// World.
+#include "World/Gameworld.h"
+
 //#define _DEBUG
 typedef struct {
     fieldtype_t type;
@@ -90,25 +93,25 @@ static const save_field_t entityfields[] = {
 //    L(model),
     F(freeTime),
 
-    L(message),
-    L(classname),
+//    L(message),
+ //   L(classname),
 //    I(spawnFlags),
 
-    F(timeStamp),
+//    F(timeStamp),
 
-    L(target),
-    L(targetName),
-    L(killTarget),
-    L(team),
-    L(pathTarget),
-    E(targetEntityPtr),
+    //L(target),
+    //L(targetName),
+    //L(killTarget),
+    //L(team),
+    //L(pathTarget),
+//    E(targetEntityPtr),
 
-    F(speed),
-    F(acceleration),
-    F(deceleration),
-    V(moveDirection),
-    V(position1),
-    V(position2),
+    //F(speed),
+    //F(acceleration),
+    //F(deceleration),
+    //V(moveDirection),
+    //V(position1),
+    //V(position2),
 
 //    V(velocity),
 //    V(angularVelocity),
@@ -116,8 +119,8 @@ static const save_field_t entityfields[] = {
 //    F(airFinishedTime),
 //    F(gravity),
 
-    E(goalEntityPtr),
-    E(moveTargetPtr),
+//    E(goalEntityPtr),
+//    E(moveTargetPtr),
 //    F(yawSpeed),
  //   F(idealYawAngle),
 
@@ -144,7 +147,7 @@ static const save_field_t entityfields[] = {
 
  //   F(powerArmorTime),
 
-    L(map),
+//    L(map),
 
     //I(viewHeight),
     //I(takeDamage),
@@ -163,19 +166,19 @@ static const save_field_t entityfields[] = {
     //E(teamChainPtr),
     //E(teamMasterPtr),
 
-    E(myNoisePtr),
-    E(myNoise2Ptr),
+    //E(myNoisePtr),
+    //E(myNoise2Ptr),
 
-    I(noiseIndex),
-    I(noiseIndex2),
-    F(volume),
-    F(attenuation),
+    //I(noiseIndex),
+    //I(noiseIndex2),
+    //F(volume),
+    //F(attenuation),
 
 //    F(wait),
 //    F(delay),
-    F(random),
+    //F(random),
 
-    F(teleportTime),
+    //F(teleportTime),
 
 //    I(waterType),
 //    I(waterLevel),
@@ -188,7 +191,7 @@ static const save_field_t entityfields[] = {
     //I(style),
     //L(customLightStyle),
 
-    T(item),
+//    T(item),
 
 //    V(moveInfo.startOrigin),
     //V(moveInfo.startAngles),
@@ -297,17 +300,12 @@ static const save_field_t clientfields[] = {
     I(persistent.selectedItem),
     IA(persistent.inventory, MAX_ITEMS),
 
-    I(persistent.maxBullets),
-    I(persistent.maxShells),
-    I(persistent.maxRockets),
-    I(persistent.maxGrenades),
-    I(persistent.maxCells),
-    I(persistent.maxSlugs),
+    I(persistent.maxAmmo9mm),
 
     T(persistent.activeWeapon),
     T(persistent.lastWeapon),
 
-    I(persistent.powerCubes),
+//    I(persistent.powerCubes),
     I(persistent.score),
 
     I(persistent.isSpectator),
@@ -369,11 +367,11 @@ static const save_field_t gamefields[] = {
     //I(maximumClients),
     //I(maxEntities),
 
-    I(serverflags),
+    //I(serverflags),
 
-    I(numberOfItems),
+    //I(numberOfItems),
 
-    I(autoSaved),
+    //I(autoSaved),
 
     {(fieldtype_t)0}
 #undef _OFS
@@ -746,7 +744,7 @@ void SVG_WriteGame(const char *filename, qboolean autosave)
     int     i;
 
     if (!autosave)
-        game.GetCurrentGamemode()->SaveClientEntityData();
+        game.GetGamemode()->StorePlayerPersistentData();
 
     f = fopen(filename, "wb");
     if (!f)
@@ -759,8 +757,9 @@ void SVG_WriteGame(const char *filename, qboolean autosave)
     write_fields(f, gamefields, &game);
     game.autoSaved = false;
 
+    ServerClient* clients = game.GetClients();
     for (i = 0; i < game.GetMaxClients(); i++) {
-        write_fields(f, clientfields, &game.clients[i]);
+        write_fields(f, clientfields, &clients[i]);
     }
 
     fclose(f);
@@ -796,18 +795,18 @@ void SVG_ReadGame(const char *filename)
         fclose(f);
         gi.Error("Savegame has bad maximumclients");
     }
-    if (game.maxEntities <= game.GetMaxClients() || game.maxEntities > MAX_EDICTS) {
+    if (game.GetMaxEntities() <= game.GetMaxClients() || game.GetMaxEntities() > MAX_EDICTS) {
         fclose(f);
         gi.Error("Savegame has bad maxEntities");
     }
 
-    globals.entities = g_entities;
-    globals.maxEntities = game.maxEntities;
+    globals.entities = game.world->GetServerEntities();
+    globals.maxEntities = game.GetMaxEntities();
 
-    game.clients = (ServerClient*)gi.TagMalloc(game.GetMaxClients() * sizeof(game.clients[0]), TAG_GAME); // CPP: Cast
-    for (i = 0; i < game.GetMaxClients(); i++) {
-        read_fields(f, clientfields, &game.clients[i]);
-    }
+    //game.clients = (ServerClient*)gi.TagMalloc(game.GetMaxClients() * sizeof(clients[0]), TAG_GAME); // CPP: Cast
+    //for (i = 0; i < game.GetMaxClients(); i++) {
+    //    read_fields(f, clientfields, &game.clients[i]);
+    //}
 
     fclose(f);
 }
@@ -839,7 +838,7 @@ void SVG_WriteLevel(const char *filename)
 
     // write out all the entities
     for (i = 0; i < globals.numberOfEntities; i++) {
-        ent = &g_entities[i];
+        ent = &game.world->GetServerEntities()[i];
         if (!ent->inUse)
             continue;
         write_int(f, i);
@@ -879,8 +878,8 @@ void SVG_ReadLevel(const char *filename)
     gi.FreeTags(TAG_LEVEL);
 
     // Ensure all entities have a clean slate in memory.
-    for (int32_t i = 0; i < game.maxEntities; i++) {
-	    g_entities[i] = {};
+    for (int32_t i = 0; i < game.GetMaxEntities(); i++) {
+	    game.world->GetServerEntities()[i] = {};
     }
 
     f = fopen(filename, "rb");
@@ -912,13 +911,13 @@ void SVG_ReadLevel(const char *filename)
         entnum = read_int(f);
         if (entnum == -1)
             break;
-        if (entnum < 0 || entnum >= game.maxEntities) {
+        if (entnum < 0 || entnum >= game.GetMaxEntities()) {
             gi.Error("%s: bad entity number", __func__);
         }
         if (entnum >= globals.numberOfEntities)
             globals.numberOfEntities = entnum + 1;
 
-        ent = &g_entities[entnum];
+        ent = &game.world->GetServerEntities()[entnum];
         read_fields(f, entityfields, ent);
         ent->inUse = true;
         ent->state.number = entnum;
@@ -932,14 +931,14 @@ void SVG_ReadLevel(const char *filename)
 
     // mark all clients as unconnected
     for (i = 0 ; i < maximumclients->value ; i++) {
-        ent = &g_entities[i + 1];
-        ent->client = game.clients + i;
+        ent = &game.world->GetServerEntities()[i + 1];
+        ent->client = game.GetClients() + i;
         ent->client->persistent.isConnected = false;
     }
 
     // do any load time things at this point
     for (i = 0 ; i < globals.numberOfEntities ; i++) {
-        ent = &g_entities[i];
+        ent = &game.world->GetServerEntities()[i];
 
         if (!ent->inUse)
             continue;

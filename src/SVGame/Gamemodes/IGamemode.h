@@ -15,9 +15,9 @@
 #include "../TypeInfo.h"
 
 class SVGBaseEntity;
-class PlayerClient;
+class SVGBasePlayer;
 
-using BaseEntityVector = std::vector<SVGBaseEntity*>;
+using ClassEntityVector = std::vector<SVGBaseEntity*>;
 
 class IGamemode {
 public:
@@ -53,9 +53,9 @@ public:
     }
 
 
-    //
-    // Map related, also known as the "current game".
-    // 
+    //////
+    // Map related.
+    //////
     /**
     *   @brief  Gets called at the moment the level exits, this gives the gamemode one last
     *           shot to finish off any last wishes before it gets destroyed.
@@ -63,70 +63,100 @@ public:
     virtual void OnLevelExit() = 0;
 
 
-    //
-    // Client related callbacks.
-    // 
-    // Game modes have the ability to implement their own, this can be of use
-    // for specific game modes. They like to have control over this.
-    //
-    // Called when a client connects. This does not get called between
-    // load games. A client is still connected to the current game session 
-    // in that case.
+    /**
+    *   @brief  Called when a client connects. This does not get called between
+    *           load games. In case of a loadgame, A client is still connected 
+    *           to the current game session.
+    **/
     virtual qboolean ClientConnect(Entity* serverEntity, char *userinfo) = 0;
-    // Called when a client has finished connecting, and is ready
-    // to be placed into the game. This will happen every map load.
+
+    /**
+    *   @brief  Called when a client has finished connecting, and is ready to be 
+    *           placed into the game. This will happen every map load.
+    **/
     virtual void ClientBegin(Entity* serverEntity) = 0;
-    // This will be called once for all clients at the start of each server 
-    // frame. Before running any other entities in the world.
-    virtual void ClientBeginServerFrame(SVGBaseEntity* entity, ServerClient *client) = 0;
-    // Called for each player at the end of the server frame and right 
-    // after spawning.
-    virtual void ClientEndServerFrame(Entity *serverEntity) = 0;
-    // Called when a client disconnects. This does not get called between
-    // load games.
-    virtual void ClientDisconnect(PlayerClient* ent) = 0;
-    //called whenever the player updates a userinfo variable.
 
-    // The game can override any of the settings in place
-    // (forcing skins or names, etc) before copying it off.
+    /**
+    *   @brief  This will be called once for all clients at the start of each server 
+    *           frame. Before running any other entities in the world.
+    **/
+    virtual void ClientBeginServerFrame(SVGBasePlayer* player, ServerClient *client) = 0;
+
+    /**
+    *   @brief  Called for each player at the end of the server frame and right 
+    *           after spawning.
+    **/
+    virtual void ClientEndServerFrame(SVGBasePlayer* player, ServerClient* client) = 0;
+
+    /**
+    *   @brief  Called when a client disconnects.This does not get called between
+    *           load games.
+    **/
+    virtual void ClientDisconnect(SVGBasePlayer* player, ServerClient* client) = 0;
+
+    /**
+    *   @brief  Called whenever the player updates a userinfo variable. The game can override any of 
+    *           the settings in place (forcing skins or names, etc) before copying it off.
+    **/
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) = 0;
-    // Called in order to process "obituary" updates, aka with what weapon did this client
-    // or did other clients, kill any other client/entity.
-    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
 
-    // Called in order to clear a client's inventory if the game mode deems this to be fit.
-    virtual void ClientDeath(PlayerClient *clientEntity) = 0;
+    /**
+    *   @brief  Called in order to process "obituary" updates, aka with what weapon did this client
+    *           or did other clients, kill any other client/entity.
+    **/
+    virtual void ClientUpdateObituary(SVGBaseEntity* player, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) = 0;
 
-    //
-    // Client related facility functions.
-    //
-    // This is only called when the game first initializes in single player,
-    // but is called after each death and level change in deathmatch
-    virtual void InitializeClientPersistentData(ServerClient* client) = 0;
-    // This is only called when the game first initializes in single player,
-    // but is called after each death and level change in deathmatch
-    virtual void InitializeClientRespawnData(ServerClient *client) = 0;
+    /**
+    *   @brief  Called when a client dies, usually used to clear their inventory.
+    **/
+    virtual void ClientDeath(SVGBasePlayer *player) = 0;
 
-    // Choose any info_player_start or its derivates, it'll do a subclassof check, so the only valid classnames are
-    // those who have inherited from info_player_start. (info_player_deathmatch, etc).
-    virtual void SelectClientSpawnPoint(Entity* ent, vec3_t& origin, vec3_t& angles, const std::string &classname) = 0;
+
+    /**
+    *   @brief  Called only once in case of a single player game.
+    *           Otherwise it is called after each death and level change.
+    **/
+    virtual void InitializePlayerPersistentData(ServerClient* client) = 0;
+
+    /**
+    *   @brief  Called only once in case of a single player game.
+    *           Otherwise it is called after each death and level change.
+    **/
+    virtual void InitializePlayerRespawnData(ServerClient* client) = 0;
+
+
+    /**
+    *   @brief  Choose any info_player_start or its derivates, it'll do a subclassof check, 
+    *           so the only valid classnames are those who have inherited from info_player_start. 
+    *           Tyoe InfoPlayerStart, map classname info_player_deathmatch, etc.
+    **/
+    virtual void SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& origin, vec3_t& angles) = 0;
+
     
     // Called when a player connects to a game (whether it be single or multi -player).
     // For a SP mode death, the loadmenu pops up and the player gets to select a load game (If there are none, there is always the autosaved one.)
     // For a MP mode death, the game waits for intermission time to pass before it'll call this function again to respawn our player.
-    virtual void PutClientInServer(Entity* ent) = 0;
+    virtual void PlacePlayerInGame(SVGBasePlayer* player) = 0;
+
     // Respawns a client (if that is what the game mode wants).
-    virtual void RespawnClient(PlayerClient* ent) = 0;
+    virtual void RespawnClient(SVGBasePlayer* player) = 0;
+
     // Respawns all clients if the game mode allows so. (See RespawnClient)
     virtual void RespawnAllClients() = 0;
 
-    // Some information that should be persistant, like health,
-    // is still stored in the edict structure, so it needs to
-    // be mirrored out to the client structure before all the
-    // edicts are wiped.
-    virtual void SaveClientEntityData(void) = 0;
-    // Fetch client data that was stored between previous entity wipe session.
-    virtual void FetchClientEntityData(Entity* ent) = 0;
+    /**
+    *   @brief Stores player entity data in the client's persistent structure..
+    * 
+    *   @details    When switching a gamemap, information that should be persistant, like health,
+    *               is still stored in the entity. This method mirrors it out to the client structure
+    *               before all entities are wiped.
+    **/
+    virtual void StorePlayerPersistentData(void) = 0;
+
+    /**
+    *   @brief Restores player persistent data from the client struct by assigning it to the player entity.
+    **/
+    virtual void RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) = 0;
 
 
     //
@@ -141,7 +171,7 @@ public:
     virtual qboolean CanDamage(SVGBaseEntity * target, SVGBaseEntity * inflictor) = 0;
     // Returns the entities found within a radius. Great for game mode fun times,
     // and that is why it resides here. Allows for customization.
-    virtual BaseEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
+    virtual ClassEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
 
 
     //

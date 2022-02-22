@@ -52,7 +52,7 @@ public:
 	*	@brief Simple constructor of an entity handle that will accept a
 	*	class entity.
 	**/
-    SVGEntityHandle(SVGBaseEntity* baseEntity);
+    SVGEntityHandle(SVGBaseEntity* classEntity);
 
     /**
     *	@brief Simple constructor that will accept a reference to another handle entity.
@@ -107,10 +107,10 @@ public:
 	*			If no valid SVGBaseEntity and server entity pointer are passed it unsets
 	*			this current handle to nullptr and entityID = 0.
 	**/
-    SVGBaseEntity* operator=(SVGBaseEntity* baseEntity);
+    SVGBaseEntity* operator=(SVGBaseEntity* classEntity);
 
     /**
-    *	@brief	Used to access the base class entity its methods.
+    *	@brief	Used to access the class entity its methods.
     **/
     SVGBaseEntity* operator->() const;
 

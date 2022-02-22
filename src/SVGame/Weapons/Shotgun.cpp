@@ -12,7 +12,7 @@
 
 // Include class entities.
 #include "../Entities/Base/SVGBaseEntity.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Include player headers.
 #include "../Player/Animations.h"
@@ -23,6 +23,9 @@
 //#include "../Gamemodes/DefaultGamemode.h"
 //#include "../Gamemodes/CoopGamemode.h"
 #include "../Gamemodes/DeathmatchGamemode.h"
+
+// World.
+#include "../World/Gameworld.h"
 
 // Include shotgun weapon header.
 #include "Shotgun.h"
@@ -41,7 +44,7 @@ static constexpr int32_t SHOTGUN_BULLET_COUNT_DEFAULT = 12;
 static constexpr int32_t SHOTGUN_HSPREAD = 500;
 static constexpr int32_t SHOTGUN_VSPREAD = 500;
 
-void weapon_shotgun_fire(PlayerClient * ent)
+void weapon_shotgun_fire(SVGBasePlayer * ent)
 {
     vec3_t      forward, right;
     int         damage = 4;
@@ -70,18 +73,18 @@ void weapon_shotgun_fire(PlayerClient * ent)
     }
 
     // Use a different count for shotgun mode.
-    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+    if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
         SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEATHMATCH, MeansOfDeath::Shotgun);
     } else {
         SVG_FireShotgun(ent, start, forward, damage, kick, SHOTGUN_HSPREAD, SHOTGUN_VSPREAD, SHOTGUN_BULLET_COUNT_DEFAULT, MeansOfDeath::Shotgun);
     }
 
     // send muzzle flash
-    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    gi.WriteShort(ent->GetServerEntity() - g_entities);
+    gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(origin, MultiCast::PVS);
+    gi.Multicast(origin, Multicast::PVS);
 
     client->playerState.gunFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
@@ -90,10 +93,10 @@ void weapon_shotgun_fire(PlayerClient * ent)
         client->persistent.inventory[client->ammoIndex]--;
 }
 
-void Weapon_Shotgun(PlayerClient* ent)
+void Weapon_Shotgun(SVGBasePlayer* ent)
 {
     static int  pause_frames[] = { 22, 28, 34, 0 };
     static int  fire_frames[] = { 8, 9, 0 };
 
-    _Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+    //_Weapon_Generic(ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
 }

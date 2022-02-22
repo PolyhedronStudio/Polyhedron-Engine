@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "../Entities.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Player Hud & Animations Header.
 #include "Hud.h"
@@ -54,14 +54,14 @@ static void SV_AddBlend(float r, float g, float b, float a, float *v_blend)
 // 
 //===============
 //
-void SVG_Client_CalculateBlend(PlayerClient *ent)
+void SVG_Client_CalculateBlend(SVGBasePlayer *ent)
 {
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = nullptr;
 
     if (!ent || !(client = ent->GetClient()) ||
-        !ent->IsSubclassOf<PlayerClient>()) {
+        !ent->IsSubclassOf<SVGBasePlayer>()) {
         return;
     }
 

@@ -17,6 +17,9 @@
 // Class Entities.
 #include "BodyCorpse.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
 // Constructor/Deconstructor.
 BodyCorpse::BodyCorpse(Entity* svEntity)
     : SVGBaseEntity(svEntity) {
@@ -28,7 +31,7 @@ BodyCorpse::~BodyCorpse() {
 
 //
 //===============
-// PlayerClient::Precache
+// SVGBasePlayer::Precache
 //
 //===============
 //
@@ -38,7 +41,7 @@ void BodyCorpse::Precache() {
 
 //
 //===============
-// PlayerClient::Spawn
+// SVGBasePlayer::Spawn
 //
 //===============
 //
@@ -112,8 +115,9 @@ void BodyCorpse::BodyCorpseDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker
         SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
         // Toss gibs.
-        for (int32_t i = 0; i < 4; i++)
-            SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+        for (int32_t i = 0; i < 4; i++) {
+            GetGameworld()->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+        }
 
         // Ensure its origin goes -48, it is a lame hack but hey...
         vec3_t origin = GetOrigin();

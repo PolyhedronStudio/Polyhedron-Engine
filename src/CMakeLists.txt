@@ -84,24 +84,28 @@ SET( SRC_SVGAME
 	SVGame/ai/MonsterAI.cpp
 	SVGame/Entities/Base/SVGBaseEntity.cpp
 	SVGame/Entities/Base/SVGBaseItem.cpp
+	SVGame/Entities/Base/SVGBaseItemAmmo.cpp
+	SVGame/Entities/Base/SVGBaseItemWeapon.cpp
 	SVGame/Entities/Base/SVGBaseTrigger.cpp
+	SVGame/Entities/Base/SVGBaseMonster.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
+	SVGame/Entities/Base/SVGBasePlayer.cpp
 	SVGame/Entities/Base/SVGEntityHandle.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
 	SVGame/Entities/Base/DebrisEntity.cpp
 	SVGame/Entities/Base/GibEntity.cpp
-	SVGame/Entities/Base/PlayerClient.cpp
+
 	#SVGame/Entities/Info/InfoNotNull.cpp
 	SVGame/Entities/Info/InfoNull.cpp
 	SVGame/Entities/Info/InfoPlayerCoop.cpp
 	SVGame/Entities/Info/InfoPlayerDeathmatch.cpp
 	SVGame/Entities/Info/InfoPlayerIntermission.cpp
 	SVGame/Entities/Info/InfoPlayerStart.cpp
+	SVGame/Entities/Items/ItemAmmo9mm.cpp
 	SVGame/Entities/Items/ItemHealthMega.cpp
-	SVGame/Entities/Items/ItemWeaponBlaster.cpp
-	SVGame/Entities/Items/ItemWeaponMachinegun.cpp
-	SVGame/Entities/Items/ItemWeaponShotgun.cpp
-	SVGame/Entities/Items/ItemWeaponSuperShotgun.cpp
+	SVGame/Entities/Items/ItemWeaponKnife.cpp
+	SVGame/Entities/Items/ItemWeaponBeretta.cpp
+	SVGame/Entities/Items/ItemWeaponSMG.cpp
 	SVGame/Entities/Func/FuncAreaportal.cpp
 	SVGame/Entities/Func/FuncButton.cpp
 	#SVGame/Entities/Func/FuncConveyor.cpp
@@ -124,6 +128,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Misc/MiscServerModel.cpp
 	#SVGame/Entities/Misc/MiscTeleporter.cpp
 	#SVGame/Entities/Misc/MiscTeleporterDest.cpp
+	SVGame/Entities/Monsters/MonsterTestDummy.cpp
 	SVGame/Entities/Path/PathCorner.cpp
 	#SVGame/Entities/Target/TargetBlaster.cpp
 	#SVGame/Entities/Target/TargetChangelevel.cpp
@@ -183,13 +188,16 @@ SET( SRC_SVGAME
 	SVGame/AI/MonsterAI.h
 	SVGame/Entities/Base/SVGBaseEntity.h
 	SVGame/Entities/Base/SVGBaseItem.h
+	SVGame/Entities/Base/SVGBaseItemAmmo.h
+	SVGame/Entities/Base/SVGBaseItemWeapon.h
 	SVGame/Entities/Base/SVGBaseTrigger.h
+	SVGame/Entities/Base/SVGBaseMonster.h
 	SVGame/Entities/Base/SVGBaseMover.h
+	SVGame/Entities/Base/SVGBasePlayer.h
 	SVGame/Entities/Base/SVGEntityHandle.h
 	SVGame/Entities/Base/BodyCorpse.h
 	SVGame/Entities/Base/DebrisEntity.h
 	SVGame/Entities/Base/GibEntity.h
-	SVGame/Entities/Base/PlayerClient.h
 	SVGame/Entities/Func/FuncAreaportal.h
 	SVGame/Entities/Func/FuncButton.h
 	SVGame/Entities/Func/FuncDoor.h
@@ -205,13 +213,18 @@ SET( SRC_SVGAME
 	SVGame/Entities/Info/InfoPlayerDeathmatch.h
 	SVGame/Entities/Info/InfoPlayerIntermission.h
 	SVGame/Entities/Info/InfoPlayerStart.h
+	
+	SVGame/Entities/Items/ItemAmmo9mm.h
+	
 	SVGame/Entities/Items/ItemHealthMega.h
-	SVGame/Entities/Items/ItemWeaponBlaster.h
-	SVGame/Entities/Items/ItemWeaponMachinegun.h
-	SVGame/Entities/Items/ItemWeaponShotgun.h
-	SVGame/Entities/Items/ItemWeaponSuperShotgun.h
+	
+	SVGame/Entities/Items/ItemWeaponKnife.h
+	SVGame/Entities/Items/ItemWeaponBeretta.h
+	SVGame/Entities/Items/ItemWeaponSMG.h
+
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h
+	SVGame/Entities/Monsters/MonsterTestDummy.h
 	SVGame/Entities/Path/PathCorner.h
 	SVGame/Entities/Target/TargetEarthquake.h
 	SVGame/Entities/Target/TargetExplosion.h
@@ -511,6 +524,7 @@ SET(SRC_VKPT
 	Refresh/vkpt/asvgf.cpp
 	Refresh/vkpt/bloom.cpp
 	Refresh/vkpt/bsp_mesh.cpp
+	Refresh/vkpt/cameras.cpp
 	Refresh/vkpt/conversion.cpp
 	Refresh/vkpt/draw.cpp
 	Refresh/vkpt/freecam.cpp
@@ -554,6 +568,7 @@ SET(HEADERS_VKPT
 	Refresh/vkpt/vkpt.h
 	Refresh/vkpt/vk_util.h
 	Refresh/vkpt/buddy_allocator.h
+	Refresh/vkpt/cameras.h
 	Refresh/vkpt/conversion.h
 	Refresh/vkpt/device_memory_allocator.h
 	Refresh/vkpt/fog.h
@@ -580,6 +595,7 @@ set(SRC_SHADERS
 	Refresh/vkpt/shader/asvgf_taau.comp
 	Refresh/vkpt/shader/asvgf_temporal.comp
 	Refresh/vkpt/shader/instance_geometry.comp
+	refresh/vkpt/shader/normalize_normal_map.comp
 	Refresh/vkpt/shader/tone_mapping_histogram.comp
 	Refresh/vkpt/shader/tone_mapping_curve.comp
     Refresh/vkpt/shader/tone_mapping_apply.comp

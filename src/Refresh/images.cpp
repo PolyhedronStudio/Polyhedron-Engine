@@ -50,6 +50,7 @@ void stbi_write(void *context, void *data, int size)
 }
 
 extern cvar_t* vid_rtx;
+extern cvar_t* gl_use_hd_assets;
 
 /*
 ====================================================================
@@ -446,6 +447,11 @@ static qhandle_t create_screenshot(char *buffer, size_t size,
     return 0;
 }
 
+static qboolean is_render_hdr() { 
+    return R_IsHDR != NULL && R_IsHDR() == true; 
+}
+
+
 static void make_screenshot(const char *name, const char *ext,
                             qerror_t (*save)(qhandle_t, const char *, byte *, int, int, int, int),
                             int param)
@@ -456,13 +462,49 @@ static void make_screenshot(const char *name, const char *ext,
     qhandle_t   f;
     int         w, h, rowbytes;
 
+    if(is_render_hdr()) {
+        Com_WPrintf("Screenshot format not supported in HDR mode");
+        return;
+    }
+
     f = create_screenshot(buffer, sizeof(buffer), name, ext);
     if (!f) {
         return;
     }
 
     pixels = IMG_ReadPixels(&w, &h, &rowbytes);
-    ret = save(f, buffer, pixels, w, h, rowbytes, param);
+    ret = save(f, buffer, pixels, w, h, rowbytes, param) ? Q_ERR_SUCCESS : Q_ERR_LIBRARY_ERROR;
+    FS_FreeTempMem(pixels);
+
+    FS_FCloseFile(f);
+
+    if (ret < 0) {
+        Com_EPrintf("Couldn't write %s: %s\n", buffer, Q_ErrorString(ret));
+    } else if(r_screenshot_message->integer) {
+        Com_Printf("Wrote %s\n", buffer);
+    }
+}
+
+static void make_screenshot_hdr(const char *name)
+{
+    char        buffer[MAX_OSPATH];
+    float       *pixels;
+    qerror_t    ret;
+    qhandle_t   f;
+    int         w, h;
+
+    if(!is_render_hdr()) {
+        Com_WPrintf("Screenshot format supported in HDR mode only");
+    }
+
+    f = create_screenshot(buffer, sizeof(buffer), name, ".hdr");
+    if (!f) {
+        return;
+    }
+
+    pixels = IMG_ReadPixelsHDR(&w, &h);
+    stbi_flip_vertically_on_write(1);
+    ret = stbi_write_hdr_to_func(stbi_write, (void*)(size_t)f, w, h, 3, pixels);
     FS_FreeTempMem(pixels);
 
     FS_FCloseFile(f);
@@ -496,7 +538,15 @@ static void IMG_ScreenShot_f(void)
     if (Cmd_Argc() > 1) {
         s = Cmd_Argv(1);
     } else {
-        s = r_screenshot_format->string;
+        if(is_render_hdr())
+            s = "hdr";
+        else
+            s = r_screenshot_format->string;
+    }
+
+    if (*s == 'h') {
+        make_screenshot_hdr(NULL);
+        return;
     }
 
     if (*s == 'j') {
@@ -567,6 +617,15 @@ static void IMG_ScreenShotPNG_f(void)
     }
 
     make_screenshot(Cmd_Argv(1), ".png", IMG_SavePNG, compression);
+}
+
+static void IMG_ScreenShotHDR_f(void) {
+    if (Cmd_Argc() > 2) {
+        Com_Printf("Usage: %s [name]\n", Cmd_Argv(0));
+        return;
+    }
+
+    make_screenshot_hdr(Cmd_Argv(1));
 }
 
 /*
@@ -1139,7 +1198,7 @@ static qerror_t find_or_load_image(const char *name, size_t len,
     }
 
     int override_textures = !!r_override_textures->integer;
-    if (!vid_rtx->integer && (type != IT_PIC))
+    if (!vid_rtx->integer && (type != IT_PIC) && !gl_use_hd_assets->integer)
         override_textures = 0;
     if (flags & IF_EXACT)
         override_textures = 0;

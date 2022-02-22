@@ -32,7 +32,7 @@ static byte     keyshift[256];
 // key down status: if > 1, it is auto-repeating
 static byte     keydown[256];
 
-// number of keys down for BUTTON_ANY
+// number of keys down for ButtonBits::Any
 static int      anykeydown;
 
 // bitmap for generating button up commands
@@ -708,7 +708,7 @@ void Key_Event(unsigned key, qboolean down, unsigned time)
         return;
     }
 
-    // track if any key is down for BUTTON_ANY
+    // track if any key is down for ButtonBits::Any
     if (down) {
         if (keydown[key] == 1)
             anykeydown++;

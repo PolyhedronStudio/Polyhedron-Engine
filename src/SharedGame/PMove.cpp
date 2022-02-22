@@ -1378,7 +1378,7 @@ static void PM_AirMove(void) {
     float max_speed = PM_SPEED_AIR;
 
     // Accounting for walk modulus
-    if (pm->moveCommand.input.buttons & BUTTON_WALK) {
+    if (pm->moveCommand.input.buttons & ButtonBits::Walk) {
         max_speed *= PM_SPEED_MOD_WALK;
     }
 
@@ -1443,7 +1443,7 @@ static void PM_WalkMove(void) {
     }
 
     // Accounting for walk modulus
-    if (pm->moveCommand.input.buttons & BUTTON_WALK) {
+    if (pm->moveCommand.input.buttons & ButtonBits::Walk) {
         max_speed *= PM_SPEED_MOD_WALK;
     }
 

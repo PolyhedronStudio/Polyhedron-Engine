@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// PlayerClient.cpp
+// SVGBasePlayer.cpp
 //
 //
 */
@@ -17,125 +17,173 @@
 // Game Mode interface.
 #include "../../Gamemodes/IGamemode.h"
 
-// Class Entities.
-#include "PlayerClient.h"
+// World.
+#include "../../World/Gameworld.h"
+
+// Class entities.
+#include "../Base/SVGBaseEntity.h"
+#include "../Base/SVGBaseTrigger.h"
+#include "../Base/SVGBaseItem.h"
+#include "../Base/SVGBaseItemAmmo.h"
+#include "../Base/SVGBaseItemWeapon.h"
+#include "../Base/SVGBasePlayer.h"
 
 // Constructor/Deconstructor.
-PlayerClient::PlayerClient(Entity* svEntity) : Base(svEntity), 
+SVGBasePlayer::SVGBasePlayer(Entity* svEntity) : Base(svEntity), 
     airFinishedTime(0.f), debounceDamageTime(0.f), debouncePainTime(0.f), debounceSoundTime(0.f), debounceTouchTime(0.f) {
 
 }
-PlayerClient::~PlayerClient() {
+SVGBasePlayer::~SVGBasePlayer() {
 
 }
 
+/**
+*   @brief  Used by game modes to recreate a fresh player entity for the client.
+**/
+SVGBasePlayer* SVGBasePlayer::Create(Entity* svEntity) {
+    // Get gameworld pointer.
+    Gameworld* gameworld = GetGameworld();
+
+    // Get pointer to server entities.
+    Entity* serverEntities = gameworld->GetServerEntities();
+
+    // Initialize a clean serverEntity.
+    svEntity->inUse = true;
+
+    // Set the entity state number.
+    svEntity->state.number = svEntity - serverEntities;
+
+    // Delete previous classentity, if existent (older client perhaps).
+    gameworld->FreeClassEntity(svEntity);
+
+    // Recreate class SVGBasePlayer entity.
+    svEntity->classEntity = gameworld->CreateClassEntity<SVGBasePlayer>(svEntity, false);
+
+    // Last but not least, return this class entity its pointer.
+    return dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);
+}
+
+//===============
+// SVGBasePlayer::Precache
 //
 //===============
-// PlayerClient::Precache
 //
-//===============
-//
-void PlayerClient::Precache() {
+void SVGBasePlayer::Precache() {
     Base::Precache();
 }
 
 //
 //===============
-// PlayerClient::Spawn
+// SVGBasePlayer::Spawn
 //
 //===============
 //
-void PlayerClient::Spawn() {
+void SVGBasePlayer::Spawn() {
     // Spawn.
     Base::Spawn();
 
     // When spawned, we aren't on any ground, make sure of that.
     SetGroundEntity(nullptr);
-
-//    ent->client = &game.clients[index];
+    // Set up the client entity accordingly.
     SetTakeDamage(TakeDamage::Aim);
+    // Fresh movetype and solid.
     SetMoveType(MoveType::Walk);
-    SetViewHeight(22);
-    SetInUse(true);
-    Base::SetMass(200);
     SetSolid(Solid::BoundingBox);
+    // Mass.
+    SetMass(200);
+    // Undead itself.
     SetDeadFlag(DEAD_NO);
-    SetAirFinishedTime(level.time + 12 * FRAMETIME);
+    // Set air finished time so it can respawn kindly.
+    SetAirFinishedTime(level.time + 12);
+    // Clip mask this client belongs to.
     SetClipMask(CONTENTS_MASK_PLAYERSOLID);
+    // Fresh default model.
     SetModel("players/male/tris.md2");
-    SetWaterLevel(WaterLevel::None);
+    /*ent->pain = player_pain;*/
+    // Fresh water level and type.
+    SetWaterLevel(0);
     SetWaterType(0);
-
-    // Setup Flags.
+    // Fresh flags.
     SetFlags(GetFlags() & ~EntityFlags::NoKnockBack);
     SetServerFlags(GetServerFlags() & ~EntityServerFlags::DeadMonster);
-
-    // Default Player Move bounding box.
+    // Fresh player move bounding box.
     SetMins(vec3_scale(PM_MINS, PM_SCALE));
     SetMaxs(vec3_scale(PM_MAXS, PM_SCALE));
-    
-    // Zero velocity.
+    // Fresh view height.
+    SetViewHeight(22);
+    // Zero out velocity in case it had any at all.
     SetVelocity(vec3_zero());
 
+    // Fresh effects.
+    Base::SetEffects(0);
+
+    // Reset model indexes.
+    SetModelIndex(255); // Use the skin specified by its model.
+    SetModelIndex2(255);// Custom gun model.
+    SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->state.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
+    
+    // Fresh frame for animations.
+    SetFrame(0);
+
     // Set the die function.
-    SetDieCallback(&PlayerClient::PlayerClientDie);
+    SetDieCallback(&SVGBasePlayer::SVGBasePlayerDie);
 
-    // Debug.
-    gi.DPrintf("PlayerClient::Spawn();");
+    // Let it be known this client entity is in use again.
+    SetInUse(true);
 }
 
 //
 //===============
-// PlayerClient::Respawn
+// SVGBasePlayer::Respawn
 //
 //===============
 //
-void PlayerClient::Respawn() {
+void SVGBasePlayer::Respawn() {
     Base::Respawn();
-    gi.DPrintf("PlayerClient::Respawn();");
+    gi.DPrintf("SVGBasePlayer::Respawn();");
 }
 
 //
 //===============
-// PlayerClient::PostSpawn
+// SVGBasePlayer::PostSpawn
 //
 //===============
 //
-void PlayerClient::PostSpawn() {
+void SVGBasePlayer::PostSpawn() {
     Base::PostSpawn();
 }
 
 //
 //===============
-// PlayerClient::Think
+// SVGBasePlayer::Think
 //
 //===============
 //
-void PlayerClient::Think() {
+void SVGBasePlayer::Think() {
     // Parent class Think.
     Base::Think();
 }
 
 //
 //===============
-// PlayerClient::SpawnKey
+// SVGBasePlayer::SpawnKey
 //
-// PlayerClient spawn key handling.
+// SVGBasePlayer spawn key handling.
 //===============
 //
-void PlayerClient::SpawnKey(const std::string& key, const std::string& value) {
+void SVGBasePlayer::SpawnKey(const std::string& key, const std::string& value) {
     // Parent class spawnkey.
     Base::SpawnKey(key, value);
 }
 
 //
 //===============
-// PlayerClient::PlayerClientDie
+// SVGBasePlayer::SVGBasePlayerDie
 //
 // Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
 //===============
 //
-void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Fetch server entity.
     Entity* serverEntity = GetServerEntity();
 
@@ -182,7 +230,7 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         SetPlayerMoveType(EnginePlayerMoveType::Dead);
 
         // Update the obituary.
-        game.GetCurrentGamemode()->ClientUpdateObituary(this, inflictor, attacker);
+        GetGameworld()->GetGamemode()->ClientUpdateObituary(this, inflictor, attacker);
 
         // Toss our weapon, assuming we had any.
         SVG_TossClientWeapon(this);
@@ -190,10 +238,10 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         // Show the scoreboard in case of a deathmatch mode.
         //if (deathmatch->value)
         // TODO: Let it be determined by game mode.
-        SVG_Command_Score_f(this);
+        SVG_Command_Score_f(this, client);
 
         // Let the gamemode know this client died.
-        game.GetCurrentGamemode()->ClientDeath(this);
+        game.GetGamemode()->ClientDeath(this);
     }
 
     // Remove powerups.
@@ -205,22 +253,21 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
         SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
         // Throw some gibs around, true horror oh boy.
-        SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+        // Get gameworld pointer.
+	    Gameworld* gameworld = GetGameworld();
+        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
         SVG_ThrowClientHead(this, damage);
 
         // Can't take damage if we're already busted.
         SetTakeDamage(TakeDamage::No);
-
     // Normal death.
     } else {
         // Ensure we aren't dead flagged already.
         if (!GetDeadFlag()) {
-            static int i;
-
-            i = (i + 1) % 3;
+            static int i = (i + 1) % 3;
 
             // start a death animation
             SetPriorityAnimation(PlayerAnimation::Death);
@@ -254,11 +301,156 @@ void PlayerClient::PlayerClientDie(SVGBaseEntity* inflictor, SVGBaseEntity* atta
     LinkEntity();
 }
 
+/***
+* 
+*   Weapon functions.
+*
+***/
+/**
+*   @brief  Adds ammo to the player's inventory.
+*   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
+**/
+qboolean SVGBasePlayer::GiveAmmo(uint32_t ammoIdentifier, uint32_t amount) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return false;
+    }
+
+    // Now we're here, acquire the item instance of the ammo type.
+    SVGBaseItemAmmo* ammoInstance = SVGBaseItemAmmo::GetAmmoInstanceByID(ammoIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!ammoInstance) {
+        return false;
+    }
+
+    // Get the cap limit for said ammo type.
+    uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
+
+    // Have we hit the cap limit for this ammo type? Return false.
+    if (client->persistent.inventory[ammoIdentifier] >= ammoCapLimit) {
+        return false;
+    }
+
+    // Add ammo amount using a clamp.
+    client->persistent.inventory[ammoIdentifier] = Clampi(client->persistent.inventory[ammoIdentifier] + amount, 0, ammoCapLimit);
+
+    return true;
+}
+
+/**
+*   @brief  Takes ammo from the player's inventory.
+*   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
+**/
+qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return false;
+    }
+
+    // Now we're here, acquire the item instance of the ammo type.
+    SVGBaseItemAmmo* ammoInstance = SVGBaseItemAmmo::GetAmmoInstanceByID(ammoIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!ammoInstance) {
+        return false;
+    }
+
+    // Have we hit the cap limit for this ammo type? Return false.
+    if (client->persistent.inventory[ammoIdentifier] <= 0) {
+        return false;
+    }
+        
+    // Get the cap limit for said ammo type.
+    uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
+
+    // Add ammo amount using a clamp.
+    client->persistent.inventory[ammoIdentifier] = Clampi(client->persistent.inventory[ammoIdentifier] - amount, 0, ammoCapLimit);
+
+    return true;
+}
+
+/**
+*   @brief  Adds weapon to the player's inventory.
+*   @return True on success, false on failure. (Meaning the player reached the maximum carrying limit.)
+**/
+qboolean SVGBasePlayer::GiveWeapon(uint32_t weaponIdentifier, uint32_t amount) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+	    return false;
+    }
+
+    // Now we're here, acquire the item instance of the weapon type.
+    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(weaponIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!weaponInstance) {
+	    return false;
+    }
+
+    // Get limited amount a player can carry of this weapon type.
+    uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
+
+    // Have we hit the cap limit for this weapon type? Return false.
+    if (client->persistent.inventory[weaponIdentifier] >= weaponCarryLimit) {
+	    return false;
+    }
+
+    // Add weapon amount using a clamp.
+    client->persistent.inventory[weaponIdentifier] = Clampi(client->persistent.inventory[weaponIdentifier] + amount, 0, weaponCarryLimit);
+
+    return true;
+}
+
+/**
+*   @brief  Takes away a specific amount of weapon type from the player's inventory.
+*   @return True on success, false on failure. (Meaning he has none left.)
+**/
+qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+	return false;
+    }
+
+    // Now we're here, acquire the item instance of the weapon type.
+    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(weaponIdentifier);
+
+    // If we can't find the instance, return false.
+    if (!weaponInstance) {
+	    return false;
+    }
+
+    // Have we hit the cap limit for this weapon type? Return false.
+    if (client->persistent.inventory[weaponIdentifier] <= 0) {
+    	return false;
+    }
+
+    // Get limited amount a player can carry of this weapon type.
+    uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
+
+    // Add weapon amount using a clamp.
+    client->persistent.inventory[weaponIdentifier] = Clampi(client->persistent.inventory[weaponIdentifier] - amount, 0, weaponCarryLimit);
+
+    return true;
+}
+
 //===============
-// PlayerClient::SetEvent
+// SVGBasePlayer::SetEvent
 // 
 //===============
-void PlayerClient::SetEvent() {
+void SVGBasePlayer::UpdateEvent() {
     ServerClient* client = GetClient();
 
     if (!client) {
@@ -283,10 +475,10 @@ void PlayerClient::SetEvent() {
 }
 
 //===============
-// PlayerClient::SetEffects
+// SVGBasePlayer::SetEffects
 // 
 //===============
-void PlayerClient::SetEffects()
+void SVGBasePlayer::UpdateEffects()
 {
     Base::SetEffects(0);
     SetRenderEffects(0);
@@ -302,13 +494,13 @@ void PlayerClient::SetEffects()
 
 //
 //===============
-// PlayerClient::SetSound
+// SVGBasePlayer::SetSound
 //
 //===============
-void PlayerClient::SetSound() {
+void SVGBasePlayer::UpdateSound() {
     //const char    *weap; // C++20: STRING: Added const to char*
 
-    // Check whether the PlayerClient is hooked up to a valid client.
+    // Check whether the SVGBasePlayer is hooked up to a valid client.
     ServerClient* client = GetClient();
 
     if (!client) {
@@ -335,22 +527,22 @@ void PlayerClient::SetSound() {
 
 //
 //===============
-// PlayerClient::LookAtKiller
+// SVGBasePlayer::LookAtKiller
 //
 // Sets the clients view to look at the killer.
 //===============
 //
-void PlayerClient::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker)
+void SVGBasePlayer::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker)
 {
     // Fetch client.
     gclient_s* client = GetClient();
 
     // Is the attack, not us, or the world?
-    if (attacker && attacker != SVG_GetWorldClassEntity() && attacker != this) {
+    if (attacker && attacker != GetGameworld()->GetWorldspawnClassEntity() && attacker != this) {
         float yaw = vec3_to_yaw(attacker->GetOrigin() - GetOrigin());
         SetKillerYaw(yaw);
     // Is the inflictor, and not an attack, NOT us or the WORLD?
-    } else if (inflictor && inflictor != SVG_GetWorldClassEntity() && inflictor != this) {
+    } else if (inflictor && inflictor != GetGameworld()->GetWorldspawnClassEntity() && inflictor != this) {
         float yaw = vec3_to_yaw(inflictor->GetOrigin() - GetOrigin());
         SetKillerYaw(yaw);
     // If none of the above, set the yaw as is.
@@ -365,10 +557,10 @@ void PlayerClient::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacke
 // View/BobMove Functionality.
 //-------------------------------------------------------------
 //===============
-// PlayerClient::CalculateRoll
+// SVGBasePlayer::CalculateRoll
 //
 //===============
-float PlayerClient::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) {
+float SVGBasePlayer::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) {
     float side = vec3_dot(velocity, bobMove.right);
     float sign = side < 0 ? -1 : 1;
     side = fabs(side);
@@ -384,16 +576,16 @@ float PlayerClient::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) 
 }
 
 //===============
-// PlayerClient::CheckFallingDamage
+// SVGBasePlayer::CheckFallingDamage
 //
 //===============
-void PlayerClient::CheckFallingDamage()
+void SVGBasePlayer::CheckFallingDamage()
 {
     float   delta;
     int     damage;
     vec3_t  dir;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -454,8 +646,8 @@ void PlayerClient::CheckFallingDamage()
         dir = { 0.f, 0.f, 1.f };
 
         //if (!deathmatch->value || 
-        if (!((int)gamemodeflags->value & GamemodeFlags::NoFalling)) {
-            SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
+        if (!((int)gamemodeflags->value & GamemodeFlags::NoFallingDamage)) {
+	        SVG_InflictDamage(this, GetGameworld()->GetWorldspawnClassEntity(), GetGameworld()->GetWorldspawnClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
         }
     } else {
         SetEventID(EntityEvent::FallShort);
@@ -465,15 +657,15 @@ void PlayerClient::CheckFallingDamage()
 
 //
 //===============
-// PlayerClient::CheckWorldEffects
+// SVGBasePlayer::CheckWorldEffects
 // 
 //===============
 //
-void PlayerClient::CheckWorldEffects()
+void SVGBasePlayer::CheckWorldEffects()
 {
     int32_t waterLevel, oldWaterLevel;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -484,6 +676,9 @@ void PlayerClient::CheckWorldEffects()
         SetAirFinishedTime(level.time + 12); // don't need air
         return;
     }
+
+    // Get gameworld pointer.
+    Gameworld* gameworld = GetGameworld();
 
     // Retreive waterLevel.
     waterLevel = GetWaterLevel();
@@ -565,7 +760,7 @@ void PlayerClient::CheckWorldEffects()
 
                 SetDebouncePainTime(level.time);
 
-                SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(),   GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                SVG_InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -587,21 +782,21 @@ void PlayerClient::CheckWorldEffects()
                 SetDebouncePainTime(level.time + 1);
             }
 
-            SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
+            SVG_InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (GetWaterType() & CONTENTS_SLIME) {
-            SVG_InflictDamage(this, SVG_GetWorldClassEntity(), SVG_GetWorldClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
+            SVG_InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }
 
 
 //===============
-// PlayerClient::ApplyDamageFeedback
+// SVGBasePlayer::ApplyDamageFeedback
 //
 //===============
-void PlayerClient::ApplyDamageFeedback() {
+void SVGBasePlayer::ApplyDamageFeedback() {
     float   side;
     float   realcount, count, kick;
     vec3_t  v;
@@ -610,7 +805,7 @@ void PlayerClient::ApplyDamageFeedback() {
     static  vec3_t  acolor = {1.0f, 1.0f, 1.0f};
     static  vec3_t  bcolor = {1.0f, 0.0f, 0.0f};
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
     if (!client)
@@ -730,7 +925,7 @@ void PlayerClient::ApplyDamageFeedback() {
 
 //
 //===============
-// PlayerClient::CalculateViewOffset
+// SVGBasePlayer::CalculateViewOffset
 // 
 // Calculates t
 //
@@ -744,13 +939,13 @@ void PlayerClient::ApplyDamageFeedback() {
 // 
 //===============
 //
-void PlayerClient::CalculateViewOffset()
+void SVGBasePlayer::CalculateViewOffset()
 {
     float       bob;
     float       ratio;
     float       delta;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -843,11 +1038,11 @@ void PlayerClient::CalculateViewOffset()
     );
 }
 
-void PlayerClient::CalculateGunOffset() {
+void SVGBasePlayer::CalculateGunOffset() {
     int     i;
     float   delta;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
@@ -895,12 +1090,12 @@ void PlayerClient::CalculateGunOffset() {
 
 //
 //===============
-// PlayerClient::CalculateScreenBlend
+// SVGBasePlayer::CalculateScreenBlend
 // 
 //===============
 //
-void PlayerClient::CalculateScreenBlend() {
-        ServerClient* client = GetClient();
+void SVGBasePlayer::CalculateScreenBlend() {
+    ServerClient* client = GetClient();
 
     if (!client) {
         return;
@@ -945,11 +1140,11 @@ void PlayerClient::CalculateScreenBlend() {
         client->bonusAlpha = 0;
 }
 
-void PlayerClient::SetAnimationFrame() {
+void SVGBasePlayer::UpdateAnimationFrame() {
     qboolean isDucking = false;
     qboolean isRunning = false;
 
-    // Check whether ent is valid, and a PlayerClient hooked up 
+    // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 

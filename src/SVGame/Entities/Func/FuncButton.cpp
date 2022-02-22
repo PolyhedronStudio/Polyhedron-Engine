@@ -75,7 +75,7 @@ void FuncButton::Spawn() {
 		SetMaxHealth( GetHealth() );
 		SetDieCallback( &FuncButton::ButtonDie );
 		SetTakeDamage( TakeDamage::Yes );
-	} else if ( nullptr == serverEntity->targetName ) {
+	} else if ( GetTargetName().empty() ) {
 		SetTouchCallback( &FuncButton::ButtonTouch );
 	}
 
@@ -103,9 +103,13 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value ) {
 	// I think serverEntity variables should just be set in SVGBaseEntity::SpawnKey
 	// It doesn't make sense to set them only here, if these variables are available to every entity
 	if ( key == "speed" ) {
-		ParseFloatKeyValue( key, value, serverEntity->speed );
+	    float parsedFloat = 0.f;
+		ParseFloatKeyValue( key, value, parsedFloat);
+	    SetSpeed(parsedFloat);
 	} else if ( key == "lip" ) {
-		ParseFloatKeyValue( key, value, lip );
+		float parsedFloat = 0.f;
+		ParseFloatKeyValue( key, value, parsedFloat );
+		SetLip(parsedFloat);
 	} else {
 		return Base::SpawnKey( key, value );
 	}

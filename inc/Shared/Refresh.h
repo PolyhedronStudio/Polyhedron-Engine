@@ -152,6 +152,7 @@ typedef struct ref_feedback_s {
     int         view_material_index;
 
 	vec3_t      hdr_color;
+    float  adapted_luminance;
 } ref_feedback_t;
 
 typedef struct refdef_s {
@@ -218,6 +219,7 @@ enum imageflags_t : int {
     IF_SRGB = (1 << 9),
     IF_FAKE_EMISSIVE = (1 << 10),
     IF_EXACT = (1 << 11),
+    IF_NORMAL_MAP = (1 << 12),
 
     // Image source indicator/requirement flags
     IF_SRC_BASE = (0x1 << 16),

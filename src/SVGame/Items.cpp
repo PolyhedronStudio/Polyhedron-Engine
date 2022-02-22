@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Player/Hud.h"     // Include HUD funcs.
 
 // Entities.
-#include "Entities/Base/PlayerClient.h"
+#include "Entities/Base/SVGBasePlayer.h"
 
 // Weapons.
 #include "Weapons/Blaster.h"
@@ -29,9 +29,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Weapons/Shotgun.h"
 #include "Weapons/SuperShotgun.h"
 
-qboolean    Pickup_Weapon(SVGBaseEntity *ent, PlayerClient *other);
-void        Use_Weapon(PlayerClient *ent, gitem_t *inv);
-void        Drop_Weapon(PlayerClient *ent, gitem_t *inv);
+qboolean    Pickup_Weapon(SVGBaseEntity *ent, SVGBasePlayer *other);
+void        Use_Weapon(SVGBasePlayer *ent, gitem_t *inv);
+void        Drop_Weapon(SVGBasePlayer *ent, gitem_t *inv);
 
 static int  body_armor_index;
 #define HEALTH_IGNORE_MAX   1
@@ -46,10 +46,11 @@ SVG_GetItemByIndex
 */
 gitem_t *SVG_GetItemByIndex(int index)
 {
-    if (index == 0 || index >= game.numberOfItems)
-        return NULL;
+    //if (index == 0 || index >= game.numberOfItems)
+    //    return NULL;
 
-    return &itemlist[index];
+    //return &itemlist[index];
+    return NULL;
 }
 
 
@@ -61,16 +62,16 @@ SVG_FindItemByClassname
 */
 gitem_t *SVG_FindItemByClassname(const char *classname)
 {
-    int     i;
-    gitem_t *it;
+    //int     i;
+    //gitem_t *it;
 
-    it = itemlist;
-    for (i = 0 ; i < game.numberOfItems ; i++, it++) {
-        if (!it->classname)
-            continue;
-        if (!PH_StringCompare(it->classname, classname))
-            return it;
-    }
+    //it = itemlist;
+    //for (i = 0 ; i < game.numberOfItems ; i++, it++) {
+    //    if (!it->classname)
+    //        continue;
+    //    if (!PH_StringCompare(it->classname, classname))
+    //        return it;
+    //}
 
     return NULL;
 }
@@ -83,16 +84,16 @@ SVG_FindItemByPickupName
 */
 gitem_t *SVG_FindItemByPickupName(const char *pickup_name) // C++20: STRING: Added const to char*
 {
-    int     i;
-    gitem_t *it;
+    //int     i;
+    //gitem_t *it;
 
-    it = itemlist;
-    for (i = 0 ; i < game.numberOfItems ; i++, it++) {
-        if (!it->pickupName)
-            continue;
-        if (!PH_StringCompare(it->pickupName, pickup_name))
-            return it;
-    }
+    //it = itemlist;
+    //for (i = 0 ; i < game.numberOfItems ; i++, it++) {
+    //    if (!it->pickupName)
+    //        continue;
+    //    if (!PH_StringCompare(it->pickupName, pickup_name))
+    //        return it;
+    //}
 
     return NULL;
 }
@@ -148,15 +149,15 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
 {
     int     quantity;
 
-    quantity = other->client->persistent.inventory[ITEM_INDEX(ent->item)];
-    if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
-        return false;
+//    quantity = other->client->persistent.inventory[ITEM_INDEX(ent->item)];
+//    if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
+//        return false;
 
     // TODO: Move into gamemode whether it can be picked up.
     //if ((coop->value) && (ent->item->flags & ItemFlags::StayInCoop) && (quantity > 0))
     //    return false;
 
-    other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
+    //other->client->persistent.inventory[ITEM_INDEX(ent->item)]++;
 
     // TODO: Move to gamemode whether it can be respawned after dropping or not.
     //if (deathmatch->value) {
@@ -170,8 +171,8 @@ qboolean Pickup_Powerup(Entity *ent, Entity *other)
 void Drop_General(Entity *ent, gitem_t *item)
 {
     SVG_DropItem(ent, item);
-    ent->client->persistent.inventory[ITEM_INDEX(item)]--;
-    HUD_ValidateSelectedItem((PlayerClient*)ent->classEntity);
+    //ent->client->persistent.inventory[ITEM_INDEX(item)]--;
+    HUD_ValidateSelectedItem((SVGBasePlayer*)ent->classEntity);
 }
 
 //======================================================================
@@ -187,22 +188,15 @@ qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count)
     if (!ent->client)
         return false;
 
-    if (item->tag == AmmoType::Bullets)
-        max = ent->client->persistent.maxBullets;
-    else if (item->tag == AmmoType::Shells)
-        max = ent->client->persistent.maxShells;
-    else if (item->tag == AmmoType::Rockets)
-        max = ent->client->persistent.maxRockets;
-    else if (item->tag == AmmoType::Grenade)
-        max = ent->client->persistent.maxGrenades;
-    else if (item->tag == AmmoType::Cells)
-        max = ent->client->persistent.maxCells;
-    else if (item->tag == AmmoType::Slugs)
-        max = ent->client->persistent.maxSlugs;
-    else
+    if (item->tag == AmmoType::Ammo9mm) {
+	    max = ent->client->persistent.maxAmmo9mm;
+	//    } else if (item->tag == AmmoType::Shells) {
+	//        max = ent->client->persistent.maxShells;
+    } else {
         return false;
+    }
 
-    index = ITEM_INDEX(item);
+//    index = ITEM_INDEX(item);
 
     if (ent->client->persistent.inventory[index] == max)
         return false;
@@ -215,7 +209,7 @@ qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count)
     return true;
 }
 
-qboolean Pickup_Ammo(SVGBaseEntity *ent, PlayerClient*other)
+qboolean Pickup_Ammo(SVGBaseEntity *ent, SVGBasePlayer*other)
 {
     //int         oldcount;
     //int         count;
@@ -244,7 +238,7 @@ qboolean Pickup_Ammo(SVGBaseEntity *ent, PlayerClient*other)
     return true;
 }
 
-void Drop_Ammo(PlayerClient *ent, gitem_t *item)
+void Drop_Ammo(SVGBasePlayer *ent, gitem_t *item)
 {
     //Entity *dropped;
     //int     index;
@@ -333,7 +327,7 @@ int SVG_ArmorIndex(SVGBaseEntity *ent)
     return 0;
 }
 
-qboolean Pickup_Armor(SVGBaseEntity *ent, PlayerClient *other)
+qboolean Pickup_Armor(SVGBaseEntity *ent, SVGBasePlayer *other)
 {
     //int             old_armor_index;
     //gitem_armor_t   *oldinfo;
@@ -703,7 +697,7 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     //            return;
     //        }
     //    }
-    //    if ((int)gamemodeflags->value & GamemodeFlags::NoHealth) {
+    //    if ((int)gamemodeflags->value & GamemodeFlags::NoHealthItems) {
     //        if (item->Pickup == Pickup_Health) {
     //            SVG_FreeEntity(ent);
     //            return;
@@ -728,11 +722,11 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
     //    item->Drop = NULL;
     //}
 
-    ent->item = item;
+//    ent->item = item;
 //    ent->nextThinkTime = level.time + 2 * FRAMETIME;    // items start after other solids
 //    ent->Think = droptofloor;
-    ent->state.effects = item->worldModelFlags;
-    ent->state.renderEffects = RenderEffects::Glow;
+//    ent->state.effects = item->worldModelFlags;
+//    ent->state.renderEffects = RenderEffects::Glow;
     //if (ent->model)
     //    gi.ModelIndex(ent->model);
 }
@@ -743,10 +737,10 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 //const char *classname;
 //
 //// Function callbacks.
-//qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
-//void (*Use)(PlayerClient *ent, struct gitem_s *item);
-//void (*Drop)(PlayerClient *ent, struct gitem_s *item);
-//void (*WeaponThink)(PlayerClient *ent);
+//qboolean (*Pickup)(SVGBaseEntity *ent, SVGBasePlayer *other);
+//void (*Use)(SVGBasePlayer *ent, struct gitem_s *item);
+//void (*Drop)(SVGBasePlayer *ent, struct gitem_s *item);
+//void (*WeaponThink)(SVGBasePlayer *ent);
 //
 //// Sound used when being picked up.
 //const char *pickupSound;
@@ -784,297 +778,207 @@ void SVG_SpawnItem(Entity *ent, gitem_t *item)
 //
 //// An actual string of all models, sounds, and images this item will use
 //const char  *precaches;     
-gitem_t itemlist[] = {
-    {
-        NULL
-    },  // leave index 0 alone
+//gitem_t itemlist[] = {
+//    {
+//        NULL
+//    },  // leave index 0 alone
+//
+//    //
+//    // ARMOR
+//    //
+//
+//    /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
+//    */
+//    //{
+//    //    "item_armor_body",
+//    //    Pickup_Armor,
+//    //    NULL,
+//    //    NULL,
+//    //    NULL,
+//    //    "misc/ar1_pkup.wav",
+//    //    "models/items/armor/body/tris.md2", EntityEffectType::Rotate,
+//    //    NULL,
+//    //    /* icon */      "i_bodyarmor",
+//    //    /* pickup */    "Body Armor",
+//    //    /* width */     3,
+//    //    0,
+//    //    NULL,
+//    //    ItemFlags::IsArmor,
+//    //    0,
+//    //    &bodyarmor_info,
+//    //    ArmorType::Body,
+//    //    /* precache */ ""
+//    //},
+//
+//    //
+//    // WEAPONS
+//    //
+//
+//    /* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
+//    always owned, never in the world
+//    */
+//    {
+//        "weapon_blaster",
+//        NULL,
+//        Use_Weapon,
+//        NULL,
+//        Weapon_Blaster,
+//        "misc/w_pkup.wav",
+//        NULL, 0,
+//	    "models/weapons/v_mark23/tris.iqm",  //"models/weapons/v_blast/tris.md2", // "models/weapons/v_mark23/tris.iqm",
+//        /* icon */      "w_blaster",
+//        /* pickup */    "Blaster",
+//        0,
+//        0,
+//        NULL,
+//        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
+//        WEAP_BLASTER,
+//        NULL,
+//        0,
+//        /* precache */ "weapons/v_mark23/fire0.wav"// misc/lasfly.wav"
+//    },
+//
+//    /*QUAKED weapon_machinegun (.3 .3 1) (-16 -16 -16) (16 16 16)
+//    */
+//    {
+//        "weapon_machinegun",
+//        Pickup_Weapon,
+//        Use_Weapon,
+//        Drop_Weapon,
+//        Weapon_Machinegun,
+//        "misc/w_pkup.wav",
+//        "models/weapons/g_machn/tris.md2", EntityEffectType::Rotate,
+//        "models/weapons/v_machn/tris.md2",
+//        /* icon */      "w_machinegun",
+//        /* pickup */    "Machinegun",
+//        0,
+//        1,
+//        "Bullets",
+//        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
+//        WEAP_MACHINEGUN,
+//        NULL,
+//        0,
+//        /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/machgf5b.wav"
+//    },
+//
+//    /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+//    */
+//    {
+//        "weapon_shotgun",
+//        Pickup_Weapon,
+//        Use_Weapon,
+//        Drop_Weapon,
+//        Weapon_Shotgun,
+//        "misc/w_pkup.wav",
+//        "models/weapons/g_shotg/tris.md2", EntityEffectType::Rotate,
+//        "models/weapons/v_shotg/tris.md2",
+//        /* icon */      "w_shotgun",
+//        /* pickup */    "Shotgun",
+//        0,
+//        1,
+//        "Shells",
+//        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
+//        WEAP_SHOTGUN,
+//        NULL,
+//        0,
+//        /* precache */ "weapons/shotgf1b.wav weapons/shotgr1b.wav"
+//    },
+//
+//    /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+//    */
+//    {
+//        "weapon_supershotgun",
+//        Pickup_Weapon,
+//        Use_Weapon,
+//        Drop_Weapon,
+//        Weapon_SuperShotgun,
+//        "misc/w_pkup.wav",
+//        "models/weapons/g_shotg2/tris.md2", EntityEffectType::Rotate,
+//        "models/weapons/v_shotg2/tris.md2",
+//        /* icon */      "w_sshotgun",
+//        /* pickup */    "Super Shotgun",
+//        0,
+//        2,
+//        "Shells",
+//        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
+//        WEAP_SUPERSHOTGUN,
+//        NULL,
+//        0,
+//        /* precache */ "weapons/sshotf1b.wav"
+//    },
+//
+//    //
+//    // AMMO ITEMS
+//    //
+//
+//    /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
+//    */
+//    {
+//        "ammo_shells",
+//        Pickup_Ammo,
+//        NULL,
+//        Drop_Ammo,
+//        NULL,
+//        "misc/am_pkup.wav",
+//        "models/items/ammo/shells/medium/tris.md2", 0,
+//        NULL,
+//        /* icon */      "a_shells",
+//        /* pickup */    "Shells",
+//        /* width */     3,
+//        10,
+//        NULL,
+//        ItemFlags::IsAmmo,
+//        0,
+//        NULL,
+//        AmmoType::Shells,
+//        /* precache */ ""
+//    },
+//
+//    /*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16)
+//    */
+//    {
+//        "ammo_bullets",
+//        Pickup_Ammo,
+//        NULL,
+//        Drop_Ammo,
+//        NULL,
+//        "misc/am_pkup.wav",
+//        "models/items/ammo/bullets/medium/tris.md2", 0,
+//        NULL,
+//        /* icon */      "a_bullets",
+//        /* pickup */    "Bullets",
+//        /* width */     3,
+//        50,
+//        NULL,
+//        ItemFlags::IsAmmo,
+//        0,
+//        NULL,
+//        AmmoType::Bullets,
+//        /* precache */ ""
+//    },
+//
+//    //{
+//    //    NULL,
+//    //    Pickup_Health,
+//    //    NULL,
+//    //    NULL,
+//    //    NULL,
+//    //    "items/pkup.wav",
+//    //    NULL, 0,
+//    //    NULL,
+//    //    /* icon */      "i_health",
+//    //    /* pickup */    "Health",
+//    //    /* width */     3,
+//    //    0,
+//    //    NULL,
+//    //    0,
+//    //    0,
+//    //    NULL,
+//    //    0,
+//    //    /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
+//    //},
+//
+//    // end of list marker
+//    {NULL}
+//};
 
-    //
-    // ARMOR
-    //
-
-    /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    //{
-    //    "item_armor_body",
-    //    Pickup_Armor,
-    //    NULL,
-    //    NULL,
-    //    NULL,
-    //    "misc/ar1_pkup.wav",
-    //    "models/items/armor/body/tris.md2", EntityEffectType::Rotate,
-    //    NULL,
-    //    /* icon */      "i_bodyarmor",
-    //    /* pickup */    "Body Armor",
-    //    /* width */     3,
-    //    0,
-    //    NULL,
-    //    ItemFlags::IsArmor,
-    //    0,
-    //    &bodyarmor_info,
-    //    ArmorType::Body,
-    //    /* precache */ ""
-    //},
-
-    //
-    // WEAPONS
-    //
-
-    /* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
-    always owned, never in the world
-    */
-    {
-        "weapon_blaster",
-        NULL,
-        Use_Weapon,
-        NULL,
-        Weapon_Blaster,
-        "misc/w_pkup.wav",
-        NULL, 0,
-	    "models/weapons/v_mark23/tris.iqm",  //"models/weapons/v_blast/tris.md2", // "models/weapons/v_mark23/tris.iqm",
-        /* icon */      "w_blaster",
-        /* pickup */    "Blaster",
-        0,
-        0,
-        NULL,
-        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
-        WEAP_BLASTER,
-        NULL,
-        0,
-        /* precache */ "weapons/v_mark23/fire0.wav"// misc/lasfly.wav"
-    },
-
-    /*QUAKED weapon_machinegun (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_machinegun",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_Machinegun,
-        "misc/w_pkup.wav",
-        "models/weapons/g_machn/tris.md2", EntityEffectType::Rotate,
-        "models/weapons/v_machn/tris.md2",
-        /* icon */      "w_machinegun",
-        /* pickup */    "Machinegun",
-        0,
-        1,
-        "Bullets",
-        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
-        WEAP_MACHINEGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav weapons/machgf5b.wav"
-    },
-
-    /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_shotgun",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_Shotgun,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg/tris.md2", EntityEffectType::Rotate,
-        "models/weapons/v_shotg/tris.md2",
-        /* icon */      "w_shotgun",
-        /* pickup */    "Shotgun",
-        0,
-        1,
-        "Shells",
-        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
-        WEAP_SHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/shotgf1b.wav weapons/shotgr1b.wav"
-    },
-
-    /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_supershotgun",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_SuperShotgun,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg2/tris.md2", EntityEffectType::Rotate,
-        "models/weapons/v_shotg2/tris.md2",
-        /* icon */      "w_sshotgun",
-        /* pickup */    "Super Shotgun",
-        0,
-        2,
-        "Shells",
-        ItemFlags::IsWeapon | ItemFlags::StayInCoop,
-        WEAP_SUPERSHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/sshotf1b.wav"
-    },
-
-    //
-    // AMMO ITEMS
-    //
-
-    /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "ammo_shells",
-        Pickup_Ammo,
-        NULL,
-        Drop_Ammo,
-        NULL,
-        "misc/am_pkup.wav",
-        "models/items/ammo/shells/medium/tris.md2", 0,
-        NULL,
-        /* icon */      "a_shells",
-        /* pickup */    "Shells",
-        /* width */     3,
-        10,
-        NULL,
-        ItemFlags::IsAmmo,
-        0,
-        NULL,
-        AmmoType::Shells,
-        /* precache */ ""
-    },
-
-    /*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "ammo_bullets",
-        Pickup_Ammo,
-        NULL,
-        Drop_Ammo,
-        NULL,
-        "misc/am_pkup.wav",
-        "models/items/ammo/bullets/medium/tris.md2", 0,
-        NULL,
-        /* icon */      "a_bullets",
-        /* pickup */    "Bullets",
-        /* width */     3,
-        50,
-        NULL,
-        ItemFlags::IsAmmo,
-        0,
-        NULL,
-        AmmoType::Bullets,
-        /* precache */ ""
-    },
-
-    //{
-    //    NULL,
-    //    Pickup_Health,
-    //    NULL,
-    //    NULL,
-    //    NULL,
-    //    "items/pkup.wav",
-    //    NULL, 0,
-    //    NULL,
-    //    /* icon */      "i_health",
-    //    /* pickup */    "Health",
-    //    /* width */     3,
-    //    0,
-    //    NULL,
-    //    0,
-    //    0,
-    //    NULL,
-    //    0,
-    //    /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
-    //},
-
-    // end of list marker
-    {NULL}
-};
-
-/**
-*   @brief Counts the length of our items array so the game is aware of the total of items.
-**/
-void GameLocals::PrepareItems() { numberOfItems = Q_COUNTOF(itemlist) - 1; }
-
-/*QUAKED item_health (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health(Entity *self)
-{
-    // TODO: Move these sorts of things over to gamemode.
-    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-    //    SVG_FreeEntity(self);
-    //    return;
-    //}
-
-//    self->model = "models/items/healing/medium/tris.md2";
-    //self->SetCount(10);
-    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
-    gi.SoundIndex("items/n_health.wav");
-}
-
-/*QUAKED item_health_small (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health_small(Entity *self)
-{
-    // TODO: Move these sorts of things over to gamemode.
-    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-    //    SVG_FreeEntity(self);
-    //    return;
-    //}
-
-//    self->model = "models/items/healing/stimpack/tris.md2";
-    //self->SetCount(2);
-    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
-    //self->style = HEALTH_IGNORE_MAX;
-    gi.SoundIndex("items/s_health.wav");
-}
-
-/*QUAKED item_health_large (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health_large(Entity *self)
-{
-    // TODO: Move these sorts of things over to gamemode.
-    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-    //    SVG_FreeEntity(self);
-    //    return;
-    //}
-
-//    self->model = "models/items/healing/large/tris.md2";
-    //self->SetCount(25);
-    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
-    gi.SoundIndex("items/l_health.wav");
-}
-
-/*QUAKED item_health_mega (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health_mega(Entity *self)
-{
-    // TODO: Move these sorts of things over to gamemode.
-    //if (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::NoHealth)) {
-    //    SVG_FreeEntity(self);
-    //    return;
-    //}
-
-//    self->model = "models/items/mega_h/tris.md2";
-    //self->SetCount(100);
-    SVG_SpawnItem(self, SVG_FindItemByPickupName("Health"));
-    gi.SoundIndex("items/m_health.wav");
-    //self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
-}
-
-/*
-===============
-SVG_SetItemNames
-
-Called by worldspawn
-===============
-*/
-void SVG_SetItemNames(void)
-{
-    int     i;
-    gitem_t *it;
-
-    for (i = 0 ; i < game.numberOfItems ; i++) {
-        it = &itemlist[i];
-        gi.configstring(ConfigStrings::Items+ i, it->pickupName);
-    }
-
-    body_armor_index   = ITEM_INDEX(SVG_FindItemByPickupName("Body Armor"));
-}

@@ -307,20 +307,14 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
     // subtract origin offset
     vec3_t p_l = p - origin;
 
+    vec3_t axis[3];
     // rotate start and end into the models frame of reference
-    if (headNode != box_headnode &&
-        (angles[0] || angles[1] || angles[2])) {
-        AngleVectors(angles, &forward, &right, &up);
-
-        temp = p_l;
-        p_l[0] = vec3_dot(temp, forward);
-        p_l[1] = -vec3_dot(temp, right);
-        p_l[2] = vec3_dot(temp, up);
+    if (headNode != box_headnode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
+        AnglesToAxis(angles, axis);
+        RotatePoint(p_l, axis);
     }
 
-    mleaf_t *leaf = BSP_PointLeaf(headNode, p_l);
-
-    return leaf->contents;
+    return BSP_PointLeaf(headNode, p_l)->contents;
 }
 
 
@@ -333,18 +327,9 @@ BOX TRACING
 */
 
 // 1/32 epsilon to keep floating point happy
-// N&C: FF Precision.
 //#define DIST_EPSILON    (0.03125)
 //#define DIST_EPSILON    0.125
 static constexpr float DIST_EPSILON = 1.0f / 32.0f;
-
-//There is a possible fix here related to slopes, and walls. Try it in pmove bruh!
-//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
-//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
-//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
-//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
-//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
-//https://github.com/id-Software/Quake/blob/master/WinQuake/sv_phys.c#L1031
 
 static vec3_t   trace_start, trace_end;
 static vec3_t   trace_mins, trace_maxs;
@@ -710,7 +695,7 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
             c2[i] += 1;
         }
 
-        int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, 1024, headNode, NULL);
+        int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, NULL);
         for (int32_t i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
             if (trace_trace->allSolid)
@@ -970,21 +955,17 @@ int CM_WriteAreaBits(cm_t *cm, byte *buffer, int area)
 
 int CM_WritePortalBits(cm_t *cm, byte *buffer)
 {
+    int32_t     i, bytes, numportals;
+
     if (!cm->cache) {
         return 0;
     }
 
-    int32_t numportals = cm->cache->lastareaportal + 1;
-    if (numportals > MAX_MAP_AREAS) {
-        /* HACK: use the same array size as areaBytes!
-         * It is nonsense for a map to have > 256 areaportals anyway. */
-        Com_WPrintf("%s: too many areaportals\n", __func__);
-        numportals = MAX_MAP_AREAS;
-    }
+    numportals = min(cm->cache->lastareaportal + 1, MAX_MAP_PORTAL_BYTES << 3);
 
-    int32_t bytes = (numportals + 7) >> 3;
+    bytes = (numportals + 7) >> 3;
     memset(buffer, 0, bytes);
-    for (int32_t i = 0; i < numportals; i++) {
+    for (i = 0; i < numportals; i++) {
         if (cm->portalopen[i]) {
             Q_SetBit(buffer, i);
         }
@@ -1004,12 +985,13 @@ void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
             cm->portalopen[i] = true;
         }
     } else {
-        int32_t numportals = bytes << 3;
-        if (numportals > cm->cache->lastareaportal + 1) {
-            numportals = cm->cache->lastareaportal + 1;
-        }
-        for (int32_t i = 0; i < numportals; i++) {
+        int32_t numPortals = min(cm->cache->lastareaportal + 1, bytes << 3);
+        int32_t i = 0;
+        for (i = 0; i < numPortals; i++) {
             cm->portalopen[i] = Q_IsBitSet(buffer, i);
+        }
+        for (; i <= cm->cache->lastareaportal; i++) {
+            cm->portalopen[i] = true;
         }
     }
 

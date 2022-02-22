@@ -18,7 +18,7 @@
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
 
-
+#include "../../World/Gameworld.h"
 
 //
 // Constructor/Deconstructor.
@@ -269,10 +269,10 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
     if (GetGroundEntity()) {
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::Explosion1);
         gi.WriteVector3(GetOrigin());
-        gi.Multicast(GetOrigin(), MultiCast::PHS);
+        gi.Multicast(GetOrigin(), Multicast::PHS);
 
         SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
@@ -282,10 +282,10 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         UseTargets(GetActivator());
         SetDelayTime(save);
     } else {
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::Explosion2);
         gi.WriteVector3(GetOrigin());
-        gi.Multicast(GetOrigin(), MultiCast::PHS);
+        gi.Multicast(GetOrigin(), Multicast::PHS);
 
         SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
@@ -362,6 +362,9 @@ void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* oth
 //===============
 //
 void MiscExplosionBox::SpawnDebris1Chunk() {
+    // Acquire a pointer to the game world.
+    Gameworld* gameworld = GetGameworld();
+
     // Speed to throw debris at.
     float speed = 1.5 * (float)GetDamage() / 200.0f;
 
@@ -376,7 +379,7 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Throw debris!
-    SVG_ThrowDebris(this, "models/objects/debris1/tris.md2", speed, origin);
+    gameworld->ThrowDebris(this, "models/objects/debris1/tris.md2", origin, speed);
 }
 
 
@@ -402,7 +405,7 @@ void MiscExplosionBox::SpawnDebris2Chunk() {
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Last but not least, throw debris.
-    SVG_ThrowDebris(this, "models/objects/debris2/tris.md2", speed, origin);
+    GetGameworld()->ThrowDebris(this, "models/objects/debris2/tris.md2", origin, speed);
 }
 
 //
@@ -417,5 +420,5 @@ void MiscExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
     float speed = 1.75 * (float)GetDamage() / 200.0f;
 
     // Throw debris!
-    SVG_ThrowDebris(this, "models/objects/debris3/tris.md2", speed, origin);
+    GetGameworld()->ThrowDebris(this, "models/objects/debris3/tris.md2", origin, speed);
 }

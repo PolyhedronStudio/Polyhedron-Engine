@@ -1252,7 +1252,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             int     color;
 
             width = 3;
-            value = cl->frame.playerState.stats[STAT_AMMO];
+            value = cl->frame.playerState.stats[STAT_AMMO_PRIMARY];
             if (value > 5)
                 color = 0;  // green
             else if (value >= 0)

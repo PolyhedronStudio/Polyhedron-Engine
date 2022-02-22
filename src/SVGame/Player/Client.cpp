@@ -28,11 +28,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Weapons.h"
 
 // ClassEntities.
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 #include "../Entities/Info/InfoPlayerStart.h"
 
 // Game modes.
 #include "../Gamemodes/IGamemode.h"
+
+// World.
+#include "../World/Gameworld.h"
 
 // Shared Game.
 #include "SharedGame/SharedGame.h" // Include SG Base.
@@ -52,52 +55,15 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     if (!ent)
         return;
 
-    game.GetCurrentGamemode()->ClientUserinfoChanged(ent, userinfo);
-}
-
-
-//
-// Gross, ugly, disgustuing hack section
-//
-
-// this function is an ugly as hell hack to fix some map flaws
-//
-// the coop spawn spots on some maps are SNAFU.  There are coop spots
-// with the wrong targetName as well as spots with no name at all
-//
-// we use carnal knowledge of the maps to fix the coop spot targetnames to match
-// that of the nearest named single player spot
-
-void SP_FixCoopSpots(Entity *self)
-{
-    Entity *spot;
-    vec3_t  d;
-
-    spot = NULL;
-
-    while (1) {
-        spot = SVG_Find(spot, FOFS(classname), "info_player_start");
-        if (!spot)
-            return;
-        if (!spot->targetName)
-            continue;
-        d = self->state.origin - spot->state.origin;
-        if (vec3_length(d) < 384) {
-            if ((!self->targetName) || PH_StringCompare(self->targetName, spot->targetName) != 0) {
-                //              gi.DPrintf("FixCoopSpots changed %s at %s targetName from %s to %s\n", self->classname, Vec3ToString(self->state.origin), self->targetName, spot->targetName);
-                self->targetName = spot->targetName;
-            }
-            return;
-        }
-    }
+    game.GetGamemode()->ClientUserinfoChanged(ent, userinfo);
 }
 
 //=======================================================================
 
 // TODO: Move into game mode.
-void SVG_TossClientWeapon(PlayerClient *playerClient)
+void SVG_TossClientWeapon(SVGBasePlayer *player)
 {
-    gitem_t     *item;
+    SVGBaseItemWeapon *item;
     Entity      *drop;
     float       spread = 1.5f;
 
@@ -105,11 +71,26 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
     //if (!deathmatch->value)
     //    return;
 
-    item = playerClient->GetActiveWeapon();
-    if (!playerClient->GetClient()->persistent.inventory[playerClient->GetClient()->ammoIndex])
-        item = NULL;
-    if (item && (strcmp(item->pickupName, "Blaster") == 0))
-        item = NULL;
+    // Sanity check.
+    if (!player) {
+        return;
+    }
+
+    // Get client
+    ServerClient* client = player->GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return;
+    }
+
+    // Fetch active weapon, if any.
+    //item = player->GetActiveWeapon();
+
+    //if (!player->GetClient()->persistent.inventory[player->GetClient()->ammoIndex])
+    //    item = NULL;
+    //if (item && (strcmp(item->pickupName, "Blaster") == 0))
+    //    item = NULL;
 
     if (item) {
         //playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
@@ -120,22 +101,6 @@ void SVG_TossClientWeapon(PlayerClient *playerClient)
 }
 
 //=======================================================================
-
-//======================================================================
-
-void body_die(Entity *self, Entity *inflictor, Entity *attacker, int damage, const vec3_t& point)
-{
-    //int n;
-
-    //if (self->classEntity && self->classEntity->GetHealth() < -40) {
-    //    gi.Sound(self, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
-    //    for (n = 0; n < 4; n++)
-    //        SVG_ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    //    self->state.origin.z -= 48;
-    //    SVG_ThrowClientHead(self, damage);
-    //    self->takeDamage = TakeDamage::No;
-    //}
-}
 
 /*
 * only called when persistent.isSpectator changes
@@ -166,7 +131,7 @@ void spectator_respawn(Entity *ent)
 
         // Count actual active spectators
         for (i = 1, numspec = 0; i <= maximumclients->value; i++)
-            if (g_entities[i].inUse && g_entities[i].client->persistent.isSpectator)
+            if (game.world->GetServerEntities()[i].inUse && game.world->GetServerEntities()[i].client->persistent.isSpectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
@@ -203,15 +168,15 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.GetCurrentGamemode()->PutClientInServer(ent);
+    game.GetGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->classEntity));
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
         // send effect
-        gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-        gi.WriteShort(ent - g_entities);
+        gi.WriteByte(ServerGameCommands::MuzzleFlash);
+        gi.WriteShort(ent - game.world->GetServerEntities());
         gi.WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(ent->state.origin, MultiCast::PVS);
+        gi.Multicast(ent->state.origin, Multicast::PVS);
 
         // hold in place briefly
         ent->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
@@ -241,11 +206,11 @@ extern void DebugShitForEntitiesLulz();
 void SVG_ClientBegin(Entity *ent)
 {
     // Fetch this entity's client.
-    ent->client = game.clients + (ent - g_entities - 1);
+    ent->client = game.GetClients() + (ent - game.world->GetServerEntities() - 1);
 
     // Let the game mode decide from here on out.
-    game.GetCurrentGamemode()->ClientBegin(ent);
-    //game.GetCurrentGamemode()->ClientEndServerFrame(ent);
+    game.GetGamemode()->ClientBegin(ent);
+    //game.GetGamemode()->ClientEndServerFrame(ent);
 }
 
 
@@ -263,7 +228,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    return game.GetCurrentGamemode()->ClientConnect(ent, userinfo);
+    return game.GetGamemode()->ClientConnect(ent, userinfo);
 }
 
 /*
@@ -284,7 +249,7 @@ void SVG_ClientDisconnect(Entity *ent)
         return;
 
     // Since it does, we pass it on to the game mode.
-    game.GetCurrentGamemode()->ClientDisconnect((PlayerClient*)ent->classEntity);
+    game.GetGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->classEntity), ent->client);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;
@@ -293,8 +258,6 @@ void SVG_ClientDisconnect(Entity *ent)
 
 
 //==============================================================
-
-
 Entity *pm_passent;
 
 // pmove doesn't need to know about passent and contentmask
@@ -322,6 +285,7 @@ void PrintPMove(PlayerMove *pm)
     c2 = CheckBlock(&pm->moveCommand, sizeof(pm->moveCommand));
     Com_Printf("sv %3i:%i %i\n", pm->moveCommand.input.impulse, c1, c2);
 }
+//==============================================================
 
 /*
 ==============
@@ -334,7 +298,7 @@ usually be a couple times for each server frame.
 void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 {
     ServerClient* client = nullptr;
-    PlayerClient *classEntity = nullptr;
+    SVGBasePlayer *classEntity = nullptr;
     Entity* other = nullptr;
 
     PlayerMove pm = {};
@@ -356,13 +320,13 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
     client = serverEntity->client;
 
     // Fetch the class entity.
-    classEntity = (PlayerClient*)serverEntity->classEntity;
+    classEntity = (SVGBasePlayer*)serverEntity->classEntity;
 
     if (level.intermission.time) {
         client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
         // can exit intermission after five seconds
         if (level.time > level.intermission.time + 5.0
-            && (moveCommand->input.buttons & BUTTON_ANY))
+            && (moveCommand->input.buttons & ButtonBits::Any))
             level.intermission.exitIntermission = true;
         return;
     }
@@ -490,7 +454,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
     //ent->lightLevel = moveCommand->input.lightLevel;
 
     // fire weapon from final position if needed
-    if (client->latchedButtons & BUTTON_ATTACK) {
+    if (client->latchedButtons & ButtonBits::Attack) {
         if (client->respawn.isSpectator) {
 
             client->latchedButtons = 0;
@@ -501,10 +465,14 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
             } else
                 SVG_GetChaseTarget(classEntity);
 
-        } else if (!client->weaponThunk) {
-            client->weaponThunk = true;
+        } else {// if (!client->weaponState.shouldThink) {
+            //client->weaponState.shouldThink = true;
             SVG_ThinkWeapon(classEntity);
         }
+    } else {
+	    if (!client->respawn.isSpectator) {
+	        SVG_ThinkWeapon(classEntity);
+	    }
     }
 
     if (client->respawn.isSpectator) {
@@ -522,7 +490,7 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
 
     // update chase cam if being followed
     for (int i = 1; i <= maximumclients->value; i++) {
-        other = g_entities + i;
+        other = game.world->GetServerEntities() + i;
         if (other->inUse && other->client->chaseTarget == serverEntity)
             SVG_UpdateChaseCam(classEntity);
     }

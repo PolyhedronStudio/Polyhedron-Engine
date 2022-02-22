@@ -35,14 +35,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 //-------------------
-// Forward Declaration.
+// Forward Declarations.
 //-------------------
 class SVGBaseEntity;
-class PlayerClient;
+class SVGBaseItem;
+class SVGBaseItemWeapon;
+class SVGBasePlayer;
 class Gameworld;
 class IGamemode;
 struct entity_s;
 
+#include "GameLocals.h"
 //==================================================================
 
 //! Time it takes to go over a frame. 
@@ -103,32 +106,6 @@ struct TakeDamage {
 };
 
 //-------------------
-// WeaponState
-//
-// Add custom weapon states here.
-//-------------------
-struct WeaponState {
-    static constexpr int32_t Ready = 0;
-    static constexpr int32_t Activating = 1;
-    static constexpr int32_t Dropping = 2;
-    static constexpr int32_t Firing = 3;
-};
-
-//-------------------
-// AmmoType
-//
-// Add ammo types here.
-//-------------------
-struct AmmoType {
-    static constexpr int32_t Bullets = 0;
-    static constexpr int32_t Shells = 1;
-    static constexpr int32_t Rockets = 2;
-    static constexpr int32_t Grenade = 3;
-    static constexpr int32_t Cells = 4;
-    static constexpr int32_t Slugs = 5;
-};
-
-//-------------------
 // deadFlag
 //-------------------
 constexpr int32_t  DEAD_NO = 0;
@@ -147,8 +124,10 @@ constexpr int32_t  RANGE_FAR = 3;
 //-------------------
 //gib types
 //-------------------
-constexpr int32_t GIB_ORGANIC = 0;
-constexpr int32_t GIB_METALLIC = 1;
+struct GibType {
+    static constexpr int32_t Organic = 0;
+    static constexpr int32_t Metallic = 1;
+};
 
 //monster ai flags
 constexpr int32_t AI_STAND_GROUND = 0x00000001;
@@ -172,6 +151,53 @@ constexpr int32_t AS_STRAIGHT = 1;
 constexpr int32_t AS_SLIDING = 2;
 constexpr int32_t AS_MELEE = 3;
 constexpr int32_t AS_MISSILE = 4;
+
+/**
+*   @brief Item identifiers.
+**/
+struct ItemIdentifier {
+    /***
+    * Weapon Identifiers.
+    ***/
+    //! Unused.
+    static constexpr uint32_t None          = 0;
+    //! Pistol.
+    static constexpr uint32_t Beretta       = 1;
+    //! SMG.
+    static constexpr uint32_t SMG           = 2;
+    //! Shotgun.
+    static constexpr uint32_t Shotgun       = 3;
+    //! Maximum amount of weapons allowed.
+    static constexpr uint32_t MaxWeapons    = 64;
+
+    /***
+    * Ammo Identifiers.
+    ***/
+    //! 9 millimeter ammo.
+    static constexpr uint32_t Ammo9mm       = 65;
+    //! Reserved2. Intended for weaponry.
+    static constexpr uint32_t Reserved66    = 66;
+    //! Reserved3. Intended for weaponry.
+    static constexpr uint32_t Reserved67    = 67;
+    //! Reserved4. Intended for weaponry.
+    static constexpr uint32_t Reserved68    = 68;
+    //! Reserved5. Intended for weaponry.
+    static constexpr uint32_t Reserved69    = 69;
+    //! Reserved6. Intended for weaponry.
+    static constexpr uint32_t Reserved70    = 70;
+
+    /***
+    * Medical Stats Items.
+    ***/
+    //! Mega Health.
+    static constexpr uint32_t MegaHealth = 11;
+
+    //! Total amount of items.
+    static constexpr uint32_t Total = 12; 
+
+    //! Maximum amount of allowed items.
+    static constexpr uint32_t Maximum = 255;
+};
 
 //-------------------
 // Armor types
@@ -267,10 +293,10 @@ typedef struct gitem_s {
     const char *classname;
 
     // Function callbacks.
-    qboolean (*Pickup)(SVGBaseEntity *ent, PlayerClient *other);
-    void (*Use)(PlayerClient *ent, struct gitem_s *item);
-    void (*Drop)(PlayerClient *ent, struct gitem_s *item);
-    void (*WeaponThink)(PlayerClient *ent);
+    qboolean (*Pickup)(SVGBaseEntity *ent, SVGBasePlayer *other);
+    void (*Use)(SVGBasePlayer *ent, struct gitem_s *item);
+    void (*Drop)(SVGBasePlayer *ent, struct gitem_s *item);
+    void (*WeaponThink)(SVGBasePlayer *ent);
 
     // Sound used when being picked up.
     const char *pickupSound;
@@ -396,18 +422,19 @@ struct TemporarySpawnFields {
     float maxpitch;
 };
 
-// Wrap these in functions such as?:
-// SVG_GetGameLocals
-// SVG_GetLevelLocals
-// 
-#include "GameLocals.h"
+
+// Externized.
 extern  GameLocals   game;
 extern  LevelLocals  level;
 extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
 extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
 extern  TemporarySpawnFields    st;
 
-// These too need to be taken care of.
+// Static Get functions for readability.
+static inline Gameworld* GetGameworld() { return game.world; }
+static inline LevelLocals* GetLevelLocals() { return &level; }
+
+    // These too need to be taken care of.
 extern  int32_t sm_meat_index;
 extern  int32_t snd_fry;
 
@@ -445,11 +472,6 @@ struct MeansOfDeath {
     static constexpr int32_t Hit = 26;
     static constexpr int32_t FriendlyFire = 27;
 };
-
-// Once again, ugly.
-extern Entity g_entities[MAX_EDICTS];
-extern SVGBaseEntity* g_baseEntities[MAX_EDICTS];
-
 
 //
 // Small macros that are used to generate a field offset with. These are used
@@ -547,25 +569,24 @@ typedef enum {
     F_IGNORE
 } fieldtype_t;
 
-extern  gitem_t itemlist[];
+//extern  gitem_t itemlist[];
 
 
 //
 // g_cmds.c
 //
-void SVG_Command_Score_f(SVGBaseEntity *ent);
+void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client);
 
 //
 // g_items.c
 //
 void SVG_PrecacheItem(gitem_t *it);
-void SVG_SetItemNames(void);
 gitem_t *SVG_FindItemByPickupName(const char *pickup_name);
 gitem_t *SVG_FindItemByClassname(const char *classname);
-#define ITEM_INDEX(x) ((x)-itemlist)
+//#define ITEM_INDEX(x) ((x)-itemlist)
 Entity *SVG_DropItem(Entity *ent, gitem_t *item);
 void SVG_SetRespawn(Entity *ent, float delay);
-void SVG_ChangeWeapon(PlayerClient* ent);
+void SVG_ChangeWeapon(SVGBasePlayer* ent);
 void SVG_SpawnItem(Entity *ent, gitem_t *item);
 //void SVG_ThinkWeapon(Entity *ent);
 int32_t SVG_ArmorIndex(SVGBaseEntity *ent);
@@ -583,18 +604,17 @@ void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, 
 
 // damage flags
 struct DamageFlags {
-    static constexpr int32_t IndirectFromRadius = 0x00000001;  // damage was indirect
-    static constexpr int32_t NoArmorProtection = 0x00000002;  // armour does not protect from this damage
-    static constexpr int32_t EnergyBasedWeapon = 0x00000004;  // damage is from an energy based weapon
-    static constexpr int32_t NoKnockBack = 0x00000008;  // do not affect velocity, just view angles
-    static constexpr int32_t Bullet = 0x00000010;  // damage is from a bullet (used for ricochets)
-    static constexpr int32_t IgnoreProtection = 0x00000020;  // armor, shields, invulnerability, and godmode have no effect
+    static constexpr int32_t IndirectFromRadius = 0x00000001;  // Damage was indirect
+    static constexpr int32_t NoArmorProtection = 0x00000002;  // Armour does not protect from this damage
+    static constexpr int32_t EnergyBasedWeapon = 0x00000004;  // Damage is from an energy based weapon
+    static constexpr int32_t NoKnockBack = 0x00000008;  // Do not affect velocity, just view angles
+    static constexpr int32_t Bullet = 0x00000010;  // Damage is from a bullet (used for ricochets)
+    static constexpr int32_t IgnoreProtection = 0x00000020;  // Armor, shields, invulnerability, and godmode have no effect
 };
 
 //
 // g_weapon.c
 //
-void SVG_ThrowDebris(SVGBaseEntity *self, const char *modelname, float speed, const vec3_t& origin);
 qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t kick);
 void SVG_FireBullet(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t mod);
 void SVG_FireShotgun(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t count, int32_t mod);
@@ -630,6 +650,7 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int32_t type);
 //
 // g_phys.c
 //
+class SVGEntityHandle;
 void SVG_RunEntity(SVGEntityHandle &entityHandle);
 
 //
@@ -699,16 +720,10 @@ qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);
 qhandle_t SVG_PrecacheSound(const std::string& filename);
 
+void SVG_CPrint(SVGBaseEntity* ent, int32_t printlevel, const std::string& str);
+void SVG_DPrint(const std::string &str);
 void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str);
 void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-//
-// g_chase.c
-//
-
 
 //============================================================================
 
@@ -725,270 +740,292 @@ struct PlayerAnimation {
     static constexpr int32_t Reverse = 6;
 };
 
-//-------------------
-// The ClientPersistentData struct manages data that has to stay persistent
-// across level changes.
-//-------------------
+/**
+*   @brief  The ClientPersistentData struct manages data that has to stay persistent
+*           across level changes.
+**/
 struct ClientPersistentData {
     char userinfo[MAX_INFO_STRING];
     char netname[16];
     int32_t hand;
 
-    qboolean isConnected;  // A loadgame will leave valid entities that
-                           // just don't have a connection yet
+    qboolean isConnected = false;   // A loadgame will leave valid entities that
+                                    // just don't have a connection yet
 
-    // Values saved and restored from entities when changing levels
-    int32_t health;
-    int32_t maxHealth;
-    int32_t savedFlags;
+    /***
+    * Values saved and restored from entities when changing levels
+    ***/
+    //! Client's health.
+    int32_t health = 100;
+    //! The maximum amount of health.
+    int32_t maxHealth = 100;
+    //! Flags to save.
+    int32_t savedFlags = 0;
+    //! What item was selected?
+    int32_t selectedItem = 0;
+    //! Entire inventory.
+    int32_t inventory[MAX_ITEMS] = {};
 
-    int32_t selectedItem;
-    int32_t inventory[MAX_ITEMS];
+    //! Ammo capacities
+    int32_t maxAmmo9mm = 150;
 
-    // Ammo capacities
-    int32_t maxBullets;
-    int32_t maxShells;
-    int32_t maxRockets;
-    int32_t maxGrenades;
-    int32_t maxCells;
-    int32_t maxSlugs;
+    //! Pointer to the active weapon item instance.
+    SVGBaseItemWeapon *activeWeapon = nullptr;
+    //! Pointer to the last active weapon item instance.
+    SVGBaseItemWeapon *lastWeapon = nullptr;
 
-    gitem_t *activeWeapon;
-    gitem_t *lastWeapon;
+    //int32_t powerCubes = 0;    // Used for tracking the cubes in coop games
+    int32_t score = 0;         // For calculating total unit score in coop games
 
-    int32_t powerCubes;    // Used for tracking the cubes in coop games
-    int32_t score;         // For calculating total unit score in coop games
-
-    qboolean isSpectator;          // client is a isSpectator
+    //! Spectator mode or not?
+    qboolean isSpectator = false;          // client is a isSpectator
 };
 
-//-------------------
-// The ClientRespawnData struct is used to store specific information about
-// respawning. Also maintains a member variable for data that has to stay
-// persistent during mapchanges/respawns in a coop game.
-//-------------------
+/**
+*   @brief  The ClientRespawnData struct is used to store specific information about
+*           respawning. Also maintains a member variable for data that has to stay
+*           persistent during mapchanges/respawns in a coop game.
+**/
 struct ClientRespawnData {
-    ClientPersistentData persistentCoopRespawn;   // What to set client->persistent to on a respawn
-    int32_t enterGameFrameNumber;       // level.frameNumber the client entered the game
-    int32_t score;                      // frags, etc
-    vec3_t commandViewAngles;           // angles sent over in the last command
+    //! What to set client->persistent to in a coop game.
+    ClientPersistentData persistentCoopRespawn;
+    
+    //! The level.frameNumber on which the player entered the game.
+    int32_t enterGameFrameNumber;
 
-    qboolean isSpectator;               // client is a isSpectator
+    //! A client's score, usually this means the amount of frags.
+    int32_t score;
+
+    //! Angles sent over in the last client user command.
+    vec3_t commandViewAngles;
+    
+    //! Is this client a spectator?
+    qboolean isSpectator;
 };
 
 
-//-------------------
-// The gclient_s, Game Client structure.
-// 
-// Whenever PutClientInServer is called, this structure is cleared.
-// The only thing that maintains its data is the persistent member.
-// 
-// This is to maintain several specific client data across maps.
-//-------------------
+/**
+*   @brief  The Game Client structure.
+*
+*   @details    This structure is cleared whenever PlacePlayerInGame is called,
+*               with the exception of all data in its persistent member variable.
+**/
 struct gclient_s {
-    // known to server
-    PlayerState  playerState;             // communicated by server to clients
+    //! Communicated by the server to the client.
+    PlayerState  playerState;
+    //! Client Ping.
     int32_t ping;
 
-    // private to game
+    //! Persistent data private to the game.
     ClientPersistentData persistent;
+    //! Respawn data private to the game.
     ClientRespawnData respawn;
 
-    qboolean showScores;         // set layout stat
-    qboolean showInventory;      // set layout stat
+    //! Whether to generate a show score layout stat.
+    qboolean showScores;
+    //! Whether to generate a show inventory layout stat.
+    qboolean showInventory;
+	//! Whether to generate a show help layout stat.
     qboolean showHelpIcon;
 
+    //! Current ammo index.
     int32_t ammoIndex;
 
+    //! State of buttons for this frame.
     int32_t buttons;
+    //! State of buttons in the previous frame.
     int32_t oldButtons;
-    int32_t latchedButtons;     // These are used for one time push events.
+    //! Latched Buttons are used for single key push events.
+    int32_t latchedButtons;
 
-    qboolean weaponThunk;
+    struct ClientWeaponState {
+	    //! Should we execute a weapon think method?
+        qboolean shouldThink = false;
 
-    gitem_t *newWeapon;
+        //! Last state, used for animation resetting.
+        int32_t lastState = WeaponState::Finished;
 
-    // sum up damage over an entire frame, so
-    // shotgun blasts give a single big kick
+        //! Current state the active weapon resides in.
+        int32_t currentState = WeaponState::Finished;
+
+        //! Queued weapon state to switch to after finishing the current state.
+        int32_t queuedState = -1;
+
+        // Animation start frame.
+        float startFrame = 0.f;
+
+            // Animation end frame.
+        float endFrame = 0.f;
+    } weaponState;
+
+    //! Pointer to the new weapon the client wishes to switch to.
+    SVGBaseItemWeapon *newWeapon;
+
+    /**
+    *   @brief  Used to sum up damage over an entire frame so weapons and other
+    *           activities can give the player a single big kick.
+    **/
     struct {
-        int32_t armor;       // damage absorbed by armor
-        int32_t powerArmor;      // damage absorbed by power armor
-        int32_t blood;       // damage taken out of health
-        int32_t knockBack;   // impact damage
-        vec3_t from;        // origin for vector calculation
+        //! Damage absorbed by the armor. (Unused.)
+        int32_t armor;
+        //! Damage absorbed by the power armor. (Unused.)
+        int32_t powerArmor;
+        //! Damage taken out of health, determines how much blood to display.
+        int32_t blood;
+        //! Actual impact damage to knock the client back with.
+        int32_t knockBack;
+        //! Origin of where the damage came from.
+        vec3_t from;
     } damages;
 
-    float killerYaw;         // when dead, look at killer
+    //! Yaw angle of where our killer is located at in case we're dead.
+    float killerYaw;
 
-    int32_t weaponState;
 
-    vec3_t kickAngles;    // weapon kicks
+
+    //! Current kick angles.
+    vec3_t kickAngles;
+    //! Current kick origin.
     vec3_t kickOrigin;
 
-    // View damage kicks.
+    /**
+    *   @brief  View damage kicks.
+    **/
     struct {
         float roll;
         float pitch;
         float time;
     } viewDamage;
 
-    float fallTime, fallValue;      // for view drop on fall
+    //! Falling time.
+    float fallTime;
+    //! Falling value for adding on to the view's pitch when landing.
+    float fallValue;
+    //! Alpha value for damage indicator display.
     float damageAlpha;
+    //! Alpha value for bonus indicator display.
     float bonusAlpha;
+    //! Total damage blend value.
     vec3_t damageBlend;
-    vec3_t aimAngles;            // aiming direction
-    float bobTime;            // so off-ground doesn't change it
+    //! Aiming direction.
+    vec3_t aimAngles;
+    //! Store bob time so going off-ground doesn't change it.
+    float bobTime;
 
-    // Old view angles and velocity.
+    //! Old view angles.
     vec3_t oldViewAngles;
+    //! Old velocity.
     vec3_t oldVelocity;
 
+    //! Timer for the next drown event.
     float nextDrownTime;
+    //! Old water level.
     int32_t oldWaterLevel;
 
-    // For weapon raising
+    //! For weapon raising
     int32_t machinegunShots;
 
-    // animation vars
-    struct {
-        float     endFrame;
+    /**
+    *   @brief  Animation state.
+    **/
+    struct ClientAnimationState {
+        float endFrame;
         float priorityAnimation;
+
         qboolean    isDucking;
         qboolean    isRunning;
     } animation;
 
-    // Weapon Sound.
+    //! Weapon Sound.
     int32_t weaponSound;
 
-    // Pick up message time.
+    //! Pick up message time.
     float pickupMessageTime;
 
-    // Flood protection struct.
-    struct {
+    /**
+    *   @brief  Used to protect from chat flooding.
+    **/
+    struct ClientFloodProtection {
         float lockTill;     // locked from talking
         float when[10];     // when messages were said
         int32_t whenHead;     // head pointer for when said
     } flood;
 
-    // Client can respawn when time > this
+    //! Client can respawn when time > this
     float respawnTime;
 
-    // The (client)player we are chasing
+    //! The (client)player we are chasing
     Entity *chaseTarget;
 
-    // Do we need to update chase info?
+    //! Do we need to update chase info?
     qboolean updateChase;
 };
 
-//-------------------
-// entity_s, the server side entity structure. If you know what an entity is,
-// then you know what this is.
-// 
-// The actual SVGBaseEntity class is a member. It is where the magic happens.
-// Entities can be linked to their "classname", this will in turn make sure that
-// the proper inheritance entity is allocated.
-//-------------------
+
+/**
+*   @brief  An std::map storing an entity's key/value dictionary.
+**/
 using EntityDictionary = std::map<std::string, std::string>;
 
+/**
+*   @brief  entity_s, the server side entity structure. If you know what an entity is,
+*           then you know what this is.
+*
+*   @details    The actual SVGBaseEntity class is a member. It is where the magic happens.
+*               Entities can be linked to their "classname", this will in turn make sure that
+*               the proper inheritance entity is allocated.
+**/
 struct entity_s {
-    // Actual entity state member. Contains all data that is actually networked.
-    EntityState  state;
+    //! Actual entity state member, a POD type that contains all data that is actually networked.
+    EntityState state;
 
-    // NULL if not a player the server expects the first part of gclient_s to
-    // be a PlayerState but the rest of it is opaque
-    struct gclient_s *client;       
+    //! NULL if not a player the server expects the first part of gclient_s to
+    //! be a PlayerState but the rest of it is opaque
+    struct gclient_s *client = nullptr;       
 
-    // An entity is in no use, in case it complies to the INUSE macro.
-    qboolean inUse;
-    int32_t linkCount;
+    //! An entity is in no use, in case it complies to the INUSE macro.
+    qboolean inUse = false;
+    //! Keeps track of whether this entity is linked, or unlinked.
+    int32_t linkCount = 0;
 
     // FIXME: move these fields to a server private sv_entity_t
+    //=================================
     list_t area; // Linked to a division node or leaf
 
-    // If numClusters is -1, use headNodew instead.
-    int32_t numClusters;       // if -1, use headNode instead
-    int32_t clusterNumbers[MAX_ENT_CLUSTERS];
+    //! If numClusters is -1, use headNode instead.
+    int32_t numClusters = 0;
+    int32_t clusterNumbers[MAX_ENT_CLUSTERS] = {};
 
-    // Only use this instead of numClusters if numClusters == -1
-    int32_t headNode;           
-    int32_t areaNumber;
-    int32_t areaNumber2;
-
+    //! Only use this instead of numClusters if numClusters == -1
+    int32_t headNode = 0;
+    int32_t areaNumber = 0;
+    int32_t areaNumber2 = 0;
     //================================
-    int32_t serverFlags;
-    vec3_t mins, maxs;
-    vec3_t absMin, absMax, size;
-    uint32_t solid;
-    int32_t clipMask;
-    Entity *owner;
+    //! An entity's server state flags.
+    int32_t serverFlags = 0;
+    //! Min and max bounding box.
+    vec3_t mins = vec3_zero(), maxs = vec3_zero();
+    //! Absolute world transform bounding box.
+    vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
+    //! The type of 'Solid' this entity contains.
+    uint32_t solid = Solid::Not;
+    //! Clipping mask this entity belongs to.
+    int32_t clipMask = 0;
+    //! Pointer to the owning entity (if any.)
+    Entity *owner = nullptr;
 
-    // !!!!!!!!!!!!!!!!!
-    // !! DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
-    // !! EXPECTS THE FIELDS IN THAT ORDER!
-    // !!!!!!!!!!!!!!!!!
-    //================================
-    // Pointer to the actual game class entity belonging to this server entity.
-    SVGBaseEntity* classEntity;
+    //---------------------------------------------------
+    // Do not modify the fields above, they're shared memory wise with the server itself.
+    //---------------------------------------------------
+    //! Actual class entity implementation pointer.
+    SVGBaseEntity* classEntity = nullptr;
 
-    // Hashmap containing the key:value entity properties.
+    //! Dictionary containing the initial key:value entity properties.
     EntityDictionary entityDictionary;
 
-    //const char *model;       // C++20: STRING: Added const to char*
-    float freeTime;     // sv.time when the object was freed
+    //! Actual sv.time when this entity was freed.
+    float freeTime = 0.f;
 
-    //
-    // only used locally in game, not by server
-    //
-    const char *message;     // C++20: STRING: Added const to char *
-    const char *classname;   // C++20: STRING: Made const.
-    
-    float timeStamp;
-
-    char *target;
-    const char *targetName;
-    char *killTarget;
-    char *team;
-    char *pathTarget;
-    Entity *targetEntityPtr;
-
-    // For moving objects(plats, etc)
-    float speed;
-    float acceleration;
-    float deceleration;
-    vec3_t moveDirection;
-    vec3_t position1, position2;
-
-    // Regular entity velocity, gravity, mass.
-    Entity *goalEntityPtr;
-    Entity *moveTargetPtr;
-
-    const char *map;           // target_changelevel // C++20: STRING: Added const to char *
-
-    Entity *myNoisePtr;       // can go in client only
-    Entity *myNoise2Ptr;
-
-    int32_t noiseIndex;
-    int32_t noiseIndex2;
-    float volume;
-    float attenuation;
-
-    // Timing variables
-    float random;
-
-    float teleportTime;
-
-
-
-//    vec3_t moveOrigin;
-//    vec3_t moveAngles;
-
-    // move this to clientInfo?
-    int32_t lightLevel;
-
-    //int32_t style;          // also used as areaportal number
-
-    // Custom lightstyle.
-    //char *customLightStyle;
-
-    gitem_t *item;          // for bonus items
+    // Move this to clientInfo?
+    int32_t lightLevel = 0;
 };

@@ -20,13 +20,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "../Entities.h"
-#include "../Entities/Base/PlayerClient.h"
+// Server Game Base Entity.
+#include "../Entities/Base/SVGBaseEntity.h"
+#include "../Entities/Base/SVGBaseTrigger.h"
+#include "../Entities/Base/SVGBaseItem.h"
+#include "../Entities/Base/SVGBaseItemWeapon.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Gamemodes.
 #include "../Gamemodes/IGamemode.h"
 //#include "../Gamemodes/DefaultGamemode.h"
 #include "../Gamemodes/CoopGamemode.h"
 #include "../Gamemodes/DeathmatchGamemode.h"
+
+// World.
+#include "../World/Gameworld.h"
 
 // Player Client & Hud Header.
 #include "Client.h"     // Include Player Client header.
@@ -120,30 +128,31 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     game.autoSaved = false;
 
     // Respawn any dead clients.
-    game.GetCurrentGamemode()->RespawnAllClients();
+    game.GetGamemode()->RespawnAllClients();
 
     // Set intermission time and the map to change to.
     level.intermission.time = level.time;
-    level.intermission.changeMap = targ->map;
+    //level.intermission.changeMap = targ->map;
 
     // 
     if (strstr(level.intermission.changeMap, "*")) {
-        if (!game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
+        if (!game.GetGamemode()->IsClass<CoopGamemode>()) {
             for (i = 0 ; i < maximumclients->value ; i++) {
-                client = g_entities + 1 + i;
+                client = game.world->GetServerEntities() + 1 + i;
                 if (!client->inUse) {
                     continue;
                 }
+
                 // strip players of all keys between units
-                for (n = 0; n < MAX_ITEMS; n++) {
-                    if (itemlist[n].flags & ItemFlags::IsKey) {
-                        client->client->persistent.inventory[n] = 0;
-                    }
-                }
+                //for (n = 0; n < MAX_ITEMS; n++) {
+                //    if (itemlist[n].flags & ItemFlags::IsKey) {
+                //        client->client->persistent.inventory[n] = 0;
+                //    }
+                //}
             }
         }
     } else {
-        if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+        if (!game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
             level.intermission.exitIntermission = 1;     // go immediately to the next level
             return;
         }
@@ -151,34 +160,34 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     level.intermission.exitIntermission = 0;
 
-    // Fetch an intermission entity.
-    Entity *intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_intermission");
-    if (!intermissionEntity) {
-        // the map creator forgot to put in an intermission point...
-        intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_start");
-        if (!intermissionEntity) {
-            intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_deathmatch");
-        }
-    } else {
-        // chose one of four spots
-        i = rand() & 3;
-        while (i--) {
-            intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
-            if (!intermissionEntity) {  // wrap around the list 
-                intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
-            }
-        }
-    }
+    //// Fetch an intermission entity.
+    //Entity *intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_intermission");
+    //if (!intermissionEntity) {
+    //    // the map creator forgot to put in an intermission point...
+    //    intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_start");
+    //    if (!intermissionEntity) {
+    //        intermissionEntity = SVG_Find(NULL, FOFS(classname), "info_player_deathmatch");
+    //    }
+    //} else {
+    //    // chose one of four spots
+    //    i = rand() & 3;
+    //    while (i--) {
+    //        intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+    //        if (!intermissionEntity) {  // wrap around the list 
+    //            intermissionEntity = SVG_Find(intermissionEntity, FOFS(classname), "info_player_intermission");
+    //        }
+    //    }
+    //}
 
     // Setup intermission origin and view angle.
-    level.intermission.origin = intermissionEntity->state.origin, level.intermission.origin;
-    level.intermission.viewAngle = intermissionEntity->state.angles;
+    level.intermission.origin = vec3_zero();// intermissionEntity->state.origin, level.intermission.origin;
+    level.intermission.viewAngle = vec3_zero(); //intermissionEntity->state.angles;
 
     // Initiate the client intermission mode for all clients.
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
     for (i = 0 ; i < maximumclients->value ; i++) {
         // Fetch client.
-        client = g_entities + 1 + i;
+        client = game.world->GetServerEntities() + 1 + i;
 
         // Ensure a client is in use, otherwise skip it.
         if (!client->inUse)
@@ -210,13 +219,15 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
     Entity     *cl_ent;
     const char    *tag; // C++20: STRING: Added const to char*
 
+    ServerClient* clients = game.GetClients();
+
     // sort the clients by score
     total = 0;
     for (i = 0 ; i < game.GetMaxClients() ; i++) {
-        cl_ent = g_entities + 1 + i;
-        if (!cl_ent->inUse || game.clients[i].respawn.isSpectator)
+        cl_ent = game.world->GetServerEntities() + 1 + i;
+        if (!cl_ent->inUse || clients[i].respawn.isSpectator)
             continue;
-        score = game.clients[i].respawn.score;
+        score = clients[i].respawn.score;
         for (j = 0 ; j < total ; j++) {
             if (score > sortedscores[j])
                 break;
@@ -240,8 +251,8 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
         total = 12;
 
     for (i = 0 ; i < total ; i++) {
-        cl = &game.clients[sorted[i]];
-        cl_ent = g_entities + 1 + sorted[i];
+	cl = &game.GetClients()[sorted[i]];
+        cl_ent = game.world->GetServerEntities() + 1 + sorted[i];
 
         x = (i >= 6) ? 160 : 0;
         y = 32 + 32 * (i % 6);
@@ -274,7 +285,7 @@ void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *kille
         stringlength += j;
     }
 
-    gi.WriteByte(SVG_CMD_LAYOUT);
+    gi.WriteByte(ServerGameCommands::Layout);
     gi.WriteString(string);
 }
 
@@ -305,23 +316,12 @@ SVG_Command_Score_f
 Display the scoreboard
 ==================
 */
-void SVG_Command_Score_f(SVGBaseEntity*ent)
-{
-    // Entity. Make sure it is valid.
-    if (!ent)
-        return;
-    
-    ServerClient* client = ent->GetClient();
-
-    // We obviously should not continue, for some reason it has no client...
-    if (!client)
-        return;
-    
+void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client) {
     // Hide inventory display.
     client->showInventory = false;
 
     // Don't show scores if not in one of the following game modes.
-    if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>() && !game.GetCurrentGamemode()->IsClass<CoopGamemode>()) {
+    if (!game.GetGamemode()->IsClass<DeathmatchGamemode>() && !game.GetGamemode()->IsClass<CoopGamemode>()) {
         return;
     }
 
@@ -333,7 +333,7 @@ void SVG_Command_Score_f(SVGBaseEntity*ent)
 
     // Show score display.
     client->showScores = true;
-    HUD_SendDMScoreboardMessage(ent);
+    HUD_SendDMScoreboardMessage(player);
 }
 
 
@@ -348,102 +348,113 @@ void SVG_Command_Score_f(SVGBaseEntity*ent)
 // and audio if required.
 //================
 //
-void SVG_HUD_SetClientStats(Entity* ent)
-{
+void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     gitem_t* item;
 
     // Ensure ent is valid.
-    if (!ent || !ent->client) {
+    if (!player || !client) {
         return;
     }
 
     //
     // health
     //
-    ent->client->playerState.stats[STAT_HEALTH_ICON] = level.pic_health;
-    ent->client->playerState.stats[STAT_HEALTH] = ent->classEntity->GetHealth();
+    client->playerState.stats[STAT_HEALTH_ICON] = level.pic_health;
+    client->playerState.stats[STAT_HEALTH] = player->GetHealth();
 
     //
     // ammo
     //
-    if (!ent->client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
-        ent->client->playerState.stats[STAT_AMMO_ICON] = 0;
-        ent->client->playerState.stats[STAT_AMMO] = 0;
+    if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+        client->playerState.stats[STAT_AMMO_ICON] = 0;
+        client->playerState.stats[STAT_AMMO_PRIMARY] = 0;
+    } else {
+    //    item = 0;// &itemlist[ent->client->ammoIndex];
+        client->playerState.stats[STAT_AMMO_ICON] = 1;//gi.ImageIndex(item->icon);
+        client->playerState.stats[STAT_AMMO_PRIMARY] = client->persistent.inventory[client->ammoIndex];
     }
-    else {
-        item = &itemlist[ent->client->ammoIndex];
-        ent->client->playerState.stats[STAT_AMMO_ICON] = gi.ImageIndex(item->icon);
-        ent->client->playerState.stats[STAT_AMMO] = ent->client->persistent.inventory[ent->client->ammoIndex];
-    }
+    // Get active weapon.
+    //SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
+
+    //// Get primary ammo identifier.
+    //uint32_t primaryAmmoIdentifier = (activeWeapon ? activeWeapon->GetPrimaryAmmoIdentifier() : 0);
+    //if (primaryAmmoIdentifier != 0) {
+	   // client->playerState.stats[STAT_AMMO_ICON] = 1;
+    //    client->playerState.stats[STAT_AMMO_PRIMARY] = client->persistent.inventory[primaryAmmoIdentifier];
+    //} else {
+	   // client->playerState.stats[STAT_AMMO_ICON] = 0;
+    //    client->playerState.stats[STAT_AMMO_PRIMARY] = 0;
+    //}
 
     //
     // armor
     //
-    ent->client->playerState.stats[STAT_ARMOR_ICON] = 0;
-    ent->client->playerState.stats[STAT_ARMOR] = 0;
+    client->playerState.stats[STAT_ARMOR_ICON] = 0;
+    client->playerState.stats[STAT_ARMOR] = 0;
 
     //
     // pickup message
     //
-    if (level.time > ent->client->pickupMessageTime) {
-        ent->client->playerState.stats[STAT_PICKUP_ICON] = 0;
-        ent->client->playerState.stats[STAT_PICKUP_STRING] = 0;
+    if (level.time > client->pickupMessageTime) {
+        client->playerState.stats[STAT_PICKUP_ICON] = 0;
+        client->playerState.stats[STAT_PICKUP_STRING] = 0;
     }
 
     //
     // timers
     //
-    ent->client->playerState.stats[STAT_TIMER_ICON] = 0;
-    ent->client->playerState.stats[STAT_TIMER] = 0;
+    client->playerState.stats[STAT_TIMER_ICON] = 0;
+    client->playerState.stats[STAT_TIMER] = 0;
 
     //
     // selected item
     //
-    if (ent->client->persistent.selectedItem == -1)
-        ent->client->playerState.stats[STAT_SELECTED_ICON] = 0;
-    else
-        ent->client->playerState.stats[STAT_SELECTED_ICON] = gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
-
-    ent->client->playerState.stats[STAT_SELECTED_ITEM] = ent->client->persistent.selectedItem;
+    if (client->persistent.selectedItem == -1) {
+	    client->playerState.stats[STAT_SELECTED_ICON] = 0;
+    } else {
+    	client->playerState.stats[STAT_SELECTED_ICON] = 0;  //gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
+    }
+    
+    client->playerState.stats[STAT_SELECTED_ITEM] = client->persistent.selectedItem;
 
     //
     // layouts
     //
-    ent->client->playerState.stats[STAT_LAYOUTS] = 0;
+    client->playerState.stats[STAT_LAYOUTS] = 0;
 
     // Special layout for deathmatch.
-    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
-        if (ent->client->persistent.health <= 0 || level.intermission.time
-            || ent->client->showScores)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showInventory && ent->client->persistent.health > 0)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
-    }
-    else {
-        if (ent->client->showScores)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 1;
-        if (ent->client->showInventory && ent->client->persistent.health > 0)
-            ent->client->playerState.stats[STAT_LAYOUTS] |= 2;
+    if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
+	    if (client->persistent.health <= 0 || level.intermission.time || client->showScores) {
+	        client->playerState.stats[STAT_LAYOUTS] |= 1;
+	    }
+	    if (client->showInventory && client->persistent.health > 0) { 
+            client->playerState.stats[STAT_LAYOUTS] |= 2;
+        }
+    } else {
+        if (client->showScores) {
+	        client->playerState.stats[STAT_LAYOUTS] |= 1;
+        }
+	    if (client->showInventory && client->persistent.health > 0) {
+	        client->playerState.stats[STAT_LAYOUTS] |= 2;
+	    }
     }
 
     //
     // frags
     //
-    ent->client->playerState.stats[STAT_FRAGS] = ent->client->respawn.score;
+    client->playerState.stats[STAT_FRAGS] = client->respawn.score;
 
     //
     // help icon / current weapon if not shown
     //
-    if ((ent->client->persistent.hand == CENTER_HANDED
-                || ent->client->playerState.fov > 91)
-                && ent->client->persistent.activeWeapon) {
-
-        ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->icon);
+    if ((client->persistent.hand == CENTER_HANDED || client->playerState.fov > 91) && client->persistent.activeWeapon) {
+        //ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->GetItemIcon());
+	    client->playerState.stats[STAT_HELPICON] = 0;
     } else {
-        ent->client->playerState.stats[STAT_HELPICON] = 0;
+        client->playerState.stats[STAT_HELPICON] = 0;
     }
 
-    ent->client->playerState.stats[STAT_SPECTATOR] = 0;
+    client->playerState.stats[STAT_SPECTATOR] = 0;
 }
 
 /*
@@ -453,24 +464,27 @@ SVG_HUD_CheckChaseStats
 */
 void SVG_HUD_CheckChaseStats(Entity *ent)
 {
-    int i;
+    // TODO: Iterate over class entities(client range) and use that information instead.
+    //int i;
 
-    if (!ent)    {
-        return;
-    }
+    //if (!ent)    {
+    //    return;
+    //}
 
-    for (i = 1; i <= maximumclients->value; i++) {
-        ServerClient* cl;
+    //for (i = 1; i <= maximumclients->value; i++) {
+    //    ServerClient* cl;
 
-        cl = g_entities[i].client;
+    //    cl = game.world->GetServerEntities()[i].client;
 
-        if (!g_entities[i].inUse || (cl->chaseTarget != ent)) {
-            continue;
-        }
+    //    if (!game.world->GetServerEntities()[i].inUse || (cl->chaseTarget != ent)) {
+    //        continue;
+    //    }
 
-        memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
-        SVG_HUD_SetSpectatorStats(g_entities + i);
-    }
+    //    //memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
+
+    //    // Copy the server entities client into the current spectator.
+    //    SVG_HUD_SetSpectatorStats(game.world->GetServerEntities() + i);
+    //}
 }
 
 /*
@@ -478,41 +492,37 @@ void SVG_HUD_CheckChaseStats(Entity *ent)
 SVG_HUD_SetSpectatorStats
 ===============
 */
-void SVG_HUD_SetSpectatorStats(Entity *ent)
-{
-    if (!ent) {
+void SVG_HUD_SetSpectatorStats(SVGBasePlayer *player, ServerClient *client) {
+    if (!player || !client) {
         return;
     }
 
-    ServerClient* cl = ent->client;
-
-    if (!cl->chaseTarget) {
-        SVG_HUD_SetClientStats(ent);
+    if (!client->chaseTarget) {
+        SVG_HUD_SetClientStats(player, client);
     }
 
-    cl->playerState.stats[STAT_SPECTATOR] = 1;
+    client->playerState.stats[STAT_SPECTATOR] = 1;
 
     /* layouts are independant in isSpectator */
-    cl->playerState.stats[STAT_LAYOUTS] = 0;
+    client->playerState.stats[STAT_LAYOUTS] = 0;
 
-    if ((cl->persistent.health <= 0) || level.intermission.time || cl->showScores)
+    if ((client->persistent.health <= 0) || level.intermission.time || client->showScores)
     {
-        cl->playerState.stats[STAT_LAYOUTS] |= 1;
+	    client->playerState.stats[STAT_LAYOUTS] |= 1;
     }
 
-    if (cl->showInventory && (cl->persistent.health > 0))
+    if (client->showInventory && (client->persistent.health > 0))
     {
-        cl->playerState.stats[STAT_LAYOUTS] |= 2;
+        client->playerState.stats[STAT_LAYOUTS] |= 2;
     }
 
-    if (cl->chaseTarget && cl->chaseTarget->inUse)
+    if (client->chaseTarget && client->chaseTarget->inUse)
     {
-        cl->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins +
-            (cl->chaseTarget - g_entities) - 1;
+    	client->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins + (client->chaseTarget - game.world->GetServerEntities()) - 1;
     }
     else
     {
-        cl->playerState.stats[STAT_CHASE] = 0;
+	    client->playerState.stats[STAT_CHASE] = 0;
     }
 }
 

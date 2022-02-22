@@ -180,10 +180,10 @@ void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
         underwater = 1;
         cl->snd_is_underwater = 1; // OAL: snd_is_underwater moved to client struct.
                                    // TODO: DO!
-#ifdef USE_OPENAL
+//#ifdef USE_OPENAL
         if (cl->snd_is_underwater_enabled)
             clgi.SFX_Underwater_Enable();
-#endif
+//#endif
     }
 
     if ((pm->waterLevel < 3) && underwater) {
@@ -191,9 +191,9 @@ void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
         cl->snd_is_underwater = 0; // OAL: snd_is_underwater moved to client struct.
 
                                    // TODO: DO!
-#ifdef USE_OPENAL
+//#ifdef USE_OPENAL
         if (cl->snd_is_underwater_enabled)
             clgi.SFX_Underwater_Disable();
-#endif
+//#endif
     }
 }

@@ -122,13 +122,13 @@ public:
     }
 
     // Return the 'classname' value.
-    inline const char* GetClassname() {
-        return serverEntity->classname;
+    inline const std::string &GetClassname() {
+        return classname;
     }
 
     // Set the 'classname' value.
-    inline void SetClassname(const char* classname) {
-        serverEntity->classname = classname;
+    inline void SetClassname(const std::string &classname) {
+        this->classname = classname;
     }
 
     // Return the 'client' pointer.
@@ -299,12 +299,12 @@ public:
 
     // Return the 'noiseIndex' value.
     inline const int32_t GetNoiseIndex() {
-        return serverEntity->noiseIndex;
+        return noiseIndex;
     }
 
     // Return the 'noiseIndex2' value.
     inline const int32_t GetNoiseIndex2() {
-        return serverEntity->noiseIndex2;
+        return noiseIndex2;
     }
 
     inline const int32_t GetNumber() {
@@ -635,7 +635,7 @@ public:
 
     // Set the 'noiseIndex' value.
     inline void SetNoiseIndex(const int32_t& noiseIndex) {
-        this->serverEntity->noiseIndex = noiseIndex;
+        this->noiseIndex = noiseIndex;
     }
     
     inline void SetNumber(const int32_t number) {
@@ -820,6 +820,8 @@ protected:
 
     //---------------------------------
     // -- Strings.
+    // Classname of this entity.
+    std::string classname = "";
     // Entity MODEL filename.
     std::string model = "";
     // Trigger kill target string.
@@ -868,6 +870,11 @@ protected:
     float yawSpeed = 0.f;
     // Ideal Yaw Angle. (Should be for monsters...)
     float idealYawAngle = 0.f;
+
+    //------------------------------------
+    // Noise indexes.
+    int32_t noiseIndex = 0;
+    int32_t noiseIndex2 = 0;
 
     //------------------------------------
     // Timing.

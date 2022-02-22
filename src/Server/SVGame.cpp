@@ -111,7 +111,7 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
         flags |= MSG_RELIABLE;
     }
 
-    if (cmd == SVG_CMD_LAYOUT) {
+    if (cmd == ServerGameCommands::Layout) {
         flags |= MSG_COMPRESS;
     }
 
@@ -680,15 +680,15 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     // (global radio chatter, voiceovers, etc)
     if (attenuation == ATTN_NONE || (channel & CHAN_NO_PHS_ADD)) {
         if (channel & CHAN_RELIABLE) {
-            SV_Multicast(vec3_zero(), MultiCast::All_R);
+            SV_Multicast(vec3_zero(), Multicast::All_R);
         } else {
-            SV_Multicast(vec3_zero(), MultiCast::All);
+            SV_Multicast(vec3_zero(), Multicast::All);
         }
     } else {
         if (channel & CHAN_RELIABLE) {
-            SV_Multicast(origin, MultiCast::PHS_R);
+            SV_Multicast(origin, Multicast::PHS_R);
         } else {
-            SV_Multicast(origin, MultiCast::PHS);
+            SV_Multicast(origin, Multicast::PHS);
         }
     }
 }

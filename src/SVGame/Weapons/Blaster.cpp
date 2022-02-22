@@ -12,7 +12,7 @@
 
 // Include class entities.
 #include "../Entities/Base/SVGBaseEntity.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Include player headers.
 #include "../Player/Animations.h"
@@ -21,6 +21,9 @@
 // Game modes.
 #include "../Gamemodes/IGameMode.h"
 #include "../Gamemodes/DeathMatchGamemode.h"
+
+// World.
+#include "../World/Gameworld.h"
 
 // Include weapon header.
 #include "Blaster.h"
@@ -33,7 +36,7 @@
 //======================================================================
 //
 
-void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolean hyper, int effect)
+void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboolean hyper, int effect)
 {
     //vec3_t  forward, right;
     //vec3_t  start;
@@ -54,11 +57,11 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
     //SVG_FireBlaster(ent, start, forward, damage, 1000, effect, hyper);
 
     //// send muzzle flash
-    //gi.WriteByte(SVG_CMD_MUZZLEFLASH);
+    //gi.WriteByte(ServerGameCommands::MuzzleFlash);
     //gi.WriteShort(ent->GetServerEntity() - g_entities);
     //gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     //vec3_t origin = ent->GetOrigin();
-    //gi.Multicast(origin, MultiCast::PVS);
+    //gi.Multicast(origin, Multicast::PVS);
     static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_HSPREAD = 300;
     static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_VSPREAD = 500;
 
@@ -89,11 +92,11 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
     SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
     // send muzzle flash
-    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    gi.WriteShort(ent->GetServerEntity() - g_entities);
+    gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(origin, MultiCast::PVS);
+    gi.Multicast(origin, Multicast::PVS);
 
 
     //int32_t i;
@@ -111,7 +114,7 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
 
     //ServerClient* client = ent->GetClient();
 
-    //if (!(client->buttons & BUTTON_ATTACK)) {
+    //if (!(client->buttons & ButtonBits::Attack)) {
     //    client->machinegunShots = 0;
     //    client->playerState.gunFrame++;
     //    return;
@@ -145,7 +148,7 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
     //client->kickAngles[0] = client->machinegunShots * -1.5;
 
     //// raise the gun as it is firing if not in deathmatch mode.
-    //if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+    //if (!game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
     //    client->machinegunShots++;
     //    if (client->machinegunShots > 9)
     //        client->machinegunShots = 9;
@@ -164,11 +167,11 @@ void Blaster_Fire(PlayerClient* ent, const vec3_t &g_offset, int damage, qboolea
 }
 
 
-void Weapon_Blaster_Fire(PlayerClient *ent)
+void Weapon_Blaster_Fire(SVGBasePlayer *ent)
 {
     int     damage;
 
-    if (game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>())
+    if (game.GetGamemode()->IsClass<DeathmatchGamemode>())
         damage = 15;
     else
         damage = 10;
@@ -176,11 +179,11 @@ void Weapon_Blaster_Fire(PlayerClient *ent)
     ent->GetClient()->playerState.gunFrame++;
 }
 
-void Weapon_Blaster(PlayerClient* ent)
+void Weapon_Blaster(SVGBasePlayer* ent)
 {
     static int  pause_frames[] = { 160 };
     static int  fire_frames[] = { 119 };
 
     //Weapon_Generic(ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
-    Weapon_Generic(ent, 136, 160, 114, 124, 160, 160, 124, 134, pause_frames, fire_frames, Weapon_Blaster_Fire);
+    //Weapon_Generic(ent, 136, 160, 114, 124, 160, 160, 124, 134, pause_frames, fire_frames, Weapon_Blaster_Fire);
 }

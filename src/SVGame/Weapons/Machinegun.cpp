@@ -12,7 +12,7 @@
 
 // Include class entities.
 #include "../Entities/Base/SVGBaseEntity.h"
-#include "../Entities/Base/PlayerClient.h"
+#include "../Entities/Base/SVGBasePlayer.h"
 
 // Include player headers.
 #include "../Player/Animations.h"
@@ -23,6 +23,9 @@
 //#include "../Gamemodes/DefaultGamemode.h"
 //#include "../Gamemodes/CoopGamemode.h"
 #include "../Gamemodes/DeathmatchGamemode.h"
+
+// World.
+#include "../World/Gameworld.h"
 
 // Include machinegun weapon header.
 #include "Machinegun.h"
@@ -37,7 +40,7 @@
 static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_HSPREAD = 300;
 static constexpr int32_t DEFAULT_MACHINEGUN_BULLET_VSPREAD = 500;
 
-void Machinegun_Fire(PlayerClient* ent)
+void Machinegun_Fire(SVGBasePlayer* ent)
 {
     int32_t i;
     vec3_t start;
@@ -50,7 +53,7 @@ void Machinegun_Fire(PlayerClient* ent)
     // Get the client.
     ServerClient* client = ent->GetClient();
 
-    if (!(client->buttons & BUTTON_ATTACK)) {
+    if (!(client->buttons & ButtonBits::Attack)) {
         client->machinegunShots = 0;
         client->playerState.gunFrame++;
         return;
@@ -84,7 +87,7 @@ void Machinegun_Fire(PlayerClient* ent)
     client->kickAngles[0] = client->machinegunShots * -1.5;
 
     // raise the gun as it is firing if not in deathmatch mode.
-    if (!game.GetCurrentGamemode()->IsClass<DeathmatchGamemode>()) {
+    if (!game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
         client->machinegunShots++;
         if (client->machinegunShots > 9)
             client->machinegunShots = 9;
@@ -99,11 +102,11 @@ void Machinegun_Fire(PlayerClient* ent)
     start = SVG_PlayerProjectSource(client, ent->GetOrigin(), offset, forward, right);
     SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
-    gi.WriteByte(SVG_CMD_MUZZLEFLASH);
-    gi.WriteShort(ent->GetServerEntity() - g_entities);
+    gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
     vec3_t origin = ent->GetOrigin();
-    gi.Multicast(origin, MultiCast::PVS);
+    gi.Multicast(origin, Multicast::PVS);
 
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
@@ -121,7 +124,7 @@ void Machinegun_Fire(PlayerClient* ent)
     }
 }
 
-void Weapon_Machinegun(PlayerClient* ent)
+void Weapon_Machinegun(SVGBasePlayer* ent)
 {
     static int  pause_frames[] = { 23, 45, 0 };
     static int  fire_frames[] = { 4, 5, 0 };

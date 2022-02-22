@@ -1,24 +1,24 @@
-/*
-// LICENSE HERE.
-
-//
-// ItemMegaHealth.h
-//
-//
-*/
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Simple health item class, "mega", cuz it heals you to 100%.
+*
+***/
 #pragma once
 
 class SVGBaseEntity;
-class SVGBaseTrigger;
 class SVGBaseItem;
 
 class ItemHealthMega : public SVGBaseItem {
 public:
     // Constructor/Deconstructor.
-    ItemHealthMega(Entity* svEntity);
+    ItemHealthMega(Entity* svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~ItemHealthMega();
 
-    DefineMapClass( "item_health_mega", ItemHealthMega, SVGBaseItem);
+    DefineItemMapClass("Mega Health", "megahealth", ItemIdentifier::MegaHealth, "item_health_mega", ItemHealthMega, SVGBaseItem);
 
     // Item flags
     static constexpr int32_t IF_IgnoreMaxHealth     = 1 << 0;

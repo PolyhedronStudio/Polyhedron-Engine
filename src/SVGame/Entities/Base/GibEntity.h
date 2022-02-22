@@ -7,17 +7,23 @@
 // Base entity for gibs.
 //
 */
-#ifndef __SVGAME_ENTITIES_BASE_GIBENTITY_H__
-#define __SVGAME_ENTITIES_BASE_GIBENTITY_H__
+#pragma once
 
 class SVGBaseEntity;
 
 class GibEntity : public SVGBaseEntity {
 public:
-    // Constructor/Deconstructor.
+    /**
+    *   @brief  Used by game modes to spawn server side gibs.
+    **/
+    static GibEntity* Create(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
+
+private:
+    //! Private constructor. Gibs are created using the Create function.
     GibEntity(Entity* svEntity);
     virtual ~GibEntity();
 
+public:
     DefineClass(GibEntity, SVGBaseEntity);
 
     //
@@ -53,4 +59,3 @@ private:
 
 };
 
-#endif // __SVGAME_ENTITIES_BASE_GIBENTITY_H__

@@ -406,11 +406,11 @@ struct ConfigStrings {
     static constexpr uint32_t Models            = 32;
     static constexpr uint32_t Sounds            = (ConfigStrings::Models + MAX_MODELS);
     static constexpr uint32_t Images            = (ConfigStrings::Sounds + MAX_SOUNDS);
-    static constexpr uint32_t Lights            = (ConfigStrings::Images+ MAX_IMAGES);
-    static constexpr uint32_t Items             = (ConfigStrings::Lights+ MAX_LIGHTSTYLES);
-    static constexpr uint32_t PlayerSkins       = (ConfigStrings::Items+ MAX_ITEMS);
+    static constexpr uint32_t Lights            = (ConfigStrings::Images + MAX_IMAGES);
+    static constexpr uint32_t Items             = (ConfigStrings::Lights + MAX_LIGHTSTYLES);
+    static constexpr uint32_t PlayerSkins       = (ConfigStrings::Items + MAX_ITEMS);
     static constexpr uint32_t General           = (ConfigStrings::PlayerSkins + MAX_CLIENTS);
-    static constexpr uint32_t MaxConfigStrings  = (ConfigStrings::General+ MAX_GENERAL);
+    static constexpr uint32_t MaxConfigStrings  = (ConfigStrings::General + MAX_GENERAL);
 };
 
 // Some mods actually exploit ConfigStrings::StatusBar to take space up to ConfigStrings::Unused
@@ -532,10 +532,16 @@ typedef enum {
 //ROGUE
 
 // player_state->stats[] indexes
+//struct PlayerStateStats {
+//    static constexpr int32_t HealthIcon = 0;
+//    static constexpr int32_t Health = 1;
+//    static constexpr int32_t AmmoIcon = 2;
+//    static constexpr int32_t AmmoPrimary = 3;
+//};
 #define STAT_HEALTH_ICON        0
 #define STAT_HEALTH             1
 #define STAT_AMMO_ICON          2
-#define STAT_AMMO               3
+#define STAT_AMMO_PRIMARY       3
 #define STAT_ARMOR_ICON         4
 #define STAT_ARMOR              5
 #define STAT_SELECTED_ICON      6

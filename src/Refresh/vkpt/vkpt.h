@@ -98,6 +98,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	SHADER_MODULE_DO(QVK_MOD_FSR_EASU_FP32_COMP)                     \
 	SHADER_MODULE_DO(QVK_MOD_FSR_RCAS_FP16_COMP)                     \
 	SHADER_MODULE_DO(QVK_MOD_FSR_RCAS_FP32_COMP)                     \
+	SHADER_MODULE_DO(QVK_MOD_NORMALIZE_NORMAL_MAP_COMP)              \
 
 #define LIST_RT_RGEN_SHADER_MODULES \
 	SHADER_MODULE_DO(QVK_MOD_PRIMARY_RAYS_RGEN)                      \
@@ -181,6 +182,7 @@ typedef struct QVK_s {
 	VkSurfaceKHR                surface;
 	VkSwapchainKHR              swap_chain;
 	VkSurfaceFormatKHR          surf_format;
+	qboolean					surf_is_hdr;
 	VkPresentModeKHR            present_mode;
 	VkExtent2D                  extent_screen_images;
 	VkExtent2D                  extent_render;
@@ -229,6 +231,7 @@ typedef struct QVK_s {
 	// when set, we'll do a WFI before acquire for this many frames
 	uint32_t                    wait_for_idle_frames;
 	float                       timestampPeriod;
+	qboolean		    frame_menu_mode;
 
 	VkShaderModule              shader_modules[NUM_QVK_SHADER_MODULES];
 
@@ -432,7 +435,7 @@ typedef struct sun_light_s {
 } sun_light_t;
 
 void mult_matrix_matrix(float* p, const mat4_t &a, const mat4_t &b);
-void mult_matrix_vector(float* p, const mat4_t &a, const vec4_t &b);
+void mult_matrix_vector(float* v, const mat4_t &a, const vec4_t &b);
 mat4_t mult_matrix_matrix(const mat4_t &a, const mat4_t &b);
 mat4_t mult_matrix_vector(const mat4_t &a, const vec4_t &b);
 void create_entity_matrix(mat4_t &matrix, r_entity_t* e, qboolean enable_left_hand);
@@ -523,7 +526,6 @@ VkResult vkpt_textures_end_registration();
 VkResult vkpt_textures_upload_envmap(int w, int h, byte *data);
 void vkpt_textures_destroy_unused();
 void vkpt_textures_update_descriptor_set();
-void vkpt_normalize_normal_map(image_t *image);
 image_t* vkpt_fake_emissive_texture(image_t* image, int bright_threshold_int);
 void vkpt_extract_emissive_texture_info(image_t *image);
 void vkpt_textures_prefetch();
@@ -665,6 +667,7 @@ VkResult vkpt_tone_mapping_reset(VkCommandBuffer cmd_buf);
 VkResult vkpt_tone_mapping_destroy_pipelines();
 VkResult vkpt_tone_mapping_record_cmd_buffer(VkCommandBuffer cmd_buf, float frame_time);
 void vkpt_tone_mapping_request_reset();
+void vkpt_tone_mapping_draw_debug();
 
 VkResult vkpt_shadow_map_initialize();
 VkResult vkpt_shadow_map_destroy();
@@ -813,6 +816,7 @@ qboolean R_InterceptKey_RTX(unsigned key, qboolean down);
 void IMG_Load_RTX(image_t *image, byte *pic);
 void IMG_Unload_RTX(image_t *image);
 byte *IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes);
+float *IMG_ReadPixelsHDR_RTX(int* width, int* height);
 
 qerror_t MOD_LoadMD2_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
 qerror_t MOD_LoadMD3_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);

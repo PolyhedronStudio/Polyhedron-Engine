@@ -32,7 +32,7 @@ static size_t CL_Health_m(char* buffer, size_t size) {
 }
 
 static size_t CL_Ammo_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_AMMO]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_AMMO_PRIMARY]);
 }
 
 static size_t CL_Armor_m(char* buffer, size_t size) {

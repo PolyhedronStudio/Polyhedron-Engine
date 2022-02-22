@@ -16,7 +16,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // g_combat.c
-
 #include "ServerGameLocal.h"         // Include SVGame funcs.
 #include "Entities.h"
 #include "Utilities.h"           // Include Utilities funcs.
@@ -57,7 +56,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int damage, int knockBack, int dflags, int mod)
 {
-    game.GetCurrentGamemode()->InflictDamage(targ, inflictor, attacker, dmgDir, point, normal, damage, knockBack, dflags, mod);
+    game.GetGamemode()->InflictDamage(targ, inflictor, attacker, dmgDir, point, normal, damage, knockBack, dflags, mod);
 }
 
 
@@ -71,5 +70,5 @@ void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEnt
 //
 void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int mod)
 {
-    game.GetCurrentGamemode()->InflictRadiusDamage(inflictor, attacker, damage, ignore, radius, mod);
+    game.GetGamemode()->InflictRadiusDamage(inflictor, attacker, damage, ignore, radius, mod);
 }

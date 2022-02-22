@@ -28,7 +28,7 @@ BlasterBolt::~BlasterBolt() {
 
 //
 //===============
-// PlayerClient::Precache
+// SVGBasePlayer::Precache
 //
 //===============
 //
@@ -38,7 +38,7 @@ void BlasterBolt::Precache() {
 
 //
 //===============
-// PlayerClient::Spawn
+// SVGBasePlayer::Spawn
 //
 //===============
 //
@@ -98,7 +98,6 @@ void BlasterBolt::SpawnKey(const std::string& key, const std::string& value) {
 //===============
 //
 void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
-    // N&C: From Yamagi Q2, this seems to resolve our random crashes at times.
     if (!self || !other) { // Plane and Surf can be NULL
         Remove();
         return;
@@ -133,7 +132,7 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
         }
 
     } else {
-        gi.WriteByte(SVG_CMD_TEMP_ENTITY);
+        gi.WriteByte(ServerGameCommands::TempEntity);
         gi.WriteByte(TempEntityEvent::Blaster);
         gi.WriteVector3(self->GetOrigin());
 
@@ -144,7 +143,7 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
         }
 
         vec3_t origin = self->GetOrigin();
-        gi.Multicast(origin, MultiCast::PVS);
+        gi.Multicast(origin, Multicast::PVS);
     }
 
     // Queue the entity for removal. 

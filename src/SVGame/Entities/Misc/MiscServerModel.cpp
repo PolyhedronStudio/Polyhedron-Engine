@@ -15,6 +15,9 @@
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
 // Misc Server Model Entity.
 #include "MiscServerModel.h"
 
@@ -75,10 +78,10 @@ void MiscServerModel::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
+    SetMoveType(MoveType::None);
 
     // Since this is a "monster", after all...
-    SetServerFlags(EntityServerFlags::Monster);
+    //SetServerFlags(EntityServerFlags::Monster);
     
     // Set clip mask.
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
@@ -161,16 +164,7 @@ void MiscServerModel::Think() {
     // Always call parent class method.
     Base::Think();
 
-    // Continue the animation on a per frame basis.
-    float currentFrame = GetFrame();
 
-    if (currentFrame > endFrame) {
-        SetFrame(startFrame);
-    } else {
-        SetFrame(currentFrame + 1);
-    }
-
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
     //if (GetNoiseIndex()) {
     //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
     //}
@@ -192,9 +186,9 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
         ParseVector3KeyValue(key, value, boundingBoxMaxs);
         SetMaxs(boundingBoxMaxs);
     } else if (key == "endframe") {
-        ParseIntegerKeyValue(key, value, endFrame);
+        ParseFloatKeyValue(key, value, endFrame);
     } else if (key == "startframe") {
-        ParseIntegerKeyValue(key, value, startFrame);
+        ParseFloatKeyValue(key, value, startFrame);
     } else if (key == "mass") {
         uint32_t parsedMass = 0;
         ParseUnsignedIntegerKeyValue(key, value, parsedMass);
@@ -229,36 +223,69 @@ void MiscServerModel::SpawnKey(const std::string& key, const std::string& value)
 //===============
 void MiscServerModel::MiscServerModelThink(void) {
     // First, ensure our origin is +1 off the floor.
-    vec3_t newOrigin = GetOrigin() + vec3_t{
-        0.f, 0.f, 1.f
-    };
+    //vec3_t newOrigin = GetOrigin() + vec3_t{
+    //    0.f, 0.f, 1.f
+    //};
 
-    SetOrigin(newOrigin);
+    //SetOrigin(newOrigin);
     
-    // Calculate the end origin to use for tracing.
-    vec3_t end = newOrigin + vec3_t{
-        0, 0, -256.f
-    };
-    
-    
-    // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
-    
-    // Return in case we hit anything.
-    if (trace.fraction == 1 || trace.allSolid)
-        return;
-    
-    // Set new entity origin.
-    SetOrigin(trace.endPosition);
-    
-    
-    // Check for ground.
-    SVG_StepMove_CheckGround(this);
-    
-    // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
+    //// Calculate the end origin to use for tracing.
+    //vec3_t end = newOrigin + vec3_t{
+    //    0, 0, -256.f
+    //};
+    //
+    //
+    //// Exceute the trace.
+    //SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+    //
+    //// Return in case we hit anything.
+    //if (trace.fraction == 1 || trace.allSolid)
+    //    return;
+    //
+    //// Set new entity origin.
+    //SetOrigin(trace.endPosition);
+    float currentFrame = GetFrame();
+    float nextFrame = GetFrame() + 1.f;
+
+    if (nextFrame > endFrame) {
+
+        //if (GetHealth() > 0) {
+	        nextFrame = startFrame;
+	    //}
+    }
+
+    SetFrame(nextFrame);
+
+    ////
+    //// Calculate direction.
+    ////
+    //if (GetHealth() > 0) {
+    //    vec3_t currentMoveAngles = GetAngles();
+    //
+    //    // Direction vector between player and other entity.
+    //    vec3_t wishMoveAngles = GetGameworld()->GetClassEntities()[1]->GetOrigin() - GetOrigin();
+
+    //    //  
+    //    vec3_t newModelAngles = vec3_euler(wishMoveAngles);
+    //    newModelAngles.x = 0;
+
+    //    SetAngles(newModelAngles);
+
+    //    // Calculate yaw to use based on direction.
+    //    float yaw = vec3_to_yaw(wishMoveAngles);
+
+    //    // Last but not least, move a step ahead.
+    //    SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
+    //}
+
     // Link entity back in.
     LinkEntity();
+    
+    // Check for ground.
+    //SVG_StepMove_CheckGround(this);
+
+    // Setup its next think time, for a frame ahead.
+    SetNextThinkTime(level.time + 1.f * FRAMETIME);
 }
 
 //===============
@@ -273,20 +300,27 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
 
     // Attacker becomes this entity its "activator".
     SetActivator(attacker);
-
+    
+    // Set movetype to dead, solid dead.
+    SetMoveType(MoveType::None);
+    SetSolid(Solid::Not);
+    LinkEntity();
     // Play a nasty gib sound, yughh :)
     SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
 
     // Throw some gibs around, true horror oh boy.
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    SVG_ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+    Gameworld* gameworld = GetGameworld();
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+
     //SVG_ThrowClientHead(this, damage);
-    
+    SetEndFrame(119.f);
+    SetStartFrame(4.f);
     // Setup the next think and think time.
     SetNextThinkTime(level.time + 1 * FRAMETIME);
 
     // Set think function.
-    SetThinkCallback(&MiscServerModel::SVGBaseEntityThinkFree);
+    //SetThinkCallback(&MiscServerModel::SVGBaseEntityThinkFree);
 }
