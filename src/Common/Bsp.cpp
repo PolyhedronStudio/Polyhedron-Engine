@@ -1631,7 +1631,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 
     // load into hunk
     len = strlen(name);
-    bsp = (bsp_t*)Z_Mallocz(sizeof(*bsp) + len); // CPP: Cast
+    bsp = (bsp_t*)Z_Mallocz(sizeof(*bsp) + len + 1); // CPP: Cast
     memcpy(bsp->name, name, len + 1);
     bsp->refcount = 1;
     // Extended qbsp?

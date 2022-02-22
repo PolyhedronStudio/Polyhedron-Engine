@@ -1032,16 +1032,20 @@ static void material_command(void) {
 	set_material_attribute(mat, key, Cmd_Argv(2), NULL, 0, &reload_flags);
 
 	if ((reload_flags & RELOAD_EMISSIVE) != 0) 	{
-		if (mat->image_emissive && strstr(mat->image_emissive->name, "*E")) 		{
+		if (mat->image_emissive && strstr(mat->image_emissive->name, "*E")) {
 			// Prevent previous image being reused to allow emissive_threshold changes
 			mat->image_emissive->name[0] = 0;
 			mat->image_emissive = NULL;
 		}
-		if (mat->synth_emissive && !mat->image_emissive) 		{
+		if (mat->synth_emissive && !mat->image_emissive) {
 			// Regenerate emissive image
 			MAT_SynthesizeEmissive(mat);
-			// Make sure it's reloaded by CL_PrepareMedia()
-			IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
+
+			// Ensure we only move on in case it is a valid pointer.
+			if (mat->image_emissive) {
+			    // Make sure it's reloaded by CL_PrepareMedia()
+			    IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
+			}
 			reload_flags |= RELOAD_MAP;
 		}
 	}

@@ -153,11 +153,6 @@ void SVG_ThinkWeapon(SVGBasePlayer *player)
 
     // call active weapon Think routine
     if (client->persistent.activeWeapon) { // && client->weaponState.shouldThink) {
-        int x = 10;
-        int x2 = 11;
-        int x3 = 12;
-	gi.DPrintf("x=%i x2=%i x3=%i\n", x, x2, x3);
-	gi.DPrintf("!x=%i !x2=%i !x3=%i\n", !x, !x2, !x3);
 	    client->persistent.activeWeapon->InstanceWeaponThink(player, client->persistent.activeWeapon, client);
     }
 }

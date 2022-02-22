@@ -682,7 +682,7 @@ void CLG_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count)
 
         d = (rand() & 31) * 10.0f;
         for (j = 0; j < 3; j++) {
-            p->org[j] = org[j] + ((rand() & 7) - 4) + d * (dir[j]
+            p->org[j] = org[j] + ((int)(rand() & 7) - 4) + d * (dir[j]
                 + a[j] * 0.5f * ((rand() & 31) / 64.0f - .5f)
                 + b[j] * 0.5f * ((rand() & 31) / 64.0f - .5f));
 
@@ -725,7 +725,7 @@ void CLG_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count)
 
         d = rand() & 7;
         for (j = 0; j < 3; j++) {
-            p->org[j] = org[j] + ((rand() & 7) - 4) + d * dir[j];
+            p->org[j] = org[j] + ((int)(rand() & 7) - 4) + d * dir[j];
             p->vel[j] = crand() * 20;
         }
 
@@ -884,8 +884,8 @@ void CLG_ExplosionParticles(vec3_t org)
         p->brightness = cvar_pt_particle_emissive->value;
 
         for (j = 0; j < 3; j++) {
-            p->org[j] = org[j] + ((rand() % 32) - 16);
-            p->vel[j] = (rand() % 384) - 192;
+            p->org[j] = org[j] + ((int)(rand() % 32) - 16);
+            p->vel[j] = (int)(rand() % 384) - 192;
         }
 
         p->acceleration[0] = p->acceleration[1] = 0;
@@ -965,7 +965,7 @@ void CLG_BlasterParticles(vec3_t org, vec3_t dir)
 
         d = rand() & 15;
         for (j = 0; j < 3; j++) {
-            p->org[j] = org[j] + ((rand() & 7) - 4) + d * dir[j];
+            p->org[j] = org[j] + ((int)(rand() & 7) - 4) + d * dir[j];
             p->vel[j] = dir[j] * 30 + crand() * 40;
         }
 
