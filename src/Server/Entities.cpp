@@ -255,28 +255,18 @@ copies off the playerstat and areaBits.
 */
 void SV_BuildClientFrame(client_t *client)
 {
-    int         e;
-    vec3_t      org;
-    Entity     *ent;
-    Entity     *clent;
-    ClientFrame  *frame;
-    EntityState *state;
-    PlayerState  *ps;
-	EntityState  es;
 	int         l;
-    int         clientarea, clientcluster;
-    mleaf_t     *leaf;
-    static byte        clientphs[VIS_MAX_BYTES];
-    static byte        clientpvs[VIS_MAX_BYTES];
-    qboolean    ent_visible;
+    static byte clientphs[VIS_MAX_BYTES];
+    static byte clientpvs[VIS_MAX_BYTES];
+    qboolean ent_visible;
     int cull_nonvisible_entities = Cvar_Get("sv_cull_nonvisible_entities", "1", CVAR_CHEAT)->integer;
 
-    clent = client->edict;
+    Entity *clent = client->edict;
     if (!clent->client)
         return;        // not in game yet
 
     // this is the frame we are creating
-    frame = &client->frames[client->frameNumber & UPDATE_MASK];
+    ClientFrame *frame = &client->frames[client->frameNumber & UPDATE_MASK];
     frame->number = client->frameNumber;
     frame->sentTime = com_eventTime; // save it for ping calc later
     frame->latency = -1; // not yet acked
@@ -284,12 +274,12 @@ void SV_BuildClientFrame(client_t *client)
     client->framesSent++;
 
     // find the client's PVS
-    ps = &clent->client->playerState;
-    org = ps->pmove.origin + ps->pmove.viewOffset;
+    PlayerState *ps = &clent->client->playerState;
+    vec3_t org = ps->pmove.origin + ps->pmove.viewOffset;
 
-    leaf = CM_PointLeaf(client->cm, org);
-    clientarea = CM_LeafArea(leaf);
-    clientcluster = CM_LeafCluster(leaf);
+    mleaf_t *leaf = CM_PointLeaf(client->cm, org);
+    int32_t clientarea = CM_LeafArea(leaf);
+    int32_t clientcluster = CM_LeafCluster(leaf);
 
     // calculate the visible areas
     frame->areaBytes = CM_WriteAreaBits(client->cm, frame->areaBits, clientarea);
@@ -324,8 +314,8 @@ void SV_BuildClientFrame(client_t *client)
     frame->num_entities = 0;
     frame->first_entity = svs.next_entity;
 
-    for (e = 1; e < client->pool->numberOfEntities; e++) {
-        ent = EDICT_POOL(client, e);
+    for (int32_t e = 1; e < client->pool->numberOfEntities; e++) {
+        Entity *ent = EDICT_POOL(client, e);
 
         // ignore entities not in use
         if (!ent->inUse) {
@@ -395,18 +385,21 @@ void SV_BuildClientFrame(client_t *client)
 			ent->state.number = e;
 		}
 
-		memcpy(&es, &ent->state, sizeof(EntityState));
+        // Copy over entities state.
+        EntityState es = ent->state;
+		//memcpy(&es, &ent->state, sizeof(EntityState));
 
+        // Disable sound if the entity isn't visible.
 		if (!ent_visible) {
 			// if the entity is invisible, kill its sound
 			es.sound = 0;
 		}
 
-        // add it to the circular client_entities array
-        state = &svs.entities[svs.next_entity % svs.num_entities];
-        
+        // Add it to the circular client_entities array
+        EntityState *state = &svs.entities[svs.next_entity % svs.num_entities];
         *state = es;
 
+        // Clear out event ID in case of footsteps.
         if (ent->state.eventID = EntityEvent::Footstep) {
             ent->state.eventID = 0;
         }

@@ -15,22 +15,20 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#pragma once
 
 //
 // Protocol Configuration.
 //
-// The maximum length of a message on the network: 32k.
-constexpr uint32_t MAX_MSGLEN = 0x8000;
+// The maximum length of a message on the network: 32k bytes.
+constexpr uint32_t MAX_MSGLEN = 32768;
 
 // Used to refer when during a connection challenge the protocols differ.
-constexpr int32_t   PROTOCOL_VERSION_UNKNOWN = -1;
+constexpr int32_t PROTOCOL_VERSION_UNKNOWN = -1;
 
 // The DEFAULT version is the minimum allowed for connecting.
-constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 1340;
-constexpr uint32_t  PROTOCOL_VERSION_POLYHEDRON     = 1340;
+constexpr uint32_t PROTOCOL_VERSION_DEFAULT = 1340;
+constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON     = 1340;
 
 // Minimum required "MINOR" protocol version for this client to be compatible to.
 constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_MINIMUM = 1337;
@@ -95,13 +93,6 @@ struct ServerCommand {
     //! A bad servercommand.
     static constexpr int32_t Bad = 0;
 
-    // These ops are known to the game dll
-    //ServerGameCommand::MuzzleFlash,
-    //ServerGameCommand::MuzzleFlash2,
-    //ServerGameCommand::TempEntity,
-    //ServerGameCommand::Layout,
-    //ServerGameCommand::Inventory,
-
     // the rest are private to the client and server
     static constexpr int32_t Padding = 1;
     static constexpr int32_t Disconnect = 2;
@@ -134,15 +125,13 @@ struct ServerCommand {
 //
 // Client to Server commands.
 //
-enum ClientCommand {
-    clc_bad,
-    clc_nop,
-    clc_move,               // [ClientMoveCommand]
-    clc_userinfo,           // [userinfo string]
-    clc_stringcmd,          // [string] message
-
-    // q2pro specific operations
-    clc_userinfo_delta
+struct ClientCommand {
+    static constexpr int32_t Bad = 0;           // Bad
+    static constexpr int32_t NoPacket = 1;      // NoPacket
+    static constexpr int32_t Move = 2;          // [ClientMoveCommand]
+	static constexpr int32_t UserInfo = 3;      // [userinfo string]
+	static constexpr int32_t StringCommand = 4; // [string] message
+	static constexpr int32_t DeltaUserInfo = 5; // Delta User Info.
 };
 
 //==============================================
@@ -225,45 +214,6 @@ enum ClientCommand {
 //==============================================
 
 // EntityState communication
-
-// Try to pack the common update flags into the first byte
-//#define U_ORIGIN_X  (1<<0)          // was named: U_ORIGIN_X
-//#define U_ORIGIN_Y  (1<<1)          // was named: U_ORIGIN_Y
-//#define U_ANGLE_Y   (1<<2)          // was named: U_ANGLE_Y
-//#define U_ANGLE_Z   (1<<3)          // was named: U_ANGLE_Z
-//#define U_FRAME     (1<<4)          // frame is a byte
-//#define U_EVENT     (1<<5)
-//#define U_REMOVE    (1<<6)          // REMOVE this entity, don't add it
-//#define U_MOREBITS1 (1<<7)          // read one additional byte
-//
-//// Second byte
-//#define U_NUMBER16  (1<<8)          // NUMBER8 is implicit if not set
-//#define U_ORIGIN_Z  (1<<9)         // was named: U_ORIGIN_Z
-//#define U_ANGLE_X   (1<<10)        // was named: U_ANGLE_X
-//#define U_MODEL     (1<<11)
-//#define U_RENDERFX8 (1<<12)        // fullbright, etc
-////#define U_ANGLE16   (1<<13)
-//#define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
-//#define U_MOREBITS2 (1<<15)        // read one additional byte
-//
-//// Third byte
-//#define U_SKIN8         (1<<16)
-//#define U_FRAME16       (1<<17)     // frame is a short
-//#define U_RENDERFX16    (1<<18)     // 8 + 16 = 32
-//#define U_EFFECTS16     (1<<19)     // 8 + 16 = 32
-//#define U_MODEL2        (1<<20)     // weapons, flags, etc
-//#define U_MODEL3        (1<<21)
-//#define U_MODEL4        (1<<22)
-//#define U_MOREBITS3     (1<<23)     // read one additional byte
-//
-//// fourth byte
-//#define U_OLDORIGIN     (1<<24)     // FIXME: get rid of this
-//#define U_SKIN16        (1<<25)
-//#define U_SOUND         (1<<26)
-//#define U_SOLID         (1<<27)
-//#define U_ANIMATION_STARTTIME (1 << 28) 
-//#define U_ANIMATION_INDEX (1 << 29)
-//#define U_ANIMATION_FRAMERATE (1 << 30)
 
 /**
 *   @brief  Client Game Commands are a way for the client to tell the server what to do.
@@ -379,5 +329,3 @@ struct FrameFlags {
     // a heavy lag, when a lot of packets are dropped by the network.
     static constexpr int32_t NoDeltaFrame = (1 << 8);
 };
-
-#endif // PROTOCOL_H

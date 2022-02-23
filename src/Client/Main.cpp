@@ -24,52 +24,52 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Sound/Vorbis.h"
 #include "Client/GameModule.h"
 
-cvar_t  *rcon_address;
+cvar_t* rcon_address = nullptr;
 
-cvar_t  *cl_noskins;
-cvar_t  *cl_footsteps;
-cvar_t  *cl_jumpsound;
-cvar_t  *cl_timeout;
-cvar_t  *cl_predict;
-cvar_t  *cl_gun;
-cvar_t* cl_warn_on_fps_rounding;
-cvar_t  *cl_maxfps;
-cvar_t  *cl_async;
-cvar_t  *r_maxfps;
-cvar_t  *cl_autopause;
+cvar_t* cl_noskins      = nullptr;
+cvar_t* cl_footsteps    = nullptr;
+cvar_t* cl_jumpsound    = nullptr;
+cvar_t* cl_timeout      = nullptr;
+cvar_t* cl_predict      = nullptr;
+cvar_t* cl_gun          = nullptr;
+cvar_t* cl_warn_on_fps_rounding = nullptr;
+cvar_t* cl_maxfps       = nullptr;
+cvar_t* cl_async        = nullptr;
+cvar_t* r_maxfps        = nullptr;
+cvar_t* cl_autopause    = nullptr;
 
-cvar_t  *cl_kickangles;
-cvar_t  *cl_rollhack;
-cvar_t  *cl_noglow;
-cvar_t  *cl_nolerp;
+cvar_t* cl_kickangles   = nullptr;
+cvar_t* cl_rollhack     = nullptr;
+cvar_t* cl_noglow       = nullptr;
+cvar_t* cl_nolerp       = nullptr;
 
 #ifdef _DEBUG
-cvar_t  *cl_shownet;
-cvar_t  *cl_showmiss;
-cvar_t  *cl_showclamp;
+cvar_t*	cl_shownet      = nullptr;
+cvar_t* cl_showmiss     = nullptr;
+cvar_t*	cl_showclamp    = nullptr;
 #endif
 
-cvar_t  *cl_player_model;
-cvar_t  *cl_thirdperson_angle;
-cvar_t  *cl_thirdperson_range;
+cvar_t*	cl_player_model         = nullptr;
+cvar_t* cl_thirdperson_angle    = nullptr;
+cvar_t*	cl_thirdperson_range    = nullptr;
 
 //cvar_t  *cl_disable_particles;
 //cvar_t  *cl_disable_explosions;
 //cvar_t  *cl_chat_notify;
 //cvar_t  *cl_chat_sound;
 //cvar_t  *cl_chat_filter;
-cvar_t  *cl_explosion_sprites;
-cvar_t  *cl_explosion_frametime;
+cvar_t* cl_explosion_sprites    = nullptr;
+cvar_t* cl_explosion_frametime  = nullptr;
 
-cvar_t  *cl_disconnectcmd;
-cvar_t  *cl_changemapcmd;
-cvar_t  *cl_beginmapcmd;
+cvar_t* cl_disconnectcmd    = nullptr;
+cvar_t* cl_changemapcmd     = nullptr;
+cvar_t* cl_beginmapcmd      = nullptr;
 
-cvar_t  *cl_protocol;
+cvar_t* cl_protocol = nullptr;
 
-cvar_t  *cl_vwep;
+cvar_t* cl_vwep = nullptr;
 
-cvar_t  *cl_cinematics;
+cvar_t* cl_cinematics = nullptr;
 
 //
 // userinfo
@@ -87,26 +87,28 @@ cvar_t  *info_in_bspmenu    = nullptr;
 
 #ifdef _DEBUG
 // Polyhedron: Developer utilities.
-cvar_t* dev_map;
-cvar_t* dev_gamemode;
+cvar_t* dev_map         = nullptr;
+cvar_t* dev_gamemode    = nullptr;
 #endif
 #if USE_REF == REF_GL
-extern cvar_t *gl_modulate_world;
-extern cvar_t *gl_modulate_entities;
-extern cvar_t *gl_brightness;
+extern cvar_t* gl_modulate_world;
+extern cvar_t* gl_modulate_entities;
+extern cvar_t* gl_brightness;
 #endif
 
 
-extern cvar_t *cl_renderdemo;
-extern cvar_t *cl_renderdemo_fps;
+extern cvar_t* cl_renderdemo;
+extern cvar_t* cl_renderdemo_fps;
 
+// Client Static information.
 ClientStatic cls;
-ClientState  cl;
+// Client State information.
+ClientState cl;
 
 // PH: Client shared structure. used to access entities etc in CG Module.
 ClientShared cs;
 
-// used for executing stringcmds
+// Used for executing stringcmds
 cmdbuf_t    cl_cmdbuf;
 char        cl_cmdbuf_text[MAX_STRING_CHARS];
 
@@ -232,7 +234,7 @@ void CL_ClientCommand(const char *string)
 
     Com_DDPrintf("%s: %s\n", __func__, string);
 
-    MSG_WriteByte(clc_stringcmd);
+    MSG_WriteByte(ClientCommand::StringCommand);
     MSG_WriteString(string);
     MSG_FlushTo(&cls.netChannel->message);
 }
@@ -241,7 +243,7 @@ void CL_ClientCommand(const char *string)
 ===================
 CL_ForwardToServer
 
-adds the current command line as a clc_stringcmd to the client message.
+adds the current command line as a ClientCommand::StringCommand to the client message.
 things like godmode, noclip, etc, are commands directed to the server,
 so when they are typed in at the console, they will need to be forwarded.
 ===================
@@ -790,7 +792,7 @@ void CL_Disconnect(ErrorType type)
 
     if (cls.netChannel) {
         // send a disconnect message to the server
-        MSG_WriteByte(clc_stringcmd);
+        MSG_WriteByte(ClientCommand::StringCommand);
         MSG_WriteData("disconnect", 11);
 
         Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3);

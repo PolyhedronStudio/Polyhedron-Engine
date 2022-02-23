@@ -69,10 +69,10 @@ extern const ClientMoveCommand  nullUserCmd;
 void    MSG_Init(void);
 
 void    MSG_BeginWriting(void);
-void    MSG_WriteChar(int c);
-void    MSG_WriteByte(int c);
-void    MSG_WriteShort(int c);
-void    MSG_WriteLong(int c);
+void	MSG_WriteChar(int32_t c);
+void	MSG_WriteByte(int32_t c);
+void	MSG_WriteShort(int32_t c);
+void	MSG_WriteLong(int32_t c);
 void    MSG_WriteFloat(float c);
 void    MSG_WriteString(const char* s);
 void    MSG_WriteVector3(const vec3_t& pos);
@@ -80,7 +80,7 @@ void    MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Ent
 int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags);
 
 #if USE_CLIENT
-    void MSG_WriteBits(int value, int bits);
+    void MSG_WriteBits(int32_t value, int32_t bits);
     int  MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd);
 #endif // USE_CLIENT
 
@@ -106,20 +106,20 @@ float   MSG_ReadFloat(void);
 size_t  MSG_ReadString(char* dest, size_t size);
 size_t  MSG_ReadStringLine(char* dest, size_t size);
 void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCommand* cmd);
-int     MSG_ParseEntityBits(int* bits);
+int     MSG_ParseEntityBits(int32_t* bits);
 void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, int32_t bits, EntityStateMessageFlags flags);
 #if USE_CLIENT
     vec3_t MSG_ReadVector3(void);
     vec3_t MSG_ReadVector3(void);
 
-    void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags);
+    void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t extraflags);
 
     #ifdef _DEBUG
-        void    MSG_ShowDeltaPlayerstateBits(int flags, int extraflags);
-        void    MSG_ShowDeltaUsercmdBits(int bits);
-        void    MSG_ShowDeltaEntityBits(int bits);
+        void    MSG_ShowDeltaPlayerstateBits(int32_t flags, int32_t extraflags);
+        void    MSG_ShowDeltaUsercmdBits(int32_t bits);
+        void    MSG_ShowDeltaEntityBits(int32_t bits);
 
-        const char* MSG_ServerCommandString(int cmd);
+        const char* MSG_ServerCommandString(int32_t cmd);
 
         #define MSG_ShowSVC(cmd) Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readCount - 1, MSG_ServerCommandString(cmd))
     #endif // _DEBUG
