@@ -173,7 +173,7 @@ void spectator_respawn(Entity *ent)
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
         // send effect
-        gi.WriteByte(ServerGameCommands::MuzzleFlash);
+        gi.WriteByte(ServerGameCommand::MuzzleFlash);
         gi.WriteShort(ent - game.world->GetServerEntities());
         gi.WriteByte(MuzzleFlashType::Login);
         gi.Multicast(ent->state.origin, Multicast::PVS);

@@ -71,7 +71,7 @@ void weapon_supershotgun_fire(SVGBasePlayer * ent)
     SVG_FireShotgun(ent, start, forward, damage, kick, DEFAULT_SUPERSHOTGUN_HSPREAD, DEFAULT_SUPERSHOTGUN_VSPREAD, DEFAULT_SUPERSHOTGUN_COUNT / 2, MeansOfDeath::SuperShotgun);
 
     // send muzzle flash
-    gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    gi.WriteByte(ServerGameCommand::MuzzleFlash);
     gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::SuperShotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();

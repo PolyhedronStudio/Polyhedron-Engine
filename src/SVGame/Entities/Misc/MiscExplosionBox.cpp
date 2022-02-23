@@ -269,7 +269,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
     if (GetGroundEntity()) {
-        gi.WriteByte(ServerGameCommands::TempEntity);
+        gi.WriteByte(ServerGameCommand::TempEntity);
         gi.WriteByte(TempEntityEvent::Explosion1);
         gi.WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), Multicast::PHS);
@@ -282,7 +282,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         UseTargets(GetActivator());
         SetDelayTime(save);
     } else {
-        gi.WriteByte(ServerGameCommands::TempEntity);
+        gi.WriteByte(ServerGameCommand::TempEntity);
         gi.WriteByte(TempEntityEvent::Explosion2);
         gi.WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), Multicast::PHS);

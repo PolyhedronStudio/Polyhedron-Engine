@@ -87,7 +87,7 @@ void DeathmatchGamemode::ClientBegin(Entity* svEntity) {
     if (level.intermission.time) {
         HUD_MoveClientToIntermission(svEntity);
     } else {
-        gi.WriteByte(ServerGameCommands::MuzzleFlash);
+        gi.WriteByte(ServerGameCommand::MuzzleFlash);
         //gi.WriteShort(serverEntity - g_entities);
         gi.WriteShort(player->GetNumber());
         gi.WriteByte(MuzzleFlashType::Login);

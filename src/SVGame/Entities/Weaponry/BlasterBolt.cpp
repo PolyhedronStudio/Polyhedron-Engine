@@ -132,7 +132,7 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
         }
 
     } else {
-        gi.WriteByte(ServerGameCommands::TempEntity);
+        gi.WriteByte(ServerGameCommand::TempEntity);
         gi.WriteByte(TempEntityEvent::Blaster);
         gi.WriteVector3(self->GetOrigin());
 

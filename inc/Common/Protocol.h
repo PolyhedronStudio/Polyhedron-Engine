@@ -96,11 +96,11 @@ struct ServerCommand {
     static constexpr int32_t Bad = 0;
 
     // These ops are known to the game dll
-    //ServerGameCommands::MuzzleFlash,
-    //ServerGameCommands::MuzzleFlash2,
-    //ServerGameCommands::TempEntity,
-    //ServerGameCommands::Layout,
-    //ServerGameCommands::Inventory,
+    //ServerGameCommand::MuzzleFlash,
+    //ServerGameCommand::MuzzleFlash2,
+    //ServerGameCommand::TempEntity,
+    //ServerGameCommand::Layout,
+    //ServerGameCommand::Inventory,
 
     // the rest are private to the client and server
     static constexpr int32_t Padding = 1;

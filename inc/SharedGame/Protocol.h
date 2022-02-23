@@ -19,7 +19,7 @@
 *           Due to protocol limitations at the time of writing, the index starts at 22
 *           and the limit is 32 extra custom types.
 **/
-struct ServerGameCommands {
+struct ServerGameCommand {
     //! First index is 22, all other slots are reserved for the server itself.
     static constexpr int32_t MuzzleFlash = 22;
     static constexpr int32_t MuzzleFlash2 = 23;
@@ -39,7 +39,7 @@ struct ServerGameCommands {
 *           and the limit is 32 extra custom types.
 **/
 
-struct ClientGameCommands {
+struct ClientGameCommand {
     //! First index is 13, all other slots are reserved for the client itself. Feel free to rename this one and make it your own.
     static constexpr int32_t FirstCommand = 13;
 

@@ -57,7 +57,7 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
     //SVG_FireBlaster(ent, start, forward, damage, 1000, effect, hyper);
 
     //// send muzzle flash
-    //gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    //gi.WriteByte(ServerGameCommand::MuzzleFlash);
     //gi.WriteShort(ent->GetServerEntity() - g_entities);
     //gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     //vec3_t origin = ent->GetOrigin();
@@ -92,7 +92,7 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
     SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
     // send muzzle flash
-    gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    gi.WriteByte(ServerGameCommand::MuzzleFlash);
     gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Blaster | is_silenced);
     vec3_t origin = ent->GetOrigin();

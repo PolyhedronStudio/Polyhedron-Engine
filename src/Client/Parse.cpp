@@ -996,12 +996,12 @@ void CL_SeekDemoMessage(void)
             break;
 
         // WatIsDeze: Movd to CGModule.
-        //case ServerGameCommands::TempEntity:
+        //case ServerGameCommand::TempEntity:
         //    CL_ParseTEntPacket();
         //    break;
 
-        //case ServerGameCommands::MuzzleFlash:
-        //case ServerGameCommands::MuzzleFlash2:
+        //case ServerGameCommand::MuzzleFlash:
+        //case ServerGameCommand::MuzzleFlash2:
         //    CL_ParseMuzzleFlashPacket(0);
         //    break;
 
@@ -1010,11 +1010,11 @@ void CL_SeekDemoMessage(void)
             continue;
 
         // N&C: Moved to CGModule.
-        //case ServerGameCommands::Inventory:
+        //case ServerGameCommand::Inventory:
         //    CL_ParseInventory();
         //    break;
 
-        //case ServerGameCommands::Layout:
+        //case ServerGameCommand::Layout:
         //    CL_ParseLayout();
         //    break;
 
