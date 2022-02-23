@@ -99,7 +99,7 @@ void CLG_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_
             continue;
         }
 
-        if (player->current.solid == PACKED_BSP) {
+        if (player->current.solid == PACKED_BBOX) {
             // special value for bmodel
             cmodel = cl->clipModels[player->current.modelIndex];
             if (!cmodel)
@@ -196,7 +196,7 @@ int CLG_PointContents(const vec3_t &point)
     for (i = 0; i < cl->numSolidEntities; i++) {
         ent = cl->solidEntities[i];
 
-        if (ent->current.solid != PACKED_BSP) // special value for bmodel
+        if (ent->current.solid != PACKED_BBOX) // special value for bmodel
             continue;
 
         cmodel = cl->clipModels[ent->current.modelIndex];

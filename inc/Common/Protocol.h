@@ -265,6 +265,13 @@ enum ClientCommand {
 //#define U_ANIMATION_INDEX (1 << 29)
 //#define U_ANIMATION_FRAMERATE (1 << 30)
 
+/**
+*   @brief  Client Game Commands are a way for the client to tell the server what to do.
+*           Currently it is not in utilized but can be used if needed.
+*
+*           Due to protocol limitations at the time of writing, the index starts at 13
+*           and the limit is 32 extra custom types.
+**/
 static constexpr uint32_t BIT_NUMBER = (1 << 0);
 static constexpr uint32_t BIT_REMOVE = (1 << 6);
 
@@ -341,13 +348,13 @@ static constexpr uint32_t BIT_SOLID = (1 << 22);
 #define CLIENTNUM_RESERVED    (MAX_CLIENTS - 1)
 
 // a Solid::BoundingBox will never create this value
-#define PACKED_BSP      31
+#define PACKED_BBOX      31
 
 
 // q2pro frame flags sent by the server
 // only SUPPRESSCOUNT_BITS can be used
 struct FrameFlags {
-    // Server surpressed packets to client because rate limit was exceeded.
+    // Server supressed packets to client because rate limit was exceeded.
     static constexpr int32_t Suppressed = (1 << 0);
     // A few packets from client to server were dropped by the network.
     // Server recovered player's movement using backup commands.

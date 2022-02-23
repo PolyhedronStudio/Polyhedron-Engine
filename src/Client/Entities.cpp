@@ -142,12 +142,12 @@ static void Entity_UpdateState(const EntityState *state)
     ClientEntity *player = &cs.entities[state->number];
     vec3_t entityOrigin = vec3_zero();
 
-    // If entity its solid is PACKED_BSP, decode mins/maxs and add to the list
+    // If entity its solid is PACKED_BBOX, decode mins/maxs and add to the list
     if (state->solid && state->number != cl.frame.clientNumber + 1
         && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = player;
 
-        if (state->solid != PACKED_BSP) {
+        if (state->solid != PACKED_BBOX) {
             // 32 bit encoded bbox
             MSG_UnpackBoundingBox32(state->solid, player->mins, player->maxs);
         }
@@ -432,7 +432,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             continue;
         }
 
-        if (player->current.solid == PACKED_BSP) {
+        if (player->current.solid == PACKED_BBOX) {
             // special value for bmodel
             cmodel = cl.clipModels[player->current.modelIndex];
             if (!cmodel)
@@ -533,7 +533,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
     LerpVector(ent->prev.origin, ent->current.origin, cl.lerpFraction, org);
 
     // offset the origin for BSP models
-    if (ent->current.solid == PACKED_BSP) {
+    if (ent->current.solid == PACKED_BBOX) {
         cm = cl.clipModels[ent->current.modelIndex];
         if (cm) {
             VectorAverage(cm->mins, cm->maxs, mid);

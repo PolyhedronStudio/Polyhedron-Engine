@@ -297,8 +297,8 @@ void PF_LinkEntity(Entity *ent)
         }
         break;
     case Solid::BSP:
-        ent->state.solid = PACKED_BSP;      // a Solid::BoundingBox will never create this value
-        sent->solid32 = PACKED_BSP;     // FIXME: use 255?
+        ent->state.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
+        sent->solid32 = PACKED_BBOX;     // FIXME: use 255?
         break;
     default:
         ent->state.solid = 0;

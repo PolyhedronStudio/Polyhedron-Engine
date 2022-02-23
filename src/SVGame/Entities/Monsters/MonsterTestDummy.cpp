@@ -74,7 +74,7 @@ void MonsterTestDummy::Spawn() {
     SetModel("models/monsters/testdummy/testdummy.iqm");
 
     // Set the bounding box.
-    SetBoundingBox({ -16, -16, 0 }, { 16, 16, 40 });
+    SetBoundingBox({ -16, -16, 0 }, { 16, 16, 52 });
 
     // Set default values in case we have none.
     if (!GetMass()) {
@@ -158,7 +158,7 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
     //} else {
 	   // Base::SpawnKey(key, value);
     //}
-    Base::SpawnKey(key, value);
+    //Base::SpawnKey(key, value);
 }
 
 /////

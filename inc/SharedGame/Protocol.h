@@ -38,7 +38,6 @@ struct ServerGameCommand {
 *           Due to protocol limitations at the time of writing, the index starts at 13
 *           and the limit is 32 extra custom types.
 **/
-
 struct ClientGameCommand {
     //! First index is 13, all other slots are reserved for the client itself. Feel free to rename this one and make it your own.
     static constexpr int32_t FirstCommand = 13;

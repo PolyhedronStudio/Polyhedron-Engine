@@ -1130,37 +1130,32 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
     }
 }
 
-/*
-===================
-MSG_ParseDeltaPlayerstate_Default
-===================
-*/
+/**
+*   @brief  Parses the delta packets of player states.
+**/
 void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags) {
-    int         i;
-    int         statbits;
 
+    // Sanity check. 
     if (!to) {
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Error(ERR_DROP, "%s: no state to delta to, 'to' == nullptr", __func__);
     }
 
-    // clear to old value before delta parsing
+    // Clear to old value before doing any delta parsing.
     if (!from) {
-        //memset(to, 0, sizeof(*to));
 	    *to = {};
-    }
-    else if (to != from) {
-        //memcpy(to, from, sizeof(*to));
+    } else if (to != from) {
         *to = *from;
     }
 
+    // Read the flag bits.
     int32_t flags = MSG_ReadLong();
 
     //
-    // parse the PlayerMoveState
-    //
+    // Parse movement related state data.
+    // 
     // PM Type
     if (flags & PS_PM_TYPE)
-        to->pmove.type = MSG_ReadByte(); // CPP: Cast
+        to->pmove.type = MSG_ReadByte();
 
     // Origin X Y.
     if (flags & PS_PM_ORIGIN) {
@@ -1203,27 +1198,28 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int ext
         to->pmove.deltaAngles.z = MSG_ReadFloat();
     }
 
-    //
-    // parse the rest of the PlayerState
-    //
     // View Offset.
     if (flags & PS_PM_VIEW_OFFSET) {
-        to->pmove.viewOffset.x = MSG_ReadFloat();
-        to->pmove.viewOffset.y = MSG_ReadFloat();
-        to->pmove.viewOffset.z = MSG_ReadFloat();
+	    to->pmove.viewOffset.x = MSG_ReadFloat();
+	    to->pmove.viewOffset.y = MSG_ReadFloat();
+	    to->pmove.viewOffset.z = MSG_ReadFloat();
     }
 
+    // Step offset.
     if (flags & PS_PM_STEP_OFFSET) {
-        to->pmove.stepOffset = MSG_ReadFloat();
+	    to->pmove.stepOffset = MSG_ReadFloat();
     }
 
     // View Angles X Y Z.
     if (flags & PS_PM_VIEW_ANGLES) {
-        to->pmove.viewAngles.x = MSG_ReadFloat();
-        to->pmove.viewAngles.y = MSG_ReadFloat();
-        to->pmove.viewAngles.z = MSG_ReadFloat();
+	to->pmove.viewAngles.x = MSG_ReadFloat();
+	to->pmove.viewAngles.y = MSG_ReadFloat();
+	to->pmove.viewAngles.z = MSG_ReadFloat();
     }
 
+    //
+    // Parse the rest of the player state data.
+    //
     // Kick Angles.
     if (flags & PS_KICKANGLES) {
         to->kickAngles[0] = MSG_ReadFloat();
@@ -1236,14 +1232,17 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int ext
         to->gunIndex = MSG_ReadByte();
     }
 
-    // Weapon Frame.
+    // Gun model current animation frame.
     if (flags & PS_GUNANIMATION_FRAME) {
         to->gunAnimationFrame = MSG_ReadFloat();
     }
 
+    // Gun model animation framerate.
     if (flags & PS_GUNANIMATION_FRAMERATE) {
 	    to->gunAnimationFramerate = MSG_ReadFloat();
     }
+
+    // Gun model animation start time.
 	if (flags & PS_GUNANIMATION_STARTTIME) {
 	    to->gunAnimationStartTime = MSG_ReadFloat();
 	}
@@ -1280,8 +1279,8 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int ext
 
     // Parse Stats.
     if (extraflags & EPS_STATS) {
-        statbits = MSG_ReadLong();
-        for (i = 0; i < MAX_STATS; i++) {
+        int32_t statbits = MSG_ReadLong();
+        for (int32_t i = 0; i < MAX_STATS; i++) {
             if (statbits & (1 << i)) {
                 to->stats[i] = MSG_ReadShort();
             }
@@ -1311,10 +1310,10 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
 #define SP(b,s) if(flags&PS_##b) SHOWBITS(s)
 #define SE(b,s) if(extraflags&EPS_##b) SHOWBITS(s)
     SP(PM_TYPE, "pmove.type");
-    SP(PM_ORIGIN, "pmove.origin[0,1]");
-    SE(M_ORIGIN2, "pmove.origin[2]");
-    SP(PM_VELOCITY, "pmove.velocity[0,1]");
-    SE(M_VELOCITY2, "pmove.velocity[2]");
+    SP(PM_ORIGIN, "pmove.origin[x,y]");
+    SE(M_ORIGIN2, "pmove.origin[z]");
+    SP(PM_VELOCITY, "pmove.velocity[x,y]");
+    SE(M_VELOCITY2, "pmove.velocity[z]");
     SP(PM_TIME, "pmove.time");
     SP(PM_FLAGS, "pmove.flags");
     SP(PM_GRAVITY, "pmove.gravity");
@@ -1361,7 +1360,7 @@ void MSG_ShowDeltaUsercmdBits(int bits)
 
 void MSG_ShowDeltaEntityBits(int bits)
 {
-#define S(b,s) if(bits&U_##b) SHOWBITS(s)
+#define S(b,s) if(bits&BIT_##b) SHOWBITS(s)
     S(MODEL, "modelIndex");
     S(MODEL2, "modelIndex2");
     S(MODEL3, "modelIndex3");
@@ -1393,38 +1392,17 @@ void MSG_ShowDeltaEntityBits(int bits)
     else if (bits & U_RENDERFX16)
         SHOWBITS("renderfx16");
 
-    S(ORIGIN_X, "origin[0]");
-    S(ORIGIN_Y, "origin[1]");
-    S(ORIGIN_Z, "origin[2]");
-    S(ANGLE_X, "angles[0]");
-    S(ANGLE_Y, "angles[1]");
-    S(ANGLE_Z, "angles[2]");
-    S(OLDORIGIN, "oldOrigin");
+    S(ORIGIN_X, "origin.x");
+    S(ORIGIN_Y, "origin.y");
+    S(ORIGIN_Z, "origin.z");
+    S(ANGLE_X, "angles.x");
+    S(ANGLE_Y, "angles.y");
+    S(ANGLE_Z, "angles.z");
+    S(OLD_ORIGIN, "oldOrigin");
     S(SOUND, "sound");
-    S(EVENT, "event");
+    S(EVENT_ID, "event");
     S(SOLID, "solid");
 #undef S
-}
-
-void MSG_ShowDeltaPlayerstateBits_Packet(int flags)
-{
-//#define S(b,s) if(flags&PPS_##b) SHOWBITS(s)
-//    S(M_TYPE, "pmove.type");
-//    S(M_ORIGIN, "pmove.origin[0,1]");
-//    S(M_ORIGIN2, "pmove.origin[2]");
-//    S(VIEWOFFSET, "viewOffset");
-//    S(VIEWANGLES, "viewAngles[0,1]");
-//    S(VIEWANGLE2, "viewAngles[2]");
-//    S(KICKANGLES, "kickAngles");
-//    S(WEAPONINDEX, "gunIndex");
-//    S(WEAPONFRAME, "gunAnimationFrame");
-//    S(GUNOFFSET, "gunOffset");
-//    S(GUNANGLES, "gunAngles");
-//    S(BLEND, "blend");
-//    S(FOV, "fov");
-//    S(RDFLAGS, "rdflags");
-//    S(STATS, "stats");
-//#undef S
 }
 
 const char* MSG_ServerCommandString(int cmd)

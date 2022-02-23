@@ -51,15 +51,17 @@ enum EntityStateMessageFlags {
     MSG_ES_NEWENTITY = (1 << 1),
     MSG_ES_FIRSTPERSON = (1 << 2),
     MSG_ES_BEAMORIGIN = (1 << 3),
-
 };
 
+// Write message buffer.
 extern SizeBuffer   msg_write;
 extern byte         msg_write_buffer[MAX_MSGLEN];
 
+// Read message buffer.
 extern SizeBuffer   msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
+//! Extern null baseline states.
 extern const EntityState        nullEntityState;
 extern const PlayerState        nullPlayerState;
 extern const ClientMoveCommand  nullUserCmd;
@@ -74,12 +76,13 @@ void    MSG_WriteLong(int c);
 void    MSG_WriteFloat(float c);
 void    MSG_WriteString(const char* s);
 void    MSG_WriteVector3(const vec3_t& pos);
-#if USE_CLIENT
-void    MSG_WriteBits(int value, int bits);
-int     MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd);
-#endif
 void    MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, EntityStateMessageFlags flags);
 int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags);
+
+#if USE_CLIENT
+    void MSG_WriteBits(int value, int bits);
+    int  MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd);
+#endif // USE_CLIENT
 
 static inline void* MSG_WriteData(const void* data, size_t len)
 {
@@ -102,31 +105,25 @@ int     MSG_ReadLong(void);
 float   MSG_ReadFloat(void);
 size_t  MSG_ReadString(char* dest, size_t size);
 size_t  MSG_ReadStringLine(char* dest, size_t size);
-#if USE_CLIENT
-vec3_t  MSG_ReadVector3(void);
-vec3_t  MSG_ReadVector3(void);
-#endif
 void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCommand* cmd);
 int     MSG_ParseEntityBits(int* bits);
 void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, int32_t bits, EntityStateMessageFlags flags);
 #if USE_CLIENT
-void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags);
-#endif
+    vec3_t MSG_ReadVector3(void);
+    vec3_t MSG_ReadVector3(void);
 
-#ifdef _DEBUG
-#if USE_CLIENT
-void    MSG_ShowDeltaPlayerstateBits(int flags, int extraflags);
-void    MSG_ShowDeltaUsercmdBits(int bits);
-#endif
-#if USE_CLIENT
-void    MSG_ShowDeltaEntityBits(int bits);
-void    MSG_ShowDeltaPlayerstateBits_Packet(int flags);
-const char* MSG_ServerCommandString(int cmd);
-#define MSG_ShowSVC(cmd) \
-    Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readCount - 1, \
-        MSG_ServerCommandString(cmd))
+    void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags);
+
+    #ifdef _DEBUG
+        void    MSG_ShowDeltaPlayerstateBits(int flags, int extraflags);
+        void    MSG_ShowDeltaUsercmdBits(int bits);
+        void    MSG_ShowDeltaEntityBits(int bits);
+
+        const char* MSG_ServerCommandString(int cmd);
+
+        #define MSG_ShowSVC(cmd) Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readCount - 1, MSG_ServerCommandString(cmd))
+    #endif // _DEBUG
 #endif // USE_CLIENT
-#endif // _DEBUG
 
 
 //============================================================================
@@ -145,21 +142,17 @@ const char* MSG_ServerCommandString(int cmd);
 **/
 static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
 {
-    int32_t x, zd, zu;
+    // Assume that x/y are equal and symetric
+    int32_t XY = Clampi(maxs[0], 1, 255);
 
-    // assume that x/y are equal and symetric
-    x = maxs[0];
-    clamp(x, 1, 255);
+    // Z is not symetric (Boundingbox height.)
+    int32_t ZDown = Clampi(-mins[2], 1, 255);
 
-    // z is not symetric
-    zd = -mins[2];
-    clamp(zd, 1, 255);
+    // And z maxs can be negative...
+    int32_t ZUp = Clampi(maxs[2] + 32768, 1, 65535);
 
-    // and z maxs can be negative...
-    zu = maxs[2] + 32768;
-    clamp(zu, 1, 65535);
-
-    return (zu << 16) | (zd << 8) | x;
+    // Return packed bounding box.
+    return (ZUp << 16) | (ZDown << 8) | XY;
 }
 
 /**
@@ -171,16 +164,16 @@ static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
 **/
 static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& maxs)
 {
-    int32_t x, zd, zu;
+    // Unpack.
+    int32_t XY = solid & 255;
+    int32_t ZDown = (solid >> 8) & 255;
+    int32_t ZUp = ((solid >> 16) & 65535) - 32768;
 
-    x = solid & 255;
-    zd = (solid >> 8) & 255;
-    zu = ((solid >> 16) & 65535) - 32768;
-
-    mins[0] = mins[1] = -x;
-    maxs[0] = maxs[1] = x;
-    mins[2] = -zd;
-    maxs[2] = zu;
+    // Store unpacked values.
+    mins[0] = mins[1] = -XY;
+    maxs[0] = maxs[1] = XY;
+    mins[2] = -ZDown;
+    maxs[2] = ZUp;
 }
 
 //
