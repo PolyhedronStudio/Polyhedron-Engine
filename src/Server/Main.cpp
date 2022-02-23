@@ -218,7 +218,7 @@ void SV_DropClient(client_t *client, const char *reason)
         print_drop_reason(client, reason, oldConnectionState);
 
     // add the disconnect
-    MSG_WriteByte(svc_disconnect);
+    MSG_WriteByte(ServerCommand::Disconnect);
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
 
     if (oldConnectionState == ConnectionState::Spawned) {
@@ -851,10 +851,10 @@ static client_t *redirect(const char *addr)
     // set up a fake server netchan
     MSG_WriteLong(1);
     MSG_WriteLong(0);
-    MSG_WriteByte(svc_print);
+    MSG_WriteByte(ServerCommand::Print);
     MSG_WriteByte(PRINT_HIGH);
     MSG_WriteString(va("Server is full. Redirecting you to %s...\n", addr));
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString(va("connect %s\n", addr));
 
     NET_SendPacket(NS_SERVER, msg_write.data, msg_write.currentSize, &net_from);
@@ -2031,15 +2031,15 @@ static void SV_FinalMessage(const char *message, ErrorType type)
         return;
 
     if (message) {
-        MSG_WriteByte(svc_print);
+        MSG_WriteByte(ServerCommand::Print);
         MSG_WriteByte(PRINT_HIGH);
         MSG_WriteString(message);
     }
 
     if (type == ERR_RECONNECT)
-        MSG_WriteByte(svc_reconnect);
+        MSG_WriteByte(ServerCommand::Reconnect);
     else
-        MSG_WriteByte(svc_disconnect);
+        MSG_WriteByte(ServerCommand::Disconnect);
 
     // send it twice
     // stagger the packets to crutch operating system limited buffers

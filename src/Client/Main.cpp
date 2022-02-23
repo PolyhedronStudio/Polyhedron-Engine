@@ -1433,7 +1433,7 @@ static void CL_ConnectionlessPacket(void)
         Com_Printf("Connected to %s (protocol %d).\n",
                    NET_AdrToString(&cls.serverAddress), cls.serverProtocol);
         if (cls.netChannel) {
-            // this may happen after svc_reconnect
+            // this may happen after ServerCommand::Reconnect
             Netchan_Close(cls.netChannel);
         }
         cls.netChannel = Netchan_Setup(NS_CLIENT, &cls.serverAddress,

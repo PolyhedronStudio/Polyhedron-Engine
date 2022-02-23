@@ -853,7 +853,7 @@ qboolean CL_GM_ParseServerMessage (int32_t serverCommand) {
 // 
 // Parses command operations known to the game dll, but for
 // demo playback only. This means certain commands such as
-// svc_centerprint can be skipped.
+// ServerCommand::CenterPrint can be skipped.
 //===============
 //
 qboolean CL_GM_SeekDemoMessage (int32_t demoCommand) {

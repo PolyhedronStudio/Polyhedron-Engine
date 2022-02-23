@@ -223,7 +223,7 @@ void SV_WriteFrameToClient(client_t *client) {
     }
 
     // save 3 high bits of extraflags
-    *b1 = svc_frame | (((extraflags & 0x70) << 1));
+    *b1 = ServerCommand::Frame | (((extraflags & 0x70) << 1));
 
     // save 4 low bits of extraflags
     *b2 = (suppressed & SUPPRESSCOUNT_MASK) |

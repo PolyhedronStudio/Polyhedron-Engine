@@ -75,7 +75,7 @@ fail:
     return false;
 }
 
-// writes a delta update of an EntityState list to the message.
+// Writes a delta update of an EntityState list to the message.
 static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 {
     EntityState *oldent, *newent;
@@ -144,7 +144,7 @@ static void emit_delta_frame(ServerFrame *from, ServerFrame *to,
 {
     PlayerState oldPlayerState, newPlayerState;
 
-    MSG_WriteByte(svc_frame);
+    MSG_WriteByte(ServerCommand::Frame);
     MSG_WriteLong(tonum);
     MSG_WriteLong(fromnum);   // what we are delta'ing from
     MSG_WriteByte(0);   // rate dropped packets
@@ -154,7 +154,7 @@ static void emit_delta_frame(ServerFrame *from, ServerFrame *to,
     MSG_WriteData(to->areaBits, to->areaBytes);
 
     // delta encode the playerstate
-    MSG_WriteByte(svc_playerinfo);
+    MSG_WriteByte(ServerCommand::PlayerInfo);
     //MSG_PackPlayer(&newpack, &to->playerState);
     newPlayerState = to->playerState;
     if (from) {
@@ -166,7 +166,7 @@ static void emit_delta_frame(ServerFrame *from, ServerFrame *to,
     }
 
     // delta encode the entities
-    MSG_WriteByte(svc_packetentities);
+    MSG_WriteByte(ServerCommand::PacketEntities);
     emit_packet_entities(from, to);
 }
 
@@ -387,7 +387,7 @@ static void CL_Record_f(void)
     //
 
     // send the serverdata
-    MSG_WriteByte(svc_serverdata);
+    MSG_WriteByte(ServerCommand::ServerData);
     MSG_WriteLong(PROTOCOL_VERSION_DEFAULT);
     MSG_WriteLong(0x10000 + cl.serverCount);
     MSG_WriteByte(1);      // demos are always attract loops
@@ -410,7 +410,7 @@ static void CL_Record_f(void)
                 return;
         }
 
-        MSG_WriteByte(svc_configstring);
+        MSG_WriteByte(ServerCommand::ConfigString);
         MSG_WriteShort(i);
         MSG_WriteData(s, len);
         MSG_WriteByte(0);
@@ -427,11 +427,11 @@ static void CL_Record_f(void)
                 return;
         }
 
-        MSG_WriteByte(svc_spawnbaseline);
+        MSG_WriteByte(ServerCommand::SpawnBaseline);
         MSG_WriteDeltaEntity(NULL, ent, MSG_ES_FORCE);
     }
 
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString("precache\n");
 
     // write it to the demo file
@@ -470,7 +470,7 @@ static void resume_record(void)
                 // multiple packets = not seamless
             }
 
-            SZ_WriteByte(&cls.demo.buffer, svc_configstring);
+            SZ_WriteByte(&cls.demo.buffer, ServerCommand::ConfigString);
             SZ_WriteShort(&cls.demo.buffer, index);
             SZ_Write(&cls.demo.buffer, s, len);
             SZ_WriteByte(&cls.demo.buffer, 0);
@@ -811,7 +811,7 @@ void CL_EmitDemoSnapshot(void)
         if (len > MAX_QPATH)
             len = MAX_QPATH;
 
-        MSG_WriteByte(svc_configstring);
+        MSG_WriteByte(ServerCommand::ConfigString);
         MSG_WriteShort(i);
         MSG_WriteData(to, len);
         MSG_WriteByte(0);
@@ -1085,7 +1085,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
     }
 
     if (type == 0) {
-        if (MSG_ReadByte() != svc_serverdata) {
+        if (MSG_ReadByte() != ServerCommand::ServerData) {
             goto fail;
         }
         if (MSG_ReadLong() != PROTOCOL_VERSION_DEFAULT) {
@@ -1105,7 +1105,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
                 }
                 continue; // parse new message
             }
-            if (c != svc_configstring) {
+            if (c != ServerCommand::ConfigString) {
                 break;
             }
             index = MSG_ReadShort();

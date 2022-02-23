@@ -292,7 +292,7 @@ static void CL_ParseFrame(int extrabits)
 
     // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
     //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-    //    if (MSG_ReadByte() != svc_playerinfo) {
+    //    if (MSG_ReadByte() != ServerCommand::PlayerInfo) {
     //        Com_Error(ERR_DROP, "%s: not playerinfo", __func__);
     //    }
     //}
@@ -412,7 +412,7 @@ static void CL_ParseBaseline(int index, int bits)
     MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, bits, cl.esFlags);
 }
 
-// instead of wasting space for svc_configstring and svc_spawnbaseline
+// instead of wasting space for ServerCommand::ConfigString and ServerCommand::SpawnBaseline
 // bytes, entire game state is compressed into a single stream.
 static void CL_ParseGamestate(void)
 {
@@ -712,7 +712,7 @@ static void CL_ParseDownload(int cmd)
     }
 
     // read optional uncompressed packet size
-    if (cmd == svc_zdownload) {
+    if (cmd == ServerCommand::ZDownload) {
         // MSG: !! ZLIB PKZ Download: Kept here in case this was part of Q2PRO protocol as well (This was related to challenging connect packets.)
         //if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2) {
         //    compressed = MSG_ReadShort();
@@ -843,57 +843,57 @@ badbyte:
             Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
             break;
 
-        case svc_nop:
+        case ServerCommand::Padding:
             break;
 
-        case svc_disconnect:
+        case ServerCommand::Disconnect:
             Com_Error(ERR_DISCONNECT, "Server disconnected");
             break;
 
-        case svc_reconnect:
+        case ServerCommand::Reconnect:
             CL_ParseReconnect();
             return;
 
-        case svc_stufftext:
+        case ServerCommand::StuffText:
             CL_ParseStuffText();
             break;
 
-        case svc_serverdata:
+        case ServerCommand::ServerData:
             CL_ParseServerData();
             continue;
 
-        case svc_configstring:
+        case ServerCommand::ConfigString:
             index = MSG_ReadShort();
             CL_ParseConfigstring(index);
             break;
 
-        case svc_sound:
+        case ServerCommand::Sound:
             CL_ParseStartSoundPacket();
             S_ParseStartSound();
             break;
 
-        case svc_spawnbaseline:
+        case ServerCommand::SpawnBaseline:
             index = MSG_ParseEntityBits(&bits);
             CL_ParseBaseline(index, bits);
             break;
 
-        case svc_download:
+        case ServerCommand::Download:
             CL_ParseDownload(cmd);
             continue;
 
-        case svc_frame:
+        case ServerCommand::Frame:
             CL_ParseFrame(extrabits);
             continue;
 
-        case svc_zpacket:
+        case ServerCommand::ZPacket:
             CL_ParseZPacket();
             continue;
 
-        case svc_zdownload:
+        case ServerCommand::ZDownload:
             CL_ParseDownload(cmd);
             continue;
 
-        case svc_gamestate:
+        case ServerCommand::GameState:
             CL_ParseGamestate();
             continue;
         }
@@ -969,29 +969,29 @@ void CL_SeekDemoMessage(void)
             }
             break;
 
-        case svc_nop:
+        case ServerCommand::Padding:
             break;
 
-        case svc_disconnect:
-        case svc_reconnect:
+        case ServerCommand::Disconnect:
+        case ServerCommand::Reconnect:
             Com_Error(ERR_DISCONNECT, "Server disconnected");
             break;
 
-        case svc_print:
+        case ServerCommand::Print:
             MSG_ReadByte();
             // fall thorugh
 
-        case svc_centerprint:
-        case svc_stufftext:
+        case ServerCommand::CenterPrint:
+        case ServerCommand::StuffText:
             MSG_ReadString(NULL, 0);
             break;
 
-        case svc_configstring:
+        case ServerCommand::ConfigString:
             index = MSG_ReadShort();
             CL_ParseConfigstring(index);
             break;
 
-        case svc_sound:
+        case ServerCommand::Sound:
             CL_ParseStartSoundPacket();
             break;
 
@@ -1005,7 +1005,7 @@ void CL_SeekDemoMessage(void)
         //    CL_ParseMuzzleFlashPacket(0);
         //    break;
 
-        case svc_frame:
+        case ServerCommand::Frame:
             CL_ParseFrame(extrabits);
             continue;
 

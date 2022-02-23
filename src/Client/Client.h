@@ -210,9 +210,9 @@ struct ClientStatic {
         qhandle_t   recording;
         unsigned    time_start;
         unsigned    time_frames;
-        int         last_server_frame;  // number of server frame the last svc_frame was written
+        int         last_server_frame;  // number of server frame the last ServerCommand::Frame was written
         int         frames_written;     // number of frames written to demo file
-        int         frames_dropped;     // number of svc_frames that didn't fit
+        int         frames_dropped;     // number of ServerCommand::Frames that didn't fit
         int         others_dropped;     // number of misc svc_* messages that didn't fit
         int         frames_read;        // number of frames read from demo file
         int         last_snapshot;      // number of demo frame the last snapshot was saved

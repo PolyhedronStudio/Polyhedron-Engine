@@ -37,9 +37,9 @@ struct ClientConnectionState {
     static constexpr int32_t Disconnected = 1;  // Not talking to a server
     static constexpr int32_t Challenging = 2;   // Sending getchallenge packets to the server
     static constexpr int32_t Connecting = 3;    // Sending connect packets to the server
-    static constexpr int32_t Connected = 4;     // Netchan_t established, waiting for svc_serverdata
+    static constexpr int32_t Connected = 4;     // Netchan_t established, waiting for ServerCommand::ServerData
     static constexpr int32_t Loading = 5;       // Loading level data
-    static constexpr int32_t Precached = 6;     // Loaded level data, waiting for svc_frame
+    static constexpr int32_t Precached = 6;     // Loaded level data, waiting for ServerCommand::Frame
     static constexpr int32_t Active = 7;        // Game views should be displayed
     static constexpr int32_t Cinematic = 8;     // Running a cinematic
 };

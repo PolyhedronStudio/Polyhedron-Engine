@@ -134,7 +134,7 @@ static void write_plain_configstrings(void)
             SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
         }
 
-        MSG_WriteByte(svc_configstring);
+        MSG_WriteByte(ServerCommand::ConfigString);
         MSG_WriteShort(i);
         MSG_WriteData(string, length);
         MSG_WriteByte(0);
@@ -168,7 +168,7 @@ static void write_plain_baselines(void)
                     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
                 }
 
-                MSG_WriteByte(svc_spawnbaseline);
+                MSG_WriteByte(ServerCommand::SpawnBaseline);
                 write_baseline(base);
             }
             base++;
@@ -189,7 +189,7 @@ static void write_compressed_gamestate(void)
     uint8_t     *patch;
     char        *string;
 
-    MSG_WriteByte(svc_gamestate);
+    MSG_WriteByte(ServerCommand::GameState);
 
     // write configstrings
     string = sv_client->configstrings;
@@ -232,7 +232,7 @@ static void write_compressed_gamestate(void)
     }
     MSG_WriteShort(0);   // end of entityBaselines
 
-    SZ_WriteByte(buf, svc_zpacket);
+    SZ_WriteByte(buf, ServerCommand::ZPacket);
     patch = (uint8_t*)SZ_GetSpace(buf, 2); // CPP: Cast
     SZ_WriteShort(buf, msg_write.currentSize);
 
@@ -271,7 +271,7 @@ static inline int z_flush(byte *buffer)
     SV_DPrintf(0, "%s: comp: %lu into %lu\n",
                sv_client->name, svs.z.total_in, svs.z.total_out);
 
-    MSG_WriteByte(svc_zpacket);
+    MSG_WriteByte(ServerCommand::ZPacket);
     MSG_WriteShort(svs.z.total_out);
     MSG_WriteShort(svs.z.total_in);
     MSG_WriteData(buffer, svs.z.total_out);
@@ -317,7 +317,7 @@ static void write_compressed_configstrings(void)
             z_reset(buffer);
         }
 
-        MSG_WriteByte(svc_configstring);
+        MSG_WriteByte(ServerCommand::ConfigString);
         MSG_WriteShort(i);
         MSG_WriteData(string, length);
         MSG_WriteByte(0);
@@ -345,7 +345,7 @@ static void stuff_cmds(list_t *list)
     StuffTextCommand *stuff;
 
     LIST_FOR_EACH(StuffTextCommand, stuff, list, entry) {
-        MSG_WriteByte(svc_stufftext);
+        MSG_WriteByte(ServerCommand::StuffText);
         MSG_WriteData(stuff->string, stuff->len);
         MSG_WriteByte('\n');
         MSG_WriteByte(0);
@@ -434,7 +434,7 @@ void SV_New_f(void)
     create_baselines();
 
     // send the serverdata
-    MSG_WriteByte(svc_serverdata);
+    MSG_WriteByte(ServerCommand::ServerData);
     MSG_WriteLong(sv_client->protocolVersion);
     // WID: This value was unset here, so it defaulted to the int64 max or so.
     sv_client->spawncount = 0;
@@ -660,7 +660,7 @@ static void SV_BeginDownload_f(void)
     }
 
     f = 0;
-    downloadcmd = svc_download;
+    downloadcmd = ServerCommand::Download;
 
 #if USE_ZLIB
     // prefer raw deflate stream from .pkz if supported
@@ -669,7 +669,7 @@ static void SV_BeginDownload_f(void)
         downloadsize = FS_FOpenFile(name, &f, FS_MODE_READ | FS_FLAG_DEFLATE);
         if (f) {
             Com_DPrintf("Serving compressed download to %s\n", sv_client->name);
-            downloadcmd = svc_zdownload;
+            downloadcmd = ServerCommand::ZDownload;
         }
     }
 #endif
@@ -711,7 +711,7 @@ static void SV_BeginDownload_f(void)
         Com_DPrintf("Refusing download, %s already has %s (%d bytes)\n",
                     sv_client->name, name, offset);
         FS_FCloseFile(f);
-        MSG_WriteByte(svc_download);
+        MSG_WriteByte(ServerCommand::Download);
         MSG_WriteShort(0);
         MSG_WriteByte(100);
         SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
@@ -742,7 +742,7 @@ fail3:
 fail2:
     FS_FCloseFile(f);
 fail1:
-    MSG_WriteByte(svc_download);
+    MSG_WriteByte(ServerCommand::Download);
     MSG_WriteShort(-1);
     MSG_WriteByte(0);
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
@@ -757,7 +757,7 @@ static void SV_StopDownload_f(void)
 
     percent = sv_client->download.bytesSent * 100 / sv_client->download.fileSize;
 
-    MSG_WriteByte(svc_download);
+    MSG_WriteByte(ServerCommand::Download);
     MSG_WriteShort(-1);
     MSG_WriteByte(percent);
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
@@ -941,11 +941,11 @@ static void handle_filtercmd(FilterCommand *filter)
 
     switch (filter->action) {
     case FA_PRINT:
-        MSG_WriteByte(svc_print);
+        MSG_WriteByte(ServerCommand::Print);
         MSG_WriteByte(PRINT_HIGH);
         break;
     case FA_STUFF:
-        MSG_WriteByte(svc_stufftext);
+        MSG_WriteByte(ServerCommand::StuffText);
         break;
     case FA_KICK:
         SV_DropClient(sv_client, filter->comment[0] ?

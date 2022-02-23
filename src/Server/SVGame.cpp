@@ -118,7 +118,7 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
     SV_ClientAddMessage(client, flags);
 
     // fix anti-kicking exploit for broken mods
-    if (cmd == svc_disconnect) {
+    if (cmd == ServerCommand::Disconnect) {
         client->drop_hack = true;
         goto clear;
     }
@@ -152,7 +152,7 @@ static void PF_bprintf(int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_print);
+    MSG_WriteByte(ServerCommand::Print);
     MSG_WriteByte(level);
     MSG_WriteData(string, len + 1);
 
@@ -237,7 +237,7 @@ static void PF_cprintf(Entity *ent, int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_print);
+    MSG_WriteByte(ServerCommand::Print);
     MSG_WriteByte(level);
     MSG_WriteData(msg, len + 1);
 
@@ -284,7 +284,7 @@ static void PF_centerprintf(Entity *ent, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_centerprint);
+    MSG_WriteByte(ServerCommand::CenterPrint);
     MSG_WriteData(msg, len + 1);
 
     PF_Unicast(ent, true);
@@ -397,7 +397,7 @@ static void PF_configstring(int index, const char *val)
     }
 
     // send the update to everyone
-    MSG_WriteByte(svc_configstring);
+    MSG_WriteByte(ServerCommand::ConfigString);
     MSG_WriteShort(index);
     MSG_WriteData(val, len);
     MSG_WriteByte(0);
@@ -579,7 +579,7 @@ static void PF_StartSound(Entity *edict, int channel,
         // reliable sounds will always have position explicitly set,
         // as no one gurantees reliables to be delivered in time
         if (channel & CHAN_RELIABLE) {
-            MSG_WriteByte(svc_sound);
+            MSG_WriteByte(ServerCommand::Sound);
             MSG_WriteByte(flags | SND_POS);
             MSG_WriteByte(soundindex);
 
@@ -662,7 +662,7 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     if (timeofs)
         flags |= SND_OFFSET;
 
-    MSG_WriteByte(svc_sound);
+    MSG_WriteByte(ServerCommand::Sound);
     MSG_WriteByte(flags);
     MSG_WriteByte(soundindex);
 
@@ -711,7 +711,7 @@ static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 //===============
 //
 static void PF_stuffcmd(Entity* pent, const char* pszCommand) {
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString(pszCommand);
 
     // Use the PF Unicast.

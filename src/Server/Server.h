@@ -100,7 +100,7 @@ static constexpr uint32_t MAX_TOTAL_ENT_LEAFS = 128;
 //=============================================================================
 
 //-----------------
-// A client svc_frame message.
+// A client ServerCommand::Frame message.
 //-----------------
 typedef struct {
     int         number;

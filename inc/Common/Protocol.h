@@ -91,10 +91,11 @@ constexpr int32_t CS_BITMAP_LONGS = (CS_BITMAP_BYTES / 4);
 //
 // Server to Client commands.
 //
-typedef enum {
-    svc_bad,
+struct ServerCommand {
+    //! A bad servercommand.
+    static constexpr int32_t Bad = 0;
 
-    // these ops are known to the game dll
+    // These ops are known to the game dll
     //ServerGameCommands::MuzzleFlash,
     //ServerGameCommands::MuzzleFlash2,
     //ServerGameCommands::TempEntity,
@@ -102,38 +103,38 @@ typedef enum {
     //ServerGameCommands::Inventory,
 
     // the rest are private to the client and server
-    svc_nop,
-    svc_disconnect,
-    svc_reconnect,
-    svc_sound,                  // <see code>
-    svc_print,                  // [byte] id [string] null terminated string
-    svc_stufftext,              // [string] stuffed into client's console buffer
-                                // should be \n terminated
-    svc_serverdata,             // [long] protocol ...
-    svc_configstring,           // [short] [string]
-    svc_spawnbaseline,
-    svc_centerprint,            // [string] to put in center of the screen
-    svc_download,               // [short] size [size bytes]
-    svc_playerinfo,             // variable
-    svc_packetentities,         // [...]
-    svc_deltapacketentities,    // [...]
-    svc_frame,
+    static constexpr int32_t Padding = 1;
+    static constexpr int32_t Disconnect = 2;
+    static constexpr int32_t Reconnect = 3;
+    static constexpr int32_t Sound = 4;    // <see code>
+    static constexpr int32_t Print = 5;	 // [byte] id [string] null terminated string
+    static constexpr int32_t StuffText = 6;	   // [string] stuffed into client's console buffer
+                                                // should be \n terminated
+    static constexpr int32_t ServerData = 7;     // [long] protocol ...
+    static constexpr int32_t ConfigString = 8;    // [short] [string]
+	static constexpr int32_t SpawnBaseline = 9;
+	static constexpr int32_t CenterPrint = 10;  // [string] to put in center of the screen
+	static constexpr int32_t Download = 11;    // [short] size [size bytes]
+	static constexpr int32_t PlayerInfo = 12;  // variable
+	static constexpr int32_t PacketEntities = 13;   // [...]
+	static constexpr int32_t DeltaPacketEntities = 14;  // [...]
+	static constexpr int32_t Frame = 15;
 
     // r1q2 specific operations
-    svc_zpacket,
-    svc_zdownload,
-    svc_gamestate, // q2pro specific, means svc_playerupdate in r1q2
+    static constexpr int32_t ZPacket = 16;
+    static constexpr int32_t ZDownload = 17;
+	static constexpr int32_t GameState = 18;	 // q2pro specific, means svc_playerupdate in r1q2
 
     // This determines the maximum amount of types we can have.
-    svc_num_types = 255
-} svc_ops_t;
+	static constexpr int32_t Maximum = 255;
+};
 
 //==============================================
 
 //
 // Client to Server commands.
 //
-typedef enum {
+enum ClientCommand {
     clc_bad,
     clc_nop,
     clc_move,               // [ClientMoveCommand]
@@ -142,7 +143,7 @@ typedef enum {
 
     // q2pro specific operations
     clc_userinfo_delta
-} clc_ops_t;
+};
 
 //==============================================
 

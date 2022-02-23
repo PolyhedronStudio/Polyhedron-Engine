@@ -121,13 +121,13 @@ qboolean ClientGameServerMessage::ParseMessage(int32_t serverCommand) {
     switch (serverCommand) {
 
         // Client Print Messages.
-    case svc_print:
+    case ServerCommand::Print:
         CLG_ParsePrint();
         return true;
         break;
 
         // Client Center Screen Print messages.
-    case svc_centerprint:
+    case ServerCommand::CenterPrint:
         CLG_ParseCenterPrint();
         return true;
         break;

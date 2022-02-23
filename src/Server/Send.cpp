@@ -38,7 +38,7 @@ void SV_FlushRedirect(int redirected, char *outputbuf, size_t len)
         memcpy(buffer + 10, outputbuf, len);
         NET_SendPacket(NS_SERVER, buffer, len + 10, &net_from);
     } else if (redirected == RD_CLIENT) {
-        MSG_WriteByte(svc_print);
+        MSG_WriteByte(ServerCommand::Print);
         MSG_WriteByte(PRINT_HIGH);
         MSG_WriteData(outputbuf, len);
         MSG_WriteByte(0);
@@ -132,7 +132,7 @@ void SV_ClientPrintf(client_t *client, int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_print);
+    MSG_WriteByte(ServerCommand::Print);
     MSG_WriteByte(level);
     MSG_WriteData(string, len + 1);
 
@@ -163,7 +163,7 @@ void SV_BroadcastPrintf(int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_print);
+    MSG_WriteByte(ServerCommand::Print);
     MSG_WriteByte(level);
     MSG_WriteData(string, len + 1);
 
@@ -193,7 +193,7 @@ void SV_ClientCommand(client_t *client, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteData(string, len + 1);
 
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
@@ -223,7 +223,7 @@ void SV_BroadcastCommand(const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteData(string, len + 1);
 
     FOR_EACH_CLIENT(client) {
@@ -354,7 +354,7 @@ static qboolean compress_message(client_t *client, int flags)
     if (deflate(&svs.z, Z_FINISH) != Z_STREAM_END)
         return false;
 
-    buffer[0] = svc_zpacket;
+    buffer[0] = ServerCommand::ZPacket;
     buffer[1] = svs.z.total_out & 255;
     buffer[2] = (svs.z.total_out >> 8) & 255;
     buffer[3] = msg_write.currentSize & 255;
@@ -531,7 +531,7 @@ static void emit_snd(client_t *client, MessagePacket *msg)
         flags |= SND_POS;   // entity is not present in frame
     }
 
-    MSG_WriteByte(svc_sound);
+    MSG_WriteByte(ServerCommand::Sound);
     MSG_WriteByte(flags);
     MSG_WriteByte(msg->index);
 
@@ -635,7 +635,7 @@ static void SV_WriteDatagram(client_t *client)
             pad = msg_write.maximumSize;
         }
         for (; pad > 0; pad--) {
-            MSG_WriteByte(svc_nop);
+            MSG_WriteByte(ServerCommand::Padding);
         }
     }
 #endif
@@ -676,7 +676,7 @@ static void finish_frame(client_t *client)
 =======================
 SV_SendClientMessages
 
-Called each game frame, sends svc_frame messages to spawned clients only.
+Called each game frame, sends ServerCommand::Frame messages to spawned clients only.
 Clients in earlier connection state are handled in SV_SendAsyncPackets.
 =======================
 */
@@ -777,7 +777,7 @@ If the client is just connecting, it is pointless to wait another 100ms
 before sending next command and/or reliable acknowledge, send it as soon
 as client rate limit allows.
 
-For spawned clients, this is not used, as we are forced to send svc_frame
+For spawned clients, this is not used, as we are forced to send ServerCommand::Frame
 packets synchronously with game DLL ticks.
 ==================
 */
