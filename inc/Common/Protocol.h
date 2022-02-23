@@ -123,7 +123,6 @@ typedef enum {
     svc_zpacket,
     svc_zdownload,
     svc_gamestate, // q2pro specific, means svc_playerupdate in r1q2
-    svc_setting,
 
     // This determines the maximum amount of types we can have.
     svc_num_types = 255

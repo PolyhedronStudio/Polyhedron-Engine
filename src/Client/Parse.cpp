@@ -784,23 +784,6 @@ static void CL_ParseZPacket(void)
 #endif // USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
 }
 
-static void CL_ParseSetting(void)
-{
-    int index q_unused;
-    int value q_unused;
-
-    index = MSG_ReadLong();
-    value = MSG_ReadLong();
-
-//    switch (index) {
-//    case SVS_SOME_SETTING:
-//          .....
-//        break;
-//    default:
-//        break;
-//    }
-}
-
 /*
 =====================
 CL_ParseServerMessage
@@ -912,10 +895,6 @@ badbyte:
 
         case svc_gamestate:
             CL_ParseGamestate();
-            continue;
-
-        case svc_setting:
-            CL_ParseSetting();
             continue;
         }
 
