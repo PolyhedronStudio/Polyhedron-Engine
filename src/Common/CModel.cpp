@@ -718,7 +718,7 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
         trace_extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
         trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
 
-        // N&C: Q3 - FF Precision. Hopefully...
+        // PH: Q3 - FF Precision. Hopefully...
         trace_trace->offsets[0] = maxs;//VectorCopy(maxs, trace_trace->offsets[0]);
 
         trace_trace->offsets[1][0] = maxs[0];

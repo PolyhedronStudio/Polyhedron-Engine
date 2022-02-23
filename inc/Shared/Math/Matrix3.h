@@ -3,7 +3,7 @@
 //
 // Shared/Math/matrix3.h
 //
-// N&C Math Library: Matrix3
+// PH Math Library: Matrix3
 // 
 // Implemented like a union class, not templated though.
 //

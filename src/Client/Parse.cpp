@@ -498,7 +498,7 @@ static void CL_ParseServerData(void)
     // MSG: !! Removed: PROTOCOL_VERSION_POLYHEDRON
     //if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON) {
     i = MSG_ReadShort();
-    if (!NAC_PROTOCOL_SUPPORTED(protocol)) {
+    if (!POLYHEDRON_PROTOCOL_SUPPORTED(protocol)) {
         Com_Error(ERR_DROP,
                     "Polyhedron server reports unsupported protocol version %d.\n"
                     "Current server/client version is %d.", protocol, PROTOCOL_VERSION_POLYHEDRON_CURRENT);

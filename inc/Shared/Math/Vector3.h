@@ -3,7 +3,7 @@
 //
 // Shared/Math/vector3.h
 //
-// N&C Math Library: Vector3
+// PH Math Library: Vector3
 // 
 // vec3_template is a templated union class which by use of several operators
 // allows for backwards compatibility support to most of the old Quake 2 based

@@ -827,8 +827,9 @@ qboolean CL_GM_UpdateConfigString (int32_t index, const char *str) {
 //===============
 //
 void CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from) {
-    if (cge)
-        return cge->ClientUpdateUserinfo(var, from);
+    if (cge) {
+	    cge->ClientUpdateUserinfo(var, from);
+    }
 }
 
 //

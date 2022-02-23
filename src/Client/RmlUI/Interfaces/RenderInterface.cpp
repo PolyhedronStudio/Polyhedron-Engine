@@ -4,7 +4,7 @@
 // client/rmlui/Interfaces/RenderInterface.cpp
 //
 //
-// RmlUI N&C System Interface implementation.
+// RmlUI PH System Interface implementation.
 // 
 // Uses the refresh API and is render agnostic.
 //

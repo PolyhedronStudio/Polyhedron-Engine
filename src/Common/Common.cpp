@@ -1061,7 +1061,7 @@ void Qcommon_Init(int argc, char **argv)
 
     Com_AddConfigFile(COM_POSTINIT_CFG, FS_TYPE_REAL);
 
-    // N&C: Tell us whether we have an initialized dedicated server, or a client that has been initialized.
+    // PH: Tell us whether we have an initialized dedicated server, or a client that has been initialized.
     if (!dedicated->integer) {
         Com_Printf("====== " PRODUCT " - Client Initialized ======\n\n");
     } else {

@@ -3,7 +3,7 @@
 //
 // Shared/Math/color.h
 //
-// N&C Math Library: Color
+// PH Math Library: Color
 //
 #ifndef __INC_SHARED_MATH_COLOR_H__
 #define __INC_SHARED_MATH_COLOR_H__

@@ -411,7 +411,7 @@ void DefaultGamemode::InflictRadiusDamage(SVGBaseEntity* inflictor, SVGBaseEntit
     // Actual entity loop pointer.
     SVGBaseEntity* ent = nullptr;
 
-    // N&C: From Yamagi Q2, to prevent issues.
+    // PH: From Yamagi Q2, to prevent issues.
     if (!inflictor || !attacker) {
         return;
     }

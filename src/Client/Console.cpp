@@ -909,7 +909,7 @@ static void Con_DrawSolidConsole(void)
             text = "sounds";
             break;
         default:
-            // N&C: Allow for custom load screen states.
+            // PH: Allow for custom load screen states.
             text = CL_GM_GetMediaLoadStateName(con.loadstate);
             break;
         }

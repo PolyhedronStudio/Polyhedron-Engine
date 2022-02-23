@@ -94,11 +94,17 @@ struct EntityState {
     //! Extended model indices.
     int32_t modelIndex2 = 0, modelIndex3 = 0, modelIndex4 = 0;
 
+    //----------------------------------------------------------
+    //! Server start time of current animation.
+    uint32_t animationStartTime = 0;
+    //! Animation index in the IQM data.
+    uint32_t animationIndex = 0;
     //! Current animation frame the entity is at.
     float animationFrame = 0.f;
     //! Current animation playback framerate.
     float animationFramerate = 0.f;
-
+    //----------------------------------------------------------
+    
     //! Model skin number.
     int32_t skinNumber = 0;
     //! Entity Effects. (Rotating etc.)

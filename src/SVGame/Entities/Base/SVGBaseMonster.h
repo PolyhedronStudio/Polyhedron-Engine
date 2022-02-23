@@ -35,18 +35,41 @@ public:
     *   Interface functions.
     *
     ***/
+    virtual void Think() override;
     virtual void Precache() override;
     virtual void Spawn() override;
 
+    // Overrided to automatically fetch model handle.
+    inline void SetModelIndex(const int32_t& index) { 
+        // Base set model index.
+        Base::SetModelIndex(index);
+
+        // Acquire handle.
+	    //modelHandle = gi.GetModelByHandle(index);
+    }
+
+    // Animation functions.
+    virtual void ProcessAnimation();
 
     /***
     * 
     *   Entity functions.
     * 
     ***/
+
     /**
     *   @return The maximum ammo cap limit to carry around for this ammo type.
     **/
+    // Set animation.
+    virtual inline void SetAnimation(uint32_t index) {
+        animationIndex = index;
+        animationStartTime = level.time;
+    }
+
+    // Set framerate. (1.0f = fps of iqm.)
+    virtual inline void SetAnimationFramerate(float framerate) {
+        animationFramerate = framerate;
+    }
     //virtual uint32_t GetCapLimit() { return 0; }
     
 
@@ -62,6 +85,25 @@ public:
     //}
 
 protected:
+    /***
+    * 
+    *   Animation State Related.
+    *
+    ***/
+
+    //! The index of the animation we're playing. (0 = static or none)
+    short animationIndex = 0;
+
+    //! The time the current(thus also last) animation started.
+    float animationStartTime = 0.f;
+
+    //! The framerate the current animation is playing at.
+    float animationFramerate = 1.0f;
+
+    //! Are we animating?
+    qboolean isAnimating = false;
+
+
     /***
     * 
     *   Monster Logic function pointers.

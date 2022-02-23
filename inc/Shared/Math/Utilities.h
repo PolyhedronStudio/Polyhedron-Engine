@@ -3,7 +3,7 @@
 //
 // Shared/Math/utilities.h
 //
-// N&C Math Library: Utilities
+// PH Math Library: Utilities
 // 
 // Contains utility functions used elsewhere by the math library, and/or in 
 // game and engine code. 

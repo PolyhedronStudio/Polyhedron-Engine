@@ -708,7 +708,7 @@ struct SVGTrace {
     // The impacted entity, or `NULL`.
     SVGBaseEntity *ent;   // Not set by CM_*() functions
 
-    // N&C: Custom added.
+    // PH: Custom added.
     vec3_t		offsets[8];	// [signBits][x] = either size[0][x] or size[1][x]
 };
 

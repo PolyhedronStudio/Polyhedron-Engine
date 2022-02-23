@@ -104,7 +104,7 @@ void CL_PrepareMedia(void)
     // register sounds.
     S_BeginRegistration();
 
-    // N&C: Pass over loading to the CG Module so it can actively
+    // PH: Pass over loading to the CG Module so it can actively
     // manage the load state. This is useful for load screen information.
     CL_GM_LoadWorldMedia();
 

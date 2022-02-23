@@ -357,7 +357,7 @@ void SCR_CenterPrint(const char* str)
     // echo it to the console
     Com_LPrintf(PRINT_ALL, "%s\n", scr_centerstring);
 
-    // N&C: We call into the client so it can clear the previous notify times.
+    // PH: We call into the client so it can clear the previous notify times.
     // (these are set at realtime).
     clgi.Con_ClearNotify();
 }
@@ -853,7 +853,7 @@ void SCR_RegisterMedia(void)
 {
     int     i, j;
 
-    // N&C: We register these here, once again. The client has its own
+    // PH: We register these here, once again. The client has its own
     // internally. However, we want to give the CG Module the option to
     // register their own, and for that... We have this piece of code around :)
     for (i = 0; i < 2; i++)

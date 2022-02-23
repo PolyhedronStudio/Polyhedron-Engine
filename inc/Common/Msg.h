@@ -108,7 +108,7 @@ vec3_t  MSG_ReadVector3(void);
 #endif
 void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCommand* cmd);
 int     MSG_ParseEntityBits(int* bits);
-void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags);
+void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, int32_t bits, EntityStateMessageFlags flags);
 #if USE_CLIENT
 void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags);
 #endif

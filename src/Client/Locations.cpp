@@ -94,7 +94,7 @@ void LOC_LoadLocations(void)
                 Com_WPrintf("Line %d is incomplete in %s\n", line, path);
             } else {
                 loc = LOC_Alloc(Cmd_RawArgsFrom(3));
-                // N&C: FF Precision.
+                // PH: FF Precision.
                 loc->origin[0] = atof(Cmd_Argv(0));
                 loc->origin[1] = atof(Cmd_Argv(1));
                 loc->origin[2] = atof(Cmd_Argv(2));
@@ -360,7 +360,7 @@ static void LOC_Write_f(void)
     count = 0;
     LIST_FOR_EACH(location_t, loc, &cl_locations, entry) {
         FS_FPrintf(f, "%d %d %d %s\n",
-                    // N&C: FF Precision.
+                    // PH: FF Precision.
                     (loc->origin[0]),
                     (loc->origin[1]),
                     (loc->origin[2]),

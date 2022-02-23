@@ -192,7 +192,7 @@ typedef struct {
     const char *(*argv)(int n);     // C++20: char*
     const char *(*args)(void);      // concatenation of all argv >= 1 // C++20: char*
 
-    // N&C: Stuff Cmd.
+    // PH: Stuff Cmd.
     void (*StuffCmd) (Entity* pent, const char* pszCommand); // C++20: STRING: Added const to char*
     
     // add commands to the server console as if they were typed in

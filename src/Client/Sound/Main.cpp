@@ -79,7 +79,7 @@ static cvar_t   *s_enable;
 static cvar_t   *s_auto_focus;
 static cvar_t   *s_swapstereo;
 
-// N&C: Moved to ClientState
+// PH: Moved to ClientState
 //extern qboolean snd_is_underwater;
 //qboolean snd_is_underwater_enabled;
 

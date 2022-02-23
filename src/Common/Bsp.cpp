@@ -1578,7 +1578,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
         return filelen;
     }
 
-    // N&C: BSP: Version check, currently supports ID and QBSP formats.
+    // PH: BSP: Version check, currently supports ID and QBSP formats.
     // byte swap and validate the header
     header = (dheader_t *)buf;
     if (LittleLong(header->ident) != IDBSPHEADER &&

@@ -1020,7 +1020,7 @@ static void CL_Seek_f(void)
     memset(&cl.oldframe, 0, sizeof(cl.oldframe));
 
     // clear old effects
-    // N&C: Inform the CG Module to clear effects for demo playback seeking.
+    // PH: Inform the CG Module to clear effects for demo playback seeking.
     CL_GM_DemoSeek();
 
     // fix time delta

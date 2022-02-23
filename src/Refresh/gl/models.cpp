@@ -274,7 +274,7 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
         return Q_ERR_TOO_MANY;
     if (header.num_tris < 1)
         return Q_ERR_TOO_FEW;
-    // N&C: 
+    // PH: 
     if (header.num_tris > TESS_MAX_INDICES / 3)
         return Q_ERR_TOO_MANY;
     if (header.num_skins > MAX_ALIAS_SKINS)

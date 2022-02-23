@@ -103,7 +103,7 @@ extern cvar_t *cl_renderdemo_fps;
 ClientStatic cls;
 ClientState  cl;
 
-// N&C: Client shared structure. used to access entities etc in CG Module.
+// PH: Client shared structure. used to access entities etc in CG Module.
 ClientShared cs;
 
 // used for executing stringcmds
@@ -767,7 +767,7 @@ void CL_Disconnect(ErrorType type)
     //cvar_t *info_in_bspmenu = Info_SetValueForKey("in_bspmenu")
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
-    // N&C: Call into the CG Module to inform that we're disconnected.
+    // PH: Call into the CG Module to inform that we're disconnected.
     CL_GM_ClientDisconnect();
 
     if (cls.connectionState > ClientConnectionState::Disconnected && !cls.demo.playback) {
@@ -1333,7 +1333,7 @@ static void CL_ConnectionlessPacket(void)
         //cls.connect_count = 0;
 
         // Parse additional parameters
-        int protocolFound = 0; // N&C: Added in to ensure we find a protocol, otherwise warn the player.
+        int protocolFound = 0; // PH: Added in to ensure we find a protocol, otherwise warn the player.
 
         j = Cmd_Argc();
         for (i = 2; i < j; i++) {
@@ -1590,7 +1590,7 @@ void CL_UpdateUserinfo(cvar_t *var, from_t from)
     }
 
 
-    // N&C: Allow the CG Module to work with it.
+    // PH: Allow the CG Module to work with it.
     CL_GM_ClientUpdateUserInfo(var, from);
 
     // check for the same variable being modified twice
@@ -1698,7 +1698,7 @@ void CL_Begin(void)
 {
     Cvar_FixCheats();
 
-    // N&C: Prepare media loading.
+    // PH: Prepare media loading.
     CL_PrepareMedia();
 
     // TODO: Move over to the CG Module.
@@ -2340,7 +2340,7 @@ void CL_RestartFilesystem(qboolean total)
 
         // Load client screen media first.
         SCR_RegisterMedia();
-        // N&C: Inform the CG Module about the registration of media.
+        // PH: Inform the CG Module about the registration of media.
         CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
@@ -2401,7 +2401,7 @@ void CL_RestartRefresh(qboolean total)
         
         // Load client screen media first.
         SCR_RegisterMedia();
-        // N&C: Inform the CG Module about the registration of media.
+        // PH: Inform the CG Module about the registration of media.
         CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
@@ -2702,7 +2702,7 @@ static void CL_InitLocal(void)
     Cmd_AddMacro("cl_pps", CL_Pps_m);   // packets per second
     Cmd_AddMacro("cl_ping", CL_Ping_m);
     Cmd_AddMacro("cl_lag", CL_Lag_m);
-    // N&C: Moved over to the client game.
+    // PH: Moved over to the client game.
     //Cmd_AddMacro("cl_health", CL_Health_m);
     //Cmd_AddMacro("cl_ammo", CL_Ammo_m);
     //Cmd_AddMacro("cl_armor", CL_Armor_m);
@@ -2717,7 +2717,7 @@ static void CL_InitLocal(void)
 	Cmd_AddMacro("cl_hdr_color", CL_HdrColor_m);
 	Cmd_AddMacro("cl_resolution_scale", CL_ResolutionScale_m);
 
-    // N&C: Initialize the game progs.
+    // PH: Initialize the game progs.
     CL_GM_Init();
 
     // Fetch CVars that should've been initialized by CG Module.
@@ -3237,7 +3237,7 @@ void CL_Init(void)
     // start with full screen console
     cls.key_dest = KEY_CONSOLE;
     
-    // N&C: Load our client game module here.
+    // PH: Load our client game module here.
     CL_InitGameProgs();
 
 #ifdef _WIN32
@@ -3303,7 +3303,7 @@ void CL_Shutdown(void)
     // Shutdown the RMLUI
     RMLUI_Shutdown();
 
-    // N&C: Notify the CG Module.
+    // PH: Notify the CG Module.
     CL_GM_Shutdown();
 
     CL_Disconnect(ERR_FATAL);
@@ -3319,7 +3319,7 @@ void CL_Shutdown(void)
     Con_Shutdown();
     
     CL_ShutdownRefresh();
-    // N&C: Unload the client game dll.
+    // PH: Unload the client game dll.
     CL_ShutdownGameProgs();
 
     CL_WriteConfig();

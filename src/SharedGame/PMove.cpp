@@ -79,7 +79,7 @@ constexpr float PM_GROUND_DIST_TRICK = 16.f;
 //-----------------
 // Speed constants; intended velocities are clipped to these.
 //-----------------
-constexpr float PM_SPEED_AIR = 285.f; // N&C: Tweaked - old value: 350
+constexpr float PM_SPEED_AIR = 285.f; // PH: Tweaked - old value: 350
 constexpr float PM_SPEED_CURRENT = 100.f;
 constexpr float PM_SPEED_DUCK_STAND = 200.f;
 constexpr float PM_SPEED_DUCKED = 140.f;

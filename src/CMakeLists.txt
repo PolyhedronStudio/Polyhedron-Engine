@@ -334,7 +334,7 @@ SET(HEADERS_CLIENT
 	Client/Sound/QAL/fixed.h
 )
 
-###################### Client.
+###################### Server.
 SET(SRC_SERVER
 	Server/Commands.cpp
 	Server/Entities.cpp
@@ -464,22 +464,22 @@ SET(HEADERS_SHARED
 	# Other shared lib functionalities.
 	../inc/Shared/CLGame.h
 	../inc/Shared/CLTypes.h
-	../inc/Shared/collision.h
-	../inc/Shared/common.h
-	../inc/Shared/config.h
-	../inc/Shared/endian.h 
-	../inc/Shared/svgame.h 
-	../inc/Shared/keys.h 
-	../inc/Shared/list.h 
+	../inc/Shared/Collision.h
+	../inc/Shared/Common.h
+	../inc/Shared/Config.h
+	../inc/Shared/Endian.h 
+	../inc/Shared/SVGame.h 
+	../inc/Shared/Keys.h 
+	../inc/Shared/List.h 
 	../inc/Shared/Math.h 
-	../inc/Shared/messaging.h 
-	../inc/Shared/platform.h
-	../inc/Shared/refresh.h 
-	../inc/Shared/qstring.h 
-	../inc/Shared/strings.h
-	../inc/Shared/shared.h 
-	../inc/Shared/tickrate.h 
-	../inc/Shared/ui.h 
+	../inc/Shared/Messaging.h 
+	../inc/Shared/Platform.h
+	../inc/Shared/Refresh.h 
+	../inc/Shared/QString.h 
+	../inc/Shared/Strings.h
+	../inc/Shared/Shared.h 
+	../inc/Shared/TickRate.h 
+	../inc/Shared/UI.h 
 )
 SET(SRC_SHARED
 	Shared/Math/plane.cpp

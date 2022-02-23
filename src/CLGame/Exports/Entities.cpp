@@ -43,22 +43,22 @@ void ClientGameEntities::Event(int32_t number) {
     }
 
     // Fetch the client entity.
-    ClientEntity* currentEntity = &cs->entities[number];
+    ClientEntity* clientEntity = &cs->entities[number];
 
     // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((currentEntity->current.effects & EntityEffectType::Teleporter) && CLG_FRAMESYNC()) {
-        CLG_TeleporterParticles(currentEntity->current.origin);
+    if ((clientEntity->current.effects & EntityEffectType::Teleporter) && CLG_FRAMESYNC()) {
+        CLG_TeleporterParticles(clientEntity->current.origin);
     }
 
     // Switch to specific execution based on a unique Event ID.
-    switch (currentEntity->current.eventID) {
+    switch (clientEntity->current.eventID) {
         case EntityEvent::ItemRespawn:
             clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
-            CLG_ItemRespawnParticles(currentEntity->current.origin);
+            CLG_ItemRespawnParticles(clientEntity->current.origin);
             break;
         case EntityEvent::PlayerTeleport:
             clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
-            CLG_TeleportParticles(currentEntity->current.origin);
+            CLG_TeleportParticles(clientEntity->current.origin);
             break;
         case EntityEvent::Footstep:
             if (cl_footsteps->integer)
@@ -86,7 +86,7 @@ void ClientGameEntities::AddPacketEntities() {
     // State of the current entity.
     EntityState* entityState = nullptr;
     // Current processing client entity ptr.
-    ClientEntity* currentEntity = nullptr;
+    ClientEntity* clientEntity = nullptr;
     // Client Info.
     ClientInfo*  clientInfo = nullptr;
     // Entity specific effects. (Such as whether to rotate or not.)
@@ -111,9 +111,9 @@ void ClientGameEntities::AddPacketEntities() {
         // Fetch the state of the given entity index.
         entityState = &cl->entityStates[entityIndex];
         // Fetch the actual entity to process based on the entity's state index number.
-        currentEntity = &cs->entities[entityState->number];
+        clientEntity = &cs->entities[entityState->number];
         // Setup the render entity ID for the renderer.
-        renderEntity.id = currentEntity->id + RESERVED_ENTITIY_COUNT;
+        renderEntity.id = clientEntity->id + RESERVED_ENTITIY_COUNT;
 
         //
         // Effects.
@@ -134,28 +134,42 @@ void ClientGameEntities::AddPacketEntities() {
             renderEntity.frame = autoAnimation;
         else if (effects & EntityEffectType::AnimCycleAll30hz)
             renderEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
-        else
-            renderEntity.frame = entityState->animationFrame;
+	    else {
+    	    // Fetch the iqm animation index data.
+            if (clientEntity->current.animationIndex != 0 && clientEntity->current.modelIndex != 0) {
+		        model_t* iqmData = clgi.MOD_ForHandle(clientEntity->current.modelIndex);
+		Com_DPrint("22222222222222222222WOW!!!\n");
+                if (iqmData) {
+			        Com_DPrint("WOW!!!\n");
+                }
+            } else {
+		        renderEntity.frame = entityState->animationFrame;
+		        renderEntity.oldframe = clientEntity->prev.animationFrame;
+		        renderEntity.backlerp = 1.0 - cl->lerpFraction;
+            }
+        }
+        
 
         // Optionally remove the glowing effect.
         if (cl_noglow->integer)
             renderEffects &= ~RenderEffects::Glow;
 
         // Setup the proper lerp and model frame to render this pass.
-        renderEntity.oldframe = currentEntity->prev.animationFrame;
-        renderEntity.backlerp = 1.0 - cl->lerpFraction;
+        // Moved into the if statement's else case up above.
+        //renderEntity.oldframe = clientEntity->prev.animationFrame;
+        //renderEntity.backlerp = 1.0 - cl->lerpFraction;
 
         //
         // Setup renderEntity origin.
         //
         if (renderEffects & RenderEffects::FrameLerp) {
             // Step origin discretely, because the model frames do the animation properly.
-            renderEntity.origin = currentEntity->current.origin;
-            renderEntity.oldorigin = currentEntity->current.oldOrigin;
+            renderEntity.origin = clientEntity->current.origin;
+            renderEntity.oldorigin = clientEntity->current.oldOrigin;
         } else if (renderEffects & RenderEffects::Beam) {
             // Interpolate start and end points for beams
-            renderEntity.origin = vec3_mix(currentEntity->prev.origin, currentEntity->current.origin, cl->lerpFraction);
-            renderEntity.oldorigin = vec3_mix(currentEntity->prev.oldOrigin, currentEntity->current.oldOrigin, cl->lerpFraction);
+            renderEntity.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+            renderEntity.oldorigin = vec3_mix(clientEntity->prev.oldOrigin, clientEntity->current.oldOrigin, cl->lerpFraction);
         } else {
             if (entityState->number == cl->frame.clientNumber + 1) {
                 // In case of this being our actual client entity, we use the predicted origin.
@@ -163,7 +177,7 @@ void ClientGameEntities::AddPacketEntities() {
                 renderEntity.oldorigin = cl->playerEntityOrigin;
             } else {
                 // Ohterwise, just neatly interpolate the origin.
-                renderEntity.origin = vec3_mix(currentEntity->prev.origin, currentEntity->current.origin, cl->lerpFraction);
+                renderEntity.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
                 // Neatly copy it as the renderEntity's oldorigin.
                 renderEntity.oldorigin = renderEntity.origin;
             }
@@ -171,7 +185,7 @@ void ClientGameEntities::AddPacketEntities() {
 
 	    // Draw debug bounding box for client entity.
 	    if (renderEffects & RenderEffects::DebugBoundingBox) {
-	        CLG_DrawDebugBoundingBox(currentEntity->lerpOrigin, currentEntity->mins, currentEntity->maxs);
+	        CLG_DrawDebugBoundingBox(clientEntity->lerpOrigin, clientEntity->mins, clientEntity->maxs);
 	    }
 
         // tweak the color of beams
@@ -242,7 +256,7 @@ void ClientGameEntities::AddPacketEntities() {
             renderEntity.angles = cl->playerEntityAngles;
         } else {
             // Otherwise, lerp angles by default.
-            renderEntity.angles = vec3_mix(currentEntity->prev.angles, currentEntity->current.angles, cl->lerpFraction);
+            renderEntity.angles = vec3_mix(clientEntity->prev.angles, clientEntity->current.angles, cl->lerpFraction);
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (entityState->modelIndex == 255 && cl_rollhack->integer) {
@@ -404,10 +418,10 @@ void ClientGameEntities::AddPacketEntities() {
         // Add automatic particle trail effects where desired.
         if (effects & ~EntityEffectType::Rotate) {
             if (effects & EntityEffectType::Blaster) {
-                CLG_BlasterTrail(currentEntity->lerpOrigin, renderEntity.origin);
+                CLG_BlasterTrail(clientEntity->lerpOrigin, renderEntity.origin);
                 V_AddLight(renderEntity.origin, 200, 0.6f, 0.4f, 0.12f);
             } else if (effects & EntityEffectType::Gib) {
-                CLG_DiminishingTrail(currentEntity->lerpOrigin, renderEntity.origin, currentEntity, effects);
+                CLG_DiminishingTrail(clientEntity->lerpOrigin, renderEntity.origin, clientEntity, effects);
             } else if (effects & EntityEffectType::Torch) {
                 const float anim = sinf((float)renderEntity.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
                 const float offset = anim * 0.0f;
@@ -423,8 +437,8 @@ void ClientGameEntities::AddPacketEntities() {
         }
 
     skip:
-        // Assign renderEntity origin to currentEntity lerp origin in the case of a skip.
-        currentEntity->lerpOrigin = renderEntity.origin;
+        // Assign renderEntity origin to clientEntity lerp origin in the case of a skip.
+        clientEntity->lerpOrigin = renderEntity.origin;
     }
 }
 

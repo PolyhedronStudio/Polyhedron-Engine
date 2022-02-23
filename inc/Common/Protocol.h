@@ -46,7 +46,7 @@ constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_FEATURE_UPDATE = 1341;
 constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_CURRENT = 1340;
 
 // This is used to ensure that the protocols in use match up, and support each other.
-qboolean static inline NAC_PROTOCOL_SUPPORTED(uint32_t x) {
+qboolean static inline POLYHEDRON_PROTOCOL_SUPPORTED(uint32_t x) {
     return x >= PROTOCOL_VERSION_POLYHEDRON_MINIMUM && x <= PROTOCOL_VERSION_POLYHEDRON_CURRENT;
 }
 
@@ -227,40 +227,113 @@ typedef enum {
 // EntityState communication
 
 // Try to pack the common update flags into the first byte
-#define U_ORIGIN_X  (1<<0)          // was named: U_ORIGIN_X
-#define U_ORIGIN_Y  (1<<1)          // was named: U_ORIGIN_Y
-#define U_ANGLE_Y   (1<<2)          // was named: U_ANGLE_Y
-#define U_ANGLE_Z   (1<<3)          // was named: U_ANGLE_Z
-#define U_FRAME     (1<<4)          // frame is a byte
-#define U_EVENT     (1<<5)
-#define U_REMOVE    (1<<6)          // REMOVE this entity, don't add it
-#define U_MOREBITS1 (1<<7)          // read one additional byte
+//#define U_ORIGIN_X  (1<<0)          // was named: U_ORIGIN_X
+//#define U_ORIGIN_Y  (1<<1)          // was named: U_ORIGIN_Y
+//#define U_ANGLE_Y   (1<<2)          // was named: U_ANGLE_Y
+//#define U_ANGLE_Z   (1<<3)          // was named: U_ANGLE_Z
+//#define U_FRAME     (1<<4)          // frame is a byte
+//#define U_EVENT     (1<<5)
+//#define U_REMOVE    (1<<6)          // REMOVE this entity, don't add it
+//#define U_MOREBITS1 (1<<7)          // read one additional byte
+//
+//// Second byte
+//#define U_NUMBER16  (1<<8)          // NUMBER8 is implicit if not set
+//#define U_ORIGIN_Z  (1<<9)         // was named: U_ORIGIN_Z
+//#define U_ANGLE_X   (1<<10)        // was named: U_ANGLE_X
+//#define U_MODEL     (1<<11)
+//#define U_RENDERFX8 (1<<12)        // fullbright, etc
+////#define U_ANGLE16   (1<<13)
+//#define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
+//#define U_MOREBITS2 (1<<15)        // read one additional byte
+//
+//// Third byte
+//#define U_SKIN8         (1<<16)
+//#define U_FRAME16       (1<<17)     // frame is a short
+//#define U_RENDERFX16    (1<<18)     // 8 + 16 = 32
+//#define U_EFFECTS16     (1<<19)     // 8 + 16 = 32
+//#define U_MODEL2        (1<<20)     // weapons, flags, etc
+//#define U_MODEL3        (1<<21)
+//#define U_MODEL4        (1<<22)
+//#define U_MOREBITS3     (1<<23)     // read one additional byte
+//
+//// fourth byte
+//#define U_OLDORIGIN     (1<<24)     // FIXME: get rid of this
+//#define U_SKIN16        (1<<25)
+//#define U_SOUND         (1<<26)
+//#define U_SOLID         (1<<27)
+//#define U_ANIMATION_STARTTIME (1 << 28) 
+//#define U_ANIMATION_INDEX (1 << 29)
+//#define U_ANIMATION_FRAMERATE (1 << 30)
+
+static constexpr uint32_t BIT_NUMBER = (1 << 0);
+static constexpr uint32_t BIT_REMOVE = (1 << 6);
+
+static constexpr uint32_t BIT_ORIGIN_X = (1 << 2);
+static constexpr uint32_t BIT_ORIGIN_Y = (1 << 3);
+static constexpr uint32_t BIT_ORIGIN_Z = (1 << 4);
+
+static constexpr uint32_t BIT_ANGLE_X = (1 << 5);
+static constexpr uint32_t BIT_ANGLE_Y = (1 << 1);
+static constexpr uint32_t BIT_ANGLE_Z = (1 << 7);
+
+static constexpr uint32_t BIT_FRAME = (1 << 8);
+static constexpr uint32_t BIT_ANIMATION_INDEX = (1 << 9);
+static constexpr uint32_t BIT_ANIMATION_START_TIME = (1 << 10);
+static constexpr uint32_t BIT_ANIMATION_FRAMERATE = (1 << 11);
+
+static constexpr uint32_t BIT_MODEL = (1 << 12);
+static constexpr uint32_t BIT_MODEL2 = (1 << 13);
+static constexpr uint32_t BIT_MODEL3 = (1 << 14);
+static constexpr uint32_t BIT_MODEL4 = (1 << 15);
+
+static constexpr uint32_t BIT_EVENT_ID = (1 << 16);
+
+static constexpr uint32_t BIT_EFFECTS = (1 << 17);
+static constexpr uint32_t BIT_RENDER_EFFECTS = (1 << 18);
+
+static constexpr uint32_t BIT_SKIN = (1 << 19);
+static constexpr uint32_t BIT_OLD_ORIGIN = (1 << 20);
+
+static constexpr uint32_t BIT_SOUND = (1 << 21);
+static constexpr uint32_t BIT_SOLID = (1 << 22);
+
+#define U_ORIGIN_X (1 << 0)  // was named: U_ORIGIN_X
+#define U_ORIGIN_Y (1 << 1)  // was named: U_ORIGIN_Y
+#define U_ANGLE_Y (1 << 2)   // was named: U_ANGLE_Y
+#define U_ANGLE_Z (1 << 3)   // was named: U_ANGLE_Z
+#define U_FRAME (1 << 4)     // frame is a byte
+#define U_EVENT (1 << 5)
+#define U_REMOVE (1 << 6)     // REMOVE this entity, don't add it
+#define U_MOREBITS1 (1 << 7)  // read one additional byte
 
 // Second byte
-#define U_NUMBER16  (1<<8)          // NUMBER8 is implicit if not set
-#define U_ORIGIN_Z  (1<<9)         // was named: U_ORIGIN_Z
-#define U_ANGLE_X   (1<<10)        // was named: U_ANGLE_X
-#define U_MODEL     (1<<11)
-#define U_RENDERFX8 (1<<12)        // fullbright, etc
+#define U_NUMBER16 (1 << 8)  // NUMBER8 is implicit if not set
+#define U_ORIGIN_Z (1 << 9)  // was named: U_ORIGIN_Z
+#define U_ANGLE_X (1 << 10)  // was named: U_ANGLE_X
+#define U_MODEL (1 << 11)
+#define U_RENDERFX8 (1 << 12)  // fullbright, etc
 //#define U_ANGLE16   (1<<13)
-#define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
-#define U_MOREBITS2 (1<<15)        // read one additional byte
+#define U_EFFECTS8 (1 << 14)   // autorotate, trails, etc
+#define U_MOREBITS2 (1 << 15)  // read one additional byte
 
 // Third byte
-#define U_SKIN8         (1<<16)
-#define U_FRAME16       (1<<17)     // frame is a short
-#define U_RENDERFX16    (1<<18)     // 8 + 16 = 32
-#define U_EFFECTS16     (1<<19)     // 8 + 16 = 32
-#define U_MODEL2        (1<<20)     // weapons, flags, etc
-#define U_MODEL3        (1<<21)
-#define U_MODEL4        (1<<22)
-#define U_MOREBITS3     (1<<23)     // read one additional byte
+#define U_SKIN8 (1 << 16)
+#define U_FRAME16 (1 << 17)	// frame is a short
+#define U_RENDERFX16 (1 << 18)	// 8 + 16 = 32
+#define U_EFFECTS16 (1 << 19)	// 8 + 16 = 32
+#define U_MODEL2 (1 << 20)	// weapons, flags, etc
+#define U_MODEL3 (1 << 21)
+#define U_MODEL4 (1 << 22)
+#define U_MOREBITS3 (1 << 23)  // read one additional byte
 
 // fourth byte
-#define U_OLDORIGIN     (1<<24)     // FIXME: get rid of this
-#define U_SKIN16        (1<<25)
-#define U_SOUND         (1<<26)
-#define U_SOLID         (1<<27)
+#define U_OLDORIGIN (1 << 24)  // FIXME: get rid of this
+#define U_SKIN16 (1 << 25)
+#define U_SOUND (1 << 26)
+#define U_SOLID (1 << 27)
+#define U_ANIMATION_STARTTIME (1 << 28)
+#define U_ANIMATION_INDEX (1 << 29)
+#define U_ANIMATION_FRAMERATE (1 << 30)
 
 // ==============================================================
 

@@ -234,7 +234,7 @@ void ClientGameCore::Initialize() {
     clgi.Cmd_Register(cmd_cgmodule);
 
     // Generate a random user name to avoid new users being kicked out of MP servers.
-    // The default N&C config files set the user name to "Player", same as the cvar initialization above.
+    // The default PH config files set the user name to "Player", same as the cvar initialization above.
     if (PH_StringCaseCompare(info_name->string, "Player") == 0)     {
         int random_number = rand() % 10000;
         char buf[MAX_CLIENT_NAME];
