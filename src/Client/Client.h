@@ -49,7 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Video.h"
 
 // Shared Game includes.
-#include "SharedGame/Protocol.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
+#include "SharedGame/Protocol.h"
 
 #if USE_ZLIB
 #include <zlib.h>
@@ -63,9 +63,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/CLTypes.h"
 
 // PH: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
-extern explosion_t  cl_explosions[MAX_EXPLOSIONS];
-extern ClientEntity  cl_entities[MAX_EDICTS];
-
 extern    ClientState    cl;
 extern    ClientShared   cs;
 
@@ -77,9 +74,7 @@ extern    ClientShared   cs;
 static constexpr double CL_FRAMETIME    = BASE_FRAMETIME;
 static constexpr double CL_1_FRAMETIME  = BASE_1_FRAMETIME;
 static constexpr int32_t CL_FRAMEDIV = BASE_FRAMERATE / 10.0;
-//inline qboolean CL_FRAMESYNC() {
-//    return !(cl.frame.number % CL_FRAMEDIV);
-//}
+
 
 /*
 ==================================================================

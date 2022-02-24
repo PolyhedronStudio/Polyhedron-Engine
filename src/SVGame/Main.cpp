@@ -324,38 +324,6 @@ static void SVG_SetupCVars() {
     cl_monsterfootsteps = gi.cvar("cl_monsterfootsteps", "1", 0);
 }
 
-//
-//=====================
-// SVG_CreateSVGBasePlayerEntities
-//
-// Allocate the client player class entities before hand. No need to redo this all over,
-// that'd just be messy and complicate things more.
-//=====================
-//
-//void SVG_CreateSVGBasePlayerEntities() {
-//    ServerClient* clients = game.GetClients();
-//
-//    // Allocate a classentity for each client in existence.
-//    for (int32_t i = 1; i < game.GetMaxClients() + 1; i++) {
-//        // Fetch server entity.
-//        Entity* serverEntity = &g_entities[i];
-//
-//        // Initialize entity.
-//        SVG_InitEntity(serverEntity);
-//
-//        // Allocate player client class entity 
-//        SVGBasePlayer *playerClientEntity = SVG_CreateClassEntity<SVGBasePlayer>(serverEntity, false); //SVG_SpawnClassEntity(serverEntity, serverEntity->classname);
-//        
-//        // Be sure to reset their inuse, after all, they aren't in use.
-//        playerClientEntity->SetInUse(false);
-//
-//        // Fetch client index.
-//        const int32_t clientIndex = i - 1; // Same as the older: serverEntity - g_entities - 1;
-//
-//        // Assign the designated client to this SVGBasePlayer entity.
-//        playerClientEntity->SetClient(&clients[clientIndex]);
-//    }
-//}
 
 
 //

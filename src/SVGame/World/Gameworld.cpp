@@ -1,3 +1,10 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+***/
 // Core.
 #include "../ServerGameLocal.h"
 

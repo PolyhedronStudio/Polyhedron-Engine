@@ -299,13 +299,10 @@ static void CL_SetActiveState(void) {
         Cmd_ExecTrigger("#cl_enterlevel");
     }
 }
-/*
-==================
-CL_DeltaFrame
 
-A valid frame has been parsed.
-==================
-*/
+/**
+*   @brief  A valid frame has been parsed.
+**/
 void CL_DeltaFrame(void)
 {
     // Getting a valid frame message ends the connection process.

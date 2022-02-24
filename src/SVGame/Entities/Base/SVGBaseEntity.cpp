@@ -185,7 +185,7 @@ qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::
 void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
     // Stop mapversion from causing warnings.
 	if ( key == "classname" ) {
-		SetClassname( value.c_str() );
+		SetClassname( value );
 	}
 	// Stop mapversion from causing warnings.
 	else if (key == "mapversion") {
@@ -297,7 +297,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 		// Set SpawnFlags.
 		SetSpawnFlags(parsedSpawnFlags);
 	} else {
-	    gi.DPrintf("Warning: Entity[#%i:%s] has unknown Key/Value['%s','%s']\n", GetNumber(), GetClassname(), key.c_str(), value.c_str());
+	    SVG_DPrint("Warning: Entity[#" + std::to_string(GetNumber()) + ":" + GetClassname() + "] has unknown Key/Value['" + key + "','" + value + "']\n");
 	}
 }
 
