@@ -22,6 +22,7 @@ class IGamemode;
 
 #include "../Entities.h"
 #include "../Entities/Worldspawn.h"
+
 /**
 *	@brief GameWorld regulates the lifetime management of all entities.
 * 
@@ -104,6 +105,7 @@ public:
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
     Entity* ObtainFreeServerEntity();
+
     /**
 	*   @brief  Creates and assigns a class entity to the given server entity based on the classname.
     *

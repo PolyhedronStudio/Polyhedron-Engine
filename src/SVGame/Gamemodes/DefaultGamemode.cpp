@@ -1216,22 +1216,11 @@ void DefaultGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* i
         // Also we gotta adjust that ->classname thing, but this is a template, cheers :)
         if (!message.empty()) {
             gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassname(), messageAddition.c_str());
-        //    if (deathmatch->value) {
-        //        if (friendlyFire)
-        //            attacker->GetClient()->respawn.score--;
-        //        else
-        //            attacker->GetClient()->respawn.score++;
-        //    }
-        //    return;
         }
     }
 
     // 
     gi.BPrintf(PRINT_MEDIUM, "%s died.\n", self->GetClient()->persistent.netname);
-
-    // WID: We can uncomment these in case we end up making a SinglePlayerMode after all.
-    //if (deathmatch->value)
-    //    self->GetClient()->respawn.score--;
 }
 
 
@@ -1318,45 +1307,6 @@ void DefaultGamemode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
         // We might as well error out at this point.
         gi.Error("Couldn't find spawn point %s", game.spawnpoint);
     }
-    // 
-    //// Pointer to our spawn point to be.
-    //SVGBaseEntity *spawnPoint = nullptr;
-
-    //// Find a single player start spot
-    //if (!spawnPoint) {
-    //    // Find a spawnpoint that has a target:
-    //    for (auto* result : g_baseEntities | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>()) {
-    //        // Continue in case there is no comparison to it with the possible target
-    //        // of the InfoPlayerStart
-    //        if (!game.spawnpoint[0])
-    //            continue;
-
-    //        if (result->GetTargetName() == game.spawnpoint) {
-    //            spawnPoint = result;
-    //            break;
-    //        }
-    //    }
-    //}
-
-    //// Since we still haven't found one with a target, do it again, but this time without
-    //// a target requirement.
-    //if (!spawnPoint) {
-    //    for (auto* result : g_baseEntities | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>()) {
-    //        if (result) {
-    //            spawnPoint = result;
-    //            break;
-    //        }
-    //    }
-    //}
-
-    //// Setup player origin and angles, also raise him 9 units above the ground to be sure it fits.
-    //if (spawnPoint) {
-    //    origin = spawnPoint->GetOrigin();
-    //    origin.z += 9;
-    //    angles = spawnPoint->GetAngles();
-    //} else {
-    //    gi.Error("Couldn't find spawn point %s", game.spawnpoint);
-    //}
 }
 
 //===============

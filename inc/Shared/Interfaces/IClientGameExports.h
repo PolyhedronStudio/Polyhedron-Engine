@@ -52,16 +52,36 @@ public:
 class IClientGameExportEntities {
 public:
     virtual ~IClientGameExportEntities()  = default;
+     
+    /**
+    *   @brief  Parses and spawns the local class entities in the BSP Entity String.
+    * 
+    *   @details    When a class isn't locally registered, it'll automatically spawn
+    *               a CLGBaseEntity instead which has all the default behaviors that
+    *               you'd expect for it to be functional.
+    * 
+    *   @return True on success.
+    **/
+    virtual qboolean SpawnClassEntities(const char* entities) = 0;
 
-    // Executed whenever an entity event is receieved.
+
+
+
+    /**
+    *   @brief Executed whenever an entity event is receieved.
+    **/
     virtual void Event(int32_t number) = 0;
 
-    // Parse the server frame for server entities to add to our client view.
-    // Also applies special rendering effects to them where desired.
+    /**
+    *   @brief  Parse the server frame for server entities to add to our client view.
+    *           Also applies special rendering effects to them where desired.
+    **/
     virtual void AddPacketEntities() = 0;
 
-    // Add the view weapon render entity to the screen. Can also be used for
-    // other scenarios where a depth hack is required.
+    /**
+    * Add the view weapon render entity to the screen. Can also be used for
+    * other scenarios where a depth hack is required.
+    **/
     virtual void AddViewEntities() = 0;
 };
 

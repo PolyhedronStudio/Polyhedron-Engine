@@ -645,13 +645,25 @@ void CL_InitGameProgs(void)
 //
 //=============================================================================
 //
+
+//===============
+// CL_GM_SpawnClassEntities
 //
+// Spawns local client side class entities.
+//===============
+qboolean CL_GM_SpawnClassEntities(const char* entities) { 
+    if (cge && cge->entities) {
+	    return cge->entities->SpawnClassEntities(entities);
+    }
+
+    return false;
+}
+
 //===============
 // CL_GM_DemoSeek
 // 
 // Called when the client is seeking in a demo playback.
 //===============
-//
 void CL_GM_EntityEvent(int32_t number) {
     if (cge && cge->entities)
         cge->entities->Event(number);

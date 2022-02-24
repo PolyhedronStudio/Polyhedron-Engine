@@ -19,14 +19,21 @@
 //
 //-----------------
 // Destination class for gi.Multicast()
+// 
+// Reliable messages will always arrive even if it takes multiple frames,
+// unreliable messages will accept being dropped by a lag or if a frame's message
+// data has already been pumped to the rim with reliable messages.
+// 
+// It is best to use reliables only for things that are truly cognitively important
+// to clients. Anything else should be put in unreliable messages.
 //-----------------
 struct Multicast {
-    static constexpr int32_t All = 0;
-    static constexpr int32_t PHS = 1;
-    static constexpr int32_t PVS = 2;
-    static constexpr int32_t All_R = 3;
-    static constexpr int32_t PHS_R = 4;
-    static constexpr int32_t PVS_R = 5;
+    static constexpr int32_t All = 0;       // Send an unreliable message to all clients.
+    static constexpr int32_t PHS = 1;       // Send an unreliable message to all clients who are in the possible hearing set.
+    static constexpr int32_t PVS = 2;       // Send an unreliable message to all clients who are in the possible visibility set.
+    static constexpr int32_t All_R = 3;     // Send a reliable message to all clients.
+    static constexpr int32_t PHS_R = 4;     // Send a reliable message to all clients who are in the possible hearing set.
+    static constexpr int32_t PVS_R = 5;     // Send a reliable message to all clients who are in the possible visibility set.
 };
 
 //-----------------
@@ -34,24 +41,25 @@ struct Multicast {
 //-----------------
 struct ClientConnectionState {
     static constexpr int32_t Uninitialized = 0;
-    static constexpr int32_t Disconnected = 1;  // Not talking to a server
-    static constexpr int32_t Challenging = 2;   // Sending getchallenge packets to the server
-    static constexpr int32_t Connecting = 3;    // Sending connect packets to the server
-    static constexpr int32_t Connected = 4;     // Netchan_t established, waiting for ServerCommand::ServerData
-    static constexpr int32_t Loading = 5;       // Loading level data
-    static constexpr int32_t Precached = 6;     // Loaded level data, waiting for ServerCommand::Frame
-    static constexpr int32_t Active = 7;        // Game views should be displayed
-    static constexpr int32_t Cinematic = 8;     // Running a cinematic
+    static constexpr int32_t Disconnected = 1;  // Not talking to a server.
+    static constexpr int32_t Challenging = 2;   // Sending getchallenge packets to the server.
+    static constexpr int32_t Connecting = 3;    // Sending connect packets to the server.
+    static constexpr int32_t Connected = 4;     // Netchan_t established, waiting for ServerCommand::ServerData.
+    static constexpr int32_t Loading = 5;       // Loading level data.
+    static constexpr int32_t Precached = 7;     // Loaded level data, waiting for ServerCommand::Frame.
+    static constexpr int32_t Spawning = 8;      // Spawning local client entities.
+    static constexpr int32_t Active = 9;        // Game views should be displayed.
+    static constexpr int32_t Cinematic = 10;    // Running a cinematic.
 };
 
 //-----------------
 // Run State of the server.
 //-----------------
 struct ServerState {
-    static constexpr int32_t Dead = 0;            // No map loaded
-    static constexpr int32_t Loading = 1;         // Spawning level edicts
-    static constexpr int32_t Game = 2;            // Actively running
-    static constexpr int32_t Pic = 3;             // Showing static picture
+    static constexpr int32_t Dead = 0;            // No map loaded.
+    static constexpr int32_t Loading = 1;         // Spawning level edicts.
+    static constexpr int32_t Game = 2;            // Actively running.
+    static constexpr int32_t Pic = 3;             // Showing static picture.
     static constexpr int32_t Cinematic = 4;
 };
 

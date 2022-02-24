@@ -3740,7 +3740,7 @@ static void fs_game_changed(cvar_t *self)
     CL_RestartFilesystem(false);
 
     Com_AddConfigFile(COM_DEFAULT_CFG, FS_TYPE_REAL);
-    Com_AddConfigFile(COM_NAC_CFG, 0);
+    Com_AddConfigFile(COM_POLY_CFG, 0);
     Com_AddConfigFile(COM_CONFIG_CFG, FS_TYPE_REAL | FS_PATH_GAME);
 
     // If baseq2/autoexec.cfg exists exec it again after default.cfg and config.cfg.

@@ -47,10 +47,10 @@ enum PlayerStateMessageFlags {
 // Entity state messaging flags.
 //---------------
 enum EntityStateMessageFlags {
-    MSG_ES_FORCE = (1 << 0),
-    MSG_ES_NEWENTITY = (1 << 1),
-    MSG_ES_FIRSTPERSON = (1 << 2),
-    MSG_ES_BEAMORIGIN = (1 << 3),
+    MSG_ES_FORCE = (1 << 0),        // Force it whether we got a state to delta from or not.
+    MSG_ES_NEWENTITY = (1 << 1),    // New entity.
+    MSG_ES_FIRSTPERSON = (1 << 2),  // Tells whether the entity state that being parsed is for a firstperson perspective. (This implies a client.)
+    MSG_ES_BEAMORIGIN = (1 << 3),   // Informs the parsing that we're dealing with a beam, so we should treat origins differently.
 };
 
 // Write message buffer.

@@ -1529,7 +1529,7 @@ static void CL_PacketEvent(void)
     CL_ParseServerMessage();
 
     // if recording demo, write the message out
-    if (cls.demo.recording && !cls.demo.paused && CL_FRAMESYNC()) {
+    if (cls.demo.recording && !cls.demo.paused) {
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
 

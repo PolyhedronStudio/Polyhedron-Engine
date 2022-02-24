@@ -1540,8 +1540,8 @@ static void SV_PrepWorldFrame(void)
 
     sv.tracecount = 0;
 
-    if (!SV_FRAMESYNC)
-        return;
+    //if (!SV_FRAMESYNC)
+    //    return;
 
     for (i = 1; i < ge->numberOfEntities; i++) {
         ent = EDICT_NUM(i);

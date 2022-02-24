@@ -690,8 +690,8 @@ void SV_SendClientMessages(void)
         if (client->connectionState != ConnectionState::Spawned || client->download.bytes || client->nodata)
             goto finish;
 
-        if (!SV_CLIENTSYNC(client))
-            continue;
+        //if (!SV_CLIENTSYNC(client))
+        //    continue;
 
         // if the reliable message overflowed,
         // drop the client (should never happen)

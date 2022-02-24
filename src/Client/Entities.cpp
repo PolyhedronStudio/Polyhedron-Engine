@@ -242,7 +242,7 @@ duplicate:
 /**
 *   @brief  Set the client state to active after having precached all data.
 **/
-static void SetActiveState(void) {
+static void CL_SetActiveState(void) {
     // Switch to an active connection state.
     cls.connectionState = ClientConnectionState::Active;
 
@@ -310,7 +310,11 @@ void CL_DeltaFrame(void)
 {
     // Getting a valid frame message ends the connection process.
     if (cls.connectionState == ClientConnectionState::Precached) {
-	    SetActiveState();
+	    // Spawn all local class entities.
+	    CL_GM_SpawnClassEntities(cl.bsp->entityString);
+
+        // Set the client to an active connection state.
+        CL_SetActiveState();
     }
 
     // Set server time
@@ -337,7 +341,7 @@ void CL_DeltaFrame(void)
         Entity_FireEvent(state->number);
     }
 
-    if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking && CL_FRAMESYNC()) {
+    if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();
     }
 
@@ -347,6 +351,7 @@ void CL_DeltaFrame(void)
         cl.frame.playerState.pmove.deltaAngles = vec3_zero();
     }
 
+    // Activate user input.
     if (cl.oldframe.playerState.pmove.type != cl.frame.playerState.pmove.type) {
         IN_Activate();
     }

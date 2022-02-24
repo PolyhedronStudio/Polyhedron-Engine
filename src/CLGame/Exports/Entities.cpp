@@ -31,10 +31,170 @@ static constexpr int32_t RESERVED_ENTITIY_GUN = 1;
 static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 2;
 static constexpr int32_t RESERVED_ENTITIY_COUNT = 3;
 
-//---------------
-// ClientGameEntities::Event
-//
-//---------------
+
+/**
+*   @brief  Parses and spawns the local class entities in the BSP Entity String.
+* 
+*   @details    When a class isn't locally registered, it'll automatically spawn
+*               a CLGBaseEntity instead which has all the default behaviors that
+*               you'd expect for it to be functional.
+* 
+*   @return True on success.
+**/
+qboolean ClientGameEntities::SpawnClassEntities(const char* entities) {
+	// Clear level state.
+    //level = {};
+
+    // Delete class entities if they are allocated, and reset the server entity to a zero state.
+	//for (int32_t i = 0; i < classEntities.size(); i++) {
+	//for (auto& classEntity : classEntities) {
+	//	// Delete class entity.
+	//	if (classEntities[i]) {
+	//	    delete classEntities[i];
+	//		classEntities[i] = NULL;
+	//	}
+
+	//	// Reset server entity to a zero state.
+	//	serverEntities[i] = {};
+    //}
+
+	// Copy in the map name and designated spawnpoint(if any.)
+    //strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
+    //strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
+
+	// Spawn SVGBasePlayer classes for each reserved client entity.
+    //PreparePlayer();
+
+	// We'll keep on parsing until this is set to false.
+	qboolean isParsing = true;
+	
+	// This gets set to false the immediate moment we run into parsing trouble.
+	qboolean parsedSuccessfully = false;
+
+	// Token pointer.
+	char *com_token = nullptr;
+
+	// Pointer to the server entity we intend to employ.
+	//Entity *serverEntity = nullptr;
+
+	// Engage parsing.
+	while (isParsing == true) {
+		// Parse the opening brace.
+		com_token = COM_Parse(&entities);
+
+		if (!entities) {
+			break;
+		}
+
+		if (com_token[0] != '{') {
+		    Com_Error(ERR_DROP, "SpawnEntitiesFromString: found %s when expecting {", com_token);
+			return false;
+		}
+
+		// Pick the first entity there is, start asking for 
+		//if (!serverEntity) {
+		//	serverEntity = serverEntities;
+		//} else {
+		//	serverEntity = ObtainFreeServerEntity();
+		//}
+
+		// Now we've got the reserved server entity to use, let's parse the entity.
+        ClientEntity clientEntity;
+
+		ParseEntityString(&entities, &clientEntity);
+
+		// Allocate the class entity, and call its spawn.
+		//if (!SpawnParsedClassEntity(serverEntity)) {
+		//	parsedSuccessfully = false;
+		//}
+	}
+
+	//// Post spawn entities.
+	//for (auto& classEntity : classEntities) {
+	//	if (classEntity) {
+	//		classEntity->PostSpawn();
+	//	}
+	//}
+
+	//// Find and hook team slaves.
+	//FindTeams();
+
+	// Initialize player trail...
+	// SVG_PlayerTrail_Init
+
+	return parsedSuccessfully;
+}
+
+
+/**
+*	@brief	Parses the BSP Entity string and places the results in the server
+*			entity dictionary.
+**/
+qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* clEntity) {
+    // False until proven otherwise.
+    qboolean parsedSuccessfully = false;
+
+	// Key value ptrs.
+    char *key = nullptr, *value = nullptr;
+
+    // Go through all the dictionary pairs.
+    while (1) {
+		// Parse the key.
+		key = COM_Parse(data);
+		
+		// If we hit a }, it means we're done parsing, break out of this loop.
+		if (key[0] == '}') {
+		    break;
+		}
+		// If we are at the end of the string without a closing brace, error out.
+		if (!*data) {
+		    Com_Error(ERR_DROP, "%s: EOF without closing brace", __func__);
+		    return false;
+		}
+
+		// Parse the value.
+		value = COM_Parse(data);
+		// If we are at the end of the string without a closing brace, error out.
+		if (!*data) {
+		    Com_Error(ERR_DROP, "%s: EOF without closing brace", __func__);
+			return false;
+		}
+
+		// Ensure we had a value.
+		if (value[0] == '}') {
+		    Com_Error(ERR_DROP, "%s: closing brace without value for key %s", __func__, key);
+			return false;
+		}
+
+		// We successfully managed to parse this entity.
+		parsedSuccessfully = true;
+
+		// keynames with a leading underscore are used for utility comments,
+		// and are immediately discarded by quake
+		if (key[0] == '_') {
+		    continue;
+		}
+
+		// Insert the key/value into the dictionary.
+		Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
+		//clEntity->entityDictionary[key] = value;
+    }
+
+	// If we failed to parse the entity properly, zero this one back out.
+    if (!parsedSuccessfully) {
+		//*svEntity = {};
+		return false;
+	}
+
+	// Return the result.
+	return parsedSuccessfully;
+}
+
+//---------------------------------------------------------------------------------------
+
+/**
+*   @brief Executed whenever an entity event is receieved.
+**/
 void ClientGameEntities::Event(int32_t number) {
     // Ensure entity number is in bounds.
     if (number < 0 || number > MAX_ENTITIES) {
@@ -46,7 +206,7 @@ void ClientGameEntities::Event(int32_t number) {
     ClientEntity* clientEntity = &cs->entities[number];
 
     // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((clientEntity->current.effects & EntityEffectType::Teleporter) && CLG_FRAMESYNC()) {
+    if ((clientEntity->current.effects & EntityEffectType::Teleporter)) {
         CLG_TeleporterParticles(clientEntity->current.origin);
     }
 
@@ -76,10 +236,10 @@ void ClientGameEntities::Event(int32_t number) {
     }
 }
 
-//---------------
-// ClientGameEntities::AddPacketEntities
-//
-//---------------
+/**
+*   @brief  Parse the server frame for server entities to add to our client view.
+*           Also applies special rendering effects to them where desired.
+**/
 void ClientGameEntities::AddPacketEntities() {
     // Render entity that is about to be passed to the current render frame.
     r_entity_t   renderEntity = {}; // Ensure it is clear aka set to 0.
@@ -135,18 +295,18 @@ void ClientGameEntities::AddPacketEntities() {
         else if (effects & EntityEffectType::AnimCycleAll30hz)
             renderEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
 	    else {
-    	    // Fetch the iqm animation index data.
-            if (clientEntity->current.animationIndex != 0 && clientEntity->current.modelIndex != 0) {
-		        model_t* iqmData = clgi.MOD_ForHandle(clientEntity->current.modelIndex);
-		Com_DPrint("22222222222222222222WOW!!!\n");
-                if (iqmData) {
-			        Com_DPrint("WOW!!!\n");
-                }
-            } else {
+    	    //// Fetch the iqm animation index data.
+         //   if (clientEntity->current.animationIndex != 0 && clientEntity->current.modelIndex != 0) {
+		       // model_t* iqmData = clgi.MOD_ForHandle(clientEntity->current.modelIndex);
+
+         //       if (iqmData) {
+			      //  Com_DPrint("WOW!!!\n");
+         //       }
+         //   } else {
 		        renderEntity.frame = entityState->animationFrame;
-		        renderEntity.oldframe = clientEntity->prev.animationFrame;
-		        renderEntity.backlerp = 1.0 - cl->lerpFraction;
-            }
+		 //       renderEntity.oldframe = clientEntity->prev.animationFrame;
+		//        renderEntity.backlerp = 1.0 - cl->lerpFraction;
+//            }
         }
         
 
@@ -156,8 +316,8 @@ void ClientGameEntities::AddPacketEntities() {
 
         // Setup the proper lerp and model frame to render this pass.
         // Moved into the if statement's else case up above.
-        //renderEntity.oldframe = clientEntity->prev.animationFrame;
-        //renderEntity.backlerp = 1.0 - cl->lerpFraction;
+        renderEntity.oldframe = clientEntity->prev.animationFrame;
+        renderEntity.backlerp = 1.0 - cl->lerpFraction;
 
         //
         // Setup renderEntity origin.
@@ -442,12 +602,10 @@ void ClientGameEntities::AddPacketEntities() {
     }
 }
 
-//---------------
-// ClientGameEntities::AddViewEntities
-//
-// Currently is only used for rendering the view weapon, however it can be
-// used to render other models in a similar fashion if wished for.
-//---------------
+/**
+* Add the view weapon render entity to the screen. Can also be used for
+* other scenarios where a depth hack is required.
+**/
 void ClientGameEntities::AddViewEntities() {
     int32_t  shellFlags = 0;
 

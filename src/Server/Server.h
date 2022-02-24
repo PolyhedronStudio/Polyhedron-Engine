@@ -93,7 +93,7 @@ constexpr uint32_t SV_FRAMERATE = BASE_FRAMERATE;
 constexpr uint32_t SV_FRAMETIME = BASE_FRAMETIME;
 constexpr uint32_t SV_FRAMEDIV = 1;
 constexpr uint32_t SV_FRAMESYNC = 1;
-#define SV_CLIENTSYNC(cl)   1
+//#define SV_CLIENTSYNC(cl)   1
 
 // Entity leaf settings.
 static constexpr uint32_t MAX_TOTAL_ENT_LEAFS = 128;
