@@ -19,6 +19,11 @@ public:
     virtual ~CoopGamemode() override;
 
     //
+    // Server Related.
+    //
+    virtual qboolean CanSaveGame(qboolean isDedicatedServer) override;
+
+    //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;

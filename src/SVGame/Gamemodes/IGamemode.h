@@ -54,6 +54,11 @@ public:
 
 
     //////
+    // Server related.
+    //////
+    virtual qboolean CanSaveGame(qboolean isDedicatedServer) = 0;
+
+    //////
     // Map related.
     //////
     /**

@@ -18,6 +18,11 @@ public:
     virtual ~DefaultGamemode() override;
 
     //
+    // Server Related.
+    //
+    virtual qboolean CanSaveGame(qboolean isDedicatedServer) override;
+
+    //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     virtual void OnLevelExit() override;

@@ -995,7 +995,7 @@ static void SVC_DirectConnect(void)
     newcl->gamedir = fs_game->string;
     newcl->mapName = sv.name;
     newcl->configstrings = (char *)sv.configstrings;
-    newcl->pool = (EntityPool*)&ge->entities; // N&C: Edict_pool_t change
+    newcl->pool = (EntityPool*)&ge->entities;
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
     newcl->maximumClients = sv_maxclients->integer;

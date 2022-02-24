@@ -167,6 +167,16 @@ void SVG_ShutdownGame(void) {
     gi.FreeTags(TAG_GAME);
 }
 
+// TODO: Move elsewhere...
+qboolean SVG_CanSaveGame(qboolean isDedicatedServer) { 
+    IGamemode* gamemode = game.GetGamemode();
+
+    if (!gamemode)
+        return false;
+
+    return gamemode->CanSaveGame(isDedicatedServer);
+}
+
 /**
 *   @brief  Returns a pointer to the structure with all entry points
 *           and global variables.
@@ -201,6 +211,8 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
     globals.RunFrame = SVG_RunFrame;
 
     globals.ServerCommand = SVG_ServerCommand;
+
+    globals.CanSaveGame = SVG_CanSaveGame;
 
     globals.entitySize = sizeof(Entity);
 

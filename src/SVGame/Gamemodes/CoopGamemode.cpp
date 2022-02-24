@@ -36,6 +36,11 @@ CoopGamemode::~CoopGamemode() {
 //
 //
 
+qboolean CoopGamemode::CanSaveGame(qboolean isDedicatedServer) {
+    // Can't save deathmatch games.
+    return true;
+}
+
 //
 //===============
 // CoopGamemode::CanDamage

@@ -42,6 +42,65 @@ DefaultGamemode::~DefaultGamemode() {
 //
 // Interface functions. 
 //
+
+qboolean DefaultGamemode::CanSaveGame(qboolean isDedicatedServer) {
+    // For default game mode we'll just assume that dedicated servers are not allowed to save a game.
+    if (isDedicatedServer) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+//===============
+// DefaultGamemode::OnLevelExit
+// 
+// Default implementation for exiting levels.
+//===============
+void DefaultGamemode::OnLevelExit() {
+    // Acquire server entities pointer.
+    Entity* serverEntities = game.world->GetServerEntities();
+    
+    // Acquire class entities pointer.
+    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+
+    // Create the command to use for switching to the next game map.
+    std::string command = "gamemap \"";
+    command += level.intermission.changeMap;
+    command += +"\"";
+
+    // Add the gamemap command to the 
+    gi.AddCommandString(command.c_str());
+    // Reset the changeMap string, intermission time, and regular level time.
+    level.intermission.changeMap = NULL;
+    level.intermission.exitIntermission = 0;
+    level.intermission.time = 0;
+
+    // End the server frames for all clients.
+    SVG_ClientEndServerFrames();
+
+    // Loop through the server entities, and run the base entity frame if any exists.
+    for (int32_t i = 0; i < maximumclients->value; i++) {
+        // Fetch the Worldspawn entity number.
+        Entity *serverEntity = &serverEntities[i];
+
+        if (!serverEntity)
+            continue;
+
+        if (!serverEntity->inUse)
+            continue;
+
+        uint32_t stateNumber = serverEntity->state.number;
+
+        // Fetch the corresponding base entity.
+        SVGBaseEntity* entity = classEntities[stateNumber];
+
+        // Ensure an entity its health is reset to default.
+        if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
+            entity->SetHealth(entity->GetClient()->persistent.maxHealth);
+    }
+} 
+
 //===============
 // DefaultGamemode::GetEntityTeamName
 //
@@ -582,55 +641,6 @@ vec3_t DefaultGamemode::CalculateDamageVelocity(int32_t damage) {
 
     // Return.
     return velocity;
-}
-
-//===============
-// DefaultGamemode::OnLevelExit
-// 
-// Default implementation for exiting levels.
-//===============
-void DefaultGamemode::OnLevelExit() {
-    // Acquire server entities pointer.
-    Entity* serverEntities = game.world->GetServerEntities();
-    
-    // Acquire class entities pointer.
-    SVGBaseEntity** classEntities = game.world->GetClassEntities();
-
-    // Create the command to use for switching to the next game map.
-    std::string command = "gamemap \"";
-    command += level.intermission.changeMap;
-    command += +"\"";
-
-    // Add the gamemap command to the 
-    gi.AddCommandString(command.c_str());
-    // Reset the changeMap string, intermission time, and regular level time.
-    level.intermission.changeMap = NULL;
-    level.intermission.exitIntermission = 0;
-    level.intermission.time = 0;
-
-    // End the server frames for all clients.
-    SVG_ClientEndServerFrames();
-
-    // Loop through the server entities, and run the base entity frame if any exists.
-    for (int32_t i = 0; i < maximumclients->value; i++) {
-        // Fetch the Worldspawn entity number.
-        Entity *serverEntity = &serverEntities[i];
-
-        if (!serverEntity)
-            continue;
-
-        if (!serverEntity->inUse)
-            continue;
-
-        uint32_t stateNumber = serverEntity->state.number;
-
-        // Fetch the corresponding base entity.
-        SVGBaseEntity* entity = classEntities[stateNumber];
-
-        // Ensure an entity its health is reset to default.
-        if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
-            entity->SetHealth(entity->GetClient()->persistent.maxHealth);
-    }
 }
 
 //===============

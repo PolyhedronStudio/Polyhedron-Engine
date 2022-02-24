@@ -41,6 +41,11 @@ DeathmatchGamemode::~DeathmatchGamemode() {
 //
 //
 
+qboolean DeathmatchGamemode::CanSaveGame(qboolean isDedicatedServer) {
+    // Can't save deathmatch games.
+    return false;
+}
+
 //
 //===============
 // DeathmatchGamemode::CanDamage

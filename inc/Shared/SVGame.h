@@ -254,6 +254,8 @@ typedef struct {
     // ReadGame is called on a loadgame.
     void (*WriteGame)(const char *filename, qboolean autosave);
     void (*ReadGame)(const char *filename);
+    // Does the current game mode support save games?
+    qboolean (*CanSaveGame)(qboolean isDedicatedServer);
 
     // ReadLevel is called after the default map information has been
     // loaded with SpawnEntities
