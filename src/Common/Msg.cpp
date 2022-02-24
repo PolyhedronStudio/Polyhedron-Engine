@@ -92,7 +92,7 @@ void MSG_BeginWriting(void)
 // 
 //===============
 //
-void MSG_WriteChar(int32_t c)
+void MSG_WriteChar(int c)
 {
     byte* buf;
 
@@ -111,7 +111,7 @@ void MSG_WriteChar(int32_t c)
 // 
 //===============
 //
-void MSG_WriteByte(int32_t c)
+void MSG_WriteByte(int c)
 {
     byte* buf;
 
@@ -130,7 +130,7 @@ void MSG_WriteByte(int32_t c)
 // 
 //===============
 //
-void MSG_WriteShort(int32_t c)
+void MSG_WriteShort(int c)
 {
     byte* buf;
 
@@ -150,7 +150,7 @@ void MSG_WriteShort(int32_t c)
 // 
 //===============
 //
-void MSG_WriteLong(int32_t c)
+void MSG_WriteLong(int c)
 {
     byte* buf;
 
@@ -221,7 +221,7 @@ void MSG_WriteVector3(const vec3_t& pos)
 // 
 //===============
 //
-int32_t MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd)
+int MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd)
 {
     // Send a null message in case we had none.
     if (!from) {
@@ -516,21 +516,17 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
     }
 }
 
-int32_t MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags)
+int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags)
 {
-    int32_t     i;
-    int32_t     pflags, eflags;
-    int32_t     statbits;
+    int     i;
+    int     pflags, eflags;
+    int     statbits;
 
-    // Sanity check.
-    if (!to) {
-	Com_Error(ERR_DROP, "%s: NULL", __func__);
-    }
+    if (!to)
+        Com_Error(ERR_DROP, "%s: NULL", __func__);
 
-    // Reading from baseline.
-    if (!from) {
-	    from = &nullPlayerState;
-    }
+    if (!from)
+        from = &nullPlayerState;
 
     //
     // Determine what needs to be sent
@@ -766,25 +762,20 @@ int32_t MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, Play
     return eflags;
 }
 
-/****
-* 
-* 
-*   Message Read Functionalities.
-* 
-* 
-****/
-/**
-*   @brief Resets the readcount and bitposition to start reading messages into the buffer again.
-**/
+/*
+==============================================================================
+
+            READING
+
+==============================================================================
+*/
+
 void MSG_BeginReading(void)
 {
     msg_read.readCount = 0;
     msg_read.bitPosition = 0;
 }
 
-/**
-*   @brief Reads data of a specific length into the buffer.
-**/
 byte* MSG_ReadData(size_t len)
 {
     byte* buf = msg_read.data + msg_read.readCount;
@@ -802,14 +793,11 @@ byte* MSG_ReadData(size_t len)
     return buf;
 }
 
-/**
-*   @brief Reads a character.
-*   @return Returns -1 when no more characters are available.
-**/
-int32_t MSG_ReadChar(void)
+// returns -1 if no more characters are available
+int MSG_ReadChar(void)
 {
     byte* buf = MSG_ReadData(1);
-    int32_t c;
+    int c;
 
     if (!buf) {
         c = -1;
@@ -821,13 +809,10 @@ int32_t MSG_ReadChar(void)
     return c;
 }
 
-/**
-*   @return The byte that was read from the buffer, -1 if not available.
-**/
-int32_t MSG_ReadByte(void)
+int MSG_ReadByte(void)
 {
     byte* buf = MSG_ReadData(1);
-    int32_t c;
+    int c;
 
     if (!buf) {
         c = -1;
@@ -839,13 +824,10 @@ int32_t MSG_ReadByte(void)
     return c;
 }
 
-/**
-*   @return The signed short that was read from the buffer, -1 if not available.
-**/
-int32_t MSG_ReadShort(void)
+int MSG_ReadShort(void)
 {
     byte* buf = MSG_ReadData(2);
-    int32_t c;
+    int c;
 
     if (!buf) {
         c = -1;
@@ -857,13 +839,10 @@ int32_t MSG_ReadShort(void)
     return c;
 }
 
-/**
-*   @return The unsigned short that was read from the buffer, -1 if not available.
-**/
-int32_t MSG_ReadWord(void)
+int MSG_ReadWord(void)
 {
     byte* buf = MSG_ReadData(2);
-    int32_t c;
+    int c;
 
     if (!buf) {
         c = -1;
@@ -875,13 +854,10 @@ int32_t MSG_ReadWord(void)
     return c;
 }
 
-/**
-*   @return The 32 bit integer that was read from the buffer, -1 if not available.
-**/
-int32_t MSG_ReadLong(void)
+int MSG_ReadLong(void)
 {
     byte* buf = MSG_ReadData(4);
-    int32_t c;
+    int c;
 
     if (!buf) {
         c = -1;
@@ -893,22 +869,23 @@ int32_t MSG_ReadLong(void)
     return c;
 }
 
-/**
-*   @return The float that was read from the buffer, -1 if not available.
-**/
+//
+//===============
+// MSG_ReadFloat
+// 
+// The idea is smart and taken from Quetoo, use an union for memory mapping.
+// Read the float as an int32_t, use the union struct trick to convert it to a float.
+//================
+//
 float MSG_ReadFloat(void) {
     msg_float vec;
     vec.i = MSG_ReadLong();
     return vec.f;
 }
 
-/**
-*   @brief  Fills up the destination buffer with the read data up till size.
-*   @return Length of the string. 0 if empty.
-**/
 size_t MSG_ReadString(char* dest, size_t size)
 {
-    int32_t     c;
+    int     c;
     size_t  len = 0;
 
     while (1) {
@@ -928,13 +905,9 @@ size_t MSG_ReadString(char* dest, size_t size)
     return len;
 }
 
-/**
-*   @brief  Fills up the destination buffer with the read data up till size, or a newline was found.
-*   @return Length of the string. 0 if empty.
-**/
 size_t MSG_ReadStringLine(char* dest, size_t size)
 {
-    int32_t     c;
+    int     c;
     size_t  len = 0;
 
     while (1) {
@@ -954,9 +927,6 @@ size_t MSG_ReadStringLine(char* dest, size_t size)
     return len;
 }
 
-/**
-*   @return A vec3_t containing the 3 floating point32_t coordinate values.
-**/
 vec3_t MSG_ReadVector3(void) {
     return vec3_t{
         MSG_ReadFloat(),
@@ -965,20 +935,20 @@ vec3_t MSG_ReadVector3(void) {
     };
 }
 
-
 void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCommand* to)
 {
-    int32_t bits;
+    int bits;
 
     if (from) {
-        *to = *from;
-    } else {
-	    *to = {};
+        memcpy(to, from, sizeof(*to));
+    }
+    else {
+        memset(to, 0, sizeof(*to));
     }
 
     bits = MSG_ReadByte();
 
-    // Read current angles
+    // read current angles
     if (bits & CM_ANGLE1)
         to->input.viewAngles[0] = MSG_ReadFloat();
     if (bits & CM_ANGLE2)
@@ -986,7 +956,7 @@ void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCom
     if (bits & CM_ANGLE3)
         to->input.viewAngles[2] = MSG_ReadFloat();
 
-    // Read movement
+    // read movement
     if (bits & CM_FORWARD)
         to->input.forwardMove = MSG_ReadShort();
     if (bits & CM_SIDE)
@@ -994,17 +964,17 @@ void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCom
     if (bits & CM_UP)
         to->input.upMove = MSG_ReadShort();
 
-    // Read buttons
+    // read buttons
     if (bits & CM_BUTTONS)
         to->input.buttons = MSG_ReadByte();
 
     if (bits & CM_IMPULSE)
         to->input.impulse = MSG_ReadByte();
 
-    // Read time to run command
+    // read time to run command
     to->input.msec = MSG_ReadByte();
 
-    // Read the light level
+    // read the light level
     to->input.lightLevel = MSG_ReadByte();
 }
 
@@ -1017,10 +987,10 @@ MSG_ParseEntityBits
 Returns the entity number and the header bits
 =================
 */
-int32_t MSG_ParseEntityBits(int32_t* bits)
+int MSG_ParseEntityBits(int* bits)
 {
-    int32_t         b, total;
-    int32_t         number;
+    int         b, total;
+    int         number;
 
     total = MSG_ReadByte();
     if (total & U_MOREBITS1) {
@@ -1053,7 +1023,7 @@ MSG_ParseDeltaEntity
 Can go from either a baseline or a previous packet_entity
 ==================
 */
-void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, int32_t bits, EntityStateMessageFlags flags) {
+void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags) {
     // Sanity checks.
     if (!to) {
         Com_Error(ERR_DROP, "%s: NULL", __func__);
@@ -1163,7 +1133,8 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 /**
 *   @brief  Parses the delta packets of player states.
 **/
-void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t extraflags) {
+void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags) {
+
     // Sanity check. 
     if (!to) {
         Com_Error(ERR_DROP, "%s: no state to delta to, 'to' == nullptr", __func__);
@@ -1320,20 +1291,21 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t
 
 #endif // USE_CLIENT
 
-/****
-* 
-* 
-*   Debugging Functionalities.
-* 
-* 
-****/
+/*
+==============================================================================
+
+            DEBUGGING STUFF
+
+==============================================================================
+*/
+
 #ifdef _DEBUG
 
-// Shows the bits.
 #define SHOWBITS(x) Com_LPrintf(PRINT_DEVELOPER, x " ")
 
 #if USE_CLIENT
-void MSG_ShowDeltaPlayerstateBits(int32_t flags, int32_t extraflags)
+
+void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
 {
 #define SP(b,s) if(flags&PS_##b) SHOWBITS(s)
 #define SE(b,s) if(extraflags&EPS_##b) SHOWBITS(s)
@@ -1363,7 +1335,7 @@ void MSG_ShowDeltaPlayerstateBits(int32_t flags, int32_t extraflags)
 #undef SE
 }
 
-void MSG_ShowDeltaUsercmdBits(int32_t bits)
+void MSG_ShowDeltaUsercmdBits(int bits)
 {
     if (!bits) {
         SHOWBITS("<none>");
@@ -1386,7 +1358,7 @@ void MSG_ShowDeltaUsercmdBits(int32_t bits)
 
 #if USE_CLIENT
 
-void MSG_ShowDeltaEntityBits(int32_t bits)
+void MSG_ShowDeltaEntityBits(int bits)
 {
 #define S(b,s) if(bits&BIT_##b) SHOWBITS(s)
     S(MODEL, "modelIndex");
@@ -1433,7 +1405,7 @@ void MSG_ShowDeltaEntityBits(int32_t bits)
 #undef S
 }
 
-const char* MSG_ServerCommandString(int32_t cmd)
+const char* MSG_ServerCommandString(int cmd)
 {
     switch (cmd) {
     case -1: return "END OF MESSAGE";

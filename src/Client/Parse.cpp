@@ -32,7 +32,11 @@ extern IClientGameExports* cge;
 =====================================================================
 */
 
-static inline void CL_ParseDeltaEntity(ServerFrame* frame, int32_t newnum, EntityState* old, int32_t bits) {
+static inline void CL_ParseDeltaEntity(ServerFrame  *frame,
+                                       int             newnum,
+                                       EntityState  *old,
+                                       int             bits)
+{
     EntityState    *state;
 
     // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
@@ -58,19 +62,21 @@ static inline void CL_ParseDeltaEntity(ServerFrame* frame, int32_t newnum, Entit
         VectorCopy(old->origin, state->oldOrigin);
 }
 
-static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
-    int32_t newnum = 0;
-    int32_t bits = 0;
-    int32_t oldnum = 0;
-    int32_t i = 0;
+static void CL_ParsePacketEntities(ServerFrame *oldframe,
+                                   ServerFrame *frame)
+{
+    int            newnum;
+    int            bits;
+    EntityState    *oldstate;
+    int            oldindex, oldnum;
+    int i;
 
-    // Initialize frame.
     frame->firstEntity = cl.numEntityStates;
     frame->numEntities = 0;
 
-    // Delta from the entities present in oldframe
-    int32_t oldindex = 0;
-    EntityState *oldstate = NULL;
+    // delta from the entities present in oldframe
+    oldindex = 0;
+    oldstate = NULL;
     if (!oldframe) {
         oldnum = 99999;
     } else {
@@ -185,32 +191,26 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
     }
 }
 
-static void CL_ParseFrame(int32_t extrabits)
+static void CL_ParseFrame(int extrabits)
 {
+    uint32_t bits, extraflags;
+    int     currentframe, deltaframe,
+            delta, suppressed;
     ServerFrame  frame, *oldframe;
     PlayerState  *from;
-    int32_t     length;
+    int     length;
 
-    // Zero out frame.
-    frame = {};
+    memset(&frame, 0, sizeof(frame));
 
-    // Reset frame flags to 0.
     cl.frameFlags = 0;
 
-    uint32_t extraflags = 0;
+    extraflags = 0;
+    bits = MSG_ReadLong();
 
-    // Read out bits.
-    uint32_t bits = MSG_ReadLong();
+    currentframe = bits & FRAMENUM_MASK;
+    delta = bits >> FRAMENUM_BITS;
 
-    // Read out current frame and delta byte.
-    int32_t currentframe = 0;//bits & FRAMENUM_MASK;  //MSG_ReadLong();  //bits & FRAMENUM_MASK;
-    int32_t delta = 0; //bits >> FRAMENUM_BITS;
-    //MSG_ReadByte();  //bits >> FRAMENUM_BITS;
-
-    // Calculate delta frame.
-    int32_t deltaframe = 0;
-
-    if (delta >= 31) {
+    if (delta == 31) {
         deltaframe = -1;
     } else {
         deltaframe = currentframe - delta;
@@ -218,7 +218,7 @@ static void CL_ParseFrame(int32_t extrabits)
 
     bits = MSG_ReadByte();
 
-    int32_t suppressed = bits & SUPPRESSCOUNT_MASK;
+    suppressed = bits & SUPPRESSCOUNT_MASK;
     if (suppressed & FrameFlags::ClientPredict) {
         // CLIENTDROP is implied, don't draw both
         suppressed &= ~FrameFlags::ClientDrop;

@@ -1,14 +1,15 @@
-/***
-*
-*	License here.
-*
-*	@file
-*
-*	Protocol information which is shared between both client and server games.
-*
-***/
-#pragma once
+/*
+// LICENSE HERE.
 
+//
+// SharedGame/protocol.h
+//
+// The server game module gets a chance to define its own commands to send to
+// the client here.
+//
+*/
+#ifndef __SHAREDGAME_PROTOCOL_H__
+#define __SHAREDGAME_PROTOCOL_H__
 
 /**
 *   @brief  Server Game Command are a way for the server to tell a client what to do.
@@ -30,7 +31,6 @@ struct ServerGameCommand {
     static constexpr int32_t TotalNumberOfCommands = 27;
 };
 
-
 /**
 *   @brief  Client Game Commands are a way for the client to tell the server what to do.
 *           Currently it is not in utilized but can be used if needed.
@@ -45,3 +45,5 @@ struct ClientGameCommand {
     //! Be sure to increase limit in case you modify this array.
     static constexpr int32_t TotalNumberOfCommands = 14;
 };
+
+#endif

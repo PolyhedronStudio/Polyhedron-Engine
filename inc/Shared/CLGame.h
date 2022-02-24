@@ -246,7 +246,7 @@ extern "C" {
         void        (*Cbuf_InsertText) (char *text);
         // Executes the current command buffer.
         void        (*Cbuf_Execute) ();
-        // Adds the current command line text as a ClientCommand::StringCommand to the client 
+        // Adds the current command line text as a clc_stringcmd to the client 
         // message. Things like godmode, noclip, etc, are commands directed to 
         // the server, so when they are typed in at the console, they will 
         // need to be forwarded.
