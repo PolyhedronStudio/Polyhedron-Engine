@@ -10,6 +10,9 @@
 #pragma once
 
 
+
+
+
 /**
 *   @brief  These are used for game logic. They are set in clg_input.cpp. One is free
 *           to use up the remaining slots for their own custom needs.

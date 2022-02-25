@@ -19,6 +19,9 @@
 #include "../ClientGameExports.h"
 #include "Entities.h"
 
+// Shared Game.
+#include "SharedGame/SkeletalAnimation.h"
+
 // WID: TODO: Gotta fix this one too.
 extern qhandle_t cl_mod_powerscreen;
 extern qhandle_t cl_mod_laser;
@@ -78,7 +81,7 @@ qboolean ClientGameEntities::SpawnClassEntities(const char* entities) {
 	//Entity *serverEntity = nullptr;
 
 	// Engage parsing.
-	while (isParsing == true) {
+	while (!!isParsing == true) {
 		// Parse the opening brace.
 		com_token = COM_Parse(&entities);
 
@@ -303,10 +306,19 @@ void ClientGameEntities::AddPacketEntities() {
 			      //  Com_DPrint("WOW!!!\n");
          //       }
          //   } else {
-		        renderEntity.frame = entityState->animationFrame;
+		        //renderEntity.frame = entityState->animationFrame;
 		 //       renderEntity.oldframe = clientEntity->prev.animationFrame;
 		//        renderEntity.backlerp = 1.0 - cl->lerpFraction;
 //            }
+
+ 
+            //clientEntity->current.animationFrame, 
+	 //   framefrac = GS_FrameForTime(&curframe, cg.time, viewweapon->baseAnimStartTime,  // start time
+		//weaponInfo->frametime[viewweapon->baseAnim],				    // current frame time?
+		//weaponInfo->firstframe[viewweapon->baseAnim],				    // first frame.
+		//weaponInfo->lastframe[viewweapon->baseAnim],				    // last frame.
+		//weaponInfo->loopingframes[viewweapon->baseAnim],			    // looping frames.
+		//true); 
         }
         
 
@@ -317,7 +329,17 @@ void ClientGameEntities::AddPacketEntities() {
         // Setup the proper lerp and model frame to render this pass.
         // Moved into the if statement's else case up above.
         renderEntity.oldframe = clientEntity->prev.animationFrame;
-        renderEntity.backlerp = 1.0 - cl->lerpFraction;
+        renderEntity.backlerp = 1.0 - SG_FrameForTime(&renderEntity.frame,
+            cl->time,  // Current Time.
+            clientEntity->current.animationStartTime,         // Animation Start time.
+            clientEntity->current.animationFramerate,  // Current frame time.
+            clientEntity->current.animationStartFrame,  // Start frame.
+            clientEntity->current.animationEndFrame,  // End frame.
+            0,             // Loop count.
+            true         // Force loop
+        );
+        clientEntity->current.animationFrame = renderEntity.frame;
+    //clientEntity->prev.animationFrame = clientEntity->current.animationFrame;
 
         //
         // Setup renderEntity origin.

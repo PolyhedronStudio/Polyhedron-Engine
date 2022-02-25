@@ -320,9 +320,9 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
 
     if (!(flags & MSG_ES_FIRSTPERSON)) {
         if (!EqualEpsilonf(to->origin[0], from->origin[0]))
-            bits |= U_ORIGIN_X;
+            bits |= BIT_ORIGIN_X;
         if (!EqualEpsilonf(to->origin[1], from->origin[1]))
-            bits |= U_ORIGIN_Y;
+            bits |= BIT_ORIGIN_Y;
         if (!EqualEpsilonf(to->origin[2], from->origin[2]))
             bits |= U_ORIGIN_Z;
 
@@ -409,6 +409,19 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
         }
     }
 
+    if (to->animationStartTime != from->animationStartTime) { 
+        bits |= U_ANIMATION_TIME_START;
+    }
+    if (to->animationStartFrame != from->animationStartFrame) {
+	    bits |= U_ANIMATION_FRAME_START;
+    }
+    if (to->animationEndFrame != from->animationEndFrame) {
+	    bits |= U_ANIMATION_FRAME_END;
+    }
+    if (to->animationFramerate != from->animationFramerate) {
+	    bits |= U_ANIMATION_FRAME_RATE;
+    }
+    
     //
     // write the message
     //
@@ -485,9 +498,9 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
         MSG_WriteShort(to->renderEffects);
 
     // N&C: Full float precision.
-    if (bits & U_ORIGIN_X)
+    if (bits & BIT_ORIGIN_X)
         MSG_WriteFloat(to->origin[0]);
-    if (bits & U_ORIGIN_Y)
+    if (bits & BIT_ORIGIN_Y)
         MSG_WriteFloat(to->origin[1]);
     if (bits & U_ORIGIN_Z)
         MSG_WriteFloat(to->origin[2]);
@@ -513,6 +526,19 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
         MSG_WriteByte(to->eventID);
     if (bits & U_SOLID) {
         MSG_WriteLong(to->solid);
+    }
+
+    if (bits & U_ANIMATION_TIME_START) {
+	    MSG_WriteLong(to->animationStartTime);
+    }
+    if (bits & U_ANIMATION_FRAME_START) {
+	    MSG_WriteShort(to->animationStartFrame);
+    }
+    if (bits & U_ANIMATION_FRAME_END) {
+	    MSG_WriteShort(to->animationEndFrame);
+    }
+    if (bits & U_ANIMATION_FRAME_RATE) {
+    	MSG_WriteFloat(to->animationFramerate);
     }
 }
 
@@ -1006,6 +1032,7 @@ int MSG_ParseEntityBits(int* bits)
         total |= b << 24;
     }
 
+
     if (total & U_NUMBER16)
         number = MSG_ReadShort();
     else
@@ -1092,9 +1119,9 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
         to->renderEffects = MSG_ReadWord();
 
     // Origin.
-    if (bits & U_ORIGIN_X)
+    if (bits & BIT_ORIGIN_X)
         to->origin[0] = MSG_ReadFloat();
-    if (bits & U_ORIGIN_Y) {
+    if (bits & BIT_ORIGIN_Y) {
         to->origin[1] = MSG_ReadFloat();
     }
     if (bits & U_ORIGIN_Z) {
@@ -1128,6 +1155,20 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
     if (bits & U_SOLID) {
         to->solid = MSG_ReadLong();
     }
+
+    if (bits & U_ANIMATION_TIME_START) {
+	    to->animationStartTime = MSG_ReadLong();
+    }
+    if (bits & U_ANIMATION_FRAME_START) {
+	    to->animationStartFrame = MSG_ReadShort();
+    }
+    if (bits & U_ANIMATION_FRAME_END) {
+	    to->animationEndFrame = MSG_ReadShort();
+    }
+    if (bits & U_ANIMATION_FRAME_RATE) {
+    	to->animationFramerate = MSG_ReadFloat();
+    }
+
 }
 
 /**

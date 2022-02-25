@@ -227,8 +227,8 @@ enum ClientCommand {
 // EntityState communication
 
 // Try to pack the common update flags into the first byte
-//#define U_ORIGIN_X  (1<<0)          // was named: U_ORIGIN_X
-//#define U_ORIGIN_Y  (1<<1)          // was named: U_ORIGIN_Y
+//#define BIT_ORIGIN_X  (1<<0)          // was named: BIT_ORIGIN_X
+//#define BIT_ORIGIN_Y  (1<<1)          // was named: BIT_ORIGIN_Y
 //#define U_ANGLE_Y   (1<<2)          // was named: U_ANGLE_Y
 //#define U_ANGLE_Z   (1<<3)          // was named: U_ANGLE_Z
 //#define U_FRAME     (1<<4)          // frame is a byte
@@ -304,8 +304,22 @@ static constexpr uint32_t BIT_OLD_ORIGIN = (1 << 20);
 static constexpr uint32_t BIT_SOUND = (1 << 21);
 static constexpr uint32_t BIT_SOLID = (1 << 22);
 
-#define U_ORIGIN_X (1 << 0)  // was named: U_ORIGIN_X
-#define U_ORIGIN_Y (1 << 1)  // was named: U_ORIGIN_Y
+//struct EntityMessageBits {
+//    // First 8 bits.
+//    static constexpr int32_t OriginX = (1 << 0);
+//    static constexpr int32_t OriginY = (1 << 1);
+//    static constexpr int32_t AngleX = (1 << 2);
+//    static constexpr int32_t AngleY = (1 << 3);
+//    static constexpr int32_t AnimationFrame = (1 << 4);
+//    static constexpr int32_t EventID = (1 << 5);
+//    static constexpr int32_t Remove = (1 << 6);
+//    static constexpr int32_t MoreBitsA = (1 << 7);
+//
+//    // Second 8 bits.
+//    static constexpr int32_t Number = (1 )
+//};
+#define BIT_ORIGIN_X (1 << 0)  // was named: BIT_ORIGIN_X
+#define BIT_ORIGIN_Y (1 << 1)  // was named: BIT_ORIGIN_Y
 #define U_ANGLE_Y (1 << 2)   // was named: U_ANGLE_Y
 #define U_ANGLE_Z (1 << 3)   // was named: U_ANGLE_Z
 #define U_FRAME (1 << 4)     // frame is a byte
@@ -338,9 +352,10 @@ static constexpr uint32_t BIT_SOLID = (1 << 22);
 #define U_SKIN16 (1 << 25)
 #define U_SOUND (1 << 26)
 #define U_SOLID (1 << 27)
-#define U_ANIMATION_STARTTIME (1 << 28)
-#define U_ANIMATION_INDEX (1 << 29)
-#define U_ANIMATION_FRAMERATE (1 << 30)
+#define U_ANIMATION_TIME_START (1 << 28)
+#define U_ANIMATION_FRAME_START (1 << 29)
+#define U_ANIMATION_FRAME_END (1 << 30)
+#define U_ANIMATION_FRAME_RATE (1 << 31)
 
 // ==============================================================
 

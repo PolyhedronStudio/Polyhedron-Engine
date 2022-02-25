@@ -227,6 +227,12 @@ static float drawStart = 0;
 static float totalTimeTaken = 0;
 static qboolean newDraw = true;
 
+
+static float gunAnimStartTime = 0.f;
+static float gunAnimationEndTime = 0.f;
+static float gunAnimationStartFrame = 112.f;
+static float gunAnimationEndFrame = 141.f;
+
 void ItemWeaponSMG::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Animation start and end frame.
     static constexpr float drawStartFrame = 112.f;

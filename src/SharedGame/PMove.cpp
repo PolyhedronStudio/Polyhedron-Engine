@@ -1,34 +1,21 @@
-/*
-Copyright (C) 1997-2001 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
-//
-// pmove.cpp
-//
-//
-// Implements the player movement logic for both client and server game modules
-// 
-// The playerMoveLocals_t structure is used locally when processing the movement. Consider it
-// a temporary structure. The prev origin and velocity are copied in there for storage.
-// 
-// At the start of pmove we initialize certain pm-> variables, and the playerMoveLocals.
-// 
-// After that, we check for whether we are on a ladder, ducking, on-ground, in-water,
-// and/or in air. We execute the right movement according to that.
-//
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Implements the player movement logic for both client and server game modules.
+*
+*   The playerMoveLocals_t serves as a temporary structure which is used to store
+*   data when processing the movement logic. The previous origin and velocity are
+*   stored in there.
+* 
+*   At the start of pmove we initialize it, as well as certain pm-> variables.
+* 
+*   After that, we go state checking(on ladder, ducking, on-ground, in-water, etc)
+*   and execute the right movement according to that.
+* 
+***/
 #include "Shared/Shared.h"
 #include "SharedGame/SharedGame.h"
 #include "SharedGame/PMove.h"

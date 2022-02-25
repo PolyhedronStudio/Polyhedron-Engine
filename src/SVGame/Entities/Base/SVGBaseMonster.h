@@ -62,6 +62,8 @@ public:
     **/
     // Set animation.
     virtual inline void SetAnimation(uint32_t index) {
+	    
+
         animationIndex = index;
         animationStartTime = level.time;
     }

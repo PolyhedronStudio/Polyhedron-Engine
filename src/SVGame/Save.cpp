@@ -277,8 +277,12 @@ static const save_field_t clientfields[] = {
     V(playerState.gunAngles),
     V(playerState.gunOffset),
     I(playerState.gunIndex),
-    I(playerState.gunAnimationFrame),
-    I(playerState.gunAnimationFramerate),
+    I(playerState.gunAnimationStartTime),
+    I(playerState.gunAnimationStartFrame),
+    I(playerState.gunAnimationEndFrame),
+    I(playerState.gunAnimationFrametime),
+    I(playerState.gunAnimationLoopCount),
+    I(playerState.gunAnimationForceLoop),
 
     FA(playerState.blend, 4),
 

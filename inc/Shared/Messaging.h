@@ -103,16 +103,39 @@ struct EntityState {
     int32_t modelIndex2 = 0, modelIndex3 = 0, modelIndex4 = 0;
 
     //----------------------------------------------------------
+    //! Server time at which this animation started.
+    //uint32_t animationEventStartTime = 0;
+    ////! Animation Index
+    //uint16_t animationEventIndex = 0;
+    ////! Animation Start Frame
+    //uint16_t animationStartFrame = 0;
+    ////! Animation End Frame
+    //uint16_t animationEndFrame = 0;
+    ////! Animation Frame Time. (30fps for a 30fps mesh = 1 second, etc.)
+    //float animationEventframeTime = 30.f;
+
+    //+++ Get the below working first, then do the on top, use events??
+    
+    //    Events might be easier to use with regards to possible predictions?
     //! Server start time of current animation.
-    uint32_t animationStartTime = 0;
-    //! Animation index in the IQM data.
-    uint32_t animationIndex = 0;
+    int32_t animationStartTime = 0;
+    //! Animation Start Frame
+    uint16_t animationStartFrame = 1;
+    //! Animation End Frame
+    uint16_t animationEndFrame = 2;
+    //! Current animation playback framerate.
+    float animationFramerate = 30.f;
+    //! Amount of loops to do.
+    uint8_t animationLoopCount = 0;
+    //! Force loop?
+    uint8_t animationForceLoop = false;
+
+    //--- Part of the old frame code :P
+    
     //! Current animation frame the entity is at.
     float animationFrame = 0.f;
-    //! Current animation playback framerate.
-    float animationFramerate = 0.f;
     //----------------------------------------------------------
-    
+
     //! Model skin number.
     int32_t skinNumber = 0;
     //! Entity Effects. (Rotating etc.)
@@ -138,33 +161,41 @@ struct EntityState {
 
 struct PlayerState {
     //! State of the actual movement. (Used for client side movement prediction.)
-    PlayerMoveState   pmove;
+    PlayerMoveState pmove = {};
 
     // These fields do not need to be communicated bit-precise
     //! Adds to view direction to get render angles. (Set by weapon kicks, pain effects, etc.)
-    vec3_t      kickAngles;
+    vec3_t  kickAngles = vec3_zero();
 
     //! Gun angles.
-    vec3_t      gunAngles;
+    vec3_t  gunAngles = vec3_zero();
     //! Gun offset.
-    vec3_t      gunOffset;
+    vec3_t  gunOffset = vec3_zero();
+
     //! Actual gun index.
-    int         gunIndex;
-    //! Gun animation frame. 
-    float       gunAnimationFrame;
-    //! Gun animation framerate.
-    float gunAnimationFramerate;
-    //! Server Time at which the gun animation started.
-    float gunAnimationStartTime;
+    int     gunIndex = 0;
+
+    //! Server start time of current animation.
+    int32_t     gunAnimationStartTime = 0;
+    //! Animation Start Frame
+    uint16_t    gunAnimationStartFrame = 1;
+    //! Animation End Frame
+    uint16_t    gunAnimationEndFrame = 2;
+    //! Current animation playback frame time.
+    float       gunAnimationFrametime = 15.f;
+    //! Amount of loops to do.
+    uint8_t     animationLoopCount = 0;
+    //! Force loop?
+    uint8_t     animationForceLoop = false;
 
     //! RGBA Full Screen blend effect.
-    float       blend[4];       // RGBA full screen effect
+    float   blend[4] = { 0.f, 0.f, 0.f, 0.f };  // RGBA full screen effect
     //! Field of View.
-    float       fov;            // Horizontal field of view
+    float   fov = 0;            // Horizontal field of view
     // Refresh render flags.
-    int         rdflags;        // Refdef flags
+    int     rdflags = 0;        // Refdef flags
     //! Status bar information.
-    short       stats[MAX_STATS];
+    short   stats[MAX_STATS] = {};
 }; 
 
 #endif // __SHARED__MESSAGING_H__

@@ -45,7 +45,7 @@ void MonsterTestDummy::Precache() {
     Base::Precache();
 
     // Precache test dummy model.
-    SVG_PrecacheModel("models/monsters/testdummy/testdummy.iqm");
+    SVG_PrecacheModel("models/monsters/testdummy/60fps.iqm");
 }
 
 //
@@ -71,7 +71,7 @@ void MonsterTestDummy::Spawn() {
     SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
 
     // Set the barrel model, and model index.
-    SetModel("models/monsters/testdummy/testdummy.iqm");
+    SetModel("models/monsters/testdummy/60fps.iqm");
 
     // Set the bounding box.
     SetBoundingBox({ -16, -16, 0 }, { 16, 16, 52 });
@@ -118,6 +118,10 @@ void MonsterTestDummy::Respawn() { Base::Respawn(); }
 void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
+
+    GetServerEntity()->state.animationStartTime = level.time * 1000;
+    //GetServerEntity()->state.animationFramerate = 60;
+
 }
 
 //===============
@@ -127,12 +131,6 @@ void MonsterTestDummy::PostSpawn() {
 void MonsterTestDummy::Think() {
     // Always call parent class method.
     Base::Think();
-
-    //if (GetNoiseIndex()) {
-    //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
-    //}
-
-    //gi.DPrintf("MonsterTestDummy::Think();");
 }
 
 //===============
@@ -140,33 +138,32 @@ void MonsterTestDummy::Think() {
 //
 //===============
 void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value) {
-    if (key == "animindex") { 
+    EntityState* state = &GetServerEntity()->state;
+
+    if (key == "startframe") { 
         // This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
         int32_t parsedInt = 0;
-    	ParseIntegerKeyValue("animindex", value, parsedInt);
-        animationIndex = parsedInt;
+	    ParseIntegerKeyValue(key, value, parsedInt);
+        state->animationStartFrame = parsedInt;
+    } else if (key == "endframe") {
+	// This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
+	    int32_t parsedInt = 0;
+	    ParseIntegerKeyValue(key, value, parsedInt);
+	    state->animationEndFrame = parsedInt;
+    } else if (key == "framerate") {
+	    float parsedFloat = 0.f;
+	    ParseFloatKeyValue(key, value, parsedFloat);
+	    state->animationFramerate = parsedFloat;        
     } else {
 	    Base::SpawnKey(key, value);
     }
-	   // ParseStringKeyValue(key, value, model);
-    //} else if (key == "boundingboxmins") {
-	   // ParseVector3KeyValue(key, value, boundingBoxMins);
-	   // SetMins(boundingBoxMins);
-    //} else if (key == "boundingboxmaxs") {
-	   // ParseVector3KeyValue(key, value, boundingBoxMaxs);
-	   // SetMaxs(boundingBoxMaxs);
-    //} else {
-	   // Base::SpawnKey(key, value);
-    //}
-    //Base::SpawnKey(key, value);
 }
 
 /////
 // Starts the animation.
 // 
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-    SetAnimation(1);
-    SetAnimationFramerate(1.f);
+
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
