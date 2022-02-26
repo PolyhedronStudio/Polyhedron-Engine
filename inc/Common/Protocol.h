@@ -1,23 +1,13 @@
-/*
-Copyright (C) 1997-2001 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
-
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client/Server Protocol.
+*
+***/
+#pragma once
 
 //
 // Protocol Configuration.
@@ -164,14 +154,17 @@ enum ClientCommand {
 #define PS_FOV              (1 << 12)
 #define PS_WEAPONINDEX      (1 << 13)
 //#define PS_WEAPONFRAME      (1 << 14)
-#define PS_RDFLAGS          (1 << 15)
+#define PS_RDFLAGS          (1 << 14)
 
 // New Animation thingy.
-#define PS_GUNANIMATION_FRAME (1 << 16)
-#define PS_GUNANIMATION_FRAMERATE (1 << 17)
-#define PS_GUNANIMATION_STARTTIME (1 << 18)
+#define PS_GUNANIMATION_TIME_START  (1 << 15)
+#define PS_GUNANIMATION_FRAME_START (1 << 16)
+#define PS_GUNANIMATION_FRAME_END   (1 << 17)
+#define PS_GUNANIMATION_FRAME_TIME  (1 << 18)
+#define PS_GUNANIMATION_LOOP_COUNT  (1 << 29)
+#define PS_GUNANIMATION_LOOP_FORCE  (1 << 20)
 
-#define PS_BITS             19
+#define PS_BITS             21
 #define PS_MASK             ((1<<PS_BITS)-1)
 
 // r1q2 protocol specific extra flags
@@ -227,40 +220,40 @@ enum ClientCommand {
 // EntityState communication
 
 // Try to pack the common update flags into the first byte
-//#define BIT_ORIGIN_X  (1<<0)          // was named: BIT_ORIGIN_X
-//#define BIT_ORIGIN_Y  (1<<1)          // was named: BIT_ORIGIN_Y
-//#define U_ANGLE_Y   (1<<2)          // was named: U_ANGLE_Y
-//#define U_ANGLE_Z   (1<<3)          // was named: U_ANGLE_Z
-//#define U_FRAME     (1<<4)          // frame is a byte
-//#define U_EVENT     (1<<5)
-//#define U_REMOVE    (1<<6)          // REMOVE this entity, don't add it
-//#define U_MOREBITS1 (1<<7)          // read one additional byte
+//#define EntityMessageBits::OriginX  (1<<0)          // was named: EntityMessageBits::OriginX
+//#define EntityMessageBits::OriginY  (1<<1)          // was named: EntityMessageBits::OriginY
+//#define EntityMessageBits::AngleY   (1<<2)          // was named: EntityMessageBits::AngleY
+//#define EntityMessageBits::AngleZ   (1<<3)          // was named: EntityMessageBits::AngleZ
+//#define EntityMessageBits::AnimationFrame     (1<<4)          // frame is a byte
+//#define EntityMessageBits::EventID     (1<<5)
+//#define EntityMessageBits::Remove    (1<<6)          // REMOVE this entity, don't add it
+//#define EntityMessageBits::MoreBitsA (1<<7)          // read one additional byte
 //
 //// Second byte
 //#define U_NUMBER16  (1<<8)          // NUMBER8 is implicit if not set
-//#define U_ORIGIN_Z  (1<<9)         // was named: U_ORIGIN_Z
-//#define U_ANGLE_X   (1<<10)        // was named: U_ANGLE_X
-//#define U_MODEL     (1<<11)
+//#define EntityMessageBits::OriginZ  (1<<9)         // was named: EntityMessageBits::OriginZ
+//#define EntityMessageBits::AngleX   (1<<10)        // was named: EntityMessageBits::AngleX
+//#define EntityMessageBits::ModelIndex1     (1<<11)
 //#define U_RENDERFX8 (1<<12)        // fullbright, etc
 ////#define U_ANGLE16   (1<<13)
 //#define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
-//#define U_MOREBITS2 (1<<15)        // read one additional byte
+//#define EntityMessageBits::MoreBitsB (1<<15)        // read one additional byte
 //
 //// Third byte
 //#define U_SKIN8         (1<<16)
 //#define U_FRAME16       (1<<17)     // frame is a short
 //#define U_RENDERFX16    (1<<18)     // 8 + 16 = 32
 //#define U_EFFECTS16     (1<<19)     // 8 + 16 = 32
-//#define U_MODEL2        (1<<20)     // weapons, flags, etc
-//#define U_MODEL3        (1<<21)
-//#define U_MODEL4        (1<<22)
-//#define U_MOREBITS3     (1<<23)     // read one additional byte
+//#define EntityMessageBits::ModelIndex2        (1<<20)     // weapons, flags, etc
+//#define EntityMessageBits::ModelIndex3        (1<<21)
+//#define EntityMessageBits::ModelIndex4        (1<<22)
+//#define EntityMessageBits::MoreBitsC     (1<<23)     // read one additional byte
 //
 //// fourth byte
-//#define U_OLDORIGIN     (1<<24)     // FIXME: get rid of this
+//#define EntityMessageBits::OldOrigin     (1<<24)     // FIXME: get rid of this
 //#define U_SKIN16        (1<<25)
-//#define U_SOUND         (1<<26)
-//#define U_SOLID         (1<<27)
+//#define EntityMessageBits::Sound         (1<<26)
+//#define EntityMessageBits::Solid         (1<<27)
 //#define U_ANIMATION_STARTTIME (1 << 28) 
 //#define U_ANIMATION_INDEX (1 << 29)
 //#define U_ANIMATION_FRAMERATE (1 << 30)
@@ -272,90 +265,127 @@ enum ClientCommand {
 *           Due to protocol limitations at the time of writing, the index starts at 13
 *           and the limit is 32 extra custom types.
 **/
-static constexpr uint32_t BIT_NUMBER = (1 << 0);
-static constexpr uint32_t BIT_REMOVE = (1 << 6);
-
-static constexpr uint32_t BIT_ORIGIN_X = (1 << 2);
-static constexpr uint32_t BIT_ORIGIN_Y = (1 << 3);
-static constexpr uint32_t BIT_ORIGIN_Z = (1 << 4);
-
-static constexpr uint32_t BIT_ANGLE_X = (1 << 5);
-static constexpr uint32_t BIT_ANGLE_Y = (1 << 1);
-static constexpr uint32_t BIT_ANGLE_Z = (1 << 7);
-
-static constexpr uint32_t BIT_FRAME = (1 << 8);
-static constexpr uint32_t BIT_ANIMATION_INDEX = (1 << 9);
-static constexpr uint32_t BIT_ANIMATION_START_TIME = (1 << 10);
-static constexpr uint32_t BIT_ANIMATION_FRAMERATE = (1 << 11);
-
-static constexpr uint32_t BIT_MODEL = (1 << 12);
-static constexpr uint32_t BIT_MODEL2 = (1 << 13);
-static constexpr uint32_t BIT_MODEL3 = (1 << 14);
-static constexpr uint32_t BIT_MODEL4 = (1 << 15);
-
-static constexpr uint32_t BIT_EVENT_ID = (1 << 16);
-
-static constexpr uint32_t BIT_EFFECTS = (1 << 17);
-static constexpr uint32_t BIT_RENDER_EFFECTS = (1 << 18);
-
-static constexpr uint32_t BIT_SKIN = (1 << 19);
-static constexpr uint32_t BIT_OLD_ORIGIN = (1 << 20);
-
-static constexpr uint32_t BIT_SOUND = (1 << 21);
-static constexpr uint32_t BIT_SOLID = (1 << 22);
-
-//struct EntityMessageBits {
-//    // First 8 bits.
-//    static constexpr int32_t OriginX = (1 << 0);
-//    static constexpr int32_t OriginY = (1 << 1);
-//    static constexpr int32_t AngleX = (1 << 2);
-//    static constexpr int32_t AngleY = (1 << 3);
-//    static constexpr int32_t AnimationFrame = (1 << 4);
-//    static constexpr int32_t EventID = (1 << 5);
-//    static constexpr int32_t Remove = (1 << 6);
-//    static constexpr int32_t MoreBitsA = (1 << 7);
+//static constexpr uint32_t BIT_NUMBER = (1 << 0);
+//static constexpr uint32_t BIT_REMOVE = (1 << 6);
 //
-//    // Second 8 bits.
-//    static constexpr int32_t Number = (1 )
-//};
-#define BIT_ORIGIN_X (1 << 0)  // was named: BIT_ORIGIN_X
-#define BIT_ORIGIN_Y (1 << 1)  // was named: BIT_ORIGIN_Y
-#define U_ANGLE_Y (1 << 2)   // was named: U_ANGLE_Y
-#define U_ANGLE_Z (1 << 3)   // was named: U_ANGLE_Z
-#define U_FRAME (1 << 4)     // frame is a byte
-#define U_EVENT (1 << 5)
-#define U_REMOVE (1 << 6)     // REMOVE this entity, don't add it
-#define U_MOREBITS1 (1 << 7)  // read one additional byte
+//static constexpr uint32_t EntityMessageBits::OriginX = (1 << 2);
+//static constexpr uint32_t EntityMessageBits::OriginY = (1 << 3);
+//static constexpr uint32_t BIT_ORIGIN_Z = (1 << 4);
+//
+//static constexpr uint32_t BIT_ANGLE_X = (1 << 5);
+//static constexpr uint32_t BIT_ANGLE_Y = (1 << 1);
+//static constexpr uint32_t BIT_ANGLE_Z = (1 << 7);
+//
+//static constexpr uint32_t BIT_FRAME = (1 << 8);
+//static constexpr uint32_t BIT_ANIMATION_INDEX = (1 << 9);
+//static constexpr uint32_t BIT_ANIMATION_START_TIME = (1 << 10);
+//static constexpr uint32_t BIT_ANIMATION_FRAMERATE = (1 << 11);
+//
+//static constexpr uint32_t BIT_MODEL = (1 << 12);
+//static constexpr uint32_t BIT_MODEL2 = (1 << 13);
+//static constexpr uint32_t BIT_MODEL3 = (1 << 14);
+//static constexpr uint32_t BIT_MODEL4 = (1 << 15);
+//
+//static constexpr uint32_t BIT_EVENT_ID = (1 << 16);
+//
+//static constexpr uint32_t BIT_EFFECTS = (1 << 17);
+//static constexpr uint32_t BIT_RENDER_EFFECTS = (1 << 18);
+//
+//static constexpr uint32_t BIT_SKIN = (1 << 19);
+//static constexpr uint32_t BIT_OLD_ORIGIN = (1 << 20);
+//
+//static constexpr uint32_t BIT_SOUND = (1 << 21);
+//static constexpr uint32_t BIT_SOLID = (1 << 22);
+//#define EntityMessageBits::OriginX (1 << 0)  // was named: EntityMessageBits::OriginX
+//#define EntityMessageBits::OriginY (1 << 1)  // was named: EntityMessageBits::OriginY
+//#define EntityMessageBits::AngleY (1 << 2)   // was named: EntityMessageBits::AngleY
+//#define EntityMessageBits::AngleZ (1 << 3)   // was named: EntityMessageBits::AngleZ
+//#define EntityMessageBits::AnimationFrame (1 << 4)     // frame is a byte
+//#define EntityMessageBits::EventID (1 << 5)
+//#define EntityMessageBits::Remove (1 << 6)     // REMOVE this entity, don't add it
+//#define EntityMessageBits::MoreBitsA (1 << 7)  // read one additional byte
+//
+//// Second byte
+//#define U_NUMBER16 (1 << 8)  // NUMBER8 is implicit if not set
+//#define EntityMessageBits::OriginZ (1 << 9)  // was named: EntityMessageBits::OriginZ
+//#define EntityMessageBits::AngleX (1 << 10)  // was named: EntityMessageBits::AngleX
+//#define EntityMessageBits::ModelIndex1 (1 << 11)
+//#define U_RENDERFX8 (1 << 12)  // fullbright, etc
+////#define U_ANGLE16   (1<<13)
+//#define U_EFFECTS8 (1 << 14)   // autorotate, trails, etc
+//#define EntityMessageBits::MoreBitsB (1 << 15)  // read one additional byte
 
-// Second byte
-#define U_NUMBER16 (1 << 8)  // NUMBER8 is implicit if not set
-#define U_ORIGIN_Z (1 << 9)  // was named: U_ORIGIN_Z
-#define U_ANGLE_X (1 << 10)  // was named: U_ANGLE_X
-#define U_MODEL (1 << 11)
-#define U_RENDERFX8 (1 << 12)  // fullbright, etc
-//#define U_ANGLE16   (1<<13)
-#define U_EFFECTS8 (1 << 14)   // autorotate, trails, etc
-#define U_MOREBITS2 (1 << 15)  // read one additional byte
+struct EntityMessageBits {
 
-// Third byte
-#define U_SKIN8 (1 << 16)
-#define U_FRAME16 (1 << 17)	// frame is a short
-#define U_RENDERFX16 (1 << 18)	// 8 + 16 = 32
-#define U_EFFECTS16 (1 << 19)	// 8 + 16 = 32
-#define U_MODEL2 (1 << 20)	// weapons, flags, etc
-#define U_MODEL3 (1 << 21)
-#define U_MODEL4 (1 << 22)
-#define U_MOREBITS3 (1 << 23)  // read one additional byte
+    // TODO: Adjust net code to send data perhaps like the following lists instead, prioritized by that which changes less often:
+    // Order of data being sent, per category.
+    // Entity State         : Number, Remove
+    // Entity Transform     : OriginX, OriginY, AngleX, AngleY, OriginZ, AngleZ, OldOrigin 
+    // Entity Display       : AnimationFrame, Skin, ModelIndex #1, RenderEffects, EntityEffects, ModelIndex #2, ModelIndex #3, ModelIndex #4, 
 
-// fourth byte
-#define U_OLDORIGIN (1 << 24)  // FIXME: get rid of this
-#define U_SKIN16 (1 << 25)
-#define U_SOUND (1 << 26)
-#define U_SOLID (1 << 27)
-#define U_ANIMATION_TIME_START (1 << 28)
-#define U_ANIMATION_FRAME_START (1 << 29)
-#define U_ANIMATION_FRAME_END (1 << 30)
-#define U_ANIMATION_FRAME_RATE (1 << 31)
+    // First 8 bits.
+    static constexpr int32_t OriginX        = (1 << 0); //! X Origin.
+    static constexpr int32_t OriginY        = (1 << 1); //! Y Origin.
+    static constexpr int32_t AngleX         = (1 << 2); //! X Angle.
+    static constexpr int32_t AngleY         = (1 << 3); //! Y Angle.
+    static constexpr int32_t AnimationFrame = (1 << 4); //! Animation frame, not used by skeletal models.
+    static constexpr int32_t EventID        = (1 << 5); //! EventID for this state, reset each frame.
+    //static constexpr int32_t Remove         = (1 << 6); //! Notifies the client to remove this entity.
+    static constexpr int32_t MoreBitsA      = (1 << 7); //! Notifies the client that more bits are coming its way for this entity state.
+
+    // Second 8 bits.
+    //static constexpr int32_t Number         = (1 << 8);  //! The entity index number.
+    static constexpr int32_t OriginZ        = (1 << 9);  //! Origin Z.
+    static constexpr int32_t AngleZ         = (1 << 10); //! Angle Z.
+    static constexpr int32_t ModelIndex     = (1 << 11); //! Model Index #1.
+    static constexpr int32_t ModelIndex2    = (1 << 12); //! Model Index #2.
+    static constexpr int32_t ModelIndex3    = (1 << 13); //! Model Index #3.
+    static constexpr int32_t ModelIndex4    = (1 << 14); //! Model Index #4.
+    static constexpr int32_t MoreBitsB      = (1 << 15); //! Notifies the client that more bits are coming its way for this entity state.
+
+    // Third 8 bits.
+    static constexpr int32_t RenderEffects          = (1 << 16); //! Render Effects.
+    static constexpr int32_t EntityEffects          = (1 << 17); //! Entity Effects.
+    static constexpr int32_t Skin                   = (1 << 17); //! Model Skin.
+    static constexpr int32_t OldOrigin              = (1 << 19); //! Old origin.
+    static constexpr int32_t Sound                  = (1 << 20); //! Sound
+    static constexpr int32_t Solid                  = (1 << 21); //! The animation start time.
+    static constexpr int32_t AnimationTimeStart     = (1 << 22); //! The animation starting frame.
+    static constexpr int32_t MoreBitsC              = (1 << 23); //! Notifies the client that more bits are coming its way for this entity state.
+
+    // Fourth 8 bits.
+    static constexpr int32_t AnimationFrameStart    = (1 << 24); //! The animation ending frame.
+    static constexpr int32_t AnimationFrameEnd      = (1 << 25); //! The frame time.
+    static constexpr int32_t AnimationFrameTime     = (1 << 26); //! Reserved for future use.
+    static constexpr int32_t Unused1                = (1 << 27); //! Reserved for future use.
+    static constexpr int32_t Unused2                = (1 << 28); //! Reserved for future use.
+    static constexpr int32_t Unused3                = (1 << 29); //! Reserved for future use.
+    static constexpr int32_t Unused4                = (1 << 30); //! Reserved for future use.
+    static constexpr int32_t Unused5                = (1 << 31); //! Reserved for future use.
+
+};
+
+
+
+//// Third byte
+//#define U_SKIN8 (1 << 16)
+//#define U_FRAME16 (1 << 17)	// frame is a short
+//#define U_RENDERFX16 (1 << 18)	// 8 + 16 = 32
+//#define U_EFFECTS16 (1 << 19)	// 8 + 16 = 32
+//#define EntityMessageBits::ModelIndex2 (1 << 20)	// weapons, flags, etc
+//#define EntityMessageBits::ModelIndex3 (1 << 21)
+//#define EntityMessageBits::ModelIndex4 (1 << 22)
+//#define EntityMessageBits::MoreBitsC (1 << 23)  // read one additional byte
+//
+//// fourth byte
+//#define EntityMessageBits::OldOrigin (1 << 24)  // FIXME: get rid of this
+//#define U_SKIN16 (1 << 25)
+//#define EntityMessageBits::Sound (1 << 26)
+//#define EntityMessageBits::Solid (1 << 27)
+//#define EntityMessageBits::AnimationTimeStart (1 << 28)
+//#define EntityMessageBits::AnimationFrameStart (1 << 29)
+//#define EntityMessageBits::AnimationFrameEnd (1 << 30)
+//#define EntityMessageBits::AnimationFrameTime (1 << 31)
 
 // ==============================================================
 
@@ -395,4 +425,140 @@ struct FrameFlags {
     static constexpr int32_t NoDeltaFrame = (1 << 8);
 };
 
-#endif // PROTOCOL_H
+
+//    // Set the "more bits" flags based on how deep this state update is.
+//    if (bits & 0xff000000)
+//        bits |= EntityMessageBits::MoreBitsC | EntityMessageBits::MoreBitsB | EntityMessageBits::MoreBitsA;
+//    else if (bits & 0x00ff0000)
+//        bits |= EntityMessageBits::MoreBitsB | EntityMessageBits::MoreBitsA;
+//    else if (bits & 0x0000ff00)
+//        bits |= EntityMessageBits::MoreBitsA;
+//
+//    // Write out the first 8 bits.
+//    MSG_WriteUint8(bits & 255);
+//
+//    // Write out the next 24 bits if this is an update reaching to MoreBitsC
+//    if (bits & 0xff000000) {
+//        MSG_WriteUint8((bits >> 8) & 255);
+//        MSG_WriteUint8((bits >> 16) & 255);
+//        MSG_WriteUint8((bits >> 24) & 255);
+//    }
+//    // Write out the next 16 bits if this is an update reaching to MoreBitsB
+//    else if (bits & 0x00ff0000) {
+//        MSG_WriteUint8((bits >> 8) & 255);
+//        MSG_WriteUint8((bits >> 16) & 255);
+//    }
+//    // Write out the next 8 bits if this is an update reaching to MoreBitsA
+//    else if (bits & 0x0000ff00) {
+//        MSG_WriteUint8((bits >> 8) & 255);
+//    }
+//
+//    //----------
+//    // Make sure the "REMOVE" bit is unset before writing out the Entity State Number.
+//    int32_t entityNumber = to->number & ~(1U << 15);
+//
+//    // Write out the Entity State number.
+//    MSG_WriteUint16(to->number);
+//
+//    // Write out the ModelIndex.
+//    if (bits & EntityMessageBits::ModelIndex) { 
+//        MSG_WriteUint8(to->modelIndex);
+//    }
+//    // Write out the ModelIndex2.
+//    if (bits & EntityMessageBits::ModelIndex2) {
+//	    MSG_WriteUint8(to->modelIndex2);
+//    }
+//    // Write out the ModelIndex3.
+//    if (bits & EntityMessageBits::ModelIndex3) {
+//	    MSG_WriteUint8(to->modelIndex3);
+//    }
+//    // Write out the ModelIndex4.
+//    if (bits & EntityMessageBits::ModelIndex4) {
+//	    MSG_WriteUint8(to->modelIndex4);
+//    }
+//
+//    // Write out the AnimationFrame.
+//    if (bits & EntityMessageBits::AnimationFrame) {
+//	    MSG_WriteFloat(to->animationFrame);
+//    }
+//    
+//    // Write out the Skin Number.
+//    if (bits & EntityMessageBits::Skin) {
+//	    MSG_WriteUint16(to->skinNumber);
+//    }
+//
+//    // Write out the Entity Effects.
+//    if (bits & EntityMessageBits::EntityEffects) {
+//	    MSG_WriteLong(to->effects);
+//    }
+//
+//    // Write out the Render Effects.
+//    if (bits & EntityMessageBits::RenderEffects) {
+//	    MSG_WriteLong(to->renderEffects);
+//    }
+//
+//    // Write out the Origin X.
+//    if (bits & EntityMessageBits::OriginX) {
+//	    MSG_WriteFloat(to->origin[0]);
+//    }
+//    // Write out the Origin Y.
+//    if (bits & EntityMessageBits::OriginY) {
+//	    MSG_WriteFloat(to->origin[1]);
+//    }
+//    // Write out the Origin Z.
+//    if (bits & EntityMessageBits::OriginZ) {
+//	    MSG_WriteFloat(to->origin[2]);
+//    }
+//
+//    // Write out the Angle X.
+//    if (bits & EntityMessageBits::AngleX) {
+//	    MSG_WriteFloat(to->angles[0]);
+//    }
+//    // Write out the Angle Y.
+//    if (bits & EntityMessageBits::AngleY) {
+//	    MSG_WriteFloat(to->angles[1]);
+//    }
+//    // Write out the Angle Z.
+//    if (bits & EntityMessageBits::AngleZ) {
+//	    MSG_WriteFloat(to->angles[2]);
+//    }
+//
+//    // Write out the Old Origin.
+//    if (bits & EntityMessageBits::OldOrigin) {
+//        MSG_WriteFloat(to->oldOrigin[0]);
+//        MSG_WriteFloat(to->oldOrigin[1]);
+//        MSG_WriteFloat(to->oldOrigin[2]);
+//    }
+//
+//    // Write out the Sound.
+//    if (bits & EntityMessageBits::Sound) {
+//	    MSG_WriteUint8(to->sound);
+//    }
+//
+//    // Write out the Event ID.
+//    if (bits & EntityMessageBits::EventID) {
+//	    MSG_WriteUint8(to->eventID);
+//    }
+//
+//    // Write out the Solid.
+//    if (bits & EntityMessageBits::Solid) {
+//        MSG_WriteLong(to->solid);
+//    }
+//
+//    // Write out the Animation Start Time.
+//    if (bits & EntityMessageBits::AnimationTimeStart) {
+//	    MSG_WriteLong(to->animationStartTime);
+//    }
+//    // Write out the Animation Start Frame.
+//    if (bits & EntityMessageBits::AnimationFrameStart) {
+//	    MSG_WriteUint16(to->animationStartFrame);
+//    }
+//    // Write out the Animation End Frame.
+//    if (bits & EntityMessageBits::AnimationFrameEnd) {
+//	    MSG_WriteUint16(to->animationEndFrame);
+//    }
+//    // Write out the Animation Frame Time.
+//    if (bits & EntityMessageBits::AnimationFrameTime) {
+//    	MSG_WriteFloat(to->animationFramerate);
+//    }
+//}

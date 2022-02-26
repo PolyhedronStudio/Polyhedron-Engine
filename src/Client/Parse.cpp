@@ -58,7 +58,7 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *frame,
     MSG_ParseDeltaEntity(old, state, newnum, bits, cl.esFlags);
 
     // shuffle previous origin to old
-    if (!(bits & U_OLDORIGIN) && !(state->renderEffects & RenderEffects::Beam))
+    if (!(bits & EntityMessageBits::OldOrigin) && !(state->renderEffects & RenderEffects::Beam))
         VectorCopy(old->origin, state->oldOrigin);
 }
 
@@ -90,7 +90,15 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
     }
 
     while (1) {
+        // Get entity number, and bits to read out.
         newnum = MSG_ParseEntityBits(&bits);
+
+        // Store "Remove" bit.
+	    qboolean isRemoveBitSet = newnum & (1U << 15);
+
+        // Remove the "Remove" bit to acquire its real entity number value.
+	    newnum &= ~(1U << 15);
+
         if (newnum < 0 || newnum >= MAX_EDICTS) {
             Com_Error(ERR_DROP, "%s: bad number: %d", __func__, newnum);
         }
@@ -119,14 +127,15 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
             }
         }
 
-        if (bits & U_REMOVE) {
+        //if (bits & EntityMessageBits::Remove) {
+	    if (isRemoveBitSet) {
             // the entity present in oldframe is not in the current frame
             SHOWNET(2, "   remove: %i\n", newnum);
             if (oldnum != newnum) {
-                Com_DPrintf("U_REMOVE: oldnum != newnum\n");
+                Com_DPrintf("EntityMessageBits::Remove: oldnum != newnum\n");
             }
             if (!oldframe) {
-                Com_Error(ERR_DROP, "%s: U_REMOVE with NULL oldframe", __func__);
+                Com_Error(ERR_DROP, "%s: EntityMessageBits::Remove with NULL oldframe", __func__);
             }
 
             oldindex++;

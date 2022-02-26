@@ -142,7 +142,7 @@ void SVG_ThinkWeapon(SVGBasePlayer *player)
     if (client->weaponState.queuedState != -1){
 	    // TODO: Add a proper state machine for these animations here.
         // Reset gun frame so animations work properly.
-        client->playerState.gunAnimationFrame = 0;
+//        client->playerState.gunAnimationFrame = 0;
 
         // Switch to queued weaponstate.
 	    client->weaponState.currentState = client->weaponState.queuedState;

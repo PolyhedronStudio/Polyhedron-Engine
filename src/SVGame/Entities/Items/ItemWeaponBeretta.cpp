@@ -187,18 +187,18 @@ void ItemWeaponBeretta::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWea
     static constexpr float idleStartFrame = 187.f;
     static constexpr float idleEndFrame = 210.f;
 
-    // Get current gunAnimationFrame and Clamp it between start and end just to be sure.
-    float currentFrame = Clampf(client->playerState.gunAnimationFrame, idleStartFrame, idleEndFrame);
+    //// Get current gunAnimationFrame and Clamp it between start and end just to be sure.
+    //float currentFrame = Clampf(client->playerState.gunAnimationFrame, idleStartFrame, idleEndFrame);
 
-    // Calculate the next frame to head on forward to.
-    float nextFrame = currentFrame + BASE_1_FRAMETIME;
+    //// Calculate the next frame to head on forward to.
+    //float nextFrame = currentFrame + BASE_1_FRAMETIME;
 
-    // Move on to the next frame until we've ended.
-    if (nextFrame < idleEndFrame) {
-    	client->playerState.gunAnimationFrame = nextFrame;
-    } else {
-    	client->playerState.gunAnimationFrame = idleStartFrame;
-    }
+    //// Move on to the next frame until we've ended.
+    //if (nextFrame < idleEndFrame) {
+    //	client->playerState.gunAnimationFrame = nextFrame;
+    //} else {
+    //	client->playerState.gunAnimationFrame = idleStartFrame;
+    //}
     gi.DPrintf("ItemWeaponBeretta::InstanceWeaponIdle : %f - currentState: %i - queuedState: %i\n", level.time, client->weaponState.currentState, client->weaponState.queuedState);
 }
 
@@ -210,19 +210,19 @@ void ItemWeaponBeretta::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWea
     static constexpr float drawStartFrame = 149.f;
     static constexpr float drawEndFrame = 181.f;
 
-    // Get current gunAnimationFrame and Clamp it between start and end just to be sure.
-    float currentFrame = Clampf(client->playerState.gunAnimationFrame, drawStartFrame, drawEndFrame);
+    //// Get current gunAnimationFrame and Clamp it between start and end just to be sure.
+    //float currentFrame = Clampf(client->playerState.gunAnimationFrame, drawStartFrame, drawEndFrame);
 
-    // Calculate the next frame to head on forward to.
-    float nextFrame = currentFrame + BASE_1_FRAMETIME;
+    //// Calculate the next frame to head on forward to.
+    //float nextFrame = currentFrame + BASE_1_FRAMETIME;
 
-    // Move on to the next frame until we've ended.
-    if (nextFrame < drawEndFrame) {
-        client->playerState.gunAnimationFrame = nextFrame;
-    } else {
-	    client->weaponState.currentState = WeaponState::Finished;
-	    client->weaponState.queuedState = WeaponState::Idle;
-    }
+    //// Move on to the next frame until we've ended.
+    //if (nextFrame < drawEndFrame) {
+    //    client->playerState.gunAnimationFrame = nextFrame;
+    //} else {
+	   // client->weaponState.currentState = WeaponState::Finished;
+	   // client->weaponState.queuedState = WeaponState::Idle;
+    //}
 
     gi.DPrintf("ItemWeaponBeretta::InstanceWeaponDraw : %f - currentState: %i - queuedState: %i\n", level.time, client->weaponState.currentState, client->weaponState.queuedState);
 }
@@ -235,18 +235,18 @@ void ItemWeaponBeretta::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItem
     static constexpr float holsterStartFrame = 140.f;
     static constexpr float holsterEndFrame = 150.f;
 
-    // Get current gunAnimationFrame and Clamp it between start and end just to be sure.
-    float currentFrame = Clampf(client->playerState.gunAnimationFrame, holsterStartFrame, holsterEndFrame);
+    //// Get current gunAnimationFrame and Clamp it between start and end just to be sure.
+    //float currentFrame = Clampf(client->playerState.gunAnimationFrame, holsterStartFrame, holsterEndFrame);
 
-    // Calculate the next frame to head on forward to.
-    float nextFrame = currentFrame + BASE_1_FRAMETIME;
+    //// Calculate the next frame to head on forward to.
+    //float nextFrame = currentFrame + BASE_1_FRAMETIME;
 
-    // Move on to the next frame until we've ended.
-    if (nextFrame < holsterEndFrame) {
-        client->playerState.gunAnimationFrame = nextFrame;
-    } else {
-        client->weaponState.queuedState = WeaponState::Down;
-    }
+    //// Move on to the next frame until we've ended.
+    //if (nextFrame < holsterEndFrame) {
+    //    client->playerState.gunAnimationFrame = nextFrame;
+    //} else {
+    //    client->weaponState.queuedState = WeaponState::Down;
+    //}
 
     gi.DPrintf("ItemWeaponBeretta::InstanceWeaponHolster : %f - currentState: %i - queuedState: %i\n", level.time, client->weaponState.currentState, client->weaponState.queuedState);
 }

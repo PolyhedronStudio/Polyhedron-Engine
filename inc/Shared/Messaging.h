@@ -184,9 +184,9 @@ struct PlayerState {
     //! Current animation playback frame time.
     float       gunAnimationFrametime = 15.f;
     //! Amount of loops to do.
-    uint8_t     animationLoopCount = 0;
+    uint8_t     gunAnimationLoopCount = 0;
     //! Force loop?
-    uint8_t     animationForceLoop = false;
+    uint8_t     gunAnimationForceLoop = false;
 
     //! RGBA Full Screen blend effect.
     float   blend[4] = { 0.f, 0.f, 0.f, 0.f };  // RGBA full screen effect

@@ -1,135 +1,370 @@
-/*
-Copyright (C) 1997-2001 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
-
-#ifndef MSG_H
-#define MSG_H
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client/Server messaging API. (Partially borrowed from QFusion.)
+*
+***/
+#pragma once
 
 #include "Common/Protocol.h"
 #include "Common/SizeBuffer.h"
 
-//===========================================================================//
-// (Antique) Q2-Pro MSG Style.
-//===========================================================================//
-//---------------
-// A trick taken from Quetoo. Use an int32_t and a float in an union to
-// simplify the networking of a float.
-//---------------
-typedef union {
-    int32_t i;
-    float f;
-} msg_float;
 
-//---------------
-// Player state messaging flags.
-//---------------
-enum PlayerStateMessageFlags {
-    MSG_PS_IGNORE_VIEWANGLES    = (1 << 0),
-    MSG_PS_IGNORE_DELTAANGLES   = (1 << 1),
-    MSG_PS_IGNORE_PREDICTION    = (1 << 2), // Mutually exclusive with IGNORE_VIEWANGLES
+//============================================================================
+
+enum WireType {
+    WIRE_BOOL,	// a of value of 'true' is represented by a single bit in the header
+
+    WIRE_FIXED_INT8,    // 8-bit integer
+    WIRE_FIXED_INT16,   // 16-bit integer
+    WIRE_FIXED_INT32,   // 32-bit integer
+    WIRE_FIXED_INT64,   // 64-bit integer
+
+    WIRE_FLOAT,         // 32-bit floating point value
+    WIRE_HALF_FLOAT,    // 16-bit floating point value
+
+    WIRE_ANGLE,         // 32-bit float angle value, normalized to [0..360], transmitted at half-precision
+
+    WIRE_BASE128,       // base-128 encoded unsigned integer
+    WIRE_UBASE128       // base-128 encoded signed integer
 };
 
-//---------------
-// Entity state messaging flags.
-//---------------
-enum EntityStateMessageFlags {
-    MSG_ES_FORCE = (1 << 0),        // Force it whether we got a state to delta from or not.
-    MSG_ES_NEWENTITY = (1 << 1),    // New entity.
-    MSG_ES_FIRSTPERSON = (1 << 2),  // Tells whether the entity state that being parsed is for a firstperson perspective. (This implies a client.)
-    MSG_ES_BEAMORIGIN = (1 << 3),   // Informs the parsing that we're dealing with a beam, so we should treat origins differently.
+
+//typedef struct {
+//	uint8_t *data;
+//	size_t maxsize;
+//	size_t cursize;
+//	size_t readcount;
+//	bool compressed;
+//} MessageBuffer;
+
+struct MessageBufferField {
+    //! The field offset in the POD structure.
+    int32_t     offset;
+    //! The bits. If 0, it'll treat it as sizeof(float)
+    int32_t     bits;
+    //! The count of how many there are, if more than 1, it handles it as an array.
+    int32_t     count;
+    //! The type of encoding to use "over the wire".
+    WireType    encoding;
 };
 
-// Write message buffer.
-extern SizeBuffer   msg_write;
-extern byte         msg_write_buffer[MAX_MSGLEN];
+//============================================================================
 
-// Read message buffer.
-extern SizeBuffer   msg_read;
-extern byte         msg_read_buffer[MAX_MSGLEN];
 
-//! Extern null baseline states.
-extern const EntityState        nullEntityState;
-extern const PlayerState        nullPlayerState;
-extern const ClientMoveCommand  nullUserCmd;
-
-void    MSG_Init(void);
-
-void    MSG_BeginWriting(void);
-void    MSG_WriteChar(int c);
-void    MSG_WriteByte(int c);
-void    MSG_WriteShort(int c);
-void    MSG_WriteLong(int c);
-void    MSG_WriteFloat(float c);
-void    MSG_WriteString(const char* s);
-void    MSG_WriteVector3(const vec3_t& pos);
-void    MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, EntityStateMessageFlags flags);
-int     MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags);
-
-#if USE_CLIENT
-    void MSG_WriteBits(int value, int bits);
-    int  MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientMoveCommand* cmd);
-#endif // USE_CLIENT
-
-static inline void* MSG_WriteData(const void* data, size_t len)
-{
-    return memcpy(SZ_GetSpace(&msg_write, len), data, len);
-}
-
-static inline void MSG_FlushTo(SizeBuffer* buf)
-{
-    SZ_Write(buf, msg_write.data, msg_write.currentSize);
-    SZ_Clear(&msg_write);
-}
-
-void    MSG_BeginReading(void);
-byte*   MSG_ReadData(size_t len);
-int     MSG_ReadChar(void);
-int     MSG_ReadByte(void);
-int     MSG_ReadShort(void);
-int     MSG_ReadWord(void);
-int     MSG_ReadLong(void);
-float   MSG_ReadFloat(void);
-size_t  MSG_ReadString(char* dest, size_t size);
-size_t  MSG_ReadStringLine(char* dest, size_t size);
-void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCommand* cmd);
-int     MSG_ParseEntityBits(int* bits);
-void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, int32_t bits, EntityStateMessageFlags flags);
-#if USE_CLIENT
-    vec3_t MSG_ReadVector3(void);
-    vec3_t MSG_ReadVector3(void);
-
-    void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int extraflags);
-
-    #ifdef _DEBUG
-        void    MSG_ShowDeltaPlayerstateBits(int flags, int extraflags);
-        void    MSG_ShowDeltaUsercmdBits(int bits);
-        void    MSG_ShowDeltaEntityBits(int bits);
-
-        const char* MSG_ServerCommandString(int cmd);
-
-        #define MSG_ShowSVC(cmd) Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readCount - 1, MSG_ServerCommandString(cmd))
-    #endif // _DEBUG
-#endif // USE_CLIENT
+// Remove later on, use this for now.
+using MessageBuffer = SizeBuffer;
+struct GameState { };
 
 
 //============================================================================
 
 /**
-*   @brief Packs a bounding box by encoding it in a 32 bit unsigned int.
+*
+*   Message Flags.
+*
+**/
+/**
+*   Player State Messaging Flags.
+**/
+enum PlayerStateMessageFlags {
+    //! Ignore View Angles.
+    MSG_PS_IGNORE_VIEWANGLES = (1 << 0),
+    //! Ignore Delta Angles.
+    MSG_PS_IGNORE_DELTAANGLES = (1 << 1),
+    //! Mutually exclusive with IGNORE_VIEWANGLES
+    MSG_PS_IGNORE_PREDICTION = (1 << 2),
+};
+
+/**
+*   Entity State Messaging Flags.
+**/
+enum EntityStateMessageFlags {
+    //! Force it whether we got a state to delta from or not.
+    MSG_ES_FORCE = (1 << 0),
+    //! New entity.
+    MSG_ES_NEWENTITY = (1 << 1),
+    //! Tells whether the entity state that being parsed is for a firstperson perspective.
+    MSG_ES_FIRSTPERSON = (1 << 2), // Helps optimizing packet data by not sending certain information to a client.
+    //! Informs the parsing that we're dealing with a beam, so we should treat origins differently.
+    MSG_ES_BEAMORIGIN = (1 << 3),
+};
+
+// Write message buffer.
+extern SizeBuffer msg_write;
+extern byte	  msg_write_buffer[MAX_MSGLEN];
+
+// Read message buffer.
+extern SizeBuffer msg_read;
+extern byte	  msg_read_buffer[MAX_MSGLEN];
+
+
+
+/**
+*
+*   Message Buffer functionality.
+*
+**/
+/**
+*   @brief Initializes a MessageBuffer with said data of given length.
+**/
+void MSG_Init( MessageBuffer *buf, uint8_t *data, size_t length );
+
+/**
+*   @brief Clears the Messagebuffer.
+**/
+void MSG_Clear( MessageBuffer *buf );
+
+/**
+*   @brief  Tells the MessageBuffer that the wished for space has been written to.
+* 
+*   @return Pointer to the acquired space which to write in. nullptr on failure.
+**/
+void *MSG_GetSpace( MessageBuffer *buf, size_t length );
+
+/**
+*   @brief  Writes given data to the MessageBuffer.
+**/
+void MSG_WriteData( MessageBuffer *msg, const void *data, size_t length );
+
+/**
+*   @brief Reads the data into the message buffer.
+**/
+void MSG_ReadData(MessageBuffer* sb, void* buffer, size_t length);
+
+/**
+*   @brief Copies an entire piece of data into the MessageBuffer.
+**/
+void MSG_CopyData( MessageBuffer *buf, const void *data, size_t length );
+
+/**
+*   @brief Skips reading data in the message buffer, like flushing does.
+**/
+int32_t MSG_SkipData( MessageBuffer *sb, size_t length );
+
+
+
+/**
+*
+*   Wire Types write functionality.
+*
+**/
+/**
+*   @brief Writes a signed 8 bit byte.
+**/
+void MSG_WriteInt8( MessageBuffer *sb, int32_t c );
+
+/**
+*   @brief Writes an unsigned 8 bit byte.
+**/
+void MSG_WriteUint8( MessageBuffer *sb, int32_t c );
+
+/**
+*   @brief Writes a signed 16 bit short.
+**/
+void MSG_WriteInt16( MessageBuffer *sb, int32_t c );
+
+/**
+*   @brief Writes an unsigned 16 bit short.
+**/
+void MSG_WriteUint16( MessageBuffer *sb, uint32_t c );
+
+/**
+*   @brief Writes a 32 bit integer.
+**/
+void MSG_WriteInt32( MessageBuffer *sb, int32_t c );
+
+/**
+*   @brief Writes a 64 bit integer.
+**/
+void MSG_WriteInt64( MessageBuffer *sb, int64_t c );
+
+/**
+*   @brief Writes an unsigned LEB 128(base 128 encoded) integer.
+**/
+void MSG_WriteUintBase128( MessageBuffer *msg, uint64_t c );
+
+/**
+*   @brief Writes a zic-zac encoded signed integer.
+**/
+void MSG_WriteIntBase128( MessageBuffer *msg, int64_t c );
+
+/**
+*   @brief Writes a full precision float. (Transfered over the wire as an int32_t).
+**/
+void MSG_WriteFloat( MessageBuffer *sb, float f );
+
+/**
+*   @brief Writes a half float, lesser precision. (Transfered over the wire as an uint16_t)
+**/
+void MSG_WriteHalfFloat( MessageBuffer *sb, float f );
+
+/**
+*   @brief Writes a character string.
+**/
+void MSG_WriteString( MessageBuffer *sb, const char *s );
+
+/**
+*   @brief Writes a floating point angle converted to a 16 bit short. Lesser precision than full floats do.
+**/
+static inline void MSG_WriteAngle16(MessageBuffer* sb, float f) {
+    //#define MSG_WriteAngle16( sb, f ) ( MSG_WriteInt16( ( sb ), FloatAngleToShort( ( f ) ) ) )
+    MSG_WriteInt16(sb, FloatAngleToShort(f));
+}
+
+
+
+/**
+*
+*   Delta struct write functionality.
+*
+**/
+/**
+*   @brief Writes a delta user command.
+**/
+void MSG_WriteDeltaUsercmd( MessageBuffer *sb, const struct usercmd_s *from, struct usercmd_s *cmd );
+
+/**
+*   @brief Writes the entity number, remove state, and byte mask of the entity state.
+**/
+void MSG_WriteEntityNumber( MessageBuffer *msg, int32_t number, bool remove, uint32_t byteMask );
+
+/**
+*   @brief Writes the delta entity state.
+**/
+void MSG_WriteDeltaEntity( MessageBuffer *msg, const struct entity_state_s *from, const struct entity_state_s *to, bool force );
+
+/**
+*   @brief Writes the delta player state.
+**/
+void MSG_WriteDeltaPlayerState( MessageBuffer *msg, const PlayerState *ops, const PlayerState*ps );
+
+/**
+*   @brief Writes the delta of a game state.
+**/
+//void MSG_WriteDeltaGameState( MessageBuffer *msg, const GameState *from, const GameState *to );
+
+/**
+*   @brief Writes the delta of a given struct.
+**/
+void MSG_WriteDeltaStruct( MessageBuffer *msg, const void *from, const void *to, const MessageBufferField *fields, size_t numFields );
+
+
+
+/**
+*
+*   Wire Types read functionality.
+*
+**/
+/**
+*   @brief Engages reading mode for the message buffer.
+**/
+void MSG_BeginReading( MessageBuffer *sb );
+/**
+*   @return Signed 8 bit byte.
+**/
+int32_t MSG_ReadInt8( MessageBuffer *msg );
+/**
+*   @return Unsigned 8 bit byte.
+**/
+int32_t MSG_ReadUint8( MessageBuffer *msg );
+/**
+*   @return Signed 16 bit short.
+**/
+int16_t MSG_ReadInt16( MessageBuffer *sb );
+/**
+*   @return Unsigned 16 bit short.
+**/
+uint16_t MSG_ReadUint16( MessageBuffer *sb );
+/**
+*   @return 32 bit integer.
+**/
+int32_t MSG_ReadInt32( MessageBuffer *sb );
+/**
+*   @return 64 bit integer.
+**/
+int64_t MSG_ReadInt64( MessageBuffer *sb );
+/**
+*   @return Base 128 decoded unsigned integer.
+**/
+uint64_t MSG_ReadUintBase128( MessageBuffer *msg );
+
+/**
+*   @return Zig-Zac decoded integer.
+**/
+int64_t MSG_ReadIntBase128( MessageBuffer *msg );
+
+/**
+*   @return The full precision float.
+**/
+float MSG_ReadFloat( MessageBuffer *sb );
+/**
+*   @return A half float, converted to float, keep in mind that half floats have less precision.
+**/
+float MSG_ReadHalfFloat( MessageBuffer *sb );
+/**
+*   @return The full string until its end.
+**/
+char *MSG_ReadString( MessageBuffer *sb );
+
+/**
+*   @return The part of the string data up till the first '\n'
+**/
+char *MSG_ReadStringLine( MessageBuffer *sb );
+
+static inline float MSG_ReadAngle16(MessageBuffer* sb) { 
+    //#define MSG_ReadAngle16( sb ) ( ShortToFloatAngle( MSG_ReadInt16( ( sb ) ) ) )
+    return ShortToFloatAngle(MSG_ReadInt16(sb));
+}
+
+/**
+*   @brief Reads the byte 'direction' into the vector.
+**/
+//void MSG_ReadDir(MessageBuffer* sb, vec3_t &dir);
+
+
+/**
+*
+*   Delta struct read functionality.
+*
+**/
+/**
+*   @brief Reads in the entity number, the belonging byte mask, and whether to remove it or not.
+**/
+int32_t MSG_ReadEntityNumber(MessageBuffer* msg, bool* remove, uint32_t* byteMask);
+
+/**
+*   @brief Reads in the delta values of the entity states *from and *to into the message buffer.
+**/
+void MSG_ReadDeltaEntity(MessageBuffer* msg, const EntityState* from, EntityState* to, int32_t number, uint32_t byteMask);
+
+/**
+*   @brief Reads in the delta user command.
+**/
+void MSG_ReadDeltaUsercmd( MessageBuffer *sb, const struct usercmd_s *from, struct usercmd_s *cmd );
+
+/**
+*   @brief Reads in the delta values of the player states *from and *to into the message buffer.
+**/
+void MSG_ReadDeltaPlayerState(MessageBuffer* msg, const PlayerState* ops, PlayerState* ps);
+
+/**
+*   @brief Reads in the delta values of the game states *from and *to into the message buffer.
+**/
+void MSG_ReadDeltaGameState(MessageBuffer* msg, const GameState* from, GameState* to);
+
+/**
+*   @brief Reads in the delta values from the message buffer for the *from and *to structs.
+**/
+void MSG_ReadDeltaStruct( MessageBuffer *msg, const void *from, void *to, size_t size, const MessageBufferField *fields, size_t numFields );
+
+
+
+/**
+*   @brief Packs a bounding box by encoding it in a 32 bit unsigned int32_t.
 *   
 *   Mainly used for client side prediction, 
 *       8*(bits 0-4) is x/y radius
@@ -140,8 +375,7 @@ void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t n
 *   @param[in]  mins The mins of the bounding box to pack.
 *   @param[in]  maxs The maxs of the bounding box to pack.
 **/
-static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
-{
+static inline int32_t MSG_PackBoundingBox32(const vec3_t& mins, const vec3_t& maxs) {
     // Assume that x/y are equal and symetric
     int32_t XY = Clampi(maxs[0], 1, 255);
 
@@ -162,8 +396,7 @@ static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
 *   @param[out/in]  mins The mins of the bounding box to set after unpacking.
 *   @param[out/in]  maxs The maxs of the bounding box to set after unpacking.
 **/
-static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& maxs)
-{
+static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& maxs) {
     // Unpack.
     int32_t XY = solid & 255;
     int32_t ZDown = (solid >> 8) & 255;
@@ -179,9 +412,9 @@ static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& 
 //
 // UNUSED
 //
-//static inline int MSG_PackBoundingBox16(const vec3_t &mins, const vec3_t &maxs)
+//static inline int32_t MSG_PackBoundingBox16(const vec3_t &mins, const vec3_t &maxs)
 //{
-//    int x, zd, zu;
+//    int32_t x, zd, zu;
 //
 //    // assume that x/y are equal and symetric
 //    x = maxs[0] / 8;
@@ -201,9 +434,9 @@ static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& 
 //
 // UNUSED.
 //
-//static inline void MSG_UnpackBoundingBox16(int solid, vec3_t &mins, vec3_t &maxs)
+//static inline void MSG_UnpackBoundingBox16(int32_t solid, vec3_t &mins, vec3_t &maxs)
 //{
-//    int x, zd, zu;
+//    int32_t x, zd, zu;
 //
 //    x = 8 * (solid & 31);
 //    zd = 8 * ((solid >> 5) & 31);
@@ -214,5 +447,3 @@ static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& 
 //    mins[2] = -zd;
 //    maxs[2] = zu;
 //}
-
-#endif // MSG_H

@@ -713,11 +713,11 @@ void ClientGameEntities::AddViewEntities() {
         gunRenderEntity.frame = gun_frame;      // Development tool
         gunRenderEntity.oldframe = gun_frame;   // Development tool
     } else {
-        gunRenderEntity.frame = currentPlayerState->gunAnimationFrame;
+        gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;
         if (gunRenderEntity.frame == 0) {
             gunRenderEntity.oldframe = 0;   // just changed weapons, don't lerp from old
         } else {
-            gunRenderEntity.oldframe = oldPlayerState->gunAnimationFrame;
+            gunRenderEntity.oldframe = 0;//oldPlayerState->gunAnimationFrame;
             gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
         }
     }

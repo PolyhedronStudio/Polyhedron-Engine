@@ -169,10 +169,10 @@ SET( SRC_SVGAME
 	SVGame/Player/Player.cpp
 	SVGame/Player/View.cpp
 	SVGame/Player/Weapons.cpp
-	SVGame/Weapons/Blaster.cpp
-	SVGame/Weapons/Machinegun.cpp
-	SVGame/Weapons/Shotgun.cpp
-	SVGame/Weapons/SuperShotgun.cpp
+	#SVGame/Weapons/Blaster.cpp
+	#SVGame/Weapons/Machinegun.cpp
+	#SVGame/Weapons/Shotgun.cpp
+	#SVGame/Weapons/SuperShotgun.cpp
 	SVGame/World/GameWorld.cpp
     SVGame/svgame.def
     )
