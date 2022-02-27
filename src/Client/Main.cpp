@@ -232,7 +232,7 @@ void CL_ClientCommand(const char *string)
 
     Com_DDPrintf("%s: %s\n", __func__, string);
 
-    MSG_WriteUint8(clc_stringcmd);//MSG_WriteByte(clc_stringcmd);
+    MSG_WriteUint8(ClientCommand::StringCommand);//MSG_WriteByte(ClientCommand::StringCommand);
     MSG_WriteString(string);
     MSG_FlushTo(&cls.netChannel->message);
 }
@@ -241,7 +241,7 @@ void CL_ClientCommand(const char *string)
 ===================
 CL_ForwardToServer
 
-adds the current command line as a clc_stringcmd to the client message.
+adds the current command line as a ClientCommand::StringCommand to the client message.
 things like godmode, noclip, etc, are commands directed to the server,
 so when they are typed in at the console, they will need to be forwarded.
 ===================
@@ -711,7 +711,7 @@ void CL_Disconnect(ErrorType type)
 
     if (cls.netChannel) {
         // send a disconnect message to the server
-        MSG_WriteUint8(clc_stringcmd);//MSG_WriteByte(clc_stringcmd);
+        MSG_WriteUint8(ClientCommand::StringCommand);//MSG_WriteByte(ClientCommand::StringCommand);
         MSG_WriteData("disconnect", 11);
 
         Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3);

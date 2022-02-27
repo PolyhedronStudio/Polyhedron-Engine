@@ -1100,7 +1100,7 @@ static void SV_ExecuteMove(void)
     int         net_drop;
 
     if (moveIssued) {
-        SV_DropClient(sv_client, "multiple clc_move commands in packet");
+        SV_DropClient(sv_client, "multiple ClientCommand::Move commands in packet");
         return;     // someone is trying to cheat...
     }
 
@@ -1258,7 +1258,7 @@ static void SV_ParseDeltaUserinfo(void)
         if (msg_read.readCount >= msg_read.currentSize)
             break; // end of message
 
-        if (msg_read.data[msg_read.readCount] != clc_userinfo_delta)
+        if (msg_read.data[msg_read.readCount] != ClientCommand::DeltaUserInfo)
             break; // not delta userinfo
 
         msg_read.readCount++;
@@ -1321,22 +1321,22 @@ void SV_ExecuteClientMessage(client_t *client)
 
         switch (c & SVCMD_MASK) {
         default:
-        case clc_nop:
+        case ClientCommand::Nop:
             break;
 
-        case clc_userinfo:
+        case ClientCommand::UserInfo:
             SV_ParseFullUserinfo();
             break;
 
-        case clc_move:
+        case ClientCommand::Move:
             SV_ExecuteMove();
             break;
 
-        case clc_stringcmd:
+        case ClientCommand::StringCommand:
             SV_ParseClientCommand();
             break;
 
-        case clc_userinfo_delta:
+        case ClientCommand::DeltaUserInfo:
             SV_ParseDeltaUserinfo();
             break;
         }

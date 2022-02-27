@@ -36,7 +36,7 @@ constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_FEATURE_UPDATE = 1341;
 constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_CURRENT = 1340;
 
 // This is used to ensure that the protocols in use match up, and support each other.
-qboolean static inline POLYHEDRON_PROTOCOL_SUPPORTED(uint32_t x) {
+static inline qboolean POLYHEDRON_PROTOCOL_SUPPORTED(uint32_t x) {
     return x >= PROTOCOL_VERSION_POLYHEDRON_MINIMUM && x <= PROTOCOL_VERSION_POLYHEDRON_CURRENT;
 }
 
@@ -124,24 +124,15 @@ struct ServerCommand {
 //
 // Client to Server commands.
 //
-//struct ClientCommand {
-//    static constexpr int32_t Bad = 0;
-//    static constexpr int32_t Nop = 1;
-//    static constexpr int32_t Move = 2;
-//    static constexpr int32_t UserInfo = 3;
-//    static constexpr int32_t StringCommand = 3;
-//    static constexpr int32_t DeltaUserInfo = 3;
-//};
-enum ClientCommand {
-    clc_bad,
-    clc_nop,
-    clc_move,               // [ClientMoveCommand]
-    clc_userinfo,           // [userinfo string]
-    clc_stringcmd,          // [string] message
-
-    // q2pro specific operations
-    clc_userinfo_delta
+struct ClientCommand {
+    static constexpr int32_t Bad = 0;
+    static constexpr int32_t Nop = 1;
+    static constexpr int32_t Move = 2;
+    static constexpr int32_t UserInfo = 3;
+    static constexpr int32_t StringCommand = 4;
+    static constexpr int32_t DeltaUserInfo = 5;
 };
+
 
 //==============================================
 
