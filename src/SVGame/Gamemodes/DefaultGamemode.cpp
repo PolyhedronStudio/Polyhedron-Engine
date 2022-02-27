@@ -947,7 +947,7 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
 
     // If there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
-    if (svEntity->inUse == true) {
+    if (!!svEntity->inUse == true) {
         // Only pull through if it is a base player.
         if (svEntity->classEntity->IsSubclassOf<SVGBasePlayer>()) {
 	        player = dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);

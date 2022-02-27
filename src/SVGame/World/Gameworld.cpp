@@ -186,7 +186,7 @@ qboolean Gameworld::SpawnEntitiesFromString(const char* mapName, const char* ent
 	Entity *serverEntity = nullptr;
 
 	// Engage parsing.
-	while (isParsing == true) {
+	while (!!isParsing == true) {
 		// Parse the opening brace.
 		com_token = COM_Parse(&entities);
 
