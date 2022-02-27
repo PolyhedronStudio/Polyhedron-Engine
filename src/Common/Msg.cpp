@@ -148,7 +148,7 @@ void MSG_WriteUintBase128( uint64_t c ) {
 			buf[len] |= 0x80U;
 		}
 		len++;
-	} while( c );
+	} while( c ); // TODO: If it breaks, this might resolve it. while ( c != 0);
 
 	MSG_WriteData( buf, len );
 }
@@ -187,12 +187,12 @@ void MSG_WriteHalfFloat( float f ) {
 **/
 void MSG_WriteString( const char *s ) {
 	if( !s ) {
-		MSG_WriteData( "", 1 );
+		MSG_WriteUint8(0); //MSG_WriteData( "", 1 );
 	} else {
 		int32_t l = strlen( s );
 		if( l >= MAX_MSG_STRING_CHARS ) {
 			Com_Printf( "MSG_WriteString: MAX_MSG_STRING_CHARS overflow" );
-			MSG_WriteData( "", 1 );
+			MSG_WriteUint8(0);//MSG_WriteData( "", 1 );
 			return;
 		}
 		MSG_WriteData( s, l + 1 );
@@ -291,7 +291,7 @@ int32_t MSG_ReadUint8() {
     uint8_t *buf = MSG_ReadData(1);
 
     if (!buf) {
-        return 0;   
+        return -1; // TODO: Used to be 0 for QFusion but that won't budge for us now does it?   
     }
 
     return static_cast<unsigned char>(buf[0]);
@@ -307,7 +307,8 @@ int16_t MSG_ReadInt16() {
         return -1;
     }
 
-    return (int16_t)(buf[1] | (buf[0] << 8));
+    return (int16_t)(buf[0] | (buf[1] << 8));
+//    return (int16_t)(buf[1] | (buf[0] << 8));
 }
 
 /**
@@ -317,10 +318,11 @@ uint16_t MSG_ReadUint16() {
     uint8_t *buf = MSG_ReadData(2);
 
     if (!buf) {
-        return 0;
+        return -1; // TODO: This used to be 0, ...
     }
 
-    return (uint16_t)(buf[1] | (buf[0] << 8));
+    return (uint16_t)(buf[0] | (buf[1] << 8));
+    //return (uint16_t)(buf[1] | (buf[0] << 8));
 }
 
 /**
@@ -333,10 +335,11 @@ int32_t MSG_ReadInt32() {
         return -1;
     }
 
-    return buf[3] 
-		| (buf[2] << 8) 
-		| (buf[1] << 16) 
-		| (buf[0] << 24);
+    return buf[0] 
+		| (buf[1] << 8) 
+		| (buf[2] << 16) 
+		| (buf[3] << 24);
+    //return buf[3] | (buf[2] << 8) | (buf[1] << 16) | (buf[0] << 24);
 }
 
 /**
@@ -349,14 +352,22 @@ int64_t MSG_ReadInt64() {
         return -1;
     }
 
-	return ( int64_t )buf[7]
-		| ( ( int64_t )buf[6] << 8L )
-		| ( ( int64_t )buf[5] << 16L )
-		| ( ( int64_t )buf[4] << 24L )
-		| ( ( int64_t )buf[3] << 32L )
-		| ( ( int64_t )buf[2] << 40L )
-		| ( ( int64_t )buf[1] << 48L )
-		| ( ( int64_t )buf[0] << 56L );
+	//return ( int64_t )buf[7]
+	//	| ( ( int64_t )buf[6] << 8L )
+	//	| ( ( int64_t )buf[5] << 16L )
+	//	| ( ( int64_t )buf[4] << 24L )
+	//	| ( ( int64_t )buf[3] << 32L )
+	//	| ( ( int64_t )buf[2] << 40L )
+	//	| ( ( int64_t )buf[1] << 48L )
+	//	| ( ( int64_t )buf[0] << 56L );
+	return ( int64_t )buf[0]
+		| ( ( int64_t )buf[1] << 8L )
+		| ( ( int64_t )buf[2] << 16L )
+		| ( ( int64_t )buf[3] << 24L )
+		| ( ( int64_t )buf[4] << 32L )
+		| ( ( int64_t )buf[5] << 40L )
+		| ( ( int64_t )buf[6] << 48L )
+		| ( ( int64_t )buf[7] << 56L );
 }
 
 /**
@@ -552,7 +563,7 @@ vec4_t MSG_ReadVector4(bool halfFloat) {
 /**
 *   @brief  Parses the delta packets of player states.
 **/
-void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t extraflags) {
+void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t extraFlags) {
 
     // Sanity check. 
     if (!to) {
@@ -567,7 +578,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t
     }
 
     // Read the flag bits.
-    int32_t flags = MSG_ReadInt32();
+    uint32_t flags = static_cast<uint32_t>(MSG_ReadInt32());
 
     //
     // Parse movement related state data.
@@ -584,7 +595,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t
     }
 
     // Origin Z.
-    if (extraflags & EPS_M_ORIGIN2) {
+    if (extraFlags & EPS_M_ORIGIN2) {
         to->pmove.origin[2] = MSG_ReadFloat();
     }
 
@@ -595,7 +606,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t
     }
 
     // Velocity Z.
-    if (extraflags & EPS_M_VELOCITY2) {
+    if (extraFlags & EPS_M_VELOCITY2) {
         to->pmove.velocity[2] = MSG_ReadFloat();
     }
 
@@ -667,12 +678,12 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t
     }
 
     // Gun Offset.
-    if (extraflags & EPS_GUNOFFSET) {
+    if (extraFlags & EPS_GUNOFFSET) {
         to->gunOffset = MSG_ReadVector3();
     }
 
     // Gun Angles.
-    if (extraflags & EPS_GUNANGLES) {
+    if (extraFlags & EPS_GUNANGLES) {
         to->gunAngles = MSG_ReadVector3();
     }
 
@@ -695,7 +706,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t
     }
 
     // Parse Stats.
-    if (extraflags & EPS_STATS) {
+    if (extraFlags & EPS_STATS) {
         int32_t statbits = MSG_ReadInt32();
         for (int32_t i = 0; i < MAX_STATS; i++) {
             if (statbits & (1 << i)) {
@@ -708,7 +719,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t
 /**
 *   @brief Writes the delta player state.
 **/
-int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags)
+int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t playerStateMessageFlags)
 {
     // Sanity check.
     if (!to) {
@@ -723,8 +734,8 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
     //
     // Determine what needs to be sent
     //
-    int32_t playerStateFlags = 0;
-    int32_t entityStateFlags = 0;
+    uint32_t playerStateFlags = 0;
+    uint32_t entityStateFlags = 0;
 
     if (to->pmove.type != from->pmove.type) {
         playerStateFlags |= PS_PM_TYPE;
@@ -739,7 +750,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
         entityStateFlags |= EPS_M_ORIGIN2;
     }
 
-    if (!(flags & MSG_PS_IGNORE_PREDICTION)) {
+    if (!(playerStateMessageFlags & MSG_PS_IGNORE_PREDICTION)) {
         if (!EqualEpsilonf(to->pmove.velocity[0], from->pmove.velocity[0]) ||
             !EqualEpsilonf(to->pmove.velocity[1], from->pmove.velocity[1])) {
             playerStateFlags |= PS_PM_VELOCITY;
@@ -768,7 +779,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
         to->pmove.gravity = from->pmove.gravity;
     }
 
-    if (!(flags & MSG_PS_IGNORE_DELTAANGLES)) {
+    if (!(playerStateMessageFlags & MSG_PS_IGNORE_DELTAANGLES)) {
         if (!EqualEpsilonf(to->pmove.deltaAngles.x, from->pmove.deltaAngles.x) ||
             !EqualEpsilonf(to->pmove.deltaAngles.y, from->pmove.deltaAngles.y) ||
             !EqualEpsilonf(to->pmove.deltaAngles.z, from->pmove.deltaAngles.z))
@@ -784,7 +795,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerSt
         playerStateFlags |= PS_PM_VIEW_OFFSET;
     }
 
-    if (!(flags & MSG_PS_IGNORE_VIEWANGLES)) {
+    if (!(playerStateMessageFlags & MSG_PS_IGNORE_VIEWANGLES)) {
         if (!EqualEpsilonf(to->pmove.viewAngles.x, from->pmove.viewAngles.x) ||
             !EqualEpsilonf(to->pmove.viewAngles.y, from->pmove.viewAngles.y) ||
             !EqualEpsilonf(to->pmove.viewAngles.z, from->pmove.viewAngles.z)) {
@@ -1031,7 +1042,7 @@ int32_t MSG_ReadEntityNumber(bool* remove, uint32_t* byteMask) {
 /**
 *   @brief Writes the delta values of the entity state.
 **/
-void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, EntityStateMessageFlags flags) {
+void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32_t entityStateMessageFlags) {
     // Check whether to remove this entity if it isn't going anywhere.
     if (!to) {
         // If it never came from anywhere, we got no data to work with, error out.
@@ -1062,36 +1073,36 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
     }
 
     // Set byteMask to 0.
-    uint32_t bits = 0;
+    uint32_t byteMask = 0;
 
-    if (!(flags & MSG_ES_FIRSTPERSON)) {
+    if (!(entityStateMessageFlags & MSG_ES_FIRSTPERSON)) {
 	    if (!EqualEpsilonf(to->origin[0], from->origin[0])) {
-	        bits |= EntityMessageBits::OriginX;
+	        byteMask |= EntityMessageBits::OriginX;
 	    }
 	    if (!EqualEpsilonf(to->origin[1], from->origin[1])) {
-		    bits |= EntityMessageBits::OriginY;
+		    byteMask |= EntityMessageBits::OriginY;
         }
 	    if (!EqualEpsilonf(to->origin[2], from->origin[2])) { 
-            bits |= EntityMessageBits::OriginZ;
+            byteMask |= EntityMessageBits::OriginZ;
         }
 
         // N&C: Full float precision.
         if (!EqualEpsilonf(to->angles[0], from->angles[0])) {
-            bits |= EntityMessageBits::AngleX;
+            byteMask |= EntityMessageBits::AngleX;
         }
 	    if (!EqualEpsilonf(to->angles[1], from->angles[1])) {
-	        bits |= EntityMessageBits::AngleY;
+	        byteMask |= EntityMessageBits::AngleY;
 	    }
 	    if (!EqualEpsilonf(to->angles[2], from->angles[2])) {
-		    bits |= EntityMessageBits::AngleZ;
+		    byteMask |= EntityMessageBits::AngleZ;
 	    }
 
-        if (flags & MSG_ES_NEWENTITY) {
+        if (entityStateMessageFlags & MSG_ES_NEWENTITY) {
             if (!EqualEpsilonf(to->oldOrigin[0], from->origin[0]) ||
                 !EqualEpsilonf(to->oldOrigin[1], from->origin[1]) ||
                 !EqualEpsilonf(to->oldOrigin[2], from->origin[2]))
             {
-                bits |= EntityMessageBits::OldOrigin;
+                byteMask |= EntityMessageBits::OldOrigin;
             }
         }
     }
@@ -1099,216 +1110,218 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
 //    mask = 0xffff8000;  // don't confuse old clients
 
     if (to->skinNumber != from->skinNumber) {
-        bits |= EntityMessageBits::Skin;
+        byteMask |= EntityMessageBits::Skin;
     }
 
     if (!EqualEpsilonf(to->animationFrame, from->animationFrame)) {
-        bits |= EntityMessageBits::AnimationFrame;
+        byteMask |= EntityMessageBits::AnimationFrame;
     }
 
     if (to->effects != from->effects) {
-	    bits |= EntityMessageBits::EntityEffects;
+	    byteMask |= EntityMessageBits::EntityEffects;
     }
 
     if (to->renderEffects != from->renderEffects) {
-	    bits |= EntityMessageBits::RenderEffects;
+	    byteMask |= EntityMessageBits::RenderEffects;
     }
 
     if (to->solid != from->solid) {
-	    bits |= EntityMessageBits::Solid;
+	    byteMask |= EntityMessageBits::Solid;
     }
 
     // Event is not delta compressed, it's bit is set when eventID is non 0.
     if (to->eventID) {
-	    bits |= EntityMessageBits::EventID;
+	    byteMask |= EntityMessageBits::EventID;
     }
 
     if (to->modelIndex != from->modelIndex) {
-	    bits |= EntityMessageBits::ModelIndex;
+	    byteMask |= EntityMessageBits::ModelIndex;
     }
     if (to->modelIndex2 != from->modelIndex2) {
-	    bits |= EntityMessageBits::ModelIndex2;
+	    byteMask |= EntityMessageBits::ModelIndex2;
     }
     if (to->modelIndex3 != from->modelIndex3) {
-	    bits |= EntityMessageBits::ModelIndex3;
+	    byteMask |= EntityMessageBits::ModelIndex3;
     }
     if (to->modelIndex4 != from->modelIndex4) {
-	    bits |= EntityMessageBits::ModelIndex4;
+	    byteMask |= EntityMessageBits::ModelIndex4;
     }
 
     if (to->sound != from->sound) {
-	    bits |= EntityMessageBits::Sound;
+	    byteMask |= EntityMessageBits::Sound;
     }
 
     if (to->renderEffects & RenderEffects::FrameLerp) {
-        bits |= EntityMessageBits::OldOrigin;
+        byteMask |= EntityMessageBits::OldOrigin;
     }
     else if (to->renderEffects & RenderEffects::Beam) {
-        if (flags & MSG_ES_BEAMORIGIN) {
+        if (entityStateMessageFlags & MSG_ES_BEAMORIGIN) {
             if (!EqualEpsilonf(to->oldOrigin[0], from->oldOrigin[0]) ||
                 !EqualEpsilonf(to->oldOrigin[1], from->oldOrigin[1]) ||
                 !EqualEpsilonf(to->oldOrigin[2], from->oldOrigin[2])) 
             {
-                bits |= EntityMessageBits::OldOrigin;
+                byteMask |= EntityMessageBits::OldOrigin;
             }
         } else {
-            bits |= EntityMessageBits::OldOrigin;
+            byteMask |= EntityMessageBits::OldOrigin;
         }
     }
 
     if (to->animationStartTime != from->animationStartTime) { 
-        bits |= EntityMessageBits::AnimationTimeStart;
+        byteMask |= EntityMessageBits::AnimationTimeStart;
     }
     if (to->animationStartFrame != from->animationStartFrame) {
-	    bits |= EntityMessageBits::AnimationFrameStart;
+	    byteMask |= EntityMessageBits::AnimationFrameStart;
     }
     if (to->animationEndFrame != from->animationEndFrame) {
-	    bits |= EntityMessageBits::AnimationFrameEnd;
+	    byteMask |= EntityMessageBits::AnimationFrameEnd;
     }
     if (to->animationFramerate != from->animationFramerate) {
-	    bits |= EntityMessageBits::AnimationFrameTime;
+	    byteMask |= EntityMessageBits::AnimationFrameTime;
     }
     
     //
     // write the message
     //
-    if (!bits && !(flags & MSG_ES_FORCE))
+    if (!byteMask && !(entityStateMessageFlags & MSG_ES_FORCE))
         return;     // nothing to send!
 
     //----------
 
-    // Set the "more bits" flags based on how deep this state update is.
-    if (bits & 0xff000000)
-        bits |= EntityMessageBits::MoreBitsC | EntityMessageBits::MoreBitsB | EntityMessageBits::MoreBitsA;
-    else if (bits & 0x00ff0000)
-        bits |= EntityMessageBits::MoreBitsB | EntityMessageBits::MoreBitsA;
-    else if (bits & 0x0000ff00)
-        bits |= EntityMessageBits::MoreBitsA;
+    // Set the "more byteMask" flags based on how deep this state update is.
+    //if (byteMask & 0xff000000)
+    //    byteMask |= EntityMessageBits::MoreBitsC | EntityMessageBits::MoreBitsB | EntityMessageBits::MoreBitsA;
+    //else if (byteMask & 0x00ff0000)
+    //    byteMask |= EntityMessageBits::MoreBitsB | EntityMessageBits::MoreBitsA;
+    //else if (byteMask & 0x0000ff00)
+    //    byteMask |= EntityMessageBits::MoreBitsA;
 
-    // Write out the first 8 bits.
-    //MSG_WriteUint8(bits & 255);
+    // Write out the first 8 byteMask.
+    //MSG_WriteUint8(byteMask & 255);
 
-    //// Write out the next 24 bits if this is an update reaching to MoreBitsC
-    //if (bits & 0xff000000) {
-    //    MSG_WriteUint8((bits >> 8) & 255);
-    //    MSG_WriteUint8((bits >> 16) & 255);
-    //    MSG_WriteUint8((bits >> 24) & 255);
+    //// Write out the next 24 byteMask if this is an update reaching to MoreBitsC
+    //if (byteMask & 0xff000000) {
+    //    MSG_WriteUint8((byteMask >> 8) & 255);
+    //    MSG_WriteUint8((byteMask >> 16) & 255);
+    //    MSG_WriteUint8((byteMask >> 24) & 255);
     //}
-    //// Write out the next 16 bits if this is an update reaching to MoreBitsB
-    //else if (bits & 0x00ff0000) {
-    //    MSG_WriteUint8((bits >> 8) & 255);
-    //    MSG_WriteUint8((bits >> 16) & 255);
+    //// Write out the next 16 byteMask if this is an update reaching to MoreBitsB
+    //else if (byteMask & 0x00ff0000) {
+    //    MSG_WriteUint8((byteMask >> 8) & 255);
+    //    MSG_WriteUint8((byteMask >> 16) & 255);
     //}
-    //// Write out the next 8 bits if this is an update reaching to MoreBitsA
-    //else if (bits & 0x0000ff00) {
-    //    MSG_WriteUint8((bits >> 8) & 255);
+    //// Write out the next 8 byteMask if this is an update reaching to MoreBitsA
+    //else if (byteMask & 0x0000ff00) {
+    //    MSG_WriteUint8((byteMask >> 8) & 255);
     //}
-    MSG_WriteInt32(bits);
+    //MSG_WriteInt32(byteMask);
 
-    //----------
-    // Make sure the "REMOVE" bit is unset before writing out the Entity State Number.
-    int32_t entityNumber = to->number & ~(1U << 15);
 
-    // Write out the Entity State number.
-    MSG_WriteInt16(to->number);
+    ////----------
+    //// Make sure the "REMOVE" bit is unset before writing out the Entity State Number.
+    //int32_t entityNumber = to->number & ~(1U << 15);
+
+    //// Write out the Entity State number.
+    //MSG_WriteInt16(to->number);
+    MSG_WriteEntityNumber(to->number, false, byteMask);
 
     // Write out the ModelIndex.
-    if (bits & EntityMessageBits::ModelIndex) { 
+    if (byteMask & EntityMessageBits::ModelIndex) { 
         MSG_WriteUint8(to->modelIndex);
     }
     // Write out the ModelIndex2.
-    if (bits & EntityMessageBits::ModelIndex2) {
+    if (byteMask & EntityMessageBits::ModelIndex2) {
 	    MSG_WriteUint8(to->modelIndex2);
     }
     // Write out the ModelIndex3.
-    if (bits & EntityMessageBits::ModelIndex3) {
+    if (byteMask & EntityMessageBits::ModelIndex3) {
 	    MSG_WriteUint8(to->modelIndex3);
     }
     // Write out the ModelIndex4.
-    if (bits & EntityMessageBits::ModelIndex4) {
+    if (byteMask & EntityMessageBits::ModelIndex4) {
 	    MSG_WriteUint8(to->modelIndex4);
     }
 
     // Write out the AnimationFrame.
-    if (bits & EntityMessageBits::AnimationFrame) {
+    if (byteMask & EntityMessageBits::AnimationFrame) {
 	    MSG_WriteFloat(to->animationFrame);
     }
     
     // Write out the Skin Number.
-    if (bits & EntityMessageBits::Skin) {
+    if (byteMask & EntityMessageBits::Skin) {
 	    MSG_WriteInt16(to->skinNumber);
     }
 
     // Write out the Entity Effects.
-    if (bits & EntityMessageBits::EntityEffects) {
+    if (byteMask & EntityMessageBits::EntityEffects) {
 	    MSG_WriteInt32(to->effects);
     }
 
     // Write out the Render Effects.
-    if (bits & EntityMessageBits::RenderEffects) {
+    if (byteMask & EntityMessageBits::RenderEffects) {
 	    MSG_WriteInt32(to->renderEffects);
     }
 
     // Write out the Origin X.
-    if (bits & EntityMessageBits::OriginX) {
+    if (byteMask & EntityMessageBits::OriginX) {
 	    MSG_WriteFloat(to->origin[0]);
     }
     // Write out the Origin Y.
-    if (bits & EntityMessageBits::OriginY) {
+    if (byteMask & EntityMessageBits::OriginY) {
 	    MSG_WriteFloat(to->origin[1]);
     }
     // Write out the Origin Z.
-    if (bits & EntityMessageBits::OriginZ) {
+    if (byteMask & EntityMessageBits::OriginZ) {
 	    MSG_WriteFloat(to->origin[2]);
     }
 
     // Write out the Angle X.
-    if (bits & EntityMessageBits::AngleX) {
+    if (byteMask & EntityMessageBits::AngleX) {
 	    MSG_WriteFloat(to->angles[0]);
     }
     // Write out the Angle Y.
-    if (bits & EntityMessageBits::AngleY) {
+    if (byteMask & EntityMessageBits::AngleY) {
 	    MSG_WriteFloat(to->angles[1]);
     }
     // Write out the Angle Z.
-    if (bits & EntityMessageBits::AngleZ) {
+    if (byteMask & EntityMessageBits::AngleZ) {
 	    MSG_WriteFloat(to->angles[2]);
     }
 
     // Write out the Old Origin.
-    if (bits & EntityMessageBits::OldOrigin) {
+    if (byteMask & EntityMessageBits::OldOrigin) {
         MSG_WriteVector3(to->oldOrigin);
     }
 
     // Write out the Sound.
-    if (bits & EntityMessageBits::Sound) {
+    if (byteMask & EntityMessageBits::Sound) {
 	    MSG_WriteUint8(to->sound);
     }
 
     // Write out the Event ID.
-    if (bits & EntityMessageBits::EventID) {
+    if (byteMask & EntityMessageBits::EventID) {
 	    MSG_WriteUint8(to->eventID);
     }
 
     // Write out the Solid.
-    if (bits & EntityMessageBits::Solid) {
+    if (byteMask & EntityMessageBits::Solid) {
         MSG_WriteInt32(to->solid);
     }
 
     // Write out the Animation Start Time.
-    if (bits & EntityMessageBits::AnimationTimeStart) {
+    if (byteMask & EntityMessageBits::AnimationTimeStart) {
 	    MSG_WriteInt32(to->animationStartTime);
     }
     // Write out the Animation Start Frame.
-    if (bits & EntityMessageBits::AnimationFrameStart) {
+    if (byteMask & EntityMessageBits::AnimationFrameStart) {
 	    MSG_WriteUint16(to->animationStartFrame);
     }
     // Write out the Animation End Frame.
-    if (bits & EntityMessageBits::AnimationFrameEnd) {
+    if (byteMask & EntityMessageBits::AnimationFrameEnd) {
 	    MSG_WriteUint16(to->animationEndFrame);
     }
     // Write out the Animation Frame Time.
-    if (bits & EntityMessageBits::AnimationFrameTime) {
+    if (byteMask & EntityMessageBits::AnimationFrameTime) {
     	MSG_WriteFloat(to->animationFramerate);
     }
 }
@@ -1316,7 +1329,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, Entity
 /**
 *   @brief Reads the delta entity state, can go from either a baseline or a previous packet Entity State.
 **/
-void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, int bits, EntityStateMessageFlags flags) {
+void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, uint32_t byteMask, uint32_t entityStateFlags) {
     // Sanity checks.
     if (!to) {
         Com_Error(ERR_DROP, "%s: NULL", __func__);
@@ -1341,96 +1354,96 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int number, 
     // Reset eventID.
     to->eventID = 0;
 
-    // If no bits were received, we got no business here, return.
-    if (!bits) {
+    // If no byteMask were received, we got no business here, return.
+    if (!byteMask) {
         return;
     }
 
     // Model Indexes.
-    if (bits & EntityMessageBits::ModelIndex) {
+    if (byteMask & EntityMessageBits::ModelIndex) {
         to->modelIndex = MSG_ReadUint8();
     }
-    if (bits & EntityMessageBits::ModelIndex2) {
+    if (byteMask & EntityMessageBits::ModelIndex2) {
         to->modelIndex2 = MSG_ReadUint8();
     }
-    if (bits & EntityMessageBits::ModelIndex3) {
+    if (byteMask & EntityMessageBits::ModelIndex3) {
         to->modelIndex3 = MSG_ReadUint8();
     }
-    if (bits & EntityMessageBits::ModelIndex4) {
+    if (byteMask & EntityMessageBits::ModelIndex4) {
         to->modelIndex4 = MSG_ReadUint8();
     }
 
     // Frame.
-    if (bits & EntityMessageBits::AnimationFrame)
+    if (byteMask & EntityMessageBits::AnimationFrame)
         to->animationFrame = MSG_ReadFloat();
 
     // Skinnum.
-    if (bits & EntityMessageBits::Skin) { 
+    if (byteMask & EntityMessageBits::Skin) { 
         to->skinNumber = MSG_ReadUint16();
     }
 
     // Effects.
-    if (bits & EntityMessageBits::EntityEffects) {
+    if (byteMask & EntityMessageBits::EntityEffects) {
 	    to->effects = MSG_ReadInt32();
     }
 
     // RenderFX.
-    if (bits & EntityMessageBits::RenderEffects) {
+    if (byteMask & EntityMessageBits::RenderEffects) {
 	    to->renderEffects = MSG_ReadInt32();
     }
 
     // Origin.
-    if (bits & EntityMessageBits::OriginX) {
+    if (byteMask & EntityMessageBits::OriginX) {
         to->origin[0] = MSG_ReadFloat();
     }
-    if (bits & EntityMessageBits::OriginY) {
+    if (byteMask & EntityMessageBits::OriginY) {
         to->origin[1] = MSG_ReadFloat();
     }
-    if (bits & EntityMessageBits::OriginZ) {
+    if (byteMask & EntityMessageBits::OriginZ) {
         to->origin[2] = MSG_ReadFloat();
     }
 
     // Angle.
-    if (bits & EntityMessageBits::AngleX) {
+    if (byteMask & EntityMessageBits::AngleX) {
 	    to->angles[0] = MSG_ReadFloat();
     }
-    if (bits & EntityMessageBits::AngleY) {
+    if (byteMask & EntityMessageBits::AngleY) {
     	to->angles[1] = MSG_ReadFloat();
     }
-    if (bits & EntityMessageBits::AngleZ) {
+    if (byteMask & EntityMessageBits::AngleZ) {
 	    to->angles[2] = MSG_ReadFloat();
     }
 
     // Old Origin.
-    if (bits & EntityMessageBits::OldOrigin) {
+    if (byteMask & EntityMessageBits::OldOrigin) {
         to->oldOrigin = MSG_ReadVector3();
     }
 
     // Sound.
-    if (bits & EntityMessageBits::Sound) {
+    if (byteMask & EntityMessageBits::Sound) {
         to->sound = MSG_ReadUint8();
     }
 
     // Event.
-    if (bits & EntityMessageBits::EventID) {
+    if (byteMask & EntityMessageBits::EventID) {
         to->eventID = MSG_ReadUint8();
     }
 
     // Solid.
-    if (bits & EntityMessageBits::Solid) {
+    if (byteMask & EntityMessageBits::Solid) {
         to->solid = MSG_ReadInt32();
     }
 
-    if (bits & EntityMessageBits::AnimationTimeStart) {
+    if (byteMask & EntityMessageBits::AnimationTimeStart) {
 	    to->animationStartTime = MSG_ReadInt32();
     }
-    if (bits & EntityMessageBits::AnimationFrameStart) {
+    if (byteMask & EntityMessageBits::AnimationFrameStart) {
 	    to->animationStartFrame = MSG_ReadUint16();
     }
-    if (bits & EntityMessageBits::AnimationFrameEnd) {
+    if (byteMask & EntityMessageBits::AnimationFrameEnd) {
 	    to->animationEndFrame = MSG_ReadUint16();
     }
-    if (bits & EntityMessageBits::AnimationFrameTime) {
+    if (byteMask & EntityMessageBits::AnimationFrameTime) {
     	to->animationFramerate = MSG_ReadFloat();
     }
 }

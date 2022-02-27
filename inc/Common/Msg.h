@@ -123,6 +123,7 @@ extern const ClientMoveCommand  nullUserCmd;
 *               the allow underflow flag as appropriate.
 **/
 void MSG_Init(void);
+
 static inline void* MSG_WriteData(const void* data, size_t len)
 {
     return memcpy(SZ_GetSpace(&msg_write, len), data, len);
@@ -144,7 +145,7 @@ static inline void MSG_FlushTo(SizeBuffer* buf)
 /**
 *   @brief Initializes write buffer for a new write session.
 **/
-void    MSG_BeginWriting(void);//void    MSG_WriteChar(int c);
+void MSG_BeginWriting(void);//void    MSG_WriteChar(int c);
 /**
 *   @brief Writes a signed 8 bit byte.
 **/
@@ -308,11 +309,12 @@ int32_t MSG_ReadEntityNumber(bool* remove, uint32_t* byteMask);
 /**
 *   @brief
 **/
-void    MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, EntityStateMessageFlags flags);
+void    MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32_t entityStateMessageFlags);
 /**
 *   @brief
 **/
-void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, int32_t bits, EntityStateMessageFlags flags);
+void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, uint32_t byteMask, uint32_t entityStateFlags);
+
 
 
 /**
@@ -320,8 +322,8 @@ void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t n
 *   PlayerState Write/Read Functions.
 *
 **/
-int32_t MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, PlayerStateMessageFlags flags);
-void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, int32_t extraflags);
+int32_t MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t flags);
+void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t extraflags);
 
 
 

@@ -326,7 +326,7 @@ struct ClientState {
     int32_t numEntityStates;
 
     // The current client entity state messaging flags.
-    EntityStateMessageFlags    esFlags;
+    uint32_t    entityStateFlags;
 
     //
     // Server Frames.

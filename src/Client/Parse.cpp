@@ -55,21 +55,21 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *frame,
     }
 #endif
 
-    MSG_ParseDeltaEntity(old, state, newnum, bits, cl.esFlags);
+    MSG_ParseDeltaEntity(old, state, newnum, bits, cl.entityStateFlags);
 
     // shuffle previous origin to old
     if (!(bits & EntityMessageBits::OldOrigin) && !(state->renderEffects & RenderEffects::Beam))
-        VectorCopy(old->origin, state->oldOrigin);
+        state->oldOrigin = old->origin;//VectorCopy(old->origin, state->oldOrigin);
 }
 
 static void CL_ParsePacketEntities(ServerFrame *oldframe,
                                    ServerFrame *frame)
 {
-    int            newnum;
-    int            bits;
-    EntityState    *oldstate;
-    int            oldindex, oldnum;
-    int i;
+    int32_t            newnum = 0;
+    uint32_t        byteMask = 0;
+    EntityState    *oldstate = nullptr;
+    int32_t         oldindex = 0, oldnum = 0;
+    int32_t i = 0;
 
     frame->firstEntity = cl.numEntityStates;
     frame->numEntities = 0;
@@ -90,14 +90,17 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
     }
 
     while (1) {
-        // Get entity number, and bits to read out.
-        newnum = MSG_ParseEntityBits(&bits);
+     //   // Get entity number, and bits to read out.
+     //   newnum = MSG_ParseEntityBits(&bits);
 
-        // Store "Remove" bit.
-	    qboolean isRemoveBitSet = newnum & (1U << 15);
+     //   // Store "Remove" bit.
+	    //qboolean isRemoveBitSet = newnum & (1U << 15);
 
-        // Remove the "Remove" bit to acquire its real entity number value.
-	    newnum &= ~(1U << 15);
+     //   // Remove the "Remove" bit to acquire its real entity number value.
+	    //newnum &= ~(1U << 15);
+        bool removeEntity = false;
+        // Read out entity number, whether to remove it or not, and its byteMask.
+        newnum = MSG_ReadEntityNumber(&removeEntity, &byteMask);
 
         if (newnum < 0 || newnum >= MAX_EDICTS) {
             Com_Error(ERR_DROP, "%s: bad number: %d", __func__, newnum);
@@ -128,7 +131,7 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
         }
 
         //if (bits & EntityMessageBits::Remove) {
-	    if (isRemoveBitSet) {
+	    if (removeEntity) {
             // the entity present in oldframe is not in the current frame
             SHOWNET(2, "   remove: %i\n", newnum);
             if (oldnum != newnum) {
@@ -153,8 +156,8 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
         if (oldnum == newnum) {
             // delta from previous state
             SHOWNET(2, "   delta: %i ", newnum);
-            CL_ParseDeltaEntity(frame, newnum, oldstate, bits);
-            if (!bits) {
+            CL_ParseDeltaEntity(frame, newnum, oldstate, byteMask);
+            if (!byteMask) {
                 SHOWNET(2, "\n");
             }
 
@@ -173,8 +176,8 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
         if (oldnum > newnum) {
             // delta from baseline
             SHOWNET(2, "   baseline: %i ", newnum);
-            CL_ParseDeltaEntity(frame, newnum, &cl.entityBaselines[newnum], bits);
-            if (!bits) {
+            CL_ParseDeltaEntity(frame, newnum, &cl.entityBaselines[newnum], byteMask);
+            if (!byteMask) {
                 SHOWNET(2, "\n");
             }
             continue;
@@ -214,7 +217,7 @@ static void CL_ParseFrame(int extrabits)
     cl.frameFlags = 0;
 
     extraflags = 0;
-    bits = MSG_ReadInt32();//MSG_ReadLong();
+    bits = static_cast<uint32_t>(MSG_ReadInt32());//MSG_ReadLong();
 
     currentframe = bits & FRAMENUM_MASK;
     delta = bits >> FRAMENUM_BITS;
@@ -309,7 +312,7 @@ static void CL_ParseFrame(int extrabits)
     SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readCount - 1);
 
     // parse playerstate
-
+    //bits = MSG_ReadUint16();
     MSG_ParseDeltaPlayerstate(from, &frame.playerState, extraflags);
 #ifdef _DEBUG
     if (cl_shownet->integer > 2 && (bits || extraflags)) {
@@ -407,25 +410,26 @@ static void CL_ParseConfigstring(int index)
     CL_UpdateConfigstring(index);
 }
 
-static void CL_ParseBaseline(int index, int bits)
+static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
 {
     if (index < 1 || index >= MAX_EDICTS) {
         Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
     }
 #ifdef _DEBUG
     if (cl_shownet->integer > 2) {
-        MSG_ShowDeltaEntityBits(bits);
+        MSG_ShowDeltaEntityBits(byteMask);
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif
-    MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, bits, cl.esFlags);
+    MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, byteMask, cl.entityStateFlags);
 }
 
 // instead of wasting space for ServerCommand::ConfigString and ServerCommand::SpawnBaseline
 // bytes, entire game state is compressed into a single stream.
 static void CL_ParseGamestate(void)
 {
-    int        index, bits;
+    int32_t index = 0;
+    uint32_t byteMask = 0;
 
     while (msg_read.readCount < msg_read.currentSize) {
         index = MSG_ReadInt16();//MSG_ReadShort();
@@ -436,11 +440,13 @@ static void CL_ParseGamestate(void)
     }
 
     while (msg_read.readCount < msg_read.currentSize) {
-        index = MSG_ParseEntityBits(&bits);
+        //index = MSG_ParseEntityBits(&byteMask);
+        bool remove = false;
+        index = MSG_ReadEntityNumber(&remove, &byteMask);
         if (!index) {
             break;
         }
-        CL_ParseBaseline(index, bits);
+        CL_ParseBaseline(index, byteMask);
     }
 }
 
@@ -522,8 +528,7 @@ static void CL_ParseServerData(void)
     cl.serverState = i;
 
 
-    //cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
-    cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
+    cl.entityStateFlags = (cl.entityStateFlags | MSG_ES_BEAMORIGIN);
 
 
     if (cl.clientNumber == -1) {
@@ -881,10 +886,14 @@ badbyte:
             S_ParseStartSound();
             break;
 
-        case ServerCommand::SpawnBaseline:
-            index = MSG_ParseEntityBits(&bits);
-            CL_ParseBaseline(index, bits);
+        case ServerCommand::SpawnBaseline: {
+            //index = MSG_ParseEntityBits(&bits);
+            uint32_t byteMask = 0;
+            bool removeEntity = false;
+            index = MSG_ReadEntityNumber(&removeEntity, &byteMask);
+            CL_ParseBaseline(index, byteMask);
             break;
+        }
 
         case ServerCommand::Download:
             CL_ParseDownload(cmd);

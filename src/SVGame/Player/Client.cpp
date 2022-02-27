@@ -63,8 +63,8 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
 // TODO: Move into game mode.
 void SVG_TossClientWeapon(SVGBasePlayer *player)
 {
-    SVGBaseItemWeapon *item;
-    Entity      *drop;
+    SVGBaseItemWeapon *item = nullptr;
+    Entity      *drop= nullptr;
     float       spread = 1.5f;
 
     // Always allow.
