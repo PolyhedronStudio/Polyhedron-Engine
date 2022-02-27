@@ -35,7 +35,7 @@ BEGIN
             VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
             VALUE "FileVersion", VERSION_STRING
             VALUE "InternalName", "Polyhedron Client Game Module"
-            VALUE "LegalCopyright", "Copyright (C) 2020-2021, Polyhedron Studio. All rights reserved."
+            VALUE "LegalCopyright", "Copyright (C) 2020-2022, Polyhedron Studio. All rights reserved."
             VALUE "ProductName", "Polyhedron Engine"
             VALUE "ProductVersion", VERSION_STRING
         END

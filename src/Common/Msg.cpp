@@ -1106,8 +1106,6 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
             }
         }
     }
-    
-//    mask = 0xffff8000;  // don't confuse old clients
 
     if (to->skinNumber != from->skinNumber) {
         byteMask |= EntityMessageBits::Skin;

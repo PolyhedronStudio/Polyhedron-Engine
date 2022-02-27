@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Video.h"
 #include "refresh/refresh.h"
 #include "System/System.h"
-#include "../Resources/q2pro.xbm"
+#include "../Resources/polyhedron.xbm"
 #include <SDL.h>
 
 // RMLUI.
@@ -503,21 +503,21 @@ qboolean VID_Init(graphics_api_t api)
 
 	SDL_SetWindowMinimumSize(sdl_window, 320, 240);
 
-	uint32_t icon_rgb[q2icon_height][q2icon_width];
-	for (int y = 0; y < q2icon_height; y++)
+	uint32_t icon_rgb[polyhedron_height][polyhedron_width ];
+	for (int y = 0; y < polyhedron_height; y++)
 	{
-		for (int x = 0; x < q2icon_height; x++)
+		for (int x = 0; x < polyhedron_height; x++)
 		{
-			byte b = q2icon_bits[(y * q2icon_width + x) / 8];
+			byte b = polyhedron_bits[(y * polyhedron_width + x) / 8];
 			if ((b >> (x & 7)) & 1)
-				icon_rgb[y][x] = 0xFF7AB632; // NVIDIA green color
-			else
 				icon_rgb[y][x] = 0x00000000;
+			else
+				icon_rgb[y][x] = 0xff17dfa4;
 		}
 	}
 
     // C++20: Declaration moved to top.
-    icon = SDL_CreateRGBSurfaceFrom(icon_rgb, q2icon_width, q2icon_height, 32, q2icon_width * sizeof(uint32_t), 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    icon = SDL_CreateRGBSurfaceFrom(icon_rgb, polyhedron_width, polyhedron_height, 32, polyhedron_width * sizeof(uint32_t), 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     if (icon) {
         SDL_SetWindowIcon(sdl_window, icon);
         SDL_FreeSurface(icon);

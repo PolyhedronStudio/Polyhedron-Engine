@@ -1,5 +1,5 @@
 /* XPM */
-static char * q2pro_xpm[] = {
+static char * polyhedron_xpm[] = {
 "32 32 684 2",
 "  	c #222322",
 ". 	c #222323",
