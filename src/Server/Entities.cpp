@@ -116,7 +116,7 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
         }
     }
 
-    MSG_WriteShort(0);      // end of packetentities
+    MSG_WriteInt16(0);//MSG_WriteShort(0);      // end of packetentities
 }
 
 static ClientFrame *get_last_frame(client_t *client)
@@ -185,13 +185,13 @@ void SV_WriteFrameToClient(client_t *client) {
     // first byte to be patched
     b1 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
-    MSG_WriteLong((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
+    MSG_WriteInt32((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));//MSG_WriteLong((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
 
     // second byte to be patched
     b2 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
     // send over the areaBits
-    MSG_WriteByte(frame->areaBytes);
+    MSG_WriteUint8(frame->areaBytes);//MSG_WriteByte(frame->areaBytes);
     MSG_WriteData(frame->areaBits, frame->areaBytes);
 
     // ignore some parts of playerstate if not recording demo
@@ -219,7 +219,7 @@ void SV_WriteFrameToClient(client_t *client) {
     int clientNumber = oldframe ? oldframe->clientNumber : 0;
     if (clientNumber != frame->clientNumber) {
         extraflags |= EPS_CLIENTNUM;
-        MSG_WriteByte(frame->clientNumber);
+        MSG_WriteUint8(frame->clientNumber);//MSG_WriteByte(frame->clientNumber);
     }
 
     // save 3 high bits of extraflags

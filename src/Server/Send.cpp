@@ -38,10 +38,10 @@ void SV_FlushRedirect(int redirected, char *outputbuf, size_t len)
         memcpy(buffer + 10, outputbuf, len);
         NET_SendPacket(NS_SERVER, buffer, len + 10, &net_from);
     } else if (redirected == RD_CLIENT) {
-        MSG_WriteByte(ServerCommand::Print);
-        MSG_WriteByte(PRINT_HIGH);
+        MSG_WriteUint8(ServerCommand::Print);//MSG_WriteByte(ServerCommand::Print);
+        MSG_WriteUint8(PRINT_HIGH);//MSG_WriteByte(PRINT_HIGH);
         MSG_WriteData(outputbuf, len);
-        MSG_WriteByte(0);
+        MSG_WriteUint8(0);//MSG_WriteByte(0);
         SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
     }
 }
@@ -132,8 +132,8 @@ void SV_ClientPrintf(client_t *client, int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(ServerCommand::Print);
-    MSG_WriteByte(level);
+    MSG_WriteUint8(ServerCommand::Print);//MSG_WriteByte(ServerCommand::Print);
+    MSG_WriteUint8(level); //MSG_WriteByte(level);
     MSG_WriteData(string, len + 1);
 
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
@@ -163,8 +163,8 @@ void SV_BroadcastPrintf(int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(ServerCommand::Print);
-    MSG_WriteByte(level);
+    MSG_WriteUint8(ServerCommand::Print); //MSG_WriteByte(ServerCommand::Print);
+    MSG_WriteUint8(level);//MSG_WriteByte(level);
     MSG_WriteData(string, len + 1);
 
     FOR_EACH_CLIENT(client) {
@@ -193,7 +193,7 @@ void SV_ClientCommand(client_t *client, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(ServerCommand::StuffText);
+    MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteData(string, len + 1);
 
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
@@ -223,7 +223,7 @@ void SV_BroadcastCommand(const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(ServerCommand::StuffText);
+    MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteData(string, len + 1);
 
     FOR_EACH_CLIENT(client) {
@@ -531,18 +531,21 @@ static void emit_snd(client_t *client, MessagePacket *msg)
         flags |= SND_POS;   // entity is not present in frame
     }
 
-    MSG_WriteByte(ServerCommand::Sound);
-    MSG_WriteByte(flags);
-    MSG_WriteByte(msg->index);
+    MSG_WriteUint8(ServerCommand::Sound);//MSG_WriteByte(ServerCommand::Sound);
+    MSG_WriteUint8(flags);//MSG_WriteByte(flags);
+    MSG_WriteUint8(msg->index);//MSG_WriteByte(msg->index);
 
-    if (flags & SND_VOLUME)
-        MSG_WriteByte(msg->volume);
-    if (flags & SND_ATTENUATION)
-        MSG_WriteByte(msg->attenuation);
-    if (flags & SND_OFFSET)
-        MSG_WriteByte(msg->timeofs);
+    if (flags & SND_VOLUME) {
+        MSG_WriteUint8(msg->volume);//MSG_WriteByte(msg->volume);
+    }
+    if (flags & SND_ATTENUATION) {
+        MSG_WriteUint8(msg->attenuation);//MSG_WriteByte(msg->attenuation);
+    }
+    if (flags & SND_OFFSET) {
+        MSG_WriteUint8(msg->timeofs);//MSG_WriteByte(msg->timeofs);
+    }
 
-    MSG_WriteShort(msg->sendchan);
+    MSG_WriteInt16(msg->sendchan);//MSG_WriteShort(msg->sendchan);
 
     if (flags & SND_POS) {
         MSG_WriteVector3(msg->pos);
@@ -635,7 +638,7 @@ static void SV_WriteDatagram(client_t *client)
             pad = msg_write.maximumSize;
         }
         for (; pad > 0; pad--) {
-            MSG_WriteByte(ServerCommand::Padding);
+            MSG_WriteUint8(ServerCommand::Padding);//MSG_WriteByte(ServerCommand::Padding);
         }
     }
 #endif

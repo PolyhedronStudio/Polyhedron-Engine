@@ -376,15 +376,15 @@ qboolean Netchan_Process(NetChannel *netchan)
 
     // get sequence numbers
     MSG_BeginReading();
-    sequence = MSG_ReadLong();
-    sequence_ack = MSG_ReadLong();
+    sequence = static_cast<uint32_t>(MSG_ReadInt32()); // MSG_ReadLong
+    sequence_ack = static_cast<uint32_t>(MSG_ReadInt32()); // MSG_ReadLong
 
     // read the qport if we are a server
 #if USE_CLIENT
     if (netchan->netSource == NS_SERVER) {
 #endif
         if (netchan->remoteQPort) {
-            MSG_ReadByte();
+            MSG_ReadUint8();//MSG_ReadByte();
         }
 #if USE_CLIENT
     }
@@ -400,7 +400,7 @@ qboolean Netchan_Process(NetChannel *netchan)
     fragment_offset = 0;
     more_fragments = false;
     if (fragmented_message) {
-        fragment_offset = MSG_ReadShort();
+        fragment_offset = MSG_ReadUint16();//MSG_ReadShort();
         more_fragments = fragment_offset >> 15;
         fragment_offset &= 0x7FFF;
     }

@@ -169,13 +169,23 @@ typedef struct {
     // network messaging
     void (*Multicast)(const vec3_t &origin, int32_t to);
     void (*Unicast)(Entity *ent, qboolean reliable);
-    void (*WriteChar)(int c);
-    void (*WriteByte)(int c);
-    void (*WriteShort)(int c);
-    void (*WriteLong)(int c);
-    void (*WriteFloat)(float f);
-    void (*WriteString)(const char *s);
-    void (*WriteVector3)(const vec3_t &pos);
+    //void (*WriteChar)(int c);
+    //void (*WriteByte)(int c);
+    //void (*WriteShort)(int c);
+    //void (*WriteLong)(int c);
+    void (*MSG_WriteInt8)(int32_t c);
+    void (*MSG_WriteUint8)(int32_t c);
+    void (*MSG_WriteInt16)(int32_t c);
+    void (*MSG_WriteUint16)(uint32_t c);
+    void (*MSG_WriteInt32)(int32_t c);
+    void (*MSG_WriteInt64)(int64_t c);
+    void (*MSG_WriteUintBase128)(uint64_t c);
+    void (*MSG_WriteIntBase128)(int64_t c);
+    void (*MSG_WriteFloat)(float f);
+    void (*MSG_WriteHalfFloat)(float f);
+    void (*MSG_WriteString)(const char *s);
+    void (*MSG_WriteVector3)(const vec3_t &pos, bool halfFloat);
+    void (*MSG_WriteVector4)(const vec4_t &pos, bool halfFloat);
 
     // managed memory allocation
     void *(*TagMalloc)(size_t size, unsigned tag);

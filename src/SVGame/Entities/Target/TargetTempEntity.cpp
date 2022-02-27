@@ -32,8 +32,8 @@ void TargetTempEntity::Spawn() {
 // TargetTempEntity::TempEntityUse
 //===============
 void TargetTempEntity::TempEntityUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-	gi.WriteByte( ServerGameCommand::TempEntity );
-	gi.WriteByte( GetStyle() );
-	gi.WriteVector3( GetOrigin() );
+	gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte( ServerGameCommand::TempEntity );
+	gi.MSG_WriteUint8(GetStyle());//WriteByte( GetStyle() );
+	gi.MSG_WriteVector3( GetOrigin(), false );//WriteVector3( GetOrigin() );
 	gi.Multicast( GetOrigin(), Multicast::PVS );
 }

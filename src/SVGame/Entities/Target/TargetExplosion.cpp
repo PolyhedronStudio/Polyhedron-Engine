@@ -48,9 +48,9 @@ void TargetExplosion::ExplosionUse( SVGBaseEntity* other, SVGBaseEntity* activat
 // TargetExplosion::ExplosionThink
 //===============
 void TargetExplosion::ExplosionThink() {
-	gi.WriteByte( ServerGameCommand::TempEntity );
-	gi.WriteByte( TempEntityEvent::Explosion1 );
-	gi.WriteVector3( GetOrigin() );
+	gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte( ServerGameCommand::TempEntity );
+	gi.MSG_WriteUint8(TempEntityEvent::Explosion1);//WriteByte( TempEntityEvent::Explosion1 );
+	gi.MSG_WriteVector3( GetOrigin(), false );
 	gi.Multicast( GetOrigin(), Multicast::PHS );
 
 	SVG_InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);

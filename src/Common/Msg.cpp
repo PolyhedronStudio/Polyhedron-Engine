@@ -25,7 +25,7 @@
 *   Message Buffer functionality.
 *
 **/
-static constexpr int32_t MAX_MSG_STRING_CHARS = 2048;
+static constexpr int32_t MAX_MSG_STRING_CHARS = MAX_NET_STRING;
 
 //! Write Message SizeBuffer.
 SizeBuffer   msg_write;

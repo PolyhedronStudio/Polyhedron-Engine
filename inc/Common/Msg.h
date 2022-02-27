@@ -178,13 +178,13 @@ void MSG_WriteUintBase128( uint64_t c );
 **/
 void MSG_WriteIntBase128( int64_t c );
 /**
-*   @brief Writes a full precision float. (Transfered over the wire as an int32_t).
-**/
-void MSG_WriteFloat( float f );
-/**
 *   @brief Writes a half float, lesser precision. (Transfered over the wire as an uint16_t)
 **/
 void MSG_WriteHalfFloat( float f );
+/**
+*   @brief Writes a full precision float. (Transfered over the wire as an int32_t).
+**/
+void MSG_WriteFloat( float f );
 /**
 *   @brief Writes a character string.
 **/
@@ -251,13 +251,13 @@ uint64_t MSG_ReadUintBase128();
 **/
 int64_t MSG_ReadIntBase128();
 /**
-*   @return The full precision float.
-**/
-float MSG_ReadFloat();
-/**
 *   @return A half float, converted to float, keep in mind that half floats have less precision.
 **/
 float MSG_ReadHalfFloat();
+/**
+*   @return The full precision float.
+**/
+float MSG_ReadFloat();
 /**
 *   @return The full string until its end.
 **/

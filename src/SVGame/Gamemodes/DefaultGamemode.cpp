@@ -556,10 +556,10 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     // This'll cause a body not to just "disappear", but actually play some
     // bloody particles over there.
     if (bodyEntity->state.modelIndex) {
-        gi.WriteByte(ServerGameCommand::TempEntity);
-        gi.WriteByte(TempEntityEvent::Blood);
-        gi.WriteVector3(bodyEntity->state.origin);
-        gi.WriteVector3(vec3_zero());
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(TempEntityEvent::Blood);//WriteByte(TempEntityEvent::Blood);
+        gi.MSG_WriteVector3(bodyEntity->state.origin, false);
+        gi.MSG_WriteVector3(vec3_zero(), false);
         gi.Multicast(bodyEntity->state.origin, Multicast::PVS);
     }
 
@@ -612,11 +612,11 @@ void DefaultGamemode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, 
         damage = 255;
 
     // Write away.
-    gi.WriteByte(ServerGameCommand::TempEntity);
-    gi.WriteByte(type);
+    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+    gi.MSG_WriteUint8(type);//WriteByte(type);
     //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
-    gi.WriteVector3(origin);
-    gi.WriteVector3(normal);
+    gi.MSG_WriteVector3(origin, false);
+    gi.MSG_WriteVector3(normal, false);
     gi.Multicast(origin, Multicast::PVS);
 }
 
@@ -981,10 +981,10 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
     } else {
         // send effect if in a multiplayer game
         if (game.GetMaxClients() > 1) {
-	        gi.WriteByte(ServerGameCommand::MuzzleFlash);
+	        gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);//WriteByte(ServerGameCommand::MuzzleFlash);
 	        //gi.WriteShort(serverEntity - g_entities);
-	        gi.WriteShort(player->GetNumber());
-	        gi.WriteByte(MuzzleFlashType::Login);
+	        gi.MSG_WriteInt16(player->GetNumber());//WriteShort(player->GetNumber());
+	        gi.MSG_WriteUint8(MuzzleFlashType::Login);//WriteByte(MuzzleFlashType::Login);
 	        gi.Multicast(player->GetOrigin(), Multicast::PVS);
 
             gi.BPrintf(PRINT_HIGH, "%s entered the game\n", client->persistent.netname);
@@ -1010,10 +1010,10 @@ void DefaultGamemode::ClientDisconnect(SVGBasePlayer* player, ServerClient *clie
 
     // Send effect
     if (player->IsInUse()) {
-        gi.WriteByte(ServerGameCommand::MuzzleFlash);
+        gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);//WriteByte(ServerGameCommand::MuzzleFlash);
         //gi.WriteShort(ent - g_entities);
-        gi.WriteShort(player->GetNumber());
-        gi.WriteByte(MuzzleFlashType::Logout);
+        gi.MSG_WriteInt16(player->GetNumber());//WriteShort(player->GetNumber());
+        gi.MSG_WriteUint8(MuzzleFlashType::Logout);//WriteByte(MuzzleFlashType::Logout);
         gi.Multicast(player->GetOrigin(), Multicast::PVS);
     }
 

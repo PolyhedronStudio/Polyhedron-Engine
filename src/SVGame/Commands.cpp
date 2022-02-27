@@ -462,9 +462,9 @@ void Cmd_Inven_f(Entity *ent)
 
     cl->showInventory = true;
 
-    gi.WriteByte(ServerGameCommand::Inventory);
+    gi.MSG_WriteUint8(ServerGameCommand::Inventory);//WriteByte(ServerGameCommand::Inventory);
     for (i = 0 ; i < MAX_ITEMS ; i++) {
-        gi.WriteShort(cl->persistent.inventory[i]);
+        gi.MSG_WriteInt16(cl->persistent.inventory[i]);//WriteShort(cl->persistent.inventory[i]);
     }
     gi.Unicast(ent, true);
 }

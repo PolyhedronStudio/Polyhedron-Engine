@@ -92,9 +92,9 @@ void SVG_BecomeExplosion1(SVGBaseEntity *self)
     vec3_t origin = self->GetOrigin();
 
     // Execute a TE effect.
-    gi.WriteByte(ServerGameCommand::TempEntity);
-    gi.WriteByte(TempEntityEvent::Explosion1);
-    gi.WriteVector3(origin);
+    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity); // Write Byte.
+    gi.MSG_WriteUint8(TempEntityEvent::Explosion1); //WriteByte(TempEntityEvent::Explosion1);
+    gi.MSG_WriteVector3(origin, false);
     gi.Multicast(origin, Multicast::PVS);
 
     // Queue for removal.
@@ -113,8 +113,8 @@ void SVG_BecomeExplosion2(SVGBaseEntity*self)
     vec3_t origin = self->GetOrigin();
 
     // Execute a TE effect.
-    gi.WriteByte(ServerGameCommand::TempEntity);
-    gi.WriteByte(TempEntityEvent::Explosion2);
-    gi.WriteVector3(origin);
+    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+    gi.MSG_WriteUint8(TempEntityEvent::Explosion2);//WriteByte(TempEntityEvent::Explosion2);
+    gi.MSG_WriteVector3(origin, false);
     gi.Multicast(origin, Multicast::PVS);
 }

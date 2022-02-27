@@ -124,6 +124,14 @@ struct ServerCommand {
 //
 // Client to Server commands.
 //
+//struct ClientCommand {
+//    static constexpr int32_t Bad = 0;
+//    static constexpr int32_t Nop = 1;
+//    static constexpr int32_t Move = 2;
+//    static constexpr int32_t UserInfo = 3;
+//    static constexpr int32_t StringCommand = 3;
+//    static constexpr int32_t DeltaUserInfo = 3;
+//};
 enum ClientCommand {
     clc_bad,
     clc_nop,

@@ -136,7 +136,7 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
         }
     }
 
-    MSG_WriteShort(0);      // end of packetentities
+    MSG_WriteInt16(0); //MSG_WriteShort(0);      // end of packetentities
 }
 
 static void emit_delta_frame(ServerFrame *from, ServerFrame *to,
@@ -144,17 +144,17 @@ static void emit_delta_frame(ServerFrame *from, ServerFrame *to,
 {
     PlayerState oldPlayerState, newPlayerState;
 
-    MSG_WriteByte(ServerCommand::Frame);
-    MSG_WriteLong(tonum);
-    MSG_WriteLong(fromnum);   // what we are delta'ing from
-    MSG_WriteByte(0);   // rate dropped packets
+    MSG_WriteUint8(ServerCommand::Frame);//MSG_WriteByte(ServerCommand::Frame);
+    MSG_WriteInt32(tonum);//MSG_WriteLong(tonum);
+    MSG_WriteInt32(fromnum);//MSG_WriteLong(fromnum);   // what we are delta'ing from
+    MSG_WriteUint8(0);//MSG_WriteByte(0);   // rate dropped packets
 
     // send over the areaBits
-    MSG_WriteByte(to->areaBytes);
+    MSG_WriteUint8(to->areaBytes);//MSG_WriteByte(to->areaBytes);
     MSG_WriteData(to->areaBits, to->areaBytes);
 
     // delta encode the playerstate
-    MSG_WriteByte(ServerCommand::PlayerInfo);
+    MSG_WriteUint8(ServerCommand::PlayerInfo);//MSG_WriteByte(ServerCommand::PlayerInfo);
     //MSG_PackPlayer(&newpack, &to->playerState);
     newPlayerState = to->playerState;
     if (from) {
@@ -166,7 +166,7 @@ static void emit_delta_frame(ServerFrame *from, ServerFrame *to,
     }
 
     // delta encode the entities
-    MSG_WriteByte(ServerCommand::PacketEntities);
+    MSG_WriteUint8(ServerCommand::PacketEntities);//MSG_WriteByte(ServerCommand::PacketEntities);
     emit_packet_entities(from, to);
 }
 
@@ -387,12 +387,12 @@ static void CL_Record_f(void)
     //
 
     // send the serverdata
-    MSG_WriteByte(ServerCommand::ServerData);
-    MSG_WriteLong(PROTOCOL_VERSION_DEFAULT);
-    MSG_WriteLong(0x10000 + cl.serverCount);
-    MSG_WriteByte(1);      // demos are always attract loops
+    MSG_WriteUint8(ServerCommand::ServerData);//MSG_WriteByte(ServerCommand::ServerData);
+    MSG_WriteInt32(PROTOCOL_VERSION_DEFAULT);//MSG_WriteLong(PROTOCOL_VERSION_DEFAULT);
+    MSG_WriteInt32(0x10000 + cl.serverCount);//MSG_WriteLong(0x10000 + cl.serverCount);
+    MSG_WriteUint8(1);//MSG_WriteByte(1);      // demos are always attract loops
     MSG_WriteString(cl.gamedir);
-    MSG_WriteShort(cl.clientNumber);
+    MSG_WriteInt16(cl.clientNumber);//MSG_WriteShort(cl.clientNumber);
     MSG_WriteString(cl.configstrings[ConfigStrings::Name]);
 
     // configstrings
@@ -410,10 +410,10 @@ static void CL_Record_f(void)
                 return;
         }
 
-        MSG_WriteByte(ServerCommand::ConfigString);
-        MSG_WriteShort(i);
+        MSG_WriteUint8(ServerCommand::ConfigString);//MSG_WriteByte(ServerCommand::ConfigString);
+        MSG_WriteInt16(i);//MSG_WriteShort(i);
         MSG_WriteData(s, len);
-        MSG_WriteByte(0);
+        MSG_WriteUint8(0);//MSG_WriteByte(0);
     }
 
     // entityBaselines
@@ -427,11 +427,11 @@ static void CL_Record_f(void)
                 return;
         }
 
-        MSG_WriteByte(ServerCommand::SpawnBaseline);
+        MSG_WriteUint8(ServerCommand::SpawnBaseline);//MSG_WriteByte(ServerCommand::SpawnBaseline);
         MSG_WriteDeltaEntity(NULL, ent, MSG_ES_FORCE);
     }
 
-    MSG_WriteByte(ServerCommand::StuffText);
+    MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString("precache\n");
 
     // write it to the demo file
@@ -811,14 +811,14 @@ void CL_EmitDemoSnapshot(void)
         if (len > MAX_QPATH)
             len = MAX_QPATH;
 
-        MSG_WriteByte(ServerCommand::ConfigString);
-        MSG_WriteShort(i);
+        MSG_WriteUint8(ServerCommand::ConfigString);//MSG_WriteByte(ServerCommand::ConfigString);
+        MSG_WriteInt16(i);//MSG_WriteShort(i);
         MSG_WriteData(to, len);
-        MSG_WriteByte(0);
+        MSG_WriteUint8(0);//MSG_WriteByte(0);
     }
 
     // write layout
-    MSG_WriteByte(ServerGameCommand::Layout);
+    MSG_WriteUint8(ServerGameCommand::Layout);//MSG_WriteByte(ServerGameCommand::Layout);
     MSG_WriteString(cl.layout);
 
     // CPP: Cast void* to demosnap_t *
@@ -1085,20 +1085,20 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
     }
 
     if (type == 0) {
-        if (MSG_ReadByte() != ServerCommand::ServerData) {
+        if (MSG_ReadUint8() != ServerCommand::ServerData) {//if (MSG_ReadByte() != ServerCommand::ServerData) {
             goto fail;
         }
-        if (MSG_ReadLong() != PROTOCOL_VERSION_DEFAULT) {
+        if (MSG_ReadUint8() != PROTOCOL_VERSION_DEFAULT) {//if (MSG_ReadLong() != PROTOCOL_VERSION_DEFAULT) {
             goto fail;
         }
-        MSG_ReadLong();
-        MSG_ReadByte();
-        MSG_ReadString(NULL, 0);
-        clientNumber = MSG_ReadShort();
-        MSG_ReadString(NULL, 0);
+        MSG_ReadInt32();//MSG_ReadLong();
+        MSG_ReadUint8();//MSG_ReadByte();
+        MSG_ReadStringBuffer(nullptr, 0);//MSG_ReadString(NULL, 0);
+        clientNumber = MSG_ReadInt16();//MSG_ReadShort();
+        MSG_ReadStringBuffer(nullptr, 0);//MSG_ReadString(NULL, 0);
 
         while (1) {
-            c = MSG_ReadByte();
+            c = MSG_ReadUint8();//MSG_ReadByte();
             if (c == -1) {
                 if (read_next_message(f) <= 0) {
                     break;
@@ -1108,11 +1108,11 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
             if (c != ServerCommand::ConfigString) {
                 break;
             }
-            index = MSG_ReadShort();
+            index = MSG_ReadInt16();//MSG_ReadShort();
             if (index < 0 || index >= ConfigStrings::MaxConfigStrings) {
                 goto fail;
             }
-            MSG_ReadString(string, sizeof(string));
+            MSG_ReadStringBuffer(string, sizeof(string));//MSG_ReadString(string, sizeof(string));
             parse_info_string(info, clientNumber, index, string);
         }
 

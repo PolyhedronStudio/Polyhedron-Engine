@@ -232,7 +232,7 @@ void CL_ClientCommand(const char *string)
 
     Com_DDPrintf("%s: %s\n", __func__, string);
 
-    MSG_WriteByte(clc_stringcmd);
+    MSG_WriteUint8(clc_stringcmd);//MSG_WriteByte(clc_stringcmd);
     MSG_WriteString(string);
     MSG_FlushTo(&cls.netChannel->message);
 }
@@ -711,7 +711,7 @@ void CL_Disconnect(ErrorType type)
 
     if (cls.netChannel) {
         // send a disconnect message to the server
-        MSG_WriteByte(clc_stringcmd);
+        MSG_WriteUint8(clc_stringcmd);//MSG_WriteByte(clc_stringcmd);
         MSG_WriteData("disconnect", 11);
 
         Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3);
@@ -901,7 +901,7 @@ static void CL_ParsePrintMessage(void)
     serverStatus_t status;
     Request *r;
 
-    MSG_ReadString(string, sizeof(string));
+    MSG_ReadStringBuffer(string, sizeof(string));//MSG_ReadString(string, sizeof(string));
 
     r = CL_FindRequest();
     if (r) {
@@ -960,7 +960,7 @@ static void CL_ParseInfoMessage(void)
     if (r->type != REQ_INFO)
         return;
 
-    MSG_ReadString(string, sizeof(string));
+    MSG_ReadStringBuffer(string, sizeof(string));//MSG_ReadString(string, sizeof(string));
     Com_Printf("%s", string);
     if (r->adr.type != NA_BROADCAST)
         r->type = REQ_FREE;
@@ -1217,9 +1217,9 @@ static void CL_ConnectionlessPacket(void)
     int type;
 
     MSG_BeginReading();
-    MSG_ReadLong(); // skip the -1
+    MSG_ReadInt32();//MSG_ReadLong(); // skip the -1
 
-    len = MSG_ReadStringLine(string, sizeof(string));
+    len = MSG_ReadStringLineBuffer(string, sizeof(string));//len = MSG_ReadStringLine(string, sizeof(string));
     if (len >= sizeof(string)) {
         Com_DPrintf("Oversize message received.  Ignored.\n");
         return;

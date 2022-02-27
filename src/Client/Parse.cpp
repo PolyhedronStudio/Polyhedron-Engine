@@ -214,7 +214,7 @@ static void CL_ParseFrame(int extrabits)
     cl.frameFlags = 0;
 
     extraflags = 0;
-    bits = MSG_ReadLong();
+    bits = MSG_ReadInt32();//MSG_ReadLong();
 
     currentframe = bits & FRAMENUM_MASK;
     delta = bits >> FRAMENUM_BITS;
@@ -225,7 +225,7 @@ static void CL_ParseFrame(int extrabits)
         deltaframe = currentframe - delta;
     }
 
-    bits = MSG_ReadByte();
+    bits = MSG_ReadUint8();//MSG_ReadByte();
 
     suppressed = bits & SUPPRESSCOUNT_MASK;
     if (suppressed & FrameFlags::ClientPredict) {
@@ -284,7 +284,7 @@ static void CL_ParseFrame(int extrabits)
     }
 
     // read areaBits
-    length = MSG_ReadByte();
+    length = MSG_ReadUint8();//MSG_ReadByte();
     if (length) {
         if (length < 0 || msg_read.readCount + length > msg_read.currentSize) {
             Com_Error(ERR_DROP, "%s: read past end of message", __func__);
@@ -319,7 +319,7 @@ static void CL_ParseFrame(int extrabits)
 #endif
     // parse clientNumber
     if (extraflags & EPS_CLIENTNUM) {
-        frame.clientNumber = MSG_ReadByte();
+        frame.clientNumber = MSG_ReadUint8();//MSG_ReadByte();
     } else if (oldframe) {
         frame.clientNumber = oldframe->clientNumber;
     }
@@ -384,7 +384,7 @@ static void CL_ParseConfigstring(int index)
 
     s = cl.configstrings[index];
     maxlen = CS_SIZE(index);
-    len = MSG_ReadString(s, maxlen);
+    len = MSG_ReadStringBuffer(s, maxlen);//MSG_ReadString(s, maxlen);
 
     SHOWNET(2, "    %d \"%s\"\n", index, s);
 
@@ -428,7 +428,7 @@ static void CL_ParseGamestate(void)
     int        index, bits;
 
     while (msg_read.readCount < msg_read.currentSize) {
-        index = MSG_ReadShort();
+        index = MSG_ReadInt16();//MSG_ReadShort();
         if (index == ConfigStrings::MaxConfigStrings) {
             break;
         }
@@ -456,9 +456,9 @@ static void CL_ParseServerData(void)
     CL_ClearState();
 
     // parse protocol version number
-    protocol = MSG_ReadLong();
-    cl.serverCount = MSG_ReadLong();
-    attractloop = MSG_ReadByte();
+    protocol = MSG_ReadInt32();//MSG_ReadLong();
+    cl.serverCount = MSG_ReadInt32();//MSG_ReadLong();
+    attractloop = MSG_ReadUint8(); //MSG_ReadByte();
 
     Com_DPrintf("Serverdata packet received "
                 "(protocol=%d, serverCount=%d, attractloop=%d)\n",
@@ -477,7 +477,7 @@ static void CL_ParseServerData(void)
     }
 
     // game directory
-    len = MSG_ReadString(cl.gamedir, sizeof(cl.gamedir));
+    len = MSG_ReadStringBuffer(cl.gamedir, sizeof(cl.gamedir));//MSG_ReadString(cl.gamedir, sizeof(cl.gamedir));
     if (len >= sizeof(cl.gamedir)) {
         Com_Error(ERR_DROP, "Oversize gamedir string");
     }
@@ -496,17 +496,17 @@ static void CL_ParseServerData(void)
     }
 
     // parse player entity number
-    cl.clientNumber = MSG_ReadShort();
+    cl.clientNumber = MSG_ReadInt16();//MSG_ReadShort();
 
     // get the full level name
-    MSG_ReadString(levelname, sizeof(levelname));
+    MSG_ReadStringBuffer(levelname, sizeof(levelname));//MSG_ReadString(levelname, sizeof(levelname));
 
     // setup default server state
     cl.serverState = ServerState::Game;
 
     // MSG: !! Removed: PROTOCOL_VERSION_POLYHEDRON
     //if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON) {
-    i = MSG_ReadShort();
+    i = MSG_ReadInt16();//MSG_ReadShort();
     if (!POLYHEDRON_PROTOCOL_SUPPORTED(protocol)) {
         Com_Error(ERR_DROP,
                     "Polyhedron server reports unsupported protocol version %d.\n"
@@ -517,7 +517,7 @@ static void CL_ParseServerData(void)
     cls.protocolVersion = protocol;
             
     // Parse N&C server state.
-    i = MSG_ReadByte();
+    i = MSG_ReadUint8();//MSG_ReadByte();
     Com_DPrintf("Polyhedron server state %d\n", i);
     cl.serverState = i;
 
@@ -560,32 +560,32 @@ static void CL_ParseStartSoundPacket(void)
 {
     int flags, channel, entity;
 
-    flags = MSG_ReadByte();
+    flags = MSG_ReadUint8();//MSG_ReadByte();
     if ((flags & (SND_ENT | SND_POS)) == 0)
         Com_Error(ERR_DROP, "%s: neither SND_ENT nor SND_POS set", __func__);
 
-    snd.index = MSG_ReadByte();
+    snd.index = MSG_ReadUint8();//MSG_ReadByte();
     if (snd.index == -1)
         Com_Error(ERR_DROP, "%s: read past end of message", __func__);
 
     if (flags & SND_VOLUME)
-        snd.volume = MSG_ReadByte() / 255.0f;
+        snd.volume = MSG_ReadUint8() / 255.0f;//MSG_ReadByte() / 255.0f;
     else
         snd.volume = DEFAULT_SOUND_PACKET_VOLUME;
 
     if (flags & SND_ATTENUATION)
-        snd.attenuation = MSG_ReadByte() / 64.0f;
+        snd.attenuation = MSG_ReadUint8() / 64.0f; //MSG_ReadByte() / 64.0f;
     else
         snd.attenuation = DEFAULT_SOUND_PACKET_ATTENUATION;
 
     if (flags & SND_OFFSET)
-        snd.timeofs = MSG_ReadByte() / 1000.0f;
+        snd.timeofs = MSG_ReadUint8() / 1000.0f; //MSG_ReadByte() / 1000.0f;
     else
         snd.timeofs = 0;
 
     if (flags & SND_ENT) {
         // entity relative
-        channel = MSG_ReadShort();
+        channel = MSG_ReadInt16();//MSG_ReadShort();
         entity = channel >> 3;
         if (entity < 0 || entity >= MAX_EDICTS)
             Com_Error(ERR_DROP, "%s: bad entity: %d", __func__, entity);
@@ -598,7 +598,7 @@ static void CL_ParseStartSoundPacket(void)
 
     // positioned in space
     if (flags & SND_POS)
-        snd.pos = MSG_ReadVector3();
+        snd.pos = MSG_ReadVector3(false);
 
     snd.flags = flags;
 
@@ -698,7 +698,7 @@ static void CL_ParseStuffText(void)
 {
     char s[MAX_STRING_CHARS];
 
-    MSG_ReadString(s, sizeof(s));
+    MSG_ReadStringBuffer(s, sizeof(s));//MSG_ReadString(s, sizeof(s));
     SHOWNET(2, "    \"%s\"\n", s);
     Cbuf_AddText(&cl_cmdbuf, s);
 }
@@ -713,8 +713,8 @@ static void CL_ParseDownload(int cmd)
     }
 
     // read the data
-    size = MSG_ReadShort();
-    percent = MSG_ReadByte();
+    size = MSG_ReadInt16();//MSG_ReadShort();
+    percent = MSG_ReadUint8();//MSG_ReadByte();
     if (size == -1) {
         CL_HandleDownload(NULL, size, percent, false);
         return;
@@ -757,8 +757,8 @@ static void CL_ParseZPacket(void)
         Com_Error(ERR_DROP, "%s: recursively entered", __func__);
     }
 
-    inlen = MSG_ReadWord();
-    outlen = MSG_ReadWord();
+    inlen = MSG_ReadUint16();//MSG_ReadWord();
+    outlen = MSG_ReadUint16();//MSG_ReadWord();
 
     if (inlen == -1 || outlen == -1 || msg_read.readCount + inlen > msg_read.currentSize) {
         Com_Error(ERR_DROP, "%s: read past end of message", __func__);
@@ -825,7 +825,7 @@ void CL_ParseServerMessage(void)
 
         readCount = msg_read.readCount;
 
-        if ((cmd = MSG_ReadByte()) == -1) {
+        if ((cmd = MSG_ReadUint8()) == -1) {//if ((cmd = MSG_ReadByte()) == -1) {
             SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readCount - 1);
             break;
         }
@@ -872,7 +872,7 @@ badbyte:
             continue;
 
         case ServerCommand::ConfigString:
-            index = MSG_ReadShort();
+            index = MSG_ReadInt16();//MSG_ReadShort();
             CL_ParseConfigstring(index);
             break;
 
@@ -955,7 +955,7 @@ void CL_SeekDemoMessage(void)
             Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
         }
 
-        if ((cmd = MSG_ReadByte()) == -1) {
+        if ((cmd = MSG_ReadUint8()) == -1) {//if ((cmd = MSG_ReadByte()) == -1) {
             SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readCount - 1);
             break;
         }
@@ -987,16 +987,16 @@ void CL_SeekDemoMessage(void)
             break;
 
         case ServerCommand::Print:
-            MSG_ReadByte();
+            MSG_ReadUint8();//MSG_ReadByte();
             // fall thorugh
 
         case ServerCommand::CenterPrint:
         case ServerCommand::StuffText:
-            MSG_ReadString(NULL, 0);
+            MSG_ReadStringBuffer(nullptr, 0);//MSG_ReadString(NULL, 0);
             break;
 
         case ServerCommand::ConfigString:
-            index = MSG_ReadShort();
+            index = MSG_ReadInt16();//MSG_ReadShort();
             CL_ParseConfigstring(index);
             break;
 
