@@ -9,8 +9,12 @@
 #include "../../ServerGameLocal.h"     // SVGame.
 #include "../../Effects.h"     // Effects.
 #include "../../Utilities.h"       // Util funcs.
+
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
+
+#include "../../Gamemodes/IGamemode.h"
+
 #include "TriggerHurt.h"
 
 //
@@ -164,7 +168,7 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 	else
 		damageFlags = 0;
 
-	SVG_InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
+	game.GetGamemode()->InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
 }
 
 //

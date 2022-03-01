@@ -16,6 +16,7 @@
 
 #include "FuncExplosive.h"
 
+#include "../../Gamemodes/IGamemode.h"
 #include "../../World/Gameworld.h"
 
 //===============
@@ -80,7 +81,7 @@ void FuncExplosive::ExplosiveDeath( SVGBaseEntity* inflictor, SVGBaseEntity* att
     SetTakeDamage( TakeDamage::No );
 
     if ( GetDamage() ) {
-        SVG_InflictRadiusDamage( this, attacker, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive );
+        game.GetGamemode()->InflictRadiusDamage( this, attacker, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive );
     }
 
     // Velocity = attack direction * 150

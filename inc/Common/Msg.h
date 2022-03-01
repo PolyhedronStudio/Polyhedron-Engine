@@ -342,7 +342,7 @@ void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMove
 #ifdef _DEBUG
     void    MSG_ShowDeltaPlayerstateBits(int32_t flags, int32_t extraflags);
     void    MSG_ShowDeltaUsercmdBits(int32_t bits);
-    void    MSG_ShowDeltaEntityBits(int32_t bits);
+    void    MSG_ShowDeltaEntityBits(uint32_t bits);
 
     const char* MSG_ServerCommandString(int32_t cmd);
 

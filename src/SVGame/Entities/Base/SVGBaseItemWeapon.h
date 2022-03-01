@@ -56,6 +56,15 @@ public:
     **/
     virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
+    /**
+    *   @brief  Instantly sets the current state.
+    **/
+    virtual void InstanceWeaponSetCurrentState(SVGBasePlayer *player, ServerClient* client, uint32_t state);
+
+    /** @brief  Queues a state and sets it as the next current state when the state currently processing has finished.
+    **/
+    virtual void InstanceWeaponQueueNextState(SVGBasePlayer *player, ServerClient* client, int32_t state);
+
     ///**
     //*   @brief  Called to execute the animation of the current weaponstate.
     //**/
@@ -70,11 +79,7 @@ public:
 	    SVGBaseItem* itemInstance = GetItemInstanceByID(identifier);
 
 	    // Do a type check and return it casted to SVGBaseItemAmmo
-	    if (itemInstance->IsSubclassOf<SVGBaseItemWeapon>()) {
-	        return dynamic_cast<SVGBaseItemWeapon*>(itemInstance);
-	    } else {
-	        return nullptr;
-	    }
+        return dynamic_cast<SVGBaseItemWeapon*>(itemInstance);
     }
 
     /**

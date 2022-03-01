@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Utilities.
 #include "Utilities.h"
 
+// Game Mode interface.
+#include "Gamemodes/IGamemode.h"
+
 // World.
 #include "World/Gameworld.h"
 
@@ -116,8 +119,8 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
     point = vec3_fmaf(point, aim[2], up);
     dir = point - self->GetEnemy()->GetOrigin();
 
-    // Do the damage
-    SVG_InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    // Do the damage.
+    game.GetGamemode()->InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
         return false;
@@ -230,7 +233,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     if ( !(tr.surface && tr.surface->flags & SURF_SKY) ) {
         if (tr.fraction < 1.0) {
             if (tr.ent->GetTakeDamage()) {
-                SVG_InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
+                game.GetGamemode()->InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);

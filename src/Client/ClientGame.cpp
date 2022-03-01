@@ -439,6 +439,7 @@ void CL_InitGameProgs(void)
 
     // Collision Model.
     importAPI.CM_HeadnodeForBox = CM_HeadnodeForBox;
+    importAPI.CM_HeadnodeForOctagon= CM_HeadnodeForOctagon;
     importAPI.CM_InlineModel = _wrp_CM_InlineModel;
     importAPI.CM_PointContents = CM_PointContents;
     importAPI.CM_TransformedPointContents = CM_TransformedPointContents;

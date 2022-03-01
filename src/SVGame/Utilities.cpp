@@ -21,6 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Entities.h"
 #include "Utilities.h"
 
+#include "Gamemodes/IGamemode.h"
+
 vec3_t SVG_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
 {
     return vec3_t{
@@ -173,7 +175,7 @@ qboolean SVG_KillBox(SVGBaseEntity *ent)
         }
 
         // Cheers.
-	    SVG_InflictDamage(boxedEntity, boxedEntity, boxedEntity, vec3_zero(), boxedEntity->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+	    game.GetGamemode()->InflictDamage(boxedEntity, boxedEntity, boxedEntity, vec3_zero(), boxedEntity->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // Assume it is dead by testing its solid.
 	    if (boxedEntity->GetSolid()) {

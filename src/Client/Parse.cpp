@@ -32,39 +32,33 @@ extern IClientGameExports* cge;
 =====================================================================
 */
 
-static inline void CL_ParseDeltaEntity(ServerFrame  *frame,
-                                       int             newnum,
-                                       EntityState  *old,
-                                       int             bits)
-{
-    EntityState    *state;
+static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityNumber, EntityState  *oldEntityState, uint32_t byteMask) {
+    EntityState *entityState = nullptr;
 
     // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
-    if (frame->numEntities >= MAX_EDICTS) {
+    if (svFrame->numEntities >= MAX_EDICTS) {
         Com_Error(ERR_DROP, "%s: MAX_EDICTS exceeded", __func__);
     }
 
-    state = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
+    entityState = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
     cl.numEntityStates++;
-    frame->numEntities++;
+    svFrame->numEntities++;
 
 #ifdef _DEBUG
-    if (cl_shownet->integer > 2 && bits) {
-        MSG_ShowDeltaEntityBits(bits);
+    if (cl_shownet->integer > 2 && byteMask) {
+        MSG_ShowDeltaEntityBits(byteMask);
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif
 
-    MSG_ParseDeltaEntity(old, state, newnum, bits, cl.entityStateFlags);
+    MSG_ParseDeltaEntity(oldEntityState, entityState, newEntityNumber, byteMask, cl.entityStateFlags);
 
-    // shuffle previous origin to old
-    if (!(bits & EntityMessageBits::OldOrigin) && !(state->renderEffects & RenderEffects::Beam))
-        state->oldOrigin = old->origin;//VectorCopy(old->origin, state->oldOrigin);
+    // Shuffle previous origin to old
+    if (!(byteMask & EntityMessageBits::OldOrigin) && !(entityState->renderEffects & RenderEffects::Beam))
+        entityState->oldOrigin = oldEntityState->origin;//VectorCopy(old->origin, state->oldOrigin);
 }
 
-static void CL_ParsePacketEntities(ServerFrame *oldframe,
-                                   ServerFrame *frame)
-{
+static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
     int32_t            newnum = 0;
     uint32_t        byteMask = 0;
     EntityState    *oldstate = nullptr;
@@ -90,15 +84,8 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
     }
 
     while (1) {
-     //   // Get entity number, and bits to read out.
-     //   newnum = MSG_ParseEntityBits(&bits);
-
-     //   // Store "Remove" bit.
-	    //qboolean isRemoveBitSet = newnum & (1U << 15);
-
-     //   // Remove the "Remove" bit to acquire its real entity number value.
-	    //newnum &= ~(1U << 15);
         bool removeEntity = false;
+
         // Read out entity number, whether to remove it or not, and its byteMask.
         newnum = MSG_ReadEntityNumber(&removeEntity, &byteMask);
 
@@ -566,29 +553,29 @@ static void CL_ParseStartSoundPacket(void)
     int flags, channel, entity;
 
     flags = MSG_ReadUint8();//MSG_ReadByte();
-    if ((flags & (SND_ENT | SND_POS)) == 0)
-        Com_Error(ERR_DROP, "%s: neither SND_ENT nor SND_POS set", __func__);
+    if ((flags & (SoundCommandBits::Entity | SoundCommandBits::Position)) == 0)
+        Com_Error(ERR_DROP, "%s: neither SoundCommandBits::Entity nor SoundCommandBits::Position set", __func__);
 
     snd.index = MSG_ReadUint8();//MSG_ReadByte();
     if (snd.index == -1)
         Com_Error(ERR_DROP, "%s: read past end of message", __func__);
 
-    if (flags & SND_VOLUME)
+    if (flags & SoundCommandBits::Volume)
         snd.volume = MSG_ReadUint8() / 255.0f;//MSG_ReadByte() / 255.0f;
     else
         snd.volume = DEFAULT_SOUND_PACKET_VOLUME;
 
-    if (flags & SND_ATTENUATION)
+    if (flags & SoundCommandBits::Attenuation)
         snd.attenuation = MSG_ReadUint8() / 64.0f; //MSG_ReadByte() / 64.0f;
     else
         snd.attenuation = DEFAULT_SOUND_PACKET_ATTENUATION;
 
-    if (flags & SND_OFFSET)
+    if (flags & SoundCommandBits::Offset)
         snd.timeofs = MSG_ReadUint8() / 1000.0f; //MSG_ReadByte() / 1000.0f;
     else
         snd.timeofs = 0;
 
-    if (flags & SND_ENT) {
+    if (flags & SoundCommandBits::Entity) {
         // entity relative
         channel = MSG_ReadInt16();//MSG_ReadShort();
         entity = channel >> 3;
@@ -602,7 +589,7 @@ static void CL_ParseStartSoundPacket(void)
     }
 
     // positioned in space
-    if (flags & SND_POS)
+    if (flags & SoundCommandBits::Position)
         snd.pos = MSG_ReadVector3(false);
 
     snd.flags = flags;
@@ -807,7 +794,7 @@ void CL_ParseServerMessage(void)
 {
     int         cmd, extrabits;
     size_t      readCount;
-    int         index, bits;
+    int         index;
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {

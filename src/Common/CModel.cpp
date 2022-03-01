@@ -197,6 +197,11 @@ mnode_t *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs)
     return box_headnode;
 }
 
+// TODO: Implement.
+mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
+    return nullptr;
+}
+
 
 mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p)
 {

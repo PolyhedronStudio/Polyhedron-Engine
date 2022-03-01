@@ -295,43 +295,35 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
-void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
+void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 {
-    ServerClient* client = nullptr;
-    SVGBasePlayer *classEntity = nullptr;
-    Entity* other = nullptr;
+    // Acquire player entity pointer.
+    SVGBasePlayer *playerEntity = game.GetGameworld()->GetPlayerClassEntity(svEntity);
 
-    PlayerMove pm = {};
-
-    // Sanity checks.
-    if (!serverEntity) {
-        Com_Error(ErrorType::ERR_DROP, "%s: has a NULL *ent!\n", __FUNCTION__);
-    }
-    if (!serverEntity->client)
-        Com_Error(ErrorType::ERR_DROP, "%s: *ent has no client to think with!\n", __FUNCTION__);
-
-    if (!serverEntity->classEntity)
+    // Sanity check.
+    if (!playerEntity) {
+        gi.DPrintf("Warning: ClientThink called on svEntity(#%i) without a SVGBasePlayer or derivate class entity.\n", svEntity->state.number);
         return;
+    }
+
+    // We can safely acquire client entity since it's already been sanitized by GetPlayerClassEntity.
+    ServerClient *client = playerEntity->GetClient();
 
     // Store the current entity to be run from SVG_RunFrame.
-    level.currentEntity = serverEntity->classEntity;
+    level.currentEntity = playerEntity;
 
-    // Fetch the entity client.
-    client = serverEntity->client;
-
-    // Fetch the class entity.
-    classEntity = (SVGBasePlayer*)serverEntity->classEntity;
-
+    // Set move type to freeze in case intermission has a waiting time set on it.
     if (level.intermission.time) {
-        client->playerState.pmove.type = EnginePlayerMoveType::Freeze;
-        // can exit intermission after five seconds
-        if (level.time > level.intermission.time + 5.0
-            && (moveCommand->input.buttons & ButtonBits::Any))
+        playerEntity->SetPlayerMoveType(EnginePlayerMoveType::Freeze);
+        
+        // Can exit intermission after five seconds
+        if (level.time > level.intermission.time + 5.0 && (moveCommand->input.buttons & ButtonBits::Any)) {
             level.intermission.exitIntermission = true;
-        return;
+        }
     }
 
-    pm_passent = serverEntity;
+    // Store the player move trace skip entity.
+    pm_passent = svEntity;
 
     if (client->chaseTarget) {
         // Angles are fetched from the client we are chasing.
@@ -339,63 +331,67 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
         client->respawn.commandViewAngles[1] = moveCommand->input.viewAngles[1];
         client->respawn.commandViewAngles[2] = moveCommand->input.viewAngles[2];
     } else {
+        PlayerMove pm = {};
+        
+        // Check entity move types, and set player move type based on that.
+        if ( playerEntity->GetMoveType() == MoveType::NoClip ) {
+            playerEntity->SetPlayerMoveType(PlayerMoveType::Noclip);
+        } else if ( playerEntity->GetMoveType() == MoveType::Spectator ) {
+            playerEntity->SetPlayerMoveType(PlayerMoveType::Spectator);
+        } else if (playerEntity->GetModelIndex() != 255 ) {
+            playerEntity->SetPlayerMoveType(EnginePlayerMoveType::Gib);
+        } else if ( playerEntity->GetDeadFlag() ) {
+            playerEntity->SetPlayerMoveType(EnginePlayerMoveType::Dead);
+        } else {
+            playerEntity->SetPlayerMoveType(PlayerMoveType::Normal);
+        }
 
-        // set up for pmove
-        memset(&pm, 0, sizeof(pm));
-
-        if ( classEntity->GetMoveType() == MoveType::NoClip )
-            client->playerState.pmove.type = PlayerMoveType::Noclip;
-        else if ( classEntity->GetMoveType() == MoveType::Spectator )
-            client->playerState.pmove.type = PlayerMoveType::Spectator;
-        else if (classEntity->GetModelIndex() != 255 )
-            client->playerState.pmove.type = EnginePlayerMoveType::Gib;
-        else if ( classEntity->GetDeadFlag() )
-            client->playerState.pmove.type = EnginePlayerMoveType::Dead;
-        else
-            client->playerState.pmove.type = PlayerMoveType::Normal;
-
+        // Update player move's gravity state.
         client->playerState.pmove.gravity = sv_gravity->value;
 
-        // Copy over the latest playerstate its pmove state.
+        // Copy over the pmove state from the latest player state.
         pm.state = client->playerState.pmove;
 
-        // Move over entity state values into the player move state so it is up to date.
-        pm.state.origin = classEntity->GetOrigin();
-        pm.state.velocity = classEntity->GetVelocity();
-        pm.moveCommand = *moveCommand;
-        if (classEntity->GetGroundEntity())
-            pm.groundEntityPtr = classEntity->GetGroundEntity()->GetServerEntity();
-        else
-            pm.groundEntityPtr = nullptr;
+        // Update origin, velocity, and ground entity pointer of the player movement state.
+        pm.state.origin = playerEntity->GetOrigin();
+        pm.state.velocity = playerEntity->GetVelocity();
+        pm.groundEntityPtr = playerEntity->GetGroundEntity().Get();
 
+        // Update the move command.
+        pm.moveCommand = *moveCommand;
+
+        // Set trace callbacks.
         pm.Trace = PM_Trace;
         pm.PointContents = gi.PointContents;
 
-        // perform a pmove
+        // Simulate player movement for the current frame.
         PMove(&pm);
 
-        // Save client pmove results.
+        // Store results back into the client's player state.
         client->playerState.pmove = pm.state;
 
-        // Move over needed results to the entity and its state.
-        classEntity->SetOrigin(pm.state.origin);
-        classEntity->SetVelocity(pm.state.velocity);
-        classEntity->SetMins(pm.mins);
-        classEntity->SetMaxs(pm.maxs);
-        classEntity->SetViewHeight(pm.state.viewOffset[2]);
-        classEntity->SetWaterLevel(pm.waterLevel);
-        classEntity->SetWaterType(pm.waterType);
+        // Update entity properties based on results of the player move simulation.
+        playerEntity->SetOrigin(pm.state.origin);
+        playerEntity->SetVelocity(pm.state.velocity);
+        playerEntity->SetMins(pm.mins);
+        playerEntity->SetMaxs(pm.maxs);
+        playerEntity->SetViewHeight(pm.state.viewOffset[2]);
+        playerEntity->SetWaterLevel(pm.waterLevel);
+        playerEntity->SetWaterType(pm.waterType);
 
         // Check for jumping sound.
-        if (classEntity->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
-            gi.Sound(serverEntity, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(classEntity, classEntity->GetOrigin(), PNOISE_SELF);
+        if (playerEntity->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+            SVG_Sound(playerEntity, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
+            SVG_PlayerNoise(playerEntity, playerEntity->GetOrigin(), PNOISE_SELF);
         }
-
-        if (pm.groundEntityPtr)
-            classEntity->SetGroundEntity(pm.groundEntityPtr->classEntity);
-        else
-            classEntity->SetGroundEntity(nullptr);
+        
+        // Store ground entity and its entity link count, if present. Unset otherwise.
+        if (pm.groundEntityPtr && pm.groundEntityPtr->classEntity) {
+            playerEntity->SetGroundEntity(pm.groundEntityPtr->classEntity);
+            playerEntity->SetGroundEntityLinkCount(pm.groundEntityPtr->linkCount);
+        } else {
+            playerEntity->SetGroundEntity(nullptr);
+        }
 
         // Copy over the user command angles so they are stored for respawns.
         // (Used when going into a new map etc.)
@@ -403,12 +399,8 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
         client->respawn.commandViewAngles[1] = moveCommand->input.viewAngles[1];
         client->respawn.commandViewAngles[2] = moveCommand->input.viewAngles[2];
 
-        // Store entity link count in case we have a ground entity pointer.
-        if (pm.groundEntityPtr)
-            classEntity->SetGroundEntityLinkCount(pm.groundEntityPtr->linkCount);
-
         // Special treatment for angles in case we are dead. Target the killer entity yaw angle.
-        if (classEntity->GetDeadFlag()) {
+        if (playerEntity->GetDeadFlag() != DEAD_NO) {
             client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
             client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
             client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
@@ -418,42 +410,56 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
             client->playerState.pmove.viewAngles = pm.viewAngles;
         }
 
-        // Link it back in for collision testing.
-        classEntity->LinkEntity();
+        // Link player entity back in for collision testing.
+        playerEntity->LinkEntity();
 
-        // Only check for trigger and object touches if not one of these movetypes.
-        if (classEntity->GetMoveType() != MoveType::NoClip && classEntity->GetMoveType() != MoveType::Spectator)
-            UTIL_TouchTriggers(classEntity);
+        // Get player move type.
+        int32_t playerMoveType = playerEntity->GetMoveType();
 
-        // Touch other objects
-        int32_t i = 0;
-        int32_t j = 0;
-        for (i = 0 ; i < pm.numTouchedEntities; i++) {
-            other = pm.touchedEntities[i];
-            for (j = 0 ; j < i ; j++)
-                if (pm.touchedEntities[j] == other)
-                    break;
-            if (j != i)
-                continue;   // duplicated
-                            //if (!other->Touch)
-                            //    continue;
-                            //other->Touch(other, ent, NULL, NULL);
-            if (!other->classEntity)
-                continue;
-            other->classEntity->Touch(other->classEntity, classEntity, NULL, NULL);
+        // Execute touch callbacks as long as movetype isn't noclip, or spectator.
+        if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
+            // Trigger touch logic. 
+            UTIL_TouchTriggers(playerEntity);
+
+            // Solid touch logic.
+            int32_t i = 0;
+            int32_t j = 0;
+            Entity *other = nullptr;
+            for (i = 0 ; i < pm.numTouchedEntities; i++) {
+                other = pm.touchedEntities[i];
+                for (j = 0 ; j < i ; j++) {
+                    if (pm.touchedEntities[j] == other) {
+                        break;
+                    }
+                }
+                if (j != i) {
+                    continue;   // duplicated
+                }
+
+                if (!other->classEntity) {
+                    continue;
+                }
+
+                other->classEntity->Touch(other->classEntity, playerEntity, NULL, NULL);
+            }
+
         }
-
     }
 
+    // Store the buttons that were still set as current frame buttons in the oldButtons.
     client->oldButtons = client->buttons;
+
+    // Update current buttons with those acquired from the move command.
     client->buttons = moveCommand->input.buttons;
+
+    // Figure out the latched buttons by bit fun. (latched buttons is used for single button press logic.)
     client->latchedButtons |= client->buttons & ~client->oldButtons;
 
     // save light level the player is standing on for
     // monster sighting AI
     //ent->lightLevel = moveCommand->input.lightLevel;
 
-    // fire weapon from final position if needed
+    // Fire weapon from final position if needed
     if (client->latchedButtons & ButtonBits::Attack) {
         if (client->respawn.isSpectator) {
 
@@ -462,16 +468,17 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
             if (client->chaseTarget) {
                 client->chaseTarget = NULL;
                 client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
-            } else
-                SVG_GetChaseTarget(classEntity);
+            } else {
+                SVG_GetChaseTarget(playerEntity);
+            }
 
         } else {// if (!client->weaponState.shouldThink) {
             //client->weaponState.shouldThink = true;
-            SVG_ThinkWeapon(classEntity);
+            playerEntity->WeaponThink();
         }
     } else {
 	    if (!client->respawn.isSpectator) {
-	        SVG_ThinkWeapon(classEntity);
+	        playerEntity->WeaponThink();
 	    }
     }
 
@@ -479,19 +486,20 @@ void SVG_ClientThink(Entity *serverEntity, ClientMoveCommand *moveCommand)
         if (moveCommand->input.upMove >= 10) {
             if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
-                if (client->chaseTarget)
-                    SVG_ChaseNext(classEntity);
-                else
-                    SVG_GetChaseTarget(classEntity);
+                if (client->chaseTarget) {
+                    SVG_ChaseNext(playerEntity);
+                } else {
+                    SVG_GetChaseTarget(playerEntity);
+                }
             }
         } else
             client->playerState.pmove.flags &= ~PMF_JUMP_HELD;
     }
 
     // update chase cam if being followed
-    for (int i = 1; i <= maximumclients->value; i++) {
-        other = game.world->GetServerEntities() + i;
-        if (other->inUse && other->client->chaseTarget == serverEntity)
-            SVG_UpdateChaseCam(classEntity);
-    }
+    //for (int i = 1; i <= maximumclients->value; i++) {
+    //    other = game.world->GetServerEntities() + i;
+    //    if (other->inUse && other->client->chaseTarget == serverEntity)
+    //        SVG_UpdateChaseCam(playerEntity);
+    //}
 }

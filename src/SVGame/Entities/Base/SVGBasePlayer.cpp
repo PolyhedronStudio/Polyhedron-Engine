@@ -307,6 +307,51 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
 *
 ***/
 /**
+*   @brief  Gives the player's weapon a chance to "think".
+**/
+void SVGBasePlayer::WeaponThink() {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) { 
+        return;
+    }
+
+    // If dead, switch to weapon ID 0 (a space holder, but is essentially no weapon.)
+    if (game.GetGamemode()->IsDeadEntity(this)) {
+        ChangeWeapon(0, false);
+        return;
+    }
+
+    // If the WeaponState is Down(Done holstering), or Finished(with shooting for example), we're allowed to change weapons.
+    int32_t currentState = client->weaponState.currentState;
+    //if (client->newWeapon && (currentState == WeaponState::Down || currentState == WeaponState::Finished)) {
+	   // // Change weapon, yeeeehaa.
+	   // SVG_ChangeWeapon(player);
+    //}
+
+    // See if we got a queued state, if we do, override our current weaponstate.
+    if (client->weaponState.queuedState != -1){
+	    // // TODO: Add a proper state machine for these animations here.
+        // Reset gun frame so animations work properly.
+
+        // Switch to queued weaponstate.
+	    client->weaponState.currentState = client->weaponState.queuedState;
+	    // Reset it.
+	    client->weaponState.queuedState = -1;
+    }
+
+
+    // Let the player's active weapon "think" for this frame.
+    SVGBaseItemWeapon *activeWeapon = SVGBaseItemWeapon::GetWeaponInstanceByID(client->persistent.inventory.activeWeaponID);
+
+    if (activeWeapon) { // && client->weaponState.shouldThink) {
+	    activeWeapon->InstanceWeaponThink(this, activeWeapon, client);
+    }
+}
+
+/**
 *   @brief  Adds ammo to the player's inventory.
 *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
 **/
@@ -331,12 +376,12 @@ qboolean SVGBasePlayer::GiveAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
 
     // Have we hit the cap limit for this ammo type? Return false.
-    if (client->persistent.inventory[ammoIdentifier] >= ammoCapLimit) {
+    if (client->persistent.inventory.items[ammoIdentifier] >= ammoCapLimit) {
         return false;
     }
 
     // Add ammo amount using a clamp.
-    client->persistent.inventory[ammoIdentifier] = Clampi(client->persistent.inventory[ammoIdentifier] + amount, 0, ammoCapLimit);
+    client->persistent.inventory.items[ammoIdentifier] = Clampi(client->persistent.inventory.items[ammoIdentifier] + amount, 0, ammoCapLimit);
 
     return true;
 }
@@ -363,7 +408,7 @@ qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     }
 
     // Have we hit the cap limit for this ammo type? Return false.
-    if (client->persistent.inventory[ammoIdentifier] <= 0) {
+    if (client->persistent.inventory.items[ammoIdentifier] <= 0) {
         return false;
     }
         
@@ -371,7 +416,7 @@ qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
 
     // Add ammo amount using a clamp.
-    client->persistent.inventory[ammoIdentifier] = Clampi(client->persistent.inventory[ammoIdentifier] - amount, 0, ammoCapLimit);
+    client->persistent.inventory.items[ammoIdentifier] = Clampi(client->persistent.inventory.items[ammoIdentifier] - amount, 0, ammoCapLimit);
 
     return true;
 }
@@ -401,12 +446,12 @@ qboolean SVGBasePlayer::GiveWeapon(uint32_t weaponIdentifier, uint32_t amount) {
     uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
 
     // Have we hit the cap limit for this weapon type? Return false.
-    if (client->persistent.inventory[weaponIdentifier] >= weaponCarryLimit) {
+    if (client->persistent.inventory.items[weaponIdentifier] >= weaponCarryLimit) {
 	    return false;
     }
 
     // Add weapon amount using a clamp.
-    client->persistent.inventory[weaponIdentifier] = Clampi(client->persistent.inventory[weaponIdentifier] + amount, 0, weaponCarryLimit);
+    client->persistent.inventory.items[weaponIdentifier] = Clampi(client->persistent.inventory.items[weaponIdentifier] + amount, 0, weaponCarryLimit);
 
     return true;
 }
@@ -433,7 +478,7 @@ qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
     }
 
     // Have we hit the cap limit for this weapon type? Return false.
-    if (client->persistent.inventory[weaponIdentifier] <= 0) {
+    if (client->persistent.inventory.items[weaponIdentifier] <= 0) {
     	return false;
     }
 
@@ -441,10 +486,136 @@ qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
     uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
 
     // Add weapon amount using a clamp.
-    client->persistent.inventory[weaponIdentifier] = Clampi(client->persistent.inventory[weaponIdentifier] - amount, 0, weaponCarryLimit);
+    client->persistent.inventory.items[weaponIdentifier] = Clampi(client->persistent.inventory.items[weaponIdentifier] - amount, 0, weaponCarryLimit);
 
     return true;
 }
+
+/**
+*   @brief  Engages the player to change to the new weapon.
+*   @param  weaponIdentifier The identifier used for acquiring the weapon type its instance pointer.
+*   @param  storeLastWeapon If set to true it'll store the current active weapon as its last weapon pointer,
+*           if set to false it'll set the lastWeapon pointer to nullptr.
+*   @return A pointer to the newly activated weapon, nullptr if something went wrong.
+**/
+SVGBaseItemWeapon* SVGBasePlayer::ChangeWeapon(uint32_t weaponIdentifier, qboolean storeLastWeapon) {
+    // Get client, sanity check.
+    ServerClient* client = GetClient();
+    if (!client) {
+        return nullptr;
+    }
+
+    // Ensure that the weapon actually has an existing instance.
+    SVGBaseItemWeapon *instanceWeapon = SVGBaseItemWeapon::GetWeaponInstanceByID(weaponIdentifier);
+
+    if (!instanceWeapon) {
+        return nullptr;
+    }
+
+    // Store the ID as our inventory's "nextWeaponID".
+    client->persistent.inventory.nextWeaponID = weaponIdentifier;
+
+    // Are we ready to actually switch weapon yet, or should we keep it on the back burner?
+    if (client->weaponState.currentState != WeaponState::Down 
+        || client->weaponState.currentState != WeaponState::Finished) {
+        return nullptr;
+    }
+
+    // Store activeWeaponID in previousActiveWeaponID.
+    client->persistent.inventory.previousActiveWeaponID = (storeLastWeapon ? client->persistent.inventory.activeWeaponID : 0);
+
+    // Exchange activeWeaponID for nextWeaponID.
+    client->persistent.inventory.activeWeaponID = client->persistent.inventory.nextWeaponID;
+    // Zero out nextWeaponID.
+    client->persistent.inventory.nextWeaponID = 0;
+        
+    // Set visible model
+    if (GetModelIndex() == 255) {
+        int32_t i = 0;
+        if (instanceWeapon) {
+    	    i = ((instanceWeapon->GetViewModelIndex() & 0xff) << 8);
+        } else {
+    	    i = 0;
+        }
+    
+        SetSkinNumber((GetNumber()  - 1) | i);
+    }
+    
+    // Update the player state so the client won't display the weapon, or ammo, and make sure that its state is Down.
+    if (!instanceWeapon) {
+        // Ensure client won't see model anymore.
+        client->playerState.gunIndex = 0;
+        // Ensure client won't see any ammo indexes on his/her hud.
+        client->ammoIndex = 0;
+
+        // Change weapon state to being down.
+        instanceWeapon->InstanceWeaponSetCurrentState(this, client, WeaponState::Down);
+        // Ensure that the queued state is empty.
+        instanceWeapon->InstanceWeaponQueueNextState(this, client, -1);
+        return nullptr;
+    }
+    
+    // Update the client's ammo index.
+    client->ammoIndex = instanceWeapon->GetPrimaryAmmoIdentifier();
+
+    // Set gun index to view model ID of this instance weapon.
+    client->playerState.gunIndex = instanceWeapon->GetViewModelIndex();
+
+    // Queue draw weapon state.
+    instanceWeapon->InstanceWeaponQueueNextState(this, client, WeaponState::Draw);
+
+    // Set player animation. No clue why the OG code used Pain, but we'll have to live with it for now.
+    client->animation.priorityAnimation = PlayerAnimation::Pain;
+    if (client->playerState.pmove.flags & PMF_DUCKED) {
+        SetAnimationFrame(FRAME_crpain1);
+        client->animation.endFrame = FRAME_crpain4;
+    } else {
+        SetAnimationFrame(FRAME_pain301);
+        client->animation.endFrame = FRAME_pain304;
+    }
+
+    return instanceWeapon;
+}
+    
+
+/**
+*   @brief  Looks into the player entity's client structure for the active instance item weapon.
+*   @return Pointer to the instance item weapon that is active for the client.
+**/
+SVGBaseItemWeapon* SVGBasePlayer::GetActiveWeaponInstance() {
+    // Get entity's client.
+    ServerClient *client = GetClient();
+
+    // Sanity.
+    if (!client) {
+        return nullptr;
+    }
+
+    // Acquire active weapon instance.
+    SVGBaseItemWeapon *activeWeaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(client->persistent.inventory.activeWeaponID);
+    return activeWeaponInstance;
+}
+//
+///**
+//*   @brief  Sets the player entity's client structure activeWeapon pointer to the instance item weapon.
+//**/
+//SVGBaseItemWeapon* SVGBasePlayer::SetActiveWeapon(SVGBaseItemWeapon* instanceWeapon) {
+//    // Get entity's client.
+//    ServerClient *client = GetClient();
+//
+//    // Sanity.
+//    if (!client) {
+//        return nullptr;
+//    }
+//    // Store current active weapon as last weapon.
+//    client->persistent.lastWeapon = client->persistent.activeWeapon;
+//
+//    // Set the instance waepon arg as our active weapon.
+//    client->persistent.activeWeapon = instanceWeapon;
+//
+//    // Return active weapon pointer.
+//    return client->persistent.activeWeapon;
+//}
 
 //===============
 // SVGBasePlayer::SetEvent
@@ -647,7 +818,7 @@ void SVGBasePlayer::CheckFallingDamage()
 
         //if (!deathmatch->value || 
         if (!((int)gamemodeflags->value & GamemodeFlags::NoFallingDamage)) {
-	        SVG_InflictDamage(this, GetGameworld()->GetWorldspawnClassEntity(), GetGameworld()->GetWorldspawnClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
+	        game.GetGamemode()->InflictDamage(this, GetGameworld()->GetWorldspawnClassEntity(), GetGameworld()->GetWorldspawnClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
         }
     } else {
         SetEventID(EntityEvent::FallShort);
@@ -760,7 +931,7 @@ void SVGBasePlayer::CheckWorldEffects()
 
                 SetDebouncePainTime(level.time);
 
-                SVG_InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                game.GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -782,11 +953,11 @@ void SVGBasePlayer::CheckWorldEffects()
                 SetDebouncePainTime(level.time + 1);
             }
 
-            SVG_InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
+            game.GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (GetWaterType() & CONTENTS_SLIME) {
-            SVG_InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
+            game.GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }

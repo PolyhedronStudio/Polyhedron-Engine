@@ -526,13 +526,13 @@ static void PF_StartSound(Entity *edict, int channel,
     sendchan = (ent << 3) | (channel & 7);
 
     // always send the entity number for channel overrides
-    flags = SND_ENT;
+    flags = SoundCommandBits::Entity;
     if (volume != DEFAULT_SOUND_PACKET_VOLUME)
-        flags |= SND_VOLUME;
+        flags |= SoundCommandBits::Volume;
     if (attenuation != DEFAULT_SOUND_PACKET_ATTENUATION)
-        flags |= SND_ATTENUATION;
+        flags |= SoundCommandBits::Attenuation;
     if (timeofs)
-        flags |= SND_OFFSET;
+        flags |= SoundCommandBits::Offset;
 
     // if the sound doesn't attenuate,send it to everyone
     // (global radio chatter, voiceovers, etc)
@@ -580,14 +580,14 @@ static void PF_StartSound(Entity *edict, int channel,
         // as no one gurantees reliables to be delivered in time
         if (channel & CHAN_RELIABLE) {
             MSG_WriteUint8(ServerCommand::Sound); //MSG_WriteByte(ServerCommand::Sound);
-            MSG_WriteUint8(flags | SND_POS);//MSG_WriteByte(flags | SND_POS);
+            MSG_WriteUint8(flags | SoundCommandBits::Position);//MSG_WriteByte(flags | SoundCommandBits::Position);
             MSG_WriteUint8(soundindex); //MSG_WriteByte(soundindex);
 
-            if (flags & SND_VOLUME)
+            if (flags & SoundCommandBits::Volume)
                 MSG_WriteUint8(volume * 255);//MSG_WriteByte(volume * 255);
-            if (flags & SND_ATTENUATION)
+            if (flags & SoundCommandBits::Attenuation)
                 MSG_WriteUint8(attenuation * 64); //MSG_WriteByte(attenuation * 64);
-            if (flags & SND_OFFSET)
+            if (flags & SoundCommandBits::Offset)
                 MSG_WriteUint8(timeofs * 1000); //MSG_WriteByte(timeofs * 1000);
 
             MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);
@@ -605,13 +605,13 @@ static void PF_StartSound(Entity *edict, int channel,
 
         // send origin for invisible entities
         if (edict->serverFlags & EntityServerFlags::NoClient) {
-            flags |= SND_POS;
+            flags |= SoundCommandBits::Position;
         }
 
         // default client doesn't know that bmodels have weird origins
         // MSG: !! Removed: PROTOCOL_VERSION_DEFAULT
         //if (edict->solid == Solid::BSP && client->protocolVersion == PROTOCOL_VERSION_DEFAULT) {
-        //    flags |= SND_POS;
+        //    flags |= SoundCommandBits::Position;
         //}
 
         msg = LIST_FIRST(MessagePacket, &client->msg_free_list, entry);
@@ -633,7 +633,7 @@ static void PF_StartSound(Entity *edict, int channel,
         List_Append(&client->msg_unreliable_list, &msg->entry);
         client->msg_unreliable_bytes += MAX_SOUND_PACKET;
 
-        flags &= ~SND_POS;
+        flags &= ~SoundCommandBits::Position;
     }
 }
 
@@ -654,23 +654,23 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     sendchan = (ent << 3) | (channel & 7);
 
     // always send the entity number for channel overrides
-    flags = SND_ENT | SND_POS;
+    flags = SoundCommandBits::Entity | SoundCommandBits::Position;
     if (volume != DEFAULT_SOUND_PACKET_VOLUME)
-        flags |= SND_VOLUME;
+        flags |= SoundCommandBits::Volume;
     if (attenuation != DEFAULT_SOUND_PACKET_ATTENUATION)
-        flags |= SND_ATTENUATION;
+        flags |= SoundCommandBits::Attenuation;
     if (timeofs)
-        flags |= SND_OFFSET;
+        flags |= SoundCommandBits::Offset;
 
     MSG_WriteUint8(ServerCommand::Sound);//MSG_WriteByte(ServerCommand::Sound);
     MSG_WriteUint8(flags); //MSG_WriteByte(flags);
     MSG_WriteUint8(soundindex); //MSG_WriteByte(soundindex);
 
-    if (flags & SND_VOLUME)
+    if (flags & SoundCommandBits::Volume)
         MSG_WriteUint8(volume * 255); //MSG_WriteByte(volume * 255);
-    if (flags & SND_ATTENUATION)
+    if (flags & SoundCommandBits::Attenuation)
         MSG_WriteUint8(attenuation * 64); //MSG_WriteByte(attenuation * 64);
-    if (flags & SND_OFFSET)
+    if (flags & SoundCommandBits::Offset)
         MSG_WriteUint8(timeofs * 1000);//MSG_WriteByte(timeofs * 1000);
     
     MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);

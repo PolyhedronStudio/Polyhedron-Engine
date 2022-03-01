@@ -272,7 +272,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(SVGBaseEntity* other) {
     // Acquire client.
     ServerClient* client = player->GetClient();
     // Acquire the player's active weapon instance. (If any.)
-    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
+    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeaponInstance();
 
     // TODO HERE: Check whether game mode allows for picking up this tiem.
     // Check whether the player already had an Beretta or not.
@@ -285,7 +285,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(SVGBaseEntity* other) {
     }
 
     // Do an auto change weapon pick up in this case.
-    if (!activeWeapon || (activeWeapon->GetIdentifier() != ItemIdentifier::Beretta && client->persistent.inventory[ItemIdentifier::Beretta] >= 1)) {
+    if (!activeWeapon || (activeWeapon->GetIdentifier() != ItemIdentifier::Beretta && client->persistent.inventory.items[ItemIdentifier::Beretta] >= 1)) {
 	    // Fetch weapon instance so we can call upon UseInstance
 	    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(GetIdentifier());
 
@@ -326,15 +326,15 @@ void ItemWeaponBeretta::InstanceWeaponBerettaUse(SVGBaseEntity* user, SVGBaseIte
     // Get client.
     ServerClient* client = player->GetClient();
 
-    // Set it as our new to switch to.
-    client->newWeapon = berettaItem;
+    //// Set it as our new to switch to.
+    //client->newWeapon = berettaItem;
 
-    // Set state to holster if active weapon, otherwise to draw.
-    if (client->persistent.activeWeapon) {
-	    client->weaponState.queuedState = WeaponState::Holster;
-    } else {
-	    client->weaponState.queuedState = WeaponState::Draw;
-    }
+    //// Set state to holster if active weapon, otherwise to draw.
+    //if (client->persistent.inventory.activeWeaponID) {
+	   // client->weaponState.queuedState = WeaponState::Holster;
+    //} else {
+	   // client->weaponState.queuedState = WeaponState::Draw;
+    //}
 
     // Is the client already having an active weapon? Queue up a holster state.
  //   if (!client->persistent.activeWeapon) {

@@ -524,26 +524,26 @@ static void emit_snd(client_t *client, MessagePacket *msg)
     flags = msg->flags;
 
     // check if position needs to be explicitly sent
-    if (!(flags & SND_POS) && !check_entity(client, entnum)) {
+    if (!(flags & SoundCommandBits::Position) && !check_entity(client, entnum)) {
         SV_DPrintf(0, "Forcing position on entity %d for %s\n",
                    entnum, client->name);
-        flags |= SND_POS;   // entity is not present in frame
+        flags |= SoundCommandBits::Position;   // entity is not present in frame
     }
 
     MSG_WriteByte(ServerCommand::Sound);
     MSG_WriteByte(flags);
     MSG_WriteByte(msg->index);
 
-    if (flags & SND_VOLUME)
+    if (flags & SoundCommandBits::Volume)
         MSG_WriteByte(msg->volume);
-    if (flags & SND_ATTENUATION)
+    if (flags & SoundCommandBits::Attenuation)
         MSG_WriteByte(msg->attenuation);
-    if (flags & SND_OFFSET)
+    if (flags & SoundCommandBits::Offset)
         MSG_WriteByte(msg->timeofs);
 
     MSG_WriteShort(msg->sendchan);
 
-    if (flags & SND_POS) {
+    if (flags & SoundCommandBits::Position) {
         MSG_WriteVector3(msg->pos);
     }
 }

@@ -167,6 +167,10 @@ public:
     //
     // Combat GameRules checks.
     //
+    /**
+    *   @return True if the entity is considered dead.
+    **/
+    virtual qboolean IsDeadEntity(SVGBaseEntity *ent) = 0;
     // Assigns the teamname to 'teamName', returns false/true if they are
     // on the same specific team.
     virtual qboolean GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) = 0;

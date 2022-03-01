@@ -101,6 +101,22 @@ void DefaultGamemode::OnLevelExit() {
     }
 } 
 
+qboolean DefaultGamemode::IsDeadEntity(SVGBaseEntity *entity) {
+    // Sanity check.
+    if (!entity) {
+        gi.DPrintf("Warning: IsDeadEntity called with a nullptr.\n");
+        return true;
+    }
+
+    // In this case it's dead either when health is < 1, or if its DeadFlag has been set.
+    if (entity->GetHealth() < 1 || entity->GetDeadFlag()) {
+        return true;
+    }
+
+    // It's alive.
+    return false;
+}
+
 //===============
 // DefaultGamemode::GetEntityTeamName
 //
@@ -665,7 +681,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
     if (!client->respawn.isSpectator)  //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(player);
+        player->WeaponThink();
     else
         client->weaponState.shouldThink = false;
 
@@ -887,7 +903,7 @@ qboolean DefaultGamemode::ClientConnect(Entity* svEntity, char *userinfo) {
     if (svEntity->inUse == false) {
         // clear the respawning variables
         InitializePlayerRespawnData(svEntity->client);
-        if (!game.autoSaved || !svEntity->client->persistent.activeWeapon)
+        if (!game.autoSaved || !svEntity->client->persistent.inventory.activeWeaponID)
             InitializePlayerPersistentData(svEntity->client);
     }
 
@@ -1230,26 +1246,33 @@ void DefaultGamemode::InitializePlayerPersistentData(ServerClient* client) {
         return;
     }
 
+    /**
+    *   Main Persistent Data.
+    **/
     // Reset its persistent data, we're initializing it for this client.
-    client->persistent = {};
+    client->persistent = { 
+        .isConnected = true 
+    };
 
-    // Give the client a default starter weapon to spawn with.
-    //gitem_t *item = SVG_FindItemByPickupName("Blaster");
-    client->persistent.selectedItem = 0;//ITEM_INDEX(item);
-    client->persistent.inventory[client->persistent.selectedItem] = 1;
-
-    // Reset active weapon to nothing.
-    client->persistent.activeWeapon = nullptr;
-
-    // Reset health and max health.
+    /**
+    *   Stats.
+    **/
     client->persistent.health       = 100;
     client->persistent.maxHealth    = 100;
 
-    // Reset maximum values of inventory.
-    client->persistent.maxAmmo9mm   = 150;
+    /**
+    *   Inventory.
+    **/
+    // Give the client a default starter weapon to spawn with.
+    //client->persistent.selectedItem = 0;//ITEM_INDEX(item);
+    //client->persistent.inventory[client->persistent.selectedItem] = 1;
 
-    // This client is connected.
-    client->persistent.isConnected = true;
+    // Reset active weapon to nothing.
+    client->persistent.inventory.activeWeaponID = 0;
+
+    // Reset maximum carrying values of inventory.
+    client->persistent.inventory.maxAmmo9mm   = 150;
+
 }
 
 void DefaultGamemode::InitializePlayerRespawnData(ServerClient* client) {
@@ -1444,8 +1467,8 @@ void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     client->playerState.gunIndex = gi.ModelIndex("models/weapons/v_mark23/tris.iqm");  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
 
     // Set its current new weapon to the one that was stored in persistent and activate it.
-    client->newWeapon = client->persistent.activeWeapon;
-    SVG_ChangeWeapon(player);
+    //client->newWeapon = client->persistent.activeWeapon;
+    player->ChangeWeapon(client->persistent.inventory.activeWeaponID, false);
 }
 
 //===============

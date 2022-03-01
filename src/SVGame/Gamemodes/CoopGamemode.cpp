@@ -174,12 +174,12 @@ void CoopGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
             // Print it.
             gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClient()->persistent.netname, messageAddition.c_str());
 
-            // WID: Old piec of code // if (deathmatch->value) {
-            if (friendlyFire)
+            if (friendlyFire) {
                 attacker->GetClient()->respawn.score--;
-            else
+            } else {
                 attacker->GetClient()->respawn.score++;
-            // WID: Old piec of code // }
+            }
+
             return;
         }
     }
@@ -192,12 +192,10 @@ void CoopGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* infl
         // Also we gotta adjust that ->classname thing, but this is a template, cheers :)
         //if (!message.empty()) {
         //    gi.BPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->GetClient()->persistent.netname, message.c_str(), attacker->GetClassname(), messageAddition.c_str());
-        //    if (deathmatch->value) {
-        //        if (friendlyFire)
-        //            attacker->GetClient()->respawn.score--;
-        //        else
-        //            attacker->GetClient()->respawn.score++;
-        //    }
+    //        if (friendlyFire)
+    //            attacker->GetClient()->respawn.score--;
+    //        else
+    //            attacker->GetClient()->respawn.score++;
         //    return;
         //}
     }
@@ -221,8 +219,8 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* player) {
 	    SpawnClientCorpse(player);
     }
 
+    // Remove no client flag so this player becomes visible to clients.
     player->SetServerFlags(player->GetServerFlags() & ~EntityServerFlags::NoClient);
-    PlacePlayerInGame(player);
 
     // Add a teleportation effect
     player->SetEventID(EntityEvent::PlayerTeleport);
@@ -237,6 +235,9 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* player) {
 
     // Setup respawn time.
     serverClient->respawnTime = level.time;
+
+    // Last but not least, deploy player.
+    PlacePlayerInGame(player);
 }
 
 //===============
@@ -245,11 +246,10 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* player) {
 // Respawn all valid client entities who's health is < 0.
 //===============
 void CoopGamemode::RespawnAllClients() {
-    // Get class entities array.
-    SVGBaseEntity** classEntities = game.world->GetClassEntities();
-
     // Respawn all valid client entities who's health is < 0.
-    for (auto& player : game.world->GetClassEntityRange(0, MAX_EDICTS) | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>()) {
+    for (auto& player : game.world->GetClassEntityRange<0, MAX_EDICTS>()
+        | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>())
+    {
         if (player->GetHealth() < 0) {
             RespawnClient(dynamic_cast<SVGBasePlayer*>(player));
         }
@@ -278,11 +278,14 @@ void CoopGamemode::ClientDeath(SVGBasePlayer *player) {
     }
 
     // Clear inventory this is kind of ugly, but it's how we want to handle keys in coop
-    for (int32_t i = 0; i < game.numberOfItems; i++) {
-        //if (itemlist[i].flags & ItemFlags::IsKey)
-        //    client->respawn.persistentCoopRespawn.inventory[i] = client->persistent.inventory[i];
-        client->persistent.inventory[i] = 0;
+    for (int32_t i = 0; i < MAX_ITEMS; i++) {
+        client->persistent.inventory.items[i] = 0;
     }
+    //for (int32_t i = 0; i < game.numberOfItems; i++) {
+    //    //if (itemlist[i].flags & ItemFlags::IsKey)
+    //    //    client->respawn.persistentCoopRespawn.inventory[i] = client->persistent.inventory[i];
+    //    client->persistent.inventory.items[i] = 0;
+    //}
 }
 
 //===============

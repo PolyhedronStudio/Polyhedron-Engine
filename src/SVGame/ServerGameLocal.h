@@ -590,17 +590,12 @@ void SVG_ChangeWeapon(SVGBasePlayer* ent);
 void SVG_SpawnItem(Entity *ent, gitem_t *item);
 //void SVG_ThinkWeapon(Entity *ent);
 int32_t SVG_ArmorIndex(SVGBaseEntity *ent);
-gitem_t *SVG_GetItemByIndex(int32_t index);
-qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int32_t count);
 void SVG_TouchItem(SVGBaseEntity* ent, SVGBaseEntity* other, cplane_t *plane, csurface_t *surf);
 
 //
 // g_combat.c
 //
 qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2);
-qboolean SVG_CanDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor);
-void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, int32_t dflags, int32_t mod);
-void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int32_t mod);
 
 // damage flags
 struct DamageFlags {
@@ -629,12 +624,6 @@ void SVG_PlayerTrail_New(vec3_t spot);
 Entity *SVG_PlayerTrail_PickFirst(Entity *self);
 Entity *SVG_PlayerTrail_PickNext(Entity *self);
 Entity *SVG_PlayerTrail_LastSpot(void);
-
-//
-// g_player.c
-//
-void SVG_Client_Pain(Entity *self, Entity *other, float kick, int32_t damage);
-void SVG_Client_Die(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t& point);
 
 //
 // g_svcmds.c
@@ -745,15 +734,21 @@ struct PlayerAnimation {
 *           across level changes.
 **/
 struct ClientPersistentData {
+    /**
+    *   @brief Client Identity Data.
+    **/
+    //! User Info string.
     char userinfo[MAX_INFO_STRING];
+    //! The client's beautiful netname string.
     char netname[16];
+    //! The hand with which the player is holding the gun. (Left or right.)
     int32_t hand;
-
+    //! Whether the client is currently actively connected, or not.
     qboolean isConnected = false;   // A loadgame will leave valid entities that
                                     // just don't have a connection yet
 
     /***
-    * Values saved and restored from entities when changing levels
+    *   @brief Values saved and restored from clients when changing levels
     ***/
     //! Client's health.
     int32_t health = 100;
@@ -761,19 +756,29 @@ struct ClientPersistentData {
     int32_t maxHealth = 100;
     //! Flags to save.
     int32_t savedFlags = 0;
-    //! What item was selected?
-    int32_t selectedItem = 0;
-    //! Entire inventory.
-    int32_t inventory[MAX_ITEMS] = {};
 
-    //! Ammo capacities
-    int32_t maxAmmo9mm = 150;
+    /**
+    *   @brief Inventory member structure.
+    **/
+    struct {
+        //! The currently active weapon item ID.
+        uint32_t activeWeaponID = 0;
+        //! The last active weapon ID.
+        uint32_t previousActiveWeaponID = 0;
+        //! Used to store the next weapon to switch to, it is set when 
+        //! the current weapon was still busy with an action.
+        uint32_t nextWeaponID = 0;
 
-    //! Pointer to the active weapon item instance.
-    SVGBaseItemWeapon *activeWeapon = nullptr;
-    //! Pointer to the last active weapon item instance.
-    SVGBaseItemWeapon *lastWeapon = nullptr;
+        //! All the items this client posesses.
+        int32_t items[MAX_ITEMS] = {};
 
+        //! The item currently selected. NOTE: Not in use currently.
+        //int32_t selectedItem = 0;
+
+        //! Maximum Ammo Capacities for this client.
+        int32_t maxAmmo9mm = 150;
+    } inventory;
+    
     //int32_t powerCubes = 0;    // Used for tracking the cubes in coop games
     int32_t score = 0;         // For calculating total unit score in coop games
 

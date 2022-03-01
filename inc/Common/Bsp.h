@@ -132,6 +132,7 @@ typedef struct mface_s {
 typedef struct mnode_s {
     /* ======> */
     cplane_t            *plane;     // never NULL to differentiate from leafs
+
 #if USE_REF
 //    union {
 //        vec_t           minmaxs[6];

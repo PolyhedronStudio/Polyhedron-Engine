@@ -187,16 +187,6 @@ void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon
     }
 }
 
-// Set here how fast you want the tick rate to be.
-static constexpr uint32_t ANIM_HZ = 30.0;
-
-// Calclate all related values we need to make it work smoothly even if we have
-// a nice 250fps, the game must run at 50fps.
-static constexpr uint32_t ANIM_FRAMERATE = ANIM_HZ;
-static constexpr double	  ANIM_FRAMETIME = 1000.0 / ANIM_FRAMERATE;
-static constexpr double	  ANIM_1_FRAMETIME = 1.0 / (ANIM_FRAMETIME / 50.f);
-static constexpr double	  ANIM_FRAMETIME_1000 = ANIM_FRAMETIME / 1000.0;
-
 /**
 *   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
 **/
@@ -223,16 +213,6 @@ void ItemWeaponSMG::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon*
 /**
 *   @brief  Draw weapon callback.
 **/
-static float drawStart = 0;
-static float totalTimeTaken = 0;
-static qboolean newDraw = true;
-
-
-static float gunAnimStartTime = 0.f;
-static float gunAnimationEndTime = 0.f;
-static float gunAnimationStartFrame = 112.f;
-static float gunAnimationEndFrame = 141.f;
-
 void ItemWeaponSMG::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Animation start and end frame.
     static constexpr float drawStartFrame = 112.f;
@@ -311,7 +291,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     // Acquire client.
     ServerClient *client = player->GetClient();
     // Acquire the player's active weapon instance. (If any.)
-    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
+    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeaponInstance();
 
     // TODO HERE: Check whether game mode allows for picking up this tiem.
     // Check whether the player already had an SMG or not.
@@ -324,7 +304,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     }
 
     // Do an auto change weapon pick up in this case.
-    if (!activeWeapon || (activeWeapon->GetIdentifier() != ItemIdentifier::SMG && client->persistent.inventory[ItemIdentifier::SMG] >= 1)) {
+    if (!activeWeapon || (activeWeapon->GetIdentifier() != ItemIdentifier::SMG && client->persistent.inventory.items[ItemIdentifier::SMG] >= 1)) {
 	    // Fetch weapon instance so we can call upon UseInstance
 	    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(GetIdentifier());
 
@@ -371,7 +351,7 @@ void ItemWeaponSMG::InstanceWeaponSMGUse(SVGBaseEntity* user, SVGBaseItem* item)
     client->newWeapon = smgItem;
 
     // Set state to holster if active weapon, otherwise to draw.
-    if (client->persistent.activeWeapon) {
+    if (client->persistent.inventory.activeWeaponID) {
 	    client->weaponState.queuedState = WeaponState::Holster;
     } else {
 	    client->weaponState.queuedState = WeaponState::Draw;

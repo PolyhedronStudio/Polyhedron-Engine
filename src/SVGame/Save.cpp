@@ -296,19 +296,19 @@ static const save_field_t clientfields[] = {
     SZ(persistent.netname, 16),
     I(persistent.hand),
 
-    I(persistent.isConnected),
+    //I(persistent.isConnected),
 
-    I(persistent.health),
-    I(persistent.maxHealth),
-    I(persistent.savedFlags),
+    //I(persistent.health),
+    //I(persistent.maxHealth),
+    //I(persistent.savedFlags),
 
-    I(persistent.selectedItem),
-    IA(persistent.inventory, MAX_ITEMS),
+    //I(persistent.selectedItem),
+    //IA(persistent.inventory, MAX_ITEMS),
 
-    I(persistent.maxAmmo9mm),
+    //I(persistent.maxAmmo9mm),
 
-    T(persistent.activeWeapon),
-    T(persistent.lastWeapon),
+    //T(persistent.activeWeapon),
+    //T(persistent.lastWeapon),
 
 //    I(persistent.powerCubes),
     I(persistent.score),

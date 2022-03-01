@@ -627,21 +627,18 @@ qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
 SVGBasePlayer* Gameworld::GetPlayerClassEntity(Entity* serverEntity) {
     // Ensure the entity is valid.
     if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
-	return nullptr;
+		return nullptr;
     }
 
     // Ensure that its classentity is of or derived of SVGBasePlayer.
     SVGBaseEntity* classEntity = serverEntity->classEntity;
 
     if (!classEntity->IsSubclassOf<SVGBasePlayer>()) {
-	return nullptr;
+		return nullptr;
     }
 
     // We can safely cast to SVGBasePlayer now.
-    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
-
-    // Return it.
-    return player;
+    return dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
 }
 
 

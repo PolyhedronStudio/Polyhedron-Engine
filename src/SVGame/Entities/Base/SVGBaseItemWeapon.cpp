@@ -174,6 +174,26 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     //}
 }
 
+/**
+*   @brief  Instantly sets the current state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponSetCurrentState(SVGBasePlayer *player, ServerClient* client, uint32_t state) {
+    if (!client) {
+        return;
+    }
+    client->weaponState.currentState = state;
+}
+
+/** 
+*   @brief  Queues a state and sets it as the next current state when the state currently processing has finished.
+**/
+void SVGBaseItemWeapon::InstanceWeaponQueueNextState(SVGBasePlayer *player, ServerClient* client, int32_t state) {
+    if (!client) {
+        return;
+    }
+    client->weaponState.queuedState = state;
+}
+
 //===============
 // SVGBaseItemWeapon::SetRespawn
 //===============

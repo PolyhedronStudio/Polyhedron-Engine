@@ -148,7 +148,7 @@ void MSG_WriteUintBase128( uint64_t c ) {
 			buf[len] |= 0x80U;
 		}
 		len++;
-	} while( c ); // TODO: If it breaks, this might resolve it. while ( c != 0);
+	} while( c );
 
 	MSG_WriteData( buf, len );
 }
@@ -1470,58 +1470,58 @@ int MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientM
     int32_t bits = 0;
 
     if (cmd->input.viewAngles[0] != from->input.viewAngles[0]) {
-        bits |= CM_ANGLE1;
+        bits |= UserCommandBits::AngleX;
     }
     if (cmd->input.viewAngles[1] != from->input.viewAngles[1]) {
-        bits |= CM_ANGLE2;
+        bits |= UserCommandBits::AngleY;
     }
     if (cmd->input.viewAngles[2] != from->input.viewAngles[2]) {
-        bits |= CM_ANGLE3;
+        bits |= UserCommandBits::AngleZ;
     }
     if (cmd->input.forwardMove != from->input.forwardMove) {
-        bits |= CM_FORWARD;
+        bits |= UserCommandBits::Forward;
     }
     if (cmd->input.rightMove != from->input.rightMove) {
-        bits |= CM_SIDE;
+        bits |= UserCommandBits::Side;
     }
     if (cmd->input.upMove != from->input.upMove) {
-        bits |= CM_UP;
+        bits |= UserCommandBits::Up;
     }
     if (cmd->input.buttons != from->input.buttons) {
-        bits |= CM_BUTTONS;
+        bits |= UserCommandBits::Buttons;
     }
     if (cmd->input.impulse != from->input.impulse) {
-        bits |= CM_IMPULSE;
+        bits |= UserCommandBits::Impulse;
     }
 
     // Write out the changed bits.
     MSG_WriteUint8(bits);
 
-    if (bits & CM_ANGLE1) {
+    if (bits & UserCommandBits::AngleX) {
         MSG_WriteFloat(cmd->input.viewAngles[0]);
     }
-    if (bits & CM_ANGLE2) {
+    if (bits & UserCommandBits::AngleY) {
         MSG_WriteFloat(cmd->input.viewAngles[1]);
     }
-    if (bits & CM_ANGLE3) {
+    if (bits & UserCommandBits::AngleZ) {
         MSG_WriteFloat(cmd->input.viewAngles[2]);
     }
 
-    if (bits & CM_FORWARD) {
+    if (bits & UserCommandBits::Forward) {
         MSG_WriteInt16(cmd->input.forwardMove);
     }
-    if (bits & CM_SIDE) {
+    if (bits & UserCommandBits::Side) {
         MSG_WriteInt16(cmd->input.rightMove);
     }
-    if (bits & CM_UP) {
+    if (bits & UserCommandBits::Up) {
         MSG_WriteInt16(cmd->input.upMove);
     }
 
-    if (bits & CM_BUTTONS) {
+    if (bits & UserCommandBits::Buttons) {
         MSG_WriteUint8(cmd->input.buttons);
     }
 
-    if (bits & CM_IMPULSE) {
+    if (bits & UserCommandBits::Impulse) {
         MSG_WriteUint8(cmd->input.impulse);
     }
 
@@ -1550,33 +1550,33 @@ void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCom
     bits = MSG_ReadUint8();
 
     // Read current angles.
-    if (bits & CM_ANGLE1) {
+    if (bits & UserCommandBits::AngleX) {
         to->input.viewAngles[0] = MSG_ReadFloat();
     }
-    if (bits & CM_ANGLE2) {
+    if (bits & UserCommandBits::AngleY) {
         to->input.viewAngles[1] = MSG_ReadFloat();
     }
-    if (bits & CM_ANGLE3) {
+    if (bits & UserCommandBits::AngleZ) {
         to->input.viewAngles[2] = MSG_ReadFloat();
     }
 
     // Read movement.
-    if (bits & CM_FORWARD) {
+    if (bits & UserCommandBits::Forward) {
         to->input.forwardMove = MSG_ReadInt16();
     }
-    if (bits & CM_SIDE) {
+    if (bits & UserCommandBits::Side) {
         to->input.rightMove = MSG_ReadInt16();
     }
-    if (bits & CM_UP) {
+    if (bits & UserCommandBits::Up) {
         to->input.upMove = MSG_ReadInt16();
     }
 
     // Read buttons.
-    if (bits & CM_BUTTONS) {
+    if (bits & UserCommandBits::Buttons) {
         to->input.buttons = MSG_ReadUint8();
     }
 
-    if (bits & CM_IMPULSE) {
+    if (bits & UserCommandBits::Impulse) {
         to->input.impulse = MSG_ReadUint8();
     }
 
@@ -1587,47 +1587,6 @@ void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCom
     to->input.lightLevel = MSG_ReadUint8();
 }
 
-#if USE_CLIENT
-
-/*
-=================
-MSG_ParseEntityBits
-
-Returns the entity number and the header bits
-=================
-*/
-int MSG_ParseEntityBits(int* bits)
-{
-    int         b = 0, total = 0;
-    int         number = 0;
-
-    total = MSG_ReadUint8();
-    if (total & EntityMessageBits::MoreBitsA) {
-        b = MSG_ReadUint8();
-        total |= b << 8;
-    }
-    if (total & EntityMessageBits::MoreBitsB) {
-        b = MSG_ReadUint8();
-        total |= b << 16;
-    }
-    if (total & EntityMessageBits::MoreBitsC) {
-        b = MSG_ReadUint8();
-        total |= b << 24;
-    }
-
-	number = MSG_ReadInt16();
-
-
-    *bits = total;
-
-    return number;
-}
-
-
-
-
-
-#endif // USE_CLIENT
 
 /*
 ==============================================================================
@@ -1644,137 +1603,118 @@ int MSG_ParseEntityBits(int* bits)
 #if USE_CLIENT
 void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
 {
-//#define SP(b,s) if(flags&PS_##b) SHOWBITS(s)
-//#define SE(b,s) if(extraflags&EPS_##b) SHOWBITS(s)
-//    SP(PM_TYPE, "pmove.type");
-//    SP(PM_ORIGIN, "pmove.origin[x,y]");
-//    SE(M_ORIGIN2, "pmove.origin[z]");
-//    SP(PM_VELOCITY, "pmove.velocity[x,y]");
-//    SE(M_VELOCITY2, "pmove.velocity[z]");
-//    SP(PM_TIME, "pmove.time");
-//    SP(PM_FLAGS, "pmove.flags");
-//    SP(PM_GRAVITY, "pmove.gravity");
-//    SP(PM_DELTA_ANGLES, "pmove.deltaAngles");
-//    SP(PM_VIEW_OFFSET, "pmove.viewOffset");
-//    SP(PM_VIEW_ANGLES, "pmove.viewAngles");
-//    SP(KICKANGLES, "kickAngles");
-//    SP(WEAPONINDEX, "gunIndex");
-//    SP(GUNANIMATION_TIME_START, "gunAnimationStartTime");
-//    SP(GUNANIMATION_FRAME_START, "gunAnimationFrameStart");
-//    SP(GUNANIMATION_FRAME_END, "gunAnimationFrameEnd");
-//    SP(GUNANIMATION_FRAME_TIME, "gunAnimationFrameTime");
-//    SP(GUNANIMATION_LOOP_COUNT, "gunAnimationLoopCount");
-//    SP(GUNANIMATION_LOOP_FORCE, "gunAnimationForceLoop");
-//    SE(GUNOFFSET, "gunOffset");
-//    SE(GUNANGLES, "gunAngles");
-//    SP(BLEND, "blend");
-//    SP(FOV, "fov");
-//    SP(RDFLAGS, "rdflags");
-//    SE(STATS, "stats");
-//#undef SP
-//#undef SE
+#define SP(b,s) if(flags&PS_##b) SHOWBITS(s)
+#define SE(b,s) if(extraflags&EPS_##b) SHOWBITS(s)
+    SP(PM_TYPE, "pmove.type");
+    SP(PM_ORIGIN, "pmove.origin[x,y]");
+    SE(M_ORIGIN2, "pmove.origin[z]");
+    SP(PM_VELOCITY, "pmove.velocity[x,y]");
+    SE(M_VELOCITY2, "pmove.velocity[z]");
+    SP(PM_TIME, "pmove.time");
+    SP(PM_FLAGS, "pmove.flags");
+    SP(PM_GRAVITY, "pmove.gravity");
+    SP(PM_DELTA_ANGLES, "pmove.deltaAngles");
+    SP(PM_VIEW_OFFSET, "pmove.viewOffset");
+    SP(PM_VIEW_ANGLES, "pmove.viewAngles");
+    SP(KICKANGLES, "kickAngles");
+    SP(WEAPONINDEX, "gunIndex");
+    SP(GUNANIMATION_TIME_START, "gunAnimationStartTime");
+    SP(GUNANIMATION_FRAME_START, "gunAnimationFrameStart");
+    SP(GUNANIMATION_FRAME_END, "gunAnimationFrameEnd");
+    SP(GUNANIMATION_FRAME_TIME, "gunAnimationFrameTime");
+    SP(GUNANIMATION_LOOP_COUNT, "gunAnimationLoopCount");
+    SP(GUNANIMATION_LOOP_FORCE, "gunAnimationForceLoop");
+    SE(GUNOFFSET, "gunOffset");
+    SE(GUNANGLES, "gunAngles");
+    SP(BLEND, "blend");
+    SP(FOV, "fov");
+    SP(RDFLAGS, "rdflags");
+    SE(STATS, "stats");
+#undef SP
+#undef SE
 }
 
 void MSG_ShowDeltaUsercmdBits(int bits)
 {
-//    if (!bits) {
-//        SHOWBITS("<none>");
-//        return;
-//    }
-//
-//#define S(b,s) if(bits&CM_##b) SHOWBITS(s)
-//    S(ANGLE1, "angle1");
-//    S(ANGLE2, "angle2");
-//    S(ANGLE3, "angle3");
-//    S(FORWARD, "forward");
-//    S(SIDE, "side");
-//    S(UP, "up");
-//    S(BUTTONS, "buttons");
-//    S(IMPULSE, "msec");
-//#undef S
+    if (!bits) {
+        SHOWBITS("<none>");
+        return;
+    }
+
+#define S(b,s) if(bits&UserCommandBits::##b) SHOWBITS(s)
+    S(AngleX, "angle.x");
+    S(AngleY, "angle.y");
+    S(AngleZ, "angle.z");
+    S(Forward, "forward");
+    S(Side, "side");
+    S(Up, "up");
+    S(Buttons, "buttons");
+    S(Impulse, "msec");
+#undef S
 }
 
-void MSG_ShowDeltaEntityBits(int bits)
+void MSG_ShowDeltaEntityBits(uint32_t byteMask)
 {
-//#define S(b,s) if(bits&BIT_##b) SHOWBITS(s)
-//    S(MODEL, "modelIndex");
-//    S(MODEL2, "modelIndex2");
-//    S(MODEL3, "modelIndex3");
-//    S(MODEL4, "modelIndex4");
-//
-//    if (bits & EntityMessageBits::AnimationFrame)
-//        SHOWBITS("frame8");
-//    if (bits & U_FRAME16)
-//        SHOWBITS("frame16");
-//
-//    if ((bits & (U_SKIN8 | U_SKIN16)) == (U_SKIN8 | U_SKIN16))
-//        SHOWBITS("skinnum32");
-//    else if (bits & U_SKIN8)
-//        SHOWBITS("skinnum8");
-//    else if (bits & U_SKIN16)
-//        SHOWBITS("skinnum16");
-//
-//    if ((bits & (U_EFFECTS8 | U_EFFECTS16)) == (U_EFFECTS8 | U_EFFECTS16))
-//        SHOWBITS("effects32");
-//    else if (bits & U_EFFECTS8)
-//        SHOWBITS("effects8");
-//    else if (bits & U_EFFECTS16)
-//        SHOWBITS("effects16");
-//
-//    if ((bits & (U_RENDERFX8 | U_RENDERFX16)) == (U_RENDERFX8 | U_RENDERFX16))
-//        SHOWBITS("renderfx32");
-//    else if (bits & U_RENDERFX8)
-//        SHOWBITS("renderfx8");
-//    else if (bits & U_RENDERFX16)
-//        SHOWBITS("renderfx16");
-//
-//    S(ORIGIN_X, "origin.x");
-//    S(ORIGIN_Y, "origin.y");
-//    S(ORIGIN_Z, "origin.z");
-//    S(ANGLE_X, "angles.x");
-//    S(ANGLE_Y, "angles.y");
-//    S(ANGLE_Z, "angles.z");
-//    S(OLD_ORIGIN, "oldOrigin");
-//    S(SOUND, "sound");
-//    S(EVENT_ID, "event");
-//    S(SOLID, "solid");
-//#undef S
+#define S(b,s) if(byteMask&EntityMessageBits::##b) SHOWBITS(s)
+    S(OriginX, "origin.x");
+    S(OriginY, "origin.y");
+    S(OriginZ, "origin.z");
+    S(AngleX, "angles.x");
+    S(AngleY, "angles.y");
+    S(AngleZ, "angles.z");
+    S(OldOrigin, "oldOrigin");
+    S(EventID, "eventID");
+
+    S(Sound, "sound");    
+    S(Solid, "solid");
+    S(AnimationFrame, "animationFrame");
+    S(AnimationTimeStart, "animationTimeStart");
+    S(AnimationFrameStart, "animationFrameStart");
+    S(AnimationFrameEnd, "animationFrameEnd");
+    S(AnimationFrameTime, "animationFrameTime");
+    S(Skin, "skin");
+    S(ModelIndex, "modelIndex");
+    S(ModelIndex2, "modelIndex2");
+    S(ModelIndex3, "modelIndex3");
+    S(ModelIndex4, "modelIndex4");
+    S(EntityEffects, "entityEffects");
+    S(RenderEffects, "renderEffects");
+#undef S
 }
 
 const char* MSG_ServerCommandString(int cmd)
 {
-//    switch (cmd) {
-//    case -1: return "END OF MESSAGE";
-//    default: return "UNKNOWN COMMAND";
-//#define S(x) case ServerCommand::##x: return "ServerCommand::" #x;
-//            S(Bad)
-//            // N&C: Protocol todo: add a game callback for this...?
-//            //S(muzzleflash)
-//            //S(muzzleflash2)
-//            //S(temp_entity)
-//            //S(layout)
-//            //S(inventory)
-//            S(Padding)
-//            S(Disconnect)
-//            S(Reconnect)
-//            S(Sound)
-//            S(Print)
-//            S(StuffText)
-//            S(ServerData)
-//            S(ConfigString)
-//            S(SpawnBaseline)
-//            S(CenterPrint)
-//            S(Download)
-//            S(PlayerInfo)
-//            S(PacketEntities)
-//	        S(DeltaPacketEntities)
-//            S(Frame)
-//            S(ZPacket)
-//            S(ZDownload)
-//            S(GameState)
-//#undef S
-//    }
-    return "FUNCTION IS COMMENTED LOLOL";
+    switch (cmd) {
+    case -1: return "END OF MESSAGE";
+    default: return "UNKNOWN COMMAND";
+#define S(x) case ServerCommand::##x: return "ServerCommand::" #x;
+            S(Bad)
+            // TODO: Protocol todo: add a game callback for this...?
+            //S(muzzleflash)
+            //S(muzzleflash2)
+            //S(temp_entity)
+            //S(layout)
+            //S(inventory)
+            S(Padding)
+            S(Disconnect)
+            S(Reconnect)
+            S(Sound)
+            S(Print)
+            S(StuffText)
+            S(ServerData)
+            S(ConfigString)
+            S(SpawnBaseline)
+            S(CenterPrint)
+            S(Download)
+            S(PlayerInfo)
+            S(PacketEntities)
+	        S(DeltaPacketEntities)
+            S(Frame)
+            S(ZPacket)
+            S(ZDownload)
+            S(GameState)
+#undef S
+    }
 }
 #endif // USE_CLIENT
 #endif // _DEBUG

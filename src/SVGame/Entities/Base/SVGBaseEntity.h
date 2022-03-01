@@ -897,7 +897,7 @@ protected:
 
     //------------------------------------
     // Entity GAME settings.
-    // The height above the origin, this is where EYE SIGHT comes from. Ok?
+    // The height above the origin, this is where EYE SIGHT is at.
     int32_t viewHeight = 0;
     // Determines how to interpret, take damage like a man or like a ... ? Yeah, pick up soap.
     int32_t takeDamage = 0;

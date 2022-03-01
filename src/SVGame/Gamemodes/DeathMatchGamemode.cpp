@@ -226,11 +226,11 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     player->LinkEntity();
 
     // Set player state gun index to whichever was persistent in the previous map (if there was one).
-    client->playerState.gunIndex = gi.ModelIndex("models/weapons/v_mark23/tris.iqm");  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
+    //client->playerState.gunIndex = gi.ModelIndex("models/weapons/v_mark23/tris.iqm");  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
 
     // Set its current new weapon to the one that was stored in persistent and activate it.
-    client->newWeapon = client->persistent.activeWeapon;
-    SVG_ChangeWeapon(player);
+    //client->newWeapon = client->persistent.activeWeapon;
+    player->ChangeWeapon(0, false);
 }
 
 //===============
@@ -316,7 +316,7 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerCli
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
     if (!client->respawn.isSpectator)  //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(player);
+        player->WeaponThink();
     else
         client->weaponState.shouldThink = false;
 

@@ -14,6 +14,7 @@
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
 
+#include "../../Gamemodes/IGamemode.h"
 #include "FuncRotating.h"
 
 //===============
@@ -82,7 +83,7 @@ void FuncRotating::Spawn() {
 // FuncRotating::RotatorBlocked
 //===============
 void FuncRotating::RotatorBlocked( SVGBaseEntity* other ) {
-	SVG_InflictDamage( other, this, this, vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+	game.GetGamemode()->InflictDamage( other, this, this, vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 }
 
 //===============

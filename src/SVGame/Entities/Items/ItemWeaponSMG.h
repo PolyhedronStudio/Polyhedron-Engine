@@ -98,6 +98,7 @@ public:
     **/
     virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) override;
 
+
     /**
     *   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
     **/

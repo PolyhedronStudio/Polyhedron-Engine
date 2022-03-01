@@ -352,7 +352,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     gitem_t* item;
 
     // Ensure ent is valid.
-    if (!player || !client) {
+    if (!player || !player->IsSubclassOf<SVGBasePlayer>() || !client) {
         return;
     }
 
@@ -371,7 +371,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     } else {
     //    item = 0;// &itemlist[ent->client->ammoIndex];
         client->playerState.stats[STAT_AMMO_ICON] = 1;//gi.ImageIndex(item->icon);
-        client->playerState.stats[STAT_AMMO_PRIMARY] = client->persistent.inventory[client->ammoIndex];
+        client->playerState.stats[STAT_AMMO_PRIMARY] = client->persistent.inventory.items[client->ammoIndex];
     }
     // Get active weapon.
     //SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
@@ -409,13 +409,14 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     //
     // selected item
     //
-    if (client->persistent.selectedItem == -1) {
-	    client->playerState.stats[STAT_SELECTED_ICON] = 0;
-    } else {
-    	client->playerState.stats[STAT_SELECTED_ICON] = 0;  //gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
-    }
-    
-    client->playerState.stats[STAT_SELECTED_ITEM] = client->persistent.selectedItem;
+    //if (client->persistent.selectedItem == -1) {
+	   // client->playerState.stats[STAT_SELECTED_ICON] = 0;
+    //} else {
+    //	client->playerState.stats[STAT_SELECTED_ICON] = 0;  //gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
+    //}
+    //
+    client->playerState.stats[STAT_SELECTED_ICON] = 0;
+    client->playerState.stats[STAT_SELECTED_ITEM] = 0; //client->persistent.selectedItem;
 
     //
     // layouts
@@ -447,7 +448,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     //
     // help icon / current weapon if not shown
     //
-    if ((client->persistent.hand == CENTER_HANDED || client->playerState.fov > 91) && client->persistent.activeWeapon) {
+    if ((client->persistent.hand == CENTER_HANDED || client->playerState.fov > 91) && client->persistent.inventory.activeWeaponID) {
         //ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->GetItemIcon());
 	    client->playerState.stats[STAT_HELPICON] = 0;
     } else {

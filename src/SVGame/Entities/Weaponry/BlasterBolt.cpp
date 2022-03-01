@@ -14,6 +14,7 @@
 #include "../../Player/View.h"          // Include Player View functions..
 #include "../../Utilities.h"            // Util funcs.
 
+#include "../../Gamemodes/IGamemode.h"
 // Class Entities.
 #include "BlasterBolt.h"
 
@@ -124,10 +125,10 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 
         // Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
         if (plane) {
-            SVG_InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
+            game.GetGamemode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
                 plane->normal, self->GetDamage(), 1, DamageFlags::EnergyBasedWeapon, meansOfDeath);
         } else {
-            SVG_InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
+            game.GetGamemode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
                 vec3_zero(), self->GetDamage(), 1, DamageFlags::EnergyBasedWeapon, meansOfDeath);
         }
 
