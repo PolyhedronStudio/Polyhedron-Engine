@@ -628,6 +628,7 @@ void ClientGameEntities::AddPacketEntities() {
 * Add the view weapon render entity to the screen. Can also be used for
 * other scenarios where a depth hack is required.
 **/
+r_entity_t gunRenderEntity;
 void ClientGameEntities::AddViewEntities() {
     int32_t  shellFlags = 0;
 
@@ -651,10 +652,8 @@ void ClientGameEntities::AddViewEntities() {
     PlayerState *oldPlayerState= &cl->oldframe.playerState;
 
     // Gun ViewModel.
-    r_entity_t gunRenderEntity = {
-        .model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0)),
-        .id = RESERVED_ENTITIY_GUN,
-    };
+    gunRenderEntity.model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0));
+    gunRenderEntity.id = RESERVED_ENTITIY_GUN;
 
     // If there is no model to render, there is no need to continue.
     if (!gunRenderEntity.model) {
@@ -713,13 +712,29 @@ void ClientGameEntities::AddViewEntities() {
         gunRenderEntity.frame = gun_frame;      // Development tool
         gunRenderEntity.oldframe = gun_frame;   // Development tool
     } else {
-        gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;
-        if (gunRenderEntity.frame == 0) {
-            gunRenderEntity.oldframe = 0;   // just changed weapons, don't lerp from old
-        } else {
-            gunRenderEntity.oldframe = 0;//oldPlayerState->gunAnimationFrame;
-            gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
+        // Setup the proper lerp and model frame to render this pass.
+        // Moved into the if statement's else case up above.
+        gunRenderEntity.oldframe = gunRenderEntity.frame;
+        gunRenderEntity.backlerp = 1.0 - SG_FrameForTime(&gunRenderEntity.frame,
+            cl->time,  // Current Time.
+            currentPlayerState->gunAnimationStartTime,         // Animation Start time.
+            currentPlayerState->gunAnimationFrametime,  // Current frame time.
+            currentPlayerState->gunAnimationStartFrame,  // Start frame.
+            currentPlayerState->gunAnimationEndFrame,  // End frame.
+            currentPlayerState->gunAnimationLoopCount,             // Loop count.
+            currentPlayerState->gunAnimationForceLoop
+        );
+        if (gunRenderEntity.frame < 0) {
+            gunRenderEntity.frame = 0;
         }
+        //gunRenderEntity.frame = tionFrame = renderEntity.frame;
+        //gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;
+        //if (gunRenderEntity.frame == 0) {
+        //    gunRenderEntity.oldframe = 0;   // just changed weapons, don't lerp from old
+        //} else {
+        //    gunRenderEntity.oldframe = 0;//oldPlayerState->gunAnimationFrame;
+        //    gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
+        //}
     }
 
     // Setup basic render entity flags for our view weapon.

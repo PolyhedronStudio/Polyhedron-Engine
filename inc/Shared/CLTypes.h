@@ -359,7 +359,7 @@ struct ClientState {
     vec2_t      mouseMove;
 
     int32_t         time;           // this is the time value that the client
-                                // is rendering at.  always <= cl.serverTime
+                                    // is rendering at.  always <= cl.serverTime
     float       lerpFraction;       // between oldframe and frame
 
     //

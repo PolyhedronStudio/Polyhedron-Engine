@@ -848,12 +848,13 @@ struct gclient_s {
 	    //! Should we execute a weapon think method?
         qboolean shouldThink = false;
 
-        //! Last state, used for animation resetting.
-        int32_t lastState = WeaponState::Finished;
+        //! Timestamp of when this state was engaged.
+        uint32_t stateTimestamp = 0;
 
+        //! Last state, used for animation resetting.
+        //int32_t lastState = WeaponState::Finished;
         //! Current state the active weapon resides in.
         int32_t currentState = WeaponState::Finished;
-
         //! Queued weapon state to switch to after finishing the current state.
         int32_t queuedState = -1;
 

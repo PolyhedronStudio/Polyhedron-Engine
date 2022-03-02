@@ -334,11 +334,14 @@ void SVGBasePlayer::WeaponThink() {
     // See if we got a queued state, if we do, override our current weaponstate.
     if (client->weaponState.queuedState != -1){
 	    // // TODO: Add a proper state machine for these animations here.
-        // Reset gun frame so animations work properly.
+        // Set the timestamp of when this current state got set.
+        client->weaponState.stateTimestamp = level.time * 1000;
+        client->playerState.gunAnimationStartTime = level.time* 1000;
 
         // Switch to queued weaponstate.
 	    client->weaponState.currentState = client->weaponState.queuedState;
-	    // Reset it.
+        gi.DPrintf("WeaponState switched to: %i at timestamp: %f\n", client->weaponState.currentState, client->weaponState.stateTimestamp);
+        // Reset it.
 	    client->weaponState.queuedState = -1;
     }
 
@@ -375,13 +378,16 @@ qboolean SVGBasePlayer::GiveAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     // Get the cap limit for said ammo type.
     uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
 
+    // Acquire the amount one is carrying of ammo type.
+    uint32_t carryingAmount = HasItem(ammoIdentifier);
+
     // Have we hit the cap limit for this ammo type? Return false.
-    if (client->persistent.inventory.items[ammoIdentifier] >= ammoCapLimit) {
+    if (carryingAmount >= ammoCapLimit) {
         return false;
     }
 
     // Add ammo amount using a clamp.
-    client->persistent.inventory.items[ammoIdentifier] = Clampi(client->persistent.inventory.items[ammoIdentifier] + amount, 0, ammoCapLimit);
+    client->persistent.inventory.items[ammoIdentifier] = Clampi(carryingAmount + amount, 0, ammoCapLimit);
 
     return true;
 }
@@ -407,8 +413,11 @@ qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
         return false;
     }
 
+    // Acquire carrying weapon count.
+    uint32_t carryingAmount = HasItem(ammoIdentifier);
+
     // Have we hit the cap limit for this ammo type? Return false.
-    if (client->persistent.inventory.items[ammoIdentifier] <= 0) {
+    if (carryingAmount < 0) {
         return false;
     }
         
@@ -416,7 +425,7 @@ qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     uint32_t ammoCapLimit = ammoInstance->GetCapLimit();
 
     // Add ammo amount using a clamp.
-    client->persistent.inventory.items[ammoIdentifier] = Clampi(client->persistent.inventory.items[ammoIdentifier] - amount, 0, ammoCapLimit);
+    client->persistent.inventory.items[ammoIdentifier] = Clampi(carryingAmount - amount, 0, ammoCapLimit);
 
     return true;
 }
@@ -445,13 +454,16 @@ qboolean SVGBasePlayer::GiveWeapon(uint32_t weaponIdentifier, uint32_t amount) {
     // Get limited amount a player can carry of this weapon type.
     uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
 
+    // Acquire carrying weapon count.
+    uint32_t carryingAmount = HasItem(weaponIdentifier);
+
     // Have we hit the cap limit for this weapon type? Return false.
-    if (client->persistent.inventory.items[weaponIdentifier] >= weaponCarryLimit) {
+    if (carryingAmount >= weaponCarryLimit) {
 	    return false;
     }
 
     // Add weapon amount using a clamp.
-    client->persistent.inventory.items[weaponIdentifier] = Clampi(client->persistent.inventory.items[weaponIdentifier] + amount, 0, weaponCarryLimit);
+    client->persistent.inventory.items[weaponIdentifier] = Clampi(carryingAmount + amount, 0, weaponCarryLimit);
 
     return true;
 }
@@ -466,7 +478,7 @@ qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
 
     // Sanity check.
     if (!client) {
-	return false;
+	    return false;
     }
 
     // Now we're here, acquire the item instance of the weapon type.
@@ -477,8 +489,11 @@ qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
 	    return false;
     }
 
-    // Have we hit the cap limit for this weapon type? Return false.
-    if (client->persistent.inventory.items[weaponIdentifier] <= 0) {
+    // Acquire carrying weapon count.
+    uint32_t carryingAmount = HasItem(weaponIdentifier);
+
+    // Have we hit the bottom limit for this weapon type? Return false.
+    if (carryingAmount < 0) {
     	return false;
     }
 
@@ -486,9 +501,25 @@ qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
     uint32_t weaponCarryLimit = weaponInstance->GetCarryLimit();
 
     // Add weapon amount using a clamp.
-    client->persistent.inventory.items[weaponIdentifier] = Clampi(client->persistent.inventory.items[weaponIdentifier] - amount, 0, weaponCarryLimit);
+    client->persistent.inventory.items[weaponIdentifier] = Clampi(carryingAmount - amount, 0, weaponCarryLimit);
 
     return true;
+}
+
+/**
+*   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)
+**/
+uint32_t SVGBasePlayer::HasItem(uint32_t itemIdentifier) {
+    // Get client.
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+	    return false;
+    }
+
+    // Return amount holding.
+    return client->persistent.inventory.items[itemIdentifier];
 }
 
 /**
@@ -515,15 +546,24 @@ SVGBaseItemWeapon* SVGBasePlayer::ChangeWeapon(uint32_t weaponIdentifier, qboole
     // Store the ID as our inventory's "nextWeaponID".
     client->persistent.inventory.nextWeaponID = weaponIdentifier;
 
+    // If the client is in idling mode with his gun, we can safely holster it.
+    if (client->weaponState.currentState == WeaponState::Idle
+        && client->persistent.inventory.nextWeaponID != 0) {
+        // Queue holsterweapon state.
+        instanceWeapon->InstanceWeaponQueueNextState(this, client, WeaponState::Holster);
+        return nullptr;
+    }
+
     // Are we ready to actually switch weapon yet, or should we keep it on the back burner?
-    if (client->weaponState.currentState != WeaponState::Down 
-        || client->weaponState.currentState != WeaponState::Finished) {
+    if ((client->weaponState.currentState != WeaponState::Down 
+        && client->weaponState.currentState != WeaponState::Finished
+        && client->weaponState.currentState != WeaponState::Idle)
+        && client->persistent.inventory.nextWeaponID == 0) {
         return nullptr;
     }
 
     // Store activeWeaponID in previousActiveWeaponID.
     client->persistent.inventory.previousActiveWeaponID = (storeLastWeapon ? client->persistent.inventory.activeWeaponID : 0);
-
     // Exchange activeWeaponID for nextWeaponID.
     client->persistent.inventory.activeWeaponID = client->persistent.inventory.nextWeaponID;
     // Zero out nextWeaponID.

@@ -80,6 +80,12 @@ public:
     *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
     **/
     virtual qboolean TakeWeapon(uint32_t weaponIdentifier, uint32_t amount);
+
+    /**
+    *   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)
+    **/
+    virtual uint32_t HasItem(uint32_t itemIdentifier);
+
     /**
     *   @brief  Engages the player to change to the new weapon.
     *   @param  weaponIdentifier The identifier used for acquiring the weapon type its instance pointer.
