@@ -298,13 +298,16 @@ usually be a couple times for each server frame.
 void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 {
     // Acquire player entity pointer.
-    SVGBasePlayer *playerEntity = game.GetGameworld()->GetPlayerClassEntity(svEntity);
+    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(svEntity, true, true);
 
     // Sanity check.
-    if (!playerEntity) {
+    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
         gi.DPrintf("Warning: ClientThink called on svEntity(#%i) without a SVGBasePlayer or derivate class entity.\n", svEntity->state.number);
         return;
     }
+
+    // Save to cast now.
+    SVGBasePlayer *playerEntity = dynamic_cast<SVGBasePlayer*>(validEntity);
 
     // We can safely acquire client entity since it's already been sanitized by GetPlayerClassEntity.
     ServerClient *client = playerEntity->GetClient();

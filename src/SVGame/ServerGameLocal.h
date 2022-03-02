@@ -428,7 +428,6 @@ extern  GameLocals   game;
 extern  LevelLocals  level;
 extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
 extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
-extern  TemporarySpawnFields    st;
 
 // Static Get functions for readability.
 static inline Gameworld* GetGameworld() { return game.world; }
@@ -746,16 +745,18 @@ struct ClientPersistentData {
     //! Whether the client is currently actively connected, or not.
     qboolean isConnected = false;   // A loadgame will leave valid entities that
                                     // just don't have a connection yet
+    //! Flags to save.
+    int32_t savedFlags = 0;
 
     /***
     *   @brief Values saved and restored from clients when changing levels
     ***/
-    //! Client's health.
-    int32_t health = 100;
-    //! The maximum amount of health.
-    int32_t maxHealth = 100;
-    //! Flags to save.
-    int32_t savedFlags = 0;
+    struct {
+        //! Client's health.
+        int32_t health = 100;
+        //! The maximum amount of health.
+        int32_t maxHealth = 100;
+    } stats;
 
     /**
     *   @brief Inventory member structure.

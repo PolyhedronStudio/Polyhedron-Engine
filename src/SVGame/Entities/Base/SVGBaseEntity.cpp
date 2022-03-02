@@ -417,7 +417,7 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 	// Print the "message"
 	if ( !GetMessage().empty() && !(activatorOverride->GetServerFlags() & EntityServerFlags::Monster) ) {
 		// Get the message sound
-		const int32_t messageSound = GetNoiseIndex();
+		const int32_t messageSound = GetNoiseIndexA();
 		
 		// Print the message.
 		SVG_CenterPrint(activatorOverride, GetMessage());

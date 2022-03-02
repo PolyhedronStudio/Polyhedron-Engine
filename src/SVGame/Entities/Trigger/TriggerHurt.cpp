@@ -69,7 +69,7 @@ void TriggerHurt::Spawn() {
 	// Initialize Brush Trigger.
 	InitBrushTrigger();
 
-	//self->noiseIndex = gi.SoundIndex("world/electro.wav");
+	//self->noiseIndexA = gi.SoundIndex("world/electro.wav");
 	//self->Touch = hurt_touch;
 	SetTouchCallback(&TriggerHurt::TriggerHurtTouch);
 
@@ -159,7 +159,7 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 
 	if (!(GetSpawnFlags()& SPAWNFLAG_SILENT)) {
 		if ((level.frameNumber % 10) == 0)
-			SVG_Sound(other, CHAN_AUTO, GetNoiseIndex(), 1, ATTN_NORM, 0);
+			SVG_Sound(other, CHAN_AUTO, GetNoiseIndexA(), 1, ATTN_NORM, 0);
 	}
 
 	int32_t damageFlags = 0;

@@ -892,16 +892,24 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
 ClientCommand
 =================
 */
-void SVG_ClientCommand(Entity* serverEntity) {
+void SVG_ClientCommand(Entity* svEntity) {
     //
     // TODO In the future the contents of this function will move along
     // into the gi interface implementation. Leaving this function for just
     // checking if the entity is valid to work with.
     //
     //
+    // Acquire player entity pointer.
+    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(svEntity, true, true);
 
-    // Fetch player entity.
-    SVGBasePlayer* player = GetGameworld()->GetPlayerClassEntity(serverEntity);
+    // Sanity check.
+    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+        gi.DPrintf("Warning: SVG_ClientCommand called on svEntity(#%i) without a valid SVGBasePlayer pointer.\n");
+        return;
+    }
+
+    // Save to cast now.
+    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
 
     // Fetch its client pointer.
     ServerClient *client = player->GetClient();

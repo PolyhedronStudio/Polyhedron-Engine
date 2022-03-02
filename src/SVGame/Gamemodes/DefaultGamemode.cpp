@@ -96,8 +96,8 @@ void DefaultGamemode::OnLevelExit() {
         SVGBaseEntity* entity = classEntities[stateNumber];
 
         // Ensure an entity its health is reset to default.
-        if (entity->GetHealth() > entity->GetClient()->persistent.maxHealth)
-            entity->SetHealth(entity->GetClient()->persistent.maxHealth);
+        if (entity->GetHealth() > entity->GetClient()->persistent.stats.maxHealth)
+            entity->SetHealth(entity->GetClient()->persistent.stats.maxHealth);
     }
 } 
 
@@ -1257,8 +1257,8 @@ void DefaultGamemode::InitializePlayerPersistentData(ServerClient* client) {
     /**
     *   Stats.
     **/
-    client->persistent.health       = 100;
-    client->persistent.maxHealth    = 100;
+    client->persistent.stats.health       = 100;
+    client->persistent.stats.maxHealth    = 100;
 
     /**
     *   Inventory.
@@ -1381,7 +1381,7 @@ void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     // Now move its persistent data back into the client's information.
     client->persistent = persistentData;
     // In case the persistent data consists of a dead client, reinitialize it.
-    if (client->persistent.health <= 0) {
+    if (client->persistent.stats.health <= 0) {
 	    InitializePlayerPersistentData(client);
     }
     // Last but not least, set its respawn data.
@@ -1543,8 +1543,8 @@ void DefaultGamemode::StorePlayerPersistentData(void) {
         if (!entity->classEntity)
             continue;
 
-        gameClients[i].persistent.health = entity->classEntity->GetHealth();
-        gameClients[i].persistent.maxHealth = entity->classEntity->GetMaxHealth();
+        gameClients[i].persistent.stats.health = entity->classEntity->GetHealth();
+        gameClients[i].persistent.stats.maxHealth = entity->classEntity->GetMaxHealth();
         gameClients[i].persistent.savedFlags = (entity->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
     }
 }
@@ -1558,8 +1558,8 @@ void DefaultGamemode::RestorePlayerPersistentData(SVGBaseEntity* player, ServerC
     if (!player || !client)
         return;
         
-    player->SetHealth(client->persistent.health);
-    player->SetMaxHealth(client->persistent.maxHealth);
+    player->SetHealth(client->persistent.stats.health);
+    player->SetMaxHealth(client->persistent.stats.maxHealth);
     player->SetFlags(player->GetFlags() | client->persistent.savedFlags);
 }
 

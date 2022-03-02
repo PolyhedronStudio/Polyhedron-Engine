@@ -55,6 +55,11 @@ SVGEntityHandle::SVGEntityHandle(SVGEntityHandle& other) : serverEntity(other.se
 SVGEntityHandle::SVGEntityHandle(const SVGEntityHandle& other) : serverEntity(other.serverEntity), entityID(other.entityID) { }
 
 /**
+*	@brief Simple constructor that will accept a server entity.
+**/
+SVGEntityHandle::SVGEntityHandle(Entity* entity) : serverEntity(entity), entityID(entity->state.number) { }
+
+/**
 *	@brief Simple constructor that will accept a server entity and an entity number.
 **/
 SVGEntityHandle::SVGEntityHandle(Entity* entity, const uint32_t number) : serverEntity(entity), entityID(number) { }

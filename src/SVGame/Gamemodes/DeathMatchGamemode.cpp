@@ -140,7 +140,7 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     // Now move its persistent data back into the client's information.
     client->persistent = persistentData;
     // In case the persistent data consists of a dead client, reinitialize it.
-    if (client->persistent.health <= 0) {
+    if (client->persistent.stats.health <= 0) {
 	    InitializePlayerPersistentData(client);
     }
     // Last but not least, set its respawn data.

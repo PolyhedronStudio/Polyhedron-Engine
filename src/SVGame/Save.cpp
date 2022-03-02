@@ -169,8 +169,8 @@ static const save_field_t entityfields[] = {
     //E(myNoisePtr),
     //E(myNoise2Ptr),
 
-    //I(noiseIndex),
-    //I(noiseIndex2),
+    //I(noiseIndexA),
+    //I(noiseIndexB),
     //F(volume),
     //F(attenuation),
 

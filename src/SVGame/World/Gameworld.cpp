@@ -535,7 +535,7 @@ SVGBaseEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::strin
 void Gameworld::FreeServerEntity(Entity* svEntity) {
     // Sanity check.
     if (!svEntity) {
-	return;
+		return;
     }
 
     // Unlink entity from world.
@@ -546,8 +546,8 @@ void Gameworld::FreeServerEntity(Entity* svEntity) {
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
     if (entityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
-	gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
-	return;
+		gi.DPrintf("Tried to free special edict: %i\n", entityNumber);
+		return;
     }
 
     // Delete the actual entity class pointer.
@@ -591,28 +591,28 @@ qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
 
     // Special class entity handling IF it still has one.
     if (svEntity->classEntity) {
-	// Get pointer to class entity.
-	SVGBaseEntity* classEntity = svEntity->classEntity;
+		// Get pointer to class entity.
+		SVGBaseEntity* classEntity = svEntity->classEntity;
 
-	// Remove the classEntity reference
-	classEntity->SetGroundEntity(nullptr);
-	classEntity->SetLinkCount(0);
-	classEntity->SetGroundEntityLinkCount(0);
-	classEntity->SetServerEntity(nullptr);
+		// Remove the classEntity reference
+		classEntity->SetGroundEntity(nullptr);
+		classEntity->SetLinkCount(0);
+		classEntity->SetGroundEntityLinkCount(0);
+		classEntity->SetServerEntity(nullptr);
 
-	// Reset server entity's class entity pointer.
-	svEntity->classEntity = nullptr;
+		// Reset server entity's class entity pointer.
+		svEntity->classEntity = nullptr;
     }
 
     // For whichever faulty reason the entity might not have had a classentity,
     // so we do an extra delete here just in case.
     if (classEntities[entityNumber] != nullptr) {
-	// Free it.
-	delete classEntities[entityNumber];
-	classEntities[entityNumber] = nullptr;
+		// Free it.
+		delete classEntities[entityNumber];
+		classEntities[entityNumber] = nullptr;
 
-	// Freed class entity.
-	freedClassEntity = true;
+		// Freed class entity.
+		freedClassEntity = true;
     }
 
     // Return result.
@@ -620,25 +620,37 @@ qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
 }
 
 /**
-*   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer.
+*   @brief	Utility function so we can acquire a valid entity pointer. It operates
+*			by using an entity handle in order to make sure that it has a valid
+*			server and class entity object.
+*	@param	requireValidClient	Expands the check to make sure the entity's client isn't set to nullptr.
+*	@param	requireInUse		Expands the check to make sure the entity has its inUse set to true.
 * 
-*   @return A valid pointer to the entity's SVGBasePlayer class entity. nullptr on failure.
+*   @return A valid pointer to the entity class entity. nullptr on failure.
 **/
-SVGBasePlayer* Gameworld::GetPlayerClassEntity(Entity* serverEntity) {
+SVGBaseEntity* Gameworld::ValidateEntity(const SVGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
     // Ensure the entity is valid.
-    if (!serverEntity || !serverEntity->client || !serverEntity->classEntity || !serverEntity->inUse) {
+    if (!*entityHandle || (!entityHandle.Get() ||
+			(
+				!(requireClient == true ? (entityHandle.Get()->client != nullptr ? true : false) : true) 
+				&& !(requireInUse == true ? entityHandle.Get()->inUse : true)) 
+			)
+		)
+	{
 		return nullptr;
     }
 
-    // Ensure that its classentity is of or derived of SVGBasePlayer.
-    SVGBaseEntity* classEntity = serverEntity->classEntity;
-
-    if (!classEntity->IsSubclassOf<SVGBasePlayer>()) {
+    // It's lame, but without requiring a const entity handle, we can't pass
+	// in any pointers to (server-)entity types.
+	SVGEntityHandle castHandle = static_cast<SVGEntityHandle>(entityHandle);
+	
+	// Ensure it is of class type player.
+    if (!castHandle->IsSubclassOf<SVGBasePlayer>()) {
 		return nullptr;
     }
 
-    // We can safely cast to SVGBasePlayer now.
-    return dynamic_cast<SVGBasePlayer*>(serverEntity->classEntity);
+    // We've got a definite valid player entity here. Return it.
+    return dynamic_cast<SVGBasePlayer*>(*castHandle);
 }
 
 

@@ -425,17 +425,17 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
 
     // Special layout for deathmatch.
     if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
-	    if (client->persistent.health <= 0 || level.intermission.time || client->showScores) {
+	    if (client->persistent.stats.health <= 0 || level.intermission.time || client->showScores) {
 	        client->playerState.stats[STAT_LAYOUTS] |= 1;
 	    }
-	    if (client->showInventory && client->persistent.health > 0) { 
+	    if (client->showInventory && client->persistent.stats.health > 0) { 
             client->playerState.stats[STAT_LAYOUTS] |= 2;
         }
     } else {
         if (client->showScores) {
 	        client->playerState.stats[STAT_LAYOUTS] |= 1;
         }
-	    if (client->showInventory && client->persistent.health > 0) {
+	    if (client->showInventory && client->persistent.stats.health > 0) {
 	        client->playerState.stats[STAT_LAYOUTS] |= 2;
 	    }
     }
@@ -507,12 +507,12 @@ void SVG_HUD_SetSpectatorStats(SVGBasePlayer *player, ServerClient *client) {
     /* layouts are independant in isSpectator */
     client->playerState.stats[STAT_LAYOUTS] = 0;
 
-    if ((client->persistent.health <= 0) || level.intermission.time || client->showScores)
+    if ((client->persistent.stats.health <= 0) || level.intermission.time || client->showScores)
     {
 	    client->playerState.stats[STAT_LAYOUTS] |= 1;
     }
 
-    if (client->showInventory && (client->persistent.health > 0))
+    if (client->showInventory && (client->persistent.stats.health > 0))
     {
         client->playerState.stats[STAT_LAYOUTS] |= 2;
     }

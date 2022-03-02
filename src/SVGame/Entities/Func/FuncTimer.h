@@ -27,5 +27,6 @@ public:
 	void TimerUse( SVGBaseEntity* other, SVGBaseEntity* activator );
 
 protected:
+	float pauseTime{ 0.0f };
 	float randomTime{ 0.0f };
 };

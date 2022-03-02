@@ -308,8 +308,8 @@ void CoopGamemode::StorePlayerPersistentData(void) {
             continue;
         if (!ent->classEntity)
             continue;
-	    gameClients[i].persistent.health = ent->classEntity->GetHealth();
-	    gameClients[i].persistent.maxHealth = ent->classEntity->GetMaxHealth();
+	    gameClients[i].persistent.stats.health = ent->classEntity->GetHealth();
+	    gameClients[i].persistent.stats.maxHealth = ent->classEntity->GetMaxHealth();
 	    gameClients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
         if (ent->client)
 		    gameClients[i].persistent.score = ent->client->respawn.score;
@@ -327,8 +327,8 @@ void CoopGamemode::RestorePlayerPersistentData(SVGBaseEntity* player, ServerClie
     }
 
     // Restore player entity information.
-    player->SetHealth(client->persistent.health);
-    player->SetMaxHealth(client->persistent.maxHealth);
+    player->SetHealth(client->persistent.stats.health);
+    player->SetMaxHealth(client->persistent.stats.maxHealth);
     player->SetFlags(player->GetFlags() | client->persistent.savedFlags);
 
     // Restore the score the player had stored.

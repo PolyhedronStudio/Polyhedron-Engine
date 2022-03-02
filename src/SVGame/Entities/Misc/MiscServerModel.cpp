@@ -91,8 +91,8 @@ void MiscServerModel::Spawn() {
 
     // Set noise ( in case one is precached. )
     if (precachedNoiseIndex) {
-        SetNoiseIndex(precachedNoiseIndex);
-        SetSound(GetNoiseIndex());
+        SetNoiseIndexA(precachedNoiseIndex);
+        SetSound(GetNoiseIndexA());
     }
 
     // Determine whether the model is a sprite. In case it is, we must set the Translucent flag for it to render properly.
@@ -165,7 +165,7 @@ void MiscServerModel::Think() {
     Base::Think();
 
 
-    //if (GetNoiseIndex()) {
+    //if (GetNoiseIndexA()) {
     //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
     //}
 

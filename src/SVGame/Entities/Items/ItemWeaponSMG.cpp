@@ -22,6 +22,9 @@
 #include "../Base/SVGBaseItemWeapon.h"
 #include "../Base/SVGBasePlayer.h"
 
+// World.
+#include "../../World/Gameworld.h"
+
 // Misc Explosion Box Entity.
 #include "ItemWeaponSMG.h"
 
@@ -157,34 +160,34 @@ void ItemWeaponSMG::InstanceSpawn() {
 *   @brief  The mother of all instance weapon callbacks. Calls upon the others depending on state.
 **/
 void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Call base InstanceWeaponThink, this will check whether we have newWeapon set and engage a switch.
-    Base::InstanceWeaponThink(player, weapon, client);
+    //// Call base InstanceWeaponThink, this will check whether we have newWeapon set and engage a switch.
+    //Base::InstanceWeaponThink(player, weapon, client);
 
-    // Switch based on weapon state.
-    switch (client->weaponState.currentState) { 
-        case WeaponState::Idle:
-            InstanceWeaponIdle(player, weapon, client);
-        break;
-        case WeaponState::Draw:
-	        InstanceWeaponDraw(player, weapon, client);
-        break;
-        case WeaponState::Holster:
-	        InstanceWeaponHolster(player, weapon, client);
-        break;
-        case WeaponState::Reload:
-	        //InstanceWeaponReload(player, weapon, client);
-        break;
-        case WeaponState::PrimaryFire:
-	        //InstanceWeaponPrimaryFire(player, weapon, client);
-        break;
-        case WeaponState::SecondaryFire:
-	        //InstanceWeaponSecondaryFire(player, weapon, client);
-        break;
-        default:
-            // Do an idle anyway.
-    	    //InstanceWeaponIdle(player, weapon, client);
-        break;
-    }
+    //// Switch based on weapon state.
+    //switch (client->weaponState.currentState) { 
+    //    case WeaponState::Idle:
+    //        InstanceWeaponIdle(player, weapon, client);
+    //    break;
+    //    case WeaponState::Draw:
+	   //     InstanceWeaponDraw(player, weapon, client);
+    //    break;
+    //    case WeaponState::Holster:
+	   //     InstanceWeaponHolster(player, weapon, client);
+    //    break;
+    //    case WeaponState::Reload:
+	   //     //InstanceWeaponReload(player, weapon, client);
+    //    break;
+    //    case WeaponState::PrimaryFire:
+	   //     //InstanceWeaponPrimaryFire(player, weapon, client);
+    //    break;
+    //    case WeaponState::SecondaryFire:
+	   //     //InstanceWeaponSecondaryFire(player, weapon, client);
+    //    break;
+    //    default:
+    //        // Do an idle anyway.
+    //	    //InstanceWeaponIdle(player, weapon, client);
+    //    break;
+    //}
 }
 
 /**
@@ -282,34 +285,35 @@ void ItemWeaponSMG::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeap
 **/
 qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     // Sanity check.
-    if (!other || !other->GetClient() || !other->IsSubclassOf<SVGBasePlayer>()) {
+    if (!other || !other->IsSubclassOf<SVGBasePlayer>()) {
 	    return false;
     }
 
-    // Cast to SVGBasePlayer.
-    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(other);
-    // Acquire client.
+    // Cast player, get client, sanity check, and let's go.
+    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(other);
     ServerClient *client = player->GetClient();
-    // Acquire the player's active weapon instance. (If any.)
-    SVGBaseItemWeapon* activeWeapon = player->GetActiveWeaponInstance();
+    if (!client) {
+        return false;
+    }
 
-    // TODO HERE: Check whether game mode allows for picking up this tiem.
+    // Do nothing if player already has this weapon.
+    if (client->persistent.inventory.items[GetIdentifier()] >= 1) {
+        return false;
+    }
+
+    //// TODO HERE: Check whether game mode allows for picking up this tiem.
     // Check whether the player already had an SMG or not.
-    player->GiveWeapon(ItemIdentifier::SMG, 1);
+    player->GiveWeapon(GetIdentifier(), 1);
 
     // If this item wasn't dropped by an other player, give them some ammo to go along.
     if (!(GetSpawnFlags() & ItemSpawnFlags::DroppedItem)) {
     	// TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
-	    player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
+        player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
     }
 
-    // Do an auto change weapon pick up in this case.
-    if (!activeWeapon || (activeWeapon->GetIdentifier() != ItemIdentifier::SMG && client->persistent.inventory.items[ItemIdentifier::SMG] >= 1)) {
-	    // Fetch weapon instance so we can call upon UseInstance
-	    SVGBaseItemWeapon* weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(GetIdentifier());
-
-        // Take care of switching player weapon here.
-        weaponInstance->UseInstance(player, weaponInstance);
+    // Execute a player change weapon in case he isn't holding it already.
+    if (client->persistent.inventory.activeWeaponID != GetIdentifier() && client->persistent.inventory.items[GetIdentifier()] >= 1) {
+        player->ChangeWeapon(GetIdentifier());
     }
 
     // Play sound.
@@ -317,53 +321,65 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
 
     // Set a respawn think for after 2 seconds.
     if (!game.GetGamemode()->IsClass<DefaultGamemode>()) {
-	    SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
-	    SetNextThinkTime(level.time + 2);
+        SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
+        SetNextThinkTime(level.time + 2);
     }
 
     return true;
 }
 
 /**
-*   @brief Changes the player's weapon to the SMG if it has one that is.
+*   @brief  If a player has the SMG in its inventory try and change weapon.
 **/
 void ItemWeaponSMG::InstanceWeaponSMGUse(SVGBaseEntity* user, SVGBaseItem* item) { 
+    // Acquire player entity pointer.
+    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(user, true, true);
+
+    // Sanity check.
+    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+        gi.DPrintf("Warning: InstanceWeaponSMGUse called without a valid SVGBasePlayer pointer.\n");
+        return;
+    }
+
+    // Save to cast now.
+    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
+
     // Check if the caller is a player.
-    if (!user || !user->GetClient() || !user->IsSubclassOf<SVGBasePlayer>()) {
+    /*if (!user || !user->GetClient() || !user->IsSubclassOf<SVGBasePlayer>()) {
         return;
-    }
+    }*/
 
-    // Check if the activator is a valid weapon.
-    if (!item->IsClass<ItemWeaponSMG>()) {
-        return;
-    }
-
-    // Cast to player.
-    SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(user);
-    // Cast to weapon.
-    ItemWeaponSMG* smgItem = dynamic_cast<ItemWeaponSMG*>(item);
-    // Get its identifier.
-    uint32_t smgItemID = smgItem->GetIdentifier();
-    // Get client.
-    ServerClient* client = player->GetClient();
-
-    // Set the client's new weapon before calling upon change weapon.
-    client->newWeapon = smgItem;
-
-    // Set state to holster if active weapon, otherwise to draw.
-    if (client->persistent.inventory.activeWeaponID) {
-	    client->weaponState.queuedState = WeaponState::Holster;
-    } else {
-	    client->weaponState.queuedState = WeaponState::Draw;
-    }
-
-    //SVG_ChangeWeapon(player);
-
-    // Is the client already having an active weapon? Queue up a holster state.
-    //if (client->persistent.activeWeapon) {
-    //    client->weaponState.queuedState = WeaponState::Holster;
-    //// Otherwise, queue up a draw weapon state.
-    //} else {
-    //    client->weaponState.queuedState = WeaponState::Draw;
+    //// Check if the activator is a valid weapon.
+    //if (!item->IsClass<ItemWeaponSMG>()) {
+    //    return;
     //}
+
+    //// Cast to player.
+    //SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(user);
+    //// Cast to weapon.
+    //ItemWeaponSMG* smgItem = dynamic_cast<ItemWeaponSMG*>(item);
+    //// Get its identifier.
+    //uint32_t smgItemID = smgItem->GetIdentifier();
+    //// Get client.
+    //ServerClient* client = player->GetClient();
+
+    //// Set the client's new weapon before calling upon change weapon.
+    //client->newWeapon = smgItem;
+
+    //// Set state to holster if active weapon, otherwise to draw.
+    //if (client->persistent.inventory.activeWeaponID) {
+	   // client->weaponState.queuedState = WeaponState::Holster;
+    //} else {
+	   // client->weaponState.queuedState = WeaponState::Draw;
+    //}
+
+    ////SVG_ChangeWeapon(player);
+
+    //// Is the client already having an active weapon? Queue up a holster state.
+    ////if (client->persistent.activeWeapon) {
+    ////    client->weaponState.queuedState = WeaponState::Holster;
+    ////// Otherwise, queue up a draw weapon state.
+    ////} else {
+    ////    client->weaponState.queuedState = WeaponState::Draw;
+    ////}
 }

@@ -55,7 +55,6 @@ GameLocals game;
 LevelLocals level;
 ServerGameImports gi;       // CLEANUP: These were game_import_t and game_export_t
 ServerGameExports globals;  // CLEANUP: These were game_import_t and game_export_t
-TemporarySpawnFields st;
 
 int sm_meat_index;
 int snd_fry;
@@ -365,12 +364,16 @@ void SVG_ClientEndServerFrames(void)
         // Now, let's go wild. (Purposely, do not assume the pointer is a SVGBasePlayer.)
         Entity *entity = &serverEntities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
-        // Acquire player client entity.
-	    SVGBasePlayer* player = gameworld->GetPlayerClassEntity(entity);
+        // Acquire player entity pointer.
+        SVGBaseEntity *validEntity = Gameworld::ValidateEntity(entity, true, true);
 
-        // If it is invalid, continue to the next iteration.
-        if (!player)
+        // Sanity check.
+        if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
             continue;
+        }
+
+        // Save to cast now.
+        SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
 
         // Acquire server client.
         ServerClient *client = player->GetClient();
