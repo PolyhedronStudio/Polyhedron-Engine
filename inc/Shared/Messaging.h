@@ -176,7 +176,7 @@ struct PlayerState {
     int     gunIndex = 0;
 
     //! Server start time of current animation.
-    int32_t     gunAnimationStartTime = 0;
+    uint32_t     gunAnimationStartTime = 0;
     //! Animation Start Frame
     uint16_t    gunAnimationStartFrame = 1;
     //! Animation End Frame

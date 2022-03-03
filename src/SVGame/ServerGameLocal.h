@@ -344,10 +344,12 @@ typedef struct gitem_s {
 //-------------------
 struct LevelLocals  {
     // Current local level frame number.
-    int32_t frameNumber;
+    int32_t frameNumber = 0;
 
-    // Current local level time.
-    float time;
+    //! Current sum of total frame time taken.
+    float time = 0.f;
+    //! Same as time, but multiplied by a 1000 to get a proper integer.
+    uint32_t timeStamp = 0;
 
     char levelName[MAX_QPATH];  // The descriptive name (Outer Base, etc)
     char mapName[MAX_QPATH];    // The server name (base1, etc)
@@ -858,11 +860,14 @@ struct gclient_s {
         //! Queued weapon state to switch to after finishing the current state.
         int32_t queuedState = -1;
 
-        // Animation start frame.
-        float startFrame = 0.f;
+        //! Current frame the weapon animation(if any) is residing in. -1 if finished/none.
+        int32_t currentAnimationFrame = 0;
 
-            // Animation end frame.
-        float endFrame = 0.f;
+        //// Animation start frame.
+        //float startFrame = 0.f;
+
+        //    // Animation end frame.
+        //float endFrame = 0.f;
     } weaponState;
 
     //! Pointer to the new weapon the client wishes to switch to.

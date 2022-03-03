@@ -191,7 +191,7 @@ void ItemWeaponBeretta::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWea
     static constexpr uint32_t idleStartFrame = 187;
     static constexpr uint32_t idleEndFrame = 210;
 
-    client->playerState.gunAnimationFrametime = 20.f;
+    client->playerState.gunAnimationFrametime = 1.f / BASE_1_FRAMETIME;
     client->playerState.gunAnimationStartFrame = idleStartFrame;
     client->playerState.gunAnimationEndFrame = idleEndFrame;
     client->playerState.gunAnimationLoopCount = 0;
@@ -212,7 +212,7 @@ void ItemWeaponBeretta::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWea
     );
 
     // If the animation has ended...
-    if ( weaponFrame == -1) {
+    if (weaponFrame < 0)  {
         InstanceWeaponQueueNextState(player, client, WeaponState::Idle);
     }
 }
@@ -225,7 +225,7 @@ void ItemWeaponBeretta::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWea
     static constexpr uint32_t drawStartFrame = 151;
     static constexpr uint32_t drawEndFrame = 186;
 
-    client->playerState.gunAnimationFrametime = 20.f;
+    client->playerState.gunAnimationFrametime = 1.f / BASE_1_FRAMETIME; 20.f;
     client->playerState.gunAnimationStartFrame = drawStartFrame;
     client->playerState.gunAnimationEndFrame = drawEndFrame;
     client->playerState.gunAnimationLoopCount = 1;
@@ -247,7 +247,7 @@ void ItemWeaponBeretta::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWea
     );
 
     // If the animation has ended...
-    if ( weaponFrame == -1) {
+    if (weaponFrame < 0) {
         InstanceWeaponQueueNextState(player, client, WeaponState::Idle);
     }
 }
@@ -260,7 +260,7 @@ void ItemWeaponBeretta::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItem
     static constexpr uint32_t holsterStartFrame = 140;
     static constexpr uint32_t holsterEndFrame = 150;
 
-    client->playerState.gunAnimationFrametime = 20.f;
+    client->playerState.gunAnimationFrametime = 1.f / BASE_1_FRAMETIME;
     client->playerState.gunAnimationStartFrame = holsterStartFrame;
     client->playerState.gunAnimationEndFrame = holsterEndFrame;
     client->playerState.gunAnimationLoopCount = 1;
@@ -281,7 +281,7 @@ void ItemWeaponBeretta::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItem
     );
 
     // If the animation has ended...
-    if ( weaponFrame == -1) {
+    if (weaponFrame < 0) {
         InstanceWeaponQueueNextState(player, client, WeaponState::Down);
     }
 }

@@ -96,23 +96,36 @@ public:
     /**
     *   @brief  The mother of all instance weapon callbacks. Calls upon the others depending on state.
     **/
-    virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) override;
-
+    void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) final;
+    /**
+    * @brief   A callback which can be implemented by weapons in order to fire code one time
+    *          when the weapon has switched to a new state. 
+    * 
+    *          (Mainly used for setting animations, but can be used for anything really.)
+    * 
+    * @param newState The current new state that the weapon resides in.
+    * @param oldState Old previous state the weapon was residing in.
+    **/
+    void InstanceWeaponOnSwitchState(SVGBasePlayer *player, ServerClient *client,int32_t newState, int32_t oldState) final;
+    /**
+    *   @brief Called when an animation has finished. Usually used to then switch states.
+    **/
+    void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) final;
 
     /**
     *   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
     **/
-    virtual void InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    void InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
     /**
     *   @brief  Draw weapon callback.
     **/
-    virtual void InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    void InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
     /**
     *   @brief  Holster weapon callback.
     **/
-    virtual void InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    void InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
 
     /**

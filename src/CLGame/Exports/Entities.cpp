@@ -330,9 +330,9 @@ void ClientGameEntities::AddPacketEntities() {
         // Moved into the if statement's else case up above.
         renderEntity.oldframe = clientEntity->prev.animationFrame;
         renderEntity.backlerp = 1.0 - SG_FrameForTime(&renderEntity.frame,
-            cl->time,  // Current Time.
+            cl->serverTime,  // Current Time.
             clientEntity->current.animationStartTime,         // Animation Start time.
-            clientEntity->current.animationFramerate,  // Current frame time.
+            20.f,//clientEntity->current.animationFramerate,  // Current frame time.
             clientEntity->current.animationStartFrame,  // Start frame.
             clientEntity->current.animationEndFrame,  // End frame.
             0,             // Loop count.
@@ -697,12 +697,12 @@ void ClientGameEntities::AddViewEntities() {
         CLGTrace trace = CLG_Trace(gun_real_pos, mins, maxs, gun_tip, 0, CONTENTS_MASK_PLAYERSOLID); 
 
         // In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
-        //if (trace.fraction != 1.0f || trace.ent != nullptr)
-        //{
+        if (trace.fraction != 1.0f || trace.ent != nullptr)
+        {
             gunRenderEntity.origin = vec3_fmaf(trace.endPosition, -gun_length, view_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_right, right_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_up, up_dir);
-//        }
+        }
     }
 
     // Do not lerp the origin at all.
@@ -716,16 +716,18 @@ void ClientGameEntities::AddViewEntities() {
         // Moved into the if statement's else case up above.
         gunRenderEntity.oldframe = gunRenderEntity.frame;
         gunRenderEntity.backlerp = 1.0 - SG_FrameForTime(&gunRenderEntity.frame,
-            cl->time,  // Current Time.
-            currentPlayerState->gunAnimationStartTime,         // Animation Start time.
+            cl->serverTime, // Current Time.
+            currentPlayerState->gunAnimationStartTime,  // Animation Start time.
             currentPlayerState->gunAnimationFrametime,  // Current frame time.
-            currentPlayerState->gunAnimationStartFrame,  // Start frame.
-            currentPlayerState->gunAnimationEndFrame,  // End frame.
-            currentPlayerState->gunAnimationLoopCount,             // Loop count.
+            currentPlayerState->gunAnimationStartFrame, // Start frame.
+            currentPlayerState->gunAnimationEndFrame,   // End frame.
+            currentPlayerState->gunAnimationLoopCount,  // Loop count.
             currentPlayerState->gunAnimationForceLoop
         );
+
+        // Don't allow it to go below 0, instead set it to old frame.
         if (gunRenderEntity.frame < 0) {
-            gunRenderEntity.frame = 0;
+            gunRenderEntity.frame = gunRenderEntity.oldframe;
         }
         //gunRenderEntity.frame = tionFrame = renderEntity.frame;
         //gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;
