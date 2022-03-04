@@ -62,6 +62,7 @@ public:
     virtual void ClientDisconnect(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
     virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
+    virtual void ClientThink(SVGBasePlayer *player, ServerClient *client, ClientMoveCommand *moveCommand) override;
 
     /***
     * Client Related Functions.
@@ -93,6 +94,11 @@ public:
     virtual void RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) override;
 
 protected:
+    /**
+    *   @brief  Sets a client's button, oldButton, and latched button bits.
+    **/
+    virtual void SetClientButtonBits(ServerClient *client, ClientMoveCommand *moveCommand);
+
     /**
     *   @brief  Sets client into intermission mode by setting movetype to freeze
     *           and positioning the client at the intermission point.

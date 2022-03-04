@@ -31,10 +31,8 @@
 
 //! Constructor/Deconstructor.
 ItemWeaponSMG::ItemWeaponSMG(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
-    : Base(svEntity, displayString, identifier) { 
-}
-ItemWeaponSMG::~ItemWeaponSMG() { 
-}
+    : Base(svEntity, displayString, identifier) { }
+ItemWeaponSMG::~ItemWeaponSMG() { }
 
 
 /**
@@ -161,85 +159,107 @@ void ItemWeaponSMG::InstanceSpawn() {
 *   @brief  The mother of all instance weapon callbacks. Calls upon the others depending on state.
 **/
 void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Ensure it is of type ItemWeaponSMG
+    if (!weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
+        return;
+    }
+
+    // Cast it.
+    ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
+
+    // Call base InstanceWeaponThink, this will check whether we have newWeapon set and engage a switch.
+    Base::InstanceWeaponThink(player, weaponSMG, client);
 
     // Switch based on weapon state.
     switch (client->weaponState.currentState) { 
         case WeaponState::Idle:
-            //gi.DPrintf("SMG WeaponState: Idle   startTimestamp=%i   levelTime=%i    startFrame=%i  endFrame=%i\n", client->playerState.gunAnimationStartTime, level.timeStamp, client->playerState.gunAnimationStartFrame, client->playerState.gunAnimationEndFrame);
-            InstanceWeaponIdle(player, weapon, client);
+            weaponSMG->InstanceWeaponIdle(player, weaponSMG, client);
         break;
         case WeaponState::Draw:
-            //gi.DPrintf("SMG WeaponState: Draw   startTimestamp=%i   levelTime=%i    startFrame=%i   endFrame=%i\n", client->playerState.gunAnimationStartTime, level.timeStamp, client->playerState.gunAnimationStartFrame, client->playerState.gunAnimationEndFrame);
-            InstanceWeaponDraw(player, weapon, client);
+            weaponSMG->InstanceWeaponDraw(player, weaponSMG, client);
         break;
         case WeaponState::Holster:
-            //gi.DPrintf("SMG WeaponState: Holster    startTimestamp=%i   levelTime=%i    startFrame=%i   endFrame=%i\n", client->playerState.gunAnimationStartTime, level.timeStamp, client->playerState.gunAnimationStartFrame, client->playerState.gunAnimationEndFrame);
-            InstanceWeaponHolster(player, weapon, client);
+            weaponSMG->InstanceWeaponHolster(player, weaponSMG, client);
         break;
         case WeaponState::Reload:
-            //gi.DPrintf("SMG WeaponState: Reload     startTimestamp=%i   levelTime=%i    startFrame=%i   endFrame=%i\n", client->playerState.gunAnimationStartTime, level.timeStamp, client->playerState.gunAnimationStartFrame, client->playerState.gunAnimationEndFrame);
-            //InstanceWeaponReload(player, weapon, client);
+            //weapon->InstanceWeaponReload(player, weapon, client);
         break;
         case WeaponState::PrimaryFire:
-            //gi.DPrintf("SMG WeaponState: PrimaryFire    startTimestamp=%i   levelTime=%i    startFrame=%i   endFrame=%i\n", client->playerState.gunAnimationStartTime, level.timeStamp, client->playerState.gunAnimationStartFrame, client->playerState.gunAnimationEndFrame);
-            //InstanceWeaponPrimaryFire(player, weapon, client);
+            //weapon->InstanceWeaponPrimaryFire(player, weapon, client);
         break;
         case WeaponState::SecondaryFire:
-            //gi.DPrintf("SMG WeaponState: SecondaryFire  startTimestamp=%i   levelTime=%i    startFrame=%i   endFrame=%i\n", client->playerState.gunAnimationStartTime, level.timeStamp, client->playerState.gunAnimationStartFrame, client->playerState.gunAnimationEndFrame);
-            //InstanceWeaponSecondaryFire(player, weapon, client);
+            //weapon->InstanceWeaponSecondaryFire(player, weapon, client);
         break;
         default:
-            // Do an idle anyway.
- //           InstanceWeaponIdle(player, weapon, client);
+ //           weapon->InstanceWeaponIdle(player, weapon, client);
         break;
     }
 
-    // Call base InstanceWeaponThink, this will check whether we have newWeapon set and engage a switch.
-    Base::InstanceWeaponThink(player, weapon, client);
 }
 
 /**
 *   @brief  Callback used when an instance weapon is switching state.
 **/
-void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, ServerClient *client, int32_t newState, int32_t oldState) {
+void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon *weapon, ServerClient *client, int32_t newState, int32_t oldState) {
+    // Ensure it is of type ItemWeaponSMG
+    if (!weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
+        return;
+    }
+
+    // Cast it.
+    ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
+
     // Revert time to uint32_t.
     uint32_t startTime = level.timeStamp;
 
     // Set animations here.
     switch (newState) {
     case WeaponState::Draw:
-            InstanceWeaponSetAnimation(player, client, startTime, 110, 142, 0, false, 1.f / BASE_1_FRAMETIME);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 110, 142);
         break;
     case WeaponState::Holster:
-            InstanceWeaponSetAnimation(player, client, startTime, 104, 112, 0, false, 1.f / BASE_1_FRAMETIME);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
         break;
     case WeaponState::Idle:
-            InstanceWeaponSetAnimation(player, client, startTime, 141, 172, 0, false, 1.f / BASE_1_FRAMETIME);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 141, 172);
         break;
     default:
         break;
     }
 }
 
+/**
+*   @brief Called when an animation has finished. Usually used to then switch states.
+**/
 void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    //// Set animations here.
+    // Ensure it is of type ItemWeaponSMG
+    if (!weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
+        return;
+    }
+
+    // Cast it.
+    ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
+
+    // Set animations here.
     switch (client->weaponState.currentState) {
     case WeaponState::Draw:
-        InstanceWeaponQueueNextState(player, client, WeaponState::Idle);
+        weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
         gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     case WeaponState::Holster:
-        InstanceWeaponQueueNextState(player, client, WeaponState::Down);
-        gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+        weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Down);
+        gi.DPrintf("WeaponState::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     case WeaponState::Idle:
-        if (client->weaponState.queuedState == -1) {
-            InstanceWeaponQueueNextState(player, client, WeaponState::Idle);
+        if (client->weaponState.currentState == -1) {
+            weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
         }
-        gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+        gi.DPrintf("WeaponState::Idle(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     default:
-        InstanceWeaponQueueNextState(player, client, -1);
+        if (client->weaponState.currentState == -1) {
+            weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
+        }
         gi.DPrintf("WeaponState::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     }

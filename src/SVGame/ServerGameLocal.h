@@ -862,12 +862,6 @@ struct gclient_s {
 
         //! Current frame the weapon animation(if any) is residing in. -1 if finished/none.
         int32_t currentAnimationFrame = 0;
-
-        //// Animation start frame.
-        //float startFrame = 0.f;
-
-        //    // Animation end frame.
-        //float endFrame = 0.f;
     } weaponState;
 
     //! Pointer to the new weapon the client wishes to switch to.

@@ -94,6 +94,14 @@ public:
     virtual void ClientEndServerFrame(SVGBasePlayer* player, ServerClient* client) = 0;
 
     /**
+    *
+    *   @brief  Called for each player to give them a chance to process player movement,
+    *           catch other user input to act on, check intermission state and let the
+    *           weapon logic think.
+    **/
+    virtual void ClientThink(SVGBasePlayer *player, ServerClient *client, ClientMoveCommand *moveCommand) = 0;
+
+    /**
     *   @brief  Called when a client disconnects.This does not get called between
     *           load games.
     **/

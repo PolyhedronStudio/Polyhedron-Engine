@@ -115,6 +115,8 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
 
     // Select the clients spawn point.
     SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
+    player->SetOrigin(spawnOrigin);
+    player->SetAngles(spawnAngles);
 
     // Acquire the new client index belonging to this entity.
     int32_t clientIndex = player->GetNumber() - 1;  //ent - g_entities - 1;
@@ -315,10 +317,11 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerCli
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
-    if (!client->respawn.isSpectator)  //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
+    if (!client->respawn.isSpectator) { //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
         player->WeaponThink();
-    else
+    } else {
         client->weaponState.shouldThink = false;
+    }
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.

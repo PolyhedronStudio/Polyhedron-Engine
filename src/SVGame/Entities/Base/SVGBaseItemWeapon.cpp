@@ -125,20 +125,17 @@ void SVGBaseItemWeapon::SetRespawn(const float delay) {
 ***/
 void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     //// Huuueeeee
-    if (!player || !client) {
+    if (!player || !weapon || !client) {
         return;
     }
-
+    
     /**
     *   Pre-Animation and State logic.
     **/
     if (client->weaponState.currentAnimationFrame < 0) {
         // Call upon Animation Finished callback.
-        InstanceWeaponOnAnimationFinished(player, weapon, client);
-        
-        // Set it back to 0 to prevent it from repeating the animation finished callback.
-        client->weaponState.currentAnimationFrame = 0;
-        //return;
+        weapon->InstanceWeaponOnAnimationFinished(player, weapon, client);
+        return;
     }
 
     /**
@@ -150,12 +147,13 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         client->weaponState.stateTimestamp = level.timeStamp;
 
         // Make the queued weapon state our active one. NOTE: SetCurrentState also calls upon OnSwitchState.
-        InstanceWeaponSetCurrentState(player, client, client->weaponState.queuedState);
+        weapon->InstanceWeaponSetCurrentState(player, weapon, client, client->weaponState.queuedState);
 
 	    // Reset it to -1.
         client->weaponState.queuedState = -1;
         
         gi.DPrintf("WeaponState switched to: %i at timestamp: %i\n", client->weaponState.currentState, client->weaponState.stateTimestamp);
+        //return;
     }
 
     /**
@@ -173,26 +171,29 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 }
 
 /**
-* @brief   A callback which can be implemented by weapons in order to fire code one time
-*          when the weapon has switched to a new state. 
+* @brief    A callback which can be implemented by weapons in order to set up and
+*           prepare for the next state.
 * 
-*          (Mainly used for setting animations, but can be used for anything really.)
+*           (Mainly used for setting animations, but can be used for anything really.)
 * 
 * @param newState The current new state that the weapon resides in.
 * @param oldState Old previous state the weapon was residing in.
 **/
-void SVGBaseItemWeapon::InstanceWeaponOnSwitchState(SVGBasePlayer *player, ServerClient *client, int32_t newState, int32_t oldState) {}
+void SVGBaseItemWeapon::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, int32_t newState, int32_t oldState) {}
 
 void SVGBaseItemWeapon::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {}
 /**
 * @brief    Sets the weapon's animation properties.
 * @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
 **/
-void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, ServerClient *client, uint32_t startTime, uint16_t startFrame, uint16_t endFrame, uint32_t loopCount, qboolean forceLoop, float frameTime) {
+void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, uint32_t startTime, uint16_t startFrame, uint16_t endFrame, uint32_t loopCount, qboolean forceLoop, float frameTime) {
     // Sanity.
-    if (!client) {
+    if (!player || !weapon || !client) {
         return;
     }
+
+    // Reset current animation frame to startFrame
+    client->weaponState.currentAnimationFrame   = 0;
 
     // Time properties.
     client->playerState.gunAnimationStartTime   = startTime;
@@ -210,7 +211,7 @@ void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, Server
 /**
 *   @brief  Instantly sets the current state.
 **/
-void SVGBaseItemWeapon::InstanceWeaponSetCurrentState(SVGBasePlayer *player, ServerClient* client, int32_t state) {
+void SVGBaseItemWeapon::InstanceWeaponSetCurrentState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient* client, int32_t state) {
     if (!player || !client) {
         return;
     }
@@ -218,20 +219,23 @@ void SVGBaseItemWeapon::InstanceWeaponSetCurrentState(SVGBasePlayer *player, Ser
     // Store old current state so we can use it for our call to OnSwitchState.
     int32_t oldWeaponState = client->weaponState.currentState;
 
-    // Assign new state.
-    client->weaponState.currentState = state;
-
     // Only call on switch state in case the state isn't identical to old state.
-    if (oldWeaponState != state) {
-        InstanceWeaponOnSwitchState(player, client, state, oldWeaponState);
-    }
+ //   if (client->weaponState.currentState != state) {
+        // Assign new state.
+        client->weaponState.currentState = state;
+
+        // Call switch state.
+        weapon->InstanceWeaponOnSwitchState(player, weapon, client, state, oldWeaponState);
+ //   } else {
+        // ??
+ //   }
 }
 
 /** 
 *   @brief  Queues a state and sets it as the next current state when the state currently processing has finished.
 **/
-void SVGBaseItemWeapon::InstanceWeaponQueueNextState(SVGBasePlayer *player, ServerClient* client, int32_t state) {
-    if (!player || !client) {
+void SVGBaseItemWeapon::InstanceWeaponQueueNextState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient* client, int32_t state) {
+    if (!player || !weapon || !client) {
         return;
     }
     client->weaponState.queuedState = state;

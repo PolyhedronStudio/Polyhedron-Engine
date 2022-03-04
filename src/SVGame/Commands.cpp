@@ -403,8 +403,6 @@ void Cmd_Use_f(SVGBasePlayer *player, ServerClient *client) {
 
     // Call the UseItem callback that this instance item has.
     itemInstance->UseInstance(player, itemInstance);
-
-    //it->Use(ent, it);
 }
 
 

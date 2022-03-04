@@ -11,6 +11,10 @@
 #include "../Entities.h"    // Entities.
 #include "../Utilities.h"       // Util funcs.
 
+// Shared Game.
+#include "SharedGame/SharedGame.h" // Include SG Base.
+#include "SharedGame/PMove.h"   // Include SG PMove.
+
 // Server Game Base Entity.
 #include "../Entities/Base/BodyCorpse.h"
 #include "../Entities/Base/SVGBasePlayer.h"
@@ -680,10 +684,11 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
-    if (!client->respawn.isSpectator)  //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
+    if (!client->respawn.isSpectator) { //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
         player->WeaponThink();
-    else
+    } else {
         client->weaponState.shouldThink = false;
+    }
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.
@@ -763,18 +768,18 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     // Set model angles from view angles so other things in
     // the world can tell which direction you are looking
     //
-    vec3_t newPlayerAngles = serverEntity->state.angles;
+    vec3_t newAngles = player->GetAngles();
 
     if (client->aimAngles[vec3_t::Pitch] > 180)
-        newPlayerAngles[vec3_t::Pitch] = (-360 + client->aimAngles[vec3_t::Pitch]) / 3;
+        newAngles[vec3_t::Pitch] = (-360 + client->aimAngles[vec3_t::Pitch]) / 3;
     else
-        newPlayerAngles[vec3_t::Pitch] = client->aimAngles[vec3_t::Pitch] / 3;
-    newPlayerAngles[vec3_t::Yaw] = client->aimAngles[vec3_t::Yaw];
-    newPlayerAngles[vec3_t::Roll] = 0;
-    newPlayerAngles[vec3_t::Roll] = player->CalculateRoll(newPlayerAngles, player->GetVelocity()) * 4;
+        newAngles[vec3_t::Pitch] = client->aimAngles[vec3_t::Pitch] / 3;
+    newAngles[vec3_t::Yaw] = client->aimAngles[vec3_t::Yaw];
+    newAngles[vec3_t::Roll] = 0;
+    newAngles[vec3_t::Roll] = player->CalculateRoll(newAngles, player->GetVelocity()) * 4;
 
     // Last but not least, after having calculated the Pitch, Yaw, and Roll, set the new angles.
-    player->SetAngles(newPlayerAngles);
+    player->SetAngles(newAngles);
 
     //
     // Calculate the player its X Y axis' speed and calculate the cycle for
@@ -866,6 +871,221 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     }
 }
 
+// TODO: Obvious to see what to do here lol.
+//
+// Create a static PM_Trace in Gameworld perhaps?
+static SVGBasePlayer* pm_passent;
+
+// pmove doesn't need to know about passent and contentmask
+trace_t q_gameabi PM_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
+{
+    if (pm_passent && pm_passent->GetHealth() > 0) {
+        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), CONTENTS_MASK_PLAYERSOLID);
+    } else {
+        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), CONTENTS_MASK_DEADSOLID);
+    }
+}
+void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, ClientMoveCommand* moveCommand) {
+    // Store the current entity to be run from SVG_RunFrame.
+    level.currentEntity = player;
+
+    // Set move type to freeze in case intermission has a waiting time set on it.
+    if (level.intermission.time) {
+        player->SetPlayerMoveType(EnginePlayerMoveType::Freeze);
+        
+        // Can exit intermission after five seconds
+        if (level.time > level.intermission.time + 5.0 && (moveCommand->input.buttons & ButtonBits::Any)) {
+            level.intermission.exitIntermission = true;
+        }
+    }
+
+    // Special behavior for view angles in case of chasing a client.
+    if (client->chaseTarget) {
+        client->respawn.commandViewAngles = moveCommand->input.viewAngles;
+    } else {
+        // When our model index isn't 255 (player model), we are gibbed.
+        if (player->GetModelIndex() != 255) {
+            player->SetPlayerMoveType(EnginePlayerMoveType::Gib);
+        // Ensure movetype changes to Dead if we got a DeadFlag set.
+        } else if (player->GetDeadFlag()) {
+            player->SetPlayerMoveType(EnginePlayerMoveType::Dead);
+        } else {
+            uint32_t moveType = player->GetMoveType();
+
+            // Check entity move types, and set player move type based on that.
+            switch (moveType) {
+            case MoveType::NoClip:
+                player->SetPlayerMoveType(PlayerMoveType::Noclip);
+                break;
+            case MoveType::Spectator:
+                player->SetPlayerMoveType(PlayerMoveType::Spectator);
+                break;
+            default:
+                player->SetPlayerMoveType(PlayerMoveType::Normal);
+                break;
+            }
+        }
+
+        // Store pass entity.
+        pm_passent = player;
+
+        // Update player move's gravity state.
+        client->playerState.pmove.gravity = sv_gravity->value;
+
+        // Copy over the pmove state from the latest player state.
+        PlayerMove pm       = {};
+        pm.moveCommand      = *moveCommand;
+        pm.groundEntityPtr  = player->GetGroundEntity().Get();
+        pm.state            = client->playerState.pmove;
+        pm.state.origin     = player->GetOrigin();
+        pm.state.velocity   = player->GetVelocity();
+        
+        // Set trace callbacks.
+        pm.Trace            = PM_Trace;
+        pm.PointContents    = gi.PointContents;
+
+        // Simulate player movement for the current frame.
+        PMove(&pm);
+
+        // Store results back into the client's player state.
+        client->playerState.pmove = pm.state;
+
+        // Update entity properties based on results of the player move simulation.
+        player->SetOrigin(pm.state.origin);
+        player->SetVelocity(pm.state.velocity);
+        player->SetMins(pm.mins);
+        player->SetMaxs(pm.maxs);
+        player->SetViewHeight(pm.state.viewOffset[2]);
+        player->SetWaterLevel(pm.waterLevel);
+        player->SetWaterType(pm.waterType);
+
+        // Check for jumping sound.
+        if (player->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+            SVG_Sound(player, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
+            SVG_PlayerNoise(player, player->GetOrigin(), PNOISE_SELF);
+        }
+        
+        // Use an entity handle to validate and store the new ground entity after pmove.
+        SVGEntityHandle groundEntityHandle = pm.groundEntityPtr;
+        if (*groundEntityHandle && groundEntityHandle.Get()) {
+            player->SetGroundEntity(*groundEntityHandle);
+            player->SetGroundEntityLinkCount(groundEntityHandle->GetLinkCount());
+        } else {
+            player->SetGroundEntity(nullptr);
+        }
+
+        // Copy over the user command angles so they are stored for respawns.
+        // (Used when going into a new map etc.)
+        client->respawn.commandViewAngles[0] = moveCommand->input.viewAngles[0];
+        client->respawn.commandViewAngles[1] = moveCommand->input.viewAngles[1];
+        client->respawn.commandViewAngles[2] = moveCommand->input.viewAngles[2];
+
+        // Special treatment for angles in case we are dead. Target the killer entity yaw angle.
+        if (player->GetDeadFlag() != DEAD_NO) {
+            client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
+            client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
+            client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
+        } else {
+            // Otherwise, store the resulting view angles accordingly.
+            client->aimAngles = pm.viewAngles;
+            client->playerState.pmove.viewAngles = pm.viewAngles;
+        }
+
+        // Link player entity back in for collision testing.
+        player->LinkEntity();
+
+        // Get player move type.
+        int32_t playerMoveType = player->GetMoveType();
+
+        // Execute touch callbacks as long as movetype isn't noclip, or spectator.
+        if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
+            // Trigger touch logic. 
+            UTIL_TouchTriggers(player);
+
+            // Solid touch logic.
+            int32_t i = 0;
+            int32_t j = 0;
+            
+            for (i = 0 ; i < pm.numTouchedEntities; i++) {
+                for (j = 0 ; j < i ; j++) {
+                    if (pm.touchedEntities[j] == pm.touchedEntities[i]) {
+                        break;
+                    }
+                }
+                if (j != i) {
+                    continue;   // duplicated
+                }
+
+                SVGEntityHandle other(pm.touchedEntities[i]);
+                if (!other || !*other) {
+                    continue;
+                }
+
+                other->Touch(*other, player, NULL, NULL);
+            }
+
+        }
+    }
+
+    // Update client button bits.
+    SetClientButtonBits(client, moveCommand);
+
+    // save light level the player is standing on for
+    // monster sighting AI
+    //ent->lightLevel = moveCommand->input.lightLevel;
+
+    // Fire weapon from final position if needed
+    if (client->latchedButtons & ButtonBits::Attack) {
+        if (client->respawn.isSpectator) {
+
+            client->latchedButtons = 0;
+
+            if (client->chaseTarget) {
+                client->chaseTarget = NULL;
+                client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
+            } else {
+//                SVG_GetChaseTarget(player);
+            }
+
+        } else {// if (!client->weaponState.shouldThink) {
+            //client->weaponState.shouldThink = true;
+            //player->WeaponThink();
+        }
+    } else {
+	    if (!client->respawn.isSpectator) {
+	        //player->WeaponThink();
+	    }
+    }
+
+    // Act on the jump key(which sets upMove), used to change spectator targets.
+    if (client->respawn.isSpectator) {
+        if (moveCommand->input.upMove >= 10) {
+            // When jump isn't held yet in the player move flags..
+            if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
+                // We add the jump held bit.
+                client->playerState.pmove.flags |= PMF_JUMP_HELD;
+
+                // So we can change chase target.
+                if (client->chaseTarget) {
+    //                SVG_ChaseNext(player);
+                } else {
+  //                  SVG_GetChaseTarget(player);
+                }
+            }
+        } else {
+            // Undo jump button after having let go of the jump key..
+            client->playerState.pmove.flags &= ~PMF_JUMP_HELD;
+        }
+    }
+
+    // update chase cam if being followed
+    //for (int i = 1; i <= maximumclients->value; i++) {
+    //    other = game.world->GetServerEntities() + i;
+    //    if (other->inUse && other->client->chaseTarget == serverEntity)
+    //        SVG_UpdateChaseCam(playerEntity);
+    //}
+}
+
 //===============
 // DefaultGamemode::ClientConnect
 // 
@@ -910,8 +1130,9 @@ qboolean DefaultGamemode::ClientConnect(Entity* svEntity, char *userinfo) {
     ClientUserinfoChanged(svEntity, userinfo);
 
     // This is default behaviour for this function.
-    if (game.GetMaxClients() > 1)
+    if (game.GetMaxClients() > 1) {
         gi.DPrintf("%s connected\n", svEntity->client->persistent.netname);
+    }
 
     // Make sure we start with clean serverFlags.
     svEntity->serverFlags = 0;
@@ -935,21 +1156,6 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
         gi.DPrintf("ClientBegin executed with invalid (nullptr) serverEntity->client");
         return;
     }
-
-    //if (serverEntity->client) {
-    //    int32_t entityIndex = serverEntity - g_entities;
-    //    int32_t stateNumber = serverEntity->state.number;
-
-    //    if (serverEntity == g_entities) {
-    //        gi.DPrintf("serverEntity == g_entities!!!\n");
-    //    }
-    //    gi.DPrintf("ClientBegin - serverEntity#: %i has a client#: %i\n", serverEntity->state.number, serverEntity->client - game.clients);
-    //} else {
-    //    int32_t entityIndex = serverEntity - g_entities;
-    //    int32_t stateNumber = serverEntity->state.number;
-
-    //    gi.DPrintf("ClientBegin - serverEntity#: %i has no client.\n", serverEntity->state.number, serverEntity->client - game.clients);
-    //}
 
     // Fetch client.
     ServerClient* clients = game.GetClients();
@@ -1026,10 +1232,9 @@ void DefaultGamemode::ClientDisconnect(SVGBasePlayer* player, ServerClient *clie
 
     // Send effect
     if (player->IsInUse()) {
-        gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);//WriteByte(ServerGameCommand::MuzzleFlash);
-        //gi.WriteShort(ent - g_entities);
-        gi.MSG_WriteInt16(player->GetNumber());//WriteShort(player->GetNumber());
-        gi.MSG_WriteUint8(MuzzleFlashType::Logout);//WriteByte(MuzzleFlashType::Logout);
+        gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);
+        gi.MSG_WriteInt16(player->GetNumber());
+        gi.MSG_WriteUint8(MuzzleFlashType::Logout);
         gi.Multicast(player->GetOrigin(), Multicast::PVS);
     }
 
@@ -1316,8 +1521,7 @@ void DefaultGamemode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
 
         // Select random spawn point.
     	if (spawnVector.size() > 0) {
-	        uint32_t choice = RandomRangeui(0, spawnVector.size());
-		    spawnPoint = spawnVector[choice];
+		    spawnPoint = spawnVector[RandomRangeui(0, spawnVector.size())];
 	    }
     }
 
@@ -1351,6 +1555,8 @@ void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     vec3_t  spawnAngles = vec3_zero();
 
     SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
+    player->SetOrigin(spawnOrigin);
+    player->SetAngles(spawnAngles);
 
     // Acquire the new client index belonging to this entity.
     int32_t clientIndex = player->GetNumber() - 1; //ent - g_entities - 1;
@@ -1561,6 +1767,24 @@ void DefaultGamemode::RestorePlayerPersistentData(SVGBaseEntity* player, ServerC
     player->SetHealth(client->persistent.stats.health);
     player->SetMaxHealth(client->persistent.stats.maxHealth);
     player->SetFlags(player->GetFlags() | client->persistent.savedFlags);
+}
+
+/**
+*   @brief  Sets a client's button, oldButton, and latched button bits.
+**/
+void DefaultGamemode::SetClientButtonBits(ServerClient *client, ClientMoveCommand* moveCommand) {
+    if (!client || !moveCommand) {
+        return;
+    }
+
+    // Store the buttons that were still set as current frame buttons in the oldButtons.
+    client->oldButtons = client->buttons;
+
+    // Update current buttons with those acquired from the move command.
+    client->buttons = moveCommand->input.buttons;
+
+    // Figure out the latched buttons by bit fun. (latched buttons is used for single button press logic.)
+    client->latchedButtons |= client->buttons & ~client->oldButtons;
 }
 
 /**

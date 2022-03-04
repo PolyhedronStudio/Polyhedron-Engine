@@ -324,21 +324,21 @@ void SVGBasePlayer::WeaponThink() {
         return;
     }
 
-    // If the WeaponState is Down(Done holstering), or Finished(with shooting for example), we're allowed to change weapons.
-    int32_t currentState = client->weaponState.currentState;
-    
-    if (client->persistent.inventory.nextWeaponID && (currentState == WeaponState::Idle || 
-        currentState == WeaponState::Down || currentState == WeaponState::Finished))
-    {
-        ChangeWeapon(client->persistent.inventory.nextWeaponID);
-    }
-
     // Let the player's active weapon "think" for this frame.
     SVGBaseItemWeapon *activeWeapon = SVGBaseItemWeapon::GetWeaponInstanceByID(client->persistent.inventory.activeWeaponID);
 
-    if (activeWeapon) { // && client->weaponState.shouldThink) {
-	    activeWeapon->InstanceWeaponThink(this, activeWeapon, client);
+    if (client->persistent.inventory.nextWeaponID) {
+        ChangeWeapon(client->persistent.inventory.nextWeaponID);
+    } else {
+        if (activeWeapon) {//}&& client->weaponState.shouldThink) {
+	        activeWeapon->InstanceWeaponThink(this, activeWeapon, client);
+        }
     }
+
+    // If the WeaponState is Down(Done holstering), or Finished(with shooting for example), we're allowed to change weapons.
+    //if (client->persistent.inventory.nextWeaponID) {
+    //    ChangeWeapon(client->persistent.inventory.nextWeaponID);
+    //}
 }
 
 /**
@@ -526,21 +526,33 @@ SVGBaseItemWeapon* SVGBasePlayer::ChangeWeapon(uint32_t weaponIdentifier, qboole
     // Store the ID as our inventory's "nextWeaponID" regardless.
     client->persistent.inventory.nextWeaponID = weaponIdentifier;
 
-    // Ensure that the weapon actually has an existing instance.
-    SVGBaseItemWeapon *instanceWeapon = SVGBaseItemWeapon::GetWeaponInstanceByID(weaponIdentifier);
+    // Determine whether we can actually change weapons already.
+    int32_t currentState = client->weaponState.currentState;
+    
+    if (client->persistent.inventory.nextWeaponID
+        && client->persistent.inventory.nextWeaponID != client->persistent.inventory.activeWeaponID
+        && client->weaponState.currentAnimationFrame <= 0
+        &&
+        !(currentState == -1 || currentState == WeaponState::Idle || currentState == WeaponState::Down || currentState == WeaponState::Finished))
+    {
+        return nullptr;
+    }
 
-    if (!instanceWeapon) {
+    // Ensure that the weapon actually has an existing instance.
+    SVGBaseItemWeapon *weaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(weaponIdentifier);
+
+    if (!weaponInstance) {
         // Ensure client won't see model anymore.
         client->playerState.gunIndex = 0;
         // Ensure client won't see any ammo indexes on his/her hud.
         client->ammoIndex = 0;
         
-        // Change weapon state to being down.
+        //// Change weapon state to being down.
         client->weaponState.currentState = WeaponState::Down;
         client->weaponState.queuedState = -1;
 
-        // Unset skin number.
-        SetSkinNumber(0);
+        //// Unset skin number.
+        //SetSkinNumber(0);
 
         return nullptr;
     }
@@ -552,69 +564,35 @@ SVGBaseItemWeapon* SVGBasePlayer::ChangeWeapon(uint32_t weaponIdentifier, qboole
     // Zero out nextWeaponID.
     client->persistent.inventory.nextWeaponID = 0;
     
-
     // We got ourselves a valid instance, set view model accordingly.
-    //if (GetModelIndex() == 255) {
-    //    int32_t i = (instanceWeapon->GetViewModelIndex() & 0xff) << 8;
-    //    SetSkinNumber((GetNumber()  -  1) | i);
-    //}
-    //// Update the client's ammo index.
-    client->ammoIndex = instanceWeapon->GetPrimaryAmmoIdentifier();
+    if (GetModelIndex() == 255) {
+        int32_t i = (weaponInstance->GetViewModelIndex() & 0xff) << 8;
+        SetSkinNumber((GetNumber()  -  1) | i);
+    }
+
+    // Update the client's ammo index.
+    client->ammoIndex = weaponInstance->GetPrimaryAmmoIdentifier();
 
     // Set gun index to view model ID of this instance weapon.
-    client->playerState.gunIndex = instanceWeapon->GetViewModelIndex();
+    client->playerState.gunIndex = weaponInstance->GetViewModelIndex();
 
     // See what happens when we do this.
-    instanceWeapon->InstanceWeaponQueueNextState(this, client, WeaponState::Draw);
-
-    return instanceWeapon;
-    //// If the client is in idling mode with his gun, we can safely holster it.
-    //if (client->weaponState.currentState == WeaponState::Idle
-    //    && client->persistent.inventory.nextWeaponID != 0) {
-    //    // Queue holsterweapon state.
-    //    instanceWeapon->InstanceWeaponQueueNextState(this, client, WeaponState::Holster);
-    //    return nullptr;
+    weaponInstance->InstanceWeaponQueueNextState(this, weaponInstance, client, WeaponState::Draw);
+    //if (weaponInstance) {
+    //    weaponInstance->UseInstance(this, weaponInstance);
     //}
 
-    //// Are we ready to actually switch weapon yet, or should we keep it on the back burner?
-    //if (client->weaponState.currentState != WeaponState::Down 
-    //    && client->weaponState.currentState != WeaponState::Finished) {
-    //    return nullptr;
-    //}
+    // Set player animation. No clue why the OG code used Pain, but we'll have to live with it for now.
+    client->animation.priorityAnimation = PlayerAnimation::Pain;
+    if (client->playerState.pmove.flags & PMF_DUCKED) {
+        SetAnimationFrame(FRAME_crpain1);
+        client->animation.endFrame = FRAME_crpain4;
+    } else {
+        SetAnimationFrame(FRAME_pain301);
+        client->animation.endFrame = FRAME_pain304;
+    }
 
-    //// Store activeWeaponID in previousActiveWeaponID.
-    //client->persistent.inventory.previousActiveWeaponID = (storeLastWeapon ? client->persistent.inventory.activeWeaponID : 0);
-    //// Exchange activeWeaponID for nextWeaponID.
-    //client->persistent.inventory.activeWeaponID = client->persistent.inventory.nextWeaponID;
-    //// Zero out nextWeaponID.
-    //client->persistent.inventory.nextWeaponID = 0;
-    //    
-    //// Set visible model
-    //if (GetModelIndex() == 255) {
-    //    int32_t i = (instanceWeapon->GetViewModelIndex() & 0xff) << 8;
-    //    SetSkinNumber((GetNumber()  -  1) | i);
-    //}
-    //
-    //// Update the client's ammo index.
-    //client->ammoIndex = instanceWeapon->GetPrimaryAmmoIdentifier();
-
-    //// Set gun index to view model ID of this instance weapon.
-    //client->playerState.gunIndex = instanceWeapon->GetViewModelIndex();
-
-    //// Queue draw weapon state.
-    //instanceWeapon->InstanceWeaponQueueNextState(this, client, WeaponState::Draw);
-
-    //// Set player animation. No clue why the OG code used Pain, but we'll have to live with it for now.
-    //client->animation.priorityAnimation = PlayerAnimation::Pain;
-    //if (client->playerState.pmove.flags & PMF_DUCKED) {
-    //    SetAnimationFrame(FRAME_crpain1);
-    //    client->animation.endFrame = FRAME_crpain4;
-    //} else {
-    //    SetAnimationFrame(FRAME_pain301);
-    //    client->animation.endFrame = FRAME_pain304;
-    //}
-
-    //return instanceWeapon;
+    return weaponInstance;
 }
     
 
@@ -632,8 +610,7 @@ SVGBaseItemWeapon* SVGBasePlayer::GetActiveWeaponInstance() {
     }
 
     // Acquire active weapon instance.
-    SVGBaseItemWeapon *activeWeaponInstance = SVGBaseItemWeapon::GetWeaponInstanceByID(client->persistent.inventory.activeWeaponID);
-    return activeWeaponInstance;
+    return SVGBaseItemWeapon::GetWeaponInstanceByID(client->persistent.inventory.activeWeaponID);
 }
 //
 ///**

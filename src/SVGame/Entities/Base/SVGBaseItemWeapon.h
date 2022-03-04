@@ -56,6 +56,7 @@ public:
     *   @brief  Only called when allowed to think.
     **/
     virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    
     /**
     * @brief   A callback which can be implemented by weapons in order to fire code one time
     *          when the weapon has switched to a new state. 
@@ -65,30 +66,36 @@ public:
     * @param newState The current new state that the weapon resides in.
     * @param oldState Old previous state the weapon was residing in.
     **/
-    virtual void InstanceWeaponOnSwitchState(SVGBasePlayer *player, ServerClient *client,int32_t newState, int32_t oldState);
+    virtual void InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client,int32_t newState, int32_t oldState);
+    
+    /**
+    *   @brief Called when an animation has finished. Usually used to then switch states.
+    **/
     virtual void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    
     /**
     * @brief    Sets the weapon's animation properties.
     * @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
     **/
-    virtual void InstanceWeaponSetAnimation(SVGBasePlayer *player, ServerClient *client, 
-        uint32_t startTime, uint16_t startFrame, uint16_t endFrame, uint32_t loopCount = 0, qboolean forceLoop = false, float frameTime = 1.f / BASE_1_FRAMETIME);
+    virtual void InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, 
+        uint32_t startTime, uint16_t startFrame, uint16_t endFrame, uint32_t loopCount = 1, qboolean forceLoop = false, float frameTime = 1.f / BASE_1_FRAMETIME);
 
     /**
     *   @brief  Instantly sets the current state.
     **/
-    virtual void InstanceWeaponSetCurrentState(SVGBasePlayer *player, ServerClient* client, int32_t state);
+    virtual void InstanceWeaponSetCurrentState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient* client, int32_t state);
 
     /** @brief  Queues a state and sets it as the next current state when the state currently processing has finished.
     **/
-    virtual void InstanceWeaponQueueNextState(SVGBasePlayer *player, ServerClient* client, int32_t state);
+    virtual void InstanceWeaponQueueNextState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient* client, int32_t state);
 
 
 
-    ///**
-    //*   @brief  Called to execute the animation of the current weaponstate.
-    //**/
+    /**
+    *   @brief  Called to execute the animation of the current weaponstate.
+    **/
     //virtual void InstanceWeaponAnimate(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    
     /***
     * 
     *   Entity functions.

@@ -528,7 +528,7 @@ void SVG_RunFrame(void) {
 
     // Calculate the current frame time for this game its own frame number.
     level.time = level.frameNumber * FRAMETIME;
-    level.timeStamp = static_cast<uint32_t>(level.time * 1000.f);
+    level.timeStamp = static_cast<uint32_t>((level.time * 1000.f));
 
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
