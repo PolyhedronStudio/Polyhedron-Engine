@@ -65,16 +65,16 @@ void ItemWeaponBeretta::Precache() {
     // TODO: The above precache sound section of this code must move to player sound precache code.
 
     // Precache sounds.
-    SVG_PrecacheSound("weapons/Beretta/fire1.wav");
-    SVG_PrecacheSound("weapons/Beretta/fire2.wav");
-    SVG_PrecacheSound("weapons/Beretta/ready1.wav");
-    SVG_PrecacheSound("weapons/Beretta/ready2.wav");
+    SVG_PrecacheSound("weapons/beretta/fire1.wav");
+    SVG_PrecacheSound("weapons/beretta/fire2.wav");
+    SVG_PrecacheSound("weapons/beretta/ready1.wav");
+    SVG_PrecacheSound("weapons/beretta/ready2.wav");
 
-    SVG_PrecacheSound("weapons/Beretta/reload1.wav");
-    SVG_PrecacheSound("weapons/Beretta/reload2.wav");
+    SVG_PrecacheSound("weapons/beretta/reload1.wav");
+    SVG_PrecacheSound("weapons/beretta/reload2.wav");
 
-    SVG_PrecacheSound("weapons/Beretta/reloadclip1.wav");
-    SVG_PrecacheSound("weapons/Beretta/reloadclip2.wav");
+    SVG_PrecacheSound("weapons/beretta/reloadclip1.wav");
+    SVG_PrecacheSound("weapons/beretta/reloadclip2.wav");
 }
 
 /**
@@ -171,7 +171,7 @@ void ItemWeaponBeretta::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     Base::InstanceWeaponThink(player, weaponBeretta, client);
 
     // Switch based on weapon state.
-    switch (client->weaponState.currentState) { 
+    switch (client->weaponState.current) { 
         case WeaponState::Idle:
             weaponBeretta->InstanceWeaponIdle(player, weaponBeretta, client);
         break;
@@ -215,13 +215,38 @@ void ItemWeaponBeretta::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBa
     // Set animations here.
     switch (newState) {
     case WeaponState::Draw:
+            // Let the player entity play the 'draw Beretta' sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/Beretta45/ready2.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/Beretta45/ready2.wav"), 1.f, ATTN_NORM, 0.f);
+
+            // Call upon the Beretta instance weapon's SetAnimation for this client.
             weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 151, 186);
-        break;
-    case WeaponState::Holster:
-            weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 140, 150);
+
+            // Disable client from being able to holster, and switch weapons.
+            client->weaponState.canHolster = false;
         break;
     case WeaponState::Idle:
-            weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 187, 210);
+            // Play idle animation based on random number generation. Cheap, but effective.
+            if (client->weaponState.animationFrame == -1) {
+                int32_t animateIdleState = 100 % RandomRangeui(0, 100);
+
+                if (animateIdleState < 10) {
+                    weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 187, 210);
+                }
+            }
+    
+            // Enable holstering to client, so it can switch weapons.
+            client->weaponState.canHolster = true;
+        break;
+    case WeaponState::Holster:
+            // Let the player entity play the 'holster Beretta' sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/hidedefault.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/hidedefault.wav"), 1.f, ATTN_NORM, 0.f);
+            // Call upon the Beretta instance weapon's SetAnimation for this client.
+            weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 140, 150);
+
+            // Disable client from being able to holster, and switch weapons.
+            client->weaponState.canHolster = false;
         break;
     default:
         break;
@@ -241,27 +266,29 @@ void ItemWeaponBeretta::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player,
     ItemWeaponBeretta *weaponBeretta = dynamic_cast<ItemWeaponBeretta*>(weapon);
 
     // Set animations here.
-    switch (client->weaponState.currentState) {
+    switch (client->weaponState.current) {
     case WeaponState::Draw:
         weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, WeaponState::Idle);
         gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     case WeaponState::Holster:
+        // Switch to down state.
         weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, WeaponState::Down);
-        gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+
+        // Enable holstering to client, so it can switch weapons.
+        client->weaponState.canHolster = true;
+
+        gi.DPrintf("WeaponState::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     case WeaponState::Idle:
-        //if (client->weaponState.queuedState == -1) {
-        //    InstanceWeaponQueueNextState(player, client, WeaponState::Idle);
-        //}
-        gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+        gi.DPrintf("WeaponState::Idle(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     default:
-        weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, WeaponState::Idle);
         gi.DPrintf("WeaponState::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     }
 }
+
 
 /**
 *   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)

@@ -65,16 +65,16 @@ void ItemWeaponSMG::Precache() {
     // TODO: The above precache sound section of this code must move to player sound precache code.
 
     // Precache sounds.
-    SVG_PrecacheSound("weapons/smg/fire1.wav");
-    SVG_PrecacheSound("weapons/smg/fire2.wav");
-    SVG_PrecacheSound("weapons/smg/ready1.wav");
-    SVG_PrecacheSound("weapons/smg/ready2.wav");
+    SVG_PrecacheSound("weapons/smg45/fire1.wav");
+    SVG_PrecacheSound("weapons/smg45/fire2.wav");
+    SVG_PrecacheSound("weapons/smg45/ready1.wav");
+    SVG_PrecacheSound("weapons/smg45/ready2.wav");
 
-    SVG_PrecacheSound("weapons/smg/reload1.wav");
-    SVG_PrecacheSound("weapons/smg/reload2.wav");
+    SVG_PrecacheSound("weapons/smg45/reload1.wav");
+    SVG_PrecacheSound("weapons/smg45/reload2.wav");
 
-    SVG_PrecacheSound("weapons/smg/reloadclip1.wav");
-    SVG_PrecacheSound("weapons/smg/reloadclip2.wav");
+    SVG_PrecacheSound("weapons/smg45/reloadclip1.wav");
+    SVG_PrecacheSound("weapons/smg45/reloadclip2.wav");
 }
 
 /**
@@ -171,7 +171,7 @@ void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon
     Base::InstanceWeaponThink(player, weaponSMG, client);
 
     // Switch based on weapon state.
-    switch (client->weaponState.currentState) { 
+    switch (client->weaponState.current) { 
         case WeaponState::Idle:
             weaponSMG->InstanceWeaponIdle(player, weaponSMG, client);
         break;
@@ -215,13 +215,38 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
     // Set animations here.
     switch (newState) {
     case WeaponState::Draw:
+            // Let the player entity play the 'draw SMG' sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/smg45/ready2.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/ready2.wav"), 1.f, ATTN_NORM, 0.f);
+
+            // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 110, 142);
-        break;
-    case WeaponState::Holster:
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
+
+            // Disable client from being able to holster, and switch weapons.
+            client->weaponState.canHolster = false;
         break;
     case WeaponState::Idle:
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 141, 172);
+            // Play idle animation based on random number generation. Cheap, but effective.
+            if (client->weaponState.animationFrame == -1) {
+                int32_t animateIdleState = 100 % RandomRangeui(0, 100);
+
+                if (animateIdleState < 10) {
+                    weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 141, 172);
+                }
+            }
+    
+            // Enable holstering to client, so it can switch weapons.
+            client->weaponState.canHolster = true;
+        break;
+    case WeaponState::Holster:
+            // Let the player entity play the 'holster SMG' sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/hidedefault.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/hidedefault.wav"), 1.f, ATTN_NORM, 0.f);
+            // Call upon the SMG instance weapon's SetAnimation for this client.
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
+
+            // Disable client from being able to holster, and switch weapons.
+            client->weaponState.canHolster = false;
         break;
     default:
         break;
@@ -241,25 +266,24 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
     ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
 
     // Set animations here.
-    switch (client->weaponState.currentState) {
+    switch (client->weaponState.current) {
     case WeaponState::Draw:
         weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
         gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
-    case WeaponState::Holster:
-        weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Down);
-        gi.DPrintf("WeaponState::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
-        break;
     case WeaponState::Idle:
-        if (client->weaponState.currentState == -1) {
-            weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
-        }
         gi.DPrintf("WeaponState::Idle(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
+    case WeaponState::Holster:
+        // Switch to down state.
+        weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Down);
+
+        // Enable holstering to client, so it can switch weapons.
+        client->weaponState.canHolster = true;
+
+        gi.DPrintf("WeaponState::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+        break;
     default:
-        if (client->weaponState.currentState == -1) {
-            weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
-        }
         gi.DPrintf("WeaponState::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
         break;
     }
@@ -324,6 +348,9 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     //if (player->HasItem[GetIdentifier()] >= 1) {
     //    return false;
     //}
+    
+    // Play sound.
+    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
 
     //// TODO HERE: Check whether game mode allows for picking up this tiem.
     // Check whether the player already had an SMG or not.
@@ -335,13 +362,10 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
         player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
     }
 
-    // Execute a player change weapon in case he isn't holding it already.
+    // Change weapon. Assuming he has the item.
     if ( player->HasItem(GetIdentifier()) >= 1 && client->persistent.inventory.activeWeaponID != GetIdentifier() ) {
         player->ChangeWeapon(GetIdentifier());
     }
-
-    // Play sound.
-    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
 
     // Set a respawn think for after 2 seconds.
     if (!game.GetGamemode()->IsClass<DefaultGamemode>()) {

@@ -727,7 +727,7 @@ void ClientGameEntities::AddViewEntities() {
 
         // Don't allow it to go below 0, instead set it to old frame.
         if (gunRenderEntity.frame < 0) {
-            gunRenderEntity.frame = gunRenderEntity.oldframe;
+            gunRenderEntity.frame = 0;
         }
         //gunRenderEntity.frame = tionFrame = renderEntity.frame;
         //gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;

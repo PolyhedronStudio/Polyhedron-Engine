@@ -847,21 +847,21 @@ struct gclient_s {
     int32_t latchedButtons;
 
     struct ClientWeaponState {
-	    //! Should we execute a weapon think method?
-        qboolean shouldThink = false;
+        //! Start time of the current active weapon state.
+        uint32_t timeStamp = 0;
 
-        //! Timestamp of when this state was engaged.
-        uint32_t stateTimestamp = 0;
-
-        //! Last state, used for animation resetting.
-        //int32_t lastState = WeaponState::Finished;
-        //! Current state the active weapon resides in.
-        int32_t currentState = WeaponState::Finished;
-        //! Queued weapon state to switch to after finishing the current state.
-        int32_t queuedState = -1;
-
+        //! Sound to play for this weapon frame.
+        uint32_t sound = 0;
         //! Current frame the weapon animation(if any) is residing in. -1 if finished/none.
-        int32_t currentAnimationFrame = 0;
+        int32_t animationFrame = 0;
+
+        //! Down state by default (i.e. no weapon active.)
+        int32_t current = WeaponState::Down;
+        //! Queued weapon state to switch to after finishing the current state.
+        int32_t queued = -1;
+        // When false, disables client from being able to holster and switch weapon.
+        // Usually set when in the process of drawing a weapon, reloading, etc.
+        bool canHolster = false;
     } weaponState;
 
     //! Pointer to the new weapon the client wishes to switch to.

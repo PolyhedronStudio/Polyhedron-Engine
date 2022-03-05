@@ -319,9 +319,9 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerCli
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
     if (!client->respawn.isSpectator) { //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
         player->WeaponThink();
-    } else {
+    }/* else {
         client->weaponState.shouldThink = false;
-    }
+    }*/
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.
