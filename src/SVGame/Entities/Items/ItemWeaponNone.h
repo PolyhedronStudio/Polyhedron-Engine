@@ -4,7 +4,9 @@
 *
 *	@file
 *
-*	Sub Machine Gun weapon.
+*	'None' weapon, currently functions as a stub for ID = 0.
+* 
+*   Can of course be modified to function as literal arms.
 *
 ***/
 #pragma once
@@ -13,17 +15,13 @@ class SVGBaseEntity;
 class SVGBaseItem;
 class SVGBaseItemWeapon;
 
-class ItemWeaponSMG : public SVGBaseItemWeapon {
+class ItemWeaponNone: public SVGBaseItemWeapon {
 public:
     // Constructor/Deconstructor.
-    ItemWeaponSMG(Entity* svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~ItemWeaponSMG();
+    ItemWeaponNone(Entity* svEntity, const std::string& displayString, uint32_t identifier);
+    virtual ~ItemWeaponNone();
 
-    DefineItemMapClass("Sub Machine Gun", "smg", ItemIdentifier::SMG, "item_weapon_smg", ItemWeaponSMG, SVGBaseItemWeapon);
-
-    // Item flags
-    //static constexpr int32_t IF_xxx = 1 << 0;
-    //static constexpr int32_t IF_xxx = 1 << 1;
+    DefineItemMapClass("None", "none", ItemIdentifier::Barehands, "item_weapon_none", ItemWeaponNone, SVGBaseItemWeapon);
 
     //
     // Interface functions.
@@ -55,7 +53,7 @@ public:
     /**
     *   @return The item index of the primary ammo for this weapon.
     **/
-    inline virtual uint32_t GetPrimaryAmmoIdentifier() override { return ItemIdentifier::Ammo9mm; }
+    inline virtual uint32_t GetPrimaryAmmoIdentifier() override { return 0; }
     /**
     *   @return The item index of the secondary ammo for this weapon.
     **/
@@ -65,26 +63,26 @@ public:
     *   @return Returns the path to this weapon's view model.
     **/
     inline virtual const std::string GetViewModel() override {
-        return "models/weapons/smg45/v_smg45.iqm"; 
+        return ""; 
     };
     /**
     *   @return Returns the model index of the view model.
     **/
     inline virtual const uint32_t GetViewModelIndex() override { 
-        return SVG_PrecacheModel( GetViewModel() ); 
+        return 0; 
     }
 
     /**
     *   @return Returns the path to this weapon's vorld model.
     **/
     inline virtual const std::string GetWorldModel() override { 
-        return "models/weapons/smg45/w_smg45.iqm"; 
+        return ""; 
     };
     /**
     *   @return Returns the model index of the world model.
     **/
     inline virtual const uint32_t GetWorldModelIndex() override {
-        return SVG_PrecacheModel(GetWorldModel()); 
+        return 0; 
     }
 
 
@@ -112,21 +110,6 @@ public:
     **/
     void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) override;
 
-    /**
-    *   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
-    **/
-    void InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
-    /**
-    *   @brief  Draw weapon callback.
-    **/
-    void InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
-    /**
-    *   @brief  Holster weapon callback.
-    **/
-    void InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
 
     /**
     *
@@ -134,15 +117,9 @@ public:
     *
     **/
     /**
-    *   @brief  Checks whether to add to inventory or not. If added to a client's
-    *           inventory it'll also engage a weapon switch.
-    **/
-    qboolean WeaponSMGPickup(SVGBaseEntity* other);
-
-    /**
     *   @brief Changes the player's weapon to the SMG if it has one that is.
     **/
-    void InstanceWeaponSMGUse(SVGBaseEntity* user, SVGBaseItem* item);
+    void InstanceWeaponNoneUse(SVGBaseEntity* user, SVGBaseItem* item);
 
 private:
 

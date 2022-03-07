@@ -105,6 +105,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Items/ItemHealthMega.cpp
 	SVGame/Entities/Items/ItemWeaponKnife.cpp
 	SVGame/Entities/Items/ItemWeaponBeretta.cpp
+	SVGame/Entities/Items/ItemWeaponNone.cpp
 	SVGame/Entities/Items/ItemWeaponSMG.cpp
 	SVGame/Entities/Func/FuncAreaportal.cpp
 	SVGame/Entities/Func/FuncButton.cpp
@@ -221,6 +222,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Items/ItemWeaponKnife.h
 	SVGame/Entities/Items/ItemWeaponBeretta.h
 	SVGame/Entities/Items/ItemWeaponSMG.h
+	SVGame/Entities/Items/ItemWeaponNone.h
 
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h

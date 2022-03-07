@@ -652,7 +652,13 @@ void ClientGameEntities::AddViewEntities() {
     PlayerState *oldPlayerState= &cl->oldframe.playerState;
 
     // Gun ViewModel.
+    //if (gunRenderEntity.model != cl->drawModels[currentPlayerState->gunIndex]) {
+    //    gunRenderEntity.frame = 1;
+    //    gunRenderEntity.oldframe = 0;
+    //}
     gunRenderEntity.model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0));
+    
+
     gunRenderEntity.id = RESERVED_ENTITIY_GUN;
 
     // If there is no model to render, there is no need to continue.
@@ -678,7 +684,7 @@ void ClientGameEntities::AddViewEntities() {
     {
         vec3_t view_dir, right_dir, up_dir;
         vec3_t gun_real_pos, gun_tip;
-        constexpr float gun_length = 28.f;
+        constexpr float gun_length = 56.f;
         constexpr float gun_right = 10.f;
         constexpr float gun_up = -5.f;
         static vec3_t mins = { -4, -2, -12 }, maxs = { 4, 8, 12 };
@@ -727,7 +733,7 @@ void ClientGameEntities::AddViewEntities() {
 
         // Don't allow it to go below 0, instead set it to old frame.
         if (gunRenderEntity.frame < 0) {
-            gunRenderEntity.frame = 0;
+            gunRenderEntity.frame = gunRenderEntity.oldframe;
         }
         //gunRenderEntity.frame = tionFrame = renderEntity.frame;
         //gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;

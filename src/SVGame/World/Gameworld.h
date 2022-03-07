@@ -295,6 +295,7 @@ private:
     **/
     void PreparePlayers();
 
+
 private:
     // Array storing the POD server entities.
     Entity serverEntities[MAX_EDICTS];

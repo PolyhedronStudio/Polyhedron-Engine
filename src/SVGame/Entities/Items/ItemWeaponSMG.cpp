@@ -12,8 +12,7 @@
 #include "../../Utilities.h"        // Util funcs.
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
-// Deathmatch Game Mode.
-#include "../../Gamemodes/DeathmatchGamemode.h"
+#include <SharedGame/SkeletalAnimation.h>
 
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
@@ -22,7 +21,9 @@
 #include "../Base/SVGBaseItemWeapon.h"
 #include "../Base/SVGBasePlayer.h"
 
-// World.
+// Game mode.
+#include "../../Gamemodes/DefaultGamemode.h"
+// Game world.
 #include "../../World/Gameworld.h"
 
 // SMG.
@@ -59,7 +60,7 @@ void ItemWeaponSMG::Precache() {
     SVG_PrecacheSound("weapons/bulletdrop3.wav");
 
     SVG_PrecacheSound("weapons/dryfire.wav");
-    SVG_PrecacheSound("weapons/hidedefault.wav");
+    SVG_PrecacheSound("weapons/holster_weapon1.wav");
     SVG_PrecacheSound("weapons/pickup1.wav");
     SVG_PrecacheSound("weapons/readygeneric.wav");
     // TODO: The above precache sound section of this code must move to player sound precache code.
@@ -159,8 +160,11 @@ void ItemWeaponSMG::InstanceSpawn() {
 *   @brief  The mother of all instance weapon callbacks. Calls upon the others depending on state.
 **/
 void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Execute base class function regardless of sanity checks in this override.
+    Base::InstanceWeaponThink(player, weapon, client);
+
     // Ensure it is of type ItemWeaponSMG
-    if (!weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
+    if (!client || !weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
         return;
     }
 
@@ -194,15 +198,17 @@ void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon
  //           weapon->InstanceWeaponIdle(player, weapon, client);
         break;
     }
-
 }
 
 /**
 *   @brief  Callback used when an instance weapon is switching state.
 **/
 void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon *weapon, ServerClient *client, int32_t newState, int32_t oldState) {
+    // Execute base class function regardless of sanity checks in this override.
+    Base::InstanceWeaponOnSwitchState(player, weapon, client, newState, oldState);
+
     // Ensure it is of type ItemWeaponSMG
-    if (!weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
+    if (!client || !weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
         return;
     }
 
@@ -210,46 +216,31 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
     ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
 
     // Revert time to uint32_t.
-    uint32_t startTime = level.timeStamp;
+    int64_t startTime = level.timeStamp;
 
     // Set animations here.
     switch (newState) {
-    case WeaponState::Draw:
+        case WeaponState::Draw:
             // Let the player entity play the 'draw SMG' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/smg45/ready2.wav");
             SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/ready2.wav"), 1.f, ATTN_NORM, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 110, 142);
-
-            // Disable client from being able to holster, and switch weapons.
-            client->weaponState.canHolster = false;
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 112, 142);
         break;
-    case WeaponState::Idle:
-            // Play idle animation based on random number generation. Cheap, but effective.
-            if (client->weaponState.animationFrame == -1) {
-                int32_t animateIdleState = 100 % RandomRangeui(0, 100);
+        case WeaponState::Idle: 
 
-                if (animateIdleState < 10) {
-                    weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 141, 172);
-                }
-            }
-    
-            // Enable holstering to client, so it can switch weapons.
-            client->weaponState.canHolster = true;
         break;
-    case WeaponState::Holster:
+        case WeaponState::Holster:
             // Let the player entity play the 'holster SMG' sound.
-            client->weaponSound = SVG_PrecacheSound("weapons/hidedefault.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/hidedefault.wav"), 1.f, ATTN_NORM, 0.f);
+            client->weaponSound = SVG_PrecacheSound("weapons/holster_weapon1.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, ATTN_NORM, 0.f);
+
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
-
-            // Disable client from being able to holster, and switch weapons.
-            client->weaponState.canHolster = false;
         break;
-    default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -257,8 +248,11 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
 *   @brief Called when an animation has finished. Usually used to then switch states.
 **/
 void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Execute base class function regardless of sanity checks in this override.
+    Base::InstanceWeaponOnAnimationFinished(player, weapon, client);
+
     // Ensure it is of type ItemWeaponSMG
-    if (!weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
+    if (!client || !weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
         return;
     }
 
@@ -267,25 +261,34 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
 
     // Set animations here.
     switch (client->weaponState.current) {
-    case WeaponState::Draw:
-        weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
-        gi.DPrintf("WeaponState::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
-        break;
-    case WeaponState::Idle:
-        gi.DPrintf("WeaponState::Idle(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
-        break;
-    case WeaponState::Holster:
-        // Switch to down state.
-        weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Down);
+        case WeaponState::Draw:
+                // Remove IsHolstered flag.
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsHolstered;
 
-        // Enable holstering to client, so it can switch weapons.
-        client->weaponState.canHolster = true;
+                // Queue 'Idle' State.
+                weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
-        gi.DPrintf("WeaponState::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
-        break;
-    default:
-        gi.DPrintf("WeaponState::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
-        break;
+                // Debug Print.
+                gi.DPrintf("SMG State::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+            break;
+        case WeaponState::Idle:
+
+                // Debug print.
+                gi.DPrintf("SMG State::Idle(started: %i) current time: %i\n", client->weaponState.timeStamp, level.timeStamp);
+            break;
+        case WeaponState::Holster:
+                // Add IsHolstered flag.
+                client->weaponState.flags |= ServerClient::WeaponState::Flags::IsHolstered;
+
+                // Queue 'None' state.
+                weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::None);
+
+                // Debug Print.
+                gi.DPrintf("SMG State::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+            break;
+        default:
+//                gi.DPrintf("SMG State::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+            break;
     }
 }
 

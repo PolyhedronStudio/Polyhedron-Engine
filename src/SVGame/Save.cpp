@@ -321,7 +321,7 @@ static const save_field_t clientfields[] = {
 
     I(ammoIndex),
 
-    T(newWeapon),
+//    T(newWeapon),
 
     I(damages.armor),
     I(damages.powerArmor),

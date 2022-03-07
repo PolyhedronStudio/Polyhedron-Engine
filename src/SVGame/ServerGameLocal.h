@@ -48,7 +48,10 @@ struct entity_s;
 #include "GameLocals.h"
 //==================================================================
 
-//! Time it takes to go over a frame. 
+//! MS Frametime for animations.
+constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;
+
+//! Float time it takes to go over a frame. 
 constexpr float FRAMETIME = BASE_FRAMETIME_1000;
 
 //! Memory tags to allow dynamic memory to be cleaned up
@@ -159,14 +162,14 @@ struct ItemIdentifier {
     /***
     * Weapon Identifiers.
     ***/
-    //! Unused.
-    static constexpr uint32_t None          = 0;
+    //! Bare hands.
+    static constexpr uint32_t Barehands     = 1;
     //! Pistol.
-    static constexpr uint32_t Beretta       = 1;
+    static constexpr uint32_t Beretta       = 2;
     //! SMG.
-    static constexpr uint32_t SMG           = 2;
+    static constexpr uint32_t SMG           = 3;
     //! Shotgun.
-    static constexpr uint32_t Shotgun       = 3;
+    static constexpr uint32_t Shotgun       = 4;
     //! Maximum amount of weapons allowed.
     static constexpr uint32_t MaxWeapons    = 64;
 
@@ -349,7 +352,7 @@ struct LevelLocals  {
     //! Current sum of total frame time taken.
     float time = 0.f;
     //! Same as time, but multiplied by a 1000 to get a proper integer.
-    uint32_t timeStamp = 0;
+    int64_t timeStamp = 0;
 
     char levelName[MAX_QPATH];  // The descriptive name (Outer Base, etc)
     char mapName[MAX_QPATH];    // The server name (base1, etc)
@@ -765,12 +768,12 @@ struct ClientPersistentData {
     **/
     struct {
         //! The currently active weapon item ID.
-        uint32_t activeWeaponID = 0;
+        int32_t activeWeaponID = ItemIdentifier::Barehands;
         //! The last active weapon ID.
-        uint32_t previousActiveWeaponID = 0;
+        int32_t previousActiveWeaponID = 0;
         //! Used to store the next weapon to switch to, it is set when 
         //! the current weapon was still busy with an action.
-        uint32_t nextWeaponID = 0;
+        int32_t nextWeaponID = 0;
 
         //! All the items this client posesses.
         int32_t items[MAX_ITEMS] = {};
@@ -846,26 +849,38 @@ struct gclient_s {
     //! Latched Buttons are used for single key push events.
     int32_t latchedButtons;
 
-    struct ClientWeaponState {
+    struct WeaponState {
+        struct Flags {
+            //! Set if and only if an animation is still playing.
+            static constexpr uint32_t IsAnimating           = 1 << 0;
+            //! Set if and only if an animation is still playing.
+            static constexpr uint32_t ProcessAnimation      = 1 << 1;
+
+            //! Is the weapon holstered?
+            static constexpr uint32_t IsHolstered           = 1 << 2;
+            
+            ////! Set if the weapon is processing a primary fire.
+            //static constexpr uint32_t PrimaryFire           = 1 << 2;
+            ////! Set if the weapon is processing a secondary fire.
+            //static constexpr uint32_t SecondaryFire       = 1 << 3;
+        };
+
         //! Start time of the current active weapon state.
         uint32_t timeStamp = 0;
-
-        //! Sound to play for this weapon frame.
-        uint32_t sound = 0;
-        //! Current frame the weapon animation(if any) is residing in. -1 if finished/none.
-        int32_t animationFrame = 0;
-
+        
+        //! Flags of the weapon's state, gets set to 0 after each successful weapon switch.
+        uint32_t flags  = Flags::IsHolstered;
+        
         //! Down state by default (i.e. no weapon active.)
-        int32_t current = WeaponState::Down;
+        int32_t current = ::WeaponState::None;
         //! Queued weapon state to switch to after finishing the current state.
-        int32_t queued = -1;
-        // When false, disables client from being able to holster and switch weapon.
-        // Usually set when in the process of drawing a weapon, reloading, etc.
-        bool canHolster = false;
-    } weaponState;
+        int32_t queued  = ::WeaponState::None;
 
-    //! Pointer to the new weapon the client wishes to switch to.
-    SVGBaseItemWeapon *newWeapon;
+        //! Current frame the weapon animation(if any) is residing in. -1 if finished/none.
+        int32_t animationFrame  = 0;
+        //! Sound to play for this weapon frame.
+        uint32_t sound          = 0;
+    } weaponState;
 
     /**
     *   @brief  Used to sum up damage over an entire frame so weapons and other
@@ -886,8 +901,6 @@ struct gclient_s {
 
     //! Yaw angle of where our killer is located at in case we're dead.
     float killerYaw;
-
-
 
     //! Current kick angles.
     vec3_t kickAngles;

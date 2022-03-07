@@ -93,7 +93,7 @@ public:
     *           if set to false it'll set the lastWeapon pointer to nullptr.
     *   @return A pointer to the newly activated weapon, nullptr if something went wrong.
     **/
-    virtual SVGBaseItemWeapon *ChangeWeapon(uint32_t weaponID, qboolean storeLastWeapon = true);
+    virtual SVGBaseItemWeapon *ChangeWeapon(int32_t weaponID, qboolean storeLastWeapon = true);
     
     /**
     *   @brief  Looks into the player entity's client structure for the active instance item weapon.
