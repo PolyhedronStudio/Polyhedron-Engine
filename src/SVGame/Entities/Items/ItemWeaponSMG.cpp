@@ -143,59 +143,41 @@ void ItemWeaponSMG::InstanceSpawn() {
 *
 **/
 /**
-*   @brief
-**/
-//void ItemWeaponSMG::InstanceWeaponSMGIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) { 
-//    // Default think callback.
-//
-//    // Presumably base weapon item WEaponThink-> calls whichever think callback is set.
-//
-//    // This one should thus show an idle animation.
-//
-//    // Primary fire does a fire animation, it'll keep setting itself to nextthink until all
-//    // frames are done playing.
-//}
-
-/**
 *   @brief  The mother of all instance weapon callbacks. Calls upon the others depending on state.
 **/
 void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Execute base class function regardless of sanity checks in this override.
     Base::InstanceWeaponThink(player, weapon, client);
 
-    // Ensure it is of type ItemWeaponSMG
-    if (!client || !weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
+    // Ensure all pointers are valid before proceeding.
+    if (!player || !client || !weapon || !weapon->IsSubclassOf<ItemWeaponSMG>()) {
         return;
     }
 
     // Cast it.
     ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
 
-    // Call base InstanceWeaponThink, this will check whether we have newWeapon set and engage a switch.
-    Base::InstanceWeaponThink(player, weaponSMG, client);
-
     // Switch based on weapon state.
-    switch (client->weaponState.current) { 
+    switch (client->weaponState.current) {
         case WeaponState::Idle:
-            weaponSMG->InstanceWeaponIdle(player, weaponSMG, client);
+            weaponSMG->InstanceWeaponProcessIdleState(player, weaponSMG, client);
         break;
         case WeaponState::Draw:
-            weaponSMG->InstanceWeaponDraw(player, weaponSMG, client);
+            weaponSMG->InstanceWeaponProcessDrawState(player, weaponSMG, client);
         break;
         case WeaponState::Holster:
-            weaponSMG->InstanceWeaponHolster(player, weaponSMG, client);
+            weaponSMG->InstanceWeaponProcessHolsterState(player, weaponSMG, client);
         break;
         case WeaponState::Reload:
-            //weapon->InstanceWeaponReload(player, weapon, client);
+            //weapon->InstanceWeaponProcessReloadState(player, weapon, client);
         break;
         case WeaponState::PrimaryFire:
-            //weapon->InstanceWeaponPrimaryFire(player, weapon, client);
+            //weapon->InstanceWeaponProcessPrimaryFireState(player, weapon, client);
         break;
         case WeaponState::SecondaryFire:
-            //weapon->InstanceWeaponSecondaryFire(player, weapon, client);
+            //weapon->InstanceWeaponProcessSecondaryFireState(player, weapon, client);
         break;
         default:
- //           weapon->InstanceWeaponIdle(player, weapon, client);
         break;
     }
 }
@@ -229,7 +211,6 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 112, 142);
         break;
         case WeaponState::Idle: 
-
         break;
         case WeaponState::Holster:
             // Let the player entity play the 'holster SMG' sound.
@@ -265,20 +246,25 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 // Remove IsHolstered flag.
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsHolstered;
 
+                // Remove state processing flag.
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+
                 // Queue 'Idle' State.
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
                 // Debug Print.
                 gi.DPrintf("SMG State::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
-        case WeaponState::Idle:
-
+        case WeaponState::Idle:               
                 // Debug print.
                 gi.DPrintf("SMG State::Idle(started: %i) current time: %i\n", client->weaponState.timeStamp, level.timeStamp);
             break;
         case WeaponState::Holster:
                 // Add IsHolstered flag.
                 client->weaponState.flags |= ServerClient::WeaponState::Flags::IsHolstered;
+                
+                // Remove state processing flag.
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
                 // Queue 'None' state.
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::None);
@@ -293,32 +279,51 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
 }
 
 /**
-*   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
+*   @brief  Called each frame the weapon is in Draw state.
 **/
-void ItemWeaponSMG::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    ////// Animation start and end frame.
-    //static constexpr uint32_t idleStartFrame = 142;
-    //static constexpr uint32_t idleEndFrame = 172;
-}
-
-/**
-*   @brief  Draw weapon callback.
-**/
-void ItemWeaponSMG::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    //// Animation start and end frame.
+void ItemWeaponSMG::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Animation start and end frame.
     //static constexpr uint32_t drawStartFrame = 110;
     //static constexpr uint32_t drawEndFrame = 142;
-}
+     
+    // Call base class method.
+    Base::InstanceWeaponProcessDrawState(player, weapon, client);
 
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
+}
+    
 /**
-*   @brief  Holster weapon callback.
+*   @brief  Called each frame the weapon is in Holster state.
 **/
-void ItemWeaponSMG::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    //// Animation start and end frame.
+void ItemWeaponSMG::InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Animation start and end frame.
     //static constexpr uint32_t holsterStartFrame = 104;
     //static constexpr uint32_t holsterEndFrame = 112;
-}
+     
+    // Call base class method.
+    Base::InstanceWeaponProcessHolsterState(player, weapon, client);
 
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
+}
+/**
+*   @brief  Called each frame the weapon is in Holster state.
+**/
+void ItemWeaponSMG::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Animation start and end frame.
+    //static constexpr uint32_t idleStartFrame = 142;
+    //static constexpr uint32_t idleEndFrame = 172;
+
+    // Call base class method.
+    Base::InstanceWeaponProcessIdleState(player, weapon, client);
+
+    // Remove state processing flag.
+    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+
+    // Process animation.
+    //InstanceWeaponProcessAnimation(player, weapon, client);
+}
 
 
 /**
@@ -346,28 +351,23 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     // Save to fetch client now.
     ServerClient *client = player->GetClient();
 
-    //// Don't proceed is the player already owns this weapon, we want it to stay on-ground
-    //// for other players to pick up.
-    //if (player->HasItem[GetIdentifier()] >= 1) {
-    //    return false;
-    //}
-    
     // Play sound.
     SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
 
-    //// TODO HERE: Check whether game mode allows for picking up this tiem.
-    // Check whether the player already had an SMG or not.
-    player->GiveWeapon(GetIdentifier(), 1);
+    // Give the player the SMG weapon if he didn't have one yet.
+    if ( !player->HasItem(GetIdentifier()) ) {
+        player->GiveWeapon(GetIdentifier(), 1);
+    }
 
     // If this item wasn't dropped by an other player, give them some ammo to go along.
     if (!(GetSpawnFlags() & ItemSpawnFlags::DroppedItem)) {
     	// TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
         player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
     }
-
+    
     // Change weapon. Assuming he has the item.
-    if ( player->HasItem(GetIdentifier()) >= 1 && client->persistent.inventory.activeWeaponID != GetIdentifier() ) {
-        player->ChangeWeapon(GetIdentifier());
+    if ( player->HasItem(GetIdentifier()) >= 1 ) {
+        player->ChangeWeapon(GetIdentifier(), true);
     }
 
     // Set a respawn think for after 2 seconds.

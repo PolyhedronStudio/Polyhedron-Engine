@@ -1671,8 +1671,7 @@ void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     client->playerState.gunIndex    = 0;
     client->ammoIndex               = 0;
 
-    // Set its current new weapon to the one that was stored in persistent and activate it.
-    //client->newWeapon = client->persistent.activeWeapon;
+    // Ensure we change to whichever active weaponID we had.
     player->ChangeWeapon(client->persistent.inventory.activeWeaponID, false);
 }
 

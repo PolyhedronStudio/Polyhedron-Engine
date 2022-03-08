@@ -227,11 +227,7 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     // Link our entity.
     player->LinkEntity();
 
-    // Set player state gun index to whichever was persistent in the previous map (if there was one).
-    //client->playerState.gunIndex = gi.ModelIndex("models/weapons/v_mark23/tris.iqm");  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
-
-    // Set its current new weapon to the one that was stored in persistent and activate it.
-    //client->newWeapon = client->persistent.activeWeapon;
+    // Ensure we change to whichever active weaponID we had.
     player->ChangeWeapon(ItemIdentifier::Barehands, false);
 }
 

@@ -49,7 +49,7 @@ public:
     }
 
     // Animation functions.
-    virtual void ProcessAnimation();
+    virtual void IsProcessingState();
 
     /***
     * 

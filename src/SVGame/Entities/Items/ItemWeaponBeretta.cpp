@@ -157,39 +157,35 @@ void ItemWeaponBeretta::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     // Execute base class function regardless of sanity checks in this override.
     Base::InstanceWeaponThink(player, weapon, client);
 
-    // Ensure it is of type ItemWeaponBeretta
-    if (!client || !weapon || !weapon->IsSubclassOf<ItemWeaponBeretta>()) {
+    // Ensure all pointers are valid before proceeding.
+    if (!player || !client || !weapon || !weapon->IsSubclassOf<ItemWeaponBeretta>()) {
         return;
     }
 
     // Cast it.
     ItemWeaponBeretta *weaponBeretta = dynamic_cast<ItemWeaponBeretta*>(weapon);
 
-    // Call base InstanceWeaponThink, this will check whether we have newWeapon set and engage a switch.
-    Base::InstanceWeaponThink(player, weaponBeretta, client);
-
     // Switch based on weapon state.
-    switch (client->weaponState.current) { 
+    switch (client->weaponState.current) {
         case WeaponState::Idle:
-            weaponBeretta->InstanceWeaponIdle(player, weaponBeretta, client);
+            weaponBeretta->InstanceWeaponProcessIdleState(player, weaponBeretta, client);
         break;
         case WeaponState::Draw:
-            weaponBeretta->InstanceWeaponDraw(player, weaponBeretta, client);
+            weaponBeretta->InstanceWeaponProcessDrawState(player, weaponBeretta, client);
         break;
         case WeaponState::Holster:
-            weaponBeretta->InstanceWeaponHolster(player, weaponBeretta, client);
+            weaponBeretta->InstanceWeaponProcessHolsterState(player, weaponBeretta, client);
         break;
         case WeaponState::Reload:
-            //weapon->InstanceWeaponReload(player, weapon, client);
+            //weapon->InstanceWeaponProcessReloadState(player, weapon, client);
         break;
         case WeaponState::PrimaryFire:
-            //weapon->InstanceWeaponPrimaryFire(player, weapon, client);
+            //weapon->InstanceWeaponProcessPrimaryFireState(player, weapon, client);
         break;
         case WeaponState::SecondaryFire:
-            //weapon->InstanceWeaponSecondaryFire(player, weapon, client);
+            //weapon->InstanceWeaponProcessSecondaryFireState(player, weapon, client);
         break;
         default:
- //           weapon->InstanceWeaponIdle(player, weapon, client);
         break;
     }
 }
@@ -223,7 +219,8 @@ void ItemWeaponBeretta::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBa
             weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 151, 186);
         break;
         case WeaponState::Idle: 
-
+            // DEBUG: Remove state processing flag, see if it alleviates our complaints.
+            client->weaponState.flags &= ServerClient::WeaponState::Flags::IsProcessingState;
         break;
         case WeaponState::Holster:
             // Let the player entity play the 'holster Beretta' sound.
@@ -242,12 +239,10 @@ void ItemWeaponBeretta::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBa
 *   @brief Called when an animation has finished. Usually used to then switch states.
 **/
 void ItemWeaponBeretta::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    using WeaponState = ServerClient::WeaponState;
-
     // Execute base class function regardless of sanity checks in this override.
     Base::InstanceWeaponOnAnimationFinished(player, weapon, client);
 
-    // Ensure it is of type ItemWeaponBeretta
+    // Ensure it is of type ItemWeaponSMG
     if (!client || !weapon || !weapon->IsSubclassOf<ItemWeaponBeretta>()) {
         return;
     }
@@ -257,64 +252,89 @@ void ItemWeaponBeretta::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player,
 
     // Set animations here.
     switch (client->weaponState.current) {
-        case ::WeaponState::Draw:
+        case WeaponState::Draw:
                 // Remove IsHolstered flag.
-                client->weaponState.flags &= ~WeaponState::Flags::IsHolstered;
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsHolstered;
+
+                // Remove state processing flag.
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
                 // Queue 'Idle' State.
-                weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, ::WeaponState::Idle);
+                weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("Beretta State::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+                gi.DPrintf("SMG State::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
-        case ::WeaponState::Idle:
-
+        case WeaponState::Idle:                
                 // Debug print.
-                gi.DPrintf("Beretta State::Idle(started: %i) current time: %i\n", client->weaponState.timeStamp, level.timeStamp);
+                gi.DPrintf("SMG State::Idle(started: %i) current time: %i\n", client->weaponState.timeStamp, level.timeStamp);
             break;
-        case ::WeaponState::Holster:
+        case WeaponState::Holster:
                 // Add IsHolstered flag.
-                client->weaponState.flags |= WeaponState::Flags::IsHolstered;
+                client->weaponState.flags |= ServerClient::WeaponState::Flags::IsHolstered;
+                
+                // Remove state processing flag.
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
                 // Queue 'None' state.
-                weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, ::WeaponState::None);
+                weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, WeaponState::None);
 
                 // Debug Print.
-                gi.DPrintf("Beretta State::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+                gi.DPrintf("SMG State::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
         default:
-//                gi.DPrintf("Beretta State::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+//                gi.DPrintf("SMG State::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
     }
 }
 
 /**
-*   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
+*   @brief  Called each frame the weapon is in Holster state.
 **/
-void ItemWeaponBeretta::InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    ////// Animation start and end frame.
-    //static constexpr uint32_t idleStartFrame = 187;
-    //static constexpr uint32_t idleEndFrame = 210;
-}
-
-/**
-*   @brief  Draw weapon callback.
-**/
-void ItemWeaponBeretta::InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    //// Animation start and end frame.
+void ItemWeaponBeretta::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Animation start and end frame.
     //static constexpr uint32_t drawStartFrame = 151;
     //static constexpr uint32_t drawEndFrame = 186;
+
+    // Call base class method.
+    Base::InstanceWeaponProcessDrawState(player, weapon, client);
+
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
 }
 
 /**
-*   @brief  Holster weapon callback.
+*   @brief  Called each frame the weapon is in Holster state.
 **/
-void ItemWeaponBeretta::InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    //// Animation start and end frame.
+void ItemWeaponBeretta::InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Animation start and end frame.
     //static constexpr uint32_t holsterStartFrame = 140;
     //static constexpr uint32_t holsterEndFrame = 150;
+
+    // Call base class method.
+    Base::InstanceWeaponProcessHolsterState(player, weapon, client);
+
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
 }
 
+/**
+*   @brief  Called each frame the weapon is in Draw state.
+**/
+void ItemWeaponBeretta::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Animation start and end frame.
+    //static constexpr uint32_t idleStartFrame = 187;
+    //static constexpr uint32_t idleEndFrame = 210;
+
+    // Call base class method.
+    Base::InstanceWeaponProcessIdleState(player, weapon, client);
+
+    // Remove state processing flag.
+    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+
+    // Process animation.
+    //InstanceWeaponProcessAnimation(player, weapon, client);
+}
 
 
 /**
@@ -332,7 +352,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(SVGBaseEntity* other) {
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
-        gi.DPrintf("Warning: InstanceWeaponBerettaUse called without a valid SVGBasePlayer pointer.\n");
+        gi.DPrintf("Warning: InstanceWeaponSMGUse called without a valid SVGBasePlayer pointer.\n");
         return false;
     }
 
@@ -342,29 +362,24 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(SVGBaseEntity* other) {
     // Save to fetch client now.
     ServerClient *client = player->GetClient();
 
-    //// Don't proceed is the player already owns this weapon, we want it to stay on-ground
-    //// for other players to pick up.
-    //if (player->HasItem[GetIdentifier()] >= 1) {
-    //    return false;
-    //}
+    // Play sound.
+    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
 
-    //// TODO HERE: Check whether game mode allows for picking up this tiem.
-    // Check whether the player already had an Beretta or not.
-    player->GiveWeapon(GetIdentifier(), 1);
+    // Give the player the SMG weapon if he didn't have one yet.
+    if ( !player->HasItem(GetIdentifier()) ) {
+        player->GiveWeapon(GetIdentifier(), 1);
+    }
 
     // If this item wasn't dropped by an other player, give them some ammo to go along.
     if (!(GetSpawnFlags() & ItemSpawnFlags::DroppedItem)) {
     	// TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
         player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
     }
-
-    // Execute a player change weapon in case he isn't holding it already.
-    if ( player->HasItem(GetIdentifier()) >= 1 && client->persistent.inventory.activeWeaponID != GetIdentifier() ) {
-        player->ChangeWeapon(GetIdentifier());
+    
+    // Change weapon. Assuming he has the item.
+    if ( player->HasItem(GetIdentifier()) >= 1 ) {
+        player->ChangeWeapon(GetIdentifier(), true);
     }
-
-    // Play sound.
-    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
 
     // Set a respawn think for after 2 seconds.
     if (!game.GetGamemode()->IsClass<DefaultGamemode>()) {

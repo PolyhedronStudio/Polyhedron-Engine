@@ -96,7 +96,7 @@ public:
     /**
     *   @brief  The mother of all instance weapon callbacks. Calls upon the others depending on state.
     **/
-    void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) final;
+    void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) override;
     /**
     * @brief   A callback which can be implemented by weapons in order to fire code one time
     *          when the weapon has switched to a new state. 
@@ -106,26 +106,24 @@ public:
     * @param newState The current new state that the weapon resides in.
     * @param oldState Old previous state the weapon was residing in.
     **/
-    void InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client,int32_t newState, int32_t oldState) final;
+    void InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client,int32_t newState, int32_t oldState) override;
     /**
     *   @brief Called when an animation has finished. Usually used to then switch states.
     **/
-    void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) final;
+    void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) override;
 
     /**
-    *   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
+    *   @brief  Called each frame the weapon is in Draw state.
     **/
-    void InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
+    virtual void InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
-    *   @brief  Draw weapon callback.
+    *   @brief  Called each frame the weapon is in Holster state.
     **/
-    void InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
+    virtual void InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
-    *   @brief  Holster weapon callback.
+    *   @brief  Called each frame the weapon is in Holster state.
     **/
-    void InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    virtual void InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
 
     /**

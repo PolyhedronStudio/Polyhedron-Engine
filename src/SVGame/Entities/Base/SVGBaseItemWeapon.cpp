@@ -146,41 +146,16 @@ void SVGBaseItemWeapon::SetRespawn(const float delay) {
 *   States are handled using the weapon state flags. Care has to be taken not to exploit this.
 ***/
 void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    //// Huuueeeee
+    // Make life slightly simpler, TODO: Rename things for more consistency.
+    using WeaponFlags = ServerClient::WeaponState::Flags;
+
+    // Sanity.
     if (!player || !client) {
         return;
     }
 
-    // Debug Print.
-    gi.DPrintf("WeaponState(#%i):   Timestamp:(%i)\n", client->weaponState.current, level.timeStamp);
-
-    // Acquire weaponID values.
-    int32_t activeWeaponID         = client->persistent.inventory.activeWeaponID;
-    int32_t nextWeaponID           = client->persistent.inventory.nextWeaponID;
-    int32_t previousActiveWeaponID = client->persistent.inventory.previousActiveWeaponID;
-    
-    // Less typing.
-    using WeaponFlags = ServerClient::WeaponState::Flags;
-
-
-    // Have an IsAnimating flag for when it really is doing animations.
-    // Have a ProcessAnimation flag for when it is even allowed to process animations. This flag
-    // does not mean it is animating. It means that it is allowed to process animations if it has any set.
-    
     /**
-    *   OnAnimationFinished inspection, do a callback if it truly is finished.
-    **/
-    if (client->weaponState.animationFrame < 0 && client->weaponState.flags & WeaponFlags::IsAnimating) {
-        // Call upon Animation Finished callback.
-        weapon->InstanceWeaponOnAnimationFinished(player, weapon, client);
-        
-        // Initiate animation for the current frame and 
-        InstanceWeaponProcessAnimation(player, weapon, client);
-        //return;
-    }
-
-    /**
-    *   Weapon State Machine Logic. (It's very minimal nonetheless.)
+    *   State Management Logic.
     **/
     // See if we got a queued state, if we do, override our current weaponstate.
     if (client->weaponState.queued != WeaponState::None) {
@@ -196,122 +171,109 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 	    // Reset it to -1.
         client->weaponState.queued = WeaponState::None;
 
-        // 
-        //InstanceWeaponProcessAnimation(player, weapon, client);
+        // Be sure to update view model weapon right here in case it had changes.
+        InstanceWeaponUpdateViewModel(player, player->GetActiveWeaponInstance(), client);
+
+        // Give the new state a chance to animate for this frame before exiting.
+        InstanceWeaponProcessAnimation(player, player->GetActiveWeaponInstance(), client);
         return;
-    }
-
-    //**
-    //*   Weapon Animation Processing.
-    //**/
-    InstanceWeaponProcessAnimation(player, weapon, client);
-    // 
-    //// Process only if animating flag is set.
-    //if (client->weaponState.flags & WeaponFlags::IsAnimating) {
-    //    SG_FrameForTime(&client->weaponState.animationFrame, 
-    //        level.timeStamp,
-    //        client->playerState.gunAnimationStartTime, 
-    //        client->playerState.gunAnimationFrametime, 
-    //        client->playerState.gunAnimationStartFrame,
-    //        client->playerState.gunAnimationEndFrame, 
-    //        client->playerState.gunAnimationLoopCount, 
-    //        client->playerState.gunAnimationForceLoop
-    //    );
-    //    gi.DPrintf("ANIMATIONFRAME = %i\n", client->weaponState.animationFrame);
-    //}
-
-    /**
-    *   Weapon Switch Logic.
-    **/
-    if (nextWeaponID) {
-        // See if the weapon is free to engage holster mode.
-        if (!(client->weaponState.flags & WeaponFlags::IsAnimating) && !(client->weaponState.flags & WeaponFlags::IsHolstered) && client->weaponState.current != WeaponState::Holster) {
-            // Set Player Animation. TODO: This'll have to go in the future when we go full pose skeletal on entities.
-            client->animation.priorityAnimation = PlayerAnimation::Pain;
-            if (client->playerState.pmove.flags & PMF_DUCKED) {
-                player->SetAnimationFrame(FRAME_crpain1);   // TODO: Holster Animation instead of pain.
-                client->animation.endFrame = FRAME_crpain4;
-            } else {
-                player->SetAnimationFrame(FRAME_pain301);
-                client->animation.endFrame = FRAME_pain304;
+    } else {
+        // Since we had no state queued up to switch to, we'll do a check for whether any states are being processed.
+        // If not, ignore, otherwise, call their corresponding process callback.
+        if (weapon) {
+            switch (client->weaponState.current) {
+            case WeaponState::Holster:
+                    weapon->InstanceWeaponProcessHolsterState(player, weapon, client);
+                break;
+            case WeaponState::Draw:
+                    // Change view model right here, no need to do so elsewhere, or is there?
+                    // InstanceWeaponUpdateViewModel(player, player->GetActiveWeaponInstance(), client);
+                    // Execute draw weapon state.
+                    weapon->InstanceWeaponProcessDrawState(player, weapon, client);
+                break;
+            case WeaponState::Idle:
+                    weapon->InstanceWeaponProcessIdleState(player, weapon, client);
+                break;
             }
-
-            // Add IsHolstered flag.
-            client->weaponState.flags |= WeaponFlags::IsHolstered;
-
-            // Queue holster state for next frame.
-            weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Holster);
-        // See if the weapon is free to engage draw mode. If it is, let's switch weapons shall we?
-        } else if (!(client->weaponState.flags & WeaponFlags::IsAnimating) && (client->weaponState.flags & WeaponFlags::IsHolstered) && client->weaponState.current != WeaponState::Draw) {     
-            // Set Player Animation. TODO: This'll have to go in the future when we go full pose skeletal on entities.
-            if (client->playerState.pmove.flags & PMF_DUCKED) {
-                player->SetAnimationFrame(FRAME_crpain1);   // TODO: Draw Animation instead of pain.
-                client->animation.endFrame = FRAME_crpain4;
-            } else {
-                player->SetAnimationFrame(FRAME_pain301);
-                client->animation.endFrame = FRAME_pain304;
-            }
-            
-            // Remove IsHolstered flag.
-            client->weaponState.flags &= ~WeaponFlags::IsHolstered;
-
-            // Reset flags for a fresh weapon state.
-            client->weaponState.flags = 0;
-
-            // Update client persistent weapon inventory IDs.
-            client->persistent.inventory.previousActiveWeaponID = activeWeaponID;
-            client->persistent.inventory.activeWeaponID = nextWeaponID;
-            client->persistent.inventory.nextWeaponID = 0;
-
-            // We've changed the activeWeaponID. This means we'll have to fetch ourselfes a new pointer.
-            weapon = SVGBaseItemWeapon::GetWeaponInstanceByID(client->persistent.inventory.activeWeaponID);
-
-            // Set view model based on ID == 0 aka no weapon, or a valid weapon instance.
-            if (weapon) {
-                // We got ourselves a valid instance, set view model accordingly.
-                if (player->GetModelIndex() == 255) {
-                    int32_t i = (weapon->GetViewModelIndex() & 0xff) << 8;
-                    player->SetSkinNumber((player->GetNumber()  -  1) | i);
-                }
-
-                // Update gun and ammo index.
-                client->playerState.gunIndex = weapon->GetViewModelIndex();         
-                client->ammoIndex = weapon->GetPrimaryAmmoIdentifier();
-
-                // Queue draw state for next frame.
-                weapon->InstanceWeaponQueueNextState(player, weapon, client, ::WeaponState::Draw);
-            } else {
-                // Update gun and ammo index.
-                client->playerState.gunIndex = 0;        
-                client->ammoIndex = 0;
-
-                // Skin to 0.
-                player->SetSkinNumber(0);
-
-                // If we had no weapon pointer , queue state 'None'.
-                InstanceWeaponQueueNextState(player, weapon, client, WeaponState::None);
-            }
-
-            // Return, we're done here for this frame.
-            //return;
         }
     }
 
 
+    /**
+    *   Switch Weapon Logic.
+    **/
+    // If nextWeaponID != 0, we roll.
+    if (client->persistent.inventory.nextWeaponID != 0) {
+        // Check whether the weapon is not processing any animations of a certain state, and isn't holstered.
+        if (!(client->weaponState.flags & WeaponFlags::IsProcessingState) &&
+            !(client->weaponState.flags & WeaponFlags::IsAnimating) &&
+            !(client->weaponState.flags & WeaponFlags::IsHolstered)) {
 
+            // Queue holster state for next frame, prevent this from happening over and over when already in it.
+            if (client->weaponState.current != WeaponState::Holster) {
+                weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Holster);
+            }
+            return;
+        }
 
+        // Check whether the weapon is not processing any animations of a certain state, and has been holstered.
+        if (!(client->weaponState.flags & WeaponFlags::IsProcessingState) &&
+            !(client->weaponState.flags & WeaponFlags::IsAnimating) &&
+            (client->weaponState.flags & WeaponFlags::IsHolstered)) {
 
+            // Exchange weapon IDs.
+            client->persistent.inventory.previousActiveWeaponID = client->persistent.inventory.activeWeaponID;
+            client->persistent.inventory.activeWeaponID = client->persistent.inventory.nextWeaponID;
+            client->persistent.inventory.nextWeaponID = 0;
+
+            // Reset weapon state flags.
+            client->weaponState.flags = 0;
+
+            // Queue draw state for next frame, prevent this from happening over and over when already in it.
+            if (client->weaponState.current != WeaponState::Draw) {
+                weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Draw);
+            }
+            return;
+        }
+    }
+}
+
+/**
+*   @brief  Call whenever an animation needs to be processed for another game frame.
+**/
+void SVGBaseItemWeapon::InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Sanity check.
+    if (!player || !client) {
+        return;
+    }
+    
+    /**
+    *   View Model & Stats Update Logic.
+    **/
+    if (weapon) {
+        // Update gun and ammo index.
+        client->playerState.gunIndex    = weapon->GetViewModelIndex();         
+        client->ammoIndex               = weapon->GetPrimaryAmmoIdentifier();
+
+        // We got ourselves a valid instance, set view model accordingly.
+        if (player->GetModelIndex() == 255) {
+            int32_t i = (weapon->GetViewModelIndex() & 0xff) << 8;
+            player->SetSkinNumber((player->GetNumber()  -  1) | i);
+        }
+    } else {
+        // Update gun and ammo index.
+        client->playerState.gunIndex    = 0;        
+        client->ammoIndex               = 0;
+
+        // Skin to 0.
+        player->SetSkinNumber(0);
+    }
 }
 
 /**
 *   @brief  Call whenever an animation needs to be processed for another game frame.
 **/
 void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Check if the flag for processing animations is set. If not, escape this function.
-    if (!client->weaponState.flags & ServerClient::WeaponState::Flags::ProcessAnimation) {
-        return;
-    }
-    
     // Process only if animating flag is set.
     if (client->weaponState.flags & ServerClient::WeaponState::Flags::IsAnimating) {
         SG_FrameForTime(&client->weaponState.animationFrame, 
@@ -326,7 +288,11 @@ void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SV
         
         // If the animation has finished(frame == -1), automatically unset the IsAnimating flag.
         if (client->weaponState.animationFrame < 0) {
+            // Remove IsAnimating flag.
             client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsAnimating;
+
+            // Call upon animation finished callback.
+            weapon->InstanceWeaponOnAnimationFinished(player, weapon, client);
         }
 
         gi.DPrintf("InstanceWeaponProcessAnimation - State:(#%i)    animationFrame(#%i)\n", client->weaponState.current, client->weaponState.animationFrame);
@@ -391,11 +357,18 @@ void SVGBaseItemWeapon::InstanceWeaponSetCurrentState(SVGBasePlayer *player, SVG
         return;
     }
 
-    // Store old current state so we can use it for our call to OnSwitchState.
-    int32_t oldWeaponState = client->weaponState.current;
-
     // Only call on switch state in case the state isn't identical to old state.
     if (client->weaponState.current != state) {
+        // Add IsProcessingState flag in case state isn't 'None'. Remove it otherwise.
+        if (state == WeaponState::None) {
+            client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+        } else {
+            client->weaponState.flags |= ServerClient::WeaponState::Flags::IsProcessingState;
+        }
+
+        // Store old current state so we can use it for our call to OnSwitchState.
+        int32_t oldWeaponState = client->weaponState.current;
+
         // Assign new state.
         client->weaponState.current = state;
 

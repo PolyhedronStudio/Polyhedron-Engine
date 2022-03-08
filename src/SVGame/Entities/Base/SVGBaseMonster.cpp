@@ -52,7 +52,7 @@ void SVGBaseMonster::Think() {
 	Base::Think();
 
 	// Now go and process animations.
-	ProcessAnimation();
+	IsProcessingState();
 }
 
 
@@ -67,6 +67,6 @@ void SVGBaseMonster::Think() {
 *				whether an animation has finished or not, this is all part of
 *				managing animation states.
 **/
-void SVGBaseMonster::ProcessAnimation() {
+void SVGBaseMonster::IsProcessingState() {
 
 }

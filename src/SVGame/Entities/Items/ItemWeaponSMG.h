@@ -113,19 +113,17 @@ public:
     void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) override;
 
     /**
-    *   @brief  Callback used for idling a weapon. (Show idle animation, what have ya..)
+    *   @brief  Called each frame the weapon is in Draw state.
     **/
-    void InstanceWeaponIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
+    virtual void InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
-    *   @brief  Draw weapon callback.
+    *   @brief  Called each frame the weapon is in Holster state.
     **/
-    void InstanceWeaponDraw(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
+    virtual void InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
-    *   @brief  Holster weapon callback.
+    *   @brief  Called each frame the weapon is in Holster state.
     **/
-    void InstanceWeaponHolster(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    virtual void InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
 
     /**

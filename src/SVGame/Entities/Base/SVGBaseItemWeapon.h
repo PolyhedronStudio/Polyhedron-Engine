@@ -57,7 +57,12 @@ public:
     **/
     virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
  
-    
+    /**
+    *   @brief  Updates the view model(client gun index) and ammo display (client ammo index)
+    *           to that of the weapon pointer passed to it. In case of an invalid weapon item
+    *           (nullptr), it'll set the gun and ammo indices to 0.
+    **/
+    virtual void InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
     * @brief    Sets the weapon's animation properties.
     * @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.

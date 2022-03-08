@@ -93,33 +93,21 @@ public:
     *           if set to false it'll set the lastWeapon pointer to nullptr.
     *   @return A pointer to the newly activated weapon, nullptr if something went wrong.
     **/
-    virtual SVGBaseItemWeapon *ChangeWeapon(int32_t weaponID, qboolean storeLastWeapon = true);
+    virtual SVGBaseItemWeapon *ChangeWeapon(int32_t weaponID, qboolean storePreviousActiveWeaponID = true);
     
     /**
     *   @brief  Looks into the player entity's client structure for the active instance item weapon.
     *   @return Pointer to the instance item weapon that is active for the client.
     **/
     virtual SVGBaseItemWeapon *GetActiveWeaponInstance();
-    /**
-    *   @brief  Sets the player entity's client structure activeWeapon pointer to the instance item weapon.
-    *   @return Pointer to the newly activated instance weapon if successfull, nullptr in case of trouble.
-    **/
-    SVGBaseItemWeapon* SetActiveWeapon(SVGBaseItemWeapon *instanceWeapon);
 
-    /**
-    *   @brief  Adds ammo to the player's inventory.
-    *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
-    **/
-    // ...
+
 
     /***
     * 
     *   Get/Set
     *
     ***/
-    // Active Weapon.
-
-    
     /**
     *   @brief  Sets the server entity's client pointer.
     **/
