@@ -137,20 +137,6 @@ void ItemWeaponBeretta::InstanceSpawn() {
 *
 **/
 /**
-*   @brief
-**/
-//void ItemWeaponBeretta::InstanceWeaponBerettaIdle(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) { 
-//    // Default think callback.
-//
-//    // Presumably base weapon item WEaponThink-> calls whichever think callback is set.
-//
-//    // This one should thus show an idle animation.
-//
-//    // Primary fire does a fire animation, it'll keep setting itself to nextthink until all
-//    // frames are done playing.
-//}
-
-/**
 *   @brief  The mother of all instance weapon callbacks. Calls upon the others depending on state.
 **/
 void ItemWeaponBeretta::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
@@ -232,7 +218,7 @@ void ItemWeaponBeretta::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player,
                 // Remove IsHolstered flag.
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsHolstered;
 
-                // Remove state processing flag.
+                // Remove state processing flag because we'll queue idle state next. .
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
                 // Queue 'Idle' State.
@@ -273,7 +259,7 @@ void ItemWeaponBeretta::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SV
     //static constexpr uint32_t drawEndFrame = 186;
 
     // Call base class method.
-    Base::InstanceWeaponProcessDrawState(player, weapon, client);
+    Base::InstanceWeaponProcessIdleState(player, weapon, client);
 
     // Process animation.
     InstanceWeaponProcessAnimation(player, weapon, client);
@@ -288,7 +274,7 @@ void ItemWeaponBeretta::InstanceWeaponProcessHolsterState(SVGBasePlayer* player,
     //static constexpr uint32_t holsterEndFrame = 150;
 
     // Call base class method.
-    Base::InstanceWeaponProcessHolsterState(player, weapon, client);
+    Base::InstanceWeaponProcessIdleState(player, weapon, client);
 
     // Process animation.
     InstanceWeaponProcessAnimation(player, weapon, client);
@@ -309,7 +295,7 @@ void ItemWeaponBeretta::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SV
     client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
     // Process animation.
-    //InstanceWeaponProcessAnimation(player, weapon, client);
+    InstanceWeaponProcessAnimation(player, weapon, client);
 }
 
 

@@ -154,6 +154,7 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         return;
     }
 
+        
 
 
     /**
@@ -164,7 +165,7 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         // Set the timestamp of when this current state got set.
         client->weaponState.timeStamp = level.timeStamp;
 
-        gi.DPrintf("WeaponState switched:(From: #%i     To: #%i)   Timestamp:(%i)\n", 
+        gi.DPrintf("WeaponState Switched:(From:#%i  To:#%i   Timestamp:%i)\n", 
             client->weaponState.current, client->weaponState.queued, client->weaponState.timeStamp);
 
         // Make the queued weapon state our active one. NOTE: SetCurrentState also calls upon OnSwitchState.
@@ -172,30 +173,7 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 
 	    // Reset it to -1.
         client->weaponState.queued = -1;
-
-        // Be sure to update view model weapon right here in case it has been changed.
-        InstanceWeaponUpdateViewModel(player, weapon, client);
     } 
-
-    /**
-    *   State Processing Logic.
-    **/
-    // Since we had no state queued up to switch to, we'll do a check for whether any states are being processed.
-    // If not, ignore, otherwise, call their corresponding process callback.
-    if (weapon) {
-        switch (client->weaponState.current) {
-        case WeaponState::Holster:
-                weapon->InstanceWeaponProcessHolsterState(player, weapon, client);
-            break;
-        case WeaponState::Draw:
-                // Execute draw weapon state.
-                weapon->InstanceWeaponProcessDrawState(player, weapon, client);
-            break;
-        case WeaponState::Idle:
-                weapon->InstanceWeaponProcessIdleState(player, weapon, client);
-            break;
-        }
-    }
 
 
     /**
@@ -232,12 +210,41 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 
             // Queue draw state for next frame, prevent this from happening over and over when already in it.
             if (client->weaponState.current != WeaponState::Draw) {
-                // Change view model right here, no need to do so elsewhere, or is there?
-                weapon->InstanceWeaponUpdateViewModel(player, weapon, client);
-
                 // Queue next state.
                 weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Draw);
+                //return;
             }
+        }
+    }
+
+    /**
+    *   State Processing Logic.
+    **/
+    // Since we had no state queued up to switch to, we'll do a check for whether any states are being processed.
+    // If not, ignore, otherwise, call their corresponding process callback.
+    if (weapon) {
+        switch (client->weaponState.current) {
+        case WeaponState::Holster:
+                // Process animation.
+                InstanceWeaponProcessAnimation(player, weapon, client);
+                // Execute Holster weapon state.
+                weapon->InstanceWeaponProcessHolsterState(player, weapon, client);
+            break;
+        case WeaponState::Draw:
+
+                // Be sure to update view model weapon right here in case it has been changed.
+                InstanceWeaponUpdateViewModel(player, weapon, client);
+                // Process animation.
+                InstanceWeaponProcessAnimation(player, weapon, client);
+                // Execute draw weapon state.
+                weapon->InstanceWeaponProcessDrawState(player, weapon, client);
+            break;
+        case WeaponState::Idle:
+                // Process animation.
+                InstanceWeaponProcessAnimation(player, weapon, client);
+                // Execute idle weapon state.
+                weapon->InstanceWeaponProcessIdleState(player, weapon, client);
+            break;
         }
     }
 
@@ -281,21 +288,7 @@ void SVGBaseItemWeapon::InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVG
 void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Process only if animating flag is set.
     if (client->weaponState.flags & ServerClient::WeaponState::Flags::IsAnimating) {
-        /**
-        *   Animation Finished Check.
-        **/
-        // If the animation has finished(frame == -1), automatically unset the IsAnimating flag.
-        if (client->weaponState.animationFrame < 0) {
-            // Remove IsAnimating flag.
-            client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsAnimating;
-
-            // Call upon animation finished callback.
-            weapon->InstanceWeaponOnAnimationFinished(player, weapon, client);
-
-        // Escape here, the animation has finished so we need not process it further.
-        //return;
-        }
-
+        // Animate for another frame.
         SG_FrameForTime(&client->weaponState.animationFrame, 
             level.timeStamp,
             client->playerState.gunAnimationStartTime, 
@@ -305,8 +298,17 @@ void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SV
             client->playerState.gunAnimationLoopCount, 
             client->playerState.gunAnimationForceLoop
         );
-        
-        gi.DPrintf("InstanceWeaponProcessAnimation - State:(#%i)    animationFrame(#%i)\n", client->weaponState.current, client->weaponState.animationFrame);
+
+        // If the animation has finished(frame == -1), automatically unset the IsAnimating flag.
+        if (client->weaponState.animationFrame < 0) {
+            // Remove IsAnimating flag.
+            client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsAnimating;
+
+            // Call upon animation finished callback.
+            weapon->InstanceWeaponOnAnimationFinished(player, weapon, client);
+        }
+
+        gi.DPrintf("ProcessAnimation - State:(#%i)    Frame(#%i)\n", client->weaponState.current, client->weaponState.animationFrame);
     }
 }
 
@@ -315,7 +317,7 @@ void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SV
 **/
 void SVGBaseItemWeapon::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Debug Print.
-    gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessDrawState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessDrawState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
 }
     
 /**
@@ -323,14 +325,14 @@ void SVGBaseItemWeapon::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SV
 **/
 void SVGBaseItemWeapon::InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Debug Print.
-    gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessHolsterState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessHolsterState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
 }
 /**
 *   @brief  Called each frame the weapon is in Holster state.
 **/
 void SVGBaseItemWeapon::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Debug Print.
-    gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessIdleState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessIdleState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
 }
 
 /**
@@ -410,6 +412,11 @@ void SVGBaseItemWeapon::InstanceWeaponQueueNextState(SVGBasePlayer *player, SVGB
 * @param oldState Old previous state the weapon was residing in.
 **/
 void SVGBaseItemWeapon::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, int32_t newState, int32_t oldState) {
+    // It is safe to assume, draw weapon state switch means we got ourselves a new viewmodel, I suppose.
+    // Change view model right here, no need to do so elsewhere, or is there?
+    if (newState == WeaponState::Draw) {
+        weapon->InstanceWeaponUpdateViewModel(player, weapon, client);
+    }
 }
 
 /**

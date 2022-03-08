@@ -230,11 +230,13 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("SMG State::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+                gi.DPrintf("SMG Anim::Draw(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
-        case WeaponState::Idle:               
+        case WeaponState::Idle:          
+                // DEBUG: Remove state processing flag, see if it alleviates our complaints.
+                client->weaponState.flags &= ServerClient::WeaponState::Flags::IsProcessingState;
                 // Debug print.
-                gi.DPrintf("SMG State::Idle(started: %i) current time: %i\n", client->weaponState.timeStamp, level.timeStamp);
+                gi.DPrintf("SMG Anim::Idle(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
         case WeaponState::Holster:
                 // Add IsHolstered flag.
@@ -247,7 +249,7 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::None);
 
                 // Debug Print.
-                gi.DPrintf("SMG State::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+                gi.DPrintf("SMG Anim::Holster(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
         default:
 //                gi.DPrintf("SMG State::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
@@ -299,7 +301,7 @@ void ItemWeaponSMG::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBas
     client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
     // Process animation.
-    //InstanceWeaponProcessAnimation(player, weapon, client);
+    InstanceWeaponProcessAnimation(player, weapon, client);
 }
 
 
