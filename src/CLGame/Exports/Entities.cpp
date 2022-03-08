@@ -662,6 +662,7 @@ void ClientGameEntities::AddViewEntities() {
     // This is very ugly right now, but it'll prevent the wrong frame from popping in-screen...
     if (lastModel != gunRenderEntity.model) {
         gunRenderEntity.frame = currentPlayerState->gunAnimationStartFrame;
+        gunRenderEntity.oldframe = currentPlayerState->gunAnimationStartFrame;
     }
 
     gunRenderEntity.id = RESERVED_ENTITIY_GUN;

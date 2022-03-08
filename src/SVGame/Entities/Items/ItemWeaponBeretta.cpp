@@ -165,29 +165,6 @@ void ItemWeaponBeretta::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     // Cast it.
     ItemWeaponBeretta *weaponBeretta = dynamic_cast<ItemWeaponBeretta*>(weapon);
 
-    // Switch based on weapon state.
-    switch (client->weaponState.current) {
-        case WeaponState::Idle:
-            weaponBeretta->InstanceWeaponProcessIdleState(player, weaponBeretta, client);
-        break;
-        case WeaponState::Draw:
-            weaponBeretta->InstanceWeaponProcessDrawState(player, weaponBeretta, client);
-        break;
-        case WeaponState::Holster:
-            weaponBeretta->InstanceWeaponProcessHolsterState(player, weaponBeretta, client);
-        break;
-        case WeaponState::Reload:
-            //weapon->InstanceWeaponProcessReloadState(player, weapon, client);
-        break;
-        case WeaponState::PrimaryFire:
-            //weapon->InstanceWeaponProcessPrimaryFireState(player, weapon, client);
-        break;
-        case WeaponState::SecondaryFire:
-            //weapon->InstanceWeaponProcessSecondaryFireState(player, weapon, client);
-        break;
-        default:
-        break;
-    }
 }
 
 /**

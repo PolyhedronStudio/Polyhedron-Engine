@@ -157,29 +157,6 @@ void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon
     // Cast it.
     ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
 
-    // Switch based on weapon state.
-    switch (client->weaponState.current) {
-        case WeaponState::Idle:
-            weaponSMG->InstanceWeaponProcessIdleState(player, weaponSMG, client);
-        break;
-        case WeaponState::Draw:
-            weaponSMG->InstanceWeaponProcessDrawState(player, weaponSMG, client);
-        break;
-        case WeaponState::Holster:
-            weaponSMG->InstanceWeaponProcessHolsterState(player, weaponSMG, client);
-        break;
-        case WeaponState::Reload:
-            //weapon->InstanceWeaponProcessReloadState(player, weapon, client);
-        break;
-        case WeaponState::PrimaryFire:
-            //weapon->InstanceWeaponProcessPrimaryFireState(player, weapon, client);
-        break;
-        case WeaponState::SecondaryFire:
-            //weapon->InstanceWeaponProcessSecondaryFireState(player, weapon, client);
-        break;
-        default:
-        break;
-    }
 }
 
 /**

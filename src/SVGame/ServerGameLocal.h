@@ -854,7 +854,7 @@ struct gclient_s {
             //! Set if and only if an animation is still playing.
             static constexpr uint32_t IsAnimating           = 1 << 0;
             //! Set if and only if an animation is still playing.
-            static constexpr uint32_t IsProcessingState      = 1 << 1;
+            static constexpr uint32_t IsProcessingState     = 1 << 1;
 
             //! Is the weapon holstered?
             static constexpr uint32_t IsHolstered           = 1 << 2;
