@@ -164,7 +164,6 @@ void ItemWeaponBeretta::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 
     // Cast it.
     ItemWeaponBeretta *weaponBeretta = dynamic_cast<ItemWeaponBeretta*>(weapon);
-
 }
 
 /**

@@ -154,11 +154,13 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         return;
     }
 
+
+
     /**
-    *   State Management Logic.
+    *   State Queue Logic.
     **/
     // See if we got a queued state, if we do, override our current weaponstate.
-    if (client->weaponState.queued != WeaponState::None && !(client->weaponState.flags & WeaponFlags::IsProcessingState)) {
+    if (client->weaponState.queued != -1 && !(client->weaponState.flags & WeaponFlags::IsProcessingState)) {
         // Set the timestamp of when this current state got set.
         client->weaponState.timeStamp = level.timeStamp;
 
@@ -169,13 +171,15 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         weapon->InstanceWeaponSetCurrentState(player, weapon, client, client->weaponState.queued);
 
 	    // Reset it to -1.
-        client->weaponState.queued = WeaponState::None;
+        client->weaponState.queued = -1;
 
-        // Be sure to update view model weapon right here in case it had changes.
-        //InstanceWeaponUpdateViewModel(player, weapon, client);
-        //return;
-    } //else {
+        // Be sure to update view model weapon right here in case it has been changed.
+        InstanceWeaponUpdateViewModel(player, weapon, client);
+    } 
 
+    /**
+    *   State Processing Logic.
+    **/
     // Since we had no state queued up to switch to, we'll do a check for whether any states are being processed.
     // If not, ignore, otherwise, call their corresponding process callback.
     if (weapon) {
@@ -184,8 +188,6 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
                 weapon->InstanceWeaponProcessHolsterState(player, weapon, client);
             break;
         case WeaponState::Draw:
-                // Change view model right here, no need to do so elsewhere, or is there?
-                weapon->InstanceWeaponUpdateViewModel(player, weapon, client);
                 // Execute draw weapon state.
                 weapon->InstanceWeaponProcessDrawState(player, weapon, client);
             break;
@@ -195,18 +197,18 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         }
     }
 
-   // }
-
 
     /**
     *   Switch Weapon Logic.
     **/
     // If nextWeaponID != 0, we roll.
-    if (client->persistent.inventory.nextWeaponID != 0 && client->persistent.inventory.nextWeaponID != client->persistent.inventory.activeWeaponID ) {
+    if ( client->persistent.inventory.nextWeaponID != 0 && 
+        client->persistent.inventory.nextWeaponID != client->persistent.inventory.activeWeaponID ) {
         // Check whether the weapon is not processing any animations of a certain state, and isn't holstered.
         if (!(client->weaponState.flags & WeaponFlags::IsProcessingState) &&
             !(client->weaponState.flags & WeaponFlags::IsAnimating) &&
-            !(client->weaponState.flags & WeaponFlags::IsHolstered)) {
+            !(client->weaponState.flags & WeaponFlags::IsHolstered) &&
+            client->weaponState.current == WeaponState::Idle) {
 
             // Queue holster state for next frame, prevent this from happening over and over when already in it.
             if (client->weaponState.current != WeaponState::Holster) {
@@ -217,7 +219,8 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         // Check whether the weapon is not processing any animations of a certain state, and has been holstered.
         if (!(client->weaponState.flags & WeaponFlags::IsProcessingState) &&
             !(client->weaponState.flags & WeaponFlags::IsAnimating) &&
-            (client->weaponState.flags & WeaponFlags::IsHolstered)) {
+            (client->weaponState.flags & WeaponFlags::IsHolstered) &&
+            client->weaponState.current == WeaponState::None) {
 
             // Exchange weapon IDs.
             client->persistent.inventory.previousActiveWeaponID = client->persistent.inventory.activeWeaponID;
@@ -229,10 +232,15 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 
             // Queue draw state for next frame, prevent this from happening over and over when already in it.
             if (client->weaponState.current != WeaponState::Draw) {
+                // Change view model right here, no need to do so elsewhere, or is there?
+                weapon->InstanceWeaponUpdateViewModel(player, weapon, client);
+
+                // Queue next state.
                 weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Draw);
             }
         }
     }
+
 }
 
 /**
@@ -273,6 +281,9 @@ void SVGBaseItemWeapon::InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVG
 void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Process only if animating flag is set.
     if (client->weaponState.flags & ServerClient::WeaponState::Flags::IsAnimating) {
+        /**
+        *   Animation Finished Check.
+        **/
         // If the animation has finished(frame == -1), automatically unset the IsAnimating flag.
         if (client->weaponState.animationFrame < 0) {
             // Remove IsAnimating flag.
@@ -281,8 +292,8 @@ void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SV
             // Call upon animation finished callback.
             weapon->InstanceWeaponOnAnimationFinished(player, weapon, client);
 
-            // Escape here, the animation has finished so we need not process it further.
-            return;
+        // Escape here, the animation has finished so we need not process it further.
+        //return;
         }
 
         SG_FrameForTime(&client->weaponState.animationFrame, 

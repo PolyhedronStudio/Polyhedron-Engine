@@ -871,10 +871,12 @@ struct gclient_s {
         //! Flags of the weapon's state, gets set to 0 after each successful weapon switch.
         uint32_t flags  = Flags::IsHolstered;
         
-        //! Down state by default (i.e. no weapon active.)
-        int32_t current = ::WeaponState::None;
+        //! None by default.
+        int32_t current     = ::WeaponState::None;
+        //! Same as 'current' by default.
+        int32_t previous    = current;
         //! Queued weapon state to switch to after finishing the current state.
-        int32_t queued  = ::WeaponState::None;
+        int32_t queued      = ::WeaponState::None;
 
         //! Current frame the weapon animation(if any) is residing in. -1 if finished/none.
         int32_t animationFrame  = 0;

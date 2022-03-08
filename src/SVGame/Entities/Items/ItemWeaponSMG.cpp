@@ -223,7 +223,7 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 // Remove IsHolstered flag.
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsHolstered;
 
-                // Remove state processing flag.
+                // Remove state processing flag because we'll queue idle state next. .
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
                 // Queue 'Idle' State.

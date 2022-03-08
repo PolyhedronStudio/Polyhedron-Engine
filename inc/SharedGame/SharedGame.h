@@ -57,19 +57,19 @@ struct ButtonBits {
 **/
 struct WeaponState {
     //! None state, meaning it has no logic to process.
-    static constexpr int32_t None = -1;
+    static constexpr int32_t None = 0;
     //! Draw state, when set it'll process a draw animation.
-    static constexpr int32_t Holster = 0;
+    static constexpr int32_t Holster = 1;
     //! Holster state, when set it'll process a holster animation.
-    static constexpr int32_t Draw = 1;
+    static constexpr int32_t Draw = 2;
     //! Idle state, when set it'll play idle animations at random intervals.
-    static constexpr int32_t Idle = 2;
+    static constexpr int32_t Idle = 3;
     //! Reload, when set it'll try and reload.
-    static constexpr int32_t Reload = 3;
+    static constexpr int32_t Reload = 4;
     //! Primary Fire. Speaks for itself.
-    static constexpr int32_t PrimaryFire = 4;
+    static constexpr int32_t PrimaryFire = 5;
     //! Secondary Fire. This too, speaks for itself.
-    static constexpr int32_t SecondaryFire = 5;
+    static constexpr int32_t SecondaryFire = 6;
 };
 
 /**
