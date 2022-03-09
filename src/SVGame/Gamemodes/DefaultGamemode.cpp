@@ -332,10 +332,30 @@ void DefaultGamemode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflict
     //targ->Die(targ, inflictor, attacker, damage, point);
 }
 
-//===============
-// DefaultGamemode::InflictDamage
-// 
-//===============
+/**
+*   @details    Inflicts damage on the targeted entity if it passes certain demands based on the
+*               game mode.
+*
+*               An example of how this method operates using the following operators listed below:
+*               Example : target = monster, inflictor = rocket, attacker = player
+* 
+*   @param  target      The entity that is about to take damage.
+*   @param  inflictor   The entity that is causing the damage.
+*   @param  attacker    The entity that caused the inflictor to damage target.
+*
+*   @param  dmgDir      Direction of the attack.
+*   @param  point       Point at which the damage is being inflicted.
+*   @param  normal      Normal vector from that point.
+*   @param  damage      Amount of damage being inflicted.
+*   @param  knockBack   Force to be applied against targ as a result of the damage.
+*   @param  damageFlags The following flags can be passed in order to affect the outcome:
+*                       DamageFlags::IndirectFromRadius Damage was indirect(from a nearby explosion).
+*                       DamageFlags::NoArmorProtection  Armor does not protect from this damage.
+*                       DamageFlags::EnergyBasedWeapon  Damage is from an energy based weapon.
+*                       DamageFlags::NoKnockBack        Do not affect velocity, just view angles.
+*                       DamageFlags::Bullet             Damage is from a bullet(used for ricochets).
+*                       DamageFlags::IgnoreProtection   Kills the entity, even if it reside in godmode, has specific armor, etc.
+**/
 void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t damageFlags, int32_t mod) {
     int32_t damageTaken = 0;   // Damage taken.
     int32_t damageSaved = 0;   // Damaged saved, from being taken.

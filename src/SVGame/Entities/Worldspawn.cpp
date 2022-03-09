@@ -174,20 +174,39 @@ void Worldspawn::Precache() {
     // Parent class precache.
     Base::Precache();
 
+    /**
+    *   Audio Precache: General Weaponry.
+    **/
+    SVG_PrecacheSound("weapons/bullet_drop1.wav");
+    SVG_PrecacheSound("weapons/bullet_drop2.wav");
+    SVG_PrecacheSound("weapons/bullet_drop3.wav");
+    SVG_PrecacheSound("weapons/hide_default.wav");
+    SVG_PrecacheSound("weapons/holster_weapon1.wav");
+    SVG_PrecacheSound("weapons/pickup1.wav");
+    SVG_PrecacheSound("weapons/ready_generic1.wav");
+
+
+    /**
+    *   Image Precache: HUD Icons
+    **/
+
+
     // help icon for statusbar
     SVG_PrecacheImage("i_help");
     level.pic_health = SVG_PrecacheImage("i_health");
     SVG_PrecacheImage("help");
     SVG_PrecacheImage("field_3");
 
-    if (!globalGravity)
+    /**
+    *   CVars.
+    **/
+    if (!globalGravity) {
         gi.cvar_set("sv_gravity", std::to_string(DEFAULT_GRAVITY).c_str());
-    else
+    } else {
         gi.cvar_set("sv_gravity", std::to_string(globalGravity).c_str());
+    }
 
     snd_fry = SVG_PrecacheSound("player/fry.wav");  // standing in lava / slime
-
-    SVG_PrecacheItem(SVG_FindItemByPickupName("Blaster"));
 
     SVG_PrecacheSound("player/lava1.wav");
     SVG_PrecacheSound("player/lava2.wav");
@@ -219,20 +238,6 @@ void Worldspawn::Precache() {
     SVG_PrecacheSound("*pain100_1.wav");
     SVG_PrecacheSound("*pain100_2.wav");
 
-    // sexed models
-    // THIS ORDER MUST MATCH THE DEFINES IN g_local.h
-    // you can add more, max 15
-    SVG_PrecacheModel("#w_blaster.md2");
-    SVG_PrecacheModel("#w_shotgun.md2");
-    SVG_PrecacheModel("#w_sshotgun.md2");
-    SVG_PrecacheModel("#w_machinegun.md2");
-    SVG_PrecacheModel("#w_chaingun.md2");
-    SVG_PrecacheModel("#a_grenades.md2");
-    SVG_PrecacheModel("#w_glauncher.md2");
-    SVG_PrecacheModel("#w_rlauncher.md2");
-    SVG_PrecacheModel("#w_hyperblaster.md2");
-    SVG_PrecacheModel("#w_railgun.md2");
-    SVG_PrecacheModel("#w_bfg.md2");
 
     //-------------------
 

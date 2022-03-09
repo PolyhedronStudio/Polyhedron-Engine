@@ -68,16 +68,13 @@ SET(HEADERS_CLGAME
 SET( SRC_SVGAME 
 	SVGame/ChaseCamera.cpp
 	SVGame/Commands.cpp
-	SVGame/Combat.cpp
 	SVGame/Effects.cpp
 	SVGame/Entities.cpp
 	SVGame/GameLocals.cpp
-	SVGame/Items.cpp
 	SVGame/ImportsWrapper.cpp
 	SVGame/Main.cpp
 	SVGame/Effects.cpp
 	SVGame/Save.cpp
-	SVGame/Spawn.cpp
 	SVGame/SVCommands.cpp
 	SVGame/Utilities.cpp
 	SVGame/Weapons.cpp 

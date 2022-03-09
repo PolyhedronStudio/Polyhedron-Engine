@@ -49,31 +49,16 @@ void ItemWeaponSMG::Precache() {
     Base::Precache();
 
     // Precache models.
-    // NOTE: There are none to precache as of yet, SVGBaseItem does so by using
+    // NOTE: There are none to precache right here. SVGBaseItem does so by using
     // GetViewModel and GetWorldModel to acquire the path for precaching.
-
-
-    // Precache sounds.
-    // TODO: First precache sound section of this code must move to player sound precache code.
-    SVG_PrecacheSound("weapons/bulletdrop1.wav");
-    SVG_PrecacheSound("weapons/bulletdrop2.wav");
-    SVG_PrecacheSound("weapons/bulletdrop3.wav");
-
-    SVG_PrecacheSound("weapons/dryfire.wav");
-    SVG_PrecacheSound("weapons/holster_weapon1.wav");
-    SVG_PrecacheSound("weapons/pickup1.wav");
-    SVG_PrecacheSound("weapons/readygeneric.wav");
-    // TODO: The above precache sound section of this code must move to player sound precache code.
 
     // Precache sounds.
     SVG_PrecacheSound("weapons/smg45/fire1.wav");
     SVG_PrecacheSound("weapons/smg45/fire2.wav");
     SVG_PrecacheSound("weapons/smg45/ready1.wav");
     SVG_PrecacheSound("weapons/smg45/ready2.wav");
-
     SVG_PrecacheSound("weapons/smg45/reload1.wav");
     SVG_PrecacheSound("weapons/smg45/reload2.wav");
-
     SVG_PrecacheSound("weapons/smg45/reloadclip1.wav");
     SVG_PrecacheSound("weapons/smg45/reloadclip2.wav");
 }

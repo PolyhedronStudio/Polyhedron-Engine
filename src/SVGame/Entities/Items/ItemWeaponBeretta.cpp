@@ -48,26 +48,12 @@ void ItemWeaponBeretta::Precache() {
     Base::Precache();
 
     // Precache models.
-    // NOTE: There are none to precache as of yet, SVGBaseItem does so by using
+    // NOTE: There are none to precache right here. SVGBaseItem does so by using
     // GetViewModel and GetWorldModel to acquire the path for precaching.
-
-
-    // Precache sounds.
-    // TODO: First precache sound section of this code must move to player sound precache code.
-    SVG_PrecacheSound("weapons/bulletdrop1.wav");
-    SVG_PrecacheSound("weapons/bulletdrop2.wav");
-    SVG_PrecacheSound("weapons/bulletdrop3.wav");
-
-    SVG_PrecacheSound("weapons/dryfire.wav");
-    SVG_PrecacheSound("weapons/holster_weapon1.wav");
-    SVG_PrecacheSound("weapons/pickup1.wav");
-    SVG_PrecacheSound("weapons/readygeneric.wav");
-    // TODO: The above precache sound section of this code must move to player sound precache code.
 
     // Precache sounds.
     SVG_PrecacheSound("weapons/beretta/fire2.wav");
     SVG_PrecacheSound("weapons/beretta/ready1.wav");
-
     SVG_PrecacheSound("weapons/beretta/reload1.wav");
     SVG_PrecacheSound("weapons/beretta/reload2.wav");
 }

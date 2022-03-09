@@ -118,9 +118,6 @@ public:
     //! Used to store Cross level triggers.
     int32_t serverflags = 0;
 
-    //! Number of total items that exist in this game.
-    int32_t numberOfItems = 0;
-
     //! Did we autosave?
     qboolean autoSaved = false;
 };
