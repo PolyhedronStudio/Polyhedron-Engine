@@ -61,8 +61,6 @@ public:
     **/
     qboolean SpawnClassEntities(const char* entities) final;
 
-
-
     /**
     *   @brief Executed whenever an entity event is receieved.
     **/

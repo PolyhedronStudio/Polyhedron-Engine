@@ -52,6 +52,10 @@ The following features are intended to be completed before deploying an official
 
 ### Other future ideas:
 Even though the list for v0.4.0 is small, it's mainly targetting the nescessary things that are still lacking in order to actually be able to call itself a useable project again. With that said we can't deny the everlasting need for more, can we? So here's a list of things that demand more research and/or have been researched but simply not implemented yet.
+- Material System, even though one exists for the Vulkan Path Tracer, there is no functionality with regards to surface contents and their physical behavior. Reasons to add it are footstep audios, setting friction, one step closer to adding decals some day.
+- Decals: These can most likely be simulated by having some overlay that gets clipped accordingly to surfaces. Not perfect, and may still be prone to creating noise. Can't say until we try.
+- Material type defined footsteps.
+- Material type defined friction.
 - JoltPhysics support. Why? So far nobody has had luck replacing the good old tracing mechanics using PhysX, Bullet3D or other known libraries of its sort. JoltPhysics may play a valuable roll in this thanks to it being targeted to games 100%, fully open-source, and has an easy enough to use API. It allows for implementing custom broad and narrow phases which may play a part in the solution of this mystery.
 - RmlUI. Already exists in OpenGL mode, however for it to work nicely in both renderers it requires several small extensions to the R_DrawPic APIs. Including various modifications to the current Vulkan 2D rendering pipeline. The basics are already there however, just not finished. RmlUI will allow for us to use RML(HTML like layouts), and  RCSS(CSS3 like styling including transforms: Nice effects in menu's and HUDs.)
 - Add in UDP Packet Fragmenting support for up to 4 packets max, anything higher would be irrational and counter-act on the net code instead. This'll prevent the quite easily achieved net frame drops which ultimately ruin a game.

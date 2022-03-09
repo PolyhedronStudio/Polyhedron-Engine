@@ -175,7 +175,7 @@ SET( SRC_SVGAME
 	#SVGame/Weapons/Shotgun.cpp
 	#SVGame/Weapons/SuperShotgun.cpp
 	SVGame/World/GameWorld.cpp
-    SVGame/svgame.def
+    SVGame/SVGame.def
     )
     
     SET ( HEADERS_SVGAME
@@ -260,7 +260,7 @@ SET( SRC_SVGAME
 	SVGame/Weapons/Shotgun.h
 	SVGame/Weapons/SuperShotgun.h
 	SVGame/World/GameWorld.h
-    SVGame/svgame.def
+    SVGame/SVGame.def
     )
     
     ###################### Client.

@@ -12,63 +12,6 @@
 
 //
 //===============
-// CLG_CheckPredictionError
-// 
-// Checks for prediction errors.
-//================
-//
-//void CLG_CheckPredictionError(ClientMoveCommand *moveCommand) {
-//    const PlayerMoveState* in = &cl->frame.playerState.pmove;
-//    ClientPredictedState* out = &cl->predictedState;
-//
-//    // if prediction was not run (just spawned), don't sweat it
-//    if (moveCommand->prediction.simulationTime == 0) {
-//        out->viewOrigin = in->origin;
-//        out->viewOffset = in->viewOffset;
-//        out->viewAngles = in->viewAngles;
-//        out->stepOffset = 0.f;
-//
-//        out->error = vec3_zero();
-//        return;
-//    }
-//
-//    // Subtract what the server returned from our predicted origin for that frame
-//    out->error = moveCommand->prediction.error = (moveCommand->prediction.origin - in->origin);
-//
-//    // If the error is too large, it was likely a teleport or respawn, so ignore it
-//    const float len = vec3_length(out->error);
-//    if (len > .1f) {
-//        if (len > MAX_DELTA_ORIGIN) {
-//            Com_DPrint("CLG_PredictionError: if (len > MAX_DELTA_ORIGIN): %s\n", Vec3ToString(out->error));
-//
-//            out->viewOrigin = in->origin;
-//            out->viewOffset = in->viewOffset;
-//            out->viewAngles = in->viewAngles;
-//            out->stepOffset = 0.f;
-//
-//            out->error = vec3_zero();
-//        }
-//        else {
-//            Com_DPrint("CLG_PredictionError: %s\n", Vec3ToString(out->error));
-//        }
-//    }
-//}
-
-//
-//===============
-// CLG_PredictAngles
-// 
-// Sets the predicted angles.
-//================
-//
-//void CLG_PredictAngles(void) {
-//    cl->predictedState.viewAngles[0] = cl->viewAngles[0] + cl->frame.playerState.pmove.deltaAngles[0];
-//    cl->predictedState.viewAngles[1] = cl->viewAngles[1] + cl->frame.playerState.pmove.deltaAngles[1];
-//    cl->predictedState.viewAngles[2] = cl->viewAngles[2] + cl->frame.playerState.pmove.deltaAngles[2];
-//}
-
-//
-//===============
 // CLG_ClipMoveToEntities
 // 
 // 

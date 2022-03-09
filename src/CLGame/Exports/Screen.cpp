@@ -115,7 +115,7 @@ void ClientGameScreen::RenderScreen() {
     clgi.R_SetAlpha(clgi.Cvar_ClampValue(scr_alpha, 0, 1));
 
     // Draw new stats lmao, we got a lot of cleaning up to do for the time being :-P
-    //SRC_DrawNewHud();
+    SRC_DrawNewHud();
 
     // Draw status.
     SCR_DrawStats();

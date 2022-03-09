@@ -760,9 +760,9 @@ void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
     CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
     if (trace_trace->fraction == 1)
-        trace_trace->endPosition = end; // VectorCopy(end, trace_trace->endPosition);
+        trace_trace->endPosition = end;
     else
-        trace_trace->endPosition = vec3_mix(start, end, trace_trace->fraction); //LerpVector(start, end, trace_trace->fraction, trace_trace->endPosition);
+        trace_trace->endPosition = vec3_mix(start, end, trace_trace->fraction);
 }
 
 
@@ -783,8 +783,8 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
     qboolean    rotated;
 
     // subtract origin offset
-    vec3_t start_l = start - origin; // VectorSubtract(start, origin, start_l);
-    vec3_t end_l = end - origin; // VectorSubtract(end, origin, end_l);
+    vec3_t start_l = start - origin;
+    vec3_t end_l = end - origin;
 
     // rotate start and end into the models frame of reference
     if (headNode != box_headnode &&
@@ -792,7 +792,7 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
         rotated = true;
     else
         rotated = false;
-
+    
     if (rotated) {
         AnglesToAxis(angles, axis);
         RotatePoint(start_l, axis);
