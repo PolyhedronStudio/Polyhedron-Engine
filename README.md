@@ -54,6 +54,10 @@ The following features are intended to be completed before deploying an official
 Even though the list for v0.4.0 is small, it's mainly targetting the nescessary things that are still lacking in order to actually be able to call itself a useable project again. With that said we can't deny the everlasting need for more, can we? So here's a list of things that demand more research and/or have been researched but simply not implemented yet.
 - JoltPhysics support. Why? So far nobody has had luck replacing the good old tracing mechanics using PhysX, Bullet3D or other known libraries of its sort. JoltPhysics may play a valuable roll in this thanks to it being targeted to games 100%, fully open-source, and has an easy enough to use API. It allows for implementing custom broad and narrow phases which may play a part in the solution of this mystery.
 - RmlUI. Already exists in OpenGL mode, however for it to work nicely in both renderers it requires several small extensions to the R_DrawPic APIs. Including various modifications to the current Vulkan 2D rendering pipeline. The basics are already there however, just not finished. RmlUI will allow for us to use RML(HTML like layouts), and  RCSS(CSS3 like styling including transforms: Nice effects in menu's and HUDs.)
+- Add in UDP Packet Fragmenting support for up to 4 packets max, anything higher would be irrational and counter-act on the net code instead. This'll prevent the quite easily achieved net frame drops which ultimately ruin a game.
+- Change the time code to use int/uint64_t instead. Q2PRO's old code relied on floats that start running out of precision after 4.5 hours. (Q2RTX is derived from Q2VKPT, and in turn from Q2PRo so. We gotta deal with that as it is.)
+- Move over to MiniZ instead of LibZ.
+- Look into audio effects, we got OpenAL Soft support right now, however perhaps switching to miniaudio(a single header library supporting special effects and 3D spatilization of audio.)
 - Persistent client side class entities that can execute their own game logic. Examples for use are for example debris/gib entities. Right now spawning a few of these can already cause a loss of frame packets due to it overloading with baseline entity states.
 - Client side weapon prediction.
 - Simulate physics on the client where possible. This means less(perhaps, even none) client side prediction errors on stable connections. (Right now riding a platform will always have some minor prediction errors going on due to the client always being a frame behind the server.)
@@ -61,7 +65,7 @@ Even though the list for v0.4.0 is small, it's mainly targetting the nescessary 
 - (Partial-) glTF2 support. This mainly makes the entire content pipeline of things easier to work with. IQM is a fine format otherwise.
 - There's more, this list should just give you a general idea of what Polyhedron is heading out for. Feel free to chime in and suggest possible ideas, or help out.
 ### Acquiring the Sauce
-In order to acquire the sauce, one has to do a recursive submodules checkout, otherwise one is going to find himself in a land full of wonderful error warnings that share misery and pain. Keep in mind that the engine is currently still undergoing full development. We promote interested people to check out the code, and join on our [Discord](https://discord.gg/TfnH5buTq7) if you have any interests in joining forces.
+In order to acquire the sauce, one has to do a recursive submodules checkout, otherwise one is going to find himself in a land full of wonderful error warnings that share misery and pain. Keep in mind that the engine is currently still undergoing full development. We promote interested people to check out the code, and join on our [Discord](https://discord.gg/6Qc6wfmFMR) if you have any interests in joining forces.
 
 ### Building the Sauce
 Nothing more than using cmake on the Sauce root folder, or using Visual Studio's "Open Folder" which'll use CMake from there.
