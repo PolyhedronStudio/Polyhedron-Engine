@@ -179,6 +179,3 @@ namespace ClassEntityFilters {
 
 //! Shorthand for ClassEntityFilters. Less typing.
 namespace cef = ClassEntityFilters;  // Shortcut, lesser typing.
-
-//// This one really has to go....
-Entity* SVG_CreateTargetChangeLevel(char* map);

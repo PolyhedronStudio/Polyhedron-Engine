@@ -398,7 +398,7 @@ void SVG_EndDMLevel(void)
 
     // Stay on same level flag
     if ((int)gamemodeflags->value & GamemodeFlags::SameLevel) {
-        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
+        SVG_HUD_BeginIntermission(nullptr);//SVG_CreateTargetChangeLevel(level.mapName));
         return;
     }
 
@@ -413,11 +413,11 @@ void SVG_EndDMLevel(void)
                 t = strtok(NULL, seps);
                 if (t == NULL) { // end of list, go to first one
                     if (f == NULL) // there isn't a first one, same level
-                        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.mapName));
+                        SVG_HUD_BeginIntermission(nullptr);//SVG_CreateTargetChangeLevel(level.mapName));
                     else
-                        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(f));
+                        SVG_HUD_BeginIntermission(nullptr);//SVG_CreateTargetChangeLevel(f));
                 } else
-                    SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(t));
+                    SVG_HUD_BeginIntermission(nullptr);//SVG_CreateTargetChangeLevel(f));
                 free(s);
                 return;
             }
@@ -429,7 +429,7 @@ void SVG_EndDMLevel(void)
     }
 
     if (level.nextMap[0]) // go to a specific map
-        SVG_HUD_BeginIntermission(SVG_CreateTargetChangeLevel(level.nextMap));
+        SVG_HUD_BeginIntermission(nullptr);//SVG_CreateTargetChangeLevel(level.mapName));
     else {  // search for a changelevel
         //ent = SVG_Find(NULL, FOFS(classname), "target_changelevel");
         //if (!ent) {

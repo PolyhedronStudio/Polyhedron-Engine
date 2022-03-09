@@ -628,6 +628,7 @@ void ClientGameEntities::AddPacketEntities() {
 * Add the view weapon render entity to the screen. Can also be used for
 * other scenarios where a depth hack is required.
 **/
+static uint32_t animStart = 0;
 r_entity_t gunRenderEntity;
 void ClientGameEntities::AddViewEntities() {
     int32_t  shellFlags = 0;
@@ -659,11 +660,17 @@ void ClientGameEntities::AddViewEntities() {
     uint32_t lastModel = gunRenderEntity.model;
     gunRenderEntity.model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0));
 
+
     // This is very ugly right now, but it'll prevent the wrong frame from popping in-screen...
-    if (lastModel != gunRenderEntity.model) {
-        gunRenderEntity.frame = currentPlayerState->gunAnimationStartFrame;
-        gunRenderEntity.oldframe = currentPlayerState->gunAnimationStartFrame;
+    if (oldPlayerState->gunAnimationStartTime != currentPlayerState->gunAnimationStartTime) {
+        animStart = cl->time;
+                gunRenderEntity.frame = currentPlayerState->gunAnimationStartFrame;
+        gunRenderEntity.oldframe = currentPlayerState->gunAnimationEndFrame;
     }
+    //if (lastModel != gunRenderEntity.model) {
+    //    gunRenderEntity.frame = currentPlayerState->gunAnimationStartFrame;
+    //    gunRenderEntity.oldframe = currentPlayerState->gunAnimationEndFrame;
+    //}
 
     gunRenderEntity.id = RESERVED_ENTITIY_GUN;
 
@@ -729,7 +736,7 @@ void ClientGameEntities::AddViewEntities() {
         gunRenderEntity.oldframe = gunRenderEntity.frame;
         gunRenderEntity.backlerp = 1.0 - SG_FrameForTime(&gunRenderEntity.frame,
             cl->time, // Current Time.
-            currentPlayerState->gunAnimationStartTime,  // Animation Start time.
+            animStart,  // Animation Start time.
             currentPlayerState->gunAnimationFrametime,  // Current frame time.
             currentPlayerState->gunAnimationStartFrame, // Start frame.
             currentPlayerState->gunAnimationEndFrame,   // End frame.
@@ -739,7 +746,7 @@ void ClientGameEntities::AddViewEntities() {
 
         // Don't allow it to go below 0, instead set it to old frame.
         if (gunRenderEntity.frame < 0) {
-            gunRenderEntity.frame = 0;
+            gunRenderEntity.frame = gunRenderEntity.oldframe;
         }
         //gunRenderEntity.frame = tionFrame = renderEntity.frame;
         //gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;

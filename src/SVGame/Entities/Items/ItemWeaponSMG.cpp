@@ -166,8 +166,8 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
     switch (newState) {
         case WeaponState::Draw:
             // Let the player entity play the 'draw SMG' sound.
-            client->weaponSound = SVG_PrecacheSound("weapons/smg45/ready2.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/ready2.wav"), 1.f, ATTN_NORM, 0.f);
+            client->weaponSound = SVG_PrecacheSound("weapons/smg45/ready1.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/ready1.wav"), 1.f, ATTN_NORM, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 112, 142);

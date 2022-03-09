@@ -154,8 +154,6 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         return;
     }
 
-        
-
 
     /**
     *   State Queue Logic.
@@ -174,6 +172,37 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 	    // Reset it to -1.
         client->weaponState.queued = -1;
     } 
+
+
+    /**
+    *   State Processing Logic.
+    **/
+    // Since we had no state queued up to switch to, we'll do a check for whether any states are being processed.
+    // If not, ignore, otherwise, call their corresponding process callback.
+    if (weapon) {
+        switch (client->weaponState.current) {
+        case WeaponState::Holster:
+                // Process animation.
+                InstanceWeaponProcessAnimation(player, weapon, client);
+                // Execute Holster weapon state.
+                weapon->InstanceWeaponProcessHolsterState(player, weapon, client);
+            break;
+        case WeaponState::Draw:
+                // Be sure to update view model weapon right here in case it has been changed.
+                InstanceWeaponUpdateViewModel(player, weapon, client);
+                // Process animation.
+                InstanceWeaponProcessAnimation(player, weapon, client);
+                // Execute draw weapon state.
+                weapon->InstanceWeaponProcessDrawState(player, weapon, client);
+            break;
+        case WeaponState::Idle:
+                // Process animation.
+                InstanceWeaponProcessAnimation(player, weapon, client);
+                // Execute idle weapon state.
+                weapon->InstanceWeaponProcessIdleState(player, weapon, client);
+            break;
+        }
+    }
 
 
     /**
@@ -212,40 +241,9 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
             if (client->weaponState.current != WeaponState::Draw) {
                 // Queue next state.
                 weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Draw);
-                //return;
             }
         }
     }
-
-    /**
-    *   State Processing Logic.
-    **/
-    // Since we had no state queued up to switch to, we'll do a check for whether any states are being processed.
-    // If not, ignore, otherwise, call their corresponding process callback.
-    if (weapon) {
-        switch (client->weaponState.current) {
-        case WeaponState::Holster:
-                // Process animation.
-                InstanceWeaponProcessAnimation(player, weapon, client);
-                // Execute Holster weapon state.
-                weapon->InstanceWeaponProcessHolsterState(player, weapon, client);
-            break;
-        case WeaponState::Draw:
-
-                // Process animation.
-                InstanceWeaponProcessAnimation(player, weapon, client);
-                // Execute draw weapon state.
-                weapon->InstanceWeaponProcessDrawState(player, weapon, client);
-            break;
-        case WeaponState::Idle:
-                // Process animation.
-                InstanceWeaponProcessAnimation(player, weapon, client);
-                // Execute idle weapon state.
-                weapon->InstanceWeaponProcessIdleState(player, weapon, client);
-            break;
-        }
-    }
-
 }
 
 /**
