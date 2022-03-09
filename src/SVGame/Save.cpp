@@ -67,7 +67,7 @@ static const save_field_t entityfields[] = {
     I(state.modelIndex2),
     I(state.modelIndex3),
     I(state.modelIndex4),
-    I(state.frame),
+    I(state.animationFrame),
     I(state.skinNumber),
     I(state.effects),
     I(state.renderEffects),
@@ -169,8 +169,8 @@ static const save_field_t entityfields[] = {
     //E(myNoisePtr),
     //E(myNoise2Ptr),
 
-    //I(noiseIndex),
-    //I(noiseIndex2),
+    //I(noiseIndexA),
+    //I(noiseIndexB),
     //F(volume),
     //F(attenuation),
 
@@ -277,7 +277,12 @@ static const save_field_t clientfields[] = {
     V(playerState.gunAngles),
     V(playerState.gunOffset),
     I(playerState.gunIndex),
-    I(playerState.gunFrame),
+    I(playerState.gunAnimationStartTime),
+    I(playerState.gunAnimationStartFrame),
+    I(playerState.gunAnimationEndFrame),
+    I(playerState.gunAnimationFrametime),
+    I(playerState.gunAnimationLoopCount),
+    I(playerState.gunAnimationForceLoop),
 
     FA(playerState.blend, 4),
 
@@ -291,19 +296,19 @@ static const save_field_t clientfields[] = {
     SZ(persistent.netname, 16),
     I(persistent.hand),
 
-    I(persistent.isConnected),
+    //I(persistent.isConnected),
 
-    I(persistent.health),
-    I(persistent.maxHealth),
-    I(persistent.savedFlags),
+    //I(persistent.health),
+    //I(persistent.maxHealth),
+    //I(persistent.savedFlags),
 
-    I(persistent.selectedItem),
-    IA(persistent.inventory, MAX_ITEMS),
+    //I(persistent.selectedItem),
+    //IA(persistent.inventory, MAX_ITEMS),
 
-    I(persistent.maxAmmo9mm),
+    //I(persistent.maxAmmo9mm),
 
-    T(persistent.activeWeapon),
-    T(persistent.lastWeapon),
+    //T(persistent.activeWeapon),
+    //T(persistent.lastWeapon),
 
 //    I(persistent.powerCubes),
     I(persistent.score),
@@ -316,7 +321,7 @@ static const save_field_t clientfields[] = {
 
     I(ammoIndex),
 
-    T(newWeapon),
+//    T(newWeapon),
 
     I(damages.armor),
     I(damages.powerArmor),

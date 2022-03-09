@@ -65,6 +65,11 @@ public:
     SVGEntityHandle(const SVGEntityHandle& other);
 
     /**
+	*	@brief Simple constructor that will accept a server entity.
+	**/
+    SVGEntityHandle(Entity* entity);
+
+    /**
 	*	@brief Simple constructor that will accept a server entity and an entity number.
 	**/
     SVGEntityHandle(Entity* entity, const uint32_t number);

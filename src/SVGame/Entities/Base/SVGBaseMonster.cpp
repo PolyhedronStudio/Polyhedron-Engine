@@ -35,12 +35,25 @@ SVGBaseMonster::~SVGBaseMonster() { }
 /**
 *   @brief 
 **/
-void SVGBaseMonster::Precache() { Base::Precache(); }
+void SVGBaseMonster::Precache() { 
+	Base::Precache();
+}
 
 /**
 *   @brief 
 **/
 void SVGBaseMonster::Spawn() { Base::Spawn(); }
+
+/**
+*   @brief Override think method to add in animation processing.
+**/
+void SVGBaseMonster::Think() { 
+	// Base think.
+	Base::Think();
+
+	// Now go and process animations.
+	IsProcessingState();
+}
 
 
 /***
@@ -48,3 +61,12 @@ void SVGBaseMonster::Spawn() { Base::Spawn(); }
 *   Entity functions.
 *
 ***/
+/**
+*   @brief Takes care of server side animation processing.
+*	@details	The server also does animation processing in order to determine
+*				whether an animation has finished or not, this is all part of
+*				managing animation states.
+**/
+void SVGBaseMonster::IsProcessingState() {
+
+}

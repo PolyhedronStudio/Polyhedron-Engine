@@ -101,79 +101,79 @@ qboolean SVG_OnSameTeam(SVGBaseEntity *entityA, SVGBaseEntity *entityB)
 
 void SelectNextItem(SVGBasePlayer *ent, int itflags)
 {
-    ServerClient   *cl;
-    int         i, index;
-    gitem_t     *it;
+    //ServerClient   *cl;
+    //int         i, index;
+    //gitem_t     *it;
 
-    cl = ent->GetClient();
+    //cl = ent->GetClient();
 
-    if (cl->chaseTarget) {
-        SVG_ChaseNext(ent);
-        return;
-    }
-
-    // scan  for the next valid one
-    //for (i = 1 ; i <= MAX_ITEMS ; i++) {
-    //    index = (cl->persistent.selectedItem + i) % MAX_ITEMS;
-    //    if (!cl->persistent.inventory[index])
-    //        continue;
-    //    it = &itemlist[index];
-    //    if (!it->Use)
-    //        continue;
-    //    if (!(it->flags & itflags))
-    //        continue;
-
-    //    cl->persistent.selectedItem = index;
+    //if (cl->chaseTarget) {
+    //    SVG_ChaseNext(ent);
     //    return;
     //}
 
-    cl->persistent.selectedItem = -1;
+    //// scan  for the next valid one
+    ////for (i = 1 ; i <= MAX_ITEMS ; i++) {
+    ////    index = (cl->persistent.selectedItem + i) % MAX_ITEMS;
+    ////    if (!cl->persistent.inventory[index])
+    ////        continue;
+    ////    it = &itemlist[index];
+    ////    if (!it->Use)
+    ////        continue;
+    ////    if (!(it->flags & itflags))
+    ////        continue;
+
+    ////    cl->persistent.selectedItem = index;
+    ////    return;
+    ////}
+
+    //cl->persistent.selectedItem = -1;
 }
 
 void SelectPrevItem(Entity *ent, int itflags)
 {
-    ServerClient   *cl;
-    int         i, index;
-    gitem_t     *it;
+    //ServerClient   *cl;
+    //int         i, index;
+    //gitem_t     *it;
 
-    cl = ent->client;
+    //cl = ent->client;
 
-    if (cl->chaseTarget) {
-        SVG_ChasePrev((SVGBasePlayer*)ent->classEntity);
-        return;
-    }
-
-    // scan  for the next valid one
-    //for (i = 1 ; i <= MAX_ITEMS ; i++) {
-    //    index = (cl->persistent.selectedItem + MAX_ITEMS - i) % MAX_ITEMS;
-    //    if (!cl->persistent.inventory[index])
-    //        continue;
-    //    it = &itemlist[index];
-    //    if (!it->Use)
-    //        continue;
-    //    if (!(it->flags & itflags))
-    //        continue;
-
-    //    cl->persistent.selectedItem = index;
+    //if (cl->chaseTarget) {
+    //    SVG_ChasePrev((SVGBasePlayer*)ent->classEntity);
     //    return;
     //}
 
-    cl->persistent.selectedItem = -1;
+    //// scan  for the next valid one
+    ////for (i = 1 ; i <= MAX_ITEMS ; i++) {
+    ////    index = (cl->persistent.selectedItem + MAX_ITEMS - i) % MAX_ITEMS;
+    ////    if (!cl->persistent.inventory[index])
+    ////        continue;
+    ////    it = &itemlist[index];
+    ////    if (!it->Use)
+    ////        continue;
+    ////    if (!(it->flags & itflags))
+    ////        continue;
+
+    ////    cl->persistent.selectedItem = index;
+    ////    return;
+    ////}
+
+    //cl->persistent.selectedItem = -1;
 }
 
 void HUD_ValidateSelectedItem(SVGBasePlayer *ent)
 {
-    // Ensure these are valid.
-    if (!ent || !ent->GetClient()) {
-        return;
-    }
+    //// Ensure these are valid.
+    //if (!ent || !ent->GetClient()) {
+    //    return;
+    //}
 
-    ServerClient* cl = ent->GetClient();
+    //ServerClient* cl = ent->GetClient();
 
-    if (cl->persistent.inventory[cl->persistent.selectedItem])
-        return;     // valid
+    //if (cl->persistent.inventory[cl->persistent.selectedItem])
+    //    return;     // valid
 
-    SelectNextItem(ent, -1);
+    //SelectNextItem(ent, -1);
 }
 
 
@@ -396,15 +396,13 @@ void Cmd_Use_f(SVGBasePlayer *player, ServerClient *client) {
     }
 
     // See if it exists in the player's inventory, if not, he ran out.
-    if (!client->persistent.inventory[itemInstance->GetIdentifier()]) {
+    if (!client->persistent.inventory.items[itemInstance->GetIdentifier()]) {
     	SVG_CPrint(player, PRINT_HIGH, "Out of item: " + itemInstance->GetDisplayString()  + "\n");
         return;
     }
 
     // Call the UseItem callback that this instance item has.
     itemInstance->UseInstance(player, itemInstance);
-
-    //it->Use(ent, it);
 }
 
 
@@ -462,9 +460,9 @@ void Cmd_Inven_f(Entity *ent)
 
     cl->showInventory = true;
 
-    gi.WriteByte(ServerGameCommands::Inventory);
+    gi.MSG_WriteUint8(ServerGameCommand::Inventory);//WriteByte(ServerGameCommand::Inventory);
     for (i = 0 ; i < MAX_ITEMS ; i++) {
-        gi.WriteShort(cl->persistent.inventory[i]);
+        gi.MSG_WriteInt16(cl->persistent.inventory.items[i]);//WriteShort(cl->persistent.inventory[i]);
     }
     gi.Unicast(ent, true);
 }
@@ -475,14 +473,14 @@ Cmd_InvUse_f
 =================
 */
 void Cmd_InvUse_f(SVGBasePlayer *player, ServerClient *client) {
-    gitem_t     *it;
+    //gitem_t     *it;
 
-    //HUD_ValidateSelectedItem(ent);
+    ////HUD_ValidateSelectedItem(ent);
 
-    if (client->persistent.selectedItem == -1) {
-        SVG_CPrint(player, PRINT_HIGH, "No item to use.\n");
-        return;
-    }
+    //if (client->persistent.inventory.selectedItem == -1) {
+    //    SVG_CPrint(player, PRINT_HIGH, "No item to use.\n");
+    //    return;
+    //}
 
     //it = &itemlist[ent->GetClient()->persistent.selectedItem];
     //if (!it->Use) {
@@ -615,6 +613,10 @@ Cmd_Kill_f
 =================
 */
 void Cmd_Kill_f(SVGBasePlayer* player, ServerClient* client) {
+    if (!player || !player->IsSubclassOf<SVGBasePlayer>() || !client) {
+        return;
+    }
+
     if ((level.time - client->respawnTime) < 5)
         return;
 
@@ -645,8 +647,8 @@ int PlayerSort(void const *a, void const *b)
     Gameworld* gameworld = game.GetGameworld();
     ServerClient* clients = gameworld->GetClients();
 
-    anum = clients[anum].playerState.stats[STAT_FRAGS];
-    bnum = clients[bnum].playerState.stats[STAT_FRAGS];
+    anum = clients[anum].playerState.stats[PlayerStats::Frags];
+    bnum = clients[bnum].playerState.stats[PlayerStats::Frags];
 
     if (anum < bnum)
         return -1;
@@ -685,7 +687,7 @@ void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
     for (int32_t i = 0; i < numConnectedClients; i++) {
         // Generate score string.
         Q_snprintf(small, sizeof(small), "%3i %s\n",
-                   clients[index[i]].playerState.stats[STAT_FRAGS],
+                   clients[index[i]].playerState.stats[PlayerStats::Frags],
                    clients[index[i]].persistent.netname);
 
         // Ensure buffer doesn't overflow.
@@ -725,28 +727,28 @@ void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
 //    switch (i) {
 //    case 0:
 //        gi.CPrintf(ent, PRINT_HIGH, "flipoff\n");
-//        ent->state.frame = FRAME_flip01 - 1;
+//        ent->state.animationFrame = FRAME_flip01 - 1;
 //        ent->client->animation.endFrame = FRAME_flip12;
 //        break;
 //    case 1:
 //        gi.CPrintf(ent, PRINT_HIGH, "salute\n");
-//        ent->state.frame = FRAME_salute01 - 1;
+//        ent->state.animationFrame = FRAME_salute01 - 1;
 //        ent->client->animation.endFrame = FRAME_salute11;
 //        break;
 //    case 2:
 //        gi.CPrintf(ent, PRINT_HIGH, "taunt\n");
-//        ent->state.frame = FRAME_taunt01 - 1;
+//        ent->state.animationFrame = FRAME_taunt01 - 1;
 //        ent->client->animation.endFrame = FRAME_taunt17;
 //        break;
 //    case 3:
 //        gi.CPrintf(ent, PRINT_HIGH, "wave\n");
-//        ent->state.frame = FRAME_wave01 - 1;
+//        ent->state.animationFrame = FRAME_wave01 - 1;
 //        ent->client->animation.endFrame = FRAME_wave11;
 //        break;
 //    case 4:
 //    default:
 //        gi.CPrintf(ent, PRINT_HIGH, "point\n");
-//        ent->state.frame = FRAME_point01 - 1;
+//        ent->state.animationFrame = FRAME_point01 - 1;
 //        ent->client->animation.endFrame = FRAME_point12;
 //        break;
 //    }
@@ -888,16 +890,24 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
 ClientCommand
 =================
 */
-void SVG_ClientCommand(Entity* serverEntity) {
+void SVG_ClientCommand(Entity* svEntity) {
     //
     // TODO In the future the contents of this function will move along
     // into the gi interface implementation. Leaving this function for just
     // checking if the entity is valid to work with.
     //
     //
+    // Acquire player entity pointer.
+    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(svEntity, true, true);
 
-    // Fetch player entity.
-    SVGBasePlayer* player = GetGameworld()->GetPlayerClassEntity(serverEntity);
+    // Sanity check.
+    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+        gi.DPrintf("Warning: SVG_ClientCommand called on svEntity(#%i) without a valid SVGBasePlayer pointer.\n");
+        return;
+    }
+
+    // Save to cast now.
+    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
 
     // Fetch its client pointer.
     ServerClient *client = player->GetClient();

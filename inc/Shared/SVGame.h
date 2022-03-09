@@ -33,18 +33,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // edict->serverFlags
 struct EntityServerFlags {
-    static constexpr uint32_t NoClient = 0x00000001;    // Don't send entity to clients, even if it has effects
-    static constexpr uint32_t DeadMonster = 0x00000002; // Treat as CONTENTS_DEADMONSTER for collision
-    static constexpr uint32_t Monster = 0x00000004;     // Treat as CONTENTS_MONSTER for collision
-    static constexpr uint32_t Remove = 0x00000008;      // Delete the entity next tick
+    static constexpr uint32_t NoClient      = 0x00000001;   // Don't send entity to clients, even if it has effects.
+    static constexpr uint32_t DeadMonster   = 0x00000002;   // Treat as CONTENTS_DEADMONSTER for collision.
+    static constexpr uint32_t Monster       = 0x00000004;   // Treat as CONTENTS_MONSTER for collision.
+    static constexpr uint32_t Remove        = 0x00000008;   // Delete the entity next tick.
 };
 
 // edict->solid values
 struct Solid {
-    static constexpr uint32_t Not       = 0;    // No interaction with other objects
-    static constexpr uint32_t Trigger   = 1;    // Only touch when inside, after moving
-    static constexpr uint32_t BoundingBox = 2;  // Touch on edge
-    static constexpr uint32_t BSP       = 3;    // Bsp clip, touch on edge
+    static constexpr uint32_t Not           = 0;    // No interaction with other objects.
+    static constexpr uint32_t Trigger       = 1;    // Only touch when inside, after moving.
+    static constexpr uint32_t BoundingBox   = 2;    // Touch on edge.
+    static constexpr uint32_t OctagonBox    = 3;    // Touch on edge, although it has 20, not 10.
+    static constexpr uint32_t BSP           = 4;    // Bsp clip, touch on edge.
 };
 
 //===============================================================
@@ -169,13 +170,23 @@ typedef struct {
     // network messaging
     void (*Multicast)(const vec3_t &origin, int32_t to);
     void (*Unicast)(Entity *ent, qboolean reliable);
-    void (*WriteChar)(int c);
-    void (*WriteByte)(int c);
-    void (*WriteShort)(int c);
-    void (*WriteLong)(int c);
-    void (*WriteFloat)(float f);
-    void (*WriteString)(const char *s);
-    void (*WriteVector3)(const vec3_t &pos);
+    //void (*WriteChar)(int c);
+    //void (*WriteByte)(int c);
+    //void (*WriteShort)(int c);
+    //void (*WriteLong)(int c);
+    void (*MSG_WriteInt8)(int32_t c);
+    void (*MSG_WriteUint8)(int32_t c);
+    void (*MSG_WriteInt16)(int32_t c);
+    void (*MSG_WriteUint16)(uint32_t c);
+    void (*MSG_WriteInt32)(int32_t c);
+    void (*MSG_WriteInt64)(int64_t c);
+    void (*MSG_WriteUintBase128)(uint64_t c);
+    void (*MSG_WriteIntBase128)(int64_t c);
+    void (*MSG_WriteFloat)(float f);
+    void (*MSG_WriteHalfFloat)(float f);
+    void (*MSG_WriteString)(const char *s);
+    void (*MSG_WriteVector3)(const vec3_t &pos, bool halfFloat);
+    void (*MSG_WriteVector4)(const vec4_t &pos, bool halfFloat);
 
     // managed memory allocation
     void *(*TagMalloc)(size_t size, unsigned tag);
@@ -192,7 +203,7 @@ typedef struct {
     const char *(*argv)(int n);     // C++20: char*
     const char *(*args)(void);      // concatenation of all argv >= 1 // C++20: char*
 
-    // N&C: Stuff Cmd.
+    // PH: Stuff Cmd.
     void (*StuffCmd) (Entity* pent, const char* pszCommand); // C++20: STRING: Added const to char*
     
     // add commands to the server console as if they were typed in
@@ -254,6 +265,8 @@ typedef struct {
     // ReadGame is called on a loadgame.
     void (*WriteGame)(const char *filename, qboolean autosave);
     void (*ReadGame)(const char *filename);
+    // Does the current game mode support save games?
+    qboolean (*CanSaveGame)(qboolean isDedicatedServer);
 
     // ReadLevel is called after the default map information has been
     // loaded with SpawnEntities

@@ -79,7 +79,7 @@ static cvar_t   *s_enable;
 static cvar_t   *s_auto_focus;
 static cvar_t   *s_swapstereo;
 
-// N&C: Moved to ClientState
+// PH: Moved to ClientState
 //extern qboolean snd_is_underwater;
 //qboolean snd_is_underwater_enabled;
 
@@ -247,7 +247,7 @@ void S_Init(void)
 	s_reverb = Cvar_Get("s_reverb", "1", CVAR_ARCHIVE);
 	s_reverb_preset_autopick = Cvar_Get("s_reverb_preset_autopick", "1", CVAR_ARCHIVE);
 	s_voiceinput = Cvar_Get("s_voiceinput", "0", CVAR_ARCHIVE);
-	s_voiceinput_volume = Cvar_Get("s_voiceinput_volume", "1", CVAR_ARCHIVE);
+	s_voiceinput_volume = Cvar_Get("s_voiceinput_volume", "0", CVAR_ARCHIVE);
 	s_voiceinput_volume->changed = voiceinputvolume_changed;
 	s_underwater = Cvar_Get("s_underwater", "1", CVAR_ARCHIVE);
 	s_underwater_gain_hf = Cvar_Get("s_underwater_gain_hf", "0.25", CVAR_ARCHIVE);
@@ -1001,11 +1001,11 @@ void S_ParseStartSound(void)
         return;
 
 #ifdef _DEBUG
-    if (developer->integer && !(snd.flags & SND_POS))
+    if (developer->integer && !(snd.flags & SoundCommandBits::Position))
         CL_CheckEntityPresent(snd.entity, "sound");
 #endif
 
-    S_StartSound((snd.flags & SND_POS) ? &snd.pos : NULL,
+    S_StartSound((snd.flags & SoundCommandBits::Position) ? &snd.pos : NULL,
                  snd.entity, snd.channel, handle,
                  snd.volume, snd.attenuation, snd.timeofs);
 }

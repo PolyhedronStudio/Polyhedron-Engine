@@ -528,7 +528,7 @@ static void dump_clients(void)
         "--- ----- ---- --------------- ------- --------------------- ----- -- ---\n");
     FOR_EACH_CLIENT(client) {
         Com_Printf("%3i %5i ", client->number,
-                   client->edict->client->playerState.stats[STAT_FRAGS]);
+                   client->edict->client->playerState.stats[PlayerStats::Frags]);
 
         switch (client->connectionState) {
         case ConnectionState::Zombie:
@@ -840,7 +840,7 @@ static void SV_Stuff_f(void)
     if (!SV_SetPlayer())
         return;
 
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString(Cmd_RawArgsFrom(2));
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
 
@@ -869,7 +869,7 @@ static void SV_StuffAll_f(void)
         return;
     }
 
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString(Cmd_RawArgsFrom(1));
 
     FOR_EACH_CLIENT(client) {

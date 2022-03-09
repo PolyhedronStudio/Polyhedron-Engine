@@ -439,6 +439,7 @@ void CL_InitGameProgs(void)
 
     // Collision Model.
     importAPI.CM_HeadnodeForBox = CM_HeadnodeForBox;
+    importAPI.CM_HeadnodeForOctagon= CM_HeadnodeForOctagon;
     importAPI.CM_InlineModel = _wrp_CM_InlineModel;
     importAPI.CM_PointContents = CM_PointContents;
     importAPI.CM_TransformedPointContents = CM_TransformedPointContents;
@@ -550,20 +551,36 @@ void CL_InitGameProgs(void)
     importAPI.Z_Free = Z_Free;
 
     // Networking.
-    importAPI.MSG_ReadChar = MSG_ReadChar;
-    importAPI.MSG_ReadByte = MSG_ReadByte;
-    importAPI.MSG_ReadShort = MSG_ReadShort;
-    importAPI.MSG_ReadWord = MSG_ReadWord;
-    importAPI.MSG_ReadLong = MSG_ReadLong;
+    importAPI.MSG_ReadInt8      = MSG_ReadInt8;
+    importAPI.MSG_ReadUint8     = MSG_ReadUint8;
+    importAPI.MSG_ReadInt16     = MSG_ReadInt16;
+    importAPI.MSG_ReadUint16    = MSG_ReadUint16;
+    importAPI.MSG_ReadInt32     = MSG_ReadInt32;
+    importAPI.MSG_ReadInt64     = MSG_ReadInt64;
+    importAPI.MSG_ReadUintBase128   = MSG_ReadUintBase128;
+    importAPI.MSG_ReadIntBase128    = MSG_ReadIntBase128;
+    importAPI.MSG_ReadHalfFloat = MSG_ReadHalfFloat;
+    importAPI.MSG_ReadFloat     = MSG_ReadFloat;
     importAPI.MSG_ReadString = MSG_ReadString;
+    importAPI.MSG_ReadStringLine = MSG_ReadStringLine;
+    importAPI.MSG_ReadStringBuffer = MSG_ReadStringBuffer;
+    importAPI.MSG_ReadStringLineBuffer = MSG_ReadStringLineBuffer;
     importAPI.MSG_ReadVector3 = MSG_ReadVector3;
-    importAPI.MSG_ReadVector3 = MSG_ReadVector3;
-    importAPI.MSG_WriteChar = MSG_WriteChar;
-    importAPI.MSG_WriteByte = MSG_WriteByte;
-    importAPI.MSG_WriteShort = MSG_WriteShort;
-    importAPI.MSG_WriteLong = MSG_WriteLong;
-    importAPI.MSG_WriteString = MSG_WriteString;
-    importAPI.MSG_WriteVector3 = MSG_WriteVector3;
+    importAPI.MSG_ReadVector4 = MSG_ReadVector4;
+
+    importAPI.MSG_WriteInt8      = MSG_WriteInt8;
+    importAPI.MSG_WriteUint8     = MSG_WriteUint8;
+    importAPI.MSG_WriteInt16     = MSG_WriteInt16;
+    importAPI.MSG_WriteUint16    = MSG_WriteUint16;
+    importAPI.MSG_WriteInt32     = MSG_WriteInt32;
+    importAPI.MSG_WriteInt64     = MSG_WriteInt64;
+    importAPI.MSG_WriteUintBase128  = MSG_WriteUintBase128;
+    importAPI.MSG_WriteIntBase128   = MSG_WriteIntBase128;
+    importAPI.MSG_WriteHalfFloat    = MSG_WriteHalfFloat;
+    importAPI.MSG_WriteFloat    = MSG_WriteFloat;
+    importAPI.MSG_WriteString   = MSG_WriteString;
+    importAPI.MSG_WriteVector3  = MSG_WriteVector3;
+    importAPI.MSG_WriteVector4  = MSG_WriteVector4;
 
     importAPI.MSG_FlushTo = _trp_MSG_FlushTo;
 
@@ -645,13 +662,25 @@ void CL_InitGameProgs(void)
 //
 //=============================================================================
 //
+
+//===============
+// CL_GM_SpawnClassEntities
 //
+// Spawns local client side class entities.
+//===============
+qboolean CL_GM_SpawnClassEntities(const char* entities) { 
+    if (cge && cge->entities) {
+	    return cge->entities->SpawnClassEntities(entities);
+    }
+
+    return false;
+}
+
 //===============
 // CL_GM_DemoSeek
 // 
 // Called when the client is seeking in a demo playback.
 //===============
-//
 void CL_GM_EntityEvent(int32_t number) {
     if (cge && cge->entities)
         cge->entities->Event(number);
@@ -827,8 +856,9 @@ qboolean CL_GM_UpdateConfigString (int32_t index, const char *str) {
 //===============
 //
 void CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from) {
-    if (cge)
-        return cge->ClientUpdateUserinfo(var, from);
+    if (cge) {
+	    cge->ClientUpdateUserinfo(var, from);
+    }
 }
 
 //
@@ -852,7 +882,7 @@ qboolean CL_GM_ParseServerMessage (int32_t serverCommand) {
 // 
 // Parses command operations known to the game dll, but for
 // demo playback only. This means certain commands such as
-// svc_centerprint can be skipped.
+// ServerCommand::CenterPrint can be skipped.
 //===============
 //
 qboolean CL_GM_SeekDemoMessage (int32_t demoCommand) {

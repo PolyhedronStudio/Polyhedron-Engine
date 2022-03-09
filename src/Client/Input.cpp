@@ -448,7 +448,7 @@ static void CL_SendUserCommand(void)
     cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
     // begin a client move command
-    MSG_WriteByte(clc_move);
+    MSG_WriteUint8(ClientCommand::Move);//MSG_WriteByte(ClientCommand::Move);
 
     // save the position for a checksum byte
     checksumIndex = 0;
@@ -456,9 +456,9 @@ static void CL_SendUserCommand(void)
     // let the server know what the last frame we
     // got was, so the next message can be delta compressed
     if (cl_nodelta->integer || !cl.frame.valid /*|| cls.demowaiting*/) {
-        MSG_WriteLong(-1);   // no compression
+        MSG_WriteInt32(-1);//MSG_WriteLong(-1);   // no compression
     } else {
-        MSG_WriteLong(cl.frame.number);
+        MSG_WriteInt32(cl.frame.number);//MSG_WriteLong(cl.frame.number);
     }
 
     // send this and the previous clientUserCommands in the message, so
@@ -534,7 +534,7 @@ static void CL_SendUserinfo(void)
     if (cls.userinfo_modified == MAX_PACKET_USERINFOS) {
         size_t len = Cvar_BitInfo(userinfo, CVAR_USERINFO);
         Com_DDPrintf("%s: %u: full update\n", __func__, com_framenum);
-        MSG_WriteByte(clc_userinfo);
+        MSG_WriteUint8(ClientCommand::UserInfo);//MSG_WriteByte(ClientCommand::UserInfo);
         MSG_WriteData(userinfo, len + 1);
         MSG_FlushTo(&cls.netChannel->message);
     } else if (cls.serverProtocol == PROTOCOL_VERSION_POLYHEDRON) {
@@ -542,7 +542,7 @@ static void CL_SendUserinfo(void)
                      cls.userinfo_modified);
         for (i = 0; i < cls.userinfo_modified; i++) {
             var = cls.userinfo_updates[i];
-            MSG_WriteByte(clc_userinfo_delta);
+            MSG_WriteUint8(ClientCommand::DeltaUserInfo);//MSG_WriteByte(ClientCommand::DeltaUserInfo);
             MSG_WriteString(var->name);
             if (var->flags & CVAR_USERINFO) {
                 MSG_WriteString(var->string);

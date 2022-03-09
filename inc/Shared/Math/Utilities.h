@@ -3,7 +3,7 @@
 //
 // Shared/Math/utilities.h
 //
-// N&C Math Library: Utilities
+// PH Math Library: Utilities
 // 
 // Contains utility functions used elsewhere by the math library, and/or in 
 // game and engine code. 
@@ -37,6 +37,42 @@
 // Conversion (Degrees, Radians) scalar values.
 #define DegreesScalar ((float) (180.0f / std::numbers::pi_v<float>))
 #define RadiansScalar ((float) (std::numbers::pi_v<float> / 180.0f))
+
+//#define ANGLE2SHORT(x) ((int)((x)*65536 / 360) & 65535)
+//#define SHORT2ANGLE(x) ((x) * (360.0 / 65536))
+//
+//#define ANGLE2BYTE(x) ((int)((x)*256 / 360) & 255)
+//#define BYTE2ANGLE(x) ((x) * (360.0 / 256))
+
+/**
+*   @brief  Encodes the floating point angle to a short. Note: Loss of precision.
+*   @return The short angle after encoding the float to a short.
+**/
+static inline short FloatAngleToShort(float angle) { 
+    return ((int32_t)((angle)*65536 / 360) & 65535);
+}
+/**
+*   @brief  Decodes the short angle to a floating point value.
+*   @return The float angle after decoding the float to a short.
+**/
+static inline float ShortToFloatAngle(short angle) {
+    return ((angle) * (360.0f / 65536));
+}
+
+/**
+*   @brief  Encodes the floating point angle to a byte. Note: Loss of precision.
+*   @return The byte angle after encoding the float to a byte.
+**/
+static inline short FloatAngleToByte(float angle) { 
+    return ((int32_t)((angle)*256 / 360) & 255);
+}
+/**
+*   @brief  Decodes the byte angle to a floating point value.
+*   @return The float angle after decoding the float to a byte.
+**/
+static inline float ByteToFloatAngle(short angle) {
+    return ((angle) * (360.0f / 256));
+}
 
 
 //

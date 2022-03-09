@@ -111,14 +111,14 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
         flags |= MSG_RELIABLE;
     }
 
-    if (cmd == ServerGameCommands::Layout) {
+    if (cmd == ServerGameCommand::Layout) {
         flags |= MSG_COMPRESS;
     }
 
     SV_ClientAddMessage(client, flags);
 
     // fix anti-kicking exploit for broken mods
-    if (cmd == svc_disconnect) {
+    if (cmd == ServerCommand::Disconnect) {
         client->drop_hack = true;
         goto clear;
     }
@@ -152,8 +152,8 @@ static void PF_bprintf(int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_print);
-    MSG_WriteByte(level);
+    MSG_WriteUint8(ServerCommand::Print);//MSG_WriteByte(ServerCommand::Print);
+    MSG_WriteUint8(level); //MSG_WriteByte(level);
     MSG_WriteData(string, len + 1);
 
     // echo to console
@@ -237,8 +237,8 @@ static void PF_cprintf(Entity *ent, int level, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_print);
-    MSG_WriteByte(level);
+    MSG_WriteUint8(ServerCommand::Print);//MSG_WriteByte(ServerCommand::Print);
+    MSG_WriteUint8(level);//MSG_WriteByte(level);
     MSG_WriteData(msg, len + 1);
 
     if (level >= client->messageLevel) {
@@ -284,7 +284,7 @@ static void PF_centerprintf(Entity *ent, const char *fmt, ...)
         return;
     }
 
-    MSG_WriteByte(svc_centerprint);
+    MSG_WriteUint8(ServerCommand::CenterPrint); //MSG_WriteByte(ServerCommand::CenterPrint);
     MSG_WriteData(msg, len + 1);
 
     PF_Unicast(ent, true);
@@ -397,10 +397,10 @@ static void PF_configstring(int index, const char *val)
     }
 
     // send the update to everyone
-    MSG_WriteByte(svc_configstring);
-    MSG_WriteShort(index);
+    MSG_WriteUint8(ServerCommand::ConfigString); //MSG_WriteByte(ServerCommand::ConfigString);
+    MSG_WriteInt16(index);//MSG_WriteShort(index);
     MSG_WriteData(val, len);
-    MSG_WriteByte(0);
+    MSG_WriteUint8(0);//MSG_WriteByte(0);
 
     FOR_EACH_CLIENT(client) {
         if (client->connectionState < ConnectionState::Primed) {
@@ -526,13 +526,13 @@ static void PF_StartSound(Entity *edict, int channel,
     sendchan = (ent << 3) | (channel & 7);
 
     // always send the entity number for channel overrides
-    flags = SND_ENT;
+    flags = SoundCommandBits::Entity;
     if (volume != DEFAULT_SOUND_PACKET_VOLUME)
-        flags |= SND_VOLUME;
+        flags |= SoundCommandBits::Volume;
     if (attenuation != DEFAULT_SOUND_PACKET_ATTENUATION)
-        flags |= SND_ATTENUATION;
+        flags |= SoundCommandBits::Attenuation;
     if (timeofs)
-        flags |= SND_OFFSET;
+        flags |= SoundCommandBits::Offset;
 
     // if the sound doesn't attenuate,send it to everyone
     // (global radio chatter, voiceovers, etc)
@@ -579,18 +579,18 @@ static void PF_StartSound(Entity *edict, int channel,
         // reliable sounds will always have position explicitly set,
         // as no one gurantees reliables to be delivered in time
         if (channel & CHAN_RELIABLE) {
-            MSG_WriteByte(svc_sound);
-            MSG_WriteByte(flags | SND_POS);
-            MSG_WriteByte(soundindex);
+            MSG_WriteUint8(ServerCommand::Sound); //MSG_WriteByte(ServerCommand::Sound);
+            MSG_WriteUint8(flags | SoundCommandBits::Position);//MSG_WriteByte(flags | SoundCommandBits::Position);
+            MSG_WriteUint8(soundindex); //MSG_WriteByte(soundindex);
 
-            if (flags & SND_VOLUME)
-                MSG_WriteByte(volume * 255);
-            if (flags & SND_ATTENUATION)
-                MSG_WriteByte(attenuation * 64);
-            if (flags & SND_OFFSET)
-                MSG_WriteByte(timeofs * 1000);
+            if (flags & SoundCommandBits::Volume)
+                MSG_WriteUint8(volume * 255);//MSG_WriteByte(volume * 255);
+            if (flags & SoundCommandBits::Attenuation)
+                MSG_WriteUint8(attenuation * 64); //MSG_WriteByte(attenuation * 64);
+            if (flags & SoundCommandBits::Offset)
+                MSG_WriteUint8(timeofs * 1000); //MSG_WriteByte(timeofs * 1000);
 
-            MSG_WriteShort(sendchan);
+            MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);
             MSG_WriteVector3(origin);
 
             SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
@@ -605,13 +605,13 @@ static void PF_StartSound(Entity *edict, int channel,
 
         // send origin for invisible entities
         if (edict->serverFlags & EntityServerFlags::NoClient) {
-            flags |= SND_POS;
+            flags |= SoundCommandBits::Position;
         }
 
         // default client doesn't know that bmodels have weird origins
         // MSG: !! Removed: PROTOCOL_VERSION_DEFAULT
         //if (edict->solid == Solid::BSP && client->protocolVersion == PROTOCOL_VERSION_DEFAULT) {
-        //    flags |= SND_POS;
+        //    flags |= SoundCommandBits::Position;
         //}
 
         msg = LIST_FIRST(MessagePacket, &client->msg_free_list, entry);
@@ -633,7 +633,7 @@ static void PF_StartSound(Entity *edict, int channel,
         List_Append(&client->msg_unreliable_list, &msg->entry);
         client->msg_unreliable_bytes += MAX_SOUND_PACKET;
 
-        flags &= ~SND_POS;
+        flags &= ~SoundCommandBits::Position;
     }
 }
 
@@ -654,26 +654,26 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     sendchan = (ent << 3) | (channel & 7);
 
     // always send the entity number for channel overrides
-    flags = SND_ENT | SND_POS;
+    flags = SoundCommandBits::Entity | SoundCommandBits::Position;
     if (volume != DEFAULT_SOUND_PACKET_VOLUME)
-        flags |= SND_VOLUME;
+        flags |= SoundCommandBits::Volume;
     if (attenuation != DEFAULT_SOUND_PACKET_ATTENUATION)
-        flags |= SND_ATTENUATION;
+        flags |= SoundCommandBits::Attenuation;
     if (timeofs)
-        flags |= SND_OFFSET;
+        flags |= SoundCommandBits::Offset;
 
-    MSG_WriteByte(svc_sound);
-    MSG_WriteByte(flags);
-    MSG_WriteByte(soundindex);
+    MSG_WriteUint8(ServerCommand::Sound);//MSG_WriteByte(ServerCommand::Sound);
+    MSG_WriteUint8(flags); //MSG_WriteByte(flags);
+    MSG_WriteUint8(soundindex); //MSG_WriteByte(soundindex);
 
-    if (flags & SND_VOLUME)
-        MSG_WriteByte(volume * 255);
-    if (flags & SND_ATTENUATION)
-        MSG_WriteByte(attenuation * 64);
-    if (flags & SND_OFFSET)
-        MSG_WriteByte(timeofs * 1000);
-
-    MSG_WriteShort(sendchan);
+    if (flags & SoundCommandBits::Volume)
+        MSG_WriteUint8(volume * 255); //MSG_WriteByte(volume * 255);
+    if (flags & SoundCommandBits::Attenuation)
+        MSG_WriteUint8(attenuation * 64); //MSG_WriteByte(attenuation * 64);
+    if (flags & SoundCommandBits::Offset)
+        MSG_WriteUint8(timeofs * 1000);//MSG_WriteByte(timeofs * 1000);
+    
+    MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);
     MSG_WriteVector3(origin);
 
     // if the sound doesn't attenuate,send it to everyone
@@ -711,7 +711,7 @@ static cvar_t *PF_cvar(const char *name, const char *value, int flags)
 //===============
 //
 static void PF_stuffcmd(Entity* pent, const char* pszCommand) {
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString(pszCommand);
 
     // Use the PF Unicast.
@@ -894,13 +894,19 @@ void SV_InitGameProgs(void)
     importAPI.Sound = PF_StartSound;
     importAPI.PositionedSound = PF_PositionedSound;
 
-    importAPI.WriteChar = MSG_WriteChar;
-    importAPI.WriteByte = MSG_WriteByte;
-    importAPI.WriteShort = MSG_WriteShort;
-    importAPI.WriteLong = MSG_WriteLong;
-    importAPI.WriteFloat = MSG_WriteFloat;
-    importAPI.WriteString = MSG_WriteString;
-    importAPI.WriteVector3 = MSG_WriteVector3;
+    importAPI.MSG_WriteInt8 = MSG_WriteInt8;//MSG_WriteChar;
+    importAPI.MSG_WriteUint8 = MSG_WriteUint8;//MSG_WriteByte;
+    importAPI.MSG_WriteInt16 = MSG_WriteInt16;
+    importAPI.MSG_WriteUint16 = MSG_WriteUint16;
+    importAPI.MSG_WriteInt32 = MSG_WriteInt32;
+    importAPI.MSG_WriteInt64 = MSG_WriteInt64;
+    importAPI.MSG_WriteIntBase128 = MSG_WriteIntBase128;
+    importAPI.MSG_WriteUintBase128 = MSG_WriteUintBase128;
+    importAPI.MSG_WriteString = MSG_WriteString;
+    importAPI.MSG_WriteHalfFloat = MSG_WriteHalfFloat;
+    importAPI.MSG_WriteFloat = MSG_WriteFloat;
+    importAPI.MSG_WriteVector3 = MSG_WriteVector3;
+    importAPI.MSG_WriteVector4 = MSG_WriteVector4;
 
     importAPI.TagMalloc = PF_TagMalloc;
     importAPI.TagFree = Z_Free;

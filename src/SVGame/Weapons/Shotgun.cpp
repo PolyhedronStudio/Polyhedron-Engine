@@ -52,8 +52,8 @@ void weapon_shotgun_fire(SVGBasePlayer * ent)
 
     ServerClient* client = ent->GetClient();
 
-    if (client->playerState.gunFrame == 9) {
-        client->playerState.gunFrame++;
+    if (client->playerState.gunAnimationFrame == 9) {
+        client->playerState.gunAnimationFrame++;
         return;
     }
 
@@ -80,13 +80,13 @@ void weapon_shotgun_fire(SVGBasePlayer * ent)
     }
 
     // send muzzle flash
-    gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    gi.WriteByte(ServerGameCommand::MuzzleFlash);
     gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::Shotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
     gi.Multicast(origin, Multicast::PVS);
 
-    client->playerState.gunFrame++;
+    client->playerState.gunAnimationFrame++;
     SVG_PlayerNoise(ent, start, PNOISE_WEAPON);
 
     if (!((int)gamemodeflags->value & GamemodeFlags::InfiniteAmmo))

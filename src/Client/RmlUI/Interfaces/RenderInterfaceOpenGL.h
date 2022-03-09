@@ -32,7 +32,7 @@
 // client/rmlui/Interfaces/RenderInterface.h
 //
 //
-// RmlUI N&C Render Interface implementation.
+// RmlUI PH Render Interface implementation.
 //
 #ifndef __CLIENT_RMLUI_INTERFACES_RENDERINTERFACE_H__
 #define __CLIENT_RMLUI_INTERFACES_RENDERINTERFACE_H__
@@ -41,7 +41,7 @@
 
 
  /**
-	N&C Quake RML Render Interface.
+	PH Quake RML Render Interface.
   */
 
 class RmlUiRenderInterface : public Rml::RenderInterface

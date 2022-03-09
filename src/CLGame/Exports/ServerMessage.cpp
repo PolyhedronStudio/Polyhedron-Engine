@@ -121,45 +121,45 @@ qboolean ClientGameServerMessage::ParseMessage(int32_t serverCommand) {
     switch (serverCommand) {
 
         // Client Print Messages.
-    case svc_print:
+    case ServerCommand::Print:
         CLG_ParsePrint();
         return true;
         break;
 
         // Client Center Screen Print messages.
-    case svc_centerprint:
+    case ServerCommand::CenterPrint:
         CLG_ParseCenterPrint();
         return true;
         break;
 
         // Client temporary entities. (Particles, etc.)
-    case ServerGameCommands::TempEntity:
+    case ServerGameCommand::TempEntity:
         CLG_ParseTempEntitiesPacket();
         CLG_ParseTempEntity();
         return true;
         break;
 
         // Client Muzzle Flash.
-    case ServerGameCommands::MuzzleFlash:
+    case ServerGameCommand::MuzzleFlash:
         CLG_ParseMuzzleFlashPacket(0);
         CLG_MuzzleFlash();
         return true;
         break;
         // Entity Muzzle Flash.
-    case ServerGameCommands::MuzzleFlash2:
+    case ServerGameCommand::MuzzleFlash2:
         CLG_ParseMuzzleFlashPacket(0);
         CLG_MuzzleFlash2();
         return true;
         break;
 
         // Client inventory updates.
-    case ServerGameCommands::Inventory:
+    case ServerGameCommand::Inventory:
         CLG_ParseInventory();
         return true;
         break;
 
         // Client layout (Cruel, limited, ugly UI...) updates
-    case ServerGameCommands::Layout:
+    case ServerGameCommand::Layout:
         CLG_ParseLayout();
         return true;
         break;
@@ -176,11 +176,11 @@ qboolean ClientGameServerMessage::ParseMessage(int32_t serverCommand) {
 qboolean ClientGameServerMessage::SeekDemoMessage(int32_t demoCommand) {
     // Switch cmd.
     switch (demoCommand) {
-    case ServerGameCommands::Inventory:
+    case ServerGameCommand::Inventory:
         CLG_ParseInventory();
         return true;
         break;
-    case ServerGameCommands::Layout:
+    case ServerGameCommand::Layout:
         CLG_ParseLayout();
         return true;
         break;

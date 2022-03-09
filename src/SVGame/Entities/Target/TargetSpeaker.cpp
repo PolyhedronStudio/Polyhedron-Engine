@@ -33,7 +33,7 @@ void TargetSpeaker::Spawn() {
         soundFile += ".wav";
     }
 
-    SetNoiseIndex( gi.SoundIndex( soundFile.c_str() ) );
+    SetNoiseIndexA( gi.SoundIndex( soundFile.c_str() ) );
 
     if ( attenuation == -1.0f ) {
         attenuation = 0.0f;
@@ -41,7 +41,7 @@ void TargetSpeaker::Spawn() {
 
     // Check for prestarted looping sound
     if ( GetSpawnFlags() & SF_LoopedOn ) {
-        SetSound( GetNoiseIndex() );
+        SetSound( GetNoiseIndexA() );
     }
 
     SetUseCallback( &TargetSpeaker::SpeakerUse );
@@ -74,7 +74,7 @@ void TargetSpeaker::SpeakerUse( SVGBaseEntity* other, SVGBaseEntity* activator )
 
     if ( GetSpawnFlags() & (SF_LoopedOn | SF_LoopedOn) ) {
         // Looping sound toggles
-        SetSound( GetSound() ? 0 : GetNoiseIndex() );
+        SetSound( GetSound() ? 0 : GetNoiseIndexA() );
     } else {
         // Normal sound
         if ( GetSpawnFlags() & SF_Reliable ) {
@@ -82,6 +82,6 @@ void TargetSpeaker::SpeakerUse( SVGBaseEntity* other, SVGBaseEntity* activator )
         }
         // Use a positioned_sound, because this entity won't normally be
         // sent to any clients because it is invisible
-        gi.PositionedSound( GetOrigin(), serverEntity, channel, GetNoiseIndex(), volume, attenuation, 0.0f );
+        gi.PositionedSound( GetOrigin(), serverEntity, channel, GetNoiseIndexA(), volume, attenuation, 0.0f );
     }
 }

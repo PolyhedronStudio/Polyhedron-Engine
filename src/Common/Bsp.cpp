@@ -1578,7 +1578,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
         return filelen;
     }
 
-    // N&C: BSP: Version check, currently supports ID and QBSP formats.
+    // PH: BSP: Version check, currently supports ID and QBSP formats.
     // byte swap and validate the header
     header = (dheader_t *)buf;
     if (LittleLong(header->ident) != IDBSPHEADER &&
@@ -1631,7 +1631,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 
     // load into hunk
     len = strlen(name);
-    bsp = (bsp_t*)Z_Mallocz(sizeof(*bsp) + len); // CPP: Cast
+    bsp = (bsp_t*)Z_Mallocz(sizeof(*bsp) + len + 1); // CPP: Cast
     memcpy(bsp->name, name, len + 1);
     bsp->refcount = 1;
     // Extended qbsp?

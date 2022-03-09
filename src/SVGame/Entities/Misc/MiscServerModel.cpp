@@ -91,8 +91,8 @@ void MiscServerModel::Spawn() {
 
     // Set noise ( in case one is precached. )
     if (precachedNoiseIndex) {
-        SetNoiseIndex(precachedNoiseIndex);
-        SetSound(GetNoiseIndex());
+        SetNoiseIndexA(precachedNoiseIndex);
+        SetSound(GetNoiseIndexA());
     }
 
     // Determine whether the model is a sprite. In case it is, we must set the Translucent flag for it to render properly.
@@ -116,9 +116,9 @@ void MiscServerModel::Spawn() {
 
     // Setup the start frame to animate from.
     if (startFrame) {
-        SetFrame(startFrame);
+        SetAnimationFrame(startFrame);
     } else {
-        SetFrame(0);
+        SetAnimationFrame(0);
     }
 
     // Set entity to allow taking damage.
@@ -165,7 +165,7 @@ void MiscServerModel::Think() {
     Base::Think();
 
 
-    //if (GetNoiseIndex()) {
+    //if (GetNoiseIndexA()) {
     //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
     //}
 
@@ -244,8 +244,8 @@ void MiscServerModel::MiscServerModelThink(void) {
     //
     //// Set new entity origin.
     //SetOrigin(trace.endPosition);
-    float currentFrame = GetFrame();
-    float nextFrame = GetFrame() + 1.f;
+    float currentFrame = GetAnimationFrame();
+    float nextFrame = GetAnimationFrame() + 1.f;
 
     if (nextFrame > endFrame) {
 
@@ -254,7 +254,7 @@ void MiscServerModel::MiscServerModelThink(void) {
 	    //}
     }
 
-    SetFrame(nextFrame);
+    SetAnimationFrame(nextFrame);
 
     ////
     //// Calculate direction.

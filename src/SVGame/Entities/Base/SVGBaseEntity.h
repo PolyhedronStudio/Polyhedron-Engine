@@ -108,28 +108,18 @@ public:
         return activatorEntityPtr;
     }
     // Return the 'angles' value.
-    inline const vec3_t& GetAngles() {
-        return serverEntity->state.angles;
-    }
+    inline const vec3_t& GetAngles() { return serverEntity->state.angles; }
 
     // Return the 'angularVelocity' value.
-    inline const vec3_t& GetAngularVelocity() {
-        return angularVelocity;
-    }
+    inline const vec3_t& GetAngularVelocity() { return angularVelocity; }
+    
     // @returns The local center
-    inline vec3_t GetCenter() {
-        return vec3_scale( GetMaxs() + GetMins(), 0.5f );
-    }
-
+    inline vec3_t GetCenter() { return vec3_scale( GetMaxs() + GetMins(), 0.5f ); }
+    
     // Return the 'classname' value.
-    inline const std::string &GetClassname() {
-        return classname;
-    }
-
+    inline const std::string &GetClassname() { return classname; }
     // Set the 'classname' value.
-    inline void SetClassname(const std::string &classname) {
-        this->classname = classname;
-    }
+    inline void SetClassname(const std::string &classname) { this->classname = classname; }
 
     // Return the 'client' pointer.
     gclient_s* GetClient() {
@@ -137,343 +127,224 @@ public:
     }
 
     // Return the 'clipmask' value.
-    inline const int32_t GetClipMask() {
-        return serverEntity->clipMask;
-    }
+    inline const int32_t GetClipMask() { return serverEntity->clipMask; }
 
     // Return the 'count' value.
-    inline const int32_t GetCount() {
-        return count;
-    }
+    inline const int32_t GetCount() { return count; }
 
     // Return the 'damage' value.
-    inline const int32_t GetDamage() {
-        return damage;
-    }
+    inline const int32_t GetDamage() { return damage; }
 
     // Get the 'deadFlag' value.
-    inline const int32_t GetDeadFlag() {
-        return deadFlag;
-    }
+    inline const int32_t GetDeadFlag() { return deadFlag; }
+
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    virtual inline float GetDeceleration() {
-        return 0.f;
-    }
+    virtual inline float GetDeceleration() { return 0.f; }
     // Return the 'delay' value.
-    inline const float &GetDelayTime() {
-        return delayTime;
-    }
+    inline const float &GetDelayTime() { return delayTime; }
 
     // Return the 'effects' value.
-    inline const uint32_t GetEffects() {
-        return serverEntity->state.effects;
-    }
+    inline const uint32_t GetEffects() { return serverEntity->state.effects; }
 
     // Return the 'enemyPtr' entity pointer.
-    inline SVGBaseEntity* GetEnemy() {
-        return enemyEntity;
-    }
+    inline SVGBaseEntity* GetEnemy() { return enemyEntity; }
 
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    virtual inline const vec3_t& GetEndPosition() {
-        return vec3_zero();
-    }
+    virtual inline const vec3_t& GetEndPosition() { return vec3_zero(); }
 
     // Returns a reference to the 'entityDictionary'.
-    virtual inline EntityDictionary &GetEntityDictionary() {
-        return serverEntity->entityDictionary;
-    }
+    virtual inline EntityDictionary &GetEntityDictionary() { return serverEntity->entityDictionary; }
 
     // Return the 'eventID' value.
-    inline const uint8_t GetEventID() {
-        return serverEntity->state.eventID;
-    }
+    inline const uint8_t GetEventID() { return serverEntity->state.eventID; }
 
     // Return the 'flags' value.
-    inline const int32_t GetFlags() {
-        return flags;
-    }
+    inline const int32_t GetFlags() { return flags; }
 
     // Return the 'frame' value.
-    inline const float GetFrame() {
-        return serverEntity->state.frame;
-    }
+    inline const float GetAnimationFrame() { return serverEntity->state.animationFrame; }
 
     // Return the 'gravity' value.
-    inline const float GetGravity() {
-        return gravity;
-    }
+    inline const float GetGravity() { return gravity; }
 
     // Return the 'groundEntitPtr' entity.
-    inline SVGEntityHandle GetGroundEntity() {
-        return groundEntity;
-    }
+    inline SVGEntityHandle GetGroundEntity() { return groundEntity; }
 
     // Return the 'groundEntityLinkCount' value.
-    inline int32_t GetGroundEntityLinkCount() {
-        return groundEntityLinkCount;
-    }
+    inline int32_t GetGroundEntityLinkCount() { return groundEntityLinkCount; }
 
     // Return the 'health' value.
-    inline const int32_t GetHealth() {
-        return health;
-    }
+    inline const int32_t GetHealth() { return health; }
 
-    inline const float GetIdealYawAngle() {
-        return idealYawAngle;
-    }
+    inline const float GetIdealYawAngle() { return idealYawAngle; }
 
     // Get the 'inuse' value.
-    inline qboolean IsInUse() {
-        return serverEntity->inUse;
-    }
+    inline qboolean IsInUse() { return serverEntity->inUse; }
 
     // Get the 'killTarget' entity value.
-    inline const std::string &GetKillTarget() {
-        return killTargetStr;
-    }
+    inline const std::string &GetKillTarget() { return killTargetStr; }
 
     // Get the 'linkCount' value.
-    inline const int32_t GetLinkCount() {
-        // WID: Should we really do this? Fixes a bug when MiscExploboxes are on top of each other and "die".
-        if (!serverEntity) {
-            return 0;
-        }
-
-        return serverEntity->linkCount;
-    }
+    inline const int32_t GetLinkCount() { return (serverEntity ? serverEntity->linkCount : 0); }
 
     // Return the 'mass' value.
-    inline int32_t GetMass() {
-        return mass;
-    }
+    inline int32_t GetMass() { return mass; }
 
     // Return the 'maxHealth' value.
-    inline const int32_t GetMaxHealth() {
-        return maxHealth;
-    }
+    inline const int32_t GetMaxHealth() { return maxHealth; }
 
     // Return the bounding box 'maxs' value.
-    inline const vec3_t& GetMaxs() {
-        return serverEntity->maxs;
-    }
+    inline const vec3_t& GetMaxs() { return serverEntity->maxs; }
 
     // Return the 'message' value.
-    inline const std::string &GetMessage() {
-        return messageStr;
-    }
+    inline const std::string &GetMessage() { return messageStr; }
 
     // Return the bounding box 'mins' value.
-    inline const vec3_t& GetMins() {
-        return serverEntity->mins;
-    }
+    inline const vec3_t& GetMins() { return serverEntity->mins; }
    
     // Return the 'model' value.
-    inline const std::string &GetModel() {
-        return model;
-    }
+    inline const std::string &GetModel() { return model; }
 
-    // Return the 'modelIndex, modelIndex1, modelIndex2, modelIndex3' values.
-    inline const int32_t GetModelIndex() {
-        return serverEntity->state.modelIndex;
-    }
-    inline const int32_t GetModelIndex2() {
-        return serverEntity->state.modelIndex2;
-    }
-    inline const int32_t GetModelIndex3() {
-        return serverEntity->state.modelIndex3;
-    }
-    inline const int32_t GetModelIndex4() {
-        return serverEntity->state.modelIndex4;
-    }
+    // Model Index 1.
+    inline const int32_t    GetModelIndex()  { return serverEntity->state.modelIndex;  }
+    // Model Index 2.
+    inline const int32_t    GetModelIndex2() { return serverEntity->state.modelIndex2; }
+    // Model Index 3.
+    inline const int32_t    GetModelIndex3() { return serverEntity->state.modelIndex3; }
+    // Model Index 4.
+    inline const int32_t    GetModelIndex4() { return serverEntity->state.modelIndex4; }
 
     // Return the 'movetype' value.
-    inline const int32_t GetMoveType() {
-        return moveType;
-    } 
+    inline const int32_t    GetMoveType() { return moveType; } 
+    // Set the 'moveType' value.
+    inline void             SetMoveType(const int32_t &moveType) { this->moveType = moveType; }
 
-    // Return the 'nextThinkTime' value.
-    inline const float GetNextThinkTime() {
-        return nextThinkTime;
-    }
+    // Next Think Time.
+    inline const float  GetNextThinkTime() { return nextThinkTime; }
+    inline void         SetNextThinkTime(const float& nextThinkTime) { this->nextThinkTime = nextThinkTime; }
 
-    // Return the 'noiseIndex' value.
-    inline const int32_t GetNoiseIndex() {
-        return noiseIndex;
-    }
+    // Noise Index A.
+    inline const int32_t    GetNoiseIndexA() { return noiseIndexA; }
+    inline void             SetNoiseIndexA(const int32_t& noiseIndexA) { this->noiseIndexA = noiseIndexA; }
 
-    // Return the 'noiseIndex2' value.
-    inline const int32_t GetNoiseIndex2() {
-        return noiseIndex2;
-    }
+    // Noise Index B.
+    inline const int32_t    GetNoiseIndexB() { return noiseIndexB; }
+    inline void             SetNoiseIndexB(const int32_t& noiseIndexB) { this->noiseIndexB = noiseIndexB; }
 
-    inline const int32_t GetNumber() {
-        return serverEntity->state.number;
-    }
+    // State Number.
+    inline const int32_t    GetNumber() { return serverEntity->state.number; }
+    inline void             SetNumber(const int32_t number) { serverEntity->state.number = number; }
 
-    // Return the 'oldEnemyPtr' entity pointer.
-    SVGBaseEntity* GetOldEnemy() {
-        return oldEnemyEntity;
-    }
+    // Old Enemy.
+    SVGBaseEntity*  GetOldEnemy() { return oldEnemyEntity; }
+    inline void     SetOldEnemy(SVGBaseEntity* oldEnemy) { this->oldEnemyEntity = oldEnemy; }
 
-    // Return the 'oldOrigin' value.
-    inline const vec3_t& GetOldOrigin() {
-        return serverEntity->state.oldOrigin;
-    }
+    // State Old Origin.
+    inline const vec3_t&    GetOldOrigin() { return serverEntity->state.oldOrigin; }
+    inline void             SetOldOrigin(const vec3_t& oldOrigin) { serverEntity->state.oldOrigin = oldOrigin; }
 
-    // Return the 'origin' value.
-    inline const vec3_t &GetOrigin() {
-        return serverEntity->state.origin;
-    }
+    // State Origin.
+    inline const vec3_t &GetOrigin() { return serverEntity->state.origin; }
+    inline void         SetOrigin(const vec3_t& origin) { serverEntity->state.origin = origin; }
 
-    // Get the 'owner' value.
-    inline SVGBaseEntity* GetOwner() {
-        return this->ownerEntity;
-    }
+    // Owner Entity.
+    inline SVGBaseEntity*   GetOwner() { return this->ownerEntity; }
+    inline void             SetOwner(SVGBaseEntity* owner) { this->ownerEntity = owner; }
 
-    // Return the 'renderEffects' value.
-    inline const int32_t GetRenderEffects() {
-        return serverEntity->state.renderEffects;
-    }
-
+    // Render Effects.
+    inline const int32_t    GetRenderEffects() { return serverEntity->state.renderEffects; }
+    inline void             SetRenderEffects(const int32_t& renderEffects) { serverEntity->state.renderEffects = renderEffects; }
+        
     // Get the 'pathTarget' entity value.
     // Overridden by PathCorner
     // TODO: replace this ugly workaround with some component system
-    inline virtual const char* GetPathTarget() {
-        return nullptr;
-    }
+    inline virtual const char* GetPathTarget() { return nullptr; }
 
-    // Return the 'serverFlags' value.
-    inline const int32_t GetServerFlags() {
-        return serverEntity->serverFlags;
-    }
+    // Server Flags.
+    inline const int32_t    GetServerFlags() { return serverEntity->serverFlags; }
+    inline void             SetServerFlags(const int32_t &serverFlags) { serverEntity->serverFlags = serverFlags; }
 
-    // Return the 'skinNumber' value.
-    inline const int32_t GetSkinNumber() {
-        return serverEntity->state.skinNumber;
-    }
+    // Skin Number.
+    inline const int32_t    GetSkinNumber() { return serverEntity->state.skinNumber; }
+    inline void             SetSkinNumber(const int32_t& skinNumber) { serverEntity->state.skinNumber = skinNumber; }
 
-    // Return the 'size' value.
-    inline const vec3_t& GetSize() {
-        return serverEntity->size;
-    }
+    // Entity Size.
+    inline const vec3_t&    GetSize() { return serverEntity->size; }
+    inline void             SetSize(const vec3_t& size) { serverEntity->size = size; }
 
-    // Return the 'solid' value.
-    inline const uint32_t GetSolid() {
-        return serverEntity->solid;
-    }
+    // Solid.
+    inline const uint32_t   GetSolid() { return serverEntity->solid; }
+    inline void             SetSolid(const uint32_t &solid) { serverEntity->solid = solid; }
 
-    // Return the 'spawnFlags' value.
-    inline const int32_t GetSpawnFlags() {
-        return spawnFlags;
-    }
+    // Spawn Flags.
+    inline const int32_t    GetSpawnFlags() { return spawnFlags; }
+    inline void             SetSpawnFlags(const int32_t& spawnFlags) { this->spawnFlags = spawnFlags; }
+
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    virtual inline float GetSpeed() {
-        return 0.f;
-    }
+    virtual inline float    GetSpeed() { return 0.f; }
     // Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    virtual inline const vec3_t& GetStartPosition() {
-        return vec3_zero();
-    }
+    virtual inline const vec3_t& GetStartPosition() { return vec3_zero(); }
+
     // Return a reference to the serverEntity its state.
-    inline const EntityState& GetState() {
-        return serverEntity->state;
-    }
+    inline const EntityState& GetState() { return serverEntity->state; }
+
     // Return the 'style' value.
-    inline const int32_t GetStyle() {
-        return style;
-    }
+    inline const int32_t GetStyle() { return style; }
 
     // Return the 'sound' value.
-    inline const int32_t GetSound() {
-        return serverEntity->state.sound;
-    }
+    inline const int32_t GetSound() { return serverEntity->state.sound; }
 
     // Return the 'takeDamage' value.
-    inline const int32_t GetTakeDamage() {
-        return takeDamage;
-    }
+    inline const int32_t GetTakeDamage() { return takeDamage; }
 
     // Return the 'target' entity value.
-    inline const std::string& GetTarget() {
-        return targetStr;
-    }
+    inline const std::string& GetTarget() { return targetStr; }
     // Return the 'targetName' entity value.
-    inline const std::string& GetTargetName() {
-        return targetNameStr;
-    }
+    inline const std::string& GetTargetName() { return targetNameStr; }
 
     // Return the 'team' entity value.
-    inline const std::string &GetTeam() {
-        return teamStr;
-    }
+    inline const std::string &GetTeam() { return teamStr; }
 
     // Return the 'teamChain' entity value.
-    inline SVGBaseEntity* GetTeamChainEntity() {
-        return teamChainEntity;
-    }
+    inline SVGBaseEntity* GetTeamChainEntity() { return teamChainEntity; }
 
     // Return the 'teamMaster' entity value.
-    inline SVGBaseEntity *GetTeamMasterEntity() {
-        return teamMasterEntity;
-    }
+    inline SVGBaseEntity *GetTeamMasterEntity() { return teamMasterEntity; }
 
     // Return the 'viewHeight' entity value.
-    inline const int32_t GetViewHeight() {
-        return viewHeight;
-    }
+    inline const int32_t GetViewHeight() { return viewHeight; }
 
     // Return the 'velocity' value.
-    inline const vec3_t& GetVelocity() {
-        return velocity;
-    }
+    inline const vec3_t& GetVelocity() { return velocity; }
 
     // Return the 'wait' value.
-    inline const float& GetWaitTime() {
-        return waitTime;
-    }
+    inline const float& GetWaitTime() { return waitTime; }
 
     // Return the 'waterLevel' value.
-    inline const int32_t GetWaterLevel() {
-        return waterLevel;
-    }
+    inline const int32_t GetWaterLevel() { return waterLevel; }
 
     // Return the 'waterType' value.
-    inline const int32_t GetWaterType() {
-        return waterType;
-    }
+    inline const int32_t GetWaterType() { return waterType; }
 
-    inline const float GetYawSpeed() {
-        return yawSpeed;
-    }
+    inline const float GetYawSpeed() { return yawSpeed; }
 
     //
     // Entity Set Functions.
     //  
     // Set the bounding box absolute 'min' value.
-    inline void SetAbsoluteMin(const vec3_t &absMin) {
-        serverEntity->absMin = absMin;
-    }
+    inline void SetAbsoluteMin(const vec3_t &absMin) { serverEntity->absMin = absMin; }
 
     // Set the bounding box absolute 'max' value.
-    inline void SetAbsoluteMax(const vec3_t &absMax) {
-        serverEntity->absMax = absMax;
-    }
+    inline void SetAbsoluteMax(const vec3_t &absMax) { serverEntity->absMax = absMax; }
 
     // Set the 'activatorEntity' pointer.
-    inline void SetActivator(SVGBaseEntity* activator) {
-        this->activatorEntityPtr = activator;
-    }
+    inline void SetActivator(SVGBaseEntity* activator) { this->activatorEntityPtr = activator; }
 
     // Set the 'angles' value.
-    inline void SetAngles(const vec3_t& angles) {
-        serverEntity->state.angles = angles;
-    }
+    inline void SetAngles(const vec3_t& angles) { serverEntity->state.angles = angles; }
 
     // Set the 'angularVelocity' value.
-    inline void SetAngularVelocity(const vec3_t& angularVelocity) {
-        this->angularVelocity = angularVelocity;
-    }
+    inline void SetAngularVelocity(const vec3_t& angularVelocity) { this->angularVelocity = angularVelocity; }
 
     // Set the 'mins', and 'maxs' values of the entity bounding box.
     inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) {
@@ -482,134 +353,78 @@ public:
     }
 
     // Set the 'clipmask' value.
-    inline void SetClipMask(const int32_t &clipMask) {
-        serverEntity->clipMask = clipMask;
-    }
+    inline void SetClipMask(const int32_t &clipMask) { serverEntity->clipMask = clipMask; }
 
     // Set the 'count' value.
-    inline void SetCount(const int32_t& count) {
-        this->count = count;
-    }
+    inline void SetCount(const int32_t& count) { this->count = count; }
     // Set the 'damage' value.
-    inline void SetDamage(const int32_t &damage) {
-        this->damage = damage;
-    }
+    inline void SetDamage(const int32_t &damage) { this->damage = damage; }
 
     // Set the 'deadFlag' value.
-    inline void SetDeadFlag(const int32_t& deadFlag) {
-        this->deadFlag = deadFlag;
-    }
+    inline void SetDeadFlag(const int32_t& deadFlag) { this->deadFlag = deadFlag; }
 
     // Set the 'delayTime' value.
-    inline void SetDelayTime(const float& delayTime) {
-        this->delayTime = delayTime;
-    }
+    inline void SetDelayTime(const float& delayTime) { this->delayTime = delayTime; }
 
     // Set the 'effects' value.
-    inline void SetEffects(const uint32_t &effects) {
-        serverEntity->state.effects = effects;
-    }
+    inline void SetEffects(const uint32_t &effects) { serverEntity->state.effects = effects; }
 
     // Set the 'enemyPtr' pointer.
-    inline void SetEnemy(SVGBaseEntity* enemy) {
-        this->enemyEntity = enemy;
-    }
+    inline void SetEnemy(SVGBaseEntity* enemy) { this->enemyEntity = enemy; }
 
     // Return the 'eventID' value.
-    inline void SetEventID(const uint8_t &eventID) {
-        serverEntity->state.eventID = eventID;
-    }
+    inline void SetEventID(const uint8_t &eventID) { serverEntity->state.eventID = eventID; }
 
     // Set the 'flags' value.
-    inline void SetFlags(const int32_t &flags) {
-        this->flags = flags;
-    }
+    inline void SetFlags(const int32_t &flags) { this->flags = flags; }
 
     // Set the 'frame' value.
-    inline void SetFrame(const float &frame) {
-        serverEntity->state.frame = frame;
-    }
+    inline void SetAnimationFrame(const float &frame) { serverEntity->state.animationFrame = frame; }
 
     // Set the 'gravity' value.
-    inline void SetGravity(const float &gravity) {
-        this->gravity = gravity;
-    }
+    inline void SetGravity(const float &gravity) { this->gravity = gravity; }
 
     // Set the 'groundEntitPtr' entity.
-    inline void SetGroundEntity(SVGBaseEntity* groundEntity) {
-        // Set SVGBaseEntity variant ground entity.
-        this->groundEntity = groundEntity;
-    }
+    inline void SetGroundEntity(SVGBaseEntity* groundEntity) { this->groundEntity = groundEntity; }
 
     // Set the 'groundEntityLinkCount' value.
-    inline void SetGroundEntityLinkCount(int32_t groundEntityLinkCount) {
-        // Set it for THIS class entity.
-        this->groundEntityLinkCount = groundEntityLinkCount;
-    }
+    inline void SetGroundEntityLinkCount(int32_t groundEntityLinkCount) { this->groundEntityLinkCount = groundEntityLinkCount; }
 
     // Set the 'health' value.
-    inline void SetHealth(const int32_t &health) {
-        this->health = health;
-    }
+    inline void SetHealth(const int32_t &health) { this->health = health; }
 
     // Set the 'idealYawAngle' value.
-    inline void SetIdealYawAngle(const float& idealYawAngle) {
-        this->idealYawAngle = idealYawAngle;
-    }
+    inline void SetIdealYawAngle(const float& idealYawAngle) { this->idealYawAngle = idealYawAngle; }
 
     // Set the 'inuse' value.
-    inline void SetInUse(const qboolean& inUse) {
-        serverEntity->inUse = inUse;
-    }
+    inline void SetInUse(const qboolean& inUse) { serverEntity->inUse = inUse; }
     
     // Set the 'killTargetSTr' value.
-    inline void SetKillTarget(const std::string& killTarget) {
-        this->killTargetStr = killTarget;
-    }
+    inline void SetKillTarget(const std::string& killTarget) { this->killTargetStr = killTarget; }
 
     // Set the 'linkCount' value.
-    inline void SetLinkCount(const int32_t &linkCount) {
-        serverEntity->linkCount = linkCount;
-    }
+    inline void SetLinkCount(const int32_t &linkCount) { serverEntity->linkCount = linkCount; }
 
     // Set the 'mass' value.
-    inline void SetMass(const int32_t &_mass) {
-        this->mass = _mass;
-    }
+    inline void SetMass(const int32_t &_mass) { this->mass = _mass; }
 
     // Set the 'maxHealth' value.
-    inline void SetMaxHealth(const int32_t& maxHealth) {
-        this->maxHealth = maxHealth;
-    }
+    inline void SetMaxHealth(const int32_t& maxHealth) { this->maxHealth = maxHealth; }
 
     // Set the 'maxs' value.
-    inline void SetMaxs(const vec3_t& maxs) {
-        serverEntity->maxs = maxs;
-    }
+    inline void SetMaxs(const vec3_t& maxs) { serverEntity->maxs = maxs; }
 
     // Set the 'messageStr' value.
-    inline void SetMessage(const std::string& message) {
-        this->messageStr = message;
-    }
+    inline void SetMessage(const std::string& message) { this->messageStr = message; }
     
     // Set the 'mins' value.
-    inline void SetMins(const vec3_t& mins) {
-        serverEntity->mins = mins;
-    }
+    inline void SetMins(const vec3_t& mins) { serverEntity->mins = mins; }
 
     // Set the 'modelIndex, modelIndex1, modelIndex2, modelIndex3' values.
-    inline void SetModelIndex(const int32_t& index) {
-        serverEntity->state.modelIndex = index;
-    }
-    inline void SetModelIndex2(const int32_t& index) {
-        serverEntity->state.modelIndex2 = index;
-    }
-    inline void SetModelIndex3(const int32_t& index) {
-        serverEntity->state.modelIndex3 = index;
-    }
-    inline void SetModelIndex4(const int32_t& index) {
-        serverEntity->state.modelIndex4 = index;
-    }
+    inline void SetModelIndex(const int32_t& index)  { serverEntity->state.modelIndex = index;  }
+    inline void SetModelIndex2(const int32_t& index) { serverEntity->state.modelIndex2 = index; }
+    inline void SetModelIndex3(const int32_t& index) { serverEntity->state.modelIndex3 = index; }
+    inline void SetModelIndex4(const int32_t& index) { serverEntity->state.modelIndex4 = index; }
 
     // Set the 'model' value.
     inline void SetModel(const std::string &model) {
@@ -623,148 +438,65 @@ public:
         SetModelIndex(gi.ModelIndex(model.c_str()));
     }
 
-    // Set the 'moveType' value.
-    inline void SetMoveType(const int32_t &moveType) {
-        this->moveType = moveType;
-    }
 
-    // Set the 'nextThinkTime' value.
-    inline void SetNextThinkTime(const float& nextThinkTime) {
-        this->nextThinkTime = nextThinkTime;
-    }
 
-    // Set the 'noiseIndex' value.
-    inline void SetNoiseIndex(const int32_t& noiseIndex) {
-        this->noiseIndex = noiseIndex;
-    }
+
+
+
     
-    inline void SetNumber(const int32_t number) {
-        serverEntity->state.number = number;
-    }
+    
 
-    // Set the 'oldEnemyPtr' pointer.
-    inline void SetOldEnemy(SVGBaseEntity* oldEnemy) {
-        this->oldEnemyEntity = oldEnemy;
-    }
 
-    // Set the 'origin' value.
-    inline void SetOldOrigin(const vec3_t& oldOrigin) {
-        serverEntity->state.oldOrigin = oldOrigin;
-    }
 
-    // Set the 'origin' value.
-    inline void SetOrigin(const vec3_t& origin) {
-        serverEntity->state.origin = origin;
-    }
 
-    // Set the 'owner' value.
-    inline void SetOwner(SVGBaseEntity* owner) {
-        this->ownerEntity = owner;
-    }
 
-    // Set the 'renderEffects' value.
-    inline void SetRenderEffects(const int32_t& renderEffects) {
-        serverEntity->state.renderEffects = renderEffects;
-    }
 
-    // Set the 'serverFlags' value.
-    inline void SetServerFlags(const int32_t &serverFlags) {
-        serverEntity->serverFlags = serverFlags;
-    }
-
-    // Set the 'skinNumber' value.
-    inline void SetSkinNumber(const int32_t& skinNumber) {
-        serverEntity->state.skinNumber = skinNumber;
-    }
-
-    // Sest the 'size' value.
-    inline void SetSize(const vec3_t& size) {
-        serverEntity->size = size;
-    }
-
-    // Set the 'solid' value.
-    inline void SetSolid(const uint32_t &solid) {
-        serverEntity->solid = solid;
-    }
 
     // Sets the 'sound' value.
-    inline void SetSound(const int32_t& sound) {
-        serverEntity->state.sound = sound;
-    }
+    inline void SetSound(const int32_t& sound) { serverEntity->state.sound = sound; }
 
-    // Set the 'spawnFlags' value.
-    inline void SetSpawnFlags(const int32_t& spawnFlags) {
-        this->spawnFlags = spawnFlags;
-    }
+
 
     // Set another copy of a serverEntity its state.
-    inline void SetState(const EntityState &state) {
-        serverEntity->state = state;
-    }
+    inline void SetState(const EntityState &state) { serverEntity->state = state; }
 
     // Set the 'style' value.
-    inline void SetStyle(const int32_t &style) {
-        this->style = style;
-    }
+    inline void SetStyle(const int32_t &style) { this->style = style; }
 
     // Set the 'takeDamage' value.
-    inline void SetTakeDamage(const int32_t& takeDamage) {
-        this->takeDamage = takeDamage;
-    }
+    inline void SetTakeDamage(const int32_t& takeDamage) { this->takeDamage = takeDamage; }
 
     // Set the 'target' entity value.
-    inline void SetTarget(const std::string& target) {
-        this->targetStr = target;
-    }
+    inline void SetTarget(const std::string& target) { this->targetStr = target; }
     // Set the 'targetName' entity value.
-    inline void SetTargetName(const std::string& targetName) {
-        this->targetNameStr = targetName;
-    }
+    inline void SetTargetName(const std::string& targetName) { this->targetNameStr = targetName; }
 
     // Set the 'team' index value.
-    inline void SetTeam(const std::string &team) {
-        this->teamStr = team;
-    }
+    inline void SetTeam(const std::string &team) { this->teamStr = team; }
 
     // Set the 'teamChain' entity value.
-    inline void SetTeamChainEntity(SVGBaseEntity* entity) {
-        teamChainEntity = entity;
-    }
+    inline void SetTeamChainEntity(SVGBaseEntity* entity) { teamChainEntity = entity; }
 
     // Set the 'teamMaster' entity value.
-    inline void SetTeamMasterEntity(SVGBaseEntity* entity) {
-        teamMasterEntity = entity;
-    }
+    inline void SetTeamMasterEntity(SVGBaseEntity* entity) { teamMasterEntity = entity; }
 
     // Set the 'viewHeight' entity value.
-    inline void SetViewHeight(const int32_t& height) {
-        this->viewHeight = height;
-    }
+    inline void SetViewHeight(const int32_t& height) { this->viewHeight = height; }
 
     // Set the 'velocity' value.
-    inline void SetVelocity(const vec3_t &velocity) {
-        this->velocity = velocity;
-    }
+    inline void SetVelocity(const vec3_t &velocity) { this->velocity = velocity; }
 
     // Return the 'wait' value.
-    inline void SetWaitTime(const float& waitTime) {
-        this->waitTime = waitTime;
-    }
+    inline void SetWaitTime(const float& waitTime) { this->waitTime = waitTime; }
 
     // Return the 'waterLevel' value.
-    inline void SetWaterLevel(const int32_t &waterLevel) {
-        this->waterLevel = waterLevel;
-    }
+    inline void SetWaterLevel(const int32_t &waterLevel) { this->waterLevel = waterLevel; }
 
     // Return the 'waterType' value.
-    inline void SetWaterType(const int32_t &waterType) {
-        this->waterType = waterType;
-    }
+    inline void SetWaterType(const int32_t &waterType) { this->waterType = waterType; }
 
     // Yaw Speed. (Should be for monsters...)
-    inline void SetYawSpeed(const float& yawSpeed) {
-        this->yawSpeed = yawSpeed;
-    }
+    inline void SetYawSpeed(const float& yawSpeed) { this->yawSpeed = yawSpeed; }
 
     //
     // General Entity Functions.
@@ -873,8 +605,8 @@ protected:
 
     //------------------------------------
     // Noise indexes.
-    int32_t noiseIndex = 0;
-    int32_t noiseIndex2 = 0;
+    int32_t noiseIndexA = 0;
+    int32_t noiseIndexB = 0;
 
     //------------------------------------
     // Timing.
@@ -897,7 +629,7 @@ protected:
 
     //------------------------------------
     // Entity GAME settings.
-    // The height above the origin, this is where EYE SIGHT comes from. Ok?
+    // The height above the origin, this is where EYE SIGHT is at.
     int32_t viewHeight = 0;
     // Determines how to interpret, take damage like a man or like a ... ? Yeah, pick up soap.
     int32_t takeDamage = 0;

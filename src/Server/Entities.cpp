@@ -34,13 +34,9 @@ SV_EmitPacketEntities
 Writes a delta update of a PackedEntity list to the message.
 =============
 */
-static void SV_EmitPacketEntities(client_t         *client,
-                                  ClientFrame   *from,
-                                  ClientFrame   *to,
-                                  int              clientEntityNum)
-{
-    PackedEntity *newent;
-    const PackedEntity *oldent;
+static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientFrame *to, int clientEntityNum) {
+    EntityState *newent;
+    const EntityState *oldent;
     unsigned i, oldindex, newindex, from_num_entities;
     int oldnum, newnum;
     EntityStateMessageFlags flags;
@@ -120,7 +116,7 @@ static void SV_EmitPacketEntities(client_t         *client,
         }
     }
 
-    MSG_WriteShort(0);      // end of packetentities
+    MSG_WriteInt16(0);//MSG_WriteShort(0);      // end of packetentities
 }
 
 static ClientFrame *get_last_frame(client_t *client)
@@ -166,11 +162,11 @@ SV_WriteFrameToClient_Enhanced
 void SV_WriteFrameToClient(client_t *client) {
  
     ClientFrame  *frame, *oldframe;
-    PlayerState *oldPlayerState;
+    PlayerState  *oldPlayerState;
     uint32_t        extraflags;
     int             delta, suppressed;
     byte            *b1, *b2;
-    PlayerStateMessageFlags    psFlags;
+    uint32_t        playerStateMessageFlags = 0;
     int             clientEntityNum;
 
     // this is the frame we are creating
@@ -189,24 +185,23 @@ void SV_WriteFrameToClient(client_t *client) {
     // first byte to be patched
     b1 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
-    MSG_WriteLong((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
+    MSG_WriteInt32((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));//MSG_WriteLong((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
 
     // second byte to be patched
     b2 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
 
     // send over the areaBits
-    MSG_WriteByte(frame->areaBytes);
+    MSG_WriteUint8(frame->areaBytes);//MSG_WriteByte(frame->areaBytes);
     MSG_WriteData(frame->areaBits, frame->areaBytes);
 
     // ignore some parts of playerstate if not recording demo
-    psFlags = (PlayerStateMessageFlags)0; // CPP: Cast
     if (frame->playerState.pmove.type < EnginePlayerMoveType::Dead) {
         if (!(frame->playerState.pmove.flags & PMF_NO_PREDICTION)) {
-            psFlags = (PlayerStateMessageFlags)(psFlags | MSG_PS_IGNORE_VIEWANGLES);  // CPP: Cast
+            playerStateMessageFlags |= MSG_PS_IGNORE_VIEWANGLES;
         }
     } else {
         // lying dead on a rotating platform?
-        psFlags = (PlayerStateMessageFlags)(psFlags | MSG_PS_IGNORE_DELTAANGLES);  // CPP: Cast
+        playerStateMessageFlags |= MSG_PS_IGNORE_DELTAANGLES;  // CPP: Cast
     }
 
     // Fetch client entity number.
@@ -218,16 +213,16 @@ void SV_WriteFrameToClient(client_t *client) {
 
 
     // delta encode the playerstate
-    extraflags = MSG_WriteDeltaPlayerstate(oldPlayerState, &frame->playerState, psFlags);
+    extraflags = MSG_WriteDeltaPlayerstate(oldPlayerState, &frame->playerState, playerStateMessageFlags);
 
     int clientNumber = oldframe ? oldframe->clientNumber : 0;
     if (clientNumber != frame->clientNumber) {
         extraflags |= EPS_CLIENTNUM;
-        MSG_WriteByte(frame->clientNumber);
+        MSG_WriteUint8(frame->clientNumber);//MSG_WriteByte(frame->clientNumber);
     }
 
     // save 3 high bits of extraflags
-    *b1 = svc_frame | (((extraflags & 0x70) << 1));
+    *b1 = ServerCommand::Frame | (((extraflags & 0x70) << 1));
 
     // save 4 low bits of extraflags
     *b2 = (suppressed & SUPPRESSCOUNT_MASK) |
@@ -264,7 +259,7 @@ void SV_BuildClientFrame(client_t *client)
     Entity     *ent;
     Entity     *clent;
     ClientFrame  *frame;
-    PackedEntity *state;
+    EntityState *state;
     PlayerState  *ps;
 	EntityState  es;
 	int         l;
@@ -408,7 +403,8 @@ void SV_BuildClientFrame(client_t *client)
 
         // add it to the circular client_entities array
         state = &svs.entities[svs.next_entity % svs.num_entities];
-        MSG_PackEntity(state, &es);
+        
+        *state = es;
 
         if (ent->state.eventID = EntityEvent::Footstep) {
             ent->state.eventID = 0;

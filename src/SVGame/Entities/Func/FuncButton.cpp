@@ -145,7 +145,7 @@ void FuncButton::ButtonDone() {
 void FuncButton::ButtonReturn() {
 	moveInfo.state = MoverState::Down;
 	BrushMoveCalc( moveInfo.startOrigin, OnButtonDone );
-	SetFrame( 0 );
+	SetAnimationFrame( 0 );
 
 	if ( GetHealth() ) {
 		SetTakeDamage( TakeDamage::Yes );
@@ -174,7 +174,7 @@ void FuncButton::ButtonWait() {
 	moveInfo.state = MoverState::Top;
 	serverEntity->state.effects &= ~(EntityEffectType::AnimCycleFrames01hz2);
 	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames23hz2;
-	SetFrame( 1 );
+	SetAnimationFrame( 1 );
 
 	UseTargets( GetActivator() );
 

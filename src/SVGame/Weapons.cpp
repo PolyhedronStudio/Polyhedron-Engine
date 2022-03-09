@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Utilities.
 #include "Utilities.h"
 
+// Game Mode interface.
+#include "Gamemodes/IGamemode.h"
+
 // World.
 #include "World/Gameworld.h"
 
@@ -116,8 +119,8 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
     point = vec3_fmaf(point, aim[2], up);
     dir = point - self->GetEnemy()->GetOrigin();
 
-    // Do the damage
-    SVG_InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    // Do the damage.
+    game.GetGamemode()->InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
         return false;
@@ -202,12 +205,12 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     color = SplashType::Unknown;
 
                 if (color != SplashType::Unknown) {
-                    gi.WriteByte(ServerGameCommands::TempEntity);
-                    gi.WriteByte(TempEntityEvent::Splash);
-                    gi.WriteByte(8);
-                    gi.WriteVector3(tr.endPosition);
-                    gi.WriteVector3(tr.plane.normal);
-                    gi.WriteByte(color);
+                    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//gi.WriteByte(ServerGameCommand::TempEntity);
+                    gi.MSG_WriteUint8(TempEntityEvent::Splash);//gi.WriteByte(TempEntityEvent::Splash);
+                    gi.MSG_WriteUint8(8);//gi.WriteByte(8);
+                    gi.MSG_WriteVector3(tr.endPosition, false);
+                    gi.MSG_WriteVector3(tr.plane.normal, false);
+                    gi.MSG_WriteUint8(color);//gi.WriteByte(color);
                     gi.Multicast(tr.endPosition, Multicast::PVS);
                 }
 
@@ -230,13 +233,13 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     if ( !(tr.surface && tr.surface->flags & SURF_SKY) ) {
         if (tr.fraction < 1.0) {
             if (tr.ent->GetTakeDamage()) {
-                SVG_InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
+                game.GetGamemode()->InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
-                    gi.WriteByte(ServerGameCommands::TempEntity);
-                    gi.WriteByte(te_impact);
-                    gi.WriteVector3(tr.endPosition);
-                    gi.WriteVector3(tr.plane.normal);
+                    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+                    gi.MSG_WriteUint8(te_impact);//WriteByte(te_impact);
+                    gi.MSG_WriteVector3(tr.endPosition, false);
+                    gi.MSG_WriteVector3(tr.plane.normal, false);
                     gi.Multicast(tr.endPosition, Multicast::PVS);
 
                     if (self->GetClient())
@@ -261,10 +264,10 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
 
-        gi.WriteByte(ServerGameCommands::TempEntity);
-        gi.WriteByte(TempEntityEvent::BubbleTrail);
-        gi.WriteVector3(water_start);
-        gi.WriteVector3(tr.endPosition);
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(TempEntityEvent::BubbleTrail);//WriteByte(TempEntityEvent::BubbleTrail);
+        gi.MSG_WriteVector3(water_start, false);
+        gi.MSG_WriteVector3(tr.endPosition, false);
         gi.Multicast(pos, Multicast::PVS);
     }
 }

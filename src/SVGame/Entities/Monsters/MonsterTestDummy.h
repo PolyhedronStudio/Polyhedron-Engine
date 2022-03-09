@@ -57,6 +57,7 @@ public:
     **/  
     //void MonsterTestBoxUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
     void MonsterTestDummyThink(void);
+    void MonsterTestDummyStartAnimation(void);
     void MonsterTestDummyDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
     //void MonsterTestTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
 

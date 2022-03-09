@@ -3,7 +3,7 @@
 //
 // Shared/Math/rectangle.h
 //
-// N&C Math Library: Rectangle
+// PH Math Library: Rectangle
 //
 #ifndef __INC_SHARED_MATH_RECTANGLE_H__
 #define __INC_SHARED_MATH_RECTANGLE_H__

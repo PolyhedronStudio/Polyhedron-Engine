@@ -19,6 +19,9 @@
 #include "../ClientGameExports.h"
 #include "Entities.h"
 
+// Shared Game.
+#include "SharedGame/SkeletalAnimation.h"
+
 // WID: TODO: Gotta fix this one too.
 extern qhandle_t cl_mod_powerscreen;
 extern qhandle_t cl_mod_laser;
@@ -31,10 +34,170 @@ static constexpr int32_t RESERVED_ENTITIY_GUN = 1;
 static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 2;
 static constexpr int32_t RESERVED_ENTITIY_COUNT = 3;
 
-//---------------
-// ClientGameEntities::Event
-//
-//---------------
+
+/**
+*   @brief  Parses and spawns the local class entities in the BSP Entity String.
+* 
+*   @details    When a class isn't locally registered, it'll automatically spawn
+*               a CLGBaseEntity instead which has all the default behaviors that
+*               you'd expect for it to be functional.
+* 
+*   @return True on success.
+**/
+qboolean ClientGameEntities::SpawnClassEntities(const char* entities) {
+	// Clear level state.
+    //level = {};
+
+    // Delete class entities if they are allocated, and reset the server entity to a zero state.
+	//for (int32_t i = 0; i < classEntities.size(); i++) {
+	//for (auto& classEntity : classEntities) {
+	//	// Delete class entity.
+	//	if (classEntities[i]) {
+	//	    delete classEntities[i];
+	//		classEntities[i] = NULL;
+	//	}
+
+	//	// Reset server entity to a zero state.
+	//	serverEntities[i] = {};
+    //}
+
+	// Copy in the map name and designated spawnpoint(if any.)
+    //strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
+    //strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
+
+	// Spawn SVGBasePlayer classes for each reserved client entity.
+    //PreparePlayer();
+
+	// We'll keep on parsing until this is set to false.
+	qboolean isParsing = true;
+	
+	// This gets set to false the immediate moment we run into parsing trouble.
+	qboolean parsedSuccessfully = false;
+
+	// Token pointer.
+	char *com_token = nullptr;
+
+	// Pointer to the server entity we intend to employ.
+	//Entity *serverEntity = nullptr;
+
+	// Engage parsing.
+	while (!!isParsing == true) {
+		// Parse the opening brace.
+		com_token = COM_Parse(&entities);
+
+		if (!entities) {
+			break;
+		}
+
+		if (com_token[0] != '{') {
+		    Com_Error(ERR_DROP, "SpawnEntitiesFromString: found %s when expecting {", com_token);
+			return false;
+		}
+
+		// Pick the first entity there is, start asking for 
+		//if (!serverEntity) {
+		//	serverEntity = serverEntities;
+		//} else {
+		//	serverEntity = ObtainFreeServerEntity();
+		//}
+
+		// Now we've got the reserved server entity to use, let's parse the entity.
+        ClientEntity clientEntity;
+
+		ParseEntityString(&entities, &clientEntity);
+
+		// Allocate the class entity, and call its spawn.
+		//if (!SpawnParsedClassEntity(serverEntity)) {
+		//	parsedSuccessfully = false;
+		//}
+	}
+
+	//// Post spawn entities.
+	//for (auto& classEntity : classEntities) {
+	//	if (classEntity) {
+	//		classEntity->PostSpawn();
+	//	}
+	//}
+
+	//// Find and hook team slaves.
+	//FindTeams();
+
+	// Initialize player trail...
+	// SVG_PlayerTrail_Init
+
+	return parsedSuccessfully;
+}
+
+
+/**
+*	@brief	Parses the BSP Entity string and places the results in the server
+*			entity dictionary.
+**/
+qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* clEntity) {
+    // False until proven otherwise.
+    qboolean parsedSuccessfully = false;
+
+	// Key value ptrs.
+    char *key = nullptr, *value = nullptr;
+
+    // Go through all the dictionary pairs.
+    while (1) {
+		// Parse the key.
+		key = COM_Parse(data);
+		
+		// If we hit a }, it means we're done parsing, break out of this loop.
+		if (key[0] == '}') {
+		    break;
+		}
+		// If we are at the end of the string without a closing brace, error out.
+		if (!*data) {
+		    Com_Error(ERR_DROP, "%s: EOF without closing brace", __func__);
+		    return false;
+		}
+
+		// Parse the value.
+		value = COM_Parse(data);
+		// If we are at the end of the string without a closing brace, error out.
+		if (!*data) {
+		    Com_Error(ERR_DROP, "%s: EOF without closing brace", __func__);
+			return false;
+		}
+
+		// Ensure we had a value.
+		if (value[0] == '}') {
+		    Com_Error(ERR_DROP, "%s: closing brace without value for key %s", __func__, key);
+			return false;
+		}
+
+		// We successfully managed to parse this entity.
+		parsedSuccessfully = true;
+
+		// keynames with a leading underscore are used for utility comments,
+		// and are immediately discarded by quake
+		if (key[0] == '_') {
+		    continue;
+		}
+
+		// Insert the key/value into the dictionary.
+		Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
+		//clEntity->entityDictionary[key] = value;
+    }
+
+	// If we failed to parse the entity properly, zero this one back out.
+    if (!parsedSuccessfully) {
+		//*svEntity = {};
+		return false;
+	}
+
+	// Return the result.
+	return parsedSuccessfully;
+}
+
+//---------------------------------------------------------------------------------------
+
+/**
+*   @brief Executed whenever an entity event is receieved.
+**/
 void ClientGameEntities::Event(int32_t number) {
     // Ensure entity number is in bounds.
     if (number < 0 || number > MAX_ENTITIES) {
@@ -43,22 +206,22 @@ void ClientGameEntities::Event(int32_t number) {
     }
 
     // Fetch the client entity.
-    ClientEntity* currentEntity = &cs->entities[number];
+    ClientEntity* clientEntity = &cs->entities[number];
 
     // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((currentEntity->current.effects & EntityEffectType::Teleporter) && CLG_FRAMESYNC()) {
-        CLG_TeleporterParticles(currentEntity->current.origin);
+    if ((clientEntity->current.effects & EntityEffectType::Teleporter)) {
+        CLG_TeleporterParticles(clientEntity->current.origin);
     }
 
     // Switch to specific execution based on a unique Event ID.
-    switch (currentEntity->current.eventID) {
+    switch (clientEntity->current.eventID) {
         case EntityEvent::ItemRespawn:
             clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0);
-            CLG_ItemRespawnParticles(currentEntity->current.origin);
+            CLG_ItemRespawnParticles(clientEntity->current.origin);
             break;
         case EntityEvent::PlayerTeleport:
             clgi.S_StartSound(NULL, number, CHAN_WEAPON, clgi.S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
-            CLG_TeleportParticles(currentEntity->current.origin);
+            CLG_TeleportParticles(clientEntity->current.origin);
             break;
         case EntityEvent::Footstep:
             if (cl_footsteps->integer)
@@ -76,17 +239,17 @@ void ClientGameEntities::Event(int32_t number) {
     }
 }
 
-//---------------
-// ClientGameEntities::AddPacketEntities
-//
-//---------------
+/**
+*   @brief  Parse the server frame for server entities to add to our client view.
+*           Also applies special rendering effects to them where desired.
+**/
 void ClientGameEntities::AddPacketEntities() {
     // Render entity that is about to be passed to the current render frame.
     r_entity_t   renderEntity = {}; // Ensure it is clear aka set to 0.
     // State of the current entity.
     EntityState* entityState = nullptr;
     // Current processing client entity ptr.
-    ClientEntity* currentEntity = nullptr;
+    ClientEntity* clientEntity = nullptr;
     // Client Info.
     ClientInfo*  clientInfo = nullptr;
     // Entity specific effects. (Such as whether to rotate or not.)
@@ -111,9 +274,9 @@ void ClientGameEntities::AddPacketEntities() {
         // Fetch the state of the given entity index.
         entityState = &cl->entityStates[entityIndex];
         // Fetch the actual entity to process based on the entity's state index number.
-        currentEntity = &cs->entities[entityState->number];
+        clientEntity = &cs->entities[entityState->number];
         // Setup the render entity ID for the renderer.
-        renderEntity.id = currentEntity->id + RESERVED_ENTITIY_COUNT;
+        renderEntity.id = clientEntity->id + RESERVED_ENTITIY_COUNT;
 
         //
         // Effects.
@@ -134,28 +297,61 @@ void ClientGameEntities::AddPacketEntities() {
             renderEntity.frame = autoAnimation;
         else if (effects & EntityEffectType::AnimCycleAll30hz)
             renderEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
-        else
-            renderEntity.frame = entityState->frame;
+	    else {
+    	    //// Fetch the iqm animation index data.
+         //   if (clientEntity->current.animationIndex != 0 && clientEntity->current.modelIndex != 0) {
+		       // model_t* iqmData = clgi.MOD_ForHandle(clientEntity->current.modelIndex);
+
+         //       if (iqmData) {
+			      //  Com_DPrint("WOW!!!\n");
+         //       }
+         //   } else {
+		        //renderEntity.frame = entityState->animationFrame;
+		 //       renderEntity.oldframe = clientEntity->prev.animationFrame;
+		//        renderEntity.backlerp = 1.0 - cl->lerpFraction;
+//            }
+
+ 
+            //clientEntity->current.animationFrame, 
+	 //   framefrac = GS_FrameForTime(&curframe, cg.time, viewweapon->baseAnimStartTime,  // start time
+		//weaponInfo->frametime[viewweapon->baseAnim],				    // current frame time?
+		//weaponInfo->firstframe[viewweapon->baseAnim],				    // first frame.
+		//weaponInfo->lastframe[viewweapon->baseAnim],				    // last frame.
+		//weaponInfo->loopingframes[viewweapon->baseAnim],			    // looping frames.
+		//true); 
+        }
+        
 
         // Optionally remove the glowing effect.
         if (cl_noglow->integer)
             renderEffects &= ~RenderEffects::Glow;
 
         // Setup the proper lerp and model frame to render this pass.
-        renderEntity.oldframe = currentEntity->prev.frame;
-        renderEntity.backlerp = 1.0 - cl->lerpFraction;
+        // Moved into the if statement's else case up above.
+        renderEntity.oldframe = clientEntity->prev.animationFrame;
+        renderEntity.backlerp = 1.0 - SG_FrameForTime(&renderEntity.frame,
+            cl->serverTime,  // Current Time.
+            clientEntity->current.animationStartTime,         // Animation Start time.
+            20.f,//clientEntity->current.animationFramerate,  // Current frame time.
+            clientEntity->current.animationStartFrame,  // Start frame.
+            clientEntity->current.animationEndFrame,  // End frame.
+            0,             // Loop count.
+            true         // Force loop
+        );
+        clientEntity->current.animationFrame = renderEntity.frame;
+    //clientEntity->prev.animationFrame = clientEntity->current.animationFrame;
 
         //
         // Setup renderEntity origin.
         //
         if (renderEffects & RenderEffects::FrameLerp) {
             // Step origin discretely, because the model frames do the animation properly.
-            renderEntity.origin = currentEntity->current.origin;
-            renderEntity.oldorigin = currentEntity->current.oldOrigin;
+            renderEntity.origin = clientEntity->current.origin;
+            renderEntity.oldorigin = clientEntity->current.oldOrigin;
         } else if (renderEffects & RenderEffects::Beam) {
             // Interpolate start and end points for beams
-            renderEntity.origin = vec3_mix(currentEntity->prev.origin, currentEntity->current.origin, cl->lerpFraction);
-            renderEntity.oldorigin = vec3_mix(currentEntity->prev.oldOrigin, currentEntity->current.oldOrigin, cl->lerpFraction);
+            renderEntity.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+            renderEntity.oldorigin = vec3_mix(clientEntity->prev.oldOrigin, clientEntity->current.oldOrigin, cl->lerpFraction);
         } else {
             if (entityState->number == cl->frame.clientNumber + 1) {
                 // In case of this being our actual client entity, we use the predicted origin.
@@ -163,7 +359,7 @@ void ClientGameEntities::AddPacketEntities() {
                 renderEntity.oldorigin = cl->playerEntityOrigin;
             } else {
                 // Ohterwise, just neatly interpolate the origin.
-                renderEntity.origin = vec3_mix(currentEntity->prev.origin, currentEntity->current.origin, cl->lerpFraction);
+                renderEntity.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
                 // Neatly copy it as the renderEntity's oldorigin.
                 renderEntity.oldorigin = renderEntity.origin;
             }
@@ -171,7 +367,7 @@ void ClientGameEntities::AddPacketEntities() {
 
 	    // Draw debug bounding box for client entity.
 	    if (renderEffects & RenderEffects::DebugBoundingBox) {
-	        CLG_DrawDebugBoundingBox(currentEntity->lerpOrigin, currentEntity->mins, currentEntity->maxs);
+	        CLG_DrawDebugBoundingBox(clientEntity->lerpOrigin, clientEntity->mins, clientEntity->maxs);
 	    }
 
         // tweak the color of beams
@@ -242,7 +438,7 @@ void ClientGameEntities::AddPacketEntities() {
             renderEntity.angles = cl->playerEntityAngles;
         } else {
             // Otherwise, lerp angles by default.
-            renderEntity.angles = vec3_mix(currentEntity->prev.angles, currentEntity->current.angles, cl->lerpFraction);
+            renderEntity.angles = vec3_mix(clientEntity->prev.angles, clientEntity->current.angles, cl->lerpFraction);
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (entityState->modelIndex == 255 && cl_rollhack->integer) {
@@ -404,10 +600,10 @@ void ClientGameEntities::AddPacketEntities() {
         // Add automatic particle trail effects where desired.
         if (effects & ~EntityEffectType::Rotate) {
             if (effects & EntityEffectType::Blaster) {
-                CLG_BlasterTrail(currentEntity->lerpOrigin, renderEntity.origin);
+                CLG_BlasterTrail(clientEntity->lerpOrigin, renderEntity.origin);
                 V_AddLight(renderEntity.origin, 200, 0.6f, 0.4f, 0.12f);
             } else if (effects & EntityEffectType::Gib) {
-                CLG_DiminishingTrail(currentEntity->lerpOrigin, renderEntity.origin, currentEntity, effects);
+                CLG_DiminishingTrail(clientEntity->lerpOrigin, renderEntity.origin, clientEntity, effects);
             } else if (effects & EntityEffectType::Torch) {
                 const float anim = sinf((float)renderEntity.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
                 const float offset = anim * 0.0f;
@@ -423,17 +619,16 @@ void ClientGameEntities::AddPacketEntities() {
         }
 
     skip:
-        // Assign renderEntity origin to currentEntity lerp origin in the case of a skip.
-        currentEntity->lerpOrigin = renderEntity.origin;
+        // Assign renderEntity origin to clientEntity lerp origin in the case of a skip.
+        clientEntity->lerpOrigin = renderEntity.origin;
     }
 }
 
-//---------------
-// ClientGameEntities::AddViewEntities
-//
-// Currently is only used for rendering the view weapon, however it can be
-// used to render other models in a similar fashion if wished for.
-//---------------
+/**
+* Add the view weapon render entity to the screen. Can also be used for
+* other scenarios where a depth hack is required.
+**/
+r_entity_t gunRenderEntity;
 void ClientGameEntities::AddViewEntities() {
     int32_t  shellFlags = 0;
 
@@ -457,10 +652,20 @@ void ClientGameEntities::AddViewEntities() {
     PlayerState *oldPlayerState= &cl->oldframe.playerState;
 
     // Gun ViewModel.
-    r_entity_t gunRenderEntity = {
-        .model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0)),
-        .id = RESERVED_ENTITIY_GUN,
-    };
+    //if (gunRenderEntity.model != cl->drawModels[currentPlayerState->gunIndex]) {
+    //    gunRenderEntity.frame = 1;
+    //    gunRenderEntity.oldframe = 0;
+    //}
+    uint32_t lastModel = gunRenderEntity.model;
+    gunRenderEntity.model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0));
+
+    // This is very ugly right now, but it'll prevent the wrong frame from popping in-screen...
+    if (lastModel != gunRenderEntity.model) {
+        gunRenderEntity.frame = currentPlayerState->gunAnimationStartFrame;
+        gunRenderEntity.oldframe = currentPlayerState->gunAnimationStartFrame;
+    }
+
+    gunRenderEntity.id = RESERVED_ENTITIY_GUN;
 
     // If there is no model to render, there is no need to continue.
     if (!gunRenderEntity.model) {
@@ -485,7 +690,7 @@ void ClientGameEntities::AddViewEntities() {
     {
         vec3_t view_dir, right_dir, up_dir;
         vec3_t gun_real_pos, gun_tip;
-        constexpr float gun_length = 28.f;
+        constexpr float gun_length = 56.f;
         constexpr float gun_right = 10.f;
         constexpr float gun_up = -5.f;
         static vec3_t mins = { -4, -2, -12 }, maxs = { 4, 8, 12 };
@@ -504,12 +709,12 @@ void ClientGameEntities::AddViewEntities() {
         CLGTrace trace = CLG_Trace(gun_real_pos, mins, maxs, gun_tip, 0, CONTENTS_MASK_PLAYERSOLID); 
 
         // In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
-        //if (trace.fraction != 1.0f || trace.ent != nullptr)
-        //{
+        if (trace.fraction != 1.0f || trace.ent != nullptr)
+        {
             gunRenderEntity.origin = vec3_fmaf(trace.endPosition, -gun_length, view_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_right, right_dir);
             gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, -gun_up, up_dir);
-//        }
+        }
     }
 
     // Do not lerp the origin at all.
@@ -519,13 +724,31 @@ void ClientGameEntities::AddViewEntities() {
         gunRenderEntity.frame = gun_frame;      // Development tool
         gunRenderEntity.oldframe = gun_frame;   // Development tool
     } else {
-        gunRenderEntity.frame = currentPlayerState->gunFrame;
-        if (gunRenderEntity.frame == 0) {
-            gunRenderEntity.oldframe = 0;   // just changed weapons, don't lerp from old
-        } else {
-            gunRenderEntity.oldframe = oldPlayerState->gunFrame;
-            gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
+        // Setup the proper lerp and model frame to render this pass.
+        // Moved into the if statement's else case up above.
+        gunRenderEntity.oldframe = gunRenderEntity.frame;
+        gunRenderEntity.backlerp = 1.0 - SG_FrameForTime(&gunRenderEntity.frame,
+            cl->time, // Current Time.
+            currentPlayerState->gunAnimationStartTime,  // Animation Start time.
+            currentPlayerState->gunAnimationFrametime,  // Current frame time.
+            currentPlayerState->gunAnimationStartFrame, // Start frame.
+            currentPlayerState->gunAnimationEndFrame,   // End frame.
+            currentPlayerState->gunAnimationLoopCount,  // Loop count.
+            currentPlayerState->gunAnimationForceLoop
+        );
+
+        // Don't allow it to go below 0, instead set it to old frame.
+        if (gunRenderEntity.frame < 0) {
+            gunRenderEntity.frame = 0;
         }
+        //gunRenderEntity.frame = tionFrame = renderEntity.frame;
+        //gunRenderEntity.frame = 0;//currentPlayerState->gunAnimationFrame;
+        //if (gunRenderEntity.frame == 0) {
+        //    gunRenderEntity.oldframe = 0;   // just changed weapons, don't lerp from old
+        //} else {
+        //    gunRenderEntity.oldframe = 0;//oldPlayerState->gunAnimationFrame;
+        //    gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
+        //}
     }
 
     // Setup basic render entity flags for our view weapon.

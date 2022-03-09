@@ -1,34 +1,21 @@
-/*
-Copyright (C) 1997-2001 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
-//
-// pmove.cpp
-//
-//
-// Implements the player movement logic for both client and server game modules
-// 
-// The playerMoveLocals_t structure is used locally when processing the movement. Consider it
-// a temporary structure. The prev origin and velocity are copied in there for storage.
-// 
-// At the start of pmove we initialize certain pm-> variables, and the playerMoveLocals.
-// 
-// After that, we check for whether we are on a ladder, ducking, on-ground, in-water,
-// and/or in air. We execute the right movement according to that.
-//
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Implements the player movement logic for both client and server game modules.
+*
+*   The playerMoveLocals_t serves as a temporary structure which is used to store
+*   data when processing the movement logic. The previous origin and velocity are
+*   stored in there.
+* 
+*   At the start of pmove we initialize it, as well as certain pm-> variables.
+* 
+*   After that, we go state checking(on ladder, ducking, on-ground, in-water, etc)
+*   and execute the right movement according to that.
+* 
+***/
 #include "Shared/Shared.h"
 #include "SharedGame/SharedGame.h"
 #include "SharedGame/PMove.h"
@@ -79,7 +66,7 @@ constexpr float PM_GROUND_DIST_TRICK = 16.f;
 //-----------------
 // Speed constants; intended velocities are clipped to these.
 //-----------------
-constexpr float PM_SPEED_AIR = 285.f; // N&C: Tweaked - old value: 350
+constexpr float PM_SPEED_AIR = 285.f; // PH: Tweaked - old value: 350
 constexpr float PM_SPEED_CURRENT = 100.f;
 constexpr float PM_SPEED_DUCK_STAND = 200.f;
 constexpr float PM_SPEED_DUCKED = 140.f;
@@ -1631,10 +1618,14 @@ static void PM_Init(PlayerMove * pmove) {
 //
 static void PM_ClampAngles(void) {
     // Copy the command angles into the outgoing state
-    for (int i = 0; i < 3; i++) {
-        float temp = pm->moveCommand.input.viewAngles[i] + pm->state.deltaAngles[i];
-        pm->viewAngles[i] = temp;
-    }
+    // Do we need this check per se?
+    //if (pm->state.flags & PMF_TIME_TELEPORT) {
+	   // pm->viewAngles[vec3_t::PYR::Yaw] = pm->moveCommand.input.viewAngles[vec3_t::PYR::Yaw] + pm->state.deltaAngles[vec3_t::PYR::Yaw];
+	   // pm->viewAngles[vec3_t::PYR::Pitch] = 0;
+	   // pm->viewAngles[vec3_t::PYR::Roll] = 0;
+    //} else {
+	    pm->viewAngles = pm->moveCommand.input.viewAngles + pm->state.deltaAngles;
+    //}
 
     // Clamp pitch to prevent the player from looking up or down more than 90º
     if (pm->viewAngles.x > 90.0f && pm->viewAngles.x < 270.0f) {

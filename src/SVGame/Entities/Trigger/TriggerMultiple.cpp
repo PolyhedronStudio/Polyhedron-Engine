@@ -64,16 +64,16 @@ void TriggerMultiple::Spawn() {
 	// Set default sounds.
 	int32_t sound = GetSound();
 	if (sound == 1)
-		SetNoiseIndex(SVG_PrecacheSound("misc/secret.wav")); // Similar to gi.SoundIndex.
+		SetNoiseIndexA(SVG_PrecacheSound("misc/secret.wav")); // Similar to gi.SoundIndex.
 	else if (sound == 2)
-		SetNoiseIndex(SVG_PrecacheSound("misc/talk.wav")); // Similar to gi.SoundIndex.
+		SetNoiseIndexA(SVG_PrecacheSound("misc/talk.wav")); // Similar to gi.SoundIndex.
 	else if (sound == 3)
-		SetNoiseIndex(SVG_PrecacheSound("misc/trigger1.wav")); // Similar to gi.SoundIndex.
+		SetNoiseIndexA(SVG_PrecacheSound("misc/trigger1.wav")); // Similar to gi.SoundIndex.
 
 	if (!GetWaitTime())
 		SetWaitTime(0.2f);
 
-	//self->noiseIndex = gi.SoundIndex("world/electro.wav");
+	//self->noiseIndexA = gi.SoundIndex("world/electro.wav");
 	SetTouchCallback(&TriggerMultiple::TriggerMultipleTouch);
 
 	// In case the entity can be "used", set it to hurt those who use it as well.

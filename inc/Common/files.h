@@ -75,7 +75,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FS_FLAG_TEXT            0x00000400
 #define FS_FLAG_DEFLATE         0x00000800
 
-// N&C: These are for FS_SeekEx
+// WID: These are for FS_SeekEx
 #define FS_SEEK_CUR         0
 #define FS_SEEK_SET         1
 #define FS_SEEK_END         2

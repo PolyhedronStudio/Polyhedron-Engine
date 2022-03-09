@@ -105,6 +105,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Items/ItemHealthMega.cpp
 	SVGame/Entities/Items/ItemWeaponKnife.cpp
 	SVGame/Entities/Items/ItemWeaponBeretta.cpp
+	SVGame/Entities/Items/ItemWeaponNone.cpp
 	SVGame/Entities/Items/ItemWeaponSMG.cpp
 	SVGame/Entities/Func/FuncAreaportal.cpp
 	SVGame/Entities/Func/FuncButton.cpp
@@ -169,10 +170,10 @@ SET( SRC_SVGAME
 	SVGame/Player/Player.cpp
 	SVGame/Player/View.cpp
 	SVGame/Player/Weapons.cpp
-	SVGame/Weapons/Blaster.cpp
-	SVGame/Weapons/Machinegun.cpp
-	SVGame/Weapons/Shotgun.cpp
-	SVGame/Weapons/SuperShotgun.cpp
+	#SVGame/Weapons/Blaster.cpp
+	#SVGame/Weapons/Machinegun.cpp
+	#SVGame/Weapons/Shotgun.cpp
+	#SVGame/Weapons/SuperShotgun.cpp
 	SVGame/World/GameWorld.cpp
     SVGame/svgame.def
     )
@@ -221,6 +222,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Items/ItemWeaponKnife.h
 	SVGame/Entities/Items/ItemWeaponBeretta.h
 	SVGame/Entities/Items/ItemWeaponSMG.h
+	SVGame/Entities/Items/ItemWeaponNone.h
 
 	SVGame/Entities/Misc/MiscExplosionBox.h
 	SVGame/Entities/Misc/MiscServerModel.h
@@ -334,7 +336,7 @@ SET(HEADERS_CLIENT
 	Client/Sound/QAL/fixed.h
 )
 
-###################### Client.
+###################### Server.
 SET(SRC_SERVER
 	Server/Commands.cpp
 	Server/Entities.cpp
@@ -432,12 +434,14 @@ SET(HEADERS_GL
 
 ###################### Shared Game Folder.
 SET(HEADERS_SHAREDGAME
-	../inc/SharedGame/pmove.h 
-	../inc/SharedGame/protocol.h 
-	../inc/SharedGame/sharedgame.h 
+	../inc/SharedGame/PMove.h 
+	../inc/SharedGame/Protocol.h 
+	../inc/SharedGame/SharedGame.h 
+	../inc/SharedGame/SkeletalAnimation.h 
 )
 SET(SRC_SHAREDGAME
-	../src/SharedGame/pmove.cpp
+	../src/SharedGame/PMove.cpp
+	../src/SharedGame/SkeletalAnimation.cpp
 )
 
 ###################### Shared Folder.
@@ -464,22 +468,22 @@ SET(HEADERS_SHARED
 	# Other shared lib functionalities.
 	../inc/Shared/CLGame.h
 	../inc/Shared/CLTypes.h
-	../inc/Shared/collision.h
-	../inc/Shared/common.h
-	../inc/Shared/config.h
-	../inc/Shared/endian.h 
-	../inc/Shared/svgame.h 
-	../inc/Shared/keys.h 
-	../inc/Shared/list.h 
+	../inc/Shared/Collision.h
+	../inc/Shared/Common.h
+	../inc/Shared/Config.h
+	../inc/Shared/Endian.h 
+	../inc/Shared/SVGame.h 
+	../inc/Shared/Keys.h 
+	../inc/Shared/List.h 
 	../inc/Shared/Math.h 
-	../inc/Shared/messaging.h 
-	../inc/Shared/platform.h
-	../inc/Shared/refresh.h 
-	../inc/Shared/qstring.h 
-	../inc/Shared/strings.h
-	../inc/Shared/shared.h 
-	../inc/Shared/tickrate.h 
-	../inc/Shared/ui.h 
+	../inc/Shared/Messaging.h 
+	../inc/Shared/Platform.h
+	../inc/Shared/Refresh.h 
+	../inc/Shared/QString.h 
+	../inc/Shared/Strings.h
+	../inc/Shared/Shared.h 
+	../inc/Shared/TickRate.h 
+	../inc/Shared/UI.h 
 )
 SET(SRC_SHARED
 	Shared/Math/plane.cpp

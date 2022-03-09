@@ -363,17 +363,17 @@ void CL_InitRefresh(void)
 
     mode_changed = 0;
 
-    // N&C: Initialize these first, we fetch certain cvars in the CG Module.
+    // PH: Initialize these first, we fetch certain cvars in the CG Module.
     V_Init();
     SCR_Init();
 
-    // N&C: Inform the CG Module about the initialization.
+    // PH: Inform the CG Module about the initialization.
     CL_GM_InitMedia();
 
     // Load client screen media first.
     SCR_RegisterMedia();
 
-    // N&C: Inform the CG Module about the registration of media.
+    // PH: Inform the CG Module about the registration of media.
     CL_GM_LoadScreenMedia();
 
     // Register the rest.
@@ -394,10 +394,10 @@ void CL_ShutdownRefresh(void)
         return;
     }
 
-    // N&C: Notify the CG Module about it.
+    // PH: Notify the CG Module about it.
     CL_GM_ShutdownMedia();
 
-    // N&C: Eventually these should move over to the CG Module.
+    // PH: Eventually these should move over to the CG Module.
     // Shutdown the rest of graphics subsystems
     V_Shutdown();
     SCR_Shutdown();

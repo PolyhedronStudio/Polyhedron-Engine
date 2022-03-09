@@ -179,32 +179,32 @@ void Drop_General(Entity *ent, gitem_t *item)
 
 qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int count)
 {
-    int         index;
-    int         max;
-
-    if (!ent)
-        return false;
-
-    if (!ent->client)
-        return false;
-
-    if (item->tag == AmmoType::Ammo9mm) {
-	    max = ent->client->persistent.maxAmmo9mm;
-	//    } else if (item->tag == AmmoType::Shells) {
-	//        max = ent->client->persistent.maxShells;
-    } else {
-        return false;
-    }
-
-//    index = ITEM_INDEX(item);
-
-    if (ent->client->persistent.inventory[index] == max)
-        return false;
-
-    ent->client->persistent.inventory[index] += count;
-
-    if (ent->client->persistent.inventory[index] > max)
-        ent->client->persistent.inventory[index] = max;
+//    int         index;
+//    int         max;
+//
+//    if (!ent)
+//        return false;
+//
+//    if (!ent->client)
+//        return false;
+//
+//    if (item->tag == AmmoType::Ammo9mm) {
+//	    max = ent->client->persistent.inventory.maxAmmo9mm;
+//	//    } else if (item->tag == AmmoType::Shells) {
+//	//        max = ent->client->persistent.maxShells;
+//    } else {
+//        return false;
+//    }
+//
+////    index = ITEM_INDEX(item);
+//
+//    if (ent->client->persistent.inventory.items[index] == max)
+//        return false;
+//
+//    ent->client->persistent.inventory[index] += count;
+//
+//    if (ent->client->persistent.inventory[index] > max)
+//        ent->client->persistent.inventory[index] = max;
 
     return true;
 }
@@ -312,17 +312,17 @@ qboolean Pickup_Health(Entity *ent, Entity *other)
 
 int SVG_ArmorIndex(SVGBaseEntity *ent)
 {
-    if (!ent)
-        return 0;
+    //if (!ent)
+    //    return 0;
 
-    // Fetch client.
-    gclient_s* client = ent->GetClient();
-    
-    if (!client)
-        return 0;
+    //// Fetch client.
+    //gclient_s* client = ent->GetClient();
+    //
+    //if (!client)
+    //    return 0;
 
-    if (client->persistent.inventory[body_armor_index] > 0)
-        return body_armor_index;
+    //if (client->persistent.inventory[body_armor_index] > 0)
+    //    return body_armor_index;
 
     return 0;
 }

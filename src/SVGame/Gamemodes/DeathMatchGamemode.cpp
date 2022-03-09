@@ -41,6 +41,11 @@ DeathmatchGamemode::~DeathmatchGamemode() {
 //
 //
 
+qboolean DeathmatchGamemode::CanSaveGame(qboolean isDedicatedServer) {
+    // Can't save deathmatch games.
+    return false;
+}
+
 //
 //===============
 // DeathmatchGamemode::CanDamage
@@ -87,10 +92,10 @@ void DeathmatchGamemode::ClientBegin(Entity* svEntity) {
     if (level.intermission.time) {
         HUD_MoveClientToIntermission(svEntity);
     } else {
-        gi.WriteByte(ServerGameCommands::MuzzleFlash);
+        gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);//WriteByte(ServerGameCommand::MuzzleFlash);
         //gi.WriteShort(serverEntity - g_entities);
-        gi.WriteShort(player->GetNumber());
-        gi.WriteByte(MuzzleFlashType::Login);
+        gi.MSG_WriteInt16(player->GetNumber());//WriteShort(player->GetNumber());
+        gi.MSG_WriteUint8(MuzzleFlashType::Login);//WriteByte(MuzzleFlashType::Login);
         gi.Multicast(player->GetOrigin(), Multicast::PVS);
     }
     
@@ -110,6 +115,8 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
 
     // Select the clients spawn point.
     SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
+    player->SetOrigin(spawnOrigin);
+    player->SetAngles(spawnAngles);
 
     // Acquire the new client index belonging to this entity.
     int32_t clientIndex = player->GetNumber() - 1;  //ent - g_entities - 1;
@@ -135,7 +142,7 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     // Now move its persistent data back into the client's information.
     client->persistent = persistentData;
     // In case the persistent data consists of a dead client, reinitialize it.
-    if (client->persistent.health <= 0) {
+    if (client->persistent.stats.health <= 0) {
 	    InitializePlayerPersistentData(client);
     }
     // Last but not least, set its respawn data.
@@ -170,7 +177,7 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     }
 
     // Set gun index to whichever was persistent in the previous map (if there was one).
-    client->playerState.gunIndex = gi.ModelIndex("models/weapons/v_mark23/tris.iqm");  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
+    client->playerState.gunIndex = 0;  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
 
     // Set entity state origins and angles.
     player->SetOrigin(spawnOrigin + vec3_t { 0.f, 0.f, 1.f });
@@ -220,12 +227,8 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     // Link our entity.
     player->LinkEntity();
 
-    // Set player state gun index to whichever was persistent in the previous map (if there was one).
-    client->playerState.gunIndex = gi.ModelIndex("models/weapons/v_mark23/tris.iqm");  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
-
-    // Set its current new weapon to the one that was stored in persistent and activate it.
-    client->newWeapon = client->persistent.activeWeapon;
-    SVG_ChangeWeapon(player);
+    // Ensure we change to whichever active weaponID we had.
+    player->ChangeWeapon(ItemIdentifier::Barehands, false);
 }
 
 //===============
@@ -310,10 +313,9 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerCli
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
-    if (!client->respawn.isSpectator)  //(!client->weaponState.shouldThink && !client->respawn.isSpectator)
-        SVG_ThinkWeapon(player);
-    else
-        client->weaponState.shouldThink = false;
+    if (!client->respawn.isSpectator) {
+        player->WeaponThink();
+    }
 
     // Check if the player is actually dead or not. If he is, we're going to enact on
     // the user input that's been given to us. When fired, we'll respawn.
@@ -514,8 +516,14 @@ void DeathmatchGamemode::RespawnClient(SVGBasePlayer* player) {
         SpawnClientCorpse(player);
     }
 
+    // Remove no client flag.
     player->SetServerFlags(player->GetServerFlags() & ~EntityServerFlags::NoClient);
+
+    // Attach client to player.
     PlacePlayerInGame(player);
+
+    // Give player "Barehands".
+    player->GiveWeapon(ItemIdentifier::Barehands, 1);
 
     // Add a teleportation effect
     player->SetEventID(EntityEvent::PlayerTeleport);

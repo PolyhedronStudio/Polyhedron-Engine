@@ -81,16 +81,27 @@ constexpr uint32_t NOEXP_ROCKET = 2;
 // Local client entity structure, temporary entities.
 //
 struct ClientEntity {
+    //! The last received state of this entity.
     EntityState current;
-    EntityState prev;        // will always be valid, but might just be a copy of current
+    
+    //! The previous last received state. Will always be valid, 
+    //! but might just be a copy of current
+    EntityState prev;       
 
-    vec3_t      mins, maxs;
+    //! The mins and maxs of the entity's bounding box.
+    vec3_t  mins, maxs;
 
-    int32_t     serverFrame;// if not current, this ent isn't in the frame
+    //! The frame number that this entity was received at.
+    //! If it isn't identical to the current frame, the entity isn't in this frame anymore.
+    int32_t     serverFrame;
 
-    int32_t     trailcount; // for diminishing grenade trails
-    vec3_t      lerpOrigin; // for trails (variable hz)
+    //! For diminishing grenade trails
+    int32_t     trailcount; 
 
+    //! for trails (variable hz)
+    vec3_t      lerpOrigin; 
+
+    //! The id matching the one on the server.
     int32_t id;
 };
 
@@ -315,7 +326,7 @@ struct ClientState {
     int32_t numEntityStates;
 
     // The current client entity state messaging flags.
-    EntityStateMessageFlags    esFlags;
+    uint32_t    entityStateFlags;
 
     //
     // Server Frames.
@@ -348,7 +359,7 @@ struct ClientState {
     vec2_t      mouseMove;
 
     int32_t         time;           // this is the time value that the client
-                                // is rendering at.  always <= cl.serverTime
+                                    // is rendering at.  always <= cl.serverTime
     float       lerpFraction;       // between oldframe and frame
 
     //

@@ -49,7 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Video.h"
 
 // Shared Game includes.
-#include "SharedGame/Protocol.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
+#include "SharedGame/Protocol.h"
 
 #if USE_ZLIB
 #include <zlib.h>
@@ -58,14 +58,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 //=============================================================================
 
-// N&C: Most structures related to the client have been moved over here.
+// PH: Most structures related to the client have been moved over here.
 // They are shared to the client game dll, since it is tightly coupled.
 #include "Shared/CLTypes.h"
 
-// N&C: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
-extern explosion_t  cl_explosions[MAX_EXPLOSIONS];
-extern ClientEntity  cl_entities[MAX_EDICTS];
-
+// PH: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern    ClientState    cl;
 extern    ClientShared   cs;
 
@@ -74,12 +71,10 @@ extern    ClientShared   cs;
 // Client Specific FPS
 // 
 //=============================================================================
-static constexpr double CL_FRAMETIME = BASE_FRAMETIME;
-static constexpr double CL_1_FRAMETIME = BASE_1_FRAMETIME;
+static constexpr double CL_FRAMETIME    = BASE_FRAMETIME;
+static constexpr double CL_1_FRAMETIME  = BASE_1_FRAMETIME;
 static constexpr int32_t CL_FRAMEDIV = BASE_FRAMERATE / 10.0;
-inline qboolean CL_FRAMESYNC() {
-    return !(cl.frame.number % CL_FRAMEDIV);
-}
+
 
 /*
 ==================================================================
@@ -210,9 +205,9 @@ struct ClientStatic {
         qhandle_t   recording;
         unsigned    time_start;
         unsigned    time_frames;
-        int         last_server_frame;  // number of server frame the last svc_frame was written
+        int         last_server_frame;  // number of server frame the last ServerCommand::Frame was written
         int         frames_written;     // number of frames written to demo file
-        int         frames_dropped;     // number of svc_frames that didn't fit
+        int         frames_dropped;     // number of ServerCommand::Frames that didn't fit
         int         others_dropped;     // number of misc svc_* messages that didn't fit
         int         frames_read;        // number of frames read from demo file
         int         last_snapshot;      // number of demo frame the last snapshot was saved

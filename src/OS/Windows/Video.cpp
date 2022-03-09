@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Video.h"
 #include "refresh/refresh.h"
 #include "System/System.h"
-#include "../res/q2pro.xbm"
+#include "../res/polyhedron.xbm"
 #include <SDL.h>
 
 #ifdef _WINDOWS
@@ -476,16 +476,16 @@ qboolean VID_Init(graphics_api_t api)
 
 	SDL_SetWindowMinimumSize(sdl_window, 320, 240);
 
-	uint32_t icon_rgb[q2icon_height][q2icon_width];
-	for (int y = 0; y < q2icon_height; y++)
+	uint32_t icon_rgb[polyhedron_height][polyhedron_width ];
+	for (int y = 0; y < polyhedron_height; y++)
 	{
-		for (int x = 0; x < q2icon_height; x++)
+		for (int x = 0; x < polyhedron_height; x++)
 		{
-			byte b = q2icon_bits[(y * q2icon_width + x) / 8];
+			byte b = polyhedron_bits[(y * polyhedron_width + x) / 8];
 			if ((b >> (x & 7)) & 1)
-				icon_rgb[y][x] = 0xFF7AB632; // NVIDIA green color
-			else
 				icon_rgb[y][x] = 0x00000000;
+			else
+				icon_rgb[y][x] = 0xff17dfa4;
 		}
 	}
 

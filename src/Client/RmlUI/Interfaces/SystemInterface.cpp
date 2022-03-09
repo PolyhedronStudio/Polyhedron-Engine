@@ -4,7 +4,7 @@
 // client/rmlui/Interfaces/SystemInterface.cpp
 //
 //
-// RmlUI N&C System Interface implementation.
+// RmlUI PH System Interface implementation.
 //
 
 #include "../librmlui.h"

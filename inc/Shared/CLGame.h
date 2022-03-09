@@ -246,7 +246,7 @@ extern "C" {
         void        (*Cbuf_InsertText) (char *text);
         // Executes the current command buffer.
         void        (*Cbuf_Execute) ();
-        // Adds the current command line text as a clc_stringcmd to the client 
+        // Adds the current command line text as a ClientCommand::StringCommand to the client 
         // message. Things like godmode, noclip, etc, are commands directed to 
         // the server, so when they are typed in at the console, they will 
         // need to be forwarded.
@@ -257,6 +257,8 @@ extern "C" {
         //---------------------------------------------------------------------
         // Creates a clipping hull for an arbitrary box.
         mnode_t     *(*CM_HeadnodeForBox) (const vec3_t &mins, const vec3_t &maxs);
+        // Creates a clipping hull for an arbitrary octagon.
+        mnode_t     *(*CM_HeadnodeForOctagon) (const vec3_t &mins, const vec3_t &maxs);
         // We need a way to share these values to cgame dll.
         mmodel_t    *(*CM_InlineModel) (cm_t *cm, const char *name);
         // TODO: Document.
@@ -505,34 +507,93 @@ extern "C" {
         //---------------------------------------------------------------------
         // Network.
         //---------------------------------------------------------------------
-        // Reads a character from the network.
-        int			(*MSG_ReadChar) (void);
-        // Reads a byte from the network.
-        int			(*MSG_ReadByte) (void);
-        // Reads a short from the network.
-        int			(*MSG_ReadShort) (void);
-        // Reads a word from the network.
-        int 		(*MSG_ReadWord) (void);
-        // Reads a long from the network.
-        int			(*MSG_ReadLong) (void);
-        // Reads a string from the network.
-        size_t		(*MSG_ReadString) (char *dest, size_t size);
-        // Reads a vector3 from the network.
-        vec3_t		(*MSG_ReadVector3) (void);
-
-        // Writes a character over the network.
-        void        (*MSG_WriteChar) (int c);
-        // Writes a byte over the network.
-        void        (*MSG_WriteByte) (int c);
-        // Writes a short over the network.
-        void        (*MSG_WriteShort) (int c);
-        // Writes a long over the network.
-        void        (*MSG_WriteLong) (int c);
-        // Writes a string over the network.
+        //// Reads a character from the network.
+        //int			(*MSG_ReadChar) (void);
+        //// Reads a byte from the network.
+        //int			(*MSG_ReadByte) (void);
+        //// Reads a short from the network.
+        //int			(*MSG_ReadShort) (void);
+        //// Reads a word from the network.
+        //int 		(*MSG_ReadWord) (void);
+        //// Reads a long from the network.
+        //int			(*MSG_ReadLong) (void);
+        //// Reads a string from the network.
+        //size_t		(*MSG_ReadString) (char *dest, size_t size);
+        //// Reads a vector3 from the network.
+        //vec3_t		(*MSG_ReadVector3) (void);
+        //! Reads a signed 8 bit byte.
+        int32_t     (*MSG_ReadInt8) (void);
+        //! Reads an unsigned 8 bit byte.
+        int32_t     (*MSG_ReadUint8) (void);
+        //! Reads a signed 16 bit short.
+        int16_t     (*MSG_ReadInt16) (void);
+        //! Reads an unsigned 16 bit short.
+        uint16_t    (*MSG_ReadUint16) (void);
+        //! Reads a 32 bit integer.
+        int32_t     (*MSG_ReadInt32) (void);
+        //! Reads a 64 bit integer.
+        int64_t     (*MSG_ReadInt64) (void);
+        //! Reads a base 128 encoded unsigned integer.
+        uint64_t     (*MSG_ReadUintBase128) (void);        
+        //! Reads a base 128 encoded, zig-zagged signed integer.
+        int64_t     (*MSG_ReadIntBase128) (void);
+        //! Reads a half float (wired as a short, so lesser precision than a full float.)
+        //! Note: It needs to be sent as a half float too in order for it to work of course.
+        float       (*MSG_ReadHalfFloat) (void);
+        //! Reads a full precision float.
+        float       (*MSG_ReadFloat) (void);
+        //! Reads a character buffer string until end of string occures.
+        char*       (*MSG_ReadString) (void);
+        //! Reads a character buffer string until end of line was found, or end of buffer.
+        char*       (*MSG_ReadStringLine) (void);
+        //! Reads the string from message buffer, into the string buffer, up till count of length.
+        size_t      (*MSG_ReadStringBuffer) (char *destination, size_t size);
+        //! Reads the string from message buffer, into the string buffer, 
+        //! up till count of length or a newline was found.
+        size_t      (*MSG_ReadStringLineBuffer) (char *destination, size_t size);
+        //! Reads a vector 3, either using half floats, or floats. (Note, it has to be send as the same type of course.)
+        vec3_t      (*MSG_ReadVector3) (bool halfFloat);
+        //! Reads a vector 3, either using half floats, or floats. (Note, it has to be send as the same type of course.)
+        vec4_t      (*MSG_ReadVector4) (bool halfFloat);
+        //// Writes a character over the network.
+        //void        (*MSG_WriteChar) (int c);
+        //// Writes a byte over the network.
+        //void        (*MSG_WriteByte) (int c);
+        //// Writes a short over the network.
+        //void        (*MSG_WriteShort) (int c);
+        //// Writes a long over the network.
+        //void        (*MSG_WriteLong) (int c);
+        //// Writes a string over the network.
+        //void        (*MSG_WriteString) (const char *s);
+        //// Writes a position over the network.
+        //void        (*MSG_WriteVector3) (const vec3_t &pos);
+        //! Writes a signed 8 bit byte.
+        void        (*MSG_WriteInt8) (int32_t c);
+        //! Writes an unsigned 8 bit byte.
+        void        (*MSG_WriteUint8) (int32_t c);
+        //! Writes a signed 16 bit short.
+        void        (*MSG_WriteInt16) (int32_t c);
+        //! Writes an unsigned 16 bit short.
+        void        (*MSG_WriteUint16) (uint32_t c);
+        //! Writes a 32 bit integer.
+        void        (*MSG_WriteInt32) (int32_t c);
+        //! Writes a 64 bit integer.
+        void        (*MSG_WriteInt64) (int64_t c);
+        //! Writes an unsigned LEB 128(base 128 encoded) integer.
+        void        (*MSG_WriteUintBase128) (uint64_t c);
+        //! Writes a ZigZag encoded signed integer with LEB 128 on top.
+        void        (*MSG_WriteIntBase128) (int64_t c);
+        //! Writes a half float.
+        void        (*MSG_WriteHalfFloat) (float f);
+        //! Writes a full precision floating point.
+        void        (*MSG_WriteFloat) (float f);
+        //! Writes a string.
         void        (*MSG_WriteString) (const char *s);
-        // Writes a position over the network.
-        void        (*MSG_WriteVector3) (const vec3_t &pos);
-        // Flushes message.
+        //! Writes a vector3, if halfFloat is true, it'll write it with half float precision.
+        void        (*MSG_WriteVector3) (const vec3_t &vec, bool halfFloat);
+        //! Writes a vector3, if halfFloat is true, it'll write it with half float precision.
+        void        (*MSG_WriteVector4) (const vec4_t &vec, bool halfFloat);
+        //! Flushes message.
         void        (*MSG_FlushTo) (SizeBuffer *buf);
         
         //---------------------------------------------------------------------

@@ -18,6 +18,7 @@
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
 
+#include "../../Gamemodes/IGamemode.h"
 #include "../../World/Gameworld.h"
 
 //
@@ -228,7 +229,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
 //
 void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     // Execute radius damage.
-    SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
+    game.GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
     // Retrieve origin.
     vec3_t save = GetOrigin();
@@ -269,12 +270,12 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
     if (GetGroundEntity()) {
-        gi.WriteByte(ServerGameCommands::TempEntity);
-        gi.WriteByte(TempEntityEvent::Explosion1);
-        gi.WriteVector3(GetOrigin());
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(TempEntityEvent::Explosion1);//WriteByte(TempEntityEvent::Explosion1);
+        gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), Multicast::PHS);
 
-        SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+        game.GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         float save;
         save = GetDelayTime();
@@ -282,12 +283,12 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         UseTargets(GetActivator());
         SetDelayTime(save);
     } else {
-        gi.WriteByte(ServerGameCommands::TempEntity);
-        gi.WriteByte(TempEntityEvent::Explosion2);
-        gi.WriteVector3(GetOrigin());
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(TempEntityEvent::Explosion2);//WriteByte(TempEntityEvent::Explosion2);
+        gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), Multicast::PHS);
 
-        SVG_InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+        game.GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         float save;
         save = GetDelayTime();

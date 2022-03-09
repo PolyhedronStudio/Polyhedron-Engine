@@ -14,6 +14,7 @@
 #include "../../Player/View.h"          // Include Player View functions..
 #include "../../Utilities.h"            // Util funcs.
 
+#include "../../Gamemodes/IGamemode.h"
 // Class Entities.
 #include "BlasterBolt.h"
 
@@ -124,22 +125,22 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 
         // Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
         if (plane) {
-            SVG_InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
+            game.GetGamemode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
                 plane->normal, self->GetDamage(), 1, DamageFlags::EnergyBasedWeapon, meansOfDeath);
         } else {
-            SVG_InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
+            game.GetGamemode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
                 vec3_zero(), self->GetDamage(), 1, DamageFlags::EnergyBasedWeapon, meansOfDeath);
         }
 
     } else {
-        gi.WriteByte(ServerGameCommands::TempEntity);
-        gi.WriteByte(TempEntityEvent::Blaster);
-        gi.WriteVector3(self->GetOrigin());
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(TempEntityEvent::Blaster );//WriteByte(TempEntityEvent::Blaster);
+        gi.MSG_WriteVector3( self->GetOrigin(), false );//WriteVector3(self->GetOrigin());
 
         if (!plane) {
-            gi.WriteVector3(vec3_zero());
+            gi.MSG_WriteVector3( vec3_zero(), false );//WriteVector3(vec3_zero());
         } else {
-            gi.WriteVector3(plane->normal);
+            gi.MSG_WriteVector3( plane->normal, false );//WriteVector3(plane->normal);
         }
 
         vec3_t origin = self->GetOrigin();

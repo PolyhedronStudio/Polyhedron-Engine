@@ -36,7 +36,7 @@ void TargetEarthquake::Spawn() {
     SetThinkCallback( &TargetEarthquake::QuakeThink );
     SetUseCallback( &TargetEarthquake::QuakeUse );
 
-    SetNoiseIndex( gi.SoundIndex( "world/quake.wav" ) );
+    SetNoiseIndexA( gi.SoundIndex( "world/quake.wav" ) );
 }
 
 //===============
@@ -71,7 +71,7 @@ void TargetEarthquake::QuakeThink() {
     SVGBaseEntity** classEntities = GetGameworld()->GetClassEntities();
 
     if ( lastQuakeTime < level.time ) {
-        gi.PositionedSound( GetOrigin(), GetServerEntity(), CHAN_AUTO, GetNoiseIndex(), 1.0f, ATTN_NONE, 0.0f);
+        gi.PositionedSound( GetOrigin(), GetServerEntity(), CHAN_AUTO, GetNoiseIndexA(), 1.0f, ATTN_NONE, 0.0f);
         lastQuakeTime = level.time + 0.5f;
     }
 

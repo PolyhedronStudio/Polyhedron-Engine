@@ -218,7 +218,7 @@ void SV_DropClient(client_t *client, const char *reason)
         print_drop_reason(client, reason, oldConnectionState);
 
     // add the disconnect
-    MSG_WriteByte(svc_disconnect);
+    MSG_WriteUint8(ServerCommand::Disconnect);//MSG_WriteByte(ServerCommand::Disconnect);
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
 
     if (oldConnectionState == ConnectionState::Spawned) {
@@ -429,7 +429,7 @@ static size_t SV_StatusString(char *status)
             }
             len = Q_snprintf(entry, sizeof(entry),
                              "%i %i \"%s\"\n",
-                             cl->edict->client->playerState.stats[STAT_FRAGS],
+                             cl->edict->client->playerState.stats[PlayerStats::Frags],
                              cl->ping, cl->name);
             if (len >= sizeof(entry)) {
                 continue;
@@ -849,12 +849,12 @@ static client_t *redirect(const char *addr)
     Netchan_OutOfBand(NS_SERVER, &net_from, "client_connect");
 
     // set up a fake server netchan
-    MSG_WriteLong(1);
-    MSG_WriteLong(0);
-    MSG_WriteByte(svc_print);
-    MSG_WriteByte(PRINT_HIGH);
+    MSG_WriteInt32(1);//MSG_WriteLong(1);
+    MSG_WriteInt32(0);//MSG_WriteLong(0);
+    MSG_WriteUint8(ServerCommand::Print);//MSG_WriteByte(ServerCommand::Print);
+    MSG_WriteUint8(PRINT_HIGH);//MSG_WriteByte(PRINT_HIGH);
     MSG_WriteString(va("Server is full. Redirecting you to %s...\n", addr));
-    MSG_WriteByte(svc_stufftext);
+    MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
     MSG_WriteString(va("connect %s\n", addr));
 
     NET_SendPacket(NS_SERVER, msg_write.data, msg_write.currentSize, &net_from);
@@ -995,7 +995,7 @@ static void SVC_DirectConnect(void)
     newcl->gamedir = fs_game->string;
     newcl->mapName = sv.name;
     newcl->configstrings = (char *)sv.configstrings;
-    newcl->pool = (EntityPool*)&ge->entities; // N&C: Edict_pool_t change
+    newcl->pool = (EntityPool*)&ge->entities;
     newcl->cm = &sv.cm;
     newcl->spawncount = sv.spawncount;
     newcl->maximumClients = sv_maxclients->integer;
@@ -1146,9 +1146,9 @@ static void SV_ConnectionlessPacket(void)
     }
 
     MSG_BeginReading();
-    MSG_ReadLong();        // skip the -1 marker
+    MSG_ReadInt32();//MSG_ReadLong();        // skip the -1 marker
 
-    len = MSG_ReadStringLine(string, sizeof(string));
+    len = MSG_ReadStringLineBuffer(string, sizeof(string));//MSG_ReadStringLine(string, sizeof(string));
     if (len >= sizeof(string)) {
         Com_DPrintf("ignored oversize connectionless packet\n");
         return;
@@ -1540,8 +1540,8 @@ static void SV_PrepWorldFrame(void)
 
     sv.tracecount = 0;
 
-    if (!SV_FRAMESYNC)
-        return;
+    //if (!SV_FRAMESYNC)
+    //    return;
 
     for (i = 1; i < ge->numberOfEntities; i++) {
         ent = EDICT_NUM(i);
@@ -2031,15 +2031,15 @@ static void SV_FinalMessage(const char *message, ErrorType type)
         return;
 
     if (message) {
-        MSG_WriteByte(svc_print);
-        MSG_WriteByte(PRINT_HIGH);
+        MSG_WriteUint8(ServerCommand::Print);//MSG_WriteByte(ServerCommand::Print);
+        MSG_WriteUint8(PRINT_HIGH);//MSG_WriteByte(PRINT_HIGH);
         MSG_WriteString(message);
     }
 
     if (type == ERR_RECONNECT)
-        MSG_WriteByte(svc_reconnect);
+        MSG_WriteUint8(ServerCommand::Reconnect);//MSG_WriteByte(ServerCommand::Reconnect);
     else
-        MSG_WriteByte(svc_disconnect);
+        MSG_WriteUint8(ServerCommand::Disconnect);//MSG_WriteByte(ServerCommand::Disconnect);
 
     // send it twice
     // stagger the packets to crutch operating system limited buffers

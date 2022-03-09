@@ -41,7 +41,7 @@ void FuncTimer::Spawn() {
 	}
 
 	if ( spawnFlags & SF_StartOn ) {
-		nextThinkTime = level.time + 1.0f + st.pausetime + delayTime + waitTime + crandom() * randomTime;
+		nextThinkTime = level.time + 1.0f + pauseTime + delayTime + waitTime + crandom() * randomTime;
 		SetActivator(this);
 	}
 
@@ -53,7 +53,9 @@ void FuncTimer::Spawn() {
 //===============
 void FuncTimer::SpawnKey( const std::string& key, const std::string& value )
 {
-	if ( key == "random" ) {
+	if (key == "pausetime") {
+		ParseFloatKeyValue( key, value, pauseTime );
+	} else if ( key == "random" ) {
 		ParseFloatKeyValue( key, value, randomTime );
 	} else if ( key == "wait" ) {
 		ParseFloatKeyValue( key, value, waitTime );

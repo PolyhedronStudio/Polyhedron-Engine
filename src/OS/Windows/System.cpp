@@ -617,7 +617,7 @@ Sys_Quit
 This function never returns.
 ================
 */
-void Sys_Quit(void)
+q_noreturn void Sys_Quit(void)
 {
     timeEndPeriod(1);
 

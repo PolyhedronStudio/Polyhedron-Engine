@@ -37,7 +37,8 @@ snd_params_t    sndParameters;
 //
 void CLG_ParseLayout(void)
 {
-    clgi.MSG_ReadString(cl->layout, sizeof(cl->layout));
+    //clgi.MSG_ReadString(cl->layout, sizeof(cl->layout));
+    clgi.MSG_ReadStringBuffer(cl->layout, sizeof(cl->layout));
 }
 
 //
@@ -52,7 +53,7 @@ void CLG_ParseInventory(void)
     int        i;
 
     for (i = 0; i < MAX_ITEMS; i++) {
-        cl->inventory[i] = clgi.MSG_ReadShort();
+        cl->inventory[i] = clgi.MSG_ReadInt16();//clgi.MSG_ReadShort();
     }
 }
 
@@ -68,7 +69,7 @@ void CLG_ParseInventory(void)
 //
 void CLG_ParseTempEntitiesPacket(void)
 {
-    teParameters.type = clgi.MSG_ReadByte();
+    teParameters.type = clgi.MSG_ReadUint8(); //clgi.MSG_ReadByte();
 
     switch (teParameters.type) {
     case TempEntityEvent::Blaster:
@@ -79,22 +80,22 @@ void CLG_ParseTempEntitiesPacket(void)
     case TempEntityEvent::Sparks:
     case TempEntityEvent::BulletSparks:
     case TempEntityEvent::ElectricSparks:
-        teParameters.position1 = clgi.MSG_ReadVector3();
-        teParameters.dir = clgi.MSG_ReadVector3();
+        teParameters.position1 = clgi.MSG_ReadVector3(false);
+        teParameters.dir = clgi.MSG_ReadVector3(false);
         break;
 
     case TempEntityEvent::Splash:
-        teParameters.count = clgi.MSG_ReadByte();
-        teParameters.position1 = clgi.MSG_ReadVector3();
-        teParameters.dir = clgi.MSG_ReadVector3();
-        teParameters.color = clgi.MSG_ReadByte();
+        teParameters.count = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
+        teParameters.position1 = clgi.MSG_ReadVector3(false);
+        teParameters.dir = clgi.MSG_ReadVector3(false);
+        teParameters.color = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
         break;
 
     case TempEntityEvent::DebugTrail:
     case TempEntityEvent::BubbleTrail:
     case TempEntityEvent::BubbleTrail2:
-        teParameters.position1 = clgi.MSG_ReadVector3();
-        teParameters.position2 = clgi.MSG_ReadVector3();
+        teParameters.position1 = clgi.MSG_ReadVector3(false);
+        teParameters.position2 = clgi.MSG_ReadVector3(false);
         break;
 
     case TempEntityEvent::Explosion2:
@@ -103,32 +104,32 @@ void CLG_ParseTempEntitiesPacket(void)
     case TempEntityEvent::BigExplosion1:
     case TempEntityEvent::PlainExplosion:
     case TempEntityEvent::TeleportEffect:
-        teParameters.position1 = clgi.MSG_ReadVector3();
+        teParameters.position1 = clgi.MSG_ReadVector3(false);
         break;
 
     case TempEntityEvent::ForceWall:
-        teParameters.position1 = clgi.MSG_ReadVector3();
-        teParameters.position2 = clgi.MSG_ReadVector3();
-        teParameters.color = clgi.MSG_ReadByte();
+        teParameters.position1 = clgi.MSG_ReadVector3(false);
+        teParameters.position2 = clgi.MSG_ReadVector3(false);
+        teParameters.color = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
         break;
 
     case TempEntityEvent::Steam:
-        teParameters.entity1 = clgi.MSG_ReadShort();
-        teParameters.count = clgi.MSG_ReadByte();
-        teParameters.position1 = clgi.MSG_ReadVector3();
-        teParameters.dir = clgi.MSG_ReadVector3();
-        teParameters.color = clgi.MSG_ReadByte();
-        teParameters.entity2 = clgi.MSG_ReadShort();
+        teParameters.entity1 = clgi.MSG_ReadInt16();//clgi.MSG_ReadShort();
+        teParameters.count = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
+        teParameters.position1 = clgi.MSG_ReadVector3(false);
+        teParameters.dir = clgi.MSG_ReadVector3(false);
+        teParameters.color = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
+        teParameters.entity2 = clgi.MSG_ReadInt16(); //clgi.MSG_ReadShort();
         if (teParameters.entity1 != -1) {
-            teParameters.time = clgi.MSG_ReadLong();
+            teParameters.time = clgi.MSG_ReadInt32();//clgi.MSG_ReadLong();
         }
         break;
 
     case TempEntityEvent::Flare:
-        teParameters.entity1 = clgi.MSG_ReadShort();
-        teParameters.count = clgi.MSG_ReadByte();
-        teParameters.position1 = clgi.MSG_ReadVector3();
-        teParameters.dir = clgi.MSG_ReadVector3();
+        teParameters.entity1 = clgi.MSG_ReadInt16();//clgi.MSG_ReadShort();
+        teParameters.count = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
+        teParameters.position1 = clgi.MSG_ReadVector3(false);
+        teParameters.dir = clgi.MSG_ReadVector3(false);
         break;
 
     default:
@@ -150,11 +151,11 @@ void CLG_ParseMuzzleFlashPacket(int mask)
 {
     int entity, weapon;
 
-    entity = clgi.MSG_ReadShort();
+    entity = clgi.MSG_ReadInt16();//clgi.MSG_ReadShort();
     if (entity < 1 || entity >= MAX_EDICTS)
         Com_Error(ERR_DROP, "%s: bad entity", __func__);
 
-    weapon = clgi.MSG_ReadByte();
+    weapon = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
     mzParameters.silenced = weapon & mask;
     mzParameters.weapon = weapon & ~mask;
     mzParameters.entity = entity;
@@ -196,8 +197,8 @@ void CLG_ParsePrint(void)
     char s[MAX_STRING_CHARS];
     const char* fmt; // C++20: STRING: Added const to char*
 
-    level = clgi.MSG_ReadByte();
-    clgi.MSG_ReadString(s, sizeof(s));
+    level = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
+    clgi.MSG_ReadStringBuffer(s, sizeof(s));//clgi.MSG_ReadString(s, sizeof(s));
 
     //SHOWNET(2, "    %i \"%s\"\n", level, s);
 
@@ -260,7 +261,7 @@ void CLG_ParseCenterPrint(void)
 {
     char s[MAX_STRING_CHARS];
 
-    clgi.MSG_ReadString(s, sizeof(s));
+    clgi.MSG_ReadStringBuffer(s, sizeof(s));//clgi.MSG_ReadString(s, sizeof(s));
     //SHOWNET(2, "    \"%s\"\n", s);
     SCR_CenterPrint(s);
 

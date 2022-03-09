@@ -3,7 +3,7 @@
 //
 // Shared/Math/vector4.h
 //
-// N&C Math Library: Vector4
+// PH Math Library: Vector4
 // 
 // vec4_template is a templated union class which by use of several operators
 // allows for backwards compatibility support to most of the old Quake 2 based

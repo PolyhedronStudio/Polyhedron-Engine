@@ -1,15 +1,13 @@
-/*
-// LICENSE HERE.
-
-//
-// SharedGame/protocol.h
-//
-// The server game module gets a chance to define its own commands to send to
-// the client here.
-//
-*/
-#ifndef __SHAREDGAME_PROTOCOL_H__
-#define __SHAREDGAME_PROTOCOL_H__
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Shared Game Network Protocol.
+*
+***/
+#pragma once
 
 /**
 *   @brief  Server Game Command are a way for the server to tell a client what to do.
@@ -19,7 +17,7 @@
 *           Due to protocol limitations at the time of writing, the index starts at 22
 *           and the limit is 32 extra custom types.
 **/
-struct ServerGameCommands {
+struct ServerGameCommand {
     //! First index is 22, all other slots are reserved for the server itself.
     static constexpr int32_t MuzzleFlash = 22;
     static constexpr int32_t MuzzleFlash2 = 23;
@@ -38,13 +36,10 @@ struct ServerGameCommands {
 *           Due to protocol limitations at the time of writing, the index starts at 13
 *           and the limit is 32 extra custom types.
 **/
-
-struct ClientGameCommands {
+struct ClientGameCommand {
     //! First index is 13, all other slots are reserved for the client itself. Feel free to rename this one and make it your own.
     static constexpr int32_t FirstCommand = 13;
 
     //! Be sure to increase limit in case you modify this array.
     static constexpr int32_t TotalNumberOfCommands = 14;
 };
-
-#endif

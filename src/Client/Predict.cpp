@@ -82,7 +82,7 @@ void CL_PredictMovement(void)
     }
 
     if (!cl_predict->integer || (cl.frame.playerState.pmove.flags & PMF_NO_PREDICTION)) {
-        // N&C: Call into the CG Module to let it handle this.
+        // PH: Call into the CG Module to let it handle this.
         // just set angles
         CL_GM_PredictAngles();
         return;

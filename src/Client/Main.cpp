@@ -103,7 +103,7 @@ extern cvar_t *cl_renderdemo_fps;
 ClientStatic cls;
 ClientState  cl;
 
-// N&C: Client shared structure. used to access entities etc in CG Module.
+// PH: Client shared structure. used to access entities etc in CG Module.
 ClientShared cs;
 
 // used for executing stringcmds
@@ -232,7 +232,7 @@ void CL_ClientCommand(const char *string)
 
     Com_DDPrintf("%s: %s\n", __func__, string);
 
-    MSG_WriteByte(clc_stringcmd);
+    MSG_WriteUint8(ClientCommand::StringCommand);//MSG_WriteByte(ClientCommand::StringCommand);
     MSG_WriteString(string);
     MSG_FlushTo(&cls.netChannel->message);
 }
@@ -241,7 +241,7 @@ void CL_ClientCommand(const char *string)
 ===================
 CL_ForwardToServer
 
-adds the current command line as a clc_stringcmd to the client message.
+adds the current command line as a ClientCommand::StringCommand to the client message.
 things like godmode, noclip, etc, are commands directed to the server,
 so when they are typed in at the console, they will need to be forwarded.
 ===================
@@ -412,85 +412,6 @@ static void CL_Connect_c(genctx_t *ctx, int argnum)
     }
 }
 
-//-----------------------------------------------------------------------------------------------------
-// WID: This function is here to not break shit instantly, and try and use ENet to do the OOB
-// sending and reading of.
-//
-// After that, the challenging and/or get going into the game.
-//-----------------------------------------------------------------------------------------------------
-/*
-================
-CL_EConnect_f
-
-================
-*/
-static void CL_EConnect_f(void) {
-    const char* server;// , * p; // C++20: STRING: Added const to char*
-    char* p;
-    NetAdr    address;
-    int protocol;
-    int argc = Cmd_Argc();
-
-    if (argc < 2) {
-    usage:
-        Com_Printf("Usage: %s <server> [34|35|36]\n", Cmd_Argv(0));
-        return;
-    }
-
-    if (argc > 2) {
-        protocol = atoi(Cmd_Argv(2));
-        if (protocol < PROTOCOL_VERSION_DEFAULT ||
-            protocol > PROTOCOL_VERSION_POLYHEDRON) {
-            goto usage;
-        }
-    } else {
-        protocol = cl_protocol->integer;
-        if (!protocol) {
-            protocol = PROTOCOL_VERSION_POLYHEDRON;
-        }
-    }
-
-    server = Cmd_Argv(1);
-
-    // support quake2://<address>[/] scheme
-    if (!PH_StringNumberCaseCompare(server, "quake2://", 9)) {
-        server += 9;
-        if ((p = (char*)strchr(server, '/')) != NULL) {
-            *p = 0;
-        }
-    }
-
-
-
-    //if (!NET_StringToAdr(server, &address, PORT_SERVER)) {
-    //    Com_Printf("Bad server address\n");
-    //    return;
-    //}
-
-    // copy early to avoid potential cmd_argv[1] clobbering
-    Q_strlcpy(cls.servername, server, sizeof(cls.servername));
-
-    // if running a local server, kill it and reissue
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
-
-    NET_Config(NET_CLIENT);
-
-    CL_Disconnect(ERR_RECONNECT);
-
-    cls.serverAddress = address;
-    cls.serverProtocol = protocol;
-    cls.protocolVersion = 0;
-    cls.passive = false;
-    cls.connectionState = ClientConnectionState::Challenging;
-    cls.timeOfInitialConnect -= CONNECT_FAST;
-    cls.connect_count = 0;
-
-    Con_Popup(true);
-
-    CL_CheckForResend();
-
-    Cvar_Set("timedemo", "0");
-}
 
 /*
 ================
@@ -767,7 +688,7 @@ void CL_Disconnect(ErrorType type)
     //cvar_t *info_in_bspmenu = Info_SetValueForKey("in_bspmenu")
     SCR_EndLoadingPlaque(); // get rid of loading plaque
 
-    // N&C: Call into the CG Module to inform that we're disconnected.
+    // PH: Call into the CG Module to inform that we're disconnected.
     CL_GM_ClientDisconnect();
 
     if (cls.connectionState > ClientConnectionState::Disconnected && !cls.demo.playback) {
@@ -790,7 +711,7 @@ void CL_Disconnect(ErrorType type)
 
     if (cls.netChannel) {
         // send a disconnect message to the server
-        MSG_WriteByte(clc_stringcmd);
+        MSG_WriteUint8(ClientCommand::StringCommand);//MSG_WriteByte(ClientCommand::StringCommand);
         MSG_WriteData("disconnect", 11);
 
         Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3);
@@ -980,7 +901,7 @@ static void CL_ParsePrintMessage(void)
     serverStatus_t status;
     Request *r;
 
-    MSG_ReadString(string, sizeof(string));
+    MSG_ReadStringBuffer(string, sizeof(string));//MSG_ReadString(string, sizeof(string));
 
     r = CL_FindRequest();
     if (r) {
@@ -1039,7 +960,7 @@ static void CL_ParseInfoMessage(void)
     if (r->type != REQ_INFO)
         return;
 
-    MSG_ReadString(string, sizeof(string));
+    MSG_ReadStringBuffer(string, sizeof(string));//MSG_ReadString(string, sizeof(string));
     Com_Printf("%s", string);
     if (r->adr.type != NA_BROADCAST)
         r->type = REQ_FREE;
@@ -1296,9 +1217,9 @@ static void CL_ConnectionlessPacket(void)
     int type;
 
     MSG_BeginReading();
-    MSG_ReadLong(); // skip the -1
+    MSG_ReadInt32();//MSG_ReadLong(); // skip the -1
 
-    len = MSG_ReadStringLine(string, sizeof(string));
+    len = MSG_ReadStringLineBuffer(string, sizeof(string));//len = MSG_ReadStringLine(string, sizeof(string));
     if (len >= sizeof(string)) {
         Com_DPrintf("Oversize message received.  Ignored.\n");
         return;
@@ -1333,7 +1254,7 @@ static void CL_ConnectionlessPacket(void)
         //cls.connect_count = 0;
 
         // Parse additional parameters
-        int protocolFound = 0; // N&C: Added in to ensure we find a protocol, otherwise warn the player.
+        int protocolFound = 0; // PH: Added in to ensure we find a protocol, otherwise warn the player.
 
         j = Cmd_Argc();
         for (i = 2; i < j; i++) {
@@ -1433,7 +1354,7 @@ static void CL_ConnectionlessPacket(void)
         Com_Printf("Connected to %s (protocol %d).\n",
                    NET_AdrToString(&cls.serverAddress), cls.serverProtocol);
         if (cls.netChannel) {
-            // this may happen after svc_reconnect
+            // this may happen after ServerCommand::Reconnect
             Netchan_Close(cls.netChannel);
         }
         cls.netChannel = Netchan_Setup(NS_CLIENT, &cls.serverAddress,
@@ -1529,7 +1450,7 @@ static void CL_PacketEvent(void)
     CL_ParseServerMessage();
 
     // if recording demo, write the message out
-    if (cls.demo.recording && !cls.demo.paused && CL_FRAMESYNC()) {
+    if (cls.demo.recording && !cls.demo.paused) {
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
 
@@ -1590,7 +1511,7 @@ void CL_UpdateUserinfo(cvar_t *var, from_t from)
     }
 
 
-    // N&C: Allow the CG Module to work with it.
+    // PH: Allow the CG Module to work with it.
     CL_GM_ClientUpdateUserInfo(var, from);
 
     // check for the same variable being modified twice
@@ -1698,7 +1619,7 @@ void CL_Begin(void)
 {
     Cvar_FixCheats();
 
-    // N&C: Prepare media loading.
+    // PH: Prepare media loading.
     CL_PrepareMedia();
 
     // TODO: Move over to the CG Module.
@@ -2340,7 +2261,7 @@ void CL_RestartFilesystem(qboolean total)
 
         // Load client screen media first.
         SCR_RegisterMedia();
-        // N&C: Inform the CG Module about the registration of media.
+        // PH: Inform the CG Module about the registration of media.
         CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
@@ -2401,7 +2322,7 @@ void CL_RestartRefresh(qboolean total)
         
         // Load client screen media first.
         SCR_RegisterMedia();
-        // N&C: Inform the CG Module about the registration of media.
+        // PH: Inform the CG Module about the registration of media.
         CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
@@ -2702,7 +2623,7 @@ static void CL_InitLocal(void)
     Cmd_AddMacro("cl_pps", CL_Pps_m);   // packets per second
     Cmd_AddMacro("cl_ping", CL_Ping_m);
     Cmd_AddMacro("cl_lag", CL_Lag_m);
-    // N&C: Moved over to the client game.
+    // PH: Moved over to the client game.
     //Cmd_AddMacro("cl_health", CL_Health_m);
     //Cmd_AddMacro("cl_ammo", CL_Ammo_m);
     //Cmd_AddMacro("cl_armor", CL_Armor_m);
@@ -2717,7 +2638,7 @@ static void CL_InitLocal(void)
 	Cmd_AddMacro("cl_hdr_color", CL_HdrColor_m);
 	Cmd_AddMacro("cl_resolution_scale", CL_ResolutionScale_m);
 
-    // N&C: Initialize the game progs.
+    // PH: Initialize the game progs.
     CL_GM_Init();
 
     // Fetch CVars that should've been initialized by CG Module.
@@ -3237,7 +3158,7 @@ void CL_Init(void)
     // start with full screen console
     cls.key_dest = KEY_CONSOLE;
     
-    // N&C: Load our client game module here.
+    // PH: Load our client game module here.
     CL_InitGameProgs();
 
 #ifdef _WIN32
@@ -3303,7 +3224,7 @@ void CL_Shutdown(void)
     // Shutdown the RMLUI
     RMLUI_Shutdown();
 
-    // N&C: Notify the CG Module.
+    // PH: Notify the CG Module.
     CL_GM_Shutdown();
 
     CL_Disconnect(ERR_FATAL);
@@ -3319,7 +3240,7 @@ void CL_Shutdown(void)
     Con_Shutdown();
     
     CL_ShutdownRefresh();
-    // N&C: Unload the client game dll.
+    // PH: Unload the client game dll.
     CL_ShutdownGameProgs();
 
     CL_WriteConfig();

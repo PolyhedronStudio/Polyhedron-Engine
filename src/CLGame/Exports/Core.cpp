@@ -28,15 +28,15 @@
 // where commands may need to be constructed for menus etc.
 //---------------
 static size_t CL_Health_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_HEALTH]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::Health]);
 }
 
 static size_t CL_Ammo_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_AMMO_PRIMARY]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::PrimaryAmmo]);
 }
 
 static size_t CL_Armor_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_ARMOR]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::Armor]);
 }
 
 static size_t CL_WeaponModel_m(char* buffer, size_t size) {
@@ -234,7 +234,7 @@ void ClientGameCore::Initialize() {
     clgi.Cmd_Register(cmd_cgmodule);
 
     // Generate a random user name to avoid new users being kicked out of MP servers.
-    // The default N&C config files set the user name to "Player", same as the cvar initialization above.
+    // The default PH config files set the user name to "Player", same as the cvar initialization above.
     if (PH_StringCaseCompare(info_name->string, "Player") == 0)     {
         int random_number = rand() % 10000;
         char buf[MAX_CLIENT_NAME];

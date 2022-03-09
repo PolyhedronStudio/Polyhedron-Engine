@@ -37,15 +37,15 @@ static int write_server_file(qboolean autosave)
     uint64_t    timeStamp;
 
     // write magic
-    MSG_WriteLong(SAVE_MAGIC1);
-    MSG_WriteLong(SAVE_VERSION);
+    MSG_WriteInt32(SAVE_MAGIC1);//MSG_WriteLong(SAVE_MAGIC1);
+    MSG_WriteInt32(SAVE_VERSION);//MSG_WriteLong(SAVE_VERSION);
 
     timeStamp = (uint64_t)time(NULL);
 
     // write the comment field
-    MSG_WriteLong(timeStamp & 0xffffffff);
-    MSG_WriteLong(timeStamp >> 32);
-    MSG_WriteByte(autosave);
+    MSG_WriteInt32(timeStamp & 0xffffffff);//MSG_WriteLong(timeStamp & 0xffffffff);
+    MSG_WriteInt32(timeStamp >> 32);//MSG_WriteLong(timeStamp >> 32);
+    MSG_WriteUint8(autosave);//MSG_WriteByte(autosave);
     MSG_WriteString(sv.configstrings[ConfigStrings::Name]);
 
     // write the mapcmd
@@ -92,8 +92,8 @@ static int write_level_file(void)
     qerror_t    ret;
 
     // write magic
-    MSG_WriteLong(SAVE_MAGIC2);
-    MSG_WriteLong(SAVE_VERSION);
+    MSG_WriteInt32(SAVE_MAGIC2);//MSG_WriteLong(SAVE_MAGIC2);
+    MSG_WriteInt32(SAVE_VERSION);//MSG_WriteLong(SAVE_VERSION);
 
     // write configstrings
     for (i = 0; i < ConfigStrings::MaxConfigStrings; i++) {
@@ -105,14 +105,14 @@ static int write_level_file(void)
         if (len > MAX_QPATH)
             len = MAX_QPATH;
 
-        MSG_WriteShort(i);
+        MSG_WriteInt16(i);//MSG_WriteShort(i);
         MSG_WriteData(s, len);
-        MSG_WriteByte(0);
+        MSG_WriteUint8(0);//MSG_WriteByte(0);
     }
-    MSG_WriteShort(ConfigStrings::MaxConfigStrings);
+    MSG_WriteInt16(ConfigStrings::MaxConfigStrings);//MSG_WriteShort(ConfigStrings::MaxConfigStrings);
 
     len = CM_WritePortalBits(&sv.cm, portalbits);
-    MSG_WriteByte(len);
+    MSG_WriteUint8(len);//MSG_WriteByte(len);
     MSG_WriteData(portalbits, len);
 
     len = Q_snprintf(name, MAX_QPATH, "%s/%s/%s.sv2", sv_savedir->string, SAVE_CURRENT, sv.name);
@@ -273,17 +273,17 @@ char *SV_GetSaveInfo(const char *dir)
     if (read_binary_file(name))
         return NULL;
 
-    if (MSG_ReadLong() != SAVE_MAGIC1)
+    if (MSG_ReadInt32() != SAVE_MAGIC1)//if (MSG_ReadLong() != SAVE_MAGIC1)
         return NULL;
 
-    if (MSG_ReadLong() != SAVE_VERSION)
+    if (MSG_ReadInt32() != SAVE_VERSION)//if (MSG_ReadLong() != SAVE_VERSION)
         return NULL;
 
     // read the comment field
-    timeStamp = (uint64_t)MSG_ReadLong();
-    timeStamp |= (uint64_t)MSG_ReadLong() << 32;
-    autosave = MSG_ReadByte();
-    MSG_ReadString(name, sizeof(name));
+    timeStamp = (uint64_t)MSG_ReadInt32();//MSG_ReadLong();
+    timeStamp |= (uint64_t)MSG_ReadInt32() << 32;//MSG_ReadLong() << 32;
+    autosave = MSG_ReadUint8();//MSG_ReadByte();
+    MSG_ReadStringBuffer(name, sizeof(name));//MSG_ReadString(name, sizeof(name));
 
     if (autosave)
         return Z_CopyString(va("ENTERING %s", name));
@@ -326,25 +326,25 @@ static int read_server_file(void)
     if (read_binary_file(name))
         return -1;
 
-    if (MSG_ReadLong() != SAVE_MAGIC1)
+    if (MSG_ReadInt32() != SAVE_MAGIC1)//if (MSG_ReadLong() != SAVE_MAGIC1)
         return -1;
 
-    if (MSG_ReadLong() != SAVE_VERSION)
+    if (MSG_ReadInt32() != SAVE_VERSION)//if (MSG_ReadLong() != SAVE_VERSION)
         return -1;
 
     memset(&cmd, 0, sizeof(cmd));
 
     // read the comment field
-    MSG_ReadLong();
-    MSG_ReadLong();
-    if (MSG_ReadByte())
+    MSG_ReadInt32();//MSG_ReadLong();
+    MSG_ReadInt32();//MSG_ReadLong();
+    if (MSG_ReadUint8())//if (MSG_ReadByte())
         cmd.loadgame = 2;   // autosave
     else
         cmd.loadgame = 1;   // regular savegame
-    MSG_ReadString(NULL, 0);
+    MSG_ReadStringBuffer(nullptr, 0);//MSG_ReadString(NULL, 0);
 
     // read the mapcmd
-    len = MSG_ReadString(cmd.buffer, sizeof(cmd.buffer));
+    len = MSG_ReadStringBuffer(cmd.buffer, sizeof(cmd.buffer));//len = MSG_ReadString(cmd.buffer, sizeof(cmd.buffer));
     if (len >= sizeof(cmd.buffer))
         return -1;
 
@@ -364,13 +364,13 @@ static int read_server_file(void)
     // read all CVAR_LATCH cvars
     // these will be things like coop, skill, deathmatch, etc
     while (1) {
-        len = MSG_ReadString(name, MAX_QPATH);
+        len = MSG_ReadStringBuffer(name, MAX_QPATH);//len = MSG_ReadString(name, MAX_QPATH);
         if (!len)
             break;
         if (len >= MAX_QPATH)
             Com_Error(ERR_DROP, "Savegame cvar name too long");
 
-        len = MSG_ReadString(string, sizeof(string));
+        len = MSG_ReadStringBuffer(string, sizeof(string));//len = MSG_ReadString(string, sizeof(string));
         if (len >= sizeof(string))
             Com_Error(ERR_DROP, "Savegame cvar value too long");
 
@@ -409,10 +409,10 @@ static int read_level_file(void)
     if (read_binary_file(name))
         return -1;
 
-    if (MSG_ReadLong() != SAVE_MAGIC2)
+    if (MSG_ReadInt32() != SAVE_MAGIC2)//if (MSG_ReadLong() != SAVE_MAGIC2)
         return -1;
 
-    if (MSG_ReadLong() != SAVE_VERSION)
+    if (MSG_ReadInt32() != SAVE_VERSION)//if (MSG_ReadLong() != SAVE_VERSION)
         return -1;
 
     // any error will drop from this point
@@ -422,7 +422,7 @@ static int read_level_file(void)
 
     // read all configstrings
     while (1) {
-        index = MSG_ReadShort();
+        index = MSG_ReadInt16();//MSG_ReadShort();
         if (index == ConfigStrings::MaxConfigStrings)
             break;
 
@@ -430,12 +430,12 @@ static int read_level_file(void)
             Com_Error(ERR_DROP, "Bad savegame configstring index");
 
         maxlen = CS_SIZE(index);
-        len = MSG_ReadString(sv.configstrings[index], maxlen);
+        len = MSG_ReadStringBuffer(sv.configstrings[index], maxlen);//len = MSG_ReadString(sv.configstrings[index], maxlen);
         if (len >= maxlen)
             Com_Error(ERR_DROP, "Savegame configstring too long");
     }
 
-    len = MSG_ReadByte();
+    len = MSG_ReadUint8();//MSG_ReadByte();
     if (len > MAX_MAP_PORTAL_BYTES)
         Com_Error(ERR_DROP, "Savegame portalbits too long");
 
@@ -455,13 +455,15 @@ static int read_level_file(void)
 
 int SV_NoSaveGames(void)
 {
-	if (dedicated->integer && !Cvar_VariableInteger("coop"))
-        return 1;
+//    if (dedicated->integer && ge->CanSaveGame(dedicated->integer) !Cvar_VariableInteger("coop"))
+//        return 1;
 
-    if (Cvar_VariableInteger("deathmatch"))
-        return 1;
+ //   if (Cvar_VariableInteger("deathmatch"))
+   //     return 1;
 
-    return 0;
+    //return 0;
+
+    return ge->CanSaveGame(dedicated->integer);
 }
 
 void SV_AutoSaveBegin(MapCommand *cmd)
@@ -647,7 +649,7 @@ static void SV_Savegame_f(void)
         return;
     }
 
-    if (sv_maxclients->integer == 1 && svs.client_pool[0].edict->client->playerState.stats[STAT_HEALTH] <= 0) {
+    if (sv_maxclients->integer == 1 && svs.client_pool[0].edict->client->playerState.stats[PlayerStats::Health] <= 0) {
         Com_Printf("Can't savegame while dead!\n");
         return;
     }

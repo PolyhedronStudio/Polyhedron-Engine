@@ -21,6 +21,11 @@ public:
     virtual ~DeathmatchGamemode() override;
 
     //
+    // Server Related.
+    //
+    virtual qboolean CanSaveGame(qboolean isDedicatedServer) override;
+
+    //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
     // DeathMatch unique function implementations.

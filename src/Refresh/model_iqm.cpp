@@ -478,8 +478,6 @@ qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, co
 			surface->num_vertexes = mesh->num_vertexes;
 			surface->first_triangle = mesh->first_triangle;
 			surface->num_triangles = mesh->num_triangles;
-
-			Com_DPrintf("surface->name = '%s', surface->material='%s\n", surface->name, surface->material);
 		}
 
 		// copy triangles

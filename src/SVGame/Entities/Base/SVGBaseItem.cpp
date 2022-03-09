@@ -211,7 +211,7 @@ void SVGBaseItem::UseInstance(SVGBaseEntity* user, SVGBaseItem* item) {
 	    return;
     }
 
-    // Execute 'UseITem' callback function.
+    // Execute 'Use Item' callback function.
     (this->*useInstanceFunction)(user, item);
 }
 

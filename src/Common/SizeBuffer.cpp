@@ -1,21 +1,13 @@
-/*
-Copyright (C) 1997-2001 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
-
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	SizeBuffers are used for collecting data to read and send data
+*   over the wire.
+*
+***/
 #include "Shared/Shared.h"
 #include "Common/Protocol.h"
 #include "Common/SizeBuffer.h"
@@ -26,6 +18,7 @@ void SZ_TagInit(SizeBuffer *buf, void *data, size_t size, uint32_t tag)
     buf->data = (byte*)data; // CPP: Cast
     buf->maximumSize = size;
     buf->tag = tag;
+    //buf->isCompressed = false;
 }
 
 void SZ_Init(SizeBuffer *buf, void *data, size_t size)

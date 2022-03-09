@@ -270,7 +270,7 @@ void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es)
 {
     vec_t pitch;
 
-    // N&C: FF Precision.
+    // PH: FF Precision.
     VectorCopy(ps->pmove.origin, es->origin);
     //VectorScale(ps->pmove.origin, 0.125f, es->origin);
 

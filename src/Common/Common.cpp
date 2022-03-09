@@ -1009,7 +1009,7 @@ void Qcommon_Init(int argc, char **argv)
     // execute configs: default.cfg and q2rtx.cfg may come from the packfile, but config.cfg
     // and autoexec.cfg must be real files within the game directory
 	Com_AddConfigFile(COM_DEFAULT_CFG, FS_TYPE_REAL); // WID: We don't use PACK or PKZ right now. And def not for text config files.
-	Com_AddConfigFile(COM_NAC_CFG, FS_TYPE_REAL); // WID: We don't use PACK or PKZ right now. And def not for text config files.
+	Com_AddConfigFile(COM_POLY_CFG, FS_TYPE_REAL); // WID: We don't use PACK or PKZ right now. And def not for text config files.
     Com_AddConfigFile(COM_CONFIG_CFG, FS_TYPE_REAL | FS_PATH_GAME);
     Com_AddConfigFile(COM_AUTOEXEC_CFG, FS_TYPE_REAL | FS_PATH_GAME);
     Com_AddConfigFile(COM_POSTEXEC_CFG, FS_TYPE_REAL);
@@ -1061,7 +1061,7 @@ void Qcommon_Init(int argc, char **argv)
 
     Com_AddConfigFile(COM_POSTINIT_CFG, FS_TYPE_REAL);
 
-    // N&C: Tell us whether we have an initialized dedicated server, or a client that has been initialized.
+    // PH: Tell us whether we have an initialized dedicated server, or a client that has been initialized.
     if (!dedicated->integer) {
         Com_Printf("====== " PRODUCT " - Client Initialized ======\n\n");
     } else {

@@ -20,6 +20,74 @@ extern cvar_t* scr_scale;
 
 extern RenderScreenData scr;
 
+
+
+//---------------------------------------------------------
+#define ICON_WIDTH  24
+#define ICON_HEIGHT 24
+#define DIGIT_WIDTH 16
+#define ICON_SPACE  8
+
+static void HUD_DrawNumber(int x, int y, int color, int width, int value)
+{
+    char    num[16], * ptr;
+    int     l;
+    int     frame;
+
+    if (width < 1)
+        return;
+
+    // draw number string
+    if (width > 5)
+        width = 5;
+
+    color &= 1;
+
+    l = Q_scnprintf(num, sizeof(num), "%i", value);
+    if (l > width)
+        l = width;
+    x += 2 + DIGIT_WIDTH * (width - l);
+
+    ptr = num;
+    while (*ptr && l) {
+        if (*ptr == '-')
+            frame = STAT_MINUS;
+        else
+            frame = *ptr - '0';
+
+        clgi.R_DrawPic(x, y, scr.sb_pics[color][frame]);
+        x += DIGIT_WIDTH;
+        ptr++;
+        l--;
+    }
+}
+
+static void SRC_DrawNewHud_PrimaryAmmo() {
+    uint32_t x = scr.hud_width - 288;
+    uint32_t y = scr.hud_height - 160;
+
+    uint32_t width = 3;
+    int32_t value = cl->frame.playerState.stats[PlayerStats::PrimaryAmmo];
+    int32_t color = 0;
+    if (value > 5)
+        color = 0;  // green
+    else if (value >= 0)
+        color = ((cl->frame.number / CLG_FRAMEDIV) >> 2) & 1;     // flash
+    else
+        return;
+
+    if (cl->frame.playerState.stats[PlayerStats::Flashes] & 4)
+        clgi.R_DrawPic(x, y, scr.field_pic);
+
+    HUD_DrawNumber(x, y, color, width, value);
+}
+
+void SRC_DrawNewHud() {
+        clgi.R_SetScale(scr.hud_scale);
+    clgi.R_DrawPic(scr.hud_width - 128, scr.hud_height - 32, clgi.R_RegisterPic("num_rightslash"));
+    HUD_DrawNumber(scr.hud_width - 96, scr.hud_height - 32, 0, 3, cl->frame.playerState.stats[PlayerStats::PrimaryAmmo]);
+    HUD_DrawNumber(scr.hud_width - 128, scr.hud_height - 32, 0, 3, cl->frame.playerState.stats[PlayerStats::PrimaryAmmo]);
+}
 //---------------
 // ClientGameScreen::CheckPredictionError
 //
@@ -45,6 +113,9 @@ void ClientGameScreen::RenderScreen() {
     // the rest of 2D elements share common alpha
     clgi.R_ClearColor();
     clgi.R_SetAlpha(clgi.Cvar_ClampValue(scr_alpha, 0, 1));
+
+    // Draw new stats lmao, we got a lot of cleaning up to do for the time being :-P
+    //SRC_DrawNewHud();
 
     // Draw status.
     SCR_DrawStats();

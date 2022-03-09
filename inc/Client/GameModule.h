@@ -16,8 +16,8 @@
 //
 // cgmodule.c
 //
-extern "C" void CL_ShutdownGameProgs(void);    // N&C: Place elsewhere?
-extern "C" void CL_InitGameProgs(void);        // N&C: Place elsewhere? // CPP: Extern "C"
+extern "C" void CL_ShutdownGameProgs(void);    // WID: Place elsewhere?
+extern "C" void CL_InitGameProgs(void);        // WID: Place elsewhere? // CPP: Extern "C"
 
 //
 // Core
@@ -38,6 +38,7 @@ void		CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from);
 //
 // Entities.
 //
+qboolean	CL_GM_SpawnClassEntities(const char *entities);
 void		CL_GM_EntityEvent(int32_t number);
 
 //

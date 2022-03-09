@@ -32,44 +32,38 @@ extern IClientGameExports* cge;
 =====================================================================
 */
 
-static inline void CL_ParseDeltaEntity(ServerFrame  *frame,
-                                       int             newnum,
-                                       EntityState  *old,
-                                       int             bits)
-{
-    EntityState    *state;
+static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityNumber, EntityState  *oldEntityState, uint32_t byteMask) {
+    EntityState *entityState = nullptr;
 
     // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
-    if (frame->numEntities >= MAX_EDICTS) {
+    if (svFrame->numEntities >= MAX_EDICTS) {
         Com_Error(ERR_DROP, "%s: MAX_EDICTS exceeded", __func__);
     }
 
-    state = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
+    entityState = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
     cl.numEntityStates++;
-    frame->numEntities++;
+    svFrame->numEntities++;
 
 #ifdef _DEBUG
-    if (cl_shownet->integer > 2 && bits) {
-        MSG_ShowDeltaEntityBits(bits);
+    if (cl_shownet->integer > 2 && byteMask) {
+        MSG_ShowDeltaEntityBits(byteMask);
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif
 
-    MSG_ParseDeltaEntity(old, state, newnum, bits, cl.esFlags);
+    MSG_ParseDeltaEntity(oldEntityState, entityState, newEntityNumber, byteMask, cl.entityStateFlags);
 
-    // shuffle previous origin to old
-    if (!(bits & U_OLDORIGIN) && !(state->renderEffects & RenderEffects::Beam))
-        VectorCopy(old->origin, state->oldOrigin);
+    // Shuffle previous origin to old
+    if (!(byteMask & EntityMessageBits::OldOrigin) && !(entityState->renderEffects & RenderEffects::Beam))
+        entityState->oldOrigin = oldEntityState->origin;//VectorCopy(old->origin, state->oldOrigin);
 }
 
-static void CL_ParsePacketEntities(ServerFrame *oldframe,
-                                   ServerFrame *frame)
-{
-    int            newnum;
-    int            bits;
-    EntityState    *oldstate;
-    int            oldindex, oldnum;
-    int i;
+static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
+    int32_t            newnum = 0;
+    uint32_t        byteMask = 0;
+    EntityState    *oldstate = nullptr;
+    int32_t         oldindex = 0, oldnum = 0;
+    int32_t i = 0;
 
     frame->firstEntity = cl.numEntityStates;
     frame->numEntities = 0;
@@ -90,7 +84,11 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
     }
 
     while (1) {
-        newnum = MSG_ParseEntityBits(&bits);
+        bool removeEntity = false;
+
+        // Read out entity number, whether to remove it or not, and its byteMask.
+        newnum = MSG_ReadEntityNumber(&removeEntity, &byteMask);
+
         if (newnum < 0 || newnum >= MAX_EDICTS) {
             Com_Error(ERR_DROP, "%s: bad number: %d", __func__, newnum);
         }
@@ -119,14 +117,15 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
             }
         }
 
-        if (bits & U_REMOVE) {
+        //if (bits & EntityMessageBits::Remove) {
+	    if (removeEntity) {
             // the entity present in oldframe is not in the current frame
             SHOWNET(2, "   remove: %i\n", newnum);
             if (oldnum != newnum) {
-                Com_DPrintf("U_REMOVE: oldnum != newnum\n");
+                Com_DPrintf("EntityMessageBits::Remove: oldnum != newnum\n");
             }
             if (!oldframe) {
-                Com_Error(ERR_DROP, "%s: U_REMOVE with NULL oldframe", __func__);
+                Com_Error(ERR_DROP, "%s: EntityMessageBits::Remove with NULL oldframe", __func__);
             }
 
             oldindex++;
@@ -144,8 +143,8 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
         if (oldnum == newnum) {
             // delta from previous state
             SHOWNET(2, "   delta: %i ", newnum);
-            CL_ParseDeltaEntity(frame, newnum, oldstate, bits);
-            if (!bits) {
+            CL_ParseDeltaEntity(frame, newnum, oldstate, byteMask);
+            if (!byteMask) {
                 SHOWNET(2, "\n");
             }
 
@@ -164,8 +163,8 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe,
         if (oldnum > newnum) {
             // delta from baseline
             SHOWNET(2, "   baseline: %i ", newnum);
-            CL_ParseDeltaEntity(frame, newnum, &cl.entityBaselines[newnum], bits);
-            if (!bits) {
+            CL_ParseDeltaEntity(frame, newnum, &cl.entityBaselines[newnum], byteMask);
+            if (!byteMask) {
                 SHOWNET(2, "\n");
             }
             continue;
@@ -205,7 +204,7 @@ static void CL_ParseFrame(int extrabits)
     cl.frameFlags = 0;
 
     extraflags = 0;
-    bits = MSG_ReadLong();
+    bits = static_cast<uint32_t>(MSG_ReadInt32());//MSG_ReadLong();
 
     currentframe = bits & FRAMENUM_MASK;
     delta = bits >> FRAMENUM_BITS;
@@ -216,7 +215,7 @@ static void CL_ParseFrame(int extrabits)
         deltaframe = currentframe - delta;
     }
 
-    bits = MSG_ReadByte();
+    bits = MSG_ReadUint8();//MSG_ReadByte();
 
     suppressed = bits & SUPPRESSCOUNT_MASK;
     if (suppressed & FrameFlags::ClientPredict) {
@@ -275,7 +274,7 @@ static void CL_ParseFrame(int extrabits)
     }
 
     // read areaBits
-    length = MSG_ReadByte();
+    length = MSG_ReadUint8();//MSG_ReadByte();
     if (length) {
         if (length < 0 || msg_read.readCount + length > msg_read.currentSize) {
             Com_Error(ERR_DROP, "%s: read past end of message", __func__);
@@ -292,7 +291,7 @@ static void CL_ParseFrame(int extrabits)
 
     // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
     //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-    //    if (MSG_ReadByte() != svc_playerinfo) {
+    //    if (MSG_ReadByte() != ServerCommand::PlayerInfo) {
     //        Com_Error(ERR_DROP, "%s: not playerinfo", __func__);
     //    }
     //}
@@ -300,8 +299,8 @@ static void CL_ParseFrame(int extrabits)
     SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readCount - 1);
 
     // parse playerstate
-    bits = MSG_ReadShort();
-    MSG_ParseDeltaPlayerstate(from, &frame.playerState, bits, extraflags);
+    //bits = MSG_ReadUint16();
+    MSG_ParseDeltaPlayerstate(from, &frame.playerState, extraflags);
 #ifdef _DEBUG
     if (cl_shownet->integer > 2 && (bits || extraflags)) {
         MSG_ShowDeltaPlayerstateBits(bits, extraflags);
@@ -310,7 +309,7 @@ static void CL_ParseFrame(int extrabits)
 #endif
     // parse clientNumber
     if (extraflags & EPS_CLIENTNUM) {
-        frame.clientNumber = MSG_ReadByte();
+        frame.clientNumber = MSG_ReadUint8();//MSG_ReadByte();
     } else if (oldframe) {
         frame.clientNumber = oldframe->clientNumber;
     }
@@ -375,7 +374,7 @@ static void CL_ParseConfigstring(int index)
 
     s = cl.configstrings[index];
     maxlen = CS_SIZE(index);
-    len = MSG_ReadString(s, maxlen);
+    len = MSG_ReadStringBuffer(s, maxlen);//MSG_ReadString(s, maxlen);
 
     SHOWNET(2, "    %d \"%s\"\n", index, s);
 
@@ -398,28 +397,29 @@ static void CL_ParseConfigstring(int index)
     CL_UpdateConfigstring(index);
 }
 
-static void CL_ParseBaseline(int index, int bits)
+static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
 {
     if (index < 1 || index >= MAX_EDICTS) {
         Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
     }
 #ifdef _DEBUG
     if (cl_shownet->integer > 2) {
-        MSG_ShowDeltaEntityBits(bits);
+        MSG_ShowDeltaEntityBits(byteMask);
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif
-    MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, bits, cl.esFlags);
+    MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, byteMask, cl.entityStateFlags);
 }
 
-// instead of wasting space for svc_configstring and svc_spawnbaseline
+// instead of wasting space for ServerCommand::ConfigString and ServerCommand::SpawnBaseline
 // bytes, entire game state is compressed into a single stream.
 static void CL_ParseGamestate(void)
 {
-    int        index, bits;
+    int32_t index = 0;
+    uint32_t byteMask = 0;
 
     while (msg_read.readCount < msg_read.currentSize) {
-        index = MSG_ReadShort();
+        index = MSG_ReadInt16();//MSG_ReadShort();
         if (index == ConfigStrings::MaxConfigStrings) {
             break;
         }
@@ -427,11 +427,13 @@ static void CL_ParseGamestate(void)
     }
 
     while (msg_read.readCount < msg_read.currentSize) {
-        index = MSG_ParseEntityBits(&bits);
+        //index = MSG_ParseEntityBits(&byteMask);
+        bool remove = false;
+        index = MSG_ReadEntityNumber(&remove, &byteMask);
         if (!index) {
             break;
         }
-        CL_ParseBaseline(index, bits);
+        CL_ParseBaseline(index, byteMask);
     }
 }
 
@@ -447,9 +449,9 @@ static void CL_ParseServerData(void)
     CL_ClearState();
 
     // parse protocol version number
-    protocol = MSG_ReadLong();
-    cl.serverCount = MSG_ReadLong();
-    attractloop = MSG_ReadByte();
+    protocol = MSG_ReadInt32();//MSG_ReadLong();
+    cl.serverCount = MSG_ReadInt32();//MSG_ReadLong();
+    attractloop = MSG_ReadUint8(); //MSG_ReadByte();
 
     Com_DPrintf("Serverdata packet received "
                 "(protocol=%d, serverCount=%d, attractloop=%d)\n",
@@ -468,7 +470,7 @@ static void CL_ParseServerData(void)
     }
 
     // game directory
-    len = MSG_ReadString(cl.gamedir, sizeof(cl.gamedir));
+    len = MSG_ReadStringBuffer(cl.gamedir, sizeof(cl.gamedir));//MSG_ReadString(cl.gamedir, sizeof(cl.gamedir));
     if (len >= sizeof(cl.gamedir)) {
         Com_Error(ERR_DROP, "Oversize gamedir string");
     }
@@ -487,18 +489,18 @@ static void CL_ParseServerData(void)
     }
 
     // parse player entity number
-    cl.clientNumber = MSG_ReadShort();
+    cl.clientNumber = MSG_ReadInt16();//MSG_ReadShort();
 
     // get the full level name
-    MSG_ReadString(levelname, sizeof(levelname));
+    MSG_ReadStringBuffer(levelname, sizeof(levelname));//MSG_ReadString(levelname, sizeof(levelname));
 
     // setup default server state
     cl.serverState = ServerState::Game;
 
     // MSG: !! Removed: PROTOCOL_VERSION_POLYHEDRON
     //if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON) {
-    i = MSG_ReadShort();
-    if (!NAC_PROTOCOL_SUPPORTED(protocol)) {
+    i = MSG_ReadInt16();//MSG_ReadShort();
+    if (!POLYHEDRON_PROTOCOL_SUPPORTED(protocol)) {
         Com_Error(ERR_DROP,
                     "Polyhedron server reports unsupported protocol version %d.\n"
                     "Current server/client version is %d.", protocol, PROTOCOL_VERSION_POLYHEDRON_CURRENT);
@@ -508,13 +510,12 @@ static void CL_ParseServerData(void)
     cls.protocolVersion = protocol;
             
     // Parse N&C server state.
-    i = MSG_ReadByte();
+    i = MSG_ReadUint8();//MSG_ReadByte();
     Com_DPrintf("Polyhedron server state %d\n", i);
     cl.serverState = i;
 
 
-    //cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_UMASK); // CPP: IMPROVE: cl.esFlags |= MSG_ES_UMASK;
-    cl.esFlags = (EntityStateMessageFlags)(cl.esFlags | MSG_ES_BEAMORIGIN); // CPP: IMPROVE: cl.esFlags |= MSG_ES_BEAMORIGIN;
+    cl.entityStateFlags = (cl.entityStateFlags | MSG_ES_BEAMORIGIN);
 
 
     if (cl.clientNumber == -1) {
@@ -551,32 +552,32 @@ static void CL_ParseStartSoundPacket(void)
 {
     int flags, channel, entity;
 
-    flags = MSG_ReadByte();
-    if ((flags & (SND_ENT | SND_POS)) == 0)
-        Com_Error(ERR_DROP, "%s: neither SND_ENT nor SND_POS set", __func__);
+    flags = MSG_ReadUint8();//MSG_ReadByte();
+    if ((flags & (SoundCommandBits::Entity | SoundCommandBits::Position)) == 0)
+        Com_Error(ERR_DROP, "%s: neither SoundCommandBits::Entity nor SoundCommandBits::Position set", __func__);
 
-    snd.index = MSG_ReadByte();
+    snd.index = MSG_ReadUint8();//MSG_ReadByte();
     if (snd.index == -1)
         Com_Error(ERR_DROP, "%s: read past end of message", __func__);
 
-    if (flags & SND_VOLUME)
-        snd.volume = MSG_ReadByte() / 255.0f;
+    if (flags & SoundCommandBits::Volume)
+        snd.volume = MSG_ReadUint8() / 255.0f;//MSG_ReadByte() / 255.0f;
     else
         snd.volume = DEFAULT_SOUND_PACKET_VOLUME;
 
-    if (flags & SND_ATTENUATION)
-        snd.attenuation = MSG_ReadByte() / 64.0f;
+    if (flags & SoundCommandBits::Attenuation)
+        snd.attenuation = MSG_ReadUint8() / 64.0f; //MSG_ReadByte() / 64.0f;
     else
         snd.attenuation = DEFAULT_SOUND_PACKET_ATTENUATION;
 
-    if (flags & SND_OFFSET)
-        snd.timeofs = MSG_ReadByte() / 1000.0f;
+    if (flags & SoundCommandBits::Offset)
+        snd.timeofs = MSG_ReadUint8() / 1000.0f; //MSG_ReadByte() / 1000.0f;
     else
         snd.timeofs = 0;
 
-    if (flags & SND_ENT) {
+    if (flags & SoundCommandBits::Entity) {
         // entity relative
-        channel = MSG_ReadShort();
+        channel = MSG_ReadInt16();//MSG_ReadShort();
         entity = channel >> 3;
         if (entity < 0 || entity >= MAX_EDICTS)
             Com_Error(ERR_DROP, "%s: bad entity: %d", __func__, entity);
@@ -588,8 +589,8 @@ static void CL_ParseStartSoundPacket(void)
     }
 
     // positioned in space
-    if (flags & SND_POS)
-        snd.pos = MSG_ReadVector3();
+    if (flags & SoundCommandBits::Position)
+        snd.pos = MSG_ReadVector3(false);
 
     snd.flags = flags;
 
@@ -689,7 +690,7 @@ static void CL_ParseStuffText(void)
 {
     char s[MAX_STRING_CHARS];
 
-    MSG_ReadString(s, sizeof(s));
+    MSG_ReadStringBuffer(s, sizeof(s));//MSG_ReadString(s, sizeof(s));
     SHOWNET(2, "    \"%s\"\n", s);
     Cbuf_AddText(&cl_cmdbuf, s);
 }
@@ -704,15 +705,15 @@ static void CL_ParseDownload(int cmd)
     }
 
     // read the data
-    size = MSG_ReadShort();
-    percent = MSG_ReadByte();
+    size = MSG_ReadInt16();//MSG_ReadShort();
+    percent = MSG_ReadUint8();//MSG_ReadByte();
     if (size == -1) {
         CL_HandleDownload(NULL, size, percent, false);
         return;
     }
 
     // read optional uncompressed packet size
-    if (cmd == svc_zdownload) {
+    if (cmd == ServerCommand::ZDownload) {
         // MSG: !! ZLIB PKZ Download: Kept here in case this was part of Q2PRO protocol as well (This was related to challenging connect packets.)
         //if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2) {
         //    compressed = MSG_ReadShort();
@@ -748,8 +749,8 @@ static void CL_ParseZPacket(void)
         Com_Error(ERR_DROP, "%s: recursively entered", __func__);
     }
 
-    inlen = MSG_ReadWord();
-    outlen = MSG_ReadWord();
+    inlen = MSG_ReadUint16();//MSG_ReadWord();
+    outlen = MSG_ReadUint16();//MSG_ReadWord();
 
     if (inlen == -1 || outlen == -1 || msg_read.readCount + inlen > msg_read.currentSize) {
         Com_Error(ERR_DROP, "%s: read past end of message", __func__);
@@ -784,23 +785,6 @@ static void CL_ParseZPacket(void)
 #endif // USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
 }
 
-static void CL_ParseSetting(void)
-{
-    int index q_unused;
-    int value q_unused;
-
-    index = MSG_ReadLong();
-    value = MSG_ReadLong();
-
-//    switch (index) {
-//    case SVS_SOME_SETTING:
-//          .....
-//        break;
-//    default:
-//        break;
-//    }
-}
-
 /*
 =====================
 CL_ParseServerMessage
@@ -810,7 +794,7 @@ void CL_ParseServerMessage(void)
 {
     int         cmd, extrabits;
     size_t      readCount;
-    int         index, bits;
+    int         index;
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
@@ -833,7 +817,7 @@ void CL_ParseServerMessage(void)
 
         readCount = msg_read.readCount;
 
-        if ((cmd = MSG_ReadByte()) == -1) {
+        if ((cmd = MSG_ReadUint8()) == -1) {//if ((cmd = MSG_ReadByte()) == -1) {
             SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readCount - 1);
             break;
         }
@@ -860,62 +844,62 @@ badbyte:
             Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
             break;
 
-        case svc_nop:
+        case ServerCommand::Padding:
             break;
 
-        case svc_disconnect:
+        case ServerCommand::Disconnect:
             Com_Error(ERR_DISCONNECT, "Server disconnected");
             break;
 
-        case svc_reconnect:
+        case ServerCommand::Reconnect:
             CL_ParseReconnect();
             return;
 
-        case svc_stufftext:
+        case ServerCommand::StuffText:
             CL_ParseStuffText();
             break;
 
-        case svc_serverdata:
+        case ServerCommand::ServerData:
             CL_ParseServerData();
             continue;
 
-        case svc_configstring:
-            index = MSG_ReadShort();
+        case ServerCommand::ConfigString:
+            index = MSG_ReadInt16();//MSG_ReadShort();
             CL_ParseConfigstring(index);
             break;
 
-        case svc_sound:
+        case ServerCommand::Sound:
             CL_ParseStartSoundPacket();
             S_ParseStartSound();
             break;
 
-        case svc_spawnbaseline:
-            index = MSG_ParseEntityBits(&bits);
-            CL_ParseBaseline(index, bits);
+        case ServerCommand::SpawnBaseline: {
+            //index = MSG_ParseEntityBits(&bits);
+            uint32_t byteMask = 0;
+            bool removeEntity = false;
+            index = MSG_ReadEntityNumber(&removeEntity, &byteMask);
+            CL_ParseBaseline(index, byteMask);
             break;
+        }
 
-        case svc_download:
+        case ServerCommand::Download:
             CL_ParseDownload(cmd);
             continue;
 
-        case svc_frame:
+        case ServerCommand::Frame:
             CL_ParseFrame(extrabits);
             continue;
 
-        case svc_zpacket:
+        case ServerCommand::ZPacket:
             CL_ParseZPacket();
             continue;
 
-        case svc_zdownload:
+        case ServerCommand::ZDownload:
             CL_ParseDownload(cmd);
             continue;
 
-        case svc_gamestate:
+        case ServerCommand::GameState:
             CL_ParseGamestate();
-            continue;
-
-        case svc_setting:
-            CL_ParseSetting();
             continue;
         }
 
@@ -967,7 +951,7 @@ void CL_SeekDemoMessage(void)
             Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
         }
 
-        if ((cmd = MSG_ReadByte()) == -1) {
+        if ((cmd = MSG_ReadUint8()) == -1) {//if ((cmd = MSG_ReadByte()) == -1) {
             SHOWNET(1, "%3" PRIz ":END OF MESSAGE\n", msg_read.readCount - 1);
             break;
         }
@@ -990,52 +974,52 @@ void CL_SeekDemoMessage(void)
             }
             break;
 
-        case svc_nop:
+        case ServerCommand::Padding:
             break;
 
-        case svc_disconnect:
-        case svc_reconnect:
+        case ServerCommand::Disconnect:
+        case ServerCommand::Reconnect:
             Com_Error(ERR_DISCONNECT, "Server disconnected");
             break;
 
-        case svc_print:
-            MSG_ReadByte();
+        case ServerCommand::Print:
+            MSG_ReadUint8();//MSG_ReadByte();
             // fall thorugh
 
-        case svc_centerprint:
-        case svc_stufftext:
-            MSG_ReadString(NULL, 0);
+        case ServerCommand::CenterPrint:
+        case ServerCommand::StuffText:
+            MSG_ReadStringBuffer(nullptr, 0);//MSG_ReadString(NULL, 0);
             break;
 
-        case svc_configstring:
-            index = MSG_ReadShort();
+        case ServerCommand::ConfigString:
+            index = MSG_ReadInt16();//MSG_ReadShort();
             CL_ParseConfigstring(index);
             break;
 
-        case svc_sound:
+        case ServerCommand::Sound:
             CL_ParseStartSoundPacket();
             break;
 
         // WatIsDeze: Movd to CGModule.
-        //case ServerGameCommands::TempEntity:
+        //case ServerGameCommand::TempEntity:
         //    CL_ParseTEntPacket();
         //    break;
 
-        //case ServerGameCommands::MuzzleFlash:
-        //case ServerGameCommands::MuzzleFlash2:
+        //case ServerGameCommand::MuzzleFlash:
+        //case ServerGameCommand::MuzzleFlash2:
         //    CL_ParseMuzzleFlashPacket(0);
         //    break;
 
-        case svc_frame:
+        case ServerCommand::Frame:
             CL_ParseFrame(extrabits);
             continue;
 
         // N&C: Moved to CGModule.
-        //case ServerGameCommands::Inventory:
+        //case ServerGameCommand::Inventory:
         //    CL_ParseInventory();
         //    break;
 
-        //case ServerGameCommands::Layout:
+        //case ServerGameCommand::Layout:
         //    CL_ParseLayout();
         //    break;
 

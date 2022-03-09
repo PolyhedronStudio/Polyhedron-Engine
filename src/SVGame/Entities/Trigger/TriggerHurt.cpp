@@ -9,8 +9,12 @@
 #include "../../ServerGameLocal.h"     // SVGame.
 #include "../../Effects.h"     // Effects.
 #include "../../Utilities.h"       // Util funcs.
+
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
+
+#include "../../Gamemodes/IGamemode.h"
+
 #include "TriggerHurt.h"
 
 //
@@ -65,7 +69,7 @@ void TriggerHurt::Spawn() {
 	// Initialize Brush Trigger.
 	InitBrushTrigger();
 
-	//self->noiseIndex = gi.SoundIndex("world/electro.wav");
+	//self->noiseIndexA = gi.SoundIndex("world/electro.wav");
 	//self->Touch = hurt_touch;
 	SetTouchCallback(&TriggerHurt::TriggerHurtTouch);
 
@@ -155,7 +159,7 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 
 	if (!(GetSpawnFlags()& SPAWNFLAG_SILENT)) {
 		if ((level.frameNumber % 10) == 0)
-			SVG_Sound(other, CHAN_AUTO, GetNoiseIndex(), 1, ATTN_NORM, 0);
+			SVG_Sound(other, CHAN_AUTO, GetNoiseIndexA(), 1, ATTN_NORM, 0);
 	}
 
 	int32_t damageFlags = 0;
@@ -164,7 +168,7 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 	else
 		damageFlags = 0;
 
-	SVG_InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
+	game.GetGamemode()->InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
 }
 
 //

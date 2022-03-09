@@ -45,22 +45,87 @@ public:
 
     /***
     * 
-    *   Entity functions.
+    *   Instance Weapon functions.
     * 
-    *   NOTE:   For primary and secondary ammo, returning 0 means that the
-    *           primary/secondary ammo isn't in use for this weapon.
+    *   Keep in mind that these operate purely on data stored in the player entity, 
+    *   its client, and depending on the case, also 
+    *   
     *
     ***/
     /**
     *   @brief  Only called when allowed to think.
     **/
     virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+ 
+    /**
+    *   @brief  Updates the view model(client gun index) and ammo display (client ammo index)
+    *           to that of the weapon pointer passed to it. In case of an invalid weapon item
+    *           (nullptr), it'll set the gun and ammo indices to 0.
+    **/
+    virtual void InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    * @brief    Sets the weapon's animation properties.
+    * @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
+    **/
+    virtual void InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, 
+        int64_t startTime, int32_t startFrame, int32_t endFrame, int32_t loopCount = 0, qboolean forceLoop = false, float frameTime = ANIMATION_FRAMETIME);
+    /**
+    *   @brief  Call whenever an animation needs to be processed for another game frame.
+    **/
+    virtual void InstanceWeaponProcessAnimation(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    *   @brief Called when an animation has finished. Usually used to then switch states.
+    **/
+    virtual void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
-    ///**
-    //*   @brief  Called to execute the animation of the current weaponstate.
-    //**/
+
+    /**
+    *   @brief  Instantly sets the current state.
+    **/
+    virtual void InstanceWeaponSetCurrentState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient* client, int32_t state);
+    /** 
+    *   @brief  Queues a state and sets it as the next current state when the state currently processing has finished.
+    **/
+    virtual void InstanceWeaponQueueNextState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient* client, int32_t state);
+    /**
+    * @brief   A callback which can be implemented by weapons in order to fire code one time
+    *          when the weapon has switched to a new state. 
+    * 
+    *          (Mainly used for setting animations, but can be used for anything really.)
+    * 
+    * @param newState The current new state that the weapon resides in.
+    * @param oldState Old previous state the weapon was residing in.
+    **/
+    virtual void InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client,int32_t newState, int32_t oldState);
+
+
+    /**
+    *   @brief  Called each frame the weapon is in Draw state.
+    **/
+    virtual void InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    *   @brief  Called each frame the weapon is in Holster state.
+    **/
+    virtual void InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    *   @brief  Called each frame the weapon is in Holster state.
+    **/
+    virtual void InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+
+
+    /**
+    *   @brief  Called to execute the animation of the current weaponstate.
+    **/
     //virtual void InstanceWeaponAnimate(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
+    
+    /***
+    * 
+    *   Entity functions.
+    * 
+    *   NOTE:   For primary and secondary ammo, returning 0 means that the
+    *           primary/secondary ammo isn't in use for this weapon.
+    *
+    ***/
     /**
     *   @return Pointer to a weapon item instance. Does a typeinfo check to make sure. 
     *           Returns nullptr if not found or a type mismatch occures.
@@ -70,11 +135,7 @@ public:
 	    SVGBaseItem* itemInstance = GetItemInstanceByID(identifier);
 
 	    // Do a type check and return it casted to SVGBaseItemAmmo
-	    if (itemInstance->IsSubclassOf<SVGBaseItemWeapon>()) {
-	        return dynamic_cast<SVGBaseItemWeapon*>(itemInstance);
-	    } else {
-	        return nullptr;
-	    }
+        return dynamic_cast<SVGBaseItemWeapon*>(itemInstance);
     }
 
     /**

@@ -54,6 +54,11 @@ public:
 
 
     //////
+    // Server related.
+    //////
+    virtual qboolean CanSaveGame(qboolean isDedicatedServer) = 0;
+
+    //////
     // Map related.
     //////
     /**
@@ -87,6 +92,14 @@ public:
     *           after spawning.
     **/
     virtual void ClientEndServerFrame(SVGBasePlayer* player, ServerClient* client) = 0;
+
+    /**
+    *
+    *   @brief  Called for each player to give them a chance to process player movement,
+    *           catch other user input to act on, check intermission state and let the
+    *           weapon logic think.
+    **/
+    virtual void ClientThink(SVGBasePlayer *player, ServerClient *client, ClientMoveCommand *moveCommand) = 0;
 
     /**
     *   @brief  Called when a client disconnects.This does not get called between
@@ -162,6 +175,10 @@ public:
     //
     // Combat GameRules checks.
     //
+    /**
+    *   @return True if the entity is considered dead.
+    **/
+    virtual qboolean IsDeadEntity(SVGBaseEntity *ent) = 0;
     // Assigns the teamname to 'teamName', returns false/true if they are
     // on the same specific team.
     virtual qboolean GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) = 0;

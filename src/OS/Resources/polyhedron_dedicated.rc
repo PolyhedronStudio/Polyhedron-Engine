@@ -30,12 +30,12 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "PalmliX Studio"
+            VALUE "CompanyName", "Polyhedron Studio"
             VALUE "FileDescription", VER_FILEDESCRIPTION_STR
             VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
             VALUE "FileVersion", VERSION_STRING
             VALUE "InternalName", "Polyhedron Dedicated Server"
-            VALUE "LegalCopyright", "Copyright (C) 2020-2021, PalmliX Studio. All rights reserved."
+            VALUE "LegalCopyright", "Copyright (C) 2020-2022, Polyhedron Studio. All rights reserved."
             VALUE "ProductName", "Polyhedron Engine"
             VALUE "ProductVersion", VERSION_STRING
         END

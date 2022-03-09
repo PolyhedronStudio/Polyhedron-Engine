@@ -55,17 +55,17 @@ void Machinegun_Fire(SVGBasePlayer* ent)
 
     if (!(client->buttons & ButtonBits::Attack)) {
         client->machinegunShots = 0;
-        client->playerState.gunFrame++;
+        client->playerState.gunAnimationFrame++;
         return;
     }
 
-    if (client->playerState.gunFrame == 5)
-        client->playerState.gunFrame = 4;
+    if (client->playerState.gunAnimationFrame == 5)
+        client->playerState.gunAnimationFrame = 4;
     else
-        client->playerState.gunFrame = 5;
+        client->playerState.gunAnimationFrame = 5;
 
     if (client->persistent.inventory[client->ammoIndex] < 1) {
-        client->playerState.gunFrame = 6;
+        client->playerState.gunAnimationFrame = 6;
         if (level.time >= ent->GetDebouncePainTime()) {
             gi.Sound(ent->GetServerEntity(), CHAN_VOICE, gi.SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
             ent->SetDebouncePainTime(level.time + 1);
@@ -102,7 +102,7 @@ void Machinegun_Fire(SVGBasePlayer* ent)
     start = SVG_PlayerProjectSource(client, ent->GetOrigin(), offset, forward, right);
     SVG_FireBullet(ent, start, forward, damage, kick, DEFAULT_MACHINEGUN_BULLET_HSPREAD, DEFAULT_MACHINEGUN_BULLET_VSPREAD, MeansOfDeath::Machinegun);
 
-    gi.WriteByte(ServerGameCommands::MuzzleFlash);
+    gi.WriteByte(ServerGameCommand::MuzzleFlash);
     gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::MachineGun | is_silenced);
     vec3_t origin = ent->GetOrigin();
@@ -115,11 +115,11 @@ void Machinegun_Fire(SVGBasePlayer* ent)
 
     client->animation.priorityAnimation = PlayerAnimation::Attack;
     if (client->playerState.pmove.flags & PMF_DUCKED) {
-        ent->SetFrame(FRAME_crattak1 - (int)(random() + 0.25));
+        ent->SetAnimationFrame(FRAME_crattak1 - (int)(random() + 0.25));
         client->animation.endFrame = FRAME_crattak9;
     }
     else {
-        ent->SetFrame(FRAME_attack1 - (int)(random() + 0.25));
+        ent->SetAnimationFrame(FRAME_attack1 - (int)(random() + 0.25));
         client->animation.endFrame = FRAME_attack8;
     }
 }

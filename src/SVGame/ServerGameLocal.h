@@ -48,7 +48,10 @@ struct entity_s;
 #include "GameLocals.h"
 //==================================================================
 
-//! Time it takes to go over a frame. 
+//! MS Frametime for animations.
+constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;
+
+//! Float time it takes to go over a frame. 
 constexpr float FRAMETIME = BASE_FRAMETIME_1000;
 
 //! Memory tags to allow dynamic memory to be cleaned up
@@ -159,14 +162,14 @@ struct ItemIdentifier {
     /***
     * Weapon Identifiers.
     ***/
-    //! Unused.
-    static constexpr uint32_t None          = 0;
+    //! Bare hands.
+    static constexpr uint32_t Barehands     = 1;
     //! Pistol.
-    static constexpr uint32_t Beretta       = 1;
+    static constexpr uint32_t Beretta       = 2;
     //! SMG.
-    static constexpr uint32_t SMG           = 2;
+    static constexpr uint32_t SMG           = 3;
     //! Shotgun.
-    static constexpr uint32_t Shotgun       = 3;
+    static constexpr uint32_t Shotgun       = 4;
     //! Maximum amount of weapons allowed.
     static constexpr uint32_t MaxWeapons    = 64;
 
@@ -344,10 +347,12 @@ typedef struct gitem_s {
 //-------------------
 struct LevelLocals  {
     // Current local level frame number.
-    int32_t frameNumber;
+    int32_t frameNumber = 0;
 
-    // Current local level time.
-    float time;
+    //! Current sum of total frame time taken.
+    float time = 0.f;
+    //! Same as time, but multiplied by a 1000 to get a proper integer.
+    int64_t timeStamp = 0;
 
     char levelName[MAX_QPATH];  // The descriptive name (Outer Base, etc)
     char mapName[MAX_QPATH];    // The server name (base1, etc)
@@ -428,7 +433,6 @@ extern  GameLocals   game;
 extern  LevelLocals  level;
 extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
 extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
-extern  TemporarySpawnFields    st;
 
 // Static Get functions for readability.
 static inline Gameworld* GetGameworld() { return game.world; }
@@ -590,17 +594,12 @@ void SVG_ChangeWeapon(SVGBasePlayer* ent);
 void SVG_SpawnItem(Entity *ent, gitem_t *item);
 //void SVG_ThinkWeapon(Entity *ent);
 int32_t SVG_ArmorIndex(SVGBaseEntity *ent);
-gitem_t *SVG_GetItemByIndex(int32_t index);
-qboolean SVG_AddAmmo(Entity *ent, gitem_t *item, int32_t count);
 void SVG_TouchItem(SVGBaseEntity* ent, SVGBaseEntity* other, cplane_t *plane, csurface_t *surf);
 
 //
 // g_combat.c
 //
 qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2);
-qboolean SVG_CanDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor);
-void SVG_InflictDamage(SVGBaseEntity *targ, SVGBaseEntity *inflictor, SVGBaseEntity *attacker, const vec3_t &dmgDir, const vec3_t &point, const vec3_t &normal, int32_t damage, int32_t knockback, int32_t dflags, int32_t mod);
-void SVG_InflictRadiusDamage(SVGBaseEntity *inflictor, SVGBaseEntity *attacker, float damage, SVGBaseEntity *ignore, float radius, int32_t mod);
 
 // damage flags
 struct DamageFlags {
@@ -629,12 +628,6 @@ void SVG_PlayerTrail_New(vec3_t spot);
 Entity *SVG_PlayerTrail_PickFirst(Entity *self);
 Entity *SVG_PlayerTrail_PickNext(Entity *self);
 Entity *SVG_PlayerTrail_LastSpot(void);
-
-//
-// g_player.c
-//
-void SVG_Client_Pain(Entity *self, Entity *other, float kick, int32_t damage);
-void SVG_Client_Die(Entity *self, Entity *inflictor, Entity *attacker, int32_t damage, const vec3_t& point);
 
 //
 // g_svcmds.c
@@ -708,7 +701,7 @@ struct SVGTrace {
     // The impacted entity, or `NULL`.
     SVGBaseEntity *ent;   // Not set by CM_*() functions
 
-    // N&C: Custom added.
+    // PH: Custom added.
     vec3_t		offsets[8];	// [signBits][x] = either size[0][x] or size[1][x]
 };
 
@@ -745,35 +738,53 @@ struct PlayerAnimation {
 *           across level changes.
 **/
 struct ClientPersistentData {
+    /**
+    *   @brief Client Identity Data.
+    **/
+    //! User Info string.
     char userinfo[MAX_INFO_STRING];
+    //! The client's beautiful netname string.
     char netname[16];
+    //! The hand with which the player is holding the gun. (Left or right.)
     int32_t hand;
-
+    //! Whether the client is currently actively connected, or not.
     qboolean isConnected = false;   // A loadgame will leave valid entities that
                                     // just don't have a connection yet
-
-    /***
-    * Values saved and restored from entities when changing levels
-    ***/
-    //! Client's health.
-    int32_t health = 100;
-    //! The maximum amount of health.
-    int32_t maxHealth = 100;
     //! Flags to save.
     int32_t savedFlags = 0;
-    //! What item was selected?
-    int32_t selectedItem = 0;
-    //! Entire inventory.
-    int32_t inventory[MAX_ITEMS] = {};
 
-    //! Ammo capacities
-    int32_t maxAmmo9mm = 150;
+    /***
+    *   @brief Values saved and restored from clients when changing levels
+    ***/
+    struct {
+        //! Client's health.
+        int32_t health = 100;
+        //! The maximum amount of health.
+        int32_t maxHealth = 100;
+    } stats;
 
-    //! Pointer to the active weapon item instance.
-    SVGBaseItemWeapon *activeWeapon = nullptr;
-    //! Pointer to the last active weapon item instance.
-    SVGBaseItemWeapon *lastWeapon = nullptr;
+    /**
+    *   @brief Inventory member structure.
+    **/
+    struct {
+        //! The currently active weapon item ID.
+        int32_t activeWeaponID = ItemIdentifier::Barehands;
+        //! The last active weapon ID.
+        int32_t previousActiveWeaponID = 0;
+        //! Used to store the next weapon to switch to, it is set when 
+        //! the current weapon was still busy with an action.
+        int32_t nextWeaponID = 0;
 
+        //! All the items this client posesses.
+        int32_t items[MAX_ITEMS] = {};
+
+        //! The item currently selected. NOTE: Not in use currently.
+        //int32_t selectedItem = 0;
+
+        //! Maximum Ammo Capacities for this client.
+        int32_t maxAmmo9mm = 150;
+    } inventory;
+    
     //int32_t powerCubes = 0;    // Used for tracking the cubes in coop games
     int32_t score = 0;         // For calculating total unit score in coop games
 
@@ -838,28 +849,40 @@ struct gclient_s {
     //! Latched Buttons are used for single key push events.
     int32_t latchedButtons;
 
-    struct ClientWeaponState {
-	    //! Should we execute a weapon think method?
-        qboolean shouldThink = false;
+    struct WeaponState {
+        struct Flags {
+            //! Set if and only if an animation is still playing.
+            static constexpr uint32_t IsAnimating           = 1 << 0;
+            //! Set if and only if an animation is still playing.
+            static constexpr uint32_t IsProcessingState     = 1 << 1;
 
-        //! Last state, used for animation resetting.
-        int32_t lastState = WeaponState::Finished;
+            //! Is the weapon holstered?
+            static constexpr uint32_t IsHolstered           = 1 << 2;
+            
+            ////! Set if the weapon is processing a primary fire.
+            //static constexpr uint32_t PrimaryFire           = 1 << 2;
+            ////! Set if the weapon is processing a secondary fire.
+            //static constexpr uint32_t SecondaryFire       = 1 << 3;
+        };
 
-        //! Current state the active weapon resides in.
-        int32_t currentState = WeaponState::Finished;
-
+        //! Start time of the current active weapon state.
+        uint32_t timeStamp = 0;
+        
+        //! Flags of the weapon's state, gets set to 0 after each successful weapon switch.
+        uint32_t flags  = Flags::IsHolstered;
+        
+        //! None by default.
+        int32_t current     = ::WeaponState::None;
+        //! Same as 'current' by default.
+        int32_t previous    = current;
         //! Queued weapon state to switch to after finishing the current state.
-        int32_t queuedState = -1;
+        int32_t queued      = ::WeaponState::None;
 
-        // Animation start frame.
-        float startFrame = 0.f;
-
-            // Animation end frame.
-        float endFrame = 0.f;
+        //! Current frame the weapon animation(if any) is residing in. -1 if finished/none.
+        int32_t animationFrame  = 0;
+        //! Sound to play for this weapon frame.
+        uint32_t sound          = 0;
     } weaponState;
-
-    //! Pointer to the new weapon the client wishes to switch to.
-    SVGBaseItemWeapon *newWeapon;
 
     /**
     *   @brief  Used to sum up damage over an entire frame so weapons and other
@@ -880,8 +903,6 @@ struct gclient_s {
 
     //! Yaw angle of where our killer is located at in case we're dead.
     float killerYaw;
-
-
 
     //! Current kick angles.
     vec3_t kickAngles;

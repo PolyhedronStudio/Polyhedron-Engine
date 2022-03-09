@@ -3,7 +3,7 @@
 //
 // Shared/containers/IterableCArray.h
 //
-// N&C Container Library: IterableCArray
+// PH Container Library: IterableCArray
 // 
 // Can be used to wrap up C arrays, so they can be nicely iterated in a C++ friendly style.
 // This method we are using here should be performance prove, so it won't be a burden.

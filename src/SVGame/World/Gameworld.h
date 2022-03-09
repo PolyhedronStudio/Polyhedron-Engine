@@ -22,6 +22,7 @@ class IGamemode;
 
 #include "../Entities.h"
 #include "../Entities/Worldspawn.h"
+
 /**
 *	@brief GameWorld regulates the lifetime management of all entities.
 * 
@@ -104,6 +105,7 @@ public:
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
     Entity* ObtainFreeServerEntity();
+
     /**
 	*   @brief  Creates and assigns a class entity to the given server entity based on the classname.
     *
@@ -155,11 +157,15 @@ public:
     **/
     qboolean FreeClassEntity(Entity* svEntity);
     /**
-    *   @brief Utility function so we can acquire a valid SVGBasePlayer* pointer.
+    *   @brief	Utility function so we can acquire a valid SVGBasePlayer*. It operates
+    *			by using an entity handle in order to make sure that it has a valid
+    *			server and class entity object.
+    *	@param	requireValidClient	Expands the check to make sure the entity's client isn't set to nullptr.
+    *	@param	requireInUse		Expands the check to make sure the entity has its inUse set to true.
     * 
     *   @return A valid pointer to the entity's SVGBasePlayer class entity. nullptr on failure.
     **/
-    SVGBasePlayer* GetPlayerClassEntity(Entity* serverEntity);
+    static SVGBaseEntity* ValidateEntity(const SVGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
 
 
@@ -288,6 +294,7 @@ private:
     *	@brief Prepares the game's client entities with a base player class entity.
     **/
     void PreparePlayers();
+
 
 private:
     // Array storing the POD server entities.

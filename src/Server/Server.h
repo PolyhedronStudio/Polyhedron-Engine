@@ -93,14 +93,14 @@ constexpr uint32_t SV_FRAMERATE = BASE_FRAMERATE;
 constexpr uint32_t SV_FRAMETIME = BASE_FRAMETIME;
 constexpr uint32_t SV_FRAMEDIV = 1;
 constexpr uint32_t SV_FRAMESYNC = 1;
-#define SV_CLIENTSYNC(cl)   1
+//#define SV_CLIENTSYNC(cl)   1
 
 // Entity leaf settings.
 static constexpr uint32_t MAX_TOTAL_ENT_LEAFS = 128;
 //=============================================================================
 
 //-----------------
-// A client svc_frame message.
+// A client ServerCommand::Frame message.
 //-----------------
 typedef struct {
     int         number;
@@ -307,7 +307,7 @@ typedef struct client_s {
     size_t msg_dynamic_bytes;      // total size of dynamic memory allocated
 
     // per-client baseline chunks
-    PackedEntity *entityBaselines[SV_BASELINES_CHUNKS];
+    EntityState *entityBaselines[SV_BASELINES_CHUNKS];
 
     // server state pointers (hack for MVD channels implementation)
     char *configstrings;
@@ -419,7 +419,7 @@ typedef struct server_static_s {
 
     unsigned        num_entities;   // maximumclients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
-    PackedEntity    *entities;      // [num_entities]
+    EntityState    *entities;      // [num_entities]
 
 #if USE_ZLIB
     z_stream        z;  // for compressing messages at once

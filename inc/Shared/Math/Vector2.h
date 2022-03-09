@@ -3,7 +3,7 @@
 //
 // Shared/Math/vector2.h
 //
-// N&C Math Library: Vector2
+// PH Math Library: Vector2
 // 
 // vec2_template is a templated union class which by use of several operators
 // allows for backwards compatibility support to most of the old Quake 2 based
