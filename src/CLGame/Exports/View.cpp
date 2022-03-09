@@ -141,7 +141,7 @@ void ClientGameView::SetupThirdpersonView() {
     static const vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
 
     // In case of death, set a specific view angle that looks nice.
-    if (cl->frame.playerState.stats[STAT_HEALTH] <= 0) {
+    if (cl->frame.playerState.stats[PlayerStats::Health] <= 0) {
         cl->refdef.viewAngles[vec3_t::Roll] = 0;
         cl->refdef.viewAngles[vec3_t::Pitch] = 10;
     }

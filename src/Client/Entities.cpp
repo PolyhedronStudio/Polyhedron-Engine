@@ -447,8 +447,10 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
         } else {
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
+
             MSG_UnpackBoundingBox32(player->current.solid, entityMins, entityMaxs);
             headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
+
             traceAngles = vec3_zero();
             traceOrigin = player->current.origin;
         }

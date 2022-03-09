@@ -728,7 +728,7 @@ void ClientGameEntities::AddViewEntities() {
         // Moved into the if statement's else case up above.
         gunRenderEntity.oldframe = gunRenderEntity.frame;
         gunRenderEntity.backlerp = 1.0 - SG_FrameForTime(&gunRenderEntity.frame,
-            cl->serverTime, // Current Time.
+            cl->time, // Current Time.
             currentPlayerState->gunAnimationStartTime,  // Animation Start time.
             currentPlayerState->gunAnimationFrametime,  // Current frame time.
             currentPlayerState->gunAnimationStartFrame, // Start frame.

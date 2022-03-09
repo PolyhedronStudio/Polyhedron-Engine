@@ -952,11 +952,11 @@ void SVGBasePlayer::ApplyDamageFeedback() {
         return;
 
     // flash the backgrounds behind the status numbers
-    client->playerState.stats[STAT_FLASHES] = 0;
+    client->playerState.stats[PlayerStats::Flashes] = 0;
     if (client->damages.blood)
-        client->playerState.stats[STAT_FLASHES] |= 1;
+        client->playerState.stats[PlayerStats::Flashes] |= 1;
     if (client->damages.armor && !(GetFlags() & EntityFlags::GodMode))
-        client->playerState.stats[STAT_FLASHES] |= 2;
+        client->playerState.stats[PlayerStats::Flashes] |= 2;
 
     // total points of damage shot at the player this frame
     count = (client->damages.blood + client->damages.armor + client->damages.powerArmor);

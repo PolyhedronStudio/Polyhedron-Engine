@@ -232,8 +232,6 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
             break;
         case WeaponState::Draw:
 
-                // Be sure to update view model weapon right here in case it has been changed.
-                InstanceWeaponUpdateViewModel(player, weapon, client);
                 // Process animation.
                 InstanceWeaponProcessAnimation(player, weapon, client);
                 // Execute draw weapon state.

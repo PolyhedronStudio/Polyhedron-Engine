@@ -359,19 +359,19 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     //
     // health
     //
-    client->playerState.stats[STAT_HEALTH_ICON] = level.pic_health;
-    client->playerState.stats[STAT_HEALTH] = player->GetHealth();
+    client->playerState.stats[PlayerStats::HealthIcon] = level.pic_health;
+    client->playerState.stats[PlayerStats::Health] = player->GetHealth();
 
     //
     // ammo
     //
     if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
-        client->playerState.stats[STAT_AMMO_ICON] = 0;
-        client->playerState.stats[STAT_AMMO_PRIMARY] = 0;
+        client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 0;
+        client->playerState.stats[PlayerStats::PrimaryAmmo]     = 0;
     } else {
     //    item = 0;// &itemlist[ent->client->ammoIndex];
-        client->playerState.stats[STAT_AMMO_ICON] = 1;//gi.ImageIndex(item->icon);
-        client->playerState.stats[STAT_AMMO_PRIMARY] = client->persistent.inventory.items[client->ammoIndex];
+        client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 1;//gi.ImageIndex(item->icon);
+        client->playerState.stats[PlayerStats::PrimaryAmmo]     = client->persistent.inventory.items[client->ammoIndex];
     }
     // Get active weapon.
     //SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
@@ -389,22 +389,22 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     //
     // armor
     //
-    client->playerState.stats[STAT_ARMOR_ICON] = 0;
-    client->playerState.stats[STAT_ARMOR] = 0;
+    client->playerState.stats[PlayerStats::ArmorIcon]   = 0;
+    client->playerState.stats[PlayerStats::Armor]       = 0;
 
     //
     // pickup message
     //
     if (level.time > client->pickupMessageTime) {
-        client->playerState.stats[STAT_PICKUP_ICON] = 0;
-        client->playerState.stats[STAT_PICKUP_STRING] = 0;
+        client->playerState.stats[PlayerStats::PickupIcon]     = 0;
+        client->playerState.stats[PlayerStats::PickupString]   = 0;
     }
 
     //
     // timers
     //
-    client->playerState.stats[STAT_TIMER_ICON] = 0;
-    client->playerState.stats[STAT_TIMER] = 0;
+    client->playerState.stats[PlayerStats::TimerIcon]   = 0;
+    client->playerState.stats[PlayerStats::Timer]       = 0;
 
     //
     // selected item
@@ -415,47 +415,47 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     //	client->playerState.stats[STAT_SELECTED_ICON] = 0;  //gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
     //}
     //
-    client->playerState.stats[STAT_SELECTED_ICON] = 0;
-    client->playerState.stats[STAT_SELECTED_ITEM] = 0; //client->persistent.selectedItem;
+    client->playerState.stats[PlayerStats::SelectedItemIcon]    = 0;
+    client->playerState.stats[PlayerStats::SelectedItem]        = 0; //client->persistent.selectedItem;
 
     //
     // layouts
     //
-    client->playerState.stats[STAT_LAYOUTS] = 0;
+    client->playerState.stats[PlayerStats::Layouts] = 0;
 
     // Special layout for deathmatch.
     if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
 	    if (client->persistent.stats.health <= 0 || level.intermission.time || client->showScores) {
-	        client->playerState.stats[STAT_LAYOUTS] |= 1;
+	        client->playerState.stats[PlayerStats::Layouts] |= 1;
 	    }
 	    if (client->showInventory && client->persistent.stats.health > 0) { 
-            client->playerState.stats[STAT_LAYOUTS] |= 2;
+            client->playerState.stats[PlayerStats::Layouts] |= 2;
         }
     } else {
         if (client->showScores) {
-	        client->playerState.stats[STAT_LAYOUTS] |= 1;
+	        client->playerState.stats[PlayerStats::Layouts] |= 1;
         }
 	    if (client->showInventory && client->persistent.stats.health > 0) {
-	        client->playerState.stats[STAT_LAYOUTS] |= 2;
+	        client->playerState.stats[PlayerStats::Layouts] |= 2;
 	    }
     }
 
     //
     // frags
     //
-    client->playerState.stats[STAT_FRAGS] = client->respawn.score;
+    client->playerState.stats[PlayerStats::Frags] = client->respawn.score;
 
     //
     // help icon / current weapon if not shown
     //
     if ((client->persistent.hand == CENTER_HANDED || client->playerState.fov > 91) && client->persistent.inventory.activeWeaponID) {
         //ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->GetItemIcon());
-	    client->playerState.stats[STAT_HELPICON] = 0;
+	    client->playerState.stats[PlayerStats::HelpIcon] = 0;
     } else {
-        client->playerState.stats[STAT_HELPICON] = 0;
+        client->playerState.stats[PlayerStats::HelpIcon] = 0;
     }
 
-    client->playerState.stats[STAT_SPECTATOR] = 0;
+    client->playerState.stats[PlayerStats::IsSpectator] = 0;
 }
 
 /*
@@ -502,28 +502,28 @@ void SVG_HUD_SetSpectatorStats(SVGBasePlayer *player, ServerClient *client) {
         SVG_HUD_SetClientStats(player, client);
     }
 
-    client->playerState.stats[STAT_SPECTATOR] = 1;
+    client->playerState.stats[PlayerStats::IsSpectator] = 1;
 
     /* layouts are independant in isSpectator */
-    client->playerState.stats[STAT_LAYOUTS] = 0;
+    client->playerState.stats[PlayerStats::Layouts] = 0;
 
     if ((client->persistent.stats.health <= 0) || level.intermission.time || client->showScores)
     {
-	    client->playerState.stats[STAT_LAYOUTS] |= 1;
+	    client->playerState.stats[PlayerStats::Layouts] |= 1;
     }
 
     if (client->showInventory && (client->persistent.stats.health > 0))
     {
-        client->playerState.stats[STAT_LAYOUTS] |= 2;
+        client->playerState.stats[PlayerStats::Layouts] |= 2;
     }
 
     if (client->chaseTarget && client->chaseTarget->inUse)
     {
-    	client->playerState.stats[STAT_CHASE] = ConfigStrings::PlayerSkins + (client->chaseTarget - game.world->GetServerEntities()) - 1;
+    	client->playerState.stats[PlayerStats::ChaseClientID] = ConfigStrings::PlayerSkins + (client->chaseTarget - game.world->GetServerEntities()) - 1;
     }
     else
     {
-	    client->playerState.stats[STAT_CHASE] = 0;
+	    client->playerState.stats[PlayerStats::ChaseClientID] = 0;
     }
 }
 

@@ -28,15 +28,15 @@
 // where commands may need to be constructed for menus etc.
 //---------------
 static size_t CL_Health_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_HEALTH]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::Health]);
 }
 
 static size_t CL_Ammo_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_AMMO_PRIMARY]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::PrimaryAmmo]);
 }
 
 static size_t CL_Armor_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[STAT_ARMOR]);
+    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::Armor]);
 }
 
 static size_t CL_WeaponModel_m(char* buffer, size_t size) {

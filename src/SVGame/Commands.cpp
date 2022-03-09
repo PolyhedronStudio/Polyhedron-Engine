@@ -647,8 +647,8 @@ int PlayerSort(void const *a, void const *b)
     Gameworld* gameworld = game.GetGameworld();
     ServerClient* clients = gameworld->GetClients();
 
-    anum = clients[anum].playerState.stats[STAT_FRAGS];
-    bnum = clients[bnum].playerState.stats[STAT_FRAGS];
+    anum = clients[anum].playerState.stats[PlayerStats::Frags];
+    bnum = clients[bnum].playerState.stats[PlayerStats::Frags];
 
     if (anum < bnum)
         return -1;
@@ -687,7 +687,7 @@ void Cmd_Players_f(SVGBasePlayer* player, ServerClient* client) {
     for (int32_t i = 0; i < numConnectedClients; i++) {
         // Generate score string.
         Q_snprintf(small, sizeof(small), "%3i %s\n",
-                   clients[index[i]].playerState.stats[STAT_FRAGS],
+                   clients[index[i]].playerState.stats[PlayerStats::Frags],
                    clients[index[i]].persistent.netname);
 
         // Ensure buffer doesn't overflow.

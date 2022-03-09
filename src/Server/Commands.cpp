@@ -528,7 +528,7 @@ static void dump_clients(void)
         "--- ----- ---- --------------- ------- --------------------- ----- -- ---\n");
     FOR_EACH_CLIENT(client) {
         Com_Printf("%3i %5i ", client->number,
-                   client->edict->client->playerState.stats[STAT_FRAGS]);
+                   client->edict->client->playerState.stats[PlayerStats::Frags]);
 
         switch (client->connectionState) {
         case ConnectionState::Zombie:

@@ -429,7 +429,7 @@ static size_t SV_StatusString(char *status)
             }
             len = Q_snprintf(entry, sizeof(entry),
                              "%i %i \"%s\"\n",
-                             cl->edict->client->playerState.stats[STAT_FRAGS],
+                             cl->edict->client->playerState.stats[PlayerStats::Frags],
                              cl->ping, cl->name);
             if (len >= sizeof(entry)) {
                 continue;

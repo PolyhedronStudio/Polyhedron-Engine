@@ -538,24 +538,40 @@ typedef enum {
 //    static constexpr int32_t AmmoIcon = 2;
 //    static constexpr int32_t AmmoPrimary = 3;
 //};
-#define STAT_HEALTH_ICON        0
-#define STAT_HEALTH             1
-#define STAT_AMMO_ICON          2
-#define STAT_AMMO_PRIMARY       3
-#define STAT_ARMOR_ICON         4
-#define STAT_ARMOR              5
-#define STAT_SELECTED_ICON      6
-#define STAT_PICKUP_ICON        7
-#define STAT_PICKUP_STRING      8
-#define STAT_TIMER_ICON         9
-#define STAT_TIMER              10
-#define STAT_HELPICON           11
-#define STAT_SELECTED_ITEM      12
-#define STAT_LAYOUTS            13
-#define STAT_FRAGS              14
-#define STAT_FLASHES            15      // cleared each frame, 1 = health, 2 = armor
-#define STAT_CHASE              16
-#define STAT_SPECTATOR          17
+struct PlayerStats {
+    static constexpr uint32_t HealthIcon        = 0;
+    static constexpr uint32_t Health            = 1;
+    static constexpr uint32_t PrimaryAmmoIcon   = 2;
+    static constexpr uint32_t PrimaryAmmo       = 3;
+    static constexpr uint32_t SecondaryAmmoIcon = 4;
+    static constexpr uint32_t SecondaryAmmo     = 5;
+    static constexpr uint32_t ArmorIcon         = 6;
+    static constexpr uint32_t Armor             = 7;
+    static constexpr uint32_t SelectedItemIcon  = 8;
+    static constexpr uint32_t PickupIcon        = 9;
+    static constexpr uint32_t PickupString      = 10;
+    static constexpr uint32_t TimerIcon         = 11;
+    static constexpr uint32_t Timer             = 12;
+    static constexpr uint32_t HelpIcon          = 13;
+    static constexpr uint32_t SelectedItem      = 14;
+    static constexpr uint32_t Layouts           = 15;
+    static constexpr uint32_t Frags             = 16;
+    static constexpr uint32_t Flashes           = 17; // Cleared each frame: 1 = health, 2 = armor, 3 = primary ammo, 4 = secondary ammo.
+    static constexpr uint32_t ChaseClientID     = 18;
+    static constexpr uint32_t IsSpectator       = 19;
+    //#define STAT_SELECTED_ICON      6
+    //#define STAT_PICKUP_ICON        7
+    //#define STAT_PICKUP_STRING      8
+    //#define STAT_TIMER_ICON         9
+    //#define STAT_TIMER              10
+    //#define STAT_HELPICON           11
+    //#define STAT_SELECTED_ITEM      12
+    //#define STAT_LAYOUTS            13
+    //#define STAT_FRAGS              14
+    //#define STAT_FLASHES            15      // cleared each frame, 1 = health, 2 = armor
+    //#define STAT_CHASE              16
+    //#define STAT_SPECTATOR          17
+};
 
 //
 // User Field.

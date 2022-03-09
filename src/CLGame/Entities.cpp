@@ -27,8 +27,8 @@ ClientEntity* CLG_GetClientViewEntity(void) {
     int32_t index = cl->clientNumber;
 
     // Fetch the chasing entity index if we are chasing.
-    if (cl->frame.playerState.stats[STAT_CHASE]) {
-        index = cl->frame.playerState.stats[STAT_CHASE] - ConfigStrings::PlayerSkins;
+    if (cl->frame.playerState.stats[PlayerStats::ChaseClientID]) {
+        index = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
     }
 
     return &cs->entities[index + 1];
@@ -52,7 +52,7 @@ qboolean CLG_IsClientViewEntity(const ClientEntity* ent) {
             } 
 
             // If we came to this point, fetch the chasing client.
-            const int16_t chase = cl->frame.playerState.stats[STAT_CHASE] - ConfigStrings::PlayerSkins;
+            const int16_t chase = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
 
             if (ent->current.number == chase) {
                 return true;

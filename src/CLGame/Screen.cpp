@@ -457,7 +457,7 @@ void SCR_SetCrosshairColor(void)
         return;
     }
 
-    health = cl->frame.playerState.stats[STAT_HEALTH];
+    health = cl->frame.playerState.stats[PlayerStats::Health];
     if (health <= 0) {
         scr.crosshair_color.u8[0] = 0; scr.crosshair_color.u8[1] = 0; scr.crosshair_color.u8[2] = 0;
         return;
@@ -872,6 +872,9 @@ void SCR_RegisterMedia(void)
     scr.loading_pic = clgi.R_RegisterPic("loading");
     clgi.R_GetPicSize(&scr.loading_width, &scr.loading_height, scr.loading_pic);
 
+    // Register slash pic for ammo display.
+    clgi.R_RegisterPic("num_rightslash");
+
     // Register font pic. (Has unless modified, already been registered by the client.)
     scr.font_pic = clgi.R_RegisterFont(scr_font->string);
 
@@ -952,10 +955,10 @@ void SCR_DrawInventory(void)
     int     selected;
     int     top;
 
-    if (!(cl->frame.playerState.stats[STAT_LAYOUTS] & 2))
+    if (!(cl->frame.playerState.stats[PlayerStats::Layouts] & 2))
         return;
 
-    selected = cl->frame.playerState.stats[STAT_SELECTED_ITEM];
+    selected = cl->frame.playerState.stats[PlayerStats::Layouts];
 
     num = 0;
     selected_num = 0;
@@ -1123,9 +1126,9 @@ static void SCR_ExecuteLayoutString(const char* s)
                 clgi.R_DrawPic(x, y, cl->precaches.images[index]);
             }
 
-            if (value == STAT_SELECTED_ICON && scr_showitemname->integer)
+            if (value == PlayerStats::SelectedItemIcon && scr_showitemname->integer)
             {
-                SCR_DrawSelectedItemName(x + 32, y + 8, cl->frame.playerState.stats[STAT_SELECTED_ITEM]);
+                SCR_DrawSelectedItemName(x + 32, y + 8, cl->frame.playerState.stats[PlayerStats::SelectedItem]);
             }
             continue;
         }
@@ -1232,7 +1235,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             int     color;
 
             width = 3;
-            value = cl->frame.playerState.stats[STAT_HEALTH];
+            value = cl->frame.playerState.stats[PlayerStats::Health];
             if (value > 25)
                 color = 0;  // green
             else if (value > 0)
@@ -1240,7 +1243,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             else
                 color = 1;
 
-            if (cl->frame.playerState.stats[STAT_FLASHES] & 1)
+            if (cl->frame.playerState.stats[PlayerStats::Flashes] & 1)
                 clgi.R_DrawPic(x, y, scr.field_pic);
 
             HUD_DrawNumber(x, y, color, width, value);
@@ -1252,7 +1255,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             int     color;
 
             width = 3;
-            value = cl->frame.playerState.stats[STAT_AMMO_PRIMARY];
+            value = cl->frame.playerState.stats[PlayerStats::PrimaryAmmo];
             if (value > 5)
                 color = 0;  // green
             else if (value >= 0)
@@ -1260,7 +1263,7 @@ static void SCR_ExecuteLayoutString(const char* s)
             else
                 continue;   // negative number = don't show
 
-            if (cl->frame.playerState.stats[STAT_FLASHES] & 4)
+            if (cl->frame.playerState.stats[PlayerStats::Flashes] & 4)
                 clgi.R_DrawPic(x, y, scr.field_pic);
 
             HUD_DrawNumber(x, y, color, width, value);
@@ -1272,13 +1275,13 @@ static void SCR_ExecuteLayoutString(const char* s)
             int     color;
 
             width = 3;
-            value = cl->frame.playerState.stats[STAT_ARMOR];
+            value = cl->frame.playerState.stats[PlayerStats::Armor];
             if (value < 1)
                 continue;
 
             color = 0;  // green
 
-            if (cl->frame.playerState.stats[STAT_FLASHES] & 2)
+            if (cl->frame.playerState.stats[PlayerStats::Flashes] & 2)
                 clgi.R_DrawPic(x, y, scr.field_pic);
 
             HUD_DrawNumber(x, y, color, width, value);
@@ -1386,6 +1389,7 @@ void SCR_DrawStats(void)
     if (scr_draw2d->integer <= 1)
         return;
 
+    // TODO: Remove in the near future, of course!
     SCR_ExecuteLayoutString(cl->configstrings[ConfigStrings::StatusBar]);
 }
 
@@ -1397,7 +1401,7 @@ void SCR_DrawLayout(void)
     if (clgi.IsDemoPlayback() && clgi.Key_IsDown(K_F1))
         goto draw;
 
-    if (!(cl->frame.playerState.stats[STAT_LAYOUTS] & 1))
+    if (!(cl->frame.playerState.stats[PlayerStats::Flashes] & 1))
         return;
 
 draw:
