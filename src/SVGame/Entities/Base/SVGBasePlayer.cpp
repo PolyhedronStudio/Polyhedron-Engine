@@ -231,10 +231,10 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
         SetPlayerMoveType(EnginePlayerMoveType::Dead);
 
         // Update the obituary.
-        GetGameworld()->GetGamemode()->ClientUpdateObituary(this, inflictor, attacker);
+        GetGamemode()->ClientUpdateObituary(this, inflictor, attacker);
 
         // Toss our weapon, assuming we had any.
-        SVG_TossClientWeapon(this);
+        TossWeapon();
 
         // Show the scoreboard in case of a deathmatch mode.
         //if (deathmatch->value)
@@ -308,6 +308,42 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
 *   Player Functions.
 *
 ***/
+/**
+*   @brief  Tosses the player's weapon away from himself.
+**/
+void SVGBasePlayer::TossWeapon() {
+    SVGBaseItemWeapon *item = nullptr;
+    Entity      *drop= nullptr;
+    float       spread = 1.5f;
+
+    // Always allow.
+    //if (!deathmatch->value)
+    //    return;
+
+    // Get client
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return;
+    }
+
+    // Fetch active weapon, if any.
+    //item = player->GetActiveWeapon();
+
+    //if (!player->GetClient()->persistent.inventory[player->GetClient()->ammoIndex])
+    //    item = NULL;
+    //if (item && (strcmp(item->pickupName, "Blaster") == 0))
+    //    item = NULL;
+
+    if (item) {
+        //playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
+        //drop = SVG_DropItem(playerClient->GetServerEntity(), item);
+        //playerClient->GetClient()->aimAngles[vec3_t::Yaw] += spread;
+        //drop->spawnFlags = ItemSpawnFlags::DroppedPlayerItem;
+    }
+}
+
 /**
 *   @brief  Each player can have two 'noise sources' associated to it. One slot for
 *           player personal noises such as jumpin, pain, firing a weapon. The other
@@ -922,22 +958,23 @@ void SVGBasePlayer::CheckWorldEffects()
         // if out of air, start drowning
         if (GetAirFinishedTime() < level.time) {
             // drown!
-            if (GetNextDrownTime() < level.time
-                && GetHealth() > 0) {
+            if (GetNextDrownTime() < level.time && GetHealth() > 0) {
                 SetNextDrownTime(level.time + 1);
 
                 // take more damage the longer underwater
                 SetDamage(GetDamage() + 2);
-                if (GetDamage() > 15)
+                if (GetDamage() > 15) {
                     SetDamage(15);
+                }
 
                 // play a gurp sound instead of a normal pain sound
-                if (GetHealth() <= GetDamage())
+                if (GetHealth() <= GetDamage()) {
                     SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/drown1.wav"), 1, ATTN_NORM, 0);
-                else if (rand() & 1)
+                } else if (rand() & 1) {
                     SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("*gurp1.wav"), 1, ATTN_NORM, 0);
-                else
+                } else {
                     SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
+                }
 
                 SetDebouncePainTime(level.time);
 
@@ -974,130 +1011,155 @@ void SVGBasePlayer::CheckWorldEffects()
 *   @brief Process and apply damage feedback effects.
 **/
 void SVGBasePlayer::ApplyDamageFeedback() {
-    float   side;
-    float   realcount, count, kick;
-    vec3_t  v;
-    int     r, l;
-    static  vec3_t  power_color = {0.0f, 1.0f, 0.0f};
-    static  vec3_t  acolor = {1.0f, 1.0f, 1.0f};
-    static  vec3_t  bcolor = {1.0f, 0.0f, 0.0f};
-
     // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
-    if (!client)
+    if (!client) {
         return;
+    }
 
-    // flash the backgrounds behind the status numbers
+    // Flash the backgrounds behind the status numbers.
     client->playerState.stats[PlayerStats::Flashes] = 0;
-    if (client->damages.blood)
+    if (client->damages.blood) {
         client->playerState.stats[PlayerStats::Flashes] |= 1;
-    if (client->damages.armor && !(GetFlags() & EntityFlags::GodMode))
+    }
+    if (client->damages.armor && !(GetFlags() & EntityFlags::GodMode)) {
         client->playerState.stats[PlayerStats::Flashes] |= 2;
+    }
 
-    // total points of damage shot at the player this frame
-    count = (client->damages.blood + client->damages.armor + client->damages.powerArmor);
-    if (count == 0)
-        return;     // didn't take any damage
+    // Total points of damage shot at the player this frame.
+    float totalDamageCount = (client->damages.blood + client->damages.armor + client->damages.powerArmor);
+    
+    // Return in case of not having taken any damage at all.
+    if (totalDamageCount == 0) {
+        return;
+    }
 
-                    // start a pain animation if still in the player model
+    // Start a pain animation if still in the player model
     if (client->animation.priorityAnimation < PlayerAnimation::Pain && GetModelIndex() == 255) {
-        static int      i;
-
+        // Pain is our priority player animation.
         client->animation.priorityAnimation = PlayerAnimation::Pain;
+        // In case of being ducked, we only have a single one.
         if (client->playerState.pmove.flags & PMF_DUCKED) {
             SetAnimationFrame(FRAME_crpain1 - 1);
             client->animation.endFrame = FRAME_crpain4;
         } else {
-            i = (i + 1) % 3;
-            switch (i) {
-            case 0:
-                SetAnimationFrame(FRAME_pain101 - 1);
-                client->animation.endFrame = FRAME_pain104;
+            // Otherwise, we shift through them circulary.
+            static int32_t painAnimation = (painAnimation + 1) % 3;
+            switch (painAnimation) {
+                case 0:
+                    SetAnimationFrame(FRAME_pain101 - 1);
+                    client->animation.endFrame = FRAME_pain104;
                 break;
-            case 1:
-                SetAnimationFrame(FRAME_pain201 - 1);
-                client->animation.endFrame = FRAME_pain204;
+                case 1:
+                    SetAnimationFrame(FRAME_pain201 - 1);
+                    client->animation.endFrame = FRAME_pain204;
                 break;
-            case 2:
-                SetAnimationFrame(FRAME_pain301 - 1);
-                client->animation.endFrame = FRAME_pain304;
+                case 2:
+                    SetAnimationFrame(FRAME_pain301 - 1);
+                    client->animation.endFrame = FRAME_pain304;
                 break;
             }
         }
     }
 
-    realcount = count;
-    if (count < 10)
-        count = 10; // always make a visible effect
+    // Store the real damage count.
+    float realDamageCount = totalDamageCount;
 
-                    // Play an apropriate pain sound
+    // It isn't <= 0, but still has a count, so we want to make sure it is visibly evident.
+    if (totalDamageCount < 10) {
+        totalDamageCount = 10;
+    }
+
+    // Play an apropriate pain sound
     if ((level.time > GetDebouncePainTime()) && !(GetFlags() & EntityFlags::GodMode)) {
-        r = 1 + (rand() & 1);
+        // Left pain audio file number index.
+        int32_t l = 0;
+        // Right pain audio file number index.
+        int32_t r = 1 + (rand() & 1);
+
+        // Set debounce pain time.
         SetDebouncePainTime(level.time + 0.7f);
-        if (GetHealth() < 25)
+
+        // Set left index based on health value.
+        if (GetHealth() < 25) {
             l = 25;
-        else if (GetHealth() < 50)
+        } else if (GetHealth() < 50) {
             l = 50;
-        else if (GetHealth() < 75)
+        } else if (GetHealth() < 75) {
             l = 75;
-        else
+        } else {
             l = 100;
+        }
+
+        // Play pain sound based on damage taken.
         SVG_Sound(this, CHAN_VOICE, gi.SoundIndex(va("*pain%i_%i.wav", l, r)), 1, ATTN_NORM, 0);
     }
 
     // The total alpha of the blend is always proportional to count.
-    if (client->damageAlpha < 0.f)
+    if (client->damageAlpha < 0.f) {
         client->damageAlpha = 0.f;
+    }
     client->damageAlpha += count * 0.01f;
-    if (client->damageAlpha < 0.2f)
+    if (client->damageAlpha < 0.2f) {
         client->damageAlpha = 0.2f;
-    if (client->damageAlpha > 0.6f)
+    }
+    if (client->damageAlpha > 0.6f) {
         client->damageAlpha = 0.6f;     // don't go too saturated
+    }
 
-                                        // The color of the blend will vary based on how much was absorbed
-                                        // by different armors.
-    vec3_t blendColor = vec3_zero();
-    if (client->damages.powerArmor)
-        blendColor = vec3_fmaf(blendColor, (float)client->damages.powerArmor / realcount, power_color);
-    if (client->damages.armor)
-        blendColor = vec3_fmaf(blendColor, (float)client->damages.armor / realcount, acolor);
-    if (client->damages.blood)
-        blendColor = vec3_fmaf(blendColor, (float)client->damages.blood / realcount, bcolor);
-    client->damageBlend = blendColor;
+    
+    // Reset damageblend for a fresh start. The final color of the blend will 
+    // vary based on how much was absorbed by different armors.
+    client->damageBlend = vec3_zero();
 
+    // Power Armor blend.
+    if (client->damages.powerArmor) {
+        client->damageBlend = vec3_fmaf(client->damageBlend, (float)client->damages.powerArmor / realDamageCount, { 0.0f, 1.0f, 0.0f });
+    }
+    // Damage Armor blend.
+    if (client->damages.armor) {
+        client->damageBlend = vec3_fmaf(client->damageBlend, (float)client->damages.armor / realDamageCount, {1.0f, 1.0f, 1.0f});
+    }
+    // Damage Blood blend.
+    if (client->damages.blood) {
+        client->damageBlend = vec3_fmaf(client->damageBlend, (float)client->damages.blood / realDamageCount, {1.0f, 0.0f, 0.0f});
+    }
 
-    //
     // Calculate view angle kicks
-    //
-    kick = abs(client->damages.knockBack);
-    if (kick && GetHealth() > 0) { // kick of 0 means no view adjust at all
-        kick = kick * 100 / GetHealth();
+    float knockBackKick = abs(client->damages.knockBack);
 
-        if (kick < count * 0.5f)
-            kick = count * 0.5f;
-        if (kick > 50)
-            kick = 50;
+    // A kick of 0 means no there is no need to adjust view at all.
+    if (knockBackKick && GetHealth() > 0) {
+        knockBackKick = knockBackKick * 100 / GetHealth();
 
-        vec3_t kickVec = client->damages.from - GetOrigin();
-        kickVec = vec3_normalize(kickVec);
+        if (knockBackKick  < count * 0.5f) {
+            knockBackKick = count * 0.5f;
+        }
+        if (knockBackKick > 50) {
+            knockBackKick = 50;
+        }
 
-        side = vec3_dot(kickVec, bobMove.right);
-        client->viewDamage.roll = kick * side * 0.3f;
+        // Calculate a normalized kick force vector.
+        vec3_t kickForce = vec3_normalize(client->damages.from - GetOrigin());
 
-        side = -vec3_dot(kickVec, bobMove.forward);
-        client->viewDamage.pitch = kick * side * 0.3f;
+        // Calculate side force and apply to view damage roll.
+        float side = vec3_dot(kickForce, bobMove.right);
+        client->viewDamage.roll = knockBackKick * side * 0.3f;
 
+        // Calculate pitch force and apply to view damage pitch.
+        side = -vec3_dot(kickForce, bobMove.forward);
+        client->viewDamage.pitch = knockBackKick * side * 0.3f;
+
+        // Set the time for view damage to hold.
         client->viewDamage.time = level.time + DAMAGE_TIME;
     }
 
-    //
-    // clear totals
-    //
-    client->damages.blood = 0;
-    client->damages.armor = 0;
-    client->damages.powerArmor = 0;
-    client->damages.knockBack = 0;
+    // Reset totals.
+    client->damages.powerArmor  = 0;
+    client->damages.knockBack   = 0;
+    client->damages.blood       = 0;
+    client->damages.armor       = 0;
 }
 
 /**
@@ -1110,23 +1172,11 @@ void SVGBasePlayer::ApplyDamageFeedback() {
 *               Fall from 640 : 960 =
 *               damage = deltavelocity * deltavelocity * 0.0001
 **/
-// Calculates t
-//
-// fall from 128 : 400 = 160000
-// fall from 256 : 580 = 336400
-// fall from 384 : 720 = 518400
-// fall from 512 : 800 = 640000
-// fall from 640 : 960 =
-//
-// damage = deltavelocity * deltavelocity * 0.0001
-// 
-//===============
-//
 void SVGBasePlayer::CalculateViewOffset()
 {
-    float       bob;
-    float       ratio;
-    float       delta;
+    float bob = 0;
+    float ratio = 0;
+    float delta = 0;
 
     // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
@@ -1136,9 +1186,6 @@ void SVGBasePlayer::CalculateViewOffset()
         return;
     }
 
-    //
-    // Calculate new kick angle vales. (
-    // 
     // If dead, set a fixed angle and don't add any kick
     if (GetDeadFlag()) {
         client->playerState.kickAngles = vec3_zero();
@@ -1150,7 +1197,7 @@ void SVGBasePlayer::CalculateViewOffset()
         // Fetch client kick angles.
         vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
 
-                                                                                    // Add pitch(X) and roll(Z) angles based on damage kick
+        // Add pitch(X) and roll(Z) angles based on damage kick
         ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
         if (ratio < 0) {
             ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
@@ -1160,8 +1207,9 @@ void SVGBasePlayer::CalculateViewOffset()
 
         // Add pitch based on fall kick
         ratio = ((client->fallTime - level.time) / FALL_TIME);
-        if (ratio < 0)
+        if (ratio < 0) {
             ratio = 0;
+        }
         newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
 
         // Add angles based on velocity
@@ -1173,14 +1221,20 @@ void SVGBasePlayer::CalculateViewOffset()
 
         // Add angles based on bob
         delta = bobMove.fracSin * bob_pitch->value * bobMove.XYSpeed;
-        if (client->playerState.pmove.flags & PMF_DUCKED)
-            delta *= 6;     // crouching
+        // Adjust for crouching.
+        if (client->playerState.pmove.flags & PMF_DUCKED) {
+            delta *= 6;
+        }
         newKickAngles[vec3_t::Pitch] += delta;
         delta = bobMove.fracSin * bob_roll->value * bobMove.XYSpeed;
-        if (client->playerState.pmove.flags & PMF_DUCKED)
-            delta *= 6;     // crouching
-        if (bobMove.cycle & 1)
+
+        // Adjust for crouching.
+        if (client->playerState.pmove.flags & PMF_DUCKED) {
+            delta *= 6;
+        }
+        if (bobMove.cycle & 1) {
             delta = -delta;
+        }
         newKickAngles[vec3_t::Roll] += delta;
 
         // Last but not least, assign new kickangles to player state.
@@ -1199,14 +1253,16 @@ void SVGBasePlayer::CalculateViewOffset()
 
     // Add fall impact view punch height.
     ratio = (client->fallTime - level.time) / FALL_TIME;
-    if (ratio < 0)
+    if (ratio < 0) {
         ratio = 0;
+    }
     newViewOffset.z -= ratio * client->fallValue * 0.4f;
 
     // Add bob height.
-    bob = bobMove.fracSin * bobMove.XYSpeed * bob_up->value ;
-    if (bob > 6)
+    bob = bobMove.fracSin * bobMove.XYSpeed * bob_up->value;
+    if (bob > 6) {
         bob = 6;
+    }
     newViewOffset.z += bob;
 
     // Add kick offset
@@ -1216,15 +1272,12 @@ void SVGBasePlayer::CalculateViewOffset()
     // Clamping ensures that they never exceed the non visible, but physically 
     // there, player bounding box.
     client->playerState.pmove.viewOffset = vec3_clamp(newViewOffset,
-        GetMins(),        //{ -14, -14, -22 },
-        GetMaxs()        //{ 14,  14, 30 }
+        GetMins(),  //{ -14, -14, -22 },
+        GetMaxs()   //{ 14,  14, 30 }
     );
 }
 
 void SVGBasePlayer::CalculateGunOffset() {
-    int     i;
-    float   delta;
-
     // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
@@ -1233,29 +1286,44 @@ void SVGBasePlayer::CalculateGunOffset() {
         return;
     }
 
-    // gun angles from bobbing
+    // Calculate gun angles based on view bob.
     client->playerState.gunAngles[vec3_t::Roll] = bobMove.XYSpeed * bobMove.fracSin * 0.005;
     client->playerState.gunAngles[vec3_t::Yaw]  = bobMove.XYSpeed * bobMove.fracSin * 0.01;
+
+    // Negate roll and yaw based on which bob cycle step we're in.
     if (bobMove.cycle & 1) {
         client->playerState.gunAngles[vec3_t::Roll] = -client->playerState.gunAngles[vec3_t::Roll];
         client->playerState.gunAngles[vec3_t::Yaw]  = -client->playerState.gunAngles[vec3_t::Yaw];
     }
 
+    // Calculate pitch.
     client->playerState.gunAngles[vec3_t::Pitch] = bobMove.XYSpeed * bobMove.fracSin * 0.005;
 
-    // gun angles from delta movement
-    for (i = 0 ; i < 3 ; i++) {
-        delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
-        if (delta > 180)
+    // Calculate gun angles from delta view movement.
+    for (int32_t i = 0 ; i < 3 ; i++) {
+        // Calculate delta value.
+        float delta = client->oldViewAngles[i] - client->playerState.pmove.viewAngles[i];
+
+        // Keep delta within sane bounds.
+        if (delta > 180) {
             delta -= 360;
-        if (delta < -180)
+        }
+        if (delta < -180) {
             delta += 360;
-        if (delta > 45)
+        }
+        if (delta > 45) {
             delta = 45;
-        if (delta < -45)
+        }
+        if (delta < -45) {
             delta = -45;
-        if (i == vec3_t::Yaw)
+        }
+
+        // Special handling for gun angle Yaw.
+        if (i == vec3_t::Yaw) {
             client->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
+        }
+
+        // Apply delta to gun angles.
         client->playerState.gunAngles[i] += 0.2 * delta;
     }
 
@@ -1264,7 +1332,7 @@ void SVGBasePlayer::CalculateGunOffset() {
 
 
     // gun_x / gun_y / gun_z are development tools
-    for (i = 0 ; i < 3 ; i++) {
+    for (int32_t i = 0 ; i < 3 ; i++) {
         client->playerState.gunOffset[i] += bobMove.forward[i] * (gun_y->value);
         client->playerState.gunOffset[i] += bobMove.right[i] * gun_x->value;
         client->playerState.gunOffset[i] += bobMove.up[i] * (-gun_z->value);
@@ -1280,98 +1348,111 @@ void SVGBasePlayer::CalculateGunOffset() {
 void SVGBasePlayer::CalculateScreenBlend() {
     ServerClient* client = GetClient();
 
+    // Sanity.
     if (!client) {
         return;
     }
 
     // Clear blend values.
-    client->playerState.blend[0] = client->playerState.blend[1] =
-        client->playerState.blend[2] = client->playerState.blend[3] = 0;
+    client->playerState.blend[0] = client->playerState.blend[1] = client->playerState.blend[2] = client->playerState.blend[3] = 0;
 
     // Calculate view origin to use for PointContents.
     vec3_t viewOrigin = GetOrigin() + client->playerState.pmove.viewOffset;
     int32_t contents = gi.PointContents(viewOrigin);
 
-    if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA))
+    // Set render definition flags.
+    if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA)) {
         client->playerState.rdflags |= RDF_UNDERWATER;
-    else
+    } else {
         client->playerState.rdflags &= ~RDF_UNDERWATER;
+    }
 
-    if (contents & (CONTENTS_SOLID | CONTENTS_LAVA))
+    // Add screen blends for Liquid surface contents.
+    if (contents & (CONTENTS_SOLID | CONTENTS_LAVA)) {
         AddScreenBlend(1.0, 0.3, 0.0, 0.6, client->playerState.blend);
-    else if (contents & CONTENTS_SLIME)
+    } else if (contents & CONTENTS_SLIME) {
         AddScreenBlend(0.0, 0.1, 0.05, 0.6, client->playerState.blend);
-    else if (contents & CONTENTS_WATER)
+    } else if (contents & CONTENTS_WATER) {
         AddScreenBlend(0.5, 0.3, 0.2, 0.4, client->playerState.blend);
+    }
 
-    // add for damage
-    if (client->damageAlpha > 0)
-        AddScreenBlend(client->damageBlend[0], client->damageBlend[1]
-                    , client->damageBlend[2], client->damageAlpha, client->playerState.blend);
+    // Damage Alpha blend.
+    if (client->damageAlpha > 0) {
+        AddScreenBlend(client->damageBlend[0], client->damageBlend[1], client->damageBlend[2], client->damageAlpha, client->playerState.blend);
+    }
 
-    if (client->bonusAlpha > 0)
+    // Bonus Alpha blend.
+    if (client->bonusAlpha > 0) {
         AddScreenBlend(0.85, 0.7, 0.3, client->bonusAlpha, client->playerState.blend);
+    }
 
-    // drop the damage value
+    // Cool down the damage alpha value and ensure it won't go under 0.
     client->damageAlpha -= 0.06;
-    if (client->damageAlpha < 0)
+    if (client->damageAlpha < 0) {
         client->damageAlpha = 0;
+    }
 
-    // drop the bonus value
+    // Cool down the bonus alpha value and ensure it won't go under 0.
     client->bonusAlpha -= 0.1;
-    if (client->bonusAlpha < 0)
+    if (client->bonusAlpha < 0) {
         client->bonusAlpha = 0;
+    }
 }
 
 void SVGBasePlayer::UpdateAnimationFrame() {
-    qboolean isDucking = false;
-    qboolean isRunning = false;
-
     // Check whether ent is valid, and a SVGBasePlayer hooked up 
     // to a valid client.
     ServerClient* client = GetClient();
 
+    // Sanity.
     if (!client) {
         return;
     }
 
+    // Need to be a player model.
     if (GetModelIndex() != 255) { 
-        return;     // not in the player model
+        return;
     }
 
-    if (client->playerState.pmove.flags & PMF_DUCKED)
-        isDucking = true;
-    else
-        isDucking = false;
-    if (bobMove.XYSpeed)
-        isRunning = true;
-    else
-        isRunning = false;
+    // Are we ducking?
+    qboolean isDucking = (client->playerState.pmove.flags & PMF_DUCKED ? true : false);
+    qboolean isRunning = (bobMove.XYSpeed ? true : false);
 
-    // check for stand/duck and stop/go transitions
-    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death)
+    // Transition to new animation of necessary.
+    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death) {
         goto newanim;
-    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic)
+    }
+    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic) {
         goto newanim;
-    if (!GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave)
+    }
+    if (!GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave) {
         goto newanim;
+    }
 
+    // Reverse animation if it is prioritized.
     if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
         if (GetAnimationFrame() > client->animation.endFrame) {
             SetAnimationFrame(GetAnimationFrame() - 0.2f);
             return;
         }
+    // Otherwise continue the animation playback.
     } else if (GetAnimationFrame() < client->animation.endFrame) {
-        // continue an animation
+        // Continue an animation
         SetAnimationFrame(GetAnimationFrame() + 0.2f);
         return;
     }
 
-    if (client->animation.priorityAnimation == PlayerAnimation::Death)
+    // Return in case of death.
+    if (client->animation.priorityAnimation == PlayerAnimation::Death) {
         return;     // stay there
+    }
+
     if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
-        if (!GetGroundEntity())
-            return;     // stay there
+        // Return in case of no ground entity, how can one jump otherwise?
+        if (!GetGroundEntity()) {
+            return;
+        }
+        // Silly old Q2 animation stuff.
         client->animation.priorityAnimation = PlayerAnimation::Wave;
         SetAnimationFrame(FRAME_jump3);
         client->animation.endFrame = FRAME_jump6;
@@ -1379,18 +1460,22 @@ void SVGBasePlayer::UpdateAnimationFrame() {
     }
 
 newanim:
-    // return to either a running or standing frame
+    // Transit to either a running or standing frame.
     client->animation.priorityAnimation = PlayerAnimation::Basic;
     client->animation.isDucking = isDucking;
     client->animation.isRunning = isRunning;
 
+    // Got ground?
     if (!GetGroundEntity()) {
+        // Jump.
         client->animation.priorityAnimation = PlayerAnimation::Jump;
-        if (GetAnimationFrame() != FRAME_jump2)
+        if (GetAnimationFrame() != FRAME_jump2) {
             SetAnimationFrame(FRAME_jump1);
+        }
         client->animation.endFrame = FRAME_jump2;
+    // Keep running.
     } else if (isRunning) {
-        // running
+        // Running
         if (isDucking) {
             SetAnimationFrame(FRAME_crwalk1);
             client->animation.endFrame = FRAME_crwalk6;
@@ -1398,6 +1483,7 @@ newanim:
             SetAnimationFrame(FRAME_run1);
             client->animation.endFrame = FRAME_run6;
         }
+    // Standing animations.
     } else {
         // standing
         if (isDucking) {

@@ -826,15 +826,15 @@ struct gclient_s {
     **/
     struct {
         //! Damage absorbed by the armor. (Unused.)
-        int32_t armor;
+        int32_t armor = 0;
         //! Damage absorbed by the power armor. (Unused.)
-        int32_t powerArmor;
+        int32_t powerArmor = 0;
         //! Damage taken out of health, determines how much blood to display.
-        int32_t blood;
+        int32_t blood = 0;
         //! Actual impact damage to knock the client back with.
-        int32_t knockBack;
+        int32_t knockBack = 0;
         //! Origin of where the damage came from.
-        vec3_t from;
+        vec3_t from = vec3_zero();
     } damages;
 
     //! Yaw angle of where our killer is located at in case we're dead.
@@ -849,9 +849,12 @@ struct gclient_s {
     *   @brief  View damage kicks.
     **/
     struct {
-        float roll;
-        float pitch;
-        float time;
+        //! Roll for view damage kick.
+        float roll  = 0.f;
+        //! Pitch for view damage kick.
+        float pitch = 0.f;
+        //! Time of view damage.
+        float time  = 0.f;
     } viewDamage;
 
     //! Falling time.

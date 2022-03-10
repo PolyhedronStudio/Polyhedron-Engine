@@ -66,6 +66,10 @@ public:
     **/
     virtual void PlayerNoise(SVGBaseEntity *noiseEntity, const vec3_t &noiseOrigin, int32_t noiseType);
 
+    /**
+    *   @brief  Tosses the player's weapon away from himself.
+    **/
+    virtual void TossWeapon();
 
 
     /***

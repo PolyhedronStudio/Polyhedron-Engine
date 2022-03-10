@@ -58,50 +58,6 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     GetGamemode()->ClientUserinfoChanged(ent, userinfo);
 }
 
-//=======================================================================
-
-// TODO: Move into game mode.
-void SVG_TossClientWeapon(SVGBasePlayer *player)
-{
-    SVGBaseItemWeapon *item = nullptr;
-    Entity      *drop= nullptr;
-    float       spread = 1.5f;
-
-    // Always allow.
-    //if (!deathmatch->value)
-    //    return;
-
-    // Sanity check.
-    if (!player) {
-        return;
-    }
-
-    // Get client
-    ServerClient* client = player->GetClient();
-
-    // Sanity check.
-    if (!client) {
-        return;
-    }
-
-    // Fetch active weapon, if any.
-    //item = player->GetActiveWeapon();
-
-    //if (!player->GetClient()->persistent.inventory[player->GetClient()->ammoIndex])
-    //    item = NULL;
-    //if (item && (strcmp(item->pickupName, "Blaster") == 0))
-    //    item = NULL;
-
-    if (item) {
-        //playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
-        //drop = SVG_DropItem(playerClient->GetServerEntity(), item);
-        //playerClient->GetClient()->aimAngles[vec3_t::Yaw] += spread;
-        //drop->spawnFlags = ItemSpawnFlags::DroppedPlayerItem;
-    }
-}
-
-//=======================================================================
-
 /*
 * only called when persistent.isSpectator changes
 * note that resp.isSpectator should be the opposite of persistent.isSpectator here
@@ -279,7 +235,7 @@ void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
     ServerClient *client = player->GetClient();
 
     // Do client think.
-    GetGameworld()->GetGamemode()->ClientThink(player, client, moveCommand);
+    GetGamemode()->ClientThink(player, client, moveCommand);
 
     // update chase cam if being followed
     //for (int i = 1; i <= maximumclients->value; i++) {
