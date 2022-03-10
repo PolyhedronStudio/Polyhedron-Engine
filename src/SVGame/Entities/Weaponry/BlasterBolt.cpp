@@ -115,7 +115,7 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 
     if (self->GetOwner()->GetClient()) {
         // Play impact noise.
-        SVG_PlayerNoise(self->GetOwner(), self->GetOrigin(), PNOISE_IMPACT);
+        //SVG_PlayerNoise(self->GetOwner(), self->GetOrigin(), PNOISE_IMPACT);
     }
 
     // Does the other entity take damage?

@@ -49,21 +49,22 @@ struct entity_s;
 //==================================================================
 
 //! MS Frametime for animations.
-constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;
+static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;
 
 //! Float time it takes to go over a frame. 
-constexpr float FRAMETIME = BASE_FRAMETIME_1000;
+static constexpr float FRAMETIME = BASE_FRAMETIME_1000;
 
 //! Memory tags to allow dynamic memory to be cleaned up
-constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll
-constexpr int32_t TAG_LEVEL = 766;  // clear when loading a new level
+static constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll
+static constexpr int32_t TAG_LEVEL = 766;  // clear when loading a new level
 
 //! View pitching times
-constexpr float DAMAGE_TIME = 0.5f;
-constexpr float FALL_TIME = 0.3f;
+static constexpr float DAMAGE_TIME = 0.5f;
+static constexpr float FALL_TIME = 0.3f;
 
-// entity->spawnFlags
-// These are set with checkboxes on each entity in the map editor
+/**
+*   @brief Entity Spawn Flags. Can be set for each entity in the map editor. (Most likely TrenchBroom.)
+**/
 struct EntitySpawnFlags {
     static constexpr int32_t NotEasy = 0x00000100;
     static constexpr int32_t NotMedium = 0x00000200;
@@ -72,61 +73,60 @@ struct EntitySpawnFlags {
     static constexpr int32_t NotCoop = 0x00001000;
 };
 
-// entity->flags
-// These flags are set during game-play and are unlike spawnflags not set in any editor.
+/**
+*   @brief Entity Flags. These are set in-game during gameplay.
+**/
 struct EntityFlags {
-    static constexpr int32_t Fly = 1;
-    static constexpr int32_t Swim = 2; // Implied immunity to drowining
-    static constexpr int32_t ImmuneLaser = 4;
-    static constexpr int32_t InWater = 8;
-    static constexpr int32_t GodMode = 16;
-    static constexpr int32_t NoTarget = 32;
-    static constexpr int32_t ImmuneToSlime = 64;
-    static constexpr int32_t ImmuneToLava = 128;
-    static constexpr int32_t PartiallyOnGround = 256;  // Not all corners are valid
-    static constexpr int32_t WaterJump = 512; // Player jumping out of water
-    static constexpr int32_t TeamSlave = 1024;  // Not the first on the team
-    static constexpr int32_t NoKnockBack = 2048;
-    static constexpr int32_t PowerArmor = 4096;  // Power armor (if any) is active
-    static constexpr int32_t Respawn = 0x80000000;  // Used for item respawning
+    static constexpr int32_t Fly            = 1;
+    static constexpr int32_t Swim           = 2;        //! Implied immunity to drowining
+    static constexpr int32_t ImmuneLaser    = 4;
+    static constexpr int32_t InWater        = 8;
+    static constexpr int32_t GodMode        = 16;
+    static constexpr int32_t NoTarget       = 32;
+    static constexpr int32_t ImmuneToSlime  = 64;
+    static constexpr int32_t ImmuneToLava   = 128;
+    static constexpr int32_t PartiallyOnGround = 256;   //! Not all corners are valid
+    static constexpr int32_t WaterJump      = 512;      //! Player jumping out of water
+    static constexpr int32_t TeamSlave      = 1024;     //! Not the first on the team
+    static constexpr int32_t NoKnockBack    = 2048;
+    static constexpr int32_t PowerArmor     = 4096;     //! Power armor (if any) is active
+    static constexpr int32_t Respawn        = 0x80000000;   //! Used for item respawning
 };
 
+static constexpr int32_t MELEE_DISTANCE = 80;
+static constexpr int32_t BODY_QUEUE_SIZE = 8;
 
-
-constexpr int32_t MELEE_DISTANCE = 80;
-
-constexpr int32_t BODY_QUEUE_SIZE = 8;
-
-//-------------------
-// TakeDamage
-//
-// Add custom take damage conditions here.
-//-------------------
+/**
+*   Take Damage.
+**/
 struct TakeDamage {
-    static constexpr int32_t No = 0;  // Will NOT take damage if hit
-    static constexpr int32_t Yes = 1; // WILL take damage if hit
-    static constexpr int32_t Aim = 2; // When auto targeting is enabled, it'll recognizes this
+    //! Will NOT take damage if hit.
+    static constexpr int32_t No     = 0;  
+    //! WILL take damage if hit
+    static constexpr int32_t Yes    = 1;
+    //! When auto targeting is enabled, it'll recognizes this
+    static constexpr int32_t Aim    = 2; 
 };
 
-//-------------------
-// deadFlag
-//-------------------
+/**
+*   Dead Flags.
+**/
 constexpr int32_t  DEAD_NO = 0;
 constexpr int32_t  DEAD_DYING = 1;
 constexpr int32_t  DEAD_DEAD = 2;
 constexpr int32_t  DEAD_RESPAWNABLE = 3;
 
-//-------------------
-// Ranges
-//-------------------
+/**
+*   Combat Ranges.
+**/
 constexpr int32_t  RANGE_MELEE = 0;
 constexpr int32_t  RANGE_NEAR = 1;
 constexpr int32_t  RANGE_MID = 2;
 constexpr int32_t  RANGE_FAR = 3;
 
-//-------------------
-//gib types
-//-------------------
+/**
+*   Gib Types.
+**/
 struct GibType {
     static constexpr int32_t Organic = 0;
     static constexpr int32_t Metallic = 1;
@@ -202,9 +202,9 @@ struct ItemIdentifier {
     static constexpr uint32_t Maximum = 255;
 };
 
-//-------------------
-// Armor types
-//-------------------
+/**
+*   Armor Types.
+**/
 struct ArmorType {
     static constexpr int32_t None = 0;
     static constexpr int32_t Jacket = 1;
@@ -213,22 +213,18 @@ struct ArmorType {
     static constexpr int32_t Shard = 4;
 };
 
-//-------------------
-// Power armor types
-//-------------------
-constexpr int32_t POWER_ARMOR_NONE = 0;
 
-//-------------------
-// Player handedness values
-//-------------------
+/**
+*   Player Handedness.
+**/
 constexpr int32_t RIGHT_HANDED = 0;
 constexpr int32_t LEFT_HANDED = 1;
 constexpr int32_t CENTER_HANDED = 2;
 
 
-//-------------------
-// game.serverflags values
-//-------------------
+/**
+*   Game specific server flags.
+**/
 constexpr int32_t SFL_CROSS_TRIGGER_1 = 0x00000001;
 constexpr int32_t SFL_CROSS_TRIGGER_2 = 0x00000002;
 constexpr int32_t SFL_CROSS_TRIGGER_3 = 0x00000004;
@@ -239,37 +235,54 @@ constexpr int32_t SFL_CROSS_TRIGGER_7 = 0x00000040;
 constexpr int32_t SFL_CROSS_TRIGGER_8 = 0x00000080;
 constexpr int32_t SFL_CROSS_TRIGGER_MASK = 0x000000ff;
 
-//-------------------
-// Noise types for SVG_PlayerNoise
-//-------------------
-constexpr int32_t PNOISE_SELF = 0;
-constexpr int32_t PNOISE_WEAPON = 1;
-constexpr int32_t PNOISE_IMPACT = 2;
+/**
+*   Player Noise Types.
+**/
+struct PlayerNoiseType {
+    //! Jump, fall/land, getting hurt etc.
+    static constexpr int32_t Self   = 0;
+    //! Shooting a gun, reloading a gun, etc.
+    static constexpr int32_t Weapon = 1;
+    //! Noise created by impacting other entities with ballistics.
+    static constexpr int32_t Impact = 2;
+};
 
 
-//-------------------
-// Actual entity movetypes that can be employed. 
-//-------------------
-// Entity moveType values
+/**
+*   Entity Move Types.
+**/
 struct MoveType {
-    static constexpr int32_t None = 0;      // Never moves
-    static constexpr int32_t Spectator = 1; // Special movetype for spectators to not go through walls
-    static constexpr int32_t NoClip = 2;    // Origin and angles change with no interaction
-    static constexpr int32_t Push = 3;      // No clip to world, push on box contact
-    static constexpr int32_t Stop = 4;      // No clip to world, stops on box contact
+    //! An entity that never moves at all.
+    static constexpr int32_t None       = 0;
+    //! Spectator movement allows for flying around like noclip, but it does clip to BSP.
+    static constexpr int32_t Spectator  = 1;
+    //! Similar to spectator movement however it does not clip.
+    static constexpr int32_t NoClip     = 2;
+    //! No clip to world, push on box contact.
+    static constexpr int32_t Push = 3;
+    //! No clip to world, stops on box contact
+    static constexpr int32_t Stop = 4;
 
-    static constexpr int32_t Walk       = 10;    // Gravity. (Player Movement entities use this.)
-    static constexpr int32_t Step       = 11;    // Gravity, fixed distance, and special edge handling if wished for.
-    static constexpr int32_t Fly        = 12;    // 
-    static constexpr int32_t FlyMissile = 13;	 // Extra size to monsters
-    static constexpr int32_t Toss       = 14;    // Gravity
-    static constexpr int32_t TossSlide  = 15;    // 
+    //! This entity makes use of the player movement code. 
+    static constexpr int32_t PlayerMove = 10;    // Gravity. (Player Movement entities use this.)
+    //! This entity makes use of the step movement physics.
+    static constexpr int32_t Step       = 11;    // Fixed distance per frame, impacted by gravity, supports special edge handling.
+    //! Similar to step movement however it does not care for gravity.
+    static constexpr int32_t Fly        = 12;
+    //! Similar to step fly movement, but with an extra size bounding box for hitting other entities. It's for missiles after all.
+    static constexpr int32_t FlyMissile = 13;
+    //! Toss is used for when dropping items, dying entities etc. It simply does basic velocity and gravity movement.
+    static constexpr int32_t Toss       = 14;
+    //! Similar to Toss but doesn't halt to a stop when having landed on-ground.
+    static constexpr int32_t TossSlide  = 15;
+    //! Similar to Toss but bounces back from the impacted surface instead.
     static constexpr int32_t Bounce     = 16;
 };
 
-//-------------------
-// Item flags.
-//-------------------
+
+/**
+*   Item Flags.
+**/
 struct ItemFlags {
     static constexpr int32_t IsWeapon = 1;       // use makes active weapon
     static constexpr int32_t IsAmmo = 2;
@@ -279,65 +292,6 @@ struct ItemFlags {
     static constexpr int32_t IsPowerUp = 32;
 };
 
-//-------------------
-// Weapon model indexes for: gitem_t->weaponModelIndex
-//-------------------
-constexpr int32_t WEAP_BLASTER = 1;
-constexpr int32_t WEAP_MACHINEGUN = 2;
-constexpr int32_t WEAP_SHOTGUN = 3;
-constexpr int32_t WEAP_SUPERSHOTGUN = 4;
-
-//-------------------
-// Special item entity structure. This is a hybrid of ammo, health,
-// and actual weapons. 
-//-------------------
-typedef struct gitem_s {
-    // Spawning classname.
-    const char *classname;
-
-    // Function callbacks.
-    qboolean (*Pickup)(SVGBaseEntity *ent, SVGBasePlayer *other);
-    void (*Use)(SVGBasePlayer *ent, struct gitem_s *item);
-    void (*Drop)(SVGBasePlayer *ent, struct gitem_s *item);
-    void (*WeaponThink)(SVGBasePlayer *ent);
-
-    // Sound used when being picked up.
-    const char *pickupSound;
-
-    // Actual world model used to display.
-    const char *worldModel;
-    
-    // Specific worldmodel flags.
-    int32_t worldModelFlags;
-
-    // Item view model. (Used for weapons, weapons are items.)
-    const char        *viewModel;
-
-    // Client side infe.
-    const char  *icon;
-    const char  *pickupName;    // for printing on pickup
-    int32_t countWidth;             // number of digits to display by icon
-
-    // For ammo items this value dictates how much ammo to gain.
-    // For weapon items, this value dictates how much ammo is used on a per shot basis.
-    int32_t quantity;
-
-    // Ammo string for weapons.
-    const char  *ammo;
-
-    // IT_* flags
-    int32_t flags;          
-
-    // Weaponmodel index.
-    int32_t weaponModelIndex;      // weapon model index (for weapons)
-
-    // Info string & Tag.
-    void *info;
-    int32_t tag;
-
-    // An actual string of all models, sounds, and images this item will use
-    const char  *precaches;     
-} gitem_t;
 
 //-------------------
 // Stores level locals, from current time, to which entities are sighted.
@@ -388,10 +342,6 @@ struct LevelLocals  {
     // Not renaming this one, it has to go in the future.
     int32_t pic_health;
 
-    // Total level Monster stats.
-    int32_t totalMonsters;
-    int32_t killedMonsters;
-
     // The current entity that is actively being ran from SVG_RunFrame.
     SVGBaseEntity *currentEntity;
 
@@ -434,12 +384,18 @@ extern  LevelLocals  level;
 extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
 extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
 
-// Static Get functions for readability.
-static inline Gameworld* GetGameworld() { return game.world; }
-static inline IGamemode* GetGamemode() { return (game.world ? game.world->GetGamemode() : nullptr); }
-static inline LevelLocals* GetLevelLocals() { return &level; }
 
-    // These too need to be taken care of.
+/**
+*   @return A pointer to the game's world object. The man that runs the show.
+**/
+Gameworld* GetGameworld();
+
+/**
+*   @return A pointer to the gamemode object. The man's little helper.
+**/
+IGamemode* GetGamemode();
+
+// These too need to be taken care of.
 extern  int32_t sm_meat_index;
 extern  int32_t snd_fry;
 
@@ -583,21 +539,6 @@ typedef enum {
 void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client);
 
 //
-// g_items.c
-//
-void SVG_PrecacheItem(gitem_t *it);
-gitem_t *SVG_FindItemByPickupName(const char *pickup_name);
-gitem_t *SVG_FindItemByClassname(const char *classname);
-//#define ITEM_INDEX(x) ((x)-itemlist)
-Entity *SVG_DropItem(Entity *ent, gitem_t *item);
-void SVG_SetRespawn(Entity *ent, float delay);
-void SVG_ChangeWeapon(SVGBasePlayer* ent);
-void SVG_SpawnItem(Entity *ent, gitem_t *item);
-//void SVG_ThinkWeapon(Entity *ent);
-int32_t SVG_ArmorIndex(SVGBaseEntity *ent);
-void SVG_TouchItem(SVGBaseEntity* ent, SVGBaseEntity* other, cplane_t *plane, csurface_t *surf);
-
-//
 // g_combat.c
 //
 qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2);
@@ -637,11 +578,6 @@ void    SVG_ServerCommand(void);
 qboolean SVG_FilterPacket(char *from);
 
 //
-// g_pweapon.c
-//
-void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int32_t type);
-
-//
 // g_phys.c
 //
 class SVGEntityHandle;
@@ -651,7 +587,6 @@ void SVG_RunEntity(SVGEntityHandle &entityHandle);
 // g_main.c
 //
 //-----------------------------------------------------------------------------------------------------------
-Entity* SVG_Spawn(void);
 
 // TODO: All these go elsewhere, sometime, as does most...
 void SVG_SetConfigString(const int32_t &configStringIndex, const std::string &configString);

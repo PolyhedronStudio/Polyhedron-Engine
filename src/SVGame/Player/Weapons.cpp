@@ -119,27 +119,3 @@ void NoAmmoWeaponChange(SVGBasePlayer *ent)
     //}
     //client->newWeapon = SVG_FindItemByPickupName("blaster");
 }
-
-
-
-/*
-================
-Drop_Weapon
-================
-*/
-void Drop_Weapon(SVGBasePlayer *ent, gitem_t *item)
-{
-    int     index;
-
-    ServerClient* client = ent->GetClient();
-    //index = ITEM_INDEX(item);
-    //// see if we're already using it
-    //if (((item == client->persistent.activeWeapon) || (item == client->newWeapon)) && (client->persistent.inventory[index] == 1)) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Can't drop current weapon\n");
-    //    return;
-    //}
-
-    //SVG_DropItem(ent->GetServerEntity(), item);
-    //client->persistent.inventory[index]--;
-}
-

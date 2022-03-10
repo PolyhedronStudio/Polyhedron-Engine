@@ -242,8 +242,9 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     gi.MSG_WriteVector3(tr.plane.normal, false);
                     gi.Multicast(tr.endPosition, Multicast::PVS);
 
-                    if (self->GetClient())
-                        SVG_PlayerNoise(self, tr.endPosition, PNOISE_IMPACT);
+                    if (self->GetClient()) {
+                        //self->PlayerNoise(self, tr.endPosition, PlayerNoiseType::Impact);
+                    }
                 }
             }
         }

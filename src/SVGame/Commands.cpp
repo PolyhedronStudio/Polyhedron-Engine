@@ -189,7 +189,7 @@ Give items to a client
 void Cmd_Give_f(Entity *ent)
 {
     const char        *name;
-    gitem_t     *it;
+    //gitem_t     *it;
     int         index;
     int         i;
     qboolean    give_all;
@@ -353,7 +353,7 @@ void Cmd_Noclip_f(SVGBasePlayer *player, ServerClient *client) {
     //}
 
     if (player->GetMoveType() == MoveType::NoClip) {
-        player->SetMoveType(MoveType::Walk);
+        player->SetMoveType(MoveType::PlayerMove);
         SVG_CPrint(player, PRINT_HIGH, "noclip OFF\n");
     } else {
         player->SetMoveType(MoveType::NoClip);
@@ -416,7 +416,7 @@ Drop an inventory item
 void Cmd_Drop_f(SVGBasePlayer*ent)
 {
     int         index;
-    gitem_t     *it;
+    //gitem_t     *it;
     const char        *s;
 
     s = (const char*)gi.args(); // C++20: Added casts.
@@ -498,7 +498,7 @@ Cmd_WeapPrev_f
 void Cmd_WeapPrev_f(SVGBasePlayer* player, ServerClient* client) {
     ServerClient   *cl;
     int         i, index;
-    gitem_t     *it;
+    //gitem_t     *it;
     int         selected_weapon;
 
     //cl = ent->GetClient();
@@ -590,7 +590,7 @@ Cmd_InvDrop_f
 =================
 */
 void Cmd_InvDrop_f(SVGBasePlayer* player, ServerClient* client) {
-    gitem_t     *it;
+    //gitem_t     *it;
 
     //HUD_ValidateSelectedItem(ent);
 

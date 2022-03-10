@@ -87,7 +87,7 @@ void SVGBasePlayer::Spawn() {
     // Set up the client entity accordingly.
     SetTakeDamage(TakeDamage::Aim);
     // Fresh movetype and solid.
-    SetMoveType(MoveType::Walk);
+    SetMoveType(MoveType::PlayerMove);
     SetSolid(Solid::BoundingBox);
     // Mass.
     SetMass(200);
@@ -176,13 +176,14 @@ void SVGBasePlayer::SpawnKey(const std::string& key, const std::string& value) {
     Base::SpawnKey(key, value);
 }
 
-//
-//===============
-// SVGBasePlayer::SVGBasePlayerDie
-//
-// Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
-//===============
-//
+/***
+* 
+*   Callback Functions.
+*
+***/
+/**
+*   @brief  Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
+**/
 void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Fetch server entity.
     Entity* serverEntity = GetServerEntity();
@@ -300,6 +301,67 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
     // Link our entity back in for collision purposes.
     LinkEntity();
 }
+
+
+/***
+* 
+*   Player Functions.
+*
+***/
+/**
+*   @brief  Each player can have two 'noise sources' associated to it. One slot for
+*           player personal noises such as jumpin, pain, firing a weapon. The other
+*           slot for target noise, such as bullets impacting a wall.
+* 
+*           Use your imagination to think of what this is useful for ;-P
+**/
+void SVGBasePlayer::PlayerNoise(SVGBaseEntity* noiseEntity, const vec3_t& noiseOrigin, int32_t noiseType) {
+//    Entity     *noise;
+
+//if (deathmatch->value)
+//    return;
+//if (GetGamemode()->IsClass<DeathmatchGamemode>()) {
+//    return;
+//}
+
+//if (who->GetFlags() & EntityFlags::NoTarget)
+//    return;
+
+//    if (!who->GetServerEntity()->myNoisePtr) {
+//        noise = SVG_Spawn();
+////        noise->classname = "player_noise";
+//        VectorSet(noise->mins, -8, -8, -8);
+//        VectorSet(noise->maxs, 8, 8, 8);
+//        noise->owner = who->GetServerEntity();
+//        noise->serverFlags = EntityServerFlags::NoClient;
+//        //who->GetServerEntity()->myNoisePtr = noise;
+//
+//        noise = SVG_Spawn();
+//     //   noise->classname = "player_noise";
+//        VectorSet(noise->mins, -8, -8, -8);
+//        VectorSet(noise->maxs, 8, 8, 8);
+//        noise->owner = who->GetServerEntity();
+//        noise->serverFlags = EntityServerFlags::NoClient;
+//        //who->GetServerEntity()->myNoise2Ptr = noise;
+//    }
+//
+//    if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
+//        noise = who->GetServerEntity()->myNoisePtr;
+//        level.soundEntity = noise;
+//        level.soundEntityFrameNumber = level.frameNumber;
+//    } else { // type == PNOISE_IMPACT
+//        noise = who->GetServerEntity()->myNoise2Ptr;
+//        level.sound2Entity = noise;
+//        level.sound2EntityFrameNumber = level.frameNumber;
+//    }
+//
+//    VectorCopy(where, noise->state.origin);
+//    VectorSubtract(where, noise->maxs, noise->absMin);
+//    VectorAdd(where, noise->maxs, noise->absMax);
+//    noise->teleportTime = level.time;
+//    gi.LinkEntity(noise);
+}
+
 
 /***
 * 
@@ -586,10 +648,9 @@ SVGBaseItemWeapon* SVGBasePlayer::GetActiveWeaponInstance() {
 //    return client->persistent.activeWeapon;
 //}
 
-//===============
-// SVGBasePlayer::SetEvent
-// 
-//===============
+/**
+*   @brief  Called each frame to check if this player's entity event needs to be set.
+**/
 void SVGBasePlayer::UpdateEvent() {
     ServerClient* client = GetClient();
 
@@ -614,68 +675,61 @@ void SVGBasePlayer::UpdateEvent() {
     }
 }
 
-//===============
-// SVGBasePlayer::SetEffects
-// 
-//===============
+/**
+*   @brief  Called each frame to reset, and set, this player's entity and render effects.
+**/
 void SVGBasePlayer::UpdateEffects()
 {
-    Base::SetEffects(0);
+    // Set to a clean slate.
+    SetEffects(0);
     SetRenderEffects(0);
 
-    if (GetHealth() <= 0 || level.intermission.time)
+    // No need to go on in case we are dead or well, the intermission mode is engaged.
+    if (GetHealth() <= 0 || level.intermission.time) {
         return;
+    }
 
-    // show cheaters!!!
+    // Be sure to show cheaters, lmao, that'll teach them right? * cough *
     if (GetFlags() & EntityFlags::GodMode) {
         SetRenderEffects(GetRenderEffects() | (RenderEffects::RedShell | RenderEffects::GreenShell | RenderEffects::BlueShell));
     }
 }
 
-//
-//===============
-// SVGBasePlayer::SetSound
-//
-//===============
+/**
+*   @brief  Called each frame to reset, and set, this player's sound effects.
+**/
 void SVGBasePlayer::UpdateSound() {
-    //const char    *weap; // C++20: STRING: Added const to char*
-
     // Check whether the SVGBasePlayer is hooked up to a valid client.
     ServerClient* client = GetClient();
 
+    // Sanity check.
     if (!client) {
         return;
     }
 
-    //if (client->persistent.activeWeapon)
-    //    weap = client->persistent.activeWeapon->classname;
-    //else
-    //    weap = "";
-
+    // Whenever we "fry" by so called lava or slime, we prioritize its sound over weaponry, of course.
     if (GetWaterLevel() && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
-        Base::SetSound(snd_fry);
-        //else if (strcmp(weap, "weapon_railgun") == 0)
-        //    Base::SetSound(gi.SoundIndex("weapons/rg_hum.wav"));
-        //else if (strcmp(weap, "weapon_bfg") == 0)
-        //    Base::SetSound(gi.SoundIndex("weapons/bfg_hum.wav"));
+        SetSound(snd_fry);
+    // Otherwise, we check if we have any weaponry sound for this frame.
     } else if (client->weaponSound) {
-        Base::SetSound(client->weaponSound);
+        SetSound(client->weaponSound);
+    // If we did not, we clear the sound for this frame.
     } else {
-        Base::SetSound(0);
+        SetSound(0);
     }
 }
 
-//
-//===============
-// SVGBasePlayer::LookAtKiller
-//
-// Sets the clients view to look at the killer.
-//===============
-//
+/**
+*   @brief  Sets the clients view angles to look towards the origin of the killer entity.
+**/
 void SVGBasePlayer::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker)
 {
-    // Fetch client.
-    gclient_s* client = GetClient();
+    ServerClient* client = GetClient();
+
+    // Sanity check.
+    if (!client) {
+        return;
+    }
 
     // Is the attack, not us, or the world?
     if (attacker && attacker != GetGameworld()->GetWorldspawnClassEntity() && attacker != this) {
@@ -693,13 +747,14 @@ void SVGBasePlayer::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attack
 }
 
 
-//--------------------------------------------------------------
-// View/BobMove Functionality.
-//-------------------------------------------------------------
-//===============
-// SVGBasePlayer::CalculateRoll
-//
-//===============
+/***
+* 
+*   View/Bobmove Functionality.
+* 
+***/
+/**
+*   @brief Calculates player view roll.
+**/
 float SVGBasePlayer::CalculateRoll(const vec3_t& angles, const vec3_t& velocity) {
     float side = vec3_dot(velocity, bobMove.right);
     float sign = side < 0 ? -1 : 1;
@@ -715,10 +770,9 @@ float SVGBasePlayer::CalculateRoll(const vec3_t& angles, const vec3_t& velocity)
     return side * sign;
 }
 
-//===============
-// SVGBasePlayer::CheckFallingDamage
-//
-//===============
+/**
+*   @brief Process and apply falling damage effects if needed.
+**/
 void SVGBasePlayer::CheckFallingDamage()
 {
     float   delta;
@@ -795,12 +849,9 @@ void SVGBasePlayer::CheckFallingDamage()
     }
 }
 
-//
-//===============
-// SVGBasePlayer::CheckWorldEffects
-// 
-//===============
-//
+/**
+*   @brief Process and apply world specific effects if needed.
+**/
 void SVGBasePlayer::CheckWorldEffects()
 {
     int32_t waterLevel, oldWaterLevel;
@@ -825,11 +876,9 @@ void SVGBasePlayer::CheckWorldEffects()
     oldWaterLevel = client->oldWaterLevel;
     client->oldWaterLevel = waterLevel;
 
-    //
-    // if just entered a water volume, play a sound
-    //
+    // Just entered a water volume sound effect.
     if (!oldWaterLevel && waterLevel) {
-        SVG_PlayerNoise(this, GetOrigin(), PNOISE_SELF);
+        PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
         if (GetWaterType() & CONTENTS_LAVA) {
             SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
         } else if (GetWaterType() & CONTENTS_SLIME) {
@@ -844,39 +893,31 @@ void SVGBasePlayer::CheckWorldEffects()
         SetDebounceDamageTime(level.time - 1);
     }
 
-    //
-    // if just completely exited a water volume, play a sound
-    //
+    // Just completely exited a water volume sound effect.
     if (oldWaterLevel && ! waterLevel) {
-        SVG_PlayerNoise(this, GetOrigin(), PNOISE_SELF);
+        PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
         SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
         SetFlags(GetFlags() & ~EntityFlags::InWater);
     }
 
-    //
-    // check for head just going under water
-    //
+    // Head just going under water effect.
     if (oldWaterLevel != 3 && waterLevel == 3) {
         SVG_Sound(this, CHAN_BODY, gi.SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
     }
 
-    //
-    // check for head just coming out of water
-    //
+    // Head just coming out of water effect.
     if (oldWaterLevel == 3 && waterLevel != 3) {
         if (GetAirFinishedTime() < level.time) {
             // gasp for air
             SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(this, GetOrigin(), PNOISE_SELF);
+            PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
         } else  if (GetAirFinishedTime() < level.time + 11) {
             // just break surface
             SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
         }
     }
 
-    //
-    // check for drowning
-    //
+    // Check for drowning effects.
     if (waterLevel == 3) {
         // if out of air, start drowning
         if (GetAirFinishedTime() < level.time) {
@@ -908,9 +949,7 @@ void SVGBasePlayer::CheckWorldEffects()
         SetDamage(2);
     }
 
-    //
-    // check for sizzle damage
-    //
+    // Check for sizzle damage
     if (waterLevel && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
         if (GetWaterType() & CONTENTS_LAVA) {
             if (GetHealth() > 0
@@ -931,11 +970,9 @@ void SVGBasePlayer::CheckWorldEffects()
     }
 }
 
-
-//===============
-// SVGBasePlayer::ApplyDamageFeedback
-//
-//===============
+/**
+*   @brief Process and apply damage feedback effects.
+**/
 void SVGBasePlayer::ApplyDamageFeedback() {
     float   side;
     float   realcount, count, kick;
@@ -1063,10 +1100,16 @@ void SVGBasePlayer::ApplyDamageFeedback() {
     client->damages.knockBack = 0;
 }
 
-//
-//===============
-// SVGBasePlayer::CalculateViewOffset
-// 
+/**
+*   @details    Calculates the view offset for this player.
+*               Calculates t
+*               Fall from 128 : 400 = 160000
+*               Fall from 256 : 580 = 336400
+*               Fall from 384 : 720 = 518400
+*               Fall from 512 : 800 = 640000
+*               Fall from 640 : 960 =
+*               damage = deltavelocity * deltavelocity * 0.0001
+**/
 // Calculates t
 //
 // fall from 128 : 400 = 160000

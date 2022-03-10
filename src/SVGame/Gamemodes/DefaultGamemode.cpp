@@ -980,7 +980,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         // Check for jumping sound.
         if (player->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
             SVG_Sound(player, CHAN_VOICE, gi.SoundIndex("*jump1.wav"), 1, ATTN_NORM, 0);
-            SVG_PlayerNoise(player, player->GetOrigin(), PNOISE_SELF);
+            player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
         }
         
         // Use an entity handle to validate and store the new ground entity after pmove.

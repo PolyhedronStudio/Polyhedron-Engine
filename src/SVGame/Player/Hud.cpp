@@ -349,7 +349,7 @@ void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client) {
 //================
 //
 void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
-    gitem_t* item;
+//    gitem_t* item;
 
     // Ensure ent is valid.
     if (!player || !player->IsSubclassOf<SVGBasePlayer>() || !client) {

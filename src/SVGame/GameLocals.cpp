@@ -22,6 +22,25 @@
 extern cvar_t* gamemode;
 
 /**
+*   @return A pointer to the gameworld object. The big man in charge.
+**/
+Gameworld *GetGameworld() {
+    return game.world;
+}
+
+
+/**
+*   @return A pointer to the gamemode object. The man's little helper.
+**/
+IGamemode *GetGamemode() {
+    if (game.world) {
+        return game.world->GetGamemode();
+    } else {
+        return nullptr;
+    }
+}
+
+/**
 *	@brief Initializes the gameworld and its member objects.
 **/
 void GameLocals::Initialize() {

@@ -6,8 +6,7 @@
 //
 //
 */
-#ifndef __SVGAME_ENTITIES_MISC_PLAYERCLIENT_H__
-#define __SVGAME_ENTITIES_MISC_PLAYERCLIENT_H__
+#pragma once
 
 class SVGBaseEntity;
 
@@ -31,20 +30,42 @@ public:
     *   Interface implementation functions.
     *
     ***/
-    void Precache() override;    // Precaches data.
-    void Spawn() override;       // Spawns the entity.
-    void Respawn() override;     // Respawns the entity.
-    void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    void Think() override;       // General entity thinking routine.
+    void Precache() override;
+    void Spawn() override;
+    void Respawn() override;
+    void PostSpawn() override;
+    void Think() override;
 
     void SpawnKey(const std::string& key, const std::string& value)  override;
+
+
 
     /***
     * 
     *   Callback functions.
     *
     ***/
+    /**
+    *   @brief  Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
+    **/
     void SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+
+
+
+    /***
+    * 
+    *   Player Functions.
+    *
+    ***/
+    /**
+    *   @brief  Each player can have two 'noise sources' associated to it. One slot for
+    *           player personal noises such as jumpin, pain, firing a weapon. The other
+    *           slot for target noise, such as bullets impacting a wall.
+    * 
+    *           Use your imagination to think of what this is useful for ;-P
+    **/
+    virtual void PlayerNoise(SVGBaseEntity *noiseEntity, const vec3_t &noiseOrigin, int32_t noiseType);
+
 
 
     /***
@@ -52,7 +73,6 @@ public:
     *   Weapon functions.
     *
     ***/
-
     /**
     *   @brief Gives the player's weapon a chance to "think".
     **/
@@ -68,7 +88,6 @@ public:
     *   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
     **/
     virtual qboolean TakeAmmo(uint32_t ammoIdentifier, uint32_t amount);
-
     /**
     *   @brief  Gives a specific amount of weapon type to the player.
     *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
@@ -80,7 +99,6 @@ public:
     *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
     **/
     virtual qboolean TakeWeapon(uint32_t weaponIdentifier, uint32_t amount);
-
     /**
     *   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)
     **/
@@ -295,5 +313,3 @@ private:
         v_blend[3] = a2;
     }
 };
-
-#endif // __SVGAME_ENTITIES_MISC_PLAYERCLIENT_H__

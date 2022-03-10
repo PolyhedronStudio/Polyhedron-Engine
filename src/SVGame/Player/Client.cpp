@@ -136,7 +136,7 @@ void spectator_respawn(Entity *ent)
 
         if (numspec >= maxspectators->value) {
             // Report error message by centerprinting it to client.
-            gi.CPrintf(ent, PRINT_HIGH, "Server isSpectator limit is full.\n");
+            gi.CPrintf(ent, PRINT_HIGH, "Server spectator limit is full.\n");
 
             // Enable isSpectator state.
             ent->client->persistent.isSpectator = false;
@@ -201,8 +201,6 @@ called when a client has finished connecting, and is ready
 to be placed into the game.  This will happen every level load.
 ============
 */
-extern void DebugShitForEntitiesLulz();
-
 void SVG_ClientBegin(Entity *ent)
 {
     // Fetch this entity's client.
@@ -210,7 +208,6 @@ void SVG_ClientBegin(Entity *ent)
 
     // Let the game mode decide from here on out.
     GetGamemode()->ClientBegin(ent);
-    //GetGamemode()->ClientEndServerFrame(ent);
 }
 
 

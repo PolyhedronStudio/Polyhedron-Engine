@@ -224,36 +224,36 @@ static const save_field_t entityfields[] = {
 
 static const save_field_t levelfields[] = {
 #define _OFS LLOFS
-    I(frameNumber),
-    F(time),
+    //I(frameNumber),
+    //F(time),
 
-    SZ(levelName, MAX_QPATH),
-    SZ(mapName, MAX_QPATH),
-    SZ(nextMap, MAX_QPATH),
+    //SZ(levelName, MAX_QPATH),
+    //SZ(mapName, MAX_QPATH),
+    //SZ(nextMap, MAX_QPATH),
 
-    F(intermission.time),
-    L(intermission.changeMap),
-    I(intermission.exitIntermission),
-    V(intermission.origin),
-    V(intermission.viewAngle),
+    //F(intermission.time),
+    //L(intermission.changeMap),
+    //I(intermission.exitIntermission),
+    //V(intermission.origin),
+    //V(intermission.viewAngle),
 
-    E(sightClient),
+    //E(sightClient),
 
-    E(sightEntity),
-    I(sightEntityFrameNumber),
-    E(soundEntity),
-    I(soundEntityFrameNumber),
-    E(sound2Entity),
-    I(sound2EntityFrameNumber),
+    //E(sightEntity),
+    //I(sightEntityFrameNumber),
+    //E(soundEntity),
+    //I(soundEntityFrameNumber),
+    //E(sound2Entity),
+    //I(sound2EntityFrameNumber),
 
-    I(pic_health),
+    //I(pic_health),
 
-    I(totalMonsters),
-    I(killedMonsters),
+    //I(totalMonsters),
+    //I(killedMonsters),
 
-    I(bodyQue),
+//    I(bodyQue),
 
-    I(powerCubes),
+//    I(powerCubes),
 
     {(fieldtype_t)0}
 #undef _OFS
