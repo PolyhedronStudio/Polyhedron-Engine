@@ -241,7 +241,7 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
         SVG_Command_Score_f(this, client);
 
         // Let the gamemode know this client died.
-        game.GetGamemode()->ClientDeath(this);
+        GetGamemode()->ClientDeath(this);
     }
 
     // Remove powerups.
@@ -319,7 +319,7 @@ void SVGBasePlayer::WeaponThink() {
     }
 
     // If dead, switch to weapon ID 0 (a space holder, but is essentially no weapon.)
-    if (game.GetGamemode()->IsDeadEntity(this)) {
+    if (GetGamemode()->IsDeadEntity(this)) {
         ChangeWeapon(0, false);
         return;
     }
@@ -787,7 +787,7 @@ void SVGBasePlayer::CheckFallingDamage()
 
         //if (!deathmatch->value || 
         if (!((int)gamemodeflags->value & GamemodeFlags::NoFallingDamage)) {
-	        game.GetGamemode()->InflictDamage(this, GetGameworld()->GetWorldspawnClassEntity(), GetGameworld()->GetWorldspawnClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
+	        GetGamemode()->InflictDamage(this, GetGameworld()->GetWorldspawnClassEntity(), GetGameworld()->GetWorldspawnClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
         }
     } else {
         SetEventID(EntityEvent::FallShort);
@@ -900,7 +900,7 @@ void SVGBasePlayer::CheckWorldEffects()
 
                 SetDebouncePainTime(level.time);
 
-                game.GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -922,11 +922,11 @@ void SVGBasePlayer::CheckWorldEffects()
                 SetDebouncePainTime(level.time + 1);
             }
 
-            game.GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
+            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (GetWaterType() & CONTENTS_SLIME) {
-            game.GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
+            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }

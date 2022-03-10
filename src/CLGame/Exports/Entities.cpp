@@ -330,13 +330,13 @@ void ClientGameEntities::AddPacketEntities() {
         // Moved into the if statement's else case up above.
         renderEntity.oldframe = clientEntity->prev.animationFrame;
         renderEntity.backlerp = 1.0 - SG_FrameForTime(&renderEntity.frame,
-            cl->serverTime,  // Current Time.
-            clientEntity->current.animationStartTime,         // Animation Start time.
-            20.f,//clientEntity->current.animationFramerate,  // Current frame time.
-            clientEntity->current.animationStartFrame,  // Start frame.
-            clientEntity->current.animationEndFrame,  // End frame.
-            0,             // Loop count.
-            true         // Force loop
+            cl->serverTime,                                     // Current Time.
+            clientEntity->current.animationStartTime,           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
+            clientEntity->current.animationFramerate,           // Current frame time.
+            clientEntity->current.animationStartFrame,          // Start frame.
+            clientEntity->current.animationEndFrame,            // End frame.
+            0,                                                  // Loop count.
+            true                                                // Force loop
         );
         clientEntity->current.animationFrame = renderEntity.frame;
     //clientEntity->prev.animationFrame = clientEntity->current.animationFrame;

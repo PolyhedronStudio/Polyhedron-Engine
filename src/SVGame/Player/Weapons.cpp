@@ -60,7 +60,7 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
 
     //if (deathmatch->value)
     //    return;
-    //if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
+    //if (GetGamemode()->IsClass<DeathmatchGamemode>()) {
     //    return;
     //}
 

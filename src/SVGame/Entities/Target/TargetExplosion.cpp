@@ -55,7 +55,7 @@ void TargetExplosion::ExplosionThink() {
 	gi.MSG_WriteVector3( GetOrigin(), false );
 	gi.Multicast( GetOrigin(), Multicast::PHS );
 
-	game.GetGamemode()->InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+	GetGamemode()->InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
 	float save = GetDelayTime();
 	SetDelayTime( 0.0f );

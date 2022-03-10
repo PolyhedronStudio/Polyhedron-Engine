@@ -12,21 +12,15 @@
 #include "Entities.h"
 #include "View.h"
 
-extern qhandle_t cl_mod_powerscreen;
-extern qhandle_t cl_mod_laser;
-extern qhandle_t cl_mod_dmspot;
-extern qhandle_t cl_sfx_footsteps[4];
-
-
 /**
 *   @brief  Gets us a pointer to the entity that is currently being viewed.
 *           This could be an other client to in case of spectator mode.
 **/
 ClientEntity* CLG_GetClientViewEntity(void) {
-    // Fetch clientnumber by default.
+    // Default is of course our own client entity number.
     int32_t index = cl->clientNumber;
 
-    // Fetch the chasing entity index if we are chasing.
+    // However, faith has it that a chase client ID might be set, in which case we want to switch to its number instead.
     if (cl->frame.playerState.stats[PlayerStats::ChaseClientID]) {
         index = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
     }
@@ -45,21 +39,23 @@ qboolean CLG_IsClientViewEntity(const ClientEntity* ent) {
 
     // If not, then we are viewing an other client entity, check whether it is in corpse mode.
     if ((ent->current.effects & EntityEffectType::Corpse) == 0) {
-        // In case of no model index, we still want to validate some other cases.
+        // No corpse, and modelIndex #255 indicating that we are dealing with a client entity.
         if (ent->current.modelIndex == 255) {
+            // If the entity number matches our client number, we're good to go.
             if (ent->current.number == cl->clientNumber) {
                 return true;
             } 
 
-            // If we came to this point, fetch the chasing client.
+            // Otherwise we'll fetch the number of currently being chased client and see if that matches with this entity's number instead.
             const int16_t chase = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
 
+            // Oh boy, it matched, someone is really happy right now.
             if (ent->current.number == chase) {
                 return true;
             }
         }
     }
 
-    // And if we came to this point, all bets are off, this is no client entity which we are viewing.
+    // All bets are off, this is no client entity which we are viewing.
     return false;
 }

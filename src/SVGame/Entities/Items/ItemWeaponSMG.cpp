@@ -335,7 +335,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     }
 
     // Set a respawn think for after 2 seconds.
-    if (!game.GetGamemode()->IsClass<DefaultGamemode>()) {
+    if (!GetGamemode()->IsClass<DefaultGamemode>()) {
         SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
         SetNextThinkTime(level.time + 2);
     }

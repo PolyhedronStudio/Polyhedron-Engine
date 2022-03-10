@@ -128,7 +128,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     game.autoSaved = false;
 
     // Respawn any dead clients.
-    game.GetGamemode()->RespawnAllClients();
+    GetGamemode()->RespawnAllClients();
 
     // Set intermission time and the map to change to.
     level.intermission.time = level.time;
@@ -136,7 +136,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     // 
     if (strstr(level.intermission.changeMap, "*")) {
-        if (!game.GetGamemode()->IsClass<CoopGamemode>()) {
+        if (!GetGamemode()->IsClass<CoopGamemode>()) {
             for (i = 0 ; i < maximumclients->value ; i++) {
                 client = game.world->GetServerEntities() + 1 + i;
                 if (!client->inUse) {
@@ -152,7 +152,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
             }
         }
     } else {
-        if (!game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
+        if (!GetGamemode()->IsClass<DeathmatchGamemode>()) {
             level.intermission.exitIntermission = 1;     // go immediately to the next level
             return;
         }
@@ -321,7 +321,7 @@ void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client) {
     client->showInventory = false;
 
     // Don't show scores if not in one of the following game modes.
-    if (!game.GetGamemode()->IsClass<DeathmatchGamemode>() && !game.GetGamemode()->IsClass<CoopGamemode>()) {
+    if (!GetGamemode()->IsClass<DeathmatchGamemode>() && !GetGamemode()->IsClass<CoopGamemode>()) {
         return;
     }
 
@@ -424,7 +424,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     client->playerState.stats[PlayerStats::Layouts] = 0;
 
     // Special layout for deathmatch.
-    if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
+    if (GetGamemode()->IsClass<DeathmatchGamemode>()) {
 	    if (client->persistent.stats.health <= 0 || level.intermission.time || client->showScores) {
 	        client->playerState.stats[PlayerStats::Layouts] |= 1;
 	    }

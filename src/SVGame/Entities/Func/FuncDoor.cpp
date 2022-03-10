@@ -62,7 +62,7 @@ void FuncDoor::Spawn() {
     if ( !GetSpeed() ) {
         SetSpeed( 100.0f );
     }
-    //if ( game.GetGamemode()->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
+    //if ( GetGamemode()->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
     //    SetSpeed( GetSpeed() * 2.0f );
     //}
     if ( !GetAcceleration() ) {
@@ -233,7 +233,7 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
 
     if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
         // Give it a chance to go away on its own terms (like gibs)
-        game.GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
+        GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
 
         // If it's still there, nuke it
         if ( other->GetHealth() > 0 || other->GetSolid() != Solid::Not ) {
@@ -241,7 +241,7 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
         }
     }
 
-    game.GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+    GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 
     if ( GetSpawnFlags() & SF_Crusher ) {
         return;

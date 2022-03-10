@@ -168,7 +168,7 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 	else
 		damageFlags = 0;
 
-	game.GetGamemode()->InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
+	GetGamemode()->InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
 }
 
 //

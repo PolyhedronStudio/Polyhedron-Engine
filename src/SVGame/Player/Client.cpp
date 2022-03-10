@@ -55,7 +55,7 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     if (!ent)
         return;
 
-    game.GetGamemode()->ClientUserinfoChanged(ent, userinfo);
+    GetGamemode()->ClientUserinfoChanged(ent, userinfo);
 }
 
 //=======================================================================
@@ -168,7 +168,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    game.GetGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->classEntity));
+    GetGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->classEntity));
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -209,8 +209,8 @@ void SVG_ClientBegin(Entity *ent)
     ent->client = game.GetClients() + (ent - game.world->GetServerEntities() - 1);
 
     // Let the game mode decide from here on out.
-    game.GetGamemode()->ClientBegin(ent);
-    //game.GetGamemode()->ClientEndServerFrame(ent);
+    GetGamemode()->ClientBegin(ent);
+    //GetGamemode()->ClientEndServerFrame(ent);
 }
 
 
@@ -228,7 +228,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    return game.GetGamemode()->ClientConnect(ent, userinfo);
+    return GetGamemode()->ClientConnect(ent, userinfo);
 }
 
 /*
@@ -249,33 +249,12 @@ void SVG_ClientDisconnect(Entity *ent)
         return;
 
     // Since it does, we pass it on to the game mode.
-    game.GetGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->classEntity), ent->client);
+    GetGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->classEntity), ent->client);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;
     //gi.configstring (ConfigStrings::PlayerSkins+playernum, "");
 }
-
-
-//==============================================================
-
-unsigned CheckBlock(void *b, int c)
-{
-    int v, i;
-    v = 0;
-    for (i = 0 ; i < c ; i++)
-        v += ((byte *)b)[i];
-    return v;
-}
-void PrintPMove(PlayerMove *pm)
-{
-    unsigned    c1, c2;
-
-    c1 = CheckBlock(&pm->state, sizeof(pm->state));
-    c2 = CheckBlock(&pm->moveCommand, sizeof(pm->moveCommand));
-    Com_Printf("sv %3i:%i %i\n", pm->moveCommand.input.impulse, c1, c2);
-}
-//==============================================================
 
 /*
 ==============
@@ -304,6 +283,7 @@ void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 
     // Do client think.
     GetGameworld()->GetGamemode()->ClientThink(player, client, moveCommand);
+
     // update chase cam if being followed
     //for (int i = 1; i <= maximumclients->value; i++) {
     //    other = game.world->GetServerEntities() + i;

@@ -168,7 +168,7 @@ void SVG_ShutdownGame(void) {
 
 // TODO: Move elsewhere...
 qboolean SVG_CanSaveGame(qboolean isDedicatedServer) { 
-    IGamemode* gamemode = game.GetGamemode();
+    IGamemode* gamemode = GetGamemode();
 
     if (!gamemode)
         return false;
@@ -533,7 +533,7 @@ void SVG_RunFrame(void) {
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
         //SVG_ExitLevel();
-        game.GetGamemode()->OnLevelExit();
+        GetGamemode()->OnLevelExit();
         return;
     }
 
@@ -608,7 +608,7 @@ void SVG_RunFrame(void) {
             }
 
             // Last but not least, begin its server frame.
-            game.GetGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(classEntity), client);
+            GetGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(classEntity), client);
 
             // Continue to next iteration.
             continue;

@@ -62,7 +62,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityDamage = game.GetGamemode()->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = GetGamemode()->CalculateDamageVelocity(damage);
 
     // Add the velocityDamage up to the current velocity.
     self->SetVelocity(self->GetVelocity() + velocityDamage);

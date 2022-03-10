@@ -118,19 +118,19 @@ void ClientGameScreen::RenderScreen() {
     SRC_DrawNewHud();
 
     // Draw status.
-    SCR_DrawStats();
+    //SCR_DrawStats();
 
     // Draw layout string.
-    SCR_DrawLayout();
+    //SCR_DrawLayout();
 
     // Draw inventory.
-    SCR_DrawInventory();
+    //SCR_DrawInventory();
 
     // Draw center screen print
     SCR_DrawCenterString();
 
     // Draw objects.
-    SCR_DrawObjects();
+    //SCR_DrawObjects();
 
     // Draw FPS.
     SCR_DrawFPS();
@@ -144,8 +144,9 @@ void ClientGameScreen::RenderScreen() {
 //
 //---------------
 void ClientGameScreen::ScreenModeChanged() {
-    if (scr.initialized)
+    if (scr.initialized) {
         scr.hud_scale = clgi.R_ClampScale(scr_scale);
+    }
 
     scr.hud_alpha = 1.f;
 }

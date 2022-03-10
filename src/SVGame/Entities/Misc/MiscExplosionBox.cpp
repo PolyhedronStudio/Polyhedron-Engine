@@ -229,7 +229,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
 //
 void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     // Execute radius damage.
-    game.GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
+    GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
     // Retrieve origin.
     vec3_t save = GetOrigin();
@@ -275,7 +275,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), Multicast::PHS);
 
-        game.GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+        GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         float save;
         save = GetDelayTime();
@@ -288,7 +288,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), Multicast::PHS);
 
-        game.GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+        GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         float save;
         save = GetDelayTime();

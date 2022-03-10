@@ -83,7 +83,7 @@ void FuncRotating::Spawn() {
 // FuncRotating::RotatorBlocked
 //===============
 void FuncRotating::RotatorBlocked( SVGBaseEntity* other ) {
-	game.GetGamemode()->InflictDamage( other, this, this, vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+	GetGamemode()->InflictDamage( other, this, this, vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 }
 
 //===============

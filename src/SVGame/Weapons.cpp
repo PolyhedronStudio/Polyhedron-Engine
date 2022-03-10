@@ -120,7 +120,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
     dir = point - self->GetEnemy()->GetOrigin();
 
     // Do the damage.
-    game.GetGamemode()->InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    GetGamemode()->InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
         return false;
@@ -233,7 +233,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     if ( !(tr.surface && tr.surface->flags & SURF_SKY) ) {
         if (tr.fraction < 1.0) {
             if (tr.ent->GetTakeDamage()) {
-                game.GetGamemode()->InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
+                GetGamemode()->InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);

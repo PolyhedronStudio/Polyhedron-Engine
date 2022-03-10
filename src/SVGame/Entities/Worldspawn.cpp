@@ -306,7 +306,7 @@ void Worldspawn::Spawn() {
     SVG_SetConfigString(ConfigStrings::MaxClients, std::to_string(maximumclients->integer));
 
     // Status bar program
-    if (game.GetGamemode()->IsClass<DeathmatchGamemode>()) {
+    if (GetGamemode()->IsClass<DeathmatchGamemode>()) {
         SVG_SetConfigString(ConfigStrings::StatusBar, dm_statusbar);
     } else {
         SVG_SetConfigString(ConfigStrings::StatusBar, single_statusbar);

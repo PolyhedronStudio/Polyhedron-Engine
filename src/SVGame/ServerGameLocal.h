@@ -436,6 +436,7 @@ extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and g
 
 // Static Get functions for readability.
 static inline Gameworld* GetGameworld() { return game.world; }
+static inline IGamemode* GetGamemode() { return (game.world ? game.world->GetGamemode() : nullptr); }
 static inline LevelLocals* GetLevelLocals() { return &level; }
 
     // These too need to be taken care of.

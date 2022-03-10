@@ -75,7 +75,7 @@ GibEntity* GibEntity::Create(SVGBaseEntity* gibber, const std::string& gibModel,
     }
 
     // Comment later...
-    vec3_t velocityDamage = game.GetGamemode()->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = GetGamemode()->CalculateDamageVelocity(damage);
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
     // adding it on to 'velocityDamage' its old value.

@@ -175,7 +175,7 @@ qboolean SVG_KillBox(SVGBaseEntity *ent)
         }
 
         // Cheers.
-	    game.GetGamemode()->InflictDamage(boxedEntity, boxedEntity, boxedEntity, vec3_zero(), boxedEntity->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
+	    GetGamemode()->InflictDamage(boxedEntity, boxedEntity, boxedEntity, vec3_zero(), boxedEntity->GetOrigin(), vec3_zero(), 100000, 0, DamageFlags::IgnoreProtection, MeansOfDeath::TeleFrag);
 
         // Assume it is dead by testing its solid.
 	    if (boxedEntity->GetSolid()) {

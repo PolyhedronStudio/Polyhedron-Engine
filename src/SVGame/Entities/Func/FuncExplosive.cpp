@@ -81,7 +81,7 @@ void FuncExplosive::ExplosiveDeath( SVGBaseEntity* inflictor, SVGBaseEntity* att
     SetTakeDamage( TakeDamage::No );
 
     if ( GetDamage() ) {
-        game.GetGamemode()->InflictRadiusDamage( this, attacker, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive );
+        GetGamemode()->InflictRadiusDamage( this, attacker, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive );
     }
 
     // Velocity = attack direction * 150

@@ -622,7 +622,7 @@ void Cmd_Kill_f(SVGBasePlayer* player, ServerClient* client) {
 
     player->SetFlags(player->GetFlags() & ~EntityFlags::GodMode);
     player->SetHealth(0);
-    game.GetGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
+    GetGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
     player->Die(player, player, 100000, vec3_zero());
 }
 

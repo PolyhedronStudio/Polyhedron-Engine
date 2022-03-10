@@ -374,7 +374,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockBack still occurs
     //if ((targ != attacker) && ((deathmatch->value && ((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams))) || coop->value)) {
-    //    if (game.GetGamemode()->OnSameTeam(targ, attacker)) {
+    //    if (GetGamemode()->OnSameTeam(targ, attacker)) {
     //        if ((int)(gamemodeflags->value) & GamemodeFlags::NoFriendlyFire)
     //            damage = 0;
     //        else
@@ -434,7 +434,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     }
 
     // Team damage avoidance
-    if (!(damageFlags & DamageFlags::IgnoreProtection) && game.GetGamemode()->OnSameTeam(target, attacker))
+    if (!(damageFlags & DamageFlags::IgnoreProtection) && GetGamemode()->OnSameTeam(target, attacker))
         return;
 
     // Inflict the actual damage, in case we got to deciding to do so based on the above.
@@ -723,7 +723,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
             if (client->latchedButtons & buttonMask) 
                 // || (deathmatch->value && ((int)gamemodeflags->value & GamemodeFlags::ForceRespawn))) {
             {
-                game.GetGamemode()->RespawnClient(player);
+                GetGamemode()->RespawnClient(player);
                 client->latchedButtons = 0;
             }
         }
@@ -1706,10 +1706,10 @@ void DefaultGamemode::RespawnClient(SVGBasePlayer* ent) {
     //if (deathmatch->value || coop->value) {
     //    // Spectator's don't leave bodies
     //    if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-    //        game.GetGamemode()->SpawnClientCorpse(self->classEntity);
+    //        GetGamemode()->SpawnClientCorpse(self->classEntity);
 
     //    self->serverFlags &= ~EntityServerFlags::NoClient;
-    //    game.GetGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->classEntity);
+    //    GetGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->classEntity);
 
     //    // add a teleportation effect
     //    self->state.eventID = EntityEvent::PlayerTeleport;
