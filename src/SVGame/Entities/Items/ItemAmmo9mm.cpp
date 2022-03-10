@@ -120,7 +120,7 @@ qboolean ItemAmmo9mm::Ammo9mmPickup(SVGBaseEntity* other) {
     }
 
     // Play sound.
-    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
+    SVG_Sound(other, SoundChannel::Item, SVG_PrecacheSound("weapons/pickup1.wav"), 1, Attenuation::Normal, 0);
 
     // Let it be known we picked the fucker up.
     SVG_CenterPrint(other, std::string("Picked up item: ") + GetClassname());

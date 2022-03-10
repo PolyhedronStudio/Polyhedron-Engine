@@ -166,7 +166,7 @@ void MiscServerModel::Think() {
 
 
     //if (GetNoiseIndexA()) {
-    //    SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, GetSound(), 1.f, ATTN_NONE, 0.f);
+    //    SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, GetSound(), 1.f, Attenuation::None, 0.f);
     //}
 
     //gi.DPrintf("MiscServerModel::Think();");
@@ -306,7 +306,7 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SetSolid(Solid::Not);
     LinkEntity();
     // Play a nasty gib sound, yughh :)
-    SVG_Sound(this, CHAN_BODY, gi.SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+    SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
     Gameworld* gameworld = GetGameworld();

@@ -194,7 +194,7 @@ void FuncButton::ButtonFire() {
 
 	moveInfo.state = MoverState::Up;
 	if ( moveInfo.startSoundIndex && !(flags & EntityFlags::TeamSlave) ) {
-		gi.Sound( serverEntity, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0 );
+		gi.Sound( serverEntity, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0 );
 	}
 	
 	BrushMoveCalc( moveInfo.endOrigin, OnButtonWait );

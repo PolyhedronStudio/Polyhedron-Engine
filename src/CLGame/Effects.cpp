@@ -353,39 +353,39 @@ void CLG_MuzzleFlash() {
     switch (mzParameters.weapon) {
     case MuzzleFlashType::Blaster:
         dl->color = vec3_t{1, 1, 0};
-        //clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, ATTN_NORM, 0);
-	    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/v_mark23/fire0.wav"), volume, ATTN_NORM, 0);
+        //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, Attenuation::Normal, 0);
+	    clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/v_mark23/fire0.wav"), volume, Attenuation::Normal, 0);
         break;
     case MuzzleFlashType::MachineGun:
         dl->color = vec3_t{1, 1, 0};
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound(soundname), volume, ATTN_NORM, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound(soundname), volume, Attenuation::Normal, 0);
         break;
     case MuzzleFlashType::Shotgun:
         dl->color = vec3_t{1, 1, 0};
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0);
-        //  S_StartSound(NULL, mzParameters.entity, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/shotgf1b.wav"), volume, Attenuation::Normal, 0);
+        //  S_StartSound(NULL, mzParameters.entity, SoundChannel::Auto,   S_RegisterSound("weapons/shotgr1b.wav"), volume, Attenuation::Normal, 0.1);
         break;
     case MuzzleFlashType::SuperShotgun:
         dl->color = vec3_t{1, 1, 0};
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/sshotf1b.wav"), volume, ATTN_NORM, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/sshotf1b.wav"), volume, Attenuation::Normal, 0);
         break;
     case MuzzleFlashType::Login:
         dl->color = vec3_t{0, 1, 0};
         dl->die = cl->time + 1.0f;
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Logout:
         dl->color = vec3_t{1, 0, 0};
         dl->die = cl->time + 1.0f;
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Respawn:
         dl->color = vec3_t{1, 1, 0};
         dl->die = cl->time + 1.0f;
-        clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0);
+        clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
         CLG_LogoutEffect(pl->current.origin, mzParameters.weapon);
         break;
     }
@@ -437,7 +437,7 @@ void CLG_MuzzleFlash2() {
     //    dl->color = vec3_t{1, 1, 0};
     //    CLG_ParticleEffect(origin, forward, 0, 40);
     //    CLG_SmokeAndFlash(origin);
-    //    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck3.wav"), 1, ATTN_NORM, 0);
+    //    clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("soldier/solatck3.wav"), 1, Attenuation::Normal, 0);
     //    break;
 
     //case MZ2_SOLDIER_BLASTER_1:
@@ -449,7 +449,7 @@ void CLG_MuzzleFlash2() {
     //case MZ2_SOLDIER_BLASTER_7:
     //case MZ2_SOLDIER_BLASTER_8:
     //    dl->color = vec3_t{1, 1, 0};
-    //    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck2.wav"), 1, ATTN_NORM, 0);
+    //    clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("soldier/solatck2.wav"), 1, Attenuation::Normal, 0);
     //    break;
 
     //case MZ2_SOLDIER_SHOTGUN_1:
@@ -462,7 +462,7 @@ void CLG_MuzzleFlash2() {
     //case MZ2_SOLDIER_SHOTGUN_8:
     //    dl->color = vec3_t{1, 1, 0};
     //    CLG_SmokeAndFlash(origin);
-    //    clgi.S_StartSound(NULL, mzParameters.entity, CHAN_WEAPON, clgi.S_RegisterSound("soldier/solatck1.wav"), 1, ATTN_NORM, 0);
+    //    clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("soldier/solatck1.wav"), 1, Attenuation::Normal, 0);
     //    break;
     //}
 }

@@ -159,10 +159,16 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     *   Primary/Secondary Fire Logic.
     **/
     if (weapon) {
-        if ((client->latchedButtons | client->buttons) & ButtonBits::PrimaryFire) {
-            weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::PrimaryFire);
-        } else if ((client->latchedButtons | client->buttons) & ButtonBits::SecondaryFire) {
-            weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::SecondaryFire);
+        if ((client->buttons) & ButtonBits::PrimaryFire) {
+            // Do a hard state set, we can't have a weapon need to wait till next frame when willing to fire.
+            if (client->weaponState.current == WeaponState::Idle) {
+                weapon->InstanceWeaponSetCurrentState(player, weapon, client, WeaponState::PrimaryFire);
+            }
+        } else if ((client->buttons) & ButtonBits::SecondaryFire) {
+            // Do a hard state set, we can't have a weapon need to wait till next frame when willing to fire.
+            if (client->weaponState.current == WeaponState::Idle) {
+                weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::SecondaryFire);
+            }
         } else {
 
         }

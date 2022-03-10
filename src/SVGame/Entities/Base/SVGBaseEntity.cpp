@@ -424,9 +424,9 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 
 		// Play the message sound
 		if ( messageSound ) {
-			SVG_Sound( activatorOverride, CHAN_AUTO, messageSound, 1, ATTN_NORM, 0 );
+			SVG_Sound( activatorOverride, SoundChannel::Auto, messageSound, 1, Attenuation::Normal, 0 );
 		} else {
-			SVG_Sound( activatorOverride, CHAN_AUTO, SVG_PrecacheSound( "misc/talk1.wav" ), 1, ATTN_NORM, 0 );
+			SVG_Sound( activatorOverride, SoundChannel::Auto, SVG_PrecacheSound( "misc/talk1.wav" ), 1, Attenuation::Normal, 0 );
 		}
 	}
 

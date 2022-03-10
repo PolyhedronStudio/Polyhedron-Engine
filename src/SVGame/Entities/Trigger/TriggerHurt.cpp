@@ -159,7 +159,7 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
 
 	if (!(GetSpawnFlags()& SPAWNFLAG_SILENT)) {
 		if ((level.frameNumber % 10) == 0)
-			SVG_Sound(other, CHAN_AUTO, GetNoiseIndexA(), 1, ATTN_NORM, 0);
+			SVG_Sound(other, SoundChannel::Auto, GetNoiseIndexA(), 1, Attenuation::Normal, 0);
 	}
 
 	int32_t damageFlags = 0;

@@ -71,7 +71,7 @@ void TargetEarthquake::QuakeThink() {
     SVGBaseEntity** classEntities = GetGameworld()->GetClassEntities();
 
     if ( lastQuakeTime < level.time ) {
-        gi.PositionedSound( GetOrigin(), GetServerEntity(), CHAN_AUTO, GetNoiseIndexA(), 1.0f, ATTN_NONE, 0.0f);
+        gi.PositionedSound( GetOrigin(), GetServerEntity(), SoundChannel::Auto, GetNoiseIndexA(), 1.0f, Attenuation::None, 0.0f);
         lastQuakeTime = level.time + 0.5f;
     }
 

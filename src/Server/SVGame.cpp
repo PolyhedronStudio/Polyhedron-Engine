@@ -536,8 +536,8 @@ static void PF_StartSound(Entity *edict, int channel,
 
     // if the sound doesn't attenuate,send it to everyone
     // (global radio chatter, voiceovers, etc)
-    if (attenuation == ATTN_NONE) {
-        channel |= CHAN_NO_PHS_ADD;
+    if (attenuation == Attenuation::None) {
+        channel |= SoundChannel::IgnorePHS;
     }
 
     FOR_EACH_CLIENT(client) {
@@ -547,7 +547,7 @@ static void PF_StartSound(Entity *edict, int channel,
         }
 
         // PHS cull this sound
-        if (!(channel & CHAN_NO_PHS_ADD)) {
+        if (!(channel & SoundChannel::IgnorePHS)) {
             // get client viewpos
             ps = &client->edict->client->playerState;
             // N&C: FF Precision.
@@ -578,7 +578,7 @@ static void PF_StartSound(Entity *edict, int channel,
 
         // reliable sounds will always have position explicitly set,
         // as no one gurantees reliables to be delivered in time
-        if (channel & CHAN_RELIABLE) {
+        if (channel & SoundChannel::Reliable) {
             MSG_WriteUint8(ServerCommand::Sound); //MSG_WriteByte(ServerCommand::Sound);
             MSG_WriteUint8(flags | SoundCommandBits::Position);//MSG_WriteByte(flags | SoundCommandBits::Position);
             MSG_WriteUint8(soundindex); //MSG_WriteByte(soundindex);
@@ -678,14 +678,14 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
 
     // if the sound doesn't attenuate,send it to everyone
     // (global radio chatter, voiceovers, etc)
-    if (attenuation == ATTN_NONE || (channel & CHAN_NO_PHS_ADD)) {
-        if (channel & CHAN_RELIABLE) {
+    if (attenuation == Attenuation::None || (channel & SoundChannel::IgnorePHS)) {
+        if (channel & SoundChannel::Reliable) {
             SV_Multicast(vec3_zero(), Multicast::All_R);
         } else {
             SV_Multicast(vec3_zero(), Multicast::All);
         }
     } else {
-        if (channel & CHAN_RELIABLE) {
+        if (channel & SoundChannel::Reliable) {
             SV_Multicast(origin, Multicast::PHS_R);
         } else {
             SV_Multicast(origin, Multicast::PHS);

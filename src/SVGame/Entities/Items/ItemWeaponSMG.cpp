@@ -7,12 +7,14 @@
 *	SMG weapon implementation.
 *
 ***/
+// Main.
 #include "../../ServerGameLocal.h"  // SVGame.
+#include "../../Ballistics.h"          // Effects.
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"        // Util funcs.
-#include "../../Physics/StepMove.h" // Stepmove funcs.
 
-#include <SharedGame/SkeletalAnimation.h>
+// Shared Game.
+#include "SharedGame/SkeletalAnimation.h"
 
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
@@ -167,7 +169,7 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
         case WeaponState::Holster:
             // Let the player entity play the 'holster SMG' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/smg45/reload.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, ATTN_NORM, 0.f);
+            SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
@@ -175,7 +177,7 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
         case WeaponState::Draw:
             // Let the player entity play the 'draw SMG' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/smg45/ready1.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/ready1.wav"), 1.f, ATTN_NORM, 0.f);
+            SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/ready1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 112, 142);
@@ -183,7 +185,7 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
         case WeaponState::Reload:
             // Let the player entity play the 'draw SMG' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/smg45/reloadclip1.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/reloadclip1.wav"), 1.f, ATTN_NORM, 0.f);
+            SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/reloadclip1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 9, 65);
@@ -195,20 +197,20 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             // Let the player entity play the 'draw SMG' sound.
             if (fireSound == 0) {
                 client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
-                SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, ATTN_NORM, 0.f);
+                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, Attenuation::Normal, 0.f);
             } else {
                 client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
-                SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, ATTN_NORM, 0.f);
+                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
             }
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 0, 7);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 0, 5);
             break;
         }
         case WeaponState::SecondaryFire:
             // Let the player entity play the 'draw SMG' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/smg45/melee1.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/melee1.wav"), 1.f, ATTN_NORM, 0.f);
+            SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/melee1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 172, 188);
@@ -360,7 +362,7 @@ void ItemWeaponSMG::InstanceWeaponProcessReloadState(SVGBasePlayer* player, SVGB
 /**
 *   @brief  Called each frame the weapon is in 'Primary Fire' state.
 * 
-*           StartFrame = 0, EndFrame    = 7
+*           StartFrame = 0, EndFrame    = 5
 **/
 void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Call base class method.
@@ -368,6 +370,23 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
 
     // Process animation.
     InstanceWeaponProcessAnimation(player, weapon, client);
+
+    // TODO: This needs to be changed obviously, but it's a quick hack for now.
+    // Fire single bullet.
+    if (client->playerState.gunAnimationStartTime < level.timeStamp + 20) {
+            // Calculate where to start tracing the bullet hit from.
+            // TODO: This needs to be decided by a joint on the weapon mesh.
+        // get start / end positions
+        vec3_t forward = vec3_zero(), right = vec3_zero();
+        vec3_t angles = client->aimAngles + client->kickAngles;
+        AngleVectors(angles, &forward, &right, NULL);
+        vec3_t offset = {0, 8, static_cast<float>(player->GetViewHeight() - 8)};
+
+    
+        vec3_t bulletStart = SVG_ProjectSource(player->GetOrigin(), offset, forward, right);
+
+        SVG_FireBullet(player, bulletStart, forward, 10, 50, 150, 150, 0);
+    }
 }
 /**
 *   @brief  Called each frame the weapon is in 'Secondary Fire' state.
@@ -408,7 +427,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     ServerClient *client = player->GetClient();
 
     // Play sound.
-    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
+    SVG_Sound(other, SoundChannel::Item, SVG_PrecacheSound("weapons/pickup1.wav"), 1, Attenuation::Normal, 0);
 
     // Give the player the SMG weapon if he didn't have one yet.
     if ( !player->HasItem(GetIdentifier()) ) {

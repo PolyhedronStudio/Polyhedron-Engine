@@ -920,9 +920,9 @@ void SVG_Physics_Toss(SVGEntityHandle& entityHandle) {
 
     // Determine what sound to play.
     if (!wasInWater && isInWater)
-        gi.PositionedSound(oldOrigin, game.world->GetServerEntities(), CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(oldOrigin, game.world->GetServerEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
-        gi.PositionedSound(ent->GetOrigin(), game.world->GetServerEntities(), CHAN_AUTO, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->GetOrigin(), game.world->GetServerEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
     for (SVGBaseEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {

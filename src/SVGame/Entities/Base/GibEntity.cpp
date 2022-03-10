@@ -251,7 +251,7 @@ void GibEntity::GibEntityTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane
 
     // Did we get a plane passed?
     if (plane) {
-        SVG_Sound(this, CHAN_VOICE, gi.SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
+        SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("misc/fhit3.wav"), 1, Attenuation::Normal, 0);
 
         vec3_t normalAngles = vec3_euler(plane->normal);
         vec3_vectors(normalAngles, NULL, &right, NULL);

@@ -884,7 +884,7 @@ void S_IssuePlaysound(playsound_t *ps)
     }
 
     // spatialize
-    if (ps->attenuation == ATTN_STATIC)
+    if (ps->attenuation == Attenuation::Static)
         ch->dist_mult = ps->attenuation * 0.001;
     else
         ch->dist_mult = ps->attenuation * 0.0005;
@@ -1019,7 +1019,7 @@ void S_StartLocalSound(const char *sound)
 {
     if (s_started) {
         qhandle_t sfx = S_RegisterSound(sound);
-        S_StartSound(NULL, listener_entnum, 0, sfx, 1, ATTN_NONE, 0);
+        S_StartSound(NULL, listener_entnum, 0, sfx, 1, Attenuation::None, 0);
     }
 }
 
@@ -1027,7 +1027,7 @@ void S_StartLocalSound_(const char *sound)
 {
     if (s_started) {
         qhandle_t sfx = S_RegisterSound(sound);
-        S_StartSound(NULL, listener_entnum, 256, sfx, 1, ATTN_NONE, 0);
+        S_StartSound(NULL, listener_entnum, 256, sfx, 1, Attenuation::None, 0);
     }
 }
 

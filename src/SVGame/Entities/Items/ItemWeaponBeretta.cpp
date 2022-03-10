@@ -161,7 +161,7 @@ void ItemWeaponBeretta::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBa
         case WeaponState::Draw:
             // Let the player entity play the 'draw Beretta' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/beretta/ready1.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/beretta/ready1.wav"), 1.f, ATTN_NORM, 0.f);
+            SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/beretta/ready1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the Beretta instance weapon's SetAnimation for this client.
             weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 151, 186);
@@ -173,7 +173,7 @@ void ItemWeaponBeretta::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBa
         case WeaponState::Holster:
             // Let the player entity play the 'holster Beretta' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/holster_weapon1.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, ATTN_NORM, 0.f);
+            SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the Beretta instance weapon's SetAnimation for this client.
             weaponBeretta->InstanceWeaponSetAnimation(player, weaponBeretta, client, startTime, 140, 150);
@@ -311,7 +311,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(SVGBaseEntity* other) {
     ServerClient *client = player->GetClient();
 
     // Play sound.
-    SVG_Sound(other, CHAN_ITEM, SVG_PrecacheSound("weapons/pickup1.wav"), 1, ATTN_NORM, 0);
+    SVG_Sound(other, SoundChannel::Item, SVG_PrecacheSound("weapons/pickup1.wav"), 1, Attenuation::Normal, 0);
 
     // Give the player the SMG weapon if he didn't have one yet.
     if ( !player->HasItem(GetIdentifier()) ) {

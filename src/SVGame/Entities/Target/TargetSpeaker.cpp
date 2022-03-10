@@ -70,7 +70,7 @@ void TargetSpeaker::SpawnKey( const std::string& key, const std::string& value )
 // TargetSpeaker::SpeakerUse
 //===============
 void TargetSpeaker::SpeakerUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
-    int channel = CHAN_VOICE;
+    int channel = SoundChannel::Voice;
 
     if ( GetSpawnFlags() & (SF_LoopedOn | SF_LoopedOn) ) {
         // Looping sound toggles
@@ -78,7 +78,7 @@ void TargetSpeaker::SpeakerUse( SVGBaseEntity* other, SVGBaseEntity* activator )
     } else {
         // Normal sound
         if ( GetSpawnFlags() & SF_Reliable ) {
-            channel |= CHAN_RELIABLE;
+            channel |= SoundChannel::Reliable;
         }
         // Use a positioned_sound, because this entity won't normally be
         // sent to any clients because it is invisible

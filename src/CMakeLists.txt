@@ -66,6 +66,7 @@ SET(HEADERS_CLGAME
 # Server game DLL
 # Throw all sources in here, but group them elsewhere
 SET( SRC_SVGAME 
+	SVGame/Ballistics.cpp
 	SVGame/ChaseCamera.cpp
 	SVGame/Commands.cpp
 	SVGame/Effects.cpp
@@ -177,6 +178,7 @@ SET( SRC_SVGAME
     
     SET ( HEADERS_SVGAME
 	SVGame/ServerGameLocal.h
+	SVGame/Ballistics.h
 	SVGame/ChaseCamera.h
 	SVGame/Effects.h
 	SVGame/Entities.h

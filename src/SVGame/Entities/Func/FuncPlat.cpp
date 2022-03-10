@@ -227,7 +227,7 @@ void FuncPlat::PlatformBlocked( SVGBaseEntity* other ) {
 void FuncPlat::PlatformGoUp(  ) {
     if (!(GetFlags() & EntityFlags::TeamSlave)) {
 	    if (moveInfo.startSoundIndex) {
-	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0.0f);
+	        SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0.0f);
 	    }
 	    SetSound(moveInfo.startSoundIndex);
     }
@@ -241,7 +241,7 @@ void FuncPlat::PlatformGoUp(  ) {
 void FuncPlat::PlatformGoDown() {
     if (!(GetFlags() & EntityFlags::TeamSlave)) {
 	    if (moveInfo.startSoundIndex) {
-	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0.0f);
+	        SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0.0f);
 	    }
 	    SetSound(moveInfo.startSoundIndex);
     }
@@ -255,7 +255,7 @@ void FuncPlat::PlatformGoDown() {
 void FuncPlat::DoGoUp() {
     if (!(GetFlags() & EntityFlags::TeamSlave)) {
 	    if (moveInfo.middleSoundIndex) {
-	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.middleSoundIndex, 1, ATTN_STATIC, 0.0f);
+	        SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.middleSoundIndex, 1, Attenuation::Static, 0.0f);
 	    }
 	    SetSound(moveInfo.middleSoundIndex);
     }
@@ -269,7 +269,7 @@ void FuncPlat::DoGoUp() {
 void FuncPlat::DoGoDown() {
     if (!(GetFlags() & EntityFlags::TeamSlave)) {
 	    if (moveInfo.middleSoundIndex) {
-	        SVG_Sound(this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.middleSoundIndex, 1, ATTN_STATIC, 0.0f);
+	        SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.middleSoundIndex, 1, Attenuation::Static, 0.0f);
 	    }
 	    SetSound(moveInfo.middleSoundIndex);
     }
@@ -284,7 +284,7 @@ void FuncPlat::DoGoDown() {
 void FuncPlat::HitTop() {
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.endSoundIndex ) {
-            SVG_Sound( this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+            SVG_Sound( this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
         }
         SetSound( 0 );
     }
@@ -301,7 +301,7 @@ void FuncPlat::HitTop() {
 void FuncPlat::HitBottom() {
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.endSoundIndex ) {
-            SVG_Sound( this, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+            SVG_Sound( this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
         }
         SetSound( 0 );
     }

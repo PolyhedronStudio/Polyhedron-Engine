@@ -298,7 +298,7 @@ void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* p
 
     if ( !messageStr.empty() ) {
         gi.CenterPrintf( other->GetServerEntity(), "%s", messageStr.c_str() );
-        gi.Sound( other->GetServerEntity(), CHAN_AUTO, gi.SoundIndex( MessageSoundPath ), 1.0f, ATTN_NORM, 0.0f );
+        gi.Sound( other->GetServerEntity(), SoundChannel::Auto, gi.SoundIndex( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
     }
 
     Use(GetOwner(), other);
@@ -322,7 +322,7 @@ void FuncDoor::DoorGoUp( SVGBaseEntity* activator ) {
 
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.startSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0.0f );
+            gi.Sound( GetServerEntity(), SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0.0f );
         }
         SetSound( moveInfo.middleSoundIndex );
     }
@@ -340,7 +340,7 @@ void FuncDoor::DoorGoUp( SVGBaseEntity* activator ) {
 void FuncDoor::DoorGoDown() {
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.startSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.startSoundIndex, 1, ATTN_STATIC, 0 );
+            gi.Sound( GetServerEntity(), SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0 );
         }
         SetSound( moveInfo.middleSoundIndex );
     }
@@ -374,7 +374,7 @@ void FuncDoor::DoGoDown() {
 void FuncDoor::HitTop() {
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.endSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+            gi.Sound( GetServerEntity(), SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
         }
         SetSound( 0 );
     }
@@ -396,7 +396,7 @@ void FuncDoor::HitTop() {
 void FuncDoor::HitBottom() {
     if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
         if ( moveInfo.endSoundIndex ) {
-            gi.Sound( GetServerEntity(), CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1.0f, ATTN_STATIC, 0.0f );
+            gi.Sound( GetServerEntity(), SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
         }
         SetSound( 0 );
     }

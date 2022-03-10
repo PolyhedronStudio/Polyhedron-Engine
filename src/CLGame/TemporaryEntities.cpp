@@ -1010,11 +1010,11 @@ void CLG_ParseTempEntity(void)
 			// impact sound
 			r = rand() & 15;
 			if (r == 1)
-				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_ric1, 1, ATTN_NORM, 0);
+				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_ric1, 1, Attenuation::Normal, 0);
 			else if (r == 2)
-				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_ric2, 1, ATTN_NORM, 0);
+				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_ric2, 1, Attenuation::Normal, 0);
 			else if (r == 3)
-				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_ric3, 1, ATTN_NORM, 0);
+				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_ric3, 1, Attenuation::Normal, 0);
 		}
 		break;
 
@@ -1028,11 +1028,11 @@ void CLG_ParseTempEntity(void)
 		if (teParameters.color == SplashType::Sparks) {
 			r = rand() & 3;
 			if (r == 0)
-				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_spark5, 1, ATTN_STATIC, 0);
+				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_spark5, 1, Attenuation::Static, 0);
 			else if (r == 1)
-				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_spark6, 1, ATTN_STATIC, 0);
+				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_spark6, 1, Attenuation::Static, 0);
 			else
-				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_spark7, 1, ATTN_STATIC, 0);
+				clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_spark7, 1, Attenuation::Static, 0);
 		}
 		break;
 
@@ -1064,13 +1064,13 @@ void CLG_ParseTempEntity(void)
 
 		if (teParameters.type != TempEntityEvent::Flare)
 		{
-			clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+			clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		}
 		else
 		{
 			// teParameters.count is set to 1 on the first tick of the flare, 0 afterwards
 			if (teParameters.count != 0)
-				clgi.S_StartSound(NULL, teParameters.entity1, 0, cl_sfx_flare, 0.5, ATTN_NORM, 0);
+				clgi.S_StartSound(NULL, teParameters.entity1, 0, cl_sfx_flare, 0.5, Attenuation::Normal, 0);
 		}
 		break;
 
@@ -1082,23 +1082,23 @@ void CLG_ParseTempEntity(void)
 			ex->baseFrame = 30;
 		}
 		CLG_ExplosionParticles(teParameters.position1);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_grenexp, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::Explosion1:
 		CLG_PlainExplosion(false);
 		CLG_ExplosionParticles(teParameters.position1);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::NoParticleExplosion1:
 		CLG_PlainExplosion(false);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::BigExplosion1:
 		ex = CLG_PlainExplosion(true);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::BubbleTrail:
@@ -1123,7 +1123,7 @@ void CLG_ParseTempEntity(void)
 
 	case TempEntityEvent::BubbleTrail2:
 		CLG_BubbleTrail2(teParameters.position1, teParameters.position2, 8);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::MoreBlood:
@@ -1133,7 +1133,7 @@ void CLG_ParseTempEntity(void)
 	case TempEntityEvent::ElectricSparks:
 		CLG_ParticleEffect(teParameters.position1, teParameters.dir, 0x75, 40);
 		//FIXME : replace or remove this sound
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::TeleportEffect:

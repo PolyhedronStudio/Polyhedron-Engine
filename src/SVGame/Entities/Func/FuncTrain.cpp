@@ -305,7 +305,7 @@ void FuncTrain::WaitAtCorner() {
 
 		if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
 			if ( moveInfo.endSoundIndex ) {
-				gi.Sound( serverEntity, CHAN_NO_PHS_ADD + CHAN_VOICE, moveInfo.endSoundIndex, 1, ATTN_STATIC, 0 );
+				gi.Sound( serverEntity, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1, Attenuation::Static, 0 );
 			}
 			SetSound( 0 );
 		}

@@ -70,7 +70,7 @@ void TriggerPush::PushTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t
             player->GetClient()->oldVelocity = other->GetVelocity();
             if ( player->GetDebounceSoundTime() < level.time ) {
                 player->SetDebounceSoundTime( level.time + 1.5f);
-                SVG_Sound( player, CHAN_AUTO, WindSound, 1.0f, ATTN_NORM, 0.0f );
+                SVG_Sound( player, SoundChannel::Auto, WindSound, 1.0f, Attenuation::Normal, 0.0f );
             }
         }
     }
