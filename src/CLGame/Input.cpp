@@ -70,7 +70,7 @@ static in_state_t inputState;
 KeyBinding in_klook;
 KeyBinding in_left, in_right, in_forward, in_back;
 KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
-KeyBinding in_strafe, in_speed, in_use, in_attack;
+KeyBinding in_strafe, in_speed, in_use, in_primary_fire, in_secondary_fire;
 KeyBinding in_up, in_down;
 
 int32_t        in_impulse;
@@ -249,17 +249,29 @@ static void IN_SpeedDown(void) { CLG_KeyDown(&in_speed); }
 static void IN_SpeedUp(void) { CLG_KeyUp(&in_speed); }
 static void IN_StrafeDown(void) { CLG_KeyDown(&in_strafe); }
 static void IN_StrafeUp(void) { CLG_KeyUp(&in_strafe); }
-static void IN_AttackDown(void)
+static void IN_PrimaryFireDown(void)
 {
-    CLG_KeyDown(&in_attack);
+    CLG_KeyDown(&in_primary_fire);
 
     if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls->netchan) {
         cl->sendPacketNow = true;
     }
 }
-static void IN_AttackUp(void)
+static void IN_SecondaryFireDown(void)
 {
-    CLG_KeyUp(&in_attack);
+    CLG_KeyDown(&in_secondary_fire);
+
+    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls->netchan) {
+        cl->sendPacketNow = true;
+    }
+}
+static void IN_PrimaryFireUp(void)
+{
+    CLG_KeyUp(&in_primary_fire);
+}
+static void IN_SecondaryFireUp(void)
+{
+    CLG_KeyUp(&in_secondary_fire);
 }
 static void IN_UseDown(void)
 {
@@ -491,8 +503,10 @@ void CLG_RegisterInput(void)
     clgi.Cmd_AddCommand("-moveright", IN_MoverightUp);
     clgi.Cmd_AddCommand("+speed", IN_SpeedDown);
     clgi.Cmd_AddCommand("-speed", IN_SpeedUp);
-    clgi.Cmd_AddCommand("+attack", IN_AttackDown);
-    clgi.Cmd_AddCommand("-attack", IN_AttackUp);
+    clgi.Cmd_AddCommand("+primaryfire", IN_PrimaryFireDown);
+    clgi.Cmd_AddCommand("-primaryfire", IN_PrimaryFireUp);
+    clgi.Cmd_AddCommand("+secondaryfire", IN_SecondaryFireDown);
+    clgi.Cmd_AddCommand("-secondaryfire", IN_SecondaryFireUp);
     clgi.Cmd_AddCommand("+use", IN_UseDown);
     clgi.Cmd_AddCommand("-use", IN_UseUp);
     clgi.Cmd_AddCommand("impulse", IN_Impulse);
@@ -529,147 +543,3 @@ void CLG_RegisterInput(void)
 //
 //=============================================================================
 //
-//
-//===============
-// CLG_BuildFrameMoveCommand
-// 
-// Updates msec, anglesand builds interpolated movement vector for local 
-// prediction. Doesn't touch command forward/side/upMove, these are filled
-// by CLG_BuildMovementCommand.
-//================
-//
-void CLG_BuildFrameMoveCommand(int msec)
-{
-    cl->localMove = vec3_zero();
-
-    if (sv_paused->integer) {
-        return;
-    }
-
-    // Add to milliseconds of time to apply the move
-    cl->moveCommand.input.msec += msec;
-
-    // Adjust viewAngles
-    CLG_AdjustAngles(msec);
-
-    // Get basic movement from keyboard
-    cl->localMove = CLG_BaseMove(cl->localMove);
-
-    // Allow mice to add to the move
-    CLG_MouseMove();
-
-    // Add accumulated mouse forward/side movement
-    cl->localMove[0] += cl->mouseMove[0];
-    cl->localMove[1] += cl->mouseMove[1];
-
-    // Clamp to server defined max speed
-    cl->localMove = CLG_ClampSpeed(cl->localMove);
-
-    CLG_ClampPitch();
-
-    cl->moveCommand.input.viewAngles[0] = cl->viewAngles[0];
-    cl->moveCommand.input.viewAngles[1] = cl->viewAngles[1];
-    cl->moveCommand.input.viewAngles[2] = cl->viewAngles[2];
-}
-
-//
-//===============
-// CLG_FinalizeFrameMoveCommand
-// 
-// Builds the actual movement vector for sending to server.Assumes that msec
-// and angles are already set for this frame by CL_UpdateCmd.
-//================
-//
-void CLG_FinalizeFrameMoveCommand(void)
-{
-    if (clgi.GetClienState() != ClientConnectionState::Active) {
-        return; // not talking to a server
-    }
-
-    if (sv_paused->integer) {
-        return;
-    }
-
-    //
-    // figure button bits
-    //
-    if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->moveCommand.input.buttons |= ButtonBits::Attack;
-
-    if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->moveCommand.input.buttons |= ButtonBits::Use;
-
-    // Undo the button_state_down for the next frame, it needs a repress for
-    // that to be re-enabled.
-    in_attack.state &= ~BUTTON_STATE_DOWN;
-    in_use.state &= ~BUTTON_STATE_DOWN;
-
-    // Whether to run or not, depends on whether auto-run is on or off.
-    if (cl_run->value) {
-        if (in_speed.state & BUTTON_STATE_HELD) {
-            cl->moveCommand.input.buttons |= ButtonBits::Walk;
-        }
-    }
-    else {
-        if (!(in_speed.state & BUTTON_STATE_HELD)) {
-            cl->moveCommand.input.buttons |= ButtonBits::Walk;
-        }
-    }
-
-    // Always send in case any button was down at all in-game.
-    if (clgi.Key_GetDest() == KEY_GAME && clgi.Key_AnyKeyDown()) {
-        cl->moveCommand.input.buttons |= ButtonBits::Any;
-    }
-
-    if (cl->moveCommand.input.msec > 250) {
-        cl->moveCommand.input.msec = 100;        // time was unreasonable
-    }
-
-    // Rebuild the movement vector
-    vec3_t move = vec3_zero();
-
-    // Get basic movement from keyboard
-    move = CLG_BaseMove(move);
-
-    // Add mouse forward/side movement
-    move[0] += cl->mouseMove[0];
-    move[1] += cl->mouseMove[1];
-
-    // Clamp to server defined max speed
-    move = CLG_ClampSpeed(move);
-
-    // Store the movement vector
-    cl->moveCommand.input.forwardMove = move[0];
-    cl->moveCommand.input.rightMove = move[1];
-    cl->moveCommand.input.upMove = move[2];
-
-    // Clear all states
-    cl->mouseMove[0] = 0;
-    cl->mouseMove[1] = 0;
-    
-    cl->moveCommand.input.impulse = in_impulse;
-    in_impulse = 0;
-
-    // Save this command off for prediction
-    cl->currentClientCommandNumber++;
-    cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->moveCommand;
-
-    CLG_KeyClear(&in_right);
-    CLG_KeyClear(&in_left);
-
-    CLG_KeyClear(&in_moveright);
-    CLG_KeyClear(&in_moveleft);
-
-    CLG_KeyClear(&in_up);
-    CLG_KeyClear(&in_down);
-
-    CLG_KeyClear(&in_forward);
-    CLG_KeyClear(&in_back);
-
-    CLG_KeyClear(&in_lookup);
-    CLG_KeyClear(&in_lookdown);
-
-
-    // Clear pending cmd
-    cl->moveCommand = {};
-}

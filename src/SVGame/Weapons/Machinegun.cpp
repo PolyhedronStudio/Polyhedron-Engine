@@ -53,7 +53,7 @@ void Machinegun_Fire(SVGBasePlayer* ent)
     // Get the client.
     ServerClient* client = ent->GetClient();
 
-    if (!(client->buttons & ButtonBits::Attack)) {
+    if (!(client->buttons & ButtonBits::PrimaryFire)) {
         client->machinegunShots = 0;
         client->playerState.gunAnimationFrame++;
         return;

@@ -20,7 +20,7 @@
 extern KeyBinding in_klook;
 extern KeyBinding in_left, in_right, in_forward, in_back;
 extern KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
-extern KeyBinding in_strafe, in_speed, in_use, in_attack;
+extern KeyBinding in_strafe, in_speed, in_use, in_primary_fire, in_secondary_fire;
 extern KeyBinding in_up, in_down;
 
 extern int32_t in_impulse;
@@ -72,27 +72,36 @@ void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
 //
 //---------------
 void ClientGameMovement::FinalizeFrameMovementCommand() {
+    // Not talking to any server, so there is little use to proceed.
     if (clgi.GetClienState() != ClientConnectionState::Active) {
-        return; // not talking to a server
+        return;
     }
 
+    // Paused == Paused, nuff said.
     if (sv_paused->integer) {
         return;
     }
 
-    //
-    // figure button bits
-    //
-    if (in_attack.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
-        cl->moveCommand.input.buttons |= ButtonBits::Attack;
+    // Primary Fire Button Bits.
+    if (in_primary_fire.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN)) {
+        cl->moveCommand.input.buttons |= ButtonBits::PrimaryFire;
+    }
 
-    if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN))
+    // Secondary Fire Button Bits.
+    if (in_secondary_fire.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN)) {
+        cl->moveCommand.input.buttons |= ButtonBits::SecondaryFire;
+    }
+
+    // Use Button Bits.
+    if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN)) {
         cl->moveCommand.input.buttons |= ButtonBits::Use;
+    }
 
     // Undo the button_state_down for the next frame, it needs a repress for
     // that to be re-enabled.
-    in_attack.state &= ~BUTTON_STATE_DOWN;
-    in_use.state &= ~BUTTON_STATE_DOWN;
+    in_primary_fire.state   &= ~BUTTON_STATE_DOWN;
+    in_secondary_fire.state &= ~BUTTON_STATE_DOWN;
+    in_use.state            &= ~BUTTON_STATE_DOWN;
 
     // Whether to run or not, depends on whether auto-run is on or off.
     if (cl_run->value) {

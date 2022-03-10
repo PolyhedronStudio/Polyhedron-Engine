@@ -153,7 +153,18 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     if (!player || !client) {
         return;
     }
+            //if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
+            //ent->client->latched_buttons &= ~BUTTON_ATTACK;
+    /**
+    *   Primary/Secondary Fire Logic.
+    **/
+    if ((client->latchedButtons | client->buttons) & ButtonBits::PrimaryFire) {
+        gi.DPrintf("PRIMARY FIRE\n");
+    } else if ((client->latchedButtons | client->buttons) & ButtonBits::SecondaryFire) {
+        gi.DPrintf("SECONDARY FIRE\n");
+    } else {
 
+    }
 
     /**
     *   State Queue Logic.
@@ -163,8 +174,8 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
         // Set the timestamp of when this current state got set.
         client->weaponState.timeStamp = level.timeStamp;
 
-        gi.DPrintf("WeaponState Switched:(From:#%i  To:#%i   Timestamp:%i)\n", 
-            client->weaponState.current, client->weaponState.queued, client->weaponState.timeStamp);
+        //gi.DPrintf("WeaponState Switched:(From:#%i  To:#%i   Timestamp:%i)\n", 
+        //    client->weaponState.current, client->weaponState.queued, client->weaponState.timeStamp);
 
         // Make the queued weapon state our active one. NOTE: SetCurrentState also calls upon OnSwitchState.
         weapon->InstanceWeaponSetCurrentState(player, weapon, client, client->weaponState.queued);
@@ -304,7 +315,7 @@ void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SV
             weapon->InstanceWeaponOnAnimationFinished(player, weapon, client);
         }
 
-        gi.DPrintf("ProcessAnimation - State:(#%i)    Frame(#%i)\n", client->weaponState.current, client->weaponState.animationFrame);
+        //gi.DPrintf("ProcessAnimation - State:(#%i)    Frame(#%i)\n", client->weaponState.current, client->weaponState.animationFrame);
     }
 }
 

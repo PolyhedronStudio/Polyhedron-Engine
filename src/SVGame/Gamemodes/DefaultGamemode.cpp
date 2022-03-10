@@ -716,7 +716,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
             // In old code, the need to hit a key was only set in DM mode.
             // I figured, let's keep it like this instead.
             //if (deathmatch->value)
-            int32_t buttonMask = ButtonBits::Attack;
+            int32_t buttonMask = ButtonBits::PrimaryFire;
             //else
             //buttonMask = -1;
 
@@ -1053,7 +1053,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
     //ent->lightLevel = moveCommand->input.lightLevel;
 
     // Fire weapon from final position if needed
-    if (client->latchedButtons & ButtonBits::Attack) {
+    if (client->latchedButtons & ButtonBits::PrimaryFire) {
         if (client->respawn.isSpectator) {
 
             client->latchedButtons = 0;
@@ -1165,29 +1165,12 @@ qboolean DefaultGamemode::ClientConnect(Entity* svEntity, char *userinfo) {
 // Called when a client is ready to be placed in the game after connecting.
 //===============
 void DefaultGamemode::ClientBegin(Entity* svEntity) {
-    if (!svEntity) {
-        gi.DPrintf("ClientBegin executed with invalid (nullptr) serverEntity");
-        return;
-    }
-
-    if (!svEntity->client) {
-        gi.DPrintf("ClientBegin executed with invalid (nullptr) serverEntity->client");
-        return;
-    }
-
-    // Fetch client.
-    ServerClient* clients = game.GetClients();
-    ServerClient* client = &clients[svEntity->state.number - 1];  //(serverEntity - g_entities - 1);
-
-    // Assign  this client to the server entity.
-    svEntity->client = client;
-
     // Player entity, to be assigned next.
     SVGBasePlayer* player = nullptr;
 
     // If there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
-    if (!!svEntity->inUse == true) {
+    if (static_cast<bool>(svEntity->inUse) == true) {
         // Only pull through if it is a base player.
         if (svEntity->classEntity->IsSubclassOf<SVGBasePlayer>()) {
 	        player = dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);
@@ -1203,14 +1186,14 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
             svEntity->client->playerState.pmove.deltaAngles[i] = svEntity->client->playerState.pmove.viewAngles[i];
         }
     } else {
-        // Assign  this client to the server entity.
-        svEntity->client  = client;
+        //// Assign  this client to the server entity.
+        //svEntity->client  = client;
 
         // Create the player client entity.
         player = SVGBasePlayer::Create(svEntity);
 
         // Initialize client respawn data.
-        InitializePlayerRespawnData(client);
+        InitializePlayerRespawnData(svEntity->client);
  
         // Put into our server and blast away! (Takes care of spawning classEntity).
         PlacePlayerInGame(player);
@@ -1227,12 +1210,12 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
 	        gi.MSG_WriteUint8(MuzzleFlashType::Login);//WriteByte(MuzzleFlashType::Login);
 	        gi.Multicast(player->GetOrigin(), Multicast::PVS);
 
-            gi.BPrintf(PRINT_HIGH, "%s entered the game\n", client->persistent.netname);
+            gi.BPrintf(PRINT_HIGH, "%s entered the game\n", svEntity->client->persistent.netname);
         }
     }
 
     // Call ClientEndServerFrame to update him through the beginning frame.
-    ClientEndServerFrame(player, client);
+    ClientEndServerFrame(player, svEntity->client);
 }
 
 //===============
@@ -1266,7 +1249,7 @@ void DefaultGamemode::ClientDisconnect(SVGBasePlayer* player, ServerClient *clie
     player->SetEffects(0);
     player->SetSolid(Solid::Not);
     player->SetInUse(false);
-    player->SetClassname("disconnected");
+    //player->SetClassname("disconnected");
 
     // Ensure a state is stored for that this client is not connected anymore.
     client->persistent.isConnected = false;
@@ -1781,9 +1764,12 @@ void DefaultGamemode::StorePlayerPersistentData(void) {
 void DefaultGamemode::RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) {
     if (!player || !client)
         return;
-        
+    
+    // Set health back to what was stored in the persistent data.
     player->SetHealth(client->persistent.stats.health);
+    // Set maximum health back to what was stored in the persistent data.
     player->SetMaxHealth(client->persistent.stats.maxHealth);
+    // Add saved persistent flags to the player.
     player->SetFlags(player->GetFlags() | client->persistent.savedFlags);
 }
 
@@ -1801,7 +1787,7 @@ void DefaultGamemode::SetClientButtonBits(ServerClient *client, ClientMoveComman
     // Update current buttons with those acquired from the move command.
     client->buttons = moveCommand->input.buttons;
 
-    // Figure out the latched buttons by bit fun. (latched buttons is used for single button press logic.)
+    // Figure out the latched buttons by bit fun. (latched buttons are used for single button press logic.)
     client->latchedButtons |= client->buttons & ~client->oldButtons;
 }
 

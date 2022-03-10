@@ -114,7 +114,7 @@ void Blaster_Fire(SVGBasePlayer* ent, const vec3_t &g_offset, int damage, qboole
 
     //ServerClient* client = ent->GetClient();
 
-    //if (!(client->buttons & ButtonBits::Attack)) {
+    //if (!(client->buttons & ButtonBits::PrimaryFire)) {
     //    client->machinegunShots = 0;
     //    client->playerState.gunAnimationFrame++;
     //    return;

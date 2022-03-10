@@ -19,19 +19,19 @@
 **/
 struct ButtonBits {
     //! Button bit for when a player is using attack1
-    static constexpr uint8_t Attack = (1 << 0);
+    static constexpr uint8_t PrimaryFire    = (1 << 0);
+    //! Button bit for when a player is using attack1
+    static constexpr uint8_t SecondaryFire  = (1 << 1);
     //! Button bit for when a player is using an entity.
-    static constexpr uint8_t Use    = (1 << 1);
+    static constexpr uint8_t Use            = (1 << 2);
     //! Button bit that is set when a player is moving.
-    static constexpr uint8_t Walk   = (1 << 2);
+    static constexpr uint8_t Walk           = (1 << 3);
     //! Unused 0.
-    static constexpr uint8_t Unused0 = (1 << 3);
+    static constexpr uint8_t Unused0        = (1 << 4);
     //! Unused 1.
-    static constexpr uint8_t Unused1 = (1 << 4);
+    static constexpr uint8_t Unused1        = (1 << 5);
     //! Unused 2.
-    static constexpr uint8_t Unused2 = (1 << 5);
-    //! Unused 3.
-    static constexpr uint8_t Unused3 = (1 << 6);
+    static constexpr uint8_t Unused2        = (1 << 6);
     //! Set when any button is pressed.
     static constexpr uint8_t Any = (1 << 7);
 };
