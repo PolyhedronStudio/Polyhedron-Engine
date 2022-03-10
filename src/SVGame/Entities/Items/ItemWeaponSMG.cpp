@@ -55,6 +55,7 @@ void ItemWeaponSMG::Precache() {
     // Precache sounds.
     SVG_PrecacheSound("weapons/smg45/fire1.wav");
     SVG_PrecacheSound("weapons/smg45/fire2.wav");
+    SVG_PrecacheSound("weapons/smg45/melee1.wav");
     SVG_PrecacheSound("weapons/smg45/ready1.wav");
     SVG_PrecacheSound("weapons/smg45/ready2.wav");
     SVG_PrecacheSound("weapons/smg45/reload1.wav");
@@ -141,7 +142,6 @@ void ItemWeaponSMG::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon
 
     // Cast it.
     ItemWeaponSMG *weaponSMG = dynamic_cast<ItemWeaponSMG*>(weapon);
-
 }
 
 /**
@@ -164,6 +164,14 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
 
     // Set animations here.
     switch (newState) {
+        case WeaponState::Holster:
+            // Let the player entity play the 'holster SMG' sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/smg45/reload.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, ATTN_NORM, 0.f);
+
+            // Call upon the SMG instance weapon's SetAnimation for this client.
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
+        break;
         case WeaponState::Draw:
             // Let the player entity play the 'draw SMG' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/smg45/ready1.wav");
@@ -172,15 +180,40 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 112, 142);
         break;
-        case WeaponState::Idle: 
-        break;
-        case WeaponState::Holster:
-            // Let the player entity play the 'holster SMG' sound.
-            client->weaponSound = SVG_PrecacheSound("weapons/holster_weapon1.wav");
-            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, ATTN_NORM, 0.f);
+        case WeaponState::Reload:
+            // Let the player entity play the 'draw SMG' sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/smg45/reloadclip1.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/reloadclip1.wav"), 1.f, ATTN_NORM, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 9, 65);
+        break;
+        case WeaponState::PrimaryFire: {
+            // Toss a dice, 50/50, which fire effect to play.
+            uint32_t fireSound = RandomRangeui(0, 2);
+
+            // Let the player entity play the 'draw SMG' sound.
+            if (fireSound == 0) {
+                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
+                SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, ATTN_NORM, 0.f);
+            } else {
+                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
+                SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, ATTN_NORM, 0.f);
+            }
+
+            // Call upon the SMG instance weapon's SetAnimation for this client.
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 0, 7);
+            break;
+        }
+        case WeaponState::SecondaryFire:
+            // Let the player entity play the 'draw SMG' sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/smg45/melee1.wav");
+            SVG_Sound(player, CHAN_WEAPON, SVG_PrecacheSound("weapons/smg45/melee1.wav"), 1.f, ATTN_NORM, 0.f);
+
+            // Call upon the SMG instance weapon's SetAnimation for this client.
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 172, 188);
+        break;
+        case WeaponState::Idle: 
         break;
         default:
             break;
@@ -204,6 +237,19 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
 
     // Set animations here.
     switch (client->weaponState.current) {
+        case WeaponState::Holster:
+                // Add IsHolstered flag.
+                client->weaponState.flags |= ServerClient::WeaponState::Flags::IsHolstered;
+                
+                // Remove state processing flag.
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+
+                // Queue 'None' state.
+                weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::None);
+
+                // Debug Print.
+                gi.DPrintf("SMG Anim::Holster(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+            break;
         case WeaponState::Draw:
                 // Remove IsHolstered flag.
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsHolstered;
@@ -223,18 +269,35 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 // Debug print.
                 gi.DPrintf("SMG Anim::Idle(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
-        case WeaponState::Holster:
-                // Add IsHolstered flag.
-                client->weaponState.flags |= ServerClient::WeaponState::Flags::IsHolstered;
-                
-                // Remove state processing flag.
+        case WeaponState::Reload:         
+                // Remove state processing flag because we'll queue idle state next. .
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
-                // Queue 'None' state.
-                weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::None);
+                // Queue 'Idle' state.
+                weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("SMG Anim::Holster(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+                gi.DPrintf("SMG Anim::Reload(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+            break;
+        case WeaponState::PrimaryFire:
+                // Remove state processing flag because we'll queue idle state next. .
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+
+                // Queue 'Idle' state.
+                weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
+
+                // Debug Print.
+                gi.DPrintf("SMG Anim::PrimaryFire(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+            break;
+        case WeaponState::SecondaryFire:
+                // Remove state processing flag because we'll queue idle state next. .
+                client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+
+                // Queue 'Idle' state.
+                weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
+
+                // Debug Print.
+                gi.DPrintf("SMG Anim::SecondaryFire(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
         default:
 //                gi.DPrintf("SMG State::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
@@ -243,52 +306,81 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
 }
 
 /**
-*   @brief  Called each frame the weapon is in Draw state.
-**/
-void ItemWeaponSMG::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Animation start and end frame.
-    //static constexpr uint32_t drawStartFrame = 110;
-    //static constexpr uint32_t drawEndFrame = 142;
-     
-    // Call base class method.
-    Base::InstanceWeaponProcessDrawState(player, weapon, client);
-
-    // Process animation.
-    InstanceWeaponProcessAnimation(player, weapon, client);
-}
-    
-/**
 *   @brief  Called each frame the weapon is in Holster state.
+* 
+*           StartFrame = 104,   EndFrame = 112
 **/
 void ItemWeaponSMG::InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Animation start and end frame.
-    //static constexpr uint32_t holsterStartFrame = 104;
-    //static constexpr uint32_t holsterEndFrame = 112;
-     
     // Call base class method.
     Base::InstanceWeaponProcessHolsterState(player, weapon, client);
 
     // Process animation.
     InstanceWeaponProcessAnimation(player, weapon, client);
 }
+
 /**
-*   @brief  Called each frame the weapon is in Holster state.
+*   @brief  Called each frame the weapon is in Draw state.
+*
+*           StartFrame = 110,   EndFrame = 142
 **/
-void ItemWeaponSMG::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Animation start and end frame.
-    //static constexpr uint32_t idleStartFrame = 142;
-    //static constexpr uint32_t idleEndFrame = 172;
-
+void ItemWeaponSMG::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Call base class method.
-    Base::InstanceWeaponProcessIdleState(player, weapon, client);
-
-    // Remove state processing flag.
-    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
+    Base::InstanceWeaponProcessDrawState(player, weapon, client);
 
     // Process animation.
     InstanceWeaponProcessAnimation(player, weapon, client);
 }
+/**
+*   @brief  Called each frame the weapon is in Idle state.
+* 
+*           StartFrame = 142,   EndFrame = 172
+**/
+void ItemWeaponSMG::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Remove state processing flag.
+    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
+    // Call base class method.
+    Base::InstanceWeaponProcessIdleState(player, weapon, client);
+
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
+}
+/**
+*   @brief  Called each frame the weapon is in Idle state.
+* 
+*           StartFrame = 9, EndFrame = 65
+**/
+void ItemWeaponSMG::InstanceWeaponProcessReloadState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Call base class method.
+    Base::InstanceWeaponProcessReloadState(player, weapon, client);
+
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
+}
+/**
+*   @brief  Called each frame the weapon is in 'Primary Fire' state.
+* 
+*           StartFrame = 0, EndFrame    = 7
+**/
+void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Call base class method.
+    Base::InstanceWeaponProcessPrimaryFireState(player, weapon, client);
+
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
+}
+/**
+*   @brief  Called each frame the weapon is in 'Secondary Fire' state.
+* 
+*           StartFrame = 172, EndFrame = 188
+**/
+void ItemWeaponSMG::InstanceWeaponProcessSecondaryFireState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Call base class method.
+    Base::InstanceWeaponProcessSecondaryFireState(player, weapon, client);
+
+    // Process animation.
+    InstanceWeaponProcessAnimation(player, weapon, client);
+}
 
 /**
 *

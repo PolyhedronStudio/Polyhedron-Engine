@@ -18,20 +18,20 @@
 *           to use up the remaining slots for their own custom needs.
 **/
 struct ButtonBits {
-    //! Button bit for when a player is using attack1
+    //! Button bit for when a player is primary firing.
     static constexpr uint8_t PrimaryFire    = (1 << 0);
-    //! Button bit for when a player is using attack1
+    //! Button bit for when a player is secondary firing.
     static constexpr uint8_t SecondaryFire  = (1 << 1);
+    //! Button bit for when a player is reloading its weapon.
+    static constexpr uint8_t Reload         = (1 << 4);
     //! Button bit for when a player is using an entity.
     static constexpr uint8_t Use            = (1 << 2);
     //! Button bit that is set when a player is moving.
     static constexpr uint8_t Walk           = (1 << 3);
     //! Unused 0.
-    static constexpr uint8_t Unused0        = (1 << 4);
+    static constexpr uint8_t Unused0        = (1 << 5);
     //! Unused 1.
-    static constexpr uint8_t Unused1        = (1 << 5);
-    //! Unused 2.
-    static constexpr uint8_t Unused2        = (1 << 6);
+    static constexpr uint8_t Unused1        = (1 << 6);
     //! Set when any button is pressed.
     static constexpr uint8_t Any = (1 << 7);
 };

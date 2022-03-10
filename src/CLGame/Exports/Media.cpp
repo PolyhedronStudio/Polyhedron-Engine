@@ -174,7 +174,8 @@ void ClientGameMedia::LoadViewModels() {
         }
     }
 }
-    //---------------
+
+//---------------
 // ClientGameMedia::LoadModels
 //
 //---------------

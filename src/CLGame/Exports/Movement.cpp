@@ -20,7 +20,7 @@
 extern KeyBinding in_klook;
 extern KeyBinding in_left, in_right, in_forward, in_back;
 extern KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
-extern KeyBinding in_strafe, in_speed, in_use, in_primary_fire, in_secondary_fire;
+extern KeyBinding in_strafe, in_speed, in_use, in_reload, in_primary_fire, in_secondary_fire;
 extern KeyBinding in_up, in_down;
 
 extern int32_t in_impulse;
@@ -92,6 +92,11 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
         cl->moveCommand.input.buttons |= ButtonBits::SecondaryFire;
     }
 
+    // Reload Button Bits.
+    if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN)) {
+        cl->moveCommand.input.buttons |= ButtonBits::Use;
+    }
+
     // Use Button Bits.
     if (in_use.state & (BUTTON_STATE_HELD | BUTTON_STATE_DOWN)) {
         cl->moveCommand.input.buttons |= ButtonBits::Use;
@@ -101,6 +106,7 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     // that to be re-enabled.
     in_primary_fire.state   &= ~BUTTON_STATE_DOWN;
     in_secondary_fire.state &= ~BUTTON_STATE_DOWN;
+    in_reload.state         &= ~BUTTON_STATE_DOWN;
     in_use.state            &= ~BUTTON_STATE_DOWN;
 
     // Whether to run or not, depends on whether auto-run is on or off.

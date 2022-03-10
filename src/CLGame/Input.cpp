@@ -70,11 +70,11 @@ static in_state_t inputState;
 KeyBinding in_klook;
 KeyBinding in_left, in_right, in_forward, in_back;
 KeyBinding in_lookup, in_lookdown, in_moveleft, in_moveright;
-KeyBinding in_strafe, in_speed, in_use, in_primary_fire, in_secondary_fire;
+KeyBinding in_strafe, in_speed, in_use, in_reload, in_primary_fire, in_secondary_fire;
 KeyBinding in_up, in_down;
 
-int32_t        in_impulse;
-static qboolean   in_mlooking;
+int32_t         in_impulse;
+static qboolean in_mlooking;
 
 //
 //===============
@@ -249,6 +249,10 @@ static void IN_SpeedDown(void) { CLG_KeyDown(&in_speed); }
 static void IN_SpeedUp(void) { CLG_KeyUp(&in_speed); }
 static void IN_StrafeDown(void) { CLG_KeyDown(&in_strafe); }
 static void IN_StrafeUp(void) { CLG_KeyUp(&in_strafe); }
+
+/**
+*   +primaryfire Button down/up.
+**/
 static void IN_PrimaryFireDown(void)
 {
     CLG_KeyDown(&in_primary_fire);
@@ -265,6 +269,10 @@ static void IN_SecondaryFireDown(void)
         cl->sendPacketNow = true;
     }
 }
+
+/**
+*   +secondaryfire Button down/up.
+**/
 static void IN_PrimaryFireUp(void)
 {
     CLG_KeyUp(&in_primary_fire);
@@ -273,6 +281,26 @@ static void IN_SecondaryFireUp(void)
 {
     CLG_KeyUp(&in_secondary_fire);
 }
+
+/**
+*   +reload Button down/up.
+**/
+static void IN_ReloadDown(void)
+{
+    CLG_KeyDown(&in_reload);
+
+    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls.netChannel) {
+        cl->sendPacketNow = true;
+    }
+}
+static void IN_ReloadUp(void)
+{
+    CLG_KeyUp(&in_reload);
+}
+
+/**
+*   +use Button down/up.
+**/
 static void IN_UseDown(void)
 {
     CLG_KeyDown(&in_use);
@@ -507,6 +535,8 @@ void CLG_RegisterInput(void)
     clgi.Cmd_AddCommand("-primaryfire", IN_PrimaryFireUp);
     clgi.Cmd_AddCommand("+secondaryfire", IN_SecondaryFireDown);
     clgi.Cmd_AddCommand("-secondaryfire", IN_SecondaryFireUp);
+    clgi.Cmd_AddCommand("+reload", IN_ReloadDown);
+    clgi.Cmd_AddCommand("-reload", IN_ReloadUp);
     clgi.Cmd_AddCommand("+use", IN_UseDown);
     clgi.Cmd_AddCommand("-use", IN_UseUp);
     clgi.Cmd_AddCommand("impulse", IN_Impulse);

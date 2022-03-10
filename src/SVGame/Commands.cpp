@@ -362,13 +362,9 @@ void Cmd_Noclip_f(SVGBasePlayer *player, ServerClient *client) {
 }
 
 
-/*
-==================
-Cmd_Use_f
-
-Use an inventory item
-==================
-*/
+/**
+*   @brief  Use an inventory item
+**/
 void Cmd_Use_f(SVGBasePlayer *player, ServerClient *client) {
     SVGBaseItem *itemInstance = nullptr;
     
@@ -403,6 +399,23 @@ void Cmd_Use_f(SVGBasePlayer *player, ServerClient *client) {
 
     // Call the UseItem callback that this instance item has.
     itemInstance->UseInstance(player, itemInstance);
+}
+
+/**
+*   @brief  Engages reload mode on the current set active weapon for given player/client.
+**/
+void Cmd_Reload_f(SVGBasePlayer *player, ServerClient *client) {
+    // Sanity.
+    if (!player || !client) {
+        return;
+    }
+
+    // Fetch active weapon pointer.
+    SVGBaseItemWeapon *activeWeapon = player->GetActiveWeaponInstance();
+
+    if (activeWeapon) {
+        activeWeapon->InstanceWeaponReload(player, activeWeapon, client);
+    }
 }
 
 
@@ -937,6 +950,8 @@ void SVG_ClientCommand(Entity* svEntity) {
 
     if (command == "use")
         Cmd_Use_f(player, client);
+    if (command == "reload")
+        Cmd_Reload_f(player, client);
     /*/
     else if (command == "drop")
         Cmd_Drop_f(ent);

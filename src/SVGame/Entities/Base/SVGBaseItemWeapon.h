@@ -56,6 +56,10 @@ public:
     *   @brief  Only called when allowed to think.
     **/
     virtual void InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    *   @brief  When the weapon isn't occupied processing other states, will switch it to reload state.
+    **/
+    virtual void InstanceWeaponReload(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
  
     /**
     *   @brief  Updates the view model(client gun index) and ammo display (client ammo index)
@@ -63,6 +67,8 @@ public:
     *           (nullptr), it'll set the gun and ammo indices to 0.
     **/
     virtual void InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    
+    
     /**
     * @brief    Sets the weapon's animation properties.
     * @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
@@ -74,7 +80,7 @@ public:
     **/
     virtual void InstanceWeaponProcessAnimation(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
-    *   @brief Called when an animation has finished. Usually used to then switch states.
+    *   @brief  Called only once during the same frame when the weapon has finished playing an animation.
     **/
     virtual void InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
@@ -98,20 +104,30 @@ public:
     **/
     virtual void InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client,int32_t newState, int32_t oldState);
 
-
-    /**
-    *   @brief  Called each frame the weapon is in Draw state.
-    **/
-    virtual void InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
     *   @brief  Called each frame the weapon is in Holster state.
     **/
     virtual void InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
     /**
-    *   @brief  Called each frame the weapon is in Holster state.
+    *   @brief  Called each frame the weapon is in Draw state.
+    **/
+    virtual void InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    *   @brief  Called each frame the weapon is in Idle state.
     **/
     virtual void InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
-
+    /**
+    *   @brief  Called each frame the weapon is in Reload state.
+    **/
+    virtual void InstanceWeaponProcessReloadState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    *   @brief  Called each frame the weapon is in 'Primary Fire' state.
+    **/
+    virtual void InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
+    /**
+    *   @brief  Called each frame the weapon is in 'Secondary Fire' state.
+    **/
+    virtual void InstanceWeaponProcessSecondaryFireState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client);
 
     /**
     *   @brief  Called to execute the animation of the current weaponstate.

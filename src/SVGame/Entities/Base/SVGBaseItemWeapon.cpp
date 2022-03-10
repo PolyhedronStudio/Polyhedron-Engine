@@ -158,12 +158,14 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     /**
     *   Primary/Secondary Fire Logic.
     **/
-    if ((client->latchedButtons | client->buttons) & ButtonBits::PrimaryFire) {
-        gi.DPrintf("PRIMARY FIRE\n");
-    } else if ((client->latchedButtons | client->buttons) & ButtonBits::SecondaryFire) {
-        gi.DPrintf("SECONDARY FIRE\n");
-    } else {
+    if (weapon) {
+        if ((client->latchedButtons | client->buttons) & ButtonBits::PrimaryFire) {
+            weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::PrimaryFire);
+        } else if ((client->latchedButtons | client->buttons) & ButtonBits::SecondaryFire) {
+            weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::SecondaryFire);
+        } else {
 
+        }
     }
 
     /**
@@ -193,22 +195,30 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     if (weapon) {
         switch (client->weaponState.current) {
         case WeaponState::Holster:
-                // Process animation.
-                InstanceWeaponProcessAnimation(player, weapon, client);
-                // Execute Holster weapon state.
+                // Execute 'Holster' weapon state.
                 weapon->InstanceWeaponProcessHolsterState(player, weapon, client);
             break;
         case WeaponState::Draw:
                 // Be sure to update view model weapon right here in case it has been changed.
-                InstanceWeaponUpdateViewModel(player, weapon, client);
-                // Process animation.
-                InstanceWeaponProcessAnimation(player, weapon, client);
-                // Execute draw weapon state.
+                weapon->InstanceWeaponUpdateViewModel(player, weapon, client);
+                // Execute 'Draw' weapon state.
                 weapon->InstanceWeaponProcessDrawState(player, weapon, client);
             break;
+        case WeaponState::Reload:
+                // Execute 'Reload' weapon state.
+                weapon->InstanceWeaponProcessReloadState(player, weapon, client);
+            break;
+        case WeaponState::PrimaryFire:
+                // Execute idle weapon state.
+                weapon->InstanceWeaponProcessPrimaryFireState(player, weapon, client);
+            break;
+        case WeaponState::SecondaryFire:
+                // Execute idle weapon state.
+                weapon->InstanceWeaponProcessSecondaryFireState(player, weapon, client);
+            break;
+        // Breakthrough to processing idle state. (Unsets the IsProcessingState bit so it can engage to other stages.)
         case WeaponState::Idle:
-                // Process animation.
-                InstanceWeaponProcessAnimation(player, weapon, client);
+        default:
                 // Execute idle weapon state.
                 weapon->InstanceWeaponProcessIdleState(player, weapon, client);
             break;
@@ -258,6 +268,21 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
 }
 
 /**
+*   @brief  When the weapon isn't occupied processing other states, will switch it to reload state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponReload(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Sanity.
+    if (!player || !weapon || !client) {
+        return;
+    }
+
+    // Queue a reload state in case this weapon currently isn't processing any state. (Has to be in idle mode.)
+    if (client->weaponState.current == WeaponState::Idle && !(client->weaponState.flags & ServerClient::WeaponState::Flags::IsProcessingState)) {
+        weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Reload);
+    }
+}
+
+/**
 *   @brief  Call whenever an animation needs to be processed for another game frame.
 **/
 void SVGBaseItemWeapon::InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
@@ -287,6 +312,39 @@ void SVGBaseItemWeapon::InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVG
         // Skin to 0.
         player->SetSkinNumber(0);
     }
+}
+
+
+
+/***
+*
+*   Animation Functions.
+*
+***/
+/**
+*   @brief    Sets the weapon's animation properties.
+*   @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
+**/
+void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, int64_t startTime, int32_t startFrame, int32_t endFrame, int32_t loopCount, qboolean forceLoop, float frameTime) {
+    // Sanity.
+    if (!client) {
+        return;
+    }
+
+    // Set IsAnimating flag bit.
+    client->weaponState.flags |= ServerClient::WeaponState::Flags::IsAnimating;
+
+    // Time properties.
+    client->playerState.gunAnimationStartTime   = startTime;
+    client->playerState.gunAnimationFrametime   = frameTime;
+
+    // Animation properties.
+    client->playerState.gunAnimationStartFrame  = startFrame;
+    client->playerState.gunAnimationEndFrame    = endFrame;
+
+    // Loop properties.
+    client->playerState.gunAnimationLoopCount   = loopCount;
+    client->playerState.gunAnimationForceLoop   = forceLoop;
 }
 
 /**
@@ -320,54 +378,27 @@ void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SV
 }
 
 /**
-*   @brief  Called each frame the weapon is in Draw state.
+*   @brief  Called only once during the same frame when the weapon has finished playing an animation.
 **/
-void SVGBaseItemWeapon::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Debug Print.
-    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessDrawState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
-}
-    
-/**
-*   @brief  Called each frame the weapon is in Holster state.
-**/
-void SVGBaseItemWeapon::InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Debug Print.
-    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessHolsterState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
-}
-/**
-*   @brief  Called each frame the weapon is in Holster state.
-**/
-void SVGBaseItemWeapon::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Debug Print.
-    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessIdleState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
-}
-
-/**
-* @brief    Sets the weapon's animation properties.
-* @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
-**/
-void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, int64_t startTime, int32_t startFrame, int32_t endFrame, int32_t loopCount, qboolean forceLoop, float frameTime) {
+void SVGBaseItemWeapon::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
     // Sanity.
     if (!client) {
         return;
     }
 
-    // Set IsAnimating flag bit.
-    client->weaponState.flags |= ServerClient::WeaponState::Flags::IsAnimating;
-
-    // Time properties.
-    client->playerState.gunAnimationStartTime   = startTime;
-    client->playerState.gunAnimationFrametime   = frameTime;
-
-    // Animation properties.
-    client->playerState.gunAnimationStartFrame  = startFrame;
-    client->playerState.gunAnimationEndFrame    = endFrame;
-
-    // Loop properties.
-    client->playerState.gunAnimationLoopCount   = loopCount;
-    client->playerState.gunAnimationForceLoop   = forceLoop;
+    // Remove IsAnimating flag.
+    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsAnimating;
 }
 
+
+
+/***
+*
+* 
+*   State Management Functions.
+* 
+*
+***/
 /**
 *   @brief  Instantly sets the current state.
 **/
@@ -410,13 +441,13 @@ void SVGBaseItemWeapon::InstanceWeaponQueueNextState(SVGBasePlayer *player, SVGB
 }
 
 /**
-* @brief    A callback which can be implemented by weapons in order to set up and
+*   @brief  A callback which can be implemented by weapons in order to set up and
 *           prepare for the next state.
 * 
 *           (Mainly used for setting animations, but can be used for anything really.)
 * 
-* @param newState The current new state that the weapon resides in.
-* @param oldState Old previous state the weapon was residing in.
+*   @param  newState The current new state that the weapon resides in.
+*   @param  oldState Old previous state the weapon was residing in.
 **/
 void SVGBaseItemWeapon::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, int32_t newState, int32_t oldState) {
     // It is safe to assume, draw weapon state switch means we got ourselves a new viewmodel, I suppose.
@@ -426,16 +457,55 @@ void SVGBaseItemWeapon::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBa
     }
 }
 
-/**
-* @brief    Sets the weapon's animation properties.
-* @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
-**/
-void SVGBaseItemWeapon::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Sanity.
-    if (!client) {
-        return;
-    }
 
-    // Remove IsAnimating flag.
-    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsAnimating;
+
+
+
+/***
+*
+*   State Processing Stubs.
+*
+***/
+/**
+*   @brief  Called each frame the weapon is in Draw state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Debug Print.
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessDrawState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+}
+    
+/**
+*   @brief  Called each frame the weapon is in Holster state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponProcessHolsterState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Debug Print.
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessHolsterState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+}
+/**
+*   @brief  Called each frame the weapon is in Holster state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Debug Print.
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessIdleState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+}
+/**
+*   @brief  Called each frame the weapon is in Reload state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponProcessReloadState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Debug Print.
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessReloadState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+}
+/**
+*   @brief  Called each frame the weapon is in 'Primary Fire' state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Debug Print.
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessPrimaryFireState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
+}
+/**
+*   @brief  Called each frame the weapon is in 'Secondary Fire' state.
+**/
+void SVGBaseItemWeapon::InstanceWeaponProcessSecondaryFireState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
+    // Debug Print.
+    //gi.DPrintf("SVGBaseItemWeapon::InstanceWeaponProcessSecondaryFireState(weaponState.timeStamp: %i    level.timeStamp: %i)\n", client->weaponState.timeStamp, level.timeStamp);
 }
