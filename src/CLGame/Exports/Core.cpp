@@ -15,34 +15,6 @@
 #include "../ClientGameExports.h"
 #include "Core.h"
 
-//---------------
-// Minor command macro functions.
-//
-// They can have the same name as a cvar, but when a macro $ is used,
-// it gains a higher priority than the cvar.
-//
-// Example: echo $cl_health
-// will output the amount of health.
-//
-// These can be useful for debugging purposes, or for general use cases
-// where commands may need to be constructed for menus etc.
-//---------------
-static size_t CL_Health_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::Health]);
-}
-
-static size_t CL_Ammo_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::PrimaryAmmo]);
-}
-
-static size_t CL_Armor_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%i", cl->frame.playerState.stats[PlayerStats::Armor]);
-}
-
-static size_t CL_WeaponModel_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "%s",
-        cl->configstrings[cl->frame.playerState.gunIndex + ConfigStrings::Models]);
-}
 
 /*
 =================
@@ -149,7 +121,7 @@ static const cmdreg_t cmd_cgmodule[] = {
     //{ "say", NULL, CL_Say_c },
     //{ "say_team", NULL, CL_Say_c },
 
-    { "wave" }, { "inven" }, { "kill" }, { "use" },
+    { "wave" }, { "inven" }, { "kill" }, { "use" }, { "reload" },
     { "drop" }, { "info" }, { "prog" },
     { "give" }, { "god" }, { "notarget" }, { "noclip" },
     { "invuse" }, { "invprev" }, { "invnext" }, { "invdrop" },
@@ -180,7 +152,6 @@ void ClientGameCore::Initialize() {
     sv_paused = clgi.Cvar_Get("sv_paused", NULL, 0);
 
     // Create the CG Module its own cvars here.
-
     cl_footsteps = clgi.Cvar_Get("cl_footsteps", "1", 0);
     cl_gunalpha = clgi.Cvar_Get("cl_gunalpha", "1", 0);
     // TODO: This one was never implemented at all!!
@@ -207,7 +178,7 @@ void ClientGameCore::Initialize() {
     // User Info.
     //
     info_name = clgi.Cvar_Get("name", "Player", CVAR_USERINFO | CVAR_ARCHIVE);
-    info_fov = clgi.Cvar_Get("fov", "75", CVAR_USERINFO | CVAR_ARCHIVE);
+    info_fov = clgi.Cvar_Get("fov", "85", CVAR_USERINFO | CVAR_ARCHIVE);
     info_hand = clgi.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
     info_skin = clgi.Cvar_Get("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
     info_uf = clgi.Cvar_Get("uf", "", CVAR_USERINFO);
@@ -223,12 +194,6 @@ void ClientGameCore::Initialize() {
 
     // Video.
     vid_rtx = clgi.Cvar_Get("vid_rtx", NULL, 0);
-
-    // Register our macros.
-    clgi.Cmd_AddMacro("cl_health", CL_Health_m);
-    clgi.Cmd_AddMacro("cl_ammo", CL_Ammo_m);
-    clgi.Cmd_AddMacro("cl_armor", CL_Armor_m);
-    clgi.Cmd_AddMacro("cl_weaponmodel", CL_WeaponModel_m);
 
     // Register our commands.
     clgi.Cmd_Register(cmd_cgmodule);

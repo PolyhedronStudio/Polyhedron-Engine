@@ -62,10 +62,6 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
         shotEndPosition = vec3_fmaf(shotEndPosition, rightOffset, right);
         shotEndPosition = vec3_fmaf(shotEndPosition, upOffset, up);
 
-        //VectorMA(start, WORLD_SIZE, forward, end);
-        //VectorMA(end, r, right, end);
-        //VectorMA(end, u, up, end);
-
         // Test if we started inside of liquid.
         if (gi.PointContents(start) & CONTENTS_MASK_LIQUID) {
             // Exciting, we started inside of a liquid, yay.
@@ -161,10 +157,8 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
 
     // If went through water, determine where the end is at and make a bubble trail.
     if (inLiquid) {
-        
         vec3_t direction = vec3_normalize(trace.endPosition - liquidStartPosition);
         vec3_t position = vec3_fmaf(trace.endPosition, -2, direction);
-
 
         if (gi.PointContents(position) & CONTENTS_MASK_LIQUID) {
             trace.endPosition = position;

@@ -295,7 +295,7 @@ void DefaultGamemode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflict
     target->SetEnemy(attacker);
 
     // Determine whether it is a monster, and if it IS set to being dead....
-    if ((target->GetServerFlags() & EntityServerFlags::Monster) && (target->GetDeadFlag() != DEAD_DEAD)) {
+    if ((target->GetServerFlags() & EntityServerFlags::Monster) && (target->GetDeadFlag() != DeadFlags::Dead)) {
         target->SetServerFlags(target->GetServerFlags() | EntityServerFlags::DeadMonster);   // Now treat as a different content type
 
 //        if (!(targ->monsterInfo.aiflags & AI_GOOD_GUY)) {
@@ -317,7 +317,7 @@ void DefaultGamemode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflict
         return;
     }
 
-    if ((target->GetServerFlags() & EntityServerFlags::Monster) && (target->GetDeadFlag() != DEAD_DEAD)) {
+    if ((target->GetServerFlags() & EntityServerFlags::Monster) && (target->GetDeadFlag() != DeadFlags::Dead)) {
         target->SetTouchCallback(nullptr);
 
         // This can only be done on base monster entities and derivates
@@ -999,7 +999,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         client->respawn.commandViewAngles[2] = moveCommand->input.viewAngles[2];
 
         // Special treatment for angles in case we are dead. Target the killer entity yaw angle.
-        if (player->GetDeadFlag() != DEAD_NO) {
+        if (player->GetDeadFlag() != DeadFlags::Alive) {
             client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
             client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
             client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;

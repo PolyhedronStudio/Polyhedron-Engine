@@ -21,7 +21,7 @@ public:
     ItemWeaponNone(Entity* svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~ItemWeaponNone();
 
-    DefineItemMapClass("None", "none", ItemIdentifier::Barehands, "item_weapon_none", ItemWeaponNone, SVGBaseItemWeapon);
+    DefineItemMapClass("None", "none", ItemID::Barehands, "item_weapon_none", ItemWeaponNone, SVGBaseItemWeapon);
 
     //
     // Interface functions.

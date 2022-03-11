@@ -92,7 +92,7 @@ void SVGBasePlayer::Spawn() {
     // Mass.
     SetMass(200);
     // Undead itself.
-    SetDeadFlag(DEAD_NO);
+    SetDeadFlag(DeadFlags::Alive);
     // Set air finished time so it can respawn kindly.
     SetAirFinishedTime(level.time + 12);
     // Clip mask this client belongs to.
@@ -296,7 +296,7 @@ void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* at
     }
 
     // Set the dead flag to: DEAD, duhh.
-    SetDeadFlag(DEAD_DEAD);
+    SetDeadFlag(DeadFlags::Dead);
 
     // Link our entity back in for collision purposes.
     LinkEntity();
@@ -479,7 +479,7 @@ qboolean SVGBasePlayer::GiveAmmo(uint32_t ammoIdentifier, uint32_t amount) {
 
 /**
 *   @brief  Takes ammo from the player's inventory.
-*   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
+*   @return True on success. If false, the player is out of ammo( <= 0 ). Assuming the first few sanity checks pass.
 **/
 qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     // Get client.
@@ -499,7 +499,7 @@ qboolean SVGBasePlayer::TakeAmmo(uint32_t ammoIdentifier, uint32_t amount) {
     }
 
     // Acquire carrying weapon count.
-    uint32_t carryingAmount = HasItem(ammoIdentifier);
+    int32_t carryingAmount = HasItem(ammoIdentifier);
 
     // Have we hit the cap limit for this ammo type? Return false.
     if (carryingAmount < 0) {
@@ -594,7 +594,7 @@ qboolean SVGBasePlayer::TakeWeapon(uint32_t weaponIdentifier, uint32_t amount) {
 /**
 *   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)
 **/
-uint32_t SVGBasePlayer::HasItem(uint32_t itemIdentifier) {
+int32_t SVGBasePlayer::HasItem(uint32_t itemIdentifier) {
     // Get client.
     ServerClient* client = GetClient();
 

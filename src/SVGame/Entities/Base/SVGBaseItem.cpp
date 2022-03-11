@@ -23,7 +23,7 @@
 
 
 //! Used to store instances that are used for player weapon callbacks.
-SVGBaseItem* SVGBaseItem::itemInstances[ItemIdentifier::Maximum];
+SVGBaseItem* SVGBaseItem::itemInstances[ItemID::Maximum];
 //! Used for looking up instances by string. TODO: Improve this, it can be done more simply.
 std::map<std::string, uint32_t> SVGBaseItem::lookupStrings;
 

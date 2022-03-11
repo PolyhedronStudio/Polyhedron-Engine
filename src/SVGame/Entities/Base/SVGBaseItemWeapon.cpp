@@ -43,15 +43,9 @@ SVGBaseItemWeapon::~SVGBaseItemWeapon() {
 
 
 
-//
-// Interface functions. 
-//
-//
-//===============
-// SVGBaseItemWeapon::Precache
-//
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItemWeapon::Precache() {
     // Always call parent class method.
     Base::Precache();
@@ -61,12 +55,9 @@ void SVGBaseItemWeapon::Precache() {
     SVG_PrecacheModel(GetWorldModel());
 }
 
-//
-//===============
-// SVGBaseItemWeapon::Spawn
-//
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItemWeapon::Spawn() {
     // Always call parent class method.
     Base::Spawn();
@@ -78,39 +69,32 @@ void SVGBaseItemWeapon::Spawn() {
     SVG_SetConfigString(ConfigStrings::Items + itemIdentifier, displayString);
 }
 
-//
-//===============
-// SVGBaseItemWeapon::Respawn
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItemWeapon::Respawn() {
     Base::Respawn();
 }
 
-//
-//===============
-// SVGBaseItemWeapon::PostSpawn
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItemWeapon::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
 }
 
-//
-//===============
-// SVGBaseItemWeapon::Think
-//===============
-//
+/**
+*   @brief
+**/
 void SVGBaseItemWeapon::Think() {
     // Always call parent class method.
     Base::Think();
 }
 
-
-//===============
-// SVGBaseItemWeapon::SetRespawn
-//===============
+/**
+*   @brief
+**/
 void SVGBaseItemWeapon::SetRespawn(const float delay) {
     Base::SetRespawn(delay);
 }

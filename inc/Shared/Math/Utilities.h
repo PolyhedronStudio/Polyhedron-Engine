@@ -109,14 +109,9 @@ static inline void SinCosRadians(const float radians, float  &s, float &c) {
     c = std::cosf(radians);
 }
 
-//
-//===============
-// InitRandomNumberGenerator
-//
-// Initializes the Random Number generator for use with generating random
-// vector coordinates.
-//===============
-//
+/**
+*   @brief  Initializes the Random Number generator for use with generating random vector coordinates.
+**/
 static inline void InitRandomNumberGenerator() {
     static qboolean isInitialized = false;
     if (!isInitialized) {
@@ -125,13 +120,19 @@ static inline void InitRandomNumberGenerator() {
     }
 }
 
-//
-//===============
-// Randomi
-//
-// Returns a psuedo random unsigned integral value between `0` and `UINT_MAX`.
-//===============
-//
+/**
+*   @brief  Returns a psuedo random unsigned integral value between `-UINT_MAX` and `UINT_MAX`.
+**/
+static inline int32_t Randomi(void) {
+    // Make sure the random number generator is initialized.
+    InitRandomNumberGenerator();
+
+    return std::rand();
+}
+
+/**
+*   @brief  Returns a psuedo random unsigned integral value between `0` and `UINT_MAX`.
+**/
 static inline uint32_t Randomui(void) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
@@ -139,13 +140,9 @@ static inline uint32_t Randomui(void) {
     return std::rand();
 }
 
-//
-//===============
-// Randomf
-//
-// Returns a psuedo random float value between `0` and 1/
-//===============
-//
+/**
+*   @brief  Returns a psuedo random float value between `0` and '1'
+**/
 static inline uint32_t Randomf(void) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
@@ -154,13 +151,9 @@ static inline uint32_t Randomf(void) {
 }
 
 
-//
-//===============
-// RandomRangef
-//
-// Returns a psuedo random float value between 'begin' and 'end'.
-//===============
-//
+/**
+*   @brief  Returns a psuedo random float value between 'begin' and 'end'.
+**/
 static inline float RandomRangef(float begin, float end) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
@@ -168,13 +161,9 @@ static inline float RandomRangef(float begin, float end) {
     return begin + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (begin - end)));
 }
 
-//
-//===============
-// RandomRangei
-//
-// Returns a psuedo random unsigned integral value between 'begin' and 'end'.
-//===============
-//
+/**
+*   @brief  Returns a psuedo random unsigned integral value between 'begin' and 'end'.
+**/
 static inline uint32_t RandomRangeui(uint32_t begin, uint32_t end) {
     // Make sure the random number generator is initialized.
     InitRandomNumberGenerator();
@@ -359,13 +348,9 @@ static inline float AngleMod(float a) {
 //    return (360.f * a) & 360; //(360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
 //}
 
-//
-//===============
-// AngleMod
-// 
-// Short angle modular.
-//===============
-//
+/**
+*   @brief  Returns a random byte.
+**/
 static inline int rand_byte(void)
 {
     // Make sure the random number generator is initialized.

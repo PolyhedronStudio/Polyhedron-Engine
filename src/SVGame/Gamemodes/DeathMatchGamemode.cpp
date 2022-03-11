@@ -214,7 +214,7 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     player->LinkEntity();
 
     // Ensure we change to whichever active weaponID we had.
-    player->ChangeWeapon(ItemIdentifier::Barehands, false);
+    player->ChangeWeapon(ItemID::Barehands, false);
 }
 
 //===============
@@ -505,7 +505,7 @@ void DeathmatchGamemode::RespawnClient(SVGBasePlayer* player) {
     PlacePlayerInGame(player);
 
     // Give player "Barehands".
-    player->GiveWeapon(ItemIdentifier::Barehands, 1);
+    player->GiveWeapon(ItemID::Barehands, 1);
 
     // Add a teleportation effect
     player->SetEventID(EntityEvent::PlayerTeleport);

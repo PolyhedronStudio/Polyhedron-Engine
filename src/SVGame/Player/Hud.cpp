@@ -356,23 +356,45 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
         return;
     }
 
-    //
-    // health
-    //
+    /**
+    *   Health.
+    **/    
     client->playerState.stats[PlayerStats::HealthIcon] = level.pic_health;
     client->playerState.stats[PlayerStats::Health] = player->GetHealth();
 
-    //
-    // ammo
-    //
+    /**
+    *   Primary Ammo.
+    **/
     if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
         client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 0;
         client->playerState.stats[PlayerStats::PrimaryAmmo]     = 0;
     } else {
-    //    item = 0;// &itemlist[ent->client->ammoIndex];
         client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 1;//gi.ImageIndex(item->icon);
         client->playerState.stats[PlayerStats::PrimaryAmmo]     = client->persistent.inventory.items[client->ammoIndex];
     }
+
+    /**
+    *   Secondary Ammo.
+    **/
+    if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+        client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 0;
+        client->playerState.stats[PlayerStats::SecondaryAmmo]     = 0;
+    } else {
+        client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 1;//gi.ImageIndex(item->icon);
+        client->playerState.stats[PlayerStats::SecondaryAmmo]     = client->persistent.inventory.items[client->ammoIndex];
+    }
+
+    /**
+    *   Clip Ammo.
+    **/
+    if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+        client->playerState.stats[PlayerStats::ClipAmmoIcon] = 0;
+        client->playerState.stats[PlayerStats::ClipAmmo]     = 0;
+    } else {
+        client->playerState.stats[PlayerStats::ClipAmmoIcon] = 1;//gi.ImageIndex(item->icon);
+        client->playerState.stats[PlayerStats::ClipAmmo]     = client->persistent.inventory.items[client->ammoIndex];
+    }
+
     // Get active weapon.
     //SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();
 

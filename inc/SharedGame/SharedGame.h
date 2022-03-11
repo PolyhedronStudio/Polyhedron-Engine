@@ -73,10 +73,55 @@ struct WeaponState {
 };
 
 /**
-*   @brief  Types of ammo.
+*   @brief Item identifiers.
 **/
-struct AmmoType {
-    static constexpr int32_t Ammo9mm = 0;
+struct ItemID { 
+    /***
+    * Weapons.
+    ***/
+    //! Bare hands.
+    static constexpr uint32_t Barehands     = 1;
+    //! Pistol.
+    static constexpr uint32_t Beretta       = 2;
+    //! SMG.
+    static constexpr uint32_t SMG           = 3;
+    //! Shotgun.
+    static constexpr uint32_t Shotgun       = 4;
+    //! Last item slot that can be used for weapons.
+    static constexpr uint32_t LastWeapon    = 64;
+
+    /***
+    * Ammo.
+    ***/
+    //! 9 millimeter ammo.
+    static constexpr uint32_t Ammo9mm       = 65;
+    //! 9 millimeter ammo.
+    static constexpr uint32_t LastAmmo      = 85;    
+
+    /***
+    * Medical Stats Items.
+    ***/
+    //! Mega Health.
+    static constexpr uint32_t MegaHealth = 86;
+
+    /**
+    *   ... :-)
+    **/
+    //! Total amount of items.
+    static constexpr uint32_t Total = 87; 
+    //! Maximum amount of allowed items.
+    static constexpr uint32_t Maximum = 255;
+};
+
+/**
+*   Armor Types.
+**/
+struct ArmorType {
+    static constexpr int32_t None = 0;
+    static constexpr int32_t Jacket = 1;
+    static constexpr int32_t Combat = 2;
+    static constexpr int32_t Body = 3;
+    static constexpr int32_t Shard = 4;
 };
 
 

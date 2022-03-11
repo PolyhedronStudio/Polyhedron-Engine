@@ -94,7 +94,7 @@ public:
     virtual qboolean TakeAmmo(uint32_t ammoIdentifier, uint32_t amount);
     /**
     *   @brief  Gives a specific amount of weapon type to the player.
-    *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
+    *   @return True on success. If false, the player is out of ammo( <= 0 ). Assuming the first few sanity checks pass.
     **/
     virtual qboolean GiveWeapon(uint32_t weaponIdentifier, uint32_t amount);
     /**
@@ -106,7 +106,7 @@ public:
     /**
     *   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)
     **/
-    virtual uint32_t HasItem(uint32_t itemIdentifier);
+    virtual int32_t HasItem(uint32_t itemIdentifier);
 
     /**
     *   @brief  Engages the player to change to the new weapon.

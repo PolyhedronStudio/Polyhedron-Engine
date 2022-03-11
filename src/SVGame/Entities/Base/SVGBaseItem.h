@@ -136,7 +136,7 @@ protected:
     //! Static array holding space for each unique item ID. These instances are
     //! created at the start of the game and are used for callbacks. Each callback
     //! is served a pointer to the client's player entity when being fired.
-    static SVGBaseItem* itemInstances[ItemIdentifier::Maximum];
+    static SVGBaseItem* itemInstances[ItemID::Maximum];
 
     //! A string index mapper to playerWeaponInstances.
     //!
@@ -180,7 +180,7 @@ public:
     *   @return Pointer to an item instance that is meant to be used for example, weapon logic.
     **/
     static SVGBaseItem* GetItemInstanceByID(uint32_t identifier) {
-	    if (identifier >= 0 && identifier <= ItemIdentifier::Maximum) {
+	    if (identifier >= 0 && identifier <= ItemID::Maximum) {
 	        return itemInstances[identifier];
 	    } else {
 	        return nullptr;

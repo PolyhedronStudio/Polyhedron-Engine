@@ -21,7 +21,7 @@ public:
     virtual ~ItemAmmo9mm();
 
     //! Abstract Class TypeInfo registry.
-    DefineItemMapClass("9 Millimeter Ammo", "ammo_9mm", ItemIdentifier::Ammo9mm, "item_ammo_9mm", ItemAmmo9mm, SVGBaseItemAmmo);
+    DefineItemMapClass("9 Millimeter Ammo", "ammo_9mm", ItemID::Ammo9mm, "item_ammo_9mm", ItemAmmo9mm, SVGBaseItemAmmo);
 
 
     /*** 

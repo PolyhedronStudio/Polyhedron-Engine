@@ -111,18 +111,20 @@ struct TakeDamage {
 /**
 *   Dead Flags.
 **/
-constexpr int32_t  DEAD_NO = 0;
-constexpr int32_t  DEAD_DYING = 1;
-constexpr int32_t  DEAD_DEAD = 2;
-constexpr int32_t  DEAD_RESPAWNABLE = 3;
+struct DeadFlags {
+    static constexpr int32_t Alive = 0;
+    static constexpr int32_t Dead = 1;
+};
 
 /**
 *   Combat Ranges.
 **/
-constexpr int32_t  RANGE_MELEE = 0;
-constexpr int32_t  RANGE_NEAR = 1;
-constexpr int32_t  RANGE_MID = 2;
-constexpr int32_t  RANGE_FAR = 3;
+struct CombatRange {
+    static constexpr int32_t Melee  = 0;
+    static constexpr int32_t Near   = 1;
+    static constexpr int32_t Middle = 2;
+    static constexpr int32_t Far    = 3;
+};
 
 /**
 *   Gib Types.
@@ -132,87 +134,29 @@ struct GibType {
     static constexpr int32_t Metallic = 1;
 };
 
-//monster ai flags
-constexpr int32_t AI_STAND_GROUND = 0x00000001;
-constexpr int32_t AI_TEMP_STAND_GROUND = 0x00000002;
-constexpr int32_t AI_SOUND_TARGET = 0x00000004;
-constexpr int32_t AI_LOST_SIGHT = 0x00000008;
-constexpr int32_t AI_PURSUIT_LAST_SEEN = 0x00000010;
-constexpr int32_t AI_PURSUE_NEXT = 0x00000020;
-constexpr int32_t AI_PURSUE_TEMP = 0x00000040;
-constexpr int32_t AI_HOLD_FRAME = 0x00000080;
-constexpr int32_t AI_GOOD_GUY = 0x00000100;
-constexpr int32_t AI_BRUTAL = 0x00000200;
-constexpr int32_t AI_NOSTEP = 0x00000400;
-constexpr int32_t AI_DUCKED = 0x00000800;
-constexpr int32_t AI_COMBAT_POint32_t = 0x00001000;
-constexpr int32_t AI_MEDIC = 0x00002000;
-constexpr int32_t AI_RESURRECTING = 0x00004000;
-
-//monster attack state
-constexpr int32_t AS_STRAIGHT = 1;
-constexpr int32_t AS_SLIDING = 2;
-constexpr int32_t AS_MELEE = 3;
-constexpr int32_t AS_MISSILE = 4;
-
-/**
-*   @brief Item identifiers.
-**/
-struct ItemIdentifier {
-    /***
-    * Weapon Identifiers.
-    ***/
-    //! Bare hands.
-    static constexpr uint32_t Barehands     = 1;
-    //! Pistol.
-    static constexpr uint32_t Beretta       = 2;
-    //! SMG.
-    static constexpr uint32_t SMG           = 3;
-    //! Shotgun.
-    static constexpr uint32_t Shotgun       = 4;
-    //! Maximum amount of weapons allowed.
-    static constexpr uint32_t MaxWeapons    = 64;
-
-    /***
-    * Ammo Identifiers.
-    ***/
-    //! 9 millimeter ammo.
-    static constexpr uint32_t Ammo9mm       = 65;
-    //! Reserved2. Intended for weaponry.
-    static constexpr uint32_t Reserved66    = 66;
-    //! Reserved3. Intended for weaponry.
-    static constexpr uint32_t Reserved67    = 67;
-    //! Reserved4. Intended for weaponry.
-    static constexpr uint32_t Reserved68    = 68;
-    //! Reserved5. Intended for weaponry.
-    static constexpr uint32_t Reserved69    = 69;
-    //! Reserved6. Intended for weaponry.
-    static constexpr uint32_t Reserved70    = 70;
-
-    /***
-    * Medical Stats Items.
-    ***/
-    //! Mega Health.
-    static constexpr uint32_t MegaHealth = 11;
-
-    //! Total amount of items.
-    static constexpr uint32_t Total = 12; 
-
-    //! Maximum amount of allowed items.
-    static constexpr uint32_t Maximum = 255;
-};
-
-/**
-*   Armor Types.
-**/
-struct ArmorType {
-    static constexpr int32_t None = 0;
-    static constexpr int32_t Jacket = 1;
-    static constexpr int32_t Combat = 2;
-    static constexpr int32_t Body = 3;
-    static constexpr int32_t Shard = 4;
-};
-
+////monster ai flags
+//struct 
+//constexpr int32_t AI_STAND_GROUND = 0x00000001;
+//constexpr int32_t AI_TEMP_STAND_GROUND = 0x00000002;
+//constexpr int32_t AI_SOUND_TARGET = 0x00000004;
+//constexpr int32_t AI_LOST_SIGHT = 0x00000008;
+//constexpr int32_t AI_PURSUIT_LAST_SEEN = 0x00000010;
+//constexpr int32_t AI_PURSUE_NEXT = 0x00000020;
+//constexpr int32_t AI_PURSUE_TEMP = 0x00000040;
+//constexpr int32_t AI_HOLD_FRAME = 0x00000080;
+//constexpr int32_t AI_GOOD_GUY = 0x00000100;
+//constexpr int32_t AI_BRUTAL = 0x00000200;
+//constexpr int32_t AI_NOSTEP = 0x00000400;
+//constexpr int32_t AI_DUCKED = 0x00000800;
+//constexpr int32_t AI_COMBAT_POint32_t = 0x00001000;
+//constexpr int32_t AI_MEDIC = 0x00002000;
+//constexpr int32_t AI_RESURRECTING = 0x00004000;
+//
+////monster attack state
+//constexpr int32_t AS_STRAIGHT = 1;
+//constexpr int32_t AS_SLIDING = 2;
+//constexpr int32_t AS_MELEE = 3;
+//constexpr int32_t AS_MISSILE = 4;
 
 /**
 *   Player Handedness.
@@ -225,15 +169,17 @@ constexpr int32_t CENTER_HANDED = 2;
 /**
 *   Game specific server flags.
 **/
-constexpr int32_t SFL_CROSS_TRIGGER_1 = 0x00000001;
-constexpr int32_t SFL_CROSS_TRIGGER_2 = 0x00000002;
-constexpr int32_t SFL_CROSS_TRIGGER_3 = 0x00000004;
-constexpr int32_t SFL_CROSS_TRIGGER_4 = 0x00000008;
-constexpr int32_t SFL_CROSS_TRIGGER_5 = 0x00000010;
-constexpr int32_t SFL_CROSS_TRIGGER_6 = 0x00000020;
-constexpr int32_t SFL_CROSS_TRIGGER_7 = 0x00000040;
-constexpr int32_t SFL_CROSS_TRIGGER_8 = 0x00000080;
-constexpr int32_t SFL_CROSS_TRIGGER_MASK = 0x000000ff;
+struct ServerFlags {
+    static constexpr int32_t CrossTrigger1      = 0x00000001;
+    static constexpr int32_t CrossTrigger2      = 0x00000002;
+    static constexpr int32_t CrossTrigger3      = 0x00000004;
+    static constexpr int32_t CrossTrigger4      = 0x00000008;
+    static constexpr int32_t CrossTrigger5      = 0x00000010;
+    static constexpr int32_t CrossTrigger6      = 0x00000020;
+    static constexpr int32_t CrossTrigger7      = 0x00000040;
+    static constexpr int32_t CrossTrigger8      = 0x00000080;
+    static constexpr int32_t CrossTriggerMask   = 0x000000ff;
+};
 
 /**
 *   Player Noise Types.
@@ -704,7 +650,7 @@ struct ClientPersistentData {
     **/
     struct {
         //! The currently active weapon item ID.
-        int32_t activeWeaponID = ItemIdentifier::Barehands;
+        int32_t activeWeaponID = ItemID::Barehands;
         //! The last active weapon ID.
         int32_t previousActiveWeaponID = 0;
         //! Used to store the next weapon to switch to, it is set when 

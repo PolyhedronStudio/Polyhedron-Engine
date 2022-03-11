@@ -164,6 +164,15 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
     // Revert time to uint32_t.
     int64_t startTime = level.timeStamp;
 
+    // Animation Frames:
+    // shoot 2-6 (or 0-8)
+    // reload 8-81
+    // tac_reload 81-129
+    // stow 130-140
+    // equip 140-176
+    // idle 176-215
+    // melee 215-234
+
     // Set animations here.
     switch (newState) {
         case WeaponState::Holster:
@@ -172,7 +181,7 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/holster_weapon1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 104, 112);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 130, 140);
         break;
         case WeaponState::Draw:
             // Let the player entity play the 'draw SMG' sound.
@@ -180,7 +189,7 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/ready1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 112, 142);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 141, 176);
         break;
         case WeaponState::Reload:
             // Let the player entity play the 'draw SMG' sound.
@@ -188,7 +197,7 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/reloadclip1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 9, 65);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 8, 81);
         break;
         case WeaponState::PrimaryFire: {
             // Toss a dice, 50/50, which fire effect to play.
@@ -203,8 +212,8 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
                 SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
             }
 
-            // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 0, 5);
+            // Call upon the SMG instance weapon's SetAnimation for this client. We play this animation at a faster frameTime so it resembles more realism.
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 2, 6);
             break;
         }
         case WeaponState::SecondaryFire:
@@ -213,9 +222,10 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/melee1.wav"), 1.f, Attenuation::Normal, 0.f);
 
             // Call upon the SMG instance weapon's SetAnimation for this client.
-            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 172, 188);
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 215, 234);
         break;
         case WeaponState::Idle: 
+            weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 176, 215);
         break;
         default:
             break;
@@ -266,8 +276,6 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 gi.DPrintf("SMG Anim::Draw(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
         case WeaponState::Idle:          
-                // DEBUG: Remove state processing flag, see if it alleviates our complaints.
-                client->weaponState.flags &= ServerClient::WeaponState::Flags::IsProcessingState;
                 // Debug print.
                 gi.DPrintf("SMG Anim::Idle(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
@@ -338,14 +346,14 @@ void ItemWeaponSMG::InstanceWeaponProcessDrawState(SVGBasePlayer* player, SVGBas
 *           StartFrame = 142,   EndFrame = 172
 **/
 void ItemWeaponSMG::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SVGBaseItemWeapon* weapon, ServerClient* client) {
-    // Remove state processing flag.
-    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
-
     // Call base class method.
     Base::InstanceWeaponProcessIdleState(player, weapon, client);
 
     // Process animation.
     InstanceWeaponProcessAnimation(player, weapon, client);
+
+    // Remove state processing flag.
+    client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 }
 /**
 *   @brief  Called each frame the weapon is in Idle state.
@@ -371,21 +379,39 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
     // Process animation.
     InstanceWeaponProcessAnimation(player, weapon, client);
 
-    // TODO: This needs to be changed obviously, but it's a quick hack for now.
+    // TODO: Create a nicer solution. We know gunAnimationStartTime == level.timeStamp only once.
+    // 
     // Fire single bullet.
-    if (client->playerState.gunAnimationStartTime < level.timeStamp + 20) {
-            // Calculate where to start tracing the bullet hit from.
-            // TODO: This needs to be decided by a joint on the weapon mesh.
-        // get start / end positions
-        vec3_t forward = vec3_zero(), right = vec3_zero();
-        vec3_t angles = client->aimAngles + client->kickAngles;
-        AngleVectors(angles, &forward, &right, NULL);
-        vec3_t offset = {0, 8, static_cast<float>(player->GetViewHeight() - 8)};
+    if (client->playerState.gunAnimationStartTime == level.timeStamp) {
+        float xPositive = crandom() * 0.35f;
+        float xNegative = crandom() * -0.35f;
+        float yPositive = crandom() * 0.35f;
+        float yNegative = crandom() * -0.35f;
+        float zPositive = crandom() * 0.35f;
+        float zNegative = crandom() * -0.35f;
+        
+        client->kickOrigin = {RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f)};
+        client->kickAngles = {RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f)};
 
-    
+        // TODO: Tracing should start from a bone on the weapon mesh.
+        // get start / end positions
+        vec3_t angles = client->aimAngles + client->kickAngles;
+        vec3_t forward = vec3_zero(), right = vec3_zero();
+        AngleVectors(angles, &forward, &right, NULL);
+
+        // Calculate projected end point from source.
+        vec3_t offset = {0, 8, static_cast<float>(player->GetViewHeight() - 8)};
         vec3_t bulletStart = SVG_ProjectSource(player->GetOrigin(), offset, forward, right);
 
-        SVG_FireBullet(player, bulletStart, forward, 10, 50, 150, 150, 0);
+        // Fire a bullet.
+        SVG_FireBullet(player, bulletStart, forward, 10, 50, RandomRangef(-150, 150), RandomRangef(-150, 150), 0);
+
+        // Decrease player ammo.
+        if (!player->TakeAmmo(weapon->GetPrimaryAmmoIdentifier(), 1)) {
+            // Play out of ammo sound.
+            client->weaponSound = SVG_PrecacheSound("weapons/dryfire.wav");
+            SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/dryfire.wav"), 1.f, Attenuation::Normal, 0.f);
+        }
     }
 }
 /**
@@ -440,7 +466,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
         player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
     }
     
-    // Change weapon. Assuming he has the item.
+    // Change weapon. Assuming he acquired, or already had the item.
     if ( player->HasItem(GetIdentifier()) >= 1 ) {
         player->ChangeWeapon(GetIdentifier(), true);
     }

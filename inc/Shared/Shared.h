@@ -490,12 +490,6 @@ static constexpr int32_t RDF_UVGOGGLES       = 8;
 //ROGUE
 
 // player_state->stats[] indexes
-//struct PlayerStateStats {
-//    static constexpr int32_t HealthIcon = 0;
-//    static constexpr int32_t Health = 1;
-//    static constexpr int32_t AmmoIcon = 2;
-//    static constexpr int32_t AmmoPrimary = 3;
-//};
 struct PlayerStats {
     static constexpr uint32_t HealthIcon        = 0;
     static constexpr uint32_t Health            = 1;
@@ -503,31 +497,33 @@ struct PlayerStats {
     static constexpr uint32_t PrimaryAmmo       = 3;
     static constexpr uint32_t SecondaryAmmoIcon = 4;
     static constexpr uint32_t SecondaryAmmo     = 5;
-    static constexpr uint32_t ArmorIcon         = 6;
-    static constexpr uint32_t Armor             = 7;
-    static constexpr uint32_t SelectedItemIcon  = 8;
-    static constexpr uint32_t PickupIcon        = 9;
-    static constexpr uint32_t PickupString      = 10;
-    static constexpr uint32_t TimerIcon         = 11;
-    static constexpr uint32_t Timer             = 12;
-    static constexpr uint32_t HelpIcon          = 13;
-    static constexpr uint32_t SelectedItem      = 14;
-    static constexpr uint32_t Layouts           = 15;
-    static constexpr uint32_t Frags             = 16;
-    static constexpr uint32_t Flashes           = 17; // Cleared each frame: 1 = health, 2 = armor, 3 = primary ammo, 4 = secondary ammo.
-    static constexpr uint32_t ChaseClientID     = 18;
-    static constexpr uint32_t IsSpectator       = 19;
+    static constexpr uint32_t ClipAmmoIcon      = 6;
+    static constexpr uint32_t ClipAmmo          = 7;
+    static constexpr uint32_t ArmorIcon         = 8;
+    static constexpr uint32_t Armor             = 9;
+    static constexpr uint32_t SelectedItemIcon  = 10;
+    static constexpr uint32_t PickupIcon        = 11;
+    static constexpr uint32_t PickupString      = 12;
+    static constexpr uint32_t TimerIcon         = 13;
+    static constexpr uint32_t Timer             = 14;
+    static constexpr uint32_t HelpIcon          = 15;
+    static constexpr uint32_t SelectedItem      = 16;
+    static constexpr uint32_t Layouts           = 17;
+    static constexpr uint32_t Frags             = 18;
+    static constexpr uint32_t Flashes           = 19; // Cleared each frame: 1 = health, 2 = armor, 3 = primary ammo, 4 = secondary ammo.
+    static constexpr uint32_t ChaseClientID     = 20;
+    static constexpr uint32_t IsSpectator       = 21;
 };
 
 /**
 *   @brief  User Fields.
 **/
 struct UserFields {
-    static constexpr int32_t AutoScreenshot = 1;
-    static constexpr int32_t AutoRecord = 2;
-    static constexpr int32_t LocalFieldOfView = 4;
-    static constexpr int32_t MutePlayers = 8;
-    static constexpr int32_t MuteObservers = 16;
-    static constexpr int32_t MuteMiscellaneous = 32;
-    static constexpr int32_t PlayerFieldOfView = 64;
+    static constexpr int32_t AutoScreenshot     = 1;
+    static constexpr int32_t AutoRecord         = 2;
+    static constexpr int32_t LocalFieldOfView   = 4;
+    static constexpr int32_t MutePlayers        = 8;
+    static constexpr int32_t MuteObservers      = 16;
+    static constexpr int32_t MuteMiscellaneous  = 32;
+    static constexpr int32_t PlayerFieldOfView  = 64;
 };

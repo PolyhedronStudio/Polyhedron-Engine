@@ -19,7 +19,7 @@ public:
     ItemWeaponSMG(Entity* svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~ItemWeaponSMG();
 
-    DefineItemMapClass("Sub Machine Gun", "smg", ItemIdentifier::SMG, "item_weapon_smg", ItemWeaponSMG, SVGBaseItemWeapon);
+    DefineItemMapClass("Sub Machine Gun", "smg", ItemID::SMG, "item_weapon_smg", ItemWeaponSMG, SVGBaseItemWeapon);
 
     // Item flags
     //static constexpr int32_t IF_xxx = 1 << 0;
@@ -55,7 +55,7 @@ public:
     /**
     *   @return The item index of the primary ammo for this weapon.
     **/
-    inline virtual uint32_t GetPrimaryAmmoIdentifier() override { return ItemIdentifier::Ammo9mm; }
+    inline virtual uint32_t GetPrimaryAmmoIdentifier() override { return ItemID::Ammo9mm; }
     /**
     *   @return The item index of the secondary ammo for this weapon.
     **/
