@@ -660,6 +660,9 @@ struct ClientPersistentData {
         //! All the items this client posesses.
         int32_t items[MAX_ITEMS] = {};
 
+        //! Stores the clip ammo that is currently in a clip of said weaponID.
+        int32_t clipAmmo[ItemID::MaxWeapons] = {};
+
         //! The item currently selected. NOTE: Not in use currently.
         //int32_t selectedItem = 0;
 
@@ -721,8 +724,12 @@ struct gclient_s {
 	//! Whether to generate a show help layout stat.
     qboolean showHelpIcon;
 
-    //! Current ammo index.
-    int32_t ammoIndex;
+    //! Primary ammo index.
+    int32_t primaryAmmoIndex;
+    //! Primary ammo index.
+    int32_t secondaryAmmoIndex;
+    //! Clip ammo index. Looks up in the inventory.clipAmmo array.
+    int32_t clipAmmoIndex;
 
     //! State of buttons for this frame.
     int32_t buttons;

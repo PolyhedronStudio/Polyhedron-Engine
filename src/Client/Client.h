@@ -564,7 +564,6 @@ void    SCR_RegisterMedia(void);
 void    SCR_ModeChanged(void);
 void    SCR_LagSample(void);
 void    SCR_LagClear(void);
-void    SCR_SetCrosshairColor(void);
 qhandle_t SCR_GetFont(void);
 void    SCR_SetHudAlpha(float alpha);
 

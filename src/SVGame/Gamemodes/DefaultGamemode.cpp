@@ -1672,7 +1672,9 @@ void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
 
     // Unset gun and ammo indices.
     client->playerState.gunIndex    = 0;
-    client->ammoIndex               = 0;
+    client->primaryAmmoIndex        = 0;
+    client->secondaryAmmoIndex      = 0;
+    client->clipAmmoIndex           = 0;
 
     // Ensure we change to whichever active weaponID we had.
     player->ChangeWeapon(client->persistent.inventory.activeWeaponID, false);

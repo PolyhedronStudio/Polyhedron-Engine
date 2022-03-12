@@ -319,7 +319,7 @@ static const save_field_t clientfields[] = {
     I(showInventory),
     I(showHelpIcon),
 
-    I(ammoIndex),
+//    I(ammoIndex),
 
 //    T(newWeapon),
 

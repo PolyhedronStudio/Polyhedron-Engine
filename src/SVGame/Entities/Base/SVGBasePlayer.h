@@ -91,7 +91,8 @@ public:
     *   @brief  Takes ammo from the player's inventory.
     *   @return True on success, false on failure. (Meaning the player has no more ammo left of the specific type.)
     **/
-    virtual qboolean TakeAmmo(uint32_t ammoIdentifier, uint32_t amount);
+    virtual int32_t TakeAmmo(uint32_t ammoIdentifier, uint32_t amount);
+    
     /**
     *   @brief  Gives a specific amount of weapon type to the player.
     *   @return True on success. If false, the player is out of ammo( <= 0 ). Assuming the first few sanity checks pass.
@@ -103,6 +104,22 @@ public:
     *   @return True on success, false on failure. (Meaning the player has too much of that ammo type.)
     **/
     virtual qboolean TakeWeapon(uint32_t weaponIdentifier, uint32_t amount);
+
+    /**
+    *   @return True if the player has any ammo left for this weapon to refill its clip.
+    **/
+    virtual qboolean CanReloadWeaponClip(uint32_t weaponID);
+    /**
+    *   @brief  Refills the weapon's ammo clip.
+    *   @return True on success, false when the player ran out of ammo to refill with.
+    **/
+    virtual qboolean ReloadWeaponClip(uint32_t weaponID);
+    /**
+    *   @brief  Takes ammo from the weapon clip.
+    *   @return False if the clip is empty. True otherwise.
+    **/
+    virtual uint32_t TakeWeaponClipAmmo(uint32_t weaponID, uint32_t amount);
+
     /**
     *   @return The amount this player is holding of the itemIdentifier. (Can be used for ammo, and weapons too.)
     **/

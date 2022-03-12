@@ -13,6 +13,7 @@
 
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
+#include "Screen.h"
 #include "Media.h"
 
 //---------------
@@ -27,7 +28,7 @@ void ClientGameMedia::Initialize() {
     V_Init();
 
     // Initialize the Screen Data.
-    SCR_Init();
+    clge->screen->Initialize();
 }
 
 
@@ -40,7 +41,7 @@ void ClientGameMedia::Shutdown() {
     V_Shutdown();
 
     // Shutdown Screen Data.
-    SCR_Shutdown();
+    clge->screen->Shutdown();
 }
 
 //---------------
@@ -57,7 +58,8 @@ std::string ClientGameMedia::GetLoadStateName(LoadState loadState) {
 //
 //---------------
 void ClientGameMedia::LoadScreen() {
-    SCR_RegisterMedia();
+    //SCR_RegisterMedia();
+    clge->screen->RegisterMedia();
 }
 
 //---------------

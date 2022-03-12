@@ -3727,9 +3727,9 @@ static void fs_game_changed(cvar_t *self)
 	//	else
 	//		Cvar_Set("fs_shareware", "1");
 
-		if (!FS_FileExists("pics/colormap.pcx") || !FS_FileExists("pics/conchars.pcx") || !FS_FileExists("default.cfg"))
+		if (/*!FS_FileExists("pics/colormap.pcx") || */!FS_FileExists("pics/conchars.pcx") || !FS_FileExists("default.cfg"))
 		{
-			Com_Error(ERR_FATAL, "No game data files detected. Please make sure that there are .pak files"
+			Com_Error(ERR_FATAL, "No game data files detected. Please make sure that there is a game directory with valid content "
 				" in the game directory: %s.\nReinstalling the game can fix the issue.", fs_gamedir);
 		}
 

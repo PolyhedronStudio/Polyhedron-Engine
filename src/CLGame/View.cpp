@@ -14,6 +14,8 @@
 #include "TemporaryEntities.h"
 #include "View.h"
 
+#include "ClientGameExports.h"
+
 clg_view_t  view;
 //=============
 //

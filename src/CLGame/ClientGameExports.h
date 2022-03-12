@@ -4,49 +4,155 @@
 // ClientGameExports implementation.
 #pragma once
 
+// Export Interfaces.
 #include "Shared/Interfaces/IClientGameExports.h"
 
-//---------------------------------------------------------------------
-// MAIN interface to implement. It holds pointers to actual sub interfaces,
-// which one of course has to implement as well.
-//---------------------------------------------------------------------
+// Predeclare.
+class ClientGameCore;
+class ClientGameEntities;
+class ClientGameMedia;
+class ClientGameMovement;
+class ClientGamePrediction;
+class ClientGameScreen;
+class ClientGameServerMessage;
+class ClientGameView;
+
+/****
+*   @brief      Main client game exports interface implementation.
+*               Contains accessor functions to acquire the other interfaces.
+****/
 class ClientGameExports : public IClientGameExports {
 public:
-    //---------------------------------------------------------------------
-    // General.
-    //---------------------------------------------------------------------
-    // Calculates the FOV the client is running. (Important to have in order.)
+    //! Constructor
+    ClientGameExports();
+    ~ClientGameExports();
+    
+    /****
+    * 
+    *   General.
+    * 
+    ****/
+    /**
+    *   @brief  Calculates the FOV the client is running. (Important to have in order.)
+    **/
     float ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) final;
-    // Called when a demo is being seeked through.
+
+    /**
+    *   @brief  Called when a demo is being seeked through.
+    **/
     void DemoSeek() final;
 
-    //---------------------------------------------------------------------
-    // Frame and State related.
-    //---------------------------------------------------------------------
-    // Called after all downloads are done. (Aka, a map has started.)
-    // Not used for demos.
+
+
+    /****
+    * 
+    *   Frame & State related
+    * 
+    ****/
+    /**
+    *   @brief  Called after all downloads are done. (Aka, a map has started.)
+    *           Not used for demos.
+    **/
     void ClientBegin() final;
-    // Called upon whenever a client disconnects, for whichever reason.
-    // Could be him quiting, or pinging out etc.
+    /**
+    *   @brief  Called upon whenever a client disconnects, for whichever reason.
+    *           Could be him quiting, or pinging out etc.
+    **/
     void ClientClearState() final;
-    // Called each VALID client frame. Handle per VALID frame basis 
-    // things here.
+    /**
+    *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+    **/
     void ClientDeltaFrame() final;
-    // Called each client frame. Handle per frame basis things here.
+    /**
+    *   @brief  Called each client frame. Handle per frame basis things here.
+    **/
     void ClientFrame() final;
-    // Called when a disconnect even occures. Including those for Com_Error
+    /**
+    *   @brief  Called when a disconnect even occures. Including those for Com_Error
+    **/
     void ClientDisconnect() final;
 
-    //---------------------------------------------------------------------
-    // Update related.
-    //---------------------------------------------------------------------
-    // Updates the origin. (Used by the engine for determining current audio position too.)
+
+
+    /****
+    *
+    *   Update Related.
+    * 
+    ****/
+    /**
+    *   @brief  Updates the origin. (Used by the engine for determining current audio position too.)
+    **/
     void ClientUpdateOrigin() final;
-    // Called when there is a needed retransmit of user info variables.
+    /**
+    *   @brief  Called when there is a needed retransmit of user info variables.
+    **/
     void ClientUpdateUserinfo(cvar_t* var, from_t from) final;
 
+
+    /****
+    * 
+    *   Interface Accessors.
+    * 
+    ****/
+    /**
+    *   @return A pointer to the client game's core interface.
+    **/
+    IClientGameExportCore *GetCoreInterface() final;
+
+    /**
+    *   @return A pointer to the client game module's entities interface.
+    **/
+    IClientGameExportEntities *GetEntityInterface() final;
+
+    /**
+    *   @return A pointer to the client game module's media interface.
+    **/
+    IClientGameExportMedia *GetMediaInterface() final;
+
+    /**
+    *   @return A pointer to the client game module's movement interface.
+    **/
+    IClientGameExportMovement *GetMovementInterface() final;
+
+    /**
+    *   @return A pointer to the client game module's prediction interface.
+    **/
+    IClientGameExportPrediction *GetPredictionInterface() final;
+
+    /**
+    *   @return A pointer to the client game module's screen interface.
+    **/
+    IClientGameExportScreen *GetScreenInterface() final;
+
+    /**
+    *   @return A pointer to the client game module's servermessage interface.
+    **/
+    IClientGameExportServerMessage *GetServerMessageInterface() final;
+
+    /**
+    *   @return A pointer to the client game module's view interface.
+    **/
+    IClientGameExportView *GetViewInterface() final;
+
 private:
-    // Utility function for ClientUpdateOrigin
+    /**
+    *   @brief  Utility function for ClientUpdateOrigin
+    **/
     float LerpFieldOfView(float oldFieldOfView, float newFieldOfView, float lerp);
+
+public:
+    /***
+    *
+    *   Client Game Interfaces Pointers.
+    *
+    ***/
+	ClientGameCore* core;
+    ClientGameEntities* entities;
+    ClientGameMedia* media;
+    ClientGameMovement* movement;
+    ClientGamePrediction* prediction;
+    ClientGameScreen* screen;
+    ClientGameServerMessage* serverMessage;
+    ClientGameView* view;
 };
 

@@ -155,13 +155,30 @@ class IClientGameExportScreen {
 public:
     virtual ~IClientGameExportScreen() = default;
 
-    // Called when the engine decides to render the 2D display.
+        /**
+    *   @brief  Called when the engine decides to render the 2D display.
+    **/
+    virtual void Initialize() = 0;
+    /**
+    *   @brief  Called when the engine decides to render the 2D display.
+    **/
+    virtual void Shutdown() = 0;
+
+    /**
+    *   @brief  Called when the engine decides to render the 2D display.
+    **/
     virtual void RenderScreen() = 0;
-    // Called when the screen mode has changed.
+    /**
+    *   @brief  Called when the screen mode has changed.
+    **/
     virtual void ScreenModeChanged() = 0;
-    // Called when the client wants to render the loading screen.
+    /**
+    *   @brief  Called when the client wants to render the loading screen.
+    **/
     virtual void DrawLoadScreen() = 0;
-    // Called when the client wants to render the pause screen.
+    /**
+    *   @brief  Called when the client wants to render the pause screen.
+    **/
     virtual void DrawPauseScreen() = 0;
 };
 
@@ -215,22 +232,66 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExports {
 public:
+    //! Default destructor.
     virtual ~IClientGameExports() = default;
 
-	// WID: TODO: Normally we'd use a Get, should we do that and make these private?
-	// Perhaps not.
-	IClientGameExportCore* core;
-    IClientGameExportEntities* entities;
-    IClientGameExportMedia* media;
-    IClientGameExportMovement* movement;
-    IClientGameExportPrediction* prediction;
-    IClientGameExportScreen* screen;
-    IClientGameExportServerMessage* serverMessage;
-    IClientGameExportView* view;
 
-    //---------------------------------------------------------------------
-    // General.
-    //---------------------------------------------------------------------
+    /***
+    *
+    *
+    *   Interface Accessors.
+    *
+    *
+    ***/
+    /**
+    *   @return A pointer to the client game's core interface.
+    **/
+    virtual IClientGameExportCore *GetCoreInterface() = 0;
+
+    /**
+    *   @return A pointer to the client game module's entities interface.
+    **/
+    virtual IClientGameExportEntities *GetEntityInterface() = 0;
+
+    /**
+    *   @return A pointer to the client game module's media interface.
+    **/
+    virtual IClientGameExportMedia *GetMediaInterface() = 0;
+
+    /**
+    *   @return A pointer to the client game module's movement interface.
+    **/
+    virtual IClientGameExportMovement *GetMovementInterface() = 0;
+
+    /**
+    *   @return A pointer to the client game module's prediction interface.
+    **/
+    virtual IClientGameExportPrediction *GetPredictionInterface() = 0;
+
+    /**
+    *   @return A pointer to the client game module's screen interface.
+    **/
+    virtual IClientGameExportScreen *GetScreenInterface() = 0;
+
+    /**
+    *   @return A pointer to the client game module's servermessage interface.
+    **/
+    virtual IClientGameExportServerMessage *GetServerMessageInterface() = 0;
+
+    /**
+    *   @return A pointer to the client game module's view interface.
+    **/
+    virtual IClientGameExportView *GetViewInterface() = 0;
+    
+
+
+    /***
+    *
+    *
+    *   General.
+    *
+    *
+    ***/
     // Calculates the FOV the client is running. (Important to have in order.)
     virtual float ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) = 0;
 

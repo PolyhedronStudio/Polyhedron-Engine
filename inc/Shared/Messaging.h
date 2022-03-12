@@ -172,7 +172,7 @@ struct PlayerState {
     //! Gun offset.
     vec3_t  gunOffset = vec3_zero();
 
-    //! Actual gun index.
+    //! View Model weapon index.
     int     gunIndex = 0;
 
     //! Server start time of current animation.

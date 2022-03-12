@@ -11,10 +11,14 @@
 //---------------------------------------------------------------------
 class ClientGameCore : public IClientGameExportCore {
 public:
-	// Initializes the client game.
+	/**
+	*	@brief	Initializes the client game.
+	**/
 	void Initialize() final;
 
-	// Shuts down the client game.
+	/**
+	*	@brief	Shuts down the client game.
+	**/
 	void Shutdown() final;
 
 private:

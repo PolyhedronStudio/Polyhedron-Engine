@@ -13,6 +13,8 @@
 
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
+
+#include "Entities.h"
 #include "View.h"
 
 //---------------
@@ -112,7 +114,7 @@ firstpersonview:
 //
 //---------------
 void ClientGameView::SetupFirstpersonView() {
-    // Lerp and add the kick angles if enabled.
+    // If kickangles are enabled, lerp them and add to view angles.
     if (cl_kickangles->integer) {
         PlayerState *playerState = &cl->frame.playerState;
         PlayerState *oldPlayerState = &cl->oldframe.playerState;
@@ -176,12 +178,10 @@ void ClientGameView::SetupThirdpersonView() {
     if (trace.fraction != 1.0f) {
         // We've collided with the world, let's adjust our view origin.
         cl->refdef.vieworg = trace.endPosition;
-        // VectorCopy(trace.endPosition, cl->refdef.vieworg);
     }
     
     // Subtract view origin from focus point.
     focus -= cl->refdef.vieworg;
-    //VectorSubtract(focus, cl->refdef.vieworg, focus);
 
     // Calculate the new distance to use.
     float dist = std::sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);

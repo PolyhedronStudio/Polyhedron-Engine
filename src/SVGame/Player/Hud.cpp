@@ -365,34 +365,34 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     /**
     *   Primary Ammo.
     **/
-    if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+    if (!client->primaryAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
         client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 0;
         client->playerState.stats[PlayerStats::PrimaryAmmo]     = 0;
     } else {
         client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 1;//gi.ImageIndex(item->icon);
-        client->playerState.stats[PlayerStats::PrimaryAmmo]     = client->persistent.inventory.items[client->ammoIndex];
+        client->playerState.stats[PlayerStats::PrimaryAmmo]     = client->persistent.inventory.items[client->primaryAmmoIndex];
     }
 
     /**
     *   Secondary Ammo.
     **/
-    if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+    if (!client->secondaryAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
         client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 0;
         client->playerState.stats[PlayerStats::SecondaryAmmo]     = 0;
     } else {
         client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 1;//gi.ImageIndex(item->icon);
-        client->playerState.stats[PlayerStats::SecondaryAmmo]     = client->persistent.inventory.items[client->ammoIndex];
+        client->playerState.stats[PlayerStats::SecondaryAmmo]     = client->persistent.inventory.items[client->secondaryAmmoIndex];
     }
 
     /**
     *   Clip Ammo.
     **/
-    if (!client->ammoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+    if (!client->clipAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
         client->playerState.stats[PlayerStats::ClipAmmoIcon] = 0;
         client->playerState.stats[PlayerStats::ClipAmmo]     = 0;
     } else {
-        client->playerState.stats[PlayerStats::ClipAmmoIcon] = 1;//gi.ImageIndex(item->icon);
-        client->playerState.stats[PlayerStats::ClipAmmo]     = client->persistent.inventory.items[client->ammoIndex];
+        client->playerState.stats[PlayerStats::ClipAmmoIcon] = 1;
+        client->playerState.stats[PlayerStats::ClipAmmo]     = client->persistent.inventory.clipAmmo[client->clipAmmoIndex];
     }
 
     // Get active weapon.

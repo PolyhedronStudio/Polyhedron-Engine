@@ -88,7 +88,7 @@ struct ItemID {
     //! Shotgun.
     static constexpr uint32_t Shotgun       = 4;
     //! Last item slot that can be used for weapons.
-    static constexpr uint32_t LastWeapon    = 64;
+    static constexpr uint32_t MaxWeapons    = 64;
 
     /***
     * Ammo.
@@ -96,7 +96,7 @@ struct ItemID {
     //! 9 millimeter ammo.
     static constexpr uint32_t Ammo9mm       = 65;
     //! 9 millimeter ammo.
-    static constexpr uint32_t LastAmmo      = 85;    
+    static constexpr uint32_t MaxAmmos      = 85;    
 
     /***
     * Medical Stats Items.

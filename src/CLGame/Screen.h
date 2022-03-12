@@ -40,7 +40,6 @@ struct RenderScreenData {
 
 extern RenderScreenData scr;
 
-void SCR_SetCrosshairColor(void);
 void SCR_AddToChatHUD(const char* text);
 void SCR_CenterPrint(const char* str);
 void SCR_ClearChatHUD_f(void);

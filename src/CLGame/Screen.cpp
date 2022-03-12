@@ -41,7 +41,6 @@ static cvar_t* ch_scale;        // Crosshair scale.
 static cvar_t* ch_x;            // Crosshair Y
 static cvar_t* ch_y;            // Crosshair X
 
-static cvar_t* ch_health;       // Wether to color the crosshair based on current health or not.
 static cvar_t* ch_red;          // Crosshair R color value.
 static cvar_t* ch_green;        // Crosshair G color value.
 static cvar_t* ch_blue;         // Crosshair B color value.
@@ -427,65 +426,15 @@ static void scr_crosshair_changed(cvar_t* self)
         if (scr.crosshair_height < 1)
             scr.crosshair_height = 1;
 
-        if (ch_health->integer) {
-            SCR_SetCrosshairColor();
-        }
-        else {
+
             scr.crosshair_color.u8[0] = (byte)(ch_red->value * 255);
             scr.crosshair_color.u8[1] = (byte)(ch_green->value * 255);
             scr.crosshair_color.u8[2] = (byte)(ch_blue->value * 255);
-        }
+
         scr.crosshair_color.u8[3] = (byte)(ch_alpha->value * 255);
     }
     else {
         scr.crosshair_pic = 0;
-    }
-}
-
-//
-//===============
-// SCR_SetCrosshairColor
-// 
-// Called each time by DeltaFrame
-//===============
-//
-void SCR_SetCrosshairColor(void)
-{
-    int health;
-
-    if (!ch_health->integer) {
-        return;
-    }
-
-    health = cl->frame.playerState.stats[PlayerStats::Health];
-    if (health <= 0) {
-        scr.crosshair_color.u8[0] = 0; scr.crosshair_color.u8[1] = 0; scr.crosshair_color.u8[2] = 0;
-        return;
-    }
-
-    // red
-    scr.crosshair_color.u8[0] = 255;
-
-    // green
-    if (health >= 66) {
-        scr.crosshair_color.u8[1] = 255;
-    }
-    else if (health < 33) {
-        scr.crosshair_color.u8[1] = 0;
-    }
-    else {
-        scr.crosshair_color.u8[1] = (255 * (health - 33)) / 33;
-    }
-
-    // blue
-    if (health >= 99) {
-        scr.crosshair_color.u8[2] = 255;
-    }
-    else if (health < 66) {
-        scr.crosshair_color.u8[2] = 0;
-    }
-    else {
-        scr.crosshair_color.u8[2] = (255 * (health - 66)) / 33;
     }
 }
 
@@ -859,6 +808,9 @@ void SCR_RegisterMedia(void)
     for (i = 0; i < 2; i++)
         for (j = 0; j < STAT_PICS; j++)
             scr.sb_pics[i][j] = clgi.R_RegisterPic(sb_nums[i][j]);
+    
+    // Register slash pic for ammo display.
+    clgi.R_RegisterPic("num_rightslash");
 
     // Register inventory and field pictures.
     scr.inven_pic = clgi.R_RegisterPic("inventory");
@@ -871,9 +823,6 @@ void SCR_RegisterMedia(void)
     // Register load screen picture and fetch its size info.
     scr.loading_pic = clgi.R_RegisterPic("loading");
     clgi.R_GetPicSize(&scr.loading_width, &scr.loading_height, scr.loading_pic);
-
-    // Register slash pic for ammo display.
-    clgi.R_RegisterPic("num_rightslash");
 
     // Register font pic. (Has unless modified, already been registered by the client.)
     scr.font_pic = clgi.R_RegisterFont(scr_font->string);
@@ -891,8 +840,6 @@ void SCR_RegisterMedia(void)
 //=============================================================================
 // 
 
-#define ICON_WIDTH  24
-#define ICON_HEIGHT 24
 #define DIGIT_WIDTH 16
 #define ICON_SPACE  8
 
@@ -1531,8 +1478,6 @@ void SCR_Init(void)
     scr_chathud_x       = clgi.Cvar_Get("scr_chathud_x", "8", 0);
     scr_chathud_y       = clgi.Cvar_Get("scr_chathud_y", "-64", 0);
 
-    ch_health           = clgi.Cvar_Get("ch_health", "0", 0);
-    ch_health->changed  = scr_crosshair_changed;
     ch_red              = clgi.Cvar_Get("ch_red", "1", 0);
     ch_red->changed     = scr_crosshair_changed;
     ch_green            = clgi.Cvar_Get("ch_green", "1", 0);

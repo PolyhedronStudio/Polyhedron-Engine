@@ -266,6 +266,13 @@ void SVGBaseItemWeapon::InstanceWeaponReload(SVGBasePlayer* player, SVGBaseItemW
         return;
     }
 
+    // Ensure that the player has enough ammo to even be capable of reloading.
+    if (!player->CanReloadWeaponClip(weapon->GetIdentifier())) {
+        // TODO:    This is a sad case, got to play a special sound for it AND...
+        //          try and switch to another weapon?
+        return;
+    }
+
     // Queue a reload state in case this weapon currently isn't processing any state. (Has to be in idle mode.)
     if (client->weaponState.current == WeaponState::Idle && !(client->weaponState.flags & ServerClient::WeaponState::Flags::IsProcessingState)) {
         weapon->InstanceWeaponQueueNextState(player, weapon, client, WeaponState::Reload);
@@ -285,19 +292,25 @@ void SVGBaseItemWeapon::InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVG
     *   View Model & Stats Update Logic.
     **/
     if (weapon) {
-        // Update gun and ammo index.
+        // Update player's view model.
         client->playerState.gunIndex    = weapon->GetViewModelIndex();         
-        client->ammoIndex               = weapon->GetPrimaryAmmoIdentifier();
-
+        
+        // Assign client's clip ammo, primary, and secondary indices.
+        client->clipAmmoIndex           = weapon->GetIdentifier();
+        client->primaryAmmoIndex        = weapon->GetPrimaryAmmoIdentifier();
+        client->secondaryAmmoIndex      = weapon->GetSecondaryAmmoIdentifier();
+        
         // We got ourselves a valid instance, set view model accordingly.
         if (player->GetModelIndex() == 255) {
             int32_t i = (weapon->GetViewModelIndex() & 0xff) << 8;
             player->SetSkinNumber((player->GetNumber()  -  1) | i);
         }
     } else {
-        // Update gun and ammo index.
+        // No weapon, so reset these.
         client->playerState.gunIndex    = 0;        
-        client->ammoIndex               = 0;
+        client->primaryAmmoIndex        = 0;
+        client->secondaryAmmoIndex      = 0;
+        client->clipAmmoIndex           = 0;
 
         // Skin to 0.
         player->SetSkinNumber(0);

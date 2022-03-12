@@ -36,8 +36,6 @@
 //
 // Contains the function pointers being passed in from the engine.
 ClientGameImport clgi;
-// Static export variable, lives as long as the client game dll lives.
-IClientGameExports *clge;
 
 // Pointer to the actual client frame state.
 ClientState* cl = NULL;

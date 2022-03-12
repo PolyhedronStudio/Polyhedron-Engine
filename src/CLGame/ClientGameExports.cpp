@@ -11,13 +11,56 @@
 #include "TemporaryEntities.h"
 #include "View.h"
 
+// Export Interfaces.
 #include "Shared/Interfaces/IClientGameExports.h"
-#include "ClientGameExports.h"
 
-//---------------
-// ClientGameExports::ClientCalculateFieldOfView
-//
-//---------------
+// Export Implementations.
+#include "ClientGameExports.h"
+#include "Exports/Core.h"
+#include "Exports/Entities.h"
+#include "Exports/Media.h"
+#include "Exports/Movement.h"
+#include "Exports/Prediction.h"
+#include "Exports/Screen.h"
+#include "Exports/ServerMessage.h"
+#include "Exports/View.h"
+
+//! Static 
+ClientGameExports *clge = nullptr;
+
+
+//! Constructor/Destructor.
+ClientGameExports::ClientGameExports() {
+    core = new ClientGameCore();
+    entities = new ClientGameEntities();
+    media = new ClientGameMedia();
+    movement = new ClientGameMovement();
+    prediction = new ClientGamePrediction();
+    screen = new ClientGameScreen();
+    serverMessage = new ClientGameServerMessage();
+    view = new ClientGameView();
+}
+
+ClientGameExports::~ClientGameExports()  {
+    delete core;
+    core = nullptr;
+    delete entities;
+    entities = nullptr;
+    delete media;
+    media = nullptr;
+    delete prediction;
+    prediction = nullptr;
+    delete screen;
+    screen = nullptr;
+    delete serverMessage;
+    serverMessage = nullptr;
+    delete view;
+    view = nullptr;
+}
+
+/**
+*   @brief  Calculates the FOV the client is running. (Important to have in order.)
+**/
 float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) {
     // Ensure field of view is within valid ranges.
     if (fieldOfViewX <= 0 || fieldOfViewX > 179)
@@ -32,10 +75,28 @@ float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float wi
     return a;
 }
 
-//---------------
-// ClientGameExports::ClientClearState
-//
-//---------------
+/**
+*   @brief  Called when a demo is being seeked through.
+**/
+void ClientGameExports::DemoSeek() {
+    // Clear Effects.
+    CLG_ClearEffects();
+    // Clear Temp Entities.
+    CLG_ClearTempEntities();
+}
+
+/**
+*   @brief  Called after all downloads are done. (Aka, a map has started.)
+*           Not used for demos.
+**/
+void ClientGameExports::ClientBegin() {
+
+}
+
+/**
+*   @brief  Called upon whenever a client disconnects, for whichever reason.
+*           Could be him quiting, or pinging out etc.
+**/
 void ClientGameExports::ClientClearState() {
     // Clear Effects.
     CLG_ClearEffects();
@@ -47,10 +108,38 @@ void ClientGameExports::ClientClearState() {
     CLG_ClearTempEntities();
 }
 
-//---------------
-// ClientGameExports::ClientUpdateOrigin
-//
-//---------------
+/**
+*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+**/
+void ClientGameExports::ClientDeltaFrame() {
+    // SCR_SetCrosshairColor used to be here. It's a shitty name for a function
+    // that sets its color based on your health.
+    //
+    // Either way, this function can be used for such things. 
+}
+
+/**
+*   @brief  Called each client frame. Handle per frame basis things here.
+**/
+void ClientGameExports::ClientFrame() {
+    // Advance local effects.
+    CLG_RunDLights();
+#if USE_LIGHTSTYLES
+    CLG_RunLightStyles();
+#endif
+}
+
+/**
+*   @brief  Called when a disconnect even occures. Including those for Com_Error
+**/
+void ClientGameExports::ClientDisconnect() {
+    // Clear the chat hud.
+    SCR_ClearChatHUD_f();
+}
+
+/**
+*   @brief  Updates the origin. (Used by the engine for determining current audio position too.)
+**/
 void ClientGameExports::ClientUpdateOrigin() {
     PlayerState* currentPlayerState = NULL;
     PlayerState* previousPlayerState = NULL;
@@ -139,60 +228,9 @@ void ClientGameExports::ClientUpdateOrigin() {
     clgi.UpdateListenerOrigin();
 }
 
-//---------------
-// ClientGameExports::DemoSeek
-//
-//---------------
-void ClientGameExports::DemoSeek() {
-    // Clear Effects.
-    CLG_ClearEffects();
-    // Clear Temp Entities.
-    CLG_ClearTempEntities();
-}
-
-//---------------
-// ClientGameExports::ClientBegin
-//
-//---------------
-void ClientGameExports::ClientBegin() {
-
-}
-
-//---------------
-// ClientGameExports::ClientDeltaFrame
-//
-//---------------
-void ClientGameExports::ClientDeltaFrame() {
-    // Called each time a valid client frame has been 
-    SCR_SetCrosshairColor();
-}
-
-//---------------
-// ClientGameExports::ClientFrame
-//
-//---------------
-void ClientGameExports::ClientFrame() {
-    // Advance local effects.
-    CLG_RunDLights();
-#if USE_LIGHTSTYLES
-    CLG_RunLightStyles();
-#endif
-}
-
-//---------------
-// ClientGameExports::ClientDisconnect
-//
-//---------------
-void ClientGameExports::ClientDisconnect() {
-    // Clear the chat hud.
-    SCR_ClearChatHUD_f();
-}
-
-
-//---------------
-// ClientGameExports::ClientUpdateUserinfo
-//
-//---------------
+/**
+*   @brief  Called when there is a needed retransmit of user info variables.
+**/
 void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, from_t from) {
     // If there is a skin change, let's go for it.
     if (var == info_skin && from > FROM_CONSOLE) {
@@ -202,10 +240,70 @@ void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, from_t from) {
 }
 
 
-//---------------
-// ClientGameExports::LerpFieldOfView
-//
-//---------------
+/****
+* 
+*   Interface Accessors.
+* 
+****/
+/**
+*   @return A pointer to the client game's core interface.
+**/
+IClientGameExportCore* ClientGameExports::GetCoreInterface() {
+    return core;
+}
+
+/**
+*   @return A pointer to the client game module's entities interface.
+**/
+IClientGameExportEntities* ClientGameExports::GetEntityInterface() {
+    return entities;
+}
+
+/**
+*   @return A pointer to the client game module's media interface.
+**/
+IClientGameExportMedia* ClientGameExports::GetMediaInterface() {
+    return media;
+}
+
+/**
+*   @return A pointer to the client game module's movement interface.
+**/
+IClientGameExportMovement* ClientGameExports::GetMovementInterface() {
+    return movement;
+}
+
+/**
+*   @return A pointer to the client game module's prediction interface.
+**/
+IClientGameExportPrediction* ClientGameExports::GetPredictionInterface() {
+    return prediction;
+}
+
+/**
+*   @return A pointer to the client game module's screen interface.
+**/
+IClientGameExportScreen* ClientGameExports::GetScreenInterface() {
+    return screen;
+}
+
+/**
+*   @return A pointer to the client game module's servermessage interface.
+**/
+IClientGameExportServerMessage* ClientGameExports::GetServerMessageInterface() {
+    return serverMessage;
+}
+
+/**
+*   @return A pointer to the client game module's view interface.
+**/
+IClientGameExportView* ClientGameExports::GetViewInterface() {
+    return view;
+}
+
+/**
+*   @brief  Utility function for ClientUpdateOrigin
+**/
 float ClientGameExports::LerpFieldOfView(float oldFieldOfView, float newFieldOfView, float lerp) {
     if (clgi.IsDemoPlayback()) {
         float fov = info_fov->value;

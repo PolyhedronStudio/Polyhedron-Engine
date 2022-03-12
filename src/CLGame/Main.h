@@ -8,10 +8,12 @@
 
 #pragma once
 
+class ClientGameExports;
+
 //! Contains the function pointers being passed in from the engine.
 extern ClientGameImport clgi;
 //! Static export variable, lives as long as the client game dll lives.
-extern IClientGameExports* clge;
+extern ClientGameExports* clge;
 
 /**
 *	@brief	Common print text to screen function.

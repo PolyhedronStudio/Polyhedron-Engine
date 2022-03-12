@@ -199,23 +199,10 @@ void ItemWeaponSMG::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBaseIt
             // Call upon the SMG instance weapon's SetAnimation for this client.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 8, 81);
         break;
-        case WeaponState::PrimaryFire: {
-            // Toss a dice, 50/50, which fire effect to play.
-            uint32_t fireSound = RandomRangeui(0, 2);
-
-            // Let the player entity play the 'draw SMG' sound.
-            if (fireSound == 0) {
-                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
-                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, Attenuation::Normal, 0.f);
-            } else {
-                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
-                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
-            }
-
+        case WeaponState::PrimaryFire:
             // Call upon the SMG instance weapon's SetAnimation for this client. We play this animation at a faster frameTime so it resembles more realism.
             weaponSMG->InstanceWeaponSetAnimation(player, weaponSMG, client, startTime, 2, 6);
             break;
-        }
         case WeaponState::SecondaryFire:
             // Let the player entity play the 'draw SMG' sound.
             client->weaponSound = SVG_PrecacheSound("weapons/smg45/melee1.wav");
@@ -279,7 +266,10 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 // Debug print.
                 gi.DPrintf("SMG Anim::Idle(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.timeStamp);
             break;
-        case WeaponState::Reload:         
+        case WeaponState::Reload: 
+                // Reload clip.
+                player->ReloadWeaponClip(weapon->GetIdentifier());
+
                 // Remove state processing flag because we'll queue idle state next. .
                 client->weaponState.flags &= ~ServerClient::WeaponState::Flags::IsProcessingState;
 
@@ -383,34 +373,47 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
     // 
     // Fire single bullet.
     if (client->playerState.gunAnimationStartTime == level.timeStamp) {
-        float xPositive = crandom() * 0.35f;
-        float xNegative = crandom() * -0.35f;
-        float yPositive = crandom() * 0.35f;
-        float yNegative = crandom() * -0.35f;
-        float zPositive = crandom() * 0.35f;
-        float zNegative = crandom() * -0.35f;
-        
-        client->kickOrigin = {RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f)};
-        client->kickAngles = {RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f)};
-
-        // TODO: Tracing should start from a bone on the weapon mesh.
-        // get start / end positions
-        vec3_t angles = client->aimAngles + client->kickAngles;
-        vec3_t forward = vec3_zero(), right = vec3_zero();
-        AngleVectors(angles, &forward, &right, NULL);
-
-        // Calculate projected end point from source.
-        vec3_t offset = {0, 8, static_cast<float>(player->GetViewHeight() - 8)};
-        vec3_t bulletStart = SVG_ProjectSource(player->GetOrigin(), offset, forward, right);
-
-        // Fire a bullet.
-        SVG_FireBullet(player, bulletStart, forward, 10, 50, RandomRangef(-150, 150), RandomRangef(-150, 150), 0);
-
-        // Decrease player ammo.
-        if (!player->TakeAmmo(weapon->GetPrimaryAmmoIdentifier(), 1)) {
+        // Take ammo from the clip. When impossible, play dryfire sound.
+        if (!player->TakeWeaponClipAmmo(weapon->GetIdentifier(), 1)) {
             // Play out of ammo sound.
             client->weaponSound = SVG_PrecacheSound("weapons/dryfire.wav");
             SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/dryfire.wav"), 1.f, Attenuation::Normal, 0.f);
+            return;
+        } else {
+            // Toss a dice, 50/50, which fire effect to play.
+            uint32_t fireSound = RandomRangeui(0, 2);
+
+            // Let the player entity play the 'draw SMG' sound.
+            if (fireSound == 0) {
+                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
+                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, Attenuation::Normal, 0.f);
+            } else {
+                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
+                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
+            }
+
+            float xPositive = crandom() * 0.35f;
+            float xNegative = crandom() * -0.35f;
+            float yPositive = crandom() * 0.35f;
+            float yNegative = crandom() * -0.35f;
+            float zPositive = crandom() * 0.35f;
+            float zNegative = crandom() * -0.35f;
+        
+            client->kickOrigin = {RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f), RandomRangef(-0.35f, 0.35f)};
+            client->kickAngles = {RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f), RandomRangef(-0.7f, 0.7f)};
+
+            // TODO: Tracing should start from a bone on the weapon mesh.
+            // get start / end positions
+            vec3_t angles = client->aimAngles + client->kickAngles;
+            vec3_t forward = vec3_zero(), right = vec3_zero();
+            AngleVectors(angles, &forward, &right, NULL);
+
+            // Calculate projected end point from source.
+            vec3_t offset = {0, 8, static_cast<float>(player->GetViewHeight() - 8)};
+            vec3_t bulletStart = SVG_ProjectSource(player->GetOrigin(), offset, forward, right);
+
+            // Fire a bullet.
+            SVG_FireBullet(player, bulletStart, forward, 10, 50, RandomRangef(-150, 150), RandomRangef(-150, 150), 0);
         }
     }
 }
@@ -455,19 +458,29 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
     // Play sound.
     SVG_Sound(other, SoundChannel::Item, SVG_PrecacheSound("weapons/pickup1.wav"), 1, Attenuation::Normal, 0);
 
+    // Used to check whether to give more ammo and reload clip, or just give a single clip of ammo.
+    int32_t hasWeapon = player->HasItem(GetIdentifier());
+
     // Give the player the SMG weapon if he didn't have one yet.
-    if ( !player->HasItem(GetIdentifier()) ) {
+    if ( hasWeapon <= 0 ) {
         player->GiveWeapon(GetIdentifier(), 1);
     }
 
     // If this item wasn't dropped by an other player, give them some ammo to go along.
     if (!(GetSpawnFlags() & ItemSpawnFlags::DroppedItem)) {
-    	// TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
-        player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54); // Give it 1.5 clips of ammo to go along with.
+        // In case it already had the weapon, just give a single clip of ammo.
+        if ( !hasWeapon ) {
+    	    // TODO HERE: Check spawnflag for dropped or not, and possibly set a respawn action.
+            // Give it 1.5 clips of ammo to go along with. Ensure clip is reloaded aka filled.
+            player->GiveAmmo(GetPrimaryAmmoIdentifier(), 54);
+            player->ReloadWeaponClip(GetIdentifier());
+        } else {
+            player->GiveAmmo(GetPrimaryAmmoIdentifier(), 36);
+        }
     }
     
     // Change weapon. Assuming he acquired, or already had the item.
-    if ( player->HasItem(GetIdentifier()) >= 1 ) {
+    if ( hasWeapon <= 0) { // TODO: Test for: && autoPickupCVar.
         player->ChangeWeapon(GetIdentifier(), true);
     }
 

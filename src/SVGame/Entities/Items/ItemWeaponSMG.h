@@ -51,6 +51,10 @@ public:
     *   @return The maximum amount one is allowed to carry of this weapon.
     **/
     inline virtual uint32_t GetCarryLimit() override { return 1; }
+    /**
+    *   @return The maximum amount of ammo a clip can contain.
+    **/
+    inline virtual uint32_t GetClipAmmoLimit() override { return 36; }
 
     /**
     *   @return The item index of the primary ammo for this weapon.

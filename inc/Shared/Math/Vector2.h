@@ -44,6 +44,10 @@ template<typename T> struct vec2_template {
 
     // Assign.
     vec2_template(T X, T Y) { x = X; y = Y;  }
+    vec2_template(int32_t X, int32_t Y) { x = static_cast<int32_t>(X); y = static_cast<int32_t>(Y);  }
+    vec2_template(uint32_t X, uint32_t Y) { x = static_cast<uint32_t>(X); y = static_cast<uint32_t>(Y);  }
+    vec2_template(int16_t X, int16_t Y) { x = static_cast<int32_t>(X); y = static_cast<int32_t>(Y);  }
+    vec2_template(uint16_t X, uint16_t Y) { x = static_cast<uint16_t>(X); y = static_cast<uint16_t>(Y);  }
 
     // Regular *vec_t support.
     vec2_template(T* vec) { x = vec[0]; y = vec[1]; }
