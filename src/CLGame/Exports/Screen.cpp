@@ -58,7 +58,7 @@ void ClientGameScreen::Cmd_Sky_f() {
     clgi.R_SetSky(name, rotate, axis);
 }
 void ClientGameScreen::Cmd_ClearChatHUD_f() {
-    
+    clge->screen->chatHUD->Clear();
 }
 
 /**
@@ -121,7 +121,7 @@ void ClientGameScreen::CVarCrosshairChanged(cvar_t* cvar)
 *   @brief  Callback for when the screen scale cvar changed.
 **/
 void ClientGameScreen::CVarScreenScaleChanged(cvar_t* cvar) {
-    //clge->screen->screenData.hudScale = clgi.R_ClampScale(cvar);
+    clge->screen->screenData.hudScale = clgi.R_ClampScale(cvar);
 }
 
 
@@ -140,7 +140,7 @@ void ClientGameScreen::Initialize() {
     scr_fps         = clgi.Cvar_Get("scr_fps", nullptr, 0);
 
     // Create CVars.
-    scr_scale               = clgi.Cvar_Get("scr_scale", "1", 0);
+    scr_scale               = clgi.Cvar_Get("scr_scale", nullptr, 0);
     scr_scale->changed      = CVarScreenScaleChanged;
 
     scr_showitemname        = clgi.Cvar_Get("scr_showitemname", "1", CVAR_ARCHIVE);
@@ -191,8 +191,8 @@ void ClientGameScreen::Shutdown() {
     delete chatHUD;
     chatHUD = nullptr;
 
-    //// Unset isInitialized.
-    //screenData.isInitialized = false;
+    // Unset isInitialized.
+    screenData.isInitialized = false;
 }
 
 /**
@@ -204,23 +204,23 @@ void ClientGameScreen::RenderScreen() {
 
     // Calculate view rectangle.
     CalculateViewRectangle();
+    
+    // Calculate HUD size.
+    screenData.hudSize *= vec2_t{ screenData.hudScale, screenData.hudScale };
 
     // Prepare for rendering the HUD.
     clgi.R_SetAlphaScale(screenData.hudAlpha);
     clgi.R_SetScale(screenData.hudScale);
     
-    // Calculate HUD size.
-    screenData.hudSize *= vec2_t{ screenData.hudScale, screenData.hudScale };
-
     // Draw the crosshair.
     DrawCrosshair();
+    
+    // Draw the HUD.
+    DrawPlayerHUD();
 
     // The rest of 2D elements share the common scr_alpha cvar value.
     clgi.R_ClearColor();
     clgi.R_SetAlpha(clgi.Cvar_ClampValue(scr_alpha, 0, 1));
-    
-    // Draw the HUD.
-    DrawPlayerHUD();
 
     // Draw center screen print
     DrawCenterString();
@@ -236,10 +236,12 @@ void ClientGameScreen::RenderScreen() {
 *   @brief  Called when the screen mode has changed.
 **/
 void ClientGameScreen::ScreenModeChanged() {
+    // Do special hud scale clamping. (Takes care of handling insane resolutions etc.)
     if (screenData.isInitialized) {
         screenData.hudScale = clgi.R_ClampScale(scr_scale);
     }
 
+    // Reset alpha.
     screenData.hudAlpha = 1.f;
 }
 
@@ -248,7 +250,7 @@ void ClientGameScreen::ScreenModeChanged() {
 **/
 void ClientGameScreen::DrawLoadScreen() {
     // Return in case of not having a valid load pic handle.
-    if (screenData.loadPic) {
+    if (!screenData.loadPic) {
         return;
     }
 
@@ -275,7 +277,7 @@ void ClientGameScreen::DrawLoadScreen() {
 *   @brief  Called when the client wants to render the pause screen.
 **/
 void ClientGameScreen::DrawPauseScreen() {
-    if (screenData.pausePic) {
+    if (!screenData.pausePic) {
         return;
     }
 
@@ -326,21 +328,39 @@ int32_t ClientGameScreen::DrawString(const std::string& text, const vec2_t& posi
 }
 
 /**
+*   @brief  Utility functions for calculating the alpa fade value based on time.
+**/
+float ClientGameScreen::FadeAlpha(uint32_t startTime, uint32_t visTime, uint32_t fadeTime) {
+    uint32_t deltaTime = clgi.GetRealTime() - startTime;
+
+    if (deltaTime >= visTime) {
+        return 0.f;
+    }
+
+    if (fadeTime > visTime) {
+        fadeTime = visTime;
+    }
+
+    float alpha = 1.f;
+    uint32_t timeLeft = visTime - deltaTime;
+    if (timeLeft < fadeTime) {
+        alpha = (float)timeLeft / fadeTime;
+    }
+
+    return alpha;
+}
+
+/**
 *   @brief  Register screen media.
 **/
 void ClientGameScreen::RegisterMedia() {
-    // Load in default crosshair picture.
-    screenData.crosshairPic = clgi.R_RegisterPic("/pics/crosshairs/0.tga");
-    int32_t x = 0; 
-    int32_t y = 0;
-    clgi.R_GetPicSize(&x, &y, screenData.crosshairPic);
-    screenData.crosshairSize = vec2_t{x, y};
-
     // Pause & Load screen pics.
-    screenData.pausePic     = clgi.R_RegisterPic("pause");
-    screenData.loadPic      = clgi.R_RegisterPic("loading");
+    screenData.pausePic     = clgi.R_RegisterPic("pause.png");
+    screenData.loadPic      = clgi.R_RegisterPic("loading.png");
 
     // TODO: Adjust R_ functions to use vec2_ts.
+    int32_t x = 0;
+    int32_t y = 0;
     clgi.R_GetPicSize(&x, &y, screenData.pausePic);
     screenData.pausePicSize = vec2_t{x, y};
 
@@ -348,8 +368,9 @@ void ClientGameScreen::RegisterMedia() {
     screenData.loadPicSize = vec2_t{x, y};
 
     // Acquire handle to the font (already loaded by the client itself.)
-    screenData.fontHandle = clgi.R_RegisterFont("conchars");
+    screenData.fontHandle = clgi.R_RegisterFont(scr_font->string);
 
+    // Ensure crosshair gets loaded.
     CVarCrosshairChanged(scr_crosshair);
 }
 
@@ -381,7 +402,7 @@ void ClientGameScreen::DrawCrosshair() {
         crosshairPosition.y + ch_y->integer,
         32,
         32,
-        clgi.R_RegisterPic("/pics/crosshairs/0.tga"));
+        screenData.crosshairPic);
 }
 
 /**
@@ -409,5 +430,7 @@ void ClientGameScreen::DrawFPS() {
 *   @brief  Draws the chat HUD.
 **/
 void ClientGameScreen::DrawChatHUD() {
-
+    if (chatHUD) {
+        chatHUD->Draw();
+    }
 }

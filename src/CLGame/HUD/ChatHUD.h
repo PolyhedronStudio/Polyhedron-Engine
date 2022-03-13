@@ -20,7 +20,7 @@ public:
     /**
     *   @brief  Draws the ChatHUD at given position.
     **/
-    void Draw(const vec2_t &position);
+    void Draw();
 
     /**
     *   @brief  Adds a new line of text to the queue.
@@ -31,15 +31,19 @@ private:
     //! Configures the maximum amount of characters allowed to display per line.
     static constexpr uint32_t MaxCharsPerLine = 150;
     static constexpr uint32_t MaxLines = 32;
+    static constexpr uint32_t ChatLineMask = MaxLines - 1;
     
     //! Private struct used for the chatline queue.
     struct ChatLine {
         std::string text = "";
         uint32_t timeStamp = 0;
-    };
+    } chatLines[MaxLines];
+
+    //! Current chat head.
+    uint32_t scr_chathead;
 
     //! Chatline Queue.
-    std::queue<ChatLine> chatLineQueue;
+    //ChatLine chatLines[MaxLines];
 
     //! Pointer to client game screen object.
     ClientGameScreen *screen;

@@ -108,6 +108,11 @@ public:
     **/
     int32_t DrawString(const std::string &text, const vec2_t &position, uint32_t flags = 0);
 
+    /**
+    *   @brief  Utility functions for calculating the alpa fade value based on time.
+    **/
+    float FadeAlpha(uint32_t  startTime, uint32_t visTime, uint32_t fadeTime);
+
 
 
 private:
