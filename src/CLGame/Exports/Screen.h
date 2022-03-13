@@ -6,11 +6,22 @@
 
 #include "Shared/Interfaces/IClientGameExports.h"
 
-//---------------------------------------------------------------------
-// Client Game Screen IMPLEMENTATION.
-//---------------------------------------------------------------------
+// Predeclare.
+class ChatHUD;
+
+/**
+*   @brief  Client Game Module implementation of the Screen interface.
+* 
+*           Used for drawing 2D elements such as the player stats and the
+*           chat HUD.
+**/
 class ClientGameScreen : public IClientGameExportScreen {
 public:
+    friend class ChatHUD;
+
+    //! Destructor.
+    virtual ~ClientGameScreen() = default;
+
     /***
     *
     * 
@@ -65,8 +76,8 @@ public:
         float   hudScale    = 0.f;
         float   hudAlpha    = 0.f;
 
-        //! Handle to the font used for rendering 2D text elements.
-        qhandle_t font  = 0;
+        //! Handle to the font used for rendering 2D text elements. (Already loaded by the client, just need its handle.)
+        qhandle_t   fontHandle      = 0;
 
         //! Handle to the image used for pause display.
         qhandle_t   pausePic        = 0;
@@ -85,6 +96,11 @@ public:
             .u32 = MakeColor(255, 255, 255, 255) // White's default.
         };
     } screenData;
+
+    /**
+    *   @brief  Draws a string to the screen at the given position.
+    **/
+    int32_t DrawString(const std::string &text, const vec2_t &position, uint32_t flags = 0);
 
     /**
     *   @brief  Register screen media.
@@ -124,7 +140,7 @@ private:
     void DrawChatHUD();
 
 
-private:
+public:
     /***
     *
     *   Cmd/CVar callbacks.
@@ -132,10 +148,6 @@ private:
     ***/
     //! Console command implementations.
     static void Cmd_Sky_f();
-    static void Cmd_Draw_f();
-    static void Cmd_Draw_c(genctx_t* ctx, int argnum);
-    static void Cmd_UnDraw_f();
-    static void Cmd_UnDraw_c(genctx_t* ctx, int argnum);
     static void Cmd_ClearChatHUD_f();
 
     //! Console commands.
@@ -144,11 +156,12 @@ private:
         //{ "sizeup", SCR_SizeUp_f },
         //{ "sizedown", SCR_SizeDown_f },
         { "sky", Cmd_Sky_f },
-        { "draw", Cmd_Draw_f, Cmd_Draw_c },
-        { "undraw", Cmd_UnDraw_f, Cmd_UnDraw_c },
         { "clearchathud", Cmd_ClearChatHUD_f },
         { NULL }
     };
+
+private:
+    ChatHUD *chatHUD;
 
     //! Set on several cvars related to the crosshair display.
     static void CVarCrosshairChanged(cvar_t *cvar);

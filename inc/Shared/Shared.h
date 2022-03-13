@@ -63,12 +63,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <array>
 #include <vector>
 #include <list>
+#include <queue>
 #include <map>
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
 #include <span>
 #include <ranges>
+
 
 /**
 *   System Endian include, if needed. 

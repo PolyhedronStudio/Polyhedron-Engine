@@ -134,7 +134,7 @@ void ClientGameExports::ClientFrame() {
 **/
 void ClientGameExports::ClientDisconnect() {
     // Clear the chat hud.
-    SCR_ClearChatHUD_f();
+    ClientGameScreen::Cmd_ClearChatHUD_f();
 }
 
 /**

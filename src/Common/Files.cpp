@@ -3718,16 +3718,11 @@ static void fs_game_changed(cvar_t *self)
         // check for game override
         setup_game_paths();
 
+        // Report file system path usage. (How many in a pak, or a zip, etc)
         FS_Path_f();
 
-		// Detect if we're running full version of the game.
-		// Shareware version can't have multiplayer enabled for legal reasons.
-	//	if (FS_FileExists("maps/base1.bsp"))
-	//		Cvar_Set("fs_shareware", "0");
-	//	else
-	//		Cvar_Set("fs_shareware", "1");
-
-		if (/*!FS_FileExists("pics/colormap.pcx") || */!FS_FileExists("pics/conchars.pcx") || !FS_FileExists("default.cfg"))
+        // Determine whether we got valid game data or not. Silly, cheap check, but whatever.
+		if (/*!FS_FileExists("pics/colormap.pcx") || */!FS_FileExists("pics/conchars.png") || !FS_FileExists("default.cfg"))
 		{
 			Com_Error(ERR_FATAL, "No game data files detected. Please make sure that there is a game directory with valid content "
 				" in the game directory: %s.\nReinstalling the game can fix the issue.", fs_gamedir);

@@ -11,6 +11,9 @@
 //---------------------------------------------------------------------
 class ClientGameCore : public IClientGameExportCore {
 public:
+	//! Destructor.
+    virtual ~ClientGameCore() = default;
+
 	/**
 	*	@brief	Initializes the client game.
 	**/

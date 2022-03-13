@@ -12,6 +12,9 @@
 //---------------------------------------------------------------------
 class ClientGameView : public IClientGameExportView {
 public:
+	//! Destructor.
+    virtual ~ClientGameView() = default;
+
     // Called right after the engine clears the scene, and begins a new one.
     void PreRenderView() final;
     // Called whenever the engine wants to clear the scene.

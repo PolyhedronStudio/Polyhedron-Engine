@@ -41,7 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define Q_ERR_TOO_MANY          _Q_ERR(5)   // Too many elements
 #define Q_ERR_TOO_FEW           _Q_ERR(6)   // Too few elements
 #define Q_ERR_BAD_INDEX         _Q_ERR(7)   // Index out of range
-#define Q_ERR_INVALID_PATH      _Q_ERR(8)   // Invalid quake path
+#define Q_ERR_INVALID_PATH      _Q_ERR(8)   // Invalid Polyhedron path
 #define Q_ERR_NAMETOOSHORT      _Q_ERR(9)   // File name too short
 #define Q_ERR_UNEXPECTED_EOF    _Q_ERR(10)  // Unexpected end of file
 #define Q_ERR_FILE_TOO_SMALL    _Q_ERR(11)  // File too small

@@ -11,6 +11,9 @@
 //---------------------------------------------------------------------
 class ClientGameMedia : public IClientGameExportMedia {
 public:
+    //! Destructor.
+    virtual ~ClientGameMedia() = default;
+
     /**
     *   @brief Called upon initialization of the renderer.
     **/

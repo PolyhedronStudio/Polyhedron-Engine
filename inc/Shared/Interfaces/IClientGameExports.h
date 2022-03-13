@@ -189,22 +189,34 @@ class IClientGameExportServerMessage {
 public:
     virtual ~IClientGameExportServerMessage() = default;
 
-    // Breaks up playerskin into name(optional), modeland skin components.
-    // If model or skin are found to be invalid, replaces them with sane defaults.
+    /**
+    *   @brief  Breaks up playerskin into name(optional), modeland skin components.
+    *           If model or skin are found to be invalid, replaces them with sane defaults.
+    **/
     virtual qboolean ParsePlayerSkin(char* name, char* model, char* skin, const char* str) = 0;
-    // Called when a configstring update has been parsed and still left
-    // unhandled by the client.
+    /**
+    *   @brief  Breaks up playerskin into name(optional), modeland skin components.
+    *           If model or skin are found to be invalid, replaces them with sane defaults.
+    **/
     virtual qboolean UpdateConfigString(int32_t index, const char* str) = 0;
-
-    // Called at the start of receiving a server message.
+    
+    /**
+    *   @brief  Called at the start of receiving a server message.
+    **/
     virtual void Start() = 0;
-    // Actually parses the server message, and handles it accordingly.
-    // Returns false in case the message was unkown, or corrupted, etc.
+    /**
+    *   @brief  Actually parses the server message, and handles it accordingly.
+    *   @return True if the message was succesfully parsed. False in case the message was unkown, or corrupted, etc.
+    **/
     virtual qboolean ParseMessage(int32_t serverCommand) = 0;
-    // Handles the demo message during playback.
-    // Returns false in case the message was unknown, or corrupted, etc.
+    /**
+    *   @brief  Handles the demo message during playback.
+    *   @return True if the message was succesfully parsed. False in case the message was unkown, or corrupted, etc.
+    **/
     virtual qboolean SeekDemoMessage(int32_t demoCommand) = 0;
-    // Called when we're done receiving a server message.
+    /**
+    *   @brief  Called when we're done receiving a server message.
+    **/
     virtual void End(int32_t realTime) = 0;
 };
 

@@ -28,7 +28,7 @@ static const char *const error_table[] = {
     "Too many elements",
     "Too few elements",
     "Index out of range",
-    "Invalid quake path",
+    "Invalid Polyhedron path",
     "File name too short",
     "Unexpected end of file",
     "File too small",

@@ -14,7 +14,7 @@ class CLGBaseEntity {
 public:
     //! Constructor/Destructor.
     CLGBaseEntity() = default;
-    ~CLGBaseEntity() = default;
+    virtual ~CLGBaseEntity() = default;
 
     //! Sets the classname of this entity.
     inline void SetClassname(const std::string& classname) {

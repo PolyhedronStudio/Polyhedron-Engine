@@ -11,6 +11,9 @@
 //---------------------------------------------------------------------
 class ClientGameMovement : public IClientGameExportMovement {
 public:
+    //! Destructor.
+    virtual ~ClientGameMovement() = default;
+
     // Called when the movement command needs to be build for the given
     // client networking frame.
     void BuildFrameMovementCommand(int32_t miliseconds) final;

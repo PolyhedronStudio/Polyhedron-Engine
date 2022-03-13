@@ -61,7 +61,7 @@ qerror_t CL_QueueDownload(const char *path, dltype_t type)
 
     len = strlen(path);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize quake path", __func__);
+        Com_Error(ERR_DROP, "%s: oversize Polyhedron path", __func__);
     }
 
     // CPP:
@@ -243,7 +243,7 @@ static qboolean start_udp_download(dlqueue_t *q)
 
     len = strlen(q->path);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize quake path", __func__);
+        Com_Error(ERR_DROP, "%s: oversize Polyhedron path", __func__);
     }
 
     // download to a temp name, and only rename
