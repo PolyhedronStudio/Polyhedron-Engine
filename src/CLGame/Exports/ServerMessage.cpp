@@ -409,6 +409,8 @@ void ClientGameServerMessage::ParseCenterPrint(void) {
     clgi.MSG_ReadStringBuffer(stringBuffer, sizeof(stringBuffer));
     //SHOWNET(2, "    \"%s\"\n", s);
     //SCR_CenterPrint(s);
+    // TODO: UNCOMMENT WHEN ENABLING SCR_CENTERPRINT AND MOVE IT IN THERE.
+    clgi.Con_ClearNotify();
 
     if (!clgi.IsDemoPlayback()) {
         COM_strclr(stringBuffer);
