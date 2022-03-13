@@ -2261,8 +2261,6 @@ void CL_RestartFilesystem(qboolean total)
 
         // Load client screen media first.
         SCR_RegisterMedia();
-        // PH: Inform the CG Module about the registration of media.
-        CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
     } else {
@@ -2322,8 +2320,6 @@ void CL_RestartRefresh(qboolean total)
         
         // Load client screen media first.
         SCR_RegisterMedia();
-        // PH: Inform the CG Module about the registration of media.
-        CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
 

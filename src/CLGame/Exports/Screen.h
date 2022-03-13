@@ -32,11 +32,17 @@ public:
     /**
     *   @brief  Initialize screen related matter.
     **/
-    void Initialize();
+    void Initialize() final;
+    /**
+    *   @brief  Called when the client starts or when the renderer demands so
+    *           after having modified its settings. Used to register basic 
+    *           screen media, 2D icons etc.
+    **/
+    void RegisterMedia() final;
     /**
     *   @brief  Take care of undo-ing all screen related matter.
     **/
-    void Shutdown();
+    void Shutdown() final;
 
     /**
     *   @brief  Called when the engine needs to render the 2D display.
@@ -102,10 +108,6 @@ public:
     **/
     int32_t DrawString(const std::string &text, const vec2_t &position, uint32_t flags = 0);
 
-    /**
-    *   @brief  Register screen media.
-    **/
-    void RegisterMedia();
 
 
 private:

@@ -979,13 +979,13 @@ const char *CL_GM_GetMediaLoadStateName(LoadState state)
 /**
 *   @brief  Call into the CG Module for notifying about "Register Screen Media"
 **/
-void CL_GM_LoadScreenMedia(void)
+void CL_GM_RegisterScreenMedia(void)
 {
     if (cge) {
-        IClientGameExportMedia *media = cge->GetMediaInterface();
+        IClientGameExportScreen *screen = cge->GetScreenInterface();
 
-        if (media) {
-            media->LoadScreen();
+        if (screen) {
+            screen->RegisterMedia();
         }
     }
 }

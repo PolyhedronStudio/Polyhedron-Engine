@@ -46,7 +46,7 @@ void		CL_GM_EntityEvent(int32_t number);
 //
 void        CL_GM_InitMedia(void);
 const char	*CL_GM_GetMediaLoadStateName(LoadState state);
-void        CL_GM_LoadScreenMedia(void);
+void        CL_GM_RegisterScreenMedia(void);
 void        CL_GM_LoadWorldMedia(void);
 void        CL_GM_ShutdownMedia(void);
 

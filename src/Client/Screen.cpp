@@ -729,6 +729,9 @@ void SCR_RegisterMedia(void)
 
     scr.net_pic = R_RegisterPic("net");
     scr.font_pic = R_RegisterFont(scr_font->string);
+
+    // PH: Inform the CG Module about the registration of media.
+    CL_GM_RegisterScreenMedia();
 }
 
 static void scr_font_changed(cvar_t *self)
@@ -781,13 +784,16 @@ void SCR_Init(void)
 #endif
 
     Cmd_Register(scr_cmds);
-
-
     scr.initialized = true;
+
+    // Initialize Client Game Module screen.
+    //CL_GM_InitializeScreen();
 }
 
 void SCR_Shutdown(void)
 {
+    // Shutdown Client Game Module screen.
+    //CL_GM_ShutdownScreen();
     Cmd_Unregister(scr_cmds);
     scr.initialized = false;
 }
@@ -992,19 +998,19 @@ void SCR_UpdateScreen(void)
 
     R_BeginFrame();
 
-    // do 3D refresh drawing
+    // Render 3D View.
     SCR_DrawActive();
 
-    // draw main menu
+    // Render UI.
     UI_Draw(cls.realtime);
 
     // Draw RMLUI
     RMLUI_RenderFrame();
 
-    // draw console
+    // Draw console
     Con_DrawConsole();
 
-    // draw loading plaque
+    // Draw loading plaque
     SCR_DrawLoading();
 
 #ifdef _DEBUG

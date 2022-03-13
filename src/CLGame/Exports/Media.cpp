@@ -5,7 +5,6 @@
 #include "../Input.h"
 #include "../Main.h"
 #include "../Media.h"
-#include "../Parse.h"
 #include "../Predict.h"
 #include "../Screen.h"
 #include "../TemporaryEntities.h"
@@ -51,15 +50,6 @@ void ClientGameMedia::Shutdown() {
 std::string ClientGameMedia::GetLoadStateName(LoadState loadState) {
     // One can put a switch here for the states.
     return "";
-}
-
-//---------------
-// ClientGameMedia::LoadScreen
-//
-//---------------
-void ClientGameMedia::LoadScreen() {
-    //SCR_RegisterMedia();
-    clge->screen->RegisterMedia();
 }
 
 //---------------

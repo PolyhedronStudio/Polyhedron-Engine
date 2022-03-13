@@ -28,7 +28,6 @@ SET(SRC_CLGAME
 	CLGame/Main.cpp
 	CLGame/Media.cpp
 	CLGame/NewEffects.cpp
-	CLGame/Parse.cpp
 	CLGame/Predict.cpp
 	CLGame/Screen.cpp
 	CLGame/TemporaryEntities.cpp
@@ -60,7 +59,6 @@ SET(HEADERS_CLGAME
 	CLGame/Main.h
 	CLGame/Media.h
 	CLGame/NewEffects.h
-	CLGame/Parse.h
 	CLGame/Predict.h
 	CLGame/Screen.h
 	CLGame/TemporaryEntities.h

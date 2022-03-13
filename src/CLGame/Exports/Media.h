@@ -32,14 +32,6 @@ public:
     std::string GetLoadStateName(LoadState loadState) final;
 
     /**
-    *   @brief  Called when the client starts or when the renderer demands so
-    *           after having modified its settings.
-    *
-    *   @details    Used to register basic screen media, 2D icons etc.
-    **/
-    void LoadScreen() final;
-
-    /**
     *   @brief  This is called when the client spawns into a server,
     *   
     *   @details    Used to register world related media (particles, view models, sounds).

@@ -95,12 +95,6 @@ public:
     // Called when the client wants to know the name of a custom load state.
     virtual std::string GetLoadStateName(LoadState loadState) = 0;
 
-    // This is called when the client starts, but also when the renderer has had
-    // modified settings.
-    //
-    // It should register the basic screen media, 2D icons etc.
-    virtual void LoadScreen() = 0;
-
     // This is called when the client spawns into a server,
     //
     // It should register world related media here, such as particles that are
@@ -155,10 +149,16 @@ class IClientGameExportScreen {
 public:
     virtual ~IClientGameExportScreen() = default;
 
-        /**
+    /**
     *   @brief  Called when the engine decides to render the 2D display.
     **/
     virtual void Initialize() = 0;
+    /**
+    *   @brief  Called when the client starts or when the renderer demands so
+    *           after having modified its settings. Used to register basic 
+    *           screen media, 2D icons etc.
+    **/
+    virtual void RegisterMedia() = 0;
     /**
     *   @brief  Called when the engine decides to render the 2D display.
     **/
