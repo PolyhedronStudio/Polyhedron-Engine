@@ -6,12 +6,13 @@
 #include "../Main.h"
 #include "../Media.h"
 #include "../Predict.h"
-#include "../Screen.h"
 #include "../TemporaryEntities.h"
 #include "../View.h"
 
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
+#include "../HUD/ChatHUD.h"
+#include "Screen.h"
 #include "ServerMessage.h"
 
 /**
@@ -388,8 +389,7 @@ void ClientGameServerMessage::ParsePrint(void) {
     clgi.Com_LPrintf(PRINT_TALK, fmt, stringBuffer);
 
     clgi.Con_SkipNotify(false);
-
-    //clge->screen->chatHUD->AddTextLine(s);
+    clge->screen->ChatPrint(stringBuffer);
     //SCR_AddToChatHUD(s);
 
     // play sound
@@ -407,10 +407,9 @@ void ClientGameServerMessage::ParseCenterPrint(void) {
     // Read string buffer.
     char stringBuffer[MAX_STRING_CHARS] = {};
     clgi.MSG_ReadStringBuffer(stringBuffer, sizeof(stringBuffer));
+
     //SHOWNET(2, "    \"%s\"\n", s);
-    //SCR_CenterPrint(s);
-    // TODO: UNCOMMENT WHEN ENABLING SCR_CENTERPRINT AND MOVE IT IN THERE.
-    clgi.Con_ClearNotify();
+    clge->screen->CenterPrint(stringBuffer);
 
     if (!clgi.IsDemoPlayback()) {
         COM_strclr(stringBuffer);

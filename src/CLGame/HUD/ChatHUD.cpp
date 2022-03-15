@@ -32,7 +32,7 @@ void ChatHUD::Clear() {
 	for(int32_t i = 0; i < MaxLines; i++) {
 		chatLines[i] = {};
 	}
-	scr_chathead = 0;
+	chatHeadline = 0;
 }
 
 /**
@@ -43,11 +43,6 @@ void ChatHUD::Draw() {
 	if (screen->scr_chathud->integer == 0) {
 		return;
 	}
-
-	int32_t step = 0;
-	uint32_t lines = 0;
-	uint32_t time = 0;
-	float alpha;
 
     int32_t x = screen->scr_chathud_x->integer;
     int32_t y = screen->scr_chathud_y->integer;
@@ -64,6 +59,7 @@ void ChatHUD::Draw() {
         flags |= UI_LEFT;
     }
 
+	int32_t step = 0;
     if (y < 0) {
         y += screen->screenData.hudSize.y - CHAR_HEIGHT + 1;
         step = -CHAR_HEIGHT;
@@ -71,18 +67,18 @@ void ChatHUD::Draw() {
         step = CHAR_HEIGHT;
     }
 
-    lines = screen->scr_chathud_lines->integer;
-    if (lines > scr_chathead) {
-        lines = scr_chathead;
+    uint32_t lines = screen->scr_chathud_lines->integer;
+    if (lines > chatHeadline) {
+        lines = chatHeadline;
 	}
 
-    time = screen->scr_chathud_time->value * 1000;
+    uint32_t time = screen->scr_chathud_time->value * 1000;
 
 	for (uint32_t i = 0; i < lines; i++) {
-		ChatLine &line = chatLines[(scr_chathead - i - 1) & ChatLineMask];
+		ChatLine &line = chatLines[(chatHeadline - i - 1) & ChatLineMask];
 
 		if (time) {
-			alpha = screen->FadeAlpha(line.timeStamp, time, 1000);
+			float alpha = screen->FadeAlpha(line.timeStamp, time, 1000);
 			if (!alpha) {
 				break;
 			}
@@ -108,13 +104,13 @@ void ChatHUD::AddText(const std::string& text) {
 	size_t newLinePosition = text.find_first_of('\n');
 
 	// Ensure newLinePosition does not >= 150
-	newLinePosition = (newLinePosition >= 150 ? 150 : newLinePosition);
+	newLinePosition = (newLinePosition >= 150 || newLinePosition == std::string::npos ? 150 : newLinePosition);
 
 	// In case of newLinePosition being std::string::npos, substr will just copy over the whole string.
 	std::string lineText = text.substr(0, newLinePosition);
 
 	// Fetch the next chat headline.
-	ChatLine &line = chatLines[scr_chathead++ & ChatLineMask];
+	ChatLine &line = chatLines[chatHeadline++ & ChatLineMask];
 
 	// Configure it with the text and current timeStamp.
 	line.text = lineText;

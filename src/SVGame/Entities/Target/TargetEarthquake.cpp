@@ -67,9 +67,6 @@ void TargetEarthquake::QuakeUse( SVGBaseEntity* other, SVGBaseEntity* activator 
 // TargetEarthquake::QuakeThink
 //===============
 void TargetEarthquake::QuakeThink() {
-    // Get class entities array.
-    SVGBaseEntity** classEntities = GetGameworld()->GetClassEntities();
-
     if ( lastQuakeTime < level.time ) {
         gi.PositionedSound( GetOrigin(), GetServerEntity(), SoundChannel::Auto, GetNoiseIndexA(), 1.0f, Attenuation::None, 0.0f);
         lastQuakeTime = level.time + 0.5f;
@@ -78,14 +75,13 @@ void TargetEarthquake::QuakeThink() {
     for (auto& entity : GetGameworld()->GetClassEntityRange(0, MAX_EDICTS)
          | cef::Standard | cef::HasClient | cef::HasGroundEntity ) 
     {
-        entity->SetGroundEntity( nullptr );
-        vec3_t newVelocity{
+        vec3_t newVelocity {
             crandom() * 150.0f,
             crandom() * 150.0f,
             severity * (100.0f / entity->GetMass())
         };
-
         newVelocity += entity->GetVelocity();
+        entity->SetGroundEntity( nullptr );
         entity->SetVelocity( newVelocity );
     }
 

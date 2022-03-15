@@ -4,10 +4,12 @@
 // ClientGameScreen implementation.
 #pragma once
 
+// Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
-// Predeclare.
-class ChatHUD;
+// Game Screen HUD Utility Objects.
+#include "../HUD/ChatHUD.h"
+#include "../HUD/NumberHUD.h"
 
 /**
 *   @brief  Client Game Module implementation of the Screen interface.
@@ -101,19 +103,46 @@ public:
         color_t     crosshairColor  = { 
             .u32 = MakeColor(255, 255, 255, 255) // White's default.
         };
+
+        //! Center String management.
+        std::string centerString = "";
+        uint32_t centerStringTimeStamp = 0;
+        uint32_t centerStringLines = 0;
+
+        //! Handles to number pics for NumberHUD elements.
+        qhandle_t numberPics[10] = {};
+        qhandle_t numberMinusPic = 0;   //! Handle to the '-' minus pic.
+        qhandle_t numberDivisorPic = 0; //! Handle to the '/' divisor pic.
     } screenData;
 
     /**
-    *   @brief  Draws a string to the screen at the given position.
+    *   @brief  Draws a string to the screen at the given position, 
+    *           with an optionable max length.
+    *   @param  stringLength    Max amount of characters to draw. When 0, text.size() is used instead.
+    *   @return The advanced x coordinate.
     **/
-    int32_t DrawString(const std::string &text, const vec2_t &position, uint32_t flags = 0);
+    int32_t DrawString(const std::string &text, const vec2_t &position, uint32_t flags = 0, size_t stringLength = 0);
+
+    /**
+    *   @brief  Draws a string supporting '\n' multi-line characters to the screen 
+    *           at given position.
+    **/
+    void DrawMultilineString(const std::string &text, const vec2_t &position, uint32_t flags = 0, size_t maxLength = 0);
 
     /**
     *   @brief  Utility functions for calculating the alpa fade value based on time.
     **/
     float FadeAlpha(uint32_t  startTime, uint32_t visTime, uint32_t fadeTime);
 
+    /**
+    *   @brief  Adds('prints'), a line of text to the chat hud.
+    **/
+    void ChatPrint(const std::string &text);
 
+    /**
+    *   @brief  Adds('prints'), another line of text to the centerprint and resets its timestamp.
+    **/
+    void CenterPrint(const std::string &text);
 
 private:
     /**
@@ -168,7 +197,12 @@ public:
     };
 
 private:
-    ChatHUD *chatHUD;
+    //! Stack based HUD objects. (Small.)
+    ChatHUD chatHUD{ this }; //! Handles the chat display.
+
+    NumberHUD clipAmmo{ this }; //! For displaying the amount of the weapon's clip ammo.
+    NumberHUD primaryAmmo{ this }; //! For displaying the inventarized amount of the weapon's primary ammo type.
+    NumberHUD secondaryAmmo{ this }; //! For displaying the inventarized amount of the weapon's secondary ammo type.
 
     //! Set on several cvars related to the crosshair display.
     static void CVarCrosshairChanged(cvar_t *cvar);

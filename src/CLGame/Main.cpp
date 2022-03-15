@@ -37,9 +37,9 @@
 ClientGameImport clgi;
 
 // Pointer to the actual client frame state.
-ClientState* cl = NULL;
+ClientState* cl     = nullptr;
 // Pointer to the actual client shared data.
-ClientShared* cs = NULL;
+ClientShared* cs    = nullptr;
 
 // Actual client game state (Contains the view for example).
 clientgame_t clg;
@@ -87,7 +87,7 @@ cvar_t *info_in_bspmenu = nullptr; // Is set to 1  at boot time when loading mai
                                 // to 1 when disconnecting from a server hence, once again, loading mainmenu.bsp
 
 // Video.
-cvar_t* vid_rtx = NULL;
+cvar_t* vid_rtx = nullptr;
 
 //
 //=============================================================================

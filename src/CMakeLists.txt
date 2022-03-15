@@ -20,6 +20,7 @@ SET(SRC_CLGAME
 	CLGame/Exports/View.cpp
 
 	CLGame/HUD/ChatHUD.cpp
+	CLGame/HUD/NumberHUD.cpp
 
 	CLGame/Debug.cpp
 	CLGame/Effects.cpp
@@ -50,6 +51,7 @@ SET(HEADERS_CLGAME
 	CLGame/Exports/View.h
 
 	CLGame/HUD/ChatHUD.h
+	CLGame/HUD/NumberHUD.h
 
 	CLGame/Debug.h
 	CLGame/Effects.h

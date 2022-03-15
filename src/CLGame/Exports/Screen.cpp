@@ -58,7 +58,7 @@ void ClientGameScreen::Cmd_Sky_f() {
     clgi.R_SetSky(name, rotate, axis);
 }
 void ClientGameScreen::Cmd_ClearChatHUD_f() {
-    clge->screen->chatHUD->Clear();
+    clge->screen->chatHUD.Clear();
 }
 
 /**
@@ -176,9 +176,6 @@ void ClientGameScreen::Initialize() {
     // Call upon the callback ourselves here.
     CVarScreenScaleChanged(scr_scale);
 
-    // Allocate our HUD objects.
-    chatHUD = new ChatHUD(this);
-
     // We've initialized the screen.
     screenData.isInitialized = true;
 }
@@ -186,10 +183,6 @@ void ClientGameScreen::Initialize() {
 void ClientGameScreen::Shutdown() {
     // Unregister screen console commands.
     clgi.Cmd_Unregister(screenCommands);
-
-    // Delete HUD elements.
-    delete chatHUD;
-    chatHUD = nullptr;
 
     // Unset isInitialized.
     screenData.isInitialized = false;
@@ -230,6 +223,9 @@ void ClientGameScreen::RenderScreen() {
 
     // Draw Chat Hud.
     DrawChatHUD();
+
+    // Reset general alpha scale.
+    clgi.R_SetAlphaScale(1.0f);
 }
 
 /**
@@ -302,12 +298,14 @@ void ClientGameScreen::DrawPauseScreen() {
 * 
 ***/
 /**
-*   @brief  Draws a string to the screen at the given position.
+*   @brief  Draws a string to the screen at the given position, 
+*           with an optionable max length.
+*   @param  stringLength    Max amount of characters to draw. When 0, text.size() is used instead.
 *   @return The advanced x coordinate.
 **/
-int32_t ClientGameScreen::DrawString(const std::string& text, const vec2_t& position, uint32_t flags) {
+int32_t ClientGameScreen::DrawString(const std::string& text, const vec2_t& position, uint32_t flags, size_t stringLength) {
     // Acquire size.
-    size_t stringLength = text.size();
+    stringLength = (stringLength ? stringLength : text.size());
 
     // Ensure it doesn't exceed our limits.
     if (stringLength > MAX_STRING_CHARS) {
@@ -325,6 +323,30 @@ int32_t ClientGameScreen::DrawString(const std::string& text, const vec2_t& posi
 
     // Draw string and return R_DrawString x advancement of characters.
     return clgi.R_DrawString(stringPosition.x, stringPosition.y, flags, stringLength, text.c_str(), screenData.fontHandle);
+}
+
+void ClientGameScreen::DrawMultilineString(const std::string &text, const vec2_t &position, uint32_t flags, size_t maxLength) {
+    //char    *p;
+    //size_t  len;
+
+    size_t lineLength = text.find_first_of('\n');
+
+    // Current Position of line rendering.
+    vec2_t currentPosition = position;
+
+    // Loop till we can't find any newline feeds.
+    std::string lineText = text;
+    while (lineLength != std::string::npos) {
+        lineText = text.substr(lineLength);
+        // Render our string.
+        DrawString(text.substr(lineLength), position, flags, maxLength);
+
+        // Find next newline feed.
+        lineLength = lineText.find('\n', 0);
+    }
+
+    // Draw last/first line, depending on whether we ever found a newline feed or not.
+    DrawString(lineText, position, flags, maxLength);
 }
 
 /**
@@ -351,6 +373,42 @@ float ClientGameScreen::FadeAlpha(uint32_t startTime, uint32_t visTime, uint32_t
 }
 
 /**
+*   @brief  Adds('prints'), a line of text to the chat hud.
+**/
+void ClientGameScreen::ChatPrint(const std::string& text) {
+    chatHUD.AddText(text);
+}
+
+/**
+*   @brief  Adds('prints'), another line of text to the centerprint and resets its timestamp.
+**/
+void ClientGameScreen::CenterPrint(const std::string& text) {
+    // Store timestamp.
+    screenData.centerStringTimeStamp = clgi.GetRealTime();
+
+    // Don't process any further, no text to process.
+    if (text.empty()) {
+        return;
+    }
+
+    // Copy text and assign as screenData centerstring.
+    screenData.centerString = text;
+
+    // Count the number of lines for centering.
+    size_t newlineFeedPos = 0;
+    while (newlineFeedPos != std::string::npos) {
+        screenData.centerStringLines++;
+        newlineFeedPos = text.find('\n', newlineFeedPos + 1);
+    }
+
+    // Echo text to console.
+    Com_LPrintf(PRINT_ALL, "%s\n", screenData.centerString.c_str());
+
+    // Clear notify.
+    clgi.Con_ClearNotify();
+}
+
+/**
 *   @brief  Register screen media.
 **/
 void ClientGameScreen::RegisterMedia() {
@@ -369,6 +427,20 @@ void ClientGameScreen::RegisterMedia() {
 
     // Acquire handle to the font (already loaded by the client itself.)
     screenData.fontHandle = clgi.R_RegisterFont(scr_font->string);
+
+    // Load up number pics, the '-' minus pic and the '/' divisor pic.
+    screenData.numberPics[0] = clgi.R_RegisterPic("/pics/hud/num_0.tga");
+    screenData.numberPics[1] = clgi.R_RegisterPic("/pics/hud/num_1.tga");
+    screenData.numberPics[2] = clgi.R_RegisterPic("/pics/hud/num_2.tga");
+    screenData.numberPics[3] = clgi.R_RegisterPic("/pics/hud/num_3.tga");
+    screenData.numberPics[4] = clgi.R_RegisterPic("/pics/hud/num_4.tga");
+    screenData.numberPics[5] = clgi.R_RegisterPic("/pics/hud/num_5.tga");
+    screenData.numberPics[6] = clgi.R_RegisterPic("/pics/hud/num_6.tga");
+    screenData.numberPics[7] = clgi.R_RegisterPic("/pics/hud/num_7.tga");
+    screenData.numberPics[8] = clgi.R_RegisterPic("/pics/hud/num_8.tga");
+    screenData.numberPics[9] = clgi.R_RegisterPic("/pics/hud/num_9.tga");
+    screenData.numberDivisorPic = clgi.R_RegisterPic("/pics/hud/num_div.tga");
+    screenData.numberMinusPic   = clgi.R_RegisterPic("/pics/hud/num_min.tga");
 
     // Ensure crosshair gets loaded.
     CVarCrosshairChanged(scr_crosshair);
@@ -394,43 +466,127 @@ void ClientGameScreen::DrawCrosshair() {
     vec2_t crosshairPosition = vec2_scale(screenData.hudSize - screenData.crosshairSize, 0.5f);
 
     // Set crosshair color.
-    clgi.R_SetScale(1.f);
+    clgi.R_SetScale(screenData.hudScale);
     clgi.R_SetColor(screenData.crosshairColor.u32);
 
     // Render it.
     clgi.R_DrawStretchPic(crosshairPosition.x + ch_x->integer, 
         crosshairPosition.y + ch_y->integer,
-        32,
-        32,
+        screenData.crosshairSize.x,
+        screenData.crosshairSize.y,
         screenData.crosshairPic);
+
+    // Reset scale.
+    clgi.R_SetScale(1.0f);
 }
 
 /**
 *   @brief  Draws the 'center strings' on display.
 **/
 void ClientGameScreen::DrawCenterString() {
+    //int y;
+    //float alpha;
 
+
+    clgi.Cvar_ClampValue(scr_centertime, 0.3f, 10.0f);
+
+    float alpha = FadeAlpha(screenData.centerStringTimeStamp, scr_centertime->value * 1000, 300);
+    if (!alpha) {
+        return;
+    }
+    
+    // Set scale to hud scale.
+    clgi.R_SetScale(screenData.hudScale);
+    clgi.R_SetAlpha(alpha * scr_alpha->value);
+
+    float y = screenData.hudSize.y / 4 - screenData.centerStringLines * 8 / 2;
+
+    DrawString(screenData.centerString, {screenData.hudSize.x / 2, y}, UI_CENTER, MAX_STRING_CHARS);
+
+    clgi.R_SetAlpha(scr_alpha->value);
+    clgi.R_SetScale(1.f);
 }
+
+//                // ammo number
+//            int     color;
+//#include "clg_local.h"
+//
+//#include "clg_main.h"
+//#include "clg_media.h"
+//#include "clg_screen.h"
+//            width = 3;
+//            value = cl->frame.playerState.stats[STAT_AMMO];
+//            if (value > 5)
+//                color = 0;  // green
+//            else if (value >= 0)
+//                color = ((cl->frame.number / CL_FRAMEDIV) >> 2) & 1;     // flash
+//            else
+//                continue;   // negative number = don't show
+//
+//            if (cl->frame.playerState.stats[STAT_FLASHES] & 4)
+//                clgi.R_DrawPic(x, y, scr.field_pic);
+//
+//            HUD_DrawNumber(x, y, color, width, value);
+//            continue;
 
 /**
 *   @brief  Draws the player HUD. (Ammo, Health, etc.)
 **/
 void ClientGameScreen::DrawPlayerHUD() {
+    // Offset for primary ammo display. (We render from right to left.)
+    vec2_t primaryOffset = { -112.f * primaryAmmo.GetScale(), -144* primaryAmmo.GetScale()};
 
+    // Set alpha.
+    clgi.R_SetScale(screenData.hudScale); // divide by 2?? hmm...
+    clgi.R_SetAlpha(screenData.hudAlpha);
+
+    /**
+    *   Clip Ammo & Primary Ammo Display.
+    **/
+    primaryAmmo.SetColor(NumberHUD::DefaultColor, NumberHUD::PrimaryNumber);
+    primaryAmmo.SetColor(NumberHUD::DefaultColor, NumberHUD::SecondaryNumber);
+
+    // Set values.
+    primaryAmmo.SetPrimaryNumber(cl->frame.playerState.stats[PlayerStats::ClipAmmo]);
+    primaryAmmo.SetSecondaryNumber(cl->frame.playerState.stats[PlayerStats::PrimaryAmmo]);
+
+    // Draw our primary ammo inventory display to screen.
+    primaryAmmo.Draw(screenData.hudSize + primaryOffset);
+    
+    // Reset to defaults.
+    clgi.R_SetScale(1.0f);
+    clgi.R_SetAlpha(1.0f);
 }
 
 /**
 *   @brief  Draws the FPS value to display.
 **/
 void ClientGameScreen::DrawFPS() {
+    if (!scr_fps->integer) {
+        return;
+    }
+    // Set scale to hud scale.
+    clgi.R_SetScale(screenData.hudScale);
 
+    int32_t fps = clgi.GetFramesPerSecond();
+    int32_t scale = clgi.GetResolutionScale();
+
+    char buffer[MAX_QPATH];
+    if (scr_fps->integer == 2 && vid_rtx->integer) {
+        Q_snprintf(buffer, MAX_QPATH, "%d FPS at %3d%%", fps, scale);
+    } else {
+        Q_snprintf(buffer, MAX_QPATH, "%d FPS", fps);
+    }
+
+    clgi.R_SetColor(~0u);
+    DrawString(buffer, {screenData.hudSize.x - 2.f, 1.f}, UI_RIGHT);
+
+    clgi.R_SetScale(1.f);
 }
 
 /**
 *   @brief  Draws the chat HUD.
 **/
 void ClientGameScreen::DrawChatHUD() {
-    if (chatHUD) {
-        chatHUD->Draw();
-    }
+    chatHUD.Draw();
 }
