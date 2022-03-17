@@ -3,7 +3,6 @@
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
-#include "../Predict.h"
 #include "../TemporaryEntities.h"
 #include "../View.h"
 
@@ -15,10 +14,9 @@
 static const float MAX_DELTA_ORIGIN = (2400.f * (1.0f / BASE_FRAMERATE));
 
 
-//---------------
-// ClientGamePrediction::CheckPredictionError
-//
-//---------------
+/**
+*   @brief  Checks for prediction incorectness. If found, corrects it.
+**/
 void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) {
     const PlayerMoveState* in = &cl->frame.playerState.pmove;
     ClientPredictedState* out = &cl->predictedState;
@@ -56,10 +54,10 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
     }
 }
 
-//---------------
-// ClientGamePrediction::PredictAngles
-//
-//---------------
+/**
+*   @brief  Adds the delta angles to the view angles. Required for other
+*           (especially rotating) objects to be able to push the player around properly.
+**/
 void ClientGamePrediction::PredictAngles() {
     // Add delta predicted angles to our view angles. (Allows for doors and other objects to push the player properly.)
     cl->predictedState.viewAngles[0] = cl->viewAngles[0] + cl->frame.playerState.pmove.deltaAngles[0];
@@ -67,21 +65,9 @@ void ClientGamePrediction::PredictAngles() {
     cl->predictedState.viewAngles[2] = cl->viewAngles[2] + cl->frame.playerState.pmove.deltaAngles[2];
 }
 
-//---------------
-// Client Side PMove trace.
-//---------------
-static trace_t PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
-    trace_t cmTrace;
-    
-    cmTrace = clgi.Trace(start, mins, maxs, end, 0, CONTENTS_MASK_PLAYERSOLID);
-
-    return cmTrace;
-}
-
-//---------------
-// ClientGamePrediction::CheckPredictionError
-//
-//---------------
+/**
+*   @brief  Process the actual predict movement simulation.
+**/
 void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) {
     // Player Move object.
     PlayerMove pm = {};
@@ -92,7 +78,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
 
     // Setup base trace calls.
     pm.Trace = PM_Trace;
-    pm.PointContents = CLG_PointContents;
+    pm.PointContents = PM_PointContents;
 
     // Restore ground entity for this frame.
     pm.groundEntityPtr = cl->predictedState.groundEntityPtr;
@@ -108,12 +94,15 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         // Fetch the command.
         ClientMoveCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
 
-        // Execute a pmove with it.
+        // If the command has an msec value it means movement has taken place and we prepare for 
+        // processing another simulation.
         if (cmd->input.msec) {
             // Saved for prediction error checking.
             cmd->prediction.simulationTime = clgi.GetRealTime();
 
+            // Assign the move command.
             pm.moveCommand = *cmd;
+            // Simulate the move command.
             PMove(&pm);
 
             // Update player move client side audio effects.
@@ -148,6 +137,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     if (vec3_distance(cl->predictedState.viewOrigin, pm.state.origin) > 0.03125f) {
         cl->predictedState.viewOrigin = pm.state.origin;
     }
+
     //cl->predictedState.velocity    = pm.state.velocity;
     cl->predictedState.viewOffset = pm.state.viewOffset;
     cl->predictedState.stepOffset = pm.state.stepOffset;
@@ -156,13 +146,9 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     cl->predictedState.groundEntityPtr = pm.groundEntityPtr;
 }
 
-//
-//================
-// PM_UpdateClientSoundSpecialEffects
-//
-// Can be called by either the server or the client
-//================
-//
+/**
+*   @brief  Update the client side audio state.
+**/
 void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
 {
     static int underwater;
@@ -192,4 +178,43 @@ void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
             clgi.SFX_Underwater_Disable();
 //#endif
     }
+}
+
+/**
+*   @brief  Player Move Simulation Trace Wrapper.
+**/
+trace_t ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
+    trace_t cmTrace;
+    
+    cmTrace = clgi.Trace(start, mins, maxs, end, 0, CONTENTS_MASK_PLAYERSOLID);
+
+    return cmTrace;
+}
+
+/**
+*   @brief  Player Move Simulation PointContents Wrapper.
+**/
+int32_t ClientGamePrediction::PM_PointContents(const vec3_t &point) {
+    ClientEntity* ent = nullptr;
+    mmodel_t* cmodel = nullptr;
+
+    int32_t contents = clgi.CM_PointContents(point, cl->bsp->nodes);
+
+    for (int32_t i = 0; i < cl->numSolidEntities; i++) {
+        ent = cl->solidEntities[i];
+
+        if (ent->current.solid != PACKED_BBOX) // special value for bmodel
+            continue;
+
+        cmodel = cl->clipModels[ent->current.modelIndex];
+        if (!cmodel)
+            continue;
+
+        contents |= clgi.CM_TransformedPointContents(
+            point, cmodel->headNode,
+            ent->current.origin,
+            ent->current.angles);
+    }
+
+    return contents;
 }

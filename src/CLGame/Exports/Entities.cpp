@@ -6,7 +6,6 @@
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
-#include "../Predict.h"
 #include "../TemporaryEntities.h"
 #include "../View.h"
 
@@ -709,7 +708,7 @@ void ClientGameEntities::AddViewEntities() {
         // Add mask support and perhaps a skip...
         // Add mask support and perhaps a skip...
         // Add mask support and perhaps a skip...
-        CLGTrace trace = CLG_Trace(gun_real_pos, mins, maxs, gun_tip, 0, CONTENTS_MASK_PLAYERSOLID); 
+        trace_t trace = clgi.Trace(gun_real_pos, mins, maxs, gun_tip, nullptr, CONTENTS_MASK_PLAYERSOLID); 
 
         // In case the trace hit anything, adjust our view model position so it doesn't stick in a wall.
         if (trace.fraction != 1.0f || trace.ent != nullptr)
