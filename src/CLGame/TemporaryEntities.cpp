@@ -12,7 +12,10 @@
 #include "Main.h"
 #include "NewEffects.h"
 #include "TemporaryEntities.h"
-#include "View.h"
+
+// Exports.
+#include "ClientGameExports.h"
+#include "Exports/View.h"
 
 //
 // CVars.
@@ -166,7 +169,7 @@ static void CLG_AddLasers(void)
 		VectorCopy(l->end, ent.oldorigin);
 		ent.frame = l->width;
 
-		V_AddEntity(&ent);
+		clge->view->AddRenderEntity(&ent);
 	}
 }
 
@@ -359,7 +362,7 @@ static void CLG_AddExplosionLight(explosion_t* ex, float phase)
 	VectorMA(color, w0, s0->color, color);
 	VectorMA(color, w1, s1->color, color);
 
-	V_AddLightEx(origin, 500.f, color[0], color[1], color[2], radius);
+	clge->view->AddLight(origin, color, 500.f, radius);
 }
 
 static void CLG_AddExplosions(void)
@@ -383,8 +386,9 @@ static void CLG_AddExplosions(void)
 
 		switch (ex->type) {
 		case explosion_t::ex_mflash:
-			if (f >= ex->frames - 1)
+			if (f >= ex->frames - 1) {
 				ex->type = explosion_t::ex_free;
+			}
 			break;
 		case explosion_t::ex_misc:
 		case explosion_t::ex_blaster:
@@ -415,15 +419,17 @@ static void CLG_AddExplosions(void)
 
 			if (f < 10) {
 				ent->skinNumber = (f >> 1);
-				if (ent->skinNumber < 0)
+				if (ent->skinNumber < 0) {
 					ent->skinNumber = 0;
+				}
 			}
 			else {
 				ent->flags |= RenderEffects::Translucent;
-				if (f < 13)
+				if (f < 13) {
 					ent->skinNumber = 5;
-				else
+				} else {
 					ent->skinNumber = 6;
+				}
 			}
 			break;
 		case explosion_t::ex_poly2:
@@ -440,16 +446,16 @@ static void CLG_AddExplosions(void)
 			break;
 		}
 
-		if (ex->type == explosion_t::ex_free) // CPP: Cast
+		if (ex->type == explosion_t::ex_free) {
 			continue;
+		}
 
-		if (vid_rtx->integer)
+		if (vid_rtx->integer) {
 			CLG_AddExplosionLight(ex, frac / (ex->frames - 1));
-		else
-		{
-			if (ex->light)
-				V_AddLight(ent->origin, ex->light * ent->alpha,
-					ex->lightcolor[0], ex->lightcolor[1], ex->lightcolor[2]);
+		} else {
+			if (ex->light) {
+				clge->view->AddLight(ent->origin, ex->lightcolor, ex->light * ent->alpha);
+			}
 		}
 
 		if (ex->type != explosion_t::ex_light) {
@@ -461,7 +467,7 @@ static void CLG_AddExplosions(void)
 			ent->oldframe = ex->baseFrame + f;
 			ent->backlerp = 1.0 - (frac - f);
 
-			V_AddEntity(ent);
+			clge->view->AddRenderEntity(ent);
 		}
 	}
 }
@@ -608,7 +614,7 @@ static void CLG_AddBeams(void)
 			ent.angles[0] = angles[0];
 			ent.angles[1] = angles[1];
 			ent.angles[2] = rand() % 360;
-			V_AddEntity(&ent);
+			clge->view->AddRenderEntity(&ent);
 			return;
 		}
 
@@ -626,7 +632,7 @@ static void CLG_AddBeams(void)
 				ent.angles[2] = rand() % 360;
 			}
 
-			V_AddEntity(&ent);
+			clge->view->AddRenderEntity(&ent);
 
 			for (j = 0; j < 3; j++)
 				org[j] += dist[j] * len;
@@ -748,7 +754,7 @@ static void CLG_AddPlayerBeams(void)
 		while (d > 0) {
 			VectorCopy(org, ent.origin);
 
-			V_AddEntity(&ent);
+			clge->view->AddRenderEntity(&ent);
 
 			for (j = 0; j < 3; j++)
 				org[j] += dist[j] * len;

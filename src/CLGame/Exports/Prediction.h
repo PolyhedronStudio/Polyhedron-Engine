@@ -1,7 +1,12 @@
-// License here.
-// 
-//
-// ClientGamePrediction implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Prediction Interface Implementation.
+* 
+***/
 #pragma once
 
 #include "Shared/Interfaces/IClientGameExports.h"

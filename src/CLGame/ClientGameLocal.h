@@ -101,25 +101,7 @@ struct CLGTrace {
 // Contains all current client view entities.
 //-------------------
 typedef struct clg_view_s {
-    // Stores the entities.
-    r_entity_t entities[MAX_ENTITIES];
-    int32_t num_entities;
 
-    // Holds all the dynamic lights currently in the view frame.
-    rdlight_t dlights[MAX_DLIGHTS];
-    int32_t num_dlights;
-
-    // Holds all the particles currently in the view frame.
-    rparticle_t particles[MAX_PARTICLES];
-    int32_t num_particles;
-
-    // Holds all the explosions currently in the view frame.
-    explosion_t  explosions[MAX_EXPLOSIONS];
-
-    // Holds all the lightstyles currently in the view frame.
-#if USE_LIGHTSTYLES
-    lightstyle_t lightstyles[MAX_LIGHTSTYLES];
-#endif
 } clg_view_t;
 extern clg_view_t view;
 

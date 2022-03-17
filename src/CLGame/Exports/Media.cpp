@@ -1,15 +1,25 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Media Interface Implementation.
+* 
+***/
 #include "../ClientGameLocal.h"
 
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
-#include "../View.h"
 
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
-#include "Screen.h"
 #include "Media.h"
+#include "Screen.h"
+#include "View.h"
+
 
 //---------------
 // ClientGameMedia::Initialize
@@ -20,7 +30,7 @@ void ClientGameMedia::Initialize() {
     CLG_EffectsInit();
 
     // Initialize View Data.
-    V_Init();
+    clge->view->Initialize();
 
     // Initialize the Screen Data.
     clge->screen->Initialize();
@@ -33,7 +43,7 @@ void ClientGameMedia::Initialize() {
 //---------------
 void ClientGameMedia::Shutdown() {
     // Shutdown View Data.
-    V_Shutdown();
+    clge->view->Shutdown();
 
     // Shutdown Screen Data.
     clge->screen->Shutdown();

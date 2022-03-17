@@ -10,7 +10,6 @@
 #include "ClientGameLocal.h"
 #include "Effects.h"
 #include "Entities.h"
-#include "View.h"
 
 /**
 *   @brief  Gets us a pointer to the entity that is currently being viewed.

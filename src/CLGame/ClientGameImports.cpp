@@ -12,7 +12,6 @@
 #include "Entities.h"
 #include "Main.h"
 #include "TemporaryEntities.h"
-#include "View.h"
 
 #include "ClientGameImports.h"
 

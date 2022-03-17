@@ -13,7 +13,9 @@
 #include "Main.h"
 #include "NewEffects.h"
 #include "TemporaryEntities.h"
-#include "View.h"
+
+#include "ClientGameExports.h"
+#include "Exports/View.h"
 
 static void CLG_LogoutEffect(vec3_t org, int type);
 
@@ -178,11 +180,12 @@ CLG_AddLightStyles
 */
 void CLG_AddLightStyles(void)
 {
-    int     i;
-    ClientLightstyle* ls;
+    int32_t     i = 0;
+    ClientLightstyle* ls = nullptr;
 
-    for (i = 0, ls = cl_lightstyles; i < MAX_LIGHTSTYLES; i++, ls++)
-        V_AddLightStyle(i, ls->value);
+    for (i = 0, ls = cl_lightstyles; i < MAX_LIGHTSTYLES; i++, ls++) {
+        clge->view->AddLightStyle(i, ls->value);
+    }
 }
 
 #endif
@@ -287,7 +290,7 @@ void CLG_RunDLights(void)
 // CLG_AddDLights
 // 
 // Add current frame scene dlights to the view being passed to the refresh.
-// ===============
+//===============
 //
 void CLG_AddDLights(void)
 {
@@ -298,8 +301,7 @@ void CLG_AddDLights(void)
     for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
         if (!dl->radius)
             continue;
-        V_AddLight(dl->origin, dl->radius,
-            dl->color[0], dl->color[1], dl->color[2]);
+        clge->view->AddLight(dl->origin, dl->color, dl->radius);
     }
 }
 
@@ -1214,7 +1216,7 @@ void CLG_AddParticles(void)
     float           time = 0, time2;
     int             color;
     cparticle_t* active, * tail;
-    rparticle_t* part;
+    rparticle_t renderParticle;
 
     active = NULL;
     tail = NULL;
@@ -1236,9 +1238,9 @@ void CLG_AddParticles(void)
             alpha = p->alpha;
         }
 
-        if (view.num_particles >= MAX_PARTICLES)
-            break;
-        part = &view.particles[view.num_particles++];
+        //if (view.num_particles >= MAX_PARTICLES)
+        //    break;
+        //part = &view.particles[view.num_particles++];
 
         p->next = NULL;
         if (!tail)
@@ -1254,25 +1256,32 @@ void CLG_AddParticles(void)
 
         time2 = time * time;
 
-        part->origin[0] = p->org[0] + p->vel[0] * time + p->acceleration[0] * time2;
-        part->origin[1] = p->org[1] + p->vel[1] * time + p->acceleration[1] * time2;
-        part->origin[2] = p->org[2] + p->vel[2] * time + p->acceleration[2] * time2;
+        renderParticle.origin = p->org + p->vel * time + p->acceleration * time2;
+
+        //part->origin[0] = p->org[0] + p->vel[0] * time + p->acceleration[0] * time2;
+        //part->origin[1] = p->org[1] + p->vel[1] * time + p->acceleration[1] * time2;
+        //part->origin[2] = p->org[2] + p->vel[2] * time + p->acceleration[2] * time2;
 
         if (color == -1) {
-            part->rgba.u8[0] = p->rgba.u8[0];
-            part->rgba.u8[1] = p->rgba.u8[1];
-            part->rgba.u8[2] = p->rgba.u8[2];
-            part->rgba.u8[3] = p->rgba.u8[3] * alpha;
+            renderParticle.rgba.u8[0] = p->rgba.u8[0];
+            renderParticle.rgba.u8[1] = p->rgba.u8[1];
+            renderParticle.rgba.u8[2] = p->rgba.u8[2];
+            renderParticle.rgba.u8[3] = p->rgba.u8[3] * alpha;
         }
 
-        part->color = color;
-        part->brightness = p->brightness;
-        part->alpha = alpha;
-        part->radius = 0.f;
+        renderParticle.color = color;
+        renderParticle.brightness = p->brightness;
+        renderParticle.alpha = alpha;
+        renderParticle.radius = 0.f;
 
         if (p->alphavel == INSTANT_PARTICLE) {
             p->alphavel = 0.0;
             p->alpha = 0.0;
+        }
+
+        // Break out the first second we even notice there's no more slots left.
+        if (!clge->view->AddRenderParticle(renderParticle)) {
+            break;
         }
     }
 

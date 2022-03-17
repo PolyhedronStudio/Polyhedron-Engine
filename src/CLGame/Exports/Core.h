@@ -1,7 +1,12 @@
-// License here.
-// 
-//
-// ClientGameCore implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Core Interface Implementation.
+* 
+***/
 #pragma once
 
 #include "Shared/Interfaces/IClientGameExports.h"

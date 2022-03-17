@@ -4,7 +4,6 @@
 #include "Entities.h"
 #include "Main.h"
 #include "TemporaryEntities.h"
-#include "View.h"
 
 // Export Interfaces.
 #include "Shared/Interfaces/IClientGameExports.h"

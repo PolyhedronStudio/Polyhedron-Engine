@@ -1,7 +1,12 @@
-// License here.
-// 
-//
-// ClientGameServerMessage implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game ServerMessage Interface Implementation.
+* 
+***/
 #pragma once
 
 #include "Shared/Interfaces/IClientGameExports.h"

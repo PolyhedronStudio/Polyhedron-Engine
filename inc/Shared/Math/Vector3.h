@@ -108,6 +108,15 @@ template<typename T> struct vec3_template {
             z * operand.z
         };
     }
+    // OPERATOR: * float
+    inline vec3_template operator *(const float operand) const
+    {
+        return vec3_template{
+            x * operand,
+            y * operand,
+            z * operand
+        };
+    }
 
     // OPERATOR: -= vec3_template
     inline const vec3_template& operator -=(const vec3_template& operand) {

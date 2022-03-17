@@ -1,10 +1,18 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Core Interface Implementation.
+* 
+***/
 #include "../ClientGameLocal.h"
 
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
-#include "../View.h"
 
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
@@ -13,13 +21,9 @@
 #include "Movement.h"
 
 
-/*
-=================
-CL_Skins_f
-
-Load or download any custom player skins and models
-=================
-*/
+/**
+*   @brief  Load or download any custom player skins and models
+**/
 static void CL_Skins_f(void) {
     int i;
     char* s;
@@ -46,14 +50,14 @@ static void CL_Skins_f(void) {
     }
 }
 
-//---------------
-// Update functions for when cvars change.
-//
-// These will notify the server about the changes, this will apply to for
-// example, spectators who are viewing a game. They'll see/hear the same
-// as the actual player they are spectating due to the settings being shared
-// to the server.
-//---------------
+/**
+*   @brief  Update functions for when cvars change.
+* 
+*           These will notify the server about the changes, this will apply to for
+*           example, spectators who are viewing a game. They'll see/hear the same
+*           as the actual player they are spectating due to the settings being shared
+*           to the server.
+**/
 static void cl_chat_sound_changed(cvar_t* self) {
     if (!*self->string)
         self->integer = 0;
@@ -127,10 +131,9 @@ static const cmdreg_t cmd_cgmodule[] = {
     {NULL}
 };
 
-//---------------
-// ClientGameExportCore::Initialize
-//
-//---------------
+/**
+*	@brief	Initializes the client game.
+**/
 void ClientGameCore::Initialize() {
     // Begin init log.
     Com_Print("\n%s\n", "==== InitCLGame ====");
@@ -211,10 +214,9 @@ void ClientGameCore::Initialize() {
     CLG_InitTempEntities();
 }
 
-//---------------
-// ClientGameExportCore::Shutdown
-//
-//---------------
+/**
+*	@brief	Shuts down the client game.
+**/
 void ClientGameCore::Shutdown() {
     clgi.Cmd_Unregister(cmd_cgmodule);
 }

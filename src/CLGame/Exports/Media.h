@@ -1,7 +1,12 @@
-// License here.
-// 
-//
-// ClientGameMedia implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Media Interface Implementation.
+* 
+***/
 #pragma once
 
 #include "Shared/Interfaces/IClientGameExports.h"

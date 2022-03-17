@@ -1,3 +1,12 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Screen Interface Implementation.
+* 
+***/
 // Client Game.
 #include "../ClientGameLocal.h"
 #include "../Main.h"

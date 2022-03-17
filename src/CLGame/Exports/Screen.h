@@ -1,7 +1,12 @@
-// License here.
-// 
-//
-// ClientGameScreen implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Screen Interface Implementation.
+* 
+***/
 #pragma once
 
 // Exports Interface.

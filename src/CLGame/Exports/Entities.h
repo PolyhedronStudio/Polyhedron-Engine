@@ -1,7 +1,12 @@
-// License here.
-// 
-//
-// ClientGameEntities implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Entities Interface Implementation.
+* 
+***/
 #pragma once
 
 // Client Game Exports Interface.

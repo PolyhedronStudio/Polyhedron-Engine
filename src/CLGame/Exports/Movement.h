@@ -1,7 +1,12 @@
-// License here.
-// 
-//
-// ClientGameMovement implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Movement Interface Implementation.
+* 
+***/
 #pragma once
 
 #include "Shared/Interfaces/IClientGameExports.h"

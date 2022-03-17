@@ -30,7 +30,6 @@ SET(SRC_CLGAME
 	CLGame/Main.cpp
 	CLGame/NewEffects.cpp
 	CLGame/TemporaryEntities.cpp
-	CLGame/View.cpp
 
 	CLGame/CLGame.def
 )
@@ -60,7 +59,6 @@ SET(HEADERS_CLGAME
 	CLGame/Main.h
 	CLGame/NewEffects.h
 	CLGame/TemporaryEntities.h
-	CLGame/View.h
 )
 
 # Server game DLL

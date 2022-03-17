@@ -8,14 +8,13 @@
 //
 #include "ClientGameLocal.h"
 
-// ClientGame implementations.
+// ClientGame.
 #include "Effects.h"
 #include "Entities.h"
 #include "Main.h"
 #include "TemporaryEntities.h"
-#include "View.h"
 
-// ClientGameExports interface implementations.
+// ClientGameExports implementations.
 #include "ClientGameExports.h"
 #include "exports/Core.h"
 #include "exports/Entities.h"

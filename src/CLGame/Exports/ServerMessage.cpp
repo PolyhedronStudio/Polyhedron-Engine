@@ -1,10 +1,18 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game ServerMessage Interface Implementation.
+* 
+***/
 #include "../ClientGameLocal.h"
 
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
-#include "../View.h"
 
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"

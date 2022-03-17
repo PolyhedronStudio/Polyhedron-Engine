@@ -1,3 +1,12 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Entities Interface Implementation.
+* 
+***/
 // Core.
 #include "../ClientGameLocal.h"
 
@@ -7,12 +16,12 @@
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
-#include "../View.h"
 
 // Export classes.
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 #include "Entities.h"
+#include "View.h"
 
 // Shared Game.
 #include "SharedGame/SkeletalAnimation.h"
@@ -489,7 +498,7 @@ void ClientGameEntities::AddPacketEntities() {
         }
 
         // Last but not least, add the entity to the refresh render list.
-        V_AddEntity(&renderEntity);
+        clge->view->AddRenderEntity(&renderEntity);
 
         // Keeping it here commented to serve as an example case.
         // Add dlights for flares
@@ -519,7 +528,7 @@ void ClientGameEntities::AddPacketEntities() {
             renderEffects = ApplyRenderEffects(renderEffects);
             renderEntity.flags = renderEffects | baseEntityFlags | RenderEffects::Translucent;
             renderEntity.alpha = 0.30;
-            V_AddEntity(&renderEntity);
+            clge->view->AddRenderEntity(&renderEntity);
         }
 
         renderEntity.skin = 0;       // never use a custom skin on others
@@ -564,7 +573,7 @@ void ClientGameEntities::AddPacketEntities() {
                 renderEntity.flags |= renderEffects;
             }
 
-            V_AddEntity(&renderEntity);
+            clge->view->AddRenderEntity(&renderEntity);
 
             //PGM - make sure these get reset.
             renderEntity.flags = baseEntityFlags;
@@ -577,7 +586,7 @@ void ClientGameEntities::AddPacketEntities() {
         // Add an entity to the current rendering frame that has model index 3 attached to it.
         if (entityState->modelIndex3) {
             renderEntity.model = cl->drawModels[entityState->modelIndex3];
-            V_AddEntity(&renderEntity);
+            clge->view->AddRenderEntity(&renderEntity);
         }
 
         //
@@ -586,7 +595,7 @@ void ClientGameEntities::AddPacketEntities() {
         // Add an entity to the current rendering frame that has model index 4 attached to it.
         if (entityState->modelIndex4) {
             renderEntity.model = cl->drawModels[entityState->modelIndex4];
-            V_AddEntity(&renderEntity);
+            clge->view->AddRenderEntity(&renderEntity);
         }
 
         //
@@ -596,7 +605,7 @@ void ClientGameEntities::AddPacketEntities() {
         if (effects & ~EntityEffectType::Rotate) {
             if (effects & EntityEffectType::Blaster) {
                 CLG_BlasterTrail(clientEntity->lerpOrigin, renderEntity.origin);
-                V_AddLight(renderEntity.origin, 200, 0.6f, 0.4f, 0.12f);
+                clge->view->AddLight(renderEntity.origin, vec3_t{ 0.6f, 0.4f, 0.12f }, 200);
             } else if (effects & EntityEffectType::Gib) {
                 CLG_DiminishingTrail(clientEntity->lerpOrigin, renderEntity.origin, clientEntity, effects);
             } else if (effects & EntityEffectType::Torch) {
@@ -609,7 +618,7 @@ void ClientGameEntities::AddPacketEntities() {
                     renderEntity.origin.z + offset 
                 };
 
-                V_AddLightEx(origin, 25.f, 1.0f * brightness, 0.425f * brightness, 0.1f * brightness, 3.6f);
+                clge->view->AddLight(origin, vec3_t{ 1.0f * brightness, 0.425f * brightness, 0.1f * brightness }, 25.f, 3.6f);
             }
         }
 
@@ -653,7 +662,7 @@ void ClientGameEntities::AddViewEntities() {
     //    gunRenderEntity.oldframe = 0;
     //}
     uint32_t lastModel = gunRenderEntity.model;
-    gunRenderEntity.model = (gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0));
+    gunRenderEntity.model = (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0);//(gun_model ? gun_model : (cl->drawModels[currentPlayerState->gunIndex] ? cl->drawModels[currentPlayerState->gunIndex] : 0));
 
 
     // This is very ugly right now, but it'll prevent the wrong frame from popping in-screen...
@@ -722,10 +731,10 @@ void ClientGameEntities::AddViewEntities() {
     // Do not lerp the origin at all.
     gunRenderEntity.oldorigin = gunRenderEntity.origin;
 
-    if (gun_frame) {
-        gunRenderEntity.frame = gun_frame;      // Development tool
-        gunRenderEntity.oldframe = gun_frame;   // Development tool
-    } else {
+    //if (gun_frame) {
+    //    gunRenderEntity.frame = gun_frame;      // Development tool
+    //    gunRenderEntity.oldframe = gun_frame;   // Development tool
+    //} else {
         // Setup the proper lerp and model frame to render this pass.
         // Moved into the if statement's else case up above.
         gunRenderEntity.oldframe = gunRenderEntity.frame;
@@ -751,7 +760,7 @@ void ClientGameEntities::AddViewEntities() {
         //    gunRenderEntity.oldframe = 0;//oldPlayerState->gunAnimationFrame;
         //    gunRenderEntity.backlerp = 1.0f - cl->lerpFraction;
         //}
-    }
+    //}
 
     // Setup basic render entity flags for our view weapon.
     gunRenderEntity.flags = RenderEffects::MinimalLight | RenderEffects::DepthHack | RenderEffects::WeaponModel;
@@ -771,13 +780,13 @@ void ClientGameEntities::AddViewEntities() {
     }
 
     // Add the gun render entity to the current render frame.
-    V_AddEntity(&gunRenderEntity);
+    clge->view->AddRenderEntity(&gunRenderEntity);
 
     // Render a separate shell entity in non-rtx mode.
     if (shellFlags && !vid_rtx->integer) {
         gunRenderEntity.alpha = 0.30f * cl_gunalpha->value;
         gunRenderEntity.flags |= shellFlags | RenderEffects::Translucent;
-        V_AddEntity(&gunRenderEntity);
+        clge->view->AddRenderEntity(&gunRenderEntity);
     }
 }
 
