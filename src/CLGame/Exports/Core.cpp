@@ -2,17 +2,17 @@
 
 #include "../Effects.h"
 #include "../Entities.h"
-#include "../Input.h"
 #include "../Main.h"
 #include "../Media.h"
 #include "../Predict.h"
-#include "../Screen.h"
 #include "../TemporaryEntities.h"
 #include "../View.h"
 
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 #include "Core.h"
+#include "Media.h"
+#include "Movement.h"
 
 
 /*
@@ -32,7 +32,7 @@ static void CL_Skins_f(void) {
         return;
     }
 
-    CLG_RegisterVWepModels();
+    clge->media->LoadViewModels();
 
     for (i = 0; i < MAX_CLIENTS; i++) {
         s = cl->configstrings[ConfigStrings::PlayerSkins + i];
@@ -95,7 +95,7 @@ static void cl_vwep_changed(cvar_t* self) {
     }
 
     // Register view weapon models again.
-    CLG_RegisterVWepModels();
+    clge->media->LoadViewModels();
     cl_noskins_changed(self);
 }
 
@@ -138,7 +138,7 @@ void ClientGameCore::Initialize() {
     Com_Print("\n%s\n", "==== InitCLGame ====");
 
     // Register user input.
-    CLG_RegisterInput();
+    clge->movement->RegisterInput();
 
     // Here we fetch cvars that were created by the client.
     // These are nescessary for certain CG Module functionalities.

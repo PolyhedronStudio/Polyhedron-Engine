@@ -12,7 +12,6 @@
 #include "Effects.h"
 #include "Media.h"
 #include "Main.h"
-#include "Screen.h"
 #include "TemporaryEntities.h"
 #include "View.h"
 
@@ -25,33 +24,33 @@
 //
 void CLG_RegisterVWepModels()
 {
-    int         i;
-    char        *name;
+    //int         i;
+    //char        *name;
 
-    cl->numWeaponModels = 1;
-    strcpy(cl->weaponModels[0], "weapon.md2");
+    //cl->numWeaponModels = 1;
+    //strcpy(cl->weaponModels[0], "weapon.md2");
 
-    // only default model when vwep is off
-     if (!cl_vwep->integer) {
-         return;
-     }
-    
-    for (i = 2; i < MAX_MODELS; i++) {
-        name = cl->configstrings[ConfigStrings::Models+ i];
-        if (!name[0]) {
-            break;
-        }
-        if (name[0] != '#') {
-            continue;
-        }
+    //// only default model when vwep is off
+    //if (!cl_vwep->integer) {
+    //    return;
+    //}
+    //
+    //for (i = 2; i < MAX_MODELS; i++) {
+    //    name = cl->configstrings[ConfigStrings::Models + i];
+    //    if (!name[0]) {
+    //        break;
+    //    }
+    //    if (name[0] != '#') {
+    //        continue;
+    //    }
 
-        // special player weapon model
-        strcpy(cl->weaponModels[cl->numWeaponModels++], name + 1);
+    //    // special player weapon model
+    //    strcpy(cl->weaponModels[cl->numWeaponModels++], name + 1);
 
-        if (cl->numWeaponModels == MAX_CLIENTWEAPONMODELS) {
-            break;
-        }
-    }
+    //    if (cl->numWeaponModels == MAX_CLIENTWEAPONMODELS) {
+    //        break;
+    //    }
+    //}
 }
 
 //

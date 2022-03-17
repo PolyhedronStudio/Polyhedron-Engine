@@ -22,10 +22,11 @@ SET(SRC_CLGAME
 	CLGame/HUD/ChatHUD.cpp
 	CLGame/HUD/NumberHUD.cpp
 
+	CLGame/Input/KeyBinding.cpp
+
 	CLGame/Debug.cpp
 	CLGame/Effects.cpp
 	CLGame/Entities.cpp
-	CLGame/Input.cpp
 	CLGame/Main.cpp
 	CLGame/Media.cpp
 	CLGame/NewEffects.cpp
@@ -52,10 +53,11 @@ SET(HEADERS_CLGAME
 	CLGame/HUD/ChatHUD.h
 	CLGame/HUD/NumberHUD.h
 
+	CLGame/Input/KeyBinding.h
+
 	CLGame/Debug.h
 	CLGame/Effects.h
 	CLGame/Entities.h
-	CLGame/Input.h
 	CLGame/ClientGameLocal.h
 	CLGame/Main.h
 	CLGame/Media.h

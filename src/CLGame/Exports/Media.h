@@ -38,11 +38,13 @@ public:
     **/
     void LoadWorld() final;
 
-private:
     /**
     *   @brief Loads up the view(-weapon) models of a client.
     **/
     void LoadViewModels();
+
+private:
+
 
     /**
     *   @brief Load client models media here.

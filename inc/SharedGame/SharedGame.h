@@ -25,6 +25,7 @@ struct ButtonBits {
     //! Button bit for when a player is reloading its weapon.
     static constexpr uint8_t Reload         = (1 << 4);
     //! Button bit for when a player is using an entity.
+    //! TODO: This is currently still unimplemented. Should replace "auto touch" buttons etc.
     static constexpr uint8_t Use            = (1 << 2);
     //! Button bit that is set when a player is moving.
     static constexpr uint8_t Walk           = (1 << 3);

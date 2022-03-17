@@ -2,11 +2,9 @@
 
 #include "../Effects.h"
 #include "../Entities.h"
-#include "../Input.h"
 #include "../Main.h"
 #include "../Media.h"
 #include "../Predict.h"
-#include "../Screen.h"
 #include "../TemporaryEntities.h"
 #include "../View.h"
 
@@ -150,7 +148,7 @@ void ClientGameMedia::LoadViewModels() {
     
     // Acquire the weapon model config strings. This has to go for client side weapons.
     for (i = 2; i < MAX_MODELS; i++) {
-        name = cl->configstrings[ConfigStrings::Models+ i];
+        name = cl->configstrings[ConfigStrings::Models + i];
         if (!name[0]) {
             break;
         }

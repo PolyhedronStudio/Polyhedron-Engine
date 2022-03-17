@@ -23,19 +23,14 @@
 //
 // CLIENT STRUCTURES - GAME MODULE NEEDS TO KNOW ABOUT.
 //
-constexpr uint32_t BUTTON_STATE_HELD = (1 << 0);
-constexpr uint32_t BUTTON_STATE_DOWN = (1 << 1);
-constexpr uint32_t BUTTON_STATE_UP   = (1 << 2);
-
-//
-// Keybinding  management.
-//
-typedef struct {
-    uint32_t keys[2]; // keys holding it down
-    uint32_t downtime; // msec timeStamp
-    uint32_t msec; // msec down this frame
-    uint8_t state; // button state.
-} KeyBinding;
+/**
+*   Contains states for the KeyBindings.
+**/
+struct ButtonState {
+    static constexpr uint32_t Held  = (1 << 0);
+    static constexpr uint32_t Down  = (1 << 1);
+    static constexpr uint32_t Up    = (1 << 2);
+};
 
 //
 // Explosion particle entity effect structure.
