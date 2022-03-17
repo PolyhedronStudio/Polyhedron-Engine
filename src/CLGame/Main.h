@@ -43,4 +43,4 @@ void Com_Error(int32_t errorType, const char* fmt, ...);
 /**
 *	@brief	Common print text type of your choice to screen function.
 **/
-void Com_LPrintf(PrintType type, const char* fmt, ...);
+void Com_LPrintf(int32_t printType, const char* fmt, ...);

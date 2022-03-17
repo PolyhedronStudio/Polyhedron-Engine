@@ -192,11 +192,11 @@ void Com_Error (int32_t errorType, const char *fmt, ...) {
 }
 
 // Prints a message of a type of your own liking. Using variable arg formatting
-void Com_LPrintf(PrintType type, const char* fmt, ...) {
+void Com_LPrintf(int32_t printType, const char* fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start(args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    clgi.Com_LPrintf(type, "%s", buffer);
+    clgi.Com_LPrintf(printType, "%s", buffer);
     va_end(args);
 }

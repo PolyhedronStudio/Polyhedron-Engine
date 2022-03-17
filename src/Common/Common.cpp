@@ -281,7 +281,7 @@ static size_t format_local_time(char *buffer, size_t size, const char *fmt)
     return strftime(buffer, size, fmt, tm);
 }
 
-static void logfile_write(PrintType type, const char *s)
+static void logfile_write(int32_t printType, const char *s)
 {
     char text[MAXPRINTMSG];
     char buf[MAX_QPATH];
@@ -294,7 +294,7 @@ static void logfile_write(PrintType type, const char *s)
         p = strchr(logfile_prefix->string, '@');
         if (p) {
             // expand it in place, hacky
-            switch (type) {
+            switch (printType) {
             case PRINT_TALK:      *p = 'T'; break;
             case PRINT_DEVELOPER: *p = 'D'; break;
             case PRINT_WARNING:   *p = 'W'; break;
@@ -397,7 +397,7 @@ Both client and server can use this, and it will output
 to the apropriate place.
 =============
 */
-void Com_LPrintf(PrintType type, const char *fmt, ...)
+void Com_LPrintf(int32_t printType, const char *fmt, ...)
 {
     va_list     argptr;
     char        msg[MAXPRINTMSG];
@@ -414,7 +414,7 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
     len = Q_vscnprintf(msg, sizeof(msg), fmt, argptr);
     va_end(argptr);
 
-    if (type == PRINT_ERROR && !com_errorEntered && len) {
+    if (printType == PRINT_ERROR && !com_errorEntered && len) {
         size_t errlen = len;
 
         if (errlen >= sizeof(com_errorMsg)) {
@@ -434,7 +434,7 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
     if (rd_target) {
         Com_Redirect(msg, len);
     } else {
-        switch (type) {
+        switch (printType) {
         case PRINT_TALK:
             Com_SetColor(COLOR_NONE);
             break;
@@ -470,10 +470,10 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
 
         // logfile
         if (com_logFile) {
-            logfile_write(type, msg);
+            logfile_write(printType, msg);
         }
 
-        if (type) {
+        if (printType) {
             Com_SetColor(COLOR_NONE);
         }
     }

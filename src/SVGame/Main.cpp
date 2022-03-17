@@ -227,12 +227,12 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 //=============================================================================
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c can link
-void Com_LPrintf(PrintType type, const char *fmt, ...)
+void Com_LPrintf(int32_t printType, const char *fmt, ...)
 {
     va_list     argptr;
     char        text[MAX_STRING_CHARS];
 
-    if (type == PRINT_DEVELOPER) {
+    if (printType == PRINT_DEVELOPER) {
         return;
     }
 

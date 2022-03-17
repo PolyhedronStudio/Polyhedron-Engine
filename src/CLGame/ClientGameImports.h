@@ -63,7 +63,7 @@ class ClientGameImportCommand : public IClientGameImportCommand {
 //---------------------------------------------------------------------
 class ClientGameImportCommon : public IClientGameImports {
 	void Error(int32_t errorType, const char* fmt, ...);
-	void Printf(PrintType type, const char* fmt, ...);
+	void Printf(int32_t printType, const char* fmt, ...);
 	const char* ErrorString(qerror_t type);
 	unsigned GetEventTime(void);
 };

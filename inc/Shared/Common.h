@@ -71,7 +71,7 @@ enum LoadState {
 void    Com_Error(int32_t errorType, const char* fmt, ...)
 q_noreturn q_printf(2, 3);
 #ifndef CGAME_INCLUDE
-void    Com_LPrintf(PrintType type, const char* fmt, ...)
+void    Com_LPrintf(int32_t printType, const char* fmt, ...)
 q_printf(2, 3);
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
 #define Com_DPrintf(...) Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
