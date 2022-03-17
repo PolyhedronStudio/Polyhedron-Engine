@@ -1,13 +1,13 @@
 // Client Game.
 #include "../ClientGameLocal.h"
 #include "../Main.h"
-#include "../Media.h"
 
 // Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
 // Exports Interface Implementations.
 #include "../ClientGameExports.h"
+#include "Media.h"
 #include "Screen.h"
 
 // HUD Elements.
@@ -36,7 +36,7 @@ void ClientGameScreen::Cmd_Sky_f() {
 
     name = clgi.Cmd_Argv(1);
     if (!*name) {
-        CLG_SetSky();
+        clge->media->LoadAndConfigureSky();
         return;
     }
 

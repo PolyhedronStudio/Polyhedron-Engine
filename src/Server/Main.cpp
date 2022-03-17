@@ -2021,7 +2021,7 @@ server is going to totally exit after returning from this function.
 Also resposible for freeing all clients.
 ==================
 */
-static void SV_FinalMessage(const char *message, ErrorType type)
+static void SV_FinalMessage(const char *message, int32_t errorType)
 {
     client_t    *client;
     NetChannel   *netchan;
@@ -2036,7 +2036,7 @@ static void SV_FinalMessage(const char *message, ErrorType type)
         MSG_WriteString(message);
     }
 
-    if (type == ERR_RECONNECT)
+    if (errorType == ERR_RECONNECT)
         MSG_WriteUint8(ServerCommand::Reconnect);//MSG_WriteByte(ServerCommand::Reconnect);
     else
         MSG_WriteUint8(ServerCommand::Disconnect);//MSG_WriteByte(ServerCommand::Disconnect);
@@ -2077,12 +2077,12 @@ Called when each game quits, from Com_Quit or Com_Error.
 Should be safe to call even if server is not fully initalized yet.
 ================
 */
-void SV_Shutdown(const char *finalmsg, ErrorType type)
+void SV_Shutdown(const char *finalmsg, int32_t errorType)
 {
     if (!sv_registered)
         return;
 
-    SV_FinalMessage(finalmsg, type);
+    SV_FinalMessage(finalmsg, errorType);
     SV_MasterShutdown();
     SV_ShutdownGameProgs();
 

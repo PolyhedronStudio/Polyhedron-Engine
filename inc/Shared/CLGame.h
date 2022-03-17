@@ -316,7 +316,7 @@ extern "C" {
         // NOTE: Look at clg_local.h to see documentation for the following:
         // Com_Error, Com_LPrintf
         //---------------------------------------------------------------------
-        void		(*Com_Error) (ErrorType code, const char *fmt, ...);
+        void		(*Com_Error) (int32_t errorType, const char *fmt, ...);
 	    void		(*Com_LPrintf) (PrintType type, const char *fmt, ...);
 
         // Returns a string description value of the given qerror_t type.

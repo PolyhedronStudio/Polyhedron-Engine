@@ -243,7 +243,7 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
     gi.DPrintf("%s", text);
 }
 
-void Com_Error(ErrorType type, const char *fmt, ...)
+void Com_Error(int32_t errorType, const char *fmt, ...)
 {
     va_list     argptr;
     char        text[MAX_STRING_CHARS];

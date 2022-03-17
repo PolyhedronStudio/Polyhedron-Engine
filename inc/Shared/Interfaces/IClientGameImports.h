@@ -126,7 +126,7 @@ class IClientGameImportCommon {
 	// I'd suggest actually wrapping them up, as per usual.
 	//
 	// Will discuss this later with you, Mr Fox ;-)
-	virtual void Error(ErrorType code, const char* fmt, ...) = 0;
+	virtual void Error(int32_t errorType, const char* fmt, ...) = 0;
 	virtual void Printf(PrintType type, const char* fmt, ...) = 0;
 
 	// Returns a string description value of the given qerror_t type.

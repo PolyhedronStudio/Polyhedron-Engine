@@ -58,7 +58,7 @@ void CL_ErrorEvent(NetAdr *from);
 #endif
 void CL_Init(void);
 void CL_InitGameModule(void);
-void CL_Disconnect(ErrorType type);
+void CL_Disconnect(int32_t errorType);
 void CL_Shutdown(void);
 unsigned CL_Frame(unsigned msec);
 void CL_UpdateListenerOrigin(void);

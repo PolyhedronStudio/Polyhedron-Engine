@@ -39,23 +39,43 @@ public:
     void LoadWorld() final;
 
     /**
-    *   @brief Loads up the view(-weapon) models of a client.
+    *   @brief  Loads up the view(-weapon) models of a client.
     **/
     void LoadViewModels();
 
-private:
-
+    /**
+    *   @brief  Load and set sky media, rotation and axis to their ConfigString settings.
+    **/
+    void LoadAndConfigureSky();
 
     /**
-    *   @brief Load client models media here.
+    *   @brief  Loads up the data for the given client. Here you can set the default
+    *           models that it'll load, or totally disable clients from doing their
+    *           own.
+    *   
+    *           Think about a mod where you have a class system, you can load the info
+    *           here.
+    **/
+    void LoadClientInfo(ClientInfo* ci, const char* str);
+
+    /**
+    *   @brief  Breaks up playerskin into name (optional), model and skin components.
+    *           If model or skin are found to be invalid, replaces them with sane defaults.
+    **/
+    void ParsePlayerSkin(char* name, char* model, char* skin, const char* s);
+
+
+private:
+    /**
+    *   @brief  Load client specific model media.
     **/
     void LoadModels();
     /**
-    *   @brief Load client image media here.
+    *   @brief  Load client specific image media.
     **/
     void LoadImages();
     /**
-    *   Load client sound media here.
+    *   @brief  Load client specific sound media here.
     **/
     void LoadSounds();
 };

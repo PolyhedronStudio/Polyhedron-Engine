@@ -3,7 +3,6 @@
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
-#include "../Media.h"
 #include "../Predict.h"
 #include "../TemporaryEntities.h"
 #include "../View.h"
@@ -11,6 +10,7 @@
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 #include "../HUD/ChatHUD.h"
+#include "Media.h"
 #include "Screen.h"
 #include "ServerMessage.h"
 
@@ -100,7 +100,7 @@ qboolean ClientGameServerMessage::UpdateConfigString(int32_t index, const char* 
     }
 
     if (index >= ConfigStrings::PlayerSkins && index < ConfigStrings::PlayerSkins + MAX_CLIENTS) {
-        CLG_LoadClientInfo(&cl->clientInfo[index - ConfigStrings::PlayerSkins], str);
+        clge->media->LoadClientInfo(&cl->clientInfo[index - ConfigStrings::PlayerSkins], str);
         return true;
     }
 

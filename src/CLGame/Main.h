@@ -38,7 +38,7 @@ void Com_EPrint(const char* fmt, ...);
 /**
 *	@brief	Common print specific error type and text to screen function.
 **/
-void Com_Error(ErrorType code, const char* fmt, ...);
+void Com_Error(int32_t errorType, const char* fmt, ...);
 
 /**
 *	@brief	Common print text type of your choice to screen function.

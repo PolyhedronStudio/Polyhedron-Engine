@@ -3,7 +3,6 @@
 #include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
-#include "../Media.h"
 #include "../Predict.h"
 #include "../TemporaryEntities.h"
 #include "../View.h"
@@ -39,7 +38,7 @@ static void CL_Skins_f(void) {
         if (!s[0])
             continue;
         ci = &cl->clientInfo[i];
-        CLG_LoadClientInfo(ci, s);
+        clge->media->LoadClientInfo(ci, s);
         if (!ci->model_name[0] || !ci->skin_name[0])
             ci = &cl->baseClientInfo;
         Com_Print("client %d: %s --> %s/%s\n", i, s,
@@ -81,7 +80,7 @@ static void cl_noskins_changed(cvar_t* self) {
         if (!s[0])
             continue;
         ci = &cl->clientInfo[i];
-        CLG_LoadClientInfo(ci, s);
+        clge->media->LoadClientInfo(ci, s);
     }
 }
 
@@ -121,7 +120,7 @@ static const cmdreg_t cmd_cgmodule[] = {
     //{ "say_team", NULL, CL_Say_c },
 
     { "wave" }, { "inven" }, { "kill" }, { "use" }, { "reload" },
-    { "drop" }, { "info" }, { "prog" },
+    { "drop" }, { "info" }, /* {"prog"}, TODO: Was this a mistake of the old perhaps? */
     { "give" }, { "god" }, { "notarget" }, { "noclip" },
     { "invuse" }, { "invprev" }, { "invnext" }, { "invdrop" },
     { "weapnext" }, { "weapprev" },

@@ -679,7 +679,7 @@ Sends a disconnect message to the server
 This is also called on Com_Error, so it shouldn't cause any errors
 =====================
 */
-void CL_Disconnect(ErrorType type)
+void CL_Disconnect(int32_t errorType)
 {
     if (!cls.connectionState) {
         return;
@@ -736,7 +736,7 @@ void CL_Disconnect(ErrorType type)
 
     cls.userinfo_modified = 0;
 
-    if (type == ERR_DISCONNECT || type == ERR_DROP) {
+    if (errorType == ERR_DISCONNECT || errorType == ERR_DROP) {
         //UI_OpenMenu(UIMENU_DEFAULT);
         Cmd_ExecuteCommand(&cl_cmdbuf);
 

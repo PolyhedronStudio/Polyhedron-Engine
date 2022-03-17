@@ -12,7 +12,6 @@
 #include "Effects.h"
 #include "Entities.h"
 #include "Main.h"
-#include "Media.h"
 #include "Predict.h"
 #include "TemporaryEntities.h"
 #include "View.h"
@@ -183,12 +182,12 @@ void Com_EPrint(const char *fmt, ...) {
 }
 
 // Triggers an error code of type. Using variable arg formatting.
-void Com_Error (ErrorType code, const char *fmt, ...) {
+void Com_Error (int32_t errorType, const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    clgi.Com_Error(code, "%s", buffer);
+    clgi.Com_Error(errorType, "%s", buffer);
     va_end (args);
 }
 

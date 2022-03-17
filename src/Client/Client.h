@@ -371,7 +371,7 @@ extern console_t con;
 
 void CL_Init(void);
 void CL_Quit_f(void);
-void CL_Disconnect(ErrorType type);
+void CL_Disconnect(int32_t errorType);
 void CL_Begin(void);
 void CL_CheckForResend(void);
 void CL_ClearState(void);

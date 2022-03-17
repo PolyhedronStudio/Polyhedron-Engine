@@ -490,7 +490,7 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error(ErrorType code, const char *fmt, ...)
+void Com_Error(int32_t errorType, const char *fmt, ...)
 {
     char            msg[MAXERRORMSG];
     va_list         argptr;
@@ -541,10 +541,10 @@ void Com_Error(ErrorType code, const char *fmt, ...)
     // reset Com_Printf recursion level
     com_printEntered = 0;
 
-    if (code == ERR_DISCONNECT || code == ERR_RECONNECT) {
+    if (errorType == ERR_DISCONNECT || errorType == ERR_RECONNECT) {
         Com_WPrintf("%s\n", com_errorMsg);
-        SV_Shutdown(va("Server was killed: %s\n", com_errorMsg), code);
-        CL_Disconnect(code);
+        SV_Shutdown(va("Server was killed: %s\n", com_errorMsg), errorType);
+        CL_Disconnect(errorType);
         goto abort;
     }
 
@@ -556,10 +556,10 @@ void Com_Error(ErrorType code, const char *fmt, ...)
 
     // make otherwise non-fatal errors fatal
     if (com_fatal_error && com_fatal_error->integer) {
-        code = ERR_FATAL;
+        errorType = ERR_FATAL;
     }
 
-    if (code == ERR_DROP) {
+    if (errorType == ERR_DROP) {
         Com_EPrintf("********************\n"
                     "ERROR: %s\n"
                     "********************\n", com_errorMsg);
