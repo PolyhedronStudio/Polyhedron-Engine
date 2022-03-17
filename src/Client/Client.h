@@ -246,13 +246,13 @@ extern cvar_t    *cl_nolerp;
 #ifdef _DEBUG
 #define SHOWNET(level, ...) \
     if (cl_shownet->integer > level) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define SHOWCLAMP(level, ...) \
     if (cl_showclamp->integer > level) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define SHOWMISS(...) \
     if (cl_showmiss->integer) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 extern cvar_t    *cl_shownet;
 extern cvar_t    *cl_showmiss;
 extern cvar_t    *cl_showclamp;
@@ -360,7 +360,7 @@ typedef struct console_s {
     NetAdr remoteNetAddress;
     char *remotePassword;
 
-    LoadState loadstate;
+    int32_t loadstate;
 } console_t;
 extern console_t con;
 //=============================================================================
@@ -385,7 +385,7 @@ qboolean CL_CheckForIgnore(const char* s);
 void CL_WriteConfig(void);
 uint32_t    CL_GetConnectionState (void);               // WATISDEZE Added for CG Module.
 void        CL_SetConnectionState (uint32_t state);     // WATISDEZE Added for CG Module.
-void        CL_SetLoadState (LoadState state);          // WATISDEZE Added for CG Module.
+void        CL_SetLoadState(int32_t loadState);          // WATISDEZE Added for CG Module.
 
 qboolean      CL_InBSPMenu();
 void          CL_LoadBSPMenuMap(qboolean force);
@@ -396,7 +396,7 @@ void          CL_CloseBSPMenu();
 // precache.c
 //
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
-void CL_LoadState(LoadState state);
+void CL_LoadState(int32_t loadState);
 void CL_RegisterBspModels(void);
 void CL_PrepareMedia(void);
 void CL_UpdateConfigstring(int index);

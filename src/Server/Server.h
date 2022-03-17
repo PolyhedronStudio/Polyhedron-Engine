@@ -54,7 +54,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef _DEBUG
 #define SV_DPrintf(level,...) \
     if (sv_debug && sv_debug->integer > level) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #else
 #define SV_DPrintf(...)
 #endif

@@ -528,7 +528,7 @@ void MOD_Reference_GL(model_t *model)
     case model_s::MOD_EMPTY: // CPP: Enum
         break;
     default:
-        Com_Error(ERR_FATAL, "%s: bad model type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad model type", __func__);
     }
 
     model->registration_sequence = registration_sequence;

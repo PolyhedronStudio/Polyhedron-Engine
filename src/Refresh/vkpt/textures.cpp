@@ -1628,7 +1628,7 @@ vkpt_textures_end_registration()
 		DMAResult alloc_result = allocate_device_memory(tex_device_memory_allocator, image_memory);
 		if (alloc_result != DMA_SUCCESS)
 		{
-			Com_Error(ERR_FATAL, "Failed to allocate GPU memory for game textures!\n");
+			Com_Error(ErrorType::Fatal, "Failed to allocate GPU memory for game textures!\n");
 			return VK_ERROR_OUT_OF_DEVICE_MEMORY;
 		}
 
@@ -2058,7 +2058,7 @@ vkpt_create_images()
 
 		if (alloc_result != VK_SUCCESS) 		{
 			Com_Printf("Memory allocation error. Current total = %.2f MB, failed chunk = %.2f MB\n", (float)total_size / megabyte, (float)mem_req.size / megabyte);
-			Com_Error(ERR_FATAL, "Failed to allocate GPU memory for screen-space textures!\n");
+			Com_Error(ErrorType::Fatal, "Failed to allocate GPU memory for screen-space textures!\n");
 			return alloc_result;
 		}
 

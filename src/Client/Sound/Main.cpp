@@ -420,7 +420,7 @@ sfx_t *S_SfxForHandle(qhandle_t hSfx)
     }
 
     if (hSfx < 1 || hSfx > num_sfx) {
-        Com_Error(ERR_DROP, "S_SfxForHandle: %d out of range", hSfx);
+        Com_Error(ErrorType::Drop, "S_SfxForHandle: %d out of range", hSfx);
     }
 
     return &known_sfx[hSfx - 1];
@@ -688,7 +688,7 @@ channel_t *S_PickChannel(int entnum, int entchannel)
     channel_t   *ch;
 
     if (entchannel < 0)
-        Com_Error(ERR_DROP, "S_PickChannel: entchannel < 0");
+        Com_Error(ErrorType::Drop, "S_PickChannel: entchannel < 0");
 
 // Check for replacement sound, or find the best one to replace
     first_to_die = -1;

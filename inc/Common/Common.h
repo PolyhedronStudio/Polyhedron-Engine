@@ -87,7 +87,7 @@ void        Com_AbortFrame(void);
 char        *Com_GetLastError(void);
 void        Com_SetLastError(const char *msg);
 
-void        Com_Quit(const char *reason, ErrorType type) q_noreturn;
+void        Com_Quit(const char *reason, int32_t errorType) q_noreturn;
 
 void        Com_SetColor(color_index_t color);
 
@@ -116,16 +116,16 @@ void        Com_AddConfigFile(const char *name, unsigned flags);
 #ifdef _DEBUG
 #define Com_DPrintf(...) \
     if (developer && developer->integer > 0) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define Com_DDPrintf(...) \
     if (developer && developer->integer > 1) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define Com_DDDPrintf(...) \
     if (developer && developer->integer > 2) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define Com_DDDDPrintf(...) \
     if (developer && developer->integer > 3) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #else
 #define Com_DPrintf(...)
 #define Com_DDPrintf(...)

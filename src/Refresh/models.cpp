@@ -360,7 +360,7 @@ qhandle_t R_RegisterModel(const char *name)
 
 	// this should never happen
 	if (namelen >= MAX_QPATH)
-		Com_Error(ERR_DROP, "%s: oversize name", __func__);
+		Com_Error(ErrorType::Drop, "%s: oversize name", __func__);
 
 	// normalized to empty name?
 	if (namelen == 0) {
@@ -470,7 +470,7 @@ model_t *MOD_ForHandle(qhandle_t h)
 	}
 
 	if (h < 0 || h > r_numModels) {
-		Com_Error(ERR_DROP, "%s: %d out of range", __func__, h);
+		Com_Error(ErrorType::Drop, "%s: %d out of range", __func__, h);
 	}
 
 	model = &r_models[h - 1];
@@ -484,7 +484,7 @@ model_t *MOD_ForHandle(qhandle_t h)
 void MOD_Init(void)
 {
 	if (r_numModels) {
-		Com_Error(ERR_FATAL, "%s: %d models not freed", __func__, r_numModels);
+		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, r_numModels);
 	}
 
 	Cmd_AddCommand("modellist", MOD_List_f);

@@ -263,7 +263,7 @@ byte* MSG_ReadData(size_t len)
 
     if (msg_read.readCount > msg_read.currentSize) {
         if (!msg_read.allowUnderflow) {
-            Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+            Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);
         }
         return NULL;
     }
@@ -567,7 +567,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // Sanity check. 
     if (!to) {
-        Com_Error(ERR_DROP, "%s: no state to delta to, 'to' == nullptr", __func__);
+        Com_Error(ErrorType::Drop, "%s: no state to delta to, 'to' == nullptr", __func__);
     }
 
     // Clear to old value before doing any delta parsing.
@@ -723,7 +723,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
 {
     // Sanity check.
     if (!to) {
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Error(ErrorType::Drop, "%s: NULL", __func__);
     }
 
     // Derive 'from' from nullPlayerState if we ain't got one.
@@ -1047,12 +1047,12 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
     if (!to) {
         // If it never came from anywhere, we got no data to work with, error out.
         if (!from) {
-            Com_Error(ERR_DROP, "%s: NULL", __func__);
+            Com_Error(ErrorType::Drop, "%s: NULL", __func__);
         }
 
         // Invalid number? Error out.
         if (from->number < 1 || from->number >= MAX_EDICTS) {
-            Com_Error(ERR_DROP, "%s: bad number: %d", __func__, from->number);
+            Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, from->number);
         }
 
         // Write out entity number with a remove bit set.
@@ -1064,7 +1064,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Entity number sanity check.
     if (to->number < 1 || to->number >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: bad number: %d", __func__, to->number);
+        Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, to->number);
     }
 
     // Update from null entity state in case there is nothing to delta from.
@@ -1330,12 +1330,12 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, uint32_t byteMask, uint32_t entityStateFlags) {
     // Sanity checks.
     if (!to) {
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Error(ErrorType::Drop, "%s: NULL", __func__);
     }
 
     // Ensure the number is valid.
     if (number < 1 || number >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: bad entity number: %d", __func__, number);
+        Com_Error(ErrorType::Drop, "%s: bad entity number: %d", __func__, number);
     }
 
     // Ensure our 'to' state is cleared out in case of not having a 'from'.
@@ -1598,7 +1598,7 @@ void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCom
 
 #ifdef _DEBUG
 
-#define SHOWBITS(x) Com_LPrintf(PRINT_DEVELOPER, x " ")
+#define SHOWBITS(x) Com_LPrintf(PrintType::Developer, x " ")
 
 #if USE_CLIENT
 void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)

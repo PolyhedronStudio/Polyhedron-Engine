@@ -1309,7 +1309,7 @@ void BSP_Free(bsp_t *bsp)
         return;
     }
     if (bsp->refcount <= 0) {
-        Com_Error(ERR_FATAL, "%s: negative refcount", __func__);
+        Com_Error(ErrorType::Fatal, "%s: negative refcount", __func__);
     }
     if (--bsp->refcount == 0) {
 		if (bsp->pvs2_matrix)
@@ -1556,7 +1556,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 #endif
 
     if (!name || !bsp_p)
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
 
     *bsp_p = NULL;
 
@@ -1824,7 +1824,7 @@ byte *BSP_ClusterVis(bsp_t *bsp, byte *mask, int cluster, int vis)
         return (byte*)memset(mask, 0, bsp->visrowsize); // CPP: Cast
     }
     if (cluster < 0 || cluster >= bsp->vis->numclusters) {
-        Com_Error(ERR_DROP, "%s: bad cluster", __func__);
+        Com_Error(ErrorType::Drop, "%s: bad cluster", __func__);
     }
 
 	if (vis == DVIS_PVS2)
@@ -1937,14 +1937,14 @@ mmodel_t *BSP_InlineModel(bsp_t *bsp, const char *name)
     int     num;
 
     if (!bsp || !name) {
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Error(ErrorType::Drop, "%s: NULL", __func__);
     }
     if (name[0] != '*') {
-        Com_Error(ERR_DROP, "%s: bad name: %s", __func__, name);
+        Com_Error(ErrorType::Drop, "%s: bad name: %s", __func__, name);
     }
     num = atoi(name + 1);
     if (num < 1 || num >= bsp->nummodels) {
-        Com_Error(ERR_DROP, "%s: bad number: %d", __func__, num);
+        Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, num);
     }
 
     return &bsp->models[num];

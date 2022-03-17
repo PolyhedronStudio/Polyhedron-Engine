@@ -257,7 +257,7 @@ void SV_Multicast(const vec3_t &origin, Multicast to)
     vec3_t      org;
 
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
 
     flags = 0;
@@ -287,7 +287,7 @@ void SV_Multicast(const vec3_t &origin, Multicast to)
         BSP_ClusterVis(sv.cm.cache, mask, leaf1->cluster, DVIS_PVS2);
         break;
     default:
-        Com_Error(ERR_DROP, "SV_Multicast: bad to: %i", to);
+        Com_Error(ErrorType::Drop, "SV_Multicast: bad to: %i", to);
     }
 
     // send the data to all relevent clients
@@ -418,7 +418,7 @@ static inline void free_msg_packet(client_t *client, MessagePacket *msg)
 
     if (msg->currentSize > MSG_TRESHOLD) {
         if (msg->currentSize > client->msg_dynamic_bytes) {
-            Com_Error(ERR_FATAL, "%s: bad packet size", __func__);
+            Com_Error(ErrorType::Fatal, "%s: bad packet size", __func__);
         }
         client->msg_dynamic_bytes -= msg->currentSize;
         Z_Free(msg);
@@ -459,7 +459,7 @@ static void add_msg_packet(client_t    *client,
 
     if (len > MSG_TRESHOLD) {
         if (len > MAX_MSGLEN) {
-            Com_Error(ERR_FATAL, "%s: oversize packet", __func__);
+            Com_Error(ErrorType::Fatal, "%s: oversize packet", __func__);
         }
         if (client->msg_dynamic_bytes + len > MAX_MSGLEN) {
             Com_WPrintf("%s: %s: out of dynamic memory\n",

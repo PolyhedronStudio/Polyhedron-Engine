@@ -1144,7 +1144,7 @@ void CLG_ParseTempEntity(void)
 		break;
 
 	default:
-		Com_Error(ERR_DROP, "%s: bad type", __func__);
+		Com_Error(ErrorType::Drop, "%s: bad type", __func__);
 	}
 }
 

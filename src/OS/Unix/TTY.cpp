@@ -49,7 +49,7 @@ static void tty_fatal_error(const char *what)
     tty_enabled = false;
     tty_io = NULL;
 
-    Com_Error(ERR_FATAL, "%s: %s() failed: %s",
+    Com_Error(ErrorType::Fatal, "%s: %s() failed: %s",
               __func__, what, strerror(errno));
 }
 

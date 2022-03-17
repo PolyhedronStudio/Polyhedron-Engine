@@ -75,7 +75,7 @@ QUAKE FILESYSTEM
 #ifdef _DEBUG
 #define FS_DPrintf(...) \
     if (fs_debug && fs_debug->integer) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #else
 #define FS_DPrintf(...)
 #endif
@@ -439,7 +439,7 @@ static file_t *file_for_handle(qhandle_t f)
         return NULL;
 
     if (file->type < FS_FREE || file->type >= FS_BAD)
-        Com_Error(ERR_FATAL, "%s: bad file type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad file type", __func__);
 
     return file;
 }
@@ -1150,7 +1150,7 @@ static void open_zip_file(file_t *file)
         z->zalloc = FS_zalloc;
         z->zfree = FS_zfree;
         if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
-            Com_Error(ERR_FATAL, "%s: inflateInit2() failed", __func__);
+            Com_Error(ErrorType::Fatal, "%s: inflateInit2() failed", __func__);
         }
     }
 
@@ -1727,7 +1727,7 @@ ssize_t FS_Write(const void *buf, size_t len, qhandle_t f)
         break;
 #endif
     default:
-        Com_Error(ERR_FATAL, "%s: bad file type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad file type", __func__);
     }
 
     return len;
@@ -1745,7 +1745,7 @@ ssize_t FS_FOpenFile(const char *name, qhandle_t *f, unsigned mode)
     ssize_t ret;
 
     if (!name || !f) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     *f = 0;
@@ -1918,7 +1918,7 @@ ssize_t FS_LoadFileEx(const char *path, void **buffer, unsigned flags, memtag_t 
     ssize_t len, read;
 
     if (!path) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     if (buffer) {
@@ -2116,7 +2116,7 @@ static void pack_put(pack_t *pack)
         return;
     }
     if (!pack->refcount) {
-        Com_Error(ERR_FATAL, "%s: refcount already zero", __func__);
+        Com_Error(ErrorType::Fatal, "%s: refcount already zero", __func__);
     }
     if (!--pack->refcount) {
         FS_DPrintf("Freeing packfile %s\n", pack->filename);
@@ -3724,7 +3724,7 @@ static void fs_game_changed(cvar_t *self)
         // Determine whether we got valid game data or not. Silly, cheap check, but whatever.
 		if (/*!FS_FileExists("pics/colormap.pcx") || */!FS_FileExists("pics/conchars.png") || !FS_FileExists("default.cfg"))
 		{
-			Com_Error(ERR_FATAL, "No game data files detected. Please make sure that there is a game directory with valid content "
+			Com_Error(ErrorType::Fatal, "No game data files detected. Please make sure that there is a game directory with valid content "
 				" in the game directory: %s.\nReinstalling the game can fix the issue.", fs_gamedir);
 		}
 

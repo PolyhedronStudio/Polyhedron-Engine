@@ -349,10 +349,10 @@ void SV_InitGame()
 
     if (svs.initialized) {
         // cause any connected clients to reconnect
-        SV_Shutdown("Server restarted\n", (ErrorType)(ERR_RECONNECT));
+        SV_Shutdown("Server restarted\n", ErrorType::Reconnect);
     } else {
         // make sure the client is down
-        CL_Disconnect(ERR_RECONNECT);
+        CL_Disconnect(ErrorType::Reconnect);
         SCR_BeginLoadingPlaque();
 
         CM_FreeMap(&sv.cm);
@@ -438,7 +438,7 @@ void SV_InitGame()
     svs.z.zfree = SV_zfree;
     if (deflateInit2(&svs.z, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
                      -MAX_WBITS, 9, Z_DEFAULT_STRATEGY) != Z_OK) {
-        Com_Error(ERR_FATAL, "%s: deflateInit2() failed", __func__);
+        Com_Error(ErrorType::Fatal, "%s: deflateInit2() failed", __func__);
     }
 #endif
 

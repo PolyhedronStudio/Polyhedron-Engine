@@ -310,7 +310,7 @@ public:
 	void ClientFrame();
 	void ClientDisconnect();
 	void ClientUpdateUserinfo(cvar_t* var, from_t from);
-	void SetClientLoadState(LoadState loadState);
+	void SetClientLoadState(int32_t loadState);
 	uint32_t GetClientState();
 	qboolean CheckForIgnore(const std::string& str);
 	void CheckForIP(const std::string& str);

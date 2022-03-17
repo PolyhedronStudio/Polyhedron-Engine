@@ -37,7 +37,7 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityN
 
     // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
     if (svFrame->numEntities >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: MAX_EDICTS exceeded", __func__);
+        Com_Error(ErrorType::Drop, "%s: MAX_EDICTS exceeded", __func__);
     }
 
     entityState = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
@@ -47,7 +47,7 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityN
 #ifdef _DEBUG
     if (cl_shownet->integer > 2 && byteMask) {
         MSG_ShowDeltaEntityBits(byteMask);
-        Com_LPrintf(PRINT_DEVELOPER, "\n");
+        Com_LPrintf(PrintType::Developer, "\n");
     }
 #endif
 
@@ -90,11 +90,11 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
         newnum = MSG_ReadEntityNumber(&removeEntity, &byteMask);
 
         if (newnum < 0 || newnum >= MAX_EDICTS) {
-            Com_Error(ERR_DROP, "%s: bad number: %d", __func__, newnum);
+            Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, newnum);
         }
 
         if (msg_read.readCount > msg_read.currentSize) {
-            Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+            Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);
         }
 
         if (!newnum) {
@@ -125,7 +125,7 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
                 Com_DPrintf("EntityMessageBits::Remove: oldnum != newnum\n");
             }
             if (!oldframe) {
-                Com_Error(ERR_DROP, "%s: EntityMessageBits::Remove with NULL oldframe", __func__);
+                Com_Error(ErrorType::Drop, "%s: EntityMessageBits::Remove with NULL oldframe", __func__);
             }
 
             oldindex++;
@@ -277,10 +277,10 @@ static void CL_ParseFrame(int extrabits)
     length = MSG_ReadUint8();//MSG_ReadByte();
     if (length) {
         if (length < 0 || msg_read.readCount + length > msg_read.currentSize) {
-            Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+            Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);
         }
         if (length > sizeof(frame.areaBits)) {
-            Com_Error(ERR_DROP, "%s: invalid areaBits length", __func__);
+            Com_Error(ErrorType::Drop, "%s: invalid areaBits length", __func__);
         }
         memcpy(frame.areaBits, msg_read.data + msg_read.readCount, length);
         msg_read.readCount += length;
@@ -292,7 +292,7 @@ static void CL_ParseFrame(int extrabits)
     // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
     //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
     //    if (MSG_ReadByte() != ServerCommand::PlayerInfo) {
-    //        Com_Error(ERR_DROP, "%s: not playerinfo", __func__);
+    //        Com_Error(ErrorType::Drop, "%s: not playerinfo", __func__);
     //    }
     //}
 
@@ -304,7 +304,7 @@ static void CL_ParseFrame(int extrabits)
 #ifdef _DEBUG
     if (cl_shownet->integer > 2 && (bits || extraflags)) {
         MSG_ShowDeltaPlayerstateBits(bits, extraflags);
-        Com_LPrintf(PRINT_DEVELOPER, "\n");
+        Com_LPrintf(PrintType::Developer, "\n");
     }
 #endif
     // parse clientNumber
@@ -328,7 +328,7 @@ static void CL_ParseFrame(int extrabits)
             int seq = cls.netChannel->incomingAcknowledged & CMD_MASK;
             rtt = cls.realtime - cl.clientCommandHistory[seq].timeSent;
         }
-        Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
+        Com_LPrintf(PrintType::Developer, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
                     msg_read.readCount - 1, frame.number, frame.delta, rtt);
     }
 #endif
@@ -340,7 +340,7 @@ static void CL_ParseFrame(int extrabits)
 
     if (!frame.playerState.fov) {
         // fail out early to prevent spurious errors later
-        Com_Error(ERR_DROP, "%s: bad fov", __func__);
+        Com_Error(ErrorType::Drop, "%s: bad fov", __func__);
     }
 
     if (cls.connectionState < ClientConnectionState::Precached)
@@ -369,7 +369,7 @@ static void CL_ParseConfigstring(int index)
     char    *s;
 
     if (index < 0 || index >= ConfigStrings::MaxConfigStrings) {
-        Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
+        Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
     }
 
     s = cl.configstrings[index];
@@ -400,12 +400,12 @@ static void CL_ParseConfigstring(int index)
 static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
 {
     if (index < 1 || index >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
+        Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
     }
 #ifdef _DEBUG
     if (cl_shownet->integer > 2) {
         MSG_ShowDeltaEntityBits(byteMask);
-        Com_LPrintf(PRINT_DEVELOPER, "\n");
+        Com_LPrintf(PrintType::Developer, "\n");
     }
 #endif
     MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, byteMask, cl.entityStateFlags);
@@ -460,10 +460,10 @@ static void CL_ParseServerData(void)
     // check protocol
     if (cls.serverProtocol != protocol) {
         if (!cls.demo.playback) {
-            Com_Error(ERR_DROP, "Requested protocol version %d, but server returned %d.",
+            Com_Error(ErrorType::Drop, "Requested protocol version %d, but server returned %d.",
                       cls.serverProtocol, protocol);
         }/* else {
-            Com_Error(ERR_DROP, "Demo uses unsupported protocol version %d", protocol);
+            Com_Error(ErrorType::Drop, "Demo uses unsupported protocol version %d", protocol);
         }*/
 
         cls.serverProtocol = protocol;
@@ -472,7 +472,7 @@ static void CL_ParseServerData(void)
     // game directory
     len = MSG_ReadStringBuffer(cl.gamedir, sizeof(cl.gamedir));//MSG_ReadString(cl.gamedir, sizeof(cl.gamedir));
     if (len >= sizeof(cl.gamedir)) {
-        Com_Error(ERR_DROP, "Oversize gamedir string");
+        Com_Error(ErrorType::Drop, "Oversize gamedir string");
     }
 
     // never allow demos to change gamedir
@@ -501,7 +501,7 @@ static void CL_ParseServerData(void)
     //if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON) {
     i = MSG_ReadInt16();//MSG_ReadShort();
     if (!POLYHEDRON_PROTOCOL_SUPPORTED(protocol)) {
-        Com_Error(ERR_DROP,
+        Com_Error(ErrorType::Drop,
                     "Polyhedron server reports unsupported protocol version %d.\n"
                     "Current server/client version is %d.", protocol, PROTOCOL_VERSION_POLYHEDRON_CURRENT);
     }
@@ -554,11 +554,11 @@ static void CL_ParseStartSoundPacket(void)
 
     flags = MSG_ReadUint8();//MSG_ReadByte();
     if ((flags & (SoundCommandBits::Entity | SoundCommandBits::Position)) == 0)
-        Com_Error(ERR_DROP, "%s: neither SoundCommandBits::Entity nor SoundCommandBits::Position set", __func__);
+        Com_Error(ErrorType::Drop, "%s: neither SoundCommandBits::Entity nor SoundCommandBits::Position set", __func__);
 
     snd.index = MSG_ReadUint8();//MSG_ReadByte();
     if (snd.index == -1)
-        Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+        Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);
 
     if (flags & SoundCommandBits::Volume)
         snd.volume = MSG_ReadUint8() / 255.0f;//MSG_ReadByte() / 255.0f;
@@ -580,7 +580,7 @@ static void CL_ParseStartSoundPacket(void)
         channel = MSG_ReadInt16();//MSG_ReadShort();
         entity = channel >> 3;
         if (entity < 0 || entity >= MAX_EDICTS)
-            Com_Error(ERR_DROP, "%s: bad entity: %d", __func__, entity);
+            Com_Error(ErrorType::Drop, "%s: bad entity: %d", __func__, entity);
         snd.entity = entity;
         snd.channel = channel & 7;
     } else {
@@ -600,7 +600,7 @@ static void CL_ParseStartSoundPacket(void)
 static void CL_ParseReconnect(void)
 {
     if (cls.demo.playback) {
-        Com_Error(ERR_DISCONNECT, "Server disconnected");
+        Com_Error(ErrorType::Disconnect, "Server disconnected");
     }
 
     Com_Printf("Server disconnected, reconnecting\n");
@@ -612,7 +612,7 @@ static void CL_ParseReconnect(void)
         cls.netChannel = NULL;
     }
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     cls.connectionState = ClientConnectionState::Challenging;
     cls.timeOfInitialConnect -= CONNECT_FAST;
@@ -701,7 +701,7 @@ static void CL_ParseDownload(int cmd)
     byte *data;
 
     if (!cls.download.temp[0]) {
-        Com_Error(ERR_DROP, "%s: no download requested", __func__);
+        Com_Error(ErrorType::Drop, "%s: no download requested", __func__);
     }
 
     // read the data
@@ -725,11 +725,11 @@ static void CL_ParseDownload(int cmd)
     }
 
     if (size < 0) {
-        Com_Error(ERR_DROP, "%s: bad size: %d", __func__, size);
+        Com_Error(ErrorType::Drop, "%s: bad size: %d", __func__, size);
     }
 
     if (msg_read.readCount + size > msg_read.currentSize) {
-        Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+        Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);
     }
 
     data = msg_read.data + msg_read.readCount;
@@ -746,18 +746,18 @@ static void CL_ParseZPacket(void)
     int         inlen, outlen;
 
     if (msg_read.data != msg_read_buffer) {
-        Com_Error(ERR_DROP, "%s: recursively entered", __func__);
+        Com_Error(ErrorType::Drop, "%s: recursively entered", __func__);
     }
 
     inlen = MSG_ReadUint16();//MSG_ReadWord();
     outlen = MSG_ReadUint16();//MSG_ReadWord();
 
     if (inlen == -1 || outlen == -1 || msg_read.readCount + inlen > msg_read.currentSize) {
-        Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+        Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);
     }
 
     if (outlen > MAX_MSGLEN) {
-        Com_Error(ERR_DROP, "%s: invalid output length", __func__);
+        Com_Error(ErrorType::Drop, "%s: invalid output length", __func__);
     }
 
     inflateReset(&cls.z);
@@ -767,7 +767,7 @@ static void CL_ParseZPacket(void)
     cls.z.next_out = buffer;
     cls.z.avail_out = (uInt)outlen;
     if (inflate(&cls.z, Z_FINISH) != Z_STREAM_END) {
-        Com_Error(ERR_DROP, "%s: inflate() failed: %s", __func__, cls.z.msg);
+        Com_Error(ErrorType::Drop, "%s: inflate() failed: %s", __func__, cls.z.msg);
     }
 
     msg_read.readCount += inlen;
@@ -780,7 +780,7 @@ static void CL_ParseZPacket(void)
 
     msg_read = temp;
 #else
-    Com_Error(ERR_DROP, "Compressed server packet received, "
+    Com_Error(ErrorType::Drop, "Compressed server packet received, "
               "but no zlib support linked in.");
 #endif // USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
 }
@@ -798,9 +798,9 @@ void CL_ParseServerMessage(void)
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.currentSize); // CPP: String concat.
+        Com_LPrintf(PrintType::Developer, "%" PRIz " ", msg_read.currentSize); // CPP: String concat.
     } else if (cl_shownet->integer > 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "------------------\n");
+        Com_LPrintf(PrintType::Developer, "------------------\n");
     }
 #endif
 
@@ -812,7 +812,7 @@ void CL_ParseServerMessage(void)
 
     while (1) {
         if (msg_read.readCount > msg_read.currentSize) {
-            Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
+            Com_Error(ErrorType::Drop, "%s: read past end of server message", __func__);
         }
 
         readCount = msg_read.readCount;
@@ -841,14 +841,14 @@ void CL_ParseServerMessage(void)
                 goto badbyte;
             }
 badbyte:
-            Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
+            Com_Error(ErrorType::Drop, "%s: illegible server message: %d", __func__, cmd);
             break;
 
         case ServerCommand::Padding:
             break;
 
         case ServerCommand::Disconnect:
-            Com_Error(ERR_DISCONNECT, "Server disconnected");
+            Com_Error(ErrorType::Disconnect, "Server disconnected");
             break;
 
         case ServerCommand::Reconnect:
@@ -937,9 +937,9 @@ void CL_SeekDemoMessage(void)
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "%" PRIz " ", msg_read.currentSize); // CPP: String concat.
+        Com_LPrintf(PrintType::Developer, "%" PRIz " ", msg_read.currentSize); // CPP: String concat.
     } else if (cl_shownet->integer > 1) {
-        Com_LPrintf(PRINT_DEVELOPER, "------------------\n");
+        Com_LPrintf(PrintType::Developer, "------------------\n");
     }
 #endif
 
@@ -948,7 +948,7 @@ void CL_SeekDemoMessage(void)
 //
     while (1) {
         if (msg_read.readCount > msg_read.currentSize) {
-            Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
+            Com_Error(ErrorType::Drop, "%s: read past end of server message", __func__);
         }
 
         if ((cmd = MSG_ReadUint8()) == -1) {//if ((cmd = MSG_ReadByte()) == -1) {
@@ -970,7 +970,7 @@ void CL_SeekDemoMessage(void)
         default:
             // Give the CGModule a chance to handle the command.
             if (!CL_GM_SeekDemoMessage(cmd)) {
-                Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
+                Com_Error(ErrorType::Drop, "%s: illegible server message: %d", __func__, cmd);
             }
             break;
 
@@ -979,7 +979,7 @@ void CL_SeekDemoMessage(void)
 
         case ServerCommand::Disconnect:
         case ServerCommand::Reconnect:
-            Com_Error(ERR_DISCONNECT, "Server disconnected");
+            Com_Error(ErrorType::Disconnect, "Server disconnected");
             break;
 
         case ServerCommand::Print:

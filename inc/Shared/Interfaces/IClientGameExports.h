@@ -93,7 +93,7 @@ public:
     virtual ~IClientGameExportMedia() = default;
 
     // Called when the client wants to know the name of a custom load state.
-    virtual std::string GetLoadStateName(LoadState loadState) = 0;
+    virtual std::string GetLoadStateName(int32_t loadState) = 0;
 
     // This is called when the client spawns into a server,
     //

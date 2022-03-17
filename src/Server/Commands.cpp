@@ -280,7 +280,7 @@ static void SV_Map(qboolean restart) {
     if (!SV_ParseMapCmd(&cmd))
         return;
 
-    // save pending CM to be freed later if ERR_DROP is thrown
+    // save pending CM to be freed later if ErrorType::Drop is thrown
     Com_AbortFunc(abort_func, &cmd.cm);
 
     // wipe savegames
@@ -371,7 +371,7 @@ static void SV_GameMap_f(void)
     // admin option to reload the game DLL or entire server
     if (sv_recycle->integer > 0) {
         if (sv_recycle->integer > 1) {
-            Com_Quit(NULL, ERR_RECONNECT);
+            Com_Quit(NULL, ErrorType::Reconnect);
         }
         SV_Map(true);
         return;
@@ -726,7 +726,7 @@ static void SV_ConSay_f(void)
     }
 
     if (COM_DEDICATED) {
-        Com_LPrintf(PRINT_TALK, "console: %s\n", s);
+        Com_LPrintf(PrintType::Talk, "console: %s\n", s);
     }
 }
 
@@ -962,7 +962,7 @@ static void SV_KillServer_f(void)
         return;
     }
 
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 }
 
 /*

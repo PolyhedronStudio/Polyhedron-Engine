@@ -61,7 +61,7 @@ qerror_t CL_QueueDownload(const char *path, dltype_t type)
 
     len = strlen(path);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize Polyhedron path", __func__);
+        Com_Error(ErrorType::Drop, "%s: oversize Polyhedron path", __func__);
     }
 
     // CPP:
@@ -116,10 +116,10 @@ Mark the queue entry as done, decrementing pending count.
 void CL_FinishDownload(dlqueue_t *q)
 {
     if (q->state == DL_DONE) {
-        Com_Error(ERR_DROP, "%s: already done", __func__);
+        Com_Error(ErrorType::Drop, "%s: already done", __func__);
     }
     if (!cls.download.pending) {
-        Com_Error(ERR_DROP, "%s: bad pending count", __func__);
+        Com_Error(ErrorType::Drop, "%s: bad pending count", __func__);
     }
 
     q->state = DL_DONE;
@@ -243,7 +243,7 @@ static qboolean start_udp_download(dlqueue_t *q)
 
     len = strlen(q->path);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize Polyhedron path", __func__);
+        Com_Error(ErrorType::Drop, "%s: oversize Polyhedron path", __func__);
     }
 
     // download to a temp name, and only rename
@@ -376,7 +376,7 @@ static int inflate_udp_download(byte *data, int inlen, int outlen)
 
     // initialize stream if not done yet
     if (z->state == NULL && inflateInit2(z, -MAX_WBITS) != Z_OK)
-        Com_Error(ERR_FATAL, "%s: inflateInit2() failed", __func__);
+        Com_Error(ErrorType::Fatal, "%s: inflateInit2() failed", __func__);
 
     z->next_in = data;
     z->avail_in = inlen;
@@ -414,7 +414,7 @@ static int inflate_udp_download(byte *data, int inlen, int outlen)
     return 0;
 #else
     // should never happen
-    Com_Error(ERR_DROP, "Compressed server packet received, "
+    Com_Error(ErrorType::Drop, "Compressed server packet received, "
               "but no zlib support linked in.");
     return 0;
 #endif
@@ -433,7 +433,7 @@ void CL_HandleDownload(byte *data, int size, int percent, int compressed)
     qerror_t ret;
 
     if (!q) {
-        Com_Error(ERR_DROP, "%s: no download requested", __func__);
+        Com_Error(ErrorType::Drop, "%s: no download requested", __func__);
     }
 
     if (size == -1) {
@@ -896,7 +896,7 @@ void CL_RequestNextDownload(void)
         break;
 
     default:
-        Com_Error(ERR_DROP, "%s: bad precache_check\n", __func__);
+        Com_Error(ErrorType::Drop, "%s: bad precache_check\n", __func__);
     }
 }
 

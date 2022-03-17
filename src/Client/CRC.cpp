@@ -154,7 +154,7 @@ byte COM_BlockSequenceCRCByte(byte *base, size_t length, int sequence)
     unsigned short crc;
 
     if (sequence < 0)
-        Com_Error(ERR_DROP, "%s: sequence < 0", __func__);
+        Com_Error(ErrorType::Drop, "%s: sequence < 0", __func__);
 
     p = chktbl + (sequence % (sizeof(chktbl) - 4));
 

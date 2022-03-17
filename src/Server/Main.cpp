@@ -2036,7 +2036,7 @@ static void SV_FinalMessage(const char *message, int32_t errorType)
         MSG_WriteString(message);
     }
 
-    if (errorType == ERR_RECONNECT)
+    if (errorType == ErrorType::Reconnect)
         MSG_WriteUint8(ServerCommand::Reconnect);//MSG_WriteByte(ServerCommand::Reconnect);
     else
         MSG_WriteUint8(ServerCommand::Disconnect);//MSG_WriteByte(ServerCommand::Disconnect);

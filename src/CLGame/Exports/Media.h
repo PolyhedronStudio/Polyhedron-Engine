@@ -29,7 +29,7 @@ public:
     /**
     *   @brief Called when the client wants to acquire the name of a load state.
     **/
-    std::string GetLoadStateName(LoadState loadState) final;
+    std::string GetLoadStateName(int32_t loadState) final;
 
     /**
     *   @brief  This is called when the client spawns into a server,

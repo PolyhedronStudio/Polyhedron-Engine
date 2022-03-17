@@ -386,7 +386,7 @@ void CL_InitGameProgs(void)
 
     // all paths failed
     if (!entry)
-        Com_Error(ERR_DROP, "Failed to load Client Game library");
+        Com_Error(ErrorType::Drop, "Failed to load Client Game library");
 
     // API Version.
     importAPI.apiversion = {
@@ -633,7 +633,7 @@ void CL_InitGameProgs(void)
     cge = entry(&importAPI);
 
     if (!cge) {
-        Com_Error(ERR_DROP, "Client Game DLL returned NULL exports");
+        Com_Error(ErrorType::Drop, "Client Game DLL returned NULL exports");
         return;
     }
 
@@ -641,7 +641,7 @@ void CL_InitGameProgs(void)
 
     if (!core || core->version.major != CGAME_API_VERSION_MAJOR ||
         core->version.minor != CGAME_API_VERSION_MINOR) {
-        Com_Error(ERR_DROP, "Client Game DLL is version %i.%i.%i, expected %i.%i.%i",
+        Com_Error(ErrorType::Drop, "Client Game DLL is version %i.%i.%i, expected %i.%i.%i",
             core->version.major, core->version.minor, core->version.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
         return;
     }
@@ -963,13 +963,13 @@ void CL_GM_InitMedia(void) {
 /**
 *   @brief  Call into the CG Module for notifying about "Media Load State Name"
 **/
-const char *CL_GM_GetMediaLoadStateName(LoadState state)
+const char *CL_GM_GetMediaLoadStateName(int32_t loadState)
 {
     if (cge) {
         IClientGameExportMedia *media = cge->GetMediaInterface();
 
         if (media) {
-            return media->GetLoadStateName(state).c_str();
+            return media->GetLoadStateName(loadState).c_str();
         }
     }
 

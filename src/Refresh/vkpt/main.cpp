@@ -282,7 +282,7 @@ vkpt_initialize_all(VkptInitFlags_t init_flags)
 		assert(init->is_initialized);
 
 		if (!init->is_initialized)
-		  Com_Error(ERR_FATAL, "Couldn't initialize %s.\n", init->name);
+		  Com_Error(ErrorType::Fatal, "Couldn't initialize %s.\n", init->name);
 	}
 
 	if ((VKPT_INIT_DEFAULT & init_flags) == init_flags)
@@ -871,7 +871,7 @@ init_vulkan()
 
 	if (result != VK_SUCCESS)
 	{
-		Com_Error(ERR_FATAL, "Failed to initialize a Vulkan instance.\nError code: %s", qvk_result_to_string(result));
+		Com_Error(ErrorType::Fatal, "Failed to initialize a Vulkan instance.\nError code: %s", qvk_result_to_string(result));
 		return false;
 	}
 
@@ -1029,7 +1029,7 @@ init_vulkan()
 	}
 	if (picked_device < 0)
 	{
-		Com_Error(ERR_FATAL, "No ray tracing capable GPU found.");
+		Com_Error(ErrorType::Fatal, "No ray tracing capable GPU found.");
 	}
 
 	qvk.physical_device = devices[picked_device];
@@ -1066,7 +1066,7 @@ init_vulkan()
 			int nfields = sscanf(cvar_min_driver_version_nvidia->string, "%u.%u", &required_major, &required_minor);
 			if (nfields == 2) 			{
 				if (driver_major < required_major || driver_major == required_major && driver_minor < required_minor) 				{
-					Com_Error(ERR_FATAL, "This game requires NVIDIA Graphics Driver version to be at least %u.%02u, "
+					Com_Error(ErrorType::Fatal, "This game requires NVIDIA Graphics Driver version to be at least %u.%02u, "
 						"while the installed version is %u.%02u.\nPlease update the NVIDIA Graphics Driver.",
 						required_major, required_minor, driver_major, driver_minor);
 				}
@@ -1090,7 +1090,7 @@ init_vulkan()
 			{
 				if (present_major < required_major || present_major == required_major && present_minor < required_minor || present_major == required_major && present_minor == required_minor && present_patch < required_patch)
 				{
-					Com_Error(ERR_FATAL, "This game requires AMD Radeon Software version to be at least %s, while the installed version is %s.\nPlease update the AMD Radeon Software.",
+					Com_Error(ErrorType::Fatal, "This game requires AMD Radeon Software version to be at least %s, while the installed version is %s.\nPlease update the AMD Radeon Software.",
 						cvar_min_driver_version_amd->string, driver_properties.driverInfo);
 				}
 			}
@@ -1151,7 +1151,7 @@ init_vulkan()
 	}
 
 	if (qvk.queue_idx_graphics < 0 || qvk.queue_idx_transfer < 0) {
-		Com_Error(ERR_FATAL, "Could not find a suitable Vulkan queue family!\n");
+		Com_Error(ErrorType::Fatal, "Could not find a suitable Vulkan queue family!\n");
 		return false;
 	}
 	
@@ -1328,7 +1328,7 @@ init_vulkan()
 	result = vkCreateDevice(qvk.physical_device, &dev_create_info, NULL, &qvk.device);
 	if (result != VK_SUCCESS)
 	{
-		Com_Error(ERR_FATAL, "Failed to create a Vulkan device.\nError code: %s", qvk_result_to_string(result));
+		Com_Error(ErrorType::Fatal, "Failed to create a Vulkan device.\nError code: %s", qvk_result_to_string(result));
 		return false;
 	}
 
@@ -3386,7 +3386,7 @@ R_Init_RTX(qboolean total)
 	registration_sequence = 1;
 
 	if (!VID_Init(GAPI_VULKAN)) {
-		Com_Error(ERR_FATAL, "VID_Init failed\n");
+		Com_Error(ErrorType::Fatal, "VID_Init failed\n");
 		return false;
 	}
 
@@ -3523,7 +3523,7 @@ R_Init_RTX(qboolean total)
 	MOD_Init();
 	
 	if(!init_vulkan()) {
-		Com_Error(ERR_FATAL, "Couldn't initialize Vulkan.\n");
+		Com_Error(ErrorType::Fatal, "Couldn't initialize Vulkan.\n");
 		return false;
 	}
 
@@ -3935,7 +3935,7 @@ R_BeginRegistration_RTX(const char *name)
 	bsp_t *bsp;
 	qerror_t ret = BSP_Load(bsp_path, &bsp);
 	if(!bsp) {
-		Com_Error(ERR_DROP, "%s: couldn't load %s: %s", __func__, bsp_path, Q_ErrorString(ret));
+		Com_Error(ErrorType::Drop, "%s: couldn't load %s: %s", __func__, bsp_path, Q_ErrorString(ret));
 	}
 	bsp_world_model = bsp;
 	bsp_mesh_register_textures(bsp);

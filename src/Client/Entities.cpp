@@ -379,11 +379,11 @@ void CL_CheckEntityPresent(int entnum, const char *what)
     }
 
     if (e->serverFrame) {
-        Com_LPrintf(PRINT_DEVELOPER,
+        Com_LPrintf(PrintType::Developer,
                     "SERVER BUG: %s on entity %d last seen %d frames ago\n",
                     what, entnum, cl.frame.number - e->serverFrame);
     } else {
-        Com_LPrintf(PRINT_DEVELOPER,
+        Com_LPrintf(PrintType::Developer,
                     "SERVER BUG: %s on entity %d never seen before\n",
                     what, entnum);
     }
@@ -480,7 +480,7 @@ trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, co
 
     // Ensure we can pull of a proper trace.
     if (!cl.bsp || !cl.bsp->nodes) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
         return trace;
     }
 
@@ -522,7 +522,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
     vec3_t org = vec3_zero();
 
     if (entnum < 0 || entnum >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: bad entnum: %d", __func__, entnum);
+        Com_Error(ErrorType::Drop, "%s: bad entnum: %d", __func__, entnum);
     }
 
     if (!entnum || entnum == listener_entnum) {
@@ -560,7 +560,7 @@ vec3_t CL_GetEntitySoundVelocity(int ent)
     vec3_t vel = vec3_zero();
 	if ((ent < 0) || (ent >= MAX_EDICTS))
 	{
-		Com_Error(ERR_DROP, "CL_GetEntitySoundVelocity: bad ent");
+		Com_Error(ErrorType::Drop, "CL_GetEntitySoundVelocity: bad ent");
 	}
 
 	old = &cs.entities[ent];

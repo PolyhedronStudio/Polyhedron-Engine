@@ -518,7 +518,7 @@ LONG WINAPI Sys_ExceptionFilter(LPEXCEPTION_POINTERS exceptionInfo)
 
 finalize:
     // Try to quit nicely, most importantly, try to flush and close the console log.
-    Com_Quit(NULL, ERR_FATAL);
+    Com_Quit(NULL, ErrorType::Fatal);
 
     return EXCEPTION_EXECUTE_HANDLER;
 }

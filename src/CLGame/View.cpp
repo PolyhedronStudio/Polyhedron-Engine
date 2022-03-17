@@ -150,7 +150,7 @@ void V_AddLightStyle(int style, const vec4_t &value)
     lightstyle_t    *ls;
 
     if (style < 0 || style >= MAX_LIGHTSTYLES)
-        Com_Error(ERR_DROP, "Bad light style %i", style);
+        Com_Error(ErrorType::Drop, "Bad light style %i", style);
     ls = &view.lightstyles[style];
 
     //ls->white = r+g+b;

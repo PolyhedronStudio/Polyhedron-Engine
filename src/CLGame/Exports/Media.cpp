@@ -44,7 +44,7 @@ void ClientGameMedia::Shutdown() {
 // ClientGameMedia::GetLoadStateName
 //
 //---------------
-std::string ClientGameMedia::GetLoadStateName(LoadState loadState) {
+std::string ClientGameMedia::GetLoadStateName(int32_t loadState) {
     // One can put a switch here for the states.
     return "";
 }
@@ -325,7 +325,7 @@ void ClientGameMedia::ParsePlayerSkin(char* name, char* model, char* skin, const
     // overflow, but still check the length to be entirely fool-proof
     len = strlen(s);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize playerskin", __func__);
+        Com_Error(ErrorType::Drop, "%s: oversize playerskin", __func__);
     }
 
     // isolate the player's name

@@ -214,7 +214,7 @@ char* COM_SkipPath(const char* pathname)
     char* last;
 
     if (!pathname) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     last = (char*)pathname;
@@ -262,7 +262,7 @@ char* COM_FileExtension(const char* in)
     const char* last;
 
     if (!in) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     s = in + strlen(in);
@@ -799,7 +799,7 @@ size_t Q_strlcat(char* dst, const char* src, size_t size)
     size_t ret, len = strlen(dst);
 
     if (len >= size) {
-        Com_Error(ERR_FATAL, "%s: already overflowed", __func__);
+        Com_Error(ErrorType::Fatal, "%s: already overflowed", __func__);
     }
 
     ret = Q_strlcpy(dst + len, src, size - len);
@@ -855,7 +855,7 @@ size_t Q_vsnprintf(char* dest, size_t size, const char* fmt, va_list argptr)
     int ret;
 
     if (size > INT_MAX)
-        Com_Error(ERR_FATAL, "%s: bad buffer size", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad buffer size", __func__);
 
 #ifdef _WIN32
     if (size) {

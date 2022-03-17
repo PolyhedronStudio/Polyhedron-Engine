@@ -372,7 +372,7 @@ qhandle_t SCR_ReadNextFrame(void)
     FS_Read(&size, 4, cin.file);
     size = LittleLong(size);
     if (size > sizeof(compressed) || size < 1)
-        Com_Error(ERR_DROP, "Bad compressed frame size");
+        Com_Error(ErrorType::Drop, "Bad compressed frame size");
     FS_Read(compressed, size, cin.file);
 
     // read sound

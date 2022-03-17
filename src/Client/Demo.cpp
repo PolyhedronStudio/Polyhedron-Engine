@@ -615,13 +615,13 @@ static void finish_demo(int ret)
 
     if (!s[0]) {
         if (ret == 0) {
-            Com_Error(ERR_DISCONNECT, "Demo finished");
+            Com_Error(ErrorType::Disconnect, "Demo finished");
         } else {
-            Com_Error(ERR_DROP, "Couldn't read demo: %s", Q_ErrorString(ret));
+            Com_Error(ErrorType::Drop, "Couldn't read demo: %s", Q_ErrorString(ret));
         }
     }
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     Cvar_Set("nextserver", "");
 
@@ -709,9 +709,9 @@ static void CL_PlayDemo_f(void)
     }
 
     // if running a local server, kill it and reissue
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     cls.demo.playback = f;
 

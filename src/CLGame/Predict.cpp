@@ -85,7 +85,7 @@ CLGTrace CLG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, 
 
     //// Ensure we can pull of a proper trace.
     //if (!cl->bsp || !cl->bsp->nodes) {
-    //    Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+    //    Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     //}
 
     //// Execute box trace.

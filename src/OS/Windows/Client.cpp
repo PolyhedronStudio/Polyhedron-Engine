@@ -974,7 +974,7 @@ void VID_PumpEvents(void)
 
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         if (msg.message == WM_QUIT) {
-            Com_Quit(NULL, ERR_DISCONNECT);
+            Com_Quit(NULL, ErrorType::Disconnect);
             break;
         }
         win.lastMsgTime = msg.time;
@@ -1047,7 +1047,7 @@ void Win_Init(void)
     wc.lpszClassName = _T(WINDOW_CLASS_NAME);
 
     if (!RegisterClassEx(&wc)) {
-        Com_Error(ERR_FATAL, "Couldn't register main window class");
+        Com_Error(ErrorType::Fatal, "Couldn't register main window class");
     }
 
     // create the window
@@ -1062,12 +1062,12 @@ void Win_Init(void)
                   NULL);
 
     if (!win.wnd) {
-        Com_Error(ERR_FATAL, "Couldn't create main window");
+        Com_Error(ErrorType::Fatal, "Couldn't create main window");
     }
 
     win.dc = GetDC(win.wnd);
     if (!win.dc) {
-        Com_Error(ERR_FATAL, "Couldn't get DC of the main window");
+        Com_Error(ErrorType::Fatal, "Couldn't get DC of the main window");
     }
 
     // init gamma ramp

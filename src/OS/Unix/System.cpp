@@ -311,7 +311,7 @@ Sys_FreeLibrary
 void Sys_FreeLibrary(void *handle)
 {
     if (handle && dlclose(handle)) {
-        Com_Error(ERR_FATAL, "dlclose failed on %p: %s", handle, dlerror());
+        Com_Error(ErrorType::Fatal, "dlclose failed on %p: %s", handle, dlerror());
     }
 }
 
@@ -526,7 +526,7 @@ int main(int argc, char **argv)
         Qcommon_Frame();
     }
 
-    Com_Quit(NULL, ERR_DISCONNECT);
+    Com_Quit(NULL, ErrorType::Disconnect);
     return EXIT_FAILURE; // never gets here
 }
 

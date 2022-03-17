@@ -465,11 +465,11 @@ usage:
     Q_strlcpy(cls.servername, server, sizeof(cls.servername));
 
     // if running a local server, kill it and reissue
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 
     NET_Config(NET_CLIENT);
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     cls.serverAddress = address;
     cls.serverProtocol = protocol;
@@ -524,11 +524,11 @@ static void CL_PassiveConnect_f(void)
     }
 
     // if running a local server, kill it and reissue
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 
     NET_Config(NET_CLIENT);
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     if (!NET_GetAddress(NS_CLIENT, &address)) {
         return;
@@ -624,8 +624,8 @@ void CL_SetConnectionState (uint32_t connectionState) {
 // Sets the current load state of the client.
 //===============
 //
-void CL_SetLoadState (LoadState state) {
-    CL_LoadState(state);
+void CL_SetLoadState(int32_t loadState) {
+    CL_LoadState(loadState);
 }
 
 /*
@@ -736,7 +736,7 @@ void CL_Disconnect(int32_t errorType)
 
     cls.userinfo_modified = 0;
 
-    if (errorType == ERR_DISCONNECT || errorType == ERR_DROP) {
+    if (errorType == ErrorType::Disconnect || errorType == ErrorType::Drop) {
         //UI_OpenMenu(UIMENU_DEFAULT);
         Cmd_ExecuteCommand(&cl_cmdbuf);
 
@@ -768,7 +768,7 @@ static void CL_Disconnect_f(void)
     }
 
     if (cls.connectionState > ClientConnectionState::Disconnected) {
-        Com_Error(ERR_DISCONNECT, "Disconnected from server");
+        Com_Error(ErrorType::Disconnect, "Disconnected from server");
     }
 }
 
@@ -1080,7 +1080,7 @@ The server is changing levels
 static void CL_Reconnect_f(void)
 {
     if (cls.connectionState >= ClientConnectionState::Precached) {
-        CL_Disconnect(ERR_RECONNECT);
+        CL_Disconnect(ErrorType::Reconnect);
     }
 
     if (cls.connectionState >= ClientConnectionState::Connected) {
@@ -1333,7 +1333,7 @@ static void CL_ConnectionlessPacket(void)
                 if (*s) {
                     type = atoi(s); // CPP: int to (netchan_type_t)
                     if (type != 1) {
-                        Com_Error(ERR_DISCONNECT,
+                        Com_Error(ErrorType::Disconnect,
                                   "Server returned invalid netchan type");
                     }
                 }
@@ -2781,7 +2781,7 @@ static void CL_CheckTimeout(void)
     if (cls.errorReceived) {
         delta = 5000;
         if (com_localTime - cls.netChannel->lastReceivedTime > delta)  {
-            Com_Error(ERR_DISCONNECT, "Server connection was reset.");
+            Com_Error(ErrorType::Disconnect, "Server connection was reset.");
         }
     }
 #endif
@@ -2790,7 +2790,7 @@ static void CL_CheckTimeout(void)
     if (delta && com_localTime - cls.netChannel->lastReceivedTime > delta)  {
         // timeoutcount saves debugger
         if (++cl.timeoutCount > 5) {
-            Com_Error(ERR_DISCONNECT, "Server connection timed out.");
+            Com_Error(ErrorType::Disconnect, "Server connection timed out.");
         }
     } else {
         cl.timeoutCount = 0;
@@ -3170,7 +3170,7 @@ void CL_Init(void)
 
 #if USE_ZLIB
     if (inflateInit2(&cls.z, -MAX_WBITS) != Z_OK) {
-        Com_Error(ERR_FATAL, "%s: inflateInit2() failed", __func__);
+        Com_Error(ErrorType::Fatal, "%s: inflateInit2() failed", __func__);
     }
 #endif
 
@@ -3223,7 +3223,7 @@ void CL_Shutdown(void)
     // PH: Notify the CG Module.
     CL_GM_Shutdown();
 
-    CL_Disconnect(ERR_FATAL);
+    CL_Disconnect(ErrorType::Fatal);
 
 #if USE_ZLIB
     inflateEnd(&cls.z);

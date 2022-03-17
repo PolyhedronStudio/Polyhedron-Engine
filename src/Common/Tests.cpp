@@ -28,12 +28,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // test error shutdown procedures
 static void Com_Error_f(void)
 {
-    Com_Error(ERR_FATAL, "%s", Cmd_Argv(1));
+    Com_Error(ErrorType::Fatal, "%s", Cmd_Argv(1));
 }
 
 static void Com_ErrorDrop_f(void)
 {
-    Com_Error(ERR_DROP, "%s", Cmd_Argv(1));
+    Com_Error(ErrorType::Drop, "%s", Cmd_Argv(1));
 }
 
 static void Com_Freeze_f(void)

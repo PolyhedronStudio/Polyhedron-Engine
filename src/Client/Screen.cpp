@@ -991,7 +991,7 @@ void SCR_UpdateScreen(void)
     }
 
     if (recursive > 1) {
-        Com_Error(ERR_FATAL, "%s: recursively called", __func__);
+        Com_Error(ErrorType::Fatal, "%s: recursively called", __func__);
     }
 
     recursive++;

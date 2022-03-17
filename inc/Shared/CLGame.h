@@ -104,7 +104,7 @@ extern "C" {
     //    // Media.
     //    //---------------------------------------------------------------------
     //    // Called when the client wants to know the name of a custom load stat.
-    //    char        *(*GetMediaLoadStateName) (LoadState state);
+    //    char        *(*GetMediaLoadStateName) (int32_t loadState);
     //    // Called when the renderer initializes.
     //    void        (*InitMedia) (void);
     //    // Called whenever the screen media has te reinitialize.
@@ -225,7 +225,7 @@ extern "C" {
         //
         // Client state.
         // Sets the client load state.
-        void            (*SetClientLoadState) (LoadState state);
+        void            (*SetClientLoadState) (int32_t loadState);
         // Returns the current state of the client.
         uint32_t        (*GetClienState) (void);
 

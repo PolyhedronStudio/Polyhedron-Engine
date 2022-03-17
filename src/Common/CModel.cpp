@@ -845,7 +845,7 @@ static void FloodArea_r(cm_t *cm, int number, int floodnum)
     if (area->floodvalid == floodvalid) {
         if (cm->floodnums[number] == floodnum)
             return;
-        Com_Error(ERR_DROP, "FloodArea_r: reflooded");
+        Com_Error(ErrorType::Drop, "FloodArea_r: reflooded");
     }
 
     cm->floodnums[number] = floodnum;
@@ -1060,7 +1060,7 @@ byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis)
 
     int32_t count = CM_BoxLeafs(cm, mins, maxs, leafs, 64, NULL);
     if (count < 1)
-        Com_Error(ERR_DROP, "CM_FatPVS: leaf count < 1");
+        Com_Error(ErrorType::Drop, "CM_FatPVS: leaf count < 1");
     int32_t longs = VIS_FAST_LONGS(cm->cache);
 
     // convert leafs to clusters

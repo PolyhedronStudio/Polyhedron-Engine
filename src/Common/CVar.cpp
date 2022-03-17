@@ -275,7 +275,7 @@ cvar_t *Cvar_Get(const char *var_name, const char *var_value, int flags)
     size_t length;
 
     if (!var_name) {
-        Com_Error(ERR_FATAL, "Cvar_Get: NULL var_name");
+        Com_Error(ErrorType::Fatal, "Cvar_Get: NULL var_name");
     }
     if (!var_value) {
         return Cvar_FindVar(var_name);

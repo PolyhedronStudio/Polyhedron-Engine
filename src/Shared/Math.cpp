@@ -268,7 +268,7 @@ int DirToByte(const vec3_t &dir)
 void ByteToDir(int index, vec3_t dir)
 {
     if (index < 0 || index >= NUMVERTEXNORMALS) {
-        Com_Error(ERR_FATAL, "ByteToDir: illegal index");
+        Com_Error(ErrorType::Fatal, "ByteToDir: illegal index");
     }
 
     VectorCopy(bytedirs[index], dir);

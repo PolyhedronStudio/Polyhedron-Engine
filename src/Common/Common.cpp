@@ -54,7 +54,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <Windows.h>
 #endif
 
-static jmp_buf  com_abortframe;    // an ERR_DROP occured, exit the entire frame
+static jmp_buf  com_abortframe;    // an ErrorType::Drop occured, exit the entire frame
 
 static void     (*com_abort_func)(void *);
 static void     *com_abort_arg;
@@ -295,11 +295,11 @@ static void logfile_write(int32_t printType, const char *s)
         if (p) {
             // expand it in place, hacky
             switch (printType) {
-            case PRINT_TALK:      *p = 'T'; break;
-            case PRINT_DEVELOPER: *p = 'D'; break;
-            case PRINT_WARNING:   *p = 'W'; break;
-            case PRINT_ERROR:     *p = 'E'; break;
-            case PRINT_NOTICE:    *p = 'N'; break;
+            case PrintType::Talk:      *p = 'T'; break;
+            case PrintType::Developer: *p = 'D'; break;
+            case PrintType::Warning:   *p = 'W'; break;
+            case PrintType::Error:     *p = 'E'; break;
+            case PrintType::Notice:    *p = 'N'; break;
             default:              *p = 'A'; break;
             }
         }
@@ -414,7 +414,7 @@ void Com_LPrintf(int32_t printType, const char *fmt, ...)
     len = Q_vscnprintf(msg, sizeof(msg), fmt, argptr);
     va_end(argptr);
 
-    if (printType == PRINT_ERROR && !com_errorEntered && len) {
+    if (printType == PrintType::Error && !com_errorEntered && len) {
         size_t errlen = len;
 
         if (errlen >= sizeof(com_errorMsg)) {
@@ -435,20 +435,20 @@ void Com_LPrintf(int32_t printType, const char *fmt, ...)
         Com_Redirect(msg, len);
     } else {
         switch (printType) {
-        case PRINT_TALK:
+        case PrintType::Talk:
             Com_SetColor(COLOR_NONE);
             break;
-        case PRINT_DEVELOPER:
+        case PrintType::Developer:
             Com_SetColor(COLOR_ALT);
             Com_SetColor(COLOR_ORANGE);
             break;
-        case PRINT_WARNING:
+        case PrintType::Warning:
             Com_SetColor(COLOR_ORANGE);
             break;
-        case PRINT_ERROR:
+        case PrintType::Error:
             Com_SetColor(COLOR_RED);
             break;
-        case PRINT_NOTICE:
+        case PrintType::Notice:
             Com_SetColor(COLOR_CYAN);
             break;
         default:
@@ -498,7 +498,7 @@ void Com_Error(int32_t errorType, const char *fmt, ...)
 
     // Prevent disconnecting to a black menu etc.
     #if CLIENT
-    //if(code == ERR_DISCONNECT) {
+    //if(code == ErrorType::Disconnect) {
     //    // Let's go haha.
     //    CL_OpenBSPMenu(true);
     //    CL_ForwardToServer();
@@ -541,7 +541,7 @@ void Com_Error(int32_t errorType, const char *fmt, ...)
     // reset Com_Printf recursion level
     com_printEntered = 0;
 
-    if (errorType == ERR_DISCONNECT || errorType == ERR_RECONNECT) {
+    if (errorType == ErrorType::Disconnect || errorType == ErrorType::Reconnect) {
         Com_WPrintf("%s\n", com_errorMsg);
         SV_Shutdown(va("Server was killed: %s\n", com_errorMsg), errorType);
         CL_Disconnect(errorType);
@@ -556,15 +556,15 @@ void Com_Error(int32_t errorType, const char *fmt, ...)
 
     // make otherwise non-fatal errors fatal
     if (com_fatal_error && com_fatal_error->integer) {
-        errorType = ERR_FATAL;
+        errorType = ErrorType::Fatal;
     }
 
-    if (errorType == ERR_DROP) {
+    if (errorType == ErrorType::Drop) {
         Com_EPrintf("********************\n"
                     "ERROR: %s\n"
                     "********************\n", com_errorMsg);
-        SV_Shutdown(va("Server crashed: %s\n", com_errorMsg), ERR_DROP);
-        CL_Disconnect(ERR_DROP);
+        SV_Shutdown(va("Server crashed: %s\n", com_errorMsg), ErrorType::Drop);
+        CL_Disconnect(ErrorType::Drop);
         goto abort;
     }
 
@@ -572,7 +572,7 @@ void Com_Error(int32_t errorType, const char *fmt, ...)
         FS_FPrintf(com_logFile, "FATAL: %s\n", com_errorMsg);
     }
 
-    SV_Shutdown(va("Server fatal crashed: %s\n", com_errorMsg), ERR_FATAL);
+    SV_Shutdown(va("Server fatal crashed: %s\n", com_errorMsg), ErrorType::Fatal);
     CL_Shutdown();
     NET_Shutdown();
     logfile_close();
@@ -610,10 +610,10 @@ Both client and server can use this, and it will
 do the apropriate things. This function never returns.
 =============
 */
-void Com_Quit(const char *reason, ErrorType type)
+void Com_Quit(const char *reason, int32_t errorType)
 {
     char buffer[MAX_STRING_CHARS];
-    const char* what = (type == ErrorType::ERR_DISCONNECT ? "restarted" : "quit"); // C++20: char *what = type == ERR_RECONNECT ? "restarted" : "quit";
+    const char* what = (errorType == ErrorType::Disconnect ? "restarted" : "quit"); // C++20: char *what = type == ErrorType::Reconnect ? "restarted" : "quit";
 
     if (reason && *reason) {
         Q_snprintf(buffer, sizeof(buffer),
@@ -623,7 +623,7 @@ void Com_Quit(const char *reason, ErrorType type)
                    "Server %s\n", what);
     }
 
-    SV_Shutdown(buffer, type);
+    SV_Shutdown(buffer, errorType);
     CL_Shutdown();
     NET_Shutdown();
     logfile_close();
@@ -635,13 +635,13 @@ void Com_Quit(const char *reason, ErrorType type)
 
 static void Com_Quit_f(void)
 {
-    Com_Quit(Cmd_Args(), ERR_DISCONNECT);
+    Com_Quit(Cmd_Args(), ErrorType::Disconnect);
 }
 
 #if !USE_CLIENT
 static void Com_Recycle_f(void)
 {
-    Com_Quit(Cmd_Args(), ERR_RECONNECT);
+    Com_Quit(Cmd_Args(), ErrorType::Reconnect);
 }
 #endif
 
@@ -1025,7 +1025,7 @@ void Qcommon_Init(int argc, char **argv)
 
     // Print the engine version early so that it's definitely included in the console log.
     // The log file is opened during the execution of one of the config files above.
-    Com_LPrintf(PRINT_NOTICE, "\nEngine version: " APPLICATION " " LONG_VERSION_STRING ", built on " __DATE__ "\n\n");
+    Com_LPrintf(PrintType::Notice, "\nEngine version: " APPLICATION " " LONG_VERSION_STRING ", built on " __DATE__ "\n\n");
 
     Netchan_Init();
     NET_Init();
@@ -1067,7 +1067,7 @@ void Qcommon_Init(int argc, char **argv)
     } else {
         Com_Printf("====== " PRODUCT " - Dedicated Server Initialized ======\n\n");
     }
-    Com_LPrintf(PRINT_NOTICE, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
+    Com_LPrintf(PrintType::Notice, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
 
     time(&com_startTime);
 
@@ -1090,7 +1090,7 @@ void Qcommon_Frame(void)
     static float frac;
 
     if (setjmp(com_abortframe)) {
-        return;            // an ERR_DROP was thrown
+        return;            // an ErrorType::Drop was thrown
     }
 
 #if USE_CLIENT

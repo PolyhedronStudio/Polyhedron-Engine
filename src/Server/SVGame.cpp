@@ -48,7 +48,7 @@ static int PF_FindIndex(const char *name, int start, int max)
     }
 
     if (i == max)
-        Com_Error(ERR_DROP, "PF_FindIndex: overflow");
+        Com_Error(ErrorType::Drop, "PF_FindIndex: overflow");
 
     PF_configstring(i + start, name);
 
@@ -222,13 +222,13 @@ static void PF_cprintf(Entity *ent, int level, const char *fmt, ...)
     }
 
     if (!ent) {
-        Com_LPrintf(level == PRINT_CHAT ? PRINT_TALK : PRINT_ALL, "%s", msg);
+        Com_LPrintf(level == PRINT_CHAT ? PrintType::Talk : PrintType::All, "%s", msg);
         return;
     }
 
     clientNumber = NUM_FOR_EDICT(ent) - 1;
     if (clientNumber < 0 || clientNumber >= sv_maxclients->integer) {
-        Com_Error(ERR_DROP, "%s to a non-client %d", __func__, clientNumber);
+        Com_Error(ErrorType::Drop, "%s to a non-client %d", __func__, clientNumber);
     }
 
     client = svs.client_pool + clientNumber;
@@ -307,7 +307,7 @@ static q_noreturn void PF_error(const char *fmt, ...)
     Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
     va_end(argptr);
 
-    Com_Error(ERR_DROP, "Game Error: %s", msg);
+    Com_Error(ErrorType::Drop, "Game Error: %s", msg);
 }
 
 
@@ -324,7 +324,7 @@ static void PF_setmodel(Entity *ent, const char *name)
     mmodel_t    *mod;
 
     if (!name)
-        Com_Error(ERR_DROP, "PF_setmodel: NULL");
+        Com_Error(ErrorType::Drop, "PF_setmodel: NULL");
 
     i = PF_ModelIndex(name);
 
@@ -355,7 +355,7 @@ static void PF_configstring(int index, const char *val)
     char *dst;
 
     if (index < 0 || index >= ConfigStrings::MaxConfigStrings)
-        Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
+        Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
 
     if (sv.serverState == ServerState::Dead) {
         Com_WPrintf("%s: not yet initialized\n", __func__);
@@ -369,7 +369,7 @@ static void PF_configstring(int index, const char *val)
     len = strlen(val);
     maxlen = (ConfigStrings::MaxConfigStrings- index) * MAX_QPATH;
     if (len >= maxlen) {
-        Com_Error(ERR_DROP,
+        Com_Error(ErrorType::Drop,
                   "%s: index %d overflowed: %" PRIz " > %" PRIz, // CPP: String fix.
                   __func__, index, len, maxlen - 1);
     }
@@ -419,7 +419,7 @@ static qboolean PF_inVIS(vec3_t p1, vec3_t p2, int vis)
     bsp_t *bsp = sv.cm.cache;
 
     if (!bsp) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
 
     leaf1 = BSP_PointLeaf(bsp->nodes, p1);
@@ -488,13 +488,13 @@ or the midpoint of the entity box for bmodels.
 
 #define CHECK_PARAMS \
     if (volume < 0 || volume > 1.0) \
-        Com_Error(ERR_DROP, "%s: volume = %f", __func__, volume); \
+        Com_Error(ErrorType::Drop, "%s: volume = %f", __func__, volume); \
     if (attenuation < 0 || attenuation > 4) \
-        Com_Error(ERR_DROP, "%s: attenuation = %f", __func__, attenuation); \
+        Com_Error(ErrorType::Drop, "%s: attenuation = %f", __func__, attenuation); \
     if (timeofs < 0 || timeofs > 0.255) \
-        Com_Error(ERR_DROP, "%s: timeofs = %f", __func__, timeofs); \
+        Com_Error(ErrorType::Drop, "%s: timeofs = %f", __func__, timeofs); \
     if (soundindex < 0 || soundindex >= MAX_SOUNDS) \
-        Com_Error(ERR_DROP, "%s: soundindex = %d", __func__, soundindex);
+        Com_Error(ErrorType::Drop, "%s: soundindex = %d", __func__, soundindex);
 
 static void PF_StartSound(Entity *edict, int channel,
                           int soundindex, float volume,
@@ -646,7 +646,7 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     int     ent;
 
     if (!origin)
-        Com_Error(ERR_DROP, "%s: NULL origin", __func__);
+        Com_Error(ErrorType::Drop, "%s: NULL origin", __func__);
     CHECK_PARAMS
 
     ent = NUM_FOR_EDICT(entity);
@@ -726,7 +726,7 @@ static void PF_AddCommandString(const char *string)
 static void PF_SetAreaPortalState(int portalnum, qboolean open)
 {
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
     CM_SetAreaPortalState(&sv.cm, portalnum, open);
 }
@@ -734,7 +734,7 @@ static void PF_SetAreaPortalState(int portalnum, qboolean open)
 static qboolean PF_AreasConnected(int area1, int area2)
 {
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
     return CM_AreasConnected(&sv.cm, area1, area2);
 }
@@ -742,7 +742,7 @@ static qboolean PF_AreasConnected(int area1, int area2)
 static void *PF_TagMalloc(size_t size, unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad tag", __func__);
     }
     if (!size) {
         return NULL;
@@ -753,7 +753,7 @@ static void *PF_TagMalloc(size_t size, unsigned tag)
 static void PF_FreeTags(unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad tag", __func__);
     }
     Z_FreeTags((memtag_t)(tag + TAG_MAX)); // CPP: Cast
 }
@@ -861,7 +861,7 @@ void SV_InitGameProgs(void)
 
     // all paths failed
     if (!entry)
-        Com_Error(ERR_DROP, "Failed to load Server Game library");
+        Com_Error(ErrorType::Drop, "Failed to load Server Game library");
 
     // load a new game dll
     importAPI.apiversion = {
@@ -931,12 +931,12 @@ void SV_InitGameProgs(void)
 
     ge = entry(&importAPI);
     if (!ge) {
-        Com_Error(ERR_DROP, "Server Game DLL returned NULL exports");
+        Com_Error(ErrorType::Drop, "Server Game DLL returned NULL exports");
     }
 
     if (ge->apiversion.major != SVGAME_API_VERSION_MAJOR ||
         ge->apiversion.minor != SVGAME_API_VERSION_MINOR) {
-        Com_Error(ERR_DROP, "Server Game DLL is version %i.%i.%i, expected %i.%i.%i",
+        Com_Error(ErrorType::Drop, "Server Game DLL is version %i.%i.%i, expected %i.%i.%i",
             ge->apiversion.major, ge->apiversion.minor, ge->apiversion.point, SVGAME_API_VERSION_MAJOR, SVGAME_API_VERSION_MINOR, SVGAME_API_VERSION_POINT);
     }
 
@@ -945,12 +945,12 @@ void SV_InitGameProgs(void)
 
     // sanitize entitySize
     if (ge->entitySize < sizeof(Entity) || ge->entitySize > SIZE_MAX / MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad size of Entity");
+        Com_Error(ErrorType::Drop, "Server Game DLL returned bad size of Entity");
     }
 
     // sanitize maxEntities
     if (ge->entitySize <= sv_maxclients->integer || ge->entitySize > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad number of maxEntities %i   %i", ge->entitySize, sizeof(Entity));
+        Com_Error(ErrorType::Drop, "Server Game DLL returned bad number of maxEntities %i   %i", ge->entitySize, sizeof(Entity));
     }
 }
 

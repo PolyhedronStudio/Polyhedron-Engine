@@ -43,20 +43,20 @@ void *SZ_GetSpace(SizeBuffer *buf, size_t len)
     void    *data;
 
     if (buf->currentSize > buf->maximumSize) {
-        Com_Error(ERR_FATAL,
+        Com_Error(ErrorType::Fatal,
                   "%s: %#x: already overflowed",
                   __func__, buf->tag);
     }
 
     if (len > buf->maximumSize - buf->currentSize) {
         if (len > buf->maximumSize) {
-            Com_Error(ERR_FATAL,
+            Com_Error(ErrorType::Fatal,
                       "%s: %#x: %" PRIz " is > full buffer size %" PRIz "", // CPP: Cast
                       __func__, buf->tag, len, buf->maximumSize);
         }
 
         if (!buf->allowOverflow) {
-            Com_Error(ERR_FATAL,
+            Com_Error(ErrorType::Fatal,
                       "%s: %#x: overflow without allowOverflow set",
                       __func__, buf->tag);
         }

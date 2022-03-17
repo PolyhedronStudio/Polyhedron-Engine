@@ -60,7 +60,7 @@ ClientGameExports::~ClientGameExports()  {
 float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) {
     // Ensure field of view is within valid ranges.
     if (fieldOfViewX <= 0 || fieldOfViewX > 179)
-        Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fieldOfViewX);
+        Com_Error(ErrorType::Drop, "%s: bad fov: %f", __func__, fieldOfViewX);
 
     // Calculate proper fov value.
     float x = width / tan(fieldOfViewX / 360.f * M_PI);

@@ -453,12 +453,12 @@ static void GL_DrawEntities(int mask)
             int index = ~ent->model;
 
             if (glr.fd.rdflags & RDF_NOWORLDMODEL) {
-                Com_Error(ERR_DROP, "%s: inline model without world",
+                Com_Error(ErrorType::Drop, "%s: inline model without world",
                           __func__);
             }
 
             if (index < 1 || index >= bsp->nummodels) {
-                Com_Error(ERR_DROP, "%s: inline model %d out of range",
+                Com_Error(ErrorType::Drop, "%s: inline model %d out of range",
                           __func__, index);
             }
 
@@ -482,7 +482,7 @@ static void GL_DrawEntities(int mask)
         case model_s::MOD_EMPTY: // CPP: Enum
             break;
         default:
-            Com_Error(ERR_FATAL, "%s: bad model type", __func__);
+            Com_Error(ErrorType::Fatal, "%s: bad model type", __func__);
         }
 
         if (gl_showorigins->integer) {
@@ -557,7 +557,7 @@ void R_RenderFrame_GL(refdef_t *fd)
     GL_Flush2D();
 
     if (!gl_static.world.cache && !(fd->rdflags & RDF_NOWORLDMODEL)) {
-        Com_Error(ERR_FATAL, "%s: NULL worldmodel", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL worldmodel", __func__);
     }
 
     glr.drawframe++;

@@ -647,7 +647,7 @@ void IMG_ResampleTexture(const byte *in, int inwidth, int inheight,
     float       heightScale;
 
     if (outwidth > MAX_TEXTURE_SIZE) {
-        Com_Error(ERR_FATAL, "%s: outwidth > %d", __func__, MAX_TEXTURE_SIZE);
+        Com_Error(ErrorType::Fatal, "%s: outwidth > %d", __func__, MAX_TEXTURE_SIZE);
     }
 
     fracstep = inwidth * 0x10000 / outwidth;
@@ -1264,13 +1264,13 @@ image_t *IMG_Find(const char *name, imagetype_t type, imageflags_t flags)
     qerror_t ret;
 
     if (!name) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     // this should never happen
     len = strlen(name);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_FATAL, "%s: oversize name", __func__);
+        Com_Error(ErrorType::Fatal, "%s: oversize name", __func__);
     }
 
     ret = find_or_load_image(name, len, type, flags, &image);
@@ -1292,13 +1292,13 @@ image_t* IMG_FindExisting(const char* name, imagetype_t type) {
     unsigned hash;
 
     if (!name) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     // this should never happen
     len = strlen(name);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_FATAL, "%s: oversize name", __func__);
+        Com_Error(ErrorType::Fatal, "%s: oversize name", __func__);
     }
 
     // must have an extension and at least 1 char of base name
@@ -1368,7 +1368,7 @@ IMG_ForHandle
 image_t *IMG_ForHandle(qhandle_t h)
 {
     if (h < 0 || h >= r_numImages) {
-        Com_Error(ERR_FATAL, "%s: %d out of range", __func__, h);
+        Com_Error(ErrorType::Fatal, "%s: %d out of range", __func__, h);
     }
 
     return &r_images[h];
@@ -1616,7 +1616,7 @@ void IMG_GetPalette(void)
     return;
 
 fail:
-    Com_Error(ERR_FATAL, "Couldn't load %s: %s", R_COLORMAP_PCX, Q_ErrorString(ret));
+    Com_Error(ErrorType::Fatal, "Couldn't load %s: %s", R_COLORMAP_PCX, Q_ErrorString(ret));
 }
 
 static const cmdreg_t img_cmd[] = {
@@ -1633,7 +1633,7 @@ void IMG_Init(void)
     int i;
 
     if (r_numImages) {
-        Com_Error(ERR_FATAL, "%s: %d images not freed", __func__, r_numImages);
+        Com_Error(ErrorType::Fatal, "%s: %d images not freed", __func__, r_numImages);
     }
 
 

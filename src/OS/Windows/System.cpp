@@ -789,7 +789,7 @@ DLL LOADING
 void Sys_FreeLibrary(void *handle)
 {
     if (handle && !FreeLibrary((HMODULE)handle)) { // CPP: Cast
-        Com_Error(ERR_FATAL, "FreeLibrary failed on %p", handle);
+        Com_Error(ErrorType::Fatal, "FreeLibrary failed on %p", handle);
     }
 }
 
@@ -1055,7 +1055,7 @@ static int Sys_Main(int argc, char **argv)
 #if USE_WINSVC
             if (shouldExit == SE_FULL)
 #endif
-                Com_Quit(NULL, ERR_DISCONNECT);
+                Com_Quit(NULL, ErrorType::Disconnect);
             break;
         }
     }

@@ -248,7 +248,7 @@ char *NET_BaseAdrToString(const NetAdr *a)
         else
             return strcpy(s, "<invalid>");
     default:
-        Com_Error(ERR_FATAL, "%s: bad address type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad address type", __func__);
     }
 
     return NULL;
@@ -876,7 +876,7 @@ qboolean NET_SendPacket(NetSource sock, const void *data,
         s = udp6_sockets[sock];
         break;
     default:
-        Com_Error(ERR_FATAL, "%s: bad address type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad address type", __func__);
     }
 
     if (s == -1)
@@ -1155,7 +1155,7 @@ static void NET_OpenServer(void)
     }
 #endif
 
-    Com_Error(ERR_FATAL, "Couldn't open dedicated server UDP port");
+    Com_Error(ErrorType::Fatal, "Couldn't open dedicated server UDP port");
 }
 
 static void NET_OpenServer6(void)

@@ -167,7 +167,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_CLIENTS) {
-                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+                Com_Error(ErrorType::Drop, "%s: invalid client index", __func__);
             }
             ci = &cl.clientInfo[value];
 
@@ -203,7 +203,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_CLIENTS) {
-                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+                Com_Error(ErrorType::Drop, "%s: invalid client index", __func__);
             }
             ci = &cl.clientInfo[value];
 
@@ -234,7 +234,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Error(ErrorType::Drop, "%s: invalid stat index", __func__);
             }
             value = cl.frame.playerState.stats[value];
             TH_DrawNumber(dst, x, y, width, value);
@@ -245,11 +245,11 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             index = atoi(token);
             if (index < 0 || index >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid string index", __func__);
+                Com_Error(ErrorType::Drop, "%s: invalid string index", __func__);
             }
             index = cl.frame.playerState.stats[index];
             if (index < 0 || index >= ConfigStrings::MaxConfigStrings) {
-                Com_Error(ERR_DROP, "%s: invalid string index", __func__);
+                Com_Error(ErrorType::Drop, "%s: invalid string index", __func__);
             }
             len = strlen(cl.configstrings[index]);
             TH_DrawString(dst, x, y, cl.configstrings[index], len);
@@ -274,7 +274,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Error(ErrorType::Drop, "%s: invalid stat index", __func__);
             }
             value = cl.frame.playerState.stats[value];
             if (!value) {   // skip to endif

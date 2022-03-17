@@ -346,7 +346,7 @@ void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMove
 
     const char* MSG_ServerCommandString(int32_t cmd);
 
-    #define MSG_ShowSVC(cmd) Com_LPrintf(PRINT_DEVELOPER, "%3" PRIz ":%s\n", msg_read.readCount - 1, MSG_ServerCommandString(cmd))
+    #define MSG_ShowSVC(cmd) Com_LPrintf(PrintType::Developer, "%3" PRIz ":%s\n", msg_read.readCount - 1, MSG_ServerCommandString(cmd))
 #endif // _DEBUG
 #endif // USE_CLIENT
 

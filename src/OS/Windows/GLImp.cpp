@@ -533,7 +533,7 @@ void VID_EndFrame(void)
 
         // this happens sometimes when the window is iconified
         if (!IsIconic(win.wnd)) {
-            Com_Error(ERR_FATAL, "%s failed with error %lu",
+            Com_Error(ErrorType::Fatal, "%s failed with error %lu",
                       glw.minidriver ? "wglSwapBuffers" : "SwapBuffers", error);
         }
     }

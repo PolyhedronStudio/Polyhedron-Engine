@@ -143,41 +143,41 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
 //	COMMON
 //
 //=============================================================================
-// Prints a message of type PRINT_ALL. Using variable arg formatting.
+// Prints a message of type PrintType::All. Using variable arg formatting.
 void Com_Print(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    clgi.Com_LPrintf(PRINT_ALL, "%s", buffer);
+    clgi.Com_LPrintf(PrintType::All, "%s", buffer);
     va_end (args);
 }
-// Prints a message of type PRINT_DEVELOPER. Using variable arg formatting.
+// Prints a message of type PrintType::Developer. Using variable arg formatting.
 // Only prints when developer cvar is set to 1.
 void Com_DPrint(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    clgi.Com_LPrintf(PRINT_DEVELOPER, "%s", buffer);
+    clgi.Com_LPrintf(PrintType::Developer, "%s", buffer);
     va_end (args);
 }
-// Prints a message of type PRINT_WARNING. Using variable arg formatting.
+// Prints a message of type PrintType::Warning. Using variable arg formatting.
 void Com_WPrint(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    clgi.Com_LPrintf(PRINT_WARNING, "%s", buffer);
+    clgi.Com_LPrintf(PrintType::Warning, "%s", buffer);
     va_end (args);
 }
-// Prints a message of type PRINT_ERROR. Using variable arg formatting.
+// Prints a message of type PrintType::Error. Using variable arg formatting.
 void Com_EPrint(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    clgi.Com_LPrintf(PRINT_ERROR, "%s", buffer);
+    clgi.Com_LPrintf(PrintType::Error, "%s", buffer);
     va_end (args);
 }
 

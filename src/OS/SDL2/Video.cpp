@@ -208,7 +208,7 @@ static void VID_SDL_ModeChanged(void)
 #if USE_REF == REF_SOFT
     SDL_Surface *surf = SDL_GetWindowSurface(sdl_window);
     if (!surf)
-        Com_Error(ERR_FATAL, "Couldn't (re)create window surface: %s", SDL_GetError());
+        Com_Error(ErrorType::Fatal, "Couldn't (re)create window surface: %s", SDL_GetError());
     pixels = surf->pixels;
     rowbytes = surf->pitch;
 #else
@@ -745,7 +745,7 @@ void VID_PumpEvents(void)
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
-            Com_Quit(NULL, ERR_DISCONNECT);
+            Com_Quit(NULL, ErrorType::Disconnect);
             break;
         case SDL_TEXTINPUT:
             // RMLUI Process Textinput.
@@ -801,7 +801,7 @@ void VID_PumpEvents(void)
     //while (SDL_PollEvent(&event)) {
     //    switch (event.type) {
     //    case SDL_QUIT:
-    //        Com_Quit(NULL, ERR_DISCONNECT);
+    //        Com_Quit(NULL, ErrorType::Disconnect);
     //        break;
     //    case SDL_WINDOWEVENT:
     //        window_event(&event.window);

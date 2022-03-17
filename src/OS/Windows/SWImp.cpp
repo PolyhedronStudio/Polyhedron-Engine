@@ -95,7 +95,7 @@ void SWimp_ModeChanged(void)
                                    0);
 
     if (!sww.dibsect) {
-        Com_Error(ERR_FATAL, "DIB_Init: CreateDIBSection failed");
+        Com_Error(ErrorType::Fatal, "DIB_Init: CreateDIBSection failed");
     }
 
     if (info.bmiHeader.biHeight > 0) {
@@ -113,7 +113,7 @@ void SWimp_ModeChanged(void)
 
     sww.prevobj = SelectObject(sww.dibdc, sww.dibsect);
     if (!sww.prevobj) {
-        Com_Error(ERR_FATAL, "DIB_Init: SelectObject failed\n");
+        Com_Error(ErrorType::Fatal, "DIB_Init: SelectObject failed\n");
     }
 }
 

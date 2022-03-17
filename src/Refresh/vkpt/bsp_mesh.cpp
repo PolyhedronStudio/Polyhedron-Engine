@@ -593,7 +593,7 @@ collect_surfaces(int* idx_ctr, bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int (*
 		}
 
 		if (*idx_ctr + create_poly(bsp, surf, material_id, NULL, NULL, NULL, NULL, NULL, NULL) >= MAX_VERT_BSP) {
-			Com_Error(ERR_FATAL, "error: exceeding max vertex limit\n");
+			Com_Error(ErrorType::Fatal, "error: exceeding max vertex limit\n");
 		}
 
 		int cnt = create_poly(bsp, surf, material_id,
@@ -1661,7 +1661,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t* wm, bsp_t* bsp, const char* map_name) {
 	wm->num_clusters = bsp->vis->numclusters;
 
 	if (wm->num_clusters + 1 >= MAX_LIGHT_LISTS) 	{
-		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->num_clusters);
+		Com_Error(ErrorType::Fatal, "The BSP model has too many clusters (%d)", wm->num_clusters);
 	}
 
 	wm->num_vertices = 0;
@@ -1741,7 +1741,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t* wm, bsp_t* bsp, const char* map_name) {
 	compute_world_tangents(bsp, wm);
 
 	if (wm->num_vertices >= MAX_VERT_BSP) {
-		Com_Error(ERR_FATAL, "The BSP model has too many vertices (%d)", wm->num_vertices);
+		Com_Error(ErrorType::Fatal, "The BSP model has too many vertices (%d)", wm->num_vertices);
 	}
 
 	for (int i = 0; i < wm->num_models; i++) 	{

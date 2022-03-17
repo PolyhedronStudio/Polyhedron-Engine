@@ -26,7 +26,7 @@ qboolean ClientGameServerMessage::ParsePlayerSkin(char* name, char* model, char*
     // overflow, but still check the length to be entirely fool-proof
     len = strlen(str);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize playerskin", __func__);
+        Com_Error(ErrorType::Drop, "%s: oversize playerskin", __func__);
     }
 
     // isolate the player's name
@@ -298,7 +298,7 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
             break;
 
         default:
-            Com_Error(ERR_DROP, "%s: bad type", __func__);
+            Com_Error(ErrorType::Drop, "%s: bad type", __func__);
     }
 }
 
@@ -309,7 +309,7 @@ void ClientGameServerMessage::ParseMuzzleFlashPacket(int32_t mask) {
     // Parse entity number.
     int32_t entity = clgi.MSG_ReadInt16();
     if (entity < 1 || entity >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: bad entity", __func__);
+        Com_Error(ErrorType::Drop, "%s: bad entity", __func__);
     }
 
     // Parse weapon ID.
@@ -385,7 +385,7 @@ void ClientGameServerMessage::ParsePrint(void) {
         fmt = "%s";
     }
 
-    clgi.Com_LPrintf(PRINT_TALK, fmt, stringBuffer);
+    clgi.Com_LPrintf(PrintType::Talk, fmt, stringBuffer);
 
     clgi.Con_SkipNotify(false);
     clge->screen->ChatPrint(stringBuffer);

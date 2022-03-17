@@ -423,7 +423,7 @@ static mnode_t *SV_HullForEntity(Entity *ent)
 
         // explicit hulls in the BSP model
         if (i <= 0 || i >= sv.cm.cache->nummodels)
-            Com_Error(ERR_DROP, "%s: inline model %d out of range", __func__, i);
+            Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
 
         return sv.cm.cache->models[i].headNode;
     }
@@ -444,7 +444,7 @@ int SV_PointContents(const vec3_t &p)
     int         contents;
 
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
 
     // get base contents from world
@@ -535,7 +535,7 @@ trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t
     trace_t     trace;
 
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
 
     // work around game bugs

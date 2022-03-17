@@ -86,7 +86,7 @@ qboolean ClientGameEntities::SpawnClassEntities(const char* entities) {
 		}
 
 		if (com_token[0] != '{') {
-		    Com_Error(ERR_DROP, "SpawnEntitiesFromString: found %s when expecting {", com_token);
+		    Com_Error(ErrorType::Drop, "SpawnEntitiesFromString: found %s when expecting {", com_token);
 			return false;
 		}
 
@@ -147,7 +147,7 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 		}
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-		    Com_Error(ERR_DROP, "%s: EOF without closing brace", __func__);
+		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
 		    return false;
 		}
 
@@ -155,13 +155,13 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 		value = COM_Parse(data);
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-		    Com_Error(ERR_DROP, "%s: EOF without closing brace", __func__);
+		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
 			return false;
 		}
 
 		// Ensure we had a value.
 		if (value[0] == '}') {
-		    Com_Error(ERR_DROP, "%s: closing brace without value for key %s", __func__, key);
+		    Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
 			return false;
 		}
 

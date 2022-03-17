@@ -319,7 +319,7 @@ static qsocket_t os_socket(int domain, int type, int protocol)
 static ioentry_t *_os_get_io(qsocket_t fd, const char *func)
 {
     if (fd < 0 || fd >= FD_SETSIZE)
-        Com_Error(ERR_FATAL, "%s: fd out of range: %d", func, fd);
+        Com_Error(ErrorType::Fatal, "%s: fd out of range: %d", func, fd);
 
     return &io_entries[fd];
 }
