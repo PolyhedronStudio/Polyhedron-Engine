@@ -10,7 +10,6 @@
 #include "../ClientGameLocal.h"
 
 #include "../Main.h"
-#include "../NewEffects.h"
 #include "../TemporaryEntities.h"
 
 #include "MuzzleFlashEffects.h"

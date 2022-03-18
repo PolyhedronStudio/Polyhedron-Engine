@@ -10,7 +10,6 @@
 
 #include "Debug.h"
 #include "Main.h"
-#include "NewEffects.h"
 #include "TemporaryEntities.h"
 
 // Exports.
