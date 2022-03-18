@@ -9,7 +9,6 @@
 ***/
 #include "../ClientGameLocal.h"
 
-#include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
@@ -26,9 +25,6 @@
 //
 //---------------
 void ClientGameMedia::Initialize() {
-    // Initialize FX Data.
-    CLG_EffectsInit();
-
     // Initialize View Data.
     clge->view->Initialize();
 

@@ -9,9 +9,9 @@
 ***/
 #include "ClientGameLocal.h"
 
-#include "Effects.h"
 #include "Main.h"
 
+#include "Effects/Particles.h"
 #ifdef _DEBUG
 // Static array which should be large enough to contain at least all
 
@@ -38,7 +38,7 @@ void CLG_DrawDebugLine(const vec3_t& start, const vec3_t& end, const vec4_t& col
     while (length > 0) {
 	    length -= dec;
 
-		p = CLG_AllocParticle();
+		p = Particles::GetFreeParticle();
 		if (!p)
 			return;
 

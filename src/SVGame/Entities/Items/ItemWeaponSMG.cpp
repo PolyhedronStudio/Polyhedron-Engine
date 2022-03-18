@@ -380,17 +380,17 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
             SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/dryfire.wav"), 1.f, Attenuation::Normal, 0.f);
             return;
         } else {
-            // Toss a dice, 50/50, which fire effect to play.
-            uint32_t fireSound = RandomRangeui(0, 2);
+            //// Toss a dice, 50/50, which fire effect to play.
+            //uint32_t fireSound = RandomRangeui(0, 2);
 
-            // Let the player entity play the 'draw SMG' sound.
-            if (fireSound == 0) {
-                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
-                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, Attenuation::Normal, 0.f);
-            } else {
-                client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
-                SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
-            }
+            //// Let the player entity play the 'draw SMG' sound.
+            //if (fireSound == 0) {
+            //    client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire1.wav");
+            //    SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire1.wav"), 1.f, Attenuation::Normal, 0.f);
+            //} else {
+            //    client->weaponSound = SVG_PrecacheSound("weapons/smg45/fire2.wav");
+            //    SVG_Sound(player, SoundChannel::Weapon, SVG_PrecacheSound("weapons/smg45/fire2.wav"), 1.f, Attenuation::Normal, 0.f);
+            //}
 
             float xPositive = crandom() * 0.35f;
             float xNegative = crandom() * -0.35f;
@@ -414,6 +414,12 @@ void ItemWeaponSMG::InstanceWeaponProcessPrimaryFireState(SVGBasePlayer* player,
 
             // Fire a bullet.
             SVG_FireBullet(player, bulletStart, forward, 10, 50, RandomRangef(-150, 150), RandomRangef(-150, 150), 0);
+
+            // send muzzle flash
+            gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);
+            gi.MSG_WriteUint16(player->GetNumber());
+            gi.MSG_WriteUint8(MuzzleFlashType::Smg45);
+            gi.Multicast(player->GetOrigin(), Multicast::PVS);
         }
     }
 }

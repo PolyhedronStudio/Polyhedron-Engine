@@ -9,7 +9,6 @@
 ***/
 #include "../ClientGameLocal.h"
 
-#include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
@@ -17,6 +16,9 @@
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 
+#include "../Effects/DynamicLights.h"
+#include "../Effects/LightStyles.h"
+#include "../Effects/Particles.h"
 #include "Entities.h"
 #include "View.h"
 
@@ -55,10 +57,13 @@ void ClientGameView::RenderView() {
     // Add all entities of the current server frame to the renderers view.
     clge->entities->AddPacketEntities();
     CLG_AddTempEntities();
-    CLG_AddParticles();
-    CLG_AddDLights();
+
+    // Add all particle effects to view.
+    Particles::AddParticlesToView();
+    DynamicLights::AddDynamicLightsToView();
+
 #if USE_LIGHTSTYLES
-    CLG_AddLightStyles();
+    LightStyles::AddLightStylesToView();
 #endif
 
     // Last but not least, pass our array over to the client.

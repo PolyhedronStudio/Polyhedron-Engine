@@ -1,28 +1,16 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Contains shared structures between the client and the game module.
+* 
+***/
+#pragma once
 
-//
-// clg_types.h
-//
-// Contains shared structures between the client and the game module.
-//
-*/
-#ifndef __INC_SHARED_CLTYPES_H__
-#define __INC_SHARED_CLTYPES_H__
 
-//
-//=============================================================================
-//
-// SHARED ENGINE/CLIENT DEFINITIONS.
-//
-// These should never be tampered with, unless you intend to recompile the
-// whole engine afterwards, with the risk of possibly breaking any 
-// compatibility with current mods.
-//=============================================================================
-//
-//
-// CLIENT STRUCTURES - GAME MODULE NEEDS TO KNOW ABOUT.
-//
+
 /**
 *   Contains states for the KeyBindings.
 **/
@@ -32,10 +20,10 @@ struct ButtonState {
     static constexpr uint32_t Up    = (1 << 2);
 };
 
-//
-// Explosion particle entity effect structure.
-//
-typedef struct {
+/**
+*   Explosion particle entity effect structure.
+**/
+struct explosion_t {
 	enum {
 		ex_free,
 		ex_explosion,
@@ -56,48 +44,47 @@ typedef struct {
 	float       start;
 	int32_t     baseFrame;
 	int32_t     frameTime; /* in milliseconds */
-} explosion_t;
+};
 
 // Maximum amount of explosions.
-constexpr uint32_t MAX_EXPLOSIONS = 32;
+static constexpr uint32_t MAX_EXPLOSIONS = 32;
 
 // No Particle Settings.
-constexpr uint32_t NOPART_GRENADE_EXPLOSION = 1;
-constexpr uint32_t NOPART_GRENADE_TRAIL = 2;
-constexpr uint32_t NOPART_ROCKET_EXPLOSION = 4;
-constexpr uint32_t NOPART_ROCKET_TRAIL = 8;
-constexpr uint32_t NOPART_BLOOD = 16;
+static constexpr uint32_t NOPART_GRENADE_EXPLOSION = 1;
+static constexpr uint32_t NOPART_GRENADE_TRAIL = 2;
+static constexpr uint32_t NOPART_ROCKET_EXPLOSION = 4;
+static constexpr uint32_t NOPART_ROCKET_TRAIL = 8;
+static constexpr uint32_t NOPART_BLOOD = 16;
 
 // No Explosion settings.
-constexpr uint32_t NOEXP_GRENADE = 1;
-constexpr uint32_t NOEXP_ROCKET = 2;
+static constexpr uint32_t NOEXP_GRENADE = 1;
+static constexpr uint32_t NOEXP_ROCKET = 2;
 
 //
 // Local client entity structure, temporary entities.
 //
 struct ClientEntity {
     //! The last received state of this entity.
-    EntityState current;
+    EntityState current = {};
     
-    //! The previous last received state. Will always be valid, 
-    //! but might just be a copy of current
-    EntityState prev;       
+    //! The previous last valid state. In worst case scenario might be a copy of current state.
+    EntityState prev  = {};
 
     //! The mins and maxs of the entity's bounding box.
-    vec3_t  mins, maxs;
+    vec3_t  mins = vec3_zero(), maxs = vec3_zero();
 
     //! The frame number that this entity was received at.
-    //! If it isn't identical to the current frame, the entity isn't in this frame anymore.
-    int32_t     serverFrame;
+    //! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
+    int32_t     serverFrame = 0;
 
     //! For diminishing grenade trails
-    int32_t     trailcount; 
+    int32_t     trailcount = 0;
 
     //! for trails (variable hz)
-    vec3_t      lerpOrigin; 
+    vec3_t      lerpOrigin = vec3_zero();
 
     //! The id matching the one on the server.
-    int32_t id;
+    int32_t id = 0;
 };
 
 //
@@ -105,16 +92,16 @@ struct ClientEntity {
 // Used for parsing EFFECTS in the client.
 //
 struct tent_params_t {
-    int32_t type;
-    vec3_t position1;
-    vec3_t position2;
-    vec3_t offset;
-    vec3_t dir;
-    int32_t count;
-    int32_t color;
-    int32_t entity1;
-    int32_t entity2;
-    int32_t time;
+    int32_t type = 0;
+    vec3_t position1 = vec3_zero();
+    vec3_t position2 = vec3_zero();
+    vec3_t offset = vec3_zero();
+    vec3_t dir = vec3_zero();
+    int32_t count = 0;
+    int32_t color = 0;
+    int32_t entity1 = 0;
+    int32_t entity2 = 0;
+    int32_t time = 0;
 };
 
 //
@@ -122,9 +109,9 @@ struct tent_params_t {
 // Used for parsing MUZZLEFLASHE messages in the client.
 //
 struct mz_params_t {
-    int32_t entity;
-    int32_t weapon;
-    int32_t silenced;
+    int32_t entity = 0;
+    int32_t weapon = 0;
+    int32_t silenced = 0;
 };
 
 //
@@ -146,17 +133,17 @@ struct snd_params_t {
 // Client Sustain structure.
 //
 struct cl_sustain_t {
-    int32_t id;
-    int32_t type;
-    int32_t endTime;
-    int32_t nextThinkTime;
-    int32_t thinkinterval;
-    vec3_t  org;
-    vec3_t  dir;
-    int32_t color;
-    int32_t count;
-    int32_t magnitude;
-    void    (*Think)(cl_sustain_t *self);
+    int32_t id = 0;
+    int32_t type = 0;
+    int32_t endTime = 0;
+    int32_t nextThinkTime = 0;
+    int32_t thinkinterval = 0;
+    vec3_t  org = vec3_zero();
+    vec3_t  dir = vec3_zero();
+    int32_t color = 0;
+    int32_t count = 0;
+    int32_t magnitude = 0;
+    void    (*Think)(cl_sustain_t *self) = nullptr;
 };
 
 //
@@ -274,166 +261,192 @@ struct ClientPredictedState {
 // * the client game module to provide access to media and other client state.
 //
 struct ClientState {
-    ClientState() {
-        bsp = nullptr;
-    }
-    //
-    // Client User Command Related.
-    // 
-    int32_t         timeoutCount;
+    /**
+    *
+    *   Client User Command Related.
+    *
+    **/
+    int32_t     timeoutCount = 0;
 
-    // The time we last transmitted a user command.
-    uint32_t    lastTransmitTime;
-    // The last transmitted command number. This may differ from the one below.
-    uint32_t    lastTransmitCmdNumber;
-    // The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
-    uint32_t    lastTransmitCmdNumberReal;
-    // Determines whether to send the user command packet asap, and preferably, NOW.
-    qboolean    sendPacketNow;
+    //! The time we last transmitted a user command.
+    uint32_t    lastTransmitTime = 0;
+    //! The last transmitted command number. This may differ from the one below.
+    uint32_t    lastTransmitCmdNumber = 0;
+    //! The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
+    uint32_t    lastTransmitCmdNumberReal = 0;
+    //! Determines whether to send the user command packet asap, and preferably, NOW.
+    qboolean    sendPacketNow = 0;
 
-    // Actual current client user command.
-    ClientMoveCommand    moveCommand;
-    // Actual current client user command list.
-    ClientMoveCommand    clientUserCommands[CMD_BACKUP];    // each mesage will send several old clientUserCommands
-    // Current command number.
-    uint32_t     currentClientCommandNumber;
-    // History book of time sent, received, and command number.
-    ClientUserCommandHistory clientCommandHistory[CMD_BACKUP];
+    //! Actual current client user command.
+    ClientMoveCommand    moveCommand = {};
+    //! Actual current client user command list.
+    ClientMoveCommand    clientUserCommands[CMD_BACKUP] = {};    // each mesage will send several old clientUserCommands
+    //! Current command number.
+    uint32_t     currentClientCommandNumber = 0;
+    //! History book of time sent, received, and command number.
+    ClientUserCommandHistory clientCommandHistory[CMD_BACKUP] = {};
 
-    // Initial outgoing sequence number.
-    int32_t initialSequence;
+    //! Initial outgoing sequence number.
+    int32_t initialSequence = 0;
 
-    // Predicted Client State. (Used for movement.)
-    ClientPredictedState predictedState;
+    //! Predicted Client State. (Used for movement.)
+    ClientPredictedState predictedState = {};
 
-    //
-    // Entity States.
-    // 
-    // Solid Entities, these are REBUILT during EACH FRAME.
-    ClientEntity *solidEntities[MAX_PACKET_ENTITIES];
-    int32_t numSolidEntities;
 
-    // Entity Baseline States. These are where to start working from.
-    EntityState entityBaselines[MAX_EDICTS];
+    /**
+    *
+    *   Entity States.
+    *
+    **/
+    //! Solid Entities, these are REBUILT during EACH FRAME.
+    ClientEntity *solidEntities[MAX_PACKET_ENTITIES] = {};
+    int32_t numSolidEntities = 0;
 
-    // The actual current Entity States.
-    EntityState entityStates[MAX_PARSE_ENTITIES];
-    int32_t numEntityStates;
+    //! Entity Baseline States. These are where to start working from.
+    EntityState entityBaselines[MAX_EDICTS] = {};
 
-    // The current client entity state messaging flags.
-    uint32_t    entityStateFlags;
+    //! The actual current Entity States.
+    EntityState entityStates[MAX_PARSE_ENTITIES]; // DO NOT initialize this using {} or VS2022 will stall your machine and give a nasty stack error.
+    int32_t numEntityStates  = 0;
 
-    //
-    // Server Frames.
-    // 
-    // A list of server frames received.
+    //! The current client entity state messaging flags.
+    uint32_t    entityStateFlags = 0;
+
+
+    /**
+    *
+    *   Server Frames.
+    *
+    **/
+    //! A list of server frames received.
     ServerFrame  frames[UPDATE_BACKUP];
-    uint32_t     frameFlags;
+    uint32_t     frameFlags = 0;
 
-    // The actual current server frame.
-    ServerFrame frame; // The current(last received frame from the server)
-    ServerFrame oldframe; // The previous frame received, right before the current frame.
-    int32_t serverTime;
-    int32_t serverDelta;
+    //! The current(last received frame from the server)
+    ServerFrame frame = {}; 
+    //! The previous frame received, right before the current frame.
+    ServerFrame oldframe = {};
+    int32_t serverTime = 0;
+    int32_t serverDelta = 0;
 
-    byte            dcs[CS_BITMAP_BYTES];
+    byte            dcs[CS_BITMAP_BYTES] = {};
 
-    // the client maintains its own idea of view angles, which are
-    // sent to the server each frame.  It is cleared to 0 upon entering each level.
-    // the server sends a delta each frame which is added to the locally
-    // tracked view angles to account for standing on rotating objects,
-    // and teleport direction changes
-    vec3_t      viewAngles;
+    //! The client maintains its own idea of view angles, which are
+    //! sent to the server each frame.  It is cleared to 0 upon entering each level.
+    //! the server sends a delta each frame which is added to the locally
+    //! tracked view angles to account for standing on rotating objects,
+    //! and teleport direction changes
+    vec3_t      viewAngles = vec3_zero();
 
-    // interpolated movement vector used for local prediction,
-    // never sent to server, rebuilt each client frame
-    vec3_t      localMove;
+    //! Interpolated movement vector used for local prediction, never sent to server, rebuilt each client frame
+    vec3_t      localMove = vec3_zero();
 
-    // accumulated mouse forward/side movement, added to both
-    // localMove and pending cmd, cleared each time cmd is finalized
-    vec2_t      mouseMove;
+    //! Accumulated mouse forward/side movement, added to both localMove and pending cmd, cleared each time cmd is finalized.
+    vec2_t      mouseMove = vec2_zero();
+    //! This is the time value that the client is rendering at.  always <= cl.serverTime
+    int32_t         time = 0;
+    //! between oldframe and frame
+    float       lerpFraction = 0.f;
 
-    int32_t         time;           // this is the time value that the client
-                                    // is rendering at.  always <= cl.serverTime
-    float       lerpFraction;       // between oldframe and frame
 
-    //
-    // Client Sound Variables.
-    //
-    // Used for storing the listener origin of the client.
-    vec3_t      listener_origin;
+    /**
+    *
+    *   Client Sound.
+    *
+    **/
+    //! Used for storing the listener origin of the client.
+    vec3_t      listener_origin = vec3_zero();
 
-    // Special Effect: UNDERWATER
-    qboolean    snd_is_underwater;
-    qboolean    snd_is_underwater_enabled;
+    //! Special Effect: UNDERWATER
+    qboolean    snd_is_underwater = false;
+    qboolean    snd_is_underwater_enabled = false;
 
-    //
-    // Client Input Variables.
-    //
-    float       autosens_x;
-    float       autosens_y;
 
-    //
-    // Client Rendering Variables.
-    //
-    refdef_t refdef;
-    float fov_x;      // Interpolated
-    float fov_y;      // Derived from fov_x assuming 4/3 aspect ratio
-    int32_t lightLevel;
+    /**
+    *
+    *   Client Input.
+    *
+    **/
+    float       autosens_x = 0.f;
+    float       autosens_y = 0.f;
 
-    // Updated in ClientGameExports::ClientUpdateOrigin.
-    vec3_t v_forward, v_right, v_up;    
 
-    qboolean thirdPersonView;
+    /**
+    *
+    *   Client Rendering Variables.
+    *
+    **/
+    refdef_t refdef = {};
+    float fov_x = 0.f; //! Interpolated
+    float fov_y = 0.f; //! Derived from fov_x assuming 4/3 aspect ratio
+    int32_t lightLevel  = 0;
 
-    // Predicted values, used for smooth player entity movement in thirdperson view
-    vec3_t playerEntityOrigin;
-    vec3_t playerEntityAngles;
+    //! Updated in ClientGameExports::ClientUpdateOrigin.
+    vec3_t v_forward = vec3_zero(), v_right = vec3_zero(), v_up = vec3_zero();
+
+    qboolean thirdPersonView = false;
+
+    //! Predicted values, used for smooth player entity movement in thirdperson view
+    vec3_t playerEntityOrigin = vec3_zero();
+    vec3_t playerEntityAngles = vec3_zero();
     
-    //
-    // transient data from server
-    //
-    char    layout[MAX_NET_STRING];     // general 2D overlay
-    int32_t inventory[MAX_ITEMS];
 
-    //
-    // server state information
-    //
-    int32_t serverState;    // ss_* constants
-    int32_t serverCount;    // server identification for prespawns
+    /**
+    *
+    *   Transient Data From Server.
+    *
+    **/
+    char    layout[MAX_NET_STRING] = {};     //! general 2D overlay
+    int32_t inventory[MAX_ITEMS] = {};
+
+
+    /**
+    *
+    *   Server State Information.
+    *
+    **/
+    int32_t serverState = 0;    //! ss_* constants
+    int32_t serverCount = 0;    //! server identification for prespawns
     
-    int32_t clientNumber;   // never changed during gameplay, set by serverdata packet
-    int32_t maximumClients;
+    int32_t clientNumber = 0;   //! never changed during gameplay, set by serverdata packet
+    int32_t maximumClients = 0;
 
-    char gamedir[MAX_QPATH];
-    char mapName[MAX_QPATH]; // short format - q2dm1, etc
+    char gamedir[MAX_QPATH] = {};
+    char mapName[MAX_QPATH] = {}; // short format - q2dm1, etc
 
-    char baseConfigStrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
-    char configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
+    char baseConfigStrings[ConfigStrings::MaxConfigStrings][MAX_QPATH] = {};
+    char configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH] = {};
 
 
 #if USE_AUTOREPLY
-    uint32_t replyTime;
-    uint32_t replyDelta;
+    uint32_t replyTime = 0;
+    uint32_t replyDelta = 0;
 #endif
-    vec3_t deltaAngles;
-    //
-    // locally derived information from server state
-    //
-    bsp_t        *bsp;                  // Pointer to the actual BSP.
+    vec3_t deltaAngles = vec3_zero();
 
-    qhandle_t drawModels[MAX_MODELS];   // Handles for loaded draw models (MD2, MD3, ...).
-    mmodel_t *clipModels[MAX_MODELS];   // mmodel_t ptr handles for loaded clip models (Brush models).
+
+    /**
+    *
+    *   Locally Derived Information from Server State.
+    *
+    **/
+    bsp_t *bsp = nullptr;                  //! Pointer to the actual BSP.
+
+    qhandle_t drawModels[MAX_MODELS] = {};   //! Handles for loaded draw models (MD2, MD3, ...).
+    mmodel_t *clipModels[MAX_MODELS] = {};   //! mmodel_t ptr handles for loaded clip models (Brush models).
 
     struct {
-        qhandle_t sounds[MAX_SOUNDS];   // Handles to the loaded sounds.
-        qhandle_t images[MAX_IMAGES];   // Handles to the loaded images.
+        qhandle_t sounds[MAX_SOUNDS] = {};   //! Handles to the loaded sounds.
+        qhandle_t images[MAX_IMAGES] = {};   //! Handles to the loaded images.
     } precaches;
-    ClientInfo    clientInfo[MAX_CLIENTS];    // Client info for all clients.
-    ClientInfo    baseClientInfo;             // Local, Player, Client Info.
 
-    char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH]; // Weapon Models string paths.
-    int32_t numWeaponModels;    // Number of weapon models.
+    //! Client info for all clients.
+    ClientInfo clientInfo[MAX_CLIENTS] = {};
+    //! Local, Player, Client Info.
+    ClientInfo baseClientInfo = {};
+
+    //! Weapon Models string paths.
+    char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH] = {};
+    //! Number of weapon models.
+    int32_t numWeaponModels = 0;
 };
-
-#endif // __SHARED_CL_TYPES_H__

@@ -9,7 +9,6 @@
 ***/
 #include "../ClientGameLocal.h"
 
-#include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
@@ -17,6 +16,8 @@
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 #include "../HUD/ChatHUD.h"
+#include "../Effects/LightStyles.h"
+#include "../Effects/MuzzleFlashEffects.h"
 #include "Media.h"
 #include "Screen.h"
 #include "ServerMessage.h"
@@ -28,6 +29,7 @@
 qboolean ClientGameServerMessage::ParsePlayerSkin(char* name, char* model, char* skin, const char* str) {
     size_t len;
     char* t;
+    const char *defaultModelname = "male";
 
     // configstring parsing guarantees that playerskins can never
     // overflow, but still check the length to be entirely fool-proof
@@ -54,10 +56,13 @@ qboolean ClientGameServerMessage::ParsePlayerSkin(char* name, char* model, char*
 
     // isolate the model name
     t = strchr(model, '/');
-    if (!t)
-    t = strchr(model, '\\');
-    if (!t)
-    goto default_model;
+    if (!t) {
+        t = strchr(model, '\\');
+    }
+    if (!t) {
+        strcpy(model, defaultModelname);
+        return true;
+    }
     *t = 0;
 
     // isolate the skin name
@@ -68,20 +73,17 @@ qboolean ClientGameServerMessage::ParsePlayerSkin(char* name, char* model, char*
     strcpy(model, "male");
 
     // apply restrictions on skins
-    if (cl_noskins->integer == 2 || !COM_IsPath(skin))
-    goto default_skin;
-
-    if (cl_noskins->integer || !COM_IsPath(model))
-    goto default_model;
-
-    return false;
-
-    default_skin:
+    if (cl_noskins->integer == 2 || !COM_IsPath(skin)) {
         strcpy(skin, "grunt");
         return true;
-    default_model:
-        strcpy(model, "male");
+    }
+
+    if (cl_noskins->integer || !COM_IsPath(model)) {
+        strcpy(model, defaultModelname);
         return true;
+    }
+
+    return false;
 }
 
 /**
@@ -96,7 +98,7 @@ qboolean ClientGameServerMessage::UpdateConfigString(int32_t index, const char* 
 
 #if USE_LIGHTSTYLES
     if (index >= ConfigStrings::Lights && index < ConfigStrings::Lights + MAX_LIGHTSTYLES) {
-        CLG_SetLightStyle(index - ConfigStrings::Lights, str);
+        LightStyles::Set(index - ConfigStrings::Lights, str);
         return true;
     }
 #endif
@@ -151,13 +153,13 @@ qboolean ClientGameServerMessage::ParseMessage(int32_t serverCommand) {
         // Client Muzzle Flash.
     case ServerGameCommand::MuzzleFlash:
         ParseMuzzleFlashPacket(0);
-        CLG_MuzzleFlash();
+        MuzzleFlashEffects::ClientMuzzleFlash();
         return true;
         break;
         // Entity Muzzle Flash.
     case ServerGameCommand::MuzzleFlash2:
         ParseMuzzleFlashPacket(0);
-        CLG_MuzzleFlash2();
+        MuzzleFlashEffects::EntityMuzzleFlash();
         return true;
         break;
 
@@ -264,8 +266,8 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
             break;
 
         case TempEntityEvent::DebugTrail:
-        case TempEntityEvent::BubbleTrail:
-        case TempEntityEvent::BubbleTrail2:
+        case TempEntityEvent::BubbleTrailA:
+        case TempEntityEvent::BubbleTrailB:
             teParameters.position1 = clgi.MSG_ReadVector3(false);
             teParameters.position2 = clgi.MSG_ReadVector3(false);
             break;

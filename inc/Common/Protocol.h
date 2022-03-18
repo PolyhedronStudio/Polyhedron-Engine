@@ -46,7 +46,7 @@ static inline qboolean POLYHEDRON_PROTOCOL_SUPPORTED(uint32_t x) {
 *   @brief  Protocol Configuration.
 **/
 //! Number of copies of EntityState to keep buffered.
-constexpr int32_t UPDATE_BACKUP = 256;  // Must be Power Of Two. 
+constexpr int32_t UPDATE_BACKUP = 16;  // Must be Power Of Two. 
 constexpr int32_t UPDATE_MASK = (UPDATE_BACKUP - 1);
 
 //! Allow a lot of command backups for very fast systems, used to be 64.
@@ -268,11 +268,11 @@ struct EntityMessageBits {
 
 // ==============================================================
 
-#define CLIENTNUM_NONE        (MAX_CLIENTS - 1)
-#define CLIENTNUM_RESERVED    (MAX_CLIENTS - 1)
+static constexpr int32_t CLIENTNUM_NONE     = MAX_CLIENTS - 1;
+static constexpr int32_t CLIENTNUM_RESERVED = MAX_CLIENTS - 1;
 
 // a Solid::BoundingBox will never create this value
-#define PACKED_BBOX      31
+static constexpr uint32_t PACKED_BBOX   = 31;
 
 
 // q2pro frame flags sent by the server

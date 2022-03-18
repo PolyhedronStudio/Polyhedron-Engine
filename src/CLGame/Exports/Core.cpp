@@ -9,7 +9,6 @@
 ***/
 #include "../ClientGameLocal.h"
 
-#include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
@@ -19,6 +18,8 @@
 #include "Core.h"
 #include "Media.h"
 #include "Movement.h"
+
+#include "../Effects/Particles.h"
 
 
 /**
@@ -208,7 +209,7 @@ void ClientGameCore::Initialize() {
     }
 
     // Initialize effects.
-    CLG_EffectsInit();
+    Particles::Initialize();
 
     // Initialize temporary entities.
     CLG_InitTempEntities();

@@ -266,7 +266,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         VectorScale(pos, 0.5, pos);
 
         gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
-        gi.MSG_WriteUint8(TempEntityEvent::BubbleTrail);//WriteByte(TempEntityEvent::BubbleTrail);
+        gi.MSG_WriteUint8(TempEntityEvent::BubbleTrailA);//WriteByte(TempEntityEvent::BubbleTrailA);
         gi.MSG_WriteVector3(water_start, false);
         gi.MSG_WriteVector3(tr.endPosition, false);
         gi.Multicast(pos, Multicast::PVS);

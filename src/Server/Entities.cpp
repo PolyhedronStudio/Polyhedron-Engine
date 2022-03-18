@@ -41,10 +41,11 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
     int oldnum, newnum;
     EntityStateMessageFlags flags;
 
-    if (!from)
+    if (!from) {
         from_num_entities = 0;
-    else
+    } else {
         from_num_entities = from->num_entities;
+    }
 
     newindex = 0;
     oldindex = 0;
@@ -78,8 +79,8 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
             }
             if (newnum == clientEntityNum) {
                 flags = (EntityStateMessageFlags)(flags | MSG_ES_FIRSTPERSON);
-                newent->origin = oldent->origin; // VectorCopy(oldent->origin, newent->origin);
-                newent->angles = oldent->angles; // VectorCopy(oldent->angles, newent->angles);
+                newent->origin = oldent->origin;
+                newent->angles = oldent->angles;
             }
 
             MSG_WriteDeltaEntity(oldent, newent, flags);
@@ -99,8 +100,8 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
             }
             if (newnum == clientEntityNum) {
                 flags = (EntityStateMessageFlags)(flags | MSG_ES_FIRSTPERSON); // CPP: Cast flags |= MSG_ES_FIRSTPERSON;
-                newent->origin = oldent->origin; // VectorCopy(oldent->origin, newent->origin);
-                newent->angles = oldent->angles; // VectorCopy(oldent->angles, newent->angles);
+                newent->origin = oldent->origin;
+                newent->angles = oldent->angles;
             }
 
             MSG_WriteDeltaEntity(oldent, newent, flags);
@@ -363,8 +364,9 @@ void SV_BuildClientFrame(client_t *client)
                 // beams just check one point for PHS
                 if (ent->state.renderEffects & RenderEffects::Beam) {
                     l = ent->clusterNumbers[0];
-                    if (!Q_IsBitSet(clientphs, l))
+                    if (!Q_IsBitSet(clientphs, l)) {
                         ent_visible = false;
+                    }
                 }
                 else {
                     if (cull_nonvisible_entities && !SV_EntityIsVisible(client->cm, ent, clientpvs)) {
@@ -373,13 +375,11 @@ void SV_BuildClientFrame(client_t *client)
 
                     if (!ent->state.modelIndex) {
                         // don't send sounds if they will be attenuated away
-                        vec3_t    delta;
-                        float    len;
-
-                        delta = org - ent->state.origin;
-                        len = vec3_length(delta);
-                        if (len > 400)
+                        vec3_t delta = org - ent->state.origin;
+                        float len = vec3_length(delta);
+                        if (len > 400) {
                             ent_visible = false;
+                        }
                     }
                 }
             }

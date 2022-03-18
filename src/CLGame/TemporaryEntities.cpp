@@ -8,7 +8,7 @@
 //
 #include "ClientGameLocal.h"
 
-#include "Effects.h"
+#include "Debug.h"
 #include "Main.h"
 #include "NewEffects.h"
 #include "TemporaryEntities.h"
@@ -16,6 +16,10 @@
 // Exports.
 #include "ClientGameExports.h"
 #include "Exports/View.h"
+
+#include "Effects/DynamicLights.h"
+#include "Effects/Particles.h"
+#include "Effects/ParticleEffects.h"
 
 //
 // CVars.
@@ -694,30 +698,32 @@ static void CLG_AddPlayerBeams(void)
 
 			// FIXME: don't add offset twice?
 			d = VectorLength(dist);
-			VectorScale(cl->v_forward, d, dist);
-			VectorMA(dist, (hand_multiplier * b->offset[0]), cl->v_right, dist);
-			VectorMA(dist, b->offset[1], cl->v_forward, dist);
-			VectorMA(dist, b->offset[2], cl->v_up, dist);
-			if (info_hand->integer == 2)
-				VectorMA(org, -1, cl->v_up, org);
+			dist = vec3_scale(cl->v_forward, d);
+			dist = vec3_fmaf(dist, (hand_multiplier * b->offset[0]), cl->v_right);
+			dist = vec3_fmaf(dist, b->offset[1], cl->v_forward);
+			dist = vec3_fmaf(dist, b->offset[2], cl->v_up);
+			if (info_hand->integer == 2) {
+				org = vec3_fmaf(org, -1, cl->v_up);
+			}
+				
 
 			// FIXME: use cl.refdef.viewAngles?
 			angles = vec3_euler(dist);
 
 			// if it's the heatbeam, draw the particle effect
-			CLG_Heatbeam(org, dist);
+			ParticleEffects::HeatBeam(org, dist);
 
 			frameNumber = 1;
 		}
 		else {
-			VectorCopy(b->start, org);
+			org = b->start;
 
 			// calculate pitch and yaw
-			VectorSubtract(b->end, org, dist);
+			dist = b->end - org;
 			angles = vec3_euler(dist);
 
 			// if it's a non-origin offset, it's a player, so use the hardcoded player offset
-			if (!VectorCompare(b->offset, vec3_zero())) {
+			if (!vec3_equal(b->offset, vec3_zero())) {
 				vec3_t  tmp, f, r, u;
 
 				tmp[0] = angles[0];
@@ -731,7 +737,7 @@ static void CLG_AddPlayerBeams(void)
 			}
 			else {
 				// if it's a monster, do the particle effect
-				CLG_MonsterPlasma_Shell(b->start);
+				ParticleEffects::MonsterPlasmaShell(b->start);
 			}
 
 			frameNumber = 2;
@@ -808,12 +814,50 @@ static void CLG_ProcessSustain(void)
 	}
 }
 
+void SteamSustainThink(cl_sustain_t* self)
+{
+    int         i, j;
+    cparticle_t* p;
+    float       d;
+    vec3_t      r, u;
+    vec3_t      dir;
+
+    VectorCopy(self->dir, dir);
+    MakeNormalVectors(dir, r, u);
+
+    for (i = 0; i < self->count; i++) {
+        p = Particles::GetFreeParticle();
+        if (!p)
+            return;
+
+        p->time = cl->time;
+        p->color = self->color + (rand() & 7);
+
+        for (j = 0; j < 3; j++) {
+            p->org[j] = self->org[j] + self->magnitude * 0.1 * crand();
+        }
+        VectorScale(dir, self->magnitude, p->vel);
+        d = crand() * self->magnitude / 3;
+        VectorMA(p->vel, d, r, p->vel);
+        d = crand() * self->magnitude / 3;
+        VectorMA(p->vel, d, u, p->vel);
+
+        p->acceleration[0] = p->acceleration[1] = 0;
+        p->acceleration[2] = -ParticleEffects::ParticleGravity / 2;
+        p->alpha = 1.0;
+
+        p->alphavel = -1.0 / (0.5 + frand() * 0.3);
+    }
+
+    self->nextThinkTime += self->thinkinterval;
+}
+
 static void CLG_ParseSteam(void)
 {
 	cl_sustain_t* s;
 
 	if (teParameters.entity1 == -1) {
-		CLG_ParticleSteamEffect(teParameters.position1, teParameters.dir, teParameters.color & 0xff, teParameters.count, teParameters.entity2);
+		ParticleEffects::SteamPuffs(teParameters.position1, teParameters.dir, teParameters.color & 0xff, teParameters.count, teParameters.entity2);
 		return;
 	}
 
@@ -828,7 +872,7 @@ static void CLG_ParseSteam(void)
 	s->color = teParameters.color & 0xff;
 	s->magnitude = teParameters.entity2;
 	s->endTime = cl->time + teParameters.time;
-	s->Think = CLG_ParticleSteamEffect2;
+	s->Think = SteamSustainThink;
 	s->thinkinterval = 100;
 	s->nextThinkTime = cl->time;
 }
@@ -876,7 +920,7 @@ static void CLG_RailSpiral(void)
 	MakeNormalVectors(vec, right, up);
 
 	for (i = 0; i < len; i++) {
-		p = CLG_AllocParticle();
+		p = Particles::GetFreeParticle();
 		if (!p)
 			return;
 
@@ -928,7 +972,7 @@ static void CLG_RailLights(color_t color)
 		vec3_t pos;
 		VectorMA(move, offset, vec, pos);
 
-		cdlight_t* dl = CLG_AllocDLight(0);
+		cdlight_t* dl = DynamicLights::GetDynamicLight(0);
 		VectorScale(fcolor, 0.25f, dl->color);
 		VectorCopy(pos, dl->origin);
 		dl->radius = 400;
@@ -998,20 +1042,20 @@ void CLG_ParseTempEntity(void)
 		if (!(cl_disable_particles->integer & NOPART_BLOOD))
 		{
 			// CL_ParticleEffect(teParameters.position1, teParameters.dir, 0xe8, 60);
-			CLG_BloodParticleEffect(teParameters.position1, teParameters.dir, 0xe8, 1000);
+			ParticleEffects::BloodSplatters(teParameters.position1, teParameters.dir, 0xe8, 1000);
 		}
 		break;
 
 	case TempEntityEvent::Gunshot:            // bullet hitting wall
-		CLG_ParticleEffect(teParameters.position1, teParameters.dir, 0, 40);
+		ParticleEffects::DirtAndSparks(teParameters.position1, teParameters.dir, 0, 40);
 	case TempEntityEvent::Shotgun:            // bullet hitting wall
-		CLG_ParticleEffect(teParameters.position1, teParameters.dir, 0, 20);
+		ParticleEffects::DirtAndSparks(teParameters.position1, teParameters.dir, 0, 20);
 		CLG_SmokeAndFlash(teParameters.position1);
 		break;
 
 	case TempEntityEvent::Sparks:
 	case TempEntityEvent::BulletSparks:
-		CLG_ParticleEffect(teParameters.position1, teParameters.dir, 0xe0, 6);
+		ParticleEffects::DirtAndSparks(teParameters.position1, teParameters.dir, 0xe0, 6);
 
 		if (teParameters.type != TempEntityEvent::Sparks) {
 			CLG_SmokeAndFlash(teParameters.position1);
@@ -1032,7 +1076,7 @@ void CLG_ParseTempEntity(void)
 			r = 0x00;
 		else
 			r = splash_color[teParameters.color];
-		CLG_ParticleEffectWaterSplash(teParameters.position1, teParameters.dir, r, teParameters.count);
+		ParticleEffects::WaterSplash(teParameters.position1, teParameters.dir, r, teParameters.count);
 
 		if (teParameters.color == SplashType::Sparks) {
 			r = rand() & 3;
@@ -1045,44 +1089,6 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TempEntityEvent::Blaster:            // blaster hitting wall
-	case TempEntityEvent::Flare:              // flare
-		ex = CLG_AllocExplosion();
-		VectorCopy(teParameters.position1, ex->ent.origin);
-		dirtoangles(ex->ent.angles);
-		ex->type = explosion_t::ex_blaster;
-		ex->ent.flags = RenderEffects::FullBright | RenderEffects::Translucent;
-		ex->ent.tent_type = teParameters.type;
-		switch (teParameters.type) {
-			case TempEntityEvent::Blaster:
-				CLG_BlasterParticles(teParameters.position1, teParameters.dir);
-				ex->lightcolor[0] = 1;
-				ex->lightcolor[1] = 1;
-				break;
-			case TempEntityEvent::Flare:
-				CLG_BlasterParticles2(teParameters.position1, teParameters.dir, 0xd0);
-				ex->lightcolor[0] = 1;
-				ex->lightcolor[1] = 1;
-				ex->type = explosion_t::ex_flare;
-				break;
-		}
-		ex->start = cl->serverTime - CLG_FRAMETIME;
-		ex->light = 150;
-		ex->ent.model = cl_mod_explode;
-		ex->frames = 4;
-
-		if (teParameters.type != TempEntityEvent::Flare)
-		{
-			clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
-		}
-		else
-		{
-			// teParameters.count is set to 1 on the first tick of the flare, 0 afterwards
-			if (teParameters.count != 0)
-				clgi.S_StartSound(NULL, teParameters.entity1, 0, cl_sfx_flare, 0.5, Attenuation::Normal, 0);
-		}
-		break;
-
 	case TempEntityEvent::Explosion2:
 		ex = CLG_PlainExplosion(false);
 		if (!cl_explosion_sprites->integer)
@@ -1090,13 +1096,13 @@ void CLG_ParseTempEntity(void)
 			ex->frames = 19;
 			ex->baseFrame = 30;
 		}
-		CLG_ExplosionParticles(teParameters.position1);
+		ParticleEffects::ExplosionSparks(teParameters.position1);
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_grenexp, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::Explosion1:
 		CLG_PlainExplosion(false);
-		CLG_ExplosionParticles(teParameters.position1);
+		ParticleEffects::ExplosionSparks(teParameters.position1);
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
 		break;
 
@@ -1110,12 +1116,12 @@ void CLG_ParseTempEntity(void)
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
 		break;
 
-	case TempEntityEvent::BubbleTrail:
-		CLG_BubbleTrail(teParameters.position1, teParameters.position2);
+	case TempEntityEvent::BubbleTrailA:
+		ParticleEffects::BubbleTrailA(teParameters.position1, teParameters.position2);
 		break;
 
 	case TempEntityEvent::DebugTrail:
-		CLG_DebugTrail(teParameters.position1, teParameters.position2);
+		CLG_DrawDebugLine(teParameters.position1, teParameters.position2);
 		break;
 
 	case TempEntityEvent::PlainExplosion:
@@ -1123,31 +1129,27 @@ void CLG_ParseTempEntity(void)
 		break;
 
 	case TempEntityEvent::ForceWall:
-		CLG_ForceWall(teParameters.position1, teParameters.position2, teParameters.color);
+		ParticleEffects::ForceWall(teParameters.position1, teParameters.position2, teParameters.color);
 		break;
 
-	case TempEntityEvent::Steam:
-		CLG_ParseSteam();
-		break;
-
-	case TempEntityEvent::BubbleTrail2:
-		CLG_BubbleTrail2(teParameters.position1, teParameters.position2, 8);
+	case TempEntityEvent::BubbleTrailB:
+		ParticleEffects::BubbleTrailB(teParameters.position1, teParameters.position2, 8);
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		break;
 
 	case TempEntityEvent::MoreBlood:
-		CLG_ParticleEffect(teParameters.position1, teParameters.dir, 0xe8, 250);
+		ParticleEffects::DirtAndSparks(teParameters.position1, teParameters.dir, 0xe8, 250);
 		break;
 
 	case TempEntityEvent::ElectricSparks:
-		CLG_ParticleEffect(teParameters.position1, teParameters.dir, 0x75, 40);
+		ParticleEffects::DirtAndSparks(teParameters.position1, teParameters.dir, 0x75, 40);
 		//FIXME : replace or remove this sound
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		break;
 
-	case TempEntityEvent::TeleportEffect:
-		CLG_TeleportParticles(teParameters.position1);
-		break;
+	//case TempEntityEvent::TeleportEffect:
+	//	ParticleEffects::TeleportEffect(teParameters.position1);
+	//	break;
 
 	default:
 		Com_Error(ErrorType::Drop, "%s: bad type", __func__);

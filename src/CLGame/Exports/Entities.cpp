@@ -12,7 +12,6 @@
 
 // Base Client Game Functionality.
 #include "../Debug.h"
-#include "../Effects.h"
 #include "../Entities.h"
 #include "../Main.h"
 #include "../TemporaryEntities.h"
@@ -22,6 +21,9 @@
 #include "../ClientGameExports.h"
 #include "Entities.h"
 #include "View.h"
+
+// Effects.
+#include "../Effects/ParticleEffects.h"
 
 // Shared Game.
 #include "SharedGame/SkeletalAnimation.h"
@@ -214,18 +216,18 @@ void ClientGameEntities::Event(int32_t number) {
 
     // EF_TELEPORTER acts like an event, but is not cleared each frame
     if ((clientEntity->current.effects & EntityEffectType::Teleporter)) {
-        CLG_TeleporterParticles(clientEntity->current.origin);
+        ParticleEffects::Teleporter(clientEntity->current.origin);
     }
 
     // Switch to specific execution based on a unique Event ID.
     switch (clientEntity->current.eventID) {
         case EntityEvent::ItemRespawn:
             clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("items/respawn1.wav"), 1, Attenuation::Idle, 0);
-            CLG_ItemRespawnParticles(clientEntity->current.origin);
+            ParticleEffects::ItemRespawn(clientEntity->current.origin);
             break;
         case EntityEvent::PlayerTeleport:
             clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("misc/tele1.wav"), 1, Attenuation::Idle, 0);
-            CLG_TeleportParticles(clientEntity->current.origin);
+            ParticleEffects::Teleporter(clientEntity->current.origin);
             break;
         case EntityEvent::Footstep:
             if (cl_footsteps->integer)
@@ -282,6 +284,7 @@ void ClientGameEntities::AddPacketEntities() {
         // Setup the render entity ID for the renderer.
         renderEntity.id = clientEntity->id + RESERVED_ENTITIY_COUNT;
 
+        Com_DPrint("entityIndex=%i, entityState->number=%i, clientEntity->id=%i, pointernr=%i\n", entityIndex, entityState->number, clientEntity->id, pointerNumber);
         //
         // Effects.
         // 
@@ -603,11 +606,8 @@ void ClientGameEntities::AddPacketEntities() {
         // 
         // Add automatic particle trail effects where desired.
         if (effects & ~EntityEffectType::Rotate) {
-            if (effects & EntityEffectType::Blaster) {
-                CLG_BlasterTrail(clientEntity->lerpOrigin, renderEntity.origin);
-                clge->view->AddLight(renderEntity.origin, vec3_t{ 0.6f, 0.4f, 0.12f }, 200);
-            } else if (effects & EntityEffectType::Gib) {
-                CLG_DiminishingTrail(clientEntity->lerpOrigin, renderEntity.origin, clientEntity, effects);
+            if (effects & EntityEffectType::Gib) {
+                ParticleEffects::DiminishingTrail(clientEntity->lerpOrigin, renderEntity.origin, clientEntity, effects);
             } else if (effects & EntityEffectType::Torch) {
                 const float anim = sinf((float)renderEntity.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
                 const float offset = anim * 0.0f;

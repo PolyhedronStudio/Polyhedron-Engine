@@ -10,6 +10,25 @@ SET(SRC_CLGAME
 	CLGame/ClientGameExports.cpp
 	CLGame/ClientGameImports.cpp
 
+	CLGame/Effects/DynamicLights.cpp
+	CLGame/Effects/LightStyles.cpp
+	CLGame/Effects/MuzzleFlashEffects.cpp
+	CLGame/Effects/Particles.cpp
+	CLGame/Effects/Particles/BloodSplatters.cpp
+	CLGame/Effects/Particles/BubbleTrailA.cpp
+	CLGame/Effects/Particles/BubbleTrailB.cpp
+	CLGame/Effects/Particles/DiminishingTrail.cpp
+	CLGame/Effects/Particles/DirtAndSparks.cpp
+	CLGame/Effects/Particles/ExplosionSparks.cpp
+	CLGame/Effects/Particles/ForceWall.cpp
+	CLGame/Effects/Particles/HeatBeam.cpp
+	CLGame/Effects/Particles/ItemRespawn.cpp
+	CLGame/Effects/Particles/LogoutEffect.cpp
+	CLGame/Effects/Particles/MonsterPlasmaShell.cpp
+	CLGame/Effects/Particles/SteamPuffs.cpp
+	CLGame/Effects/Particles/Teleporter.cpp
+	CLGame/Effects/Particles/WaterSplash.cpp
+
 	CLGame/Exports/Core.cpp
 	CLGame/Exports/Entities.cpp
 	CLGame/Exports/Media.cpp
@@ -25,10 +44,8 @@ SET(SRC_CLGAME
 	CLGame/Input/KeyBinding.cpp
 
 	CLGame/Debug.cpp
-	CLGame/Effects.cpp
 	CLGame/Entities.cpp
 	CLGame/Main.cpp
-	CLGame/NewEffects.cpp
 	CLGame/TemporaryEntities.cpp
 
 	CLGame/CLGame.def
@@ -37,6 +54,12 @@ SET(SRC_CLGAME
 SET(HEADERS_CLGAME
 	CLGame/ClientGameExports.h
 	CLGame/ClientGameImports.h
+
+	CLGame/Effects/DynamicLights.h
+	CLGame/Effects/LightStyles.h
+	CLGame/Effects/MuzzleFlashEffects.h
+	CLGame/Effects/ParticleEffects.h
+	CLGame/Effects/Particles.h
 
 	CLGame/Exports/Core.h
 	CLGame/Exports/Entities.h
@@ -53,11 +76,9 @@ SET(HEADERS_CLGAME
 	CLGame/Input/KeyBinding.h
 
 	CLGame/Debug.h
-	CLGame/Effects.h
 	CLGame/Entities.h
 	CLGame/ClientGameLocal.h
 	CLGame/Main.h
-	CLGame/NewEffects.h
 	CLGame/TemporaryEntities.h
 )
 

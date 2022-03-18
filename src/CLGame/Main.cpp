@@ -9,7 +9,6 @@
 #include "ClientGameLocal.h"
 
 // ClientGame.
-#include "Effects.h"
 #include "Entities.h"
 #include "Main.h"
 #include "TemporaryEntities.h"

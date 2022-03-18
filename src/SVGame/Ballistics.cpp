@@ -169,7 +169,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
         position = vec3_scale(liquidStartPosition + trace.endPosition, 0.5f);
 
         gi.MSG_WriteUint8(ServerGameCommand::TempEntity);
-        gi.MSG_WriteUint8(TempEntityEvent::BubbleTrail);
+        gi.MSG_WriteUint8(TempEntityEvent::BubbleTrailA);
         gi.MSG_WriteVector3(liquidStartPosition, false);
         gi.MSG_WriteVector3(trace.endPosition, false);
         gi.Multicast(position, Multicast::PVS);

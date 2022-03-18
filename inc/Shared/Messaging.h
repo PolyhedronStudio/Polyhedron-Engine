@@ -90,6 +90,8 @@ struct EntityEvent {
 struct EntityState {
     //! Entity index number.
     int32_t number = 0;
+    //! Hashed class name.
+    uint32_t hashedClassname = 0;
 
     //! Entity Origin.
     vec3_t origin = vec3_zero();

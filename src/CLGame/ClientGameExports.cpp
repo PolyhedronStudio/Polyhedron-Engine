@@ -1,6 +1,5 @@
 #include "ClientGameLocal.h"
 
-#include "Effects.h"
 #include "Entities.h"
 #include "Main.h"
 #include "TemporaryEntities.h"
@@ -18,6 +17,10 @@
 #include "Exports/Screen.h"
 #include "Exports/ServerMessage.h"
 #include "Exports/View.h"
+
+#include "Effects/DynamicLights.h"
+#include "Effects/LightStyles.h"
+#include "Effects/Particles.h"
 
 //! Static 
 ClientGameExports *clge = nullptr;
@@ -73,8 +76,11 @@ float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float wi
 *   @brief  Called when a demo is being seeked through.
 **/
 void ClientGameExports::DemoSeek() {
-    // Clear Effects.
-    CLG_ClearEffects();
+    // Clear Particle.
+    Particles::Clear();
+    // Clear Dynamic Light Effects.
+    DynamicLights::Clear();
+
     // Clear Temp Entities.
     CLG_ClearTempEntities();
 }
@@ -92,12 +98,14 @@ void ClientGameExports::ClientBegin() {
 *           Could be him quiting, or pinging out etc.
 **/
 void ClientGameExports::ClientClearState() {
-    // Clear Effects.
-    CLG_ClearEffects();
+    // Clear Particle.
+    Particles::Clear();
+    // Clear Dynamic Light Effects.
+    DynamicLights::Clear();
 
     // WID: TODO: I think this #ifdef can go lol.
 #if USE_LIGHTSTYLES
-    CLG_ClearLightStyles();
+    LightStyles::Clear();
 #endif
     CLG_ClearTempEntities();
 }
@@ -117,9 +125,9 @@ void ClientGameExports::ClientDeltaFrame() {
 **/
 void ClientGameExports::ClientFrame() {
     // Advance local effects.
-    CLG_RunDLights();
+    DynamicLights::RunFrame();
 #if USE_LIGHTSTYLES
-    CLG_RunLightStyles();
+    LightStyles::RunFrame();
 #endif
 }
 

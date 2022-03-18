@@ -246,9 +246,9 @@ struct TempEntityEvent {
     static constexpr uint8_t Splash = 60;
 
     //! Bubble Trail 1 particle effect.
-    static constexpr uint8_t BubbleTrail = 70;
+    static constexpr uint8_t BubbleTrailA = 70;
     //! Bubble Trail 2 particle effect.
-    static constexpr uint8_t BubbleTrail2 = 71;
+    static constexpr uint8_t BubbleTrailB = 71;
 
     //! Flame sprite particle effect.
     static constexpr uint8_t Flame = 80;
@@ -290,7 +290,7 @@ struct MuzzleFlashType {
     static constexpr uint8_t Logout      = 3;
 
     //! Shows a Pistol muzzleflash effect.
-    static constexpr uint8_t Blaster        = 16;
+    static constexpr uint8_t Smg45        = 16;
     //! Shows a MachineGun muzzleflash effect.
     static constexpr uint8_t MachineGun     = 17;
     //! Shows a Shotgun muzzleflash effect.
