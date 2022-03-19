@@ -397,6 +397,7 @@ void ClientGameScreen::CenterPrint(const std::string& text) {
 
     // Don't process any further, no text to process.
     if (text.empty()) {
+        //Com_DPrint("WOOOWWW NO CENTERPRINT TEXTS DAWG!?\n");
         return;
     }
 
@@ -493,10 +494,6 @@ void ClientGameScreen::DrawCrosshair() {
 *   @brief  Draws the 'center strings' on display.
 **/
 void ClientGameScreen::DrawCenterString() {
-    //int y;
-    //float alpha;
-
-
     clgi.Cvar_ClampValue(scr_centertime, 0.3f, 10.0f);
 
     float alpha = FadeAlpha(screenData.centerStringTimeStamp, scr_centertime->value * 1000, 300);
@@ -505,15 +502,13 @@ void ClientGameScreen::DrawCenterString() {
     }
     
     // Set scale to hud scale.
-    clgi.R_SetScale(screenData.hudScale);
     clgi.R_SetAlpha(alpha * scr_alpha->value);
 
     float y = screenData.hudSize.y / 4 - screenData.centerStringLines * 8 / 2;
 
-    DrawString(screenData.centerString, {screenData.hudSize.x / 2, y}, UI_CENTER, MAX_STRING_CHARS);
+    DrawMultilineString(screenData.centerString, {screenData.hudSize.x / 2, y}, UI_CENTER);
 
     clgi.R_SetAlpha(scr_alpha->value);
-    clgi.R_SetScale(1.f);
 }
 
 //                // ammo number

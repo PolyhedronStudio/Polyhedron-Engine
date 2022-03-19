@@ -401,11 +401,12 @@ void ClientGameServerMessage::ParsePrint(void) {
     //SCR_AddToChatHUD(s);
 
     // play sound
-    if (cl_chat_sound->integer > 1) {
-        clgi.S_StartLocalSound_("misc/talk1.wav");
-    } else if (cl_chat_sound->integer > 0) {
-        clgi.S_StartLocalSound_("misc/talk.wav");
-    }
+    //if (cl_chat_sound->integer > 1) {
+    //    clgi.S_StartLocalSound_("misc/talk1.wav");
+    //} else if (cl_chat_sound->integer > 0) {
+    //    clgi.S_StartLocalSound_("misc/talk.wav");
+    //}
+    clgi.S_StartLocalSound("misc/talk.wav");
 }
 
 /**
