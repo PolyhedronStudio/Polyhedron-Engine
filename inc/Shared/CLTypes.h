@@ -60,6 +60,7 @@ static constexpr uint32_t NOPART_BLOOD = 16;
 static constexpr uint32_t NOEXP_GRENADE = 1;
 static constexpr uint32_t NOEXP_ROCKET = 2;
 
+
 //
 // Local client entity structure, temporary entities.
 //

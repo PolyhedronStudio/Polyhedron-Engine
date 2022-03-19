@@ -1,11 +1,12 @@
-// LICENSE HERE.
-
-//
-// clg_tents.c
-//
-//
-// Handles the temporary entities. Explions, Beams, etc.
-//
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Game Temp Entities.
+*
+***/
 #include "ClientGameLocal.h"
 
 #include "Debug.h"

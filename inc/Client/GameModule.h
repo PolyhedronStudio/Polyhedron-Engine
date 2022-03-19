@@ -38,7 +38,7 @@ void		CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from);
 //
 // Entities.
 //
-qboolean	CL_GM_SpawnClassEntities(const char *entities);
+qboolean	CL_GM_SpawnEntitiesFromString(const char *entities);
 void		CL_GM_EntityEvent(int32_t number);
 
 //

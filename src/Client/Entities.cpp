@@ -32,14 +32,13 @@ FRAME PARSING
 */
 
 /**
-*   @brief  Determines whether this entity comes from an optimized packet or not.
-*   @return True if it, false otherwise.
+*   @brief  The client's player entity is send as an "optimized" packet. Several
+*           variables are sent over the player state instead of the entity state.
+* 
+*   @return True if the entity comes from an optimized packet, false otherwise.
 **/
-static inline qboolean Entity_IsOptimized(const EntityState* state) {
-    if (cls.serverProtocol != PROTOCOL_VERSION_POLYHEDRON)
-        return false;
-
-    if (state->number != cl.frame.clientNumber + 1)
+static inline qboolean Entity_IsPlayer(const EntityState& state) {
+    if (state.number != cl.frame.clientNumber + 1)
         return false;
 
     if (cl.frame.playerState.pmove.type >= EnginePlayerMoveType::Dead)
@@ -51,17 +50,19 @@ static inline qboolean Entity_IsOptimized(const EntityState* state) {
 /**
 *   @brief  Creates a new entity based on the newly received entity state.
 **/
-static inline void Entity_UpdateNew(ClientEntity *ent, const EntityState *state, const vec_t *origin)
+static inline void Entity_UpdateNew(ClientEntity *ent, const EntityState &state, const vec3_t &origin)
 {
     static int entity_ctr;
     ent->id = ++entity_ctr;
     ent->trailcount = 1024;
 
+    Com_Printf("Entity_UpdateNew: ent->id=%i\n", ent->id);
+    
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
-    ent->prev = *state;
+    ent->prev = state;
 
-    if (state->eventID == EntityEvent::PlayerTeleport || state->eventID == EntityEvent::OtherTeleport
-       || (state->renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) 
+    if (state.eventID == EntityEvent::PlayerTeleport || state.eventID == EntityEvent::OtherTeleport
+       || (state.renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) 
     {
         // This entity has been teleported.
         ent->lerpOrigin = origin;
@@ -69,67 +70,81 @@ static inline void Entity_UpdateNew(ClientEntity *ent, const EntityState *state,
     }
 
     // oldOrigin is valid for new entities, so use it as starting point for interpolating between.
-    ent->prev.origin = state->oldOrigin;
-    ent->lerpOrigin = state->oldOrigin;
+    ent->prev.origin = state.oldOrigin;
+    ent->lerpOrigin = state.oldOrigin;
 }
 
 /**
 *   @brief  Updates an existing entity using the newly received state for it.
 **/
-static inline void Entity_UpdateExisting(ClientEntity *player, const EntityState *state, const vec_t *origin)
+static inline void Entity_UpdateExisting(ClientEntity *entity, const EntityState &state, const vec_t *origin)
 {
     // Fetch event ID.
-    int32_t eventID = state->eventID;
+    int32_t eventID = state.eventID;
 
-    if (state->modelIndex != player->current.modelIndex
-        || state->modelIndex2 != player->current.modelIndex2
-        || state->modelIndex3 != player->current.modelIndex3
-        || state->modelIndex4 != player->current.modelIndex4
+    if (state.modelIndex != entity->current.modelIndex
+        || state.modelIndex2 != entity->current.modelIndex2
+        || state.modelIndex3 != entity->current.modelIndex3
+        || state.modelIndex4 != entity->current.modelIndex4
         || eventID == EntityEvent::PlayerTeleport
         || eventID == EntityEvent::OtherTeleport
-        || fabsf(origin[0] - player->current.origin[0]) > 512
-        || fabsf(origin[1] - player->current.origin[1]) > 512
-        || fabsf(origin[2] - player->current.origin[2]) > 512
+        || fabsf(origin[0] - entity->current.origin[0]) > 512
+        || fabsf(origin[1] - entity->current.origin[1]) > 512
+        || fabsf(origin[2] - entity->current.origin[2]) > 512
         || cl_nolerp->integer == 1) 
     {
         // Some data changes will force no lerping.
-        player->trailcount = 1024;     // Used for diminishing rocket / grenade trails
+        entity->trailcount = 1024;     // Used for diminishing rocket / grenade trails
 
         // Duplicate the current state so lerping doesn't hurt anything
-        player->prev = *state;
+        entity->prev = state;
 
         // No lerping if teleported or morphed
-        player->lerpOrigin = origin;
+        entity->lerpOrigin = origin;
         return;
     }
 
     // Shuffle the last state to previous
-    player->prev = player->current;
+    entity->prev = entity->current;
 }
 
 /**
 *   @brief  Checks whether the parsed entity is a newcomer or has been around 
 *           in previous frames.
-*   @return True if it has not been around in the previous frame. False if it
-*           has not been around in previous frames. 
+*   @return True when either of these conditions are met: 
+*               - Last frame was invalid, meaning we can't compare to any previous state.
+*               - Last frame was dropped, once again, can't compare to any previous state.
+*               - cl_nolerp 2, forced by developer option.
+*           False when none of the above conditions are met or cl_nolerp is set to 3:
 **/
-static inline qboolean Entity_IsNew(const ClientEntity *player)
+static inline qboolean Entity_IsNew(const ClientEntity *clEntity)
 {
-    if (!cl.oldframe.valid)
-        return true;   // Last received frame was invalid.
+    // Last received frame was invalid.
+    if (!cl.oldframe.valid) {
+        return true;
+    }
 
-    if (player->serverFrame != cl.oldframe.number)
-        return true;   // Wasn't in last received frame.
+    // Wasn't in last received frame.
+    if (clEntity->serverFrame != cl.oldframe.number) {
+        return true;
+    }
 
-    if (cl_nolerp->integer == 2)
-        return true;   // Developer option, always new.
+    // Developer option, always new.
+    if (cl_nolerp->integer == 2) {
+        return true;
+    }
 
-    if (cl_nolerp->integer == 3)
-        return false;  // Developer option, lerp from last received frame.
+    // Developer option, lerp from last received frame.
+    if (cl_nolerp->integer == 3) {
+        return false;
+    }
 
-    if (cl.oldframe.number != cl.frame.number - 1)
-        return true;   // Previous server frame was dropped.
+    // Previous server frame was dropped.
+    if (cl.oldframe.number != cl.frame.number - 1) {
+        return true;
+    }
 
+    // No conditions met, so it wasn't in our previous frame.
     return false;
 }
 
@@ -137,44 +152,49 @@ static inline qboolean Entity_IsNew(const ClientEntity *player)
 *   @brief  Updates the entity belonging to the entity state. If it doesn't
 *           exist yet, it'll create it.
 **/
-static void Entity_UpdateState(const EntityState *state)
+static void Entity_UpdateState(const EntityState &state)
 {
-    ClientEntity *player = &cs.entities[state->number];
-    vec3_t entityOrigin = vec3_zero();
+    // Acquire a pointer to the client side entity that belongs to the state->number server entity.
+    ClientEntity *clEntity = &cs.entities[state.number];
 
     // If entity its solid is PACKED_BBOX, decode mins/maxs and add to the list
-    if (state->solid && state->number != cl.frame.clientNumber + 1
+    if (state.solid && state.number != cl.frame.clientNumber + 1
         && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
-        cl.solidEntities[cl.numSolidEntities++] = player;
+        cl.solidEntities[cl.numSolidEntities++] = clEntity;
 
-        if (state->solid != PACKED_BBOX) {
+        if (state.solid != PACKED_BBOX) {
             // 32 bit encoded bbox
-            MSG_UnpackBoundingBox32(state->solid, player->mins, player->maxs);
+            MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
         }
     }
 
     // Work around Q2PRO server bandwidth optimization.
-    const bool isOptimizedEntity = Entity_IsOptimized(state);
+    const bool isPlayerEntity = Entity_IsPlayer(state);
 
-    if (isOptimizedEntity) {
+    // Fetch the entity's origin.
+    vec3_t entityOrigin = state.origin;
+    if (isPlayerEntity) {
         entityOrigin = cl.frame.playerState.pmove.origin;
-    } else {
-        entityOrigin = state->origin;
     }
 
-    if (Entity_IsNew(player)) {
+    // Was this entity in our previous frame, or not?
+    if (Entity_IsNew(clEntity)) {
         // Wasn't in last update, so initialize some things.
-        Entity_UpdateNew(player, state, entityOrigin);
+        Entity_UpdateNew(clEntity, state, entityOrigin);
     } else {
-        Entity_UpdateExisting(player, state, entityOrigin);
+        // It already exists, update it accordingly.
+        Entity_UpdateExisting(clEntity, state, entityOrigin);
     }
 
-    player->serverFrame = cl.frame.number;
-    player->current = *state;
+    // Assign the fresh new received server frame number that belongs to this frame.
+    clEntity->serverFrame = cl.frame.number;
+
+    // Assign the fresh new received state as the entity's current.
+    clEntity->current = state;
 
     // work around Q2PRO server bandwidth optimization
-    if (isOptimizedEntity) {
-        Com_PlayerToEntityState(&cl.frame.playerState, &player->current);
+    if (isPlayerEntity) {
+        Com_PlayerToEntityState(&cl.frame.playerState, &clEntity->current);
     }
 }
 
@@ -205,8 +225,9 @@ static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *current
     // If the previous frame number we expected does not add up to the one we got
     // passed to this function, go to duplicate.
     previousFrameNumber = currentFrame->number - framediv;
-    if (previousFrame->number != previousFrameNumber)
-	goto duplicate;
+    if (previousFrame->number != previousFrameNumber) {
+	    goto duplicate;
+    }
 
     // No lerping if player entity was teleported (origin check).
     if (std::fabsf((float)(previousPlayerState->pmove.origin[0] - currentPlayerState->pmove.origin[0])) > 256 ||
@@ -214,7 +235,8 @@ static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *current
         std::fabsf((float)(previousPlayerState->pmove.origin[2] - currentPlayerState->pmove.origin[2])) > 256) {
         goto duplicate;
     }
-    // no lerping if player entity was teleported (event check)
+
+    // No lerping if player entity was teleported (event check)
     player = &cs.entities[currentFrame->clientNumber + 1];
     if (player->serverFrame > previousFrameNumber && player->serverFrame <= currentFrame->number && 
        (player->current.eventID == EntityEvent::PlayerTeleport || player->current.eventID == EntityEvent::OtherTeleport)) 
@@ -308,7 +330,7 @@ void CL_DeltaFrame(void)
     // Getting a valid frame message ends the connection process.
     if (cls.connectionState == ClientConnectionState::Precached) {
 	    // Spawn all local class entities.
-	    CL_GM_SpawnClassEntities(cl.bsp->entityString);
+	    CL_GM_SpawnEntitiesFromString(cl.bsp->entityString);
 
         // Set the client to an active connection state.
         CL_SetActiveState();
@@ -329,13 +351,13 @@ void CL_DeltaFrame(void)
 
     for (int32_t i = 0; i < cl.frame.numEntities; i++) {
         int32_t stateIndex = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
-        EntityState *state = &cl.entityStates[stateIndex];
+        EntityState &state = cl.entityStates[stateIndex];
 
-        // Update the entity state. (Sets current and previous state.)
+        // Update the entity state. (Updates current and previous state.)
         Entity_UpdateState(state);
 
         // Fire entity event.
-        Entity_FireEvent(state->number);
+        Entity_FireEvent(state.number);
     }
 
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {

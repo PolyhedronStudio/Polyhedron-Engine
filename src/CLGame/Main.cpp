@@ -1,11 +1,12 @@
-// LICENSE HERE.
-
-//
-// clg_main.c
-//
-//
-// Handles the main initialisation of the client game dll.
-//
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Game Main.
+*
+***/
 #include "ClientGameLocal.h"
 
 // ClientGame.

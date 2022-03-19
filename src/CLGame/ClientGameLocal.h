@@ -1,16 +1,13 @@
-/*
-// LICENSE HERE.
-
-//
-// clg_local.h
-//
-//
-// Contains the definitions of the import, and export API structs.
-//
-*/
-
-#ifndef __CLGAME_LOCAL_H__
-#define __CLGAME_LOCAL_H__
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Game Locals.
+*
+***/
+#pragma once
 
 // Define CGAME_INCLUDE so that files such as:
 // Common/cmodel.h
@@ -43,10 +40,7 @@
 static constexpr double CLG_FRAMETIME   = BASE_FRAMETIME;
 static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
 static constexpr int32_t CLG_FRAMEDIV   = BASE_FRAMERATE / 10.0;
-//static inline qboolean CLG_FRAMESYNC() {
-//    extern ClientState *cl;
-//    return !(cl->frame.number % CLG_FRAMEDIV);
-//}
+
 
 //
 //=============================================================================
@@ -201,5 +195,3 @@ extern cvar_t* info_in_bspmenu;     // Is set to 1  at boot time when loading ma
                                     // to 1 when disconnecting from a server hence, once again, loading mainmenu.bsp
 // Video.
 extern cvar_t* vid_rtx;     // 1 if we're in RTX mode, 0 if not.
-
-#endif // __CLGAME_LOCAL_H__

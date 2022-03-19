@@ -29,6 +29,9 @@ SET(SRC_CLGAME
 	CLGame/Effects/Particles/Teleporter.cpp
 	CLGame/Effects/Particles/WaterSplash.cpp
 
+	CLGame/Entities/Base/CLGBaseEntity.cpp
+	CLGame/Entities/EntityList.cpp
+
 	CLGame/Exports/Core.cpp
 	CLGame/Exports/Entities.cpp
 	CLGame/Exports/Media.cpp
@@ -60,6 +63,9 @@ SET(HEADERS_CLGAME
 	CLGame/Effects/MuzzleFlashEffects.h
 	CLGame/Effects/ParticleEffects.h
 	CLGame/Effects/Particles.h
+
+	CLGame/Entities/Base/CLGBaseEntity.h
+	CLGame/Entities/EntityList.h
 
 	CLGame/Exports/Core.h
 	CLGame/Exports/Entities.h

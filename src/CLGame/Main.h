@@ -1,11 +1,12 @@
-/*
-// LICENSE HERE.
-
-//
-// clgame/clg_main.h
-//
-*/
-
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Game Main.
+*
+***/
 #pragma once
 
 class ClientGameExports;

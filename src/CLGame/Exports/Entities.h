@@ -12,42 +12,45 @@
 // Client Game Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
-//-----------------------
-// Client base class entity.
-//------------------------
-class CLGBaseEntity {
-public:
-    //! Constructor/Destructor.
-    CLGBaseEntity() = default;
-    virtual ~CLGBaseEntity() = default;
+// Base Entity.
+#include "../Entities/Base/CLGBaseEntity.h"
 
-    //! Sets the classname of this entity.
-    inline void SetClassname(const std::string& classname) {
-        this->classname = classname;
-    }
-
-    //! Get the classname.
-    inline const std::string& GetClassname() {
-        return classname;
-    }
-
-    // Sets the entity ID
-    inline void SetEntityID(int32_t id) {
-        entityID = id;
-    }
-
-    // Gets the entity ID
-    inline int32_t GetEntityID() {
-        return entityID;
-    }
-
-private:
-    // Entity ID.
-    int32_t entityID = 0;
-
-    // Classname.
-    std::string classname = "";
-};
+////-----------------------
+//// Client base class entity.
+////------------------------
+//class CLGBaseEntity {
+//public:
+//    //! Constructor/Destructor.
+//    CLGBaseEntity() = default;
+//    virtual ~CLGBaseEntity() = default;
+//
+//    //! Sets the classname of this entity.
+//    inline void SetClassname(const std::string& classname) {
+//        this->classname = classname;
+//    }
+//
+//    //! Get the classname.
+//    inline const std::string& GetClassname() {
+//        return classname;
+//    }
+//
+//    // Sets the entity ID
+//    inline void SetEntityID(int32_t id) {
+//        entityID = id;
+//    }
+//
+//    // Gets the entity ID
+//    inline int32_t GetEntityID() {
+//        return entityID;
+//    }
+//
+//private:
+//    // Entity ID.
+//    int32_t entityID = 0;
+//
+//    // Classname.
+//    std::string classname = "";
+//};
 
 
 //---------------------------------------------------------------------
@@ -64,7 +67,12 @@ public:
     * 
     *   @return True on success.
     **/
-    qboolean SpawnClassEntities(const char* entities) final;
+    qboolean SpawnEntitiesFromString(const char* entities) final;
+
+    /**
+    *   @brief  Emplaces, or spawn anew, an entity from the entity state.
+    **/
+    void SpawnEntityFromState(ClientEntity *clEntity, EntityState& state) final;
 
     /**
     *   @brief Executed whenever an entity event is receieved.
@@ -78,8 +86,8 @@ public:
     void AddPacketEntities() final;
 
     /**
-    * Add the view weapon render entity to the screen. Can also be used for
-    * other scenarios where a depth hack is required.
+    *   @brief  Add the view weapon render entity to the screen. Can also be used for
+    *           other scenarios where a depth hack is required.
     **/
     void AddViewEntities() final;
 

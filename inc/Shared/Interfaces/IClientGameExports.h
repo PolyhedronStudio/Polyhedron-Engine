@@ -62,13 +62,15 @@ public:
     * 
     *   @return True on success.
     **/
-    virtual qboolean SpawnClassEntities(const char* entities) = 0;
-
-
-
+    virtual qboolean SpawnEntitiesFromString(const char* entities) = 0;
 
     /**
-    *   @brief Executed whenever an entity event is receieved.
+    *   @brief  Emplaces, or spawn anew, an entity from the entity state.
+    **/
+    virtual void SpawnEntityFromState(ClientEntity *clEntity, EntityState& state) = 0;
+
+    /**
+    *   @brief  Executed whenever an entity event is receieved.
     **/
     virtual void Event(int32_t number) = 0;
 
@@ -79,8 +81,8 @@ public:
     virtual void AddPacketEntities() = 0;
 
     /**
-    * Add the view weapon render entity to the screen. Can also be used for
-    * other scenarios where a depth hack is required.
+    *   @brief  Add the view weapon render entity to the screen. Can also be used for
+    *           other scenarios where a depth hack is required.
     **/
     virtual void AddViewEntities() = 0;
 };
@@ -90,27 +92,34 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportMedia {
 public:
+    //! Destructor.
     virtual ~IClientGameExportMedia() = default;
 
-    // Called when the client wants to know the name of a custom load state.
-    virtual std::string GetLoadStateName(int32_t loadState) = 0;
 
-    // This is called when the client spawns into a server,
-    //
-    // It should register world related media here, such as particles that are
-    // used in-game, or view models, or sounds, etc.
-    virtual void LoadWorld() = 0;
 
-    // This is called upon every time the renderer initializes, or does a total
-    // hard restart.
-    //
-    // Use this to load in persistent data, such as 2D pics. Or use it to
-    // register certain CVars related to.
+    /**
+    *   @brief Called upon initialization of the renderer.
+    **/
     virtual void Initialize() = 0;
 
-    // This is called when the client stops the renderer.
-    // Use this to unload remaining data.
+    /**
+    *   @brief Called when the client stops the renderer.
+    * 
+    *   @details    Used to unload remaining data.
+    **/
     virtual void Shutdown() = 0;
+
+    /**
+    *   @brief Called when the client wants to acquire the name of a load state.
+    **/
+    virtual std::string GetLoadStateName(int32_t loadState) = 0;
+
+    /**
+    *   @brief  This is called when the client spawns into a server,
+    *   
+    *   @details    Used to register world related media (particles, view models, sounds).
+    **/
+    virtual void LoadWorld() = 0;
 };
 
 //---------------------------------------------------------------------
@@ -118,13 +127,17 @@ public:
 //---------------------------------------------------------------------
 class IClientGameExportMovement {
 public:
+    //! Destructor.
     virtual ~IClientGameExportMovement() = default;
 
-    // Called when the movement command needs to be build for the given
-    // client networking frame.
+    /**
+    *   @brief  Called when the movement command needs to be build for the given
+    *           client networking frame.
+    **/
     virtual void BuildFrameMovementCommand(int32_t miliseconds) = 0;
-    // Finished off building the actual movement vector before sending it
-    // to server.
+    /**
+    *   @brief  Finalize the movement user command before sending it to server.
+    **/
     virtual void FinalizeFrameMovementCommand() = 0;
 };
 

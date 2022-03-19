@@ -25,6 +25,10 @@
 // Effects.
 #include "../Effects/ParticleEffects.h"
 
+// Ents.
+#include "../Entities/EntityList.h"
+#include "../Entities/Base/CLGBaseEntity.h"
+
 // Shared Game.
 #include "SharedGame/SkeletalAnimation.h"
 
@@ -50,10 +54,14 @@ static constexpr int32_t RESERVED_ENTITIY_COUNT = 3;
 * 
 *   @return True on success.
 **/
-qboolean ClientGameEntities::SpawnClassEntities(const char* entities) {
+qboolean ClientGameEntities::SpawnEntitiesFromString(const char* entities) {
 	// Clear level state.
     //level = {};
-
+    static bool hasParsedBefore = false;
+    if (hasParsedBefore == false) {
+        hasParsedBefore = true;
+        return false;
+    }
     // Delete class entities if they are allocated, and reset the server entity to a zero state.
 	//for (int32_t i = 0; i < classEntities.size(); i++) {
 	//for (auto& classEntity : classEntities) {
@@ -202,6 +210,13 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 //---------------------------------------------------------------------------------------
 
 /**
+*   @brief  Emplaces, or spawn anew, an entity from the entity state.
+**/
+void ClientGameEntities::SpawnEntityFromState(ClientEntity *clEntity, EntityState& state) {
+    
+}
+
+/**
 *   @brief Executed whenever an entity event is receieved.
 **/
 void ClientGameEntities::Event(int32_t number) {
@@ -249,6 +264,9 @@ void ClientGameEntities::Event(int32_t number) {
 *   @brief  Parse the server frame for server entities to add to our client view.
 *           Also applies special rendering effects to them where desired.
 **/
+// Class Entity List, test code.
+EntityList classEntities;
+
 void ClientGameEntities::AddPacketEntities() {
     // Render entity that is about to be passed to the current render frame.
     r_entity_t   renderEntity = {}; // Ensure it is clear aka set to 0.
@@ -283,8 +301,22 @@ void ClientGameEntities::AddPacketEntities() {
         clientEntity = &cs->entities[entityState->number];
         // Setup the render entity ID for the renderer.
         renderEntity.id = clientEntity->id + RESERVED_ENTITIY_COUNT;
+//
+//
+// 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//          class entities test code.
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Com_DPrint("entityIndex=%i, entityState->number=%i, clientEntity->id=%i, pointernr=%i\n", entityIndex, entityState->number, clientEntity->id, pointerNumber);
 
-        Com_DPrint("entityIndex=%i, entityState->number=%i, clientEntity->id=%i, pointernr=%i\n", entityIndex, entityState->number, clientEntity->id, pointerNumber);
+        // Loop through class entities, and see if their IDs still match 
+        //classEntities.UpdateFrame();
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// 
+// 
         //
         // Effects.
         // 

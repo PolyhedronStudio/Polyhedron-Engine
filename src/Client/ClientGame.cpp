@@ -661,11 +661,11 @@ void CL_InitGameProgs(void)
 /**
 *   @brief  Spawns local client side class entities.
 **/
-qboolean CL_GM_SpawnClassEntities(const char* entityString) { 
+qboolean CL_GM_SpawnEntitiesFromString(const char* entityString) { 
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-	        return entities->SpawnClassEntities(entityString);
+	        return entities->SpawnEntitiesFromString(entityString);
         }
     }
 
