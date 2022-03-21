@@ -448,8 +448,8 @@ void CL_SeekDemoMessage(void);
 //
 // entities.cpp
 //
-void CL_ClipMoveToEntities(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, ClientEntity* skipEntity, const int32_t contentMask, trace_t* cmDstTrace);
-trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
+void CL_ClipMoveToEntities(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, ClientEntity* skipEntity, const int32_t contentMask, TraceResult* cmDstTrace);
+TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
 void CL_DeltaFrame(void);
 
 // the sound code makes callbacks to the client for entitiy position
@@ -466,15 +466,6 @@ extern    qhandle_t gun_model;
 void V_Init(void);
 void V_Shutdown(void);
 void V_RenderView(void);
-//void V_AddEntity(r_entity_t *ent);
-//void V_AddParticle(rparticle_t *p);
-
-//void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
-//void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
-
-#if USE_LIGHTSTYLES
-void V_AddLightStyle(int style, const vec4_t &value);
-#endif
 
 //
 // predict.c
@@ -546,16 +537,12 @@ extern rect_t      scr_vrect;        // position of render window
 void    SCR_Init(void);
 void    SCR_Shutdown(void);
 void    SCR_UpdateScreen(void);
-void    SCR_SizeUp(void);
-void    SCR_SizeDown(void);
-void    SCR_CenterPrint(const char *str);
 void    SCR_FinishCinematic(void);
 void    SCR_PlayCinematic(const char *name);
 void    SCR_RunCinematic();
 void    SCR_BeginLoadingPlaque(void);
 void    SCR_EndLoadingPlaque(void);
 void    SCR_DebugGraph(float value, int color);
-void    SCR_TouchPics(void);
 void    SCR_RegisterMedia(void);
 void    SCR_ModeChanged(void);
 void    SCR_LagSample(void);
@@ -566,9 +553,6 @@ void    SCR_SetHudAlpha(float alpha);
 float   SCR_FadeAlpha(unsigned startTime, unsigned visTime, unsigned fadeTime);
 int     SCR_DrawStringEx(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font);
 void    SCR_DrawStringMulti(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font);
-
-void    SCR_ClearChatHUD_f(void);
-void    SCR_AddToChatHUD(const char *text);
 
 #ifdef _DEBUG
 void CL_AddNetgraph(void);

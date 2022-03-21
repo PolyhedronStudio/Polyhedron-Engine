@@ -113,7 +113,7 @@ typedef struct {
     int32_t waterLevel; // Water Level (1 - 3)
 
     // Callback functions for collision with the world and solid entities
-    trace_t (*q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end);
+    TraceResult (*q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end);
     int     (*PointContents)(const vec3_t &point);
 } PlayerMove;
 

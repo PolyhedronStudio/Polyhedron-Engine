@@ -60,7 +60,7 @@ public:
     //void MonsterTestBoxUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
     void MonsterTestThink(void);
     void MonsterTestDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    //void MonsterTestTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    //void MonsterTestTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     // Set when exploding, after a minor delay.
     //void MonsterTestBoxExplode(void);

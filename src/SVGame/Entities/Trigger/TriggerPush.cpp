@@ -52,7 +52,7 @@ void TriggerPush::SpawnKey( const std::string& key, const std::string& value ) {
 //===============
 // TriggerPush::PushTouch
 //===============
-void TriggerPush::PushTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
+void TriggerPush::PushTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
     vec3_t newVelocity = vec3_scale( pushDirection, pushForce * 10.0f);
     
     /* TODO:

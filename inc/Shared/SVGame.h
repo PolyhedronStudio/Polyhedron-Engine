@@ -34,8 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // edict->serverFlags
 struct EntityServerFlags {
     static constexpr uint32_t NoClient      = 0x00000001;   // Don't send entity to clients, even if it has effects.
-    static constexpr uint32_t DeadMonster   = 0x00000002;   // Treat as CONTENTS_DEADMONSTER for collision.
-    static constexpr uint32_t Monster       = 0x00000004;   // Treat as CONTENTS_MONSTER for collision.
+    static constexpr uint32_t DeadMonster   = 0x00000002;   // Treat as BrushContents::DeadMonster for collision.
+    static constexpr uint32_t Monster       = 0x00000004;   // Treat as BrushContents::Monster for collision.
     static constexpr uint32_t Remove        = 0x00000008;   // Delete the entity next tick.
 };
 
@@ -153,7 +153,7 @@ typedef struct {
     void (*SetModel)(Entity *ent, const char *name);
 
     // collision detection
-    trace_t (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, int contentmask);
+    TraceResult (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, int contentmask);
     int (*PointContents)(const vec3_t &point);
     qboolean (*InPVS)(const vec3_t &p1, const vec3_t &p2);
     qboolean (*InPHS)(const vec3_t &p1, const vec3_t &p2);

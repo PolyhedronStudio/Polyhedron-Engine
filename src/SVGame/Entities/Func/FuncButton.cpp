@@ -211,7 +211,7 @@ void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 //===============
 // FuncButton::ButtonTouch
 //===============
-void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
+void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	if ( !other->GetClient() || other->GetHealth() <= 0 ) {
 		return;
 	}

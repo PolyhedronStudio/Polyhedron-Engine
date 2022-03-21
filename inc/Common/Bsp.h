@@ -38,7 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     (((bsp)->visrowsize + sizeof(uint_fast32_t) - 1) / sizeof(uint_fast32_t))
 
 typedef struct mtexinfo_s {  // used internally due to name len probs //ZOID
-    csurface_t          c;
+    CollisionSurface          c;
     char                name[MAX_TEXNAME];
 
 #if USE_REF
@@ -97,7 +97,7 @@ typedef struct mface_s {
     msurfedge_t     *firstsurfedge;
     int             numsurfedges;
 
-    cplane_t        *plane;
+    CollisionPlane        *plane;
     int             drawflags; // DSURF_PLANEBACK, etc
 
     byte            *lightmap;
@@ -131,7 +131,7 @@ typedef struct mface_s {
 
 typedef struct mnode_s {
     /* ======> */
-    cplane_t            *plane;     // never NULL to differentiate from leafs
+    CollisionPlane            *plane;     // never NULL to differentiate from leafs
 
 #if USE_REF
 //    union {
@@ -156,7 +156,7 @@ typedef struct mnode_s {
 } mnode_t;
 
 typedef struct {
-    cplane_t            *plane;
+    CollisionPlane            *plane;
     mtexinfo_t          *texinfo;
 } mbrushside_t;
 
@@ -169,7 +169,7 @@ typedef struct {
 
 typedef struct {
     /* ======> */
-    cplane_t            *plane;     // always NULL to differentiate from nodes
+    CollisionPlane            *plane;     // always NULL to differentiate from nodes
 #if USE_REF
     vec3_t              mins;
     vec3_t              maxs;
@@ -241,7 +241,7 @@ typedef struct bsp_s {
     mtexinfo_t      *texinfo;
 
     int             numplanes;
-    cplane_t        *planes;
+    CollisionPlane        *planes;
 
     int             numnodes;
     mnode_t         *nodes;
@@ -315,7 +315,7 @@ const char *BSP_GetError(void);
 #if USE_REF
 typedef struct {
     mface_t     *surf;
-    cplane_t    plane;
+    CollisionPlane    plane;
     int         s, t;
     float       fraction;
 } lightpoint_t;

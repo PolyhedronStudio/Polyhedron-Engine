@@ -37,7 +37,7 @@ public:
 
     // Callback functions.
     void TriggerMultipleThinkWait(void);
-    void TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    void TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     void TriggerMultipleEnable(SVGBaseEntity* other, SVGBaseEntity* activator);
     void TriggerMultipleUse(SVGBaseEntity* other, SVGBaseEntity* activator);
 

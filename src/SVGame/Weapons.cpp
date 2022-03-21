@@ -47,7 +47,7 @@ static void check_dodge(Entity *self, const vec3_t &start, const vec3_t &dir, in
 {
     //vec3_t  end;
     //vec3_t  v;
-    //trace_t tr;
+    //TraceResult tr;
     //float   eta;
 
     //// easy mode only ducks one quarter the time
@@ -56,7 +56,7 @@ static void check_dodge(Entity *self, const vec3_t &start, const vec3_t &dir, in
     //        return;
     //}
     //VectorMA(start, WORLD_SIZE, dir, end);
-    //tr = gi.Trace(start, vec3_zero(), vec3_zero(), end, self, CONTENTS_MASK_SHOT);
+    //tr = gi.Trace(start, vec3_zero(), vec3_zero(), end, self, BrushContentsMask::Shot);
     //if ((tr.ent) && (tr.ent->serverFlags & EntityServerFlags::Monster) && (tr.ent->health > 0) && (tr.ent->monsterInfo.dodge) && infront(tr.ent, self)) {
     //    VectorSubtract(tr.endPosition, start, v);
     //    eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
@@ -104,7 +104,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
 
     point = vec3_fmaf(self->GetOrigin(), range, dir);
 
-    tr = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), point, self, CONTENTS_MASK_SHOT);
+    tr = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), point, self, BrushContentsMask::Shot);
     if (tr.fraction < 1) {
         if (!tr.ent->GetTakeDamage())
             return false;
@@ -163,9 +163,9 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     float       u;
     vec3_t      water_start;
     qboolean    water = false;
-    int         content_mask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
+    int         content_mask = BrushContentsMask::Shot | BrushContentsMask::Liquid;
 
-    tr = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), start, self, CONTENTS_MASK_SHOT);
+    tr = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), start, self, BrushContentsMask::Shot);
     if (!(tr.fraction < 1.0)) {
         dir = vec3_euler(aimdir);
         AngleVectors(dir, &forward, &right, &up);
@@ -176,30 +176,30 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         VectorMA(end, r, right, end);
         VectorMA(end, u, up, end);
 
-        if (gi.PointContents(start) & CONTENTS_MASK_LIQUID) {
+        if (gi.PointContents(start) & BrushContentsMask::Liquid) {
             water = true;
             VectorCopy(start, water_start);
-            content_mask &= ~CONTENTS_MASK_LIQUID;
+            content_mask &= ~BrushContentsMask::Liquid;
         }
 
         tr = SVG_Trace(start, vec3_zero(), vec3_zero(), end, self, content_mask);
 
         // see if we hit water
-        if (tr.contents & CONTENTS_MASK_LIQUID) {
+        if (tr.contents & BrushContentsMask::Liquid) {
             int     color;
 
             water = true;
             VectorCopy(tr.endPosition, water_start);
 
             if (!VectorCompare(start, tr.endPosition)) {
-                if (tr.contents & CONTENTS_WATER) {
+                if (tr.contents & BrushContents::Water) {
                     if (strcmp(tr.surface->name, "*brwater") == 0)
                         color = SplashType::BrownWater;
                     else
                         color = SplashType::BlueWater;
-                } else if (tr.contents & CONTENTS_SLIME)
+                } else if (tr.contents & BrushContents::Slime)
                     color = SplashType::Slime;
-                else if (tr.contents & CONTENTS_LAVA)
+                else if (tr.contents & BrushContents::Lava)
                     color = SplashType::Lava;
                 else
                     color = SplashType::Unknown;
@@ -225,7 +225,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
             }
 
             // re-trace ignoring water this time
-            tr = SVG_Trace(water_start, vec3_zero(), vec3_zero(), end, self, CONTENTS_MASK_SHOT);
+            tr = SVG_Trace(water_start, vec3_zero(), vec3_zero(), end, self, BrushContentsMask::Shot);
         }
     }
 
@@ -257,10 +257,10 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         VectorSubtract(tr.endPosition, water_start, dir);
         VectorNormalize(dir);
         VectorMA(tr.endPosition, -2, dir, pos);
-        if (gi.PointContents(pos) & CONTENTS_MASK_LIQUID)
+        if (gi.PointContents(pos) & BrushContentsMask::Liquid)
             VectorCopy(pos, tr.endPosition);
         else
-            tr = SVG_Trace(pos, vec3_zero(), vec3_zero(), water_start, tr.ent, CONTENTS_MASK_LIQUID);
+            tr = SVG_Trace(pos, vec3_zero(), vec3_zero(), water_start, tr.ent, BrushContentsMask::Liquid);
 
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
@@ -339,7 +339,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
         boltEntity->SetSpawnFlags(1);
     boltEntity->SetMoveType(MoveType::FlyMissile);
     boltEntity->SetSolid(Solid::BoundingBox);
-    boltEntity->SetClipMask(CONTENTS_MASK_SHOT);
+    boltEntity->SetClipMask(BrushContentsMask::Shot);
     boltEntity->SetEffects(boltEntity->GetEffects() | effect);
 
     // Physics attributes.
@@ -369,7 +369,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     //    check_dodge(self, bolt->state.origin, dir, speed);
 
     // Trace bolt.
-    SVGTrace trace = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), boltEntity->GetOrigin(), boltEntity, CONTENTS_MASK_SHOT);
+    SVGTrace trace = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), boltEntity->GetOrigin(), boltEntity, BrushContentsMask::Shot);
 
     // Did we hit anything?
     if (trace.fraction < 1.0) {

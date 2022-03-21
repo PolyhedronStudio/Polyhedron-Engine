@@ -97,7 +97,7 @@ void BodyCorpse::SpawnKey(const std::string& key, const std::string& value) {
 // 'Touch' callback, I am unsure what to use it for but I can imagine it being...
 // like picking up their items or something? I suppose we could do that...
 //===============
-void BodyCorpse::BodyCorpseTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void BodyCorpse::BodyCorpseTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 
 }
 

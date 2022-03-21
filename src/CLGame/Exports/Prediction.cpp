@@ -181,10 +181,10 @@ void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
 /**
 *   @brief  Player Move Simulation Trace Wrapper.
 **/
-trace_t ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
-    trace_t cmTrace;
+TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
+    TraceResult cmTrace;
     
-    cmTrace = clgi.Trace(start, mins, maxs, end, 0, CONTENTS_MASK_PLAYERSOLID);
+    cmTrace = clgi.Trace(start, mins, maxs, end, 0, BrushContentsMask::PlayerSolid);
 
     return cmTrace;
 }

@@ -27,7 +27,7 @@ public:
 	void		ButtonFire(); // The button has just been pressed, do something
 	
 	void		ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator );
-	void		ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
+	void		ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 	void		ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point );
 };
 

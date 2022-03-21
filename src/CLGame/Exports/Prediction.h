@@ -44,7 +44,7 @@ private:
     /**
     *   @brief  Player Move Simulation Trace Wrapper.
     **/
-    static trace_t PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end);
+    static TraceResult PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end);
 
     /**
     *   @brief  Player Move Simulation PointContents Wrapper.

@@ -57,7 +57,7 @@ qboolean SVG_StepMove_CheckBottom(SVGBaseEntity* ent)
         for (y = 0; y <= 1; y++) {
             start[0] = x ? maxs[0] : mins[0];
             start[1] = y ? maxs[1] : mins[1];
-            if (gi.PointContents(start) != CONTENTS_SOLID)
+            if (gi.PointContents(start) != BrushContents::Solid)
                 goto realcheck;
         }
 
@@ -75,7 +75,7 @@ realcheck:
     start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
     start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
     stop[2] = start[2] - 2 * STEPSIZE;
-    trace = SVG_Trace(start, vec3_zero(), vec3_zero(), stop, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = SVG_Trace(start, vec3_zero(), vec3_zero(), stop, ent, BrushContentsMask::MonsterSolid);
 
     if (trace.fraction == 1.0)
         return false;
@@ -87,7 +87,7 @@ realcheck:
             start[0] = stop[0] = x ? maxs[0] : mins[0];
             start[1] = stop[1] = y ? maxs[1] : mins[1];
 
-            trace = SVG_Trace(start, vec3_zero(), vec3_zero(), stop, ent, CONTENTS_MASK_MONSTERSOLID);
+            trace = SVG_Trace(start, vec3_zero(), vec3_zero(), stop, ent, BrushContentsMask::MonsterSolid);
 
             if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
                 bottom = trace.endPosition[2];
@@ -117,7 +117,7 @@ void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
         0.f, 0.f, 0.25f 
     };
 
-    trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), point, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), point, ent, BrushContentsMask::MonsterSolid);
 
     // check steepness
     //if ((trace.plane.normal[2] < 0.7 && !trace.allSolid)
@@ -193,7 +193,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
                 //        newOrigin.z += dz;
                 //}
             }
-            trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), newOrigin, ent, CONTENTS_MASK_MONSTERSOLID);
+            trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), newOrigin, ent, BrushContentsMask::MonsterSolid);
 
             // fly monsters don't enter water voluntarily
             if (ent->GetFlags() & EntityFlags::Fly) {
@@ -202,7 +202,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
                     contents = gi.PointContents(test);
-                    if (contents & CONTENTS_MASK_LIQUID)
+                    if (contents & BrushContentsMask::Liquid)
                         return false;
                 }
             }
@@ -214,7 +214,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
                     contents = gi.PointContents(test);
-                    if (!(contents & CONTENTS_MASK_LIQUID))
+                    if (!(contents & BrushContentsMask::Liquid))
                         return false;
                 }
             }
@@ -246,7 +246,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
     vec3_t end = newOrigin;
     end[2] -= stepsize * 2;
 
-    trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, CONTENTS_MASK_MONSTERSOLID);
+    trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, BrushContentsMask::MonsterSolid);
 
     // TODO: Make a flag for whether this stepmove entity should check for steps.
     if (trace.allSolid)
@@ -254,7 +254,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
 
     if (trace.startSolid) {
         newOrigin[2] -= stepsize;
-        trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, CONTENTS_MASK_MONSTERSOLID);
+        trace = SVG_Trace(newOrigin, ent->GetMins(), ent->GetMaxs(), end, ent, BrushContentsMask::MonsterSolid);
 
         // TODO: Make a flag for whether this stepmove entity should check for steps.
         //if (trace.allSolid || trace.startSolid)
@@ -269,7 +269,7 @@ qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
         test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
         contents = gi.PointContents(test);
 
-        if (contents & CONTENTS_MASK_LIQUID)
+        if (contents & BrushContentsMask::Liquid)
             return false;
     }
 

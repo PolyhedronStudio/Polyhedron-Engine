@@ -59,14 +59,14 @@ typedef struct {
     int         CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode,
                                             const vec3_t &origin, const vec3_t &angles);
 
-    void        CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
+    void        CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                             const vec3_t &mins, const vec3_t &maxs,
                             mnode_t *headNode, int brushmask);
-    void        CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
+    void        CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                                     const vec3_t &mins, const vec3_t &maxs,
                                     mnode_t * headNode, int brushmask,
                                     const vec3_t &origin, const vec3_t &angles);
-    void        CM_ClipEntity(trace_t *dst, const trace_t *src, struct entity_s *ent);
+    void        CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct entity_s *ent);
 
     // call with topnode set to the headNode, returns with topnode
     // set to the first node that splits the box

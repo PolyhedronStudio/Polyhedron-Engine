@@ -140,7 +140,7 @@ void TriggerHurt::SpawnKey(const std::string& key, const std::string& value) {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	gi.DPrintf("TriggerHurtTouch!\n");
 
 	if (this == other)

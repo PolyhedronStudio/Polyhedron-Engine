@@ -119,7 +119,7 @@ public:
     /**
     *   @brief Callback for when an entity touches this item.
     **/
-    void BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    void BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     /**
     *   @brief Callback for executing drop to floor behavior.

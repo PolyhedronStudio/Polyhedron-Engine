@@ -36,7 +36,7 @@ public:
     //
 
     // Callback functions.
-    void TriggerAlwaysTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    void TriggerAlwaysTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     void TriggerAlwaysUse(SVGBaseEntity* other, SVGBaseEntity* activator);
 
     //

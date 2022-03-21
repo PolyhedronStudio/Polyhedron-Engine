@@ -170,11 +170,11 @@ LOAD(Texinfo)
 LOAD(Planes)
 {
     dplane_t    *in;
-    cplane_t    *out;
+    CollisionPlane    *out;
     int         i, j;
 
     bsp->numplanes = count;
-    bsp->planes = (cplane_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
+    bsp->planes = (CollisionPlane*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
     in = (dplane_t*)base; // CPP: Cast
     out = bsp->planes;
@@ -727,8 +727,8 @@ LOAD(Leafs)
 #endif
     }
 
-    if (bsp->leafs[0].contents != CONTENTS_SOLID) {
-        DEBUG("map leaf 0 is not CONTENTS_SOLID");
+    if (bsp->leafs[0].contents != BrushContents::Solid) {
+        DEBUG("map leaf 0 is not BrushContents::Solid");
         return Q_ERR_INVALID_FORMAT;
     }
 
@@ -815,8 +815,8 @@ LOAD_EXT(Leafs) {
 #endif
     }
 
-    if (bsp->leafs[0].contents != CONTENTS_SOLID) {
-        DEBUG("map leaf 0 is not CONTENTS_SOLID");
+    if (bsp->leafs[0].contents != BrushContents::Solid) {
+        DEBUG("map leaf 0 is not BrushContents::Solid");
         return Q_ERR_INVALID_FORMAT;
     }
 
@@ -1107,7 +1107,7 @@ typedef struct {
 static const lump_info_t bsp_lumps[] = {
     L(Visibility,   VISIBILITY,     byte,           byte),
     L(Texinfo,      TEXINFO,        dtexinfo_t,     mtexinfo_t),
-    L(Planes,       PLANES,         dplane_t,       cplane_t),
+    L(Planes,       PLANES,         dplane_t,       CollisionPlane),
     L(BrushSides,   BRUSHSIDES,     dbrushside_t,   mbrushside_t),
     L(Brushes,      BRUSHES,        dbrush_t,       mbrush_t),
     L(LeafBrushes,  LEAFBRUSHES,    uint16_t,       mbrush_t *),
@@ -1140,7 +1140,7 @@ static const lump_info_t bsp_lumps[] = {
 static const lump_info_t qbsp_lumps[] = {
     LS(Visibility,  VISIBILITY,     byte,           byte),
     LS(Texinfo,     TEXINFO,        dtexinfo_t,     mtexinfo_t),
-    LS(Planes,      PLANES,         dplane_t,       cplane_t),
+    LS(Planes,      PLANES,         dplane_t,       CollisionPlane),
     L(BrushSides,   BRUSHSIDES,     dbrushside_qbsp_t, mbrushside_t),
     LS(Brushes,     BRUSHES,        dbrush_t,       mbrush_t),
     L(LeafBrushes,  LEAFBRUSHES,    uint32_t,       mbrush_t*),

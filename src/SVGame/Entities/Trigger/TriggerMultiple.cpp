@@ -169,7 +169,7 @@ void TriggerMultiple::TriggerMultipleThinkWait() {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void TriggerMultiple::TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void TriggerMultiple::TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	if (this == other)
 		return;
 

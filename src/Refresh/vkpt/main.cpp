@@ -2516,11 +2516,11 @@ prepare_ubo(refdef_t* fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 
 	int camera_cluster_contents = viewleaf ? viewleaf->contents : 0;
 
-	if (camera_cluster_contents & CONTENTS_WATER)
+	if (camera_cluster_contents & BrushContents::Water)
 		ubo->medium = MEDIUM_WATER;
-	else if (camera_cluster_contents & CONTENTS_SLIME)
+	else if (camera_cluster_contents & BrushContents::Slime)
 		ubo->medium = MEDIUM_SLIME;
-	else if (camera_cluster_contents & CONTENTS_LAVA)
+	else if (camera_cluster_contents & BrushContents::Lava)
 		ubo->medium = MEDIUM_LAVA;
 	else
 		ubo->medium = MEDIUM_NONE;

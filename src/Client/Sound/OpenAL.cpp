@@ -520,7 +520,7 @@ void UpdateReverb(void)
 	vec3_t left = { 0, 1000000, 0 };
 	vec3_t right = { 0, -1000000, 0 };
 	vec3_t up = { 0, 0, 1000000 };
-	trace_t trace1, trace2, trace3, trace4, trace5;
+	TraceResult trace1, trace2, trace3, trace4, trace5;
 	vec3_t length1, length2, length3, length4, length5;
 	float dist1, dist2, dist3, dist4, dist5, average;
 
@@ -592,11 +592,11 @@ void UpdateReverb(void)
 		return;
 	}
 
-	CM_BoxTrace(&trace1, listener_origin, up, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
-	CM_BoxTrace(&trace2, listener_origin, forward, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
-	CM_BoxTrace(&trace3, listener_origin, backward, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
-	CM_BoxTrace(&trace4, listener_origin, left, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
-	CM_BoxTrace(&trace5, listener_origin, right, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_DEADSOLID);
+	CM_BoxTrace(&trace1, listener_origin, up, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
+	CM_BoxTrace(&trace2, listener_origin, forward, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
+	CM_BoxTrace(&trace3, listener_origin, backward, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
+	CM_BoxTrace(&trace4, listener_origin, left, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
+	CM_BoxTrace(&trace5, listener_origin, right, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
 
 	VectorSubtract(trace1.endPosition, listener_origin, length1);
 	VectorSubtract(trace2.endPosition, listener_origin, length2);
@@ -830,7 +830,7 @@ static void AL_Spatialize(channel_t *ch)
 	vec3_t      origin;
 	vec3_t		velocity;
 	static vec3_t mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };
-	trace_t trace;
+	TraceResult trace;
 	vec3_t distance;
 	float dist;
 	float final;
@@ -856,7 +856,7 @@ static void AL_Spatialize(channel_t *ch)
 
 	if (cl.bsp && s_occlusion->integer)
 	{
-		CM_BoxTrace(&trace, origin, listener_origin, mins, maxs, cl.bsp->nodes, CONTENTS_MASK_PLAYERSOLID);
+		CM_BoxTrace(&trace, origin, listener_origin, mins, maxs, cl.bsp->nodes, BrushContentsMask::PlayerSolid);
 		if (trace.fraction < 1.0 && !(ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult))
 		{
 			VectorSubtract(origin, listener_origin, distance);

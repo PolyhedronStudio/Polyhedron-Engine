@@ -240,7 +240,7 @@ void GibEntity::GibEntityThink() {
 // GibEntity::GibEntityTouch
 //
 //===============
-void GibEntity::GibEntityTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void GibEntity::GibEntityTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     vec3_t  right;
 
     if (!GetGroundEntity())

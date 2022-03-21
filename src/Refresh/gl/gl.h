@@ -87,7 +87,7 @@ typedef struct {
 
     int             viewcluster1;
     int             viewcluster2;
-    cplane_t        frustumPlanes[4];
+    CollisionPlane        frustumPlanes[4];
     r_entity_t        *ent;
     qboolean        entrotated;
     vec3_t          entaxis[3];

@@ -37,7 +37,7 @@ public:
     void ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator );
     void ExplosionBoxDropToFloor(void);
     void ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    void ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    void ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     // Set when exploding, after a minor delay.
     void MiscExplosionBoxExplode(void);

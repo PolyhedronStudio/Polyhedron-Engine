@@ -15,7 +15,7 @@ public:
 	void					Spawn() override;
 
 	// Responds to players touching this trigger
-	void					AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
+	void					AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 	// Creates an automatic platform trigger and sets everything up for it
 	static TriggerAutoPlatform* Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs );
 

@@ -246,7 +246,7 @@ void SVGBaseItem::BaseItemUseInstance(SVGBaseEntity* user, SVGBaseItem* item) {
 /**
 *   @brief Callback for when an entity touches this item.
 **/
-void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     // Safety checks.
     if (!self || !other || self == other)
         return;
@@ -326,7 +326,7 @@ void SVGBaseItem::BaseItemDropToFloor() {
     vec3_t end = newOrigin + vec3_t { 0, 0, -256.f };
 
     // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_PLAYERSOLID);
+    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::PlayerSolid);
 
     // Return in case we hit anything.
     if (trace.fraction == 1 || trace.allSolid) {

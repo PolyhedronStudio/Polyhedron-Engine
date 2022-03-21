@@ -107,7 +107,7 @@ mleaf_t *CM_LeafNum(cm_t *cm, int number)
 
 //=======================================================================
 
-static cplane_t box_planes[12];
+static CollisionPlane box_planes[12];
 static mnode_t  box_nodes[6];
 static mnode_t  *box_headnode;
 static mbrush_t box_brush;
@@ -130,9 +130,9 @@ static void CM_InitBoxHull(void)
 
     box_brush.numsides = 6;
     box_brush.firstbrushside = &box_brushsides[0];
-    box_brush.contents = CONTENTS_MONSTER;
+    box_brush.contents = BrushContents::Monster;
 
-    box_leaf.contents = CONTENTS_MONSTER;
+    box_leaf.contents = BrushContents::Monster;
     box_leaf.firstleafbrush = &box_leafbrush;
     box_leaf.numleafbrushes = 1;
 
@@ -156,7 +156,7 @@ static void CM_InitBoxHull(void)
             node->children[side ^ 1] = (mnode_t *)&box_leaf;
 
         // planes
-        cplane_t *plane = &box_planes[i * 2];
+        CollisionPlane *plane = &box_planes[i * 2];
         plane->type = i >> 1;
         plane->signBits = 0;
         plane->normal = vec3_zero();
@@ -340,7 +340,7 @@ static vec3_t   trace_start, trace_end;
 static vec3_t   trace_mins, trace_maxs;
 static vec3_t   trace_extents;
 
-static trace_t  *trace_trace;
+static TraceResult  *trace_trace;
 static int      trace_contents;
 static qboolean trace_ispoint;      // optimized case
 
@@ -350,7 +350,7 @@ CM_ClipBoxToBrush
 ================
 */
 static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
-                              trace_t *trace, mbrush_t *brush)
+                              TraceResult *trace, mbrush_t *brush)
 {
     if (!brush->numsides)
         return;
@@ -365,12 +365,12 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
     float enterFraction = -1.f;
     float leaveFraction = 1.f;
 
-    cplane_t    *clipPlane = nullptr;
+    CollisionPlane    *clipPlane = nullptr;
     mbrushside_t *leadside = nullptr;
     mbrushside_t *side = brush->firstbrushside;
 
     for (int32_t i = 0; i < brush->numsides; i++, side++) {
-        cplane_t *plane = side->plane;
+        CollisionPlane *plane = side->plane;
 
         // FIXME: special case for axial
 
@@ -456,7 +456,7 @@ CM_TestBoxInBrush
 ================
 */
 static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1,
-                              trace_t *trace, mbrush_t *brush)
+                              TraceResult *trace, mbrush_t *brush)
 {
 
     if (!brush->numsides)
@@ -467,7 +467,7 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
     mbrushside_t *brushSide = brush->firstbrushside;
 
     for (int32_t i = 0; i < brush->numsides; i++, brushSide++) {
-        cplane_t *plane = brushSide->plane;
+        CollisionPlane *plane = brushSide->plane;
 
         // FIXME: special case for axial
 
@@ -574,7 +574,7 @@ CM_RecursiveHullCheck
 */
 static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec3_t &p1, const vec3_t &p2)
 {
-    cplane_t    *plane = nullptr;
+    CollisionPlane    *plane = nullptr;
     float       t1, t2, offset;
     float       frac, frac2;
     float       idist;
@@ -666,7 +666,7 @@ recheck:
 CM_BoxTrace
 ==================
 */
-void CM_BoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
+void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                  const vec3_t &mins, const vec3_t &maxs,
                  mnode_t *headNode, int brushmask)
 {
@@ -774,7 +774,7 @@ Handles offseting and rotation of the end points for moving and
 rotating entities
 ==================
 */
-void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &end,
+void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                             const vec3_t &mins, const vec3_t &maxs,
                             mnode_t *headNode, int brushmask,
                             const vec3_t &origin, const vec3_t &angles)
@@ -812,7 +812,7 @@ void CM_TransformedBoxTrace(trace_t *trace, const vec3_t &start, const vec3_t &e
     trace->endPosition = vec3_mix(start, end, trace->fraction); // LerpVector(start, end, trace->fraction, trace->endPosition);
 }
 
-void CM_ClipEntity(trace_t *dst, const trace_t *src, struct entity_s *ent)
+void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct entity_s *ent)
 {
     dst->allSolid |= src->allSolid;
     dst->startSolid |= src->startSolid;

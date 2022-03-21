@@ -37,7 +37,7 @@ public:
 
     // Callback functions.
     void TriggerOnceThinkWait(void);
-    void TriggerOnceTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    void TriggerOnceTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     void TriggerOnceEnable(SVGBaseEntity* other, SVGBaseEntity* activator);
     void TriggerOnceUse(SVGBaseEntity* other, SVGBaseEntity* activator);
 

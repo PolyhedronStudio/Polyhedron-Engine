@@ -68,7 +68,7 @@ void MonsterTestDummy::Spawn() {
     SetServerFlags(EntityServerFlags::Monster);
 
     // Set clip mask.
-    SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
+    SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     // Set the barrel model, and model index.
     SetModel("models/monsters/testdummy/60fps.iqm");

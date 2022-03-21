@@ -73,7 +73,7 @@ void MiscExplosionBox::Spawn() {
     SetMoveType(MoveType::TossSlide);
 
     // Set clip mask.
-    SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
+    SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     // Set the barrel model, and model index.
     SetModel("models/objects/barrels/tris.md2");
@@ -192,7 +192,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     };
     
     // Exceute the trace.
-    SVGTrace trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, CONTENTS_MASK_MONSTERSOLID);
+    SVGTrace trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, BrushContentsMask::MonsterSolid);
     
     // Return in case we hit anything.
     if (trace.fraction == 1.f || trace.allSolid) {
@@ -330,7 +330,7 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
 // 'Touch' callback, to calculate the direction to move into.
 //===============
 //
-void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     // Safety checks.
     if (!other || other == this) {
 	    return;

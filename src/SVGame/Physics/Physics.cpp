@@ -96,7 +96,7 @@ SVGBaseEntity *SVG_TestEntityPosition(SVGBaseEntity *ent)
     if (ent->GetClipMask()) {
 	    clipMask = ent->GetClipMask();
     } else {
-        clipMask = CONTENTS_MASK_SOLID;
+        clipMask = BrushContentsMask::Solid;
     }
 
     trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
@@ -193,7 +193,7 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
 void SVG_Impact(SVGBaseEntity *entityA, SVGTrace *trace)
 {
     SVGBaseEntity* entityB = nullptr;
-//  cplane_t    backplane;
+//  CollisionPlane    backplane;
 
     // Return in case there is no entity to to test with (invalid pointer.)
     if (!entityA) {
@@ -452,7 +452,7 @@ retry:
     if (ent->GetClipMask())
         mask = ent->GetClipMask();
     else
-        mask = CONTENTS_MASK_SOLID;
+        mask = BrushContentsMask::Solid;
 
     trace = SVG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
@@ -907,10 +907,10 @@ void SVG_Physics_Toss(SVGEntityHandle& entityHandle) {
     }
 
     // Check for water transition, first fetch the OLD contents mask.
-    qboolean wasInWater = (ent->GetWaterType() & CONTENTS_MASK_LIQUID);
+    qboolean wasInWater = (ent->GetWaterType() & BrushContentsMask::Liquid);
     // Set new watertype based on gi.PointContents test result.
     ent->SetWaterType(gi.PointContents(ent->GetOrigin()));
-    qboolean isInWater = ent->GetWaterType() & CONTENTS_MASK_LIQUID;
+    qboolean isInWater = ent->GetWaterType() & BrushContentsMask::Liquid;
 
     // Store waterlevel.
     if (isInWater)
@@ -1114,11 +1114,11 @@ void SVG_Physics_Step(SVGEntityHandle &entityHandle)
             }
 
         // Default mask is solid.
-        int32_t mask = CONTENTS_MASK_SOLID;
+        int32_t mask = BrushContentsMask::Solid;
 
         // In case of a monster, monstersolid.
         if (ent->GetServerFlags() & EntityServerFlags::Monster)
-            mask = CONTENTS_MASK_MONSTERSOLID;
+            mask = BrushContentsMask::MonsterSolid;
         
         // Execute "FlyMove", essentially also our water move.
         SVG_FlyMove(ent, FRAMETIME, mask);

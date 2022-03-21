@@ -449,7 +449,7 @@ static void draw_celshading(maliasmesh_t *mesh)
 static void setup_shadow(void)
 {
     GLfloat matrix[16], tmp[16];
-    cplane_t *plane;
+    CollisionPlane *plane;
     vec3_t dir;
 
     shadowmatrix[15] = 0;

@@ -203,7 +203,7 @@ qboolean DefaultGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
         destination = vec3_scale(destination, 0.5f);
         
         // Execute trace.
-        trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
+        trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, BrushContentsMask::Solid);
 
         //
         if (trace.fraction == 1.0) {
@@ -217,7 +217,7 @@ qboolean DefaultGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     }
 
     // From here on we start tracing in various directions. Look at the code yourself to figure that one out...
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), target->GetOrigin(), inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), target->GetOrigin(), inflictor, BrushContentsMask::Solid);
 
     if (trace.fraction == 1.0) {
         return true;
@@ -226,28 +226,28 @@ qboolean DefaultGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
     destination = target->GetOrigin();
     destination[0] += 15.0;
     destination[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, BrushContentsMask::Solid);
     if (trace.fraction == 1.0)
         return true;
 
     destination = target->GetOrigin();
     destination[0] += 15.0;
     destination[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, BrushContentsMask::Solid);
     if (trace.fraction == 1.0)
         return true;
 
     destination = target->GetOrigin();
     destination[0] -= 15.0;
     destination[1] += 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, BrushContentsMask::Solid);
     if (trace.fraction == 1.0)
         return true;
 
     destination = target->GetOrigin();
     destination[0] -= 15.0;
     destination[1] -= 15.0;
-    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, CONTENTS_MASK_SOLID);
+    trace = SVG_Trace(inflictor->GetOrigin(), vec3_zero(), vec3_zero(), destination, inflictor, BrushContentsMask::Solid);
     if (trace.fraction == 1.0)
         return true;
 
@@ -895,12 +895,12 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 static SVGBasePlayer* pm_passent;
 
 // pmove doesn't need to know about passent and contentmask
-trace_t q_gameabi PM_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
+TraceResult q_gameabi PM_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
 {
     if (pm_passent && pm_passent->GetHealth() > 0) {
-        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), CONTENTS_MASK_PLAYERSOLID);
+        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), BrushContentsMask::PlayerSolid);
     } else {
-        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), CONTENTS_MASK_DEADSOLID);
+        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), BrushContentsMask::DeadSolid);
     }
 }
 void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, ClientMoveCommand* moveCommand) {

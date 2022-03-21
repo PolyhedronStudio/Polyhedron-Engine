@@ -372,7 +372,7 @@ void SVGBaseEntity::Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int d
 // Execute the 'Touch' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	// Safety check.
 	if (touchFunction == nullptr)
 		return;

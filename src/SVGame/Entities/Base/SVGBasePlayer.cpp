@@ -96,7 +96,7 @@ void SVGBasePlayer::Spawn() {
     // Set air finished time so it can respawn kindly.
     SetAirFinishedTime(level.time + 12);
     // Clip mask this client belongs to.
-    SetClipMask(CONTENTS_MASK_PLAYERSOLID);
+    SetClipMask(BrushContentsMask::PlayerSolid);
     // Fresh default model.
     SetModel("players/male/tris.md2");
     /*ent->pain = player_pain;*/
@@ -873,7 +873,7 @@ void SVGBasePlayer::UpdateSound() {
     }
 
     // Whenever we "fry" by so called lava or slime, we prioritize its sound over weaponry, of course.
-    if (GetWaterLevel() && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
+    if (GetWaterLevel() && (GetWaterType() & (BrushContents::Lava | BrushContents::Slime))) {
         SetSound(snd_fry);
     // Otherwise, we check if we have any weaponry sound for this frame.
     } else if (client->weaponSound) {
@@ -1044,11 +1044,11 @@ void SVGBasePlayer::CheckWorldEffects()
     // Just entered a water volume sound effect.
     if (!oldWaterLevel && waterLevel) {
         PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
-        if (GetWaterType() & CONTENTS_LAVA) {
+        if (GetWaterType() & BrushContents::Lava) {
             SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/lava_in.wav"), 1, Attenuation::Normal, 0);
-        } else if (GetWaterType() & CONTENTS_SLIME) {
+        } else if (GetWaterType() & BrushContents::Slime) {
             SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/watr_in.wav"), 1, Attenuation::Normal, 0);
-        } else if (GetWaterType() & CONTENTS_WATER) {
+        } else if (GetWaterType() & BrushContents::Water) {
             SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/watr_in.wav"), 1, Attenuation::Normal, 0);
         }
         
@@ -1116,8 +1116,8 @@ void SVGBasePlayer::CheckWorldEffects()
     }
 
     // Check for sizzle damage
-    if (waterLevel && (GetWaterType() & (CONTENTS_LAVA | CONTENTS_SLIME))) {
-        if (GetWaterType() & CONTENTS_LAVA) {
+    if (waterLevel && (GetWaterType() & (BrushContents::Lava | BrushContents::Slime))) {
+        if (GetWaterType() & BrushContents::Lava) {
             if (GetHealth() > 0
                 && GetDebouncePainTime() <= level.time) {
                 if (rand() & 1)
@@ -1130,7 +1130,7 @@ void SVGBasePlayer::CheckWorldEffects()
             GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
         }
 
-        if (GetWaterType() & CONTENTS_SLIME) {
+        if (GetWaterType() & BrushContents::Slime) {
             GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
         }
     }
@@ -1490,18 +1490,18 @@ void SVGBasePlayer::CalculateScreenBlend() {
     int32_t contents = gi.PointContents(viewOrigin);
 
     // Set render definition flags.
-    if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA)) {
+    if (contents & (BrushContents::Water | BrushContents::Slime | BrushContents::Lava)) {
         client->playerState.rdflags |= RDF_UNDERWATER;
     } else {
         client->playerState.rdflags &= ~RDF_UNDERWATER;
     }
 
     // Add screen blends for Liquid surface contents.
-    if (contents & (CONTENTS_SOLID | CONTENTS_LAVA)) {
+    if (contents & (BrushContents::Solid | BrushContents::Lava)) {
         AddScreenBlend(1.0, 0.3, 0.0, 0.6, client->playerState.blend);
-    } else if (contents & CONTENTS_SLIME) {
+    } else if (contents & BrushContents::Slime) {
         AddScreenBlend(0.0, 0.1, 0.05, 0.6, client->playerState.blend);
-    } else if (contents & CONTENTS_WATER) {
+    } else if (contents & BrushContents::Water) {
         AddScreenBlend(0.5, 0.3, 0.2, 0.4, client->playerState.blend);
     }
 

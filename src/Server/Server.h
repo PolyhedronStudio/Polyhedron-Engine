@@ -646,7 +646,7 @@ int SV_PointContents(const vec3_t &p);
 // returns the CONTENTS_* value from the world at the given point.
 // Quake 2 extends this to also check entities, to allow moving liquids
 
-trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
+TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
                            Entity *passedict, int contentmask);
 // mins and maxs are relative
 

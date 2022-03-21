@@ -118,7 +118,7 @@ void TriggerAlways::SpawnKey(const std::string& key, const std::string& value) {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void TriggerAlways::TriggerAlwaysTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void TriggerAlways::TriggerAlwaysTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	if (this == other)
 		return;
 

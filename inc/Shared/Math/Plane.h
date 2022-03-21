@@ -1,29 +1,30 @@
-// LICENSE HERE.
-
-//
-// Shared/Math/plane.h
-//
-// Plane math library implementation.
-//
-#ifndef __INC_SHARED_MATH_PLANE_H__
-#define __INC_SHARED_MATH_PLANE_H__
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Math Lib: Plane Implementation.
+* 
+***/
+#pragma once
 
 //-----------------
 // plane_t structure
 //-----------------
 typedef struct cplane_s {
-    vec3_t  normal;
-    float   dist;
-    byte    type;           // for fast side tests
-    byte    signBits;       // signx + (signy<<1) + (signz<<1)
-    byte    pad[2];
-} cplane_t;
+    vec3_t  normal = vec3_zero();
+    float   dist = 0;
+    byte    type = 0;           //! For fast side tests.
+    byte    signBits = 0;       //! signx + (signy<<1) + (signz<<1)
+    byte    pad[2] = {};
+} CollisionPlane;
 
 //-----------------
 // Planes.
 //-----------------
 // 0-2 are axial planes
-#define PLANE_X         0 // TODO: Change to cplane_t::PLANE::X?
+#define PLANE_X         0 // TODO: Change to CollisionPlane::PLANE::X?
 #define PLANE_Y         1
 #define PLANE_Z         2
 // 3-5 are non-axial planes snapped to the nearest
@@ -33,25 +34,14 @@ typedef struct cplane_s {
 // planes (x&~1) and (x&~1)+1 are always opposites
 #define PLANE_NON_AXIAL 6
 
-//-----------------
-// Structure offset for asm code
-//-----------------
-#define CPLANE_NORMAL_X         0
-#define CPLANE_NORMAL_Y         4
-#define CPLANE_NORMAL_Z         8
-#define CPLANE_DIST             12
-#define CPLANE_TYPE             16
-#define CPLANE_SIGNBITS         17
-#define CPLANE_PAD0             18
-#define CPLANE_PAD1             19
 
 //-----------------
 // Defined in Shared/Math/plane.cpp
 //-----------------
-void SetPlaneType(cplane_t* plane);
-void SetPlaneSignbits(cplane_t* plane);
+void SetPlaneType(CollisionPlane* plane);
+void SetPlaneSignbits(CollisionPlane* plane);
 
-int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p);
+int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, CollisionPlane* p);
 
 //
 //===============
@@ -59,18 +49,14 @@ int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p);
 // 
 //===============
 //
-static inline vec_t Plane_Difference(const vec3_t& v, cplane_s* p) {
+static inline vec_t Plane_Difference(const vec3_t& v, CollisionPlane* p) {
     return DotProduct(v, p->normal) - p->dist;
 }
 
-//
-//===============
-// Plane_FastDifference
-// 
-// Returns a fast difference if available for the plane.
-//===============
-//
-static inline vec_t Plane_FastDifference(const vec3_t& v, cplane_t* p)
+/**
+*   @return  Returns a fast difference if available for the plane.
+**/
+static inline vec_t Plane_FastDifference(const vec3_t& v, CollisionPlane* p)
 {
     // fast axial cases
     if (p->type < 3) {
@@ -81,35 +67,30 @@ static inline vec_t Plane_FastDifference(const vec3_t& v, cplane_t* p)
     return Plane_Difference(v, p);
 }
 
-//
-//===============
-// BoxOnPlaneSideFast
-// 
-//===============
-//
-#define BOX_INFRONT     1 // TODO: Move into PLANE::BOX::INFRONT?
-#define BOX_BEHIND      2
-#define BOX_INTERSECTS  3
+/**
+*   Results for BoxPlane functions.
+**/
+struct BoxPlane {
+    static constexpr int32_t InFront    = 1;
+    static constexpr int32_t Behind     = 2;
+    static constexpr int32_t Intersects = 3;
+};
 
-static inline int BoxOnPlaneSideFast(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p)
+/**
+*   @brief  Tries to perform fast axial tests before resorting to the slower more thorough Box On Plane Side function.
+**/
+static inline int BoxOnPlaneSideFast(const vec3_t& emins, const vec3_t& emaxs, CollisionPlane* p)
 {
-    // fast axial cases
+    // Fast axial cases.
     if (p->type < 3) {
         if (p->dist <= emins.xyz[p->type])
-            return BOX_INFRONT;
+            return BoxPlane::InFront;
         if (p->dist >= emaxs.xyz[p->type])
-            return BOX_BEHIND;
-        return BOX_INTERSECTS;
+            return BoxPlane::Behind;
+
+        return BoxPlane::Intersects;
     }
 
-    // slow generic case
+    // Slow generic case.
     return BoxOnPlaneSide(emins, emaxs, p);
 }
-
-// Wrapper for legacy code.
-//static inline int BoxOnPlaneSideFast(const float *emins, const float *emaxs, cplane_t* p) {
-//    
-//
-//}
-#endif // __INC_SHARED_MATH_PLANE_H__
-

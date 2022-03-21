@@ -49,7 +49,7 @@ void TriggerAutoPlatform::Spawn() {
 //===============
 // TriggerAutoPlatform::AutoPlatformTouch
 //===============
-void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
+void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	bool isMonster = other->GetServerFlags() & EntityServerFlags::Monster;
 	// Alternatively, when we have a BaseMonster class:
 	// isMonster = other->IsSubclassOf<BaseMonster>();

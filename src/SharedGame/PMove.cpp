@@ -125,7 +125,7 @@ static struct {
     qboolean    isClimbingLadder;
 
     // Ground trace results.
-    trace_t groundTrace;
+    TraceResult groundTrace;
 } playerMoveLocals;
 
 //
@@ -284,7 +284,7 @@ static void PM_TouchEntity(struct entity_s* ent) {
 // Check whether the player just stepped off of something, or not.
 //===============
 //
-static bool PM_CheckStep(const trace_t * trace) {
+static bool PM_CheckStep(const TraceResult * trace) {
     if (!trace->allSolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
             //if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
@@ -305,7 +305,7 @@ static bool PM_CheckStep(const trace_t * trace) {
 // Steps the player down, for slope/stair handling.
 //===============
 //
-static void PM_StepDown(const trace_t * trace) {
+static void PM_StepDown(const TraceResult * trace) {
     // Set current origin to the trace end position.
     pm->state.origin = trace->endPosition;
 
@@ -330,7 +330,7 @@ static void PM_StepDown(const trace_t * trace) {
 // Returns the actual trace.
 //===============
 //
-const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins, const vec3_t & maxs, const vec3_t & end) {
+const TraceResult PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins, const vec3_t & maxs, const vec3_t & end) {
     // Disabled, for this we have no need. It seems to work fine at this moment without it.
     // Not getting stuck into rotating objects or what have we....
     //
@@ -355,7 +355,7 @@ const trace_t PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins,
                 };
 
                 // Execute trace.
-                const trace_t trace = pm->Trace(point, mins, maxs, end);
+                const TraceResult trace = pm->Trace(point, mins, maxs, end);
 
                 if (!trace.allSolid) {
 
@@ -438,7 +438,7 @@ static qboolean PM_StepSlideMove_(void)
         vec3_t pos = vec3_fmaf(pm->state.origin, timeRemaining, pm->state.velocity);
 
         // trace to it
-        const trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
+        const TraceResult trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
         // if the player is trapped in a solid, don't build up Z
         if (trace.allSolid) {
@@ -557,7 +557,7 @@ static void PM_StepSlideMove(void)
     // Attempt to step down to remain on ground
     if ((pm->state.flags & PMF_ON_GROUND) && pm->moveCommand.input.upMove <= 0) {
         const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
-        const trace_t downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
+        const TraceResult downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
 
         if (PM_CheckStep(&downTrace)) {
             PM_StepDown(&downTrace);
@@ -569,7 +569,7 @@ static void PM_StepSlideMove(void)
     const vec3_t vel1 = pm->state.velocity;
 
     const vec3_t up = vec3_fmaf(org0, PM_STEP_HEIGHT, vec3_up());
-    const trace_t upTrace = PM_TraceCorrectAllSolid(org0, pm->mins, pm->maxs, up);
+    const TraceResult upTrace = PM_TraceCorrectAllSolid(org0, pm->mins, pm->maxs, up);
 
     if (!upTrace.allSolid) {
         // Step from the higher position, with the original velocity
@@ -580,7 +580,7 @@ static void PM_StepSlideMove(void)
 
         // Settle to the new ground, keeping the step if and only if it was successful
         const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
-        const trace_t downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
+        const TraceResult downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
 
         if (PM_CheckStep(&downTrace)) {
             // Quake2 trick jump secret sauce
@@ -722,7 +722,7 @@ static void PM_CheckDuck(void) {
         if (!is_ducking && wants_ducking) {
             pm->state.flags |= PMF_DUCKED;
         } else if (is_ducking && !wants_ducking) {
-            const trace_t trace = pm->Trace(pm->state.origin, pm->mins, pm->maxs, pm->state.origin);
+            const TraceResult trace = pm->Trace(pm->state.origin, pm->mins, pm->maxs, pm->state.origin);
 
             if (!trace.allSolid && !trace.startSolid) {
                 pm->state.flags &= ~PMF_DUCKED;
@@ -791,10 +791,10 @@ static qboolean PM_CheckLadder(void) {
 
     // Calculate a trace for determining whether there is a isClimbingLadder in front of us.
     const vec3_t pos = vec3_fmaf(pm->state.origin, 1, playerMoveLocals.forwardXY);
-    const trace_t trace = pm->Trace(pm->state.origin, pm->mins, pm->maxs, pos);
+    const TraceResult trace = pm->Trace(pm->state.origin, pm->mins, pm->maxs, pos);
 
     // Found one, engage isClimbingLadder state.
-    if ((trace.fraction < 1.0f) && (trace.contents & CONTENTS_LADDER)) {
+    if ((trace.fraction < 1.0f) && (trace.contents & BrushContents::Ladder)) {
         // Add isClimbingLadder flag.
         pm->state.flags |= PMF_ON_LADDER;
 
@@ -834,9 +834,9 @@ static qboolean PM_CheckWaterJump(void) {
     }
 
     vec3_t pos = vec3_fmaf(pm->state.origin, 16.f, playerMoveLocals.forward);
-    trace_t trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
+    TraceResult trace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
-    if ((trace.fraction < 1.0f) && (trace.contents & CONTENTS_MASK_SOLID)) {
+    if ((trace.fraction < 1.0f) && (trace.contents & BrushContentsMask::Solid)) {
 
         pos.z += PM_STEP_HEIGHT + pm->maxs.z - pm->mins.z;
 
@@ -898,7 +898,7 @@ static void PM_CheckWater(void) {
     int32_t contents = pm->PointContents(contentPosition);
 
     // Are we in liquid? Hallelujah!
-    if (contents & CONTENTS_MASK_LIQUID) {
+    if (contents & BrushContentsMask::Liquid) {
         // Watertype is whichever contents type we are in with at least our feet.
         pm->waterType = contents;
         pm->waterLevel = WaterLevel::Feet;
@@ -907,7 +907,7 @@ static void PM_CheckWater(void) {
 
         contents = pm->PointContents(contentPosition);
 
-        if (contents & CONTENTS_MASK_LIQUID) {
+        if (contents & BrushContentsMask::Liquid) {
 
             pm->waterType |= contents;
             pm->waterLevel = WaterLevel::Waist;
@@ -916,7 +916,7 @@ static void PM_CheckWater(void) {
 
             contents = pm->PointContents(contentPosition);
 
-            if (contents & CONTENTS_MASK_LIQUID) {
+            if (contents & BrushContentsMask::Liquid) {
                 pm->waterType |= contents;
                 pm->waterLevel = WaterLevel::Under;
 
@@ -952,7 +952,7 @@ static void PM_CheckGround(void) {
     }
 
     // Seek the ground
-    trace_t trace = playerMoveLocals.groundTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
+    TraceResult trace = playerMoveLocals.groundTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, pos);
 
     // If we hit an upward facing plane, make it our ground
     if (trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL) {
@@ -1122,44 +1122,44 @@ static void PM_ApplyCurrents(void) {
 
     // add water currents
     if (pm->waterLevel) {
-        if (pm->waterType & CONTENTS_CURRENT_0) {
+        if (pm->waterType & BrushContents::Current0) {
             current.x += 1.0;
         }
-        if (pm->waterType & CONTENTS_CURRENT_90) {
+        if (pm->waterType & BrushContents::Current90) {
             current.y += 1.0;
         }
-        if (pm->waterType & CONTENTS_CURRENT_180) {
+        if (pm->waterType & BrushContents::Current180) {
             current.x -= 1.0;
         }
-        if (pm->waterType & CONTENTS_CURRENT_270) {
+        if (pm->waterType & BrushContents::Current270) {
             current.y -= 1.0;
         }
-        if (pm->waterType & CONTENTS_CURRENT_UP) {
+        if (pm->waterType & BrushContents::CurrentUp) {
             current.z += 1.0;
         }
-        if (pm->waterType & CONTENTS_CURRENT_DOWN) {
+        if (pm->waterType & BrushContents::CurrentDown) {
             current.z -= 1.0;
         }
     }
 
     // add conveyer belt velocities
     if (pm->groundEntityPtr) {
-        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_0) {
+        if (playerMoveLocals.groundTrace.contents & BrushContents::Current0) {
             current.x += 1.0;
         }
-        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_90) {
+        if (playerMoveLocals.groundTrace.contents & BrushContents::Current90) {
             current.y += 1.0;
         }
-        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_180) {
+        if (playerMoveLocals.groundTrace.contents & BrushContents::Current180) {
             current.x -= 1.0;
         }
-        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_270) {
+        if (playerMoveLocals.groundTrace.contents & BrushContents::Current270) {
             current.y -= 1.0;
         }
-        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_UP) {
+        if (playerMoveLocals.groundTrace.contents & BrushContents::CurrentUp) {
             current.z += 1.0;
         }
-        if (playerMoveLocals.groundTrace.contents & CONTENTS_CURRENT_DOWN) {
+        if (playerMoveLocals.groundTrace.contents & BrushContents::CurrentDown) {
             current.z -= 1.0;
         }
     }
@@ -1319,7 +1319,7 @@ static void PM_WaterMove(void) {
         vec3_t view = pm->state.origin + pm->state.viewOffset;
         view.z -= 4.0;
 
-        if (!(pm->PointContents(view) & CONTENTS_MASK_LIQUID)) {
+        if (!(pm->PointContents(view) & BrushContentsMask::Liquid)) {
             pm->state.velocity.z = Minf(pm->state.velocity.z, 0.0);
             vel.z = Minf(vel.z, 0.0);
         }

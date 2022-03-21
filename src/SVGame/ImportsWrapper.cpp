@@ -113,7 +113,7 @@ SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, 
     Entity* serverPassEntity = (passent ? passent->GetServerEntity() : NULL);
 
     // Execute server trace.
-    trace_t trace = gi.Trace(start, mins, maxs, end, serverPassEntity, contentMask);
+    TraceResult trace = gi.Trace(start, mins, maxs, end, serverPassEntity, contentMask);
 
     // Convert results to Server Game Trace.
     SVGTrace svgTrace;

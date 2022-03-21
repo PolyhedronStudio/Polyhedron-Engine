@@ -40,10 +40,10 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
     // Set to true if we're tracing through/inside of a liquid surface.
     qboolean    inLiquid = false;
     // ???
-    int32_t contentMask = CONTENTS_MASK_SHOT | CONTENTS_MASK_LIQUID;
+    int32_t contentMask = BrushContentsMask::Shot | BrushContentsMask::Liquid;
 
     // Execute a bullet line trace.
-    SVGTrace trace = SVG_Trace(player->GetOrigin(), vec3_zero(), vec3_zero(), start, player, CONTENTS_MASK_SHOT);
+    SVGTrace trace = SVG_Trace(player->GetOrigin(), vec3_zero(), vec3_zero(), start, player, BrushContentsMask::Shot);
 
     // Did we hit anything at all?
     if (!(trace.fraction < 1.0)) {
@@ -63,21 +63,21 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
         shotEndPosition = vec3_fmaf(shotEndPosition, upOffset, up);
 
         // Test if we started inside of liquid.
-        if (gi.PointContents(start) & CONTENTS_MASK_LIQUID) {
+        if (gi.PointContents(start) & BrushContentsMask::Liquid) {
             // Exciting, we started inside of a liquid, yay.
             inLiquid = true;
             // Store start position of the liquid.
             liquidStartPosition = start;
 
             // Remvoe liquid content mask.
-            contentMask &= ~CONTENTS_MASK_LIQUID;
+            contentMask &= ~BrushContentsMask::Liquid;
         }
 
         // Execute another trace.
         trace = SVG_Trace(start, vec3_zero(), vec3_zero(), shotEndPosition, player, contentMask);
 
         // Did we hit any water?
-        if (trace.contents & CONTENTS_MASK_LIQUID) {
+        if (trace.contents & BrushContentsMask::Liquid) {
             // Liquid splash type.
             int32_t splashType = 0;
 
@@ -89,15 +89,15 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
             
             // Check whether trace start is end position.
             if (!vec3_equal(start, trace.endPosition)) {
-                if (trace.contents & CONTENTS_WATER) {
+                if (trace.contents & BrushContents::Water) {
                     //if (strcmp(tr.surface->name, "*brwater") == 0) {
                     //    color = SplashType::BrownWater;
                     //} else {
                         splashType = SplashType::BlueWater;
                     //}
-                } else if (trace.contents & CONTENTS_SLIME) {
+                } else if (trace.contents & BrushContents::Slime) {
                     splashType = SplashType::Slime;
-                } else if (trace.contents & CONTENTS_LAVA) {
+                } else if (trace.contents & BrushContents::Lava) {
                     splashType = SplashType::Lava;
                 } else {
                     splashType = SplashType::Unknown;
@@ -129,7 +129,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
             }
 
             // Re-trace ignoring the liquid this time.
-            trace = SVG_Trace(liquidStartPosition, vec3_zero(), vec3_zero(), shotEndPosition, player, CONTENTS_MASK_SHOT);
+            trace = SVG_Trace(liquidStartPosition, vec3_zero(), vec3_zero(), shotEndPosition, player, BrushContentsMask::Shot);
         }
     }
 
@@ -160,10 +160,10 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
         vec3_t direction = vec3_normalize(trace.endPosition - liquidStartPosition);
         vec3_t position = vec3_fmaf(trace.endPosition, -2, direction);
 
-        if (gi.PointContents(position) & CONTENTS_MASK_LIQUID) {
+        if (gi.PointContents(position) & BrushContentsMask::Liquid) {
             trace.endPosition = position;
         } else {
-            trace = SVG_Trace(position, vec3_zero(), vec3_zero(), liquidStartPosition, trace.ent, CONTENTS_MASK_LIQUID);
+            trace = SVG_Trace(position, vec3_zero(), vec3_zero(), liquidStartPosition, trace.ent, BrushContentsMask::Liquid);
         }
 
         position = vec3_scale(liquidStartPosition + trace.endPosition, 0.5f);

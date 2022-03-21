@@ -23,7 +23,7 @@ public:
     **/
     using ThinkCallbackPointer      = void(CLGBaseEntity::*)(void);
     using UseCallbackPointer        = void(CLGBaseEntity::*)(CLGBaseEntity* other, CLGBaseEntity* activator);
-    using TouchCallbackPointer      = void(CLGBaseEntity::*)(CLGBaseEntity* self, CLGBaseEntity* other, cplane_t* plane, csurface_t* surf);
+    using TouchCallbackPointer      = void(CLGBaseEntity::*)(CLGBaseEntity* self, CLGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     using BlockedCallbackPointer    = void(CLGBaseEntity::*)(CLGBaseEntity* other);
     using TakeDamageCallbackPointer = void(CLGBaseEntity::*)(CLGBaseEntity* other, float kick, int32_t damage);
     using DieCallbackPointer        = void(CLGBaseEntity::*)(CLGBaseEntity* inflictor, CLGBaseEntity* attacker, int damage, const vec3_t& point);

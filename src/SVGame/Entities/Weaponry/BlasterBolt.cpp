@@ -98,7 +98,7 @@ void BlasterBolt::SpawnKey(const std::string& key, const std::string& value) {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     if (!self || !other) { // Plane and Surf can be NULL
         Remove();
         return;

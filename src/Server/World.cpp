@@ -350,7 +350,7 @@ static void SV_AreaEntities_r(areanode_t *node)
     Entity     *check;
 
     // touch linked edicts
-    if (area_type == AREA_SOLID)
+    if (area_type == AreaEntities::Solid)
         start = &node->solid_edicts;
     else
         start = &node->trigger_edicts;
@@ -451,7 +451,7 @@ int SV_PointContents(const vec3_t &p)
     contents = CM_PointContents(p, sv.cm.cache->nodes);
 
     // or in contents from all the other entities
-    num = SV_AreaEntities(p, p, touch, MAX_EDICTS, AREA_SOLID);
+    num = SV_AreaEntities(p, p, touch, MAX_EDICTS, AreaEntities::Solid);
 
     for (i = 0; i < num; i++) {
         hit = touch[i];
@@ -471,12 +471,12 @@ SV_ClipMoveToEntities
 ====================
 */
 static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
-                                  Entity *passedict, int contentmask, trace_t *tr)
+                                  Entity *passedict, int contentmask, TraceResult *tr)
 {
     vec3_t      boxmins, boxmaxs;
     int         i, num;
     static Entity     *touchlist[MAX_EDICTS], *touch;
-    trace_t     trace;
+    TraceResult     trace;
 
     // create the bounding box of the entire move
     for (i = 0; i < 3; i++) {
@@ -489,7 +489,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
         }
     }
 
-    num = SV_AreaEntities(boxmins, boxmaxs, touchlist, MAX_EDICTS, AREA_SOLID);
+    num = SV_AreaEntities(boxmins, boxmaxs, touchlist, MAX_EDICTS, AreaEntities::Solid);
 
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
@@ -508,7 +508,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
                 continue;    // don't clip against owner
         }
 
-        if (!(contentmask & CONTENTS_DEADMONSTER)
+        if (!(contentmask & BrushContents::DeadMonster)
             && (touch->serverFlags & EntityServerFlags::DeadMonster))
             continue;
 
@@ -529,10 +529,10 @@ Moves the given mins/maxs volume through the world from start to end.
 Passedict and edicts owned by passedict are explicitly not checked.
 ==================
 */
-trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
+TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
                            Entity *passedict, int contentmask)
 {
-    trace_t     trace;
+    TraceResult     trace;
 
     if (!sv.cm.cache) {
         Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);

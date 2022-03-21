@@ -84,7 +84,7 @@ void MiscServerModel::Spawn() {
     SetServerFlags(EntityServerFlags::Monster);
     
     // Set clip mask.
-    SetClipMask(CONTENTS_MASK_MONSTERSOLID | CONTENTS_MASK_PLAYERSOLID);
+    SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     // Set the barrel model, and model index.
     SetModel(model);
@@ -236,7 +236,7 @@ void MiscServerModel::MiscServerModelThink(void) {
     //
     //
     //// Exceute the trace.
-    //SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, CONTENTS_MASK_MONSTERSOLID);
+    //SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::MonsterSolid);
     //
     //// Return in case we hit anything.
     //if (trace.fraction == 1 || trace.allSolid)

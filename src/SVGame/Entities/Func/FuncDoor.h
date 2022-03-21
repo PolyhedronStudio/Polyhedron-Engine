@@ -32,7 +32,7 @@ protected:
     void        DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator );
     void        DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point );
     void        DoorBlocked( SVGBaseEntity* other );
-    void        DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf );
+    void        DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 
     void        DoorGoUp( SVGBaseEntity* activator );
     void        DoorGoDown();

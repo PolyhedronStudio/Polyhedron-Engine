@@ -283,7 +283,7 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
 //===============
 // FuncDoor::DoorTouch
 //===============
-void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
+void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
     // Clients only.
     if (other->GetClient() == nullptr) {
         return; // Players only; should we have special flags for monsters et al?

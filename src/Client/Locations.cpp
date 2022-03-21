@@ -145,7 +145,7 @@ static location_t *LOC_FindClosest(vec3_t pos)
     location_t *loc, *nearest;
     vec3_t dir;
     float dist, minDist;
-    trace_t trace;
+    TraceResult trace;
 
     minDist = 99999;
     nearest = NULL;
@@ -159,7 +159,7 @@ static location_t *LOC_FindClosest(vec3_t pos)
 
         if (loc_trace->integer) {
             CM_BoxTrace(&trace, pos, loc->origin, vec3_zero(), vec3_zero(),
-                        cl.bsp->nodes, CONTENTS_MASK_SOLID);
+                        cl.bsp->nodes, BrushContentsMask::Solid);
             if (trace.fraction != 1.0f) {
                 continue;
             }
@@ -250,7 +250,7 @@ static size_t LOC_There_m(char *buffer, size_t size)
 {
     location_t *loc;
     vec3_t pos;
-    trace_t trace;
+    TraceResult trace;
     int ret;
 
     ret = Q_strlcpy(buffer, "unknown", size);
@@ -260,7 +260,7 @@ static size_t LOC_There_m(char *buffer, size_t size)
 
     VectorMA(cl.playerEntityOrigin, 8192, cl.v_forward, pos);
     CM_BoxTrace(&trace, cl.playerEntityOrigin, pos, vec3_zero(), vec3_zero(),
-                cl.bsp->nodes, CONTENTS_MASK_SOLID);
+                cl.bsp->nodes, BrushContentsMask::Solid);
 
     loc = LOC_FindClosest(trace.endPosition);
     if (loc) {

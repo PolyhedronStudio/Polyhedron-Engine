@@ -1,52 +1,65 @@
-// License here.
-#ifndef __SHARED__COLLISION_H__
-#define __SHARED__COLLISION_H__
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Contains all shared common Collision Model declarations.
+* 
+***/
+#pragma once
+
+
 
 /**
 *   Brush Content Flags.
 **/
-// Lower bits are stronger, and will eat weaker brushes completely
-static constexpr int32_t CONTENTS_SOLID         = 1; //! An eye is never valid in a solid
-static constexpr int32_t CONTENTS_WINDOW        = 2; //! Translucent, but not watery
-static constexpr int32_t CONTENTS_AUX           = 4;
-static constexpr int32_t CONTENTS_LAVA          = 8;
-static constexpr int32_t CONTENTS_SLIME         = 16;
-static constexpr int32_t CONTENTS_WATER         = 32;
-static constexpr int32_t CONTENTS_MIST          = 64;
-static constexpr int32_t LAST_VISIBLE_CONTENTS  = 64;
+struct BrushContents {
+    // Lower bits are stronger, and will eat weaker brushes completely
+    static constexpr int32_t Solid   = 1; //! An eye is never valid in a solid
+    static constexpr int32_t Window  = 2; //! Translucent, but not watery
+    static constexpr int32_t Aux     = 4;
+    static constexpr int32_t Lava    = 8;
+    static constexpr int32_t Slime   = 16;
+    static constexpr int32_t Water   = 32;
+    static constexpr int32_t Mist    = 64;
+    static constexpr int32_t LastVisibleContents    = 64;
 
-// Remaining contents are non-visible, and don't eat brushes
-static constexpr int32_t CONTENTS_AREAPORTAL    = 0x8000;
-static constexpr int32_t CONTENTS_PLAYERCLIP    = 0x10000;
-static constexpr int32_t CONTENTS_MONSTERCLIP   = 0x20000;
+    // Remaining contents are non-visible, and don't eat brushes
+    static constexpr int32_t AreaPortal     = 0x8000;
+    static constexpr int32_t PlayerClip     = 0x10000;
+    static constexpr int32_t MonsterClip    = 0x20000;
 
-static constexpr int32_t CONTENTS_ORIGIN        = 0x1000000;   // Removed before bsping an entity
-static constexpr int32_t CONTENTS_MONSTER       = 0x2000000;   // Should never be on a brush, only in game
-static constexpr int32_t CONTENTS_DEADMONSTER   = 0x4000000;
-static constexpr int32_t CONTENTS_DETAIL        = 0x8000000;   // Brushes to be added after vis leafs
-static constexpr int32_t CONTENTS_TRANSLUCENT   = 0x10000000;  // Auto set if any surface has trans
-static constexpr int32_t CONTENTS_LADDER        = 0x20000000;
+    static constexpr int32_t Origin         = 0x1000000;   //! Removed before bsping an entity
+    static constexpr int32_t Monster        = 0x2000000;   //! Should never be on a brush, only in game
+    static constexpr int32_t DeadMonster    = 0x4000000;
+    static constexpr int32_t Detail         = 0x8000000;   //! Brushes to be added after vis leafs
+    static constexpr int32_t Translucent    = 0x10000000;  //! Auto set if any surface has trans
+    static constexpr int32_t Ladder         = 0x20000000;
 
-// Currents can be added to any other contents, and may be mixed
-static constexpr int32_t CONTENTS_CURRENT_0     = 0x40000;
-static constexpr int32_t CONTENTS_CURRENT_90    = 0x80000;
-static constexpr int32_t CONTENTS_CURRENT_180   = 0x100000;
-static constexpr int32_t CONTENTS_CURRENT_270   = 0x200000;
-static constexpr int32_t CONTENTS_CURRENT_UP    = 0x400000;
-static constexpr int32_t CONTENTS_CURRENT_DOWN  = 0x800000;
+    // Currents can be added to any other contents, and may be mixed
+    static constexpr int32_t Current0       = 0x40000;
+    static constexpr int32_t Current90      = 0x80000;
+    static constexpr int32_t Current180     = 0x100000;
+    static constexpr int32_t Current270     = 0x200000;
+    static constexpr int32_t CurrentUp      = 0x400000;
+    static constexpr int32_t CurrentDown    = 0x800000;
+};
 
 /**
 *   Brush Content Masks.
 **/
-static constexpr int32_t CONTENTS_MASK_ALL          = (-1);
-static constexpr int32_t CONTENTS_MASK_SOLID        = (CONTENTS_SOLID | CONTENTS_WINDOW);
-static constexpr int32_t CONTENTS_MASK_PLAYERSOLID  = (CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW | CONTENTS_MONSTER);
-static constexpr int32_t CONTENTS_MASK_DEADSOLID    = (CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW);
-static constexpr int32_t CONTENTS_MASK_MONSTERSOLID = (CONTENTS_SOLID | CONTENTS_MONSTERCLIP | CONTENTS_WINDOW | CONTENTS_MONSTER);
-static constexpr int32_t CONTENTS_MASK_LIQUID       = (CONTENTS_WATER | CONTENTS_LAVA | CONTENTS_SLIME);
-static constexpr int32_t CONTENTS_MASK_OPAQUE       = (CONTENTS_SOLID | CONTENTS_SLIME | CONTENTS_LAVA);
-static constexpr int32_t CONTENTS_MASK_SHOT         = (CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_WINDOW | CONTENTS_DEADMONSTER);
-static constexpr int32_t CONTENTS_MASK_CURRENT      = (CONTENTS_CURRENT_0 | CONTENTS_CURRENT_90 | CONTENTS_CURRENT_180 | CONTENTS_CURRENT_270 | CONTENTS_CURRENT_UP | CONTENTS_CURRENT_DOWN);
+struct BrushContentsMask {
+    static constexpr int32_t All          = (-1);
+    static constexpr int32_t Solid        = (BrushContents::Solid | BrushContents::Window);
+    static constexpr int32_t PlayerSolid  = (BrushContents::Solid | BrushContents::PlayerClip | BrushContents::Window | BrushContents::Monster);
+    static constexpr int32_t DeadSolid    = (BrushContents::Solid | BrushContents::PlayerClip | BrushContents::Window);
+    static constexpr int32_t MonsterSolid = (BrushContents::Solid | BrushContents::MonsterClip | BrushContents::Window | BrushContents::Monster);
+    static constexpr int32_t Liquid       = (BrushContents::Water | BrushContents::Lava | BrushContents::Slime);
+    static constexpr int32_t Opaque       = (BrushContents::Solid | BrushContents::Slime | BrushContents::Lava);
+    static constexpr int32_t Shot         = (BrushContents::Solid | BrushContents::Monster | BrushContents::Window | BrushContents::DeadMonster);
+    static constexpr int32_t Current      = (BrushContents::Current0 | BrushContents::Current90 | BrushContents::Current180 | BrushContents::Current270 | BrushContents::CurrentUp | BrushContents::CurrentDown);
+};
 
 /**
 *   Surface Flags.
@@ -67,14 +80,16 @@ struct SurfaceFlags {
 *   gi.BoxEntities() can return a list of either solid or trigger entities
 *   FIXME: eliminate AREA_ distinction?
 **/
-static constexpr int32_t AREA_SOLID     = 1;
-static constexpr int32_t AREA_TRIGGERS  = 2;
+struct AreaEntities {
+    static constexpr int32_t Solid     = 1;
+    static constexpr int32_t Triggers  = 2;
+};
 
 
 /**
 *   Surface Collision data.
 **/
-struct csurface_t {
+struct CollisionSurface {
     //! The actual material name used for this surface.
     char name[16] = {};
     //! The surface flags.
@@ -88,7 +103,7 @@ struct csurface_t {
 *   BSP planes they intersect. This is the basis for all collision detection
 *   within Polyhedron.
 **/
-struct trace_t {
+struct TraceResult {
     //! If true, the trace startedand ended within the same solid.
     qboolean allSolid = false;
     //! If true, the trace started within a solid, but exited it.
@@ -104,9 +119,9 @@ struct trace_t {
     //! returned, rather than a pointer. This is because the plane may belong to
     //! an inline BSP model or the box hull of a solid entity, in which case it must
     //! be transformed by the entity's current position.
-    cplane_t plane = {};
+    CollisionPlane plane = {};
     //! The impacted surface, or `NULL`.
-    csurface_t* surface = nullptr;
+    CollisionSurface* surface = nullptr;
     //! The contents mask of the impacted brush, or 0.
     int32_t contents = 0;
 
@@ -125,5 +140,3 @@ struct trace_t {
         vec3_zero()
     };	// [signBits][x] = either size[0][x] or size[1][x]
 };
-
-#endif // __SHARED__COLLISION_H__

@@ -89,7 +89,7 @@ void FuncRotating::RotatorBlocked( SVGBaseEntity* other ) {
 //===============
 // FuncRotating::RotatorHurtTouch
 //===============
-void FuncRotating::RotatorHurtTouch( SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf ) {
+void FuncRotating::RotatorHurtTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	if ( vec3_length( GetAngularVelocity() ) ) {
 		RotatorBlocked( other );
 	}

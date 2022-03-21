@@ -80,9 +80,9 @@ struct CLGTrace {
     // 
     // If it is an inline BSP Model or a box hull of a solid entity the plane 
     // must be transformed by the entity's current position.
-    cplane_t plane = {};
+    CollisionPlane plane = {};
     // The impacted surface, or nullptr.
-    csurface_t* surface = nullptr;
+    CollisionSurface* surface = nullptr;
     // The contents mask of the impacted brush, or 0.
     int32_t contents = 0;
     // The impacted entity, or nullptr.

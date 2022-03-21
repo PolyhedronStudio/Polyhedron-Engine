@@ -73,16 +73,16 @@ void SVG_Client_CalculateBlend(SVGBasePlayer *ent)
     vec3_t viewOrigin = ent->GetOrigin() + client->playerState.pmove.viewOffset;
     int32_t contents = gi.PointContents(viewOrigin);
 
-	if (contents & (CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA))
+	if (contents & (BrushContents::Water | BrushContents::Slime | BrushContents::Lava))
         client->playerState.rdflags |= RDF_UNDERWATER;
     else
         client->playerState.rdflags &= ~RDF_UNDERWATER;
 
-    if (contents & (CONTENTS_SOLID | CONTENTS_LAVA))
+    if (contents & (BrushContents::Solid | BrushContents::Lava))
         SV_AddBlend(1.0, 0.3, 0.0, 0.6, client->playerState.blend);
-    else if (contents & CONTENTS_SLIME)
+    else if (contents & BrushContents::Slime)
         SV_AddBlend(0.0, 0.1, 0.05, 0.6, client->playerState.blend);
-    else if (contents & CONTENTS_WATER)
+    else if (contents & BrushContents::Water)
         SV_AddBlend(0.5, 0.3, 0.2, 0.4, client->playerState.blend);
 
     // add for damage

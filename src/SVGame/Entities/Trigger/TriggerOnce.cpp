@@ -133,7 +133,7 @@ void TriggerOnce::TriggerOnceThinkWait() {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void TriggerOnce::TriggerOnceTouch(SVGBaseEntity* self, SVGBaseEntity* other, cplane_t* plane, csurface_t* surf) {
+void TriggerOnce::TriggerOnceTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	if (this == other)
 		return;
 

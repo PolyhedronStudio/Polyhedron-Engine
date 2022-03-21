@@ -407,9 +407,9 @@ CL_ClipMoveToEntities
 Clips the trace against all entities resulting in a final trace result.
 ===============
 */
-void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask, trace_t *cmDstTrace) {
+void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
     // CM Source Trace.
-    trace_t         cmSrcTrace;
+    TraceResult         cmSrcTrace;
     // Head Node used for testing.
     mnode_t*        headNode = nullptr;
     // Collision model for entity.
@@ -477,8 +477,8 @@ Executes a client side trace on the world and its entities using the given conte
 Optionally one can pass a pointer to an entity in order to skip(ignore) it.
 ===============
 */
-trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask) {
-    trace_t trace;
+TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask) {
+    TraceResult trace;
 
     // Ensure we can pull of a proper trace.
     if (!cl.bsp || !cl.bsp->nodes) {

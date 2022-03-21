@@ -86,7 +86,7 @@ static void GL_SetupFrustum(void)
 {
     vec_t angle, sf, cf;
     vec3_t forward, left, up;
-    cplane_t *p;
+    CollisionPlane *p;
     int i;
 
     // right/left
@@ -130,10 +130,10 @@ glCullResult_t GL_CullBox(vec3_t bounds[2])
     cull = CULL_IN;
     for (i = 0; i < 4; i++) {
         bits = BoxOnPlaneSide(bounds[0], bounds[1], &glr.frustumPlanes[i]);
-        if (bits == BOX_BEHIND) {
+        if (bits == BoxPlane::Behind) {
             return CULL_OUT;
         }
-        if (bits != BOX_INFRONT) {
+        if (bits != BoxPlane::InFront) {
             cull = CULL_CLIP;
         }
     }
@@ -144,7 +144,7 @@ glCullResult_t GL_CullBox(vec3_t bounds[2])
 glCullResult_t GL_CullSphere(const vec3_t origin, float radius)
 {
     float dist;
-    cplane_t *p;
+    CollisionPlane *p;
     int i;
     glCullResult_t cull;
 
@@ -184,7 +184,7 @@ static inline void make_box_points(const vec3_t    origin,
 glCullResult_t GL_CullLocalBox(const vec3_t origin, vec3_t bounds[2])
 {
     vec3_t points[8];
-    cplane_t *p;
+    CollisionPlane *p;
     int i, j;
     vec_t dot;
     qboolean infront;

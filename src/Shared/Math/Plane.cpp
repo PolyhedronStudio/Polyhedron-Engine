@@ -5,7 +5,7 @@
 //
 #include "Shared/Shared.h"
 
-void SetPlaneType(cplane_t* plane)
+void SetPlaneType(CollisionPlane* plane)
 {
     // VEC3_T: !! May be broken, pointer issue.
     vec3_t* normal = &plane->normal;
@@ -26,7 +26,7 @@ void SetPlaneType(cplane_t* plane)
     plane->type = PLANE_NON_AXIAL;
 }
 
-void SetPlaneSignbits(cplane_t* plane)
+void SetPlaneSignbits(CollisionPlane* plane)
 {
     int bits = 0;
 
@@ -50,7 +50,7 @@ BoxOnPlaneSide
 Returns 1, 2, or 1 + 2
 ==================
 */
-int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p)
+int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, CollisionPlane* p)
 {
     const vec_t* bounds[2] = { emins, emaxs };
     int     i = p->signBits & 1;
@@ -69,9 +69,9 @@ int BoxOnPlaneSide(const vec3_t& emins, const vec3_t& emaxs, cplane_t* p)
 #undef P
 
     if (dist1 >= p->dist)
-        sides = BOX_INFRONT;
+        sides = BoxPlane::InFront;
     if (dist2 < p->dist)
-        sides |= BOX_BEHIND;
+        sides |= BoxPlane::Behind;
 
     return sides;
 }

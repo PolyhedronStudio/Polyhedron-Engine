@@ -574,9 +574,9 @@ struct SVGTrace {
     // returned, rather than a pointer.This is because the plane may belong to
     // an inline BSP model or the box hull of a solid entity, in which case it must
     // be transformed by the entity's current position.
-    cplane_t    plane;
+    CollisionPlane    plane;
     // The impacted surface, or `NULL`.
-    csurface_t* surface;
+    CollisionSurface* surface;
     // The contents mask of the impacted brush, or 0.
     int         contents;
 
@@ -589,7 +589,7 @@ struct SVGTrace {
 
 SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);
 
-std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AREA_SOLID);
+std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AreaEntities::Solid);
 
 qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);
