@@ -83,9 +83,9 @@ typedef struct {
     int         vert;
 } msurfedge_t;
 
-#define SURF_TRANS_MASK (SURF_TRANS33 | SURF_TRANS66)
-#define SURF_COLOR_MASK (SURF_TRANS_MASK | SURF_WARP)
-#define SURF_NOLM_MASK  (SURF_COLOR_MASK | SURF_FLOWING | SURF_SKY)
+#define SURF_TRANS_MASK (SurfaceFlags::Transparent33 | SurfaceFlags::Transparent66)
+#define SURF_COLOR_MASK (SURF_TRANS_MASK | SurfaceFlags::Warp)
+#define SURF_NOLM_MASK  (SURF_COLOR_MASK | SurfaceFlags::Flowing | SurfaceFlags::Sky)
 
 #define DSURF_PLANEBACK     1
 

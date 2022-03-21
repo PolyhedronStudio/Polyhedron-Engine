@@ -230,7 +230,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     }
 
     // send gun puff / flash
-    if ( !(tr.surface && tr.surface->flags & SURF_SKY) ) {
+    if ( !(tr.surface && tr.surface->flags & SurfaceFlags::Sky) ) {
         if (tr.fraction < 1.0) {
             if (tr.ent->GetTakeDamage()) {
                 GetGamemode()->InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);

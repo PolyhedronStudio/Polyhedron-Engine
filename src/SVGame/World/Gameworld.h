@@ -92,7 +92,7 @@ public:
 	*			first free server entity slot there is. After doing so, allocates
 	*			a class entity based on the 'classname' of the parsed entity.
 	**/
-    qboolean SpawnEntitiesFromString(const char* mapName, const char* entities, const char* spawnpoint);
+    qboolean SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint);
     /**
 	*	@brief	Looks for the first free server entity in our buffer.
 	* 

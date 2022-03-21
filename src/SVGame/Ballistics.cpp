@@ -134,7 +134,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
     }
 
     // Send gun puff / flash
-    if ( !(trace.surface && trace.surface->flags & SURF_SKY) ) {
+    if ( !(trace.surface && trace.surface->flags & SurfaceFlags::Sky) ) {
         if (trace.fraction < 1.0) {
             if (trace.ent->GetTakeDamage()) {
                 GetGamemode()->InflictDamage(trace.ent, player, player, aimDirection, trace.endPosition, trace.plane.normal, damage, kickForce, DamageFlags::Bullet, meansOfDeath);

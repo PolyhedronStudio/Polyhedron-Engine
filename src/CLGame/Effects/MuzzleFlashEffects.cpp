@@ -12,11 +12,13 @@
 #include "../Main.h"
 #include "../TemporaryEntities.h"
 
+#include "Shared/Interfaces/IClientGameExports.h"
+#include "../ClientGameExports.h"
+
 #include "MuzzleFlashEffects.h"
 #include "DynamicLights.h"
 #include "Particles.h"
 #include "ParticleEffects.h"
-
 
 
 /**
@@ -28,11 +30,12 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
     ClientEntity* pl;
     float       volume;
     char        soundname[MAX_QPATH];
-
-    //#ifdef _DEBUG
-    //    if (developer->integer)
-    //        CL_CheckEntityPresent(mzParameters.entity, "muzzleflash");
-    //#endif
+    
+#ifdef _DEBUG
+    if (clgi.GetDeveloperLevel() > 0) {
+        clge->CheckEntityPresent(mzParameters.entity, "muzzleflash");
+    }
+#endif
 
     pl = &cs->entities[mzParameters.entity];
 

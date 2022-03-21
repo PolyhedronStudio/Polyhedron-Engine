@@ -458,6 +458,8 @@ SET(HEADERS_GL
 
 ###################### Shared Game Folder.
 SET(HEADERS_SHAREDGAME
+	../inc/SharedGame/Entities/TypeInfo.h 
+	../inc/SharedGame/Entities.h 
 	../inc/SharedGame/PMove.h 
 	../inc/SharedGame/Protocol.h 
 	../inc/SharedGame/SharedGame.h 

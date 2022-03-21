@@ -818,8 +818,8 @@ void CL_EmitDemoSnapshot(void)
     }
 
     // write layout
-    MSG_WriteUint8(ServerGameCommand::Layout);//MSG_WriteByte(ServerGameCommand::Layout);
-    MSG_WriteString(cl.layout);
+//    MSG_WriteUint8(ServerGameCommand::Layout);//MSG_WriteByte(ServerGameCommand::Layout);
+//    MSG_WriteString(cl.layout);
 
     // CPP: Cast void* to demosnap_t *
     snap = (demosnap_t*)Z_Malloc(sizeof(*snap) + msg_write.currentSize - 1);

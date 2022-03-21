@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/GameModule.h"
 #include "refresh/models.h"
 
-
+extern ClientShared cs;
 /*
 =========================================================================
 
@@ -50,28 +50,30 @@ static inline qboolean Entity_IsPlayer(const EntityState& state) {
 /**
 *   @brief  Creates a new entity based on the newly received entity state.
 **/
-static inline void Entity_UpdateNew(ClientEntity *ent, const EntityState &state, const vec3_t &origin)
+static inline void Entity_UpdateNew(ClientEntity *clEntity, const EntityState &state, const vec3_t &origin)
 {
-    static int entity_ctr;
-    ent->id = ++entity_ctr;
-    ent->trailcount = 1024;
+    static int32_t entity_ctr = 0;
+    clEntity->clientEntityNumber = entity_ctr; //state.number; // used to be: clEntity->id = ++entity_ctr;
+    clEntity->trailcount = 1024;
 
-    Com_Printf("Entity_UpdateNew: ent->id=%i\n", ent->id);
+    // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
+    //CL_GM_SpawnFromState(clEntity, state);
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
-    ent->prev = state;
+    clEntity->prev = state;
 
+    // Ensure that when the entity has been teleported we adjust its lerp origin.
     if (state.eventID == EntityEvent::PlayerTeleport || state.eventID == EntityEvent::OtherTeleport
        || (state.renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) 
     {
         // This entity has been teleported.
-        ent->lerpOrigin = origin;
+        clEntity->lerpOrigin = origin;
         return;
     }
 
     // oldOrigin is valid for new entities, so use it as starting point for interpolating between.
-    ent->prev.origin = state.oldOrigin;
-    ent->lerpOrigin = state.oldOrigin;
+    clEntity->prev.origin = state.oldOrigin;
+    clEntity->lerpOrigin = state.oldOrigin;
 }
 
 /**
@@ -245,14 +247,19 @@ static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *current
     }
 
     // No lerping if teleport bit was flipped.
-    if ((previousPlayerState->pmove.flags ^ currentPlayerState->pmove.flags) & PMF_TIME_TELEPORT)
+    if ((previousPlayerState->pmove.flags ^ currentPlayerState->pmove.flags) & PMF_TIME_TELEPORT) {
         goto duplicate;
+    }
+
     // No lerping if POV number changed.
-    if (previousFrame->clientNumber != currentFrame->clientNumber)
+    if (previousFrame->clientNumber != currentFrame->clientNumber) {
         goto duplicate;
+    }
+
     // Developer option.
-    if (cl_nolerp->integer == 1)
+    if (cl_nolerp->integer == 1) {
         goto duplicate;
+    }
 
     return;
 
@@ -330,7 +337,7 @@ void CL_DeltaFrame(void)
     // Getting a valid frame message ends the connection process.
     if (cls.connectionState == ClientConnectionState::Precached) {
 	    // Spawn all local class entities.
-	    CL_GM_SpawnEntitiesFromString(cl.bsp->entityString);
+	    CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
 
         // Set the client to an active connection state.
         CL_SetActiveState();
@@ -384,33 +391,6 @@ void CL_DeltaFrame(void)
     // Call into client game its delta frame function.
     CL_GM_ClientDeltaFrame();
 }
-
-#ifdef _DEBUG
-// for debugging problems when out-of-date entity origin is referenced
-void CL_CheckEntityPresent(int entnum, const char *what)
-{
-    ClientEntity *e;
-
-    if (entnum == cl.frame.clientNumber + 1) {
-        return; // player entity = current
-    }
-
-    e = &cs.entities[entnum];
-    if (e->serverFrame == cl.frame.number) {
-        return; // current
-    }
-
-    if (e->serverFrame) {
-        Com_LPrintf(PrintType::Developer,
-                    "SERVER BUG: %s on entity %d last seen %d frames ago\n",
-                    what, entnum, cl.frame.number - e->serverFrame);
-    } else {
-        Com_LPrintf(PrintType::Developer,
-                    "SERVER BUG: %s on entity %d never seen before\n",
-                    what, entnum);
-    }
-}
-#endif
 
 /*
 ==========================================================================
@@ -510,10 +490,10 @@ trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, co
     CM_BoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask);
 
     // Set trace entity.
-    trace.ent = (struct entity_s*)&cl.solidEntities[0];
+    trace.ent = reinterpret_cast<entity_s*>(&cl.solidEntities[0]);
 
     // Clip to other solid entities.
-    CL_ClipMoveToEntities(start, mins, maxs, end, (ClientEntity*)skipEntity, contentMask, &trace);
+    CL_ClipMoveToEntities(start, mins, maxs, end, reinterpret_cast<ClientEntity*>(skipEntity), contentMask, &trace);
 
     return trace;
 }

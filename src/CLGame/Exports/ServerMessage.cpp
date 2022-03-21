@@ -235,7 +235,7 @@ void ClientGameServerMessage::ParseInventory(void) {
 **/
 void ClientGameServerMessage::ParseLayout(void) {
     // Parse layout.
-    clgi.MSG_ReadStringBuffer(cl->layout, sizeof(cl->layout));
+//    clgi.MSG_ReadStringBuffer(cl->layout, sizeof(cl->layout));
 }
 
 /**

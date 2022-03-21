@@ -34,24 +34,59 @@ class CLGBaseEntity;
 *   working accordingly.
 * 
 **/
+using CLGEntityVector = std::vector<CLGBaseEntity*>;
+
 class EntityList {
 public:
     //! Constructor/Destructor.
-    EntityList() = default;
+    EntityList() {
+        classEntities.reserve(MAX_EDICTS);
+    }
     virtual ~EntityList() = default;
 
     /**
     *   @brief  
     **/
-    template <typename T> T* SpawnEntity() {
+    template <typename T> T* SpawnEntityFromState(ClientEntity *clgEntity, const EntityState &state) {
+        // See if this state refers to an already in-use index.
+        CLGBaseEntity *oldClassEntity = classEntities.at(state.number);
         
+        // 
+        if (oldClassEntity != nullptr) {
+            // Notify and give it a chance to clean up before its actual deallocation takes place.
+            oldClassEntity->OnDeallocate();
 
-        return new T;
+            // Delete object.
+            delete oldClassEntity;
+        }
+        
+        // Create new class entity object.
+        T *classEntity = new T(clgEntity);
+
+        // Insert it at state.number index.
+        classEntities.insert(classEntities.begin() + state.number, classEntity);
+
+        // Return pointer.
+        return classEntity;
     }
+
+    /**
+    *   @brief  Clears the list by deallocating all its members.
+    **/
+    void Clear();
+
+    /**
+    *   @return A pointer to the entity who's index matches the state number.
+    **/
+    CLGBaseEntity *GetByStateNumber(int32_t number);
+
+    /**
+    *   @brief  Inserts the class entity pointer at the number index of our class entity vector.
+    *   @return Pointer to the entity being inserted.
+    **/
+    CLGBaseEntity *InsertAtSlotNumber(CLGBaseEntity *clgEntity, int32_t number);
 
 private:
     //! First 2048 are reserved for server side entities.
-    std::vector<CLGBaseEntity*> entities;
-
-
+    CLGEntityVector classEntities;
 };

@@ -150,7 +150,7 @@ void Gameworld::PreparePlayers() {
 *			first free server entity slot there is. After doing so, allocates
 *			a class entity based on the 'classname' of the parsed entity.
 **/
-qboolean Gameworld::SpawnEntitiesFromString(const char* mapName, const char* entities, const char* spawnpoint) {
+qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint) {
 	// Clear level state.
     level = {};
 
@@ -195,7 +195,7 @@ qboolean Gameworld::SpawnEntitiesFromString(const char* mapName, const char* ent
 		}
 
 		if (com_token[0] != '{') {
-			gi.Error("SpawnEntitiesFromString: found %s when expecting {", com_token);
+			gi.Error("SpawnFromBSPString: found %s when expecting {", com_token);
 			return false;
 		}
 
@@ -433,24 +433,23 @@ qboolean Gameworld::SpawnParsedClassEntity(Entity* svEntity) {
 	// If it does not have a classname key we're in for trouble.
     if (!svEntity->entityDictionary.contains("classname")) {
 		// Error out.
-		gi.Error("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
+		gi.Error("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n", __func__, stateNumber);
 		
 		// Failed.
 		return false;
     }
 
 	// Actually spawn the class entity.
-    svEntity->classEntity = AllocateClassEntity(svEntity, svEntity->entityDictionary["classname"]);
+    SVGBaseEntity *classEntity = svEntity->classEntity = AllocateClassEntity(svEntity, svEntity->entityDictionary["classname"]);
 
     // Something went wrong with allocating the class entity.
-    if (!svEntity->classEntity) {
+    if (!classEntity) {
 		// Be sure to free it.
 		FreeServerEntity(svEntity);
 
 		// Failed.
-		gi.DPrintf("WARNING: Spawning entity(%s) failed.\n", svEntity->entityDictionary["classname"]);
+		gi.DPrintf("Warning: Spawning entity(%s) failed.\n", svEntity->entityDictionary["classname"]);
 		return false;
-		//return false;
     }
 
     // Initialise the entity with its respected keyvalue properties
@@ -458,11 +457,9 @@ qboolean Gameworld::SpawnParsedClassEntity(Entity* svEntity) {
 		svEntity->classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
     }
 
-    // Precache the entity.
-    svEntity->classEntity->Precache();
-
-	// Aaaand, spawn it.
-    svEntity->classEntity->Spawn();
+    // Precache and spawn the entity.
+    classEntity->Precache();
+	classEntity->Spawn();
 
 	// Success.
 	return true;

@@ -648,9 +648,9 @@ void CL_ClearState(void)
     memset(&cs.entities, 0, sizeof(cs.entities));
     // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
     //cl = {};
-    /*for (uint32_t i = 0; i < sizeof(cs.entities); i++) {
-        cs.entities[i] = {};
-    }*/
+    //for (int32_t i = 0; i < MAX_ENTITIES; i++) {
+    //    cs.entities[i] = {};
+    //}
 
     // In case we are more than connected, reset it to just connected.
     if (cls.connectionState > ClientConnectionState::Connected) {
@@ -1953,11 +1953,6 @@ static void CL_DumpStatusbar_f(void)
     dump_program(cl.configstrings[ConfigStrings::StatusBar], "status bar");
 }
 
-static void CL_DumpLayout_f(void)
-{
-    dump_program(cl.layout, "layout");
-}
-
 static const cmd_option_t o_writeconfig[] = {
     { "a", "aliases", "write aliases" },
     { "b", "bindings", "write bindings" },
@@ -2481,7 +2476,7 @@ static const cmdreg_t c_client[] = {
     { "unignorenick", CL_UnIgnoreNick_f, CL_IgnoreNick_c },
     { "dumpclients", CL_DumpClients_f },
     { "dumpstatusbar", CL_DumpStatusbar_f },
-    { "dumplayout", CL_DumpLayout_f },
+//    { "dumplayout", CL_DumpLayout_f },
     { "writeconfig", CL_WriteConfig_f, CL_WriteConfig_c },
 //    { "msgtab", CL_Msgtab_f, CL_Msgtab_g },
     { "vid_restart", CL_RestartRefresh_f },

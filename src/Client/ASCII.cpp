@@ -336,7 +336,7 @@ static void SCR_ScoreShot_f(void)
     }
 
     TH_DrawLayoutString(buffer, cl.configstrings[ConfigStrings::StatusBar]);
-    TH_DrawLayoutString(buffer, cl.layout);
+//    TH_DrawLayoutString(buffer, cl.layout);
 
     FS_Write(buffer, sizeof(buffer), f);
 
@@ -362,7 +362,7 @@ static void SCR_ScoreDump_f(void)
     buffer[i * (TH_WIDTH + 1) + TH_WIDTH] = 0;
 
     TH_DrawLayoutString(buffer, cl.configstrings[ConfigStrings::StatusBar]);
-    TH_DrawLayoutString(buffer, cl.layout);
+//    TH_DrawLayoutString(buffer, cl.layout);
 
     Com_Printf("%s\n", buffer);
 }

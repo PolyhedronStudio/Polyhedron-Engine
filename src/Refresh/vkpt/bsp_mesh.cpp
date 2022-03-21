@@ -243,8 +243,8 @@ create_poly(
 		? num_vertices
 		: num_vertices - 2;
 
-	//const float emissive_factor = (texinfo->c.flags & SURF_LIGHT) && texinfo->material->bsp_radiance
-	const float emissive_factor = (texinfo->c.flags & SURF_LIGHT) && texinfo->material && texinfo->material->bsp_radiance
+	//const float emissive_factor = (texinfo->c.flags & SurfaceFlags::Light) && texinfo->material->bsp_radiance
+	const float emissive_factor = (texinfo->c.flags & SurfaceFlags::Light) && texinfo->material && texinfo->material->bsp_radiance
 		? (float)texinfo->radiance * cvar_pt_bsp_radiance_scale->value
 		: 1.f;
 
@@ -315,7 +315,7 @@ belongs_to_model(bsp_t* bsp, mface_t* surf) {
 }
 
 static int filter_static_masked(int flags, int surf_flags) {
-	if ((surf_flags & SURF_NODRAW) && cvar_pt_enable_nodraw->integer)
+	if ((surf_flags & SurfaceFlags::NoDraw) && cvar_pt_enable_nodraw->integer)
 		return 0;
 
 	const pbr_material_t* mat = MAT_ForIndex(flags & MATERIAL_INDEX_MASK);
@@ -327,7 +327,7 @@ static int filter_static_masked(int flags, int surf_flags) {
 }
 
 static int filter_static_opaque(int flags, int surf_flags) {
-	if ((surf_flags & SURF_NODRAW) && cvar_pt_enable_nodraw->integer)
+	if ((surf_flags & SurfaceFlags::NoDraw) && cvar_pt_enable_nodraw->integer)
 		return 0;
 
 	if (filter_static_masked(flags, surf_flags))
@@ -341,7 +341,7 @@ static int filter_static_opaque(int flags, int surf_flags) {
 }
 
 static int filter_static_transparent(int flags, int surf_flags) {
-	if ((surf_flags & SURF_NODRAW) && cvar_pt_enable_nodraw->integer)
+	if ((surf_flags & SurfaceFlags::NoDraw) && cvar_pt_enable_nodraw->integer)
 		return 0;
 
 	flags &= MATERIAL_KIND_MASK;
@@ -352,7 +352,7 @@ static int filter_static_transparent(int flags, int surf_flags) {
 }
 
 static int filter_static_sky(int flags, int surf_flags) {
-	if ((surf_flags & SURF_NODRAW) && cvar_pt_enable_nodraw->integer)
+	if ((surf_flags & SurfaceFlags::NoDraw) && cvar_pt_enable_nodraw->integer)
 		return 0;
 
 	if (MAT_IsKind(flags, MATERIAL_KIND_SKY))
@@ -362,7 +362,7 @@ static int filter_static_sky(int flags, int surf_flags) {
 }
 
 static int filter_all(int flags, int surf_flags) {
-	if ((surf_flags & SURF_NODRAW) && cvar_pt_enable_nodraw->integer)
+	if ((surf_flags & SurfaceFlags::NoDraw) && cvar_pt_enable_nodraw->integer)
 		return 0;
 
 	if (MAT_IsKind(flags, MATERIAL_KIND_SKY))
@@ -372,7 +372,7 @@ static int filter_all(int flags, int surf_flags) {
 }
 
 static int filter_nodraw_sky_lights(int flags, int surf_flags) {
-	int expected = SURF_SKY | SURF_LIGHT | SURF_NODRAW;
+	int expected = SurfaceFlags::Sky | SurfaceFlags::Light | SurfaceFlags::NoDraw;
 	return (surf_flags & expected) == expected;
 }
 
@@ -556,14 +556,14 @@ collect_surfaces(int* idx_ctr, bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int (*
 
 		// ugly hacks for situations when the same texture is used with different effects
 
-		if ((MAT_IsKind(material_id, MATERIAL_KIND_WATER) || MAT_IsKind(material_id, MATERIAL_KIND_SLIME)) && !(surf_flags & SURF_WARP))
+		if ((MAT_IsKind(material_id, MATERIAL_KIND_WATER) || MAT_IsKind(material_id, MATERIAL_KIND_SLIME)) && !(surf_flags & SurfaceFlags::Warp))
 			material_id = MAT_SetKind(material_id, MATERIAL_KIND_REGULAR);
 
 		if (MAT_IsKind(material_id, MATERIAL_KIND_GLASS) && !(surf_flags & SURF_TRANS_MASK))
 			material_id = MAT_SetKind(material_id, MATERIAL_KIND_REGULAR);
 
 		// custom transparent surfaces
-		if (surf_flags & SURF_SKY)
+		if (surf_flags & SurfaceFlags::Sky)
 			material_id = MAT_SetKind(material_id, MATERIAL_KIND_SKY);
 
 		if (MAT_IsKind(material_id, MATERIAL_KIND_REGULAR) && (surf_flags & SURF_TRANS_MASK) && !(material_id & MATERIAL_FLAG_LIGHT))
@@ -572,10 +572,10 @@ collect_surfaces(int* idx_ctr, bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int (*
 		if (MAT_IsKind(material_id, MATERIAL_KIND_SCREEN) && (surf_flags & SURF_TRANS_MASK))
 			material_id = MAT_SetKind(material_id, MATERIAL_KIND_GLASS);
 
-		if (surf_flags & SURF_WARP)
+		if (surf_flags & SurfaceFlags::Warp)
 			material_id |= MATERIAL_FLAG_WARP;
 
-		if (surf_flags & SURF_FLOWING)
+		if (surf_flags & SurfaceFlags::Flowing)
 			material_id |= MATERIAL_FLAG_FLOWING;
 
 		if (!filter(material_id, surf_flags))
@@ -625,7 +625,7 @@ collect_surfaces(int* idx_ctr, bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int (*
 				wm->clusters[it] = cluster;
 
 				if (cluster >= 0 && (MAT_IsKind(material_id, MATERIAL_KIND_SKY) || MAT_IsKind(material_id, MATERIAL_KIND_LAVA))) 				{
-					qboolean is_bsp_sky_light = (surf_flags & (SURF_LIGHT | SURF_SKY)) == (SURF_LIGHT | SURF_SKY);
+					qboolean is_bsp_sky_light = (surf_flags & (SurfaceFlags::Light | SurfaceFlags::Sky)) == (SurfaceFlags::Light | SurfaceFlags::Sky);
 					if (is_sky_or_lava_cluster(wm, surf, cluster, material_id) || (cvar_pt_bsp_sky_lights->integer && is_bsp_sky_light)) 					{
 						wm->materials[it] |= MATERIAL_FLAG_LIGHT;
 					}
@@ -1078,7 +1078,7 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 			continue;
 		}
 
-		float emissive_factor = (texinfo->c.flags & SURF_LIGHT) && texinfo->material->bsp_radiance
+		float emissive_factor = (texinfo->c.flags & SurfaceFlags::Light) && texinfo->material->bsp_radiance
 			? (float)texinfo->radiance * cvar_pt_bsp_radiance_scale->value
 			: 1.f;
 
@@ -1119,9 +1119,9 @@ collect_sky_and_lava_light_polys(bsp_mesh_t* wm, bsp_t* bsp) {
 		int flags = surf->drawflags;
 		if (surf->texinfo) flags |= surf->texinfo->c.flags;
 
-		qboolean is_sky = !!(flags & SURF_SKY);
-		qboolean is_light = !!(flags & SURF_LIGHT);
-		qboolean is_nodraw = !!(flags & SURF_NODRAW);
+		qboolean is_sky = !!(flags & SurfaceFlags::Sky);
+		qboolean is_light = !!(flags & SurfaceFlags::Light);
+		qboolean is_nodraw = !!(flags & SurfaceFlags::NoDraw);
 		qboolean is_lava = surf->texinfo->material ? MAT_IsKind(surf->texinfo->material->flags, MATERIAL_KIND_LAVA) : false;
 
 		is_lava &= (surf->texinfo->material->image_emissive != NULL);
@@ -1811,7 +1811,7 @@ bsp_mesh_register_textures(bsp_t* bsp) {
 	for (int i = 0; i < bsp->numtexinfo; i++) {
 		mtexinfo_t* info = bsp->texinfo + i;
 		imageflags_t flags;
-		if (info->c.flags & SURF_WARP)
+		if (info->c.flags & SurfaceFlags::Warp)
 			flags = IF_TURBULENT;
 		else
 			flags = IF_NONE;
@@ -1829,10 +1829,10 @@ bsp_mesh_register_textures(bsp_t* bsp) {
 			   material has no emissive image.
 			   - Skip SKY and NODRAW surfaces, they'll be handled differently.
 			   - Make WARP surfaces optional, as giving water, slime... an emissive texture clashes visually. */
-			qboolean synth_surface_material = ((info->c.flags & (SURF_LIGHT | SURF_SKY | SURF_NODRAW)) == SURF_LIGHT)
+			qboolean synth_surface_material = ((info->c.flags & (SurfaceFlags::Light | SurfaceFlags::Sky | SurfaceFlags::NoDraw)) == SurfaceFlags::Light)
 				&& (info->radiance != 0);
 
-			qboolean is_warp_surface = (info->c.flags & SURF_WARP) != 0;
+			qboolean is_warp_surface = (info->c.flags & SurfaceFlags::Warp) != 0;
 
 			qboolean material_custom = !mat->source_matfile[0];
 

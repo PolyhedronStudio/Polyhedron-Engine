@@ -409,7 +409,7 @@ void GL_DrawBspModel(mmodel_t *model)
         }
 
         // sky faces don't have their polygon built
-        if (face->drawflags & SURF_SKY) {
+        if (face->drawflags & SurfaceFlags::Sky) {
             continue;
         }
 
@@ -494,7 +494,7 @@ static inline void GL_DrawNode(mnode_t *node)
             continue;
         }
 
-        if (face->drawflags & SURF_SKY) {
+        if (face->drawflags & SurfaceFlags::Sky) {
             R_AddSkySurface(face);
             continue;
         }

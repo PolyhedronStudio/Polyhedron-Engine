@@ -337,7 +337,7 @@ void SVG_SpawnEntities(const char* mapName, const char* entities, const char* sp
     Gameworld* gameworld = GetGameworld();
 
     // Spawn entities.
-    gameworld->SpawnEntitiesFromString(mapName, entities, spawnpoint);
+    gameworld->SpawnFromBSPString(mapName, entities, spawnpoint);
 }
 //
 //=====================

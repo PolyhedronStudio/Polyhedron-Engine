@@ -38,6 +38,7 @@ static void *cgame_library;
 extern int CL_GetFps(void);
 extern int CL_GetResolutionScale(void);
 
+
 //
 //=============================================================================
 //
@@ -53,6 +54,14 @@ int _wrp_GetProtocolVersion(void) {
 }
 int _wrp_GetServerState(void) {
     return cl.serverState;
+}
+
+/**
+*   @brief  developer->integer determines the developer print level.
+*   @return The value of developer->integer.
+**/
+int32_t _wrp_GetDeveloperLevel(void) {
+    return (developer != nullptr ? developer->integer : 0);
 }
 
 unsigned _wrp_GetRealTime(void) {
@@ -414,6 +423,8 @@ void CL_InitGameProgs(void)
 
     importAPI.IsDemoPlayback = _wrp_IsDemoPlayback;
 
+    importAPI.GetDeveloperLevel = _wrp_GetDeveloperLevel;
+
     importAPI.UpdateListenerOrigin = CL_UpdateListenerOrigin;
 
     importAPI.SetClientLoadState = CL_SetLoadState;
@@ -466,6 +477,8 @@ void CL_InitGameProgs(void)
 
     importAPI.Com_ErrorString = Q_ErrorString;
     importAPI.Com_GetEventTime = _prt_Com_GetEventTime;
+
+    importAPI.Com_HashStringLen = Com_HashStringLen;
 
     // Console.
     importAPI.Con_ClearNotify = Con_ClearNotify_f;
@@ -657,15 +670,28 @@ void CL_InitGameProgs(void)
 //
 //=============================================================================
 //
-
 /**
 *   @brief  Spawns local client side class entities.
 **/
-qboolean CL_GM_SpawnEntitiesFromString(const char* entityString) { 
+qboolean CL_GM_SpawnEntitiesFromBSPString(const char* bspString) { 
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-	        return entities->SpawnEntitiesFromString(entityString);
+	        //return entities->SpawnFromBSPString(bspString);
+        }
+    }
+
+    return false;
+}
+
+/**
+*   @brief  Notifies the client game module that we should update/spawn an entity from a newly received state.
+**/
+qboolean CL_GM_SpawnFromState(ClientEntity* clEntity, const EntityState& state) {
+    if (cge) {
+        IClientGameExportEntities *entities = cge->GetEntityInterface();
+        if (entities) {
+	     //   return entities->SpawnFromState(clEntity, state);
         }
     }
 
@@ -780,6 +806,15 @@ void CL_GM_ClientClearState(void) {
 void CL_GM_DemoSeek(void) {
     if (cge) {
         cge->DemoSeek();
+    }
+}
+
+/**
+*   @brief  For debugging problems when out-of-date entity origin is referenced.
+**/
+void CL_GM_CheckEntityPresent(int32_t entityNumber, const std::string& what) {
+    if (cge) {
+        cge->CheckEntityPresent(entityNumber, what);
     }
 }
 

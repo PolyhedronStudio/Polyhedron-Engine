@@ -1050,7 +1050,7 @@ static void PM_Friction(void) {
         friction = PM_FRICT_WATER;
         // GROUND friction.
     } else if (pm->state.flags & PMF_ON_GROUND) {
-        if (playerMoveLocals.groundTrace.surface && (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK)) {
+        if (playerMoveLocals.groundTrace.surface && (playerMoveLocals.groundTrace.surface->flags & SurfaceFlags::Slick)) {
             friction = PM_FRICT_GROUND_SLICK;
         } else {
             friction = PM_FRICT_GROUND;
@@ -1444,7 +1444,7 @@ static void PM_WalkMove(void) {
     }
 
     // Accelerate based on slickness of ground surface
-    const float acceleration = (playerMoveLocals.groundTrace.surface->flags & SURF_SLICK) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
+    const float acceleration = (playerMoveLocals.groundTrace.surface->flags & SurfaceFlags::Slick) ? PM_ACCEL_GROUND_SLICK : PM_ACCEL_GROUND;
 
     PM_Accelerate(dir, speed, acceleration);
 

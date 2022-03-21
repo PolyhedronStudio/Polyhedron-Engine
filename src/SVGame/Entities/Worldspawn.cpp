@@ -191,12 +191,6 @@ void Worldspawn::Precache() {
     **/
 
 
-    // help icon for statusbar
-    SVG_PrecacheImage("i_help");
-    level.pic_health = SVG_PrecacheImage("i_health");
-    SVG_PrecacheImage("help");
-    SVG_PrecacheImage("field_3");
-
     /**
     *   CVars.
     **/
@@ -211,15 +205,14 @@ void Worldspawn::Precache() {
     SVG_PrecacheSound("player/lava1.wav");
     SVG_PrecacheSound("player/lava2.wav");
 
-    SVG_PrecacheSound("misc/pc_up.wav");
-    SVG_PrecacheSound("misc/talk1.wav");
+    SVG_PrecacheSound("misc/talk.wav");
 
     SVG_PrecacheSound("misc/udeath.wav");
 
-    // gibs
+    // Gibs
     SVG_PrecacheSound("items/respawn1.wav");
 
-    // sexed sounds
+    // Sexed sounds
     SVG_PrecacheSound("*death1.wav");
     SVG_PrecacheSound("*death2.wav");
     SVG_PrecacheSound("*death3.wav");

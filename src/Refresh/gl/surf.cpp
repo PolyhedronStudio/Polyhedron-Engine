@@ -507,13 +507,13 @@ POLYGONS BUILDING
 
 static uint32_t color_for_surface(mface_t *surf)
 {
-    if (surf->drawflags & SURF_TRANS33)
+    if (surf->drawflags & SurfaceFlags::Transparent33)
         return gl_static.inverse_intensity_33;
 
-    if (surf->drawflags & SURF_TRANS66)
+    if (surf->drawflags & SurfaceFlags::Transparent66)
         return gl_static.inverse_intensity_66;
 
-    if (surf->drawflags & SURF_WARP)
+    if (surf->drawflags & SurfaceFlags::Warp)
         return gl_static.inverse_intensity_100;
 
     return U32_WHITE;
@@ -540,17 +540,17 @@ static void build_surface_poly(mface_t *surf, vec_t *vbo)
         surf->statebits |= GLS_TEXTURE_REPLACE;
     }
 
-    if (surf->drawflags & SURF_WARP) {
+    if (surf->drawflags & SurfaceFlags::Warp) {
         surf->statebits |= GLS_WARP_ENABLE;
     }
 
     if (surf->drawflags & SURF_TRANS_MASK) {
         surf->statebits |= GLS_BLEND_BLEND | GLS_DEPTHMASK_FALSE;
-    } else if (surf->drawflags & SURF_ALPHATEST) {
+    } else if (surf->drawflags & SurfaceFlags::AlphaTest) {
         surf->statebits |= GLS_ALPHATEST_ENABLE;
     }
 
-    if (surf->drawflags & SURF_FLOWING) {
+    if (surf->drawflags & SurfaceFlags::Flowing) {
         surf->statebits |= GLS_FLOW_ENABLE;
     }
 
@@ -766,7 +766,7 @@ static void upload_world_surfaces(void)
     currvert = 0;
     lastvert = 0;
     for (i = 0, surf = bsp->faces; i < bsp->numfaces; i++, surf++) {
-        if (surf->drawflags & SURF_SKY)
+        if (surf->drawflags & SurfaceFlags::Sky)
             continue;
 
         if (gl_static.world.vertices) {
@@ -906,7 +906,7 @@ void GL_LoadWorld(const char *name)
 
     // register all texinfo
     for (i = 0, info = bsp->texinfo; i < bsp->numtexinfo; i++, info++) {
-        if (info->c.flags & SURF_WARP)
+        if (info->c.flags & SurfaceFlags::Warp)
             flags = IF_TURBULENT;
         else
             flags = IF_NONE;
@@ -923,7 +923,7 @@ void GL_LoadWorld(const char *name)
         surf->drawflags |= surf->texinfo->c.flags & ~DSURF_PLANEBACK;
 
         // don't count sky surfaces
-        if (surf->drawflags & SURF_SKY)
+        if (surf->drawflags & SurfaceFlags::Sky)
             continue;
 
         size += surf->numsurfedges * VERTEX_SIZE * sizeof(vec_t);

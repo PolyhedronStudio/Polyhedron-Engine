@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 #include <string>
 
 class SVGBaseEntity;
@@ -247,3 +248,4 @@ static SVGBaseEntity* AllocateInstance( Entity* entity ) {		\
 	return new classname( entity );								\
 }																\
 __DeclareTypeInfo( #classname, #classname, #superClass, TypeInfo::TypeFlag_None, &classname::AllocateInstance );
+#endif

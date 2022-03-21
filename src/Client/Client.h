@@ -452,10 +452,6 @@ void CL_ClipMoveToEntities(const vec3_t& start, const vec3_t& mins, const vec3_t
 trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
 void CL_DeltaFrame(void);
 
-#ifdef _DEBUG
-void CL_CheckEntityPresent(int entnum, const char *what);
-#endif
-
 // the sound code makes callbacks to the client for entitiy position
 // information, so entities can be dynamically re-spatialized
 vec3_t CL_GetEntitySoundOrigin(int ent);

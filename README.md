@@ -1,13 +1,14 @@
 ## Polyhedron - A Q2RTX Engine Fork and a Game in one.
 [![Build Status](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml/badge.svg)](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml)
 
+### What is Polyhedron Engine:
 Polyhedron Engine is a heavily modified fork of the famous Q2RTX project by NVIDIA™. Accompanied by a game project named Polyhedron. Its history comes from the Nail & Crescent project (If you are a Quake 1 fan, do check it out. Great team, great project). After the split up, all that was left was a bunch of code that didn't represent anything anymore. That's when Polyhedron was truly born. The game serves as an indirect roadmap towards deciding what to prioritize out of the features to add to the current technology. Its soul purpose is to evolve into a fully stand-alone SDK for RTX client/server -model games. After all, what good is a fully path traced renderer without introducing more modern features next to it?
 
 The engine requires a C++ 20 compatible compiler which is capable of compiling ranges. At the time of writing this it has only been tested with the latest VS2022 Preview release (17.2). Crossplatform support is there however, currently it has been a long while since anyone tested that. 
 
 This branch v040 aims to target a first release. Not so much a complete and finished game, but a release that enables other developers to either help out development, or fork it and do their own works with. This means that although there has never been any official release yet, v040 will be the first official release of Polyhedron Engine.
 
-### Key Changes made so far?
+### Key Changes made so far:
 - The capability of using modern C++ features where possible. We try to stick to a somewhat "Orthodox C++" approach and mainly use modern features where it makes darn sense to do so. Readability is important.
 - "where possible" means that we try to stick to a somewhat "Orthodox C++" approach.
 - Tick rate of 50hz. This allows for more precise and faster game logic.

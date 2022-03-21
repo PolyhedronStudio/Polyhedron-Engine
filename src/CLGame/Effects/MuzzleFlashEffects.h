@@ -25,4 +25,5 @@ public:
     *   @brief  Regular Entity Muzzleflash Effects.
     **/
     static void EntityMuzzleFlash();
+
 };

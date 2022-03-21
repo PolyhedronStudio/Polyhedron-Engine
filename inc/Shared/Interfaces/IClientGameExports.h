@@ -62,12 +62,12 @@ public:
     * 
     *   @return True on success.
     **/
-    virtual qboolean SpawnEntitiesFromString(const char* entities) = 0;
+    virtual qboolean SpawnFromBSPString(const char* entities) = 0;
 
     /**
     *   @brief  Emplaces, or spawn anew, an entity from the entity state.
     **/
-    virtual void SpawnEntityFromState(ClientEntity *clEntity, EntityState& state) = 0;
+    virtual qboolean SpawnFromState(ClientEntity *clEntity, const EntityState &state) = 0;
 
     /**
     *   @brief  Executed whenever an entity event is receieved.
@@ -326,6 +326,13 @@ public:
 
     // Called when a demo is being seeked through.
     virtual void DemoSeek() = 0;
+
+#ifdef _DEBUG
+    /**
+    *   @brief  For debugging problems when out-of-date entity origin is referenced.
+    **/
+    virtual void CheckEntityPresent(int32_t entityNumber, const std::string &what) = 0;
+#endif
 
     // Called after all downloads are done. (Aka, a map has started.)
     // Not used for demos.

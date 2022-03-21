@@ -108,7 +108,7 @@ void BlasterBolt::BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, cp
         return;
     }
 
-    if (surf && (surf->flags & SURF_SKY)) {
+    if (surf && (surf->flags & SurfaceFlags::Sky)) {
         Remove(); 
         return;
     }

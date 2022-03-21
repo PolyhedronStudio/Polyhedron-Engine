@@ -85,6 +85,33 @@ void ClientGameExports::DemoSeek() {
     CLG_ClearTempEntities();
 }
 
+#ifdef _DEBUG
+/**
+*   @brief  For debugging problems when out-of-date entity origin is referenced.
+**/
+void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::string &what) {
+    // We're good if the player entity == current.
+    if (entityNumber == cl->frame.clientNumber + 1) {
+        return; // Player entity = current.
+    }
+
+    // We're good if the entity serverFrame == current.
+    ClientEntity *clEntity = &cs->entities[entityNumber];
+    if (clEntity->serverFrame == cl->frame.number) {
+        return; // current
+    }
+
+    // If we got to this point, something is fishy.
+    if (clEntity->serverFrame) {
+        Com_LPrintf(PrintType::Developer, "SERVER BUG: %s on entity %d last seen %d frames ago\n",
+                    what.c_str(), entityNumber, cl->frame.number - clEntity->serverFrame);
+    } else {
+        Com_LPrintf(PrintType::Developer, "SERVER BUG: %s on entity %d never seen before\n",
+                    what.c_str(), entityNumber);
+    }
+}
+#endif
+
 /**
 *   @brief  Called after all downloads are done. (Aka, a map has started.)
 *           Not used for demos.

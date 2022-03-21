@@ -61,31 +61,40 @@ static constexpr uint32_t NOEXP_GRENADE = 1;
 static constexpr uint32_t NOEXP_ROCKET = 2;
 
 
-//
-// Local client entity structure, temporary entities.
-//
+/**
+*   @brief  Local client side entity. Acts like a POD type similar to the server entity.
+**/
+class CLGBaseEntity; // Predeclaration.
+using EntityDictionary = std::map<std::string, std::string>;
 struct ClientEntity {
     //! The last received state of this entity.
     EntityState current = {};
-    
     //! The previous last valid state. In worst case scenario might be a copy of current state.
-    EntityState prev  = {};
+    EntityState prev = {};
 
     //! The mins and maxs of the entity's bounding box.
-    vec3_t  mins = vec3_zero(), maxs = vec3_zero();
-
-    //! The frame number that this entity was received at.
-    //! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
-    int32_t     serverFrame = 0;
+    vec3_t mins = vec3_zero();
+    vec3_t maxs = vec3_zero();
 
     //! For diminishing grenade trails
-    int32_t     trailcount = 0;
-
+    int32_t trailcount = 0;
     //! for trails (variable hz)
-    vec3_t      lerpOrigin = vec3_zero();
+    vec3_t lerpOrigin = vec3_zero();
+        
+    //! The frame number that this entity was received at.
+    //! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
+    int32_t serverFrame = 0;
 
-    //! The id matching the one on the server.
-    int32_t id = 0;
+    //! This is the actual server entity number.
+    int32_t serverEntityNumber = 0;
+    //! This is a unique client entity id, determined by an incremental static counter.
+    int32_t clientEntityNumber = 0;
+
+    //! Pointer to the class entity object that belongs to this client entity.
+    CLGBaseEntity *classEntity;
+
+    //! Key/Value entity dictionary.
+    //EntityDictionary entityDictionary;
 };
 
 //
@@ -232,6 +241,8 @@ struct ServerFrame {
 // This structure contains all (persistent)shared data with the client.
 //
 struct ClientShared {
+    virtual ~ClientShared() = default;
+
     // Stores the entities.
     ClientEntity entities[MAX_ENTITIES];
     int num_entities;
@@ -300,11 +311,11 @@ struct ClientState {
     *
     **/
     //! Solid Entities, these are REBUILT during EACH FRAME.
-    ClientEntity *solidEntities[MAX_PACKET_ENTITIES] = {};
+    ClientEntity *solidEntities[MAX_PACKET_ENTITIES];// = {};
     int32_t numSolidEntities = 0;
 
     //! Entity Baseline States. These are where to start working from.
-    EntityState entityBaselines[MAX_EDICTS] = {};
+    EntityState entityBaselines[MAX_EDICTS];//= {};
 
     //! The actual current Entity States.
     EntityState entityStates[MAX_PARSE_ENTITIES]; // DO NOT initialize this using {} or VS2022 will stall your machine and give a nasty stack error.
@@ -397,7 +408,7 @@ struct ClientState {
     *   Transient Data From Server.
     *
     **/
-    char    layout[MAX_NET_STRING] = {};     //! general 2D overlay
+    //char    layout[MAX_NET_STRING] = {};     //! general 2D overlay
     int32_t inventory[MAX_ITEMS] = {};
 
 

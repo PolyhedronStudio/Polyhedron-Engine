@@ -42,6 +42,12 @@ public:
     **/
     void DemoSeek() final;
 
+#ifdef _DEBUG
+    /**
+    *   @brief  For debugging problems when out-of-date entity origin is referenced.
+    **/
+    void CheckEntityPresent(int32_t entityNumber, const std::string &what) final;
+#endif
 
 
     /****

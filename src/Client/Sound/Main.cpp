@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/Shared.h"
 #include "Sound.h"
 #include "Client/Sound/Vorbis.h"
+#include "Client/GameModule.h"   // TODO: How come it can find client.h??
 
 // =======================================================================
 // Internal sound data & structures
@@ -1001,8 +1002,9 @@ void S_ParseStartSound(void)
         return;
 
 #ifdef _DEBUG
-    if (developer->integer && !(snd.flags & SoundCommandBits::Position))
-        CL_CheckEntityPresent(snd.entity, "sound");
+    if (developer->integer && !(snd.flags & SoundCommandBits::Position)) {
+        CL_GM_CheckEntityPresent(snd.entity, "sound");//CL_CheckEntityPresent(snd.entity, "sound");
+    }
 #endif
 
     S_StartSound((snd.flags & SoundCommandBits::Position) ? &snd.pos : NULL,

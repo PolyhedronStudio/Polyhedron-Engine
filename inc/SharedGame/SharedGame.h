@@ -9,9 +9,8 @@
 ***/
 #pragma once
 
-
-
-
+// Entities.
+#include "SharedGame/Entities.h"
 
 /**
 *   @brief  These are used for game logic. They are set in clg_input.cpp. One is free

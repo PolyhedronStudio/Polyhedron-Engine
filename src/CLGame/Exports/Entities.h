@@ -15,6 +15,9 @@
 // Base Entity.
 #include "../Entities/Base/CLGBaseEntity.h"
 
+// Entity List.
+#include "../Entities/EntityList.h"
+
 ////-----------------------
 //// Client base class entity.
 ////------------------------
@@ -67,12 +70,12 @@ public:
     * 
     *   @return True on success.
     **/
-    qboolean SpawnEntitiesFromString(const char* entities) final;
+    qboolean SpawnFromBSPString(const char* entities) final;
 
     /**
     *   @brief  Emplaces, or spawn anew, an entity from the entity state.
     **/
-    void SpawnEntityFromState(ClientEntity *clEntity, EntityState& state) final;
+    qboolean SpawnFromState(ClientEntity *clEntity, const EntityState &state);
 
     /**
     *   @brief Executed whenever an entity event is receieved.
@@ -95,15 +98,28 @@ public:
 //! Entity Parsing utilities.
 private:
     /**
-    *	@brief	Parses the BSP Entity string and places the results in the server
+    *	@brief	Parses the BSP Entity string and places the results in the client
     *			entity dictionary.
     **/
     qboolean ParseEntityString(const char** data, ClientEntity* clEntity);
 
+    /**
+    *   @brief  Allocates the class entity determined by the classname key, and
+    *           then does a precache before spawning the class entity.
+    **/
+    qboolean SpawnParsedClassEntity(ClientEntity* clEntity);
+
+    /**
+    *	@brief	Seeks through the type info system for a class registered under the classname string.
+    *			When found, it'll check whether it is allowed to be spawned as a map entity. If it is,
+    *			try and allocate it.
+    *	@return	nullptr in case of failure, a valid pointer to a class entity otherwise.
+    **/
+    CLGBaseEntity *AllocateClassEntity(ClientEntity* clEntity, const std::string &classname);
 
 //! Class Entity utilities.
 private:
-    //ClassEntityList 
+    EntityList entityList;
 
 //! Entity Rendering utilities.
 private:

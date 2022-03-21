@@ -217,6 +217,12 @@ extern "C" {
         // Returns true if we're in demo playback, false otherwise.
         qboolean        (*IsDemoPlayback) (void);
         
+        /**
+        *   @brief  developer->integer determines the developer print level.
+        *   @return The value of developer->integer.
+        **/
+        int32_t         (*GetDeveloperLevel) (void);
+
         // Updates the client's audio position values to the current
         // cl.refdef.vieworg, cl->v_forward, cl->v_right and cl->v_up
         // values.
@@ -323,6 +329,9 @@ extern "C" {
         const char  *(*Com_ErrorString) (qerror_t type);
         // Returns the event time between "common event frames" engine internal.
         unsigned    (*Com_GetEventTime) (void);
+
+        // Returns a hashed uint32_t of the string. Non case sensitive.
+        uint32_t    (*Com_HashStringLen) (const char *s, size_t len, uint32_t size);
 
         //---------------------------------------------------------------------
         // Console.
