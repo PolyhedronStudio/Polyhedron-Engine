@@ -53,11 +53,11 @@ static inline qboolean Entity_IsPlayer(const EntityState& state) {
 static inline void Entity_UpdateNew(ClientEntity *clEntity, const EntityState &state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
-    clEntity->clientEntityNumber = entity_ctr; //state.number; // used to be: clEntity->id = ++entity_ctr;
+    clEntity->clientEntityNumber = ++entity_ctr; //state.number; // used to be: clEntity->id = ++entity_ctr;
     clEntity->trailcount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
-    //CL_GM_SpawnFromState(clEntity, state);
+    CL_GM_SpawnFromState(clEntity, state);
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
     clEntity->prev = state;

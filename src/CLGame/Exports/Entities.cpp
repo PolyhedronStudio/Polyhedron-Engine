@@ -316,10 +316,16 @@ qboolean ClientGameEntities::SpawnFromState(ClientEntity *clEntity, const Entity
         return false;
     }
 
+    //Com_DPrint("----- clEntity->current.number=%i, state->number=%i\n")
     // DEVELOPER
-    if (clEntity->clientEntityNumber != state.number) {
-        //Com_DPrint("CAUTION: clEntity->id=%i, state->number=%i\n", clEntity->id, state.number);
-    }
+    //if (clEntity->clientEntityNumber != state.number) {
+
+        if (clEntity->current.number == state.number) {
+            Com_DPrint("=============: clEntity->current.number=%i, state->number=%i\n", clEntity->current.number, state.number);
+        } else {
+            Com_DPrint("+++++++++++++: clEntity->id=%i, state->number=%i\n", clEntity->clientEntityNumber, state.number);
+        }
+    //}
     //// DEV
 
     // See whether we already have a class entity for this id.
@@ -329,20 +335,24 @@ qboolean ClientGameEntities::SpawnFromState(ClientEntity *clEntity, const Entity
     if (!clgEntity) {
         // Spawn one from current state.
         clgEntity = entityList.SpawnEntityFromState<CLGBaseEntity>(clEntity, state);
+        //Com_DPrint("Spawned new class: %s\n", clgEntity->GetHashedClassname());
     } else {
         // If we did find it, compare its hashed classname, when not equal 
         // we'll reallocate the appropriate client game entity class.
         if (clgEntity->GetHashedClassname() != state.hashedClassname) {
             // Look up the actual class that does match for the hashed classname.
             // classregistry.lookupbyhash(hashedClassname).
-            uint32_t hashed
+            //uint32_t hashed
             // When found, allocate it. If not found, allocate a CLGBaseEntity*
+            Com_DPrint("Spawned new class: %s\n", clgEntity->GetHashedClassname());
+        } else {
+            Com_DPrint("Updated same class: %s\n", clgEntity->GetHashedClassname());
         }
     }
 
     // Now we've got the actual entity we're good to go.
 
-    Com_DPrint("SpawnFromState: clEntity->id=%i, state->number=%i\n", clEntity->clientEntityNumber, state.number);
+    //Com_DPrint("SpawnFromState: clEntity->id=%i, state->number=%i\n", clEntity->clientEntityNumber, state.number);
 
     return true;
 }
