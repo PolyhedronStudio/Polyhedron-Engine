@@ -677,7 +677,7 @@ qboolean CL_GM_SpawnEntitiesFromBSPString(const char* bspString) {
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-	        //return entities->SpawnFromBSPString(bspString);
+	        return entities->SpawnFromBSPString(bspString);
         }
     }
 
@@ -691,7 +691,7 @@ qboolean CL_GM_SpawnFromState(ClientEntity* clEntity, const EntityState& state) 
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-	     //   return entities->SpawnFromState(clEntity, state);
+	        return entities->SpawnFromState(clEntity, state);
         }
     }
 

@@ -91,9 +91,10 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 		if (!clientEntity) {
 			clientEntity = cs->entities;
 		} else {
+
+            entityIndex++;
             clientEntity = &cs->entities[entityIndex];
 
-            entityIndex++; & MAX_EDICTS;
 
             if (entityIndex > MAX_EDICTS) {
                 Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_EDICTS\n"));
@@ -131,68 +132,69 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 *			entity dictionary.
 **/
 qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* clEntity) {
-//// False until proven otherwise.
-//qboolean parsedSuccessfully = false;
-//
-//// Key value ptrs.
-//char *key = nullptr, *value = nullptr;
-//
-//// Go through all the dictionary pairs.
-//while (1) {
-//	// Parse the key.
-//	key = COM_Parse(data);
-//		
-//	// If we hit a }, it means we're done parsing, break out of this loop.
-//	if (key[0] == '}') {
-//		break;
-//	}
-//
-//	// If we are at the end of the string without a closing brace, error out.
-//	if (!*data) {
-//		Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-//		return false;
-//	}
-//
-//	// Parse the value.
-//	value = COM_Parse(data);
-//
-//	// If we are at the end of the string without a closing brace, error out.
-//	if (!*data) {
-//		Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-//		return false;
-//	}
-//
-//	// Ensure we had a value.
-//	if (value[0] == '}') {
-//		Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
-//		return false;
-//	}
-//
-//	// We successfully managed to parse this entity.
-//	parsedSuccessfully = true;
-//
-//	// keynames with a leading underscore are used for utility comments,
-//	// and are immediately discarded by quake
-//	if (key[0] == '_') {
-//		continue;
-//	}
-//
-//	// Insert the key/value into the dictionary.
-//	//Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
-//	//if (clEntity) {
-//    //    clEntity->entityDictionary.try_emplace(std::string(key),std::string(value));// = value;
-//    //}
-//}
-//
-//// If we failed to parse the entity properly, zero this one back out.
-//if (!parsedSuccessfully) {
-//	*clEntity = {};
-//	return false;
-//}
-//
-//// Return the result.
-//return parsedSuccessfully;
-    return false;
+    // False until proven otherwise.
+    qboolean parsedSuccessfully = false;
+
+    // Key value ptrs.
+    char *key = nullptr, *value = nullptr;
+
+    // Go through all the dictionary pairs.
+    while (1) {
+	    // Parse the key.
+	    key = COM_Parse(data);
+		
+	    // If we hit a }, it means we're done parsing, break out of this loop.
+	    if (key[0] == '}') {
+		    break;
+	    }
+
+	    // If we are at the end of the string without a closing brace, error out.
+	    if (!*data) {
+		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+		    return false;
+	    }
+
+	    // Parse the value.
+	    value = COM_Parse(data);
+
+	    // If we are at the end of the string without a closing brace, error out.
+	    if (!*data) {
+		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+		    return false;
+	    }
+
+	    // Ensure we had a value.
+	    if (value[0] == '}') {
+		    Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
+		    return false;
+	    }
+
+	    // We successfully managed to parse this entity.
+	    parsedSuccessfully = true;
+
+	    // keynames with a leading underscore are used for utility comments,
+	    // and are immediately discarded by quake
+	    if (key[0] == '_') {
+		    continue;
+	    }
+
+	    // Insert the key/value into the dictionary.
+	    Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
+	    if (clEntity) {
+            clEntity->entityDictionary.try_emplace(std::string(key),std::string(value));// = value;
+        }
+    }
+
+    // If we failed to parse the entity properly, zero this one back out.
+    if (!parsedSuccessfully) {
+        int32_t clientEntityNumber = clEntity->clientEntityNumber;
+
+	    *clEntity = {.clientEntityNumber = clientEntityNumber };
+	    return false;
+    }
+
+    // Return the result.
+    return parsedSuccessfully;
 }
 
 /**
@@ -200,53 +202,52 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 *           then does a precache before spawning the class entity.
 **/
 qboolean ClientGameEntities::SpawnParsedClassEntity(ClientEntity* clEntity) {
-    return false;
-//// Acquire dictionary.
-//auto &dictionary = clEntity->entityDictionary;
-//
-//// Get client side entity number.
-//int32_t stateNumber = clEntity->clientEntityNumber;
-//
-//// If it does not have a classname key we're in for trouble.
-//if (!clEntity->entityDictionary.contains("classname")) {
-//	// Error out.
-//	Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
-//		
-//	// Failed.
-//	return false;
-//}
-//
-//// Actually spawn the class entity.
-//CLGBaseEntity *classEntity = clEntity->classEntity = AllocateClassEntity(clEntity, clEntity->entityDictionary["classname"]);
-//
-//// Something went wrong with allocating the class entity.
-//if (!classEntity) {
-//	// Be sure to free it.
-//    *clEntity = {};//FreeClientEntity(clEntity);
-//
-//	// Failed.
-//	Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"]);
-//    return false;
-//}
-//
-//// Initialise the entity with its respected keyvalue properties
-//for (const auto& keyValueEntry : clEntity->entityDictionary) {
-//	classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
-//}
-//
-//// Precache and spawn the entity.
-//classEntity->Precache();
-//classEntity->Spawn();
-//
-//// Success.
-//return true;
+    // Acquire dictionary.
+    auto &dictionary = clEntity->entityDictionary;
+
+    // Get client side entity number.
+    int32_t stateNumber = clEntity->clientEntityNumber;
+
+    // If it does not have a classname key we're in for trouble.
+    if (!clEntity->entityDictionary.contains("classname")) {
+	    // Error out.
+	    Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
+		
+	    // Failed.
+	    return false;
+    }
+
+    // Actually spawn the class entity.
+    CLGBaseEntity *classEntity = clEntity->classEntity = AllocateClassEntity(clEntity, clEntity->entityDictionary["classname"]);
+
+    // Something went wrong with allocating the class entity.
+    if (!classEntity) {
+	    // Be sure to free it.
+        *clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
+
+	    // Failed.
+	    Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"].c_str());
+        return false;
+    }
+
+    // Initialise the entity with its respected keyvalue properties
+    for (const auto& keyValueEntry : clEntity->entityDictionary) {
+	    classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
+    }
+
+    // Precache and spawn the entity.
+    classEntity->Precache();
+    classEntity->Spawn();
+
+    // Success.
+    return true;
 }
 
 /**
 *	@brief	Seeks through the type info system for a class registered under the classname string.
 *			When found, it'll check whether it is allowed to be spawned as a map entity. If it is,
 *			try and allocate it.
-*	@return	nullptr in case of failure, a valid pointer to a class entity otherwise.
+*	@return	CLGBaseEntity object in case of failure, a valid pointer to a class entity otherwise.
 **/
 CLGBaseEntity *ClientGameEntities::AllocateClassEntity(ClientEntity* clEntity, const std::string &classname) {
     // Start with a nice nullptr.
@@ -334,7 +335,7 @@ qboolean ClientGameEntities::SpawnFromState(ClientEntity *clEntity, const Entity
         if (clgEntity->GetHashedClassname() != state.hashedClassname) {
             // Look up the actual class that does match for the hashed classname.
             // classregistry.lookupbyhash(hashedClassname).
-
+            uint32_t hashed
             // When found, allocate it. If not found, allocate a CLGBaseEntity*
         }
     }

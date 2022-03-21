@@ -40,7 +40,8 @@ class EntityList {
 public:
     //! Constructor/Destructor.
     EntityList() {
-        classEntities.reserve(MAX_EDICTS);
+        // 2048 for server entities, and 2048 more for... whichever.
+        classEntities.reserve(MAX_PACKET_ENTITIES * 2);
     }
     virtual ~EntityList() = default;
 
@@ -48,26 +49,32 @@ public:
     *   @brief  
     **/
     template <typename T> T* SpawnEntityFromState(ClientEntity *clgEntity, const EntityState &state) {
-        // See if this state refers to an already in-use index.
-        CLGBaseEntity *oldClassEntity = classEntities.at(state.number);
+	    // Ensure ID is within bounds.
+	    if (state.number < 0 || state.number > classEntities.size()) {
+		    return nullptr;
+	    }
         
-        // 
-        if (oldClassEntity != nullptr) {
+        // Fetch entity ptr from slot.
+        CLGBaseEntity *classEntity = classEntities.data()[state.number];
+        
+        // Clear out old entity if it exists. 
+        if (classEntity != nullptr) {
             // Notify and give it a chance to clean up before its actual deallocation takes place.
-            oldClassEntity->OnDeallocate();
+            classEntity->OnDeallocate();
 
             // Delete object.
-            delete oldClassEntity;
+            delete classEntity;
+            classEntity = nullptr;
         }
         
         // Create new class entity object.
-        T *classEntity = new T(clgEntity);
+        classEntity = new T(clgEntity);
 
         // Insert it at state.number index.
-        classEntities.insert(classEntities.begin() + state.number, classEntity);
+        classEntities.emplace(classEntities.begin() + state.number, dynamic_cast<T*>(classEntity));
 
         // Return pointer.
-        return classEntity;
+        return dynamic_cast<T*>(classEntity);
     }
 
     /**

@@ -25,12 +25,18 @@ void EntityList::Clear() {
 	// Loop through the entities to notify about their deletion.
 	for (auto& clgEntity : classEntities) {
 		if (clgEntity) {
+			// Notify about deletion.
 			clgEntity->OnDeallocate();
+
+			// Delete it from memory.
+			delete clgEntity;
+			clgEntity = nullptr;
 		}
 	}
 
+	classEntities.erase(classEntities.begin(), classEntities.end());
 	// Clear out the list.
-	classEntities.clear();
+//	classEntities.clear();
 }
 
 /**
@@ -56,7 +62,7 @@ CLGBaseEntity *EntityList::GetByStateNumber(int32_t number) {
 	}
 
 	// Return class entity that belongs to this ID.
-	return classEntities.at(number);
+	return classEntities.data()[number];
 }
 
 
@@ -66,8 +72,8 @@ CLGBaseEntity *EntityList::GetByStateNumber(int32_t number) {
 **/
 CLGBaseEntity* EntityList::InsertAtSlotNumber(CLGBaseEntity* clgEntity, int32_t number) {
 	// Insert pointer at designated location.
-	classEntities.insert(classEntities.begin() + number, clgEntity);
+	//classEntities.insert(classEntities.begin() + number, clgEntity);
 
 	// Return class entity that belongs to this ID.
-	return classEntities.at(number);
+	return classEntities.data()[number] = clgEntity; //classEntities.at(number);
 }

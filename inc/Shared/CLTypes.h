@@ -94,7 +94,7 @@ struct ClientEntity {
     CLGBaseEntity *classEntity;
 
     //! Key/Value entity dictionary.
-    //EntityDictionary entityDictionary;
+    EntityDictionary entityDictionary;
 };
 
 //
@@ -233,8 +233,8 @@ struct ServerFrame {
     PlayerState playerState;    // The player state.
     int32_t     clientNumber;   // The client number.
 
-    int32_t numEntities;    // The number of entities in the frame.
-    int32_t firstEntity;    // The first entity in the frame.
+    int32_t numEntities;    // firstEntity + numEntities = first index up to last index of entities in received frame.
+    int32_t firstEntity;    // The first entity number in the received frame.
 };
 
 //
