@@ -16,7 +16,6 @@
 
 #include <string>
 
-
 /**
 *	Predeclare the actual class entity type that we intend to use depending on which game module
 *	this file is being compiled along with.
@@ -76,10 +75,12 @@ public:
 
 public:
 	TypeInfo( const char* mapClassName, const char* entClassName, const char* superClassName, uint8_t flags, EntityAllocatorFn entityAllocator )
-		: mapClass( mapClassName ), classname( entClassName ), superName( superClassName ), typeFlags( flags ) {
+		: mapClass( mapClassName ), classname( entClassName ), superName( superClassName ), typeFlags( flags ) 
+	{
 		AllocateInstance = entityAllocator;
 		prev = head;
 		head = this;
+		hashedMapClass = HashClassnameString(mapClassName, strlen(mapClassName), 64);
 
 		// Doesn't actually quite work here, so I wrote SetupSuperClasses
 		super = GetInfoByName( superClassName );
@@ -113,6 +114,21 @@ public:
 		return typeFlags & TypeFlag_Abstract;
 	}
 
+	/**
+	*	@brief	A case-insensitive version of Com_HashString that hashes up to 'len'
+	*			characters.
+	**/
+	static uint32_t HashClassnameString(const char* s, size_t len, unsigned size) {
+		uint32_t hash = 0;
+		while (*s && len--) {
+			uint32_t c = PH_ToLower(*s++);
+			hash = 127 * hash + c;
+		}
+
+		hash = (hash >> 20) ^(hash >> 10) ^ hash;
+		return hash & (size - 1);
+	}
+	
 	// Get type info by map classname
 	static TypeInfo* GetInfoByMapName( const char* name ) { 
 		if ( nullptr == name ) {
@@ -124,6 +140,25 @@ public:
 
 		while ( current ) {
 			if ( !strcmp( current->mapClass, name ) ) {
+				return current;
+            }
+			current = current->prev;
+		}
+
+		return nullptr;
+	}
+
+	// Get type info by map classname
+	static TypeInfo* GetInfoByHashedMapName( const uint32_t hashedName ) { 
+		if ( hashedName == 0 ) {
+			return nullptr;
+		}
+
+		TypeInfo* current = nullptr;
+		current = head;
+
+		while ( current ) {
+			if (current->hashedMapClass == hashedName) {
 				return current;
             }
 			current = current->prev;
@@ -169,7 +204,9 @@ public:
 	TypeInfo*       super;
 
 	const char*     mapClass;
+	uint32_t		hashedMapClass;
 	const char*     classname;
+	//uint32_t		hashedClassname;
 	const char*     superName;
 	uint8_t			typeFlags;
 };

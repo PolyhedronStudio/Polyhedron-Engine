@@ -26,7 +26,7 @@
 #include "../Effects/ParticleEffects.h"
 
 // Ents.
-#include "../Entities/EntityList.h"
+#include "../Entities/ClassEntityList.h"
 #include "../Entities/Base/CLGBaseEntity.h"
 
 // Shared Game.
@@ -59,8 +59,19 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
     //level = {};
 
     // Clear out our entity list in case it is holding some from a previous session.
-    entityList.Clear();
+    classEntityList.Clear();
     
+    // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
+    // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
+    //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
+    //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
+    //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
+    return false;
+    // 
+    //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
+    //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
+    // 
+    // 
 	// Prepare our player class entity.
     //PreparePlayer();
 
@@ -202,112 +213,60 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 *           then does a precache before spawning the class entity.
 **/
 qboolean ClientGameEntities::SpawnParsedClassEntity(ClientEntity* clEntity) {
-    // Acquire dictionary.
-    auto &dictionary = clEntity->entityDictionary;
+    //// Acquire dictionary.
+    //auto &dictionary = clEntity->entityDictionary;
 
-    // Get client side entity number.
-    int32_t stateNumber = clEntity->clientEntityNumber;
+    //// Get client side entity number.
+    //int32_t stateNumber = clEntity->clientEntityNumber;
 
-    // If it does not have a classname key we're in for trouble.
-    if (!clEntity->entityDictionary.contains("classname")) {
-	    // Error out.
-	    Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
+    //// If it does not have a classname key we're in for trouble.
+    //if (!clEntity->entityDictionary.contains("classname")) {
+	   // // Error out.
+	   // Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
 		
-	    // Failed.
-	    return false;
-    }
+	   // // Failed.
+	   // return false;
+    //}
 
-    // Actually spawn the class entity.
-    CLGBaseEntity *classEntity = clEntity->classEntity = AllocateClassEntity(clEntity, clEntity->entityDictionary["classname"]);
+    //// Actually spawn the class entity.
+    //CLGBaseEntity *classEntity = clEntity->classEntity = AllocateClassEntity(clEntity, clEntity->entityDictionary["classname"]);
 
-    // Something went wrong with allocating the class entity.
-    if (!classEntity) {
-	    // Be sure to free it.
-        *clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
+    //// Something went wrong with allocating the class entity.
+    //if (!classEntity) {
+	   // // Be sure to free it.
+    //    *clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
 
-	    // Failed.
-	    Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"].c_str());
-        return false;
-    }
+	   // // Failed.
+	   // Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"].c_str());
+    //    return false;
+    //}
 
-    // Initialise the entity with its respected keyvalue properties
-    for (const auto& keyValueEntry : clEntity->entityDictionary) {
-	    classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
-    }
+    //// Initialise the entity with its respected keyvalue properties
+    //for (const auto& keyValueEntry : clEntity->entityDictionary) {
+	   // classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
+    //}
 
-    // Precache and spawn the entity.
-    classEntity->Precache();
-    classEntity->Spawn();
+    //// Precache and spawn the entity.
+    //classEntity->Precache();
+    //classEntity->Spawn();
 
     // Success.
     return true;
 }
 
-/**
-*	@brief	Seeks through the type info system for a class registered under the classname string.
-*			When found, it'll check whether it is allowed to be spawned as a map entity. If it is,
-*			try and allocate it.
-*	@return	CLGBaseEntity object in case of failure, a valid pointer to a class entity otherwise.
-**/
-CLGBaseEntity *ClientGameEntities::AllocateClassEntity(ClientEntity* clEntity, const std::string &classname) {
-    // Start with a nice nullptr.
-    CLGBaseEntity* spawnEntity = nullptr;
-
-	// Safety check.
-    if (!clEntity) {
-		return nullptr;
-    }
-
-    // Get entity state number.
-    int32_t stateNumber = clEntity->clientEntityNumber;
-
-	// Warn if a slot is already occupied.
-    if (entityList.GetByStateNumber(stateNumber) != nullptr) {
-		// Warn.
-		Com_DPrint("Warning: trying to allocate class entity '%s' the slot #%i was pre-occupied.\n", classname.c_str(), stateNumber);
-
-		// Return nullptr.
-		return nullptr;
-    }
-
-    // New type info-based spawning system, to replace endless string comparisons
-    // First find it by the map name
-    TypeInfo* info = TypeInfo::GetInfoByMapName(classname.c_str());
-    if (info == nullptr) {
-		// Then try finding it by the C++ class name
-		if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
-			// Warn.
-		    Com_DPrint("Warning: unknown entity '%s'\n", classname.c_str());
-
-			// Bail out, we didn't find one.
-			return nullptr;
-		}
-    }
-
-    // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
-    // Entity classes with 'DefineDummyMapClass' won't be reported here.
-    if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
-		// Allocate and return out new class entity.
-		return entityList.InsertAtSlotNumber(info->AllocateInstance(clEntity), stateNumber);
-    } else {
-		// Check and warn about what went wrong.
-		if (info->IsAbstract()) {
-			Com_DPrint("Warning: tried to allocate an abstract class '%s'\n", info->classname);
-		} else if (!info->IsMapSpawnable()) {
-		    Com_DPrint("Warning: tried to allocate a code-only class '%s'\n", info->classname);
-		}
-    }
-
-	// If we get to this point, we've triggered one warning either way.
-	return nullptr;
-}
-
 //---------------------------------------------------------------------------------------
 
 /**
-*   @brief  Emplaces, or spawn anew, an entity from the entity state.
+*   @brief  When the client receives state updates it calls into this function so we can update
+*           the class entity belonging to the server side entity(defined by state.number).
+* 
+*           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
+*           always update its ClientEntity pointer to the appropriate new one instead.
+* 
+*   @return True on success, false in case of trouble. (Should never happen, and if it does,
+*           well... file an issue lmao.)
 **/
-qboolean ClientGameEntities::SpawnFromState(ClientEntity *clEntity, const EntityState& state) {
+qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const EntityState& state) {
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
@@ -320,6 +279,7 @@ qboolean ClientGameEntities::SpawnFromState(ClientEntity *clEntity, const Entity
     // DEVELOPER
     //if (clEntity->clientEntityNumber != state.number) {
 
+    // CHECK CLIENTENTITYNUMBER HERE? BE SURE TO PERHAPS... UPDATE IT HERE?
         if (clEntity->current.number == state.number) {
             Com_DPrint("=============: clEntity->current.number=%i, state->number=%i\n", clEntity->current.number, state.number);
         } else {
@@ -329,24 +289,27 @@ qboolean ClientGameEntities::SpawnFromState(ClientEntity *clEntity, const Entity
     //// DEV
 
     // See whether we already have a class entity for this id.
-    CLGBaseEntity *clgEntity = entityList.GetByStateNumber(state.number);
-    
+    //CLGBaseEntity *clgEntity = classEntityList.GetByNumber(state.number);
+    CLGBaseEntity *clgEntity = classEntityList.SpawnFromState(state, clEntity);
+
     // If we don't, create one.
     if (!clgEntity) {
-        // Spawn one from current state.
-        clgEntity = entityList.SpawnEntityFromState<CLGBaseEntity>(clEntity, state);
-        //Com_DPrint("Spawned new class: %s\n", clgEntity->GetHashedClassname());
+        //// Spawn one from current state.
+        //clgEntity = AllocateClientGameEntityByHashedClassname(clEntity, state.hashedClassname);
+
+        // Debug Print.
+        Com_DPrint("NO GODDAMN CLG ENTITY?: clEntity->clEntityNr=%i, clgEntity=state.number=%i hasedClassname=#%i:\n", clEntity->clientEntityNumber, state.number, clgEntity->GetHashedClassname());
     } else {
-        // If we did find it, compare its hashed classname, when not equal 
-        // we'll reallocate the appropriate client game entity class.
+        // Its entity type classname has changed, destroy its old class and allocate a new one.
         if (clgEntity->GetHashedClassname() != state.hashedClassname) {
-            // Look up the actual class that does match for the hashed classname.
-            // classregistry.lookupbyhash(hashedClassname).
-            //uint32_t hashed
             // When found, allocate it. If not found, allocate a CLGBaseEntity*
-            Com_DPrint("Spawned new class: %s\n", clgEntity->GetHashedClassname());
+            Com_DPrint("Spawned new clEntity->clEntityNr=%i, clgEntity=state.number=%i hasedClassname=#%i:\n", clEntity->clientEntityNumber, state.number, clgEntity->GetHashedClassname());
         } else {
-            Com_DPrint("Updated same class: %s\n", clgEntity->GetHashedClassname());
+            // Be sure to update its clEntity pointer just in case.
+            clgEntity->SetClientEntity(clEntity);
+
+            // Debug.
+            Com_DPrint("Updated clEntity->clEntityNr=%i, clgEntity=state.number=%i hasedClassname=#%i:\n", clEntity->clientEntityNumber, state.number, clgEntity->GetHashedClassname());
         }
     }
 

@@ -40,7 +40,7 @@ void		CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from);
 // Entities.
 //
 qboolean	CL_GM_SpawnEntitiesFromBSPString(const char *entities);
-qboolean	CL_GM_SpawnFromState(ClientEntity *clEntity, const EntityState &state);
+qboolean	CL_GM_UpdateFromState(ClientEntity *clEntity, const EntityState &state);
 void		CL_GM_EntityEvent(int32_t number);
 
 //

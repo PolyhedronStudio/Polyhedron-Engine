@@ -30,7 +30,10 @@ SET(SRC_CLGAME
 	CLGame/Effects/Particles/WaterSplash.cpp
 
 	CLGame/Entities/Base/CLGBaseEntity.cpp
-	CLGame/Entities/EntityList.cpp
+	CLGame/Entities/Monsters/MonsterTestDummy.cpp
+	CLGame/Entities/ClassEntityList.cpp
+	CLGame/Entities/IClientGameClassEntity.cpp
+
 
 	CLGame/Exports/Core.cpp
 	CLGame/Exports/Entities.cpp
@@ -65,7 +68,9 @@ SET(HEADERS_CLGAME
 	CLGame/Effects/Particles.h
 
 	CLGame/Entities/Base/CLGBaseEntity.h
-	CLGame/Entities/EntityList.h
+	CLGame/Entities/Monsters/MonsterTestDummy.h
+	CLGame/Entities/ClassEntityList.h
+	CLGame/Entities/IClientGameClassEntity.h
 
 	CLGame/Exports/Core.h
 	CLGame/Exports/Entities.h

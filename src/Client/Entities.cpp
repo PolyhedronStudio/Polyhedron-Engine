@@ -57,7 +57,7 @@ static inline void Entity_UpdateNew(ClientEntity *clEntity, const EntityState &s
     clEntity->trailcount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
-    CL_GM_SpawnFromState(clEntity, state);
+    CL_GM_UpdateFromState(clEntity, state);
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
     clEntity->prev = state;

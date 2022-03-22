@@ -16,7 +16,7 @@
 #include "../Entities/Base/CLGBaseEntity.h"
 
 // Entity List.
-#include "../Entities/EntityList.h"
+#include "../Entities/ClassEntityList.h"
 
 ////-----------------------
 //// Client base class entity.
@@ -73,9 +73,16 @@ public:
     qboolean SpawnFromBSPString(const char* entities) final;
 
     /**
-    *   @brief  Emplaces, or spawn anew, an entity from the entity state.
+    *   @brief  When the client receives state updates it calls into this function so we can update
+    *           the class entity belonging to the server side entity(defined by state.number).
+    * 
+    *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
+    *           always update its ClientEntity pointer to the appropriate new one instead.
+    * 
+    *   @return True on success, false in case of trouble. (Should never happen, and if it does,
+    *           well... file an issue lmao.)
     **/
-    qboolean SpawnFromState(ClientEntity *clEntity, const EntityState &state);
+    qboolean UpdateFromState(ClientEntity *clEntity, const EntityState &state) final;
 
     /**
     *   @brief Executed whenever an entity event is receieved.
@@ -109,17 +116,9 @@ private:
     **/
     qboolean SpawnParsedClassEntity(ClientEntity* clEntity);
 
-    /**
-    *	@brief	Seeks through the type info system for a class registered under the classname string.
-    *			When found, it'll check whether it is allowed to be spawned as a map entity. If it is,
-    *			try and allocate it.
-    *	@return	nullptr in case of failure, a valid pointer to a class entity otherwise.
-    **/
-    CLGBaseEntity *AllocateClassEntity(ClientEntity* clEntity, const std::string &classname);
-
 //! Class Entity utilities.
 private:
-    EntityList entityList;
+    ClassEntityList classEntityList;
 
 //! Entity Rendering utilities.
 private:

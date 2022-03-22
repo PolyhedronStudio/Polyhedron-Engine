@@ -116,16 +116,19 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
         //return &clge;
     }
 
+    // Initialize Class Entity TypeInfo system.
+    TypeInfo::SetupSuperClasses();
+
     // Allocate the client game exports interface and its member implementations.
     clge = new ClientGameExports();
-    clge->core = new ClientGameCore();
-    clge->entities = new ClientGameEntities();
-    clge->media = new ClientGameMedia();
-    clge->movement = new ClientGameMovement();
-    clge->prediction = new ClientGamePrediction();
-    clge->screen = new ClientGameScreen();
-    clge->serverMessage = new ClientGameServerMessage();
-    clge->view = new ClientGameView();
+    //clge->core = new ClientGameCore();
+    //clge->entities = new ClientGameEntities();
+    //clge->media = new ClientGameMedia();
+    //clge->movement = new ClientGameMovement();
+    //clge->prediction = new ClientGamePrediction();
+    //clge->screen = new ClientGameScreen();
+    //clge->serverMessage = new ClientGameServerMessage();
+    //clge->view = new ClientGameView();
 
     // Return cgame function pointer struct.
     return clge;

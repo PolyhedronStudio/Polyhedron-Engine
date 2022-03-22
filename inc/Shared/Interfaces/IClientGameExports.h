@@ -65,9 +65,16 @@ public:
     virtual qboolean SpawnFromBSPString(const char* entities) = 0;
 
     /**
-    *   @brief  Emplaces, or spawn anew, an entity from the entity state.
+    *   @brief  When the client receives state updates it calls into this function so we can update
+    *           the class entity belonging to the server side entity(defined by state.number).
+    * 
+    *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
+    *           always update its ClientEntity pointer to the appropriate new one instead.
+    * 
+    *   @return True on success, false in case of trouble. (Should never happen, and if it does,
+    *           well... file an issue lmao.)
     **/
-    virtual qboolean SpawnFromState(ClientEntity *clEntity, const EntityState &state) = 0;
+    virtual qboolean UpdateFromState(ClientEntity *clEntity, const EntityState &state) = 0;
 
     /**
     *   @brief  Executed whenever an entity event is receieved.

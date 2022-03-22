@@ -80,6 +80,14 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 *
 ***/
 /**
+*   @brief  Updates the entity with the data of the newly passed EntityState object.
+**/
+void CLGBaseEntity::UpdateFromState(const EntityState& state) {
+    previousState = currentState;
+    currentState = state;
+}
+
+/**
 *   @brief  Sets the entity classname and generates a hashed string of it.
 **/
 void CLGBaseEntity::SetClassname(const std::string& classname) {
@@ -87,19 +95,20 @@ void CLGBaseEntity::SetClassname(const std::string& classname) {
     this->classname = classname;
 
     // Hash it.
-    hashedClassname = clgi.Com_HashStringLen(classname.c_str(), classname.size(), 64);
+    hashedClassname = TypeInfo::HashClassnameString(classname.c_str(), classname.size(), 64);
 }
 /**
 *   @return A string containing the entity's classname.
 **/
-const std::string& CLGBaseEntity::GetClassname() {
-    return classname;
+const std::string CLGBaseEntity::GetClassname() {
+    return GetTypeInfo()->classname;
 }
+
 /**
 *   @return An uint32_t containing the hashed classname string.
 **/
 uint32_t CLGBaseEntity::GetHashedClassname() {
-    return hashedClassname;
+    return GetTypeInfo()->hashedMapClass;
 }
 
 

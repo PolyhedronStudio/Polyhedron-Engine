@@ -1123,6 +1123,10 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 	    byteMask |= EntityMessageBits::RenderEffects;
     }
 
+    if (to->hashedClassname != from->hashedClassname) {
+        byteMask |= EntityMessageBits::HashedClassname;
+    }
+
     if (to->solid != from->solid) {
 	    byteMask |= EntityMessageBits::Solid;
     }
@@ -1260,6 +1264,11 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 	    MSG_WriteInt32(to->renderEffects);
     }
 
+    // Write out the Render Effects.
+    if (byteMask & EntityMessageBits::HashedClassname) {
+	    MSG_WriteInt32(to->hashedClassname);
+    }
+
     // Write out the Origin X.
     if (byteMask & EntityMessageBits::OriginX) {
 	    MSG_WriteFloat(to->origin[0]);
@@ -1388,6 +1397,11 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
     // RenderFX.
     if (byteMask & EntityMessageBits::RenderEffects) {
 	    to->renderEffects = MSG_ReadInt32();
+    }
+
+    // HashedClassname.
+    if (byteMask & EntityMessageBits::HashedClassname) {
+	    to->hashedClassname = MSG_ReadInt32();
     }
 
     // Origin.

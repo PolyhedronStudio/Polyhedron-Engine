@@ -87,6 +87,11 @@ void SVGBaseEntity::PostSpawn() {
 //===============
 //
 void SVGBaseEntity::Think() {
+	// Update current state of server entity's hash classname??
+	if (serverEntity) {
+		serverEntity->state.hashedClassname = GetTypeInfo()->hashedMapClass;
+	}
+
 	// Safety check.
 	if (thinkFunction == nullptr)
 		return;

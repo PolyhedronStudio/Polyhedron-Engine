@@ -251,7 +251,7 @@ struct EntityMessageBits {
     static constexpr uint32_t ModelIndex4    = (1 << 19); //! Model Index #4.
     static constexpr uint32_t EntityEffects  = (1 << 20); //! Entity Effects.
     static constexpr uint32_t RenderEffects  = (1 << 21); //! Render Effects.    
-    static constexpr uint32_t Unused1        = (1 << 22); //! A free bit, waiting to be used... some day :-)
+    static constexpr uint32_t HashedClassname= (1 << 22); //! A free bit, waiting to be used... some day :-)
     static constexpr uint32_t Unused2        = (1 << 23); //! A free bit.
 
     //! 4th byte. Waiting to be used... some day :-)

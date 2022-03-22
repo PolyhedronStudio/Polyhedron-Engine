@@ -12,9 +12,11 @@
 // Client Game Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
+// Client Game ClassEntity Interface.
+#include "../IClientGameClassEntity.h"
 
 
-class CLGBaseEntity {
+class CLGBaseEntity : public IClientGameClassEntity {
 public:
     /**
     *
@@ -38,7 +40,7 @@ public:
     virtual ~CLGBaseEntity() = default;
 
     // Runtime type information
-    DefineTopAbstractClass( CLGBaseEntity );
+	DefineMapClass( "CLGBaseEntity", CLGBaseEntity, IClientGameClassEntity);
 
     // Checks if this entity class is exactly the given class
     // @param entityClass: an entity class which must inherint from SVGBaseEntity
@@ -62,28 +64,28 @@ public:
     /**
     *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
     **/
-    virtual void Precache();    // Precaches data.
+    virtual void Precache() override;    // Precaches data.
     /**
     *   @brief  Called when it is time to spawn this entity.
     **/
-    virtual void Spawn();       // Spawns the entity.
+    virtual void Spawn() override;       // Spawns the entity.
     /**
     *   @brief  Called when it is time to respawn this entity.
     **/
-    virtual void Respawn();     // Respawns the entity.
+    virtual void Respawn() override;     // Respawns the entity.
     /**
     *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     **/
-    virtual void PostSpawn();   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
+    virtual void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
     /**
     *   @brief  General entity thinking routine.
     **/
-    virtual void Think();
+    virtual void Think() override;
 
     /**
     *   @brief  Act upon the parsed key and value.
     **/
-    virtual void SpawnKey(const std::string& key, const std::string& value); // Called for each key:value when parsing the entity dictionary.
+    virtual void SpawnKey(const std::string& key, const std::string& value) override; // Called for each key:value when parsing the entity dictionary.
 
 
 
@@ -93,28 +95,40 @@ public:
     *
     ***/
     /**
+    *   @brief  Updates the entity with the data of the newly passed EntityState object.
+    **/
+    virtual void UpdateFromState(const EntityState &state) override;
+
+    /**
+    *   @return A reference to the current state object.
+    **/
+    inline const EntityState& GetCurrentEntityState() final {
+        return currentState;
+    }
+
+    /**
     *   @brief  Sets the classname of this entity.
     **/
-    virtual void SetClassname(const std::string& classname);
+    virtual void SetClassname(const std::string& classname) override;
 
     /**
     *   @return A string containing the entity's classname.
     **/
-    virtual const std::string& GetClassname();
+    virtual const std::string GetClassname() override;
     /**
     *   @return An uint32_t containing the hashed classname string.
     **/
-    virtual uint32_t GetHashedClassname();
+    virtual uint32_t GetHashedClassname() override;
 
     /**
     *   @brief  Sets a pointer referring to this class' client entity.
     **/
-    void SetClientEntity(ClientEntity* clEntity);
+    virtual void SetClientEntity(ClientEntity* clEntity) override;
 
     /**
     *   @return The pointer referring to this class' client entity.
     **/
-    ClientEntity* GetClientEntity();
+    virtual ClientEntity* GetClientEntity() override;
 
 
     /***
@@ -125,7 +139,7 @@ public:
     /**
     *   @brief  Gets called right before the moment of deallocation happens.
     **/
-    virtual void OnDeallocate();
+    virtual void OnDeallocate() override;
 
     /**
     *   @brief
@@ -158,5 +172,9 @@ private:
     uint32_t hashedClassname = 0;
 
     //! Pointer to the client entity which owns this class entity.
-    ClientEntity    *clientEntity = nullptr;
+    ClientEntity *clientEntity = nullptr;
+
+    // Client Class Entities maintain their own states. (Get copied in from updates.)
+    EntityState currentState = {};
+    EntityState previousState = {};
 };
