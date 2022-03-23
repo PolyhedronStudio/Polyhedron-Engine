@@ -479,7 +479,7 @@ retry:
 
 
 typedef struct {
-    SVGEntityHandle ent;
+    SGEntityHandle ent;
     vec3_t  origin;
     vec3_t  angles;
 #if USE_SMOOTH_DELTA_ANGLES
@@ -499,7 +499,7 @@ SVGBaseEntity *obstacle = nullptr;
 // otherwise riders would continue to slide.
 //===============
 //
-qboolean SVG_Push(SVGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
+qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 {
     int e;
     SVGBaseEntity* check = NULL;
@@ -546,7 +546,7 @@ qboolean SVG_Push(SVGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     for (e = 1; e < globals.numberOfEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-	    SVGEntityHandle checkHandle = classEntities[e];
+	    SGEntityHandle checkHandle = classEntities[e];
 
         if (!checkHandle) {
     		SVG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");
@@ -698,7 +698,7 @@ qboolean SVG_Push(SVGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 // push all box objects
 //===============
 //
-void SVG_Physics_Pusher(SVGEntityHandle &entityHandle)
+void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
 {
     vec3_t      move, amove;
     SVGBaseEntity     *part, *mv;
@@ -735,7 +735,7 @@ void SVG_Physics_Pusher(SVGEntityHandle &entityHandle)
             move = vec3_scale(part->GetVelocity(), FRAMETIME);
             amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME);
 
-            SVGEntityHandle partHandle(part);
+            SGEntityHandle partHandle(part);
             if (!SVG_Push(partHandle, move, amove))
                 break;  // move was Blocked
         }
@@ -775,7 +775,7 @@ void SVG_Physics_Pusher(SVGEntityHandle &entityHandle)
 *   @brief  Executes MoveType::None behavior for said entity. Meaning it
 *           only gets a chance to think.
 **/
-void SVG_Physics_None(SVGEntityHandle& entityHandle) {
+void SVG_Physics_None(SGEntityHandle& entityHandle) {
     // Assign handle to base entity.
     SVGBaseEntity* ent = *entityHandle;
 
@@ -793,7 +793,7 @@ void SVG_Physics_None(SVGEntityHandle& entityHandle) {
 *   @brief  Executes MoveType::Noclip, behavior on said entity meaning it
 *           does not clip to world, or respond to other entities.
 **/
-void SVG_Physics_Noclip(SVGEntityHandle &entityHandle) {
+void SVG_Physics_Noclip(SGEntityHandle &entityHandle) {
     // Assign handle to base entity.
     SVGBaseEntity* ent = *entityHandle;
 
@@ -825,7 +825,7 @@ void SVG_Physics_Noclip(SVGEntityHandle &entityHandle) {
 *   @brief  Executes MoveType::Toss, TossSlide, Bounce and Fly movement behaviors on
 *           said entity.
 **/
-void SVG_Physics_Toss(SVGEntityHandle& entityHandle) {
+void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Assign handle to base entity.
     SVGBaseEntity* ent = *entityHandle;
 
@@ -952,7 +952,7 @@ constexpr float STEPMOVE_WATERFRICTION = 1.f;
 // Does what it says it does.
 //===============
 //
-void SVG_AddRotationalFriction(SVGEntityHandle entityHandle) { 
+void SVG_AddRotationalFriction(SGEntityHandle entityHandle) { 
     // Assign handle to base entity.
     SVGBaseEntity *ent = *entityHandle;
 
@@ -1001,7 +1001,7 @@ void SVG_AddRotationalFriction(SVGEntityHandle entityHandle) {
 // FIXME: is this true ?
 //===============
 //
-void SVG_Physics_Step(SVGEntityHandle &entityHandle)
+void SVG_Physics_Step(SGEntityHandle &entityHandle)
 {
     // Stores whether to play a "surface hit" sound.
     qboolean    hitSound = false;
@@ -1154,7 +1154,7 @@ void SVG_Physics_Step(SVGEntityHandle &entityHandle)
 // Determines what kind of run/thinking method to execute.
 //===============
 //
-void SVG_RunEntity(SVGEntityHandle &entityHandle)
+void SVG_RunEntity(SGEntityHandle &entityHandle)
 {
     SVGBaseEntity *ent = *entityHandle;
 

@@ -21,9 +21,6 @@
 ***/
 #pragma once
 
-// Include the entity bridge.
-#include "Entities/Base/SVGEntityHandle.h"
-
 // Include our base entity.
 #include "Entities/Base/SVGBaseEntity.h"
 

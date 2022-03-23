@@ -625,7 +625,7 @@ qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
 * 
 *   @return A valid pointer to the entity class entity. nullptr on failure.
 **/
-SVGBaseEntity* Gameworld::ValidateEntity(const SVGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
+SVGBaseEntity* Gameworld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
     // Ensure the entity is valid.
     if (!*entityHandle || (!entityHandle.Get() ||
 			(
@@ -639,7 +639,7 @@ SVGBaseEntity* Gameworld::ValidateEntity(const SVGEntityHandle &entityHandle, bo
 
     // It's lame, but without requiring a const entity handle, we can't pass
 	// in any pointers to (server-)entity types.
-	SVGEntityHandle castHandle = static_cast<SVGEntityHandle>(entityHandle);
+	SGEntityHandle castHandle = static_cast<SGEntityHandle>(entityHandle);
 	
 	// Ensure it is of class type player.
     if (!castHandle->IsSubclassOf<SVGBasePlayer>()) {

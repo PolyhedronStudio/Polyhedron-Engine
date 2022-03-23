@@ -16,7 +16,7 @@
 
 // Pre-define.
 class SVGBaseEntity;
-class SVGEntityHandle;
+class SGEntityHandle;
 class Worldspawn;
 class IGamemode;
 
@@ -165,7 +165,7 @@ public:
     * 
     *   @return A valid pointer to the entity's SVGBasePlayer class entity. nullptr on failure.
     **/
-    static SVGBaseEntity* ValidateEntity(const SVGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
+    static SVGBaseEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
 
 

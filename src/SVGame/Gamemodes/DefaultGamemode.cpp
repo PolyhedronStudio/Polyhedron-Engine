@@ -984,7 +984,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         }
         
         // Use an entity handle to validate and store the new ground entity after pmove.
-        SVGEntityHandle groundEntityHandle = pm.groundEntityPtr;
+        SGEntityHandle groundEntityHandle = pm.groundEntityPtr;
         if (*groundEntityHandle && groundEntityHandle.Get()) {
             player->SetGroundEntity(*groundEntityHandle);
             player->SetGroundEntityLinkCount(groundEntityHandle->GetLinkCount());
@@ -1034,7 +1034,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
                     continue;   // duplicated
                 }
 
-                SVGEntityHandle other(pm.touchedEntities[i]);
+                SGEntityHandle other(pm.touchedEntities[i]);
                 if (!other || !*other) {
                     continue;
                 }

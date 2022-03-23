@@ -531,8 +531,8 @@ qboolean SVG_FilterPacket(char *from);
 //
 // g_phys.c
 //
-class SVGEntityHandle;
-void SVG_RunEntity(SVGEntityHandle &entityHandle);
+class SGEntityHandle;
+void SVG_RunEntity(SGEntityHandle &entityHandle);
 
 //
 // g_main.c

@@ -101,7 +101,7 @@ SET( SRC_SVGAME
 	SVGame/Commands.cpp
 	SVGame/Effects.cpp
 	SVGame/Entities.cpp
-	SVGame/GameLocals.cpp
+	SVGame/ServerGameLocals.cpp
 	SVGame/ImportsWrapper.cpp
 	SVGame/Main.cpp
 	SVGame/Effects.cpp
@@ -118,7 +118,6 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseMonster.cpp
 	SVGame/Entities/Base/SVGBaseMover.cpp
 	SVGame/Entities/Base/SVGBasePlayer.cpp
-	SVGame/Entities/Base/SVGEntityHandle.cpp
 	SVGame/Entities/Base/BodyCorpse.cpp
 	SVGame/Entities/Base/DebrisEntity.cpp
 	SVGame/Entities/Base/GibEntity.cpp
@@ -212,7 +211,7 @@ SET( SRC_SVGAME
 	SVGame/ChaseCamera.h
 	SVGame/Effects.h
 	SVGame/Entities.h
-	SVGame/GameLocals.h
+	SVGame/ServerGameLocals.h
 	SVGame/TypeInfo.h
 	SVGame/Utilities.h
 	SVGame/AI/MonsterAI.h
@@ -224,7 +223,6 @@ SET( SRC_SVGAME
 	SVGame/Entities/Base/SVGBaseMonster.h
 	SVGame/Entities/Base/SVGBaseMover.h
 	SVGame/Entities/Base/SVGBasePlayer.h
-	SVGame/Entities/Base/SVGEntityHandle.h
 	SVGame/Entities/Base/BodyCorpse.h
 	SVGame/Entities/Base/DebrisEntity.h
 	SVGame/Entities/Base/GibEntity.h

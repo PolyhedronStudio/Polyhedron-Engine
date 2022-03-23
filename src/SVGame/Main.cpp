@@ -117,7 +117,7 @@ cvar_t* dev_show_physwarnings = nullptr;
 void SVG_SpawnEntities(const char *mapName, const char *entities, const char *spawnpoint);
 static void SVG_SetupCVars();
 
-void SVG_RunEntity(SVGEntityHandle &entityHandle);
+void SVG_RunEntity(SGEntityHandle &entityHandle);
 void SVG_WriteGame(const char *filename, qboolean autosave);
 void SVG_ReadGame(const char *filename);
 void SVG_WriteLevel(const char *filename);
@@ -547,7 +547,7 @@ void SVG_RunFrame(void) {
         int32_t stateNumber = serverEntities[i].state.number;
 
         // Use an entity handle to safely acquire pointers to the corresponding entity.
-	    SVGEntityHandle entityHandle = classEntities[i];
+	    SGEntityHandle entityHandle = classEntities[i];
 
         // Acquire the class entity.
         SVGBaseEntity *classEntity = *entityHandle;

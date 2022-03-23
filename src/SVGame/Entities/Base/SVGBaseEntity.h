@@ -16,7 +16,7 @@
 class SVGEntityHandle;
 
 // Include Entity Handle.
-#include "SVGEntityHandle.h"
+#include "SharedGame/Entities/SGEntityHandle.h"
 
 
 
@@ -337,7 +337,7 @@ public:
     /**
     *   @brief Get/Set: Ground Entity
     **/
-    inline SVGEntityHandle  GetGroundEntity() { return groundEntity; }
+    inline SGEntityHandle   GetGroundEntity() { return groundEntity; }
     inline void             SetGroundEntity(SVGBaseEntity* groundEntity) { this->groundEntity = groundEntity; }
 
     /**
