@@ -4,21 +4,25 @@
 *
 *	@file
 *
-*	Client Game ClassEntity Interface.
+*	ClientGame Entity Interface.
 * 
 ***/
 #pragma once
 
-
-// Client Game Exports Interface.
+// ClientGame Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
+// SharedGame Entity Interface.
+#include "SharedGame/Entities/ISharedGameEntity.h"
 
-class IClientGameEntity {
+
+
+
+/**
+*   IClientGameEntity
+**/
+class IClientGameEntity : public ISharedGameEntity {
 public:
-    // Runtime type information
-    DefineTopAbstractClass( IClientGameEntity );
-
     /**
     *
     *   Constructor/Destructor AND TypeInfo related.
@@ -27,37 +31,41 @@ public:
     //! Constructor/Destructor.
     virtual ~IClientGameEntity() = default;
 
+    //! Runtime type information
+    DefineAbstractClass( IClientGameEntity, ISharedGameEntity );
+
+    
 
     /**
     *
     *   SharedGame ClassEntity Interface Functions.
     *
     **/
-    /**
-    *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
-    **/
-    virtual void Precache() = 0;    // Precaches data.
-    /**
-    *   @brief  Called when it is time to spawn this entity.
-    **/
-    virtual void Spawn() = 0;       // Spawns the entity.
-    /**
-    *   @brief  Called when it is time to respawn this entity.
-    **/
-    virtual void Respawn() = 0;     // Respawns the entity.
-    /**
-    *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    **/
-    virtual void PostSpawn() = 0;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    /**
-    *   @brief  General entity thinking routine.
-    **/
-    virtual void Think() = 0;
+    ///**
+    //*   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
+    //**/
+    //virtual void Precache() = 0;    // Precaches data.
+    ///**
+    //*   @brief  Called when it is time to spawn this entity.
+    //**/
+    //virtual void Spawn() = 0;       // Spawns the entity.
+    ///**
+    //*   @brief  Called when it is time to respawn this entity.
+    //**/
+    //virtual void Respawn() = 0;     // Respawns the entity.
+    ///**
+    //*   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
+    //**/
+    //virtual void PostSpawn() = 0;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
+    ///**
+    //*   @brief  General entity thinking routine.
+    //**/
+    //virtual void Think() = 0;
 
-    /**
-    *   @brief  Act upon the parsed key and value.
-    **/
-    virtual void SpawnKey(const std::string& key, const std::string& value) = 0; // Called for each key:value when parsing the entity dictionary.
+    ///**
+    //*   @brief  Act upon the parsed key and value.
+    //**/
+    //virtual void SpawnKey(const std::string& key, const std::string& value) = 0; // Called for each key:value when parsing the entity dictionary.
 
 
 
@@ -117,16 +125,10 @@ public:
     virtual void OnDeallocate() = 0;
 
 private:
-    // Classname.
-    std::string classname = "";
-
-    //  Hashed classname string.
-    uint32_t hashedClassname = 0;
-
     //! Pointer to the client entity which owns this class entity.
     ClientEntity *clientEntity = nullptr;
 
-    // Client Class Entities maintain their own states. (Get copied in from updates.)
+    //! Client Class Entities maintain their own states. (Get copied in from updates.)
     EntityState currentState = {};
     EntityState previousState = {};
 };

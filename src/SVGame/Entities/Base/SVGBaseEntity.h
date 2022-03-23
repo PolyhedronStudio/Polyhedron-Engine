@@ -279,7 +279,7 @@ public:
     *   @brief Get/Set: Damage
     **/
     inline const int32_t    GetDamage() { return damage; }
-    inline void             SetDamage(const int32_t &damage) { this->damage = damage; }
+    inline void             SetDamage(const int32_t damage) { this->damage = damage; }
 
     /**
     *   @brief Get/Set: Dead Flag

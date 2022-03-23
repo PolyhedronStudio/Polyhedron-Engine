@@ -14,22 +14,8 @@
 ***/
 #pragma once
 
+// Required include here.
 #include <string>
-
-/**
-*	Predeclare the actual class entity type that we intend to use depending on which game module
-*	this file is being compiled along with.
-**/
-#ifdef CGAME_INCLUDE
-class CLGBaseEntity;
-struct ClientEntity;
-using ClassEntity = CLGBaseEntity;
-using Entity = ClientEntity;
-#else
-class SVGBaseEntity;
-using ClassEntity = SVGBaseEntity;
-using Entity = entity_s;
-#endif
 
 
 
