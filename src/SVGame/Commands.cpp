@@ -500,7 +500,7 @@ void Cmd_InvUse_f(SVGBasePlayer *player, ServerClient *client) {
     //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "Item is not usable.\n");
     //    return;
     //}
-    //it->Use(ent, it);
+    //it->DispatchUseCallback(ent, it);
 }
 
 /*
@@ -531,7 +531,7 @@ void Cmd_WeapPrev_f(SVGBasePlayer* player, ServerClient* client) {
     //        continue;
     //    if (!(it->flags & ItemFlags::IsWeapon))
     //        continue;
-    //    it->Use(ent, it);
+    //    it->DispatchUseCallback(ent, it);
     //    if (cl->persistent.activeWeapon == it)
     //        return; // successful
     //}
@@ -565,7 +565,7 @@ void Cmd_WeapNext_f(SVGBasePlayer* player, ServerClient* client) {
     //        continue;
     //    if (!(it->flags & ItemFlags::IsWeapon))
     //        continue;
-    //    it->Use(ent, it);
+    //    it->DispatchUseCallback(ent, it);
     //    if (cl->persistent.activeWeapon == it)
     //        return; // successful
     //}
@@ -594,7 +594,7 @@ void Cmd_WeapLast_f(SVGBasePlayer* player, ServerClient* client) {
     //    return;
     //if (!(it->flags & ItemFlags::IsWeapon))
     //    return;
-    //it->Use(ent, it);
+    //it->DispatchUseCallback(ent, it);
 }
 
 /*
@@ -636,7 +636,7 @@ void Cmd_Kill_f(SVGBasePlayer* player, ServerClient* client) {
     player->SetFlags(player->GetFlags() & ~EntityFlags::GodMode);
     player->SetHealth(0);
     GetGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
-    player->Die(player, player, 100000, vec3_zero());
+    player->DispatchDieCallback(player, player, 100000, vec3_zero());
 }
 
 /*

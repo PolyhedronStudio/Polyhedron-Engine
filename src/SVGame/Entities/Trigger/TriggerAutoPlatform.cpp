@@ -108,7 +108,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 	////// If it's not the time to activate the platform yet, then don't
 
 	// Trigger our platform
-	GetOwner()->Use( other, GetActivator() );
+	GetOwner()->DispatchUseCallback( other, GetActivator() );
 }
 
 //===============

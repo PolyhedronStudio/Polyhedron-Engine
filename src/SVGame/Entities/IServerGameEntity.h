@@ -4,13 +4,13 @@
 *
 *	@file
 *
-*	ClientGame Entity Interface.
+*	ServerGame Entity Interface.
 * 
 ***/
 #pragma once
 
-// ClientGame Exports Interface.
-#include "Shared/Interfaces/IClientGameExports.h"
+// ServerGame Exports Interface. TODO: Obviously, still implement.
+//#include "Shared/Interfaces/IServerGameExports.h"
 
 // SharedGame Entity Interface.
 #include "SharedGame/Entities/ISharedGameEntity.h"
@@ -21,7 +21,7 @@
 /**
 *   IClientGameEntity
 **/
-class IClientGameEntity : public ISharedGameEntity {
+class IServerGameEntity : public ISharedGameEntity {
 public:
     /**
     *
@@ -31,10 +31,10 @@ public:
     * 
     **/
     //! Constructor/Destructor.
-    virtual ~IClientGameEntity() = default;
+    virtual ~IServerGameEntity() = default;
 
     //! Runtime type information
-    DefineAbstractClass( IClientGameEntity, ISharedGameEntity );
+    DefineAbstractClass( IServerGameEntity, ISharedGameEntity );
 
     
 
@@ -75,7 +75,7 @@ public:
 
     /***
     *
-    *   ClientGame Class Entity Functions.
+    *   ServerGame Class Entity Functions.
     * 
     *   These functions are all implemented in CLGBaseEntity, some are purposely left empty to act
     *   as a stub. Just because they are empty doesn't mean one can't fill them in and make them tick.
@@ -83,58 +83,9 @@ public:
     *   by doing so is easy.
     *
     ***/
-    /**
-    *   @brief  Updates the entity with the data of the newly passed EntityState object.
-    **/
-    virtual void UpdateFromState(const EntityState &state) = 0;
-
-    /**
-    *   @return A reference to the current state object.
-    **/
-    virtual const EntityState& GetCurrentEntityState() = 0;
-
-    /**
-    *   @brief  Sets the classname of this entity.
-    **/
-    virtual void SetClassname(const std::string& classname) = 0;
-
-    /**
-    *   @return A string containing the entity's classname.
-    **/
-    virtual const std::string GetClassname() = 0;
-    /**
-    *   @return An uint32_t containing the hashed classname string.
-    **/
-    virtual uint32_t GetHashedClassname() = 0;
-
-    /**
-    *   @brief  Sets a pointer referring to this class' client entity.
-    **/
-    virtual void SetPODEntity(PODEntity* podEntity) = 0;
-
-    /**
-    *   @return The pointer referring to this class' client entity.
-    **/
-    virtual PODEntity* GetPODEntity() = 0;
 
 
-    /***
-    *
-    * 
-    *   OnEventCallbacks.
-    *
-    * 
-    ***/
-    /**
-    *   @brief  Gets called right before the moment of deallocation happens.
-    **/
-    virtual void OnDeallocate() = 0;
 
 private:
-    //! Pointer to the client entity which owns this class entity.
-    PODEntity *podEntity = nullptr;
 
-    //! Client Class Entities maintain their own states. (Get copied in from updates.)
-    EntityState currentState = {};
-    EntityState previousState = {};
 };

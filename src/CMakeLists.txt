@@ -270,6 +270,7 @@ SET( SRC_SVGAME
 	SVGame/Entities/Trigger/TriggerPush.h
 	SVGame/Entities/Trigger/TriggerRelay.h
 	SVGame/Entities/weaponry/BlasterBolt.h
+	SVGame/Entities/IServerGameEntity.h
 	SVGame/Entities/Light.h
 	SVGame/Entities/Worldspawn.h
 	SVGame/Gamemodes/DefaultGamemode.h

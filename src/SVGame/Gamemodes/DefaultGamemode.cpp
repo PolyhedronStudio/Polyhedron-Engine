@@ -311,7 +311,7 @@ void DefaultGamemode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflict
     if (target->GetMoveType() == MoveType::Push || target->GetMoveType() == MoveType::Stop || target->GetMoveType() == MoveType::None) {
         // Doors, triggers, etc
         if (target) {
-            target->Die(inflictor, attacker, damage, point);
+            target->DispatchDieCallback(inflictor, attacker, damage, point);
         }
 
         return;
@@ -327,9 +327,9 @@ void DefaultGamemode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflict
     //    monster_death_use(targ);
     }
     if (target) {
-        target->Die(inflictor, attacker, damage, point);
+        target->DispatchDieCallback(inflictor, attacker, damage, point);
     }
-    //targ->Die(targ, inflictor, attacker, damage, point);
+    //targ->DispatchDieCallback(targ, inflictor, attacker, damage, point);
 }
 
 /**
@@ -472,7 +472,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
         //M_ReactToDamage(targ, attacker);
 
         //if (!(targ->monsterInfo.aiflags & AI_DUCKED) && (take)) {
-        target->TakeDamage(attacker, knockBack, damageTaken);
+        target->DispatchTakeDamageCallback(attacker, knockBack, damageTaken);
         //// nightmare mode monsters don't go into pain frames often
         //if (skill->value == 3)
         //    targ->debouncePainTime = level.time + 5;
@@ -482,10 +482,10 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
             //if (!(targ->flags & EntityFlags::GodMode) && (take))
             //    targ->Pain(targ, attacker, knockBack, take);
             if (!(target->GetFlags() & EntityFlags::GodMode) && (damageTaken)) {
-                target->TakeDamage(attacker, knockBack, damageTaken);
+                target->DispatchTakeDamageCallback(attacker, knockBack, damageTaken);
             }
         } else if (damageTaken) {
-            target->TakeDamage(attacker, knockBack, damageTaken);
+            target->DispatchTakeDamageCallback(attacker, knockBack, damageTaken);
         }
     }
 
@@ -1039,7 +1039,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
                     continue;
                 }
 
-                other->Touch(*other, player, NULL, NULL);
+                other->DispatchTouchCallback(*other, player, NULL, NULL);
             }
 
         }

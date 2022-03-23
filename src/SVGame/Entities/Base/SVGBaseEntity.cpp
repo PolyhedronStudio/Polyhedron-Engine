@@ -310,7 +310,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 // Execute the 'Use' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
+void SVGBaseEntity::DispatchUseCallback(SVGBaseEntity* other, SVGBaseEntity* activator) {
 	// Safety check.
 	if (useFunction == nullptr)
 		return;
@@ -326,7 +326,7 @@ void SVGBaseEntity::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
 // Execute the 'Blocked' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::Blocked(SVGBaseEntity* other) {
+void SVGBaseEntity::DispatchBlockedCallback(SVGBaseEntity* other) {
 	// Safety check.
 	if (blockedFunction == nullptr)
 		return;
@@ -342,7 +342,7 @@ void SVGBaseEntity::Blocked(SVGBaseEntity* other) {
 // Execute the 'TakeDamage' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::TakeDamage(SVGBaseEntity* other, float kick, int32_t damage) {
+void SVGBaseEntity::DispatchTakeDamageCallback(SVGBaseEntity* other, float kick, int32_t damage) {
 	// Safety check.
 	if (takeDamageFunction == nullptr)
 		return;
@@ -358,7 +358,7 @@ void SVGBaseEntity::TakeDamage(SVGBaseEntity* other, float kick, int32_t damage)
 // Execute the 'Die' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void SVGBaseEntity::DispatchDieCallback(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
 	// Safety check.
 	if (dieFunction == nullptr)
 		return;
@@ -374,7 +374,7 @@ void SVGBaseEntity::Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int d
 // Execute the 'Touch' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::Touch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void SVGBaseEntity::DispatchTouchCallback(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	// Safety check.
 	if (touchFunction == nullptr)
 		return;
@@ -480,7 +480,7 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 			if (triggerEntity == this) {
 				gi.DPrintf("Warning: Target entity{#(%i):%s} can't trigger itself.\n", GetState().number, GetTarget().c_str());
 			} else {
-				triggerEntity->Use(this, activatorOverride);
+				triggerEntity->DispatchUseCallback(this, activatorOverride);
 			}
 		}
 	}

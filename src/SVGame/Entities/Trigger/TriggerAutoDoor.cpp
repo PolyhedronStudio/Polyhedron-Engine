@@ -67,7 +67,7 @@ void TriggerAutoDoor::AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, 
 	}
 	debounceTouchTime = level.time + 1.0f;
 	// Trigger our door
-	GetOwner()->Use( other, other );
+	GetOwner()->DispatchUseCallback( other, other );
 }
 
 //===============

@@ -97,7 +97,7 @@ void UTIL_TouchTriggers(SVGBaseEntity *ent)
 		    continue;
 	    }
 
-        touchedEntity->Touch(touchedEntity, ent, NULL, NULL);
+        touchedEntity->DispatchTouchCallback(touchedEntity, ent, NULL, NULL);
     }
 }
 
@@ -131,7 +131,7 @@ void G_TouchSolids(SVGBaseEntity *ent)
 	        continue;
 	    }
 
-	    touchedEntity->Touch(touchedEntity, ent, NULL, NULL);
+	    touchedEntity->DispatchTouchCallback(touchedEntity, ent, NULL, NULL);
     }
 }
 

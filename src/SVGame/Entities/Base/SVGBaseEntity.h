@@ -18,12 +18,13 @@ class SVGEntityHandle;
 // Include Entity Handle.
 #include "SharedGame/Entities/SGEntityHandle.h"
 
-
+// Incldue ServerGame Entity Interface.
+#include "../IServerGameEntity.h"
 
 /**
 *   SVGBaseEntity
 **/
-class SVGBaseEntity {
+class SVGBaseEntity : public IServerGameEntity {
 public:
     /**
     *
@@ -168,12 +169,11 @@ public:
     *
     *
     **/
-    // Admer: these should all be prefixed with Dispatch
-    void Use(SVGBaseEntity* other, SVGBaseEntity* activator);
-    void Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    void Blocked(SVGBaseEntity* other);
-    void Touch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-    void TakeDamage(SVGBaseEntity* other, float kick, int32_t damage);
+    virtual void DispatchUseCallback(SVGBaseEntity* other, SVGBaseEntity* activator);
+    virtual void DispatchDieCallback(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    virtual void DispatchBlockedCallback(SVGBaseEntity* other);
+    virtual void DispatchTouchCallback(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    virtual void DispatchTakeDamageCallback(SVGBaseEntity* other, float kick, int32_t damage);
 
 
 
@@ -253,7 +253,7 @@ public:
     /**
     *   @brief Get/Set: Classname
     **/
-    inline const std::string &GetClassname() { return classname; }
+    inline const std::string GetClassname() { return classname; }
     inline void SetClassname(const std::string &classname) { this->classname = classname; }
 
     /**

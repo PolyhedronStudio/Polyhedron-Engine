@@ -374,6 +374,6 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     // Did we hit anything?
     if (trace.fraction < 1.0) {
         boltEntity->SetOrigin(vec3_fmaf(boltEntity->GetOrigin(), -10, dir));
-        boltEntity->Touch(boltEntity, trace.ent, NULL, NULL);
+        boltEntity->DispatchTouchCallback(boltEntity, trace.ent, NULL, NULL);
     }
 }

@@ -109,11 +109,11 @@ public:
     *
     **/
     // Admer: these should all be prefixed with Dispatch
-    virtual void Use(ClassEntity* other, ClassEntity* activator) = 0;
-    virtual void Die(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) = 0;
-    virtual void Blocked(ClassEntity* other) = 0;
-    virtual void Touch(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
-    virtual void TakeDamage(ClassEntity* other, float kick, int32_t damage) = 0;
+    virtual void DispatchUseCallback(ClassEntity* other, ClassEntity* activator) = 0;
+    virtual void DispatchDieCallback(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) = 0;
+    virtual void DispatchBlockedCallback(ClassEntity* other) = 0;
+    virtual void DispatchTouchCallback(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
+    virtual void DispatchTakeDamageCallback(ClassEntity* other, float kick, int32_t damage) = 0;
 
 
 
@@ -136,7 +136,7 @@ public:
     /**
     *
     *
-    *   Base entity Set/Get:
+    *   Set/Get:
     *
     *
     **/

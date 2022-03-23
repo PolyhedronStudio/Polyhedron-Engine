@@ -66,7 +66,7 @@ void FuncRotating::Spawn() {
 	SetBlockedCallback( &FuncRotating::RotatorBlocked );
 
 	if ( GetSpawnFlags() & SF_StartOn ) {
-		Use( nullptr, nullptr );
+		DispatchUseCallback( nullptr, nullptr );
 	}
 
 	if ( GetSpawnFlags() & SF_Animated ) {

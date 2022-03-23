@@ -67,7 +67,7 @@ public:
 
     /**
     *
-    *   Client Class Entity Interface Functions.
+    *   ClientGame Entity Interface Functions.
     *
     **/
     /**
@@ -100,8 +100,10 @@ public:
 
     /***
     *
-    *   Client Class Entity Functions.
+    * 
+    *   ClientGame BaseEntity Functions.
     *
+    * 
     ***/
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
@@ -114,11 +116,6 @@ public:
     inline const EntityState& GetCurrentEntityState() final {
         return currentState;
     }
-
-    /**
-    *   @brief  Stub
-    **/
-    virtual void SetClassname(const std::string& classname) final {};
 
     /**
     *   @return A string containing the entity's classname.
@@ -160,15 +157,22 @@ public:
 
 
     /**
+    *   [Stub Implementation]
+    *   @brief  Sets classname.
+    **/
+    virtual void SetClassname(const std::string& classname) final {};
+    /**
+    *   [Stub Implementation]
     *   @brief  Link entity to world for collision testing using gi.LinkEntity.
     **/
     void LinkEntity() override {};
     /**
+    *   [Stub Implementation]
     *   @brief  Unlink the entity from the world for collision testing.
     **/
     void UnlinkEntity() override {};
-    
     /**
+    *   [Stub Implementation]
     *   @brief  Marks the entity to be removed in the next server frame. This is preferred to SVG_FreeEntity, 
     *           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
     *           on us during the current server game frame we're processing.
@@ -179,23 +183,22 @@ public:
 
     /**
     *
-    *
+    *   [Stub Implementation]
     *   Callback Functions to Dispatch.
     *
     *
     **/
-    // Admer: these should all be prefixed with Dispatch
-    void Use(ClassEntity* other, ClassEntity* activator) {};
-    void Die(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) {};
-    void Blocked(ClassEntity* other) {};
-    void Touch(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) {};
-    void TakeDamage(ClassEntity* other, float kick, int32_t damage) {};
+    virtual void DispatchUseCallback(ClassEntity* other, ClassEntity* activator) {};
+    virtual void DispatchDieCallback(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) {};
+    virtual void DispatchBlockedCallback(ClassEntity* other) {};
+    virtual void DispatchTouchCallback(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) {};
+    virtual void DispatchTakeDamageCallback(ClassEntity* other, float kick, int32_t damage) {};
 
 
 
     /**
     *
-    *
+    *   [Stub Implementation]
     *   Target Functions.
     *
     *

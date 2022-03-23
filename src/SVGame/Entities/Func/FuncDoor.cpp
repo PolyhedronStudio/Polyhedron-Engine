@@ -223,7 +223,7 @@ void FuncDoor::DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, 
         ent->SetTakeDamage( TakeDamage::No );
     }
 
-    GetTeamMasterEntity()->Use( attacker, attacker );
+    GetTeamMasterEntity()->DispatchUseCallback( attacker, attacker );
 }
 
 //===============
@@ -301,7 +301,7 @@ void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPl
         gi.Sound( other->GetPODEntity(), SoundChannel::Auto, gi.SoundIndex( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
     }
 
-    Use(GetOwner(), other);
+    DispatchUseCallback(GetOwner(), other);
 }
 
 //===============

@@ -207,14 +207,14 @@ void SVG_Impact(SVGBaseEntity *entityA, SVGTrace *trace)
 
     // Execute touch functionality for entityA if its solid is not a Solid::Not.
     if (entityA->GetSolid() != Solid::Not) {
-        //e1->Touch(e1, e2, &trace->plane, trace->surface);
-        entityA->Touch(entityA, entityB, &trace->plane, trace->surface);
+        //e1->DispatchTouchCallback(e1, e2, &trace->plane, trace->surface);
+        entityA->DispatchTouchCallback(entityA, entityB, &trace->plane, trace->surface);
     }
 
     // Execute touch functionality for entityB exists, and is not a Solid::Not.
     if (entityB != nullptr && entityB->GetSolid() != Solid::Not) {
-        //e2->Touch(e2, e1, NULL, NULL);
-        entityB->Touch(entityB, entityA, nullptr, nullptr);
+        //e2->DispatchTouchCallback(e2, e1, NULL, NULL);
+        entityB->DispatchTouchCallback(entityB, entityA, nullptr, nullptr);
     }
 }
 
@@ -753,7 +753,7 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
         // if the pusher has a "Blocked" function, call it
         // otherwise, just stay in place until the obstacle is gone
         if (obstacle) {
-            part->Blocked(obstacle);
+            part->DispatchBlockedCallback(obstacle);
         }
 
 #if 0
@@ -903,7 +903,7 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
             }
         }
 
-        //ent->Touch(ent, trace.ent, &trace.plane, trace.surface);
+        //ent->DispatchTouchCallback(ent, trace.ent, &trace.plane, trace.surface);
     }
 
     // Check for water transition, first fetch the OLD contents mask.
