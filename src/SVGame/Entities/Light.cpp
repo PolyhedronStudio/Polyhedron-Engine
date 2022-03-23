@@ -8,7 +8,7 @@
 */
 
 // Core.
-#include "../ServerGameLocal.h"              // SVGame.
+#include "../ServerGameLocals.h"              // SVGame.
 #include "../Entities.h"
 
 // Entities.

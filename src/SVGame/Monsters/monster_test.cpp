@@ -8,7 +8,7 @@
 // First test monster implementation...
 //
 */
-#include "../ServerGameLocal.h"     // SVGame.
+#include "../ServerGameLocals.h"     // SVGame.
 #include "../effects.h"     // Effects.
 #include "../Utilities.h"       // Util.
 #include "SharedGame/SharedGame.h"

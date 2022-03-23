@@ -5,7 +5,7 @@
 //
 // Polyhedron SVGame: Player pain, and die, callback code.
 // 
-#include "../ServerGameLocal.h" // Include SVGame header.
+#include "../ServerGameLocals.h" // Include SVGame header.
 #include "../Effects.h" // Include Effects header.
 #include "Client.h"     // Include Player Client header.
 

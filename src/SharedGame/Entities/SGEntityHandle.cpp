@@ -16,7 +16,7 @@
 #include "../src/CLGame/ClientGameLocal.h"
 #include "../src/CLGame/Entities/Base/CLGBaseEntity.h"
 #else
-#include "../src/SVGame/ServerGameLocal.h"
+#include "../src/SVGame/ServerGameLocals.h"
 #include "../src/SVGame/Entities/Base/SVGBaseEntity.h"
 #endif
 

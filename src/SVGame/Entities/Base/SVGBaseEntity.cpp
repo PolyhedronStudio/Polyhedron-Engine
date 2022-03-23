@@ -7,7 +7,7 @@
 //
 */
 
-#include "../../ServerGameLocal.h"		// SVGame.
+#include "../../ServerGameLocals.h"		// SVGame.
 
 //
 // EntityBridge.

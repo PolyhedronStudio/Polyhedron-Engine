@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // General.
-#include "../ServerGameLocal.h" // SVGame.
+#include "../ServerGameLocals.h" // SVGame.
 #include "../ChaseCamera.h"     // Chase Camera.
 #include "../Effects.h"         // Effects.
 #include "../Entities.h"        // Entities.

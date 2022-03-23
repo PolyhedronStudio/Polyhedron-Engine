@@ -1,5 +1,5 @@
 // Core.
-#include "ServerGameLocal.h"	 // Include SVGame header.
+#include "ServerGameLocals.h"	 // Include SVGame header.
 
 // Entities.
 #include "Entities.h"
@@ -15,8 +15,6 @@
 // Gameworld.
 #include "World/Gameworld.h"
 
-// GameLocals.
-#include "GameLocals.h"
 
 // Extern cvars.
 extern cvar_t* gamemode;

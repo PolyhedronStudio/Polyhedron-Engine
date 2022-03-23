@@ -88,16 +88,6 @@ struct CLGTrace {
 };
 
 //-------------------
-// Client View structure.
-//
-// Contains all current client view entities.
-//-------------------
-typedef struct clg_view_s {
-
-} clg_view_t;
-extern clg_view_t view;
-
-//-------------------
 // Client Game structure.
 //
 // This structure is used to contain all local client game module

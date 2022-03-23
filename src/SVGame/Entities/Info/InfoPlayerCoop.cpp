@@ -6,7 +6,7 @@
 //
 //
 */
-#include "../../ServerGameLocal.h"              // SVGame.
+#include "../../ServerGameLocals.h"              // SVGame.
 #include "../Base/SVGBaseEntity.h"      // BaseEntity.
 #include "InfoPlayerStart.h"
 #include "InfoPlayerCoop.h"     // Class.

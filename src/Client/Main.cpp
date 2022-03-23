@@ -2980,8 +2980,9 @@ unsigned CL_Frame(unsigned msec)
         break;
     }
 
-	if (cls.demo.playback && cl_renderdemo->integer && cl_paused->integer != 2)
+	if (cls.demo.playback && cl_renderdemo->integer && cl_paused->integer != 2) {
 		main_extra = main_msec;
+    }
 
     Com_DDDDPrintf("main_extra=%d ref_frame=%d ref_extra=%d "
                    "phys_frame=%d phys_extra=%d\n",
@@ -2991,20 +2992,23 @@ unsigned CL_Frame(unsigned msec)
     // Decide the simulation time
     cls.frameTime = main_extra * 0.001f;
 
-    if (cls.frameTime > 1.0 / 5)
+    if (cls.frameTime > 1.0 / 5) {
         cls.frameTime = 1.0 / 5;
+    }
 
 	if (!sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         cl.time += main_extra;
     }
 
     // Read next demo frame
-    if (cls.demo.playback)
+    if (cls.demo.playback) {
         CL_DemoFrame(main_extra);
+    }
 
     // Calculate local time
-	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2))
+	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         CL_SetClientTime();
+    }
 
 #if USE_AUTOREPLY
     // Check for version reply
@@ -3052,13 +3056,15 @@ unsigned CL_Frame(unsigned msec)
 
     if (ref_frame) {
         // Update the screen
-        if (host_speeds->integer)
+        if (host_speeds->integer) {
             time_before_ref = Sys_Milliseconds();
+        }
 
         SCR_UpdateScreen();
 
-        if (host_speeds->integer)
+        if (host_speeds->integer) {
             time_after_ref = Sys_Milliseconds();
+        }
 
         ref_extra -= ref_msec;
         R_FRAMES++;
@@ -3078,8 +3084,9 @@ run_fx:
     }
 
     // Check connection timeout
-    if (cls.netChannel)
+    if (cls.netChannel) {
         CL_CheckTimeout();
+    }
 
     C_FRAMES++;
 

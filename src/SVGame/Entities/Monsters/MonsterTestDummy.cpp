@@ -7,7 +7,7 @@
 *	MonsterTestDummy implementation.
 *
 ***/
-#include "../../ServerGameLocal.h"
+#include "../../ServerGameLocals.h"
 #include "../../Effects.h"
 #include "../../Utilities.h"
 #include "../../Physics/StepMove.h"

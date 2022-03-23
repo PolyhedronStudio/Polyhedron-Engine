@@ -8,7 +8,7 @@
 //
 
 // Include local game header.
-#include "../ServerGameLocal.h"
+#include "../ServerGameLocals.h"
 
 // Include class entities.
 #include "../Entities.h"

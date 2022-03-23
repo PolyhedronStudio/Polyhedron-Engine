@@ -7,7 +7,7 @@
 // This trigger will always fire.  It is activated by the world.
 //
 */
-#include "../../ServerGameLocal.h"     // SVGame.
+#include "../../ServerGameLocals.h"     // SVGame.
 #include "../../Effects.h"     // Effects.
 #include "../../Utilities.h"       // Util funcs.
 #include "../Base/SVGBaseEntity.h"

@@ -6,7 +6,7 @@
 *
 ***/
 // Core.
-#include "../ServerGameLocal.h"
+#include "../ServerGameLocals.h"
 
 // Entities.
 #include "../Entities.h"

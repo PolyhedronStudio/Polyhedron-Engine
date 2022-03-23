@@ -4,7 +4,7 @@
 // TriggerRelay.cpp
 */
 
-#include "../../ServerGameLocal.h"
+#include "../../ServerGameLocals.h"
 #include "../../Effects.h"
 #include "../../Entities.h"
 #include "../../Utilities.h"

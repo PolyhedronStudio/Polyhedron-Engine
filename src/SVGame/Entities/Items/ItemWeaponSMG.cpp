@@ -8,7 +8,7 @@
 *
 ***/
 // Main.
-#include "../../ServerGameLocal.h"  // SVGame.
+#include "../../ServerGameLocals.h"  // SVGame.
 #include "../../Ballistics.h"          // Effects.
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"        // Util funcs.

@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // Core.
-#include "../ServerGameLocal.h"
+#include "../ServerGameLocals.h"
 
 // Entities.
 #include "../Entities.h"

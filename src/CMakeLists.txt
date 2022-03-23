@@ -206,7 +206,6 @@ SET( SRC_SVGAME
     )
     
     SET ( HEADERS_SVGAME
-	SVGame/ServerGameLocal.h
 	SVGame/Ballistics.h
 	SVGame/ChaseCamera.h
 	SVGame/Effects.h

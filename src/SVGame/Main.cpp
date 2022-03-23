@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // Core.
-#include "ServerGameLocal.h"          // Include SVGame header.
+#include "ServerGameLocals.h"          // Include SVGame header.
 
 // Entities.
 #include "Entities.h"
@@ -33,9 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Gameworld.
 #include "World/GameWorld.h"
-
-// GameLocals.
-#include "GameLocals.h"
 
 // Player related.
 #include "Player/Client.h"      // Include Player Client header.

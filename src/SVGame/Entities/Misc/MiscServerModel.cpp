@@ -6,7 +6,7 @@
 //
 //
 */
-#include "../../ServerGameLocal.h"          // SVGame.
+#include "../../ServerGameLocals.h"          // SVGame.
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"            // Util funcs.
 #include "../../Physics/StepMove.h" // Stepmove funcs.

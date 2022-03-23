@@ -1,4 +1,4 @@
-#include "ServerGameLocal.h"
+#include "ServerGameLocals.h"
 #include "Entities.h"
 
 // Class Entities.

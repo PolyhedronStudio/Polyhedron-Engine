@@ -7,7 +7,7 @@
 // Contains misc definitions.
 //
 
-#include "ServerGameLocal.h"         // Include SVGame funcs.
+#include "ServerGameLocals.h"         // Include SVGame funcs.
 #include "Entities.h"
 #include "Utilities.h"           // Include Utilities funcs.
 #include "Effects.h"

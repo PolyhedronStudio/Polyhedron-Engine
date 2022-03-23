@@ -10,7 +10,7 @@
 // TODO: Explain what.
 //
 */
-#include "../../ServerGameLocal.h"  // SVGame.
+#include "../../ServerGameLocals.h"  // SVGame.
 #include "../../Effects.h"          // Effects.
 #include "../../Player/Animations.h"    // Include Player Client Animations.
 #include "../../Physics/StepMove.h" // Stepmove funcs.

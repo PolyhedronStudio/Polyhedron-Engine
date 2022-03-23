@@ -4,7 +4,7 @@
 // FuncTrain.cpp
 */
 
-#include "../../ServerGameLocal.h"
+#include "../../ServerGameLocals.h"
 #include "../../Entities.h"
 #include "../../Effects.h"
 
