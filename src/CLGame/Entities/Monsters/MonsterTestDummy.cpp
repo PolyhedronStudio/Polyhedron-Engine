@@ -24,7 +24,7 @@
 **/
 //! Constructor/Destructor.
 MonsterTestDummy::MonsterTestDummy(ClientEntity* clEntity) : Base(clEntity) {
-	clgi.Com_LPrintf(PrintType::Warning, "HO LAWD, SPAWNED A MONSTERTESTDUMMY ON THA CLIENT HAHA\n");
+
 }
 
 
@@ -82,6 +82,9 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 *   Client Class Entity Functions.
 *
 ***/
+
+
+
 
 /***
 *

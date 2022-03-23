@@ -27,7 +27,13 @@
 //
 // Constructor/Deconstructor.
 //
-MonsterTestDummy::MonsterTestDummy(Entity* svEntity) : Base(svEntity) { }
+MonsterTestDummy::MonsterTestDummy(Entity* svEntity) : Base(svEntity) { 
+	const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
+	uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
+
+	gi.DPrintf("SVG Spawned: svNumber=#%i mapClass=%s hashedMapClass=#%i\n", svEntity->state.number, mapClass, hashedMapClass);
+}
+
 MonsterTestDummy::~MonsterTestDummy() { }
 
 
@@ -154,6 +160,12 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 	    float parsedFloat = 0.f;
 	    ParseFloatKeyValue(key, value, parsedFloat);
 	    state->animationFramerate = parsedFloat;        
+    } else if (key == "animindex") {
+    } else if (key == "skin") {
+    } else if (key == "health") {
+        int32_t parsedInt = 0;
+        ParseIntegerKeyValue(key, value, parsedInt);
+        SetHealth(parsedInt);
     } else {
 	    Base::SpawnKey(key, value);
     }

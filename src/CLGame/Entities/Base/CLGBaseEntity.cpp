@@ -85,22 +85,15 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 void CLGBaseEntity::UpdateFromState(const EntityState& state) {
     previousState = currentState;
     currentState = state;
+
+    DebugPrint();
 }
 
 /**
-*   @brief  Sets the entity classname and generates a hashed string of it.
-**/
-void CLGBaseEntity::SetClassname(const std::string& classname) {
-    // Sets the classname.
-    this->classname = classname;
-
-    // Hash it.
-    hashedClassname = TypeInfo::HashClassnameString(classname.c_str(), classname.size(), 64);
-}
-/**
-*   @return A string containing the entity's classname.
+*   @brief  Stub.
 **/
 const std::string CLGBaseEntity::GetClassname() {
+    // Returns this classname, the base entity.
     return GetTypeInfo()->classname;
 }
 

@@ -11,13 +11,13 @@
 
 
 // Client Game Exports Interface.
-//#include "Shared/Interfaces/IClientGameExports.h"
+#include "Shared/Interfaces/IClientGameExports.h"
 
 
-class IClientGameClassEntity {
+class IClientGameEntity {
 public:
     // Runtime type information
-    DefineTopAbstractClass( IClientGameClassEntity );
+    DefineTopAbstractClass( IClientGameEntity );
 
     /**
     *
@@ -25,7 +25,7 @@ public:
     *
     **/
     //! Constructor/Destructor.
-    virtual ~IClientGameClassEntity() = default;
+    virtual ~IClientGameEntity() = default;
 
 
     /**

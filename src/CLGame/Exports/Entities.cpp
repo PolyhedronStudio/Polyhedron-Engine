@@ -275,49 +275,18 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
         return false;
     }
 
-    //Com_DPrint("----- clEntity->current.number=%i, state->number=%i\n")
-    // DEVELOPER
-    //if (clEntity->clientEntityNumber != state.number) {
-
-    // CHECK CLIENTENTITYNUMBER HERE? BE SURE TO PERHAPS... UPDATE IT HERE?
-        if (clEntity->current.number == state.number) {
-            Com_DPrint("=============: clEntity->current.number=%i, state->number=%i\n", clEntity->current.number, state.number);
-        } else {
-            Com_DPrint("+++++++++++++: clEntity->id=%i, state->number=%i\n", clEntity->clientEntityNumber, state.number);
-        }
-    //}
-    //// DEV
-
-    // See whether we already have a class entity for this id.
-    //CLGBaseEntity *clgEntity = classEntityList.GetByNumber(state.number);
+    
+    // Will either return a pointer to a new classentity type, or an existing one, depending on the state.
     CLGBaseEntity *clgEntity = classEntityList.SpawnFromState(state, clEntity);
 
-    // If we don't, create one.
-    if (!clgEntity) {
-        //// Spawn one from current state.
-        //clgEntity = AllocateClientGameEntityByHashedClassname(clEntity, state.hashedClassname);
-
-        // Debug Print.
-        Com_DPrint("NO GODDAMN CLG ENTITY?: clEntity->clEntityNr=%i, clgEntity=state.number=%i hasedClassname=#%i:\n", clEntity->clientEntityNumber, state.number, clgEntity->GetHashedClassname());
-    } else {
-        // Its entity type classname has changed, destroy its old class and allocate a new one.
-        if (clgEntity->GetHashedClassname() != state.hashedClassname) {
-            // When found, allocate it. If not found, allocate a CLGBaseEntity*
-            Com_DPrint("Spawned new clEntity->clEntityNr=%i, clgEntity=state.number=%i hasedClassname=#%i:\n", clEntity->clientEntityNumber, state.number, clgEntity->GetHashedClassname());
-        } else {
-            // Be sure to update its clEntity pointer just in case.
-            clgEntity->SetClientEntity(clEntity);
-
-            // Debug.
-            Com_DPrint("Updated clEntity->clEntityNr=%i, clgEntity=state.number=%i hasedClassname=#%i:\n", clEntity->clientEntityNumber, state.number, clgEntity->GetHashedClassname());
-        }
+    // Do a debug print.
+#ifdef _DEBUG
+    if (clgEntity) {
+        clgEntity->DebugPrint();
     }
+#endif
 
-    // Now we've got the actual entity we're good to go.
-
-    //Com_DPrint("SpawnFromState: clEntity->id=%i, state->number=%i\n", clEntity->clientEntityNumber, state.number);
-
-    return true;
+    return (clgEntity != nullptr ? true : false);
 }
 
 /**

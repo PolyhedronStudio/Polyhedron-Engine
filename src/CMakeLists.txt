@@ -32,7 +32,7 @@ SET(SRC_CLGAME
 	CLGame/Entities/Base/CLGBaseEntity.cpp
 	CLGame/Entities/Monsters/MonsterTestDummy.cpp
 	CLGame/Entities/ClassEntityList.cpp
-	CLGame/Entities/IClientGameClassEntity.cpp
+	CLGame/Entities/IClientGameEntity.cpp
 
 
 	CLGame/Exports/Core.cpp
@@ -70,7 +70,7 @@ SET(HEADERS_CLGAME
 	CLGame/Entities/Base/CLGBaseEntity.h
 	CLGame/Entities/Monsters/MonsterTestDummy.h
 	CLGame/Entities/ClassEntityList.h
-	CLGame/Entities/IClientGameClassEntity.h
+	CLGame/Entities/IClientGameEntity.h
 
 	CLGame/Exports/Core.h
 	CLGame/Exports/Entities.h

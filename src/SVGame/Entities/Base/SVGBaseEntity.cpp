@@ -29,9 +29,6 @@
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
 
 }
-SVGBaseEntity::~SVGBaseEntity() {
-
-}
 
 // Interface functions. 
 //

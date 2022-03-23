@@ -13,10 +13,10 @@
 #include "Shared/Interfaces/IClientGameExports.h"
 
 // Client Game ClassEntity Interface.
-#include "../IClientGameClassEntity.h"
+#include "../IClientGameEntity.h"
 
 
-class CLGBaseEntity : public IClientGameClassEntity {
+class CLGBaseEntity : public IClientGameEntity {
 public:
     /**
     *
@@ -40,7 +40,7 @@ public:
     virtual ~CLGBaseEntity() = default;
 
     // Runtime type information
-	DefineMapClass( "CLGBaseEntity", CLGBaseEntity, IClientGameClassEntity);
+	DefineMapClass( "CLGBaseEntity", CLGBaseEntity, IClientGameEntity);
 
     // Checks if this entity class is exactly the given class
     // @param entityClass: an entity class which must inherint from SVGBaseEntity
@@ -107,9 +107,9 @@ public:
     }
 
     /**
-    *   @brief  Sets the classname of this entity.
+    *   @brief  Stub
     **/
-    virtual void SetClassname(const std::string& classname) override;
+    virtual void SetClassname(const std::string& classname) final {};
 
     /**
     *   @return A string containing the entity's classname.
@@ -164,13 +164,20 @@ public:
     //    return 0; // None, or world for that matter.
     //}
 
+#ifdef _DEBUG
+    // Do a debug print.
+    inline void DebugPrint() {
+	    const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
+	    uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
+
+        if (clientEntity) {
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG Spawned: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", clientEntity->clientEntityNumber, currentState.number, mapClass, hashedMapClass);
+        } else {
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG Spawned: clEntity= nullptr, mapClass=%s, hashedMapClass=%i\n", clientEntity->clientEntityNumber, currentState.number, mapClass, hashedMapClass);
+        }
+    }
+#endif
 private:
-    // Classname.
-    std::string classname = "";
-
-    //  Hashed classname string.
-    uint32_t hashedClassname = 0;
-
     //! Pointer to the client entity which owns this class entity.
     ClientEntity *clientEntity = nullptr;
 

@@ -58,12 +58,6 @@ CLGBaseEntity* ClassEntityList::SpawnFromState(const EntityState& state, ClientE
 	const uint32_t currentHashedClassname = state.hashedClassname;
 	uint32_t previousHashedClassname = clEntity->prev.hashedClassname;
 
-	// Warn if a slot is already occupied.
-    if (classEntities.size() > stateNumber && classEntities[stateNumber] != nullptr) {
-		// Warn.
-		Com_DPrint("Warning: Trying to allocate class entity (hash #%i) to a slot already occupied by #%i was pre-occupied.\n", currentHashedClassname, previousHashedClassname);
-    }
-
     // New type info-based spawning system, to replace endless string comparisons
     // First find it by the map name
     TypeInfo* info = TypeInfo::GetInfoByHashedMapName(currentHashedClassname);
@@ -73,7 +67,7 @@ CLGBaseEntity* ClassEntityList::SpawnFromState(const EntityState& state, ClientE
 		// 
 		if ((info = TypeInfo::GetInfoByName("CLGBaseEntity")) == nullptr) {
 			// Warn.
-		    Com_DPrint("Warning: clEntity(#%i) tried to spawn unkown entity class: #%i - Using CLGBaseEntity instead\n", clEntity->clientEntityNumber, currentHashedClassname);
+		    Com_DPrint("Warning: info = TypeInfo::GetInfoByName(\"CLGBaseEntity\")) == nullptr\n");
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -88,6 +82,8 @@ CLGBaseEntity* ClassEntityList::SpawnFromState(const EntityState& state, ClientE
 
 		// If it isn't a nullptr...
 		if (!classEntity) {
+			Com_DPrint("Warning: ClassEntityList.InsertAt failed.\n");
+			return nullptr;
 			//classEntity = new CLGBaseEntity(clEntity);
 		}
 
