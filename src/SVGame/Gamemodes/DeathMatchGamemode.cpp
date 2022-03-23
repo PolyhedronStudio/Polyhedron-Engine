@@ -118,7 +118,7 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     // Reinitialize persistent data since we are in a fresh spawn.
     InitializePlayerPersistentData(client);
     // Inform of a client user info change.
-    ClientUserinfoChanged(player->GetServerEntity(), userinfo);
+    ClientUserinfoChanged(player->GetPODEntity(), userinfo);
 
     // Backup the current client persistent data.
     ClientPersistentData persistentData = client->persistent;
@@ -590,5 +590,5 @@ void DeathmatchGamemode::StartClientIntermission(SVGBasePlayer* player, ServerCl
     SVG_HUD_GenerateDMScoreboardLayout(player, NULL);
 
     // Do a reliable unicast.
-    gi.Unicast(player->GetServerEntity(), true);
+    gi.Unicast(player->GetPODEntity(), true);
 }

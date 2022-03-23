@@ -595,7 +595,7 @@ qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
 		classEntity->SetGroundEntity(nullptr);
 		classEntity->SetLinkCount(0);
 		classEntity->SetGroundEntityLinkCount(0);
-		classEntity->SetServerEntity(nullptr);
+		classEntity->SetPODEntity(nullptr);
 
 		// Reset server entity's class entity pointer.
 		svEntity->classEntity = nullptr;

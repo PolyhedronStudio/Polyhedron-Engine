@@ -22,7 +22,7 @@
 **/
 //! Constructor/Destructor.
 CLGBaseEntity::CLGBaseEntity(ClientEntity* clEntity) {
-    this->clientEntity = clEntity;
+    this->podEntity = clEntity;
 }
 
 
@@ -102,20 +102,6 @@ const std::string CLGBaseEntity::GetClassname() {
 **/
 uint32_t CLGBaseEntity::GetHashedClassname() {
     return GetTypeInfo()->hashedMapClass;
-}
-
-
-/**
-*   @brief  Sets a pointer referring to this class' client entity.
-**/
-void CLGBaseEntity::SetClientEntity(ClientEntity* clEntity) {
-    clientEntity = clEntity;
-}
-/**
-*   @return The pointer referring to this class' client entity.
-**/
-ClientEntity* CLGBaseEntity::GetClientEntity() {
-    return clientEntity;
 }
 
 

@@ -24,7 +24,7 @@ void SVG_CPrint(SVGBaseEntity* ent, int32_t printlevel, const std::string& str) 
     if (!ent)
     	return;
 
-    gi.CPrintf(ent->GetServerEntity(), printlevel, "%s", str.c_str());
+    gi.CPrintf(ent->GetPODEntity(), printlevel, "%s", str.c_str());
 }
 
 // Wraps up gi.DPrintf
@@ -43,7 +43,7 @@ void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str) {
     if (!ent)
         return;
 
-    gi.CenterPrintf(ent->GetServerEntity(), "%s", str.c_str());
+    gi.CenterPrintf(ent->GetPODEntity(), "%s", str.c_str());
 }
 
 //
@@ -57,7 +57,7 @@ void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float vo
     if (!ent)
         return;
 
-    gi.Sound(ent->GetServerEntity(), channel, soundIndex, volume, attenuation, timeOffset);
+    gi.Sound(ent->GetPODEntity(), channel, soundIndex, volume, attenuation, timeOffset);
 }
 
 
@@ -110,7 +110,7 @@ SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, 
     SVGBaseEntity** classEntities = game.world->GetClassEntities();
 
     // Fetch server entity in case one was passed to us.
-    Entity* serverPassEntity = (passent ? passent->GetServerEntity() : NULL);
+    Entity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);
 
     // Execute server trace.
     TraceResult trace = gi.Trace(start, mins, maxs, end, serverPassEntity, contentMask);

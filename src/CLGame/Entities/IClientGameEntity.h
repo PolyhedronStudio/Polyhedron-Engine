@@ -106,12 +106,12 @@ public:
     /**
     *   @brief  Sets a pointer referring to this class' client entity.
     **/
-    virtual void SetClientEntity(ClientEntity* clEntity) = 0;
+    virtual void SetPODEntity(PODEntity* podEntity) = 0;
 
     /**
     *   @return The pointer referring to this class' client entity.
     **/
-    virtual ClientEntity* GetClientEntity() = 0;
+    virtual PODEntity* GetPODEntity() = 0;
 
 
     /***
@@ -126,7 +126,7 @@ public:
 
 private:
     //! Pointer to the client entity which owns this class entity.
-    ClientEntity *clientEntity = nullptr;
+    PODEntity *podEntity = nullptr;
 
     //! Client Class Entities maintain their own states. (Get copied in from updates.)
     EntityState currentState = {};

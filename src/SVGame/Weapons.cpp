@@ -113,7 +113,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
             tr.ent = self->GetEnemy();
     }
 
-    AngleVectors(self->GetServerEntity()->state.angles, &forward, &right, &up);
+    AngleVectors(self->GetPODEntity()->state.angles, &forward, &right, &up);
     point = vec3_fmaf(self->GetOrigin(), range, forward);
     point = vec3_fmaf(point, aim[1], right);
     point = vec3_fmaf(point, aim[2], up);

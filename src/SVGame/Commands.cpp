@@ -304,7 +304,7 @@ argv(0) god
 */
 void Cmd_God_f(SVGBasePlayer *player, ServerClient *client) {
     //if (deathmatch->value && !sv_cheats->value) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
     //}
 
@@ -327,7 +327,7 @@ argv(0) notarget
 */
 void Cmd_Notarget_f(SVGBasePlayer* player, ServerClient* client) {
     //if (deathmatch->value && !sv_cheats->value) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
     //}
 
@@ -348,7 +348,7 @@ argv(0) noclip
 */
 void Cmd_Noclip_f(SVGBasePlayer *player, ServerClient *client) {
     //if (deathmatch->value && !sv_cheats->value) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
     //    return;
     //}
 
@@ -435,16 +435,16 @@ void Cmd_Drop_f(SVGBasePlayer*ent)
     s = (const char*)gi.args(); // C++20: Added casts.
     //it = SVG_FindItemByPickupName(s);
     //if (!it) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "unknown item: %s\n", s);
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "unknown item: %s\n", s);
     //    return;
     //}
     //if (!it->Drop) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "Item is not dropable.\n");
     //    return;
     //}
 //    index = ITEM_INDEX(it);
     //if (!ent->GetClient()->persistent.inventory[index]) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Out of item: %s\n", s);
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "Out of item: %s\n", s);
     //    return;
     //}
 
@@ -497,7 +497,7 @@ void Cmd_InvUse_f(SVGBasePlayer *player, ServerClient *client) {
 
     //it = &itemlist[ent->GetClient()->persistent.selectedItem];
     //if (!it->Use) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not usable.\n");
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "Item is not usable.\n");
     //    return;
     //}
     //it->Use(ent, it);
@@ -608,13 +608,13 @@ void Cmd_InvDrop_f(SVGBasePlayer* player, ServerClient* client) {
     //HUD_ValidateSelectedItem(ent);
 
     //if (ent->GetClient()->persistent.selectedItem == -1) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "No item to drop.\n");
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "No item to drop.\n");
     //    return;
     //}
 
     //it = &itemlist[ent->GetClient()->persistent.selectedItem];
     //if (!it->Drop) {
-    //    gi.CPrintf(ent->GetServerEntity(), PRINT_HIGH, "Item is not dropable.\n");
+    //    gi.CPrintf(ent->GetPODEntity(), PRINT_HIGH, "Item is not dropable.\n");
     //    return;
     //}
     //it->Drop(ent, it);
@@ -956,7 +956,7 @@ void SVG_ClientCommand(Entity* svEntity) {
     else if (command == "drop")
         Cmd_Drop_f(ent);
     else if (command == "give")
-        Cmd_Give_f(ent->GetServerEntity());*/
+        Cmd_Give_f(ent->GetPODEntity());*/
     else if (command == "god")
         Cmd_God_f(player, client);
     else if (command == "notarget")
@@ -964,7 +964,7 @@ void SVG_ClientCommand(Entity* svEntity) {
     else if (command == "noclip")
         Cmd_Noclip_f(player, client);
     //else if (PH_StringCompare(cmd, "inven") == 0)
-    //    Cmd_Inven_f(ent->GetServerEntity());
+    //    Cmd_Inven_f(ent->GetPODEntity());
     //else if (PH_StringCompare(cmd, "invnext") == 0)
     //    SelectNextItem(ent, -1);
     //else if (PH_StringCompare(cmd, "invprev") == 0)

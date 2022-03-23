@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client.h"
 #include "Client/GameModule.h"
 #include "Shared/CLGame.h"
-#include "SharedGame/SharedGame.h"
 #include "system/Lirc.h"
 
 static cvar_t    *cl_nodelta;

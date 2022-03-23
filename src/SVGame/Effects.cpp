@@ -99,7 +99,7 @@ void SVG_BecomeExplosion1(SVGBaseEntity *self)
 
     // Queue for removal.
     //self->Remove();
-    //SVG_FreeEntity(self->GetServerEntity());
+    //SVG_FreeEntity(self->GetPODEntity());
 }
 
 //=================

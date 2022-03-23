@@ -186,7 +186,7 @@ void SVGBasePlayer::SpawnKey(const std::string& key, const std::string& value) {
 **/
 void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
     // Fetch server entity.
-    Entity* serverEntity = GetServerEntity();
+    Entity* serverEntity = GetPODEntity();
 
     // Fetch client.
     gclient_s* client = GetClient();
@@ -338,7 +338,7 @@ void SVGBasePlayer::TossWeapon() {
 
     if (item) {
         //playerClient->GetClient()->aimAngles[vec3_t::Yaw] -= spread;
-        //drop = SVG_DropItem(playerClient->GetServerEntity(), item);
+        //drop = SVG_DropItem(playerClient->GetPODEntity(), item);
         //playerClient->GetClient()->aimAngles[vec3_t::Yaw] += spread;
         //drop->spawnFlags = ItemSpawnFlags::DroppedPlayerItem;
     }
@@ -363,30 +363,30 @@ void SVGBasePlayer::PlayerNoise(SVGBaseEntity* noiseEntity, const vec3_t& noiseO
 //if (who->GetFlags() & EntityFlags::NoTarget)
 //    return;
 
-//    if (!who->GetServerEntity()->myNoisePtr) {
+//    if (!who->GetPODEntity()->myNoisePtr) {
 //        noise = SVG_Spawn();
 ////        noise->classname = "player_noise";
 //        VectorSet(noise->mins, -8, -8, -8);
 //        VectorSet(noise->maxs, 8, 8, 8);
-//        noise->owner = who->GetServerEntity();
+//        noise->owner = who->GetPODEntity();
 //        noise->serverFlags = EntityServerFlags::NoClient;
-//        //who->GetServerEntity()->myNoisePtr = noise;
+//        //who->GetPODEntity()->myNoisePtr = noise;
 //
 //        noise = SVG_Spawn();
 //     //   noise->classname = "player_noise";
 //        VectorSet(noise->mins, -8, -8, -8);
 //        VectorSet(noise->maxs, 8, 8, 8);
-//        noise->owner = who->GetServerEntity();
+//        noise->owner = who->GetPODEntity();
 //        noise->serverFlags = EntityServerFlags::NoClient;
-//        //who->GetServerEntity()->myNoise2Ptr = noise;
+//        //who->GetPODEntity()->myNoise2Ptr = noise;
 //    }
 //
 //    if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
-//        noise = who->GetServerEntity()->myNoisePtr;
+//        noise = who->GetPODEntity()->myNoisePtr;
 //        level.soundEntity = noise;
 //        level.soundEntityFrameNumber = level.frameNumber;
 //    } else { // type == PNOISE_IMPACT
-//        noise = who->GetServerEntity()->myNoise2Ptr;
+//        noise = who->GetPODEntity()->myNoise2Ptr;
 //        level.sound2Entity = noise;
 //        level.sound2EntityFrameNumber = level.frameNumber;
 //    }

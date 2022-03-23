@@ -750,7 +750,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
 //===============
 void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* client) {
     // Acquire server entity.
-    Entity* serverEntity = player->GetServerEntity();
+    Entity* serverEntity = player->GetPODEntity();
     // Fetch the bobMove state.
     SVGBasePlayer::BobMoveCycle& bobMoveCycle = player->GetBobMoveCycle();
 
@@ -898,9 +898,9 @@ static SVGBasePlayer* pm_passent;
 TraceResult q_gameabi PM_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end)
 {
     if (pm_passent && pm_passent->GetHealth() > 0) {
-        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), BrushContentsMask::PlayerSolid);
+        return gi.Trace(start, mins, maxs, end, pm_passent->GetPODEntity(), BrushContentsMask::PlayerSolid);
     } else {
-        return gi.Trace(start, mins, maxs, end, pm_passent->GetServerEntity(), BrushContentsMask::DeadSolid);
+        return gi.Trace(start, mins, maxs, end, pm_passent->GetPODEntity(), BrushContentsMask::DeadSolid);
     }
 }
 void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, ClientMoveCommand* moveCommand) {
@@ -1575,7 +1575,7 @@ void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     // If we had persistent coop respawn data, be sure to back it up right now.
     client->persistent = respawnData.persistentCoopRespawn;
     // Inform of a client user info change.
-    ClientUserinfoChanged(player->GetServerEntity(), userinfo);
+    ClientUserinfoChanged(player->GetPODEntity(), userinfo);
     // In case the score was higher, be sure to update it.
     if (respawnData.score > client->persistent.score) {
 	    client->persistent.score = respawnData.score;

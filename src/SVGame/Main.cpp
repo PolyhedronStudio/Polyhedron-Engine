@@ -563,13 +563,13 @@ void SVG_RunFrame(void) {
         // Admer: entity was marked for removal at the previous tick
         if (classEntity->GetServerFlags() & EntityServerFlags::Remove) {
             // Free server entity.
-            game.world->FreeServerEntity(classEntity->GetServerEntity());
+            game.world->FreeServerEntity(classEntity->GetPODEntity());
 
             // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
             // 
             // Other entities may wish to point at this entity for the current tick. By unsetting
             // the server entity we can prevent malicious situations from happening.
-            classEntity->SetServerEntity(nullptr);
+            classEntity->SetPODEntity(nullptr);
 
             // Skip further processing of this entity, it's removed.
             continue;

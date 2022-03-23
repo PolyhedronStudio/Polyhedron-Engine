@@ -28,8 +28,6 @@
 
 // Shared Game Headers.
 #include "SharedGame/SharedGame.h" // Include SG Base.
-#include "SharedGame/PMove.h"
-#include "SharedGame/Protocol.h"
 
 // Shared Client Game Headers.
 #include "Shared/CLTypes.h"

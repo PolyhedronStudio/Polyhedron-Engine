@@ -68,30 +68,30 @@ void SVG_PlayerNoise(SVGBaseEntity *who, vec3_t where, int type)
     //    return;
 
 
-//    if (!who->GetServerEntity()->myNoisePtr) {
+//    if (!who->GetPODEntity()->myNoisePtr) {
 //        noise = SVG_Spawn();
 ////        noise->classname = "player_noise";
 //        VectorSet(noise->mins, -8, -8, -8);
 //        VectorSet(noise->maxs, 8, 8, 8);
-//        noise->owner = who->GetServerEntity();
+//        noise->owner = who->GetPODEntity();
 //        noise->serverFlags = EntityServerFlags::NoClient;
-//        //who->GetServerEntity()->myNoisePtr = noise;
+//        //who->GetPODEntity()->myNoisePtr = noise;
 //
 //        noise = SVG_Spawn();
 //     //   noise->classname = "player_noise";
 //        VectorSet(noise->mins, -8, -8, -8);
 //        VectorSet(noise->maxs, 8, 8, 8);
-//        noise->owner = who->GetServerEntity();
+//        noise->owner = who->GetPODEntity();
 //        noise->serverFlags = EntityServerFlags::NoClient;
-//        //who->GetServerEntity()->myNoise2Ptr = noise;
+//        //who->GetPODEntity()->myNoise2Ptr = noise;
 //    }
 //
 //    if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
-//        noise = who->GetServerEntity()->myNoisePtr;
+//        noise = who->GetPODEntity()->myNoisePtr;
 //        level.soundEntity = noise;
 //        level.soundEntityFrameNumber = level.frameNumber;
 //    } else { // type == PNOISE_IMPACT
-//        noise = who->GetServerEntity()->myNoise2Ptr;
+//        noise = who->GetPODEntity()->myNoise2Ptr;
 //        level.sound2Entity = noise;
 //        level.sound2EntityFrameNumber = level.frameNumber;
 //    }

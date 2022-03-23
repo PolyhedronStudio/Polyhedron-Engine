@@ -62,7 +62,7 @@ void SVG_PhysicsEntityWPrint(const std::string &functionName, const std::string 
     gi.DPrintf(warning.c_str());
  //   // Write the index, programmers may look at that thing first
  //   std::string errorString = "";
- //   if (ent->GetServerEntity()) {
+ //   if (ent->GetPODEntity()) {
 	//errorString += "entity (index " + std::to_string(ent->GetNumber());
  //   } else {
 	//errorString += "entity has no ServerEntity ";
@@ -152,7 +152,7 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
     if ( !ent->HasThinkCallback() ) {
         // Write the index, programmers may look at that thing first
         std::string errorString = "";
-        if (ent->GetServerEntity()) {
+        if (ent->GetPODEntity()) {
             errorString += "entity (index " + std::to_string(ent->GetNumber());
         } else {
             errorString += "entity has no ServerEntity ";
@@ -571,7 +571,7 @@ qboolean SVG_Push(SVGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             || moveType == MoveType::Spectator)
             continue;
 
-        if (!check->GetServerEntity()->area.prev)
+        if (!check->GetPODEntity()->area.prev)
             continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved

@@ -68,7 +68,7 @@ void TargetEarthquake::QuakeUse( SVGBaseEntity* other, SVGBaseEntity* activator 
 //===============
 void TargetEarthquake::QuakeThink() {
     if ( lastQuakeTime < level.time ) {
-        gi.PositionedSound( GetOrigin(), GetServerEntity(), SoundChannel::Auto, GetNoiseIndexA(), 1.0f, Attenuation::None, 0.0f);
+        gi.PositionedSound( GetOrigin(), GetPODEntity(), SoundChannel::Auto, GetNoiseIndexA(), 1.0f, Attenuation::None, 0.0f);
         lastQuakeTime = level.time + 0.5f;
     }
 

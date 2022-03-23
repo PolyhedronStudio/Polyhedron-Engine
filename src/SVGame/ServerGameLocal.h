@@ -19,24 +19,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+// Shared includes.
 #include "Shared/Shared.h"
-#include "Shared/list.h"
+#include "Shared/List.h"
 
-// define GAME_INCLUDE so that game.h does not define the
-// short, server-visible ServerClient and Entity structures,
-// because we define the full size ones in this file
+
+// Because we define the full size ServerClient and Entity structures in this file
+// we define GAME_INCLUDE so that SVGame.h does not define the short server-visible variety.
 #define GAME_INCLUDE
+
+// ServerGame Include.
 #include "Shared/SVGame.h"
+
+// SharedGame includes.
 #include "SharedGame/SharedGame.h" // Include SG Base.
 #include "SharedGame/Protocol.h"
 
-// the "gameversion" client command will print32_t this plus compile date
+// The "gameversion" client command will print this including the compile date
 #define GAMEVERSION "basepoly"
 
 
-//-------------------
 // Forward Declarations.
-//-------------------
 class SVGBaseEntity;
 class SVGBaseItem;
 class SVGBaseItemWeapon;
@@ -45,7 +48,9 @@ class Gameworld;
 class IGamemode;
 struct entity_s;
 
+// Game Locals.
 #include "GameLocals.h"
+
 //==================================================================
 
 //! MS Frametime for animations.

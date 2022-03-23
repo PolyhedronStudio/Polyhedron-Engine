@@ -9,7 +9,8 @@
 ***/
 #pragma once
 
-
+// Predeclare.
+struct gclient_s;
 
 /**
 *   ISharedGameEntity
@@ -91,16 +92,12 @@ public:
     /**
     *   @return Pointer to the client/server side POD Entity.
     **/
-    inline PODEntity* GetPODEntity() {
-        return podEntity;
-    }
+    virtual PODEntity* GetPODEntity() = 0;
     /**
     *   @brief  Sets the pointer ot the client/server side POD Entity.
     *           Used only in SVG_FreeEntity and SVG_CreateClassEntity.
     **/
-    virtual inline void SetPODEntity(PODEntity* podEntity) {
-        this->podEntity = podEntity;
-    }
+    virtual void SetPODEntity(PODEntity* podEntity) = 0;
 
 
 
@@ -112,11 +109,11 @@ public:
     *
     **/
     // Admer: these should all be prefixed with Dispatch
-    virtual void Use(SVGBaseEntity* other, SVGBaseEntity* activator) = 0;
-    virtual void Die(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) = 0;
-    virtual void Blocked(SVGBaseEntity* other) = 0;
-    virtual void Touch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
-    virtual void TakeDamage(SVGBaseEntity* other, float kick, int32_t damage) = 0;
+    virtual void Use(ClassEntity* other, ClassEntity* activator) = 0;
+    virtual void Die(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) = 0;
+    virtual void Blocked(ClassEntity* other) = 0;
+    virtual void Touch(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
+    virtual void TakeDamage(ClassEntity* other, float kick, int32_t damage) = 0;
 
 
 
@@ -132,7 +129,7 @@ public:
     *   @param  activatorOverride:  if nullptr, the entity's own activator is used and if the entity's own activator is nullptr, 
     *                               then this entity itself becomes the activator
     **/
-    virtual void UseTargets( SVGBaseEntity* activatorOverride = nullptr ) = 0;
+    virtual void UseTargets( ClassEntity* activatorOverride = nullptr ) = 0;
 
 
 
@@ -146,7 +143,7 @@ public:
     /**
     *   @returns The local center(world-space) of the entity's Bounding Box.
     **/
-    virtual vec3_t GetAbsoluteCenter() = 0;
+    virtual vec3_t          GetAbsoluteCenter() = 0;
 
     /**
     *   @brief Get/Set: BoundingBox Mins
@@ -163,8 +160,8 @@ public:
     /**
     *   @brief Get/Set: Activator
     **/
-    virtual SVGBaseEntity*  GetActivator() = 0;
-    virtual void            SetActivator(SVGBaseEntity* activator) = 0;
+    virtual ClassEntity*    GetActivator() = 0;
+    virtual void            SetActivator(ClassEntity* activator) = 0;
 
     /**
     *   @brief Get/Set: Angles
@@ -191,7 +188,7 @@ public:
     /**
     *   @brief Get/Set: Classname
     **/
-    virtual const std::string&  GetClassname() = 0;
+    virtual const std::string   GetClassname() = 0;
     virtual void                SetClassname(const std::string &classname) = 0;
 
     /**
@@ -238,8 +235,8 @@ public:
     /**
     *   @brief Get/Set: Enemy
     **/
-    virtual SVGBaseEntity*  GetEnemy() = 0;
-    virtual void            SetEnemy(SVGBaseEntity* enemy) = 0;
+    virtual ClassEntity*    GetEnemy() = 0;
+    virtual void            SetEnemy(ClassEntity* enemy) = 0;
 
     /**
     *   @brief Get: Entity Dictionary.
@@ -273,8 +270,8 @@ public:
     /**
     *   @brief Get/Set: Ground Entity
     **/
-    virtual SVGEntityHandle GetGroundEntity() = 0;
-    virtual void            SetGroundEntity(SVGBaseEntity* groundEntity) = 0;
+    virtual SGEntityHandle  GetGroundEntity() = 0;
+    virtual void            SetGroundEntity(ClassEntity* groundEntity) = 0;
 
     /**
     *   @brief Get/Set: Ground Entity Link Count
@@ -402,8 +399,8 @@ public:
     /**
     *   @brief Get/Set:     Old Enemy Entity
     **/
-    virtual SVGBaseEntity*  GetOldEnemy() = 0;
-    virtual void            SetOldEnemy(SVGBaseEntity* oldEnemy) = 0;
+    virtual ClassEntity*    GetOldEnemy() = 0;
+    virtual void            SetOldEnemy(ClassEntity* oldEnemy) = 0;
 
     /**
     *   @brief Get/Set:     Old Origin
@@ -420,8 +417,8 @@ public:
     /**
     *   @brief Get/Set:     Owner Entity
     **/
-    virtual SVGBaseEntity*  GetOwner() = 0;
-    virtual void            SetOwner(SVGBaseEntity* owner) = 0;
+    virtual ClassEntity*    GetOwner() = 0;
+    virtual void            SetOwner(ClassEntity* owner) = 0;
 
     /**
     *   @brief Get/Set:     Render Effects
@@ -509,20 +506,20 @@ public:
     /**
     *   @brief Get/Set:     Team Chain
     **/
-    virtual SVGBaseEntity*   GetTeamChainEntity() = 0;
-    virtual void             SetTeamChainEntity(SVGBaseEntity* entity) = 0;
+    virtual ClassEntity*    GetTeamChainEntity() = 0;
+    virtual void            SetTeamChainEntity(ClassEntity* entity) = 0;
 
     /**
     *   @brief Get/Set:     Team Master
     **/
-    virtual SVGBaseEntity*  GetTeamMasterEntity() = 0;
-    virtual void            SetTeamMasterEntity(SVGBaseEntity* entity) = 0;
+    virtual ClassEntity*    GetTeamMasterEntity() = 0;
+    virtual void            SetTeamMasterEntity(ClassEntity* entity) = 0;
 
     /**
     *   @brief Get/Set:     Velocity
     **/
-    virtual const vec3_t& GetVelocity() = 0;
-    virtual void SetVelocity(const vec3_t &velocity) = 0;
+    virtual const vec3_t&   GetVelocity() = 0;
+    virtual void            SetVelocity(const vec3_t &velocity) = 0;
 
     /**
     *   @brief Get/Set:     View Height
@@ -533,7 +530,7 @@ public:
     /**
     *   @brief Get/Set:     Wait Time
     **/
-    virtual const float&    GetWaitTime() = 0;
+    virtual const float     GetWaitTime() = 0;
     virtual void            SetWaitTime(const float waitTime) = 0;
 
     /**

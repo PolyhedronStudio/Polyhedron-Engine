@@ -13,8 +13,9 @@
 // Base Entity.
 #include "Base/CLGBaseEntity.h"
 
-// Entity list.
+// ClassEntity list.
 #include "ClassEntityList.h"
+
 
 
 /**

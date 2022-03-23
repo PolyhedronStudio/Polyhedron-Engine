@@ -132,7 +132,7 @@ SVGBaseEntity* SVGEntityHandle::operator=(SVGBaseEntity* classEntity) {
 	// Ensure SVGBaseEntity pointer is valid.
     if (classEntity) {
 		// Acquire server entity pointer.
-		serverEntity = classEntity->GetServerEntity();
+		serverEntity = classEntity->GetPODEntity();
 
 		// In case of a valid server entity pointer, assign entityID to its number.
 		if (serverEntity) {
@@ -166,7 +166,7 @@ bool SVGEntityHandle::operator==(const SVGBaseEntity* classEntity) {
 	    return false;
     }
 
-    Entity* serverEntity = const_cast<SVGBaseEntity*>(classEntity)->GetServerEntity();
+    Entity* serverEntity = const_cast<SVGBaseEntity*>(classEntity)->GetPODEntity();
 
     if (!serverEntity) {
 		return false;

@@ -72,7 +72,7 @@ void weapon_supershotgun_fire(SVGBasePlayer * ent)
 
     // send muzzle flash
     gi.WriteByte(ServerGameCommand::MuzzleFlash);
-    gi.WriteShort(ent->GetServerEntity() - game.world->GetServerEntities());
+    gi.WriteShort(ent->GetPODEntity() - game.world->GetServerEntities());
     gi.WriteByte(MuzzleFlashType::SuperShotgun | is_silenced);
     vec3_t origin = ent->GetOrigin();
     gi.Multicast(origin, Multicast::PVS);

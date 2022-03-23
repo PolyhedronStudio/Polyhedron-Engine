@@ -148,14 +148,14 @@ public:
     /**
     *   @return Pointer to the server side entity.
     **/
-    inline Entity* GetServerEntity() {
+    inline Entity* GetPODEntity() {
         return serverEntity;
     }
     /**
     *   @brief  Used only in SVG_FreeEntity and SVG_CreateClassEntity.
     *   @return Pointer to the server side entity.
     **/
-    inline void SetServerEntity(Entity* svEntity) {
+    inline void SetPODEntity(Entity* svEntity) {
         serverEntity = svEntity;
     }
 
@@ -606,7 +606,7 @@ public:
     /**
     *   @brief Get/Set:     Wait Time
     **/
-    inline const float&     GetWaitTime() { return waitTime; }
+    inline const float      GetWaitTime() { return waitTime; }
     inline void             SetWaitTime(const float waitTime) { this->waitTime = waitTime; }
 
     /**

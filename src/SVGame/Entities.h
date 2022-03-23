@@ -72,7 +72,7 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether a ClassEntity has a serverentity set.
 	*   @return Returns true in case the ClassEntity has a serverentity set.
 	**/
-	inline bool ClassEntityHasServerEntity(SVGBaseEntity* ent) { return ent->GetServerEntity(); }
+	inline bool ClassEntityHasServerEntity(SVGBaseEntity* ent) { return ent->GetPODEntity(); }
 	/**
 	*   @brief Filter method for checking whether a ClassEntity has a given targetname.
 	*   @return Returns true if the ClassEntity has a given targetname.

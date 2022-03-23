@@ -9,8 +9,47 @@
 ***/
 #pragma once
 
-// Entities.
+
+
+/**
+*	What game module is including this in its sources?
+**/
+#ifdef CGAME_INCLUDE
+// Start of ClientGame.
+
+#define SGINCLUDE_CLIENTGAME
+
+// End of ClientGame.
+#else
+// Start of ServerGame.
+
+#define SGINCLUDE_SERVERGAME
+
+// End of ServerGame.
+#endif
+
+
+
+/**
+*   Protocol
+**/
+#include "SharedGame/PMove.h"
+
+/**
+*   Protocol
+**/
+#include "SharedGame/Protocol.h"
+
+/**
+*   Skeletal Animation
+**/
+#include "SharedGame/SkeletalAnimation.h"
+
+/**
+*   Entity Framework
+**/
 #include "SharedGame/Entities.h"
+
 
 /**
 *   @brief  These are used for game logic. They are set in clg_input.cpp. One is free

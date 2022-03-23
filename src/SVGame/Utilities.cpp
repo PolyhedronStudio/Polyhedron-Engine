@@ -47,7 +47,7 @@ vec3_t SVG_PlayerProjectSource(ServerClient* client, const vec3_t& point, const 
 void Think_Delay(SVGBaseEntity *ent)
 {
     //UTIL_UseTargets(ent, ent->GetActivator());
-    //SVG_FreeEntity(ent->GetServerEntity());
+    //SVG_FreeEntity(ent->GetPODEntity());
 }
 
 
@@ -90,7 +90,7 @@ void UTIL_TouchTriggers(SVGBaseEntity *ent)
         if (!touchedEntity) {
 	        continue;
         }
-	    if (!touchedEntity->GetServerEntity()) {
+	    if (!touchedEntity->GetPODEntity()) {
 	        continue;
 	    }
 	    if (!touchedEntity->IsInUse()) {
@@ -124,7 +124,7 @@ void G_TouchSolids(SVGBaseEntity *ent)
 	    if (!touchedEntity) {
 	        continue;
 	    }
-	    if (!touchedEntity->GetServerEntity()) {
+	    if (!touchedEntity->GetPODEntity()) {
 	        continue;
 	    }
 	    if (!touchedEntity->IsInUse()) {
