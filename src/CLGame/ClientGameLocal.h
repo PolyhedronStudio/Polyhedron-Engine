@@ -33,6 +33,15 @@
 #include "Shared/CLTypes.h"
 #include "Shared/CLGame.h"
 
+//// Temporary.
+#include "LevelLocals.h"
+extern LevelLocals level;
+
+// END OF TEMPORARY.
+
+
+
+
 // "Shared" cl frametime.
 // WID: TODO: Make these part of the ClientGameImports instead.
 static constexpr double CLG_FRAMETIME   = BASE_FRAMETIME;
@@ -40,16 +49,16 @@ static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
 static constexpr int32_t CLG_FRAMEDIV   = BASE_FRAMERATE / 10.0;
 
 
-//
-//=============================================================================
-//
-//	Client Game structures and definitions.
-//
-//=============================================================================
-// 
-//
-// Custom client game trace struct, stores ClientEntity* instead.
-//
+/**
+*
+*
+*   Client Game structures and definitions.
+*
+*
+**/
+/**
+*   Custom client game trace struct, stores ClientEntity* instead.
+**/
 struct CLGTrace {
     // If true, the trace startedand ended within the same solid.
     qboolean allSolid = false;
@@ -87,21 +96,6 @@ struct CLGTrace {
     ClientEntity *ent = nullptr;
 };
 
-//-------------------
-// Client Game structure.
-//
-// This structure is used to contain all local client game module
-// variables.
-//
-// Expand as you please.
-//-------------------
-typedef struct clientgame_s {
-    // This is required for C to compile. It doesn't like to compile an empty
-    // struct.
-    int nothingHereYet;
-} clientgame_t;
-
-extern clientgame_t clg;
 
 // Custom load state enumerator.
 //

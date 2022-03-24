@@ -25,24 +25,28 @@
 #include "exports/ServerMessage.h"
 #include "exports/View.h"
 
-//
-// Core.
-//
-// Contains the function pointers being passed in from the engine.
+
+
+/**
+*   Contains the function pointers being passed in from the engine.
+**/
 ClientGameImport clgi;
 
+
+
+/**
+*   Pointer to the client frame state, and the client shared data.
+**/
 // Pointer to the actual client frame state.
 ClientState* cl     = nullptr;
 // Pointer to the actual client shared data.
 ClientShared* cs    = nullptr;
 
-// Actual client game state (Contains the view for example).
-clientgame_t clg;
 
 
-//
-// CVar.
-//
+/**
+*   Core CVars.
+**/
 cvar_t *cl_chat_notify          = nullptr;
 cvar_t *cl_chat_sound           = nullptr;
 cvar_t *cl_chat_filter          = nullptr;
@@ -80,18 +84,29 @@ cvar_t *info_spectator  = nullptr;
 cvar_t *info_uf         = nullptr;
 cvar_t *info_in_bspmenu = nullptr; // Is set to 1  at boot time when loading mainmenu.bsp, and is set 
                                 // to 1 when disconnecting from a server hence, once again, loading mainmenu.bsp
-
 // Video.
 cvar_t* vid_rtx = nullptr;
 
-//
-//=============================================================================
-//
-//	CGAME API
-//
-//=============================================================================
-//
 
+
+/**
+*
+*
+*   Temporary objects for simulating parts of ServerGame module.
+*
+*
+**/
+LevelLocals level;
+
+
+
+/**
+*
+*
+*   ClientGame Module Entry Point.
+*
+*
+**/
 // CPP: These might need to be re-enabled on Linux.
 #ifdef __cplusplus
 extern "C" {
@@ -138,12 +153,15 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
 }; // Extern "C"
 #endif
 
-//
-//=============================================================================
-//
-//	COMMON
-//
-//=============================================================================
+
+
+/**
+*
+*
+*   Common Wrappers. (Debug-) Printing, etc.
+*
+*
+**/
 // Prints a message of type PrintType::All. Using variable arg formatting.
 void Com_Print(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];

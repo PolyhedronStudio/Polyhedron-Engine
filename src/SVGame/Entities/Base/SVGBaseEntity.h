@@ -895,12 +895,12 @@ protected:
     /**
     *   Dispatch Callback Function Pointers.
     **/
-    ThinkCallbackPointer        thinkFunction = nullptr;
-    UseCallbackPointer          useFunction = nullptr;
-    TouchCallbackPointer        touchFunction = nullptr;
-    BlockedCallbackPointer      blockedFunction = nullptr;
-    TakeDamageCallbackPointer   takeDamageFunction = nullptr;
-    DieCallbackPointer          dieFunction = nullptr;
+    ThinkCallbackPointer        thinkFunction       = nullptr;
+    UseCallbackPointer          useFunction         = nullptr;
+    TouchCallbackPointer        touchFunction       = nullptr;
+    BlockedCallbackPointer      blockedFunction     = nullptr;
+    TakeDamageCallbackPointer   takeDamageFunction  = nullptr;
+    DieCallbackPointer          dieFunction         = nullptr;
 
 public:
     /**
@@ -909,7 +909,7 @@ public:
     * 
     **/
     /**
-    *   @brief  Callback method to use for freeing this entity.
+    *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
     **/
     void SVGBaseEntityThinkFree(void);
 

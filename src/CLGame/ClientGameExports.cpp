@@ -117,7 +117,11 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 *           Not used for demos.
 **/
 void ClientGameExports::ClientBegin() {
-
+    // Reset level locals.
+    level = LevelLocals{};
+    level.frameNumber = cl->frame.number;
+    level.time = cl->serverTime;
+    level.timeStamp = cl->serverTime / 1000.f;
 }
 
 /**
@@ -145,6 +149,9 @@ void ClientGameExports::ClientDeltaFrame() {
     // that sets its color based on your health.
     //
     // Either way, this function can be used for such things. 
+    
+    // Low and behold, time to run the ClientGame Entity logic for another single frame.
+    entities->RunFrame();
 }
 
 /**

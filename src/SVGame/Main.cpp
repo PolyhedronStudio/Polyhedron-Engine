@@ -566,7 +566,7 @@ void SVG_RunFrame(void) {
             // 
             // Other entities may wish to point at this entity for the current tick. By unsetting
             // the server entity we can prevent malicious situations from happening.
-            classEntity->SetPODEntity(nullptr);
+            //classEntity->SetPODEntity(nullptr);
 
             // Skip further processing of this entity, it's removed.
             continue;

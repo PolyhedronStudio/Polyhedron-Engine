@@ -101,6 +101,10 @@ public:
     **/
     void AddViewEntities() final;
 
+    /**
+    *   @brief  Runs the client game module's entity logic for a single frame.
+    **/
+    void RunFrame();
 
 //! Entity Parsing utilities.
 private:

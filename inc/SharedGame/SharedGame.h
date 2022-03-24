@@ -51,6 +51,19 @@
 #include "SharedGame/Entities.h"
 
 
+
+/**
+*   @brief  Contains types of 'solid' 
+*           to use up the remaining slots for their own custom needs.
+**/
+struct Solid {
+    static constexpr uint32_t Not           = 0;    // No interaction with other objects.
+    static constexpr uint32_t Trigger       = 1;    // Only touch when inside, after moving.
+    static constexpr uint32_t BoundingBox   = 2;    // Touch on edge.
+    static constexpr uint32_t OctagonBox    = 3;    // Touch on edge, although it has 20, not 10.
+    static constexpr uint32_t BSP           = 4;    // Bsp clip, touch on edge.
+};
+
 /**
 *   @brief  These are used for game logic. They are set in clg_input.cpp. One is free
 *           to use up the remaining slots for their own custom needs.

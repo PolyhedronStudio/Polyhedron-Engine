@@ -62,7 +62,13 @@ void CLGBaseEntity::PostSpawn() {
 *   @brief  General entity thinking routine.
 **/
 void CLGBaseEntity::Think() {
+	// Safety check.
+    if (thinkFunction == nullptr) {
+		return;
+    }
 
+	// Execute 'Think' callback function.
+	(this->*thinkFunction)();
 }
 
 /**
@@ -85,8 +91,6 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 void CLGBaseEntity::UpdateFromState(const EntityState& state) {
     previousState = currentState;
     currentState = state;
-
-    DebugPrint();
 }
 
 /**

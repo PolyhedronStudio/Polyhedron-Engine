@@ -215,14 +215,26 @@ public:
     /***
     *
     * 
-    *   ISharedGameEntity Stubs.
+    *   ClientGame Base Entity Set/Get:
     *
     * 
     ***/
     /**
+    *   @brief Get/Set:     NextThink Time.
+    **/
+    inline const float GetNextThinkTime() final { 
+        //Com_DPrint("WTF NEXTTHINKTIME\n");
+        return nextThinkTime;
+    }
+    inline void SetNextThinkTime(const float nextThinkTime) final {
+        //Com_DPrint("WTF SETNEXTTHINKTIME: %f\n", nextThinkTime);
+        this->nextThinkTime = nextThinkTime;
+    };
+
+    /**
     *
     *
-    *   Base entity Set/Get:
+    *   Base entity Set/Get Stubs:
     *
     *
     **/
@@ -462,8 +474,8 @@ public:
     /**
     *   @brief Get/Set:     NextThink Time.
     **/
-    virtual const float     GetNextThinkTime() { return 0.f; };
-    virtual void            SetNextThinkTime(const float nextThinkTime) {};
+    //virtual const float     GetNextThinkTime() { return 0.f; };
+    //virtual void            SetNextThinkTime(const float nextThinkTime) {};
 
     /**
     *   @brief Get/Set:     Noise Index A
@@ -640,24 +652,120 @@ public:
 
 
 
-#ifdef _DEBUG
-    // Do a debug print.
-    inline void DebugPrint() {
-	    const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
-	    uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
-
-        if (podEntity) {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG Spawned: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, currentState.number, mapClass, hashedMapClass);
-        } else {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG Spawned: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", currentState.number, mapClass, hashedMapClass);
-        }
-    }
-#endif
 private:
     //! Pointer to the client entity which owns this class entity.
     ClientEntity *podEntity = nullptr;
 
+    //! Refresh Entity Object.
+    r_entity_t refreshEntity = {};
+
     // Client Class Entities maintain their own states. (Get copied in from updates.)
     EntityState currentState = {};
     EntityState previousState = {};
+
+
+
+private:
+    /**
+    *   Entity 'Timing'
+    **/
+    //! The next 'think' time, determines when to call the 'think' callback.
+    float nextThinkTime = 0.f;
+    //! Delay before calling trigger execution.
+    float delayTime = 0.f;
+    //! Wait time before triggering at all, in case it was set to auto.
+    float waitTime = 0.f;
+
+
+
+public:
+    /**
+    *
+    *   Ugly, but effective callback SET methods.
+    *
+    **/
+    /**
+    *   @brief  Sets the 'Think' callback function.
+    **/
+    template<typename function>
+    inline void SetThinkCallback(function f)
+    {
+        thinkFunction = static_cast<ThinkCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'Think' callback set. False if it is nullptr.
+    **/
+    inline qboolean HasThinkCallback() {
+        return (thinkFunction != nullptr ? true : false);
+    }
+
+    /**
+    *   @brief  Sets the 'Use' callback function.
+    **/
+    template<typename function>
+    inline void SetUseCallback(function f)
+    {
+        useFunction = static_cast<UseCallbackPointer>(f);
+    }
+
+    /**
+    *   @brief  Sets the 'Touch' callback function.
+    **/
+    template<typename function>
+    inline void SetTouchCallback(function f)
+    {
+        touchFunction = static_cast<TouchCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'Touch' callback set. False if it is nullptr.
+    **/
+    inline qboolean HasTouchCallback() {
+        return (touchFunction != nullptr ? true : false);
+    }
+
+    /**
+    *   @brief  Sets the 'Blocked' callback function.
+    **/
+    template<typename function>
+    inline void SetBlockedCallback(function f)
+    {
+        blockedFunction = static_cast<BlockedCallbackPointer>(f);
+    }
+
+    /**
+    *   @brief  Sets the 'SetTakeDamage' callback function.
+    **/
+    template<typename function>
+    inline void SetTakeDamageCallback(function f)
+    {
+        takeDamageFunction = static_cast<TakeDamageCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'TakeDamage' callback set. False if it is nullptr.
+    **/
+    inline qboolean HasTakeDamageCallback() {
+        return (takeDamageFunction != nullptr ? true : false);
+    }
+
+    /**
+    *   @brief  Sets the 'Die' callback function.
+    **/
+    template<typename function>
+    inline void SetDieCallback(function f)
+    {
+        dieFunction = static_cast<DieCallbackPointer>(f);
+    }
+
+
+
+protected:
+    /**
+    *   Dispatch Callback Function Pointers.
+    **/
+    ThinkCallbackPointer        thinkFunction       = nullptr;
+    UseCallbackPointer          useFunction         = nullptr;
+    TouchCallbackPointer        touchFunction       = nullptr;
+    BlockedCallbackPointer      blockedFunction     = nullptr;
+    TakeDamageCallbackPointer   takeDamageFunction  = nullptr;
+    DieCallbackPointer          dieFunction         = nullptr;
 };

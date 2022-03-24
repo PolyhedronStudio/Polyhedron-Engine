@@ -56,6 +56,9 @@ public:
     *   Client Class Entity Functions.
     *
     ***/
+    // TEMP
+    void FrameThink();
+
 
 
     /***

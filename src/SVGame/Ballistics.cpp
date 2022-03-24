@@ -139,7 +139,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
             if (trace.ent->GetTakeDamage()) {
                 GetGamemode()->InflictDamage(trace.ent, player, player, aimDirection, trace.endPosition, trace.plane.normal, damage, kickForce, DamageFlags::Bullet, meansOfDeath);
             } else {
-                if (strncmp(trace.surface->name, "sky", 3) != 0) {
+                if (strncmp(trace.surface->name, "sky", 3) != 0 && strncmp(trace.surface->name, "sky_surfacelight", 16) != 0) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
                     gi.MSG_WriteUint8(te_impact);//WriteByte(te_impact);
                     gi.MSG_WriteVector3(trace.endPosition, false);

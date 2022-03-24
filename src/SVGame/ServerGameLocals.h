@@ -392,9 +392,6 @@ struct LevelLocals  {
     Entity *sound2Entity;           // In case of a weapon action.
     int32_t sound2EntityFrameNumber;
 
-    // Not renaming this one, it has to go in the future.
-    int32_t pic_health;
-
     // The current entity that is actively being ran from SVG_RunFrame.
     SVGBaseEntity *currentEntity;
 

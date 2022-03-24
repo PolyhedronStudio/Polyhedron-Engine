@@ -359,7 +359,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     /**
     *   Health.
     **/    
-    client->playerState.stats[PlayerStats::HealthIcon] = level.pic_health;
+    client->playerState.stats[PlayerStats::HealthIcon] = 0;
     client->playerState.stats[PlayerStats::Health] = player->GetHealth();
 
     /**

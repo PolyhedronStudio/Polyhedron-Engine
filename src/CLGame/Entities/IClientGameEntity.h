@@ -75,14 +75,15 @@ public:
 
     /***
     *
-    *   ClientGame Class Entity Functions.
     * 
-    *   These functions are all implemented in CLGBaseEntity, some are purposely left empty to act
-    *   as a stub. Just because they are empty doesn't mean one can't fill them in and make them tick.
-    *   It does require one to have a proper understanding of the matter before doing so. Breaking things
-    *   by doing so is easy.
+    *   ClientGame Entity Functions.
     *
+    * 
     ***/
+    /**
+    *   @brief  
+    **/
+
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/

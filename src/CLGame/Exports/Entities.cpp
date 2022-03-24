@@ -279,15 +279,120 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
     // Will either return a pointer to a new classentity type, or an existing one, depending on the state.
     CLGBaseEntity *clgEntity = classEntityList.SpawnFromState(state, clEntity);
 
+    // Call the spawn function if it is a valid entity.
+    if (clgEntity) {
+        clgEntity->Spawn();
+    }
     // Do a debug print.
 #ifdef _DEBUG
     if (clgEntity) {
-        clgEntity->DebugPrint();
+        PODEntity *podEntity = clgEntity->GetPODEntity();
+
+	    const char *mapClass = clgEntity->GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
+	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
+
+        if (podEntity) {
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
+        } else {
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state.number, mapClass, hashedMapClass);
+        }
     }
 #endif
 
     return (clgEntity != nullptr ? true : false);
 }
+
+//===============
+// SVG_RunThink
+//
+// Runs entity thinking code for this frame if necessary
+//===============
+qboolean CLG_RunThink(CLGBaseEntity *ent)
+{
+    if (!ent) {
+	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
+        return false;
+    }
+
+    // Fetch think time.
+    const float thinkTime = ent->GetNextThinkTime();
+
+    if (thinkTime <= 0 || thinkTime > level.time + 0.001) {
+        //Com_DPrint("(thinkTime <= 0) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
+        return true;
+    } else if (thinkTime > level.time + 0.001) {// Used to be: if (thinkTime > level.time + 0.001)
+        //Com_DPrint("(thinkTime > level.time + 0.001) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
+        return true;
+    }
+
+    // Reset think time before thinking.
+    ent->SetNextThinkTime(0);
+
+//#if _DEBUG
+//    if ( !ent->HasThinkCallback() ) {
+//        // Write the index, programmers may look at that thing first
+//        std::string errorString = "";
+//        if (ent->GetPODEntity()) {
+//            errorString += "entity (index " + std::to_string(ent->GetNumber());
+//        } else {
+//            errorString += "entity has no ServerEntity ";
+//        }
+//
+//        // Write the targetname as well, if it exists
+//        if ( !ent->GetTargetName().empty() ) {
+//            errorString += ", name '" + ent->GetTargetName() + "'";
+//        }
+//
+//        // Write down the C++ class name too
+//        errorString += ", class '";
+//        errorString += ent->GetTypeInfo()->classname;
+//        errorString += "'";
+//
+//        // Close it off and state what's actually going on
+//        errorString += ") has a nullptr think callback \n";
+//    //    
+//        Com_WPrint( errorString.c_str() );
+//
+//        // Return true.
+//        return true;
+//    }
+//#endif
+
+    // Last but not least, let the entity execute its think behavior callback.
+    ent->Think();
+
+
+    return false;
+}
+
+/**
+*   @brief  Runs the client game module's entity logic for a single frame.
+**/
+void ClientGameEntities::RunFrame() {
+    // We're moving the game a frame forward.
+    level.frameNumber++;
+
+    // Calculate the current frame time for this game its own frame number.
+    level.time = level.frameNumber * CLG_FRAMETIME;
+    level.timeStamp = static_cast<uint32_t>((level.time * 1000.f));
+
+    // Iterate up till the amount of entities active in the current frame.
+    for (int32_t entityNumber = 1; entityNumber < cl->frame.numEntities; entityNumber++) {
+        // Acquire class entity object.
+        CLGBaseEntity *classEntity = classEntityList.GetByNumber(entityNumber);
+
+        // If invalid for whichever reason, warn and continue to next iteration.
+        if (!classEntity) {
+            Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
+            continue;
+        }
+
+        // Run it for a frame.
+        CLG_RunThink(classEntity);
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Executed whenever an entity event is receieved.

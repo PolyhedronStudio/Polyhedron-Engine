@@ -486,37 +486,33 @@ void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
 	}
 }
 
-//
-//===============
-// SVGBaseEntity::LinkEntity
-//
-// Link entity to world for collision testing using gi.LinkEntity.
-//===============
-//
+/**
+*   @brief  Link entity to world for collision testing using gi.LinkEntity.
+**/
 void SVGBaseEntity::LinkEntity() {
 	gi.LinkEntity(serverEntity);
 }
 
-//===============
-// SVGBaseEntity::UnlinkEntity
-//
-// 
-//===============
+/**
+*   @brief  Unlink the entity from the world for collision testing.
+**/
 void SVGBaseEntity::UnlinkEntity() {
 	gi.UnlinkEntity(serverEntity);
 }
 
-//===============
-// SVGBaseEntity::Remove
-//===============
+/**
+*   @brief  Marks the entity to be removed in the next server frame. This is preferred to SVG_FreeEntity, 
+*           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
+*           on us during the current server game frame we're processing.
+**/
 void SVGBaseEntity::Remove()
 {
 	serverEntity->serverFlags |= EntityServerFlags::Remove;
 }
 
-//
-//
-//
+/**
+*   @brief  Callback method to use for freeing this entity. It calls upon Remove()
+**/
 void SVGBaseEntity::SVGBaseEntityThinkFree(void) {
 	//SVG_FreeEntity(serverEntity);
 	Remove();

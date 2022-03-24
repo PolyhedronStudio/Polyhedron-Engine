@@ -49,6 +49,9 @@ SET(SRC_CLGAME
 
 	CLGame/Input/KeyBinding.cpp
 
+	#CLGame/Physics/Physics.cpp
+	#CLGame/Physics/StepMove.cpp
+
 	CLGame/Debug.cpp
 	CLGame/Entities.cpp
 	CLGame/Main.cpp
@@ -85,6 +88,8 @@ SET(HEADERS_CLGAME
 	CLGame/HUD/NumberHUD.h
 
 	CLGame/Input/KeyBinding.h
+	
+	#CLGame/Physics/StepMove.h
 
 	CLGame/Debug.h
 	CLGame/Entities.h

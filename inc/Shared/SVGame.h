@@ -20,8 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __INC_SHARED__SVGAME_H__
 
 #include "Shared/list.h"
-#include "SharedGame/PMove.h"
-#include "SharedGame/Protocol.h"
+#include "SharedGame/SharedGame.h"
 
 //
 // game.h -- game dll information visible to server
@@ -39,14 +38,7 @@ struct EntityServerFlags {
     static constexpr uint32_t Remove        = 0x00000008;   // Delete the entity next tick.
 };
 
-// edict->solid values
-struct Solid {
-    static constexpr uint32_t Not           = 0;    // No interaction with other objects.
-    static constexpr uint32_t Trigger       = 1;    // Only touch when inside, after moving.
-    static constexpr uint32_t BoundingBox   = 2;    // Touch on edge.
-    static constexpr uint32_t OctagonBox    = 3;    // Touch on edge, although it has 20, not 10.
-    static constexpr uint32_t BSP           = 4;    // Bsp clip, touch on edge.
-};
+
 
 //===============================================================
 
