@@ -36,13 +36,18 @@
 //// Temporary.
 #include "LevelLocals.h"
 extern LevelLocals level;
-
 // END OF TEMPORARY.
 
 
 
 
-// "Shared" cl frametime.
+/**
+*
+*
+*   ClientGame Frame Time.
+*
+*
+**/
 // WID: TODO: Make these part of the ClientGameImports instead.
 static constexpr double CLG_FRAMETIME   = BASE_FRAMETIME;
 static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;

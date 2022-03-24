@@ -7,7 +7,7 @@
 *	Client Game MuzzleFlash Effects.
 * 
 ***/
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 
 #include "../Main.h"
 #include "../TemporaryEntities.h"

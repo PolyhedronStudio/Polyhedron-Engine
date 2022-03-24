@@ -7,7 +7,7 @@
 *   Client Game Temp Entities.
 *
 ***/
-#include "ClientGameLocal.h"
+#include "ClientGameLocals.h"
 
 #include "Debug.h"
 #include "Main.h"

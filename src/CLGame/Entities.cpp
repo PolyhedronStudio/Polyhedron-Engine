@@ -7,7 +7,7 @@
 *   Client Entity utility functions.
 *
 ***/
-#include "ClientGameLocal.h"
+#include "ClientGameLocals.h"
 #include "Entities.h"
 
 ///**

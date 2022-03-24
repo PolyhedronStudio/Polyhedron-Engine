@@ -7,7 +7,7 @@
 *	Client Game EntityList implementation.
 * 
 ***/
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 #include "../Main.h"
 
 // Base Entity.

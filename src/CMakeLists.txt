@@ -91,9 +91,9 @@ SET(HEADERS_CLGAME
 	
 	#CLGame/Physics/StepMove.h
 
+	CLGame/ClientGameLocals.h
 	CLGame/Debug.h
 	CLGame/Entities.h
-	CLGame/ClientGameLocal.h
 	CLGame/Main.h
 	CLGame/TemporaryEntities.h
 )

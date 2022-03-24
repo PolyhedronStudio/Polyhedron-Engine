@@ -7,7 +7,7 @@
 *	Bubble Trail A particle effect implementation.
 * 
 ***/
-#include "../../ClientGameLocal.h"
+#include "../../ClientGameLocals.h"
 #include "../../Main.h"
 
 #include "../Particles.h"

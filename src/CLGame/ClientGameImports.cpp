@@ -6,7 +6,7 @@
 //
 // Handles the main initialisation of the client game dll.
 //
-#include "ClientGameLocal.h"
+#include "ClientGameLocals.h"
 
 #include "Entities.h"
 #include "Main.h"

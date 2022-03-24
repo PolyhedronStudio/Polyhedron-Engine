@@ -7,7 +7,7 @@
 *	Client Game Media Interface Implementation.
 * 
 ***/
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 
 #include "../Entities.h"
 #include "../Main.h"

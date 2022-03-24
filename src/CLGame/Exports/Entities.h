@@ -18,42 +18,6 @@
 // Entity List.
 #include "../Entities/ClassEntityList.h"
 
-////-----------------------
-//// Client base class entity.
-////------------------------
-//class CLGBaseEntity {
-//public:
-//    //! Constructor/Destructor.
-//    CLGBaseEntity() = default;
-//    virtual ~CLGBaseEntity() = default;
-//
-//    //! Sets the classname of this entity.
-//    inline void SetClassname(const std::string& classname) {
-//        this->classname = classname;
-//    }
-//
-//    //! Get the classname.
-//    inline const std::string& GetClassname() {
-//        return classname;
-//    }
-//
-//    // Sets the entity ID
-//    inline void SetEntityID(int32_t id) {
-//        entityID = id;
-//    }
-//
-//    // Gets the entity ID
-//    inline int32_t GetEntityID() {
-//        return entityID;
-//    }
-//
-//private:
-//    // Entity ID.
-//    int32_t entityID = 0;
-//
-//    // Classname.
-//    std::string classname = "";
-//};
 
 
 //---------------------------------------------------------------------

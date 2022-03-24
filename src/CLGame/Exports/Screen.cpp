@@ -8,7 +8,7 @@
 * 
 ***/
 // Client Game.
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 #include "../Main.h"
 
 // Exports Interface.

@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // m_move.c -- monster movement
 
 // Core.
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 #include "../Entities.h"
 //#include "../Utilities.h"
 

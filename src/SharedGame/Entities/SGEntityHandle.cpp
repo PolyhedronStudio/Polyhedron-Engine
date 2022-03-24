@@ -13,7 +13,7 @@
 // Depending on which module we are at, include Base Entity and Game Locals 
 // of ClientGamne or ServerGame respectively.
 #ifdef SGINCLUDE_CLIENTGAME
-#include "../src/CLGame/ClientGameLocal.h"
+#include "../src/CLGame/ClientGameLocals.h"
 #include "../src/CLGame/Entities/Base/CLGBaseEntity.h"
 #else
 #include "../src/SVGame/ServerGameLocals.h"

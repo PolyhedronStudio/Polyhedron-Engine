@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // Core.
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 #include "../Main.h"
 #include "SharedGame/SharedGame.h"
 #include "../Exports/Entities.h"

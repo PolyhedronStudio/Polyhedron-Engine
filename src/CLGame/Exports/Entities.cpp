@@ -8,7 +8,7 @@
 * 
 ***/
 // Core.
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 
 // Base Client Game Functionality.
 #include "../Debug.h"

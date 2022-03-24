@@ -7,7 +7,7 @@
 *   Client Game Main.
 *
 ***/
-#include "ClientGameLocal.h"
+#include "ClientGameLocals.h"
 
 // ClientGame.
 #include "Entities.h"

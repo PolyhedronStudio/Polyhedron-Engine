@@ -7,7 +7,7 @@
 *	Contains the implementations for debug rendering client information.
 *
 ***/
-#include "ClientGameLocal.h"
+#include "ClientGameLocals.h"
 
 #include "Main.h"
 

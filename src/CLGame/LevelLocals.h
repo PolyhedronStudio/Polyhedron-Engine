@@ -9,7 +9,7 @@
 ***/
 #pragma once
 
-#include "ClientGameLocal.h"
+#include "ClientGameLocals.h"
 
 
 

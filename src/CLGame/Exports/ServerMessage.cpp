@@ -7,7 +7,7 @@
 *	Client Game ServerMessage Interface Implementation.
 * 
 ***/
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 
 #include "../Entities.h"
 #include "../Main.h"

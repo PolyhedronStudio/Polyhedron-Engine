@@ -7,7 +7,7 @@
 *	Light Style Management.
 * 
 ***/
-#include "../ClientGameLocal.h"
+#include "../ClientGameLocals.h"
 
 #include "../Main.h"
 #include "../TemporaryEntities.h"
