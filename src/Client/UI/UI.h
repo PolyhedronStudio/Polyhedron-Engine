@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "Shared/list.h"
+#include "Shared/List.h"
 #include "Common/Cmd.h"
 #include "Common/Common.h"
 #include "Common/CVar.h"

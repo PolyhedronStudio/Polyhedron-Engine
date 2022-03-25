@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __INC_SHARED__SVGAME_H__
 #define __INC_SHARED__SVGAME_H__
 
-#include "Shared/list.h"
+#include "Shared/List.h"
 
 // Shared Game "Framework".
 #include <Game/Shared/SharedGame.h>

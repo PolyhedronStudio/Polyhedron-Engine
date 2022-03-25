@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef BSP_H
 #define BSP_H
 
-#include "Shared/list.h"
+#include "Shared/List.h"
 #include "Common/Error.h"
 #include "System/Hunk.h"
 #include "Format/Bsp.h"

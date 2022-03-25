@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // images.h -- common image manager
 //
 
-#include "Shared/list.h"
+#include "Shared/List.h"
 #include "Common/Files.h"
 #include "Common/Zone.h"
 #include "Common/Error.h"

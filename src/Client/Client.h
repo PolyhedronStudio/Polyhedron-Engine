@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // client.h -- primary header for client
 
 #include "Shared/Shared.h"
-#include "Shared/list.h"
+#include "Shared/List.h"
 
 #include "Common/Bsp.h"
 #include "Common/Cmd.h"

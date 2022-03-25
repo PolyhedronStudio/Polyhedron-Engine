@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // bsp.c -- model loading
 
 #include "Shared/Shared.h"
-#include "Shared/list.h"
+#include "Shared/List.h"
 #include "Common/CVar.h"
 #include "Common/Cmd.h"
 #include "Common/Common.h"
