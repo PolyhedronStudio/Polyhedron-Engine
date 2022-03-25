@@ -16,7 +16,7 @@
 #include "Gamemodes/IGamemode.h"
 
 // Class Entities.
-#include "Entities/Base/SVGBasePlayer.h"
+//#include "Entities/Base/SVGBasePlayer.h"
 #include "Entities/Base/DebrisEntity.h"
 #include "Entities/Base/GibEntity.h"
 
@@ -86,7 +86,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
 // 
 // Sends an explosion effect as a TE cmd, and queues the entity up for removal.
 //=================
-void SVG_BecomeExplosion1(SVGBaseEntity *self)
+void SVG_BecomeExplosion1(IServerGameEntity *self)
 {
     // Fetch origin.
     vec3_t origin = self->GetOrigin();
@@ -107,7 +107,7 @@ void SVG_BecomeExplosion1(SVGBaseEntity *self)
 // 
 // Sends an explosion effect as a TE cmd, and queues the entity up for removal.
 //=================
-void SVG_BecomeExplosion2(SVGBaseEntity*self)
+void SVG_BecomeExplosion2(IServerGameEntity*self)
 {
     // Fetch origin.
     vec3_t origin = self->GetOrigin();

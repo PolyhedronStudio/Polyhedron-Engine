@@ -20,7 +20,7 @@
 #include "World/GameWorld.h"
 
 // Wraps up gi.CPrintf for SVGBaseEntities.
-void SVG_CPrint(SVGBaseEntity* ent, int32_t printlevel, const std::string& str) {
+void SVG_CPrint(IServerGameEntity* ent, int32_t printlevel, const std::string& str) {
     if (!ent)
     	return;
 
@@ -39,7 +39,7 @@ void SVG_DPrint(const std::string& str) {
 // Wraps up gi.CenterPrintf for SVGBaseEntity, and nice std::string hurray.
 //===============
 //
-void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str) {
+void SVG_CenterPrint(IServerGameEntity* ent, const std::string& str) {
     if (!ent)
         return;
 
@@ -53,7 +53,7 @@ void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str) {
 // Wraps up gi.Sound for SVGBaseEntity.
 //===============
 //
-void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset) {
+void SVG_Sound(IServerGameEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset) {
     if (!ent)
         return;
 
@@ -68,15 +68,15 @@ void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float vo
 // Returns an std::vector containing the found boxed entities. Will not exceed listCount.
 //===============
 //
-std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
+std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
     // Boxed server entities set by gi.BoxEntities.
     Entity* boxedServerEntities[MAX_EDICTS];
 
     // Vector of the boxed class entities to return.
-    std::vector<SVGBaseEntity*> boxedClassEntities;
+    std::vector<IServerGameEntity*> boxedClassEntities;
 
     // Acquire pointer to the class entities array.
-    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+    IServerGameEntity** classEntities = game.world->GetClassEntities();
 
     // Ensure the listCount can't exceed the max edicts.
     if (listCount > MAX_EDICTS) {
@@ -107,7 +107,7 @@ std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& ma
 SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t& contentMask) {
     // Acquire server and class entity array pointers.
     Entity* serverEntities = game.world->GetServerEntities();
-    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+    IServerGameEntity** classEntities = game.world->GetClassEntities();
 
     // Fetch server entity in case one was passed to us.
     Entity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);

@@ -170,7 +170,7 @@ void FuncTrain::SpawnKey( const std::string& key, const std::string& value ) {
 //===============
 // FuncTrain::TrainUse
 //===============
-void FuncTrain::TrainUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncTrain::TrainUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	SetActivator(activator);
 
 	if (GetSpawnFlags()  & SF_StartOn) {
@@ -317,7 +317,7 @@ void FuncTrain::WaitAtCorner() {
 //===============
 // FuncTrain::OnWaitAtCorner
 //===============
-void FuncTrain::OnWaitAtCorner( SVGBaseEntity* ent) {
+void FuncTrain::OnWaitAtCorner( IServerGameEntity* ent) {
 	if ( ent->IsSubclassOf<FuncTrain>() ) {
 		dynamic_cast<FuncTrain*>( ent )->WaitAtCorner();
 	}
@@ -326,7 +326,7 @@ void FuncTrain::OnWaitAtCorner( SVGBaseEntity* ent) {
 //===============
 // FuncTrain::TrainBlocked
 //===============
-void FuncTrain::TrainBlocked( SVGBaseEntity* other ) {
+void FuncTrain::TrainBlocked( IServerGameEntity* other ) {
 	if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !other->GetClient() ) {
 		// Give it a chance to go away on its own terms (like gibs)
 		GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 100000, 1, 0, MeansOfDeath::Crush );

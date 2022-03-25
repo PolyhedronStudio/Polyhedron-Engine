@@ -24,7 +24,7 @@ public:
 	void SpawnKey( const std::string& key, const std::string& value ) override;
 
 	void TimerThink();
-	void TimerUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void TimerUse( IServerGameEntity* other, IServerGameEntity* activator );
 
 protected:
 	float pauseTime{ 0.0f };

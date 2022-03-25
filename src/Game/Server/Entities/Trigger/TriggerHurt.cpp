@@ -140,7 +140,7 @@ void TriggerHurt::SpawnKey(const std::string& key, const std::string& value) {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void TriggerHurt::TriggerHurtTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	gi.DPrintf("TriggerHurtTouch!\n");
 
 	if (this == other)
@@ -178,7 +178,7 @@ void TriggerHurt::TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, Co
 // 'Use' callback, to trigger it on/off.
 //===============
 //
-void TriggerHurt::TriggerHurtUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
+void TriggerHurt::TriggerHurtUse(IServerGameEntity* other, IServerGameEntity* activator) {
 	gi.DPrintf("TriggerHurtUse!\n");
 
 	// Switch states.
@@ -218,7 +218,7 @@ void TriggerHurt::TriggerHurtUse(SVGBaseEntity* other, SVGBaseEntity* activator)
 // Execute the 'Use' callback in case we ran into any.
 //===============
 //
-//void Base::Use(SVGBaseEntity* other, SVGBaseEntity* activator) {
+//void Base::Use(IServerGameEntity* other, IServerGameEntity* activator) {
 //	// Safety check.
 //	if (useFunction == nullptr)
 //		return;

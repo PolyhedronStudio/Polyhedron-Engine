@@ -24,7 +24,7 @@ public:
 
 	void SpawnKey(const std::string& key, const std::string& value) override;
 
-	void RotatorBlocked( SVGBaseEntity* other );
-	void RotatorHurtTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf );
-	void RotatorUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void RotatorBlocked( IServerGameEntity* other );
+	void RotatorHurtTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
+	void RotatorUse( IServerGameEntity* other, IServerGameEntity* activator );
 };

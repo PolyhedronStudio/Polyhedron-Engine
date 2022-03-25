@@ -97,7 +97,7 @@ void BodyCorpse::SpawnKey(const std::string& key, const std::string& value) {
 // 'Touch' callback, I am unsure what to use it for but I can imagine it being...
 // like picking up their items or something? I suppose we could do that...
 //===============
-void BodyCorpse::BodyCorpseTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void BodyCorpse::BodyCorpseTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 
 }
 
@@ -106,7 +106,7 @@ void BodyCorpse::BodyCorpseTouch(SVGBaseEntity* self, SVGBaseEntity* other, Coll
 //
 // Spawn gibs to make things gore like :P
 //===============
-void BodyCorpse::BodyCorpseDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void BodyCorpse::BodyCorpseDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     //int n;
 
     // In case health is low enough...

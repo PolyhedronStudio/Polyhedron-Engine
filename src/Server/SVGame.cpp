@@ -111,9 +111,9 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
         flags |= MSG_RELIABLE;
     }
 
-    if (cmd == ServerGameCommand::Layout) {
-        flags |= MSG_COMPRESS;
-    }
+    //if (cmd == ServerGameCommand::Layout) {
+    //    flags |= MSG_COMPRESS;
+    //}
 
     SV_ClientAddMessage(client, flags);
 

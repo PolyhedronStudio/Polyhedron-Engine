@@ -69,7 +69,7 @@ void FuncWall::Spawn() {
 //===============
 // FuncWall::WallUse
 //===============
-void FuncWall::WallUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncWall::WallUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     if ( GetSolid() == Solid::Not ) {
         SetSolid( Solid::BSP );
         SetServerFlags( GetServerFlags() & ~EntityServerFlags::NoClient );

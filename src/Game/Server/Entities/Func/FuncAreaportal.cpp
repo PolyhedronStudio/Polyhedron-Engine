@@ -50,7 +50,7 @@ void FuncAreaportal::SpawnKey( const std::string& key, const std::string& value 
 //===============
 // FuncAreaportal::PortalUse
 //===============
-void FuncAreaportal::PortalUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncAreaportal::PortalUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	ActivatePortal( !turnedOn );
 }
 

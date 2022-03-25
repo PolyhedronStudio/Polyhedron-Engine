@@ -154,7 +154,7 @@ void FuncDoor::PostSpawn() {
 //===============
 // FuncDoor::DoorUse
 //===============
-void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncDoor::DoorUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     if ( GetFlags() & EntityFlags::TeamSlave ) {
         return;
     }
@@ -168,7 +168,7 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
     if ( GetSpawnFlags() & SF_Toggle ) {
         if ( moveInfo.state == MoverState::Up || moveInfo.state == MoverState::Top ) {
             // Trigger all paired movers.
-	        for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+	        for (IServerGameEntity* ent = dynamic_cast<IServerGameEntity*>(this); ent != nullptr; ent = ent->GetTeamChainEntity()) {
 		        // Check it is a derivate of base mover, if not, break out of this loop.
 		        if (!ent->IsSubclassOf<SVGBaseMover>()) {
 		            gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
@@ -192,7 +192,7 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
     }
 
     // Trigger all paired movers.
-    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+    for (IServerGameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
         // Check it is a derivate of base mover, if not, break out of this loop.
         if (!ent->IsSubclassOf<SVGBaseMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
@@ -203,7 +203,7 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
             ent->SetMessage( "" );
             // WID: TODO: Add a flag for whether to unset touch callbacks after being used for the first time.
             //ent->SetTouchCallback( nullptr );
-	        static_cast<FuncDoor*>(ent)->DoorGoUp(activator);
+	        static_cast<FuncDoor*>(ent)->DoorGoUp(dynamic_cast<SVGBaseEntity*>(activator));
         }
     }
 }
@@ -211,8 +211,8 @@ void FuncDoor::DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 //===============
 // FuncDoor::DoorShotOpen
 //===============
-void FuncDoor::DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point ) {
-    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+void FuncDoor::DoorShotOpen( IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point ) {
+    for (IServerGameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!ent->IsSubclassOf<SVGBaseMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
@@ -229,7 +229,7 @@ void FuncDoor::DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, 
 //===============
 // FuncDoor::DoorBlocked
 //===============
-void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
+void FuncDoor::DoorBlocked( IServerGameEntity* other ) {
 
     if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
         // Give it a chance to go away on its own terms (like gibs)
@@ -251,7 +251,7 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
     // so let it just squash the object to death real fast
     if ( moveInfo.wait >= 0 ) {
         if ( moveInfo.state == MoverState::Down ) {
-	        for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+	        for (IServerGameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 		        // Check it is a derivate of base mover, if not, break out of this loop.
 		        if (!ent->IsSubclassOf<SVGBaseMover>()) {
 		            gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
@@ -264,7 +264,7 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
                 }
             }
         } else {
-	        for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+	        for (IServerGameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 		        // Check it is a derivate of base mover, if not, break out of this loop.
 		        if (!ent->IsSubclassOf<SVGBaseMover>()) {
 		            gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
@@ -283,7 +283,7 @@ void FuncDoor::DoorBlocked( SVGBaseEntity* other ) {
 //===============
 // FuncDoor::DoorTouch
 //===============
-void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
+void FuncDoor::DoorTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
     // Clients only.
     if (other->GetClient() == nullptr) {
         return; // Players only; should we have special flags for monsters et al?
@@ -307,7 +307,7 @@ void FuncDoor::DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPl
 //===============
 // FuncDoor::DoorGoUp
 //===============
-void FuncDoor::DoorGoUp( SVGBaseEntity* activator ) {
+void FuncDoor::DoorGoUp( IServerGameEntity* activator ) {
     if ( moveInfo.state == MoverState::Up ) {
         return; // already going up
     }
@@ -408,7 +408,7 @@ void FuncDoor::HitBottom() {
 //===============
 // FuncDoor::OnDoorHitTop
 //===============
-void FuncDoor::OnDoorHitTop( SVGBaseEntity* self ) {
+void FuncDoor::OnDoorHitTop( IServerGameEntity* self ) {
     if ( self->IsSubclassOf<FuncDoor>() ) {
         static_cast<FuncDoor*>( self )->HitTop();
     }
@@ -417,7 +417,7 @@ void FuncDoor::OnDoorHitTop( SVGBaseEntity* self ) {
 //===============
 // FuncDoor::OnDoorHitBottom
 //===============
-void FuncDoor::OnDoorHitBottom( SVGBaseEntity* self ) {
+void FuncDoor::OnDoorHitBottom( IServerGameEntity* self ) {
     if ( self->IsSubclassOf<FuncDoor>() ) {
         static_cast<FuncDoor*>(self)->HitBottom();
     }
@@ -439,7 +439,7 @@ void FuncDoor::CalculateMoveSpeed() {
     
     // Find the smallest distance any member of the team will be moving
     min = fabsf( moveInfo.distance );
-    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+    for (IServerGameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!ent->IsSubclassOf<SVGBaseMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
@@ -461,7 +461,7 @@ void FuncDoor::CalculateMoveSpeed() {
     time = min / GetSpeed();
 
     // Adjust speeds so they will all complete at the same time
-    for (SVGBaseEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
+    for (IServerGameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!ent->IsSubclassOf<SVGBaseMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
@@ -513,7 +513,7 @@ void FuncDoor::SpawnDoorTrigger() {
         return; // Only the team leader spawns a trigger
     }
     
-    for (SVGBaseEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+    for (IServerGameEntity* teamMember = dynamic_cast<SVGBaseEntity*>(GetTeamChainEntity()); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());

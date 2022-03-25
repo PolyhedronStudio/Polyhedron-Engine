@@ -15,7 +15,7 @@ public:
 
 	void Spawn() override;
 
-	void ExplosiveDeath( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point );
-	void ExplosiveUse( SVGBaseEntity* other, SVGBaseEntity* activator );
-	void ExplosiveAppearUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void ExplosiveDeath( IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point );
+	void ExplosiveUse( IServerGameEntity* other, IServerGameEntity* activator );
+	void ExplosiveAppearUse( IServerGameEntity* other, IServerGameEntity* activator );
 };

@@ -15,7 +15,7 @@ public:
 	void Spawn() override;
 	void SpawnKey( const std::string& key, const std::string& value ) override;
 
-	void SpeakerUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void SpeakerUse( IServerGameEntity* other, IServerGameEntity* activator );
 
 private:
 	std::string soundFile;

@@ -37,9 +37,9 @@ public:
 
     // Callback functions.
     void TriggerOnceThinkWait(void);
-    void TriggerOnceTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-    void TriggerOnceEnable(SVGBaseEntity* other, SVGBaseEntity* activator);
-    void TriggerOnceUse(SVGBaseEntity* other, SVGBaseEntity* activator);
+    void TriggerOnceTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void TriggerOnceEnable(IServerGameEntity* other, IServerGameEntity* activator);
+    void TriggerOnceUse(IServerGameEntity* other, IServerGameEntity* activator);
 
     //
     // Get/Set
@@ -49,7 +49,7 @@ protected:
     //
     // Trigger function.
     //
-    void Trigger(SVGBaseEntity* activator);
+    void Trigger(IServerGameEntity* activator);
 
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)

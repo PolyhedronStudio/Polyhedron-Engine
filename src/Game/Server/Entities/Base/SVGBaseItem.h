@@ -27,7 +27,7 @@ public:
     *   Item callback function pointers.
     *
     ***/
-    using PickupCallbackPointer         = qboolean(SVGBaseItem::*)(SVGBaseEntity *picker);
+    using PickupCallbackPointer         = qboolean(SVGBaseItem::*)(IServerGameEntity *picker);
     using UseInstanceCallbackPointer    = void(SVGBaseItem::*)(SVGBaseEntity *user, SVGBaseItem* item);
     using DropCallbackPointer           = void(SVGBaseItem::*)(SVGBaseEntity* other);
 
@@ -109,7 +109,7 @@ public:
     /**
     *   @brief Callback for when being triggered. Also known as "Use".
     **/
-    void BaseItemUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
+    void BaseItemUse(IServerGameEntity* caller, IServerGameEntity* activator);
 
     /**
     *   @brief Callback for item instance usage.
@@ -119,7 +119,7 @@ public:
     /**
     *   @brief Callback for when an entity touches this item.
     **/
-    void BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void BaseItemTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     /**
     *   @brief Callback for executing drop to floor behavior.

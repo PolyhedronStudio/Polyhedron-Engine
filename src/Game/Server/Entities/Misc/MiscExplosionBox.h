@@ -34,10 +34,10 @@ public:
     //
     // Callback Functions.
     //
-    void ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator );
+    void ExplosionBoxUse( IServerGameEntity* caller, IServerGameEntity* activator );
     void ExplosionBoxDropToFloor(void);
-    void ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    void ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void ExplosionBoxDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
+    void ExplosionBoxTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     // Set when exploding, after a minor delay.
     void MiscExplosionBoxExplode(void);

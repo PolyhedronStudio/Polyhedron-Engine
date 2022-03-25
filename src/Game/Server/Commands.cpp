@@ -21,11 +21,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Player/Animations.h"
 
 // Class Entities.
-#include "Entities/Base/SVGBaseEntity.h"
-#include "Entities/Base/SVGBaseTrigger.h"
-#include "Entities/Base/SVGBaseItem.h"
-#include "Entities/Base/SVGBaseItemWeapon.h"
-#include "Entities/Base/SVGBasePlayer.h"
+//#include "Entities/Base/SVGBaseEntity.h"
+//#include "Entities/Base/SVGBaseTrigger.h"
+//#include "Entities/Base/SVGBaseItem.h"
+//#include "Entities/Base/SVGBaseItemWeapon.h"
+//#include "Entities/Base/SVGBasePlayer.h"
 
 // Game Modes.
 #include "Gamemodes/IGamemode.h"
@@ -57,7 +57,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //    return ++p;
 //}
 
-static inline const std::string ClientTeam(SVGBaseEntity* ent) {
+static inline const std::string ClientTeam(IServerGameEntity* ent) {
     // No team name to return.
     if (!ent->GetClient())
 	    "";
@@ -82,7 +82,7 @@ static inline const std::string ClientTeam(SVGBaseEntity* ent) {
     //return ++p;
 }
 
-qboolean SVG_OnSameTeam(SVGBaseEntity *entityA, SVGBaseEntity *entityB)
+qboolean SVG_OnSameTeam(IServerGameEntity *entityA, IServerGameEntity *entityB)
 {
     // TODO: Check in gameworld whether 
     if (!((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams)))

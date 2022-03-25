@@ -155,7 +155,7 @@ public:
     *   @brief  Checks whether to add to inventory or not. If added to a client's
     *           inventory it'll also engage a weapon switch.
     **/
-    qboolean WeaponSMGPickup(SVGBaseEntity* other);
+    qboolean WeaponSMGPickup(IServerGameEntity *other);
 
     /**
     *   @brief Changes the player's weapon to the SMG if it has one that is.

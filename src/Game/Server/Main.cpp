@@ -21,9 +21,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Entities.
 #include "Entities.h"
-#include "Entities/Worldspawn.h"
+//#include "Entities/Worldspawn.h"
 //#include "Entities/Base/SVGEntityHandle.h"
-#include "Entities/Base/SVGBasePlayer.h"
+//#include "Entities/Base/SVGBasePlayer.h"
 
 // Gamemodes.
 #include "Gamemodes/IGamemode.h"
@@ -518,7 +518,7 @@ Advances the world by FRAMETIME(for 50hz=0.019) seconds
 void SVG_RunFrame(void) {
     // Acquire server and class entities arrays.
     Entity* serverEntities = game.world->GetServerEntities();
-    SVGBaseEntity **classEntities = game.world->GetClassEntities();
+    IServerGameEntity **classEntities = game.world->GetClassEntities();
 
     // We're moving the game a frame forward.
     level.frameNumber++;
@@ -547,7 +547,7 @@ void SVG_RunFrame(void) {
 	    SGEntityHandle entityHandle = classEntities[i];
 
         // Acquire the class entity.
-        SVGBaseEntity *classEntity = *entityHandle;
+        IServerGameEntity *classEntity = *entityHandle;
 
         if (!classEntity || !classEntity->IsInUse()) {
             continue;
@@ -579,7 +579,7 @@ void SVG_RunFrame(void) {
         classEntity->SetOldOrigin(classEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-	    SVGBaseEntity* groundEntity = *classEntity->GetGroundEntity();
+	    ClassEntity* groundEntity = *classEntity->GetGroundEntity();
         if (groundEntity && (groundEntity->GetLinkCount() != classEntity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             classEntity->SetGroundEntity(nullptr);

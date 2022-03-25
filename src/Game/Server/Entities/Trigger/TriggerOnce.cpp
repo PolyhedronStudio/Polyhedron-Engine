@@ -110,7 +110,7 @@ void TriggerOnce::SpawnKey(const std::string& key, const std::string& value) {
 	}
 }
 
-void TriggerOnce::Trigger(SVGBaseEntity* activator) {
+void TriggerOnce::Trigger(IServerGameEntity* activator) {
 	// Parent trigger.
 	Base::Trigger(activator);
 }
@@ -133,7 +133,7 @@ void TriggerOnce::TriggerOnceThinkWait() {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void TriggerOnce::TriggerOnceTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void TriggerOnce::TriggerOnceTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	if (this == other)
 		return;
 
@@ -169,7 +169,7 @@ void TriggerOnce::TriggerOnceTouch(SVGBaseEntity* self, SVGBaseEntity* other, Co
 // 'Use' callback, whenever the trigger is activated.
 //===============
 //
-void TriggerOnce::TriggerOnceUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
+void TriggerOnce::TriggerOnceUse(IServerGameEntity* other, IServerGameEntity* activator) {
 	// Trigger itself.
 	Trigger(activator);
 }
@@ -181,7 +181,7 @@ void TriggerOnce::TriggerOnceUse(SVGBaseEntity* other, SVGBaseEntity* activator)
 // 'Use' callback, whenever the trigger wasn't, but still has to be activated.
 //===============
 //
-void TriggerOnce::TriggerOnceEnable(SVGBaseEntity* other, SVGBaseEntity* activator) {
+void TriggerOnce::TriggerOnceEnable(IServerGameEntity* other, IServerGameEntity* activator) {
 	// Set the new solid, since it wasn't Solid::Trigger when disabled.
 	SetSolid(Solid::Trigger);
 

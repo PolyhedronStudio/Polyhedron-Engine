@@ -66,7 +66,7 @@ void FuncExplosive::Spawn() {
 //===============
 // FuncExplosive::ExplosiveDeath
 //===============
-void FuncExplosive::ExplosiveDeath( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point ) {
+void FuncExplosive::ExplosiveDeath( IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point ) {
     vec3_t  origin;
     vec3_t  chunkorigin;
     vec3_t  size;
@@ -131,14 +131,14 @@ void FuncExplosive::ExplosiveDeath( SVGBaseEntity* inflictor, SVGBaseEntity* att
 //===============
 // FuncExplosive::ExplosiveUse
 //===============
-void FuncExplosive::ExplosiveUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncExplosive::ExplosiveUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     ExplosiveDeath( other, activator, GetHealth(), vec3_zero() );
 }
 
 //===============
 // FuncExplosive::ExplosiveAppearUse
 //===============
-void FuncExplosive::ExplosiveAppearUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncExplosive::ExplosiveAppearUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     SetSolid( Solid::BSP );
     SetServerFlags( GetServerFlags() & ~EntityServerFlags::NoClient );
     SetUseCallback( nullptr );

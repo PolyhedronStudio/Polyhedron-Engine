@@ -205,88 +205,88 @@ SVG_HUD_GenerateDMScoreboardLayout
 
 ==================
 */
-void SVG_HUD_GenerateDMScoreboardLayout(SVGBaseEntity *ent, SVGBaseEntity *killer)
+void SVG_HUD_GenerateDMScoreboardLayout(IServerGameEntity *ent, IServerGameEntity *killer)
 {
-    char    entry[1024];
-    char    string[1400];
-    int     stringlength;
-    int     i, j, k;
-    int     sorted[MAX_CLIENTS];
-    int     sortedscores[MAX_CLIENTS];
-    int     score, total;
-    int     x, y;
-    ServerClient   *cl;
-    Entity     *cl_ent;
-    const char    *tag; // C++20: STRING: Added const to char*
+ //   char    entry[1024];
+ //   char    string[1400];
+ //   int     stringlength;
+ //   int     i, j, k;
+ //   int     sorted[MAX_CLIENTS];
+ //   int     sortedscores[MAX_CLIENTS];
+ //   int     score, total;
+ //   int     x, y;
+ //   ServerClient   *cl;
+ //   Entity     *cl_ent;
+ //   const char    *tag; // C++20: STRING: Added const to char*
 
-    ServerClient* clients = game.GetClients();
+ //   ServerClient* clients = game.GetClients();
 
-    // sort the clients by score
-    total = 0;
-    for (i = 0 ; i < game.GetMaxClients() ; i++) {
-        cl_ent = game.world->GetServerEntities() + 1 + i;
-        if (!cl_ent->inUse || clients[i].respawn.isSpectator)
-            continue;
-        score = clients[i].respawn.score;
-        for (j = 0 ; j < total ; j++) {
-            if (score > sortedscores[j])
-                break;
-        }
-        for (k = total ; k > j ; k--) {
-            sorted[k] = sorted[k - 1];
-            sortedscores[k] = sortedscores[k - 1];
-        }
-        sorted[j] = i;
-        sortedscores[j] = score;
-        total++;
-    }
+ //   // sort the clients by score
+ //   total = 0;
+ //   for (i = 0 ; i < game.GetMaxClients() ; i++) {
+ //       cl_ent = game.world->GetServerEntities() + 1 + i;
+ //       if (!cl_ent->inUse || clients[i].respawn.isSpectator)
+ //           continue;
+ //       score = clients[i].respawn.score;
+ //       for (j = 0 ; j < total ; j++) {
+ //           if (score > sortedscores[j])
+ //               break;
+ //       }
+ //       for (k = total ; k > j ; k--) {
+ //           sorted[k] = sorted[k - 1];
+ //           sortedscores[k] = sortedscores[k - 1];
+ //       }
+ //       sorted[j] = i;
+ //       sortedscores[j] = score;
+ //       total++;
+ //   }
 
-    // print level name and exit rules
-    string[0] = 0;
+ //   // print level name and exit rules
+ //   string[0] = 0;
 
-    stringlength = strlen(string);
+ //   stringlength = strlen(string);
 
-    // add the clients in sorted order
-    if (total > 12)
-        total = 12;
+ //   // add the clients in sorted order
+ //   if (total > 12)
+ //       total = 12;
 
-    for (i = 0 ; i < total ; i++) {
-	cl = &game.GetClients()[sorted[i]];
-        cl_ent = game.world->GetServerEntities() + 1 + sorted[i];
+ //   for (i = 0 ; i < total ; i++) {
+	//cl = &game.GetClients()[sorted[i]];
+ //       cl_ent = game.world->GetServerEntities() + 1 + sorted[i];
 
-        x = (i >= 6) ? 160 : 0;
-        y = 32 + 32 * (i % 6);
+ //       x = (i >= 6) ? 160 : 0;
+ //       y = 32 + 32 * (i % 6);
 
-        // add a dogtag
-        if (ent && cl_ent == ent->GetPODEntity())
-            tag = "tag1";
-        else if (killer && cl_ent == killer->GetPODEntity())
-            tag = "tag2";
-        else
-            tag = NULL;
-        if (tag) {
-            Q_snprintf(entry, sizeof(entry),
-                       "xv %i yv %i picn %s ", x + 32, y, tag);
-            j = strlen(entry);
-            if (stringlength + j > 1024)
-                break;
-            strcpy(string + stringlength, entry);
-            stringlength += j;
-        }
+ //       // add a dogtag
+ //       if (ent && cl_ent == ent->GetPODEntity())
+ //           tag = "tag1";
+ //       else if (killer && cl_ent == killer->GetPODEntity())
+ //           tag = "tag2";
+ //       else
+ //           tag = NULL;
+ //       if (tag) {
+ //           Q_snprintf(entry, sizeof(entry),
+ //                      "xv %i yv %i picn %s ", x + 32, y, tag);
+ //           j = strlen(entry);
+ //           if (stringlength + j > 1024)
+ //               break;
+ //           strcpy(string + stringlength, entry);
+ //           stringlength += j;
+ //       }
 
-        // send the layout
-        Q_snprintf(entry, sizeof(entry),
-                   "client %i %i %i %i %i %i ",
-                   x, y, sorted[i], cl->respawn.score, cl->ping, (level.frameNumber - cl->respawn.enterGameFrameNumber) / 600);
-        j = strlen(entry);
-        if (stringlength + j > 1024)
-            break;
-        strcpy(string + stringlength, entry);
-        stringlength += j;
-    }
+ //       // send the layout
+ //       Q_snprintf(entry, sizeof(entry),
+ //                  "client %i %i %i %i %i %i ",
+ //                  x, y, sorted[i], cl->respawn.score, cl->ping, (level.frameNumber - cl->respawn.enterGameFrameNumber) / 600);
+ //       j = strlen(entry);
+ //       if (stringlength + j > 1024)
+ //           break;
+ //       strcpy(string + stringlength, entry);
+ //       stringlength += j;
+ //   }
 
-    gi.MSG_WriteUint8(ServerGameCommand::Layout);//gi.WriteByte(ServerGameCommand::Layout);
-    gi.MSG_WriteString(string);//gi.WriteString(string);
+ //   gi.MSG_WriteUint8(ServerGameCommand::Layout);//gi.WriteByte(ServerGameCommand::Layout);
+ //   gi.MSG_WriteString(string);//gi.WriteString(string);
 }
 
 

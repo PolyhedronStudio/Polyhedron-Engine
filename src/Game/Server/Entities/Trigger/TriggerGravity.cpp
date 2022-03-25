@@ -50,6 +50,6 @@ void TriggerGravity::SpawnKey( const std::string& key, const std::string& value 
 //===============
 // TriggerGravity::GravityTouch
 //===============
-void TriggerGravity::GravityTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
+void TriggerGravity::GravityTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	other->SetGravity( GetGravity() );
 }

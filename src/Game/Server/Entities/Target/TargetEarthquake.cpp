@@ -55,7 +55,7 @@ void TargetEarthquake::SpawnKey( const std::string& key, const std::string& valu
 //===============
 // TargetEarthquake::QuakeUse
 //===============
-void TargetEarthquake::QuakeUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void TargetEarthquake::QuakeUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     SetActivator(activator);
     
     lastQuakeTime = 0.0f;

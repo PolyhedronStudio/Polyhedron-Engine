@@ -19,10 +19,10 @@
 # Sources #
 ###########
 SET(SRC_SHAREDGAME
-	Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
+	${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp #Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
 
-	PMove.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.cpp
-	SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
+	${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.cpp #PMove.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.cpp
+	${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
 )
 
 ###########

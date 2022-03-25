@@ -16,14 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef __INC_SHARED__SVGAME_H__
-#define __INC_SHARED__SVGAME_H__
+#pragma once
 
 #include "Shared/List.h"
-
-// Shared Game "Framework".
-#include <Game/Shared/SharedGame.h>
-
 
 //
 // game.h -- game dll information visible to server
@@ -45,7 +40,7 @@ struct EntityServerFlags {
 
 //===============================================================
 
-#define MAX_ENT_CLUSTERS    16
+static constexpr int32_t MAX_ENT_CLUSTERS = 16;
 
 
 typedef struct entity_s Entity;
@@ -212,12 +207,12 @@ typedef struct {
 // functions exported by the game subsystem
 //
 
-struct {
+struct EntityPool {
     struct entity_s  *entities;
     int         entitySize;
     int         numberOfEntities;     // current number, <= maxEntities
     int         maxEntities;
-} EntityPool;
+};
 
 typedef struct {
     //---------------------------------------------------------------------
@@ -298,5 +293,3 @@ typedef struct {
     int         numberOfEntities;     // current number, <= maxEntities
     int         maxEntities;
 } ServerGameExports;
-
-#endif // __INC_SHARED__SVGAME_H__

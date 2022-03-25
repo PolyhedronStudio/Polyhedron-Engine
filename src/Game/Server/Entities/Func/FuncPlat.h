@@ -52,8 +52,8 @@ protected:
     //
     // Callbacks for FuncPlat.
     //
-    void        PlatformUse( SVGBaseEntity* other, SVGBaseEntity* activator );
-    void        PlatformBlocked( SVGBaseEntity* other );
+    void        PlatformUse( IServerGameEntity* other, IServerGameEntity* activator );
+    void        PlatformBlocked( IServerGameEntity* other );
     
     void        PlatformGoUp();
     void        PlatformGoDown();
@@ -72,8 +72,8 @@ protected:
     // 
     // These are leftovers from the legacy brush movement functions
     // Soon, we'll have a... better way... of doing this
-    static void OnPlatformHitTop( SVGBaseEntity* self );
-    static void OnPlatformHitBottom( SVGBaseEntity* self );
+    static void OnPlatformHitTop( IServerGameEntity* self );
+    static void OnPlatformHitBottom( IServerGameEntity* self );
 
     //
     // Private Utilities.

@@ -15,7 +15,9 @@ SET(SRC_SVGAME
 	SVCommands.cpp
 	Utilities.cpp
 	Weapons.cpp 
+
 	ai/MonsterAI.cpp
+
 	Entities/Base/SVGBaseEntity.cpp
 	Entities/Base/SVGBaseItem.cpp
 	Entities/Base/SVGBaseItemAmmo.cpp
@@ -34,12 +36,14 @@ SET(SRC_SVGAME
 	Entities/Info/InfoPlayerDeathmatch.cpp
 	Entities/Info/InfoPlayerIntermission.cpp
 	Entities/Info/InfoPlayerStart.cpp
+
 	Entities/Items/ItemAmmo9mm.cpp
 	Entities/Items/ItemHealthMega.cpp
 	Entities/Items/ItemWeaponKnife.cpp
 	Entities/Items/ItemWeaponBeretta.cpp
 	Entities/Items/ItemWeaponNone.cpp
 	Entities/Items/ItemWeaponSMG.cpp
+
 	Entities/Func/FuncAreaportal.cpp
 	Entities/Func/FuncButton.cpp
 	#Entities/Func/FuncConveyor.cpp
@@ -54,6 +58,7 @@ SET(SRC_SVGAME
 	Entities/Func/FuncTrain.cpp 
 	Entities/Func/FuncWall.cpp
 	#Entities/Func/FuncWater.cpp
+
 	#Entities/Misc/MiscExplobox.cpp
 	#Entities/Misc/MiscGibArm.cpp 
 	#Entities/Misc/MiscGibLeg.cpp 
@@ -62,7 +67,9 @@ SET(SRC_SVGAME
 	Entities/Misc/MiscServerModel.cpp
 	#Entities/Misc/MiscTeleporter.cpp
 	#Entities/Misc/MiscTeleporterDest.cpp
+
 	Entities/Monsters/MonsterTestDummy.cpp
+
 	Entities/Path/PathCorner.cpp
 	#Entities/Target/TargetBlaster.cpp
 	#Entities/Target/TargetChangelevel.cpp
@@ -75,6 +82,7 @@ SET(SRC_SVGAME
 	Entities/Target/TargetSpeaker.cpp
 	#Entities/Target/TargetSplash.cpp
 	Entities/Target/TargetTempEntity.cpp
+
 	Entities/Trigger/TriggerCounter.cpp
 	#Entities/Trigger/TriggerElevator.cpp
 	Entities/Trigger/TriggerGravity.cpp
@@ -89,23 +97,30 @@ SET(SRC_SVGAME
 	Entities/Trigger/TriggerMultiple.cpp
 	Entities/Trigger/TriggerOnce.cpp
 	Entities/Trigger/TriggerRelay.cpp
+
 	Entities/Weaponry/BlasterBolt.cpp
+
 	Entities/Light.cpp
 	Entities/Worldspawn.cpp
+
 	Gamemodes/DefaultGamemode.cpp
 	Gamemodes/CoopGamemode.cpp
 	Gamemodes/DeathmatchGamemode.cpp
+
 	Physics/Physics.cpp
 	Physics/StepMove.cpp
+
 	Player/Client.cpp
 	Player/Hud.cpp
 	Player/Trail.cpp
 	Player/View.cpp
 	Player/Weapons.cpp
+
 	#Weapons/Blaster.cpp
 	#Weapons/Machinegun.cpp
 	#Weapons/Shotgun.cpp
 	#Weapons/SuperShotgun.cpp
+
 	World/GameWorld.cpp
 	#SVGame.def
 	
@@ -120,7 +135,9 @@ SET(HEADERS_SVGAME
 	ServerGameLocals.h
 	TypeInfo.h
 	Utilities.h
+
 	AI/MonsterAI.h
+
 	Entities/Base/SVGBaseEntity.h
 	Entities/Base/SVGBaseItem.h
 	Entities/Base/SVGBaseItemAmmo.h
@@ -132,6 +149,7 @@ SET(HEADERS_SVGAME
 	Entities/Base/BodyCorpse.h
 	Entities/Base/DebrisEntity.h
 	Entities/Base/GibEntity.h
+
 	Entities/Func/FuncAreaportal.h
 	Entities/Func/FuncButton.h
 	Entities/Func/FuncDoor.h
@@ -142,6 +160,7 @@ SET(HEADERS_SVGAME
 	Entities/Func/FuncTimer.h
 	Entities/Func/FuncTrain.h
 	Entities/Func/FuncWall.h
+
 	#Entities/Info/InfoNull.h - Only has a .cpp file.
 	Entities/Info/InfoPlayerCoop.h
 	Entities/Info/InfoPlayerDeathmatch.h
@@ -149,9 +168,7 @@ SET(HEADERS_SVGAME
 	Entities/Info/InfoPlayerStart.h
 	
 	Entities/Items/ItemAmmo9mm.h
-	
 	Entities/Items/ItemHealthMega.h
-	
 	Entities/Items/ItemWeaponKnife.h
 	Entities/Items/ItemWeaponBeretta.h
 	Entities/Items/ItemWeaponSMG.h
@@ -177,21 +194,26 @@ SET(HEADERS_SVGAME
 	Entities/Trigger/TriggerPush.h
 	Entities/Trigger/TriggerRelay.h
 	Entities/weaponry/BlasterBolt.h
+
 	Entities/IServerGameEntity.h
 	Entities/Light.h
 	Entities/Worldspawn.h
+
 	Gamemodes/DefaultGamemode.h
 	Gamemodes/CoopGamemode.h
 	Gamemodes/DeathmatchGamemode.h
 	Gamemodes/IGamemode.h
+
 	Player/Animations.h
 	Player/Client.h
 	Player/View.h
 	Player/Weapons.h
+
 	Weapons/Blaster.h
 	Weapons/Machinegun.h
 	Weapons/Shotgun.h
 	Weapons/SuperShotgun.h
+
 	World/GameWorld.h
 	#SVGame.def
 

@@ -48,7 +48,7 @@ void TriggerCounter::SpawnKey( const std::string& key, const std::string& value 
 //===============
 // TriggerCounter::CounterUse
 //===============
-void TriggerCounter::CounterUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void TriggerCounter::CounterUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	if ( !count ) {
 		return;
 	}

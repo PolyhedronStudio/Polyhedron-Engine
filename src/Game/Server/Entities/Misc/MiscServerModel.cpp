@@ -294,7 +294,7 @@ void MiscServerModel::MiscServerModelThink(void) {
 // 'Die' callback, the explosion box has been damaged too much.
 //===============
 //
-void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void MiscServerModel::MiscServerModelDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
 

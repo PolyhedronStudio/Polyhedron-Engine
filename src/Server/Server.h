@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Shared/Shared.h"
 #include "Shared/List.h"
-//#include "Shared/svgame.h"
+#include "Shared/SVGame.h"
 
 #include "Common/Bsp.h"
 #include "Common/Cmd.h"
@@ -99,9 +99,9 @@ constexpr uint32_t SV_FRAMESYNC = 1;
 static constexpr uint32_t MAX_TOTAL_ENT_LEAFS = 128;
 //=============================================================================
 
-//-----------------
-// A client ServerCommand::Frame message.
-//-----------------
+/**
+*   A client ServerCommand::Frame message.
+**/
 typedef struct {
     int         number;
     unsigned    num_entities;
@@ -109,22 +109,21 @@ typedef struct {
     PlayerState playerState;
     int         clientNumber;
     int         areaBytes;
-    byte        areaBits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
-    unsigned    sentTime;                   // for ping calculations
+    byte        areaBits[MAX_MAP_AREA_BYTES];  // PortalArea visibility bits.
+    unsigned    sentTime;   // For ping calculations.
     int         latency;
 } ClientFrame;
 
-//-----------------
-// Server side Entity.
-//-----------------
+/**
+*   Server side Entity.
+**/
 typedef struct {
     int         solid32;
 } server_entity_t;
 
-
-//-----------------
-// Main server structure.
-//-----------------
+/**
+*   Main server structure.
+**/
 typedef struct {
     int32_t serverState;    // precache commands are only valid during load
     int32_t spawncount;     // random number generated each server spawn
@@ -145,29 +144,40 @@ typedef struct {
     unsigned    tracecount;
 } server_t;
 
-
+/**
+*   ConnectionState struct enum.
+**/
 struct ConnectionState {
-    static constexpr int32_t Free = 0;      // Can be reused for a new connection
-    static constexpr int32_t Zombie = 1;    // Client has been disconnected, but don't reuse
-                                            // Connection for a couple seconds
-    static constexpr int32_t Assigned = 2;  // Client_t assigned, but no data received from client yet
-    static constexpr int32_t Connected = 3; // Netchan fully established, but not in game yet
-    static constexpr int32_t Primed = 4;    // Sent serverdata, client is precaching
-    static constexpr int32_t Spawned = 5;   // Client is fully in game
+    static constexpr int32_t Free = 0;      //! Can be reused for a new connection.
+    static constexpr int32_t Zombie = 1;    //! Client has been disconnected, but don't reuse connection for a couple seconds.
+    static constexpr int32_t Assigned = 2;  //! Client_t assigned, but no data received from client yet.
+    static constexpr int32_t Connected = 3; //! Netchan fully established, but not in game yet.
+    static constexpr int32_t Primed = 4;    //! Sent serverdata, client is precaching.
+    static constexpr int32_t Spawned = 5;   //! Client is fully in game.
 };
 
+/**
+*   Message Configuration.
+**/
 constexpr uint32_t MSG_POOLSIZE = 8192;
 constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
 
+/**
+*   Message Flags.
+**/
 constexpr uint32_t MSG_RELIABLE = 1;
-constexpr uint32_t MSG_CLEAR = 2;
+constexpr uint32_t MSG_CLEAR    = 2;
 constexpr uint32_t MSG_COMPRESS = 4;
 
+/**
+*   Maximum Sound Packets.
+**/
 constexpr uint32_t MAX_SOUND_PACKET = 14;
 
-//-----------------
-// The actual networking message packets.
-//-----------------
+
+/**
+*   The actual networking message packets.
+**/
 typedef struct {
     list_t              entry;
     uint16_t            currentSize;    // Zero means sound packet
@@ -185,25 +195,36 @@ typedef struct {
     };
 } MessagePacket;
 
-// This is best to match the actual server game frame rate.
+//! This is best to match the actual server game frame rate.
 static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;
 
-// Used to divide for rate calculating.
+//! Used to divide for rate calculating.
 static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
-// Used to multiply for rate user input drop calculating.
+//! Used to multiply for rate user input drop calculating.
 static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
+
+/**
+*   Server Utility Macros.
+**/
+//! Loops over each client.
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
 
+// Calculates ping for player server 2 client.
 #define PL_S2C(cl) (cl->framesSent ? \
     (1.0f - (float)cl->framesAcknowledged / cl->framesSent) * 100.0f : 0.0f)
+// Calculates ping for player client 2 server.
 #define PL_C2S(cl) (cl->netchan->totalReceived ? \
     ((float)cl->netchan->totalDropped / cl->netchan->totalReceived) * 100.0f : 0.0f)
+// Averages the final ping value.
 #define AVG_PING(cl) (cl->averagePingCount ? \
     cl->averagePingTime / cl->averagePingCount : cl->ping)
 
+/**
+*  RateLimit
+**/
 typedef struct {
     unsigned    time;
     unsigned    credit;
@@ -211,15 +232,24 @@ typedef struct {
     unsigned    cost;
 } RateLimit;
 
+/**
+*   Client Data.
+* 
+*   A client can leave the server in one of the following four ways:
+*    - #1: Dropping properly by quiting or disconnecting.
+*    - #2: Timing out if no valid messages are received for timeout.value seconds.
+*    - #3: Getting kicked off by the server operator
+*    - #4: A program error, like an overflowed reliable buffer.
+**/
 typedef struct client_s {
     list_t entry;
 
-    // core info
+    // Core info
     int32_t connectionState;
     Entity *edict;     // EDICT_NUM(clientnum+1)
     int number;     // client slot number
 
-    // client flags
+    // Client flags
     qboolean reconnected: 1;
     qboolean nodata: 1;
     qboolean has_zlib: 1;
@@ -229,7 +259,7 @@ typedef struct client_s {
 #endif
     qboolean http_download: 1;
 
-    // userinfo
+    // Userinfo
     char userinfo[MAX_INFO_STRING];  // name, etc
     char name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
     int32_t messageLevel;               // for filtering printed messages
@@ -334,25 +364,24 @@ typedef struct client_s {
 
 } client_t;
 
-// a client can leave the server in one of four ways:
-// dropping properly by quiting or disconnecting
-// timing out if no valid messages are received for timeout.value seconds
-// getting kicked off by the server operator
-// a program error, like an overflowed reliable buffer
-
 //=============================================================================
 
-// MAX_CHALLENGES is made large to prevent a denial
-// of service attack that could cycle all of them
-// out before legitimate users connected
+// MAX_CHALLENGES is made large to prevent a denial of service attack that could 
+// cycle all of them out before legitimate users connected.
 static constexpr uint32_t    MAX_CHALLENGES = 1024;
 
+/**
+*   Challenge Data.
+**/
 typedef struct {
     NetAdr adr;
     uint32_t challenge;
     uint32_t time;
 } Challenge;
 
+/**
+*   AddressMatch
+**/
 typedef struct {
     list_t      entry;
     NetAdr    addr;
@@ -362,12 +391,18 @@ typedef struct {
     char        comment[1];
 } AddressMatch;
 
+/**
+*   StuffText Commands.
+**/
 typedef struct {
     list_t  entry;
     int32_t len;
     char    string[1];
 } StuffTextCommand;
 
+/**
+*   Filter Actions.
+**/
 typedef enum {
     FA_IGNORE,
     FA_PRINT,
@@ -377,6 +412,9 @@ typedef enum {
     FA_MAX
 } FilterAction;
 
+/**
+*   Filter Commands.
+**/
 struct FilterCommand {
     list_t entry;
     
@@ -386,6 +424,9 @@ struct FilterCommand {
     char  string[1];
 };
 
+/**
+*   Master Server
+**/
 typedef struct {
     list_t entry;
     NetAdr adr;

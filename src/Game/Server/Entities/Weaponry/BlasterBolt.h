@@ -34,7 +34,7 @@ public:
     // Callback functions.
     //
     //
-    void BlasterBoltTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void BlasterBoltTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     //
     // Get/Set

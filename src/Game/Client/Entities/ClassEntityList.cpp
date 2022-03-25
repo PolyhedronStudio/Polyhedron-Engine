@@ -43,9 +43,9 @@ void ClassEntityList::Clear() {
 *			which belongs to the ClientEntity.
 *   @return Pointer to the class entity object on sucess. On failure, nullptr.
 **/
-CLGBaseEntity* ClassEntityList::SpawnFromState(const EntityState& state, ClientEntity* clEntity) {
+IClientGameEntity* ClassEntityList::SpawnFromState(const EntityState& state, ClientEntity* clEntity) {
     // Start with a nice nullptr.
-    CLGBaseEntity* spawnEntity = nullptr;
+    IClientGameEntity* spawnEntity = nullptr;
 
 	// Safety check.
     if (!clEntity) {
@@ -79,7 +79,7 @@ CLGBaseEntity* ClassEntityList::SpawnFromState(const EntityState& state, ClientE
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
 		// Allocate and return a pointer to the new class entity object.
-		CLGBaseEntity *classEntity = InsertAt(state.number, info->AllocateInstance(clEntity));
+		IClientGameEntity *classEntity = InsertAt(state.number, info->AllocateInstance(clEntity));
 
 		// If it isn't a nullptr...
 		if (!classEntity) {
@@ -109,7 +109,7 @@ CLGBaseEntity* ClassEntityList::SpawnFromState(const EntityState& state, ClientE
 /**
 *   @return A pointer to the entity who's index matches the state number.
 **/
-CLGBaseEntity *ClassEntityList::GetByNumber(int32_t number) {
+IClientGameEntity *ClassEntityList::GetByNumber(int32_t number) {
 	// Ensure ID is within bounds.
 	if (number <= 0 || number > classEntities.size()) {
 		return nullptr;
@@ -124,7 +124,7 @@ CLGBaseEntity *ClassEntityList::GetByNumber(int32_t number) {
 *   @param  force   When set to true it'll delete any previously allocated class entity occupying the given index.
 *   @return Pointer to the entity being inserted. nullptr on failure.
 **/
-CLGBaseEntity *ClassEntityList::InsertAt(int32_t number, CLGBaseEntity *clgEntity, bool force) {
+IClientGameEntity *ClassEntityList::InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force) {
 	// Ensure that the number range is valid, otherwise return a nullptr.
 	if (number <= 0 || number > classEntities.capacity()) {
 		return nullptr;

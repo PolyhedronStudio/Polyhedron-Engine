@@ -49,7 +49,7 @@ public:
     //
     // Callback functions.
     //
-    void LightUse(SVGBaseEntity* other, SVGBaseEntity* activator);
+    void LightUse(IServerGameEntity* other, IServerGameEntity* activator);
     void LightThink(void);
 
 private:

@@ -34,7 +34,7 @@ void TargetExplosion::Spawn() {
 //===============
 // TargetExplosion::ExplosionUse
 //===============
-void TargetExplosion::ExplosionUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void TargetExplosion::ExplosionUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	SetActivator(activator);
 
 	if ( !GetDelayTime() ) {

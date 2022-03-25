@@ -33,7 +33,7 @@ class CLGBaseEntity;
 *   respectively.
 * 
 **/
-using CLGEntityVector = std::vector<CLGBaseEntity*>;
+using CLGEntityVector = std::vector<IClientGameEntity*>;
 
 class ClassEntityList {
 public:
@@ -57,19 +57,19 @@ public:
     *           as its 'soulmate', I suppose.
     *   @return Pointer to the class entity object on sucess. On failure, nullptr.
     **/
-    CLGBaseEntity *SpawnFromState(const EntityState &state, ClientEntity *clEntity);
+    IClientGameEntity *SpawnFromState(const EntityState &state, ClientEntity *clEntity);
 
     /**
     *   @return A pointer to the entity who's index matches the state number.
     **/
-    CLGBaseEntity *GetByNumber(int32_t number);
+    IClientGameEntity *GetByNumber(int32_t number);
 
     /**
     *   @brief  Inserts the class entity pointer at the number index of our class entity vector.
     *   @param  force   When set to true it'll delete any previously allocated class entity occupying the given slot.
     *   @return Pointer to the entity being inserted. nullptr on failure.
     **/
-    CLGBaseEntity *InsertAt(int32_t number, CLGBaseEntity *clgEntity, bool force = true);
+    IClientGameEntity *InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force = true);
 
 private:
     //! First 2048 are reserved for server side entities.

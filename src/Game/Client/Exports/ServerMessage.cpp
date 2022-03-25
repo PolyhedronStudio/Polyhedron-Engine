@@ -170,10 +170,10 @@ qboolean ClientGameServerMessage::ParseMessage(int32_t serverCommand) {
         break;
 
         // Client layout (Cruel, limited, ugly UI...) updates
-    case ServerGameCommand::Layout:
-        ParseLayout();
-        return true;
-        break;
+    //case ServerGameCommand::Layout:
+    //    ParseLayout();
+    //    return true;
+    //    break;
         // Fail by default.
     default:
         return false;
@@ -191,10 +191,10 @@ qboolean ClientGameServerMessage::SeekDemoMessage(int32_t demoCommand) {
         ParseInventory();
         return true;
         break;
-    case ServerGameCommand::Layout:
-        ParseLayout();
-        return true;
-        break;
+    //case ServerGameCommand::Layout:
+    //    ParseLayout();
+    //    return true;
+    //    break;
         // Return false for failure in case we've reached this checkpoint.
     default:
         return false;

@@ -23,7 +23,7 @@ public:
 	void			PostSpawn() override;
 	void			SpawnKey( const std::string& key, const std::string& value ) override;
 
-	void			TrainUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void			TrainUse( IServerGameEntity* other, IServerGameEntity* activator );
 
 	// Finds the next path corner target, if any.
 	void			FindNextTarget();
@@ -34,9 +34,9 @@ public:
 	// Waits at the arrived path_corner
 	void			WaitAtCorner();
 	// Callback for the brush movement code
-	static void		OnWaitAtCorner( SVGBaseEntity* ent );
+	static void		OnWaitAtCorner( IServerGameEntity* ent );
 	// The train has been blocked by an obstacle, damage it or stop?
-	void			TrainBlocked( SVGBaseEntity* other );
+	void			TrainBlocked( IServerGameEntity* other );
 
 private:
 	PathCorner*		currentPathEntity{ nullptr };

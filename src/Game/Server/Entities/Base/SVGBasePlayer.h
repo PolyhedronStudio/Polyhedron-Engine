@@ -20,7 +20,7 @@ public:
 private:
     //! Private constructor. Players are created using the Create function.
     SVGBasePlayer(Entity* svEntity);
-    virtual ~SVGBasePlayer();
+    virtual ~SVGBasePlayer() = default;
 
 public:
     DefineClass(SVGBasePlayer, SVGBaseEntity);
@@ -48,7 +48,7 @@ public:
     /**
     *   @brief  Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
     **/
-    void SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    void SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
 
 
 
@@ -248,13 +248,13 @@ public:
 
 protected:
     // The level.time when the "air" state finished. 
-    float airFinishedTime;
+    float airFinishedTime = 0.f;
 
     // Debounce level.time values.
-    float debounceTouchTime;
-    float debouncePainTime;
-    float debounceDamageTime;
-    float debounceSoundTime;
+    float debounceTouchTime = 0.f;
+    float debouncePainTime = 0.f;
+    float debounceDamageTime = 0.f;
+    float debounceSoundTime = 0.f;
 
 
     // View and BobMove functionality.
@@ -264,15 +264,15 @@ public:
     // walking instead of floating around.
     struct BobMoveCycle {
         // Forward, right, and up vectors.
-        vec3_t  forward, right, up;
+        vec3_t  forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
         // Speed squared over the X/Y axis.
-        float XYSpeed;
+        float XYSpeed = 0.f;
         // bobMove counter.
-        float move;
+        float move = 0.f;
         // Cycles are caculated over bobMove, uneven cycles = right foot.
-        int cycle;
+        int cycle = 0;
         // Calculated as: // sin(bobfrac*M_PI)
-        float fracSin;
+        float fracSin = 0.f;
     } bobMove;
 
     // Calculates the roll value that can be used for the view, 
@@ -316,7 +316,7 @@ private:
     /**
     *   @brief  Will ensure the player client sets it view looking at its killer.
     **/
-    void LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker);
+    void LookAtKiller(IServerGameEntity* inflictor, IServerGameEntity* attacker);
 
     //Adds the specific blend of colors on top of each other.
     static void AddScreenBlend(float r, float g, float b, float a, float *v_blend)

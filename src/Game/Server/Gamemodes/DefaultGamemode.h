@@ -32,16 +32,16 @@ public:
     ***/
     virtual qboolean IsDeadEntity(SVGBaseEntity *entity) override;
     virtual qboolean GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) override;
-    virtual qboolean OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) override;
-    virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
+    virtual qboolean OnSameTeam(IServerGameEntity* ent1, IServerGameEntity* ent2) override;
+    virtual qboolean CanDamage(IServerGameEntity* targ, IServerGameEntity* inflictor) override;
     virtual ClassEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
 
     /***
     * Combat Gamemode Actions.
     ***/    
-    virtual void EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int32_t damage, vec3_t point) override;
-    virtual void InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t dflags, int32_t mod) override;
-    virtual void InflictRadiusDamage(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, float damage, SVGBaseEntity* ignore, float radius, int32_t mod) override;
+    virtual void EntityKilled(IServerGameEntity* target, IServerGameEntity* inflictor, IServerGameEntity* attacker, int32_t damage, vec3_t point) override;
+    virtual void InflictDamage(IServerGameEntity* target, IServerGameEntity* inflictor, IServerGameEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t dflags, int32_t mod) override;
+    virtual void InflictRadiusDamage(IServerGameEntity* inflictor, IServerGameEntity* attacker, float damage, IServerGameEntity* ignore, float radius, int32_t mod) override;
     virtual void SetCurrentMeansOfDeath(int32_t meansOfDeath) override;
     virtual const int32_t& GetCurrentMeansOfDeath() override;
 
@@ -61,7 +61,7 @@ public:
     virtual void ClientEndServerFrame(SVGBasePlayer *player, ServerClient *client) override;
     virtual void ClientDisconnect(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientUserinfoChanged(Entity* ent, char *userinfo) override;
-    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
+    virtual void ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) override;
     virtual void ClientThink(SVGBasePlayer *player, ServerClient *client, ClientMoveCommand *moveCommand) override;
 
     /***

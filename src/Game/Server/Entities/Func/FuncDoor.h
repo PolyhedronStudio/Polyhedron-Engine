@@ -29,12 +29,12 @@ public:
 	void		SpawnKey( const std::string& key, const std::string& value ) override;
 
 protected:
-    void        DoorUse( SVGBaseEntity* other, SVGBaseEntity* activator );
-    void        DoorShotOpen( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point );
-    void        DoorBlocked( SVGBaseEntity* other );
-    void        DoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf );
+    void        DoorUse( IServerGameEntity* other, IServerGameEntity* activator );
+    void        DoorShotOpen( IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point );
+    void        DoorBlocked( IServerGameEntity* other );
+    void        DoorTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 
-    void        DoorGoUp( SVGBaseEntity* activator );
+    void        DoorGoUp( IServerGameEntity* activator );
     void        DoorGoDown();
    
     // These two are overridden by FuncDoorRotating
@@ -46,8 +46,8 @@ protected:
 
     // These are leftovers from the legacy brush movement functions
     // Soon, we'll have a... better way... of doing this
-    static void OnDoorHitTop( SVGBaseEntity* self );
-    static void OnDoorHitBottom( SVGBaseEntity* self );
+    static void OnDoorHitTop( IServerGameEntity* self );
+    static void OnDoorHitBottom( IServerGameEntity* self );
 
     // Admer: some of these could be moved to SVGBaseMover
     void        CalculateMoveSpeed();

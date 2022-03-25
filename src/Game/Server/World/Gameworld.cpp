@@ -301,14 +301,14 @@ Entity* Gameworld::ObtainFreeServerEntity() {
 **/
 void Gameworld::FindTeams() {
     Entity *e = nullptr, *e2 = nullptr;
-    SVGBaseEntity *chain = nullptr;
+    IServerGameEntity *chain = nullptr;
     int32_t i, j;
 
     int32_t c = 0;
     int32_t c2 = 0;
     for (i = 1, e = serverEntities + i; i < numberOfEntities; i++, e++) {
         // Fetch class entity.
-        SVGBaseEntity *classEntity = classEntities[e->state.number];
+        IServerGameEntity *classEntity = classEntities[e->state.number];
 
         if (classEntity == nullptr) {
             continue;
@@ -329,7 +329,7 @@ void Gameworld::FindTeams() {
 
         for (j = i + 1, e2 = e + 1 ; j < globals.numberOfEntities ; j++, e2++) {
             // Fetch class entity.
-            SVGBaseEntity* classEntity2 = classEntities[e->state.number];
+            IServerGameEntity* classEntity2 = classEntities[e->state.number];
 
             if (classEntity2 == nullptr) { 
                 continue;
@@ -440,7 +440,7 @@ qboolean Gameworld::SpawnParsedClassEntity(Entity* svEntity) {
     }
 
 	// Actually spawn the class entity.
-    SVGBaseEntity *classEntity = svEntity->classEntity = AllocateClassEntity(svEntity, svEntity->entityDictionary["classname"]);
+    IServerGameEntity *classEntity = svEntity->classEntity = AllocateClassEntity(svEntity, svEntity->entityDictionary["classname"]);
 
     // Something went wrong with allocating the class entity.
     if (!classEntity) {
@@ -471,9 +471,9 @@ qboolean Gameworld::SpawnParsedClassEntity(Entity* svEntity) {
 *			try and allocate it.
 *	@return	nullptr in case of failure, a valid pointer to a class entity otherwise.
 **/
-SVGBaseEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &classname) {
+IServerGameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &classname) {
     // Start with a nice nullptr.
-    SVGBaseEntity* spawnEntity = nullptr;
+    IServerGameEntity* spawnEntity = nullptr;
 
 	// Safety check.
     if (!svEntity) {
@@ -589,7 +589,7 @@ qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
     // Special class entity handling IF it still has one.
     if (svEntity->classEntity) {
 		// Get pointer to class entity.
-		SVGBaseEntity* classEntity = svEntity->classEntity;
+		IServerGameEntity* classEntity = svEntity->classEntity;
 
 		// Remove the classEntity reference
 		classEntity->SetGroundEntity(nullptr);

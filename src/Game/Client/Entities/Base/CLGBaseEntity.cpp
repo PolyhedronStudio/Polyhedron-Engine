@@ -21,8 +21,8 @@
 *
 **/
 //! Constructor/Destructor.
-CLGBaseEntity::CLGBaseEntity(ClientEntity* clEntity) {
-    this->podEntity = clEntity;
+CLGBaseEntity::CLGBaseEntity(ClientEntity* clEntity) : IClientGameEntity(), podEntity(clEntity) {
+    
 }
 
 

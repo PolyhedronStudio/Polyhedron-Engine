@@ -15,7 +15,7 @@
 class SVGBaseTrigger;
 
 // Callbacks used at the end of a pushmove action.
-using PushMoveEndFunction = void(SVGBaseEntity*);
+using PushMoveEndFunction = void(IServerGameEntity*);
 
 struct MoverState
 {

@@ -56,7 +56,7 @@ public:
     *   Callback functions.
     *
     ***/
-    qboolean Ammo9mmPickup(SVGBaseEntity* other);
+    qboolean Ammo9mmPickup(IServerGameEntity *other);
 
 private:
 

@@ -275,7 +275,7 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
 
     
     // Will either return a pointer to a new classentity type, or an existing one, depending on the state.
-    CLGBaseEntity *clgEntity = classEntityList.SpawnFromState(state, clEntity);
+    IClientGameEntity *clgEntity = classEntityList.SpawnFromState(state, clEntity);
 
     // Call the spawn function if it is a valid entity.
     if (clgEntity) {
@@ -305,7 +305,7 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
 //
 // Runs entity thinking code for this frame if necessary
 //===============
-qboolean CLG_RunThink(CLGBaseEntity *ent)
+qboolean CLG_RunThink(IClientGameEntity *ent)
 {
     if (!ent) {
 	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
@@ -377,7 +377,7 @@ void ClientGameEntities::RunFrame() {
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 1; entityNumber < cl->frame.numEntities; entityNumber++) {
         // Acquire class entity object.
-        CLGBaseEntity *classEntity = classEntityList.GetByNumber(entityNumber);
+        IClientGameEntity *classEntity = classEntityList.GetByNumber(entityNumber);
 
         // If invalid for whichever reason, warn and continue to next iteration.
         if (!classEntity) {

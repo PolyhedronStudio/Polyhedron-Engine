@@ -442,7 +442,7 @@ void ItemWeaponSMG::InstanceWeaponProcessSecondaryFireState(SVGBasePlayer* playe
 *   @brief  Checks whether to add to inventory or not. In case of adding it 
 *           to the inventory it also checks whether to change weapon or not.
 **/
-qboolean ItemWeaponSMG::WeaponSMGPickup(SVGBaseEntity* other) {
+qboolean ItemWeaponSMG::WeaponSMGPickup(IServerGameEntity *other) {
     // Acquire player entity pointer.
     SVGBaseEntity *validEntity = Gameworld::ValidateEntity(other, true, true);
 

@@ -26,7 +26,7 @@
 #include "../../World/Gameworld.h"
 
 // Constructor/Deconstructor.
-SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : serverEntity(svEntity) {
+SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : IServerGameEntity(), serverEntity(svEntity) {
 
 }
 
@@ -310,7 +310,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 // Execute the 'Use' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::DispatchUseCallback(SVGBaseEntity* other, SVGBaseEntity* activator) {
+void SVGBaseEntity::DispatchUseCallback(IServerGameEntity* other, IServerGameEntity* activator) {
 	// Safety check.
 	if (useFunction == nullptr)
 		return;
@@ -326,7 +326,7 @@ void SVGBaseEntity::DispatchUseCallback(SVGBaseEntity* other, SVGBaseEntity* act
 // Execute the 'Blocked' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::DispatchBlockedCallback(SVGBaseEntity* other) {
+void SVGBaseEntity::DispatchBlockedCallback(IServerGameEntity* other) {
 	// Safety check.
 	if (blockedFunction == nullptr)
 		return;
@@ -342,7 +342,7 @@ void SVGBaseEntity::DispatchBlockedCallback(SVGBaseEntity* other) {
 // Execute the 'TakeDamage' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::DispatchTakeDamageCallback(SVGBaseEntity* other, float kick, int32_t damage) {
+void SVGBaseEntity::DispatchTakeDamageCallback(IServerGameEntity* other, float kick, int32_t damage) {
 	// Safety check.
 	if (takeDamageFunction == nullptr)
 		return;
@@ -358,7 +358,7 @@ void SVGBaseEntity::DispatchTakeDamageCallback(SVGBaseEntity* other, float kick,
 // Execute the 'Die' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::DispatchDieCallback(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void SVGBaseEntity::DispatchDieCallback(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
 	// Safety check.
 	if (dieFunction == nullptr)
 		return;
@@ -374,7 +374,7 @@ void SVGBaseEntity::DispatchDieCallback(SVGBaseEntity* inflictor, SVGBaseEntity*
 // Execute the 'Touch' callback in case we ran into any.
 //===============
 //
-void SVGBaseEntity::DispatchTouchCallback(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void SVGBaseEntity::DispatchTouchCallback(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	// Safety check.
 	if (touchFunction == nullptr)
 		return;
@@ -388,7 +388,7 @@ void SVGBaseEntity::DispatchTouchCallback(SVGBaseEntity* self, SVGBaseEntity* ot
 // 
 // Calls Use on this entity's targets, as well as killtargets
 //===============
-void SVGBaseEntity::UseTargets( SVGBaseEntity* activatorOverride )
+void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 {
 	// If activatorOverride is null, use our default activator.
 	if (activatorOverride == nullptr) {

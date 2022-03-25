@@ -26,9 +26,9 @@ public:
     //
     // Functions defining game rules. Such as, CanDamage, Can... IsAllowedTo...
     //
-    virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
+    virtual qboolean CanDamage(IServerGameEntity* targ, IServerGameEntity* inflictor) override;
     // Coop has its own Obituary madness.
-    virtual void ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
+    virtual void ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) override;
 
     // Respawn clients in Coop mode.
     virtual void RespawnClient(SVGBasePlayer* playerClient) override;

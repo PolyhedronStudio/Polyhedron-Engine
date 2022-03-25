@@ -33,6 +33,6 @@ void TriggerRelay::Spawn() {
 //===============
 // TriggerRelay::RelayUse
 //===============
-void TriggerRelay::RelayUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void TriggerRelay::RelayUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	UseTargets( activator );
 }

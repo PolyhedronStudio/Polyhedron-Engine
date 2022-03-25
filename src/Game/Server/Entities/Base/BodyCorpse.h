@@ -36,8 +36,8 @@ public:
     // Callback functions.
     //
     //
-    void BodyCorpseDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    void BodyCorpseTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void BodyCorpseDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
+    void BodyCorpseTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     //
     // Get/Set

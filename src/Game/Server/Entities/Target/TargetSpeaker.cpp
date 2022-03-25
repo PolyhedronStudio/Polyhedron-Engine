@@ -69,7 +69,7 @@ void TargetSpeaker::SpawnKey( const std::string& key, const std::string& value )
 //===============
 // TargetSpeaker::SpeakerUse
 //===============
-void TargetSpeaker::SpeakerUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void TargetSpeaker::SpeakerUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     int channel = SoundChannel::Voice;
 
     if ( GetSpawnFlags() & (SF_LoopedOn | SF_LoopedOn) ) {

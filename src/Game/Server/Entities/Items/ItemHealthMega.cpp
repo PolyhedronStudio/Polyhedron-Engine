@@ -123,7 +123,7 @@ void ItemHealthMega::Think() {
 /**
 *   @brief
 **/
-qboolean ItemHealthMega::HealthMegaPickup(SVGBaseEntity* other) {
+qboolean ItemHealthMega::HealthMegaPickup(IServerGameEntity *other) {
     // Ensure other is a valid pointer.
     if (!other) {
         return false;

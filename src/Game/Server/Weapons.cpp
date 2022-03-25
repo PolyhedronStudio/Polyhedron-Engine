@@ -126,7 +126,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
         return false;
 
     // Do our special form of knockback here
-    SVGBaseEntity* enemyEntity = self->GetEnemy();
+    IServerGameEntity* enemyEntity = self->GetEnemy();
 
     // Calculate knockback velocity based on hit point.
     vec3_t knockbackVelocity = vec3_fmaf(enemyEntity->GetAbsoluteMin(), 0.5, enemyEntity->GetSize());

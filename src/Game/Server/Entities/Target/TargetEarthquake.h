@@ -11,7 +11,7 @@ public:
 	void Spawn() override;
 	void SpawnKey( const std::string& key, const std::string& value ) override;
 
-	void QuakeUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void QuakeUse( IServerGameEntity* other, IServerGameEntity* activator );
 	void QuakeThink();
 
 private:

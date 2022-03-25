@@ -49,7 +49,7 @@ void TriggerAutoPlatform::Spawn() {
 //===============
 // TriggerAutoPlatform::AutoPlatformTouch
 //===============
-void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
+void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	bool isMonster = other->GetServerFlags() & EntityServerFlags::Monster;
 	// Alternatively, when we have a BaseMonster class:
 	// isMonster = other->IsSubclassOf<BaseMonster>();
@@ -73,7 +73,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( SVGBaseEntity* self, SVGBaseEntity*
 	debounceTouchTime = level.time + 3.0f;
 
 	// Ensure that the owner is a func_plat.
-	SVGBaseEntity* ownerEntity = GetEnemy();
+	IServerGameEntity* ownerEntity = GetEnemy();
 
 	if (!ownerEntity->IsSubclassOf<FuncPlat>()) {
 		gi.DPrintf("Warning: entity #%i is not a func_plat.\n", ownerEntity->GetNumber());

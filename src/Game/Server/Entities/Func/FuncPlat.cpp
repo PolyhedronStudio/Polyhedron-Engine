@@ -187,7 +187,7 @@ void FuncPlat::PostSpawn() {
 //===============
 // FuncPlat::PlatformUse
 //===============
-void FuncPlat::PlatformUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncPlat::PlatformUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     if (HasThinkCallback()) {
         gi.DPrintf("FuncPlat already has a think callback! - returning!!\n");
         return;
@@ -198,7 +198,7 @@ void FuncPlat::PlatformUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 //===============
 // FuncPlat::PlatformBlocked
 //===============
-void FuncPlat::PlatformBlocked( SVGBaseEntity* other ) {
+void FuncPlat::PlatformBlocked( IServerGameEntity* other ) {
     if (!other) {
         return;
     }
@@ -312,7 +312,7 @@ void FuncPlat::HitBottom() {
 //===============
 // FuncPlat::OnPlatformHitTop
 //===============
-void FuncPlat::OnPlatformHitTop( SVGBaseEntity* self ) {
+void FuncPlat::OnPlatformHitTop( IServerGameEntity* self ) {
     if (!self->IsSubclassOf<FuncPlat>()) {
 	    gi.DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
         return;
@@ -326,7 +326,7 @@ void FuncPlat::OnPlatformHitTop( SVGBaseEntity* self ) {
 //===============
 // FuncPlat::OnPlatformHitBottom
 //===============
-void FuncPlat::OnPlatformHitBottom( SVGBaseEntity* self ) {
+void FuncPlat::OnPlatformHitBottom( IServerGameEntity* self ) {
     if (!self->IsSubclassOf<FuncPlat>()) {
 	    gi.DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
         return;
@@ -438,7 +438,7 @@ void FuncPlat::SpawnPlatformTrigger() {
     }
 
     // Add points to the generated bounding box for the trigger.
-    for (SVGBaseEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+    for (IServerGameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
 	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());

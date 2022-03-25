@@ -139,7 +139,7 @@ void DebrisEntity::SpawnKey(const std::string& key, const std::string& value) {
 //
 // Spawn gibs to make things gore like :P
 //===============
-void DebrisEntity::DebrisEntityDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void DebrisEntity::DebrisEntityDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Save to queue for removal.
     Remove();
 }

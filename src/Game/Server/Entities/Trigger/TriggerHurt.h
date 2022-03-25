@@ -36,8 +36,8 @@ public:
     //
 
     // Callback functions.
-    void TriggerHurtTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-    void TriggerHurtUse(SVGBaseEntity* other, SVGBaseEntity* activator);
+    void TriggerHurtTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void TriggerHurtUse(IServerGameEntity* other, IServerGameEntity* activator);
 
     //
     // Get/Set

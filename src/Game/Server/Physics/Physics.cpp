@@ -88,7 +88,7 @@ void SVG_PhysicsEntityWPrint(const std::string &functionName, const std::string 
 // SVG_TestEntityPosition
 //
 //===============
-SVGBaseEntity *SVG_TestEntityPosition(SVGBaseEntity *ent)
+SVGBaseEntity *SVG_TestEntityPosition(IServerGameEntity *ent)
 {
     SVGTrace trace;
     int32_t clipMask = 0;
@@ -113,7 +113,7 @@ SVGBaseEntity *SVG_TestEntityPosition(SVGBaseEntity *ent)
 //
 // Keeps an entity its velocity within max boundaries. (-sv_maxvelocity, sv_maxvelocity)
 //===============
-void SVG_BoundVelocity(SVGBaseEntity *ent)
+void SVG_BoundVelocity(IServerGameEntity *ent)
 {
     vec3_t velocity = ent->GetVelocity();
 
@@ -129,7 +129,7 @@ void SVG_BoundVelocity(SVGBaseEntity *ent)
 //
 // Runs entity thinking code for this frame if necessary
 //===============
-qboolean SVG_RunThink(SVGBaseEntity *ent)
+qboolean SVG_RunThink(IServerGameEntity *ent)
 {
     if (!ent) {
 	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
@@ -190,9 +190,9 @@ qboolean SVG_RunThink(SVGBaseEntity *ent)
 //
 // Two entities have touched, so run their touch functions
 //===============
-void SVG_Impact(SVGBaseEntity *entityA, SVGTrace *trace)
+void SVG_Impact(IServerGameEntity *entityA, SVGTrace *trace)
 {
-    SVGBaseEntity* entityB = nullptr;
+    IServerGameEntity* entityB = nullptr;
 //  CollisionPlane    backplane;
 
     // Return in case there is no entity to to test with (invalid pointer.)
@@ -277,9 +277,9 @@ static vec3_t ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 //===============
 //
 #define MAX_CLIP_PLANES 5
-int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
+int SVG_FlyMove(IServerGameEntity *ent, float time, int mask)
 {
-    SVGBaseEntity     *hit;
+    IServerGameEntity     *hit;
     int         bumpcount, numbumps;
     vec3_t      dir;
     float       d;
@@ -410,7 +410,7 @@ int SVG_FlyMove(SVGBaseEntity *ent, float time, int mask)
 //
 //===============
 //
-void SVG_AddGravity(SVGBaseEntity *ent)
+void SVG_AddGravity(IServerGameEntity *ent)
 {
     // Fetch velocity.
     vec3_t velocity = ent->GetVelocity();
@@ -437,7 +437,7 @@ void SVG_AddGravity(SVGBaseEntity *ent)
 // Does not change the entities velocity at all
 //===============
 //
-SVGTrace SVG_PushEntity(SVGBaseEntity *ent, vec3_t push)
+SVGTrace SVG_PushEntity(IServerGameEntity *ent, vec3_t push)
 {
     SVGTrace trace;
     int     mask;
@@ -488,7 +488,7 @@ typedef struct {
 } pushed_t;
 pushed_t    pushed[MAX_EDICTS], *pushed_p;
 
-SVGBaseEntity *obstacle = nullptr;
+IServerGameEntity *obstacle = nullptr;
 
 
 //
@@ -502,13 +502,13 @@ SVGBaseEntity *obstacle = nullptr;
 qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 {
     int e;
-    SVGBaseEntity* check = NULL;
-    SVGBaseEntity* block = NULL;
+    IServerGameEntity* check = NULL;
+    IServerGameEntity* block = NULL;
     pushed_t    *p = NULL;
     vec3_t      org, org2, move2, forward, right, up;
 
     // Assign handle to base entity.
-    SVGBaseEntity* pusher = *entityHandle;
+    IServerGameEntity* pusher = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!pusher) {
@@ -542,7 +542,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+    IServerGameEntity** classEntities = game.world->GetClassEntities();
     for (e = 1; e < globals.numberOfEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
@@ -554,7 +554,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 	    }
 
         // Acquire base entity pointer.
-        SVGBaseEntity *check = *checkHandle;
+        IServerGameEntity *check = *checkHandle;
 
         // Fetch its properties to work with.
         qboolean isInUse = check->IsInUse();
@@ -651,7 +651,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
         // twice, it goes back to the original position
         for (p = pushed_p - 1 ; p >= pushed ; p--) {
 	        // Fetch pusher's base entity.
-            SVGBaseEntity* pusherEntity = *p->ent;
+            IServerGameEntity* pusherEntity = *p->ent;
 
             // Ensure we are dealing with a valid pusher entity.
             if (!pusherEntity) {
@@ -675,7 +675,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     // see if anything we moved has touched a trigger
     for (p = pushed_p - 1; p >= pushed; p--) {
         // Fetch pusher's base entity.
-        SVGBaseEntity* pusherEntity = *p->ent;
+        IServerGameEntity* pusherEntity = *p->ent;
 
         // Ensure we are dealing with a valid pusher entity.
 	    if (!pusherEntity) {
@@ -701,10 +701,10 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
 {
     vec3_t      move, amove;
-    SVGBaseEntity     *part, *mv;
+    IServerGameEntity     *part = nullptr, *mv = nullptr;
 
     // Assign handle to base entity.
-    SVGBaseEntity* ent = *entityHandle;
+    IServerGameEntity* ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!ent) {
@@ -777,7 +777,7 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
 **/
 void SVG_Physics_None(SGEntityHandle& entityHandle) {
     // Assign handle to base entity.
-    SVGBaseEntity* ent = *entityHandle;
+    IServerGameEntity* ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!ent) {
@@ -795,7 +795,7 @@ void SVG_Physics_None(SGEntityHandle& entityHandle) {
 **/
 void SVG_Physics_Noclip(SGEntityHandle &entityHandle) {
     // Assign handle to base entity.
-    SVGBaseEntity* ent = *entityHandle;
+    IServerGameEntity* ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!ent) {
@@ -827,7 +827,7 @@ void SVG_Physics_Noclip(SGEntityHandle &entityHandle) {
 **/
 void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Assign handle to base entity.
-    SVGBaseEntity* ent = *entityHandle;
+    IServerGameEntity* ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!ent) {
@@ -925,7 +925,7 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
         gi.PositionedSound(ent->GetOrigin(), game.world->GetServerEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
-    for (SVGBaseEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
+    for (IServerGameEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
         // Set origin and link them in.
         slave->SetOrigin(ent->GetOrigin());
         slave->LinkEntity();
@@ -954,7 +954,7 @@ constexpr float STEPMOVE_WATERFRICTION = 1.f;
 //
 void SVG_AddRotationalFriction(SGEntityHandle entityHandle) { 
     // Assign handle to base entity.
-    SVGBaseEntity *ent = *entityHandle;
+    IServerGameEntity *ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!ent) {
@@ -1007,7 +1007,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
     qboolean    hitSound = false;
 
     // Check if handle is valid.    
-    SVGBaseEntity *ent = *entityHandle;
+    IServerGameEntity *ent = *entityHandle;
 
     if (!ent) {
 	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
@@ -1015,7 +1015,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
     }
 
     // Retrieve ground entity.
-    SVGBaseEntity* groundEntity = *ent->GetGroundEntity();
+    IServerGameEntity* groundEntity = *ent->GetGroundEntity();
 
     // If we have no ground entity.
     if (!groundEntity) {
@@ -1156,7 +1156,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
 //
 void SVG_RunEntity(SGEntityHandle &entityHandle)
 {
-    SVGBaseEntity *ent = *entityHandle;
+    IServerGameEntity *ent = *entityHandle;
 
     if (!ent) {
 	    SVG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");

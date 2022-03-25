@@ -166,7 +166,7 @@ void MiscExplosionBox::SpawnKey(const std::string& key, const std::string& value
 // 
 // So that mappers can trigger this entity in order to blow it up
 // ==============
-void MiscExplosionBox::ExplosionBoxUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
+void MiscExplosionBox::ExplosionBoxUse( IServerGameEntity* caller, IServerGameEntity* activator )
 {
     ExplosionBoxDie( caller, activator, 999, GetOrigin() );
 }
@@ -309,7 +309,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
 // 'Die' callback, the explosion box has been damaged too much.
 //===============
 //
-void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void MiscExplosionBox::ExplosionBoxDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
 
@@ -330,7 +330,7 @@ void MiscExplosionBox::ExplosionBoxDie(SVGBaseEntity* inflictor, SVGBaseEntity* 
 // 'Touch' callback, to calculate the direction to move into.
 //===============
 //
-void MiscExplosionBox::ExplosionBoxTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     // Safety checks.
     if (!other || other == this) {
 	    return;

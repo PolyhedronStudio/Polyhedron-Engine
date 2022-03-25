@@ -118,7 +118,7 @@ void TriggerAlways::SpawnKey(const std::string& key, const std::string& value) {
 // 'Touch' callback, to hurt the entities touching it.
 //===============
 //
-void TriggerAlways::TriggerAlwaysTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void TriggerAlways::TriggerAlwaysTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	if (this == other)
 		return;
 
@@ -132,6 +132,6 @@ void TriggerAlways::TriggerAlwaysTouch(SVGBaseEntity* self, SVGBaseEntity* other
 // 'Use' callback, to trigger it on/off.
 //===============
 //
-void TriggerAlways::TriggerAlwaysUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
+void TriggerAlways::TriggerAlwaysUse(IServerGameEntity* other, IServerGameEntity* activator) {
 
 }

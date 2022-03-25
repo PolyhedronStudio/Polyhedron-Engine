@@ -14,7 +14,7 @@ public:
 
 	void					Spawn() override;
 	// Responds to players touching this trigger
-	void					AutoDoorTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf );
+	void					AutoDoorTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 	// Creates an automatic door trigger and sets everything up for it
 	static TriggerAutoDoor* Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs );
 

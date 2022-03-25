@@ -294,7 +294,7 @@ void ItemWeaponBeretta::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SV
 *   @brief  Checks whether to add to inventory or not. In case of adding it 
 *           to the inventory it also checks whether to change weapon or not.
 **/
-qboolean ItemWeaponBeretta::WeaponBerettaPickup(SVGBaseEntity* other) {
+qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
     // Acquire player entity pointer.
     SVGBaseEntity *validEntity = Gameworld::ValidateEntity(other, true, true);
 

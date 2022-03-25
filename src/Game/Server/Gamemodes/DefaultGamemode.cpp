@@ -62,7 +62,7 @@ void DefaultGamemode::OnLevelExit() {
     Entity* serverEntities = game.world->GetServerEntities();
     
     // Acquire class entities pointer.
-    SVGBaseEntity** classEntities = game.world->GetClassEntities();
+    IServerGameEntity** classEntities = game.world->GetClassEntities();
 
     // Create the command to use for switching to the next game map.
     std::string command = "gamemap \"";
@@ -93,7 +93,7 @@ void DefaultGamemode::OnLevelExit() {
         uint32_t stateNumber = serverEntity->state.number;
 
         // Fetch the corresponding base entity.
-        SVGBaseEntity* entity = classEntities[stateNumber];
+        IServerGameEntity* entity = classEntities[stateNumber];
 
         // Ensure an entity its health is reset to default.
         if (entity->GetHealth() > entity->GetClient()->persistent.stats.maxHealth)
@@ -161,7 +161,7 @@ qboolean DefaultGamemode::GetEntityTeamName(SVGBaseEntity* ent, std::string &tea
 // Returns false either way, because yes, there is no... team in this case.
 // PS: ClientTeam <-- weird function, needs C++-fying and oh.. it stinks anyhow.
 //===============
-qboolean DefaultGamemode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
+qboolean DefaultGamemode::OnSameTeam(IServerGameEntity* ent1, IServerGameEntity* ent2) {
     //// There is only a reason to check for this in case these specific
     //// game mode flags are set.
     //if (!((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams)))
@@ -185,7 +185,7 @@ qboolean DefaultGamemode::OnSameTeam(SVGBaseEntity* ent1, SVGBaseEntity* ent2) {
 // DefaultGamemode::CanDamage
 //
 //===============
-qboolean DefaultGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
+qboolean DefaultGamemode::CanDamage(IServerGameEntity* target, IServerGameEntity* inflictor) {
     // Destination.
     vec3_t   destination = vec3_zero();
     // Trace.
@@ -282,7 +282,7 @@ ClassEntityVector DefaultGamemode::FindBaseEnitiesWithinRadius(const vec3_t& ori
 // Called when an entity is killed, or at least, about to be.
 // Determine how to deal with it, usually resides in a callback to Die.
 //===============
-void DefaultGamemode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int32_t damage, vec3_t point) {
+void DefaultGamemode::EntityKilled(IServerGameEntity* target, IServerGameEntity* inflictor, IServerGameEntity* attacker, int32_t damage, vec3_t point) {
     // Ensure health isn't exceeding limits.
     if (target->GetHealth() < -999)
         target->SetHealth(-999);
@@ -352,7 +352,7 @@ void DefaultGamemode::EntityKilled(SVGBaseEntity* target, SVGBaseEntity* inflict
 *                       DamageFlags::Bullet             Damage is from a bullet(used for ricochets).
 *                       DamageFlags::IgnoreProtection   Kills the entity, even if it reside in godmode, has specific armor, etc.
 **/
-void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor, SVGBaseEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t damageFlags, int32_t mod) {
+void DefaultGamemode::InflictDamage(IServerGameEntity* target, IServerGameEntity* inflictor, IServerGameEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t damageFlags, int32_t mod) {
     int32_t damageTaken = 0;   // Damage taken.
     int32_t damageSaved = 0;   // Damaged saved, from being taken.
 
@@ -499,7 +499,7 @@ void DefaultGamemode::InflictDamage(SVGBaseEntity* target, SVGBaseEntity* inflic
 // DefaultGamemode::InflictDamage
 // 
 //===============
-void DefaultGamemode::InflictRadiusDamage(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, float damage, SVGBaseEntity* ignore, float radius, int32_t mod) {
+void DefaultGamemode::InflictRadiusDamage(IServerGameEntity* inflictor, IServerGameEntity* attacker, float damage, IServerGameEntity* ignore, float radius, int32_t mod) {
     // Damage point counter for radius sum ups.
     float   points = 0.f;
 
@@ -1309,7 +1309,7 @@ void DefaultGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
 // DefaultGamemode::ClientUpdateObituary
 // 
 //===============
-void DefaultGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
+void DefaultGamemode::ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) {
     std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
 
@@ -1495,7 +1495,7 @@ void DefaultGamemode::InitializePlayerRespawnData(ServerClient* client) {
 //===============
 void DefaultGamemode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& origin, vec3_t& angles) {
     // Spawn point entity pointer.
-    SVGBaseEntity *spawnPoint = nullptr;
+    IServerGameEntity *spawnPoint = nullptr;
 
     // Find a spawn point that has a targetname matching game.spawnpoint.
     auto targetSpawnPoints = game.world->GetClassEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>() | cef::HasKeyValue("targetname", game.spawnpoint);
@@ -1512,7 +1512,7 @@ void DefaultGamemode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
     // If we haven't found one, we'll push the spanned results to a vector and randomly select one from it.
     if (!spawnPoint) {
         // TODO: Improve this, find a method to select random from a range. (Or wrap something similar up.)
-	    std::vector<SVGBaseEntity*> spawnVector;
+	    std::vector<IServerGameEntity*> spawnVector;
         auto spawnPoints = game.world->GetClassEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>();
         for (auto& entity : spawnPoints) { spawnVector.push_back(entity); }
 

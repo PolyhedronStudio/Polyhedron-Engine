@@ -69,7 +69,7 @@ void Light::Think() {
     Base::Think();
 }
 
-void Light::LightUse(SVGBaseEntity* other, SVGBaseEntity* activator) {
+void Light::LightUse(IServerGameEntity* other, IServerGameEntity* activator) {
     // Get spawnflags.
     int32_t spawnFlags = GetSpawnFlags();
 

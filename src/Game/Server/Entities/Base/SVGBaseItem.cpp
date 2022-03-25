@@ -224,7 +224,7 @@ void SVGBaseItem::UseInstance(SVGBaseEntity* user, SVGBaseItem* item) {
 /**
 *   @brief Callback for when being triggered. Also known as "Use".
 **/
-void SVGBaseItem::BaseItemUse( SVGBaseEntity* caller, SVGBaseEntity* activator )
+void SVGBaseItem::BaseItemUse( IServerGameEntity* caller, IServerGameEntity* activator )
 {
     //BaseItemDie( caller, activator, 999, GetOrigin() );
 }
@@ -246,7 +246,7 @@ void SVGBaseItem::BaseItemUseInstance(SVGBaseEntity* user, SVGBaseItem* item) {
 /**
 *   @brief Callback for when an entity touches this item.
 **/
-void SVGBaseItem::BaseItemTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void SVGBaseItem::BaseItemTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     // Safety checks.
     if (!self || !other || self == other)
         return;

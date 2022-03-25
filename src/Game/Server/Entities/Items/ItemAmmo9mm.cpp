@@ -97,7 +97,7 @@ void ItemAmmo9mm::Spawn() {
 /**
 *   @brief
 **/
-qboolean ItemAmmo9mm::Ammo9mmPickup(SVGBaseEntity* other) {
+qboolean ItemAmmo9mm::Ammo9mmPickup(IServerGameEntity *other) {
     // Ensure other is a valid pointer.
     if (!other || !other->IsSubclassOf<SVGBasePlayer>()) {
         return false;

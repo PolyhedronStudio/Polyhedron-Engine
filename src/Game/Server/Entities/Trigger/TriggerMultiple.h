@@ -37,9 +37,9 @@ public:
 
     // Callback functions.
     void TriggerMultipleThinkWait(void);
-    void TriggerMultipleTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-    void TriggerMultipleEnable(SVGBaseEntity* other, SVGBaseEntity* activator);
-    void TriggerMultipleUse(SVGBaseEntity* other, SVGBaseEntity* activator);
+    void TriggerMultipleTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void TriggerMultipleEnable(IServerGameEntity* other, IServerGameEntity* activator);
+    void TriggerMultipleUse(IServerGameEntity* other, IServerGameEntity* activator);
 
     //
     // Get/Set
@@ -49,7 +49,7 @@ protected:
     //
     // Trigger function.
     //
-    void Trigger(SVGBaseEntity* activator);
+    void Trigger(IServerGameEntity* activator);
 
     //
     // Other base entity members. (These were old fields in edict_T back in the day.)

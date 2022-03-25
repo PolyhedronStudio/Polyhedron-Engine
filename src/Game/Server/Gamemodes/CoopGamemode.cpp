@@ -48,7 +48,7 @@ qboolean CoopGamemode::CanSaveGame(qboolean isDedicatedServer) {
 // Template function serves as an example atm.
 //===============
 //
-qboolean CoopGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
+qboolean CoopGamemode::CanDamage(IServerGameEntity* target, IServerGameEntity* inflictor) {
     // Let it be to DefaultGamemode. :)
     return DefaultGamemode::CanDamage(target, inflictor);
 }
@@ -57,7 +57,7 @@ qboolean CoopGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor
 // CoopGamemode::ClientUpdateObituary.
 // 
 //===============
-void CoopGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
+void CoopGamemode::ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) {
     std::string message; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
 

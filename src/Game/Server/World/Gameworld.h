@@ -184,7 +184,7 @@ public:
     *   @return Returns a span containing all the base entities from the range of [start] to [start + count]
     *           that passed the filter process.
     **/
-    template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> std::span<SVGBaseEntity*, count> {
+    template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> std::span<IServerGameEntity*, count> {
         return std::span(classEntities).subspan<start, count>(); 
     }
     /**
@@ -226,14 +226,14 @@ public:
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    inline SVGBaseEntity** GetClassEntities() {
+    inline IServerGameEntity** GetClassEntities() {
         return classEntities; 
     }
 
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline SVGBaseEntity* GetClassEntityByIndex(uint32_t index) {
+    inline IServerGameEntity* GetClassEntityByIndex(uint32_t index) {
     	if (index < 0 || index >= MAX_EDICTS) {
     	    return nullptr;
 	    }
@@ -301,7 +301,7 @@ private:
     Entity serverEntities[MAX_EDICTS];
 
     //! Array for storing the server game's class entities.
-    SVGBaseEntity* classEntities[MAX_EDICTS];
+    IServerGameEntity* classEntities[MAX_EDICTS];
 
     //! Total number of actively spawned entities.
     int32_t numberOfEntities = 0;
@@ -345,5 +345,5 @@ private:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a class entity otherwise.
     **/
-    SVGBaseEntity* AllocateClassEntity(Entity* svEntity, const std::string& classname);
+    IServerGameEntity* AllocateClassEntity(Entity* svEntity, const std::string& classname);
 };

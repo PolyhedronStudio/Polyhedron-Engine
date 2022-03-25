@@ -29,11 +29,7 @@
 #include "../Base/SVGBasePlayer.h"
 
 // Constructor/Deconstructor.
-SVGBasePlayer::SVGBasePlayer(Entity* svEntity) : Base(svEntity), 
-    airFinishedTime(0.f), debounceDamageTime(0.f), debouncePainTime(0.f), debounceSoundTime(0.f), debounceTouchTime(0.f) {
-
-}
-SVGBasePlayer::~SVGBasePlayer() {
+SVGBasePlayer::SVGBasePlayer(Entity* svEntity) : Base(svEntity) {
 
 }
 
@@ -184,7 +180,7 @@ void SVGBasePlayer::SpawnKey(const std::string& key, const std::string& value) {
 /**
 *   @brief  Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
 **/
-void SVGBasePlayer::SVGBasePlayerDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Fetch server entity.
     Entity* serverEntity = GetPODEntity();
 
@@ -887,7 +883,7 @@ void SVGBasePlayer::UpdateSound() {
 /**
 *   @brief  Sets the clients view angles to look towards the origin of the killer entity.
 **/
-void SVGBasePlayer::LookAtKiller(SVGBaseEntity* inflictor, SVGBaseEntity* attacker)
+void SVGBasePlayer::LookAtKiller(IServerGameEntity* inflictor, IServerGameEntity* attacker)
 {
     ServerClient* client = GetClient();
 

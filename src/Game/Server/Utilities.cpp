@@ -75,7 +75,7 @@ UTIL_TouchTriggers
 
 ============
 */
-void UTIL_TouchTriggers(SVGBaseEntity *ent)
+void UTIL_TouchTriggers(IServerGameEntity *ent)
 {
     // Dead things don't activate triggers!
     if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster) && ent->GetHealth() <= 0)
@@ -109,7 +109,7 @@ Call after linking a new trigger in during gameplay
 to force all entities it covers to immediately touch it
 ============
 */
-void G_TouchSolids(SVGBaseEntity *ent)
+void G_TouchSolids(IServerGameEntity *ent)
 {
     // Dead things don't activate triggers!
     if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster) && ent->GetHealth() <= 0)
@@ -154,7 +154,7 @@ Kills all entities that would touch the proposed new positioning
 of ent.  Ent should be unlinked before calling this!
 =================
 */
-qboolean SVG_KillBox(SVGBaseEntity *ent)
+qboolean SVG_KillBox(IServerGameEntity *ent)
 {
     SVGTrace tr;
 

@@ -21,11 +21,13 @@
 // Because we define the full size ServerClient and Entity structures in this file
 // we define GAME_INCLUDE so that SVGame.h does not define the short server-visible variety.
 #define GAME_INCLUDE
+#include "Shared/SVGame.h"
+struct gclient_s;
+struct entity_s;
 
 // Shared Game "Framework".
 #include "../Shared/SharedGame.h"
 
-#include "Shared/SVGame.h"
 
 // The "gameversion" client command will print this including the compile date
 #define GAMEVERSION "basepoly"
@@ -369,34 +371,34 @@ struct LevelLocals  {
     // done the game moves on to the next map. This is when exitIntermission != 0
     //
     struct {
-        float time; // Time the intermission was started
+        float time = 0.f; // Time the intermission was started
         const char* changeMap; // Map to switch to after intermission has exited.
-        int32_t exitIntermission; // Set to true(1) when exiting the intermission should take place.
-        vec3_t origin; // Origin for intermission to take place at.
-        vec3_t viewAngle; // View angle to apply for intermission.
+        int32_t exitIntermission = 0; // Set to true(1) when exiting the intermission should take place.
+        vec3_t origin = vec3_zero(); // Origin for intermission to take place at.
+        vec3_t viewAngle = vec3_zero(); // View angle to apply for intermission.
     } intermission;
 
     // The actual client the AI has sight on for this current frame.
-    Entity *sightClient;  // Changed once each frame for coop games
+    Entity *sightClient = nullptr;  // Changed once each frame for coop games
 
     // Entity which the AI has sight on.
-    Entity *sightEntity;
-    int32_t sightEntityFrameNumber;
+    Entity *sightEntity = nullptr;
+    int32_t sightEntityFrameNumber = 0;
 
     // Sound entities are set to the entity that caused the AI to be triggered.
-    Entity *soundEntity;            // In case of a footstep, jumping sound, etc.
-    int32_t soundEntityFrameNumber;
-    Entity *sound2Entity;           // In case of a weapon action.
-    int32_t sound2EntityFrameNumber;
+    Entity *soundEntity = nullptr;            // In case of a footstep, jumping sound, etc.
+    int32_t soundEntityFrameNumber = 0;
+    Entity *sound2Entity = nullptr;           // In case of a weapon action.
+    int32_t sound2EntityFrameNumber = 0;
 
     // The current entity that is actively being ran from SVG_RunFrame.
-    SVGBaseEntity *currentEntity;
+    IServerGameEntity *currentEntity = nullptr;
 
     // Index for the que pile of dead bodies.
-    int32_t bodyQue;
+    int32_t bodyQue = 0;
 
     // Ugly place for storing coop variables.
-    int32_t powerCubes; // Ugly necessity for coop
+    int32_t powerCubes = 0; // Ugly necessity for coop
 };
 
 //-------------------
@@ -682,24 +684,24 @@ struct SVGTrace {
     int         contents;
 
     // The impacted entity, or `NULL`.
-    SVGBaseEntity *ent;   // Not set by CM_*() functions
+    IServerGameEntity *ent;   // Not set by CM_*() functions
 
     // PH: Custom added.
     vec3_t		offsets[8];	// [signBits][x] = either size[0][x] or size[1][x]
 };
 
-SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, SVGBaseEntity* passent, const int32_t& contentMask);
+SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, IServerGameEntity* passent, const int32_t& contentMask);
 
-std::vector<SVGBaseEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AreaEntities::Solid);
+std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AreaEntities::Solid);
 
 qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);
 qhandle_t SVG_PrecacheSound(const std::string& filename);
 
-void SVG_CPrint(SVGBaseEntity* ent, int32_t printlevel, const std::string& str);
+void SVG_CPrint(IServerGameEntity* ent, int32_t printlevel, const std::string& str);
 void SVG_DPrint(const std::string &str);
-void SVG_CenterPrint(SVGBaseEntity* ent, const std::string& str);
-void SVG_Sound(SVGBaseEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
+void SVG_CenterPrint(IServerGameEntity* ent, const std::string& str);
+void SVG_Sound(IServerGameEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
 
 //============================================================================
 
@@ -1032,7 +1034,7 @@ struct entity_s {
     // Do not modify the fields above, they're shared memory wise with the server itself.
     //---------------------------------------------------
     //! Actual class entity implementation pointer.
-    SVGBaseEntity* classEntity = nullptr;
+    IServerGameEntity* classEntity = nullptr;
 
     //! Dictionary containing the initial key:value entity properties.
     EntityDictionary entityDictionary;

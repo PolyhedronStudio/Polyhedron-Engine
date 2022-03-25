@@ -17,5 +17,5 @@ public:
 
 	void Spawn() override;
 
-	void WallUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void WallUse( IServerGameEntity* other, IServerGameEntity* activator );
 };

@@ -13,7 +13,7 @@ public:
 	void Spawn() override;
 	void SpawnKey( const std::string& key, const std::string& value );
 
-	void CounterUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void CounterUse( IServerGameEntity* other, IServerGameEntity* activator );
 
 private:
 	uint32_t count{ 2U };

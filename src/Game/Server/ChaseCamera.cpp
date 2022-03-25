@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ChaseCamera.h"
 
 // Entities.
-#include "Entities/Base/SVGBasePlayer.h"
+//#include "Entities/Base/SVGBasePlayer.h"
 
 // Gamemodes.
 #include "Gamemodes/IGamemode.h"

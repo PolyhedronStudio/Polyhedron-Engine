@@ -6,23 +6,21 @@
 //
 // Gibs, to turning things into explosions.
 //
-#ifndef __SVGAME_EFFECTS_H__
-#define __SVGAME_EFFECTS_H__
+#pragma once
 
 //
 // Forward declaration.
 //
-class SVGBaseEntity;
+class IServerGameEntity;
+class SVGBasePlayer;
 
 //
 // Explosions.
 //
-void SVG_BecomeExplosion1(SVGBaseEntity* self);
-void SVG_BecomeExplosion2(SVGBaseEntity* self);
+void SVG_BecomeExplosion1(IServerGameEntity* self);
+void SVG_BecomeExplosion2(IServerGameEntity* self);
 
 //
 // Gibs.
 //
 void SVG_ThrowClientHead(SVGBasePlayer* self, int damage);
-
-#endif // __SVGAME_PLAYER_WEAPONS_H__

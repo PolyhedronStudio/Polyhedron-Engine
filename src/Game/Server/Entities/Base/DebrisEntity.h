@@ -41,13 +41,13 @@ public:
     //
     // DebrisEntity functions.
     // 
-    void CalculateVelocity(SVGBaseEntity* other, const int32_t& damage);
+    //void CalculateVelocity(SVGBaseEntity* other, const int32_t& damage);
 
     //
     // Callback functions.
     //
     //
-    void DebrisEntityDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    void DebrisEntityDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
    
 protected:
 

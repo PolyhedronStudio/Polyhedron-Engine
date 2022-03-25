@@ -13,7 +13,7 @@ public:
 	void Spawn() override;
 	void SpawnKey( const std::string& key, const std::string& value );
 
-	void PushTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf );
+	void PushTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
 
 private:
 	float pushForce{ 1000.0f };

@@ -31,7 +31,7 @@ void TargetTempEntity::Spawn() {
 //===============
 // TargetTempEntity::TempEntityUse
 //===============
-void TargetTempEntity::TempEntityUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void TargetTempEntity::TempEntityUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte( ServerGameCommand::TempEntity );
 	gi.MSG_WriteUint8(GetStyle());//WriteByte( GetStyle() );
 	gi.MSG_WriteVector3( GetOrigin(), false );//WriteVector3( GetOrigin() );

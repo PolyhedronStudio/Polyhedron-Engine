@@ -118,7 +118,7 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value ) {
 //===============
 // FuncButton::OnButtonDone
 //===============
-void FuncButton::OnButtonDone(SVGBaseEntity* self) {
+void FuncButton::OnButtonDone(IServerGameEntity* self) {
 	// Chances are nihil of this happening, but let's be sure to check so we can assist ourselves and other devs.
     if (!self->IsSubclassOf<FuncButton>()) { 
 		gi.DPrintf("Warning: In function %s, base entity #%i is not of type %s\n", __func__, self->GetNumber());
@@ -155,7 +155,7 @@ void FuncButton::ButtonReturn() {
 //===============
 // FuncButton::OnButtonWait
 //===============
-void FuncButton::OnButtonWait(SVGBaseEntity* self) {
+void FuncButton::OnButtonWait(IServerGameEntity* self) {
 	// Chances are nihil of this happening, but let's be sure to check so we can assist ourselves and other devs.
     if (!self->IsSubclassOf<FuncButton>()) { 
 		gi.DPrintf("Warning: In function %s, base entity #%i is not of type %s\n", __func__, self->GetNumber());
@@ -203,7 +203,7 @@ void FuncButton::ButtonFire() {
 //===============
 // FuncButton::ButtonUse
 //===============
-void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncButton::ButtonUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	SetActivator(activator);
 	ButtonFire();
 }
@@ -211,7 +211,7 @@ void FuncButton::ButtonUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
 //===============
 // FuncButton::ButtonTouch
 //===============
-void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
+void FuncButton::ButtonTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	if ( !other->GetClient() || other->GetHealth() <= 0 ) {
 		return;
 	}
@@ -223,7 +223,7 @@ void FuncButton::ButtonTouch( SVGBaseEntity* self, SVGBaseEntity* other, Collisi
 //===============
 // FuncButton::ButtonDie
 //===============
-void FuncButton::ButtonDie( SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point ) {
+void FuncButton::ButtonDie( IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point ) {
 	SetActivator(attacker);
 	SetHealth( GetMaxHealth() );
 	SetTakeDamage( TakeDamage::No );

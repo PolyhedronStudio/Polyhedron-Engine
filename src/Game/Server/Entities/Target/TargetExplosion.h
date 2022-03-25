@@ -10,6 +10,6 @@ public:
 
 	void Spawn() override;
 
-	void ExplosionUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void ExplosionUse( IServerGameEntity* other, IServerGameEntity* activator );
 	void ExplosionThink();
 };

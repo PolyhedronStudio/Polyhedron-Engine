@@ -73,8 +73,8 @@ public:
     //
     //void MiscServerModelBoxUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
     void MiscServerModelThink(void);
-    void MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    //void MiscServerModelTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void MiscServerModelDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
+    //void MiscServerModelTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     // Set when exploding, after a minor delay.
     //void MiscServerModelBoxExplode(void);

@@ -240,7 +240,7 @@ void GibEntity::GibEntityThink() {
 // GibEntity::GibEntityTouch
 //
 //===============
-void GibEntity::GibEntityTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void GibEntity::GibEntityTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     vec3_t  right;
 
     if (!GetGroundEntity())
@@ -271,7 +271,7 @@ void GibEntity::GibEntityTouch(SVGBaseEntity* self, SVGBaseEntity* other, Collis
 // Savely call Remove so it queues up for removal without causing 
 // serverEntity/classEntity conflicts.
 //===============
-void GibEntity::GibEntityDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void GibEntity::GibEntityDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Time to queue it for removal.
     Remove();
 }

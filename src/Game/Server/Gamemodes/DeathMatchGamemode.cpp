@@ -53,7 +53,7 @@ qboolean DeathmatchGamemode::CanSaveGame(qboolean isDedicatedServer) {
 // Template function serves as an example atm.
 //===============
 //
-qboolean DeathmatchGamemode::CanDamage(SVGBaseEntity* target, SVGBaseEntity* inflictor) {
+qboolean DeathmatchGamemode::CanDamage(IServerGameEntity* target, IServerGameEntity* inflictor) {
     // Let it be to DefaultGamemode. :)
     return DefaultGamemode::CanDamage(target, inflictor);
 }
@@ -335,7 +335,7 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerCli
 /**
 *   @brief  Enlists an obituary event.
 **/
-void DeathmatchGamemode::ClientUpdateObituary(SVGBaseEntity* self, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) {
+void DeathmatchGamemode::ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) {
     std::string message = ""; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition = ""; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
 

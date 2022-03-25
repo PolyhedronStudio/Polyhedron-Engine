@@ -135,7 +135,7 @@ public:
     *   @brief  Checks whether to add to inventory or not. In case of adding it 
     *           to the inventory it also checks whether to change weapon or not.
     **/
-    qboolean WeaponBerettaPickup(SVGBaseEntity* other);
+    qboolean WeaponBerettaPickup(IServerGameEntity *other);
 
     /**
     *   @brief Changes the player's weapon to the Beretta if it has one that is.

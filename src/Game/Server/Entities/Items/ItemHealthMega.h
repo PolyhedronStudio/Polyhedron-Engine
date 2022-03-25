@@ -39,8 +39,8 @@ public:
     //void HealthMegaUse( SVGBaseEntity* caller, SVGBaseEntity* activator );
     void HealthMegaThink(void);
     //void HealthMegaDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
-    //void HealthMegaTouch(SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-    qboolean HealthMegaPickup(SVGBaseEntity* other);
+    //void HealthMegaTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    qboolean HealthMegaPickup(IServerGameEntity *other);
 
 private:
 

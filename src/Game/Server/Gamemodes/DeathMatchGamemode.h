@@ -30,7 +30,7 @@ public:
     //
     // DeathMatch unique function implementations.
     virtual void PlacePlayerInGame(SVGBasePlayer* player) override;
-    virtual qboolean CanDamage(SVGBaseEntity* targ, SVGBaseEntity* inflictor) override;
+    virtual qboolean CanDamage(IServerGameEntity* targ, IServerGameEntity* inflictor) override;
     virtual void ClientBegin(Entity* serverEntity) override;
     virtual void ClientBeginServerFrame(SVGBasePlayer* player, ServerClient *client) override;
     virtual void ClientUserinfoChanged(Entity* ent, char* userinfo) override;
@@ -39,7 +39,7 @@ public:
     virtual void RespawnAllClients() override;
     virtual void ClientDeath(SVGBasePlayer* player) override;
 
-    virtual void ClientUpdateObituary(SVGBaseEntity* player, SVGBaseEntity* inflictor, SVGBaseEntity* attacker) override;
+    virtual void ClientUpdateObituary(IServerGameEntity* player, IServerGameEntity* inflictor, IServerGameEntity* attacker) override;
 
 private:
     /**

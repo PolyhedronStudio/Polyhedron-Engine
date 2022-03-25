@@ -75,7 +75,7 @@ void FuncTimer::TimerThink() {
 //===============
 // FuncTimer::TimerUse
 //===============
-void FuncTimer::TimerUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncTimer::TimerUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	SetActivator(activator);
 
 	// If on, turn it off

@@ -38,7 +38,7 @@ is not a staircase.
 */
 int c_yes, c_no;
 
-qboolean SVG_StepMove_CheckBottom(SVGBaseEntity* ent)
+qboolean SVG_StepMove_CheckBottom(IServerGameEntity* ent)
 {
     vec3_t  start, stop;
     SVGTrace trace;
@@ -99,7 +99,7 @@ realcheck:
     return true;
 }
 
-void SVG_StepMove_CheckGround(SVGBaseEntity* ent)
+void SVG_StepMove_CheckGround(IServerGameEntity* ent)
 {
     vec3_t      point;
     SVGTrace     trace;
@@ -152,7 +152,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 */
 //FIXME since we need to test end position contents here, can we avoid doing
 //it again later in catagorize position?
-qboolean SVG_MoveStep(SVGBaseEntity* ent, vec3_t move, qboolean relink)
+qboolean SVG_MoveStep(IServerGameEntity* ent, vec3_t move, qboolean relink)
 {
     float       dz;
     SVGTrace    trace;
@@ -419,7 +419,7 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
 SVG_WalkStepMove
 ===============
 */
-qboolean SVG_StepMove_Walk(SVGBaseEntity* ent, float yaw, float dist)
+qboolean SVG_StepMove_Walk(IServerGameEntity* ent, float yaw, float dist)
 {
     vec3_t  move;
 

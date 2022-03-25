@@ -10,5 +10,5 @@ public:
 
 	void Spawn() override;
 
-	void TempEntityUse( SVGBaseEntity* other, SVGBaseEntity* activator );
+	void TempEntityUse( IServerGameEntity* other, IServerGameEntity* activator );
 };

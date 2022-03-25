@@ -82,14 +82,14 @@ void FuncRotating::Spawn() {
 //===============
 // FuncRotating::RotatorBlocked
 //===============
-void FuncRotating::RotatorBlocked( SVGBaseEntity* other ) {
+void FuncRotating::RotatorBlocked( IServerGameEntity* other ) {
 	GetGamemode()->InflictDamage( other, this, this, vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 }
 
 //===============
 // FuncRotating::RotatorHurtTouch
 //===============
-void FuncRotating::RotatorHurtTouch( SVGBaseEntity* self, SVGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
+void FuncRotating::RotatorHurtTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	if ( vec3_length( GetAngularVelocity() ) ) {
 		RotatorBlocked( other );
 	}
@@ -98,7 +98,7 @@ void FuncRotating::RotatorHurtTouch( SVGBaseEntity* self, SVGBaseEntity* other, 
 //===============
 // FuncRotating::RotatorUse
 //===============
-void FuncRotating::RotatorUse( SVGBaseEntity* other, SVGBaseEntity* activator ) {
+void FuncRotating::RotatorUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	if ( !vec3_equal( GetAngularVelocity(), vec3_zero() ) ) {
 		SetSound( 0 );
 		SetAngularVelocity( vec3_zero() );
