@@ -982,6 +982,7 @@ struct gclient_s {
 *   @brief  An std::map storing an entity's key/value dictionary.
 **/
 using EntityDictionary = std::map<std::string, std::string>;
+class ISharedGameEntity;
 
 /**
 *   @brief  entity_s, the server side entity structure. If you know what an entity is,

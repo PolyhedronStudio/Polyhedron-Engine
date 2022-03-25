@@ -104,7 +104,7 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
 // The defacto trace function to use, for SVGBaseEntity and its derived family & friends.
 //===============
 //
-SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, SVGBaseEntity* passent, const int32_t& contentMask) {
+SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IServerGameEntity* passent, const int32_t& contentMask) {
     // Acquire server and class entity array pointers.
     Entity* serverEntities = game.world->GetServerEntities();
     IServerGameEntity** classEntities = game.world->GetClassEntities();

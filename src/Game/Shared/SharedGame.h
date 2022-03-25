@@ -18,55 +18,62 @@
 *	Predeclare the actual class entity type that we intend to use depending on which game module
 *	this file is being compiled along with.
 **/
-#ifdef SHAREDGAME_CLIENTGAME
-// Start of ClientGame.
+#ifdef SHAREDGAME_CLIENTGAME //! Start of ClientGame Specifics.
 
+#define CGAME_INCLUDE 1
+
+// Common.
+#include "Common/CModel.h"
+#include "Common/Cmd.h"
+#include "Common/Msg.h"
+#include "Common/Protocol.h"
+
+//! For entity_S.
+#include "Shared/SVGame.h"
+#include "Shared/Refresh.h"
+
+#include "Shared/CLTypes.h"
+#include "Shared/CLGame.h"
 
 
 // Predeclarations.
-class IClientGameEntity;
-struct ClientEntity;
+//class IClientGameEntity;
+//struct ClientEntity;
 
 // Using =
+class IClientGameEntity;
 using ClassEntity = IClientGameEntity;//CLGBaseEntity;
 //! For now, equals POD Entity.
-using Entity = ClientEntity;
+//using Entity = ClientEntity;
 //! POD Entity.
 using PODEntity = ClientEntity;
+
 //! Entity Dictionary.
 using EntityDictionary = std::map<std::string, std::string>;
 
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-// Start of ServerGame.
+#endif //! End of ClientGame Specifics.
+#ifdef SHAREDGAME_SERVERGAME //! Start of ServerGame Specifics.
+
+
 
 
 
 // Predeclarations.
-class IServerGameEntity;//SVGBaseEntity;
-struct entity_s;
-using ClassEntity = IServerGameEntity;//SVGBaseEntity;
 
-//! For now, equals POD Entity.
-using Entity = entity_s;
-//! POD Entity.
-using PODEntity = entity_s;
+
+class IServerGameEntity;
+using ClassEntity = IServerGameEntity;
 //! Entity Dictionary.
 using EntityDictionary = std::map<std::string, std::string>;
+#define GAME_INCLUDE
+//! SVGame needed includes.
+#include "Common/Common.h"
 
-// End of ServerGame.
-#endif
-// Build for ClientGame
-//#if defined(SHAREDGAME_CLIENTGAME)
-//    // Define so parts of the code can be build for the ClientGame specifically.
-//    #define SHAREDGAME_CLIENTGAME 1
-//
-//#elif SHAREDGAME_SERVER == 1
-//    // Define so parts of the code can be build for the ClientGame specifically.
-//    #undef SHAREDGAME_CLIENTGAME
-//    #define SHAREDGAME_SERVERGAME 1
-//#endif
-
+//! For now, equals POD Entity.
+//using Entity = entity_s;
+//! POD Entity.
+using PODEntity = entity_s;
+#endif //! End of ServerGame Specifics.
 
 /**
 *   Protocol

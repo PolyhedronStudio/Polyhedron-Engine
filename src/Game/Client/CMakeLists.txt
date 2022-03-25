@@ -89,12 +89,13 @@ SET(HEADERS_CLGAME
 	Main.h
 	TemporaryEntities.h
 )
-
+#add_subdirectory(Game/Shared)
 #
 # Target: ClientGame Module.
 #
-ADD_LIBRARY(clgame SHARED CLGame.def ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME}) #${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-# Set definitions for SharedGame Framework.
+ADD_LIBRARY(clgame SHARED CLGame.def ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${HEADERS_SHAREDGAME} $<TARGET_OBJECTS:clgame_sharedgame>) #${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+# Set the flag for SharedGame to build with ClientGame compatability in mind.
 ADD_DEFINITIONS("-DSHAREDGAME_CLIENTGAME=1")
+
 # Include SharedGame Framework.
 TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE Game/Shared)

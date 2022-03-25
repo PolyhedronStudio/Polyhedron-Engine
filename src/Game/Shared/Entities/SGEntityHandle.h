@@ -12,6 +12,7 @@
 #include "../SharedGame.h"
 
 // Predeclare.
+class ISharedGameEntity;
 class SGEntityHandle;
 
 /**
@@ -53,7 +54,7 @@ public:
 	*	@brief Simple constructor of an entity handle that will accept a
 	*	class entity.
 	**/
-    SGEntityHandle(ClassEntity* classEntity);
+    SGEntityHandle(ISharedGameEntity* classEntity);
 
     /**
     *	@brief Simple constructor that will accept a reference to another handle entity.
@@ -113,7 +114,7 @@ public:
 	*			If no valid ClassEntity and POD Entity pointer are passed it unsets
 	*			the current handle to nullptr and entityID = 0.
 	**/
-    ClassEntity* operator=(ClassEntity* classEntity);
+    ISharedGameEntity* operator=(ISharedGameEntity* classEntity);
 
     /**
     *	@brief	Used to access the class entity its methods.
@@ -127,7 +128,7 @@ public:
     *   @return Returns true if ClassEntity* != nullptr, its POD Entity pointer != nullptr, 
     *           and their entity index number matches.
     **/
-    bool operator==(const ClassEntity*);
+    bool operator==(const ISharedGameEntity*);
 
     /**
     *   @brief Used to check whether this entity handle has a valid server entity.

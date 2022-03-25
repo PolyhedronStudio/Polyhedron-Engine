@@ -19,10 +19,10 @@
 # Sources #
 ###########
 SET(SRC_SHAREDGAME
-	${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp #Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
+	Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
 
-	${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.cpp #PMove.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.cpp
-	${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
+	PMove.cpp
+	SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
 )
 
 ###########
@@ -39,6 +39,31 @@ SET(HEADERS_SHAREDGAME
 	SkeletalAnimation.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.h 
 	SharedGame.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SharedGame.h 
 )
+
+#
+#	SharedGame target for linking to ClientGame
+#
+if (CONFIG_BUILD_CL_GAME)
+	ADD_LIBRARY(clgame_sharedgame OBJECT ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	TARGET_COMPILE_DEFINITIONS(clgame_sharedgame PUBLIC "-DSHAREDGAME_CLIENTGAME=1")
+	TARGET_COMPILE_OPTIONS(clgame_sharedgame PUBLIC /wd4005 /wd4996)
+
+	TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PRIVATE ../../../VC/inc)
+	TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PRIVATE ../../../inc)
+endif()
+
+#
+#	SharedGame target for linking to ServerGame
+#
+if (CONFIG_BUILD_SV_GAME)
+	ADD_LIBRARY(svgame_sharedgame OBJECT ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
+	TARGET_COMPILE_DEFINITIONS(svgame_sharedgame PUBLIC "-DSHAREDGAME_SERVERGAME=1")
+	TARGET_COMPILE_OPTIONS(svgame_sharedgame PUBLIC /wd4005 /wd4996)
+
+	TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PRIVATE ../../../VC/inc)
+	TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PRIVATE ../../../inc)
+endif()
+
 
 #add_library(svgame_sharedgame OBJECT ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 #target_compile_definitions(svgame_sharedgame PUBLIC SHAREDGAME_SERVERGAME=1 SHAREDGAME_CLIENTGAME=0)

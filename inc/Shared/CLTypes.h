@@ -59,7 +59,7 @@ static constexpr uint32_t NOPART_BLOOD = 16;
 // No Explosion settings.
 static constexpr uint32_t NOEXP_GRENADE = 1;
 static constexpr uint32_t NOEXP_ROCKET = 2;
-
+class IClientGameEntity;
 
 /**
 *   @brief  Local client side entity. Acts like a POD type similar to the server entity.
@@ -91,7 +91,7 @@ struct ClientEntity {
     int32_t clientEntityNumber = 0;
 
     //! Pointer to the class entity object that belongs to this client entity.
-    CLGBaseEntity *classEntity;
+    IClientGameEntity *classEntity;
 
     //! Key/Value entity dictionary.
     EntityDictionary entityDictionary;

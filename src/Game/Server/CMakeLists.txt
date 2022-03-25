@@ -222,8 +222,9 @@ SET(HEADERS_SVGAME
 #
 # Target: ServerGame Module.
 #
-ADD_LIBRARY(svgame SHARED SVGame.def ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-# Set definitions for SharedGame Framework.
+ADD_LIBRARY(svgame SHARED SVGame.def ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${HEADERS_SHAREDGAME} ${HEADERS_SHAREDGAME} $<TARGET_OBJECTS:svgame_sharedgame>)
+# Set the flag for SharedGame to build with ServerGame compatability in mind.
 ADD_DEFINITIONS("-DSHAREDGAME_SERVERGAME=1")
+
 # Include SharedGame Framework.
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE Game/Shared)

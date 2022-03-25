@@ -8,6 +8,7 @@
 #pragma once
 
 struct PlayerMove;
+struct ClientEntity;
 
 //---------------------------------------------------------------------
 // CORE Export Interface.

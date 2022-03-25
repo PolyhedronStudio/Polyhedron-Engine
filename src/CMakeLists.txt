@@ -439,6 +439,9 @@ if (CONFIG_BUILD_CL_GAME)
 	add_subdirectory(Game/Client)
 endif()
 
+if (CONFIG_BUILD_CL_GAME OR CONFIG_BUILD_SV_GAME)
+	add_subdirectory(Game/Shared)
+endif()
 
 
 #
