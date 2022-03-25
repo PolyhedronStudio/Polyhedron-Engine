@@ -14,7 +14,7 @@
 #include "Common/Msg.h"
 #include "Common/Protocol.h"
 #include "Common/SizeBuffer.h"
-#include "SharedGame/Protocol.h"
+#include "Game/Shared/Protocol.h"
 
 // Assertion.
 #include <cassert>

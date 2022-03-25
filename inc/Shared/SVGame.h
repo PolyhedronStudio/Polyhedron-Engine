@@ -20,7 +20,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __INC_SHARED__SVGAME_H__
 
 #include "Shared/list.h"
-#include "SharedGame/SharedGame.h"
+
+// Shared Game "Framework".
+#include <Game/Shared/SharedGame.h>
+
 
 //
 // game.h -- game dll information visible to server
@@ -209,7 +212,7 @@ typedef struct {
 // functions exported by the game subsystem
 //
 
-typedef struct {
+struct {
     struct entity_s  *entities;
     int         entitySize;
     int         numberOfEntities;     // current number, <= maxEntities

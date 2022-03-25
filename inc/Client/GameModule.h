@@ -12,7 +12,8 @@
 #define __CLIENT_CLGMODULE_H__
 
 #include "Shared/Shared.h"
-#include "SharedGame/PMove.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
+#include "Game/Shared/PMove.h" // PMOVE: Remove once the game modules init pmove themselves using CLG_ParseServerData.
+
 //
 // cgmodule.c
 //

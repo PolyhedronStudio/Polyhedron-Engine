@@ -49,7 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Video.h"
 
 // Shared Game includes.
-#include "SharedGame/Protocol.h"
+#include "Game/Shared/Protocol.h"
 
 #if USE_ZLIB
 #include <zlib.h>

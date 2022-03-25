@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Shared/Shared.h"
 #include "Shared/list.h"
-#include "Shared/svgame.h"
+//#include "Shared/svgame.h"
 
 #include "Common/Bsp.h"
 #include "Common/Cmd.h"

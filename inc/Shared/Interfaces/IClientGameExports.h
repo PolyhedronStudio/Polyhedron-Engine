@@ -7,6 +7,8 @@
 // WID: Time to re-adjust here with new files. I agree, at last.
 #pragma once
 
+struct PlayerMove;
+
 //---------------------------------------------------------------------
 // CORE Export Interface.
 //---------------------------------------------------------------------
