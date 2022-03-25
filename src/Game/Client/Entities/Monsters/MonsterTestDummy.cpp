@@ -23,7 +23,7 @@
 *
 **/
 //! Constructor/Destructor.
-MonsterTestDummy::MonsterTestDummy(ClientEntity* clEntity) : Base(clEntity) {
+MonsterTestDummy::MonsterTestDummy(PODEntity* clEntity) : Base(clEntity) {
 
 }
 

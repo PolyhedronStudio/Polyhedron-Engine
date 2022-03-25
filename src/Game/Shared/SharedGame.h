@@ -67,8 +67,8 @@ using ClassEntity = IServerGameEntity;
 using EntityDictionary = std::map<std::string, std::string>;
 #define GAME_INCLUDE
 //! SVGame needed includes.
-#include "Common/Common.h"
-
+//#include "Common/Common.h"
+#include "Shared/SVGame.h"
 //! For now, equals POD Entity.
 //using Entity = entity_s;
 //! POD Entity.

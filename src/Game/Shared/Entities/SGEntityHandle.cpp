@@ -10,11 +10,6 @@
 // Shared Game include.
 #include "../SharedGame.h"
 
-#ifdef SHAREDGAME_SERVERGAME
-#define GAME_INCLUDE
-#include "Shared/SVGame.h"
-#endif
-
 
 /**
 *	@brief	Helper function to acquire the ClassEntity pointer from a server entity.

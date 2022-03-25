@@ -432,6 +432,13 @@ typedef struct file_info_s {
 #include "Shared/Strings.h"
 
 
+/***
+*
+*	C Style List.
+*
+***/
+#include "Shared/List.h"
+
 
 /***
 *
@@ -447,40 +454,7 @@ typedef struct file_info_s {
 *	Entities & Related.
 *
 ***/
-/**
-*   @details    EntityState->renderEffects
-* 
-*               The render effects are useful for tweaking the way how an entity is displayed.
-*               It may be favored for it to only be visible in mirrors, or fullbright, name it.
-*               
-*               This is the place to look for in-game entity rendering effects to apply.
-**/
-enum RenderEffects {
-    ViewerModel     = (1 << 0),     // Don't draw through eyes, only mirrors.
-    WeaponModel     = (1 << 1),     // Only draw through eyes.
-
-    MinimalLight    = (1 << 2),     // Allways have some light. (Used for viewmodels)
-    FullBright      = (1 << 3),     // Always draw the model at full light intensity.
-
-    DepthHack       = (1 << 4),     // For view weapon Z crunching.
-    Translucent     = (1 << 5),     // Translucent.
-
-    FrameLerp       = (1 << 6),     // Linear Interpolation between animation frames.
-    Beam            = (1 << 7),     // Special rendering hand: origin = to, oldOrigin = from.
-
-    CustomSkin      = (1 << 8),     // If CustomSkin is set, ent->skin is an index in precaches.images.
-    Glow            = (1 << 9),     // Pulse lighting. Used for items.
-    RedShell        = (1 << 10),    // Red shell color effect.
-    GreenShell      = (1 << 11),    // Green shell color effect.
-    BlueShell       = (1 << 12),    // Blue shell color effect.
-
-    InfraRedVisible = (1 << 13),    // Infrared rendering.
-    DoubleShell     = (1 << 14),    // Double shell rendering.
-    HalfDamShell    = (1 << 15),    // Half dam shell.
-    UseDisguise     = (1 << 16),    // Use disguise.
-
-    DebugBoundingBox = (1 << 17),   // Renders a debug bounding box using particles.
-};
+#include "Shared/Entities.h"
 
 // PlayerState->refdef flags
 static constexpr int32_t RDF_UNDERWATER     = 1;    //! Warp the screen as apropriate.

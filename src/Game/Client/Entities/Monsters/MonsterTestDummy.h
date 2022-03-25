@@ -12,7 +12,7 @@
 class MonsterTestDummy : public CLGBaseEntity {
 public:
     //! Constructor/Deconstructor.
-    MonsterTestDummy(Entity* svEntity);
+    MonsterTestDummy(PODEntity* svEntity);
     virtual ~MonsterTestDummy() = default;
 
     DefineMapClass("monster_testdummy", MonsterTestDummy, CLGBaseEntity);

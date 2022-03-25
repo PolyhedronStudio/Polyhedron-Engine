@@ -40,7 +40,7 @@ struct EntityServerFlags {
 
 //===============================================================
 
-static constexpr int32_t MAX_ENT_CLUSTERS = 16;
+//static constexpr int32_t MAX_ENT_CLUSTERS = 16;
 
 
 typedef struct entity_s Entity;
@@ -59,32 +59,32 @@ struct gclient_s {
 };
 
 
-struct entity_s {
-    EntityState  state;
-    struct gclient_s    *client;
-    qboolean    inUse;
-    int         linkCount;
-
-    // FIXME: move these fields to a server private sv_entity_t
-    list_t      area;               // linked to a division node or leaf
-
-    int         numClusters;       // if -1, use headNode instead
-    int         clusterNumbers[MAX_ENT_CLUSTERS];
-    int         headNode;           // unused if numClusters != -1
-    int         areaNumber, areaNumber2;
-
-    //================================
-
-    int         serverFlags;            // EntityServerFlags::NoClient, EntityServerFlags::DeadMonster, EntityServerFlags::Monster, etc
-    vec3_t      mins, maxs;
-    vec3_t      absMin, absMax, size;
-    uint32_t    solid;
-    int         clipMask;
-    Entity     *owner;
-
-    // the game dll can add anything it wants after
-    // this point in the structure
-};
+//struct entity_s {
+//    EntityState  state;
+//    struct gclient_s    *client;
+//    qboolean    inUse;
+//    int         linkCount;
+//
+//    // FIXME: move these fields to a server private sv_entity_t
+//    list_t      area;               // linked to a division node or leaf
+//
+//    int         numClusters;       // if -1, use headNode instead
+//    int         clusterNumbers[MAX_ENT_CLUSTERS];
+//    int         headNode;           // unused if numClusters != -1
+//    int         areaNumber, areaNumber2;
+//
+//    //================================
+//
+//    int         serverFlags;            // EntityServerFlags::NoClient, EntityServerFlags::DeadMonster, EntityServerFlags::Monster, etc
+//    vec3_t      mins, maxs;
+//    vec3_t      absMin, absMax, size;
+//    uint32_t    solid;
+//    int         clipMask;
+//    Entity     *owner;
+//
+//    // the game dll can add anything it wants after
+//    // this point in the structure
+//};
 
 #endif      // GAME_INCLUDE
 

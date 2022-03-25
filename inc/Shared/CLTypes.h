@@ -59,43 +59,7 @@ static constexpr uint32_t NOPART_BLOOD = 16;
 // No Explosion settings.
 static constexpr uint32_t NOEXP_GRENADE = 1;
 static constexpr uint32_t NOEXP_ROCKET = 2;
-class IClientGameEntity;
 
-/**
-*   @brief  Local client side entity. Acts like a POD type similar to the server entity.
-**/
-class CLGBaseEntity; // Predeclaration.
-using EntityDictionary = std::map<std::string, std::string>;
-struct ClientEntity {
-    //! The last received state of this entity.
-    EntityState current = {};
-    //! The previous last valid state. In worst case scenario might be a copy of current state.
-    EntityState prev = {};
-
-    //! The mins and maxs of the entity's bounding box.
-    vec3_t mins = vec3_zero();
-    vec3_t maxs = vec3_zero();
-
-    //! For diminishing grenade trails
-    int32_t trailcount = 0;
-    //! for trails (variable hz)
-    vec3_t lerpOrigin = vec3_zero();
-        
-    //! The frame number that this entity was received at.
-    //! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
-    int32_t serverFrame = 0;
-
-    //! This is the actual server entity number.
-    int32_t serverEntityNumber = 0;
-    //! This is a unique client entity id, determined by an incremental static counter.
-    int32_t clientEntityNumber = 0;
-
-    //! Pointer to the class entity object that belongs to this client entity.
-    IClientGameEntity *classEntity;
-
-    //! Key/Value entity dictionary.
-    EntityDictionary entityDictionary;
-};
 
 //
 // Temporarl Entity parameters.
