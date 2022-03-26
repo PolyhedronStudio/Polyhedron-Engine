@@ -244,24 +244,38 @@ static void CM_InitOctagonBoxHull(void)
         brushSide->texinfo = &nulltexinfo;
         brushSide->texinfo->c.flags = 0;
 
-        // nodes
-        mnode_t *node = &octagon_nodes[i];
-        node->plane = &octagon_planes[i * 2];
-        node->children[side] = (mnode_t *)&octagon_emptyleaf;
-        if (i != 5) {
-            node->children[side ^ 1] = &octagon_nodes[i + 1];
-        } else {
-            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-        }
+
 
         // Axial Planes
         if (i & 1) {
+            // nodes
+            mnode_t *node = &octagon_nodes[i];
+            node->plane = &octagon_planes[i * 2 + 1];
+            node->children[side] = (mnode_t *)&octagon_emptyleaf;
+            if (i != 5) {
+                node->children[side ^ 1] = &octagon_nodes[i + 1];
+            } else {
+                node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+            }
+
+            // plane
             CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-            plane->type = 3 + (i >> 1);
-            plane->signBits = 0;
+            plane->type = PLANE_NON_AXIAL;
+            plane->signBits = ( 1 << ( i >> 1 ) );
             plane->normal = vec3_zero();
             plane->normal[i >> 1] = -1;
         } else {
+            // nodes
+            mnode_t *node = &octagon_nodes[i];
+            node->plane = &octagon_planes[i * 2];
+            node->children[side] = (mnode_t *)&octagon_emptyleaf;
+            if (i != 5) {
+                node->children[side ^ 1] = &octagon_nodes[i + 1];
+            } else {
+                node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+            }
+
+            // plane
             CollisionPlane *plane = &octagon_planes[i * 2];
             plane->type = i >> 1;
             plane->signBits = 0;
@@ -269,6 +283,7 @@ static void CM_InitOctagonBoxHull(void)
             plane->normal[i >> 1] = 1;
         }
     }
+
     const vec3_t oct_dirs[4] = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
     for (int32_t i = 6; i < 10; i++) {
         int32_t side = i & 1;
@@ -283,7 +298,7 @@ static void CM_InitOctagonBoxHull(void)
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
-        if (i != 5) {
+        if (i != 9) {
             node->children[side ^ 1] = &octagon_nodes[i + 1];
         } else {
             node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
@@ -291,28 +306,31 @@ static void CM_InitOctagonBoxHull(void)
 
         // Non Axial Planes
         CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-        plane->type = 3;
+        plane->type = PLANE_NON_AXIAL;
         plane->normal = oct_dirs[i - 6];
         SetPlaneSignbits(plane);
     }
 }
 
+/**
+*   @brief  Credits go to QFusion Engine of course.
+**/
+static vec3_t   trace_cyl_offset = vec3_zero();
+static vec3_t   trace_mins = vec3_zero(), trace_maxs = vec3_zero();
 mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
-	float a, b, d, t;
-	float sina, cosa;
-	vec3_t offset, size[2];
+	const vec3_t offset = vec3_scale(mins + maxs, 0.5);
+    const vec3_t size[2] = {
+        mins - offset,
+        maxs - offset
+    };
 
-	
-	offset = vec3_scale(mins + maxs, 0.5);
-    size[0] = mins - offset;
-    size[1] = maxs - offset;
-
+    trace_cyl_offset = offset;
+    trace_mins = mins;
+    trace_maxs = maxs;
 	//VectorCopy( offset, cms->oct_cmodel->cyl_offset );
 	//VectorCopy( size[0], cms->oct_cmodel->mins );
 	//VectorCopy( size[1], cms->oct_cmodel->maxs );
     //octagon_headnode->cylinderOffset = offset;
-    //octagon_headnode->mins = size[0];
-    //octagon_headnode->maxs = size[1];
     
 	octagon_brushsides[0].plane->dist = size[1][0];
 	octagon_brushsides[1].plane->dist = -size[0][0];
@@ -321,15 +339,15 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 	octagon_brushsides[4].plane->dist = size[1][2];
 	octagon_brushsides[5].plane->dist = -size[0][2];
 
-	a = size[1][0];			   // halfx
-	b = size[1][1];			   // halfy
-	d = sqrt( a * a + b * b ); // hypothenuse
+	const float a = size[1][0];			   // halfx
+	const float b = size[1][1];			   // halfy
+	float d = sqrt( a * a + b * b ); // hypothenuse
 
-	cosa = a / d;
-	sina = b / d;
+	float cosa = a / d;
+	float sina = b / d;
 
 	// swap sin and cos, which is the same thing as adding pi/2 radians to the original angle
-	t = sina;
+	const float t = sina;
 	sina = cosa;
 	cosa = t;
 
@@ -356,8 +374,7 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 }
 
 
-mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p)
-{
+mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p) {
     if (!cm->cache) {
         return &nullleaf;       // server may call this without map loaded
     }
@@ -489,9 +506,9 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 //#define DIST_EPSILON    0.125
 static constexpr float DIST_EPSILON = 1.0f / 32.0f;
 
-static vec3_t   trace_start, trace_end;
-static vec3_t   trace_mins, trace_maxs;
-static vec3_t   trace_extents;
+static vec3_t   trace_start = vec3_zero(), trace_end = vec3_zero();
+
+static vec3_t   trace_extents = vec3_zero();
 
 static TraceResult  *trace_trace;
 static int      trace_contents;
@@ -503,8 +520,9 @@ static qboolean trace_ispoint;      // optimized case
 static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
                               TraceResult *trace, mbrush_t *brush)
 {
-    if (!brush->numsides)
+    if (!brush->numsides) {
         return;
+    }
     
     qboolean getout = false;
     qboolean startout = false;
@@ -547,17 +565,21 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
         const float d1 = vec3_dot(p1, plane->normal) - dist;
         const float d2 = vec3_dot(p2, plane->normal) - dist;
 
-        if (d2 > 0)
+        if (d2 > 0) {
             getout = true; // endpoint is not in solid
-        if (d1 > 0)
+        }
+        if (d1 > 0) {
             startout = true;
+        }
 
         // if completely in front of face, no intersection
-        if (d1 > 0 && d2 >= d1)
+        if (d1 > 0 && d2 >= d1) {
             return;
+        }
 
-        if (d1 <= 0 && d2 <= 0)
+        if (d1 <= 0 && d2 <= 0) {
             continue;
+        }
 
         // crosses face
         if (d1 > d2) {
@@ -591,8 +613,9 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
     }
     if (enterFraction < leaveFraction) {
         if (enterFraction > -1 && enterFraction < trace->fraction) {
-            if (enterFraction < 0)
+            if (enterFraction < 0) {
                 enterFraction = 0;
+            }
             trace->fraction = enterFraction;
             trace->plane = *clipPlane;
             trace->surface = &(leadside->texinfo->c);
@@ -755,10 +778,10 @@ recheck:
         if (trace_ispoint) {
             offset = 0;
         } else {
-            offset = 2048.f;
-            //offset = fabs(trace_extents[0] * plane->normal[0]) +
-            //         fabs(trace_extents[1] * plane->normal[1]) +
-            //         fabs(trace_extents[2] * plane->normal[2]);
+           offset = 2048.f;
+           // offset = fabs(trace_extents[0] * plane->normal[0]) +
+           //          fabs(trace_extents[1] * plane->normal[1]) +
+           //          fabs(trace_extents[2] * plane->normal[2]);
         }
     }
 
@@ -934,9 +957,19 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     vec3_t      axis[3];
     qboolean    rotated;
 
-    // subtract origin offset
-    vec3_t start_l = start - origin;
-    vec3_t end_l = end - origin;
+    vec3_t end_l = vec3_zero();
+    vec3_t start_l = vec3_zero();
+    if (headNode == octagon_headnode) {
+        // 
+        // subtract origin offset
+        start_l = (start - origin) - trace_cyl_offset;
+        end_l   = (end - origin) - trace_cyl_offset;
+    }
+    else {
+        // subtract origin offset
+        start_l = start - origin;
+        end_l   = end - origin;
+    }
 
     // rotate start and end into the models frame of reference
     if (headNode != box_headnode &&

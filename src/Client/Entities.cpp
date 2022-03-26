@@ -415,7 +415,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
     // Collision model for entity.
     mmodel_t*       cmodel = nullptr;
     // Client side entity.
-    ClientEntity*   player = nullptr;
+    ClientEntity*   solidEntity = nullptr;
 
     // Actual start point of the trace. May modify during the loop.
     vec3_t traceOrigin = vec3_zero();
@@ -424,42 +424,42 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
 
     for (uint32_t i = 0; i < cl.numSolidEntities; i++) {
         // Fetch client entity.
-        player = cl.solidEntities[i];
+        solidEntity = cl.solidEntities[i];
 
         // This check is likely redundent but let's make sure it is there anyway for possible future changes.
-        if (player == nullptr) {
+        if (solidEntity == nullptr) {
             continue;
         }
 
         // Should we skip it?
-        if (skipEntity != nullptr && skipEntity->current.number == player->current.number) {
+        if (skipEntity != nullptr && skipEntity->current.number == solidEntity->current.number) {
             continue;
         }
 
-        if (player->current.solid == PACKED_BBOX) {
+        if (solidEntity->current.solid == PACKED_BBOX) {
             // special value for bmodel
-            cmodel = cl.clipModels[player->current.modelIndex];
+            cmodel = cl.clipModels[solidEntity->current.modelIndex];
             if (!cmodel)
                 continue;
             headNode = cmodel->headNode;
 
             // Setup angles and origin for our trace.
-            traceAngles = player->current.angles;
-            traceOrigin = player->current.origin;
+            traceAngles = solidEntity->current.angles;
+            traceOrigin = solidEntity->current.origin;
         } else {
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
 
-            MSG_UnpackBoundingBox32(player->current.solid, entityMins, entityMaxs);
+            //MSG_UnpackBoundingBox32(solidEntity->current.solid, entityMins, entityMaxs);
             
-            if (player->current.solid == Solid::OctagonBox) {
-                headNode = CM_HeadnodeForOctagon(entityMins, entityMaxs);
+            if (solidEntity->current.solid == Solid::OctagonBox) {
+                headNode = CM_HeadnodeForOctagon(solidEntity->mins, solidEntity->maxs);
             } else {
-                headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
+                headNode = CM_HeadnodeForBox(solidEntity->mins, solidEntity->maxs);
             }
 
             traceAngles = vec3_zero();
-            traceOrigin = player->current.origin;
+            traceOrigin = solidEntity->current.origin;
         }
 
         // We're done clipping against entities if we reached an allSolid aka world.
@@ -470,7 +470,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
                                mins, maxs, headNode, contentMask,
                                traceOrigin, traceAngles);
 
-        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)player);
+        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)solidEntity);
     }
 }
 

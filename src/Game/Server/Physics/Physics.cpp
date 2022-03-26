@@ -276,7 +276,7 @@ static vec3_t ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 // 4 = dead stop
 //===============
 //
-#define MAX_CLIP_PLANES 5
+#define MAX_CLIP_PLANES 10
 int SVG_FlyMove(IServerGameEntity *ent, float time, int mask)
 {
     IServerGameEntity     *hit;
@@ -292,7 +292,7 @@ int SVG_FlyMove(IServerGameEntity *ent, float time, int mask)
     float       time_left;
     int         Blocked;
 
-    numbumps = 4;
+    numbumps = MAX_CLIP_PLANES - 1;
 
     Blocked = 0;
     original_velocity = ent->GetVelocity();
