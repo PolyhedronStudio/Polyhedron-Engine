@@ -84,7 +84,7 @@ void SVGBasePlayer::Spawn() {
     SetTakeDamage(TakeDamage::Aim);
     // Fresh movetype and solid.
     SetMoveType(MoveType::PlayerMove);
-    SetSolid(Solid::BoundingBox);
+    SetSolid(Solid::OctagonBox);
     // Mass.
     SetMass(200);
     // Undead itself.

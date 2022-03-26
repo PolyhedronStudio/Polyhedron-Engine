@@ -31,7 +31,7 @@ MonsterTestDummy::MonsterTestDummy(Entity* svEntity) : Base(svEntity) {
 	const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
 	uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
-	gi.DPrintf("SVG Spawned: svNumber=#%i mapClass=%s hashedMapClass=#%i\n", svEntity->state.number, mapClass, hashedMapClass);
+	//gi.DPrintf("SVG Spawned: svNumber=#%i mapClass=%s hashedMapClass=#%i\n", svEntity->state.number, mapClass, hashedMapClass);
 }
 
 MonsterTestDummy::~MonsterTestDummy() { }
@@ -65,7 +65,7 @@ void MonsterTestDummy::Spawn() {
     Base::Spawn();
 
     // Set solid.
-    SetSolid(Solid::BoundingBox);
+    SetSolid(Solid::OctagonBox);
 
     // Set move type.
     SetMoveType(MoveType::Step);
@@ -77,7 +77,7 @@ void MonsterTestDummy::Spawn() {
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     // Set the barrel model, and model index.
-    SetModel("models/monsters/testdummy/60fps.iqm");
+    SetModel("models/monsters/testdummy/testdummy.iqm");
 
     // Set the bounding box.
     SetBoundingBox({ -16, -16, 0 }, { 16, 16, 52 });

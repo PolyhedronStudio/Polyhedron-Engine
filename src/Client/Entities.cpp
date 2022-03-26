@@ -451,7 +451,12 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
 
             MSG_UnpackBoundingBox32(player->current.solid, entityMins, entityMaxs);
-            headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
+            
+            if (player->current.solid == Solid::OctagonBox) {
+                headNode = CM_HeadnodeForOctagon(entityMins, entityMaxs);
+            } else {
+                headNode = CM_HeadnodeForBox(entityMins, entityMaxs);
+            }
 
             traceAngles = vec3_zero();
             traceOrigin = player->current.origin;

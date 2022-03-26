@@ -107,6 +107,10 @@ mleaf_t *CM_LeafNum(cm_t *cm, int number)
 
 //=======================================================================
 
+// BOXES
+
+//=======================================================================
+
 static CollisionPlane box_planes[12];
 static mnode_t  box_nodes[6];
 static mnode_t  *box_headnode;
@@ -116,14 +120,10 @@ static mbrushside_t box_brushsides[6];
 static mleaf_t  box_leaf;
 static mleaf_t  box_emptyleaf;
 
-/*
-===================
-CM_InitBoxHull
-
-Set up the planes and nodes so that the six floats of a bounding box
-can just be stored out and get a proper clipping hull structure.
-===================
-*/
+/**
+*   @brief  Set up the planes and nodes so that the six floats of a bounding box
+*           can just be stored out and get a proper clipping hull structure.
+**/
 static void CM_InitBoxHull(void)
 {
     box_headnode = &box_nodes[0];
@@ -150,10 +150,11 @@ static void CM_InitBoxHull(void)
         mnode_t *node = &box_nodes[i];
         node->plane = &box_planes[i * 2];
         node->children[side] = (mnode_t *)&box_emptyleaf;
-        if (i != 5)
+        if (i != 5) {
             node->children[side ^ 1] = &box_nodes[i + 1];
-        else
+        } else {
             node->children[side ^ 1] = (mnode_t *)&box_leaf;
+        }
 
         // planes
         CollisionPlane *plane = &box_planes[i * 2];
@@ -197,9 +198,161 @@ mnode_t *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs)
     return box_headnode;
 }
 
-// TODO: Implement.
+
+//=======================================================================
+
+// OCTAGON BOX
+
+//=======================================================================
+static CollisionPlane octagon_planes[20];
+static mnode_t  octagon_nodes[10];
+static mnode_t  *octagon_headnode;
+static mbrush_t octagon_brush;
+static mbrush_t *octagon_leafbrush;
+static mbrushside_t octagon_brushsides[10];
+static mleaf_t  octagon_leaf;
+static mleaf_t  octagon_emptyleaf;
+
+/*
+===================
+CM_InitOctagonBoxHull
+
+Set up the planes and nodes so that the 10 floats of an octagon box
+can just be stored out and get a proper clipping hull structure.
+===================
+*/
+static void CM_InitOctagonBoxHull(void)
+{
+    octagon_headnode = &octagon_nodes[0];
+
+    octagon_brush.numsides = 10;
+    octagon_brush.firstbrushside = &octagon_brushsides[0];
+    octagon_brush.contents = BrushContents::Monster;
+
+    octagon_leaf.firstleafbrush = &octagon_leafbrush;
+    octagon_leaf.numleafbrushes = 1;
+    octagon_leaf.contents = BrushContents::Monster;
+
+    octagon_leafbrush = &octagon_brush;
+
+    for (int32_t i = 0; i < 6; i++) {
+        int32_t side = i & 1;
+
+        // brush sides
+        mbrushside_t *brushSide = &octagon_brushsides[i];
+        brushSide->plane = &octagon_planes[i * 2 + side];
+        brushSide->texinfo = &nulltexinfo;
+        brushSide->texinfo->c.flags = 0;
+
+        // nodes
+        mnode_t *node = &octagon_nodes[i];
+        node->plane = &octagon_planes[i * 2];
+        node->children[side] = (mnode_t *)&octagon_emptyleaf;
+        if (i != 5) {
+            node->children[side ^ 1] = &octagon_nodes[i + 1];
+        } else {
+            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+        }
+
+        // Axial Planes
+        if (i & 1) {
+            CollisionPlane *plane = &octagon_planes[i * 2 + 1];
+            plane->type = 3 + (i >> 1);
+            plane->signBits = 0;
+            plane->normal = vec3_zero();
+            plane->normal[i >> 1] = -1;
+        } else {
+            CollisionPlane *plane = &octagon_planes[i * 2];
+            plane->type = i >> 1;
+            plane->signBits = 0;
+            plane->normal = vec3_zero();
+            plane->normal[i >> 1] = 1;
+        }
+    }
+    const vec3_t oct_dirs[4] = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
+    for (int32_t i = 6; i < 10; i++) {
+        int32_t side = i & 1;
+
+        // brush sides
+        mbrushside_t *brushSide = &octagon_brushsides[i];
+        brushSide->plane = &octagon_planes[i * 2 + side];
+        brushSide->texinfo = &nulltexinfo;
+        brushSide->texinfo->c.flags = 0;
+
+        // nodes
+        mnode_t *node = &octagon_nodes[i];
+        node->plane = &octagon_planes[i * 2];
+        node->children[side] = (mnode_t *)&octagon_emptyleaf;
+        if (i != 5) {
+            node->children[side ^ 1] = &octagon_nodes[i + 1];
+        } else {
+            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+        }
+
+        // Non Axial Planes
+        CollisionPlane *plane = &octagon_planes[i * 2 + 1];
+        plane->type = 3;
+        plane->normal = oct_dirs[i - 6];
+        SetPlaneSignbits(plane);
+    }
+}
+
 mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
-    return nullptr;
+	float a, b, d, t;
+	float sina, cosa;
+	vec3_t offset, size[2];
+
+	
+	offset = vec3_scale(mins + maxs, 0.5);
+    size[0] = mins - offset;
+    size[1] = maxs - offset;
+
+	//VectorCopy( offset, cms->oct_cmodel->cyl_offset );
+	//VectorCopy( size[0], cms->oct_cmodel->mins );
+	//VectorCopy( size[1], cms->oct_cmodel->maxs );
+    //octagon_headnode->cylinderOffset = offset;
+    //octagon_headnode->mins = size[0];
+    //octagon_headnode->maxs = size[1];
+    
+	octagon_brushsides[0].plane->dist = size[1][0];
+	octagon_brushsides[1].plane->dist = -size[0][0];
+	octagon_brushsides[2].plane->dist = size[1][1];
+	octagon_brushsides[3].plane->dist = -size[0][1];
+	octagon_brushsides[4].plane->dist = size[1][2];
+	octagon_brushsides[5].plane->dist = -size[0][2];
+
+	a = size[1][0];			   // halfx
+	b = size[1][1];			   // halfy
+	d = sqrt( a * a + b * b ); // hypothenuse
+
+	cosa = a / d;
+	sina = b / d;
+
+	// swap sin and cos, which is the same thing as adding pi/2 radians to the original angle
+	t = sina;
+	sina = cosa;
+	cosa = t;
+
+	// elleptical radius
+	d = a * b / sqrt( a * a * cosa * cosa + b * b * sina * sina );
+	// d = a * b / sqrt( a * a  + b * b ); // produces a rectangle, inscribed at middle points
+
+	// the following should match normals and signbits set in CM_InitOctagonHull
+
+	VectorSet( octagon_brushsides[6].plane->normal, cosa, sina, 0 );
+	octagon_brushsides[6].plane->dist = d;
+
+	VectorSet( octagon_brushsides[7].plane->normal, -cosa, sina, 0 );
+	octagon_brushsides[7].plane->dist = d;
+
+	VectorSet( octagon_brushsides[8].plane->normal, -cosa, -sina, 0 );
+	octagon_brushsides[8].plane->dist = d;
+
+	VectorSet( octagon_brushsides[9].plane->normal, cosa, -sina, 0 );
+	octagon_brushsides[9].plane->dist = d;
+
+	//return cms->oct_cmodel;
+    return octagon_headnode;
 }
 
 
@@ -323,13 +476,13 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 }
 
 
-/*
-===============================================================================
-
-BOX TRACING
-
-===============================================================================
-*/
+/**
+*
+*
+*   Box Tracing
+*
+*
+**/
 
 // 1/32 epsilon to keep floating point happy
 //#define DIST_EPSILON    (0.03125)
@@ -344,11 +497,9 @@ static TraceResult  *trace_trace;
 static int      trace_contents;
 static qboolean trace_ispoint;      // optimized case
 
-/*
-================
-CM_ClipBoxToBrush
-================
-*/
+/**
+*   @brief 
+**/
 static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
                               TraceResult *trace, mbrush_t *brush)
 {
@@ -450,17 +601,15 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
     }
 }
 
-/*
-================
-CM_TestBoxInBrush
-================
-*/
-static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1,
-                              TraceResult *trace, mbrush_t *brush)
-{
 
-    if (!brush->numsides)
+/**
+*   @brief 
+**/
+static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1,  TraceResult *trace, mbrush_t *brush) {
+
+    if (!brush->numsides) {
         return;
+    }
 
     vec3_t offset = vec3_zero();
 
@@ -488,8 +637,9 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
         float d1 = vec3_dot(p1, plane->normal) - dist;
 
         // if completely in front of face, no intersection
-        if (d1 > 0)
+        if (d1 > 0) {
             return;
+        }
 
     }
 
@@ -500,15 +650,13 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 }
 
 
-/*
-================
-CM_TraceToLeaf
-================
-*/
-static void CM_TraceToLeaf(mleaf_t *leaf)
-{
-    if (!(leaf->contents & trace_contents))
+/**
+*   @brief 
+**/
+static void CM_TraceToLeaf(mleaf_t *leaf) {
+    if (!(leaf->contents & trace_contents)) {
         return;
+    }
 
     // Trace line against all brushes in the leaf
     mbrush_t **leafbrush = leaf->firstleafbrush;
@@ -516,32 +664,33 @@ static void CM_TraceToLeaf(mleaf_t *leaf)
     for (int32_t k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
         mbrush_t *b = *leafbrush;
 
-        if (b->checkcount == checkcount)
+        if (b->checkcount == checkcount) {
             continue;   // Already checked this brush in another leaf
+        }
         
         b->checkcount = checkcount;
 
-        if (!(b->contents & trace_contents))
+        if (!(b->contents & trace_contents)) {
             continue;
+        }
         
         CM_ClipBoxToBrush(trace_mins, trace_maxs, trace_start, trace_end, trace_trace, b);
         
-        if (!trace_trace->fraction)
+        if (!trace_trace->fraction) {
             return;
+        }
     }
 
 }
 
-
-/*
-================
-CM_TestInLeaf
-================
-*/
+/**
+*   @brief 
+**/
 static void CM_TestInLeaf(mleaf_t *leaf)
 {
-    if (!(leaf->contents & trace_contents))
+    if (!(leaf->contents & trace_contents)) {
         return;
+    }
     
     // Trace line against all brushes in the leaf
     mbrush_t **leafbrush = leaf->firstleafbrush;
@@ -549,31 +698,29 @@ static void CM_TestInLeaf(mleaf_t *leaf)
     for (int32_t k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
         mbrush_t *b = *leafbrush;
         
-        if (b->checkcount == checkcount)
+        if (b->checkcount == checkcount) {
             continue;   // Already checked this brush in another leaf
+        }
         
         b->checkcount = checkcount;
 
-        if (!(b->contents & trace_contents))
+        if (!(b->contents & trace_contents)) {
             continue;
+        }
         
         CM_TestBoxInBrush(trace_mins, trace_maxs, trace_start, trace_trace, b);
         
-        if (!trace_trace->fraction)
+        if (!trace_trace->fraction) {
             return;
+        }
     }
 
 }
 
-
-/*
-==================
-CM_RecursiveHullCheck
-
-==================
-*/
-static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec3_t &p1, const vec3_t &p2)
-{
+/**
+*   @brief 
+**/
+static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec3_t &p1, const vec3_t &p2) {
     CollisionPlane    *plane = nullptr;
     float       t1, t2, offset;
     float       frac, frac2;
@@ -582,8 +729,9 @@ static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec
     int         side;
     float       midf;
 
-    if (trace_trace->fraction <= p1f)
+    if (trace_trace->fraction <= p1f) {
         return;     // already hit something nearer
+    }
 
 recheck:
     // if plane is NULL, we are in a leaf node
@@ -604,13 +752,14 @@ recheck:
     } else {
         t1 = PlaneDiff(p1, plane);
         t2 = PlaneDiff(p2, plane);
-        if (trace_ispoint)
+        if (trace_ispoint) {
             offset = 0;
-        else
+        } else {
             offset = 2048.f;
             //offset = fabs(trace_extents[0] * plane->normal[0]) +
             //         fabs(trace_extents[1] * plane->normal[1]) +
             //         fabs(trace_extents[2] * plane->normal[2]);
+        }
     }
 
     // see which sides we need to consider
@@ -659,8 +808,13 @@ recheck:
 
 
 
-//======================================================================
-
+/**
+*
+*
+*   Box Tracing & Entity Clipping.
+*
+*
+**/
 /*
 ==================
 CM_BoxTrace
@@ -703,8 +857,9 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
         int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, NULL);
         for (int32_t i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
-            if (trace_trace->allSolid)
+            if (trace_trace->allSolid) {
                 break;
+            }
         }
         trace_trace->endPosition = start; //VectorCopy(start, trace_trace->endPosition);
         return;
@@ -759,21 +914,18 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
     //
     CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
-    if (trace_trace->fraction == 1)
+    if (trace_trace->fraction == 1) {
         trace_trace->endPosition = end;
-    else
+    } else {
         trace_trace->endPosition = vec3_mix(start, end, trace_trace->fraction);
+    }
 }
 
 
-/*
-==================
-CM_TransformedBoxTrace
-
-Handles offseting and rotation of the end points for moving and
-rotating entities
-==================
-*/
+/**
+*   @brief  Handles offseting and rotation of the end points for moving and
+*           rotating entities
+**/
 void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                             const vec3_t &mins, const vec3_t &maxs,
                             mnode_t *headNode, int brushmask,
@@ -788,10 +940,11 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
 
     // rotate start and end into the models frame of reference
     if (headNode != box_headnode &&
-        (angles[0] || angles[1] || angles[2]))
+        (angles[0] || angles[1] || angles[2])) {
         rotated = true;
-    else
+    } else {
         rotated = false;
+    }
     
     if (rotated) {
         AnglesToAxis(angles, axis);
@@ -812,6 +965,10 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     trace->endPosition = vec3_mix(start, end, trace->fraction); // LerpVector(start, end, trace->fraction, trace->endPosition);
 }
 
+
+/**
+*   @brief  Clips the source trace result against given entity.
+**/
 void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct entity_s *ent)
 {
     dst->allSolid |= src->allSolid;
@@ -827,14 +984,17 @@ void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct entity_s *en
 }
 
 
-/*
-===============================================================================
 
-AREAPORTALS
-
-===============================================================================
-*/
-
+/**
+*
+*
+*   AREAPORTALS
+*
+*
+**/
+/**
+*   @brief
+**/
 static void FloodArea_r(cm_t *cm, int number, int floodnum)
 {
     int i;
@@ -843,8 +1003,9 @@ static void FloodArea_r(cm_t *cm, int number, int floodnum)
 
     area = &cm->cache->areas[number];
     if (area->floodvalid == floodvalid) {
-        if (cm->floodnums[number] == floodnum)
+        if (cm->floodnums[number] == floodnum) {
             return;
+        }
         Com_Error(ErrorType::Drop, "FloodArea_r: reflooded");
     }
 
@@ -852,11 +1013,15 @@ static void FloodArea_r(cm_t *cm, int number, int floodnum)
     area->floodvalid = floodvalid;
     p = area->firstareaportal;
     for (i = 0; i < area->numareaportals; i++, p++) {
-        if (cm->portalopen[p->portalnum])
+        if (cm->portalopen[p->portalnum]) {
             FloodArea_r(cm, p->otherarea, floodnum);
+        }
     }
 }
 
+/**
+*   @brief
+**/
 static void FloodAreaConnections(cm_t *cm)
 {
     marea_t *area;
@@ -868,13 +1033,17 @@ static void FloodAreaConnections(cm_t *cm)
     // Area 0 is not used
     for (int32_t i = 1; i < cm->cache->numareas; i++) {
         area = &cm->cache->areas[i];
-        if (area->floodvalid == floodvalid)
+        if (area->floodvalid == floodvalid) {
             continue;       // already flooded into
+        }
         floodnum++;
         FloodArea_r(cm, i, floodnum);
     }
 }
 
+/**
+*   @brief
+**/
 void CM_SetAreaPortalState(cm_t *cm, int portalnum, qboolean open)
 {
     if (!cm->cache) {
@@ -896,6 +1065,9 @@ void CM_SetAreaPortalState(cm_t *cm, int portalnum, qboolean open)
     FloodAreaConnections(cm);
 }
 
+/**
+*   @brief
+**/
 qboolean CM_AreasConnected(cm_t *cm, int area1, int area2)
 {
     bsp_t *cache = cm->cache;
@@ -921,16 +1093,12 @@ qboolean CM_AreasConnected(cm_t *cm, int area1, int area2)
 }
 
 
-/*
-=================
-CM_WriteAreaBits
-
-Writes a length byte followed by a bit vector of all the areas
-that area in the same flood as the area parameter
-
-This is used by the client refreshes to cull visibility
-=================
-*/
+/**
+*   @brief  Writes a length byte followed by a bit vector of all the areas
+*           that area in the same flood as the area parameter
+*
+*           This is used by the client refreshes to cull visibility
+**/
 int CM_WriteAreaBits(cm_t *cm, byte *buffer, int area)
 {
     bsp_t *cache = cm->cache;
@@ -958,6 +1126,9 @@ int CM_WriteAreaBits(cm_t *cm, byte *buffer, int area)
     return bytes;
 }
 
+/**
+*   @brief
+**/
 int CM_WritePortalBits(cm_t *cm, byte *buffer)
 {
     int32_t     i, bytes, numportals;
@@ -979,6 +1150,9 @@ int CM_WritePortalBits(cm_t *cm, byte *buffer)
     return bytes;
 }
 
+/**
+*   @brief
+**/
 void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
 {
     if (!cm->cache) {
@@ -1004,40 +1178,34 @@ void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
 }
 
 
-/*
-=============
-CM_HeadnodeVisible
 
-Returns true if any leaf under headNode has a cluster that
-is potentially visible
-=============
-*/
+/**
+*   @return True if any leaf under headNode has a cluster that is potentially visible
+**/
 qboolean CM_HeadnodeVisible(mnode_t *node, byte *visbits)
 {
     while (node->plane) {
-        if (CM_HeadnodeVisible(node->children[0], visbits))
+        if (CM_HeadnodeVisible(node->children[0], visbits)) {
             return true;
+        }
         node = node->children[1];
     }
 
     mleaf_t *leaf = (mleaf_t *)node;
     int32_t cluster = leaf->cluster;
-    if (cluster == -1)
+    if (cluster == -1) {
         return false;
-    if (Q_IsBitSet(visbits, cluster))
+    }
+    if (Q_IsBitSet(visbits, cluster)) {
         return true;
+    }
     return false;
 }
 
 
-/*
-============
-CM_FatPVS
-
-The client will interpolate the view position,
-so we can't use a single PVS point
-===========
-*/
+/**
+*   @brief  The client will interpolate the view position, so we can't use a single PVS point
+**/
 byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis)
 {
     static byte    temp[VIS_MAX_BYTES];
@@ -1059,8 +1227,9 @@ byte *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t &org, int vis)
     }
 
     int32_t count = CM_BoxLeafs(cm, mins, maxs, leafs, 64, NULL);
-    if (count < 1)
+    if (count < 1) {
         Com_Error(ErrorType::Drop, "CM_FatPVS: leaf count < 1");
+    }
     int32_t longs = VIS_FAST_LONGS(cm->cache);
 
     // convert leafs to clusters
@@ -1089,14 +1258,14 @@ nextleaf:;
     return mask;
 }
 
-/*
-=============
-CM_Init
-=============
-*/
+
+/**
+*   @brief 
+**/
 void CM_Init(void)
 {
     CM_InitBoxHull();
+    CM_InitOctagonBoxHull();
 
     nullleaf.cluster = -1;
 

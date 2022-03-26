@@ -429,7 +429,11 @@ static mnode_t *SV_HullForEntity(Entity *ent)
     }
 
     // create a temp hull from bounding box sizes
-    return CM_HeadnodeForBox(ent->mins, ent->maxs);
+    if (ent->solid == Solid::OctagonBox) {
+        return CM_HeadnodeForOctagon(ent->mins, ent->maxs);
+    } else {
+        return CM_HeadnodeForBox(ent->mins, ent->maxs);
+    }
 }
 
 /*
