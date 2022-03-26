@@ -58,7 +58,7 @@ public:
     //void MonsterTestBoxUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
     void MonsterTestDummyThink(void);
     void MonsterTestDummyStartAnimation(void);
-    void MonsterTestDummyDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point);
+    void MonsterTestDummyDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
     //void MonsterTestTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
     // Set when exploding, after a minor delay.

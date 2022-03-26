@@ -359,7 +359,7 @@ public:
     /**
     *   @brief Is/Set: In Use.
     **/
-    inline qboolean         IsInUse() override { return serverEntity->inUse; }
+    inline const qboolean   IsInUse() override { return serverEntity->inUse; }
     inline void             SetInUse(const qboolean inUse) override { serverEntity->inUse = inUse; }
 
     /**

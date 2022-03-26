@@ -303,13 +303,11 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	}
 }
 
-//
-//===============
-// SVGBaseEntity::Use
-//
-// Execute the 'Use' callback in case we ran into any.
-//===============
-//
+/**
+*   @brief  Dispatches 'Use' callback.
+*   @param  other:      
+*   @param  activator:  
+**/
 void SVGBaseEntity::DispatchUseCallback(IServerGameEntity* other, IServerGameEntity* activator) {
 	// Safety check.
 	if (useFunction == nullptr)
@@ -319,45 +317,13 @@ void SVGBaseEntity::DispatchUseCallback(IServerGameEntity* other, IServerGameEnt
 	(this->*useFunction)(other, activator);
 }
 
-//
-//===============
-// SVGBaseEntity::Blocked
-//
-// Execute the 'Blocked' callback in case we ran into any.
-//===============
-//
-void SVGBaseEntity::DispatchBlockedCallback(IServerGameEntity* other) {
-	// Safety check.
-	if (blockedFunction == nullptr)
-		return;
-
-	// Execute 'Die' callback function.
-	(this->*blockedFunction)(other);
-}
-
-//
-//===============
-// SVGBaseEntity::TakeDamage
-//
-// Execute the 'TakeDamage' callback in case we ran into any.
-//===============
-//
-void SVGBaseEntity::DispatchTakeDamageCallback(IServerGameEntity* other, float kick, int32_t damage) {
-	// Safety check.
-	if (takeDamageFunction == nullptr)
-		return;
-
-	// Execute 'Die' callback function.
-	(this->*takeDamageFunction)(other, kick, damage);
-}
-
-//
-//===============
-// SVGBaseEntity::Die
-//
-// Execute the 'Die' callback in case we ran into any.
-//===============
-//
+/**
+*   @brief  Dispatches 'Die' callback.
+*   @param  inflictor:  
+*   @param  attacker:   
+*   @param  damage:     
+*   @param  pointer:    
+**/
 void SVGBaseEntity::DispatchDieCallback(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
 	// Safety check.
 	if (dieFunction == nullptr)
@@ -367,13 +333,27 @@ void SVGBaseEntity::DispatchDieCallback(IServerGameEntity* inflictor, IServerGam
 	(this->*dieFunction)(inflictor, attacker, damage, point);
 }
 
-//
-//===============
-// SVGBaseEntity::Touch
-//
-// Execute the 'Touch' callback in case we ran into any.
-//===============
-//
+
+/**
+*   @brief  Dispatches 'Blocked' callback.
+*   @param  other:  
+**/
+void SVGBaseEntity::DispatchBlockedCallback(IServerGameEntity* other) {
+	// Safety check.
+	if (blockedFunction == nullptr)
+		return;
+
+	// Execute 'Die' callback function.
+	(this->*blockedFunction)(other);
+}
+
+/**
+*   @brief  Dispatches 'Touch' callback.
+*   @param  self:   
+*   @param  other:  
+*   @param  plane:  
+*   @param  surf:   
+**/
 void SVGBaseEntity::DispatchTouchCallback(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	// Safety check.
 	if (touchFunction == nullptr)
@@ -382,6 +362,24 @@ void SVGBaseEntity::DispatchTouchCallback(IServerGameEntity* self, IServerGameEn
 	// Execute 'Touch' callback function.
 	(this->*touchFunction)(self, other, plane, surf);
 }
+
+/**
+*   @brief  Dispatches 'TakeDamage' callback.
+*   @param  other:
+*   @param  kick:
+*   @param  damage:
+**/
+void SVGBaseEntity::DispatchTakeDamageCallback(IServerGameEntity* other, float kick, int32_t damage) {
+	// Safety check.
+	if (takeDamageFunction == nullptr)
+		return;
+
+	// Execute 'Die' callback function.
+	(this->*takeDamageFunction)(other, kick, damage);
+}
+
+
+
 
 //===============
 // SVGBaseEntity::UseTargets

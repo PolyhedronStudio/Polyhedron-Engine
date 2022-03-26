@@ -6,7 +6,7 @@
 #pragma once
 
 // Set here how fast you want the tick rate to be.
-static constexpr uint32_t   BASE_HZ = 50.0;
+static constexpr uint32_t   BASE_HZ = 60.0;
 
 // Calclate all related values we need to make it work smoothly even if we have
 // a nice 250fps, the game must run at 50fps.

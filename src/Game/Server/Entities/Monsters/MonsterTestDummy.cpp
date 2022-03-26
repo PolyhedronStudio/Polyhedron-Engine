@@ -98,7 +98,7 @@ void MonsterTestDummy::Spawn() {
 
     //// Setup our MonsterTestDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
-   // SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
+    SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
@@ -243,7 +243,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 // 'Die' callback, the explosion box has been damaged too much.
 //===============
 //
-void MonsterTestDummy::MonsterTestDummyDie(SVGBaseEntity* inflictor, SVGBaseEntity* attacker, int damage, const vec3_t& point) {
+void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
 

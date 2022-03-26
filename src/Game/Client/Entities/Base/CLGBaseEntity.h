@@ -24,21 +24,6 @@ class CLGBaseEntity : public IClientGameEntity {
 public:
     /**
     *
-    *   Function pointers for actual callbacks.
-    *
-    **/
-    using ThinkCallbackPointer      = void(CLGBaseEntity::*)(void);
-    using UseCallbackPointer        = void(CLGBaseEntity::*)(CLGBaseEntity* other, CLGBaseEntity* activator);
-    using TouchCallbackPointer      = void(CLGBaseEntity::*)(CLGBaseEntity* self, CLGBaseEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-    using BlockedCallbackPointer    = void(CLGBaseEntity::*)(CLGBaseEntity* other);
-    using TakeDamageCallbackPointer = void(CLGBaseEntity::*)(CLGBaseEntity* other, float kick, int32_t damage);
-    using DieCallbackPointer        = void(CLGBaseEntity::*)(CLGBaseEntity* inflictor, CLGBaseEntity* attacker, int damage, const vec3_t& point);
-
-
-
-
-    /**
-    *
     *   Constructor/Destructor AND TypeInfo related.
     *
     **/
@@ -118,6 +103,11 @@ public:
     }
 
     /**
+    *   @returen True if the entity is still in the current frame.
+    **/
+    //virtual const qboolean  IsInUse() final;
+
+    /**
     *   @return A string containing the entity's classname.
     **/
     virtual const std::string GetClassname() final;
@@ -178,21 +168,6 @@ public:
     *           on us during the current server game frame we're processing.
     **/
     void Remove() override {};
-
-
-
-    /**
-    *
-    *   [Stub Implementation]
-    *   Callback Functions to Dispatch.
-    *
-    *
-    **/
-    virtual void DispatchUseCallback(ClassEntity* other, ClassEntity* activator) {};
-    virtual void DispatchDieCallback(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) {};
-    virtual void DispatchBlockedCallback(ClassEntity* other) {};
-    virtual void DispatchTouchCallback(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) {};
-    virtual void DispatchTakeDamageCallback(ClassEntity* other, float kick, int32_t damage) {};
 
 
 
@@ -393,7 +368,13 @@ public:
     /**
     *   @brief Is/Set: In Use.
     **/
-    virtual qboolean        IsInUse() { return 0; };
+    virtual const qboolean        IsInUse() override { //return 0; };
+        if (podEntity) {
+            return cl->frame.number == podEntity->serverFrame;
+        } else {
+            false;
+        }
+    }
     virtual void            SetInUse(const qboolean inUse) {};
 
     /**
@@ -681,6 +662,64 @@ private:
 public:
     /**
     *
+    *
+    *   Dispatch Callback Functionalities.
+    *
+    *
+    **/
+    //! 'Think' Callback Pointer. (Gets dispatched by an entity's Think method based on nextThinkTime.)
+    using ThinkCallbackPointer      = void(IClientGameEntity::*)(void);
+    //! 'Use' Callback Pointer.
+    using UseCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* other, IClientGameEntity* activator);
+    //! 'Touch' Callback Pointer.
+    using TouchCallbackPointer      = void(IClientGameEntity::*)(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    //! 'Blocked' Callback Pointer.
+    using BlockedCallbackPointer    = void(IClientGameEntity::*)(IClientGameEntity* other);
+    //! 'Damage' Callback Pointer.
+    using TakeDamageCallbackPointer = void(IClientGameEntity::*)(IClientGameEntity* other, float kick, int32_t damage);
+    //! 'Die' Callback Pointer.
+    using DieCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
+
+    /**
+    *   @brief  Dispatches 'Use' callback.
+    *   @param  other:      
+    *   @param  activator:  
+    **/
+    void DispatchUseCallback(ClassEntity* other, ClassEntity* activator);
+    /**
+    *   @brief  Dispatches 'Use' callback.
+    *   @param  inflictor:  
+    *   @param  attacker:   
+    *   @param  damage:     
+    *   @param  pointer:    
+    **/
+    void DispatchDieCallback(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point);
+    /**
+    *   @brief  Dispatches 'Block' callback.
+    *   @param  other:  
+    **/
+    void DispatchBlockedCallback(ClassEntity* other);
+    /**
+    *   @brief  Dispatches 'Block' callback.
+    *   @param  self:   
+    *   @param  other:  
+    *   @param  plane:  
+    *   @param  surf:   
+    **/
+    void DispatchTouchCallback(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    /**
+    *   @brief  Dispatches 'TakeDamage' callback.
+    *   @param  other:
+    *   @param  kick:
+    *   @param  damage:
+    **/
+    void DispatchTakeDamageCallback(ClassEntity* other, float kick, int32_t damage);
+
+
+
+public:
+    /**
+    *
     *   Ugly, but effective callback SET methods.
     *
     **/
@@ -695,7 +734,7 @@ public:
     /**
     *   @return True if it has a 'Think' callback set. False if it is nullptr.
     **/
-    inline qboolean HasThinkCallback() {
+    inline const qboolean HasThinkCallback() {
         return (thinkFunction != nullptr ? true : false);
     }
 
@@ -706,6 +745,12 @@ public:
     inline void SetUseCallback(function f)
     {
         useFunction = static_cast<UseCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'Use' callback set. False if it is nullptr.
+    **/
+    inline const qboolean HasUseCallback() {
+        return (useFunction != nullptr ? true : false);
     }
 
     /**
@@ -719,7 +764,7 @@ public:
     /**
     *   @return True if it has a 'Touch' callback set. False if it is nullptr.
     **/
-    inline qboolean HasTouchCallback() {
+    inline const qboolean HasTouchCallback() {
         return (touchFunction != nullptr ? true : false);
     }
 
@@ -730,6 +775,12 @@ public:
     inline void SetBlockedCallback(function f)
     {
         blockedFunction = static_cast<BlockedCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'Blocked' callback set. False if it is nullptr.
+    **/
+    inline const qboolean HasBlockedCallback() {
+        return (takeDamageFunction != nullptr ? true : false);
     }
 
     /**
@@ -743,7 +794,7 @@ public:
     /**
     *   @return True if it has a 'TakeDamage' callback set. False if it is nullptr.
     **/
-    inline qboolean HasTakeDamageCallback() {
+    inline const qboolean HasTakeDamageCallback() {
         return (takeDamageFunction != nullptr ? true : false);
     }
 
@@ -754,6 +805,12 @@ public:
     inline void SetDieCallback(function f)
     {
         dieFunction = static_cast<DieCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'Die' callback set. False if it is nullptr.
+    **/
+    inline const qboolean HasDieCallback() {
+        return (dieFunction != nullptr ? true : false);
     }
 
 

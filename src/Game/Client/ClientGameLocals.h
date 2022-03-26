@@ -98,7 +98,7 @@ struct CLGTrace {
     // The contents mask of the impacted brush, or 0.
     int32_t contents = 0;
     // The impacted entity, or nullptr.
-    ClientEntity *ent = nullptr;
+    IClientGameEntity *ent = nullptr;
 };
 
 

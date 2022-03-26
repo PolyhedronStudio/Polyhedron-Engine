@@ -71,6 +71,7 @@ public:
     **/
     IClientGameEntity *InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force = true);
 
+    inline CLGEntityVector *GetClassEntities() { return &classEntities; };
 private:
     //! First 2048 are reserved for server side entities.
     CLGEntityVector classEntities;

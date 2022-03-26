@@ -126,6 +126,19 @@ struct ClientEntity {
 
 
 /**
+*   @brief  Contains types of 'solid' 
+*           to use up the remaining slots for their own custom needs.
+**/
+struct Solid {
+    static constexpr uint32_t Not           = 0;    // No interaction with other objects.
+    static constexpr uint32_t Trigger       = 1;    // Only touch when inside, after moving.
+    static constexpr uint32_t BoundingBox   = 2;    // Touch on edge.
+    static constexpr uint32_t OctagonBox    = 3;    // Touch on edge, although it has 20, not 10.
+    static constexpr uint32_t BSP           = 4;    // Bsp clip, touch on edge.
+};
+
+
+/**
 *   @details    EntityState->renderEffects
 * 
 *               The render effects are useful for tweaking the way how an entity is displayed.

@@ -70,6 +70,9 @@ public:
     **/
     void RunFrame();
 
+    inline CLGEntityVector* GetClassEntities() {
+        return classEntityList.GetClassEntities();
+    }
 //! Entity Parsing utilities.
 private:
     /**

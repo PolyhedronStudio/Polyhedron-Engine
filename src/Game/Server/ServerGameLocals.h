@@ -179,25 +179,7 @@ struct EntitySpawnFlags {
     static constexpr int32_t NotCoop = 0x00001000;
 };
 
-/**
-*   @brief Entity Flags. These are set in-game during gameplay.
-**/
-struct EntityFlags {
-    static constexpr int32_t Fly            = 1;
-    static constexpr int32_t Swim           = 2;        //! Implied immunity to drowining
-    static constexpr int32_t ImmuneLaser    = 4;
-    static constexpr int32_t InWater        = 8;
-    static constexpr int32_t GodMode        = 16;
-    static constexpr int32_t NoTarget       = 32;
-    static constexpr int32_t ImmuneToSlime  = 64;
-    static constexpr int32_t ImmuneToLava   = 128;
-    static constexpr int32_t PartiallyOnGround = 256;   //! Not all corners are valid
-    static constexpr int32_t WaterJump      = 512;      //! Player jumping out of water
-    static constexpr int32_t TeamSlave      = 1024;     //! Not the first on the team
-    static constexpr int32_t NoKnockBack    = 2048;
-    static constexpr int32_t PowerArmor     = 4096;     //! Power armor (if any) is active
-    static constexpr int32_t Respawn        = 0x80000000;   //! Used for item respawning
-};
+
 
 static constexpr int32_t MELEE_DISTANCE = 80;
 static constexpr int32_t BODY_QUEUE_SIZE = 8;
@@ -300,36 +282,7 @@ struct PlayerNoiseType {
 };
 
 
-/**
-*   Entity Move Types.
-**/
-struct MoveType {
-    //! An entity that never moves at all.
-    static constexpr int32_t None       = 0;
-    //! Spectator movement allows for flying around like noclip, but it does clip to BSP.
-    static constexpr int32_t Spectator  = 1;
-    //! Similar to spectator movement however it does not clip.
-    static constexpr int32_t NoClip     = 2;
-    //! No clip to world, push on box contact.
-    static constexpr int32_t Push = 3;
-    //! No clip to world, stops on box contact
-    static constexpr int32_t Stop = 4;
 
-    //! This entity makes use of the player movement code. 
-    static constexpr int32_t PlayerMove = 10;    // Gravity. (Player Movement entities use this.)
-    //! This entity makes use of the step movement physics.
-    static constexpr int32_t Step       = 11;    // Fixed distance per frame, impacted by gravity, supports special edge handling.
-    //! Similar to step movement however it does not care for gravity.
-    static constexpr int32_t Fly        = 12;
-    //! Similar to step fly movement, but with an extra size bounding box for hitting other entities. It's for missiles after all.
-    static constexpr int32_t FlyMissile = 13;
-    //! Toss is used for when dropping items, dying entities etc. It simply does basic velocity and gravity movement.
-    static constexpr int32_t Toss       = 14;
-    //! Similar to Toss but doesn't halt to a stop when having landed on-ground.
-    static constexpr int32_t TossSlide  = 15;
-    //! Similar to Toss but bounces back from the impacted surface instead.
-    static constexpr int32_t Bounce     = 16;
-};
 
 
 /**

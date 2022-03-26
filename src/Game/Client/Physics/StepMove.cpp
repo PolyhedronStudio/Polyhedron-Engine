@@ -19,7 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Core.
 #include "../ClientGameLocals.h"
-#include "../Entities.h"
+#include "../Main.h"
+
+#include "../ClientGameExports.h"
+#include "../Exports/Prediction.h"
+
+// Base Entity.
+#include "../Entities/Base/CLGBaseEntity.h"
+
+// ClassEntity list.
+#include "../Entities/ClassEntityList.h"
 //#include "../Utilities.h"
 
 // UP-STEP height in "Quake Units". This is used commonly all over for each stepmove entity.
@@ -27,6 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // value for each entity type.
 #define STEPSIZE    18
 
+extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
 /*
 =============
 CLG_StepMove_CheckBottom
@@ -57,7 +67,7 @@ qboolean CLG_StepMove_CheckBottom(CLGBaseEntity* ent)
         for (y = 0; y <= 1; y++) {
             start[0] = x ? maxs[0] : mins[0];
             start[1] = y ? maxs[1] : mins[1];
-            if (gi.PointContents(start) != BrushContents::Solid)
+            if (clge->prediction->PM_PointContents(start) != BrushContents::Solid)
                 goto realcheck;
         }
 
@@ -201,7 +211,7 @@ qboolean CLG_MoveStep(CLGBaseEntity* ent, vec3_t move, qboolean relink)
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
-                    contents = gi.PointContents(test);
+                    contents = clge->prediction->PM_PointContents(test);
                     if (contents & BrushContentsMask::Liquid)
                         return false;
                 }
@@ -213,7 +223,7 @@ qboolean CLG_MoveStep(CLGBaseEntity* ent, vec3_t move, qboolean relink)
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
-                    contents = gi.PointContents(test);
+                    contents = clge->prediction->PM_PointContents(test);
                     if (!(contents & BrushContentsMask::Liquid))
                         return false;
                 }
@@ -267,7 +277,7 @@ qboolean CLG_MoveStep(CLGBaseEntity* ent, vec3_t move, qboolean relink)
         test[0] = trace.endPosition[0];
         test[1] = trace.endPosition[1];
         test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
-        contents = gi.PointContents(test);
+        contents = clge->prediction->PM_PointContents(test);
 
         if (contents & BrushContentsMask::Liquid)
             return false;
@@ -330,14 +340,14 @@ M_ChangeYaw
 
 ===============
 */
-static void CLG_CalculateYawAngle (Entity* ent)
+static void CLG_CalculateYawAngle (PODEntity* ent)
 {
     float   ideal;
     float   current;
     float   move;
     float   speed;
 
-    current = AngleMod(ent->state.angles[vec3_t::Yaw]);
+    current = ent->current.angles[vec3_t::Yaw]; //AngleMod(ent->state.angles[vec3_t::Yaw]);
 
     if (ent->classEntity)
         ideal = ent->classEntity->GetIdealYawAngle();
@@ -400,7 +410,7 @@ qboolean SV_StepDirection(CLGBaseEntity* ent, float yaw, float dist)
 
     //    VectorCopy(ent->state.origin, oldorigin);
     if (CLG_MoveStep(ent, move, false)) {
-        delta = ent->GetPODEntity()->state.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
+        delta = ent->GetPODEntity()->current.angles[vec3_t::Yaw]; //ent->GetPODEntity()->state.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
             ent->SetOrigin(oldOrigin);
