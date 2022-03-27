@@ -39,32 +39,32 @@ size_t playertouchmax;
 
 void SV_PreRunCmd(void)
 {
-    //size_t max = (00 + 512 + 7) & ~7;
-    //if (max > playertouchmax)
-    //{
-    //    playertouchmax = max;
-    //    Z_Free(playertouch);
-    //    playertouch = (byte*)Z_Malloc((playertouchmax >> 3) + 1); // CPP: Cast
-    //}
-    //memset(playertouch, 0, playertouchmax >> 3);
-    std::size_t max = (ge->numberOfEntities + 512 + 7) & ~7;
-    if (max > playertouchmax) {
+    size_t max = (00 + 512 + 7) & ~7;
+    if (max > playertouchmax)
+    {
         playertouchmax = max;
-        delete []playertouch;
-        playertouch = new byte[(playertouchmax >>3) + 1];
+        Z_Free(playertouch);
+        playertouch = (byte*)Z_Malloc((playertouchmax >> 3) + 1); // CPP: Cast
     }
-    for (int i = 0; i < playertouchmax; i++) {
-        playertouch[i] = {};
-    }
+    memset(playertouch, 0, playertouchmax >> 3);
+    //std::size_t max = (ge->numberOfEntities + 512 + 7) & ~7;
+    //if (max > playertouchmax) {
+    //    playertouchmax = max;
+    //    delete []playertouch;
+    //    playertouch = new byte[(playertouchmax >>3) + 1];
+    //}
+    //for (int i = 0; i < playertouchmax; i++) {
+    //    playertouch[i] = {};
+    //}
 }
 void SV_RunCmdCleanup(void)
 {
-    delete []playertouch;
-    playertouch = nullptr;
-    playertouchmax = 0;
-    //Z_Free(playertouch);
-    //playertouch = NULL;
+    //delete []playertouch;
+    //playertouch = nullptr;
     //playertouchmax = 0;
+    Z_Free(playertouch);
+    playertouch = NULL;
+    playertouchmax = 0;
 }
 
 /*

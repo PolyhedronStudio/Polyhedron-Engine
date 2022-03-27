@@ -190,7 +190,7 @@ static void CLGPM_Debug(const char* func, const char* fmt, ...) {
         //#define PM_Debug () void(0)
 #endif // PMOVE_DEBUG
 #else
-#define DEBUG_SERVER_PMOVE 0
+#define DEBUG_SERVER_PMOVE 1
 #if DEBUG_SERVER_PMOVE == 1
 static void SVGPM_Debug(const char* func, const char* fmt, ...) {
     char buffer[MAX_STRING_CHARS];
@@ -404,12 +404,12 @@ static bool PM_ImpactPlane(vec3_t * planes, int32_t num_planes, const vec3_t & p
 // Modifies the pml velocity and origin if succesful.
 //===============
 //
-static constexpr float      MIN_STEP_NORMAL = 0.7;      // Can't step up onto very steep slopes.
-static constexpr int32_t    MAX_CLIP_PLANES = 10;        // Maximum amount of planes to clip to.
+static constexpr float      MIN_STEP_NORMAL = 0.7;  // Can't step up onto very steep slopes.
+static constexpr int32_t    MAX_CLIP_PLANES = 20;   // Maximum amount of planes to clip to.
 
 static qboolean PM_StepSlideMove_(void)
 {
-    const int32_t numBumps = MAX_CLIP_PLANES - 1;
+    const int32_t numBumps = MAX_CLIP_PLANES - 12;
     vec3_t planes[MAX_CLIP_PLANES];
     int32_t bump;
 

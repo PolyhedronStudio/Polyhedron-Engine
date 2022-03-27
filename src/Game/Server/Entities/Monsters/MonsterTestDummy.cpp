@@ -51,7 +51,7 @@ void MonsterTestDummy::Precache() {
     Base::Precache();
 
     // Precache test dummy model.
-    SVG_PrecacheModel("models/monsters/testdummy/60fps.iqm");
+    SVG_PrecacheModel("models/monsters/testdummy/testdummy.iqm");
 }
 
 //
@@ -125,7 +125,7 @@ void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
 
-    GetPODEntity()->state.animationStartTime = level.time * 1000;
+    GetPODEntity()->state.animationStartTime = level.time + 1 * FRAMETIME;
     //GetPODEntity()->state.animationFramerate = 60;
 
 }
@@ -209,7 +209,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     // Calculate direction.
     //
     //if (GetHealth() > 0) {
-	   // vec3_t currentMoveAngles = GetAngles();
+    //    vec3_t currentMoveAngles = GetAngles();
 
 	   // // Direction vector between player and other entity.
 	   // vec3_t wishMoveAngles = GetGameworld()->GetClassEntities()[1]->GetOrigin() - GetOrigin();
@@ -225,13 +225,14 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 	   // // Last but not least, move a step ahead.
 	   // SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
+    //    
+    //    // Check for ground.
+    //    SVG_StepMove_CheckGround(this);
     //}
-
-    // Link entity back in.
-    LinkEntity();
-
     // Check for ground.
     SVG_StepMove_CheckGround(this);
+    // Link entity back in.
+    LinkEntity();
 
     // Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
@@ -260,6 +261,14 @@ void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServer
     // Throw some gibs around, true horror oh boy.
     Gameworld* gameworld = GetGameworld();
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);

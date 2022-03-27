@@ -242,45 +242,49 @@ static void CM_InitOctagonBoxHull(void)
         mbrushside_t *brushSide = &octagon_brushsides[i];
         brushSide->plane = &octagon_planes[i * 2 + side];
         brushSide->texinfo = &nulltexinfo;
-        brushSide->texinfo->c.flags = 0;
+//        brushSide->texinfo->c.flags = 0;
 
-
-
-        // Axial Planes
+        
         if (i & 1) {
-            // nodes
+            // Non Axial Planes.
+            // Nodes
             mnode_t *node = &octagon_nodes[i];
             node->plane = &octagon_planes[i * 2 + 1];
             node->children[side] = (mnode_t *)&octagon_emptyleaf;
-            if (i != 5) {
+//            if (i != 5) {
                 node->children[side ^ 1] = &octagon_nodes[i + 1];
-            } else {
-                node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-            }
+//            } else {
+//                node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+//            }
 
-            // plane
+            // Plane
             CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-            plane->type = PLANE_NON_AXIAL;
-            plane->signBits = ( 1 << ( i >> 1 ) );
+            //plane->type = PLANE_NON_AXIAL;
+            //plane->signBits = ( 1 << ( i >> 1 ) );
             plane->normal = vec3_zero();
             plane->normal[i >> 1] = -1;
+            SetPlaneType(plane);
+            SetPlaneSignbits(plane);
         } else {
-            // nodes
+            // Axial Planes.
+            // Node
             mnode_t *node = &octagon_nodes[i];
             node->plane = &octagon_planes[i * 2];
             node->children[side] = (mnode_t *)&octagon_emptyleaf;
-            if (i != 5) {
+            //if (i != 5) {
                 node->children[side ^ 1] = &octagon_nodes[i + 1];
-            } else {
-                node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-            }
+            //} else {
+            //    node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+            //}
 
             // plane
             CollisionPlane *plane = &octagon_planes[i * 2];
-            plane->type = i >> 1;
-            plane->signBits = 0;
+            //plane->type = 3 + i >> 1;
+//            plane->signBits = 0;
             plane->normal = vec3_zero();
             plane->normal[i >> 1] = 1;
+            SetPlaneType(plane);
+            SetPlaneSignbits(plane);
         }
     }
 
@@ -290,9 +294,9 @@ static void CM_InitOctagonBoxHull(void)
 
         // brush sides
         mbrushside_t *brushSide = &octagon_brushsides[i];
-        brushSide->plane = &octagon_planes[i * 2 + side];
+        brushSide->plane = &octagon_planes[i * 2];
         brushSide->texinfo = &nulltexinfo;
-        brushSide->texinfo->c.flags = 0;
+        //brushSide->texinfo->c.flags = 0;
 
         // nodes
         mnode_t *node = &octagon_nodes[i];
@@ -305,10 +309,12 @@ static void CM_InitOctagonBoxHull(void)
         }
 
         // Non Axial Planes
-        CollisionPlane *plane = &octagon_planes[i * 2 + 1];
+        CollisionPlane *plane = &octagon_planes[i * 2];
         plane->type = PLANE_NON_AXIAL;
         plane->normal = oct_dirs[i - 6];
+        //SetPlaneType(plane);
         SetPlaneSignbits(plane);
+        
     }
 }
 
@@ -484,7 +490,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 
     vec3_t axis[3];
     // rotate start and end into the models frame of reference
-    if (headNode != box_headnode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
+    if (headNode != box_headnode && headNode != octagon_headnode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
         AnglesToAxis(angles, axis);
         RotatePoint(p_l, axis);
     }
@@ -972,7 +978,7 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     }
 
     // rotate start and end into the models frame of reference
-    if (headNode != box_headnode &&
+    if ((headNode != box_headnode && headNode != octagon_headnode) &&
         (angles[0] || angles[1] || angles[2])) {
         rotated = true;
     } else {

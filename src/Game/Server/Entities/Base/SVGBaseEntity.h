@@ -187,7 +187,7 @@ public:
     *   @param  activatorOverride:  if nullptr, the entity's own activator is used and if the entity's own activator is nullptr, 
     *                               then this entity itself becomes the activator
     **/
-    virtual void UseTargets( IServerGameEntity* activatorOverride = nullptr );
+    virtual void UseTargets( IServerGameEntity* activatorOverride = nullptr ) override;
 
 
 

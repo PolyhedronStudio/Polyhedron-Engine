@@ -131,7 +131,7 @@ IClientGameEntity *ClassEntityList::InsertAt(int32_t number, IClientGameEntity *
 	}
 
 	// If the index is already occupied...
-	if (classEntities.size() >= number && classEntities[number] != nullptr) {
+	if (classEntities.size() > number && classEntities[number] != nullptr) {
 		// We check if we should delete it, or return a nullptr for failure.
 		if (force) {
 			delete classEntities[number];

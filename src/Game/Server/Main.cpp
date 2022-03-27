@@ -543,24 +543,30 @@ void SVG_RunFrame(void) {
         // Acquire state number.
         int32_t stateNumber = serverEntities[i].state.number;
 
-        // Use an entity handle to safely acquire pointers to the corresponding entity.
-	    SGEntityHandle entityHandle = classEntities[i];
-
-        // Acquire the class entity.
-        IServerGameEntity *classEntity = *entityHandle;
-
-        if (!classEntity || !classEntity->IsInUse()) {
+        // Ensure it is even there.
+        if (classEntities[i] == nullptr) {
             continue;
         }
 
+        // Use an entity handle to safely acquire pointers to the corresponding entity.
+	    SGEntityHandle entityHandle = classEntities[i];
+
+
+        //if (!classEntity || !classEntity->IsInUse()) {
+        if (!(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
+            continue;
+        }
+
+        // Acquire the class entity.
+        IServerGameEntity *classEntity = *entityHandle;
         // Don't go on if it isn't in use.
         //if (!serverEntity->IsInUse())
         //    continue;
 
         // Admer: entity was marked for removal at the previous tick
-        if (classEntity->GetServerFlags() & EntityServerFlags::Remove) {
+        if (*entityHandle && entityHandle && (entityHandle->GetServerFlags() & EntityServerFlags::Remove)) {
             // Free server entity.
-            game.world->FreeServerEntity(classEntity->GetPODEntity());
+            game.world->FreeServerEntity(entityHandle.Get());
 
             // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
             // 
@@ -579,8 +585,8 @@ void SVG_RunFrame(void) {
         classEntity->SetOldOrigin(classEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-	    ClassEntity* groundEntity = *classEntity->GetGroundEntity();
-        if (groundEntity && (groundEntity->GetLinkCount() != classEntity->GetGroundEntityLinkCount())) {
+	    SGEntityHandle groundEntity = classEntity->GetGroundEntity();
+        if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != classEntity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             classEntity->SetGroundEntity(nullptr);
 

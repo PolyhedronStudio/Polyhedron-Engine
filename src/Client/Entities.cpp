@@ -450,7 +450,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
 
-            //MSG_UnpackBoundingBox32(solidEntity->current.solid, entityMins, entityMaxs);
+           // MSG_UnpackBoundingBox32(solidEntity->current.solid, entityMins, entityMaxs);
             
             if (solidEntity->current.solid == Solid::OctagonBox) {
                 headNode = CM_HeadnodeForOctagon(solidEntity->mins, solidEntity->maxs);
@@ -492,7 +492,8 @@ TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs
     }
 
     // Execute trace.
-    CM_BoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask);
+    //CM_BoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask);
+    CM_TransformedBoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask, vec3_zero(), vec3_zero());
 
     // Set trace entity.
     trace.ent = reinterpret_cast<entity_s*>(&cl.solidEntities[0]);

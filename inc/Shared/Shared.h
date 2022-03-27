@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 
 #if HAVE_CONFIG_H
-#include "config.h"
+#include "Shared/Config.h"
 #endif
 
 /***

@@ -72,7 +72,7 @@ void MonsterTestDummy::FrameThink() {
 
 	// Print if we got a valid one.
 	if (clEntity) {
-		Com_DPrint("[clEntity: #%i - svEntity: #%i - Class: %s - Hash: %i] is Thinking\n", clEntity->clientEntityNumber, clEntity->current.number, GetClassname().c_str(), GetHashedClassname());
+	//	Com_DPrint("[clEntity: #%i - svEntity: #%i - Class: %s - Hash: %i] is Thinking\n", clEntity->clientEntityNumber, clEntity->current.number, GetClassname().c_str(), GetHashedClassname());
 	}
 }
 /**

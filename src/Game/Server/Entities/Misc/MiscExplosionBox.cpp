@@ -48,7 +48,7 @@ void MiscExplosionBox::Precache() {
     Base::Precache();
 
     // Precache actual barrel model.
-    SVG_PrecacheModel("models/objects/barrels/tris.md2");
+    SVG_PrecacheModel("models/env/barrels/barrel_red.iqm");
 
     // Precache the debris.
     SVG_PrecacheModel("models/objects/debris1/tris.md2");
@@ -67,7 +67,7 @@ void MiscExplosionBox::Spawn() {
     Base::Spawn();
 
     // Set solid.
-    SetSolid(Solid::BoundingBox);
+    SetSolid(Solid::OctagonBox);
 
     // Set move type.
     SetMoveType(MoveType::TossSlide);
@@ -76,7 +76,7 @@ void MiscExplosionBox::Spawn() {
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     // Set the barrel model, and model index.
-    SetModel("models/objects/barrels/tris.md2");
+    SetModel("models/env/barrels/barrel_red.iqm");
 
     // Set the bounding box.
     SetBoundingBox(
