@@ -244,43 +244,22 @@ static void CM_InitOctagonBoxHull(void)
         brushSide->texinfo = &nulltexinfo;
 //        brushSide->texinfo->c.flags = 0;
 
-        
+        // Nodes
+        mnode_t *node = &octagon_nodes[i];
+        node->plane = &octagon_planes[i * 2];
+        node->children[side] = (mnode_t *)&octagon_emptyleaf;
+        node->children[side ^ 1] = &octagon_nodes[i + 1];
+
         if (i & 1) {
             // Non Axial Planes.
-            // Nodes
-            mnode_t *node = &octagon_nodes[i];
-            node->plane = &octagon_planes[i * 2 + 1];
-            node->children[side] = (mnode_t *)&octagon_emptyleaf;
-//            if (i != 5) {
-                node->children[side ^ 1] = &octagon_nodes[i + 1];
-//            } else {
-//                node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-//            }
-
-            // Plane
             CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-            //plane->type = PLANE_NON_AXIAL;
-            //plane->signBits = ( 1 << ( i >> 1 ) );
             plane->normal = vec3_zero();
             plane->normal[i >> 1] = -1;
-            SetPlaneType(plane);
+            plane->type = 3 + (i >> 1); //SetPlaneType(plane);
             SetPlaneSignbits(plane);
         } else {
             // Axial Planes.
-            // Node
-            mnode_t *node = &octagon_nodes[i];
-            node->plane = &octagon_planes[i * 2];
-            node->children[side] = (mnode_t *)&octagon_emptyleaf;
-            //if (i != 5) {
-                node->children[side ^ 1] = &octagon_nodes[i + 1];
-            //} else {
-            //    node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-            //}
-
-            // plane
             CollisionPlane *plane = &octagon_planes[i * 2];
-            //plane->type = 3 + i >> 1;
-//            plane->signBits = 0;
             plane->normal = vec3_zero();
             plane->normal[i >> 1] = 1;
             SetPlaneType(plane);
@@ -294,7 +273,7 @@ static void CM_InitOctagonBoxHull(void)
 
         // brush sides
         mbrushside_t *brushSide = &octagon_brushsides[i];
-        brushSide->plane = &octagon_planes[i * 2];
+        brushSide->plane = &octagon_planes[i * 2 + side];
         brushSide->texinfo = &nulltexinfo;
         //brushSide->texinfo->c.flags = 0;
 
@@ -309,12 +288,19 @@ static void CM_InitOctagonBoxHull(void)
         }
 
         // Non Axial Planes
-        CollisionPlane *plane = &octagon_planes[i * 2];
-        plane->type = PLANE_NON_AXIAL;
-        plane->normal = oct_dirs[i - 6];
-        //SetPlaneType(plane);
-        SetPlaneSignbits(plane);
-        
+        if (i & 1) {
+            CollisionPlane *plane = &octagon_planes[i * 2 + 1];
+            plane->type = PLANE_NON_AXIAL;
+            plane->normal = oct_dirs[i - 6];
+            //SetPlaneType(plane);
+            SetPlaneSignbits(plane);
+        } else {
+            CollisionPlane *plane = &octagon_planes[i * 2];
+            plane->type = PLANE_NON_AXIAL;
+            plane->normal = oct_dirs[i - 6];
+            //SetPlaneType(plane);
+            SetPlaneSignbits(plane);
+        }
     }
 }
 
@@ -331,8 +317,8 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
     };
 
     trace_cyl_offset = offset;
-    trace_mins = mins;
-    trace_maxs = maxs;
+    trace_mins = mins - offset;
+    trace_maxs = maxs - offset;
 	//VectorCopy( offset, cms->oct_cmodel->cyl_offset );
 	//VectorCopy( size[0], cms->oct_cmodel->mins );
 	//VectorCopy( size[1], cms->oct_cmodel->maxs );
@@ -486,7 +472,12 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
     }
 
     // subtract origin offset
-    vec3_t p_l = p - origin;
+    vec3_t p_l = vec3_zero();
+    if (headNode == octagon_headnode) {
+        p_l = (p - origin) - trace_cyl_offset;
+    } else {
+        p_l = p - origin;
+    } 
 
     vec3_t axis[3];
     // rotate start and end into the models frame of reference
@@ -783,9 +774,10 @@ recheck:
         t2 = PlaneDiff(p2, plane);
         if (trace_ispoint) {
             offset = 0;
+            trace_extents = vec3_zero();
         } else {
            offset = 2048.f;
-           // offset = fabs(trace_extents[0] * plane->normal[0]) +
+           //offset = fabs(trace_extents[0] * plane->normal[0]) +
            //          fabs(trace_extents[1] * plane->normal[1]) +
            //          fabs(trace_extents[2] * plane->normal[2]);
         }
@@ -870,7 +862,7 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
     trace_end = end; // VectorCopy(end, trace_end);
     trace_mins = mins; // VectorCopy(mins, trace_mins);
     trace_maxs = maxs; // VectorCopy(maxs, trace_maxs);
-
+    
     //
     // check for position test special case
     //
@@ -906,36 +898,6 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
         trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
         trace_extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
         trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
-
-        // PH: Q3 - FF Precision. Hopefully...
-        trace_trace->offsets[0] = maxs;//VectorCopy(maxs, trace_trace->offsets[0]);
-
-        trace_trace->offsets[1][0] = maxs[0];
-        trace_trace->offsets[1][1] = mins[1];
-        trace_trace->offsets[1][2] = mins[2];
-
-        trace_trace->offsets[2][0] = mins[0];
-        trace_trace->offsets[2][1] = maxs[1];
-        trace_trace->offsets[2][2] = mins[2];
-
-        trace_trace->offsets[3][0] = maxs[0];
-        trace_trace->offsets[3][1] = maxs[1];
-        trace_trace->offsets[3][2] = mins[2];
-
-        trace_trace->offsets[4][0] = mins[0];
-        trace_trace->offsets[4][1] = mins[1];
-        trace_trace->offsets[4][2] = maxs[2];
-
-        trace_trace->offsets[5][0] = maxs[0];
-        trace_trace->offsets[5][1] = mins[1];
-        trace_trace->offsets[5][2] = maxs[2];
-
-        trace_trace->offsets[6][0] = mins[0];
-        trace_trace->offsets[6][1] = maxs[1];
-        trace_trace->offsets[6][2] = maxs[2];
-
-        trace_trace->offsets[7] = maxs; // VectorCopy(maxs, trace_trace->offsets[7]);
-//        trace_trace->offsets[7] = maxs0;
     }
 
     //
