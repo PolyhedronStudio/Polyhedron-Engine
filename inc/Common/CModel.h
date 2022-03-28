@@ -34,6 +34,28 @@ typedef struct {
 
 // WatIsDeze: Added for cgame dll, it doesn't need these functions.
 #ifndef CGAME_INCLUDE
+    /**
+    *   CollisionModel data.
+    **/
+    struct CollisionModel {;
+        //! Null Texture Info.
+        mtexinfo_t  nullTextureInfo = {};
+
+        //! Null Leaf.
+        mleaf_t nullLeaf = {};
+
+        //! Valid Floods.
+        int32_t floodValid = 0;
+        //! Check Count
+        int32_t checkCount = 0;
+
+        //! No Areas CVar.
+        cvar_t  *map_noareas;
+        //! AllSolid CVar. (Simulate a bug of old, or not.)
+        cvar_t  *map_allsolid_bug;
+    };
+    extern CollisionModel collisionModel;
+
     void        CM_Init(void);
 
     void        CM_FreeMap(cm_t *cm);

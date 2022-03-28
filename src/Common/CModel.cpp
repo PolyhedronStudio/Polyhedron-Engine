@@ -20,45 +20,61 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/Shared.h"
 #include "Common/Bsp.h"
 #include "Common/Cmd.h"
+#include "Common/CVar.h"
 #include "Common/CModel.h"
 #include "Common/Common.h"
-#include "Common/CVar.h"
 #include "Common/Zone.h"
 #include "System/Hunk.h"
 
 /**
 *   CollisionModel data.
 **/
-static struct CollisionModel {;
-    //! Null Texture Info.
-    mtexinfo_t  nullTextureInfo = {};
-
-    //! Null Leaf.
-    mleaf_t nullLeaf = {};
-
-    //! Valid Floods.
-    int32_t floodValid = 0;
-    //! Check Count
-    int32_t checkCount = 0;
-
-    //! No Areas CVar.
-    cvar_t  *map_noareas;
-    //! AllSolid CVar. (Simulate a bug of old, or not.)
-    cvar_t  *map_allsolid_bug;
-} collisionModel;
+CollisionModel collisionModel;
 
 /**
 *   BoxLeaf 'Work'
 **/
-static struct BoxLeafWork {
-
-} boxLeafWork;
+static struct BoxLeafsWork {
+    //! Leaf count.
+    int32_t leafCount = 0;
+    //! Max leaf count.
+    int32_t leafMaximumCount = 0;
+    //! Leaf List.
+    mleaf_t  **leafList = nullptr;
+    //! Mins of Leaf.
+    const float *leafMins = nullptr;
+    //! Maxs of Leaf.
+    const float *leafMaxs = nullptr;
+    //! Top node of Leaf.
+    mnode_t  *leafTopNode = nullptr;
+} boxLeafsWork;
 
 /**
 *   Trace 'Work'
 **/
 static struct TraceWork {
+    //! Offset for octagon cylinder clipping.
+    vec3_t  cylinderOffset = vec3_zero();
 
+    //! Mins/Maxs.
+    vec3_t  mins = vec3_zero();
+    vec3_t  maxs = vec3_zero();
+
+    //! Start/End.
+    vec3_t  start   = vec3_zero();
+    vec3_t  end     = vec3_zero();
+
+    //! Extents.
+    vec3_t  extents = vec3_zero();
+
+    //! Brush/Surface contents.
+    int32_t contents = 0;
+
+    //! Point or Box Trace.
+    qboolean isPoint = false; // Optimized case.
+
+    //! Pointer where to store trace results.
+    TraceResult  *traceResult = nullptr;
 } traceWork;
 
 static void    FloodAreaConnections(cm_t *cm);
@@ -282,7 +298,7 @@ static void CM_InitOctagonBoxHull(void)
         if (i & 1) {
             // Non Axial Planes.
             CollisionPlane *plane = &octagon_planes[i * 2];
-            plane->type = 3 + i >> 1;
+            plane->type = 3 + (i >> 1);
             plane->normal[i >> 1] = -1;
             plane->signBits = (1 << (i >> 1 ));
         } else {
@@ -327,8 +343,6 @@ static void CM_InitOctagonBoxHull(void)
 /**
 *   @brief  Credits go to QFusion Engine of course.
 **/
-static vec3_t   trace_cyl_offset = vec3_zero();
-static vec3_t   trace_mins = vec3_zero(), trace_maxs = vec3_zero();
 mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 	const vec3_t offset = vec3_scale(mins + maxs, 0.5);
     const vec3_t size[2] = {
@@ -336,9 +350,9 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
         maxs - offset
     };
 
-    trace_cyl_offset = offset;
-    trace_mins = mins - offset;
-    trace_maxs = maxs - offset;
+    traceWork.cylinderOffset = offset;
+    traceWork.mins = mins - offset;
+    traceWork.maxs - offset;
 	//VectorCopy( offset, cms->oct_cmodel->cyl_offset );
 	//VectorCopy( size[0], cms->oct_cmodel->mins );
 	//VectorCopy( size[1], cms->oct_cmodel->maxs );
@@ -400,51 +414,48 @@ CM_BoxLeafnums
 Fills in a list of all the leafs touched
 =============
 */
-static int      leaf_count, leaf_maxcount;
-static mleaf_t  **leaf_list;
-static const float    *leaf_mins, *leaf_maxs;
-static mnode_t  *leaf_topnode;
 
 static void CM_BoxLeafs_r(mnode_t *node)
 {
     while (node->plane) {
-        int32_t s = BoxOnPlaneSideFast(leaf_mins, leaf_maxs, node->plane);
+        int32_t s = BoxOnPlaneSideFast(boxLeafsWork.leafMins, boxLeafsWork.leafMaxs, node->plane);
         if (s == 1) {
             node = node->children[0];
         } else if (s == 2) {
             node = node->children[1];
         } else {
             // go down both
-            if (!leaf_topnode) {
-                leaf_topnode = node;
+            if (!boxLeafsWork.leafTopNode) {
+                boxLeafsWork.leafTopNode = node;
             }
             CM_BoxLeafs_r(node->children[0]);
             node = node->children[1];
         }
     }
 
-    if (leaf_count < leaf_maxcount) {
-        leaf_list[leaf_count++] = (mleaf_t *)node;
+    if (boxLeafsWork.leafCount < boxLeafsWork.leafMaximumCount) {
+        boxLeafsWork.leafList[boxLeafsWork.leafCount++] = (mleaf_t *)node;
     }
 }
 
 static int CM_BoxLeafs_headnode(const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize,
                                 mnode_t *headNode, mnode_t **topnode)
 {
-    leaf_list = list;
-    leaf_count = 0;
-    leaf_maxcount = listsize;
-    leaf_mins = mins;
-    leaf_maxs = maxs;
+    boxLeafsWork.leafList   = list;
+    boxLeafsWork.leafCount  = 0;
+    boxLeafsWork.leafMaximumCount = listsize;
+    boxLeafsWork.leafMins   = mins;
+    boxLeafsWork.leafMaxs   = maxs;
 
-    leaf_topnode = NULL;
+    boxLeafsWork.leafTopNode = nullptr;
 
     CM_BoxLeafs_r(headNode);
 
-    if (topnode)
-        *topnode = leaf_topnode;
+    if (topnode) {
+        *topnode = boxLeafsWork.leafTopNode;
+    }
 
-    return leaf_count;
+    return boxLeafsWork.leafCount;
 }
 
 int CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize, mnode_t **topnode)
@@ -494,7 +505,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
     // subtract origin offset
     vec3_t p_l = vec3_zero();
     if (headNode == octagon_headnode) {
-        p_l = (p - origin) - trace_cyl_offset;
+        p_l = (p - origin) - traceWork.cylinderOffset;
     } else {
         p_l = p - origin;
     } 
@@ -523,13 +534,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 //#define DIST_EPSILON    0.125
 static constexpr float DIST_EPSILON = 1.0f / 32.0f;
 
-static vec3_t   trace_start = vec3_zero(), trace_end = vec3_zero();
 
-static vec3_t   trace_extents = vec3_zero();
-
-static TraceResult  *trace_trace;
-static int      trace_contents;
-static qboolean trace_ispoint;      // optimized case
 
 /**
 *   @brief 
@@ -560,7 +565,7 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
         // FIXME: special case for axial
 
-        if (!trace_ispoint) {
+        if (!traceWork.isPoint) {
             // general box case
 
             // push the plane out apropriately for mins/maxs
@@ -694,7 +699,7 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 *   @brief 
 **/
 static void CM_TraceToLeaf(mleaf_t *leaf) {
-    if (!(leaf->contents & trace_contents)) {
+    if (!(leaf->contents & traceWork.contents)) {
         return;
     }
 
@@ -710,13 +715,13 @@ static void CM_TraceToLeaf(mleaf_t *leaf) {
         
         b->checkcount = collisionModel.checkCount;
 
-        if (!(b->contents & trace_contents)) {
+        if (!(b->contents & traceWork.contents)) {
             continue;
         }
         
-        CM_ClipBoxToBrush(trace_mins, trace_maxs, trace_start, trace_end, trace_trace, b);
+        CM_ClipBoxToBrush(traceWork.mins, traceWork.maxs, traceWork.start, traceWork.end, traceWork.traceResult, b);
         
-        if (!trace_trace->fraction) {
+        if (!traceWork.traceResult->fraction) {
             return;
         }
     }
@@ -728,7 +733,7 @@ static void CM_TraceToLeaf(mleaf_t *leaf) {
 **/
 static void CM_TestInLeaf(mleaf_t *leaf)
 {
-    if (!(leaf->contents & trace_contents)) {
+    if (!(leaf->contents & traceWork.contents)) {
         return;
     }
     
@@ -744,13 +749,13 @@ static void CM_TestInLeaf(mleaf_t *leaf)
         
         b->checkcount = collisionModel.checkCount;
 
-        if (!(b->contents & trace_contents)) {
+        if (!(b->contents & traceWork.contents)) {
             continue;
         }
         
-        CM_TestBoxInBrush(trace_mins, trace_maxs, trace_start, trace_trace, b);
+        CM_TestBoxInBrush(traceWork.mins, traceWork.maxs, traceWork.start, traceWork.traceResult, b);
         
-        if (!trace_trace->fraction) {
+        if (!traceWork.traceResult->fraction) {
             return;
         }
     }
@@ -769,7 +774,7 @@ static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec
     int         side;
     float       midf;
 
-    if (trace_trace->fraction <= p1f) {
+    if (traceWork.traceResult->fraction <= p1f) {
         return;     // already hit something nearer
     }
 
@@ -788,13 +793,13 @@ recheck:
     if (plane->type < 3) {
         t1 = p1[plane->type] - plane->dist;
         t2 = p2[plane->type] - plane->dist;
-        offset = trace_extents[plane->type];
+        offset = traceWork.extents[plane->type];
     } else {
         t1 = PlaneDiff(p1, plane);
         t2 = PlaneDiff(p2, plane);
-        if (trace_ispoint) {
+        if (traceWork.isPoint) {
             offset = 0;
-            trace_extents = vec3_zero();
+            traceWork.extents = vec3_zero();
         } else {
            offset = 2048.f;
            //offset = fabs(trace_extents[0] * plane->normal[0]) +
@@ -865,23 +870,26 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                  const vec3_t &mins, const vec3_t &maxs,
                  mnode_t *headNode, int brushmask)
 {
-    collisionModel.checkCount++;       // for multi-check avoidance
+    // For multi-check avoidance.
+    collisionModel.checkCount++;
 
-    // fill in a default trace
-    trace_trace = trace;
-    memset(trace_trace, 0, sizeof(*trace_trace));
-    trace_trace->fraction = 1;
-    trace_trace->surface = &(collisionModel.nullTextureInfo.c);
+    // Reset and fill in a default trace.
+    traceWork.traceResult = trace;
+    *traceWork.traceResult = {
+        .fraction = 1,
+        .surface = &(collisionModel.nullTextureInfo.c)
+    };
 
+    // Need a headNode to work with or bail out.
     if (!headNode) {
         return;
     }
 
-    trace_contents = brushmask;
-    trace_start = start; //VectorCopy(start, trace_start);
-    trace_end = end; // VectorCopy(end, trace_end);
-    trace_mins = mins; // VectorCopy(mins, trace_mins);
-    trace_maxs = maxs; // VectorCopy(maxs, trace_maxs);
+    traceWork.contents = brushmask;
+    traceWork.start = start;
+    traceWork.end   = end;
+    traceWork.mins  = mins;
+    traceWork.maxs  = maxs;
     
     //
     // check for position test special case
@@ -898,26 +906,25 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
         int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, NULL);
         for (int32_t i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
-            if (trace_trace->allSolid) {
+            if (traceWork.traceResult->allSolid) {
                 break;
             }
         }
-        trace_trace->endPosition = start; //VectorCopy(start, trace_trace->endPosition);
+        traceWork.traceResult->endPosition = start; //VectorCopy(start, trace_trace->endPosition);
         return;
     }
 
     //
     // check for point special case
     //
-    if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0
-        && maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0) {
-            trace_ispoint = true;
-            trace_extents = vec3_zero();// VectorClear(trace_extents);
+    if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0 && maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0) {
+    traceWork.isPoint = true;
+    traceWork.extents = vec3_zero();
     } else {
-        trace_ispoint = false;
-        trace_extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
-        trace_extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
-        trace_extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
+        traceWork.isPoint = false;
+        traceWork.extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
+        traceWork.extents[1] = -mins[1] > maxs[1] ? -mins[1] : maxs[1];
+        traceWork.extents[2] = -mins[2] > maxs[2] ? -mins[2] : maxs[2];
     }
 
     //
@@ -925,10 +932,10 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
     //
     CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
-    if (trace_trace->fraction == 1) {
-        trace_trace->endPosition = end;
+    if (traceWork.traceResult->fraction == 1) {
+        traceWork.traceResult->endPosition = end;
     } else {
-        trace_trace->endPosition = vec3_mix(start, end, trace_trace->fraction);
+        traceWork.traceResult->endPosition = vec3_mix(start, end, traceWork.traceResult->fraction);
     }
 }
 
@@ -950,8 +957,8 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     if (headNode == octagon_headnode) {
         // 
         // subtract origin offset
-        start_l = (start - origin) - trace_cyl_offset;
-        end_l   = (end - origin) - trace_cyl_offset;
+        start_l = (start - origin) - traceWork.cylinderOffset;
+        end_l   = (end - origin) - traceWork.cylinderOffset;
     }
     else {
         // subtract origin offset

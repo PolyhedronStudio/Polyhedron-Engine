@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/Shared.h"
 #include "Shared/List.h"
 #include "Common/CVar.h"
+#include "Common/CModel.h"
 #include "Common/Cmd.h"
 #include "Common/Common.h"
 #include "Common/Files.h"
@@ -31,7 +32,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/MDFour.h"
 #include "System/Hunk.h"
 
-extern mtexinfo_t nulltexinfo;
+//extern mtexinfo_t nulltexinfo;
+extern CollisionModel collisionModel;
 
 static cvar_t *map_visibility_patch;
 
@@ -211,7 +213,7 @@ LOAD(BrushSides)
         out->plane = bsp->planes + planenum;
         texinfo = LittleShort(in->texinfo);
         if (texinfo == (uint16_t)-1) {
-            out->texinfo = &nulltexinfo;
+            out->texinfo = &collisionModel.nullTextureInfo;
         } else {
             if (texinfo >= bsp->numtexinfo) {
                 DEBUG("bad texinfo");
@@ -244,7 +246,7 @@ LOAD_EXT(BrushSides) {
         out->plane = bsp->planes + planenum;
         texinfo = LittleLong(in->texinfo);
         if (texinfo == (uint32_t)-1) {
-            out->texinfo = &nulltexinfo;
+            out->texinfo = &collisionModel.nullTextureInfo;
         }
         else {
             if (texinfo >= bsp->numtexinfo) {
