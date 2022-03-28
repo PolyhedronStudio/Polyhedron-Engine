@@ -292,7 +292,7 @@ int SVG_FlyMove(IServerGameEntity *ent, float time, int mask)
     float       time_left;
     int         Blocked;
 
-    numbumps = MAX_CLIP_PLANES - 1;
+    numbumps = MAX_CLIP_PLANES - 6;
 
     Blocked = 0;
     original_velocity = ent->GetVelocity();

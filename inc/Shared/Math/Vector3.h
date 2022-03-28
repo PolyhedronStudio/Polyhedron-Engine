@@ -908,6 +908,7 @@ vec_t VectorNormalize(vec3_t &v);        // returns vector length
 vec_t VectorNormalize2(const vec3_t& v, vec3_t& out);
 vec_t VectorNormalize2(const vec3_t& v, vec_t *out);
 void ClearBounds(vec3_t& mins, vec3_t& maxs);
+bool BoundsOverlap( const vec3_t &minsA, const vec3_t &maxsA, const vec3_t &minsB, const vec3_t &maxsB );
 void AddPointToBounds(const vec3_t& v, vec3_t& mins, vec3_t& maxs);
 vec_t RadiusFromBounds(const vec3_t& mins, const vec3_t& maxs);
 void UnionBounds(vec3_t* a, vec3_t* b, vec3_t* c);

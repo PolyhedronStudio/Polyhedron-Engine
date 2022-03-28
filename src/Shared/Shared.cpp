@@ -125,17 +125,26 @@ vec_t VectorNormalize2(const vec3_t& v, vec_t *out)
 
 }
 
-//
-//===============
-// ClearBounds
-// 
-// Clears the Min and Max bounds pointers. (Sets it to the largest around.
-// so it can later on add points to it if < ... etc.)
-//===============
-//
+/**
+*   @brief  Clears the Min and Max bounds pointers. (Sets it to the largest around.
+*           so it can later on add points to it if < ... etc.)
+**/
 void ClearBounds(vec3_t& mins, vec3_t& maxs) {
     mins.xyz[0] = mins.xyz[1] = mins.xyz[2] = 99999;
     maxs.xyz[0] = maxs.xyz[1] = maxs.xyz[2] = -99999;
+}
+
+/**
+*   @return True if the bounds(A and B) overlap each other.
+**/
+bool BoundsOverlap( const vec3_t &minsA, const vec3_t &maxsA, const vec3_t &minsB, const vec3_t &maxsB ) {
+	return ( minsA[0] <= maxsB[0] && 
+            minsA[1] <= maxsB[1] && 
+            minsA[2] <= maxsB[2] &&
+		    maxsA[0] >= minsB[0] && 
+            maxsA[1] >= minsB[1] && 
+            maxsA[2] >= minsB[2] 
+    );
 }
 
 //

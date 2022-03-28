@@ -53,28 +53,42 @@ static struct BoxLeafsWork {
 *   Trace 'Work'
 **/
 static struct TraceWork {
+    //! Pointer where to store trace results.
+    TraceResult  *traceResult = nullptr;
+
+    //! Real Fraction used for testing.
+    float realFraction = 0.f;
+
+    //! Brush/Surface contents.
+    int32_t contents = 0;
+    //! Trace checkCount.
+    int32_t checkCount = 0;
+
+    //! Point or Box Trace.
+    qboolean isPoint = false; // Optimized case.
+
     //! Offset for octagon cylinder clipping.
     vec3_t  cylinderOffset = vec3_zero();
 
     //! Mins/Maxs.
     vec3_t  mins = vec3_zero();
     vec3_t  maxs = vec3_zero();
+    //! Absolute Mins/Maxs.
+    vec3_t absMins = vec3_zero();
+    vec3_t absMaxs = vec3_zero();
 
     //! Start/End.
     vec3_t  start   = vec3_zero();
     vec3_t  end     = vec3_zero();
 
+    //! Start/End - Mins/Maxs
+    vec3_t startMins    = vec3_zero();
+    vec3_t startMaxs    = vec3_zero();
+    vec3_t endMins      = vec3_zero();
+    vec3_t endMaxs      = vec3_zero();
+
     //! Extents.
     vec3_t  extents = vec3_zero();
-
-    //! Brush/Surface contents.
-    int32_t contents = 0;
-
-    //! Point or Box Trace.
-    qboolean isPoint = false; // Optimized case.
-
-    //! Pointer where to store trace results.
-    TraceResult  *traceResult = nullptr;
 } traceWork;
 
 static void    FloodAreaConnections(cm_t *cm);
@@ -184,14 +198,14 @@ static void CM_InitBoxHull(void)
     box_leafbrush = &box_brush;
 
     for (int32_t i = 0; i < 6; i++) {
-        int32_t side = i & 1;
+        int32_t side = (i & 1);
 
-        // brush sides
+        // Setup Brush Sides.
         mbrushside_t *brushSide = &box_brushsides[i];
         brushSide->plane = &box_planes[i * 2 + side];
         brushSide->texinfo = &collisionModel.nullTextureInfo;
 
-        // nodes
+        // Setup Box Nodes.
         mnode_t *node = &box_nodes[i];
         node->plane = &box_planes[i * 2];
         node->children[side] = (mnode_t *)&box_emptyleaf;
@@ -201,18 +215,17 @@ static void CM_InitBoxHull(void)
             node->children[side ^ 1] = (mnode_t *)&box_leaf;
         }
 
-        // planes
+        // Plane A.
         CollisionPlane *plane = &box_planes[i * 2];
-        plane->type = i >> 1;
-        plane->signBits = 0;
-        plane->normal = vec3_zero();
-        plane->normal[i >> 1] = 1;
+        plane = &box_planes[i * 2];
+        plane->type = (i >> 1);
+        plane->normal[(i >> 1)] = 1;
 
+        // Plane B.
         plane = &box_planes[i * 2 + 1];
         plane->type = 3 + (i >> 1);
-        plane->signBits = 0;
-        plane->normal = vec3_zero();
-        plane->normal[i >> 1] = -1;
+        plane->signBits = (1 << (i >> 1));
+        plane->normal[(i >> 1)] = -1;
     }
 }
 
@@ -290,26 +303,53 @@ static void CM_InitOctagonBoxHull(void)
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
-        if (i != 5) {
-            node->children[side ^ 1] = &octagon_nodes[i + 1];
-        } else {
-            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-        }
 
-        if (i & 1) {
-            // Non Axial Planes.
-            CollisionPlane *plane = &octagon_planes[i * 2];
-            plane->type = 3 + (i >> 1);
-            plane->normal[i >> 1] = -1;
-            plane->signBits = (1 << (i >> 1 ));
-        } else {
-            // Axial Planes.
-            CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-            plane->type = i >> 1;
-            plane->normal[ i >> 1] = 1;
-            plane->signBits = 0;
-            SetPlaneSignbits(plane);
+        node->children[side ^ 1] = &octagon_nodes[i + 1];
+
+        // Plane A.
+        if ((i & 1)) {
+        CollisionPlane *plane = &box_planes[i * 2];
+        plane = &box_planes[i * 2];
+        plane->type = (i >> 1);
+        plane->normal[(i >> 1)] = 1;
+        }else{
+        // Plane B.
+        CollisionPlane *plane = &box_planes[i * 2 + 1];
+        plane->type = 3 + (i >> 1);
+        plane->signBits = (1 << (i >> 1));
+        plane->normal[(i >> 1)] = -1;
         }
+        //if ((i & 1)) {
+        //    CollisionPlane *plane = &octagon_planes[i * 2];
+        //    plane->type = PLANE_NON_AXIAL;
+        //    plane->normal[(i >> 1)] = -1;
+        //    plane->signBits = (1 << (i >> 1));
+        //} else {
+        //    CollisionPlane *plane = &octagon_planes[i * 2 + 1];
+        //    plane->type = (i >> 1);
+        //    plane->normal[(i >> 1)] = 1;
+        //    plane->signBits = 0;
+        //}
+        //if (i != 5) {
+        //    node->children[side ^ 1] = &octagon_nodes[i + 1];
+        //} else {
+        //    node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+        //}
+
+        //if (i & 1) {
+        //    // Non Axial Planes.
+        //    CollisionPlane *plane = &octagon_planes[i * 2];
+        //    plane->type = 3 + (i >> 1);
+        //    plane->normal[i >> 1] = -1;
+        //    plane->signBits = (1 << (i >> 1 ));
+        //} else {
+        //    // Axial Planes.
+        //    CollisionPlane *plane = &octagon_planes[i * 2 + 1];
+        //    plane->type = i >> 1;
+        //    plane->normal[ i >> 1] = 1;
+        //    plane->signBits = 0;
+        //    SetPlaneSignbits(plane);
+        //}
     }
 
     const vec3_t oct_dirs[4] = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
@@ -325,18 +365,46 @@ static void CM_InitOctagonBoxHull(void)
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
-        //if (i != 9) {
-            node->children[side ^ 1] = &octagon_nodes[i + 1];
-        //} else {
-         //   node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-      //  }
 
-        // Non Axial Planes
-        CollisionPlane *plane = &octagon_planes[i * 2];
+        
+        if (i != 9) {
+            node->children[side ^ 1] = &octagon_nodes[i + 1];
+        } else {
+            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+        }
+
+        CollisionPlane *plane = &octagon_planes[i * 2 + side];
+        //plane->type = PLANE_NON_AXIAL;
+        //plane->signBits = ( 1 << ( i >> 1 ) );
+        //plane->normal = vec3_zero();
+        //plane->normal[i >> 1] = -1;
+        //plane = &octagon_planes[i * 2];
+//        plane->type = (i >> 1);
         plane->type = PLANE_NON_AXIAL;
-        plane->normal = oct_dirs[i - 6];
+        plane->normal= oct_dirs[i - 6];
+        if ((i & 1)) {
+            plane->signBits = 3 + (i >> 1);
+        }
+//        SetPlaneSignbits(plane);
+
+    //} else {
+        //plane = &box_planes[i * 2 + 1];
         //plane->type = 3 + (i >> 1);
-        SetPlaneSignbits(plane);
+        //plane->signBits = (1 << (i >> 1));
+        //plane->normal[(i >> 1)] = -1;
+
+        //  //if (i != 9) {
+      //      node->children[side ^ 1] = &octagon_nodes[i + 1];
+      //  //} else {
+      //   //   node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+      ////  }
+
+      //  // Non Axial Planes
+      //  CollisionPlane *plane = &octagon_planes[i * 2];
+      //  plane->type = PLANE_NON_AXIAL;
+      //  plane->normal = oct_dirs[i - 6];
+      //  //plane->type = 3 + (i >> 1);
+      //  SetPlaneSignbits(plane);
  
     }
 }
@@ -491,52 +559,101 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
         return;
     }
     
-    qboolean getout = false;
-    qboolean startout = false;
+    bool getOut = false;
+    bool startOut = false;
 
-    vec3_t offset = vec3_zero();
     float dist = 0.f;
     float fraction = 0.f;
 
-    float enterFraction = -1.f;
+    float enterFractionA = -1.f;
+    float enterFractionB = -1.f;
     float leaveFraction = 1.f;
 
+    vec3_t offset = vec3_zero();
+
     CollisionPlane    *clipPlane = nullptr;
-    mbrushside_t *leadside = nullptr;
+    mbrushside_t *leadSide = nullptr;
     mbrushside_t *side = brush->firstbrushside;
 
     for (int32_t i = 0; i < brush->numsides; i++, side++) {
         CollisionPlane *plane = side->plane;
 
+        float d1 = 0.f;
+        float d2 = 0.f;
+
         // FIXME: special case for axial
+		// push the plane out apropriately for mins/maxs
+		if( plane->type < 3 ) {
+			d1 = traceWork.startMins[plane->type] - plane->dist;
+			d2 = traceWork.endMins[plane->type] - plane->dist;
+		} else {
+			switch( plane->signBits ) {
+				case 0:
+					d1 = plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMins[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMins[0] + plane->normal[1] * traceWork.endMins[1] + plane->normal[2] * traceWork.endMins[2] - plane->dist;
+					break;
+				case 1:
+					d1 = plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMins[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMaxs[0] + plane->normal[1] * traceWork.endMins[1] + plane->normal[2] * traceWork.endMins[2] - plane->dist;
+					break;
+				case 2:
+					d1 = plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMins[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMins[0] + plane->normal[1] * traceWork.endMaxs[1] + plane->normal[2] * traceWork.endMins[2] - plane->dist;
+					break;
+				case 3:
+					d1 = plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMins[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMaxs[0] + plane->normal[1] * traceWork.endMaxs[1] + plane->normal[2] * traceWork.endMins[2] - plane->dist;
+					break;
+				case 4:
+					d1 = plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMaxs[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMins[0] + plane->normal[1] * traceWork.endMins[1] + plane->normal[2] * traceWork.endMaxs[2] - plane->dist;
+					break;
+				case 5:
+					d1 = plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMaxs[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMaxs[0] + plane->normal[1] * traceWork.endMins[1] + plane->normal[2] * traceWork.endMaxs[2] - plane->dist;
+					break;
+				case 6:
+					d1 = plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMaxs[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMins[0] + plane->normal[1] * traceWork.endMaxs[1] + plane->normal[2] * traceWork.endMaxs[2] - plane->dist;
+					break;
+				case 7:
+					d1 = plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMaxs[2] - plane->dist;
+					d2 = plane->normal[0] * traceWork.endMaxs[0] + plane->normal[1] * traceWork.endMaxs[1] + plane->normal[2] * traceWork.endMaxs[2] - plane->dist;
+					break;
+				default:
+					d1 = d2 = 0; // shut up compiler
+					//assert( 0 );
+					break;
+			}
+		}
 
-        if (!traceWork.isPoint) {
-            // general box case
+        //if (!traceWork.isPoint) {
+        //    // general box case
 
-            // push the plane out apropriately for mins/maxs
+        //    // push the plane out apropriately for mins/maxs
 
-            // FIXME: use signBits into 8 way lookup for each mins/maxs
-            for (int32_t j = 0; j < 3; j++) {
-                if (plane->normal[j] < 0)
-                    offset[j] = maxs[j];
-                else
-                    offset[j] = mins[j];
-            }
-            dist = vec3_dot(offset, plane->normal);
-            dist = plane->dist - dist;
-        } else {
-            // special point case
-            dist = plane->dist;
-        }
+        //    // FIXME: use signBits into 8 way lookup for each mins/maxs
+        //    for (int32_t j = 0; j < 3; j++) {
+        //        if (plane->normal[j] < 0)
+        //            offset[j] = maxs[j];
+        //        else
+        //            offset[j] = mins[j];
+        //    }
+        //    dist = vec3_dot(offset, plane->normal);
+        //    dist = plane->dist - dist;
+        //} else {
+        //    // special point case
+        //    dist = plane->dist;
+        //}
 
-        const float d1 = vec3_dot(p1, plane->normal) - dist;
-        const float d2 = vec3_dot(p2, plane->normal) - dist;
+        //const float d1 = vec3_dot(p1, plane->normal) - dist;
+        //const float d2 = vec3_dot(p2, plane->normal) - dist;
 
         if (d2 > 0) {
-            getout = true; // endpoint is not in solid
+            getOut = true; // endpoint is not in solid
         }
         if (d1 > 0) {
-            startout = true;
+            startOut = true;
         }
 
         // if completely in front of face, no intersection
@@ -548,47 +665,98 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
             continue;
         }
 
-        // crosses face
-        if (d1 > d2) {
-            // enter
-            fraction = (d1 - DIST_EPSILON) / (d1 - d2);
-            if (fraction > enterFraction) {
-                enterFraction = fraction;
+        // Crosses faces.
+        float f = d1 - d2;
+
+        if (f > 0) { // Enter.
+            f = d1 / f;
+            if (f > enterFractionA) {
+                enterFractionA = f;
                 clipPlane = plane;
-                leadside = side;
+                leadSide = side;
+                enterFractionB = (d1 - DIST_EPSILON) / (d1 - d2);
             }
-        } else {
-            // leave
-            fraction = (d1 + DIST_EPSILON) / (d1 - d2);
-            if (fraction < leaveFraction)
-                leaveFraction = fraction;
+        } else if (f < 0) { // Leave.
+            f = d1 / f;
+            if (f < leaveFraction) {
+                leaveFraction = f;
+            }
         }
     }
 
-    if (!startout) {
-        // original point was inside brush
-        trace->startSolid = true;
-        if (!getout) {
-            trace->allSolid = true;
-            if (!collisionModel.map_allsolid_bug->integer) {
-                // original Q2 didn't set these
-                trace->fraction = 0;
-                trace->contents = brush->contents;
-            }
+    if (startOut == false) {
+        // Original point was inside brush.
+        traceWork.traceResult->startSolid = true;
+
+        // Set contents.
+        traceWork.contents = brush->contents;
+
+        if (getOut == false) {
+            traceWork.realFraction = 0.f;
+            traceWork.traceResult->allSolid = true;
+            traceWork.traceResult->fraction = 0.f;
         }
+    }
+
+    if (enterFractionA <= -1) {
         return;
     }
-    if (enterFraction < leaveFraction) {
-        if (enterFraction > -1 && enterFraction < trace->fraction) {
-            if (enterFraction < 0) {
-                enterFraction = 0;
-            }
-            trace->fraction = enterFraction;
-            trace->plane = *clipPlane;
-            trace->surface = &(leadside->texinfo->c);
-            trace->contents = brush->contents;
+
+    if (enterFractionA > leaveFraction) {
+        return;
+    }
+
+    // Check if this reduces collision time range.
+    if (enterFractionA < traceWork.realFraction) {
+        if (enterFractionB < traceWork.traceResult->fraction) {
+            traceWork.realFraction = enterFractionA;
+            traceWork.traceResult->plane = *clipPlane;
+            traceWork.traceResult->surface = &(leadSide->texinfo->c);
+            traceWork.traceResult->contents = brush->contents;
+            traceWork.traceResult->fraction = enterFractionB;
         }
     }
+    //    // crosses face
+    //    if (d1 > d2) {
+    //        // enter
+    //        fraction = (d1 - DIST_EPSILON) / (d1 - d2);
+    //        if (fraction > enterFractionA) {
+    //            enterFractionA = fraction;
+    //            clipPlane = plane;
+    //            leadSide = side;
+    //        }
+    //    } else {
+    //        // leave
+    //        fraction = (d1 + DIST_EPSILON) / (d1 - d2);
+    //        if (fraction < leaveFraction)
+    //            leaveFraction = fraction;
+    //    }
+    //}
+
+    //if (!startOut) {
+    //    // original point was inside brush
+    //    traceWork.traceResult->startSolid = true;
+    //    if (!getOut) {
+    //        traceWork.traceResult->allSolid = true;
+    //        if (!collisionModel.map_allsolid_bug->integer) {
+    //            // original Q2 didn't set these
+    //            traceWork.traceResult->fraction = 0;
+    //            traceWork.traceResult->contents = brush->contents;
+    //        }
+    //    }
+    //    return;
+    //}
+    //if (enterFractionA < leaveFraction) {
+    //    if (enterFractionA > -1 && enterFractionA < traceWork.traceResult->fraction) {
+    //        if (enterFractionA < 0) {
+    //            enterFractionA = 0;
+    //        }
+    //        traceWork.traceResult->fraction = enterFractionA;
+    //        traceWork.traceResult->plane = *clipPlane;
+    //        traceWork.traceResult->surface = &(leadSide->texinfo->c);
+    //        traceWork.traceResult->contents = brush->contents;
+    //    }
+    //}
 }
 
 
@@ -608,6 +776,59 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
     for (int32_t i = 0; i < brush->numsides; i++, brushSide++) {
         CollisionPlane *plane = brushSide->plane;
 
+		if( plane->type < 3 ) {
+			if( traceWork.startMins[plane->type] > plane->dist ) {
+				return;
+			}
+		} else {
+			switch( plane->signBits ) {
+				case 0:
+					if( plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMins[2] > plane->dist ) {
+						return;
+					}
+					break;
+				case 1:
+					if( plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMins[2] > plane->dist ) {
+						return;
+					}
+					break;
+				case 2:
+					if( plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMins[2] > plane->dist ) {
+						return;
+					}
+					break;
+				case 3:
+					if( plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMins[2] > plane->dist ) {
+						return;
+					}
+					break;
+				case 4:
+					if( plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMaxs[2] > plane->dist ) {
+						return;
+					}
+					break;
+				case 5:
+					if( plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMins[1] + plane->normal[2] * traceWork.startMaxs[2] > plane->dist ) {
+						return;
+					}
+					break;
+				case 6:
+					if( plane->normal[0] * traceWork.startMins[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMaxs[2] > plane->dist ) {
+						return;
+					}
+					break;
+				case 7:
+					if( plane->normal[0] * traceWork.startMaxs[0] + plane->normal[1] * traceWork.startMaxs[1] + plane->normal[2] * traceWork.startMaxs[2] > plane->dist ) {
+						return;
+					}
+					break;
+				default:
+					//assert( 0 );
+					return;
+			}
+        }
+
+
         // FIXME: special case for axial
 
         // general box case
@@ -615,28 +836,28 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
         // push the plane out apropriately for mins/maxs
 
         // FIXME: use signBits into 8 way lookup for each mins/maxs
-        for (int32_t j = 0; j < 3; j++) {
-            if (plane->normal[j] < 0)
-                offset[j] = maxs[j];
-            else
-                offset[j] = mins[j];
-        }
-        float dist = vec3_dot(offset, plane->normal);
-        dist = plane->dist - dist;
+        //for (int32_t j = 0; j < 3; j++) {
+        //    if (plane->normal[j] < 0)
+        //        offset[j] = maxs[j];
+        //    else
+        //        offset[j] = mins[j];
+        //}
+        //float dist = vec3_dot(offset, plane->normal);
+        //dist = plane->dist - dist;
 
-        float d1 = vec3_dot(p1, plane->normal) - dist;
+        //float d1 = vec3_dot(p1, plane->normal) - dist;
 
-        // if completely in front of face, no intersection
-        if (d1 > 0) {
-            return;
-        }
+        //// if completely in front of face, no intersection
+        //if (d1 > 0) {
+        //    return;
+        //}
 
     }
 
     // inside this brush
-    trace->startSolid = trace->allSolid = true;
-    trace->fraction = 0;
-    trace->contents = brush->contents;
+    traceWork.traceResult->startSolid = traceWork.traceResult->allSolid = true;
+    traceWork.traceResult->fraction = 0;
+    traceWork.traceResult->contents = brush->contents;
 }
 
 
@@ -711,21 +932,14 @@ static void CM_TestInLeaf(mleaf_t *leaf)
 *   @brief 
 **/
 static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec3_t &p1, const vec3_t &p2) {
-    CollisionPlane    *plane = nullptr;
-    float       t1, t2, offset;
-    float       frac, frac2;
-    float       idist;
-    vec3_t      mid;
-    int         side;
-    float       midf;
 
+recheck:
     if (traceWork.traceResult->fraction <= p1f) {
         return;     // already hit something nearer
     }
 
-recheck:
-    // if plane is NULL, we are in a leaf node
-    plane = node->plane;
+    // If plane is NULL, we are in a leaf node
+    CollisionPlane *plane = node->plane;
     if (!plane) {
         CM_TraceToLeaf((mleaf_t *)node);
         return;
@@ -735,6 +949,9 @@ recheck:
     // find the point distances to the seperating plane
     // and the offset for the size of the box
     //
+    float offset = 0;
+    float t1 = 0.f;
+    float t2 = 0.f;
     if (plane->type < 3) {
         t1 = p1[plane->type] - plane->dist;
         t2 = p2[plane->type] - plane->dist;
@@ -747,9 +964,9 @@ recheck:
             traceWork.extents = vec3_zero();
         } else {
            offset = 2048.f;
-           //offset = fabs(trace_extents[0] * plane->normal[0]) +
-           //          fabs(trace_extents[1] * plane->normal[1]) +
-           //          fabs(trace_extents[2] * plane->normal[2]);
+           offset = fabs(traceWork.extents[0] * plane->normal[0]) +
+                     fabs(traceWork.extents[1] * plane->normal[1]) +
+                     fabs(traceWork.extents[2] * plane->normal[2]);
         }
     }
 
@@ -764,35 +981,39 @@ recheck:
     }
 
     // put the crosspoint DIST_EPSILON pixels on the near side
+    int32_t side = 0;
+    float idist = 0.f;
+    float fractionA = 0.f;
+    float fractionB = 0.f;
     if (t1 < t2) {
-        idist = 1.0 / (t1 - t2);
+        idist = 1.0f / (t1 - t2);
         side = 1;
-        frac2 = (t1 + offset + DIST_EPSILON) * idist;
-        frac = (t1 - offset + DIST_EPSILON) * idist;
+        fractionB = (t1 + offset + DIST_EPSILON) * idist;
+        fractionA = (t1 - offset + DIST_EPSILON) * idist;
     } else if (t1 > t2) {
-        idist = 1.0 / (t1 - t2);
+        idist = 1.0f / (t1 - t2);
         side = 0;
-        frac2 = (t1 - offset - DIST_EPSILON) * idist;
-        frac = (t1 + offset + DIST_EPSILON) * idist;
+        fractionB = (t1 - offset - DIST_EPSILON) * idist;
+        fractionA = (t1 + offset + DIST_EPSILON) * idist;
     } else {
         side = 0;
-        frac = 1;
-        frac2 = 0;
+        fractionA = 1.f;
+        fractionB = 0.f;
     }
 
     // Move up to the node
-    frac = Clampf(frac);
+    fractionA = Clampf(fractionA, 0.f, 1.f);
 
-    midf = p1f + (p2f - p1f) * frac;
-    mid = vec3_mix(p1, p2, frac);
+    float midf = p1f + (p2f - p1f) * fractionA;
+    vec3_t mid = vec3_mix(p1, p2, fractionA);
 
     CM_RecursiveHullCheck(node->children[side], p1f, midf, p1, mid);
 
     // Go past the node
-    frac2 = Clampf(frac2);
+    fractionB = Clampf(fractionB, 0.f, 1.f);
 
-    midf = p1f + (p2f - p1f) * frac2;
-    mid = vec3_mix(p1, p2, frac2);
+    midf = p1f + (p2f - p1f) * fractionB;
+    mid = vec3_mix(p1, p2, fractionB);
 
     CM_RecursiveHullCheck(node->children[side ^ 1], midf, p2f, mid, p2);
 }
@@ -827,8 +1048,11 @@ int CM_PointContents(const vec3_t &p, mnode_t *headNode)
 **/
 void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                  const vec3_t &mins, const vec3_t &maxs,
-                 mnode_t *headNode, int brushmask)
+                 mnode_t *headNode, int brushMask)
 {
+    // Determine whether we are tracing world or not.
+    bool worldTrace = !(headNode != box_headnode && headNode != octagon_headnode);
+
     // For multi-check avoidance.
     collisionModel.checkCount++;
 
@@ -844,41 +1068,74 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
         return;
     }
 
-    traceWork.contents = brushmask;
+    // Prepare TraceWork for the current trace.
+    traceWork.realFraction = 1 + DIST_EPSILON;
+    traceWork.checkCount = collisionModel.checkCount;
+    traceWork.traceResult = trace;
+    traceWork.contents = brushMask;
     traceWork.start = start;
     traceWork.end   = end;
     traceWork.mins  = mins;
     traceWork.maxs  = maxs;
     
+    // Build a bounding box of the entire move.
+    ClearBounds(traceWork.absMins, traceWork.absMaxs);
+
+    // Calculate startMins and add points to bounds.
+    traceWork.startMins = start + traceWork.mins;
+    AddPointToBounds(traceWork.startMins, traceWork.absMins, traceWork.absMaxs);
+
+    // Calculate startMaxs and add points to bounds.
+    traceWork.startMaxs = start + traceWork.maxs;
+    AddPointToBounds(traceWork.startMaxs, traceWork.absMins, traceWork.absMaxs);
+
+    // Calculate endMins and add points to bounds.
+    traceWork.endMins = end + traceWork.mins;
+    AddPointToBounds(traceWork.endMins, traceWork.absMins, traceWork.absMaxs);
+
+    // Calculate endMaxs and add points to bounds.
+    traceWork.endMaxs = end + traceWork.maxs;
+    AddPointToBounds(traceWork.endMaxs, traceWork.absMins, traceWork.absMaxs);
+
+
     //
     // check for position test special case
     //
     if (start[0] == end[0] && start[1] == end[1] && start[2] == end[2]) {
         mleaf_t *leafs[1024];
-        vec3_t c1 = start + mins;  //VectorAdd(start, mins, c1);
-        vec3_t c2 = start + maxs; // VectorAdd(start, maxs, c2);
-        for (int32_t i = 0; i < 3; i++) {
-            c1[i] -= 1;
-            c2[i] += 1;
-        }
+        int32_t topNode = 0;
 
-        int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, NULL);
+//        if (worldTrace) {
+            // Calculate c1 and c2 vectors.
+        vec3_t c1 = start + mins + vec3_t{ -1.f, -1.f, -1.f };
+        vec3_t c2 = start + maxs + vec3_t{ 1.f, 1.f, 1.f };            
+
+        int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, nullptr);
         for (int32_t i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
             if (traceWork.traceResult->allSolid) {
                 break;
             }
         }
-        traceWork.traceResult->endPosition = start; //VectorCopy(start, trace_trace->endPosition);
+            //VectorCopy(start, trace_traceWork.traceResult->endPosition);
+  //      } else {
+            //if (BoundsOverlap(headNode->mins, headNode->maxs, traceWork.absMins, traceWork.absMaxs)) {
+            //    CM_TestInLeaf()
+            //}
+  //      }
+
+        traceWork.traceResult->endPosition = start;
+
         return;
     }
 
     //
     // check for point special case
     //
-    if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0 && maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0) {
-    traceWork.isPoint = true;
-    traceWork.extents = vec3_zero();
+    //if (mins[0] == 0 && mins[1] == 0 && mins[2] == 0 && maxs[0] == 0 && maxs[1] == 0 && maxs[2] == 0) {
+    if (vec3_equal(mins, vec3_zero()) && vec3_equal(maxs, vec3_zero())) {
+        traceWork.isPoint = true;
+        traceWork.extents = vec3_zero();
     } else {
         traceWork.isPoint = false;
         traceWork.extents[0] = -mins[0] > maxs[0] ? -mins[0] : maxs[0];
@@ -891,6 +1148,10 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
     //
     CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
+    // Clamp.
+    traceWork.traceResult->fraction = Clampf(traceWork.traceResult->fraction, 0.f, 1.f);
+
+    // Lerp end position if necessary.
     if (traceWork.traceResult->fraction == 1) {
         traceWork.traceResult->endPosition = end;
     } else {
@@ -941,45 +1202,53 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     vec3_t      axis[3];
     qboolean    rotated;
 
-    vec3_t end_l = vec3_zero();
-    vec3_t start_l = vec3_zero();
-    if (headNode == octagon_headnode) {
-        // 
-        // subtract origin offset
-        start_l = (start - origin) - traceWork.cylinderOffset;
-        end_l   = (end - origin) - traceWork.cylinderOffset;
-    }
-    else {
-        // subtract origin offset
-        start_l = start - origin;
-        end_l   = end - origin;
+    // Reset tracework.
+    traceWork = {};
+
+    // Can't go on without a valid TraceResult
+    if (!trace) {
+        return;
     }
 
-    // rotate start and end into the models frame of reference
-    if ((headNode != box_headnode && headNode != octagon_headnode) &&
-        (angles[0] || angles[1] || angles[2])) {
-        rotated = true;
+    // Calculate end and start l.
+    vec3_t end_l = vec3_zero();
+    vec3_t start_l = vec3_zero();
+
+    if (headNode == octagon_headnode) {
+        // Octagon Cylinder offset.
+        start_l = start - traceWork.cylinderOffset;
+        end_l   = end - traceWork.cylinderOffset;
     } else {
-        rotated = false;
+        start_l = start;
+        end_l   = end;
     }
-    
-    if (rotated) {
+
+    // Substract Origin offset.
+    start_l -= origin;
+    end_l   -= origin;
+
+    // Rotate start and end into the models frame of reference.
+    if ((headNode != box_headnode && headNode != octagon_headnode) && (angles[0] || angles[1] || angles[2])) {
+        rotated = true;
+
         AnglesToAxis(angles, axis);
         RotatePoint(start_l, axis);
         RotatePoint(end_l, axis);
+    } else {
+        rotated = false;
     }
 
-    // sweep the box through the model
+    // Sweep the box through the model.
     CM_BoxTrace(trace, start_l, end_l, mins, maxs, headNode, brushmask);
 
-    // rotate plane normal into the worlds frame of reference
-    if (rotated && trace->fraction != 1.0) {
+    // Rotate plane normal back into the worlds frame of reference.
+    if (rotated && traceWork.traceResult->fraction != 1.0) {
         TransposeAxis(axis);
-        RotatePoint(trace->plane.normal, axis);
+        RotatePoint(traceWork.traceResult->plane.normal, axis);
     }
 
     // FIXME: offset plane distance?
-    trace->endPosition = vec3_mix(start, end, trace->fraction); // LerpVector(start, end, trace->fraction, trace->endPosition);
+    traceWork.traceResult->endPosition = vec3_mix(start, end, traceWork.traceResult->fraction); // LerpVector(start, end, traceWork.traceResult->fraction, traceWork.traceResult->endPosition);
 }
 
 

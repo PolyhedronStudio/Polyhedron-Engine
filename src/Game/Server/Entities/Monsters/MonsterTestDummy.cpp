@@ -65,7 +65,7 @@ void MonsterTestDummy::Spawn() {
     Base::Spawn();
 
     // Set solid.
-    SetSolid(Solid::OctagonBox);
+    SetSolid(Solid::BoundingBox);
 
     // Set move type.
     SetMoveType(MoveType::Step);
