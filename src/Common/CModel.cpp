@@ -217,7 +217,6 @@ static void CM_InitBoxHull(void)
 
         // Plane A.
         CollisionPlane *plane = &box_planes[i * 2];
-        plane = &box_planes[i * 2];
         plane->type = (i >> 1);
         plane->normal[(i >> 1)] = 1;
 
@@ -292,120 +291,68 @@ static void CM_InitOctagonBoxHull(void)
     octagon_leafbrush = &octagon_brush;
 
     for (int32_t i = 0; i < 6; i++) {
-        int32_t side = i & 1;
+        int32_t side = (i & 1);
 
-        // Brush Sides
+        // Setup Brush Sides.
         mbrushside_t *brushSide = &octagon_brushsides[i];
         brushSide->plane = &octagon_planes[i * 2 + side];
         brushSide->texinfo = &collisionModel.nullTextureInfo;
 
-        // Nodes
+        // Setup Box Nodes.
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
-
-        node->children[side ^ 1] = &octagon_nodes[i + 1];
+        if (i != 5) {
+            node->children[side ^ 1] = &octagon_nodes[i + 1];
+        } else {
+            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+        }
 
         // Plane A.
         if ((i & 1)) {
-        CollisionPlane *plane = &box_planes[i * 2];
-        plane = &box_planes[i * 2];
+        CollisionPlane *plane = &octagon_planes[i * 2];
         plane->type = (i >> 1);
         plane->normal[(i >> 1)] = 1;
         }else{
         // Plane B.
-        CollisionPlane *plane = &box_planes[i * 2 + 1];
+        CollisionPlane *plane = &octagon_planes[i * 2 + 1];
         plane->type = 3 + (i >> 1);
         plane->signBits = (1 << (i >> 1));
         plane->normal[(i >> 1)] = -1;
         }
-        //if ((i & 1)) {
-        //    CollisionPlane *plane = &octagon_planes[i * 2];
-        //    plane->type = PLANE_NON_AXIAL;
-        //    plane->normal[(i >> 1)] = -1;
-        //    plane->signBits = (1 << (i >> 1));
-        //} else {
-        //    CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-        //    plane->type = (i >> 1);
-        //    plane->normal[(i >> 1)] = 1;
-        //    plane->signBits = 0;
-        //}
-        //if (i != 5) {
-        //    node->children[side ^ 1] = &octagon_nodes[i + 1];
-        //} else {
-        //    node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-        //}
-
-        //if (i & 1) {
-        //    // Non Axial Planes.
-        //    CollisionPlane *plane = &octagon_planes[i * 2];
-        //    plane->type = 3 + (i >> 1);
-        //    plane->normal[i >> 1] = -1;
-        //    plane->signBits = (1 << (i >> 1 ));
-        //} else {
-        //    // Axial Planes.
-        //    CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-        //    plane->type = i >> 1;
-        //    plane->normal[ i >> 1] = 1;
-        //    plane->signBits = 0;
-        //    SetPlaneSignbits(plane);
-        //}
     }
 
     const vec3_t oct_dirs[4] = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
-    for (int32_t i = 6; i < 10; i++) {
-        int32_t side = i & 1;
 
-        // Brush Sides.
+    for (int32_t i = 6; i < 10; i++) {
+        int32_t side = (i & 1);
+
+        // Setup Brush Sides.
         mbrushside_t *brushSide = &octagon_brushsides[i];
         brushSide->plane = &octagon_planes[i * 2 + side];
         brushSide->texinfo = &collisionModel.nullTextureInfo;
- 
-        // Nodes.
+
+        // Setup Box Nodes.
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
-
-        
         if (i != 9) {
             node->children[side ^ 1] = &octagon_nodes[i + 1];
         } else {
             node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
         }
 
-        CollisionPlane *plane = &octagon_planes[i * 2 + side];
-        //plane->type = PLANE_NON_AXIAL;
-        //plane->signBits = ( 1 << ( i >> 1 ) );
-        //plane->normal = vec3_zero();
-        //plane->normal[i >> 1] = -1;
-        //plane = &octagon_planes[i * 2];
-//        plane->type = (i >> 1);
+        // Plane A.
+        CollisionPlane *plane = &octagon_planes[i * 2];
         plane->type = PLANE_NON_AXIAL;
-        plane->normal= oct_dirs[i - 6];
-        if ((i & 1)) {
-            plane->signBits = 3 + (i >> 1);
-        }
-//        SetPlaneSignbits(plane);
+        plane->normal = oct_dirs[i - 6];
+        //SetPlaneSignbits(plane);
 
-    //} else {
-        //plane = &box_planes[i * 2 + 1];
-        //plane->type = 3 + (i >> 1);
-        //plane->signBits = (1 << (i >> 1));
-        //plane->normal[(i >> 1)] = -1;
-
-        //  //if (i != 9) {
-      //      node->children[side ^ 1] = &octagon_nodes[i + 1];
-      //  //} else {
-      //   //   node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-      ////  }
-
-      //  // Non Axial Planes
-      //  CollisionPlane *plane = &octagon_planes[i * 2];
-      //  plane->type = PLANE_NON_AXIAL;
-      //  plane->normal = oct_dirs[i - 6];
-      //  //plane->type = 3 + (i >> 1);
-      //  SetPlaneSignbits(plane);
- 
+        // Plane B.
+        plane = &octagon_planes[i * 2 + 1];
+        plane->type = PLANE_NON_AXIAL;
+        plane->normal = oct_dirs[i - 6];
+        SetPlaneSignbits(plane);
     }
 }
 
@@ -420,15 +367,26 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
     };
 
     traceWork.cylinderOffset = offset;
-    traceWork.mins = size[0];
-    traceWork.maxs - size[1];
 	
-	octagon_brushsides[0].plane->dist = size[1][0];
-	octagon_brushsides[1].plane->dist = -size[0][0];
-	octagon_brushsides[2].plane->dist = size[1][1];
-	octagon_brushsides[3].plane->dist = -size[0][1];
-	octagon_brushsides[4].plane->dist = size[1][2];
-	octagon_brushsides[5].plane->dist = -size[0][2];
+	//octagon_brushsides[0].plane->dist = size[1][0];
+	//octagon_brushsides[1].plane->dist = -size[0][0];
+	//octagon_brushsides[2].plane->dist = size[1][1];
+	//octagon_brushsides[3].plane->dist = -size[0][1];
+	//octagon_brushsides[4].plane->dist = size[1][2];
+	//octagon_brushsides[5].plane->dist = -size[0][2];
+
+    octagon_planes[0].dist = size[1][0];
+    octagon_planes[1].dist = -size[1][0];
+    octagon_planes[2].dist = size[0][0];
+    octagon_planes[3].dist = -size[0][0];
+    octagon_planes[4].dist = size[1][1];
+    octagon_planes[5].dist = -size[1][1];
+    octagon_planes[6].dist = size[0][1];
+    octagon_planes[7].dist = -size[0][1];
+    octagon_planes[8].dist = size[1][2];
+    octagon_planes[9].dist = -size[1][2];
+    octagon_planes[10].dist = size[0][2];
+    octagon_planes[11].dist = -size[0][2];
 
 	const float a = size[1][0];			   // halfx
 	const float b = size[1][1];			   // halfy
@@ -448,17 +406,40 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 
 	// the following should match normals and signbits set in CM_InitOctagonHull
 
-	VectorSet( octagon_brushsides[6].plane->normal, cosa, sina, 0 );
-	octagon_brushsides[6].plane->dist = d;
+	//VectorSet( octagon_brushsides[6].plane->normal, cosa, sina, 0 );
+    octagon_planes[12].normal = vec3_t{cosa, sina, 0.f};
+    octagon_planes[12].dist = d;
+    octagon_planes[13].normal = vec3_t{cosa, sina, 0.f};
+    octagon_planes[13].dist = d;
 
-	VectorSet( octagon_brushsides[7].plane->normal, -cosa, sina, 0 );
-	octagon_brushsides[7].plane->dist = d;
+    octagon_planes[14].normal = vec3_t{-cosa, sina, 0.f};
+    octagon_planes[14].dist = d;
+    octagon_planes[15].normal = vec3_t{-cosa, sina, 0.f};
+    octagon_planes[15].dist = d;
 
-	VectorSet( octagon_brushsides[8].plane->normal, -cosa, -sina, 0 );
-	octagon_brushsides[8].plane->dist = d;
+    octagon_planes[16].normal = vec3_t{-cosa, -sina, 0.f};
+    octagon_planes[16].dist = d;
+    octagon_planes[17].normal = vec3_t{-cosa, -sina, 0.f};
+    octagon_planes[17].dist = d;
 
-	VectorSet( octagon_brushsides[9].plane->normal, cosa, -sina, 0 );
-	octagon_brushsides[9].plane->dist = d;
+    octagon_planes[18].normal = vec3_t{cosa, -sina, 0.f};
+    octagon_planes[18].dist = d;
+    octagon_planes[19].normal = vec3_t{cosa, -sina, 0.f};
+    octagon_planes[19].dist = d;
+ //   octagon_brushsides[6].plane->normal = vec3_t{cosa, sina, 0.f};
+ //   octagon_brushsides[6].plane->dist = d;
+
+	////VectorSet( octagon_brushsides[7].plane->normal, -cosa, sina, 0 );
+ //   octagon_brushsides[7].plane->normal = vec3_t{-cosa, sina, 0.f};
+	//octagon_brushsides[7].plane->dist = d;
+
+	////VectorSet( octagon_brushsides[8].plane->normal, -cosa, -sina, 0 );
+ //   octagon_brushsides[8].plane->normal = vec3_t{-cosa, -sina, 0.f};
+	//octagon_brushsides[8].plane->dist = d;
+
+	////VectorSet( octagon_brushsides[9].plane->normal, cosa, -sina, 0 );
+ //   octagon_brushsides[9].plane->normal = vec3_t{cosa, -sina, 0.f};
+	//octagon_brushsides[9].plane->dist = d;
 
     return octagon_headnode;
 }
@@ -949,7 +930,7 @@ recheck:
     // find the point distances to the seperating plane
     // and the offset for the size of the box
     //
-    float offset = 0;
+    float offset = 0.f;
     float t1 = 0.f;
     float t2 = 0.f;
     if (plane->type < 3) {

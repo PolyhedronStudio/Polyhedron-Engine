@@ -84,13 +84,13 @@ void SVGBasePlayer::Spawn() {
     SetTakeDamage(TakeDamage::Aim);
     // Fresh movetype and solid.
     SetMoveType(MoveType::PlayerMove);
-    SetSolid(Solid::BoundingBox);
+    SetSolid(Solid::OctagonBox);
     // Mass.
     SetMass(200);
     // Undead itself.
     SetDeadFlag(DeadFlags::Alive);
     // Set air finished time so it can respawn kindly.
-    SetAirFinishedTime(level.time + 12);
+    SetAirFinishedTime(level.time + 12 * FRAMETIME);
     // Clip mask this client belongs to.
     SetClipMask(BrushContentsMask::PlayerSolid);
     // Fresh default model.
