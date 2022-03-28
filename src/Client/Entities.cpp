@@ -450,7 +450,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
 
-           // MSG_UnpackBoundingBox32(solidEntity->current.solid, entityMins, entityMaxs);
+            MSG_UnpackBoundingBox32(solidEntity->current.solid, entityMins, entityMaxs);
             
             if (solidEntity->current.solid == Solid::OctagonBox) {
                 headNode = CM_HeadnodeForOctagon(solidEntity->mins, solidEntity->maxs);

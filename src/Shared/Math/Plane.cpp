@@ -42,11 +42,11 @@ void SetPlaneSignbits(CollisionPlane* plane)
 
     //plane->signBits = bits;
 
-	// for fast box on planeside test
+	// For fast box on planeside test
     plane->signBits = 0;
-	for(int32_t  j = 0; j < 3; j++ ) {
+	for(int32_t j = 0; j < 3; j++ ) {
 		if( plane->normal[j] < 0 ) {
-			plane->signBits  |= 1 << j;
+			plane->signBits |= (1 << j);
 		}
 	}
 }

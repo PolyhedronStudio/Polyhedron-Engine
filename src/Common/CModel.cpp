@@ -346,12 +346,15 @@ static void CM_InitOctagonBoxHull(void)
         CollisionPlane *plane = &octagon_planes[i * 2];
         plane->type = PLANE_NON_AXIAL;
         plane->normal = oct_dirs[i - 6];
+        //SetPlaneType(plane);
         SetPlaneSignbits(plane);
 
         // Plane B.
-        plane = &octagon_planes[i * 2 + 1];
+        plane = &octagon_planes[i * 2 + side];
         plane->type = PLANE_NON_AXIAL;
-        plane->normal = oct_dirs[i - 6];
+        plane->normal = oct_dirs[(i - 6)];
+        //plane->signBits = (1 << (i >> 1)); //SetPlaneSignbits(plane);
+        //SetPlaneType(plane);
         SetPlaneSignbits(plane);
     }
 }
@@ -407,25 +410,25 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 	// the following should match normals and signbits set in CM_InitOctagonHull
 
 	//VectorSet( octagon_brushsides[6].plane->normal, cosa, sina, 0 );
-    octagon_planes[12].normal = vec3_t{cosa, sina, 0.f};
-    octagon_planes[12].dist = d;
-    octagon_planes[13].normal = vec3_t{cosa, sina, 0.f};
-    octagon_planes[13].dist = d;
+    octagon_planes[12].normal   = vec3_t{cosa, sina, 0.f};
+    octagon_planes[12].dist     = d;
+    octagon_planes[13].normal   = vec3_t{cosa, sina, 0.f};
+    octagon_planes[13].dist     = d;
 
-    octagon_planes[14].normal = vec3_t{-cosa, sina, 0.f};
-    octagon_planes[14].dist = d;
-    octagon_planes[15].normal = vec3_t{-cosa, sina, 0.f};
-    octagon_planes[15].dist = d;
+    octagon_planes[14].normal   = vec3_t{-cosa, sina, 0.f};
+    octagon_planes[14].dist     = d;
+    octagon_planes[15].normal   = vec3_t{-cosa, sina, 0.f};
+    octagon_planes[15].dist     = d;
 
-    octagon_planes[16].normal = vec3_t{-cosa, -sina, 0.f};
-    octagon_planes[16].dist = d;
-    octagon_planes[17].normal = vec3_t{-cosa, -sina, 0.f};
-    octagon_planes[17].dist = d;
+    octagon_planes[16].normal   = vec3_t{-cosa, -sina, 0.f};
+    octagon_planes[16].dist     = d;
+    octagon_planes[17].normal   = vec3_t{-cosa, -sina, 0.f};
+    octagon_planes[17].dist     = d;
 
-    octagon_planes[18].normal = vec3_t{cosa, -sina, 0.f};
-    octagon_planes[18].dist = d;
-    octagon_planes[19].normal = vec3_t{cosa, -sina, 0.f};
-    octagon_planes[19].dist = d;
+    octagon_planes[18].normal   = vec3_t{cosa, -sina, 0.f};
+    octagon_planes[18].dist     = d;
+    octagon_planes[19].normal   = vec3_t{cosa, -sina, 0.f};
+    octagon_planes[19].dist     = d;
  //   octagon_brushsides[6].plane->normal = vec3_t{cosa, sina, 0.f};
  //   octagon_brushsides[6].plane->dist = d;
 

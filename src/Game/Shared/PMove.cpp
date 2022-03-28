@@ -409,7 +409,7 @@ static constexpr int32_t    MAX_CLIP_PLANES = 20;   // Maximum amount of planes 
 
 static qboolean PM_StepSlideMove_(void)
 {
-    const int32_t numBumps = MAX_CLIP_PLANES - 6;
+    const int32_t numBumps = MAX_CLIP_PLANES - 2;
     vec3_t planes[MAX_CLIP_PLANES];
     int32_t bump;
 
