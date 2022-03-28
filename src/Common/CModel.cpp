@@ -26,15 +26,40 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Zone.h"
 #include "System/Hunk.h"
 
-mtexinfo_t nulltexinfo;
+/**
+*   CollisionModel data.
+**/
+static struct CollisionModel {;
+    //! Null Texture Info.
+    mtexinfo_t  nullTextureInfo = {};
 
-static mleaf_t      nullleaf;
+    //! Null Leaf.
+    mleaf_t nullLeaf = {};
 
-static int          floodvalid;
-static int          checkcount;
+    //! Valid Floods.
+    int32_t floodValid = 0;
+    //! Check Count
+    int32_t checkCount = 0;
 
-static cvar_t       *map_noareas;
-static cvar_t       *map_allsolid_bug;
+    //! No Areas CVar.
+    cvar_t  *map_noareas;
+    //! AllSolid CVar. (Simulate a bug of old, or not.)
+    cvar_t  *map_allsolid_bug;
+} collisionModel;
+
+/**
+*   BoxLeaf 'Work'
+**/
+static struct BoxLeafWork {
+
+} boxLeafWork;
+
+/**
+*   Trace 'Work'
+**/
+static struct TraceWork {
+
+} traceWork;
 
 static void    FloodAreaConnections(cm_t *cm);
 
@@ -81,14 +106,14 @@ qerror_t CM_LoadMap(cm_t *cm, const char *name)
 mnode_t *CM_NodeNum(cm_t *cm, int number)
 {
     if (!cm->cache) {
-        return (mnode_t *)&nullleaf;
+        return (mnode_t *)&collisionModel.nullLeaf;
     }
     if (number == -1) {
         return (mnode_t *)cm->cache->leafs;   // special case for solid leaf
     }
     if (number < 0 || number >= cm->cache->numnodes) {
         Com_EPrintf("%s: bad number: %d\n", __func__, number);
-        return (mnode_t *)&nullleaf;
+        return (mnode_t *)&collisionModel.nullLeaf;
     }
     return cm->cache->nodes + number;
 }
@@ -96,11 +121,11 @@ mnode_t *CM_NodeNum(cm_t *cm, int number)
 mleaf_t *CM_LeafNum(cm_t *cm, int number)
 {
     if (!cm->cache) {
-        return &nullleaf;
+        return &collisionModel.nullLeaf;
     }
     if (number < 0 || number >= cm->cache->numleafs) {
         Com_EPrintf("%s: bad number: %d\n", __func__, number);
-        return &nullleaf;
+        return &collisionModel.nullLeaf;
     }
     return cm->cache->leafs + number;
 }
@@ -144,7 +169,7 @@ static void CM_InitBoxHull(void)
         // brush sides
         mbrushside_t *brushSide = &box_brushsides[i];
         brushSide->plane = &box_planes[i * 2 + side];
-        brushSide->texinfo = &nulltexinfo;
+        brushSide->texinfo = &collisionModel.nullTextureInfo;
 
         // nodes
         mnode_t *node = &box_nodes[i];
@@ -241,28 +266,31 @@ static void CM_InitOctagonBoxHull(void)
         // brush sides
         mbrushside_t *brushSide = &octagon_brushsides[i];
         brushSide->plane = &octagon_planes[i * 2 + side];
-        brushSide->texinfo = &nulltexinfo;
+        brushSide->texinfo = &collisionModel.nullTextureInfo;
 //        brushSide->texinfo->c.flags = 0;
 
         // Nodes
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
-        node->children[side ^ 1] = &octagon_nodes[i + 1];
+        if (i != 5) {
+            node->children[side ^ 1] = &octagon_nodes[i + 1];
+        } else {
+            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+        }
 
         if (i & 1) {
             // Non Axial Planes.
-            CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-            plane->normal = vec3_zero();
+            CollisionPlane *plane = &octagon_planes[i * 2];
+            plane->type = 3 + i >> 1;
             plane->normal[i >> 1] = -1;
-            plane->type = 3 + (i >> 1); //SetPlaneType(plane);
-            SetPlaneSignbits(plane);
+            plane->signBits = (1 << (i >> 1 ));
         } else {
             // Axial Planes.
-            CollisionPlane *plane = &octagon_planes[i * 2];
-            plane->normal = vec3_zero();
-            plane->normal[i >> 1] = 1;
-            SetPlaneType(plane);
+            CollisionPlane *plane = &octagon_planes[i * 2 + 1];
+            plane->type = i >> 1;
+            plane->normal[ i >> 1] = 1;
+            plane->signBits = 0;
             SetPlaneSignbits(plane);
         }
     }
@@ -274,33 +302,25 @@ static void CM_InitOctagonBoxHull(void)
         // brush sides
         mbrushside_t *brushSide = &octagon_brushsides[i];
         brushSide->plane = &octagon_planes[i * 2 + side];
-        brushSide->texinfo = &nulltexinfo;
-        //brushSide->texinfo->c.flags = 0;
-
+        brushSide->texinfo = &collisionModel.nullTextureInfo;
+ 
         // nodes
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
-        if (i != 9) {
+        //if (i != 9) {
             node->children[side ^ 1] = &octagon_nodes[i + 1];
-        } else {
-            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
-        }
+        //} else {
+         //   node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+      //  }
 
         // Non Axial Planes
-        if (i & 1) {
-            CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-            plane->type = PLANE_NON_AXIAL;
-            plane->normal = oct_dirs[i - 6];
-            //SetPlaneType(plane);
-            SetPlaneSignbits(plane);
-        } else {
-            CollisionPlane *plane = &octagon_planes[i * 2];
-            plane->type = PLANE_NON_AXIAL;
-            plane->normal = oct_dirs[i - 6];
-            //SetPlaneType(plane);
-            SetPlaneSignbits(plane);
-        }
+        CollisionPlane *plane = &octagon_planes[i * 2];
+        plane->type = PLANE_NON_AXIAL;
+        plane->normal = oct_dirs[i - 6];
+        //plane->type = 3 + (i >> 1);
+        SetPlaneSignbits(plane);
+ 
     }
 }
 
@@ -368,7 +388,7 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 
 mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p) {
     if (!cm->cache) {
-        return &nullleaf;       // server may call this without map loaded
+        return &collisionModel.nullLeaf;       // server may call this without map loaded
     }
     return BSP_PointLeaf(cm->cache->nodes, p);
 }
@@ -600,7 +620,7 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
         trace->startSolid = true;
         if (!getout) {
             trace->allSolid = true;
-            if (!map_allsolid_bug->integer) {
+            if (!collisionModel.map_allsolid_bug->integer) {
                 // original Q2 didn't set these
                 trace->fraction = 0;
                 trace->contents = brush->contents;
@@ -684,11 +704,11 @@ static void CM_TraceToLeaf(mleaf_t *leaf) {
     for (int32_t k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
         mbrush_t *b = *leafbrush;
 
-        if (b->checkcount == checkcount) {
+        if (b->checkcount == collisionModel.checkCount) {
             continue;   // Already checked this brush in another leaf
         }
         
-        b->checkcount = checkcount;
+        b->checkcount = collisionModel.checkCount;
 
         if (!(b->contents & trace_contents)) {
             continue;
@@ -718,11 +738,11 @@ static void CM_TestInLeaf(mleaf_t *leaf)
     for (int32_t k = 0; k < leaf->numleafbrushes; k++, leafbrush++) {
         mbrush_t *b = *leafbrush;
         
-        if (b->checkcount == checkcount) {
+        if (b->checkcount == collisionModel.checkCount) {
             continue;   // Already checked this brush in another leaf
         }
         
-        b->checkcount = checkcount;
+        b->checkcount = collisionModel.checkCount;
 
         if (!(b->contents & trace_contents)) {
             continue;
@@ -845,13 +865,13 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                  const vec3_t &mins, const vec3_t &maxs,
                  mnode_t *headNode, int brushmask)
 {
-    checkcount++;       // for multi-check avoidance
+    collisionModel.checkCount++;       // for multi-check avoidance
 
     // fill in a default trace
     trace_trace = trace;
     memset(trace_trace, 0, sizeof(*trace_trace));
     trace_trace->fraction = 1;
-    trace_trace->surface = &(nulltexinfo.c);
+    trace_trace->surface = &(collisionModel.nullTextureInfo.c);
 
     if (!headNode) {
         return;
@@ -1003,7 +1023,7 @@ static void FloodArea_r(cm_t *cm, int number, int floodnum)
     marea_t *area;
 
     area = &cm->cache->areas[number];
-    if (area->floodvalid == floodvalid) {
+    if (area->floodvalid == collisionModel.floodValid) {
         if (cm->floodnums[number] == floodnum) {
             return;
         }
@@ -1011,7 +1031,7 @@ static void FloodArea_r(cm_t *cm, int number, int floodnum)
     }
 
     cm->floodnums[number] = floodnum;
-    area->floodvalid = floodvalid;
+    area->floodvalid = collisionModel.floodValid;
     p = area->firstareaportal;
     for (i = 0; i < area->numareaportals; i++, p++) {
         if (cm->portalopen[p->portalnum]) {
@@ -1028,13 +1048,13 @@ static void FloodAreaConnections(cm_t *cm)
     marea_t *area;
 
     // All current floods are now invalid
-    floodvalid++;
+    collisionModel.floodValid++;
     int32_t floodnum = 0;
 
     // Area 0 is not used
     for (int32_t i = 1; i < cm->cache->numareas; i++) {
         area = &cm->cache->areas[i];
-        if (area->floodvalid == floodvalid) {
+        if (area->floodvalid == collisionModel.floodValid) {
             continue;       // already flooded into
         }
         floodnum++;
@@ -1076,7 +1096,7 @@ qboolean CM_AreasConnected(cm_t *cm, int area1, int area2)
     if (!cache) {
         return false;
     }
-    if (map_noareas->integer) {
+    if (collisionModel.map_noareas->integer) {
         return true;
     }
     if (area1 < 1 || area2 < 1) {
@@ -1110,7 +1130,7 @@ int CM_WriteAreaBits(cm_t *cm, byte *buffer, int area)
 
     int32_t bytes = (cache->numareas + 7) >> 3;
 
-    if (map_noareas->integer || !area) {
+    if (collisionModel.map_noareas->integer || !area) {
         // for debugging, send everything
         memset(buffer, 255, bytes);
     } else {
@@ -1268,9 +1288,9 @@ void CM_Init(void)
     CM_InitBoxHull();
     CM_InitOctagonBoxHull();
 
-    nullleaf.cluster = -1;
+    collisionModel.nullLeaf.cluster = -1;
 
-    map_noareas = Cvar_Get("map_noareas", "0", 0);
-    map_allsolid_bug = Cvar_Get("map_allsolid_bug", "1", 0);
+    collisionModel.map_noareas = Cvar_Get("map_noareas", "0", 0);
+    collisionModel.map_allsolid_bug = Cvar_Get("map_allsolid_bug", "1", 0);
 }
 
