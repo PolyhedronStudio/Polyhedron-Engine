@@ -346,7 +346,7 @@ static void CM_InitOctagonBoxHull(void)
         CollisionPlane *plane = &octagon_planes[i * 2];
         plane->type = PLANE_NON_AXIAL;
         plane->normal = oct_dirs[i - 6];
-        //SetPlaneSignbits(plane);
+        SetPlaneSignbits(plane);
 
         // Plane B.
         plane = &octagon_planes[i * 2 + 1];
