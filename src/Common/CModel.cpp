@@ -79,11 +79,10 @@ static struct TraceWork {
 
 static void    FloodAreaConnections(cm_t *cm);
 
-/*
-==================
-CM_FreeMap
-==================
-*/
+
+/**
+*   @brief  Frees the map and all of its "submodels".
+**/
 void CM_FreeMap(cm_t *cm)
 {
     if (cm->floodnums) {
@@ -94,13 +93,9 @@ void CM_FreeMap(cm_t *cm)
     memset(cm, 0, sizeof(*cm));
 }
 
-/*
-==================
-CM_LoadMap
-
-Loads in the map and all submodels
-==================
-*/
+/**
+*   @brief  Loads in the BSP map and its "submodels".
+**/
 qerror_t CM_LoadMap(cm_t *cm, const char *name)
 {
     bsp_t *cache;
@@ -119,6 +114,9 @@ qerror_t CM_LoadMap(cm_t *cm, const char *name)
     return Q_ERR_SUCCESS;
 }
 
+/**
+*   @return Pointer to a valid node matching 'number'.
+**/
 mnode_t *CM_NodeNum(cm_t *cm, int number)
 {
     if (!cm->cache) {
@@ -134,6 +132,9 @@ mnode_t *CM_NodeNum(cm_t *cm, int number)
     return cm->cache->nodes + number;
 }
 
+/**
+*   @return Pointer to a valid leaf matching 'number'.
+**/
 mleaf_t *CM_LeafNum(cm_t *cm, int number)
 {
     if (!cm->cache) {
@@ -146,12 +147,15 @@ mleaf_t *CM_LeafNum(cm_t *cm, int number)
     return cm->cache->leafs + number;
 }
 
-//=======================================================================
 
-// BOXES
 
-//=======================================================================
-
+/***
+*
+*
+*   General 'Box' Collision Shape
+*
+*
+***/
 static CollisionPlane box_planes[12];
 static mnode_t  box_nodes[6];
 static mnode_t  *box_headnode;
@@ -240,11 +244,13 @@ mnode_t *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs)
 }
 
 
-//=======================================================================
-
-// OCTAGON BOX
-
-//=======================================================================
+/***
+*
+*
+*   General 'Octagon' Collision Shape
+*
+*
+***/
 static CollisionPlane octagon_planes[20];
 static mnode_t  octagon_nodes[10];
 static mnode_t  *octagon_headnode;
@@ -254,14 +260,10 @@ static mbrushside_t octagon_brushsides[10];
 static mleaf_t  octagon_leaf;
 static mleaf_t  octagon_emptyleaf;
 
-/*
-===================
-CM_InitOctagonBoxHull
-
-Set up the planes and nodes so that the 10 floats of an octagon box
-can just be stored out and get a proper clipping hull structure.
-===================
-*/
+/**
+*   @brief  Set up the planes and nodes so that the 10 floats of an octagon box
+*           can just be stored out and get a proper clipping hull structure.
+**/
 static void CM_InitOctagonBoxHull(void)
 {
     octagon_headnode = &octagon_nodes[0];
@@ -279,11 +281,10 @@ static void CM_InitOctagonBoxHull(void)
     for (int32_t i = 0; i < 6; i++) {
         int32_t side = i & 1;
 
-        // brush sides
+        // Brush Sides
         mbrushside_t *brushSide = &octagon_brushsides[i];
         brushSide->plane = &octagon_planes[i * 2 + side];
         brushSide->texinfo = &collisionModel.nullTextureInfo;
-//        brushSide->texinfo->c.flags = 0;
 
         // Nodes
         mnode_t *node = &octagon_nodes[i];
@@ -315,12 +316,12 @@ static void CM_InitOctagonBoxHull(void)
     for (int32_t i = 6; i < 10; i++) {
         int32_t side = i & 1;
 
-        // brush sides
+        // Brush Sides.
         mbrushside_t *brushSide = &octagon_brushsides[i];
         brushSide->plane = &octagon_planes[i * 2 + side];
         brushSide->texinfo = &collisionModel.nullTextureInfo;
  
-        // nodes
+        // Nodes.
         mnode_t *node = &octagon_nodes[i];
         node->plane = &octagon_planes[i * 2];
         node->children[side] = (mnode_t *)&octagon_emptyleaf;
@@ -351,13 +352,9 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
     };
 
     traceWork.cylinderOffset = offset;
-    traceWork.mins = mins - offset;
-    traceWork.maxs - offset;
-	//VectorCopy( offset, cms->oct_cmodel->cyl_offset );
-	//VectorCopy( size[0], cms->oct_cmodel->mins );
-	//VectorCopy( size[1], cms->oct_cmodel->maxs );
-    //octagon_headnode->cylinderOffset = offset;
-    
+    traceWork.mins = size[0];
+    traceWork.maxs - size[1];
+	
 	octagon_brushsides[0].plane->dist = size[1][0];
 	octagon_brushsides[1].plane->dist = -size[0][0];
 	octagon_brushsides[2].plane->dist = size[1][1];
@@ -395,11 +392,12 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 	VectorSet( octagon_brushsides[9].plane->normal, cosa, -sina, 0 );
 	octagon_brushsides[9].plane->dist = d;
 
-	//return cms->oct_cmodel;
     return octagon_headnode;
 }
 
-
+/**
+*   @return Pointer to the leaf matching vec3 'p'. Nullptr if it is called without a map loaded.
+**/
 mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p) {
     if (!cm->cache) {
         return &collisionModel.nullLeaf;       // server may call this without map loaded
@@ -407,14 +405,9 @@ mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p) {
     return BSP_PointLeaf(cm->cache->nodes, p);
 }
 
-/*
-=============
-CM_BoxLeafnums
-
-Fills in a list of all the leafs touched
-=============
-*/
-
+/**
+*   @brief  Fills in a list of all the leafs touched
+**/
 static void CM_BoxLeafs_r(mnode_t *node)
 {
     while (node->plane) {
@@ -438,6 +431,9 @@ static void CM_BoxLeafs_r(mnode_t *node)
     }
 }
 
+/**
+*   @brief  
+**/
 static int CM_BoxLeafs_headnode(const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize,
                                 mnode_t *headNode, mnode_t **topnode)
 {
@@ -458,66 +454,15 @@ static int CM_BoxLeafs_headnode(const vec3_t &mins, const vec3_t &maxs, mleaf_t 
     return boxLeafsWork.leafCount;
 }
 
+/**
+*   @brief  
+**/
 int CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize, mnode_t **topnode)
 {
     if (!cm->cache)     // map not loaded
         return 0;
     return CM_BoxLeafs_headnode(mins, maxs, list,
                                 listsize, cm->cache->nodes, topnode);
-}
-
-
-
-/*
-==================
-CM_PointContents
-
-==================
-*/
-int CM_PointContents(const vec3_t &p, mnode_t *headNode)
-{
-    if (!headNode) {
-        return 0;
-    }
-
-    mleaf_t *leaf = BSP_PointLeaf(headNode, p);
-
-    return leaf->contents;
-}
-
-/*
-==================
-CM_TransformedPointContents
-
-Handles offseting and rotation of the end points for moving and
-rotating entities
-==================
-*/
-int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t& origin, const vec3_t& angles)
-{
-    vec3_t temp = vec3_zero();
-    vec3_t forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
-
-    if (!headNode) {
-        return 0;
-    }
-
-    // subtract origin offset
-    vec3_t p_l = vec3_zero();
-    if (headNode == octagon_headnode) {
-        p_l = (p - origin) - traceWork.cylinderOffset;
-    } else {
-        p_l = p - origin;
-    } 
-
-    vec3_t axis[3];
-    // rotate start and end into the models frame of reference
-    if (headNode != box_headnode && headNode != octagon_headnode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
-        AnglesToAxis(angles, axis);
-        RotatePoint(p_l, axis);
-    }
-
-    return BSP_PointLeaf(headNode, p_l)->contents;
 }
 
 
@@ -537,7 +482,7 @@ static constexpr float DIST_EPSILON = 1.0f / 32.0f;
 
 
 /**
-*   @brief 
+*   @brief Clips the box to the brush if needed.
 **/
 static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1, const vec3_t &p2,
                               TraceResult *trace, mbrush_t *brush)
@@ -648,7 +593,7 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
 
 /**
-*   @brief 
+*   @brief Test whether trace is inside a brush box or not.
 **/
 static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3_t &p1,  TraceResult *trace, mbrush_t *brush) {
 
@@ -835,19 +780,19 @@ recheck:
         frac2 = 0;
     }
 
-    // move up to the node
-    frac = Clampf(frac);//clamp(frac, 0, 1);
+    // Move up to the node
+    frac = Clampf(frac);
 
     midf = p1f + (p2f - p1f) * frac;
-    mid = vec3_mix(p1, p2, frac);//LerpVector(p1, p2, frac, mid);
+    mid = vec3_mix(p1, p2, frac);
 
     CM_RecursiveHullCheck(node->children[side], p1f, midf, p1, mid);
 
-    // go past the node
-    frac2 = Clampf(frac2);//clamp(frac2, 0, 1);
+    // Go past the node
+    frac2 = Clampf(frac2);
 
     midf = p1f + (p2f - p1f) * frac2;
-    mid = vec3_mix(p1, p2, frac2); //LerpVector(p1, p2, frac2, mid);
+    mid = vec3_mix(p1, p2, frac2);
 
     CM_RecursiveHullCheck(node->children[side ^ 1], midf, p2f, mid, p2);
 }
@@ -857,15 +802,29 @@ recheck:
 /**
 *
 *
+* 
 *   Box Tracing & Entity Clipping.
 *
+* 
 *
 **/
-/*
-==================
-CM_BoxTrace
-==================
-*/
+/**
+*   @brief  Check for what brush contents reside at vec3 'p' inside given node list.
+**/
+int CM_PointContents(const vec3_t &p, mnode_t *headNode)
+{
+    if (!headNode) {
+        return 0;
+    }
+
+    mleaf_t *leaf = BSP_PointLeaf(headNode, p);
+
+    return leaf->contents;
+}
+
+/**
+*   @brief Executes a box trace.
+**/
 void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                  const vec3_t &mins, const vec3_t &maxs,
                  mnode_t *headNode, int brushmask)
@@ -939,10 +898,40 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
     }
 }
 
+/**
+*   @brief  Same as PointContents but also handles offsetting and rotation of the end points 
+*           for moving and rotating entities. (Brush Models are the only rotating entities.)
+**/
+int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t& origin, const vec3_t& angles)
+{
+    vec3_t temp = vec3_zero();
+    vec3_t forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
+
+    if (!headNode) {
+        return 0;
+    }
+
+    // subtract origin offset
+    vec3_t p_l = vec3_zero();
+    if (headNode == octagon_headnode) {
+        p_l = (p - origin) - traceWork.cylinderOffset;
+    } else {
+        p_l = p - origin;
+    } 
+
+    vec3_t axis[3];
+    // rotate start and end into the models frame of reference
+    if (headNode != box_headnode && headNode != octagon_headnode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
+        AnglesToAxis(angles, axis);
+        RotatePoint(p_l, axis);
+    }
+
+    return BSP_PointLeaf(headNode, p_l)->contents;
+}
 
 /**
-*   @brief  Handles offseting and rotation of the end points for moving and
-*           rotating entities
+*   @brief  Same as CM_TraceBox but also handles offsetting and rotation of the end points 
+*           for moving and rotating entities. (Brush Models are the only rotating entities.)
 **/
 void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                             const vec3_t &mins, const vec3_t &maxs,
@@ -1016,8 +1005,10 @@ void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct entity_s *en
 /**
 *
 *
+* 
 *   AREAPORTALS
 *
+* 
 *
 **/
 /**
@@ -1120,7 +1111,6 @@ qboolean CM_AreasConnected(cm_t *cm, int area1, int area2)
     return false;
 }
 
-
 /**
 *   @brief  Writes a length byte followed by a bit vector of all the areas
 *           that area in the same flood as the area parameter
@@ -1205,8 +1195,6 @@ void CM_SetPortalStates(cm_t *cm, byte *buffer, int bytes)
     FloodAreaConnections(cm);
 }
 
-
-
 /**
 *   @return True if any leaf under headNode has a cluster that is potentially visible
 **/
@@ -1229,7 +1217,6 @@ qboolean CM_HeadnodeVisible(mnode_t *node, byte *visbits)
     }
     return false;
 }
-
 
 /**
 *   @brief  The client will interpolate the view position, so we can't use a single PVS point
