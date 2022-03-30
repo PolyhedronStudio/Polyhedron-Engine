@@ -263,14 +263,16 @@ mnode_t *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs)
 *
 *
 ***/
-static CollisionPlane octagon_planes[20];
-static mnode_t  octagon_nodes[10];
-static mnode_t  *octagon_headnode;
-static mbrush_t octagon_brush;
-static mbrush_t *octagon_leafbrush;
-static mbrushside_t octagon_brushsides[10];
-static mleaf_t  octagon_leaf;
-static mleaf_t  octagon_emptyleaf;
+static struct OctagonHull {
+    CollisionPlane planes[20];
+    mnode_t  nodes[10];
+    mnode_t  *headNode;
+    mbrush_t brush;
+    mbrush_t *leafBrush;
+    mbrushside_t brushSides[10];
+    mleaf_t  leaf;
+    mleaf_t  emptyLeaf;
+} octagonHull = {};
 
 /**
 *   @brief  Set up the planes and nodes so that the 10 floats of an octagon box
@@ -278,47 +280,47 @@ static mleaf_t  octagon_emptyleaf;
 **/
 static void CM_InitOctagonBoxHull(void)
 {
-    octagon_headnode = &octagon_nodes[0];
+    octagonHull.headNode = &octagonHull.nodes[0];
 
-    octagon_brush.numsides = 10;
-    octagon_brush.firstbrushside = &octagon_brushsides[0];
-    octagon_brush.contents = BrushContents::Monster;
+    octagonHull.brush.numsides = 10;
+    octagonHull.brush.firstbrushside = &octagonHull.brushSides[0];
+    octagonHull.brush.contents = BrushContents::Monster;
 
-    octagon_leaf.firstleafbrush = &octagon_leafbrush;
-    octagon_leaf.numleafbrushes = 1;
-    octagon_leaf.contents = BrushContents::Monster;
+    octagonHull.leaf.firstleafbrush = &octagonHull.leafBrush;
+    octagonHull.leaf.numleafbrushes = 1;
+    octagonHull.leaf.contents = BrushContents::Monster;
 
-    octagon_leafbrush = &octagon_brush;
+    octagonHull.leafBrush = &octagonHull.brush;
 
     for (int32_t i = 0; i < 6; i++) {
         int32_t side = (i & 1);
 
         // Setup Brush Sides.
-        mbrushside_t *brushSide = &octagon_brushsides[i];
-        brushSide->plane = &octagon_planes[i * 2 + side];
+        mbrushside_t *brushSide = &octagonHull.brushSides[i];
+        brushSide->plane = &octagonHull.planes[i * 2 + side];
         brushSide->texinfo = &collisionModel.nullTextureInfo;
 
         // Setup Box Nodes.
-        mnode_t *node = &octagon_nodes[i];
-        node->plane = &octagon_planes[i * 2];
-        node->children[side] = (mnode_t *)&octagon_emptyleaf;
+        mnode_t *node = &octagonHull.nodes[i];
+        node->plane = &octagonHull.planes[i * 2];
+        node->children[side] = (mnode_t *)&octagonHull.emptyLeaf;
         if (i != 5) {
-            node->children[side ^ 1] = &octagon_nodes[i + 1];
+            node->children[side ^ 1] = &octagonHull.nodes[i + 1];
         } else {
-            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+            node->children[side ^ 1] = (mnode_t *)&octagonHull.leaf;
         }
 
-        // Plane A.
         if ((i & 1)) {
-        CollisionPlane *plane = &octagon_planes[i * 2];
-        plane->type = (i >> 1);
-        plane->normal[(i >> 1)] = 1;
+            // Plane A.
+            CollisionPlane *plane = &octagonHull.planes[i * 2];
+            plane->type = (i >> 1);
+            plane->normal[(i >> 1)] = 1;
         }else{
-        // Plane B.
-        CollisionPlane *plane = &octagon_planes[i * 2 + 1];
-        plane->type = 3 + (i >> 1);
-        plane->signBits = (1 << (i >> 1));
-        plane->normal[(i >> 1)] = -1;
+            // Plane B.
+            CollisionPlane *plane = &octagonHull.planes[i * 2 + 1];
+            plane->type = 3 + (i >> 1);
+            plane->signBits = (1 << (i >> 1));
+            plane->normal[(i >> 1)] = -1;
         }
     }
 
@@ -328,29 +330,29 @@ static void CM_InitOctagonBoxHull(void)
         int32_t side = (i & 1);
 
         // Setup Brush Sides.
-        mbrushside_t *brushSide = &octagon_brushsides[i];
-        brushSide->plane = &octagon_planes[i * 2 + side];
+        mbrushside_t *brushSide = &octagonHull.brushSides[i];
+        brushSide->plane = &octagonHull.planes[i * 2 + side];
         brushSide->texinfo = &collisionModel.nullTextureInfo;
 
         // Setup Box Nodes.
-        mnode_t *node = &octagon_nodes[i];
-        node->plane = &octagon_planes[i * 2];
-        node->children[side] = (mnode_t *)&octagon_emptyleaf;
+        mnode_t *node = &octagonHull.nodes[i];
+        node->plane = &octagonHull.planes[i * 2];
+        node->children[side] = (mnode_t *)&octagonHull.emptyLeaf;
         if (i != 9) {
-            node->children[side ^ 1] = &octagon_nodes[i + 1];
+            node->children[side ^ 1] = &octagonHull.nodes[i + 1];
         } else {
-            node->children[side ^ 1] = (mnode_t *)&octagon_leaf;
+            node->children[side ^ 1] = (mnode_t *)&octagonHull.leaf;
         }
 
         // Plane A.
-        CollisionPlane *plane = &octagon_planes[i * 2];
+        CollisionPlane *plane = &octagonHull.planes[i * 2];
         plane->type = PLANE_NON_AXIAL;
         plane->normal = oct_dirs[i - 6];
         //SetPlaneType(plane);
         SetPlaneSignbits(plane);
 
         // Plane B.
-        plane = &octagon_planes[i * 2 + side];
+        plane = &octagonHull.planes[i * 2 + 1];
         plane->type = PLANE_NON_AXIAL;
         plane->normal = oct_dirs[(i - 6)];
         //plane->signBits = (1 << (i >> 1)); //SetPlaneSignbits(plane);
@@ -360,43 +362,52 @@ static void CM_InitOctagonBoxHull(void)
 }
 
 /**
+*   @brief  Temp Helper function. (Needs to be moved elsewhere if it is ia keeper.)
+**/
+static inline float DistForOctaPlane(CollisionPlane &plane, const vec3_t &mins, const vec3_t &maxs) {
+    return vec3_dot(plane.normal, {(plane.signBits & 1) ? mins[0] : maxs[0], (plane.signBits & 2) ? mins[1] : maxs[1], (plane.signBits & 4) ? mins[2] : maxs[2]});//-d;//d;
+}
+
+/**
 *   @brief  Credits go to QFusion Engine of course.
 **/
 mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
-	const vec3_t offset = vec3_scale(mins + maxs, 0.5);
+	const vec3_t offset = vec3_scale(mins + maxs, 0.5f);
     const vec3_t size[2] = {
-        mins - offset,
-        maxs - offset
+        //mins - offset,
+        //maxs - offset
+        vec3_scale(mins, 0.5f),
+        vec3_scale(maxs, 0.5f),
     };
 
     traceWork.cylinderOffset = offset;
 	
-	//octagon_brushsides[0].plane->dist = size[1][0];
-	//octagon_brushsides[1].plane->dist = -size[0][0];
-	//octagon_brushsides[2].plane->dist = size[1][1];
-	//octagon_brushsides[3].plane->dist = -size[0][1];
-	//octagon_brushsides[4].plane->dist = size[1][2];
-	//octagon_brushsides[5].plane->dist = -size[0][2];
+	//octagon_brushsides[0].plane->dist = maxs[0];
+	//octagon_brushsides[1].plane->dist = -mins[0];
+	//octagon_brushsides[2].plane->dist = maxs[1];
+	//octagon_brushsides[3].plane->dist = -mins[1];
+	//octagon_brushsides[4].plane->dist = maxs[2];
+	//octagon_brushsides[5].plane->dist = -mins[2];
 
-    octagon_planes[0].dist = size[1][0];
-    octagon_planes[1].dist = -size[1][0];
-    octagon_planes[2].dist = size[0][0];
-    octagon_planes[3].dist = -size[0][0];
-    octagon_planes[4].dist = size[1][1];
-    octagon_planes[5].dist = -size[1][1];
-    octagon_planes[6].dist = size[0][1];
-    octagon_planes[7].dist = -size[0][1];
-    octagon_planes[8].dist = size[1][2];
-    octagon_planes[9].dist = -size[1][2];
-    octagon_planes[10].dist = size[0][2];
-    octagon_planes[11].dist = -size[0][2];
+    octagonHull.planes[0].dist = maxs[0];
+    octagonHull.planes[1].dist = -maxs[0];
+    octagonHull.planes[2].dist = mins[0];
+    octagonHull.planes[3].dist = -mins[0];
+    octagonHull.planes[4].dist = maxs[1];
+    octagonHull.planes[5].dist = -maxs[1];
+    octagonHull.planes[6].dist = mins[1];
+    octagonHull.planes[7].dist = -mins[1];
+    octagonHull.planes[8].dist = maxs[2];
+    octagonHull.planes[9].dist = -maxs[2];
+    octagonHull.planes[10].dist = mins[2];
+    octagonHull.planes[11].dist = -mins[2];
 
-	const float a = size[1][0];			   // halfx
-	const float b = size[1][1];			   // halfy
-	float d = sqrt( a * a + b * b ); // hypothenuse
+	const float a = maxs[0];			   // halfx
+	const float b = maxs[1];			   // halfy
+	float dist = sqrt( a * a + b * b ); // hypothenuse
 
-	float cosa = a / d;
-	float sina = b / d;
+	float cosa = a / dist;
+	float sina = b / dist;
 
 	// swap sin and cos, which is the same thing as adding pi/2 radians to the original angle
 	const float t = sina;
@@ -404,47 +415,43 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
 	cosa = t;
 
 	// elleptical radius
-	d = a * b / sqrt( a * a * cosa * cosa + b * b * sina * sina );
+	dist = a * b / sqrt( a * a * cosa * cosa + b * b * sina * sina );
 	// d = a * b / sqrt( a * a  + b * b ); // produces a rectangle, inscribed at middle points
 
 	// the following should match normals and signbits set in CM_InitOctagonHull
+    octagonHull.planes[12].normal   = vec3_t{cosa, sina, 0.f};
+    octagonHull.planes[12].dist     = DistForOctaPlane(octagonHull.planes[12], size[0], size[1]);
+    octagonHull.planes[13].normal   = vec3_t{cosa, sina, 0.f};
+    octagonHull.planes[13].dist     = DistForOctaPlane(octagonHull.planes[13], size[0], size[1]);
 
-	//VectorSet( octagon_brushsides[6].plane->normal, cosa, sina, 0 );
-    octagon_planes[12].normal   = vec3_t{cosa, sina, 0.f};
-    octagon_planes[12].dist     = d;
-    octagon_planes[13].normal   = vec3_t{cosa, sina, 0.f};
-    octagon_planes[13].dist     = d;
+    octagonHull.planes[14].normal   = vec3_t{-cosa, sina, 0.f};
+    octagonHull.planes[14].dist     = DistForOctaPlane(octagonHull.planes[14], size[0], size[1]);
+    octagonHull.planes[15].normal   = vec3_t{-cosa, sina, 0.f};
+    octagonHull.planes[15].dist     = DistForOctaPlane(octagonHull.planes[15], size[0], size[1]);
 
-    octagon_planes[14].normal   = vec3_t{-cosa, sina, 0.f};
-    octagon_planes[14].dist     = d;
-    octagon_planes[15].normal   = vec3_t{-cosa, sina, 0.f};
-    octagon_planes[15].dist     = d;
+    octagonHull.planes[16].normal   = vec3_t{-cosa, -sina, 0.f};
+    octagonHull.planes[16].dist     = DistForOctaPlane(octagonHull.planes[16], size[0], size[1]);
+    octagonHull.planes[17].normal   = vec3_t{-cosa, -sina, 0.f};
+    octagonHull.planes[17].dist     = DistForOctaPlane(octagonHull.planes[17], size[0], size[1]);
 
-    octagon_planes[16].normal   = vec3_t{-cosa, -sina, 0.f};
-    octagon_planes[16].dist     = d;
-    octagon_planes[17].normal   = vec3_t{-cosa, -sina, 0.f};
-    octagon_planes[17].dist     = d;
+    octagonHull.planes[18].normal   = vec3_t{cosa, -sina, 0.f};
+    octagonHull.planes[18].dist     = DistForOctaPlane(octagonHull.planes[18], size[0], size[1]);
+    octagonHull.planes[19].normal   = vec3_t{cosa, -sina, 0.f};
+    octagonHull.planes[19].dist     = DistForOctaPlane(octagonHull.planes[19], size[0], size[1]);
 
-    octagon_planes[18].normal   = vec3_t{cosa, -sina, 0.f};
-    octagon_planes[18].dist     = d;
-    octagon_planes[19].normal   = vec3_t{cosa, -sina, 0.f};
-    octagon_planes[19].dist     = d;
- //   octagon_brushsides[6].plane->normal = vec3_t{cosa, sina, 0.f};
- //   octagon_brushsides[6].plane->dist = d;
+    //octagon_brushsides[6].plane->normal = vec3_t{cosa, sina, 0.f};
+    //octagon_brushsides[6].plane->dist = d;
 
-	////VectorSet( octagon_brushsides[7].plane->normal, -cosa, sina, 0 );
- //   octagon_brushsides[7].plane->normal = vec3_t{-cosa, sina, 0.f};
+    //octagon_brushsides[7].plane->normal = vec3_t{-cosa, sina, 0.f};
 	//octagon_brushsides[7].plane->dist = d;
 
-	////VectorSet( octagon_brushsides[8].plane->normal, -cosa, -sina, 0 );
- //   octagon_brushsides[8].plane->normal = vec3_t{-cosa, -sina, 0.f};
+    //octagon_brushsides[8].plane->normal = vec3_t{-cosa, -sina, 0.f};
 	//octagon_brushsides[8].plane->dist = d;
 
-	////VectorSet( octagon_brushsides[9].plane->normal, cosa, -sina, 0 );
- //   octagon_brushsides[9].plane->normal = vec3_t{cosa, -sina, 0.f};
+    //octagon_brushsides[9].plane->normal = vec3_t{cosa, -sina, 0.f};
 	//octagon_brushsides[9].plane->dist = d;
 
-    return octagon_headnode;
+    return octagonHull.headNode;
 }
 
 /**
@@ -1035,7 +1042,7 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
                  mnode_t *headNode, int brushMask)
 {
     // Determine whether we are tracing world or not.
-    bool worldTrace = !(headNode != box_headnode && headNode != octagon_headnode);
+    bool worldTrace = !(headNode != box_headnode && headNode != octagonHull.headNode);
 
     // For multi-check avoidance.
     collisionModel.checkCount++;
@@ -1158,7 +1165,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 
     // subtract origin offset
     vec3_t p_l = vec3_zero();
-    if (headNode == octagon_headnode) {
+    if (headNode == octagonHull.headNode) {
         p_l = (p - origin) - traceWork.cylinderOffset;
     } else {
         p_l = p - origin;
@@ -1166,7 +1173,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 
     vec3_t axis[3];
     // rotate start and end into the models frame of reference
-    if (headNode != box_headnode && headNode != octagon_headnode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
+    if (headNode != box_headnode && headNode != octagonHull.headNode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
         AnglesToAxis(angles, axis);
         RotatePoint(p_l, axis);
     }
@@ -1198,7 +1205,7 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     vec3_t end_l = vec3_zero();
     vec3_t start_l = vec3_zero();
 
-    if (headNode == octagon_headnode) {
+    if (headNode == octagonHull.headNode) {
         // Octagon Cylinder offset.
         start_l = start - traceWork.cylinderOffset;
         end_l   = end - traceWork.cylinderOffset;
@@ -1212,7 +1219,7 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     end_l   -= origin;
 
     // Rotate start and end into the models frame of reference.
-    if ((headNode != box_headnode && headNode != octagon_headnode) && (angles[0] || angles[1] || angles[2])) {
+    if ((headNode != box_headnode && headNode != octagonHull.headNode) && (angles[0] || angles[1] || angles[2])) {
         rotated = true;
 
         AnglesToAxis(angles, axis);
