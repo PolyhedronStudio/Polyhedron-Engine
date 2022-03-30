@@ -371,18 +371,6 @@ void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMove
 **/
 static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
 {
-    //// Assume that x/y are equal and symetric
-    //int32_t XY = Clampi(maxs[0], 1, 255);
-
-    //// Z is not symetric (Boundingbox height.)
-    //int32_t ZDown = Clampi(-mins[2], 1, 255);
-
-    //// And z maxs can be negative...
-    //int32_t ZUp = Clampi(maxs[2] + 32768, 1, 65535);
-
-    //// Return packed bounding box.
-    //return (ZUp << 16) | (ZDown << 8) | XY;
-   
     // Assume that x/y are equal and symetric
     int32_t XY = Clampi(maxs[0] / 8, 1, 31);
 
@@ -410,20 +398,11 @@ static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& 
     int32_t ZDown = 8 * ((solid >> 5) & 31);
     int32_t ZUp = 8 * ((solid >> 10) & 63) - 32;
 
+    // Set bbox values.
     mins[0] = mins[1] = -XY;
     maxs[0] = maxs[1] = XY;
     mins[2] = -ZDown;
     maxs[2] = ZUp;
-    //// Unpack.
-    //int32_t XY = solid & 255;
-    //int32_t ZDown = (solid >> 8) & 255;
-    //int32_t ZUp = ((solid >> 16) & 65535) - 32768;
-
-    //// Store unpacked values.
-    //mins[0] = mins[1] = -XY;
-    //maxs[0] = maxs[1] = XY;
-    //mins[2] = -ZDown;
-    //maxs[2] = ZUp;
 }
 
 //
@@ -431,21 +410,17 @@ static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& 
 //
 //static inline int MSG_PackBoundingBox16(const vec3_t &mins, const vec3_t &maxs)
 //{
-//    int x, zd, zu;
-//
-//    // assume that x/y are equal and symetric
-//    x = maxs[0] / 8;
-//    clamp(x, 1, 31);
-//
-//    // z is not symetric
-//    zd = -mins[2] / 8;
-//    clamp(zd, 1, 31);
-//
-//    // and z maxs can be negative...
-//    zu = (maxs[2] + 32) / 8;
-//    clamp(zu, 1, 63);
-//
-//    return (zu << 10) | (zd << 5) | x;
+//// Assume that x/y are equal and symetric
+//int32_t XY = Clampi(maxs[0], 1, 255);
+
+//// Z is not symetric (Boundingbox height.)
+//int32_t ZDown = Clampi(-mins[2], 1, 255);
+
+//// And z maxs can be negative...
+//int32_t ZUp = Clampi(maxs[2] + 32768, 1, 65535);
+
+//// Return packed bounding box.
+//return (ZUp << 16) | (ZDown << 8) | XY;
 //}
 
 //
@@ -453,14 +428,14 @@ static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& 
 //
 //static inline void MSG_UnpackBoundingBox16(int solid, vec3_t &mins, vec3_t &maxs)
 //{
-//    int x, zd, zu;
-//
-//    x = 8 * (solid & 31);
-//    zd = 8 * ((solid >> 5) & 31);
-//    zu = 8 * ((solid >> 10) & 63) - 32;
-//
-//    mins[0] = mins[1] = -x;
-//    maxs[0] = maxs[1] = x;
-//    mins[2] = -zd;
-//    maxs[2] = zu;
+//// Unpack.
+//int32_t XY = solid & 255;
+//int32_t ZDown = (solid >> 8) & 255;
+//int32_t ZUp = ((solid >> 16) & 65535) - 32768;
+
+//// Store unpacked values.
+//mins[0] = mins[1] = -XY;
+//maxs[0] = maxs[1] = XY;
+//mins[2] = -ZDown;
+//maxs[2] = ZUp;
 //}

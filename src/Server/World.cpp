@@ -296,6 +296,15 @@ void PF_LinkEntity(Entity *ent)
             sent->solid32 = MSG_PackBoundingBox32(ent->mins, ent->maxs);
         }
         break;
+    case Solid::OctagonBox:
+        if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
+            ent->state.solid = 0;
+            sent->solid32 = 0;
+        } else {
+            ent->state.solid = MSG_PackBoundingBox32(ent->mins, ent->maxs);
+            sent->solid32 = MSG_PackBoundingBox32(ent->mins, ent->maxs);
+        }
+        break;
     case Solid::BSP:
         ent->state.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
         sent->solid32 = PACKED_BBOX;     // FIXME: use 255?
