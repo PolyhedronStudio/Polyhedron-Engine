@@ -364,24 +364,35 @@ void    MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMove
 *       8*(bits 0-4) is x/y radius
 *       8*(bits 5-9) is z down distance, 8(bits10-15) is z up
 *       
-*       LinkEntity sets this properly
+*   LinkEntity sets this properly
 * 
 *   @param[in]  mins The mins of the bounding box to pack.
 *   @param[in]  maxs The maxs of the bounding box to pack.
 **/
 static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
 {
+    //// Assume that x/y are equal and symetric
+    //int32_t XY = Clampi(maxs[0], 1, 255);
+
+    //// Z is not symetric (Boundingbox height.)
+    //int32_t ZDown = Clampi(-mins[2], 1, 255);
+
+    //// And z maxs can be negative...
+    //int32_t ZUp = Clampi(maxs[2] + 32768, 1, 65535);
+
+    //// Return packed bounding box.
+    //return (ZUp << 16) | (ZDown << 8) | XY;
+   
     // Assume that x/y are equal and symetric
-    int32_t XY = Clampi(maxs[0], 1, 255);
+    int32_t XY = Clampi(maxs[0] / 8, 1, 31);
 
-    // Z is not symetric (Boundingbox height.)
-    int32_t ZDown = Clampi(-mins[2], 1, 255);
+    // Z is not symetric
+    int32_t ZDown = Clampi(- mins[2] / 8, 1, 31);
 
-    // And z maxs can be negative...
-    int32_t ZUp = Clampi(maxs[2] + 32768, 1, 65535);
+    // And Z maxs can be negative...
+    int32_t ZUp = Clampi((maxs[2] + 32) / 8, 1, 63);
 
-    // Return packed bounding box.
-    return (ZUp << 16) | (ZDown << 8) | XY;
+    return (ZUp << 10) | (ZDown << 5) | XY;
 }
 
 /**
@@ -394,15 +405,25 @@ static inline int MSG_PackBoundingBox32(const vec3_t &mins, const vec3_t &maxs)
 static inline void MSG_UnpackBoundingBox32(int32_t solid, vec3_t& mins, vec3_t& maxs)
 {
     // Unpack.
-    int32_t XY = solid & 255;
-    int32_t ZDown = (solid >> 8) & 255;
-    int32_t ZUp = ((solid >> 16) & 65535) - 32768;
+    int32_t XY = 8 * (solid & 31);
 
-    // Store unpacked values.
+    int32_t ZDown = 8 * ((solid >> 5) & 31);
+    int32_t ZUp = 8 * ((solid >> 10) & 63) - 32;
+
     mins[0] = mins[1] = -XY;
     maxs[0] = maxs[1] = XY;
     mins[2] = -ZDown;
     maxs[2] = ZUp;
+    //// Unpack.
+    //int32_t XY = solid & 255;
+    //int32_t ZDown = (solid >> 8) & 255;
+    //int32_t ZUp = ((solid >> 16) & 65535) - 32768;
+
+    //// Store unpacked values.
+    //mins[0] = mins[1] = -XY;
+    //maxs[0] = maxs[1] = XY;
+    //mins[2] = -ZDown;
+    //maxs[2] = ZUp;
 }
 
 //

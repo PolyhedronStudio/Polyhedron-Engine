@@ -83,7 +83,7 @@ void MiscExplosionBox::Spawn() {
         // Mins.
         { -16.f, -16.f, 0.f },
         // Maxs.
-        { 16.f, 16.f, 32.f }
+        { 16.f, 16.f, 40.f }
     );
 
     //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
