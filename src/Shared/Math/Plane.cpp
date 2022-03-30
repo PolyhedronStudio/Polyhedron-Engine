@@ -28,27 +28,27 @@ void SetPlaneType(CollisionPlane* plane)
 
 void SetPlaneSignbits(CollisionPlane* plane)
 {
-    //int bits = 0;
+    int32_t bits = 0;
 
-    //if (plane->normal.xyz[0] < 0) {
-    //    bits |= 1;
-    //}
-    //if (plane->normal.xyz[1] < 0) {
-    //    bits |= 2;
-    //}
-    //if (plane->normal.xyz[2] < 0) {
-    //    bits |= 4;
-    //}
+    if (plane->normal.xyz[0] < 0) {
+        bits |= 1;
+    }
+    if (plane->normal.xyz[1] < 0) {
+        bits |= 2;
+    }
+    if (plane->normal.xyz[2] < 0) {
+        bits |= 4;
+    }
 
-    //plane->signBits = bits;
+    plane->signBits = bits;
 
 	// For fast box on planeside test
-    plane->signBits = 0;
+    /*plane->signBits = 0;
 	for(int32_t j = 0; j < 3; j++ ) {
 		if( plane->normal[j] < 0 ) {
 			plane->signBits |= (1 << j);
 		}
-	}
+	}*/
 }
 
 /*

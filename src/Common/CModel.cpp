@@ -310,18 +310,18 @@ static void CM_InitOctagonBoxHull(void)
             node->children[side ^ 1] = (mnode_t *)&octagonHull.leaf;
         }
 
-        if ((i & 1)) {
+        //if ((i & 1)) {
             // Plane A.
             CollisionPlane *plane = &octagonHull.planes[i * 2];
             plane->type = (i >> 1);
             plane->normal[(i >> 1)] = 1;
-        }else{
+        //}else{
             // Plane B.
-            CollisionPlane *plane = &octagonHull.planes[i * 2 + 1];
+            plane = &octagonHull.planes[i * 2 + 1];
             plane->type = 3 + (i >> 1);
             plane->signBits = (1 << (i >> 1));
             plane->normal[(i >> 1)] = -1;
-        }
+        //}
     }
 
     const vec3_t oct_dirs[4] = { { 1, 1, 0 }, { -1, 1, 0 }, { -1, -1, 0 }, { 1, -1, 0 } };
@@ -346,14 +346,14 @@ static void CM_InitOctagonBoxHull(void)
 
         // Plane A.
         CollisionPlane *plane = &octagonHull.planes[i * 2];
-        plane->type = PLANE_NON_AXIAL;
+        plane->type = 3;// + (i >> 1);
         plane->normal = oct_dirs[i - 6];
         //SetPlaneType(plane);
         SetPlaneSignbits(plane);
 
         // Plane B.
         plane = &octagonHull.planes[i * 2 + 1];
-        plane->type = PLANE_NON_AXIAL;
+        plane->type = 3;// + (i >> 1);
         plane->normal = oct_dirs[(i - 6)];
         //plane->signBits = (1 << (i >> 1)); //SetPlaneSignbits(plane);
         //SetPlaneType(plane);
@@ -422,22 +422,22 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
     octagonHull.planes[12].normal   = vec3_t{cosa, sina, 0.f};
     octagonHull.planes[12].dist     = DistForOctaPlane(octagonHull.planes[12], size[0], size[1]);
     octagonHull.planes[13].normal   = vec3_t{cosa, sina, 0.f};
-    octagonHull.planes[13].dist     = DistForOctaPlane(octagonHull.planes[13], size[0], size[1]);
+    octagonHull.planes[13].dist     = -1;//DistForOctaPlane(octagonHull.planes[13], size[0], size[1]);
 
     octagonHull.planes[14].normal   = vec3_t{-cosa, sina, 0.f};
-    octagonHull.planes[14].dist     = DistForOctaPlane(octagonHull.planes[14], size[0], size[1]);
+    octagonHull.planes[14].dist     = -1;//DistForOctaPlane(octagonHull.planes[14], size[0], size[1]);
     octagonHull.planes[15].normal   = vec3_t{-cosa, sina, 0.f};
     octagonHull.planes[15].dist     = DistForOctaPlane(octagonHull.planes[15], size[0], size[1]);
 
     octagonHull.planes[16].normal   = vec3_t{-cosa, -sina, 0.f};
-    octagonHull.planes[16].dist     = DistForOctaPlane(octagonHull.planes[16], size[0], size[1]);
+    octagonHull.planes[16].dist     = -1;//DistForOctaPlane(octagonHull.planes[16], size[0], size[1]);
     octagonHull.planes[17].normal   = vec3_t{-cosa, -sina, 0.f};
     octagonHull.planes[17].dist     = DistForOctaPlane(octagonHull.planes[17], size[0], size[1]);
 
     octagonHull.planes[18].normal   = vec3_t{cosa, -sina, 0.f};
     octagonHull.planes[18].dist     = DistForOctaPlane(octagonHull.planes[18], size[0], size[1]);
     octagonHull.planes[19].normal   = vec3_t{cosa, -sina, 0.f};
-    octagonHull.planes[19].dist     = DistForOctaPlane(octagonHull.planes[19], size[0], size[1]);
+    octagonHull.planes[19].dist     = -1;//DistForOctaPlane(octagonHull.planes[19], size[0], size[1]);
 
     //octagon_brushsides[6].plane->normal = vec3_t{cosa, sina, 0.f};
     //octagon_brushsides[6].plane->dist = d;
