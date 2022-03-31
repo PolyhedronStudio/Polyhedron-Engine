@@ -15,6 +15,12 @@
 
 
 
+//! Used for returning vectors from a const vec3_t & reference.
+vec3_t CLGBaseEntity::ZeroVec3 = vec3_zero();
+
+//! Used for returning strings from a const std::string & reference.
+std::string CLGBaseEntity::EmptyString = "";
+
 /**
 *
 *   Constructor/Destructor AND TypeInfo related.

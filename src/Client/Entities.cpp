@@ -54,7 +54,7 @@ static inline void Entity_UpdateNew(ClientEntity *clEntity, const EntityState &s
 {
     static int32_t entity_ctr = 0;
     clEntity->clientEntityNumber = ++entity_ctr; //state.number; // used to be: clEntity->id = ++entity_ctr;
-    clEntity->trailcount = 1024;
+    clEntity->trailCount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
     CL_GM_UpdateFromState(clEntity, state);
@@ -96,7 +96,7 @@ static inline void Entity_UpdateExisting(ClientEntity *entity, const EntityState
         || cl_nolerp->integer == 1) 
     {
         // Some data changes will force no lerping.
-        entity->trailcount = 1024;     // Used for diminishing rocket / grenade trails
+        entity->trailCount = 1024;     // Used for diminishing rocket / grenade trails
 
         // Duplicate the current state so lerping doesn't hurt anything
         entity->prev = state;

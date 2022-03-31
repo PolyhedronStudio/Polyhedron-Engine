@@ -312,18 +312,12 @@ qboolean CLG_RunThink(IClientGameEntity *ent)
         return false;
     }
 
-    //// Fetch think time.
-    //const GameTime thinkTime = ent->GetNextThinkTime();
-
-    //if (thinkTime <= 0s || thinkTime > level.time + 0.001s) {
-    //    //Com_DPrint("(thinkTime <= 0) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
-    //    return true;
-    //} else if (thinkTime > level.time + 0.001s) {// Used to be: if (thinkTime > level.time + 0.001)
-    //    //Com_DPrint("(thinkTime > level.time + 0.001) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
-    //    return true;
-    //}
+    // Fetch think time.
     GameTime nextThinkTime = ent->GetNextThinkTime();
 
+    // Should we think at all? 
+    // Condition A: Below 0, aka -(1+) means no thinking.
+    // Condition B: > level.time, means we're still waiting before we can think.
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
 		return true;
     }
@@ -331,35 +325,35 @@ qboolean CLG_RunThink(IClientGameEntity *ent)
     // Reset think time before thinking.
     ent->SetNextThinkTime(GameTime::zero());
 
-//#if _DEBUG
-//    if ( !ent->HasThinkCallback() ) {
-//        // Write the index, programmers may look at that thing first
-//        std::string errorString = "";
-//        if (ent->GetPODEntity()) {
-//            errorString += "entity (index " + std::to_string(ent->GetNumber());
-//        } else {
-//            errorString += "entity has no ServerEntity ";
-//        }
-//
-//        // Write the targetname as well, if it exists
-//        if ( !ent->GetTargetName().empty() ) {
-//            errorString += ", name '" + ent->GetTargetName() + "'";
-//        }
-//
-//        // Write down the C++ class name too
-//        errorString += ", class '";
-//        errorString += ent->GetTypeInfo()->classname;
-//        errorString += "'";
-//
-//        // Close it off and state what's actually going on
-//        errorString += ") has a nullptr think callback \n";
-//    //    
-//        Com_WPrint( errorString.c_str() );
-//
-//        // Return true.
-//        return true;
-//    }
-//#endif
+#if _DEBUG
+    if ( !ent->HasThinkCallback() ) {
+        // Write the index, programmers may look at that thing first
+        std::string errorString = "";
+        if (ent->GetPODEntity()) {
+            errorString += "entity (index " + std::to_string(ent->GetNumber());
+        } else {
+            errorString += "entity has no ServerEntity ";
+        }
+
+        // Write the targetname as well, if it exists
+        if ( !ent->GetTargetName().empty() ) {
+            errorString += ", name '" + ent->GetTargetName() + "'";
+        }
+
+        // Write down the C++ class name too
+        errorString += ", class '";
+        errorString += ent->GetTypeInfo()->classname;
+        errorString += "'";
+
+        // Close it off and state what's actually going on
+        errorString += ") has a nullptr think callback \n";
+        
+        Com_WPrint( errorString.c_str() );
+
+        // Return true.
+        return true;
+    }
+#endif
 
     // Last but not least, let the entity execute its think behavior callback.
     ent->Think();

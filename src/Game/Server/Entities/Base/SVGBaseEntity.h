@@ -71,8 +71,11 @@ public:
     //bool IsSubclassOf() const {
     //    return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
     //}
+     
 
 
+    //! Used for returning vectors from a const vec3_t & reference.
+    static vec3_t ZeroVec3;
 
     /**
     *
@@ -645,7 +648,7 @@ public:
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline const vec3_t& GetEndPosition() { return vec3_zero(); }
+    virtual inline const vec3_t& GetEndPosition() { return ZeroVec3; }
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
@@ -653,7 +656,7 @@ public:
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline const vec3_t& GetStartPosition() { return vec3_zero(); }
+    virtual inline const vec3_t& GetStartPosition() { return ZeroVec3; }
 
 
 

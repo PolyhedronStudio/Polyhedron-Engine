@@ -99,7 +99,7 @@ protected:
     //! The time the current(thus also last) animation started.
     Frametime animationStartTime = Frametime::zero();
 
-    //! The framerate the current animation is playing at.
+    //! The time an animation frame takes the current animation is playing at.
     Frametime animationFrametime = 1s;
 
     //! Are we animating?

@@ -34,21 +34,26 @@ public:
     // Runtime type information
 	DefineMapClass( "CLGBaseEntity", CLGBaseEntity, IClientGameEntity);
 
-    // Checks if this entity class is exactly the given class
-    // @param entityClass: an entity class which must inherint from SVGBaseEntity
-    template<typename entityClass>
-    bool IsClass() const { // every entity has a ClassInfo, thanks to the DefineXYZ macro
-        return GetTypeInfo()->IsClass( entityClass::ClassInfo );
-    }
+    //// Checks if this entity class is exactly the given class
+    //// @param entityClass: an entity class which must inherint from SVGBaseEntity
+    //template<typename entityClass>
+    //bool IsClass() const { // every entity has a ClassInfo, thanks to the DefineXYZ macro
+    //    return GetTypeInfo()->IsClass( entityClass::ClassInfo );
+    //}
 
-    // Checks if this entity class is a subclass of another, or is the same class
-    // @param entityClass: an entity class which must inherint from SVGBaseEntity
-    template<typename entityClass>
-    bool IsSubclassOf() const {
-        return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
-    }
+    //// Checks if this entity class is a subclass of another, or is the same class
+    //// @param entityClass: an entity class which must inherint from SVGBaseEntity
+    //template<typename entityClass>
+    //bool IsSubclassOf() const {
+    //    return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
+    //}
 
+    
 
+    //! Used for returning vectors from a const vec3_t & reference.
+    static vec3_t ZeroVec3;
+    //! Used for returning strings from a const std::string & reference.
+    static std::string EmptyString;
 
     /**
     *
@@ -216,52 +221,88 @@ public:
     /**
     *   @returns The local center(world-space) of the entity's Bounding Box.
     **/
-    virtual vec3_t          GetAbsoluteCenter() { return vec3_zero(); };
+    virtual vec3_t GetAbsoluteCenter() override {
+        return vec3_scale(GetAbsoluteMax() + GetAbsoluteMin(), 0.5f);
+    };
 
     /**
     *   @brief Get/Set: BoundingBox Mins
     **/
-    virtual const vec3_t&   GetAbsoluteMin() { return vec3_zero(); };
-    virtual void            SetAbsoluteMin(const vec3_t &absMin) {};
+    virtual const vec3_t& GetAbsoluteMin() override { 
+        if (podEntity) {
+            return podEntity->absMin;
+        } else {
+            return ZeroVec3;
+        }
+    };
+    virtual void SetAbsoluteMin(const vec3_t &absMin) {
+        if (podEntity) {
+            podEntity->absMin = absMin;
+        }
+    };
 
     /**
     *   @brief Get/Set: BoundingBox Maxs
     **/
-    virtual const vec3_t&   GetAbsoluteMax() { return vec3_zero(); };
-    virtual void            SetAbsoluteMax(const vec3_t &absMax) {};
+    virtual const vec3_t& GetAbsoluteMax() override { 
+        if (podEntity) {
+            return podEntity->absMax;
+        } else {
+            return ZeroVec3;
+        }
+    };
+    virtual void SetAbsoluteMax(const vec3_t &absMax) override {
+        if (podEntity) {
+            podEntity->absMax = absMax;
+        }
+    };
 
     /**
     *   @brief Get/Set: Activator
     **/
-    virtual ClassEntity*    GetActivator() { return nullptr; };
-    virtual void            SetActivator(ClassEntity* activator) {};
+    virtual ClassEntity* GetActivator() { return nullptr; };
+    virtual void SetActivator(ClassEntity* activator) {};
 
     /**
     *   @brief Get/Set: Angles
     **/
-    virtual const vec3_t&   GetAngles() { return vec3_zero(); };
-    virtual void            SetAngles(const vec3_t& angles) {};
-
+    virtual const vec3_t& GetAngles() override { 
+        if (podEntity) {
+            return podEntity->current.angles;
+        } else {
+            return ZeroVec3;
+        }
+    };
+    virtual void SetAngles(const vec3_t& angles) override { 
+        if (podEntity) {
+            podEntity->current.angles = angles;
+        }
+    };
     /**
     *   @brief Get/Set: Angular Velocity
     **/
-    virtual const vec3_t&   GetAngularVelocity() { return vec3_zero(); };
-    virtual void            SetAngularVelocity(const vec3_t& angularVelocity) {};
+    virtual const vec3_t& GetAngularVelocity() override { return ZeroVec3; };// { 
+        //return angularVelocity;
+    //};
+    virtual void SetAngularVelocity(const vec3_t& angularVelocity) override {};// {
+        // This minght need to be networked in the future?
+        //this->angularVelocity = angularVelocity;
+    //};
 
     /**
     *   @return The local center(model-space) of the entity's Bounding Box.
     **/
-    virtual vec3_t          GetCenter() { return vec3_zero(); };
+    virtual vec3_t GetCenter() { return ZeroVec3; };
 
     /**
     *   @brief Set: Mins and Maxs determining the entity's Bounding Box
     **/
-    virtual void            SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) {};
+    virtual void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) {};
 
     /**
     *   @brief Get/Set: Classname
     **/
-    //virtual const std::string   GetClassname() { return ""; };
+    //virtual const std::string   GetClassname() { return EmptyString; };
     //virtual void                SetClassname(const std::string &classname) {};
 
     /**
@@ -380,7 +421,7 @@ public:
     /**
     *   @brief Get/Set: Kill Target.
     **/
-    virtual const std::string&  GetKillTarget() { return ""; };
+    virtual const std::string&  GetKillTarget() { return EmptyString; };
     virtual void                SetKillTarget(const std::string& killTarget) {};
 
     /**
@@ -404,25 +445,25 @@ public:
     /**
     *   @brief Get/Set: Bounding Box 'Maxs'
     **/
-    virtual const vec3_t&   GetMaxs() { return vec3_zero(); };
+    virtual const vec3_t&   GetMaxs() { return ZeroVec3; };
     virtual void            SetMaxs(const vec3_t& maxs) {};
 
     /**
     *   @brief Get/Set: Message
     **/
-    virtual const std::string&  GetMessage() { return ""; };
+    virtual const std::string&  GetMessage() { return EmptyString; };
     virtual void                SetMessage(const std::string& message) {};
 
     /**
     *   @brief Get/Set: Bounding Box 'Mins'
     **/
-    virtual const vec3_t&   GetMins() { return vec3_zero(); };
+    virtual const vec3_t&   GetMins() { return ZeroVec3; };
     virtual void            SetMins(const vec3_t& mins) {};
    
     /**
     *   @brief Get/Set: Model
     **/
-    virtual const std::string&  GetModel() { return ""; };
+    virtual const std::string&  GetModel() { return EmptyString; };
     virtual void                SetModel(const std::string &model) {};
 
     /**
@@ -485,13 +526,13 @@ public:
     /**
     *   @brief Get/Set:     Old Origin
     **/
-    virtual const vec3_t&   GetOldOrigin() { return vec3_zero(); };
+    virtual const vec3_t&   GetOldOrigin() { return ZeroVec3; };
     virtual void            SetOldOrigin(const vec3_t& oldOrigin) {};
 
     /**
     *   @brief Get/Set:     Origin
     **/
-    virtual const vec3_t&   GetOrigin() { return vec3_zero(); };
+    virtual const vec3_t&   GetOrigin() { return ZeroVec3; };
     virtual void            SetOrigin(const vec3_t& origin) {};
 
     /**
@@ -509,7 +550,7 @@ public:
     // Get the 'pathTarget' entity value.
     // Overridden by PathCorner
     // TODO: replace this ugly workaround with some component system
-    virtual const char*     GetPathTarget() { return ""; };
+    virtual const char*     GetPathTarget() { return EmptyString.c_str(); };
 
     /**
     *   @brief Get/Set:     Server Flags
@@ -526,7 +567,7 @@ public:
     /**
     *   @brief Get/Set:     Entity Size
     **/
-    virtual const vec3_t&   GetSize() { return vec3_zero(); };
+    virtual const vec3_t&   GetSize() { return ZeroVec3; };
     virtual void            SetSize(const vec3_t& size) {};
 
     /**
@@ -568,19 +609,19 @@ public:
     /**
     *   @brief Get/Set:     Take Damage
     **/
-    virtual const std::string&   GetTarget() { return ""; };
+    virtual const std::string&   GetTarget() { return EmptyString; };
     virtual void                 SetTarget(const std::string& target) {};
 
     /**
     *   @brief Get/Set:     Target Name
     **/
-    virtual const std::string&   GetTargetName() { return ""; };
+    virtual const std::string&   GetTargetName() { return EmptyString; };
     virtual void                 SetTargetName(const std::string& targetName) {};
 
     /**
     *   @brief Get/Set:     Team
     **/
-    virtual const std::string&   GetTeam() { return ""; };
+    virtual const std::string&   GetTeam() { return EmptyString; };
     virtual void                 SetTeam(const std::string &team) {};
 
     /**
@@ -598,7 +639,7 @@ public:
     /**
     *   @brief Get/Set:     Velocity
     **/
-    virtual const vec3_t&   GetVelocity() { return vec3_zero(); };
+    virtual const vec3_t&   GetVelocity() { return ZeroVec3; };
     virtual void            SetVelocity(const vec3_t &velocity) {};
 
     /**

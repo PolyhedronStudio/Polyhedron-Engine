@@ -39,11 +39,13 @@ struct entity_s {
     //! Actual entity state member, a POD type that contains all data that is actually networked.
     EntityState state;
 
-    //! NULL if not a player the server expects the first part of gclient_s to
+    //! NULL if not a player. The server expects the first part of gclient_s to
     //! be a PlayerState but the rest of it is opaque
     struct gclient_s *client = nullptr;       
 
-    //! An entity is in no use, in case it complies to the INUSE macro.
+    //! When an entity is not in use it isn't being processed for a game's frame.
+    //! If it also has a freeTime set it means it has been freed and its slot is
+    //! ready to be reused in the future.
     qboolean inUse = false;
     //! Keeps track of whether this entity is linked, or unlinked.
     int32_t linkCount = 0;
@@ -94,29 +96,48 @@ struct entity_s {
 *   @brief  Local Client entity. Acts like a POD type similar to the server entity.
 **/
 struct ClientEntity {
+    /**
+    * 
+    *   @brief  Entity Data matching that from the last received server frame.
+    * 
+    **/
+    //! The frame number that this entity was received at.
+    //! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
+    int32_t serverFrame = 0;
+
     //! The last received state of this entity.
     EntityState current = {};
     //! The previous last valid state. In worst case scenario might be a copy of current state.
     EntityState prev = {};
+        
+    //! An entity's server state flags.
+    //int32_t serverFlags = 0; // TODO: Not sure if we need this yet.
+    //! Min and max bounding box.
+    vec3_t mins = vec3_zero(), maxs = vec3_zero();
+    //! Absolute world transform bounding box.
+    vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
 
-    //! The mins and maxs of the entity's bounding box.
-    vec3_t mins = vec3_zero();
-    vec3_t maxs = vec3_zero();
+
+    /**
+    *
+    *   @brief  Entity Data local to the client only.
+    * 
+    **/
+    //! An entity's client state flags.
+    int32_t clientFlags = 0;
 
     //! For diminishing grenade trails
-    int32_t trailcount = 0;
+    int32_t trailCount = 0;
     //! for trails (variable hz)
     vec3_t lerpOrigin = vec3_zero();
-        
-    //! The frame number that this entity was received at.
-    //! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
-    int32_t serverFrame = 0;
 
     //! This is the actual server entity number.
     int32_t serverEntityNumber = 0;
     //! This is a unique client entity id, determined by an incremental static counter.
     int32_t clientEntityNumber = 0;
 
+    //! Pointer to the owning entity (if any.)
+    ClientEntity *owner = nullptr;
     //! Pointer to the class entity object that belongs to this client entity.
     IClientGameEntity *classEntity;
 

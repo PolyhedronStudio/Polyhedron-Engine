@@ -25,6 +25,11 @@
 // World.
 #include "../../World/Gameworld.h"
 
+
+
+//! Used for returning vectors from a const vec3_t & reference.
+vec3_t SVGBaseEntity::ZeroVec3 = vec3_zero();
+
 // Constructor/Deconstructor.
 SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : IServerGameEntity(), serverEntity(svEntity) {
 

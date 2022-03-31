@@ -27,10 +27,10 @@ void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, C
     float dec = 0.5f;
     vec = vec3_scale(vec, dec);
 
-    if (oldTrailEntity->trailcount > 900) {
+    if (oldTrailEntity->trailCount > 900) {
         originScale     = 4;
         velocityScale   = 15;
-    } else if (oldTrailEntity->trailcount > 800) {
+    } else if (oldTrailEntity->trailCount > 800) {
         originScale     = 2;
         velocityScale   = 10;
     } else {
@@ -42,7 +42,7 @@ void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, C
         len -= dec;
 
         // drop less particles as it flies
-        if ((rand() & 1023) < oldTrailEntity->trailcount) {
+        if ((rand() & 1023) < oldTrailEntity->trailCount) {
             cparticle_t *particle = Particles::GetFreeParticle();
             if (!particle) {
                 return;
@@ -80,9 +80,9 @@ void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, C
             }
         }
 
-        oldTrailEntity->trailcount -= 5;
-        if (oldTrailEntity->trailcount < 100) {
-            oldTrailEntity->trailcount = 100;
+        oldTrailEntity->trailCount -= 5;
+        if (oldTrailEntity->trailCount < 100) {
+            oldTrailEntity->trailCount = 100;
         }
         move += vec;
     }
