@@ -119,12 +119,9 @@ void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
 	}
 	// Wait.
 	else if (key == "wait") {
-		// Parse float.
-		float parsedFloat = 0.f;
-		ParseFloatKeyValue(key, value, parsedFloat);
-
 		// Set wait.
-		SetWaitTime(parsedFloat);
+		//SetWaitTime(parsedFloat);
+		ParseFrametimeKeyValue(key, value, waitTime);
 	} else {
 		Base::SpawnKey(key, value);
 	}
@@ -213,10 +210,10 @@ void SVGBaseMover::BrushMoveFinal() {
 	}
 
 	// Move only as far as to clear the remaining distance
-	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME ) );
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME.count() ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushMoveDone );
-	SetNextThinkTime( level.time + 1.f * FRAMETIME );
+	SetNextThinkTime( level.time + FRAMETIME );
 }
 
 //===============
@@ -226,18 +223,18 @@ void SVGBaseMover::BrushMoveBegin() {
 	float frames;
 
 	// It's time to stop
-	if ( (moveInfo.speed * FRAMETIME) >= moveInfo.remainingDistance ) {
+	if ( (moveInfo.speed * FRAMETIME.count()) >= moveInfo.remainingDistance ) {
 		BrushMoveFinal();
 		return;
 	}
 
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.speed ) );
 
-	frames = floor( (moveInfo.remainingDistance / moveInfo.speed) / FRAMETIME );
-	moveInfo.remainingDistance -= frames * moveInfo.speed * FRAMETIME;
+	frames = floor( (moveInfo.remainingDistance / moveInfo.speed) / FRAMETIME.count() );
+	moveInfo.remainingDistance -= frames * moveInfo.speed * FRAMETIME.count();
 
 	SetThinkCallback( &SVGBaseMover::BrushMoveFinal );
-	SetNextThinkTime( level.time + (frames * FRAMETIME) );
+	SetNextThinkTime( level.time + Frametime(frames * FRAMETIME.count()) );
 }
 
 //===============
@@ -292,10 +289,10 @@ void SVGBaseMover::BrushAngleMoveFinal() {
 		return;
 	}
 
-	SetAngularVelocity( vec3_scale( move, 1.0f / FRAMETIME ) );
+	SetAngularVelocity( vec3_scale( move, 1.0f / FRAMETIME.count() ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushAngleMoveDone );
-	SetNextThinkTime( level.time + 1.f * FRAMETIME );
+	SetNextThinkTime( level.time + FRAMETIME );
 }
 
 //===============
@@ -316,12 +313,12 @@ void SVGBaseMover::BrushAngleMoveBegin() {
 	length = vec3_length( destinationDelta );
 	travelTime = length / moveInfo.speed;
 
-	if ( travelTime < FRAMETIME ) {
+	if ( travelTime < FRAMETIME.count() ) {
 		BrushAngleMoveFinal();
 		return;
 	}
 
-	frames = floor( travelTime / FRAMETIME );
+	frames = floor( travelTime / FRAMETIME.count() );
 
 	// Get the velocity by scaling the delta vector by the time spent traveling
 	SetAngularVelocity( vec3_scale( destinationDelta, 1.0f / travelTime ) );

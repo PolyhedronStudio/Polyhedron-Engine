@@ -44,7 +44,7 @@ void TargetEarthquake::Spawn() {
 //===============
 void TargetEarthquake::SpawnKey( const std::string& key, const std::string& value ) {
     if ( key == "count" ) {
-        duration = std::stof( value );
+        ParseFrametimeKeyValue(key, value, duration);
     } else if ( key == "speed" ) {
         severity = std::stof( value );
     } else {
@@ -58,8 +58,8 @@ void TargetEarthquake::SpawnKey( const std::string& key, const std::string& valu
 void TargetEarthquake::QuakeUse( IServerGameEntity* other, IServerGameEntity* activator ) {
     SetActivator(activator);
     
-    lastQuakeTime = 0.0f;
-    timeStamp = level.time + duration;
+    lastQuakeTime = GameTime::zero();
+    timeStamp = duration_cast<GameTime>(level.time + duration);
     SetNextThinkTime( level.time + FRAMETIME );
 }
 
@@ -69,7 +69,7 @@ void TargetEarthquake::QuakeUse( IServerGameEntity* other, IServerGameEntity* ac
 void TargetEarthquake::QuakeThink() {
     if ( lastQuakeTime < level.time ) {
         gi.PositionedSound( GetOrigin(), GetPODEntity(), SoundChannel::Auto, GetNoiseIndexA(), 1.0f, Attenuation::None, 0.0f);
-        lastQuakeTime = level.time + 0.5f;
+        lastQuakeTime = duration_cast<GameTime>(level.time + 0.5s);
     }
 
     for (auto& entity : GetGameworld()->GetClassEntityRange(0, MAX_EDICTS)

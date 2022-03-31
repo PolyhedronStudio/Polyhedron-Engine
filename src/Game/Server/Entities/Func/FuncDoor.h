@@ -54,5 +54,5 @@ protected:
     void        SpawnDoorTrigger();
     void        UseAreaportals( bool open ) const;
 
-    float		debounceTouchTime{ 0.0f };
+    GameTime		debounceTouchTime = GameTime::zero();
 };

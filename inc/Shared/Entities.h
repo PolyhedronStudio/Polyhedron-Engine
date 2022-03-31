@@ -84,7 +84,7 @@ struct entity_s {
     EntityDictionary entityDictionary;
 
     //! Actual sv.time when this entity was freed.
-    float freeTime = 0.f;
+    GameTime freeTime = 0s;
 
     // Move this to clientInfo?
     int32_t lightLevel = 0;

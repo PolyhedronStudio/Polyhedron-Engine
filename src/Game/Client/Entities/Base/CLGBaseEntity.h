@@ -197,13 +197,13 @@ public:
     /**
     *   @brief Get/Set:     NextThink Time.
     **/
-    inline const float GetNextThinkTime() final { 
+    inline const GameTime &GetNextThinkTime() final { 
         //Com_DPrint("WTF NEXTTHINKTIME\n");
         return nextThinkTime;
     }
-    inline void SetNextThinkTime(const float nextThinkTime) final {
+    inline void SetNextThinkTime(const Frametime &nextThinkTime) final {
         //Com_DPrint("WTF SETNEXTTHINKTIME: %f\n", nextThinkTime);
-        this->nextThinkTime = nextThinkTime;
+        this->nextThinkTime = duration_cast<GameTime>(nextThinkTime);
     };
 
     /**
@@ -296,8 +296,8 @@ public:
     /**
     *   @brief Get/Set: Delay Time
     **/
-    virtual const float     GetDelayTime() { return 0.f; };
-    virtual void            SetDelayTime(const float delayTime) {};
+    virtual const Frametime&    GetDelayTime() { return delayTime; };
+    virtual void                SetDelayTime(const Frametime &delayTime) { this->delayTime = delayTime; };
 
     /**
     *   @brief Get/Set: Effects
@@ -610,8 +610,8 @@ public:
     /**
     *   @brief Get/Set:     Wait Time
     **/
-    virtual const float     GetWaitTime() { return 0.f; }
-    virtual void            SetWaitTime(const float waitTime) {};
+    virtual const Frametime&    GetWaitTime() { return waitTime; }
+    virtual void                SetWaitTime(const Frametime &waitTime) { this->waitTime = waitTime; };
 
     /**
     *   @brief Get/Set:     Water Level
@@ -651,11 +651,11 @@ private:
     *   Entity 'Timing'
     **/
     //! The next 'think' time, determines when to call the 'think' callback.
-    float nextThinkTime = 0.f;
+    GameTime nextThinkTime = GameTime::zero();
     //! Delay before calling trigger execution.
-    float delayTime = 0.f;
+    Frametime delayTime = Frametime::zero();
     //! Wait time before triggering at all, in case it was set to auto.
-    float waitTime = 0.f;
+    Frametime waitTime = Frametime::zero();
 
 
 

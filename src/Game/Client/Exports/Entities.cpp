@@ -312,19 +312,24 @@ qboolean CLG_RunThink(IClientGameEntity *ent)
         return false;
     }
 
-    // Fetch think time.
-    const float thinkTime = ent->GetNextThinkTime();
+    //// Fetch think time.
+    //const GameTime thinkTime = ent->GetNextThinkTime();
 
-    if (thinkTime <= 0 || thinkTime > level.time + 0.001) {
-        //Com_DPrint("(thinkTime <= 0) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
-        return true;
-    } else if (thinkTime > level.time + 0.001) {// Used to be: if (thinkTime > level.time + 0.001)
-        //Com_DPrint("(thinkTime > level.time + 0.001) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
-        return true;
+    //if (thinkTime <= 0s || thinkTime > level.time + 0.001s) {
+    //    //Com_DPrint("(thinkTime <= 0) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
+    //    return true;
+    //} else if (thinkTime > level.time + 0.001s) {// Used to be: if (thinkTime > level.time + 0.001)
+    //    //Com_DPrint("(thinkTime > level.time + 0.001) level.time:(%f) thinkTime:(%f)\n", level.time, thinkTime);
+    //    return true;
+    //}
+    GameTime nextThinkTime = ent->GetNextThinkTime();
+
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+		return true;
     }
 
     // Reset think time before thinking.
-    ent->SetNextThinkTime(0);
+    ent->SetNextThinkTime(GameTime::zero());
 
 //#if _DEBUG
 //    if ( !ent->HasThinkCallback() ) {
@@ -367,13 +372,9 @@ qboolean CLG_RunThink(IClientGameEntity *ent)
 *   @brief  Runs the client game module's entity logic for a single frame.
 **/
 void ClientGameEntities::RunFrame() {
-    // We're moving the game a frame forward.
-    level.frameNumber++;
-
-    // Calculate the current frame time for this game its own frame number.
-    level.time = level.frameNumber * CLG_FRAMETIME;
-    level.timeStamp = static_cast<uint32_t>((level.time * 1000.f));
-
+    // Unlike for the server game, the level's framenumber, time and timeStamp
+    // have already been calculated before reaching this point.
+    
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 1; entityNumber < cl->frame.numEntities; entityNumber++) {
         // Acquire class entity object.

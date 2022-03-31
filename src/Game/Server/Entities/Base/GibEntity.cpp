@@ -95,7 +95,7 @@ GibEntity* GibEntity::Create(SVGBaseEntity* gibber, const std::string& gibModel,
 
     // Setup the Gib think function and its think time.
     gibEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
-    gibEntity->SetNextThinkTime(level.time + 10 + Randomui() * 10);
+    gibEntity->SetNextThinkTime(level.time + 10s + GameTime(Randomui() * 10));
 
     // Link entity into the world.
     gibEntity->LinkEntity();
@@ -232,7 +232,7 @@ void GibEntity::GibEntityThink() {
     // Play frames for these meshes, cut the crap at frame 10.
     if (GetAnimationFrame() == 10) {
         SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
-        SetNextThinkTime(level.time + 8 + Randomui() * 10);
+        SetNextThinkTime(level.time + 8s + GameTime(Randomui() * 10));
     }
 }
 

@@ -190,71 +190,71 @@ public:
     /**
     *   @return Time at which air has been finished.
     **/
-    inline const float GetAirFinishedTime() { return airFinishedTime; }
+    inline const GameTime &GetAirFinishedTime() { return airFinishedTime; }
     /**
     *   @brief  Sets the air finished time.
     **/
-    inline void SetAirFinishedTime(const float& airFinishedTime) { this->airFinishedTime = airFinishedTime; }
+    inline void SetAirFinishedTime(const GameTime& airFinishedTime) { this->airFinishedTime = airFinishedTime; }
     /**
     *   @return Debounce touch time.
     **/
-    inline const float GetDebounceTouchTime() { return debounceTouchTime; }
+    inline const GameTime &GetDebounceTouchTime() { return debounceTouchTime; }
     /**
     *   @brief  Sets the debounce touch time.
     **/
-    void SetDebounceTouchTime(const float& debounceTouchTime) { this->debounceTouchTime = debounceTouchTime; }
+    void SetDebounceTouchTime(const GameTime& debounceTouchTime) { this->debounceTouchTime = debounceTouchTime; }
     /**
     *   @return Debounce pain time.
     **/
-    inline const float GetDebouncePainTime() { return debouncePainTime; }
+    inline const GameTime &GetDebouncePainTime() { return debouncePainTime; }
     /**
     *   @brief  Sets the debounce pain time.
     **/
-    void SetDebouncePainTime(const float& debouncePainTime) { this->debouncePainTime = debouncePainTime; }
+    void SetDebouncePainTime(const GameTime& debouncePainTime) { this->debouncePainTime = debouncePainTime; }
     /**
     *   @return Debounce damage time.
     **/
-    inline const float GetDebounceDamageTime() { return debounceDamageTime; }
+    inline const GameTime &GetDebounceDamageTime() { return debounceDamageTime; }
     /**
     *   @brief  Sets the debounce damage time.
     **/
-    void SetDebounceDamageTime(const float& debounceDamageTime) { this->debounceDamageTime = debounceDamageTime; }
+    void SetDebounceDamageTime(const GameTime& debounceDamageTime) { this->debounceDamageTime = debounceDamageTime; }
     /**
     *   @return Debounce sound time.
     **/
-    inline const float GetDebounceSoundTime() { return debounceSoundTime; }
+    inline const GameTime &GetDebounceSoundTime() { return debounceSoundTime; }
     /**
     *   @brief  Sets the debounce sound time.
     **/
-    void SetDebounceSoundTime(const float& debounceSoundTime) { this->debounceSoundTime = debounceSoundTime; }
+    void SetDebounceSoundTime(const GameTime& debounceSoundTime) { this->debounceSoundTime = debounceSoundTime; }
     /**
     *   @return The time till the next drown event.
     **/
-    inline const float GetNextDrownTime() { return GetClient()->nextDrownTime; }
+    inline const GameTime GetNextDrownTime() { return GetClient()->nextDrownTime; }
     /**
     *   @brief  Sets the time for the next drown event to occure.
     **/
-    inline void SetNextDrownTime(const float& nextDrownTime) { GetClient()->nextDrownTime = nextDrownTime; }
+    inline void SetNextDrownTime(const GameTime& nextDrownTime) { GetClient()->nextDrownTime = nextDrownTime; }
     
     /**
     *   @return The time when this player is allowed to respawn again.
     **/
-    inline float GetRespawnTime() { return GetClient()->respawnTime; }
+    inline GameTime GetRespawnTime() { return GetClient()->respawnTime; }
     /**
     *   @brief  Sets the next respawn time for this player.
     **/
-    inline void SetRespawnTime(float time) { GetClient()->respawnTime = time; }
+    inline void SetRespawnTime(const GameTime &time) { GetClient()->respawnTime = time; }
 
 
 protected:
     // The level.time when the "air" state finished. 
-    float airFinishedTime = 0.f;
+    GameTime airFinishedTime = GameTime::zero();
 
     // Debounce level.time values.
-    float debounceTouchTime = 0.f;
-    float debouncePainTime = 0.f;
-    float debounceDamageTime = 0.f;
-    float debounceSoundTime = 0.f;
+    GameTime debounceTouchTime = GameTime::zero();
+    GameTime debouncePainTime = GameTime::zero();
+    GameTime debounceDamageTime = GameTime::zero();
+    GameTime debounceSoundTime = GameTime::zero();
 
 
     // View and BobMove functionality.

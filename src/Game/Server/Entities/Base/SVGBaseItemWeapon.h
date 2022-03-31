@@ -74,7 +74,7 @@ public:
     * @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
     **/
     virtual void InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, 
-        int64_t startTime, int32_t startFrame, int32_t endFrame, int32_t loopCount = 0, qboolean forceLoop = false, float frameTime = ANIMATION_FRAMETIME);
+        int64_t startTime, int32_t startFrame, int32_t endFrame, int32_t loopCount = 0, qboolean forceLoop = false, float frameTime = ANIMATION_FRAMETIME.count());
     /**
     *   @brief  Call whenever an animation needs to be processed for another game frame.
     **/
@@ -189,7 +189,7 @@ public:
     **/
     inline virtual const uint32_t       GetWorldModelIndex() { return 0; };
 
-    virtual void SetRespawn(const float delay) override;	 // Sets the item in respawn mode.
+    virtual void SetRespawn(const Frametime &delay) override;	 // Sets the item in respawn mode.
 
     //
     // The following function looks up a callback and will fire it accordingly.

@@ -16,7 +16,7 @@ public:
 
 private:
 	float severity{ 200.0f };
-	float duration{ 5.0f };
-	float timeStamp{ 0.0f };
-	float lastQuakeTime{ 0.0f };
+	Frametime duration = 5s;
+	GameTime timeStamp = GameTime::zero();
+	GameTime lastQuakeTime = GameTime::zero();
 };

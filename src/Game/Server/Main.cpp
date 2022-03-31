@@ -478,14 +478,14 @@ void SVG_CheckDMRules(void)
     int         i;
     ServerClient   *cl;
     ServerClient* clients = game.GetClients();
-    if (level.intermission.time)
+    if (level.intermission.time != GameTime::zero())
         return;
 
     //if (!deathmatch->value)
     //    return;
 
     if (timelimit->value) {
-        if (level.time >= timelimit->value * 60) {
+        if (level.time >= Frametime(timelimit->value)) {
             gi.BPrintf(PRINT_HIGH, "Timelimit hit.\n");
             SVG_EndDMLevel();
             return;
@@ -524,8 +524,9 @@ void SVG_RunFrame(void) {
     level.frameNumber++;
 
     // Calculate the current frame time for this game its own frame number.
-    level.time = level.frameNumber * FRAMETIME;
-    level.timeStamp = static_cast<uint32_t>((level.time * 1000.f));
+    level.time += FRAMERATE_MS;
+    level.timeStamp = (level.time.count());//static_cast<uint64_t>((level.time.count() * 1000.f));
+
 
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {

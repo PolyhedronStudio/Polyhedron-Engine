@@ -60,7 +60,7 @@ void TriggerOnce::Spawn() {
 	Base::Spawn();
 
 	// Set wait time to -1... (So it triggers only once.)
-	SetWaitTime(-1.f);
+	SetWaitTime(-1s);
 }
 
 //
@@ -123,7 +123,7 @@ void TriggerOnce::Trigger(IServerGameEntity* activator) {
 //===============
 //
 void TriggerOnce::TriggerOnceThinkWait() {
-	SetNextThinkTime(0.f);
+	SetNextThinkTime(0s);
 }
 
 //

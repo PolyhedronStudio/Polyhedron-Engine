@@ -20,5 +20,5 @@ public:
 	static TriggerAutoPlatform* Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs );
 
 protected:
-	float					debounceTouchTime;
+	GameTime					debounceTouchTime = GameTime::zero();
 };

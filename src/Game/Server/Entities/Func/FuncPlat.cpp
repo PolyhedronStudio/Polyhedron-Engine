@@ -292,7 +292,7 @@ void FuncPlat::HitTop() {
     moveInfo.state = MoverState::Top;
 
     SetThinkCallback( &FuncPlat::PlatformGoDown );
-    SetNextThinkTime( level.time + 3);
+    SetNextThinkTime( level.time + 3s);
 }
 
 //===============

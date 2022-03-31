@@ -28,7 +28,7 @@ TriggerCounter::TriggerCounter( Entity* entity )
 //===============
 void TriggerCounter::Spawn()
 {
-	SetWaitTime( -1.0f );
+	SetWaitTime( -1.0s );
 	SetUseCallback( &TriggerCounter::CounterUse );
 }
 

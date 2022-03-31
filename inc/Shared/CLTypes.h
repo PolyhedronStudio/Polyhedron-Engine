@@ -42,8 +42,8 @@ struct explosion_t {
 	float       light;
 	vec3_t      lightcolor;
 	float       start;
-	int32_t     baseFrame;
-	int32_t     frameTime; /* in milliseconds */
+	int64_t     baseFrame;
+	int64_t     frameTime; /* in milliseconds */
 };
 
 // Maximum amount of explosions.
@@ -75,7 +75,7 @@ struct tent_params_t {
     int32_t color = 0;
     int32_t entity1 = 0;
     int32_t entity2 = 0;
-    int32_t time = 0;
+    int64_t time = 0;
 };
 
 //
@@ -109,9 +109,9 @@ struct snd_params_t {
 struct cl_sustain_t {
     int32_t id = 0;
     int32_t type = 0;
-    int32_t endTime = 0;
-    int32_t nextThinkTime = 0;
-    int32_t thinkinterval = 0;
+    int64_t endTime = 0;
+    int64_t nextThinkTime = 0;
+    int64_t thinkinterval = 0;
     vec3_t  org = vec3_zero();
     vec3_t  dir = vec3_zero();
     int32_t color = 0;
@@ -176,9 +176,9 @@ struct ClientInfo {
 // Used for storing client input commands.
 //
 struct ClientUserCommandHistory {
-    uint32_t timeSent;      // Time sent, for calculating pings.
-    uint32_t timeReceived;  // Time received, for calculating pings.
-    uint32_t commandNumber; // Current commandNumber for this frame,
+    uint64_t timeSent;      // Time sent, for calculating pings.
+    uint64_t timeReceived;  // Time received, for calculating pings.
+    uint64_t commandNumber; // Current commandNumber for this frame,
 };
 
 //
@@ -245,11 +245,11 @@ struct ClientState {
     int32_t     timeoutCount = 0;
 
     //! The time we last transmitted a user command.
-    uint32_t    lastTransmitTime = 0;
+    uint64_t    lastTransmitTime = 0;
     //! The last transmitted command number. This may differ from the one below.
-    uint32_t    lastTransmitCmdNumber = 0;
+    uint64_t    lastTransmitCmdNumber = 0;
     //! The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
-    uint32_t    lastTransmitCmdNumberReal = 0;
+    uint64_t    lastTransmitCmdNumberReal = 0;
     //! Determines whether to send the user command packet asap, and preferably, NOW.
     qboolean    sendPacketNow = 0;
 
@@ -258,7 +258,7 @@ struct ClientState {
     //! Actual current client user command list.
     ClientMoveCommand    clientUserCommands[CMD_BACKUP] = {};    // each mesage will send several old clientUserCommands
     //! Current command number.
-    uint32_t     currentClientCommandNumber = 0;
+    uint64_t     currentClientCommandNumber = 0;
     //! History book of time sent, received, and command number.
     ClientUserCommandHistory clientCommandHistory[CMD_BACKUP] = {};
 
@@ -302,8 +302,8 @@ struct ClientState {
     ServerFrame frame = {}; 
     //! The previous frame received, right before the current frame.
     ServerFrame oldframe = {};
-    int32_t serverTime = 0;
-    int32_t serverDelta = 0;
+    int64_t serverTime = 0;
+    int64_t serverDelta = 0;
 
     byte            dcs[CS_BITMAP_BYTES] = {};
 
@@ -320,7 +320,7 @@ struct ClientState {
     //! Accumulated mouse forward/side movement, added to both localMove and pending cmd, cleared each time cmd is finalized.
     vec2_t      mouseMove = vec2_zero();
     //! This is the time value that the client is rendering at.  always <= cl.serverTime
-    int32_t         time = 0;
+    int64_t         time = 0;
     //! between oldframe and frame
     float       lerpFraction = 0.f;
 

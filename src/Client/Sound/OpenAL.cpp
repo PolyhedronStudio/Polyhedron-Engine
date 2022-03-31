@@ -51,12 +51,7 @@ static ALuint ReverbEffect;
 static ALuint ReverbEffectSlot;
 int lastreverbtreshold = 0;
 
-int TriggerReverbOverrideReverb;
-int TriggerReverbOverride;
-int TriggerReverbOverrideNeeded;
-char *TriggerReverbOverrideReverbString;
-int TriggerReverbOverride2;
-int TriggerReverbOverrideNeeded2;
+
 void AL_SoundInfo(void)
 {
 	Com_Printf("===============\n");
@@ -509,7 +504,7 @@ void AL_InitReverbEffect(void)
 	ReverbEffectSlot = 0;
 	qalGenAuxiliaryEffectSlots(1, &ReverbEffectSlot);
 	qalEffecti(ReverbEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
-	SetReverb(s_reverb_preset->integer, 0);
+//	SetReverb(s_reverb_preset->integer, 0);
 }
 
 void UpdateReverb(void)
@@ -520,132 +515,83 @@ void UpdateReverb(void)
 	vec3_t left = { 0, 1000000, 0 };
 	vec3_t right = { 0, -1000000, 0 };
 	vec3_t up = { 0, 0, 1000000 };
-	TraceResult trace1, trace2, trace3, trace4, trace5;
-	vec3_t length1, length2, length3, length4, length5;
-	float dist1, dist2, dist3, dist4, dist5, average;
+	
+	TraceResult traceA = {};
+	TraceResult traceB = {}; 
+	TraceResult traceC = {};
+	TraceResult traceD = {};
+	TraceResult traceE = {};
+	vec3_t lengthA = vec3_zero();
+	vec3_t lengthB = vec3_zero();
+	vec3_t lengthC = vec3_zero();
+	vec3_t lengthD = vec3_zero();
+	vec3_t lengthE = vec3_zero();
+	float distanceA = 0.f;
+	float distanceB = 0.f; 
+	float distanceC = 0.f; 
+	float distanceD = 0.f; 
+	float distanceE = 0.f; 
+	float averageDistance = 0.f;
 
 	if (ReverbEffect == 0)
 		return;
 
-	if (TriggerReverbOverride == 1)
+
+	traceA = CL_Trace(listener_origin, up, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
+	traceB = CL_Trace(listener_origin, forward, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
+	traceC = CL_Trace(listener_origin, backward, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
+	traceD = CL_Trace(listener_origin, left, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
+	traceE = CL_Trace(listener_origin, right, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
+
+	lengthA = traceA.endPosition - listener_origin; //VectorSubtract(trace1.endPosition, listener_origin, length1);
+	lengthB = traceB.endPosition - listener_origin;
+	lengthC = traceC.endPosition - listener_origin;
+	lengthD = traceD.endPosition - listener_origin;
+	lengthE = traceE.endPosition - listener_origin;
+
+	distanceA = vec3_length(lengthA);
+	distanceB = vec3_length(lengthB);
+	distanceC = vec3_length(lengthC);
+	distanceD = vec3_length(lengthD);
+	distanceE = vec3_length(lengthE);
+
+	averageDistance = (distanceA + distanceB + distanceC + distanceD + distanceE) / 5;
+
+	
+	if (averageDistance > 650 && lastreverbtreshold != 5)
 	{
-		if (TriggerReverbOverrideNeeded == 1)
-		{
-			SetReverb(TriggerReverbOverrideReverb, 0);
-			TriggerReverbOverrideNeeded = 0;
-		}
-		return;
+		SetReverb(12, 0);
+		lastreverbtreshold = 5;
 	}
 
-	if (TriggerReverbOverride2 == 1)
+	if (averageDistance > 450 && averageDistance < 650 && lastreverbtreshold != 4)
 	{
-		if (TriggerReverbOverrideNeeded2 == 1)
-		{
-			float		
-				flDensity,
-				flDiffusion,
-				flGain,
-				flGainHF,
-				flDecayTime,
-				flDecayHFRatio,
-				flReflectionsGain,
-				flReflectionsDelay,
-				flLateReverbGain,
-				flLateReverbDelay,
-				flAirAbsorptionGainHF,
-				flRoomRolloffFactor;
-			int			
-				iDecayHFLimit;
-
-			sscanf(TriggerReverbOverrideReverbString, "%f %f %f %f %f %f %f %f %f %f %f %f %d", 
-				&flDensity,
-				&flDiffusion,
-				&flGain,
-				&flGainHF,
-				&flDecayTime,
-				&flDecayHFRatio,
-				&flReflectionsGain,
-				&flReflectionsDelay,
-				&flLateReverbGain,
-				&flLateReverbDelay,
-				&flAirAbsorptionGainHF,
-				&flRoomRolloffFactor,
-				&iDecayHFLimit);
-
-			qalEffectf(ReverbEffect, AL_REVERB_DENSITY, flDensity);
-			qalEffectf(ReverbEffect, AL_REVERB_DIFFUSION, flDiffusion);
-			qalEffectf(ReverbEffect, AL_REVERB_GAIN, flGain);
-			qalEffectf(ReverbEffect, AL_REVERB_GAINHF, flGainHF);
-			qalEffectf(ReverbEffect, AL_REVERB_DECAY_TIME, flDecayTime);
-			qalEffectf(ReverbEffect, AL_REVERB_DECAY_HFRATIO, flDecayHFRatio);
-			qalEffectf(ReverbEffect, AL_REVERB_REFLECTIONS_GAIN, flReflectionsGain);
-			qalEffectf(ReverbEffect, AL_REVERB_REFLECTIONS_DELAY, flReflectionsDelay);
-			qalEffectf(ReverbEffect, AL_REVERB_LATE_REVERB_GAIN, flLateReverbGain);
-			qalEffectf(ReverbEffect, AL_REVERB_LATE_REVERB_DELAY, flLateReverbDelay);
-			qalEffectf(ReverbEffect, AL_REVERB_AIR_ABSORPTION_GAINHF, flAirAbsorptionGainHF);
-			qalEffectf(ReverbEffect, AL_REVERB_ROOM_ROLLOFF_FACTOR, flRoomRolloffFactor);
-			qalEffecti(ReverbEffect, AL_REVERB_DECAY_HFLIMIT, iDecayHFLimit);
-
-			qalAuxiliaryEffectSloti(ReverbEffectSlot, AL_EFFECTSLOT_EFFECT, ReverbEffect);
-			TriggerReverbOverrideNeeded2 = 0;
-		}
-		return;
+		SetReverb(15, 0);
+		lastreverbtreshold = 4;
 	}
-
-	CM_BoxTrace(&trace1, listener_origin, up, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
-	CM_BoxTrace(&trace2, listener_origin, forward, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
-	CM_BoxTrace(&trace3, listener_origin, backward, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
-	CM_BoxTrace(&trace4, listener_origin, left, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
-	CM_BoxTrace(&trace5, listener_origin, right, mins, maxs, cl.bsp->nodes, BrushContentsMask::DeadSolid);
-
-	VectorSubtract(trace1.endPosition, listener_origin, length1);
-	VectorSubtract(trace2.endPosition, listener_origin, length2);
-	VectorSubtract(trace3.endPosition, listener_origin, length3);
-	VectorSubtract(trace4.endPosition, listener_origin, length4);
-	VectorSubtract(trace5.endPosition, listener_origin, length5);
-
-	dist1 = VectorLength(length1);
-	dist2 = VectorLength(length2);
-	dist3 = VectorLength(length3);
-	dist4 = VectorLength(length4);
-	dist5 = VectorLength(length5);
-
-	average = (dist1 + dist2 + dist3 + dist4 + dist5) / 5;
-
-	if (average < 100 && lastreverbtreshold != 0)
-	{
-		SetReverb(41, 0);
-		lastreverbtreshold = 0;
-	}
-
-	if (average > 100 && average < 200 && lastreverbtreshold != 1)
-	{
-		SetReverb(26, 0);
-		lastreverbtreshold = 1;
-	}
-
-	if (average > 200 && average < 330 && lastreverbtreshold != 2)
-	{
-		SetReverb(20, 0);
-		lastreverbtreshold = 2;
-	}
-
-	if (average > 330 && average < 450 && lastreverbtreshold != 3)
+	
+	if (averageDistance > 330 && averageDistance < 450 && lastreverbtreshold != 3)
 	{
 		SetReverb(18, 0);
 		lastreverbtreshold = 3;
 	}
 
-	if (average > 450 && average < 650 && lastreverbtreshold != 4)
+	if (averageDistance > 200 && averageDistance < 330 && lastreverbtreshold != 2)
 	{
-		SetReverb(15, 0);
-		lastreverbtreshold = 4;
+		SetReverb(20, 0);
+		lastreverbtreshold = 2;
 	}
 
-	if (average > 650 && lastreverbtreshold != 5)
+	if (averageDistance > 100 && averageDistance < 200 && lastreverbtreshold != 1)
 	{
-		SetReverb(12, 0);
-		lastreverbtreshold = 5;
+		SetReverb(26, 0);
+		lastreverbtreshold = 1;
+	}
+
+	if (averageDistance < 100 && lastreverbtreshold != 0)
+	{
+		SetReverb(41, 0);
+		lastreverbtreshold = 0;
 	}
 }
 
@@ -666,9 +612,6 @@ qboolean AL_Init(void)
 {
 	int i;
 
-	// CPP: Cast.
-	TriggerReverbOverrideReverbString = (char*)malloc(256 + 1);
-	memset(TriggerReverbOverrideReverbString, 0, 256);
 	Com_DPrintf("Initializing OpenAL\n");
 
 	if (!QAL_Init()) {
@@ -781,11 +724,14 @@ sfxcache_t *AL_UploadSfx(sfx_t *s)
 	double sTime = 0.019;
 	int sampleCount = (int)(sTime*sampleRate);
 	int byteCount = sampleCount * sizeof(byte);
-	byte *final = (byte*)calloc(1, byteCount + size);
-	memcpy(final + byteCount, s_info.data, size);
+	byte *finalAddress = (byte*)calloc(1, byteCount + size);
+	if (finalAddress == nullptr) {
+		return nullptr;
+	}
+	memcpy(finalAddress + byteCount, s_info.data, size);
 	/**/
 
-	qalBufferData(name, format, final, size + byteCount, s_info.rate);
+	qalBufferData(name, format, finalAddress, size + byteCount, s_info.rate);
 	if (qalGetError() != AL_NO_ERROR) {
 		s->error = Q_ERR_LIBRARY_ERROR;
 		return NULL;
@@ -1179,10 +1125,10 @@ void AL_SpecialEffect_Underwater_Disable(void)
 	{
 		qalSourcei(s_srcnums[i], AL_DIRECT_FILTER, AL_FILTER_NULL);
 
-		if (!s_reverb_preset_autopick->integer)
-			SetReverb(s_reverb_preset->integer, 0);
-		else
-			lastreverbtreshold = -1;
+//		if (!s_reverb_preset_autopick->integer)
+//			SetReverb(s_reverb_preset->integer, 0);
+		//else
+		//	lastreverbtreshold = -1;
 	}
 }
 
@@ -1259,7 +1205,7 @@ void AL_Update(void)
 
 	oal_update_underwater();
 
-	if (cl.bsp && !cl.snd_is_underwater && s_reverb_preset_autopick->integer && s_reverb->integer) // OAL: snd_is_underwater moved to client struct.
+	if (cl.bsp && !cl.snd_is_underwater && /*s_reverb_preset_autopick->integer &&*/ s_reverb->integer) // OAL: snd_is_underwater moved to client struct.
 		UpdateReverb();
 
 	if (s_voiceinput->integer && inputdevice)

@@ -155,18 +155,18 @@ public:
 //==================================================================
 
 //! MS Frametime for animations.
-static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;
+static constexpr GameTime ANIMATION_FRAMETIME = FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
-static constexpr float FRAMETIME = BASE_FRAMETIME_1000;
+static constexpr Frametime FRAMETIME = FRAMETIME_S;
 
 //! Memory tags to allow dynamic memory to be cleaned up
 static constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll
 static constexpr int32_t TAG_LEVEL = 766;  // clear when loading a new level
 
 //! View pitching times
-static constexpr float DAMAGE_TIME = 0.5f;
-static constexpr float FALL_TIME = 0.3f;
+static constexpr Frametime DAMAGE_TIME = 0.5s;
+static constexpr Frametime FALL_TIME = 0.3s;
 
 /**
 *   @brief Entity Spawn Flags. Can be set for each entity in the map editor. (Most likely TrenchBroom.)
@@ -306,10 +306,11 @@ struct ItemFlags {
 //-------------------
 struct LevelLocals  {
     // Current local level frame number.
-    int32_t frameNumber = 0;
+    uint64_t frameNumber = 0;
 
     //! Current sum of total frame time taken.
-    float time = 0.f;
+    GameTime time = GameTime::zero();
+
     //! Same as time, but multiplied by a 1000 to get a proper integer.
     int64_t timeStamp = 0;
 
@@ -324,7 +325,7 @@ struct LevelLocals  {
     // done the game moves on to the next map. This is when exitIntermission != 0
     //
     struct {
-        float time = 0.f; // Time the intermission was started
+        GameTime time = GameTime::zero(); // Time the intermission was started
         const char* changeMap; // Map to switch to after intermission has exited.
         int32_t exitIntermission = 0; // Set to true(1) when exiting the intermission should take place.
         vec3_t origin = vec3_zero(); // Origin for intermission to take place at.
@@ -334,51 +335,14 @@ struct LevelLocals  {
     // The actual client the AI has sight on for this current frame.
     Entity *sightClient = nullptr;  // Changed once each frame for coop games
 
-    // Entity which the AI has sight on.
-    Entity *sightEntity = nullptr;
-    int32_t sightEntityFrameNumber = 0;
-
-    // Sound entities are set to the entity that caused the AI to be triggered.
-    Entity *soundEntity = nullptr;            // In case of a footstep, jumping sound, etc.
-    int32_t soundEntityFrameNumber = 0;
-    Entity *sound2Entity = nullptr;           // In case of a weapon action.
-    int32_t sound2EntityFrameNumber = 0;
-
     // The current entity that is actively being ran from SVG_RunFrame.
     IServerGameEntity *currentEntity = nullptr;
 
     // Index for the que pile of dead bodies.
     int32_t bodyQue = 0;
 
-    // Ugly place for storing coop variables.
-    int32_t powerCubes = 0; // Ugly necessity for coop
+    // A bit ugly, but one can store coop values here.    
 };
-
-//-------------------
-// Holds entity field values that can be set from the editor, but aren't actualy present
-// in Entity during gameplay
-//-------------------
-struct TemporarySpawnFields {
-    // world vars
-    char *sky;
-    float skyrotate;
-    vec3_t skyaxis;
-    char *nextMap;
-
-    int32_t lip;
-    int32_t distance;
-    int32_t height;
-    const char *noise; // C++20: STRING: Added const to char *
-    float pausetime;
-    const char *item; // C++20: STRING: Added const to char *
-    const char *gravity;    // C++20: STRING: Added const to char *
-
-    float minyaw;
-    float maxyaw;
-    float minpitch;
-    float maxpitch;
-};
-
 
 // Externized.
 extern  GameLocals   game;
@@ -436,16 +400,6 @@ struct MeansOfDeath {
     static constexpr int32_t FriendlyFire = 27;
 };
 
-//
-// Small macros that are used to generate a field offset with. These are used
-// in the save game system for example. Best not mess with these unless...
-//
-#define FOFS(x) q_offsetof(Entity, x)
-#define STOFS(x) q_offsetof(TemporarySpawnFields, x)
-#define LLOFS(x) q_offsetof(LevelLocals, x)
-#define GLOFS(x) q_offsetof(GameLocals, x)
-#define CLOFS(x) q_offsetof(ServerClient, x)
-
 // Very ugly macros, need to rid ourselves and inline func them at the least.
 // Also, there should be alternatives in our utils for math lib as is.
 #define random()    ((rand () & RAND_MAX) / ((float)RAND_MAX))
@@ -495,9 +449,9 @@ extern  cvar_t  *sv_flaregun;
 
 extern  cvar_t  *cl_monsterfootsteps;
 
-//-------------------
-// Spawnflags for items, set by editor(s).
-//-------------------
+/**
+*   @brief  Spawnflags for items, set by editor(s).
+**/
 struct ItemSpawnFlags {
     static constexpr int32_t TriggerSpawn = 0x00000001;
     static constexpr int32_t NoTouch = 0x00000002;
@@ -540,12 +494,9 @@ typedef enum {
 //
 void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client);
 
-//
-// g_combat.c
-//
-qboolean SVG_OnSameTeam(SVGBaseEntity *ent1, SVGBaseEntity *ent2);
-
-// damage flags
+/**
+*   @brief  Flags describing damage details.
+*/
 struct DamageFlags {
     static constexpr int32_t IndirectFromRadius = 0x00000001;  // Damage was indirect
     static constexpr int32_t NoArmorProtection = 0x00000002;  // Armour does not protect from this damage
@@ -555,39 +506,15 @@ struct DamageFlags {
     static constexpr int32_t IgnoreProtection = 0x00000020;  // Armor, shields, invulnerability, and godmode have no effect
 };
 
-//
-// g_weapon.c
-//
-qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t kick);
-void SVG_FireBullet(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t mod);
-void SVG_FireShotgun(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t kick, int32_t hspread, int32_t vspread, int32_t count, int32_t mod);
-void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int32_t damage, int32_t speed, int32_t effect, qboolean hyper);
 
-//
-// g_ptrail.c
-//
-void SVG_PlayerTrail_Init(void);
-void SVG_PlayerTrail_Add(vec3_t spot);
-void SVG_PlayerTrail_New(vec3_t spot);
-Entity *SVG_PlayerTrail_PickFirst(Entity *self);
-Entity *SVG_PlayerTrail_PickNext(Entity *self);
-Entity *SVG_PlayerTrail_LastSpot(void);
-
-//
-// g_svcmds.c
-//
 void    SVG_ServerCommand(void);
 qboolean SVG_FilterPacket(char *from);
 
-//
-// g_phys.c
-//
-class SGEntityHandle;
+/**
+*   @brief  
+**/
 void SVG_RunEntity(SGEntityHandle &entityHandle);
 
-//
-// g_main.c
-//
 //-----------------------------------------------------------------------------------------------------------
 
 // TODO: All these go elsewhere, sometime, as does most...
@@ -743,16 +670,16 @@ struct ClientRespawnData {
     ClientPersistentData persistentCoopRespawn;
     
     //! The level.frameNumber on which the player entered the game.
-    int32_t enterGameFrameNumber;
+    GameTime enterGameFrameNumber = GameTime::zero();
 
     //! A client's score, usually this means the amount of frags.
-    int32_t score;
+    int32_t score = 0;
 
     //! Angles sent over in the last client user command.
-    vec3_t commandViewAngles;
+    vec3_t commandViewAngles = vec3_zero();
     
     //! Is this client a spectator?
-    qboolean isSpectator;
+    qboolean isSpectator = false;
 };
 
 
@@ -811,7 +738,7 @@ struct gclient_s {
         };
 
         //! Start time of the current active weapon state.
-        uint32_t timeStamp = 0;
+        GameTime timeStamp = GameTime::zero();
         
         //! Flags of the weapon's state, gets set to 0 after each successful weapon switch.
         uint32_t flags  = Flags::IsHolstered;
@@ -843,16 +770,16 @@ struct gclient_s {
         //! Actual impact damage to knock the client back with.
         int32_t knockBack = 0;
         //! Origin of where the damage came from.
-        vec3_t from = vec3_zero();
+        vec3_t fromOrigin = vec3_zero();
     } damages;
 
     //! Yaw angle of where our killer is located at in case we're dead.
-    float killerYaw;
+    float killerYaw = 0.f;
 
     //! Current kick angles.
-    vec3_t kickAngles;
+    vec3_t kickAngles = vec3_zero();
     //! Current kick origin.
-    vec3_t kickOrigin;
+    vec3_t kickOrigin = vec3_zero();
 
     /**
     *   @brief  View damage kicks.
@@ -863,71 +790,71 @@ struct gclient_s {
         //! Pitch for view damage kick.
         float pitch = 0.f;
         //! Time of view damage.
-        float time  = 0.f;
+        Frametime time = Frametime::zero();
     } viewDamage;
 
     //! Falling time.
-    float fallTime;
+    Frametime fallTime = Frametime::zero();
     //! Falling value for adding on to the view's pitch when landing.
-    float fallValue;
+    float fallValue = 0.f;
     //! Alpha value for damage indicator display.
-    float damageAlpha;
+    float damageAlpha = 0.f;
     //! Alpha value for bonus indicator display.
-    float bonusAlpha;
+    float bonusAlpha = 0.f;
     //! Total damage blend value.
-    vec3_t damageBlend;
+    vec3_t damageBlend = vec3_zero();
     //! Aiming direction.
-    vec3_t aimAngles;
+    vec3_t aimAngles = vec3_zero();
     //! Store bob time so going off-ground doesn't change it.
-    float bobTime;
+    float bobTime = 0.f;
 
     //! Old view angles.
-    vec3_t oldViewAngles;
+    vec3_t oldViewAngles = vec3_zero();
     //! Old velocity.
-    vec3_t oldVelocity;
+    vec3_t oldVelocity = vec3_zero();
 
     //! Timer for the next drown event.
-    float nextDrownTime;
+    GameTime nextDrownTime = GameTime::zero();
     //! Old water level.
-    int32_t oldWaterLevel;
+    int32_t oldWaterLevel = 0;
 
     //! For weapon raising
-    int32_t machinegunShots;
+    int32_t machinegunShots = 0;
 
     /**
     *   @brief  Animation state.
     **/
     struct ClientAnimationState {
-        float endFrame;
-        float priorityAnimation;
+        float endFrame = 0;
+        float priorityAnimation = 0;
 
-        qboolean    isDucking;
-        qboolean    isRunning;
+        qboolean    isDucking = false;
+        qboolean    isRunning = false;
     } animation;
 
     //! Weapon Sound.
-    int32_t weaponSound;
+    int32_t weaponSound = 0;
 
     //! Pick up message time.
-    float pickupMessageTime;
+    GameTime pickupMessageTime = GameTime::zero();
 
     /**
     *   @brief  Used to protect from chat flooding.
     **/
     struct ClientFloodProtection {
-        float lockTill;     // locked from talking
-        float when[10];     // when messages were said
-        int32_t whenHead;     // head pointer for when said
+        Frametime lockTill = GameTime::zero();   // Locked from talking.
+        Frametime when[10] = { };    // When messages were said.
+        int32_t whenHead = 0;   // Head pointer for when said
     } flood;
 
     //! Client can respawn when time > this
-    float respawnTime;
+    GameTime respawnTime = GameTime::zero();
 
     //! The (client)player we are chasing
-    Entity *chaseTarget;
+    Entity *chaseTarget = nullptr;
 
     //! Do we need to update chase info?
-    qboolean updateChase;
+    qboolean updateChase = false;
 };
 
 

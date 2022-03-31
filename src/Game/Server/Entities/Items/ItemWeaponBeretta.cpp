@@ -332,7 +332,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
     // Set a respawn think for after 2 seconds.
     if (!GetGamemode()->IsClass<DefaultGamemode>()) {
         SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
-        SetNextThinkTime(level.time + 2);
+        SetNextThinkTime(level.time + 2s);
     }
 
     return true;

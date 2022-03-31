@@ -93,7 +93,7 @@ void SVGBaseItemWeapon::Think() {
 /**
 *   @brief
 **/
-void SVGBaseItemWeapon::SetRespawn(const float delay) {
+void SVGBaseItemWeapon::SetRespawn(const Frametime &delay) {
     Base::SetRespawn(delay);
 }
 
@@ -162,7 +162,7 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     // See if we got a queued state, if we do, override our current weaponstate.
     if (client->weaponState.queued != -1 && !(client->weaponState.flags & WeaponFlags::IsProcessingState)) {
         // Set the timestamp of when this current state got set.
-        client->weaponState.timeStamp = level.timeStamp;
+        client->weaponState.timeStamp = GameTime(level.timeStamp);
 
         //gi.DPrintf("WeaponState Switched:(From:#%i  To:#%i   Timestamp:%i)\n", 
         //    client->weaponState.current, client->weaponState.queued, client->weaponState.timeStamp);

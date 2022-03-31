@@ -59,39 +59,39 @@ typedef struct {
 #define P(name, type) _FA(F_POINTER, name, type)
 
 static const save_field_t entityfields[] = {
-#define _OFS FOFS
-    V(state.origin),
-    V(state.angles),
-    V(state.oldOrigin),
-    I(state.modelIndex),
-    I(state.modelIndex2),
-    I(state.modelIndex3),
-    I(state.modelIndex4),
-    I(state.animationFrame),
-    I(state.skinNumber),
-    I(state.effects),
-    I(state.renderEffects),
-    I(state.solid),
-    I(state.sound),
-    I(state.eventID),
-
-    // [...]
-
-    I(serverFlags),
-    V(mins),
-    V(maxs),
-    V(absMin),
-    V(absMax),
-    V(size),
-    I(solid),
-    I(clipMask),
-    E(owner),
-
-    //I(classEntity->GetMoveType()),
-//    I(flags),
-
-//    L(model),
-    F(freeTime),
+//#define _OFS FOFS
+//    V(state.origin),
+//    V(state.angles),
+//    V(state.oldOrigin),
+//    I(state.modelIndex),
+//    I(state.modelIndex2),
+//    I(state.modelIndex3),
+//    I(state.modelIndex4),
+//    I(state.animationFrame),
+//    I(state.skinNumber),
+//    I(state.effects),
+//    I(state.renderEffects),
+//    I(state.solid),
+//    I(state.sound),
+//    I(state.eventID),
+//
+//    // [...]
+//
+//    I(serverFlags),
+//    V(mins),
+//    V(maxs),
+//    V(absMin),
+//    V(absMax),
+//    V(size),
+//    I(solid),
+//    I(clipMask),
+//    E(owner),
+//
+//    //I(classEntity->GetMoveType()),
+////    I(flags),
+//
+////    L(model),
+//    F(freeTime),
 
 //    L(message),
  //   L(classname),
@@ -186,7 +186,7 @@ static const save_field_t entityfields[] = {
     //V(moveOrigin),
     //V(moveAngles),
 
-    I(lightLevel),
+  //  I(lightLevel),
 
     //I(style),
     //L(customLightStyle),
@@ -261,107 +261,107 @@ static const save_field_t levelfields[] = {
 
 static const save_field_t clientfields[] = {
 #define _OFS CLOFS
-    I(playerState.pmove.type),
-
-    V(playerState.pmove.origin),
-    V(playerState.pmove.velocity),
-    B(playerState.pmove.flags),
-    B(playerState.pmove.time),
-    S(playerState.pmove.gravity),
-    SA(playerState.pmove.deltaAngles, 3),
-
-    V(playerState.pmove.viewAngles),
-    V(playerState.pmove.viewOffset),
-    V(playerState.kickAngles),
-
-    V(playerState.gunAngles),
-    V(playerState.gunOffset),
-    I(playerState.gunIndex),
-    I(playerState.gunAnimationStartTime),
-    I(playerState.gunAnimationStartFrame),
-    I(playerState.gunAnimationEndFrame),
-    I(playerState.gunAnimationFrametime),
-    I(playerState.gunAnimationLoopCount),
-    I(playerState.gunAnimationForceLoop),
-
-    FA(playerState.blend, 4),
-
-    F(playerState.fov),
-
-    I(playerState.rdflags),
-
-    SA(playerState.stats, MAX_STATS),
-
-    SZ(persistent.userinfo, MAX_INFO_STRING),
-    SZ(persistent.netname, 16),
-    I(persistent.hand),
-
-    //I(persistent.isConnected),
-
-    //I(persistent.health),
-    //I(persistent.maxHealth),
-    //I(persistent.savedFlags),
-
-    //I(persistent.selectedItem),
-    //IA(persistent.inventory, MAX_ITEMS),
-
-    //I(persistent.maxAmmo9mm),
-
-    //T(persistent.activeWeapon),
-    //T(persistent.lastWeapon),
-
-//    I(persistent.powerCubes),
-    I(persistent.score),
-
-    I(persistent.isSpectator),
-
-    I(showScores),
-    I(showInventory),
-    I(showHelpIcon),
-
-//    I(ammoIndex),
-
-//    T(newWeapon),
-
-    I(damages.armor),
-    I(damages.powerArmor),
-    I(damages.blood),
-    I(damages.knockBack),
-    V(damages.from),
-
-    F(killerYaw),
-
-    I(weaponState),
-
-    V(kickAngles),
-    V(kickOrigin),
-    F(viewDamage.roll),
-    F(viewDamage.pitch),
-    F(viewDamage.time),
-    F(fallTime),
-    F(fallValue),
-    F(damageAlpha),
-    F(bonusAlpha),
-    V(damageBlend),
-    V(aimAngles),
-    F(bobTime),
-    V(oldViewAngles),
-    V(oldVelocity),
-
-    F(nextDrownTime),
-    I(oldWaterLevel),
-
-    I(machinegunShots),
-
-    I(animation.endFrame),
-    I(animation.priorityAnimation),
-    I(animation.isDucking),
-    I(animation.isRunning),
-
-    // powerup timers
-    I(weaponSound),
-
-    F(pickupMessageTime),
+//    I(playerState.pmove.type),
+//
+//    V(playerState.pmove.origin),
+//    V(playerState.pmove.velocity),
+//    B(playerState.pmove.flags),
+//    B(playerState.pmove.time),
+//    S(playerState.pmove.gravity),
+//    SA(playerState.pmove.deltaAngles, 3),
+//
+//    V(playerState.pmove.viewAngles),
+//    V(playerState.pmove.viewOffset),
+//    V(playerState.kickAngles),
+//
+//    V(playerState.gunAngles),
+//    V(playerState.gunOffset),
+//    I(playerState.gunIndex),
+//    I(playerState.gunAnimationStartTime),
+//    I(playerState.gunAnimationStartFrame),
+//    I(playerState.gunAnimationEndFrame),
+//    I(playerState.gunAnimationFrametime),
+//    I(playerState.gunAnimationLoopCount),
+//    I(playerState.gunAnimationForceLoop),
+//
+//    FA(playerState.blend, 4),
+//
+//    F(playerState.fov),
+//
+//    I(playerState.rdflags),
+//
+//    SA(playerState.stats, MAX_STATS),
+//
+//    SZ(persistent.userinfo, MAX_INFO_STRING),
+//    SZ(persistent.netname, 16),
+//    I(persistent.hand),
+//
+//    //I(persistent.isConnected),
+//
+//    //I(persistent.health),
+//    //I(persistent.maxHealth),
+//    //I(persistent.savedFlags),
+//
+//    //I(persistent.selectedItem),
+//    //IA(persistent.inventory, MAX_ITEMS),
+//
+//    //I(persistent.maxAmmo9mm),
+//
+//    //T(persistent.activeWeapon),
+//    //T(persistent.lastWeapon),
+//
+////    I(persistent.powerCubes),
+//    I(persistent.score),
+//
+//    I(persistent.isSpectator),
+//
+//    I(showScores),
+//    I(showInventory),
+//    I(showHelpIcon),
+//
+////    I(ammoIndex),
+//
+////    T(newWeapon),
+//
+//    I(damages.armor),
+//    I(damages.powerArmor),
+//    I(damages.blood),
+//    I(damages.knockBack),
+//    V(damages.fromOrigin),
+//
+//    F(killerYaw),
+//
+//    I(weaponState),
+//
+//    V(kickAngles),
+//    V(kickOrigin),
+//    F(viewDamage.roll),
+//    F(viewDamage.pitch),
+//    F(viewDamage.time),
+//    F(fallTime),
+//    F(fallValue),
+//    F(damageAlpha),
+//    F(bonusAlpha),
+//    V(damageBlend),
+//    V(aimAngles),
+//    F(bobTime),
+//    V(oldViewAngles),
+//    V(oldVelocity),
+//
+//    F(nextDrownTime),
+//    I(oldWaterLevel),
+//
+//    I(machinegunShots),
+//
+//    I(animation.endFrame),
+//    I(animation.priorityAnimation),
+//    I(animation.isDucking),
+//    I(animation.isRunning),
+//
+//    // powerup timers
+//    I(weaponSound),
+//
+//    F(pickupMessageTime),
 
     {(fieldtype_t)0}
 #undef _OFS

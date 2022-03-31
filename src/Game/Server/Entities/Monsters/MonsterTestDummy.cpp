@@ -101,7 +101,7 @@ void MonsterTestDummy::Spawn() {
     SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime(level.time + 2s);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -125,7 +125,7 @@ void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
 
-    GetPODEntity()->state.animationStartTime = level.time + 1 * FRAMETIME;
+    GetPODEntity()->state.animationStartTime = GameTime(level.time + 1s).count();
     //GetPODEntity()->state.animationFramerate = 60;
 
 }

@@ -86,15 +86,19 @@ using PODEntity = entity_s;
 #include "SkeletalAnimation.h"
 
 /**
-*   Entity Framework
-**/
-#include "Entities.h"
-
-/**
 *   Protocol
 **/
 #include "PMove.h"
 
+/**
+*   Game Time Utilities.
+**/
+#include "Time.h"
+
+/**
+*   Entity Framework
+**/
+#include "Entities.h"
 
 
 /**

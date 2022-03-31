@@ -39,6 +39,6 @@ public:
 	void			TrainBlocked( IServerGameEntity* other );
 
 private:
-	PathCorner*		currentPathEntity{ nullptr };
-	float			damageDebounceTime{ 0.0f };
+	PathCorner*		currentPathEntity = nullptr;
+	GameTime		damageDebounceTime = GameTime::zero();
 };

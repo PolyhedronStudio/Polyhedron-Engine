@@ -151,6 +151,19 @@ qboolean SVGBaseEntity::ParseStringKeyValue(const std::string& key, const std::s
 
 //
 //===============
+// SVGBaseEntity::ParseFloatKeyValue
+//
+// PROTECTED function to help parsing float key:value string pairs with.
+//===============
+//
+qboolean SVGBaseEntity::ParseFrametimeKeyValue(const std::string& key, const std::string& value, Frametime &frametime) {
+	frametime = Frametime(std::stof(value));
+
+	return true;
+}
+
+//
+//===============
 // SVGBaseEntity::ParseVector3KeyValue
 //
 // PROTECTED function to help parsing vector key:value string pairs with.
@@ -223,11 +236,11 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	// Delay.
 	else if (key == "delay") {
 		// Parsed float.
-		float parsedFloat = 0.f;
-		ParseFloatKeyValue(key, value, parsedFloat);
+		Frametime parsedTime = Frametime::zero();
+		ParseFrametimeKeyValue(key, value, parsedTime);
 
 		// Assign.
-		SetDelayTime(parsedFloat);
+		SetDelayTime(parsedTime);
 	}
 	// KillTarget.
 	else if (key == "killtarget") {
@@ -399,7 +412,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 	}
 
 	// Create a temporary DelayedUse entity in case this entity has a trigger delay
-	if ( GetDelayTime() ) {
+	if ( GetDelayTime() != Frametime::zero() ) {
 		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
 		// allocates one such entity and accepts activator, message, target etc. as parameters
 		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'

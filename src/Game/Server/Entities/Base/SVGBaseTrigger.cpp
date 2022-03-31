@@ -112,14 +112,8 @@ void SVGBaseTrigger::InitPointTrigger() {
 void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
 	// Wait.
 	if (key == "wait") {
-		// Parsed float.
-		float parsedFloat = 0.f;
-
 		// Parse.
-		ParseFloatKeyValue(key, value, parsedFloat);
-
-		// Assign.
-		SetWaitTime(parsedFloat);
+		ParseFrametimeKeyValue(key, value, waitTime);
 	}
 	// Parent class spawnkey.
 	else {

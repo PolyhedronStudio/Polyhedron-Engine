@@ -28,18 +28,7 @@ static constexpr int32_t SPAWNFLAG_SLOW_HURT		= 16;
 
 // Constructor/Deconstructor.
 TriggerHurt::TriggerHurt(Entity* svEntity) : SVGBaseTrigger(svEntity) {
-	//
-	// All callback functions best be nullptr.
-	//
 
-	//
-	// Set all entity pointer references to nullptr.
-	//
-
-	//
-	// Default values for members.
-	//
-	lastHurtTime = 0.f;
 }
 TriggerHurt::~TriggerHurt() {
 
@@ -153,9 +142,9 @@ void TriggerHurt::TriggerHurtTouch(IServerGameEntity* self, IServerGameEntity* o
 		return;
 
 	if (GetSpawnFlags() & SPAWNFLAG_SLOW_HURT)
-		lastHurtTime = level.time + 1;
+		lastHurtTime = level.time + 1s;
 	else
-		lastHurtTime = level.time + FRAMETIME;
+		lastHurtTime = level.time + duration_cast<GameTime>(FRAMETIME);
 
 	if (!(GetSpawnFlags()& SPAWNFLAG_SILENT)) {
 		if ((level.frameNumber % 10) == 0)

@@ -70,8 +70,9 @@ void TriggerMultiple::Spawn() {
 	else if (sound == 3)
 		SetNoiseIndexA(SVG_PrecacheSound("misc/trigger1.wav")); // Similar to gi.SoundIndex.
 
-	if (!GetWaitTime())
-		SetWaitTime(0.2f);
+	if (GetWaitTime() == Frametime::zero()) {
+		SetWaitTime(0.2s);
+	}
 
 	//self->noiseIndexA = gi.SoundIndex("world/electro.wav");
 	SetTouchCallback(&TriggerMultiple::TriggerMultipleTouch);
@@ -80,7 +81,7 @@ void TriggerMultiple::Spawn() {
 	SetUseCallback(&TriggerMultiple::TriggerMultipleUse);
 
 	// Default to 0.
-	SetNextThinkTime(0);
+	SetNextThinkTime(0s);
 
 	LinkEntity();
 }
@@ -129,14 +130,15 @@ void TriggerMultiple::SpawnKey(const std::string& key, const std::string& value)
 
 void TriggerMultiple::Trigger(IServerGameEntity *activator) {
 	// We've already been triggered.
-	if (GetNextThinkTime())
+	if (GetNextThinkTime() != Frametime::zero()) {
 		return;
+	}
 
 	// Execute UseTargets.
 	SetActivator(activator);
 	UseTargets(activator);
 
-	if (GetWaitTime() > 0) {
+	if (GetWaitTime() != Frametime::zero()) {
 		// Set our think callback to be "waiting".
 		SetThinkCallback(&TriggerMultiple::TriggerMultipleThinkWait);
 
@@ -159,7 +161,7 @@ void TriggerMultiple::Trigger(IServerGameEntity *activator) {
 //===============
 //
 void TriggerMultiple::TriggerMultipleThinkWait() {
-	SetNextThinkTime(0.f);
+	SetNextThinkTime(0s);
 }
 
 //

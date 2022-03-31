@@ -37,7 +37,7 @@ void TargetExplosion::Spawn() {
 void TargetExplosion::ExplosionUse( IServerGameEntity* other, IServerGameEntity* activator ) {
 	SetActivator(activator);
 
-	if ( !GetDelayTime() ) {
+	if ( GetDelayTime() == Frametime::zero() ) {
 		ExplosionThink();
 		return;
 	}
@@ -57,8 +57,8 @@ void TargetExplosion::ExplosionThink() {
 
 	GetGamemode()->InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
-	float save = GetDelayTime();
-	SetDelayTime( 0.0f );
+	const Frametime save = GetDelayTime();
+	SetDelayTime( 0s );
 	UseTargets();
 	SetDelayTime( save );
 }

@@ -89,7 +89,7 @@ public:
     /**
     *   @brief Engages this item in respawn mode waiting for the set delay to pass before respawning.
     **/
-    virtual void SetRespawn(const float delay);
+    virtual void SetRespawn(const Frametime& delay);
 
     /**
     *   @brief  Use for item instances, calls their "UseInstance" callback.

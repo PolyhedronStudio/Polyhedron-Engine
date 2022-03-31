@@ -238,8 +238,8 @@ public:
     /**
     *   @brief Get/Set: Delay Time
     **/
-    virtual const float     GetDelayTime() = 0;
-    virtual void            SetDelayTime(const float delayTime) = 0;
+    virtual const Frametime&    GetDelayTime() = 0;
+    virtual void                SetDelayTime(const Frametime& delayTime) = 0;
 
     /**
     *   @brief Get/Set: Effects
@@ -390,8 +390,8 @@ public:
     /**
     *   @brief Get/Set:     NextThink Time.
     **/
-    virtual const float     GetNextThinkTime() = 0;
-    virtual void            SetNextThinkTime(const float nextThinkTime) = 0;
+    virtual const GameTime& GetNextThinkTime() = 0;
+    virtual void            SetNextThinkTime(const Frametime& nextThinkTime) = 0;
 
     /**
     *   @brief Get/Set:     Noise Index A
@@ -545,8 +545,8 @@ public:
     /**
     *   @brief Get/Set:     Wait Time
     **/
-    virtual const float     GetWaitTime() = 0;
-    virtual void            SetWaitTime(const float waitTime) = 0;
+    virtual const Frametime&    GetWaitTime() = 0;
+    virtual void                SetWaitTime(const Frametime& waitTime) = 0;
 
     /**
     *   @brief Get/Set:     Water Level

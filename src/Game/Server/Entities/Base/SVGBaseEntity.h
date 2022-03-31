@@ -288,8 +288,8 @@ public:
     /**
     *   @brief Get/Set: Delay Time
     **/
-    inline const float      GetDelayTime() override { return delayTime; }
-    inline void             SetDelayTime(const float delayTime) override { this->delayTime = delayTime; }
+    inline const Frametime& GetDelayTime() override { return delayTime; }
+    inline void             SetDelayTime(const Frametime& delayTime) override { this->delayTime = delayTime; }
 
     /**
     *   @brief Get/Set: Effects
@@ -449,8 +449,8 @@ public:
     /**
     *   @brief Get/Set:     NextThink Time.
     **/
-    inline const float      GetNextThinkTime() override { return nextThinkTime; }
-    inline void             SetNextThinkTime(const float nextThinkTime) override { this->nextThinkTime = nextThinkTime; }
+    inline const GameTime&  GetNextThinkTime() override { return nextThinkTime; }
+    inline void             SetNextThinkTime(const Frametime& nextThinkTime) override { this->nextThinkTime = duration_cast<GameTime>(nextThinkTime); }
 
     /**
     *   @brief Get/Set:     Noise Index A
@@ -604,8 +604,8 @@ public:
     /**
     *   @brief Get/Set:     Wait Time
     **/
-    inline const float      GetWaitTime() override { return waitTime; }
-    inline void             SetWaitTime(const float waitTime) override { this->waitTime = waitTime; }
+    inline const Frametime& GetWaitTime() override { return waitTime; }
+    inline void             SetWaitTime(const Frametime &waitTime) override { this->waitTime = waitTime; }
 
     /**
     *   @brief Get/Set:     Water Level
@@ -667,6 +667,7 @@ protected:
     qboolean ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t& integerNumber);
     qboolean ParseUnsignedIntegerKeyValue(const std::string& key, const std::string& value, uint32_t& unsignedIntegerNumber);
     qboolean ParseStringKeyValue(const std::string& key, const std::string& value, std::string& stringValue);
+    qboolean ParseFrametimeKeyValue(const std::string& key, const std::string& value, Frametime &frameTime);
     qboolean ParseVector3KeyValue(const std::string& key, const std::string& value, vec3_t& vectorValue);
 
 
@@ -758,11 +759,11 @@ protected:
     *   Entity 'Timing'
     **/
     //! The next 'think' time, determines when to call the 'think' callback.
-    float nextThinkTime = 0.f;
+    GameTime nextThinkTime = GameTime::zero();
     //! Delay before calling trigger execution.
-    float delayTime = 0.f;
+    Frametime delayTime = Frametime::zero();
     //! Wait time before triggering at all, in case it was set to auto.
-    float waitTime = 0.f;
+    Frametime waitTime = Frametime::zero();
 
 
     /**

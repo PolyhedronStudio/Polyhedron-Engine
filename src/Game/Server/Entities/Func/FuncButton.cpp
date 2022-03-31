@@ -59,8 +59,8 @@ void FuncButton::Spawn() {
 	if ( !GetDeceleration() ) {
 		SetDeceleration( GetSpeed() );
 	} // If the mapper didn't specify 'wait until return', then default to 3 seconds
-	if ( !GetWaitTime() ) {
-		SetWaitTime( 3.0f );
+	if ( GetWaitTime() == Frametime::zero() ) {
+		SetWaitTime( 3.0s );
 	} // Lip: how much to subtract from the door's travel distance
 	if ( !GetLip() ) {
 		SetLip( 8.0f );
@@ -178,7 +178,7 @@ void FuncButton::ButtonWait() {
 
 	UseTargets( GetActivator() );
 
-	if ( moveInfo.wait >= 0.0f ) {
+	if ( moveInfo.wait != Frametime::zero() ) {
 		SetNextThinkTime( level.time + moveInfo.wait );
 		SetThinkCallback( &FuncButton::ButtonReturn );
 	}

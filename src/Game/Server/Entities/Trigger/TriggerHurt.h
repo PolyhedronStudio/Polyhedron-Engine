@@ -48,7 +48,7 @@ protected:
     // Other base entity members. (These were old fields in edict_t back in the day.)
     //
     // The time this entity has last been hurting anyone else. It is used for the slow damage flag.
-    float lastHurtTime;
+    GameTime lastHurtTime = GameTime::zero();
 
     //
     // Entity pointers.

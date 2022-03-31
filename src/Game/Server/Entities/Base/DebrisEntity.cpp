@@ -48,7 +48,7 @@ DebrisEntity* DebrisEntity::Create(SVGBaseEntity* debrisser, const std::string& 
 
     // Set up the thinking machine.
     debrisEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
-    debrisEntity->SetNextThinkTime(level.time + 5 + random() * 5);
+    debrisEntity->SetNextThinkTime(level.time + 5s + Frametime(random() * 5));
 
     // Setup the other properties.
     debrisEntity->SetAnimationFrame(0);

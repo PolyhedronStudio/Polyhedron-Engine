@@ -68,7 +68,7 @@ void Machinegun_Fire(SVGBasePlayer* ent)
         client->playerState.gunAnimationFrame = 6;
         if (level.time >= ent->GetDebouncePainTime()) {
             gi.Sound(ent->GetPODEntity(), SoundChannel::Voice, gi.SoundIndex("weapons/noammo.wav"), 1, Attenuation::Normal, 0);
-            ent->SetDebouncePainTime(level.time + 1);
+            ent->SetDebouncePainTime(level.time + 1s);
         }
         NoAmmoWeaponChange(ent);
         return;

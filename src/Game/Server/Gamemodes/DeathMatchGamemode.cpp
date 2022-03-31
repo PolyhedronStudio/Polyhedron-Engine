@@ -73,7 +73,7 @@ void DeathmatchGamemode::ClientBegin(Entity* svEntity) {
     // Put into our server and blast away! (Takes care of spawning classEntity).
     PlacePlayerInGame(player);
 
-    if (level.intermission.time) {
+    if (level.intermission.time != GameTime::zero()) {
         HUD_MoveClientToIntermission(svEntity);
     } else {
         gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);//WriteByte(ServerGameCommand::MuzzleFlash);
@@ -287,12 +287,12 @@ void DeathmatchGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerCli
     }
 
     // Ensure we aren't in an intermission time.
-    if (level.intermission.time)
+    if (level.intermission.time != GameTime::zero())
         return;
 
     // This has to go ofc.... lol. What it simply does though, is determine whether there is 
     // a need to respawn as spectator.
-    if (client->persistent.isSpectator != client->respawn.isSpectator && (level.time - client->respawnTime) >= 5) {
+    if (client->persistent.isSpectator != client->respawn.isSpectator && (level.time - client->respawnTime) >= 5s) {
         RespawnSpectator(player, client);
         return;
     }

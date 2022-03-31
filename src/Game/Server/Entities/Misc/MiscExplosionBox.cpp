@@ -277,9 +277,8 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
 
         GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
-        float save;
-        save = GetDelayTime();
-        SetDelayTime(0.0f);
+        const Frametime save = GetDelayTime();
+        SetDelayTime(0s);
         UseTargets(GetActivator());
         SetDelayTime(save);
     } else {
@@ -290,9 +289,8 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
 
         GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
-        float save;
-        save = GetDelayTime();
-        SetDelayTime(0.0f);
+        const Frametime save = GetDelayTime();
+        SetDelayTime(0s);
         UseTargets(GetActivator());
         SetDelayTime(save);
     }
@@ -351,7 +349,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
     float yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, (20.f / BASE_FRAMEDIVIDER) * ratio * FRAMETIME);
+    SVG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 }
 
 

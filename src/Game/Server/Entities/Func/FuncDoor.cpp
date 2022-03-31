@@ -71,8 +71,8 @@ void FuncDoor::Spawn() {
     if ( !GetDeceleration() ) {
         SetDeceleration( GetSpeed() );
     }
-    if ( !GetWaitTime() ) {
-        SetWaitTime( 3.0f );
+    if ( GetWaitTime() == Frametime::zero() ) {
+        SetWaitTime( 3s );
     }
     if ( !GetLip() ) {
         SetLip( 8.0f );
@@ -249,7 +249,7 @@ void FuncDoor::DoorBlocked( IServerGameEntity* other ) {
 
     // If a door has a negative wait, it would never come back if blocked,
     // so let it just squash the object to death real fast
-    if ( moveInfo.wait >= 0 ) {
+    if ( moveInfo.wait != Frametime::zero() ) {
         if ( moveInfo.state == MoverState::Down ) {
 	        for (IServerGameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 		        // Check it is a derivate of base mover, if not, break out of this loop.
@@ -294,7 +294,7 @@ void FuncDoor::DoorTouch( IServerGameEntity* self, IServerGameEntity* other, Col
         return;
     }
 
-    debounceTouchTime = level.time + 5.0f;
+    debounceTouchTime = level.time + 5s;
 
     if ( !messageStr.empty() ) {
         gi.CenterPrintf( other->GetPODEntity(), "%s", messageStr.c_str() );
@@ -314,7 +314,7 @@ void FuncDoor::DoorGoUp( IServerGameEntity* activator ) {
 
     if ( moveInfo.state == MoverState::Top ) {
         // Reset top wait time 
-        if ( moveInfo.wait >= 0.0f ) {
+        if ( moveInfo.wait != Frametime::zero() ) {
             SetNextThinkTime( level.time + moveInfo.wait );
         }
         return;
@@ -384,7 +384,7 @@ void FuncDoor::HitTop() {
         return;
     }
 
-    if ( moveInfo.wait >= 0.0f ) {
+    if ( moveInfo.wait != Frametime::zero() ) {
         SetThinkCallback( &FuncDoor::DoorGoDown );
         SetNextThinkTime( level.time + moveInfo.wait );
     }

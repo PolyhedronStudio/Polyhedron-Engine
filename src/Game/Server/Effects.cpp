@@ -74,7 +74,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
         client->animation.endFrame = self->GetAnimationFrame();
     } else {
         self->SetThinkCallback(nullptr);
-        self->SetNextThinkTime(0);
+        self->SetNextThinkTime(Frametime::zero());
     }
 
     // Relink entity, this'll make it... be "not around", but in the "queue".

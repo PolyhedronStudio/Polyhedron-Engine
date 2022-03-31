@@ -69,8 +69,8 @@ public:
     }
 
     // Set framerate. (1.0f = fps of iqm.)
-    virtual inline void SetAnimationFramerate(float framerate) {
-        animationFramerate = framerate;
+    virtual inline void SetAnimationFrametime(Frametime frametime) {
+        animationFrametime = frametime;
     }
     //virtual uint32_t GetCapLimit() { return 0; }
     
@@ -97,10 +97,10 @@ protected:
     short animationIndex = 0;
 
     //! The time the current(thus also last) animation started.
-    float animationStartTime = 0.f;
+    Frametime animationStartTime = Frametime::zero();
 
     //! The framerate the current animation is playing at.
-    float animationFramerate = 1.0f;
+    Frametime animationFrametime = 1s;
 
     //! Are we animating?
     qboolean isAnimating = false;

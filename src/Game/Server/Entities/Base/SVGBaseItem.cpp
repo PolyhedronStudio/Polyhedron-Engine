@@ -184,7 +184,7 @@ void SVGBaseItem::InstanceSpawn() {
 /**
 *   @brief Engages this item in respawn mode waiting for the set delay to pass before respawning.
 **/
-void SVGBaseItem::SetRespawn(const float delay) {
+void SVGBaseItem::SetRespawn(const Frametime& delay) {
     // Ensure that for the time being the item doesn't appear to clients.
     SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
 
@@ -307,7 +307,7 @@ void SVGBaseItem::BaseItemTouch(IServerGameEntity* self, IServerGameEntity* othe
 
     // If the respawn spawnflag is set, let it respawn.
     if (GetFlags() & EntityFlags::Respawn) {
-        SetRespawn(2);
+        SetRespawn(2s);
     } else {
         Remove();
     }

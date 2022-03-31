@@ -120,7 +120,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     }
 
     // If it's already activate there is no use in executing this function again.
-    if (level.intermission.time) {
+    if (level.intermission.time != Frametime::zero()) {
         return;
     }
 
@@ -447,7 +447,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
 
     // Special layout for deathmatch.
     if (GetGamemode()->IsClass<DeathmatchGamemode>()) {
-	    if (client->persistent.stats.health <= 0 || level.intermission.time || client->showScores) {
+	    if (client->persistent.stats.health <= 0 || level.intermission.time != GameTime::zero() || client->showScores) {
 	        client->playerState.stats[PlayerStats::Layouts] |= 1;
 	    }
 	    if (client->showInventory && client->persistent.stats.health > 0) { 
@@ -529,7 +529,7 @@ void SVG_HUD_SetSpectatorStats(SVGBasePlayer *player, ServerClient *client) {
     /* layouts are independant in isSpectator */
     client->playerState.stats[PlayerStats::Layouts] = 0;
 
-    if ((client->persistent.stats.health <= 0) || level.intermission.time || client->showScores)
+    if ((client->persistent.stats.health <= 0) || level.intermission.time != GameTime::zero() || client->showScores)
     {
 	    client->playerState.stats[PlayerStats::Layouts] |= 1;
     }

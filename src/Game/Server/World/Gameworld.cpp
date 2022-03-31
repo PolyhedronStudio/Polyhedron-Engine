@@ -260,7 +260,7 @@ Entity* Gameworld::ObtainFreeServerEntity() {
 	for (int32_t i = maxClients + 1; i < numberOfEntities; i++, svEntity++) {
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-	    if (!svEntity->inUse && (svEntity->freeTime < 2.f || level.time - svEntity->freeTime > 0.5f)) {
+	    if (!svEntity->inUse && (svEntity->freeTime < FRAMETIME_S * 2 || level.time - svEntity->freeTime > 500ms)) {
             //SVG_InitEntity(serverEntity);
             // Set entity to "inUse".
 			svEntity->inUse = true;

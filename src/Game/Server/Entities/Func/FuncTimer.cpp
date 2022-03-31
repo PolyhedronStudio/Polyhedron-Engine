@@ -28,8 +28,8 @@ FuncTimer::FuncTimer( Entity* entity )
 void FuncTimer::Spawn() {
 	Base::Spawn();
 
-	if ( !waitTime ) {
-		waitTime = 1.0f;
+	if ( waitTime == Frametime::zero() ) {
+		waitTime = 1s;
 	}
 
 	SetUseCallback( &FuncTimer::TimerUse );
@@ -41,7 +41,7 @@ void FuncTimer::Spawn() {
 	}
 
 	if ( spawnFlags & SF_StartOn ) {
-		nextThinkTime = level.time + 1.0f + pauseTime + delayTime + waitTime + crandom() * randomTime;
+		nextThinkTime = duration_cast<GameTime>(level.time + 1s + pauseTime + delayTime + waitTime + crandom() * randomTime);
 		SetActivator(this);
 	}
 
@@ -54,11 +54,11 @@ void FuncTimer::Spawn() {
 void FuncTimer::SpawnKey( const std::string& key, const std::string& value )
 {
 	if (key == "pausetime") {
-		ParseFloatKeyValue( key, value, pauseTime );
+		ParseFrametimeKeyValue( key, value, pauseTime);
 	} else if ( key == "random" ) {
-		ParseFloatKeyValue( key, value, randomTime );
+		ParseFrametimeKeyValue( key, value, randomTime);
 	} else if ( key == "wait" ) {
-		ParseFloatKeyValue( key, value, waitTime );
+		ParseFrametimeKeyValue( key, value, waitTime);
 	} else {
 		Base::SpawnKey( key, value );
 	}
@@ -69,7 +69,7 @@ void FuncTimer::SpawnKey( const std::string& key, const std::string& value )
 //===============
 void FuncTimer::TimerThink() {
 	UseTargets();
-	SetNextThinkTime( level.time + waitTime + crandom() * randomTime );
+	SetNextThinkTime( duration_cast<GameTime>(level.time + waitTime + crandom() * randomTime) );
 }
 
 //===============
@@ -79,13 +79,13 @@ void FuncTimer::TimerUse( IServerGameEntity* other, IServerGameEntity* activator
 	SetActivator(activator);
 
 	// If on, turn it off
-	if ( nextThinkTime ) {
-		SetNextThinkTime( 0.0f );
+	if ( nextThinkTime != GameTime::zero() ) {
+		SetNextThinkTime( 0s );
 		return;
 	}
 
 	// Turn it on
-	if ( delayTime ) {
+	if ( delayTime != Frametime::zero() ) {
 		SetNextThinkTime( level.time + delayTime );
 	} else {
 		TimerThink();

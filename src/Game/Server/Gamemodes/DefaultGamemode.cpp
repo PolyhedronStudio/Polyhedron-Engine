@@ -74,7 +74,7 @@ void DefaultGamemode::OnLevelExit() {
     // Reset the changeMap string, intermission time, and regular level time.
     level.intermission.changeMap = NULL;
     level.intermission.exitIntermission = 0;
-    level.intermission.time = 0;
+    level.intermission.time = GameTime::zero();
 
     // End the server frames for all clients.
     SVG_ClientEndServerFrames();
@@ -491,7 +491,7 @@ void DefaultGamemode::InflictDamage(IServerGameEntity* target, IServerGameEntity
     if (client) {
         client->damages.blood += damageTaken;
         client->damages.knockBack += knockBack;
-        client->damages.from = point;
+        client->damages.fromOrigin = point;
     }
 }
 
@@ -695,8 +695,9 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
     }
 
     // Ensure we aren't in intermission mode.
-    if (level.intermission.time)
+    if (level.intermission.time != GameTime::zero()) {
         return;
+    }
 
     // Run weapon animations in case this has not been done by user input itself.
     // (Idle animations, and general weapon thinking when a weapon is not in action.)
@@ -765,7 +766,7 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     // If the end of unit layout is displayed, don't give
     // the player any normal movement attributes
     //
-    if (level.intermission.time) {
+    if (level.intermission.time != GameTime::zero()) {
         // FIXME: add view drifting here?
         client->playerState.blend[3] = 0;
         client->playerState.fov = 90;
@@ -904,11 +905,11 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
     level.currentEntity = player;
 
     // Set move type to freeze in case intermission has a waiting time set on it.
-    if (level.intermission.time) {
+    if (level.intermission.time != GameTime::zero()) {
         player->SetPlayerMoveType(EnginePlayerMoveType::Freeze);
         
         // Can exit intermission after five seconds
-        if (level.time > level.intermission.time + 5.0 && (moveCommand->input.buttons & ButtonBits::Any)) {
+        if (level.time > level.intermission.time + 5s && (moveCommand->input.buttons & ButtonBits::Any)) {
             level.intermission.exitIntermission = true;
         }
     }
@@ -1195,7 +1196,7 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
         PlacePlayerInGame(player);
     }
 
-    if (level.intermission.time) {
+    if (level.intermission.time != GameTime::zero()) {
         HUD_MoveClientToIntermission(svEntity);
     } else {
         // send effect if in a multiplayer game
@@ -1483,7 +1484,7 @@ void DefaultGamemode::InitializePlayerRespawnData(ServerClient* client) {
     }
 
     client->respawn = {};
-    client->respawn.enterGameFrameNumber = level.frameNumber;
+    //client->respawn.enterGameFrameNumber = level.frameNumber;
     client->respawn.persistentCoopRespawn = client->persistent;
 }
 

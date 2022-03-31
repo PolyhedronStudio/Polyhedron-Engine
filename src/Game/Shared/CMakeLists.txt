@@ -38,6 +38,7 @@ SET(HEADERS_SHAREDGAME
 	Protocol.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Protocol.h 
 	SkeletalAnimation.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.h 
 	SharedGame.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SharedGame.h 
+	Time.h
 )
 
 #

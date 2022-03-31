@@ -69,7 +69,7 @@ void TriggerPush::PushTouch( IServerGameEntity* self, IServerGameEntity* other, 
             // Don't take fall damage immediately from this
             player->GetClient()->oldVelocity = other->GetVelocity();
             if ( player->GetDebounceSoundTime() < level.time ) {
-                player->SetDebounceSoundTime( level.time + 1.5f);
+                player->SetDebounceSoundTime( level.time + 1500ms);
                 SVG_Sound( player, SoundChannel::Auto, WindSound, 1.0f, Attenuation::Normal, 0.0f );
             }
         }

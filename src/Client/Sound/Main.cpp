@@ -63,12 +63,12 @@ cvar_t		*s_underwater_gain_hf;
 cvar_t		*s_doppler;
 cvar_t		*s_occlusion;
 cvar_t		*s_occlusion_strength;
-cvar_t		*s_reverb_preset;
-cvar_t		*s_reverb_preset_autopick;
+//cvar_t		*s_reverb_preset;
+//cvar_t		*s_reverb_preset_autopick;
 cvar_t		*s_reverb;
 cvar_t		*s_voiceinput;
 cvar_t		*s_voiceinput_volume;
-cvar_t		*s_reverb_set_preset;
+//cvar_t		*s_reverb_set_preset;
 cvar_t      *s_ambient;
 
 
@@ -160,60 +160,6 @@ static void s_auto_focus_changed(cvar_t *self)
 {
     S_Activate();
 }
-
-// CPP: This needs a declaration here... it resides in al.cpp
-void SetReverb(int index, int concalled);
-
-static void reverb_changed(cvar_t *self)
-{
-	if (s_reverb_preset_autopick->integer)
-	{
-		Com_Printf("This will not have effect while s_reverb_preset_autopick is 1!");
-		return;
-	}
-
-	if (s_reverb_preset->integer < 0)
-		s_reverb_preset->integer = 0;
-
-	if (s_reverb_preset->integer > 112)
-		s_reverb_preset->integer = 112;
-
-	SetReverb(s_reverb_preset->integer, 1);
-}
-
-extern int TriggerReverbOverrideReverb;
-extern int TriggerReverbOverride;
-extern int TriggerReverbOverrideNeeded;
-extern char* TriggerReverbOverrideReverbString;
-extern int TriggerReverbOverride2;
-extern int TriggerReverbOverrideNeeded2;
-static void reverb_set_preset_changed(cvar_t *self)
-{
-	int selfValue = self->integer;
-
-	if (selfValue < 0)
-		selfValue = 0;
-
-	if (selfValue > 112)
-		selfValue = 112;
-	
-	TriggerReverbOverrideReverb = selfValue;
-	TriggerReverbOverride2 = 0;
-	TriggerReverbOverrideNeeded2 = 0;
-	TriggerReverbOverride = 1;
-	TriggerReverbOverrideNeeded = 1;
-}
-
-static void reverb_set_changed(cvar_t *self)
-{
-	strcpy(TriggerReverbOverrideReverbString, self->string);
-	TriggerReverbOverride = 0;
-	TriggerReverbOverrideNeeded = 0;
-	TriggerReverbOverride2 = 1;
-	TriggerReverbOverrideNeeded2 = 1;
-	
-}
-
 static void voiceinputvolume_changed(cvar_t *self)
 {
 	if (s_voiceinput_volume->value < 0)
@@ -243,10 +189,10 @@ void S_Init(void)
 	s_doppler = Cvar_Get("s_doppler", "1", CVAR_ARCHIVE);
 	s_occlusion = Cvar_Get("s_occlusion", "1", CVAR_ARCHIVE);
 	s_occlusion_strength = Cvar_Get("s_occlusion_strength", "1", CVAR_ARCHIVE);
-	s_reverb_preset = Cvar_Get("s_reverb_preset", "7", CVAR_ARCHIVE);
-	s_reverb_preset->changed = reverb_changed;
+	//s_reverb_preset = Cvar_Get("s_reverb_preset", "7", CVAR_ARCHIVE);
+//	s_reverb_preset->changed = reverb_changed;
 	s_reverb = Cvar_Get("s_reverb", "1", CVAR_ARCHIVE);
-	s_reverb_preset_autopick = Cvar_Get("s_reverb_preset_autopick", "1", CVAR_ARCHIVE);
+	//s_reverb_preset_autopick = Cvar_Get("s_reverb_preset_autopick", "1", CVAR_ARCHIVE);
 	s_voiceinput = Cvar_Get("s_voiceinput", "0", CVAR_ARCHIVE);
 	s_voiceinput_volume = Cvar_Get("s_voiceinput_volume", "0", CVAR_ARCHIVE);
 	s_voiceinput_volume->changed = voiceinputvolume_changed;
@@ -254,10 +200,10 @@ void S_Init(void)
 	s_underwater_gain_hf = Cvar_Get("s_underwater_gain_hf", "0.25", CVAR_ARCHIVE);
     s_ambient = Cvar_Get("s_ambient", "1", 0);
 
-	s_reverb_set_preset = Cvar_Get("s_reverb_set_preset", "7", CVAR_SERVERINFO);
-	s_reverb_set_preset->changed = reverb_set_preset_changed;
-	s_reverb_set_preset = Cvar_Get("s_reverb_set", "0 0 0 0 0 0 0 0 0 0 0 0 0", CVAR_SERVERINFO);
-	s_reverb_set_preset->changed = reverb_set_changed;
+	//s_reverb_set_preset = Cvar_Get("s_reverb_set_preset", "7", CVAR_SERVERINFO);
+	//s_reverb_set_preset->changed = reverb_set_preset_changed;
+	//s_reverb_set_preset = Cvar_Get("s_reverb_set", "0 0 0 0 0 0 0 0 0 0 0 0 0", CVAR_SERVERINFO);
+	//s_reverb_set_preset->changed = reverb_set_changed;
 
 
 

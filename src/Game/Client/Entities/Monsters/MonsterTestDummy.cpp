@@ -48,7 +48,7 @@ void MonsterTestDummy::Spawn() {
 	Base::Spawn();
 
 	// Here we should probably animate this sucker eh?
-	SetNextThinkTime(level.time + CLG_FRAMETIME);
+	SetNextThinkTime(level.time + 1s);
 	SetThinkCallback(&MonsterTestDummy::FrameThink);
 }
 /**
@@ -79,11 +79,11 @@ void MonsterTestDummy::FrameThink() {
 *   @brief  General entity thinking routine.
 **/
 void MonsterTestDummy::Think() {
-		// Do Base Thinking.
+	// Do Base Thinking.
 	Base::Think();
 
 	// Here we should probably animate this sucker eh?
-	SetNextThinkTime(level.time + CLG_FRAMETIME);
+	SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&MonsterTestDummy::FrameThink);
 }
 

@@ -181,7 +181,7 @@ void FuncTrain::TrainUse( IServerGameEntity* other, IServerGameEntity* activator
 
 		SetSpawnFlags(GetSpawnFlags() & ~SF_StartOn);
 		SetVelocity( vec3_zero() );
-		SetNextThinkTime( 0.0f );
+		SetNextThinkTime( 0s );
 	} else {
 		// Resume path in case we werer traveling along one.
 		if ( nullptr != currentPathEntity ) {
@@ -292,15 +292,15 @@ void FuncTrain::WaitAtCorner() {
 		}
 	}
 
-	if ( moveInfo.wait ) {
-		if ( moveInfo.wait > 0.0f ) {
+	if ( moveInfo.wait != Frametime::zero() ) {
+		if ( moveInfo.wait > 0s ) {
 			SetNextThinkTime( level.time + moveInfo.wait );
 			SetThinkCallback( &FuncTrain::NextCornerThink );
 		} else if ( GetSpawnFlags() & SF_Toggled ) {
 			NextCornerThink();
 		    SetSpawnFlags(GetSpawnFlags() & ~SF_StartOn);
 			SetVelocity( vec3_zero() );
-			SetNextThinkTime( 0.0f );
+			SetNextThinkTime( 0s );
 		}
 
 		if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
@@ -342,6 +342,6 @@ void FuncTrain::TrainBlocked( IServerGameEntity* other ) {
 		return;
 	}
 
-	damageDebounceTime = level.time + 0.5f;
+	damageDebounceTime = level.time + 500ms;
 	GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 }

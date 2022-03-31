@@ -27,7 +27,7 @@
 //===============
 TriggerAutoDoor::TriggerAutoDoor( Entity* entity )
 	: Base( entity ) {
-	debounceTouchTime = 0.0f;
+
 }
 
 //===============
@@ -65,7 +65,7 @@ void TriggerAutoDoor::AutoDoorTouch( IServerGameEntity* self, IServerGameEntity*
 	if ( level.time < debounceTouchTime ) {
 		return;
 	}
-	debounceTouchTime = level.time + 1.0f;
+	debounceTouchTime = level.time + 1s;
 	// Trigger our door
 	GetOwner()->DispatchUseCallback( other, other );
 }

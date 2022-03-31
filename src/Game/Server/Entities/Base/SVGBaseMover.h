@@ -48,7 +48,7 @@ struct PushMoveInfo {
     float speed = 0.f;
     float deceleration = 0.f;
     float distance = 0.f;
-    float wait = 0.f;
+    Frametime wait = Frametime::zero();
 
     // State data
     int32_t state = 0;

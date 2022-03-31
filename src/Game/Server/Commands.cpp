@@ -630,7 +630,7 @@ void Cmd_Kill_f(SVGBasePlayer* player, ServerClient* client) {
         return;
     }
 
-    if ((level.time - client->respawnTime) < 5)
+    if ((level.time - client->respawnTime) < 5s)
         return;
 
     player->SetFlags(player->GetFlags() & ~EntityFlags::GodMode);
@@ -827,29 +827,29 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
 
     //strcat(text, "\n");
 
-    // Flood msg protection.
-    if (flood_msgs->value) {
-        // Notify client of his spamming behaviors.
-        if (level.time < client->flood.lockTill) {
-	        SVG_CPrint(player, PRINT_HIGH, "You can't talk for " + std::to_string((int)(client->flood.lockTill - level.time)) + " more seconds\n ");
-            return;
-        }
+    //// Flood msg protection.
+    //if (flood_msgs->value) {
+    //    // Notify client of his spamming behaviors.
+    //    if (level.time < client->flood.lockTill) {
+	   //     SVG_CPrint(player, PRINT_HIGH, "You can't talk for " + std::to_string((client->flood.lockTill - level.time).count()) + " more seconds\n ");
+    //        return;
+    //    }
 
-        i = client->flood.whenHead - flood_msgs->value + 1;
-	    if (i < 0) {
-	        i = (sizeof(client->flood.when) / sizeof(client->flood.when[0])) + i;
-	    }
+    //    i = client->flood.whenHead - flood_msgs->value + 1;
+	   // if (i < 0) {
+	   //     i = (sizeof(client->flood.when) / sizeof(client->flood.when[0])) + i;
+	   // }
 
-        if (client->flood.when[i] && level.time - client->flood.when[i] < flood_persecond->value) {
-            client->flood.lockTill = level.time + flood_waitdelay->value;
-    	    SVG_CPrint(player, PRINT_CHAT, "Flood protection:  You can't talk for " + std::to_string(static_cast<int>(flood_waitdelay->value)) + " seconds.\n ");
-            return;
-        }
+    //    if (client->flood.when[i] != GameTime::zero()  && (level.time - client->flood.when[i] < Frametime(flood_persecond->value))) {
+    //        client->flood.lockTill = duration_cast<GameTime>(level.time + Frametime(flood_waitdelay->value));
+    //	    SVG_CPrint(player, PRINT_CHAT, "Flood protection:  You can't talk for " + std::to_string(static_cast<int>(flood_waitdelay->value)) + " seconds.\n ");
+    //        return;
+    //    }
 
-        // Circle around our buffer.
-        client->flood.whenHead = (client->flood.whenHead + 1) % (sizeof(client->flood.when) / sizeof(client->flood.when[0]));
-        client->flood.when[client->flood.whenHead] = level.time;
-    }
+    //    // Circle around our buffer.
+    //    client->flood.whenHead = (client->flood.whenHead + 1) % (sizeof(client->flood.when) / sizeof(client->flood.when[0]));
+    //    client->flood.when[client->flood.whenHead] = level.time;
+    //}
 
     if (dedicated->value)
         SVG_CPrint(NULL, PRINT_CHAT, sayBuffer);
@@ -881,8 +881,8 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
             continue;
 
         Q_snprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",
-                   (level.frameNumber - e2->client->respawn.enterGameFrameNumber) / 600,
-                   ((level.frameNumber - e2->client->respawn.enterGameFrameNumber) % 600) / 10,
+                   (level.time - e2->client->respawn.enterGameFrameNumber) / 600,
+                   ((level.time - e2->client->respawn.enterGameFrameNumber) % 600) / 10,
                    e2->client->ping,
                    e2->client->respawn.score,
                    e2->client->persistent.netname,
@@ -945,7 +945,7 @@ void SVG_ClientCommand(Entity* svEntity) {
         return;
     }
 
-    if (level.intermission.time)
+    if (level.intermission.time != GameTime::zero())
         return;
 
     if (command == "use")

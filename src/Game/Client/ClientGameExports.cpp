@@ -120,8 +120,8 @@ void ClientGameExports::ClientBegin() {
     // Reset level locals.
     level = LevelLocals{};
     level.frameNumber = cl->frame.number;
-    level.time = cl->serverTime;
-    level.timeStamp = cl->serverTime / 1000.f;
+    level.time = GameTime(cl->serverTime) + FRAMERATE_MS;
+    level.timeStamp = cl->time;
 }
 
 /**

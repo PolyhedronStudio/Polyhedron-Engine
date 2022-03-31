@@ -90,7 +90,7 @@ void SVGBasePlayer::Spawn() {
     // Undead itself.
     SetDeadFlag(DeadFlags::Alive);
     // Set air finished time so it can respawn kindly.
-    SetAirFinishedTime(level.time + 12 * FRAMETIME);
+    SetAirFinishedTime(level.time + 12s);
     // Clip mask this client belongs to.
     SetClipMask(BrushContentsMask::PlayerSolid);
     // Fresh default model.
@@ -218,7 +218,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
     // If we're not dead yet, we got some death initializing to do.
     if (!GetDeadFlag()) {
         // Set respawn time.
-        SetRespawnTime(level.time + 1.0);
+        SetRespawnTime(level.time + 1s);
 
         // Ensure we are looking at our killer.
         LookAtKiller(inflictor, attacker);
@@ -846,7 +846,7 @@ void SVGBasePlayer::UpdateEffects()
     SetRenderEffects(0);
 
     // No need to go on in case we are dead or well, the intermission mode is engaged.
-    if (GetHealth() <= 0 || level.intermission.time) {
+    if (GetHealth() <= 0 || level.intermission.time != GameTime::zero()) {
         return;
     }
 
@@ -989,10 +989,11 @@ void SVGBasePlayer::CheckFallingDamage()
 
     if (delta > 30) {
         if (GetHealth() > 0) {
-            if (delta >= 55)
+            if (delta >= 55) {
                 SetEventID(EntityEvent::FallFar);
-            else
+            } else {
                 SetEventID(EntityEvent::Fall);
+            }
         }
         SetDebouncePainTime(level.time);   // no normal pain sound
         damage = (delta - 30) / 2;
@@ -1025,7 +1026,7 @@ void SVGBasePlayer::CheckWorldEffects()
         return;
 
     if (GetMoveType() == MoveType::NoClip || GetMoveType() == MoveType::Spectator) {
-        SetAirFinishedTime(level.time + 12); // don't need air
+        SetAirFinishedTime(level.time + 12s); // don't need air
         return;
     }
 
@@ -1051,7 +1052,7 @@ void SVGBasePlayer::CheckWorldEffects()
         SetFlags(GetFlags() | EntityFlags::InWater);
 
         // clear damage_debounce, so the pain sound will play immediately
-        SetDebounceDamageTime(level.time - 1);
+        SetDebounceDamageTime(level.time - 1s);
     }
 
     // Just completely exited a water volume sound effect.
@@ -1072,7 +1073,7 @@ void SVGBasePlayer::CheckWorldEffects()
             // gasp for air
             SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/gasp1.wav"), 1, Attenuation::Normal, 0);
             PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
-        } else  if (GetAirFinishedTime() < level.time + 11) {
+        } else  if (GetAirFinishedTime() < level.time + 11s) {
             // just break surface
             SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/gasp2.wav"), 1, Attenuation::Normal, 0);
         }
@@ -1084,7 +1085,7 @@ void SVGBasePlayer::CheckWorldEffects()
         if (GetAirFinishedTime() < level.time) {
             // drown!
             if (GetNextDrownTime() < level.time && GetHealth() > 0) {
-                SetNextDrownTime(level.time + 1);
+                SetNextDrownTime(level.time + 1s);
 
                 // take more damage the longer underwater
                 SetDamage(GetDamage() + 2);
@@ -1107,7 +1108,7 @@ void SVGBasePlayer::CheckWorldEffects()
             }
         }
     } else {
-        SetAirFinishedTime(level.time + 12);
+        SetAirFinishedTime(level.time + 12s);
         SetDamage(2);
     }
 
@@ -1120,7 +1121,7 @@ void SVGBasePlayer::CheckWorldEffects()
                     SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/burn1.wav"), 1, Attenuation::Normal, 0);
                 else
                     SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/burn2.wav"), 1, Attenuation::Normal, 0);
-                SetDebouncePainTime(level.time + 1);
+                SetDebouncePainTime(level.time + 1s);
             }
 
             GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
@@ -1204,7 +1205,7 @@ void SVGBasePlayer::ApplyDamageFeedback() {
         int32_t r = 1 + (rand() & 1);
 
         // Set debounce pain time.
-        SetDebouncePainTime(level.time + 0.7f);
+        SetDebouncePainTime(level.time + 700ms);
 
         // Set left index based on health value.
         if (GetHealth() < 25) {
@@ -1252,11 +1253,11 @@ void SVGBasePlayer::ApplyDamageFeedback() {
     }
 
     // Calculate view angle kicks
-    float knockBackKick = abs(client->damages.knockBack);
+    float knockBackKick = std::fabs(client->damages.knockBack);
 
     // A kick of 0 means no there is no need to adjust view at all.
     if (knockBackKick && GetHealth() > 0) {
-        knockBackKick = knockBackKick * 100 / GetHealth();
+        knockBackKick = knockBackKick * 100.0 / (float)GetHealth();
 
         if (knockBackKick  < count * 0.5f) {
             knockBackKick = count * 0.5f;
@@ -1266,7 +1267,7 @@ void SVGBasePlayer::ApplyDamageFeedback() {
         }
 
         // Calculate a normalized kick force vector.
-        vec3_t kickForce = vec3_normalize(client->damages.from - GetOrigin());
+        vec3_t kickForce = vec3_normalize(client->damages.fromOrigin - GetOrigin());
 
         // Calculate side force and apply to view damage roll.
         float side = vec3_dot(kickForce, bobMove.right);
@@ -1331,7 +1332,7 @@ void SVGBasePlayer::CalculateViewOffset()
         newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
 
         // Add pitch based on fall kick
-        ratio = ((client->fallTime - level.time) / FALL_TIME);
+        ratio = (client->fallTime - level.time) / FALL_TIME;
         if (ratio < 0) {
             ratio = 0;
         }
@@ -1386,7 +1387,7 @@ void SVGBasePlayer::CalculateViewOffset()
     // Add bob height.
     bob = bobMove.fracSin * bobMove.XYSpeed * bob_up->value;
     if (bob > 6) {
-        bob = 6;
+        bob = 6.f;
     }
     newViewOffset.z += bob;
 
@@ -1412,8 +1413,8 @@ void SVGBasePlayer::CalculateGunOffset() {
     }
 
     // Calculate gun angles based on view bob.
-    client->playerState.gunAngles[vec3_t::Roll] = bobMove.XYSpeed * bobMove.fracSin * 0.005;
-    client->playerState.gunAngles[vec3_t::Yaw]  = bobMove.XYSpeed * bobMove.fracSin * 0.01;
+    client->playerState.gunAngles[vec3_t::Roll] = bobMove.XYSpeed * bobMove.fracSin * 0.005f;
+    client->playerState.gunAngles[vec3_t::Yaw]  = bobMove.XYSpeed * bobMove.fracSin * 0.01f;
 
     // Negate roll and yaw based on which bob cycle step we're in.
     if (bobMove.cycle & 1) {
@@ -1422,7 +1423,7 @@ void SVGBasePlayer::CalculateGunOffset() {
     }
 
     // Calculate pitch.
-    client->playerState.gunAngles[vec3_t::Pitch] = bobMove.XYSpeed * bobMove.fracSin * 0.005;
+    client->playerState.gunAngles[vec3_t::Pitch] = bobMove.XYSpeed * bobMove.fracSin * 0.005f;
 
     // Calculate gun angles from delta view movement.
     for (int32_t i = 0 ; i < 3 ; i++) {
@@ -1445,11 +1446,11 @@ void SVGBasePlayer::CalculateGunOffset() {
 
         // Special handling for gun angle Yaw.
         if (i == vec3_t::Yaw) {
-            client->playerState.gunAngles[vec3_t::Roll] += 0.1 * delta;
+            client->playerState.gunAngles[vec3_t::Roll] += 0.1f * delta;
         }
 
         // Apply delta to gun angles.
-        client->playerState.gunAngles[i] += 0.2 * delta;
+        client->playerState.gunAngles[i] += 0.2f * delta;
     }
 
     // gun height
@@ -1494,11 +1495,11 @@ void SVGBasePlayer::CalculateScreenBlend() {
 
     // Add screen blends for Liquid surface contents.
     if (contents & (BrushContents::Solid | BrushContents::Lava)) {
-        AddScreenBlend(1.0, 0.3, 0.0, 0.6, client->playerState.blend);
+        AddScreenBlend(1.0f, 0.3f, 0.0f, 0.6f, client->playerState.blend);
     } else if (contents & BrushContents::Slime) {
-        AddScreenBlend(0.0, 0.1, 0.05, 0.6, client->playerState.blend);
+        AddScreenBlend(0.0f, 0.1f, 0.05f, 0.6f, client->playerState.blend);
     } else if (contents & BrushContents::Water) {
-        AddScreenBlend(0.5, 0.3, 0.2, 0.4, client->playerState.blend);
+        AddScreenBlend(0.5f, 0.3f, 0.2f, 0.4f, client->playerState.blend);
     }
 
     // Damage Alpha blend.
@@ -1508,17 +1509,17 @@ void SVGBasePlayer::CalculateScreenBlend() {
 
     // Bonus Alpha blend.
     if (client->bonusAlpha > 0) {
-        AddScreenBlend(0.85, 0.7, 0.3, client->bonusAlpha, client->playerState.blend);
+        AddScreenBlend(0.85f, 0.7f, 0.3f, client->bonusAlpha, client->playerState.blend);
     }
 
     // Cool down the damage alpha value and ensure it won't go under 0.
-    client->damageAlpha -= 0.06;
+    client->damageAlpha -= 0.06f;
     if (client->damageAlpha < 0) {
         client->damageAlpha = 0;
     }
 
     // Cool down the bonus alpha value and ensure it won't go under 0.
-    client->bonusAlpha -= 0.1;
+    client->bonusAlpha -= 0.1f;
     if (client->bonusAlpha < 0) {
         client->bonusAlpha = 0;
     }

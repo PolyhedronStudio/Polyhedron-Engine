@@ -137,16 +137,14 @@ qboolean SVG_RunThink(IServerGameEntity *ent)
     }
 
     // Fetch think time.
-    const float thinkTime = ent->GetNextThinkTime();
+    GameTime nextThinkTime = ent->GetNextThinkTime();
 
-    if (thinkTime <= 0) {
-        return true;
-    } else if (thinkTime > level.time + 0.001) {// Used to be: if (thinkTime > level.time + 0.001)
-        return true;
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+		return true;
     }
 
     // Reset think time before thinking.
-    ent->SetNextThinkTime(0);
+    ent->SetNextThinkTime(GameTime::zero());
 
 #if _DEBUG
     if ( !ent->HasThinkCallback() ) {
@@ -180,7 +178,6 @@ qboolean SVG_RunThink(IServerGameEntity *ent)
 
     // Last but not least, let the entity execute its think behavior callback.
     ent->Think();
-
 
     return false;
 }
@@ -416,7 +413,7 @@ void SVG_AddGravity(IServerGameEntity *ent)
     vec3_t velocity = ent->GetVelocity();
 
     // Apply gravity.
-    velocity.z -= ent->GetGravity() * sv_gravity->value * FRAMETIME;
+    velocity.z -= ent->GetGravity() * sv_gravity->value * FRAMETIME.count();
 
     // Apply new velocity to entity.
     ent->SetVelocity(velocity);
@@ -732,8 +729,8 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
             // object is moving
-            move = vec3_scale(part->GetVelocity(), FRAMETIME);
-            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME);
+            move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
+            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
 
             SGEntityHandle partHandle(part);
             if (!SVG_Push(partHandle, move, amove))
@@ -746,8 +743,9 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
     if (part) {
         // the move failed, bump all nextThinkTime times and back out moves
         for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
-            if (mv->GetNextThinkTime() > 0)
-                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMETIME);
+            if (mv->GetNextThinkTime() > 0s) {
+                mv->SetNextThinkTime(mv->GetNextThinkTime() + 1_hz);
+            }
         }
 
         // if the pusher has a "Blocked" function, call it
@@ -809,8 +807,8 @@ void SVG_Physics_Noclip(SGEntityHandle &entityHandle) {
     if (!ent->IsInUse())
         return;
 
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, ent->GetAngularVelocity()));
-    ent->SetOrigin(vec3_fmaf(ent->GetOrigin(), FRAMETIME, ent->GetVelocity()));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
+    ent->SetOrigin(vec3_fmaf(ent->GetOrigin(), FRAMETIME.count(), ent->GetVelocity()));
 
     ent->LinkEntity();
 }
@@ -874,10 +872,10 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
         SVG_AddGravity(ent);
 
     // Move angles
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, ent->GetAngularVelocity()));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
 
     // Move origin
-    vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME);
+    vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
     SVGTrace trace = SVG_PushEntity(ent, move);
     if (!ent->IsInUse())
         return;
@@ -966,10 +964,10 @@ void SVG_AddRotationalFriction(SGEntityHandle entityHandle) {
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
     // Set angles in proper direction.
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME, angularVelocity));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity));
 
     // Calculate adjustment to apply.
-    float adjustment = FRAMETIME * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
+    float adjustment = FRAMETIME.count() * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
 
     // Apply adjustments.
     angularVelocity = ent->GetAngularVelocity();
@@ -1068,7 +1066,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
         float speed = std::fabsf(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float friction = STEPMOVE_FRICTION / 3;
-        float newSpeed = speed - (FRAMETIME * control * friction);
+        float newSpeed = speed - (FRAMETIME.count() * control * friction);
         if (newSpeed < 0)
             newSpeed = 0;
         newSpeed /= speed;
@@ -1080,7 +1078,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
     if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
         float speed = std::fabsf(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-        float newSpeed = speed - (FRAMETIME * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
+        float newSpeed = speed - (FRAMETIME.count() * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
         if (newSpeed < 0)
             newSpeed = 0;
         newSpeed /= speed;
@@ -1099,7 +1097,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
                 if (speed) {
                     float friction = STEPMOVE_FRICTION;
                     float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-                    float newSpeed = speed - FRAMETIME * control * friction;
+                    float newSpeed = speed - FRAMETIME.count() * control * friction;
 
                     if (newSpeed < 0)
                         newSpeed = 0;
@@ -1121,7 +1119,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
             mask = BrushContentsMask::MonsterSolid;
         
         // Execute "FlyMove", essentially also our water move.
-        SVG_FlyMove(ent, FRAMETIME, mask);
+        SVG_FlyMove(ent, FRAMETIME.count(), mask);
 
         // Link entity back for collision, and execute a check for touching triggers.
         ent->LinkEntity();

@@ -27,7 +27,6 @@
 //===============
 TriggerAutoPlatform::TriggerAutoPlatform( Entity* entity )
 	: Base( entity ) {
-	debounceTouchTime = 0.0f;
 }
 
 //===============
@@ -70,7 +69,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 	}
 
 	// Set new debounce time.
-	debounceTouchTime = level.time + 3.0f;
+	debounceTouchTime = level.time + 3s;
 
 	// Ensure that the owner is a func_plat.
 	IServerGameEntity* ownerEntity = GetEnemy();
