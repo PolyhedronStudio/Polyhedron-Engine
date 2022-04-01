@@ -166,17 +166,17 @@ extern cvar_t   *rcon_password;
 
 #if USE_CLIENT
 // host_speeds times
-extern unsigned     time_before_game;
-extern unsigned     time_after_game;
-extern unsigned     time_before_ref;
-extern unsigned     time_after_ref;
+extern uint64_t     time_before_game;
+extern uint64_t     time_after_game;
+extern uint64_t     time_before_ref;
+extern uint64_t     time_after_ref;
 #endif
 
 extern const char   com_version_string[];
 
-extern unsigned     com_framenum;
-extern unsigned     com_eventTime; // system time of the last event
-extern unsigned     com_localTime; // milliseconds since Q2 startup
+extern uint64_t     com_framenum;
+extern uint64_t     com_eventTime; // system time of the last event
+extern uint64_t     com_localTime; // milliseconds since Q2 startup
 extern qboolean     com_initialized;
 extern time_t       com_startTime;
 

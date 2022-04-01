@@ -114,9 +114,9 @@ cvar_t  *rcon_password;
 const char  com_version_string[] =
     APPLICATION " " VERSION_STRING " " __DATE__ " " BUILDSTRING " " CPUSTRING;
 
-unsigned    com_framenum;
-unsigned    com_eventTime;
-unsigned    com_localTime;
+uint64_t    com_framenum;
+uint64_t    com_eventTime;
+uint64_t    com_localTime;
 qboolean    com_initialized;
 time_t      com_startTime;
 
@@ -124,10 +124,10 @@ time_t      com_startTime;
 cvar_t  *host_speeds;
 
 // host_speeds times
-unsigned    time_before_game;
-unsigned    time_after_game;
-unsigned    time_before_ref;
-unsigned    time_after_ref;
+uint64_t    time_before_game;
+uint64_t    time_after_game;
+uint64_t    time_before_ref;
+uint64_t    time_after_ref;
 #endif
 
 /*
@@ -1082,12 +1082,12 @@ Qcommon_Frame
 void Qcommon_Frame(void)
 {
 #if USE_CLIENT
-    unsigned time_before, time_event, time_between, time_after;
-    unsigned clientrem;
+    uint64_t time_before, time_event, time_between, time_after;
+    uint64_t clientrem;
 #endif
-    unsigned oldtime, msec;
-    static unsigned remaining;
-    static float frac;
+    uint64_t oldtime, msec;
+    static uint64_t remaining;
+    static double frac;
 
     if (setjmp(com_abortframe)) {
         return;            // an ErrorType::Drop was thrown
@@ -1169,7 +1169,7 @@ void Qcommon_Frame(void)
         time_after = Sys_Milliseconds();
 
     if (host_speeds->integer) {
-        int all, ev, sv, gm, cl, rf;
+        int64_t all, ev, sv, gm, cl, rf;
 
         all = time_after - time_before;
         ev = time_event - time_before;

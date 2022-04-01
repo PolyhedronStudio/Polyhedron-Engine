@@ -129,16 +129,16 @@ struct ClientStatic {
     active_t    active;
 
     qboolean    ref_initialized;
-    unsigned    disable_screen;
+    uint64_t    disable_screen;
 
     int         userinfo_modified;
     cvar_t* userinfo_updates[MAX_PACKET_USERINFOS];
     // this is set each time a CVAR_USERINFO variable is changed
     // so that the client knows to send it to the server
 
-    int         framecount;
-    unsigned    realtime;           // always increasing, no clamping, etc
-    float       frameTime;          // seconds since last frame
+    int64_t     framecount = 0;
+    uint64_t    realtime = 0;           // always increasing, no clamping, etc
+    double      frameTime = 0.0;          // seconds since last frame
 
 // preformance measurement
 #define C_FPS   cls.measure.fps[0]
@@ -150,7 +150,7 @@ struct ClientStatic {
 #define M_FRAMES    cls.measure.frames[2]
 #define P_FRAMES    cls.measure.frames[3]
     struct {
-        unsigned    time;
+        uint64_t    time;
         int         frames[4];
         int         fps[4];
         int         ping;
@@ -159,7 +159,7 @@ struct ClientStatic {
     // connection information
     NetAdr    serverAddress;
     char        servername[MAX_OSPATH]; // name of server from original connect
-    unsigned    timeOfInitialConnect;           // for connection retransmits
+    uint64_t    timeOfInitialConnect;           // for connection retransmits
     int         connect_count;
     qboolean    passive;
 
@@ -203,8 +203,8 @@ struct ClientStatic {
     struct {
         qhandle_t   playback;
         qhandle_t   recording;
-        unsigned    time_start;
-        unsigned    time_frames;
+        uint64_t    time_start;
+        uint64_t    time_frames;
         int         last_server_frame;  // number of server frame the last ServerCommand::Frame was written
         int         frames_written;     // number of frames written to demo file
         int         frames_dropped;     // number of ServerCommand::Frames that didn't fit
@@ -485,17 +485,6 @@ void CL_EmitDemoSnapshot(void);
 void CL_FirstDemoFrame(void);
 void CL_Stop_f(void);
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
-
-
-//
-// locs.c
-//
-void LOC_Init(void);
-void LOC_LoadLocations(void);
-void LOC_FreeLocations(void);
-void LOC_UpdateCvars(void);
-void LOC_AddLocationsToScene(void);
-
 
 //
 // console.c

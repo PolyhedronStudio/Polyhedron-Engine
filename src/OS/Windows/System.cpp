@@ -642,10 +642,10 @@ void Sys_DebugBreak(void)
     DebugBreak();
 }
 
-unsigned Sys_Milliseconds(void)
-{
-    return timeGetTime();
-}
+//uint64_t Sys_Milliseconds(void)
+//{
+//    return timeGetTime();
+//}
 
 void Sys_AddDefaultConfig(void)
 {

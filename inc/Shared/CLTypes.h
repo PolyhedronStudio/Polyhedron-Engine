@@ -319,10 +319,11 @@ struct ClientState {
 
     //! Accumulated mouse forward/side movement, added to both localMove and pending cmd, cleared each time cmd is finalized.
     vec2_t      mouseMove = vec2_zero();
-    //! This is the time value that the client is rendering at.  always <= cl.serverTime
+    //! This is the 'current moment in time' value of the client's game state at.  
+    //! Always <= cl.serverTime
     int64_t         time = 0;
     //! between oldframe and frame
-    float       lerpFraction = 0.f;
+    double       lerpFraction = 0.f;
 
 
     /**
@@ -352,9 +353,13 @@ struct ClientState {
     *   Client Rendering Variables.
     *
     **/
+    //! Refresh Definitions of current frame for the renderer.
     refdef_t refdef = {};
+    //! X Field of View.
     float fov_x = 0.f; //! Interpolated
+    //! Y Field of View.
     float fov_y = 0.f; //! Derived from fov_x assuming 4/3 aspect ratio
+    //! UNUSED: LightLevel, server has no concept of where rays are so... not done.
     int32_t lightLevel  = 0;
 
     //! Updated in ClientGameExports::ClientUpdateOrigin.

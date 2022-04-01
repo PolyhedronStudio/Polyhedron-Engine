@@ -412,9 +412,9 @@ public:
     virtual const qboolean        IsInUse() override { //return 0; };
         if (podEntity) {
             return cl->frame.number == podEntity->serverFrame;
-        } else {
-            false;
-        }
+        } 
+
+        return false;
     }
     virtual void            SetInUse(const qboolean inUse) {};
 

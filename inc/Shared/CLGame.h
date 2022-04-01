@@ -200,9 +200,9 @@ extern "C" {
         // Client.
         //---------------------------------------------------------------------
         // Returns the current amount of seconds since the last frame.
-        float           (*GetFrameTime) (void);
+        double          (*GetFrameTime) (void);
         // Returns the amount of miliseconds since the start of client.
-        unsigned        (*GetRealTime) (void);
+        uint64_t        (*GetRealTime) (void);
 
         int             (*GetFramesPerSecond) (void);
         int             (*GetResolutionScale) (void);
@@ -695,7 +695,7 @@ extern "C" {
         //---------------------------------------------------------------------
         // System.
         //---------------------------------------------------------------------
-        unsigned        (*Sys_Milliseconds) (void);
+        int64_t        (*Sys_Milliseconds) (void);
 
         //
         // Pointers to actual client data.

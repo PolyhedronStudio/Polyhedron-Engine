@@ -44,6 +44,8 @@ SET(SRC_CLGAME
 	#Physics/Physics.cpp
 	#Physics/StepMove.cpp
 
+	View/ViewCamera.cpp
+
 	Debug.cpp
 	Entities.cpp
 	Main.cpp
@@ -82,6 +84,8 @@ SET(HEADERS_CLGAME
 	Input/KeyBinding.h
 	
 	#Physics/StepMove.h
+
+	View/ViewCamera.h
 
 	ClientGameLocals.h
 	Debug.h

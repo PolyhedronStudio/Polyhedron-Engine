@@ -1,44 +1,106 @@
-/*
-Copyright (C) 1997-2001 Id Software, Inc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
-
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	SharedGame PlayerMove header. Contains the actual configuration
+*   const expressions as well.
+* 
+***/
 #pragma once
 
-//
-//==============================================================
-//
-// Player Movement(PM) Code.
-//
-// Common between server and client so prediction matches.
-//
-//==============================================================
-//
 
-//-----------------
-// Step Climbing.
-//----------------- 
-constexpr float PM_STEP_HEIGHT			= 18.f; // The vertical distance afforded in step climbing.
+
+/**
+*   Player Movement configuration.
+*   
+*   Most settings can be easily tweaked here to fine tune movement to custom
+*   desires.
+**/
+/**
+*   Acceleration Constants.
+**/
+static constexpr float PM_ACCEL_AIR = 3.625f; // WID: [DO NOT REMOVE THIS COMMENT] The default for lesser air control is: 2.125f
+static constexpr float PM_ACCEL_AIR_MOD_DUCKED = 0.125f;
+static constexpr float PM_ACCEL_GROUND = 10.f;
+static constexpr float PM_ACCEL_GROUND_SLICK = 4.375f;
+static constexpr float PM_ACCEL_LADDER = 16.f;
+static constexpr float PM_ACCEL_SPECTATOR = 2.5f;
+static constexpr float PM_ACCEL_WATER = 2.8f;
+
+/**
+*   Bounce constant when clipping against solids.
+**/
+static constexpr float PM_CLIP_BOUNCE = 1.01f;
+
+/**
+*   Friction constants.
+**/
+static constexpr float PM_FRICT_AIR = 0.1f; // WID: [DO NOT REMOVE THIS COMMENT] The default for lesser air control is: 0.075f;
+static constexpr float PM_FRICT_GROUND = 6.f;
+static constexpr float PM_FRICT_GROUND_SLICK = 2.f;
+static constexpr float PM_FRICT_LADDER = 5.f;
+static constexpr float PM_FRICT_SPECTATOR = 2.5f;
+static constexpr float PM_FRICT_WATER = 2.f;
+
+/**
+*   Water gravity constant.
+**/
+static constexpr float PM_GRAVITY_WATER = 0.33f;
+
+/**
+*   Distances traced when seeking ground.
+**/
+static constexpr float PM_GROUND_DIST = .25f;
+static constexpr float PM_GROUND_DIST_TRICK = 16.f;
+
+/**
+*   Speed constants; intended velocities are clamped/clipped to these.
+**/
+static constexpr float PM_SPEED_AIR = 285.f; // PH: Tweaked - old value: 350
+static constexpr float PM_SPEED_CURRENT = 100.f;
+static constexpr float PM_SPEED_DUCK_STAND = 200.f;
+static constexpr float PM_SPEED_DUCKED = 140.f;
+static constexpr float PM_SPEED_FALL = -700.f;
+static constexpr float PM_SPEED_FALL_FAR = -900.f;
+static constexpr float PM_SPEED_JUMP = 270.f;
+static constexpr float PM_SPEED_LADDER = 125.f;
+static constexpr float PM_SPEED_LAND = -280.f;
+static constexpr float PM_SPEED_RUN = 300.f; // This is the wished for running speed. Changing it, also impacts walking speed.
+static constexpr float PM_SPEED_SPECTATOR = 500.f;
+static constexpr float PM_SPEED_STOP = 100.f;
+static constexpr float PM_SPEED_UP = 0.1f;
+static constexpr float PM_SPEED_TRICK_JUMP = 0.f;
+static constexpr float PM_SPEED_WATER = 118.f;
+static constexpr float PM_SPEED_WATER_JUMP = 420.f;
+static constexpr float PM_SPEED_WATER_SINK = -16.f;
+static constexpr float PM_SPEED_STEP = 150.f;
+
+/**
+*   General Configuration.
+**/
+static constexpr float PM_SPEED_MOD_WALK = 0.48f;// The walk modifier slows all user-controlled speeds.
+static constexpr float PM_SPEED_JUMP_MOD_WATER = 0.66;// Water reduces jumping ability.
+static constexpr float PM_STOP_EPSILON = 0.1f; // Velocity is cleared when less than this.
+static constexpr float PM_NUDGE_DIST = 1.f;  // Invalid player positions are nudged to find a valid position.
+static constexpr float PM_SNAP_DISTANCE = PM_GROUND_DIST; // Valid player positions are snapped a small distance away from planes.
+
+/**
+*   Step Climbing.
+**/
+static constexpr float PM_STEP_HEIGHT = 18.f; // The vertical distance afforded in step climbing.
+static constexpr float PM_STEP_HEIGHT_MIN = 4.f;  // The smallest step that will be interpolated by the client.
+static constexpr float PM_STEP_NORMAL = 0.7f; // The minimum Z plane normal component required for standing.
 
 //-----------------
 // Player bounding box scaling. mins = VectorScale(PM_MINS, PM_SCALE)..
 //-----------------
 constexpr float PM_SCALE = 1.f;
 
+//! Actual player (bounding/octagon-)box mins.
 extern const vec3_t PM_MINS;
+//! Actual player (bounding/octagon-)maxs.
 extern const vec3_t PM_MAXS;
 
 //

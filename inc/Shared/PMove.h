@@ -70,12 +70,12 @@ struct PlayerMoveInput {
 struct ClientMoveCommand {
     PlayerMoveInput input;  // the movement command
 
-    uint32_t timeSent;      // Time sent, for calculating pings
-    uint32_t timeReceived;  // Time rcvd, for calculating pings
-    uint32_t commandNumber; // Current commandNumber for this move command frame
+    uint64_t timeSent;      // Time sent, for calculating pings
+    uint64_t timeReceived;  // Time rcvd, for calculating pings
+    uint64_t commandNumber; // Current commandNumber for this move command frame
 
     struct {
-        uint32_t simulationTime;    // The simulation time when prediction was run
+        uint64_t simulationTime;    // The simulation time when prediction was run
         vec3_t origin;              // The predicted origin for this command
         vec3_t error;               // The prediction error for this command
     } prediction;

@@ -19,97 +19,16 @@
 #include "Shared/Shared.h"
 #include "SharedGame.h"
 
-//--------------------------------------------------
-// Player Movement configuration.
-//
-// Most settings can be easily tweaked here to fine tune movement to custom
-// desires.
-//--------------------------------------------------
-//-----------------
-// Acceleration Constants.
-//-----------------
-static constexpr float PM_ACCEL_AIR = 3.625f; // WID: [DO NOT REMOVE THIS COMMENT] The default for lesser air control is: 2.125f
-static constexpr float PM_ACCEL_AIR_MOD_DUCKED = 0.125f;
-static constexpr float PM_ACCEL_GROUND = 10.f;
-static constexpr float PM_ACCEL_GROUND_SLICK = 4.375f;
-static constexpr float PM_ACCEL_LADDER = 16.f;
-static constexpr float PM_ACCEL_SPECTATOR = 2.5f;
-static constexpr float PM_ACCEL_WATER = 2.8f;
 
-//-----------------
-// Bounce constant when clipping against solids.
-//-----------------
-static constexpr float PM_CLIP_BOUNCE = 1.01f;
-
-//-----------------debug
-// Friction constants.
-//-----------------
-static constexpr float PM_FRICT_AIR = 0.1f; // WID: [DO NOT REMOVE THIS COMMENT] The default for lesser air control is: 0.075f;
-static constexpr float PM_FRICT_GROUND = 6.f;
-static constexpr float PM_FRICT_GROUND_SLICK = 2.f;
-static constexpr float PM_FRICT_LADDER = 5.f;
-static constexpr float PM_FRICT_SPECTATOR = 2.5f;
-static constexpr float PM_FRICT_WATER = 2.f;
-
-//-----------------
-// Water gravity constant.
-//-----------------
-static constexpr float PM_GRAVITY_WATER = 0.33f;
-
-//-----------------
-// Distances traced when seeking ground.
-//-----------------
-static constexpr float PM_GROUND_DIST = .25f;
-static constexpr float PM_GROUND_DIST_TRICK = 16.f;
-
-//-----------------
-// Speed constants; intended velocities are clipped to these.
-//-----------------
-static constexpr float PM_SPEED_AIR = 285.f; // PH: Tweaked - old value: 350
-static constexpr float PM_SPEED_CURRENT = 100.f;
-static constexpr float PM_SPEED_DUCK_STAND = 200.f;
-static constexpr float PM_SPEED_DUCKED = 140.f;
-static constexpr float PM_SPEED_FALL = -700.f;
-static constexpr float PM_SPEED_FALL_FAR = -900.f;
-static constexpr float PM_SPEED_JUMP = 270.f;
-static constexpr float PM_SPEED_LADDER = 125.f;
-static constexpr float PM_SPEED_LAND = -280.f;
-static constexpr float PM_SPEED_RUN = 300.f; // This is the wished for running speed. Changing it, also impacts walking speed.
-static constexpr float PM_SPEED_SPECTATOR = 500.f;
-static constexpr float PM_SPEED_STOP = 100.f;
-static constexpr float PM_SPEED_UP = 0.1f;
-static constexpr float PM_SPEED_TRICK_JUMP = 0.f;
-static constexpr float PM_SPEED_WATER = 118.f;
-static constexpr float PM_SPEED_WATER_JUMP = 420.f;
-static constexpr float PM_SPEED_WATER_SINK = -16.f;
-static constexpr float PM_SPEED_STEP = 150.f;
-
-//-----------------
-// General.
-//-----------------
-static constexpr float PM_SPEED_MOD_WALK = 0.48f;// The walk modifier slows all user-controlled speeds.
-static constexpr float PM_SPEED_JUMP_MOD_WATER = 0.66;// Water reduces jumping ability.
-static constexpr float PM_STOP_EPSILON = 0.1f; // Velocity is cleared when less than this.
-static constexpr float PM_NUDGE_DIST = 1.f;  // Invalid player positions are nudged to find a valid position.
-static constexpr float PM_SNAP_DISTANCE = PM_GROUND_DIST; // Valid player positions are snapped a small distance away from planes.
-
-//-----------------
-// Step Climbing.
-//-----------------
-//static constexpr float PM_STEP_HEIGHT = OMG!? - Moved to pmove.h, because clg_predict wants to know about it also :)
-static constexpr float PM_STEP_HEIGHT_MIN = 4.f;  // The smallest step that will be interpolated by the client.
-static constexpr float PM_STEP_NORMAL = 0.7f; // The minimum Z plane normal component required for standing.
-
-//--------------------------------------------------
-// Pointer to the actual (client-/npc-)entity PlayerMove(PM) structure.
-//--------------------------------------------------
+/**
+*   Pointer to the actual (client-/npc-)entity PlayerMove(PM) structure.
+**/
 static PlayerMove* pm;
 
-//--------------------------------------------------
-// all of the locals will be zeroed before each
-// pmove, just to make damn sure we don't have
-// any differences when running on client or server
-//--------------------------------------------------
+/**
+*   All of the locals will be zeroed before each player move, just to make damn sure 
+*   we don't have any differences when running on the client or the server.
+**/
 static struct {
     vec3_t      origin;
     vec3_t      velocity;
@@ -127,11 +46,11 @@ static struct {
     TraceResult groundTrace;
 } playerMoveLocals;
 
-//
-// PM_MINS and PM_MAXS are the default bounding box, scaled by PM_SCALE
-// in Pm_Init. They are referenced in a few other places e.g. to create effects
-// at a certain body position on the player model.
-//
+/**
+*   PM_MINS and PM_MAXS are the default bounding box, scaled by PM_SCALE
+*   in Pm_Init. They are referenced in a few other places e.g. to create effects
+*   at a certain body position on the player model.
+**/
 const vec3_t PM_MINS = { -16.f, -16.f, -24.f };
 const vec3_t PM_MAXS = { 16.f,  16.f,  32.f };
 
@@ -142,21 +61,17 @@ static const vec3_t PM_GIBLET_MINS = { -8.f, -8.f, -8.f };
 static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };
 
 
-//
-//=============================================================================
-//
-//	UTILITY FUNCTIONS.
-//
-//=============================================================================
-//
+/**
+*
+*
+*   (Debug) Utility Functions.
+*
+*
+**/
 
-//
-//===============
-// PM_Debug
-//
-// Can be enabled on/off for client AND server indistinctively.
-//===============
-//
+/**
+*   Can be enabled on/off for client AND server indistinctively.
+**/
 #ifdef CGAME_INCLUDE
 #define DEBUG_CLIENT_PMOVE 1
 #if DEBUG_CLIENT_PMOVE == 1
@@ -223,13 +138,11 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 #endif // PMOVE_DEBUG
 #endif // CGAME_INCLUDE
 
-//
-//===============
-// PM_ClipVelocity
-//
-// Slide off of the impacted plane.
-//===============
-//
+
+
+/**
+*   @brief  Slide off of the impacted plane.
+**/
 static vec3_t PM_ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 
     float backoff = vec3_dot(in, normal);

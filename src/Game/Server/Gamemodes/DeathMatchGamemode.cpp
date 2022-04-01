@@ -18,7 +18,6 @@
 #include "../Player/Client.h"
 #include "../Player/Hud.h"
 #include "../Player/Weapons.h"
-#include "../Player/View.h"
 
 // Game Mode.
 #include "DeathmatchGamemode.h"

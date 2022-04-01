@@ -64,10 +64,10 @@ int32_t _wrp_GetDeveloperLevel(void) {
     return (developer != nullptr ? developer->integer : 0);
 }
 
-unsigned _wrp_GetRealTime(void) {
+uint64_t _wrp_GetRealTime(void) {
     return cls.realtime;
 }
-float _wrp_GetFrameTime(void) {
+double _wrp_GetFrameTime(void) {
     return cls.frameTime;
 }
 int _wrp_GetRFps(void) {

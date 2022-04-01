@@ -112,8 +112,6 @@ SET(SRC_SVGAME
 
 	Player/Client.cpp
 	Player/Hud.cpp
-	Player/Trail.cpp
-	Player/View.cpp
 	Player/Weapons.cpp
 
 	#Weapons/Blaster.cpp
@@ -206,7 +204,6 @@ SET(HEADERS_SVGAME
 
 	Player/Animations.h
 	Player/Client.h
-	Player/View.h
 	Player/Weapons.h
 
 	Weapons/Blaster.h

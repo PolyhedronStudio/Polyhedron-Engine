@@ -24,7 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Utilities.h"       // Util funcs.
 #include "Client.h"             // Include Player Client header.
 #include "Hud.h"                // Include HUD header.
-#include "View.h"               // View header.
 #include "Weapons.h"
 
 // ClassEntities.

@@ -1625,9 +1625,6 @@ void CL_Begin(void)
     // PH: Prepare media loading.
     CL_PrepareMedia();
 
-    // TODO: Move over to the CG Module.
-    LOC_LoadLocations();
-
     // Set state to precached and send over a begin command.
     CL_LoadState(LOAD_NONE);
     cls.connectionState = ClientConnectionState::Precached;
@@ -2519,7 +2516,6 @@ static void CL_InitLocal(void)
     // Initialize the rest of the client.
     CL_RegisterInput();
     CL_InitDemos();
-    LOC_Init();
     CL_InitAscii();
     CL_InitDownloads();
 

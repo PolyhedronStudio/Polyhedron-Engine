@@ -36,7 +36,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Player related.
 #include "Player/Client.h"      // Include Player Client header.
-#include "Player/View.h"        // Include Player View header.
 
 // Physics related.
 #include "Physics/StepMove.h"

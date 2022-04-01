@@ -71,7 +71,7 @@ typedef struct {
     menuList_t      players;
     void            *names[MAX_STATUS_SERVERS];
     const char            *args;  // C++20: STRING: Added const to char*
-    unsigned        timeStamp;
+    uint64_t        timeStamp;
     int             pingstage;
     int             pingindex;
     int             pingtime;

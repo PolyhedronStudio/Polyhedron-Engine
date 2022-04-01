@@ -33,6 +33,9 @@
 // Shared Game "Framework".
 #include "../Shared/SharedGame.h"
 
+// Main Client Game Headers.
+#include "Main.h"
+
 //// Temporary.
 #include "LevelLocals.h"
 extern LevelLocals level;

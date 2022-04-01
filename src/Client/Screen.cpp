@@ -661,7 +661,7 @@ SCR_TimeRefresh_f
 static void SCR_TimeRefresh_f(void)
 {
     int     i;
-    unsigned    start, stop;
+    uint64_t    start, stop;
     float       time;
 
     if (cls.connectionState != ClientConnectionState::Active) {
@@ -980,7 +980,7 @@ void SCR_UpdateScreen(void)
 
     // if the screen is disabled (loading plaque is up), do nothing at all
     if (cls.disable_screen) {
-        unsigned delta = Sys_Milliseconds() - cls.disable_screen;
+        uint64_t delta = Sys_Milliseconds() - cls.disable_screen;
 
         if (delta < 120 * 1000) {
             return;

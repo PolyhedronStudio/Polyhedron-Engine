@@ -21,7 +21,6 @@ SET(SRC_CLIENT
 	Client/Entities.cpp
 	Client/input.cpp
 	Client/Keys.cpp
-	Client/Locations.cpp
 	Client/Main.cpp
 	Client/Parse.cpp
 	Client/Precache.cpp
@@ -264,11 +263,13 @@ SET(SRC_WINDOWS
 	OS/Windows/Debug.cpp
 	OS/Windows/Hunk.cpp
 	OS/Windows/System.cpp
+
+	OS/SDL2/Time.cpp
 )
 SET(SRC_WINDOWS_CLIENT
 	OS/Windows/Wave.cpp
 	OS/SDL2/Video.cpp
-	OS/SDL2/Time.cpp
+	#OS/SDL2/Time.cpp
 )
 SET(HEADERS_WINDOWS
 	OS/Windows/WGL.h
