@@ -1,76 +1,79 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Contains network messaging related POD structures, and related constexpr
+*   enums, etc.
+*
+***/
+#pragma once
 
-//
-// messaging.h
-//
-// Contains messaging related structures.
-//
-*/
-#ifndef __SHARED__MESSAGING_H__
-#define __SHARED__MESSAGING_H__
 
-//
-//=============================================================================
-//
-//	Messaging/Network
-//
-//=============================================================================
-//
-//-----------------
-// Destination class for gi.Multicast()
-// 
-// Reliable messages will always arrive even if it takes multiple frames,
-// unreliable messages will accept being dropped by a lag or if a frame's message
-// data has already been pumped to the rim with reliable messages.
-// 
-// It is best to use reliables only for things that are truly cognitively important
-// to clients. Anything else should be put in unreliable messages.
-//-----------------
+//! Maximum amount of stats available to the player state.
+static constexpr int32_t MAX_PLAYERSTATS = 32;
+
+
+/**
+*
+*	Messaging/Network
+*
+**/
+/**
+*   Destination class for gi.Multicast()
+* 
+*   Reliable messages will always arrive even if it takes multiple frames,
+*   unreliable messages will accept being dropped by a lag or if a frame's message
+*   data has already been pumped to the rim with reliable messages.
+*   
+*   It is best to use reliables only for things that are truly cognitively important
+*   to clients. Anything else should be put in unreliable messages.
+**/
 struct Multicast {
-    static constexpr int32_t All = 0;       // Send an unreliable message to all clients.
-    static constexpr int32_t PHS = 1;       // Send an unreliable message to all clients who are in the possible hearing set.
-    static constexpr int32_t PVS = 2;       // Send an unreliable message to all clients who are in the possible visibility set.
-    static constexpr int32_t All_R = 3;     // Send a reliable message to all clients.
-    static constexpr int32_t PHS_R = 4;     // Send a reliable message to all clients who are in the possible hearing set.
-    static constexpr int32_t PVS_R = 5;     // Send a reliable message to all clients who are in the possible visibility set.
+    static constexpr int32_t All = 0;       //! Send an unreliable message to all clients.
+    static constexpr int32_t PHS = 1;       //! Send an unreliable message to all clients who are in the possible hearing set.
+    static constexpr int32_t PVS = 2;       //! Send an unreliable message to all clients who are in the possible visibility set.
+    static constexpr int32_t All_R = 3;     //! Send a reliable message to all clients.
+    static constexpr int32_t PHS_R = 4;     //! Send a reliable message to all clients who are in the possible hearing set.
+    static constexpr int32_t PVS_R = 5;     //! Send a reliable message to all clients who are in the possible visibility set.
 };
 
-//-----------------
-// Connection State of the client.
-//-----------------
+/**
+*   Connection State of the client.
+**/
 struct ClientConnectionState {
     static constexpr int32_t Uninitialized = 0;
-    static constexpr int32_t Disconnected = 1;  // Not talking to a server.
-    static constexpr int32_t Challenging = 2;   // Sending getchallenge packets to the server.
-    static constexpr int32_t Connecting = 3;    // Sending connect packets to the server.
-    static constexpr int32_t Connected = 4;     // Netchan_t established, waiting for ServerCommand::ServerData.
-    static constexpr int32_t Loading = 5;       // Loading level data.
-    static constexpr int32_t Precached = 7;     // Loaded level data, waiting for ServerCommand::Frame.
-    static constexpr int32_t Spawning = 8;      // Spawning local client entities.
-    static constexpr int32_t Active = 9;        // Game views should be displayed.
-    static constexpr int32_t Cinematic = 10;    // Running a cinematic.
+    static constexpr int32_t Disconnected = 1;  //! Not talking to a server.
+    static constexpr int32_t Challenging = 2;   //! Sending getchallenge packets to the server.
+    static constexpr int32_t Connecting = 3;    //! Sending connect packets to the server.
+    static constexpr int32_t Connected = 4;     //! Netchan_t established, waiting for ServerCommand::ServerData.
+    static constexpr int32_t Loading = 5;       //! Loading level data.
+    static constexpr int32_t Precached = 7;     //! Loaded level data, waiting for ServerCommand::Frame.
+    static constexpr int32_t Spawning = 8;      //! Spawning local client entities.
+    static constexpr int32_t Active = 9;        //! Game views should be displayed.
+    static constexpr int32_t Cinematic = 10;    //! Running a cinematic.
 };
 
-//-----------------
-// Run State of the server.
-//-----------------
+/**
+*   Run State of the Server.
+**/
 struct ServerState {
-    static constexpr int32_t Dead = 0;            // No map loaded.
-    static constexpr int32_t Loading = 1;         // Spawning level edicts.
-    static constexpr int32_t Game = 2;            // Actively running.
-    static constexpr int32_t Pic = 3;             // Showing static picture.
+    static constexpr int32_t Dead = 0;            //! No map loaded.
+    static constexpr int32_t Loading = 1;         //! Spawning level edicts.
+    static constexpr int32_t Game = 2;            //! Actively running.
+    static constexpr int32_t Pic = 3;             //! Showing static picture.
     static constexpr int32_t Cinematic = 4;
 };
 
-//-----------------
-// EntityState->event values
-// 
-// Entity events are for effects that take place relative to an existing 
-// entities origin. Very network efficient.
-// 
-// All muzzle flashes really should be converted to events...
-//-----------------
+/**
+*   EntityState->event values
+*   
+*   Entity events are for effects that take place relative to an existing 
+*   entities origin. Very network efficient.
+*   
+*   All muzzle flashes really should be converted to events...
+**/
 struct EntityEvent {
     static constexpr int32_t None = 0;
     static constexpr int32_t ItemRespawn = 1;
@@ -82,11 +85,11 @@ struct EntityEvent {
     static constexpr int32_t OtherTeleport = 7;
 };
 
-//-----------------
-// EntityState is the information conveyed from the server
-// in an update message about entities that the client will
-// need to render in some way
-//-----------------
+/**
+*   EntityState is the information conveyed from the server
+*   in an update message about entities that the client will
+*   need to render in some way
+**/
 struct EntityState {
     //! Entity index number.
     int32_t number = 0;
@@ -152,15 +155,13 @@ struct EntityState {
     int32_t eventID = 0;
 };
 
-//-----------------
-// PlayerState is the information needed in addition to PlayerMoveState
-// to rendered a view.  There will only be 10 PlayerState sent each second,
-// but the number of PlayerMoveState changes will be reletive to client
-// frame rates
-//-----------------
-// Maximum amount of stats available to the player state.
-#define MAX_STATS               32
 
+/**
+*   @brief  A PlayerState contains the information needed in addition to the PlayerMoveState
+*           to render a view. Every game frame of a second, a PlayerState is sent.
+*
+*           The number of PlayerMoveState changes will be reletive to client frame rates
+**/
 struct PlayerState {
     //! State of the actual movement. (Used for client side movement prediction.)
     PlayerMoveState pmove = {};
@@ -178,7 +179,7 @@ struct PlayerState {
     int     gunIndex = 0;
 
     //! Server start time of current animation.
-    int64_t     gunAnimationStartTime = 0;
+    uint64_t     gunAnimationStartTime = 0;
     //! Animation Start Frame
     int16_t     gunAnimationStartFrame = 1;
     //! Animation End Frame
@@ -197,7 +198,5 @@ struct PlayerState {
     // Refresh render flags.
     int     rdflags = 0;        // Refdef flags
     //! Status bar information.
-    short   stats[MAX_STATS] = {};
-}; 
-
-#endif // __SHARED__MESSAGING_H__
+    short   stats[MAX_PLAYERSTATS] = {};
+};

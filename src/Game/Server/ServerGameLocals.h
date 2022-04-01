@@ -155,7 +155,7 @@ public:
 //==================================================================
 
 //! MS Frametime for animations.
-static constexpr GameTime ANIMATION_FRAMETIME = FRAMERATE_MS;
+static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
 static constexpr Frametime FRAMETIME = FRAMETIME_S;
@@ -305,14 +305,8 @@ struct ItemFlags {
 // to the 'level.sav' file for savegames
 //-------------------
 struct LevelLocals  {
-    // Current local level frame number.
-    uint64_t frameNumber = 0;
-
-    //! Current sum of total frame time taken.
+    //! Current level time in Milliseconds.
     GameTime time = GameTime::zero();
-
-    //! Same as time, but multiplied by a 1000 to get a proper integer.
-    int64_t timeStamp = 0;
 
     char levelName[MAX_QPATH];  // The descriptive name (Outer Base, etc)
     char mapName[MAX_QPATH];    // The server name (base1, etc)
@@ -669,8 +663,8 @@ struct ClientRespawnData {
     //! What to set client->persistent to in a coop game.
     ClientPersistentData persistentCoopRespawn;
     
-    //! The level.frameNumber on which the player entered the game.
-    GameTime enterGameFrameNumber = GameTime::zero();
+    //! The level.timeStamp on which the player entered the game.
+    GameTime enterGameTimestamp = GameTime::zero();
 
     //! A client's score, usually this means the amount of frags.
     int32_t score = 0;

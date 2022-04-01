@@ -1142,7 +1142,7 @@ void CL_CleanupDemos(void)
         FS_FCloseFile(cls.demo.playback);
 
         if (com_timedemo->integer && cls.demo.time_frames) {
-            unsigned msec = Sys_Milliseconds();
+            uint64_t msec = Sys_Milliseconds();
 
             if (msec > cls.demo.time_start) {
                 float sec = (msec - cls.demo.time_start) * 0.001f;

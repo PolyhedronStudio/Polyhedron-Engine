@@ -708,7 +708,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
     // Parse Stats.
     if (extraFlags & EPS_STATS) {
         int32_t statbits = MSG_ReadInt32();
-        for (int32_t i = 0; i < MAX_STATS; i++) {
+        for (int32_t i = 0; i < MAX_PLAYERSTATS; i++) {
             if (statbits & (1 << i)) {
                 to->stats[i] = MSG_ReadInt16();
             }
@@ -870,7 +870,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     int32_t statbits = 0;
-    for (int32_t i = 0; i < MAX_STATS; i++) {
+    for (int32_t i = 0; i < MAX_PLAYERSTATS; i++) {
 	    if (to->stats[i] != from->stats[i]) {
 	        statbits |= 1 << i;
         }
@@ -991,7 +991,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     // Send stats
     if (entityStateFlags & EPS_STATS) {
         MSG_WriteInt32(statbits);
-	    for (int32_t i = 0; i < MAX_STATS; i++) {
+	    for (int32_t i = 0; i < MAX_PLAYERSTATS; i++) {
 	        if (statbits & (1 << i)) {
     		    MSG_WriteInt16(to->stats[i]);
 	        }

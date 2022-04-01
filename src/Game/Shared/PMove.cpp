@@ -156,13 +156,9 @@ static vec3_t PM_ClipVelocity(const vec3_t in, const vec3_t normal, float bounce
     return in - vec3_scale(normal, backoff);
 }
 
-//
-//===============
-// PM_TouchEntity
-// 
-// Marks the specified entity as touched.
-//===============
-//
+/**
+*   @brief  Marks the specified entity as touched.
+**/
 static void PM_TouchEntity(struct entity_s* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
@@ -182,20 +178,17 @@ static void PM_TouchEntity(struct entity_s* ent) {
 }
 
 
-//
-//=============================================================================
-//
-//	STEP SLIDE MOVE
-//
-//=============================================================================
-//
-//
-//===============
-// PM_StepCheck
-// 
-// Check whether the player just stepped off of something, or not.
-//===============
-//
+
+/**
+*
+* 
+*	STEP SLIDE MOVE
+*
+* 
+**/
+/**
+*   @brief  Check whether the player just stepped off of something, or not.
+**/
 static bool PM_CheckStep(const TraceResult * trace) {
     if (!trace->allSolid) {
         if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
@@ -210,13 +203,9 @@ static bool PM_CheckStep(const TraceResult * trace) {
     return false;
 }
 
-//
-//===============
-// Pm_StepDown
-// 
-// Steps the player down, for slope/stair handling.
-//===============
-//
+/**
+*   @brief  Check whether the player just stepped off of something, or not.
+**/
 static void PM_StepDown(const TraceResult * trace) {
     // Set current origin to the trace end position.
     pm->state.origin = trace->endPosition;
@@ -233,21 +222,14 @@ static void PM_StepDown(const TraceResult * trace) {
     }
 }
 
-//
-//===============
-// PM_TraceCorrectAllSolid
-// 
-// Adapted from Quake III, this function adjusts a trace so that if it starts inside of a wall,
-// it is adjusted so that the trace begins outside of the solid it impacts.
-// Returns the actual trace.
-//===============
-//
+/**
+*   @brief  Adapted from Quake III, this function adjusts a trace so that if it starts inside of a wall,
+*           it is adjusted so that the trace begins outside of the solid it impacts.
+*           Returns the actual trace.
+**/
 const TraceResult PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins, const vec3_t & maxs, const vec3_t & end) {
     // Disabled, for this we have no need. It seems to work fine at this moment without it.
     // Not getting stuck into rotating objects or what have we....
-    //
-    // If we do end up running into trouble, we may first want to look at the old
-    // M_CheckGround function instead. (Seems related to a -0.25f).
     // 
     // And otherwise, we got this solution below, which... is seemingly slow in certain cases...
 #if 1
@@ -256,9 +238,9 @@ const TraceResult PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & m
     const vec3_t offsets = { 0.f, 1.f, -1.f };
 
     // Jitter around
-    for (uint32_t i = 0; i < 3; i++) {
-        for (uint32_t j = 0; j < 3; j++) {
-            for (uint32_t k = 0; k < 3; k++) {
+    for (int32_t i = 0; i < 3; i++) {
+        for (int32_t j = 0; j < 3; j++) {
+            for (int32_t k = 0; k < 3; k++) {
                 // Calculate start.
                 const vec3_t point = start + vec3_t{
                     offsets[i],
@@ -288,14 +270,10 @@ const TraceResult PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & m
 #endif
 }
 
-//
-//===============
-// PM_ImpactPlane
-// 
-// Return True if `plane` is unique to `planes` and should be impacted, 
-// return false otherwise.
-//===============
-//
+/**
+*   @return True if `plane` is unique to `planes` and should be impacted, 
+*           return false otherwise.
+**/
 static bool PM_ImpactPlane(vec3_t * planes, int32_t num_planes, const vec3_t & plane) {
 
     for (int32_t i = 0; i < num_planes; i++) {
@@ -307,16 +285,10 @@ static bool PM_ImpactPlane(vec3_t * planes, int32_t num_planes, const vec3_t & p
     return true;
 }
 
-//
-//===============
-// PM_StepSlideMove_
-// 
-// Each intersection will try to step over the obstruction instead of
-// sliding along it.
-//
-// Modifies the pml velocity and origin if succesful.
-//===============
-//
+/**
+*   @brief  Calculates a new origin, velocity, and contact entities based on the
+*           movement command and world state. Returns true if not blocked.
+**/
 static constexpr float      MIN_STEP_NORMAL = 0.7;  // Can't step up onto very steep slopes.
 static constexpr int32_t    MAX_CLIP_PLANES = 20;   // Maximum amount of planes to clip to.
 
@@ -450,13 +422,9 @@ static qboolean PM_StepSlideMove_(void)
     return bump == 0;
 }
 
-//
-//===============
-// PM_StepSlideMove
-//
-// Executes the slide movement.
-//===============
-//
+/**
+*   @brief  Executes the stepslide movement.
+**/
 static void PM_StepSlideMove(void)
 {
     // Store pre-move parameters
@@ -511,21 +479,19 @@ static void PM_StepSlideMove(void)
     pm->state.velocity = vel1;
 }
 
-//
-//=============================================================================
-//
-//	MOVEMENT CONDITION CHECKS/HANDLING
-//
-//=============================================================================
-//
-//
-//===============
-// PM_CheckTrickJump
-//
-// Returns true if the player will be eligible for trick jumping should they
-// impact the ground on this frame, false otherwise.
-//===============
-//
+
+
+/**
+*
+* 
+*	MOVEMENT CONDITION CHECKS/HANDLING
+*
+* 
+**/
+/**
+*   @return True if the player will be eligible for trick jumping should they
+*           impact the ground on this frame, false otherwise.
+**/
 static qboolean PM_CheckTrickJump(void) {
     // False in the following conditions.
     if (pm->groundEntityPtr) { return false; }
@@ -538,15 +504,10 @@ static qboolean PM_CheckTrickJump(void) {
     return true;
 }
 
-//
-//===============
-// PM_CheckJump
-//
-// Check for jumpingand trick jumping.
-//
-// Returns true if a jump occurs, false otherwise.
-//===============
-//
+/**
+*   @brief  Check for jumpingand trick jumping.
+*   @return True if a jump occurs, false otherwise.
+**/
 static qboolean PM_CheckJump(void) {
     // KEEP AROUND - //PM_Debug("PM_CheckJump");
 
@@ -609,14 +570,9 @@ static qboolean PM_CheckJump(void) {
     return true;
 }
 
-//
-//===============
-// PM_CheckDuck
-//
-// Sets the wished for values to crouch:
-// pm->mins, pm->maxs, and pm->viewHeight
-//===============
-//
+/**
+*   @brief  Sets the wished for values to crouch: pm->mins, pm->maxs, and pm->viewHeight
+**/
 static void PM_CheckDuck(void) {
     // Any state after dead, can be checked for here.
     if (pm->state.type >= EnginePlayerMoveType::Dead) {
@@ -687,14 +643,10 @@ static void PM_CheckDuck(void) {
 }
 
 
-//
-//===============
-// PM_CheckLadder
-//
-// Check for isClimbingLadder interaction.
-// Returns true if the player is on a isClimbingLadder.
-//===============
-//
+/**
+*   @brief  Check for isClimbingLadder interaction.
+*   @return True if the player is on a isClimbingLadder.
+**/
 static qboolean PM_CheckLadder(void) {
     // If any time mask flag is set, return.
     if (pm->state.flags & PMF_TIME_MASK) {
@@ -722,16 +674,12 @@ static qboolean PM_CheckLadder(void) {
     return false;
 }
 
-//
-//===============
-// PM_CheckWater
-//
-// Checks for water exit.The player may exit the water when they can
-// see a usable step out of the water.
-//
-// Returns true if a water jump has occurred, false otherwise.
-//===============
-//
+/**
+*   Checks for water exit.The player may exit the water when they can
+*   see a usable step out of the water.
+*
+*   @return True if a water jump has occurred, false otherwise.
+**/
 static qboolean PM_CheckWaterJump(void) {
     if (pm->state.flags & PMF_TIME_WATER_JUMP) {
         return false;
@@ -785,13 +733,9 @@ static qboolean PM_CheckWaterJump(void) {
     return false;
 }
 
-//
-//===============
-// PM_CheckWater
-//
-// Checks for water interaction, accounting for player ducking, etc.
-//===============
-//
+/**
+*   @brief  Checks for water interaction, accounting for player ducking, etc.
+**/
 static void PM_CheckWater(void) {
     // When checking for water level we first reset all to defaults for this frame.
     pm->waterLevel = WaterLevel::None;
@@ -838,13 +782,9 @@ static void PM_CheckWater(void) {
     }
 }
 
-//
-//===============
-// PM_CheckGround
-//
-// Checks for ground interaction, enabling trick jumpingand dealing with landings.
-//===============
-//
+/**
+*   @brief  Checks for ground interaction, enabling trick jumpingand dealing with landings.
+**/
 static void PM_CheckGround(void) {
     // If we jumped, or been pushed, do not attempt to seek ground
     if (pm->state.flags & (PMF_JUMPED | PMF_TIME_PUSHED | PMF_ON_LADDER)) {
@@ -918,21 +858,17 @@ static void PM_CheckGround(void) {
 }
 
 
-//
-//=============================================================================
-//
-//	PHYSICS - ACCELERATION/FRICTION/GRAVITY
-//
-//=============================================================================
-//
 
-//
-//===============
-// PM_Friction
-// 
-// Handles friction against user intentions, and based on contents.
-//===============
-//
+/**
+*
+* 
+*	PHYSICS - ACCELERATION/FRICTION/GRAVITY
+*
+* 
+**/
+/**
+*   @brief  Handles friction against user intentions, and based on contents.
+**/
 static void PM_Friction(void) {
     vec3_t vel = pm->state.velocity;
 
@@ -978,13 +914,9 @@ static void PM_Friction(void) {
     pm->state.velocity = vec3_scale(pm->state.velocity, scale);
 }
 
-//
-//===============
-// PM_Accelerate
-// 
-// Returns the newly user intended velocity
-//===============
-//
+/**
+*   @brief  Returns the newly user intended velocity
+**/
 static void PM_Accelerate(const vec3_t & dir, float speed, float acceleration) {
     const float currentSpeed = vec3_dot(pm->state.velocity, dir);
     const float add_speed = speed - currentSpeed;
@@ -1002,13 +934,9 @@ static void PM_Accelerate(const vec3_t & dir, float speed, float acceleration) {
     pm->state.velocity = vec3_fmaf(pm->state.velocity, accel_speed, dir);
 }
 
-//
-//===============
-// PM_Gravity
-// 
-// Applies gravity to the current movement.
-//===============
-//
+/**
+*   @brief  Applies gravity to the current movement.
+**/
 static void PM_Gravity(void) {
     float gravity = pm->state.gravity;
 
@@ -1019,15 +947,9 @@ static void PM_Gravity(void) {
     pm->state.velocity.z -= gravity * playerMoveLocals.frameTime;
 }
 
-
-//
-//===============
-// PM_ApplyCurrents
-// 
-// Applies external force currents, such as water currents or
-// conveyor belts.
-//===============
-//
+/**
+*   @brief  Applies external force currents, such as water currents or conveyor belts.
+**/
 static void PM_ApplyCurrents(void) {
     // Start off with 0 currents.
     vec3_t current = vec3_zero();
@@ -1084,20 +1006,17 @@ static void PM_ApplyCurrents(void) {
 }
 
 
-//
-//=============================================================================
-//
-//	PLAYE MOVEMENT STYLE IMPLEMENTATIONS
-//
-//=============================================================================
-//
-//
-//===============
-// PM_LadderMove
-// 
-// Called when the player is climbing a isClimbingLadder.
-//===============
-//
+
+/**
+*
+* 
+*	PLAYER MOVEMENT STYLE IMPLEMENTATIONS
+*
+* 
+**/
+/**
+*   @brief  Called when the player is climbing a isClimbingLadder.
+**/
 static void PM_LadderMove(void) {
     //PM_Debug("%s", Vec3ToString(pm->state.origin));
 
@@ -1154,13 +1073,9 @@ static void PM_LadderMove(void) {
     PM_StepSlideMove();
 }
 
-//
-//===============
-// PM_WaterJumpMove
-// 
-// Called when the player is jumping out of the water to a solid.
-//===============
-//
+/**
+*   @brief  Called when the player is jumping out of the water to a solid.
+**/
 static void PM_WaterJumpMove(void) {
     //PM_Debug("%s\n", Vec3ToString(pm->state.origin));
 
@@ -1185,13 +1100,9 @@ static void PM_WaterJumpMove(void) {
     PM_StepSlideMove();
 }
 
-//
-//===============
-// PM_WaterMove
-// 
-// Called for movements where player is in the water
-//===============
-//
+/**
+*   @brief  Called for movements where player is in the water
+**/
 static void PM_WaterMove(void) {
 
     if (PM_CheckWaterJump()) {
@@ -1254,13 +1165,9 @@ static void PM_WaterMove(void) {
     }
 }
 
-//
-//===============
-// PM_AirMove
-// 
-// Called for movements where player is in air.
-//===============
-//
+/**
+*   @brief  Called for movements where player is in air.
+**/
 static void PM_AirMove(void) {
 
     PM_Debug("{%s}", Vec3ToString(pm->state.origin));
@@ -1300,13 +1207,9 @@ static void PM_AirMove(void) {
     PM_StepSlideMove();
 }
 
-//
-//===============
-// PM_WalkMove
-// 
-// Called for movements where player is on ground, regardless of water level.
-//===============
-//
+/**
+*   @brief  Called for movements where player is on ground, regardless of water level.
+**/
 static void PM_WalkMove(void) {
     PM_Debug("{%s}", Vec3ToString(pm->state.origin));
 
@@ -1376,13 +1279,9 @@ static void PM_WalkMove(void) {
     }
 }
 
-//
-//===============
-// PM_SpectatorMove
-// 
-// Handles special isSpectator movement.
-//===============
-//
+/**
+*   @brief  Handles special isSpectator movement.
+**/
 static void PM_SpectatorMove(void) {
     //PM_Debug("%s", Vec3ToString(pm->state.origin));
 
@@ -1411,13 +1310,9 @@ static void PM_SpectatorMove(void) {
     PM_StepSlideMove();
 }
 
-//
-//===============
-// PM_NoclipMove
-// 
-// Handles special noclip movement.
-//===============
-//
+/**
+*   @brief  Handles special noclip movement.
+**/
 static void PM_NoclipMove() {
     PM_Friction();
 
@@ -1444,13 +1339,9 @@ static void PM_NoclipMove() {
     pm->state.origin += vec3_scale( pm->state.velocity, playerMoveLocals.frameTime );
 }
 
-//
-//===============
-// PM_FreezeMove
-// 
-// Freeze Player movement/
-//===============
-//
+/**
+*   @brief  Freeze Player Movement.
+**/
 static void PM_FreezeMove(void) {
     //PM_Debug("%s", Vec3ToString(pm->state.origin));
          
@@ -1461,13 +1352,9 @@ static void PM_FreezeMove(void) {
     // The miracles of the universe? Try the vkpt folder for that. :D <3
 }
 
-//
-//===============
-// PM_Init
-// 
-// Initializes the current set PMove pointer for another frame iteration.
-//===============
-//
+/**
+*   @brief  Initializes the current set PMove pointer for another frame iteration.
+**/
 static void PM_Init(PlayerMove * pmove) {
     // Store pmove ptr.
     pm = pmove;
@@ -1521,13 +1408,9 @@ static void PM_Init(PlayerMove * pmove) {
     }
 }
 
-//
-//===============
-// PM_ClampAngles
-// 
-// Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
-//===============
-//
+/**
+*   @brief  Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
+**/
 static void PM_ClampAngles(void) {
     // Copy the command angles into the outgoing state
     // Do we need this check per se?
@@ -1548,13 +1431,9 @@ static void PM_ClampAngles(void) {
     }
 }
 
-//
-//===============
-// PM_CheckViewStep
-// 
-// Caculate the view step value that we are at when stepping up and down a ledge/slope/stairs.
-//===============
-//
+/**
+*   @brief  Caculate the view step value that we are at when stepping up and down a ledge/slope/stairs.
+**/
 static void PM_CheckViewStep(void) {
     // Add the step offset we've made on this frame
     if (pm->step) {
@@ -1575,14 +1454,10 @@ static void PM_CheckViewStep(void) {
     }
 }
 
-//
-//===============
-// PM_InitLocal
-// 
-// Resets the current local pmove values, and stores the required data for
-// reverting an invalid pmove command.
-//===============
-//
+/**
+*   @brief  Resets the current local pmove values, and stores the required data for
+*           reverting an invalid pmove command.
+**/
 static void PM_InitLocal() {
     // Clear all PM local vars
     playerMoveLocals = {};
@@ -1599,13 +1474,9 @@ static void PM_InitLocal() {
     vec3_vectors(vec3_t{ 0.f, pm->viewAngles.y, 0.f }, &playerMoveLocals.forwardXY, &playerMoveLocals.rightXY, NULL);
 }
 
-//
-//===============
-// PMove
-// 
-// Can be called by either the server or the client
-//===============
-//
+/**
+*   @brief  Actual Player Move function. Called by both, the ServerGame and ClientGame modules.
+**/
 void PMove(PlayerMove * pmove)
 {
     // Initialize the PMove.

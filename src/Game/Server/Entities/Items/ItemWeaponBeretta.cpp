@@ -154,7 +154,7 @@ void ItemWeaponBeretta::InstanceWeaponOnSwitchState(SVGBasePlayer *player, SVGBa
     ItemWeaponBeretta *weaponBeretta = dynamic_cast<ItemWeaponBeretta*>(weapon);
 
     // Revert time to uint32_t.
-    int64_t startTime = level.timeStamp;
+    GameTime startTime = level.time;
 
     // Set animations here.
     switch (newState) {
@@ -211,11 +211,11 @@ void ItemWeaponBeretta::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player,
                 weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("Beretta State::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+                gi.DPrintf("Beretta State::Draw(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.time);
             break;
         case WeaponState::Idle:                
                 // Debug print.
-                gi.DPrintf("Beretta State::Idle(started: %i) current time: %i\n", client->weaponState.timeStamp, level.timeStamp);
+                gi.DPrintf("Beretta State::Idle(started: %i) current time: %i\n", client->weaponState.timeStamp, level.time);
             break;
         case WeaponState::Holster:
                 // Add IsHolstered flag.
@@ -228,7 +228,7 @@ void ItemWeaponBeretta::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player,
                 weaponBeretta->InstanceWeaponQueueNextState(player, weaponBeretta, client, WeaponState::None);
 
                 // Debug Print.
-                gi.DPrintf("Beretta State::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);
+                gi.DPrintf("Beretta State::Holster(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.time);
             break;
         default:
 //                gi.DPrintf("SMG State::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);

@@ -115,7 +115,7 @@ Netchan_Init
 */
 void Netchan_Init(void)
 {
-    int     port;
+    int32_t     port;
 
 #ifdef _DEBUG
     showpackets = Cvar_Get("showpackets", "0", 0);

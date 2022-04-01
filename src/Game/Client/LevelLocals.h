@@ -25,5 +25,5 @@ struct LevelLocals  {
     //! Current sum of total frame time taken.
     GameTime time = GameTime::zero();
     //! Same as time, but multiplied by a 1000 to get a proper integer.
-    int64_t timeStamp = 0;
+    uint64_t timeStamp = 0;
 };

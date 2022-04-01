@@ -149,7 +149,10 @@ void ClientGameExports::ClientDeltaFrame() {
     // that sets its color based on your health.
     //
     // Either way, this function can be used for such things. 
-    
+    level.frameNumber = cl->frame.number;
+    level.time = GameTime(cl->serverTime) + FRAMERATE_MS;
+    level.timeStamp = cl->time;
+
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
     entities->RunFrame();
 }
@@ -177,10 +180,12 @@ void ClientGameExports::ClientDisconnect() {
 *   @brief  Updates the origin. (Used by the engine for determining current audio position too.)
 **/
 void ClientGameExports::ClientUpdateOrigin() {
-    PlayerState* currentPlayerState = NULL;
-    PlayerState* previousPlayerState = NULL;
+    // Player States.
+    PlayerState* currentPlayerState = nullptr;
+    PlayerState* previousPlayerState = nullptr;
 
-    float lerpFraction = cl->lerpFraction;
+    // Get Lerp Fraction.
+    double lerpFraction = cl->lerpFraction;
 
     // Only do this if we had a valid frame.
     if (!cl->frame.valid) {

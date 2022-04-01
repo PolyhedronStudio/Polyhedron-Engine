@@ -16,7 +16,7 @@
 *           When the animation is finished it will return frame -1. Takes looping into account. Looping animations
 *           are never finished.
 **/
-float SG_FrameForTime( int32_t *frame, int32_t currentTimestamp, int32_t startTimeStamp, float frameTime, int32_t startFrame, int32_t endFrame, int32_t loopingFrames, bool forceLoop ) {
+double SG_FrameForTime( int32_t *frame, const GameTime &currentTimestamp, const GameTime &startTimeStamp, float frameTime, int32_t startFrame, int32_t endFrame, int32_t loopingFrames, bool forceLoop ) {
 	// Always set frame to start frame if the current time stamp is lower than the animation start timestamp.
 	if( currentTimestamp <= startTimeStamp ) {
 		*frame = startFrame;
@@ -30,11 +30,11 @@ float SG_FrameForTime( int32_t *frame, int32_t currentTimestamp, int32_t startTi
 	}
 
 	// Calculate current amount of time this animation is running for.
-	int32_t runningTime = currentTimestamp - startTimeStamp;
+	GameTime runningTime = currentTimestamp - startTimeStamp;
 
 	// Calculate frame fraction.
-	float frameFraction = ( (double)runningTime / (double)frameTime );
-	int32_t frameCount = (unsigned int)frameFraction;
+	double frameFraction = ( runningTime / frameTime ).count();
+	int64_t frameCount = (int64_t)frameFraction;
 	frameFraction -= frameCount;
 
 	// Calculate current frame.
@@ -58,7 +58,7 @@ float SG_FrameForTime( int32_t *frame, int32_t currentTimestamp, int32_t startTi
 
 			// Special frame fraction handling.
 			if( loopingFrames == 1 ) {
-				frameFraction = 1.0f;
+				frameFraction = 1.0;
 			}
 		} else {
 			// Animation's finished, set current frame to -1 and get over with it.

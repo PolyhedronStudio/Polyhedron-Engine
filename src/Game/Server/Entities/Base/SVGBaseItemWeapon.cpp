@@ -162,7 +162,7 @@ void SVGBaseItemWeapon::InstanceWeaponThink(SVGBasePlayer* player, SVGBaseItemWe
     // See if we got a queued state, if we do, override our current weaponstate.
     if (client->weaponState.queued != -1 && !(client->weaponState.flags & WeaponFlags::IsProcessingState)) {
         // Set the timestamp of when this current state got set.
-        client->weaponState.timeStamp = GameTime(level.timeStamp);
+        client->weaponState.timeStamp = level.time;
 
         //gi.DPrintf("WeaponState Switched:(From:#%i  To:#%i   Timestamp:%i)\n", 
         //    client->weaponState.current, client->weaponState.queued, client->weaponState.timeStamp);
@@ -326,7 +326,7 @@ void SVGBaseItemWeapon::InstanceWeaponUpdateViewModel(SVGBasePlayer* player, SVG
 *   @brief    Sets the weapon's animation properties.
 *   @param    frameTime Determines the time taken for each frame, this can be used to either speed up or slow down an animation.
 **/
-void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, int64_t startTime, int32_t startFrame, int32_t endFrame, int32_t loopCount, qboolean forceLoop, float frameTime) {
+void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBaseItemWeapon* weapon, ServerClient *client, GameTime startTime, int32_t startFrame, int32_t endFrame, int32_t loopCount, qboolean forceLoop, float frameTime) {
     // Sanity.
     if (!client) {
         return;
@@ -336,7 +336,7 @@ void SVGBaseItemWeapon::InstanceWeaponSetAnimation(SVGBasePlayer *player, SVGBas
     client->weaponState.flags |= ServerClient::WeaponState::Flags::IsAnimating;
 
     // Time properties.
-    client->playerState.gunAnimationStartTime   = startTime;
+    client->playerState.gunAnimationStartTime   = startTime.count();
     client->playerState.gunAnimationFrametime   = frameTime;
 
     // Animation properties.
@@ -356,8 +356,8 @@ void SVGBaseItemWeapon::InstanceWeaponProcessAnimation(SVGBasePlayer* player, SV
     if (client->weaponState.flags & ServerClient::WeaponState::Flags::IsAnimating) {
         // Animate for another frame.
         SG_FrameForTime(&client->weaponState.animationFrame, 
-            level.timeStamp,
-            client->playerState.gunAnimationStartTime, 
+            GameTime(level.time),
+            GameTime(client->playerState.gunAnimationStartTime), 
             client->playerState.gunAnimationFrametime, 
             client->playerState.gunAnimationStartFrame,
             client->playerState.gunAnimationEndFrame, 

@@ -881,8 +881,10 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
             continue;
 
         Q_snprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",
-                   (level.time - e2->client->respawn.enterGameFrameNumber) / 600,
-                   ((level.time - e2->client->respawn.enterGameFrameNumber) % 600) / 10,
+                    // These may be inaccurate after changing from frameNumber to timeStamps.
+                   (level.time - e2->client->respawn.enterGameTimestamp) / 600,
+                    // These may be inaccurate after changing from frameNumber to timeStamps.
+                   ((level.time - e2->client->respawn.enterGameTimestamp) % 600) / 10,
                    e2->client->ping,
                    e2->client->respawn.score,
                    e2->client->persistent.netname,

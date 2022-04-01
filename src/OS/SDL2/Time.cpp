@@ -12,13 +12,9 @@
 #include <SDL.h>
 
 
-//
-//=============================================================================
-// Sys_Microseconds
-// 
-// Returns SDL2 time in Microseconds.
-//=============================================================================
-//
+/**
+*   @return Returns SDL2 time in Microseconds.
+**/
 uint64_t Sys_Microseconds(void) {
     static Uint64 base = 0;
     static Uint64 freq = 0;
@@ -32,16 +28,13 @@ uint64_t Sys_Microseconds(void) {
         base = SDL_GetPerformanceCounter();
         freq = SDL_GetPerformanceFrequency();
     }
+
     return 1000000ULL * (SDL_GetPerformanceCounter() - base) / freq;
 }
 
-//
-//=============================================================================
-// Sys_Milliseconds
-// 
-// Returns SDL2 time in Milliseconds.
-//=============================================================================
-//
-int64_t Sys_Milliseconds(void) {
+/**
+*   @return Returns SDL2 time in Milliseconds.
+**/
+uint64_t Sys_Milliseconds(void) {
     return Sys_Microseconds() / 1000;
 }

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // win_dbg.c -- crash dump generation
 //
 
-#include "client.h"
+#include "WinClient.h"
 #include <dbghelp.h>
 
 typedef DWORD (WINAPI *SETSYMOPTIONS)(DWORD);

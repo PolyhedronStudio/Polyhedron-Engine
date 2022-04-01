@@ -353,7 +353,9 @@ static int VID_SDL_InitSubSystem(void)
 static int VID_SDL_EventFilter(void *userdata, SDL_Event *event)
 {
     // SDL uses relative time, we need absolute
-    event->common.timestamp = Sys_Milliseconds();
+    if (event) {
+        event->common.timestamp = Sys_Milliseconds();
+    }
     return 1;
 }
 

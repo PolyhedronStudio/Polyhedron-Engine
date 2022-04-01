@@ -32,26 +32,30 @@ void vectoangles2(const vec3_t value1, vec3_t angles)
 
     if (value1[1] == 0 && value1[0] == 0) {
         yaw = 0;
-        if (value1[2] > 0)
+        if (value1[2] > 0) {
             pitch = 90;
-        else
+        } else {
             pitch = 270;
+        }
     }
     else {
-        if (value1[0])
+        if (value1[0]) {
             yaw = std::atan2f(value1[1], value1[0]) * 180.f / M_PI;
-        else if (value1[1] > 0)
+        } else if (value1[1] > 0) {
             yaw = 90;
-        else
+        } else {
             yaw = 270;
+        }
 
-        if (yaw < 0)
+        if (yaw < 0) {
             yaw += 360;
+        }
 
         forward = std::sqrtf(value1[0] * value1[0] + value1[1] * value1[1]);
         pitch = std::atan2f(value1[2], forward) * 180.f / M_PI;
-        if (pitch < 0)
+        if (pitch < 0) {
             pitch += 360;
+        }
     }
 
     angles[vec3_t::Pitch] = -pitch;

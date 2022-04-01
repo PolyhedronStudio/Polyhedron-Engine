@@ -563,8 +563,8 @@ static void SCR_DrawDebugStats(void)
     if (j <= 0)
         return;
 
-    if (j > MAX_STATS)
-        j = MAX_STATS;
+    if (j > MAX_PLAYERSTATS)
+        j = MAX_PLAYERSTATS;
 
     x = CHAR_WIDTH;
     y = (scr.hud_height - j * CHAR_HEIGHT) / 2;
@@ -660,27 +660,23 @@ SCR_TimeRefresh_f
 */
 static void SCR_TimeRefresh_f(void)
 {
-    int     i;
-    uint64_t    start, stop;
-    float       time;
-
     if (cls.connectionState != ClientConnectionState::Active) {
         Com_Printf("No map loaded.\n");
         return;
     }
 
-    start = Sys_Milliseconds();
+    uint64_t start = Sys_Milliseconds();
 
     if (Cmd_Argc() == 2) {
         // run without page flipping
         R_BeginFrame();
-        for (i = 0; i < 128; i++) {
+        for (int32_t i = 0; i < 128; i++) {
             cl.refdef.viewAngles[1] = i / 128.0f * 360.0f;
             R_RenderFrame(&cl.refdef);
         }
         R_EndFrame();
     } else {
-        for (i = 0; i < 128; i++) {
+        for (int32_t i = 0; i < 128; i++) {
             cl.refdef.viewAngles[1] = i / 128.0f * 360.0f;
 
             R_BeginFrame();
@@ -689,8 +685,8 @@ static void SCR_TimeRefresh_f(void)
         }
     }
 
-    stop = Sys_Milliseconds();
-    time = (stop - start) * 0.001f;
+    uint64_t stop = Sys_Milliseconds();
+    double time = (stop - start) * 0.001f;
     Com_Printf("%f seconds (%f fps)\n", time, 128.0f / time);
 }
 

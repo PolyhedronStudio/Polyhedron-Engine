@@ -537,8 +537,8 @@ void ClientGameEntities::AddPacketEntities() {
         // Moved into the if statement's else case up above.
         renderEntity.oldframe = clientEntity->prev.animationFrame;
         renderEntity.backlerp = 1.0 - SG_FrameForTime(&renderEntity.frame,
-            cl->serverTime,                                     // Current Time.
-            clientEntity->current.animationStartTime,           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
+            GameTime(cl->serverTime),                                     // Current Time.
+            GameTime(clientEntity->current.animationStartTime),           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
             clientEntity->current.animationFramerate,           // Current frame time.
             clientEntity->current.animationStartFrame,          // Start frame.
             clientEntity->current.animationEndFrame,            // End frame.
@@ -939,8 +939,8 @@ void ClientGameEntities::AddViewEntities() {
         // Moved into the if statement's else case up above.
         gunRenderEntity.oldframe = gunRenderEntity.frame;
         gunRenderEntity.backlerp = 1.0 - SG_FrameForTime(&gunRenderEntity.frame,
-            cl->time, // Current Time.
-            animStart,  // Animation Start time.
+            GameTime(cl->time), // Current Time.
+            GameTime(animStart),  // Animation Start time.
             currentPlayerState->gunAnimationFrametime,  // Current frame time.
             currentPlayerState->gunAnimationStartFrame, // Start frame.
             currentPlayerState->gunAnimationEndFrame,   // End frame.

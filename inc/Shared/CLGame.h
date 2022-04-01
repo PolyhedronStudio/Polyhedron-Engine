@@ -695,7 +695,7 @@ extern "C" {
         //---------------------------------------------------------------------
         // System.
         //---------------------------------------------------------------------
-        int64_t        (*Sys_Milliseconds) (void);
+        uint64_t        (*Sys_Milliseconds) (void);
 
         //
         // Pointers to actual client data.

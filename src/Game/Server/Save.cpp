@@ -290,7 +290,7 @@ static const save_field_t clientfields[] = {
 //
 //    I(playerState.rdflags),
 //
-//    SA(playerState.stats, MAX_STATS),
+//    SA(playerState.stats, MAX_PLAYERSTATS),
 //
 //    SZ(persistent.userinfo, MAX_INFO_STRING),
 //    SZ(persistent.netname, 16),

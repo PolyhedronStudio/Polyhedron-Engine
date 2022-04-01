@@ -121,10 +121,6 @@ SET(SRC_COMMON
 
 	Common/Net/NetChan.cpp
 	Common/Net/Net.cpp
-
-	# These might have to go some day.
-	#Common/netq3/netchan.cpp
-	#Common/netq3/net.cpp
 )
 SET(HEADERS_COMMON
 	Common/Net/INetNToP.h
@@ -177,27 +173,18 @@ SET(HEADERS_GL
 	Refresh/gl/gl.h
 )
 
-###################### Shared Game Folder.
-#SET(HEADERS_SHAREDGAME
-#	Game/Shared/Entities/TypeInfo.h 
-#	Game/Shared/Entities/ISharedGameEntity.h 
-#	Game/Shared/Entities/SGEntityHandle.h 
-#	Game/Shared/Entities.h 
-#	
-#	Game/Shared/PMove.h 
-#	Game/Shared/Protocol.h 
-#	Game/Shared/SharedGame.h 
-#	Game/Shared/SkeletalAnimation.h 
-#)
-#SET(SRC_SHAREDGAME
-#	Game/Shared/Entities/SGEntityHandle.cpp
+
+
 #
-#	Game/Shared/PMove.cpp
-#	Game/Shared/SkeletalAnimation.cpp
-#)
+#	Shared Folder.	
+#
+SET(SRC_SHARED
+	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/plane.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/vector3.cpp
 
-
-###################### Shared Folder.
+	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Shared/shared.cpp
+)
 SET(HEADERS_SHARED
 	# Container lib.
 	${CMAKE_SOURCE_DIR}/inc/Shared/Containers/IterableCArray.h # ../inc/Shared/Containers/IterableCArray.h
@@ -238,15 +225,12 @@ SET(HEADERS_SHARED
 	${CMAKE_SOURCE_DIR}/inc/Shared/TickRate.h 
 	${CMAKE_SOURCE_DIR}/inc/Shared/UI.h 
 )
-SET(SRC_SHARED
-	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/plane.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/vector3.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Shared/shared.cpp
-)
 
-###################### UNIX Client Specific.
+
+#
+#	Unix
+#
 SET(SRC_UNIX
 	OS/Unix/Hunk.cpp
 	OS/Unix/System.cpp
@@ -258,7 +242,9 @@ SET(SRC_UNIX_CLIENT
 	OS/SDL2/Time.cpp
 )
 
-###################### Windows Client Specific.
+#
+#	Windows
+#
 SET(SRC_WINDOWS
 	OS/Windows/Debug.cpp
 	OS/Windows/Hunk.cpp
@@ -267,9 +253,9 @@ SET(SRC_WINDOWS
 	OS/SDL2/Time.cpp
 )
 SET(SRC_WINDOWS_CLIENT
-	OS/Windows/Wave.cpp
+	#OS/Windows/Wave.cpp
+	OS/SDL2/Sound.cpp
 	OS/SDL2/Video.cpp
-	#OS/SDL2/Time.cpp
 )
 SET(HEADERS_WINDOWS
 	OS/Windows/WGL.h
@@ -278,7 +264,11 @@ SET(HEADERS_WINDOWS
 	OS/Windows/Threads/Threads.h
 )
 
-###################### VKPT.
+
+
+#
+#	Vulkan Path Tracer
+#
 SET(SRC_VKPT
 	Refresh/vkpt/asvgf.cpp
 	Refresh/vkpt/bloom.cpp
@@ -336,7 +326,9 @@ SET(HEADERS_VKPT
 	Refresh/vkpt/precomputed_sky.h
 )
 
-###################### Vulkan Shaders.
+#
+#	Vulkan Path Tracer Shaders
+#
 set(SRC_SHADERS
 	Refresh/vkpt/shader/animate_materials.comp
 	Refresh/vkpt/shader/god_rays_filter.comp
@@ -371,7 +363,6 @@ set(SRC_SHADERS
 	Refresh/vkpt/shader/fsr_rcas_fp16.comp
 	Refresh/vkpt/shader/fsr_rcas_fp32.comp
 )
-
 set(SRC_RT_SHADERS
 	Refresh/vkpt/shader/primary_rays.rgen
 	Refresh/vkpt/shader/direct_lighting.rgen
@@ -387,7 +378,9 @@ set(SRC_RT_SHADERS
 	Refresh/vkpt/shader/reflect_refract.rgen
 )
 
-# Check for a shader compiler.
+#
+#	Check for a shader compiler.
+#
 if (CONFIG_VKPT_RENDERER)
 	IF(IS_64_BIT)
 		include(${CMAKE_SOURCE_DIR}/cmake/compileShaders.cmake)
@@ -413,12 +406,15 @@ if (CONFIG_VKPT_RENDERER)
 	ENDIF()
 endif()
 
+#
 # Embed version number
+#
 ADD_DEFINITIONS(-DVERSION_MAJOR=${POLYHEDRON_VERSION_MAJOR})
 ADD_DEFINITIONS(-DVERSION_MINOR=${POLYHEDRON_VERSION_MINOR})
 ADD_DEFINITIONS(-DVERSION_POINT=${POLYHEDRON_VERSION_POINT})
 ADD_DEFINITIONS(-DVERSION_SHA=${POLYHEDRON_VERSION_SHA})
 ADD_DEFINITIONS(-DVERSION_BRANCH=${POLYHEDRON_VERSION_BRANCH})
+
 
 ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB)
 
@@ -428,18 +424,26 @@ ENDIF()
 
 
 #
-#	Add Library(Optional: svgame, clgame)
+#	ServerGame Module
 #
-# Optional build target.
 if (CONFIG_BUILD_SV_GAME)
 	add_subdirectory(Game/Server)
 endif()
 
-# Optional build target.
+
+
+#
+#	ClientGame Module
+#
 if (CONFIG_BUILD_CL_GAME)
 	add_subdirectory(Game/Client)
 endif()
 
+
+
+#
+#	SharedGame Module
+#
 if (CONFIG_BUILD_CL_GAME OR CONFIG_BUILD_SV_GAME)
 	add_subdirectory(Game/Shared)
 endif()
@@ -449,40 +453,54 @@ endif()
 #	Add Executable (client, server)
 #
 IF(WIN32)
-ADD_EXECUTABLE(client WIN32 
-	${SRC_CLIENT} ${HEADERS_CLIENT} 
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_REFRESH} ${SRC_SHADERS} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
-	${SRC_SERVER} ${HEADERS_SERVER}
-	OS/Resources/polyhedron.rc
-)
-ADD_EXECUTABLE(server 
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_WINDOWS} ${HEADERS_WINDOWS}
-	${SRC_SERVER} ${HEADERS_SERVER}
-	client/null.cpp
-	#OS/sdl2/time.cpp
-	OS/Resources/polyhedron_dedicated.rc
-)
+	#
+	#
+	#
+	ADD_EXECUTABLE(client WIN32 
+		${SRC_CLIENT} ${HEADERS_CLIENT} 
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_REFRESH} ${SRC_SHADERS} 
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
+		${SRC_SERVER} ${HEADERS_SERVER}
+		OS/Resources/polyhedron.rc
+	)
+
+	#
+	#	Win32 Server.
+	#
+	ADD_EXECUTABLE(server 
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_WINDOWS} ${HEADERS_WINDOWS}
+		${SRC_SERVER} ${HEADERS_SERVER}
+		client/null.cpp
+		#OS/sdl2/time.cpp
+		OS/Resources/polyhedron_dedicated.rc
+	)
 ELSE()
-ADD_EXECUTABLE(client
-	${SRC_CLIENT} ${HEADERS_CLIENT} 
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_REFRESH} ${SRC_SHADERS} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_UNIX} ${SRC_UNIX_CLIENT}
-	${SRC_SERVER} ${HEADERS_SERVER}
-)
-ADD_EXECUTABLE(server
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_UNIX}
-	${SRC_SERVER} ${HEADERS_SERVER}
-	client/null.c
-)
+	#
+	#	Unix Client.
+	#
+	ADD_EXECUTABLE(client
+		${SRC_CLIENT} ${HEADERS_CLIENT} 
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_REFRESH} ${SRC_SHADERS} 
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_UNIX} ${SRC_UNIX_CLIENT}
+		${SRC_SERVER} ${HEADERS_SERVER}
+	)
+
+	#
+	#	Unix Server.
+	#
+	ADD_EXECUTABLE(server
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_UNIX}
+		${SRC_SERVER} ${HEADERS_SERVER}
+		Client/Null.cpp
+	)
 ENDIF()
 
 
@@ -494,7 +512,7 @@ TARGET_COMPILE_DEFINITIONS(server PRIVATE USE_SERVER=1 USE_CLIENT=0)
 
 
 #
-#	CURL
+#	CURL Build Configuration.
 #
 IF(CONFIG_USE_CURL)
 	ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB)
@@ -504,8 +522,10 @@ IF(CONFIG_USE_CURL)
 	TARGET_LINK_LIBRARIES(client libcurl)
 ENDIF()
 
+
+
 #
-#	RMLUI
+#	RMLUI Build Configuration
 #
 IF(CONFIG_ENABLE_RMLUI)
  	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
@@ -517,15 +537,17 @@ ELSE()
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 ENDIF()
 
+
+
 #
-#	GLSLANG COMPILER
+#	GLSLang Compiler
 #
 if (GLSLANG_COMPILER AND CONFIG_VKPT_RENDERER)
 	add_dependencies(client shaders)
 endif()
 
 #
-#	GL1.x RENDERER
+#	GL1.x Renderer Build Configuration
 #
 IF (CONFIG_GL_RENDERER)
 	TARGET_SOURCES(client PRIVATE ${SRC_GL} ${HEADERS_GL})
@@ -533,7 +555,7 @@ IF (CONFIG_GL_RENDERER)
 ENDIF()
 
 #
-#	VKPT RENDERER
+#	VKPT Renderer Build Configuration
 #
 IF (CONFIG_VKPT_RENDERER)
 	TARGET_SOURCES(client PRIVATE ${SRC_VKPT} ${HEADERS_VKPT})
@@ -554,11 +576,12 @@ IF (CONFIG_VKPT_RENDERER)
 ENDIF()
 
 #
-#	STB + TINYOBJLOADER
+#	Client Link Libraries.
 #
 TARGET_LINK_LIBRARIES(client stb)
 TARGET_LINK_LIBRARIES(client tinyobjloader)
-#TARGET_LINK_LIBRARIES(server enet)
+
+
 
 #
 #	SOURCE GROUPING
@@ -587,6 +610,8 @@ SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_UNIX})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_UNIX})
 
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES client/null.cpp )
+
+
 
 #
 #	WIN32 SPECIFICS
@@ -617,30 +642,15 @@ IF (WIN32)
         OS/Resources/polyhedron.rc )
 ENDIF()
 
-TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)
-TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../inc)
-#TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PRIVATE ../inc)
-#TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PRIVATE ../inc)
 
+
+#
+#	Client Build Configuration.
+#
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
-TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
-TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
-
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "/extern/stb/")
-
-# WATISDEZE: Do we still need this?
-# Use dynamic zlib for steam runtime
-# if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
-#     TARGET_LINK_LIBRARIES(client SDL2main SDL2-static z)
-#     TARGET_LINK_LIBRARIES(server SDL2main SDL2-static z)
-# else()
-# TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
-# TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
-# endif()
 TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
-TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
-
 SET_TARGET_PROPERTIES(client
     PROPERTIES
     OUTPUT_NAME "Polyhedron"
@@ -651,7 +661,15 @@ SET_TARGET_PROPERTIES(client
     RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin"
     DEBUG_POSTFIX ""
 )
-include_directories()
+
+
+#
+#	Server Build Configuration.
+#
+#include_directories()
+TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
+TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
 SET_TARGET_PROPERTIES(server
     PROPERTIES
     OUTPUT_NAME "Polyhedron_Dedicated"
@@ -663,8 +681,15 @@ SET_TARGET_PROPERTIES(server
     DEBUG_POSTFIX ""
 )
 
-# Client Game
+
+
+#
+#	ClientGame Build Configuration.
+#
 if (CONFIG_BUILD_CL_GAME)
+	# Include directories.
+	TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../inc)
+
 	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
 	SET_TARGET_PROPERTIES(clgame
 		PROPERTIES
@@ -683,8 +708,15 @@ if (CONFIG_BUILD_CL_GAME)
 	)
 endif()
 
-# Server Game
+
+
+#
+#	ServerGame Build Configuration.
+#
 if (CONFIG_BUILD_SV_GAME)
+	# Include directories.
+	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)
+
 	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
 	SET_TARGET_PROPERTIES(svgame
 		PROPERTIES
@@ -702,69 +734,3 @@ if (CONFIG_BUILD_SV_GAME)
 		DEBUG_POSTFIX ""
 	)
 endif()
-
-# WATISDEZE: Do we still need this?
-# IF(CONFIG_LINUX_PACKAGING_SUPPORT)
-#     # Put the real game binary in /usr/share so we can have a wrapper in /usr/bin
-#     INSTALL(TARGETS client DESTINATION share/quake2rtx/bin COMPONENT shareware)
-#     INSTALL(TARGETS server DESTINATION games COMPONENT shareware)
-
-#     # Compress NVIDIA custom content
-#     INSTALL(CODE "set(SOURCE \"${CMAKE_SOURCE_DIR}\")"
-#         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_media.cmake"
-#         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_shaders.cmake"
-#         COMPONENT shareware)
-#     INSTALL(TARGETS svgame DESTINATION share/quake2rtx/basenac COMPONENT shareware)
-
-#     # Package data files, including the shareware pak0 for demo levels
-#     set (SHAREWARE_DATA_FILES_LIST
-#         "${CMAKE_SOURCE_DIR}/basenac/q2rtx_media.pkz"
-#         "${CMAKE_SOURCE_DIR}/basenac/shaders.pkz"
-#         "${CMAKE_SOURCE_DIR}/basenac/blue_noise.pkz"
-#         "${CMAKE_SOURCE_DIR}/basenac/shareware/pak0.pak"
-#     )
-#     INSTALL(FILES
-#         ${SHAREWARE_DATA_FILES_LIST}
-#         DESTINATION share/quake2rtx/basenac
-#         COMPONENT shareware)
-
-#     # Package shareware player model
-#     INSTALL(DIRECTORY
-#         "${CMAKE_SOURCE_DIR}/basenac/shareware/players"
-#         DESTINATION share/quake2rtx/basenac
-#         COMPONENT shareware)
-
-#     # Package the legal and info files
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/license.txt"
-#         "${CMAKE_SOURCE_DIR}/notice.txt"
-#         "${CMAKE_SOURCE_DIR}/readme.md"
-#         "${CMAKE_SOURCE_DIR}/changelog.md"
-#         DESTINATION share/quake2rtx/
-#         COMPONENT shareware)
-
-#     # Package the icon/desktop file
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/q2rtx.desktop"
-#         DESTINATION share/applications/
-#         COMPONENT shareware)
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/q2rtx.png"
-#         DESTINATION share/pixmaps/
-#         COMPONENT shareware)
-
-#     # Install Client Wrapper
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/q2rtx.sh"
-#         DESTINATION games/
-#         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-#         COMPONENT shareware
-# 	RENAME q2rtx)
-
-#     # Install PAK file finder
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/find-retail-paks.sh"
-#         DESTINATION share/quake2rtx/bin
-#         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-#         COMPONENT shareware)
-# ENDIF()

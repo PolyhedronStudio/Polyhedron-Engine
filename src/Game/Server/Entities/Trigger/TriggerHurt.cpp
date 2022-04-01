@@ -147,8 +147,9 @@ void TriggerHurt::TriggerHurtTouch(IServerGameEntity* self, IServerGameEntity* o
 		lastHurtTime = level.time + duration_cast<GameTime>(FRAMETIME);
 
 	if (!(GetSpawnFlags()& SPAWNFLAG_SILENT)) {
-		if ((level.frameNumber % 10) == 0)
+		if ((level.time % 1000ms) == GameTime::zero()) {
 			SVG_Sound(other, SoundChannel::Auto, GetNoiseIndexA(), 1, Attenuation::Normal, 0);
+		}
 	}
 
 	int32_t damageFlags = 0;

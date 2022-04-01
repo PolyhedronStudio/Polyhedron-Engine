@@ -515,17 +515,8 @@ Advances the world by FRAMETIME(for 50hz=0.019) seconds
 ================
 */
 void SVG_RunFrame(void) {
-    // Acquire server and class entities arrays.
-    Entity* serverEntities = game.world->GetServerEntities();
-    IServerGameEntity **classEntities = game.world->GetClassEntities();
-
-    // We're moving the game a frame forward.
-    level.frameNumber++;
-
-    // Calculate the current frame time for this game its own frame number.
+    // Add the time it takes to simulate a ServerGame frame to our level.time value.
     level.time += FRAMERATE_MS;
-    level.timeStamp = (level.time.count());//static_cast<uint64_t>((level.time.count() * 1000.f));
-
 
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
@@ -538,6 +529,10 @@ void SVG_RunFrame(void) {
     // Treat each object in turn
     // "even the world gets a chance to Think", it does.
     //
+    // Acquire server and class entities arrays.
+    Entity* serverEntities = game.world->GetServerEntities();
+    IServerGameEntity **classEntities = game.world->GetClassEntities();
+
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < globals.numberOfEntities; i++) {
         // Acquire state number.

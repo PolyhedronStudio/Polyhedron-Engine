@@ -302,8 +302,8 @@ struct ClientState {
     ServerFrame frame = {}; 
     //! The previous frame received, right before the current frame.
     ServerFrame oldframe = {};
-    int64_t serverTime = 0;
-    int64_t serverDelta = 0;
+    uint64_t serverTime = 0;
+    uint64_t serverDelta = 0;
 
     byte            dcs[CS_BITMAP_BYTES] = {};
 
@@ -321,7 +321,7 @@ struct ClientState {
     vec2_t      mouseMove = vec2_zero();
     //! This is the 'current moment in time' value of the client's game state at.  
     //! Always <= cl.serverTime
-    int64_t         time = 0;
+    uint64_t         time = 0;
     //! between oldframe and frame
     double       lerpFraction = 0.f;
 

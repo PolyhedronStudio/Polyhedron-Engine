@@ -879,7 +879,7 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     client->kickAngles = vec3_zero();
 
     // if the scoreboard is up, update it
-    if (client->showScores && !(level.frameNumber & 31)) {
+    if (client->showScores && ((level.time % 3200) == GameTime::zero())) {
         SVG_HUD_GenerateDMScoreboardLayout(player, player->GetEnemy());
         gi.Unicast(serverEntity, false);
     }
@@ -1483,7 +1483,7 @@ void DefaultGamemode::InitializePlayerRespawnData(ServerClient* client) {
     }
 
     client->respawn = {};
-    //client->respawn.enterGameFrameNumber = level.frameNumber;
+    client->respawn.enterGameTimestamp = level.time;
     client->respawn.persistentCoopRespawn = client->persistent;
 }
 

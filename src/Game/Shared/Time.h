@@ -12,13 +12,11 @@
 #pragma once
 
 
-//! Time of a game's frame per second.
+//! Time of a game's frame.
 static constexpr Frametime FRAMETIME_S = Frametime(1.0f / BASE_HZ);
 
-
+//! Literal to return the 'frame counts'. Should be avoided to use.
 using Frames = std::chrono::duration<int64_t, std::ratio<1, BASE_HZ>>;
-
-//! Literal to return the 'frame counts'.
 static constexpr Frames operator""_hz(uint64_t frame) {
 	return Frames(frame);
 }
