@@ -29,7 +29,7 @@
 * 
 **/
 /**
-*   @brief  Called right after the engine clears the scene, and begins a new one.
+*   @brief  Called right after ClearScene.
 **/
 void ClientGameView::PreRenderView() {
 
@@ -54,14 +54,18 @@ void ClientGameView::RenderView() {
     // Finish calculating view values.
     FinalizeViewValues();
 
-    // Add all entities of the current server frame to the renderers view.
+    // Add all entities of the last received(should be the current if all is stable)
+    // server frame to the current frame view.
     clge->entities->AddPacketEntities();
+
+    //
+    // TODO: Not like how it is done right now haha. 
+    //
     CLG_AddTempEntities();
 
     // Add all particle effects to view.
     Particles::AddParticlesToView();
     DynamicLights::AddDynamicLightsToView();
-
 #if USE_LIGHTSTYLES
     LightStyles::AddLightStylesToView();
 #endif
@@ -170,7 +174,7 @@ void ClientGameView::SetupThirdpersonView() {
     // Add an additional unit to the z value.
     cl->refdef.vieworg[2] += 8;
     cl->refdef.viewAngles[vec3_t::Pitch] *= 0.5f;
-    AngleVectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
+    vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
 
     // Calculate view origin to use based on thirdperson range and angle.
     float angle = Radians(cl_thirdperson_angle->value);
