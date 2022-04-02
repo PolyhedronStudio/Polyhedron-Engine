@@ -6,7 +6,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #
 #   Polyhedron Version.
 #
-project(Polyhedron)
+project(Polyhedron VERSION 0.4.0)
 set(POLYHEDRON_VERSION_MAJOR 0)
 set(POLYHEDRON_VERSION_MINOR 4)
 set(POLYHEDRON_VERSION_POINT 0)
@@ -78,7 +78,7 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY
    "Single Directory for all Libraries."
 )
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/Bin CACHE PATH "Single Directory for all Binaries.")
-  
+
 #
 # Base Build Configuration.
 #
@@ -97,6 +97,7 @@ add_subdirectory(extern)
 
 # Add current folder to linkdirectories.
 link_directories(.)
+
 
 # Last but not least, add the source folder and its CMakeLists.txt
 add_subdirectory(src)
