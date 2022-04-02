@@ -38,7 +38,7 @@ SET(SRC_CLIENT
 	Client/Sound/Main.cpp
 	Client/Sound/Memory.cpp
 	Client/Sound/Mix.cpp
-	Client/Sound/OGG.cpp
+	Client/Sound/Ogg.cpp
 #	Client/Sound/QAL/fixed.c
 	Client/Sound/QAL/Dynamic.cpp
 )
@@ -132,14 +132,14 @@ SET(HEADERS_COMMON
 #SET(SRC_FORMAT
 #)
 SET(HEADERS_COMMON
-	${CMAKE_SOURCE_DIR}/inc/Format/Bsp.h
-	${CMAKE_SOURCE_DIR}/inc/Format/Iqm.h
-	${CMAKE_SOURCE_DIR}/inc/Format/Md2.h
-	${CMAKE_SOURCE_DIR}/inc/Format/Md3.h
-	${CMAKE_SOURCE_DIR}/inc/Format/Pak.h
-	${CMAKE_SOURCE_DIR}/inc/Format/Pcx.h
-	${CMAKE_SOURCE_DIR}/inc/Format/Sp2.h
-	${CMAKE_SOURCE_DIR}/inc/Format/Wal.h
+	../inc/Format/Bsp.h
+	../inc/Format/Iqm.h
+	../inc/Format/Md2.h
+	../inc/Format/Md3.h
+	../inc/Format/Pak.h
+	../inc/Format/Pcx.h
+	../inc/Format/Sp2.h
+	../inc/Format/Wal.h
 )
 
 ###################### Refresh.
