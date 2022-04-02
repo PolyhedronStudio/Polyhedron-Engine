@@ -4,12 +4,14 @@
 #include "../Main.h"
 #include "../TemporaryEntities.h"
 
+// Exports.
 #include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 #include "Prediction.h"
+#include "View.h"
 
 // Distance that is allowed to be taken as a delta before we reset it.
-static const float MAX_DELTA_ORIGIN = (2400.f * (1.0f / BASE_FRAMERATE));
+static const double MAX_DELTA_ORIGIN = (2400.0 * (1.00 / BASE_FRAMERATE));
 
 
 /**
@@ -35,7 +37,7 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
 
     // If the error is too large, it was likely a teleport or respawn, so ignore it
     const float len = vec3_length(out->error);
-    if (len > .1f) {
+    if (len > .1) {
         if (len > MAX_DELTA_ORIGIN) {
             Com_DPrint("CLG_PredictionError: if (len > MAX_DELTA_ORIGIN): %s\n", Vec3ToString(out->error));
 
@@ -84,7 +86,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     // Copy current state to pmove
     pm.state = cl->frame.playerState.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
-    pm.state.deltaAngles = cl->deltaAngles;
+    pm.state.deltaAngles = clge->view->GetViewCamera()->GetViewDeltaAngles(); //cl->deltaAngles;
 #endif
 
     // Run frames in order.

@@ -425,7 +425,7 @@ void CL_InitGameProgs(void)
 
     importAPI.GetDeveloperLevel = _wrp_GetDeveloperLevel;
 
-    importAPI.UpdateListenerOrigin = CL_UpdateListenerOrigin;
+    importAPI.UpdateSoundSpatializationOrigin = CL_UpdateSoundSpatializationOrigin;
 
     importAPI.SetClientLoadState = CL_SetLoadState;
     importAPI.GetClienState = CL_GetConnectionState;

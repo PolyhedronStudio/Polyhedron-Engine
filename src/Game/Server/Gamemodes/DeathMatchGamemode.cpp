@@ -171,7 +171,6 @@ void DeathmatchGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
 
     // Set aim angles and player move delta angles based on spawn and last received view angles.
     client->playerState.pmove.deltaAngles = spawnAngles - client->respawn.commandViewAngles;
-    //client->playerState.pmove.viewAngles = player->GetAngles();
     client->aimAngles = player->GetAngles();
 
     // spawn a spectator in case the client was/is one.

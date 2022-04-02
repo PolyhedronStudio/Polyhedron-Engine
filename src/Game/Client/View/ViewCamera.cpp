@@ -26,12 +26,12 @@
 void ViewCamera::SetupFirstpersonViewProjection() {
     // If kickangles are enabled, lerp them and add to view angles.
     if (cl_kickangles->integer) {
-        PlayerState *playerState = &cl->frame.playerState;
-        PlayerState *oldPlayerState = &cl->oldframe.playerState;
+        const PlayerState *playerState = &cl->frame.playerState;
+        const PlayerState *oldPlayerState = &cl->oldframe.playerState;
 
         // Lerp first.
-        double lerp = cl->lerpFraction;
-        kickAngles = vec3_mix_euler(oldPlayerState->kickAngles, playerState->kickAngles, cl->lerpFraction);
+        const double lerp = cl->lerpFraction;
+        const vec3_t kickAngles = vec3_mix_euler(oldPlayerState->kickAngles, playerState->kickAngles, cl->lerpFraction);
 
         // Add afterwards.
         viewAngles += kickAngles;
@@ -103,12 +103,21 @@ void ViewCamera::SetupThirdpersonViewProjection() {
 }
 
 /**
-*   @brief  Calculates the new forward, up, and right vectors of
-*           the view camera.
+*   @brief  Calculates the new forward, up, and right vectors based on
+*           the camera's current viewAngles.
 **/
-void ViewCamera::CalculateViewVectors() {
+void ViewCamera::UpdateViewVectors() {
     // Calculate new client forward, right, and up vectors.
-    vec3_vectors(viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
+    vec3_vectors(viewAngles, &viewForward, &viewRight, &viewUp);
+}
+
+/**
+*   @brief  Calculates the new forward, up, and right vectors of
+*           the view camera based on the vec3_t argument.
+**/
+void ViewCamera::UpdateViewVectors(const vec3_t& fromAngles) {
+    // Calculate new client forward, right, and up vectors.
+    vec3_vectors(fromAngles, &viewForward, &viewRight, &viewUp);
 }
 
 /**

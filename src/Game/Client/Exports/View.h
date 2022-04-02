@@ -12,13 +12,19 @@
 // Client Game Exports Interface.
 #include "Shared/Interfaces/IClientGameExports.h"
 
-//---------------------------------------------------------------------
-// Client Game View IMPLEMENTATION.
-//---------------------------------------------------------------------
+// View Camera.
+#include "../View/ViewCamera.h"
+
+
+/**
+*   Client Game View IMPLEMENTATION.
+**/
 class ClientGameView : public IClientGameExportView {
 public:
 	//! Destructor.
     virtual ~ClientGameView() = default;
+
+
 
     /**
     *
@@ -42,6 +48,7 @@ public:
     *           finish up its current frame loop iteration.
     **/
     void PostRenderView() final;
+
 
 
     /**
@@ -82,20 +89,27 @@ public:
     *   @brief  Adds a 'lightstyle' to the current frame view.
     **/
     void AddLightStyle(int32_t style, const vec4_t &rgba);
-
-
+    
+    /**
+    *   @return Pointer to our view camera.
+    **/
+    inline ViewCamera *GetViewCamera() { return &viewCamera; }
 
 
 private:
     /**
     *
-    *    Camera Setup Functions.
+    *    View Camera Functionality.
     * 
     **/
+    //! Client's main view camera tracking the player position and angles.
+    ViewCamera viewCamera;
+
+
     /**
     *   @brief  Finalizes the view values, aka render first or third person specific view data.
     **/
-    void FinalizeViewValues();
+    void SetupViewCamera();
     
     /**
     *   @brief  Sets up a firstperson view mode.
@@ -115,6 +129,7 @@ private:
     void SetLightLevel();
 
 
+
 private:
     cvar_t *cl_add_lights   = nullptr;
     cvar_t *cl_show_lights  = nullptr;
@@ -122,6 +137,8 @@ private:
     cvar_t *cl_add_entities = nullptr;
     cvar_t *cl_add_blend    = nullptr;
     cvar_t *cl_adjustfov    = nullptr;
+
+
 
 private:
     //! Stores the entities.

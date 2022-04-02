@@ -1598,13 +1598,13 @@ static int precache_spawncount;
 
 //
 //===============
-// CL_UpdateListenerOrigin
+// CL_UpdateSoundSpatializationOrigin
 //
 // Updates the listener_ variables, this is called by the CG Module its
 // CLG_RenderView function.
 //===============
 //
-void CL_UpdateListenerOrigin(void) {
+void CL_UpdateSoundSpatializationOrigin(void) {
     VectorCopy(cl.refdef.vieworg, listener_origin);
     VectorCopy(cl.v_forward, listener_forward);
     VectorCopy(cl.v_right, listener_right);

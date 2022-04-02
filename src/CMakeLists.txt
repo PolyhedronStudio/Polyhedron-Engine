@@ -260,7 +260,7 @@ SET(SRC_WINDOWS_CLIENT
 SET(HEADERS_WINDOWS
 	OS/Windows/WGL.h
 	OS/Windows/GLImp.h
-	OS/Windows/Client.h
+	OS/Windows/WinClient.h
 	OS/Windows/Threads/Threads.h
 )
 

@@ -112,12 +112,6 @@ SET(SRC_SVGAME
 
 	Player/Client.cpp
 	Player/Hud.cpp
-	Player/Weapons.cpp
-
-	#Weapons/Blaster.cpp
-	#Weapons/Machinegun.cpp
-	#Weapons/Shotgun.cpp
-	#Weapons/SuperShotgun.cpp
 
 	World/GameWorld.cpp
 	#SVGame.def
@@ -204,12 +198,6 @@ SET(HEADERS_SVGAME
 
 	Player/Animations.h
 	Player/Client.h
-	Player/Weapons.h
-
-	Weapons/Blaster.h
-	Weapons/Machinegun.h
-	Weapons/Shotgun.h
-	Weapons/SuperShotgun.h
 
 	World/GameWorld.h
 	#SVGame.def

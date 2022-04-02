@@ -119,9 +119,7 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 void ClientGameExports::ClientBegin() {
     // Reset level locals.
     level = LevelLocals{};
-    level.frameNumber = cl->frame.number;
     level.time = GameTime(cl->serverTime) + FRAMERATE_MS;
-    level.timeStamp = cl->time;
 }
 
 /**
@@ -145,13 +143,10 @@ void ClientGameExports::ClientClearState() {
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameExports::ClientDeltaFrame() {
-    // SCR_SetCrosshairColor used to be here. It's a shitty name for a function
     // that sets its color based on your health.
-    //
-    // Either way, this function can be used for such things. 
-    level.frameNumber = cl->frame.number;
+
+    // Run the entity prediction logic for the next frame.
     level.time = GameTime(cl->serverTime) + FRAMERATE_MS;
-    level.timeStamp = cl->time;
 
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
     entities->RunFrame();
@@ -180,83 +175,92 @@ void ClientGameExports::ClientDisconnect() {
 *   @brief  Updates the origin. (Used by the engine for determining current audio position too.)
 **/
 void ClientGameExports::ClientUpdateOrigin() {
-    // Player States.
-    PlayerState* currentPlayerState = nullptr;
-    PlayerState* previousPlayerState = nullptr;
-
-    // Get Lerp Fraction.
-    double lerpFraction = cl->lerpFraction;
-
     // Only do this if we had a valid frame.
     if (!cl->frame.valid) {
         return;
     }
 
     // Find states to interpolate between
-    currentPlayerState = &cl->frame.playerState;
-    previousPlayerState = &cl->oldframe.playerState;
+    const PlayerState* currentPlayerState  = &cl->frame.playerState;
+    const PlayerState* previousPlayerState = &cl->oldframe.playerState;
+
+    // These are applied to the view camera at the very end.
+    vec3_t newViewOrigin = vec3_zero();
+    vec3_t oldViewOrigin = vec3_zero();
+
+    vec3_t newViewAngles = vec3_zero();
+    vec3_t oldViewAngles = vec3_zero();
+
+    // Get Lerp Fraction.
+    const double lerpFraction = cl->lerpFraction;
+
 
     //
     // Origin
     //
-    if (!clgi.IsDemoPlayback()
-        && cl_predict->integer
-        && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
-        // Add view offset to view org.
+    if (!clgi.IsDemoPlayback() && cl_predict->integer && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
+        // Set the view camera's origin to that of the predicted state's view origin + view offset.
         ClientPredictedState* predictedState = &cl->predictedState;
-        cl->refdef.vieworg = predictedState->viewOrigin + predictedState->viewOffset;
+        newViewOrigin = predictedState->viewOrigin + predictedState->viewOffset;
 
+        // Scale prediction error to frame lerp fraction and add it to the camera view origin.
         const vec3_t error = vec3_scale(predictedState->error, 1.f - lerpFraction);
-        cl->refdef.vieworg += error;
+        newViewOrigin += error;
 
-        cl->refdef.vieworg.z -= predictedState->stepOffset;
-    }
-    else {
-        // Just use interpolated values
-        // Adjust origins to keep stepOffset in mind.
-        vec3_t oldOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
-        oldOrigin.z -= cl->predictedState.stepOffset;
-        vec3_t newOrigin = currentPlayerState->pmove.origin + currentPlayerState->pmove.viewOffset;
-        newOrigin.z -= cl->predictedState.stepOffset;
+        // Last but not least, subtract the stepOffset from the Z axis.
+        newViewOrigin.z -= predictedState->stepOffset;
+    } else {
+        // Use the interpolated values, and substract stepOffset.
+        oldViewOrigin = previousPlayerState->pmove.origin + previousPlayerState->pmove.viewOffset;
+        oldViewOrigin.z -= cl->predictedState.stepOffset;
+        newViewOrigin = currentPlayerState->pmove.origin + currentPlayerState->pmove.viewOffset;
+        newViewOrigin.z -= cl->predictedState.stepOffset;
 
-        // Calculate final origin.
-        cl->refdef.vieworg = vec3_mix(oldOrigin, newOrigin, lerpFraction);
+        // Interpolate new view origin based on the frame's lerpfraction.
+        newViewOrigin = vec3_mix(oldViewOrigin, newViewOrigin, lerpFraction);
     }
 
     //
     // View Angles.
     //
-    // if not running a demo or on a locked frame, add the local angle movement
+    // If not running a demo or on a locked frame, add the local angle movement.
     if (clgi.IsDemoPlayback()) {
-        LerpAngles(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction, cl->refdef.viewAngles);
+        // Interpolate view angles.
+        newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
+    } else if (currentPlayerState->pmove.type < EnginePlayerMoveType::Dead) {
+        // Use predicted state view angles.
+        newViewAngles = cl->predictedState.viewAngles;
+    } else {
+        // Interpolate view angles.
+        newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
     }
-    else if (currentPlayerState->pmove.type < EnginePlayerMoveType::Dead) {
-        // use predicted values
-        cl->refdef.viewAngles = cl->predictedState.viewAngles;
-    }
-    else {
-        // just use interpolated values
-        LerpAngles(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction, cl->refdef.viewAngles);
-    }
-
+    
     // Lerp between previous and current frame delta angles.
-    cl->deltaAngles[0] = LerpAngle(previousPlayerState->pmove.deltaAngles[0], currentPlayerState->pmove.deltaAngles[0], lerpFraction);
-    cl->deltaAngles[1] = LerpAngle(previousPlayerState->pmove.deltaAngles[1], currentPlayerState->pmove.deltaAngles[1], lerpFraction);
-    cl->deltaAngles[2] = LerpAngle(previousPlayerState->pmove.deltaAngles[2], currentPlayerState->pmove.deltaAngles[2], lerpFraction);
+    const vec3_t newDeltaAngles = vec3_mix_euler(previousPlayerState->pmove.deltaAngles, currentPlayerState->pmove.deltaAngles, lerpFraction);
+//    cl->deltaAngles[1] = vec3_mix(previousPlayerState->pmove.deltaAngles[1], currentPlayerState->pmove.deltaAngles[1], lerpFraction);
+//    cl->deltaAngles[2] = vec3_mix(previousPlayerState->pmove.deltaAngles[2], currentPlayerState->pmove.deltaAngles[2], lerpFraction);
 
-    // don't interpolate blend color
+    // Don't interpolate blend color
     cl->refdef.blend = currentPlayerState->blend;
 
     // Interpolate field of view
     cl->fov_x = LerpFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
     cl->fov_y = ClientCalculateFieldOfView(cl->fov_x, 4, 3);
 
+    // Acquire the view camera.
+    ViewCamera *viewCamera = clge->view->GetViewCamera();
+
+    // Set new view origin, angles and delta angles.
+    viewCamera->SetViewOrigin(newViewOrigin);
+    viewCamera->SetViewAngles(newViewAngles);
+    viewCamera->SetViewDeltaAngles(newDeltaAngles);
+
     // Calculate new client forward, right, and up vectors.
-    vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
+    viewCamera->UpdateViewVectors();
 
     // Setup player entity origin and angles accordingly to update the client's listener origins with.
-    cl->playerEntityOrigin = cl->refdef.vieworg;
-    cl->playerEntityAngles = cl->refdef.viewAngles;
+    cl->playerEntityOrigin = newViewOrigin;
+    cl->playerEntityAngles = newViewAngles;
 
     // Keep it properly within range.
     if (cl->playerEntityAngles[vec3_t::Pitch] > 180) {
@@ -264,9 +268,9 @@ void ClientGameExports::ClientUpdateOrigin() {
     }
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
-    // Update the client's listener origin values. This is a nescessity for the game in order
-    // to properly play sound effects.
-    clgi.UpdateListenerOrigin();
+    // Update the client's 3D Sound Spatialization Origin values. This is a nescessity for the game 
+    // in order to properly play sound effects.
+    clgi.UpdateSoundSpatializationOrigin();
 }
 
 /**

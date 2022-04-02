@@ -226,7 +226,7 @@ extern "C" {
         // Updates the client's audio position values to the current
         // cl.refdef.vieworg, cl->v_forward, cl->v_right and cl->v_up
         // values.
-        void            (*UpdateListenerOrigin) (void);
+        void            (*UpdateSoundSpatializationOrigin) (void);
 
         //
         // Client state.

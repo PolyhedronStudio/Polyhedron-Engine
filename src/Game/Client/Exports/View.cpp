@@ -52,7 +52,7 @@ void ClientGameView::RenderView() {
     clge->ClientUpdateOrigin();
 
     // Finish calculating view values.
-    FinalizeViewValues();
+    SetupViewCamera();
 
     // Add all entities of the last received(should be the current if all is stable)
     // server frame to the current frame view.
@@ -69,6 +69,10 @@ void ClientGameView::RenderView() {
 #if USE_LIGHTSTYLES
     LightStyles::AddLightStylesToView();
 #endif
+
+    // Set view origin and angles to that of our view camera.
+    cl->refdef.vieworg = viewCamera.GetViewOrigin();
+    cl->refdef.viewAngles = viewCamera.GetViewAngles();
 
     // Last but not least, pass our array over to the client.
     cl->refdef.num_entities = num_renderEntities;
@@ -98,11 +102,11 @@ void ClientGameView::PostRenderView() {
 * 
 **/
 /**
-*   @brief  Finalizes the view values, aka render first or third person specific view data.
+*   @brief  Sets up the view for either first or third -person camera modes
+*           and interpolates the camera smoothly between frames.
 **/
-void ClientGameView::FinalizeViewValues() {
-    // For fetching the player pointer.
-    ClientEntity* player = nullptr;
+void ClientGameView::SetupViewCamera() {
+    ClientEntity *viewEntity = &cs->entities[cl->frame.clientNumber + 1];
 
     // If cl_player_model isn't set to thirdperson, jump to firstperson label.
     if (cl_player_model->integer != CL_PLAYER_MODEL_THIRD_PERSON)
@@ -112,22 +116,25 @@ void ClientGameView::FinalizeViewValues() {
     if (cl->frame.clientNumber == CLIENTNUM_NONE)
         goto firstpersonview;
 
-    // If the entity its serverframe isn't matching the client's frame number, jump to firstperson label.
-    player = &cs->entities[cl->frame.clientNumber + 1];
-    if (player->serverFrame != cl->frame.number)
+    // If the serverframe isn't matching the view entity's frame number, engage
+    // a first person view instead. 
+    if (viewEntity && viewEntity->serverFrame != cl->frame.number)
         goto firstpersonview;
 
     // If there is no modelindex, jump to firstperson label.
-    if (!player ->current.modelIndex)
+    if (viewEntity && !viewEntity->current.modelIndex)
         goto firstpersonview;
 
     // Setup the thirdperson view.
-    SetupThirdpersonView();
+    //SetupThirdpersonView();
+    viewCamera.SetupThirdpersonViewProjection();
+
     return;
 
 firstpersonview:
     // Setup the firstperson view.
-    SetupFirstpersonView();
+    //SetupFirstpersonView();
+    viewCamera.SetupFirstpersonViewProjection();
 }
 
 /**
@@ -144,7 +151,8 @@ void ClientGameView::SetupFirstpersonView() {
         vec3_t kickAngles = vec3_mix_euler(oldPlayerState->kickAngles, playerState->kickAngles, cl->lerpFraction);
 
         // Add afterwards.
-        cl->refdef.viewAngles += kickAngles;
+        viewCamera.SetViewAngles(viewCamera.GetViewAngles() + kickAngles);
+        //cl->refdef.viewAngles += kickAngles;
     }
 
     // Add the first person view entities.
