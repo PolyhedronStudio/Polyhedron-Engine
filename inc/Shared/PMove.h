@@ -1,36 +1,39 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Contains definitions of the PlayerMove that are shared with the engine.
+*
+***/
+#pragma once
 
-//
-// pmove.h
-//
-// Contains engine/game shared pmove declarations.
-//
+
+/**
+*   @brief  Engine specific PlayerMove types.
 */
-#ifndef __SHARED__PMOVE_H__
-#define __SHARED__PMOVE_H__
-
 struct EnginePlayerMoveType {
     static constexpr int32_t Dead = 32;     // No movement, but the ability to rotate in place
     static constexpr int32_t Freeze = 33;   // No movement at all
     static constexpr int32_t Gib = 34;      // No movement, different bounding box
 };
 
-//-----------------
-// Player movement flags.The game is free to define up to 16 bits.
-//-----------------
-constexpr int32_t PMF_ENGINE = (1 << 0);                    // Engine flags first.
-constexpr int32_t PMF_TIME_TELEPORT = (PMF_ENGINE << 1);    // time frozen in place
-constexpr int32_t PMF_NO_PREDICTION = (PMF_ENGINE << 2);    // temporarily disables client side prediction
-constexpr int32_t PMF_GAME = (PMF_ENGINE << 3);             // Game flags start from here.
+/**
+*   Player movement flags. The game is free to define up to 16 bits.
+**/
+static constexpr int32_t PMF_ENGINE = (1 << 0);                    // Engine flags first.
+static constexpr int32_t PMF_TIME_TELEPORT = (PMF_ENGINE << 1);    // time frozen in place
+static constexpr int32_t PMF_NO_PREDICTION = (PMF_ENGINE << 2);    // temporarily disables client side prediction
+static constexpr int32_t PMF_GAME = (PMF_ENGINE << 3);             // Game flags start from here.
 
-//-----------------
-// This structure needs to be communicated bit-accurate from the server to the 
-// client to guarantee that prediction stays in sync, so no floats are used.
-// 
-// If any part of the game code modifies this struct, it will result in a 
-// prediction error of some degree.
-//-----------------
+/**
+*   This structure needs to be communicated bit-accurate from the server to the 
+*   client to guarantee that prediction stays in sync, so no floats are used.
+*   
+*   If any part of the game code modifies this struct, it will result in a 
+*   prediction error of some degree.
+**/
 struct PlayerMoveState {
     uint32_t    type;
 
@@ -52,9 +55,9 @@ struct PlayerMoveState {
     float stepOffset;
 };
 
-//-----------------
-// PlayerMoveInput is part of each client user cmd.
-//-----------------
+/**
+*   PlayerMoveInput is part of each client user cmd.
+**/
 struct PlayerMoveInput {
     uint8_t msec;       // Duration of the command, in milliseconds
     vec3_t viewAngles;  // The final view angles for this command
@@ -64,9 +67,9 @@ struct PlayerMoveInput {
     uint8_t lightLevel; // Lightlevel.
 };
 
-//-----------------
-// ClientMoveCommand is sent to the server each client frame
-//-----------------
+/**
+*   ClientMoveCommand is sent to the server each client frame
+**/
 struct ClientMoveCommand {
     PlayerMoveInput input;  // the movement command
 
@@ -80,5 +83,3 @@ struct ClientMoveCommand {
         vec3_t error;               // The prediction error for this command
     } prediction;
 };
-
-#endif // #ifndef __SHARED__PMOVE_H__

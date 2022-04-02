@@ -1,3 +1,12 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ClientGame Movement and User Input handling interface implementation.
+*
+***/
 #include "../ClientGameLocals.h"
 
 #include "../Entities.h"

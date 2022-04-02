@@ -177,31 +177,28 @@ SET(HEADERS_GL
 #	Shared Folder.	
 #
 SET(SRC_SHARED
-	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/plane.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/vector3.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/Plane.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/Vector3.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Shared.cpp
 )
 SET(HEADERS_SHARED
-	# Container lib.
-	${CMAKE_SOURCE_DIR}/inc/Shared/Containers/IterableCArray.h # ../inc/Shared/Containers/IterableCArray.h
-
 	# Interfaces
 	${CMAKE_SOURCE_DIR}/inc/Shared/Interfaces/IClientGameExports.h
 	${CMAKE_SOURCE_DIR}/inc/Shared/Interfaces/IClientGameImports.h
 
 	# Math lib.
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/color.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/matrix3.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/matrix4.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/plane.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/rectangle.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/utilities.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/vector2.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/vector3.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/vector4.h
-	${CMAKE_SOURCE_DIR}/inc/Shared/Math/vector5.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Color.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Matrix3.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Matrix4.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Plane.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Rectangle.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Utilities.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Vector2.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Vector3.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Vector4.h
+	${CMAKE_SOURCE_DIR}/inc/Shared/Math/Vector5.h
 	
 	# Other shared lib functionalities.
 	${CMAKE_SOURCE_DIR}/inc/Shared/CLGame.h
