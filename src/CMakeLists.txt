@@ -75,7 +75,7 @@ SET(HEADERS_CLIENT
 	Client/UI/UI.h
 	Client/Sound/Sound.h
 	Client/Sound/QAL/Dynamic.h
-	Client/Sound/QAL/fixed.h
+	Client/Sound/QAL/Fixed.h
 )
 
 ###################### Server.
