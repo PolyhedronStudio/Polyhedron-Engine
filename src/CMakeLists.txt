@@ -180,11 +180,11 @@ include(../cmake/Shared.cmake)
 
 
 SET(SRC_SHARED
-	${PROJECT_SOURCE_DIR}/src/Shared/Math/Plane.cpp
-	${PROJECT_SOURCE_DIR}/src/Shared/Math/Vector3.cpp
+	${CMAKE_SOURCE_DIR}/src/Shared/Math/Plane.cpp
+	${CMAKE_SOURCE_DIR}/src/Shared/Math/Vector3.cpp
 
-	${PROJECT_SOURCE_DIR}/src/Shared/Math.cpp
-	${PROJECT_SOURCE_DIR}/src/Shared/Shared.cpp
+	${CMAKE_SOURCE_DIR}/src/Shared/Math.cpp
+	${CMAKE_SOURCE_DIR}/src/Shared/Shared.cpp
 )
 
 #
