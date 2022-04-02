@@ -176,7 +176,7 @@ SET(HEADERS_GL
 #	Shared Folder.	
 #
 
-include(${CMAKE_SOURCE_DIR}/cmake/Shared.cmake)
+include(../cmake/Shared.cmake)
 
 
 
