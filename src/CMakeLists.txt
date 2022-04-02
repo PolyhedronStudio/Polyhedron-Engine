@@ -179,6 +179,13 @@ SET(HEADERS_GL
 include(../cmake/Shared.cmake)
 
 
+SET(SRC_SHARED
+	${PROJECT_SOURCE_DIR}/src/Shared/Math/Plane.cpp
+	${PROJECT_SOURCE_DIR}/src/Shared/Math/Vector3.cpp
+
+	${PROJECT_SOURCE_DIR}/src/Shared/Math.cpp
+	${PROJECT_SOURCE_DIR}/src/Shared/Shared.cpp
+)
 
 #
 #	Unix
