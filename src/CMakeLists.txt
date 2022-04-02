@@ -17,7 +17,7 @@ SET(SRC_CLIENT
 	Client/Demo.cpp
 	Client/Download.cpp
 	Client/Entities.cpp
-	Client/input.cpp
+	Client/Input.cpp
 	Client/Keys.cpp
 	Client/Main.cpp
 	Client/Parse.cpp
