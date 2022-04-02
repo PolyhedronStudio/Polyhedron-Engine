@@ -1,14 +1,9 @@
 #include "ClientGameLocals.h"
 
 #include "Entities.h"
-#include "Main.h"
 #include "TemporaryEntities.h"
 
-// Export Interfaces.
-#include "Shared/Interfaces/IClientGameExports.h"
-
 // Export Implementations.
-#include "ClientGameExports.h"
 #include "Exports/Core.h"
 #include "Exports/Entities.h"
 #include "Exports/Media.h"
@@ -143,8 +138,6 @@ void ClientGameExports::ClientClearState() {
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameExports::ClientDeltaFrame() {
-    // that sets its color based on your health.
-
     // Run the entity prediction logic for the next frame.
     level.time = GameTime(cl->serverTime) + FRAMERATE_MS;
 
@@ -270,7 +263,7 @@ void ClientGameExports::ClientUpdateOrigin() {
 
     // Update the client's 3D Sound Spatialization Origin values. This is a nescessity for the game 
     // in order to properly play sound effects.
-    clgi.UpdateSoundSpatializationOrigin();
+    clgi.UpdateSoundSpatializationOrigin(viewCamera->GetViewOrigin(), viewCamera->GetForwardViewVector(), viewCamera->GetRightViewVector(), viewCamera->GetUpViewVector());
 }
 
 /**

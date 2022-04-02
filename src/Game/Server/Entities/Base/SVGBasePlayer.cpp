@@ -1388,7 +1388,7 @@ void SVGBasePlayer::CalculateViewOffset()
     if (bob > 6) {
         bob = 6.f;
     }
-    newViewOffset.z += bob;
+    //newViewOffset.z += bob;
 
     // Add kick offset
     newViewOffset += client->kickOrigin;

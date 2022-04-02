@@ -315,7 +315,7 @@ class IClientGameImportMemory {
 class IClientGameImportMovement {
 	// Called when the movement command needs to be build for the given
 	// client networking frame.
-	virtual void BuildFrameMovementCommand(int32_t msec) = 0;
+	virtual void BuildFrameMovementCommand(uint64_t msec) = 0;
 	// Finished off building the actual movement vector before sending it
 	// to server.
 	virtual void FinalizeFrameMovementCommand() = 0;

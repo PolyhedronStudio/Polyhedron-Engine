@@ -1,6 +1,5 @@
 // Client Game.
 #include "../ClientGameLocals.h"
-#include "../Main.h"
 
 // ChatHUD.
 #include "KeyBinding.h"

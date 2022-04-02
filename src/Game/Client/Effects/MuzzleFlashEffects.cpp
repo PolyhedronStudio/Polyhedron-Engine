@@ -9,7 +9,6 @@
 ***/
 #include "../ClientGameLocals.h"
 
-#include "../Main.h"
 #include "../TemporaryEntities.h"
 
 #include "Shared/Interfaces/IClientGameExports.h"

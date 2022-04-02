@@ -253,11 +253,11 @@ struct ClientState {
     //! Determines whether to send the user command packet asap, and preferably, NOW.
     qboolean    sendPacketNow = 0;
 
-    //! Actual current client user command.
+    //! Actual current client move command.
     ClientMoveCommand    moveCommand = {};
-    //! Actual current client user command list.
+    //! Actual current client move command list.
     ClientMoveCommand    clientUserCommands[CMD_BACKUP] = {};    // each mesage will send several old clientUserCommands
-    //! Current command number.
+    //! Current client move command number.
     uint64_t     currentClientCommandNumber = 0;
     //! History book of time sent, received, and command number.
     ClientUserCommandHistory clientCommandHistory[CMD_BACKUP] = {};
@@ -362,9 +362,6 @@ struct ClientState {
     //! UNUSED: LightLevel, server has no concept of where rays are so... not done.
     int32_t lightLevel  = 0;
 
-    //! Updated in ClientGameExports::ClientUpdateOrigin.
-    vec3_t v_forward = vec3_zero(), v_right = vec3_zero(), v_up = vec3_zero();
-
     qboolean thirdPersonView = false;
 
     //! Predicted values, used for smooth player entity movement in thirdperson view
@@ -403,7 +400,6 @@ struct ClientState {
     uint32_t replyTime = 0;
     uint32_t replyDelta = 0;
 #endif
-    vec3_t deltaAngles = vec3_zero();
 
 
     /**

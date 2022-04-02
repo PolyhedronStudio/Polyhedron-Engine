@@ -167,7 +167,7 @@ class ClientGameImportMemory : public IClientGameImportMouse {
 // MOVEMENT implementation.
 //---------------------------------------------------------------------
 class ClientGameImportMovement : public IClientGameImportMovement {
-	void BuildFrameMovementCommand(int32_t msec);
+	void BuildFrameMovementCommand(uint64_t msec);
 	void FinalizeFrameMovementCommand();
 };
 

@@ -144,7 +144,7 @@ public:
     *   @brief  Called when the movement command needs to be build for the given
     *           client networking frame.
     **/
-    virtual void BuildFrameMovementCommand(int32_t miliseconds) = 0;
+    virtual void BuildFrameMovementCommand(uint64_t miliseconds) = 0;
     /**
     *   @brief  Finalize the movement user command before sending it to server.
     **/

@@ -159,23 +159,10 @@ void V_RenderView(void)
     CL_GM_PostRenderView();
 }
 
-/*
-=============
-V_Viewpos_f
-=============
-*/
-static void V_Viewpos_f(void)
-{
-    Com_Printf("(%i %i %i) : %i\n", (int)cl.refdef.vieworg[0],
-               (int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2],
-               (int)cl.refdef.viewAngles[vec3_t::Yaw]);
-}
-
 static const cmdreg_t v_cmds[] = {
     { "gun_next", V_Gun_Next_f },
     { "gun_prev", V_Gun_Prev_f },
     { "gun_model", V_Gun_Model_f },
-    { "viewpos", V_Viewpos_f },
     { NULL }
 };
 

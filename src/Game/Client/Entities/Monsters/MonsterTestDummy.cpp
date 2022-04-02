@@ -8,7 +8,6 @@
 * 
 ***/
 #include "../../ClientGameLocals.h"
-#include "../../Main.h"
 
 // Base Entity.
 #include "../Base/CLGBaseEntity.h"

@@ -33,8 +33,11 @@
 // Shared Game "Framework".
 #include "../Shared/SharedGame.h"
 
-// Main Client Game Headers.
-#include "Main.h"
+// Client Game Exports Interface.
+#include "Shared/Interfaces/IClientGameExports.h"
+
+// Client Game Exports Implementation.
+#include "ClientGameExports.h"
 
 //// Temporary.
 #include "LevelLocals.h"
@@ -42,6 +45,43 @@ extern LevelLocals level;
 // END OF TEMPORARY.
 
 
+
+class ClientGameExports;
+
+//! Contains the function pointers being passed in from the engine.
+extern ClientGameImport clgi;
+//! Static export variable, lives as long as the client game dll lives.
+extern ClientGameExports* clge;
+
+/**
+*	@brief	Common print text to screen function.
+**/
+void Com_Print(const char* fmt, ...);
+
+/**
+*	@brief	Common print debug text to screen function.
+**/
+void Com_DPrint(const char* fmt, ...);
+
+/**
+*	@brief	Common print warning text to screen function.
+**/
+void Com_WPrint(const char* fmt, ...);
+
+/**
+*	@brief	Common print error text to screen function.
+**/
+void Com_EPrint(const char* fmt, ...);
+
+/**
+*	@brief	Common print specific error type and text to screen function.
+**/
+void Com_Error(int32_t errorType, const char* fmt, ...);
+
+/**
+*	@brief	Common print text type of your choice to screen function.
+**/
+void Com_LPrintf(int32_t printType, const char* fmt, ...);
 
 
 /**

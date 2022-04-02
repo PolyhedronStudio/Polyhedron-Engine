@@ -10,10 +10,6 @@
 // ClientGame Locals.
 #include "../ClientGameLocals.h"
 
-// Exports interfaces.
-#include "Shared/Interfaces/IClientGameExports.h"
-#include "../ClientGameExports.h"
-
 // Exports classes.
 #include "../Exports/Entities.h"
 #include "../Exports/View.h"
@@ -58,20 +54,20 @@ void ViewCamera::SetupThirdpersonViewProjection() {
     }
 
     // Calculate focus point.
-    vec3_t focus = vec3_fmaf(viewOrigin, 512, cl->v_forward);
+    vec3_t focus = vec3_fmaf(viewOrigin, 512, viewForward);
 
     // Add an additional unit to the z value.
     viewOrigin.z += 8.f;
     viewAngles[vec3_t::Pitch] *= 0.5f;
-    AngleVectors(viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
+    AngleVectors(viewAngles, &viewForward, &viewRight, &viewUp);
 
     // Calculate view origin to use based on thirdperson range and angle.
     const float angle = Radians(cl_thirdperson_angle->value);
     const float range = cl_thirdperson_range->value;
     const float fscale = std::cosf(angle);
     const float rscale = std::sinf(angle);
-    viewOrigin = vec3_fmaf(viewOrigin, -range * fscale, cl->v_forward);
-    viewOrigin = vec3_fmaf(viewOrigin, -range * rscale, cl->v_right);
+    viewOrigin = vec3_fmaf(viewOrigin, -range * fscale, viewForward);
+    viewOrigin = vec3_fmaf(viewOrigin, -range * rscale, viewRight);
 
     // TODO: Uncomment when I get back to work on thirdperson camera.
     // This is the start of having a camera that is nice third person wise.

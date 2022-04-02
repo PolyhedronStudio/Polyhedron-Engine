@@ -7,11 +7,14 @@
 *	Contains the implementations for debug rendering client information.
 *
 ***/
+// ClientGameLocals.
 #include "ClientGameLocals.h"
 
-#include "Main.h"
-
+// Used for debug rendering.
 #include "Effects/Particles.h"
+
+
+
 #ifdef _DEBUG
 // Static array which should be large enough to contain at least all
 

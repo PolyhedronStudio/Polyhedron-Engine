@@ -18,14 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Core.
 #include "../ClientGameLocals.h"
-#include "../Main.h"
 #include "../Exports/Entities.h"
 #include "../Entities/IClientGameEntity.h"
-
-// Export classes.
-#include "Shared/Interfaces/IClientGameExports.h"
-#include "../ClientGameExports.h"
-
 
 //#include "../Utilities.h"
 

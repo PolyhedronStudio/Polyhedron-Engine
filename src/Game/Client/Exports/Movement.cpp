@@ -1,16 +1,13 @@
 #include "../ClientGameLocals.h"
 
 #include "../Entities.h"
-#include "../Main.h"
 #include "../TemporaryEntities.h"
 
-// Exports Interface.
-#include "Shared/Interfaces/IClientGameExports.h"
-#include "../ClientGameExports.h"
-
-// Movement.
+// Exports Interfaces.
 #include "Movement.h"
+#include "View.h"
 
+// KeyBinding Object.
 #include "../Input/KeyBinding.h"
 
 /**
@@ -68,7 +65,10 @@ int32_t ClientGameMovement::in_impulse;
 /**
 *   @brief 
 **/
-void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
+void ClientGameMovement::BuildFrameMovementCommand(uint64_t miliseconds) {
+    // Assign view angles to move command user input.
+    ViewCamera *viewCamera = clge->view->GetViewCamera();
+
     // Reset for this frame.
     cl->localMove = vec3_zero();
 
@@ -88,7 +88,7 @@ void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
 
     // Allow mice to add to the move
     MouseMove();
-
+    
     // Add accumulated mouse forward/side movement
     cl->localMove[0] += cl->mouseMove[0];
     cl->localMove[1] += cl->mouseMove[1];
@@ -99,10 +99,7 @@ void ClientGameMovement::BuildFrameMovementCommand(int32_t miliseconds) {
     // Clamp the pitch.
     ClampPitch();
 
-    // Assign view angles to move command user input.
-    cl->moveCommand.input.viewAngles[0] = cl->viewAngles[0];
-    cl->moveCommand.input.viewAngles[1] = cl->viewAngles[1];
-    cl->moveCommand.input.viewAngles[2] = cl->viewAngles[2];
+    cl->moveCommand.input.viewAngles = cl->viewAngles; //viewCamera->GetViewAngles();
 }
 
 /**
@@ -197,6 +194,9 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
     // Save this command off for client move prediction.
     cl->currentClientCommandNumber++;
     cl->clientUserCommands[cl->currentClientCommandNumber & CMD_MASK] = cl->moveCommand;
+    
+    // Clear the pending cmd for the next frame.
+    cl->moveCommand = {};
 
     // Clear keys that need clearing for the next frame.
     in_right.ClearKeyState();
@@ -213,9 +213,6 @@ void ClientGameMovement::FinalizeFrameMovementCommand() {
 
     in_lookup.ClearKeyState();
     in_lookdown.ClearKeyState();
-
-    // Clear the pending cmd for the next frame.
-    cl->moveCommand = {};
 }
 
 /**
@@ -270,7 +267,7 @@ void ClientGameMovement::MouseMove() {
 /**
 *   @brief  Moves the local angle positions
 **/
-void ClientGameMovement::AdjustAngles(int32_t miliseconds)
+void ClientGameMovement::AdjustAngles(uint64_t miliseconds)
 {
     float speed;
 

@@ -47,10 +47,13 @@ SET(HEADERS_SHAREDGAME
 if (CONFIG_BUILD_CL_GAME)
 	ADD_LIBRARY(clgame_sharedgame OBJECT ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 	TARGET_COMPILE_DEFINITIONS(clgame_sharedgame PUBLIC "-DSHAREDGAME_CLIENTGAME=1")
-	TARGET_COMPILE_OPTIONS(clgame_sharedgame PUBLIC /wd4005 /wd4996)
-
-	TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PRIVATE ../../../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PRIVATE ../../../inc)
+
+	# Win32 Specifics.
+	if (WIN32)
+		TARGET_COMPILE_OPTIONS(clgame_sharedgame PUBLIC /wd4005 /wd4996)
+		TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PRIVATE ../../../VC/inc)
+	endif()	
 endif()
 
 #
@@ -59,23 +62,18 @@ endif()
 if (CONFIG_BUILD_SV_GAME)
 	ADD_LIBRARY(svgame_sharedgame OBJECT ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
 	TARGET_COMPILE_DEFINITIONS(svgame_sharedgame PUBLIC "-DSHAREDGAME_SERVERGAME=1")
-	TARGET_COMPILE_OPTIONS(svgame_sharedgame PUBLIC /wd4005 /wd4996)
-
-	TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PRIVATE ../../../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PRIVATE ../../../inc)
+
+	# Win32 Specifics.
+	if (WIN32)
+		TARGET_COMPILE_OPTIONS(svgame_sharedgame PUBLIC /wd4005 /wd4996)
+		TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PRIVATE ../../../VC/inc)
+	endif()
+	
 endif()
 
-
-#add_library(svgame_sharedgame OBJECT ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-#target_compile_definitions(svgame_sharedgame PUBLIC SHAREDGAME_SERVERGAME=1 SHAREDGAME_CLIENTGAME=0)
-#TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PUBLIC ${CMAKE_SOURCE_DIR}/../../inc)
-#TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PUBLIC ${CMAKE_SOURCE_DIR}/../../VC/inc)
-#target_include_directories(svgame_sharedgame PUBLIC ${CMAKE_SOURCE_DIR}/../)
-#target_compile_options(svgame_sharedgame PUBLIC /wd4005 /wd4996)
-
-#add_library(clgame_sharedgame OBJECT ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-#target_compile_definitions(clgame_sharedgame PUBLIC SHAREDGAME_SERVERGAME=0 SHAREDGAME_CLIENTGAME=1)
-#TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PUBLIC ${CMAKE_SOURCE_DIR}/../../inc)
-#TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PUBLIC ${CMAKE_SOURCE_DIR}/../VC/inc)
-#target_include_directories(clgame_sharedgame PUBLIC ${CMAKE_SOURCE_DIR}/../)
-#target_compile_options(clgame_sharedgame PUBLIC /wd4005 /wd4996)
+#
+# Source Groups
+#
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHAREDGAME} )
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SHAREDGAME} )

@@ -10,14 +10,16 @@
 #include "../ClientGameLocals.h"
 
 #include "../Entities.h"
-#include "../Main.h"
 #include "../TemporaryEntities.h"
 
-#include "Shared/Interfaces/IClientGameExports.h"
-#include "../ClientGameExports.h"
+// ChatHUD Objects.
 #include "../HUD/ChatHUD.h"
+
+// Effects.
 #include "../Effects/LightStyles.h"
 #include "../Effects/MuzzleFlashEffects.h"
+
+// Exports Implementations.
 #include "Media.h"
 #include "Screen.h"
 #include "ServerMessage.h"

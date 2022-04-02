@@ -8,10 +8,11 @@
 * 
 ***/
 #include "../../ClientGameLocals.h"
-#include "../../Main.h"
 
 #include "../Particles.h"
 #include "../ParticleEffects.h"
+
+#include "../../Exports/View.h"
 
 /**
 *   @brief  'Heat Beam' like particle effect.
@@ -32,17 +33,18 @@ void ParticleEffects::HeatBeam(const vec3_t &start, const vec3_t &forward) {
     float       variance;
     vec3_t      end;
 
-    VectorMA(start, 4096, forward, end);
+    ViewCamera *viewCamera = clge->view->GetViewCamera();
+    end = vec3_fmaf(start, 4096, forward);
 
-    VectorCopy(start, move);
-    VectorSubtract(end, start, vec);
-    len = VectorNormalize(vec);
+    move = start;
+    vec = end - start;
+    vec3_normalize_length(vec, len);
 
     ltime = (float)cl->time / 1000.0;
     start_pt = fmod(ltime * 96.0, step);
-    VectorMA(move, start_pt, vec, move);
+    move = vec3_fmaf(move, start_pt, vec);
 
-    VectorScale(vec, step, vec);
+    vec = vec3_scale(vec, step);
 
     rstep = M_PI / 10.0;
     for (i = start_pt; i < len; i += step) {
@@ -55,19 +57,19 @@ void ParticleEffects::HeatBeam(const vec3_t &start, const vec3_t &forward) {
                 return;
 
             p->time = cl->time;
-            VectorClear(p->acceleration);
+            p->acceleration = vec3_zero();
             variance = 0.5;
             c = std::cosf(rot) * variance;
             s = std::sinf(rot) * variance;
 
             // trim it so it looks like it's starting at the origin
             if (i < 10) {
-                VectorScale(cl->v_right, c * (i / 10.0), dir);
-                VectorMA(dir, s * (i / 10.0), cl->v_up, dir);
+                dir = vec3_scale(viewCamera->GetRightViewVector(), c * (i / 10.0));
+                dir = vec3_fmaf(dir, s * (i / 10.0), viewCamera->GetUpViewVector());
             }
             else {
-                VectorScale(cl->v_right, c, dir);
-                VectorMA(dir, s, cl->v_up, dir);
+                dir = vec3_scale(viewCamera->GetRightViewVector(), c);
+                dir = vec3_fmaf(dir, s, viewCamera->GetUpViewVector());
             }
 
             p->alpha = 0.5;
@@ -79,6 +81,6 @@ void ParticleEffects::HeatBeam(const vec3_t &start, const vec3_t &forward) {
             }
         }
 
-        VectorAdd(move, vec, move);
+        move += vec;
     }
 }

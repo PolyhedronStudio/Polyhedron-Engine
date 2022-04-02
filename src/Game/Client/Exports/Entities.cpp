@@ -13,12 +13,9 @@
 // Base Client Game Functionality.
 #include "../Debug.h"
 #include "../Entities.h"
-#include "../Main.h"
 #include "../TemporaryEntities.h"
 
 // Export classes.
-#include "Shared/Interfaces/IClientGameExports.h"
-#include "../ClientGameExports.h"
 #include "Entities.h"
 #include "View.h"
 
@@ -852,6 +849,13 @@ void ClientGameEntities::AddViewEntities() {
         return;
     }
 
+    // Acquire access to View Camera.
+    ViewCamera *viewCamera = clge->view->GetViewCamera();
+
+    // View Origin and Angles.
+    const vec3_t viewOrigin = viewCamera->GetViewOrigin();
+    const vec3_t viewAngles = viewCamera->GetViewAngles();
+
     // Find states to between frames to interpolate between.
     PlayerState *currentPlayerState = &cl->frame.playerState;
     PlayerState *oldPlayerState= &cl->oldframe.playerState;
@@ -885,16 +889,16 @@ void ClientGameEntities::AddViewEntities() {
 
     // Set up gunRenderEntity position
     for (int32_t i = 0; i < 3; i++) {
-        gunRenderEntity.origin[i] = cl->refdef.vieworg[i] + oldPlayerState->gunOffset[i] +
+        gunRenderEntity.origin[i] = viewOrigin[i] + oldPlayerState->gunOffset[i] +
             cl->lerpFraction * (currentPlayerState->gunOffset[i] - oldPlayerState->gunOffset[i]);
-        gunRenderEntity.angles = cl->refdef.viewAngles + vec3_mix_euler(oldPlayerState->gunAngles,
+        gunRenderEntity.angles = viewAngles + vec3_mix_euler(oldPlayerState->gunAngles,
                                                             currentPlayerState->gunAngles, cl->lerpFraction);
     }
 
     // Adjust for high fov.
     if (currentPlayerState->fov > 90) {
         vec_t ofs = (90 - currentPlayerState->fov) * 0.2f;
-        gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, ofs, cl->v_forward);
+        gunRenderEntity.origin = vec3_fmaf(gunRenderEntity.origin, ofs, viewCamera->GetForwardViewVector());
     }
 
     // Adjust the gunRenderEntity origin so that the gunRenderEntity doesn't intersect with walls
@@ -906,7 +910,7 @@ void ClientGameEntities::AddViewEntities() {
         constexpr float gun_up = -5.f;
         static vec3_t mins = { -4, -2, -12 }, maxs = { 4, 8, 12 };
 
-        AngleVectors(cl->refdef.viewAngles, &view_dir, &right_dir, &up_dir);
+        vec3_vectors(viewAngles, &view_dir, &right_dir, &up_dir);
         gun_real_pos = vec3_fmaf(gunRenderEntity.origin, gun_right, right_dir);
         gun_real_pos = vec3_fmaf(gun_real_pos, gun_up, up_dir);
         gun_tip = vec3_fmaf(gun_real_pos, gun_length, view_dir);

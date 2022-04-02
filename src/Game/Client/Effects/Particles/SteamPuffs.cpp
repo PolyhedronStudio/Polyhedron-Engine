@@ -8,7 +8,6 @@
 * 
 ***/
 #include "../../ClientGameLocals.h"
-#include "../../Main.h"
 
 #include "../Particles.h"
 #include "../ParticleEffects.h"

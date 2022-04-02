@@ -1,3 +1,7 @@
+#
+#	ServerGame Module.
+#
+if (CONFIG_BUILD_SV_GAME)
 # Server game DLL
 # Throw all sources in here, but group them elsewhere
 SET(SRC_SVGAME 
@@ -211,7 +215,30 @@ ADD_LIBRARY(svgame SHARED SVGame.def ${SRC_SVGAME} ${HEADERS_SVGAME} ${HEADERS_S
 # Set the flag for SharedGame to build with ServerGame compatability in mind.
 ADD_DEFINITIONS("-DSHAREDGAME_SERVERGAME=1")
 
+# Include directories.
+TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../../../inc)
 # Include SharedGame Framework.
 TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE Game/Shared)
 
+# Source Groups.
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SVGAME} )
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SVGAME} )
 
+# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
+SET_TARGET_PROPERTIES(svgame
+	PROPERTIES
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	PREFIX ""
+	DEBUG_POSTFIX ""
+)
+
+endif()

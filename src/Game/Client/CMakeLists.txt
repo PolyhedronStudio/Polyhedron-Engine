@@ -1,3 +1,8 @@
+#
+#	ClientGame Module.
+#
+if (CONFIG_BUILD_CL_GAME)
+
 SET(SRC_CLGAME
 	ClientGameExports.cpp
 	ClientGameImports.cpp
@@ -46,9 +51,9 @@ SET(SRC_CLGAME
 
 	View/ViewCamera.cpp
 
+	ClientGameLocals.cpp
 	Debug.cpp
 	Entities.cpp
-	Main.cpp
 	TemporaryEntities.cpp
 
 	#CLGame.def
@@ -90,7 +95,6 @@ SET(HEADERS_CLGAME
 	ClientGameLocals.h
 	Debug.h
 	Entities.h
-	Main.h
 	TemporaryEntities.h
 )
 
@@ -101,5 +105,30 @@ ADD_LIBRARY(clgame SHARED CLGame.def ${SRC_CLGAME} ${HEADERS_CLGAME} ${HEADERS_S
 # Set the flag for SharedGame to build with ClientGame compatability in mind.
 ADD_DEFINITIONS("-DSHAREDGAME_CLIENTGAME=1")
 
+# Include directories.
+TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../../../inc)
 # Include SharedGame Framework.
 TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE Game/Shared)
+
+# Source Groups.
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_CLGAME} )
+SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_CLGAME} )
+
+# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
+SET_TARGET_PROPERTIES(clgame
+	PROPERTIES
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
+	PREFIX ""
+	DEBUG_POSTFIX ""
+)
+
+endif()

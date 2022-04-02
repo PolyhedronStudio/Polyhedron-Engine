@@ -19,9 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Core.
 #include "../ClientGameLocals.h"
-#include "../Main.h"
 
-#include "../ClientGameExports.h"
+// Exports Implementations.
 #include "../Exports/Prediction.h"
 
 // Base Entity.

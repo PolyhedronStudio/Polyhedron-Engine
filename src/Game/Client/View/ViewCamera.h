@@ -59,7 +59,6 @@ public:
     void SetViewOrigin(const vec3_t& viewOrigin) {
         this->viewOrigin = viewOrigin;
     }
-    
     /**
     *   @return View angles of ViewCamera.
     **/
@@ -70,7 +69,6 @@ public:
     void SetViewAngles(const vec3_t& viewAngles) {
         this->viewAngles = viewAngles;
     }
-
     /**
     *   @return View delta angles of ViewCamera.
     **/
@@ -81,6 +79,19 @@ public:
     void SetViewDeltaAngles(const vec3_t& viewAngles) {
         this->viewDeltaAngles = viewAngles;
     }
+
+    /**
+    *   @return The last calculated Forward vector for the View Camera's view. (Based on ViewAngles).
+    **/
+    inline const vec3_t &GetForwardViewVector() { return viewForward; }
+    /**
+    *   @return The last calculated Right vector for the View Camera's view. (Based on ViewAngles).
+    **/
+    inline const vec3_t &GetRightViewVector() { return viewRight; }
+    /**
+    *   @return The last calculated Up vector for the View Camera's view. (Based on ViewAngles).
+    **/
+    inline const vec3_t &GetUpViewVector() { return viewUp; }
 
 private:
     /**
@@ -104,7 +115,11 @@ private:
 
     //! View Origin.
     vec3_t viewOrigin   = vec3_zero();
-    //! View Angles.
+    //! The client maintains its own idea of view angles, which are
+    //! sent to the server each frame.  It is cleared to 0 upon entering each level.
+    //! the server sends a delta each frame which is added to the locally
+    //! tracked view angles to account for standing on rotating objects,
+    //! and teleport direction changes.
     vec3_t viewAngles   = vec3_zero();
     //! View Delta Angles.
     vec3_t viewDeltaAngles = vec3_zero();

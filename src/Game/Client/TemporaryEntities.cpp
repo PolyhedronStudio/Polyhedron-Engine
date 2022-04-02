@@ -10,11 +10,9 @@
 #include "ClientGameLocals.h"
 
 #include "Debug.h"
-#include "Main.h"
 #include "TemporaryEntities.h"
 
 // Exports.
-#include "ClientGameExports.h"
 #include "Exports/View.h"
 
 #include "Effects/DynamicLights.h"
@@ -672,6 +670,9 @@ static void CLG_AddPlayerBeams(void)
 	else
 		hand_multiplier = 1;
 
+	// Acquire access to the view camera.
+	ViewCamera *viewCamera = clge->view->GetViewCamera();
+
 	// update beams
 	for (i = 0, b = clg_playerbeams; i < MAX_BEAMS; i++, b++) {
 		if (!b->model || b->endTime < cl->time)
@@ -687,23 +688,24 @@ static void CLG_AddPlayerBeams(void)
 				b->start[j] = cl->refdef.vieworg[j] + ops->gunOffset[j] +
 				cl->lerpFraction * (ps->gunOffset[j] - ops->gunOffset[j]);
 
-			VectorMA(b->start, (hand_multiplier * b->offset[0]), cl->v_right, org);
-			VectorMA(org, b->offset[1], cl->v_forward, org);
-			VectorMA(org, b->offset[2], cl->v_up, org);
-			if (info_hand->integer == 2)
-				VectorMA(org, -1, cl->v_up, org);
+			org = vec3_fmaf(b->start, (hand_multiplier * b->offset[0]), viewCamera->GetRightViewVector());
+			org = vec3_fmaf(org, b->offset[1], viewCamera->GetForwardViewVector());
+			org = vec3_fmaf(org, b->offset[2], viewCamera->GetUpViewVector());
+			if (info_hand->integer == 2) {
+				org = vec3_fmaf(org, -1, viewCamera->GetUpViewVector());
+			}
 
 			// calculate pitch and yaw
 			VectorSubtract(b->end, org, dist);
 
 			// FIXME: don't add offset twice?
 			d = VectorLength(dist);
-			dist = vec3_scale(cl->v_forward, d);
-			dist = vec3_fmaf(dist, (hand_multiplier * b->offset[0]), cl->v_right);
-			dist = vec3_fmaf(dist, b->offset[1], cl->v_forward);
-			dist = vec3_fmaf(dist, b->offset[2], cl->v_up);
+			dist = vec3_scale(viewCamera->GetForwardViewVector(), d);
+			dist = vec3_fmaf(dist, (hand_multiplier * b->offset[0]), viewCamera->GetRightViewVector());
+			dist = vec3_fmaf(dist, b->offset[1], viewCamera->GetForwardViewVector());
+			dist = vec3_fmaf(dist, b->offset[2], viewCamera->GetUpViewVector());
 			if (info_hand->integer == 2) {
-				org = vec3_fmaf(org, -1, cl->v_up);
+				org = vec3_fmaf(org, -1, viewCamera->GetUpViewVector());
 			}
 				
 

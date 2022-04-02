@@ -15,7 +15,7 @@
 
 
 // Shared includes.
-#include <Shared/Shared.h>
+#include "Shared/Shared.h"
 #include "Shared/List.h"
 
 // Because we define the full size ServerClient and Entity structures in this file

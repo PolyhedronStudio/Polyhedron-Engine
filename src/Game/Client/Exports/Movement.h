@@ -28,14 +28,18 @@ public:
     *   @brief  Called when the movement command needs to be build for the given
     *           client networking frame.
     **/
-    void BuildFrameMovementCommand(int32_t miliseconds) final;
+    void BuildFrameMovementCommand(uint64_t miliseconds) final;
 
     /**
     *   @brief  Finalize the movement user command before sending it to server.
     **/
     void FinalizeFrameMovementCommand() final;
 
-
+        /**
+    *   @brief  Each frame we sample the user input and configure the ClientMoveCommand
+    *           which is then sent to the server.
+    **/
+    ClientMoveCommand moveCommand = {};
 private:
     /**
     *   @brief  Register input messages and binds them to a callback function.
@@ -53,7 +57,7 @@ private:
     /**
     *   @brief  Moves the local angle positions
     **/
-    void AdjustAngles(int32_t miliseconds);
+    void AdjustAngles(uint64_t miliseconds);
 
     /**
     *   @brief  Build and return the intended movement vector
@@ -73,6 +77,8 @@ private:
 
 
 private:
+
+
     /**
     *   Player Input Key Binds.
     **/

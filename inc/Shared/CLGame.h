@@ -226,7 +226,7 @@ extern "C" {
         // Updates the client's audio position values to the current
         // cl.refdef.vieworg, cl->v_forward, cl->v_right and cl->v_up
         // values.
-        void            (*UpdateSoundSpatializationOrigin) (void);
+        void            (*UpdateSoundSpatializationOrigin) (const vec3_t &viewOrigin, const vec3_t &viewForward, const vec3_t &viewRight, const vec3_t &viewUp);
 
         //
         // Client state.

@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 3.8)
-
 ###############################################################################
 ##
 ##			SOURCE AND HEADER FILE LISTS
@@ -134,14 +132,14 @@ SET(HEADERS_COMMON
 #SET(SRC_FORMAT
 #)
 SET(HEADERS_COMMON
-	../inc/Format/Bsp.h
-	../inc/Format/Iqm.h
-	../inc/Format/Md2.h
-	../inc/Format/Md3.h
-	../inc/Format/Pak.h
-	../inc/Format/Pcx.h
-	../inc/Format/Sp2.h
-	../inc/Format/Wal.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Bsp.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Iqm.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Md2.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Md3.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Pak.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Pcx.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Sp2.h
+	${CMAKE_SOURCE_DIR}/inc/Format/Wal.h
 )
 
 ###################### Refresh.
@@ -183,7 +181,7 @@ SET(SRC_SHARED
 	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math/vector3.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Math.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Shared/shared.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Shared/Shared.cpp
 )
 SET(HEADERS_SHARED
 	# Container lib.
@@ -431,14 +429,12 @@ if (CONFIG_BUILD_SV_GAME)
 endif()
 
 
-
 #
 #	ClientGame Module
 #
 if (CONFIG_BUILD_CL_GAME)
 	add_subdirectory(Game/Client)
 endif()
-
 
 
 #
@@ -594,21 +590,18 @@ SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SERVER})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SERVER})
 
 # Source and header groups
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SVGAME} )
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SVGAME} )
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHAREDGAME} )
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SHAREDGAME} )
-
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_REFRESH} ${SRC_VKPT})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_VKPT})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHADERS})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHARED})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SHARED})
+if (WIN32)
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_WINDOWS})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_WINDOWS})
+else()
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_UNIX})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_UNIX})
-
+endif()
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES client/null.cpp )
 
 
@@ -633,8 +626,6 @@ IF (WIN32)
 	# macro redefinition, deprecation
 	target_compile_options(client PRIVATE /wd4005 /wd4996)
 	target_compile_options(server PRIVATE /wd4005 /wd4996)
-	target_compile_options(svgame PRIVATE /wd4005 /wd4996)
-	target_compile_options(clgame PRIVATE /wd4005 /wd4996)
 
     ## Group the resource files too, so they don't end up in the ugly "Source Files" folder in VS
     SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES 
@@ -680,57 +671,3 @@ SET_TARGET_PROPERTIES(server
     RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin"
     DEBUG_POSTFIX ""
 )
-
-
-
-#
-#	ClientGame Build Configuration.
-#
-if (CONFIG_BUILD_CL_GAME)
-	# Include directories.
-	TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../inc)
-
-	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-	SET_TARGET_PROPERTIES(clgame
-		PROPERTIES
-		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		PREFIX ""
-		DEBUG_POSTFIX ""
-	)
-endif()
-
-
-
-#
-#	ServerGame Build Configuration.
-#
-if (CONFIG_BUILD_SV_GAME)
-	# Include directories.
-	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)
-
-	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-	SET_TARGET_PROPERTIES(svgame
-		PROPERTIES
-		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		PREFIX ""
-		DEBUG_POSTFIX ""
-	)
-endif()

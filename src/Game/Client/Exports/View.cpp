@@ -10,15 +10,14 @@
 #include "../ClientGameLocals.h"
 
 #include "../Entities.h"
-#include "../Main.h"
 #include "../TemporaryEntities.h"
 
-#include "Shared/Interfaces/IClientGameExports.h"
-#include "../ClientGameExports.h"
-
+// Effects.
 #include "../Effects/DynamicLights.h"
 #include "../Effects/LightStyles.h"
 #include "../Effects/Particles.h"
+
+// Exports.
 #include "Entities.h"
 #include "View.h"
 
@@ -71,8 +70,8 @@ void ClientGameView::RenderView() {
 #endif
 
     // Set view origin and angles to that of our view camera.
-    cl->refdef.vieworg = viewCamera.GetViewOrigin();
-    cl->refdef.viewAngles = viewCamera.GetViewAngles();
+    cl->refdef.vieworg      = viewCamera.GetViewOrigin();
+    cl->refdef.viewAngles   = viewCamera.GetViewAngles();
 
     // Last but not least, pass our array over to the client.
     cl->refdef.num_entities = num_renderEntities;
@@ -138,90 +137,6 @@ firstpersonview:
 }
 
 /**
-*   @brief  Sets up a firstperson view mode.
-**/
-void ClientGameView::SetupFirstpersonView() {
-    // If kickangles are enabled, lerp them and add to view angles.
-    if (cl_kickangles->integer) {
-        PlayerState *playerState = &cl->frame.playerState;
-        PlayerState *oldPlayerState = &cl->oldframe.playerState;
-
-        // Lerp first.
-        double lerp = cl->lerpFraction;
-        vec3_t kickAngles = vec3_mix_euler(oldPlayerState->kickAngles, playerState->kickAngles, cl->lerpFraction);
-
-        // Add afterwards.
-        viewCamera.SetViewAngles(viewCamera.GetViewAngles() + kickAngles);
-        //cl->refdef.viewAngles += kickAngles;
-    }
-
-    // Add the first person view entities.
-    clge->entities->AddViewEntities();
-
-    // Let the client state be known we aren't in thirdperson mode.
-    cl->thirdPersonView = false;
-}
-
-/**
-*   @brief  Sets up a thirdperson view mode.
-**/
-void ClientGameView::SetupThirdpersonView() {
-    // Const vec3_t mins and maxs for box tracing the camera with.
-    static const vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
-
-    // In case of death, set a specific view angle that looks nice.
-    if (cl->frame.playerState.stats[PlayerStats::Health] <= 0) {
-        cl->refdef.viewAngles[vec3_t::Roll] = 0;
-        cl->refdef.viewAngles[vec3_t::Pitch] = 10;
-    }
-
-    // Calculate focus point.
-    vec3_t focus = vec3_fmaf(cl->refdef.vieworg, 512, cl->v_forward);
-    //VectorMA(cl->refdef.vieworg, 512, cl->v_forward, focus);
-
-    // Add an additional unit to the z value.
-    cl->refdef.vieworg[2] += 8;
-    cl->refdef.viewAngles[vec3_t::Pitch] *= 0.5f;
-    vec3_vectors(cl->refdef.viewAngles, &cl->v_forward, &cl->v_right, &cl->v_up);
-
-    // Calculate view origin to use based on thirdperson range and angle.
-    float angle = Radians(cl_thirdperson_angle->value);
-    float range = cl_thirdperson_range->value;
-    float fscale = std::cosf(angle);
-    float rscale = std::sinf(angle);
-    cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, -range * fscale, cl->v_forward);
-    cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, -range * rscale, cl->v_right);
-
-    // TODO: Uncomment when I get back to work on thirdperson camera.
-    // This is the start of having a camera that is nice third person wise.
-    // 
-    // Likely needs a sphere instead of box collide in order to work properly though.
-    // Experimenting with a side third person view.
-    //cl->refdef.vieworg = vec3_fmaf(cl->refdef.vieworg, 24, cl->v_right);
-    
-    // Execute a box trace to see if we collide with the world.
-    TraceResult trace = clgi.Trace(cl->playerEntityOrigin, vec3_zero(), vec3_zero(), cl->refdef.vieworg, nullptr, BrushContentsMask::PlayerSolid);
-
-    if (trace.fraction != 1.0f) {
-        // We've collided with the world, let's adjust our view origin.
-        cl->refdef.vieworg = trace.endPosition;
-    }
-    
-    // Subtract view origin from focus point.
-    focus -= cl->refdef.vieworg;
-
-    // Calculate the new distance to use.
-    float dist = std::sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
-
-    // Set our view angles.
-    cl->refdef.viewAngles[vec3_t::Pitch] = -180.f / M_PI * std::atan2f(focus[2], dist);
-    cl->refdef.viewAngles[vec3_t::Yaw] -= cl_thirdperson_angle->value;
-
-    // Last but not least, let it be known we are in thirdperson view.
-    cl->thirdPersonView = true;
-}
-
-/**
 *   TODO: If this feature gets to stay-alive, it should be moved over to the server.
 *   Technically this is rather impossible to do given that we have no pre-baked data anymore.
 *   And even if we do, it won't align to the real time RTX data that is made use of.
@@ -260,10 +175,54 @@ void ClientGameView::SetLightLevel() {
 * 
 **/
 /**
+*   @brief   Outputs the view position to console.
+**/
+static void V_Viewpos_f(void)
+{
+    // Acquire view camera origin and angles.
+    ViewCamera *viewCamera = clge->view->GetViewCamera();
+    const vec3_t viewOrigin = viewCamera->GetViewOrigin();
+    const vec3_t viewAngles = viewCamera->GetViewAngles();
+
+    Com_Print("(%i %i %i) : %i\n", (int32_t)viewOrigin.x, (int32_t)viewOrigin.y, (int32_t)viewOrigin.z, (int32_t)viewAngles[vec3_t::Yaw]);
+}
+
+/**
+*   @brief   View Commands to register.
+**/
+static const cmdreg_t viewCommands[] = {
+    { "viewpos", V_Viewpos_f },
+    { NULL }
+};
+
+/**
+*   @brief   ViewPosition macro.
+**/
+static size_t CL_ViewPos_m(char* buffer, size_t size) {
+    ViewCamera *viewCamera = clge->view->GetViewCamera();
+    const vec3_t viewOrigin = viewCamera->GetViewOrigin();
+
+    return Q_scnprintf(buffer, size, "(%.1f, %.1f, %.1f)", viewOrigin.x, viewOrigin.y, viewOrigin.z);
+}
+
+/**
+*   @brief   ViewDirection macro.
+**/
+static size_t CL_ViewDir_m(char* buffer, size_t size) {
+    ViewCamera *viewCamera = clge->view->GetViewCamera();
+    const vec3_t viewForward = viewCamera->GetForwardViewVector();
+    return Q_scnprintf(buffer, size, "(%.3f, %.3f, %.3f)", viewForward.x, viewForward.y, viewForward.z);
+}
+
+/**
 *   @brief  Called by media initialization to locally initialize 
 *           the client game view data.
 **/
 void ClientGameView::Initialize() {
+    // Set Cmds.
+    clgi.Cmd_Register(viewCommands);
+
+    // Set Cvars.
     cl_add_lights       = clgi.Cvar_Get("cl_lights", "1", 0);
     cl_show_lights      = clgi.Cvar_Get("cl_show_lights", "0", 0);
 
@@ -273,13 +232,19 @@ void ClientGameView::Initialize() {
     //cl_add_blend->changed = cl_add_blend_changed;
 
     cl_adjustfov        = clgi.Cvar_Get("cl_adjustfov", "1", 0);
+
+    clgi.Cmd_AddMacro("cl_viewpos", CL_ViewPos_m);
+	clgi.Cmd_AddMacro("cl_viewdir", CL_ViewDir_m);
+
+
 }
 
 /**
 *   @brief  Same as Initialize, but for shutting down instead..
 */
 void ClientGameView::Shutdown() {
-
+    // Unregister view commands.
+    clgi.Cmd_Unregister(viewCommands);
 }
 
 /**

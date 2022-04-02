@@ -9,7 +9,6 @@
 #include "ClientGameLocals.h"
 
 #include "Entities.h"
-#include "Main.h"
 #include "TemporaryEntities.h"
 
 #include "ClientGameImports.h"
