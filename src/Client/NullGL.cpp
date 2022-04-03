@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "Common/CVar.h"
-#include "Common/Bsp.h"
+#include "../Common/CVar.h"
+#include "../Common/Bsp.h"
 #include "Client/Client.h"
 
 // This varialbe is actually defined in /src/refresh/vkpt/transperancy.c

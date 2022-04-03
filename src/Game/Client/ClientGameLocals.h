@@ -21,10 +21,10 @@
 #include "Shared/refresh.h"
 
 // Common.
-#include "Common/CModel.h"
-#include "Common/Cmd.h"
-#include "Common/Msg.h"
-#include "Common/Protocol.h"
+#include "../../Common/CModel.h"
+#include "../../Common/Cmd.h"
+#include "../../Common/Msg.h"
+#include "../../Common/Protocol.h"
 
 // Shared Client Game Headers.
 #include "Shared/CLTypes.h"

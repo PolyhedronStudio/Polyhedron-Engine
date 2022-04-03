@@ -20,8 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // for pure dedicated servers
 
 #include "Shared/Shared.h"
-#include "Common/CVar.h"
-#include "Common/Bsp.h"
+#include "../Common/CVar.h"
+#include "../Common/Bsp.h"
 #include "Client/Client.h"
 
 static void Key_Bind_Null_f(void)

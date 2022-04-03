@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BSP_H
 
 #include "Shared/List.h"
-#include "Common/Error.h"
+#include "Error.h"
 #include "System/Hunk.h"
 #include "Format/Bsp.h"
 

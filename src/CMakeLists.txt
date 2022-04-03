@@ -175,16 +175,14 @@ SET(HEADERS_GL
 #
 #	Shared Folder.	
 #
-
 include(../cmake/Shared.cmake)
 
-
 SET(SRC_SHARED
-	${CMAKE_SOURCE_DIR}/src/Shared/Math/Plane.cpp
-	${CMAKE_SOURCE_DIR}/src/Shared/Math/Vector3.cpp
+	${PROJECT_SOURCE_DIR}/src/Shared/Math/Plane.cpp
+	${PROJECT_SOURCE_DIR}/src/Shared/Math/Vector3.cpp
 
-	${CMAKE_SOURCE_DIR}/src/Shared/Math.cpp
-	${CMAKE_SOURCE_DIR}/src/Shared/Shared.cpp
+	${PROJECT_SOURCE_DIR}/src/Shared/Math.cpp
+	${PROJECT_SOURCE_DIR}/src/Shared/Shared.cpp
 )
 
 #
@@ -599,7 +597,7 @@ ENDIF()
 #
 #	Client Build Configuration.
 #
-TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(client PUBLIC ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "/extern/stb/")
 TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)

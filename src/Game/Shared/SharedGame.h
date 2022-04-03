@@ -23,10 +23,10 @@
 #define CGAME_INCLUDE 1
 
 // Common.
-#include "Common/CModel.h"
-#include "Common/Cmd.h"
-#include "Common/Msg.h"
-#include "Common/Protocol.h"
+#include "../../Common/CModel.h"
+#include "../../Common/Cmd.h"
+#include "../../Common/Msg.h"
+#include "../../Common/Protocol.h"
 
 //! For entity_S.
 #include "Shared/SVGame.h"
@@ -67,7 +67,7 @@ using ClassEntity = IServerGameEntity;
 using EntityDictionary = std::map<std::string, std::string>;
 #define GAME_INCLUDE
 //! SVGame needed includes.
-//#include "Common/Common.h"
+//#include "../../Common/Common.h"
 #include "Shared/SVGame.h"
 //! For now, equals POD Entity.
 //using Entity = entity_s;

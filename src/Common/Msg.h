@@ -9,8 +9,8 @@
 ***/
 #pragma once
 
-#include "Common/Protocol.h"
-#include "Common/SizeBuffer.h"
+#include "Protocol.h"
+#include "SizeBuffer.h"
 
 
 //============================================================================

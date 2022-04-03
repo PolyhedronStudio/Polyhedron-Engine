@@ -17,13 +17,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+// Shared.
 #include "Shared/Shared.h"
 #include "Shared/List.h"
-#include "Common/Cmd.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Field.h"
-#include "Common/Zone.h"
+
+// Common.
+#include "../../Common/Cmd.h"
+#include "../../Common/Common.h"
+#include "../../Common/CVar.h"
+#include "../../Common/Field.h"
+#include "../../Common/Zone.h"
+
+// Client.
 #include "Client/Keys.h"
 #include "Client/Sound/Sound.h"
 #include "Client/Client.h"
