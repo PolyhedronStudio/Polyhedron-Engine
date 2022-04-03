@@ -10,6 +10,8 @@
 #ifndef __INC_SHARED_MATH_MATRIX4_H__
 #define __INC_SHARED_MATH_MATRIX4_H__
 
+#include "../Shared.h"
+
 //-----------------
 // Matrix 4x4 type definiton.
 //

@@ -18,7 +18,7 @@
 //
 #ifndef __INC_SHARED_MATH_VECTOR3_H__
 #define __INC_SHARED_MATH_VECTOR3_H__
-
+#include "../Shared.h"
 //-----------------
 // Vector 3 type definiton. (X, Y, Z)
 //

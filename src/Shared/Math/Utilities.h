@@ -11,6 +11,8 @@
 #ifndef __INC_SHARED_MATH_UTILITIES_H__
 #define __INC_SHARED_MATH_UTILITIES_H__
 
+#include "../Shared.h"
+
 // NAN Macro - Use for checking NAN errors.
 #define nanmask (255<<23)
 #define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)

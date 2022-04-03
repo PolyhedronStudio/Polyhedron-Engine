@@ -21,10 +21,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef BSP_H
 #define BSP_H
 
-#include "Shared/List.h"
+#include "../Shared/List.h"
 #include "Error.h"
 #include "../System/Hunk.h"
-#include "Shared/Formats/Bsp.h"
+#include "../Shared/Formats/Bsp.h"
 
 #ifndef MIPLEVELS
 #define MIPLEVELS 4

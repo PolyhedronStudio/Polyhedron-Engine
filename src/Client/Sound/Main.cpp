@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // snd_main.c -- common sound functions
 
-#include "Shared/Shared.h"
+#include "../../Shared/Shared.h"
 #include "../Client.h"
 #include "Sound.h"
 #include "Vorbis.h"

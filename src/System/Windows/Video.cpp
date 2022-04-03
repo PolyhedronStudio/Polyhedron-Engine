@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // video.c
 //
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/CVar.h"
 #include "Common/Common.h"
 #include "Common/Files.h"

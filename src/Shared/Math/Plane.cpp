@@ -3,7 +3,7 @@
 //
 // plane.cpp
 //
-#include "Shared/Shared.h"
+#include "../Shared.h"
 
 void SetPlaneType(CollisionPlane* plane)
 {

@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 
 struct memhunk_t {
     void    *base;

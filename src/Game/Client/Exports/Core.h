@@ -9,8 +9,6 @@
 ***/
 #pragma once
 
-#include "Shared/Interfaces/IClientGameExports.h"
-
 //---------------------------------------------------------------------
 // Client Game Core IMPLEMENTATION.
 //---------------------------------------------------------------------

@@ -10,6 +10,8 @@
 #ifndef __INC_SHARED_MATH_MATRIX3_H__
 #define __INC_SHARED_MATH_MATRIX3_H__
 
+#include "../Shared.h"
+
 //-----------------
 // Matrix 3x3 type definiton.
 //

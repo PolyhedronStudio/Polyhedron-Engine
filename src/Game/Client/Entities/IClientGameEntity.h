@@ -9,9 +9,6 @@
 ***/
 #pragma once
 
-// ClientGame Exports Interface.
-#include "Shared/Interfaces/IClientGameExports.h"
-
 
 /**
 *   IClientGameEntity

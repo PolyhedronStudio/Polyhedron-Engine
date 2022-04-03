@@ -9,6 +9,8 @@
 ***/
 #pragma once
 
+#include "../Shared.h"
+
 //-----------------
 // plane_t structure
 //-----------------

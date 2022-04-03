@@ -5,7 +5,7 @@
 #pragma once
 
 // Export Interfaces.
-#include "Shared/Interfaces/IClientGameExports.h"
+#include "../../Shared/Interfaces/IClientGameExports.h"
 
 // Predeclare.
 class ClientGameCore;

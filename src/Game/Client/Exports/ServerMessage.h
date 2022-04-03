@@ -9,7 +9,6 @@
 ***/
 #pragma once
 
-#include "Shared/Interfaces/IClientGameExports.h"
 
 //---------------------------------------------------------------------
 // Client Game Server Message IMPLEMENTATION.

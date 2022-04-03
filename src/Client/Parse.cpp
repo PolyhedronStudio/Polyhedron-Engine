@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client.h"
 #include "GameModule.h"
 #include "Sound/Sound.h"
-#include "Shared/CLGame.h"
+#include "../Shared/CLGame.h"
 
 // N&C: Cheesy hack, we need to actually make this extern in a header.
 extern IClientGameExports* cge;

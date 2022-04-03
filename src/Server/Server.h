@@ -18,8 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // server.h
 #pragma once
 
-#include "Shared/Shared.h"
-#include "Shared/List.h"
+#include "../Shared/Shared.h"
+#include "../Shared/List.h"
 #include "Shared/SVGame.h"
 
 #include "../Common/Bsp.h"

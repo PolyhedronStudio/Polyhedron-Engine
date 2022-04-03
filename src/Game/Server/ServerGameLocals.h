@@ -15,13 +15,14 @@
 
 
 // Shared includes.
-#include "Shared/Shared.h"
-#include "Shared/List.h"
+//#include "../../Shared/Shared.h"
+
 
 // Because we define the full size ServerClient and Entity structures in this file
 // we define GAME_INCLUDE so that SVGame.h does not define the short server-visible variety.
 #define GAME_INCLUDE
-#include "Shared/SVGame.h"
+#include "../../Shared/Shared.h"
+#include "../../Shared/List.h"
 struct gclient_s;
 struct entity_s;
 

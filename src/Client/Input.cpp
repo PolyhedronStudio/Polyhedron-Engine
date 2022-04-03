@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Client.h"
 #include "Client/GameModule.h"
-#include "Shared/CLGame.h"
-#include "system/Lirc.h"
+#include "../Shared/CLGame.h"
+#include "System/Lirc.h"
 
 static cvar_t    *cl_nodelta;
 static cvar_t    *cl_maxpackets;

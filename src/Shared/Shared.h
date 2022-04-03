@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //-----------------
 
 #if HAVE_CONFIG_H
-#include "Shared/Config.h"
+#include "Config.h"
 #endif
 
 /***
@@ -83,7 +83,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /**
 *   Platform specific includes.
 **/
-#include "Shared/Platform.h"
+#include "Platform.h"
 
 
 
@@ -191,7 +191,7 @@ static inline bool PH_IsSpecial(const char c) { return (c == '\r' || c == '\n' |
 *   Endian Swap Library.
 * 
 ***/
-#include "Shared/Endian.h"
+#include "Endian.h"
 
 
 /***
@@ -199,7 +199,7 @@ static inline bool PH_IsSpecial(const char c) { return (c == '\r' || c == '\n' |
 *   Math Library.
 * 
 ***/
-#include "Shared/Math.h"
+#include "Math.h"
 
 
 /***
@@ -207,7 +207,7 @@ static inline bool PH_IsSpecial(const char c) { return (c == '\r' || c == '\n' |
 *   Tick Rate Configuration.
 * 
 ***/
-#include "Shared/TickRate.h"
+#include "TickRate.h"
 
 
 
@@ -216,7 +216,7 @@ static inline bool PH_IsSpecial(const char c) { return (c == '\r' || c == '\n' |
 *   Common Library.
 * 
 ***/
-#include "Shared/Common.h"
+#include "Common.h"
 
 
 
@@ -258,7 +258,7 @@ enum memtag_t {
 *   User Input
 *  
 ***/
-#include "Shared/Keys.h"
+#include "Keys.h"
 
 
 
@@ -267,7 +267,7 @@ enum memtag_t {
 *   User Interface.
 * 
 ***/
-#include "Shared/UI.h"
+#include "UI.h"
 
 /**
 *   Color defines, modify these as you please for custom colors.
@@ -289,7 +289,7 @@ enum memtag_t {
 *	Sound Channels & Attenuation
 * 
 ***/
-#include "Shared/Sound.h"
+#include "Sound.h"
 
 
 
@@ -394,7 +394,7 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 *	Player Move - Shared between Client, Server, and Game Modules.
 *
 ***/
-#include "Shared/PMove.h"
+#include "PMove.h"
 
 
 
@@ -403,7 +403,7 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 *	Network Messaging.
 *
 ***/
-#include "Shared/Messaging.h"
+#include "Messaging.h"
 
 
 
@@ -429,8 +429,8 @@ typedef struct file_info_s {
 *	String Manipulation Utilities.
 *
 ***/
-#include "Shared/QString.h"
-#include "Shared/Strings.h"
+#include "QString.h"
+#include "Strings.h"
 
 
 /***
@@ -438,7 +438,7 @@ typedef struct file_info_s {
 *	C Style List.
 *
 ***/
-#include "Shared/List.h"
+#include "List.h"
 
 
 /***
@@ -446,7 +446,7 @@ typedef struct file_info_s {
 *	Collision Detection.
 *
 ***/
-#include "Shared/Collision.h"
+#include "Collision.h"
 
 
 
@@ -455,7 +455,7 @@ typedef struct file_info_s {
 *	Entities & Related.
 *
 ***/
-#include "Shared/Entities.h"
+#include "Entities.h"
 
 // PlayerState->refdef flags
 static constexpr int32_t RDF_UNDERWATER     = 1;    //! Warp the screen as apropriate.

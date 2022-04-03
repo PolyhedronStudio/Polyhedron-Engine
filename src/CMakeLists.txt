@@ -3,128 +3,129 @@
 ##			SOURCE AND HEADER FILE LISTS
 ##
 ###############################################################################
-# Need this.
-include_directories(${CMAKE_SOURCE_DIR}/inc)
+SET(PATH_SRC ${CMAKE_CURRENT_SOURCE_DIR})
 
-###################### Client.
+#
+#	Client Sources.
+#
 SET(SRC_CLIENT
-	Client/ASCII.cpp
-	Client/Console.cpp
-	Client/Cinematic.cpp
-	Client/ClientGame.cpp
-	Client/CRC.cpp
-	Client/Demo.cpp
-	Client/Download.cpp
-	Client/Entities.cpp
-	Client/Input.cpp
-	Client/Keys.cpp
-	Client/Main.cpp
-	Client/Parse.cpp
-	Client/Precache.cpp
-	Client/Predict.cpp
-	Client/Refresh.cpp
-	Client/Screen.cpp
-	Client/View.cpp
-	Client/UI/Demos.cpp
-	Client/UI/Menu.cpp
-	Client/UI/PlayerConfig.cpp
-	Client/UI/PlayerModels.cpp
-	Client/UI/Script.cpp
-	Client/UI/Servers.cpp
-	Client/UI/UI.cpp
-	Client/Sound/DirectMemoryAccess.cpp
-	Client/Sound/OpenAL.cpp
-	Client/Sound/Main.cpp
-	Client/Sound/Memory.cpp
-	Client/Sound/Mix.cpp
-	Client/Sound/Ogg.cpp
-#	Client/Sound/QAL/fixed.c
-	Client/Sound/QAL/Dynamic.cpp
+	${PATH_SRC}/Client/ASCII.cpp
+	${PATH_SRC}/Client/Console.cpp
+	${PATH_SRC}/Client/Cinematic.cpp
+	${PATH_SRC}/Client/ClientGame.cpp
+	${PATH_SRC}/Client/CRC.cpp
+	${PATH_SRC}/Client/Demo.cpp
+	${PATH_SRC}/Client/Download.cpp
+	${PATH_SRC}/Client/Entities.cpp
+	${PATH_SRC}/Client/Input.cpp
+	${PATH_SRC}/Client/Keys.cpp
+	${PATH_SRC}/Client/Main.cpp
+	${PATH_SRC}/Client/Parse.cpp
+	${PATH_SRC}/Client/Precache.cpp
+	${PATH_SRC}/Client/Predict.cpp
+	${PATH_SRC}/Client/Refresh.cpp
+	${PATH_SRC}/Client/Screen.cpp
+	${PATH_SRC}/Client/View.cpp
+	${PATH_SRC}/Client/UI/Demos.cpp
+	${PATH_SRC}/Client/UI/Menu.cpp
+	${PATH_SRC}/Client/UI/PlayerConfig.cpp
+	${PATH_SRC}/Client/UI/PlayerModels.cpp
+	${PATH_SRC}/Client/UI/Script.cpp
+	${PATH_SRC}/Client/UI/Servers.cpp
+	${PATH_SRC}/Client/UI/UI.cpp
+	${PATH_SRC}/Client/Sound/DirectMemoryAccess.cpp
+	${PATH_SRC}/Client/Sound/OpenAL.cpp
+	${PATH_SRC}/Client/Sound/Main.cpp
+	${PATH_SRC}/Client/Sound/Memory.cpp
+	${PATH_SRC}/Client/Sound/Mix.cpp
+	${PATH_SRC}/Client/Sound/Ogg.cpp
+	#${PATH_SRC}/Client/Sound/QAL/fixed.c
+	${PATH_SRC}/Client/Sound/QAL/Dynamic.cpp
 )
 # Required as a placeholder for certain Vulkan only related features.
 if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
 	set(SRC_CLIENT 
 		${SRC_CLIENT}
-		Client/NullGL.cpp
+	${PATH_SRC}/Client/NullGL.cpp
 	)
 endif()
 
 if (CONFIG_ENABLE_RMLUI)
-SET(SRC_CLIENT_RMLUI
-	Client/RmlUI/Interfaces/FileInterface.cpp
-	Client/RmlUI/Interfaces/FileInterface.h
-	Client/RmlUI/Interfaces/RenderInterface.cpp
-	Client/RmlUI/Interfaces/RenderInterface.h
-	Client/RmlUI/Interfaces/SystemInterface.cpp
-	Client/RmlUI/Interfaces/SystemInterface.h
-	Client/RmlUI/RmlUI.cpp
-	Client/RmlUI/RmlUI.h
-)
+	SET(SRC_CLIENT_RMLUI
+		${PATH_SRC}/Client/RmlUI/Interfaces/FileInterface.cpp
+		${PATH_SRC}/Client/RmlUI/Interfaces/FileInterface.h
+		${PATH_SRC}/Client/RmlUI/Interfaces/RenderInterface.cpp
+		${PATH_SRC}/Client/RmlUI/Interfaces/RenderInterface.h
+		${PATH_SRC}/Client/RmlUI/Interfaces/SystemInterface.cpp
+		${PATH_SRC}/Client/RmlUI/Interfaces/SystemInterface.h
+		${PATH_SRC}/Client/RmlUI/RmlUI.cpp
+		${PATH_SRC}/Client/RmlUI/RmlUI.h
+	)
 else()
-SET(SRC_CLIENT_RMLUI
-	Client/RmlUI/RmlUINull.cpp
-	Client/RmlUI/RmlUI.h
-)
+	SET(SRC_CLIENT_RMLUI
+		${PATH_SRC}/Client/RmlUI/RmlUINull.cpp
+		${PATH_SRC}/Client/RmlUI/RmlUI.h
+	)
 endif()
 
 SET(SRC_CLIENT_HTTP
-	Client/HTTP.cpp
+	${PATH_SRC}/Client/HTTP.cpp
 )
 SET(HEADERS_CLIENT
-	Client/Client.h
-	Client/UI/UI.h
-	Client/Sound/Sound.h
-	Client/Sound/QAL/Dynamic.h
-	Client/Sound/QAL/Fixed.h
+	${PATH_SRC}/Client/Client.h
+	${PATH_SRC}/Client/UI/UI.h
+	${PATH_SRC}/Client/Sound/Sound.h
+	${PATH_SRC}/Client/Sound/QAL/Dynamic.h
+	${PATH_SRC}/Client/Sound/QAL/Fixed.h
 )
 
 ###################### Server.
 SET(SRC_SERVER
-	Server/Commands.cpp
-	Server/Entities.cpp
-	Server/SVGame.cpp
-	Server/Init.cpp
-	Server/Main.cpp
+	${PATH_SRC}/Server/Commands.cpp
+	${PATH_SRC}/Server/Entities.cpp
+	${PATH_SRC}/Server/SVGame.cpp
+	${PATH_SRC}/Server/Init.cpp
+	${PATH_SRC}/Server/Main.cpp
 
-	Server/Send.cpp
-	Server/User.cpp
-	Server/World.cpp
+	${PATH_SRC}/Server/Send.cpp
+	${PATH_SRC}/Server/User.cpp
+	${PATH_SRC}/Server/World.cpp
 
-	Server/Save.cpp
+	${PATH_SRC}/Server/Save.cpp
 )
 SET(HEADERS_SERVER
-	Server/Server.h
+	${PATH_SRC}/Server/Server.h
 )
 
 ###################### Common.
 SET(SRC_COMMON
-	Common/Bsp.cpp
-	Common/Cmd.cpp
-	Common/CModel.cpp
-	Common/Common.cpp
-	Common/CVar.cpp
-	Common/Error.cpp
-	Common/Field.cpp
-	Common/Fifo.cpp
-	Common/Files.cpp
-	Common/MDFour.cpp
-	Common/Msg.cpp
-	Common/Prompt.cpp
-	Common/SizeBuffer.cpp
-	Common/Utilities.cpp
-	Common/Zone.cpp
+	${PATH_SRC}/Common/Bsp.cpp
+	${PATH_SRC}/Common/Cmd.cpp
+	${PATH_SRC}/Common/CModel.cpp
+	${PATH_SRC}/Common/Common.cpp
+	${PATH_SRC}/Common/CVar.cpp
+	${PATH_SRC}/Common/Error.cpp
+	${PATH_SRC}/Common/Field.cpp
+	${PATH_SRC}/Common/Fifo.cpp
+	${PATH_SRC}/Common/Files.cpp
+	${PATH_SRC}/Common/MDFour.cpp
+	${PATH_SRC}/Common/Msg.cpp
+	${PATH_SRC}/Common/Prompt.cpp
+	${PATH_SRC}/Common/SizeBuffer.cpp
+	${PATH_SRC}/Common/Utilities.cpp
+	${PATH_SRC}/Common/Zone.cpp
 
-	Common/Hashes/Crc32.cpp
+	${PATH_SRC}/Common/Hashes/Crc32.cpp
 
-	Common/Net/NetChan.cpp
-	Common/Net/Net.cpp
+	${PATH_SRC}/Common/Net/NetChan.cpp
+	${PATH_SRC}/Common/Net/Net.cpp
 )
 SET(HEADERS_COMMON
-	Common/Net/INetNToP.h
-	Common/Net/INetPToN.h
-	Common/Net/Win.h
+	${PATH_SRC}/Common/Net/INetNToP.h
+	${PATH_SRC}/Common/Net/INetPToN.h
+	${PATH_SRC}/Common/Net/Win.h
 	
-	Common/Hashes/Crc32.h
+	${PATH_SRC}/Common/Hashes/Crc32.h
 )
 
 ###################### Format.
@@ -143,35 +144,35 @@ SET(HEADERS_COMMON
 
 ###################### Refresh.
 SET(SRC_REFRESH
-	Refresh/images.cpp
-	Refresh/models.cpp
-	Refresh/model_iqm.cpp
-	Refresh/stb/stb.cpp
+	${PATH_SRC}/Refresh/images.cpp
+	${PATH_SRC}/Refresh/models.cpp
+	${PATH_SRC}/Refresh/model_iqm.cpp
+	${PATH_SRC}/Refresh/stb/stb.cpp
 )
 SET(HEADERS_REFRESH
-	Refresh/Images.h
-	Refresh/Models.h
-	Refresh/Refresh.h
+	${PATH_SRC}/Refresh/Images.h
+	${PATH_SRC}/Refresh/Models.h
+	${PATH_SRC}/Refresh/Refresh.h
 )
 ###################### GL.
 SET(SRC_GL
-	Refresh/gl/draw.cpp
-	Refresh/gl/hq2x.cpp
-	Refresh/gl/images.cpp
-	Refresh/gl/main.cpp
-	Refresh/gl/mesh.cpp
-	Refresh/gl/models.cpp
-	Refresh/gl/sky.cpp
-	Refresh/gl/state.cpp
-	Refresh/gl/surf.cpp
-	Refresh/gl/tess.cpp
-	Refresh/gl/world.cpp
-	Refresh/gl/qgl/dynamic.cpp
-#	Refresh/gl/qgl/fixed.c
+	${PATH_SRC}/Refresh/gl/draw.cpp
+	${PATH_SRC}/Refresh/gl/hq2x.cpp
+	${PATH_SRC}/Refresh/gl/images.cpp
+	${PATH_SRC}/Refresh/gl/main.cpp
+	${PATH_SRC}/Refresh/gl/mesh.cpp
+	${PATH_SRC}/Refresh/gl/models.cpp
+	${PATH_SRC}/Refresh/gl/sky.cpp
+	${PATH_SRC}/Refresh/gl/state.cpp
+	${PATH_SRC}/Refresh/gl/surf.cpp
+	${PATH_SRC}/Refresh/gl/tess.cpp
+	${PATH_SRC}/Refresh/gl/world.cpp
+	${PATH_SRC}/Refresh/gl/qgl/dynamic.cpp
+#	${PATH_SRC}/Refresh/gl/qgl/fixed.c
 )
 SET(HEADERS_GL
-	Refresh/gl/arbfp.h
-	Refresh/gl/gl.h
+	${PATH_SRC}/Refresh/gl/arbfp.h
+	${PATH_SRC}/Refresh/gl/gl.h
 )
 
 
@@ -179,15 +180,65 @@ SET(HEADERS_GL
 #
 #	Shared Folder.	
 #
-include(../cmake/Shared.cmake)
-
 SET(SRC_SHARED
-	${PROJECT_SOURCE_DIR}/src/Shared/Math/Plane.cpp
-	${PROJECT_SOURCE_DIR}/src/Shared/Math/Vector3.cpp
+	${PATH_SRC}/Shared/Math/Plane.cpp
+	${PATH_SRC}/Shared/Math/Vector3.cpp
 
-	${PROJECT_SOURCE_DIR}/src/Shared/Math.cpp
-	${PROJECT_SOURCE_DIR}/src/Shared/Shared.cpp
+	# Interfaces
+	${PATH_SRC}/Shared/Math.cpp
+	${PATH_SRC}/Shared/Shared.cpp
 )
+
+SET(HEADERS_SHARED
+	# Formats.
+	${PATH_SRC}/Shared/Formats/Bsp.h 
+	${PATH_SRC}/Shared/Formats/Iqm.h 
+	${PATH_SRC}/Shared/Formats/Md2.h 
+	${PATH_SRC}/Shared/Formats/Md3.h 
+	${PATH_SRC}/Shared/Formats/Pak.h 
+	${PATH_SRC}/Shared/Formats/Pcx.h 
+	${PATH_SRC}/Shared/Formats/Sp2.h 
+	${PATH_SRC}/Shared/Formats/Wal.h 
+
+	# Interfaces
+	${PATH_SRC}/Shared/Interfaces/IClientGameExports.h
+	${PATH_SRC}/Shared/Interfaces/IClientGameImports.h
+	${PATH_SRC}/Shared/Interfaces/IServerGameExports.h
+	${PATH_SRC}/Shared/Interfaces/IServerGameImports.h
+
+	# Math lib.
+	${PATH_SRC}/Shared/Math/Color.h
+	${PATH_SRC}/Shared/Math/Matrix3.h
+	${PATH_SRC}/Shared/Math/Matrix4.h
+	${PATH_SRC}/Shared/Math/Plane.h
+	${PATH_SRC}/Shared/Math/Rectangle.h
+	${PATH_SRC}/Shared/Math/Utilities.h
+	${PATH_SRC}/Shared/Math/Vector2.h
+	${PATH_SRC}/Shared/Math/Vector3.h
+	${PATH_SRC}/Shared/Math/Vector4.h
+	${PATH_SRC}/Shared/Math/Vector5.h
+	
+	# Other shared lib functionalities.
+	${PATH_SRC}/Shared/CLGame.h
+	${PATH_SRC}/Shared/CLTypes.h
+	${PATH_SRC}/Shared/Collision.h
+	${PATH_SRC}/Shared/Common.h
+	${PATH_SRC}/Shared/Config.h
+	${PATH_SRC}/Shared/Endian.h 
+	${PATH_SRC}/Shared/Keys.h 
+	${PATH_SRC}/Shared/List.h 
+	${PATH_SRC}/Shared/Math.h 
+	${PATH_SRC}/Shared/Messaging.h 
+	${PATH_SRC}/Shared/Platform.h
+	${PATH_SRC}/Shared/QString.h
+	${PATH_SRC}/Shared/Refresh.h 
+	${PATH_SRC}/Shared/Shared.h 
+	${PATH_SRC}/Shared/Strings.h
+	${PATH_SRC}/Shared/SVGame.h 
+	${PATH_SRC}/Shared/TickRate.h 
+	${PATH_SRC}/Shared/UI.h 
+)
+
 
 #
 #	Unix
@@ -231,60 +282,60 @@ SET(HEADERS_WINDOWS
 #	Vulkan Path Tracer
 #
 SET(SRC_VKPT
-	Refresh/vkpt/asvgf.cpp
-	Refresh/vkpt/bloom.cpp
-	Refresh/vkpt/bsp_mesh.cpp
-	Refresh/vkpt/cameras.cpp
-	Refresh/vkpt/conversion.cpp
-	Refresh/vkpt/draw.cpp
-	Refresh/vkpt/freecam.cpp
-	Refresh/vkpt/fog.cpp
-	Refresh/vkpt/fsr.cpp
-	Refresh/vkpt/main.cpp
-	Refresh/vkpt/material.cpp
-	Refresh/vkpt/matrix.cpp
-	Refresh/vkpt/mgpu.cpp
-	Refresh/vkpt/models.cpp
-	Refresh/vkpt/path_tracer.cpp
-	Refresh/vkpt/physical_sky.cpp
-	Refresh/vkpt/precomputed_sky.cpp
-	Refresh/vkpt/profiler.cpp
-	Refresh/vkpt/shadow_map.cpp
-	Refresh/vkpt/textures.cpp
-	Refresh/vkpt/tone_mapping.cpp
-	Refresh/vkpt/transparency.cpp
-	Refresh/vkpt/uniform_buffer.cpp
-	Refresh/vkpt/vertex_buffer.cpp
-	Refresh/vkpt/vk_util.cpp
-	Refresh/vkpt/buddy_allocator.cpp
-	Refresh/vkpt/device_memory_allocator.cpp
-	Refresh/vkpt/god_rays.cpp
+	${PATH_SRC}/Refresh/vkpt/asvgf.cpp
+	${PATH_SRC}/Refresh/vkpt/bloom.cpp
+	${PATH_SRC}/Refresh/vkpt/bsp_mesh.cpp
+	${PATH_SRC}/Refresh/vkpt/cameras.cpp
+	${PATH_SRC}/Refresh/vkpt/conversion.cpp
+	${PATH_SRC}/Refresh/vkpt/draw.cpp
+	${PATH_SRC}/Refresh/vkpt/freecam.cpp
+	${PATH_SRC}/Refresh/vkpt/fog.cpp
+	${PATH_SRC}/Refresh/vkpt/fsr.cpp
+	${PATH_SRC}/Refresh/vkpt/main.cpp
+	${PATH_SRC}/Refresh/vkpt/material.cpp
+	${PATH_SRC}/Refresh/vkpt/matrix.cpp
+	${PATH_SRC}/Refresh/vkpt/mgpu.cpp
+	${PATH_SRC}/Refresh/vkpt/models.cpp
+	${PATH_SRC}/Refresh/vkpt/path_tracer.cpp
+	${PATH_SRC}/Refresh/vkpt/physical_sky.cpp
+	${PATH_SRC}/Refresh/vkpt/precomputed_sky.cpp
+	${PATH_SRC}/Refresh/vkpt/profiler.cpp
+	${PATH_SRC}/Refresh/vkpt/shadow_map.cpp
+	${PATH_SRC}/Refresh/vkpt/textures.cpp
+	${PATH_SRC}/Refresh/vkpt/tone_mapping.cpp
+	${PATH_SRC}/Refresh/vkpt/transparency.cpp
+	${PATH_SRC}/Refresh/vkpt/uniform_buffer.cpp
+	${PATH_SRC}/Refresh/vkpt/vertex_buffer.cpp
+	${PATH_SRC}/Refresh/vkpt/vk_util.cpp
+	${PATH_SRC}/Refresh/vkpt/buddy_allocator.cpp
+	${PATH_SRC}/Refresh/vkpt/device_memory_allocator.cpp
+	${PATH_SRC}/Refresh/vkpt/god_rays.cpp
 )
 SET(HEADERS_VKPT
-	Refresh/vkpt/fsr/ffx_a.h
-	Refresh/vkpt/fsr/ffx_fsr1.h
+	${PATH_SRC}/Refresh/vkpt/fsr/ffx_a.h
+	${PATH_SRC}/Refresh/vkpt/fsr/ffx_fsr1.h
 
-    Refresh/vkpt/shader/constants.h
-    Refresh/vkpt/shader/global_textures.h
-    Refresh/vkpt/shader/global_ubo.h
-    Refresh/vkpt/shader/god_rays_shared.h
-    Refresh/vkpt/shader/light_lists.h
-    Refresh/vkpt/shader/path_tracer_hit_shaders.h
-    Refresh/vkpt/shader/path_tracer_rgen.h
-    Refresh/vkpt/shader/path_tracer.h
-    Refresh/vkpt/shader/sky.h
-    Refresh/vkpt/shader/vertex_buffer.h
+    ${PATH_SRC}/Refresh/vkpt/shader/constants.h
+    ${PATH_SRC}/Refresh/vkpt/shader/global_textures.h
+    ${PATH_SRC}/Refresh/vkpt/shader/global_ubo.h
+    ${PATH_SRC}/Refresh/vkpt/shader/god_rays_shared.h
+    ${PATH_SRC}/Refresh/vkpt/shader/light_lists.h
+    ${PATH_SRC}/Refresh/vkpt/shader/path_tracer_hit_shaders.h
+    ${PATH_SRC}/Refresh/vkpt/shader/path_tracer_rgen.h
+    ${PATH_SRC}/Refresh/vkpt/shader/path_tracer.h
+    ${PATH_SRC}/Refresh/vkpt/shader/sky.h
+    ${PATH_SRC}/Refresh/vkpt/shader/vertex_buffer.h
 
-	Refresh/vkpt/vkpt.h
-	Refresh/vkpt/vk_util.h
-	Refresh/vkpt/buddy_allocator.h
-	Refresh/vkpt/cameras.h
-	Refresh/vkpt/conversion.h
-	Refresh/vkpt/device_memory_allocator.h
-	Refresh/vkpt/fog.h
-	Refresh/vkpt/material.h
-	Refresh/vkpt/physical_sky.h
-	Refresh/vkpt/precomputed_sky.h
+	${PATH_SRC}/Refresh/vkpt/vkpt.h
+	${PATH_SRC}/Refresh/vkpt/vk_util.h
+	${PATH_SRC}/Refresh/vkpt/buddy_allocator.h
+	${PATH_SRC}/Refresh/vkpt/cameras.h
+	${PATH_SRC}/Refresh/vkpt/conversion.h
+	${PATH_SRC}/Refresh/vkpt/device_memory_allocator.h
+	${PATH_SRC}/Refresh/vkpt/fog.h
+	${PATH_SRC}/Refresh/vkpt/material.h
+	${PATH_SRC}/Refresh/vkpt/physical_sky.h
+	${PATH_SRC}/Refresh/vkpt/precomputed_sky.h
 )
 
 #
@@ -433,7 +484,7 @@ IF(WIN32)
 		${SRC_SHARED} ${HEADERS_SHARED}
 		${SRC_WINDOWS} ${HEADERS_WINDOWS}
 		${SRC_SERVER} ${HEADERS_SERVER}
-		client/null.cpp
+	${PATH_SRC}/Client/null.cpp
 		#System/sdl2/time.cpp
 		System/Resources/polyhedron_dedicated.rc
 	)
@@ -458,7 +509,7 @@ ELSE()
 		${SRC_SHARED} ${HEADERS_SHARED}
 		${SRC_UNIX}
 		${SRC_SERVER} ${HEADERS_SERVER}
-		Client/Null.cpp
+	${PATH_SRC}/Client/Null.cpp
 	)
 ENDIF()
 

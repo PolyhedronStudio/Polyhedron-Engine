@@ -8,6 +8,8 @@
 #ifndef __INC_SHARED_MATH_RECTANGLE_H__
 #define __INC_SHARED_MATH_RECTANGLE_H__
 
+#include "../Shared.h"
+
 // Use to 
 typedef struct rect_s {
     int32_t x, y, width, height;

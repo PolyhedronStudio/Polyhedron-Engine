@@ -9,16 +9,16 @@
 ***/
 #pragma once
 
-#include "Shared/Shared.h"
-#include "Shared/Refresh.h"
+#include "Shared.h"
+#include "Refresh.h"
 
-#include "../src/Common/Bsp.h"
-#include "../src/Common/CModel.h"
-#include "../src/Common/Bsp.h"
-#include "../src/Common/Cmd.h"
-#include "../src/Common/Protocol.h"
-#include "../src/Common/CModel.h"
-#include "../src/Common/Common.h"
+#include "../Common/Bsp.h"
+#include "../Common/CModel.h"
+#include "../Common/Bsp.h"
+#include "../Common/Cmd.h"
+#include "../Common/Protocol.h"
+#include "../Common/CModel.h"
+#include "../Common/Common.h"
 /**
 *   Contains states for the KeyBindings.
 **/

@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Client.h"
-#include "Shared/Formats/Md2.h"
-#include "Shared/Formats/Sp2.h"
+#include "../Shared/Formats/Md2.h"
+#include "../Shared/Formats/Sp2.h"
 
 #define CL_DOWNLOAD_IGNORES     "download-ignores.txt"
 

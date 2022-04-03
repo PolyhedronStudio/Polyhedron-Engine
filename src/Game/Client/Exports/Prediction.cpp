@@ -4,7 +4,6 @@
 #include "../TemporaryEntities.h"
 
 // Exports.
-#include "Shared/Interfaces/IClientGameExports.h"
 #include "../ClientGameExports.h"
 #include "Prediction.h"
 #include "View.h"

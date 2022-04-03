@@ -9,7 +9,7 @@
 *	Handles byte ordering and avoids alignment errors.
 *
 ***/
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/HalfFloat.h"
 #include "Common/Msg.h"
 #include "Common/Protocol.h"

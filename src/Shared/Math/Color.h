@@ -8,6 +8,8 @@
 #ifndef __INC_SHARED_MATH_COLOR_H__
 #define __INC_SHARED_MATH_COLOR_H__
 
+#include "../Shared.h"
+
 // Color type definiton. (R8,G8,B8,A8) == uint32_t total.
 typedef union {
     uint32_t u32;

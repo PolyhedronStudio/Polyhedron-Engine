@@ -16,9 +16,9 @@
 #define CGAME_INCLUDE 1
 
 // Shared.
-#include "Shared/Shared.h"
-#include "Shared/List.h"
-#include "Shared/refresh.h"
+#include "../../Shared/Shared.h"
+#include "../../Shared/List.h"
+#include "../../Shared/Refresh.h"
 
 // Common.
 #include "../../Common/CModel.h"
@@ -27,14 +27,14 @@
 #include "../../Common/Protocol.h"
 
 // Shared Client Game Headers.
-#include "Shared/CLTypes.h"
-#include "Shared/CLGame.h"
+#include "../../Shared/CLTypes.h"
+#include "../../Shared/CLGame.h"
 
 // Shared Game "Framework".
 #include "../Shared/SharedGame.h"
 
 // Client Game Exports Interface.
-#include "Shared/Interfaces/IClientGameExports.h"
+#include "../../Shared/Interfaces/IClientGameExports.h"
 
 // Client Game Exports Implementation.
 #include "ClientGameExports.h"

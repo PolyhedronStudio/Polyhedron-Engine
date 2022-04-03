@@ -20,20 +20,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // net.c
 //
 
-#include "Shared/Shared.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Fifo.h"
+#include "../../Shared/Shared.h"
+#include "../Common.h"
+#include "../CVar.h"
+#include "../Fifo.h"
 #ifdef _DEBUG
-#include "Common/Files.h"
+#include "../Files.h"
 #endif
-#include "Common/Msg.h"
-#include "Common/Net/Net.h"
-#include "Common/Protocol.h"
-#include "Common/Zone.h"
+#include "../Msg.h"
+#include "../Net/Net.h"
+#include "../Protocol.h"
+#include "../Zone.h"
 #include "../../Client/Client.h"
 #include "../../Server/Server.h"
-#include "System/System.h"
+#include "../../System/System.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN

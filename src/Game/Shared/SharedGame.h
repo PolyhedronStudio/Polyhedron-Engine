@@ -9,7 +9,7 @@
 ***/
 #pragma once
 
-#include "Shared/Shared.h"
+#include "../../Shared/Shared.h"
 
 /**
 *	What game module is including this in its sources?
@@ -29,11 +29,15 @@
 #include "../../Common/Protocol.h"
 
 //! For entity_S.
-#include "Shared/SVGame.h"
-#include "Shared/Refresh.h"
-
-#include "Shared/CLTypes.h"
-#include "Shared/CLGame.h"
+//#include "Shared/SVGame.h"
+//#include "Shared/Refresh.h"
+//
+//#include "Shared/CLTypes.h"
+//#include "Shared/CLGame.h"
+#include "../../Shared/SVGame.h"
+#include "../../Shared/Refresh.h"
+#include "../../Shared/CLTypes.h"
+#include "../../Shared/CLGame.h"
 
 
 // Predeclarations.
@@ -68,7 +72,7 @@ using EntityDictionary = std::map<std::string, std::string>;
 #define GAME_INCLUDE
 //! SVGame needed includes.
 //#include "../../Common/Common.h"
-#include "Shared/SVGame.h"
+#include "../../Shared/SVGame.h"
 //! For now, equals POD Entity.
 //using Entity = entity_s;
 //! POD Entity.

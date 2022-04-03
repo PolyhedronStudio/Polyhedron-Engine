@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // client.h -- Win32 client stuff
 //
 
-#include "Shared/Shared.h"
+#include "../../Shared/Shared.h"
 #include "Common/Common.h"
 #include "Common/CVar.h"
 #include "Common/Files.h"
@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Keys.h"
 #include "client/ui.h"
 #include "Client/Video.h"
-#include "refresh/refresh.h"
+#include "Refresh/refresh.h"
 #endif
 #include "../System.h"
 

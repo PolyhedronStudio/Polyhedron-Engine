@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "../src/System/Hunk.h"
+#include "../System/Hunk.h"
 
 #define MAX_DLIGHTS     32
 #define MAX_ENTITIES    2048     // == MAX_PACKET_ENTITIES * 2

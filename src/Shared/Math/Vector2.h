@@ -18,7 +18,7 @@
 //
 #ifndef __INC_SHARED_MATH_VECTOR2_H__
 #define __INC_SHARED_MATH_VECTOR2_H__
-
+#include "../Shared.h"
 //-----------------
 // Vector 2 type definiton. (X, Y)
 //

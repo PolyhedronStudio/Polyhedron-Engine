@@ -16,18 +16,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
-#include "Common/Bsp.h"
-#include "Common/Cmd.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Files.h"
-#include "Client/Video.h"
-#include "Client/Client.h"
-#include "refresh/refresh.h"
-#include "refresh/images.h"
-#include "refresh/models.h"
-#include "System/Hunk.h"
+#include "../../Shared/Shared.h"
+#include "../../Common/Bsp.h"
+#include "../../Common/Cmd.h"
+#include "../../Common/Common.h"
+#include "../../Common/CVar.h"
+#include "../../Common/Files.h"
+#include "../../Client/Video.h"
+#include "../../Client/Client.h"
+#include "../../Refresh/Refresh.h"
+#include "../../Refresh/Images.h"
+#include "../../Refresh/Models.h"
+#include "../../System/Hunk.h"
 
 #if USE_FIXED_LIBGL
 #include "QGL/Fixed.h"

@@ -11,9 +11,6 @@
 
 #include "../TemporaryEntities.h"
 
-#include "Shared/Interfaces/IClientGameExports.h"
-#include "../ClientGameExports.h"
-
 #include "MuzzleFlashEffects.h"
 #include "DynamicLights.h"
 #include "Particles.h"

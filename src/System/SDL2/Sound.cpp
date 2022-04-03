@@ -20,9 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // snd_sdl.c
 //
 
-#include "Shared/Shared.h"
-#include "Common/Zone.h"
-#include "Client/Sound/DirectMemoryAccess.h"
+#include "../../Shared/Shared.h"
+#include "../../Common/Zone.h"
+#include "../../Client/Sound/DirectMemoryAccess.h"
 #include "SDL.h"
 
 static void Filler(void *userdata, Uint8 *stream, int len)

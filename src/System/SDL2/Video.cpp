@@ -21,17 +21,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // video.c
 //
 
-#include "Shared/Shared.h"
-#include "Common/CVar.h"
-#include "Common/Common.h"
-#include "Common/Files.h"
-#include "Common/Zone.h"
-#include "Client/Client.h"
-#include "Client/Input.h"
-#include "Client/Keys.h"
-#include "client/ui.h"
-#include "Client/Video.h"
-#include "Refresh/refresh.h"
+#include "../../Shared/Shared.h"
+#include "../../Common/CVar.h"
+#include "../../Common/Common.h"
+#include "../../Common/Files.h"
+#include "../../Common/Zone.h"
+#include "../../Client/Client.h"
+#include "../../Client/Input.h"
+#include "../../Client/Keys.h"
+#include "../../client/UI.h"
+#include "../../Client/Video.h"
+#include "../../Refresh/Refresh.h"
 #include "../System.h"
 #include "../Resources/polyhedron.xbm"
 #include <SDL.h>

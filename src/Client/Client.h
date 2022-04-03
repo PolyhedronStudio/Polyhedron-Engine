@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // client.h -- primary header for client
 #pragma once
 
-#include "Shared/Shared.h"
-#include "Shared/List.h"
+#include "../Shared/Shared.h"
+#include "../Shared/List.h"
 
 #include "../Common/Bsp.h"
 #include "../Common/Cmd.h"
@@ -39,9 +39,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Common/Utilities.h"
 #include "../Common/Zone.h"
 
-#include "System/System.h"
-#include "Refresh/Refresh.h"
-#include "Server/Server.h"
+#include "../System/System.h"
+#include "../Refresh/Refresh.h"
+#include "../Server/Server.h"
 
 #include "Input.h"
 #include "Keys.h"
@@ -61,7 +61,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // PH: Most structures related to the client have been moved over here.
 // They are shared to the client game dll, since it is tightly coupled.
-#include "Shared/CLTypes.h"
+#include "../Shared/CLTypes.h"
 
 // PH: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern    ClientState    cl;
@@ -586,21 +586,21 @@ void CL_InitAscii(void);
 //
 // http.c
 //
-#if USE_CURL
+//#if USE_CURL
 void HTTP_Init(void);
 void HTTP_Shutdown(void);
 void HTTP_SetServer(const char *url);
 qerror_t HTTP_QueueDownload(const char *path, dltype_t type);
 void HTTP_RunDownloads(void);
 void HTTP_CleanupDownloads(void);
-#else
-#define HTTP_Init()                     (void)0
-#define HTTP_Shutdown()                 (void)0
-#define HTTP_SetServer(url)             (void)0
-#define HTTP_QueueDownload(path, type)  Q_ERR_NOSYS
-#define HTTP_RunDownloads()             (void)0
-#define HTTP_CleanupDownloads()         (void)0
-#endif
+//#else
+//#define HTTP_Init()                     (void)0
+//#define HTTP_Shutdown()                 (void)0
+//#define HTTP_SetServer(url)             (void)0
+//#define HTTP_QueueDownload(path, type)  Q_ERR_NOSYS
+//#define HTTP_RunDownloads()             (void)0
+//#define HTTP_CleanupDownloads()         (void)0
+//#endif
 
 //
 // gtv.c

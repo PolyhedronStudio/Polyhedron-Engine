@@ -7,7 +7,7 @@
 //
 #ifndef __INC_SHARED_MATH_VECTOR5_H__
 #define __INC_SHARED_MATH_VECTOR5_H__
-
+#include "../Shared.h"
 //-----------------
 // Vector 5 type definiton. (X, Y, Z, W, V)
 //

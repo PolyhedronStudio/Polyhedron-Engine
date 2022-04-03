@@ -12,7 +12,6 @@
 #include "../Entities.h"
 #include "../TemporaryEntities.h"
 
-#include "Shared/Interfaces/IClientGameExports.h"
 #include "Core.h"
 #include "Media.h"
 #include "Movement.h"

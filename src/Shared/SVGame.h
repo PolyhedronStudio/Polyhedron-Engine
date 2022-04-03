@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "Shared/List.h"
+#include "List.h"
 
 //
 // game.h -- game dll information visible to server

@@ -8,7 +8,7 @@
 *   over the wire.
 *
 ***/
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/Protocol.h"
 #include "Common/SizeBuffer.h"
 

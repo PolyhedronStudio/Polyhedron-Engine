@@ -18,7 +18,7 @@
 //
 #ifndef __INC_SHARED_MATH_VECTOR4_H__
 #define __INC_SHARED_MATH_VECTOR4_H__
-
+#include "../Shared.h"
 //-----------------
 // Vector 4 type definiton. (X, Y, Z, W)
 //
