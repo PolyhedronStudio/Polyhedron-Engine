@@ -45,7 +45,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "../Client/Client.h"
 #include "../Client/Keys.h"
-#include "Server/Server.h"
+#include "../Server/Server.h"
 #include "System/System.h"
 
 #include <setjmp.h>

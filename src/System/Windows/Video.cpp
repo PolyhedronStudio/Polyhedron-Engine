@@ -32,12 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/ui.h"
 #include "Client/Video.h"
 #include "refresh/refresh.h"
-#include "System/System.h"
-#include "../Resources/polyhedron.xbm"
+#include "../System.h"
+#include "../res/polyhedron.xbm"
 #include <SDL.h>
-
-// RMLUI.
-#include "Client/RmlUI/RmlUI.h"
 
 #ifdef _WINDOWS
 #include <ShellScalingAPI.h>
@@ -195,15 +192,10 @@ static void VID_SDL_ModeChanged(void)
     SDL_GetWindowSize(sdl_window, &width, &height);
 
     Uint32 flags = SDL_GetWindowFlags(sdl_window);
-    // CPP: Bitflags
     if (flags & SDL_WINDOW_FULLSCREEN)
-        sdl_flags = (vidFlags_t)(sdl_flags | QVF_FULLSCREEN);
+        sdl_flags |= QVF_FULLSCREEN;
     else
-        sdl_flags = (vidFlags_t)(sdl_flags & ~QVF_FULLSCREEN);
-    //if (flags & SDL_WINDOW_FULLSCREEN)
-    //    sdl_flags |= QVF_FULLSCREEN;
-    //else
-    //    sdl_flags &= ~QVF_FULLSCREEN;
+        sdl_flags &= ~QVF_FULLSCREEN;
 
 #if USE_REF == REF_SOFT
     SDL_Surface *surf = SDL_GetWindowSurface(sdl_window);
@@ -236,21 +228,13 @@ static void VID_SDL_SetMode(void)
         SDL_SetWindowPosition(sdl_window, display_bounds.x, display_bounds.y);
 
         if (VID_GetFullscreen(&rc, &freq, NULL)) {
-            // CPP: Struct init ...
             SDL_DisplayMode mode = {
-                SDL_PIXELFORMAT_UNKNOWN, // .format = 
-                rc.width, // .w = 
-                rc.height, // .h = 
-                freq, // .refresh_rate = 
-                NULL // .driverdata =
+                .format         = SDL_PIXELFORMAT_UNKNOWN,
+                .w              = rc.width,
+                .h              = rc.height,
+                .refresh_rate   = freq,
+                .driverdata     = NULL
             };
-            //SDL_DisplayMode mode = {
-            //    .format         = SDL_PIXELFORMAT_UNKNOWN,
-            //    .w              = rc.width,
-            //    .h              = rc.height,
-            //    .refresh_rate   = freq,
-            //    .driverdata     = NULL
-            //};
             SDL_SetWindowDisplayMode(sdl_window, &mode);
             flags = SDL_WINDOW_FULLSCREEN;
         } else {
@@ -271,15 +255,6 @@ void VID_SetMode(void)
 {
     VID_SDL_SetMode();
     VID_SDL_ModeChanged();
-}
-
-void VID_VideoWait(void)
-{
-}
-
-qboolean VID_VideoSync(void)
-{
-    return true;
 }
 
 void VID_BeginFrame(void)
@@ -354,7 +329,7 @@ static int VID_SDL_EventFilter(void *userdata, SDL_Event *event)
 {
     // SDL uses relative time, we need absolute
     if (event) {
-        event->common.timestamp = Sys_Milliseconds();
+        event->common.timeStamp = Sys_Milliseconds();
     }
     return 1;
 }
@@ -375,8 +350,8 @@ static void VID_GetDisplayList()
     string_size += 1;
     max_display_name_length += 1;
 
-    char *display_list = (char*)Z_Malloc(string_size); // CPP: Cast
-    char *display_name = (char*)Z_Malloc(max_display_name_length); // CPP: Cast
+    char *display_list = Z_Malloc(string_size);
+    char *display_name = Z_Malloc(max_display_name_length);
     display_list[0] = 0;
 
     for (int display = 0; display < num_displays; display++)
@@ -422,7 +397,7 @@ char *VID_GetDefaultModeList(void)
         return Z_CopyString(VID_MODELIST);
 
     size = 8 + num_modes * 32 + 1;
-    buf = (char*)Z_Malloc(size); // CPP: Cast
+    buf = Z_Malloc(size);
 
     len = Q_strlcpy(buf, "desktop ", size);
     for (i = 0; i < num_modes; i++) {
@@ -444,8 +419,6 @@ char *VID_GetDefaultModeList(void)
 
 qboolean VID_Init(graphics_api_t api)
 {
-    cvar_t* vid_hwgamma;
-    SDL_Surface* icon;
 #ifdef _WINDOWS
 	// Load the DLL and function dynamically to avoid exe file incompatibility with Windows 7
 
@@ -518,8 +491,7 @@ qboolean VID_Init(graphics_api_t api)
 		}
 	}
 
-    // C++20: Declaration moved to top.
-    icon = SDL_CreateRGBSurfaceFrom(icon_rgb, polyhedron_width, polyhedron_height, 32, polyhedron_width * sizeof(uint32_t), 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+    SDL_Surface *icon = SDL_CreateRGBSurfaceFrom(icon_rgb, q2icon_width, q2icon_height, 32, q2icon_width * sizeof(uint32_t), 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
     if (icon) {
         SDL_SetWindowIcon(sdl_window, icon);
         SDL_FreeSurface(icon);
@@ -530,7 +502,7 @@ qboolean VID_Init(graphics_api_t api)
 #if REF_GL
 	if (api == GAPI_OPENGL)
 	{
-		sdl_context = (SDL_GLContext*)SDL_GL_CreateContext(sdl_window); // CPP: Cast
+		sdl_context = SDL_GL_CreateContext(sdl_window);
 		if (!sdl_context) {
 			Com_EPrintf("Couldn't create OpenGL context: %s\n", SDL_GetError());
 			goto fail;
@@ -543,15 +515,14 @@ qboolean VID_Init(graphics_api_t api)
 	}
 #endif
 
-    // C++20: Moved declaration to top.
-    vid_hwgamma = Cvar_Get("vid_hwgamma", "0", CVAR_REFRESH);
+    cvar_t *vid_hwgamma = Cvar_Get("vid_hwgamma", "0", CVAR_REFRESH);
     if (vid_hwgamma->integer) {
         Uint16  gamma[3][256];
 
         if (SDL_GetWindowGammaRamp(sdl_window, gamma[0], gamma[1], gamma[2]) == 0 &&
             SDL_SetWindowGammaRamp(sdl_window, gamma[0], gamma[1], gamma[2]) == 0) {
             Com_Printf("...enabling hardware gamma\n");
-            sdl_flags = (vidFlags_t)(sdl_flags | (sdl_flags | QVF_GAMMARAMP)); // CPP: IMPORTANT: DANGER: sdl_flags |= (sdl_flags | QVF_GAMMARAMP);
+            sdl_flags |= QVF_GAMMARAMP;
         } else {
             Com_Printf("...hardware gamma not supported\n");
             Cvar_Reset(vid_hwgamma);
@@ -561,11 +532,9 @@ qboolean VID_Init(graphics_api_t api)
     VID_SetMode();
     return true;
 
-#if REF_GL
 fail:
 	VID_Shutdown();
 	return false;
-#endif
 }
 
 void VID_Shutdown(void)
@@ -580,7 +549,7 @@ void VID_Shutdown(void)
         SDL_DestroyWindow(sdl_window);
         sdl_window = NULL;
     }
-    sdl_flags = (vidFlags_t)0; // CPP: Cast
+    sdl_flags = 0;
     if (SDL_WasInit(SDL_INIT_EVERYTHING) == SDL_INIT_VIDEO) {
         SDL_Quit();
     } else {
@@ -679,13 +648,13 @@ static void key_event(SDL_KeyboardEvent *event)
     }
 
     if (result == K_LALT || result == K_RALT)
-        Key_Event(K_ALT, event->state, event->timestamp);
+        Key_Event(K_ALT, event->state, event->timeStamp);
     else if (result == K_LCTRL || result == K_RCTRL)
-        Key_Event(K_CTRL, event->state, event->timestamp);
+        Key_Event(K_CTRL, event->state, event->timeStamp);
     else if (result == K_LSHIFT || result == K_RSHIFT)
-        Key_Event(K_SHIFT, event->state, event->timestamp);
+        Key_Event(K_SHIFT, event->state, event->timeStamp);
 
-    Key_Event(result, event->state, event->timestamp);
+    Key_Event(result, event->state, event->timeStamp);
 }
 
 static void mouse_button_event(SDL_MouseButtonEvent *event)
@@ -713,25 +682,25 @@ static void mouse_button_event(SDL_MouseButtonEvent *event)
         return;
     }
 
-    Key_Event(key, event->state, event->timestamp);
+    Key_Event(key, event->state, event->timeStamp);
 }
 
 static void mouse_wheel_event(SDL_MouseWheelEvent *event)
 {
     if (event->x > 0) {
-        Key_Event(K_MWHEELRIGHT, true, event->timestamp);
-        Key_Event(K_MWHEELRIGHT, false, event->timestamp);
+        Key_Event(K_MWHEELRIGHT, true, event->timeStamp);
+        Key_Event(K_MWHEELRIGHT, false, event->timeStamp);
     } else if (event->x < 0) {
-        Key_Event(K_MWHEELLEFT, true, event->timestamp);
-        Key_Event(K_MWHEELLEFT, false, event->timestamp);
+        Key_Event(K_MWHEELLEFT, true, event->timeStamp);
+        Key_Event(K_MWHEELLEFT, false, event->timeStamp);
     }
 
     if (event->y > 0) {
-        Key_Event(K_MWHEELUP, true, event->timestamp);
-        Key_Event(K_MWHEELUP, false, event->timestamp);
+        Key_Event(K_MWHEELUP, true, event->timeStamp);
+        Key_Event(K_MWHEELUP, false, event->timeStamp);
     } else if (event->y < 0) {
-        Key_Event(K_MWHEELDOWN, true, event->timestamp);
-        Key_Event(K_MWHEELDOWN, false, event->timestamp);
+        Key_Event(K_MWHEELDOWN, true, event->timeStamp);
+        Key_Event(K_MWHEELDOWN, false, event->timeStamp);
     }
 }
 
@@ -749,81 +718,25 @@ void VID_PumpEvents(void)
         case SDL_QUIT:
             Com_Quit(NULL, ErrorType::Disconnect);
             break;
-        case SDL_TEXTINPUT:
-            // RMLUI Process Textinput.
-            RMLUI_ProcessTextInput(event.text.text);
-            break;
-        case SDL_KEYDOWN:
-            // RMLUI Process Keydown.
-            RMLUI_ProcessKeyDown(event.key.keysym.sym);
-            //if (RMLUI_ProcessKeyDown(event.key.keysym.sym))
-                // Regular Key Event.
-            key_event(&event.key);
-            break;
-        case SDL_KEYUP:
-            // RMLUI Process Keyup.
-            RMLUI_ProcessKeyUp(event.key.keysym.sym);
-            //if (RMLUI_ProcessKeyUp(event.key.keysym.sym))
-                // Regular Key Event.
-            key_event(&event.key);
-            break;
         case SDL_WINDOWEVENT:
             window_event(&event.window);
             break;
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+            key_event(&event.key);
+            break;
         case SDL_MOUSEMOTION:
-            // RMLUI Process Mouse Move.
-            RMLUI_ProcessMouseMove(event.motion.x, event.motion.y);
-            //if (RMLUI_ProcessMouseMove(event.motion.x, event.motion.y))
-                // Regular UI Mouse event for Q-Based engine.
             UI_MouseEvent(event.motion.x, event.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
-            // RMLUI Process Mouse Button Down.
-            //RMLUI_ProcessMouseButtonDown(event.button.button);
-            if (RMLUI_ProcessMouseButtonDown(event.button.button))
-                // Process regular mouse button event.
-                mouse_button_event(&event.button);
-            break;
         case SDL_MOUSEBUTTONUP:
-            // RMLUI Process Mouse Button Up.
-            //RMLUI_ProcessMouseButtonUp(event.button.button);
-            if (RMLUI_ProcessMouseButtonUp(event.button.button))
-                // Process regular mouse button event.
-                mouse_button_event(&event.button);
+            mouse_button_event(&event.button);
             break;
         case SDL_MOUSEWHEEL:
-            // RMLUI Process Mouse Button Up.
-            //RMLUI_ProcessMouseWheel(-(float)event.wheel.y);
-            if (RMLUI_ProcessMouseWheel(-(float)event.wheel.y))
-                // Process regular mouse scroll event.
-                mouse_wheel_event(&event.wheel);
+            mouse_wheel_event(&event.wheel);
             break;
         }
     }
-    //while (SDL_PollEvent(&event)) {
-    //    switch (event.type) {
-    //    case SDL_QUIT:
-    //        Com_Quit(NULL, ErrorType::Disconnect);
-    //        break;
-    //    case SDL_WINDOWEVENT:
-    //        window_event(&event.window);
-    //        break;
-    //    case SDL_KEYDOWN:
-    //    case SDL_KEYUP:
-    //        key_event(&event.key);
-    //        break;
-    //    case SDL_MOUSEMOTION:
-    //        UI_MouseEvent(event.motion.x, event.motion.y);
-    //        break;
-    //    case SDL_MOUSEBUTTONDOWN:
-    //    case SDL_MOUSEBUTTONUP:
-    //        mouse_button_event(&event.button);
-    //        break;
-    //    case SDL_MOUSEWHEEL:
-    //        mouse_wheel_event(&event.wheel);
-    //        break;
-    //    }
-    //}
 }
 
 /*
@@ -868,7 +781,7 @@ static qboolean InitMouse(void)
 
 static void GrabMouse(qboolean grab)
 {
-    SDL_bool relative = (SDL_bool)(grab && !(Key_GetDest() & KEY_MENU)); // CPP: Cast
+    SDL_bool relative = grab && !(Key_GetDest() & KEY_MENU);
     int cursor = (sdl_flags & QVF_FULLSCREEN) ? SDL_DISABLE : SDL_ENABLE;
 
     SDL_SetWindowGrab(sdl_window, (SDL_bool)grab);

@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if USE_REF
 #include "Client/Video.h"
 #endif
-#include "System/System.h"
+#include "../System.h"
 #include "TTY.h"
 
 #include <sys/types.h>

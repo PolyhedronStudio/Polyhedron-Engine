@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Protocol.h"
 #include "Common/Zone.h"
 #include "../../Client/Client.h"
-#include "Server/Server.h"
+#include "../../Server/Server.h"
 #include "System/System.h"
 
 #ifdef _WIN32

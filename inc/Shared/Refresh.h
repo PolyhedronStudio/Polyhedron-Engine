@@ -10,10 +10,9 @@
 //
 */
 
-#ifndef __SHARED_REFRESH_H__
-#define __SHARED_REFRESH_H__
+#pragma once
 
-#include "System/Hunk.h"
+#include "../src/System/Hunk.h"
 
 #define MAX_DLIGHTS     32
 #define MAX_ENTITIES    2048     // == MAX_PACKET_ENTITIES * 2
@@ -348,5 +347,3 @@ typedef struct model_s {
     int num_light_polys;
     light_poly_t* light_polys;
 } model_t;
-
-#endif // __SHARED_REFRESH_H__

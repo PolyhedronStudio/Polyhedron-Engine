@@ -8,7 +8,7 @@
 //
 
 #include "Shared/Shared.h"
-#include "System/System.h"
+#include "../System.h"
 #include <SDL.h>
 
 

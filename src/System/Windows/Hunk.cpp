@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Shared/Shared.h"
-#include "System/Hunk.h"
+#include "../Hunk.h"
 #include <windows.h>
 
 void Hunk_Begin(memhunk_t *hunk, size_t maximumSize)

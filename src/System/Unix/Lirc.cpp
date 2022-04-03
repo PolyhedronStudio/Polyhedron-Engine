@@ -23,8 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Net/Net.h"
 #include "Client/Input.h"
 #include "Client/Keys.h"
-#include "system/Lirc.h"
-#include "System/System.h"
+#include "../Lirc.h"
+#include "../System.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

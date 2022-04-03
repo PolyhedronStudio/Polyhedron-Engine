@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // server.h
+#pragma once
 
 #include "Shared/Shared.h"
 #include "Shared/List.h"
@@ -36,12 +37,42 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Common/Zone.h"
 
 #include "Client/Client.h"
-#include "Server/Server.h"
+//#include "Server/Server.h"
 #include "System/System.h"
 
 #if USE_ZLIB
 #include <zlib.h>
 #endif
+
+
+
+
+
+
+
+#if USE_ICMP
+void SV_ErrorEvent(NetAdr *from, int ee_errno, int ee_info);
+#endif
+void SV_Init(void);
+void SV_Shutdown(const char *finalmsg, int32_t errorType);
+unsigned SV_Frame(unsigned msec);
+#if USE_SYSCON
+void SV_SetConsoleTitle(void);
+#endif
+//void SV_ConsoleOutput(const char *msg);
+uint32_t		SV_GetServerState (void);                 // WATISDEZE: Added for client game dll
+void            SV_SetServerState (uint32_t serverSate); // WATISDEZE: Added for client game dll
+
+#if USE_CLIENT
+char *SV_GetSaveInfo(const char *dir);
+#endif
+
+// svgame.c
+
+
+// user.c
+void SV_PreRunCmd(void);
+void SV_RunCmdCleanup(void);
 
 //=============================================================================
 

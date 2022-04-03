@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2003-2012 Andrey Nazarov
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,7 +16,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef SOUND_H
-#define SOUND_H
+#pragma once
 
-#endif // SOUND_H
+#include "Shared/Shared.h"
+
+struct memhunk_t {
+    void    *base;
+    size_t  maximumSize;
+    size_t  currentSize;
+    size_t  mapped;
+};
+
+void    Hunk_Begin(memhunk_t *hunk, size_t maximumSize);
+void    *Hunk_Alloc(memhunk_t *hunk, size_t size);
+void    Hunk_End(memhunk_t *hunk);
+void    Hunk_Free(memhunk_t *hunk);

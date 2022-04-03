@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Field.h"
 #include "Common/Net/Net.h"
 #include "Common/Prompt.h"
-#include "System/System.h"
+#include "../System.h"
 #include "TTY.h"
 
 #include <sys/time.h>

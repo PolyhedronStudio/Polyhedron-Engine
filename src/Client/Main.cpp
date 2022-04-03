@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/CLTypes.h"
 
 #include "Client.h"
+#include "../Server/Server.h"
 #include "UI/UI.h"
 #include "Sound/Vorbis.h"
 #include "GameModule.h"

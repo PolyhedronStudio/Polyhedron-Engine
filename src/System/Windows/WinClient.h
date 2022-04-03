@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Video.h"
 #include "refresh/refresh.h"
 #endif
-#include "System/System.h"
+#include "../System.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

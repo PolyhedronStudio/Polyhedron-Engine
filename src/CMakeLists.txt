@@ -148,7 +148,11 @@ SET(SRC_REFRESH
 	Refresh/model_iqm.cpp
 	Refresh/stb/stb.cpp
 )
-
+SET(HEADERS_REFRESH
+	Refresh/Images.h
+	Refresh/Models.h
+	Refresh/Refresh.h
+)
 ###################### GL.
 SET(SRC_GL
 	Refresh/gl/draw.cpp
@@ -189,36 +193,36 @@ SET(SRC_SHARED
 #	Unix
 #
 SET(SRC_UNIX
-	OS/Unix/Hunk.cpp
-	OS/Unix/System.cpp
-	OS/Unix/TTY.cpp
+	System/Unix/Hunk.cpp
+	System/Unix/System.cpp
+	System/Unix/TTY.cpp
 )
 SET(SRC_UNIX_CLIENT
-	OS/SDL2/Sound.cpp
-	OS/SDL2/Video.cpp
-	OS/SDL2/Time.cpp
+	System/SDL2/Sound.cpp
+	System/SDL2/Video.cpp
+	System/SDL2/Time.cpp
 )
 
 #
 #	Windows
 #
 SET(SRC_WINDOWS
-	OS/Windows/Debug.cpp
-	OS/Windows/Hunk.cpp
-	OS/Windows/System.cpp
+	System/Windows/Debug.cpp
+	System/Windows/Hunk.cpp
+	System/Windows/System.cpp
 
-	OS/SDL2/Time.cpp
+	System/SDL2/Time.cpp
 )
 SET(SRC_WINDOWS_CLIENT
-	#OS/Windows/Wave.cpp
-	OS/SDL2/Sound.cpp
-	OS/SDL2/Video.cpp
+	#System/Windows/Wave.cpp
+	System/SDL2/Sound.cpp
+	System/SDL2/Video.cpp
 )
 SET(HEADERS_WINDOWS
-	OS/Windows/WGL.h
-	OS/Windows/GLImp.h
-	OS/Windows/WinClient.h
-	OS/Windows/Threads/Threads.h
+	System/Windows/WGL.h
+	System/Windows/GLImp.h
+	System/Windows/WinClient.h
+	System/Windows/Threads/Threads.h
 )
 
 
@@ -414,11 +418,11 @@ IF(WIN32)
 	ADD_EXECUTABLE(client WIN32 
 		${SRC_CLIENT} ${HEADERS_CLIENT} 
 		${SRC_COMMON} ${HEADERS_COMMON} 
-		${SRC_REFRESH} ${SRC_SHADERS} 
+		${SRC_REFRESH} ${SRC_SHADERS} ${HEADERS_REFRESH}
 		${SRC_SHARED} ${HEADERS_SHARED}
 		${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
 		${SRC_SERVER} ${HEADERS_SERVER}
-		OS/Resources/polyhedron.rc
+		System/Resources/polyhedron.rc
 	)
 
 	#
@@ -430,8 +434,8 @@ IF(WIN32)
 		${SRC_WINDOWS} ${HEADERS_WINDOWS}
 		${SRC_SERVER} ${HEADERS_SERVER}
 		client/null.cpp
-		#OS/sdl2/time.cpp
-		OS/Resources/polyhedron_dedicated.rc
+		#System/sdl2/time.cpp
+		System/Resources/polyhedron_dedicated.rc
 	)
 ELSE()
 	#
@@ -573,8 +577,8 @@ IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../VC/inc)
-	TARGET_SOURCES(svgame PRIVATE ${CMAKE_SOURCE_DIR}/src/OS/Resources/basepoly_sv.rc)
-	TARGET_SOURCES(clgame PRIVATE ${CMAKE_SOURCE_DIR}/src/OS/Resources/basepoly_cl.rc)
+	TARGET_SOURCES(svgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_sv.rc)
+	TARGET_SOURCES(clgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_cl.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -588,8 +592,8 @@ IF (WIN32)
 
     ## Group the resource files too, so they don't end up in the ugly "Source Files" folder in VS
     SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES 
-        OS/Resources/polyhedron.rc 
-        OS/Resources/polyhedron.rc )
+        System/Resources/polyhedron.rc 
+        System/Resources/polyhedron.rc )
 ENDIF()
 
 
