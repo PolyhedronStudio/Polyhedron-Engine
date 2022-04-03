@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // client.h -- primary header for client
+#pragma once
 
 #include "Shared/Shared.h"
 #include "Shared/List.h"
@@ -35,18 +36,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Common/Prompt.h"
 #include "../Common/Protocol.h"
 #include "../Common/SizeBuffer.h"
+#include "../Common/Utilities.h"
 #include "../Common/Zone.h"
 
 #include "System/System.h"
-#include "refresh/refresh.h"
+#include "Refresh/Refresh.h"
 #include "Server/Server.h"
 
-#include "Client/Client.h"
-#include "Client/Input.h"
-#include "Client/Keys.h"
-#include "Client/Sound/Sound.h"
-#include "Client/UI.h"
-#include "Client/Video.h"
+#include "Input.h"
+#include "Keys.h"
+#include "Sound/Sound.h"
+#include "UI.h"
+#include "Video.h"
 
 // Shared Game includes.
 #include "Game/Shared/Protocol.h"
@@ -121,6 +122,34 @@ typedef struct {
     dlstate_t   state;
     char        path[1];
 } dlqueue_t;
+
+
+#define MAX_LOCAL_SERVERS   16
+#define MAX_STATUS_PLAYERS  64
+
+typedef struct {
+    char name[MAX_CLIENT_NAME];
+    int ping;
+    int score;
+} playerStatus_t;
+
+struct serverStatus_t {
+    char infostring[MAX_INFO_STRING];
+    playerStatus_t players[MAX_STATUS_PLAYERS];
+    int numPlayers;
+} ;
+
+typedef struct {
+    char map[MAX_QPATH];
+    char pov[MAX_CLIENT_NAME];
+    qboolean mvd;
+} demoInfo_t;
+
+typedef enum {
+    ACT_MINIMIZED,
+    ACT_RESTORED,
+    ACT_ACTIVATED
+} active_t;
 
 struct ClientStatic {
     int32_t    connectionState;
@@ -581,3 +610,74 @@ void HTTP_CleanupDownloads(void);
 // crc.c
 //
 byte COM_BlockSequenceCRCByte(byte *base, size_t length, int sequence);
+
+
+
+#if USE_CLIENT
+
+
+qboolean CL_ProcessEvents(void);
+#if USE_ICMP
+void CL_ErrorEvent(NetAdr *from);
+#endif
+void CL_Init(void);
+void CL_InitGameModule(void);
+void CL_Disconnect(int32_t errorType);
+void CL_Shutdown(void);
+unsigned CL_Frame(unsigned msec);
+void CL_UpdateSoundSpatializationOrigin(const vec3_t &viewOrigin, const vec3_t &viewForward, const vec3_t &viewRight, const vec3_t &viewUp);
+void CL_RestartFilesystem(qboolean total);
+void CL_Activate(active_t active);
+void CL_UpdateUserinfo(cvar_t* var, from_t from);
+void CL_SendStatusRequest(const NetAdr *address);
+void CL_CheckForIP(const char* s);
+demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
+qboolean CL_CheatsOK(void);
+
+#if USE_CURL
+ssize_t HTTP_FetchFile(const char *url, void **data);
+#endif
+
+// adds the current command line as a ClientCommand::StringCommand to the client message.
+// things like godmode, noclip, etc, are commands directed to the server,
+// so when they are typed in at the console, they will need to be forwarded.
+qboolean CL_ForwardToServer(void);
+
+void Con_Init(void);
+void Con_SetColor(color_index_t color);
+void Con_Print(const char *text);
+void Con_Printf(const char *fmt, ...) q_printf(1, 2);
+void Con_Close(qboolean force);
+
+// this is in the client code, but can be used for debugging from server
+void SCR_DebugGraph(float value, int color);
+void SCR_BeginLoadingPlaque(void);
+void SCR_EndLoadingPlaque(void);
+void SCR_ModeChanged(void);
+void SCR_UpdateScreen(void);
+
+extern const uint32_t   colorTable[8];
+
+qboolean SCR_ParseColor(const char *s, color_t *color);
+
+
+#else // USE_CLIENT
+
+#define CL_Init()                       (void)0
+#define CL_Disconnect(type)             (void)0
+#define CL_Shutdown()                   (void)0
+#define CL_UpdateUserinfo(var, from)    (void)0
+#define CL_ErrorEvent(from)             (void)0
+#define CL_RestartFilesystem(total)     FS_Restart(total)
+#define CL_ForwardToServer()            false
+#define CL_CheatsOK()                   (!!Cvar_VariableInteger("cheats"))
+
+#define Con_Init()                      (void)0
+#define Con_SetColor(color)             (void)0
+#define Con_Print(text)                 (void)0
+
+#define SCR_DebugGraph(value, color)    (void)0
+#define SCR_BeginLoadingPlaque()        (void)0
+#define SCR_EndLoadingPlaque()          (void)0
+
+#endif // !USE_CLIENT

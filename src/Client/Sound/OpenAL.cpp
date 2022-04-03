@@ -15,7 +15,8 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-
+#include "Shared/Shared.h"
+#include "../Client.h"
 #include "Sound.h"
 #include "QAL/AL/efx-presets.h"
 
@@ -507,6 +508,8 @@ void AL_InitReverbEffect(void)
 //	SetReverb(s_reverb_preset->integer, 0);
 }
 
+
+extern TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
 void UpdateReverb(void)
 {
 	static vec3_t mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };
@@ -535,7 +538,6 @@ void UpdateReverb(void)
 
 	if (ReverbEffect == 0)
 		return;
-
 
 	traceA = CL_Trace(listener_origin, up, mins, maxs, nullptr, BrushContentsMask::DeadSolid);
 	traceB = CL_Trace(listener_origin, forward, mins, maxs, nullptr, BrushContentsMask::DeadSolid);

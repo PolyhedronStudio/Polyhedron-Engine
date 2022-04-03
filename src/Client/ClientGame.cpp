@@ -21,10 +21,11 @@
 //
 #include "Client.h"
 #include "Server/Server.h"
-#include "refresh/models.h"
+#include "Refresh/models.h"
 
 // (Client/Game) related.
-#include "Client/GameModule.h"   // TODO: How come it can find client.h??
+#include "GameModule.h"   // TODO: How come it can find client.h??
+#include "Sound/Sound.h"
 #include "Shared/CLTypes.h"
 #include "Shared/CLGame.h"
 
@@ -61,7 +62,11 @@ int _wrp_GetServerState(void) {
 *   @return The value of developer->integer.
 **/
 int32_t _wrp_GetDeveloperLevel(void) {
+#if _DEBUG
     return (developer != nullptr ? developer->integer : 0);
+#else
+    return 0;
+#endif
 }
 
 uint64_t _wrp_GetRealTime(void) {
@@ -813,9 +818,11 @@ void CL_GM_DemoSeek(void) {
 *   @brief  For debugging problems when out-of-date entity origin is referenced.
 **/
 void CL_GM_CheckEntityPresent(int32_t entityNumber, const std::string& what) {
+#if _DEBUG
     if (cge) {
         cge->CheckEntityPresent(entityNumber, what);
     }
+#endif
 }
 
 /**

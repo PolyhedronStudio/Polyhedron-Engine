@@ -19,10 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_main.c  -- client main loop
 #include "RmlUI/RmlUI.h"
 
+#include "Shared/Shared.h"
+#include "Shared/CLTypes.h"
+
 #include "Client.h"
-#include "Client/UI/UI.h"
-#include "Client/Sound/Vorbis.h"
-#include "Client/GameModule.h"
+#include "UI/UI.h"
+#include "Sound/Vorbis.h"
+#include "GameModule.h"
+#include "Sound/Sound.h"
 
 cvar_t  *rcon_address;
 
@@ -2549,11 +2553,11 @@ static void CL_InitLocal(void)
     warn_on_fps_rounding(cl_maxfps);
     warn_on_fps_rounding(r_maxfps);
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
     cl_shownet = Cvar_Get("cl_shownet", "0", 0);
     cl_showmiss = Cvar_Get("cl_showmiss", "0", 0);
     cl_showclamp = Cvar_Get("showclamp", "0", 0);
-//#endif
+#endif
 
     cl_timeout = Cvar_Get("cl_timeout", "120", 0);
 

@@ -19,49 +19,4 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SOUND_H
 #define SOUND_H
 
-void S_Init(void);
-void S_Shutdown(void);
-
-// if origin is NULL, the sound will be dynamically sourced from the entity
-void S_StartSound(const vec3_t *origin, int entnum, int entchannel,
-                  qhandle_t sfx, float fvol, float attenuation, float timeofs);
-void S_ParseStartSound(void);
-void S_StartLocalSound(const char *s);
-void S_StartLocalSound_(const char *s);
-
-void S_FreeAllSounds(void);
-void S_StopAllSounds(void);
-void S_Update(void);
-
-void S_Activate(void);
-
-void S_BeginRegistration(void);
-qhandle_t S_RegisterSound(const char *sample);
-void S_EndRegistration(void);
-
-void S_RawSamples(int samples, int rate, int width,
-		int channels, byte *data, float volume);
-
-void S_UnqueueRawSamples();
-
-float S_GetLinearVolume(float perceptual);
-
-typedef enum {
-    SS_NOT,
-#if USE_SNDDMA
-    SS_DMA,
-#endif
-#if USE_OPENAL
-    SS_OAL
-#endif
-} sndstarted_t;
-
-extern sndstarted_t s_started;
-
-extern  vec3_t  listener_origin;
-extern  vec3_t  listener_forward;
-extern  vec3_t  listener_right;
-extern  vec3_t  listener_up;
-extern  int     listener_entnum;
-
 #endif // SOUND_H

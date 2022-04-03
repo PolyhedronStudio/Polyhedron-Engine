@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Files.h"
 #include "Common/Prompt.h"
 #include "Common/Utilities.h"
-#include "Client/Client.h"
+#include "../Client/Client.h"
 
 #ifdef _WINDOWS
 #include <Windows.h>

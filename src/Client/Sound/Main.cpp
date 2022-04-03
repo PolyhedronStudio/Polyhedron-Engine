@@ -18,9 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // snd_main.c -- common sound functions
 
 #include "Shared/Shared.h"
+#include "../Client.h"
 #include "Sound.h"
-#include "Client/Sound/Vorbis.h"
-#include "Client/GameModule.h"   // TODO: How come it can find client.h??
+#include "Vorbis.h"
+#include "../GameModule.h"   // TODO: How come it can find client.h??
 
 // =======================================================================
 // Internal sound data & structures

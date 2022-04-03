@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_parse.c  -- parse a message received from the server
 
 #include "Client.h"
-#include "Client/GameModule.h"
+#include "GameModule.h"
+#include "Sound/Sound.h"
 #include "Shared/CLGame.h"
 
 // N&C: Cheesy hack, we need to actually make this extern in a header.

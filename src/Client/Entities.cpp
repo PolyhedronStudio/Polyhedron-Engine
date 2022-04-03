@@ -19,8 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_ents.c -- entity parsing and management
 
 #include "Client.h"
-#include "Client/GameModule.h"
-#include "refresh/models.h"
+#include "GameModule.h"
+#include "Refresh/models.h"
+#include "Sound/Sound.h"
 
 extern ClientShared cs;
 /*

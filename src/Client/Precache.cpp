@@ -22,8 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Client.h"
-#include "Client/GameModule.h"
-#include "Client/Sound/Vorbis.h"
+#include "GameModule.h"
+#include "Sound/Vorbis.h"
+#include "Sound/Sound.h"
 
 /*
 ================

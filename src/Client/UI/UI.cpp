@@ -17,8 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "UI.h"
-#include "Client/Input.h"
 #include "../Client.h"
+#include "../Input.h"
+#include "../Sound/Sound.h"
 #include "../../Common/Prompt.h"
 
 uiStatic_t    uis;

@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "Common/Cmd.h"
-#include "Common/Utilities.h"
+#include "Cmd.h"
+#include "Utilities.h"
 
 //
 // common.h -- definitions common between client and server, but not game.dll

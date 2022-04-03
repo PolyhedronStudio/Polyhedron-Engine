@@ -43,8 +43,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Utilities.h"
 #include "Common/Zone.h"
 
-#include "Client/Client.h"
-#include "Client/Keys.h"
+#include "../Client/Client.h"
+#include "../Client/Keys.h"
 #include "Server/Server.h"
 #include "System/System.h"
 
@@ -927,7 +927,7 @@ void Qcommon_Init(int argc, char **argv)
 #ifdef _DEBUG
     developer = Cvar_Get("developer", "1", 0);
 #else
-    developer = Cvar_Get("developer", "0", 0);
+//    developer = Cvar_Get("developer", "0", 0);
 #endif
     timescale = Cvar_Get("timescale", "1", CVAR_CHEAT);
     fixedtime = Cvar_Get("fixedtime", "0", CVAR_CHEAT);

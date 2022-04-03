@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Prompt.h"
 #include "Common/Utilities.h"
 #include "Common/Zone.h"
-#include "Client/Client.h"
+#include "../Client/Client.h"
 
 cvar_t  *cvar_vars;
 

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define UI_H
 
 #include "Common/Net/Net.h"
-#include "Client/Client.h"
+#include "Client.h"
 
 typedef enum {
     UIMENU_NONE,
@@ -38,6 +38,7 @@ void        UI_CharEvent(int key);
 void        UI_Draw(int realtime);
 void        UI_OpenMenu(uiMenu_t menu);
 void        UI_Frame(int msec);
+struct serverStatus_t;
 void        UI_StatusEvent(const serverStatus_t *status);
 void        UI_ErrorEvent(NetAdr *from);
 void        UI_MouseEvent(int x, int y);

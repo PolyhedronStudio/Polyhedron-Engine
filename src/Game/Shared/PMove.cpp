@@ -16,7 +16,6 @@
 *   and execute the right movement according to that.
 * 
 ***/
-#include "Shared/Shared.h"
 #include "SharedGame.h"
 
 
@@ -24,7 +23,7 @@
 *   Pointer to the actual (client-/npc-)entity PlayerMove(PM) structure.
 **/
 static PlayerMove* pm;
-
+cvar_t *developer;
 /**
 *   All of the locals will be zeroed before each player move, just to make damn sure 
 *   we don't have any differences when running on the client or the server.

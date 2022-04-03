@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Server.h"
+#include "../Client/Client.h"
 
 ServerStatic svs;                // persistant server info
 server_t        sv;                 // local server
