@@ -39,9 +39,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "vkpt.h"
 
-#include "Format/Md2.h"
-#include "Format/Md3.h"
-#include "Format/Sp2.h"
+#include "Shared/Formats/Md2.h"
+#include "Shared/Formats/Md3.h"
+#include "Shared/Formats/Sp2.h"
 #include "material.h"
 #include <assert.h>
 

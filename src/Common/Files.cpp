@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Prompt.h"
 #include "System/System.h"
 #include "../Client/Client.h"
-#include "Format/Pak.h"
+#include "Shared/Formats/Pak.h"
 
 #include <fcntl.h>
 

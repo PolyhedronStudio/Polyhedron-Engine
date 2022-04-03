@@ -35,4 +35,14 @@ SET(HEADERS_SHARED
 	${PROJECT_SOURCE_DIR}/inc/Shared/Shared.h 
 	${PROJECT_SOURCE_DIR}/inc/Shared/TickRate.h 
 	${PROJECT_SOURCE_DIR}/inc/Shared/UI.h 
+
+	# Formats.
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Bsp.h 
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Iqm.h 
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Md2.h 
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Md3.h 
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Pak.h 
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Pcx.h 
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Sp2.h 
+	${PROJECT_SOURCE_DIR}/inc/Shared/Formats/Wal.h 
 )

@@ -23,14 +23,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Common.h"
 #include "Common/Files.h"
 #include "System/Hunk.h"
-#include "Format/Md2.h"
+#include "Shared/Formats/Md2.h"
 #if USE_MD3
-#include "Format/Md3.h"
+#include "Shared/Formats/Md3.h"
 #endif
-#include "Format/Sp2.h"
-#include "Format/Iqm.h"
-#include "refresh/images.h"
-#include "refresh/models.h"
+#include "Shared/Formats/Sp2.h"
+#include "Shared/Formats/Iqm.h"
+#include "Refresh/images.h"
+#include "Refresh/models.h"
 
 // during registration it is possible to have more models than could actually
 // be referenced during gameplay, because we don't want to free anything until

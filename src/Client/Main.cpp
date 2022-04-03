@@ -2596,18 +2596,11 @@ static void CL_InitLocal(void)
     Cmd_AddMacro("cl_pps", CL_Pps_m);   // packets per second
     Cmd_AddMacro("cl_ping", CL_Ping_m);
     Cmd_AddMacro("cl_lag", CL_Lag_m);
-    // PH: Moved over to the client game.
-    //Cmd_AddMacro("cl_health", CL_Health_m);
-    //Cmd_AddMacro("cl_ammo", CL_Ammo_m);
-    //Cmd_AddMacro("cl_armor", CL_Armor_m);
-    //Cmd_AddMacro("cl_weaponmodel", CL_WeaponModel_m);
 	Cmd_AddMacro("cl_cluster", CL_Cluster_m);
 	Cmd_AddMacro("cl_clusterthere", CL_ClusterThere_m);
 	Cmd_AddMacro("cl_lightpolys", CL_NumLightPolys_m);
 	Cmd_AddMacro("cl_material", CL_Material_m);
 	Cmd_AddMacro("cl_material_override", CL_Material_Override_m);
-	//Cmd_AddMacro("cl_viewpos", CL_ViewPos_m);
-	//Cmd_AddMacro("cl_viewdir", CL_ViewDir_m);
 	Cmd_AddMacro("cl_hdr_color", CL_HdrColor_m);
 	Cmd_AddMacro("cl_resolution_scale", CL_ResolutionScale_m);
 

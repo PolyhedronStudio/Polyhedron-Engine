@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/List.h"
 #include "Error.h"
 #include "System/Hunk.h"
-#include "Format/Bsp.h"
+#include "Shared/Formats/Bsp.h"
 
 #ifndef MIPLEVELS
 #define MIPLEVELS 4

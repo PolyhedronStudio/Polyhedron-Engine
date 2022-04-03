@@ -130,16 +130,16 @@ SET(HEADERS_COMMON
 ###################### Format.
 #SET(SRC_FORMAT
 #)
-SET(HEADERS_COMMON
-	../inc/Format/Bsp.h
-	../inc/Format/Iqm.h
-	../inc/Format/Md2.h
-	../inc/Format/Md3.h
-	../inc/Format/Pak.h
-	../inc/Format/Pcx.h
-	../inc/Format/Sp2.h
-	../inc/Format/Wal.h
-)
+#SET(HEADERS_COMMON
+#	../inc/Format/Bsp.h
+#	../inc/Format/Iqm.h
+#	../inc/Format/Md2.h
+#	../inc/Format/Md3.h
+#	../inc/Format/Pak.h
+#	../inc/Format/Pcx.h
+#	../inc/Format/Sp2.h
+#	../inc/Format/Wal.h
+#)
 
 ###################### Refresh.
 SET(SRC_REFRESH

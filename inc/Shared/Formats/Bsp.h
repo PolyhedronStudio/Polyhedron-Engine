@@ -4,7 +4,7 @@
 *
 *	@file
 *
-*	Supported BSP Format(s) Structures.
+*	ClientGame ViewCamera Implementation.
 * 
 ***/
 #pragma once

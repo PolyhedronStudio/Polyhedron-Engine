@@ -26,9 +26,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Common.h"
 #include "Common/CVar.h"
 #include "Common/Files.h"
-#include "refresh/images.h"
-#include "Format/Pcx.h"
-#include "Format/Wal.h"
+#include "Refresh/images.h"
+#include "Shared/Formats/Pcx.h"
+#include "Shared/Formats/Wal.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
 
