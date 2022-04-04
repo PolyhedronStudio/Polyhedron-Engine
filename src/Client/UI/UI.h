@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Sound/Sound.h"
 #include "../Client.h"
 #include "../UI.h"
-#include "../../Refresh/refresh.h"
+#include "../../Refresh/Refresh.h"
 
 #define UI_Malloc(s)        Z_TagMalloc(s, TAG_UI)
 #define UI_Mallocz(s)       Z_TagMallocz(s, TAG_UI)
