@@ -185,7 +185,7 @@ SET(HEADERS_SVGAME
 	Entities/Trigger/TriggerOnce.h
 	Entities/Trigger/TriggerPush.h
 	Entities/Trigger/TriggerRelay.h
-	Entities/weaponry/BlasterBolt.h
+	Entities/Weaponry/BlasterBolt.h
 
 	Entities/IServerGameEntity.h
 	Entities/Light.h
