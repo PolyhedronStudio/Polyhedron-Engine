@@ -22,10 +22,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include <Shared/shared.h>
-#include <Shared/Formats/Iqm.h>
-#include <Refresh/models.h>
-#include <Refresh/refresh.h>
+#include "../Shared/Shared.h"
+#include "../Shared/Formats/Iqm.h"
+#include "Models.h"
+#include "Refresh.h"
 
 static qboolean IQM_CheckRange(const iqmHeader_t* header, uint32_t offset, uint32_t count, size_t size) {
 	// return true if the range specified by offset, count and size

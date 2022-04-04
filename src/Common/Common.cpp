@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //#include "pmove.h"
 #include "Prompt.h"
 #include "Protocol.h"
-#include "tests.h"
+#include "Tests.h"
 #include "Utilities.h"
 #include "Zone.h"
 

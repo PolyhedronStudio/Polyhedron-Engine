@@ -651,9 +651,9 @@ static void NET_ErrorEvent(qsocket_t sock, NetAdr *from,
 
 // include our wrappers to hide platfrom-specific details
 #ifdef _WIN32
-#include "win.h"
+#include "Win.h"
 #else
-#include "unix.h"
+#include "Unix.h"
 #endif
 
 /*

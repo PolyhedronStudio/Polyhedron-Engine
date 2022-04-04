@@ -29,8 +29,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #include "Shared/Formats/Sp2.h"
 #include "Shared/Formats/Iqm.h"
-#include "Refresh/images.h"
-#include "Refresh/models.h"
+#include "Refresh/Images.h"
+#include "Refresh/Models.h"
 
 // during registration it is possible to have more models than could actually
 // be referenced during gameplay, because we don't want to free anything until

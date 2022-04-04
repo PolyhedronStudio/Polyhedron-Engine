@@ -17,7 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // CPP: Required include for _ReturnAddress();
+#ifdef WIN32
 #include <intrin.h>
+#endif
 
 #include "../Shared/Shared.h"
 #include "Common/Common.h"

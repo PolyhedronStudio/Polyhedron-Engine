@@ -19,9 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __MATERIAL_H_
 #define __MATERIAL_H_
 
-#include <Shared/shared.h>
-#include <Shared/list.h>
-#include <Refresh/Refresh.h>
+#include "../../Shared/Shared.h"
+#include "../../Shared/List.h"
+#include "../Refresh.h"
 
 #define MAX_PBR_MATERIALS 4096
 
