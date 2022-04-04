@@ -618,14 +618,14 @@ static void PF_StartSound(Entity *edict, int channel,
         msg = LIST_FIRST(MessagePacket, &client->msg_free_list, entry);
 
         msg->currentSize = 0;
-        msg->flags = flags;
-        msg->index = soundindex;
-        msg->volume = volume * 255;
-        msg->attenuation = attenuation * 64;
-        msg->timeofs = timeofs * 1000;
-        msg->sendchan = sendchan;
+        msg->packet.ps.flags = flags;
+        msg->packet.ps.index = soundindex;
+        msg->packet.ps.volume = volume * 255;
+        msg->packet.ps.attenuation = attenuation * 64;
+        msg->packet.ps.timeofs = timeofs * 1000;
+        msg->packet.ps.sendchan = sendchan;
         // N&C: FF Precision.
-        VectorCopy(msg->pos, origin);
+        msg->packet.ps.pos = origin;
         //for (i = 0; i < 3; i++) {
         //    msg->pos[i] = origin[i] * 8;
         //}

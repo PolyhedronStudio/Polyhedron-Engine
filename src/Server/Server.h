@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "../Shared/Shared.h"
 #include "../Shared/List.h"
-#include "Shared/SVGame.h"
+#include "../Shared/SVGame.h"
 
 #include "../Common/Bsp.h"
 #include "../Common/Cmd.h"
@@ -209,12 +209,14 @@ constexpr uint32_t MAX_SOUND_PACKET = 14;
 /**
 *   The actual networking message packets.
 **/
-typedef struct {
+typedef struct MessagePacket_t {
     list_t              entry;
     uint16_t            currentSize;    // Zero means sound packet
-    union {
+    union PacketUnion {
         uint8_t         data[MSG_TRESHOLD];
-        struct {
+        struct PacketStructure {
+            PacketStructure() = default;
+            ~PacketStructure() = default;
             uint8_t     flags;
             uint8_t     index;
             uint16_t    sendchan;
@@ -222,8 +224,8 @@ typedef struct {
             uint8_t     attenuation;
             uint8_t     timeofs;
             vec3_t      pos;     // Saved in case entity is freed
-        };
-    };
+        } ps;
+    } packet;
 } MessagePacket;
 
 //! This is best to match the actual server game frame rate.

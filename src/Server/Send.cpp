@@ -479,7 +479,7 @@ static void add_msg_packet(client_t    *client,
         List_Remove(&msg->entry);
     }
 
-    memcpy(msg->data, data, len);
+    memcpy(msg->packet.data, data, len);
     msg->currentSize = (uint16_t)len;
 
     if (reliable) {
@@ -521,8 +521,8 @@ static void emit_snd(client_t *client, MessagePacket *msg)
 {
     int flags, entnum;
 
-    entnum = msg->sendchan >> 3;
-    flags = msg->flags;
+    entnum = msg->packet.ps.sendchan >> 3;
+    flags = msg->packet.ps.flags;
 
     // check if position needs to be explicitly sent
     if (!(flags & SoundCommandBits::Position) && !check_entity(client, entnum)) {
@@ -533,22 +533,22 @@ static void emit_snd(client_t *client, MessagePacket *msg)
 
     MSG_WriteUint8(ServerCommand::Sound);//MSG_WriteByte(ServerCommand::Sound);
     MSG_WriteUint8(flags);//MSG_WriteByte(flags);
-    MSG_WriteUint8(msg->index);//MSG_WriteByte(msg->index);
+    MSG_WriteUint8(msg->packet.ps.index);//MSG_WriteByte(msg->index);
 
     if (flags & SoundCommandBits::Volume) {
-        MSG_WriteUint8(msg->volume);//MSG_WriteByte(msg->volume);
+        MSG_WriteUint8(msg->packet.ps.volume);//MSG_WriteByte(msg->volume);
     }
     if (flags & SoundCommandBits::Attenuation) {
-        MSG_WriteUint8(msg->attenuation);//MSG_WriteByte(msg->attenuation);
+        MSG_WriteUint8(msg->packet.ps.attenuation);//MSG_WriteByte(msg->attenuation);
     }
     if (flags & SoundCommandBits::Offset) {
-        MSG_WriteUint8(msg->timeofs);//MSG_WriteByte(msg->timeofs);
+        MSG_WriteUint8(msg->packet.ps.timeofs);//MSG_WriteByte(msg->timeofs);
     }
 
-    MSG_WriteInt16(msg->sendchan);//MSG_WriteShort(msg->sendchan);
+    MSG_WriteInt16(msg->packet.ps.sendchan);//MSG_WriteShort(msg->sendchan);
 
     if (flags & SoundCommandBits::Position) {
-        MSG_WriteVector3(msg->pos);
+        MSG_WriteVector3(msg->packet.ps.pos, true);
     }
 
 
@@ -568,7 +568,7 @@ static inline void write_msg(client_t *client, MessagePacket *msg, size_t maximu
 {
     // if this msg fits, write it
     if (msg_write.currentSize + msg->currentSize <= maximumSize) {
-        MSG_WriteData(msg->data, msg->currentSize);
+        MSG_WriteData(msg->packet.data, msg->currentSize);
     }
     free_msg_packet(client, msg);
 }

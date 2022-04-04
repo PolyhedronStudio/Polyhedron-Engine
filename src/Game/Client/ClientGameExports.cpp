@@ -114,7 +114,7 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 void ClientGameExports::ClientBegin() {
     // Reset level locals.
     level = LevelLocals{};
-    level.time = GameTime(cl->serverTime) + FRAMERATE_MS;
+    level.time = GameTime(cl->serverTime);
 }
 
 /**
@@ -139,7 +139,16 @@ void ClientGameExports::ClientClearState() {
 **/
 void ClientGameExports::ClientDeltaFrame() {
     // Run the entity prediction logic for the next frame.
-    level.time = GameTime(cl->serverTime) + FRAMERATE_MS;
+    GameTime svTime = GameTime(cl->serverTime);
+    GameTime clTime = GameTime(cl->time);
+
+    if (clTime > svTime) {
+        level.time = svTime;
+    } else {
+        level.time = clTime;
+    }
+ level.time = clTime;
+//    level.time = GameTime(cl->serverTime);
 
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
     entities->RunFrame();
