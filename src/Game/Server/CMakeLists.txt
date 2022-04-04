@@ -207,7 +207,12 @@ SET(HEADERS_SVGAME
 #
 # Target: ServerGame Module.
 #
-ADD_LIBRARY(svgame SHARED SVGame.def ${SRC_SVGAME} ${HEADERS_SVGAME} ${HEADERS_SHARED} ${HEADERS_SHAREDGAME} $<TARGET_OBJECTS:svgame_sharedgame>)
+if (WIN32)
+	ADD_LIBRARY(svgame SHARED SVGame.def ${SRC_SVGAME} ${HEADERS_SVGAME} ${HEADERS_SHARED} ${HEADERS_SHAREDGAME} $<TARGET_OBJECTS:svgame_sharedgame>)
+else()
+	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${HEADERS_SHARED} ${HEADERS_SHAREDGAME} $<TARGET_OBJECTS:svgame_sharedgame>)
+endif()
+
 # Set the flag for SharedGame to build with ServerGame compatability in mind.
 TARGET_COMPILE_DEFINITIONS(svgame PUBLIC "cxx_std_20 -DSHAREDGAME_SERVERGAME=1")
 
