@@ -21,15 +21,17 @@ struct mat4_t {
 	union
 	{
 		// matrix array index accessor.
-		float matrix[16];
+		struct mat4_mat_t {
+			float matrix[16];
+		} mat;
 
 		// Rows: A B C accessors.
-		struct {
-			vec4_t rowA;
-			vec4_t rowB;
-			vec4_t rowC;
-			vec4_t rowD;
-		};
+		struct mat4_rows_t {
+			vec4_t a;
+			vec4_t b;
+			vec4_t c;
+			vec4_t d;
+		} rows;
 	};
 
 	//-----------------
@@ -38,29 +40,29 @@ struct mat4_t {
 	// Default.
 	mat4_t() {
 		// Set to identity by default.
-		rowA = vec4_t{ 1.f, 0.f, 0.f, 0.f };
-		rowB = vec4_t{ 0.f, 1.f, 0.f, 0.f };
-		rowC = vec4_t{ 0.f, 0.f, 1.f, 0.f };
-		rowC = vec4_t{ 0.f, 0.f, 0.f, 1.f };
+		rows.a = vec4_t{ 1.f, 0.f, 0.f, 0.f };
+		rows.b = vec4_t{ 0.f, 1.f, 0.f, 0.f };
+		rows.c = vec4_t{ 0.f, 0.f, 1.f, 0.f };
+		rows.d = vec4_t{ 0.f, 0.f, 0.f, 1.f };
 	}
 	mat4_t(const vec4_t &RowA, const vec4_t &RowB, const vec4_t &RowC, const vec4_t &RowD) {
-		rowA = RowA;
-		rowB = RowB;
-		rowC = RowC;
-		rowD = RowD;
+		rows.a = RowA;
+		rows.b = RowB;
+		rows.c = RowC;
+		rows.d = RowD;
 	}
 	// Regular T* support.
 	mat4_t(float *mat) {
-		rowA = vec4_t{ mat[0], mat[1], mat[2], mat[3]};
-		rowB = vec4_t{ mat[4], mat[5], mat[6], mat[7] };
-		rowC = vec4_t{ mat[8], mat[9], mat[10], mat[11] };
-		rowD = vec4_t{ mat[12], mat[13], mat[14], mat[15] };
+		rows.a = vec4_t{ mat[0], mat[1], mat[2], mat[3]};
+		rows.b = vec4_t{ mat[4], mat[5], mat[6], mat[7] };
+		rows.c = vec4_t{ mat[8], mat[9], mat[10], mat[11] };
+		rows.d = vec4_t{ mat[12], mat[13], mat[14], mat[15] };
 	}
 	mat4_t(const float * mat) {
-		rowA = vec4_t{ mat[0], mat[1], mat[2], mat[3]};
-		rowB = vec4_t{ mat[4], mat[5], mat[6], mat[7] };
-		rowC = vec4_t{ mat[8], mat[9], mat[10], mat[11] };
-		rowD = vec4_t{ mat[12], mat[13], mat[14], mat[15] };
+		rows.a = vec4_t{ mat[0], mat[1], mat[2], mat[3]};
+		rows.b = vec4_t{ mat[4], mat[5], mat[6], mat[7] };
+		rows.c = vec4_t{ mat[8], mat[9], mat[10], mat[11] };
+		rows.d = vec4_t{ mat[12], mat[13], mat[14], mat[15] };
 	}
 
 	//-----------------
@@ -77,29 +79,29 @@ struct mat4_t {
 	// OPERATOR: ==
 	inline bool operator==(const mat4_t& m) const
 	{
-		return (rowA[0] == m.rowA[0] && rowA[1] == m.rowA[1] && rowA[2] == m.rowA[2] && rowA[3] == m.rowA[3]
-				&& rowC[0] == m.rowB[0] && rowB[1] == m.rowB[1] && rowB[2] == m.rowB[2] && rowB[3] == m.rowB[3]
-				&& rowB[0] == m.rowC[0] && rowC[1] == m.rowC[1] && rowC[2] == m.rowC[2] && rowC[3] == m.rowC[3]
-				&& rowD[0] == m.rowD[0] && rowD[1] == m.rowD[1] && rowD[2] == m.rowD[2] && rowD[3] == m.rowD[3]);
+		return (rows.a[0] == m.rows.a[0] && m.rows.a[1] == m.rows.a[1] && m.rows.a[2] == m.rows.a[2] && rows.a[3] == m.rows.a[3]
+				&& rows.c[0] == m.rows.b[0] && rows.b[1] == m.rows.b[1] && rows.b[2] == m.rows.b[2] && rows.b[3] == m.rows.b[3]
+				&& rows.b[0] == m.rows.c[0] && rows.c[1] == m.rows.c[1] && rows.c[2] == m.rows.c[2] && rows.c[3] == m.rows.c[3]
+				&& rows.d[0] == m.rows.d[0] && rows.d[1] == m.rows.d[1] && rows.d[2] == m.rows.d[2] && rows.d[3] == m.rows.d[3]);
 	}
 
 	// OPERATOR: !=
 	inline bool operator!=(const mat4_t& m) const
 	{
-		return (rowA[0] != m.rowA[0] && rowA[1] != m.rowA[1] && rowA[2] != m.rowA[2] && rowA[3] != m.rowA[3]
-				&& rowC[0] != m.rowB[0] && rowB[1] != m.rowB[1] && rowB[2] != m.rowB[2] && rowB[3] != m.rowB[3]
-				&& rowB[0] != m.rowC[0] && rowC[1] != m.rowC[1] && rowC[2] != m.rowC[2] && rowC[3] != m.rowC[3]
-				&& rowD[0] != m.rowD[0] && rowD[1] != m.rowD[1] && rowD[2] != m.rowD[2] && rowD[3] != m.rowD[3]);
+		return (rows.a[0] != m.rows.a[0] && m.rows.a[1] != m.rows.a[1] && m.rows.a[2] != m.rows.a[2] && rows.a[3] != m.rows.a[3]
+				&& rows.c[0] != m.rows.b[0] && rows.b[1] != m.rows.b[1] && rows.b[2] != m.rows.b[2] && rows.b[3] != m.rows.b[3]
+				&& rows.b[0] != m.rows.c[0] && rows.c[1] != m.rows.c[1] && rows.c[2] != m.rows.c[2] && rows.c[3] != m.rows.c[3]
+				&& rows.d[0] != m.rows.d[0] && rows.d[1] != m.rows.d[1] && rows.d[2] != m.rows.d[2] && rows.d[3] != m.rows.d[3]);
 	}
 
 	// Pointer.
 	inline operator float *() {
-		return &matrix[0];
+		return &mat.matrix[0];
 	}
 
 	// Pointer cast to const float*
 	inline operator const float* () const {
-		return &matrix[0];
+		return &mat.matrix[0];
 	}
 };
 
@@ -275,10 +277,10 @@ static inline mat4_t mat4_rotate(vec_t angle, vec_t x, vec_t y, vec_t z ) {
 	t[3] = t[7] = t[11] = t[12] = t[13] = t[14] = 0;
 	t[15] = 1;
 
-	m.rowA = b.rowA;
-	m.rowB = b.rowB;
-	m.rowC = b.rowC;
-	m.rowD = b.rowD;
+	m.rows.a = b.rows.a;
+	m.rows.b = b.rows.b;
+	m.rows.c = b.rows.c;
+	m.rows.d = b.rows.d;
 	m = mat4_multiply_fast_mat4(b, t);
 
 	return m;

@@ -20,15 +20,17 @@
 struct mat3_t {
 	union
 	{
+		struct mat3_floats_t {
 		// matrix array index accessor.
-		float matrix[9];
+			float matrix[9];
+		} mat;
 
 		// Rows: A B C accessors.
-		struct {
-			vec3_t rowA;
-			vec3_t rowB;
-			vec3_t rowC;
-		};
+		struct mat3_rows_t {
+			vec3_t a;
+			vec3_t b;
+			vec3_t c;
+		} rows;
 	};
 
 	//-----------------
@@ -37,28 +39,28 @@ struct mat3_t {
 	// Default.
 	mat3_t() {
 		// Set to identity by default.
-		rowA = vec3_t{ 1.f, 0.f, 0.f };
-		rowB = vec3_t{ 0.f, 1.f, 0.f };
-		rowC = vec3_t{ 0.f, 0.f, 1.f };
+		rows.a = vec3_t{ 1.f, 0.f, 0.f };
+		rows.b = vec3_t{ 0.f, 1.f, 0.f };
+		rows.c = vec3_t{ 0.f, 0.f, 1.f };
 	}
 
 	// Assign.
 	mat3_t(const vec3_t &RowA, const vec3_t &RowB, const vec3_t &RowC) {
-		rowA = RowA;
-		rowB = RowB;
-		rowC = RowC;
+		rows.a =  RowA;
+		rows.b =  RowB;
+		rows.c =  RowC;
 	}
 
 	// Regular T* support.
 	mat3_t(float *mat) {
-		rowA = vec3_t{ mat[0], mat[1], mat[2] };
-		rowB = vec3_t{ mat[3], mat[4], mat[5] };
-		rowC = vec3_t{ mat[6], mat[7], mat[8] };
+		rows.a =  vec3_t{ mat[0], mat[1], mat[2] };
+		rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
+		rows.c =  vec3_t{ mat[6], mat[7], mat[8] };
 	}
 	mat3_t(const float * mat) {
-		rowA = vec3_t{ mat[0], mat[1], mat[2] };
-		rowB = vec3_t{ mat[3], mat[4], mat[5] };
-		rowC = vec3_t{ mat[6], mat[7], mat[8] };
+		rows.a =  vec3_t{ mat[0], mat[1], mat[2] };
+		rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
+		rows.c =  vec3_t{ mat[6], mat[7], mat[8] };
 	}
 
 	//-----------------
@@ -67,27 +69,27 @@ struct mat3_t {
 	// OPERATOR: ==
 	inline bool operator==(const mat3_t& m) const
 	{
-		return (rowA[0] == m.rowA[0] && rowA[1] == m.rowA[1] && rowA[2] == m.rowA[2]
-			&& rowB[0] == m.rowB[0] && rowB[1] == m.rowB[1] && rowB[2] == m.rowB[2]
-			&& rowC[0] == m.rowC[0] && rowC[1] == m.rowC[1] && rowC[2] == m.rowC[2]);
+		return (rows.a[0] == m.rows.a[0] && rows.a[1] == m.rows.a[1] && rows.a[2] == m.rows.a[2]
+			&& rows.b[0] == m.rows.b[0] && rows.b[1] == m.rows.b[1] && rows.b[2] == m.rows.b[2]
+			&& rows.c[0] == m.rows.c[0] && rows.c[1] == m.rows.c[1] && rows.c[2] == m.rows.c[2]);
 	}
 
 	// OPERATOR: !=
 	inline bool operator!=(const mat3_t& m) const
 	{
-		return (rowA[0] != m.rowA[0] && rowA[1] != m.rowA[1] && rowA[2] != m.rowA[2]
-			&& rowB[0] != m.rowB[0] && rowB[1] != m.rowB[1] && rowB[2] != m.rowB[2]
-			&& rowC[0] != m.rowC[0] && rowC[1] != m.rowC[1] && rowC[2] != m.rowC[2]);
+		return (rows.a[0] != m.rows.a[0] && rows.a[1] != m.rows.a[1] && rows.a[2] != m.rows.a[2]
+			&& rows.b[0] != m.rows.b[0] && rows.b[1] != m.rows.b[1] && rows.b[2] != m.rows.b[2]
+			&& rows.c[0] != m.rows.c[0] && rows.c[1] != m.rows.c[1] && rows.c[2] != m.rows.c[2]);
 	}
 
 	// Pointer.
 	inline operator float *() {
-		return &matrix[0];
+		return &mat.matrix[0];
 	}
 
 	// Pointer cast to const float*
 	inline operator const float* () const {
-		return &matrix[0];
+		return &mat.matrix[0];
 	}
 };
 
@@ -188,9 +190,9 @@ static inline mat3_t matrix3_transpose(const mat3_t &in) {
 //===============
 //
 static inline mat3_t matrix3_from_angles(const vec3_t &angles) {
-	vec3_t rowA = vec3_zero();
-	vec3_t rowB = vec3_zero();
-	vec3_t rowC = vec3_zero();
+	vec3_t rowA =  vec3_zero();
+	vec3_t rowB =  vec3_zero();
+	vec3_t rowC =  vec3_zero();
 	vec3_vectors(angles, &rowA, &rowB, &rowC);
 	return mat3_t{rowA, rowB, rowC};
 }
