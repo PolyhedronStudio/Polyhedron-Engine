@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/Keys.h"
 #include "client/ui.h"
 #include "Client/Video.h"
-#include "refresh/refresh.h"
+#include "Refresh/Refresh.h"
 #include "../System.h"
 #include "../res/polyhedron.xbm"
 #include <SDL.h>

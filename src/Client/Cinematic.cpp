@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Client/Sound/Sound.h"
 #include "Client/Sound/Vorbis.h"
 #include "../Common/Files.h"
-#include "refresh/images.h"
+#include "Refresh/Images.h"
 
 typedef struct
 {

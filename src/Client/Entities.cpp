@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Client.h"
 #include "GameModule.h"
-#include "Refresh/models.h"
+#include "Refresh/Models.h"
 #include "Sound/Sound.h"
 
 extern ClientShared cs;

@@ -25,8 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client.h"
 #include "Client/GameModule.h"
 
-#include "refresh/images.h"
-#include "refresh/models.h"
+#include "Refresh/Images.h"
+#include "Refresh/Models.h"
 
 // Console variables that we need to access from this module
 cvar_t      *vid_rtx;

@@ -17,7 +17,7 @@
 #include "client/gamemodule.h"
 
 // RmlUi Client includes.
-#include "../rmlui.h"
+#include "../RmlUI"
 #include "FileInterface.h"
 
 //

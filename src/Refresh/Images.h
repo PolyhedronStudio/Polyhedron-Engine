@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Files.h"
 #include "Common/Zone.h"
 #include "Common/Error.h"
-#include "refresh/refresh.h"
+#include "Refresh/Refresh.h"
 
 #define R_Malloc(size)      Z_TagMalloc(size, TAG_RENDERER)
 #define R_Mallocz(size)     Z_TagMallocz(size, TAG_RENDERER)
@@ -104,7 +104,7 @@ extern int registration_sequence;
 
 extern uint32_t d_8to24table[256];
 
-// these are implemented in src/refresh/images.c
+// these are implemented in src/Refresh/Images.c
 void IMG_ReloadAll();
 image_t *IMG_Find(const char *name, imagetype_t type, imageflags_t flags);
 image_t* IMG_FindExisting(const char* name, imagetype_t type);

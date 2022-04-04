@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "vkpt.h"
 #include "vk_util.h"
-#include "refresh/images.h"
+#include "Refresh/Images.h"
 #include "device_memory_allocator.h"
 
 #include <assert.h>

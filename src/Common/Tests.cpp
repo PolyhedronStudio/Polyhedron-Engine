@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Common.h"
 #include "Common/Files.h"
 #include "Common/tests.h"
-#include "refresh/refresh.h"
+#include "Refresh/Refresh.h"
 #include "System/System.h"
 
 // test error shutdown procedures
