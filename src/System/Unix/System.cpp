@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "../Shared/Shared.h"
+#include "../../Shared/Shared.h"
 #include "Common/Cmd.h"
 #include "Common/Common.h"
 #include "Common/CVar.h"
@@ -67,15 +67,15 @@ void Sys_DebugBreak(void)
     raise(SIGTRAP);
 }
 
-unsigned Sys_Milliseconds(void)
-{
-    struct timeval tp;
-    unsigned time;
-
-    gettimeofday(&tp, NULL);
-    time = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-    return time;
-}
+//unsigned Sys_Milliseconds(void)
+//{
+//    struct timeval tp;
+//    unsigned time;
+//
+//    gettimeofday(&tp, NULL);
+//    time = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+//    return time;
+//}
 
 /*
 =================

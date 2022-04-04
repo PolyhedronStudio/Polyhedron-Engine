@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../../../Shared/Shared.h"
 #include "../../../Common/Common.h"
 #include "../../../Client/Video.h"
-#include "Dynamic.h"
+#include "dynamic.h"
 
 // ==========================================================
 

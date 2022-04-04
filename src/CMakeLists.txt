@@ -247,11 +247,11 @@ SET(SRC_UNIX
 	System/Unix/Hunk.cpp
 	System/Unix/System.cpp
 	System/Unix/TTY.cpp
+	System/SDL2/Time.cpp
 )
 SET(SRC_UNIX_CLIENT
 	System/SDL2/Sound.cpp
 	System/SDL2/Video.cpp
-	System/SDL2/Time.cpp
 )
 
 #

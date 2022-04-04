@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "material.h"
 #include "vkpt.h"
-#include <Common/prompt.h>
+#include <Common/Prompt.h>
 
 #include <stdlib.h>
 #include <string.h>

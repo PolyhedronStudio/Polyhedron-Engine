@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../../Client/Client.h"
 #include "../../Client/Input.h"
 #include "../../Client/Keys.h"
-#include "../../client/UI.h"
+#include "../../Client/UI.h"
 #include "../../Client/Video.h"
 #include "../../Refresh/Refresh.h"
 #include "../System.h"

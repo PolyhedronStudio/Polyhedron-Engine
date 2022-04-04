@@ -30,9 +30,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../../System/Hunk.h"
 
 #if USE_FIXED_LIBGL
-#include "QGL/Fixed.h"
+#include "qgl/fixed.h"
 #else
-#include "QGL/Dynamic.h"
+#include "qgl/dynamic.h"
 #endif
 
 /*
