@@ -205,7 +205,7 @@ static inline vec3_t matrix3_to_angles(const mat3_t &m) {
 	float c;
 	float pitch;
 
-	pitch = -std::asinf(m[2]);
+	pitch = -asinf(m[2]);
 	c = cosf(pitch);
 	if (fabs(c) > 5 * 10e-6) {     // Gimball lock?
 		// no

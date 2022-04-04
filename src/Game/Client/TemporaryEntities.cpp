@@ -1013,7 +1013,7 @@ static void CLG_RailTrail(void)
 
 static void dirtoangles(vec3_t angles)
 {
-	angles[0] = std::acosf(teParameters.dir[2]) / M_PI * 180.f;
+	angles[0] = acosf(teParameters.dir[2]) / M_PI * 180.f;
 	if (teParameters.dir[0])
 		angles[1] = atan2f(teParameters.dir[1], teParameters.dir[0]) / M_PI * 180.f;
 	else if (teParameters.dir[1] > 0)

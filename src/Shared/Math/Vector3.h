@@ -410,9 +410,9 @@ inline const vec3_t vec3_fabsf(const vec3_t &v) {
 //
 inline const vec3_t vec3_floorf(const vec3_t &v) {
     return vec3_t{
-        std::floorf(v.x),
-        std::floorf(v.y),
-        std::floorf(v.z)
+        floorf(v.x),
+        floorf(v.y),
+        floorf(v.z)
     };
 }
 
