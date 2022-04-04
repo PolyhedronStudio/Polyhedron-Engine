@@ -184,8 +184,8 @@ public:
     *   @return Returns a span containing all the base entities from the range of [start] to [start + count]
     *           that passed the filter process.
     **/
-    template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> std::span<IServerGameEntity*, count> {
-        return std::span(classEntities).subspan(start, count); //return std::span(classEntities).subspan<start, count>(); 
+    template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> ClassEntitySpan {
+        return ClassEntitySpan(classEntities).subspan(start, count); //return std::span(classEntities).subspan<start, count>(); 
     }
     /**
     *   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.
