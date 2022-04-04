@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Gamemodes/IGamemode.h"
 //#include "../Gamemodes/DefaultGamemode.h"
 #include "../Gamemodes/CoopGamemode.h"
-#include "../Gamemodes/DeathmatchGamemode.h"
+#include "../Gamemodes/DeathMatchGamemode.h"
 
 // World.
 #include "../World/Gameworld.h"

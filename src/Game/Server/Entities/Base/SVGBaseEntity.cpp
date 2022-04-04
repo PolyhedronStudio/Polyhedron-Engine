@@ -20,7 +20,7 @@
 #include "SVGBaseTrigger.h"
 
 // Delayed Use Trigger.
-#include "../trigger/TriggerDelayedUse.h"
+#include "../Trigger/TriggerDelayedUse.h"
 
 // World.
 #include "../../World/Gameworld.h"
@@ -452,7 +452,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 	if ( !GetKillTarget().empty() ) {
 		qboolean foundKillTarget = false;
 
-		for (auto* killtargetEntity : GetGameworld()->GetClassEntityRange<0, MAX_EDICTS>()
+		for (auto* killtargetEntity : GetGameworld()->GetClassEntityRange(0, MAX_EDICTS)
 			| cef::IsValidPointer
 			| cef::HasServerEntity
 			| cef::InUse

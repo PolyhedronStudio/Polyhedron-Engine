@@ -15,7 +15,7 @@
 #include "Worldspawn.h"
 
 // Gamemodes.
-#include "../Gamemodes/IGameMode.h"
+#include "../Gamemodes/IGamemode.h"
 #include "../Gamemodes/DeathMatchGamemode.h"
 
 // World.

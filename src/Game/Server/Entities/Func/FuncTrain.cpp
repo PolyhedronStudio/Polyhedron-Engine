@@ -11,7 +11,7 @@
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
 
-#include "../path/PathCorner.h"
+#include "../Path/PathCorner.h"
 #include "FuncTrain.h"
 
 #include "../../Gamemodes/IGamemode.h"

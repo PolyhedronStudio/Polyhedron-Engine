@@ -14,7 +14,7 @@
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
 
-#include "../trigger/TriggerAutoPlatform.h"
+#include "../Trigger/TriggerAutoPlatform.h"
 
 #include "../../Gamemodes/IGamemode.h"
 

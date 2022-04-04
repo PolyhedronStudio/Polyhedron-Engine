@@ -18,8 +18,8 @@ class SGEntityHandle;
 /**
 *	Helper function to cast from an entity handle pointer to a ClassEntity pointer.
 **/
-template<typename T> static inline T CastHandle(SGEntityHandle& bridge) { return static_cast<T>( static_cast<ClassEntity*>(bridge) ); }
-template<typename T> static inline T CastHandle(const SGEntityHandle& bridge) { return static_cast<T>(static_cast<ClassEntity*>(bridge)); }
+template<typename T> static inline T CastHandle(SGEntityHandle& bridge) { return static_cast<T>( static_cast<T*>(bridge) ); }
+template<typename T> static inline T CastHandle(const SGEntityHandle& bridge) { return static_cast<T>(static_cast<T*>(bridge)); }
 
 /**
 *	@brief A bridge between class entity and server entity.

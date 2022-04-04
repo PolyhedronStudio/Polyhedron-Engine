@@ -176,7 +176,7 @@ public:
     *           that passed the filter process.
     **/
     template<std::size_t start, std::size_t count> inline auto GetServerEntityRange() -> std::span<Entity, count> {
-        return std::span(serverEntities).subspan<start, count>(); 
+        return std::span(serverEntities).subspan(start, count); //return std::span(serverEntities).subspan<start, count>(); 
     }
     /**
     *   @brief Selectively acquire a list of SVGBaseEntity* derived objects using class entity filters.
@@ -185,7 +185,7 @@ public:
     *           that passed the filter process.
     **/
     template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> std::span<IServerGameEntity*, count> {
-        return std::span(classEntities).subspan<start, count>(); 
+        return std::span(classEntities).subspan(start, count); //return std::span(classEntities).subspan<start, count>(); 
     }
     /**
     *   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.

@@ -14,7 +14,7 @@
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
 
-#include "../trigger/TriggerAutoDoor.h"
+#include "../Trigger/TriggerAutoDoor.h"
 
 #include "FuncAreaportal.h"
 #include "FuncDoor.h"

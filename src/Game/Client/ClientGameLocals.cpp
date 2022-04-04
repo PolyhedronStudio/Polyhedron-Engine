@@ -14,14 +14,14 @@
 #include "TemporaryEntities.h"
 
 // ClientGameExports implementations.
-#include "exports/Core.h"
-#include "exports/Entities.h"
-#include "exports/Media.h"
-#include "exports/Movement.h"
-#include "exports/Prediction.h"
-#include "exports/Screen.h"
-#include "exports/ServerMessage.h"
-#include "exports/View.h"
+#include "Exports/Core.h"
+#include "Exports/Entities.h"
+#include "Exports/Media.h"
+#include "Exports/Movement.h"
+#include "Exports/Prediction.h"
+#include "Exports/Screen.h"
+#include "Exports/ServerMessage.h"
+#include "Exports/View.h"
 
 
 

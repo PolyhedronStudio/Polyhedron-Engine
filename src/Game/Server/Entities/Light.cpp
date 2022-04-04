@@ -12,7 +12,7 @@
 #include "../Entities.h"
 
 // Entities.
-#include "base/SVGBaseTrigger.h"
+#include "Base/SVGBaseTrigger.h"
 #include "Light.h"
 
 // SpawnFlags.

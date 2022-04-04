@@ -10,7 +10,7 @@
 #include "Gamemodes/IGamemode.h"
 #include "Gamemodes/DefaultGamemode.h"
 #include "Gamemodes/CoopGamemode.h"
-#include "Gamemodes/DeathmatchGamemode.h"
+#include "Gamemodes/DeathMatchGamemode.h"
 
 // Gameworld.
 #include "World/Gameworld.h"

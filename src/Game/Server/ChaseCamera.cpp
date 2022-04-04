@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Gamemodes/IGamemode.h"
 
 // Gameworld.
-#include "World/GameWorld.h"
+#include "World/Gameworld.h"
 
 void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 {
