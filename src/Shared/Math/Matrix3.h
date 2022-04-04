@@ -100,9 +100,9 @@ struct mat3_t {
 //
 static inline mat3_t matrix3_identity() {
 	mat3_t m = {
-		{1, 0, 0},
-		{0, 1, 0},
-		{0, 0, 1}
+		vec3_t{1.f, 0.f, 0.f},
+		vec3_t{0.f, 1.f, 0.f},
+		vec3_t{0.f, 0.f, 1.f}
 	};
 
 	return m;
@@ -119,17 +119,17 @@ static inline mat3_t matrix3_multiply(const mat3_t &m1, const mat3_t &m2) {
 	mat3_t out;
 
 	return mat3_t{
-		{ 
+		vec3_t{ 
 			m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6],
 			m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7],
 			m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8]
 		},
-		{
+		vec3_t{
 			m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6],
 			m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7],
 			m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8]
 		},
-		{
+		vec3_t{
 			m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6],
 			m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7],
 			m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]
@@ -174,9 +174,9 @@ static inline mat3_t matrix3_transpose(const mat3_t &in) {
 	//out[7] = in[5];
 
 	return mat3_t{
-		{in[0], in[3], in[6]},
-		{in[1], in[4], in[7]},
-		{in[2], in[5], in[8]}
+		vec3_t{in[0], in[3], in[6]},
+		vec3_t{in[1], in[4], in[7]},
+		vec3_t{in[2], in[5], in[8]}
 	};
 }
 
@@ -188,9 +188,11 @@ static inline mat3_t matrix3_transpose(const mat3_t &in) {
 //===============
 //
 static inline mat3_t matrix3_from_angles(const vec3_t &angles) {
-	mat3_t m;
-	vec3_vectors(angles, &m.rowA, &m.rowB, &m.rowC);
-	return m;
+	vec3_t rowA = vec3_zero();
+	vec3_t rowB = vec3_zero();
+	vec3_t rowC = vec3_zero();
+	vec3_vectors(angles, &rowA, &rowB, &rowC);
+	return mat3_t{rowA, rowB, rowC};
 }
 
 //
@@ -201,7 +203,7 @@ static inline mat3_t matrix3_from_angles(const vec3_t &angles) {
 //===============
 //
 static inline vec3_t matrix3_to_angles(const mat3_t &m) {
-	vec3_t angles;
+	vec3_t angles = vec3_zero();
 	float c;
 	float pitch;
 
