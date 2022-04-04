@@ -883,8 +883,8 @@ LOAD(Nodes)
         out->numfaces = numfaces;
 
         for (j = 0; j < 3; j++) {
-            out->mins[j] = (int16_t)LittleShort(in->mins[j]);
-            out->maxs[j] = (int16_t)LittleShort(in->maxs[j]);
+            out->bounds.mins[j] = (int16_t)LittleShort(in->mins[j]);
+            out->bounds.maxs[j] = (int16_t)LittleShort(in->maxs[j]);
         }
 
         out->parent = NULL;
@@ -953,8 +953,8 @@ LOAD_EXT(Nodes) {
         out->numfaces = numfaces;
 
         for (j = 0; j < 3; j++) {
-            out->mins[j] = LittleFloat(in->mins[j]);
-            out->maxs[j] = LittleFloat(in->maxs[j]);
+            out->bounds.mins[j] = LittleFloat(in->mins[j]);
+            out->bounds.maxs[j] = LittleFloat(in->maxs[j]);
         }
 
         out->parent = NULL;

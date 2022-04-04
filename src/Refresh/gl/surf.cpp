@@ -811,7 +811,7 @@ static void set_world_size(void)
     int i;
 
     for (i = 0, size = 0; i < 3; i++) {
-        temp = node->maxs[i] - node->mins[i];
+        temp = node->bounds.maxs[i] - node->bounds.mins[i];
         if (temp > size)
             size = temp;
     }

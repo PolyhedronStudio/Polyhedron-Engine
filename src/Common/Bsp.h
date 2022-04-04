@@ -136,10 +136,11 @@ typedef struct mnode_s {
 #if USE_REF
 //    union {
 //        vec_t           minmaxs[6];
-        struct {
-            vec3_t      mins;
-            vec3_t      maxs;
-        };
+        struct bounds_t {
+            bounds_t() = default;
+            vec3_t mins;
+            vec3_t maxs;
+        } bounds;
     //};
 
     int                 visframe;
