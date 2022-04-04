@@ -88,7 +88,7 @@ void ViewCamera::SetupThirdpersonViewProjection() {
     focus -= viewOrigin;
 
     // Calculate the new distance to use.
-    float dist = std::sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
+    float dist = sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
 
     // Set our view angles.
     viewAngles[vec3_t::Pitch] = -180.f / M_PI * std::atan2f(focus[2], dist);

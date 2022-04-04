@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // WATISDEZE: Moved most to shared, since cgame needs to know about the structs and defines,
 // thus making this part of the shared folder.
-#include "Shared/refresh.h"
+#include "Shared/Refresh.h"
 
 // called when the library is loaded
 extern qboolean    (*R_Init)(qboolean total);

@@ -20,8 +20,6 @@ SET(SRC_SVGAME
 	Utilities.cpp
 	Weapons.cpp 
 
-	ai/MonsterAI.cpp
-
 	Entities/Base/SVGBaseEntity.cpp
 	Entities/Base/SVGBaseItem.cpp
 	Entities/Base/SVGBaseItemAmmo.cpp
@@ -109,7 +107,7 @@ SET(SRC_SVGAME
 
 	Gamemodes/DefaultGamemode.cpp
 	Gamemodes/CoopGamemode.cpp
-	Gamemodes/DeathmatchGamemode.cpp
+	Gamemodes/DeathMatchGamemode.cpp
 
 	Physics/Physics.cpp
 	Physics/StepMove.cpp
@@ -117,7 +115,7 @@ SET(SRC_SVGAME
 	Player/Client.cpp
 	Player/Hud.cpp
 
-	World/GameWorld.cpp
+	World/Gameworld.cpp
 	#SVGame.def
 	
 )
@@ -131,8 +129,6 @@ SET(HEADERS_SVGAME
 	ServerGameLocals.h
 	TypeInfo.h
 	Utilities.h
-
-	AI/MonsterAI.h
 
 	Entities/Base/SVGBaseEntity.h
 	Entities/Base/SVGBaseItem.h
@@ -197,13 +193,13 @@ SET(HEADERS_SVGAME
 
 	Gamemodes/DefaultGamemode.h
 	Gamemodes/CoopGamemode.h
-	Gamemodes/DeathmatchGamemode.h
+	Gamemodes/DeathMatchGamemode.h
 	Gamemodes/IGamemode.h
 
 	Player/Animations.h
 	Player/Client.h
 
-	World/GameWorld.h
+	World/Gameworld.h
 	#SVGame.def
 
 )
@@ -213,7 +209,7 @@ SET(HEADERS_SVGAME
 #
 ADD_LIBRARY(svgame SHARED SVGame.def ${SRC_SVGAME} ${HEADERS_SVGAME} ${HEADERS_SHARED} ${HEADERS_SHAREDGAME} $<TARGET_OBJECTS:svgame_sharedgame>)
 # Set the flag for SharedGame to build with ServerGame compatability in mind.
-ADD_DEFINITIONS("-DSHAREDGAME_SERVERGAME=1")
+TARGET_COMPILE_DEFINITIONS(svgame PUBLIC "cxx_std_20 -DSHAREDGAME_SERVERGAME=1")
 
 # Include directories.
 TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC PATH_SHARED )

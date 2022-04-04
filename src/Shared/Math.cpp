@@ -51,7 +51,7 @@ void vectoangles2(const vec3_t value1, vec3_t angles)
             yaw += 360;
         }
 
-        forward = std::sqrtf(value1[0] * value1[0] + value1[1] * value1[1]);
+        forward = sqrtf(value1[0] * value1[0] + value1[1] * value1[1]);
         pitch = std::atan2f(value1[2], forward) * 180.f / M_PI;
         if (pitch < 0) {
             pitch += 360;

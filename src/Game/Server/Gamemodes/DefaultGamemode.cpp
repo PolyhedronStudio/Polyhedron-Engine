@@ -800,8 +800,8 @@ void DefaultGamemode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     // bobbing based on that.
     //
     vec3_t playerVelocity = player->GetVelocity();
-    // Without * FRAMETIME = XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
-    bobMoveCycle.XYSpeed = std::sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+    // Without * FRAMETIME = XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+    bobMoveCycle.XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
     if (bobMoveCycle.XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
         // Special handling for when not on ground.

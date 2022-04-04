@@ -343,7 +343,7 @@ inline const vec3_t vec3_euler(const vec3_t &dir) {
             yaw += 360.f;
         }
 
-        const float forward = std::sqrtf(dir.x * dir.x + dir.y * dir.y);
+        const float forward = sqrtf(dir.x * dir.x + dir.y * dir.y);
         pitch = Degrees(std::atan2f(dir.z, forward));
 
         if (pitch < 0.f) {
@@ -658,7 +658,7 @@ inline float vec3_length_squared(const vec3_t &v) {
 //===============
 //
 inline float vec3_length(const vec3_t &v) {
-    return std::sqrtf(vec3_length_squared(v));
+    return sqrtf(vec3_length_squared(v));
 }
 
 //
@@ -860,7 +860,7 @@ inline const char* vec3_to_cstr( const vec3_t& v, qboolean rounded = true )
 //#define VectorMA(a,b,c,d) d=vec3_fmaf(a,b,c)
 #define VectorEmpty(v) v=vec3_zero() //((v)[0]==0&&(v)[1]==0&&(v)[2]==0)
 #define VectorCompare(v1,v2) vec3_equal(v1, v2) //((v1)[0]==(v2)[0]&&(v1)[1]==(v2)[1]&&(v1)[2]==(v2)[2])
-#define VectorLength(v) vec3_length(v)    //(std::sqrtf(DotProduct((v),(v))))
+#define VectorLength(v) vec3_length(v)    //(sqrtf(DotProduct((v),(v))))
 #define VectorLengthSquared(v) vec3_length_squared(v)     //(DotProduct((v),(v)))
 #define VectorScale(in,scale,out) \
         ((out)[0]=(in)[0]*(scale), \
@@ -875,7 +875,7 @@ inline const char* vec3_to_cstr( const vec3_t& v, qboolean rounded = true )
         (((v1)[0]-(v2)[0])*((v1)[0]-(v2)[0])+ \
         ((v1)[1]-(v2)[1])*((v1)[1]-(v2)[1])+ \
         ((v1)[2]-(v2)[2])*((v1)[2]-(v2)[2]))
-#define Distance(v1,v2) (std::sqrtf(DistanceSquared(v1,v2)))
+#define Distance(v1,v2) (sqrtf(DistanceSquared(v1,v2)))
 //#define LerpAngles(a,b,c,d) \
 //        ((d)[0]=LerpAngle((a)[0],(b)[0],c), \
 //         (d)[1]=LerpAngle((a)[1],(b)[1],c), \

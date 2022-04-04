@@ -1093,7 +1093,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
         if ((wasOnGround) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
             if (!(ent->GetHealth() <= 0.0)) {
                 vec3_t vel = ent->GetVelocity();
-                float speed = std::sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
+                float speed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
                 if (speed) {
                     float friction = STEPMOVE_FRICTION;
                     float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;

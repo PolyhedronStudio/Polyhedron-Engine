@@ -176,7 +176,7 @@ static inline float vec2_length_squared(const vec2_t &v) {
 //===============
 //
 static inline float vec2_length(const vec2_t &v) {
-    return std::sqrtf(vec2_length_squared(v));
+    return sqrtf(vec2_length_squared(v));
 }
 
 //

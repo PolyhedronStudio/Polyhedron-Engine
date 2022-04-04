@@ -257,7 +257,7 @@ void ClientGameMovement::MouseMove() {
 
     clgi.Cvar_ClampValue(m_accel, 0, 1);
 
-    speed = std::sqrtf(motionX * motionX + motionY * motionY);
+    speed = sqrtf(motionX * motionX + motionY * motionY);
     speed = sensitivity->value + speed * m_accel->value;
 
     motionX *= speed;
