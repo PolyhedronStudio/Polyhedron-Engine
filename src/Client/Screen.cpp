@@ -516,6 +516,12 @@ DEBUG STUFF
 ===============================================================================
 */
 
+static inline void SCR_Turtle_FrameFlag(int32_t &x, int32_t &y, int32_t f, const char *str) {
+    if (cl.frameFlags & f) {
+        SCR_DrawString(x, y, UI_ALTCOLOR, str);
+        y += CHAR_HEIGHT;
+    }
+}
 static void SCR_DrawTurtle(void)
 {
     int x, y;
@@ -529,24 +535,24 @@ static void SCR_DrawTurtle(void)
     x = CHAR_WIDTH;
     y = scr.hud_height - 11 * CHAR_HEIGHT;
 
-#define DF(f) \
-    if (cl.frameFlags & ##f) { \
-        SCR_DrawString(x, y, UI_ALTCOLOR, #f); \
-        y += CHAR_HEIGHT; \
-    }
+//#define DF(f) \
+//    if (cl.frameFlags & ##f) { \
+//        SCR_DrawString(x, y, UI_ALTCOLOR, #f); \
+//        y += CHAR_HEIGHT; \
+//    }
 
     if (scr_showturtle->integer > 1) {
-        DF(FrameFlags::Suppressed)
+        SCR_Turtle_FrameFlag(x, y, FrameFlags::Suppressed, "Suppressed");
     }
-    DF(FrameFlags::ClientPredict)
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::ClientPredict, "ClientPredict");
     if (scr_showturtle->integer > 1) {
-        DF(FrameFlags::ClientDrop)
-        DF(FrameFlags::ServerDrop)
+        SCR_Turtle_FrameFlag(x, y, FrameFlags::ClientDrop, "ClientDrop");
+        SCR_Turtle_FrameFlag(x, y, FrameFlags::ServerDrop, "ServerDrop");
     }
-    DF(FrameFlags::BadFrame)
-    DF(FrameFlags::OldFrame)
-    DF(FrameFlags::OldEntity)
-    DF(FrameFlags::NoDeltaFrame)
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::BadFrame, "BadFrame");
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::OldFrame, "OldFrame");
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::OldEntity, "OldEntity");
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::NoDeltaFrame, "NoDeltaFrame");
 
 #undef DF
 }
