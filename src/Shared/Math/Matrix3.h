@@ -21,17 +21,19 @@ struct mat3_t {
 	union
 	{
 		struct mat3_floats_t {
-		// matrix array index accessor.
+			mat3_floats_t () = default;
+			// matrix array index accessor.
 			float matrix[9];
 		} mat;
 
 		// Rows: A B C accessors.
 		struct mat3_rows_t {
+			mat3_rows_t() = default;
 			vec3_t a;
 			vec3_t b;
 			vec3_t c;
 		} rows;
-	};
+	} u = { };
 
 	//-----------------
 	// Constructors.
@@ -39,28 +41,28 @@ struct mat3_t {
 	// Default.
 	mat3_t() {
 		// Set to identity by default.
-		rows.a = vec3_t{ 1.f, 0.f, 0.f };
-		rows.b = vec3_t{ 0.f, 1.f, 0.f };
-		rows.c = vec3_t{ 0.f, 0.f, 1.f };
+		u.rows.a = vec3_t{ 1.f, 0.f, 0.f };
+		u.rows.b = vec3_t{ 0.f, 1.f, 0.f };
+		u.rows.c = vec3_t{ 0.f, 0.f, 1.f };
 	}
 
 	// Assign.
 	mat3_t(const vec3_t &RowA, const vec3_t &RowB, const vec3_t &RowC) {
-		rows.a =  RowA;
-		rows.b =  RowB;
-		rows.c =  RowC;
+		u.rows.a =  RowA;
+		u.rows.b =  RowB;
+		u.rows.c =  RowC;
 	}
 
 	// Regular T* support.
 	mat3_t(float *mat) {
-		rows.a =  vec3_t{ mat[0], mat[1], mat[2] };
-		rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
-		rows.c =  vec3_t{ mat[6], mat[7], mat[8] };
+		u.rows.a =  vec3_t{ mat[0], mat[1], mat[2] };
+		u.rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
+		u.rows.c =  vec3_t{ mat[6], mat[7], mat[8] };
 	}
 	mat3_t(const float * mat) {
-		rows.a =  vec3_t{ mat[0], mat[1], mat[2] };
-		rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
-		rows.c =  vec3_t{ mat[6], mat[7], mat[8] };
+		u.rows.a =  vec3_t{ mat[0], mat[1], mat[2] };
+		u.rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
+		u.rows.c =  vec3_t{ mat[6], mat[7], mat[8] };
 	}
 
 	//-----------------
@@ -69,27 +71,27 @@ struct mat3_t {
 	// OPERATOR: ==
 	inline bool operator==(const mat3_t& m) const
 	{
-		return (rows.a[0] == m.rows.a[0] && rows.a[1] == m.rows.a[1] && rows.a[2] == m.rows.a[2]
-			&& rows.b[0] == m.rows.b[0] && rows.b[1] == m.rows.b[1] && rows.b[2] == m.rows.b[2]
-			&& rows.c[0] == m.rows.c[0] && rows.c[1] == m.rows.c[1] && rows.c[2] == m.rows.c[2]);
+		return (u.rows.a[0] == m.u.rows.a[0] && u.rows.a[1] == m.u.rows.a[1] && u.rows.a[2] == m.u.rows.a[2]
+			&& u.rows.b[0] == m.u.rows.b[0] && u.rows.b[1] == m.u.rows.b[1] && u.rows.b[2] == m.u.rows.b[2]
+			&& u.rows.c[0] == m.u.rows.c[0] && u.rows.c[1] == m.u.rows.c[1] && u.rows.c[2] == m.u.rows.c[2]);
 	}
 
 	// OPERATOR: !=
 	inline bool operator!=(const mat3_t& m) const
 	{
-		return (rows.a[0] != m.rows.a[0] && rows.a[1] != m.rows.a[1] && rows.a[2] != m.rows.a[2]
-			&& rows.b[0] != m.rows.b[0] && rows.b[1] != m.rows.b[1] && rows.b[2] != m.rows.b[2]
-			&& rows.c[0] != m.rows.c[0] && rows.c[1] != m.rows.c[1] && rows.c[2] != m.rows.c[2]);
+		return (u.rows.a[0] != m.u.rows.a[0] && u.rows.a[1] != m.u.rows.a[1] && u.rows.a[2] != m.u.rows.a[2]
+			&& u.rows.b[0] != m.u.rows.b[0] && u.rows.b[1] != m.u.rows.b[1] && u.rows.b[2] != m.u.rows.b[2]
+			&& u.rows.c[0] != m.u.rows.c[0] && u.rows.c[1] != m.u.rows.c[1] && u.rows.c[2] != m.u.rows.c[2]);
 	}
 
 	// Pointer.
 	inline operator float *() {
-		return &mat.matrix[0];
+		return &u.mat.matrix[0];
 	}
 
 	// Pointer cast to const float*
 	inline operator const float* () const {
-		return &mat.matrix[0];
+		return &u.mat.matrix[0];
 	}
 };
 
