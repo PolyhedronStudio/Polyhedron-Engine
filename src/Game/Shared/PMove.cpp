@@ -1036,7 +1036,7 @@ static void PM_LadderMove(void) {
     vel.z = 0.f;
 
     // handle Z intentions differently
-    if (std::fabsf(pm->state.velocity.z) < PM_SPEED_LADDER) {
+    if (fabs(pm->state.velocity.z) < PM_SPEED_LADDER) {
 
         if ((pm->viewAngles.x <= -15.0f) && (pm->moveCommand.input.forwardMove > 0)) {
             vel.z = PM_SPEED_LADDER;

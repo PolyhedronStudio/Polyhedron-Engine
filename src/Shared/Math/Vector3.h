@@ -330,7 +330,7 @@ inline const vec3_t vec3_euler(const vec3_t &dir) {
     }
     else {
         if (dir.x) {
-            yaw = Degrees(std::atan2f(dir.y, dir.x));
+            yaw = Degrees(atan2f(dir.y, dir.x));
         }
         else if (dir.y > 0.f) {
             yaw = 90.f;
@@ -344,7 +344,7 @@ inline const vec3_t vec3_euler(const vec3_t &dir) {
         }
 
         const float forward = sqrtf(dir.x * dir.x + dir.y * dir.y);
-        pitch = Degrees(std::atan2f(dir.z, forward));
+        pitch = Degrees(atan2f(dir.z, forward));
 
         if (pitch < 0.f) {
             pitch += 360.f;
@@ -395,9 +395,9 @@ inline const float vec3_to_yaw(const vec3_t& dir) {
 //
 inline const vec3_t vec3_fabsf(const vec3_t &v) {
     return vec3_t{
-        std::fabsf(v.x),
-        std::fabsf(v.y),
-        std::fabsf(v.z)
+        fabs(v.x),
+        fabs(v.y),
+        fabs(v.z)
     };
 }
 

@@ -233,9 +233,9 @@ static void Player_UpdateStates(ServerFrame *previousFrame, ServerFrame *current
     }
 
     // No lerping if player entity was teleported (origin check).
-    if (std::fabsf((float)(previousPlayerState->pmove.origin[0] - currentPlayerState->pmove.origin[0])) > 256 ||
-        std::fabsf((float)(previousPlayerState->pmove.origin[1] - currentPlayerState->pmove.origin[1])) > 256 ||
-        std::fabsf((float)(previousPlayerState->pmove.origin[2] - currentPlayerState->pmove.origin[2])) > 256) {
+    if (fabs((float)(previousPlayerState->pmove.origin[0] - currentPlayerState->pmove.origin[0])) > 256 ||
+        fabs((float)(previousPlayerState->pmove.origin[1] - currentPlayerState->pmove.origin[1])) > 256 ||
+        fabs((float)(previousPlayerState->pmove.origin[2] - currentPlayerState->pmove.origin[2])) > 256) {
         goto duplicate;
     }
 

@@ -64,8 +64,8 @@ void ViewCamera::SetupThirdpersonViewProjection() {
     // Calculate view origin to use based on thirdperson range and angle.
     const float angle = Radians(cl_thirdperson_angle->value);
     const float range = cl_thirdperson_range->value;
-    const float fscale = std::cosf(angle);
-    const float rscale = std::sinf(angle);
+    const float fscale = cosf(angle);
+    const float rscale = sinf(angle);
     viewOrigin = vec3_fmaf(viewOrigin, -range * fscale, viewForward);
     viewOrigin = vec3_fmaf(viewOrigin, -range * rscale, viewRight);
 
@@ -91,7 +91,7 @@ void ViewCamera::SetupThirdpersonViewProjection() {
     float dist = sqrtf(focus[0] * focus[0] + focus[1] * focus[1]);
 
     // Set our view angles.
-    viewAngles[vec3_t::Pitch] = -180.f / M_PI * std::atan2f(focus[2], dist);
+    viewAngles[vec3_t::Pitch] = -180.f / M_PI * atan2f(focus[2], dist);
     viewAngles[vec3_t::Yaw] -= cl_thirdperson_angle->value;
 
     // Last but not least, let it be known we are in thirdperson view.

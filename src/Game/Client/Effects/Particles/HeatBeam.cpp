@@ -59,8 +59,8 @@ void ParticleEffects::HeatBeam(const vec3_t &start, const vec3_t &forward) {
             p->time = cl->time;
             p->acceleration = vec3_zero();
             variance = 0.5;
-            c = std::cosf(rot) * variance;
-            s = std::sinf(rot) * variance;
+            c = cosf(rot) * variance;
+            s = sinf(rot) * variance;
 
             // trim it so it looks like it's starting at the origin
             if (i < 10) {

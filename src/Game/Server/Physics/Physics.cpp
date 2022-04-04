@@ -1063,7 +1063,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
 
     // Friction for flying monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0)) {
-        float speed = std::fabsf(ent->GetVelocity().z);
+        float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float friction = STEPMOVE_FRICTION / 3;
         float newSpeed = speed - (FRAMETIME.count() * control * friction);
@@ -1076,7 +1076,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
 
     // Friction for flying monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
-        float speed = std::fabsf(ent->GetVelocity().z);
+        float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float newSpeed = speed - (FRAMETIME.count() * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
         if (newSpeed < 0)

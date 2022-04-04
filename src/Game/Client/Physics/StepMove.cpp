@@ -401,8 +401,8 @@ qboolean SV_StepDirection(CLGBaseEntity* ent, float yaw, float dist)
     CLG_CalculateYawAngle(ent->GetPODEntity());
 
     yaw = yaw * M_PI * 2 / 360;
-    move[0] = std::cosf(yaw) * dist;
-    move[1] = std::sinf(yaw) * dist;
+    move[0] = cosf(yaw) * dist;
+    move[1] = sinf(yaw) * dist;
     move[2] = 0;
 
     oldOrigin = ent->GetOrigin();
@@ -437,8 +437,8 @@ qboolean CLG_StepMove_Walk(CLGBaseEntity* ent, float yaw, float dist)
 
     yaw = yaw * M_PI * 2 / 360;
 
-    move[0] = std::cosf(yaw) * dist;
-    move[1] = std::sinf(yaw) * dist;
+    move[0] = cosf(yaw) * dist;
+    move[1] = sinf(yaw) * dist;
     move[2] = 0;
 
     return CLG_MoveStep(ent, move, true);

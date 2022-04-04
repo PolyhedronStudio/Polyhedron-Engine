@@ -174,10 +174,10 @@ void SV_LinkEntity(cm_t *cm, Entity *ent)
 
         max = 0;
         for (i = 0; i < 3; i++) {
-            v = std::fabsf(ent->mins[i]);
+            v = fabs(ent->mins[i]);
             if (v > max)
                 max = v;
-            v = std::fabsf(ent->maxs[i]);
+            v = fabs(ent->maxs[i]);
             if (v > max)
                 max = v;
         }

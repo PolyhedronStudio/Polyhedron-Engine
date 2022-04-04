@@ -107,8 +107,8 @@ static inline float Radians(float degrees) {
 //===============
 //
 static inline void SinCosRadians(const float radians, float  &s, float &c) {
-    s = std::sinf(radians);
-    c = std::cosf(radians);
+    s = sinf(radians);
+    c = cosf(radians);
 }
 
 /**
@@ -288,7 +288,7 @@ static inline float Smoothf(float f, float min, float max) {
 //===============
 //
 static inline bool EqualEpsilonf(float a, float b, float epsilon = FLT_EPSILON) {
-    return std::fabsf(a - b) <= epsilon;
+    return fabs(a - b) <= epsilon;
 }
 
 //
