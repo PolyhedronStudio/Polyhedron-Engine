@@ -18,25 +18,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Client.h"
 
-static keywaitcb_t  key_wait_cb;
-static void         *key_wait_arg;
+static keywaitcb_t	key_wait_cb;
+static void			*key_wait_arg;
 
-static char     *keybindings[256];
+static char		*keybindings[256];
 
 // bitmap of keys not passed to interpreter while in console
-static byte     consolekeys[256 / 8];
+static byte		consolekeys[256 / 8];
 
 // key to map to if shift held down in console
-static byte     keyshift[256];
+static byte		keyshift[256];
 
 // key down status: if > 1, it is auto-repeating
-static byte     keydown[256];
+static byte		keydown[256];
 
 // number of keys down for ButtonBits::Any
-static int      anykeydown;
+static int		anykeydown;
 
 // bitmap for generating button up commands
-static byte     buttondown[256 / 8];
+static byte		buttondown[256 / 8];
 
 static qboolean key_overstrike;
 

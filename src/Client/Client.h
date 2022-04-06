@@ -624,7 +624,7 @@ void CL_Init(void);
 void CL_InitGameModule(void);
 void CL_Disconnect(int32_t errorType);
 void CL_Shutdown(void);
-unsigned CL_Frame(unsigned msec);
+uint64_t CL_Frame(uint64_t msec);
 void CL_UpdateSoundSpatializationOrigin(const vec3_t &viewOrigin, const vec3_t &viewForward, const vec3_t &viewRight, const vec3_t &viewUp);
 void CL_RestartFilesystem(qboolean total);
 void CL_Activate(active_t active);

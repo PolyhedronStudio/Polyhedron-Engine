@@ -484,7 +484,7 @@ void SVG_CheckDMRules(void)
     //    return;
 
     if (timelimit->value) {
-        if (level.time >= Frametime(timelimit->value)) {
+        if (level.time >= GameTime(timelimit->integer)) {
             gi.BPrintf(PRINT_HIGH, "Timelimit hit.\n");
             SVG_EndDMLevel();
             return;

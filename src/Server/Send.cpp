@@ -548,7 +548,7 @@ static void emit_snd(client_t *client, MessagePacket *msg)
     MSG_WriteInt16(msg->packet.ps.sendchan);//MSG_WriteShort(msg->sendchan);
 
     if (flags & SoundCommandBits::Position) {
-        MSG_WriteVector3(msg->packet.ps.pos, true);
+        MSG_WriteVector3(msg->packet.ps.pos, false);
     }
 
 

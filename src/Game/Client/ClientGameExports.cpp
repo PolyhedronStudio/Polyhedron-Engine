@@ -272,7 +272,7 @@ void ClientGameExports::ClientUpdateOrigin() {
 
     // Update the client's 3D Sound Spatialization Origin values. This is a nescessity for the game 
     // in order to properly play sound effects.
-    clgi.UpdateSoundSpatializationOrigin(viewCamera->GetViewOrigin(), viewCamera->GetForwardViewVector(), viewCamera->GetRightViewVector(), viewCamera->GetUpViewVector());
+    clgi.UpdateSoundSpatializationOrigin(cl->refdef.vieworg, viewCamera->GetForwardViewVector(), viewCamera->GetRightViewVector(), viewCamera->GetUpViewVector());
 }
 
 /**

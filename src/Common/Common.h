@@ -166,10 +166,10 @@ extern cvar_t   *rcon_password;
 
 #if USE_CLIENT
 // host_speeds times
-extern uint64_t     time_before_game;
-extern uint64_t     time_after_game;
-extern uint64_t     time_before_ref;
-extern uint64_t     time_after_ref;
+extern uint64_t     timeBeforeServerGame;
+extern uint64_t     timeAfterServerGame;
+extern uint64_t     timeBeforeRefresh;
+extern uint64_t     timeAfterRefresh;
 #endif
 
 extern const char   com_version_string[];

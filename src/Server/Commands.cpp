@@ -635,14 +635,14 @@ static void dump_lag(void)
     client_t    *cl;
 
     Com_Printf(
-        "num name            PLs2c PLc2s Rmin Ravg Rmax dup\n"
-        "--- --------------- ----- ----- ---- ---- ---- ---\n");
+        "num name            PLs2c PLc2s Rmin Ravg Rmax dup scale\n"
+        "--- --------------- ----- ----- ---- ---- ---- --- -----\n");
 
     FOR_EACH_CLIENT(cl) {
-        Com_Printf("%3i %-15.15s %5.2f %5.2f %4d %4d %4d %3d\n",
+        Com_Printf("%3i %-15.15s %5.2f %5.2f %4d %4d %4d %3d %5.3f\n",
                    cl->number, cl->name, PL_S2C(cl), PL_C2S(cl),
                    cl->pingMinimum, AVG_PING(cl), cl->pingMaximum,
-                   cl->numpackets - 1);
+                   cl->numpackets - 1, cl->timescale);
     }
 }
 

@@ -75,7 +75,7 @@ void MiscServerModel::Spawn() {
     Base::Spawn();
 
     // Set solid.
-    SetSolid(Solid::BoundingBox);
+    SetSolid(Solid::OctagonBox);
 
     // Set move type.
     SetMoveType(MoveType::None);

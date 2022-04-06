@@ -563,7 +563,7 @@ TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const ve
     //}
 
     // clip to world
-    CM_BoxTrace(&trace, start, end, mins, maxs, sv.cm.cache->nodes, contentmask);
+    CM_TransformedBoxTrace(&trace, start, end, mins, maxs, sv.cm.cache->nodes, contentmask, vec3_zero(), vec3_zero());
     trace.ent = ge->entities;
     if (trace.fraction == 0) {
         return trace;   // Blocked by the world

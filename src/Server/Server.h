@@ -134,15 +134,15 @@ static constexpr uint32_t MAX_TOTAL_ENT_LEAFS = 128;
 *   A client ServerCommand::Frame message.
 **/
 typedef struct {
-    int         number;
+    int64_t     number;
     unsigned    num_entities;
     unsigned    first_entity;
     PlayerState playerState;
-    int         clientNumber;
-    int         areaBytes;
+    int32_t     clientNumber;
+    int32_t		areaBytes;
     byte        areaBits[MAX_MAP_AREA_BYTES];  // PortalArea visibility bits.
-    unsigned    sentTime;   // For ping calculations.
-    int         latency;
+    uint64_t	sentTime;   // For ping calculations.
+    int64_t		latency;
 } ClientFrame;
 
 /**
@@ -156,11 +156,11 @@ typedef struct {
 *   Main server structure.
 **/
 typedef struct {
-    int32_t serverState;    // precache commands are only valid during load
-    int32_t spawncount;     // random number generated each server spawn
+    int64_t serverState;    // precache commands are only valid during load
+    int64_t spawncount;     // random number generated each server spawn
 
-    int32_t  frameNumber;
-    uint32_t frameResidual;
+    int64_t  frameNumber;
+    uint64_t frameResidual;
 
     char    mapcmd[MAX_QPATH];          // ie: *intro.cin+base
 
@@ -172,7 +172,7 @@ typedef struct {
 
     server_entity_t entities[MAX_EDICTS];
 
-    unsigned    tracecount;
+    uint64_t    tracecount;
 } server_t;
 
 /**
@@ -190,7 +190,7 @@ struct ConnectionState {
 /**
 *   Message Configuration.
 **/
-constexpr uint32_t MSG_POOLSIZE = 8192;
+constexpr uint32_t MSG_POOLSIZE = 16384; // WID: WAS //8192 * 2;
 constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
 
 /**
@@ -216,7 +216,6 @@ typedef struct MessagePacket_t {
         uint8_t         data[MSG_TRESHOLD];
         struct PacketStructure {
             PacketStructure() = default;
-            ~PacketStructure() = default;
             uint8_t     flags;
             uint8_t     index;
             uint16_t    sendchan;
@@ -259,10 +258,10 @@ static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 50 / 
 *  RateLimit
 **/
 typedef struct {
-    unsigned    time;
-    unsigned    credit;
-    unsigned    credit_cap;
-    unsigned    cost;
+    uint64_t    time;
+    uint64_t	credit;
+    uint64_t	credit_cap;
+    uint64_t	cost;
 } RateLimit;
 
 /**
@@ -278,9 +277,9 @@ typedef struct client_s {
     list_t entry;
 
     // Core info
-    int32_t connectionState;
-    Entity *edict;     // EDICT_NUM(clientnum+1)
-    int number;     // client slot number
+    int32_t		connectionState;
+    Entity		*edict;     // EDICT_NUM(clientnum+1)
+    int32_t		number;     // client slot number
 
     // Client flags
     qboolean reconnected: 1;
@@ -293,43 +292,46 @@ typedef struct client_s {
     qboolean http_download: 1;
 
     // Userinfo
-    char userinfo[MAX_INFO_STRING];  // name, etc
-    char name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
-    int32_t messageLevel;               // for filtering printed messages
-    size_t rate;
-    RateLimit ratelimitNameChange;       // for suppressing "foo changed name" flood
+    char		userinfo[MAX_INFO_STRING];  // name, etc
+    char		name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
+    int32_t		messageLevel;               // for filtering printed messages
+    size_t		rate;
+    RateLimit	ratelimitNameChange;       // for suppressing "foo changed name" flood
 
     // console var probes
-    char *versionString;
-    char reconnectKey[16];
-    char reconnectValue[16];
-    int32_t consoleQueries;
+    char		*versionString;
+    char		reconnectKey[16];
+    char		reconnectValue[16];
+    int64_t		consoleQueries;
 
     // usercmd stuff
-    uint32_t    lastMessage;    // svs.realTime when packet was last received
-    uint32_t    lastActivity;   // svs.realTime when user activity was last seen
-    int32_t     lastFrame;      // for delta compression
-    ClientMoveCommand lastClientUserCommand;        // for filling in big drops
-    int32_t clientUserCommandMiliseconds;   // every seconds this is reset, if user
-                                            // commands exhaust it, assume time cheating
-    int32_t numberOfMoves;      // reset every 10 seconds
-    int32_t movesPerSecond;     // average movement FPS
+    uint64_t    lastMessage;					// svs.realTime when packet was last received
+    uint64_t    lastActivity;					// svs.realTime when user activity was last seen
+    int64_t		lastFrame;						// for delta compression
+    ClientMoveCommand lastClientUserCommand;	// for filling in big drops
+    int64_t		clientUserCommandMiliseconds;	// every seconds this is reset, if user commands exhaust it, assume time cheating
+    int64_t		numberOfMoves;					// Reset every 10 seconds
+    int64_t		movesPerSecond;					// Average movement FPS
 
-    // Networking PING.
-    int32_t ping;
-    int32_t pingMinimum;
-    int32_t pingMaximum;
+	// Timescale for usercmd stuff.
+	int			cmd_msec_used;	// UserCommand Time used so far for this frame.
+    float		timescale;		// Time scale.
 
-    // Networking averages.
-    int32_t averagePingTime;
-    int32_t averagePingCount;
+    // Ping.
+    int64_t		ping;
+    int64_t		pingMinimum;
+    int64_t		pingMaximum;
+
+    // Ping averages.
+    int64_t		averagePingTime;
+    int64_t		averagePingCount;
 
     // frame encoding
     ClientFrame frames[UPDATE_BACKUP];    // Updates can be delta'd from here
-    uint32_t framesSent;
-    uint32_t framesAcknowledged;
-    uint32_t framesNoDelta;
-    int32_t frameNumber;
+    uint64_t	framesSent;
+    uint64_t	framesAcknowledged;
+    uint64_t	framesNoDelta;
+    int64_t		frameNumber;
 
     uint32_t frameFlags;
 
@@ -338,8 +340,8 @@ typedef struct client_s {
     int32_t suppressCount; // Number of messages rate suppressed
     
     // Used to rate drop async packets
-    uint32_t sendTime;
-    uint32_t sendDelta;
+    uint64_t sendTime;
+    uint64_t sendDelta;
 
     // current download
     struct {
@@ -408,8 +410,8 @@ static constexpr uint32_t    MAX_CHALLENGES = 1024;
 **/
 typedef struct {
     NetAdr adr;
-    uint32_t challenge;
-    uint32_t time;
+    uint32_t	challenge;
+    uint64_t	time;
 } Challenge;
 
 /**
@@ -464,7 +466,7 @@ typedef struct {
     list_t entry;
     NetAdr adr;
 
-    uint32_t last_ack;
+    uint64_t last_ack;
     time_t last_resolved;
 
     char name[1];
@@ -487,7 +489,7 @@ typedef struct {
 
 typedef struct server_static_s {
     qboolean    initialized;        // sv_init has completed
-    unsigned    realtime;           // always increasing, no clamping, etc
+    uint64_t	realtime;           // always increasing, no clamping, etc
 
     client_t    *client_pool;       // [maximumclients]
 
@@ -499,7 +501,8 @@ typedef struct server_static_s {
     z_stream        z;  // for compressing messages at once
 #endif
 
-    unsigned        last_heartbeat;
+    uint64_t		last_heartbeat;
+	uint64_t		last_timescale_check;
 
     RateLimit     ratelimit_status;
     RateLimit     ratelimit_auth;

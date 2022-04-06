@@ -32,65 +32,68 @@ Entity      *sv_player;         // current client edict
 
 qboolean    sv_pending_autosave = 0;
 
-cvar_t  *sv_enforcetime;
-cvar_t  *sv_allow_nodelta;
+cvar_t  *sv_enforcetime			= nullptr;
+cvar_t  *sv_timescale_time		= nullptr;
+cvar_t  *sv_timescale_warn		= nullptr;
+cvar_t  *sv_timescale_kick		= nullptr;
+cvar_t  *sv_allow_nodelta		= nullptr;
 
-cvar_t  *sv_timeout;            // seconds without any message
-cvar_t  *sv_zombietime;         // seconds to sink messages after disconnect
-cvar_t  *sv_ghostime;
-cvar_t  *sv_idlekick;
+cvar_t  *sv_timeout				= nullptr;            // seconds without any message
+cvar_t  *sv_zombietime			= nullptr;         // seconds to sink messages after disconnect
+cvar_t  *sv_ghostime			= nullptr;
+cvar_t  *sv_idlekick			= nullptr;
 
-cvar_t  *sv_password;
-cvar_t  *sv_reserved_password;
+cvar_t  *sv_password			= nullptr;
+cvar_t  *sv_reserved_password	= nullptr;
 
-cvar_t  *sv_force_reconnect;
-cvar_t  *sv_show_name_changes;
+cvar_t  *sv_force_reconnect		= nullptr;
+cvar_t  *sv_show_name_changes	= nullptr;
 
-cvar_t  *sv_novis;
+cvar_t  *sv_novis				= nullptr;
 
-cvar_t* sv_in_bspmenu;
+cvar_t* sv_in_bspmenu			= nullptr;
 
-cvar_t  *sv_maxclients;
-cvar_t  *sv_gamemode;
-cvar_t  *sv_reserved_slots;
-cvar_t  *sv_showclamp;
-cvar_t  *sv_locked;
-cvar_t  *sv_downloadserver;
-cvar_t  *sv_redirect_address;
+cvar_t  *sv_maxclients			= nullptr;
+cvar_t  *sv_gamemode			= nullptr;
+cvar_t  *sv_reserved_slots		= nullptr;
+cvar_t  *sv_showclamp			= nullptr;
+cvar_t  *sv_locked				= nullptr;
+cvar_t  *sv_downloadserver		= nullptr;
+cvar_t  *sv_redirect_address	= nullptr;
 
-cvar_t  *sv_hostname;
-cvar_t  *sv_public;            // should heartbeats be sent
+cvar_t  *sv_hostname			= nullptr;
+cvar_t  *sv_public				= nullptr;            // should heartbeats be sent
 
 #ifdef _DEBUG
-cvar_t  *sv_debug;
-cvar_t  *sv_pad_packets;
+cvar_t  *sv_debug				= nullptr;
+cvar_t  *sv_pad_packets			= nullptr;
 #endif
-cvar_t  *sv_lan_force_rate;
-cvar_t  *sv_calcpings_method;
-cvar_t  *sv_changemapcmd;
+cvar_t  *sv_lan_force_rate		= nullptr;
+cvar_t  *sv_calcpings_method	= nullptr;
+cvar_t  *sv_changemapcmd		= nullptr;
 
 #if USE_PACKETDUP
-cvar_t  *sv_packetdup_hack;
+cvar_t  *sv_packetdup_hack		= nullptr;
 #endif
-cvar_t  *sv_allow_map;
+cvar_t  *sv_allow_map			= nullptr;
 #if !USE_CLIENT
-cvar_t  *sv_recycle;
+cvar_t  *sv_recycle				= nullptr;
 #endif
-cvar_t  *sv_enhanced_setplayer;
+cvar_t  *sv_enhanced_setplayer	= nullptr;
 
-cvar_t  *sv_iplimit;
-cvar_t  *sv_status_limit;
-cvar_t  *sv_status_show;
-cvar_t  *sv_uptime;
-cvar_t  *sv_auth_limit;
-cvar_t  *sv_rcon_limit;
-cvar_t  *sv_namechange_limit;
+cvar_t  *sv_iplimit				= nullptr;
+cvar_t  *sv_status_limit		= nullptr;
+cvar_t  *sv_status_show			= nullptr;
+cvar_t  *sv_uptime				= nullptr;
+cvar_t  *sv_auth_limit			= nullptr;
+cvar_t  *sv_rcon_limit			= nullptr;
+cvar_t  *sv_namechange_limit	= nullptr;
 
-cvar_t  *sv_restrict_rtx;
+cvar_t  *sv_restrict_rtx		= nullptr;
 
-cvar_t  *sv_allow_unconnected_cmds;
+cvar_t  *sv_allow_unconnected_cmds	= nullptr;
 
-cvar_t  *map_override_path;
+cvar_t  *map_override_path		= nullptr;
 
 qboolean sv_registered;
 
@@ -1301,13 +1304,42 @@ for their command moves.  If they exceed it, assume cheating.
 */
 static void SV_GiveMsec(void)
 {
+ //   client_t    *cl;
+
+ //   //if (sv.frameNumber % (int)(BASE_FRAMETIME * (BASE_FRAMERATE / 10.0))) // WID: This was: (16 * SV_FRAMEDIV)
+	////if (fmod(sv.frameNumber, BASE_FRAMETIME * (BASE_FRAMERATE / 10.0f)))
+ //   if (sv.frameNumber % (16 * SV_FRAMEDIV))
+	//	return;
+
+ //   FOR_EACH_CLIENT(cl) {
+ //       cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100); // WID: This was: 1800; // 1600 + some slop
+ //   }
     client_t    *cl;
 
-    if (sv.frameNumber % (int)(BASE_FRAMETIME * (BASE_FRAMERATE / 10))) // WID: This was: (16 * SV_FRAMEDIV)
+    if (!(fmod(sv.frameNumber, BASE_FRAMETIME * (BASE_FRAMERATE / 10.0f)))) {
+        FOR_EACH_CLIENT(cl) {
+            cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100);//1800; // 1600 + some slop
+        }
+    }
+
+    if (svs.realtime - svs.last_timescale_check < sv_timescale_time->integer)
         return;
 
+    float d = svs.realtime - svs.last_timescale_check;
+    svs.last_timescale_check = svs.realtime;
+
     FOR_EACH_CLIENT(cl) {
-        cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100); // WID: This was: 1800; // 1600 + some slop
+        cl->timescale = cl->clientUserCommandMiliseconds / d;
+        cl->cmd_msec_used = 0;
+
+        if (sv_timescale_warn->value > 1.0f && cl->timescale > sv_timescale_warn->value) {
+            Com_Printf("%s[%s]: detected time skew: %.3f\n", cl->name,
+                       NET_AdrToString(&cl->netchan->remoteNetAddress), cl->timescale);
+        }
+
+        if (sv_timescale_kick->value > 1.0f && cl->timescale > sv_timescale_kick->value) {
+            SV_DropClient(cl, "time skew too high");
+        }
     }
 }
 
@@ -1593,14 +1625,14 @@ static void SV_RunGameFrame(void)
 {
 #if USE_CLIENT
     if (host_speeds->integer)
-        time_before_game = Sys_Milliseconds();
+        timeBeforeServerGame = Sys_Milliseconds();
 #endif
 
     ge->RunFrame();
 
 #if USE_CLIENT
     if (host_speeds->integer)
-        time_after_game = Sys_Milliseconds();
+        timeAfterServerGame = Sys_Milliseconds();
 #endif
 
     if (msg_write.currentSize) {
@@ -1698,7 +1730,7 @@ Returns amount of extra frameTime available for sleeping on IO.
 unsigned SV_Frame(unsigned msec)
 {
 #if USE_CLIENT
-    time_before_game = time_after_game = 0;
+    timeBeforeServerGame = timeAfterServerGame = 0;
 #endif
 
     // advance local server time
@@ -1914,6 +1946,11 @@ SV_Init
 Only called at quake2.exe startup, not for each game
 ===============
 */
+void sv_sec_timeout_changed(cvar_t *self)
+{
+    self->integer = 1000 * Cvar_ClampValue(self, 0, 24 * 24 * 60 * 60);
+}
+
 void SV_Init(void)
 {
     SV_InitOperatorCommands();
@@ -1943,6 +1980,11 @@ void SV_Init(void)
     sv_idlekick = Cvar_Get("sv_idlekick", "0", 0);
     sv_showclamp = Cvar_Get("showclamp", "0", 0);
     sv_enforcetime = Cvar_Get("sv_enforcetime", "1", 0);
+    sv_timescale_time = Cvar_Get("sv_timescale_time", "16", 0);
+    sv_timescale_time->changed = sv_sec_timeout_changed;
+    sv_timescale_time->changed(sv_timescale_time);
+    sv_timescale_warn = Cvar_Get("sv_timescale_warn", "0", 0);
+    sv_timescale_kick = Cvar_Get("sv_timescale_kick", "0", 0);
     sv_allow_nodelta = Cvar_Get("sv_allow_nodelta", "1", 0);
 
     sv_force_reconnect = Cvar_Get("sv_force_reconnect", "", CVAR_LATCH);

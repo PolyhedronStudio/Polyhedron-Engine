@@ -534,6 +534,7 @@ void SV_Begin_f(void)
     sv_client->connectionState = ConnectionState::Spawned;
     sv_client->sendDelta = 0;
     sv_client->clientUserCommandMiliseconds = 1800;
+	sv_client->cmd_msec_used = 0;
     sv_client->suppressCount = 0;
     sv_client->http_download = false;
 
@@ -856,8 +857,9 @@ static void SV_Lag_f(void)
                     "RTT (min/avg/max):   %d/%d/%d ms\n"
                     "Server to client PL: %.2f%% (approx)\n"
                     "Client to server PL: %.2f%%\n",
+					"Timescale          : %.3f\n",
                     cl->name, cl->pingMinimum, AVG_PING(cl), cl->pingMaximum,
-                    PL_S2C(cl), PL_C2S(cl));
+                    PL_S2C(cl), PL_C2S(cl), cl->timescale);
 }
 
 #if USE_PACKETDUP
@@ -1045,6 +1047,7 @@ static inline void SV_ClientThink(ClientMoveCommand *cmd)
     ClientMoveCommand *old = &sv_client->lastClientUserCommand;
 
     sv_client->clientUserCommandMiliseconds -= cmd->input.msec;
+	sv_client->cmd_msec_used += cmd->input.msec;
     sv_client->numberOfMoves++;
 
     if (sv_client->clientUserCommandMiliseconds < 0 && sv_enforcetime->integer) {

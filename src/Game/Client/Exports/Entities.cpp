@@ -373,7 +373,7 @@ void ClientGameEntities::RunFrame() {
 
         // If invalid for whichever reason, warn and continue to next iteration.
         if (!classEntity) {
-            Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
+            //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
 

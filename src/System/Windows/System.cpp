@@ -642,10 +642,16 @@ void Sys_DebugBreak(void)
     DebugBreak();
 }
 
-//uint64_t Sys_Milliseconds(void)
-//{
+static LARGE_INTEGER            timer_freq;
+uint64_t Sys_Milliseconds(void)
+{
+
+
+	    LARGE_INTEGER tm;
+    QueryPerformanceCounter(&tm);
+    return tm.QuadPart * 1000ULL / timer_freq.QuadPart;
 //    return timeGetTime();
-//}
+}
 
 void Sys_AddDefaultConfig(void)
 {
@@ -1115,6 +1121,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
     if (hPrevInstance) {
         return 1;
     }
+			if (!QueryPerformanceFrequency(&timer_freq)) {
+			Sys_Error("QueryPerformanceFrequency failed");
+		}
 
     hGlobalInstance = hInstance;
 #ifndef UNICODE

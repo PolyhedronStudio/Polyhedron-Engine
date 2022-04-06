@@ -591,7 +591,7 @@ static void CL_ParseStartSoundPacket(void)
 
     // positioned in space
     if (flags & SoundCommandBits::Position)
-        snd.pos = MSG_ReadVector3(true);
+        snd.pos = MSG_ReadVector3(false);
 
     snd.flags = flags;
 

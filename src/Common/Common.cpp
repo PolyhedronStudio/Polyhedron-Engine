@@ -124,10 +124,10 @@ time_t      com_startTime;
 cvar_t  *host_speeds;
 
 // host_speeds times
-uint64_t    time_before_game;
-uint64_t    time_after_game;
-uint64_t    time_before_ref;
-uint64_t    time_after_ref;
+uint64_t    timeBeforeServerGame;
+uint64_t    timeAfterServerGame;
+uint64_t    timeBeforeRefresh;
+uint64_t    timeAfterRefresh;
 #endif
 
 /*
@@ -1082,11 +1082,11 @@ Qcommon_Frame
 void Qcommon_Frame(void)
 {
 #if USE_CLIENT
-    uint64_t time_before, time_event, time_between, time_after;
-    uint64_t clientrem;
+    uint64_t timeBefore, timeEvent, timeBetween, timeAfter;
+    uint64_t clientRemainingTime;
 #endif
     uint64_t oldtime, msec;
-    static uint64_t remaining;
+    static uint64_t serverRemainingTime;
     static double frac;
 
     if (setjmp(com_abortframe)) {
@@ -1094,15 +1094,15 @@ void Qcommon_Frame(void)
     }
 
 #if USE_CLIENT
-    time_before = time_event = time_between = time_after = 0;
+    timeBefore = timeEvent = timeBetween = timeAfter = 0;
 
     if (host_speeds->integer)
-        time_before = Sys_Milliseconds();
+        timeBefore = Sys_Milliseconds();
 #endif
 
     // sleep on network sockets when running a dedicated server
     // still do a select(), but don't sleep when running a client!
-    NET_Sleep(remaining);
+    NET_Sleep(serverRemainingTime);
 
     // calculate time spent running last frame and sleeping
     oldtime = com_eventTime;
@@ -1146,7 +1146,7 @@ void Qcommon_Frame(void)
 
 #if USE_CLIENT
     if (host_speeds->integer)
-        time_event = Sys_Milliseconds();
+        timeEvent = Sys_Milliseconds();
 #endif
 
     // run system console
@@ -1154,29 +1154,29 @@ void Qcommon_Frame(void)
 
     NET_UpdateStats();
 
-    remaining = SV_Frame(msec);
+    serverRemainingTime = SV_Frame(msec);
 
 #if USE_CLIENT
     if (host_speeds->integer)
-        time_between = Sys_Milliseconds();
+        timeBetween = Sys_Milliseconds();
 
-    clientrem = CL_Frame(msec);
-    if (remaining > clientrem) {
-        remaining = clientrem;
+    clientRemainingTime = CL_Frame(msec);
+    if (serverRemainingTime > clientRemainingTime) {
+        serverRemainingTime = clientRemainingTime;
     }
 
     if (host_speeds->integer)
-        time_after = Sys_Milliseconds();
+        timeAfter = Sys_Milliseconds();
 
     if (host_speeds->integer) {
         int64_t all, ev, sv, gm, cl, rf;
 
-        all = time_after - time_before;
-        ev = time_event - time_before;
-        sv = time_between - time_event;
-        cl = time_after - time_between;
-        gm = time_after_game - time_before_game;
-        rf = time_after_ref - time_before_ref;
+        all = timeAfter - timeBefore;
+        ev = timeEvent - timeBefore;
+        sv = timeBetween - timeEvent;
+        cl = timeAfter - timeBetween;
+        gm = timeAfterServerGame - timeBeforeServerGame;
+        rf = timeAfterRefresh - timeBeforeRefresh;
         sv -= gm;
         cl -= rf;
 

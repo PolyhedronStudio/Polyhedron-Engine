@@ -2902,14 +2902,14 @@ CL_Frame
 */
 unsigned int totaltime = 0;
 unsigned int lasttime = 0;
-unsigned CL_Frame(unsigned msec)
+uint64_t CL_Frame(uint64_t msec)
 {
     qboolean phys_frame = true, ref_frame = true;
 
-    time_after_ref = time_before_ref = 0;
+    timeAfterRefresh = timeBeforeRefresh = 0;
 
     if (!cl_running->integer) {
-        return UINT_MAX;
+        return UINT64_MAX;
     }
 
     main_extra += msec;
@@ -3043,13 +3043,13 @@ unsigned CL_Frame(unsigned msec)
     if (ref_frame) {
         // Update the screen
         if (host_speeds->integer) {
-            time_before_ref = Sys_Milliseconds();
+            timeBeforeRefresh = Sys_Milliseconds();
         }
 
         SCR_UpdateScreen();
 
         if (host_speeds->integer) {
-            time_after_ref = Sys_Milliseconds();
+            timeAfterRefresh = Sys_Milliseconds();
         }
 
         ref_extra -= ref_msec;
