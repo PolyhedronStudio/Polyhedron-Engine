@@ -101,16 +101,16 @@ public:
     qboolean    fragmentPending;    // Set to true when there is still a fragment pending.
 
     // sequencing variables
-    int         incomingSequence;
-    int         incomingAcknowledged;
-    int         outgoingSequence;
+    int32_t     incomingSequence;
+    int32_t		incomingAcknowledged;
+    int32_t		outgoingSequence;
 
     // sequencing variables
-    int         incomingReliableAcknowledged;   // single bit
-    int         incomingReliableSequence;       // single bit, maintained local
-    int         reliableSequence;               // single bit
-    int         lastReliableSequence;           // sequence number of last send
-    int         fragmentSequence;
+    int32_t		incomingReliableAcknowledged;   // single bit
+    int32_t		incomingReliableSequence;       // single bit, maintained local
+    int32_t		reliableSequence;               // single bit
+    int32_t		lastReliableSequence;           // sequence number of last send
+    int32_t		fragmentSequence;
 
     // Reliable staging and holding areas
     SizeBuffer  message;                    // writing buffer for reliable data

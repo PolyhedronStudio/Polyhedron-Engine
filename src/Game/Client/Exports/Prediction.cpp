@@ -66,7 +66,7 @@ void ClientGamePrediction::PredictAngles() {
 /**
 *   @brief  Process the actual predict movement simulation.
 **/
-void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) {
+void ClientGamePrediction::PredictMovement(uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex) {
     // Player Move object.
     PlayerMove pm = {};
 

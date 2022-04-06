@@ -706,7 +706,7 @@ qboolean CL_GM_UpdateFromState(ClientEntity* clEntity, const EntityState& state)
 /**
 *   @brief  Called when the client is seeking in a demo playback.
 **/
-void CL_GM_EntityEvent(int32_t number) {
+void CL_GM_EntityEvent(int64_t number) {
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
@@ -817,7 +817,7 @@ void CL_GM_DemoSeek(void) {
 /**
 *   @brief  For debugging problems when out-of-date entity origin is referenced.
 **/
-void CL_GM_CheckEntityPresent(int32_t entityNumber, const std::string& what) {
+void CL_GM_CheckEntityPresent(int64_t entityNumber, const std::string& what) {
 #if _DEBUG
     if (cge) {
         cge->CheckEntityPresent(entityNumber, what);
@@ -979,7 +979,7 @@ void CL_GM_PredictAngles(void) {
 /**
 *   @brief  Called by the client to predict the actual movement.
 **/
-void CL_GM_PredictMovement(uint32_t ack, uint32_t current) {
+void CL_GM_PredictMovement(uint64_t ack, uint64_t current) {
     if (cge) {
         IClientGameExportPrediction *prediction = cge->GetPredictionInterface();
 

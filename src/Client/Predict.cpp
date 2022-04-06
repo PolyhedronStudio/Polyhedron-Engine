@@ -50,8 +50,8 @@ void CL_CheckPredictionError(void)
     }
 
     // Calculate the last ClientMoveCommand we sent that the server has processed
-    uint32_t frame = cls.netChannel->incomingAcknowledged & CMD_MASK;
-    uint32_t commandNumber = cl.clientCommandHistory[frame].commandNumber;
+    uint64_t frame = cls.netChannel->incomingAcknowledged & CMD_MASK;
+    uint64_t commandNumber = cl.clientCommandHistory[frame].commandNumber;
 
     ClientMoveCommand* cmd = &cl.clientUserCommands[commandNumber & CMD_MASK];
 
@@ -89,8 +89,8 @@ void CL_PredictMovement(void)
     }
 
     // Fetch acknowledged command and frame.
-    uint32_t ack = cl.clientCommandHistory[cls.netChannel->incomingAcknowledged & CMD_MASK].commandNumber;
-    uint32_t currentFrameIndex = cl.currentClientCommandNumber;
+    uint64_t ack = cl.clientCommandHistory[cls.netChannel->incomingAcknowledged & CMD_MASK].commandNumber;
+    uint64_t currentFrameIndex = cl.currentClientCommandNumber;
 
     // If we are too far out of date, just freeze
     if (currentFrameIndex - ack > CMD_BACKUP - 1) {

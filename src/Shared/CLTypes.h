@@ -196,8 +196,8 @@ struct ClientUserCommandHistory {
 struct ServerFrame {
     qboolean valid; // False if delta parsing failed.
 
-    int32_t number; // Sequential identifier, used for delta.
-    int32_t delta;  // Delta between frames.
+    int64_t number; // Sequential identifier, used for delta.
+    int64_t delta;  // Delta between frames.
 
     byte    areaBits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
     int32_t areaBytes;                      // Area bytes.

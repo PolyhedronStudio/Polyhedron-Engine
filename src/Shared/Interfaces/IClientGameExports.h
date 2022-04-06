@@ -82,7 +82,7 @@ public:
     /**
     *   @brief  Executed whenever an entity event is receieved.
     **/
-    virtual void Event(int32_t number) = 0;
+    virtual void Event(int64_t number) = 0;
 
     /**
     *   @brief  Parse the server frame for server entities to add to our client view.
@@ -160,7 +160,7 @@ public:
 
     virtual void CheckPredictionError(ClientMoveCommand* moveCommand) = 0;
     virtual void PredictAngles() = 0;
-    virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
+    virtual void PredictMovement(uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex) = 0;
 
     virtual void UpdateClientSoundSpecialEffects(PlayerMove* pm) = 0;
 };
@@ -341,7 +341,7 @@ public:
     /**
     *   @brief  For debugging problems when out-of-date entity origin is referenced.
     **/
-    virtual void CheckEntityPresent(int32_t entityNumber, const std::string &what) = 0;
+    virtual void CheckEntityPresent(int64_t entityNumber, const std::string &what) = 0;
 #endif
 
     // Called after all downloads are done. (Aka, a map has started.)

@@ -34,7 +34,7 @@ void		CL_GM_ClientFrame(void);
 void		CL_GM_ClientDisconnect(void);
 void		CL_GM_ClientClearState(void);
 void		CL_GM_DemoSeek(void);
-void		CL_GM_CheckEntityPresent(int32_t entityNumber, const std::string& what);
+void		CL_GM_CheckEntityPresent(int64_t entityNumber, const std::string& what);
 void		CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from);
 
 //
@@ -42,7 +42,7 @@ void		CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from);
 //
 qboolean	CL_GM_SpawnEntitiesFromBSPString(const char *entities);
 qboolean	CL_GM_UpdateFromState(ClientEntity *clEntity, const EntityState &state);
-void		CL_GM_EntityEvent(int32_t number);
+void		CL_GM_EntityEvent(int64_t number);
 
 //
 // Media
@@ -64,13 +64,13 @@ void CL_GM_FinalizeFrameMoveCommand(void);
 //
 void		CL_GM_CheckPredictionError(ClientMoveCommand* moveCommand);
 void		CL_GM_PredictAngles(void);
-void		CL_GM_PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex);
+void		CL_GM_PredictMovement(uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex);
 
 //
 // Parse
 //
 void		CL_GM_ParsePlayerSkin(char* name, char* model, char* skin, const char* s);
-qboolean	CL_GM_UpdateConfigString(int index, const char* str);
+qboolean	CL_GM_UpdateConfigString(int32_t index, const char* str);
 
 void		CL_GM_StartServerMessage(void);
 qboolean	CL_GM_ParseServerMessage(int32_t serverCommand);
