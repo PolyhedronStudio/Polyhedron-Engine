@@ -358,7 +358,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     boltEntity->SetTouchCallback(&BlasterBolt::BlasterBoltTouch);
 
     // Set think.
-    boltEntity->SetNextThinkTime(level.time + 2_hz); // Admer: should this really be a thing?
+    boltEntity->SetNextThinkTime(level.time + FRAMERATE_MS * 2);//2_hz); // Admer: should this really be a thing?
     boltEntity->SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
 
     // Link Bolt into world.

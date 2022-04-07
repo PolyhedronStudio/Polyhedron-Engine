@@ -176,7 +176,8 @@ qboolean SVG_CanSaveGame(qboolean isDedicatedServer) {
 *   @brief  Returns a pointer to the structure with all entry points
 *           and global variables.
 **/
-ServerGameExports* GetServerGameAPI(ServerGameImports* import)
+extern "C" {
+q_exported ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 {
     gi = *import;
 
@@ -213,6 +214,7 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 
     return &globals;
 }
+}; // extern "C".
 
 //=============================================================================
 //
