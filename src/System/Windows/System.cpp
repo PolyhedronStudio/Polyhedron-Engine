@@ -642,17 +642,6 @@ void Sys_DebugBreak(void)
     DebugBreak();
 }
 
-static LARGE_INTEGER            timer_freq;
-uint64_t Sys_Milliseconds(void)
-{
-
-
-	    LARGE_INTEGER tm;
-    QueryPerformanceCounter(&tm);
-    return tm.QuadPart * 1000ULL / timer_freq.QuadPart;
-//    return timeGetTime();
-}
-
 void Sys_AddDefaultConfig(void)
 {
 }
@@ -1117,14 +1106,6 @@ WinMain
 */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-    // previous instances do not exist in Win32
-    if (hPrevInstance) {
-        return 1;
-    }
-			if (!QueryPerformanceFrequency(&timer_freq)) {
-			Sys_Error("QueryPerformanceFrequency failed");
-		}
-
     hGlobalInstance = hInstance;
 #ifndef UNICODE
     // TODO: wince support

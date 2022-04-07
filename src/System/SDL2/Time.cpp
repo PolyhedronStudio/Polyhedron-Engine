@@ -35,6 +35,6 @@ uint64_t Sys_Microseconds(void) {
 ///**
 //*   @return Returns SDL2 time in Milliseconds.
 //**/
-//uint64_t Sys_Milliseconds(void) {
-//    return Sys_Microseconds() / 1000;
-//}
+uint64_t Sys_Milliseconds(void) {
+    return Sys_Microseconds() / 1000;
+}
