@@ -31,7 +31,7 @@ public:
     /**
     *   @brief  Process the actual predict movement simulation.
     **/
-    void PredictMovement(uint64_t acknowledgedCommandIndex, uint64_t currentCommandIndex) final;
+    void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) final;
 
     /**
     *   @brief  Update the client side audio state.

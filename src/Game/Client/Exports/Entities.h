@@ -48,7 +48,7 @@ public:
     /**
     *   @brief Executed whenever an entity event is receieved.
     **/
-    void Event(int64_t number) final;
+    void Event(int32_t number) final;
 
     /**
     *   @brief  Parse the server frame for server entities to add to our client view.

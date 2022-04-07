@@ -84,7 +84,7 @@ void ClientGameExports::DemoSeek() {
 /**
 *   @brief  For debugging problems when out-of-date entity origin is referenced.
 **/
-void ClientGameExports::CheckEntityPresent(int64_t entityNumber, const std::string &what) {
+void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::string &what) {
     // We're good if the player entity == current.
     if (entityNumber == cl->frame.clientNumber + 1) {
         return; // Player entity = current.

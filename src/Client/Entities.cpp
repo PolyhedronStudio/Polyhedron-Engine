@@ -204,7 +204,7 @@ static void Entity_UpdateState(const EntityState &state)
 /**
 *   @brief  Notifies the client game about an entity event to execute.
 **/
-static void Entity_FireEvent(int64_t number) {
+static void Entity_FireEvent(int number) {
     CL_GM_EntityEvent(number);
 }
 
@@ -345,7 +345,7 @@ void CL_DeltaFrame(void)
     }
 
     // Set server time
-    int64_t frameNumber = cl.frame.number - cl.serverDelta;
+    int32_t frameNumber = cl.frame.number - cl.serverDelta;
     cl.serverTime = frameNumber * CL_FRAMETIME;
 
     // Rebuild the list of solid entities for this frame

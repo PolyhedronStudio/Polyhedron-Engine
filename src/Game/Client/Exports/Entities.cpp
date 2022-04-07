@@ -387,7 +387,7 @@ void ClientGameEntities::RunFrame() {
 /**
 *   @brief Executed whenever an entity event is receieved.
 **/
-void ClientGameEntities::Event(int64_t number) {
+void ClientGameEntities::Event(int32_t number) {
     // Ensure entity number is in bounds.
     if (number < 0 || number > MAX_ENTITIES) {
         Com_WPrint("ClientGameEntities::Event caught an OOB Entity ID: %i\n", number);
