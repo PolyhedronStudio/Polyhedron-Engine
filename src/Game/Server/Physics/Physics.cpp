@@ -744,7 +744,7 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
         // the move failed, bump all nextThinkTime times and back out moves
         for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
             if (mv->GetNextThinkTime() > GameTime::zero()) {
-                mv->SetNextThinkTime(mv->GetNextThinkTime() + 1_hz);
+                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);// 1_hz);
             }
         }
 

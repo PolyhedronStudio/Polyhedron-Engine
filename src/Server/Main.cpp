@@ -1314,33 +1314,74 @@ static void SV_GiveMsec(void)
  //   FOR_EACH_CLIENT(cl) {
  //       cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100); // WID: This was: 1800; // 1600 + some slop
  //   }
-    client_t    *cl;
+    client_t    *client;
 
-    if (!(fmod(sv.frameNumber, BASE_FRAMETIME * (BASE_FRAMERATE / 10.0f)))) {
-        FOR_EACH_CLIENT(cl) {
-            cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100);//1800; // 1600 + some slop
-        }
-    }
-
+    if (fmod(sv.frameNumber, BASE_FRAMETIME * (BASE_FRAMERATE / 10.0f))) {
+		return;
+	}
+     
+	FOR_EACH_CLIENT(client) {
+		client->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100);//1800; // 1600 + some slop
+	}
+    
     if (svs.realtime - svs.last_timescale_check < sv_timescale_time->integer)
         return;
 
     float d = svs.realtime - svs.last_timescale_check;
     svs.last_timescale_check = svs.realtime;
 
-    FOR_EACH_CLIENT(cl) {
-        cl->timescale = cl->clientUserCommandMiliseconds / d;
-        cl->cmd_msec_used = 0;
+    FOR_EACH_CLIENT(client) {
+        client->timescale = client->clientUserCommandMiliseconds / d;
+        client->cmd_msec_used = 0;
 
-        if (sv_timescale_warn->value > 1.0f && cl->timescale > sv_timescale_warn->value) {
-            Com_Printf("%s[%s]: detected time skew: %.3f\n", cl->name,
-                       NET_AdrToString(&cl->netchan->remoteNetAddress), cl->timescale);
+        if (sv_timescale_warn->value > 1.0f && client->timescale > sv_timescale_warn->value) {
+            Com_Printf("%s[%s]: detected time skew: %.3f\n", client->name,
+                       NET_AdrToString(&client->netchan->remoteNetAddress), client->timescale);
         }
 
-        if (sv_timescale_kick->value > 1.0f && cl->timescale > sv_timescale_kick->value) {
-            SV_DropClient(cl, "time skew too high");
+        if (sv_timescale_kick->value > 1.0f && client->timescale > sv_timescale_kick->value) {
+            SV_DropClient(client, "time skew too high");
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //if (!(fmod(sv.frameNumber, BASE_FRAMETIME * (BASE_FRAMERATE / 10.0f)))) {
+    //    FOR_EACH_CLIENT(cl) {
+    //        cl->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100);//1800; // 1600 + some slop
+    //    }
+    //}
+
+    //if (svs.realtime - svs.last_timescale_check < sv_timescale_time->integer)
+    //    return;
+
+    //float d = svs.realtime - svs.last_timescale_check;
+    //svs.last_timescale_check = svs.realtime;
+
+    //FOR_EACH_CLIENT(cl) {
+    //    cl->timescale = cl->clientUserCommandMiliseconds / d;
+    //    cl->cmd_msec_used = 0;
+
+    //    if (sv_timescale_warn->value > 1.0f && cl->timescale > sv_timescale_warn->value) {
+    //        Com_Printf("%s[%s]: detected time skew: %.3f\n", cl->name,
+    //                   NET_AdrToString(&cl->netchan->remoteNetAddress), cl->timescale);
+    //    }
+
+    //    if (sv_timescale_kick->value > 1.0f && cl->timescale > sv_timescale_kick->value) {
+    //        SV_DropClient(cl, "time skew too high");
+    //    }
+    //}
 }
 
 

@@ -176,7 +176,8 @@ qboolean SVG_CanSaveGame(qboolean isDedicatedServer) {
 *   @brief  Returns a pointer to the structure with all entry points
 *           and global variables.
 **/
-ServerGameExports* GetServerGameAPI(ServerGameImports* import)
+extern "C" {
+q_exported ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 {
     gi = *import;
 
@@ -213,6 +214,7 @@ ServerGameExports* GetServerGameAPI(ServerGameImports* import)
 
     return &globals;
 }
+}; // extern "C".
 
 //=============================================================================
 //
@@ -484,7 +486,10 @@ void SVG_CheckDMRules(void)
     //    return;
 
     if (timelimit->value) {
-        if (level.time >= GameTime(timelimit->integer)) {
+		Frametime frameTimeLimit(timelimit->value);
+
+		if (frameTimeLimit != Frametime::zero() && level.time >= frameTimeLimit) {
+//        if (level.time >= Frametime(timelimit->value)) {
             gi.BPrintf(PRINT_HIGH, "Timelimit hit.\n");
             SVG_EndDMLevel();
             return;

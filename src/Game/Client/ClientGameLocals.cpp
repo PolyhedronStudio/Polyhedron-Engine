@@ -106,10 +106,7 @@ LevelLocals level;
 *
 **/
 // CPP: These might need to be re-enabled on Linux.
-#ifdef __cplusplus
 extern "C" {
-#endif
-
 q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
     // Store a copy of the engine imported function pointer struct.
     clgi = *clgimp;
@@ -139,9 +136,8 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
     return clge;
 }
 
-#ifdef __cplusplus
 }; // Extern "C"
-#endif
+
 
 
 

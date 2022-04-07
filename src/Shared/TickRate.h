@@ -20,7 +20,7 @@ using Frametime = std::chrono::duration<double>;
 *	@brief	This is the actual framerate which the game logic will simulate at.
 *			(Client, Server and including Shared game modules.)
 **/
-static constexpr uint64_t   BASE_HZ = 40;
+static constexpr uint64_t   BASE_HZ = 60;
 
 // Calclate all related values we need to make it work smoothly even if we have
 // a nice 250fps, the game must run at 50fps.
@@ -34,4 +34,4 @@ static constexpr double     BASE_1_FRAMETIME = 1.0 / BASE_FRAMETIME;
 static constexpr double     BASE_FRAMETIME_1000 = BASE_FRAMETIME / 1000.0;
 
 // Used for old-school hardcoded values.
-static constexpr uint64_t    BASE_FRAMEDIVIDER = (int64_t)BASE_FRAMERATE / 10.0;
+static constexpr uint64_t	BASE_FRAMEDIVIDER = (int64_t)BASE_FRAMERATE / 10.0;
