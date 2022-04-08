@@ -1181,7 +1181,7 @@ const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end,
     end_l   -= origin;
 
     // Rotate start and end into the models frame of reference.
-    if ((headNode != boxHull.headNode && headNode != octagonHull.headNode) && !(angles[0] || angles[1] || angles[2])) {
+    if ((headNode != boxHull.headNode && headNode != octagonHull.headNode) && (angles[0] || angles[1] || angles[2])) {
         rotated = true;
 
         AnglesToAxis(angles, axis);
