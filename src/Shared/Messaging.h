@@ -176,7 +176,7 @@ struct PlayerState {
     vec3_t  gunOffset = vec3_zero();
 
     //! View Model weapon index.
-    int     gunIndex = 0;
+    int32_t     gunIndex = 0;
 
     //! Server start time of current animation.
     uint64_t     gunAnimationStartTime = 0;
@@ -196,7 +196,7 @@ struct PlayerState {
     //! Field of View.
     float   fov = 0;            // Horizontal field of view
     // Refresh render flags.
-    int     rdflags = 0;        // Refdef flags
+    int32_t rdflags = 0;        // Refdef flags
     //! Status bar information.
-    short   stats[MAX_PLAYERSTATS] = {};
+    int16_t   stats[MAX_PLAYERSTATS] = {};
 };
