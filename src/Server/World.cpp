@@ -526,7 +526,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
             continue;
 
         // might intersect, so do an exact clip
-        CM_TransformedBoxTrace(&trace, start, end, mins, maxs,
+        trace = CM_TransformedBoxTrace(start, end, mins, maxs,
                                SV_HullForEntity(touch), contentmask,
                                touch->state.origin, touch->state.angles);
 
@@ -542,35 +542,20 @@ Moves the given mins/maxs volume through the world from start to end.
 Passedict and edicts owned by passedict are explicitly not checked.
 ==================
 */
-TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
-                           Entity *passedict, int contentmask)
-{
-    TraceResult     trace;
-
+const TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passedict, int32_t contentMask) {
     if (!sv.cm.cache) {
         Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
 
-    // work around game bugs
-    //if (++sv.tracecount > 10000) {
-    //    Com_EPrintf("%s: runaway loop avoided\n", __func__);
-    //    memset(&trace, 0, sizeof(trace));
-    //    trace.fraction = 1;
-    //    trace.ent = ge->entities;
-    //    VectorCopy(end, trace.endPosition);
-    //    sv.tracecount = 0;
-    //    return trace;
-    //}
-
     // clip to world
-    CM_TransformedBoxTrace(&trace, start, end, mins, maxs, sv.cm.cache->nodes, contentmask, vec3_zero(), vec3_zero());
+    TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, sv.cm.cache->nodes, contentMask, vec3_zero(), vec3_zero());
     trace.ent = ge->entities;
     if (trace.fraction == 0) {
         return trace;   // Blocked by the world
     }
 
     // clip to other solid entities
-    SV_ClipMoveToEntities(start, mins, maxs, end, passedict, contentmask, &trace);
+    SV_ClipMoveToEntities(start, mins, maxs, end, passedict, contentMask, &trace);
     return trace;
 }
 

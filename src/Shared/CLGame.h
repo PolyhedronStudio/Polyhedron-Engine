@@ -271,13 +271,9 @@ extern "C" {
         int         (*CM_PointContents) (const vec3_t &p, mnode_t *headNode);
         int         (*CM_TransformedPointContents) (const vec3_t &p, mnode_t *headNode,
                                                     const vec3_t &origin, const vec3_t &angles);
-        void        (*CM_BoxTrace)(TraceResult *trace, const vec3_t &start, const vec3_t &end,
-                                    const vec3_t &mins, const vec3_t &maxs,
-                                    mnode_t *headNode, int brushmask);
-        void        (*CM_TransformedBoxTrace) (TraceResult *trace, const vec3_t &start, const vec3_t &end,
-                                                const vec3_t &mins, const vec3_t &maxs,
-                                                mnode_t * headNode, int brushmask,
-                                                const vec3_t &origin, const vec3_t &angles);
+
+        const TraceResult (*CM_BoxTrace)(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask);
+        const TraceResult (*CM_TransformedBoxTrace) (const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin, const vec3_t& angles);
         void        (*CM_ClipEntity) (TraceResult* dst, const TraceResult* src, struct entity_s* ent);
 
         //---------------------------------------------------------------------

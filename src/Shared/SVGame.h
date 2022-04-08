@@ -143,7 +143,7 @@ typedef struct {
     void (*SetModel)(Entity *ent, const char *name);
 
     // collision detection
-    TraceResult (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, int contentmask);
+    const TraceResult (* q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passent, int contentmask);
     int (*PointContents)(const vec3_t &point);
     qboolean (*InPVS)(const vec3_t &p1, const vec3_t &p2);
     qboolean (*InPHS)(const vec3_t &p1, const vec3_t &p2);

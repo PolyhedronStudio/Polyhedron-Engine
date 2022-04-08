@@ -601,13 +601,13 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // Velocity X Y.
     if (flags & PS_PM_VELOCITY) {
-        to->pmove.velocity[0] = MSG_ReadFloat();
-        to->pmove.velocity[1] = MSG_ReadFloat();
+        to->pmove.velocity[0] = MSG_ReadHalfFloat();
+        to->pmove.velocity[1] = MSG_ReadHalfFloat();
     }
 
     // Velocity Z.
     if (extraFlags & EPS_M_VELOCITY2) {
-        to->pmove.velocity[2] = MSG_ReadFloat();
+        to->pmove.velocity[2] = MSG_ReadHalfFloat();
     }
 
     // PM Time.
@@ -627,22 +627,22 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // PM Delta Angles.
     if (flags & PS_PM_DELTA_ANGLES) {
-	    to->pmove.deltaAngles = MSG_ReadVector3();
+	    to->pmove.deltaAngles = MSG_ReadVector3(true);
     }
 
     // View Offset.
     if (flags & PS_PM_VIEW_OFFSET) {
-	    to->pmove.viewOffset = MSG_ReadVector3();
+	    to->pmove.viewOffset = MSG_ReadVector3(true);
     }
 
     // Step offset.
     if (flags & PS_PM_STEP_OFFSET) {
-	    to->pmove.stepOffset = MSG_ReadFloat();
+	    to->pmove.stepOffset = MSG_ReadHalfFloat();
     }
 
     // View Angles X Y Z.
     if (flags & PS_PM_VIEW_ANGLES) {
-	    to->pmove.viewAngles = MSG_ReadVector3();
+	    to->pmove.viewAngles = MSG_ReadVector3(true);
     }
 
     //
@@ -650,7 +650,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
     //
     // Kick Angles.
     if (flags & PS_KICKANGLES) {
-        to->kickAngles = MSG_ReadVector3();
+        to->kickAngles = MSG_ReadVector3(true);
     }
 
     // Weapon Index.
@@ -668,7 +668,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 	    to->gunAnimationEndFrame = MSG_ReadUint16();
     }
     if (flags & PS_GUNANIMATION_FRAME_TIME) {
-	    to->gunAnimationFrametime = MSG_ReadFloat();
+	    to->gunAnimationFrametime = MSG_ReadHalfFloat();
     }
     if (flags & PS_GUNANIMATION_LOOP_COUNT) {
 	    to->gunAnimationLoopCount = MSG_ReadUint8(); 
@@ -679,25 +679,25 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // Gun Offset.
     if (extraFlags & EPS_GUNOFFSET) {
-        to->gunOffset = MSG_ReadVector3();
+        to->gunOffset = MSG_ReadVector3(true);
     }
 
     // Gun Angles.
     if (extraFlags & EPS_GUNANGLES) {
-        to->gunAngles = MSG_ReadVector3();
+        to->gunAngles = MSG_ReadVector3(true);
     }
 
     // Blend.
     if (flags & PS_BLEND) {
-        to->blend[0] = MSG_ReadFloat();
-        to->blend[1] = MSG_ReadFloat();
-        to->blend[2] = MSG_ReadFloat();
-        to->blend[3] = MSG_ReadFloat();
+        to->blend[0] = MSG_ReadHalfFloat();
+        to->blend[1] = MSG_ReadHalfFloat();
+        to->blend[2] = MSG_ReadHalfFloat();
+        to->blend[3] = MSG_ReadHalfFloat();
     }
 
     // FOV.
     if (flags & PS_FOV) {
-        to->fov = MSG_ReadFloat();
+        to->fov = MSG_ReadHalfFloat();
     }
 
     // RDFlags.
@@ -902,12 +902,12 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_PM_VELOCITY) {
-        MSG_WriteFloat(to->pmove.velocity[0]);
-        MSG_WriteFloat(to->pmove.velocity[1]);
+        MSG_WriteHalfFloat(to->pmove.velocity[0]);
+        MSG_WriteHalfFloat(to->pmove.velocity[1]);
     }
 
     if (entityStateFlags & EPS_M_VELOCITY2) {
-	    MSG_WriteFloat(to->pmove.velocity[2]);
+	    MSG_WriteHalfFloat(to->pmove.velocity[2]);
     }
 
     if (playerStateFlags & PS_PM_TIME) {
@@ -923,26 +923,26 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_PM_DELTA_ANGLES) {
-        MSG_WriteVector3(to->pmove.deltaAngles);
+        MSG_WriteVector3(to->pmove.deltaAngles, true);
     }
 
     //
     // write the rest of the PlayerState
     //
     if (playerStateFlags & PS_PM_VIEW_OFFSET) {
-        MSG_WriteVector3(to->pmove.viewOffset);
+        MSG_WriteVector3(to->pmove.viewOffset, true);
     }
 
     if (playerStateFlags & PS_PM_STEP_OFFSET) {
-        MSG_WriteFloat(to->pmove.stepOffset);
+        MSG_WriteHalfFloat(to->pmove.stepOffset);
     }
 
     if (playerStateFlags & PS_PM_VIEW_ANGLES) {
-        MSG_WriteVector3(to->pmove.viewAngles);
+        MSG_WriteVector3(to->pmove.viewAngles, true);
     }
 
     if (playerStateFlags & PS_KICKANGLES) {
-        MSG_WriteVector3(to->kickAngles);
+        MSG_WriteVector3(to->kickAngles, true);
     }
 
     if (playerStateFlags & PS_WEAPONINDEX) {
@@ -959,7 +959,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
 	    MSG_WriteUint16(to->gunAnimationEndFrame);
     }
     if (playerStateFlags & PS_GUNANIMATION_FRAME_TIME) {
-	    MSG_WriteFloat(to->gunAnimationFrametime);
+	    MSG_WriteHalfFloat(to->gunAnimationFrametime);
     }
     if (playerStateFlags & PS_GUNANIMATION_LOOP_COUNT) {
 	    MSG_WriteUint8(to->gunAnimationLoopCount);
@@ -969,19 +969,19 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (entityStateFlags & EPS_GUNOFFSET) {
-        MSG_WriteVector3(to->gunOffset);
+        MSG_WriteVector3(to->gunOffset, true);
     }
 
     if (entityStateFlags & EPS_GUNANGLES) {
-        MSG_WriteVector3(to->gunAngles);
+        MSG_WriteVector3(to->gunAngles, true);
     }
 
     if (playerStateFlags & PS_BLEND) {
-        MSG_WriteVector4(to->blend);
+        MSG_WriteVector4(to->blend, true);
     }
   
     if (playerStateFlags & PS_FOV) {
-	    MSG_WriteFloat(to->fov);
+	    MSG_WriteHalfFloat(to->fov);
     }
 
     if (playerStateFlags & PS_RDFLAGS) {
@@ -1246,7 +1246,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the AnimationFrame.
     if (byteMask & EntityMessageBits::AnimationFrame) {
-	    MSG_WriteFloat(to->animationFrame);
+	    MSG_WriteHalfFloat(to->animationFrame);
     }
     
     // Write out the Skin Number.
@@ -1284,15 +1284,15 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Angle X.
     if (byteMask & EntityMessageBits::AngleX) {
-	    MSG_WriteFloat(to->angles[0]);
+	    MSG_WriteHalfFloat(to->angles[0]);
     }
     // Write out the Angle Y.
     if (byteMask & EntityMessageBits::AngleY) {
-	    MSG_WriteFloat(to->angles[1]);
+	    MSG_WriteHalfFloat(to->angles[1]);
     }
     // Write out the Angle Z.
     if (byteMask & EntityMessageBits::AngleZ) {
-	    MSG_WriteFloat(to->angles[2]);
+	    MSG_WriteHalfFloat(to->angles[2]);
     }
 
     // Write out the Old Origin.
@@ -1329,7 +1329,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
     }
     // Write out the Animation Frame Time.
     if (byteMask & EntityMessageBits::AnimationFrameTime) {
-    	MSG_WriteFloat(to->animationFramerate);
+    	MSG_WriteHalfFloat(to->animationFramerate);
     }
 }
 
@@ -1382,7 +1382,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Frame.
     if (byteMask & EntityMessageBits::AnimationFrame)
-        to->animationFrame = MSG_ReadFloat();
+        to->animationFrame = MSG_ReadHalfFloat();
 
     // Skinnum.
     if (byteMask & EntityMessageBits::Skin) { 
@@ -1417,13 +1417,13 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Angle.
     if (byteMask & EntityMessageBits::AngleX) {
-	    to->angles[0] = MSG_ReadFloat();
+	    to->angles[0] = MSG_ReadHalfFloat();
     }
     if (byteMask & EntityMessageBits::AngleY) {
-    	to->angles[1] = MSG_ReadFloat();
+    	to->angles[1] = MSG_ReadHalfFloat();
     }
     if (byteMask & EntityMessageBits::AngleZ) {
-	    to->angles[2] = MSG_ReadFloat();
+	    to->angles[2] = MSG_ReadHalfFloat();
     }
 
     // Old Origin.
@@ -1456,7 +1456,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 	    to->animationEndFrame = MSG_ReadUint16();
     }
     if (byteMask & EntityMessageBits::AnimationFrameTime) {
-    	to->animationFramerate = MSG_ReadFloat();
+    	to->animationFramerate = MSG_ReadHalfFloat();
     }
 }
 
@@ -1512,13 +1512,13 @@ int MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientM
     MSG_WriteUint8(bits);
 
     if (bits & UserCommandBits::AngleX) {
-        MSG_WriteFloat(cmd->input.viewAngles[0]);
+        MSG_WriteHalfFloat(cmd->input.viewAngles[0]);
     }
     if (bits & UserCommandBits::AngleY) {
-        MSG_WriteFloat(cmd->input.viewAngles[1]);
+        MSG_WriteHalfFloat(cmd->input.viewAngles[1]);
     }
     if (bits & UserCommandBits::AngleZ) {
-        MSG_WriteFloat(cmd->input.viewAngles[2]);
+        MSG_WriteHalfFloat(cmd->input.viewAngles[2]);
     }
 
     if (bits & UserCommandBits::Forward) {
@@ -1565,13 +1565,13 @@ void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCom
 
     // Read current angles.
     if (bits & UserCommandBits::AngleX) {
-        to->input.viewAngles[0] = MSG_ReadFloat();
+        to->input.viewAngles[0] = MSG_ReadHalfFloat();
     }
     if (bits & UserCommandBits::AngleY) {
-        to->input.viewAngles[1] = MSG_ReadFloat();
+        to->input.viewAngles[1] = MSG_ReadHalfFloat();
     }
     if (bits & UserCommandBits::AngleZ) {
-        to->input.viewAngles[2] = MSG_ReadFloat();
+        to->input.viewAngles[2] = MSG_ReadHalfFloat();
     }
 
     // Read movement.

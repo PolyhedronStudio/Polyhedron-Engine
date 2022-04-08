@@ -804,7 +804,7 @@ static void AL_Spatialize(channel_t *ch)
 
 	if (cl.bsp && s_occlusion->integer)
 	{
-		CM_BoxTrace(&trace, origin, listener_origin, mins, maxs, cl.bsp->nodes, BrushContentsMask::PlayerSolid);
+		trace = CM_BoxTrace(origin, listener_origin, mins, maxs, cl.bsp->nodes, BrushContentsMask::PlayerSolid);
 		if (trace.fraction < 1.0 && !(ch->entnum == -1 || ch->entnum == listener_entnum || !ch->dist_mult))
 		{
 			VectorSubtract(origin, listener_origin, distance);

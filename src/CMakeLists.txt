@@ -25,7 +25,9 @@ SET(SRC_CLIENT
 	${PATH_SRC}/Client/Predict.cpp
 	${PATH_SRC}/Client/Refresh.cpp
 	${PATH_SRC}/Client/Screen.cpp
+	${PATH_SRC}/Client/Traces.cpp
 	${PATH_SRC}/Client/View.cpp
+
 	${PATH_SRC}/Client/UI/Demos.cpp
 	${PATH_SRC}/Client/UI/Menu.cpp
 	${PATH_SRC}/Client/UI/PlayerConfig.cpp
@@ -33,12 +35,14 @@ SET(SRC_CLIENT
 	${PATH_SRC}/Client/UI/Script.cpp
 	${PATH_SRC}/Client/UI/Servers.cpp
 	${PATH_SRC}/Client/UI/UI.cpp
+
 	${PATH_SRC}/Client/Sound/DirectMemoryAccess.cpp
 	${PATH_SRC}/Client/Sound/OpenAL.cpp
 	${PATH_SRC}/Client/Sound/Main.cpp
 	${PATH_SRC}/Client/Sound/Memory.cpp
 	${PATH_SRC}/Client/Sound/Mix.cpp
 	${PATH_SRC}/Client/Sound/Ogg.cpp
+	
 	#${PATH_SRC}/Client/Sound/QAL/fixed.c
 	${PATH_SRC}/Client/Sound/QAL/Dynamic.cpp
 )
@@ -58,6 +62,7 @@ if (CONFIG_ENABLE_RMLUI)
 		${PATH_SRC}/Client/RmlUI/Interfaces/RenderInterface.h
 		${PATH_SRC}/Client/RmlUI/Interfaces/SystemInterface.cpp
 		${PATH_SRC}/Client/RmlUI/Interfaces/SystemInterface.h
+
 		${PATH_SRC}/Client/RmlUI/RmlUI.cpp
 		${PATH_SRC}/Client/RmlUI/RmlUI.h
 	)
@@ -73,8 +78,18 @@ SET(SRC_CLIENT_HTTP
 )
 SET(HEADERS_CLIENT
 	${PATH_SRC}/Client/Client.h
+	${PATH_SRC}/Client/ClientGame.cpp
+	${PATH_SRC}/Client/GameModule.h
+	${PATH_SRC}/Client/Input.h
+	${PATH_SRC}/Client/Keys.h
+	${PATH_SRC}/Client/Traces.h
+	${PATH_SRC}/Client/UI.h
+	${PATH_SRC}/Client/Video.h
+
 	${PATH_SRC}/Client/UI/UI.h
+
 	${PATH_SRC}/Client/Sound/Sound.h
+	
 	${PATH_SRC}/Client/Sound/QAL/Dynamic.h
 	${PATH_SRC}/Client/Sound/QAL/Fixed.h
 )

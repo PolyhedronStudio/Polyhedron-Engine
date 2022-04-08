@@ -219,7 +219,7 @@ void SV_SpawnServer(MapCommand *cmd)
     ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
 
     // Run 2 frames times SERVER_RATE_MULTIPLIER to allow everything to settle.
-    for (int32_t i = 0; i < SERVER_RATE_MULTIPLIER; i++) {
+    for (int32_t i = 0; i < 10; i++) {//SERVER_RATE_MULTIPLIER; i++) {
         ge->RunFrame(); sv.frameNumber++;
         ge->RunFrame(); sv.frameNumber++;
     }

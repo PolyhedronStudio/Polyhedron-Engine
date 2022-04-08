@@ -54,7 +54,9 @@ static struct BoxLeafsWork {
 **/
 static struct TraceWork {
     //! Pointer where to store trace results.
-    TraceResult  *traceResult = nullptr;
+	TraceResult  traceResult = { 
+	
+	};
 
     //! Real Fraction used for testing.
     float realFraction = 0.f;
@@ -648,15 +650,15 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
     if (startOut == false) {
         // Original point was inside brush.
-        traceWork.traceResult->startSolid = true;
+        traceWork.traceResult.startSolid = true;
 
         // Set contents.
         traceWork.contents = brush->contents;
 
         if (getOut == false) {
             traceWork.realFraction = 0.f;
-            traceWork.traceResult->allSolid = true;
-            traceWork.traceResult->fraction = 0.f;
+            traceWork.traceResult.allSolid = true;
+            traceWork.traceResult.fraction = 0.f;
         }
     }
 
@@ -670,12 +672,12 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
     // Check if this reduces collision time range.
     if (enterFractionA < traceWork.realFraction) {
-        if (enterFractionB < traceWork.traceResult->fraction) {
+        if (enterFractionB < traceWork.traceResult.fraction) {
             traceWork.realFraction = enterFractionA;
-            traceWork.traceResult->plane = *clipPlane;
-            traceWork.traceResult->surface = &(leadSide->texinfo->c);
-            traceWork.traceResult->contents = brush->contents;
-            traceWork.traceResult->fraction = enterFractionB;
+            traceWork.traceResult.plane = *clipPlane;
+            traceWork.traceResult.surface = &(leadSide->texinfo->c);
+            traceWork.traceResult.contents = brush->contents;
+            traceWork.traceResult.fraction = enterFractionB;
         }
     }
     //    // crosses face
@@ -697,26 +699,26 @@ static void CM_ClipBoxToBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
 
     //if (!startOut) {
     //    // original point was inside brush
-    //    traceWork.traceResult->startSolid = true;
+    //    traceWork.traceResult.startSolid = true;
     //    if (!getOut) {
-    //        traceWork.traceResult->allSolid = true;
+    //        traceWork.traceResult.allSolid = true;
     //        if (!collisionModel.map_allsolid_bug->integer) {
     //            // original Q2 didn't set these
-    //            traceWork.traceResult->fraction = 0;
-    //            traceWork.traceResult->contents = brush->contents;
+    //            traceWork.traceResult.fraction = 0;
+    //            traceWork.traceResult.contents = brush->contents;
     //        }
     //    }
     //    return;
     //}
     //if (enterFractionA < leaveFraction) {
-    //    if (enterFractionA > -1 && enterFractionA < traceWork.traceResult->fraction) {
+    //    if (enterFractionA > -1 && enterFractionA < traceWork.traceResult.fraction) {
     //        if (enterFractionA < 0) {
     //            enterFractionA = 0;
     //        }
-    //        traceWork.traceResult->fraction = enterFractionA;
-    //        traceWork.traceResult->plane = *clipPlane;
-    //        traceWork.traceResult->surface = &(leadSide->texinfo->c);
-    //        traceWork.traceResult->contents = brush->contents;
+    //        traceWork.traceResult.fraction = enterFractionA;
+    //        traceWork.traceResult.plane = *clipPlane;
+    //        traceWork.traceResult.surface = &(leadSide->texinfo->c);
+    //        traceWork.traceResult.contents = brush->contents;
     //    }
     //}
 }
@@ -817,9 +819,9 @@ static void CM_TestBoxInBrush(const vec3_t &mins, const vec3_t &maxs, const vec3
     }
 
     // inside this brush
-    traceWork.traceResult->startSolid = traceWork.traceResult->allSolid = true;
-    traceWork.traceResult->fraction = 0;
-    traceWork.traceResult->contents = brush->contents;
+    traceWork.traceResult.startSolid = traceWork.traceResult.allSolid = true;
+    traceWork.traceResult.fraction = 0;
+    traceWork.traceResult.contents = brush->contents;
 }
 
 
@@ -847,9 +849,9 @@ static void CM_TraceToLeaf(mleaf_t *leaf) {
             continue;
         }
         
-        CM_ClipBoxToBrush(traceWork.mins, traceWork.maxs, traceWork.start, traceWork.end, traceWork.traceResult, b);
+        CM_ClipBoxToBrush(traceWork.mins, traceWork.maxs, traceWork.start, traceWork.end, &traceWork.traceResult, b);
         
-        if (!traceWork.traceResult->fraction) {
+        if (!traceWork.traceResult.fraction) {
             return;
         }
     }
@@ -881,9 +883,9 @@ static void CM_TestInLeaf(mleaf_t *leaf)
             continue;
         }
         
-        CM_TestBoxInBrush(traceWork.mins, traceWork.maxs, traceWork.start, traceWork.traceResult, b);
+        CM_TestBoxInBrush(traceWork.mins, traceWork.maxs, traceWork.start, &traceWork.traceResult, b);
         
-        if (!traceWork.traceResult->fraction) {
+        if (!traceWork.traceResult.fraction) {
             return;
         }
     }
@@ -896,7 +898,7 @@ static void CM_TestInLeaf(mleaf_t *leaf)
 static void CM_RecursiveHullCheck(mnode_t *node, float p1f, float p2f, const vec3_t &p1, const vec3_t &p2) {
 
 recheck:
-    if (traceWork.traceResult->fraction <= p1f) {
+    if (traceWork.traceResult.fraction <= p1f) {
         return;     // already hit something nearer
     }
 
@@ -1008,10 +1010,7 @@ int CM_PointContents(const vec3_t &p, mnode_t *headNode)
 /**
 *   @brief Executes a box trace.
 **/
-void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
-                 const vec3_t &mins, const vec3_t &maxs,
-                 mnode_t *headNode, int brushMask)
-{
+const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask) {
     // Determine whether we are tracing world or not.
     bool worldTrace = !(headNode != boxHull.headNode && headNode != octagonHull.headNode);
 
@@ -1019,21 +1018,19 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
     collisionModel.checkCount++;
 
     // Reset and fill in a default trace.
-    traceWork.traceResult = trace;
-    *traceWork.traceResult = {
+    traceWork.traceResult = {
         .fraction = 1,
         .surface = &(collisionModel.nullTextureInfo.c)
     };
 
     // Need a headNode to work with or bail out.
     if (!headNode) {
-        return;
+        return traceWork.traceResult;
     }
 
     // Prepare TraceWork for the current trace.
     traceWork.realFraction = 1 + DIST_EPSILON;
     traceWork.checkCount = collisionModel.checkCount;
-    traceWork.traceResult = trace;
     traceWork.contents = brushMask;
     traceWork.start = start;
     traceWork.end   = end;
@@ -1075,20 +1072,20 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
         int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, nullptr);
         for (int32_t i = 0; i < numleafs; i++) {
             CM_TestInLeaf(leafs[i]);
-            if (traceWork.traceResult->allSolid) {
+            if (traceWork.traceResult.allSolid) {
                 break;
             }
         }
-            //VectorCopy(start, trace_traceWork.traceResult->endPosition);
+            //VectorCopy(start, trace_traceWork.traceResult.endPosition);
   //      } else {
             //if (BoundsOverlap(headNode->mins, headNode->maxs, traceWork.absMins, traceWork.absMaxs)) {
             //    CM_TestInLeaf()
             //}
   //      }
 
-        traceWork.traceResult->endPosition = start;
+        traceWork.traceResult.endPosition = start;
 
-        return;
+        return traceWork.traceResult;
     }
 
     //
@@ -1111,13 +1108,13 @@ void CM_BoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
     CM_RecursiveHullCheck(headNode, 0, 1, start, end);
 
     // Clamp.
-    traceWork.traceResult->fraction = Clampf(traceWork.traceResult->fraction, 0.f, 1.f);
+    traceWork.traceResult.fraction = Clampf(traceWork.traceResult.fraction, 0.f, 1.f);
 
     // Lerp end position if necessary.
-    if (traceWork.traceResult->fraction == 1) {
-        traceWork.traceResult->endPosition = end;
+    if (traceWork.traceResult.fraction == 1) {
+        traceWork.traceResult.endPosition = end;
     } else {
-        traceWork.traceResult->endPosition = vec3_mix(start, end, traceWork.traceResult->fraction);
+        traceWork.traceResult.endPosition = vec3_mix(start, end, traceWork.traceResult.fraction);
     }
 }
 
@@ -1156,21 +1153,13 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 *   @brief  Same as CM_TraceBox but also handles offsetting and rotation of the end points 
 *           for moving and rotating entities. (Brush Models are the only rotating entities.)
 **/
-void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_t &end,
-                            const vec3_t &mins, const vec3_t &maxs,
-                            mnode_t *headNode, int brushmask,
-                            const vec3_t &origin, const vec3_t &angles)
+const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin, const vec3_t &angles)
 {
-    vec3_t      axis[3];
-    qboolean    rotated;
+    vec3_t      axis[3] = { vec3_zero(), vec3_zero(), vec3_zero()};
+    qboolean    rotated = false;
 
     // Reset tracework.
     traceWork = {};
-
-    // Can't go on without a valid TraceResult
-    if (!trace) {
-        return;
-    }
 
     // Calculate end and start l.
     vec3_t end_l = vec3_zero();
@@ -1190,7 +1179,7 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     end_l   -= origin;
 
     // Rotate start and end into the models frame of reference.
-    if ((headNode != boxHull.headNode && headNode != octagonHull.headNode) && (angles[0] || angles[1] || angles[2])) {
+    if ((headNode != boxHull.headNode && headNode != octagonHull.headNode) && !(angles[0] || angles[1] || angles[2])) {
         rotated = true;
 
         AnglesToAxis(angles, axis);
@@ -1201,16 +1190,19 @@ void CM_TransformedBoxTrace(TraceResult *trace, const vec3_t &start, const vec3_
     }
 
     // Sweep the box through the model.
-    CM_BoxTrace(trace, start_l, end_l, mins, maxs, headNode, brushmask);
+    CM_BoxTrace(start_l, end_l, mins, maxs, headNode, brushMask);
 
     // Rotate plane normal back into the worlds frame of reference.
-    if (rotated && traceWork.traceResult->fraction != 1.0) {
+    if (rotated && traceWork.traceResult.fraction != 1.0) {
         TransposeAxis(axis);
-        RotatePoint(traceWork.traceResult->plane.normal, axis);
+        RotatePoint(traceWork.traceResult.plane.normal, axis);
     }
 
     // FIXME: offset plane distance?
-    traceWork.traceResult->endPosition = vec3_mix(start, end, traceWork.traceResult->fraction); // LerpVector(start, end, traceWork.traceResult->fraction, traceWork.traceResult->endPosition);
+    traceWork.traceResult.endPosition = vec3_mix(start, end, traceWork.traceResult.fraction); // LerpVector(start, end, traceWork.traceResult.fraction, traceWork.traceResult.endPosition);
+
+	// Return trace result.
+	return traceWork.traceResult;
 }
 
 
