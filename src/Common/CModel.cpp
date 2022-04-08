@@ -1008,6 +1008,37 @@ int CM_PointContents(const vec3_t &p, mnode_t *headNode)
 }
 
 /**
+*   @brief  Same as PointContents but also handles offsetting and rotation of the end points 
+*           for moving and rotating entities. (Brush Models are the only rotating entities.)
+**/
+int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t& origin, const vec3_t& angles)
+{
+    vec3_t temp = vec3_zero();
+    vec3_t forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
+
+    if (!headNode) {
+        return 0;
+    }
+
+    // subtract origin offset
+    vec3_t p_l = vec3_zero();
+    if (headNode == octagonHull.headNode) {
+        p_l = (p - origin) - traceWork.cylinderOffset;
+    } else {
+        p_l = p - origin;
+    } 
+
+    vec3_t axis[3];
+    // rotate start and end into the models frame of reference
+    if (headNode != boxHull.headNode && headNode != octagonHull.headNode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
+        AnglesToAxis(angles, axis);
+        RotatePoint(p_l, axis);
+    }
+
+    return BSP_PointLeaf(headNode, p_l)->contents;
+}
+
+/**
 *   @brief Executes a box trace.
 **/
 const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask) {
@@ -1116,37 +1147,8 @@ const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3
     } else {
         traceWork.traceResult.endPosition = vec3_mix(start, end, traceWork.traceResult.fraction);
     }
-}
 
-/**
-*   @brief  Same as PointContents but also handles offsetting and rotation of the end points 
-*           for moving and rotating entities. (Brush Models are the only rotating entities.)
-**/
-int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t& origin, const vec3_t& angles)
-{
-    vec3_t temp = vec3_zero();
-    vec3_t forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
-
-    if (!headNode) {
-        return 0;
-    }
-
-    // subtract origin offset
-    vec3_t p_l = vec3_zero();
-    if (headNode == octagonHull.headNode) {
-        p_l = (p - origin) - traceWork.cylinderOffset;
-    } else {
-        p_l = p - origin;
-    } 
-
-    vec3_t axis[3];
-    // rotate start and end into the models frame of reference
-    if (headNode != boxHull.headNode && headNode != octagonHull.headNode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
-        AnglesToAxis(angles, axis);
-        RotatePoint(p_l, axis);
-    }
-
-    return BSP_PointLeaf(headNode, p_l)->contents;
+	return traceWork.traceResult;
 }
 
 /**

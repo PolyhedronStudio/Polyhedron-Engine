@@ -80,35 +80,35 @@ static inline void Entity_UpdateNew(ClientEntity *clEntity, const EntityState &s
 /**
 *   @brief  Updates an existing entity using the newly received state for it.
 **/
-static inline void Entity_UpdateExisting(ClientEntity *entity, const EntityState &state, const vec_t *origin)
+static inline void Entity_UpdateExisting(ClientEntity *clEntity, const EntityState &state, const vec_t *origin)
 {
     // Fetch event ID.
     int32_t eventID = state.eventID;
 
-    if (state.modelIndex != entity->current.modelIndex
-        || state.modelIndex2 != entity->current.modelIndex2
-        || state.modelIndex3 != entity->current.modelIndex3
-        || state.modelIndex4 != entity->current.modelIndex4
+    if (state.modelIndex != clEntity->current.modelIndex
+        || state.modelIndex2 != clEntity->current.modelIndex2
+        || state.modelIndex3 != clEntity->current.modelIndex3
+        || state.modelIndex4 != clEntity->current.modelIndex4
         || eventID == EntityEvent::PlayerTeleport
         || eventID == EntityEvent::OtherTeleport
-        || fabsf(origin[0] - entity->current.origin[0]) > 512
-        || fabsf(origin[1] - entity->current.origin[1]) > 512
-        || fabsf(origin[2] - entity->current.origin[2]) > 512
+        || fabsf(origin[0] - clEntity->current.origin[0]) > 512
+        || fabsf(origin[1] - clEntity->current.origin[1]) > 512
+        || fabsf(origin[2] - clEntity->current.origin[2]) > 512
         || cl_nolerp->integer == 1) 
     {
         // Some data changes will force no lerping.
-        entity->trailCount = 1024;     // Used for diminishing rocket / grenade trails
+        clEntity->trailCount = 1024;     // Used for diminishing rocket / grenade trails
 
         // Duplicate the current state so lerping doesn't hurt anything
-        entity->prev = state;
+        clEntity->prev = state;
 
         // No lerping if teleported or morphed
-        entity->lerpOrigin = origin;
+        clEntity->lerpOrigin = origin;
         return;
     }
 
     // Shuffle the last state to previous
-    entity->prev = entity->current;
+    clEntity->prev = clEntity->current;
 }
 
 /**
@@ -160,14 +160,15 @@ static void Entity_UpdateState(const EntityState &state)
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
     ClientEntity *clEntity = &cs.entities[state.number];
 
-    // If entity its solid is PACKED_BBOX, decode mins/maxs and add to the list
-    if (state.solid && state.number != cl.frame.clientNumber + 1
-        && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
+    // Add entity to the solids list if it has a solid.
+    if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = clEntity;
 
+		// For non BRUSH models...
         if (state.solid != PACKED_BBOX) {
-            // 32 bit encoded bbox
-            MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
+            // Update the actual bounding box.
+            clEntity->mins = state.mins;
+			clEntity->maxs = state.maxs; //MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
         }
     }
 

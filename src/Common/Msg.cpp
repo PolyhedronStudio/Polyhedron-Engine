@@ -1130,6 +1130,10 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
     if (to->solid != from->solid) {
 	    byteMask |= EntityMessageBits::Solid;
     }
+    
+	if (to->solid != PACKED_BBOX && (!vec3_equal(to->mins, from->mins) || !vec3_equal(to->maxs, from->maxs))) {
+        byteMask |= EntityMessageBits::Bounds;
+    }
 
     // Event is not delta compressed, it's bit is set when eventID is non 0.
     if (to->eventID) {
@@ -1312,7 +1316,19 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Solid.
     if (byteMask & EntityMessageBits::Solid) {
-        MSG_WriteIntBase128(to->solid);
+        MSG_WriteInt32(to->solid);
+    }
+
+    // Write out the Bounding Box.
+    if (byteMask & EntityMessageBits::Bounds) {
+        //MSG_WriteIntBase128(to->solid);
+		MSG_WriteUint8(-to->mins.x);
+		MSG_WriteUint8(-to->mins.y);
+		MSG_WriteUint8(-to->mins.z);
+
+		MSG_WriteUint8(to->maxs.x);
+		MSG_WriteUint8(to->maxs.y);
+		MSG_WriteUint8(to->maxs.z);
     }
 
     // Write out the Animation Start Time.
@@ -1443,7 +1459,20 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Solid.
     if (byteMask & EntityMessageBits::Solid) {
-        to->solid = MSG_ReadIntBase128();
+        to->solid = MSG_ReadInt32();
+    }
+
+    // Read in the Bounding Box.
+    if (byteMask & EntityMessageBits::Bounds) {
+
+        //MSG_WriteIntBase128(to->solid);
+		to->mins.x = -MSG_ReadUint8();
+		to->mins.y = -MSG_ReadUint8();
+		to->mins.z = -MSG_ReadUint8();
+
+		to->maxs.x = MSG_ReadUint8();
+		to->maxs.y = MSG_ReadUint8();
+		to->maxs.z = MSG_ReadUint8();
     }
 
     if (byteMask & EntityMessageBits::AnimationTimeStart) {

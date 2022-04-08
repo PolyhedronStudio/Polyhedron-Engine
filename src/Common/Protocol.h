@@ -225,44 +225,44 @@ static constexpr float DEFAULT_SOUND_PACKET_ATTENUATION = 1.0f;
 **/
 struct EntityMessageBits {
     //! 1st byte.
-    static constexpr uint32_t OriginX        = (1 << 0); //! X Origin.
-    static constexpr uint32_t OriginY        = (1 << 1); //! Y Origin.
-    static constexpr uint32_t AngleX         = (1 << 2); //! X Angle.
-    static constexpr uint32_t AngleY         = (1 << 3); //! Y Angle.
-    static constexpr uint32_t OriginZ        = (1 << 4); //! Origin Z.
-    static constexpr uint32_t AngleZ         = (1 << 5); //! Angle Z.
-    static constexpr uint32_t OldOrigin      = (1 << 6); //! Old origin.
-    static constexpr uint32_t EventID        = (1 << 7); //! EventID for this state, reset each frame.
+    static constexpr uint32_t OriginX				= (1 << 0); //! X Origin.
+    static constexpr uint32_t OriginY				= (1 << 1); //! Y Origin.
+    static constexpr uint32_t AngleX				= (1 << 2); //! X Angle.
+    static constexpr uint32_t AngleY				= (1 << 3); //! Y Angle.
+    static constexpr uint32_t OriginZ				= (1 << 4); //! Origin Z.
+    static constexpr uint32_t AngleZ				= (1 << 5); //! Angle Z.
+    static constexpr uint32_t OldOrigin				= (1 << 6); //! Old origin.
+    static constexpr uint32_t EventID				= (1 << 7); //! EventID for this state, reset each frame.
 
     //! 2nd byte.
-    static constexpr uint32_t Sound                  = (1 << 8);     //! Sound
-    static constexpr uint32_t Solid                  = (1 << 9);     //! The animation start time.
-    static constexpr uint32_t AnimationFrame         = (1 << 10);    //! Animation Frame for anything BUT skeletal models.
-    static constexpr uint32_t AnimationTimeStart     = (1 << 11);    //! The animation starting frame.
-    static constexpr uint32_t AnimationFrameStart    = (1 << 12);    //! Animation Start Frame.
-    static constexpr uint32_t AnimationFrameEnd      = (1 << 13);    //! Animation End Frame.
-    static constexpr uint32_t AnimationFrameTime     = (1 << 14);    //! Animation Speed
-    static constexpr uint32_t Skin                   = (1 << 15);    //! Model Skin.
+    static constexpr uint32_t Sound                 = (1 << 8);  //! Sound
+    static constexpr uint32_t AnimationFrame        = (1 << 9);  //! Animation Frame for anything BUT skeletal models.
+    static constexpr uint32_t AnimationTimeStart    = (1 << 10); //! The animation starting frame.
+    static constexpr uint32_t AnimationFrameStart   = (1 << 11); //! Animation Start Frame.
+    static constexpr uint32_t AnimationFrameEnd     = (1 << 12); //! Animation End Frame.
+    static constexpr uint32_t AnimationFrameTime    = (1 << 13); //! Animation Speed
+    static constexpr uint32_t Skin                  = (1 << 14); //! Model Skin.
+	static constexpr uint32_t Solid                 = (1 << 15); //! The Entity Solid.
     
     //! 3rd byte.
-    static constexpr uint32_t ModelIndex     = (1 << 16); //! Model Index #1.
-    static constexpr uint32_t ModelIndex2    = (1 << 17); //! Model Index #2.
-    static constexpr uint32_t ModelIndex3    = (1 << 18); //! Model Index #3.
-    static constexpr uint32_t ModelIndex4    = (1 << 19); //! Model Index #4.
-    static constexpr uint32_t EntityEffects  = (1 << 20); //! Entity Effects.
-    static constexpr uint32_t RenderEffects  = (1 << 21); //! Render Effects.    
-    static constexpr uint32_t HashedClassname= (1 << 22); //! A free bit, waiting to be used... some day :-)
-    static constexpr uint32_t Unused2        = (1 << 23); //! A free bit.
+    static constexpr uint32_t ModelIndex			= (1 << 16); //! Model Index #1.
+    static constexpr uint32_t ModelIndex2			= (1 << 17); //! Model Index #2.
+    static constexpr uint32_t ModelIndex3			= (1 << 18); //! Model Index #3.
+    static constexpr uint32_t ModelIndex4			= (1 << 19); //! Model Index #4.
+    static constexpr uint32_t EntityEffects			= (1 << 20); //! Entity Effects.
+    static constexpr uint32_t RenderEffects			= (1 << 21); //! Render Effects.    
+    static constexpr uint32_t HashedClassname		= (1 << 22); //! 32 bit Hashed version of an entity's classname string.
+    static constexpr uint32_t Bounds				= (1 << 23); //! X/y Size and Z -Mins/+Maxs of an entity.
 
     //! 4th byte. Waiting to be used... some day :-)
-    static constexpr uint32_t Unused3        = (1 << 24); //! A free bit.
-    static constexpr uint32_t Unused4        = (1 << 25); //! A free bit.
-    static constexpr uint32_t Unused5        = (1 << 26); //! A free bit.
-    static constexpr uint32_t Unused6        = (1 << 27); //! A free bit.
-    static constexpr uint32_t Unused7        = (1 << 28); //! A free bit.
-    static constexpr uint32_t Unused8        = (1 << 29); //! A free bit.
-    static constexpr uint32_t Unused9        = (1 << 30); //! A free bit.
-    static constexpr uint32_t Unused10       = (1 << 31); //! A free bit.
+    static constexpr uint32_t Unused3				= (1 << 24); //! A free bit.
+    static constexpr uint32_t Unused4				= (1 << 25); //! A free bit.
+    static constexpr uint32_t Unused5				= (1 << 26); //! A free bit.
+    static constexpr uint32_t Unused6				= (1 << 27); //! A free bit.
+    static constexpr uint32_t Unused7				= (1 << 28); //! A free bit.
+    static constexpr uint32_t Unused8				= (1 << 29); //! A free bit.
+    static constexpr uint32_t Unused9				= (1 << 30); //! A free bit.
+    static constexpr uint32_t Unused10				= (1 << 31); //! A free bit.
 };
 
 

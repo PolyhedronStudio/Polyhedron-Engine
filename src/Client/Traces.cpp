@@ -59,22 +59,11 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             traceAngles = solidEntity->current.angles;
             traceOrigin = solidEntity->current.origin;
         } else {
-            vec3_t entityMins = {0.f, 0.f, 0.f};
-            vec3_t entityMaxs = {0.f, 0.f, 0.f};
-
-            //MSG_UnpackBoundingBox32(solidEntity->current.solid, entityMins, entityMaxs);
-            
-			// TO FIX THIS: Transfer Bounding Boxes and Octagons like this over the wire:
-			// solid -> 8 bits.
-			// xy -> 16 bits (half-float, expanding on both plane signs.)
-			// z -> 16 bits (half-float, expanding on both plane signs.)
-
-
-            //if (solidEntity->current.solid == Solid::OctagonBox) {
-                headNode = CM_HeadnodeForOctagon(solidEntity->mins, solidEntity->maxs);
-            //} else {
-            //    headNode = CM_HeadnodeForBox(solidEntity->mins, solidEntity->maxs);
-            //}
+            if (solidEntity->current.solid == Solid::OctagonBox) {
+                headNode = CM_HeadnodeForOctagon(solidEntity->current.mins, solidEntity->current.maxs);
+            } else {
+                headNode = CM_HeadnodeForBox(solidEntity->current.mins, solidEntity->current.maxs);
+            }
 
             traceAngles = vec3_zero();
             traceOrigin = solidEntity->current.origin;

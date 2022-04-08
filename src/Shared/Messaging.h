@@ -147,8 +147,13 @@ struct EntityState {
     uint32_t effects = 0;  // PGM - we're filling it, so it needs to be unsigned
     //! Entity Render Effects. (For Shells, Transparency etc.)
     int32_t renderEffects = 0;
-    //! For client side prediction. 8*(bits0-4) is x/y radius. 8*(bits 5-9) is z down distance. 8(bits10-15) is z up.
+    
+	//! For client side prediction.
     int32_t solid = 0;	//! gi.LinkEntity sets this properly.
+	//! For client side prediction. x/y need to be integral values(we won't go less than 1 unit.)
+	vec3_t mins = vec3_zero();
+	vec3_t maxs = vec3_zero();
+
     //! For looping sounds, used to guarantee a shutoff.
     int32_t sound = 0;
     //! Impulse events, cleared after each frame. (Muzzle flashes, footsteps, etc.)
