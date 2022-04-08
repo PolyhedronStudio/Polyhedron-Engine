@@ -168,7 +168,7 @@ void ClientGameCore::Initialize() {
     cl_disable_particles = clgi.Cvar_Get("cl_disable_particles", "0", 0);
     cl_disable_explosions = clgi.Cvar_Get("cl_disable_explosions", "0", 0);
     cl_explosion_sprites = clgi.Cvar_Get("cl_explosion_sprites", "1", 0);
-    cl_explosion_frametime = clgi.Cvar_Get("cl_explosion_frametime", "20", 0);
+    cl_explosion_frametime = clgi.Cvar_Get("cl_explosion_frametime", "14", 0);
     cl_vwep = clgi.Cvar_Get("cl_vwep", "1", CVAR_ARCHIVE);
     cl_vwep->changed = cl_vwep_changed;
 
