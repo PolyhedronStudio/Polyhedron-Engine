@@ -65,7 +65,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
                 headNode = CM_HeadnodeForBox(solidEntity->current.mins, solidEntity->current.maxs);
             }
 
-            traceAngles = vec3_zero();
+            traceAngles = solidEntity->current.angles;
             traceOrigin = solidEntity->current.origin;
         }
 
@@ -97,7 +97,10 @@ TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs
 
     // Execute trace.
     //CM_BoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask);
-    trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.bsp->nodes, contentMask, vec3_zero(), vec3_zero());
+	vec3_t traceOrigin = vec3_zero();
+	vec3_t traceAngles = vec3_zero();
+
+    trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.bsp->nodes, contentMask, traceOrigin, traceAngles);
 
     // Set trace entity.
     trace.ent = reinterpret_cast<entity_s*>(&cl.solidEntities[0]);

@@ -259,8 +259,7 @@ protected:
 
     // View and BobMove functionality.
 public:
-    // BobMoveCycle is used for view bobbing,
-    // where the player FPS view looks like he is
+    // BobMoveCycle is used for view bobbing, where the player FPS view looks like he is
     // walking instead of floating around.
     struct BobMoveCycle {
         // Forward, right, and up vectors.

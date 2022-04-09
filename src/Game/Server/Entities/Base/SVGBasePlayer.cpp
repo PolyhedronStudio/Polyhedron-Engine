@@ -1319,51 +1319,51 @@ void SVGBasePlayer::CalculateViewOffset()
         client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
         client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
     } else {
-        // Fetch client kick angles.
-        vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
+		// Fetch client kick angles.
+		vec3_t newKickAngles = client->playerState.kickAngles = client->kickAngles; //ent->client->playerState.kickAngles;
 
-        // Add pitch(X) and roll(Z) angles based on damage kick
-        ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
-        if (ratio < 0) {
-            ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
-        }
-        newKickAngles[vec3_t::Pitch] += ratio * client->viewDamage.pitch;
-        newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
+		// Add pitch(X) and roll(Z) angles based on damage kick
+		ratio = ((client->viewDamage.time - level.time) / DAMAGE_TIME);
+		if (ratio < 0) {
+			ratio = client->viewDamage.pitch = client->viewDamage.roll = 0;
+		}
+		newKickAngles[vec3_t::Pitch] += ratio * client->viewDamage.pitch;
+		newKickAngles[vec3_t::Roll] += ratio * client->viewDamage.roll;
 
-        // Add pitch based on fall kick
-        ratio = (client->fallTime - level.time) / FALL_TIME;
-        if (ratio < 0) {
-            ratio = 0;
-        }
-        newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
+		// Add pitch based on fall kick
+		ratio = (client->fallTime - level.time) / FALL_TIME;
+		if (ratio < 0) {
+			ratio = 0;
+		}
+		newKickAngles[vec3_t::Pitch] += ratio * client->fallValue;
 
-        // Add angles based on velocity
-        delta = vec3_dot(GetVelocity(), bobMove.forward);
-        newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
+		// Add angles based on velocity
+		delta = vec3_dot(GetVelocity(), bobMove.forward);
+		newKickAngles[vec3_t::Pitch] += delta * run_pitch->value;
 
-        delta = vec3_dot(GetVelocity(), bobMove.right);
-        newKickAngles[vec3_t::Roll] += delta * run_roll->value;
+		delta = vec3_dot(GetVelocity(), bobMove.right);
+		newKickAngles[vec3_t::Roll] += delta * run_roll->value;
 
-        // Add angles based on bob
-        delta = bobMove.fracSin * bob_pitch->value * bobMove.XYSpeed;
-        // Adjust for crouching.
-        if (client->playerState.pmove.flags & PMF_DUCKED) {
-            delta *= 6;
-        }
-        newKickAngles[vec3_t::Pitch] += delta;
-        delta = bobMove.fracSin * bob_roll->value * bobMove.XYSpeed;
+		// Add angles based on bob
+		delta = bobMove.fracSin * bob_pitch->value * bobMove.XYSpeed;
+		// Adjust for crouching.
+		if (client->playerState.pmove.flags & PMF_DUCKED) {
+			delta *= 6; 
+		}
+		newKickAngles[vec3_t::Pitch] += delta;
+		delta = bobMove.fracSin * bob_roll->value * bobMove.XYSpeed;
 
-        // Adjust for crouching.
-        if (client->playerState.pmove.flags & PMF_DUCKED) {
-            delta *= 6;
-        }
-        if (bobMove.cycle & 1) {
-            delta = -delta;
-        }
-        newKickAngles[vec3_t::Roll] += delta;
+		// Adjust for crouching.
+		if (client->playerState.pmove.flags & PMF_DUCKED) {
+			delta *= 6;
+		}
+		if (bobMove.cycle & 1) {
+			delta = -delta;
+		}
+		newKickAngles[vec3_t::Roll] += delta;
 
-        // Last but not least, assign new kickangles to player state.
-        client->playerState.kickAngles = newKickAngles;
+		// Last but not least, assign new kickangles to player state.
+		client->playerState.kickAngles = newKickAngles;
     }
 
     //
@@ -1381,17 +1381,18 @@ void SVGBasePlayer::CalculateViewOffset()
     if (ratio < 0) {
         ratio = 0;
     }
-    newViewOffset.z -= ratio * client->fallValue * 0.4f;
+    newViewOffset.z -= ratio * client->fallValue * 0.4f / BASE_FRAMEDIVIDER;
 
     // Add bob height.
     bob = bobMove.fracSin * bobMove.XYSpeed * bob_up->value;
-    if (bob > 6) {
-        bob = 6.f;
+	// Divider acts as a multiplier in this scenario.
+    if (bob > 6 * 5.25) { // If you use base frame divider you get the old Q2 feel.
+        bob = 6.f * 5.25;
     }
     //newViewOffset.z += bob;
 
     // Add kick offset
-    newViewOffset += client->kickOrigin;
+    //newViewOffset += client->kickOrigin;
 
     // Clamp the new view offsets, and finally assign them to the player state.
     // Clamping ensures that they never exceed the non visible, but physically 

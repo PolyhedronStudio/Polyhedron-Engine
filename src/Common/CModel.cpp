@@ -1030,7 +1030,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 
     vec3_t axis[3];
     // rotate start and end into the models frame of reference
-    if (headNode != boxHull.headNode && headNode != octagonHull.headNode && !(angles[0] == 0 && angles[1] == 0 && angles[2] == 0)) {
+    if (headNode != boxHull.headNode && headNode != octagonHull.headNode && (angles[0] || angles[1] || angles[2])) {
         AnglesToAxis(angles, axis);
         RotatePoint(p_l, axis);
     }
@@ -1043,7 +1043,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 **/
 const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask) {
     // Determine whether we are tracing world or not.
-    bool worldTrace = !(headNode != boxHull.headNode && headNode != octagonHull.headNode);
+    bool worldTrace = (headNode != boxHull.headNode && headNode != octagonHull.headNode);
 
     // For multi-check avoidance.
     collisionModel.checkCount++;
@@ -1095,30 +1095,33 @@ const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3
         mleaf_t *leafs[1024];
         int32_t topNode = 0;
 
-//        if (worldTrace) {
-            // Calculate c1 and c2 vectors.
-        vec3_t c1 = start + mins + vec3_t{ -1.f, -1.f, -1.f };
-        vec3_t c2 = start + maxs + vec3_t{ 1.f, 1.f, 1.f };            
+        if (worldTrace) {
+			// Calculate c1 and c2 vectors.
+			vec3_t c1 = start + mins + vec3_t{ -1.f, -1.f, -1.f };
+			vec3_t c2 = start + maxs + vec3_t{ 1.f, 1.f, 1.f };            
 
-        int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, nullptr);
-        for (int32_t i = 0; i < numleafs; i++) {
-            CM_TestInLeaf(leafs[i]);
-            if (traceWork.traceResult.allSolid) {
-                break;
-            }
-        }
-            //VectorCopy(start, trace_traceWork.traceResult.endPosition);
-  //      } else {
-            //if (BoundsOverlap(headNode->mins, headNode->maxs, traceWork.absMins, traceWork.absMaxs)) {
-            //    CM_TestInLeaf()
-            //}
-  //      }
+			int32_t numleafs = CM_BoxLeafs_headnode(c1, c2, leafs, Q_COUNTOF(leafs), headNode, nullptr);
+			for (int32_t i = 0; i < numleafs; i++) {
+				CM_TestInLeaf(leafs[i]);
+				if (traceWork.traceResult.allSolid) {
+					break;
+				}
+			}
+		} else {
+			if (BoundsOverlap(start + mins, start + maxs, traceWork.absMins, traceWork.absMaxs)) {
+				if (headNode == octagonHull.headNode) {
+					CM_TestInLeaf(&octagonHull.leaf);
+				} else {
+					CM_TestInLeaf(&boxHull.leaf);
+				}
+			}
+		}
 
         traceWork.traceResult.endPosition = start;
 
         return traceWork.traceResult;
-    }
-
+	}
+	
     //
     // check for point special case
     //
@@ -1136,7 +1139,15 @@ const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3
     //
     // general sweeping through world
     //
-    CM_RecursiveHullCheck(headNode, 0, 1, start, end);
+	if (worldTrace) {
+		CM_RecursiveHullCheck(headNode, 0, 1, start, end);
+	} else if (BoundsOverlap(start + mins, start + maxs, traceWork.absMins, traceWork.absMaxs)) {
+		if (headNode == octagonHull.headNode) {
+			CM_TraceToLeaf(&octagonHull.leaf);
+		} else {
+			CM_TraceToLeaf(&boxHull.leaf);
+		}
+	}
 
     // Clamp.
     traceWork.traceResult.fraction = Clampf(traceWork.traceResult.fraction, 0.f, 1.f);
@@ -1182,6 +1193,7 @@ const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end,
 
     // Rotate start and end into the models frame of reference.
     if ((headNode != boxHull.headNode && headNode != octagonHull.headNode) && (angles[0] || angles[1] || angles[2])) {
+	//if ((angles[0] || angles[1] || angles[2])) {
         rotated = true;
 
         AnglesToAxis(angles, axis);
@@ -1200,7 +1212,11 @@ const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end,
         RotatePoint(traceWork.traceResult.plane.normal, axis);
     }
 
-    // FIXME: offset plane distance?
+    
+	// Clamp fraction just to be sure.
+	traceWork.traceResult.fraction = Clampf(traceWork.traceResult.fraction, 0.0, 1.0);
+
+	// FIXME: offset plane distance?
     traceWork.traceResult.endPosition = vec3_mix(start, end, traceWork.traceResult.fraction); // LerpVector(start, end, traceWork.traceResult.fraction, traceWork.traceResult.endPosition);
 
 	// Return trace result.

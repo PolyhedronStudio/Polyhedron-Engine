@@ -239,8 +239,6 @@ void ClientGameExports::ClientUpdateOrigin() {
     
     // Lerp between previous and current frame delta angles.
     const vec3_t newDeltaAngles = vec3_mix_euler(previousPlayerState->pmove.deltaAngles, currentPlayerState->pmove.deltaAngles, lerpFraction);
-//    cl->deltaAngles[1] = vec3_mix(previousPlayerState->pmove.deltaAngles[1], currentPlayerState->pmove.deltaAngles[1], lerpFraction);
-//    cl->deltaAngles[2] = vec3_mix(previousPlayerState->pmove.deltaAngles[2], currentPlayerState->pmove.deltaAngles[2], lerpFraction);
 
     // Don't interpolate blend color
     cl->refdef.blend = currentPlayerState->blend;

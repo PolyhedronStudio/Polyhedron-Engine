@@ -781,9 +781,9 @@ struct gclient_s {
     **/
     struct {
         //! Roll for view damage kick.
-        float roll  = 0.f;
+        double roll  = 0.f;
         //! Pitch for view damage kick.
-        float pitch = 0.f;
+        double pitch = 0.f;
         //! Time of view damage.
         Frametime time = Frametime::zero();
     } viewDamage;
@@ -791,17 +791,17 @@ struct gclient_s {
     //! Falling time.
     Frametime fallTime = Frametime::zero();
     //! Falling value for adding on to the view's pitch when landing.
-    float fallValue = 0.f;
+    double fallValue = 0.f;
     //! Alpha value for damage indicator display.
-    float damageAlpha = 0.f;
+    double damageAlpha = 0.f;
     //! Alpha value for bonus indicator display.
-    float bonusAlpha = 0.f;
+    double bonusAlpha = 0.f;
     //! Total damage blend value.
     vec3_t damageBlend = vec3_zero();
     //! Aiming direction.
     vec3_t aimAngles = vec3_zero();
     //! Store bob time so going off-ground doesn't change it.
-    float bobTime = 0.f;
+    double bobTime = 0.f;
 
     //! Old view angles.
     vec3_t oldViewAngles = vec3_zero();
