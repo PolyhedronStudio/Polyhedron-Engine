@@ -722,7 +722,7 @@ void CL_Disconnect(int32_t errorType)
         MSG_WriteUint8(ClientCommand::StringCommand);//MSG_WriteByte(ClientCommand::StringCommand);
         MSG_WriteData("disconnect", 11);
 
-        Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3);
+        Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3, cls.realtime);
 
         SZ_Clear(&msg_write);
 

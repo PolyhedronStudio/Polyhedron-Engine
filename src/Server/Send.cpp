@@ -342,7 +342,7 @@ static qboolean compress_message(client_t *client, int flags)
         return false;
 
     // compress only sufficiently large layouts
-    if (msg_write.currentSize < client->netchan->maximumPacketLength / 2)
+    if (msg_write.currentSize < client->netChan->maximumPacketLength / 2)
         return false;
 
     deflateReset(&svs.z);
@@ -599,7 +599,7 @@ static void SV_AddMessage(client_t *client, byte *data,
 {
 //    if (reliable) {
         // don't packetize, netchan level will do fragmentation as needed
-        SZ_Write(&client->netchan->message, data, len);
+        SZ_Write(&client->netChan->message, data, len);
     //} else {
     //    // still have to packetize, relative sounds need special processing
     //    add_msg_packet(client, data, len, false);
@@ -644,10 +644,10 @@ static void SV_WriteDatagram(client_t *client)
 #endif
 
     // send the datagram
-    currentSize = Netchan_Transmit(client->netchan,
+    currentSize = Netchan_Transmit(client->netChan,
                                         msg_write.currentSize,
                                         msg_write.data,
-                                        client->numpackets);
+                                        client->numpackets, svs.realtime);
 
     // record the size for rate estimation
     SV_CalcSendTime(client, currentSize);
@@ -698,8 +698,8 @@ void SV_SendClientMessages(void)
 
         // if the reliable message overflowed,
         // drop the client (should never happen)
-        if (client->netchan->message.overflowed) {
-            SZ_Clear(&client->netchan->message);
+        if (client->netChan->message.overflowed) {
+            SZ_Clear(&client->netChan->message);
             SV_DropClient(client, "reliable message overflowed");
             goto finish;
         }
@@ -709,9 +709,9 @@ void SV_SendClientMessages(void)
             goto advance;
 
         // don't write any frame data until all fragments are sent
-        if (client->netchan->fragmentPending) {
+        if (client->netChan->fragmentPending) {
             client->frameFlags |= FrameFlags::Suppressed;
-            currentSize = Netchan_TransmitNextFragment(client->netchan);
+            currentSize = Netchan_TransmitNextFragment(client->netChan, 0);
             SV_CalcSendTime(client, currentSize);
             goto advance;
         }
@@ -742,14 +742,14 @@ static void write_pending_download(client_t *client)
     if (!client->download.isPending)
         return;
 
-    if (client->netchan->reliableLength)
+    if (client->netChan->reliableLength)
         return;
 
-    buf = &client->netchan->message;
-    if (buf->currentSize > client->netchan->maximumPacketLength)
+    buf = &client->netChan->message;
+    if (buf->currentSize > client->netChan->maximumPacketLength)
         return;
 
-    remaining = client->netchan->maximumPacketLength - buf->currentSize;
+    remaining = client->netChan->maximumPacketLength - buf->currentSize;
     if (remaining <= 4)
         return;
 
@@ -797,11 +797,11 @@ void SV_SendAsyncPackets(void)
             continue;
         }
 
-        netchan = client->netchan;
+        netchan = client->netChan;
 
         // make sure all fragments are transmitted first
         if (netchan->fragmentPending) {
-            currentSize = Netchan_TransmitNextFragment(netchan);
+            currentSize = Netchan_TransmitNextFragment(netchan, 0);
             SV_DPrintf(0, "%s: frag: %" PRIz "\n", client->name, currentSize);
             goto calctime;
         }
@@ -829,7 +829,7 @@ void SV_SendAsyncPackets(void)
 
         if (netchan->message.currentSize || netchan->reliableAckPending ||
             netchan->reliableLength || retransmit) {
-            currentSize = Netchan_Transmit(netchan, 0, NULL, 1);
+            currentSize = Netchan_Transmit(netchan, 0, NULL, 1, svs.realtime);
             SV_DPrintf(0, "%s: send: %" PRIz "\n", client->name, currentSize);
 calctime:
             SV_CalcSendTime(client, currentSize);
@@ -851,7 +851,7 @@ void SV_InitClientSend(client_t *newcl)
     }
 
     // setup protocol
-//    if (newcl->netchan->type == NETCHAN_NEW) {
+//    if (newcl->netChan->type == NETCHAN_NEW) {
         newcl->AddMessage = SV_AddMessage;
         newcl->WriteDatagram = SV_WriteDatagram;
     //} else {

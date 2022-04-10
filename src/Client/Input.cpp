@@ -464,7 +464,7 @@ static void CL_SendUserCommand(void)
     //
     // deliver the message
     //
-    currentSize = Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 1);
+    currentSize = Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 1, cls.realtime);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize); // C++20: String concat fix.
@@ -489,7 +489,7 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
     cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
-    currentSize = Netchan_Transmit(cls.netChannel, 0, NULL, 1);
+    currentSize = Netchan_Transmit(cls.netChannel, 0, NULL, 1, cls.realtime);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize);

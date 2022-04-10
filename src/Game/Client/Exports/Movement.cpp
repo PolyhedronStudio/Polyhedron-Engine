@@ -530,7 +530,7 @@ void ClientGameMovement::IN_StrafeUp(void) {
 void ClientGameMovement::IN_PrimaryFireDown(void) {
     in_primary_fire.ProcessKeyDown();
 
-    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls->netchan) {
+    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls->netChan) {
         cl->sendPacketNow = true;
     }
 }
@@ -544,7 +544,7 @@ void ClientGameMovement::IN_PrimaryFireUp(void) {
 void ClientGameMovement::IN_SecondaryFireDown(void) {
     in_secondary_fire.ProcessKeyDown();
 
-    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls->netchan) {
+    if (cl_instantpacket->integer && clgi.GetClienState() == ClientConnectionState::Active) {// && cls->netChan) {
         cl->sendPacketNow = true;
     }
 }

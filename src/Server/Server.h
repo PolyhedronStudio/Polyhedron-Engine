@@ -248,8 +248,8 @@ static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 50 / 
 #define PL_S2C(cl) (cl->framesSent ? \
     (1.0f - (float)cl->framesAcknowledged / cl->framesSent) * 100.0f : 0.0f)
 // Calculates ping for player client 2 server.
-#define PL_C2S(cl) (cl->netchan->totalReceived ? \
-    ((float)cl->netchan->totalDropped / cl->netchan->totalReceived) * 100.0f : 0.0f)
+#define PL_C2S(cl) (cl->netChan->totalReceived ? \
+    ((float)cl->netChan->totalDropped / cl->netChan->totalReceived) * 100.0f : 0.0f)
 // Averages the final ping value.
 #define AVG_PING(cl) (cl->averagePingCount ? \
     cl->averagePingTime / cl->averagePingCount : cl->ping)
@@ -389,7 +389,7 @@ typedef struct client_s {
     void (*WriteDatagram)(struct client_s *);
 
     // netchan
-    NetChannel *netchan;
+    NetChannel *netChan;
     int32_t numpackets; // for that nasty packetdup hack
 
     // misc

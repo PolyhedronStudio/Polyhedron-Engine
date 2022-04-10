@@ -105,9 +105,9 @@ void SV_RemoveClient(client_t *client)
         SV_ShutdownClientSend(client);
     }
 
-    if (client->netchan) {
-        Netchan_Close(client->netchan);
-        client->netchan = NULL;
+    if (client->netChan) {
+        Netchan_Close(client->netChan);
+        client->netChan = NULL;
     }
 
     // unlink them from active client list, but don't clear the list entry
@@ -190,9 +190,9 @@ static void print_drop_reason(client_t *client, const char *reason, int32_t oldC
                         client->name, prefix, reason);
 
     // print to server console
-    if (COM_DEDICATED && client->netchan)
+    if (COM_DEDICATED && client->netChan)
         Com_Printf("%s[%s]%s%s\n", client->name,
-                   NET_AdrToString(&client->netchan->remoteNetAddress),
+                   NET_AdrToString(&client->netChan->remoteNetAddress),
                    prefix, reason);
 }
 
@@ -692,7 +692,7 @@ static qboolean permit_connection(conn_params_t *p)
     if (sv_iplimit->integer > 0) {
         count = 0;
         FOR_EACH_CLIENT(cl) {
-            NetAdr *adr = &cl->netchan->remoteNetAddress;
+            NetAdr *adr = &cl->netChan->remoteNetAddress;
 
             if (net_from.type != adr->type)
                 continue;
@@ -873,7 +873,7 @@ static client_t *find_client_slot(conn_params_t *params)
 
     // if there is already a slot for this ip, reuse it
     FOR_EACH_CLIENT(cl) {
-        if (NET_IsEqualAdr(&net_from, &cl->netchan->remoteNetAddress)) {
+        if (NET_IsEqualAdr(&net_from, &cl->netChan->remoteNetAddress)) {
             if (cl->connectionState == ConnectionState::Zombie) {
                 strcpy(params->reconnectKey, cl->reconnectKey);
                 strcpy(params->reconnectValue, cl->reconnectValue);
@@ -1027,7 +1027,7 @@ static void SVC_DirectConnect(void)
     }
 
     // setup netchan
-    newcl->netchan = Netchan_Setup(NS_SERVER, &net_from, params.qport, params.maxlength, params.protocolVersion);
+    newcl->netChan = Netchan_Setup(NS_SERVER, &net_from, params.qport, params.maxlength, params.protocolVersion);
     newcl->numpackets = 1;
 
     // parse some info from the info strings
@@ -1336,7 +1336,7 @@ static void SV_GiveMsec(void)
 
         if (sv_timescale_warn->value > 1.0f && client->timescale > sv_timescale_warn->value) {
             Com_Printf("%s[%s]: detected time skew: %.3f\n", client->name,
-                       NET_AdrToString(&client->netchan->remoteNetAddress), client->timescale);
+                       NET_AdrToString(&client->netChan->remoteNetAddress), client->timescale);
         }
 
         if (sv_timescale_kick->value > 1.0f && client->timescale > sv_timescale_kick->value) {
@@ -1375,7 +1375,7 @@ static void SV_GiveMsec(void)
 
     //    if (sv_timescale_warn->value > 1.0f && cl->timescale > sv_timescale_warn->value) {
     //        Com_Printf("%s[%s]: detected time skew: %.3f\n", cl->name,
-    //                   NET_AdrToString(&cl->netchan->remoteNetAddress), cl->timescale);
+    //                   NET_AdrToString(&cl->netChan->remoteNetAddress), cl->timescale);
     //    }
 
     //    if (sv_timescale_kick->value > 1.0f && cl->timescale > sv_timescale_kick->value) {
@@ -1409,7 +1409,7 @@ static void SV_PacketEvent(void)
 
     // check for packets from connected clients
     FOR_EACH_CLIENT(client) {
-        netchan = client->netchan;
+        netchan = client->netChan;
         if (!NET_IsEqualBaseAdr(&net_from, &netchan->remoteNetAddress)) {
             continue;
         }
@@ -1465,7 +1465,7 @@ static void SV_PacketEvent(void)
 // Total 64 bytes of headers is assumed.
 static void update_client_mtu(client_t *client, int ee_info)
 {
-    NetChannel *netchan = client->netchan;
+    NetChannel *netchan = client->netChan;
     size_t newpacketlen;
 
     // sanity check discovered MTU
@@ -1512,7 +1512,7 @@ void SV_ErrorEvent(NetAdr *from, int ee_errno, int ee_info)
         if (client->connectionState == ConnectionState::Zombie) {
             continue; // already a zombie
         }
-        netchan = client->netchan;
+        netchan = client->netChan;
         if (!NET_IsEqualBaseAdr(from, &netchan->remoteNetAddress)) {
             continue;
         }
@@ -1555,7 +1555,7 @@ static void SV_CheckTimeouts(void)
 
     FOR_EACH_CLIENT(client) {
         // never timeout local clients
-        if (NET_IsLocalAddress(&client->netchan->remoteNetAddress)) {
+        if (NET_IsLocalAddress(&client->netChan->remoteNetAddress)) {
             continue;
         }
         // NOTE: delta calculated this way is not sensitive to overflow
@@ -1876,7 +1876,7 @@ void SV_UserinfoChanged(client_t *cl)
     if (cl->name[0] && strcmp(cl->name, name)) {
         if (COM_DEDICATED) {
             Com_Printf("%s[%s] changed name to %s\n", cl->name,
-                       NET_AdrToString(&cl->netchan->remoteNetAddress), name);
+                       NET_AdrToString(&cl->netChan->remoteNetAddress), name);
         }
 
         if (sv_show_name_changes->integer) {
@@ -1896,13 +1896,13 @@ void SV_UserinfoChanged(client_t *cl)
     }
 
     // never drop over the loopback
-    if (NET_IsLocalAddress(&cl->netchan->remoteNetAddress)) {
+    if (NET_IsLocalAddress(&cl->netChan->remoteNetAddress)) {
         cl->rate = 0;
     }
 
     // don't drop over LAN connections
     if (sv_lan_force_rate->integer &&
-        NET_IsLanAddress(&cl->netchan->remoteNetAddress)) {
+        NET_IsLanAddress(&cl->netChan->remoteNetAddress)) {
         cl->rate = 0;
     }
 
@@ -2131,11 +2131,11 @@ static void SV_FinalMessage(const char *message, int32_t errorType)
             if (client->connectionState == ConnectionState::Zombie) {
                 continue;
             }
-            netchan = client->netchan;
+            netchan = client->netChan;
             while (netchan->fragmentPending) {
-                Netchan_TransmitNextFragment(netchan);
+                Netchan_TransmitNextFragment(netchan, 0);
             }
-            Netchan_Transmit(netchan, msg_write.currentSize, msg_write.data, 1);
+            Netchan_Transmit(netchan, msg_write.currentSize, msg_write.data, 1, svs.realtime);
         }
     }
 

@@ -142,7 +142,7 @@ static void write_plain_configstrings(void)
             length = MAX_QPATH;
         }
         // check if this configstring will overflow
-        if (msg_write.currentSize + length + 64 > sv_client->netchan->maximumPacketLength) {
+        if (msg_write.currentSize + length + 64 > sv_client->netChan->maximumPacketLength) {
             SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
         }
 
@@ -176,7 +176,7 @@ static void write_plain_baselines(void)
         for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
             if (base->number) {
                 // check if this baseline will overflow
-                if (msg_write.currentSize + 64 > sv_client->netchan->maximumPacketLength) {
+                if (msg_write.currentSize + 64 > sv_client->netChan->maximumPacketLength) {
                     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
                 }
 
@@ -194,7 +194,7 @@ static void write_plain_baselines(void)
 
 static void write_compressed_gamestate(void)
 {
-    SizeBuffer   *buf = &sv_client->netchan->message;
+    SizeBuffer   *buf = &sv_client->netChan->message;
     EntityState  *base;
     int         i, j;
     size_t      length;
@@ -289,7 +289,7 @@ static inline void z_reset(byte *buffer)
 {
     deflateReset(&svs.z);
     svs.z.next_out = buffer;
-    svs.z.avail_out = (uInt)(sv_client->netchan->maximumPacketLength - 5);
+    svs.z.avail_out = (uInt)(sv_client->netChan->maximumPacketLength - 5);
 }
 
 static void write_compressed_configstrings(void)
@@ -421,7 +421,7 @@ void SV_New_f(void)
 
     // stuff some junk, drop them and expect them to be back soon
     if (sv_force_reconnect->string[0] && !sv_client->reconnectKey[0] &&
-        !NET_IsLocalAddress(&sv_client->netchan->remoteNetAddress)) {
+        !NET_IsLocalAddress(&sv_client->netChan->remoteNetAddress)) {
         stuff_junk();
         SV_DropClient(sv_client, NULL);
         return;
@@ -481,7 +481,7 @@ void SV_New_f(void)
 
 #if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     if (sv_client->has_zlib) {
-        //if (sv_client->netchan->type == NETCHAN_NEW) {
+        //if (sv_client->netChan->type == NETCHAN_NEW) {
             write_compressed_gamestate();
         //} else {
         //    // FIXME: Z_SYNC_FLUSH is not efficient for entityBaselines
@@ -894,7 +894,7 @@ static void SV_CvarResult_f(void)
             v = (char*)Cmd_RawArgsFrom(2); // C++20: Added a cast.
             if (COM_DEDICATED) {
                 Com_Printf("%s[%s]: %s\n", sv_client->name,
-                           NET_AdrToString(&sv_client->netchan->remoteNetAddress), v);
+                           NET_AdrToString(&sv_client->netChan->remoteNetAddress), v);
             }
             sv_client->versionString = SV_CopyString(v);
         }
@@ -907,7 +907,7 @@ static void SV_CvarResult_f(void)
     } else if (!strcmp(c, "console")) {
         if (sv_client->consoleQueries > 0) {
             Com_Printf("%s[%s]: \"%s\" is \"%s\"\n", sv_client->name,
-                       NET_AdrToString(&sv_client->netchan->remoteNetAddress),
+                       NET_AdrToString(&sv_client->netChan->remoteNetAddress),
                        Cmd_Argv(2), Cmd_RawArgsFrom(3));
             sv_client->consoleQueries--;
         }
@@ -1127,7 +1127,7 @@ static void SV_ExecuteMove(void)
     SV_SetLastFrame(lastFrame);
     
     // Determine drop rate, on whether we should be predicting or not.
-    net_drop = sv_client->netchan->deltaFramePacketDrops;
+    net_drop = sv_client->netChan->deltaFramePacketDrops;
     if (net_drop > 2) {
         sv_client->frameFlags |= FrameFlags::ClientPredict;
     }
