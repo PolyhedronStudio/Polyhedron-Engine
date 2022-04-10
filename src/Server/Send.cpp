@@ -31,7 +31,7 @@ char sv_outputbuf[SV_OUTPUTBUF_LENGTH];
 
 void SV_FlushRedirect(int redirected, char *outputbuf, size_t len)
 {
-    byte    buffer[MAX_PACKETLEN_DEFAULT];
+    byte    buffer[SERVER_MAX_PACKET_LENGTH_DEFAULT];
 
     if (redirected == RD_PACKET) {
         memcpy(buffer, "\xff\xff\xff\xffprint\n", 10);
@@ -644,10 +644,15 @@ static void SV_WriteDatagram(client_t *client)
 #endif
 
     // send the datagram
-    currentSize = Netchan_Transmit(client->netChan,
-                                        msg_write.currentSize,
-                                        msg_write.data,
-                                        client->numpackets, svs.realtime);
+    currentSize = Netchan_Transmit(client->netChan, svs.realtime, msg_write);
+
+		// Make sure a previous packet is completely sent
+	if (client->netChan->outgoingFragments){
+		//Com_DWarning("Sending unsent server message fragments to %s", client->playerName);
+
+		Netchan_TransmitAllFragments(client->netChan, svs.realtime);
+	}
+
 
     // record the size for rate estimation
     SV_CalcSendTime(client, currentSize);
@@ -709,7 +714,7 @@ void SV_SendClientMessages(void)
             goto advance;
 
         // don't write any frame data until all fragments are sent
-        if (client->netChan->fragmentPending) {
+        if (client->netChan->outgoingFragments) {
             client->frameFlags |= FrameFlags::Suppressed;
             currentSize = Netchan_TransmitNextFragment(client->netChan, 0);
             SV_CalcSendTime(client, currentSize);
@@ -790,6 +795,7 @@ void SV_SendAsyncPackets(void)
     client_t    *client;
     NetChannel   *netchan;
     size_t      currentSize;
+	SizeBuffer nullMessage;
 
     FOR_EACH_CLIENT(client) {
         // don't overrun bandwidth
@@ -800,7 +806,7 @@ void SV_SendAsyncPackets(void)
         netchan = client->netChan;
 
         // make sure all fragments are transmitted first
-        if (netchan->fragmentPending) {
+        if (netchan->outgoingFragments) {
             currentSize = Netchan_TransmitNextFragment(netchan, 0);
             SV_DPrintf(0, "%s: frag: %" PRIz "\n", client->name, currentSize);
             goto calctime;
@@ -829,7 +835,8 @@ void SV_SendAsyncPackets(void)
 
         if (netchan->message.currentSize || netchan->reliableAckPending ||
             netchan->reliableLength || retransmit) {
-            currentSize = Netchan_Transmit(netchan, 0, NULL, 1, svs.realtime);
+			
+            currentSize = Netchan_Transmit(netchan, svs.realtime, nullMessage);
             SV_DPrintf(0, "%s: send: %" PRIz "\n", client->name, currentSize);
 calctime:
             SV_CalcSendTime(client, currentSize);

@@ -72,7 +72,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if USE_CLIENT
 #define MAX_LOOPBACK    4
 typedef struct {
-    byte    data[MAX_PACKETLEN];
+    byte    data[MAX_PACKET_LENGTH_DEFAULT];
     size_t  datalen;
 } loopmsg_t;
 
@@ -786,7 +786,7 @@ static void NET_GetUdpPackets(qsocket_t sock, void (*packet_cb)(void))
         return;
 
     while (1) {
-        ret = os_udp_recv(sock, msg_read_buffer, MAX_PACKETLEN, &net_from);
+        ret = os_udp_recv(sock, msg_read_buffer, MAX_PACKET_LENGTH_DEFAULT, &net_from);
         if (ret == NET_AGAIN) {
             e->canread = false;
             break;
@@ -855,7 +855,7 @@ qboolean NET_SendPacket(NetSource sock, const void *data,
     if (len == 0)
         return false;
 
-    if (len > MAX_PACKETLEN) {
+    if (len > MAX_PACKET_LENGTH_DEFAULT) {
         Com_EPrintf("%s: oversize packet to %s\n", __func__,
                     NET_AdrToString(to));
         return false;

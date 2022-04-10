@@ -464,12 +464,20 @@ static void CL_SendUserCommand(void)
     //
     // deliver the message
     //
-    currentSize = Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 1, cls.realtime);
+    currentSize = Netchan_Transmit(cls.netChannel, cls.realtime, msg_write);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize); // C++20: String concat fix.
     }
 #endif
+
+		// Clients never really should have messages large enough to fragment, but in case they do,
+	// fire them all off at once
+	if (cls.netChannel->outgoingFragments) {
+		//Com_DWarning("Sending unsent client message fragments");
+
+		Netchan_TransmitAllFragments(cls.netChannel, cls.realtime);
+	}
 
     SZ_Clear(&msg_write);
 }
@@ -489,7 +497,9 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
     cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
-    currentSize = Netchan_Transmit(cls.netChannel, 0, NULL, 1, cls.realtime);
+	SizeBuffer nullMessage;
+
+    currentSize = Netchan_Transmit(cls.netChannel, cls.realtime, nullMessage);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize);

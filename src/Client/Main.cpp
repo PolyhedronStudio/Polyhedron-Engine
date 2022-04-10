@@ -371,7 +371,7 @@ void CL_CheckForResend(void)
     // use maximum allowed msglen for loopback
     maxmsglen = net_maxmsglen->integer;
     if (NET_IsLocalAddress(&cls.serverAddress)) {
-        maxmsglen = MAX_PACKETLEN_WRITABLE;
+        maxmsglen = CLIENT_MAX_PACKET_LENGTH_WRITABLE;
     }
 
     // add protocol dependent stuff
@@ -722,7 +722,7 @@ void CL_Disconnect(int32_t errorType)
         MSG_WriteUint8(ClientCommand::StringCommand);//MSG_WriteByte(ClientCommand::StringCommand);
         MSG_WriteData("disconnect", 11);
 
-        Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3, cls.realtime);
+        Netchan_Transmit(cls.netChannel, cls.realtime, msg_write);
 
         SZ_Clear(&msg_write);
 
@@ -1434,7 +1434,8 @@ static void CL_PacketEvent(void)
         return;     // dump it if not connected
     }
 
-    if (msg_read.currentSize < 8) {
+    //if (msg_read.currentSize < 8) {
+	if (msg_read.currentSize < 6) {
         Com_DPrintf("%s: runt packet\n", NET_AdrToString(&net_from));
         return;
     }
@@ -1448,7 +1449,7 @@ static void CL_PacketEvent(void)
         return;
     }
 
-    if (!Netchan_Process(cls.netChannel))
+    if (!Netchan_Process(cls.netChannel, cls.realtime, cls.netChannel->message))
         return;     // wasn't accepted for some reason
 
 #if USE_ICMP

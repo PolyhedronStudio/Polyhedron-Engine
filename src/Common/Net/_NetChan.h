@@ -144,7 +144,3 @@ void Netchan_Close(NetChannel*netchan);
 
 #define OOB_PRINT(sock, addr, data) \
     NET_SendPacket(sock, CONST_STR_LEN("\xff\xff\xff\xff" data), addr)
-
-//============================================================================
-
-#endif // NET_CHAN_H
