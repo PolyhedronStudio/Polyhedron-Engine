@@ -459,7 +459,7 @@ Responds with all the info that qplug or qspy can see
 */
 static void SVC_Status(void)
 {
-    char    buffer[SERVER_MAX_PACKET_LENGTH_DEFAULT];
+    char    buffer[MAX_PACKETLEN_DEFAULT];
     size_t  len;
 
     if (!sv_status_show->integer) {
@@ -722,17 +722,17 @@ static qboolean parse_packet_length(conn_params_t *p)
     const char *s;
 
     // set maximum packet length
-    p->maxlength = SERVER_MAX_PACKET_LENGTH_DEFAULT;
+    p->maxlength = MAX_PACKETLEN_WRITABLE_DEFAULT;
 
     s = Cmd_Argv(5); // C++20: Added cast.
     if (*s) {
         p->maxlength = atoi(s);
-        if (p->maxlength < 0 || p->maxlength > MAX_PACKET_LENGTH)
+        if (p->maxlength < 0 || p->maxlength > MAX_PACKETLEN_WRITABLE)
             return reject("Invalid maximum message length.\n");
 
         // 0 means highest available
         if (!p->maxlength)
-            p->maxlength = SERVER_MAX_PACKET_LENGTH_WRITABLE;
+            p->maxlength = MAX_PACKETLEN_WRITABLE;
     }
 
     if (!NET_IsLocalAddress(&net_from) && net_maxmsglen->integer > 0) {
@@ -742,8 +742,8 @@ static qboolean parse_packet_length(conn_params_t *p)
     }
 
     // don't allow too small packets
-    if (p->maxlength < SERVER_MIN_PACKET_LENGTH)
-        p->maxlength = SERVER_MIN_PACKET_LENGTH;
+    if (p->maxlength < MIN_PACKETLEN)
+        p->maxlength = MIN_PACKETLEN;
 
     return true;
 }
@@ -1440,7 +1440,7 @@ static void SV_PacketEvent(void)
             netchan->remoteNetAddress.port = net_from.port;
         }
 
-        if (!Netchan_Process(netchan, svs.realtime, netchan->message))
+        if (!Netchan_Process(netchan))
             break;
 
         if (client->connectionState == ConnectionState::Zombie)
@@ -1694,7 +1694,7 @@ let it know we are alive, and log information
 */
 static void SV_MasterHeartbeat(void)
 {
-    char    buffer[SERVER_MAX_PACKET_LENGTH_DEFAULT];
+    char    buffer[MAX_PACKETLEN_DEFAULT];
     size_t  len;
     master_t *m;
 
@@ -2132,10 +2132,10 @@ static void SV_FinalMessage(const char *message, int32_t errorType)
                 continue;
             }
             netchan = client->netChan;
-            while (netchan->outgoingFragments) {
+            while (netchan->fragmentPending) {
                 Netchan_TransmitNextFragment(netchan, 0);
             }
-            Netchan_Transmit(netchan, svs.realtime, msg_write);
+            Netchan_Transmit(netchan, msg_write.currentSize, msg_write.data, 1, svs.realtime);
         }
     }
 

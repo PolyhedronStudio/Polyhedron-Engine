@@ -16,72 +16,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#pragma once
+#ifndef NET_H
+#define NET_H
 
 #include "Common/Fifo.h"
 
-/**
-*	'quake's interface to the networking layer' lol.
-**/
+// net.h -- quake's interface to the networking layer
+
 #define PORT_ANY            -1
 #define PORT_MASTER         27900
 #define PORT_SERVER         27910
 
+#define MIN_PACKETLEN                   512     // don't allow smaller packets
+#define MAX_PACKETLEN                   4096    // max length of a single packet
+#define PACKET_HEADER                   10      // two ints and a short (worst case)
+#define MAX_PACKETLEN_DEFAULT           1400    // default quake2 limit
+#define MAX_PACKETLEN_WRITABLE          (MAX_PACKETLEN - PACKET_HEADER)
+#define MAX_PACKETLEN_WRITABLE_DEFAULT  (MAX_PACKETLEN_DEFAULT - PACKET_HEADER)
 
-//! This is shared across client and server configurations.
-static constexpr int32_t MAX_PACKET_LENGTH_DEFAULT = 1400;
-
-/**
-*	Client Packet Configuration.
-**/
-static constexpr int32_t PACKET_HEADER						= 8; 
-static constexpr int32_t MIN_PACKET_LENGTH					= 0;	// Don't allow smaller packets.
-static constexpr int32_t MAX_PACKET_LENGTH					= 4096;	// Max length of a single packet.
-//static constexpr int32_t MAX_PACKET_LENGTH_DEFAULT			= MAX_PACKET_LENGTH_DEFAULT;	// Default MTU based packet limit.
-static constexpr int32_t MAX_PACKET_LENGTH_WRITABLE			= (MAX_PACKET_LENGTH - PACKET_HEADER);
-static constexpr int32_t MAX_PACKET_LENGTH_WRITABLE_DEFAULT	= (MAX_PACKET_LENGTH_DEFAULT - PACKET_HEADER);
-
-//static constexpr int32_t CLIENT_PACKET_HEADER						= 8; 
-//static constexpr int32_t CLIENT_MIN_PACKET_LENGTH					= 0;	// Don't allow smaller packets.
-//static constexpr int32_t CLIENT_MAX_PACKET_LENGTH					= 4096;	// Max length of a single packet.
-//static constexpr int32_t CLIENT_MAX_PACKET_LENGTH_DEFAULT			= MAX_PACKET_LENGTH_DEFAULT;	// Default MTU based packet limit.
-//static constexpr int32_t CLIENT_MAX_PACKET_LENGTH_WRITABLE			= (CLIENT_MAX_PACKET_LENGTH - CLIENT_PACKET_HEADER);
-//static constexpr int32_t CLIENT_MAX_PACKET_LENGTH_WRITABLE_DEFAULT	= (CLIENT_MAX_PACKET_LENGTH_DEFAULT - CLIENT_PACKET_HEADER);
-static constexpr int32_t CLIENT_PACKET_HEADER						= 8; 
-static constexpr int32_t CLIENT_MIN_PACKET_LENGTH					= 0;	// Don't allow smaller packets.
-static constexpr int32_t CLIENT_MAX_PACKET_LENGTH					= 4096;	// Max length of a single packet.
-static constexpr int32_t CLIENT_MAX_PACKET_LENGTH_DEFAULT			= MAX_PACKET_LENGTH_DEFAULT;	// Default MTU based packet limit.
-static constexpr int32_t CLIENT_MAX_PACKET_LENGTH_WRITABLE			= (CLIENT_MAX_PACKET_LENGTH - CLIENT_PACKET_HEADER);
-static constexpr int32_t CLIENT_MAX_PACKET_LENGTH_WRITABLE_DEFAULT	= (CLIENT_MAX_PACKET_LENGTH_DEFAULT - CLIENT_PACKET_HEADER);
-
-
-/**
-*	Server Packet Configuration.
-**/
-static constexpr int32_t SERVER_PACKET_HEADER						= 8; 
-static constexpr int32_t SERVER_MIN_PACKET_LENGTH					= 0;	// Don't allow smaller packets.
-static constexpr int32_t SERVER_MAX_PACKET_LENGTH					= 4096;	// Max length of a single packet.
-static constexpr int32_t SERVER_MAX_PACKET_LENGTH_DEFAULT			= MAX_PACKET_LENGTH_DEFAULT;	// Default MTU based packet limit.
-static constexpr int32_t SERVER_MAX_PACKET_LENGTH_WRITABLE			= (SERVER_MAX_PACKET_LENGTH - SERVER_PACKET_HEADER);
-static constexpr int32_t SERVER_MAX_PACKET_LENGTH_WRITABLE_DEFAULT	= (SERVER_MAX_PACKET_LENGTH_DEFAULT - SERVER_PACKET_HEADER);
-
-
-
-/**
-*	Fragment Information.
-**/
-static constexpr int32_t FRAGMENT_SIZE		= (MAX_PACKET_LENGTH_DEFAULT - 12);
-static constexpr int32_t FRAGMENT_BIT		= (1ULL << (31));
-
-
-
-/**
-*	Portable Network Error Codes.
-**/
-static constexpr int32_t NET_OK      =  0;  // Success.
-static constexpr int32_t NET_ERROR   = -1;  // Failure (NET_ErrorString returns error message).
-static constexpr int32_t NET_AGAIN   = -2;  // Operation would block, try again.
-static constexpr int32_t NET_CLOSED  = -3;  // Peer has closed connection.
+// portable network error codes
+#define NET_OK       0  // success
+#define NET_ERROR   -1  // failure (NET_ErrorString returns error message)
+#define NET_AGAIN   -2  // operation would block, try again
+#define NET_CLOSED  -3  // peer has closed connection
 
 typedef int neterr_t;
 
@@ -295,3 +252,5 @@ extern cvar_t       *net_ip;
 extern cvar_t       *net_port;
 
 extern NetAdr     net_from;
+
+#endif // NET_H

@@ -296,7 +296,7 @@ static void write_compressed_configstrings(void)
 {
     int     i;
     size_t  length;
-    byte    buffer[SERVER_MAX_PACKET_LENGTH_WRITABLE];
+    byte    buffer[MAX_PACKETLEN_WRITABLE];
     char    *string;
 
     z_reset(buffer);

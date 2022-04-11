@@ -610,7 +610,7 @@ void SV_InitGame();
 // sv_send.c
 //
 typedef enum {RD_NONE, RD_CLIENT, RD_PACKET} redirect_t;
-#define SV_OUTPUTBUF_LENGTH     (SERVER_MAX_PACKET_LENGTH_DEFAULT - 16)
+#define SV_OUTPUTBUF_LENGTH     (MAX_PACKETLEN_DEFAULT - 16)
 
 #define SV_ClientRedirect() \
     Com_BeginRedirect(RD_CLIENT, sv_outputbuf, MAX_STRING_CHARS - 1, SV_FlushRedirect)

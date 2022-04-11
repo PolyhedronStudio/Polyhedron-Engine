@@ -123,7 +123,6 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/Field.cpp
 	${PATH_SRC}/Common/Fifo.cpp
 	${PATH_SRC}/Common/Files.cpp
-	${PATH_SRC}/Common/Huffman.cpp
 	${PATH_SRC}/Common/MDFour.cpp
 	${PATH_SRC}/Common/Msg.cpp
 	${PATH_SRC}/Common/Prompt.cpp
@@ -142,7 +141,6 @@ SET(HEADERS_COMMON
 	${PATH_SRC}/Common/Net/Win.h
 	
 	${PATH_SRC}/Common/Hashes/Crc32.h
-	${PATH_SRC}/Common/Huffman.h
 )
 
 ###################### Format.

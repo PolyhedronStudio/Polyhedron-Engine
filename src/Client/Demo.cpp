@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client/GameModule.h"
 #include "../Server/Server.h"
 
-static byte     demo_buffer[MAX_PACKET_LENGTH_DEFAULT];
+static byte     demo_buffer[MAX_PACKETLEN];
 
 static cvar_t   *cl_demosnaps;
 static cvar_t   *cl_demomsglen;
@@ -321,8 +321,8 @@ static void CL_Record_f(void)
     unsigned        mode = FS_MODE_WRITE;
     size_t          size = Cvar_ClampInteger(
                                cl_demomsglen,
-                               CLIENT_MIN_PACKET_LENGTH,
-                               CLIENT_MAX_PACKET_LENGTH_WRITABLE);
+                               MIN_PACKETLEN,
+                               MAX_PACKETLEN_WRITABLE);
 
     while ((c = Cmd_ParseOptions(o_record)) != -1) {
         switch (c) {
@@ -334,10 +334,10 @@ static void CL_Record_f(void)
         case 'z':
             mode |= FS_FLAG_GZIP;
         case 'e':
-            size = CLIENT_MAX_PACKET_LENGTH_WRITABLE;
+            size = MAX_PACKETLEN_WRITABLE;
             break;
         case 's':
-            size = CLIENT_MAX_PACKET_LENGTH_WRITABLE_DEFAULT;
+            size = MAX_PACKETLEN_WRITABLE_DEFAULT;
             break;
         default:
             return;
@@ -1228,7 +1228,7 @@ CL_InitDemos
 void CL_InitDemos(void)
 {
     cl_demosnaps = Cvar_Get("cl_demosnaps", "10", 0);
-    cl_demomsglen = Cvar_Get("cl_demomsglen", va("%d", CLIENT_MAX_PACKET_LENGTH_WRITABLE_DEFAULT), 0);
+    cl_demomsglen = Cvar_Get("cl_demomsglen", va("%d", MAX_PACKETLEN_WRITABLE_DEFAULT), 0);
     cl_demowait = Cvar_Get("cl_demowait", "0", 0);
 
 	cl_renderdemo = Cvar_Get("cl_renderdemo", "0", CVAR_ARCHIVE);

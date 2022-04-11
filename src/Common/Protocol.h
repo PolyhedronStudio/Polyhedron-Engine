@@ -13,7 +13,7 @@
 // Protocol Configuration.
 //
 // The maximum length of a message on the network: 32k.
-constexpr uint32_t MAX_MSGLEN = 0x4000;
+constexpr uint32_t MAX_MSGLEN = 0x8000;
 
 // Used to refer when during a connection challenge the protocols differ.
 constexpr int32_t   PROTOCOL_VERSION_UNKNOWN = -1;

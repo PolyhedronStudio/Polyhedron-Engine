@@ -8,7 +8,7 @@
 *	
 *	A network channel handles packet compression and decompression, packet fragmentation and
 *	reassembly, and out of order / duplicate suppression.
-*
+
 *	Packet header:
 *	--------------
 *	4		Outgoing sequence (FRAGMENT_BIT will be set if this is a fragmented message)
@@ -56,12 +56,6 @@ public:
 
     NetSource   netSource;          // The source this channel is from: Client, or Server.
 
-	// Remote.
-	NetAdr		remoteNetAddress;		// NetChan settled to the remote ahost.
-    std::string remoteAddress = "";     // Textual address.
-    int32_t     remoteQPort = 0;        // qport value to write when transmitting
-
-	// Status.
     int32_t     deltaFramePacketDrops = 0;  // Between last packet and previous.
     uint32_t    totalDropped = 0;           // For statistics.
     uint32_t    totalReceived = 0;
@@ -69,62 +63,41 @@ public:
     uint32_t    lastReceivedTime = 0;   // For timeouts.
     uint32_t    lastSentTime = 0;       // For retransmits.
 
-	    size_t      reliableLength;
-//
-//    // Pending states.
-    qboolean    reliableAckPending;   // set to true each time reliable is received
-//    qboolean    fragmentPending;
-//
-//    // sequencing variables
-//    int         incomingSequence;
-    int         incomingAcknowledged;
-//    int         outgoingSequence;
-//
-//    // sequencing variables
-    int         incomingReliableAcknowledged; // single bit
-    int         incomingReliableSequence;     // single bit, maintained local
-    int         reliableSequence;              // single bit
-    int         lastReliableSequence;         // sequence number of last send
+    NetAdr		remoteNetAddress;   // NetChan settled to the remote ahost.
+    std::string remoteAddress = "";      // Textual address.
+    int32_t     remoteQPort = 0;        // qport value to write when transmitting
 
-	// Sequencing variables
-	int32_t					incomingSequence = 0;
-	int32_t					outgoingSequence = 0;
+    size_t      reliableLength = 0;
 
-	// Rate variables
-	int32_t					incomingRateTime = 0;
-	int32_t					incomingRateBytes = 0;
-	int32_t					outgoingRateTime = 0;
-	int32_t					outgoingRateBytes = 0;
+    // Pending states.
+    qboolean    reliableAckPending = 0; // Set to true each time reliable is received
+    qboolean    fragmentPending = 0;    // Set to true when there is still a fragment pending.
 
-	// Incoming fragment buffer
-	int32_t					incomingFragmentSequence = 0;
-	int32_t					incomingFragmentSize = 0;
-	byte					incomingFragmentBuffer[MAX_MSGLEN];
+    // sequencing variables
+    int32_t     incomingSequence = 0;
+    int32_t     incomingAcknowledged = 0;
+    int32_t     outgoingSequence = 0;
 
-	// Outgoing fragment buffer
-	bool					outgoingFragments = 0;
-	int32_t					outgoingFragmentBytes;
-	int32_t					outgoingFragmentOffset;
-	int32_t					outgoingFragmentSize;
-	byte					outgoingFragmentBuffer[MAX_MSGLEN];
+    // sequencing variables
+    int32_t     incomingReliableAcknowledged = 0;   // single bit
+    int32_t     incomingReliableSequence = 0;       // single bit, maintained local
+    int32_t     reliableSequence = 0;               // single bit
+    int32_t     lastReliableSequence = 0;           // sequence number of last send
+    int32_t     fragmentSequence = 0;
 
     // Reliable staging and holding areas
-    //SizeBuffer  message;                    // Writing buffer for reliable data
-    //byte        messageBuffer[MAX_MSGLEN];  // Leave space for header
+    SizeBuffer  message;                    // writing buffer for reliable data
+    byte        messageBuffer[MAX_MSGLEN];  // leave space for header
 
-    //// Message is copied to this buffer when it is first transfered
-    //SizeBuffer  reliable;
-    //byte        reliableBuffer[MAX_MSGLEN];   // Unacked reliable message
+    // Message is copied to this buffer when it is first transfered
+    SizeBuffer  reliable;
+    byte        reliableBuffer[MAX_MSGLEN];   // unacked reliable message
 
     SizeBuffer  inFragment;
     byte        inFragmentBuffer[MAX_MSGLEN];
 
     SizeBuffer  outFragment;
     byte        outFragmentBuffer[MAX_MSGLEN];
-
-    // Actual message buffer that shit is added to.
-    SizeBuffer  message;                    // writing buffer for reliable data
-    byte        messageBuffer[MAX_MSGLEN];  // leave space for header
 };
 
 
@@ -147,7 +120,7 @@ NetChannel *Netchan_Setup(NetSource sock, const NetAdr *adr, int32_t qport, size
 *	@brief	Sends a message to a connection, fragmenting if necessary. 
 *			A zero sized message will still generate a packet.
 **/
-size_t      Netchan_Transmit(NetChannel *netChannel, uint64_t time, SizeBuffer &message);
+size_t      Netchan_Transmit(NetChannel *netChannel, size_t, const void*, int32_t numberOfPackets, uint64_t time);
 
 /**
 *	@brief	Sends one fragment of the current message.
@@ -165,7 +138,7 @@ size_t      Netchan_TransmitAllFragments(NetChannel *netChannel, uint64_t time);
 *			the final fragment of a multi-part message, the entire thing will be copied out.
 *	@return	Returns false if the message should not be processed due to being out of order or a fragment.
 **/
-qboolean    Netchan_Process(NetChannel *netChannel, uint64_t time, SizeBuffer &message);
+qboolean    Netchan_Process(NetChannel *netChannel);
 
 
 /**
