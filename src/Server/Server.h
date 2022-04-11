@@ -277,11 +277,11 @@ typedef struct client_s {
     list_t entry;
 
     // Core info
-    int32_t		connectionState;
+    int32_t		connectionState = 0;
     Entity		*edict;     // EDICT_NUM(clientnum+1)
-    int32_t		number;     // client slot number
+    int32_t		number;     // Client slot number.
 
-    // Client flags
+    // Client flags.
     qboolean reconnected: 1;
     qboolean nodata: 1;
     qboolean has_zlib: 1;
@@ -294,7 +294,7 @@ typedef struct client_s {
     // Userinfo
     char		userinfo[MAX_INFO_STRING];  // name, etc
     char		name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
-    int32_t		messageLevel;               // for filtering printed messages
+    int32_t		messageLevel = 0;               // for filtering printed messages
     size_t		rate;
     RateLimit	ratelimitNameChange;       // for suppressing "foo changed name" flood
 
@@ -302,64 +302,64 @@ typedef struct client_s {
     char		*versionString;
     char		reconnectKey[16];
     char		reconnectValue[16];
-    int64_t		consoleQueries;
+    int64_t		consoleQueries = 0;
 
     // usercmd stuff
-    uint64_t    lastMessage;					// svs.realTime when packet was last received
-    uint64_t    lastActivity;					// svs.realTime when user activity was last seen
-    int64_t		lastFrame;						// for delta compression
-    ClientMoveCommand lastClientUserCommand;	// for filling in big drops
-    int64_t		clientUserCommandMiliseconds;	// every seconds this is reset, if user commands exhaust it, assume time cheating
-    int64_t		numberOfMoves;					// Reset every 10 seconds
-    int64_t		movesPerSecond;					// Average movement FPS
+    uint64_t    lastMessage = 0;					// svs.realTime when packet was last received.
+    uint64_t    lastActivity = 0;					// svs.realTime when user activity was last seen.
+    int64_t		lastFrame = 0;						// For delta compression.
+    ClientMoveCommand lastClientUserCommand;		// For filling in big drops.
+    int64_t		clientUserCommandMiliseconds = 0;	// Every seconds this is reset, if user commands exhaust it, assume time cheating.
+    int64_t		numberOfMoves = 0;					// Reset every 10 seconds.
+    int64_t		movesPerSecond = 0;					// Average movement FPS.
 
 	// Timescale for usercmd stuff.
-	int			cmd_msec_used;	// UserCommand Time used so far for this frame.
-    float		timescale;		// Time scale.
+	int32_t		cmd_msec_used = 0;	// UserCommand Time used so far for this frame.
+    float		timescale = 0;		// Time scale.
 
     // Ping.
-    int64_t		ping;
-    int64_t		pingMinimum;
-    int64_t		pingMaximum;
+    int64_t		ping = 0;
+    int64_t		pingMinimum = 0;
+    int64_t		pingMaximum = 0;
 
     // Ping averages.
-    int64_t		averagePingTime;
-    int64_t		averagePingCount;
+    int64_t		averagePingTime = 0;
+    int64_t		averagePingCount = 0;
 
     // frame encoding
     ClientFrame frames[UPDATE_BACKUP];    // Updates can be delta'd from here
-    uint64_t	framesSent;
-    uint64_t	framesAcknowledged;
-    uint64_t	framesNoDelta;
-    int64_t		frameNumber;
+    uint64_t	framesSent = 0;
+    uint64_t	framesAcknowledged = 0;
+    uint64_t	framesNoDelta = 0;
+    int64_t		frameNumber = 0;
 
-    uint32_t frameFlags;
+    uint32_t frameFlags = 0;
 
     // rate dropping
     size_t messageSizes[SERVER_MESSAGES_TICKRATE]; // Used to rate drop normal packets
-    int32_t suppressCount; // Number of messages rate suppressed
+    int32_t suppressCount = 0; // Number of messages rate suppressed
     
     // Used to rate drop async packets
-    uint64_t sendTime;
-    uint64_t sendDelta;
+    uint64_t sendTime = 0;
+    uint64_t sendDelta = 0;
 
     // current download
     struct {
-        int32_t fileSize;   // total bytes (can't use EOF because of paks)
+        int32_t fileSize = 0;   // total bytes (can't use EOF because of paks)
         char *fileName;  // name of the file
 
-        byte *bytes;     // file being downloaded
-        int32_t bytesSent;  // bytes sent
+        byte *bytes = nullptr;     // file being downloaded
+        int32_t bytesSent = 0;  // bytes sent
 
-        int32_t command;    // svc_(z)download
+        int32_t command = 0;    // svc_(z)download
 
-        qboolean isPending;
+        qboolean isPending = 0;
     } download;
 
     // protocol stuff
-    int32_t challenge;              // Challenge of this user, randomly generated
-    int32_t protocolVersion;        // Major version
-    int32_t protocolMinorVersion;   // Minor version
+    int32_t challenge = 0;              // Challenge of this user, randomly generated
+    int32_t protocolVersion = 0;        // Major version
+    int32_t protocolMinorVersion = 0;   // Minor version
 
     EntityStateMessageFlags esFlags; // Entity protocol flags
 
@@ -367,7 +367,7 @@ typedef struct client_s {
     list_t msg_free_list;
     list_t msg_unreliable_list;
     list_t msg_reliable_list;
-    MessagePacket *msg_pool;
+    MessagePacket *msg_pool = nullptr;
     size_t msg_unreliable_bytes;   // total size of unreliable datagram
     size_t msg_dynamic_bytes;      // total size of dynamic memory allocated
 
@@ -375,26 +375,21 @@ typedef struct client_s {
     EntityState *entityBaselines[SV_BASELINES_CHUNKS];
 
     // server state pointers (hack for MVD channels implementation)
-    char *configstrings;
-    char *gamedir, *mapName;
-    EntityPool *pool;
-    cm_t *cm;
-    int32_t slot;
-    int32_t spawncount;
-    int32_t maximumClients;
+    char *configstrings = 0;
+    char *gamedir, *mapName = 0;
+    EntityPool *pool = 0;
+    cm_t *cm = nullptr;
+    int32_t slot = 0;
+    int32_t spawncount = 0;
+    int32_t maximumClients = 0;
 
-    // netchan type dependent methods
-    void (*AddMessage)(struct client_s *, byte *, size_t, qboolean);
-    void (*WriteFrame)(struct client_s *);
-    void (*WriteDatagram)(struct client_s *);
-
-    // netchan
-    NetChannel *netChan;
-    int32_t numpackets; // for that nasty packetdup hack
+    // Net Channel.
+    NetChannel *netChan = nullptr;
+    int32_t numpackets = 0; // For that nasty packetdup hack.
 
     // misc
-    time_t timeOfInitialConnect; // time of initial connect
-	int32_t lastValidCluster;
+    time_t timeOfInitialConnect = 0; // Time of initial connect.
+	int32_t lastValidCluster = 0;
 
 
 } client_t;
@@ -488,25 +483,25 @@ typedef struct {
     LIST_FOR_EACH_SAFE(master_t, m, n, &sv_masterlist, entry)
 
 typedef struct server_static_s {
-    qboolean    initialized;        // sv_init has completed
-    uint64_t	realtime;           // always increasing, no clamping, etc
+    qboolean    initialized;	//! sv_init has completed
+    uint64_t	realTime;		//! Always increasing, no clamping, etc.
 
-    client_t    *client_pool;       // [maximumclients]
+    client_t    *clientPool;	//! [maximumclients]
 
-    unsigned        num_entities;   // maximumclients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
-    unsigned        next_entity;    // next state to use
-    EntityState    *entities;      // [num_entities]
+    unsigned	num_entities;	//! maximumclients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
+    unsigned	next_entity;    //! next state to use
+    EntityState    *entities;   //! [num_entities]
 
 #if USE_ZLIB
     z_stream        z;  // for compressing messages at once
 #endif
 
-    uint64_t		last_heartbeat;
-	uint64_t		last_timescale_check;
+    uint64_t		lastHeartBeat;
+	uint64_t		lastTimescaleCheck;
 
-    RateLimit     ratelimit_status;
-    RateLimit     ratelimit_auth;
-    RateLimit     ratelimit_rcon;
+    RateLimit     ratelimitStatus;
+    RateLimit     ratelimitAuth;
+    RateLimit     ratelimitRemoteCon;
 
     Challenge     challenges[MAX_CHALLENGES]; // to prevent invalid IPs from connecting
 } ServerStatic;

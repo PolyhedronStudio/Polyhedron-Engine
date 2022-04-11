@@ -84,7 +84,7 @@ static void SV_CalcSendTime(client_t *client, size_t size)
 {
     // never drop over the loopback
     if (!client->rate) {
-        client->sendTime = svs.realtime;
+        client->sendTime = svs.realTime;
         client->sendDelta = 0;
         return;
     }
@@ -92,7 +92,7 @@ static void SV_CalcSendTime(client_t *client, size_t size)
     if (client->state == ConnectionState::Spawned)
         client->messageSizes[client->frameNumber % SERVER_MESSAGES_TICKRATE] = size;
 
-    client->sendTime = svs.realtime;
+    client->sendTime = svs.realTime;
     client->sendDelta = size * 1000 / client->rate;
 }
 
@@ -949,7 +949,7 @@ void SV_SendAsyncPackets(void)
 
     FOR_EACH_CLIENT(client) {
         // don't overrun bandwidth
-        if (svs.realtime - client->sendTime < client->sendDelta) {
+        if (svs.realTime - client->sendTime < client->sendDelta) {
             continue;
         }
 

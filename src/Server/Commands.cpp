@@ -93,7 +93,7 @@ out:;
         // make sure the server is listed public
         Cvar_Set("public", "1");
 
-        svs.last_heartbeat = svs.realtime - HEARTBEAT_SECONDS * 1000;
+        svs.lastHeartBeat = svs.realTime - HEARTBEAT_SECONDS * 1000;
     }
 }
 
@@ -118,7 +118,7 @@ static void SV_ListMasters_f(void)
         } else if (!m->last_ack) {
             strcpy(buf, "never");
         } else {
-            Q_snprintf(buf, sizeof(buf), "%u", svs.realtime - m->last_ack);
+            Q_snprintf(buf, sizeof(buf), "%u", svs.realTime - m->last_ack);
         }
         adr = m->adr.port ? NET_AdrToString(&m->adr) : "error";
         Com_Printf("%3d %-21.21s %7s %-21s\n", ++i, m->name, buf, adr);
@@ -142,7 +142,7 @@ client_t *SV_GetPlayer(const char *s, qboolean partial)
             return NULL;
         }
 
-        other = &svs.client_pool[i];
+        other = &svs.clientPool[i];
         if (other->connectionState <= ConnectionState::Zombie) {
             Com_Printf("Client slot %d is not active.\n", i);
             return NULL;
@@ -298,7 +298,7 @@ static void SV_Map(qboolean restart) {
         int32_t i = 0;
         int32_t entnum = 0;
         for (i = 0; i < sv_maxclients->integer; i++) {
-            client = svs.client_pool + i;
+            client = svs.clientPool + i;
             entnum = i + 1;
             ent = EDICT_NUM(entnum);
             ent->state.number = entnum;
@@ -499,7 +499,7 @@ static void SV_Kick_f(void)
         return;
 
     SV_DropClient(sv_client, "?was kicked");
-    sv_client->lastMessage = svs.realtime;    // min case there is a funny zombie
+    sv_client->lastMessage = svs.realTime;    // min case there is a funny zombie
 
     // optionally ban their IP address
     if (!strcmp(Cmd_Argv(0), "kickban")) {
@@ -555,7 +555,7 @@ static void dump_clients(void)
         }
 
         Com_Printf("%-15.15s ", client->name);
-        Com_Printf("%7u ", svs.realtime - client->lastMessage);
+        Com_Printf("%7u ", svs.realTime - client->lastMessage);
         Com_Printf("%-21s ", NET_AdrToString(
                        &client->netChan->remoteNetAddress));
         Com_Printf("%5" PRIz " ", client->rate);
@@ -620,7 +620,7 @@ static void dump_time(void)
         "--- --------------- ---- --------\n");
 
     FOR_EACH_CLIENT(client) {
-        idle = (svs.realtime - client->lastActivity) / 1000;
+        idle = (svs.realTime - client->lastActivity) / 1000;
         if (idle > 9999)
             idle = 9999;
         Com_TimeDiff(buffer, sizeof(buffer),
@@ -738,7 +738,7 @@ SV_Heartbeat_f
 */
 static void SV_Heartbeat_f(void)
 {
-    svs.last_heartbeat = svs.realtime - HEARTBEAT_SECONDS * 1000;
+    svs.lastHeartBeat = svs.realTime - HEARTBEAT_SECONDS * 1000;
 }
 
 

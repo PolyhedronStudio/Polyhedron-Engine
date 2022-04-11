@@ -73,12 +73,12 @@ public:
     qboolean    reliableAckPending = 0; // Set to true each time reliable is received
     qboolean    fragmentPending = 0;    // Set to true when there is still a fragment pending.
 
-    // sequencing variables
+    // Sequencing Variables
     int32_t     incomingSequence = 0;
     int32_t     incomingAcknowledged = 0;
     int32_t     outgoingSequence = 0;
 
-    // sequencing variables
+    // Sequencing Variables
     int32_t     incomingReliableAcknowledged = 0;   // single bit
     int32_t     incomingReliableSequence = 0;       // single bit, maintained local
     int32_t     reliableSequence = 0;               // single bit

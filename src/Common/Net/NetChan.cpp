@@ -196,19 +196,20 @@ size_t Netchan_Transmit(NetChannel *netChannel, size_t length, const void *data,
         return 0;
     }
 
+// If we got any fragments pending, send them out.
     if (netChannel->fragmentPending) {
-        return Netchan_TransmitNextFragment(netChannel, 0);
+        return Netchan_TransmitNextFragment(netChannel, time);
     }
 
     send_reliable = false;
 
-// if the remote side dropped the last reliable message, resend it
+// If the remote side dropped the last reliable message, resend it.
     if (netChannel->incomingAcknowledged > netChannel->lastReliableSequence &&
         netChannel->incomingReliableAcknowledged != netChannel->reliableSequence) {
         send_reliable = true;
     }
 
-// if the reliable transmit buffer is empty, copy the current message out
+// If the reliable transmit buffer is empty, copy the current message out.
     if (!netChannel->reliableLength && netChannel->message.currentSize) {
         send_reliable = true;
         memcpy(netChannel->reliableBuffer, netChannel->messageBuffer,
@@ -218,6 +219,8 @@ size_t Netchan_Transmit(NetChannel *netChannel, size_t length, const void *data,
         netChannel->reliableSequence ^= 1;
     }
 
+// If our length exceeds maximum packet length, or we are about to send a reliable which exceeds MTU size,
+// separate and send the packet in multiplate fragments.
     if (length > netChannel->maximumPacketLength || (send_reliable &&
                                            (netChannel->reliableLength + length > netChannel->maximumPacketLength))) {
         if (send_reliable) {
@@ -231,46 +234,44 @@ size_t Netchan_Transmit(NetChannel *netChannel, size_t length, const void *data,
         else
             Com_WPrintf("%s: dumped unreliable\n",
                         NET_AdrToString(&netChannel->remoteNetAddress));
-        return Netchan_TransmitNextFragment(netChannel, 0);
+        return Netchan_TransmitNextFragment(netChannel, time);
     }
 
-// write the packet header
+// Write the packet header
     w1 = (netChannel->outgoingSequence & 0x3FFFFFFF) | (send_reliable << 31);
     w2 = (netChannel->incomingSequence & 0x3FFFFFFF) |
          (netChannel->incomingReliableSequence << 31);
 
+// Tag init our Send SizeBuffer.
     SZ_TagInit(&send, send_buf, sizeof(send_buf), SZ_NC_SEND_NEW);
 
+// Write packet header.
     SZ_WriteLong(&send, w1);
     SZ_WriteLong(&send, w2);
 
 #if USE_CLIENT
-    // send the qport if we are a client
+    // If we are a client, send the 'QPort'.
     if (netChannel->netSource == NS_CLIENT && netChannel->remoteQPort) {
         SZ_WriteByte(&send, netChannel->remoteQPort);
     }
 #endif
 
-    // copy the reliable message to the packet first
+// Copy the reliable message to the packet first
     if (send_reliable) {
         netChannel->lastReliableSequence = netChannel->outgoingSequence;
         SZ_Write(&send, netChannel->reliableBuffer, netChannel->reliableLength);
     }
 
-    // add the unreliable part
+// Add the unreliable part to our send sizebuffer.
     SZ_Write(&send, data, length);
 
-    DShowPacket("send %4" PRIz " : s=%d ack=%d rack=%d",
-               send.currentSize,
-               netChannel->outgoingSequence,
-               netChannel->incomingSequence,
-        netChannel->incomingReliableSequence);
+    DShowPacket("send %4" PRIz " : s=%d ack=%d rack=%d", send.currentSize, netChannel->outgoingSequence, netChannel->incomingSequence, netChannel->incomingReliableSequence);
     if (send_reliable) {
         DShowPacket(" reliable=%d", netChannel->reliableSequence);
     }
     DShowPacket("\n");
 
-    // send the datagram
+// Send the datagram
     for (i = 0; i < numberOfPackets; i++) {
         NET_SendPacket(netChannel->netSource, send.data, send.currentSize,
                        &netChannel->remoteNetAddress);
@@ -339,14 +340,15 @@ size_t Netchan_TransmitNextFragment(NetChannel *netChannel, uint64_t time) {
     SZ_Write(&send, netChannel->outFragment.data + netChannel->outFragment.readCount,
              fragment_length);
 
-    DShowPacket("send %4" PRIz " : s=%d ack=%d rack=%d "
-               "fragment_offset=%" PRIz " more_fragments=%d",
+	// Debug printing.
+    DShowPacket("send %4" PRIz " : s=%d ack=%d rack=%d " "fragment_offset=%" PRIz " more_fragments=%d",
                send.currentSize,
                netChannel->outgoingSequence,
                netChannel->incomingSequence,
                netChannel->incomingReliableSequence,
                netChannel->outFragment.readCount,
-               more_fragments);
+               more_fragments
+	);
     if (send_reliable) {
         DShowPacket(" reliable=%i ", netChannel->reliableSequence);
     }

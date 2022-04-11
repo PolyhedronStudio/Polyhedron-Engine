@@ -94,7 +94,7 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
         goto clear;
     }
 
-    client = svs.client_pool + clientNumber;
+    client = svs.clientPool + clientNumber;
     if (client->connectionState <= ConnectionState::Zombie) {
         Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         goto clear;
@@ -232,7 +232,7 @@ static void PF_cprintf(Entity *ent, int level, const char *fmt, ...)
         Com_Error(ErrorType::Drop, "%s to a non-client %d", __func__, clientNumber);
     }
 
-    client = svs.client_pool + clientNumber;
+    client = svs.clientPool + clientNumber;
     if (client->connectionState <= ConnectionState::Zombie) {
         Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         return;

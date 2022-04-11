@@ -142,7 +142,7 @@ static void SVGPM_Debug(const char* func, const char* fmt, ...) {
 /**
 *   @brief  Slide off of the impacted plane.
 **/
-static vec3_t PM_ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
+static vec3_t PM_ClipVelocity(const vec3_t &in, const vec3_t &normal, float bounce) {
 
     float backoff = vec3_dot(in, normal);
 
@@ -203,7 +203,7 @@ static bool PM_CheckStep(const TraceResult * trace) {
 }
 
 /**
-*   @brief  Check whether the player just stepped off of something, or not.
+*   @brief  Steps the player down to the trace origin, calculated the stepHeight for interpolation.
 **/
 static void PM_StepDown(const TraceResult * trace) {
     // Set current origin to the trace end position.

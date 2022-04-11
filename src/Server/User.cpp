@@ -412,7 +412,7 @@ void SV_New_f(void)
         Com_DPrintf("Going from ConnectionState::Assigned to ConnectionState::Connected for %s\n",
                     sv_client->name);
         sv_client->connectionState = ConnectionState::Connected;
-        sv_client->lastMessage = svs.realtime; // don't timeout
+        sv_client->lastMessage = svs.realTime; // don't timeout
         time(&sv_client->timeOfInitialConnect);
     } else if (sv_client->connectionState > ConnectionState::Connected) {
         Com_DPrintf("New not valid -- already primed\n");
@@ -1019,7 +1019,7 @@ static void SV_ExecuteUserCommand(const char *s)
 
     if (!strcmp(c, "say") || !strcmp(c, "say_team")) {
         // don't timeout. only chat commands count as activity.
-        sv_client->lastActivity = svs.realtime;
+        sv_client->lastActivity = svs.realTime;
     }
 
     ge->ClientCommand(sv_player);
@@ -1061,7 +1061,7 @@ static inline void SV_ClientThink(ClientMoveCommand *cmd)
         || cmd->input.rightMove != old->input.rightMove
         || cmd->input.upMove != old->input.upMove) {
         // don't timeout
-        sv_client->lastActivity = svs.realtime;
+        sv_client->lastActivity = svs.realTime;
     }
 
     ge->ClientThink(sv_player, cmd);

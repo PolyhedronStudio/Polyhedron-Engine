@@ -426,7 +426,7 @@ void SV_InitGame()
         NET_Config(NET_SERVER);
     }
 
-    svs.client_pool = (client_t*)SV_Mallocz(sizeof(client_t) * sv_maxclients->integer); // CPP: Cast
+    svs.clientPool = (client_t*)SV_Mallocz(sizeof(client_t) * sv_maxclients->integer); // CPP: Cast
 
     svs.num_entities = sv_maxclients->integer * UPDATE_BACKUP * MAX_PACKET_ENTITIES;
     svs.entities = (EntityState*)SV_Mallocz(sizeof(EntityState) * svs.num_entities);  // CPP: Cast
@@ -446,10 +446,10 @@ void SV_InitGame()
     SV_InitGameProgs();
 
     // send heartbeat very soon
-    svs.last_heartbeat = -(HEARTBEAT_SECONDS - 5) * 1000;
+    svs.lastHeartBeat = -(HEARTBEAT_SECONDS - 5) * 1000;
 
     for (i = 0; i < sv_maxclients->integer; i++) {
-        client = svs.client_pool + i;
+        client = svs.clientPool + i;
         entnum = i + 1;
         ent = EDICT_NUM(entnum);
         ent->state.number = entnum;

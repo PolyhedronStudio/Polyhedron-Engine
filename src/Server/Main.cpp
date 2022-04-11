@@ -214,7 +214,7 @@ void SV_DropClient(client_t *client, const char *reason)
 
     oldConnectionState = client->connectionState;
     client->connectionState = ConnectionState::Zombie;        // become free in a few seconds
-    client->lastMessage = svs.realtime;
+    client->lastMessage = svs.realTime;
 
     // print the reason
     if (reason)
@@ -255,8 +255,8 @@ kernel. Returns true if limit is exceeded.
 */
 qboolean SV_RateLimited(RateLimit *r)
 {
-    r->credit += (svs.realtime - r->time) * CREDITS_PER_MSEC;
-    r->time = svs.realtime;
+    r->credit += (svs.realTime - r->time) * CREDITS_PER_MSEC;
+    r->time = svs.realTime;
     if (r->credit > r->credit_cap)
         r->credit = r->credit_cap;
 
@@ -352,7 +352,7 @@ void SV_RateInit(RateLimit *r, const char *s)
         return;
     }
 
-    r->time = svs.realtime;
+    r->time = svs.realTime;
     r->credit = rate2credits(rate * burst);
     r->credit_cap = rate2credits(rate * burst);
     r->cost = rate2credits(rate);
@@ -466,7 +466,7 @@ static void SVC_Status(void)
         return;
     }
 
-    if (SV_RateLimited(&svs.ratelimit_status)) {
+    if (SV_RateLimited(&svs.ratelimitStatus)) {
         Com_DPrintf("Dropping status request from %s\n",
                     NET_AdrToString(&net_from));
         return;
@@ -499,7 +499,7 @@ static void SVC_Ack(void)
         if (NET_IsEqualBaseAdr(&m->adr, &net_from)) {
             Com_DPrintf("Ping acknowledge from %s\n",
                         NET_AdrToString(&net_from));
-            m->last_ack = svs.realtime;
+            m->last_ack = svs.realTime;
             break;
         }
     }
@@ -815,14 +815,14 @@ static qboolean parse_userinfo(conn_params_t *params, char *userinfo)
         if (!s[0])
             return reject("Please set your password before connecting.\n");
 
-        if (SV_RateLimited(&svs.ratelimit_auth))
+        if (SV_RateLimited(&svs.ratelimitAuth))
             return reject("Invalid password.\n");
 
         if (strcmp(sv_password->string, s))
             return reject("Invalid password.\n");
 
         // valid connect packets are not rate limited
-        SV_RateRecharge(&svs.ratelimit_auth);
+        SV_RateRecharge(&svs.ratelimitAuth);
 
         // allow them to use reserved slots
     } else if (!sv_reserved_password->string[0] ||
@@ -894,7 +894,7 @@ static client_t *find_client_slot(conn_params_t *params)
 
     // find a free client slot
     for (i = 0; i < sv_maxclients->integer - params->reserved; i++) {
-        cl = &svs.client_pool[i];
+        cl = &svs.clientPool[i];
         if (cl->connectionState == ConnectionState::Free)
             return cl;
     }
@@ -983,7 +983,7 @@ static void SVC_DirectConnect(void)
     if (!newcl)
         return;
 
-    number = newcl - svs.client_pool;
+    number = newcl - svs.clientPool;
 
     // build a new connection
     // accept the new client
@@ -1041,13 +1041,6 @@ static void SVC_DirectConnect(void)
 
     SV_InitClientSend(newcl);
 
-    // MSG: !!
-    //if (newcl->protocolVersion == PROTOCOL_VERSION_DEFAULT) {
-    //    newcl->WriteFrame = __OLD_SV_WriteFrameToClient_Default;
-    //} else {
-        newcl->WriteFrame = SV_WriteFrameToClient;
-//    }
-
     // loopback client doesn't need to reconnect
     if (NET_IsLocalAddress(&net_from)) {
         newcl->reconnected = true;
@@ -1060,8 +1053,8 @@ static void SVC_DirectConnect(void)
     newcl->connectionState = ConnectionState::Assigned;
     newcl->frameNumber = 1; // frame 0 can't be used
     newcl->lastFrame = -1;
-    newcl->lastMessage = svs.realtime;    // don't timeout
-    newcl->lastActivity = svs.realtime;
+    newcl->lastMessage = svs.realTime;    // don't timeout
+    newcl->lastActivity = svs.realTime;
     newcl->pingMinimum = 9999;
 }
 
@@ -1088,7 +1081,7 @@ static void SVC_RemoteCommand(void)
 {
     const char *s;
 
-    if (SV_RateLimited(&svs.ratelimit_rcon)) {
+    if (SV_RateLimited(&svs.ratelimitRemoteCon)) {
         Com_DPrintf("Dropping rcon from %s\n",
                     NET_AdrToString(&net_from));
         return;
@@ -1104,7 +1097,7 @@ static void SVC_RemoteCommand(void)
     }
 
     // valid rcon packets are not rate limited
-    SV_RateRecharge(&svs.ratelimit_rcon);
+    SV_RateRecharge(&svs.ratelimitRemoteCon);
 
 	if (dedicated->integer)
 	{
@@ -1324,11 +1317,11 @@ static void SV_GiveMsec(void)
 		client->clientUserCommandMiliseconds = (BASE_FRAMETIME * 100) + (2 * 100);//1800; // 1600 + some slop
 	}
     
-    if (svs.realtime - svs.last_timescale_check < sv_timescale_time->integer)
+    if (svs.realTime - svs.lastTimescaleCheck < sv_timescale_time->integer)
         return;
 
-    float d = svs.realtime - svs.last_timescale_check;
-    svs.last_timescale_check = svs.realtime;
+    float d = svs.realTime - svs.lastTimescaleCheck;
+    svs.lastTimescaleCheck = svs.realTime;
 
     FOR_EACH_CLIENT(client) {
         client->timescale = client->clientUserCommandMiliseconds / d;
@@ -1363,11 +1356,11 @@ static void SV_GiveMsec(void)
     //    }
     //}
 
-    //if (svs.realtime - svs.last_timescale_check < sv_timescale_time->integer)
+    //if (svs.realTime - svs.lastTimescaleCheck < sv_timescale_time->integer)
     //    return;
 
-    //float d = svs.realtime - svs.last_timescale_check;
-    //svs.last_timescale_check = svs.realtime;
+    //float d = svs.realTime - svs.lastTimescaleCheck;
+    //svs.lastTimescaleCheck = svs.realTime;
 
     //FOR_EACH_CLIENT(cl) {
     //    cl->timescale = cl->clientUserCommandMiliseconds / d;
@@ -1447,7 +1440,7 @@ static void SV_PacketEvent(void)
             break;
 
         // this is a valid, sequenced packet, so process it
-        client->lastMessage = svs.realtime;    // don't timeout
+        client->lastMessage = svs.realTime;    // don't timeout
 #if USE_ICMP
         client->unreachable = false; // don't drop
 #endif
@@ -1559,7 +1552,7 @@ static void SV_CheckTimeouts(void)
             continue;
         }
         // NOTE: delta calculated this way is not sensitive to overflow
-        delta = svs.realtime - client->lastMessage;
+        delta = svs.realTime - client->lastMessage;
         if (client->connectionState == ConnectionState::Zombie) {
             if (delta > zombie_time) {
                 SV_RemoveClient(client);
@@ -1590,7 +1583,7 @@ static void SV_CheckTimeouts(void)
             continue;
         }
 
-        delta = svs.realtime - client->lastActivity;
+        delta = svs.realTime - client->lastActivity;
         if (idle_time && delta > idle_time) {
             SV_DropClient(client, "idling");
             continue;
@@ -1704,10 +1697,10 @@ static void SV_MasterHeartbeat(void)
     if (!sv_public->integer)
         return;        // a private dedicated game
 
-    if (svs.realtime - svs.last_heartbeat < HEARTBEAT_SECONDS * 1000)
+    if (svs.realTime - svs.lastHeartBeat < HEARTBEAT_SECONDS * 1000)
         return;        // not time to send yet
 
-    svs.last_heartbeat = svs.realtime;
+    svs.lastHeartBeat = svs.realTime;
 
     // write the packet header
     memcpy(buffer, "\xff\xff\xff\xffheartbeat\n", 14);
@@ -1775,7 +1768,7 @@ unsigned SV_Frame(unsigned msec)
 #endif
 
     // advance local server time
-    svs.realtime += msec;
+    svs.realTime += msec;
 
     if (COM_DEDICATED) {
         // process console commands if not running a client
@@ -1932,24 +1925,24 @@ void SV_SetConsoleTitle(void)
 
 static void sv_status_limit_changed(cvar_t *self)
 {
-    SV_RateInit(&svs.ratelimit_status, self->string);
+    SV_RateInit(&svs.ratelimitStatus, self->string);
 }
 
 static void sv_auth_limit_changed(cvar_t *self)
 {
-    SV_RateInit(&svs.ratelimit_auth, self->string);
+    SV_RateInit(&svs.ratelimitAuth, self->string);
 }
 
 static void sv_rcon_limit_changed(cvar_t *self)
 {
-    SV_RateInit(&svs.ratelimit_rcon, self->string);
+    SV_RateInit(&svs.ratelimitRemoteCon, self->string);
 }
 
 static void init_rate_limits(void)
 {
-    SV_RateInit(&svs.ratelimit_status, sv_status_limit->string);
-    SV_RateInit(&svs.ratelimit_auth, sv_auth_limit->string);
-    SV_RateInit(&svs.ratelimit_rcon, sv_rcon_limit->string);
+    SV_RateInit(&svs.ratelimitStatus, sv_status_limit->string);
+    SV_RateInit(&svs.ratelimitAuth, sv_auth_limit->string);
+    SV_RateInit(&svs.ratelimitRemoteCon, sv_rcon_limit->string);
 }
 
 static void sv_namechange_limit_changed(cvar_t *self)
@@ -2133,9 +2126,9 @@ static void SV_FinalMessage(const char *message, int32_t errorType)
             }
             netchan = client->netChan;
             while (netchan->fragmentPending) {
-                Netchan_TransmitNextFragment(netchan, 0);
+                Netchan_TransmitNextFragment(netchan, svs.realTime);
             }
-            Netchan_Transmit(netchan, msg_write.currentSize, msg_write.data, 1, svs.realtime);
+            Netchan_Transmit(netchan, msg_write.currentSize, msg_write.data, 1, svs.realTime);
         }
     }
 
@@ -2175,7 +2168,7 @@ void SV_Shutdown(const char *finalmsg, int32_t errorType)
     memset(&sv, 0, sizeof(sv));
 
     // free server static data
-    Z_Free(svs.client_pool);
+    Z_Free(svs.clientPool);
     Z_Free(svs.entities);
 #if USE_ZLIB
     deflateEnd(&svs.z);
