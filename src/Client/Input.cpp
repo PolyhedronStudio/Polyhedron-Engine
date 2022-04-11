@@ -347,9 +347,9 @@ void CL_FinalizeCmd(void)
     CL_GM_FinalizeFrameMoveCommand();
 }
 
-static inline qboolean ready_to_send(void)
+static inline qboolean CL_ReadyToSendInputPacket(void)
 {
-    unsigned msec;
+
 
     if (cl.sendPacketNow) {
         Com_DDPrintf("NET: if cl.sendPacketNow\n");
@@ -370,29 +370,30 @@ static inline qboolean ready_to_send(void)
         Com_DDPrintf("NET: cl_maxpackets->integer[%i] < BASE_FRAMERATE[%i]\n", cl_maxpackets->integer, BASE_FRAMERATE);
     }
 
-    msec = 1000 / cl_maxpackets->integer;
-    if (msec) {
-        int oldmsec = msec;
-        msec = 100 / (100 / msec);
-        Com_DDPrintf("NET: if msec { oldmsec[%i], msec[%i] }\n", oldmsec, msec);
+    uint32_t milliseconds = 1000 / cl_maxpackets->integer;
+    if (milliseconds) {
+        int32_t oldMilliseconds = milliseconds;
+        //milliseconds = 100 / (100 / milliseconds);
+		milliseconds = static_cast<int32_t>(BASE_FRAMETIME) / (static_cast<int32_t>(BASE_FRAMETIME)  / milliseconds);
+        Com_DDPrintf("NET: if msec { oldmsec[%i], msec[%i] }\n", oldMilliseconds, milliseconds);
     }
-    if (cls.realtime - cl.lastTransmitTime < msec) {
-        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return falses\n", cls.realtime, cl.lastTransmitTime, msec);
+    if (cls.realtime - cl.lastTransmitTime < milliseconds) {
+        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return falses\n", cls.realtime, cl.lastTransmitTime, milliseconds);
         return false;
     } else {
-        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return true;\n", cls.realtime, cl.lastTransmitTime, msec);
+        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return true;\n", cls.realtime, cl.lastTransmitTime, milliseconds);
     }
 
     return true;
 }
 
-static inline qboolean ready_to_send_hacked(void)
+static inline qboolean CL_ReadyToSendInputPacket_Hacked(void)
 {
     if (cl.currentClientCommandNumber - cl.lastTransmitCmdNumberReal > 2) {
         return true; // can't drop more than 2 clientUserCommands
     }
 
-    return ready_to_send();
+    return CL_ReadyToSendInputPacket();
 }
 
 /*
@@ -415,7 +416,7 @@ static void CL_SendUserCommand(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
 
     // see if we are ready to send this packet
-    if (!ready_to_send_hacked()) {
+    if (!CL_ReadyToSendInputPacket_Hacked()) {
         cls.netChannel->outgoingSequence++; // just drop the packet
         return;
     }
