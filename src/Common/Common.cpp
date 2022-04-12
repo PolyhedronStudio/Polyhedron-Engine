@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Field.h"
 #include "Fifo.h"
 #include "Files.h"
+#include "Huffman.h"
 #include "MDFour.h"
 #include "Msg.h"
 #include "Net/Net.h"
@@ -1028,6 +1029,7 @@ void Qcommon_Init(int argc, char **argv)
     Com_LPrintf(PrintType::Notice, "\nEngine version: " APPLICATION " " LONG_VERSION_STRING ", built on " __DATE__ "\n\n");
 
     Netchan_Init();
+	Huff_Init();
     NET_Init();
     BSP_Init();
     CM_Init();

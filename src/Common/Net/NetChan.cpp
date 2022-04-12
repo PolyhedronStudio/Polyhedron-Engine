@@ -176,17 +176,104 @@ void Netchan_OutOfBand(NetSource sock, const NetAdr *address, const char *format
 
 // ============================================================================
 
+
+/**
+*	@brief	Sends one fragment of the current message.
+**/
+size_t Netchan_TransmitNextFragment(NetChannel *netChannel, uint64_t time) {
+    SizeBuffer   send;
+    byte        send_buf[MAX_PACKETLEN];
+    qboolean    send_reliable;
+    uint32_t    w1, w2;
+    uint16_t    offset;
+    size_t      fragment_length;
+    qboolean    more_fragments;
+
+    // Should we send a reliable message, or not?
+    send_reliable = netChannel->reliableLength ? true : false;
+
+    // Write the packet header
+    w1 = (netChannel->outgoingSequence & 0x3FFFFFFF) | (1 << 30) |
+         (send_reliable << 31);
+    w2 = (netChannel->incomingSequence & 0x3FFFFFFF) | (0 << 30) |
+         (netChannel->incomingReliableSequence << 31);
+
+    SZ_TagInit(&send, send_buf, sizeof(send_buf), SZ_NC_SEND_FRG);
+
+    SZ_WriteLong(&send, w1);
+    SZ_WriteLong(&send, w2);
+
+#if USE_CLIENT
+    // Send the qport if we are a client
+    if (netChannel->netSource == NS_CLIENT && netChannel->remoteQPort) {
+        SZ_WriteByte(&send, netChannel->remoteQPort);
+    }
+#endif
+
+    // Calculate Fragment length based on how much has been read so far.
+    // Ensure we do not exceed the max packet length.
+    fragment_length = netChannel->outFragment.currentSize - netChannel->outFragment.readCount;
+    if (fragment_length > netChannel->maximumPacketLength) {
+        fragment_length = netChannel->maximumPacketLength;
+    }
+
+    // More 
+    more_fragments = true;
+    if (netChannel->outFragment.readCount + fragment_length == netChannel->outFragment.currentSize) {
+        more_fragments = false;
+    }
+
+    // Write fragment offset
+    offset = (netChannel->outFragment.readCount & 0x7FFF) |
+             (more_fragments << 15);
+    SZ_WriteShort(&send, offset);
+
+    // Write fragment contents
+    SZ_Write(&send, netChannel->outFragment.data + netChannel->outFragment.readCount, fragment_length);
+
+	// Debug printing.
+    DShowPacket("send %4" PRIz " : s=%d ack=%d rack=%d " "fragment_offset=%" PRIz " more_fragments=%d", send.currentSize, netChannel->outgoingSequence, netChannel->incomingSequence, netChannel->incomingReliableSequence, netChannel->outFragment.readCount, more_fragments);
+    if (send_reliable) {
+        DShowPacket(" reliable=%i ", netChannel->reliableSequence);
+    }
+    DShowPacket("\n");
+
+    // Increment read count with fragment length and store whether one more is pending or not.
+    netChannel->outFragment.readCount += fragment_length;
+    netChannel->fragmentPending = more_fragments;
+
+    // If the message has been sent completely, clear the fragment buffer
+    if (!netChannel->fragmentPending) {
+        netChannel->outgoingSequence++;
+        netChannel->lastSentTime = com_localTime;
+        SZ_Clear(&netChannel->outFragment);
+    }
+
+    // Send the datagram
+    NET_SendPacket(netChannel->netSource, send.data, send.currentSize,
+                   &netChannel->remoteNetAddress);
+
+    return send.currentSize;
+}
+
+/**
+*	@brief	Sends the remaining fragments of the current message
+**/
+size_t Netchan_TransmitAllFragments(NetChannel* netChannel, uint64_t time) {
+return 0;
+}
+
 /**
 *	@brief	Sends a message to a connection, fragmenting if necessary. 
 *			A zero sized message will still generate a packet.
 **/
 size_t Netchan_Transmit(NetChannel *netChannel, size_t length, const void *data, int32_t numberOfPackets, uint64_t time)
 {
-    SizeBuffer   send;
-    byte        send_buf[MAX_PACKETLEN];
-    qboolean    send_reliable;
-    uint32_t    w1, w2;
-    int         i;
+    SizeBuffer send;
+    byte send_buf[MAX_PACKETLEN];
+    qboolean send_reliable = false;
+    uint32_t w1 = 0, w2 = 0;
+    int32_t i = 0;
 
 // check for message overflow
     if (netChannel->message.overflowed) {
@@ -211,6 +298,7 @@ size_t Netchan_Transmit(NetChannel *netChannel, size_t length, const void *data,
 
 // If the reliable transmit buffer is empty, copy the current message out.
     if (!netChannel->reliableLength && netChannel->message.currentSize) {
+		//////////////////// FRAGMENTING SHOULD HAPPEN ABOUT HERE PROBABLY.
         send_reliable = true;
         memcpy(netChannel->reliableBuffer, netChannel->messageBuffer,
                netChannel->message.currentSize);
@@ -283,102 +371,6 @@ size_t Netchan_Transmit(NetChannel *netChannel, size_t length, const void *data,
 
     return send.currentSize * numberOfPackets;
 }
-
-/**
-*	@brief	Sends one fragment of the current message.
-**/
-size_t Netchan_TransmitNextFragment(NetChannel *netChannel, uint64_t time) {
-    SizeBuffer   send;
-    byte        send_buf[MAX_PACKETLEN];
-    qboolean    send_reliable;
-    uint32_t    w1, w2;
-    uint16_t    offset;
-    size_t      fragment_length;
-    qboolean    more_fragments;
-
-    // Should we send a reliable message, or not?
-    send_reliable = netChannel->reliableLength ? true : false;
-
-    // Write the packet header
-    w1 = (netChannel->outgoingSequence & 0x3FFFFFFF) | (1 << 30) |
-         (send_reliable << 31);
-    w2 = (netChannel->incomingSequence & 0x3FFFFFFF) | (0 << 30) |
-         (netChannel->incomingReliableSequence << 31);
-
-    SZ_TagInit(&send, send_buf, sizeof(send_buf), SZ_NC_SEND_FRG);
-
-    SZ_WriteLong(&send, w1);
-    SZ_WriteLong(&send, w2);
-
-#if USE_CLIENT
-    // Send the qport if we are a client
-    if (netChannel->netSource == NS_CLIENT && netChannel->remoteQPort) {
-        SZ_WriteByte(&send, netChannel->remoteQPort);
-    }
-#endif
-
-    // Calculate Fragment length based on how much has been read so far.
-    // Ensure we do not exceed the max packet length.
-    fragment_length = netChannel->outFragment.currentSize - netChannel->outFragment.readCount;
-    if (fragment_length > netChannel->maximumPacketLength) {
-        fragment_length = netChannel->maximumPacketLength;
-    }
-
-    // More 
-    more_fragments = true;
-    if (netChannel->outFragment.readCount + fragment_length ==
-        netChannel->outFragment.currentSize) {
-        more_fragments = false;
-    }
-
-    // Write fragment offset
-    offset = (netChannel->outFragment.readCount & 0x7FFF) |
-             (more_fragments << 15);
-    SZ_WriteShort(&send, offset);
-
-    // Write fragment contents
-    SZ_Write(&send, netChannel->outFragment.data + netChannel->outFragment.readCount,
-             fragment_length);
-
-	// Debug printing.
-    DShowPacket("send %4" PRIz " : s=%d ack=%d rack=%d " "fragment_offset=%" PRIz " more_fragments=%d",
-               send.currentSize,
-               netChannel->outgoingSequence,
-               netChannel->incomingSequence,
-               netChannel->incomingReliableSequence,
-               netChannel->outFragment.readCount,
-               more_fragments
-	);
-    if (send_reliable) {
-        DShowPacket(" reliable=%i ", netChannel->reliableSequence);
-    }
-    DShowPacket("\n");
-
-    // Increment read count with fragment length and store whether one more is pending or not.
-    netChannel->outFragment.readCount += fragment_length;
-    netChannel->fragmentPending = more_fragments;
-
-    // If the message has been sent completely, clear the fragment buffer
-    if (!netChannel->fragmentPending) {
-        netChannel->outgoingSequence++;
-        netChannel->lastSentTime = com_localTime;
-        SZ_Clear(&netChannel->outFragment);
-    }
-
-    // Send the datagram
-    NET_SendPacket(netChannel->netSource, send.data, send.currentSize,
-                   &netChannel->remoteNetAddress);
-
-    return send.currentSize;
-}
-
-/**
-*	@brief	Sends the remaining fragments of the current message
-**/
-size_t Netchan_TransmitAllFragments(NetChannel* netChannel, uint64_t time) {
-return 0;
-}
-
 
 /**
 *	@brief	Receives a message from a connection.

@@ -98,6 +98,9 @@ public:
 
     SizeBuffer  outFragment;
     byte        outFragmentBuffer[MAX_MSGLEN];
+	int32_t		outgoingFragmentBytes = 0;
+	int32_t		outgoingFragmentOffset = 0;
+	int32_t		outgoingFragmentSize = 0;
 };
 
 

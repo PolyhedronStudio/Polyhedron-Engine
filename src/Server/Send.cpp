@@ -612,7 +612,7 @@ static inline void SV_WriteMessagePacket(client_t *client, MessagePacket *msg, s
 
 static inline void SV_WriteUnreliableMessagePackets(client_t *client, size_t maximumSize)
 {
-    MessagePacket    *msg, *next;
+    MessagePacket *msg, *next;
 
     FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
         if (msg->currentSize) {
@@ -635,7 +635,7 @@ FRAME UPDATES
 *			First it sends out all the reliables which are 
 **/
 static void SV_WriteDatagram(client_t *client) {
-    size_t currentSize;
+    size_t currentSize = 0;
 
     // send over all the relevant EntityState
     // and the PlayerState
@@ -709,16 +709,13 @@ static void SV_FreeUnreliablePackets(client_t *client) {
 **/
 void SV_SendClientMessages(void)
 {
-    client_t    *client;
-    size_t      currentSize;
+    client_t *client = nullptr;
+    size_t currentSize = 0;
 
     // send a message to each connected client
     FOR_EACH_CLIENT(client) {
         if (client->connectionState != ConnectionState::Spawned || client->download.bytes || client->nodata)
             goto finish;
-
-        //if (!SV_CLIENTSYNC(client))
-        //    continue;
 
         // if the reliable message overflowed,
         // drop the client (should never happen)
@@ -732,11 +729,18 @@ void SV_SendClientMessages(void)
         if (SV_RateDrop(client))
             goto advance;
 
-        // don't write any frame data until all fragments are sent
+        // Don't write any frame data until all fragments are sent
         if (client->netChan->fragmentPending) {
+			// Set suppressed bits.
             client->frameFlags |= FrameFlags::Suppressed;
+
+			// Transmit next fragment.
             currentSize = Netchan_TransmitNextFragment(client->netChan, svs.realTime);
+
+			// Calculate sendtime.
             SV_CalcSendTime(client, currentSize);
+
+			// Go on to next frame.
             goto advance;
         }
 
