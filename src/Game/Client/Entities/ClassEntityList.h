@@ -50,12 +50,18 @@ public:
     **/
     void Clear();
 
+	/**
+	*   @brief  Spawns and inserts a new class entity of type 'classname', which belongs to the ClientEntity.
+	*   @return Pointer to the class entity object on sucess. On failure, nullptr.
+	**/
+	IClientGameEntity *AllocateFromClassname(const std::string &classname, ClientEntity* clEntity);
+
     /**
     *   @brief  Spawns and inserts a new class entity at the state.number index, assigning the client entity pointer
     *           as its 'soulmate', I suppose.
     *   @return Pointer to the class entity object on sucess. On failure, nullptr.
     **/
-    IClientGameEntity *SpawnFromState(const EntityState &state, ClientEntity *clEntity);
+    IClientGameEntity *AllocateFromState(const EntityState &state, ClientEntity *clEntity);
 
     /**
     *   @return A pointer to the entity who's index matches the state number.

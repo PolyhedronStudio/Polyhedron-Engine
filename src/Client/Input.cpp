@@ -374,7 +374,7 @@ static inline qboolean CL_ReadyToSendInputPacket(void)
     if (milliseconds) {
         int32_t oldMilliseconds = milliseconds;
         //milliseconds = 100 / (100 / milliseconds);
-		milliseconds = static_cast<int32_t>(BASE_FRAMETIME) / (static_cast<int32_t>(BASE_FRAMETIME)  / milliseconds);
+		milliseconds = static_cast<int32_t>(32) / (static_cast<int32_t>(32)  / milliseconds);
         Com_DDPrintf("NET: if msec { oldmsec[%i], msec[%i] }\n", oldMilliseconds, milliseconds);
     }
     if (cls.realtime - cl.lastTransmitTime < milliseconds) {

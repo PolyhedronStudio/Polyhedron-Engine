@@ -92,6 +92,27 @@ struct entity_s {
     int32_t lightLevel = 0;
 };
 
+
+/**
+*   Client Take Damage.
+**/
+struct ClientTakeDamage {
+    //! Will NOT take damage if hit.
+    static constexpr int32_t No     = 0;  
+    //! WILL take damage if hit
+    static constexpr int32_t Yes    = 1;
+    //! When auto targeting is enabled, it'll recognizes this
+    static constexpr int32_t Aim    = 2; 
+};
+
+// edict->clientFlags
+struct EntityClientFlags {
+    //static constexpr uint32_t NoClient      = 0x00000001;   // Don't send entity to clients, even if it has effects.
+    static constexpr uint32_t DeadMonster   = 0x00000002;   // Treat as BrushContents::DeadMonster for collision.
+    static constexpr uint32_t Monster       = 0x00000004;   // Treat as BrushContents::Monster for collision.
+    static constexpr uint32_t Remove        = 0x00000008;   // Delete the entity next tick.
+};
+
 /**
 *   @brief  Local Client entity. Acts like a POD type similar to the server entity.
 **/

@@ -28,40 +28,18 @@ public:
     //! Runtime type information
     DefineAbstractClass( IClientGameEntity, ISharedGameEntity );
 
-    
+
 
     /**
     *
     * 
-    *   SharedGame ClassEntity Interface Functions.
+    *   ClientGame ONLY ClassEntity Interface Functions.
     *
     * 
     **/
-    ///**
-    //*   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
-    //**/
-    //virtual void Precache() = 0;    // Precaches data.
-    ///**
-    //*   @brief  Called when it is time to spawn this entity.
-    //**/
-    //virtual void Spawn() = 0;       // Spawns the entity.
-    ///**
-    //*   @brief  Called when it is time to respawn this entity.
-    //**/
-    //virtual void Respawn() = 0;     // Respawns the entity.
-    ///**
-    //*   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    //**/
-    //virtual void PostSpawn() = 0;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    ///**
-    //*   @brief  General entity thinking routine.
-    //**/
-    //virtual void Think() = 0;
-
-    ///**
-    //*   @brief  Act upon the parsed key and value.
-    //**/
-    //virtual void SpawnKey(const std::string& key, const std::string& value) = 0; // Called for each key:value when parsing the entity dictionary.
+	//!
+	//!	None as of yet.
+	//!
 
 
 
@@ -205,7 +183,7 @@ public:
     /**
     *   @return True if it has a 'Think' callback set. False if it is nullptr.
     **/
-    inline const qboolean HasThinkCallback() {
+    inline const qboolean HasThinkCallback() override {
         return (thinkFunction != nullptr ? true : false);
     }
 
@@ -220,7 +198,7 @@ public:
     /**
     *   @return True if it has a 'Use' callback set. False if it is nullptr.
     **/
-    inline const qboolean HasUseCallback() {
+    inline const qboolean HasUseCallback() override {
         return (useFunction != nullptr ? true : false);
     }
 
@@ -235,7 +213,7 @@ public:
     /**
     *   @return True if it has a 'Touch' callback set. False if it is nullptr.
     **/
-    inline const qboolean HasTouchCallback() {
+    inline const qboolean HasTouchCallback() override {
         return (touchFunction != nullptr ? true : false);
     }
 
@@ -250,7 +228,7 @@ public:
     /**
     *   @return True if it has a 'Blocked' callback set. False if it is nullptr.
     **/
-    inline const qboolean HasBlockedCallback() {
+    inline const qboolean HasBlockedCallback() override {
         return (takeDamageFunction != nullptr ? true : false);
     }
 
@@ -265,7 +243,7 @@ public:
     /**
     *   @return True if it has a 'TakeDamage' callback set. False if it is nullptr.
     **/
-    inline const qboolean HasTakeDamageCallback() {
+    inline const qboolean HasTakeDamageCallback() override {
         return (takeDamageFunction != nullptr ? true : false);
     }
 
@@ -280,7 +258,7 @@ public:
     /**
     *   @return True if it has a 'Die' callback set. False if it is nullptr.
     **/
-    inline const qboolean HasDieCallback() {
+    inline const qboolean HasDieCallback() override {
         return (dieFunction != nullptr ? true : false);
     }
 

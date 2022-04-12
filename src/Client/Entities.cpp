@@ -339,7 +339,7 @@ void CL_DeltaFrame(void)
     // Getting a valid frame message ends the connection process.
     if (cls.connectionState == ClientConnectionState::Precached) {
 	    // Spawn all local class entities.
-	    CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
+	    //CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
 
         // Set the client to an active connection state.
         CL_SetActiveState();

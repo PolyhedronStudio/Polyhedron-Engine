@@ -26,95 +26,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Step Move physics.
 #include "StepMove.h"
 
-// World.
-//#include "../World/Gameworld.h"
-/*
 
 
-pushmove objects do not obey gravity, and do not interact with each other or trigger fields, but block normal movement and push normal objects when they move.
-
-onground is set for toss objects when they come to a complete rest. It is set for steping or walking objects
-
-doors, plats, etc are Solid::BSP, and MoveType::Push
-bonus items are Solid::Trigger touch, and MoveType::Toss
-corpses are Solid::Not and MoveType::Toss
-crates are Solid::BoundingBox and MoveType::Toss
-walking monsters are SOLID_SLIDEBOX and MoveType::Step
-flying/floating monsters are SOLID_SLIDEBOX and MoveType::Fly
-
-solid_edge items only clip against bsp models.
-
-*/
-
-void CLG_PhysicsEntityWPrint(const std::string &functionName, const std::string &functionSector, const std::string& message) {
-    // Only continue if developer warnings for physics are enabled.
-    extern cvar_t* dev_show_physwarnings;
-    if (!dev_show_physwarnings->integer) {
-        return;
-    }
-
-    // Show warning.
-    std::string warning = "Physics warning occured in: ";
-    warning += functionName;
-    warning += " ";
-    warning += functionSector;
-    warning += " ";
-    warning += message;
-    warning += "\n";
-    Com_DPrint(warning.c_str());
-}
 
 
-/*
-============
-UTIL_TouchTriggers
-
-============
-*/
-void UTIL_TouchTriggers(IClientGameEntity *ent)
-{
-    // Dead things don't activate triggers!
-    if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster) && ent->GetHealth() <= 0)
-        return;
-
-    // Fetch the boxed entities.
-    //ClassEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
-
-    //// Do some extra sanity checks on the touched entity list. It is possible to have 
-    //// an entity be removed before we get to it (kill triggered).
-    //for (auto& touchedEntity : touched) {
-    //    if (!touchedEntity) {
-	   //     continue;
-    //    }
-	   // if (!touchedEntity->GetPODEntity()) {
-	   //     continue;
-	   // }
-	   // if (!touchedEntity->IsInUse()) {
-		  //  continue;
-	   // }
-
-    //    touchedEntity->DispatchTouchCallback(touchedEntity, ent, NULL, NULL);
-    //}
-}
 
 
-//
-//===============
-// SVG_Trace
-//
-// The defacto trace function to use, for SVGBaseEntity and its derived family & friends.
-//===============
-//
+static cvar_t *sv_maxvelocity = nullptr;
+static cvar_t *sv_gravity= nullptr;
+
+extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
+
 CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) {
     // Acquire server and class entity array pointers.
-    
-    std::vector<IClientGameEntity*> *classEntities = clge->entities->GetClassEntities();//game.world->GetClassEntities();
+    ClientEntity* clientEntities = cl->solidEntities[0];
+    CLGEntityVector *classEntities = clge->entities->GetClassEntities();
 
     // Fetch server entity in case one was passed to us.
-    PODEntity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);
-    
+    ClientEntity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);
+
     // Execute server trace.
-    TraceResult trace = clgi.Trace(start, mins, maxs, end, (entity_s*)serverPassEntity, contentMask);
+    TraceResult trace = clgi.Trace(start, mins, maxs, end, (struct entity_s*)serverPassEntity, contentMask);
 
     // Convert results to Server Game Trace.
     CLGTrace svgTrace;
@@ -138,23 +70,107 @@ CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, 
     if (trace.ent) {
         uint32_t index = trace.ent->state.number;
 
-        if ((* classEntities)[index] != NULL) {
-            svgTrace.ent = (* classEntities)[index];
+        if (index < classEntities->size() && classEntities->data()[index] != NULL) {
+            svgTrace.ent = classEntities->data()[index];
         } else {
-	        svgTrace.ent = (* classEntities)[0];
+	        svgTrace.ent = classEntities->data()[0];
         }
     } else {
-        svgTrace.ent = (* classEntities)[0];
+        svgTrace.ent = classEntities->data()[0];
     }
 
     return svgTrace;
 }
 
+// World.
+//#include "../World/Gameworld.h"
+/*
+
+
+pushmove objects do not obey gravity, and do not interact with each other or trigger fields, but block normal movement and push normal objects when they move.
+
+onground is set for toss objects when they come to a complete rest. It is set for steping or walking objects
+
+doors, plats, etc are Solid::BSP, and MoveType::Push
+bonus items are Solid::Trigger touch, and MoveType::Toss
+corpses are Solid::Not and MoveType::Toss
+crates are Solid::BoundingBox and MoveType::Toss
+walking monsters are SOLID_SLIDEBOX and MoveType::Step
+flying/floating monsters are SOLID_SLIDEBOX and MoveType::Fly
+
+solid_edge items only clip against bsp models.
+
+*/
+
+void CLG_PhysicsEntityWPrint(const std::string &functionName, const std::string &functionSector, const std::string& message) {
+    // Only continue if developer warnings for physics are enabled.
+    //extern cvar_t* dev_show_physwarnings;
+    //if (!dev_show_physwarnings->integer) {
+    //    return;
+    //}
+
+    // Show warning.
+    std::string warning = "Physics warning occured in: ";
+    warning += functionName;
+    warning += " ";
+    warning += functionSector;
+    warning += " ";
+    warning += message;
+    warning += "\n";
+    Com_DPrint(warning.c_str());
+ //   // Write the index, programmers may look at that thing first
+ //   std::string errorString = "";
+ //   if (ent->GetPODEntity()) {
+	//errorString += "entity (index " + std::to_string(ent->GetNumber());
+ //   } else {
+	//errorString += "entity has no ServerEntity ";
+ //   }
+
+ //   // Write the targetname as well, if it exists
+ //   if (!ent->GetTargetName().empty()) {
+	//errorString += ", name '" + ent->GetTargetName() + "'";
+ //   }
+
+ //   // Write down the C++ class name too
+ //   errorString += ", class '";
+ //   errorString += ent->GetTypeInfo()->classname;
+ //   errorString += "'";
+
+ //   // Close it off and state what's actually going on
+ //   errorString += ") has a nullptr think callback \n";
+ //   //
+ //   gi.Error(errorString.c_str());
+}
+static void UTIL_TouchTriggers(IClientGameEntity *ent)
+{
+    //// Dead things don't activate triggers!
+    //if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster) && ent->GetHealth() <= 0)
+    //    return;
+
+    //// Fetch the boxed entities.
+    //ClassEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
+
+    //// Do some extra sanity checks on the touched entity list. It is possible to have 
+    //// an entity be removed before we get to it (kill triggered).
+    //for (auto& touchedEntity : touched) {
+    //    if (!touchedEntity) {
+	   //     continue;
+    //    }
+	   // if (!touchedEntity->GetPODEntity()) {
+	   //     continue;
+	   // }
+	   // if (!touchedEntity->IsInUse()) {
+		  //  continue;
+	   // }
+
+    //    touchedEntity->DispatchTouchCallback(touchedEntity, ent, NULL, NULL);
+    //}
+}
 //===============
 // CLG_TestEntityPosition
 //
 //===============
-IClientGameEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
+CLGBaseEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
 {
     CLGTrace trace;
     int32_t clipMask = 0;
@@ -168,8 +184,7 @@ IClientGameEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
     trace = CLG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
 
     if (trace.startSolid) {
-	    //return clge->entities->GetClassEntities()[0];
-        return nullptr;
+	    return 0;//dynamic_cast<CLGBaseEntity*>(game.world->GetWorldspawnClassEntity());
     }
 
     return nullptr;
@@ -196,61 +211,58 @@ void CLG_BoundVelocity(IClientGameEntity *ent)
 //
 // Runs entity thinking code for this frame if necessary
 //===============
-qboolean CLG_RunThink(IClientGameEntity *ent)
-{
-    if (!ent) {
-	    CLG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
-        return false;
-    }
-
-    // Fetch think time.
-    const float thinkTime = ent->GetNextThinkTime();
-
-    if (thinkTime <= 0) {
-        return true;
-    } else if (thinkTime > level.time + 0.001) {// Used to be: if (thinkTime > level.time + 0.001)
-        return true;
-    }
-
-    // Reset think time before thinking.
-    ent->SetNextThinkTime(0);
-
-#if _DEBUG
-    if ( !ent->HasThinkCallback() ) {
-        // Write the index, programmers may look at that thing first
-        std::string errorString = "";
-        if (ent->GetPODEntity()) {
-            errorString += "entity (index " + std::to_string(ent->GetNumber());
-        } else {
-            errorString += "entity has no ServerEntity ";
-        }
-
-        // Write the targetname as well, if it exists
-        if ( !ent->GetTargetName().empty() ) {
-            errorString += ", name '" + ent->GetTargetName() + "'";
-        }
-
-        // Write down the C++ class name too
-        errorString += ", class '";
-        errorString += ent->GetTypeInfo()->classname;
-        errorString += "'";
-
-        // Close it off and state what's actually going on
-        errorString += ") has a nullptr think callback \n";
-    //    
-        Com_EPrint( errorString.c_str() );
-
-        // Return true.
-        return true;
-    }
-#endif
-
-    // Last but not least, let the entity execute its think behavior callback.
-    ent->Think();
-
-
-    return false;
-}
+extern qboolean CLG_RunThink(IClientGameEntity *ent);
+//{
+//    if (!ent) {
+//	    CLG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
+//        return false;
+//    }
+//
+//    // Fetch think time.
+//    GameTime nextThinkTime = ent->GetNextThinkTime();
+//
+//	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+//		return true;
+//    }
+//
+//    // Reset think time before thinking.
+//    ent->SetNextThinkTime(GameTime::zero());
+//
+//#if _DEBUG
+//    if ( !ent->HasThinkCallback() ) {
+//        // Write the index, programmers may look at that thing first
+//        std::string errorString = "";
+//        if (ent->GetPODEntity()) {
+//            errorString += "entity (index " + std::to_string(ent->GetNumber());
+//        } else {
+//            errorString += "entity has no ServerEntity ";
+//        }
+//
+//        // Write the targetname as well, if it exists
+//        if ( !ent->GetTargetName().empty() ) {
+//            errorString += ", name '" + ent->GetTargetName() + "'";
+//        }
+//
+//        // Write down the C++ class name too
+//        errorString += ", class '";
+//        errorString += ent->GetTypeInfo()->classname;
+//        errorString += "'";
+//
+//        // Close it off and state what's actually going on
+//        errorString += ") has a nullptr think callback \n";
+//    //    
+//        //gi.Error( errorString.c_str() );
+//
+//        // Return true.
+//        return true;
+//    }
+//#endif
+//
+//    // Last but not least, let the entity execute its think behavior callback.
+//    ent->Think();
+//
+//    return false;
+//}
 
 //===============
 // CLG_Impact
@@ -264,7 +276,7 @@ void CLG_Impact(IClientGameEntity *entityA, CLGTrace *trace)
 
     // Return in case there is no entity to to test with (invalid pointer.)
     if (!entityA) {
-        gi.DPrintf("Warning: Tried to call CLG_Impact with a nullptr entity!\n");
+        Com_DPrint("Warning: Tried to call CLG_Impact with a nullptr entity!\n");
     }
 
     // If the impact came from a trace, set entityB to this ent.
@@ -343,7 +355,7 @@ static vec3_t ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
 // 4 = dead stop
 //===============
 //
-#define MAX_CLIP_PLANES 5
+#define MAX_CLIP_PLANES 20
 int CLG_FlyMove(IClientGameEntity *ent, float time, int mask)
 {
     IClientGameEntity     *hit;
@@ -359,7 +371,7 @@ int CLG_FlyMove(IClientGameEntity *ent, float time, int mask)
     float       time_left;
     int         Blocked;
 
-    numbumps = 4;
+    numbumps = MAX_CLIP_PLANES - 2;
 
     Blocked = 0;
     original_velocity = ent->GetVelocity();
@@ -447,7 +459,7 @@ int CLG_FlyMove(IClientGameEntity *ent, float time, int mask)
         } else {
             // go along the crease
             if (numplanes != 2) {
-//              gi.DPrintf ("clip velocity, numplanes == %i\n",numplanes);
+//              Com_DPrint ("clip velocity, numplanes == %i\n",numplanes);
                 ent->SetVelocity(vec3_zero());
                 return 7;
             }
@@ -483,7 +495,7 @@ void CLG_AddGravity(IClientGameEntity *ent)
     vec3_t velocity = ent->GetVelocity();
 
     // Apply gravity.
-    velocity.z -= ent->GetGravity() * sv_gravity->value * CLG_FRAMETIME;
+    velocity.z -= ent->GetGravity() * sv_gravity->value * FRAMETIME.count();
 
     // Apply new velocity to entity.
     ent->SetVelocity(velocity);
@@ -609,11 +621,12 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    IClientGameEntity** classEntities = game.world->GetClassEntities();
-    for (e = 1; e < globals.numberOfEntities; e++) {
+    //IClientGameEntity** classEntities = clge->entities->GetClassEntities();
+	CLGEntityVector *classEntities = clge->entities->GetClassEntities();
+    for (e = 1; e < cl->numSolidEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-	    SGEntityHandle checkHandle = classEntities[e];
+	    SGEntityHandle checkHandle = classEntities->data()[e];
 
         if (!checkHandle) {
     		CLG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");
@@ -638,8 +651,8 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             || moveType == MoveType::Spectator)
             continue;
 
-        if (!check->GetPODEntity()->area.prev)
-            continue;       // not linked in anywhere
+        //if (!check->GetPODEntity()->area.prev)
+        //    continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
         if (check->GetGroundEntity() != pusher) {
@@ -768,7 +781,7 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 void CLG_Physics_Pusher(SGEntityHandle &entityHandle)
 {
     vec3_t      move, amove;
-    IClientGameEntity     *part, *mv;
+    IClientGameEntity     *part = nullptr, *mv = nullptr;
 
     // Assign handle to base entity.
     IClientGameEntity* ent = *entityHandle;
@@ -799,22 +812,24 @@ void CLG_Physics_Pusher(SGEntityHandle &entityHandle)
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
             // object is moving
-            move = vec3_scale(part->GetVelocity(), CLG_FRAMETIME);
-            amove = vec3_scale(part->GetAngularVelocity(), CLG_FRAMETIME);
+            move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
+            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
 
             SGEntityHandle partHandle(part);
             if (!CLG_Push(partHandle, move, amove))
                 break;  // move was Blocked
         }
     }
-    if (pushed_p > &pushed[MAX_EDICTS])
-        Com_EPrint("pushed_p > &pushed[MAX_EDICTS], memory corrupted");
+    if (pushed_p > &pushed[MAX_EDICTS]) {
+        //gi.Error("pushed_p > &pushed[MAX_EDICTS], memory corrupted");
+	}
 
     if (part) {
         // the move failed, bump all nextThinkTime times and back out moves
         for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
-            if (mv->GetNextThinkTime() > 0)
-                mv->SetNextThinkTime(mv->GetNextThinkTime() + CLG_FRAMETIME);
+            if (mv->GetNextThinkTime() > GameTime::zero()) {
+                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);// 1_hz);
+            }
         }
 
         // if the pusher has a "Blocked" function, call it
@@ -876,8 +891,8 @@ void CLG_Physics_Noclip(SGEntityHandle &entityHandle) {
     if (!ent->IsInUse())
         return;
 
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), CLG_FRAMETIME, ent->GetAngularVelocity()));
-    ent->SetOrigin(vec3_fmaf(ent->GetOrigin(), CLG_FRAMETIME, ent->GetVelocity()));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
+    ent->SetOrigin(vec3_fmaf(ent->GetOrigin(), FRAMETIME.count(), ent->GetVelocity()));
 
     ent->LinkEntity();
 }
@@ -941,10 +956,10 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
         CLG_AddGravity(ent);
 
     // Move angles
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), CLG_FRAMETIME, ent->GetAngularVelocity()));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
 
     // Move origin
-    vec3_t move = vec3_scale(ent->GetVelocity(), CLG_FRAMETIME);
+    vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
     CLGTrace trace = CLG_PushEntity(ent, move);
     if (!ent->IsInUse())
         return;
@@ -976,7 +991,7 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Check for water transition, first fetch the OLD contents mask.
     qboolean wasInWater = (ent->GetWaterType() & BrushContentsMask::Liquid);
     // Set new watertype based on gi.PointContents test result.
-    ent->SetWaterType(gi.PointContents(ent->GetOrigin()));
+    //ent->SetWaterType(clgi.CM_PointContents(ent->GetOrigin()));
     qboolean isInWater = ent->GetWaterType() & BrushContentsMask::Liquid;
 
     // Store waterlevel.
@@ -987,9 +1002,9 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // Determine what sound to play.
     if (!wasInWater && isInWater)
-        gi.PositionedSound(oldOrigin, game.world->GetServerEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        clgi.S_StartSound(&oldOrigin,  ent->GetState().number, SoundChannel::Auto, clgi.S_RegisterSound("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
-        gi.PositionedSound(ent->GetOrigin(), game.world->GetServerEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        clgi.S_StartSound(&ent->GetOrigin(), ent->GetState().number, SoundChannel::Auto, clgi.S_RegisterSound("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
     for (IClientGameEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
@@ -1033,10 +1048,10 @@ void CLG_AddRotationalFriction(SGEntityHandle entityHandle) {
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
     // Set angles in proper direction.
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), CLG_FRAMETIME, angularVelocity));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity));
 
     // Calculate adjustment to apply.
-    float adjustment = CLG_FRAMETIME * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
+    float adjustment = FRAMETIME.count() * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
 
     // Apply adjustments.
     angularVelocity = ent->GetAngularVelocity();
@@ -1135,7 +1150,7 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
         float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float friction = STEPMOVE_FRICTION / 3;
-        float newSpeed = speed - (CLG_FRAMETIME * control * friction);
+        float newSpeed = speed - (FRAMETIME.count() * control * friction);
         if (newSpeed < 0)
             newSpeed = 0;
         newSpeed /= speed;
@@ -1147,7 +1162,7 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
     if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
         float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-        float newSpeed = speed - (CLG_FRAMETIME * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
+        float newSpeed = speed - (FRAMETIME.count() * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
         if (newSpeed < 0)
             newSpeed = 0;
         newSpeed /= speed;
@@ -1166,7 +1181,7 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
                 if (speed) {
                     float friction = STEPMOVE_FRICTION;
                     float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-                    float newSpeed = speed - CLG_FRAMETIME * control * friction;
+                    float newSpeed = speed - FRAMETIME.count() * control * friction;
 
                     if (newSpeed < 0)
                         newSpeed = 0;
@@ -1188,7 +1203,7 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
             mask = BrushContentsMask::MonsterSolid;
         
         // Execute "FlyMove", essentially also our water move.
-        CLG_FlyMove(ent, CLG_FRAMETIME, mask);
+        CLG_FlyMove(ent, FRAMETIME.count(), mask);
 
         // Link entity back for collision, and execute a check for touching triggers.
         ent->LinkEntity();
@@ -1202,7 +1217,7 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
         if (ent->GetGroundEntity()) {
             if (!wasOnGround) {
                 if (hitSound) {
-                    CLG_Sound(ent, 0, clgi.S_RegisterSound("world/land.wav"), 1, 1, 0);
+                    clgi.S_StartLocalSound("world/land.wav");
                 }
             }
         }
@@ -1224,6 +1239,13 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
 void CLG_RunEntity(SGEntityHandle &entityHandle)
 {
     IClientGameEntity *ent = *entityHandle;
+
+	if (!sv_maxvelocity) {
+		sv_maxvelocity = clgi.Cvar_Get("sv_maxvelocity", "2000", 0);
+	}
+	if (!sv_gravity) {
+		sv_gravity = clgi.Cvar_Get("sv_gravity", "875", 0);
+	}
 
     if (!ent) {
 	    CLG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
@@ -1256,6 +1278,7 @@ void CLG_RunEntity(SGEntityHandle &entityHandle)
 	        CLG_Physics_Toss(entityHandle);
         break;
     default:
-        Com_EPrint("SV_Physics: bad moveType %i", ent->GetMoveType());
+		break;
+        //gi.Error("SV_Physics: bad moveType %i", ent->GetMoveType());
     }
 }

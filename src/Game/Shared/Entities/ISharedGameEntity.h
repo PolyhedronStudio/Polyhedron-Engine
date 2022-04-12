@@ -29,6 +29,25 @@ public:
     virtual ~ISharedGameEntity() = default;
     
 
+    /**
+    *   @brief  Checks if this entity class is exactly the same type of given entityClass.
+    *   @param  entityClass:    an entity class which must be inherited from SVGBaseEntity.
+    **/
+    template<typename entityClass>
+    bool IsClass() const { // every entity has a ClassInfo, thanks to the DefineXYZ macro
+        return GetTypeInfo()->IsClass( entityClass::ClassInfo );
+    }
+
+    /**
+    *   @brief  Checks if this entity class is a subclass of another, or is the same class
+    *   @param  entityClass:    an entity class which must be inherited from SVGBaseEntity.
+    **/
+    template<typename entityClass>
+    bool IsSubclassOf() const {
+        return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
+    }
+
+
 
     /**
     *
@@ -58,9 +77,11 @@ public:
     **/
     virtual void Think() = 0;
 
-    /**
-    *   @brief  Act upon the parsed key and value.
-    **/
+	/**
+	*	@brief	This function can be overrided, it should always call upon its Base::SpawnKey function
+	*			in order to make sure that spawnkeys from the inherited base class get parsed
+	*			and set accordingly as well.
+	**/
     virtual void SpawnKey(const std::string& key, const std::string& value) = 0; // Called for each key:value when parsing the entity dictionary.
 
 

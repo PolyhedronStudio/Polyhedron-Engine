@@ -36,6 +36,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define STEPSIZE    18
 
 extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
+static void UTIL_TouchTriggers(IClientGameEntity *ent)
+{
+}
 /*
 =============
 CLG_StepMove_CheckBottom
@@ -47,7 +50,7 @@ is not a staircase.
 */
 int c_yes, c_no;
 
-qboolean CLG_StepMove_CheckBottom(CLGBaseEntity* ent)
+qboolean CLG_StepMove_CheckBottom(IClientGameEntity* ent)
 {
     vec3_t  start, stop;
     CLGTrace trace;
@@ -108,7 +111,7 @@ realcheck:
     return true;
 }
 
-void CLG_StepMove_CheckGround(CLGBaseEntity* ent)
+void CLG_StepMove_CheckGround(IClientGameEntity* ent)
 {
     vec3_t      point;
     CLGTrace     trace;
@@ -161,7 +164,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 */
 //FIXME since we need to test end position contents here, can we avoid doing
 //it again later in catagorize position?
-qboolean CLG_MoveStep(CLGBaseEntity* ent, vec3_t move, qboolean relink)
+qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
 {
     float       dz;
     CLGTrace    trace;
@@ -379,7 +382,7 @@ static void CLG_CalculateYawAngle (PODEntity* ent)
             move = -speed;
     }
 
-    ent->state.angles[vec3_t::Yaw] = AngleMod(current + move);
+    ent->current.angles[vec3_t::Yaw] = AngleMod(current + move);
 }
 
 
@@ -428,7 +431,7 @@ qboolean SV_StepDirection(CLGBaseEntity* ent, float yaw, float dist)
 CLG_WalkStepMove
 ===============
 */
-qboolean CLG_StepMove_Walk(CLGBaseEntity* ent, float yaw, float dist)
+qboolean CLG_StepMove_Walk(IClientGameEntity* ent, float yaw, float dist)
 {
     vec3_t  move;
 

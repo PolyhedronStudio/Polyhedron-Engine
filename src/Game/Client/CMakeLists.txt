@@ -27,7 +27,11 @@ SET(SRC_CLGAME
 	Effects/Particles/WaterSplash.cpp
 
 	Entities/Base/CLGBaseEntity.cpp
+
+	Entities/Misc/MiscExplosionBox.cpp
+	
 	Entities/Monsters/MonsterTestDummy.cpp
+
 	Entities/ClassEntityList.cpp
 	Entities/IClientGameEntity.cpp
 
@@ -46,8 +50,8 @@ SET(SRC_CLGAME
 
 	Input/KeyBinding.cpp
 
-	#Physics/Physics.cpp
-	#Physics/StepMove.cpp
+	Physics/Physics.cpp
+	Physics/StepMove.cpp
 
 	View/ViewCamera.cpp
 
@@ -70,7 +74,11 @@ SET(HEADERS_CLGAME
 	Effects/Particles.h
 
 	Entities/Base/CLGBaseEntity.h
+
+	Entities/Misc/MiscExplosionBox.h
+
 	Entities/Monsters/MonsterTestDummy.h
+
 	Entities/ClassEntityList.h
 	Entities/IClientGameEntity.h
 
@@ -88,7 +96,7 @@ SET(HEADERS_CLGAME
 
 	Input/KeyBinding.h
 	
-	#Physics/StepMove.h
+	Physics/StepMove.h
 
 	View/ViewCamera.h
 

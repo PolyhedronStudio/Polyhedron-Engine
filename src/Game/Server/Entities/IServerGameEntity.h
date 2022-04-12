@@ -37,60 +37,19 @@ public:
 
     //! Runtime type information
     DefineAbstractClass( IServerGameEntity, ISharedGameEntity );
-
     
-    /**
-    *   @brief  Checks if this entity class is exactly the same type of given entityClass.
-    *   @param  entityClass:    an entity class which must be inherited from SVGBaseEntity.
-    **/
-    template<typename entityClass>
-    bool IsClass() const { // every entity has a ClassInfo, thanks to the DefineXYZ macro
-        return GetTypeInfo()->IsClass( entityClass::ClassInfo );
-    }
-
-    /**
-    *   @brief  Checks if this entity class is a subclass of another, or is the same class
-    *   @param  entityClass:    an entity class which must be inherited from SVGBaseEntity.
-    **/
-    template<typename entityClass>
-    bool IsSubclassOf() const {
-        return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
-    }
 
 
     /**
     *
     * 
-    *   SharedGame ClassEntity Interface Functions.
+    *   ServerGame ONLY ClassEntity Interface Functions.
     *
     * 
     **/
-    /**
-    *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
-    **/
-    virtual void Precache() = 0;    // Precaches data.
-    /**
-    *   @brief  Called when it is time to spawn this entity.
-    **/
-    virtual void Spawn() = 0;       // Spawns the entity.
-    /**
-    *   @brief  Called when it is time to respawn this entity.
-    **/
-    virtual void Respawn() = 0;     // Respawns the entity.
-    /**
-    *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    **/
-    virtual void PostSpawn() = 0;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    /**
-    *   @brief  General entity thinking routine.
-    **/
-    virtual void Think() = 0;
-
-    /**
-    *   @brief  Act upon the parsed key and value.
-    **/
-    virtual void SpawnKey(const std::string& key, const std::string& value) = 0; // Called for each key:value when parsing the entity dictionary.
-
+	//!
+	//!	None as of yet.
+	//!
 
 
     /**

@@ -61,7 +61,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
     //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
     //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
     //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
-    return false;
+   // return false;
     // 
     //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
     //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
@@ -116,7 +116,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 		}
 	}
 
-	//// Post spawn entities.
+	// Post spawn entities.
 	//for (auto& classEntity : classEntities) {
 	//	if (classEntity) {
 	//		classEntity->PostSpawn();
@@ -208,42 +208,42 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 *           then does a precache before spawning the class entity.
 **/
 qboolean ClientGameEntities::SpawnParsedClassEntity(ClientEntity* clEntity) {
-    //// Acquire dictionary.
-    //auto &dictionary = clEntity->entityDictionary;
+    // Acquire dictionary.
+    auto &dictionary = clEntity->entityDictionary;
 
-    //// Get client side entity number.
-    //int32_t stateNumber = clEntity->clientEntityNumber;
+    // Get client side entity number.
+    int32_t stateNumber = clEntity->clientEntityNumber;
 
-    //// If it does not have a classname key we're in for trouble.
-    //if (!clEntity->entityDictionary.contains("classname")) {
-	   // // Error out.
-	   // Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
+    // If it does not have a classname key we're in for trouble.
+    if (!clEntity->entityDictionary.contains("classname")) {
+	   // Error out.
+	   Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
 		
-	   // // Failed.
-	   // return false;
-    //}
+	   // Failed.
+	   return false;
+    }
 
-    //// Actually spawn the class entity.
-    //CLGBaseEntity *classEntity = clEntity->classEntity = AllocateClassEntity(clEntity, clEntity->entityDictionary["classname"]);
+    // Actually spawn the class entity.
+    IClientGameEntity *classEntity = clEntity->classEntity = classEntityList.AllocateFromClassname(clEntity->entityDictionary["classname"], clEntity);
+	
+    // Something went wrong with allocating the class entity.
+    if (!classEntity) {
+		// Be sure to free it.
+		*clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
 
-    //// Something went wrong with allocating the class entity.
-    //if (!classEntity) {
-	   // // Be sure to free it.
-    //    *clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
+		// Failed.
+		Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"].c_str());
+		return false;
+	}
 
-	   // // Failed.
-	   // Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"].c_str());
-    //    return false;
-    //}
+    // Initialise the entity with its respected keyvalue properties
+    for (const auto& keyValueEntry : clEntity->entityDictionary) {
+		classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
+	}
 
-    //// Initialise the entity with its respected keyvalue properties
-    //for (const auto& keyValueEntry : clEntity->entityDictionary) {
-	   // classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
-    //}
-
-    //// Precache and spawn the entity.
-    //classEntity->Precache();
-    //classEntity->Spawn();
+    // Precache and spawn the entity.
+    classEntity->Precache();
+    classEntity->Spawn();
 
     // Success.
     return true;
@@ -265,14 +265,14 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
-        Com_DPrint("Warning: ClientGameEntities::SpawnFromState called with a nullptr(clEntity)!!\n");
+        Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
 
         return false;
     }
 
     
     // Will either return a pointer to a new classentity type, or an existing one, depending on the state.
-    IClientGameEntity *clgEntity = classEntityList.SpawnFromState(state, clEntity);
+    IClientGameEntity *clgEntity = classEntityList.AllocateFromState(state, clEntity);
 
     // Call the spawn function if it is a valid entity.
     if (clgEntity) {
@@ -302,8 +302,7 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
 //
 // Runs entity thinking code for this frame if necessary
 //===============
-qboolean CLG_RunThink(IClientGameEntity *ent)
-{
+qboolean CLG_RunThink(IClientGameEntity *ent) {
     if (!ent) {
 	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
         return false;

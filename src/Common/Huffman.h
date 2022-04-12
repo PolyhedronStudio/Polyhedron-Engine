@@ -10,7 +10,7 @@
 *	Used for network packets and demo files.
 *
 ***/
-#pragma once.
+#pragma once
 
 /**
 *	@brief	Initializes the Huffman compressor / decompressor.

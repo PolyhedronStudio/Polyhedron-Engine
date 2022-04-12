@@ -145,9 +145,9 @@ void ClientGameExports::ClientDeltaFrame() {
     if (clTime > svTime) {
         level.time = svTime;
     } else {
-        level.time = clTime;
+        level.time = svTime + FRAMERATE_MS;
     }
- level.time = clTime;
+ //level.time = clTime;
 //    level.time = GameTime(cl->serverTime);
 
     // Low and behold, time to run the ClientGame Entity logic for another single frame.

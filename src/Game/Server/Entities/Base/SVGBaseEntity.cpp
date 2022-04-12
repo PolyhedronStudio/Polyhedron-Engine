@@ -195,15 +195,13 @@ qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::
 	return true;
 }
 
-//
-//===============
-// SVGBaseEntity::SpawnKey
-//
-// This function can be overrided, to allow for custom entity key:value parsing.
-//===============
-//
+/**
+*	@brief	This function can be overrided, it should always call upon its Base::SpawnKey function
+*			in order to make sure that spawnkeys from the inherited base class get parsed
+*			and set accordingly as well.
+**/
 void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
-    // Stop mapversion from causing warnings.
+    // Deal with classname, set it anyway.
 	if ( key == "classname" ) {
 		SetClassname( value );
 	}

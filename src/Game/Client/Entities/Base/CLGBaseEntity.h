@@ -152,7 +152,7 @@ public:
     *   [Stub Implementation]
     *   @brief  Sets classname.
     **/
-    virtual void SetClassname(const std::string& classname) final {};
+    virtual void SetClassname(const std::string& classname) final { this->classname = classname; };
     /**
     *   [Stub Implementation]
     *   @brief  Link entity to world for collision testing using gi.LinkEntity.
@@ -169,7 +169,7 @@ public:
     *           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
     *           on us during the current server game frame we're processing.
     **/
-    void Remove() override {};
+    void Remove() override;
 
 
 
@@ -185,7 +185,7 @@ public:
     *   @param  activatorOverride:  if nullptr, the entity's own activator is used and if the entity's own activator is nullptr, 
     *                               then this entity itself becomes the activator
     **/
-    void UseTargets( ClassEntity* activatorOverride = nullptr ) {};
+    void UseTargets( ClassEntity* activatorOverride = nullptr ) override {};
 
 
 
@@ -672,6 +672,13 @@ public:
 
 
 private:
+	/**
+	*
+	*
+	*	Client Specific.
+	*
+	*
+	**/
     //! Pointer to the client entity which owns this class entity.
     ClientEntity *podEntity = nullptr;
 
@@ -681,19 +688,6 @@ private:
     // Client Class Entities maintain their own states. (Get copied in from updates.)
     EntityState currentState = {};
     EntityState previousState = {};
-
-
-
-private:
-    /**
-    *   Entity 'Timing'
-    **/
-    //! The next 'think' time, determines when to call the 'think' callback.
-    GameTime nextThinkTime = GameTime::zero();
-    //! Delay before calling trigger execution.
-    Frametime delayTime = Frametime::zero();
-    //! Wait time before triggering at all, in case it was set to auto.
-    Frametime waitTime = Frametime::zero();
 
 
 
@@ -723,7 +717,7 @@ public:
     *   @param  other:      
     *   @param  activator:  
     **/
-    void DispatchUseCallback(ClassEntity* other, ClassEntity* activator);
+    void DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator);
     /**
     *   @brief  Dispatches 'Use' callback.
     *   @param  inflictor:  
@@ -731,12 +725,12 @@ public:
     *   @param  damage:     
     *   @param  pointer:    
     **/
-    void DispatchDieCallback(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point);
+    void DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  other:  
     **/
-    void DispatchBlockedCallback(ClassEntity* other);
+    void DispatchBlockedCallback(IClientGameEntity* other);
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  self:   
@@ -755,112 +749,168 @@ public:
 
 
 
-public:
-    /**
-    *
-    *   Ugly, but effective callback SET methods.
-    *
-    **/
-    /**
-    *   @brief  Sets the 'Think' callback function.
-    **/
-    template<typename function>
-    inline void SetThinkCallback(function f)
-    {
-        thinkFunction = static_cast<ThinkCallbackPointer>(f);
-    }
-    /**
-    *   @return True if it has a 'Think' callback set. False if it is nullptr.
-    **/
-    inline const qboolean HasThinkCallback() {
-        return (thinkFunction != nullptr ? true : false);
-    }
-
-    /**
-    *   @brief  Sets the 'Use' callback function.
-    **/
-    template<typename function>
-    inline void SetUseCallback(function f)
-    {
-        useFunction = static_cast<UseCallbackPointer>(f);
-    }
-    /**
-    *   @return True if it has a 'Use' callback set. False if it is nullptr.
-    **/
-    inline const qboolean HasUseCallback() {
-        return (useFunction != nullptr ? true : false);
-    }
-
-    /**
-    *   @brief  Sets the 'Touch' callback function.
-    **/
-    template<typename function>
-    inline void SetTouchCallback(function f)
-    {
-        touchFunction = static_cast<TouchCallbackPointer>(f);
-    }
-    /**
-    *   @return True if it has a 'Touch' callback set. False if it is nullptr.
-    **/
-    inline const qboolean HasTouchCallback() {
-        return (touchFunction != nullptr ? true : false);
-    }
-
-    /**
-    *   @brief  Sets the 'Blocked' callback function.
-    **/
-    template<typename function>
-    inline void SetBlockedCallback(function f)
-    {
-        blockedFunction = static_cast<BlockedCallbackPointer>(f);
-    }
-    /**
-    *   @return True if it has a 'Blocked' callback set. False if it is nullptr.
-    **/
-    inline const qboolean HasBlockedCallback() {
-        return (takeDamageFunction != nullptr ? true : false);
-    }
-
-    /**
-    *   @brief  Sets the 'SetTakeDamage' callback function.
-    **/
-    template<typename function>
-    inline void SetTakeDamageCallback(function f)
-    {
-        takeDamageFunction = static_cast<TakeDamageCallbackPointer>(f);
-    }
-    /**
-    *   @return True if it has a 'TakeDamage' callback set. False if it is nullptr.
-    **/
-    inline const qboolean HasTakeDamageCallback() {
-        return (takeDamageFunction != nullptr ? true : false);
-    }
-
-    /**
-    *   @brief  Sets the 'Die' callback function.
-    **/
-    template<typename function>
-    inline void SetDieCallback(function f)
-    {
-        dieFunction = static_cast<DieCallbackPointer>(f);
-    }
-    /**
-    *   @return True if it has a 'Die' callback set. False if it is nullptr.
-    **/
-    inline const qboolean HasDieCallback() {
-        return (dieFunction != nullptr ? true : false);
-    }
-
-
-
 protected:
     /**
-    *   Dispatch Callback Function Pointers.
+    *   Entity Dictionary Parsing Utilities.
+    * 
+    *   @return True on success, false on failure.
     **/
-    ThinkCallbackPointer        thinkFunction       = nullptr;
-    UseCallbackPointer          useFunction         = nullptr;
-    TouchCallbackPointer        touchFunction       = nullptr;
-    BlockedCallbackPointer      blockedFunction     = nullptr;
-    TakeDamageCallbackPointer   takeDamageFunction  = nullptr;
-    DieCallbackPointer          dieFunction         = nullptr;
+    qboolean ParseFloatKeyValue(const std::string& key, const std::string& value, float& floatNumber) ;
+    qboolean ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t& integerNumber);
+    qboolean ParseUnsignedIntegerKeyValue(const std::string& key, const std::string& value, uint32_t& unsignedIntegerNumber);
+    qboolean ParseStringKeyValue(const std::string& key, const std::string& value, std::string& stringValue);
+    qboolean ParseFrametimeKeyValue(const std::string& key, const std::string& value, Frametime &frameTime);
+    qboolean ParseVector3KeyValue(const std::string& key, const std::string& value, vec3_t& vectorValue);
+
+
+    /**
+    *   Entity Flags
+    **/
+    //! Entity flags, general flags, flags... :) 
+    //int32_t flags = 0;
+    //! Entity spawn flags (Such as, is this a dropped item?)
+    //int32_t spawnFlags = 0;
+
+    
+    /**
+    *   Entity Strings/Targetnames.
+    **/
+    // Classname of this entity.
+    std::string classname = "";		// This is only set when the entity has been spawned from the BSP entity string.
+    // Entity MODEL filename.
+    std::string model = "";
+    // Trigger kill target string.
+    std::string killTargetStr = "";
+    // Trigger its message string.
+    std::string messageStr = "";
+    // Trigger target string.
+    std::string targetStr = "";
+    // Trigger its own targetname string.
+    std::string targetNameStr = "";
+    // Team string.
+    std::string teamStr = "";
+
+
+    /**
+    *   Entity Category Types (Move, Water, what have ya? Add in here.)
+    **/
+    //! Move Type. (MoveType::xxx)
+    int32_t moveType = MoveType::None;
+    //! WaterType::xxxx
+    int32_t waterType = 0; // TODO: Introduce WaterType "enum".
+    //! WaterLevel::xxxx
+    int32_t waterLevel = WaterLevel::None;
+
+
+    /**
+    *   Entity Physics
+    **/
+    //! Velocity.
+    vec3_t velocity = vec3_zero();
+    //! Angular Velocity.
+    vec3_t angularVelocity = vec3_zero();
+    //! Mass
+    int32_t mass = 0;
+    //! Per entity gravity multiplier (1.0 is normal). TIP: Use for lowgrav artifact, flares
+    float gravity = 1.0f;
+    //! Ground Entity link count. (To keep track if it is linked or not.)
+    int32_t groundEntityLinkCount = 0;
+    //! Yaw Speed. (Should be for monsters, move over to SVGBaseMonster?)
+    float yawSpeed = 0.f;
+    //! Ideal Yaw Angle. (Should be for monsters, move over to SVGBaseMonster?)
+    float idealYawAngle = 0.f;
+
+
+    /**
+    *   Entity Goal, Move, Activator.
+    **/
+    //! Goal Entity.
+    //Entity* goalEntityPtr = nullptr;
+    //! Move Target Entity.
+    //Entity* moveTargetPtr = nullptr;
+    //! The entity that activated this
+    IClientGameEntity* activatorEntityPtr = nullptr;
+
+
+    /**
+    *   Entity Noise Indices.
+    **/
+    //! Noise Index A.
+    //int32_t noiseIndexA = 0;
+    //! Noise Index B.
+    //int32_t noiseIndexB = 0;
+
+
+    /**
+    *   Entity 'Timing'
+    **/
+    //! The next 'think' time, determines when to call the 'think' callback.
+    GameTime nextThinkTime = GameTime::zero();
+    //! Delay before calling trigger execution.
+    Frametime delayTime = Frametime::zero();
+    //! Wait time before triggering at all, in case it was set to auto.
+    Frametime waitTime = Frametime::zero();
+
+
+    /**
+    *   Entity '(Health-)Stats'
+    **/
+    //! Current health.
+    //int32_t health = 0;
+    //! Maximum health.
+    //int32_t maxHealth = 0;
+
+
+    /**
+    *   Entity 'Game Settings'
+    **/
+    //! The height above the origin, this is where EYE SIGHT is at.
+    //int32_t viewHeight = 0;
+    //! Determines how to interpret, take damage like a man or like a ... ? Yeah, pick up soap.
+    //int32_t takeDamage = 0;
+    //! Actual damage it does if encountered or fucked around with.
+    //int32_t damage = 0;
+    //! Dead Flag. (Are we dead, dying or...?)
+    //int32_t deadFlag = 0;
+    //! Count (usually used for SVGBaseItem)
+    //int32_t count = 0;
+    //! Style/AreaPortal
+    //int32_t style = 0;
+
+    
+    /**
+    *   Entity pointers.
+    **/
+    //! Current active enemy, NULL if not any.    
+    IClientGameEntity* enemyEntity      = nullptr;
+    //! Ground entity we're standing on.
+    IClientGameEntity* groundEntity     = nullptr;
+    //! Old enemy.
+    //IServerGameEntity* oldEnemyEntity   = nullptr;
+    //! Owner. (Such as, did the player fire a blaster bolt? If so, the owner is...)
+    IClientGameEntity* ownerEntity      = nullptr;
+    //! Team Chain.
+    IClientGameEntity* teamChainEntity  = nullptr;
+    //! Team Master.
+    IClientGameEntity* teamMasterEntity = nullptr;
+
+
+
+public:
+    /**
+    * 
+	(
+    *   Entity Utility callbacks that can be set as a nextThink function.
+    * 
+	*
+    **/
+    /**
+    *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
+    **/
+    void CLGBaseEntityThinkFree(void);
+
+    /**
+    *   @brief  Callback for assigning when "no thinking" behavior is wished for.
+    **/
+    void CLGBaseEntityThinkNull() { }
 };
