@@ -36,6 +36,9 @@
 #define USE_MAPCHECKSUM 1
 #define USE_SMOOTH_DELTA_ANGLES 1
 
+// Uncomment for experimental rotating entity bounding boxes.
+//#define CFG_CM_ALLOW_ROTATING_BOXES 1
+
 #if USE_CLIENT || CGAME_INCLUDE
 //#define VID_REF "gl"
 #define VID_MODELIST "640x480 800x600 1024x768 1280x720"

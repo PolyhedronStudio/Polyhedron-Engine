@@ -28,6 +28,11 @@ FIXME: this use of "area" is different from the bsp file use
 ===============================================================================
 */
 
+// Area Grid configuration.
+static constexpr int32_t AREA_DEPTH	= 4;
+static constexpr int32_t AREA_NODES	= 32;
+
+// Area Grid Node.
 typedef struct areanode_s {
     int32_t     axis;       // -1 = leaf node
     float   dist;
@@ -36,16 +41,21 @@ typedef struct areanode_s {
     list_t  solidEdicts;
 } areanode_t;
 
-#define    AREA_DEPTH    4
-#define    AREA_NODES    32
+// Area nodes array.
+static areanode_t sv_areanodes[AREA_NODES];
+static int32_t sv_numareanodes = 0;
 
-static areanode_t	sv_areanodes[AREA_NODES];
-static int32_t		sv_numareanodes = 0;
+// Area Mins/Maxs.
+static vec3_t areaMins	= vec3_zero();
+static vec3_t areaMaxs	= vec3_zero();
 
-static vec3_t    areaMins, areaMaxs; // MATHLIB: No more float* pointers to local func arrays.
-static Entity  **areaList;
-static int32_t  areaCount, areaMaxCount;
-static int32_t	areaType = 0;
+// List of entities in an area.
+static Entity  **areaList	= nullptr;
+
+// Area stats.
+static int32_t areaCount	= 0;
+static int32_t areaMaxCount	= 0;
+static int32_t areaType		= 0;
 
 /**
 *	@brief Builds a uniformly subdivided tree for the given world size
@@ -430,11 +440,12 @@ int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, Entity **list,
 static mnode_t *SV_HullForEntity(Entity *ent)
 {
     if (ent->solid == Solid::BSP) {
-        int i = ent->state.modelIndex - 1;
+        int32_t i = ent->state.modelIndex - 1;
 
-        // explicit hulls in the BSP model
-        if (i <= 0 || i >= sv.cm.cache->nummodels)
+        // Explicit hulls in the BSP model.
+        if (i <= 0 || i >= sv.cm.cache->nummodels) {
             Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
+		}
 
         return sv.cm.cache->models[i].headNode;
     }

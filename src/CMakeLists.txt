@@ -27,6 +27,7 @@ SET(SRC_CLIENT
 	${PATH_SRC}/Client/Screen.cpp
 	${PATH_SRC}/Client/Traces.cpp
 	${PATH_SRC}/Client/View.cpp
+	${PATH_SRC}/Client/World.cpp
 
 	${PATH_SRC}/Client/UI/Demos.cpp
 	${PATH_SRC}/Client/UI/Menu.cpp
@@ -85,6 +86,7 @@ SET(HEADERS_CLIENT
 	${PATH_SRC}/Client/Traces.h
 	${PATH_SRC}/Client/UI.h
 	${PATH_SRC}/Client/Video.h
+	${PATH_SRC}/Client/World.h
 
 	${PATH_SRC}/Client/UI/UI.h
 

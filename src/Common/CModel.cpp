@@ -1030,7 +1030,11 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
 
     vec3_t axis[3];
     // rotate start and end into the models frame of reference
+#ifndef CFG_CM_ALLOW_ROTATING_BOXES
     if (headNode != boxHull.headNode && headNode != octagonHull.headNode && (angles[0] || angles[1] || angles[2])) {
+#else
+	if ((angles[0] || angles[1] || angles[2])) {
+#endif
         AnglesToAxis(angles, axis);
         RotatePoint(p_l, axis);
     }
@@ -1192,8 +1196,11 @@ const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end,
     end_l   -= origin;
 
     // Rotate start and end into the models frame of reference.
-    if ((headNode != boxHull.headNode && headNode != octagonHull.headNode) && (angles[0] || angles[1] || angles[2])) {
-	//if ((angles[0] || angles[1] || angles[2])) {
+#ifndef CFG_CM_ALLOW_ROTATING_BOXES
+	if ((headNode != boxHull.headNode && headNode != octagonHull.headNode) && (angles[0] || angles[1] || angles[2])) {
+#else
+	if ((angles[0] || angles[1] || angles[2])) {
+#endif
         rotated = true;
 
         AnglesToAxis(angles, axis);
