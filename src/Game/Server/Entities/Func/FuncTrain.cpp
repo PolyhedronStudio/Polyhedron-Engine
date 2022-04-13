@@ -161,7 +161,7 @@ void FuncTrain::FindNextTarget() {
 //===============
 void FuncTrain::SpawnKey( const std::string& key, const std::string& value ) {
 	//if ( key == "speed" ) {
-	//	ParseFloatKeyValue( key, value, speed );
+	//	ParseKeyValue( key, value, speed );
 	//} else {
 		return Base::SpawnKey( key, value );
 //	}

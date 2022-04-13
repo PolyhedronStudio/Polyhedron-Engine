@@ -178,38 +178,38 @@ void MiscServerModel::Think() {
 //===============
 void MiscServerModel::SpawnKey(const std::string& key, const std::string& value) {
     if (key == "model") {
-        ParseStringKeyValue(key, value, model);
+        ParseKeyValue(key, value, model);
     } else if (key == "boundingboxmins") {
-        ParseVector3KeyValue(key, value, boundingBoxMins);
+        ParseKeyValue(key, value, boundingBoxMins);
         SetMins(boundingBoxMins);
     } else if (key == "boundingboxmaxs") {
-        ParseVector3KeyValue(key, value, boundingBoxMaxs);
+        ParseKeyValue(key, value, boundingBoxMaxs);
         SetMaxs(boundingBoxMaxs);
     } else if (key == "endframe") {
-        ParseFloatKeyValue(key, value, endFrame);
+        ParseKeyValue(key, value, endFrame);
     } else if (key == "startframe") {
-        ParseFloatKeyValue(key, value, startFrame);
+        ParseKeyValue(key, value, startFrame);
     } else if (key == "mass") {
         uint32_t parsedMass = 0;
-        ParseUnsignedIntegerKeyValue(key, value, parsedMass);
+        ParseKeyValue(key, value, parsedMass);
         SetMass(parsedMass);
     } else if (key == "health") {
         uint32_t parsedHealth = 0;
-        ParseUnsignedIntegerKeyValue(key, value, parsedHealth);
+        ParseKeyValue(key, value, parsedHealth);
         SetMaxHealth(parsedHealth);
         SetHealth(parsedHealth);
     } else if (key == "effects") {
         uint32_t parsedEffects = 0;
-        ParseUnsignedIntegerKeyValue(key, value, parsedEffects);
+        ParseKeyValue(key, value, parsedEffects);
         SetEffects(parsedEffects);
     } else if (key == "rendereffects") {
         uint32_t parsedRenderEffects = 0;
-        ParseUnsignedIntegerKeyValue(key, value, parsedRenderEffects);
+        ParseKeyValue(key, value, parsedRenderEffects);
         SetRenderEffects(parsedRenderEffects);
     } else if (key == "noise") {
         std::string parsedNoisePath = "";
 
-        ParseStringKeyValue(key, value, parsedNoisePath);
+        ParseKeyValue(key, value, parsedNoisePath);
         noisePath = parsedNoisePath;
     } else {
         Base::SpawnKey(key, value);

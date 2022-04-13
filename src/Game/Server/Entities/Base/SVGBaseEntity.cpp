@@ -36,58 +36,38 @@ SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : IServerGameEntity(), serverEnti
 }
 
 // Interface functions. 
-//
-//===============
-// SVGBaseEntity::Precache
-//
-// This function is used to load all entity data with.
-//===============
-//
+/**
+*	This function is used to load all entity data with.
+**/
 void SVGBaseEntity::Precache() {
 }
 
-//
-//===============
-// SVGBaseEntity::Spawn
-//
-// This function can be overrided, to allow for entity spawning.
-// Setup the basic entity properties here.
-//===============
-//
+/**
+*	This function can be overrided, to allow for entity spawning.
+*	Setup the basic entity properties here.
+**/
 void SVGBaseEntity::Spawn() {
 }
 
-//
-//===============
-// SVGBaseEntity::Respawn
-//
-// This function can be overrided, to allow for entity respawning.
-// Setup the basic entity properties here.
-//===============
-//
+/**
+*	This function can be overrided, to allow for entity respawning.
+*	Setup the basic entity properties here.
+**/
 void SVGBaseEntity::Respawn() {
 }
 
-//
-//===============
-// SVGBaseEntity::PostSpawn
-//
-// This function can be overrided, to allow for entity post spawning.
-// An example of that could be finding targetnames for certain target
-// trigger settings, etc.
-//===============
-//
+/**
+*	This function can be overrided, to allow for entity post spawning.
+*	An example of that could be finding targetnames for certain target
+*	trigger settings, etc.
+**/	
 void SVGBaseEntity::PostSpawn() {
 }
 
-//
-//===============
-// SVGBaseEntity::Think
-//
-// This function can be overrided, to allow for custom entity thinking.
-// By default it only executes the 'Think' callback in case we have any set.
-//===============
-//
+/**
+*	This function can be overrided, to allow for custom entity thinking.
+*	By default it only executes the 'Think' callback in case we have any set.
+**/
 void SVGBaseEntity::Think() {
 	// Update current state of server entity's hash classname??
 	if (serverEntity) {
@@ -100,99 +80,6 @@ void SVGBaseEntity::Think() {
 
 	// Execute 'Think' callback function.
 	(this->*thinkFunction)();
-}
-
-//
-//===============
-// SVGBaseEntity::ParseFloatKeyValue
-//
-// PROTECTED function to help parsing float key:value string pairs with.
-//===============
-//
-qboolean SVGBaseEntity::ParseFloatKeyValue(const std::string& key, const std::string& value, float &floatNumber) {
-	floatNumber = std::stof(value);
-
-	return true;
-}
-
-//
-//===============
-// SVGBaseEntity::ParseIntegerKeyValue
-//
-// PROTECTED function to help parsing int32_t key:value string pairs with.
-//===============
-//
-qboolean SVGBaseEntity::ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t &integerNumber) {
-	integerNumber = std::stoi(value);
-
-	return true;
-}
-
-//
-//===============
-// SVGBaseEntity::ParseUnsignedIntegerKeyValue
-//
-// PROTECTED function to help parsing uint32_t key:value string pairs with.
-//===============
-//
-qboolean SVGBaseEntity::ParseUnsignedIntegerKeyValue(const std::string& key, const std::string& value, uint32_t& unsignedIntegerNumber) {
-	unsignedIntegerNumber = std::stoul(value);
-
-	return true;
-}
-
-//
-//===============
-// SVGBaseEntity::ParseStringKeyValue
-//
-// PROTECTED function to help parsing string key:value string pairs with.
-//===============
-//
-qboolean SVGBaseEntity::ParseStringKeyValue(const std::string& key, const std::string& value, std::string& stringValue) {
-	stringValue = value;
-
-	return true;
-}
-
-//
-//===============
-// SVGBaseEntity::ParseFloatKeyValue
-//
-// PROTECTED function to help parsing float key:value string pairs with.
-//===============
-//
-qboolean SVGBaseEntity::ParseFrametimeKeyValue(const std::string& key, const std::string& value, Frametime &frametime) {
-	frametime = Frametime(std::stof(value));
-
-	return true;
-}
-
-//
-//===============
-// SVGBaseEntity::ParseVector3KeyValue
-//
-// PROTECTED function to help parsing vector key:value string pairs with.
-//===============
-//
-qboolean SVGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::string &value, vec3_t &vectorValue) {
-	// Stores vector fields fetched from string. (Might be corrupted, so we're parsing this nicely.)
-	std::vector<std::string> vectorFields;
-
-	// We split it based on the space delimiter. Empties are okay, how can they be empty then? Good question...
-	STR_Split(vectorFields, value, " ");
-
-	// Zero out our vector.
-	vectorValue = vec3_zero();
-	int32_t i = 0;
-	for (auto& str : vectorFields) {
-		vectorValue[i] = std::stof(str);
-		i++;
-
-		if (i > 2)
-			break;
-	}
-
-	return true;
 }
 
 /**
@@ -213,7 +100,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "angle") {
 		// Parse angle.
 		vec3_t hackedAngles = vec3_zero();
-		ParseFloatKeyValue(key, value, hackedAngles.y);
+		ParseKeyValue(key, value, hackedAngles.y);
 
 		// Set angle.
 		SetAngles( hackedAngles );
@@ -222,7 +109,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "angles") {
 		// Parse angles.
 		vec3_t parsedAngles = vec3_zero();
-		ParseVector3KeyValue(key, value, parsedAngles);
+		ParseKeyValue(key, value, parsedAngles);
 
 		// Set origin.
 		SetAngles(parsedAngles);
@@ -231,7 +118,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "dmg") {
 		// Parse damage.
 		int32_t parsedDamage = 0;
-		ParseIntegerKeyValue(key, value, parsedDamage);
+		ParseKeyValue(key, value, parsedDamage);
 
 		// Set Damage.
 		SetDamage(parsedDamage);
@@ -240,7 +127,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "delay") {
 		// Parsed float.
 		Frametime parsedTime = Frametime::zero();
-		ParseFrametimeKeyValue(key, value, parsedTime);
+		ParseKeyValue(key, value, parsedTime);
 
 		// Assign.
 		SetDelayTime(parsedTime);
@@ -249,7 +136,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "killtarget") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetKillTarget(parsedString);
@@ -258,7 +145,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "mass") {
 	    // Parsed string.
 	    int32_t parsedInteger = 0;
-	    ParseIntegerKeyValue(key, value, parsedInteger);
+	    ParseKeyValue(key, value, parsedInteger);
 
 	    // Assign.
 	    SetMass(parsedInteger);
@@ -267,7 +154,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "message") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetMessage(parsedString);
@@ -276,7 +163,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "model") {
 		// Parse model.
 		std::string parsedModel = "";
-		ParseStringKeyValue(key, value, parsedModel);
+		ParseKeyValue(key, value, parsedModel);
 
 		// Set model.
 		SetModel(parsedModel);
@@ -285,7 +172,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "origin") {
 		// Parse origin.
 		vec3_t parsedOrigin = vec3_zero();
-		ParseVector3KeyValue(key, value, parsedOrigin);
+		ParseKeyValue(key, value, parsedOrigin);
 
 		// Set origin.
 		SetOrigin(parsedOrigin);
@@ -293,7 +180,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else if (key == "target") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetTarget(parsedString);
@@ -301,7 +188,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else 	if (key == "targetname") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetTargetName(parsedString);
@@ -310,7 +197,7 @@ void SVGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "spawnflags") {
 		// Parse damage.
 		int32_t parsedSpawnFlags = 0;
-		ParseIntegerKeyValue(key, value, parsedSpawnFlags);
+		ParseKeyValue(key, value, parsedSpawnFlags);
 
 		// Set SpawnFlags.
 		SetSpawnFlags(parsedSpawnFlags);
@@ -397,11 +284,9 @@ void SVGBaseEntity::DispatchTakeDamageCallback(IServerGameEntity* other, float k
 
 
 
-//===============
-// SVGBaseEntity::UseTargets
-// 
-// Calls Use on this entity's targets, as well as killtargets
-//===============
+/**
+*	@brief Calls Use on this entity's targets, as well as killtargets
+**/
 void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 {
 	// If activatorOverride is null, use our default activator.

@@ -54,11 +54,11 @@ void FuncTimer::Spawn() {
 void FuncTimer::SpawnKey( const std::string& key, const std::string& value )
 {
 	if (key == "pausetime") {
-		ParseFrametimeKeyValue( key, value, pauseTime);
+		ParseKeyValue( key, value, pauseTime);
 	} else if ( key == "random" ) {
-		ParseFrametimeKeyValue( key, value, randomTime);
+		ParseKeyValue( key, value, randomTime);
 	} else if ( key == "wait" ) {
-		ParseFrametimeKeyValue( key, value, waitTime);
+		ParseKeyValue( key, value, waitTime);
 	} else {
 		Base::SpawnKey( key, value );
 	}

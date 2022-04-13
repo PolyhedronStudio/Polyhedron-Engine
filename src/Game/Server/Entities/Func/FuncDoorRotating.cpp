@@ -103,7 +103,7 @@ void FuncDoorRotating::SpawnKey( const std::string& key, const std::string& valu
 		float parsedFloat = 0;
 
 		// Parse.
-		ParseFloatKeyValue( key, value, parsedFloat);
+		ParseKeyValue( key, value, parsedFloat);
 
 		distance = parsedFloat;
 	} else {

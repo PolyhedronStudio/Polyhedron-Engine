@@ -149,22 +149,22 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
     if (key == "startframe") { 
         // This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
         int32_t parsedInt = 0;
-	    ParseIntegerKeyValue(key, value, parsedInt);
+	    ParseKeyValue(key, value, parsedInt);
         state->animationStartFrame = parsedInt;
     } else if (key == "endframe") {
 	// This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
 	    int32_t parsedInt = 0;
-	    ParseIntegerKeyValue(key, value, parsedInt);
+	    ParseKeyValue(key, value, parsedInt);
 	    state->animationEndFrame = parsedInt;
     } else if (key == "framerate") {
 	    float parsedFloat = 0.f;
-	    ParseFloatKeyValue(key, value, parsedFloat);
+	    ParseKeyValue(key, value, parsedFloat);
 	    state->animationFramerate = parsedFloat;        
     } else if (key == "animindex") {
     } else if (key == "skin") {
     } else if (key == "health") {
         int32_t parsedInt = 0;
-        ParseIntegerKeyValue(key, value, parsedInt);
+        ParseKeyValue(key, value, parsedInt);
         SetHealth(parsedInt);
     } else {
 	    Base::SpawnKey(key, value);

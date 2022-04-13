@@ -463,7 +463,7 @@ void FuncPlat::SpawnKey(const std::string& key, const std::string& value) {
         float parsedFloat = 0.f;
 
         // Parse.
-        ParseFloatKeyValue(key, value, parsedFloat);
+        ParseKeyValue(key, value, parsedFloat);
 
         // Assign.
         SetHeight(parsedFloat);

@@ -352,14 +352,14 @@ void Worldspawn::SpawnKey(const std::string& key, const std::string& value) {
     if (key == "gravity") {
         // Parse Gravity.
         int32_t parsedInteger = 0;
-        ParseIntegerKeyValue(key, value, parsedInteger);
+        ParseKeyValue(key, value, parsedInteger);
         
         // Assign.
         globalGravity = parsedInteger;
     } else if (key == "message") {
         // Parse message.
         std::string message = "";
-        ParseStringKeyValue(key, value, message);
+        ParseKeyValue(key, value, message);
 
         // Assign level name, in case there is one.
         if (message != "") {
@@ -370,7 +370,7 @@ void Worldspawn::SpawnKey(const std::string& key, const std::string& value) {
     } else if (key == "nextmap") {
         // Parse message.
         std::string parsedString = "";
-        ParseStringKeyValue(key, value, parsedString);
+        ParseKeyValue(key, value, parsedString);
 
         // Assign.
 	    if (!parsedString.empty()) {
@@ -379,7 +379,7 @@ void Worldspawn::SpawnKey(const std::string& key, const std::string& value) {
     } else if (key == "sky") {
         // Parse message.
         std::string parsedString = "";
-        ParseStringKeyValue(key, value, parsedString);
+        ParseKeyValue(key, value, parsedString);
 
         // Assign.
         if (!parsedString.empty())
@@ -389,7 +389,7 @@ void Worldspawn::SpawnKey(const std::string& key, const std::string& value) {
     } else if (key == "skyrotate") {
         // Parse skyrotate.
         float parsedFloat = 0.f;
-        ParseFloatKeyValue(key, value, parsedFloat);
+        ParseKeyValue(key, value, parsedFloat);
 
         // Assign.
         SVG_SetConfigString(ConfigStrings::SkyRotate, va("%f", parsedFloat));
@@ -397,14 +397,14 @@ void Worldspawn::SpawnKey(const std::string& key, const std::string& value) {
     } else if (key == "skyaxis") {
         // Parse skyaxis.
         vec3_t parsedVector = vec3_zero();
-        ParseVector3KeyValue(key, value, parsedVector);
+        ParseKeyValue(key, value, parsedVector);
 
         // Assign.
         SVG_SetConfigString(ConfigStrings::SkyAxis, va("%f %f %f", parsedVector.x, parsedVector.y, parsedVector.z));
     } else if (key == "sounds") {
         // Parse sounds.
         int32_t parsedInteger = 0;
-        ParseIntegerKeyValue(key, value, parsedInteger);
+        ParseKeyValue(key, value, parsedInteger);
 
         // Assign.
         SVG_SetConfigString(ConfigStrings::CdTrack, std::to_string(parsedInteger));

@@ -153,6 +153,8 @@ public:
     virtual inline const qboolean HasTakeDamageCallback() = 0;
 
 
+
+public:
     /**
     *
     *
@@ -586,6 +588,76 @@ public:
     **/
     virtual const float     GetYawSpeed() = 0;
     virtual void            SetYawSpeed(const float yawSpeed) = 0;
+
+
+protected:
+	/**
+	*
+	*
+	*	Specialized Template Entity Dictionary Parsing Utilities.
+	*
+	*   @return True on success, false on failure.
+	*
+	**/
+	/**
+	*	@brief	Parses the key/value for the float type. (0.1, 0.004899)
+	**/
+	template<typename T> auto ParseKeyValue(const std::string &key, const std::string &value, T &outValue) {};
+	template<> auto ParseKeyValue(const std::string &key, const std::string &value, float &floatNumber) {
+		floatNumber = std::stof(value);
+		return true;
+	};
+	/**
+	*	@brief	Parses the key/value for the signed numbers, -/+ 
+	**/
+	template<> auto ParseKeyValue(const std::string &key, const std::string &value, int32_t &signedNumber) {
+		signedNumber = std::stoi(value);
+		return true;
+	};
+	/**
+	*	@brief	Parses the key/value for the unsigned numbers(0 and up) type.
+	**/
+	template<> auto ParseKeyValue(const std::string &key, const std::string &value, uint32_t &unsignedNumber) {
+		unsignedNumber = std::stof(value);
+		return true;
+	};
+	/**
+	*	@brief	Parses the key/value for the string type.
+	**/
+	template<> auto ParseKeyValue(const std::string &key, const std::string &value, std::string &string) {
+		string = value;
+		return true;
+	};
+	/**
+	*	@brief	Parses the key/value for the Frametime type. (floating point time numbers. 0.1, 1.2 etc.)
+	**/
+	template<> auto ParseKeyValue(const std::string &key, const std::string &value, Frametime &frametime) {
+		frametime = Frametime(std::stof(value));
+		return true;
+	};
+	/**
+	*	@brief	Parses the key/value for the vec3_t type.
+	**/
+	template<> auto ParseKeyValue(const std::string& key, const std::string& value, vec3_t& vector3) {
+		// Stores vector fields fetched from string. (Might be corrupted, so we're parsing this nicely.)
+		std::vector<std::string> vectorFields;
+
+		// We split it based on the space delimiter. Empties are okay, how can they be empty then? Good question...
+		STR_Split(vectorFields, value, " ");
+
+		// Zero out our vector.
+		vector3 = vec3_zero();
+		int32_t i = 0;
+		for (auto& str : vectorFields) {
+			vector3[i] = std::stof(str);
+			i++;
+
+			if (i > 2)
+				break;
+		}
+
+		return true;
+	}
 
 
 

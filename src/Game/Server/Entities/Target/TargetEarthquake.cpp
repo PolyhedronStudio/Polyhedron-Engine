@@ -44,7 +44,7 @@ void TargetEarthquake::Spawn() {
 //===============
 void TargetEarthquake::SpawnKey( const std::string& key, const std::string& value ) {
     if ( key == "count" ) {
-        ParseFrametimeKeyValue(key, value, duration);
+        ParseKeyValue(key, value, duration);
     } else if ( key == "speed" ) {
         severity = std::stof( value );
     } else {

@@ -106,7 +106,7 @@ void Light::SpawnKey(const std::string& key, const std::string& value) {
         int32_t parsedInteger = 0;
 
         // Parse.
-        ParseIntegerKeyValue(key, value, parsedInteger);
+        ParseKeyValue(key, value, parsedInteger);
 
         // Assign.
         SetStyle(parsedInteger);
@@ -117,7 +117,7 @@ void Light::SpawnKey(const std::string& key, const std::string& value) {
         std::string parsedString;
 
         // Parse.
-        ParseStringKeyValue(key, value, parsedString);
+        ParseKeyValue(key, value, parsedString);
 
         // Assign.
         SetCustomLightStyle(parsedString);

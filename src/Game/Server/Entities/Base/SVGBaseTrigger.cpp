@@ -1,11 +1,12 @@
-/*
-// LICENSE HERE.
-
-//
-// SVGBaseTrigger.cpp
-//
-//
-*/
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ServerGame BaseTrigger Entity.
+* 
+***/
 #include "../../ServerGameLocals.h"	// SVGame.
 #include "../../Effects.h"			// Effects.
 #include "../../Entities.h"			// Entities.
@@ -22,61 +23,11 @@ SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : Base(svEntity) {}
 
 // Interface functions. 
 //
-//===============
-// SVGBaseTrigger::Precache
 //
-//===============
-//
-void SVGBaseTrigger::Precache() {
-	Base::Precache();
-}
 
-//
-//===============
-// SVGBaseTrigger::Spawn
-//
-//===============
-//
-void SVGBaseTrigger::Spawn() {
-	Base::Spawn();
-}
-
-//
-//===============
-// SVGBaseTrigger::Respawn
-// 
-//===============
-//
-void SVGBaseTrigger::Respawn() {
-	Base::Respawn();
-}
-
-//
-//===============
-// SVGBaseTrigger::PostSpawn
-// 
-//===============
-//
-void SVGBaseTrigger::PostSpawn() {
-	Base::PostSpawn();
-}
-
-//
-//===============
-// SVGBaseTrigger::Think
-//
-//===============
-//
-void SVGBaseTrigger::Think() {
-	Base::Think();
-}
-
-//
-//===============
-// SVGBaseTrigger::InitBrushTrigger
-//
-//===============
-//
+/**
+*	
+**/
 void SVGBaseTrigger::InitBrushTrigger() {
 	SetModel(GetModel());
 	SetMoveType(MoveType::None);
@@ -85,12 +36,9 @@ void SVGBaseTrigger::InitBrushTrigger() {
 	SetServerFlags(EntityServerFlags::NoClient);
 }
 
-//
-//===============
-// SVGBaseTrigger::InitPointTrigger
-//
-//===============
-//
+/**
+*	
+**/
 void SVGBaseTrigger::InitPointTrigger() {
 	const vec3_t HULL_MINS = { -16.f, -16.f, -36.f };
 	const vec3_t HULL_MAXS = { 16.f,  16.f,  36.f };
@@ -103,17 +51,14 @@ void SVGBaseTrigger::InitPointTrigger() {
 	SetServerFlags(EntityServerFlags::NoClient);
 }
 
-//
-//===============
-// SVGBaseTrigger::SpawnKey
-//
-//===============
-//
+/**
+*	
+**/
 void SVGBaseTrigger::SpawnKey(const std::string& key, const std::string& value) {
 	// Wait.
 	if (key == "wait") {
 		// Parse.
-		ParseFrametimeKeyValue(key, value, waitTime);
+		ParseKeyValue(key, value, waitTime);
 	}
 	// Parent class spawnkey.
 	else {

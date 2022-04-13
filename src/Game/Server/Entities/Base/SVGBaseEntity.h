@@ -662,19 +662,6 @@ public:
 
 protected:
     /**
-    *   Entity Dictionary Parsing Utilities.
-    * 
-    *   @return True on success, false on failure.
-    **/
-    qboolean ParseFloatKeyValue(const std::string& key, const std::string& value, float& floatNumber) ;
-    qboolean ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t& integerNumber);
-    qboolean ParseUnsignedIntegerKeyValue(const std::string& key, const std::string& value, uint32_t& unsignedIntegerNumber);
-    qboolean ParseStringKeyValue(const std::string& key, const std::string& value, std::string& stringValue);
-    qboolean ParseFrametimeKeyValue(const std::string& key, const std::string& value, Frametime &frameTime);
-    qboolean ParseVector3KeyValue(const std::string& key, const std::string& value, vec3_t& vectorValue);
-
-
-    /**
     *   Server Entity Pointer.
     **/
     Entity *serverEntity = nullptr;

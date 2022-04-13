@@ -38,7 +38,7 @@ void FuncAreaportal::SpawnKey( const std::string& key, const std::string& value 
 		int32_t parsedInteger = 0;
 
 		// Parse.
-		ParseIntegerKeyValue( key, value, parsedInteger);
+		ParseKeyValue( key, value, parsedInteger);
 
 		// Set style.
 		SetStyle(parsedInteger);

@@ -79,99 +79,6 @@ void CLGBaseEntity::Think() {
 	(this->*thinkFunction)();
 }
 
-//
-//===============
-// CLGBaseEntity::ParseFloatKeyValue
-//
-// PROTECTED function to help parsing float key:value string pairs with.
-//===============
-//
-qboolean CLGBaseEntity::ParseFloatKeyValue(const std::string& key, const std::string& value, float &floatNumber) {
-	floatNumber = std::stof(value);
-
-	return true;
-}
-
-//
-//===============
-// CLGBaseEntity::ParseIntegerKeyValue
-//
-// PROTECTED function to help parsing int32_t key:value string pairs with.
-//===============
-//
-qboolean CLGBaseEntity::ParseIntegerKeyValue(const std::string& key, const std::string& value, int32_t &integerNumber) {
-	integerNumber = std::stoi(value);
-
-	return true;
-}
-
-//
-//===============
-// CLGBaseEntity::ParseUnsignedIntegerKeyValue
-//
-// PROTECTED function to help parsing uint32_t key:value string pairs with.
-//===============
-//
-qboolean CLGBaseEntity::ParseUnsignedIntegerKeyValue(const std::string& key, const std::string& value, uint32_t& unsignedIntegerNumber) {
-	unsignedIntegerNumber = std::stoul(value);
-
-	return true;
-}
-
-//
-//===============
-// CLGBaseEntity::ParseStringKeyValue
-//
-// PROTECTED function to help parsing string key:value string pairs with.
-//===============
-//
-qboolean CLGBaseEntity::ParseStringKeyValue(const std::string& key, const std::string& value, std::string& stringValue) {
-	stringValue = value;
-
-	return true;
-}
-
-//
-//===============
-// CLGBaseEntity::ParseFloatKeyValue
-//
-// PROTECTED function to help parsing float key:value string pairs with.
-//===============
-//
-qboolean CLGBaseEntity::ParseFrametimeKeyValue(const std::string& key, const std::string& value, Frametime &frametime) {
-	frametime = Frametime(std::stof(value));
-
-	return true;
-}
-
-//
-//===============
-// CLGBaseEntity::ParseVector3KeyValue
-//
-// PROTECTED function to help parsing vector key:value string pairs with.
-//===============
-//
-qboolean CLGBaseEntity::ParseVector3KeyValue(const std::string& key, const std::string &value, vec3_t &vectorValue) {
-	// Stores vector fields fetched from string. (Might be corrupted, so we're parsing this nicely.)
-	std::vector<std::string> vectorFields;
-
-	// We split it based on the space delimiter. Empties are okay, how can they be empty then? Good question...
-	STR_Split(vectorFields, value, " ");
-
-	// Zero out our vector.
-	vectorValue = vec3_zero();
-	int32_t i = 0;
-	for (auto& str : vectorFields) {
-		vectorValue[i] = std::stof(str);
-		i++;
-
-		if (i > 2)
-			break;
-	}
-
-	return true;
-}
-
 /**
 *   @brief  Act upon the parsed key and value.
 **/
@@ -188,7 +95,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "angle") {
 		// Parse angle.
 		vec3_t hackedAngles = vec3_zero();
-		ParseFloatKeyValue(key, value, hackedAngles.y);
+		ParseKeyValue(key, value, hackedAngles.y);
 
 		// Set angle.
 		SetAngles( hackedAngles );
@@ -197,7 +104,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "angles") {
 		// Parse angles.
 		vec3_t parsedAngles = vec3_zero();
-		ParseVector3KeyValue(key, value, parsedAngles);
+		ParseKeyValue(key, value, parsedAngles);
 
 		// Set origin.
 		SetAngles(parsedAngles);
@@ -206,7 +113,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "dmg") {
 		// Parse damage.
 		int32_t parsedDamage = 0;
-		ParseIntegerKeyValue(key, value, parsedDamage);
+		ParseKeyValue(key, value, parsedDamage);
 
 		// Set Damage.
 		SetDamage(parsedDamage);
@@ -215,7 +122,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "delay") {
 		// Parsed float.
 		Frametime parsedTime = Frametime::zero();
-		ParseFrametimeKeyValue(key, value, parsedTime);
+		ParseKeyValue(key, value, parsedTime);
 
 		// Assign.
 		SetDelayTime(parsedTime);
@@ -224,7 +131,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "killtarget") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetKillTarget(parsedString);
@@ -233,7 +140,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "mass") {
 	    // Parsed string.
 	    int32_t parsedInteger = 0;
-	    ParseIntegerKeyValue(key, value, parsedInteger);
+	    ParseKeyValue(key, value, parsedInteger);
 
 	    // Assign.
 	    SetMass(parsedInteger);
@@ -242,7 +149,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "message") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetMessage(parsedString);
@@ -251,7 +158,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "model") {
 		// Parse model.
 		std::string parsedModel = "";
-		ParseStringKeyValue(key, value, parsedModel);
+		ParseKeyValue(key, value, parsedModel);
 
 		// Set model.
 		SetModel(parsedModel);
@@ -260,7 +167,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "origin") {
 		// Parse origin.
 		vec3_t parsedOrigin = vec3_zero();
-		ParseVector3KeyValue(key, value, parsedOrigin);
+		ParseKeyValue(key, value, parsedOrigin);
 
 		// Set origin.
 		SetOrigin(parsedOrigin);
@@ -268,7 +175,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else if (key == "target") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetTarget(parsedString);
@@ -276,7 +183,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	} else 	if (key == "targetname") {
 		// Parsed string.
 		std::string parsedString = "";
-		ParseStringKeyValue(key, value, parsedString);
+		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
 		SetTargetName(parsedString);
@@ -285,7 +192,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 	else if (key == "spawnflags") {
 		// Parse damage.
 		int32_t parsedSpawnFlags = 0;
-		ParseIntegerKeyValue(key, value, parsedSpawnFlags);
+		ParseKeyValue(key, value, parsedSpawnFlags);
 
 		// Set SpawnFlags.
 		SetSpawnFlags(parsedSpawnFlags);

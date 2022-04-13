@@ -104,11 +104,11 @@ void FuncButton::SpawnKey( const std::string& key, const std::string& value ) {
 	// It doesn't make sense to set them only here, if these variables are available to every entity
 	if ( key == "speed" ) {
 	    float parsedFloat = 0.f;
-		ParseFloatKeyValue( key, value, parsedFloat);
+		ParseKeyValue( key, value, parsedFloat);
 	    SetSpeed(parsedFloat);
 	} else if ( key == "lip" ) {
 		float parsedFloat = 0.f;
-		ParseFloatKeyValue( key, value, parsedFloat );
+		ParseKeyValue( key, value, parsedFloat );
 		SetLip(parsedFloat);
 	} else {
 		return Base::SpawnKey( key, value );

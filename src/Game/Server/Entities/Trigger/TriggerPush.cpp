@@ -41,9 +41,9 @@ void TriggerPush::Spawn() {
 //===============
 void TriggerPush::SpawnKey( const std::string& key, const std::string& value ) {
 	if ( key == "speed" ) {
-        ParseFloatKeyValue(key, value, pushForce);
+        ParseKeyValue(key, value, pushForce);
 	} else if ( key == "movedir" ) {
-        ParseVector3KeyValue( key, value, pushDirection );
+        ParseKeyValue( key, value, pushDirection );
 	} else {
 		return Base::SpawnKey( key, value );
 	}
