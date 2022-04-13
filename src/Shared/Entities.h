@@ -131,11 +131,13 @@ struct ClientEntity {
     //! The previous last valid state. In worst case scenario might be a copy of current state.
     EntityState prev = {};
         
-    //! An entity's server state flags.
+    //! This entity's server state flags.
     //int32_t serverFlags = 0; // TODO: Not sure if we need this yet.
+	//! Clipping mask this entity belongs to.
+    int32_t clipMask = 0;
     //! Min and max bounding box.
     vec3_t mins = vec3_zero(), maxs = vec3_zero();
-    //! Absolute world transform bounding box.
+    //! Absolute world transform bounding box. (Note that these are calculated with the link/unlink functions.)
     vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
 
 
@@ -144,7 +146,10 @@ struct ClientEntity {
     *   @brief  Entity Data local to the client only.
     * 
     **/
-    //! An entity's client state flags.
+	//! NOTE: It's never transfered by state, which might be interesting to do however.
+	int32_t linkCount = 0;
+
+	//! An entity's client state flags.
     int32_t clientFlags = 0;
 
     //! For diminishing grenade trails
@@ -158,7 +163,7 @@ struct ClientEntity {
     int32_t clientEntityNumber = 0;
 
     //! Pointer to the owning entity (if any.)
-    ClientEntity *owner = nullptr;
+    IClientGameEntity *owner = nullptr;
     //! Pointer to the class entity object that belongs to this client entity.
     IClientGameEntity *classEntity;
 

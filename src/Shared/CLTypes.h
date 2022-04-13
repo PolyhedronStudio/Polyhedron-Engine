@@ -194,19 +194,19 @@ struct ClientUserCommandHistory {
 // being sent from the server.
 //
 struct ServerFrame {
-    qboolean valid; // False if delta parsing failed.
+    qboolean valid = false; // False if delta parsing failed.
 
-    int32_t number; // Sequential identifier, used for delta.
-    int32_t delta;  // Delta between frames.
+    int32_t number = 0; // Sequential identifier, used for delta.
+    int32_t delta = 0;  // Delta between frames.
 
     byte    areaBits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
     int32_t areaBytes;                      // Area bytes.
 
     PlayerState playerState;    // The player state.
-    int32_t     clientNumber;   // The client number.
+    int32_t     clientNumber = 0;   // The client number.
 
-    int32_t numEntities;    // firstEntity + numEntities = first index up to last index of entities in received frame.
-    int32_t firstEntity;    // The first entity number in the received frame.
+    int32_t numEntities = 0;    // firstEntity + numEntities = first index up to last index of entities in received frame.
+    int32_t firstEntity = 0;    // The first entity number in the received frame.
 };
 
 //

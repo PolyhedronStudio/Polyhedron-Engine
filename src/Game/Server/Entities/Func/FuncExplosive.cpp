@@ -48,9 +48,9 @@ void FuncExplosive::Spawn() {
     }
 
     if ( GetSpawnFlags() & SF_Animated ) {
-        serverEntity->state.effects |= EntityEffectType::AnimCycleAll2hz;
+        SetEffects(GetEffects() | EntityEffectType::AnimCycleAll2hz);
     } else if ( GetSpawnFlags() & SF_AnimatedFast ) {
-        serverEntity->state.effects |= EntityEffectType::AnimCycleAll30hz;
+        SetEffects(GetEffects() | EntityEffectType::AnimCycleAll30hz);
     }
 
     if ( useFunction != &FuncExplosive::ExplosiveUse ) {

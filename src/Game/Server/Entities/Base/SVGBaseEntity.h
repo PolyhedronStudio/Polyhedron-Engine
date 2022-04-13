@@ -151,14 +151,14 @@ public:
     *   @return Pointer to the server side entity.
     **/
     inline Entity* GetPODEntity() final {
-        return serverEntity;
+        return podEntity;
     }
     /**
     *   @brief  Used only in SVG_FreeEntity and SVG_CreateClassEntity.
     *   @return Pointer to the server side entity.
     **/
     inline void SetPODEntity(Entity* svEntity) final {
-        serverEntity = svEntity;
+        podEntity = svEntity;
     }
 
 
@@ -211,14 +211,14 @@ public:
     /**
     *   @brief Get/Set: BoundingBox Mins
     **/
-    inline const vec3_t&    GetAbsoluteMin() override { return serverEntity->absMin; }
-    inline void             SetAbsoluteMin(const vec3_t &absMin) override { serverEntity->absMin = absMin; }
+    inline const vec3_t&    GetAbsoluteMin() override { return podEntity->absMin; }
+    inline void             SetAbsoluteMin(const vec3_t &absMin) override { podEntity->absMin = absMin; }
 
     /**
     *   @brief Get/Set: BoundingBox Maxs
     **/
-    inline const vec3_t&    GetAbsoluteMax() override { return serverEntity->absMax; }
-    inline void             SetAbsoluteMax(const vec3_t &absMax) override { serverEntity->absMax = absMax; }
+    inline const vec3_t&    GetAbsoluteMax() override { return podEntity->absMax; }
+    inline void             SetAbsoluteMax(const vec3_t &absMax) override { podEntity->absMax = absMax; }
 
     /**
     *   @brief Get/Set: Activator
@@ -229,8 +229,8 @@ public:
     /**
     *   @brief Get/Set: Angles
     **/
-    inline const vec3_t&    GetAngles() override { return serverEntity->state.angles; }
-    inline void             SetAngles(const vec3_t& angles) override { serverEntity->state.angles = angles; }
+    inline const vec3_t&    GetAngles() override { return podEntity->state.angles; }
+    inline void             SetAngles(const vec3_t& angles) override { podEntity->state.angles = angles; }
 
     /**
     *   @brief Get/Set: Angular Velocity
@@ -247,8 +247,8 @@ public:
     *   @brief Set: Mins and Maxs determining the entity's Bounding Box
     **/
     inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) override {
-        serverEntity->mins = mins;
-        serverEntity->maxs = maxs;
+        podEntity->mins = mins;
+        podEntity->maxs = maxs;
     }
 
     /**
@@ -261,14 +261,14 @@ public:
     *   @brief Get: Entity Client
     **/
     gclient_s* GetClient() override {
-        return serverEntity->client;
+        return podEntity->client;
     }
 
     /**
     *   @brief Get/Set: Clip Mask
     **/
-    inline const int32_t    GetClipMask() override { return serverEntity->clipMask; }
-    inline void             SetClipMask(const int32_t clipMask) override { serverEntity->clipMask = clipMask; }
+    inline const int32_t    GetClipMask() override { return podEntity->clipMask; }
+    inline void             SetClipMask(const int32_t clipMask) override { podEntity->clipMask = clipMask; }
 
     /**
     *   @brief Get/Set: Count
@@ -297,8 +297,8 @@ public:
     /**
     *   @brief Get/Set: Effects
     **/
-    inline const uint32_t   GetEffects() override { return serverEntity->state.effects; }
-    inline void             SetEffects(const uint32_t effects) override { serverEntity->state.effects = effects; }
+    inline const uint32_t   GetEffects() override { return podEntity->state.effects; }
+    inline void             SetEffects(const uint32_t effects) override { podEntity->state.effects = effects; }
 
     /**
     *   @brief Get/Set: Enemy
@@ -309,13 +309,13 @@ public:
     /**
     *   @brief Get: Entity Dictionary.
     **/
-    virtual inline EntityDictionary &GetEntityDictionary() override { return serverEntity->entityDictionary; }
+    virtual inline EntityDictionary &GetEntityDictionary() override { return podEntity->entityDictionary; }
 
     /**
     *   @brief Get/Set: Event ID
     **/
-    inline const uint8_t    GetEventID() override { return serverEntity->state.eventID; }
-    inline void             SetEventID(const uint8_t eventID) override { serverEntity->state.eventID = eventID; }
+    inline const uint8_t    GetEventID() override { return podEntity->state.eventID; }
+    inline void             SetEventID(const uint8_t eventID) override { podEntity->state.eventID = eventID; }
 
     /**
     *   @brief Get/Set: Flags
@@ -326,8 +326,8 @@ public:
     /**
     *   @brief Get/Set: Animation Frame
     **/
-    inline const float      GetAnimationFrame() override { return serverEntity->state.animationFrame; }
-    inline void             SetAnimationFrame(const float frame) override { serverEntity->state.animationFrame = frame; }
+    inline const float      GetAnimationFrame() override { return podEntity->state.animationFrame; }
+    inline void             SetAnimationFrame(const float frame) override { podEntity->state.animationFrame = frame; }
 
     /**
     *   @brief Get/Set: Gravity
@@ -362,8 +362,8 @@ public:
     /**
     *   @brief Is/Set: In Use.
     **/
-    inline const qboolean   IsInUse() override { return serverEntity->inUse; }
-    inline void             SetInUse(const qboolean inUse) override { serverEntity->inUse = inUse; }
+    inline const qboolean   IsInUse() override { return podEntity->inUse; }
+    inline void             SetInUse(const qboolean inUse) override { podEntity->inUse = inUse; }
 
     /**
     *   @brief Get/Set: Kill Target.
@@ -374,8 +374,8 @@ public:
     /**
     *   @brief Get/Set: Link Count.
     **/
-    inline const int32_t    GetLinkCount() override { return (serverEntity ? serverEntity->linkCount : 0); }
-    inline void             SetLinkCount(const int32_t linkCount) override { serverEntity->linkCount = linkCount; }
+    inline const int32_t    GetLinkCount() override { return (podEntity ? podEntity->linkCount : 0); }
+    inline void             SetLinkCount(const int32_t linkCount) override { podEntity->linkCount = linkCount; }
 
     /**
     *   @brief Get/Set: Mass
@@ -392,8 +392,8 @@ public:
     /**
     *   @brief Get/Set: Bounding Box 'Maxs'
     **/
-    inline const vec3_t&    GetMaxs() override { return serverEntity->maxs; }
-    inline void             SetMaxs(const vec3_t& maxs) override { serverEntity->maxs = maxs; }
+    inline const vec3_t&    GetMaxs() override { return podEntity->maxs; }
+    inline void             SetMaxs(const vec3_t& maxs) override { podEntity->maxs = maxs; }
 
     /**
     *   @brief Get/Set: Message
@@ -404,8 +404,8 @@ public:
     /**
     *   @brief Get/Set: Bounding Box 'Mins'
     **/
-    inline const vec3_t&    GetMins() override { return serverEntity->mins; }
-    inline void             SetMins(const vec3_t& mins) override { serverEntity->mins = mins; }
+    inline const vec3_t&    GetMins() override { return podEntity->mins; }
+    inline void             SetMins(const vec3_t& mins) override { podEntity->mins = mins; }
    
     /**
     *   @brief Get/Set: Model
@@ -416,7 +416,7 @@ public:
         this->model = model;
 
         // Set the model.
-        gi.SetModel(serverEntity, model.c_str());
+        gi.SetModel(podEntity, model.c_str());
 
         // Set model index.
         SetModelIndex(gi.ModelIndex(model.c_str()));
@@ -425,23 +425,23 @@ public:
     /**
     *   @brief Get/Set: Model Index 1
     **/
-    inline const int32_t    GetModelIndex() override { return serverEntity->state.modelIndex;  }
-    inline void             SetModelIndex(const int32_t index) override { serverEntity->state.modelIndex = index;  }
+    inline const int32_t    GetModelIndex() override { return podEntity->state.modelIndex;  }
+    inline void             SetModelIndex(const int32_t index) override { podEntity->state.modelIndex = index;  }
     /**
     *   @brief Get/Set: Model Index 2
     **/
-    inline const int32_t    GetModelIndex2() override { return serverEntity->state.modelIndex2; }
-    inline void             SetModelIndex2(const int32_t index) override { serverEntity->state.modelIndex2 = index; }
+    inline const int32_t    GetModelIndex2() override { return podEntity->state.modelIndex2; }
+    inline void             SetModelIndex2(const int32_t index) override { podEntity->state.modelIndex2 = index; }
     /**
     *   @brief Get/Set: Model Index 3
     **/
-    inline const int32_t    GetModelIndex3() override { return serverEntity->state.modelIndex3; }
-    inline void             SetModelIndex3(const int32_t index) override { serverEntity->state.modelIndex3 = index; }
+    inline const int32_t    GetModelIndex3() override { return podEntity->state.modelIndex3; }
+    inline void             SetModelIndex3(const int32_t index) override { podEntity->state.modelIndex3 = index; }
     /**
     *   @brief Get/Set: Model Index 4
     **/
-    inline const int32_t    GetModelIndex4() override { return serverEntity->state.modelIndex4; }
-    inline void SetModelIndex4(const int32_t index) override { serverEntity->state.modelIndex4 = index; }
+    inline const int32_t    GetModelIndex4() override { return podEntity->state.modelIndex4; }
+    inline void SetModelIndex4(const int32_t index) override { podEntity->state.modelIndex4 = index; }
 
     /**
     *   @brief Get/Set: Move Type.
@@ -470,8 +470,8 @@ public:
     /**
     *   @brief Get/Set:     State Number
     **/
-    inline const int32_t    GetNumber() override { return serverEntity->state.number; }
-    inline void             SetNumber(const int32_t number) override { serverEntity->state.number = number; }
+    inline const int32_t    GetNumber() override { return podEntity->state.number; }
+    inline void             SetNumber(const int32_t number) override { podEntity->state.number = number; }
 
     /**
     *   @brief Get/Set:     Old Enemy Entity
@@ -482,14 +482,14 @@ public:
     /**
     *   @brief Get/Set:     Old Origin
     **/
-    inline const vec3_t&    GetOldOrigin() override { return serverEntity->state.oldOrigin; }
-    inline void             SetOldOrigin(const vec3_t& oldOrigin) override { serverEntity->state.oldOrigin = oldOrigin; }
+    inline const vec3_t&    GetOldOrigin() override { return podEntity->state.oldOrigin; }
+    inline void             SetOldOrigin(const vec3_t& oldOrigin) override { podEntity->state.oldOrigin = oldOrigin; }
 
     /**
     *   @brief Get/Set:     Origin
     **/
-    inline const vec3_t&    GetOrigin() override { return serverEntity->state.origin; }
-    inline void             SetOrigin(const vec3_t& origin) override { serverEntity->state.origin = origin; }
+    inline const vec3_t&    GetOrigin() override { return podEntity->state.origin; }
+    inline void             SetOrigin(const vec3_t& origin) override { podEntity->state.origin = origin; }
 
     /**
     *   @brief Get/Set:     Owner Entity
@@ -500,8 +500,8 @@ public:
     /**
     *   @brief Get/Set:     Render Effects
     **/
-    inline const int32_t    GetRenderEffects() override { return serverEntity->state.renderEffects; }
-    inline void             SetRenderEffects(const int32_t renderEffects) override { serverEntity->state.renderEffects = renderEffects; }
+    inline const int32_t    GetRenderEffects() override { return podEntity->state.renderEffects; }
+    inline void             SetRenderEffects(const int32_t renderEffects) override { podEntity->state.renderEffects = renderEffects; }
         
     // Get the 'pathTarget' entity value.
     // Overridden by PathCorner
@@ -511,32 +511,32 @@ public:
     /**
     *   @brief Get/Set:     Server Flags
     **/
-    inline const int32_t    GetServerFlags() override { return serverEntity->serverFlags; }
-    inline void             SetServerFlags(const int32_t serverFlags) override { serverEntity->serverFlags = serverFlags; }
+    inline const int32_t    GetServerFlags() override { return podEntity->serverFlags; }
+    inline void             SetServerFlags(const int32_t serverFlags) override { podEntity->serverFlags = serverFlags; }
 
     /**
     *   @brief Get/Set:     Skin Number
     **/
-    inline const int32_t    GetSkinNumber() override { return serverEntity->state.skinNumber; }
-    inline void             SetSkinNumber(const int32_t skinNumber) override { serverEntity->state.skinNumber = skinNumber; }
+    inline const int32_t    GetSkinNumber() override { return podEntity->state.skinNumber; }
+    inline void             SetSkinNumber(const int32_t skinNumber) override { podEntity->state.skinNumber = skinNumber; }
 
     /**
     *   @brief Get/Set:     Entity Size
     **/
-    inline const vec3_t&    GetSize() override { return serverEntity->size; }
-    inline void             SetSize(const vec3_t& size) override { serverEntity->size = size; }
+    inline const vec3_t&    GetSize() override { return podEntity->size; }
+    inline void             SetSize(const vec3_t& size) override { podEntity->size = size; }
 
     /**
     *   @brief Get/Set:     Solid
     **/
-    inline const uint32_t   GetSolid() override { return serverEntity->solid; }
-    inline void             SetSolid(const uint32_t solid) override { serverEntity->solid = solid; }
+    inline const uint32_t   GetSolid() override { return podEntity->solid; }
+    inline void             SetSolid(const uint32_t solid) override { podEntity->solid = solid; }
 
     /**
     *   @brief Get/Set:     Sound.
     **/
-    inline const int32_t GetSound() override { return serverEntity->state.sound; }
-    inline void SetSound(const int32_t sound) override { serverEntity->state.sound = sound; }
+    inline const int32_t GetSound() override { return podEntity->state.sound; }
+    inline void SetSound(const int32_t sound) override { podEntity->state.sound = sound; }
 
     /**
     *   @brief Get/Set:     Spawn Flags
@@ -547,8 +547,8 @@ public:
     /**
     *   @brief Get/Set:     Entity State
     **/
-    inline const EntityState&   GetState() override { return serverEntity->state; }
-    inline void                 SetState(const EntityState &state) override { serverEntity->state = state; }
+    inline const EntityState&   GetState() override { return podEntity->state; }
+    inline void                 SetState(const EntityState &state) override { podEntity->state = state; }
 
     /**
     *   @brief Get/Set:     Style
@@ -664,7 +664,7 @@ protected:
     /**
     *   Server Entity Pointer.
     **/
-    Entity *serverEntity = nullptr;
+    //Entity *podEntity = nullptr;
 
 
     /**

@@ -82,6 +82,6 @@ void TargetSpeaker::SpeakerUse( IServerGameEntity* other, IServerGameEntity* act
         }
         // Use a positioned_sound, because this entity won't normally be
         // sent to any clients because it is invisible
-        gi.PositionedSound( GetOrigin(), serverEntity, channel, GetNoiseIndexA(), volume, attenuation, 0.0f );
+        gi.PositionedSound( GetOrigin(), GetPODEntity(), channel, GetNoiseIndexA(), volume, attenuation, 0.0f);
     }
 }

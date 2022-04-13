@@ -99,6 +99,14 @@ void _wrp_Cvar_Reset(cvar_t *var) {
 }
 
 // CMODEL
+mmodel_t *_wrp_BSP_InlineModel(const char *name) {
+	if (!cl.bsp) {
+		return nullptr;
+	}
+    
+	return BSP_InlineModel(cl.bsp, name);
+}
+
 mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
     return CM_InlineModel(cm, name);
 }
@@ -449,7 +457,8 @@ void CL_InitGameProgs(void)
     // Collision Model.
     importAPI.CM_HeadnodeForBox = CM_HeadnodeForBox;
     importAPI.CM_HeadnodeForOctagon= CM_HeadnodeForOctagon;
-    importAPI.CM_InlineModel = _wrp_CM_InlineModel;
+    importAPI.BSP_InlineModel = _wrp_BSP_InlineModel;
+	importAPI.CM_InlineModel = _wrp_CM_InlineModel;
     importAPI.CM_PointContents = CM_PointContents;
     importAPI.CM_TransformedPointContents = CM_TransformedPointContents;
     importAPI.CM_BoxTrace = CM_BoxTrace;

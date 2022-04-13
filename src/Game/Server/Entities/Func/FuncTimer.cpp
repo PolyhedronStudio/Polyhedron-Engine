@@ -45,7 +45,7 @@ void FuncTimer::Spawn() {
 		SetActivator(this);
 	}
 
-	serverEntity->serverFlags = EntityServerFlags::NoClient;
+	SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
 }
 
 //===============

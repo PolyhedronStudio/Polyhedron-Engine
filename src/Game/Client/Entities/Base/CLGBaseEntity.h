@@ -197,6 +197,22 @@ public:
     * 
     ***/
     /**
+    *   @brief Get/Set:     Client Entity Flags
+    **/
+	virtual const int32_t   GetClientFlags() {
+		if (podEntity) {
+			return podEntity->clientFlags;
+		} else {
+			return 0;
+		}
+	};
+	virtual void            SetClientFlags(const int32_t clientFlags) {
+		if (podEntity) {
+			podEntity->clientFlags = clientFlags;
+		}
+	};
+
+    /**
     *   @brief Get/Set:     NextThink Time.
     **/
     inline const GameTime &GetNextThinkTime() final { 
@@ -315,8 +331,18 @@ public:
     /**
     *   @brief Get/Set: Clip Mask
     **/
-    virtual const int32_t   GetClipMask() { return 0; };
-    virtual void            SetClipMask(const int32_t clipMask) {};
+    virtual inline const int32_t    GetClipMask() override { 
+		if (podEntity) {
+			return podEntity->clipMask; 
+		} else {
+			return 0;
+		}
+	};
+    virtual inline void             SetClipMask(const int32_t clipMask) override { 
+		if (podEntity) {
+			podEntity->clipMask = clipMask; 
+		}
+	};
 
     /**
     *   @brief Get/Set: Count
@@ -409,14 +435,14 @@ public:
     /**
     *   @brief Get/Set: Health
     **/
-    virtual const int32_t   GetHealth() { return 0; };
-    virtual void            SetHealth(const int32_t health) {};
+    virtual const int32_t   GetHealth() { return health; };
+    virtual void            SetHealth(const int32_t health) { this->health = health; };
 
     /**
     *   @brief Get/Set: Ideal Yaw Angle.
     **/
-    virtual const float     GetIdealYawAngle() { return 0.f; };
-    virtual void            SetIdealYawAngle(const float idealYawAngle) {};
+    virtual const float     GetIdealYawAngle() { return idealYawAngle; };
+    virtual void            SetIdealYawAngle(const float idealYawAngle) { this->idealYawAngle = idealYawAngle; };
 
     /**
     *   @brief Is/Set: In Use.
@@ -433,14 +459,24 @@ public:
     /**
     *   @brief Get/Set: Kill Target.
     **/
-    virtual const std::string&  GetKillTarget() { return EmptyString; };
-    virtual void                SetKillTarget(const std::string& killTarget) {};
+    virtual const std::string&  GetKillTarget() { return killTargetStr; };
+    virtual void                SetKillTarget(const std::string& killTarget) { killTargetStr = killTarget;};
 
     /**
     *   @brief Get/Set: Link Count.
     **/
-    virtual const int32_t   GetLinkCount() { return linkCount; };
-    virtual void            SetLinkCount(const int32_t linkCount) { this->linkCount = linkCount; };
+    virtual const int32_t   GetLinkCount() { 
+		if (podEntity) {
+			return podEntity->linkCount; 
+		} else {
+			return 0;
+		}
+	};
+    virtual void            SetLinkCount(const int32_t linkCount) { 
+		if (podEntity) {
+			podEntity->linkCount = linkCount; 
+		}
+	};
 
     /**
     *   @brief Get/Set: Mass
@@ -451,8 +487,8 @@ public:
     /**
     *   @brief Get/Set: Max Health
     **/
-    virtual const int32_t   GetMaxHealth() { return 0; };
-    virtual void            SetMaxHealth(const int32_t maxHealth) {};
+    virtual const int32_t   GetMaxHealth() { return maxHealth; };
+    virtual void            SetMaxHealth(const int32_t maxHealth) { this->maxHealth = maxHealth; };
 
     /**
     *   @brief Get/Set: Bounding Box 'Maxs'
@@ -492,8 +528,31 @@ public:
     /**
     *   @brief Get/Set: Model
     **/
-    virtual const std::string&  GetModel() { return EmptyString; };
-    virtual void                SetModel(const std::string &model) {};
+    virtual const std::string&  GetModel() { return model; };
+    virtual void                SetModel(const std::string &model) {
+		// Set the actual entity model.
+		if (podEntity) {
+			// Set modelstr.
+			this->model = model;
+
+
+			// If it is an inline model, get the size information for it.
+			if (model[0] == '*') {
+				mmodel_t *inlineModel = clgi.BSP_InlineModel(model.c_str());
+
+				if (inlineModel) {
+					podEntity->mins = inlineModel->mins;
+					podEntity->maxs = inlineModel->maxs;
+				}
+
+				// Link it for collision testing.
+				LinkEntity();
+			}
+
+			// Update model index.
+			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
+		}
+	};
 
     /**
     *   @brief Get/Set: Model Index 1
@@ -571,14 +630,14 @@ public:
     /**
     *   @brief Get/Set:     Noise Index A
     **/
-    virtual const int32_t   GetNoiseIndexA() { return 0; };
-    virtual void            SetNoiseIndexA(const int32_t noiseIndexA) {};
+    virtual const int32_t   GetNoiseIndexA() { return noiseIndexA; };
+    virtual void            SetNoiseIndexA(const int32_t noiseIndexA) { this->noiseIndexA = noiseIndexA; };
 
     /**
     *   @brief Get/Set:     Noise Index B
     **/
-    virtual const int32_t   GetNoiseIndexB() { return 0; };
-    virtual void            SetNoiseIndexB(const int32_t noiseIndexB) {};
+    virtual const int32_t   GetNoiseIndexB() { return noiseIndexB; };
+    virtual void            SetNoiseIndexB(const int32_t noiseIndexB) { this->noiseIndexB = noiseIndexB; };
 
     /**
     *   @brief Get/Set:     State Number
@@ -599,8 +658,8 @@ public:
     /**
     *   @brief Get/Set:     Old Enemy Entity
     **/
-    virtual ClassEntity*    GetOldEnemy() { return nullptr; }
-    virtual void            SetOldEnemy(ClassEntity* oldEnemy) {};
+    virtual ClassEntity*    GetOldEnemy() { return oldEnemyEntity; }
+    virtual void            SetOldEnemy(IClientGameEntity* oldEnemy) { this->oldEnemyEntity = oldEnemy; };
 
     /**
     *   @brief Get/Set:     Old Origin
@@ -687,7 +746,9 @@ public:
     *   @brief Get/Set:     Entity Size
     **/
     virtual const vec3_t&   GetSize() { return ZeroVec3; };
-    virtual void            SetSize(const vec3_t& size) {};
+    virtual void            SetSize(const vec3_t& size) {
+	
+	};
 
     /**
     *   @brief Get/Set:     Solid
@@ -708,8 +769,18 @@ public:
     /**
     *   @brief Get/Set:     Sound.
     **/
-    virtual const int32_t   GetSound() { return 0; };
-    virtual void            SetSound(const int32_t sound) {};
+    virtual const int32_t   GetSound() { 
+		if (podEntity) {
+			return podEntity->current.sound;
+		} else {
+			return 0;
+		}
+	};
+    virtual void            SetSound(const int32_t sound) {
+		if (podEntity) {
+			podEntity->current.sound = sound;
+		}
+	};
 
     /**
     *   @brief Get/Set:     Spawn Flags
@@ -811,9 +882,6 @@ private:
 	*
 	*
 	**/
-    //! Pointer to the client entity which owns this class entity.
-    ClientEntity *podEntity = nullptr;
-
     //! Refresh Entity Object.
     r_entity_t refreshEntity = {};
 
@@ -933,9 +1001,6 @@ protected:
     int32_t mass = 0;
     //! Per entity gravity multiplier (1.0 is normal). TIP: Use for lowgrav artifact, flares
     float gravity = 1.0f;
-	//! NOTE: For the client entity we store the linkCount here. It's never transfered by state.
-	//  it might be interesting to do however.
-	int32_t linkCount = 0;
     //! Ground Entity link count. (To keep track if it is linked or not.)
     int32_t groundEntityLinkCount = 0;
     //! Yaw Speed. (Should be for monsters, move over to SVGBaseMonster?)
@@ -959,9 +1024,9 @@ protected:
     *   Entity Noise Indices.
     **/
     //! Noise Index A.
-    //int32_t noiseIndexA = 0;
+    int32_t noiseIndexA = 0;
     //! Noise Index B.
-    //int32_t noiseIndexB = 0;
+    int32_t noiseIndexB = 0;
 
 
     /**
@@ -979,9 +1044,9 @@ protected:
     *   Entity '(Health-)Stats'
     **/
     //! Current health.
-    //int32_t health = 0;
+    int32_t health = 0;
     //! Maximum health.
-    //int32_t maxHealth = 0;
+    int32_t maxHealth = 0;
 
 
     /**

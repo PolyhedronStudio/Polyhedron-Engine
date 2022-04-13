@@ -602,7 +602,16 @@ protected:
 	/**
 	*	@brief	Parses the key/value for the float type. (0.1, 0.004899)
 	**/
-	template<typename T> auto ParseKeyValue(const std::string &key, const std::string &value, T &outValue) {};
+	template<typename T> auto ParseKeyValue(const std::string &key, const std::string &value, T &outValue) {
+		// Warning print...
+#if defined(SHAREDGAME_SERVERGAME)
+		Com_DPrint("Warning: svEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->state.number, typeid(T).name().c_str(), key.c_str());
+#elif defined(SHAREDGAME_CLIENTGAME)
+		Com_DPrintf("Warning: clEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->clientEntityNumber, typeid(T).name().c_str(), key.c_str());
+#else
+		//Com_Print("Warning: Called specialized template function ParseKeyValue that wasn't compiled for client/server -game modules.\n");
+#endif
+	};
 	template<> auto ParseKeyValue(const std::string &key, const std::string &value, float &floatNumber) {
 		floatNumber = std::stof(value);
 		return true;
@@ -661,6 +670,7 @@ protected:
 
 
 
-private:
-
+protected:
+	//! Pointer to the client entity which owns this class entity.
+    PODEntity *podEntity = nullptr;
 };

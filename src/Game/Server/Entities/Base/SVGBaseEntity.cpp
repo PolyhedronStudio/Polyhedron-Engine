@@ -31,8 +31,8 @@
 vec3_t SVGBaseEntity::ZeroVec3 = vec3_zero();
 
 // Constructor/Deconstructor.
-SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : IServerGameEntity(), serverEntity(svEntity) {
-
+SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : IServerGameEntity() {
+	podEntity = svEntity;
 }
 
 // Interface functions. 
@@ -70,8 +70,8 @@ void SVGBaseEntity::PostSpawn() {
 **/
 void SVGBaseEntity::Think() {
 	// Update current state of server entity's hash classname??
-	if (serverEntity) {
-		serverEntity->state.hashedClassname = GetTypeInfo()->hashedMapClass;
+	if (podEntity) {
+		podEntity->state.hashedClassname = GetTypeInfo()->hashedMapClass;
 	}
 
 	// Safety check.
@@ -389,14 +389,14 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 *   @brief  Link entity to world for collision testing using gi.LinkEntity.
 **/
 void SVGBaseEntity::LinkEntity() {
-	gi.LinkEntity(serverEntity);
+	gi.LinkEntity(podEntity);
 }
 
 /**
 *   @brief  Unlink the entity from the world for collision testing.
 **/
 void SVGBaseEntity::UnlinkEntity() {
-	gi.UnlinkEntity(serverEntity);
+	gi.UnlinkEntity(podEntity);
 }
 
 /**
@@ -406,13 +406,13 @@ void SVGBaseEntity::UnlinkEntity() {
 **/
 void SVGBaseEntity::Remove()
 {
-	serverEntity->serverFlags |= EntityServerFlags::Remove;
+	podEntity->serverFlags |= EntityServerFlags::Remove;
 }
 
 /**
 *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
 **/
 void SVGBaseEntity::SVGBaseEntityThinkFree(void) {
-	//SVG_FreeEntity(serverEntity);
+	//SVG_FreeEntity(podEntity);
 	Remove();
 }

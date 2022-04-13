@@ -135,8 +135,8 @@ void FuncButton::OnButtonDone(IServerGameEntity* self) {
 //===============
 void FuncButton::ButtonDone() {
 	moveInfo.state = MoverState::Bottom;
-	serverEntity->state.effects &= ~(EntityEffectType::AnimCycleFrames23hz2);
-	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames01hz2;
+	SetEffects(GetEffects() & ~(EntityEffectType::AnimCycleFrames23hz2));
+	SetEffects(GetEffects() | EntityEffectType::AnimCycleFrames01hz2);
 }
 
 //===============
@@ -172,8 +172,8 @@ void FuncButton::OnButtonWait(IServerGameEntity* self) {
 //===============
 void FuncButton::ButtonWait() {
 	moveInfo.state = MoverState::Top;
-	serverEntity->state.effects &= ~(EntityEffectType::AnimCycleFrames01hz2);
-	serverEntity->state.effects |= EntityEffectType::AnimCycleFrames23hz2;
+	SetEffects(GetEffects() & ~(EntityEffectType::AnimCycleFrames01hz2));
+	SetEffects(GetEffects() | EntityEffectType::AnimCycleFrames23hz2);
 	SetAnimationFrame( 1 );
 
 	UseTargets( GetActivator() );
@@ -194,7 +194,7 @@ void FuncButton::ButtonFire() {
 
 	moveInfo.state = MoverState::Up;
 	if ( moveInfo.startSoundIndex && !(flags & EntityFlags::TeamSlave) ) {
-		gi.Sound( serverEntity, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0 );
+		gi.Sound( podEntity, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0 );
 	}
 	
 	BrushMoveCalc( moveInfo.endOrigin, OnButtonWait );

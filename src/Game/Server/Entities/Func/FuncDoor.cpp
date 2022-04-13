@@ -121,10 +121,10 @@ void FuncDoor::Spawn() {
     moveInfo.endAngles = GetAngles();
 
     if ( GetSpawnFlags() & SF_Toggle ) {
-        serverEntity->state.effects |= EntityEffectType::AnimCycleAll2hz;
+        SetEffects(GetEffects() | EntityEffectType::AnimCycleAll2hz);
     }
     if ( GetSpawnFlags() & SF_YAxis ) {
-        serverEntity->state.effects |= EntityEffectType::AnimCycleAll30hz;
+        SetEffects(GetEffects() | EntityEffectType::AnimCycleAll30hz);
     }
 
     // To simplify logic elsewhere, make non-teamed doors into a team of one

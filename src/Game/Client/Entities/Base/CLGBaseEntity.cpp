@@ -26,8 +26,8 @@ std::string CLGBaseEntity::EmptyString = "";
 *
 **/
 //! Constructor/Destructor.
-CLGBaseEntity::CLGBaseEntity(ClientEntity* clEntity) : IClientGameEntity(), podEntity(clEntity) {
-    
+CLGBaseEntity::CLGBaseEntity(ClientEntity* clEntity) : Base() {//}, podEntity(clEntity) {
+    podEntity = clEntity;
 }
 
 
@@ -354,7 +354,7 @@ void CLGBaseEntity::DispatchTakeDamageCallback(IClientGameEntity* other, float k
 *
 **/
 /**
-*   @brief  Marks the entity to be removed in the next server frame. This is preferred to SVG_FreeEntity, 
+*   @brief  Marks the entity to be removed in the next client frame. This is preferred to CLG_FreeEntity, 
 *           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
 *           on us during the current server game frame we're processing.
 **/
@@ -367,6 +367,6 @@ void CLGBaseEntity::Remove()
 *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
 **/
 void CLGBaseEntity::CLGBaseEntityThinkFree(void) {
-	//SVG_FreeEntity(serverEntity);
+	//CLG_FreeEntity(serverEntity);
 	Remove();
 }

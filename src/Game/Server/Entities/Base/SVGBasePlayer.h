@@ -150,7 +150,7 @@ public:
     /**
     *   @brief  Sets the server entity's client pointer.
     **/
-    void SetClient(gclient_s* client) { serverEntity->client = client; }
+    void SetClient(gclient_s* client) { podEntity->client = client; }
 
     /**
     *   @return The killer yaw.
