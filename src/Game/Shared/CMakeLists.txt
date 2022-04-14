@@ -3,23 +3,13 @@
 #			SharedGame CMakeLists
 #
 ###############################################################################
-#		if(TARGET clgame)
-#			# Remove client include in case CMake still thinks it has to be defined somehow.
-#			REMOVE_DEFINITIONS(-DSHAREDGAME_SERVERGAME)
-#			# Set SharedGame compilation settings for: ServerGame compilation.
-#			ADD_COMPILE_DEFINITIONS(-DSHAREDGAME_CLIENTGAME)
-#		elseif(TARGET svgame)
-#			# Remove client include in case CMake still thinks it has to be defined somehow.
-#			REMOVE_DEFINITIONS(-DSHAREDGAME_CLIENTGAME)
-#			# Set SharedGame compilation settings for: ServerGame compilation.
-#			ADD_COMPILE_DEFINITIONS(-DSHAREDGAME_SERVERGAME)
-#		endif()
-
 ###########
 # Sources #
 ###########
 SET(SRC_SHAREDGAME
 	Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
+
+	World/IGameworld.cpp
 
 	PMove.cpp
 	SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
@@ -33,6 +23,8 @@ SET(HEADERS_SHAREDGAME
 	Entities/SGEntityHandle.h  #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.h 
 	Entities/TypeInfo.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/TypeInfo.h 
 	Entities.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities.h 
+
+	World/IGameworld.h
 	
 	PMove.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.h 
 	Protocol.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Protocol.h 

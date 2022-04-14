@@ -118,27 +118,6 @@ void MiscExplosionBox::Spawn() {
 
 //
 //===============
-// MiscExplosionBox::Respawn
-//
-//===============
-//
-void MiscExplosionBox::Respawn() {
-    Base::Respawn();
-}
-
-//
-//===============
-// MiscExplosionBox::PostSpawn
-//
-//===============
-//
-void MiscExplosionBox::PostSpawn() {
-    // Always call parent class method.
-    Base::PostSpawn();
-}
-
-//
-//===============
 // MiscExplosionBox::Think
 //
 //===============
@@ -150,8 +129,9 @@ void MiscExplosionBox::Think() {
 	// Interpolate origin?
 	ClientEntity *clientEntity = GetPODEntity();
 //	clientEntity->current.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
-	SetRenderEffects(RenderEffects::Beam);
-	clientEntity->lerpOrigin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+	//SetRenderEffects(RenderEffects::Beam);
+	clientEntity->current.origin	= vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+	clientEntity->current.oldOrigin = vec3_mix(clientEntity->prev.oldOrigin, clientEntity->current.oldOrigin, cl->lerpFraction);
 }
 
 //===============
@@ -215,8 +195,8 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     CLG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
-    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
-    //SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME);
 
     // Do a check ground for the step move of this pusher.
     //CLG_StepMove_CheckGround(this);
@@ -346,13 +326,13 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
     }
 
     // Calculate ratio to use.
-    float ratio = ((float)other->GetMass()) / ((float) GetMass());
+    double ratio = (static_cast<double>(other->GetMass()) / static_cast<double>(GetMass()));
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
 
     // Calculate yaw to use based on direction.
-    float yaw = vec3_to_yaw(dir);
+    double yaw = vec3_to_yaw(dir);
 
 	Com_DPrint("CLIENT IS TOUCHING EXPLOBOX ZOMGSSS LMAO ROFL\n");
     // Last but not least, move a step ahead.

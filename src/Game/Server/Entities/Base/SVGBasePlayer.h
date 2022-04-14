@@ -32,12 +32,6 @@ public:
     ***/
     void Precache() override;
     void Spawn() override;
-    void Respawn() override;
-    void PostSpawn() override;
-    void Think() override;
-
-    void SpawnKey(const std::string& key, const std::string& value)  override;
-
 
 
     /***

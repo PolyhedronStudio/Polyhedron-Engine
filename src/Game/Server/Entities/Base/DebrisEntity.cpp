@@ -19,6 +19,25 @@
 // World.
 #include "../../World/Gameworld.h"
 
+
+//! Constructor/Deconstructor.
+DebrisEntity::DebrisEntity(Entity* svEntity)
+    : SVGBaseEntity(svEntity) {
+
+}
+DebrisEntity::~DebrisEntity() {
+
+}
+
+/**
+*	@brief	Die callback.
+**/
+void DebrisEntity::DebrisEntityDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
+    // Save to queue for removal.
+    Remove();
+}
+
+
 /**
 *   @brief  Used by game modes to spawn server side gibs.
 *   @param  debrisser The entity that is about to spawn debris.
@@ -60,85 +79,4 @@ DebrisEntity* DebrisEntity::Create(SVGBaseEntity* debrisser, const std::string& 
 
     // Return the debris entity.
     return debrisEntity;
-}
-
-// Constructor/Deconstructor.
-DebrisEntity::DebrisEntity(Entity* svEntity)
-    : SVGBaseEntity(svEntity) {
-
-}
-DebrisEntity::~DebrisEntity() {
-
-}
-
-//
-//===============
-// SVGBasePlayer::Precache
-//
-//===============
-//
-void DebrisEntity::Precache() {
-    Base::Precache();
-}
-
-//
-//===============
-// SVGBasePlayer::Spawn
-//
-//===============
-//
-void DebrisEntity::Spawn() {
-    // Spawn.
-    Base::Spawn();
-}
-
-//
-//===============
-// DebrisEntity::Respawn
-//
-//===============
-//
-void DebrisEntity::Respawn() {
-    Base::Respawn();
-}
-
-//
-//===============
-// DebrisEntity::PostSpawn
-//
-//===============
-//
-void DebrisEntity::PostSpawn() {
-    Base::PostSpawn();
-}
-
-//
-//===============
-// DebrisEntity::Think
-//
-//===============
-//
-void DebrisEntity::Think() {
-    // Parent class Think.
-    Base::Think();
-}
-
-//===============
-// DebrisEntity::SpawnKey
-//
-// DebrisEntity spawn key handling.
-//===============
-void DebrisEntity::SpawnKey(const std::string& key, const std::string& value) {
-    // Parent class spawnkey.
-    Base::SpawnKey(key, value);
-}
-
-//===============
-// DebrisEntity::DebrisEntityDie
-//
-// Spawn gibs to make things gore like :P
-//===============
-void DebrisEntity::DebrisEntityDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
-    // Save to queue for removal.
-    Remove();
 }

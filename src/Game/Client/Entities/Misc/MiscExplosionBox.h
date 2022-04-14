@@ -8,8 +8,8 @@
 */
 #pragma once
 
-class SVGBaseEntity;
-class SVGBaseTrigger;
+class CLGBaseEntity;
+class CLGBaseTrigger;
 
 class MiscExplosionBox : public CLGBaseEntity { // Should be: : public CLGBaseTrigger
 public:
@@ -19,26 +19,28 @@ public:
 
     DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseEntity ); // Should be CLGBaseTrigger inherited.
 
-    //
-    // Interface functions. 
-    //
-    void Precache() override;    // Precaches data.
-    void Spawn() override;       // Spawns the entity.
-    void Respawn() override;     // Respawns the entity.
-    void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    void Think() override;       // General entity thinking routine.
+    /**
+    *	Interface functions. 
+    **/
+    void Precache() override;
+    void Spawn() override;
+    void Think() override;
 
     void SpawnKey(const std::string& key, const std::string& value) override;
 
-    //
-    // Callback Functions.
-    //
+
+    /**
+    *	Callback Functions.
+    **/
     void ExplosionBoxUse( IClientGameEntity* caller, IClientGameEntity* activator );
     void ExplosionBoxDropToFloor(void);
     void ExplosionBoxDie(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
     void ExplosionBoxTouch(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
-    // Set when exploding, after a minor delay.
+    
+	/**
+	*	Set when exploding, after a minor delay.
+	**/
     void MiscExplosionBoxExplode(void);
 
 private:

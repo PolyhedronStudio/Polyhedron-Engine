@@ -340,13 +340,13 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
     }
 
     // Calculate ratio to use.
-    float ratio = ((float)other->GetMass()) / ((float) GetMass());
+    double ratio = (static_cast<double>(other->GetMass()) / static_cast<double>(GetMass()));
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
 
     // Calculate yaw to use based on direction.
-    float yaw = vec3_to_yaw(dir);
+    double yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
     SVG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));

@@ -127,50 +127,6 @@ void SVGBasePlayer::Spawn() {
     SetInUse(true);
 }
 
-//
-//===============
-// SVGBasePlayer::Respawn
-//
-//===============
-//
-void SVGBasePlayer::Respawn() {
-    Base::Respawn();
-    gi.DPrintf("SVGBasePlayer::Respawn();");
-}
-
-//
-//===============
-// SVGBasePlayer::PostSpawn
-//
-//===============
-//
-void SVGBasePlayer::PostSpawn() {
-    Base::PostSpawn();
-}
-
-//
-//===============
-// SVGBasePlayer::Think
-//
-//===============
-//
-void SVGBasePlayer::Think() {
-    // Parent class Think.
-    Base::Think();
-}
-
-//
-//===============
-// SVGBasePlayer::SpawnKey
-//
-// SVGBasePlayer spawn key handling.
-//===============
-//
-void SVGBasePlayer::SpawnKey(const std::string& key, const std::string& value) {
-    // Parent class spawnkey.
-    Base::SpawnKey(key, value);
-}
-
 /***
 * 
 *   Callback Functions.
