@@ -129,5 +129,5 @@ void TriggerDelayedUse::TriggerDelayedUseThink() {
 	UseTargets(GetActivator());
 
 	// Free this entity.
-	GetGameworld()->FreeServerEntity(GetPODEntity());
+	GetGameworld()->FreePODEntity(GetPODEntity());
 }

@@ -13,10 +13,11 @@
 #pragma once
 
 // Pre-declare.
-class ISharedGameEntity;
 class SGEntityHandle;
-class Worldspawn;
+class ISharedGameEntity;
 class IGamemode;
+class Worldspawn;
+
 
 
 /**
@@ -100,21 +101,21 @@ public:
 	* 
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
-    virtual PODEntity* ObtainFreePODEntity() = 0; // Rename to: QueryForPODEntity
+    virtual PODEntity* GetUnusedPODEntity() = 0; // Rename to: QueryForPODEntity
 
  //   /**
 	//*   @brief  Creates and assigns a class entity to the given server entity based on the classname.
  //   *
  //   *   @return A pointer to the class entity on success, nullptr on failure.
  //   **/
- //   template<typename entityClass> inline entityClass* CreateClassEntity(Entity* svEntity = nullptr, bool allocateNewServerEntity = true) {
+ //   template<typename entityClass> inline entityClass* CreateGameEntity(Entity* svEntity = nullptr, bool allocateNewServerEntity = true) {
  //       // Class entity to be returned.
  //       entityClass* classEntity = nullptr;
 
  //       // If a null entity was passed, create a new one
 	//    if (svEntity == nullptr) {
  //           if (allocateNewServerEntity) {
- //               svEntity = ObtainFreeServerEntity();
+ //               svEntity = GetUnusedPODEntity();
  //           } else {
  //               gi.DPrintf("WARNING: tried to spawn a class entity when the edict is null\n");
  //               return nullptr;
@@ -151,8 +152,9 @@ public:
     *
     *   @return True on success, false on failure.
     **/
-    virtual qboolean FreeClassEntity(PODEntity* podEntity) = 0;
-    /**
+    virtual qboolean FreeGameEntity(PODEntity* podEntity) = 0;
+    
+	/**
     *   @brief	Utility function so we can acquire a valid SVGBasePlayer*. It operates
     *			by using an entity handle in order to make sure that it has a valid
     *			server and class entity object.
@@ -161,7 +163,7 @@ public:
     * 
     *   @return A valid pointer to the entity's SVGBasePlayer class entity. nullptr on failure.
     **/
-    static ClassEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
+    static ISharedGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
 
 
@@ -180,8 +182,8 @@ public:
     *   @return Returns a span containing all the base entities from the range of [start] to [start + count]
     *           that passed the filter process.
     **/
-    template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> ClassEntitySpan {
-        return ClassEntitySpan(classEntities).subspan(start, count); //return std::span(classEntities).subspan<start, count>(); 
+    template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> GameEntitySpan {
+        return GameEntitySpan(gameEntities).subspan(start, count); //return std::span(classEntities).subspan<start, count>(); 
     }
     /**
     *   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.
@@ -190,7 +192,7 @@ public:
     *           that passed the filter process.
     **/
     inline PODEntitySpan GetPODEntityRange(std::size_t start, std::size_t count) { 
-        return PODEntitySpan(serverEntities).subspan(start, count); 
+        return PODEntitySpan(podEntities).subspan(start, count); 
     }
     /**
     *   @brief Selectively acquire a list of SVGBaseEntity* derived objects using class entity filters. Use the templated version where possible.
@@ -198,8 +200,8 @@ public:
     *   @return Returns a span containing all the base entities from the range of [start] to [start + count]
     *           that passed the filter process.
     **/
-    inline ClassEntitySpan GetClassEntityRange(std::size_t start, std::size_t count) {
-        return ClassEntitySpan(classEntities).subspan(start, count); 
+    inline GameEntitySpan GetClassEntityRange(std::size_t start, std::size_t count) {
+        return GameEntitySpan(gameEntities).subspan(start, count); 
     }
 
 
@@ -216,16 +218,16 @@ public:
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    virtual ISharedGameEntity** GetClassEntities() = 0;
+    virtual GameEntity** GetGameEntities() = 0;
     /**
     *   @return A pointer of the pod entity located at index.
     **/
-    ISharedGameEntity* GetClassEntityByIndex(uint32_t index) = 0;
+    virtual GameEntity* GetGameEntityByIndex(uint32_t index) = 0;
 
     /**
 	*   @return A pointer to the worldspawn class entity.
 	**/
-    virtual Entity* GetWorldspawnPODEntity() = 0;
+    virtual PODEntity* GetWorldspawnPODEntity() = 0;
     /**
 	*   @return A pointer to the worldspawn class entity.
 	**/
@@ -237,13 +239,13 @@ public:
     *   @brief  Spawns a debris model entity at the given origin.
     *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
     **/
-    virtual void ThrowDebris(SVGBaseEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed) = 0;
+    virtual void ThrowDebris(GameEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed) = 0;
 
     /**
     *   @brief  Spawns a gib model entity flying at random velocities and directions.
     *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
     */
-    virtual void ThrowGib(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) = 0;
+    virtual void ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) = 0;
 
 
 
@@ -273,12 +275,12 @@ private:
     virtual void PreparePlayers() = 0;
 
 
-private:
-    // Array storing the POD server entities.
-    PODEntity serverEntities[MAX_EDICTS];
+protected:
+    // Array storing the engine's client/server POD entities.
+    PODEntity podEntities[MAX_EDICTS];
 
-    //! Array for storing the server game's class entities.
-    ISharedGameEntity* classEntities[MAX_EDICTS];
+    //! Array for storing the (client/server -)game's class entities.
+    GameEntity* gameEntities[MAX_EDICTS];
 
     //! Total number of actively spawned entities.
     int32_t numberOfEntities = 0;
@@ -314,7 +316,7 @@ private:
     *   @brief  Allocates the class entity determined by the classname key, and
     *           then does a precache before spawning the class entity.
     **/
-    qboolean SpawnParsedClassEntity(Entity* svEntity);
+    qboolean SpawnParsedGameEntity(Entity* svEntity);
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.

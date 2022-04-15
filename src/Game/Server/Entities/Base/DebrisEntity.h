@@ -17,7 +17,7 @@ public:
     *   @brief  Used by game modes to spawn server side gibs.
     *   @param  debrisser The entity that is about to spawn debris.
     **/
-    static DebrisEntity* Create(SVGBaseEntity* debrisser, const std::string& debrisModel, const vec3_t &origin, float speed);
+    static DebrisEntity* Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t &origin, float speed);
 
 private:
     DebrisEntity(Entity* svEntity);

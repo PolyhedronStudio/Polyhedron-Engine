@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Base Entity.
 #include "../Entities/Base/CLGBaseEntity.h"
 
-// ClassEntity list.
+// GameEntity list.
 #include "../Entities/ClassEntityList.h"
 //#include "../Utilities.h"
 

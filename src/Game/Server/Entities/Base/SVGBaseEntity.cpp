@@ -304,7 +304,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
 		// allocates one such entity and accepts activator, message, target etc. as parameters
 		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'
-	    SVGBaseTrigger* triggerDelay = GetGameworld()->CreateClassEntity<TriggerDelayedUse>();
+	    SVGBaseTrigger* triggerDelay = GetGameworld()->CreateGameEntity<TriggerDelayedUse>();
 		triggerDelay->SetActivator( activatorOverride );
 		triggerDelay->SetMessage( GetMessage() );
 		triggerDelay->SetTarget( GetTarget() );

@@ -21,3 +21,12 @@
 
 // Shared Entity Interface.
 #include "Entities/ISharedGameEntity.h"
+
+//! Span for PODEntity* objects.
+using PODEntitySpan = std::span<PODEntity>;
+//! Vector for PODEntity* objects.
+using PODEntityVector = std::vector<PODEntity*>;
+//! Span for GameEntity* derived objects.
+using GameEntitySpan = std::span<GameEntity*>;
+//! Vector for GameEntity* derived objects.
+using GameEntityVector = std::vector<GameEntity*>;

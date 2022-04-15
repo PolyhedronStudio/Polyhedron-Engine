@@ -16,7 +16,7 @@ class ISharedGameEntity;
 class SGEntityHandle;
 
 /**
-*	Helper function to cast from an entity handle pointer to a ClassEntity pointer.
+*	Helper function to cast from an entity handle pointer to a GameEntity pointer.
 **/
 template<typename T> static inline T CastHandle(SGEntityHandle& bridge) { return static_cast<T>( static_cast<T*>(bridge) ); }
 template<typename T> static inline T CastHandle(const SGEntityHandle& bridge) { return static_cast<T>(static_cast<T*>(bridge)); }
@@ -29,7 +29,7 @@ template<typename T> static inline T CastHandle(const SGEntityHandle& bridge) { 
 *
 *	By storing the entity index number and a pointer to the POD Entity it is 
 *   capable of acting like a safe handle. The -> operator returns a pointer to a
-*   ClassEntity if, and only if, the POD Entity isn't 0 and the entity index
+*   GameEntity if, and only if, the POD Entity isn't 0 and the entity index
 *   number is equal to the one of the POD Entity's classentity pointer. In order
 *   to assign the pointer to an SVG/CLG -BaseEntity use the * operator. 
 *
@@ -106,12 +106,12 @@ public:
     /**
 	*	@brief * operator implementations.
 	**/
-    ClassEntity*        operator*();
-    const ClassEntity*  operator*() const;
+    GameEntity*        operator*();
+    const GameEntity*  operator*() const;
 
     /**
-	*	@brief	Assigns the ClassEntity to this handle if it has a valid POD Entity.
-	*			If no valid ClassEntity and POD Entity pointer are passed it unsets
+	*	@brief	Assigns the GameEntity to this handle if it has a valid POD Entity.
+	*			If no valid GameEntity and POD Entity pointer are passed it unsets
 	*			the current handle to nullptr and entityID = 0.
 	**/
     ISharedGameEntity* operator=(ISharedGameEntity* classEntity);
@@ -119,13 +119,13 @@ public:
     /**
     *	@brief	Used to access the class entity its methods.
     **/
-    ClassEntity* operator->() const;
+    GameEntity* operator->() const;
 
     /**
     *   @brief  Comparison check for whether this handle points to the same entity as 
-    *           the ClassEntity pointer does.
+    *           the GameEntity pointer does.
     * 
-    *   @return Returns true if ClassEntity* != nullptr, its POD Entity pointer != nullptr, 
+    *   @return Returns true if GameEntity* != nullptr, its POD Entity pointer != nullptr, 
     *           and their entity index number matches.
     **/
     bool operator==(const ISharedGameEntity*);

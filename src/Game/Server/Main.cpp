@@ -350,7 +350,7 @@ void SVG_ClientEndServerFrames(void)
     Gameworld* gameworld = GetGameworld();
 
     // Acquire server entities array.
-    Entity* serverEntities = gameworld->GetServerEntities();
+    Entity* serverEntities = gameworld->GetPODEntities();
 
     // Go through each client and calculate their final view for the state.
     // (This happens here, so we can take into consideration objects that have
@@ -474,7 +474,7 @@ SVG_CheckDMRules
 void SVG_CheckDMRules(void)
 {
     // Get server entities array.
-    Entity* serverEntities = game.world->GetServerEntities();
+    Entity* serverEntities = game.world->GetPODEntities();
 
     int         i;
     ServerClient   *cl;
@@ -535,8 +535,8 @@ void SVG_RunFrame(void) {
     // "even the world gets a chance to Think", it does.
     //
     // Acquire server and class entities arrays.
-    Entity* serverEntities = game.world->GetServerEntities();
-    IServerGameEntity **classEntities = game.world->GetClassEntities();
+    Entity* serverEntities = game.world->GetPODEntities();
+    GameEntity ** gameEntities = game.world->GetGameEntities();
 
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < globals.numberOfEntities; i++) {
@@ -544,12 +544,12 @@ void SVG_RunFrame(void) {
         int32_t stateNumber = serverEntities[i].state.number;
 
         // Ensure it is even there.
-        if (classEntities[i] == nullptr) {
+        if (gameEntities[i] == nullptr) {
             continue;
         }
 
         // Use an entity handle to safely acquire pointers to the corresponding entity.
-	    SGEntityHandle entityHandle = classEntities[i];
+	    SGEntityHandle entityHandle = gameEntities[i];
 
 
         //if (!classEntity || !classEntity->IsInUse()) {
@@ -566,7 +566,7 @@ void SVG_RunFrame(void) {
         // Admer: entity was marked for removal at the previous tick
         if (*entityHandle && entityHandle && (entityHandle->GetServerFlags() & EntityServerFlags::Remove)) {
             // Free server entity.
-            game.world->FreeServerEntity(entityHandle.Get());
+            game.world->FreePODEntity(entityHandle.Get());
 
             // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
             // 

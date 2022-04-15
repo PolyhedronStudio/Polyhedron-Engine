@@ -40,7 +40,7 @@ SVGBasePlayer* SVGBasePlayer::Create(Entity* svEntity) {
     Gameworld* gameworld = GetGameworld();
 
     // Get pointer to server entities.
-    Entity* serverEntities = gameworld->GetServerEntities();
+    Entity* serverEntities = gameworld->GetPODEntities();
 
     // Initialize a clean serverEntity.
     svEntity->inUse = true;
@@ -49,10 +49,10 @@ SVGBasePlayer* SVGBasePlayer::Create(Entity* svEntity) {
     svEntity->state.number = svEntity - serverEntities;
 
     // Delete previous classentity, if existent (older client perhaps).
-    gameworld->FreeClassEntity(svEntity);
+    gameworld->FreeGameEntity(svEntity);
 
     // Recreate class SVGBasePlayer entity.
-    svEntity->classEntity = gameworld->CreateClassEntity<SVGBasePlayer>(svEntity, false);
+    svEntity->classEntity = gameworld->CreateGameEntity<SVGBasePlayer>(svEntity, false);
 
     // Last but not least, return this class entity its pointer.
     return dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);

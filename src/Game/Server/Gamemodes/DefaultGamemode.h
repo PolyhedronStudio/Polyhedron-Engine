@@ -34,7 +34,7 @@ public:
     virtual qboolean GetEntityTeamName(SVGBaseEntity* ent, std::string &teamName) override;
     virtual qboolean OnSameTeam(IServerGameEntity* ent1, IServerGameEntity* ent2) override;
     virtual qboolean CanDamage(IServerGameEntity* targ, IServerGameEntity* inflictor) override;
-    virtual ClassEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
+    virtual GameEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
 
     /***
     * Combat Gamemode Actions.

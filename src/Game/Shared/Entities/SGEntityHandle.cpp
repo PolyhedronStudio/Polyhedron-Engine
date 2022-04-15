@@ -12,11 +12,11 @@
 
 
 /**
-*	@brief	Helper function to acquire the ClassEntity pointer from a server entity.
+*	@brief	Helper function to acquire the GameEntity pointer from a server entity.
 * 
 *	@return	A valid pointer if the POD Entity is pointing to one. nullptr otherwise.
 **/
-static ClassEntity* GetClassEntity(PODEntity* podEntity) {
+static GameEntity* GetClassEntity(PODEntity* podEntity) {
     // Reinterpret cast the classEntity pointer.
     if (podEntity) {
 	    if (podEntity->classEntity != nullptr) {
@@ -134,16 +134,16 @@ const uint32_t SGEntityHandle::ID() { return entityID; }
 /**
 *	@brief * operator implementations.
 **/
-ClassEntity* SGEntityHandle::operator*() { return (ClassEntity*)GetClassEntity(Get()); }
-const ClassEntity* SGEntityHandle::operator*() const { return (ClassEntity*)GetClassEntity(Get()); }
+GameEntity* SGEntityHandle::operator*() { return (GameEntity*)GetClassEntity(Get()); }
+const GameEntity* SGEntityHandle::operator*() const { return (GameEntity*)GetClassEntity(Get()); }
 
 /**
-*	@brief	Assigns the ClassEntity to this handle if it has a valid server entity.
-*			If no valid ClassEntity and server entity pointer are passed it unsets
+*	@brief	Assigns the GameEntity to this handle if it has a valid server entity.
+*			If no valid GameEntity and server entity pointer are passed it unsets
 *			this current handle to nullptr and entityID = 0.
 **/
 ISharedGameEntity* SGEntityHandle::operator=(ISharedGameEntity* classEntity) {
-	// Ensure ClassEntity pointer is valid.
+	// Ensure GameEntity pointer is valid.
     if (classEntity) {
 		// Acquire server entity pointer.
 		podEntity = classEntity->GetPODEntity();
@@ -157,7 +157,7 @@ ISharedGameEntity* SGEntityHandle::operator=(ISharedGameEntity* classEntity) {
 #endif
 		}
 	} else {
-		// No valid ClassEntity pointer, so reset this entity handle.
+		// No valid GameEntity pointer, so reset this entity handle.
 		podEntity = nullptr;
 		entityID = 0;
 	}
@@ -170,13 +170,13 @@ ISharedGameEntity* SGEntityHandle::operator=(ISharedGameEntity* classEntity) {
 /**
 *	@brief	Used to access the class entity its methods.
 **/
-ClassEntity* SGEntityHandle::operator->() const { return (ClassEntity*)GetClassEntity(Get()); }
+GameEntity* SGEntityHandle::operator->() const { return (GameEntity*)GetClassEntity(Get()); }
 
 /**
 *   @brief  Comparison check for whether this handle points to the same POD Entity as 
-*           the ClassEntity pointer does.
+*           the GameEntity pointer does.
 * 
-*   @return Returns true if ClassEntity* != nullptr, its podEntity pointer 
+*   @return Returns true if GameEntity* != nullptr, its podEntity pointer 
 *           != nullptr, and their entity index number matches.
 **/
 bool SGEntityHandle::operator==(const ISharedGameEntity* classEntity) {

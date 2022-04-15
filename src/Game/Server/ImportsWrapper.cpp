@@ -76,7 +76,7 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
     std::vector<IServerGameEntity*> boxedClassEntities;
 
     // Acquire pointer to the class entities array.
-    IServerGameEntity** classEntities = game.world->GetClassEntities();
+    IServerGameEntity** classEntities = game.world->GetGameEntities();
 
     // Ensure the listCount can't exceed the max edicts.
     if (listCount > MAX_EDICTS) {
@@ -106,8 +106,8 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
 //
 SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IServerGameEntity* passent, const int32_t& contentMask) {
     // Acquire server and class entity array pointers.
-    Entity* serverEntities = game.world->GetServerEntities();
-    IServerGameEntity** classEntities = game.world->GetClassEntities();
+    Entity* serverEntities = game.world->GetPODEntities();
+    IServerGameEntity** classEntities = game.world->GetGameEntities();
 
     // Fetch server entity in case one was passed to us.
     Entity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);

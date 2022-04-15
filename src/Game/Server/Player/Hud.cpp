@@ -138,7 +138,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     if (strstr(level.intermission.changeMap, "*")) {
         if (!GetGamemode()->IsClass<CoopGamemode>()) {
             for (i = 0 ; i < maximumclients->value ; i++) {
-                client = game.world->GetServerEntities() + 1 + i;
+                client = game.world->GetPODEntities() + 1 + i;
                 if (!client->inUse) {
                     continue;
                 }
@@ -187,7 +187,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     // (MoveType = PM_FREEZE, positioned at intermission entity view values.)
     for (i = 0 ; i < maximumclients->value ; i++) {
         // Fetch client.
-        client = game.world->GetServerEntities() + 1 + i;
+        client = game.world->GetPODEntities() + 1 + i;
 
         // Ensure a client is in use, otherwise skip it.
         if (!client->inUse)
@@ -224,7 +224,7 @@ void SVG_HUD_GenerateDMScoreboardLayout(IServerGameEntity *ent, IServerGameEntit
  //   // sort the clients by score
  //   total = 0;
  //   for (i = 0 ; i < game.GetMaxClients() ; i++) {
- //       cl_ent = game.world->GetServerEntities() + 1 + i;
+ //       cl_ent = game.world->GetPODEntities() + 1 + i;
  //       if (!cl_ent->inUse || clients[i].respawn.isSpectator)
  //           continue;
  //       score = clients[i].respawn.score;
@@ -252,7 +252,7 @@ void SVG_HUD_GenerateDMScoreboardLayout(IServerGameEntity *ent, IServerGameEntit
 
  //   for (i = 0 ; i < total ; i++) {
 	//cl = &game.GetClients()[sorted[i]];
- //       cl_ent = game.world->GetServerEntities() + 1 + sorted[i];
+ //       cl_ent = game.world->GetPODEntities() + 1 + sorted[i];
 
  //       x = (i >= 6) ? 160 : 0;
  //       y = 32 + 32 * (i % 6);
@@ -497,16 +497,16 @@ void SVG_HUD_CheckChaseStats(Entity *ent)
     //for (i = 1; i <= maximumclients->value; i++) {
     //    ServerClient* cl;
 
-    //    cl = game.world->GetServerEntities()[i].client;
+    //    cl = game.world->GetPODEntities()[i].client;
 
-    //    if (!game.world->GetServerEntities()[i].inUse || (cl->chaseTarget != ent)) {
+    //    if (!game.world->GetPODEntities()[i].inUse || (cl->chaseTarget != ent)) {
     //        continue;
     //    }
 
     //    //memcpy(cl->playerState.stats, ent->client->playerState.stats, sizeof(cl->playerState.stats));
 
     //    // Copy the server entities client into the current spectator.
-    //    SVG_HUD_SetSpectatorStats(game.world->GetServerEntities() + i);
+    //    SVG_HUD_SetSpectatorStats(game.world->GetPODEntities() + i);
     //}
 }
 
@@ -541,7 +541,7 @@ void SVG_HUD_SetSpectatorStats(SVGBasePlayer *player, ServerClient *client) {
 
     if (client->chaseTarget && client->chaseTarget->inUse)
     {
-    	client->playerState.stats[PlayerStats::ChaseClientID] = ConfigStrings::PlayerSkins + (client->chaseTarget - game.world->GetServerEntities()) - 1;
+    	client->playerState.stats[PlayerStats::ChaseClientID] = ConfigStrings::PlayerSkins + (client->chaseTarget - game.world->GetPODEntities()) - 1;
     }
     else
     {

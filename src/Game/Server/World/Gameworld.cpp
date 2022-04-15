@@ -96,12 +96,12 @@ void Gameworld::PrepareEntities() {
 
     // Setup the globals entities pointer and max entities value so
 	// that the server can access it.
-    globals.entities = serverEntities;
+    globals.entities = podEntities;
     globals.maxEntities = this->maxEntities = maxEntities;
 
     // Ensure, all base entities are nullptrs. Just to be save.
     for (int32_t i = 0; i < MAX_EDICTS; i++) {
-		classEntities[i] = nullptr;
+		gameEntities[i] = nullptr;
     }
 }
 
@@ -124,19 +124,19 @@ void Gameworld::PreparePlayers() {
     // Allocate a classentity for each client in existence.
     for (int32_t i = 1; i < maxClients + 1; i++) {
 		// Fetch server entity.
-		Entity* svEntity = &serverEntities[i];
+		PODEntity* podEntity = &podEntities[i];
 
 		// We can fetch the number based on subtracting these two pointers.
-		svEntity->state.number = svEntity - serverEntities;
+		podEntity->state.number = podEntity - podEntities;
 
 		// Allocate player client class entity
-		SVGBasePlayer* playerClientEntity = CreateClassEntity<SVGBasePlayer>(svEntity, false);
+		SVGBasePlayer* playerClientEntity = CreateGameEntity<SVGBasePlayer>(podEntity, false);
 
 		// Be sure to reset their inuse, after all, they aren't in use.
 		playerClientEntity->SetInUse(false);
 
 		// Fetch client index.
-		const int32_t clientIndex = i - 1;  // Same as the older: serverEntity - g_entities - 1;
+		const int32_t clientIndex = i - 1;  // Same as the older: podEntities - podEntities - 1;
 
 		// Assign the designated client to this SVGBasePlayer entity.
 		playerClientEntity->SetClient(&clients[clientIndex]);
@@ -157,13 +157,13 @@ qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities
     // Delete class entities if they are allocated, and reset the server entity to a zero state.
     for (int32_t i = 0; i < game.GetMaxEntities(); i++) {
 		// Delete class entity.
-		if (classEntities[i]) {
-		    delete classEntities[i];
-			classEntities[i] = NULL;
+		if (gameEntities[i]) {
+		    delete gameEntities[i];
+			gameEntities[i] = NULL;
 		}
 
 		// Reset server entity to a zero state.
-		serverEntities[i] = {};
+		gameEntities[i] = {};
     }
 
 	// Copy in the map name and designated spawnpoint(if any.)
@@ -182,8 +182,8 @@ qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities
 	// Token pointer.
 	char *com_token = nullptr;
 
-	// Pointer to the server entity we intend to employ.
-	Entity *serverEntity = nullptr;
+	// Pointer to the pod entity we intend to employ.
+	Entity *podEntity = nullptr;
 
 	// Engage parsing.
 	while (!!isParsing == true) {
@@ -200,23 +200,23 @@ qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities
 		}
 
 		// Pick the first entity there is, start asking for 
-		if (!serverEntity) {
-			serverEntity = serverEntities;
+		if (!podEntity) {
+			podEntity = podEntities;
 		} else {
-			serverEntity = ObtainFreeServerEntity();
+			podEntity = GetUnusedPODEntity();
 		}
 
 		// Now we've got the reserved server entity to use, let's parse the entity.
-		ParseEntityString(&entities, serverEntity);
+		ParseEntityString(&entities, podEntity);
 
 		// Allocate the class entity, and call its spawn.
-		if (!SpawnParsedClassEntity(serverEntity)) {
+		if (!SpawnParsedGameEntity(podEntity)) {
 			parsedSuccessfully = false;
 		}
 	}
 
 	// Post spawn entities.
-	for (auto& classEntity : classEntities) {
+	for (auto& classEntity : gameEntities) {
 		if (classEntity) {
 			classEntity->PostSpawn();
 		}
@@ -242,40 +242,37 @@ qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities
 * 
 *	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 **/
-Entity* Gameworld::ObtainFreeServerEntity() { 
+Entity* Gameworld::GetUnusedPODEntity() { 
     // Incrementor, declared here so we can access it later on.
 	int32_t i = 0;
 
-	// Pointer to server entity to return.
-	Entity *svEntity = nullptr;
-    
 	// Acquire a pointer to the first server entity to start checking from.
-	svEntity = &serverEntities[maxClients + 1];
+	PODEntity *podEntity = &podEntities[maxClients + 1];
 
 	// We'll loop until from maxclients + 1(world entity) till the numberOfEntities 
 	// has been reached. If we never managed to return a pointer to a valid server 
 	// entity right now, we're going to have to increase the amount of entities in use. 
 	// 
 	// However, this ONLY proceeds if we haven't already hit the maximum entity count.
-	for (int32_t i = maxClients + 1; i < numberOfEntities; i++, svEntity++) {
+	for (int32_t i = maxClients + 1; i < numberOfEntities; i++, podEntity++) {
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-	    if (!svEntity->inUse && (svEntity->freeTime < FRAMETIME_S * 2 || level.time - svEntity->freeTime > 500ms)) {
+	    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
             //SVG_InitEntity(serverEntity);
             // Set entity to "inUse".
-			svEntity->inUse = true;
+			podEntity->inUse = true;
 			
 			// Set the entity state number.
-			svEntity->state.number = svEntity - serverEntities;
+			podEntity->state.number = podEntity - podEntities;
 			
 			// Return the newly found server entity pointer.
-			return svEntity;
+			return podEntity;
         }
     }
 
 	// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
     if (i >= maxEntities) {
-        gi.Error("Gameworld::ObtainFreeServerEntity: no free edicts");
+        gi.Error("Gameworld::GetUnusedPODEntity: no free edicts");
 		return nullptr;
 	}
 
@@ -284,13 +281,13 @@ Entity* Gameworld::ObtainFreeServerEntity() {
 	globals.numberOfEntities = numberOfEntities;
 
     // Set entity to "inUse".
-    svEntity->inUse = true;
+    podEntity->inUse = true;
 
     // Set the entity state number.
-    svEntity->state.number = svEntity - serverEntities;
+    podEntity->state.number = podEntity - podEntities;
 
     // Return the server entity.
-    return svEntity;
+    return podEntity;
 }
 
 /**
@@ -300,55 +297,56 @@ Entity* Gameworld::ObtainFreeServerEntity() {
 *               All but the last will have the teamchain field set to the next one.
 **/
 void Gameworld::FindTeams() {
-    Entity *e = nullptr, *e2 = nullptr;
-    IServerGameEntity *chain = nullptr;
+    PODEntity *podEntityA = nullptr;
+	PODEntity *podEntityB = nullptr;
+    GameEntity *chain = nullptr;
     int32_t i, j;
 
     int32_t c = 0;
     int32_t c2 = 0;
-    for (i = 1, e = serverEntities + i; i < numberOfEntities; i++, e++) {
+    for (i = 1, podEntityA = podEntities + i; i < numberOfEntities; i++, podEntityA++) {
         // Fetch class entity.
-        IServerGameEntity *classEntity = classEntities[e->state.number];
+        GameEntity *gameEntityA = gameEntities[podEntityA->state.number];
 
-        if (classEntity == nullptr) {
+        if (gameEntityA == nullptr) {
             continue;
 		}
-        if (!classEntity->IsInUse()) {
+        if (!gameEntityA->IsInUse()) {
             continue;
 		}
-        if (classEntity->GetTeam().empty()) {
+        if (gameEntityA->GetTeam().empty()) {
             continue;
 		}
-		if (classEntity->GetFlags() & EntityFlags::TeamSlave) { 
+		if (gameEntityA->GetFlags() & EntityFlags::TeamSlave) { 
             continue;
 		}
-        chain = classEntity;
-        classEntity->SetTeamMasterEntity(classEntity);
+        chain = gameEntityA;
+        gameEntityA->SetTeamMasterEntity(gameEntityA);
         c++;
         c2++;
 
-        for (j = i + 1, e2 = e + 1 ; j < globals.numberOfEntities ; j++, e2++) {
+        for (j = i + 1, podEntityB = podEntityA + 1 ; j < globals.numberOfEntities ; j++, podEntityB++) {
             // Fetch class entity.
-            IServerGameEntity* classEntity2 = classEntities[e->state.number];
+            GameEntity* gameEntityB = gameEntities[podEntityA->state.number];
 
-            if (classEntity2 == nullptr) { 
+            if (gameEntityB == nullptr) { 
                 continue;
 			}
-            if (!classEntity2->IsInUse()) { 
+            if (!gameEntityB->IsInUse()) { 
                 continue;
 			}
-			if (classEntity2->GetTeam().empty()) {
+			if (gameEntityB->GetTeam().empty()) {
 				continue;
 			}
-			if (classEntity2->GetFlags() & EntityFlags::TeamSlave) {
+			if (gameEntityB->GetFlags() & EntityFlags::TeamSlave) {
 				continue;
 			}
-            if (classEntity->GetTeam() == classEntity2->GetTeam()) {
+            if (gameEntityA->GetTeam() == gameEntityB->GetTeam()) {
                 c2++;
-                chain->SetTeamChainEntity(classEntity2);
-                classEntity2->SetTeamMasterEntity(classEntity);
-                chain = classEntity2;
-                classEntity2->SetFlags(classEntity2->GetFlags() | EntityFlags::TeamSlave);
+                chain->SetTeamChainEntity(gameEntityB);
+                gameEntityB->SetTeamMasterEntity(gameEntityA);
+                chain = gameEntityB;
+                gameEntityB->SetFlags(gameEntityB->GetFlags() | EntityFlags::TeamSlave);
             }
         }
     }
@@ -423,7 +421,7 @@ qboolean Gameworld::ParseEntityString(const char** data, Entity* svEntity) {
 *   @brief  Allocates the class entity determined by the classname key, and
 *           then does a precache before spawning the class entity.
 **/
-qboolean Gameworld::SpawnParsedClassEntity(Entity* svEntity) {
+qboolean Gameworld::SpawnParsedGameEntity(Entity* svEntity) {
 	// Acquire dictionary.
     auto &dictionary = svEntity->entityDictionary;
 
@@ -445,7 +443,7 @@ qboolean Gameworld::SpawnParsedClassEntity(Entity* svEntity) {
     // Something went wrong with allocating the class entity.
     if (!classEntity) {
 		// Be sure to free it.
-		FreeServerEntity(svEntity);
+		FreePODEntity(svEntity);
 
 		// Failed.
 		gi.DPrintf("Warning: Spawning entity(%s) failed.\n", svEntity->entityDictionary["classname"]);
@@ -471,9 +469,9 @@ qboolean Gameworld::SpawnParsedClassEntity(Entity* svEntity) {
 *			try and allocate it.
 *	@return	nullptr in case of failure, a valid pointer to a class entity otherwise.
 **/
-IServerGameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &classname) {
+GameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &classname) {
     // Start with a nice nullptr.
-    IServerGameEntity* spawnEntity = nullptr;
+    GameEntity* spawnEntity = nullptr;
 
 	// Safety check.
     if (!svEntity) {
@@ -484,7 +482,7 @@ IServerGameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::s
     int32_t stateNumber = svEntity->state.number;
 
 	// Warn if a slot is already occupied.
-    if (classEntities[stateNumber] != nullptr) {
+    if (gameEntities[stateNumber] != nullptr) {
 		// Warn.
 		gi.DPrintf("WARNING: trying to allocate class entity '%s' the slot #%i was pre-occupied.\n");
 
@@ -510,7 +508,7 @@ IServerGameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::s
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
 		// Allocate and return out new class entity.
-		return (classEntities[stateNumber] = info->AllocateInstance(svEntity));
+		return (gameEntities[stateNumber] = info->AllocateInstance(svEntity));
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
@@ -525,21 +523,22 @@ IServerGameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::s
 }
 
 /**
-*   @brief  Frees the given server entity and its class entity in order to recycle it again.
+*   @brief  Frees the given pod entity and its game class object entity 
+*			rendering this entity to be used for recycling.
 *
 *   @return A pointer to the class entity on success, nullptr on failure.
 **/
-void Gameworld::FreeServerEntity(Entity* svEntity) {
+void Gameworld::FreePODEntity(PODEntity* podEntity) {
     // Sanity check.
-    if (!svEntity) {
+    if (!podEntity) {
 		return;
     }
 
     // Unlink entity from world.
-    gi.UnlinkEntity(svEntity);
+    gi.UnlinkEntity(podEntity);
 
     // Get entity number.
-    int32_t entityNumber = svEntity->state.number;
+    int32_t entityNumber = podEntity->state.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
     if (entityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
@@ -548,48 +547,48 @@ void Gameworld::FreeServerEntity(Entity* svEntity) {
     }
 
     // Delete the actual entity class pointer.
-    FreeClassEntity(svEntity);
+    FreeGameEntity(podEntity);
 
     // Reset the entities values.
-    *svEntity = {};
+    *podEntity = {};
 
     // Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
     // If we don't, we risk the chance of a client lerping between an older entity that
     // was taking up this current slot.
-    svEntity->freeTime = level.time;
+    podEntity->freeTime = level.time;
 
     // Last but not least, since it isn't in use anymore, let it be known.
-    svEntity->inUse = false;
+    podEntity->inUse = false;
 
     // Reset serverFlags.
-    svEntity->serverFlags = 0;
+    podEntity->serverFlags = 0;
 
     // Ensure the class entity is nullified.
-    svEntity->classEntity = nullptr;
+    podEntity->classEntity = nullptr;
 }
 
 /**
-*   @brief  Frees the given class entity.
+*   @brief  Frees the given game entity class object.
 *
 *   @return True on success, false on failure.
 **/
-qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
+qboolean Gameworld::FreeGameEntity(PODEntity* podEntity) {
     // Sanity check.
-    if (!svEntity) {
-	gi.DPrintf("WARNING: tried to %s on a nullptr entity.", __func__);
-	return false;
+    if (!podEntity) {
+		gi.DPrintf("WARNING: tried to %s on a nullptr PODEntity!\n", __func__);
+		return false;
     }
 
     // Used as return value.
-    qboolean freedClassEntity = false;
+    qboolean freedGameEntity = false;
 
     // Fetch entity number.
-    int32_t entityNumber = svEntity->state.number;
+    int32_t entityNumber = podEntity->state.number;
 
     // Special class entity handling IF it still has one.
-    if (svEntity->classEntity) {
+    if (podEntity->classEntity) {
 		// Get pointer to class entity.
-		IServerGameEntity* classEntity = svEntity->classEntity;
+		IServerGameEntity* classEntity = podEntity->classEntity;
 
 		// Remove the classEntity reference
 		classEntity->SetGroundEntity(nullptr);
@@ -598,22 +597,22 @@ qboolean Gameworld::FreeClassEntity(Entity* svEntity) {
 		classEntity->SetPODEntity(nullptr);
 
 		// Reset server entity's class entity pointer.
-		svEntity->classEntity = nullptr;
+		podEntity->classEntity = nullptr;
     }
 
     // For whichever faulty reason the entity might not have had a classentity,
     // so we do an extra delete here just in case.
-    if (classEntities[entityNumber] != nullptr) {
+    if (gameEntities[entityNumber] != nullptr) {
 		// Free it.
-		delete classEntities[entityNumber];
-		classEntities[entityNumber] = nullptr;
+		delete gameEntities[entityNumber];
+		gameEntities[entityNumber] = nullptr;
 
 		// Freed class entity.
-		freedClassEntity = true;
+		freedGameEntity = true;
     }
 
     // Return result.
-    return freedClassEntity;
+    return freedGameEntity;
 }
 
 /**
@@ -656,7 +655,7 @@ SVGBaseEntity* Gameworld::ValidateEntity(const SGEntityHandle &entityHandle, boo
 *   @brief  Spawns a debris model entity at the given origin.
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
-void Gameworld::ThrowDebris(SVGBaseEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
+void Gameworld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
 	DebrisEntity::Create(debrisser, gibModel, origin, speed); 
 }
 
@@ -664,6 +663,6 @@ void Gameworld::ThrowDebris(SVGBaseEntity* debrisser, const std::string &gibMode
 *   @brief  Spawns a gib model entity flying at random velocities and directions.
 *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
 */
-void Gameworld::ThrowGib(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) { 
+void Gameworld::ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) { 
 	GibEntity::Create(gibber, gibModel, damage, gibType);
 }

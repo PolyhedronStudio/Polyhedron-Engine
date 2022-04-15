@@ -46,7 +46,7 @@
 
 // Using =
 class IClientGameEntity;
-using ClassEntity = IClientGameEntity;//CLGBaseEntity;
+using GameEntity = IClientGameEntity;//CLGBaseEntity;
 //! For now, equals POD Entity.
 //using Entity = ClientEntity;
 //! POD Entity.
@@ -66,7 +66,7 @@ using EntityDictionary = std::map<std::string, std::string>;
 
 
 class IServerGameEntity;
-using ClassEntity = IServerGameEntity;
+using GameEntity = IServerGameEntity;
 //! Entity Dictionary.
 using EntityDictionary = std::map<std::string, std::string>;
 #define GAME_INCLUDE

@@ -16,7 +16,7 @@ public:
     /**
     *   @brief  Used by game modes to spawn server side gibs.
     **/
-    static GibEntity* Create(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
+    static GibEntity* Create(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
 
 private:
     //! Private constructor. Gibs are created using the Create function.

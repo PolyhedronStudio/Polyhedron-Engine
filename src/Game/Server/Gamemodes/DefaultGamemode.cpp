@@ -57,11 +57,11 @@ qboolean DefaultGamemode::CanSaveGame(qboolean isDedicatedServer) {
 // Default implementation for exiting levels.
 //===============
 void DefaultGamemode::OnLevelExit() {
-    // Acquire server entities pointer.
-    Entity* serverEntities = game.world->GetServerEntities();
+    // Acquire pod entities pointer.
+    Entity* podEntities = game.world->GetPODEntities();
     
-    // Acquire class entities pointer.
-    IServerGameEntity** classEntities = game.world->GetClassEntities();
+    // Acquire game entities pointer.
+    GameEntity** gameEntities = game.world->GetGameEntities();
 
     // Create the command to use for switching to the next game map.
     std::string command = "gamemap \"";
@@ -81,34 +81,34 @@ void DefaultGamemode::OnLevelExit() {
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < maximumclients->value; i++) {
         // Fetch the Worldspawn entity number.
-        Entity *serverEntity = &serverEntities[i];
+        PODEntity *podEntity = &podEntities[i];
 
-        if (!serverEntity)
+        if (!podEntity || !podEntity->inUse) {
             continue;
+		}
 
-        if (!serverEntity->inUse)
-            continue;
-
-        uint32_t stateNumber = serverEntity->state.number;
+		// Get state number.
+        const uint32_t stateNumber = podEntity->state.number;
 
         // Fetch the corresponding base entity.
-        IServerGameEntity* entity = classEntities[stateNumber];
+        GameEntity* gameEntity = gameEntities[stateNumber];
 
         // Ensure an entity its health is reset to default.
-        if (entity->GetHealth() > entity->GetClient()->persistent.stats.maxHealth)
-            entity->SetHealth(entity->GetClient()->persistent.stats.maxHealth);
+        if (gameEntity->GetHealth() > gameEntity->GetClient()->persistent.stats.maxHealth) {
+            gameEntity->SetHealth(gameEntity->GetClient()->persistent.stats.maxHealth);
+		}
     }
 } 
 
-qboolean DefaultGamemode::IsDeadEntity(SVGBaseEntity *entity) {
+qboolean DefaultGamemode::IsDeadEntity(SVGBaseEntity *gameEntity) {
     // Sanity check.
-    if (!entity) {
+    if (!gameEntity) {
         gi.DPrintf("Warning: IsDeadEntity called with a nullptr.\n");
         return true;
     }
 
     // In this case it's dead either when health is < 1, or if its DeadFlag has been set.
-    if (entity->GetHealth() < 1 || entity->GetDeadFlag()) {
+    if (gameEntity->GetHealth() < 1 || gameEntity->GetDeadFlag()) {
         return true;
     }
 
@@ -253,14 +253,14 @@ qboolean DefaultGamemode::CanDamage(IServerGameEntity* target, IServerGameEntity
 //===============
 // DefaultGamemode::FindWithinRadius
 //
-// Returns a ClassEntityVector list containing the results of the found
+// Returns a GameEntityVector list containing the results of the found
 // given entities that reside within the origin to radius. 
 // 
 // Flags can be set to determine which "solids" to exclude.
 //===============
-ClassEntityVector DefaultGamemode::FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) {
+GameEntityVector DefaultGamemode::FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) {
     // List of base entities to return.
-    ClassEntityVector radiusEntities;
+    GameEntityVector radiusEntities;
 
     // Iterate over all entities, see who is nearby, and who is not.
     for (auto* radiusEntity : game.world->GetClassEntityRange<0, MAX_EDICTS>()
@@ -511,7 +511,7 @@ void DefaultGamemode::InflictRadiusDamage(IServerGameEntity* inflictor, IServerG
     }
 
     // Find entities within radius.
-    ClassEntityVector radiusEntities = FindBaseEnitiesWithinRadius(inflictor->GetOrigin(), radius, Solid::Not);
+    GameEntityVector radiusEntities = FindBaseEnitiesWithinRadius(inflictor->GetOrigin(), radius, Solid::Not);
 
     //while ((ent = SVG_FindEntitiesWithinRadius(ent, inflictor->GetOrigin(), radius)) != NULL) {
     for (auto& baseEntity : radiusEntities) {
@@ -578,7 +578,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
         return;
 
     // Acquire pointer to server entities array.
-    Entity *serverEntities = game.world->GetServerEntities();
+    Entity *serverEntities = game.world->GetPODEntities();
 
     // Unlink the player client entity.
     ent->UnlinkEntity();
@@ -599,7 +599,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     }
 
     // Create the class entity for this queued bodyEntity.
-    SVGBaseEntity *bodyClassEntity = game.world->CreateClassEntity<BodyCorpse>(bodyEntity, false);
+    SVGBaseEntity *bodyClassEntity = game.world->CreateGameEntity<BodyCorpse>(bodyEntity, false);
 
     // Unlink the body entity, in case it was linked before.
     bodyClassEntity->UnlinkEntity();
@@ -1094,7 +1094,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 
     // update chase cam if being followed
     //for (int i = 1; i <= maximumclients->value; i++) {
-    //    other = game.world->GetServerEntities() + i;
+    //    other = game.world->GetPODEntities() + i;
     //    if (other->inUse && other->client->chaseTarget == serverEntity)
     //        SVG_UpdateChaseCam(playerEntity);
     //}
@@ -1278,7 +1278,7 @@ void DefaultGamemode::ClientUserinfoChanged(Entity* ent, char* userinfo) {
     // set skin
     s = Info_ValueForKey(userinfo, "skin");
 
-    playernum = ent - game.world->GetServerEntities() - 1;
+    playernum = ent - game.world->GetPODEntities() - 1;
 
     // combine name and skin into a configstring
     gi.configstring(ConfigStrings::PlayerSkins + playernum, va("%s\\%s", ent->client->persistent.netname, s));
@@ -1735,7 +1735,7 @@ void DefaultGamemode::ClientDeath(SVGBasePlayer *player) {
 //===============
 void DefaultGamemode::StorePlayerPersistentData(void) {
     // Acquire server entity pointer.
-    Entity* serverEntities = game.world->GetServerEntities();
+    Entity* serverEntities = game.world->GetPODEntities();
 
     // Acquire a pointer to the game's clients.
     ServerClient* gameClients = game.GetClients();

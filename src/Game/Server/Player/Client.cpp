@@ -84,7 +84,7 @@ void spectator_respawn(Entity *ent)
 
         // Count actual active spectators
         for (i = 1, numspec = 0; i <= maximumclients->value; i++)
-            if (game.world->GetServerEntities()[i].inUse && game.world->GetServerEntities()[i].client->persistent.isSpectator)
+            if (game.world->GetPODEntities()[i].inUse && game.world->GetPODEntities()[i].client->persistent.isSpectator)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
@@ -127,7 +127,7 @@ void spectator_respawn(Entity *ent)
     if (!ent->client->persistent.isSpectator)  {
         // send effect
         gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);//WriteByte(ServerGameCommand::MuzzleFlash);
-        gi.MSG_WriteInt16(ent - game.world->GetServerEntities());//WriteShort(ent - game.world->GetServerEntities());
+        gi.MSG_WriteInt16(ent - game.world->GetPODEntities());//WriteShort(ent - game.world->GetPODEntities());
         gi.MSG_WriteUint8(MuzzleFlashType::Login);//WriteByte(MuzzleFlashType::Login);
         gi.Multicast(ent->state.origin, Multicast::PVS);
 
@@ -157,7 +157,7 @@ to be placed into the game.  This will happen every level load.
 void SVG_ClientBegin(Entity *ent)
 {
     // Fetch this entity's client.
-    ent->client = game.GetClients() + (ent - game.world->GetServerEntities() - 1);
+    ent->client = game.GetClients() + (ent - game.world->GetPODEntities() - 1);
 
     // Let the game mode decide from here on out.
     GetGamemode()->ClientBegin(ent);
@@ -236,7 +236,7 @@ void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 
     // update chase cam if being followed
     //for (int i = 1; i <= maximumclients->value; i++) {
-    //    other = game.world->GetServerEntities() + i;
+    //    other = game.world->GetPODEntities() + i;
     //    if (other->inUse && other->client->chaseTarget == serverEntity)
     //        SVG_UpdateChaseCam(playerEntity);
     //}

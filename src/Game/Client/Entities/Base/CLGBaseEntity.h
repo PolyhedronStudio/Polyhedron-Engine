@@ -9,7 +9,7 @@
 ***/
 #pragma once
 
-// Client Game ClassEntity Interface.
+// Client Game GameEntity Interface.
 #include "../IClientGameEntity.h"
 
 
@@ -185,7 +185,7 @@ public:
     *   @param  activatorOverride:  if nullptr, the entity's own activator is used and if the entity's own activator is nullptr, 
     *                               then this entity itself becomes the activator
     **/
-    void UseTargets( ClassEntity* activatorOverride = nullptr ) override {};
+    void UseTargets( GameEntity* activatorOverride = nullptr ) override {};
 
 
 
@@ -273,8 +273,8 @@ public:
     /**
     *   @brief Get/Set: Activator
     **/
-    virtual ClassEntity* GetActivator() { return nullptr; };
-    virtual void SetActivator(ClassEntity* activator) {};
+    virtual GameEntity* GetActivator() { return nullptr; };
+    virtual void SetActivator(GameEntity* activator) {};
 
     /**
     *   @brief Get/Set: Angles
@@ -387,8 +387,8 @@ public:
     /**
     *   @brief Get/Set: Enemy
     **/
-    virtual ClassEntity*    GetEnemy() { return 0; };
-    virtual void            SetEnemy(ClassEntity* enemy) {};
+    virtual GameEntity*    GetEnemy() { return 0; };
+    virtual void            SetEnemy(GameEntity* enemy) {};
 
     /**
     *   @brief Get: Entity Dictionary.
@@ -424,7 +424,7 @@ public:
     **/
     // TODO TODO TODO: Fix it so it returns the actual ground entity....
 	virtual SGEntityHandle  GetGroundEntity() { return groundEntity; }; //SGEntityHandle(); };
-    virtual void            SetGroundEntity(ClassEntity* groundEntity) { this->groundEntity = groundEntity; };
+    virtual void            SetGroundEntity(GameEntity* groundEntity) { this->groundEntity = groundEntity; };
 
     /**
     *   @brief Get/Set: Ground Entity Link Count
@@ -658,7 +658,7 @@ public:
     /**
     *   @brief Get/Set:     Old Enemy Entity
     **/
-    virtual ClassEntity*    GetOldEnemy() { return oldEnemyEntity; }
+    virtual GameEntity*    GetOldEnemy() { return oldEnemyEntity; }
     virtual void            SetOldEnemy(IClientGameEntity* oldEnemy) { this->oldEnemyEntity = oldEnemy; };
 
     /**
@@ -696,7 +696,7 @@ public:
     /**
     *   @brief Get/Set:     Owner Entity
     **/
-    virtual ClassEntity*    GetOwner() { return ownerEntity; };
+    virtual GameEntity*    GetOwner() { return ownerEntity; };
     virtual void            SetOwner(IClientGameEntity* owner) { ownerEntity = owner; };
 
     /**
@@ -828,7 +828,7 @@ public:
     *   @brief Get/Set:     Team Chain
     **/
     virtual IClientGameEntity*	GetTeamChainEntity() { return this->teamChainEntity; }
-    virtual void				SetTeamChainEntity(ClassEntity* entity) { this->teamChainEntity = teamChainEntity; };
+    virtual void				SetTeamChainEntity(GameEntity* entity) { this->teamChainEntity = teamChainEntity; };
 
     /**
     *   @brief Get/Set:     Team Master

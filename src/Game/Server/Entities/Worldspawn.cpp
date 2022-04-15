@@ -287,7 +287,7 @@ void Worldspawn::Spawn() {
     // Reserve some spots for dead player bodies for coop / deathmatch
     level.bodyQue = 0;
     for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
-	    Entity* ent = GetGameworld()->ObtainFreeServerEntity();
+	    Entity* ent = GetGameworld()->GetUnusedPODEntity();
 
         //ent->classname = "bodyque";
     }

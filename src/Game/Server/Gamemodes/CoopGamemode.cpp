@@ -297,13 +297,13 @@ void CoopGamemode::ClientDeath(SVGBasePlayer *player) {
 // edicts are wiped.
 //===============
 void CoopGamemode::StorePlayerPersistentData(void) {
-    Entity *ent;
-
-    ServerClient* gameClients = game.GetClients();
-    Entity*	  serverEntities = game.world->GetServerEntities();
+    // Acquire pointer to the current game's clients.
+	ServerClient* gameClients = game.GetClients();
+	// Pointer to the POD Entities.
+    PODEntity* podEntities = game.world->GetPODEntities();
 
     for (int32_t i = 0 ; i < game.GetMaxClients() ; i++) {
-        ent = &serverEntities[1 + i];
+        const PODEntity *ent = &podEntities[1 + i];
         if (!ent->inUse)
             continue;
         if (!ent->classEntity)

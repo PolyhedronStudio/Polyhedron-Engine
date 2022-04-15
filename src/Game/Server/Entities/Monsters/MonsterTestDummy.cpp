@@ -212,7 +212,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     //    vec3_t currentMoveAngles = GetAngles();
 
 	   // // Direction vector between player and other entity.
-	   // vec3_t wishMoveAngles = GetGameworld()->GetClassEntities()[1]->GetOrigin() - GetOrigin();
+	   // vec3_t wishMoveAngles = GetGameworld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
 
 	   // // Teehee
 	   // vec3_t newModelAngles = vec3_euler(wishMoveAngles);

@@ -82,7 +82,7 @@ void UTIL_TouchTriggers(IServerGameEntity *ent)
         return;
 
     // Fetch the boxed entities.
-    ClassEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
+    GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
 
     // Do some extra sanity checks on the touched entity list. It is possible to have 
     // an entity be removed before we get to it (kill triggered).
@@ -116,7 +116,7 @@ void G_TouchSolids(IServerGameEntity *ent)
 	return;
 
     // Fetch the boxed entities.
-    ClassEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Solid);
+    GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Solid);
 
     // Do some extra sanity checks on the touched entity list. It is possible to have
     // an entity be removed before we get to it (kill triggered).
@@ -162,7 +162,7 @@ qboolean SVG_KillBox(IServerGameEntity *ent)
         return false;
 
     // Get all entities within the entities bounding box.
-    ClassEntityVector boxEntities = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax());
+    GameEntityVector boxEntities = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax());
 
     // For each boxed entity ensure it isn't our test entity and inflict damage to them.
     bool success = false;

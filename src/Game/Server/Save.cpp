@@ -805,7 +805,7 @@ void SVG_ReadGame(const char *filename)
         gi.Error("Savegame has bad maxEntities");
     }
 
-    globals.entities = game.world->GetServerEntities();
+    globals.entities = game.world->GetPODEntities();
     globals.maxEntities = game.GetMaxEntities();
 
     //game.clients = (ServerClient*)gi.TagMalloc(game.GetMaxClients() * sizeof(clients[0]), TAG_GAME); // CPP: Cast
@@ -843,7 +843,7 @@ void SVG_WriteLevel(const char *filename)
 
     // write out all the entities
     for (i = 0; i < globals.numberOfEntities; i++) {
-        ent = &game.world->GetServerEntities()[i];
+        ent = &game.world->GetPODEntities()[i];
         if (!ent->inUse)
             continue;
         write_int(f, i);
@@ -884,7 +884,7 @@ void SVG_ReadLevel(const char *filename)
 
     // Ensure all entities have a clean slate in memory.
     for (int32_t i = 0; i < game.GetMaxEntities(); i++) {
-	    game.world->GetServerEntities()[i] = {};
+	    game.world->GetPODEntities()[i] = {};
     }
 
     f = fopen(filename, "rb");
@@ -922,7 +922,7 @@ void SVG_ReadLevel(const char *filename)
         if (entnum >= globals.numberOfEntities)
             globals.numberOfEntities = entnum + 1;
 
-        ent = &game.world->GetServerEntities()[entnum];
+        ent = &game.world->GetPODEntities()[entnum];
         read_fields(f, entityfields, ent);
         ent->inUse = true;
         ent->state.number = entnum;
@@ -936,14 +936,14 @@ void SVG_ReadLevel(const char *filename)
 
     // mark all clients as unconnected
     for (i = 0 ; i < maximumclients->value ; i++) {
-        ent = &game.world->GetServerEntities()[i + 1];
+        ent = &game.world->GetPODEntities()[i + 1];
         ent->client = game.GetClients() + i;
         ent->client->persistent.isConnected = false;
     }
 
     // do any load time things at this point
     for (i = 0 ; i < globals.numberOfEntities ; i++) {
-        ent = &game.world->GetServerEntities()[i];
+        ent = &game.world->GetPODEntities()[i];
 
         if (!ent->inUse)
             continue;

@@ -318,7 +318,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     vec3_t dir = vec3_normalize(aimdir);
  
     // Spawn the blaster bolt server entity.
-    BlasterBolt* boltEntity = game.world->CreateClassEntity<BlasterBolt>();
+    BlasterBolt* boltEntity = game.world->CreateGameEntity<BlasterBolt>();
 
     // Welp. It can happen sometimes
     if ( nullptr == boltEntity ) {

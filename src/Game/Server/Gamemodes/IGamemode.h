@@ -14,7 +14,7 @@
 class SVGBaseEntity;
 class SVGBasePlayer;
 
-using ClassEntityVector = std::vector<IServerGameEntity*>;
+//using GameEntityVector = std::vector<IServerGameEntity*>;
 
 class IGamemode {
 public:
@@ -185,7 +185,7 @@ public:
     virtual qboolean CanDamage(IServerGameEntity * target, IServerGameEntity * inflictor) = 0;
     // Returns the entities found within a radius. Great for game mode fun times,
     // and that is why it resides here. Allows for customization.
-    virtual ClassEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
+    virtual GameEntityVector FindBaseEnitiesWithinRadius(const vec3_t &origin, float radius, uint32_t excludeSolidFlags) = 0;
 
 
     //

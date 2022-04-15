@@ -23,9 +23,12 @@ class CLGBaseEntity;
 *   Since we're dealing with incoming packets telling us the state of each entity in frame, 
 *   we'll have to carefully manage which states belong to what entities. The entity classname
 *   is send over the wire as a hash value(Com_HashString). Whenever it changes, the current
-*   class object here is destroyed immediately and replaced by the class which registered name
-*   has an equal hashed string. If it fails to find an equal hashed string it'll resort to
-*   spawning a CLGBaseEntity instead.
+*   class object here is destroyed. A newly allocated class object which has a registered hash
+*   that matches the received hashstring takes its place instead. 
+*
+*	If it fails to find an equal hashstring however, it'll resort to the default CLGBaseEntity
+*	instead. The default CLGBaseEntity takes care of the default behavior. (Similar to how it
+*	would be in Quake 2 without having control over client-side entities.)
 * 
 *   In similar fashion like the SVGBaseEntity you have Set, Get, callback and think functions
 *   respectively.
@@ -75,7 +78,7 @@ public:
     **/
     IClientGameEntity *InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force = true);
 
-    inline CLGEntityVector *GetClassEntities() { return &classEntities; };
+    inline CLGEntityVector *GetGameEntities() { return &classEntities; };
 private:
     //! First 2048 are reserved for server side entities.
     CLGEntityVector classEntities;

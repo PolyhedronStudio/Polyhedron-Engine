@@ -19,7 +19,10 @@ class SVGBaseEntity;
 class SGEntityHandle;
 class Worldspawn;
 class IGamemode;
+class IServerGameEntity;
+#include "../Entities/IServerGameEntity.h"
 
+#include "../../../Game/Shared/World/IGameworld.h"
 #include "../Entities.h"
 #include "../Entities/Worldspawn.h"
 
@@ -28,7 +31,7 @@ class IGamemode;
 * 
 *	@details 
 **/
-class Gameworld {
+class Gameworld : public IGameworld {
 public:
     /**
 	*	@brief Default constructor.
@@ -104,21 +107,21 @@ public:
 	* 
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
-    Entity* ObtainFreeServerEntity();
+    Entity* GetUnusedPODEntity();
 
     /**
 	*   @brief  Creates and assigns a class entity to the given server entity based on the classname.
     *
     *   @return A pointer to the class entity on success, nullptr on failure.
     **/
-    template<typename entityClass> inline entityClass* CreateClassEntity(Entity* svEntity = nullptr, bool allocateNewServerEntity = true) {
+    template<typename entityClass> inline entityClass* CreateGameEntity(Entity* svEntity = nullptr, bool allocateNewServerEntity = true) {
         // Class entity to be returned.
         entityClass* classEntity = nullptr;
 
         // If a null entity was passed, create a new one
 	    if (svEntity == nullptr) {
             if (allocateNewServerEntity) {
-                svEntity = ObtainFreeServerEntity();
+                svEntity = GetUnusedPODEntity();
             } else {
                 gi.DPrintf("WARNING: tried to spawn a class entity when the edict is null\n");
                 return nullptr;
@@ -136,8 +139,8 @@ public:
             // Store the svEntity's class entity pointer.
             svEntity->classEntity = classEntity;
 
-            if (nullptr == classEntities[svEntity->state.number]) {
-                classEntities[svEntity->state.number] = classEntity;
+            if (nullptr == gameEntities[svEntity->state.number]) {
+                gameEntities[svEntity->state.number] = classEntity;
             } else {
                 gi.DPrintf("ERROR: edict %i is already taken\n", svEntity->state.number);
             }
@@ -149,13 +152,13 @@ public:
     *
     *   @return A pointer to the class entity on success, nullptr on failure.
     **/
-    void FreeServerEntity(Entity *svEntity);
+    void FreePODEntity(PODEntity *podEntity);
     /**
 	*   @brief  Frees the given class entity.
     *
     *   @return True on success, false on failure.
     **/
-    qboolean FreeClassEntity(Entity* svEntity);
+    qboolean FreeGameEntity(PODEntity* podEntity);
     /**
     *   @brief	Utility function so we can acquire a valid SVGBasePlayer*. It operates
     *			by using an entity handle in order to make sure that it has a valid
@@ -169,119 +172,129 @@ public:
 
 
 
-    /**
-    *   @brief Selectively acquire a list of Entity* derived objects using entity filters.
-    * 
-    *   @return Returns a span containing all the entities from the range of [start] to [start + count]
-    *           that passed the filter process.
-    **/
-    template<std::size_t start, std::size_t count> inline auto GetServerEntityRange() -> std::span<Entity, count> {
-        return std::span(serverEntities).subspan(start, count); //return std::span(serverEntities).subspan<start, count>(); 
-    }
-    /**
-    *   @brief Selectively acquire a list of SVGBaseEntity* derived objects using class entity filters.
-    * 
-    *   @return Returns a span containing all the base entities from the range of [start] to [start + count]
-    *           that passed the filter process.
-    **/
-    template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> ClassEntitySpan {
-        return ClassEntitySpan(classEntities).subspan(start, count); //return std::span(classEntities).subspan<start, count>(); 
-    }
-    /**
-    *   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.
-    * 
-    *   @return Returns a span containing all the entities from the range of [start] to [start + count]
-    *           that passed the filter process.
-    **/
-    inline ServerEntitySpan GetServerEntityRange(std::size_t start, std::size_t count) { 
-        return ServerEntitySpan(serverEntities).subspan(start, count); 
-    }
-    /**
-    *   @brief Selectively acquire a list of SVGBaseEntity* derived objects using class entity filters. Use the templated version where possible.
-    * 
-    *   @return Returns a span containing all the base entities from the range of [start] to [start + count]
-    *           that passed the filter process.
-    **/
-    inline ClassEntitySpan GetClassEntityRange(std::size_t start, std::size_t count) {
-        return ClassEntitySpan(classEntities).subspan(start, count); 
-    }
+    ///**
+    //*   @brief Selectively acquire a list of Entity* derived objects using entity filters.
+    //* 
+    //*   @return Returns a span containing all the entities from the range of [start] to [start + count]
+    //*           that passed the filter process.
+    //**/
+    //template<std::size_t start, std::size_t count> inline auto GetServerEntityRange() -> std::span<Entity, count> {
+    //    return std::span(serverEntities).subspan(start, count); //return std::span(serverEntities).subspan<start, count>(); 
+    //}
+    ///**
+    //*   @brief Selectively acquire a list of SVGBaseEntity* derived objects using class entity filters.
+    //* 
+    //*   @return Returns a span containing all the base entities from the range of [start] to [start + count]
+    //*           that passed the filter process.
+    //**/
+    //template<std::size_t start, std::size_t count> inline auto GetClassEntityRange() -> GameEntitySpan {
+    //    return GameEntitySpan(gameEntities).subspan(start, count); //return std::span(gameEntities).subspan<start, count>(); 
+    //}
+    ///**
+    //*   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.
+    //* 
+    //*   @return Returns a span containing all the entities from the range of [start] to [start + count]
+    //*           that passed the filter process.
+    //**/
+    //inline PODEntitySpan GetServerEntityRange(std::size_t start, std::size_t count) { 
+    //    return PODEntitySpan(serverEntities).subspan(start, count); 
+    //}
+    ///**
+    //*   @brief Selectively acquire a list of SVGBaseEntity* derived objects using class entity filters. Use the templated version where possible.
+    //* 
+    //*   @return Returns a span containing all the base entities from the range of [start] to [start + count]
+    //*           that passed the filter process.
+    //**/
+    //inline GameEntitySpan GetClassEntityRange(std::size_t start, std::size_t count) {
+    //    return GameEntitySpan(gameEntities).subspan(start, count); 
+    //}
 
 
 
     /**
 	*	@return	A pointer to the server entities array.
 	**/
-    inline Entity* GetServerEntities() { return &serverEntities[0]; }
+    inline PODEntity* GetPODEntities() { return &podEntities[0]; }
 
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline Entity* GetServerEntityByIndex(uint32_t index) {
+    inline Entity* GetPODEntityByIndex(uint32_t index) {
         if (index < 0 || index >= MAX_EDICTS) {
             return nullptr; 
         }
-	    return &serverEntities[index];
+	    return &podEntities[index];
     }
 
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    inline IServerGameEntity** GetClassEntities() {
-        return classEntities; 
+    inline GameEntity** GetGameEntities() {
+        return gameEntities;
     }
 
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline IServerGameEntity* GetClassEntityByIndex(uint32_t index) {
+    inline GameEntity* GetGameEntityByIndex(uint32_t index) {
     	if (index < 0 || index >= MAX_EDICTS) {
     	    return nullptr;
 	    }
-	    return classEntities[index];
+	    return gameEntities[index];
     }
 
     /**
 	*   @return A pointer to the worldspawn class entity.
 	**/
-    inline Entity* GetWorldspawnServerEntity() { 
-        return &serverEntities[0]; 
+    inline Entity* GetWorldspawnPODEntity() { 
+        return &podEntities[0]; 
     }
     
     /**
 	*   @return A pointer to the worldspawn class entity.
 	**/
     inline Worldspawn* GetWorldspawnClassEntity() { 
-        return dynamic_cast<Worldspawn*>(classEntities[0]); 
+        return dynamic_cast<Worldspawn*>(gameEntities[0]); 
     }
 
 
 
+    ///**
+    //*   @brief  Spawns a debris model entity at the given origin.
+    //*   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
+    //**/
+    //void ThrowDebris(SVGBaseEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed);
+
+    ///**
+    //*   @brief  Spawns a gib model entity flying at random velocities and directions.
+    //*   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
+    //*/
+    //void ThrowGib(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
     /**
     *   @brief  Spawns a debris model entity at the given origin.
     *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
     **/
-    void ThrowDebris(SVGBaseEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed);
+    virtual void ThrowDebris(GameEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed);
 
     /**
     *   @brief  Spawns a gib model entity flying at random velocities and directions.
     *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
     */
-    void ThrowGib(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
+    virtual void ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
 
 
 
 private:
-    //! Currently active game mode.
-    IGamemode* currentGamemode = nullptr;
-
-    //! Clients array, allocated to the size of maxclients cvar.
-    ServerClient *clients = nullptr;
-
     //! Assigned the value of the latched cvar maxclients. Makes for easier access.
     int32_t maxClients = 0;
-
-    //! Assigned the clamped(MAX_EDICTS) value of the latched cvar maxentities. Makes for easier access.
+	//! Assigned the clamped(MAX_EDICTS) value of the latched cvar maxentities. Makes for easier access.
     int32_t maxEntities = 0;
+
+	//! Clients array, allocated to the size of maxclients cvar.
+    ServerClient *clients = nullptr;
+
+	//! Currently active game mode.
+    IGamemode* currentGamemode = nullptr;
 
 
     
@@ -298,10 +311,10 @@ private:
 
 private:
     // Array storing the POD server entities.
-    Entity serverEntities[MAX_EDICTS];
+    //Entity serverEntities[MAX_EDICTS];
 
     //! Array for storing the server game's class entities.
-    IServerGameEntity* classEntities[MAX_EDICTS];
+    //GameEntity* gameEntities[MAX_EDICTS];
 
     //! Total number of actively spawned entities.
     int32_t numberOfEntities = 0;
@@ -337,7 +350,7 @@ private:
     *   @brief  Allocates the class entity determined by the classname key, and
     *           then does a precache before spawning the class entity.
     **/
-    qboolean SpawnParsedClassEntity(Entity* svEntity);
+    qboolean SpawnParsedGameEntity(Entity* svEntity);
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.

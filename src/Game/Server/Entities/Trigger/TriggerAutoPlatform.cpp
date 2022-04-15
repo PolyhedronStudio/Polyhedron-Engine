@@ -114,7 +114,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 // TriggerAutoPlatform::Create
 //===============
 TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
-    TriggerAutoPlatform* autoPlatform = GetGameworld()->CreateClassEntity<TriggerAutoPlatform>();
+    TriggerAutoPlatform* autoPlatform = GetGameworld()->CreateGameEntity<TriggerAutoPlatform>();
     autoPlatform->SetOrigin(ownerEntity->GetEndPosition());
 	autoPlatform->LinkEntity();
 	autoPlatform->Spawn();

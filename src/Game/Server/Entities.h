@@ -30,14 +30,14 @@
 #include "Entities/Base/SVGBasePlayer.h"
 
 
-//! Span for Entity* objects.
-using ServerEntitySpan = std::span<Entity>;
-//! Vector for Entity* objects.
-using ServerEntityVector = std::vector<Entity*>;
-//! Span for SVGBaseEntity* derived objects.
-using ClassEntitySpan = std::span<IServerGameEntity*>;
-//! Vector for SVGBaseEntity* derived objects.
-using ClassEntityVector = std::vector<IServerGameEntity*>;
+////! Span for Entity* objects.
+//using ServerEntitySpan = std::span<Entity>;
+////! Vector for Entity* objects.
+//using ServerEntityVector = std::vector<Entity*>;
+////! Span for SVGBaseEntity* derived objects.
+//using GameEntitySpan = std::span<IServerGameEntity*>;
+////! Vector for SVGBaseEntity* derived objects.
+//using GameEntityVector = std::vector<IServerGameEntity*>;
 
 
 
@@ -61,34 +61,34 @@ namespace EntityFilterFunctions {
 
 	/**
 	*   @brief Filter method for checking whether a base entity has a client attached to it.
-	*   @return Returns true in case the ClassEntity has a client attached to it.
+	*   @return Returns true in case the GameEntity has a client attached to it.
 	**/
-	inline bool ClassEntityHasClient(IServerGameEntity* ent) { return ent->GetClient(); }
+	inline bool ClassEntityHasClient(ISharedGameEntity* ent) { return ent->GetClient(); }
 	/**
 	*   @brief Filter method for checking whether a base entity has a groundentity set.
-	*   @return Returns true in case the ClassEntity has a groundentity set.
+	*   @return Returns true in case the GameEntity has a groundentity set.
 	**/
-	inline bool ClassEntityHasGroundEntity(IServerGameEntity* ent) { return ent->GetGroundEntity(); }
+	inline bool ClassEntityHasGroundEntity(ISharedGameEntity* ent) { return ent->GetGroundEntity(); }
 	/**
-	*   @brief Filter method for checking whether a ClassEntity has a serverentity set.
-	*   @return Returns true in case the ClassEntity has a serverentity set.
+	*   @brief Filter method for checking whether a GameEntity has a serverentity set.
+	*   @return Returns true in case the GameEntity has a serverentity set.
 	**/
-	inline bool ClassEntityHasServerEntity(IServerGameEntity* ent) { return ent->GetPODEntity(); }
+	inline bool ClassEntityHasServerEntity(ISharedGameEntity* ent) { return ent->GetPODEntity(); }
 	/**
-	*   @brief Filter method for checking whether a ClassEntity has a given targetname.
-	*   @return Returns true if the ClassEntity has a given targetname.
+	*   @brief Filter method for checking whether a GameEntity has a given targetname.
+	*   @return Returns true if the GameEntity has a given targetname.
 	**/
-	inline bool ClassEntityHasTargetName(IServerGameEntity* ent) { return ent->GetTargetName() != "" && !ent->GetTargetName().empty(); }
+	inline bool ClassEntityHasTargetName(ISharedGameEntity* ent) { return ent->GetTargetName() != "" && !ent->GetTargetName().empty(); }
 	/**
-	*   @brief Filter method for checking whether a ClassEntity is in use.
-	*   @return Returns true if the ClassEntity is in use.
+	*   @brief Filter method for checking whether a GameEntity is in use.
+	*   @return Returns true if the GameEntity is in use.
 	**/
-	inline bool ClassEntityInUse(IServerGameEntity* ent) { return ent->IsInUse(); }
+	inline bool ClassEntityInUse(ISharedGameEntity* ent) { return ent->IsInUse(); }
 	/**
-	*   @brief Filter method for checking whether a ClassEntity is a valid pointer or not.
-	*   @return Returns true if the ClassEntity is a valid pointer. (Non nullptr)
+	*   @brief Filter method for checking whether a GameEntity is a valid pointer or not.
+	*   @return Returns true if the GameEntity is a valid pointer. (Non nullptr)
 	**/
-	inline bool ClassEntityIsValidPointer(IServerGameEntity* ent) { return ent != nullptr; }
+	inline bool ClassEntityIsValidPointer(ISharedGameEntity* ent) { return ent != nullptr; }
 };
 
 
@@ -134,11 +134,11 @@ namespace ClassEntityFilters {
 
 	// TODO: Move these functions over into EntityFilterFunctions.
 	inline auto HasClassName(const std::string& classname) {
-		return std::ranges::views::filter([classname /*need a copy!*/](IServerGameEntity* ent) { return ent->GetClassname() == classname; });
+		return std::ranges::views::filter([classname /*need a copy!*/](ISharedGameEntity* ent) { return ent->GetClassname() == classname; });
 	}
 
 	inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
-		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](IServerGameEntity* ent) {
+		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](ISharedGameEntity* ent) {
 			auto& dictionary = ent->GetEntityDictionary();
 
 			if (dictionary.find(fieldKey) != dictionary.end()) {
@@ -152,15 +152,15 @@ namespace ClassEntityFilters {
 	}
 
 	template<typename ClassType> auto IsClassOf() {
-		return std::ranges::views::filter([](IServerGameEntity* ent) { return ent->IsClass<ClassType>(); });
+		return std::ranges::views::filter([](ISharedGameEntity* ent) { return ent->IsClass<ClassType>(); });
 	}
 
 	template<typename ClassType> auto IsSubclassOf() {
-		return std::ranges::views::filter([](IServerGameEntity* ent) { return ent->IsSubclassOf<ClassType>(); });
+		return std::ranges::views::filter([](ISharedGameEntity* ent) { return ent->IsSubclassOf<ClassType>(); });
 	}
 
 	inline auto WithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags) {
-		return std::ranges::views::filter([origin, radius, excludeSolidFlags /*need a copy!*/](IServerGameEntity* ent) {
+		return std::ranges::views::filter([origin, radius, excludeSolidFlags /*need a copy!*/](ISharedGameEntity* ent) {
 			// Find distances between entity origins.
 			vec3_t entityOrigin = origin - (ent->GetOrigin() + vec3_scale(ent->GetMins() + ent->GetMaxs(), 0.5f));
 

@@ -33,7 +33,7 @@ public:
     /**
     *
     * 
-    *   ClientGame ONLY ClassEntity Interface Functions.
+    *   ClientGame ONLY GameEntity Interface Functions.
     *
     * 
     **/
@@ -134,7 +134,7 @@ public:
     *   @param  other:      
     *   @param  activator:  
     **/
-    virtual void DispatchUseCallback(ClassEntity* other, ClassEntity* activator) = 0;
+    virtual void DispatchUseCallback(GameEntity* other, GameEntity* activator) = 0;
     /**
     *   @brief  Dispatches 'Use' callback.
     *   @param  inflictor:  
@@ -142,12 +142,12 @@ public:
     *   @param  damage:     
     *   @param  pointer:    
     **/
-    virtual void DispatchDieCallback(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) = 0;
+    virtual void DispatchDieCallback(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) = 0;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  other:  
     **/
-    virtual void DispatchBlockedCallback(ClassEntity* other) = 0;
+    virtual void DispatchBlockedCallback(GameEntity* other) = 0;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  self:   
@@ -155,14 +155,14 @@ public:
     *   @param  plane:  
     *   @param  surf:   
     **/
-    virtual void DispatchTouchCallback(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
+    virtual void DispatchTouchCallback(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
     /**
     *   @brief  Dispatches 'TakeDamage' callback.
     *   @param  other:
     *   @param  kick:
     *   @param  damage:
     **/
-    virtual void DispatchTakeDamageCallback(ClassEntity* other, float kick, int32_t damage) = 0;
+    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) = 0;
 
 
 

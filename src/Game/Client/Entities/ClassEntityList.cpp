@@ -12,7 +12,7 @@
 // Base Entity.
 #include "Base/CLGBaseEntity.h"
 
-// ClassEntity list.
+// GameEntity list.
 #include "ClassEntityList.h"
 
 

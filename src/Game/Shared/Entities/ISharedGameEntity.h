@@ -4,7 +4,7 @@
 *
 *	@file
 *
-*	SharedGame ClassEntity Interface.
+*	SharedGame GameEntity Interface.
 * 
 ***/
 #pragma once
@@ -51,7 +51,7 @@ public:
 
     /**
     *
-    *   SharedGame ClassEntity Interface Functions.
+    *   SharedGame GameEntity Interface Functions.
     * 
     *   These MUST BE IMPLEMENTED by any eventual "Base" entity derived from this interface.
     *
@@ -133,23 +133,23 @@ public:
     virtual inline const qboolean HasThinkCallback() = 0;
 
     // template<typename function> inline void SetUseCallback(function f) = 0;
-    virtual void DispatchUseCallback(ClassEntity* other, ClassEntity* activator) = 0;
+    virtual void DispatchUseCallback(GameEntity* other, GameEntity* activator) = 0;
     virtual inline const qboolean HasUseCallback() = 0;
 
     // template<typename function> inline void SetDieCallback(function f) = 0;
-    virtual void DispatchDieCallback(ClassEntity* inflictor, ClassEntity* attacker, int damage, const vec3_t& point) = 0;
+    virtual void DispatchDieCallback(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) = 0;
     virtual inline const qboolean HasDieCallback() = 0;
 
     // template<typename function> inline void SetBlockedCallback(function f) = 0;
-    virtual void DispatchBlockedCallback(ClassEntity* other) = 0;
+    virtual void DispatchBlockedCallback(GameEntity* other) = 0;
     virtual inline const qboolean HasBlockedCallback() = 0;
 
     // template<typename function> inline void SetTouchCallback(function f) = 0;
-    virtual void DispatchTouchCallback(ClassEntity* self, ClassEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
+    virtual void DispatchTouchCallback(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) = 0;
     virtual inline const qboolean HasTouchCallback() = 0;
 
     // template<typename function> inline void SetDamageCallback(function f) = 0;
-    virtual void DispatchTakeDamageCallback(ClassEntity* other, float kick, int32_t damage) = 0;
+    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) = 0;
     virtual inline const qboolean HasTakeDamageCallback() = 0;
 
 
@@ -167,7 +167,7 @@ public:
     *   @param  activatorOverride:  if nullptr, the entity's own activator is used and if the entity's own activator is nullptr, 
     *                               then this entity itself becomes the activator
     **/
-    virtual void UseTargets( ClassEntity* activatorOverride = nullptr ) = 0;
+    virtual void UseTargets( GameEntity* activatorOverride = nullptr ) = 0;
 
 
 
@@ -198,8 +198,8 @@ public:
     /**
     *   @brief Get/Set: Activator
     **/
-    virtual ClassEntity*    GetActivator() = 0;
-    virtual void            SetActivator(ClassEntity* activator) = 0;
+    virtual GameEntity*    GetActivator() = 0;
+    virtual void            SetActivator(GameEntity* activator) = 0;
 
     /**
     *   @brief Get/Set: Angles
@@ -273,8 +273,8 @@ public:
     /**
     *   @brief Get/Set: Enemy
     **/
-    virtual ClassEntity*    GetEnemy() = 0;
-    virtual void            SetEnemy(ClassEntity* enemy) = 0;
+    virtual GameEntity*    GetEnemy() = 0;
+    virtual void            SetEnemy(GameEntity* enemy) = 0;
 
     /**
     *   @brief Get: Entity Dictionary.
@@ -309,7 +309,7 @@ public:
     *   @brief Get/Set: Ground Entity
     **/
     virtual SGEntityHandle  GetGroundEntity() = 0;
-    virtual void            SetGroundEntity(ClassEntity* groundEntity) = 0;
+    virtual void            SetGroundEntity(GameEntity* groundEntity) = 0;
 
     /**
     *   @brief Get/Set: Ground Entity Link Count
@@ -437,8 +437,8 @@ public:
     /**
     *   @brief Get/Set:     Old Enemy Entity
     **/
-    virtual ClassEntity*    GetOldEnemy() = 0;
-    virtual void            SetOldEnemy(ClassEntity* oldEnemy) = 0;
+    virtual GameEntity*    GetOldEnemy() = 0;
+    virtual void            SetOldEnemy(GameEntity* oldEnemy) = 0;
 
     /**
     *   @brief Get/Set:     Old Origin
@@ -455,8 +455,8 @@ public:
     /**
     *   @brief Get/Set:     Owner Entity
     **/
-    virtual ClassEntity*    GetOwner() = 0;
-    virtual void            SetOwner(ClassEntity* owner) = 0;
+    virtual GameEntity*    GetOwner() = 0;
+    virtual void            SetOwner(GameEntity* owner) = 0;
 
     /**
     *   @brief Get/Set:     Render Effects
@@ -544,14 +544,14 @@ public:
     /**
     *   @brief Get/Set:     Team Chain
     **/
-    virtual ClassEntity*    GetTeamChainEntity() = 0;
-    virtual void            SetTeamChainEntity(ClassEntity* entity) = 0;
+    virtual GameEntity*    GetTeamChainEntity() = 0;
+    virtual void            SetTeamChainEntity(GameEntity* entity) = 0;
 
     /**
     *   @brief Get/Set:     Team Master
     **/
-    virtual ClassEntity*    GetTeamMasterEntity() = 0;
-    virtual void            SetTeamMasterEntity(ClassEntity* entity) = 0;
+    virtual GameEntity*    GetTeamMasterEntity() = 0;
+    virtual void            SetTeamMasterEntity(GameEntity* entity) = 0;
 
     /**
     *   @brief Get/Set:     Velocity

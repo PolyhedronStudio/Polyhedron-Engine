@@ -539,7 +539,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    IServerGameEntity** classEntities = game.world->GetClassEntities();
+    GameEntity** classEntities = game.world->GetGameEntities();
     for (e = 1; e < globals.numberOfEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
@@ -551,7 +551,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 	    }
 
         // Acquire base entity pointer.
-        IServerGameEntity *check = *checkHandle;
+        GameEntity *check = *checkHandle;
 
         // Fetch its properties to work with.
         qboolean isInUse = check->IsInUse();
@@ -918,9 +918,9 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // Determine what sound to play.
     if (!wasInWater && isInWater)
-        gi.PositionedSound(oldOrigin, game.world->GetServerEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(oldOrigin, game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
     else if (wasInWater && !isInWater)
-        gi.PositionedSound(ent->GetOrigin(), game.world->GetServerEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->GetOrigin(), game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 
     // Move teamslaves
     for (IServerGameEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {

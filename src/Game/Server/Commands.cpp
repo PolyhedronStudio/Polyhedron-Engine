@@ -872,7 +872,7 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
     Entity *e2;
 
     // Acquire the world's server entity array pointer.
-    Entity* serverEntities = GetGameworld()->GetServerEntities();
+    Entity* serverEntities = GetGameworld()->GetPODEntities();
 
     // connect time, ping, score, name
     *text = 0;

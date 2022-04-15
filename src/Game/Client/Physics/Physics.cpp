@@ -40,7 +40,7 @@ extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t&
 CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) {
     // Acquire server and class entity array pointers.
     ClientEntity* clientEntities = cl->solidEntities[0];
-    CLGEntityVector *classEntities = clge->entities->GetClassEntities();
+    CLGEntityVector *classEntities = clge->entities->GetGameEntities();
 
     // Fetch server entity in case one was passed to us.
     ClientEntity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);
@@ -148,7 +148,7 @@ static void UTIL_TouchTriggers(IClientGameEntity *ent)
     //    return;
 
     //// Fetch the boxed entities.
-    //ClassEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
+    //GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
 
     //// Do some extra sanity checks on the touched entity list. It is possible to have 
     //// an entity be removed before we get to it (kill triggered).
@@ -621,8 +621,8 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    //IClientGameEntity** classEntities = clge->entities->GetClassEntities();
-	CLGEntityVector *classEntities = clge->entities->GetClassEntities();
+    //IClientGameEntity** classEntities = clge->entities->GetGameEntities();
+	CLGEntityVector *classEntities = clge->entities->GetGameEntities();
     for (e = 1; e < cl->numSolidEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];

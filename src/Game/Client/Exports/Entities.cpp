@@ -111,7 +111,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
         ParseEntityString(&bspString, clientEntity);
 
 		// Allocate the class entity, and call its spawn.
-		if (!SpawnParsedClassEntity(clientEntity)) {
+		if (!SpawnParsedGameEntity(clientEntity)) {
 			parsedSuccessfully = false;
 		}
 	}
@@ -207,7 +207,7 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 *   @brief  Allocates the class entity determined by the classname key, and
 *           then does a precache before spawning the class entity.
 **/
-qboolean ClientGameEntities::SpawnParsedClassEntity(ClientEntity* clEntity) {
+qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
     // Acquire dictionary.
     auto &dictionary = clEntity->entityDictionary;
 

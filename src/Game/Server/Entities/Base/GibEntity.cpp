@@ -26,9 +26,9 @@
 /**
 *   @brief  Used by game modes to spawn server side gibs.
 **/
-GibEntity* GibEntity::Create(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) {
+GibEntity* GibEntity::Create(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) {
     // Create a gib entity.
-    GibEntity* gibEntity = GetGameworld()->CreateClassEntity<GibEntity>();
+    GibEntity* gibEntity = GetGameworld()->CreateGameEntity<GibEntity>();
 
     // Set size.
     vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);

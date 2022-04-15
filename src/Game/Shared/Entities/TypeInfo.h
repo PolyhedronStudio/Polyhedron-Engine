@@ -45,7 +45,7 @@ private:
 };
 
 //! Actual entity allocator function pointer type.
-using EntityAllocatorFn = ClassEntity* ( PODEntity* );
+using EntityAllocatorFn = GameEntity* ( PODEntity* );
 
 //===============
 // TypeInfo, a system for getting runtime information about classes
@@ -232,7 +232,7 @@ __DeclareTypeInfo( #classname, #classname, #superClass, TypeInfo::TypeFlag_Abstr
 // @param superClass (symbol) - the class this entity class inherits from
 #define DefineMapClass( mapClassName, classname, superClass )	\
 using Base = superClass;										\
-static ClassEntity* AllocateInstance( PODEntity* entity ) {		\
+static GameEntity* AllocateInstance( PODEntity* entity ) {		\
 	classname *baseEntity = new classname( entity );			\
 	baseEntity->SetClassname(mapClassName);						\
 	return baseEntity;											\
@@ -249,7 +249,7 @@ __DeclareTypeInfo( mapClassName, #classname, #superClass, TypeInfo::TypeFlag_Map
 // @param superClass (symbol) - the class this entity class inherits from
 //#define DefineItemMapClass(itemStringName, itemIdentifier, mapClassName, classname, superClass) \
 //using Base = superClass;																		\
-//static ClassEntity* AllocateInstance(Entity* entity) {										\
+//static GameEntity* AllocateInstance(Entity* entity) {										\
 //	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);				\
 //	itemEntity->SetClassname(mapClassName);														\
 //	return itemEntity;																			\
@@ -264,7 +264,7 @@ __DeclareTypeInfo( mapClassName, #classname, #superClass, TypeInfo::TypeFlag_Map
 // @param superClass (symbol) - the class this entity class inherits from
 #define DefineItemMapClass(itemStringName, itemInstanceString, itemIdentifier, mapClassName, classname, superClass)       \
 using Base = superClass;                                                                                                  \
-static ClassEntity* AllocateInstance(PODEntity* entity) {                                                                  \
+static GameEntity* AllocateInstance(PODEntity* entity) {                                                                  \
 	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);                                        \
 	itemEntity->SetClassname(mapClassName);                                                                               \
 	classname *itemInstance = CreateItemInstance<classname>(itemStringName, itemInstanceString, itemIdentifier);          \
@@ -278,7 +278,7 @@ __DeclareTypeInfo(mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapS
 ///////////// OLD MACRO, Kept around just in case.
 //#define DefineItemWeaponMapClass(itemStringName, itemInstanceString, itemIdentifier, mapClassName, classname, superClass)	\
 //using Base = superClass;                                                                        \
-//static ClassEntity* AllocateInstance(Entity* entity) {                                        \
+//static GameEntity* AllocateInstance(Entity* entity) {                                        \
 //	classname* itemEntity = new classname(entity, itemStringName, itemIdentifier);              \
 //	itemEntity->SetClassname(mapClassName);                                                     \
 //	CreatePlayerWeaponInstance<classname>(itemStringName, itemInstanceString, itemIdentifier); \
@@ -300,7 +300,7 @@ __DeclareTypeInfo( mapClassName, #classname, #superClass, TypeInfo::TypeFlag_Map
 // @param superClass (symbol) - the class this entity class inherits from
 #define DefineClass( classname, superClass )					\
 using Base = superClass;										\
-static ClassEntity* AllocateInstance( PODEntity* entity ) {		\
+static GameEntity* AllocateInstance( PODEntity* entity ) {		\
 	return new classname( entity );								\
 }																\
 __DeclareTypeInfo( #classname, #classname, #superClass, TypeInfo::TypeFlag_None, &classname::AllocateInstance );

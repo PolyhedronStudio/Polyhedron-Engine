@@ -42,9 +42,9 @@ void DebrisEntity::DebrisEntityDie(IServerGameEntity* inflictor, IServerGameEnti
 *   @brief  Used by game modes to spawn server side gibs.
 *   @param  debrisser The entity that is about to spawn debris.
 **/
-DebrisEntity* DebrisEntity::Create(SVGBaseEntity* debrisser, const std::string& debrisModel, const vec3_t& origin, float speed) {
+DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t& origin, float speed) {
     // Chunk Entity.
-    DebrisEntity* debrisEntity = GetGameworld()->CreateClassEntity<DebrisEntity>();
+    DebrisEntity* debrisEntity = GetGameworld()->CreateGameEntity<DebrisEntity>();
 
     // Set the origin.
     debrisEntity->SetOrigin(origin);

@@ -67,8 +67,8 @@ public:
     **/
     void RunFrame();
 
-    inline CLGEntityVector* GetClassEntities() {
-        return classEntityList.GetClassEntities();
+    inline CLGEntityVector* GetGameEntities() {
+        return classEntityList.GetGameEntities();
     }
 //! Entity Parsing utilities.
 private:
@@ -82,7 +82,7 @@ private:
     *   @brief  Allocates the class entity determined by the classname key, and
     *           then does a precache before spawning the class entity.
     **/
-    qboolean SpawnParsedClassEntity(ClientEntity* clEntity);
+    qboolean SpawnParsedGameEntity(ClientEntity* clEntity);
 
 //! Class Entity utilities.
 private:
