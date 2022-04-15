@@ -116,7 +116,7 @@ public:
     virtual PODEntity* GetPODEntity() = 0;
     /**
     *   @brief  Sets the pointer ot the client/server side POD Entity.
-    *           Used only in SVG_FreeEntity and SVG_CreateClassEntity.
+    *           Used only in SVG_FreeEntity and SVG_CreateGameEntity.
     **/
     virtual void SetPODEntity(PODEntity* podEntity) = 0;
 
@@ -671,6 +671,6 @@ protected:
 
 
 protected:
-	//! Pointer to the client entity which owns this class entity.
+	//! Pointer to the client entity which owns this game entity.
     PODEntity *podEntity = nullptr;
 };

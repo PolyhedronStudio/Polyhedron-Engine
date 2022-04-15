@@ -69,7 +69,7 @@ public:
 
     /**
     *   @brief  When the client receives state updates it calls into this function so we can update
-    *           the class entity belonging to the server side entity(defined by state.number).
+    *           the game entity belonging to the server side entity(defined by state.number).
     * 
     *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
     *           always update its ClientEntity pointer to the appropriate new one instead.

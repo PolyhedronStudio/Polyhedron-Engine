@@ -121,7 +121,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    GetGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->classEntity));
+    GetGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->gameEntity));
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -194,12 +194,12 @@ void SVG_ClientDisconnect(Entity *ent)
     // Ensure this entity has a client.
     if (!ent->client)
         return;
-    // Ensure it has a class entity also.
-    if (!ent->classEntity)
+    // Ensure it has a game entity also.
+    if (!ent->gameEntity)
         return;
 
     // Since it does, we pass it on to the game mode.
-    GetGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->classEntity), ent->client);
+    GetGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->gameEntity), ent->client);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;
@@ -221,14 +221,14 @@ void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
-        gi.DPrintf("Warning: ClientThink called on svEntity(#%i) without a SVGBasePlayer or derivate class entity.\n", svEntity->state.number);
+        gi.DPrintf("Warning: ClientThink called on svEntity(#%i) without a SVGBasePlayer or derivate game entity.\n", svEntity->state.number);
         return;
     }
 
     // Save to cast now.
     SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
 
-    // We can safely acquire client entity since it's already been sanitized by GetPlayerClassEntity.
+    // We can safely acquire client entity since it's already been sanitized by GetPlayerGameEntity.
     ServerClient *client = player->GetClient();
 
     // Do client think.

@@ -23,7 +23,7 @@
 #include "../Effects/ParticleEffects.h"
 
 // Ents.
-#include "../Entities/ClassEntityList.h"
+#include "../Entities/GameEntityList.h"
 #include "../Entities/Base/CLGBaseEntity.h"
 
 
@@ -54,7 +54,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
     //level = {};
 
     // Clear out our entity list in case it is holding some from a previous session.
-    classEntityList.Clear();
+    gameEntityList.Clear();
     
     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
@@ -67,7 +67,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
     //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
     // 
     // 
-	// Prepare our player class entity.
+	// Prepare our player game entity.
     //PreparePlayer();
 
     // Parsing state variables.
@@ -110,16 +110,16 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 		// Now we've got the reserved server entity to use, let's parse the entity.
         ParseEntityString(&bspString, clientEntity);
 
-		// Allocate the class entity, and call its spawn.
+		// Allocate the game entity, and call its spawn.
 		if (!SpawnParsedGameEntity(clientEntity)) {
 			parsedSuccessfully = false;
 		}
 	}
 
 	// Post spawn entities.
-	//for (auto& classEntity : classEntities) {
-	//	if (classEntity) {
-	//		classEntity->PostSpawn();
+	//for (auto& gameEntity : classEntities) {
+	//	if (gameEntity) {
+	//		gameEntity->PostSpawn();
 	//	}
 	//}
 
@@ -204,8 +204,8 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 }
 
 /**
-*   @brief  Allocates the class entity determined by the classname key, and
-*           then does a precache before spawning the class entity.
+*   @brief  Allocates the game entity determined by the classname key, and
+*           then does a precache before spawning the game entity.
 **/
 qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
     // Acquire dictionary.
@@ -223,11 +223,11 @@ qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
 	   return false;
     }
 
-    // Actually spawn the class entity.
-    IClientGameEntity *classEntity = clEntity->classEntity = classEntityList.AllocateFromClassname(clEntity->entityDictionary["classname"], clEntity);
+    // Actually spawn the game entity.
+    IClientGameEntity *gameEntity = clEntity->gameEntity = gameEntityList.AllocateFromClassname(clEntity->entityDictionary["classname"], clEntity);
 	
-    // Something went wrong with allocating the class entity.
-    if (!classEntity) {
+    // Something went wrong with allocating the game entity.
+    if (!gameEntity) {
 		// Be sure to free it.
 		*clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
 
@@ -238,12 +238,12 @@ qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
 
     // Initialise the entity with its respected keyvalue properties
     for (const auto& keyValueEntry : clEntity->entityDictionary) {
-		classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
+		gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
 	}
 
     // Precache and spawn the entity.
-    classEntity->Precache();
-    classEntity->Spawn();
+    gameEntity->Precache();
+    gameEntity->Spawn();
 
     // Success.
     return true;
@@ -253,7 +253,7 @@ qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
 
 /**
 *   @brief  When the client receives state updates it calls into this function so we can update
-*           the class entity belonging to the server side entity(defined by state.number).
+*           the game entity belonging to the server side entity(defined by state.number).
 * 
 *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
 *           always update its ClientEntity pointer to the appropriate new one instead.
@@ -272,7 +272,7 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
 
     
     // Will either return a pointer to a new classentity type, or an existing one, depending on the state.
-    IClientGameEntity *clgEntity = classEntityList.AllocateFromState(state, clEntity);
+    IClientGameEntity *clgEntity = gameEntityList.AllocateFromState(state, clEntity);
 
     // Call the spawn function if it is a valid entity.
     if (clgEntity) {
@@ -367,17 +367,17 @@ void ClientGameEntities::RunFrame() {
     
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 1; entityNumber < cl->frame.numEntities; entityNumber++) {
-        // Acquire class entity object.
-        IClientGameEntity *classEntity = classEntityList.GetByNumber(entityNumber);
+        // Acquire game entity object.
+        IClientGameEntity *gameEntity = gameEntityList.GetByNumber(entityNumber);
 
         // If invalid for whichever reason, warn and continue to next iteration.
-        if (!classEntity) {
+        if (!gameEntity) {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
 
         // Run it for a frame.
-        CLG_RunThink(classEntity);
+        CLG_RunThink(gameEntity);
     }
 }
 

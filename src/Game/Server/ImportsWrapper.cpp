@@ -105,7 +105,7 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
 //===============
 //
 SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IServerGameEntity* passent, const int32_t& contentMask) {
-    // Acquire server and class entity array pointers.
+    // Acquire server and game entity array pointers.
     Entity* serverEntities = game.world->GetPODEntities();
     IServerGameEntity** classEntities = game.world->GetGameEntities();
 

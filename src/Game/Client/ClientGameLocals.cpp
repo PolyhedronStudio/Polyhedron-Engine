@@ -126,7 +126,7 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
         //return &clge;
     }
 
-    // Initialize Class Entity TypeInfo system.
+    // Initialize Game Entity TypeInfo system.
     TypeInfo::SetupSuperClasses();
 
     // Allocate the client game exports interface and its member implementations.

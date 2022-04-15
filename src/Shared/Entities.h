@@ -79,8 +79,8 @@ struct entity_s {
     //---------------------------------------------------
     // Do not modify the fields above, they're shared memory wise with the server itself.
     //---------------------------------------------------
-    //! Actual class entity implementation pointer.
-    IServerGameEntity* classEntity = nullptr;
+    //! Actual game entity implementation pointer.
+    IServerGameEntity* gameEntity = nullptr;
 
     //! Dictionary containing the initial key:value entity properties.
     EntityDictionary entityDictionary;
@@ -164,8 +164,8 @@ struct ClientEntity {
 
     //! Pointer to the owning entity (if any.)
     IClientGameEntity *owner = nullptr;
-    //! Pointer to the class entity object that belongs to this client entity.
-    IClientGameEntity *classEntity;
+    //! Pointer to the game entity object that belongs to this client entity.
+    IClientGameEntity *gameEntity;
 
     //! Key/Value entity dictionary.
     EntityDictionary entityDictionary;

@@ -268,7 +268,7 @@ void GibEntity::GibEntityTouch(IServerGameEntity* self, IServerGameEntity* other
 // GibEntity::GibEntityDie
 //
 // Savely call Remove so it queues up for removal without causing 
-// serverEntity/classEntity conflicts.
+// serverEntity/gameEntity conflicts.
 //===============
 void GibEntity::GibEntityDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
     // Time to queue it for removal.

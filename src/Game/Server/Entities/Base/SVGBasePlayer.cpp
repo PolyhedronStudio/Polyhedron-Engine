@@ -52,10 +52,10 @@ SVGBasePlayer* SVGBasePlayer::Create(Entity* svEntity) {
     gameworld->FreeGameEntity(svEntity);
 
     // Recreate class SVGBasePlayer entity.
-    svEntity->classEntity = gameworld->CreateGameEntity<SVGBasePlayer>(svEntity, false);
+    svEntity->gameEntity = gameworld->CreateGameEntity<SVGBasePlayer>(svEntity, false);
 
-    // Last but not least, return this class entity its pointer.
-    return dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);
+    // Last but not least, return this game entity its pointer.
+    return dynamic_cast<SVGBasePlayer*>(svEntity->gameEntity);
 }
 
 //===============
@@ -848,11 +848,11 @@ void SVGBasePlayer::LookAtKiller(IServerGameEntity* inflictor, IServerGameEntity
     }
 
     // Is the attack, not us, or the world?
-    if (attacker && attacker != GetGameworld()->GetWorldspawnClassEntity() && attacker != this) {
+    if (attacker && attacker != GetGameworld()->GetWorldspawnGameEntity() && attacker != this) {
         float yaw = vec3_to_yaw(attacker->GetOrigin() - GetOrigin());
         SetKillerYaw(yaw);
     // Is the inflictor, and not an attack, NOT us or the WORLD?
-    } else if (inflictor && inflictor != GetGameworld()->GetWorldspawnClassEntity() && inflictor != this) {
+    } else if (inflictor && inflictor != GetGameworld()->GetWorldspawnGameEntity() && inflictor != this) {
         float yaw = vec3_to_yaw(inflictor->GetOrigin() - GetOrigin());
         SetKillerYaw(yaw);
     // If none of the above, set the yaw as is.
@@ -958,7 +958,7 @@ void SVGBasePlayer::CheckFallingDamage()
 
         //if (!deathmatch->value || 
         if (!((int)gamemodeflags->value & GamemodeFlags::NoFallingDamage)) {
-	        GetGamemode()->InflictDamage(this, GetGameworld()->GetWorldspawnClassEntity(), GetGameworld()->GetWorldspawnClassEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
+	        GetGamemode()->InflictDamage(this, GetGameworld()->GetWorldspawnGameEntity(), GetGameworld()->GetWorldspawnGameEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
         }
     } else {
         SetEventID(EntityEvent::FallShort);
@@ -1059,7 +1059,7 @@ void SVGBasePlayer::CheckWorldEffects()
 
                 SetDebouncePainTime(level.time);
 
-                GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -1079,11 +1079,11 @@ void SVGBasePlayer::CheckWorldEffects()
                 SetDebouncePainTime(level.time + 1s);
             }
 
-            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
+            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (GetWaterType() & BrushContents::Slime) {
-            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnClassEntity(), gameworld->GetWorldspawnClassEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
+            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }

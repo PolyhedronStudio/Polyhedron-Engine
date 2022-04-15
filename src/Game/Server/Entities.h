@@ -6,13 +6,13 @@
 *
 *	Contains implementations of filter functions that can be piped to the gameworld functions:
 *		- GetServerEntityRange
-*		- GetClassEntityRange
+*		- GetGameEntityRange
 * 
 *	They are best used whenever there is a need for acquiring, or looping, over a set range of entities.
 *	An example usage of that is:
 * 
-*	for (auto &entity : GetClassEntityRange(0, MAX_EDICTS)
-*			| cef::Standard	// This automatically checks for whether the pointer is valid, inUse = true, and whether the classEntity pointer is valid also.
+*	for (auto &entity : GetGameEntityRange(0, MAX_EDICTS)
+*			| cef::Standard	// This automatically checks for whether the pointer is valid, inUse = true, and whether the gameEntity pointer is valid also.
 *			| cef::HasKeyValue("target", "value")) { // Filters out any entity not having a key: target, value: targetValue.
 *		// Do something with the entity... entity->Remove(); // Remove it for example.
 *	}
@@ -54,41 +54,41 @@ namespace EntityFilterFunctions {
 	**/
 	inline bool ServerEntityHasClient(const Entity& ent) { return static_cast<bool>(ent.client); }
 	/**
-	*   @brief Filter method for checking whether an entity has a class entity.
-	*   @return Returns true in case the entity has a class entity.
+	*   @brief Filter method for checking whether an entity has a game entity.
+	*   @return Returns true in case the entity has a game entity.
 	**/
-	inline bool ServerEntityHasClassEntity(const Entity& ent) { return static_cast<bool>(ent.classEntity); }
+	inline bool ServerEntityHasGameEntity(const Entity& ent) { return static_cast<bool>(ent.gameEntity); }
 
 	/**
 	*   @brief Filter method for checking whether a base entity has a client attached to it.
 	*   @return Returns true in case the GameEntity has a client attached to it.
 	**/
-	inline bool ClassEntityHasClient(ISharedGameEntity* ent) { return ent->GetClient(); }
+	inline bool GameEntityHasClient(ISharedGameEntity* ent) { return ent->GetClient(); }
 	/**
 	*   @brief Filter method for checking whether a base entity has a groundentity set.
 	*   @return Returns true in case the GameEntity has a groundentity set.
 	**/
-	inline bool ClassEntityHasGroundEntity(ISharedGameEntity* ent) { return ent->GetGroundEntity(); }
+	inline bool GameEntityHasGroundEntity(ISharedGameEntity* ent) { return ent->GetGroundEntity(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a serverentity set.
 	*   @return Returns true in case the GameEntity has a serverentity set.
 	**/
-	inline bool ClassEntityHasServerEntity(ISharedGameEntity* ent) { return ent->GetPODEntity(); }
+	inline bool GameEntityHasServerEntity(ISharedGameEntity* ent) { return ent->GetPODEntity(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a given targetname.
 	*   @return Returns true if the GameEntity has a given targetname.
 	**/
-	inline bool ClassEntityHasTargetName(ISharedGameEntity* ent) { return ent->GetTargetName() != "" && !ent->GetTargetName().empty(); }
+	inline bool GameEntityHasTargetName(ISharedGameEntity* ent) { return ent->GetTargetName() != "" && !ent->GetTargetName().empty(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity is in use.
 	*   @return Returns true if the GameEntity is in use.
 	**/
-	inline bool ClassEntityInUse(ISharedGameEntity* ent) { return ent->IsInUse(); }
+	inline bool GameEntityInUse(ISharedGameEntity* ent) { return ent->IsInUse(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity is a valid pointer or not.
 	*   @return Returns true if the GameEntity is a valid pointer. (Non nullptr)
 	**/
-	inline bool ClassEntityIsValidPointer(ISharedGameEntity* ent) { return ent != nullptr; }
+	inline bool GameEntityIsValidPointer(ISharedGameEntity* ent) { return ent != nullptr; }
 };
 
 
@@ -99,7 +99,7 @@ namespace ServerEntityFilters {
 
 	inline auto InUse = std::views::filter(&EntityFilterFunctions::ServerEntityInUse);
 	inline auto HasClient = std::views::filter(&EntityFilterFunctions::ServerEntityHasClient);
-	inline auto HasClassEntity = std::views::filter(&EntityFilterFunctions::ServerEntityHasClassEntity);
+	inline auto HasGameEntity = std::views::filter(&EntityFilterFunctions::ServerEntityHasGameEntity);
 
 	inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
 		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](Entity& ent) {
@@ -123,14 +123,14 @@ namespace sef = ServerEntityFilters;
 
 
 //! Namespace containing the actual Base Entity filter functions to use and apply.
-namespace ClassEntityFilters {
+namespace GameEntityFilters {
 	using namespace std::ranges::views;
 
-	inline auto IsValidPointer = std::views::filter(&EntityFilterFunctions::ClassEntityIsValidPointer);
-	inline auto HasServerEntity = std::views::filter(&EntityFilterFunctions::ClassEntityHasServerEntity);
-	inline auto HasGroundEntity = std::views::filter(&EntityFilterFunctions::ClassEntityHasGroundEntity);
-	inline auto InUse = std::views::filter(&EntityFilterFunctions::ClassEntityInUse);
-	inline auto HasClient = std::views::filter(&EntityFilterFunctions::ClassEntityHasClient);
+	inline auto IsValidPointer = std::views::filter(&EntityFilterFunctions::GameEntityIsValidPointer);
+	inline auto HasServerEntity = std::views::filter(&EntityFilterFunctions::GameEntityHasServerEntity);
+	inline auto HasGroundEntity = std::views::filter(&EntityFilterFunctions::GameEntityHasGroundEntity);
+	inline auto InUse = std::views::filter(&EntityFilterFunctions::GameEntityInUse);
+	inline auto HasClient = std::views::filter(&EntityFilterFunctions::GameEntityHasClient);
 
 	// TODO: Move these functions over into EntityFilterFunctions.
 	inline auto HasClassName(const std::string& classname) {
@@ -169,7 +169,7 @@ namespace ClassEntityFilters {
 			    return false;
 			}
 
-			// Cheers, we found our class entity.
+			// Cheers, we found our game entity.
 			return true;
 		});
 	}
@@ -178,5 +178,5 @@ namespace ClassEntityFilters {
 	inline auto Standard = (IsValidPointer | HasServerEntity | InUse);
 };
 
-//! Shorthand for ClassEntityFilters. Less typing.
-namespace cef = ClassEntityFilters;  // Shortcut, lesser typing.
+//! Shorthand for GameEntityFilters. Less typing.
+namespace cef = GameEntityFilters;  // Shortcut, lesser typing.

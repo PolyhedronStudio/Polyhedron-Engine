@@ -38,7 +38,7 @@ static cvar_t *sv_gravity= nullptr;
 extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
 
 CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) {
-    // Acquire server and class entity array pointers.
+    // Acquire server and game entity array pointers.
     ClientEntity* clientEntities = cl->solidEntities[0];
     CLGEntityVector *classEntities = clge->entities->GetGameEntities();
 
@@ -184,7 +184,7 @@ CLGBaseEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
     trace = CLG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
 
     if (trace.startSolid) {
-	    return 0;//dynamic_cast<CLGBaseEntity*>(game.world->GetWorldspawnClassEntity());
+	    return 0;//dynamic_cast<CLGBaseEntity*>(game.world->GetWorldspawnGameEntity());
     }
 
     return nullptr;

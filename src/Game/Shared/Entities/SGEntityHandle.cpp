@@ -16,11 +16,11 @@
 * 
 *	@return	A valid pointer if the POD Entity is pointing to one. nullptr otherwise.
 **/
-static GameEntity* GetClassEntity(PODEntity* podEntity) {
-    // Reinterpret cast the classEntity pointer.
+static GameEntity* GetGameEntity(PODEntity* podEntity) {
+    // Reinterpret cast the gameEntity pointer.
     if (podEntity) {
-	    if (podEntity->classEntity != nullptr) {
-	        return podEntity->classEntity;
+	    if (podEntity->gameEntity != nullptr) {
+	        return podEntity->gameEntity;
 	    } else {
 	        return nullptr;
 	    }
@@ -35,11 +35,11 @@ static GameEntity* GetClassEntity(PODEntity* podEntity) {
 
 /**
 *	@brief Simple constructor of an entity handle that will accept a
-*	class entity.
+*	game entity.
 **/
-SGEntityHandle::SGEntityHandle(ISharedGameEntity* classEntity) : podEntity(nullptr), entityID(0) {
+SGEntityHandle::SGEntityHandle(ISharedGameEntity* gameEntity) : podEntity(nullptr), entityID(0) {
     // Exploits the assignment operator.
-    *this = classEntity;
+    *this = gameEntity;
 }
 
 /**
@@ -134,19 +134,19 @@ const uint32_t SGEntityHandle::ID() { return entityID; }
 /**
 *	@brief * operator implementations.
 **/
-GameEntity* SGEntityHandle::operator*() { return (GameEntity*)GetClassEntity(Get()); }
-const GameEntity* SGEntityHandle::operator*() const { return (GameEntity*)GetClassEntity(Get()); }
+GameEntity* SGEntityHandle::operator*() { return (GameEntity*)GetGameEntity(Get()); }
+const GameEntity* SGEntityHandle::operator*() const { return (GameEntity*)GetGameEntity(Get()); }
 
 /**
 *	@brief	Assigns the GameEntity to this handle if it has a valid server entity.
 *			If no valid GameEntity and server entity pointer are passed it unsets
 *			this current handle to nullptr and entityID = 0.
 **/
-ISharedGameEntity* SGEntityHandle::operator=(ISharedGameEntity* classEntity) {
+ISharedGameEntity* SGEntityHandle::operator=(ISharedGameEntity* gameEntity) {
 	// Ensure GameEntity pointer is valid.
-    if (classEntity) {
+    if (gameEntity) {
 		// Acquire server entity pointer.
-		podEntity = classEntity->GetPODEntity();
+		podEntity = gameEntity->GetPODEntity();
 
 		// In case of a valid server entity pointer, assign entityID to its number.
 		if (podEntity) {
@@ -163,14 +163,14 @@ ISharedGameEntity* SGEntityHandle::operator=(ISharedGameEntity* classEntity) {
 	}
 
 	// Last but not least, return.
-	return classEntity;
+	return gameEntity;
 }
 
 
 /**
-*	@brief	Used to access the class entity its methods.
+*	@brief	Used to access the game entity its methods.
 **/
-GameEntity* SGEntityHandle::operator->() const { return (GameEntity*)GetClassEntity(Get()); }
+GameEntity* SGEntityHandle::operator->() const { return (GameEntity*)GetGameEntity(Get()); }
 
 /**
 *   @brief  Comparison check for whether this handle points to the same POD Entity as 
@@ -179,12 +179,12 @@ GameEntity* SGEntityHandle::operator->() const { return (GameEntity*)GetClassEnt
 *   @return Returns true if GameEntity* != nullptr, its podEntity pointer 
 *           != nullptr, and their entity index number matches.
 **/
-bool SGEntityHandle::operator==(const ISharedGameEntity* classEntity) {
-    if (!classEntity) {
+bool SGEntityHandle::operator==(const ISharedGameEntity* gameEntity) {
+    if (!gameEntity) {
 	    return false;
     }
 
-    PODEntity* podEntity = const_cast<ISharedGameEntity*>(classEntity)->GetPODEntity();
+    PODEntity* podEntity = const_cast<ISharedGameEntity*>(gameEntity)->GetPODEntity();
 
     if (!podEntity) {
 		return false;

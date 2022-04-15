@@ -247,7 +247,7 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* player) {
 //===============
 void CoopGamemode::RespawnAllClients() {
     // Respawn all valid client entities who's health is < 0.
-    for (auto& player : game.world->GetClassEntityRange<0, MAX_EDICTS>()
+    for (auto& player : game.world->GetGameEntityRange<0, MAX_EDICTS>()
         | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>())
     {
         if (player->GetHealth() < 0) {
@@ -306,11 +306,11 @@ void CoopGamemode::StorePlayerPersistentData(void) {
         const PODEntity *ent = &podEntities[1 + i];
         if (!ent->inUse)
             continue;
-        if (!ent->classEntity)
+        if (!ent->gameEntity)
             continue;
-	    gameClients[i].persistent.stats.health = ent->classEntity->GetHealth();
-	    gameClients[i].persistent.stats.maxHealth = ent->classEntity->GetMaxHealth();
-	    gameClients[i].persistent.savedFlags = (ent->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
+	    gameClients[i].persistent.stats.health = ent->gameEntity->GetHealth();
+	    gameClients[i].persistent.stats.maxHealth = ent->gameEntity->GetMaxHealth();
+	    gameClients[i].persistent.savedFlags = (ent->gameEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
         if (ent->client)
 		    gameClients[i].persistent.score = ent->client->respawn.score;
     }

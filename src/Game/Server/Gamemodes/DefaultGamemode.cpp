@@ -263,7 +263,7 @@ GameEntityVector DefaultGamemode::FindBaseEnitiesWithinRadius(const vec3_t& orig
     GameEntityVector radiusEntities;
 
     // Iterate over all entities, see who is nearby, and who is not.
-    for (auto* radiusEntity : game.world->GetClassEntityRange<0, MAX_EDICTS>()
+    for (auto* radiusEntity : game.world->GetGameEntityRange<0, MAX_EDICTS>()
          | cef::Standard
          | cef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
@@ -598,41 +598,41 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
         gi.Multicast(bodyEntity->state.origin, Multicast::PVS);
     }
 
-    // Create the class entity for this queued bodyEntity.
-    SVGBaseEntity *bodyClassEntity = game.world->CreateGameEntity<BodyCorpse>(bodyEntity, false);
+    // Create the game entity for this queued bodyEntity.
+    SVGBaseEntity *bodyGameEntity = game.world->CreateGameEntity<BodyCorpse>(bodyEntity, false);
 
     // Unlink the body entity, in case it was linked before.
-    bodyClassEntity->UnlinkEntity();
+    bodyGameEntity->UnlinkEntity();
 
     // Copy over the bodies state of the current entity into the body entity.
-    bodyClassEntity->SetState(ent->GetState());
+    bodyGameEntity->SetState(ent->GetState());
     // Change its number so it is accurately set to the one belonging to bodyEntity.
     // (Has to happen since we first copied over an entire entity state.)
-    bodyClassEntity->SetNumber(bodyEntity - serverEntities);
+    bodyGameEntity->SetNumber(bodyEntity - serverEntities);
     // Set the event ID for this frame to OtherTeleport.
-    bodyClassEntity->SetEventID(EntityEvent::OtherTeleport);
+    bodyGameEntity->SetEventID(EntityEvent::OtherTeleport);
 
     // Copy over the serverflags from ent.
-    bodyClassEntity->SetServerFlags(ent->GetServerFlags());
-    bodyClassEntity->SetMins(ent->GetMins());
-    bodyClassEntity->SetMaxs(ent->GetMaxs());
-    bodyClassEntity->SetAbsoluteMin(ent->GetAbsoluteMin());
-    bodyClassEntity->SetAbsoluteMax(ent->GetAbsoluteMax());
-    bodyClassEntity->SetSize(ent->GetSize());
-    bodyClassEntity->SetVelocity(ent->GetVelocity());
-    bodyClassEntity->SetAngularVelocity(ent->GetAngularVelocity());
-    bodyClassEntity->SetSolid(ent->GetSolid());
-    bodyClassEntity->SetClipMask(ent->GetClipMask());
-    bodyClassEntity->SetOwner(ent->GetOwner());
-    bodyClassEntity->SetMoveType(ent->GetMoveType());
-    //bodyClassEntity->SetGroundEntity(ent->GetGroundEntity());
+    bodyGameEntity->SetServerFlags(ent->GetServerFlags());
+    bodyGameEntity->SetMins(ent->GetMins());
+    bodyGameEntity->SetMaxs(ent->GetMaxs());
+    bodyGameEntity->SetAbsoluteMin(ent->GetAbsoluteMin());
+    bodyGameEntity->SetAbsoluteMax(ent->GetAbsoluteMax());
+    bodyGameEntity->SetSize(ent->GetSize());
+    bodyGameEntity->SetVelocity(ent->GetVelocity());
+    bodyGameEntity->SetAngularVelocity(ent->GetAngularVelocity());
+    bodyGameEntity->SetSolid(ent->GetSolid());
+    bodyGameEntity->SetClipMask(ent->GetClipMask());
+    bodyGameEntity->SetOwner(ent->GetOwner());
+    bodyGameEntity->SetMoveType(ent->GetMoveType());
+    //bodyGameEntity->SetGroundEntity(ent->GetGroundEntity());
 
     // Set the die callback, and set its take damage.
-    bodyClassEntity->SetDieCallback(&BodyCorpse::BodyCorpseDie);
-    bodyClassEntity->SetTakeDamage(TakeDamage::Yes);
+    bodyGameEntity->SetDieCallback(&BodyCorpse::BodyCorpseDie);
+    bodyGameEntity->SetTakeDamage(TakeDamage::Yes);
 
     // Link it in for collision etc.
-    bodyClassEntity->LinkEntity();
+    bodyGameEntity->LinkEntity();
 }
 
 //===============
@@ -1168,8 +1168,8 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
     // take it, otherwise spawn one from scratch
     if (static_cast<bool>(svEntity->inUse) == true) {
         // Only pull through if it is a base player.
-        if (svEntity->classEntity->IsSubclassOf<SVGBasePlayer>()) {
-	        player = dynamic_cast<SVGBasePlayer*>(svEntity->classEntity);
+        if (svEntity->gameEntity->IsSubclassOf<SVGBasePlayer>()) {
+	        player = dynamic_cast<SVGBasePlayer*>(svEntity->gameEntity);
         } else {
 	        gi.Error("ClientBegin called with an inUse entity that is not of type or derived from SVGBasePlayer\n");
         }
@@ -1191,7 +1191,7 @@ void DefaultGamemode::ClientBegin(Entity* svEntity) {
         // Initialize client respawn data.
         InitializePlayerRespawnData(svEntity->client);
  
-        // Put into our server and blast away! (Takes care of spawning classEntity).
+        // Put into our server and blast away! (Takes care of spawning gameEntity).
         PlacePlayerInGame(player);
     }
 
@@ -1498,7 +1498,7 @@ void DefaultGamemode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
     IServerGameEntity *spawnPoint = nullptr;
 
     // Find a spawn point that has a targetname matching game.spawnpoint.
-    auto targetSpawnPoints = game.world->GetClassEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>() | cef::HasKeyValue("targetname", game.spawnpoint);
+    auto targetSpawnPoints = game.world->GetGameEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>() | cef::HasKeyValue("targetname", game.spawnpoint);
 
     // First try and find the one with the targetname.
     for (auto& entity : targetSpawnPoints) {
@@ -1513,7 +1513,7 @@ void DefaultGamemode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
     if (!spawnPoint) {
         // TODO: Improve this, find a method to select random from a range. (Or wrap something similar up.)
 	    std::vector<IServerGameEntity*> spawnVector;
-        auto spawnPoints = game.world->GetClassEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>();
+        auto spawnPoints = game.world->GetGameEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>();
         for (auto& entity : spawnPoints) { spawnVector.push_back(entity); }
 
         // Select random spawn point.
@@ -1591,7 +1591,7 @@ void DefaultGamemode::PlacePlayerInGame(SVGBasePlayer *player) {
     client->respawn = respawnData;
 
     // Spawn the client again using spawn instead of respawn. (Respawn serves a different use.)
-    //SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(ent->classEntity);
+    //SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(ent->gameEntity);
     player->Spawn();
 
     // Copy some data from the client to the entity
@@ -1685,11 +1685,11 @@ void DefaultGamemode::RespawnClient(SVGBasePlayer* ent) {
     // Kept around here to port later to other gamemodes.
     //if (deathmatch->value || coop->value) {
     //    // Spectator's don't leave bodies
-    //    if (self->classEntity->GetMoveType() != MoveType::NoClip && self->classEntity->GetMoveType() != MoveType::Spectator)
-    //        GetGamemode()->SpawnClientCorpse(self->classEntity);
+    //    if (self->gameEntity->GetMoveType() != MoveType::NoClip && self->gameEntity->GetMoveType() != MoveType::Spectator)
+    //        GetGamemode()->SpawnClientCorpse(self->gameEntity);
 
     //    self->serverFlags &= ~EntityServerFlags::NoClient;
-    //    GetGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->classEntity);
+    //    GetGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->gameEntity);
 
     //    // add a teleportation effect
     //    self->state.eventID = EntityEvent::PlayerTeleport;
@@ -1744,12 +1744,12 @@ void DefaultGamemode::StorePlayerPersistentData(void) {
         Entity *entity = &serverEntities[1 + i];
         if (!entity->inUse)
             continue;
-        if (!entity->classEntity)
+        if (!entity->gameEntity)
             continue;
 
-        gameClients[i].persistent.stats.health = entity->classEntity->GetHealth();
-        gameClients[i].persistent.stats.maxHealth = entity->classEntity->GetMaxHealth();
-        gameClients[i].persistent.savedFlags = (entity->classEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
+        gameClients[i].persistent.stats.health = entity->gameEntity->GetHealth();
+        gameClients[i].persistent.stats.maxHealth = entity->gameEntity->GetMaxHealth();
+        gameClients[i].persistent.savedFlags = (entity->gameEntity->GetFlags() & (EntityFlags::GodMode | EntityFlags::NoTarget | EntityFlags::PowerArmor));
     }
 }
 

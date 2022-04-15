@@ -118,7 +118,7 @@ void Gameworld::PrepareClients() {
 }
 
 /**
-*	@brief Prepares the game's client entities with a base player class entity.
+*	@brief Prepares the game's client entities with a base player game entity.
 **/
 void Gameworld::PreparePlayers() {
     // Allocate a classentity for each client in existence.
@@ -129,7 +129,7 @@ void Gameworld::PreparePlayers() {
 		// We can fetch the number based on subtracting these two pointers.
 		podEntity->state.number = podEntity - podEntities;
 
-		// Allocate player client class entity
+		// Allocate player client game entity
 		SVGBasePlayer* playerClientEntity = CreateGameEntity<SVGBasePlayer>(podEntity, false);
 
 		// Be sure to reset their inuse, after all, they aren't in use.
@@ -148,7 +148,7 @@ void Gameworld::PreparePlayers() {
 /**
 *	@brief	Parses the 'entities' string and assigns each parsed entity to the
 *			first free server entity slot there is. After doing so, allocates
-*			a class entity based on the 'classname' of the parsed entity.
+*			a game entity based on the 'classname' of the parsed entity.
 **/
 qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint) {
 	// Clear level state.
@@ -156,7 +156,7 @@ qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities
 
     // Delete class entities if they are allocated, and reset the server entity to a zero state.
     for (int32_t i = 0; i < game.GetMaxEntities(); i++) {
-		// Delete class entity.
+		// Delete game entity.
 		if (gameEntities[i]) {
 		    delete gameEntities[i];
 			gameEntities[i] = NULL;
@@ -209,16 +209,16 @@ qboolean Gameworld::SpawnFromBSPString(const char* mapName, const char* entities
 		// Now we've got the reserved server entity to use, let's parse the entity.
 		ParseEntityString(&entities, podEntity);
 
-		// Allocate the class entity, and call its spawn.
+		// Allocate the game entity, and call its spawn.
 		if (!SpawnParsedGameEntity(podEntity)) {
 			parsedSuccessfully = false;
 		}
 	}
 
 	// Post spawn entities.
-	for (auto& classEntity : gameEntities) {
-		if (classEntity) {
-			classEntity->PostSpawn();
+	for (auto& gameEntity : gameEntities) {
+		if (gameEntity) {
+			gameEntity->PostSpawn();
 		}
 	}
 
@@ -305,7 +305,7 @@ void Gameworld::FindTeams() {
     int32_t c = 0;
     int32_t c2 = 0;
     for (i = 1, podEntityA = podEntities + i; i < numberOfEntities; i++, podEntityA++) {
-        // Fetch class entity.
+        // Fetch game entity.
         GameEntity *gameEntityA = gameEntities[podEntityA->state.number];
 
         if (gameEntityA == nullptr) {
@@ -326,7 +326,7 @@ void Gameworld::FindTeams() {
         c2++;
 
         for (j = i + 1, podEntityB = podEntityA + 1 ; j < globals.numberOfEntities ; j++, podEntityB++) {
-            // Fetch class entity.
+            // Fetch game entity.
             GameEntity* gameEntityB = gameEntities[podEntityA->state.number];
 
             if (gameEntityB == nullptr) { 
@@ -418,8 +418,8 @@ qboolean Gameworld::ParseEntityString(const char** data, Entity* svEntity) {
 }
 
 /**
-*   @brief  Allocates the class entity determined by the classname key, and
-*           then does a precache before spawning the class entity.
+*   @brief  Allocates the game entity determined by the classname key, and
+*           then does a precache before spawning the game entity.
 **/
 qboolean Gameworld::SpawnParsedGameEntity(Entity* svEntity) {
 	// Acquire dictionary.
@@ -437,11 +437,11 @@ qboolean Gameworld::SpawnParsedGameEntity(Entity* svEntity) {
 		return false;
     }
 
-	// Actually spawn the class entity.
-    IServerGameEntity *classEntity = svEntity->classEntity = AllocateClassEntity(svEntity, svEntity->entityDictionary["classname"]);
+	// Actually spawn the game entity.
+    IServerGameEntity *gameEntity = svEntity->gameEntity = AllocateGameEntity(svEntity, svEntity->entityDictionary["classname"]);
 
-    // Something went wrong with allocating the class entity.
-    if (!classEntity) {
+    // Something went wrong with allocating the game entity.
+    if (!gameEntity) {
 		// Be sure to free it.
 		FreePODEntity(svEntity);
 
@@ -452,12 +452,12 @@ qboolean Gameworld::SpawnParsedGameEntity(Entity* svEntity) {
 
     // Initialise the entity with its respected keyvalue properties
     for (const auto& keyValueEntry : svEntity->entityDictionary) {
-		svEntity->classEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
+		svEntity->gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
     }
 
     // Precache and spawn the entity.
-    classEntity->Precache();
-	classEntity->Spawn();
+    gameEntity->Precache();
+	gameEntity->Spawn();
 
 	// Success.
 	return true;
@@ -467,9 +467,9 @@ qboolean Gameworld::SpawnParsedGameEntity(Entity* svEntity) {
 *	@brief	Seeks through the type info system for a class registered under the classname string.
 *			When found, it'll check whether it is allowed to be spawned as a map entity. If it is,
 *			try and allocate it.
-*	@return	nullptr in case of failure, a valid pointer to a class entity otherwise.
+*	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
 **/
-GameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &classname) {
+GameEntity *Gameworld::AllocateGameEntity(Entity* svEntity, const std::string &classname) {
     // Start with a nice nullptr.
     GameEntity* spawnEntity = nullptr;
 
@@ -484,7 +484,7 @@ GameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &
 	// Warn if a slot is already occupied.
     if (gameEntities[stateNumber] != nullptr) {
 		// Warn.
-		gi.DPrintf("WARNING: trying to allocate class entity '%s' the slot #%i was pre-occupied.\n");
+		gi.DPrintf("WARNING: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n");
 
 		// Return nullptr.
 		return nullptr;
@@ -507,7 +507,7 @@ GameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
-		// Allocate and return out new class entity.
+		// Allocate and return out new game entity.
 		return (gameEntities[stateNumber] = info->AllocateInstance(svEntity));
     } else {
 		// Check and warn about what went wrong.
@@ -526,7 +526,7 @@ GameEntity *Gameworld::AllocateClassEntity(Entity* svEntity, const std::string &
 *   @brief  Frees the given pod entity and its game class object entity 
 *			rendering this entity to be used for recycling.
 *
-*   @return A pointer to the class entity on success, nullptr on failure.
+*   @return A pointer to the game entity on success, nullptr on failure.
 **/
 void Gameworld::FreePODEntity(PODEntity* podEntity) {
     // Sanity check.
@@ -563,8 +563,8 @@ void Gameworld::FreePODEntity(PODEntity* podEntity) {
     // Reset serverFlags.
     podEntity->serverFlags = 0;
 
-    // Ensure the class entity is nullified.
-    podEntity->classEntity = nullptr;
+    // Ensure the game entity is nullified.
+    podEntity->gameEntity = nullptr;
 }
 
 /**
@@ -585,19 +585,19 @@ qboolean Gameworld::FreeGameEntity(PODEntity* podEntity) {
     // Fetch entity number.
     int32_t entityNumber = podEntity->state.number;
 
-    // Special class entity handling IF it still has one.
-    if (podEntity->classEntity) {
-		// Get pointer to class entity.
-		IServerGameEntity* classEntity = podEntity->classEntity;
+    // Special game entity handling IF it still has one.
+    if (podEntity->gameEntity) {
+		// Get pointer to game entity.
+		IServerGameEntity* gameEntity = podEntity->gameEntity;
 
-		// Remove the classEntity reference
-		classEntity->SetGroundEntity(nullptr);
-		classEntity->SetLinkCount(0);
-		classEntity->SetGroundEntityLinkCount(0);
-		classEntity->SetPODEntity(nullptr);
+		// Remove the gameEntity reference
+		gameEntity->SetGroundEntity(nullptr);
+		gameEntity->SetLinkCount(0);
+		gameEntity->SetGroundEntityLinkCount(0);
+		gameEntity->SetPODEntity(nullptr);
 
-		// Reset server entity's class entity pointer.
-		podEntity->classEntity = nullptr;
+		// Reset server entity's game entity pointer.
+		podEntity->gameEntity = nullptr;
     }
 
     // For whichever faulty reason the entity might not have had a classentity,
@@ -607,7 +607,7 @@ qboolean Gameworld::FreeGameEntity(PODEntity* podEntity) {
 		delete gameEntities[entityNumber];
 		gameEntities[entityNumber] = nullptr;
 
-		// Freed class entity.
+		// Freed game entity.
 		freedGameEntity = true;
     }
 
@@ -618,11 +618,11 @@ qboolean Gameworld::FreeGameEntity(PODEntity* podEntity) {
 /**
 *   @brief	Utility function so we can acquire a valid entity pointer. It operates
 *			by using an entity handle in order to make sure that it has a valid
-*			server and class entity object.
+*			server and game entity object.
 *	@param	requireValidClient	Expands the check to make sure the entity's client isn't set to nullptr.
 *	@param	requireInUse		Expands the check to make sure the entity has its inUse set to true.
 * 
-*   @return A valid pointer to the entity class entity. nullptr on failure.
+*   @return A valid pointer to the entity game entity. nullptr on failure.
 **/
 SVGBaseEntity* Gameworld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
     // Ensure the entity is valid.

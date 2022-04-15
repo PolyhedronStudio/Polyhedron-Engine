@@ -36,17 +36,17 @@ class CLGBaseEntity;
 **/
 using CLGEntityVector = std::vector<IClientGameEntity*>;
 
-class ClassEntityList {
+class GameEntityList {
 public:
     //! Constructor/Destructor.
-    ClassEntityList() {
+    GameEntityList() {
         // 2048 for server entities, and 2048 more for... whichever.
-        classEntities.reserve(MAX_PACKET_ENTITIES * 2);
+        gameEntities.reserve(MAX_PACKET_ENTITIES * 2);
 
         // To ensure that slot 0 is in use, keeps indexes correct.
-        classEntities.push_back(nullptr);
+        gameEntities.push_back(nullptr);
     }
-    virtual ~ClassEntityList() = default;
+    virtual ~GameEntityList() = default;
 
     /**
     *   @brief  Clears the list by deallocating all its members.
@@ -78,8 +78,8 @@ public:
     **/
     IClientGameEntity *InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force = true);
 
-    inline CLGEntityVector *GetGameEntities() { return &classEntities; };
+    inline CLGEntityVector *GetGameEntities() { return &gameEntities; };
 private:
     //! First 2048 are reserved for server side entities.
-    CLGEntityVector classEntities;
+    CLGEntityVector gameEntities;
 };

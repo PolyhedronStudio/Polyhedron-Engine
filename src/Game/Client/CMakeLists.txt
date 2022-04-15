@@ -32,7 +32,7 @@ SET(SRC_CLGAME
 	
 	Entities/Monsters/MonsterTestDummy.cpp
 
-	Entities/ClassEntityList.cpp
+	Entities/GameEntityList.cpp
 	Entities/IClientGameEntity.cpp
 
 
@@ -79,7 +79,7 @@ SET(HEADERS_CLGAME
 
 	Entities/Monsters/MonsterTestDummy.h
 
-	Entities/ClassEntityList.h
+	Entities/GameEntityList.h
 	Entities/IClientGameEntity.h
 
 	Exports/Core.h

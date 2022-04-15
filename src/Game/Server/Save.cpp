@@ -87,7 +87,7 @@ static const save_field_t entityfields[] = {
 //    I(clipMask),
 //    E(owner),
 //
-//    //I(classEntity->GetMoveType()),
+//    //I(gameEntity->GetMoveType()),
 ////    I(flags),
 //
 ////    L(model),

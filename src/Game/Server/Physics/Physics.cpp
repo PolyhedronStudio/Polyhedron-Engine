@@ -102,7 +102,7 @@ SVGBaseEntity *SVG_TestEntityPosition(IServerGameEntity *ent)
     trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
 
     if (trace.startSolid) {
-	    return dynamic_cast<SVGBaseEntity*>(game.world->GetWorldspawnClassEntity());
+	    return dynamic_cast<SVGBaseEntity*>(game.world->GetWorldspawnGameEntity());
     }
 
     return nullptr;

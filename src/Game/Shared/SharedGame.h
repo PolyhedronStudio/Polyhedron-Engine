@@ -15,7 +15,7 @@
 *	What game module is including this in its sources?
 **/
 /**
-*	Predeclare the actual class entity type that we intend to use depending on which game module
+*	Predeclare the actual game entity type that we intend to use depending on which game module
 *	this file is being compiled along with.
 **/
 #ifdef SHAREDGAME_CLIENTGAME //! Start of ClientGame Specifics.

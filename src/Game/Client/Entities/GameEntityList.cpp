@@ -13,16 +13,16 @@
 #include "Base/CLGBaseEntity.h"
 
 // GameEntity list.
-#include "ClassEntityList.h"
+#include "GameEntityList.h"
 
 
 
 /**
 *   @brief  Clears the list by deallocating all its members.
 **/
-void ClassEntityList::Clear() {
+void GameEntityList::Clear() {
 	// Loop through the entities to notify about their deletion.
-	for (auto& clgEntity : classEntities) {
+	for (auto& clgEntity : gameEntities) {
 		if (clgEntity) {
 			// Notify about deletion.
 			clgEntity->OnDeallocate();
@@ -34,14 +34,14 @@ void ClassEntityList::Clear() {
 	}
 		
 	// Clear out the list.
-	classEntities.clear();
+	gameEntities.clear();
 }
 
 /**
 *   @brief  Spawns and inserts a new class entity of type 'classname', which belongs to the ClientEntity.
 *   @return Pointer to the class entity object on sucess. On failure, nullptr.
 **/
-IClientGameEntity* ClassEntityList::AllocateFromClassname(const std::string &classname, ClientEntity* clEntity) {
+IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &classname, ClientEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -73,7 +73,7 @@ IClientGameEntity* ClassEntityList::AllocateFromClassname(const std::string &cla
 
 		// If it isn't a nullptr...
 		if (!spawnEntity) {
-			Com_DPrint("Warning: ClassEntityList.InsertAt failed.\n");
+			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
 			return nullptr;
 			//classEntity = new CLGBaseEntity(clEntity);
 		}
@@ -98,7 +98,7 @@ IClientGameEntity* ClassEntityList::AllocateFromClassname(const std::string &cla
 *			which belongs to the ClientEntity.
 *   @return Pointer to the class entity object on sucess. On failure, nullptr.
 **/
-IClientGameEntity* ClassEntityList::AllocateFromState(const EntityState& state, ClientEntity* clEntity) {
+IClientGameEntity* GameEntityList::AllocateFromState(const EntityState& state, ClientEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -154,7 +154,7 @@ IClientGameEntity* ClassEntityList::AllocateFromState(const EntityState& state, 
 
 		// If it isn't a nullptr...
 		if (!classEntity) {
-			Com_DPrint("Warning: ClassEntityList.InsertAt failed.\n");
+			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
 			return nullptr;
 			//classEntity = new CLGBaseEntity(clEntity);
 		}
@@ -180,14 +180,14 @@ IClientGameEntity* ClassEntityList::AllocateFromState(const EntityState& state, 
 /**
 *   @return A pointer to the entity who's index matches the state number.
 **/
-IClientGameEntity *ClassEntityList::GetByNumber(int32_t number) {
+IClientGameEntity *GameEntityList::GetByNumber(int32_t number) {
 	// Ensure ID is within bounds.
-	if (number <= 0 || number > classEntities.size()) {
+	if (number <= 0 || number > gameEntities.size()) {
 		return nullptr;
 	}
 
 	// Return class entity that belongs to this ID.
-	return classEntities[number - 1];
+	return gameEntities[number - 1];
 }
 
 /**
@@ -195,26 +195,26 @@ IClientGameEntity *ClassEntityList::GetByNumber(int32_t number) {
 *   @param  force   When set to true it'll delete any previously allocated class entity occupying the given index.
 *   @return Pointer to the entity being inserted. nullptr on failure.
 **/
-IClientGameEntity *ClassEntityList::InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force) {
+IClientGameEntity *GameEntityList::InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force) {
 	// Ensure that the number range is valid, otherwise return a nullptr.
-	if (number <= 0 || number > classEntities.capacity()) {
+	if (number <= 0 || number > gameEntities.capacity()) {
 		return nullptr;
 	}
 
 	// If the index is already occupied...
-	if (classEntities.size() > number && classEntities[number] != nullptr) {
+	if (gameEntities.size() > number && gameEntities[number] != nullptr) {
 		// We check if we should delete it, or return a nullptr for failure.
 		if (force) {
-			delete classEntities[number];
-			classEntities[number] = nullptr;
+			delete gameEntities[number];
+			gameEntities[number] = nullptr;
 		} else {
 			return nullptr;
 		}
 	}
 
 	// We're good to go, let's insert and return a pointer to it.
-	//classEntities.emplace(classEntities.begin() + number, clgEntity);
-	classEntities.push_back(clgEntity);
+	//gameEntities.emplace(gameEntities.begin() + number, clgEntity);
+	gameEntities.push_back(clgEntity);
 
 	// Return object ptr.
 	return clgEntity;

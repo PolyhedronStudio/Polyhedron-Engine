@@ -13,7 +13,7 @@
 #include "../Entities/Base/CLGBaseEntity.h"
 
 // Entity List.
-#include "../Entities/ClassEntityList.h"
+#include "../Entities/GameEntityList.h"
 
 
 
@@ -35,7 +35,7 @@ public:
 
     /**
     *   @brief  When the client receives state updates it calls into this function so we can update
-    *           the class entity belonging to the server side entity(defined by state.number).
+    *           the game entity belonging to the server side entity(defined by state.number).
     * 
     *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
     *           always update its ClientEntity pointer to the appropriate new one instead.
@@ -68,7 +68,7 @@ public:
     void RunFrame();
 
     inline CLGEntityVector* GetGameEntities() {
-        return classEntityList.GetGameEntities();
+        return gameEntityList.GetGameEntities();
     }
 //! Entity Parsing utilities.
 private:
@@ -79,14 +79,14 @@ private:
     qboolean ParseEntityString(const char** data, ClientEntity* clEntity);
 
     /**
-    *   @brief  Allocates the class entity determined by the classname key, and
-    *           then does a precache before spawning the class entity.
+    *   @brief  Allocates the game entity determined by the classname key, and
+    *           then does a precache before spawning the game entity.
     **/
     qboolean SpawnParsedGameEntity(ClientEntity* clEntity);
 
-//! Class Entity utilities.
+//! Game Entity utilities.
 private:
-    ClassEntityList classEntityList;
+    GameEntityList gameEntityList;
 
 //! Entity Rendering utilities.
 private:

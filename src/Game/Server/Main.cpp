@@ -552,13 +552,13 @@ void SVG_RunFrame(void) {
 	    SGEntityHandle entityHandle = gameEntities[i];
 
 
-        //if (!classEntity || !classEntity->IsInUse()) {
+        //if (!gameEntity || !gameEntity->IsInUse()) {
         if (!(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
             continue;
         }
 
-        // Acquire the class entity.
-        IServerGameEntity *classEntity = *entityHandle;
+        // Acquire the game entity.
+        IServerGameEntity *gameEntity = *entityHandle;
         // Don't go on if it isn't in use.
         //if (!serverEntity->IsInUse())
         //    continue;
@@ -572,46 +572,46 @@ void SVG_RunFrame(void) {
             // 
             // Other entities may wish to point at this entity for the current tick. By unsetting
             // the server entity we can prevent malicious situations from happening.
-            //classEntity->SetPODEntity(nullptr);
+            //gameEntity->SetPODEntity(nullptr);
 
             // Skip further processing of this entity, it's removed.
             continue;
         }
 
         // Let the level data know which entity we are processing right now.
-        level.currentEntity = classEntity;
+        level.currentEntity = gameEntity;
 
         // Store previous(old) origin.
-        classEntity->SetOldOrigin(classEntity->GetOrigin());
+        gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-	    SGEntityHandle groundEntity = classEntity->GetGroundEntity();
-        if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != classEntity->GetGroundEntityLinkCount())) {
+	    SGEntityHandle groundEntity = gameEntity->GetGroundEntity();
+        if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
-            classEntity->SetGroundEntity(nullptr);
+            gameEntity->SetGroundEntity(nullptr);
 
             // Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-            if (!(classEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (classEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+            if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
                 // Check for a new ground entity that resides below this entity.
-                SVG_StepMove_CheckGround(classEntity);
+                SVG_StepMove_CheckGround(gameEntity);
             }
         }
 
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= game.GetMaxClients()) {
             // Ensure the entity is in posession of a client that controls it.
-            ServerClient* client = classEntity->GetClient();
+            ServerClient* client = gameEntity->GetClient();
             if (!client) {
                 continue;
             }
 
             // If the entity is NOT a SVGBasePlayer (sub-)class, skip.
-            if (!classEntity->GetTypeInfo()->IsSubclassOf(SVGBasePlayer::ClassInfo)) {
+            if (!gameEntity->GetTypeInfo()->IsSubclassOf(SVGBasePlayer::ClassInfo)) {
                 continue;
             }
 
             // Last but not least, begin its server frame.
-            GetGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(classEntity), client);
+            GetGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(gameEntity), client);
 
             // Continue to next iteration.
             continue;

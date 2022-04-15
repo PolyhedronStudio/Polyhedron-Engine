@@ -22,7 +22,7 @@ template<typename T> static inline T CastHandle(SGEntityHandle& bridge) { return
 template<typename T> static inline T CastHandle(const SGEntityHandle& bridge) { return static_cast<T>(static_cast<T*>(bridge)); }
 
 /**
-*	@brief A bridge between class entity and server entity.
+*	@brief A bridge between game entity and server entity.
 * 
 *	@details An entity handle is used to link a "Classentity" to a "POD Entity".
 *	The handle stores a pointer to the POD Entity and its index number.
@@ -52,9 +52,9 @@ public:
 
     /**
 	*	@brief Simple constructor of an entity handle that will accept a
-	*	class entity.
+	*	game entity.
 	**/
-    SGEntityHandle(ISharedGameEntity* classEntity);
+    SGEntityHandle(ISharedGameEntity* gameEntity);
 
     /**
     *	@brief Simple constructor that will accept a reference to another handle entity.
@@ -114,10 +114,10 @@ public:
 	*			If no valid GameEntity and POD Entity pointer are passed it unsets
 	*			the current handle to nullptr and entityID = 0.
 	**/
-    ISharedGameEntity* operator=(ISharedGameEntity* classEntity);
+    ISharedGameEntity* operator=(ISharedGameEntity* gameEntity);
 
     /**
-    *	@brief	Used to access the class entity its methods.
+    *	@brief	Used to access the game entity its methods.
     **/
     GameEntity* operator->() const;
 

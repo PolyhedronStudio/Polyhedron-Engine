@@ -126,7 +126,7 @@ public:
     }
     /**
     *   @brief  Sets the pointer ot the client/server side POD Entity.
-    *           Used only in SVG_FreeEntity and SVG_CreateClassEntity.
+    *           Used only in SVG_FreeEntity and SVG_CreateGameEntity.
     **/
     inline void SetPODEntity(PODEntity* podEntity) {
         this->podEntity = podEntity;

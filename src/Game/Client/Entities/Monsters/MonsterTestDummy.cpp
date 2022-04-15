@@ -30,7 +30,7 @@ MonsterTestDummy::MonsterTestDummy(PODEntity* clEntity) : Base(clEntity) {
 
 /**
 *
-*   Client Class Entity Interface Functions.
+*   Client Game Entity Interface Functions.
 *
 **/
 /**
@@ -97,7 +97,7 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 
 /***
 *
-*   Client Class Entity Functions.
+*   Client Game Entity Functions.
 *
 ***/
 

@@ -154,7 +154,7 @@ public:
         return podEntity;
     }
     /**
-    *   @brief  Used only in SVG_FreeEntity and SVG_CreateClassEntity.
+    *   @brief  Used only in SVG_FreeEntity and SVG_CreateGameEntity.
     *   @return Pointer to the server side entity.
     **/
     inline void SetPODEntity(Entity* svEntity) final {

@@ -35,7 +35,7 @@ CLGBaseEntity::CLGBaseEntity(ClientEntity* clEntity) : Base() {//}, podEntity(cl
 /**
 *
 *
-*   Client Class Entity Interface Functions.
+*   Client Game Entity Interface Functions.
 *
 *
 **/
@@ -206,7 +206,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 /***
 *
 * 
-*   Client Class Entity Functions.
+*   Client Game Entity Functions.
 *
 * 
 ***/

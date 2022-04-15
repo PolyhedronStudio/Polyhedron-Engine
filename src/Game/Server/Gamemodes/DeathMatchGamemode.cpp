@@ -69,7 +69,7 @@ void DeathmatchGamemode::ClientBegin(Entity* svEntity) {
     // Initialize client respawn data.
     InitializePlayerRespawnData(svEntity->client);
  
-    // Put into our server and blast away! (Takes care of spawning classEntity).
+    // Put into our server and blast away! (Takes care of spawning gameEntity).
     PlacePlayerInGame(player);
 
     if (level.intermission.time != GameTime::zero()) {
@@ -524,7 +524,7 @@ void DeathmatchGamemode::RespawnClient(SVGBasePlayer* player) {
 *   @brief  Respawn all valid client entities who's health is < 0.
 **/
 void DeathmatchGamemode::RespawnAllClients() {
-    for (auto& player : game.world->GetClassEntityRange(0, MAX_EDICTS) | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>()) {
+    for (auto& player : game.world->GetGameEntityRange(0, MAX_EDICTS) | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>()) {
         if (player->GetHealth() < 0) {
             RespawnClient(dynamic_cast<SVGBasePlayer*>(player));
         }

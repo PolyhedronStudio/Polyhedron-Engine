@@ -54,7 +54,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 
     VectorCopy(targ->state.origin, ownerv);
 
-    ownerv[2] += targ->classEntity->GetViewHeight();
+    ownerv[2] += targ->gameEntity->GetViewHeight();
 
     VectorCopy(targ->client->aimAngles, angles);
     if (angles[vec3_t::Pitch] > 56)
@@ -67,7 +67,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
         o[2] = targ->state.origin[2] + 20;
 
     // jump animation lifts
-    if (!targ->classEntity->GetGroundEntity())
+    if (!targ->gameEntity->GetGroundEntity())
         o[2] += 16;
 
     trace = gi.Trace(ownerv, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid);
@@ -93,7 +93,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
         goal[2] += 6;
     }
 
-    if (targ->classEntity->GetDeadFlag())
+    if (targ->gameEntity->GetDeadFlag())
         ent->GetClient()->playerState.pmove.type = EnginePlayerMoveType::Dead;
     else
         ent->GetClient()->playerState.pmove.type = EnginePlayerMoveType::Freeze;
@@ -103,7 +103,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
     for (i = 0; i < 3; i++)
         ent->GetClient()->playerState.pmove.deltaAngles[i] = targ->client->aimAngles[i] - ent->GetClient() ->respawn.commandViewAngles[i];
 
-    if (targ->classEntity->GetDeadFlag()) {
+    if (targ->gameEntity->GetDeadFlag()) {
         ent->GetClient()->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
         ent->GetClient()->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
         ent->GetClient()->playerState.pmove.viewAngles[vec3_t::Yaw] = targ->client->killerYaw;

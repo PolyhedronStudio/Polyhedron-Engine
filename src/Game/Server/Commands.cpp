@@ -139,7 +139,7 @@ void SelectPrevItem(Entity *ent, int itflags)
     //cl = ent->client;
 
     //if (cl->chaseTarget) {
-    //    SVG_ChasePrev((SVGBasePlayer*)ent->classEntity);
+    //    SVG_ChasePrev((SVGBasePlayer*)ent->gameEntity);
     //    return;
     //}
 
@@ -215,9 +215,9 @@ void Cmd_Give_f(Entity *ent)
 //
 //    if (give_all || PH_StringCompare(gi.argv(1), "health") == 0) {
 //        if (gi.argc() == 3)
-//            ent->classEntity->SetHealth(atoi(gi.argv(2)));
+//            ent->gameEntity->SetHealth(atoi(gi.argv(2)));
 //        else
-//            ent->classEntity->SetHealth(ent->classEntity->GetMaxHealth());
+//            ent->gameEntity->SetHealth(ent->gameEntity->GetMaxHealth());
 //        if (!give_all)
 //            return;
 //    }
@@ -855,7 +855,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
         SVG_CPrint(NULL, PRINT_CHAT, sayBuffer);
 
     // Loop over client entities.
-    for (auto& otherplayer : GetGameworld()->GetClassEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
+    for (auto& otherplayer : GetGameworld()->GetGameEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
         if (team) {
             if (!SVG_OnSameTeam(player, otherplayer))
                 continue;

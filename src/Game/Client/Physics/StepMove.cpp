@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Base/CLGBaseEntity.h"
 
 // GameEntity list.
-#include "../Entities/ClassEntityList.h"
+#include "../Entities/GameEntityList.h"
 //#include "../Utilities.h"
 
 // UP-STEP height in "Quake Units". This is used commonly all over for each stepmove entity.
@@ -351,8 +351,8 @@ static void CLG_CalculateYawAngle (PODEntity* ent)
 
     current = ent->current.angles[vec3_t::Yaw]; //AngleMod(ent->state.angles[vec3_t::Yaw]);
 
-    if (ent->classEntity)
-        ideal = ent->classEntity->GetIdealYawAngle();
+    if (ent->gameEntity)
+        ideal = ent->gameEntity->GetIdealYawAngle();
     else
         ideal = 0.f;
 
@@ -360,8 +360,8 @@ static void CLG_CalculateYawAngle (PODEntity* ent)
         return;
 
     move = ideal - current;
-    if (ent->classEntity)
-        speed = ent->classEntity->GetYawSpeed();
+    if (ent->gameEntity)
+        speed = ent->gameEntity->GetYawSpeed();
     else
         speed = 0.f;
 

@@ -339,8 +339,8 @@ static void SVG_CalculateYawAngle (Entity* ent)
 
     current = AngleMod(ent->state.angles[vec3_t::Yaw]);
 
-    if (ent->classEntity)
-        ideal = ent->classEntity->GetIdealYawAngle();
+    if (ent->gameEntity)
+        ideal = ent->gameEntity->GetIdealYawAngle();
     else
         ideal = 0.f;
 
@@ -348,8 +348,8 @@ static void SVG_CalculateYawAngle (Entity* ent)
         return;
 
     move = ideal - current;
-    if (ent->classEntity)
-        speed = ent->classEntity->GetYawSpeed();
+    if (ent->gameEntity)
+        speed = ent->gameEntity->GetYawSpeed();
     else
         speed = 0.f;
 

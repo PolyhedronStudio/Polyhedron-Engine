@@ -20,7 +20,7 @@ public:
 
     /**
     *
-    *   Client Class Entity Interface Functions.
+    *   Client Game Entity Interface Functions.
     *
     **/
     /**
@@ -53,7 +53,7 @@ public:
 
     /***
     *
-    *   Client Class Entity Functions.
+    *   Client Game Entity Functions.
     *
     ***/
     // TEMP

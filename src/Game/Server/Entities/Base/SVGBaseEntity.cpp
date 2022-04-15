@@ -335,7 +335,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 	if ( !GetKillTarget().empty() ) {
 		qboolean foundKillTarget = false;
 
-		for (auto* killtargetEntity : GetGameworld()->GetClassEntityRange(0, MAX_EDICTS)
+		for (auto* killtargetEntity : GetGameworld()->GetGameEntityRange(0, MAX_EDICTS)
 			| cef::IsValidPointer
 			| cef::HasServerEntity
 			| cef::InUse
@@ -357,7 +357,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 	// Actually fire the targets
 	if ( !GetTarget().empty() ) {
 		qboolean foundTarget = false;
-	    for (auto* triggerEntity : GetGameworld()->GetClassEntityRange<0, MAX_EDICTS>()
+	    for (auto* triggerEntity : GetGameworld()->GetGameEntityRange<0, MAX_EDICTS>()
 			| cef::IsValidPointer
 			| cef::HasServerEntity
 			| cef::InUse

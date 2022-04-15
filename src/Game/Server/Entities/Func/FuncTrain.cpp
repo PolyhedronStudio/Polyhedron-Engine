@@ -123,7 +123,7 @@ void FuncTrain::FindNextTarget() {
 	}
 
 	// Find target.
-	auto targetEntities = GetGameworld()->GetClassEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
+	auto targetEntities = GetGameworld()->GetGameEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
 
 	if (targetEntities.front() != nullptr && targetEntities.front()->IsSubclassOf<PathCorner>()) {
 	    PathCorner* pathCorner = dynamic_cast<PathCorner*>(targetEntities.front());
@@ -218,7 +218,7 @@ void FuncTrain::NextCornerThink() {
 		// TODO: Add a find single entity by targetname to gameworld including other utility classes?
 
 		// Find target.
-		auto targetEntities = GetGameworld()->GetClassEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
+		auto targetEntities = GetGameworld()->GetGameEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
 
 		if (targetEntities.front() != nullptr && targetEntities.front()->IsSubclassOf<PathCorner>()) {
 		    pathCornerEntity = dynamic_cast<PathCorner*>(targetEntities.front());
