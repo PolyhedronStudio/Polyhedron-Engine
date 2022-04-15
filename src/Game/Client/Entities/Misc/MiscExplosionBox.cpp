@@ -128,10 +128,9 @@ void MiscExplosionBox::Think() {
 
 	// Interpolate origin?
 	ClientEntity *clientEntity = GetPODEntity();
-	clientEntity->current.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+//	clientEntity->current.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
 	SetRenderEffects(RenderEffects::Beam);
-//	clientEntity->current.origin	= vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
-//	clientEntity->current.oldOrigin = vec3_mix(clientEntity->prev.oldOrigin, clientEntity->current.oldOrigin, cl->lerpFraction);
+	clientEntity->lerpOrigin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
 }
 
 //===============
@@ -195,8 +194,8 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     CLG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
-    SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
+    //SetNextThinkTime(level.time + 1.f * FRAMETIME);
 
     // Do a check ground for the step move of this pusher.
     //CLG_StepMove_CheckGround(this);
@@ -204,6 +203,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     // ^ <-- if not for that, it either way has to "categorize" its water levels etc.
     // Not important for this one atm.
 }
+
 
 //
 //===============
