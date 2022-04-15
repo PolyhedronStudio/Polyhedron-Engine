@@ -68,7 +68,7 @@ public:
     //
     // Constructor/Deconstructor.
     //
-    SVGBaseMover(Entity* svEntity);
+    SVGBaseMover(PODEntity *svEntity);
     virtual ~SVGBaseMover() = default;
 
     DefineAbstractClass( SVGBaseMover, SVGBaseTrigger );

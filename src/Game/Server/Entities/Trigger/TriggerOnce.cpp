@@ -20,7 +20,7 @@
 // 
 
 // Constructor/Deconstructor.
-TriggerOnce::TriggerOnce(Entity* svEntity) : TriggerMultiple(svEntity) {
+TriggerOnce::TriggerOnce(PODEntity *svEntity) : TriggerMultiple(svEntity) {
 	//
 	// All callback functions best be nullptr.
 	//

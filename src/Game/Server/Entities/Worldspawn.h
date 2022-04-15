@@ -14,7 +14,7 @@ class SVGBaseEntity;
 class Worldspawn : public SVGBaseEntity {
 public:
     //! Constructor/Deconstructor.
-    Worldspawn(Entity* svEntity);
+    Worldspawn(PODEntity *svEntity);
     virtual ~Worldspawn() = default;
 
     //! Register worldspawn class as a map entity.

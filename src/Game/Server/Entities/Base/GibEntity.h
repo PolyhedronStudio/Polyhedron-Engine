@@ -20,7 +20,7 @@ public:
 
 private:
     //! Private constructor. Gibs are created using the Create function.
-    GibEntity(Entity* svEntity);
+    GibEntity(PODEntity *svEntity);
     virtual ~GibEntity();
 
 public:

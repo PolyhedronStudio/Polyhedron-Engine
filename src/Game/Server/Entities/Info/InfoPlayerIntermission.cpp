@@ -12,7 +12,7 @@
 #include "InfoPlayerIntermission.h"     // Class.
 
 // Constructor/Deconstructor.
-InfoPlayerIntermission::InfoPlayerIntermission(Entity* svEntity) 
+InfoPlayerIntermission::InfoPlayerIntermission(PODEntity *svEntity) 
     : InfoPlayerStart(svEntity) {
 
 }

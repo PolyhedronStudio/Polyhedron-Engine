@@ -19,7 +19,7 @@
 //===============
 // FuncButton::ctor
 //===============
-FuncButton::FuncButton( Entity* svEntity )
+FuncButton::FuncButton( PODEntity *svEntity )
 	: SVGBaseMover( svEntity ) {
 
 }

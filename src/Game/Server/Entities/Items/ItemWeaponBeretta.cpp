@@ -30,7 +30,7 @@
 
 
 //! Constructor/Deconstructor.
-ItemWeaponBeretta::ItemWeaponBeretta(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+ItemWeaponBeretta::ItemWeaponBeretta(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) { }
 ItemWeaponBeretta::~ItemWeaponBeretta() { }
 

@@ -14,7 +14,7 @@ public:
     //
     // Constructor/Deconstructor.
     //
-    SVGBaseTrigger(Entity* svEntity);
+    SVGBaseTrigger(PODEntity *svEntity);
     virtual ~SVGBaseTrigger() = default;
 
     DefineAbstractClass( SVGBaseTrigger, SVGBaseEntity );

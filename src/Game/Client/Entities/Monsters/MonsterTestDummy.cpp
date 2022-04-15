@@ -67,10 +67,10 @@ void MonsterTestDummy::PostSpawn() {
     // TEMP
 void MonsterTestDummy::FrameThink() {
 	// Acquire POD pointer.
-	ClientEntity *clEntity = GetPODEntity();
+	PODEntity *podEntity = GetPODEntity();
 
 	// Print if we got a valid one.
-	if (clEntity) {
+	if (podEntity) {
 	//	Com_DPrint("[clEntity: #%i - svEntity: #%i - Class: %s - Hash: %i] is Thinking\n", clEntity->clientEntityNumber, clEntity->current.number, GetClassname().c_str(), GetHashedClassname());
 	}
 }

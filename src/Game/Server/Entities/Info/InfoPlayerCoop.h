@@ -14,7 +14,7 @@ class InfoPlayerStart;
 class InfoPlayerCoop : public InfoPlayerStart {
 public:
     // Constructor/Deconstructor.
-    InfoPlayerCoop(Entity* svEntity);
+    InfoPlayerCoop(PODEntity *svEntity);
     virtual ~InfoPlayerCoop();
 
     DefineMapClass( "info_player_coop", InfoPlayerCoop, InfoPlayerStart );

@@ -48,7 +48,7 @@ public:
     *
     **/
     //! Constructor/Deconstructor.
-    SVGBaseEntity(Entity* svEntity);
+    SVGBaseEntity(PODEntity *svEntity);
     virtual ~SVGBaseEntity() = default;
 
     //! Runtime type information.
@@ -157,7 +157,7 @@ public:
     *   @brief  Used only in SVG_FreeEntity and SVG_CreateGameEntity.
     *   @return Pointer to the server side entity.
     **/
-    inline void SetPODEntity(Entity* svEntity) final {
+    inline void SetPODEntity(PODEntity *svEntity) final {
         podEntity = svEntity;
     }
 

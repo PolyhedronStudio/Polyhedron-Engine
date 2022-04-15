@@ -16,7 +16,7 @@ class SVGBaseEntity;
 class BodyCorpse : public SVGBaseEntity {
 public:
     // Constructor/Deconstructor.
-    BodyCorpse(Entity* svEntity);
+    BodyCorpse(PODEntity *svEntity);
     virtual ~BodyCorpse();
 
     DefineClass(BodyCorpse, SVGBaseEntity);

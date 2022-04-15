@@ -27,7 +27,7 @@
 //
 // Constructor/Deconstructor.
 //
-MonsterTestDummy::MonsterTestDummy(Entity* svEntity) : Base(svEntity) { 
+MonsterTestDummy::MonsterTestDummy(PODEntity *svEntity) : Base(svEntity) { 
 	const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
 	uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
 

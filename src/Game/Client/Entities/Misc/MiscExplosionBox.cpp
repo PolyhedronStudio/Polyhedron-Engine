@@ -128,10 +128,10 @@ void MiscExplosionBox::Think() {
 
 	// Interpolate origin?
 	ClientEntity *clientEntity = GetPODEntity();
-//	clientEntity->current.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
-	//SetRenderEffects(RenderEffects::Beam);
-	clientEntity->current.origin	= vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
-	clientEntity->current.oldOrigin = vec3_mix(clientEntity->prev.oldOrigin, clientEntity->current.oldOrigin, cl->lerpFraction);
+	clientEntity->current.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+	SetRenderEffects(RenderEffects::Beam);
+//	clientEntity->current.origin	= vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+//	clientEntity->current.oldOrigin = vec3_mix(clientEntity->prev.oldOrigin, clientEntity->current.oldOrigin, cl->lerpFraction);
 }
 
 //===============

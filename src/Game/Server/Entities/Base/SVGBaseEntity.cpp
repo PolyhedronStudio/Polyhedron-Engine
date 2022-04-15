@@ -31,7 +31,7 @@
 vec3_t SVGBaseEntity::ZeroVec3 = vec3_zero();
 
 // Constructor/Deconstructor.
-SVGBaseEntity::SVGBaseEntity(Entity* svEntity) : IServerGameEntity() {
+SVGBaseEntity::SVGBaseEntity(PODEntity *svEntity) : IServerGameEntity() {
 	podEntity = svEntity;
 }
 

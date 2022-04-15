@@ -20,7 +20,7 @@
 #define TRIGGERABLE 2
 
 // Constructor/Deconstructor.
-Light::Light(Entity* svEntity) : SVGBaseTrigger(svEntity), lightState(0) {
+Light::Light(PODEntity *svEntity) : SVGBaseTrigger(svEntity), lightState(0) {
 
 }
 Light::~Light() {

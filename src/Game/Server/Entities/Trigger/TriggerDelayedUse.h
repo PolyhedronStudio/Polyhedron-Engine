@@ -15,7 +15,7 @@ public:
     //
     // Constructor/Deconstructor.
     //
-    TriggerDelayedUse(Entity* svEntity);
+    TriggerDelayedUse(PODEntity *svEntity);
     virtual ~TriggerDelayedUse();
 
     DefineClass( TriggerDelayedUse, SVGBaseTrigger );

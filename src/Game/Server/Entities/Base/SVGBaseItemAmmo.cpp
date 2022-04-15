@@ -23,7 +23,7 @@
 
 
 //! Constructor/Destructor.
-SVGBaseItemAmmo::SVGBaseItemAmmo(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+SVGBaseItemAmmo::SVGBaseItemAmmo(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) {
 
 }

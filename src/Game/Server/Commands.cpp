@@ -905,7 +905,7 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
 ClientCommand
 =================
 */
-void SVG_ClientCommand(Entity* svEntity) {
+void SVG_ClientCommand(PODEntity *svEntity) {
     //
     // TODO In the future the contents of this function will move along
     // into the gi interface implementation. Leaving this function for just

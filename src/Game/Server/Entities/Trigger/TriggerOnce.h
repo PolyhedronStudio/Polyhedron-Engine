@@ -15,7 +15,7 @@ public:
     //
     // Constructor/Deconstructor.
     //
-    TriggerOnce(Entity* svEntity);
+    TriggerOnce(PODEntity *svEntity);
     virtual ~TriggerOnce();
 
     DefineMapClass( "trigger_once", TriggerOnce, TriggerMultiple );

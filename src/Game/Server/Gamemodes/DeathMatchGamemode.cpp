@@ -62,7 +62,7 @@ qboolean DeathmatchGamemode::CanDamage(IServerGameEntity* target, IServerGameEnt
 // 
 // Called when a client is ready to be placed in the game after connecting.
 //===============
-void DeathmatchGamemode::ClientBegin(Entity* svEntity) {
+void DeathmatchGamemode::ClientBegin(PODEntity *svEntity) {
     // Create the player client entity.
     SVGBasePlayer* player = SVGBasePlayer::Create(svEntity);
 

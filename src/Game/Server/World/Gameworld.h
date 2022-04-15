@@ -114,7 +114,7 @@ public:
     *
     *   @return A pointer to the game entity on success, nullptr on failure.
     **/
-    template<typename entityClass> inline entityClass* CreateGameEntity(Entity* svEntity = nullptr, bool allocateNewServerEntity = true) {
+    template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *svEntity = nullptr, bool allocateNewServerEntity = true) {
         // Class entity to be returned.
         entityClass* gameEntity = nullptr;
 
@@ -344,13 +344,13 @@ private:
 	*			entity dictionary.
 	*	@return	True in case it succeeded parsing the entity string.
 	**/
-    qboolean ParseEntityString(const char** data, Entity* svEntity);
+    qboolean ParseEntityString(const char** data, PODEntity *svEntity);
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean SpawnParsedGameEntity(Entity* svEntity);
+    qboolean SpawnParsedGameEntity(PODEntity *svEntity);
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.
@@ -358,5 +358,5 @@ private:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
     **/
-    IServerGameEntity* AllocateGameEntity(Entity* svEntity, const std::string& classname);
+    IServerGameEntity* AllocateGameEntity(PODEntity *svEntity, const std::string& classname);
 };

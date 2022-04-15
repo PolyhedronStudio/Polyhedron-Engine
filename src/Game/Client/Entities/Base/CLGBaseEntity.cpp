@@ -26,8 +26,8 @@ std::string CLGBaseEntity::EmptyString = "";
 *
 **/
 //! Constructor/Destructor.
-CLGBaseEntity::CLGBaseEntity(ClientEntity* clEntity) : Base() {//}, podEntity(clEntity) {
-    podEntity = clEntity;
+CLGBaseEntity::CLGBaseEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEntity) {
+    this->podEntity = podEntity;
 }
 
 

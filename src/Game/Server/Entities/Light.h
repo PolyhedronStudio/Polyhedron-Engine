@@ -20,7 +20,7 @@ enum LightState : uint32_t {
 class Light : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
-    Light(Entity* svEntity);
+    Light(PODEntity *svEntity);
     virtual ~Light();
 
     DefineMapClass( "light", Light, SVGBaseTrigger );

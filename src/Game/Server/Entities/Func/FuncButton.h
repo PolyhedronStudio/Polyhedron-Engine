@@ -8,7 +8,7 @@ class SVGBaseMover;
 //===============
 class FuncButton : public SVGBaseMover {
 public:
-	FuncButton( Entity* svEntity );
+	FuncButton( PODEntity *svEntity );
 	virtual ~FuncButton() = default;
 
 	DefineMapClass( "func_button", FuncButton, SVGBaseMover );

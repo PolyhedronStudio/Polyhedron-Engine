@@ -33,7 +33,7 @@ public:
 
 
     //! Constructor/Deconstructor.
-    SVGBaseItem(Entity* svEntity, const std::string& displayString, uint32_t identifier);
+    SVGBaseItem(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~SVGBaseItem();
 
 

@@ -30,7 +30,7 @@ std::map<std::string, uint32_t> SVGBaseItem::lookupStrings;
 
 
 //! Constructor/Deconstructor.
-SVGBaseItem::SVGBaseItem(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+SVGBaseItem::SVGBaseItem(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity), displayString(displayString), itemIdentifier(identifier) {
 
 }

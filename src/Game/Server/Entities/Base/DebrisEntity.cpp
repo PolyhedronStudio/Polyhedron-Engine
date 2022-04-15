@@ -21,7 +21,7 @@
 
 
 //! Constructor/Deconstructor.
-DebrisEntity::DebrisEntity(Entity* svEntity)
+DebrisEntity::DebrisEntity(PODEntity *svEntity)
     : SVGBaseEntity(svEntity) {
 
 }

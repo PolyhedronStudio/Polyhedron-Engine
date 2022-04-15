@@ -1105,7 +1105,7 @@ void DefaultGamemode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 // 
 // Client is connecting, what do? :)
 //===============
-qboolean DefaultGamemode::ClientConnect(Entity* svEntity, char *userinfo) {
+qboolean DefaultGamemode::ClientConnect(PODEntity *svEntity, char *userinfo) {
     if (!svEntity) {
         gi.DPrintf("ClientConnect executed with invalid (nullptr) serverEntity");
         return false;
@@ -1160,7 +1160,7 @@ qboolean DefaultGamemode::ClientConnect(Entity* svEntity, char *userinfo) {
 // 
 // Called when a client is ready to be placed in the game after connecting.
 //===============
-void DefaultGamemode::ClientBegin(Entity* svEntity) {
+void DefaultGamemode::ClientBegin(PODEntity *svEntity) {
     // Player entity, to be assigned next.
     SVGBasePlayer* player = nullptr;
 

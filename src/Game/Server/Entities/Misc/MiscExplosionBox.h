@@ -15,7 +15,7 @@ class SVGBaseTrigger;
 class MiscExplosionBox : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
-    MiscExplosionBox(Entity* svEntity);
+    MiscExplosionBox(PODEntity *svEntity);
     virtual ~MiscExplosionBox();
 
     DefineMapClass( "misc_explobox", MiscExplosionBox, SVGBaseTrigger );

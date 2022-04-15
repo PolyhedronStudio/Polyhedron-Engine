@@ -24,7 +24,7 @@ public:
 
 
     //! Constructor/Deconstructor.
-    SVGBaseItemAmmo(Entity* svEntity, const std::string& displayString, uint32_t identifier);
+    SVGBaseItemAmmo(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~SVGBaseItemAmmo();
 
     //! Abstract Class TypeInfo registry.

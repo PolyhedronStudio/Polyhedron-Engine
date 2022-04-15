@@ -19,7 +19,7 @@
 // 
 
 // Constructor/Deconstructor.
-TriggerMultiple::TriggerMultiple(Entity* svEntity) : SVGBaseTrigger(svEntity) {
+TriggerMultiple::TriggerMultiple(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
 	//
 	// All callback functions best be nullptr.
 	//

@@ -21,7 +21,7 @@ class SVGBaseMonster;
 class MonsterTestDummy : public SVGBaseMonster {
 public:
     //! Constructor/Deconstructor.
-    MonsterTestDummy(Entity* svEntity);
+    MonsterTestDummy(PODEntity *svEntity);
     virtual ~MonsterTestDummy();
 
     DefineMapClass("monster_testdummy", MonsterTestDummy, SVGBaseMonster);

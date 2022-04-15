@@ -27,7 +27,7 @@ static constexpr int32_t SPAWNFLAG_NO_PROTECTION	= 8;
 static constexpr int32_t SPAWNFLAG_SLOW_HURT		= 16;
 
 // Constructor/Deconstructor.
-TriggerHurt::TriggerHurt(Entity* svEntity) : SVGBaseTrigger(svEntity) {
+TriggerHurt::TriggerHurt(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
 
 }
 TriggerHurt::~TriggerHurt() {

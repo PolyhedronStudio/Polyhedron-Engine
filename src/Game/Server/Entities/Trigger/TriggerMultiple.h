@@ -15,7 +15,7 @@ public:
     //
     // Constructor/Deconstructor.
     //
-    TriggerMultiple(Entity* svEntity);
+    TriggerMultiple(PODEntity *svEntity);
     virtual ~TriggerMultiple();
 
     DefineMapClass( "trigger_multiple", TriggerMultiple, SVGBaseTrigger );

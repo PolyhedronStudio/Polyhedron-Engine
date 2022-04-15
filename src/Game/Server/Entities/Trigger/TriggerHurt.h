@@ -15,7 +15,7 @@ public:
     //
     // Constructor/Deconstructor.
     //
-    TriggerHurt(Entity* svEntity);
+    TriggerHurt(PODEntity *svEntity);
     virtual ~TriggerHurt();
 
     DefineMapClass( "trigger_hurt", TriggerHurt, SVGBaseTrigger );

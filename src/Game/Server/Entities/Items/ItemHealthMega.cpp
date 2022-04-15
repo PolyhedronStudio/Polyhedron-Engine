@@ -31,7 +31,7 @@
 //
 // Constructor/Deconstructor.
 //
-ItemHealthMega::ItemHealthMega(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+ItemHealthMega::ItemHealthMega(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) {
 
 }

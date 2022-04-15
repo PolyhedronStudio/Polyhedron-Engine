@@ -20,7 +20,7 @@
 #include "../../World/Gameworld.h"
 
 // Constructor/Deconstructor.
-BodyCorpse::BodyCorpse(Entity* svEntity)
+BodyCorpse::BodyCorpse(PODEntity *svEntity)
     : SVGBaseEntity(svEntity) {
 
 }

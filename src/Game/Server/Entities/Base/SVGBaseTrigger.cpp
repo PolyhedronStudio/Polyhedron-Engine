@@ -19,7 +19,7 @@
 #include "../Trigger/TriggerDelayedUse.h"
 
 // Constructor/Deconstructor.
-SVGBaseTrigger::SVGBaseTrigger(Entity* svEntity) : Base(svEntity) {}
+SVGBaseTrigger::SVGBaseTrigger(PODEntity *svEntity) : Base(svEntity) {}
 
 // Interface functions. 
 //

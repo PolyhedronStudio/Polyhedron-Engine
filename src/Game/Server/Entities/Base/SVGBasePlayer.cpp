@@ -28,14 +28,14 @@
 #include "../Base/SVGBasePlayer.h"
 
 // Constructor/Deconstructor.
-SVGBasePlayer::SVGBasePlayer(Entity* svEntity) : Base(svEntity) {
+SVGBasePlayer::SVGBasePlayer(PODEntity *svEntity) : Base(svEntity) {
 
 }
 
 /**
 *   @brief  Used by game modes to recreate a fresh player entity for the client.
 **/
-SVGBasePlayer* SVGBasePlayer::Create(Entity* svEntity) {
+SVGBasePlayer* SVGBasePlayer::Create(PODEntity *svEntity) {
     // Get gameworld pointer.
     Gameworld* gameworld = GetGameworld();
 

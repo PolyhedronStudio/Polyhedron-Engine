@@ -12,7 +12,7 @@
 #include "InfoPlayerDeathmatch.h"            // Class.
 
 // Constructor/Deconstructor.
-InfoPlayerDeathmatch::InfoPlayerDeathmatch(Entity* svEntity) 
+InfoPlayerDeathmatch::InfoPlayerDeathmatch(PODEntity *svEntity) 
     : InfoPlayerStart(svEntity) {
 
 }

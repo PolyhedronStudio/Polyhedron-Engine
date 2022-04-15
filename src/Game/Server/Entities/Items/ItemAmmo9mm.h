@@ -17,7 +17,7 @@ class ItemAmmo9mm : public SVGBaseItemAmmo {
 public:
 
     //! Constructor/Deconstructor.
-    ItemAmmo9mm(Entity* svEntity, const std::string& displayString, uint32_t identifier);
+    ItemAmmo9mm(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~ItemAmmo9mm();
 
     //! Abstract Class TypeInfo registry.

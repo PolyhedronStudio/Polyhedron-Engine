@@ -18,7 +18,7 @@
 #include "BlasterBolt.h"
 
 // Constructor/Deconstructor.
-BlasterBolt::BlasterBolt(Entity* svEntity) 
+BlasterBolt::BlasterBolt(PODEntity *svEntity) 
     : SVGBaseEntity(svEntity) {
 
 }

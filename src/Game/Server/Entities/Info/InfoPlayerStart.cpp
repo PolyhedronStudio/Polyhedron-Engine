@@ -11,7 +11,7 @@
 #include "InfoPlayerStart.h"            // Class.
 
 // Constructor/Deconstructor.
-InfoPlayerStart::InfoPlayerStart(Entity* svEntity) 
+InfoPlayerStart::InfoPlayerStart(PODEntity *svEntity) 
     : SVGBaseEntity(svEntity) {
 
 }

@@ -159,7 +159,7 @@ static const char dm_statusbar[] =
 ;
 
 // Constructor/Deconstructor.
-Worldspawn::Worldspawn(Entity* svEntity) : Base(svEntity) {
+Worldspawn::Worldspawn(PODEntity *svEntity) : Base(svEntity) {
 
 }
 

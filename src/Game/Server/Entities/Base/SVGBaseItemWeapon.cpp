@@ -31,7 +31,7 @@
 //
 // Constructor/Deconstructor.
 //
-SVGBaseItemWeapon::SVGBaseItemWeapon(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+SVGBaseItemWeapon::SVGBaseItemWeapon(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) {
 
 }

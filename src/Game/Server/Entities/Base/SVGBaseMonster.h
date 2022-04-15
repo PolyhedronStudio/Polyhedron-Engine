@@ -23,7 +23,7 @@ public:
 
 
     //! Constructor/Deconstructor.
-    SVGBaseMonster(Entity* svEntity);
+    SVGBaseMonster(PODEntity *svEntity);
     virtual ~SVGBaseMonster();
 
     //! Abstract Class TypeInfo registry.

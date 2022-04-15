@@ -25,7 +25,7 @@ public:
     *
     **/
     //! Constructor/Destructor.
-    CLGBaseEntity(ClientEntity *clEntity);
+    CLGBaseEntity(PODEntity *podEntity);
     virtual ~CLGBaseEntity() = default;
 
     // Runtime type information

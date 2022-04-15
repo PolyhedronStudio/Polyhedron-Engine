@@ -26,7 +26,7 @@
 //
 // Constructor/Deconstructor.
 //
-MiscServerModel::MiscServerModel(Entity* svEntity)
+MiscServerModel::MiscServerModel(PODEntity *svEntity)
     : Base(svEntity) {
 
 }

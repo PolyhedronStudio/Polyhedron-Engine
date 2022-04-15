@@ -18,7 +18,7 @@ class SVGBaseItemWeapon;
 class ItemWeaponNone: public SVGBaseItemWeapon {
 public:
     // Constructor/Deconstructor.
-    ItemWeaponNone(Entity* svEntity, const std::string& displayString, uint32_t identifier);
+    ItemWeaponNone(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
     virtual ~ItemWeaponNone();
 
     DefineItemMapClass("None", "none", ItemID::Barehands, "item_weapon_none", ItemWeaponNone, SVGBaseItemWeapon);

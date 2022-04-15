@@ -20,7 +20,7 @@ public:
     static DebrisEntity* Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t &origin, float speed);
 
 private:
-    DebrisEntity(Entity* svEntity);
+    DebrisEntity(PODEntity *svEntity);
     virtual ~DebrisEntity();
 
 public:

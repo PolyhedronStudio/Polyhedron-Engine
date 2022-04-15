@@ -29,7 +29,7 @@
 
 
 //! Constructor/Deconstructor.
-ItemWeaponNone::ItemWeaponNone(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+ItemWeaponNone::ItemWeaponNone(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) { }
 ItemWeaponNone::~ItemWeaponNone() { }
 

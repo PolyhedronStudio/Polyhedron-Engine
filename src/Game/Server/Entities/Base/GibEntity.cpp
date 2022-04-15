@@ -104,7 +104,7 @@ GibEntity* GibEntity::Create(GameEntity* gibber, const std::string& gibModel, in
 
 
 // Constructor/Deconstructor.
-GibEntity::GibEntity(Entity* svEntity) : SVGBaseEntity(svEntity) { }
+GibEntity::GibEntity(PODEntity *svEntity) : SVGBaseEntity(svEntity) { }
 GibEntity::~GibEntity() { }
 
 //

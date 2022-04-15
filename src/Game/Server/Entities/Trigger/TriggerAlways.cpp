@@ -22,7 +22,7 @@
 // 
 
 // Constructor/Deconstructor.
-TriggerAlways::TriggerAlways(Entity* svEntity) : SVGBaseTrigger(svEntity) {
+TriggerAlways::TriggerAlways(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
 	//
 	// All callback functions best be nullptr.
 	//

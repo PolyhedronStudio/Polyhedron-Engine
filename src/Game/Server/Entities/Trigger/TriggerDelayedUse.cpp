@@ -26,7 +26,7 @@
 // 
 
 // Constructor/Deconstructor.
-TriggerDelayedUse::TriggerDelayedUse(Entity* svEntity) 
+TriggerDelayedUse::TriggerDelayedUse(PODEntity *svEntity) 
 	: SVGBaseTrigger(svEntity) {
 	//
 	// All callback functions best be nullptr.

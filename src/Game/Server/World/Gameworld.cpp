@@ -358,7 +358,7 @@ void Gameworld::FindTeams() {
 *	@brief	Parses the BSP Entity string and places the results in the server
 *			entity dictionary.
 **/
-qboolean Gameworld::ParseEntityString(const char** data, Entity* svEntity) {
+qboolean Gameworld::ParseEntityString(const char** data, PODEntity *svEntity) {
     // False until proven otherwise.
     qboolean parsedSuccessfully = false;
 
@@ -421,7 +421,7 @@ qboolean Gameworld::ParseEntityString(const char** data, Entity* svEntity) {
 *   @brief  Allocates the game entity determined by the classname key, and
 *           then does a precache before spawning the game entity.
 **/
-qboolean Gameworld::SpawnParsedGameEntity(Entity* svEntity) {
+qboolean Gameworld::SpawnParsedGameEntity(PODEntity *svEntity) {
 	// Acquire dictionary.
     auto &dictionary = svEntity->entityDictionary;
 
@@ -469,7 +469,7 @@ qboolean Gameworld::SpawnParsedGameEntity(Entity* svEntity) {
 *			try and allocate it.
 *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
 **/
-GameEntity *Gameworld::AllocateGameEntity(Entity* svEntity, const std::string &classname) {
+GameEntity *Gameworld::AllocateGameEntity(PODEntity *svEntity, const std::string &classname) {
     // Start with a nice nullptr.
     GameEntity* spawnEntity = nullptr;
 

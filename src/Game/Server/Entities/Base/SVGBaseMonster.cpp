@@ -23,7 +23,7 @@
 
 
 //! Constructor/Destructor.
-SVGBaseMonster::SVGBaseMonster(Entity* svEntity) : Base(svEntity) { }
+SVGBaseMonster::SVGBaseMonster(PODEntity *svEntity) : Base(svEntity) { }
 SVGBaseMonster::~SVGBaseMonster() { }
 
 

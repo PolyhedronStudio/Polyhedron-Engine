@@ -12,7 +12,7 @@
 #include "InfoPlayerCoop.h"     // Class.
 
 // Constructor/Deconstructor.
-InfoPlayerCoop::InfoPlayerCoop(Entity* svEntity) 
+InfoPlayerCoop::InfoPlayerCoop(PODEntity *svEntity) 
     : InfoPlayerStart(svEntity) {
 
 }

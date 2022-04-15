@@ -342,17 +342,16 @@ M_ChangeYaw
 
 ===============
 */
-static void CLG_CalculateYawAngle (PODEntity* ent)
-{
+static void CLG_CalculateYawAngle (PODEntity* clEntity) {
     float   ideal;
     float   current;
     float   move;
     float   speed;
 
-    current = ent->current.angles[vec3_t::Yaw]; //AngleMod(ent->state.angles[vec3_t::Yaw]);
+    current = clEntity->current.angles[vec3_t::Yaw]; //AngleMod(ent->state.angles[vec3_t::Yaw]);
 
-    if (ent->gameEntity)
-        ideal = ent->gameEntity->GetIdealYawAngle();
+    if (clEntity->gameEntity)
+        ideal = clEntity->gameEntity->GetIdealYawAngle();
     else
         ideal = 0.f;
 
@@ -360,8 +359,8 @@ static void CLG_CalculateYawAngle (PODEntity* ent)
         return;
 
     move = ideal - current;
-    if (ent->gameEntity)
-        speed = ent->gameEntity->GetYawSpeed();
+    if (clEntity->gameEntity)
+        speed = clEntity->gameEntity->GetYawSpeed();
     else
         speed = 0.f;
 
@@ -382,7 +381,7 @@ static void CLG_CalculateYawAngle (PODEntity* ent)
             move = -speed;
     }
 
-    ent->current.angles[vec3_t::Yaw] = AngleMod(current + move);
+    clEntity->current.angles[vec3_t::Yaw] = AngleMod(current + move);
 }
 
 

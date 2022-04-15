@@ -24,7 +24,7 @@
 //
 // Constructor/Deconstructor.
 //
-MiscExplosionBox::MiscExplosionBox(Entity* svEntity) 
+MiscExplosionBox::MiscExplosionBox(PODEntity *svEntity) 
     : Base(svEntity) {
 
 }

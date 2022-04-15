@@ -28,7 +28,7 @@
 
 
 //! Constructor/Deconstructor.
-ItemAmmo9mm::ItemAmmo9mm(Entity* svEntity, const std::string& displayString, uint32_t identifier) 
+ItemAmmo9mm::ItemAmmo9mm(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) {
 
 }

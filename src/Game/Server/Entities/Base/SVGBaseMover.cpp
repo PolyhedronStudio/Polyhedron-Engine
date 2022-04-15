@@ -19,7 +19,7 @@
 static constexpr float BASEMOVER_EPSILON = 0.03125;
 
 // Constructor/Deconstructor.
-SVGBaseMover::SVGBaseMover(Entity* svEntity) : Base(svEntity) {
+SVGBaseMover::SVGBaseMover(PODEntity *svEntity) : Base(svEntity) {
 
 }
 
