@@ -20,28 +20,28 @@ class SGEntityHandle;
 class Worldspawn;
 class IGamemode;
 class IServerGameEntity;
-#include "../Entities/IServerGameEntity.h"
+#include "../Entities/IClientGameEntity.h"
 
 #include "../../../Game/Shared/World/IGameworld.h"
 #include "../Entities.h"
-#include "../Entities/Worldspawn.h"
+//#include "../Entities/Worldspawn.h"
 
 /**
 *	@brief GameWorld regulates the lifetime management of all entities.
 * 
 *	@details 
 **/
-class Gameworld : public IGameworld {
+class ClientGameworld : public IGameworld {
 public:
     /**
 	*	@brief Default constructor.
 	**/
-    Gameworld() = default;
+    ClientGameworld() = default;
 
     /**
 	*	@brief Default destructor
 	**/
-    ~Gameworld() = default;
+    ~ClientGameworld() = default;
 
 public:
     /**
@@ -73,21 +73,21 @@ public:
     /**
     *   @return A pointer to the gameworld's clients array.
     **/
-    inline ServerClient* GetClients() { return clients; }
+    inline ServerClient* GetClients() final { return clients; }
     /**
     *   @return The maximum allowed clients in this game.
     **/
-    inline int32_t GetMaxClients() { return maxClients; }
+    inline int32_t GetMaxClients() final { return maxClients; }
     /**
     *   @brief  Code shortcut for acquiring gameworld's maxEntities.
     * 
     *   @return The maximum allowed entities in this game.
     **/
-    inline int32_t GetMaxEntities() { return maxEntities; }
+    inline int32_t GetMaxEntities() final { return MAX_EDICTS + MAX_CLIENT_EDICTS; }
     /**
 	*	@return	Total number of spawned entities.
 	**/
-    inline int32_t GetNumberOfEntities() { return numberOfEntities; }
+    inline int32_t GetNumberOfEntities() final { return numberOfEntities; }
 
 
     /**
@@ -95,7 +95,7 @@ public:
 	*			first free server entity slot there is. After doing so, allocates
 	*			a game entity based on the 'classname' of the parsed entity.
 	**/
-    qboolean SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint);
+    qboolean SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint) final;
     /**
 	*	@brief	Looks for the first free server entity in our buffer.
 	* 
@@ -107,58 +107,80 @@ public:
 	* 
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
-    Entity* GetUnusedPODEntity();
+    PODEntity* GetUnusedPODEntity() final;
 
     /**
 	*   @brief  Creates and assigns a game entity to the given server entity based on the classname.
     *
     *   @return A pointer to the game entity on success, nullptr on failure.
     **/
-    template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *svEntity = nullptr, bool allocateNewServerEntity = true) {
+    template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *podEntity = nullptr, bool allocateNewServerEntity = true) {
         // Class entity to be returned.
         entityClass* gameEntity = nullptr;
 
-        // If a null entity was passed, create a new one
-	    if (svEntity == nullptr) {
-            if (allocateNewServerEntity) {
-                svEntity = GetUnusedPODEntity();
-            } else {
-                gi.DPrintf("WARNING: tried to spawn a game entity when the edict is null\n");
-                return nullptr;
-            }
-        }
-        
-        // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
-        if (entityClass::ClassInfo.AllocateInstance) {
-    	    // Entities that aren't in the type info system will error out here
-            gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(svEntity));
+     //   // If a null entity was passed, create a new one
+	    //if (podEntity == nullptr) {
+     //       if (allocateNewServerEntity) {
+     //           podEntity = GetUnusedPODEntity();
+     //       } else {
+     //           gi.DPrintf("WARNING: tried to spawn a game entity when the edict is null\n");
+     //           return nullptr;
+     //       }
+     //   }
+     //   
+     //   // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
+     //   if (entityClass::ClassInfo.AllocateInstance) {
+    	//    // Entities that aren't in the type info system will error out here
+     //       gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(podEntity));
     
-            // Be sure ti set its classname.
-            gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
+     //       // Be sure ti set its classname.
+     //       gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
 
-            // Store the svEntity's game entity pointer.
-            svEntity->gameEntity = gameEntity;
+     //       // Store the podEntity's game entity pointer.
+     //       podEntity->gameEntity = gameEntity;
 
-            if (nullptr == gameEntities[svEntity->state.number]) {
-                gameEntities[svEntity->state.number] = gameEntity;
-            } else {
-                gi.DPrintf("ERROR: edict %i is already taken\n", svEntity->state.number);
-            }
-        }
+     //       if (nullptr == gameEntities[podEntity->state.number]) {
+     //           gameEntities[podEntity->state.number] = gameEntity;
+     //       } else {
+     //           gi.DPrintf("ERROR: edict %i is already taken\n", podEntity->state.number);
+     //       }
+     //   }
         return gameEntity;
     }
-    /**
+    
+
+	/**
+	*   @brief  Spawns a new game entity bashed on the state's hashed classname and 
+	*			assign it to the client entity.
+	*   @return Pointer to the game entity object on sucess. On failure, nullptr.
+	**/
+	GameEntity* CreateFromState(const EntityState& state, ClientEntity* clEntity);
+	/**
+	*   @brief  When the client receives state updates it calls into this function so we can update
+	*           the game entity belonging to the server side entity(defined by state.number).
+	* 
+	*           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
+	*           always update its ClientEntity pointer to the appropriate new one instead.
+	* 
+	*   @return True on success, false in case of trouble. (Should never happen, and if it does,
+	*           well... file an issue lmao.)
+	**/
+	qboolean UpdateFromState(ClientEntity *clEntity, const EntityState& state);
+	
+	/**
 	*   @brief  Frees the given server entity and its game entity in order to recycle it again.
     *
     *   @return A pointer to the game entity on success, nullptr on failure.
     **/
-    void FreePODEntity(PODEntity *podEntity);
+    void FreePODEntity(PODEntity *podEntity) override;
     /**
 	*   @brief  Frees the given game entity.
     *
     *   @return True on success, false on failure.
     **/
-    qboolean FreeGameEntity(PODEntity* podEntity);
+    qboolean FreeGameEntity(PODEntity* podEntity) override;
+
+
     /**
     *   @brief	Utility function so we can acquire a valid SVGBasePlayer*. It operates
     *			by using an entity handle in order to make sure that it has a valid
@@ -171,90 +193,53 @@ public:
     static SVGBaseEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
 
-
-    ///**
-    //*   @brief Selectively acquire a list of Entity* derived objects using entity filters.
-    //* 
-    //*   @return Returns a span containing all the entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //template<std::size_t start, std::size_t count> inline auto GetServerEntityRange() -> std::span<Entity, count> {
-    //    return std::span(serverEntities).subspan(start, count); //return std::span(serverEntities).subspan<start, count>(); 
-    //}
-    ///**
-    //*   @brief Selectively acquire a list of SVGBaseEntity* derived objects using game entity filters.
-    //* 
-    //*   @return Returns a span containing all the base entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //template<std::size_t start, std::size_t count> inline auto GetGameEntityRange() -> GameEntitySpan {
-    //    return GameEntitySpan(gameEntities).subspan(start, count); //return std::span(gameEntities).subspan<start, count>(); 
-    //}
-    ///**
-    //*   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.
-    //* 
-    //*   @return Returns a span containing all the entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //inline PODEntitySpan GetServerEntityRange(std::size_t start, std::size_t count) { 
-    //    return PODEntitySpan(serverEntities).subspan(start, count); 
-    //}
-    ///**
-    //*   @brief Selectively acquire a list of SVGBaseEntity* derived objects using game entity filters. Use the templated version where possible.
-    //* 
-    //*   @return Returns a span containing all the base entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //inline GameEntitySpan GetGameEntityRange(std::size_t start, std::size_t count) {
-    //    return GameEntitySpan(gameEntities).subspan(start, count); 
-    //}
-
-
-
     /**
 	*	@return	A pointer to the server entities array.
 	**/
-    inline PODEntity* GetPODEntities() { return &podEntities[0]; }
-
+    inline PODEntity* GetPODEntities() final { 
+		return &podEntities[0]; 
+	}
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline Entity* GetPODEntityByIndex(uint32_t index) {
-        if (index < 0 || index >= MAX_EDICTS) {
+    inline PODEntity* GetPODEntityByIndex(uint32_t index) final {
+        if (index <= 0 || index >= MAX_EDICTS + MAX_CLIENT_EDICTS) {
             return nullptr; 
         }
-	    return &podEntities[index];
+	    return &podEntities[index - 1];
     }
+
 
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    inline GameEntity** GetGameEntities() {
+    inline GameEntity** GetGameEntities() final {
         return gameEntities;
     }
-
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline GameEntity* GetGameEntityByIndex(uint32_t index) {
-    	if (index < 0 || index >= MAX_EDICTS) {
-    	    return nullptr;
-	    }
-	    return gameEntities[index];
+    inline GameEntity* GetGameEntityByIndex(int32_t index) final {
+		// Ensure ID is within bounds.
+		if (index <= 0 || index > MAX_EDICTS + MAX_CLIENT_EDICTS) {
+			return nullptr;
+		}
+
+		// Return game entity that belongs to this ID.
+		return gameEntities[index - 1];
     }
 
     /**
 	*   @return A pointer to the worldspawn game entity.
 	**/
-    inline Entity* GetWorldspawnPODEntity() { 
+    inline PODEntity* GetWorldspawnPODEntity() final { 
         return &podEntities[0]; 
     }
-    
     /**
 	*   @return A pointer to the worldspawn game entity.
 	**/
-    inline Worldspawn* GetWorldspawnGameEntity() { 
-        return dynamic_cast<Worldspawn*>(gameEntities[0]); 
+    inline Worldspawn* GetWorldspawnGameEntity() final { 
+        return nullptr;//dynamic_cast<Worldspawn*>(gameEntities[0]); 
     }
 
 
@@ -274,13 +259,13 @@ public:
     *   @brief  Spawns a debris model entity at the given origin.
     *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
     **/
-    virtual void ThrowDebris(GameEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed);
+    void ThrowDebris(GameEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed) override;
 
     /**
     *   @brief  Spawns a gib model entity flying at random velocities and directions.
     *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
     */
-    virtual void ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
+    void ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) override;
 
 
 
@@ -344,13 +329,13 @@ private:
 	*			entity dictionary.
 	*	@return	True in case it succeeded parsing the entity string.
 	**/
-    qboolean ParseEntityString(const char** data, PODEntity *svEntity);
+    qboolean ParseEntityString(const char** data, PODEntity *podEntity);
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean SpawnParsedGameEntity(PODEntity *svEntity);
+    qboolean SpawnParsedGameEntity(PODEntity *podEntity);
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.
@@ -358,5 +343,5 @@ private:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
     **/
-    IServerGameEntity* AllocateGameEntity(PODEntity *svEntity, const std::string& classname);
+    GameEntity* AllocateGameEntity(PODEntity *podEntity, const std::string& classname);
 };

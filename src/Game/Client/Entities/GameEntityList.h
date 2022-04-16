@@ -80,6 +80,7 @@ public:
 
 	// Return pointer to game entity vector.
     inline CLGEntityVector *GetGameEntities() { return &gameEntities; };
+
 private:
     //! First 2048 are reserved for server side entities.
     CLGEntityVector gameEntities;

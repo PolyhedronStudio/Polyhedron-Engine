@@ -38,7 +38,7 @@ void GameEntityList::Clear() {
 }
 
 /**
-*   @brief  Spawns and inserts a new game entity of type 'classname', which belongs to the ClientEntity.
+*   @brief  Creates, and assigns to the POD entity a new game entity of type 'classname'.
 *   @return Pointer to the game entity object on sucess. On failure, nullptr.
 **/
 IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &classname, ClientEntity* clEntity) {
@@ -74,11 +74,11 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
 		// If it isn't a nullptr...
 		if (!clEntity->gameEntity) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
-			return nullptr;
+			//return nullptr;
 
 			// Perhaps instead of returning nullptr, this is where we should do a 
 			// CLGBaseEntity instead.
-			//classEntity = new CLGBaseEntity(clEntity);
+			clEntity->gameEntity = new CLGBaseEntity(clEntity);
 		}
 
 		// Return game entity.
@@ -181,7 +181,7 @@ IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, Cli
 }
 
 /**
-*   @return A pointer to the entity who's index matches the state number.
+*   @return A pointer to the game entity who's index matches the state number.
 **/
 IClientGameEntity *GameEntityList::GetByNumber(int32_t number) {
 	// Ensure ID is within bounds.

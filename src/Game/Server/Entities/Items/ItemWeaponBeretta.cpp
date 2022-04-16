@@ -23,7 +23,7 @@
 #include "../Base/SVGBasePlayer.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 // Beretta.
 #include "ItemWeaponBeretta.h"
@@ -296,7 +296,7 @@ void ItemWeaponBeretta::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SV
 **/
 qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(other, true, true);
+    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(other, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
@@ -343,7 +343,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
 **/
 void ItemWeaponBeretta::InstanceWeaponBerettaUse(SVGBaseEntity* user, SVGBaseItem* item) { 
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(user, true, true);
+    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(user, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

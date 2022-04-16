@@ -17,7 +17,7 @@
 #include "../Func/FuncPlat.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 // Trigger Auto Platform.
 #include "TriggerAutoPlatform.h"

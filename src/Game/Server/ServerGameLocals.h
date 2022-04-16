@@ -39,10 +39,9 @@ class SVGBaseEntity;
 class SVGBaseItem;
 class SVGBaseItemWeapon;
 class SVGBasePlayer;
-class Gameworld;
+class IGameworld;
 class IGamemode;
-class Gameworld;
-class IGamemode;
+class ServerGameworld;
 
 struct entity_s;
 
@@ -85,7 +84,7 @@ public:
     /**
     *   @return A pointer to the gameworld object.
     **/
-    Gameworld* GetGameworld();
+    ServerGameworld* GetGameworld();
 
     /**
     *   @return A pointer to the gameworld its current gamemode object.
@@ -134,7 +133,7 @@ private:
     // TODO: Add Get methods and privatize the members below.
 public:
     //! Gameworld.
-    Gameworld* world = nullptr;
+    ServerGameworld* world = nullptr;
 
     //! needed for coop respawns
     //! Can't store spawnpoint32_t in level, because
@@ -349,7 +348,7 @@ extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and g
 /**
 *   @return A pointer to the game's world object. The man that runs the show.
 **/
-Gameworld* GetGameworld();
+ServerGameworld* GetGameworld();
 
 /**
 *   @return A pointer to the gamemode object. The man's little helper.

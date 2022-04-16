@@ -23,7 +23,7 @@
 #include "../Trigger/TriggerDelayedUse.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 
 

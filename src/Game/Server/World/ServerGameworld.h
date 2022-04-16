@@ -20,28 +20,28 @@ class SGEntityHandle;
 class Worldspawn;
 class IGamemode;
 class IServerGameEntity;
-#include "../Entities/IClientGameEntity.h"
+#include "../Entities/IServerGameEntity.h"
 
 #include "../../../Game/Shared/World/IGameworld.h"
 #include "../Entities.h"
-//#include "../Entities/Worldspawn.h"
+#include "../Entities/Worldspawn.h"
 
 /**
 *	@brief GameWorld regulates the lifetime management of all entities.
 * 
 *	@details 
 **/
-class Gameworld : public IGameworld {
+class ServerGameworld : public IGameworld {
 public:
     /**
 	*	@brief Default constructor.
 	**/
-    Gameworld() = default;
+    ServerGameworld() = default;
 
     /**
 	*	@brief Default destructor
 	**/
-    ~Gameworld() = default;
+    ~ServerGameworld() = default;
 
 public:
     /**
@@ -107,7 +107,7 @@ public:
 	* 
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
-    PODEntity* GetUnusedPODEntity();
+    Entity* GetUnusedPODEntity();
 
     /**
 	*   @brief  Creates and assigns a game entity to the given server entity based on the classname.
@@ -118,33 +118,33 @@ public:
         // Class entity to be returned.
         entityClass* gameEntity = nullptr;
 
-     //   // If a null entity was passed, create a new one
-	    //if (svEntity == nullptr) {
-     //       if (allocateNewServerEntity) {
-     //           svEntity = GetUnusedPODEntity();
-     //       } else {
-     //           gi.DPrintf("WARNING: tried to spawn a game entity when the edict is null\n");
-     //           return nullptr;
-     //       }
-     //   }
-     //   
-     //   // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
-     //   if (entityClass::ClassInfo.AllocateInstance) {
-    	//    // Entities that aren't in the type info system will error out here
-     //       gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(svEntity));
+        // If a null entity was passed, create a new one
+	    if (svEntity == nullptr) {
+            if (allocateNewServerEntity) {
+                svEntity = GetUnusedPODEntity();
+            } else {
+                gi.DPrintf("WARNING: tried to spawn a game entity when the edict is null\n");
+                return nullptr;
+            }
+        }
+        
+        // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
+        if (entityClass::ClassInfo.AllocateInstance) {
+    	    // Entities that aren't in the type info system will error out here
+            gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(svEntity));
     
-     //       // Be sure ti set its classname.
-     //       gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
+            // Be sure ti set its classname.
+            gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
 
-     //       // Store the svEntity's game entity pointer.
-     //       svEntity->gameEntity = gameEntity;
+            // Store the svEntity's game entity pointer.
+            svEntity->gameEntity = gameEntity;
 
-     //       if (nullptr == gameEntities[svEntity->state.number]) {
-     //           gameEntities[svEntity->state.number] = gameEntity;
-     //       } else {
-     //           gi.DPrintf("ERROR: edict %i is already taken\n", svEntity->state.number);
-     //       }
-     //   }
+            if (nullptr == gameEntities[svEntity->state.number]) {
+                gameEntities[svEntity->state.number] = gameEntity;
+            } else {
+                gi.DPrintf("ERROR: edict %i is already taken\n", svEntity->state.number);
+            }
+        }
         return gameEntity;
     }
     /**
@@ -219,7 +219,7 @@ public:
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline PODEntity* GetPODEntityByIndex(uint32_t index) {
+    inline Entity* GetPODEntityByIndex(uint32_t index) {
         if (index < 0 || index >= MAX_EDICTS) {
             return nullptr; 
         }
@@ -236,7 +236,7 @@ public:
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline GameEntity* GetGameEntityByIndex(uint32_t index) {
+    inline GameEntity* GetGameEntityByIndex(int32_t index) {
     	if (index < 0 || index >= MAX_EDICTS) {
     	    return nullptr;
 	    }
@@ -246,7 +246,7 @@ public:
     /**
 	*   @return A pointer to the worldspawn game entity.
 	**/
-    inline PODEntity* GetWorldspawnPODEntity() { 
+    inline Entity* GetWorldspawnPODEntity() { 
         return &podEntities[0]; 
     }
     
@@ -254,7 +254,7 @@ public:
 	*   @return A pointer to the worldspawn game entity.
 	**/
     inline Worldspawn* GetWorldspawnGameEntity() { 
-        return nullptr;//dynamic_cast<Worldspawn*>(gameEntities[0]); 
+        return dynamic_cast<Worldspawn*>(gameEntities[0]); 
     }
 
 
@@ -358,5 +358,5 @@ private:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
     **/
-    GameEntity* AllocateGameEntity(PODEntity *svEntity, const std::string& classname);
+    IServerGameEntity* AllocateGameEntity(PODEntity *svEntity, const std::string& classname);
 };

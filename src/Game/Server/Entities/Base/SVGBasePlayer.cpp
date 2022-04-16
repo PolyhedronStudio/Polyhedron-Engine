@@ -17,7 +17,7 @@
 #include "../../Gamemodes/IGamemode.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 // Class entities.
 #include "../Base/SVGBaseEntity.h"
@@ -37,7 +37,7 @@ SVGBasePlayer::SVGBasePlayer(PODEntity *svEntity) : Base(svEntity) {
 **/
 SVGBasePlayer* SVGBasePlayer::Create(PODEntity *svEntity) {
     // Get gameworld pointer.
-    Gameworld* gameworld = GetGameworld();
+    ServerGameworld* gameworld = GetGameworld();
 
     // Get pointer to server entities.
     Entity* serverEntities = gameworld->GetPODEntities();
@@ -206,7 +206,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
 
         // Throw some gibs around, true horror oh boy.
         // Get gameworld pointer.
-	    Gameworld* gameworld = GetGameworld();
+	    ServerGameworld* gameworld = GetGameworld();
         gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
         gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
         gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
@@ -986,7 +986,7 @@ void SVGBasePlayer::CheckWorldEffects()
     }
 
     // Get gameworld pointer.
-    Gameworld* gameworld = GetGameworld();
+    ServerGameworld* gameworld = GetGameworld();
 
     // Retreive waterLevel.
     waterLevel = GetWaterLevel();

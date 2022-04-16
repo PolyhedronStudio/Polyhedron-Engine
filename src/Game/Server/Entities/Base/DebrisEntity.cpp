@@ -17,7 +17,7 @@
 #include "DebrisEntity.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 
 //! Constructor/Deconstructor.

@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "StepMove.h"
 
 // World.
-#include "../World/Gameworld.h"
+#include "../World/ServerGameworld.h"
 /*
 
 

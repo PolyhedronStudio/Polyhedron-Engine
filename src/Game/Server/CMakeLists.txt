@@ -115,7 +115,7 @@ SET(SRC_SVGAME
 	Player/Client.cpp
 	Player/Hud.cpp
 
-	World/Gameworld.cpp
+	World/ServerGameworld.cpp
 	#SVGame.def
 	
 )
@@ -199,7 +199,7 @@ SET(HEADERS_SVGAME
 	Player/Animations.h
 	Player/Client.h
 
-	World/Gameworld.h
+	World/ServerGameworld.h
 	#SVGame.def
 
 )

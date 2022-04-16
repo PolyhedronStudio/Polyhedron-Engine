@@ -23,7 +23,7 @@
 // Game mode.
 #include "../../Gamemodes/DefaultGamemode.h"
 // Game world.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 // SMG.
 #include "ItemWeaponSMG.h"
@@ -444,7 +444,7 @@ void ItemWeaponSMG::InstanceWeaponProcessSecondaryFireState(SVGBasePlayer* playe
 **/
 qboolean ItemWeaponSMG::WeaponSMGPickup(IServerGameEntity *other) {
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(other, true, true);
+    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(other, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
@@ -501,7 +501,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(IServerGameEntity *other) {
 **/
 void ItemWeaponSMG::InstanceWeaponSMGUse(SVGBaseEntity* user, SVGBaseItem* item) { 
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(user, true, true);
+    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(user, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

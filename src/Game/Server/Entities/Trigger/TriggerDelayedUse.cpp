@@ -20,7 +20,7 @@
 #include "TriggerDelayedUse.h"
 
 // Gameworld.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 //
 // Spawn Flags.
 // 

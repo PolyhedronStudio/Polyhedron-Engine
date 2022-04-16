@@ -15,7 +15,7 @@
 #include "FuncTrain.h"
 
 #include "../../Gamemodes/IGamemode.h"
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 //===============
 // FuncTrain::ctor

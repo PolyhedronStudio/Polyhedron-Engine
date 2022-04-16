@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Gamemodes/DeathMatchGamemode.h"
 
 // Gameworld.
-#include "World/Gameworld.h"
+#include "World/ServerGameworld.h"
 
 // Player related.
 #include "Player/Client.h"      // Include Player Client header.
@@ -332,7 +332,7 @@ static void SVG_SetupCVars() {
 //
 void SVG_SpawnEntities(const char* mapName, const char* entities, const char* spawnpoint) {
     // Acquire game world pointer.
-    Gameworld* gameworld = GetGameworld();
+    ServerGameworld* gameworld = GetGameworld();
 
     // Spawn entities.
     gameworld->SpawnFromBSPString(mapName, entities, spawnpoint);
@@ -347,7 +347,7 @@ void SVG_SpawnEntities(const char* mapName, const char* entities, const char* sp
 //
 void SVG_ClientEndServerFrames(void)
 {
-    Gameworld* gameworld = GetGameworld();
+    ServerGameworld* gameworld = GetGameworld();
 
     // Acquire server entities array.
     Entity* serverEntities = gameworld->GetPODEntities();
@@ -363,7 +363,7 @@ void SVG_ClientEndServerFrames(void)
         Entity *entity = &serverEntities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
         // Acquire player entity pointer.
-        SVGBaseEntity *validEntity = Gameworld::ValidateEntity(entity, true, true);
+        SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(entity, true, true);
 
         // Sanity check.
         if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

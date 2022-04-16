@@ -18,7 +18,7 @@
 #include "../Base/SVGBaseMonster.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 // Misc Server Model Entity.
 #include "MonsterTestDummy.h"
@@ -259,7 +259,7 @@ void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServer
     SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
-    Gameworld* gameworld = GetGameworld();
+    ServerGameworld* gameworld = GetGameworld();
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);

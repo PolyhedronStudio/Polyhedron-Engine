@@ -26,7 +26,7 @@
 #include "SVGBaseItemWeapon.h"
 
 // Game world.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 //
 // Constructor/Deconstructor.

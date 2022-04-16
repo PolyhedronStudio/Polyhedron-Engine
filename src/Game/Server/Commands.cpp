@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Gamemodes/IGamemode.h"
 
 // Game world.
-#include "World/Gameworld.h"
+#include "World/ServerGameworld.h"
 
     //char *ClientTeam(SVGBaseEntity *ent)
 //{
@@ -657,7 +657,7 @@ int PlayerSort(void const *a, void const *b)
     anum = *(int *)a;
     bnum = *(int *)b;
 
-    Gameworld* gameworld = game.GetGameworld();
+    ServerGameworld* gameworld = game.GetGameworld();
     ServerClient* clients = gameworld->GetClients();
 
     anum = clients[anum].playerState.stats[PlayerStats::Frags];
@@ -913,7 +913,7 @@ void SVG_ClientCommand(PODEntity *svEntity) {
     //
     //
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(svEntity, true, true);
+    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(svEntity, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

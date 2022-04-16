@@ -86,7 +86,7 @@ struct entity_s {
     EntityDictionary entityDictionary;
 
     //! Actual sv.time when this entity was freed.
-    GameTime freeTime = 0s;
+    GameTime freeTime = GameTime::zero();
 
     // Move this to clientInfo?
     int32_t lightLevel = 0;
@@ -117,6 +117,12 @@ struct EntityClientFlags {
 *   @brief  Local Client entity. Acts like a POD type similar to the server entity.
 **/
 struct ClientEntity {
+	ClientEntity() = default;
+
+	ClientEntity(ClientEntity&) = default;
+	ClientEntity(const ClientEntity&) = default;
+	virtual ~ClientEntity() = default;
+
     /**
     * 
     *   @brief  Entity Data matching that from the last received server frame.
@@ -164,11 +170,18 @@ struct ClientEntity {
 
     //! Pointer to the owning entity (if any.)
     IClientGameEntity *owner = nullptr;
+
     //! Pointer to the game entity object that belongs to this client entity.
     IClientGameEntity *gameEntity;
 
     //! Key/Value entity dictionary.
     EntityDictionary entityDictionary;
+
+    //! Actual sv.time when this entity was freed.
+    GameTime freeTime = GameTime::zero();
+
+    // Move this to clientInfo?
+    int32_t lightLevel = 0;
 };
 
 

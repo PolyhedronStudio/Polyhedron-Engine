@@ -20,7 +20,7 @@
 #include "FuncDoor.h"
 
 #include "../../Gamemodes/IGamemode.h"
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 //===============
 // FuncDoor::ctor

@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Gamemodes/IGamemode.h"
 
 // World.
-#include "World/Gameworld.h"
+#include "World/ServerGameworld.h"
 
 // Weapons.
 #include "Entities/Weaponry/BlasterBolt.h"

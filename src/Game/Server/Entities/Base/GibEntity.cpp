@@ -20,7 +20,7 @@
 #include "../../Gamemodes/IGamemode.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 
 /**

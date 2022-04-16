@@ -76,13 +76,13 @@ private:
     *	@brief	Parses the BSP Entity string and places the results in the client
     *			entity dictionary.
     **/
-    qboolean ParseEntityString(const char** data, ClientEntity* clEntity);
+    qboolean ParseEntityString(const char** data, PODEntity* podEntity);
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean SpawnParsedGameEntity(ClientEntity* clEntity);
+    qboolean SpawnParsedGameEntity(PODEntity* podEntity);
 
 //! Game Entity utilities.
 private:

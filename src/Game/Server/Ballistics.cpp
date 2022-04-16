@@ -12,7 +12,7 @@
 #include "Gamemodes/IGamemode.h"
 
 // Game world.
-#include "World/Gameworld.h"
+#include "World/ServerGameworld.h"
 
 // Ballistics!
 #include "Ballistics.h"

@@ -17,7 +17,7 @@
 #include "FuncExplosive.h"
 
 #include "../../Gamemodes/IGamemode.h"
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 //===============
 // FuncExplosive::FuncExplosive

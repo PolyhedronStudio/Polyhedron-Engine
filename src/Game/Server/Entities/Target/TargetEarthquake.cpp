@@ -12,7 +12,7 @@
 #include "../Base/SVGBaseEntity.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 #include "TargetEarthquake.h"
 

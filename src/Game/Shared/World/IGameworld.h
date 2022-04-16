@@ -222,7 +222,7 @@ public:
     /**
     *   @return A pointer of the pod entity located at index.
     **/
-    virtual GameEntity* GetGameEntityByIndex(uint32_t index) = 0;
+    virtual GameEntity* GetGameEntityByIndex(int32_t index) = 0;
 
     /**
 	*   @return A pointer to the worldspawn game entity.

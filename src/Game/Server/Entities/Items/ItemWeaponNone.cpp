@@ -22,7 +22,7 @@
 // Game mode.
 #include "../../Gamemodes/DefaultGamemode.h"
 // Game world.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 // None.
 #include "ItemWeaponNone.h"
@@ -177,7 +177,7 @@ void ItemWeaponNone::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SV
 **/
 void ItemWeaponNone::InstanceWeaponNoneUse(SVGBaseEntity* user, SVGBaseItem* item) { 
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(user, true, true);
+    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(user, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

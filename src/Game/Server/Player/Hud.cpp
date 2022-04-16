@@ -34,7 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Gamemodes/DeathMatchGamemode.h"
 
 // World.
-#include "../World/Gameworld.h"
+#include "../World/ServerGameworld.h"
 
 // Player Client & Hud Header.
 #include "Client.h"     // Include Player Client header.

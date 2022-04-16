@@ -19,7 +19,7 @@
 #include "../Gamemodes/DeathMatchGamemode.h"
 
 // World.
-#include "../World/Gameworld.h"
+#include "../World/ServerGameworld.h"
 
 static const char single_statusbar[] =
 "yb -24 "

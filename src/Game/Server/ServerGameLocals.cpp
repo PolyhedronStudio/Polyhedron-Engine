@@ -13,7 +13,7 @@
 #include "Gamemodes/DeathMatchGamemode.h"
 
 // Gameworld.
-#include "World/Gameworld.h"
+#include "World/ServerGameworld.h"
 
 
 // Extern cvars.
@@ -22,7 +22,7 @@ extern cvar_t* gamemode;
 /**
 *   @return A pointer to the gameworld object. The big man in charge.
 **/
-Gameworld *GetGameworld() {
+ServerGameworld *GetGameworld() {
     return game.world;
 }
 
@@ -68,7 +68,7 @@ void GameLocals::Shutdown() {
 **/
 void GameLocals::CreateWorld() {
     // Create game world object.
-    world = new Gameworld();
+    world = new ServerGameworld();
 
     // Initialize it.
     world->Initialize();
@@ -93,7 +93,7 @@ void GameLocals::DestroyWorld() {
 /**
 *   @return A pointer to the gameworld object.
 **/
-Gameworld* GameLocals::GetGameworld() { 
+ServerGameworld* GameLocals::GetGameworld() { 
     return world; 
 }
 

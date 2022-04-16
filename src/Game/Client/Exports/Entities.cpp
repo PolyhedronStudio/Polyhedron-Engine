@@ -138,69 +138,72 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 *			entity dictionary.
 **/
 qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* clEntity) {
-    // False until proven otherwise.
-    qboolean parsedSuccessfully = false;
+	// False until proven otherwise.
+	qboolean parsedSuccessfully = false;
 
-    // Key value ptrs.
-    char *key = nullptr, *value = nullptr;
+	// Key value ptrs.
+	char *key = nullptr, *value = nullptr;
 
-    // Go through all the dictionary pairs.
-    while (1) {
-	    // Parse the key.
-	    key = COM_Parse(data);
+	// Go through all the dictionary pairs.
+  	while (1) {
+		// Parse the key.
+		key = COM_Parse(data);
 		
-	    // If we hit a }, it means we're done parsing, break out of this loop.
-	    if (key[0] == '}') {
-		    break;
-	    }
+		// If we hit a }, it means we're done parsing, break out of this loop.
+		if (key[0] == '}') {
+			break;
+		}
 
-	    // If we are at the end of the string without a closing brace, error out.
-	    if (!*data) {
-		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-		    return false;
-	    }
+		// If we are at the end of the string without a closing brace, error out.
+		if (!*data) {
+			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+			return false;
+		}
 
-	    // Parse the value.
-	    value = COM_Parse(data);
+		// Parse the value.
+		value = COM_Parse(data);
 
-	    // If we are at the end of the string without a closing brace, error out.
-	    if (!*data) {
-		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-		    return false;
-	    }
+		// If we are at the end of the string without a closing brace, error out.
+		if (!*data) {
+			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+			return false;
+		}
 
-	    // Ensure we had a value.
-	    if (value[0] == '}') {
-		    Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
-		    return false;
-	    }
+		// Ensure we had a value.
+		if (value[0] == '}') {
+			Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
+			return false;
+		   }
 
-	    // We successfully managed to parse this entity.
-	    parsedSuccessfully = true;
+		// We successfully managed to parse this entity.
+		parsedSuccessfully = true;
 
-	    // keynames with a leading underscore are used for utility comments,
-	    // and are immediately discarded by quake
-	    if (key[0] == '_') {
-		    continue;
-	    }
+		// keynames with a leading underscore are used for utility comments,
+		// and are immediately discarded by quake
+		if (key[0] == '_') {
+			continue;
+		}
 
-	    // Insert the key/value into the dictionary.
-	    Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
-	    if (clEntity) {
-            clEntity->entityDictionary.try_emplace(std::string(key),std::string(value));// = value;
-        }
-    }
+		// Insert the key/value into the dictionary.
+		Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
+		if (clEntity) {
+			clEntity->entityDictionary.try_emplace(std::string(key),std::string(value));// = value;
+		}
+	}
 
-    // If we failed to parse the entity properly, zero this one back out.
-    if (!parsedSuccessfully) {
-        int32_t clientEntityNumber = clEntity->clientEntityNumber;
+	// If we failed to parse the entity properly, zero this one back out.
+	if (!parsedSuccessfully) {
+		int32_t clientEntityNumber = clEntity->clientEntityNumber;
 
-	    *clEntity = {.clientEntityNumber = clientEntityNumber };
-	    return false;
-    }
+		//*clEntity = { .clientEntityNumber = clientEntityNumber };
+		*clEntity = {};
+		clEntity->clientEntityNumber = clientEntityNumber;
 
-    // Return the result.
-    return parsedSuccessfully;
+		return false;
+	}
+
+	// Return the result.
+	return parsedSuccessfully;
 }
 
 /**
@@ -226,10 +229,12 @@ qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
     // Actually spawn the game entity.
     IClientGameEntity *gameEntity = gameEntityList.AllocateFromClassname(clEntity->entityDictionary["classname"], clEntity);
 	
-    // Something went wrong with allocating the game entity.
+    // This only happens if something went badly wrong. (It shouldn't.)
     if (!gameEntity) {
-		// Be sure to free it.
-		*clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
+		// Reset the client entity.
+//		*clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
+		*clEntity = {};
+		clEntity->clientEntityNumber = stateNumber;
 
 		// Failed.
 		Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"].c_str());
@@ -293,9 +298,9 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
 	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
         if (podEntity) {
-    	//    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
         } else {
-    	//    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state.number, mapClass, hashedMapClass);
         }
     }
 #endif

@@ -17,7 +17,7 @@
 #include "../Func/FuncDoor.h"
 
 // World.
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 // Trigger Auto Door.
 #include "TriggerAutoDoor.h"

@@ -19,7 +19,7 @@
 #include "MiscExplosionBox.h"
 
 #include "../../Gamemodes/IGamemode.h"
-#include "../../World/Gameworld.h"
+#include "../../World/ServerGameworld.h"
 
 //
 // Constructor/Deconstructor.
@@ -362,7 +362,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
 //
 void MiscExplosionBox::SpawnDebris1Chunk() {
     // Acquire a pointer to the game world.
-    Gameworld* gameworld = GetGameworld();
+    ServerGameworld* gameworld = GetGameworld();
 
     // Speed to throw debris at.
     float speed = 1.5 * (float)GetDamage() / 200.0f;

@@ -136,6 +136,7 @@ static constexpr int32_t MAX_OSPATH    = 256; // Maximum length of a filesystem 
 **/
 static constexpr int32_t MAX_CLIENTS       = 256;  // Absolute limit.
 static constexpr int32_t MAX_EDICTS        = 1024; // Maximum amount of entities we can handle.
+static constexpr int32_t MAX_CLIENT_EDICTS = 1024; // Maximum amount of client-only entities we can handle.
 static constexpr int32_t MAX_LIGHTSTYLES   = 256;
 static constexpr int32_t MAX_MODELS        = 256;  // These are sent over the net as bytes.
 static constexpr int32_t MAX_SOUNDS        = 256;  // So they cannot be blindly increased.

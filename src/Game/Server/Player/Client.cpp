@@ -34,7 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Gamemodes/IGamemode.h"
 
 // World.
-#include "../World/Gameworld.h"
+#include "../World/ServerGameworld.h"
 
 // Shared Game.
 #include "Animations.h"         // Include Player Client Animations.
@@ -217,7 +217,7 @@ usually be a couple times for each server frame.
 void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 {
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = Gameworld::ValidateEntity(svEntity, true, true);
+    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(svEntity, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

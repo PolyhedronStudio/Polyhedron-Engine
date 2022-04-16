@@ -23,23 +23,12 @@
 
 // Include our base entities.
 #include "Entities/IServerGameEntity.h"
+
 #include "Entities/Base/SVGBaseEntity.h"
 #include "Entities/Base/SVGBaseTrigger.h"
 #include "Entities/Base/SVGBaseItem.h"
 #include "Entities/Base/SVGBaseItemWeapon.h"
 #include "Entities/Base/SVGBasePlayer.h"
-
-
-////! Span for Entity* objects.
-//using ServerEntitySpan = std::span<Entity>;
-////! Vector for Entity* objects.
-//using ServerEntityVector = std::vector<Entity*>;
-////! Span for SVGBaseEntity* derived objects.
-//using GameEntitySpan = std::span<IServerGameEntity*>;
-////! Vector for SVGBaseEntity* derived objects.
-//using GameEntityVector = std::vector<IServerGameEntity*>;
-
-
 
 //! Namespace containing the actual filter function implementations.
 namespace EntityFilterFunctions {
@@ -47,17 +36,17 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether an entity is in use.
 	*   @return Returns true in case the entity is in use.
 	**/
-	inline bool ServerEntityInUse(const Entity& ent) { return ent.inUse; }
+	inline bool PODEntityInUse(const PODEntity& ent) { return ent.inUse; }
 	/**
 	*   @brief Filter method for checking whether an entity has a client attached to it.
 	*   @return Returns true in case the entity has a client attached to it.
 	**/
-	inline bool ServerEntityHasClient(const Entity& ent) { return static_cast<bool>(ent.client); }
+	inline bool PODEntityHasClient(const PODEntity& ent) { return static_cast<bool>(ent.client); }
 	/**
 	*   @brief Filter method for checking whether an entity has a game entity.
 	*   @return Returns true in case the entity has a game entity.
 	**/
-	inline bool ServerEntityHasGameEntity(const Entity& ent) { return static_cast<bool>(ent.gameEntity); }
+	inline bool PODEntityHasGameEntity(const PODEntity& ent) { return static_cast<bool>(ent.gameEntity); }
 
 	/**
 	*   @brief Filter method for checking whether a base entity has a client attached to it.
@@ -73,7 +62,7 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether a GameEntity has a serverentity set.
 	*   @return Returns true in case the GameEntity has a serverentity set.
 	**/
-	inline bool GameEntityHasServerEntity(ISharedGameEntity* ent) { return ent->GetPODEntity(); }
+	inline bool GameEntityHasPODEntity(ISharedGameEntity* ent) { return ent->GetPODEntity(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a given targetname.
 	*   @return Returns true if the GameEntity has a given targetname.
@@ -94,15 +83,15 @@ namespace EntityFilterFunctions {
 
 
 //! Namespace containing the actual Entity filter functions to use and apply.
-namespace ServerEntityFilters {
+namespace PODEntityFilters {
 	using namespace std::views;
 
-	inline auto InUse = std::views::filter(&EntityFilterFunctions::ServerEntityInUse);
-	inline auto HasClient = std::views::filter(&EntityFilterFunctions::ServerEntityHasClient);
-	inline auto HasGameEntity = std::views::filter(&EntityFilterFunctions::ServerEntityHasGameEntity);
+	inline auto InUse = std::views::filter(&EntityFilterFunctions::PODEntityInUse);
+	inline auto HasClient = std::views::filter(&EntityFilterFunctions::PODEntityHasClient);
+	inline auto HasGameEntity = std::views::filter(&EntityFilterFunctions::PODEntityHasGameEntity);
 
 	inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
-		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](Entity& ent) {
+		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](PODEntity& ent) {
 			auto& dictionary = ent.entityDictionary;
 
 			if (dictionary.find(fieldKey) != dictionary.end()) {
@@ -117,8 +106,8 @@ namespace ServerEntityFilters {
 	//! Wrapper of pipelined filter functions that are quite standard to apply.
 	inline auto Standard = (InUse);
 };
-//! Shorthand for ServerEntityFilters. Less typing.
-namespace sef = ServerEntityFilters;
+//! Shorthand for PODEntityFilters. Less typing.
+namespace pef = PODEntityFilters;
 
 
 
@@ -127,7 +116,7 @@ namespace GameEntityFilters {
 	using namespace std::ranges::views;
 
 	inline auto IsValidPointer = std::views::filter(&EntityFilterFunctions::GameEntityIsValidPointer);
-	inline auto HasServerEntity = std::views::filter(&EntityFilterFunctions::GameEntityHasServerEntity);
+	inline auto HasServerEntity = std::views::filter(&EntityFilterFunctions::GameEntityHasPODEntity);
 	inline auto HasGroundEntity = std::views::filter(&EntityFilterFunctions::GameEntityHasGroundEntity);
 	inline auto InUse = std::views::filter(&EntityFilterFunctions::GameEntityInUse);
 	inline auto HasClient = std::views::filter(&EntityFilterFunctions::GameEntityHasClient);
