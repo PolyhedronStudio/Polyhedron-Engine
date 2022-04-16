@@ -146,7 +146,7 @@ qboolean ClientGameServerMessage::ParseMessage(int32_t serverCommand) {
         break;
 
         // Client temporary entities. (Particles, etc.)
-    case ServerGameCommand::TempEntity:
+    case ServerGameCommand::TempEntityEvent:
         ParseTempEntitiesPacket();
         CLG_ParseTempEntity();
         return true;
@@ -308,6 +308,12 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
             teParameters.dir = clgi.MSG_ReadVector3(false);
             break;
 
+		case TempEntityEvent::BodyGib: {
+			int32_t gibType = clgi.MSG_ReadInt16();
+			vec3_t gibOrigin = clgi.MSG_ReadVector3(false);
+
+			break;
+		}
         default:
             Com_Error(ErrorType::Drop, "%s: bad type", __func__);
     }

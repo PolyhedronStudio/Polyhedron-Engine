@@ -38,8 +38,8 @@ void GameEntityList::Clear() {
 }
 
 /**
-*   @brief  Spawns and inserts a new class entity of type 'classname', which belongs to the ClientEntity.
-*   @return Pointer to the class entity object on sucess. On failure, nullptr.
+*   @brief  Spawns and inserts a new game entity of type 'classname', which belongs to the ClientEntity.
+*   @return Pointer to the game entity object on sucess. On failure, nullptr.
 **/
 IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &classname, ClientEntity* clEntity) {
     // Start with a nice nullptr.
@@ -68,18 +68,21 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
-		// Allocate and return a pointer to the new class entity object.
-		spawnEntity = InsertAt(clEntity->clientEntityNumber, info->AllocateInstance(clEntity));
+		// Allocate and return a pointer to the new game entity object.
+		clEntity->gameEntity = InsertAt(clEntity->clientEntityNumber, info->AllocateInstance(clEntity));
 
 		// If it isn't a nullptr...
-		if (!spawnEntity) {
+		if (!clEntity->gameEntity) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
 			return nullptr;
+
+			// Perhaps instead of returning nullptr, this is where we should do a 
+			// CLGBaseEntity instead.
 			//classEntity = new CLGBaseEntity(clEntity);
 		}
 
-		// Return class entity.
-		return spawnEntity;
+		// Return game entity.
+		return clEntity->gameEntity;
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
@@ -94,9 +97,9 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
 }
 
 /**
-*   @brief  Spawns and inserts a new class entity determined by the hashedClassname for the state.number index, 
-*			which belongs to the ClientEntity.
-*   @return Pointer to the class entity object on sucess. On failure, nullptr.
+*   @brief  Spawns, inserts and assignsa new game entity to the cliententity, 
+*			based on the state's hashed classname.
+*   @return Pointer to the game entity object on sucess. On failure, nullptr.
 **/
 IClientGameEntity* GameEntityList::AllocateFromState(const EntityState& state, ClientEntity* clEntity) {
     // Start with a nice nullptr.
@@ -117,17 +120,17 @@ IClientGameEntity* GameEntityList::AllocateFromState(const EntityState& state, C
 	// If the previous and current entity number and classname hash are a match, 
 	// update the current entity from state instead.
 	if (currentHashedClassname == previousHashedClassname && stateNumber == clEntity->clientEntityNumber) {
-		// Acquire a pointer to the already in-place class entity instead of allocating a new one.
-		spawnEntity = GetByNumber(stateNumber);
+		// Acquire a pointer to the already in-place game entity instead of allocating a new one.
+		clEntity->gameEntity = GetByNumber(stateNumber);
 
 		// Update it based on state and return its pointer.
-		if (spawnEntity) {
-			spawnEntity->UpdateFromState(state);
+		if (clEntity->gameEntity) {
+			clEntity->gameEntity->UpdateFromState(state);
 		} else {
 			Com_DPrint("Warning: hashed classnames and/or state and entity number mismatch:\n currentHash: %s, previousHash: %s, %i, %i\n", currentHashedClassname, previousHashedClassname, state.number, clEntity->clientEntityNumber);
 		}
 
-		return spawnEntity;
+		return clEntity->gameEntity;
 	}
 
     // New type info-based spawning system, to replace endless string comparisons
@@ -149,21 +152,21 @@ IClientGameEntity* GameEntityList::AllocateFromState(const EntityState& state, C
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
-		// Allocate and return a pointer to the new class entity object.
-		IClientGameEntity *classEntity = InsertAt(state.number, info->AllocateInstance(clEntity));
+		// Allocate and return a pointer to the new game entity object.
+		clEntity->gameEntity = InsertAt(state.number, info->AllocateInstance(clEntity));
 
 		// If it isn't a nullptr...
-		if (!classEntity) {
+		if (!clEntity->gameEntity ) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
 			return nullptr;
 			//classEntity = new CLGBaseEntity(clEntity);
 		}
 
 		// Update its current state.
-		classEntity->UpdateFromState(state);
+		clEntity->gameEntity->UpdateFromState(state);
 
-		// Return class entity.
-		return classEntity;
+		// Return game entity.
+		return clEntity->gameEntity;
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
@@ -186,13 +189,13 @@ IClientGameEntity *GameEntityList::GetByNumber(int32_t number) {
 		return nullptr;
 	}
 
-	// Return class entity that belongs to this ID.
+	// Return game entity that belongs to this ID.
 	return gameEntities[number - 1];
 }
 
 /**
-*   @brief  Inserts the class entity pointer at the number index of our class entity vector.
-*   @param  force   When set to true it'll delete any previously allocated class entity occupying the given index.
+*   @brief  Inserts the game entity pointer at the number index of our game entity vector.
+*   @param  force   When set to true it'll delete any previously allocated game entity occupying the given index.
 *   @return Pointer to the entity being inserted. nullptr on failure.
 **/
 IClientGameEntity *GameEntityList::InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force) {
@@ -201,19 +204,28 @@ IClientGameEntity *GameEntityList::InsertAt(int32_t number, IClientGameEntity *c
 		return nullptr;
 	}
 
+	// We're using 0 
+	const int32_t index = number; // - 1; We should actually allow index 0 and just add in a worldspawn class like on the server.
+
 	// If the index is already occupied...
-	if (gameEntities.size() > number && gameEntities[number] != nullptr) {
+	if (gameEntities.size() > index && gameEntities[index] != nullptr) {
 		// We check if we should delete it, or return a nullptr for failure.
 		if (force) {
-			delete gameEntities[number];
-			gameEntities[number] = nullptr;
+			// Notify about deletion.
+			clgEntity->OnDeallocate();
+
+			// Delete old game entity.
+			delete gameEntities[index];
+			gameEntities[index] = nullptr;
+
+			// Insert & Return.
+			return gameEntities[index] = clgEntity;
 		} else {
 			return nullptr;
 		}
 	}
 
-	// We're good to go, let's insert and return a pointer to it.
-	//gameEntities.emplace(gameEntities.begin() + number, clgEntity);
+	// We didn't actually 
 	gameEntities.push_back(clgEntity);
 
 	// Return object ptr.

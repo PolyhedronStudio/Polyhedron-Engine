@@ -90,11 +90,6 @@ using PODEntity = entity_s;
 #include "SkeletalAnimation.h"
 
 /**
-*   Protocol
-**/
-#include "PMove.h"
-
-/**
 *   Game Time Utilities.
 **/
 #include "Time.h"
@@ -104,6 +99,10 @@ using PODEntity = entity_s;
 **/
 #include "Entities.h"
 
+/**
+*   Protocol
+**/
+#include "PMove.h"
 
 /**
 *   Entity Move Types.
@@ -380,6 +379,12 @@ struct TempEntityEvent {
     static constexpr uint8_t BigExplosion1 = 23;
     //! Same as Explosion1, but without particles.
     static constexpr uint8_t NoParticleExplosion1 = 24;
+
+	//! General body gibbing.
+	static constexpr uint8_t BodyGib = 30;
+
+	//! General debris gibbing.
+	static constexpr uint8_t Debris = 30;
 
     //! General sparks particle effect.
     static constexpr uint8_t Sparks = 50;

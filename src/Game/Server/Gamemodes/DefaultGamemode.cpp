@@ -591,7 +591,7 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     // This'll cause a body not to just "disappear", but actually play some
     // bloody particles over there.
     if (bodyEntity->state.modelIndex) {
-        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::Blood);//WriteByte(TempEntityEvent::Blood);
         gi.MSG_WriteVector3(bodyEntity->state.origin, false);
         gi.MSG_WriteVector3(vec3_zero(), false);
@@ -647,7 +647,7 @@ void DefaultGamemode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, 
         damage = 255;
 
     // Write away.
-    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
     gi.MSG_WriteUint8(type);//WriteByte(type);
     //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
     gi.MSG_WriteVector3(origin, false);

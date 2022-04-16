@@ -358,7 +358,7 @@ void Gameworld::FindTeams() {
 *	@brief	Parses the BSP Entity string and places the results in the server
 *			entity dictionary.
 **/
-qboolean Gameworld::ParseEntityString(const char** data, PODEntity *svEntity) {
+qboolean Gameworld::ParseEntityString(const char** data, PODEntity *podEntity) {
     // False until proven otherwise.
     qboolean parsedSuccessfully = false;
 
@@ -404,12 +404,12 @@ qboolean Gameworld::ParseEntityString(const char** data, PODEntity *svEntity) {
 		}
 
 		// Insert the key/value into the dictionary.
-		svEntity->entityDictionary[key] = value;
+		podEntity->entityDictionary[key] = value;
     }
 
 	// If we failed to parse the entity properly, zero this one back out.
     if (!parsedSuccessfully) {
-		*svEntity = {};
+		*podEntity = {};
 		return false;
 	}
 
@@ -421,15 +421,15 @@ qboolean Gameworld::ParseEntityString(const char** data, PODEntity *svEntity) {
 *   @brief  Allocates the game entity determined by the classname key, and
 *           then does a precache before spawning the game entity.
 **/
-qboolean Gameworld::SpawnParsedGameEntity(PODEntity *svEntity) {
+qboolean Gameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
 	// Acquire dictionary.
-    auto &dictionary = svEntity->entityDictionary;
+    auto &dictionary = podEntity->entityDictionary;
 
 	// Get state number.
-    int32_t stateNumber = svEntity->state.number;
+    int32_t stateNumber = podEntity->state.number;
 
 	// If it does not have a classname key we're in for trouble.
-    if (!svEntity->entityDictionary.contains("classname")) {
+    if (!podEntity->entityDictionary.contains("classname")) {
 		// Error out.
 		gi.Error("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n", __func__, stateNumber);
 		
@@ -438,21 +438,21 @@ qboolean Gameworld::SpawnParsedGameEntity(PODEntity *svEntity) {
     }
 
 	// Actually spawn the game entity.
-    IServerGameEntity *gameEntity = svEntity->gameEntity = AllocateGameEntity(svEntity, svEntity->entityDictionary["classname"]);
+    IServerGameEntity *gameEntity = podEntity->gameEntity = AllocateGameEntity(podEntity, podEntity->entityDictionary["classname"]);
 
     // Something went wrong with allocating the game entity.
     if (!gameEntity) {
 		// Be sure to free it.
-		FreePODEntity(svEntity);
+		FreePODEntity(podEntity);
 
 		// Failed.
-		gi.DPrintf("Warning: Spawning entity(%s) failed.\n", svEntity->entityDictionary["classname"]);
+		gi.DPrintf("Warning: Spawning entity(%s) failed.\n", podEntity->entityDictionary["classname"]);
 		return false;
     }
 
     // Initialise the entity with its respected keyvalue properties
-    for (const auto& keyValueEntry : svEntity->entityDictionary) {
-		svEntity->gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
+    for (const auto& keyValueEntry : podEntity->entityDictionary) {
+		podEntity->gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
     }
 
     // Precache and spawn the entity.
@@ -469,17 +469,17 @@ qboolean Gameworld::SpawnParsedGameEntity(PODEntity *svEntity) {
 *			try and allocate it.
 *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
 **/
-GameEntity *Gameworld::AllocateGameEntity(PODEntity *svEntity, const std::string &classname) {
+GameEntity *Gameworld::AllocateGameEntity(PODEntity *podEntity, const std::string &classname) {
     // Start with a nice nullptr.
     GameEntity* spawnEntity = nullptr;
 
 	// Safety check.
-    if (!svEntity) {
+    if (!podEntity) {
 		return nullptr;
     }
 
     // Get entity state number.
-    int32_t stateNumber = svEntity->state.number;
+    int32_t stateNumber = podEntity->state.number;
 
 	// Warn if a slot is already occupied.
     if (gameEntities[stateNumber] != nullptr) {
@@ -508,7 +508,7 @@ GameEntity *Gameworld::AllocateGameEntity(PODEntity *svEntity, const std::string
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
 		// Allocate and return out new game entity.
-		return (gameEntities[stateNumber] = info->AllocateInstance(svEntity));
+		return (gameEntities[stateNumber] = info->AllocateInstance(podEntity));
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
@@ -656,7 +656,8 @@ SVGBaseEntity* Gameworld::ValidateEntity(const SGEntityHandle &entityHandle, boo
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
 void Gameworld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
-	DebrisEntity::Create(debrisser, gibModel, origin, speed); 
+	
+	//DebrisEntity::Create(debrisser, gibModel, origin, speed); 
 }
 
 /**

@@ -1149,6 +1149,23 @@ void CLG_ParseTempEntity(void)
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		break;
 
+
+// ---------------------- START OF: Client Side Debris / Gibs ---------------------- 
+	case TempEntityEvent::BodyGib:
+			
+		break;
+// ---------------------- END OF: Client Side Debris / Gibs ---------------------- 
+
+
+
+
+
+
+
+
+
+
+
 	//case TempEntityEvent::TeleportEffect:
 	//	ParticleEffects::TeleportEffect(teParameters.position1);
 	//	break;

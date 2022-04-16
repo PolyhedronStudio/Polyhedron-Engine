@@ -21,7 +21,7 @@ struct ServerGameCommand {
     //! First index is 22, all other slots are reserved for the server itself.
     static constexpr int32_t MuzzleFlash = 22;
     static constexpr int32_t MuzzleFlash2 = 23;
-    static constexpr int32_t TempEntity = 24;
+    static constexpr int32_t TempEntityEvent = 24;
     static constexpr int32_t Layout = 25;
     static constexpr int32_t Inventory = 26;
 

@@ -145,36 +145,33 @@ static constexpr int32_t PM_MAX_TOUCH_ENTS = 32;
 //-------------------
 struct PlayerMove {
     // Movement command (in)
-    ClientMoveCommand moveCommand;
+	ClientMoveCommand moveCommand = {};
     
     // Movement state (in/out)
-    PlayerMoveState state;
-
-    // Hook pull speed (in)
-    float hookPullSpeed;
+	PlayerMoveState state = {};
 
     // Entities touched (out)
-    struct entity_s* touchedEntities[PM_MAX_TOUCH_ENTS];
+    struct entity_s *touchedEntities[PM_MAX_TOUCH_ENTS];
     int32_t numTouchedEntities;
 
     // Pointer to the entity that is below the player. (out)
-    struct entity_s* groundEntityPtr; 
+    struct entity_s* groundEntityPtr;
 
     // Clamped, and including kick and delta (out)
-    vec3_t viewAngles;
+    vec3_t viewAngles = vec3_zero();
 
     // Bounding box size (out)
-    vec3_t mins, maxs;
+    vec3_t mins = vec3_zero(), maxs = vec3_zero();
     
-    float       step; // Traversed step height. (out)
+    float step = 0; // Traversed step height. (out)
 
     // Water Type (lava, slime, water), and waterLevel.
-    int32_t waterType;  
-    int32_t waterLevel; // Water Level (1 - 3)
+    int32_t waterType = 0;  
+    int32_t waterLevel = 0; // Water Level (1 - 3)
 
     // Callback functions for collision with the world and solid entities
-    TraceResult (*q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end);
-    int     (*PointContents)(const vec3_t &point);
+    TraceResult (*q_gameabi Trace)(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end) = nullptr;
+    int32_t     (*PointContents)(const vec3_t &point) = nullptr;
 };
 
 //

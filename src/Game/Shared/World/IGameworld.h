@@ -108,14 +108,14 @@ public:
  //   *
  //   *   @return A pointer to the game entity on success, nullptr on failure.
  //   **/
- //   template<typename entityClass> inline entityClass* CreateGameEntity(Entity* svEntity = nullptr, bool allocateNewServerEntity = true) {
+ //   template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *podEntity = nullptr, bool allocateNewServerEntity = true) {
  //       // Class entity to be returned.
  //       entityClass* gameEntity = nullptr;
 
  //       // If a null entity was passed, create a new one
-	//    if (svEntity == nullptr) {
+	//    if (podEntity == nullptr) {
  //           if (allocateNewServerEntity) {
- //               svEntity = GetUnusedPODEntity();
+ //               podEntity = GetUnusedPODEntity();
  //           } else {
  //               gi.DPrintf("WARNING: tried to spawn a game entity when the edict is null\n");
  //               return nullptr;
@@ -125,18 +125,18 @@ public:
  //       // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
  //       if (entityClass::ClassInfo.AllocateInstance) {
  //   	    // Entities that aren't in the type info system will error out here
- //           gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(svEntity));
+ //           gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(podEntity));
  //   
  //           // Be sure ti set its classname.
  //           gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
 
- //           // Store the svEntity's game entity pointer.
- //           svEntity->gameEntity = gameEntity;
+ //           // Store the podEntity's game entity pointer.
+ //           podEntity->gameEntity = gameEntity;
 
- //           if (nullptr == classEntities[svEntity->state.number]) {
- //               classEntities[svEntity->state.number] = gameEntity;
+ //           if (nullptr == classEntities[podEntity->state.number]) {
+ //               classEntities[podEntity->state.number] = gameEntity;
  //           } else {
- //               gi.DPrintf("ERROR: edict %i is already taken\n", svEntity->state.number);
+ //               gi.DPrintf("ERROR: edict %i is already taken\n", podEntity->state.number);
  //           }
  //       }
  //       return gameEntity;
@@ -168,7 +168,7 @@ public:
 
 
     /**
-    *   @brief Selectively acquire a list of Entity* derived objects using entity filters.
+    *   @brief Selectively acquire a list of PODEntity derived objects using entity filters.
     * 
     *   @return Returns a span containing all the entities from the range of [start] to [start + count]
     *           that passed the filter process.
@@ -186,7 +186,7 @@ public:
         return GameEntitySpan(gameEntities).subspan(start, count); //return std::span(classEntities).subspan<start, count>(); 
     }
     /**
-    *   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.
+    *   @brief Selectively acquire a list of PODEntity derived objects using entity filters. Use the templated version where possible.
     * 
     *   @return Returns a span containing all the entities from the range of [start] to [start + count]
     *           that passed the filter process.
@@ -289,13 +289,13 @@ protected:
     /**
     *   @brief Nothing yet.
     **/
-    void PrepareItems() { };
+    virtual void PrepareItems() = 0;
 
     /**
     *   @brief	Clamps maxEntities if needed, assigns the exported globals.entities and ensures
     *			that all class entities are set to nullptr.
     **/
-    void PrepareEntities();
+    virtual void PrepareEntities() = 0;
 
     /**
     *   @brief Chain together all entities with a matching team field
@@ -303,20 +303,20 @@ protected:
     *   @details    All but the first will have the EntityFlags::TeamSlave flag set.
     *               All but the last will have the teamchain field set to the next one.
     **/
-    void FindTeams();
+    virtual void FindTeams() = 0;
 
     /**
 	*	@brief	Parses the BSP Entity string and places the results in the server
 	*			entity dictionary.
 	*	@return	True in case it succeeded parsing the entity string.
 	**/
-    qboolean ParseEntityString(const char** data, Entity* svEntity);
+    virtual qboolean ParseEntityString(const char** data, PODEntity *podEntity) = 0;
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean SpawnParsedGameEntity(Entity* svEntity);
+    virtual qboolean SpawnParsedGameEntity(PODEntity *podEntity) = 0;
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.
@@ -324,5 +324,5 @@ protected:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
     **/
-    IServerGameEntity* AllocateGameEntity(Entity* svEntity, const std::string& classname);
+    virtual GameEntity* AllocateGameEntity(PODEntity *podEntity, const std::string& classname) = 0;
 };

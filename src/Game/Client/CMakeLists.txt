@@ -35,6 +35,7 @@ SET(SRC_CLGAME
 	Entities/GameEntityList.cpp
 	Entities/IClientGameEntity.cpp
 
+	World/Gameworld.cpp
 
 	Exports/Core.cpp
 	Exports/Entities.cpp
@@ -99,6 +100,8 @@ SET(HEADERS_CLGAME
 	Physics/StepMove.h
 
 	View/ViewCamera.h
+
+	World/Gameworld.h
 
 	ClientGameLocals.h
 	Debug.h

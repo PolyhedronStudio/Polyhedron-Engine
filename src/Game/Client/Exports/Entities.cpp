@@ -224,7 +224,7 @@ qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
     }
 
     // Actually spawn the game entity.
-    IClientGameEntity *gameEntity = clEntity->gameEntity = gameEntityList.AllocateFromClassname(clEntity->entityDictionary["classname"], clEntity);
+    IClientGameEntity *gameEntity = gameEntityList.AllocateFromClassname(clEntity->entityDictionary["classname"], clEntity);
 	
     // Something went wrong with allocating the game entity.
     if (!gameEntity) {

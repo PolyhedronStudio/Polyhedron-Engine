@@ -50,7 +50,7 @@ void TargetExplosion::ExplosionUse( IServerGameEntity* other, IServerGameEntity*
 // TargetExplosion::ExplosionThink
 //===============
 void TargetExplosion::ExplosionThink() {
-	gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte( ServerGameCommand::TempEntity );
+	gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte( ServerGameCommand::TempEntityEvent );
 	gi.MSG_WriteUint8(TempEntityEvent::Explosion1);//WriteByte( TempEntityEvent::Explosion1 );
 	gi.MSG_WriteVector3( GetOrigin(), false );
 	gi.Multicast( GetOrigin(), Multicast::PHS );

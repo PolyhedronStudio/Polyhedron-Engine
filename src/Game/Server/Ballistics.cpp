@@ -105,7 +105,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
 
                 // Write out a splash temp entity event.
                 if (splashType != SplashType::Unknown) {
-                    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//gi.WriteByte(ServerGameCommand::TempEntity);
+                    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//gi.WriteByte(ServerGameCommand::TempEntityEvent);
                     gi.MSG_WriteUint8(TempEntityEvent::Splash);//gi.WriteByte(TempEntityEvent::Splash);
                     gi.MSG_WriteUint8(8);//gi.WriteByte(8);
                     gi.MSG_WriteVector3(trace.endPosition, false);
@@ -140,7 +140,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
                 GetGamemode()->InflictDamage(trace.ent, player, player, aimDirection, trace.endPosition, trace.plane.normal, damage, kickForce, DamageFlags::Bullet, meansOfDeath);
             } else {
                 if (strncmp(trace.surface->name, "sky", 3) != 0 && strncmp(trace.surface->name, "sky_surfacelight", 16) != 0) {
-                    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+                    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
                     gi.MSG_WriteUint8(te_impact);//WriteByte(te_impact);
                     gi.MSG_WriteVector3(trace.endPosition, false);
                     gi.MSG_WriteVector3(trace.plane.normal, false);
@@ -168,7 +168,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
 
         position = vec3_scale(liquidStartPosition + trace.endPosition, 0.5f);
 
-        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::BubbleTrailA);
         gi.MSG_WriteVector3(liquidStartPosition, false);
         gi.MSG_WriteVector3(trace.endPosition, false);

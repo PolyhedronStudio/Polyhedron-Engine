@@ -205,7 +205,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     color = SplashType::Unknown;
 
                 if (color != SplashType::Unknown) {
-                    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//gi.WriteByte(ServerGameCommand::TempEntity);
+                    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//gi.WriteByte(ServerGameCommand::TempEntityEvent);
                     gi.MSG_WriteUint8(TempEntityEvent::Splash);//gi.WriteByte(TempEntityEvent::Splash);
                     gi.MSG_WriteUint8(8);//gi.WriteByte(8);
                     gi.MSG_WriteVector3(tr.endPosition, false);
@@ -236,7 +236,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                 GetGamemode()->InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
-                    gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+                    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
                     gi.MSG_WriteUint8(te_impact);//WriteByte(te_impact);
                     gi.MSG_WriteVector3(tr.endPosition, false);
                     gi.MSG_WriteVector3(tr.plane.normal, false);
@@ -265,7 +265,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
 
-        gi.MSG_WriteUint8(ServerGameCommand::TempEntity);//WriteByte(ServerGameCommand::TempEntity);
+        gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::BubbleTrailA);//WriteByte(TempEntityEvent::BubbleTrailA);
         gi.MSG_WriteVector3(water_start, false);
         gi.MSG_WriteVector3(tr.endPosition, false);

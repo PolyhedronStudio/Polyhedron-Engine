@@ -1002,7 +1002,7 @@ void CL_SeekDemoMessage(void)
             break;
 
         // WatIsDeze: Movd to CGModule.
-        //case ServerGameCommand::TempEntity:
+        //case ServerGameCommand::TempEntityEvent:
         //    CL_ParseTEntPacket();
         //    break;
 

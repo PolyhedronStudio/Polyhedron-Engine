@@ -647,7 +647,7 @@ static void repack_unreliables(client_t *client, size_t maximumSize)
 
     // temp entities first
     FOR_EACH_MSG_SAFE(&client->msg_unreliable_list) {
-        if (!msg->currentSize || msg->data[0] != ServerGameCommand::TempEntity) {
+        if (!msg->currentSize || msg->data[0] != ServerGameCommand::TempEntityEvent) {
             continue;
         }
         write_msg(client, msg, maximumSize);
