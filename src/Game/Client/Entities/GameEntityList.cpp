@@ -101,7 +101,7 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
 *			based on the state's hashed classname.
 *   @return Pointer to the game entity object on sucess. On failure, nullptr.
 **/
-IClientGameEntity* GameEntityList::AllocateFromState(const EntityState& state, ClientEntity* clEntity) {
+IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, ClientEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 

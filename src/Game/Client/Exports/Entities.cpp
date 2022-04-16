@@ -271,11 +271,17 @@ qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const Entit
     }
 
     
-    // Will either return a pointer to a new classentity type, or an existing one, depending on the state.
-    IClientGameEntity *clgEntity = gameEntityList.AllocateFromState(state, clEntity);
+    // Depending on the state it will either return a pointer to a new classentity type, or to an already existing in place one.
+    IClientGameEntity *clgEntity = gameEntityList.CreateFromState(state, clEntity);
 
-    // Call the spawn function if it is a valid entity.
+	// Debug.
+	if (!clgEntity) {
+		Com_DPrint("Warning: ClientGameEntities::UpdateFromState had a nullptr returned from gameEntityList.CreateFromState\n");
+	}
+
+    // 
     if (clgEntity) {
+		clgEntity->Precache();
         clgEntity->Spawn();
     }
     // Do a debug print.
