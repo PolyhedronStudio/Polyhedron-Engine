@@ -7,8 +7,6 @@
 *	GameLocal class contains all of the game. Its world, entities, clients, items, etc.
 *   It stays persistently intact until the end of the game, when the dll is unloaded.
 * 
-*   Its current state at time of load/save is also read/written to the server.ssv file 
-*   for savegames
 *
 ***/
 #pragma once
@@ -276,6 +274,7 @@ struct ServerFlags {
     static constexpr int32_t CrossTriggerMask   = 0x000000ff;
 };
 
+
 /**
 *   Player Noise Types.
 **/
@@ -287,9 +286,6 @@ struct PlayerNoiseType {
     //! Noise created by impacting other entities with ballistics.
     static constexpr int32_t Impact = 2;
 };
-
-
-
 
 
 /**
@@ -305,26 +301,26 @@ struct ItemFlags {
 };
 
 
-//-------------------
-// Stores level locals, from current time, to which entities are sighted.
-// 
-// This structure is cleared as each map is entered it is read/written 
-// to the 'level.sav' file for savegames
-//-------------------
+/**
+*	@brief	Stores level locals, from current time, to which entities are sighted.
+*	
+*			This structure is cleared as each map is entered it is read/written 
+*			to the 'level.sav' file for savegames.
+**/
 struct LevelLocals  {
     //! Current level time in Milliseconds.
     GameTime time = GameTime::zero();
 
-    char levelName[MAX_QPATH];  // The descriptive name (Outer Base, etc)
-    char mapName[MAX_QPATH];    // The server name (base1, etc)
-    char nextMap[MAX_QPATH];    // Go here when fraglimit is hit
+    char levelName[MAX_QPATH];  //! The descriptive name (Outer Base, etc)
+    char mapName[MAX_QPATH];    //! The server name (base1, etc)
+    char nextMap[MAX_QPATH];    //! Go here when fraglimit is hit
 
-    //
-    // Stores the state for a games 'Intermission state'. This is where the
-    // camera hangs somewhere, at the end of a map, players get to say
-    // 'hey ggg u n00bz' after seeing each other's scores. When all is said and
-    // done the game moves on to the next map. This is when exitIntermission != 0
-    //
+    /**
+	*	Stores the state for a games 'Intermission state'. This is where the
+    *	camera hangs somewhere, at the end of a map, players get to say
+    *	'hey ggg u n00bz' after seeing each other's scores. When all is said and
+    *	done the game moves on to the next map. This is when exitIntermission != 0
+    **/
     struct {
         GameTime time = GameTime::zero(); // Time the intermission was started
         const char* changeMap; // Map to switch to after intermission has exited.
@@ -345,12 +341,14 @@ struct LevelLocals  {
     // A bit ugly, but one can store coop values here.    
 };
 
-// Externized.
-extern  GameLocals   game;
-extern  LevelLocals  level;
-extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
-extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
 
+/**
+*	Game Externals.
+**/
+//! Global game object.
+extern  GameLocals   game;
+//! Global level locals.
+extern  LevelLocals  level;
 
 /**
 *   @return A pointer to the game's world object. The man that runs the show.
@@ -361,6 +359,18 @@ ServerGameworld* GetGameworld();
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
 IGamemode* GetGamemode();
+
+
+
+/**
+*	Core - Used take and give access from game module to server.
+**/
+extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
+extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
+
+
+
+
 
 // These too need to be taken care of.
 extern  int32_t sm_meat_index;
@@ -405,50 +415,6 @@ struct MeansOfDeath {
 // Also, there should be alternatives in our utils for math lib as is.
 #define random()    ((rand () & RAND_MAX) / ((float)RAND_MAX))
 #define crandom()   (2.0f * (random() - 0.5f))
-
-//-------------------
-// Server game related cvars.
-//-------------------
-extern  cvar_t  *deathmatch;
-extern  cvar_t  *coop;
-extern  cvar_t  *gamemodeflags;
-extern  cvar_t  *skill;
-extern  cvar_t  *fraglimit;
-extern  cvar_t  *timelimit;
-extern  cvar_t  *password;
-extern  cvar_t  *spectator_password;
-extern  cvar_t  *needpass;
-extern  cvar_t  *g_select_empty;
-extern  cvar_t  *dedicated;
-
-extern  cvar_t  *filterban;
-
-extern  cvar_t  *sv_gravity;
-extern  cvar_t  *sv_maxvelocity;
-
-extern  cvar_t  *gun_x, *gun_y, *gun_z;
-extern  cvar_t  *sv_rollspeed;
-extern  cvar_t  *sv_rollangle;
-
-extern  cvar_t  *run_pitch;
-extern  cvar_t  *run_roll;
-extern  cvar_t  *bob_up;
-extern  cvar_t  *bob_pitch;
-extern  cvar_t  *bob_roll;
-
-extern  cvar_t  *sv_cheats;
-extern  cvar_t  *maximumclients;
-extern  cvar_t  *maxspectators;
-
-extern  cvar_t  *flood_msgs;
-extern  cvar_t  *flood_persecond;
-extern  cvar_t  *flood_waitdelay;
-
-extern  cvar_t  *sv_maplist;
-
-extern  cvar_t  *sv_flaregun;
-
-extern  cvar_t  *cl_monsterfootsteps;
 
 /**
 *   @brief  Spawnflags for items, set by editor(s).
@@ -547,6 +513,7 @@ struct PlayerAnimation {
     static constexpr int32_t Reverse = 6;
 };
 
+
 /**
 *   @brief  The ClientPersistentData struct manages data that has to stay persistent
 *           across level changes.
@@ -608,6 +575,7 @@ struct ClientPersistentData {
     //! Spectator mode or not?
     qboolean isSpectator = false;          // client is a isSpectator
 };
+
 
 /**
 *   @brief  The ClientRespawnData struct is used to store specific information about
@@ -807,3 +775,51 @@ struct gclient_s {
 };
 
 
+
+/***
+*
+*
+*	CVars
+*
+*
+***/
+extern  cvar_t  *deathmatch;
+extern  cvar_t  *coop;
+extern  cvar_t  *gamemodeflags;
+extern  cvar_t  *skill;
+extern  cvar_t  *fraglimit;
+extern  cvar_t  *timelimit;
+extern  cvar_t  *password;
+extern  cvar_t  *spectator_password;
+extern  cvar_t  *needpass;
+extern  cvar_t  *g_select_empty;
+extern  cvar_t  *dedicated;
+
+extern  cvar_t  *filterban;
+
+extern  cvar_t  *sv_gravity;
+extern  cvar_t  *sv_maxvelocity;
+
+extern  cvar_t  *gun_x, *gun_y, *gun_z;
+extern  cvar_t  *sv_rollspeed;
+extern  cvar_t  *sv_rollangle;
+
+extern  cvar_t  *run_pitch;
+extern  cvar_t  *run_roll;
+extern  cvar_t  *bob_up;
+extern  cvar_t  *bob_pitch;
+extern  cvar_t  *bob_roll;
+
+extern  cvar_t  *sv_cheats;
+extern  cvar_t  *maximumclients;
+extern  cvar_t  *maxspectators;
+
+extern  cvar_t  *flood_msgs;
+extern  cvar_t  *flood_persecond;
+extern  cvar_t  *flood_waitdelay;
+
+extern  cvar_t  *sv_maplist;
+
+extern  cvar_t  *sv_flaregun;
+
+extern  cvar_t  *cl_monsterfootsteps;

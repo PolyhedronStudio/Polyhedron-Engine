@@ -39,19 +39,19 @@
 // ClientGame Exports Implementation.
 #include "ClientGameExports.h"
 
-//// Temporary.
-#include "LevelLocals.h"
-extern LevelLocals level;
-// END OF TEMPORARY.
+
 
 /**
-*
-*
-*   ClientGame Frame Time.
-*
-*
+*	Predeclarations.
 **/
-// WID: TODO: Make these part of the ClientGameImports instead.
+class ClientGameExports;
+class ClientGameworld;
+
+
+
+/**
+*   ClientGame Frame Time.		// WID: TODO: Make these part of the ClientGameImports instead.
+**/
 static constexpr double		CLG_FRAMETIME	= BASE_FRAMETIME;
 static constexpr double		CLG_1_FRAMETIME	= BASE_1_FRAMETIME;
 static constexpr int32_t	CLG_FRAMEDIV	= BASE_FRAMERATE / 10.0;
@@ -64,44 +64,31 @@ static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 static constexpr Frametime FRAMETIME = FRAMETIME_S;
 
 
-// Preecdclarations.
-class ClientGameExports;
-class ClientGameworld;
-
-//! Contains the function pointers being passed in from the engine.
-extern ClientGameImport clgi;
-//! Static export variable, lives as long as the client game dll lives.
-extern ClientGameExports* clge;
 
 /**
-*	@brief	Common print text to screen function.
+*	Custom load state enumerator.
+*	
+*	Rename LOAD_CUSTOM_# or add your own.
+*	Once the load stage is set, the client will inquire the
+*	CLG_GetMediaLoadStateName function for a matching display string.
 **/
-void Com_Print(const char* fmt, ...);
+typedef enum {
+    LOAD_CUSTOM_START = LOAD_SOUNDS + 1,    // DO NOT TOUCH.
+    LOAD_CUSTOM_0,  // Let thy will be known, rename to your hearts content.
+    LOAD_CUSTOM_1,  // Let thy will be known, rename to your hearts content.
+    LOAD_CUSTOM_2   // Let thy will be known, rename to your hearts content.
+    // You can add more here if you desire so.
+} clg_load_state_t;
+
+
 
 /**
-*	@brief	Common print debug text to screen function.
+*	Client player model settings.
 **/
-void Com_DPrint(const char* fmt, ...);
-
-/**
-*	@brief	Common print warning text to screen function.
-**/
-void Com_WPrint(const char* fmt, ...);
-
-/**
-*	@brief	Common print error text to screen function.
-**/
-void Com_EPrint(const char* fmt, ...);
-
-/**
-*	@brief	Common print specific error type and text to screen function.
-**/
-void Com_Error(int32_t errorType, const char* fmt, ...);
-
-/**
-*	@brief	Common print text type of your choice to screen function.
-**/
-void Com_LPrintf(int32_t printType, const char* fmt, ...);
+static constexpr int32_t CL_PLAYER_MODEL_DISABLED       = 0;
+static constexpr int32_t CL_PLAYER_MODEL_ONLY_GUN       = 1;
+static constexpr int32_t CL_PLAYER_MODEL_FIRST_PERSON   = 2;
+static constexpr int32_t CL_PLAYER_MODEL_THIRD_PERSON   = 3;
 
 
 
@@ -116,6 +103,8 @@ void Com_LPrintf(int32_t printType, const char* fmt, ...);
 *	ClientGame Trace Results.
 **/
 #include "Utilities/CLGTraceResult.h"
+
+
 
 /**
 *	@brief GameLocal is the main server game class.
@@ -217,51 +206,98 @@ public:
     qboolean autoSaved = false;
 };
 
-// Custom load state enumerator.
-//
-// Rename LOAD_CUSTOM_# or add your own.
-// Once the load stage is set, the client will inquire the
-// CLG_GetMediaLoadStateName function for a matching display string.
-typedef enum {
-    LOAD_CUSTOM_START = LOAD_SOUNDS + 1,    // DO NOT TOUCH.
-    LOAD_CUSTOM_0,  // Let thy will be known, rename to your hearts content.
-    LOAD_CUSTOM_1,  // Let thy will be known, rename to your hearts content.
-    LOAD_CUSTOM_2   // Let thy will be known, rename to your hearts content.
-    // You can add more here if you desire so.
-} clg_load_state_t;
 
 /**
-*	Client player model settings.
+*   @brief  This one is here temporarily, it's currently the way how things still operate in the ServerGame
+*           module. Eventually we got to aim for a more streamlined design. So for now it resides here as an
+*           ugly darn copy of..
 **/
-static constexpr int32_t CL_PLAYER_MODEL_DISABLED       = 0;
-static constexpr int32_t CL_PLAYER_MODEL_ONLY_GUN       = 1;
-static constexpr int32_t CL_PLAYER_MODEL_FIRST_PERSON   = 2;
-static constexpr int32_t CL_PLAYER_MODEL_THIRD_PERSON   = 3;
+struct LevelLocals  {
+    //! Current sum of total frame time taken.
+    GameTime time = GameTime::zero();
+};
+
+
 
 /**
-*	Core - Used to access the client's internals.
+*	Game Externals.
 **/
+//! Global game object.
+extern ClientGameLocals game;
+//! Global level locals.
+extern LevelLocals level;
+
+/**
+*   @return A pointer to the game's world object. The man that runs the show.
+**/
+ClientGameworld* GetGameworld();
+
+/**
+*   @return A pointer to the gamemode object. The man's little helper.
+**/
+//IGamemode* GetGamemode();
+
+
+
+/**
+*	Core - Used take and give access from game module to client.
+**/
+//! Contains the function pointers being passed in from the engine.
 extern ClientGameImport clgi;
+//! Static export variable, lives as long as the client game dll lives.
+extern ClientGameExports* clge;
+//! Pointer to the actual client its state.
 extern ClientState      *cl;
+//! Pointer to the client shared data.
 extern ClientShared     *cs;
 
+
+
+/***
+*   
+*
+*	Console Printing.
+*
+*
+***/
 /**
-*	Game - Specific to the game itself.
+*	@brief	Common print text to screen function.
 **/
-// Stores parameters parsed from a temporary entity message.s
-extern tent_params_t   teParameters;
-// Stores parameters parsed from a muzzleflash message.
-extern mz_params_t     mzParameters;
+void Com_Print(const char* fmt, ...);
+
+/**
+*	@brief	Common print debug text to screen function.
+**/
+void Com_DPrint(const char* fmt, ...);
+
+/**
+*	@brief	Common print warning text to screen function.
+**/
+void Com_WPrint(const char* fmt, ...);
+
+/**
+*	@brief	Common print error text to screen function.
+**/
+void Com_EPrint(const char* fmt, ...);
+
+/**
+*	@brief	Common print specific error type and text to screen function.
+**/
+void Com_Error(int32_t errorType, const char* fmt, ...);
+
+/**
+*	@brief	Common print text type of your choice to screen function.
+**/
+void Com_LPrintf(int32_t printType, const char* fmt, ...);
 
 
 /***
 *
 *
-*	CVars - Externed so they can be accessed all over the CG Module.
+*	CVars
 *
 *
 ***/
-// Client.
 extern cvar_t* cl_chat_notify;
 extern cvar_t* cl_chat_sound;
 extern cvar_t* cl_chat_filter;

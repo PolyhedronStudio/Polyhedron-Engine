@@ -300,8 +300,16 @@ void MiscExplosionBox::ExplosionBoxDie(IClientGameEntity* inflictor, IClientGame
     // Attacker becomes this entity its "activator".
     SetActivator(attacker);
 
-    // Setup the next think and think time.
-    SetNextThinkTime(level.time + 2 * FRAMETIME);
+	// Get the general length of velocity, if it's non 0 we want to give this box time to fly. Teeehee :-)
+	const vec3_t normalizedVelocity = vec3_normalize(GetVelocity());
+
+	if (normalizedVelocity.z > 0.1) {
+		// Setup the next think and think time.
+		SetNextThinkTime(level.time + 20 * FRAMETIME);
+	} else {
+		// Setup the next think and think time.
+		SetNextThinkTime(level.time + 2 * FRAMETIME);
+	}
 
     // Set think function.
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxExplode);

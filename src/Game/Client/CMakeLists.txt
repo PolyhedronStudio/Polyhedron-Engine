@@ -61,6 +61,7 @@ SET(SRC_CLGAME
 	ClientGameLocals.cpp
 	Debug.cpp
 	Entities.cpp
+	Main.cpp
 	TemporaryEntities.cpp
 
 	#CLGame.def
@@ -110,6 +111,7 @@ SET(HEADERS_CLGAME
 	ClientGameLocals.h
 	Debug.h
 	Entities.h
+	Main.h
 	TemporaryEntities.h
 )
 

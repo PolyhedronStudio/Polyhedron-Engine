@@ -1,3 +1,14 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ServerGameLocals class contains all of the game. Its world, entities, clients, items, etc.
+*   It stays persistently intact until the end of the game, when the dll is unloaded.
+* 
+*
+***/
 // Core.
 #include "ServerGameLocals.h"	 // Include SVGame header.
 
@@ -46,7 +57,7 @@ void GameLocals::Initialize() {
     // 
     // Since it manages entities and clients it does the following things:
     // Allocate and reserve the clients array based on maxclients cvar.
-    // Parse the BSP entity string to create, precache and speach each game entity instances.
+    // Parse the BSP entity string to create, precache and spawn each game entity instances.
     CreateWorld();
 }
 
