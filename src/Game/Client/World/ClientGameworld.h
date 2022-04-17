@@ -83,7 +83,7 @@ public:
     * 
     *   @return The maximum allowed entities in this game.
     **/
-    inline int32_t GetMaxEntities() final { return MAX_EDICTS + MAX_CLIENT_EDICTS; }
+    inline int32_t GetMaxEntities() final { return MAX_POD_ENTITIES; }
     /**
 	*	@return	Total number of spawned entities.
 	**/
@@ -119,32 +119,33 @@ public:
         entityClass* gameEntity = nullptr;
 
      //   // If a null entity was passed, create a new one
-	    //if (podEntity == nullptr) {
-     //       if (allocateNewServerEntity) {
-     //           podEntity = GetUnusedPODEntity();
-     //       } else {
-     //           gi.DPrintf("WARNING: tried to spawn a game entity when the edict is null\n");
-     //           return nullptr;
-     //       }
-     //   }
-     //   
-     //   // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
-     //   if (entityClass::ClassInfo.AllocateInstance) {
-    	//    // Entities that aren't in the type info system will error out here
-     //       gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(podEntity));
+	    if (podEntity == nullptr) {
+            if (allocateNewServerEntity) {
+                podEntity = GetUnusedPODEntity();
+            } else {
+                Com_DPrint("WARNING: tried to spawn a game entity when the edict is null\n");
+                return nullptr;
+            }
+        }
+        
+        // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
+        if (entityClass::ClassInfo.AllocateInstance) {
+		    // Entities that aren't in the type info system will error out here
+			gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(podEntity));
     
-     //       // Be sure ti set its classname.
-     //       gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
+			// Be sure to set its classname.
+			gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
 
-     //       // Store the podEntity's game entity pointer.
-     //       podEntity->gameEntity = gameEntity;
+			// Store the podEntity's game entity pointer.
+			podEntity->gameEntity = gameEntity;
 
-     //       if (nullptr == gameEntities[podEntity->state.number]) {
-     //           gameEntities[podEntity->state.number] = gameEntity;
-     //       } else {
-     //           gi.DPrintf("ERROR: edict %i is already taken\n", podEntity->state.number);
-     //       }
-     //   }
+			if (gameEntities[podEntity->current.number] == nullptr) {
+				gameEntities[podEntity->current.number] = gameEntity;
+			} else {
+				Com_DPrint("ERROR: edict %i is already taken\n", podEntity->current.number);
+			}
+		}
+
         return gameEntity;
     }
     
@@ -203,25 +204,24 @@ public:
     *   @return A pointer of the server entity located at index.
     **/
     inline PODEntity* GetPODEntityByIndex(uint32_t index) final {
-        if (index <= 0 || index >= MAX_EDICTS + MAX_CLIENT_EDICTS) {
+        if (index <= 0 || index >= MAX_POD_ENTITIES) {
             return nullptr; 
         }
 	    return &podEntities[index - 1];
     }
 
-
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    inline GameEntity** GetGameEntities() final {
+    inline GameEntityVector &GetGameEntities() final {
         return gameEntities;
-    }
-    /**
+    }	
+	/**
     *   @return A pointer of the server entity located at index.
     **/
     inline GameEntity* GetGameEntityByIndex(int32_t index) final {
 		// Ensure ID is within bounds.
-		if (index <= 0 || index > MAX_EDICTS + MAX_CLIENT_EDICTS) {
+		if (index <= 0 || index > MAX_POD_ENTITIES) {
 			return nullptr;
 		}
 
@@ -295,14 +295,14 @@ private:
 
 
 private:
-    // Array storing the POD server entities.
+    //// Array storing the POD server entities.
     //Entity serverEntities[MAX_EDICTS];
 
-    //! Array for storing the server game's class entities.
+    ////! Array for storing the server game's class entities.
     //GameEntity* gameEntities[MAX_EDICTS];
 
-    //! Total number of actively spawned entities.
-    int32_t numberOfEntities = 0;
+    ////! Total number of actively spawned entities.
+    //int32_t numberOfEntities = 0;
 
 
     /**

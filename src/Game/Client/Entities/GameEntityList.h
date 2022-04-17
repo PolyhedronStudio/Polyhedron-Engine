@@ -40,7 +40,7 @@ class GameEntityList {
 public:
     //! Constructor/Destructor.
     GameEntityList() {
-        // 2048 for server entities, and 2048 more for... whichever.
+        // 2048 for server entities, and 2048 more for 'local' client side only entities.
         gameEntities.reserve(MAX_PACKET_ENTITIES * 2);
 
         // To ensure that slot 0 is in use, keeps indexes correct.
@@ -79,7 +79,7 @@ public:
     IClientGameEntity *InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force = true);
 
 	// Return pointer to game entity vector.
-    inline CLGEntityVector *GetGameEntities() { return &gameEntities; };
+    inline CLGEntityVector &GetGameEntities() { return gameEntities; };
 
 private:
     //! First 2048 are reserved for server side entities.

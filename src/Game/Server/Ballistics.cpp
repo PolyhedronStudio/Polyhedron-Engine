@@ -43,7 +43,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
     int32_t contentMask = BrushContentsMask::Shot | BrushContentsMask::Liquid;
 
     // Execute a bullet line trace.
-    SVGTrace trace = SVG_Trace(player->GetOrigin(), vec3_zero(), vec3_zero(), start, player, BrushContentsMask::Shot);
+    SVGTraceResult trace = SVG_Trace(player->GetOrigin(), vec3_zero(), vec3_zero(), start, player, BrushContentsMask::Shot);
 
     // Did we hit anything at all?
     if (!(trace.fraction < 1.0)) {
@@ -136,8 +136,8 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
     // Send gun puff / flash
     if ( !(trace.surface && trace.surface->flags & SurfaceFlags::Sky) ) {
         if (trace.fraction < 1.0) {
-            if (trace.ent->GetTakeDamage()) {
-                GetGamemode()->InflictDamage(trace.ent, player, player, aimDirection, trace.endPosition, trace.plane.normal, damage, kickForce, DamageFlags::Bullet, meansOfDeath);
+            if (trace.gameEntity->GetTakeDamage()) {
+                GetGamemode()->InflictDamage(trace.gameEntity, player, player, aimDirection, trace.endPosition, trace.plane.normal, damage, kickForce, DamageFlags::Bullet, meansOfDeath);
             } else {
                 if (strncmp(trace.surface->name, "sky", 3) != 0 && strncmp(trace.surface->name, "sky_surfacelight", 16) != 0) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
@@ -163,7 +163,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
         if (gi.PointContents(position) & BrushContentsMask::Liquid) {
             trace.endPosition = position;
         } else {
-            trace = SVG_Trace(position, vec3_zero(), vec3_zero(), liquidStartPosition, trace.ent, BrushContentsMask::Liquid);
+            trace = SVG_Trace(position, vec3_zero(), vec3_zero(), liquidStartPosition, trace.gameEntity, BrushContentsMask::Liquid);
         }
 
         position = vec3_scale(liquidStartPosition + trace.endPosition, 0.5f);

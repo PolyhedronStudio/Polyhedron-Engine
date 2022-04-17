@@ -75,7 +75,7 @@ Used for all impact (hit/punch/slash) attacks
 */
 qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t kick)
 {
-    SVGTrace     tr;
+    SVGTraceResult     tr;
     vec3_t      forward, right, up;
     vec3_t      v;
     vec3_t      point;
@@ -106,11 +106,14 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
 
     tr = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), point, self, BrushContentsMask::Shot);
     if (tr.fraction < 1) {
-        if (!tr.ent->GetTakeDamage())
+        if (!tr.gameEntity || !tr.gameEntity->GetTakeDamage()) {
             return false;
+		}
+
         // if it will hit any client/monster then hit the one we wanted to hit
-        if ((tr.ent->GetServerFlags() & EntityServerFlags::Monster) || (tr.ent->GetClient()))
-            tr.ent = self->GetEnemy();
+        if ((tr.gameEntity->GetServerFlags() & EntityServerFlags::Monster) || (tr.gameEntity->GetClient())) {
+            tr.gameEntity = self->GetEnemy();
+		}
     }
 
     AngleVectors(self->GetPODEntity()->state.angles, &forward, &right, &up);
@@ -120,10 +123,11 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
     dir = point - self->GetEnemy()->GetOrigin();
 
     // Do the damage.
-    GetGamemode()->InflictDamage(tr.ent, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    GetGamemode()->InflictDamage(tr.gameEntity, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
-    if (!(tr.ent->GetServerFlags() & EntityServerFlags::Monster) && (!tr.ent->GetClient()))
+    if (!(tr.gameEntity->GetServerFlags() & EntityServerFlags::Monster) && (!tr.gameEntity->GetClient())) {
         return false;
+	}
 
     // Do our special form of knockback here
     IServerGameEntity* enemyEntity = self->GetEnemy();
@@ -155,7 +159,7 @@ This is an internal support routine used for bullet/pellet based weapons.
 */
 static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& aimdir, int damage, int kick, int te_impact, int hspread, int vspread, int mod)
 {
-    SVGTrace     tr;
+    SVGTraceResult     tr;
     vec3_t      dir;
     vec3_t      forward, right, up;
     vec3_t      end;
@@ -232,8 +236,8 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     // send gun puff / flash
     if ( !(tr.surface && tr.surface->flags & SurfaceFlags::Sky) ) {
         if (tr.fraction < 1.0) {
-            if (tr.ent->GetTakeDamage()) {
-                GetGamemode()->InflictDamage(tr.ent, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
+            if (tr.gameEntity && tr.gameEntity->GetTakeDamage()) {
+                GetGamemode()->InflictDamage(tr.gameEntity, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
@@ -260,7 +264,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
         if (gi.PointContents(pos) & BrushContentsMask::Liquid)
             VectorCopy(pos, tr.endPosition);
         else
-            tr = SVG_Trace(pos, vec3_zero(), vec3_zero(), water_start, tr.ent, BrushContentsMask::Liquid);
+            tr = SVG_Trace(pos, vec3_zero(), vec3_zero(), water_start, tr.gameEntity, BrushContentsMask::Liquid);
 
         VectorAdd(water_start, tr.endPosition, pos);
         VectorScale(pos, 0.5, pos);
@@ -369,11 +373,11 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
     //    check_dodge(self, bolt->state.origin, dir, speed);
 
     // Trace bolt.
-    SVGTrace trace = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), boltEntity->GetOrigin(), boltEntity, BrushContentsMask::Shot);
+    SVGTraceResult trace = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), boltEntity->GetOrigin(), boltEntity, BrushContentsMask::Shot);
 
     // Did we hit anything?
     if (trace.fraction < 1.0) {
         boltEntity->SetOrigin(vec3_fmaf(boltEntity->GetOrigin(), -10, dir));
-        boltEntity->DispatchTouchCallback(boltEntity, trace.ent, NULL, NULL);
+        boltEntity->DispatchTouchCallback(boltEntity, trace.gameEntity, NULL, NULL);
     }
 }

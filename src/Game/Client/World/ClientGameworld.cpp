@@ -11,6 +11,7 @@
 // Entities.
 #include "../Entities.h"
 #include "../Entities/IClientGameEntity.h"
+#include "../Entities/Base/CLGBaseEntity.h"
 //#include "../Entities/Base/SVGBasePlayer.h"
 //#include "../Entities/Base/DebrisEntity.h"
 //#include "../Entities/Base/GibEntity.h"
@@ -127,21 +128,22 @@ void ClientGameworld::PrepareClients() {
 *	@brief Prepares the game's client entities with a base player game entity.
 **/
 void ClientGameworld::PreparePlayers() {
-  //  // Allocate a classentity for each client in existence.
-  for (int32_t i = 1; i < maxClients + 1; i++) {
-		// Fetch server entity.
-		//PODEntity* podEntity = &podEntities[i];
+	//  // Allocate a classentity for each client in existence.
+	for (int32_t i = 1; i < maxClients + 1; i++) {
+		// Acquire POD entity.
+		PODEntity *podEntity = GetPODEntityByIndex(i);
 
-		//// We can fetch the number based on subtracting these two pointers.
-		//podEntity->state.number = podEntity - podEntities;
-	  // Acquire POD entity.
-	  PODEntity *podEntity = GetPODEntityByIndex(i);
+		podEntity->current.number = i;
+		podEntity->prev.number = i;
+		podEntity->clientEntityNumber = i;
+		podEntity->gameEntity = nullptr; // TODO: ??
 
-	  podEntity->current.number = i;
-	  podEntity->prev.number = i;
-	  podEntity->clientEntityNumber = i;
-	  podEntity->gameEntity = nullptr; // TODO: ??
-  }
+		// Create a CLGBaseEntity.
+		CLGBaseEntity *playerClientEntity = CreateGameEntity<CLGBaseEntity>(podEntity, false);
+
+		// We should probably set their inuse here...
+
+	}
 
 		//// Allocate player client game entity
 		//SVGBasePlayer* playerClientEntity = CreateGameEntity<SVGBasePlayer>(podEntity, false);
@@ -161,22 +163,22 @@ void ClientGameworld::PreparePlayers() {
 
 /**
 *	@brief	Parses the 'entities' string and assigns each parsed entity to the
-*			first free server entity slot there is. After doing so, allocates
+*			first free client entity slot there is. After doing so, allocates
 *			a game entity based on the 'classname' of the parsed entity.
 **/
 qboolean ClientGameworld::SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint) {
 	//// Clear level state.
     level = {};
 
- //   // Delete class entities if they are allocated, and reset the server entity to a zero state.
-    for (int32_t i = 0; i < MAX_EDICTS + MAX_CLIENT_EDICTS; i++) {
+ //   // Delete class entities if they are allocated, and reset the client entity to a zero state.
+    for (int32_t i = 0; i < MAX_POD_ENTITIES; i++) {
 		// Delete game entity.
 		if (gameEntities[i]) {
 		    delete gameEntities[i];
 			gameEntities[i] = NULL;
 		}
 
-		// Reset server entity to a zero state.
+		// Reset client entity to a zero state.
 		podEntities[i] = {};
     }
 
@@ -224,7 +226,7 @@ qboolean ClientGameworld::SpawnFromBSPString(const char* mapName, const char* en
             }
 		}
 
-		// Now we've got the reserved server entity to use, let's parse the entity.
+		// Now we've got the reserved client entity to use, let's parse the entity.
         ParseEntityString(&entities, clientEntity);
 
 		// Allocate the game entity, and call its spawn.
@@ -250,9 +252,9 @@ qboolean ClientGameworld::SpawnFromBSPString(const char* mapName, const char* en
 }
 
 /**
-*	@brief	Looks for the first free server entity in our buffer.
+*	@brief	Looks for the first free client entity in our buffer.
 * 
-*	@details	Either finds a free server entity, or initializes a new one.
+*	@details	Either finds a free client entity, or initializes a new one.
 *				Try to avoid reusing an entity that was recently freed, because it
 *				can cause the client to Think the entity morphed into something else
 *				instead of being removed and recreated, which can cause interpolated
@@ -264,7 +266,7 @@ PODEntity* ClientGameworld::GetUnusedPODEntity() {
  //   // Incrementor, declared here so we can access it later on.
 	//int32_t i = 0;
 
-	//// Acquire a pointer to the first server entity to start checking from.
+	//// Acquire a pointer to the first client entity to start checking from.
 	//PODEntity *podEntity = &podEntities[maxClients + 1];
 
 	//// We'll loop until from maxclients + 1(world entity) till the numberOfEntities 
@@ -283,7 +285,7 @@ PODEntity* ClientGameworld::GetUnusedPODEntity() {
 	//		// Set the entity state number.
 	//		podEntity->state.number = podEntity - podEntities;
 	//		
-	//		// Return the newly found server entity pointer.
+	//		// Return the newly found client entity pointer.
 	//		return podEntity;
  //       }
  //   }
@@ -304,7 +306,7 @@ PODEntity* ClientGameworld::GetUnusedPODEntity() {
  //   // Set the entity state number.
  //   podEntity->state.number = podEntity - podEntities;
 
- //   // Return the server entity.
+ //   // Return the client entity.
  //   return podEntity;
 	return nullptr;
 }
@@ -442,6 +444,7 @@ qboolean ClientGameworld::ParseEntityString(const char** data, PODEntity *podEnt
 	    return false;
     }
 
+	return parsedSuccessfully;
 }
 
 /**
@@ -458,7 +461,7 @@ qboolean ClientGameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
     // If it does not have a classname key we're in for trouble.
     if (!podEntity->entityDictionary.contains("classname")) {
 	   // Error out.
-	   Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
+	   Com_EPrint("%s: Can't spawn parsed client entity #%i due to a missing classname key.\n");
 		
 	   // Failed.
 	   return false;
@@ -487,6 +490,9 @@ qboolean ClientGameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
     // Precache and spawn the entity.
     gameEntity->Precache();
     gameEntity->Spawn();
+	
+	// Spawned.
+	return true;
 }
 
 /**
@@ -496,53 +502,53 @@ qboolean ClientGameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
 *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
 **/
 GameEntity *ClientGameworld::AllocateGameEntity(PODEntity *podEntity, const std::string &classname) {
- //   // Start with a nice nullptr.
- //   GameEntity* spawnEntity = nullptr;
+	// Start with a nice nullptr.
+    GameEntity* spawnEntity = nullptr;
 
-	//// Safety check.
- //   if (!podEntity) {
-	//	return nullptr;
- //   }
+	// Safety check.
+    if (!podEntity) {
+		return nullptr;
+    }
 
- //   // Get entity state number.
- //   int32_t stateNumber = podEntity->state.number;
+    // Get entity state number.
+    int32_t stateNumber = podEntity->current.number;
 
-	//// Warn if a slot is already occupied.
- //   if (gameEntities[stateNumber] != nullptr) {
-	//	// Warn.
-	//	gi.DPrintf("WARNING: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n");
+	// Warn if a slot is already occupied.
+    if (gameEntities[stateNumber] != nullptr) {
+		// Warn.
+		Com_DPrint("WARNING: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n");
 
-	//	// Return nullptr.
-	//	return nullptr;
- //   }
+		// Return nullptr.
+		return nullptr;
+    }
 
- //   // New type info-based spawning system, to replace endless string comparisons
- //   // First find it by the map name
- //   TypeInfo* info = TypeInfo::GetInfoByMapName(classname.c_str());
- //   if (info == nullptr) {
-	//	// Then try finding it by the C++ class name
-	//	if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
-	//		// Warn.
-	//	    gi.DPrintf("WARNING: unknown entity '%s'\n", classname.c_str());
+    // New type info-based spawning system, to replace endless string comparisons
+    // First find it by the map name
+    TypeInfo* info = TypeInfo::GetInfoByMapName(classname.c_str());
+    if (info == nullptr) {
+		// Then try finding it by the C++ class name
+		if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
+			// Warn.
+		    Com_DPrint("WARNING: unknown entity '%s'\n", classname.c_str());
 
-	//		// Bail out, we didn't find one.
-	//		return nullptr;
-	//	}
- //   }
+			// Bail out, we didn't find one.
+			return nullptr;
+		}
+    }
 
- //   // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
- //   // Entity classes with 'DefineDummyMapClass' won't be reported here.
- //   if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
-	//	// Allocate and return out new game entity.
-	//	return (gameEntities[stateNumber] = info->AllocateInstance(podEntity));
- //   } else {
-	//	// Check and warn about what went wrong.
-	//	if (info->IsAbstract()) {
-	//		gi.DPrintf("WARNING: tried to allocate an abstract class '%s'\n", info->classname);
-	//	} else if (!info->IsMapSpawnable()) {
-	//	    gi.DPrintf("WARNING: tried to allocate a code-only class '%s'\n", info->classname);
-	//	}
- //   }
+    // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
+    // Entity classes with 'DefineDummyMapClass' won't be reported here.
+    if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
+		// Allocate and return out new game entity.
+		return (gameEntities[stateNumber] = info->AllocateInstance(podEntity));
+    } else {
+		// Check and warn about what went wrong.
+		if (info->IsAbstract()) {
+			Com_DPrint("WARNING: tried to allocate an abstract class '%s'\n", info->classname);
+		} else if (!info->IsMapSpawnable()) {
+		    Com_DPrint("WARNING: tried to allocate a code-only class '%s'\n", info->classname);
+		}
+    }
 
 	// If we get to this point, we've triggered one warning either way.
 	return nullptr;

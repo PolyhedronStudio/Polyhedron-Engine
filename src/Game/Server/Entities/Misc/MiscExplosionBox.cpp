@@ -192,7 +192,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     };
     
     // Exceute the trace.
-    SVGTrace trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, BrushContentsMask::MonsterSolid);
+    SVGTraceResult trace = SVG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, BrushContentsMask::MonsterSolid);
     
     // Return in case we hit anything.
     if (trace.fraction == 1.f || trace.allSolid) {

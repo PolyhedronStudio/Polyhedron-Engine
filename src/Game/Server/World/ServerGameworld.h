@@ -23,6 +23,7 @@ class IServerGameEntity;
 #include "../Entities/IServerGameEntity.h"
 
 #include "../../../Game/Shared/World/IGameworld.h"
+
 #include "../Entities.h"
 #include "../Entities/Worldspawn.h"
 
@@ -36,7 +37,9 @@ public:
     /**
 	*	@brief Default constructor.
 	**/
-    ServerGameworld() = default;
+	ServerGameworld() : IGameworld() {
+		gameEntities.resize(MAX_POD_ENTITIES);
+	};
 
     /**
 	*	@brief Default destructor
@@ -214,13 +217,14 @@ public:
     /**
 	*	@return	A pointer to the server entities array.
 	**/
-    inline PODEntity* GetPODEntities() { return &podEntities[0]; }
-
-    /**
+    inline PODEntity* GetPODEntities() { 
+		return &podEntities[0]; 
+	}
+	/**
     *   @return A pointer of the server entity located at index.
     **/
     inline Entity* GetPODEntityByIndex(uint32_t index) {
-        if (index < 0 || index >= MAX_EDICTS) {
+        if (index < 0 || index >= MAX_POD_ENTITIES) {
             return nullptr; 
         }
 	    return &podEntities[index];
@@ -229,15 +233,14 @@ public:
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    inline GameEntity** GetGameEntities() {
+    inline GameEntityVector &GetGameEntities() final {
         return gameEntities;
     }
-
-    /**
+	/**
     *   @return A pointer of the server entity located at index.
     **/
     inline GameEntity* GetGameEntityByIndex(int32_t index) {
-    	if (index < 0 || index >= MAX_EDICTS) {
+    	if (index < 0 || index >= MAX_POD_ENTITIES) {
     	    return nullptr;
 	    }
 	    return gameEntities[index];
@@ -287,7 +290,7 @@ public:
 private:
     //! Assigned the value of the latched cvar maxclients. Makes for easier access.
     int32_t maxClients = 0;
-	//! Assigned the clamped(MAX_EDICTS) value of the latched cvar maxentities. Makes for easier access.
+	//! Assigned the clamped(MAX_POD_ENTITIES) value of the latched cvar maxentities. Makes for easier access.
     int32_t maxEntities = 0;
 
 	//! Clients array, allocated to the size of maxclients cvar.
@@ -311,10 +314,10 @@ private:
 
 private:
     // Array storing the POD server entities.
-    //Entity serverEntities[MAX_EDICTS];
+    //Entity serverEntities[MAX_POD_ENTITIES];
 
     //! Array for storing the server game's class entities.
-    //GameEntity* gameEntities[MAX_EDICTS];
+    //GameEntity* gameEntities[MAX_POD_ENTITIES];
 
     //! Total number of actively spawned entities.
     int32_t numberOfEntities = 0;

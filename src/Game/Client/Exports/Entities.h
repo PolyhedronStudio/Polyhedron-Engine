@@ -67,9 +67,11 @@ public:
     **/
     void RunFrame();
 
-    inline CLGEntityVector* GetGameEntities() {
+
+    inline CLGEntityVector &GetGameEntities() {
         return gameEntityList.GetGameEntities();
     }
+
 //! Entity Parsing utilities.
 private:
     /**

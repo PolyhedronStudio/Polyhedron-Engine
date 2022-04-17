@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // value for each entity type.
 #define STEPSIZE    18
 
-extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
+extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
 static void UTIL_TouchTriggers(IClientGameEntity *ent)
 {
 }
@@ -53,7 +53,7 @@ int c_yes, c_no;
 qboolean CLG_StepMove_CheckBottom(IClientGameEntity* ent)
 {
     vec3_t  start, stop;
-    CLGTrace trace;
+    CLGTraceResult trace;
     int32_t x, y;
     float   mid, bottom;
 
@@ -114,7 +114,7 @@ realcheck:
 void CLG_StepMove_CheckGround(IClientGameEntity* ent)
 {
     vec3_t      point;
-    CLGTrace     trace;
+    CLGTraceResult     trace;
 
     if (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly))
         return;
@@ -133,20 +133,20 @@ void CLG_StepMove_CheckGround(IClientGameEntity* ent)
 
     // check steepness
     //if ((trace.plane.normal[2] < 0.7 && !trace.allSolid)
-    if ((trace.plane.normal[2] < 0.7 && !trace.allSolid) || (!trace.ent)) {
+    if ((trace.plane.normal[2] < 0.7 && !trace.allSolid) || (!trace.gameEntity)) {
         ent->SetGroundEntity(nullptr);
         return;
     }
 
-    //  ent->groundentity = trace.ent;
-    //  ent->groundentity_linkcount = trace.ent->linkcount;
+    //  ent->groundentity = trace.gameEntity;
+    //  ent->groundentity_linkcount = trace.gameEntity->linkcount;
     //  if (!trace.startsolid && !trace.allsolid)
     //      VectorCopy (trace.endpos, ent->s.origin);
     if ((!trace.startSolid && !trace.allSolid) &&
-        (trace.ent && trace.ent->GetPODEntity())) {
+        (trace.gameEntity && trace.gameEntity->GetPODEntity())) {
         ent->SetOrigin(trace.endPosition);
-        ent->SetGroundEntity(trace.ent);
-        ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
+        ent->SetGroundEntity(trace.gameEntity);
+        ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
         vec3_t velocity = ent->GetVelocity();
         ent->SetVelocity({ velocity.x, velocity.y, 0 });
     }
@@ -167,7 +167,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
 {
     float       dz;
-    CLGTrace    trace;
+    CLGTraceResult    trace;
     int         i;
     float       stepsize;
     vec3_t      test;
@@ -321,8 +321,8 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
     if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
         ent->SetFlags(ent->GetFlags() & ~EntityFlags::PartiallyOnGround);
     }
-    ent->SetGroundEntity(trace.ent);
-    ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
+    ent->SetGroundEntity(trace.gameEntity);
+    ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
 
     // the move is ok
     if (relink) {

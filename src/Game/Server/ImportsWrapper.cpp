@@ -73,10 +73,10 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
     Entity* boxedServerEntities[MAX_EDICTS];
 
     // Vector of the boxed class entities to return.
-    std::vector<IServerGameEntity*> boxedClassEntities;
+    GameEntityVector boxedClassEntities;
 
     // Acquire pointer to the class entities array.
-    IServerGameEntity** classEntities = game.world->GetGameEntities();
+    GameEntityVector gameEntities = game.world->GetGameEntities();
 
     // Ensure the listCount can't exceed the max edicts.
     if (listCount > MAX_EDICTS) {
@@ -88,8 +88,8 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
 
     // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
     for (int32_t i = 0; i < numEntities; i++) {
-        if (classEntities[boxedServerEntities[i]->state.number] != nullptr) {
-            boxedClassEntities.push_back(classEntities[boxedServerEntities[i]->state.number]);
+        if (gameEntities[boxedServerEntities[i]->state.number] != nullptr) {
+            boxedClassEntities.push_back(gameEntities[boxedServerEntities[i]->state.number]);
         }
     }
 
@@ -97,57 +97,57 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
     return boxedClassEntities;
 }
 
+////
+////===============
+//// SVG_Trace
+////
+//// The defacto trace function to use, for SVGBaseEntity and its derived family & friends.
+////===============
+////
+//SVGTraceResult SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IServerGameEntity* passent, const int32_t& contentMask) {
+//    // Acquire server and game entity array pointers.
+//    Entity* serverEntities = game.world->GetPODEntities();
+//    GameEntityVector gameEntities = game.world->GetGameEntities();
 //
-//===============
-// SVG_Trace
+//    // Fetch server entity in case one was passed to us.
+//    Entity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);
 //
-// The defacto trace function to use, for SVGBaseEntity and its derived family & friends.
-//===============
+//    // Execute server trace.
+//    TraceResult trace = gi.Trace(start, mins, maxs, end, serverPassEntity, contentMask);
 //
-SVGTrace SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IServerGameEntity* passent, const int32_t& contentMask) {
-    // Acquire server and game entity array pointers.
-    Entity* serverEntities = game.world->GetPODEntities();
-    IServerGameEntity** classEntities = game.world->GetGameEntities();
-
-    // Fetch server entity in case one was passed to us.
-    Entity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);
-
-    // Execute server trace.
-    TraceResult trace = gi.Trace(start, mins, maxs, end, serverPassEntity, contentMask);
-
-    // Convert results to Server Game Trace.
-    SVGTrace svgTrace;
-    svgTrace.allSolid = trace.allSolid;
-    svgTrace.contents = trace.contents;
-    svgTrace.endPosition = trace.endPosition;
-    svgTrace.fraction = trace.fraction;
-    svgTrace.offsets[0] = trace.offsets[0];
-    svgTrace.offsets[1] = trace.offsets[1];
-    svgTrace.offsets[2] = trace.offsets[2];
-    svgTrace.offsets[3] = trace.offsets[3];
-    svgTrace.offsets[4] = trace.offsets[4];
-    svgTrace.offsets[5] = trace.offsets[5];
-    svgTrace.offsets[6] = trace.offsets[6];
-    svgTrace.offsets[7] = trace.offsets[7];
-    svgTrace.plane = trace.plane;
-    svgTrace.startSolid = trace.startSolid;
-    svgTrace.surface = trace.surface;
-
-    // Special.
-    if (trace.ent) {
-        uint32_t index = trace.ent->state.number;
-
-        if (classEntities[index] != NULL) {
-            svgTrace.ent = classEntities[index];
-        } else {
-	        svgTrace.ent = classEntities[0];
-        }
-    } else {
-        svgTrace.ent = classEntities[0];
-    }
-
-    return svgTrace;
-}
+//    // Convert results to Server Game Trace.
+//    SVGTraceResult svgTrace;
+//    svgTrace.allSolid = trace.allSolid;
+//    svgTrace.contents = trace.contents;
+//    svgTrace.endPosition = trace.endPosition;
+//    svgTrace.fraction = trace.fraction;
+//    svgTrace.offsets[0] = trace.offsets[0];
+//    svgTrace.offsets[1] = trace.offsets[1];
+//    svgTrace.offsets[2] = trace.offsets[2];
+//    svgTrace.offsets[3] = trace.offsets[3];
+//    svgTrace.offsets[4] = trace.offsets[4];
+//    svgTrace.offsets[5] = trace.offsets[5];
+//    svgTrace.offsets[6] = trace.offsets[6];
+//    svgTrace.offsets[7] = trace.offsets[7];
+//    svgTrace.plane = trace.plane;
+//    svgTrace.startSolid = trace.startSolid;
+//    svgTrace.surface = trace.surface;
+//
+//    // Special.
+//    if (trace.ent) {
+//        uint32_t index = trace.ent->state.number;
+//
+//        if (gameEntities[index] != NULL) {
+//            svgTrace.ent = gameEntities[index];
+//        } else {
+//	        svgTrace.ent = gameEntities[0];
+//        }
+//    } else {
+//        svgTrace.ent = gameEntities[0];
+//    }
+//
+//    return svgTrace;
+//}
 
 //
 //===============

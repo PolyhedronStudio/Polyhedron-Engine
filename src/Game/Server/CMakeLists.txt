@@ -115,6 +115,8 @@ SET(SRC_SVGAME
 	Player/Client.cpp
 	Player/Hud.cpp
 
+	Utilities/SVGTraceResult.cpp
+
 	World/ServerGameworld.cpp
 	#SVGame.def
 	
@@ -198,6 +200,8 @@ SET(HEADERS_SVGAME
 
 	Player/Animations.h
 	Player/Client.h
+
+	Utilities/SVGTraceResult.h
 
 	World/ServerGameworld.h
 	#SVGame.def

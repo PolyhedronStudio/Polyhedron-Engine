@@ -92,7 +92,7 @@ static areanode_t *CL_CreateAreaNode(int depth, const vec3_t &mins, const vec3_t
 /**
 *	@brief	Clear the server entity area grid world.
 **/
-void CL_ClearWorld(void)
+void CL_ClearWorld()
 {
     mmodel_t *cm;
     Entity *ent;

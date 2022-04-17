@@ -41,7 +41,7 @@ int c_yes, c_no;
 qboolean SVG_StepMove_CheckBottom(IServerGameEntity* ent)
 {
     vec3_t  start, stop;
-    SVGTrace trace;
+    SVGTraceResult trace;
     int32_t x, y;
     float   mid, bottom;
 
@@ -102,7 +102,7 @@ realcheck:
 void SVG_StepMove_CheckGround(IServerGameEntity* ent)
 {
     vec3_t      point;
-    SVGTrace     trace;
+    SVGTraceResult     trace;
 
     if (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly))
         return;
@@ -121,20 +121,20 @@ void SVG_StepMove_CheckGround(IServerGameEntity* ent)
 
     // check steepness
     //if ((trace.plane.normal[2] < 0.7 && !trace.allSolid)
-    if ((trace.plane.normal[2] < 0.7 && !trace.allSolid) || (!trace.ent)) {
+    if ((trace.plane.normal[2] < 0.7 && !trace.allSolid) || (!trace.gameEntity)) {
         ent->SetGroundEntity(nullptr);
         return;
     }
 
-    //  ent->groundentity = trace.ent;
-    //  ent->groundentity_linkcount = trace.ent->linkcount;
+    //  ent->groundentity = trace.gameEntity;
+    //  ent->groundentity_linkcount = trace.gameEntity->linkcount;
     //  if (!trace.startsolid && !trace.allsolid)
     //      VectorCopy (trace.endpos, ent->s.origin);
     if ((!trace.startSolid && !trace.allSolid) &&
-        (trace.ent && trace.ent->GetPODEntity())) {
+        (trace.gameEntity && trace.gameEntity->GetPODEntity())) {
         ent->SetOrigin(trace.endPosition);
-        ent->SetGroundEntity(trace.ent);
-        ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
+        ent->SetGroundEntity(trace.gameEntity);
+        ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
         vec3_t velocity = ent->GetVelocity();
         ent->SetVelocity({ velocity.x, velocity.y, 0 });
     }
@@ -155,7 +155,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 qboolean SVG_MoveStep(IServerGameEntity* ent, vec3_t move, qboolean relink)
 {
     float       dz;
-    SVGTrace    trace;
+    SVGTraceResult    trace;
     int         i;
     float       stepsize;
     vec3_t      test;
@@ -309,8 +309,8 @@ qboolean SVG_MoveStep(IServerGameEntity* ent, vec3_t move, qboolean relink)
     if (ent->GetFlags() & EntityFlags::PartiallyOnGround) {
         ent->SetFlags(ent->GetFlags() & ~EntityFlags::PartiallyOnGround);
     }
-    ent->SetGroundEntity(trace.ent);
-    ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
+    ent->SetGroundEntity(trace.gameEntity);
+    ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
 
     // the move is ok
     if (relink) {

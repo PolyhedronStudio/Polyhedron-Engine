@@ -236,7 +236,7 @@ void MiscServerModel::MiscServerModelThink(void) {
     //
     //
     //// Exceute the trace.
-    //SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::MonsterSolid);
+    //SVGTraceResult trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::MonsterSolid);
     //
     //// Return in case we hit anything.
     //if (trace.fraction == 1 || trace.allSolid)

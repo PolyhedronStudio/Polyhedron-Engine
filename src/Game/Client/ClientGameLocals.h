@@ -44,6 +44,19 @@
 extern LevelLocals level;
 // END OF TEMPORARY.
 
+/**
+*
+*
+*   ClientGame Frame Time.
+*
+*
+**/
+// WID: TODO: Make these part of the ClientGameImports instead.
+static constexpr double CLG_FRAMETIME   = BASE_FRAMETIME;
+static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
+static constexpr int32_t CLG_FRAMEDIV   = BASE_FRAMERATE / 10.0;
+
+// THESE SHOULD NOT BE ADDED TO IMPORTS.
 //! MS Frametime for animations.
 static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
@@ -89,18 +102,6 @@ void Com_Error(int32_t errorType, const char* fmt, ...);
 void Com_LPrintf(int32_t printType, const char* fmt, ...);
 
 
-/**
-*
-*
-*   ClientGame Frame Time.
-*
-*
-**/
-// WID: TODO: Make these part of the ClientGameImports instead.
-static constexpr double CLG_FRAMETIME   = BASE_FRAMETIME;
-static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
-static constexpr int32_t CLG_FRAMEDIV   = BASE_FRAMERATE / 10.0;
-
 
 /**
 *
@@ -110,44 +111,9 @@ static constexpr int32_t CLG_FRAMEDIV   = BASE_FRAMERATE / 10.0;
 *
 **/
 /**
-*   Custom client game trace struct, stores ClientEntity* instead.
+*	ClientGame Trace Results.
 **/
-struct CLGTrace {
-    // If true, the trace startedand ended within the same solid.
-    qboolean allSolid = false;
-    // If true, the trace started within a solid, but exited it.
-    qboolean startSolid = false;
-    // The fraction of the desired distance traveled(0.0 - 1.0).If
-    // 1.0, no plane was impacted.
-    float fraction = 0.f;
-    // The destination position.
-    vec3_t endPosition = vec3_zero();
-    // [signBits][x] = either size[0][x] or size[1][x]
-    vec3_t offsets[8] = {
-	    vec3_zero(),
-	    vec3_zero(),
-	    vec3_zero(),
-	    vec3_zero(),
-	    vec3_zero(),
-	    vec3_zero(),
-	    vec3_zero(),
-	    vec3_zero(),
-    };
-        
-    // The impacted plane, or empty. Note that a copy of the plane is returned, 
-    // rather than a pointer.This is because the plane may belong to an inline 
-    // BSP model or the box hull of a solid entity.
-    // 
-    // If it is an inline BSP Model or a box hull of a solid entity the plane 
-    // must be transformed by the entity's current position.
-    CollisionPlane plane = {};
-    // The impacted surface, or nullptr.
-    CollisionSurface* surface = nullptr;
-    // The contents mask of the impacted brush, or 0.
-    int32_t contents = 0;
-    // The impacted entity, or nullptr.
-    IClientGameEntity *ent = nullptr;
-};
+#include "Utilities/CLGTraceResult.h"
 
 
 // Custom load state enumerator.

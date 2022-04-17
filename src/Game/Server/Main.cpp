@@ -536,7 +536,7 @@ void SVG_RunFrame(void) {
     //
     // Acquire server and class entities arrays.
     Entity* serverEntities = game.world->GetPODEntities();
-    GameEntity ** gameEntities = game.world->GetGameEntities();
+    GameEntityVector gameEntities = game.world->GetGameEntities();
 
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < globals.numberOfEntities; i++) {
@@ -558,7 +558,7 @@ void SVG_RunFrame(void) {
         }
 
         // Acquire the game entity.
-        IServerGameEntity *gameEntity = *entityHandle;
+        GameEntity *gameEntity = *entityHandle;
         // Don't go on if it isn't in use.
         //if (!serverEntity->IsInUse())
         //    continue;

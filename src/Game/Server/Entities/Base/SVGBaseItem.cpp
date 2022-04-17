@@ -326,7 +326,7 @@ void SVGBaseItem::BaseItemDropToFloor() {
     vec3_t end = newOrigin + vec3_t { 0, 0, -256.f };
 
     // Exceute the trace.
-    SVGTrace trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::PlayerSolid);
+    SVGTraceResult trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::PlayerSolid);
 
     // Return in case we hit anything.
     if (trace.fraction == 1 || trace.allSolid) {

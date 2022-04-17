@@ -9,100 +9,98 @@
 ***/
 #pragma once
 
+// Include general shared header.
 #include "../../Shared/Shared.h"
 
-/**
-*	What game module is including this in its sources?
-**/
 /**
 *	Predeclare the actual game entity type that we intend to use depending on which game module
 *	this file is being compiled along with.
 **/
 #ifdef SHAREDGAME_CLIENTGAME //! Start of ClientGame Specifics.
-
+// Needed define for said includes.
 #define CGAME_INCLUDE 1
 
-// Common.
+// Needed includes.
 #include "../../Common/CModel.h"
 #include "../../Common/Cmd.h"
 #include "../../Common/Msg.h"
 #include "../../Common/Protocol.h"
 
-//! For entity_S.
-//#include "Shared/SVGame.h"
-//#include "Shared/Refresh.h"
-//
-//#include "Shared/CLTypes.h"
-//#include "Shared/CLGame.h"
 #include "../../Shared/SVGame.h"
 #include "../../Shared/Refresh.h"
 #include "../../Shared/CLTypes.h"
 #include "../../Shared/CLGame.h"
-
-
-// Predeclarations.
-//class IClientGameEntity;
-//struct ClientEntity;
-
-// Using =
+/**
+*	Predeclarations.
+**/
+//! Actual game entity type for the ClientGame module.
 class IClientGameEntity;
-using GameEntity = IClientGameEntity;//CLGBaseEntity;
-//! For now, equals POD Entity.
-//using Entity = ClientEntity;
-//! POD Entity.
+using GameEntity = IClientGameEntity;;
+
+//! POD Entity for the ServerGame module.
 using PODEntity = ClientEntity;
 
 //! Entity Dictionary.
 using EntityDictionary = std::map<std::string, std::string>;
 
+//! Maximum amount of POD Entities.
+static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
+
 #endif //! End of ClientGame Specifics.
 #ifdef SHAREDGAME_SERVERGAME //! Start of ServerGame Specifics.
-
-
-
-
-
-// Predeclarations.
-
-
+/**
+*	Predeclarations.
+**/
+//! Actual game entity type for the ServerGame module.
 class IServerGameEntity;
 using GameEntity = IServerGameEntity;
+
 //! Entity Dictionary.
 using EntityDictionary = std::map<std::string, std::string>;
-#define GAME_INCLUDE
+
 //! SVGame needed includes.
+#define GAME_INCLUDE
 //#include "../../Common/Common.h"
 #include "../../Shared/SVGame.h"
-//! For now, equals POD Entity.
-//using Entity = entity_s;
-//! POD Entity.
+
+//! POD Entity for the ServerGame module.
 using PODEntity = entity_s;
+
+//! Maximum amount of POD Entities.
+static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
+
 #endif //! End of ServerGame Specifics.
+
 
 /**
 *   Protocol
 **/
 #include "Protocol.h"
 
+
 /**
 *   Skeletal Animation
 **/
 #include "SkeletalAnimation.h"
+
 
 /**
 *   Game Time Utilities.
 **/
 #include "Time.h"
 
+
 /**
 *   Entity Framework
 **/
 #include "Entities.h"
 
+
 /**
 *   Protocol
 **/
 #include "PMove.h"
+
 
 /**
 *   Entity Move Types.

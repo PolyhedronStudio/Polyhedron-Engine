@@ -61,7 +61,7 @@ void DefaultGamemode::OnLevelExit() {
     Entity* podEntities = game.world->GetPODEntities();
     
     // Acquire game entities pointer.
-    GameEntity** gameEntities = game.world->GetGameEntities();
+    GameEntityVector gameEntities = game.world->GetGameEntities();
 
     // Create the command to use for switching to the next game map.
     std::string command = "gamemap \"";
@@ -188,7 +188,7 @@ qboolean DefaultGamemode::CanDamage(IServerGameEntity* target, IServerGameEntity
     // Destination.
     vec3_t   destination = vec3_zero();
     // Trace.
-    SVGTrace trace;
+    SVGTraceResult trace;
 
     // Solid entities need a special check, as their origin is usually 0,0,0
     // Exception to the above: the solid entity moves or has an origin brush
@@ -204,7 +204,7 @@ qboolean DefaultGamemode::CanDamage(IServerGameEntity* target, IServerGameEntity
         if (trace.fraction == 1.0) {
 	        return true;
 	    }
-	    if (trace.ent == target) {
+	    if (trace.gameEntity == target) {
 	        return true;
 	    }
 

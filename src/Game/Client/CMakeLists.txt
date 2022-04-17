@@ -35,6 +35,8 @@ SET(SRC_CLGAME
 	Entities/GameEntityList.cpp
 	Entities/IClientGameEntity.cpp
 
+	Utilities/CLGTraceResult.cpp
+
 	World/ClientGameworld.cpp
 
 	Exports/Core.cpp
@@ -100,6 +102,8 @@ SET(HEADERS_CLGAME
 	Physics/StepMove.h
 
 	View/ViewCamera.h
+
+	Utilities/CLGTraceResult.h
 
 	World/ClientGameworld.h
 

@@ -26,12 +26,19 @@
 struct gclient_s;
 struct entity_s;
 
-// Shared Game "Framework".
-#include "../Shared/SharedGame.h"
-
 
 // The "gameversion" client command will print this including the compile date
 #define GAMEVERSION "basepoly"
+
+/**
+*	SharedGame Framework.
+**/
+#include "../Shared/SharedGame.h"
+
+/**
+*	ClientGame Trace Results.
+**/
+#include "Utilities/SVGTraceResult.h"
 
 
 // Predeclare.
@@ -513,58 +520,6 @@ void SVG_RunEntity(SGEntityHandle &entityHandle);
 
 // TODO: All these go elsewhere, sometime, as does most...
 void SVG_SetConfigString(const int32_t &configStringIndex, const std::string &configString);
-
-//
-// Custom server game trace struct, stores SVGBaseEntity* instead.
-//
-struct SVGTrace {
-    SVGTrace() {
-        allSolid = false;
-        startSolid = false;
-        fraction = 0.f;
-        endPosition = vec3_t{ 0.f, 0.f, 0.f };
-        surface = nullptr;
-        contents = 0;
-        ent = nullptr;
-        offsets[0] = vec3_t{ 0.f, 0.f, 0.f };
-        offsets[1] = vec3_t{ 0.f, 0.f, 0.f };
-        offsets[2] = vec3_t{ 0.f, 0.f, 0.f };
-        offsets[3] = vec3_t{ 0.f, 0.f, 0.f };
-        offsets[4] = vec3_t{ 0.f, 0.f, 0.f };
-        offsets[5] = vec3_t{ 0.f, 0.f, 0.f };
-        offsets[6] = vec3_t{ 0.f, 0.f, 0.f };
-        offsets[7] = vec3_t{ 0.f, 0.f, 0.f };
-    }
-
-    // If true, the trace startedand ended within the same solid.
-    qboolean    allSolid;
-    // If true, the trace started within a solid, but exited it.
-    qboolean    startSolid;
-    // The fraction of the desired distance traveled(0.0 - 1.0).If
-    // 1.0, no plane was impacted.
-    float       fraction;
-
-    // The destination position.
-    vec3_t      endPosition;
-
-    // The impacted plane, or empty.Note that a copy of the plane is
-    // returned, rather than a pointer.This is because the plane may belong to
-    // an inline BSP model or the box hull of a solid entity, in which case it must
-    // be transformed by the entity's current position.
-    CollisionPlane    plane;
-    // The impacted surface, or `NULL`.
-    CollisionSurface* surface;
-    // The contents mask of the impacted brush, or 0.
-    int         contents;
-
-    // The impacted entity, or `NULL`.
-    IServerGameEntity *ent;   // Not set by CM_*() functions
-
-    // PH: Custom added.
-    vec3_t		offsets[8];	// [signBits][x] = either size[0][x] or size[1][x]
-};
-
-SVGTrace SVG_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, IServerGameEntity* passent, const int32_t& contentMask);
 
 std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AreaEntities::Solid);
 

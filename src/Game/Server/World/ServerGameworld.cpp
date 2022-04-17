@@ -92,7 +92,7 @@ void ServerGameworld::DestroyGamemode() {
 **/
 void ServerGameworld::PrepareEntities() {
     // Clamp it just in case.
-    int32_t maxEntities = Clampi(MAX_EDICTS, (int)maximumclients->value + 1, MAX_EDICTS);
+    int32_t maxEntities = Clampi(MAX_POD_ENTITIES, (int)maximumclients->value + 1, MAX_POD_ENTITIES);
 
     // Setup the globals entities pointer and max entities value so
 	// that the server can access it.
@@ -100,7 +100,7 @@ void ServerGameworld::PrepareEntities() {
     globals.maxEntities = this->maxEntities = maxEntities;
 
     // Ensure, all base entities are nullptrs. Just to be save.
-    for (int32_t i = 0; i < MAX_EDICTS; i++) {
+    for (int32_t i = 0; i < MAX_POD_ENTITIES; i++) {
 		gameEntities[i] = nullptr;
     }
 }

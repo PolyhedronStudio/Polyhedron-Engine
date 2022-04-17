@@ -35,53 +35,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static cvar_t *sv_maxvelocity = nullptr;
 static cvar_t *sv_gravity= nullptr;
 
-extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
-
-CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) {
-    // Acquire server and game entity array pointers.
-    ClientEntity* clientEntities = cl->solidEntities[0];
-    CLGEntityVector *classEntities = clge->entities->GetGameEntities();
-
-    // Fetch server entity in case one was passed to us.
-    ClientEntity* serverPassEntity = (passent ? passent->GetPODEntity() : NULL);
-
-    // Execute server trace.
-    TraceResult trace = clgi.Trace(start, mins, maxs, end, (struct entity_s*)serverPassEntity, contentMask);
-
-    // Convert results to Server Game Trace.
-    CLGTrace svgTrace;
-    svgTrace.allSolid = trace.allSolid;
-    svgTrace.contents = trace.contents;
-    svgTrace.endPosition = trace.endPosition;
-    svgTrace.fraction = trace.fraction;
-    svgTrace.offsets[0] = trace.offsets[0];
-    svgTrace.offsets[1] = trace.offsets[1];
-    svgTrace.offsets[2] = trace.offsets[2];
-    svgTrace.offsets[3] = trace.offsets[3];
-    svgTrace.offsets[4] = trace.offsets[4];
-    svgTrace.offsets[5] = trace.offsets[5];
-    svgTrace.offsets[6] = trace.offsets[6];
-    svgTrace.offsets[7] = trace.offsets[7];
-    svgTrace.plane = trace.plane;
-    svgTrace.startSolid = trace.startSolid;
-    svgTrace.surface = trace.surface;
-
-    // Special.
-    if (trace.ent) {
-        uint32_t index = trace.ent->state.number;
-
-        if (index < classEntities->size() && classEntities->data()[index] != NULL) {
-            svgTrace.ent = classEntities->data()[index];
-        } else {
-	        svgTrace.ent = classEntities->data()[0];
-        }
-    } else {
-        svgTrace.ent = classEntities->data()[0];
-    }
-
-    return svgTrace;
-}
-
 // World.
 //#include "../World/Gameworld.h"
 /*
@@ -170,9 +123,9 @@ static void UTIL_TouchTriggers(IClientGameEntity *ent)
 // CLG_TestEntityPosition
 //
 //===============
-CLGBaseEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
+IClientGameEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
 {
-    CLGTrace trace;
+    CLGTraceResult trace;
     int32_t clipMask = 0;
 
     if (ent->GetClipMask()) {
@@ -187,7 +140,7 @@ CLGBaseEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
 	    return 0;//dynamic_cast<CLGBaseEntity*>(game.world->GetWorldspawnGameEntity());
     }
 
-    return nullptr;
+    return trace.gameEntity;
 }
 
 //===============
@@ -269,7 +222,7 @@ extern qboolean CLG_RunThink(IClientGameEntity *ent);
 //
 // Two entities have touched, so run their touch functions
 //===============
-void CLG_Impact(IClientGameEntity *entityA, CLGTrace *trace)
+void CLG_Impact(IClientGameEntity *entityA, CLGTraceResult *trace)
 {
     IClientGameEntity* entityB = nullptr;
 //  CollisionPlane    backplane;
@@ -280,8 +233,8 @@ void CLG_Impact(IClientGameEntity *entityA, CLGTrace *trace)
     }
 
     // If the impact came from a trace, set entityB to this ent.
-    if (trace && trace->ent) {
-        entityB = trace->ent;
+    if (trace && trace->gameEntity) {
+        entityB = trace->gameEntity;
     }
 
     // Execute touch functionality for entityA if its solid is not a Solid::Not.
@@ -366,7 +319,7 @@ int CLG_FlyMove(IClientGameEntity *ent, float time, int mask)
     vec3_t      planes[MAX_CLIP_PLANES];
     vec3_t      primal_velocity, original_velocity, new_velocity;
     int         i, j;
-    CLGTrace     trace;
+    CLGTraceResult     trace;
     vec3_t      end;
     float       time_left;
     int         Blocked;
@@ -405,7 +358,7 @@ int CLG_FlyMove(IClientGameEntity *ent, float time, int mask)
         if (trace.fraction == 1)
             break;     // moved the entire distance
 
-        hit = trace.ent;
+        hit = trace.gameEntity;
 
         if (trace.plane.normal[2] > 0.7) {
             Blocked |= 1;       // floor
@@ -516,9 +469,9 @@ void CLG_AddGravity(IClientGameEntity *ent)
 // Does not change the entities velocity at all
 //===============
 //
-CLGTrace CLG_PushEntity(IClientGameEntity *ent, vec3_t push)
+CLGTraceResult CLG_PushEntity(IClientGameEntity *ent, vec3_t push)
 {
-    CLGTrace trace;
+    CLGTraceResult trace;
     int     mask;
 
     // Calculate start for push.
@@ -542,7 +495,7 @@ retry:
         CLG_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (!trace.ent->IsInUse() && ent->IsInUse()) {
+        if (!trace.gameEntity->IsInUse() && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin(start);
             ent->LinkEntity();
@@ -622,11 +575,11 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 
 // see if any solid entities are inside the final position
     //IClientGameEntity** classEntities = clge->entities->GetGameEntities();
-	CLGEntityVector *classEntities = clge->entities->GetGameEntities();
+	CLGEntityVector &classEntities = clge->entities->GetGameEntities();
     for (e = 1; e < cl->numSolidEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-	    SGEntityHandle checkHandle = classEntities->data()[e];
+	    SGEntityHandle checkHandle = classEntities[e];
 
         if (!checkHandle) {
     		CLG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");
@@ -960,7 +913,7 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // Move origin
     vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
-    CLGTrace trace = CLG_PushEntity(ent, move);
+    CLGTraceResult trace = CLG_PushEntity(ent, move);
     if (!ent->IsInUse())
         return;
 
@@ -978,14 +931,14 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
         // Stop if on ground
         if (trace.plane.normal[2] > 0.7f) {
 	        if (ent->GetVelocity().z < 60.f || (ent->GetMoveType() != MoveType::Bounce)) {
-                ent->SetGroundEntity(trace.ent);
-                ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
+                ent->SetGroundEntity(trace.gameEntity);
+                ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
                 ent->SetVelocity(vec3_zero());
                 ent->SetAngularVelocity(vec3_zero());
             }
         }
 
-        //ent->DispatchTouchCallback(ent, trace.ent, &trace.plane, trace.surface);
+        //ent->DispatchTouchCallback(ent, trace.gameEntity, &trace.plane, trace.surface);
     }
 
     // Check for water transition, first fetch the OLD contents mask.

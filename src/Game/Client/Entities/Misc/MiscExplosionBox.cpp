@@ -20,7 +20,7 @@
 
 //#include "../../Gamemodes/IGamemode.h"
 //#include "../../World/Gameworld.h"
-extern CLGTrace CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
+
 //
 // Constructor/Deconstructor.
 //
@@ -177,7 +177,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     };
     
     // Exceute the trace.
-    CLGTrace trace = CLG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, BrushContentsMask::MonsterSolid);
+    CLGTraceResult trace = CLG_Trace(traceStart, GetMins(), GetMaxs(), traceEnd, this, BrushContentsMask::MonsterSolid);
     
     // Return in case we hit anything.
     if (trace.fraction == 1.f || trace.allSolid) {

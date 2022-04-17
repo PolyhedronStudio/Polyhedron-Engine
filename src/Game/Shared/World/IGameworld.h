@@ -218,7 +218,7 @@ public:
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    virtual GameEntity** GetGameEntities() = 0;
+    virtual GameEntityVector &GetGameEntities() = 0;
     /**
     *   @return A pointer of the pod entity located at index.
     **/
@@ -277,10 +277,10 @@ private:
 
 protected:
     // Array storing the engine's client/server POD entities.
-    PODEntity podEntities[MAX_EDICTS];
+    PODGameWorldArray podEntities;
 
     //! Array for storing the (client/server -)game's class entities.
-    GameEntity* gameEntities[MAX_EDICTS];
+    GameEntityVector gameEntities;
 
     //! Total number of actively spawned entities.
     int32_t numberOfEntities = 0;

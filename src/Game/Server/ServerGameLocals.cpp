@@ -45,11 +45,8 @@ void GameLocals::Initialize() {
     // Create and initialize the world object.
     // 
     // Since it manages entities and clients it does the following things:
-    // Allocate the clients array based on maxclients cvar.
-    // Reserve the entities for our clients.
-    // Parse the BSP entity string and allocate the game entity instances.
-    // 
-    // Precache and spawn the above.
+    // Allocate and reserve the clients array based on maxclients cvar.
+    // Parse the BSP entity string to create, precache and speach each game entity instances.
     CreateWorld();
 }
 

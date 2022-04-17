@@ -90,7 +90,7 @@ void SVG_PhysicsEntityWPrint(const std::string &functionName, const std::string 
 //===============
 SVGBaseEntity *SVG_TestEntityPosition(IServerGameEntity *ent)
 {
-    SVGTrace trace;
+    SVGTraceResult trace;
     int32_t clipMask = 0;
 
     if (ent->GetClipMask()) {
@@ -187,7 +187,7 @@ qboolean SVG_RunThink(IServerGameEntity *ent)
 //
 // Two entities have touched, so run their touch functions
 //===============
-void SVG_Impact(IServerGameEntity *entityA, SVGTrace *trace)
+void SVG_Impact(IServerGameEntity *entityA, SVGTraceResult *trace)
 {
     IServerGameEntity* entityB = nullptr;
 //  CollisionPlane    backplane;
@@ -198,8 +198,8 @@ void SVG_Impact(IServerGameEntity *entityA, SVGTrace *trace)
     }
 
     // If the impact came from a trace, set entityB to this ent.
-    if (trace && trace->ent) {
-        entityB = trace->ent;
+    if (trace && trace->gameEntity) {
+        entityB = trace->gameEntity;
     }
 
     // Execute touch functionality for entityA if its solid is not a Solid::Not.
@@ -284,7 +284,7 @@ int SVG_FlyMove(IServerGameEntity *ent, float time, int mask)
     vec3_t      planes[MAX_CLIP_PLANES];
     vec3_t      primal_velocity, original_velocity, new_velocity;
     int         i, j;
-    SVGTrace     trace;
+    SVGTraceResult     trace;
     vec3_t      end;
     float       time_left;
     int         Blocked;
@@ -323,7 +323,7 @@ int SVG_FlyMove(IServerGameEntity *ent, float time, int mask)
         if (trace.fraction == 1)
             break;     // moved the entire distance
 
-        hit = trace.ent;
+        hit = trace.gameEntity;
 
         if (trace.plane.normal[2] > 0.7) {
             Blocked |= 1;       // floor
@@ -434,9 +434,9 @@ void SVG_AddGravity(IServerGameEntity *ent)
 // Does not change the entities velocity at all
 //===============
 //
-SVGTrace SVG_PushEntity(IServerGameEntity *ent, vec3_t push)
+SVGTraceResult SVG_PushEntity(IServerGameEntity *ent, vec3_t push)
 {
-    SVGTrace trace;
+    SVGTraceResult trace;
     int     mask;
 
     // Calculate start for push.
@@ -460,7 +460,7 @@ retry:
         SVG_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (!trace.ent->IsInUse() && ent->IsInUse()) {
+        if (!trace.gameEntity->IsInUse() && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin(start);
             ent->LinkEntity();
@@ -476,7 +476,7 @@ retry:
 
 
 typedef struct {
-    SGEntityHandle ent;
+    SGEntityHandle entityHandle;
     vec3_t  origin;
     vec3_t  angles;
 #if USE_SMOOTH_DELTA_ANGLES
@@ -522,7 +522,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     AngleVectors(org, &forward, &right, &up);
 
     // Save the pusher's original position
-    pushed_p->ent = pusher;
+    pushed_p->entityHandle = pusher;
     pushed_p->origin = pusher->GetOrigin(); // VectorCopy(pusher->state.origin, pushed_p->origin);
     pushed_p->angles = pusher->GetAngles();
 
@@ -539,11 +539,11 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    GameEntity** classEntities = game.world->GetGameEntities();
+    GameEntityVector gameEntities  = game.world->GetGameEntities();
     for (e = 1; e < globals.numberOfEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-	    SGEntityHandle checkHandle = classEntities[e];
+	    SGEntityHandle checkHandle = gameEntities[e];
 
         if (!checkHandle) {
     		SVG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");
@@ -590,7 +590,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 
         if ((pusher->GetMoveType() == MoveType::Push) || (check->GetGroundEntity() == pusher)) {
             // move this entity
-            pushed_p->ent = check;
+            pushed_p->entityHandle = check;
             pushed_p->origin = check->GetOrigin();  //VectorCopy(check->state.origin, pushed_p->origin);
             pushed_p->angles = check->GetAngles(); //VectorCopy(check->state.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
@@ -648,7 +648,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
         // twice, it goes back to the original position
         for (p = pushed_p - 1 ; p >= pushed ; p--) {
 	        // Fetch pusher's base entity.
-            IServerGameEntity* pusherEntity = *p->ent;
+            IServerGameEntity* pusherEntity = *p->entityHandle;
 
             // Ensure we are dealing with a valid pusher entity.
             if (!pusherEntity) {
@@ -656,14 +656,14 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
                 continue;
             }
 
-            p->ent->SetOrigin(p->origin);
-            p->ent->SetAngles(p->angles);
+            pusherEntity->SetOrigin(p->origin);
+            pusherEntity->SetAngles(p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
-            if (p->ent->GetClient()) {
-                p->ent->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
+            if (pusherEntity->GetClient()) {
+                pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
             }
 #endif
-            p->ent->LinkEntity();
+            pusherEntity->LinkEntity();
         }
         return false;
     }
@@ -672,7 +672,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     // see if anything we moved has touched a trigger
     for (p = pushed_p - 1; p >= pushed; p--) {
         // Fetch pusher's base entity.
-        IServerGameEntity* pusherEntity = *p->ent;
+        IServerGameEntity* pusherEntity = *p->entityHandle;
 
         // Ensure we are dealing with a valid pusher entity.
 	    if (!pusherEntity) {
@@ -680,7 +680,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             continue;
 	    }
 
-	    UTIL_TouchTriggers(*p->ent);
+	    UTIL_TouchTriggers(*p->entityHandle);
     }
 
     return true;
@@ -876,7 +876,7 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // Move origin
     vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
-    SVGTrace trace = SVG_PushEntity(ent, move);
+    SVGTraceResult trace = SVG_PushEntity(ent, move);
     if (!ent->IsInUse())
         return;
 
@@ -894,14 +894,14 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
         // Stop if on ground
         if (trace.plane.normal[2] > 0.7f) {
 	        if (ent->GetVelocity().z < 60.f || (ent->GetMoveType() != MoveType::Bounce)) {
-                ent->SetGroundEntity(trace.ent);
-                ent->SetGroundEntityLinkCount(trace.ent->GetLinkCount());
+                ent->SetGroundEntity(trace.gameEntity);
+                ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
                 ent->SetVelocity(vec3_zero());
                 ent->SetAngularVelocity(vec3_zero());
             }
         }
 
-        //ent->DispatchTouchCallback(ent, trace.ent, &trace.plane, trace.surface);
+        //ent->DispatchTouchCallback(ent, trace.gameEntity, &trace.plane, trace.surface);
     }
 
     // Check for water transition, first fetch the OLD contents mask.

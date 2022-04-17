@@ -156,7 +156,7 @@ of ent.  Ent should be unlinked before calling this!
 */
 qboolean SVG_KillBox(IServerGameEntity *ent)
 {
-    SVGTrace tr;
+    SVGTraceResult tr;
 
     if (!ent)
         return false;
