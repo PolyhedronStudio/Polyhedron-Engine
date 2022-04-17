@@ -26,17 +26,17 @@
 #include "../../Common/Msg.h"
 #include "../../Common/Protocol.h"
 
-// Shared Client Game Headers.
+// Shared Client Type & Game Header.
 #include "../../Shared/CLTypes.h"
 #include "../../Shared/CLGame.h"
 
 // Shared Game "Framework".
 #include "../Shared/SharedGame.h"
 
-// Client Game Exports Interface.
+// ClientGame Exports Interface.
 #include "../../Shared/Interfaces/IClientGameExports.h"
 
-// Client Game Exports Implementation.
+// ClientGame Exports Implementation.
 #include "ClientGameExports.h"
 
 //// Temporary.
@@ -52,9 +52,9 @@ extern LevelLocals level;
 *
 **/
 // WID: TODO: Make these part of the ClientGameImports instead.
-static constexpr double CLG_FRAMETIME   = BASE_FRAMETIME;
-static constexpr double CLG_1_FRAMETIME = BASE_1_FRAMETIME;
-static constexpr int32_t CLG_FRAMEDIV   = BASE_FRAMERATE / 10.0;
+static constexpr double		CLG_FRAMETIME	= BASE_FRAMETIME;
+static constexpr double		CLG_1_FRAMETIME	= BASE_1_FRAMETIME;
+static constexpr int32_t	CLG_FRAMEDIV	= BASE_FRAMERATE / 10.0;
 
 // THESE SHOULD NOT BE ADDED TO IMPORTS.
 //! MS Frametime for animations.
@@ -64,7 +64,9 @@ static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 static constexpr Frametime FRAMETIME = FRAMETIME_S;
 
 
+// Preecdclarations.
 class ClientGameExports;
+class ClientGameworld;
 
 //! Contains the function pointers being passed in from the engine.
 extern ClientGameImport clgi;
@@ -115,6 +117,105 @@ void Com_LPrintf(int32_t printType, const char* fmt, ...);
 **/
 #include "Utilities/CLGTraceResult.h"
 
+/**
+*	@brief GameLocal is the main server game class.
+* 
+*	@details 
+**/
+class ClientGameLocals {
+public:
+    /**
+	*	@brief Default constructor.
+	**/
+    ClientGameLocals() = default;
+
+    /**
+	*	@brief Default destructor
+	**/
+    ~ClientGameLocals() = default;
+
+public:
+    /**
+	*	@brief Initializes the gameworld and its member objects.
+	**/
+    void Initialize();
+    
+    /**
+	*	@brief Shutsdown the gamelocal.
+	**/
+    void Shutdown();
+
+
+
+    /**
+    *   @return A pointer to the gameworld object.
+    **/
+    ClientGameworld* GetGameworld();
+
+    /**
+    *   @return A pointer to the gameworld its current gamemode object.
+    **/
+    //IGamemode* GetGamemode();
+
+    /**
+    *   @brief  Code shortcut for accessing gameworld's client array.
+    * 
+    *   @return A pointer to the gameworld's clients array.
+    **/
+    ServerClient* GetClients();
+    /**
+    *   @brief  Code shortcut for acquiring gameworld's maxClients.
+    * 
+    *   @return The maximum allowed clients in this game.
+    **/
+    int32_t GetMaxClients();
+    /**
+    *   @brief  Code shortcut for acquiring gameworld's maxEntities.
+    * 
+    *   @return The maximum allowed entities in this game.
+    **/
+    int32_t GetMaxEntities();
+
+
+
+    /**
+    *   
+    **/
+    
+    /**
+    *   
+    **/
+private:
+    /**
+    *   @brief Create the world member object and initialize it.
+    **/
+    void CreateWorld();
+    /**
+    *   @brief De-initialize the world and destroy it.
+    **/
+    void DestroyWorld();
+
+
+    // TODO: Add Get methods and privatize the members below.
+public:
+    //! Gameworld.
+    ClientGameworld* world = nullptr;
+
+    //! needed for coop respawns
+    //! Can't store spawnpoint32_t in level, because
+    //! it would get overwritten by the savegame restore
+    char spawnpoint[512];
+
+    //! Will be set to latched cvar equivelants due to having to access them a lot.
+    //int32_t maxClients = 0;
+    //int32_t maxEntities = 0;
+
+    //! Used to store Cross level triggers.
+    int32_t serverflags = 0;
+
+    //! Did we autosave?
+    qboolean autoSaved = false;
+};
 
 // Custom load state enumerator.
 //
@@ -129,32 +230,37 @@ typedef enum {
     // You can add more here if you desire so.
 } clg_load_state_t;
 
-//-------------------
-// Client player model settings.
-//-------------------
+/**
+*	Client player model settings.
+**/
 static constexpr int32_t CL_PLAYER_MODEL_DISABLED       = 0;
 static constexpr int32_t CL_PLAYER_MODEL_ONLY_GUN       = 1;
 static constexpr int32_t CL_PLAYER_MODEL_FIRST_PERSON   = 2;
 static constexpr int32_t CL_PLAYER_MODEL_THIRD_PERSON   = 3;
 
-//-------------------
-// Core - Used to access the client's internals.
-//-------------------
+/**
+*	Core - Used to access the client's internals.
+**/
 extern ClientGameImport clgi;
 extern ClientState      *cl;
 extern ClientShared     *cs;
 
-//-------------------
-// Game - Specific to the game itself.
-//-------------------
+/**
+*	Game - Specific to the game itself.
+**/
 // Stores parameters parsed from a temporary entity message.s
 extern tent_params_t   teParameters;
 // Stores parameters parsed from a muzzleflash message.
 extern mz_params_t     mzParameters;
 
-//-------------------
-// CVars - Externed so they can be accessed all over the CG Module.
-//-------------------
+
+/***
+*
+*
+*	CVars - Externed so they can be accessed all over the CG Module.
+*
+*
+***/
 // Client.
 extern cvar_t* cl_chat_notify;
 extern cvar_t* cl_chat_sound;

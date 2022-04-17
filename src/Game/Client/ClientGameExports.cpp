@@ -112,6 +112,8 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 *           Not used for demos.
 **/
 void ClientGameExports::ClientBegin() {
+	// Create our gameworld object.
+
     // Reset level locals.
     level = LevelLocals{};
     level.time = GameTime(cl->serverTime);

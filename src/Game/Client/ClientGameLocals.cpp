@@ -12,6 +12,7 @@
 // ClientGame.
 #include "Entities.h"
 #include "TemporaryEntities.h"
+#include "../World/ClientGameworld.h"
 
 // ClientGameExports implementations.
 #include "Exports/Core.h"
@@ -138,6 +139,102 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
 
 }; // Extern "C"
 
+
+
+/**
+*   @return A pointer to the gameworld object. The big man in charge.
+**/
+ClientGameworld *ClientGameLocals::GetGameworld() {
+    return world;
+}
+
+
+/**
+*   @return A pointer to the gamemode object. The man's little helper.
+**/
+//IGamemode *GetGamemode() {
+//    if (game.world) {
+//        return game.world->GetGamemode();
+//    } else {
+//        return nullptr;
+//    }
+//}
+
+/**
+*	@brief Initializes the gameworld and its member objects.
+**/
+void ClientGameLocals::Initialize() {
+    // Create and initialize the world object.
+    // 
+    // Since it manages entities and clients it does the following things:
+    // Allocate and reserve the clients array based on maxclients cvar.
+    // Parse the BSP entity string to create, precache and speach each game entity instances.
+    CreateWorld();
+}
+
+/**
+*	@brief Shutsdown the gamelocal.
+**/
+void ClientGameLocals::Shutdown() {
+    // Uninitialize world and destroy its object.
+    DestroyWorld();
+}
+
+
+
+/**
+*   @brief Create the world member object and initialize it.
+**/
+void ClientGameLocals::CreateWorld() {
+    // Create game world object.
+    world = new ClientGameworld();
+
+    // Initialize it.
+    world->Initialize();
+}
+
+/**
+*   @brief De-initialize the world and destroy it.
+**/
+void ClientGameLocals::DestroyWorld() {
+    // Give the gameworld a chance to finalize anything.
+    if (world) { 
+        world->Shutdown();
+
+        // Delete game world from memory.
+        delete world;
+        world = nullptr;
+    }
+}
+
+
+/**
+*   @return A pointer to the gameworld its current gamemode object.
+**/
+//IGamemode* ClientGameLocals::GetGamemode() { 
+//    return world->GetGamemode(); 
+//}
+
+
+
+/**
+*   @brief  Code shortcut for accessing gameworld's client array.
+* 
+*   @return A pointer to the gameworld's clients array.
+**/
+ServerClient* ClientGameLocals::GetClients() { return nullptr; } // { return world->GetClients(); }
+/**
+*   @brief  Code shortcut for acquiring gameworld's maxClients.
+* 
+*   @return The maximum allowed clients in this game.
+**/
+int32_t ClientGameLocals::GetMaxClients() { return 4; /* ?? */ } // { return world->GetMaxClients(); }
+/**
+*   @brief  Code shortcut for acquiring gameworld's maxEntities.
+* 
+*   @return The maximum allowed entities in this game.
+**/
+int32_t ClientGameLocals::GetMaxEntities() { return world->GetMaxEntities(); }
 
 
 

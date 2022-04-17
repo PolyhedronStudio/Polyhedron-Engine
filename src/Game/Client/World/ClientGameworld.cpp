@@ -117,6 +117,12 @@ void ClientGameworld::PrepareEntities() {
 **/
 void ClientGameworld::PrepareClients() {
     // Allocate our clients array.
+	cvar_t *maximumclients = clgi.Cvar_Get("maxclients", nullptr, 0);
+
+	if (maximumclients && maximumclients->integer) {
+		Com_DPrint("MAXIMUM CLIENTS YOOOO DAWG================%i\n", maximumclients->integer);
+	}
+
 //    maxClients = maximumclients->value;
 //    clients = (ServerClient*)gi.TagMalloc(maxClients * sizeof(clients[0]), TAG_GAME);  // CPP: Cast
 
