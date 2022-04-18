@@ -107,11 +107,11 @@ static void create_baselines(void)
             continue;
         }
 
-        if (!ES_INUSE(&ent->state)) {
+        if (!ES_INUSE(&ent->currentState)) {
             continue;
         }
 
-        ent->state.number = i;
+        ent->currentState.number = i;
 
         chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
         if (*chunk == NULL) {
@@ -119,7 +119,7 @@ static void create_baselines(void)
         }
 
         base = *chunk + (i & SV_BASELINES_MASK);
-        *base = ent->state;
+        *base = ent->currentState;
 
         base->solid = sv.entities[i].solid32;
     }

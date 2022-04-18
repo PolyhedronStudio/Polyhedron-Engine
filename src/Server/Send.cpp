@@ -305,7 +305,7 @@ void SV_Multicast(const vec3_t &origin, int32_t to) {
             //VectorAdd(ps->viewOffset, ps->pmove.origin, orig);
             //VectorMA(ps->viewOffset, 0.125f, ps->pmove.origin, org);
 			//#else
-            const vec3_t clientOrigin = client->edict->state.origin; // VectorCopy(client->edict->state.origin, org);
+            const vec3_t clientOrigin = client->edict->currentState.origin; // VectorCopy(client->edict->state.origin, org);
 			//#endif
 			
 			// Do a point leaf.

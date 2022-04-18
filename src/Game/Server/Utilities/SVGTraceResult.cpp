@@ -42,7 +42,7 @@ SVGTraceResult::SVGTraceResult(TraceResult& traceResult) :
 		PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
 
 		// Acquire number.
-		const uint32_t index = podEntity->state.number;
+		const uint32_t index = podEntity->currentState.number;
 
 		// Look for entity. (Should be done using gameworld get by index...)
 		if (index < gameEntities.size() && gameEntities[index] != NULL) {
@@ -94,7 +94,7 @@ SVGTraceResult::SVGTraceResult(const TraceResult& traceResult) :
 		PODEntity *tracePODEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
 
 		// Acquire index number.
-		const uint32_t index = tracePODEntity->state.number;
+		const uint32_t index = tracePODEntity->currentState.number;
 
 		// Look up both the POD and Game Enties into our gameworld to make sure we got the proper pointers.
 		ServerGameworld *gameWorld = GetGameworld();
@@ -124,5 +124,5 @@ SVGTraceResult SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& 
     PODEntity* serverPODEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
 
 	// Execute and return the actual trace.
-    return gi.Trace(start, mins, maxs, end, (struct entity_s*)serverPODEntity, contentMask);
+    return gi.Trace(start, mins, maxs, end, (struct PODEntity*)serverPODEntity, contentMask);
 }

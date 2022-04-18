@@ -88,7 +88,7 @@ void DefaultGamemode::OnLevelExit() {
 		}
 
 		// Get state number.
-        const uint32_t stateNumber = podEntity->state.number;
+        const uint32_t stateNumber = podEntity->currentState.number;
 
         // Fetch the corresponding base entity.
         GameEntity* gameEntity = gameEntities[stateNumber];
@@ -590,12 +590,12 @@ void DefaultGamemode::SpawnClientCorpse(SVGBaseEntity* ent) {
     // Send an effect on this body, in case it already has a model index.
     // This'll cause a body not to just "disappear", but actually play some
     // bloody particles over there.
-    if (bodyEntity->state.modelIndex) {
+    if (bodyEntity->currentState.modelIndex) {
         gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::Blood);//WriteByte(TempEntityEvent::Blood);
-        gi.MSG_WriteVector3(bodyEntity->state.origin, false);
+        gi.MSG_WriteVector3(bodyEntity->currentState.origin, false);
         gi.MSG_WriteVector3(vec3_zero(), false);
-        gi.Multicast(bodyEntity->state.origin, Multicast::PVS);
+        gi.Multicast(bodyEntity->currentState.origin, Multicast::PVS);
     }
 
     // Create the game entity for this queued bodyEntity.
@@ -729,7 +729,7 @@ void DefaultGamemode::ClientBeginServerFrame(SVGBasePlayer* player, ServerClient
     // add player trail so monsters can follow
     //if (!deathmatch->value)
     //    if (!visible(ent, SVG_PlayerTrail_LastSpot()))
-    //        SVG_PlayerTrail_Add(ent->state.oldOrigin);
+    //        SVG_PlayerTrail_Add(ent->currentState.oldOrigin);
 
     // Reset the latched buttons.
     client->latchedButtons = 0;
@@ -1130,7 +1130,7 @@ qboolean DefaultGamemode::ClientConnect(PODEntity *svEntity, char *userinfo) {
 
     // they can connect
     ServerClient* clients = game.GetClients();
-    svEntity->client = &clients[svEntity->state.number - 1];//game.clients + (serverEntity - g_entities - 1);
+    svEntity->client = &clients[svEntity->currentState.number - 1];//game.clients + (serverEntity - g_entities - 1);
 
     // if there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
@@ -1692,7 +1692,7 @@ void DefaultGamemode::RespawnClient(SVGBasePlayer* ent) {
     //    GetGamemode()->PlacePlayerInGame((SVGBasePlayer*)self->gameEntity);
 
     //    // add a teleportation effect
-    //    self->state.eventID = EntityEvent::PlayerTeleport;
+    //    self->currentState.eventID = EntityEvent::PlayerTeleport;
 
     //    // hold in place briefly
     //    self->client->playerState.pmove.flags = PMF_TIME_TELEPORT;

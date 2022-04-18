@@ -120,39 +120,40 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
     MSG_WriteInt16(0);//MSG_WriteShort(0);      // end of packetentities
 }
 
-static ClientFrame *get_last_frame(client_t *client)
-{
-    ClientFrame *frame;
-
-    if (client->lastFrame <= 0) {
+static ClientFrame *SV_GetLastClientFrame(client_t *client) {
+    // Increment framesNoDelta and return null.
+	if (client->lastFrame <= 0) {
         // client is asking for a retransmit
         client->framesNoDelta++;
-        return NULL;
+        return nullptr;
     }
 
+	// Reset framesNoDelta.
     client->framesNoDelta = 0;
 
+	// Check whether client has exceeded UPDATE_BACKUP range.
     if (client->frameNumber - client->lastFrame >= UPDATE_BACKUP) {
         // client hasn't gotten a good message through in a long time
         Com_DPrintf("%s: delta request from out-of-date packet.\n", client->name);
-        return NULL;
+        return nullptr;
     }
 
-    // we have a valid message to delta from
-    frame = &client->frames[client->lastFrame & UPDATE_MASK];
-    if (frame->number != client->lastFrame) {
-        // but it got never sent
+    // We have a valid frame message to delta from.
+    ClientFrame *clientFrame = &client->frames[client->lastFrame & UPDATE_MASK];
+    if (clientFrame->number != client->lastFrame) {
+        // Sadly, it never arrived since it was a dropped frame.
         Com_DPrintf("%s: delta request from dropped frame.\n", client->name);
-        return NULL;
+        return nullptr;
     }
 
-    if (svs.next_entity - frame->first_entity > svs.num_entities) {
+	// Make sure entities aren't out-of-date.
+    if (svs.next_entity - clientFrame->first_entity > svs.num_entities) {
         // but entities are too old
         Com_DPrintf("%s: delta request from out-of-date entities.\n", client->name);
-        return NULL;
+        return nullptr;
     }
 
-    return frame;
+    return clientFrame;
 }
 
 /*
@@ -174,7 +175,7 @@ void SV_WriteFrameToClient(client_t *client) {
     frame = &client->frames[client->frameNumber & UPDATE_MASK];
 
     // this is the frame we are delta'ing from
-    oldframe = get_last_frame(client);
+    oldframe = SV_GetLastClientFrame(client);
     if (oldframe) {
         oldPlayerState = &oldframe->playerState;
         delta = client->frameNumber - client->lastFrame;
@@ -337,11 +338,11 @@ void SV_BuildClientFrame(client_t *client)
             continue;
 
         // ignore ents without visible models unless they have an effect
-        if (!ent->state.modelIndex && !ent->state.effects && !ent->state.sound) {
-            if (!ent->state.eventID) {
+        if (!ent->currentState.modelIndex && !ent->currentState.effects && !ent->currentState.sound) {
+            if (!ent->currentState.eventID) {
                 continue;
             }
-            if (ent->state.eventID = EntityEvent::Footstep) {
+            if (ent->currentState.eventID = EntityEvent::Footstep) {
                 continue;
             }
         }
@@ -362,7 +363,7 @@ void SV_BuildClientFrame(client_t *client)
             if (ent_visible)
             {
                 // beams just check one point for PHS
-                if (ent->state.renderEffects & RenderEffects::Beam) {
+                if (ent->currentState.renderEffects & RenderEffects::Beam) {
                     l = ent->clusterNumbers[0];
                     if (!Q_IsBitSet(clientphs, l)) {
                         ent_visible = false;
@@ -373,9 +374,9 @@ void SV_BuildClientFrame(client_t *client)
                         ent_visible = false;
                     }
 
-                    if (!ent->state.modelIndex) {
+                    if (!ent->currentState.modelIndex) {
                         // don't send sounds if they will be attenuated away
-                        vec3_t delta = org - ent->state.origin;
+                        vec3_t delta = org - ent->currentState.origin;
                         float len = vec3_length(delta);
                         if (len > 400) {
                             ent_visible = false;
@@ -385,16 +386,16 @@ void SV_BuildClientFrame(client_t *client)
             }
         }
 
-        if(!ent_visible && (!sv_novis->integer || !ent->state.modelIndex))
+        if(!ent_visible && (!sv_novis->integer || !ent->currentState.modelIndex))
             continue;
         
-		if (ent->state.number != e) {
-			Com_WPrintf("%s: fixing ent->state.number: %d to %d\n",
-				__func__, ent->state.number, e);
-			ent->state.number = e;
+		if (ent->currentState.number != e) {
+			Com_WPrintf("%s: fixing ent->currentState.number: %d to %d\n",
+				__func__, ent->currentState.number, e);
+			ent->currentState.number = e;
 		}
 
-		memcpy(&es, &ent->state, sizeof(EntityState));
+		memcpy(&es, &ent->currentState, sizeof(EntityState));
 
 		if (!ent_visible) {
 			// if the entity is invisible, kill its sound
@@ -406,8 +407,8 @@ void SV_BuildClientFrame(client_t *client)
         
         *state = es;
 
-        if (ent->state.eventID = EntityEvent::Footstep) {
-            ent->state.eventID = 0;
+        if (ent->currentState.eventID = EntityEvent::Footstep) {
+            ent->currentState.eventID = 0;
         }
 
         // hide POV entity from renderer, unless this is player's own entity

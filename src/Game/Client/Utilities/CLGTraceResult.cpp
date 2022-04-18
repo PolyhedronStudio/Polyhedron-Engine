@@ -42,7 +42,7 @@ CLGTraceResult::CLGTraceResult(TraceResult& traceResult) :
 		PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
 
 		// Acquire number.
-		const uint32_t index = podEntity->current.number;
+		const uint32_t index = podEntity->currentState.number;
 
 		// Look for entity. (Should be done using gameworld get by index...)
 		if (index < gameEntities.size() && gameEntities[index] != NULL) {
@@ -93,7 +93,7 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 		PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
 
 		// Acquire number.
-		const uint32_t index = podEntity->current.number;
+		const uint32_t index = podEntity->currentState.number;
 
 		// Look for entity. (Should be done using gameworld get by index...)
 		if (index < gameEntities.size() && gameEntities[index] != NULL) {
@@ -122,5 +122,5 @@ CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& 
     PODEntity* clientPODEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
 
 	// Execute and return the actual trace.
-    return clgi.Trace(start, mins, maxs, end, (struct entity_s*)clientPODEntity, contentMask);
+    return clgi.Trace(start, mins, maxs, end, (struct PODEntity*)clientPODEntity, contentMask);
 }

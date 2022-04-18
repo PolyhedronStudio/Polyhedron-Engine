@@ -146,7 +146,7 @@ qboolean SV_EntityIsVisible(cm_t *cm, Entity *ent, byte *mask)
 }
 
 /**
-*	@brief	General purpose routine shared between game DLL and MVD code.
+*	@brief	General purpose routine shared to the ServerGame module.
 *			Links entity to PVS leafs.
 **/
 void SV_LinkEntity(cm_t *cm, Entity *ent)
@@ -161,7 +161,7 @@ void SV_LinkEntity(cm_t *cm, Entity *ent)
 
     // set the abs box
     if (ent->solid == Solid::BSP &&
-        (ent->state.angles[0] || ent->state.angles[1] || ent->state.angles[2])) {
+        (ent->currentState.angles[0] || ent->currentState.angles[1] || ent->currentState.angles[2])) {
         // expand for rotation
         float   max, v;
         int     i;
@@ -176,13 +176,13 @@ void SV_LinkEntity(cm_t *cm, Entity *ent)
                 max = v;
         }
         for (i = 0; i < 3; i++) {
-            ent->absMin[i] = ent->state.origin[i] - max;
-            ent->absMax[i] = ent->state.origin[i] + max;
+            ent->absMin[i] = ent->currentState.origin[i] - max;
+            ent->absMax[i] = ent->currentState.origin[i] + max;
         }
     } else {
         // normal
-        VectorAdd(ent->state.origin, ent->mins, ent->absMin);
-        VectorAdd(ent->state.origin, ent->maxs, ent->absMax);
+        VectorAdd(ent->currentState.origin, ent->mins, ent->absMin);
+        VectorAdd(ent->currentState.origin, ent->maxs, ent->absMax);
     }
 
     // because movement is clipped an epsilon away from an actual edge,
@@ -296,36 +296,36 @@ void PF_LinkEntity(Entity *ent) {
     switch (ent->solid) {
     case Solid::BoundingBox:
         if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
-            ent->state.solid = 0;
+            ent->currentState.solid = 0;
             serverEntity->solid32 = 0;
         } else {
-			ent->state.solid = Solid::BoundingBox; //MSG_PackBoundingBox32(ent->mins, ent->maxs);
-			ent->state.mins = ent->mins;
-			ent->state.maxs = ent->maxs;
-			serverEntity->solid32 = ent->state.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
+			ent->currentState.solid = Solid::BoundingBox; //MSG_PackBoundingBox32(ent->mins, ent->maxs);
+			ent->currentState.mins = ent->mins;
+			ent->currentState.maxs = ent->maxs;
+			serverEntity->solid32 = ent->currentState.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
         }
         break;
     case Solid::OctagonBox:
         if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
-            ent->state.solid = 0;
+            ent->currentState.solid = 0;
             serverEntity->solid32 = 0;
         } else {
-			ent->state.solid = Solid::OctagonBox; //MSG_PackBoundingBox32(ent->mins, ent->maxs);
-			ent->state.mins = ent->mins;
-			ent->state.maxs = ent->maxs;
-            serverEntity->solid32 = ent->state.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
+			ent->currentState.solid = Solid::OctagonBox; //MSG_PackBoundingBox32(ent->mins, ent->maxs);
+			ent->currentState.mins = ent->mins;
+			ent->currentState.maxs = ent->maxs;
+            serverEntity->solid32 = ent->currentState.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
         }
         break;
     case Solid::BSP:
-        ent->state.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
-		ent->state.mins = vec3_zero();
-		ent->state.maxs = vec3_zero();
+        ent->currentState.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
+		ent->currentState.mins = vec3_zero();
+		ent->currentState.maxs = vec3_zero();
 		serverEntity->solid32 = PACKED_BBOX;     // FIXME: use 255?
         break;
     default:
-        ent->state.solid = 0;
-		ent->state.mins = vec3_zero();
-		ent->state.maxs = vec3_zero();
+        ent->currentState.solid = 0;
+		ent->currentState.mins = vec3_zero();
+		ent->currentState.maxs = vec3_zero();
 		serverEntity->solid32 = 0;
         break;
     }
@@ -334,7 +334,7 @@ void PF_LinkEntity(Entity *ent) {
 
     // If first time, make sure oldOrigin is valid.
     if (!ent->linkCount) {
-        ent->state.oldOrigin = ent->state.origin;
+        ent->currentState.oldOrigin = ent->currentState.origin;
     }
     ent->linkCount++;
 
@@ -440,7 +440,7 @@ int SV_AreaEntities(const vec3_t &mins, const vec3_t &maxs, Entity **list,
 static mnode_t *SV_HullForEntity(Entity *ent)
 {
     if (ent->solid == Solid::BSP) {
-        int32_t i = ent->state.modelIndex - 1;
+        int32_t i = ent->currentState.modelIndex - 1;
 
         // Explicit hulls in the BSP model.
         if (i <= 0 || i >= sv.cm.cache->nummodels) {
@@ -482,7 +482,7 @@ int32_t SV_PointContents(const vec3_t &point)
         Entity *hit = touch[i];
 
         // Might intersect, so do an exact clip
-        contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->state.origin, hit->state.angles);
+        contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
     }
 
     return contents;
@@ -537,7 +537,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
 		}
 
         // Might intersect, so do an exact clip
-		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, SV_HullForEntity(touchEntity), contentMask, touchEntity->state.origin, touchEntity->state.angles);
+		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, SV_HullForEntity(touchEntity), contentMask, touchEntity->currentState.origin, touchEntity->currentState.angles);
 
 		// Finalize trace results and clip to entity.
         CM_ClipEntity(tr, &trace, touchEntity);

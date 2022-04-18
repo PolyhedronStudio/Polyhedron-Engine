@@ -193,7 +193,7 @@ TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mi
 *   @brief  Player Move Simulation PointContents Wrapper.
 **/
 int32_t ClientGamePrediction::PM_PointContents(const vec3_t &point) {
-    ClientEntity* ent = nullptr;
+    PODEntity* ent = nullptr;
     mmodel_t* cmodel = nullptr;
 
     int32_t contents = clgi.CM_PointContents(point, cl->bsp->nodes);
@@ -201,17 +201,17 @@ int32_t ClientGamePrediction::PM_PointContents(const vec3_t &point) {
     for (int32_t i = 0; i < cl->numSolidEntities; i++) {
         ent = cl->solidEntities[i];
 
-        if (ent->current.solid != PACKED_BBOX) // special value for bmodel
+        if (ent->currentState.solid != PACKED_BBOX) // special value for bmodel
             continue;
 
-        cmodel = cl->clipModels[ent->current.modelIndex];
+        cmodel = cl->clipModels[ent->currentState.modelIndex];
         if (!cmodel)
             continue;
 
         contents |= clgi.CM_TransformedPointContents(
             point, cmodel->headNode,
-            ent->current.origin,
-            ent->current.angles);
+            ent->currentState.origin,
+            ent->currentState.angles);
     }
 
     return contents;

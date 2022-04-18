@@ -47,7 +47,7 @@ public:
     /**
     *   @brief  'Diminishing Trail' like particle effect.
     **/
-    static void DiminishingTrail(const vec3_t &start, const vec3_t &end, ClientEntity *oldTrailEntity, int32_t flags = 0);
+    static void DiminishingTrail(const vec3_t &start, const vec3_t &end, PODEntity *oldTrailEntity, int32_t flags = 0);
 
     /**
     *   @brief  'Explosion Sparks' like particle effect.

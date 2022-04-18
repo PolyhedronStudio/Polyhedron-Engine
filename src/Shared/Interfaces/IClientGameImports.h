@@ -76,7 +76,7 @@ class IClientGameImportCollisionModel {
 	virtual int32_t TransformedPointContents(const vec3_t& p, mnode_t* headNode, const vec3_t& origin, const vec3_t& angles) = 0;
 	virtual void BoxTrace(TraceResult* trace, const vec3_t& start, const vec3_t& end, const vec3_t& mins, const vec3_t& maxs, mnode_t* headNode, int32_t brushmask) = 0;
 	virtual void TransformedBoxTrace(TraceResult* trace, const vec3_t& start, const vec3_t& end, const vec3_t& mins, const vec3_t& maxs, mnode_t* headNode, int32_t brushmask, const vec3_t& origin, const vec3_t& angles) = 0;
-	virtual void ClipEntity(TraceResult* dst, const TraceResult* src, struct entity_s* ent) = 0;
+	virtual void ClipEntity(TraceResult* dst, const TraceResult* src, struct PODEntity* ent) = 0;
 };
 
 //---------------------------------------------------------------------

@@ -348,7 +348,7 @@ static void CLG_CalculateYawAngle (PODEntity* clEntity) {
     float   move;
     float   speed;
 
-    current = clEntity->current.angles[vec3_t::Yaw]; //AngleMod(ent->state.angles[vec3_t::Yaw]);
+    current = clEntity->currentState.angles[vec3_t::Yaw]; //AngleMod(ent->state.angles[vec3_t::Yaw]);
 
     if (clEntity->gameEntity)
         ideal = clEntity->gameEntity->GetIdealYawAngle();
@@ -381,7 +381,7 @@ static void CLG_CalculateYawAngle (PODEntity* clEntity) {
             move = -speed;
     }
 
-    clEntity->current.angles[vec3_t::Yaw] = AngleMod(current + move);
+    clEntity->currentState.angles[vec3_t::Yaw] = AngleMod(current + move);
 }
 
 
@@ -411,7 +411,7 @@ qboolean SV_StepDirection(CLGBaseEntity* ent, float yaw, float dist)
 
     //    VectorCopy(ent->state.origin, oldorigin);
     if (CLG_MoveStep(ent, move, false)) {
-        delta = ent->GetPODEntity()->current.angles[vec3_t::Yaw]; //ent->GetPODEntity()->state.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
+        delta = ent->GetPODEntity()->currentState.angles[vec3_t::Yaw]; //ent->GetPODEntity()->state.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
             ent->SetOrigin(oldOrigin);

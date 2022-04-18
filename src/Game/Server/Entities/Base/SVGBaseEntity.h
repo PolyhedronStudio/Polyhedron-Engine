@@ -229,8 +229,8 @@ public:
     /**
     *   @brief Get/Set: Angles
     **/
-    inline const vec3_t&    GetAngles() override { return podEntity->state.angles; }
-    inline void             SetAngles(const vec3_t& angles) override { podEntity->state.angles = angles; }
+    inline const vec3_t&    GetAngles() override { return podEntity->currentState.angles; }
+    inline void             SetAngles(const vec3_t& angles) override { podEntity->currentState.angles = angles; }
 
     /**
     *   @brief Get/Set: Angular Velocity
@@ -297,8 +297,8 @@ public:
     /**
     *   @brief Get/Set: Effects
     **/
-    inline const uint32_t   GetEffects() override { return podEntity->state.effects; }
-    inline void             SetEffects(const uint32_t effects) override { podEntity->state.effects = effects; }
+    inline const uint32_t   GetEffects() override { return podEntity->currentState.effects; }
+    inline void             SetEffects(const uint32_t effects) override { podEntity->currentState.effects = effects; }
 
     /**
     *   @brief Get/Set: Enemy
@@ -314,8 +314,8 @@ public:
     /**
     *   @brief Get/Set: Event ID
     **/
-    inline const uint8_t    GetEventID() override { return podEntity->state.eventID; }
-    inline void             SetEventID(const uint8_t eventID) override { podEntity->state.eventID = eventID; }
+    inline const uint8_t    GetEventID() override { return podEntity->currentState.eventID; }
+    inline void             SetEventID(const uint8_t eventID) override { podEntity->currentState.eventID = eventID; }
 
     /**
     *   @brief Get/Set: Flags
@@ -326,8 +326,8 @@ public:
     /**
     *   @brief Get/Set: Animation Frame
     **/
-    inline const float      GetAnimationFrame() override { return podEntity->state.animationFrame; }
-    inline void             SetAnimationFrame(const float frame) override { podEntity->state.animationFrame = frame; }
+    inline const float      GetAnimationFrame() override { return podEntity->currentState.animationFrame; }
+    inline void             SetAnimationFrame(const float frame) override { podEntity->currentState.animationFrame = frame; }
 
     /**
     *   @brief Get/Set: Gravity
@@ -425,23 +425,23 @@ public:
     /**
     *   @brief Get/Set: Model Index 1
     **/
-    inline const int32_t    GetModelIndex() override { return podEntity->state.modelIndex;  }
-    inline void             SetModelIndex(const int32_t index) override { podEntity->state.modelIndex = index;  }
+    inline const int32_t    GetModelIndex() override { return podEntity->currentState.modelIndex;  }
+    inline void             SetModelIndex(const int32_t index) override { podEntity->currentState.modelIndex = index;  }
     /**
     *   @brief Get/Set: Model Index 2
     **/
-    inline const int32_t    GetModelIndex2() override { return podEntity->state.modelIndex2; }
-    inline void             SetModelIndex2(const int32_t index) override { podEntity->state.modelIndex2 = index; }
+    inline const int32_t    GetModelIndex2() override { return podEntity->currentState.modelIndex2; }
+    inline void             SetModelIndex2(const int32_t index) override { podEntity->currentState.modelIndex2 = index; }
     /**
     *   @brief Get/Set: Model Index 3
     **/
-    inline const int32_t    GetModelIndex3() override { return podEntity->state.modelIndex3; }
-    inline void             SetModelIndex3(const int32_t index) override { podEntity->state.modelIndex3 = index; }
+    inline const int32_t    GetModelIndex3() override { return podEntity->currentState.modelIndex3; }
+    inline void             SetModelIndex3(const int32_t index) override { podEntity->currentState.modelIndex3 = index; }
     /**
     *   @brief Get/Set: Model Index 4
     **/
-    inline const int32_t    GetModelIndex4() override { return podEntity->state.modelIndex4; }
-    inline void SetModelIndex4(const int32_t index) override { podEntity->state.modelIndex4 = index; }
+    inline const int32_t    GetModelIndex4() override { return podEntity->currentState.modelIndex4; }
+    inline void SetModelIndex4(const int32_t index) override { podEntity->currentState.modelIndex4 = index; }
 
     /**
     *   @brief Get/Set: Move Type.
@@ -470,8 +470,8 @@ public:
     /**
     *   @brief Get/Set:     State Number
     **/
-    inline const int32_t    GetNumber() override { return podEntity->state.number; }
-    inline void             SetNumber(const int32_t number) override { podEntity->state.number = number; }
+    inline const int32_t    GetNumber() override { return podEntity->currentState.number; }
+    inline void             SetNumber(const int32_t number) override { podEntity->currentState.number = number; }
 
     /**
     *   @brief Get/Set:     Old Enemy Entity
@@ -482,14 +482,14 @@ public:
     /**
     *   @brief Get/Set:     Old Origin
     **/
-    inline const vec3_t&    GetOldOrigin() override { return podEntity->state.oldOrigin; }
-    inline void             SetOldOrigin(const vec3_t& oldOrigin) override { podEntity->state.oldOrigin = oldOrigin; }
+    inline const vec3_t&    GetOldOrigin() override { return podEntity->currentState.oldOrigin; }
+    inline void             SetOldOrigin(const vec3_t& oldOrigin) override { podEntity->currentState.oldOrigin = oldOrigin; }
 
     /**
     *   @brief Get/Set:     Origin
     **/
-    inline const vec3_t&    GetOrigin() override { return podEntity->state.origin; }
-    inline void             SetOrigin(const vec3_t& origin) override { podEntity->state.origin = origin; }
+    inline const vec3_t&    GetOrigin() override { return podEntity->currentState.origin; }
+    inline void             SetOrigin(const vec3_t& origin) override { podEntity->currentState.origin = origin; }
 
     /**
     *   @brief Get/Set:     Owner Entity
@@ -500,8 +500,8 @@ public:
     /**
     *   @brief Get/Set:     Render Effects
     **/
-    inline const int32_t    GetRenderEffects() override { return podEntity->state.renderEffects; }
-    inline void             SetRenderEffects(const int32_t renderEffects) override { podEntity->state.renderEffects = renderEffects; }
+    inline const int32_t    GetRenderEffects() override { return podEntity->currentState.renderEffects; }
+    inline void             SetRenderEffects(const int32_t renderEffects) override { podEntity->currentState.renderEffects = renderEffects; }
         
     // Get the 'pathTarget' entity value.
     // Overridden by PathCorner
@@ -517,8 +517,8 @@ public:
     /**
     *   @brief Get/Set:     Skin Number
     **/
-    inline const int32_t    GetSkinNumber() override { return podEntity->state.skinNumber; }
-    inline void             SetSkinNumber(const int32_t skinNumber) override { podEntity->state.skinNumber = skinNumber; }
+    inline const int32_t    GetSkinNumber() override { return podEntity->currentState.skinNumber; }
+    inline void             SetSkinNumber(const int32_t skinNumber) override { podEntity->currentState.skinNumber = skinNumber; }
 
     /**
     *   @brief Get/Set:     Entity Size
@@ -535,8 +535,8 @@ public:
     /**
     *   @brief Get/Set:     Sound.
     **/
-    inline const int32_t GetSound() override { return podEntity->state.sound; }
-    inline void SetSound(const int32_t sound) override { podEntity->state.sound = sound; }
+    inline const int32_t GetSound() override { return podEntity->currentState.sound; }
+    inline void SetSound(const int32_t sound) override { podEntity->currentState.sound = sound; }
 
     /**
     *   @brief Get/Set:     Spawn Flags
@@ -547,8 +547,8 @@ public:
     /**
     *   @brief Get/Set:     Entity State
     **/
-    inline const EntityState&   GetState() override { return podEntity->state; }
-    inline void                 SetState(const EntityState &state) override { podEntity->state = state; }
+    inline const EntityState&   GetState() override { return podEntity->currentState; }
+    inline void                 SetState(const EntityState &state) override { podEntity->currentState = state; }
 
     /**
     *   @brief Get/Set:     Style

@@ -142,10 +142,10 @@ public:
             // Store the svEntity's game entity pointer.
             svEntity->gameEntity = gameEntity;
 
-            if (nullptr == gameEntities[svEntity->state.number]) {
-                gameEntities[svEntity->state.number] = gameEntity;
+            if (nullptr == gameEntities[svEntity->currentState.number]) {
+                gameEntities[svEntity->currentState.number] = gameEntity;
             } else {
-                gi.DPrintf("ERROR: edict %i is already taken\n", svEntity->state.number);
+                gi.DPrintf("ERROR: edict %i is already taken\n", svEntity->currentState.number);
             }
         }
         return gameEntity;

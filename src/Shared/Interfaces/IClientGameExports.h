@@ -8,7 +8,7 @@
 #pragma once
 
 struct PlayerMove;
-struct ClientEntity;
+struct PODEntity;
 
 //---------------------------------------------------------------------
 // CORE Export Interface.
@@ -72,17 +72,22 @@ public:
     *           the game entity belonging to the server side entity(defined by state.number).
     * 
     *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
-    *           always update its ClientEntity pointer to the appropriate new one instead.
+    *           always update its PODEntity pointer to the appropriate new one instead.
     * 
     *   @return True on success, false in case of trouble. (Should never happen, and if it does,
     *           well... file an issue lmao.)
     **/
-    virtual qboolean UpdateFromState(ClientEntity *clEntity, const EntityState &state) = 0;
+    virtual qboolean UpdateFromState(PODEntity *clEntity, const EntityState &state) = 0;
 
     /**
-    *   @brief  Executed whenever an entity event is receieved.
+    *   @brief  Executed whenever a server frame entity event is receieved.
     **/
-    virtual void Event(int32_t number) = 0;
+    virtual void ServerEntityEvent(int32_t number) = 0;
+
+    /**
+    *   @brief  Executed whenever a local client entity event is set.
+    **/
+    virtual void LocalEntityEvent(int32_t number) = 0;
 
     /**
     *   @brief  Parse the server frame for server entities to add to our client view.

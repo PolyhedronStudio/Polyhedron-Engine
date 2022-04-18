@@ -19,7 +19,7 @@ extern ClientShared cs;
 /**
 *	@brief	Clips the trace against all entities resulting in a final trace result.
 **/
-void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
+void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
     // CM Source Trace.
     TraceResult         cmSrcTrace;
     // Head Node used for testing.
@@ -27,7 +27,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
     // Collision model for entity.
     mmodel_t*       cmodel = nullptr;
     // Client side entity.
-    ClientEntity*   solidEntity = nullptr;
+    PODEntity*   solidEntity = nullptr;
 
     // Actual start point of the trace. May modify during the loop.
     vec3_t traceOrigin = vec3_zero();
@@ -44,29 +44,29 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
         }
 
         // Should we skip it?
-        if (skipEntity != nullptr && skipEntity->current.number == solidEntity->current.number) {
+        if (skipEntity != nullptr && skipEntity->currentState.number == solidEntity->currentState.number) {
             continue;
         }
 
-        if (solidEntity->current.solid == PACKED_BBOX) {
+        if (solidEntity->currentState.solid == PACKED_BBOX) {
             // special value for bmodel
-            cmodel = cl.clipModels[solidEntity->current.modelIndex];
+            cmodel = cl.clipModels[solidEntity->currentState.modelIndex];
             if (!cmodel)
                 continue;
             headNode = cmodel->headNode;
 
             // Setup angles and origin for our trace.
-            traceAngles = solidEntity->current.angles;
-            traceOrigin = solidEntity->current.origin;
+            traceAngles = solidEntity->currentState.angles;
+            traceOrigin = solidEntity->currentState.origin;
         } else {
-            if (solidEntity->current.solid == Solid::OctagonBox) {
-                headNode = CM_HeadnodeForOctagon(solidEntity->current.mins, solidEntity->current.maxs);
+            if (solidEntity->currentState.solid == Solid::OctagonBox) {
+                headNode = CM_HeadnodeForOctagon(solidEntity->currentState.mins, solidEntity->currentState.maxs);
             } else {
-                headNode = CM_HeadnodeForBox(solidEntity->current.mins, solidEntity->current.maxs);
+                headNode = CM_HeadnodeForBox(solidEntity->currentState.mins, solidEntity->currentState.maxs);
             }
 
-            traceAngles = solidEntity->current.angles;
-            traceOrigin = solidEntity->current.origin;
+            traceAngles = solidEntity->currentState.angles;
+            traceOrigin = solidEntity->currentState.origin;
         }
 
         // We're done clipping against entities if we reached an allSolid aka world.
@@ -76,7 +76,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
 		// Execute source trace.
         cmSrcTrace = CM_TransformedBoxTrace(start, end, mins, maxs, headNode, contentMask, traceOrigin, traceAngles);
 
-        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)solidEntity);
+        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct PODEntity*)solidEntity);
     }
 }
 
@@ -85,7 +85,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
 *			Optionally one can pass a pointer to an entity in order to skip(ignore) it.
 *	@return	The result of said trace, in case of hittnig the world, ent == cl.solidEntities[0] == nullptr?
 **/
-TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask) {
+TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask) {
 	// Absolute clean trace result.
 	TraceResult trace = {};
 
@@ -103,14 +103,14 @@ TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs
     trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.bsp->nodes, contentMask, traceOrigin, traceAngles);
 
     // Set trace entity.
-    trace.ent = reinterpret_cast<entity_s*>(&cl.solidEntities[0]);
+    trace.ent = reinterpret_cast<PODEntity*>(&cl.solidEntities[0]);
 
 	if (trace.fraction == 0) {
         return trace;   // Blocked by the world
     }
 
     // Clip to other solid entities.
-    CL_ClipMoveToEntities(start, mins, maxs, end, reinterpret_cast<ClientEntity*>(skipEntity), contentMask, &trace);
+    CL_ClipMoveToEntities(start, mins, maxs, end, reinterpret_cast<PODEntity*>(skipEntity), contentMask, &trace);
 
     return trace;
 }
@@ -127,7 +127,7 @@ CL_ClipMoveToEntities
 
 Clips the trace against all entities resulting in a final trace result.
 ===============
-void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, ClientEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
+void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
     // CM Source Trace.
     TraceResult         cmSrcTrace;
     // Head Node used for testing.
@@ -135,7 +135,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
     // Collision model for entity.
     mmodel_t*       cmodel = nullptr;
     // Client side entity.
-    ClientEntity*   solidEntity = nullptr;
+    PODEntity*   solidEntity = nullptr;
 
     // Actual start point of the trace. May modify during the loop.
     vec3_t traceOrigin = vec3_zero();
@@ -152,27 +152,27 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
         }
 
         // Should we skip it?
-        if (skipEntity != nullptr && skipEntity->current.number == solidEntity->current.number) {
+        if (skipEntity != nullptr && skipEntity->currentState.number == solidEntity->currentState.number) {
             continue;
         }
 
-        if (solidEntity->current.solid == PACKED_BBOX) {
+        if (solidEntity->currentState.solid == PACKED_BBOX) {
             // special value for bmodel
-            cmodel = cl.clipModels[solidEntity->current.modelIndex];
+            cmodel = cl.clipModels[solidEntity->currentState.modelIndex];
             if (!cmodel)
                 continue;
             headNode = cmodel->headNode;
 
             // Setup angles and origin for our trace.
-            traceAngles = solidEntity->current.angles;
-            traceOrigin = solidEntity->current.origin;
+            traceAngles = solidEntity->currentState.angles;
+            traceOrigin = solidEntity->currentState.origin;
         } else {
             vec3_t entityMins = {0.f, 0.f, 0.f};
             vec3_t entityMaxs = {0.f, 0.f, 0.f};
 
-            //MSG_UnpackBoundingBox32(solidEntity->current.solid, entityMins, entityMaxs);
+            //MSG_UnpackBoundingBox32(solidEntity->currentState.solid, entityMins, entityMaxs);
             
-            if (solidEntity->current.solid == Solid::OctagonBox) {
+            if (solidEntity->currentState.solid == Solid::OctagonBox) {
 
                 headNode = CM_HeadnodeForOctagon(solidEntity->mins, solidEntity->maxs);
             } else {
@@ -180,7 +180,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
             }
 
             traceAngles = vec3_zero();
-            traceOrigin = solidEntity->current.origin;
+            traceOrigin = solidEntity->currentState.origin;
         }
 
         // We're done clipping against entities if we reached an allSolid aka world.
@@ -191,7 +191,7 @@ void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t
                                mins, maxs, headNode, contentMask,
                                traceOrigin, traceAngles);
 
-        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct entity_s*)solidEntity);
+        CM_ClipEntity(cmDstTrace, &cmSrcTrace, (struct PODEntity*)solidEntity);
     }
 }
 
@@ -201,7 +201,7 @@ CL_Trace
 Executes a client side trace on the world and its entities using the given contentMask.
 Optionally one can pass a pointer to an entity in order to skip(ignore) it.
 ===============
-TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask) {
+TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask) {
     TraceResult trace;
 
     // Ensure we can pull of a proper trace.
@@ -215,10 +215,10 @@ TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs
     CM_TransformedBoxTrace(&trace, start, end, mins, maxs, cl.bsp->nodes, contentMask, vec3_zero(), vec3_zero());
 
     // Set trace entity.
-    trace.ent = reinterpret_cast<entity_s*>(&cl.solidEntities[0]);
+    trace.ent = reinterpret_cast<PODEntity*>(&cl.solidEntities[0]);
 
     // Clip to other solid entities.
-    CL_ClipMoveToEntities(start, mins, maxs, end, reinterpret_cast<ClientEntity*>(skipEntity), contentMask, &trace);
+    CL_ClipMoveToEntities(start, mins, maxs, end, reinterpret_cast<PODEntity*>(skipEntity), contentMask, &trace);
 
     return trace;
 }

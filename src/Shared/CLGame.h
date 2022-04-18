@@ -241,7 +241,7 @@ extern "C" {
         void            (*CheckForIP) (const char* s);
 
         // Executes a client side trace.
-        TraceResult         (*Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
+        TraceResult         (*Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
 
         //---------------------------------------------------------------------
         // Command Buffer.
@@ -276,7 +276,7 @@ extern "C" {
 
         const TraceResult (*CM_BoxTrace)(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask);
         const TraceResult (*CM_TransformedBoxTrace) (const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin, const vec3_t& angles);
-        void        (*CM_ClipEntity) (TraceResult* dst, const TraceResult* src, struct entity_s* ent);
+        void        (*CM_ClipEntity) (TraceResult* dst, const TraceResult* src, struct PODEntity* ent);
 
         //---------------------------------------------------------------------
         // Command

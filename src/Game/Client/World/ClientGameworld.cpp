@@ -139,8 +139,8 @@ void ClientGameworld::PreparePlayers() {
 		// Acquire POD entity.
 		PODEntity *podEntity = GetPODEntityByIndex(i);
 
-		podEntity->current.number = i;
-		podEntity->prev.number = i;
+		podEntity->currentState.number = i;
+		podEntity->previousState.number = i;
 		podEntity->clientEntityNumber = i;
 		podEntity->gameEntity = nullptr; // TODO: ??
 
@@ -199,7 +199,7 @@ qboolean ClientGameworld::SpawnFromBSPString(const char* mapName, const char* en
 	qboolean isParsing = true; // We'll keep on parsing until this is set to false.
 	qboolean parsedSuccessfully = false;// This gets set to false the immediate moment we run into parsing trouble.
 	char *com_token = nullptr; // Token pointer.
-	ClientEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
+	PODEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
     uint32_t entityIndex = 0;         
 
 	// Engage parsing.
@@ -517,7 +517,7 @@ GameEntity *ClientGameworld::AllocateGameEntity(PODEntity *podEntity, const std:
     }
 
     // Get entity state number.
-    int32_t stateNumber = podEntity->current.number;
+    int32_t stateNumber = podEntity->currentState.number;
 
 	// Warn if a slot is already occupied.
     if (gameEntities[stateNumber] != nullptr) {
@@ -576,7 +576,7 @@ void ClientGameworld::FreePODEntity(PODEntity* podEntity) {
     //gi.UnlinkEntity(podEntity);
 
     // Get entity number.
-    int32_t entityNumber = podEntity->current.number;
+    int32_t entityNumber = podEntity->currentState.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
   //  if (entityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
@@ -613,12 +613,12 @@ qboolean ClientGameworld::FreeGameEntity(PODEntity* podEntity) {
     qboolean freedGameEntity = false;
 
     // Fetch entity number.
-    int32_t entityNumber = podEntity->current.number;
+    int32_t entityNumber = podEntity->currentState.number;
 
     // If it has a pointer to a game entity, we use that instead.
     if (podEntity->gameEntity) {
 		// Get pointer to game entity.
-		IClientGameEntity* gameEntity = podEntity->gameEntity;
+		IClientGameEntity* gameEntity = static_cast<IClientGameEntity*>(podEntity->gameEntity);
 
 		// Remove the gameEntity reference
 		gameEntity->SetGroundEntity(nullptr);
@@ -657,7 +657,7 @@ qboolean ClientGameworld::FreeGameEntity(PODEntity* podEntity) {
 *			based on the state's hashed classname.
 *   @return Pointer to the game entity object on sucess. On failure, nullptr.
 **/
-GameEntity* ClientGameworld::CreateFromState(const EntityState& state, ClientEntity* clEntity) {
+GameEntity* ClientGameworld::CreateFromState(const EntityState& state, PODEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -671,7 +671,7 @@ GameEntity* ClientGameworld::CreateFromState(const EntityState& state, ClientEnt
 
 	// Acquire hashedClassname.
 	const uint32_t currentHashedClassname = state.hashedClassname;
-	uint32_t previousHashedClassname = clEntity->prev.hashedClassname;
+	uint32_t previousHashedClassname = clEntity->previousState.hashedClassname;
 
 	// If the previous and current entity number and classname hash are a match, 
 	// update the current entity from state instead.
@@ -681,12 +681,12 @@ GameEntity* ClientGameworld::CreateFromState(const EntityState& state, ClientEnt
 
 		// Update it based on state and return its pointer.
 		if (clEntity->gameEntity) {
-			clEntity->gameEntity->UpdateFromState(state);
+			static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
 		} else {
 			Com_DPrint("Warning: hashed classnames and/or state and entity number mismatch:\n currentHash: %s, previousHash: %s, %i, %i\n", currentHashedClassname, previousHashedClassname, state.number, clEntity->clientEntityNumber);
 		}
 
-		return clEntity->gameEntity;
+		return static_cast<IClientGameEntity*>(clEntity->gameEntity);
 	}
 
     // New type info-based spawning system, to replace endless string comparisons
@@ -719,10 +719,10 @@ GameEntity* ClientGameworld::CreateFromState(const EntityState& state, ClientEnt
 		}
 
 		// Update its current state.
-		clEntity->gameEntity->UpdateFromState(state);
+		static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
 
 		// Return game entity.
-		return clEntity->gameEntity;
+		return static_cast<IClientGameEntity*>(clEntity->gameEntity);
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
@@ -741,12 +741,12 @@ GameEntity* ClientGameworld::CreateFromState(const EntityState& state, ClientEnt
 *           the game entity belonging to the server side entity(defined by state.number).
 * 
 *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
-*           always update its ClientEntity pointer to the appropriate new one instead.
+*           always update its PODEntity pointer to the appropriate new one instead.
 * 
 *   @return True on success, false in case of trouble. (Should never happen, and if it does,
 *           well... file an issue lmao.)
 **/
-qboolean ClientGameworld::UpdateFromState(ClientEntity *clEntity, const EntityState& state) {
+qboolean ClientGameworld::UpdateFromState(PODEntity *clEntity, const EntityState& state) {
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.

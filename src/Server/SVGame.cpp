@@ -329,7 +329,7 @@ static void PF_setmodel(Entity *ent, const char *name)
 
     i = PF_ModelIndex(name);
 
-    ent->state.modelIndex = i;
+    ent->currentState.modelIndex = i;
 
 // if it is an inline model, get the size information for it
     if (name[0] == '*') {
@@ -572,9 +572,9 @@ static void PF_StartSound(Entity *edict, int channel,
         // use the entity origin unless it is a bmodel
         if (edict->solid == Solid::BSP) {
             VectorAverage(edict->mins, edict->maxs, origin);
-            VectorAdd(edict->state.origin, origin, origin);
+            VectorAdd(edict->currentState.origin, origin, origin);
         } else {
-            VectorCopy(edict->state.origin, origin);
+            VectorCopy(edict->currentState.origin, origin);
         }
 
         // reliable sounds will always have position explicitly set,

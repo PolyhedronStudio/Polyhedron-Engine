@@ -452,7 +452,7 @@ void SV_InitGame()
         client = svs.clientPool + i;
         entnum = i + 1;
         ent = EDICT_NUM(entnum);
-        ent->state.number = entnum;
+        ent->currentState.number = entnum;
         client->edict = ent;
         client->number = i;
     }

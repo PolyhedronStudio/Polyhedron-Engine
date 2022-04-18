@@ -45,8 +45,8 @@ qboolean SVG_StepMove_CheckBottom(IServerGameEntity* ent)
     int32_t x, y;
     float   mid, bottom;
 
-    vec3_t mins = ent->GetOrigin() + ent->GetMins(); //VectorAdd(ent->state.origin, ent->mins, mins);
-    vec3_t maxs = ent->GetOrigin() + ent->GetMaxs(); //VectorAdd(ent->state.origin, ent->maxs, maxs);
+    vec3_t mins = ent->GetOrigin() + ent->GetMins(); //VectorAdd(ent->currentState.origin, ent->mins, mins);
+    vec3_t maxs = ent->GetOrigin() + ent->GetMaxs(); //VectorAdd(ent->currentState.origin, ent->maxs, maxs);
 
 
                                                      // if all of the points under the corners are solid world, don't bother
@@ -162,7 +162,7 @@ qboolean SVG_MoveStep(IServerGameEntity* ent, vec3_t move, qboolean relink)
     int         contents;
 
     // Try the move
-    vec3_t oldOrigin = ent->GetOrigin(); // VectorCopy(ent->state.origin, oldorg);
+    vec3_t oldOrigin = ent->GetOrigin(); // VectorCopy(ent->currentState.origin, oldorg);
     vec3_t newOrigin = oldOrigin + move;
 
     // flying monsters don't step up
@@ -174,7 +174,7 @@ qboolean SVG_MoveStep(IServerGameEntity* ent, vec3_t move, qboolean relink)
             if (i == 0 && ent->GetEnemy()) {
                 //if (!ent->GetPODEntity()->goalEntityPtr)
                 //    ent->GetPODEntity()->goalEntityPtr = ent->GetEnemy()->GetPODEntity();
-                //dz = ent->GetPODEntity()->state.origin[2] - ent->GetPODEntity()->goalEntityPtr->state.origin[2];
+                //dz = ent->GetPODEntity()->currentState.origin[2] - ent->GetPODEntity()->goalEntityPtr->currentState.origin[2];
                 //if (ent->GetPODEntity()->goalEntityPtr->client) {
                 //    if (dz > 40)
                 //        newOrigin.z -= 8;
@@ -337,7 +337,7 @@ static void SVG_CalculateYawAngle (Entity* ent)
     float   move;
     float   speed;
 
-    current = AngleMod(ent->state.angles[vec3_t::Yaw]);
+    current = AngleMod(ent->currentState.angles[vec3_t::Yaw]);
 
     if (ent->gameEntity)
         ideal = ent->gameEntity->GetIdealYawAngle();
@@ -370,7 +370,7 @@ static void SVG_CalculateYawAngle (Entity* ent)
             move = -speed;
     }
 
-    ent->state.angles[vec3_t::Yaw] = AngleMod(current + move);
+    ent->currentState.angles[vec3_t::Yaw] = AngleMod(current + move);
 }
 
 
@@ -398,9 +398,9 @@ qboolean SV_StepDirection(SVGBaseEntity* ent, float yaw, float dist)
 
     oldOrigin = ent->GetOrigin();
 
-    //    VectorCopy(ent->state.origin, oldorigin);
+    //    VectorCopy(ent->currentState.origin, oldorigin);
     if (SVG_MoveStep(ent, move, false)) {
-        delta = ent->GetPODEntity()->state.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
+        delta = ent->GetPODEntity()->currentState.angles[vec3_t::Yaw] - ent->GetIdealYawAngle();
         if (delta > 45 && delta < 315) {
             // not turned far enough, so don't take the step
             ent->SetOrigin(oldOrigin);

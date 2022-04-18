@@ -41,7 +41,7 @@ void GameEntityList::Clear() {
 *   @brief  Creates, and assigns to the POD entity a new game entity of type 'classname'.
 *   @return Pointer to the game entity object on sucess. On failure, nullptr.
 **/
-IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &classname, ClientEntity* clEntity) {
+IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &classname, PODEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -82,7 +82,7 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
 		}
 
 		// Return game entity.
-		return clEntity->gameEntity;
+		return static_cast<IClientGameEntity*>(clEntity->gameEntity);
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
@@ -101,7 +101,7 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
 *			based on the state's hashed classname.
 *   @return Pointer to the game entity object on sucess. On failure, nullptr.
 **/
-IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, ClientEntity* clEntity) {
+IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, PODEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -110,12 +110,15 @@ IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, Cli
 		return nullptr;
     }
 
+	if (clEntity->isLocal) {
+		return GetByNumber(clEntity->clientEntityNumber);
+	}
     // Get entity state number.
     const int32_t stateNumber = state.number;
 
 	// Acquire hashedClassname.
 	const uint32_t currentHashedClassname = state.hashedClassname;
-	uint32_t previousHashedClassname = clEntity->prev.hashedClassname;
+	uint32_t previousHashedClassname = clEntity->previousState.hashedClassname;
 
 	// If the previous and current entity number and classname hash are a match, 
 	// update the current entity from state instead.
@@ -125,12 +128,12 @@ IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, Cli
 
 		// Update it based on state and return its pointer.
 		if (clEntity->gameEntity) {
-			clEntity->gameEntity->UpdateFromState(state);
+			static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
 		} else {
 			Com_DPrint("Warning: hashed classnames and/or state and entity number mismatch:\n currentHash: %s, previousHash: %s, %i, %i\n", currentHashedClassname, previousHashedClassname, state.number, clEntity->clientEntityNumber);
 		}
 
-		return clEntity->gameEntity;
+		return static_cast<IClientGameEntity*>(clEntity->gameEntity);
 	}
 
     // New type info-based spawning system, to replace endless string comparisons
@@ -163,10 +166,10 @@ IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, Cli
 		}
 
 		// Update its current state.
-		clEntity->gameEntity->UpdateFromState(state);
+		static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
 
 		// Return game entity.
-		return clEntity->gameEntity;
+		return static_cast<IClientGameEntity*>(clEntity->gameEntity);
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
@@ -225,8 +228,10 @@ IClientGameEntity *GameEntityList::InsertAt(int32_t number, IClientGameEntity *c
 		}
 	}
 
+	gameEntities.resize(number + 1);
+	gameEntities[number] = clgEntity;
 	// We didn't actually 
-	gameEntities.push_back(clgEntity);
+//	gameEntities.push_back(clgEntity);
 
 	// Return object ptr.
 	return clgEntity;

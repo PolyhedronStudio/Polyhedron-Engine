@@ -41,7 +41,7 @@ public:
     //! Constructor/Destructor.
     GameEntityList() {
         // 2048 for server entities, and 2048 more for 'local' client side only entities.
-        gameEntities.reserve(MAX_PACKET_ENTITIES * 2);
+        gameEntities.reserve(MAX_CLIENT_POD_ENTITIES);
 
         // To ensure that slot 0 is in use, keeps indexes correct.
         gameEntities.push_back(nullptr);
@@ -54,34 +54,34 @@ public:
     void Clear();
 
 	/**
-	*   @brief  Spawns and inserts a new game entity of type 'classname', which belongs to the ClientEntity.
+	*   @brief  Spawns and inserts a new game entity of type 'classname', which belongs to the PODEntity.
 	*   @return Pointer to the game entity object on sucess. On failure, nullptr.
 	**/
-	IClientGameEntity *AllocateFromClassname(const std::string &classname, ClientEntity* clEntity);
+	GameEntity *AllocateFromClassname(const std::string &classname, PODEntity* clEntity);
 
     /**
     *   @brief  Spawns and inserts a new game entity at the state.number index, assigning the client entity pointer
     *           as its 'soulmate', I suppose.
     *   @return Pointer to the game entity object on sucess. On failure, nullptr.
     **/
-    IClientGameEntity *CreateFromState(const EntityState &state, ClientEntity *clEntity);
+    GameEntity *CreateFromState(const EntityState &state, PODEntity *clEntity);
 
     /**
     *   @return A pointer to the entity who's index matches the state number.
     **/
-    IClientGameEntity *GetByNumber(int32_t number);
+    GameEntity *GetByNumber(int32_t number);
 
     /**
     *   @brief  Inserts the game entity pointer at the number index of our game entity vector.
     *   @param  force   When set to true it'll delete any previously allocated game entity occupying the given slot.
     *   @return Pointer to the entity being inserted. nullptr on failure.
     **/
-    IClientGameEntity *InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force = true);
+    GameEntity *InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force = true);
 
 	// Return pointer to game entity vector.
-    inline CLGEntityVector &GetGameEntities() { return gameEntities; };
+    inline GameEntityVector &GetGameEntities() { return gameEntities; };
 
 private:
     //! First 2048 are reserved for server side entities.
-    CLGEntityVector gameEntities;
+    GameEntityVector gameEntities;
 };

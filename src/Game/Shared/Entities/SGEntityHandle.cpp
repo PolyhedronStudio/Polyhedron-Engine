@@ -10,17 +10,20 @@
 // Shared Game include.
 #include "../SharedGame.h"
 
+class IServerGameEntity;
 
 /**
 *	@brief	Helper function to acquire the GameEntity pointer from a server entity.
 * 
 *	@return	A valid pointer if the POD Entity is pointing to one. nullptr otherwise.
 **/
-static GameEntity* GetGameEntity(PODEntity* podEntity) {
+#ifdef SHAREDGAME_SERVERGAME
+#include "../../Server/Entities/IServerGameEntity.h"
+static IServerGameEntity* GetGameEntity(PODEntity* podEntity) {
     // Reinterpret cast the gameEntity pointer.
     if (podEntity) {
 	    if (podEntity->gameEntity != nullptr) {
-	        return podEntity->gameEntity;
+	        return static_cast<IServerGameEntity*>(podEntity->gameEntity);
 	    } else {
 	        return nullptr;
 	    }
@@ -29,8 +32,23 @@ static GameEntity* GetGameEntity(PODEntity* podEntity) {
     // Return nullptr.
     return nullptr;
 }
+#endif
+#ifdef SHAREDGAME_CLIENTGAME
+#include "../../Client/Entities/IClientGameEntity.h"
+static IClientGameEntity* GetGameEntity(PODEntity* podEntity) {
+    // Reinterpret cast the gameEntity pointer.
+    if (podEntity) {
+	    if (podEntity->gameEntity != nullptr) {
+	        return static_cast<IClientGameEntity*>(podEntity->gameEntity);
+	    } else {
+	        return nullptr;
+	    }
+    }
 
-
+    // Return nullptr.
+    return nullptr;
+}
+#endif
 
 
 /**
@@ -65,7 +83,7 @@ SGEntityHandle::SGEntityHandle(PODEntity* podEntity) {
 #if defined(SHAREDGAME_CLIENTGAME)
         entityID    = podEntity->clientEntityNumber;
 #elif defined(SHAREDGAME_SERVERGAME)
-        entityID    = podEntity->state.number;
+        entityID    = podEntity->currentState.number;
 #endif
     } else {
         podEntity   = nullptr;
@@ -90,7 +108,7 @@ PODEntity* SGEntityHandle::Get() const {
 #if defined(SHAREDGAME_CLIENTGAME)
         if (podEntity->clientEntityNumber == entityID) {
 #elif defined(SHAREDGAME_SERVERGAME)
-		if (podEntity->state.number == entityID) {
+		if (podEntity->currentState.number == entityID) {
 #endif
             return podEntity;
 		} else {
@@ -118,7 +136,7 @@ PODEntity* SGEntityHandle::Set(PODEntity* entity) {
 #if defined(SHAREDGAME_CLIENTGAME)
         entityID = entity->clientEntityNumber;
 #elif defined(SHAREDGAME_SERVERGAME)
-    	entityID = entity->state.number;
+    	entityID = entity->currentState.number;
 #endif
     }
 
@@ -153,7 +171,7 @@ ISharedGameEntity* SGEntityHandle::operator=(ISharedGameEntity* gameEntity) {
 #if defined(SHAREDGAME_CLIENTGAME)
             entityID = podEntity->clientEntityNumber;
 #elif defined(SHAREDGAME_SERVERGAME)
-    	    entityID = podEntity->state.number;
+    	    entityID = podEntity->currentState.number;
 #endif
 		}
 	} else {
@@ -193,7 +211,7 @@ bool SGEntityHandle::operator==(const ISharedGameEntity* gameEntity) {
 #if defined(SHAREDGAME_CLIENTGAME)
     if (podEntity->clientEntityNumber != entityID) {
 #elif defined(SHAREDGAME_SERVERGAME)
-    if (podEntity->state.number != entityID) {
+    if (podEntity->currentState.number != entityID) {
 #endif
 		return false;
     }

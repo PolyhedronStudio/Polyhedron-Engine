@@ -216,7 +216,7 @@ struct ClientShared {
     virtual ~ClientShared() = default;
 
     // Stores the entities.
-    ClientEntity entities[MAX_ENTITIES];
+    PODEntity entities[MAX_CLIENT_POD_ENTITIES];
     int num_entities;
 };
 
@@ -234,7 +234,7 @@ struct ClientPredictedState {
     vec3_t velocity;
 
     // Ground entity pointer of the predicted frame.
-    struct entity_s* groundEntityPtr;
+    struct PODEntity* groundEntityPtr;
 
     // Prediction error that is interpolated over the server frame.
     vec3_t error;
@@ -283,8 +283,12 @@ struct ClientState {
     *
     **/
     //! Solid Entities, these are REBUILT during EACH FRAME.
-    ClientEntity *solidEntities[MAX_PACKET_ENTITIES];// = {};
+    PODEntity *solidEntities[MAX_PACKET_ENTITIES];// = {};
     int32_t numSolidEntities = 0;
+
+    //! Solid Local Entities, these are REBUILT during EACH FRAME.
+    PODEntity *solidLocalEntities[MAX_PACKET_ENTITIES];// = {};
+    int32_t numSolidLocalEntities = 0;
 
     //! Entity Baseline States. These are where to start working from.
     EntityState entityBaselines[MAX_EDICTS];//= {};

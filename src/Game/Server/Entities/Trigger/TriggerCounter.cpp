@@ -70,8 +70,7 @@ void TriggerCounter::CounterUse( IServerGameEntity* other, IServerGameEntity* ac
 
 	SetActivator(activator);
 
-	// Mike made a funny decision to put using targets *only* into SVGBaseTrigger
-	// which doesn't really make sense when you think about it, so now we have
-	// SVGBaseEntity::UseTargets and SVGBaseTrigger::UseTargets
+	// Admer placed a funny comment about my funny thinking mistake, so I figured after seeing it
+	// I'd just resolve it.
 	SVGBaseEntity::UseTargets();
 }

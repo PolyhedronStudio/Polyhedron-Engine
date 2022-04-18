@@ -28,31 +28,34 @@ using EntityDictionary = std::map<std::string, std::string>;
 
 
 /**
-*   @brief  entity_s, the server side entity structure. If you know what an entity is,
-*           then you know what this is.
-*
-*   @details    The actual SVGBaseEntity class is a member. It is where the magic happens.
-*               Entities can be linked to their "classname", this will in turn make sure that
-*               the proper inheritance entity is allocated.
+*   @brief  PODEntity is a POD Entity data structure shared across the client as well as the server.
+*           
+*   @details    Only a specific few set of members is strictly to either of the two and enclosed using
+*				some ifdef. (Inheritance would be neater but there's still some C magic going on in
+*				the server, best not do that.)
 **/
-struct entity_s {
+struct PODEntity {
     //! Actual entity state member, a POD type that contains all data that is actually networked.
-    EntityState state;
+	EntityState currentState = {};
+	EntityState previousState = {}; //! CL: Previous state.
 
     //! NULL if not a player. The server expects the first part of gclient_s to
     //! be a PlayerState but the rest of it is opaque
-    struct gclient_s *client = nullptr;       
+    struct gclient_s *client = nullptr;
 
+	//! When true it means this entity is not being processed for networking.
+	qboolean isLocal = false;
     //! When an entity is not in use it isn't being processed for a game's frame.
-    //! If it also has a freeTime set it means it has been freed and its slot is
-    //! ready to be reused in the future.
+    //! If it also has a freeTime value assigned to it then it has been freed and its slot is
+    //! queued for future reusal.
     qboolean inUse = false;
-    //! Keeps track of whether this entity is linked, or unlinked.
-    int32_t linkCount = 0;
 
-    // FIXME: move these fields to a server private sv_entity_t
-    //=================================
-    list_t area; // Linked to a division node or leaf
+
+	/**
+	*	World related info, used for optimizing tracing and proper VIS.
+	**/
+	//! Linked to a division node or leaf
+    list_t area;
 
     //! If numClusters is -1, use headNode instead.
     int32_t numClusters = 0;
@@ -62,25 +65,33 @@ struct entity_s {
     int32_t headNode = 0;
     int32_t areaNumber = 0;
     int32_t areaNumber2 = 0;
-    //================================
-    //! An entity's server state flags.
-    int32_t serverFlags = 0;
-    //! Min and max bounding box.
-    vec3_t mins = vec3_zero(), maxs = vec3_zero();
-    //! Absolute world transform bounding box.
-    vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
-    //! The type of 'Solid' this entity contains.
+
+
+	/**
+	*	Collision Handling Properties.
+	**/
+	//! The type of 'Solid' this entity contains.
     uint32_t solid = 0;
     //! Clipping mask this entity belongs to.
     int32_t clipMask = 0;
-    //! Pointer to the owning entity (if any.)
-    entity_s *owner = nullptr;
+	//! Keeps track of whether this entity is linked, or unlinked.
+    int32_t linkCount = 0;
+	//! An entity's server state flags.
+    int32_t serverFlags = 0;
 
-    //---------------------------------------------------
-    // Do not modify the fields above, they're shared memory wise with the server itself.
-    //---------------------------------------------------
-    //! Actual game entity implementation pointer.
-    IServerGameEntity* gameEntity = nullptr;
+	//! Min and max bounding box.
+    vec3_t mins = vec3_zero(), maxs = vec3_zero();
+    //! Absolute world transform bounding box.
+    vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
+    
+	/**
+	*	Data that the gamemodules set and a client/server may need to know of.
+	**/
+	//! Pointer to the owning entity (if any.)
+    PODEntity *owner = nullptr;
+
+	//! Actual game entity implementation pointer.
+    ISharedGameEntity* gameEntity = nullptr;
 
     //! Dictionary containing the initial key:value entity properties.
     EntityDictionary entityDictionary;
@@ -90,6 +101,26 @@ struct entity_s {
 
     // Move this to clientInfo?
     int32_t lightLevel = 0;
+
+	/**
+	*	Client/ClientGame only fields.
+	**/
+	//! The frame number that this entity was received at.
+	//! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
+	int32_t serverFrame = 0;
+
+	//! An entity's client state flags.
+    int32_t clientFlags = 0;
+
+    //! For diminishing grenade trails
+    int32_t trailCount = 0;
+    //! for trails (variable hz)
+    vec3_t lerpOrigin = vec3_zero();
+
+    //! This is the actual server entity number.
+    int32_t serverEntityNumber = 0;
+    //! This is a unique client entity id, determined by an incremental static counter.
+    int32_t clientEntityNumber = 0;
 };
 
 
@@ -112,78 +143,6 @@ struct EntityClientFlags {
     static constexpr uint32_t Monster       = 0x00000004;   // Treat as BrushContents::Monster for collision.
     static constexpr uint32_t Remove        = 0x00000008;   // Delete the entity next tick.
 };
-
-/**
-*   @brief  Local Client entity. Acts like a POD type similar to the server entity.
-**/
-struct ClientEntity {
-	ClientEntity() = default;
-
-	ClientEntity(ClientEntity&) = default;
-	ClientEntity(const ClientEntity&) = default;
-	virtual ~ClientEntity() = default;
-
-    /**
-    * 
-    *   @brief  Entity Data matching that from the last received server frame.
-    * 
-    **/
-    //! The frame number that this entity was received at.
-    //! Needs to be identical to the current frame number, or else this entity isn't in this frame anymore.
-    int32_t serverFrame = 0;
-
-    //! The last received state of this entity.
-    EntityState current = {};
-    //! The previous last valid state. In worst case scenario might be a copy of current state.
-    EntityState prev = {};
-        
-    //! This entity's server state flags.
-    //int32_t serverFlags = 0; // TODO: Not sure if we need this yet.
-	//! Clipping mask this entity belongs to.
-    int32_t clipMask = 0;
-    //! Min and max bounding box.
-    vec3_t mins = vec3_zero(), maxs = vec3_zero();
-    //! Absolute world transform bounding box. (Note that these are calculated with the link/unlink functions.)
-    vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
-
-
-    /**
-    *
-    *   @brief  Entity Data local to the client only.
-    * 
-    **/
-	//! NOTE: It's never transfered by state, which might be interesting to do however.
-	int32_t linkCount = 0;
-
-	//! An entity's client state flags.
-    int32_t clientFlags = 0;
-
-    //! For diminishing grenade trails
-    int32_t trailCount = 0;
-    //! for trails (variable hz)
-    vec3_t lerpOrigin = vec3_zero();
-
-    //! This is the actual server entity number.
-    int32_t serverEntityNumber = 0;
-    //! This is a unique client entity id, determined by an incremental static counter.
-    int32_t clientEntityNumber = 0;
-
-    //! Pointer to the owning entity (if any.)
-    IClientGameEntity *owner = nullptr;
-
-    //! Pointer to the game entity object that belongs to this client entity.
-    IClientGameEntity *gameEntity;
-
-    //! Key/Value entity dictionary.
-    EntityDictionary entityDictionary;
-
-    //! Actual sv.time when this entity was freed.
-    GameTime freeTime = GameTime::zero();
-
-    // Move this to clientInfo?
-    int32_t lightLevel = 0;
-};
-
 
 /**
 *   @brief  Contains types of 'solid' 

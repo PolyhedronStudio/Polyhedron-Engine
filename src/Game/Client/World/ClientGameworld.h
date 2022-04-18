@@ -139,10 +139,10 @@ public:
 			// Store the podEntity's game entity pointer.
 			podEntity->gameEntity = gameEntity;
 
-			if (gameEntities[podEntity->current.number] == nullptr) {
-				gameEntities[podEntity->current.number] = gameEntity;
+			if (gameEntities[podEntity->currentState.number] == nullptr) {
+				gameEntities[podEntity->currentState.number] = gameEntity;
 			} else {
-				Com_DPrint("ERROR: edict %i is already taken\n", podEntity->current.number);
+				Com_DPrint("ERROR: edict %i is already taken\n", podEntity->currentState.number);
 			}
 		}
 
@@ -155,18 +155,18 @@ public:
 	*			assign it to the client entity.
 	*   @return Pointer to the game entity object on sucess. On failure, nullptr.
 	**/
-	GameEntity* CreateFromState(const EntityState& state, ClientEntity* clEntity);
+	GameEntity* CreateFromState(const EntityState& state, PODEntity* clEntity);
 	/**
 	*   @brief  When the client receives state updates it calls into this function so we can update
 	*           the game entity belonging to the server side entity(defined by state.number).
 	* 
 	*           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
-	*           always update its ClientEntity pointer to the appropriate new one instead.
+	*           always update its PODEntity pointer to the appropriate new one instead.
 	* 
 	*   @return True on success, false in case of trouble. (Should never happen, and if it does,
 	*           well... file an issue lmao.)
 	**/
-	qboolean UpdateFromState(ClientEntity *clEntity, const EntityState& state);
+	qboolean UpdateFromState(PODEntity *clEntity, const EntityState& state);
 	
 	/**
 	*   @brief  Frees the given server entity and its game entity in order to recycle it again.

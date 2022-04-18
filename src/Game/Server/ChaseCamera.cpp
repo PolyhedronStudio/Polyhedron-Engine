@@ -52,7 +52,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 
     targ = ent->GetClient()->chaseTarget;
 
-    VectorCopy(targ->state.origin, ownerv);
+    VectorCopy(targ->currentState.origin, ownerv);
 
     ownerv[2] += targ->gameEntity->GetViewHeight();
 
@@ -63,8 +63,8 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
     VectorNormalize(forward);
     VectorMA(ownerv, -30, forward, o);
 
-    if (o[2] < targ->state.origin[2] + 20)
-        o[2] = targ->state.origin[2] + 20;
+    if (o[2] < targ->currentState.origin[2] + 20)
+        o[2] = targ->currentState.origin[2] + 20;
 
     // jump animation lifts
     if (!targ->gameEntity->GetGroundEntity())

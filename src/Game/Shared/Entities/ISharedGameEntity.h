@@ -605,7 +605,7 @@ protected:
 	template<typename T> auto ParseKeyValue(const std::string &key, const std::string &value, T &outValue) {
 		// Warning print...
 #if defined(SHAREDGAME_SERVERGAME)
-		Com_DPrint("Warning: svEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->state.number, typeid(T).name().c_str(), key.c_str());
+		Com_DPrint("Warning: svEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->currentState.number, typeid(T).name().c_str(), key.c_str());
 #elif defined(SHAREDGAME_CLIENTGAME)
 		Com_DPrintf("Warning: clEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->clientEntityNumber, typeid(T).name().c_str(), key.c_str());
 #else

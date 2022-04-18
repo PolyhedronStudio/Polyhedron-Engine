@@ -151,11 +151,11 @@ struct PlayerMove {
 	PlayerMoveState state = {};
 
     // Entities touched (out)
-    struct entity_s *touchedEntities[PM_MAX_TOUCH_ENTS];
+    struct PODEntity *touchedEntities[PM_MAX_TOUCH_ENTS];
     int32_t numTouchedEntities;
 
     // Pointer to the entity that is below the player. (out)
-    struct entity_s* groundEntityPtr;
+    struct PODEntity* groundEntityPtr;
 
     // Clamped, and including kick and delta (out)
     vec3_t viewAngles = vec3_zero();

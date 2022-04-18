@@ -15,7 +15,7 @@
 /**
 *   @brief  'Diminishing Trail' like particle effect.
 **/
-void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, ClientEntity *oldTrailEntity, int32_t flags) {
+void ParticleEffects::DiminishingTrail(const vec3_t &start, const vec3_t &end, PODEntity *oldTrailEntity, int32_t flags) {
     float originScale   = 0.f;
     float velocityScale = 0.f;
 

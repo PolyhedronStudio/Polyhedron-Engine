@@ -35,9 +35,9 @@ extern qhandle_t cl_sfx_footsteps[4];
 
 // Use a static entity ID on some things because the renderer relies on EntityID to match between meshes
 // between the current and previous frames.
-static constexpr int32_t RESERVED_ENTITIY_GUN = 1;
-static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 2;
-static constexpr int32_t RESERVED_ENTITIY_COUNT = 3;
+static constexpr int32_t RESERVED_ENTITIY_GUN = 2049;
+static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 2050;
+static constexpr int32_t RESERVED_ENTITIY_COUNT = 2051;
 
 
 /**
@@ -74,8 +74,9 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 	qboolean isParsing = true; // We'll keep on parsing until this is set to false.
 	qboolean parsedSuccessfully = false;// This gets set to false the immediate moment we run into parsing trouble.
 	char *com_token = nullptr; // Token pointer.
-	ClientEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
-    uint32_t entityIndex = 0;         
+	PODEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
+    uint32_t entityIndex = 0;	// Entity index for shared with server entities (regular type)
+	uint32_t localEntityIndex = MAX_PACKET_ENTITIES + 3; // Local entity index for local only client entities.
 
 	// Engage parsing.
 	while (!!isParsing == true) {
@@ -93,26 +94,53 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 			return false;
 		}
 
+		// Now we've got the reserved server entity to use, let's parse the entity.
+		EntityDictionary parsedKeyValues;
+        parsedSuccessfully = ParseEntityString(&bspString, parsedKeyValues);
+
 		// Pick the first entity there is, start asking for 
 		if (!clientEntity) {
 			clientEntity = cs->entities;
 		} else {
-
-            entityIndex++;
-            clientEntity = &cs->entities[entityIndex];
-
-
-            if (entityIndex > MAX_EDICTS) {
-                Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_EDICTS\n"));
-            }
+			// See if it has a classname, and if that one contains _client_
+			if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"].find("_client_")) {
+				localEntityIndex++;
+				clientEntity = &cs->entities[localEntityIndex];
+				clientEntity->clientEntityNumber = localEntityIndex;
+				clientEntity->currentState.number = localEntityIndex;
+				clientEntity->isLocal = true;
+				if (localEntityIndex < MAX_PACKET_ENTITIES) {
+					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: localEntityIndex < MAX_EDICTS\n"));
+				}
+			} else {
+				entityIndex++;
+				clientEntity = &cs->entities[entityIndex];
+				clientEntity->clientEntityNumber = entityIndex;
+				clientEntity->currentState.number = entityIndex;
+				if (entityIndex > MAX_EDICTS) {
+					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_EDICTS\n"));
+				}
+			}
 		}
 
-		// Now we've got the reserved server entity to use, let's parse the entity.
-        ParseEntityString(&bspString, clientEntity);
+		// Assign parsed dictionary to entity.
+		clientEntity->entityDictionary = parsedKeyValues;
 
 		// Allocate the game entity, and call its spawn.
-		if (!SpawnParsedGameEntity(clientEntity)) {
-			parsedSuccessfully = false;
+		bool spawnedSuccessfully = true;
+		if (parsedSuccessfully && !SpawnParsedGameEntity(clientEntity)) {
+			spawnedSuccessfully = false;
+		}
+
+		// If we failed to parse the entity properly, zero this one back out.
+		if (!parsedSuccessfully || !spawnedSuccessfully) {
+			const int32_t clientEntityNumber = clientEntity->clientEntityNumber;
+
+			//*clEntity = { .clientEntityNumber = clientEntityNumber };
+			*clientEntity = {};
+			clientEntity->clientEntityNumber = clientEntityNumber;
+
+			return false;
 		}
 	}
 
@@ -137,7 +165,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 *	@brief	Parses the BSP Entity string and places the results in the client
 *			entity dictionary.
 **/
-qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* clEntity) {
+qboolean ClientGameEntities::ParseEntityString(const char** data, EntityDictionary &parsedKeyValues) {
 	// False until proven otherwise.
 	qboolean parsedSuccessfully = false;
 
@@ -186,20 +214,9 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 
 		// Insert the key/value into the dictionary.
 		Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
-		if (clEntity) {
-			clEntity->entityDictionary.try_emplace(std::string(key),std::string(value));// = value;
-		}
-	}
-
-	// If we failed to parse the entity properly, zero this one back out.
-	if (!parsedSuccessfully) {
-		int32_t clientEntityNumber = clEntity->clientEntityNumber;
-
-		//*clEntity = { .clientEntityNumber = clientEntityNumber };
-		*clEntity = {};
-		clEntity->clientEntityNumber = clientEntityNumber;
-
-		return false;
+		//if (clEntity) {
+			parsedKeyValues.try_emplace(std::string(key),std::string(value));// = value;
+		//}
 	}
 
 	// Return the result.
@@ -210,7 +227,7 @@ qboolean ClientGameEntities::ParseEntityString(const char** data, ClientEntity* 
 *   @brief  Allocates the game entity determined by the classname key, and
 *           then does a precache before spawning the game entity.
 **/
-qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
+qboolean ClientGameEntities::SpawnParsedGameEntity(PODEntity* clEntity) {
     // Acquire dictionary.
     auto &dictionary = clEntity->entityDictionary;
 
@@ -261,12 +278,12 @@ qboolean ClientGameEntities::SpawnParsedGameEntity(ClientEntity* clEntity) {
 *           the game entity belonging to the server side entity(defined by state.number).
 * 
 *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
-*           always update its ClientEntity pointer to the appropriate new one instead.
+*           always update its PODEntity pointer to the appropriate new one instead.
 * 
 *   @return True on success, false in case of trouble. (Should never happen, and if it does,
 *           well... file an issue lmao.)
 **/
-qboolean ClientGameEntities::UpdateFromState(ClientEntity *clEntity, const EntityState& state) {
+qboolean ClientGameEntities::UpdateFromState(PODEntity *clEntity, const EntityState& state) {
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
@@ -379,7 +396,7 @@ void ClientGameEntities::RunFrame() {
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 1; entityNumber < cl->frame.numEntities; entityNumber++) {
         // Acquire game entity object.
-        IClientGameEntity *gameEntity = gameEntityList.GetByNumber(entityNumber);
+        GameEntity *gameEntity = gameEntityList.GetByNumber(entityNumber);
 
         // If invalid for whichever reason, warn and continue to next iteration.
         if (!gameEntity) {
@@ -395,9 +412,9 @@ void ClientGameEntities::RunFrame() {
 //-------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Executed whenever an entity event is receieved.
+*   @brief Executed whenever a server frame entity event is receieved.
 **/
-void ClientGameEntities::Event(int32_t number) {
+void ClientGameEntities::ServerEntityEvent(int32_t number) {
     // Ensure entity number is in bounds.
     if (number < 0 || number > MAX_ENTITIES) {
         Com_WPrint("ClientGameEntities::Event caught an OOB Entity ID: %i\n", number);
@@ -405,22 +422,22 @@ void ClientGameEntities::Event(int32_t number) {
     }
 
     // Fetch the client entity.
-    ClientEntity* clientEntity = &cs->entities[number];
+    PODEntity* clientEntity = &cs->entities[number];
 
     // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((clientEntity->current.effects & EntityEffectType::Teleporter)) {
-        ParticleEffects::Teleporter(clientEntity->current.origin);
+    if ((clientEntity->currentState.effects & EntityEffectType::Teleporter)) {
+        ParticleEffects::Teleporter(clientEntity->currentState.origin);
     }
 
     // Switch to specific execution based on a unique Event ID.
-    switch (clientEntity->current.eventID) {
+    switch (clientEntity->currentState.eventID) {
         case EntityEvent::ItemRespawn:
             clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("items/respawn1.wav"), 1, Attenuation::Idle, 0);
-            ParticleEffects::ItemRespawn(clientEntity->current.origin);
+            ParticleEffects::ItemRespawn(clientEntity->currentState.origin);
             break;
         case EntityEvent::PlayerTeleport:
             clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("misc/tele1.wav"), 1, Attenuation::Idle, 0);
-            ParticleEffects::Teleporter(clientEntity->current.origin);
+            ParticleEffects::Teleporter(clientEntity->currentState.origin);
             break;
         case EntityEvent::Footstep:
             if (cl_footsteps->integer)
@@ -439,6 +456,13 @@ void ClientGameEntities::Event(int32_t number) {
 }
 
 /**
+*   @brief  Executed whenever a local client entity event is set.
+**/
+void ClientGameEntities::LocalEntityEvent(int32_t number) {
+
+}
+
+/**
 *   @brief  Parse the server frame for server entities to add to our client view.
 *           Also applies special rendering effects to them where desired.
 **/
@@ -448,7 +472,7 @@ void ClientGameEntities::AddPacketEntities() {
     // State of the current entity.
     EntityState* entityState = nullptr;
     // Current processing client entity ptr.
-    ClientEntity* clientEntity = nullptr;
+    PODEntity* clientEntity = nullptr;
     // Client Info.
     ClientInfo*  clientInfo = nullptr;
     // Entity specific effects. (Such as whether to rotate or not.)
@@ -475,7 +499,7 @@ void ClientGameEntities::AddPacketEntities() {
         // Fetch the actual entity to process based on the entity's state index number.
         clientEntity = &cs->entities[entityState->number];
         // Setup the render entity ID for the renderer.
-        renderEntity.id = clientEntity->clientEntityNumber + RESERVED_ENTITIY_COUNT;
+        renderEntity.id = clientEntity->clientEntityNumber;// + RESERVED_ENTITIY_COUNT;
 //
 //
 // 
@@ -513,20 +537,20 @@ void ClientGameEntities::AddPacketEntities() {
             renderEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
 	    else {
     	    //// Fetch the iqm animation index data.
-         //   if (clientEntity->current.animationIndex != 0 && clientEntity->current.modelIndex != 0) {
-		       // model_t* iqmData = clgi.MOD_ForHandle(clientEntity->current.modelIndex);
+         //   if (clientEntity->currentState.animationIndex != 0 && clientEntity->currentState.modelIndex != 0) {
+		       // model_t* iqmData = clgi.MOD_ForHandle(clientEntity->currentState.modelIndex);
 
          //       if (iqmData) {
 			      //  Com_DPrint("WOW!!!\n");
          //       }
          //   } else {
 		        //renderEntity.frame = entityState->animationFrame;
-		 //       renderEntity.oldframe = clientEntity->prev.animationFrame;
+		 //       renderEntity.oldframe = clientEntity->previousState.animationFrame;
 		//        renderEntity.backlerp = 1.0 - cl->lerpFraction;
 //            }
 
  
-            //clientEntity->current.animationFrame, 
+            //clientEntity->currentState.animationFrame, 
 	 //   framefrac = GS_FrameForTime(&curframe, cg.time, viewweapon->baseAnimStartTime,  // start time
 		//weaponInfo->frametime[viewweapon->baseAnim],				    // current frame time?
 		//weaponInfo->firstframe[viewweapon->baseAnim],				    // first frame.
@@ -542,30 +566,30 @@ void ClientGameEntities::AddPacketEntities() {
 
         // Setup the proper lerp and model frame to render this pass.
         // Moved into the if statement's else case up above.
-        renderEntity.oldframe = clientEntity->prev.animationFrame;
+        renderEntity.oldframe = clientEntity->previousState.animationFrame;
         renderEntity.backlerp = 1.0 - SG_FrameForTime(&renderEntity.frame,
             GameTime(cl->serverTime),                                     // Current Time.
-            GameTime(clientEntity->current.animationStartTime),           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
-            clientEntity->current.animationFramerate,           // Current frame time.
-            clientEntity->current.animationStartFrame,          // Start frame.
-            clientEntity->current.animationEndFrame,            // End frame.
+            GameTime(clientEntity->currentState.animationStartTime),           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
+            clientEntity->currentState.animationFramerate,           // Current frame time.
+            clientEntity->currentState.animationStartFrame,          // Start frame.
+            clientEntity->currentState.animationEndFrame,            // End frame.
             0,                                                  // Loop count.
             true                                                // Force loop
         );
-        clientEntity->current.animationFrame = renderEntity.frame;
-    //clientEntity->prev.animationFrame = clientEntity->current.animationFrame;
+        clientEntity->currentState.animationFrame = renderEntity.frame;
+    //clientEntity->previousState.animationFrame = clientEntity->currentState.animationFrame;
 
         //
         // Setup renderEntity origin.
         //
         if (renderEffects & RenderEffects::FrameLerp) {
             // Step origin discretely, because the model frames do the animation properly.
-            renderEntity.origin = clientEntity->current.origin;
-            renderEntity.oldorigin = clientEntity->current.oldOrigin;
+            renderEntity.origin = clientEntity->currentState.origin;
+            renderEntity.oldorigin = clientEntity->currentState.oldOrigin;
         } else if (renderEffects & RenderEffects::Beam) {
             // Interpolate start and end points for beams
-            renderEntity.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
-            renderEntity.oldorigin = vec3_mix(clientEntity->prev.oldOrigin, clientEntity->current.oldOrigin, cl->lerpFraction);
+            renderEntity.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+            renderEntity.oldorigin = vec3_mix(clientEntity->previousState.oldOrigin, clientEntity->currentState.oldOrigin, cl->lerpFraction);
         } else {
             if (entityState->number == cl->frame.clientNumber + 1) {
                 // In case of this being our actual client entity, we use the predicted origin.
@@ -573,7 +597,7 @@ void ClientGameEntities::AddPacketEntities() {
                 renderEntity.oldorigin = cl->playerEntityOrigin;
             } else {
                 // Ohterwise, just neatly interpolate the origin.
-                renderEntity.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+                renderEntity.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
                 // Neatly copy it as the renderEntity's oldorigin.
                 renderEntity.oldorigin = renderEntity.origin;
             }
@@ -652,7 +676,7 @@ void ClientGameEntities::AddPacketEntities() {
             renderEntity.angles = cl->playerEntityAngles;
         } else {
             // Otherwise, lerp angles by default.
-            renderEntity.angles = vec3_mix(clientEntity->prev.angles, clientEntity->current.angles, cl->lerpFraction);
+            renderEntity.angles = vec3_mix(clientEntity->previousState.angles, clientEntity->currentState.angles, cl->lerpFraction);
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (entityState->modelIndex == 255 && cl_rollhack->integer) {

@@ -1465,7 +1465,7 @@ static void update_client_mtu(client_t *client, int ee_info)
     if (ee_info < 576 || ee_info > 4096)
         return;
 
-    if (client->state != ConnectionState::Primed)
+    if (client->currentState != ConnectionState::Primed)
         return;
 
     // TODO: old clients require entire queue flush :(
@@ -1613,7 +1613,7 @@ static void SV_PrepWorldFrame(void)
         ent = EDICT_NUM(i);
 
         // events only last for a single keyframe
-        ent->state.eventID = 0;
+        ent->currentState.eventID = 0;
     }
 }
 

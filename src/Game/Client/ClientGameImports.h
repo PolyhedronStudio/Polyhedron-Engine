@@ -36,7 +36,7 @@ class ClientGameImportCollisionModel : public IClientGameImportCollisionModel {
 	
 	void BoxTrace(TraceResult * trace, const vec3_t & start, const vec3_t & end, const vec3_t & mins, const vec3_t & maxs, mnode_t * headNode, int32_t brushmask);
 	void TransformedBoxTrace(TraceResult* trace, const vec3_t& start, const vec3_t& end, const vec3_t& mins, const vec3_t& maxs, mnode_t* headNode, int32_t brushmask, const vec3_t& origin, const vec3_t& angles);
-	void ClipEntity(TraceResult* dst, const TraceResult* src, struct entity_s* ent);
+	void ClipEntity(TraceResult* dst, const TraceResult* src, struct PODEntity* ent);
 };
 
 //---------------------------------------------------------------------

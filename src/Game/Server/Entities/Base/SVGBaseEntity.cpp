@@ -71,7 +71,7 @@ void SVGBaseEntity::PostSpawn() {
 void SVGBaseEntity::Think() {
 	// Update current state of server entity's hash classname??
 	if (podEntity) {
-		podEntity->state.hashedClassname = GetTypeInfo()->hashedMapClass;
+		podEntity->currentState.hashedClassname = GetTypeInfo()->hashedMapClass;
 	}
 
 	// Safety check.

@@ -43,7 +43,7 @@ struct EntityServerFlags {
 //static constexpr int32_t MAX_ENT_CLUSTERS = 16;
 
 
-typedef struct entity_s Entity;
+typedef struct PODEntity Entity;
 typedef struct gclient_s ServerClient;
 
 
@@ -59,7 +59,7 @@ struct gclient_s {
 };
 
 
-//struct entity_s {
+//struct PODEntity {
 //    EntityState  state;
 //    struct gclient_s    *client;
 //    qboolean    inUse;
@@ -208,7 +208,7 @@ typedef struct {
 //
 
 struct EntityPool {
-    struct entity_s  *entities;
+    struct PODEntity  *entities;
     int         entitySize;
     int         numberOfEntities;     // current number, <= maxEntities
     int         maxEntities;
@@ -288,7 +288,7 @@ typedef struct {
     // The size will be fixed when ge->Init() is called
 //    EntityPool pool;
 
-    struct entity_s  *entities;
+    struct PODEntity  *entities;
     int         entitySize;
     int         numberOfEntities;     // current number, <= maxEntities
     int         maxEntities;

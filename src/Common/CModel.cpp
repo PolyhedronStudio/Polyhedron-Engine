@@ -1234,7 +1234,7 @@ const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end,
 /**
 *   @brief  Clips the source trace result against given entity.
 **/
-void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct entity_s *ent)
+void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct PODEntity *ent)
 {
     dst->allSolid |= src->allSolid;
     dst->startSolid |= src->startSolid;

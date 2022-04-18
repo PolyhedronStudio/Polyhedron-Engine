@@ -83,7 +83,7 @@ typedef struct {
 
     const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushmask);
     const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin = vec3_zero(), const vec3_t& angles = vec3_zero());
-    void        CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct entity_s *ent);
+    void        CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct PODEntity *ent);
 
     // call with topnode set to the headNode, returns with topnode
     // set to the first node that splits the box

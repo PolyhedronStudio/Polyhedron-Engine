@@ -46,7 +46,7 @@ SVGBasePlayer* SVGBasePlayer::Create(PODEntity *svEntity) {
     svEntity->inUse = true;
 
     // Set the entity state number.
-    svEntity->state.number = svEntity - serverEntities;
+    svEntity->currentState.number = svEntity - serverEntities;
 
     // Delete previous classentity, if existent (older client perhaps).
     gameworld->FreeGameEntity(svEntity);
@@ -115,7 +115,7 @@ void SVGBasePlayer::Spawn() {
     // Reset model indexes.
     SetModelIndex(255); // Use the skin specified by its model.
     SetModelIndex2(255);// Custom gun model.
-    SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->state.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
+    SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->currentState.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
     
     // Fresh frame for animations.
     SetAnimationFrame(0);
@@ -342,7 +342,7 @@ void SVGBasePlayer::PlayerNoise(SVGBaseEntity* noiseEntity, const vec3_t& noiseO
 //        level.sound2EntityFrameNumber = level.frameNumber;
 //    }
 //
-//    VectorCopy(where, noise->state.origin);
+//    VectorCopy(where, noise->currentState.origin);
 //    VectorSubtract(where, noise->maxs, noise->absMin);
 //    VectorAdd(where, noise->maxs, noise->absMax);
 //    noise->teleportTime = level.time;

@@ -125,7 +125,7 @@ void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
 
-    GetPODEntity()->state.animationStartTime = GameTime(level.time + 1s).count();
+    GetPODEntity()->currentState.animationStartTime = GameTime(level.time + 1s).count();
     //GetPODEntity()->state.animationFramerate = 60;
 
 }
@@ -144,7 +144,7 @@ void MonsterTestDummy::Think() {
 //
 //===============
 void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value) {
-    EntityState* state = &GetPODEntity()->state;
+    EntityState* state = &GetPODEntity()->currentState;
 
     if (key == "startframe") { 
         // This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation

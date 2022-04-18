@@ -925,7 +925,7 @@ void SVG_ReadLevel(const char *filename)
         ent = &game.world->GetPODEntities()[entnum];
         read_fields(f, entityfields, ent);
         ent->inUse = true;
-        ent->state.number = entnum;
+        ent->currentState.number = entnum;
 
         // let the server rebuild world links for this ent
         memset(&ent->area, 0, sizeof(ent->area));

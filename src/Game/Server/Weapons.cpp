@@ -116,7 +116,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
 		}
     }
 
-    AngleVectors(self->GetPODEntity()->state.angles, &forward, &right, &up);
+    AngleVectors(self->GetPODEntity()->currentState.angles, &forward, &right, &up);
     point = vec3_fmaf(self->GetOrigin(), range, forward);
     point = vec3_fmaf(point, aim[1], right);
     point = vec3_fmaf(point, aim[2], up);
@@ -370,7 +370,7 @@ void SVG_FireBlaster(SVGBaseEntity *self, const vec3_t& start, const vec3_t &aim
 
     // If a client is firing this bolt, let AI check for dodges.
     //if (self->client)
-    //    check_dodge(self, bolt->state.origin, dir, speed);
+    //    check_dodge(self, bolt->currentState.origin, dir, speed);
 
     // Trace bolt.
     SVGTraceResult trace = SVG_Trace(self->GetOrigin(), vec3_zero(), vec3_zero(), boltEntity->GetOrigin(), boltEntity, BrushContentsMask::Shot);

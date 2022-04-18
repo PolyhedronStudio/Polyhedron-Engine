@@ -38,17 +38,22 @@ public:
     *           the game entity belonging to the server side entity(defined by state.number).
     * 
     *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
-    *           always update its ClientEntity pointer to the appropriate new one instead.
+    *           always update its PODEntity pointer to the appropriate new one instead.
     * 
     *   @return True on success, false in case of trouble. (Should never happen, and if it does,
     *           well... file an issue lmao.)
     **/
-    qboolean UpdateFromState(ClientEntity *clEntity, const EntityState &state) final;
+    qboolean UpdateFromState(PODEntity *clEntity, const EntityState &state) final;
 
     /**
-    *   @brief Executed whenever an entity event is receieved.
+    *   @brief  Executed whenever a server frame entity event is receieved.
     **/
-    void Event(int32_t number) final;
+    void ServerEntityEvent(int32_t number) final;
+
+    /**
+    *   @brief  Executed whenever a local client entity event is set.
+    **/
+    void LocalEntityEvent(int32_t number) final;
 
     /**
     *   @brief  Parse the server frame for server entities to add to our client view.
@@ -78,7 +83,7 @@ private:
     *	@brief	Parses the BSP Entity string and places the results in the client
     *			entity dictionary.
     **/
-    qboolean ParseEntityString(const char** data, PODEntity* podEntity);
+    qboolean ParseEntityString(const char** data, EntityDictionary &parsedKeyValues);// PODEntity* podEntity);
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and

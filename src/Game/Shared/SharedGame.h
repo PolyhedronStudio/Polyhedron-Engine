@@ -38,7 +38,7 @@ class IClientGameEntity;
 using GameEntity = IClientGameEntity;;
 
 //! POD Entity for the ServerGame module.
-using PODEntity = ClientEntity;
+using PODEntity = PODEntity;
 
 //! Entity Dictionary.
 using EntityDictionary = std::map<std::string, std::string>;
@@ -64,7 +64,7 @@ using EntityDictionary = std::map<std::string, std::string>;
 #include "../../Shared/SVGame.h"
 
 //! POD Entity for the ServerGame module.
-using PODEntity = entity_s;
+using PODEntity = PODEntity;
 
 //! Maximum amount of POD Entities.
 static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;

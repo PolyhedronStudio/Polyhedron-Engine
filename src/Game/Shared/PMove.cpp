@@ -159,7 +159,7 @@ static vec3_t PM_ClipVelocity(const vec3_t &in, const vec3_t &normal, float boun
 /**
 *   @brief  Marks the specified entity as touched.
 **/
-static void PM_TouchEntity(struct entity_s* ent) {
+static void PM_TouchEntity(struct PODEntity* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
         PM_Debug("ent = NULL");

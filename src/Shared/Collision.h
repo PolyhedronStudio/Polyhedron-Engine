@@ -126,7 +126,7 @@ struct TraceResult {
     int32_t contents = 0;
 
     // The impacted entity, or `NULL`.
-    struct entity_s* ent = nullptr;   // Not set by CM_*() functions
+    struct PODEntity* ent = nullptr;   // Not set by CM_*() functions
 
     // PH: Custom added.
     vec3_t offsets[8] = {

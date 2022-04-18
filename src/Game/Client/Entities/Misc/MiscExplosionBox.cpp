@@ -24,7 +24,7 @@
 //
 // Constructor/Deconstructor.
 //
-MiscExplosionBox::MiscExplosionBox(ClientEntity* clEntity) 
+MiscExplosionBox::MiscExplosionBox(PODEntity* clEntity) 
     : Base(clEntity) {
 
 }
@@ -127,10 +127,11 @@ void MiscExplosionBox::Think() {
     Base::Think();
 
 	// Interpolate origin?
-	ClientEntity *clientEntity = GetPODEntity();
+	PODEntity *clientEntity = GetPODEntity();
+	Com_DPrint("YO DAWG FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
 //	clientEntity->current.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
 	SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
-	clientEntity->lerpOrigin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
+	clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 }
 
 //===============

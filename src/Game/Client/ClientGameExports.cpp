@@ -91,7 +91,7 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
     }
 
     // We're good if the entity serverFrame == current.
-    ClientEntity *clEntity = &cs->entities[entityNumber];
+    PODEntity *clEntity = &cs->entities[entityNumber];
     if (clEntity->serverFrame == cl->frame.number) {
         return; // current
     }

@@ -105,7 +105,7 @@ void ClientGameView::PostRenderView() {
 *           and interpolates the camera smoothly between frames.
 **/
 void ClientGameView::SetupViewCamera() {
-    ClientEntity *viewEntity = &cs->entities[cl->frame.clientNumber + 1];
+    PODEntity *viewEntity = &cs->entities[cl->frame.clientNumber + 1];
 
     // If cl_player_model isn't set to thirdperson, jump to firstperson label.
     if (cl_player_model->integer != CL_PLAYER_MODEL_THIRD_PERSON)
@@ -121,7 +121,7 @@ void ClientGameView::SetupViewCamera() {
         goto firstpersonview;
 
     // If there is no modelindex, jump to firstperson label.
-    if (viewEntity && !viewEntity->current.modelIndex)
+    if (viewEntity && !viewEntity->currentState.modelIndex)
         goto firstpersonview;
 
     // Setup the thirdperson view.

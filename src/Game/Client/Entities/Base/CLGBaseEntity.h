@@ -281,14 +281,14 @@ public:
     **/
     virtual const vec3_t& GetAngles() override { 
         if (podEntity) {
-            return podEntity->current.angles;
+            return podEntity->currentState.angles;
         } else {
             return ZeroVec3;
         }
     };
     virtual void SetAngles(const vec3_t& angles) override { 
         if (podEntity) {
-            podEntity->current.angles = angles;
+            podEntity->currentState.angles = angles;
         }
     };
     /**
@@ -312,8 +312,8 @@ public:
     **/
     virtual inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) override {
 		if (podEntity) {
-			podEntity->current.mins = mins;
-			podEntity->current.maxs = maxs;
+			podEntity->currentState.mins = mins;
+			podEntity->currentState.maxs = maxs;
 		}
     }
 
@@ -373,14 +373,14 @@ public:
     **/
     virtual const uint32_t  GetEffects() { 
 		if (podEntity) {
-			return podEntity->current.effects; 
+			return podEntity->currentState.effects; 
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetEffects(const uint32_t effects) {
 		if (podEntity) {
-			podEntity->current.effects = effects;
+			podEntity->currentState.effects = effects;
 		}
 	};
 
@@ -495,13 +495,13 @@ public:
     **/
     virtual const vec3_t&   GetMaxs() { 
 		if (podEntity) {
-			return podEntity->current.maxs;
+			return podEntity->currentState.maxs;
 		}
 		return ZeroVec3;
 	};
     virtual void            SetMaxs(const vec3_t& maxs) {
 		if (podEntity) {
-			podEntity->current.maxs = maxs;
+			podEntity->currentState.maxs = maxs;
 		}
 	};
     /**
@@ -515,13 +515,13 @@ public:
     **/
     virtual const vec3_t&   GetMins() { 
 		if (podEntity) {
-			return podEntity->current.mins;
+			return podEntity->currentState.mins;
 		}
 		return ZeroVec3;
 	};
     virtual void            SetMins(const vec3_t& mins) {
 		if (podEntity) {
-			podEntity->current.mins = mins;
+			podEntity->currentState.mins = mins;
 		}
 	};
    
@@ -559,14 +559,14 @@ public:
     **/
     virtual const int32_t   GetModelIndex() { 
 		if (podEntity) {
-			return podEntity->current.modelIndex;
+			return podEntity->currentState.modelIndex;
 		} else {
 			return 0; 
 		}
 	};
     virtual void            SetModelIndex(const int32_t index) {
 		if (podEntity) {
-			podEntity->current.modelIndex = index;
+			podEntity->currentState.modelIndex = index;
 		}
 	};
     /**
@@ -574,14 +574,14 @@ public:
     **/
     virtual const int32_t   GetModelIndex2() { 
 		if (podEntity) {
-			return podEntity->current.modelIndex2;
+			return podEntity->currentState.modelIndex2;
 		} else {
 			return 0; 
 		}
 	};
     virtual void            SetModelIndex2(const int32_t index) {
 		if (podEntity) {
-			podEntity->current.modelIndex2 = index;
+			podEntity->currentState.modelIndex2 = index;
 		}
 	};
     /**
@@ -589,14 +589,14 @@ public:
     **/
     virtual const int32_t   GetModelIndex3() { 
 		if (podEntity) {
-			return podEntity->current.modelIndex3;
+			return podEntity->currentState.modelIndex3;
 		} else {
 			return 0; 
 		}
 	};
     virtual void            SetModelIndex3(const int32_t index) {
 		if (podEntity) {
-			podEntity->current.modelIndex3 = index;
+			podEntity->currentState.modelIndex3 = index;
 		}
 	};
     /**
@@ -604,14 +604,14 @@ public:
     **/
     virtual const int32_t   GetModelIndex4() { 
 		if (podEntity) {
-			return podEntity->current.modelIndex4;
+			return podEntity->currentState.modelIndex4;
 		} else {
 			return 0; 
 		}
 	}
     virtual void            SetModelIndex4(const int32_t index) { 
 		if (podEntity) {
-			podEntity->current.modelIndex4 = index;
+			podEntity->currentState.modelIndex4 = index;
 		}
 	};
 
@@ -644,14 +644,14 @@ public:
     **/
     virtual const int32_t   GetNumber() { 
 		if (podEntity) {
-			return podEntity->current.number;
+			return podEntity->currentState.number;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetNumber(const int32_t number) {
 		if (podEntity) {
-			podEntity->current.number = number;
+			podEntity->currentState.number = number;
 		}	
 	};
 
@@ -666,14 +666,14 @@ public:
     **/
     virtual const vec3_t&   GetOldOrigin() { 
 		if (podEntity) {
-			return podEntity->current.oldOrigin;
+			return podEntity->currentState.oldOrigin;
 		} else {
 			return ZeroVec3;
 		}
 	};
     virtual void            SetOldOrigin(const vec3_t& oldOrigin) {
 		if (podEntity) {
-			podEntity->current.oldOrigin = oldOrigin;
+			podEntity->currentState.oldOrigin = oldOrigin;
 		}
 	};
 
@@ -682,14 +682,14 @@ public:
     **/
     virtual const vec3_t&   GetOrigin() { 
 		if (podEntity) {
-			return podEntity->current.origin;
+			return podEntity->currentState.origin;
 		} else {
 			return ZeroVec3;
 		}
 	};
     virtual void            SetOrigin(const vec3_t& origin) {
 		if (podEntity) {
-			podEntity->current.origin = origin;
+			podEntity->currentState.origin = origin;
 		}
 	};
 
@@ -704,14 +704,14 @@ public:
     **/
     virtual const int32_t   GetRenderEffects() { 
 		if (podEntity) {
-			return podEntity->current.renderEffects;
+			return podEntity->currentState.renderEffects;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetRenderEffects(const int32_t renderEffects) {
 		if (podEntity) {
-			podEntity->current.renderEffects = renderEffects;
+			podEntity->currentState.renderEffects = renderEffects;
 		}
 	};
         
@@ -731,14 +731,14 @@ public:
     **/
     virtual const int32_t   GetSkinNumber() { 
 		if (podEntity) {
-			return podEntity->current.skinNumber;
+			return podEntity->currentState.skinNumber;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetSkinNumber(const int32_t skinNumber) {
 		if (podEntity) {
-			podEntity->current.skinNumber = skinNumber;
+			podEntity->currentState.skinNumber = skinNumber;
 		}
 	};
 
@@ -755,14 +755,14 @@ public:
     **/
     virtual const uint32_t  GetSolid() { 
 		if (podEntity) {
-			return podEntity->current.solid;
+			return podEntity->currentState.solid;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetSolid(const uint32_t solid) {
 		if (podEntity) {
-			podEntity->current.solid = solid;
+			podEntity->currentState.solid = solid;
 		}
 	};
 
@@ -771,14 +771,14 @@ public:
     **/
     virtual const int32_t   GetSound() { 
 		if (podEntity) {
-			return podEntity->current.sound;
+			return podEntity->currentState.sound;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetSound(const int32_t sound) {
 		if (podEntity) {
-			podEntity->current.sound = sound;
+			podEntity->currentState.sound = sound;
 		}
 	};
 
@@ -791,8 +791,8 @@ public:
     /**
     *   @brief Get/Set:     Entity State
     **/
-    virtual const EntityState&   GetState() { return podEntity->current; };
-    virtual void                 SetState(const EntityState &state) { podEntity->current = state; };
+    virtual const EntityState&   GetState() { return podEntity->currentState; };
+    virtual void                 SetState(const EntityState &state) { podEntity->currentState = state; };
 
     /**
     *   @brief Get/Set:     Style

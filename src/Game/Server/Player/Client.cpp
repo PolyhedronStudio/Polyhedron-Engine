@@ -129,7 +129,7 @@ void spectator_respawn(Entity *ent)
         gi.MSG_WriteUint8(ServerGameCommand::MuzzleFlash);//WriteByte(ServerGameCommand::MuzzleFlash);
         gi.MSG_WriteInt16(ent - game.world->GetPODEntities());//WriteShort(ent - game.world->GetPODEntities());
         gi.MSG_WriteUint8(MuzzleFlashType::Login);//WriteByte(MuzzleFlashType::Login);
-        gi.Multicast(ent->state.origin, Multicast::PVS);
+        gi.Multicast(ent->currentState.origin, Multicast::PVS);
 
         // hold in place briefly
         ent->client->playerState.pmove.flags = PMF_TIME_TELEPORT;
@@ -221,7 +221,7 @@ void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
-        gi.DPrintf("Warning: ClientThink called on svEntity(#%i) without a SVGBasePlayer or derivate game entity.\n", svEntity->state.number);
+        gi.DPrintf("Warning: ClientThink called on svEntity(#%i) without a SVGBasePlayer or derivate game entity.\n", svEntity->currentState.number);
         return;
     }
 

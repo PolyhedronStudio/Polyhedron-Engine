@@ -14,7 +14,7 @@
 //*   @brief  Gets us a pointer to the entity that is currently being viewed.
 //*           This could be an other client to in case of spectator mode.
 //**/
-//ClientEntity* CLG_GetClientViewEntity(void) {
+//PODEntity* CLG_GetClientViewEntity(void) {
 //    // Default is of course our own client entity number.
 //    int32_t index = cl->clientNumber;
 //
@@ -29,7 +29,7 @@
 ///**
 //*   @return True if the specified entity is bound to the local client's view.
 //**/
-//qboolean CLG_IsClientViewEntity(const ClientEntity* ent) {
+//qboolean CLG_IsClientViewEntity(const PODEntity* ent) {
 //    // If the entity number matches, then we're good.
 //    if (ent->current.number == cl->clientNumber + 1) {
 //        return true;

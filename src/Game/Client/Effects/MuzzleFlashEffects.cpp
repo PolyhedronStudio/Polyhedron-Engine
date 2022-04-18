@@ -23,7 +23,7 @@
 void MuzzleFlashEffects::ClientMuzzleFlash() {
     vec3_t      fv, rv;
     cdlight_t* dl;
-    ClientEntity* pl;
+    PODEntity* pl;
     float       volume;
     char        soundname[MAX_QPATH];
     
@@ -36,8 +36,8 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
     pl = &cs->entities[mzParameters.entity];
 
     dl = DynamicLights::GetDynamicLight(mzParameters.entity);
-    dl->origin = pl->current.origin, dl->origin;
-    AngleVectors(pl->current.angles, &fv, &rv, NULL);
+    dl->origin = pl->currentState.origin, dl->origin;
+    AngleVectors(pl->currentState.angles, &fv, &rv, NULL);
     dl->origin = vec3_fmaf(dl->origin, 18, fv);
     dl->origin = vec3_fmaf(dl->origin, 16, rv);
     if (mzParameters.silenced)
@@ -58,7 +58,7 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
         dl->die = cl->time + CLG_1_FRAMETIME * 8;
         //dl->radius = 350 + (rand() & 31);
         dl->decay = CLG_1_FRAMETIME;
-        dl->velocity = vec3_fmaf(pl->current.origin, 5, pl->current.angles);//, vec3_t { 0.f, 0.f, 1.f };
+        dl->velocity = vec3_fmaf(pl->currentState.origin, 5, pl->currentState.angles);//, vec3_t { 0.f, 0.f, 1.f };
         dl->radius = RandomRangeui(48, 64);
      //   //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/blastf1a.wav"), volume, Attenuation::Normal, 0);
 	    //clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/v_mark23/fire0.wav"), volume, Attenuation::Normal, 0);
@@ -95,19 +95,19 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
         dl->color = vec3_t{0, 1, 0};
         dl->die = cl->time + 1.0f;
         clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
-        ParticleEffects::Logout(pl->current.origin, mzParameters.weapon);
+        ParticleEffects::Logout(pl->currentState.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Logout:
         dl->color = vec3_t{1, 0, 0};
         dl->die = cl->time + 1.0f;
         clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
-        ParticleEffects::Logout(pl->current.origin, mzParameters.weapon);
+        ParticleEffects::Logout(pl->currentState.origin, mzParameters.weapon);
         break;
     case MuzzleFlashType::Respawn:
         dl->color = vec3_t{1, 1, 0};
         dl->die = cl->time + 1.0f;
         clgi.S_StartSound(NULL, mzParameters.entity, SoundChannel::Weapon, clgi.S_RegisterSound("weapons/grenlf1a.wav"), 1, Attenuation::Normal, 0);
-        ParticleEffects::Logout(pl->current.origin, mzParameters.weapon);
+        ParticleEffects::Logout(pl->currentState.origin, mzParameters.weapon);
         break;
     }
 
@@ -122,7 +122,7 @@ void MuzzleFlashEffects::ClientMuzzleFlash() {
 *   @brief  Regular Entity Muzzleflash Effects.
 **/
 void MuzzleFlashEffects::EntityMuzzleFlash() {
-    //ClientEntity* ent;
+    //PODEntity* ent;
     //vec3_t      origin;
     //const vec_t* ofs;
     //cdlight_t* dl;
@@ -130,11 +130,11 @@ void MuzzleFlashEffects::EntityMuzzleFlash() {
 
     //// locate the origin
     //ent = &cs->entities[mzParameters.entity];
-    //AngleVectors(ent->current.angles, &forward, &right, NULL);
+    //AngleVectors(ent->currentState.angles, &forward, &right, NULL);
     //ofs = vec3_t { 10.6f * 1.2f, 7.7f * 1.2f, 7.8f * 1.2f };
-    //origin[0] = ent->current.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];
-    //origin[1] = ent->current.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
-    //origin[2] = ent->current.origin[2] + forward[2] * ofs[0] + right[2] * ofs[1] + ofs[2];
+    //origin[0] = ent->currentState.origin[0] + forward[0] * ofs[0] + right[0] * ofs[1];
+    //origin[1] = ent->currentState.origin[1] + forward[1] * ofs[0] + right[1] * ofs[1];
+    //origin[2] = ent->currentState.origin[2] + forward[2] * ofs[0] + right[2] * ofs[1] + ofs[2];
 
     //dl = CLG_AllocDLight(mzParameters.entity);
     //dl->origin = origin, dl->origin;

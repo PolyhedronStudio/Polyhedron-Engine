@@ -41,8 +41,9 @@ void		CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from);
 // Entities.
 //
 qboolean	CL_GM_SpawnEntitiesFromBSPString(const char *entities);
-qboolean	CL_GM_UpdateFromState(ClientEntity *clEntity, const EntityState &state);
-void		CL_GM_EntityEvent(int32_t number);
+qboolean	CL_GM_UpdateFromState(PODEntity *clEntity, const EntityState &state);
+void		CL_GM_ServerEntityEvent(int32_t number);
+void		CL_GM_LocalEntityEvent(int32_t number);
 
 //
 // Media

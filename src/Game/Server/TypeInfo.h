@@ -4,7 +4,7 @@
 #include <string>
 
 class SVGBaseEntity;
-typedef entity_s Entity;
+typedef PODEntity Entity;
 
 //===============
 // A static counter, used by TypeInfo to get compile-time IDs

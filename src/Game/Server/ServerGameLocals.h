@@ -22,7 +22,7 @@
 #include "../../Shared/Shared.h"
 #include "../../Shared/List.h"
 struct gclient_s;
-struct entity_s;
+struct PODEntity;
 
 
 // The "gameversion" client command will print this including the compile date
@@ -48,7 +48,7 @@ class IGameworld;
 class IGamemode;
 class ServerGameworld;
 
-struct entity_s;
+struct PODEntity;
 
 
 //

@@ -357,7 +357,7 @@ void SVG_ClientEndServerFrames(void)
     // pushed the player. And of course, because damage has been added.)
     for (int32_t clientIndex = 0; clientIndex < game.GetMaxClients(); clientIndex++) {
         // First, fetch entity state number.
-        int32_t stateNumber = serverEntities[1 + clientIndex].state.number;
+        int32_t stateNumber = serverEntities[1 + clientIndex].currentState.number;
 
         // Now, let's go wild. (Purposely, do not assume the pointer is a SVGBasePlayer.)
         Entity *entity = &serverEntities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
@@ -541,7 +541,7 @@ void SVG_RunFrame(void) {
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 0; i < globals.numberOfEntities; i++) {
         // Acquire state number.
-        int32_t stateNumber = serverEntities[i].state.number;
+        int32_t stateNumber = serverEntities[i].currentState.number;
 
         // Ensure it is even there.
         if (gameEntities[i] == nullptr) {

@@ -127,7 +127,7 @@ void ServerGameworld::PreparePlayers() {
 		PODEntity* podEntity = &podEntities[i];
 
 		// We can fetch the number based on subtracting these two pointers.
-		podEntity->state.number = podEntity - podEntities;
+		podEntity->currentState.number = podEntity - podEntities;
 
 		// Allocate player client game entity
 		SVGBasePlayer* playerClientEntity = CreateGameEntity<SVGBasePlayer>(podEntity, false);
@@ -263,7 +263,7 @@ Entity* ServerGameworld::GetUnusedPODEntity() {
 			podEntity->inUse = true;
 			
 			// Set the entity state number.
-			podEntity->state.number = podEntity - podEntities;
+			podEntity->currentState.number = podEntity - podEntities;
 			
 			// Return the newly found POD entity pointer.
 			return podEntity;
@@ -284,7 +284,7 @@ Entity* ServerGameworld::GetUnusedPODEntity() {
     podEntity->inUse = true;
 
     // Set the entity state number.
-    podEntity->state.number = podEntity - podEntities;
+    podEntity->currentState.number = podEntity - podEntities;
 
     // Return the POD entity.
     return podEntity;
@@ -306,7 +306,7 @@ void ServerGameworld::FindTeams() {
     int32_t c2 = 0;
     for (i = 1, podEntityA = podEntities + i; i < numberOfEntities; i++, podEntityA++) {
         // Fetch game entity.
-        GameEntity *gameEntityA = gameEntities[podEntityA->state.number];
+        GameEntity *gameEntityA = gameEntities[podEntityA->currentState.number];
 
         if (gameEntityA == nullptr) {
             continue;
@@ -327,7 +327,7 @@ void ServerGameworld::FindTeams() {
 
         for (j = i + 1, podEntityB = podEntityA + 1 ; j < globals.numberOfEntities ; j++, podEntityB++) {
             // Fetch game entity.
-            GameEntity* gameEntityB = gameEntities[podEntityA->state.number];
+            GameEntity* gameEntityB = gameEntities[podEntityA->currentState.number];
 
             if (gameEntityB == nullptr) { 
                 continue;
@@ -426,7 +426,7 @@ qboolean ServerGameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
     auto &dictionary = podEntity->entityDictionary;
 
 	// Get state number.
-    int32_t stateNumber = podEntity->state.number;
+    int32_t stateNumber = podEntity->currentState.number;
 
 	// If it does not have a classname key we're in for trouble.
     if (!podEntity->entityDictionary.contains("classname")) {
@@ -438,7 +438,7 @@ qboolean ServerGameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
     }
 
 	// Actually spawn the game entity.
-    IServerGameEntity *gameEntity = podEntity->gameEntity = AllocateGameEntity(podEntity, podEntity->entityDictionary["classname"]);
+    IServerGameEntity *gameEntity = static_cast<IServerGameEntity*>(podEntity->gameEntity = AllocateGameEntity(podEntity, podEntity->entityDictionary["classname"]));
 
     // Something went wrong with allocating the game entity.
     if (!gameEntity) {
@@ -479,7 +479,7 @@ GameEntity *ServerGameworld::AllocateGameEntity(PODEntity *podEntity, const std:
     }
 
     // Get entity state number.
-    int32_t stateNumber = podEntity->state.number;
+    int32_t stateNumber = podEntity->currentState.number;
 
 	// Warn if a slot is already occupied.
     if (gameEntities[stateNumber] != nullptr) {
@@ -538,7 +538,7 @@ void ServerGameworld::FreePODEntity(PODEntity* podEntity) {
     gi.UnlinkEntity(podEntity);
 
     // Get entity number.
-    int32_t entityNumber = podEntity->state.number;
+    int32_t entityNumber = podEntity->currentState.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
     if (entityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
@@ -588,12 +588,12 @@ qboolean ServerGameworld::FreeGameEntity(PODEntity* podEntity) {
     qboolean freedGameEntity = false;
 
     // Fetch entity number.
-    int32_t entityNumber = podEntity->state.number;
+    int32_t entityNumber = podEntity->currentState.number;
 
     // Special game entity handling IF it still has one.
     if (podEntity->gameEntity) {
 		// Get pointer to game entity.
-		IServerGameEntity* gameEntity = podEntity->gameEntity;
+		IServerGameEntity* gameEntity = static_cast<IServerGameEntity*>(podEntity->gameEntity);
 
 		// Remove the gameEntity reference
 		gameEntity->SetGroundEntity(nullptr);
