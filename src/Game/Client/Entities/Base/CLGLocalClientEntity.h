@@ -98,13 +98,6 @@ public:
     virtual void UpdateFromState(const EntityState &state) override;
 
     /**
-    *   @return A reference to the current state object.
-    **/
-    inline const EntityState& GetCurrentEntityState() final {
-        return currentState;
-    }
-
-    /**
     *   @returen True if the entity is still in the current frame.
     **/
     //virtual const qboolean  IsInUse() final;

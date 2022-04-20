@@ -576,7 +576,7 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 // see if any solid entities are inside the final position
     //IClientGameEntity** classEntities = clge->entities->GetGameEntities();
 	CLGEntityVector &classEntities = clge->entities->GetGameEntities();
-    for (e = 1; e < cl->numSolidEntities; e++) {
+    for (e = 1; e < cl->numSolidEntities + cl->numSolidLocalEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
 	    SGEntityHandle checkHandle = classEntities[e];

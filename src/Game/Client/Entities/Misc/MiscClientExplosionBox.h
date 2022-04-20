@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// MiscExplosionBox.h
+// MiscClientExplosionBox.h
 //
 //
 */
@@ -12,14 +12,14 @@ class CLGBaseEntity;
 class CLGLocalClientEntity;
 class CLGBaseTrigger;
 
-class MiscExplosionBox : public CLGBaseEntity { // Should be: : public CLGBaseTrigger
+class MiscClientExplosionBox : public CLGLocalClientEntity { // Should be: : public CLGBaseTrigger
 public:
     // Constructor/Deconstructor.
-    MiscExplosionBox(PODEntity* clEntity);
-    virtual ~MiscExplosionBox();
+    MiscClientExplosionBox(PODEntity* clEntity);
+    virtual ~MiscClientExplosionBox();
 
-    //DefineMapClass( "misc_client_explobox", MiscExplosionBox, CLGLocalClientEntity ); // Should be CLGBaseTrigger inherited.
-	DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseEntity ); // Should be CLGBaseTrigger inherited.
+    //DefineMapClass( "misc_client_explobox", MiscClientExplosionBox, CLGLocalClientEntity ); // Should be CLGBaseTrigger inherited.
+	DefineMapClass( "misc_client_explobox", MiscClientExplosionBox, CLGLocalClientEntity ); // Should be CLGBaseTrigger inherited.
     
 																			   /**
     *	Interface functions. 

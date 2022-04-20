@@ -2877,7 +2877,7 @@ void CL_UpdateFrameTimes(void)
         sync_mode = SYNC_SLEEP_20;
     }
     else if (cls.active == ACT_RESTORED || cls.connectionState != ClientConnectionState::Active) {
-        // run at 60 fps if not active
+        // run at 60 fps if the client connection state isn't active
         main_msec = fps_to_msec(60);
         sync_mode = SYNC_SLEEP_60;
     }
@@ -2911,6 +2911,7 @@ uint64_t CL_Frame(uint64_t msec)
     qboolean phys_frame = true, ref_frame = true;
 
     timeAfterRefresh = timeBeforeRefresh = 0;
+	timeAfterClientGame = timeBeforeClientGame = 0;
 
     if (!cl_running->integer) {
         return UINT64_MAX;
@@ -3064,7 +3065,13 @@ run_fx:
         S_Update();
 
         // Advance local game effects for next frame
+        if (host_speeds->integer) {
+            timeBeforeClientGame = Sys_Milliseconds();
+        }
         CL_GM_ClientFrame();
+        if (host_speeds->integer) {
+            timeAfterClientGame = Sys_Milliseconds();
+        }
 
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_20) {

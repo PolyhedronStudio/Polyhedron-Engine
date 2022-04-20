@@ -230,6 +230,7 @@ void GibEntity::GibEntityThink() {
 
     // Play frames for these meshes, cut the crap at frame 10.
     if (GetAnimationFrame() == 10) {
+		SetEffects(0);
         SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
         SetNextThinkTime(level.time + 8s + GameTime(Randomui() * 10));
     }

@@ -126,6 +126,8 @@ cvar_t  *host_speeds;
 // host_speeds times
 uint64_t    timeBeforeServerGame;
 uint64_t    timeAfterServerGame;
+uint64_t    timeBeforeClientGame;
+uint64_t    timeAfterClientGame;
 uint64_t    timeBeforeRefresh;
 uint64_t    timeAfterRefresh;
 #endif
@@ -1170,19 +1172,20 @@ void Qcommon_Frame(void)
         timeAfter = Sys_Milliseconds();
 
     if (host_speeds->integer) {
-        int64_t all, ev, sv, gm, cl, rf;
+        //int64_t all, ev, sv, gm, cl, rf;
 
-        all = timeAfter - timeBefore;
-        ev = timeEvent - timeBefore;
-        sv = timeBetween - timeEvent;
-        cl = timeAfter - timeBetween;
-        gm = timeAfterServerGame - timeBeforeServerGame;
-        rf = timeAfterRefresh - timeBeforeRefresh;
-        sv -= gm;
-        cl -= rf;
+        int64_t all = timeAfter - timeBefore;
+        int64_t ev = timeEvent - timeBefore;
+        int64_t sv = timeBetween - timeEvent;
+        int64_t cl = timeAfter - timeBetween;
+        int64_t svgm = timeAfterServerGame - timeBeforeServerGame;
+        int64_t clgm = timeAfterClientGame - timeBeforeClientGame;
+        int64_t rf = timeAfterRefresh - timeBeforeRefresh;
+        sv -= svgm;
+        cl -= rf - clgm;
 
-        Com_Printf("all:%3i ev:%3i sv:%3i gm:%3i cl:%3i rf:%3i\n",
-                   all, ev, sv, gm, cl, rf);
+        Com_Printf("all:%3i ev:%3i sv:%3i svgm:%3i cl:%3i rf:%3i clgm:%3i\n",
+                   all, ev, sv, svgm, cl, rf, clgm);
     }
 #endif
 }

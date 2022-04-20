@@ -15,7 +15,8 @@
 // Entity List.
 #include "../Entities/GameEntityList.h"
 
-
+// World.
+#include "../World/ClientGameworld.h"
 
 //---------------------------------------------------------------------
 // Client Game Entities IMPLEMENTATION.
@@ -43,7 +44,7 @@ public:
     *   @return True on success, false in case of trouble. (Should never happen, and if it does,
     *           well... file an issue lmao.)
     **/
-    qboolean UpdateFromState(PODEntity *clEntity, const EntityState &state) final;
+    qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState &state) final;
 
     /**
     *   @brief  Executed whenever a server frame entity event is receieved.
@@ -74,7 +75,15 @@ public:
 
 
     inline CLGEntityVector &GetGameEntities() {
-        return gameEntityList.GetGameEntities();
+		ClientGameworld *gameWorld = GetGameworld();
+		if (gameWorld) {
+			return gameWorld->GetGameEntities();
+		} else {
+			// This should never happen but... yeah...
+			
+			//return nullptr;
+			return nullGameEntities;
+		}
     }
 
 //! Entity Parsing utilities.
@@ -89,11 +98,12 @@ private:
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean SpawnParsedGameEntity(PODEntity* podEntity);
+    qboolean CreateGameEntityFromDictionary(PODEntity* podEntity, EntityDictionary &dictionary);
 
 //! Game Entity utilities.
 private:
     GameEntityList gameEntityList;
+	GameEntityVector nullGameEntities;
 
 //! Entity Rendering utilities.
 private:

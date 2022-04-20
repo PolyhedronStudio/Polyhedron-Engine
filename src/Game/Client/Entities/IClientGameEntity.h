@@ -60,11 +60,6 @@ public:
     virtual void UpdateFromState(const EntityState &state) = 0;
 
     /**
-    *   @return A reference to the current state object.
-    **/
-    virtual const EntityState& GetCurrentEntityState() = 0;
-
-    /**
     *   @returen True if the entity is still in the current frame.
     **/
     virtual const qboolean  IsInUse() = 0;

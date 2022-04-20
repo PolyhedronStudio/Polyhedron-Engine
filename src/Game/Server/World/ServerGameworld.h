@@ -353,7 +353,7 @@ private:
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean SpawnParsedGameEntity(PODEntity *svEntity);
+    qboolean CreateGameEntityFromDictionary(PODEntity *svEntity, EntityDictionary &dictionary);
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.
@@ -361,5 +361,5 @@ private:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
     **/
-    IServerGameEntity* AllocateGameEntity(PODEntity *svEntity, const std::string& classname);
+    IServerGameEntity* CreateGameEntityFromClassname(PODEntity *svEntity, const std::string& classname);
 };

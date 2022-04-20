@@ -216,8 +216,8 @@ void CLGLocalClientEntity::SpawnKey(const std::string& key, const std::string& v
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
 void CLGLocalClientEntity::UpdateFromState(const EntityState& state) {
-    previousState = currentState;
-    currentState = state;
+    //previousState = currentState;
+    //currentState = state;
 }
 
 /**

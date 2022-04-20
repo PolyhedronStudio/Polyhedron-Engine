@@ -95,7 +95,7 @@ public:
 	*			first free server entity slot there is. After doing so, allocates
 	*			a game entity based on the 'classname' of the parsed entity.
 	**/
-    qboolean SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint) final;
+    qboolean SpawnFromBSPString(const char* mapName, const char* bspString, const char* spawnpoint) final;
     /**
 	*	@brief	Looks for the first free server entity in our buffer.
 	* 
@@ -151,17 +151,18 @@ public:
     
 
 	/**
-	*   @brief  Spawns a new game entity bashed on the state's hashed classname and 
-	*			assign it to the client entity.
-	*   @return Pointer to the game entity object on sucess. On failure, nullptr.
+	*   @brief  Creates a new GameEntity for the ClientEntity based on the passed state. If the 
+	*			hashedClassname values are identical it'll call its UpdateFromState on the already
+	*			instanced object.
+	*
+	*   @return On success: A pointer to the ClientEntity's GameEntity, which may be newly allocated. On failure: A nullptr.
 	**/
-	GameEntity* CreateFromState(const EntityState& state, PODEntity* clEntity);
+	GameEntity* UpdateGameEntityFromState(const EntityState& state, PODEntity* clEntity);
 	/**
 	*   @brief  When the client receives state updates it calls into this function so we can update
 	*           the game entity belonging to the server side entity(defined by state.number).
 	* 
-	*           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
-	*           always update its PODEntity pointer to the appropriate new one instead.
+	*           It defers the updating of game entity to the UpdateGameEntityFromState function.
 	* 
 	*   @return True on success, false in case of trouble. (Should never happen, and if it does,
 	*           well... file an issue lmao.)
@@ -204,10 +205,10 @@ public:
     *   @return A pointer of the server entity located at index.
     **/
     inline PODEntity* GetPODEntityByIndex(uint32_t index) final {
-        if (index <= 0 || index >= MAX_POD_ENTITIES) {
+        if (index < 0 || index >= MAX_POD_ENTITIES) {
             return nullptr; 
         }
-	    return &podEntities[index - 1];
+	    return &podEntities[index];
     }
 
     /**
@@ -221,12 +222,12 @@ public:
     **/
     inline GameEntity* GetGameEntityByIndex(int32_t index) final {
 		// Ensure ID is within bounds.
-		if (index <= 0 || index > MAX_POD_ENTITIES) {
+		if (index < 0 || index >= MAX_POD_ENTITIES) {
 			return nullptr;
 		}
 
 		// Return game entity that belongs to this ID.
-		return gameEntities[index - 1];
+		return gameEntities[index];
     }
 
     /**
@@ -330,12 +331,18 @@ private:
 	*	@return	True in case it succeeded parsing the entity string.
 	**/
     qboolean ParseEntityString(const char** data, PODEntity *podEntity);
+	/**
+	*	@brief	Parses the BSP Entity string and places the results in the server
+	*			entity dictionary.
+	**/
+	qboolean ParseEntityStringNew(const char** data, EntityDictionary &parsedKeyValues);
+
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean SpawnParsedGameEntity(PODEntity *podEntity);
+    qboolean CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary);
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.
@@ -343,5 +350,5 @@ private:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
     **/
-    GameEntity* AllocateGameEntity(PODEntity *podEntity, const std::string& classname);
+    GameEntity* CreateGameEntityFromClassname(PODEntity *podEntity, const std::string& classname);
 };

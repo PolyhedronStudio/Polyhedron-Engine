@@ -319,7 +319,8 @@ void MiscExplosionBox::ExplosionBoxDie(IServerGameEntity* inflictor, IServerGame
 
 	if (velocityLength > 0) {
 		// Setup the next think and think time.
-		SetNextThinkTime(level.time + 20 * FRAMETIME);
+		uint32_t nextThinkOffset = RandomRangeui(15, 35);
+		SetNextThinkTime(level.time + (float)nextThinkOffset * FRAMETIME);
 	} else {
 		// Setup the next think and think time.
 		SetNextThinkTime(level.time + 2 * FRAMETIME);

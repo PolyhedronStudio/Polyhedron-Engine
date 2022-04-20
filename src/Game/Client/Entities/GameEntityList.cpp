@@ -11,6 +11,7 @@
 
 // Base Entity.
 #include "Base/CLGBaseEntity.h"
+#include "Base/CLGLocalClientEntity.h"
 
 // GameEntity list.
 #include "GameEntityList.h"
@@ -69,16 +70,16 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
 		// Allocate and return a pointer to the new game entity object.
-		clEntity->gameEntity = InsertAt(clEntity->clientEntityNumber, info->AllocateInstance(clEntity));
+		clEntity->gameEntity = InsertAt(clEntity->clientEntityNumber, info->AllocateInstance(clEntity), true);
 
 		// If it isn't a nullptr...
 		if (!clEntity->gameEntity) {
-			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
+			Com_DPrint("Warning: GameEntityList.InsertAt failed so allocated a CLGLocalBaseEntity.\n");
 			//return nullptr;
 
 			// Perhaps instead of returning nullptr, this is where we should do a 
 			// CLGBaseEntity instead.
-			clEntity->gameEntity = new CLGBaseEntity(clEntity);
+			clEntity->gameEntity = new CLGLocalClientEntity(clEntity);
 		}
 
 		// Return game entity.
@@ -97,11 +98,13 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
 }
 
 /**
-*   @brief  Spawns, inserts and assignsa new game entity to the cliententity, 
-*			based on the state's hashed classname.
-*   @return Pointer to the game entity object on sucess. On failure, nullptr.
+*   @brief  Creates a new GameEntity for the ClientEntity based on the passed state. If the 
+*			hashedClassname values are identical it'll call its UpdateFromState on the already
+*			instanced object.
+*
+*   @return On success: A pointer to the ClientEntity's GameEntity, which may be newly allocated. On failure: A nullptr.
 **/
-IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, PODEntity* clEntity) {
+IClientGameEntity* GameEntityList::UpdateGameEntityFromState(const EntityState& state, PODEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -159,13 +162,13 @@ IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, POD
 		clEntity->clientEntityNumber = state.number;
 
 		// Allocate and return a pointer to the new game entity object.
-		clEntity->gameEntity = InsertAt(state.number, info->AllocateInstance(clEntity));
+		clEntity->gameEntity = InsertAt(state.number, info->AllocateInstance(clEntity), true);
 		
 		// If it isn't a nullptr...
 		if (!clEntity->gameEntity ) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
-			return nullptr;
-			//classEntity = new CLGBaseEntity(clEntity);
+			//return nullptr;
+			clEntity->gameEntity = new CLGBaseEntity(clEntity);
 		}
 
 		// Update its current state.
@@ -224,6 +227,14 @@ IClientGameEntity *GameEntityList::InsertAt(int32_t number, IClientGameEntity *c
 			// Delete old game entity.
 			delete gameEntities[index];
 			gameEntities[index] = nullptr;
+
+			// Reset old POD entity.
+			PODEntity *podEntity = &cs->entities[index];
+			int32_t clientEntityNumber = podEntity->clientEntityNumber;
+			cs->entities[index] = { };
+			cs->entities[index].clientEntityNumber = clientEntityNumber;
+			cs->entities[index].currentState.number = clientEntityNumber;
+			cs->entities[index].previousState.number = clientEntityNumber;
 
 			// Insert & Return.
 			return gameEntities[index] = clgEntity;

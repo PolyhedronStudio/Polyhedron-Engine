@@ -64,7 +64,7 @@ public:
     *           as its 'soulmate', I suppose.
     *   @return Pointer to the game entity object on sucess. On failure, nullptr.
     **/
-    GameEntity *CreateFromState(const EntityState &state, PODEntity *clEntity);
+    GameEntity *UpdateGameEntityFromState(const EntityState &state, PODEntity *clEntity);
 
     /**
     *   @return A pointer to the entity who's index matches the state number.

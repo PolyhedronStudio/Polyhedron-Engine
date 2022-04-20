@@ -214,8 +214,7 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
 void CLGBaseEntity::UpdateFromState(const EntityState& state) {
-    previousState = currentState;
-    currentState = state;
+
 }
 
 /**

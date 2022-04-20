@@ -30,6 +30,7 @@ SET(SRC_CLGAME
 	Entities/Base/CLGLocalClientEntity.cpp
 
 	Entities/Misc/MiscExplosionBox.cpp
+	Entities/Misc/MiscClientExplosionBox.cpp
 	
 	Entities/Monsters/MonsterTestDummy.cpp
 
@@ -83,6 +84,7 @@ SET(HEADERS_CLGAME
 	Entities/Base/CLGLocalClientEntity.h
 
 	Entities/Misc/MiscExplosionBox.h
+	Entities/Misc/MiscClientExplosionBox.h
 
 	Entities/Monsters/MonsterTestDummy.h
 

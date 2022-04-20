@@ -701,11 +701,11 @@ qboolean CL_GM_SpawnEntitiesFromBSPString(const char* bspString) {
 /**
 *   @brief  Notifies the client game module that we should update/spawn an entity from a newly received state.
 **/
-qboolean CL_GM_UpdateFromState(PODEntity* clEntity, const EntityState& state) {
+qboolean CL_GM_CreateFromNewState(PODEntity* clEntity, const EntityState& state) {
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-	        return entities->UpdateFromState(clEntity, state);
+	        return entities->UpdateGameEntityFromState(clEntity, state);
         }
     }
 

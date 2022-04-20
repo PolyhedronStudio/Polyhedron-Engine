@@ -57,11 +57,11 @@ static inline qboolean ServerEntity_IsPlayer(const EntityState& state) {
 static inline void ServerEntity_UpdateNew(PODEntity *clEntity, const EntityState &state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
-    clEntity->clientEntityNumber = ++entity_ctr; //state.number; // used to be: clEntity->id = ++entity_ctr;
+    clEntity->clientEntityNumber = state.number; // used to be: clEntity->id = ++entity_ctr;
     clEntity->trailCount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
-    CL_GM_UpdateFromState(clEntity, state);
+    CL_GM_CreateFromNewState(clEntity, state);
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
     clEntity->previousState = state;
@@ -112,6 +112,9 @@ static inline void ServerEntity_UpdateExisting(PODEntity *clEntity, const Entity
 
     // Shuffle the last state to previous
     clEntity->previousState = clEntity->currentState;
+
+	// Update entity number.
+	clEntity->clientEntityNumber = state.number;
 }
 
 /**
@@ -199,6 +202,9 @@ static void ServerEntity_UpdateState(const EntityState &state)
     // Assign the fresh new received state as the entity's current.
     clEntity->currentState = state;
 
+	// Assign its clientEntity number.
+	clEntity->clientEntityNumber = state.number;
+
     // work around Q2PRO server bandwidth optimization
     if (isPlayerEntity) {
         Com_PlayerToEntityState(&cl.frame.playerState, &clEntity->currentState);
@@ -227,11 +233,11 @@ static void ServerEntity_FireEvent(int number) {
 static inline void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState &state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
-    clEntity->clientEntityNumber = ++entity_ctr; //state.number; // used to be: clEntity->id = ++entity_ctr;
+    clEntity->clientEntityNumber = 2048 + (++entity_ctr); //state.number; // used to be: clEntity->id = ++entity_ctr;
     clEntity->trailCount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
-    CL_GM_UpdateFromState(clEntity, state);
+    //CL_GM_CreateFromNewState(clEntity, state);
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
     clEntity->previousState = state;
@@ -366,6 +372,7 @@ static void LocalEntity_Update(const EntityState &state)
     // Assign the fresh new received state as the entity's current.
 	clEntity->previousState = clEntity->currentState;
 	clEntity->currentState = state;
+	clEntity->clientEntityNumber = state.number;
 }
 
 /**
@@ -570,6 +577,7 @@ void CL_DeltaFrame(void)
 
 		// I guess it has to come from somewhere right?
 		localEntityState.number = i;
+		cs.entities[i].clientEntityNumber = i;
 		localEntityState.eventID = 0;
 
 		//// Update local entity.

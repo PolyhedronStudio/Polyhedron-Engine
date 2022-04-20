@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// MiscExplosionBox.cpp
+// MiscClientExplosionBox.cpp
 //
 //
 */
@@ -17,7 +17,7 @@
 //#include "../Base/CLGBaseTrigger.h"
 
 // Misc Explosion Box Entity.
-#include "MiscExplosionBox.h"
+#include "MiscClientExplosionBox.h"
 
 //#include "../../Gamemodes/IGamemode.h"
 //#include "../../World/Gameworld.h"
@@ -25,11 +25,11 @@
 //
 // Constructor/Deconstructor.
 //
-MiscExplosionBox::MiscExplosionBox(PODEntity* clEntity) 
+MiscClientExplosionBox::MiscClientExplosionBox(PODEntity* clEntity) 
     : Base(clEntity) {
 
 }
-MiscExplosionBox::~MiscExplosionBox() {
+MiscClientExplosionBox::~MiscClientExplosionBox() {
 
 }
 
@@ -40,11 +40,11 @@ MiscExplosionBox::~MiscExplosionBox() {
 //
 //
 //===============
-// MiscExplosionBox::Precache
+// MiscClientExplosionBox::Precache
 //
 //===============
 //
-void MiscExplosionBox::Precache() {
+void MiscClientExplosionBox::Precache() {
     // Always call parent class method.
     Base::Precache();
 
@@ -59,12 +59,12 @@ void MiscExplosionBox::Precache() {
 
 //
 //===============
-// MiscExplosionBox::Spawn
+// MiscClientExplosionBox::Spawn
 //
 //===============
 //
-void MiscExplosionBox::Spawn() {
-	Com_DPrint("MISC_EXPLOBOX WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!\n");
+void MiscClientExplosionBox::Spawn() {
+	Com_DPrint("MISC_CLIENT_EXPLOBOX WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!\n");
     // Always call parent class method.
     Base::Spawn();
 
@@ -72,7 +72,7 @@ void MiscExplosionBox::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::None);
+    SetMoveType(MoveType::TossSlide);
 
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -87,9 +87,6 @@ void MiscExplosionBox::Spawn() {
         // Maxs.
         { 16.f, 16.f, 40.f }
     );
-	//if (podEntity && podEntity->clientEntityNumber == 2052) {
-	//	SetInUse(true);
-	//}
     //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);
 
     // Set default values in case we have none.
@@ -106,16 +103,16 @@ void MiscExplosionBox::Spawn() {
     // We need it to take damage in case we want it to explode.
     SetTakeDamage(ClientTakeDamage::Yes);
 
-    // Setup our MiscExplosionBox callbacks.
-    SetUseCallback(&MiscExplosionBox::ExplosionBoxUse);
+    // Setup our MiscClientExplosionBox callbacks.
+    SetUseCallback(&MiscClientExplosionBox::ExplosionBoxUse);
 
-    SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
-    SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
+    SetDieCallback(&MiscClientExplosionBox::ExplosionBoxDie);
+    SetTouchCallback(&MiscClientExplosionBox::ExplosionBoxTouch);
 	const EntityState &x = GetState();
-	Com_DPrint("misc_explobox = %i\n", x.number);
+	Com_DPrint("misc_client_explobox = %i\n", x.number);
     // Setup the next think time.
-    //SetNextThinkTime(level.time + 2.f * FRAMETIME);
-    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
+    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
 	SetInUse(true);
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -123,27 +120,27 @@ void MiscExplosionBox::Spawn() {
 
 //
 //===============
-// MiscExplosionBox::Think
+// MiscClientExplosionBox::Think
 //
 //===============
 //
-void MiscExplosionBox::Think() {
+void MiscClientExplosionBox::Think() {
     // Always call parent class method.
     Base::Think();
 
 	// Interpolate origin?
 	PODEntity *clientEntity = GetPODEntity();
-//	Com_DPrint("YO DAWG FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
+	Com_DPrint("YO DAWG THINKING STRAIGHT FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
 	clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
 	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 }
 
 //===============
-// MiscExplosionBox::SpawnKey
+// MiscClientExplosionBox::SpawnKey
 //
 //===============
-void MiscExplosionBox::SpawnKey(const std::string& key, const std::string& value) {
+void MiscClientExplosionBox::SpawnKey(const std::string& key, const std::string& value) {
 	Base::SpawnKey(key, value);
 }
 
@@ -153,23 +150,23 @@ void MiscExplosionBox::SpawnKey(const std::string& key, const std::string& value
 //
 
 // ==============
-// MiscExplosionBox::ExplosionBoxUse
+// MiscClientExplosionBox::ExplosionBoxUse
 // 
 // So that mappers can trigger this entity in order to blow it up
 // ==============
-void MiscExplosionBox::ExplosionBoxUse( IClientGameEntity* caller, IClientGameEntity* activator )
+void MiscClientExplosionBox::ExplosionBoxUse( IClientGameEntity* caller, IClientGameEntity* activator )
 {
     ExplosionBoxDie( caller, activator, 999, GetOrigin() );
 }
 
 //
 //===============
-// MiscExplosionBox::ExplosionBoxDropToFloor
+// MiscClientExplosionBox::ExplosionBoxDropToFloor
 //
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 //
-void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
+void MiscClientExplosionBox::ExplosionBoxDropToFloor(void) {
     // First, ensure our origin is +1 off the floor.
     vec3_t traceStart = GetOrigin() + vec3_t{
         0.f, 0.f, 1.f
@@ -200,7 +197,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     CLG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
-    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
+    //SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
     //SetNextThinkTime(level.time + 1.f * FRAMETIME);
 
     // Do a check ground for the step move of this pusher.
@@ -213,13 +210,13 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
 
 //
 //===============
-// MiscExplosionBox::MiscExplosionBoxExplode
+// MiscClientExplosionBox::MiscExplosionBoxExplode
 //
 // 'Think' callback that is set when the explosion box is exploding.
 // (Has died due to taking damage.)
 //===============
 //
-void MiscExplosionBox::MiscExplosionBoxExplode(void) {
+void MiscClientExplosionBox::MiscExplosionBoxExplode(void) {
     // Execute radius damage.
 //    GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
@@ -289,18 +286,18 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
 	//podEntity->inUse = true;
     // Ensure we have no more think callback pointer set when this entity has "died"
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
-    //SetThinkCallback(&MiscExplosionBox::CLGLocalClientEntityThinkFree);
-	SetThinkCallback(&MiscExplosionBox::CLGBaseEntityThinkFree);
+    //SetThinkCallback(&MiscClientExplosionBox::CLGLocalClientEntityThinkFree);
+	SetThinkCallback(&MiscClientExplosionBox::CLGLocalClientEntityThinkFree);
 }
 
 //
 //===============
-// MiscExplosionBox::ExplosionBoxDie
+// MiscClientExplosionBox::ExplosionBoxDie
 //
 // 'Die' callback, the explosion box has been damaged too much.
 //===============
 //
-void MiscExplosionBox::ExplosionBoxDie(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) {
+void MiscClientExplosionBox::ExplosionBoxDie(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(ClientTakeDamage::No);
 
@@ -320,31 +317,31 @@ void MiscExplosionBox::ExplosionBoxDie(IClientGameEntity* inflictor, IClientGame
 	}
 
     // Set think function.
-    SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxExplode);
+    SetThinkCallback(&MiscClientExplosionBox::MiscExplosionBoxExplode);
 }
 
 //
 //===============
-// MiscExplosionBox::ExplosionBoxTouch
+// MiscClientExplosionBox::ExplosionBoxTouch
 //
 // 'Touch' callback, to calculate the direction to move into.
 //===============
 //
-void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
    
 	// Safety checks.
     if (!other || other == this) {
-		Com_DPrint("Touching explobox !other: %i\n", GetNumber());
+		//Com_DPrint("Touching explobox !other: %i\n", GetNumber());
 		return;
     }
 
     // Ground entity checks.
     if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
-		Com_DPrint("Touching explobox !other->GetGroundEntity: %i\n", GetNumber());
+		//Com_DPrint("Touching explobox !other->GetGroundEntity: %i\n", GetNumber());
 		return;
     }
 	
-	Com_DPrint("Touching explobox: %i\n", GetNumber());
+	//Com_DPrint("Touching explobox: %i\n", GetNumber());
 
     // Calculate ratio to use.
     double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));
@@ -362,12 +359,12 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
 
 //
 //===============
-// MiscExplosionBox::SpawnDebris1Chunk
+// MiscClientExplosionBox::SpawnDebris1Chunk
 // 
 // Function to spawn "debris1/tris.md2" chunks.
 //===============
 //
-void MiscExplosionBox::SpawnDebris1Chunk() {
+void MiscClientExplosionBox::SpawnDebris1Chunk() {
     // Acquire a pointer to the game world.
 //    Gameworld* gameworld = GetGameworld();
 
@@ -391,12 +388,12 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
 
 //
 //===============
-// MiscExplosionBox::SpawnDebris2Chunk
+// MiscClientExplosionBox::SpawnDebris2Chunk
 //
 // Function to spawn "debris2/tris.md2" chunks.
 //===============
 //
-void MiscExplosionBox::SpawnDebris2Chunk() {
+void MiscClientExplosionBox::SpawnDebris2Chunk() {
     // Speed to throw debris at.
     float speed = 2.f * GetDamage() / 200.f;
 
@@ -416,12 +413,12 @@ void MiscExplosionBox::SpawnDebris2Chunk() {
 
 //
 //===============
-// MiscExplosionBox::SpawnDebris3Chunk
+// MiscClientExplosionBox::SpawnDebris3Chunk
 // 
 // Function to spawn "debris3/tris.md2" chunks.
 //===============
 //
-void MiscExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
+void MiscClientExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
     // Speed to throw debris at.
     float speed = 1.75 * (float)GetDamage() / 200.0f;
 

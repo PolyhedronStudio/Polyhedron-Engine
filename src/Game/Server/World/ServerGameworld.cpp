@@ -210,7 +210,7 @@ qboolean ServerGameworld::SpawnFromBSPString(const char* mapName, const char* en
 		ParseEntityString(&entities, podEntity);
 
 		// Allocate the game entity, and call its spawn.
-		if (!SpawnParsedGameEntity(podEntity)) {
+		if (!CreateGameEntityFromDictionary(podEntity, podEntity->entityDictionary)) {
 			parsedSuccessfully = false;
 		}
 	}
@@ -421,37 +421,37 @@ qboolean ServerGameworld::ParseEntityString(const char** data, PODEntity *podEnt
 *   @brief  Allocates the game entity determined by the classname key, and
 *           then does a precache before spawning the game entity.
 **/
-qboolean ServerGameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
-	// Acquire dictionary.
-    auto &dictionary = podEntity->entityDictionary;
+qboolean ServerGameworld::CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary) {
 
-	// Get state number.
+	// We do need a PODEntity of course.
+	if (!podEntity) {
+		gi.Error("%s: Called __func__ with a nullptr PODEntity!\n");
+		return false;
+	}
+
+	// Get state number for debug/error logging.
     int32_t stateNumber = podEntity->currentState.number;
 
-	// If it does not have a classname key we're in for trouble.
-    if (!podEntity->entityDictionary.contains("classname")) {
-		// Error out.
-		gi.Error("%s: Can't spawn parsed POD entity #%i due to a missing classname key.\n", __func__, stateNumber);
-		
-		// Failed.
+	// It needs the classname key, as well as it needs to have a value for it, how else can we spawn a game entity?
+    if (!podEntity->entityDictionary.contains("classname") || podEntity->entityDictionary["classname"].empty()) {
+		// For the server game we error out in this case, it can't go on since it is the actual game master.
+		gi.Error("%s: Can't spawn ServerGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", __func__, stateNumber);
 		return false;
     }
 
 	// Actually spawn the game entity.
-    IServerGameEntity *gameEntity = static_cast<IServerGameEntity*>(podEntity->gameEntity = AllocateGameEntity(podEntity, podEntity->entityDictionary["classname"]));
+    IServerGameEntity *gameEntity = static_cast<IServerGameEntity*>(podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, podEntity->entityDictionary["classname"]));
 
     // Something went wrong with allocating the game entity.
     if (!gameEntity) {
-		// Be sure to free it.
+		// Free/reset the PODEntity for reusal.
 		FreePODEntity(podEntity);
-
-		// Failed.
 		gi.DPrintf("Warning: Spawning entity(%s) failed.\n", podEntity->entityDictionary["classname"]);
 		return false;
     }
 
     // Initialise the entity with its respected keyvalue properties
-    for (const auto& keyValueEntry : podEntity->entityDictionary) {
+    for (const auto& keyValueEntry : dictionary) {
 		podEntity->gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
     }
 
@@ -469,7 +469,7 @@ qboolean ServerGameworld::SpawnParsedGameEntity(PODEntity *podEntity) {
 *			try and allocate it.
 *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
 **/
-GameEntity *ServerGameworld::AllocateGameEntity(PODEntity *podEntity, const std::string &classname) {
+GameEntity *ServerGameworld::CreateGameEntityFromClassname(PODEntity *podEntity, const std::string &classname) {
     // Start with a nice nullptr.
     GameEntity* spawnEntity = nullptr;
 
@@ -661,8 +661,7 @@ SVGBaseEntity* ServerGameworld::ValidateEntity(const SGEntityHandle &entityHandl
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
 void ServerGameworld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
-	
-	//DebrisEntity::Create(debrisser, gibModel, origin, speed); 
+	DebrisEntity::Create(debrisser, gibModel, origin, speed); 
 }
 
 /**

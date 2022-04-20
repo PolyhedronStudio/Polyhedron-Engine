@@ -316,7 +316,7 @@ protected:
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    virtual qboolean SpawnParsedGameEntity(PODEntity *podEntity) = 0;
+    virtual qboolean CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary) = 0;
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.
@@ -324,5 +324,5 @@ protected:
     *			try and allocate it.
     *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
     **/
-    virtual GameEntity* AllocateGameEntity(PODEntity *podEntity, const std::string& classname) = 0;
+    virtual GameEntity* CreateGameEntityFromClassname(PODEntity *podEntity, const std::string& classname) = 0;
 };
