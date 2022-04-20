@@ -193,7 +193,7 @@ public:
     //! needed for coop respawns
     //! Can't store spawnpoint32_t in level, because
     //! it would get overwritten by the savegame restore
-    char spawnpoint[512];
+	char spawnpoint[512] = {};
 
     //! Will be set to latched cvar equivelants due to having to access them a lot.
     //int32_t maxClients = 0;

@@ -529,7 +529,7 @@ void CL_DeltaFrame(void)
     // Getting a valid frame message ends the connection process.
     if (cls.connectionState == ClientConnectionState::Precached) {
 	    // Spawn all local class entities.
-	    //CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
+	    CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
 
         // Set the client to an active connection state.
         CL_SetActiveState();
@@ -564,7 +564,7 @@ void CL_DeltaFrame(void)
 
 	// The local entities start indexed from MAX_SERVER_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
-	for (int32_t i = MAX_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
+	for (int32_t i = 2048; i < MAX_CLIENT_POD_ENTITIES; i++) {
 		//if (i < totalLocalEntities) {}
 		EntityState &localEntityState = cs.entities[i].currentState;
 

@@ -75,7 +75,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 	qboolean parsedSuccessfully = false;// This gets set to false the immediate moment we run into parsing trouble.
 	char *com_token = nullptr; // Token pointer.
 	PODEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
-    uint32_t entityIndex = 0;	// Entity index for shared with server entities (regular type)
+    uint32_t entityIndex = 13;	// Entity index for shared with server entities (regular type)
 	uint32_t localEntityIndex = MAX_PACKET_ENTITIES + 3; // Local entity index for local only client entities.
 
 	// Engage parsing.
@@ -103,7 +103,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 			clientEntity = cs->entities;
 		} else {
 			// See if it has a classname, and if that one contains _client_
-			if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"].find("_client_")) {
+			if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "misc_client_explobox") {
 				localEntityIndex++;
 				clientEntity = &cs->entities[localEntityIndex];
 				clientEntity->clientEntityNumber = localEntityIndex;
@@ -113,6 +113,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: localEntityIndex < MAX_EDICTS\n"));
 				}
 			} else {
+
 				entityIndex++;
 				clientEntity = &cs->entities[entityIndex];
 				clientEntity->clientEntityNumber = entityIndex;
@@ -128,7 +129,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 
 		// Allocate the game entity, and call its spawn.
 		bool spawnedSuccessfully = true;
-		if (parsedSuccessfully && !SpawnParsedGameEntity(clientEntity)) {
+		if (!SpawnParsedGameEntity(clientEntity)) {
 			spawnedSuccessfully = false;
 		}
 
@@ -140,7 +141,7 @@ qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 			*clientEntity = {};
 			clientEntity->clientEntityNumber = clientEntityNumber;
 
-			return false;
+			//return false;
 		}
 	}
 
@@ -385,7 +386,8 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
 
     return false;
 }
-
+void CLG_RunServerEntity(SGEntityHandle &entityHandle);
+void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle);
 /**
 *   @brief  Runs the client game module's entity logic for a single frame.
 **/
@@ -405,7 +407,29 @@ void ClientGameEntities::RunFrame() {
         }
 
         // Run it for a frame.
-        CLG_RunThink(gameEntity);
+        //CLG_RunThink(gameEntity);
+		SGEntityHandle handle = gameEntity;
+		CLG_RunServerEntity(handle);
+    }
+
+	// Iterate through our local client side entities.
+    for (int32_t localEntityNumber = 2048 + 3; localEntityNumber < MAX_POD_ENTITIES; localEntityNumber++) {
+        // Acquire game entity object.
+        GameEntity *gameEntity = gameEntityList.GetByNumber(localEntityNumber);
+		if (localEntityNumber == 2053 && gameEntity != nullptr) {
+			Com_DPrint("GOT OURSELVES THAT ENTITY 2053\n");
+		}
+        // If invalid for whichever reason, continue to next iteration.
+        if (!gameEntity) {
+            //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
+            continue;
+        } else {
+
+			// Run it for a frame.
+			//CLG_RunThink(gameEntity);
+			SGEntityHandle handle = gameEntity;
+			CLG_RunLocalClientEntity(handle);
+		}
     }
 }
 
@@ -691,10 +715,13 @@ void ClientGameEntities::AddPacketEntities() {
             if (!cl->thirdPersonView)
             {
                 // Special case handling for RTX rendering. Only draw third person model from mirroring surfaces.
-                if (vid_rtx->integer)
+                if (vid_rtx->integer) {
                     baseEntityFlags |= RenderEffects::ViewerModel;
-                else
-                    goto skip;
+				} else {
+					// Assign renderEntity origin to clientEntity lerp origin in the case of a skip.
+			        clientEntity->lerpOrigin = renderEntity.origin;
+					continue;
+				}
             }
 
             // Don't tilt the model - looks weird
@@ -719,7 +746,9 @@ void ClientGameEntities::AddPacketEntities() {
 
         // If set to invisible, skip
         if (!entityState->modelIndex) {
-            goto skip;
+			// Assign renderEntity origin to clientEntity lerp origin in the case of a skip.
+			clientEntity->lerpOrigin = renderEntity.origin;
+			continue;
         }
 
         // Add the baseEntityFlags to the renderEntity flags.
@@ -853,9 +882,383 @@ void ClientGameEntities::AddPacketEntities() {
             }
         }
 
-    skip:
+    }
+
+    // Iterate from 0 till the amount of entities present in the current frame.
+    for (int32_t localEntityNumber = 2048 + 3; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
+        // C++20: Had to be placed here because of label skip.
+        int32_t baseEntityFlags = 0;
+
+        //
+        // Fetch Entity.
+        // 
+        // Fetch the entity index.
+        int32_t entityIndex = localEntityNumber;
+
+        // Fetch the actual entity to process based on the entity's state index number.
+        clientEntity = &cs->entities[localEntityNumber];
+		// Fetch the state of the given entity index.
+		entityState = &clientEntity->currentState;
+		// Fetch the game entity belonging to this entity.
+        GameEntity *gameEntity = gameEntityList.GetByNumber(localEntityNumber);
+		// Setup the render entity ID for the renderer.
+        renderEntity.id = clientEntity->clientEntityNumber;// + RESERVED_ENTITIY_COUNT;
+//
+//
+// 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//          class entities test code.
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Com_DPrint("entityIndex=%i, entityState->number=%i, clientEntity->id=%i, pointernr=%i\n", entityIndex, entityState->number, clientEntity->id, pointerNumber);
+
+        // Loop through class entities, and see if their IDs still match 
+        //classEntities.UpdateFrame();
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// 
+// 
+        //
+        // Effects.
+        // 
+        // Fetch the effects of current entity.
+        effects = entityState->effects;
+        // Fetch the render effects of current entity.
+        renderEffects = entityState->renderEffects;
+
+        //
+        // Frame Animation Effects.
+        //
+        if (effects & EntityEffectType::AnimCycleFrames01hz2)
+            renderEntity.frame = autoAnimation & 1;
+        else if (effects & EntityEffectType::AnimCycleFrames23hz2)
+            renderEntity.frame = 2 + (autoAnimation & 1);
+        else if (effects & EntityEffectType::AnimCycleAll2hz)
+            renderEntity.frame = autoAnimation;
+        else if (effects & EntityEffectType::AnimCycleAll30hz)
+            renderEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
+	    else {
+    	    //// Fetch the iqm animation index data.
+         //   if (clientEntity->currentState.animationIndex != 0 && clientEntity->currentState.modelIndex != 0) {
+		       // model_t* iqmData = clgi.MOD_ForHandle(clientEntity->currentState.modelIndex);
+
+         //       if (iqmData) {
+			      //  Com_DPrint("WOW!!!\n");
+         //       }
+         //   } else {
+		        //renderEntity.frame = entityState->animationFrame;
+		 //       renderEntity.oldframe = clientEntity->previousState.animationFrame;
+		//        renderEntity.backlerp = 1.0 - cl->lerpFraction;
+//            }
+
+ 
+            //clientEntity->currentState.animationFrame, 
+	 //   framefrac = GS_FrameForTime(&curframe, cg.time, viewweapon->baseAnimStartTime,  // start time
+		//weaponInfo->frametime[viewweapon->baseAnim],				    // current frame time?
+		//weaponInfo->firstframe[viewweapon->baseAnim],				    // first frame.
+		//weaponInfo->lastframe[viewweapon->baseAnim],				    // last frame.
+		//weaponInfo->loopingframes[viewweapon->baseAnim],			    // looping frames.
+		//true); 
+        }
+        
+
+        // Optionally remove the glowing effect.
+        if (cl_noglow->integer)
+            renderEffects &= ~RenderEffects::Glow;
+
+        // Setup the proper lerp and model frame to render this pass.
+        // Moved into the if statement's else case up above.
+        renderEntity.oldframe = clientEntity->previousState.animationFrame;
+        renderEntity.backlerp = 1.0 - SG_FrameForTime(&renderEntity.frame,
+            GameTime(cl->serverTime),                                     // Current Time.
+            GameTime(clientEntity->currentState.animationStartTime),           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
+            clientEntity->currentState.animationFramerate,           // Current frame time.
+            clientEntity->currentState.animationStartFrame,          // Start frame.
+            clientEntity->currentState.animationEndFrame,            // End frame.
+            0,                                                  // Loop count.
+            true                                                // Force loop
+        );
+        clientEntity->currentState.animationFrame = renderEntity.frame;
+    //clientEntity->previousState.animationFrame = clientEntity->currentState.animationFrame;
+
+        //
+        // Setup renderEntity origin.
+        //
+        if (renderEffects & RenderEffects::FrameLerp) {
+            // Step origin discretely, because the model frames do the animation properly.
+            renderEntity.origin = clientEntity->currentState.origin;
+            renderEntity.oldorigin = clientEntity->currentState.oldOrigin;
+        } else if (renderEffects & RenderEffects::Beam) {
+            // Interpolate start and end points for beams
+            renderEntity.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+            renderEntity.oldorigin = vec3_mix(clientEntity->previousState.oldOrigin, clientEntity->currentState.oldOrigin, cl->lerpFraction);
+        } else {
+            if (entityState->number == cl->frame.clientNumber + 1) {
+                // In case of this being our actual client entity, we use the predicted origin.
+                renderEntity.origin = cl->playerEntityOrigin;
+                renderEntity.oldorigin = cl->playerEntityOrigin;
+            } else {
+                // Ohterwise, just neatly interpolate the origin.
+                renderEntity.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+                // Neatly copy it as the renderEntity's oldorigin.
+                renderEntity.oldorigin = renderEntity.origin;
+            }
+        }
+
+	    // Draw debug bounding box for client entity.
+	    if (renderEffects & RenderEffects::DebugBoundingBox) {
+	        CLG_DrawDebugBoundingBox(clientEntity->lerpOrigin, clientEntity->mins, clientEntity->maxs);
+	    }
+
+        // tweak the color of beams
+        if (renderEffects & RenderEffects::Beam) {
+            // The four beam colors are encoded in 32 bits of skinNumber (hack)
+            renderEntity.alpha = 0.30;
+            renderEntity.skinNumber = (entityState->skinNumber >> ((rand() % 4) * 8)) & 0xff;
+            renderEntity.model = 0;
+        } else {
+            //
+            // Set the entity model skin
+            //
+            if (entityState->modelIndex == 255) {
+                // Use a custom player skin
+                clientInfo = &cl->clientInfo[entityState->skinNumber & 255];
+                renderEntity.skinNumber = 0;
+                renderEntity.skin = clientInfo->skin;
+                renderEntity.model = clientInfo->model;
+
+                // Setup default base client info in case of 0.
+                if (!renderEntity.skin || !renderEntity.model) {
+                    renderEntity.skin = cl->baseClientInfo.skin;
+                    renderEntity.model = cl->baseClientInfo.model;
+                    clientInfo = &cl->baseClientInfo;
+                }
+
+                // Special Disguise render effect handling.
+                if (renderEffects & RenderEffects::UseDisguise) {
+                    char buffer[MAX_QPATH];
+
+                    Q_concat(buffer, sizeof(buffer), "players/", clientInfo->model_name, "/disguise.pcx", NULL);
+                    renderEntity.skin = clgi.R_RegisterSkin(buffer);
+                }
+            } else {
+                // Default entity skin number handling behavior.
+                renderEntity.skinNumber = entityState->skinNumber;
+                renderEntity.skin = 0;
+                renderEntity.model = cl->drawModels[entityState->modelIndex];
+
+                // Disable shadows on lasers and dm spots.
+                if (renderEntity.model == cl_mod_laser || renderEntity.model == cl_mod_dmspot)
+                    renderEffects |= RF_NOSHADOW;
+            }
+        }
+
+        // Only used for black hole model right now, FIXME: do better
+        if ((renderEffects & RenderEffects::Translucent) && !(renderEffects & RenderEffects::Beam)) {
+            renderEntity.alpha = 0.70;
+        }
+
+        // Render effects (fullbright, translucent, etc)
+        if ((effects & EntityEffectType::ColorShell)) {
+            renderEntity.flags = 0;  // Render effects go on color shell entity
+        } else {
+            renderEntity.flags = renderEffects;
+        }
+
+        //
+        // Angles.
+        //
+        if (effects & EntityEffectType::Rotate) {
+            // Autorotate for bonus item entities.
+            renderEntity.angles[0] = 0;
+            renderEntity.angles[1] = autoRotate;
+            renderEntity.angles[2] = 0;
+        } else if (entityState->number == cl->frame.clientNumber + 1) {
+            // Predicted angles for client entities.
+            renderEntity.angles = cl->playerEntityAngles;
+        } else {
+            // Otherwise, lerp angles by default.
+            renderEntity.angles = vec3_mix(clientEntity->previousState.angles, clientEntity->currentState.angles, cl->lerpFraction);
+
+            // Mimic original ref_gl "leaning" bug (uuugly!)
+            if (entityState->modelIndex == 255 && cl_rollhack->integer) {
+                renderEntity.angles[vec3_t::Roll] = -renderEntity.angles[vec3_t::Roll];
+            }
+        }
+
+        //
+        // Entity Effects for in case the entity is the actual client.
+        //
+        if (entityState->number == cl->frame.clientNumber + 1) {
+            if (!cl->thirdPersonView)
+            {
+                // Special case handling for RTX rendering. Only draw third person model from mirroring surfaces.
+                if (vid_rtx->integer) {
+                    baseEntityFlags |= RenderEffects::ViewerModel;
+				} else {
+					// Assign renderEntity origin to clientEntity lerp origin in the case of a skip.
+					clientEntity->lerpOrigin = renderEntity.origin;
+				}
+            }
+
+            // Don't tilt the model - looks weird
+            renderEntity.angles[0] = 0.f;
+
+            //
+            // TODO: This needs to be fixed properly for the shadow to render.
+            // 
+            // Offset the model back a bit to make the view point located in front of the head
+            //constexpr float offset = -15.f;
+            //constexpr float offset = 8.f;// 0.0f;
+            //vec3_t angles = { 0.f, renderEntity.angles[1], 0.f };
+            //vec3_t forward;
+            //AngleVectors(angles, &forward, NULL, NULL);
+            //renderEntity.origin = vec3_fmaf(renderEntity.origin, offset, forward);
+            //renderEntity.oldorigin = vec3_fmaf(renderEntity.oldorigin, offset, forward);
+
+            // Temporary fix, not quite perfect though. Add some z offset so the shadow isn't too dark under the feet.
+            renderEntity.origin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
+            renderEntity.oldorigin = cl->predictedState.viewOrigin + vec3_t{0.f, 0.f, 4.f};
+        }
+
+        // If set to invisible, skip
+        if (!entityState->modelIndex) {
         // Assign renderEntity origin to clientEntity lerp origin in the case of a skip.
         clientEntity->lerpOrigin = renderEntity.origin;
+		continue;
+        }
+
+        // Add the baseEntityFlags to the renderEntity flags.
+        renderEntity.flags |= baseEntityFlags;
+
+        // In rtx mode, the base entity has the renderEffects for shells
+        if ((effects & EntityEffectType::ColorShell) && vid_rtx->integer) {
+            renderEffects = ApplyRenderEffects(renderEffects);
+            renderEntity.flags |= renderEffects;
+        }
+
+        // Last but not least, add the entity to the refresh render list.
+        clge->view->AddRenderEntity(&renderEntity);
+
+        // Keeping it here commented to serve as an example case.
+        // Add dlights for flares
+        //model_t* model;
+        //if (renderEntity.model && !(renderEntity.model & 0x80000000) &&
+        //    (model = clgi.MOD_ForHandle(renderEntity.model)))
+        //{
+        //    if (model->model_class == MCLASS_FLARE)
+        //    {
+        //        float phase = (float)cl->time * 0.03f + (float)renderEntity.id;
+        //        float anim = sinf(phase);
+
+        //        float offset = anim * 1.5f + 5.f;
+        //        float brightness = anim * 0.2f + 0.8f;
+
+        //        vec3_t origin;
+        //        VectorCopy(renderEntity.origin, origin);
+        //        origin[2] += offset;
+
+        //        V_AddLightEx(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
+        //    }
+        //}
+
+        // For color shells we generate a separate entity for the main model.
+        // (Use the settings of the already rendered model, and apply translucency to it.
+        if ((effects & EntityEffectType::ColorShell) && !vid_rtx->integer) {
+            renderEffects = ApplyRenderEffects(renderEffects);
+            renderEntity.flags = renderEffects | baseEntityFlags | RenderEffects::Translucent;
+            renderEntity.alpha = 0.30;
+            clge->view->AddRenderEntity(&renderEntity);
+        }
+
+        renderEntity.skin = 0;       // never use a custom skin on others
+        renderEntity.skinNumber = 0;
+        renderEntity.flags = baseEntityFlags;
+        renderEntity.alpha = 0;
+
+        //
+        // ModelIndex2
+        // 
+        // Add an entity to the current rendering frame that has model index 2 attached to it.
+        // Duplicate for linked models
+        if (entityState->modelIndex2) {
+            if (entityState->modelIndex2 == 255) {
+                // Custom weapon
+                clientInfo = &cl->clientInfo[entityState->skinNumber & 0xff];
+                
+                // Determine skinIndex.
+                int32_t skinIndex = (entityState->skinNumber >> 8); // 0 is default weapon model
+                if (skinIndex < 0 || skinIndex > cl->numWeaponModels - 1) {
+                    skinIndex = 0;
+                }
+
+                // Fetch weapon model.
+                renderEntity.model = clientInfo->weaponmodel[skinIndex];
+
+                // If invalid, use defaults.
+                if (!renderEntity.model) {
+                    if (skinIndex != 0) {
+                        renderEntity.model = clientInfo->weaponmodel[0];
+                    }
+                    if (!renderEntity.model) {
+                        renderEntity.model = cl->baseClientInfo.weaponmodel[0];
+                    }
+                }
+            } else {
+                renderEntity.model = cl->drawModels[entityState->modelIndex2];
+            }
+
+
+            if ((effects & EntityEffectType::ColorShell) && vid_rtx->integer) {
+                renderEntity.flags |= renderEffects;
+            }
+
+            clge->view->AddRenderEntity(&renderEntity);
+
+            //PGM - make sure these get reset.
+            renderEntity.flags = baseEntityFlags;
+            renderEntity.alpha = 0;
+        }
+
+        //
+        // ModelIndex3
+        // 
+        // Add an entity to the current rendering frame that has model index 3 attached to it.
+        if (entityState->modelIndex3) {
+            renderEntity.model = cl->drawModels[entityState->modelIndex3];
+            clge->view->AddRenderEntity(&renderEntity);
+        }
+
+        //
+        // ModelIndex4
+        // 
+        // Add an entity to the current rendering frame that has model index 4 attached to it.
+        if (entityState->modelIndex4) {
+            renderEntity.model = cl->drawModels[entityState->modelIndex4];
+            clge->view->AddRenderEntity(&renderEntity);
+        }
+
+        //
+        // Particle Trail Effects.
+        // 
+        // Add automatic particle trail effects where desired.
+        if (effects & ~EntityEffectType::Rotate) {
+            if (effects & EntityEffectType::Gib) {
+                ParticleEffects::DiminishingTrail(clientEntity->lerpOrigin, renderEntity.origin, clientEntity, effects);
+            } else if (effects & EntityEffectType::Torch) {
+                const float anim = sinf((float)renderEntity.id + ((float)cl->time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
+                const float offset = anim * 0.0f;
+                const float brightness = anim * 1.2f + 1.6f;
+                const vec3_t origin = { 
+                    renderEntity.origin.x,
+                    renderEntity.origin.y,
+                    renderEntity.origin.z + offset 
+                };
+
+                clge->view->AddLight(origin, vec3_t{ 1.0f * brightness, 0.425f * brightness, 0.1f * brightness }, 25.f, 3.6f);
+            }
+        }
     }
 }
 

@@ -14,17 +14,19 @@ struct ErrorType {
 
 struct PrintType {
     //! General messages.
-    static constexpr int32_t All        = 0;
+    static constexpr int32_t All				= 0;
     //! Print in green color.
-    static constexpr int32_t Talk       = 1;
-    //! Only print when cvar 'developer' >= 1
-    static constexpr int32_t Developer  = 2;
+    static constexpr int32_t Talk				= 1;
     //! Print in orange color.
-    static constexpr int32_t Warning    = 3;
+    static constexpr int32_t Warning			= 3;
     //! Print in red color.
-    static constexpr int32_t Error      = 4;
+    static constexpr int32_t Error				= 4;
     //! Print in cyan color.
-    static constexpr int32_t Notice     = 5;
+    static constexpr int32_t Notice				= 5;
+    //! Only print when cvar 'developer' >= 1
+    static constexpr int32_t Developer			= 6;
+    //! Only print when cvar 'developer' >= 1
+    static constexpr int32_t DeveloperWarning	= 7;
 };
 
 //

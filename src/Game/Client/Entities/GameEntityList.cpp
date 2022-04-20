@@ -155,9 +155,12 @@ IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, POD
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
     if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
+		// Update its client entity number.
+		clEntity->clientEntityNumber = state.number;
+
 		// Allocate and return a pointer to the new game entity object.
 		clEntity->gameEntity = InsertAt(state.number, info->AllocateInstance(clEntity));
-
+		
 		// If it isn't a nullptr...
 		if (!clEntity->gameEntity ) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
@@ -188,12 +191,13 @@ IClientGameEntity* GameEntityList::CreateFromState(const EntityState& state, POD
 **/
 IClientGameEntity *GameEntityList::GetByNumber(int32_t number) {
 	// Ensure ID is within bounds.
-	if (number <= 0 || number > gameEntities.size()) {
-		return nullptr;
+	if (number < 0 || number > gameEntities.size() || number > gameEntities.capacity() ) {//|| number >= MAX_CLIENT_POD_ENTITIES) { //number > gameEntities.size()) {
+		return nullptr;	
 	}
-
+	
+	return gameEntities[number];
 	// Return game entity that belongs to this ID.
-	return gameEntities[number - 1];
+	
 }
 
 /**
@@ -203,7 +207,7 @@ IClientGameEntity *GameEntityList::GetByNumber(int32_t number) {
 **/
 IClientGameEntity *GameEntityList::InsertAt(int32_t number, IClientGameEntity *clgEntity, bool force) {
 	// Ensure that the number range is valid, otherwise return a nullptr.
-	if (number <= 0 || number > gameEntities.capacity()) {
+	if (number < 0 || number > gameEntities.capacity()) {
 		return nullptr;
 	}
 
@@ -228,8 +232,8 @@ IClientGameEntity *GameEntityList::InsertAt(int32_t number, IClientGameEntity *c
 		}
 	}
 
-	gameEntities.resize(number + 1);
-	gameEntities[number] = clgEntity;
+	gameEntities.resize(index + 1);
+	gameEntities[index] = clgEntity;
 	// We didn't actually 
 //	gameEntities.push_back(clgEntity);
 

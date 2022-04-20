@@ -1675,7 +1675,7 @@ static void CL_Precache_f(void)
 	// Check whether to set the client into a connected state right after spawning the client side world entities.
     if (cls.connectionState != ClientConnectionState::Precached) {
 		// Spawn client side Bsp Map Entities.
-		CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
+		//CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
 
 		cls.connectionState = ClientConnectionState::Connected;
     }

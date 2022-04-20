@@ -495,7 +495,7 @@ retry:
         CLG_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (!trace.gameEntity->IsInUse() && ent->IsInUse()) {
+        if (trace.gameEntity && !trace.gameEntity->IsInUse() && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin(start);
             ent->LinkEntity();
@@ -931,8 +931,14 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
         // Stop if on ground
         if (trace.plane.normal[2] > 0.7f) {
 	        if (ent->GetVelocity().z < 60.f || (ent->GetMoveType() != MoveType::Bounce)) {
-                ent->SetGroundEntity(trace.gameEntity);
-                ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
+                if (trace.gameEntity) {
+					ent->SetGroundEntity(trace.gameEntity);
+		            ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
+				}
+				else {
+					ent->SetGroundEntity(nullptr);
+		            ent->SetGroundEntityLinkCount(0);
+				}
                 ent->SetVelocity(vec3_zero());
                 ent->SetAngularVelocity(vec3_zero());
             }
@@ -945,6 +951,7 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
     qboolean wasInWater = (ent->GetWaterType() & BrushContentsMask::Liquid);
     // Set new watertype based on gi.PointContents test result.
     //ent->SetWaterType(clgi.CM_PointContents(ent->GetOrigin()));
+	
     qboolean isInWater = ent->GetWaterType() & BrushContentsMask::Liquid;
 
     // Store waterlevel.
@@ -1189,7 +1196,54 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
 // Determines what kind of run/thinking method to execute.
 //===============
 //
-void CLG_RunEntity(SGEntityHandle &entityHandle)
+void CLG_RunServerEntity(SGEntityHandle &entityHandle)
+{
+    IClientGameEntity *ent = *entityHandle;
+
+	if (!sv_maxvelocity) {
+		sv_maxvelocity = clgi.Cvar_Get("sv_maxvelocity", "2000", 0);
+	}
+	if (!sv_gravity) {
+		sv_gravity = clgi.Cvar_Get("sv_gravity", "875", 0);
+	}
+
+    if (!ent) {
+	    CLG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // Execute the proper physics that belong to its movetype.
+    int32_t moveType = ent->GetMoveType();
+
+    switch (moveType) {
+        case MoveType::Push:
+        case MoveType::Stop:
+	        CLG_Physics_Pusher(entityHandle);
+        break;
+        case MoveType::None:
+	        CLG_Physics_None(entityHandle);
+        break;
+        case MoveType::NoClip:
+        case MoveType::Spectator:
+	        CLG_Physics_Noclip(entityHandle);
+        break;
+        case MoveType::Step:
+            CLG_Physics_Step(entityHandle);
+        break;
+        case MoveType::Toss:
+	    case MoveType::TossSlide:
+        case MoveType::Bounce:
+        case MoveType::Fly:
+        case MoveType::FlyMissile:
+	        CLG_Physics_Toss(entityHandle);
+        break;
+    default:
+		break;
+        //gi.Error("SV_Physics: bad moveType %i", ent->GetMoveType());
+    }
+}
+
+void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle)
 {
     IClientGameEntity *ent = *entityHandle;
 

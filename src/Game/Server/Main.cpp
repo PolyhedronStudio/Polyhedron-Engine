@@ -42,13 +42,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 //-----------------
-// Global Game Variables.
+// Global Game and Engine API Imports/Exports Variables.
 //
-// These are used all throughout the code. To store game state related
-// information, and callbacks to the engine server game API.
+// These are used all throughout the code to communicate back and forth
+// between engine and game module.
 //-----------------
-GameLocals game;
-LevelLocals level;
 ServerGameImports gi;       // CLEANUP: These were game_import_t and game_export_t
 ServerGameExports globals;  // CLEANUP: These were game_import_t and game_export_t
 

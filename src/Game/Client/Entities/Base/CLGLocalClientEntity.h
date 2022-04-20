@@ -15,9 +15,9 @@
 
 
 /**
-*   CLGBaseEntity
+*   CLGLocalClientEntity
 **/
-class CLGBaseEntity : public IClientGameEntity {
+class CLGLocalClientEntity : public IClientGameEntity {
 public:
     /**
     *
@@ -25,11 +25,11 @@ public:
     *
     **/
     //! Constructor/Destructor.
-    CLGBaseEntity(PODEntity *podEntity);
-    virtual ~CLGBaseEntity() = default;
+    CLGLocalClientEntity(PODEntity *podEntity);
+    virtual ~CLGLocalClientEntity() = default;
 
     // Runtime type information
-	DefineMapClass( "CLGBaseEntity", CLGBaseEntity, IClientGameEntity);
+	DefineMapClass( "CLGLocalClientEntity", CLGLocalClientEntity, IClientGameEntity);
 
     //// Checks if this entity class is exactly the given class
     //// @param entityClass: an entity class which must inherint from SVGBaseEntity
@@ -157,12 +157,21 @@ public:
     *   [Stub Implementation]
     *   @brief  Link entity to world for collision testing using gi.LinkEntity.
     **/
-    void LinkEntity() override {};
+    void LinkEntity() override { 
+		if (podEntity) {
+			podEntity->linkCount++; 
+		}
+	};
+
     /**
     *   [Stub Implementation]
     *   @brief  Unlink the entity from the world for collision testing.
     **/
-    void UnlinkEntity() override {};
+    void UnlinkEntity() override {
+		if (podEntity) {
+			podEntity->linkCount = 0;
+		}
+	};
     /**
     *   [Stub Implementation]
     *   @brief  Marks the entity to be removed in the next server frame. This is preferred to SVG_FreeEntity, 
@@ -449,12 +458,16 @@ public:
     **/
     virtual const qboolean        IsInUse() override { //return 0; };
         if (podEntity) {
-            return cl->frame.number == podEntity->serverFrame;
+            return podEntity->inUse;
         } 
 
         return false;
     }
-    virtual void            SetInUse(const qboolean inUse) {};
+    virtual void            SetInUse(const qboolean inUse) {
+        if (podEntity) {
+            podEntity->inUse = inUse;
+        }
+	};
 
     /**
     *   @brief Get/Set: Kill Target.
@@ -551,8 +564,6 @@ public:
 
 			// Update model index.
 			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
-				// Link it for collision testing.
-				LinkEntity();
 		}
 	};
 
@@ -646,13 +657,14 @@ public:
     **/
     virtual const int32_t   GetNumber() { 
 		if (podEntity) {
-			return podEntity->currentState.number;
+			return podEntity->clientEntityNumber;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetNumber(const int32_t number) {
 		if (podEntity) {
+			podEntity->clientEntityNumber = number;
 			podEntity->currentState.number = number;
 		}	
 	};
@@ -660,7 +672,7 @@ public:
     /**
     *   @brief Get/Set:     Old Enemy Entity
     **/
-    virtual GameEntity*    GetOldEnemy() { return oldEnemyEntity; }
+    virtual GameEntity*		GetOldEnemy() { return oldEnemyEntity; }
     virtual void            SetOldEnemy(IClientGameEntity* oldEnemy) { this->oldEnemyEntity = oldEnemy; };
 
     /**
@@ -698,7 +710,7 @@ public:
     /**
     *   @brief Get/Set:     Owner Entity
     **/
-    virtual GameEntity*    GetOwner() { return ownerEntity; };
+    virtual GameEntity*		GetOwner() { return ownerEntity; };
     virtual void            SetOwner(IClientGameEntity* owner) { ownerEntity = owner; };
 
     /**
@@ -747,9 +759,18 @@ public:
     /**
     *   @brief Get/Set:     Entity Size
     **/
-    virtual const vec3_t&   GetSize() { return ZeroVec3; };
+    virtual const vec3_t&   GetSize() { 
+		if (podEntity) {
+			return podEntity->size;
+		}
+		else {
+			return ZeroVec3;
+		};
+	};
     virtual void            SetSize(const vec3_t& size) {
-	
+		if (podEntity) {
+			podEntity->size = size;
+		}
 	};
 
     /**
@@ -1097,10 +1118,10 @@ public:
     /**
     *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
     **/
-    void CLGBaseEntityThinkFree(void);
+    void CLGLocalClientEntityThinkFree(void);
 
     /**
     *   @brief  Callback for assigning when "no thinking" behavior is wished for.
     **/
-    void CLGBaseEntityThinkNull() { }
+    void CLGLocalClientEntityThinkNull() { }
 };

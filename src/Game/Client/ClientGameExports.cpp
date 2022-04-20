@@ -112,7 +112,9 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 *           Not used for demos.
 **/
 void ClientGameExports::ClientBegin() {
-	// Create our gameworld object.
+	// Setup a fresh game locals object.
+	game = ClientGameLocals{};
+	game.Initialize();
 
     // Reset level locals.
     level = LevelLocals{};
@@ -120,8 +122,8 @@ void ClientGameExports::ClientBegin() {
 }
 
 /**
-*   @brief  Called upon whenever a client disconnects, for whichever reason.
-*           Could be him quiting, or pinging out etc.
+*   @brief  Called upon whenever a client changes maps or disconnects for whichever reason:
+*           Could be him quiting, or pinging out etc. 
 **/
 void ClientGameExports::ClientClearState() {
     // Clear Particle.
@@ -134,6 +136,9 @@ void ClientGameExports::ClientClearState() {
     LightStyles::Clear();
 #endif
     CLG_ClearTempEntities();
+
+	// Notify our game locals about shutting down.
+	game.Shutdown();
 }
 
 /**

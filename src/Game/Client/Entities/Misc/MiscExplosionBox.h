@@ -9,17 +9,19 @@
 #pragma once
 
 class CLGBaseEntity;
+class CLGLocalClientEntity;
 class CLGBaseTrigger;
 
-class MiscExplosionBox : public CLGBaseEntity { // Should be: : public CLGBaseTrigger
+class MiscExplosionBox : public CLGLocalClientEntity { // Should be: : public CLGBaseTrigger
 public:
     // Constructor/Deconstructor.
     MiscExplosionBox(PODEntity* clEntity);
     virtual ~MiscExplosionBox();
 
-    DefineMapClass( "misc_client_explobox", MiscExplosionBox, CLGBaseEntity ); // Should be CLGBaseTrigger inherited.
-
-    /**
+    DefineMapClass( "misc_client_explobox", MiscExplosionBox, CLGLocalClientEntity ); // Should be CLGBaseTrigger inherited.
+	//DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseEntity ); // Should be CLGBaseTrigger inherited.
+    
+																			   /**
     *	Interface functions. 
     **/
     void Precache() override;

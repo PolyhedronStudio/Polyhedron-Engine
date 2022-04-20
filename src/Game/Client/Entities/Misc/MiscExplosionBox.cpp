@@ -13,6 +13,7 @@
 
 // Server Game Base Entity.
 #include "../Base/CLGBaseEntity.h"
+#include "../Base/CLGLocalClientEntity.h"
 //#include "../Base/CLGBaseTrigger.h"
 
 // Misc Explosion Box Entity.
@@ -63,6 +64,7 @@ void MiscExplosionBox::Precache() {
 //===============
 //
 void MiscExplosionBox::Spawn() {
+	Com_DPrint("MISC_EXPLOBOX WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!\n");
     // Always call parent class method.
     Base::Spawn();
 
@@ -107,11 +109,12 @@ void MiscExplosionBox::Spawn() {
 
     SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
-
+	const EntityState &x = GetState();
+	Com_DPrint("misc_client_explobox = %i\n", x.number);
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
-
+	SetInUse(true);
     // Link the entity to world, for collision testing.
     LinkEntity();
 }
@@ -129,9 +132,9 @@ void MiscExplosionBox::Think() {
 	// Interpolate origin?
 	PODEntity *clientEntity = GetPODEntity();
 	Com_DPrint("YO DAWG FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
-//	clientEntity->current.origin = vec3_mix(clientEntity->prev.origin, clientEntity->current.origin, cl->lerpFraction);
-	SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
-	clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
+	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 }
 
 //===============
@@ -281,10 +284,10 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     //    UseTargets(GetActivator());
     //    SetDelayTime(save);
     //}
-
+	podEntity->inUse = true;
     // Ensure we have no more think callback pointer set when this entity has "died"
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
-    SetThinkCallback(&MiscExplosionBox::CLGBaseEntityThinkFree);
+    SetThinkCallback(&MiscExplosionBox::CLGLocalClientEntityThinkFree);
 }
 
 //
@@ -324,18 +327,23 @@ void MiscExplosionBox::ExplosionBoxDie(IClientGameEntity* inflictor, IClientGame
 //===============
 //
 void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
-    // Safety checks.
+   
+	// Safety checks.
     if (!other || other == this) {
-	    return;
+		Com_DPrint("Touching explobox !other: %i\n", GetNumber());
+		return;
     }
 
     // Ground entity checks.
     if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
-	    return;
+		Com_DPrint("Touching explobox !other->GetGroundEntity: %i\n", GetNumber());
+		return;
     }
+	
+	Com_DPrint("Touching explobox: %i\n", GetNumber());
 
     // Calculate ratio to use.
-    double ratio = (static_cast<double>(other->GetMass()) / static_cast<double>(GetMass()));
+    double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();
@@ -343,7 +351,6 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
     // Calculate yaw to use based on direction.
     double yaw = vec3_to_yaw(dir);
 
-	Com_DPrint("CLIENT IS TOUCHING EXPLOBOX ZOMGSSS LMAO ROFL\n");
     // Last but not least, move a step ahead.
     CLG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 }

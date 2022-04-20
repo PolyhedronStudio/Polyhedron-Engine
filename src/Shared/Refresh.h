@@ -15,7 +15,7 @@
 #include "../System/Hunk.h"
 
 #define MAX_DLIGHTS     32
-#define MAX_ENTITIES    2048     // == MAX_PACKET_ENTITIES * 2
+#define MAX_ENTITIES    4096     // == MAX_PACKET_ENTITIES * 2
 #define MAX_PARTICLES   16384
 #define MAX_LIGHTSTYLES 256
 

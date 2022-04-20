@@ -657,7 +657,7 @@ int PlayerSort(void const *a, void const *b)
     anum = *(int *)a;
     bnum = *(int *)b;
 
-    ServerGameworld* gameworld = game.GetGameworld();
+    ServerGameworld* gameworld = GetGameworld();
     ServerClient* clients = gameworld->GetClients();
 
     anum = clients[anum].playerState.stats[PlayerStats::Frags];

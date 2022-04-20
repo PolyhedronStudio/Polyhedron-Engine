@@ -112,8 +112,7 @@ cvar_t  *allow_download_others;
 
 cvar_t  *rcon_password;
 
-const char  com_version_string[] =
-    APPLICATION " " VERSION_STRING " " __DATE__ " " BUILDSTRING " " CPUSTRING;
+
 
 uint64_t    com_framenum;
 uint64_t    com_eventTime;

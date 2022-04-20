@@ -202,8 +202,8 @@ struct ServerFrame {
     byte    areaBits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
     int32_t areaBytes;                      // Area bytes.
 
-    PlayerState playerState;    // The player state.
-    int32_t     clientNumber = 0;   // The client number.
+    PlayerState playerState;		// The player state.
+    int32_t     clientNumber = 0;	// The client number.
 
     int32_t numEntities = 0;    // firstEntity + numEntities = first index up to last index of entities in received frame.
     int32_t firstEntity = 0;    // The first entity number in the received frame.
@@ -333,9 +333,9 @@ struct ClientState {
     vec2_t      mouseMove = vec2_zero();
     //! This is the 'current moment in time' value of the client's game state at.  
     //! Always <= cl.serverTime
-    uint64_t         time = 0;
+    uint64_t	time = 0;
     //! between oldframe and frame
-    double       lerpFraction = 0.f;
+    double		lerpFraction = 0.f;
 
 
     /**

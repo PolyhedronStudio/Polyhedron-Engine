@@ -26,6 +26,14 @@
 // Gameworld.
 #include "World/ServerGameworld.h"
 
+//-----------------
+// Global Game Variables.
+//
+// These are used all throughout the code. To store game state related
+// information, and callbacks to the engine server game API.
+//-----------------
+GameLocals game;
+LevelLocals level;
 
 // Extern cvars.
 extern cvar_t* gamemode;

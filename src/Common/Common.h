@@ -172,7 +172,7 @@ extern uint64_t     timeBeforeRefresh;
 extern uint64_t     timeAfterRefresh;
 #endif
 
-extern const char   com_version_string[];
+static constexpr char  com_version_string[] = APPLICATION " " VERSION_STRING " " __DATE__ " " BUILDSTRING " " CPUSTRING;
 
 extern uint64_t     com_framenum;
 extern uint64_t     com_eventTime; // system time of the last event

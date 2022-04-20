@@ -420,12 +420,16 @@ void FuncPlat::SpawnPlatformTrigger() {
     triggerMaxs.z = maxs.z + 8;
 
     // Adjust height.
-    triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z + lip);
 
-    // For PlatLowTriggered state we need a different maxs.
+
+    // For PlatLowTriggered state we need a different mins and maxs.
     if (GetSpawnFlags() & SF_PlatLowTriggered) {
-        triggerMaxs.z = triggerMins.z + 8;
-    }
+
+		triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z) + lip;
+		triggerMaxs.z = triggerMins.z + 8;
+	} else {
+	    triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z + lip);
+	}
 
     // Scale it.
     if (triggerMaxs.x - triggerMins.x <= 0.f) {
