@@ -146,16 +146,16 @@ void MiscExplosionBox::Think() {
 	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 
 	// Interpolate origin?
-	//ClientGameworld *gameWorld = GetGameworld();
-	//PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(GetNumber());
+	ClientGameworld *gameWorld = GetGameworld();
+	PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(GetNumber());
 	//
-	//if (podEntity) {
+	if (podEntity) {
 
-	//	clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+		podEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 	//
 	//	SetRenderEffects(RenderEffects::Beam);
-	//	Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
-	//}
+		Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
+	}
 }
 
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {
@@ -360,7 +360,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
    
 	// Safety checks.
     if (!other || other == this) {
-		Com_DPrint("Touching explobox !other: %i\n", GetNumber());
+		Com_DPrint("Explobox: %i is touching a other == this or !other\n", GetNumber());
 		return;
     }
 
@@ -370,7 +370,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
 		return;
     }
 	
-	Com_DPrint("Touching explobox: %i\n", GetNumber());
+	Com_DPrint("ExplosionBox: %i is touching: other.GetNumber() = %i\n", GetNumber(), other->GetNumber());
 
     // Calculate ratio to use.
     double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));

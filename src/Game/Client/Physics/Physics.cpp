@@ -608,11 +608,11 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             || moveType == MoveType::Spectator)
             continue;
 
-		//if (!check->GetLinkCount()) {
-		//	continue; // Not linked in naywhere.
-		//}
-        if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
-            continue;       // not linked in anywhere
+		if (!check->GetLinkCount()) {
+			continue; // Not linked in naywhere.
+		}
+        //if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
+         //   continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
         if (check->GetGroundEntity() != pusher) {

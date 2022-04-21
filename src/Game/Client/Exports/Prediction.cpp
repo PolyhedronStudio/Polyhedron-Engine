@@ -23,7 +23,7 @@ void PlayerFrameTouch(PlayerMove *pm) {
 	ClientGameworld *gameWorld = GetGameworld();
 
 	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
-	GameEntity *player = gameWorld->GetGameEntityByIndex(1); // Client.
+	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->clientNumber + 1); // Client.
 	if (player && pm && cl->bsp && cl->cm.cache) {
 		//const int32_t playerMoveType = player->GetMoveType();
   //      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {

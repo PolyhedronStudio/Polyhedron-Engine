@@ -158,14 +158,15 @@ void ClientGameExports::ClientDeltaFrame() {
 //    level.time = GameTime(cl->serverTime);
 
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
-    entities->RunFrame();
+/   entities->RunFrame();
 }
 
 /**
 *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 **/
 void ClientGameExports::ClientPredictEntitiesFrame() {
-
+    // Low and behold, time to run the ClientGame Entity logic for another single frame.
+    entities->RunFrame();
 }
 
 /**
