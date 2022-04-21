@@ -149,7 +149,7 @@ void CL_ClipMoveToLocalClientEntities(const vec3_t &start, const vec3_t &mins, c
 *			Optionally one can pass a pointer to an entity in order to skip(ignore) it.
 *	@return	The result of said trace, in case of hittnig the world, ent == cl.solidEntities[0] == nullptr?
 **/
-TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask) {
+const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask) {
 	// Absolute clean trace result.
 	TraceResult trace = {};
 

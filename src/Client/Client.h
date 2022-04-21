@@ -478,7 +478,7 @@ void CL_SeekDemoMessage(void);
 // entities.cpp
 //
 void CL_ClipMoveToEntities(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask, TraceResult* cmDstTrace);
-TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
+//TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
 void CL_DeltaFrame(void);
 
 // the sound code makes callbacks to the client for entitiy position

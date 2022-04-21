@@ -396,18 +396,20 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
 
     return false;
 }
-void CLG_RunServerEntity(SGEntityHandle &entityHandle);
-void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle);
+
 /**
 *   @brief  Runs the client game module's entity logic for a single frame.
 **/
-void ClientGameEntities::RunFrame() {
-	// Get gameworld.
-	ClientGameworld *gameWorld = GetGameworld();
+void CLG_RunServerEntity(SGEntityHandle &entityHandle);
+void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle);
 
+void ClientGameEntities::RunFrame() {
 	// Unlike for the server game, the level's framenumber, time and timeStamp
     // have already been calculated before reaching this point.
-    
+
+	// Get Gameworld.
+	ClientGameworld *gameWorld = GetGameworld();
+
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 1; entityNumber < cl->frame.numEntities; entityNumber++) {
         // Acquire game entity object.

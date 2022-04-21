@@ -12,6 +12,49 @@
 static const double MAX_DELTA_ORIGIN = (2400.0 * (1.00 / BASE_FRAMERATE));
 
 
+//--------------------------------------------------------
+// Test code.
+void UTIL_TouchTriggers(IClientGameEntity *ent);
+// Gameworld.
+#include "../World/ClientGameworld.h"
+void PlayerFrameTouch(PlayerMove *pm) {
+	// Get gameworld.
+	ClientGameworld *gameWorld = GetGameworld();
+
+	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
+	GameEntity *player = gameWorld->GetGameEntityByIndex(1); // Client.
+	if (player) {
+		//const int32_t playerMoveType = player->GetMoveType();
+  //      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
+            // Trigger touch logic. 
+            UTIL_TouchTriggers(player);
+
+            // Solid touch logic.
+            int32_t i = 0;
+            int32_t j = 0;
+            
+            for (i = 0 ; i < pm->numTouchedEntities; i++) {
+                for (j = 0 ; j < i ; j++) {
+                    if (pm->touchedEntities[j] == pm->touchedEntities[i]) {
+                        break;
+                    }
+                }
+                if (j != i) {
+                    continue;   // duplicated
+                }
+
+                SGEntityHandle other(pm->touchedEntities[i]);
+                if (!other || !*other) {
+                    continue;
+                }
+
+                other->DispatchTouchCallback(*other, player, NULL, NULL);
+            }
+
+        //}
+	}
+
+}
 /**
 *   @brief  Checks for prediction incorectness. If found, corrects it.
 **/
@@ -102,6 +145,8 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
             pm.moveCommand = *cmd;
             // Simulate the move command.
             PMove(&pm);
+
+			PlayerFrameTouch(&pm);
 
             // Update player move client side audio effects.
             UpdateClientSoundSpecialEffects(&pm);

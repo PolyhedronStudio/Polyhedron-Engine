@@ -12,14 +12,14 @@ class CLGBaseEntity;
 class CLGLocalClientEntity;
 class CLGBaseTrigger;
 
-class MiscExplosionBox : public CLGBaseEntity { // Should be: : public CLGBaseTrigger
+class MiscExplosionBox : public CLGBaseTrigger { // public CLGBaseEntity { 
 public:
     // Constructor/Deconstructor.
     MiscExplosionBox(PODEntity* clEntity);
     virtual ~MiscExplosionBox();
 
     //DefineMapClass( "misc_client_explobox", MiscExplosionBox, CLGLocalClientEntity ); // Should be CLGBaseTrigger inherited.
-	DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseEntity ); // Should be CLGBaseTrigger inherited.
+	DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseTrigger ); // Should be CLGBaseTrigger inherited.
     
 																			   /**
     *	Interface functions. 

@@ -82,8 +82,6 @@ void CLGLocalClientEntity::PostSpawn() {
 *   @brief  General entity thinking routine.
 **/
 void CLGLocalClientEntity::Think() {
-	    previousState = currentState;
-
 	// Safety check.
     if (thinkFunction == nullptr) {
 		return;

@@ -81,8 +81,12 @@ struct SurfaceFlags {
 *   FIXME: eliminate AREA_ distinction?
 **/
 struct AreaEntities {
-    static constexpr int32_t Solid     = 1;
-    static constexpr int32_t Triggers  = 2;
+	// These are for server entities, and for those received from server by the client.
+    static constexpr int32_t Solid			= 1;
+    static constexpr int32_t Triggers		= 2;
+	// These are for local entities, whether that be server or client related.
+    static constexpr int32_t LocalSolid		= 3;
+	static constexpr int32_t LocalTriggers	= 4;
 };
 
 

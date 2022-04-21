@@ -61,13 +61,9 @@ void SVG_Sound(IServerGameEntity* ent, int32_t channel, int32_t soundIndex, floa
 }
 
 
-//
-//===============
-// SVG_BoxEntities
-//
-// Returns an std::vector containing the found boxed entities. Will not exceed listCount.
-//===============
-//
+/**
+*	@return	An std::vector containing the found boxed entities.Will not exceed listCount.
+**/
 std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
     // Boxed server entities set by gi.BoxEntities.
     Entity* boxedServerEntities[MAX_EDICTS];

@@ -649,6 +649,9 @@ void CL_ClearState(void)
 
     // Wipe the entire cl structure
     BSP_Free(cl.bsp);
+	// Unload collision model as well.
+	CM_FreeMap(&cl.cm);
+
     //cl = ClientState();
     memset(&cl, 0, sizeof(cl));
     // 
@@ -3035,8 +3038,9 @@ uint64_t CL_Frame(uint64_t msec)
     // Send pending clientUserCommands
     CL_SendCmd();
 
+	// Predict all unacknowledged movements
     // UNCOMMENT IF IT BROKE ? Predict all unacknowledged movements
-    //CL_PredictMovement();
+    CL_PredictMovement();
 
     Con_RunConsole();
 
@@ -3081,7 +3085,8 @@ run_fx:
     }
 
 	// Predict all unacknowledged movements
-    CL_PredictMovement();
+    // UNCOMMENT IF IT BROKE ? Predict all unacknowledged movements
+	//CL_PredictMovement();
 
     // Check connection timeout
     if (cls.netChannel) {

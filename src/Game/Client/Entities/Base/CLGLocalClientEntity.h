@@ -151,8 +151,11 @@ public:
     *   @brief  Link entity to world for collision testing using gi.LinkEntity.
     **/
     void LinkEntity() override { 
+		//if (podEntity) {
+		//	podEntity->linkCount++; 
+		//}
 		if (podEntity) {
-			podEntity->linkCount++; 
+			clgi.LinkEntity(podEntity);
 		}
 	};
 
@@ -161,8 +164,11 @@ public:
     *   @brief  Unlink the entity from the world for collision testing.
     **/
     void UnlinkEntity() override {
+		//if (podEntity) {
+		//	podEntity->linkCount = 0;
+		//}
 		if (podEntity) {
-			podEntity->linkCount = 0;
+			clgi.UnlinkEntity(podEntity);
 		}
 	};
     /**

@@ -509,7 +509,7 @@ void AL_InitReverbEffect(void)
 }
 
 
-extern TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
+extern const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
 void UpdateReverb(void)
 {
 	static vec3_t mins = { 0, 0, 0 }, maxs = { 0, 0, 0 };

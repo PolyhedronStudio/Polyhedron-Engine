@@ -54,7 +54,13 @@ void CL_RegisterBspModels(void)
     char *name;
     int i;
 
+	// Load Refresh BSP parts.
     ret = BSP_Load(cl.configstrings[ConfigStrings::Models+ 1], &cl.bsp);
+
+	// Load collision model BSP parts.
+	if (ret) {
+		ret = CM_LoadMap(&cl.cm, cl.configstrings[ConfigStrings::Models + 1]);
+	}
     if (cl.bsp == NULL) {
         Com_Error(ErrorType::Drop, "Couldn't load %s: %s",
                   cl.configstrings[ConfigStrings::Models+ 1], Q_ErrorString(ret));

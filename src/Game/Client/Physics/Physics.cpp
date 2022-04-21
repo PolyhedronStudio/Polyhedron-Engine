@@ -94,30 +94,30 @@ void CLG_PhysicsEntityWPrint(const std::string &functionName, const std::string 
  //   //
  //   gi.Error(errorString.c_str());
 }
-static void UTIL_TouchTriggers(IClientGameEntity *ent)
-{
+extern GameEntityVector CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType);
+void UTIL_TouchTriggers(IClientGameEntity *ent) {
     //// Dead things don't activate triggers!
-    //if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster) && ent->GetHealth() <= 0)
-    //    return;
+   if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster) && ent->GetHealth() <= 0)
+       return;
 
     //// Fetch the boxed entities.
-    //GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
+	GameEntityVector touched = CLG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::LocalTriggers);
 
-    //// Do some extra sanity checks on the touched entity list. It is possible to have 
-    //// an entity be removed before we get to it (kill triggered).
-    //for (auto& touchedEntity : touched) {
-    //    if (!touchedEntity) {
-	   //     continue;
-    //    }
-	   // if (!touchedEntity->GetPODEntity()) {
-	   //     continue;
-	   // }
-	   // if (!touchedEntity->IsInUse()) {
-		  //  continue;
-	   // }
+    // Do some extra sanity checks on the touched entity list. It is possible to have 
+    // an entity be removed before we get to it (kill triggered).
+    for (auto& touchedEntity : touched) {
+        if (!touchedEntity) {
+	        continue;
+        }
+	    if (!touchedEntity->GetPODEntity()) {
+	        continue;
+	    }
+	    if (!touchedEntity->IsInUse()) {
+		    continue;
+	    }
 
-    //    touchedEntity->DispatchTouchCallback(touchedEntity, ent, NULL, NULL);
-    //}
+        touchedEntity->DispatchTouchCallback(touchedEntity, ent, NULL, NULL);
+    }
 }
 //===============
 // CLG_TestEntityPosition
@@ -604,11 +604,11 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             || moveType == MoveType::Spectator)
             continue;
 
-		if (!check->GetLinkCount()) {
-			continue; // Not linked in naywhere.
-		}
-        //if (!check->GetPODEntity()->area.prev)
-        //    continue;       // not linked in anywhere
+		//if (!check->GetLinkCount()) {
+		//	continue; // Not linked in naywhere.
+		//}
+        if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
+            continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
         if (check->GetGroundEntity() != pusher) {

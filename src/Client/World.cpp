@@ -31,6 +31,7 @@ typedef struct areanode_s {
     struct areanode_s   *children[2];
     list_t  triggerEdicts;
     list_t  solidEdicts;
+    list_t  solidLocalClientEdicts;
 } areanode_t;
 
 // Area nodes array.
@@ -62,6 +63,7 @@ static areanode_t *CL_CreateAreaNode(int depth, const vec3_t &mins, const vec3_t
 
     List_Init(&anode->triggerEdicts);
     List_Init(&anode->solidEdicts);
+    List_Init(&anode->solidLocalClientEdicts);
 
     if (depth == AREA_DEPTH) {
         anode->axis = -1;
@@ -70,16 +72,17 @@ static areanode_t *CL_CreateAreaNode(int depth, const vec3_t &mins, const vec3_t
     }
 
     VectorSubtract(maxs, mins, size);
-    if (size[0] > size[1])
+    if (size[0] > size[1]) {
         anode->axis = 0;
-    else
+	} else {
         anode->axis = 1;
+	}
 
     anode->dist = 0.5 * (maxs[anode->axis] + mins[anode->axis]);
-    VectorCopy(mins, mins1);
-    VectorCopy(mins, mins2);
-    VectorCopy(maxs, maxs1);
-    VectorCopy(maxs, maxs2);
+    mins1 = mins;//VectorCopy(mins, mins1);
+    mins2 = mins;//VectorCopy(mins, mins2);
+	maxs1 = maxs;//VectorCopy(maxs, maxs1);
+	maxs2 = maxs;//VectorCopy(maxs, maxs2);
 
     maxs1[anode->axis] = mins2[anode->axis] = anode->dist;
 
@@ -101,13 +104,13 @@ void CL_ClearWorld()
     memset(cl_areanodes, 0, sizeof(cl_areanodes));
     cl_numareanodes = 0;
 
-    if (sv.cm.cache) {
-        cm = &sv.cm.cache->models[0];
+    if (cl.cm.cache) {
+        cm = &cl.cm.cache->models[0];
         CL_CreateAreaNode(0, cm->mins, cm->maxs);
     }
 
     // make sure all entities are unlinked
-    for (i = 0; i < ge->maxEntities; i++) {
+    for (i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {//ge->maxEntities; i++) {
         ent = EDICT_NUM(i);
         ent->area.prev = ent->area.next = NULL;
     }
@@ -172,8 +175,8 @@ void CL_LinkEntity(cm_t *cm, Entity *ent)
         }
     } else {
         // normal
-        VectorAdd(ent->currentState.origin, ent->mins, ent->absMin);
-        VectorAdd(ent->currentState.origin, ent->maxs, ent->absMax);
+        ent->absMin = ent->currentState.origin + ent->mins; //VectorAdd(ent->currentState.origin, ent->mins, ent->absMin);
+        ent->absMax = ent->currentState.origin + ent->maxs; //VectorAdd(ent->currentState.origin, ent->maxs, ent->absMax);
     }
 
     // because movement is clipped an epsilon away from an actual edge,
@@ -206,8 +209,9 @@ void CL_LinkEntity(cm_t *cm, Entity *ent)
                                 ent->absMin[0], ent->absMin[1], ent->absMin[2]);
                 }
                 ent->areaNumber2 = area;
-            } else
+            } else {
                 ent->areaNumber = area;
+			}
         }
     }
 
@@ -244,7 +248,7 @@ void CL_LinkEntity(cm_t *cm, Entity *ent)
 /**
 *	@brief	Removes the entity for collision testing.
 **/
-void CL_PF_UnlinkEntity(Entity *ent) {
+void CL_UnlinkEntity(Entity *ent) {
     if (!ent->area.prev) {
         return;        // not linked in anywhere
 	}
@@ -260,7 +264,7 @@ void CL_PF_UnlinkEntity(Entity *ent) {
 void CL_PF_LinkEntity(Entity *ent) {
 	// Unlink from previous old position.
 	if (ent->area.prev) {
-        CL_PF_UnlinkEntity(ent);
+        CL_UnlinkEntity(ent);
 	}
 
 	// Ensure it isn't the worldspawn entity itself.
@@ -275,12 +279,12 @@ void CL_PF_LinkEntity(Entity *ent) {
     }
 
 	// Ensure a map is loaded properly in our cache.
-    if (!sv.cm.cache) {
+    if (!cl.cm.cache) {
         return;
     }
 
 	// Find the actual server entity.
-    int32_t entityNumber = NUM_FOR_EDICT(ent);
+    int32_t entityNumber = ent->clientEntityNumber; //NUM_FOR_EDICT(ent);
     server_entity_t *serverEntity = &sv.entities[entityNumber];
 
     // Encode the size into the entity_state for client prediction reaspms/
@@ -321,7 +325,7 @@ void CL_PF_LinkEntity(Entity *ent) {
         break;
     }
 
-    CL_LinkEntity(&sv.cm, ent);
+    CL_LinkEntity(&cl.cm, ent);
 
     // If first time, make sure oldOrigin is valid.
     if (!ent->linkCount) {
@@ -350,10 +354,20 @@ void CL_PF_LinkEntity(Entity *ent) {
     }
 
     // Link it in
-    if (ent->solid == Solid::Trigger) {
-        List_Append(&node->triggerEdicts, &ent->area);
+	if (ent->isLocal) {
+	    //if (ent->solid == Solid::Trigger) {
+		//    List_Append(&node->triggerLocalClientEdicts, &ent->area);
+		//} else {
+		if (ent->solid != Solid::Trigger) {
+	        List_Append(&node->solidLocalClientEdicts, &ent->area);
+		}
+		//}
 	} else {
-        List_Append(&node->solidEdicts, &ent->area);
+	    if (ent->solid == Solid::Trigger) {
+		    List_Append(&node->triggerEdicts, &ent->area);
+		} else {
+	        List_Append(&node->solidEdicts, &ent->area);
+		}
 	}
 }
 
@@ -363,25 +377,29 @@ void CL_PF_LinkEntity(Entity *ent) {
 **/
 static void CL_AreaEntities_r(areanode_t *node) {
     list_t *start = nullptr;
-    Entity *check = nullptr;
+    PODEntity *check = nullptr;
 
     // touch linked edicts
     if (areaType == AreaEntities::Solid) {
         start = &node->solidEdicts;
+	} else if (areaType == AreaEntities::LocalSolid) {
+		start = &node->solidLocalClientEdicts;
 	} else {
         start = &node->triggerEdicts;
 	}
 
-    LIST_FOR_EACH(Entity, check, start, area) {
-        if (check->solid == Solid::Not)
+    LIST_FOR_EACH(PODEntity, check, start, area) {
+        if (!check || check->solid == Solid::Not) {
             continue;        // deactivated
+		}
         if (check->absMin[0] > areaMaxs[0]
             || check->absMin[1] > areaMaxs[1]
             || check->absMin[2] > areaMaxs[2]
             || check->absMax[0] < areaMins[0]
             || check->absMax[1] < areaMins[1]
-            || check->absMax[2] < areaMins[2])
+            || check->absMax[2] < areaMins[2]) {
             continue;        // not touching
+		}
 
         if (areaCount == areaMaxCount) {
             Com_WPrintf("CL_AreaEntities: MAXCOUNT\n");
@@ -406,19 +424,18 @@ static void CL_AreaEntities_r(areanode_t *node) {
 *	@brief	Looks up all areas residing in the mins/maxs box of said areaType (solid, or triggers).
 *	@return	Number of entities found and stored in the list.
 **/
-int CL_AreaEntities(const vec3_t &mins, const vec3_t &maxs, Entity **list,
-                  int maxcount, int areatype)
-{
-    areaMins = mins;
-    areaMaxs = maxs;
-    areaList = list;
-    areaCount = 0;
-    areaMaxCount = maxcount;
-    areaType = areatype;
+int32_t CL_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity **list, int32_t maxcount, int32_t areatype) {
+    //areaMins = mins;
+    //areaMaxs = maxs;
+    //areaList = list;
+    //areaCount = 0;
+    //areaMaxCount = maxcount;
+    //areaType = areatype;
 
-    CL_AreaEntities_r(cl_areanodes);
+    //CL_AreaEntities_r(cl_areanodes);
 
-    return areaCount;
+    //return areaCount;
+	return 0;
 }
 
 
@@ -434,11 +451,11 @@ static mnode_t *CL_HullForEntity(Entity *ent)
         int32_t i = ent->currentState.modelIndex - 1;
 
         // Explicit hulls in the BSP model.
-        if (i <= 0 || i >= sv.cm.cache->nummodels) {
+        if (i <= 0 || i >= cl.cm.cache->nummodels) {
             Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
 		}
 
-        return sv.cm.cache->models[i].headNode;
+        return cl.cm.cache->models[i].headNode;
     }
 
     // create a temp hull from bounding box sizes
@@ -457,13 +474,13 @@ int32_t CL_PointContents(const vec3_t &point)
     static Entity     *touch[MAX_EDICTS], *hit = nullptr;
     
 	// Ensure all is sane.
-    if (!sv.cm.cache || !sv.cm.cache->nodes) {
+    if (!cl.cm.cache || !cl.cm.cache->nodes) {
         Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
 		return 0;
 	}
 
     // get base contents from world
-    int32_t contents = CM_PointContents(point, sv.cm.cache->nodes);
+    int32_t contents = CM_PointContents(point, cl.cm.cache->nodes);
 
     // or in contents from all the other entities
     int32_t numberOfAreaEntities = CL_AreaEntities(point, point, touch, MAX_EDICTS, AreaEntities::Solid);
@@ -482,7 +499,7 @@ int32_t CL_PointContents(const vec3_t &point)
 /**
 *	@brief	Will clip the move of the bounding box to the world entities.
 **/
-static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passedict, int32_t contentMask, TraceResult *tr) {
+static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask, TraceResult *tr) {
     // Actual box mins and maxs that are used for clipping with.
 	vec3_t boxMins = vec3_zero();
 	vec3_t boxMaxs = vec3_zero();
@@ -498,8 +515,8 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
         }
     }
 
-	static Entity *touchEntityList[MAX_EDICTS];
-	Entity *touchEntity = nullptr;
+	static PODEntity *touchEntityList[MAX_EDICTS];
+	PODEntity *touchEntity = nullptr;
     int32_t numberOfAreaEntities = CL_AreaEntities(boxMins, boxMaxs, touchEntityList, MAX_EDICTS, AreaEntities::Solid);
 
     // Be careful, it is possible to have an entity in this list removed before we get to it (killtriggered)
@@ -539,20 +556,21 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
 *	@brief	Moves the given mins/maxs volume through the world from start to end.
 *			Passedict and edicts owned by passedict are explicitly skipped from being checked.
 **/
-//const TraceResult q_gameabi CL_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passedict, int32_t contentMask) {
-//    if (!sv.cm.cache) {
-//        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
-//    }
-//
-//    // clip to world
-//    TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, sv.cm.cache->nodes, contentMask, vec3_zero(), vec3_zero());
-//    trace.ent = ge->entities;
-//    if (trace.fraction == 0) {
-//        return trace;   // Blocked by the world
-//    }
-//
-//    // clip to other solid entities
-//    CL_ClipMoveToEntities(start, mins, maxs, end, passedict, contentMask, &trace);
-//    return trace;
-//}
-//
+const TraceResult CL_World_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask) {
+    if (!cl.bsp) {
+        //Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
+		return TraceResult();
+    }
+
+    // clip to world
+    TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.bsp->nodes, contentMask, vec3_zero(), vec3_zero());
+    trace.ent = ge->entities;
+    if (trace.fraction == 0) {
+        return trace;   // Blocked by the world
+    }
+
+    // clip to other solid entities
+    CL_ClipMoveToEntities(start, mins, maxs, end, passedict, contentMask, &trace);
+    return trace;
+}
+

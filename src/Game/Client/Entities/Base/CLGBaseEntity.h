@@ -148,16 +148,25 @@ public:
     *   @brief  Sets classname.
     **/
     virtual void SetClassname(const std::string& classname) final { this->classname = classname; };
+
     /**
     *   [Stub Implementation]
     *   @brief  Link entity to world for collision testing using gi.LinkEntity.
     **/
-    void LinkEntity() override {};
+    void LinkEntity() override { 
+		if (podEntity) {
+			clgi.LinkEntity(podEntity);
+		}
+	};
     /**
     *   [Stub Implementation]
     *   @brief  Unlink the entity from the world for collision testing.
     **/
-    void UnlinkEntity() override {};
+    void UnlinkEntity() override {
+		if (podEntity) {
+			clgi.UnlinkEntity(podEntity);
+		}
+	};
     /**
     *   [Stub Implementation]
     *   @brief  Marks the entity to be removed in the next server frame. This is preferred to SVG_FreeEntity, 

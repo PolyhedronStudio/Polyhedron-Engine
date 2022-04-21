@@ -25,19 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_MAP_AREA_BYTES      (MAX_MAP_AREAS / 8)
 #define MAX_MAP_PORTAL_BYTES    MAX_MAP_AREA_BYTES
 
-typedef struct {
-    bsp_t       *cache;
-    int         *floodnums;     // if two areas have equal floodnums,
-                                // they are connected
-    qboolean    *portalopen;
-} cm_t;
-
-// WatIsDeze: Added for cgame dll, it doesn't need these functions.
-#ifndef CGAME_INCLUDE
     /**
     *   CollisionModel data.
     **/
-    struct CollisionModel {;
+    struct CollisionModel {
         //! Null Texture Info.
         mtexinfo_t  nullTextureInfo = {};
 
@@ -54,6 +45,19 @@ typedef struct {
         //! AllSolid CVar. (Simulate a bug of old, or not.)
         cvar_t  *map_allsolid_bug;
     };
+
+typedef struct {
+    bsp_t       *cache;
+    int         *floodnums;     // if two areas have equal floodnums,
+                                // they are connected
+    qboolean    *portalopen;
+
+	CollisionModel collisionModel;
+} cm_t;
+
+// WatIsDeze: Added for cgame dll, it doesn't need these functions.
+#ifndef CGAME_INCLUDE
+
     extern CollisionModel collisionModel;
 
     void        CM_Init(void);

@@ -13,8 +13,12 @@
 
 // Server Game Base Entity.
 #include "../Base/CLGBaseEntity.h"
+#include "../Base/CLGBaseTrigger.h"
 #include "../Base/CLGLocalClientEntity.h"
 //#include "../Base/CLGBaseTrigger.h"
+
+// World.
+#include "../World/ClientGameworld.h"
 
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
@@ -64,7 +68,7 @@ void MiscExplosionBox::Precache() {
 //===============
 //
 void MiscExplosionBox::Spawn() {
-	Com_DPrint("MISC_EXPLOBOX WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!\n");
+	//Com_DPrint("MISC_EXPLOBOX WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!\n");
     // Always call parent class method.
     Base::Spawn();
 
@@ -140,16 +144,25 @@ void MiscExplosionBox::Think() {
         //refreshEntity.oldorigin = vec3_mix(previousState.oldOrigin, currentState.oldOrigin, lerpFraction);
 	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
 	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+
+	// Interpolate origin?
+	//ClientGameworld *gameWorld = GetGameworld();
+	//PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(GetNumber());
+	//
+	//if (podEntity) {
+
+	//	clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	//
+	//	SetRenderEffects(RenderEffects::Beam);
+	//	Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
+	//}
 }
 
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {
-    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
 
-	// Interpolate origin?
-	PODEntity *clientEntity = GetPODEntity();
-	clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
-	Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
+
 }
 
 //===============

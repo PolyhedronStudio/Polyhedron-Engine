@@ -27,6 +27,7 @@ SET(SRC_CLGAME
 	Effects/Particles/WaterSplash.cpp
 
 	Entities/Base/CLGBaseEntity.cpp
+	Entities/Base/CLGBaseTrigger.cpp
 	Entities/Base/CLGLocalClientEntity.cpp
 
 	Entities/Misc/MiscExplosionBox.cpp
@@ -81,6 +82,7 @@ SET(HEADERS_CLGAME
 	Effects/Particles.h
 
 	Entities/Base/CLGBaseEntity.h
+	Entities/Base/CLGBaseTrigger.h
 	Entities/Base/CLGLocalClientEntity.h
 
 	Entities/Misc/MiscExplosionBox.h

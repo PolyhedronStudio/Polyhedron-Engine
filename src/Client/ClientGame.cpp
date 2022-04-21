@@ -29,6 +29,10 @@
 #include "../Shared/CLTypes.h"
 #include "../Shared/CLGame.h"
 
+// Traces & World.
+#include "Traces.h"
+#include "World.h"
+
 // Contains the functions being exported to client game dll.
 IClientGameExports *cge;
 
@@ -105,6 +109,12 @@ mmodel_t *_wrp_BSP_InlineModel(const char *name) {
 	}
     
 	return BSP_InlineModel(cl.bsp, name);
+}
+void _wrp_CL_LinkEntity(PODEntity *podEntity) {
+    return CL_LinkEntity(&cl.cm, podEntity);
+}
+void _wrp_CL_UnlinkEntity(PODEntity *podEntity) {
+    return CL_UnlinkEntity(podEntity);
 }
 
 mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
@@ -446,7 +456,12 @@ void CL_InitGameProgs(void)
     importAPI.CheckForIgnore = CL_CheckForIgnore;
     importAPI.CheckForIP = CL_CheckForIP;
 
-    importAPI.Trace = CL_Trace;
+	importAPI.LinkEntity = _wrp_CL_LinkEntity;
+	importAPI.UnlinkEntity = _wrp_CL_UnlinkEntity;
+	importAPI.BoxEntities = CL_AreaEntities;
+	importAPI.PointContents = CL_PointContents;
+    importAPI.Trace = CL_World_Trace;
+	importAPI.World_Trace = CL_World_Trace;
 
     // Command Buffer.
     importAPI.Cbuf_AddText = _wrp_Cbuf_AddText;
