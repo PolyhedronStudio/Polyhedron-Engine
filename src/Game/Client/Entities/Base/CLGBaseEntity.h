@@ -92,6 +92,7 @@ public:
     *
     * 
     ***/
+
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
@@ -869,6 +870,20 @@ public:
     virtual void            SetYawSpeed(const float yawSpeed) { this->yawSpeed = yawSpeed; };
 
 
+    /***
+    *
+    * 
+    *   Refresh Related Functions.
+    *
+    * 
+    ***/
+	/**
+	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
+	**/
+	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction);
+
+private:
+	virtual void ProcessSkeletalAnimationForTime(uint64_t time);
 
 private:
 	/**
@@ -880,10 +895,6 @@ private:
 	**/
     //! Refresh Entity Object.
     r_entity_t refreshEntity = {};
-
-    // Client Class Entities maintain their own states. (Get copied in from updates.)
-    EntityState currentState = {};
-    EntityState previousState = {};
 
 
 

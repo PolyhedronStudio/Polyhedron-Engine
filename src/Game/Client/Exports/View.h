@@ -67,7 +67,7 @@ public:
     /**
     *   @brief  When a free view render entity slot is available, assign this render entity to it.
     **/
-    void AddRenderEntity(r_entity_t* ent);
+    void AddRenderEntity(r_entity_t &refreshEntity);
 
     /**
     *   @brief  When a free view particle slot is available, assign it to this render particle.

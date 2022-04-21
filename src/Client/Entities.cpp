@@ -347,7 +347,8 @@ static void LocalEntity_Update(const EntityState &state)
 
     // Add entity to the solids list if it has a solid.
     if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
-        cl.solidLocalEntities[cl.numSolidLocalEntities++] = clEntity;
+        cl.numSolidLocalEntities++;
+		cl.solidLocalEntities[cl.numSolidLocalEntities++] = clEntity;
 
 		// For non BRUSH models...
         if (state.solid != PACKED_BBOX) {
@@ -370,8 +371,8 @@ static void LocalEntity_Update(const EntityState &state)
     clEntity->serverFrame = cl.frame.number;
 
     // Assign the fresh new received state as the entity's current.
-	clEntity->previousState = clEntity->currentState;
-	clEntity->currentState = state;
+	//clEntity->previousState = clEntity->currentState;
+	//clEntity->currentState = state;
 	clEntity->clientEntityNumber = state.number;
 }
 

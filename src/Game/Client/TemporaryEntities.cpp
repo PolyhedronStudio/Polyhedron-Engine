@@ -171,7 +171,7 @@ static void CLG_AddLasers(void)
 		VectorCopy(l->end, ent.oldorigin);
 		ent.frame = l->width;
 
-		clge->view->AddRenderEntity(&ent);
+		clge->view->AddRenderEntity(ent);
 	}
 }
 
@@ -469,7 +469,7 @@ static void CLG_AddExplosions(void)
 			ent->oldframe = ex->baseFrame + f;
 			ent->backlerp = 1.0 - (frac - f);
 
-			clge->view->AddRenderEntity(ent);
+			clge->view->AddRenderEntity(*ent);
 		}
 	}
 }
@@ -616,7 +616,7 @@ static void CLG_AddBeams(void)
 			ent.angles[0] = angles[0];
 			ent.angles[1] = angles[1];
 			ent.angles[2] = rand() % 360;
-			clge->view->AddRenderEntity(&ent);
+			clge->view->AddRenderEntity(ent);
 			return;
 		}
 
@@ -634,7 +634,7 @@ static void CLG_AddBeams(void)
 				ent.angles[2] = rand() % 360;
 			}
 
-			clge->view->AddRenderEntity(&ent);
+			clge->view->AddRenderEntity(ent);
 
 			for (j = 0; j < 3; j++)
 				org[j] += dist[j] * len;
@@ -762,7 +762,7 @@ static void CLG_AddPlayerBeams(void)
 		while (d > 0) {
 			VectorCopy(org, ent.origin);
 
-			clge->view->AddRenderEntity(&ent);
+			clge->view->AddRenderEntity(ent);
 
 			for (j = 0; j < 3; j++)
 				org[j] += dist[j] * len;

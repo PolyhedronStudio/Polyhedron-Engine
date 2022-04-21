@@ -135,7 +135,7 @@ void ClientGameworld::PrepareClients() {
 *	@brief Prepares the game's client entities with a base player game entity.
 **/
 void ClientGameworld::PreparePlayers() {
-	//  // Allocate a classentity for each client in existence.
+	// Allocate a classentity for each client in existence.
 	for (int32_t i = 0; i < maxClients; i++) {//maxClients + 1; i++) {
 		const int32_t entityNumber = i + 1;
 
@@ -782,20 +782,24 @@ void ClientGameworld::FreePODEntity(PODEntity* podEntity) {
 
     // Reset the entities values.
 	(*podEntity) = {
+		// Ensure the states are assigned the correct entityNumber.
 		.currentState = {
 			.number = entityNumber,
 		},
 		.previousState = {
 			.number = entityNumber,
 		},
+		// It has no Game Entity anymore.
 		.gameEntity = nullptr,
+		//// Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
+		//// If we don't, we risk the chance of a client lerping between an older entity that
+		//// was taking up this current slot.
 		.freeTime = level.time,
+		// And ensure our main identifier has the correct entityNumber set.
 		.clientEntityNumber = entityNumber,
 	};
 
-    //// Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
-    //// If we don't, we risk the chance of a client lerping between an older entity that
-    //// was taking up this current slot.
+
     //podEntity->freeTime = level.time;
     //podEntity->gameEntity = nullptr;
 }
@@ -824,9 +828,9 @@ qboolean ClientGameworld::FreeGameEntity(PODEntity* podEntity) {
 		IClientGameEntity* gameEntity = static_cast<IClientGameEntity*>(podEntity->gameEntity);
 
 		// Remove the gameEntity reference
-		gameEntity->SetGroundEntity(nullptr);
 		gameEntity->SetLinkCount(0);
 		gameEntity->SetGroundEntityLinkCount(0);
+		gameEntity->SetGroundEntity(nullptr);
 		gameEntity->SetPODEntity(nullptr);
 
 		// Reset POD entity's game entity pointer.
@@ -845,9 +849,9 @@ qboolean ClientGameworld::FreeGameEntity(PODEntity* podEntity) {
     if (gameEntities[entityNumber] != nullptr) {
 		// Unset important parts.
 		GameEntity *gameEntity = gameEntities[entityNumber];
-		gameEntity->SetGroundEntity(nullptr);
 		gameEntity->SetLinkCount(0);
 		gameEntity->SetGroundEntityLinkCount(0);
+		gameEntity->SetGroundEntity(nullptr);
 		gameEntity->SetPODEntity(nullptr);
 
 		// Free it.
@@ -979,11 +983,11 @@ qboolean ClientGameworld::UpdateFromState(PODEntity *clEntity, const EntityState
 		Com_DPrint("Warning: ClientGameEntities::UpdateFromState had a nullptr returned from gameEntityList.UpdateGameEntityFromState\n");
 	}
 
-    // 
-    if (clgEntity) {
-		clgEntity->Precache();
-        clgEntity->Spawn();
-    }
+  //  // 
+  //  if (clgEntity) {
+		//clgEntity->Precache();
+  //      clgEntity->Spawn();
+  //  }
     // Do a debug print.
 #ifdef _DEBUG
     if (clgEntity) {

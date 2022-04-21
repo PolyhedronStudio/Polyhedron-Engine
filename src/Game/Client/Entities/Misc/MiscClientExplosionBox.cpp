@@ -72,7 +72,7 @@ void MiscClientExplosionBox::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::TossSlide);
+    SetMoveType(MoveType::None);
 
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -112,7 +112,8 @@ void MiscClientExplosionBox::Spawn() {
 	Com_DPrint("misc_client_explobox = %i\n", x.number);
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
-    SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
+    SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxThink);
+	//SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
 	SetInUse(true);
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -130,10 +131,15 @@ void MiscClientExplosionBox::Think() {
 
 	// Interpolate origin?
 	PODEntity *clientEntity = GetPODEntity();
-	Com_DPrint("YO DAWG THINKING STRAIGHT FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
+	//Com_DPrint("YO DAWG THINKING STRAIGHT FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
 	clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
 	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+}
+
+void MiscClientExplosionBox::ExplosionBoxThink(void) {
+	SetNextThinkTime(level.time + 1 * FRAMETIME);
+	SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxThink);
 }
 
 //===============

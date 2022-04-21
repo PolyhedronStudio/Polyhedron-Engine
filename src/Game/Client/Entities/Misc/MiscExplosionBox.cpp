@@ -72,7 +72,7 @@ void MiscExplosionBox::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::None);
+    SetMoveType(MoveType::TossSlide);
 
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -114,8 +114,9 @@ void MiscExplosionBox::Spawn() {
 	const EntityState &x = GetState();
 	Com_DPrint("misc_explobox = %i\n", x.number);
     // Setup the next think time.
-    //SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime(level.time + 2.f * FRAMETIME);
     //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
+	SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
 	SetInUse(true);
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -131,12 +132,24 @@ void MiscExplosionBox::Think() {
     // Always call parent class method.
     Base::Think();
 
-	// Interpolate origin?
-	PODEntity *clientEntity = GetPODEntity();
+
 //	Com_DPrint("YO DAWG FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
-	clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+//	podEntity->currentState.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
+        // Interpolate start and end points for beams
+        //refreshEntity.origin = vec3_mix(previousState.origin, currentState.origin, lerpFraction);
+        //refreshEntity.oldorigin = vec3_mix(previousState.oldOrigin, currentState.oldOrigin, lerpFraction);
 	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
 	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+}
+
+void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {
+    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
+
+	// Interpolate origin?
+	PODEntity *clientEntity = GetPODEntity();
+	clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
 }
 
 //===============

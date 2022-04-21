@@ -160,6 +160,18 @@ public:
     virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) = 0;
 
 
+    /***
+    *
+    * 
+    *   Refresh Related Functions.
+    *
+    * 
+    ***/
+	/**
+	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
+	**/
+	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) = 0;
+
 
 public:
     /**

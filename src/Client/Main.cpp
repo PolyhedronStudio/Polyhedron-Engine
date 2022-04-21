@@ -3035,8 +3035,8 @@ uint64_t CL_Frame(uint64_t msec)
     // Send pending clientUserCommands
     CL_SendCmd();
 
-    // Predict all unacknowledged movements
-    CL_PredictMovement();
+    // UNCOMMENT IF IT BROKE ? Predict all unacknowledged movements
+    //CL_PredictMovement();
 
     Con_RunConsole();
 
@@ -3079,6 +3079,9 @@ run_fx:
         CL_GM_ClientUpdateOrigin();
         goto run_fx;
     }
+
+	// Predict all unacknowledged movements
+    CL_PredictMovement();
 
     // Check connection timeout
     if (cls.netChannel) {

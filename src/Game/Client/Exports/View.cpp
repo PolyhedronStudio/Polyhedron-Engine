@@ -250,14 +250,14 @@ void ClientGameView::Shutdown() {
 /**
 *   @brief  When a free view render entity slot is available, assign this render entity to it.
 **/
-void ClientGameView::AddRenderEntity(r_entity_t *ent) {
+void ClientGameView::AddRenderEntity(r_entity_t &refreshEntity) {
     // Ensure we aren't exceeding boundary limits.
     if (num_renderEntities >= MAX_ENTITIES) {
         return;
     }
 
     // Copy entity over into the current scene frame list.
-    renderEntities[num_renderEntities++] = *ent;
+    renderEntities[num_renderEntities++] = refreshEntity;
 }
 
 /**

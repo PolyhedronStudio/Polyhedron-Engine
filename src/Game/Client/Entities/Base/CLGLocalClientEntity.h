@@ -965,6 +965,21 @@ public:
     void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage);
 
 
+    /***
+    *
+    * 
+    *   Refresh Related Functions.
+    *
+    * 
+    ***/
+	/**
+	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
+	**/
+	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction);
+
+private:
+	virtual void ProcessSkeletalAnimationForTime(uint64_t time);
+
 
 protected:
     /**

@@ -39,6 +39,7 @@ public:
     void ExplosionBoxDie(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
     void ExplosionBoxTouch(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
+	void MiscExplosionBoxInterpolateThink();
     
 	/**
 	*	Set when exploding, after a minor delay.
