@@ -140,6 +140,9 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         // Fetch the command.
         ClientMoveCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
 
+		// Simulate entities.
+clge->ClientPredictEntitiesFrame();
+
         // If the command has an msec value it means movement has taken place and we prepare for 
         // processing another simulation.
         if (cmd->input.msec) {
@@ -154,6 +157,11 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
 
             // Update player move client side audio effects.
             UpdateClientSoundSpecialEffects(&pm);
+			
+			// Execute touch callbacks and "predict" other entities.		
+			PlayerFrameTouch(&pm);
+
+
         }
 
         // Save for error detection
@@ -171,13 +179,15 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         pm.moveCommand.input.upMove = cl->localMove[2];
         PMove(&pm);
 		
-		PlayerFrameTouch(&pm);
-
         // Update player move client side audio effects.
         UpdateClientSoundSpecialEffects(&pm);
 
+		// Execute touch callbacks and "predict" other entities.		
+		PlayerFrameTouch(&pm);
+
         // Save for error detection
         cl->moveCommand.prediction.origin = pm.state.origin;
+
     }
 
     // Copy results out for rendering

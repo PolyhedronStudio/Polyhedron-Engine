@@ -72,7 +72,7 @@ void CLG_PhysicsEntityWPrint(const std::string &functionName, const std::string 
     warning += " ";
     warning += message;
     warning += "\n";
-    Com_DPrint(warning.c_str());
+    //Com_DPrint(warning.c_str());
  //   // Write the index, programmers may look at that thing first
  //   std::string errorString = "";
  //   if (ent->GetPODEntity()) {
@@ -583,7 +583,11 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     for (e = 1; e < cl->numSolidEntities + cl->numSolidLocalEntities; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-	    SGEntityHandle checkHandle = classEntities[e];
+		PODEntity *podCheck = cl->solidEntities[e];
+		if (e > cl->numSolidEntities) {
+			podCheck = cl->solidLocalEntities[e];
+		}
+	    SGEntityHandle checkHandle = podCheck;
 
         if (!checkHandle) {
     		CLG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");

@@ -146,16 +146,17 @@ void MiscExplosionBox::Think() {
 	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 
 	// Interpolate origin?
-	ClientGameworld *gameWorld = GetGameworld();
-	PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(GetNumber());
-	//
-	if (podEntity) {
+	//ClientGameworld *gameWorld = GetGameworld();
+	//PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(GetNumber());
+	////
+	//if (podEntity) {
 
-		podEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
-	//
+	//	podEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	//	podEntity->currentState.oldOrigin = vec3_mix(clientEntity->previousState.oldOrigin, clientEntity->currentState.oldOrigin, cl->lerpFraction);
+	////
 	//	SetRenderEffects(RenderEffects::Beam);
-		Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
-	}
+	//	//Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
+	//}
 }
 
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {

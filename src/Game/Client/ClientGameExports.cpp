@@ -158,7 +158,7 @@ void ClientGameExports::ClientDeltaFrame() {
 //    level.time = GameTime(cl->serverTime);
 
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
-/   entities->RunFrame();
+   //entities->RunFrame();
 }
 
 /**
