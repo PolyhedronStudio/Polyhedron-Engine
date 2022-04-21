@@ -111,10 +111,19 @@ mmodel_t *_wrp_BSP_InlineModel(const char *name) {
 	return BSP_InlineModel(cl.bsp, name);
 }
 void _wrp_CL_LinkEntity(PODEntity *podEntity) {
-    return CL_LinkEntity(&cl.cm, podEntity);
+    CL_LinkEntity(podEntity);
 }
 void _wrp_CL_UnlinkEntity(PODEntity *podEntity) {
-    return CL_UnlinkEntity(podEntity);
+    CL_UnlinkEntity(podEntity);
+}
+void _wrp_CL_World_LinkEntity(PODEntity *podEntity) {
+    CL_PF_World_LinkEntity(podEntity);
+}
+void _wrp_CL_World_UnlinkEntity(PODEntity *podEntity) {
+    CL_World_UnlinkEntity(podEntity);
+}
+int32_t _wrp_CL_World_PointContents(const vec3_t &point) {
+    return CL_World_PointContents(point);
 }
 
 mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
@@ -457,10 +466,14 @@ void CL_InitGameProgs(void)
     importAPI.CheckForIP = CL_CheckForIP;
 
 	importAPI.LinkEntity = _wrp_CL_LinkEntity;
+	importAPI.World_LinkEntity = _wrp_CL_World_LinkEntity;
 	importAPI.UnlinkEntity = _wrp_CL_UnlinkEntity;
+	importAPI.World_UnlinkEntity = _wrp_CL_World_UnlinkEntity;
 	importAPI.BoxEntities = CL_AreaEntities;
+	importAPI.World_BoxEntities = CL_World_AreaEntities;
 	importAPI.PointContents = CL_PointContents;
-    importAPI.Trace = CL_World_Trace;
+	importAPI.World_PointContents = CL_World_PointContents;
+    importAPI.Trace = CL_Trace;
 	importAPI.World_Trace = CL_World_Trace;
 
     // Command Buffer.

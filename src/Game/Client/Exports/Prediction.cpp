@@ -5,6 +5,7 @@
 
 // Exports.
 #include "../ClientGameExports.h"
+
 #include "Prediction.h"
 #include "View.h"
 
@@ -23,10 +24,14 @@ void PlayerFrameTouch(PlayerMove *pm) {
 
 	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
 	GameEntity *player = gameWorld->GetGameEntityByIndex(1); // Client.
-	if (player) {
+	if (player && pm && cl->bsp && cl->cm.cache) {
 		//const int32_t playerMoveType = player->GetMoveType();
   //      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
             // Trigger touch logic. 
+			player->SetOrigin(pm->state.origin);
+			player->SetMins(pm->mins);
+			player->SetMins(pm->maxs);
+
             UTIL_TouchTriggers(player);
 
             // Solid touch logic.
@@ -143,10 +148,9 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
 
             // Assign the move command.
             pm.moveCommand = *cmd;
+						
             // Simulate the move command.
             PMove(&pm);
-
-			PlayerFrameTouch(&pm);
 
             // Update player move client side audio effects.
             UpdateClientSoundSpecialEffects(&pm);
@@ -166,6 +170,8 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         pm.moveCommand.input.rightMove = cl->localMove[1];
         pm.moveCommand.input.upMove = cl->localMove[2];
         PMove(&pm);
+		
+		PlayerFrameTouch(&pm);
 
         // Update player move client side audio effects.
         UpdateClientSoundSpecialEffects(&pm);

@@ -104,8 +104,8 @@ void CL_ClearWorld()
     memset(cl_areanodes, 0, sizeof(cl_areanodes));
     cl_numareanodes = 0;
 
-    if (cl.cm.cache) {
-        cm = &cl.cm.cache->models[0];
+    if (cl.bsp) {
+        cm = &cl.bsp->models[0];//&cl.cm.cache->models[0];
         CL_CreateAreaNode(0, cm->mins, cm->maxs);
     }
 
@@ -143,7 +143,7 @@ qboolean CL_EntityIsVisible(cm_t *cm, Entity *ent, byte *mask)
 *	@brief	General purpose routine shared between game DLL and MVD code.
 *			Links entity to PVS leafs.
 **/
-void CL_LinkEntity(cm_t *cm, Entity *ent)
+void CL_World_LinkEntity(cm_t *cm, Entity *ent)
 {
     mleaf_t	*leafs[MAX_TOTAL_ENT_LEAFS];
     int32_t	clusters[MAX_TOTAL_ENT_LEAFS];
@@ -248,7 +248,7 @@ void CL_LinkEntity(cm_t *cm, Entity *ent)
 /**
 *	@brief	Removes the entity for collision testing.
 **/
-void CL_UnlinkEntity(Entity *ent) {
+void CL_World_UnlinkEntity(Entity *ent) {
     if (!ent->area.prev) {
         return;        // not linked in anywhere
 	}
@@ -261,14 +261,14 @@ void CL_UnlinkEntity(Entity *ent) {
 *			Finds the area to link the entity in to and sets its bounding box in case it is an
 *			actual inline bsp model.
 **/
-void CL_PF_LinkEntity(Entity *ent) {
+void CL_PF_World_LinkEntity(Entity *ent) {
 	// Unlink from previous old position.
 	if (ent->area.prev) {
-        CL_UnlinkEntity(ent);
+        CL_World_UnlinkEntity(ent);
 	}
 
 	// Ensure it isn't the worldspawn entity itself.
-    if (ent == ge->entities) {
+    if (ent == cs.entities) {
         return;        // Don't add the world
 	}
 
@@ -285,47 +285,47 @@ void CL_PF_LinkEntity(Entity *ent) {
 
 	// Find the actual server entity.
     int32_t entityNumber = ent->clientEntityNumber; //NUM_FOR_EDICT(ent);
-    server_entity_t *serverEntity = &sv.entities[entityNumber];
+    //PODEntity *clientEntity = &cs.entities[entityNumber];
 
     // Encode the size into the entity_state for client prediction reaspms/
     switch (ent->solid) {
     case Solid::BoundingBox:
         if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
             ent->currentState.solid = 0;
-            serverEntity->solid32 = 0;
+            //serverEntity->solid32 = 0;
         } else {
 			ent->currentState.solid = Solid::BoundingBox; //MSG_PackBoundingBox32(ent->mins, ent->maxs);
 			ent->currentState.mins = ent->mins;
 			ent->currentState.maxs = ent->maxs;
-			serverEntity->solid32 = ent->currentState.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
+			//serverEntity->solid32 = ent->currentState.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
         }
         break;
     case Solid::OctagonBox:
         if ((ent->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(ent->mins, ent->maxs)) {
             ent->currentState.solid = 0;
-            serverEntity->solid32 = 0;
+            //serverEntity->solid32 = 0;
         } else {
 			ent->currentState.solid = Solid::OctagonBox; //MSG_PackBoundingBox32(ent->mins, ent->maxs);
 			ent->currentState.mins = ent->mins;
 			ent->currentState.maxs = ent->maxs;
-            serverEntity->solid32 = ent->currentState.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
+            //serverEntity->solid32 = ent->currentState.solid;//MSG_PackBoundingBox32(ent->mins, ent->maxs);
         }
         break;
     case Solid::BSP:
         ent->currentState.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
 		ent->currentState.mins = vec3_zero();
 		ent->currentState.maxs = vec3_zero();
-		serverEntity->solid32 = PACKED_BBOX;     // FIXME: use 255?
+		//serverEntity->solid32 = PACKED_BBOX;     // FIXME: use 255?
         break;
     default:
         ent->currentState.solid = 0;
 		ent->currentState.mins = vec3_zero();
 		ent->currentState.maxs = vec3_zero();
-		serverEntity->solid32 = 0;
+		//serverEntity->solid32 = 0;
         break;
     }
 
-    CL_LinkEntity(&cl.cm, ent);
+    CL_World_LinkEntity(&cl.cm, ent);
 
     // If first time, make sure oldOrigin is valid.
     if (!ent->linkCount) {
@@ -375,17 +375,25 @@ void CL_PF_LinkEntity(Entity *ent) {
 /**
 *	@brief	The inner workings of CL_AreaEntities.
 **/
-static void CL_AreaEntities_r(areanode_t *node) {
+static void CL_World_AreaEntities_r(areanode_t *node) {
     list_t *start = nullptr;
     PODEntity *check = nullptr;
 
+	if (!node) {
+		return;
+	}
     // touch linked edicts
-    if (areaType == AreaEntities::Solid) {
-        start = &node->solidEdicts;
-	} else if (areaType == AreaEntities::LocalSolid) {
+ //   if (areaType == AreaEntities::Solid) {
+ //       start = &node->solidEdicts;
+	//} else if (areaType == AreaEntities::LocalSolid) {
+	//	start = &node->solidLocalClientEdicts;
+	//} else {
+ //       start = &node->triggerEdicts;
+	//}
+    if (areaType == AreaEntities::LocalSolid) {
 		start = &node->solidLocalClientEdicts;
 	} else {
-        start = &node->triggerEdicts;
+        start = &node->solidEdicts;
 	}
 
     LIST_FOR_EACH(PODEntity, check, start, area) {
@@ -415,27 +423,27 @@ static void CL_AreaEntities_r(areanode_t *node) {
 
     // recurse down both sides
     if (areaMaxs[node->axis] > node->dist)
-        CL_AreaEntities_r(node->children[0]);
+        CL_World_AreaEntities_r(node->children[0]);
     if (areaMins[node->axis] < node->dist)
-        CL_AreaEntities_r(node->children[1]);
+        CL_World_AreaEntities_r(node->children[1]);
 }
 
 /**
 *	@brief	Looks up all areas residing in the mins/maxs box of said areaType (solid, or triggers).
 *	@return	Number of entities found and stored in the list.
 **/
-int32_t CL_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity **list, int32_t maxcount, int32_t areatype) {
-    //areaMins = mins;
-    //areaMaxs = maxs;
-    //areaList = list;
-    //areaCount = 0;
-    //areaMaxCount = maxcount;
-    //areaType = areatype;
+int32_t CL_World_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity **list, int32_t maxcount, int32_t areatype) {
+    areaMins = mins;
+    areaMaxs = maxs;
+    areaList = list;
+    areaCount = 0;
+    areaMaxCount = maxcount;
+    areaType = areatype;
 
-    //CL_AreaEntities_r(cl_areanodes);
+    CL_World_AreaEntities_r(cl_areanodes);
 
-    //return areaCount;
-	return 0;
+    return areaCount;
+	//return 0;
 }
 
 
@@ -445,7 +453,7 @@ int32_t CL_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity **list
 *	@return	Returns a headNode that can be used for testing or clipping an
 *			object of mins/maxs size.
 **/
-static mnode_t *CL_HullForEntity(Entity *ent)
+static mnode_t *CL_World_HullForEntity(Entity *ent)
 {
     if (ent->solid == Solid::BSP) {
         int32_t i = ent->currentState.modelIndex - 1;
@@ -469,9 +477,9 @@ static mnode_t *CL_HullForEntity(Entity *ent)
 /**
 *	@brief	Specialized server implementation of PointContents function.
 **/
-int32_t CL_PointContents(const vec3_t &point)
+int32_t CL_World_PointContents(const vec3_t &point)
 {
-    static Entity     *touch[MAX_EDICTS], *hit = nullptr;
+    static PODEntity     *touch[MAX_CLIENT_POD_ENTITIES], *hit = nullptr;
     
 	// Ensure all is sane.
     if (!cl.cm.cache || !cl.cm.cache->nodes) {
@@ -483,14 +491,14 @@ int32_t CL_PointContents(const vec3_t &point)
     int32_t contents = CM_PointContents(point, cl.cm.cache->nodes);
 
     // or in contents from all the other entities
-    int32_t numberOfAreaEntities = CL_AreaEntities(point, point, touch, MAX_EDICTS, AreaEntities::Solid);
+    int32_t numberOfAreaEntities = CL_World_AreaEntities(point, point, touch, MAX_CLIENT_POD_ENTITIES, AreaEntities::Solid);
 
     for (int32_t i = 0; i < numberOfAreaEntities; i++) {
 		// Acquire touch entity.
-        Entity *hit = touch[i];
+        PODEntity*hit = touch[i];
 
         // Might intersect, so do an exact clip
-        contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+        contents |= CM_TransformedPointContents(point, CL_World_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
     }
 
     return contents;
@@ -499,7 +507,7 @@ int32_t CL_PointContents(const vec3_t &point)
 /**
 *	@brief	Will clip the move of the bounding box to the world entities.
 **/
-static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask, TraceResult *tr) {
+static void CL_World_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask, TraceResult *tr) {
     // Actual box mins and maxs that are used for clipping with.
 	vec3_t boxMins = vec3_zero();
 	vec3_t boxMaxs = vec3_zero();
@@ -515,9 +523,9 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
         }
     }
 
-	static PODEntity *touchEntityList[MAX_EDICTS];
+	static PODEntity *touchEntityList[MAX_CLIENT_POD_ENTITIES];
 	PODEntity *touchEntity = nullptr;
-    int32_t numberOfAreaEntities = CL_AreaEntities(boxMins, boxMaxs, touchEntityList, MAX_EDICTS, AreaEntities::Solid);
+    int32_t numberOfAreaEntities = CL_World_AreaEntities(boxMins, boxMaxs, touchEntityList, MAX_CLIENT_POD_ENTITIES, AreaEntities::Solid);
 
     // Be careful, it is possible to have an entity in this list removed before we get to it (killtriggered)
     for (int32_t i = 0; i < numberOfAreaEntities; i++) {
@@ -545,7 +553,7 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
 		}
 
         // Might intersect, so do an exact clip
-		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, CL_HullForEntity(touchEntity), contentMask, touchEntity->currentState.origin, touchEntity->currentState.angles);
+		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, CL_World_HullForEntity(touchEntity), contentMask, touchEntity->currentState.origin, touchEntity->currentState.angles);
 
 		// Finalize trace results and clip to entity.
         CM_ClipEntity(tr, &trace, touchEntity);
@@ -557,20 +565,20 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
 *			Passedict and edicts owned by passedict are explicitly skipped from being checked.
 **/
 const TraceResult CL_World_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask) {
-    if (!cl.bsp) {
+    if (!cl.bsp || !cl.cm.cache) {
         //Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
 		return TraceResult();
     }
 
     // clip to world
-    TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.bsp->nodes, contentMask, vec3_zero(), vec3_zero());
+    TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.cm.cache->nodes, contentMask, vec3_zero(), vec3_zero());
     trace.ent = ge->entities;
     if (trace.fraction == 0) {
         return trace;   // Blocked by the world
     }
 
     // clip to other solid entities
-    CL_ClipMoveToEntities(start, mins, maxs, end, passedict, contentMask, &trace);
+    CL_World_ClipMoveToEntities(start, mins, maxs, end, passedict, contentMask, &trace);
     return trace;
 }
 

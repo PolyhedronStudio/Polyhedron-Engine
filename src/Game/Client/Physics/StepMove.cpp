@@ -35,10 +35,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // value for each entity type.
 #define STEPSIZE    18
 
-extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
-static void UTIL_TouchTriggers(IClientGameEntity *ent)
-{
-}
+//extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
+extern void UTIL_TouchTriggers(IClientGameEntity *ent);
+//static void UTIL_TouchTriggers(IClientGameEntity *ent)
+//{
+//}
 /*
 =============
 CLG_StepMove_CheckBottom

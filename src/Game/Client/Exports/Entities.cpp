@@ -393,7 +393,6 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
     // Last but not least, let the entity execute its think behavior callback.
     ent->Think();
 
-
     return false;
 }
 
@@ -411,7 +410,7 @@ void ClientGameEntities::RunFrame() {
 	ClientGameworld *gameWorld = GetGameworld();
 
     // Iterate up till the amount of entities active in the current frame.
-    for (int32_t entityNumber = 1; entityNumber < cl->frame.numEntities; entityNumber++) {
+    for (int32_t entityNumber = 0; entityNumber < cl->frame.numEntities; entityNumber++) {
         // Acquire game entity object.
         GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(12 + entityNumber);
 

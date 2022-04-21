@@ -20,7 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../ClientGameLocals.h"
 #include "../Exports/Entities.h"
 #include "../Entities/IClientGameEntity.h"
+#include "../Entities/Worldspawn.h"
 
+#include "../World/ClientGameworld.h"
 //#include "../Utilities.h"
 
 // Step Move physics.
@@ -97,11 +99,12 @@ void CLG_PhysicsEntityWPrint(const std::string &functionName, const std::string 
 extern GameEntityVector CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType);
 void UTIL_TouchTriggers(IClientGameEntity *ent) {
     //// Dead things don't activate triggers!
-   if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster) && ent->GetHealth() <= 0)
+   if ((ent->GetClient() || ent->GetServerFlags() & EntityServerFlags::Monster)) {//}&& ent->GetHealth() <= 0)
        return;
+   }
 
     //// Fetch the boxed entities.
-	GameEntityVector touched = CLG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::LocalTriggers);
+	GameEntityVector touched = CLG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_CLIENT_POD_ENTITIES, AreaEntities::Triggers);
 
     // Do some extra sanity checks on the touched entity list. It is possible to have 
     // an entity be removed before we get to it (kill triggered).
@@ -137,7 +140,8 @@ IClientGameEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
     trace = CLG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
 
     if (trace.startSolid) {
-	    return 0;//dynamic_cast<CLGBaseEntity*>(game.world->GetWorldspawnGameEntity());
+		ClientGameworld *gameWorld = GetGameworld();
+	    return static_cast<IClientGameEntity*>(gameWorld->GetWorldspawnGameEntity());
     }
 
     return trace.gameEntity;

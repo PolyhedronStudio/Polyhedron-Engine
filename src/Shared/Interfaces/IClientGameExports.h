@@ -332,14 +332,30 @@ public:
     *
     *
     ***/
-    // Calculates the FOV the client is running. (Important to have in order.)
+    /**
+	*	@brief	Updates the origin. (Used by the engine for determining current audio position too.)
+	**/
+    virtual void ClientUpdateOrigin() = 0;
+
+    /**
+	*	@brief	Called when there is a needed retransmit of user info variables.
+	**/
+    virtual void ClientUpdateUserinfo(cvar_t* var, from_t from) = 0;
+
+
+    /****
+    * 
+    *   General.
+    * 
+    ****/
+    /**
+    *   @brief  Calculates the FOV the client is running. (Important to have in order.)
+    **/
     virtual float ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) = 0;
 
-    // Called upon whenever a client disconnects, for whichever reason.
-    // Could be him quiting, or pinging out etc.
-    virtual void ClientClearState() = 0;
-
-    // Called when a demo is being seeked through.
+    /**
+    *   @brief  Called when a demo is being seeked through.
+    **/
     virtual void DemoSeek() = 0;
 
 #ifdef _DEBUG
@@ -349,21 +365,33 @@ public:
     virtual void CheckEntityPresent(int32_t entityNumber, const std::string &what) = 0;
 #endif
 
-    // Called after all downloads are done. (Aka, a map has started.)
-    // Not used for demos.
+
+    /****
+    * 
+    *   Frame & State related
+    * 
+    ****/
+    /**
+    *   @brief  Called after all downloads are done. (Aka, a map has started.)
+    *           Not used for demos.
+    **/
     virtual void ClientBegin() = 0;
-    // Called each VALID client frame. Handle per VALID frame basis 
-    // things here.
+    /**
+    *   @brief  Called upon whenever a client disconnects, for whichever reason.
+    *           Could be him quiting, or pinging out etc.
+    **/
+    virtual void ClientClearState() = 0;
+    /**
+    *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+    **/
     virtual void ClientDeltaFrame() = 0;
-    // Called each client frame. Handle per frame basis things here.
+    /**
+    *   @brief  Called each client frame. Handle per frame basis things here.
+    **/
     virtual void ClientFrame() = 0;
-    // Called when a disconnect even occures. Including those for Com_Error
+    /**
+    *   @brief  Called when a disconnect even occures. Including those for Com_Error
+    **/
     virtual void ClientDisconnect() = 0;
-
-    // Updates the origin. (Used by the engine for determining current audio position too.)
-    virtual void ClientUpdateOrigin() = 0;
-
-    // Called when there is a needed retransmit of user info variables.
-    virtual void ClientUpdateUserinfo(cvar_t* var, from_t from) = 0;
 };
 

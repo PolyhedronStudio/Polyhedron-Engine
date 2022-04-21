@@ -70,6 +70,10 @@ public:
     **/
     void ClientDeltaFrame() final;
     /**
+    *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
+    **/
+    void ClientPredictEntitiesFrame();
+    /**
     *   @brief  Called each client frame. Handle per frame basis things here.
     **/
     void ClientFrame() final;

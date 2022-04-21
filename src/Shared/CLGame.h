@@ -242,12 +242,20 @@ extern "C" {
 
 		// Links a client side entity.
 		void (*LinkEntity)(PODEntity *podEntity);
+		// Links a client side entity.
+		void (*World_LinkEntity)(PODEntity *podEntity);
 		// Unlinks a client side entity.
 		void (*UnlinkEntity) (PODEntity *podEntity);
+		// Unlinks a client side entity.
+		void (*World_UnlinkEntity) (PODEntity *podEntity);
 		// Return a list of entities residing within the box.
 		int32_t (*BoxEntities)(const vec3_t &mins, const vec3_t &maxs, PODEntity **list, int maxcount, int areatype);
+		// Return a list of entities residing within the box.
+		int32_t (*World_BoxEntities)(const vec3_t &mins, const vec3_t &maxs, PODEntity **list, int maxcount, int areatype);
 		// Point Contents for Client.
 		int32_t (*PointContents) (const vec3_t &point);
+		// Point Contents for Client.
+		int32_t (*World_PointContents) (const vec3_t &point);
         // Executes a client side trace, on received server entities.
         const TraceResult (*Trace) (const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
 		// Executes a full world client side trace, on all entities.

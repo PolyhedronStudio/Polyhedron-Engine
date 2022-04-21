@@ -19,7 +19,7 @@ extern ClientShared cs;
 /**
 *	@brief	Clips the trace against all entities resulting in a final trace result.
 **/
-void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
+static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
     // CM Source Trace.
     TraceResult         cmSrcTrace;
     // Head Node used for testing.
@@ -181,7 +181,113 @@ const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t
     return trace;
 }
 
+void CL_LinkEntity(PODEntity* entity) {
+	if (entity) {
+		entity->linkCount++;
+	}
+}
+void CL_UnlinkEntity(PODEntity* entity) {
+	if (entity) {
+		entity->linkCount = 0;
+	}
+}
 
+int32_t CL_PointContents(const vec3_t& point) {
+	return CM_TransformedPointContents(point, cl.bsp->nodes, vec3_zero(), vec3_zero());
+}
+
+
+/**
+*	@brief	The inner workings of CL_AreaEntities.
+**/
+// Area Mins/Maxs.
+static vec3_t areaMins	= vec3_zero();
+static vec3_t areaMaxs	= vec3_zero();
+
+// List of entities in an area.
+static Entity  **areaList	= nullptr;
+
+// Area stats.
+static int32_t areaCount	= 0;
+static int32_t areaMaxCount	= 0;
+static int32_t areaType		= 0;
+
+static void CL_AreaEntities_r() {
+    //list_t *start = nullptr;
+    //PODEntity *check = nullptr;
+
+    // touch linked edicts
+ //   if (areaType == AreaEntities::Solid) {
+ //       start = &node->solidEdicts;
+	//} else if (areaType == AreaEntities::LocalSolid) {
+	//	start = &node->solidLocalClientEdicts;
+	//} else {
+ //       start = &node->triggerEdicts;
+	//}
+	for (int i = 0; i < cl.numSolidEntities; i++) {
+		PODEntity *solidEntity = cl.solidEntities[i];
+
+		if (!solidEntity) {
+			continue;
+		}
+
+        if (solidEntity->absMin[0] > areaMaxs[0]
+            || solidEntity->absMin[1] > areaMaxs[1]
+            || solidEntity->absMin[2] > areaMaxs[2]
+            || solidEntity->absMax[0] < areaMins[0]
+            || solidEntity->absMax[1] < areaMins[1]
+            || solidEntity->absMax[2] < areaMins[2]) {
+            continue;        // not touching
+		}
+
+        if (areaCount == areaMaxCount) {
+            Com_WPrintf("CL_AreaEntities: MAXCOUNT\n");
+            return;
+        }
+
+        areaList[areaCount] = solidEntity;
+		areaCount++;
+	}
+ //   LIST_FOR_EACH(PODEntity, check, start, area) {
+ //       if (!check || check->solid == Solid::Not) {
+ //           continue;        // deactivated
+	//	}
+ //       if (check->absMin[0] > areaMaxs[0]
+ //           || check->absMin[1] > areaMaxs[1]
+ //           || check->absMin[2] > areaMaxs[2]
+ //           || check->absMax[0] < areaMins[0]
+ //           || check->absMax[1] < areaMins[1]
+ //           || check->absMax[2] < areaMins[2]) {
+ //           continue;        // not touching
+	//	}
+
+ //       if (areaCount == areaMaxCount) {
+ //           Com_WPrintf("CL_AreaEntities: MAXCOUNT\n");
+ //           return;
+ //       }
+
+ //       areaList[areaCount] = check;
+	//	areaCount++;
+	//}
+}
+
+/**
+*	@brief	Looks up all areas residing in the mins/maxs box of said areaType (solid, or triggers).
+*	@return	Number of entities found and stored in the list.
+**/
+int32_t CL_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity **list, int32_t maxcount, int32_t areatype) {
+    areaMins = mins;
+    areaMaxs = maxs;
+    areaList = list;
+    areaCount = 0;
+    areaMaxCount = maxcount;
+    areaType = areatype;
+
+    CL_AreaEntities_r();
+
+    return areaCount;
+	//return 0;
+}
 
 
 

@@ -162,6 +162,13 @@ void ClientGameExports::ClientDeltaFrame() {
 }
 
 /**
+*   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
+**/
+void ClientGameExports::ClientPredictEntitiesFrame() {
+
+}
+
+/**
 *   @brief  Called each client frame. Handle per frame basis things here.
 **/
 void ClientGameExports::ClientFrame() {
