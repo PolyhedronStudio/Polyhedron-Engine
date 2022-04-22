@@ -183,6 +183,39 @@ const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t
 
 void CL_LinkEntity(PODEntity* entity) {
 	if (entity) {
+		// set the size
+		entity->size = entity->maxs - entity->mins;
+
+		// set the abs box
+		if (entity->solid == Solid::BSP &&
+			(entity->currentState.angles[0] || entity->currentState.angles[1] || entity->currentState.angles[2])) {
+			// expand for rotation
+			float   max, v;
+			int     i;
+
+			max = 0;
+			for (i = 0; i < 3; i++) {
+				v = fabs(entity->mins[i]);
+				if (v > max)
+					max = v;
+				v = fabs(entity->maxs[i]);
+				if (v > max)
+					max = v;
+			}
+			for (i = 0; i < 3; i++) {
+				entity->absMin[i] = entity->currentState.origin[i] - max;
+				entity->absMax[i] = entity->currentState.origin[i] + max;
+			}
+		} else {
+			// normal
+			entity->absMin = entity->currentState.origin + entity->mins; //VectorAdd(entity->currentState.origin, entity->mins, entity->absMin);
+			entity->absMax = entity->currentState.origin + entity->maxs; //VectorAdd(entity->currentState.origin, entity->maxs, entity->absMax);
+		}
+
+		// because movement is clipped an epsilon away from an actual edge,
+		// we must fully check even when bounding boxes don't quite touch
+
+
 		entity->linkCount++;
 	}
 }

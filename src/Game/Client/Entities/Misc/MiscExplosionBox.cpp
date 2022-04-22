@@ -374,20 +374,20 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
 
     // Ground entity checks.
     if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
-		////if (other->GetGroundEntity()) {
-		////	Com_DPrint("Explobox(#%i) has GroundEntity(#%i)\n", other->GetNumber());
-		////} else {
-		////	Com_DPrint("Explobox(#%i) has no GroundEntity\n", GetNumber());
-		////}
+		if (other->GetGroundEntity()) {
+			Com_DPrint("Explobox(#%i) has GroundEntity(#%i)\n", other->GetNumber());
+		} else {
+			Com_DPrint("Explobox(#%i) has no GroundEntity\n", GetNumber());
+		}
 		//return;
     }
 	
 	//Com_DPrint("ExplosionBox: %i is touching: other.GetNumber() = %i\n", GetNumber(), other->GetNumber());
 	if (other->GetNumber() == cl->frame.clientNumber + 1) {
 		Com_DPrint("Client Entity(#%i) is touching Barrel: (#%i)\n", other->GetNumber(), GetNumber());
-	} else {
+	}/* else {
 		return;
-	}
+	}*/
 
     // Calculate ratio to use.
     double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));
@@ -398,10 +398,10 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
     // Calculate yaw to use based on direction.
     double yaw = vec3_to_yaw(dir);
 
-	Com_DPrint("Origin before pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
+	//Com_DPrint("Origin before pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
     // Last but not least, move a step ahead.
     CLG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
-	Com_DPrint("Origin after pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
+	//Com_DPrint("Origin after pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
 }
 
 

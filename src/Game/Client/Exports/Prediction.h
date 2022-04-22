@@ -39,10 +39,16 @@ public:
     void UpdateClientSoundSpecialEffects(PlayerMove* pm) final;
 
 private:
-    /**
+	/**
+	*	@brief	Dispatch touch callbacks for all predicted touched entities.
+	**/
+	void DispatchPredictedTouchCallbacks(PlayerMove *pm);
+	
+	/**
     *   @brief  Player Move Simulation Trace Wrapper.
     **/
     static TraceResult PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end);
+
 public:
     /**
     *   @brief  Player Move Simulation PointContents Wrapper.

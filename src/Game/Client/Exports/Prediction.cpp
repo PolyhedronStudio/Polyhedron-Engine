@@ -17,54 +17,7 @@ static const double MAX_DELTA_ORIGIN = (2400.0 * (1.00 / BASE_FRAMERATE));
 void UTIL_TouchTriggers(IClientGameEntity *ent);
 // GameWorld.
 #include "../World/ClientGameWorld.h"
-void PlayerFrameTouch(PlayerMove *pm) {
-	// Get gameworld.
-	ClientGameWorld *gameWorld = GetGameWorld();
 
-	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
-	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->frame.clientNumber + 1); // Client.
-	if (player && pm && cl->bsp) {//}&& cl->cm.cache) {
-		//const int32_t playerMoveType = player->GetMoveType();
-  //      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
-            // Trigger touch logic. 
-			player->SetOrigin(pm->state.origin);
-			player->SetMins(pm->mins);
-			player->SetMaxs(pm->maxs);
-
-            UTIL_TouchTriggers(player);
-			const std::string absMinStr = vec3_to_str(player->GetAbsoluteMin());
-			const std::string absMaxStr = vec3_to_str(player->GetAbsoluteMax());
-
-			Com_DPrint("Player->absMin = %s, player->absMax = %s\n", absMinStr.c_str(), absMaxStr.c_str());
-            // Solid touch logic.
-            int32_t i = 0;
-            int32_t j = 0;
-            
-            for (i = 0 ; i < pm->numTouchedEntities; i++) {
-                for (j = 0 ; j < i ; j++) {
-                    if (pm->touchedEntities[j] == pm->touchedEntities[i]) {
-                        break;
-                    }
-                }
-                if (j != i) {
-                    continue;   // duplicated
-                }
-
-                SGEntityHandle other(pm->touchedEntities[i]);
-                if (!other || !*other) {
-					if (pm->touchedEntities[i] != nullptr) {
-						//Com_DPrint("Skipped dispatching player touch to entity(#%i)\n", pm->touchedEntities[i]->clientEntityNumber);;
-					}
-                    continue;
-                }
-
-                other->DispatchTouchCallback(*other, player, NULL, NULL);
-            }
-
-        //}
-	}
-
-}
 /**
 *   @brief  Checks for prediction incorectness. If found, corrects it.
 **/
@@ -145,12 +98,6 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         // Fetch the command.
         ClientMoveCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
 
-		// Simulate entities.
-		//clge->ClientPredictEntitiesFrame();
-
-		// This really might have to go elsewhere..
-		//clge->entities->RunPacketEntitiesDeltaFrame();
-
         // If the command has an msec value it means movement has taken place and we prepare for 
         // processing another simulation.
         if (cmd->input.msec) {
@@ -167,7 +114,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
             UpdateClientSoundSpecialEffects(&pm);
 			
 			// Execute touch callbacks and "predict" other entities.		
-			PlayerFrameTouch(&pm);
+			DispatchPredictedTouchCallbacks(&pm);
         }
 
         // Save for error detection
@@ -190,7 +137,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         UpdateClientSoundSpecialEffects(&pm);
 
 		// Execute touch callbacks and "predict" other entities.		
-		//PlayerFrameTouch(&pm);
+		DispatchPredictedTouchCallbacks(&pm);
 
         // Save for error detection
         cl->moveCommand.prediction.origin = pm.state.origin;
@@ -244,6 +191,61 @@ void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
             clgi.SFX_Underwater_Disable();
 //#endif
     }
+}
+
+/**
+*	@brief	Dispatch touch callbacks for all predicted touched entities.
+**/
+void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
+	// Get gameworld.
+	ClientGameWorld *gameWorld = GetGameWorld();
+
+	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
+	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->frame.clientNumber + 1); // Client.
+	if (player && pm && cl->bsp) {//}&& cl->cm.cache) {
+	//const int32_t playerMoveType = player->GetMoveType();
+	//      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
+		// Setup origin, mins and maxs for UTIL_TouchTriggers as well as the ground entity.
+		player->SetOrigin(pm->state.origin);
+		player->SetMins(pm->mins);
+		player->SetMaxs(pm->maxs);
+
+
+		PODEntity *playerGroundPODEntity = pm->groundEntityPtr;
+		if (playerGroundPODEntity) {
+			GameEntity *playerGroundGameEntity = gameWorld->GetGameEntityByIndex(playerGroundPODEntity->clientEntityNumber);
+			player->SetGroundEntity(playerGroundGameEntity);
+		}
+
+		// Dispatch touch trigger callbacks on the player entity for each touched entity.
+		UTIL_TouchTriggers(player);
+
+		// Solid touch logic.
+		int32_t i = 0;
+		int32_t j = 0;
+            
+		for (i = 0 ; i < pm->numTouchedEntities; i++) {
+			for (j = 0 ; j < i ; j++) {
+				if (pm->touchedEntities[j] == pm->touchedEntities[i]) {
+					break;
+				}
+			}
+			if (j != i) {
+				continue;   // duplicated
+			}
+
+			SGEntityHandle other(pm->touchedEntities[i]);
+			if (!other || !*other) {
+				//if (pm->touchedEntities[i] != nullptr) {
+				//	Com_DPrint("Skipped dispatching player touch to entity(#%i)\n", pm->touchedEntities[i]->clientEntityNumber);;
+				//}
+				continue;
+			}
+
+			other->DispatchTouchCallback(*other, player, NULL, NULL);
+		}
+	//} if playermovetype thing
+	}
 }
 
 /**
