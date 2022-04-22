@@ -70,7 +70,7 @@ qboolean CLG_StepMove_CheckBottom(IClientGameEntity* ent)
         for (y = 0; y <= 1; y++) {
             start[0] = x ? maxs[0] : mins[0];
             start[1] = y ? maxs[1] : mins[1];
-            if (clge->prediction->PM_PointContents(start) != BrushContents::Solid)
+            if (clgi.PointContents(start) != BrushContents::Solid)
                 goto realcheck;
         }
 
@@ -214,7 +214,7 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
-                    contents = clge->prediction->PM_PointContents(test);
+                    contents = clgi.PointContents(test);
                     if (contents & BrushContentsMask::Liquid)
                         return false;
                 }
@@ -226,7 +226,7 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
                     test[0] = trace.endPosition[0];
                     test[1] = trace.endPosition[1];
                     test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
-                    contents = clge->prediction->PM_PointContents(test);
+                    contents = clgi.PointContents(test);
                     if (!(contents & BrushContentsMask::Liquid))
                         return false;
                 }
@@ -280,7 +280,7 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
         test[0] = trace.endPosition[0];
         test[1] = trace.endPosition[1];
         test[2] = trace.endPosition[2] + ent->GetMins().z + 1;
-        contents = clge->prediction->PM_PointContents(test);
+        contents = clgi.PointContents(test);
 
         if (contents & BrushContentsMask::Liquid)
             return false;

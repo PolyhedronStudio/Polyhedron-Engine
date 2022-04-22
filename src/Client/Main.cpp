@@ -3073,6 +3073,7 @@ run_fx:
             timeBeforeClientGame = Sys_Milliseconds();
         }
         CL_GM_ClientFrame();
+
         if (host_speeds->integer) {
             timeAfterClientGame = Sys_Milliseconds();
         }
