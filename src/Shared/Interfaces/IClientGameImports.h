@@ -519,7 +519,7 @@ public:
 	//virtual void ClientBegin() = 0;
 	//// Called each VALID client frame. Handle per VALID frame basis 
 	//// things here.
-	//virtual void ClientDeltaFrame() = 0;
+	//virtual void ClientPacketEntityDeltaFrame() = 0;
 	//// Called each client frame. Handle per frame basis things here.
 	//virtual void ClientFrame() = 0;
 	//// Called when a disconnect even occures. Including those for Com_Error

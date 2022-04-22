@@ -344,16 +344,18 @@ static void CL_ParseFrame(int extrabits)
         Com_Error(ErrorType::Drop, "%s: bad fov", __func__);
     }
 
-    if (cls.connectionState < ClientConnectionState::Precached)
+    if (cls.connectionState < ClientConnectionState::Precached) {
         return;
+	}
 
     cl.oldframe = cl.frame;
     cl.frame = frame;
 
     cls.demo.frames_read++;
 
-    if (!cls.demo.seeking)
+    if (!cls.demo.seeking) {
         CL_DeltaFrame();
+	}
 }
 
 /*

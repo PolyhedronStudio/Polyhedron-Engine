@@ -381,14 +381,19 @@ public:
     *           Could be him quiting, or pinging out etc.
     **/
     virtual void ClientClearState() = 0;
-    /**
-    *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
-    **/
-    virtual void ClientDeltaFrame() = 0;
-    /**
+	/**
     *   @brief  Called each client frame. Handle per frame basis things here.
     **/
     virtual void ClientFrame() = 0;
+	/**
+    *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+    **/
+    virtual void ClientPacketEntityDeltaFrame() = 0;
+	/**
+	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
+	**/
+	virtual void ClientLocalEntityFrame() = 0;
+
     /**
     *   @brief  Called when a disconnect even occures. Including those for Com_Error
     **/

@@ -65,18 +65,22 @@ public:
     *           Could be him quiting, or pinging out etc.
     **/
     void ClientClearState() final;
-    /**
+	/**
+    *   @brief  Called each client frame. Handle per frame basis things here.
+    **/
+    void ClientFrame() final;
+	/**
     *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
     **/
-    void ClientDeltaFrame() final;
+    void ClientPacketEntityDeltaFrame() final;
+	/**
+	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
+	**/
+	void ClientLocalEntityFrame() final;
     /**
     *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
     **/
     void ClientPredictEntitiesFrame();
-    /**
-    *   @brief  Called each client frame. Handle per frame basis things here.
-    **/
-    void ClientFrame() final;
     /**
     *   @brief  Called when a disconnect even occures. Including those for Com_Error
     **/

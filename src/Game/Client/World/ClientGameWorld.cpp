@@ -925,6 +925,11 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 		// Allocate and return a pointer to the new game entity object.
 		clEntity->gameEntity = gameEntities[state.number] = info->AllocateInstance(clEntity); //InsertAt(state.number, info->AllocateInstance(clEntity));
 
+		// Spawn if needed.
+		if (clEntity->gameEntity) {
+			clEntity->gameEntity->Spawn();
+		}
+
 		// If it isn't a nullptr...
 		if (!clEntity->gameEntity ) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");

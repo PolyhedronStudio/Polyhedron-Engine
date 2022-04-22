@@ -1650,11 +1650,9 @@ resume:
     return false;
 }
 
-/*
-=================
-SV_RunGameFrame
-=================
-*/
+/**
+*	@brief	"Runs"/"Moves Forward" the Server Game Module for another frame.
+**/
 static void SV_RunGameFrame(void)
 {
 #if USE_CLIENT

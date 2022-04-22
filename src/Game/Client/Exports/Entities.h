@@ -76,11 +76,20 @@ public:
     **/
     void AddViewEntities() final;
 
-    /**
-    *   @brief  Runs the client game module's entity logic for a single frame.
-    **/
-    void RunFrame();
+	/**
+	*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+	**/
+    void RunPacketEntitiesDeltaFrame();
 
+	/**
+	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
+	**/
+	void RunLocalEntitiesFrame();
+
+	/**
+	*   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
+	**/
+	void RunPackEntitiesPredictionFrame();
 
     inline CLGEntityVector &GetGameEntities() {
 		ClientGameWorld *gameWorld = GetGameWorld();

@@ -142,10 +142,22 @@ void ClientGameExports::ClientClearState() {
 	game.Shutdown();
 }
 
+
+/**
+*   @brief  Called each client frame. Handle per frame basis things here.
+**/
+void ClientGameExports::ClientFrame() {
+    // Advance local effects.
+    DynamicLights::RunFrame();
+#if USE_LIGHTSTYLES
+    LightStyles::RunFrame();
+#endif
+}
+
 /**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
-void ClientGameExports::ClientDeltaFrame() {
+void ClientGameExports::ClientPacketEntityDeltaFrame() {
     // Run the entity prediction logic for the next frame.
     GameTime svTime = GameTime(cl->serverTime);
     GameTime clTime = GameTime(cl->time);
@@ -160,7 +172,14 @@ void ClientGameExports::ClientDeltaFrame() {
 //    level.time = GameTime(cl->serverTime);
 
    // Low and behold, time to run the ClientGame Entity logic for another single frame.
-   entities->RunFrame();
+   entities->RunPacketEntitiesDeltaFrame();
+}
+
+/**
+*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
+**/
+void ClientGameExports::ClientLocalEntityFrame() {
+	entities->RunLocalEntitiesFrame();
 }
 
 /**
@@ -168,18 +187,7 @@ void ClientGameExports::ClientDeltaFrame() {
 **/
 void ClientGameExports::ClientPredictEntitiesFrame() {
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
-    entities->RunFrame();
-}
-
-/**
-*   @brief  Called each client frame. Handle per frame basis things here.
-**/
-void ClientGameExports::ClientFrame() {
-    // Advance local effects.
-    DynamicLights::RunFrame();
-#if USE_LIGHTSTYLES
-    LightStyles::RunFrame();
-#endif
+    entities->RunPackEntitiesPredictionFrame();
 }
 
 /**

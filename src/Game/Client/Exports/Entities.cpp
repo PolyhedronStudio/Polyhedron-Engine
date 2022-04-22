@@ -401,12 +401,20 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
 void CLG_RunServerEntity(SGEntityHandle &entityHandle);
 void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle);
 
-void ClientGameEntities::RunFrame() {
+/**
+*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+**/
+void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 	// Unlike for the server game, the level's framenumber, time and timeStamp
     // have already been calculated before reaching this point.
 
 	// Get GameWorld.
 	ClientGameWorld *gameWorld = GetGameWorld();
+
+	// This needs to be set of course.
+	if (!gameWorld) {
+		return;
+	}
 
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 0; entityNumber < cl->frame.numEntities; entityNumber++) {
@@ -426,6 +434,19 @@ void ClientGameEntities::RunFrame() {
 		SGEntityHandle handle = podEntity;
 		CLG_RunServerEntity(handle);
     }
+}
+
+/**
+*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
+**/
+void ClientGameEntities::RunLocalEntitiesFrame() {
+	// Get GameWorld.
+	ClientGameWorld *gameWorld = GetGameWorld();
+
+	// This needs to be set of course.
+	if (!gameWorld) {
+		return;
+	}
 
 	// Iterate through our local client side entities.
     for (int32_t localEntityNumber = 2048 + 3; localEntityNumber < MAX_POD_ENTITIES; localEntityNumber++) {
@@ -443,6 +464,13 @@ void ClientGameEntities::RunFrame() {
 			CLG_RunLocalClientEntity(handle);
 		}
     }
+}
+
+/**
+*   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
+**/
+void ClientGameEntities::RunPackEntitiesPredictionFrame() {
+
 }
 
 ///**

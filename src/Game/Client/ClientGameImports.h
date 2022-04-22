@@ -306,7 +306,7 @@ public:
 	void UpdateClientOrigin();
 	void DemoSeek();
 	void ClientBegin();
-	void ClientDeltaFrame();
+	void ClientPacketEntityDeltaFrame();
 	void ClientFrame();
 	void ClientDisconnect();
 	void ClientUpdateUserinfo(cvar_t* var, from_t from);

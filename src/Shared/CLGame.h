@@ -76,7 +76,7 @@ extern "C" {
     //    void        (*ClientBegin) (void);
     //    // Called each VALID client frame. Handle per VALID frame basis 
     //    // things here.
-    //    void        (*ClientDeltaFrame) (void);
+    //    void        (*ClientPacketEntityDeltaFrame) (void);
     //    // Called each client frame. Handle per frame basis things here.
     //    void        (*ClientFrame) (void);
     //    // Called when a disconnect even occures. Including those for Com_Error

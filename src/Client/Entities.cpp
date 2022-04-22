@@ -610,7 +610,7 @@ void CL_DeltaFrame(void)
     CL_CheckPredictionError();
 
     // Call into client game its delta frame function.
-    CL_GM_ClientDeltaFrame();
+    CL_GM_ClientPacketEntityDeltaFrame();
 }
 
 

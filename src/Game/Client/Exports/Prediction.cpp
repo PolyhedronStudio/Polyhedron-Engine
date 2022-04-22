@@ -23,7 +23,7 @@ void PlayerFrameTouch(PlayerMove *pm) {
 
 	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
 	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->clientNumber + 1); // Client.
-	if (player && pm && cl->bsp && cl->cm.cache) {
+	if (player && pm && cl->bsp) {//}&& cl->cm.cache) {
 		//const int32_t playerMoveType = player->GetMoveType();
   //      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
             // Trigger touch logic. 
@@ -140,7 +140,10 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         ClientMoveCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
 
 		// Simulate entities.
-clge->ClientPredictEntitiesFrame();
+		//clge->ClientPredictEntitiesFrame();
+
+		// This really might have to go elsewhere..
+		//clge->entities->RunPacketEntitiesDeltaFrame();
 
         // If the command has an msec value it means movement has taken place and we prepare for 
         // processing another simulation.
@@ -159,8 +162,6 @@ clge->ClientPredictEntitiesFrame();
 			
 			// Execute touch callbacks and "predict" other entities.		
 			PlayerFrameTouch(&pm);
-
-
         }
 
         // Save for error detection
@@ -172,6 +173,7 @@ clge->ClientPredictEntitiesFrame();
         // Saved for prediction error checking.
         cl->moveCommand.prediction.simulationTime = clgi.GetRealTime();
 
+		// Process final player move command.
         pm.moveCommand = cl->moveCommand;
         pm.moveCommand.input.forwardMove = cl->localMove[0];
         pm.moveCommand.input.rightMove = cl->localMove[1];

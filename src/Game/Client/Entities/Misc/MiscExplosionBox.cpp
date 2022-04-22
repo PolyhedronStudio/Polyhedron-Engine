@@ -72,6 +72,13 @@ void MiscExplosionBox::Spawn() {
     // Always call parent class method.
     Base::Spawn();
 
+	// Spawning MiscExplosionBox Pack
+	if (podEntity) {
+		Com_DPrint("Spawning MiscExplosionBox PacketEntity(#%i), ServerFrame(#%i)\n", GetNumber(), podEntity->serverFrame);
+	} else {
+		Com_DPrint("SPAWNING MISCEXPLO WITHOUT PODENTITY?\n");
+	}
+
     // Set solid.
     SetSolid(Solid::OctagonBox);
 
@@ -116,7 +123,7 @@ void MiscExplosionBox::Spawn() {
     SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
 	const EntityState &x = GetState();
-	Com_DPrint("misc_explobox = %i\n", x.number);
+	//Com_DPrint("misc_explobox = %i\n", x.number);
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
     //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
@@ -367,11 +374,18 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
 
     // Ground entity checks.
     if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
-		Com_DPrint("Touching explobox !other->GetGroundEntity: %i\n", GetNumber());
+		if (other->GetGroundEntity() && other->GetGroundEntity() == this) {
+			Com_DPrint("Explobox(#%i) has GroundEntity(#%i)\n", other->GetNumber());
+		} else {
+			Com_DPrint("Explobox(#%i) has no GroundEntity\n", GetNumber());
+		}
 		return;
     }
 	
-	Com_DPrint("ExplosionBox: %i is touching: other.GetNumber() = %i\n", GetNumber(), other->GetNumber());
+	//Com_DPrint("ExplosionBox: %i is touching: other.GetNumber() = %i\n", GetNumber(), other->GetNumber());
+	//if (other->GetNumber() == 23) {
+	//	Com_DPrint("Client Entity is touching Barrel: (#%i)\n");
+	//}
 
     // Calculate ratio to use.
     double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));

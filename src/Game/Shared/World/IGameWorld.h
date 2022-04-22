@@ -12,12 +12,11 @@
 ***/
 #pragma once
 
-// Pre-declare.
+// Predefine.
 class SGEntityHandle;
 class ISharedGameEntity;
 class IGameMode;
 class Worldspawn;
-
 
 
 /**

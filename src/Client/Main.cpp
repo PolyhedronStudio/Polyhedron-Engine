@@ -2901,6 +2901,43 @@ void CL_UpdateFrameTimes(void)
 
 }
 
+/**
+*	@brief	"Runs"/"Moves Forward" the Server Game Module for another frame.
+**/
+static uint64_t clFrameResidual = 0;
+uint64_t CL_RunGameFrame(uint64_t msec) {
+#if USE_CLIENT
+    if (host_speeds->integer)
+        timeBeforeClientGame = Sys_Milliseconds();
+#endif
+	// move autonomous things around if enough time has passed
+    clFrameResidual += msec;
+    if (clFrameResidual < CL_FRAMETIME) {
+        return CL_FRAMETIME - clFrameResidual;
+    }
+
+	//CL_GM_ClientPacketEntityDeltaFrame();
+	CL_GM_ClientLocalEntityFrame();
+
+#if USE_CLIENT
+    if (host_speeds->integer)
+        timeAfterClientGame = Sys_Milliseconds();
+#endif
+	// decide how long to sleep next frame
+    clFrameResidual -= CL_FRAMETIME;
+    if (clFrameResidual < CL_FRAMETIME) {
+        return CL_FRAMETIME - clFrameResidual;
+    }
+
+	// don't accumulate bogus residual
+    if (clFrameResidual > 250) {
+        Com_DDDPrintf("Reset residual %u\n", clFrameResidual);
+        clFrameResidual = 100;
+    }
+
+	return 0;
+}
+
 /*
 ==================
 CL_Frame
@@ -2999,6 +3036,9 @@ uint64_t CL_Frame(uint64_t msec)
         CL_DemoFrame(main_extra);
     }
 
+	// Let client side entities do their thing.
+	CL_RunGameFrame(main_extra);
+
     // Calculate local time
 	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         CL_SetClientTime();
@@ -3073,7 +3113,6 @@ run_fx:
             timeBeforeClientGame = Sys_Milliseconds();
         }
         CL_GM_ClientFrame();
-
         if (host_speeds->integer) {
             timeAfterClientGame = Sys_Milliseconds();
         }

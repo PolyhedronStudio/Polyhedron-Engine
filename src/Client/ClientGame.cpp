@@ -818,21 +818,31 @@ void CL_GM_ClientBegin(void) {
 }
 
 /**
-*   @brief  Called each time the client has parsed a valid frame. 
-*           Handle per VALID frame basis things here.
-**/
-void CL_GM_ClientDeltaFrame(void) {
-    if (cge) {
-        cge->ClientDeltaFrame();
-    }
-}
-
-/**
 *   @brief  Called each client frame. Handle per frame basis things here.
 **/
 void CL_GM_ClientFrame(void) {
     if (cge) {
         cge->ClientFrame();
+    }
+}
+
+/**
+*   @brief  Called each time the client has parsed a valid frame. 
+*           Handle per VALID frame basis things here.
+**/
+void CL_GM_ClientPacketEntityDeltaFrame(void) {
+    if (cge) {
+        cge->ClientPacketEntityDeltaFrame();
+    }
+}
+
+/**
+*   @brief  Called each time the client has parsed a valid frame. 
+*           Handle per VALID frame basis things here.
+**/
+void CL_GM_ClientLocalEntityFrame(void) {
+    if (cge) {
+        cge->ClientLocalEntityFrame();
     }
 }
 
