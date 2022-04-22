@@ -10,8 +10,8 @@
 #include "../ClientGameLocals.h"
 
 // Base Entity.
-#include "Base/CLGBaseEntity.h"
-#include "Base/CLGLocalClientEntity.h"
+#include "Base/CLGBasePacketEntity.h"
+#include "Base/CLGBaseLocalEntity.h"
 
 // GameEntity list.
 #include "GameEntityList.h"
@@ -57,7 +57,7 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
     if (info == nullptr) {
 		// Then try finding it by the C++ class name. (USE THIS FOR SPAWNING BSP STRING ENTITIES.)
 		if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
-		//if ((info = TypeInfo::GetInfoByName("CLGBaseEntity")) == nullptr) {
+		//if ((info = TypeInfo::GetInfoByName("CLGBasePacketEntity")) == nullptr) {
 			// Warn.
 		    Com_DPrint("Warning: info = TypeInfo::GetInfoByName(\"%s\")) == nullptr\n", classname.c_str());
 
@@ -78,8 +78,8 @@ IClientGameEntity* GameEntityList::AllocateFromClassname(const std::string &clas
 			//return nullptr;
 
 			// Perhaps instead of returning nullptr, this is where we should do a 
-			// CLGBaseEntity instead.
-			clEntity->gameEntity = new CLGLocalClientEntity(clEntity);
+			// CLGBasePacketEntity instead.
+			clEntity->gameEntity = new CLGBaseLocalEntity(clEntity);
 		}
 
 		// Return game entity.
@@ -146,9 +146,9 @@ IClientGameEntity* GameEntityList::UpdateGameEntityFromState(const EntityState& 
 		// Then try finding it by the C++ class name. (USE THIS FOR SPAWNING BSP STRING ENTITIES.)
 		//if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
 		// 
-		if ((info = TypeInfo::GetInfoByName("CLGBaseEntity")) == nullptr) {
+		if ((info = TypeInfo::GetInfoByName("CLGBasePacketEntity")) == nullptr) {
 			// Warn.
-		    Com_DPrint("Warning: info = TypeInfo::GetInfoByName(\"CLGBaseEntity\")) == nullptr\n");
+		    Com_DPrint("Warning: info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n");
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -168,7 +168,7 @@ IClientGameEntity* GameEntityList::UpdateGameEntityFromState(const EntityState& 
 		if (!clEntity->gameEntity ) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
 			//return nullptr;
-			clEntity->gameEntity = new CLGBaseEntity(clEntity);
+			clEntity->gameEntity = new CLGBasePacketEntity(clEntity);
 		}
 
 		// Update its current state.

@@ -11,7 +11,7 @@
 // Entities.
 #include "../Entities.h"
 #include "../Entities/IClientGameEntity.h"
-#include "../Entities/Base/CLGBaseEntity.h"
+#include "../Entities/Base/CLGBasePacketEntity.h"
 //#include "../Entities/Base/SVGBasePlayer.h"
 //#include "../Entities/Base/DebrisEntity.h"
 //#include "../Entities/Base/GibEntity.h"
@@ -147,8 +147,8 @@ void ClientGameworld::PreparePlayers() {
 		podEntity->clientEntityNumber = entityNumber;
 		podEntity->gameEntity = nullptr; // TODO: ??
 
-		// Create a CLGBaseEntity.
-		podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBaseEntity");//CreateGameEntity<CLGBaseEntity>(podEntity, false);
+		// Create a CLGBasePacketEntity.
+		podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity");//CreateGameEntity<CLGBasePacketEntity>(podEntity, false);
 
 		// They aren't in use of course, and they come from the server.
 		podEntity->inUse = false;
@@ -167,8 +167,8 @@ void ClientGameworld::PreparePlayers() {
 		podEntity->clientEntityNumber = entityNumber;
 		podEntity->gameEntity = nullptr; // TODO: ??
 
-		// Create a CLGBaseEntity.
-		podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBaseEntity");//CreateGameEntity<CLGBaseEntity>(podEntity, false);
+		// Create a CLGBasePacketEntity.
+		podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity");//CreateGameEntity<CLGBasePacketEntity>(podEntity, false);
 
 		// They aren't in use of course, and they come from the server.
 		podEntity->inUse = false;
@@ -915,9 +915,9 @@ GameEntity* ClientGameworld::UpdateGameEntityFromState(const EntityState& state,
 		// Then try finding it by the C++ class name. (USE THIS FOR SPAWNING BSP STRING ENTITIES.)
 		//if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
 		// 
-		if ((info = TypeInfo::GetInfoByName("CLGBaseEntity")) == nullptr) {
+		if ((info = TypeInfo::GetInfoByName("CLGBasePacketEntity")) == nullptr) {
 			// Warn.
-		    Com_DPrint("Warning: info = TypeInfo::GetInfoByName(\"CLGBaseEntity\")) == nullptr\n");
+		    Com_DPrint("Warning: info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n");
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -934,7 +934,7 @@ GameEntity* ClientGameworld::UpdateGameEntityFromState(const EntityState& state,
 		if (!clEntity->gameEntity ) {
 			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
 			return nullptr;
-			//classEntity = new CLGBaseEntity(clEntity);
+			//classEntity = new CLGBasePacketEntity(clEntity);
 		}
 
 		// Update its current state.

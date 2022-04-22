@@ -10,7 +10,7 @@
 #include "../../ClientGameLocals.h"
 
 // Base Entity.
-#include "../Base/CLGBaseEntity.h"
+#include "../Base/CLGBasePacketEntity.h"
 
 // MonsterTestDummy
 #include "MonsterTestDummy.h"

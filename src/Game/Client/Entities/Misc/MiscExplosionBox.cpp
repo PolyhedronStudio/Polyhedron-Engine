@@ -12,9 +12,9 @@
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Server Game Base Entity.
-#include "../Base/CLGBaseEntity.h"
+#include "../Base/CLGBasePacketEntity.h"
 #include "../Base/CLGBaseTrigger.h"
-#include "../Base/CLGLocalClientEntity.h"
+#include "../Base/CLGBaseLocalEntity.h"
 //#include "../Base/CLGBaseTrigger.h"
 
 // World.

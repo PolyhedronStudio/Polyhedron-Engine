@@ -22,15 +22,15 @@
 #include "../Effects/ParticleEffects.h"
 
 // Base Entity.
-#include "CLGBaseEntity.h"
+#include "CLGBasePacketEntity.h"
 
 
 
 //! Used for returning vectors from a const vec3_t & reference.
-vec3_t CLGBaseEntity::ZeroVec3 = vec3_zero();
+vec3_t CLGBasePacketEntity::ZeroVec3 = vec3_zero();
 
 //! Used for returning strings from a const std::string & reference.
-std::string CLGBaseEntity::EmptyString = "";
+std::string CLGBasePacketEntity::EmptyString = "";
 
 /**
 *
@@ -38,7 +38,7 @@ std::string CLGBaseEntity::EmptyString = "";
 *
 **/
 //! Constructor/Destructor.
-CLGBaseEntity::CLGBaseEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEntity) {
+CLGBasePacketEntity::CLGBasePacketEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEntity) {
     this->podEntity = podEntity;
 }
 
@@ -54,34 +54,34 @@ CLGBaseEntity::CLGBaseEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEn
 /**
 *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
 **/
-void CLGBaseEntity::Precache() {
+void CLGBasePacketEntity::Precache() {
 
 }
 
 /**
 *   @brief  Called when it is time to spawn this entity.
 **/
-void CLGBaseEntity::Spawn() {
+void CLGBasePacketEntity::Spawn() {
 
 }
 /**
 *   @brief  Called when it is time to respawn this entity.
 **/
-void CLGBaseEntity::Respawn() {
+void CLGBasePacketEntity::Respawn() {
 
 }
 
 /**
 *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
 **/
-void CLGBaseEntity::PostSpawn() {
+void CLGBasePacketEntity::PostSpawn() {
 
 }
 
 /**
 *   @brief  General entity thinking routine.
 **/
-void CLGBaseEntity::Think() {
+void CLGBasePacketEntity::Think() {
 	// Safety check.
     if (thinkFunction == nullptr) {
 		return;
@@ -94,7 +94,7 @@ void CLGBaseEntity::Think() {
 /**
 *   @brief  Act upon the parsed key and value.
 **/
-void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
+void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& value) {
     // Deal with classname, set it anyway.
 	if ( key == "classname" ) {
 		SetClassname( value );
@@ -225,14 +225,14 @@ void CLGBaseEntity::SpawnKey(const std::string& key, const std::string& value) {
 /**
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
-void CLGBaseEntity::UpdateFromState(const EntityState& state) {
+void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 
 }
 
 /**
 *   @returen True if the entity is still in the current frame.
 **/
-//const qboolean CLGBaseEntity::IsInUse() {
+//const qboolean CLGBasePacketEntity::IsInUse() {
 //    if (podEntity) {
 //        return cl->frame.number == podEntity->serverFrame;
 //    } else {
@@ -243,7 +243,7 @@ void CLGBaseEntity::UpdateFromState(const EntityState& state) {
 /**
 *   @brief  Stub.
 **/
-const std::string CLGBaseEntity::GetClassname() {
+const std::string CLGBasePacketEntity::GetClassname() {
     // Returns this classname, the base entity.
     return GetTypeInfo()->classname;
 }
@@ -251,7 +251,7 @@ const std::string CLGBaseEntity::GetClassname() {
 /**
 *   @return An uint32_t containing the hashed classname string.
 **/
-uint32_t CLGBaseEntity::GetHashedClassname() {
+uint32_t CLGBasePacketEntity::GetHashedClassname() {
     return GetTypeInfo()->hashedMapClass;
 }
 
@@ -267,7 +267,7 @@ uint32_t CLGBaseEntity::GetHashedClassname() {
 /**
 *   @brief  Gets called right before the moment of deallocation happens.
 **/
-void CLGBaseEntity::OnDeallocate() {
+void CLGBasePacketEntity::OnDeallocate() {
 
 }
 
@@ -285,7 +285,7 @@ void CLGBaseEntity::OnDeallocate() {
 *   @param  other:      
 *   @param  activator:  
 **/
-void CLGBaseEntity::DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator) {
+void CLGBasePacketEntity::DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator) {
 	// Safety check.
 	if (useFunction == nullptr)
 		return;
@@ -301,7 +301,7 @@ void CLGBaseEntity::DispatchUseCallback(IClientGameEntity* other, IClientGameEnt
 *   @param  damage:     
 *   @param  pointer:    
 **/
-void CLGBaseEntity::DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) {
+void CLGBasePacketEntity::DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) {
 	// Safety check.
 	if (dieFunction == nullptr)
 		return;
@@ -315,7 +315,7 @@ void CLGBaseEntity::DispatchDieCallback(IClientGameEntity* inflictor, IClientGam
 *   @brief  Dispatches 'Blocked' callback.
 *   @param  other:  
 **/
-void CLGBaseEntity::DispatchBlockedCallback(IClientGameEntity* other) {
+void CLGBasePacketEntity::DispatchBlockedCallback(IClientGameEntity* other) {
 	// Safety check.
 	if (blockedFunction == nullptr)
 		return;
@@ -331,7 +331,7 @@ void CLGBaseEntity::DispatchBlockedCallback(IClientGameEntity* other) {
 *   @param  plane:  
 *   @param  surf:   
 **/
-void CLGBaseEntity::DispatchTouchCallback(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void CLGBasePacketEntity::DispatchTouchCallback(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	// Safety check.
 	if (touchFunction == nullptr)
 		return;
@@ -346,7 +346,7 @@ void CLGBaseEntity::DispatchTouchCallback(IClientGameEntity* self, IClientGameEn
 *   @param  kick:
 *   @param  damage:
 **/
-void CLGBaseEntity::DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) {
+void CLGBasePacketEntity::DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) {
 	// Safety check.
 	if (takeDamageFunction == nullptr)
 		return;
@@ -369,7 +369,7 @@ void CLGBaseEntity::DispatchTakeDamageCallback(IClientGameEntity* other, float k
 *           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
 *           on us during the current server game frame we're processing.
 **/
-void CLGBaseEntity::Remove()
+void CLGBasePacketEntity::Remove()
 {
 	podEntity->clientFlags |= EntityServerFlags::Remove;
 }
@@ -377,13 +377,13 @@ void CLGBaseEntity::Remove()
 /**
 *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
 **/
-void CLGBaseEntity::CLGBaseEntityThinkFree(void) {
+void CLGBasePacketEntity::CLGBaseEntityThinkFree(void) {
 	//CLG_FreeEntity(serverEntity);
 	Remove();
 }
 
 
-void CLGBaseEntity::ProcessSkeletalAnimationForTime(uint64_t time) {
+void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(uint64_t time) {
 	// Acquire state references.
 	EntityState &currentState = podEntity->currentState;
 	EntityState &previousState = podEntity->previousState;
@@ -404,7 +404,7 @@ void CLGBaseEntity::ProcessSkeletalAnimationForTime(uint64_t time) {
 /**
 *	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
 **/
-void CLGBaseEntity::PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) {
+void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) {
 	extern qhandle_t cl_mod_laser;
 	extern qhandle_t cl_mod_dmspot;
 

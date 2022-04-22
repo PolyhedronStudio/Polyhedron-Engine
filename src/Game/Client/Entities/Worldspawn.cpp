@@ -11,7 +11,7 @@
 // Entities.
 #include "../Entities.h"
 // Server Game Base Entity.
-#include "Base/CLGBaseEntity.h"
+#include "Base/CLGBasePacketEntity.h"
 //#include "../Base/CLGBaseTrigger.h"
 #include "Worldspawn.h"
 

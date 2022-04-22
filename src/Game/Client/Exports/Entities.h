@@ -10,7 +10,7 @@
 #pragma once
 
 // Base Entity.
-#include "../Entities/Base/CLGBaseEntity.h"
+#include "../Entities/Base/CLGBasePacketEntity.h"
 
 // Entity List.
 #include "../Entities/GameEntityList.h"
@@ -27,7 +27,7 @@ public:
     *   @brief  Parses and spawns the local class entities in the BSP Entity String.
     * 
     *   @details    When a class isn't locally registered, it'll automatically spawn
-    *               a CLGBaseEntity instead which has all the default behaviors that
+    *               a CLGBasePacketEntity instead which has all the default behaviors that
     *               you'd expect for it to be functional.
     * 
     *   @return True on success.

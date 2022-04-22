@@ -15,9 +15,9 @@
 
 
 /**
-*   CLGBaseLocalEntity
+*   CLGBasePacketEntity
 **/
-class CLGBaseLocalEntity : public IClientGameEntity {
+class CLGBasePacketEntity : public IClientGameEntity {
 public:
     /**
     *
@@ -25,11 +25,11 @@ public:
     *
     **/
     //! Constructor/Destructor.
-    CLGBaseLocalEntity(PODEntity *podEntity);
-    virtual ~CLGBaseLocalEntity() = default;
+    CLGBasePacketEntity(PODEntity *podEntity);
+    virtual ~CLGBasePacketEntity() = default;
 
     // Runtime type information
-	DefineMapClass( "CLGBaseLocalEntity", CLGBaseLocalEntity, IClientGameEntity);
+	DefineMapClass( "CLGBasePacketEntity", CLGBasePacketEntity, IClientGameEntity);
 
     //// Checks if this entity class is exactly the given class
     //// @param entityClass: an entity class which must inherint from SVGBaseEntity
@@ -92,10 +92,12 @@ public:
     *
     * 
     ***/
+
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
     virtual void UpdateFromState(const EntityState &state) override;
+
 
     /**
     *   @returen True if the entity is still in the current frame.
@@ -146,27 +148,21 @@ public:
     *   @brief  Sets classname.
     **/
     virtual void SetClassname(const std::string& classname) final { this->classname = classname; };
+
     /**
     *   [Stub Implementation]
     *   @brief  Link entity to world for collision testing using gi.LinkEntity.
     **/
     void LinkEntity() override { 
-		//if (podEntity) {
-		//	podEntity->linkCount++; 
-		//}
 		if (podEntity) {
 			clgi.LinkEntity(podEntity);
 		}
 	};
-
     /**
     *   [Stub Implementation]
     *   @brief  Unlink the entity from the world for collision testing.
     **/
     void UnlinkEntity() override {
-		//if (podEntity) {
-		//	podEntity->linkCount = 0;
-		//}
 		if (podEntity) {
 			clgi.UnlinkEntity(podEntity);
 		}
@@ -457,16 +453,12 @@ public:
     **/
     virtual const qboolean        IsInUse() override { //return 0; };
         if (podEntity) {
-            return podEntity->inUse;
+            return cl->frame.number == podEntity->serverFrame;
         } 
 
         return false;
     }
-    virtual void            SetInUse(const qboolean inUse) {
-        if (podEntity) {
-            podEntity->inUse = inUse;
-        }
-	};
+    virtual void            SetInUse(const qboolean inUse) {};
 
     /**
     *   @brief Get/Set: Kill Target.
@@ -563,6 +555,8 @@ public:
 
 			// Update model index.
 			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
+				// Link it for collision testing.
+				LinkEntity();
 		}
 	};
 
@@ -656,14 +650,13 @@ public:
     **/
     virtual const int32_t   GetNumber() { 
 		if (podEntity) {
-			return podEntity->clientEntityNumber;
+			return podEntity->currentState.number;
 		} else {
 			return 0;
 		}
 	};
     virtual void            SetNumber(const int32_t number) {
 		if (podEntity) {
-			podEntity->clientEntityNumber = number;
 			podEntity->currentState.number = number;
 		}	
 	};
@@ -671,7 +664,7 @@ public:
     /**
     *   @brief Get/Set:     Old Enemy Entity
     **/
-    virtual GameEntity*		GetOldEnemy() { return oldEnemyEntity; }
+    virtual GameEntity*    GetOldEnemy() { return oldEnemyEntity; }
     virtual void            SetOldEnemy(IClientGameEntity* oldEnemy) { this->oldEnemyEntity = oldEnemy; };
 
     /**
@@ -709,7 +702,7 @@ public:
     /**
     *   @brief Get/Set:     Owner Entity
     **/
-    virtual GameEntity*		GetOwner() { return ownerEntity; };
+    virtual GameEntity*    GetOwner() { return ownerEntity; };
     virtual void            SetOwner(IClientGameEntity* owner) { ownerEntity = owner; };
 
     /**
@@ -758,18 +751,9 @@ public:
     /**
     *   @brief Get/Set:     Entity Size
     **/
-    virtual const vec3_t&   GetSize() { 
-		if (podEntity) {
-			return podEntity->size;
-		}
-		else {
-			return ZeroVec3;
-		};
-	};
+    virtual const vec3_t&   GetSize() { return ZeroVec3; };
     virtual void            SetSize(const vec3_t& size) {
-		if (podEntity) {
-			podEntity->size = size;
-		}
+	
 	};
 
     /**
@@ -895,6 +879,20 @@ public:
     virtual void            SetYawSpeed(const float yawSpeed) { this->yawSpeed = yawSpeed; };
 
 
+    /***
+    *
+    * 
+    *   Refresh Related Functions.
+    *
+    * 
+    ***/
+	/**
+	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
+	**/
+	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction);
+
+private:
+	virtual void ProcessSkeletalAnimationForTime(uint64_t time);
 
 private:
 	/**
@@ -906,10 +904,6 @@ private:
 	**/
     //! Refresh Entity Object.
     r_entity_t refreshEntity = {};
-
-    // Client Class Entities maintain their own states. (Get copied in from updates.)
-    EntityState currentState = {};
-    EntityState previousState = {};
 
 
 
@@ -970,21 +964,6 @@ public:
     **/
     void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage);
 
-
-    /***
-    *
-    * 
-    *   Refresh Related Functions.
-    *
-    * 
-    ***/
-	/**
-	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
-	**/
-	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction);
-
-private:
-	virtual void ProcessSkeletalAnimationForTime(uint64_t time);
 
 
 protected:
@@ -1132,10 +1111,10 @@ public:
     /**
     *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
     **/
-    void CLGLocalClientEntityThinkFree(void);
+    void CLGBaseEntityThinkFree(void);
 
     /**
     *   @brief  Callback for assigning when "no thinking" behavior is wished for.
     **/
-    void CLGLocalClientEntityThinkNull() { }
+    void CLGBaseEntityThinkNull() { }
 };

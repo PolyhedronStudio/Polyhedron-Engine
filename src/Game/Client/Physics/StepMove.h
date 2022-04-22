@@ -7,7 +7,7 @@
 //
 #pragma once
 
-class CLGBaseEntity;
+class CLGBasePacketEntity;
 
 void CLG_StepMove_CheckGround(IClientGameEntity* ent);
 qboolean CLG_StepMove_CheckBottom(IClientGameEntity* ent);

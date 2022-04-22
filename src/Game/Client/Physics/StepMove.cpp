@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Exports/Prediction.h"
 
 // Base Entity.
-#include "../Entities/Base/CLGBaseEntity.h"
+#include "../Entities/Base/CLGBasePacketEntity.h"
 
 // GameEntity list.
 #include "../Entities/GameEntityList.h"
@@ -395,7 +395,7 @@ facing it.
 
 ======================
 */
-qboolean SV_StepDirection(CLGBaseEntity* ent, float yaw, float dist)
+qboolean SV_StepDirection(CLGBasePacketEntity* ent, float yaw, float dist)
 {
     vec3_t      move, oldOrigin;
     float       delta;

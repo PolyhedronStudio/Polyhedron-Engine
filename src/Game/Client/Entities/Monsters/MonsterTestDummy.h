@@ -9,13 +9,13 @@
 ***/
 #pragma once
 
-class MonsterTestDummy : public CLGBaseEntity {
+class MonsterTestDummy : public CLGBasePacketEntity {
 public:
     //! Constructor/Deconstructor.
     MonsterTestDummy(PODEntity* clEntity);
     virtual ~MonsterTestDummy() = default;
 
-    DefineMapClass("monster_testdummy", MonsterTestDummy, CLGBaseEntity);
+    DefineMapClass("monster_testdummy", MonsterTestDummy, CLGBasePacketEntity);
 
 
     /**

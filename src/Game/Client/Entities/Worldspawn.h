@@ -7,16 +7,16 @@
 ***/
 #pragma once
 
-class CLGBaseEntity;
+class CLGBasePacketEntity;
 
-class Worldspawn : public CLGBaseEntity {
+class Worldspawn : public CLGBasePacketEntity {
 public:
     //! Constructor/Deconstructor.
     Worldspawn(PODEntity *svEntity);
     virtual ~Worldspawn() = default;
 
     //! Register worldspawn class as a map entity.
-    DefineMapClass( "worldspawn", Worldspawn, CLGBaseEntity );
+    DefineMapClass( "worldspawn", Worldspawn, CLGBasePacketEntity );
 
     //! Interface functions. 
     void Precache() override;    // Precaches data.

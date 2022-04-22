@@ -9,9 +9,9 @@
 ***/
 #pragma once
 
-class CLGBaseEntity;
+class CLGBasePacketEntity;
 
-class CLGBaseTrigger : public CLGBaseEntity {
+class CLGBaseTrigger : public CLGBasePacketEntity {
 public:
     //
     // Constructor/Deconstructor.
@@ -19,7 +19,7 @@ public:
     CLGBaseTrigger(PODEntity *clEntity);
     virtual ~CLGBaseTrigger() = default;
 
-    DefineAbstractClass( CLGBaseTrigger, CLGBaseEntity );
+    DefineAbstractClass( CLGBaseTrigger, CLGBasePacketEntity );
 
     //
     // Interface functions. 

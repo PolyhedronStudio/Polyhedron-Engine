@@ -11,7 +11,7 @@
 
 
 // Predeclaration(s).
-class CLGBaseEntity;
+class CLGBasePacketEntity;
 
 /**
 *
@@ -26,8 +26,8 @@ class CLGBaseEntity;
 *   class object here is destroyed. A newly allocated class object which has a registered hash
 *   that matches the received hashstring takes its place instead. 
 *
-*	If it fails to find an equal hashstring however, it'll resort to the default CLGBaseEntity
-*	instead. The default CLGBaseEntity takes care of the default behavior. (Similar to how it
+*	If it fails to find an equal hashstring however, it'll resort to the default CLGBasePacketEntity
+*	instead. The default CLGBasePacketEntity takes care of the default behavior. (Similar to how it
 *	would be in Quake 2 without having control over client-side entities.)
 * 
 *   In similar fashion like the SVGBaseEntity you have Set, Get, callback and think functions

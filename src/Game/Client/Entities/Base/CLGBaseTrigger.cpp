@@ -13,7 +13,7 @@
 //#include "../../Utilities.h"		// Util funcs.
 
 // Class Entities.
-#include "CLGBaseEntity.h"
+#include "CLGBasePacketEntity.h"
 #include "CLGBaseTrigger.h"
 
 // Included for delayed use.
