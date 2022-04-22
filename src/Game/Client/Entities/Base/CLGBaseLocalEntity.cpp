@@ -4,7 +4,12 @@
 *
 *	@file
 *
-*	Client Game EntityList implementation.
+*	Entities that are intended for client-side only, such as decorative entities like models, gibs or
+*	and but not limited to environmental particle effects that do NOT depend on ANY server-side 
+*	interactions are inherited from this class. 
+*
+*	The inherited CLGBaseLocalEntity game entity classes are not received from the server but are parsed 
+*	and spawned directly, local to the client only, by the ClientGameWorld itself during load time.
 * 
 ***/
 #include "../../ClientGameLocals.h"
