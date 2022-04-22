@@ -6,4 +6,4 @@
 *
 ***/
 #include "../SharedGame.h"
-#include "IGameworld.h"
+#include "IGameWorld.h"

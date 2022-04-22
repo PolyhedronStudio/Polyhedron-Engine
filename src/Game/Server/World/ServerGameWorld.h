@@ -4,7 +4,7 @@
 *
 *	@file
 *
-*	Gameworld class for managing entity lifetime. 
+*	GameWorld class for managing entity lifetime. 
 *	(Creation, Destruction, Spawning etc.)
 * 
 *	Aside from managing entity lifetimes, it is also the general keeper of the
@@ -18,11 +18,11 @@
 class SVGBaseEntity;
 class SGEntityHandle;
 class Worldspawn;
-class IGamemode;
+class IGameMode;
 class IServerGameEntity;
 #include "../Entities/IServerGameEntity.h"
 
-#include "../../../Game/Shared/World/IGameworld.h"
+#include "../../../Game/Shared/World/IGameWorld.h"
 
 #include "../Entities.h"
 #include "../Entities/Worldspawn.h"
@@ -32,19 +32,19 @@ class IServerGameEntity;
 * 
 *	@details 
 **/
-class ServerGameworld : public IGameworld {
+class ServerGameWorld : public IGameWorld {
 public:
     /**
 	*	@brief Default constructor.
 	**/
-	ServerGameworld() : IGameworld() {
+	ServerGameWorld() : IGameWorld() {
 		gameEntities.resize(MAX_POD_ENTITIES);
 	};
 
     /**
 	*	@brief Default destructor
 	**/
-    ~ServerGameworld() = default;
+    ~ServerGameWorld() = default;
 
 public:
     /**
@@ -61,15 +61,15 @@ public:
     /**
 	*	@brief	Creates the correct gamemode object instance based on the gamemode cvar.
 	**/
-    void SetupGamemode();
+    void SetupGameMode();
     /**
 	*	@brief	Destroys the current gamemode object.
 	**/
-    void DestroyGamemode();
+    void DestroyGameMode();
     /**
 	*	@return A pointer to the current active game mode.
 	**/
-    inline IGamemode* GetGamemode() { return currentGamemode; }
+    inline IGameMode* GetGameMode() { return currentGameMode; }
 
 
 
@@ -297,7 +297,7 @@ private:
     ServerClient *clients = nullptr;
 
 	//! Currently active game mode.
-    IGamemode* currentGamemode = nullptr;
+    IGameMode* currentGameMode = nullptr;
 
 
     

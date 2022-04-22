@@ -2,20 +2,20 @@
 // LICENSE HERE.
 
 //
-// DefaultGamemode.h
+// DefaultGameMode.h
 //
 // Default game mode to run, allows for all sorts of stuff.
 //
 */
 #pragma once
 
-#include "IGamemode.h"
+#include "IGameMode.h"
 
-class DefaultGamemode : public IGamemode {
+class DefaultGameMode : public IGameMode {
 public:
     //! Constructor/Deconstructor.
-    DefaultGamemode();
-    virtual ~DefaultGamemode() override;
+    DefaultGameMode();
+    virtual ~DefaultGameMode() override;
 
     /***
     * Server Related.
@@ -37,7 +37,7 @@ public:
     virtual GameEntityVector FindBaseEnitiesWithinRadius(const vec3_t& origin, float radius, uint32_t excludeSolidFlags) override;
 
     /***
-    * Combat Gamemode Actions.
+    * Combat GameMode Actions.
     ***/    
     virtual void EntityKilled(IServerGameEntity* target, IServerGameEntity* inflictor, IServerGameEntity* attacker, int32_t damage, vec3_t point) override;
     virtual void InflictDamage(IServerGameEntity* target, IServerGameEntity* inflictor, IServerGameEntity* attacker, const vec3_t& dmgDir, const vec3_t& point, const vec3_t& normal, int32_t damage, int32_t knockBack, int32_t dflags, int32_t mod) override;

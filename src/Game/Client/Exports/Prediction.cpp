@@ -1,11 +1,10 @@
 #include "../ClientGameLocals.h"
 
-#include "../Entities.h"
+// Temporary Entities.
 #include "../TemporaryEntities.h"
 
 // Exports.
-#include "../ClientGameExports.h"
-
+#include "Entities.h"
 #include "Prediction.h"
 #include "View.h"
 
@@ -16,11 +15,11 @@ static const double MAX_DELTA_ORIGIN = (2400.0 * (1.00 / BASE_FRAMERATE));
 //--------------------------------------------------------
 // Test code.
 void UTIL_TouchTriggers(IClientGameEntity *ent);
-// Gameworld.
-#include "../World/ClientGameworld.h"
+// GameWorld.
+#include "../World/ClientGameWorld.h"
 void PlayerFrameTouch(PlayerMove *pm) {
 	// Get gameworld.
-	ClientGameworld *gameWorld = GetGameworld();
+	ClientGameWorld *gameWorld = GetGameWorld();
 
 	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
 	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->clientNumber + 1); // Client.

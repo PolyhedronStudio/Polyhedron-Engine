@@ -14,7 +14,7 @@
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Deathmatch Game Mode.
-#include "../../Gamemodes/DeathMatchGamemode.h"
+#include "../../GameModes/DeathMatchGameMode.h"
 
 // Base class entities.
 #include "../Base/SVGBaseEntity.h"
@@ -126,7 +126,7 @@ qboolean ItemAmmo9mm::Ammo9mmPickup(IServerGameEntity *other) {
     SVG_CenterPrint(other, std::string("Picked up item: ") + GetClassname());
 
     // Set a respawn think for after 2 seconds.
-    if (!GetGamemode()->IsClass<DefaultGamemode>()) {
+    if (!GetGameMode()->IsClass<DefaultGameMode>()) {
         SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
         SetNextThinkTime(level.time + 2s);
     }

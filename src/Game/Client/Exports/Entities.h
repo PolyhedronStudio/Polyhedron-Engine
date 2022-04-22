@@ -5,18 +5,26 @@
 *	@file
 *
 *	Client Game Entities Interface Implementation.
+*
+*	The client knows about 2 specific type of game entities, those that come from the
+*	server also known as Packet Entities, and those that are specifically local only 
+*	to the client, known as Local Entities. For further information about these look
+*	them up in the Entities/Base folder.
 * 
 ***/
 #pragma once
 
-// Base Entity.
+// Base Packet Entity.
 #include "../Entities/Base/CLGBasePacketEntity.h"
+
+// Base Local Entity.
+#include "../Entities/Base/CLGBaseLocalEntity.h"
 
 // Entity List.
 #include "../Entities/GameEntityList.h"
 
 // World.
-#include "../World/ClientGameworld.h"
+#include "../World/ClientGameWorld.h"
 
 //---------------------------------------------------------------------
 // Client Game Entities IMPLEMENTATION.
@@ -49,7 +57,7 @@ public:
     /**
     *   @brief  Executed whenever a server frame entity event is receieved.
     **/
-    void ServerEntityEvent(int32_t number) final;
+    void PacketEntityEvent(int32_t number) final;
 
     /**
     *   @brief  Executed whenever a local client entity event is set.
@@ -75,7 +83,7 @@ public:
 
 
     inline CLGEntityVector &GetGameEntities() {
-		ClientGameworld *gameWorld = GetGameworld();
+		ClientGameWorld *gameWorld = GetGameWorld();
 		if (gameWorld) {
 			return gameWorld->GetGameEntities();
 		} else {

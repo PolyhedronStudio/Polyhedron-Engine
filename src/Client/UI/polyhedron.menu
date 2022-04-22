@@ -363,12 +363,12 @@ begin development
     field --width 32 "map" dev_map
     blank
 /*
-    values "Gamemode: " dev_gamemode \
+    values "GameMode: " dev_gamemode \
         singleplayer \
         deathmatch \
         coop
 */
-    pairs "Gamemode: " dev_gamemode \
+    pairs "GameMode: " dev_gamemode \
         Singleplayer singleplayer \
         Deathmatch deathmatch \
         Cooperative coop

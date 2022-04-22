@@ -17,7 +17,7 @@
 #include "../Func/FuncPlat.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 // Trigger Auto Platform.
 #include "TriggerAutoPlatform.h"
@@ -114,7 +114,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 // TriggerAutoPlatform::Create
 //===============
 TriggerAutoPlatform* TriggerAutoPlatform::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
-    TriggerAutoPlatform* autoPlatform = GetGameworld()->CreateGameEntity<TriggerAutoPlatform>();
+    TriggerAutoPlatform* autoPlatform = GetGameWorld()->CreateGameEntity<TriggerAutoPlatform>();
     autoPlatform->SetOrigin(ownerEntity->GetEndPosition());
 	autoPlatform->LinkEntity();
 	autoPlatform->Spawn();

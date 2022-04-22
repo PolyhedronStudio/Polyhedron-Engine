@@ -9,10 +9,10 @@
 #include "Entities/Base/SVGBasePlayer.h"
 
 // Game Modes.
-#include "Gamemodes/IGamemode.h"
+#include "GameModes/IGameMode.h"
 
 // Game world.
-#include "World/ServerGameworld.h"
+#include "World/ServerGameWorld.h"
 
 // Ballistics!
 #include "Ballistics.h"
@@ -137,7 +137,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
     if ( !(trace.surface && trace.surface->flags & SurfaceFlags::Sky) ) {
         if (trace.fraction < 1.0) {
             if (trace.gameEntity->GetTakeDamage()) {
-                GetGamemode()->InflictDamage(trace.gameEntity, player, player, aimDirection, trace.endPosition, trace.plane.normal, damage, kickForce, DamageFlags::Bullet, meansOfDeath);
+                GetGameMode()->InflictDamage(trace.gameEntity, player, player, aimDirection, trace.endPosition, trace.plane.normal, damage, kickForce, DamageFlags::Bullet, meansOfDeath);
             } else {
                 if (strncmp(trace.surface->name, "sky", 3) != 0 && strncmp(trace.surface->name, "sky_surfacelight", 16) != 0) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);

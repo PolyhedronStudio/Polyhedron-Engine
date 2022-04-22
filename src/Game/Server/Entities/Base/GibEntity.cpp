@@ -16,11 +16,11 @@
 // Class Entities.
 #include "GibEntity.h"
 
-// Gamemode.
-#include "../../Gamemodes/IGamemode.h"
+// GameMode.
+#include "../../GameModes/IGameMode.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 
 /**
@@ -28,7 +28,7 @@
 **/
 GibEntity* GibEntity::Create(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) {
     // Create a gib entity.
-    GibEntity* gibEntity = GetGameworld()->CreateGameEntity<GibEntity>();
+    GibEntity* gibEntity = GetGameWorld()->CreateGameEntity<GibEntity>();
 
     // Set size.
     vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
@@ -74,7 +74,7 @@ GibEntity* GibEntity::Create(GameEntity* gibber, const std::string& gibModel, in
     }
 
     // Comment later...
-    vec3_t velocityDamage = GetGamemode()->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = GetGameMode()->CalculateDamageVelocity(damage);
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
     // adding it on to 'velocityDamage' its old value.

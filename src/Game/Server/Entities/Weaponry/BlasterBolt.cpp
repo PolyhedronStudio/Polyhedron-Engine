@@ -13,7 +13,7 @@
 #include "../../Player/Animations.h"    // Include Player Client Animations.
 #include "../../Utilities.h"            // Util funcs.
 
-#include "../../Gamemodes/IGamemode.h"
+#include "../../GameModes/IGameMode.h"
 // Class Entities.
 #include "BlasterBolt.h"
 
@@ -124,10 +124,10 @@ void BlasterBolt::BlasterBoltTouch(IServerGameEntity* self, IServerGameEntity* o
 
         // Fix for when there is no plane to base a normal of. (Taken from Yamagi Q2)
         if (plane) {
-            GetGamemode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
+            GetGameMode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
                 plane->normal, self->GetDamage(), 1, DamageFlags::EnergyBasedWeapon, meansOfDeath);
         } else {
-            GetGamemode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
+            GetGameMode()->InflictDamage(other, self, self->GetOwner(), self->GetVelocity(), self->GetOrigin(),
                 vec3_zero(), self->GetDamage(), 1, DamageFlags::EnergyBasedWeapon, meansOfDeath);
         }
 

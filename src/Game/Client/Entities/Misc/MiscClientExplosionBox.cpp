@@ -20,8 +20,8 @@
 // Misc Explosion Box Entity.
 #include "MiscClientExplosionBox.h"
 
-//#include "../../Gamemodes/IGamemode.h"
-//#include "../../World/Gameworld.h"
+//#include "../../GameModes/IGameMode.h"
+//#include "../../World/GameWorld.h"
 
 //
 // Constructor/Deconstructor.
@@ -225,7 +225,7 @@ void MiscClientExplosionBox::ExplosionBoxDropToFloor(void) {
 //
 void MiscClientExplosionBox::MiscExplosionBoxExplode(void) {
     // Execute radius damage.
-//    GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
+//    GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), NULL, GetDamage() + 40, MeansOfDeath::Barrel);
 
     // Retrieve origin.
     vec3_t save = GetOrigin();
@@ -271,7 +271,7 @@ void MiscClientExplosionBox::MiscExplosionBoxExplode(void) {
     //    gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
     //    gi.Multicast(GetOrigin(), Multicast::PHS);
 
-    //    GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+    //    GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
     //    const Frametime save = GetDelayTime();
     //    SetDelayTime(0s);
@@ -283,7 +283,7 @@ void MiscClientExplosionBox::MiscExplosionBoxExplode(void) {
     //    gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
     //    gi.Multicast(GetOrigin(), Multicast::PHS);
 
-    //    GetGamemode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+    //    GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
     //    const Frametime save = GetDelayTime();
     //    SetDelayTime(0s);
@@ -293,8 +293,8 @@ void MiscClientExplosionBox::MiscExplosionBoxExplode(void) {
 	//podEntity->inUse = true;
     // Ensure we have no more think callback pointer set when this entity has "died"
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
-    //SetThinkCallback(&MiscClientExplosionBox::CLGLocalClientEntityThinkFree);
-	SetThinkCallback(&MiscClientExplosionBox::CLGLocalClientEntityThinkFree);
+    //SetThinkCallback(&MiscClientExplosionBox::CLGBaseLocalEntityThinkFree);
+	SetThinkCallback(&MiscClientExplosionBox::CLGBaseLocalEntityThinkFree);
 }
 
 //
@@ -373,7 +373,7 @@ void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientG
 //
 void MiscClientExplosionBox::SpawnDebris1Chunk() {
     // Acquire a pointer to the game world.
-//    Gameworld* gameworld = GetGameworld();
+//    GameWorld* gameworld = GetGameWorld();
 
     // Speed to throw debris at.
     float speed = 1.5 * (float)GetDamage() / 200.0f;
@@ -415,7 +415,7 @@ void MiscClientExplosionBox::SpawnDebris2Chunk() {
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Last but not least, throw debris.
- //   GetGameworld()->ThrowDebris(this, "models/objects/debris2/tris.md2", origin, speed);
+ //   GetGameWorld()->ThrowDebris(this, "models/objects/debris2/tris.md2", origin, speed);
 }
 
 //
@@ -430,5 +430,5 @@ void MiscClientExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
     float speed = 1.75 * (float)GetDamage() / 200.0f;
 
     // Throw debris!
-//    GetGameworld()->ThrowDebris(this, "models/objects/debris3/tris.md2", origin, speed);
+//    GetGameWorld()->ThrowDebris(this, "models/objects/debris3/tris.md2", origin, speed);
 }

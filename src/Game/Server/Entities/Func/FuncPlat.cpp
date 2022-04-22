@@ -16,7 +16,7 @@
 
 #include "../Trigger/TriggerAutoPlatform.h"
 
-#include "../../Gamemodes/IGamemode.h"
+#include "../../GameModes/IGameMode.h"
 
 #include "FuncPlat.h"
 
@@ -205,14 +205,14 @@ void FuncPlat::PlatformBlocked( IServerGameEntity* other ) {
 
     if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
         // Give it a chance to go away on its own terms (like gibs)
-        GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
+        GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
         // If it's still there, nuke it
         if ( other->GetHealth() > 0 || other->GetSolid() != Solid::Not ) {
             SVG_BecomeExplosion1( other );
         }
     }
 
-    GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+    GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 
     if (moveInfo.state == MoverState::Down) {
 	    PlatformGoUp( );

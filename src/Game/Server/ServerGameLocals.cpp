@@ -17,14 +17,14 @@
 //#include "Entities/Base/SVGEntityHandle.h"
 #include "Entities/Base/SVGBasePlayer.h"
 
-// Gamemodes.
-#include "Gamemodes/IGamemode.h"
-#include "Gamemodes/DefaultGamemode.h"
-#include "Gamemodes/CoopGamemode.h"
-#include "Gamemodes/DeathMatchGamemode.h"
+// GameModes.
+#include "GameModes/IGameMode.h"
+#include "GameModes/DefaultGameMode.h"
+#include "GameModes/CoopGameMode.h"
+#include "GameModes/DeathMatchGameMode.h"
 
-// Gameworld.
-#include "World/ServerGameworld.h"
+// GameWorld.
+#include "World/ServerGameWorld.h"
 
 //-----------------
 // Global Game Variables.
@@ -41,7 +41,7 @@ extern cvar_t* gamemode;
 /**
 *   @return A pointer to the gameworld object. The big man in charge.
 **/
-ServerGameworld *GetGameworld() {
+ServerGameWorld *GetGameWorld() {
     return game.world;
 }
 
@@ -49,9 +49,9 @@ ServerGameworld *GetGameworld() {
 /**
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
-IGamemode *GetGamemode() {
+IGameMode *GetGameMode() {
     if (game.world) {
-        return game.world->GetGamemode();
+        return game.world->GetGameMode();
     } else {
         return nullptr;
     }
@@ -84,7 +84,7 @@ void GameLocals::Shutdown() {
 **/
 void GameLocals::CreateWorld() {
     // Create game world object.
-    world = new ServerGameworld();
+    world = new ServerGameWorld();
 
     // Initialize it.
     world->Initialize();
@@ -109,15 +109,15 @@ void GameLocals::DestroyWorld() {
 /**
 *   @return A pointer to the gameworld object.
 **/
-ServerGameworld* GameLocals::GetGameworld() { 
+ServerGameWorld* GameLocals::GetGameWorld() { 
     return world; 
 }
 
 /**
 *   @return A pointer to the gameworld its current gamemode object.
 **/
-IGamemode* GameLocals::GetGamemode() { 
-    return world->GetGamemode(); 
+IGameMode* GameLocals::GetGameMode() { 
+    return world->GetGameMode(); 
 }
 
 

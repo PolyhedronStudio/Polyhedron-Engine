@@ -31,10 +31,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Info/InfoPlayerStart.h"
 
 // Game modes.
-#include "../Gamemodes/IGamemode.h"
+#include "../GameModes/IGameMode.h"
 
 // World.
-#include "../World/ServerGameworld.h"
+#include "../World/ServerGameWorld.h"
 
 // Shared Game.
 #include "Animations.h"         // Include Player Client Animations.
@@ -52,7 +52,7 @@ void SVG_ClientUserinfoChanged(Entity* ent, char* userinfo) {
     if (!ent)
         return;
 
-    GetGamemode()->ClientUserinfoChanged(ent, userinfo);
+    GetGameMode()->ClientUserinfoChanged(ent, userinfo);
 }
 
 /*
@@ -121,7 +121,7 @@ void spectator_respawn(Entity *ent)
     ent->client->respawn.score = ent->client->persistent.score = 0;
 
     ent->serverFlags &= ~EntityServerFlags::NoClient;
-    GetGamemode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->gameEntity));
+    GetGameMode()->PlacePlayerInGame(dynamic_cast<SVGBasePlayer*>(ent->gameEntity));
 
     // add a teleportation effect
     if (!ent->client->persistent.isSpectator)  {
@@ -160,7 +160,7 @@ void SVG_ClientBegin(Entity *ent)
     ent->client = game.GetClients() + (ent - game.world->GetPODEntities() - 1);
 
     // Let the game mode decide from here on out.
-    GetGamemode()->ClientBegin(ent);
+    GetGameMode()->ClientBegin(ent);
 }
 
 
@@ -178,7 +178,7 @@ loadgames will.
 */
 qboolean SVG_ClientConnect(Entity *ent, char *userinfo)
 {
-    return GetGamemode()->ClientConnect(ent, userinfo);
+    return GetGameMode()->ClientConnect(ent, userinfo);
 }
 
 /*
@@ -199,7 +199,7 @@ void SVG_ClientDisconnect(Entity *ent)
         return;
 
     // Since it does, we pass it on to the game mode.
-    GetGamemode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->gameEntity), ent->client);
+    GetGameMode()->ClientDisconnect(dynamic_cast<SVGBasePlayer*>(ent->gameEntity), ent->client);
 
     // FIXME: don't break skins on corpses, etc
     //int32_t playernum = ent-g_entities-1;
@@ -217,7 +217,7 @@ usually be a couple times for each server frame.
 void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
 {
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(svEntity, true, true);
+    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(svEntity, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
@@ -232,7 +232,7 @@ void SVG_ClientThink(Entity *svEntity, ClientMoveCommand *moveCommand)
     ServerClient *client = player->GetClient();
 
     // Do client think.
-    GetGamemode()->ClientThink(player, client, moveCommand);
+    GetGameMode()->ClientThink(player, client, moveCommand);
 
     // update chase cam if being followed
     //for (int i = 1; i <= maximumclients->value; i++) {

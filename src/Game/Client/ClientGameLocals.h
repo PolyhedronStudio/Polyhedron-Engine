@@ -45,7 +45,7 @@
 *	Predeclarations.
 **/
 class ClientGameExports;
-class ClientGameworld;
+class ClientGameWorld;
 
 
 
@@ -139,12 +139,12 @@ public:
     /**
     *   @return A pointer to the gameworld object.
     **/
-    ClientGameworld* GetGameworld();
+    ClientGameWorld* GetGameWorld();
 
     /**
     *   @return A pointer to the gameworld its current gamemode object.
     **/
-    //IGamemode* GetGamemode();
+    //IGameMode* GetGameMode();
 
     /**
     *   @brief  Code shortcut for accessing gameworld's client array.
@@ -187,8 +187,8 @@ private:
 
     // TODO: Add Get methods and privatize the members below.
 public:
-    //! Gameworld.
-    ClientGameworld* world = nullptr;
+    //! GameWorld.
+    ClientGameWorld* world = nullptr;
 
     //! needed for coop respawns
     //! Can't store spawnpoint32_t in level, because
@@ -230,12 +230,12 @@ extern LevelLocals level;
 /**
 *   @return A pointer to the game's world object. The man that runs the show.
 **/
-ClientGameworld* GetGameworld();
+ClientGameWorld* GetGameWorld();
 
 /**
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
-//IGamemode* GetGamemode();
+//IGameMode* GetGameMode();
 
 
 

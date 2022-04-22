@@ -23,11 +23,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Entities.
 //#include "Entities/Base/SVGBasePlayer.h"
 
-// Gamemodes.
-#include "Gamemodes/IGamemode.h"
+// GameModes.
+#include "GameModes/IGameMode.h"
 
-// Gameworld.
-#include "World/ServerGameworld.h"
+// GameWorld.
+#include "World/ServerGameWorld.h"
 
 void SVG_UpdateChaseCam(SVGBasePlayer *ent)
 {
@@ -127,7 +127,7 @@ void SVG_ChaseNext(SVGBasePlayer *ent)
     }
 
     ServerClient* client = ent->GetClient();
-    Entity*	  serverEntities = GetGameworld()->GetPODEntities();
+    Entity*	  serverEntities = GetGameWorld()->GetPODEntities();
 
     if (!client->chaseTarget) {
         return;
@@ -159,7 +159,7 @@ void SVG_ChasePrev(SVGBasePlayer*ent)
     }
 
     ServerClient* client = ent->GetClient();
-    Entity* serverEntities = GetGameworld()->GetPODEntities();
+    Entity* serverEntities = GetGameWorld()->GetPODEntities();
 
     // Sanity check.
     if (!client->chaseTarget) {
@@ -191,7 +191,7 @@ void SVG_GetChaseTarget(SVGBasePlayer *ent)
     }
 
     ServerClient* client = ent->GetClient();
-    Entity* serverEntities = GetGameworld()->GetPODEntities();
+    Entity* serverEntities = GetGameWorld()->GetPODEntities();
 
     for (int32_t i = 1; i <= maximumclients->value; i++) {
         other = serverEntities + i;

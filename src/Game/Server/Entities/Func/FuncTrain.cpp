@@ -14,8 +14,8 @@
 #include "../Path/PathCorner.h"
 #include "FuncTrain.h"
 
-#include "../../Gamemodes/IGamemode.h"
-#include "../../World/ServerGameworld.h"
+#include "../../GameModes/IGameMode.h"
+#include "../../World/ServerGameWorld.h"
 
 //===============
 // FuncTrain::ctor
@@ -123,7 +123,7 @@ void FuncTrain::FindNextTarget() {
 	}
 
 	// Find target.
-	auto targetEntities = GetGameworld()->GetGameEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
+	auto targetEntities = GetGameWorld()->GetGameEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
 
 	if (targetEntities.front() != nullptr && targetEntities.front()->IsSubclassOf<PathCorner>()) {
 	    PathCorner* pathCorner = dynamic_cast<PathCorner*>(targetEntities.front());
@@ -218,7 +218,7 @@ void FuncTrain::NextCornerThink() {
 		// TODO: Add a find single entity by targetname to gameworld including other utility classes?
 
 		// Find target.
-		auto targetEntities = GetGameworld()->GetGameEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
+		auto targetEntities = GetGameWorld()->GetGameEntityRange<0, MAX_EDICTS>() | cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::HasKeyValue("targetname", GetTarget());
 
 		if (targetEntities.front() != nullptr && targetEntities.front()->IsSubclassOf<PathCorner>()) {
 		    pathCornerEntity = dynamic_cast<PathCorner*>(targetEntities.front());
@@ -329,7 +329,7 @@ void FuncTrain::OnWaitAtCorner( IServerGameEntity* ent) {
 void FuncTrain::TrainBlocked( IServerGameEntity* other ) {
 	if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !other->GetClient() ) {
 		// Give it a chance to go away on its own terms (like gibs)
-		GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 100000, 1, 0, MeansOfDeath::Crush );
+		GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 100000, 1, 0, MeansOfDeath::Crush );
 		// If it's still there, nuke it
 		if ( other ) {
 			SVG_BecomeExplosion1( other );
@@ -343,5 +343,5 @@ void FuncTrain::TrainBlocked( IServerGameEntity* other ) {
 	}
 
 	damageDebounceTime = level.time + 500ms;
-	GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+	GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 }

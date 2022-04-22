@@ -25,10 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Utilities.h"
 
 // Game Mode interface.
-#include "Gamemodes/IGamemode.h"
+#include "GameModes/IGameMode.h"
 
 // World.
-#include "World/ServerGameworld.h"
+#include "World/ServerGameWorld.h"
 
 // Weapons.
 #include "Entities/Weaponry/BlasterBolt.h"
@@ -123,7 +123,7 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
     dir = point - self->GetEnemy()->GetOrigin();
 
     // Do the damage.
-    GetGamemode()->InflictDamage(tr.gameEntity, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
+    GetGameMode()->InflictDamage(tr.gameEntity, self, self, dir, point, vec3_zero(), damage, kick / 2, DamageFlags::NoKnockBack, MeansOfDeath::Hit);
 
     if (!(tr.gameEntity->GetServerFlags() & EntityServerFlags::Monster) && (!tr.gameEntity->GetClient())) {
         return false;
@@ -237,7 +237,7 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
     if ( !(tr.surface && tr.surface->flags & SurfaceFlags::Sky) ) {
         if (tr.fraction < 1.0) {
             if (tr.gameEntity && tr.gameEntity->GetTakeDamage()) {
-                GetGamemode()->InflictDamage(tr.gameEntity, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
+                GetGameMode()->InflictDamage(tr.gameEntity, self, self, aimdir, tr.endPosition, tr.plane.normal, damage, kick, DamageFlags::Bullet, mod);
             } else {
                 if (strncmp(tr.surface->name, "sky", 3) != 0) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);

@@ -9,9 +9,10 @@
 ***/
 #include "../ClientGameLocals.h"
 
-#include "../Entities.h"
+// Temporay entities.
 #include "../TemporaryEntities.h"
 
+// Exports classes.
 #include "Media.h"
 #include "Screen.h"
 #include "View.h"

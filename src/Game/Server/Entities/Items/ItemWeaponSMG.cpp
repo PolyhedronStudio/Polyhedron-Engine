@@ -21,9 +21,9 @@
 #include "../Base/SVGBasePlayer.h"
 
 // Game mode.
-#include "../../Gamemodes/DefaultGamemode.h"
+#include "../../GameModes/DefaultGameMode.h"
 // Game world.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 // SMG.
 #include "ItemWeaponSMG.h"
@@ -444,7 +444,7 @@ void ItemWeaponSMG::InstanceWeaponProcessSecondaryFireState(SVGBasePlayer* playe
 **/
 qboolean ItemWeaponSMG::WeaponSMGPickup(IServerGameEntity *other) {
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(other, true, true);
+    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(other, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
@@ -488,7 +488,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(IServerGameEntity *other) {
     }
 
     // Set a respawn think for after 2 seconds.
-    if (!GetGamemode()->IsClass<DefaultGamemode>()) {
+    if (!GetGameMode()->IsClass<DefaultGameMode>()) {
         SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
         SetNextThinkTime(level.time + 2s);
     }
@@ -501,7 +501,7 @@ qboolean ItemWeaponSMG::WeaponSMGPickup(IServerGameEntity *other) {
 **/
 void ItemWeaponSMG::InstanceWeaponSMGUse(SVGBaseEntity* user, SVGBaseItem* item) { 
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(user, true, true);
+    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(user, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

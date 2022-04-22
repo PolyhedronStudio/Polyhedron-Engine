@@ -12,7 +12,7 @@
 #include "../Base/SVGBaseEntity.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 #include "TargetEarthquake.h"
 
@@ -72,7 +72,7 @@ void TargetEarthquake::QuakeThink() {
         lastQuakeTime = duration_cast<GameTime>(level.time + 0.5s);
     }
 
-    for (auto& entity : GetGameworld()->GetGameEntityRange(0, MAX_EDICTS)
+    for (auto& entity : GetGameWorld()->GetGameEntityRange(0, MAX_EDICTS)
          | cef::Standard | cef::HasClient | cef::HasGroundEntity ) 
     {
         vec3_t newVelocity {

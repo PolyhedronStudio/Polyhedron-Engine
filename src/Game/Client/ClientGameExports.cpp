@@ -1,6 +1,6 @@
 #include "ClientGameLocals.h"
 
-#include "Entities.h"
+// Temporary Entities.
 #include "TemporaryEntities.h"
 
 // Export Implementations.
@@ -13,6 +13,7 @@
 #include "Exports/ServerMessage.h"
 #include "Exports/View.h"
 
+// Effects.
 #include "Effects/DynamicLights.h"
 #include "Effects/LightStyles.h"
 #include "Effects/Particles.h"

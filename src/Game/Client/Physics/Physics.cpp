@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/IClientGameEntity.h"
 #include "../Entities/Worldspawn.h"
 
-#include "../World/ClientGameworld.h"
+#include "../World/ClientGameWorld.h"
 //#include "../Utilities.h"
 
 // Step Move physics.
@@ -38,7 +38,7 @@ static cvar_t *sv_maxvelocity = nullptr;
 static cvar_t *sv_gravity= nullptr;
 
 // World.
-//#include "../World/Gameworld.h"
+//#include "../World/GameWorld.h"
 /*
 
 
@@ -140,7 +140,7 @@ IClientGameEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
     trace = CLG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
 
     if (trace.startSolid) {
-		ClientGameworld *gameWorld = GetGameworld();
+		ClientGameWorld *gameWorld = GetGameWorld();
 	    return static_cast<IClientGameEntity*>(gameWorld->GetWorldspawnGameEntity());
     }
 

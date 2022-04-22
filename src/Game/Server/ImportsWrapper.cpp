@@ -16,8 +16,8 @@
 #include "Entities.h"
 #include "Entities/Base/SVGBasePlayer.h"
 
-// Gameworld.
-#include "World/ServerGameworld.h"
+// GameWorld.
+#include "World/ServerGameWorld.h"
 
 // Wraps up gi.CPrintf for SVGBaseEntities.
 void SVG_CPrint(IServerGameEntity* ent, int32_t printlevel, const std::string& str) {

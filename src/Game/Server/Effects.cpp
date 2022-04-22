@@ -13,7 +13,7 @@
 #include "Effects.h"
 
 // Game Mode interface.
-#include "Gamemodes/IGamemode.h"
+#include "GameModes/IGameMode.h"
 
 // Class Entities.
 //#include "Entities/Base/SVGBasePlayer.h"
@@ -21,7 +21,7 @@
 #include "Entities/Base/GibEntity.h"
 
 // World.
-#include "World/ServerGameworld.h"
+#include "World/ServerGameWorld.h"
 
 //=================
 // SVG_ThrowClientHead
@@ -62,7 +62,7 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
     self->SetFlags(EntityFlags::NoKnockBack);
 
     // Calculate the velocity for the given damage, fetch its scale.
-    vec3_t velocityDamage = GetGamemode()->CalculateDamageVelocity(damage);
+    vec3_t velocityDamage = GetGameMode()->CalculateDamageVelocity(damage);
 
     // Add the velocityDamage up to the current velocity.
     self->SetVelocity(self->GetVelocity() + velocityDamage);

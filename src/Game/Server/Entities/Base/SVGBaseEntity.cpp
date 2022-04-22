@@ -23,7 +23,7 @@
 #include "../Trigger/TriggerDelayedUse.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 
 
@@ -304,7 +304,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 		// This is all very lengthy. I'd rather have a static method in TriggerDelayedUse that
 		// allocates one such entity and accepts activator, message, target etc. as parameters
 		// Something like 'TriggerDelayedUse::Schedule( GetTarget(), GetKillTarget(), activatorOverride, GetMessage(), GetDelayTime() );'
-	    SVGBaseTrigger* triggerDelay = GetGameworld()->CreateGameEntity<TriggerDelayedUse>();
+	    SVGBaseTrigger* triggerDelay = GetGameWorld()->CreateGameEntity<TriggerDelayedUse>();
 		triggerDelay->SetActivator( activatorOverride );
 		triggerDelay->SetMessage( GetMessage() );
 		triggerDelay->SetTarget( GetTarget() );
@@ -335,7 +335,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 	if ( !GetKillTarget().empty() ) {
 		qboolean foundKillTarget = false;
 
-		for (auto* killtargetEntity : GetGameworld()->GetGameEntityRange(0, MAX_EDICTS)
+		for (auto* killtargetEntity : GetGameWorld()->GetGameEntityRange(0, MAX_EDICTS)
 			| cef::IsValidPointer
 			| cef::HasServerEntity
 			| cef::InUse
@@ -357,7 +357,7 @@ void SVGBaseEntity::UseTargets( IServerGameEntity* activatorOverride )
 	// Actually fire the targets
 	if ( !GetTarget().empty() ) {
 		qboolean foundTarget = false;
-	    for (auto* triggerEntity : GetGameworld()->GetGameEntityRange<0, MAX_EDICTS>()
+	    for (auto* triggerEntity : GetGameWorld()->GetGameEntityRange<0, MAX_EDICTS>()
 			| cef::IsValidPointer
 			| cef::HasServerEntity
 			| cef::InUse

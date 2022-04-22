@@ -17,7 +17,7 @@
 #include "DebrisEntity.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 
 //! Constructor/Deconstructor.
@@ -44,7 +44,7 @@ void DebrisEntity::DebrisEntityDie(IServerGameEntity* inflictor, IServerGameEnti
 **/
 DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t& origin, float speed) {
     // Chunk Entity.
-    DebrisEntity* debrisEntity = GetGameworld()->CreateGameEntity<DebrisEntity>();
+    DebrisEntity* debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>();
 
     // Set the origin.
     debrisEntity->SetOrigin(origin);

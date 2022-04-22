@@ -27,14 +27,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Base/SVGBaseItemWeapon.h"
 #include "../Entities/Base/SVGBasePlayer.h"
 
-// Gamemodes.
-#include "../Gamemodes/IGamemode.h"
-//#include "../Gamemodes/DefaultGamemode.h"
-#include "../Gamemodes/CoopGamemode.h"
-#include "../Gamemodes/DeathMatchGamemode.h"
+// GameModes.
+#include "../GameModes/IGameMode.h"
+//#include "../GameModes/DefaultGameMode.h"
+#include "../GameModes/CoopGameMode.h"
+#include "../GameModes/DeathMatchGameMode.h"
 
 // World.
-#include "../World/ServerGameworld.h"
+#include "../World/ServerGameWorld.h"
 
 // Player Client & Hud Header.
 #include "Client.h"     // Include Player Client header.
@@ -128,7 +128,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
     game.autoSaved = false;
 
     // Respawn any dead clients.
-    GetGamemode()->RespawnAllClients();
+    GetGameMode()->RespawnAllClients();
 
     // Set intermission time and the map to change to.
     level.intermission.time = level.time;
@@ -136,7 +136,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
 
     // 
     if (strstr(level.intermission.changeMap, "*")) {
-        if (!GetGamemode()->IsClass<CoopGamemode>()) {
+        if (!GetGameMode()->IsClass<CoopGameMode>()) {
             for (i = 0 ; i < maximumclients->value ; i++) {
                 client = game.world->GetPODEntities() + 1 + i;
                 if (!client->inUse) {
@@ -152,7 +152,7 @@ void SVG_HUD_BeginIntermission(Entity *targ)
             }
         }
     } else {
-        if (!GetGamemode()->IsClass<DeathmatchGamemode>()) {
+        if (!GetGameMode()->IsClass<DeathmatchGameMode>()) {
             level.intermission.exitIntermission = 1;     // go immediately to the next level
             return;
         }
@@ -321,7 +321,7 @@ void SVG_Command_Score_f(SVGBasePlayer *player, ServerClient *client) {
     client->showInventory = false;
 
     // Don't show scores if not in one of the following game modes.
-    if (!GetGamemode()->IsClass<DeathmatchGamemode>() && !GetGamemode()->IsClass<CoopGamemode>()) {
+    if (!GetGameMode()->IsClass<DeathmatchGameMode>() && !GetGameMode()->IsClass<CoopGameMode>()) {
         return;
     }
 
@@ -446,7 +446,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     client->playerState.stats[PlayerStats::Layouts] = 0;
 
     // Special layout for deathmatch.
-    if (GetGamemode()->IsClass<DeathmatchGamemode>()) {
+    if (GetGameMode()->IsClass<DeathmatchGameMode>()) {
 	    if (client->persistent.stats.health <= 0 || level.intermission.time != GameTime::zero() || client->showScores) {
 	        client->playerState.stats[PlayerStats::Layouts] |= 1;
 	    }

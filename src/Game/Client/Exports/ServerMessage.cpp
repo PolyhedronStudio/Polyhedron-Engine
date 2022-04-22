@@ -9,7 +9,7 @@
 ***/
 #include "../ClientGameLocals.h"
 
-#include "../Entities.h"
+// Temporary entities.
 #include "../TemporaryEntities.h"
 
 // ChatHUD Objects.
@@ -20,6 +20,7 @@
 #include "../Effects/MuzzleFlashEffects.h"
 
 // Exports Implementations.
+#include "Entities.h"
 #include "Media.h"
 #include "Screen.h"
 #include "ServerMessage.h"

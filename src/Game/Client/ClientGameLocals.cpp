@@ -10,9 +10,8 @@
 #include "ClientGameLocals.h"
 
 // ClientGame.
-#include "Entities.h"
 #include "TemporaryEntities.h"
-#include "../World/ClientGameworld.h"
+#include "../World/ClientGameWorld.h"
 
 // ClientGameExports implementations.
 #include "Exports/Core.h"
@@ -138,16 +137,16 @@ GameEntityVector CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t
 /**
 *   @return A pointer to the gameworld object. The big man in charge.
 **/
-ClientGameworld *GetGameworld() {
+ClientGameWorld *GetGameWorld() {
     return game.world;
 }
 
 //**
 //*   @return A pointer to the gamemode object. The man's little helper.
 //**/
-//IGamemode *GetGamemode() {
+//IGameMode *GetGameMode() {
 //    if (game.world) {
-//        return game.world->GetGamemode();
+//        return game.world->GetGameMode();
 //    } else {
 //        return nullptr;
 //    }
@@ -158,7 +157,7 @@ ClientGameworld *GetGameworld() {
 /**
 *   @return A pointer to the gameworld object. The big man in charge.
 **/
-ClientGameworld *ClientGameLocals::GetGameworld() {
+ClientGameWorld *ClientGameLocals::GetGameWorld() {
     return world;
 }
 
@@ -166,9 +165,9 @@ ClientGameworld *ClientGameLocals::GetGameworld() {
 /**
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
-//IGamemode *GetGamemode() {
+//IGameMode *GetGameMode() {
 //    if (game.world) {
-//        return game.world->GetGamemode();
+//        return game.world->GetGameMode();
 //    } else {
 //        return nullptr;
 //    }
@@ -201,7 +200,7 @@ void ClientGameLocals::Shutdown() {
 **/
 void ClientGameLocals::CreateWorld() {
     // Create game world object.
-    world = new ClientGameworld();
+    world = new ClientGameWorld();
 
     // Initialize it.
     world->Initialize();
@@ -225,8 +224,8 @@ void ClientGameLocals::DestroyWorld() {
 /**
 *   @return A pointer to the gameworld its current gamemode object.
 **/
-//IGamemode* ClientGameLocals::GetGamemode() { 
-//    return world->GetGamemode(); 
+//IGameMode* ClientGameLocals::GetGameMode() { 
+//    return world->GetGameMode(); 
 //}
 
 

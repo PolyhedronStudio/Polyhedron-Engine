@@ -9,21 +9,16 @@
 #include "../ClientGameLocals.h"
 
 // Entities.
-#include "../Entities.h"
-#include "../Entities/IClientGameEntity.h"
-#include "../Entities/Base/CLGBasePacketEntity.h"
-//#include "../Entities/Base/SVGBasePlayer.h"
-//#include "../Entities/Base/DebrisEntity.h"
-//#include "../Entities/Base/GibEntity.h"
-//
-//// Gamemodes.
-//#include "../Gamemodes/IGamemode.h"
-//#include "../Gamemodes/DefaultGamemode.h"
-//#include "../Gamemodes/CoopGamemode.h"
-//#include "../Gamemodes/DeathMatchGamemode.h"
+#include "../Exports/Entities.h"
 
-// Gameworld.
-#include "ClientGameworld.h"
+// GameModes.
+//#include "../GameModes/IGameMode.h"
+//#include "../GameModes/DefaultGameMode.h"
+//#include "../GameModes/CoopGameMode.h"
+//#include "../GameModes/DeathMatchGameMode.h"
+
+// GameWorld.
+#include "ClientGameWorld.h"
 
 // Cvars.
 //extern cvar_t *gamemode;
@@ -32,7 +27,7 @@
 /**
 *	@brief Initializes the gameworld and its member objects.
 ***/
-void ClientGameworld::Initialize() {
+void ClientGameWorld::Initialize() {
 	// Prepare the items.
     PrepareItems();
 
@@ -43,14 +38,14 @@ void ClientGameworld::Initialize() {
     PrepareClients();
 
 	// What game could one play without a gamemode?
-	SetupGamemode();
+	SetupGameMode();
 }
 
 /**
 *	@brief Shutsdown the gameworld and its member objects.
 **/
-void ClientGameworld::Shutdown() {
-	DestroyGamemode();
+void ClientGameWorld::Shutdown() {
+	DestroyGameMode();
 }
 
 
@@ -58,31 +53,31 @@ void ClientGameworld::Shutdown() {
 /**
 *	@brief	Creates the correct gamemode object instance based on the gamemode cvar.
 **/
-void ClientGameworld::SetupGamemode() {
+void ClientGameWorld::SetupGameMode() {
 	//// Fetch gamemode as std::string
 	//std::string gamemodeStr = gamemode->string;
 
 	//// Detect which game ode to allocate for this game round.
 	//if (gamemodeStr == "deathmatch") {
 	//	// Deathmatch gameplay mode.
-	//    currentGamemode = new DeathmatchGamemode();
+	//    currentGameMode = new DeathmatchGameMode();
 	//} else if (gamemodeStr == "coop") {
 	//	// Cooperative gameplay mode.
-	//    currentGamemode = new CoopGamemode();
+	//    currentGameMode = new CoopGameMode();
 	//} else {
 	//	// Acts as a singleplayer game mode.
-	//    currentGamemode = new DefaultGamemode();
+	//    currentGameMode = new DefaultGameMode();
 	//}
 }
 
 /**
 *	@brief	Destroys the current gamemode object.
 **/
-void ClientGameworld::DestroyGamemode() {
+void ClientGameWorld::DestroyGameMode() {
 	//// Always make sure it is valid to begin with.
- //   if (currentGamemode != nullptr) {
-	//	delete currentGamemode;
-	//	currentGamemode = nullptr;
+ //   if (currentGameMode != nullptr) {
+	//	delete currentGameMode;
+	//	currentGameMode = nullptr;
 	//}
 }
 
@@ -92,7 +87,7 @@ void ClientGameworld::DestroyGamemode() {
 *   @brief	Assigns the exported globals.entities and ensures that all class entities 
 *			are set to nullptr. Also does a clamp on maxEntities for sanity.
 **/
-void ClientGameworld::PrepareEntities() {
+void ClientGameWorld::PrepareEntities() {
     // 2048 for server entities, and 2048 more for... whichever.
     gameEntities.resize(MAX_CLIENT_POD_ENTITIES);
 
@@ -115,7 +110,7 @@ void ClientGameworld::PrepareEntities() {
 /**
 *   @brief Prepares the game clients array for use.
 **/
-void ClientGameworld::PrepareClients() {
+void ClientGameWorld::PrepareClients() {
     // Allocate our clients array.
 	cvar_t *maximumclients = clgi.Cvar_Get("maxclients", nullptr, 0);
 	
@@ -134,7 +129,7 @@ void ClientGameworld::PrepareClients() {
 /**
 *	@brief Prepares the game's client entities with a base player game entity.
 **/
-void ClientGameworld::PreparePlayers() {
+void ClientGameWorld::PreparePlayers() {
 	// Allocate a classentity for each client in existence.
 	for (int32_t i = 0; i < maxClients; i++) {//maxClients + 1; i++) {
 		const int32_t entityNumber = i + 1;
@@ -197,7 +192,7 @@ void ClientGameworld::PreparePlayers() {
 *			first free client entity slot there is. After doing so, allocates
 *			a game entity based on the 'classname' of the parsed entity.
 **/
-qboolean ClientGameworld::SpawnFromBSPString(const char* mapName, const char* bspString, const char* spawnpoint) {
+qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bspString, const char* spawnpoint) {
 	//// Clear level state.
     level = {};
 
@@ -247,7 +242,7 @@ qboolean ClientGameworld::SpawnFromBSPString(const char* mapName, const char* bs
 	uint32_t localEntityIndex = MAX_PACKET_ENTITIES + 3; // TODO: That RESERVED_COUNT thingy.
 
 	// Acquire gameworld and entity arrays.
-	ClientGameworld *gameWorld = GetGameworld();
+	ClientGameWorld *gameWorld = GetGameWorld();
 
 	// Engage parsing.
 	while (!!isParsing == true) {
@@ -395,7 +390,7 @@ qboolean ClientGameworld::SpawnFromBSPString(const char* mapName, const char* bs
 * 
 *	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 **/
-PODEntity* ClientGameworld::GetUnusedPODEntity() { 
+PODEntity* ClientGameWorld::GetUnusedPODEntity() { 
  //   // Incrementor, declared here so we can access it later on.
 	//int32_t i = 0;
 
@@ -425,7 +420,7 @@ PODEntity* ClientGameworld::GetUnusedPODEntity() {
 
 	//// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
  //   if (i >= maxEntities) {
- //       gi.Error("ClientGameworld::GetUnusedPODEntity: no free edicts");
+ //       gi.Error("ClientGameWorld::GetUnusedPODEntity: no free edicts");
 	//	return nullptr;
 	//}
 
@@ -450,7 +445,7 @@ PODEntity* ClientGameworld::GetUnusedPODEntity() {
 *   @details    All but the first will have the EntityFlags::TeamSlave flag set.
 *               All but the last will have the teamchain field set to the next one.
 **/
-void ClientGameworld::FindTeams() {
+void ClientGameWorld::FindTeams() {
     PODEntity *podEntityA = nullptr;
 	PODEntity *podEntityB = nullptr;
     GameEntity *chain = nullptr;
@@ -512,7 +507,7 @@ void ClientGameworld::FindTeams() {
 *	@brief	Parses the BSP Entity string and places the results in the server
 *			entity dictionary.
 **/
-qboolean ClientGameworld::ParseEntityString(const char** data, PODEntity *podEntity) {
+qboolean ClientGameWorld::ParseEntityString(const char** data, PODEntity *podEntity) {
     // False until proven otherwise.
     qboolean parsedSuccessfully = false;
 
@@ -584,7 +579,7 @@ qboolean ClientGameworld::ParseEntityString(const char** data, PODEntity *podEnt
 *	@brief	Parses the BSP Entity string and places the results in the server
 *			entity dictionary.
 **/
-qboolean ClientGameworld::ParseEntityStringNew(const char** data, EntityDictionary &parsedKeyValues) {
+qboolean ClientGameWorld::ParseEntityStringNew(const char** data, EntityDictionary &parsedKeyValues) {
 	// False until proven otherwise.
 	qboolean parsedSuccessfully = false;
 
@@ -646,7 +641,7 @@ qboolean ClientGameworld::ParseEntityStringNew(const char** data, EntityDictiona
 *   @brief  Allocates the game entity determined by the classname key, and
 *           then does a precache before spawning the game entity.
 **/
-qboolean ClientGameworld::CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary) {
+qboolean ClientGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary) {
     // Get client side entity number.
     const int32_t clientEntityNumber = podEntity->clientEntityNumber;
 
@@ -699,7 +694,7 @@ qboolean ClientGameworld::CreateGameEntityFromDictionary(PODEntity *podEntity, E
 *			try and allocate it.
 *	@return	nullptr in case of failure, a valid pointer to a game entity otherwise.
 **/
-GameEntity *ClientGameworld::CreateGameEntityFromClassname(PODEntity *podEntity, const std::string &classname) {
+GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity, const std::string &classname) {
 	// Start with a nice nullptr.
     GameEntity* spawnEntity = nullptr;
 
@@ -758,7 +753,7 @@ GameEntity *ClientGameworld::CreateGameEntityFromClassname(PODEntity *podEntity,
 *
 *   @return A pointer to the game entity on success, nullptr on failure.
 **/
-void ClientGameworld::FreePODEntity(PODEntity* podEntity) {
+void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
     // Sanity check.
     if (!podEntity) {
 		return;
@@ -809,7 +804,7 @@ void ClientGameworld::FreePODEntity(PODEntity* podEntity) {
 *
 *   @return True on success, false on failure.
 **/
-qboolean ClientGameworld::FreeGameEntity(PODEntity* podEntity) {
+qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
     // Sanity check.
     if (!podEntity) {
 		Com_DPrint("WARNING: tried to %s on a nullptr PODEntity!\n", __func__);
@@ -873,7 +868,7 @@ qboolean ClientGameworld::FreeGameEntity(PODEntity* podEntity) {
 *
 *   @return On success: A pointer to the ClientEntity's GameEntity, which may be newly allocated. On failure: A nullptr.
 **/
-GameEntity* ClientGameworld::UpdateGameEntityFromState(const EntityState& state, PODEntity* clEntity) {
+GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state, PODEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -965,7 +960,7 @@ GameEntity* ClientGameworld::UpdateGameEntityFromState(const EntityState& state,
 *   @return True on success, false in case of trouble. (Should never happen, and if it does,
 *           well... file an issue lmao.)
 **/
-qboolean ClientGameworld::UpdateFromState(PODEntity *clEntity, const EntityState& state) {
+qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState& state) {
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
@@ -1016,7 +1011,7 @@ qboolean ClientGameworld::UpdateFromState(PODEntity *clEntity, const EntityState
 * 
 *   @return A valid pointer to the entity game entity. nullptr on failure.
 **/
-SVGBaseEntity* ClientGameworld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
+IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
  //   // Ensure the entity is valid.
  //   if (!*entityHandle || (!entityHandle.Get() ||
 	//		(
@@ -1048,7 +1043,7 @@ SVGBaseEntity* ClientGameworld::ValidateEntity(const SGEntityHandle &entityHandl
 *   @brief  Spawns a debris model entity at the given origin.
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
-void ClientGameworld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
+void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
 	//DebrisEntity::Create(debrisser, gibModel, origin, speed); 
 }
 
@@ -1056,6 +1051,6 @@ void ClientGameworld::ThrowDebris(GameEntity* debrisser, const std::string &gibM
 *   @brief  Spawns a gib model entity flying at random velocities and directions.
 *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
 */
-void ClientGameworld::ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) { 
+void ClientGameWorld::ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) { 
 	//GibEntity::Create(gibber, gibModel, damage, gibType);
 }

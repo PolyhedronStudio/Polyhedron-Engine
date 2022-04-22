@@ -28,10 +28,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //#include "Entities/Base/SVGBasePlayer.h"
 
 // Game Modes.
-#include "Gamemodes/IGamemode.h"
+#include "GameModes/IGameMode.h"
 
 // Game world.
-#include "World/ServerGameworld.h"
+#include "World/ServerGameWorld.h"
 
     //char *ClientTeam(SVGBaseEntity *ent)
 //{
@@ -48,7 +48,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //    if (!p)
 //        return value;
 //
-//    if ((int)(gamemodeflags->value) & GamemodeFlags::ModelTeams) {
+//    if ((int)(gamemodeflags->value) & GameModeFlags::ModelTeams) {
 //        *p = 0;
 //        return value;
 //    }
@@ -73,7 +73,7 @@ static inline const std::string ClientTeam(IServerGameEntity* ent) {
 
     // Return empty team.
     return "";
-    //if ((int)(gamemodeflags->value) & GamemodeFlags::ModelTeams) {
+    //if ((int)(gamemodeflags->value) & GameModeFlags::ModelTeams) {
     //	*p = 0;
 	   // return value;
     //}
@@ -85,7 +85,7 @@ static inline const std::string ClientTeam(IServerGameEntity* ent) {
 qboolean SVG_OnSameTeam(IServerGameEntity *entityA, IServerGameEntity *entityB)
 {
     // TODO: Check in gameworld whether 
-    if (!((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams)))
+    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))
         return false;
 
     // Fetch teamname for each entity and compare if they're the same.
@@ -635,7 +635,7 @@ void Cmd_Kill_f(SVGBasePlayer* player, ServerClient* client) {
 
     player->SetFlags(player->GetFlags() & ~EntityFlags::GodMode);
     player->SetHealth(0);
-    GetGamemode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
+    GetGameMode()->SetCurrentMeansOfDeath(MeansOfDeath::Suicide);
     player->DispatchDieCallback(player, player, 100000, vec3_zero());
 }
 
@@ -657,7 +657,7 @@ int PlayerSort(void const *a, void const *b)
     anum = *(int *)a;
     bnum = *(int *)b;
 
-    ServerGameworld* gameworld = GetGameworld();
+    ServerGameWorld* gameworld = GetGameWorld();
     ServerClient* clients = gameworld->GetClients();
 
     anum = clients[anum].playerState.stats[PlayerStats::Frags];
@@ -787,7 +787,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
         return;
 
     // Check whether we are in a teamplay game.
-    if (!((int)(gamemodeflags->value) & (GamemodeFlags::ModelTeams | GamemodeFlags::SkinTeams))) {
+    if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams))) {
         team = false;
     }
 
@@ -855,7 +855,7 @@ void Cmd_Say_f(SVGBasePlayer *player, ServerClient *client, qboolean team, qbool
         SVG_CPrint(NULL, PRINT_CHAT, sayBuffer);
 
     // Loop over client entities.
-    for (auto& otherplayer : GetGameworld()->GetGameEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
+    for (auto& otherplayer : GetGameWorld()->GetGameEntityRange(1, game.GetMaxClients()) | cef::Standard | cef::HasClient) {
         if (team) {
             if (!SVG_OnSameTeam(player, otherplayer))
                 continue;
@@ -872,7 +872,7 @@ void Cmd_PlayerList_f(SVGBasePlayer* player, ServerClient* client) {
     Entity *e2;
 
     // Acquire the world's server entity array pointer.
-    Entity* serverEntities = GetGameworld()->GetPODEntities();
+    Entity* serverEntities = GetGameWorld()->GetPODEntities();
 
     // connect time, ping, score, name
     *text = 0;
@@ -913,7 +913,7 @@ void SVG_ClientCommand(PODEntity *svEntity) {
     //
     //
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(svEntity, true, true);
+    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(svEntity, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

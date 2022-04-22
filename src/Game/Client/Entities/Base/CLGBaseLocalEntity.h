@@ -1137,10 +1137,10 @@ public:
     /**
     *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
     **/
-    void CLGLocalClientEntityThinkFree(void);
+    void CLGBaseLocalEntityThinkFree(void);
 
     /**
     *   @brief  Callback for assigning when "no thinking" behavior is wished for.
     **/
-    void CLGLocalClientEntityThinkNull() { }
+    void CLGBaseLocalEntityThinkNull() { }
 };

@@ -21,11 +21,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Entities.
 #include "Entities.h"
 
-// Gamemodes.
-#include "Gamemodes/IGamemode.h"
+// GameModes.
+#include "GameModes/IGameMode.h"
 
 // World.
-#include "World/ServerGameworld.h"
+#include "World/ServerGameWorld.h"
 
 //#define _DEBUG
 typedef struct {
@@ -749,7 +749,7 @@ void SVG_WriteGame(const char *filename, qboolean autosave)
     int     i;
 
     if (!autosave)
-        GetGamemode()->StorePlayerPersistentData();
+        GetGameMode()->StorePlayerPersistentData();
 
     f = fopen(filename, "wb");
     if (!f)

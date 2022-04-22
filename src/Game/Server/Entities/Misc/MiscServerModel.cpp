@@ -16,7 +16,7 @@
 #include "../Base/SVGBaseTrigger.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 // Misc Server Model Entity.
 #include "MiscServerModel.h"
@@ -263,7 +263,7 @@ void MiscServerModel::MiscServerModelThink(void) {
     //    vec3_t currentMoveAngles = GetAngles();
     //
     //    // Direction vector between player and other entity.
-    //    vec3_t wishMoveAngles = GetGameworld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
+    //    vec3_t wishMoveAngles = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
 
     //    //  
     //    vec3_t newModelAngles = vec3_euler(wishMoveAngles);
@@ -309,7 +309,7 @@ void MiscServerModel::MiscServerModelDie(IServerGameEntity* inflictor, IServerGa
     SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
-    ServerGameworld* gameworld = GetGameworld();
+    ServerGameWorld* gameworld = GetGameWorld();
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
     gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);

@@ -4,14 +4,20 @@
 *
 *	@file
 *
-*	Client Game EntityList implementation.
+*	Entities that are received by the server-side frame packets such as anything that moves and/or
+*	does not have its NOCLIENTS flag set are inherited from CLGBasePacketEntity. These entities come
+*	and go on a per frame basis. 
+*
+*	The client side soul-mate of these entities is generally just an instance of the CLGBasePacketEntity 
+*	itself. If there is any need to adjust the way how it is represented on-screen in more advanced 
+*	manners than a SetEffects/SetRenderEffects, and/or to try and predict an entities movement and its
+*	actions, then one should inherit from this class to provide its client-side counterpart. 
 * 
 ***/
 #include "../../ClientGameLocals.h"
 
 // Base Client Game Functionality.
 #include "../Debug.h"
-#include "../Entities.h"
 #include "../TemporaryEntities.h"
 
 // Export classes.
@@ -377,7 +383,7 @@ void CLGBasePacketEntity::Remove()
 /**
 *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
 **/
-void CLGBasePacketEntity::CLGBaseEntityThinkFree(void) {
+void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 	//CLG_FreeEntity(serverEntity);
 	Remove();
 }

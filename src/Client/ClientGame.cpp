@@ -743,11 +743,11 @@ qboolean CL_GM_CreateFromNewState(PODEntity* clEntity, const EntityState& state)
 /**
 *   @brief  Executed whenever a server frame entity event is receieved.
 **/
-void CL_GM_ServerEntityEvent(int32_t number) {
+void CL_GM_PacketEntityEvent(int32_t number) {
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-            entities->ServerEntityEvent(number);
+            entities->PacketEntityEvent(number);
         }
     }
 }

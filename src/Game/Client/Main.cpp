@@ -11,17 +11,16 @@
 #include "ClientGameLocals.h"          // Include SVGame header.
 
 // Entities.
-#include "Entities.h"
 //#include "Entities/Worldspawn.h"
 
-// Gamemodes.
-//#include "Gamemodes/IGamemode.h"
-//#include "Gamemodes/DefaultGamemode.h"
-//#include "Gamemodes/CoopGamemode.h"
-//#include "Gamemodes/DeathMatchGamemode.h"
+// GameModes.
+//#include "GameModes/IGameMode.h"
+//#include "GameModes/DefaultGameMode.h"
+//#include "GameModes/CoopGameMode.h"
+//#include "GameModes/DeathMatchGameMode.h"
 
-// Gameworld.
-#include "World/ClientGameworld.h"
+// GameWorld.
+#include "World/ClientGameWorld.h"
 
 // Player related.
 //#include "Player/Client.h"      // Include Player Client header.

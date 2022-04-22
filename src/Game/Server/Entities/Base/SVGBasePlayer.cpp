@@ -14,10 +14,10 @@
 #include "../../Utilities.h"                // Util funcs.
 
 // Game Mode interface.
-#include "../../Gamemodes/IGamemode.h"
+#include "../../GameModes/IGameMode.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 // Class entities.
 #include "../Base/SVGBaseEntity.h"
@@ -37,7 +37,7 @@ SVGBasePlayer::SVGBasePlayer(PODEntity *svEntity) : Base(svEntity) {
 **/
 SVGBasePlayer* SVGBasePlayer::Create(PODEntity *svEntity) {
     // Get gameworld pointer.
-    ServerGameworld* gameworld = GetGameworld();
+    ServerGameWorld* gameworld = GetGameWorld();
 
     // Get pointer to server entities.
     Entity* serverEntities = gameworld->GetPODEntities();
@@ -182,7 +182,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
         SetPlayerMoveType(EnginePlayerMoveType::Dead);
 
         // Update the obituary.
-        GetGamemode()->ClientUpdateObituary(this, inflictor, attacker);
+        GetGameMode()->ClientUpdateObituary(this, inflictor, attacker);
 
         // Toss our weapon, assuming we had any.
         TossWeapon();
@@ -193,7 +193,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
         SVG_Command_Score_f(this, client);
 
         // Let the gamemode know this client died.
-        GetGamemode()->ClientDeath(this);
+        GetGameMode()->ClientDeath(this);
     }
 
     // Remove powerups.
@@ -206,7 +206,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
 
         // Throw some gibs around, true horror oh boy.
         // Get gameworld pointer.
-	    ServerGameworld* gameworld = GetGameworld();
+	    ServerGameWorld* gameworld = GetGameWorld();
         gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
         gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
         gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
@@ -307,7 +307,7 @@ void SVGBasePlayer::PlayerNoise(SVGBaseEntity* noiseEntity, const vec3_t& noiseO
 
 //if (deathmatch->value)
 //    return;
-//if (GetGamemode()->IsClass<DeathmatchGamemode>()) {
+//if (GetGameMode()->IsClass<DeathmatchGameMode>()) {
 //    return;
 //}
 
@@ -368,7 +368,7 @@ void SVGBasePlayer::WeaponThink() {
     }
 
     // If dead, switch to weapon ID 0 (a space holder, but is essentially no weapon.)
-    if (GetGamemode()->IsDeadEntity(this)) {
+    if (GetGameMode()->IsDeadEntity(this)) {
         ChangeWeapon(0, false);
         return;
     }
@@ -848,11 +848,11 @@ void SVGBasePlayer::LookAtKiller(IServerGameEntity* inflictor, IServerGameEntity
     }
 
     // Is the attack, not us, or the world?
-    if (attacker && attacker != GetGameworld()->GetWorldspawnGameEntity() && attacker != this) {
+    if (attacker && attacker != GetGameWorld()->GetWorldspawnGameEntity() && attacker != this) {
         float yaw = vec3_to_yaw(attacker->GetOrigin() - GetOrigin());
         SetKillerYaw(yaw);
     // Is the inflictor, and not an attack, NOT us or the WORLD?
-    } else if (inflictor && inflictor != GetGameworld()->GetWorldspawnGameEntity() && inflictor != this) {
+    } else if (inflictor && inflictor != GetGameWorld()->GetWorldspawnGameEntity() && inflictor != this) {
         float yaw = vec3_to_yaw(inflictor->GetOrigin() - GetOrigin());
         SetKillerYaw(yaw);
     // If none of the above, set the yaw as is.
@@ -957,8 +957,8 @@ void SVGBasePlayer::CheckFallingDamage()
         dir = { 0.f, 0.f, 1.f };
 
         //if (!deathmatch->value || 
-        if (!((int)gamemodeflags->value & GamemodeFlags::NoFallingDamage)) {
-	        GetGamemode()->InflictDamage(this, GetGameworld()->GetWorldspawnGameEntity(), GetGameworld()->GetWorldspawnGameEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
+        if (!((int)gamemodeflags->value & GameModeFlags::NoFallingDamage)) {
+	        GetGameMode()->InflictDamage(this, GetGameWorld()->GetWorldspawnGameEntity(), GetGameWorld()->GetWorldspawnGameEntity(), dir, GetOrigin(), vec3_zero(), damage, 0, 0, MeansOfDeath::Falling);
         }
     } else {
         SetEventID(EntityEvent::FallShort);
@@ -986,7 +986,7 @@ void SVGBasePlayer::CheckWorldEffects()
     }
 
     // Get gameworld pointer.
-    ServerGameworld* gameworld = GetGameworld();
+    ServerGameWorld* gameworld = GetGameWorld();
 
     // Retreive waterLevel.
     waterLevel = GetWaterLevel();
@@ -1059,7 +1059,7 @@ void SVGBasePlayer::CheckWorldEffects()
 
                 SetDebouncePainTime(level.time);
 
-                GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
+                GetGameMode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 0, DamageFlags::NoArmorProtection, MeansOfDeath::Water);
             }
         }
     } else {
@@ -1079,11 +1079,11 @@ void SVGBasePlayer::CheckWorldEffects()
                 SetDebouncePainTime(level.time + 1s);
             }
 
-            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
+            GetGameMode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 3 * waterLevel, 0, 0, MeansOfDeath::Lava);
         }
 
         if (GetWaterType() & BrushContents::Slime) {
-            GetGamemode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
+            GetGameMode()->InflictDamage(this, gameworld->GetWorldspawnGameEntity(), gameworld->GetWorldspawnGameEntity(), vec3_zero(), GetOrigin(), vec3_zero(), 1 * waterLevel, 0, 0, MeansOfDeath::Slime);
         }
     }
 }

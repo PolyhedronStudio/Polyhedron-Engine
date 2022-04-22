@@ -12,7 +12,6 @@
 
 // Base Client Game Functionality.
 #include "../Debug.h"
-#include "../Entities.h"
 #include "../TemporaryEntities.h"
 
 // Export classes.
@@ -27,7 +26,7 @@
 #include "../Entities/Base/CLGBasePacketEntity.h"
 
 // World.
-#include "../World/ClientGameworld.h"
+#include "../World/ClientGameWorld.h"
 
 
 // WID: TODO: Gotta fix this one too.
@@ -53,7 +52,7 @@ static constexpr int32_t RESERVED_ENTITIY_COUNT = 2051;
 *   @return True on success.
 **/
 qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
-	ClientGameworld *gameWorld = GetGameworld();
+	ClientGameWorld *gameWorld = GetGameWorld();
 	return gameWorld->SpawnFromBSPString("mapname", bspString, nullptr);
 	// Clear level state.
     //level = {};
@@ -276,7 +275,7 @@ qboolean ClientGameEntities::CreateGameEntityFromDictionary(PODEntity* clEntity,
 //    gameEntity->Precache();
 //    gameEntity->Spawn();
 
-	ClientGameworld *gameWorld = GetGameworld();
+	ClientGameWorld *gameWorld = GetGameWorld();
 	//gameWorld->CreateGameEntity
 
     // Success.
@@ -305,14 +304,14 @@ qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, cons
     }
 
 	// Acquire gameworld.
-	ClientGameworld *gameWorld = GetGameworld();
+	ClientGameWorld *gameWorld = GetGameWorld();
     
     // Depending on the state it will either return a pointer to a new classentity type, or to an already existing in place one.
     IClientGameEntity *clgEntity = gameWorld->UpdateGameEntityFromState(state, clEntity);
 
 	// Debug.
 	if (!clgEntity) {
-		Com_DPrint("Warning: ClientGameEntities::UpdateFromState had a nullptr returned from ClientGameworld::UpdateGameEntityFromState\n");
+		Com_DPrint("Warning: ClientGameEntities::UpdateFromState had a nullptr returned from ClientGameWorld::UpdateGameEntityFromState\n");
 		return false;
 	} else {
 		//// Precache and spawn entity.
@@ -406,8 +405,8 @@ void ClientGameEntities::RunFrame() {
 	// Unlike for the server game, the level's framenumber, time and timeStamp
     // have already been calculated before reaching this point.
 
-	// Get Gameworld.
-	ClientGameworld *gameWorld = GetGameworld();
+	// Get GameWorld.
+	ClientGameWorld *gameWorld = GetGameWorld();
 
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 0; entityNumber < cl->frame.numEntities; entityNumber++) {
@@ -446,12 +445,59 @@ void ClientGameEntities::RunFrame() {
     }
 }
 
+///**
+//*   @brief  Gets us a pointer to the entity that is currently being viewed.
+//*           This could be an other client to in case of spectator mode.
+//**/
+//PODEntity* CLG_GetClientViewEntity(void) {
+//    // Default is of course our own client entity number.
+//    int32_t index = cl->clientNumber;
+//
+//    // However, faith has it that a chase client ID might be set, in which case we want to switch to its number instead.
+//    if (cl->frame.playerState.stats[PlayerStats::ChaseClientID]) {
+//        index = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
+//    }
+//
+//    return &cs->entities[index + 1];
+//}
+//
+///**
+//*   @return True if the specified entity is bound to the local client's view.
+//**/
+//qboolean CLG_IsClientViewEntity(const PODEntity* ent) {
+//    // If the entity number matches, then we're good.
+//    if (ent->current.number == cl->clientNumber + 1) {
+//        return true;
+//    }
+//
+//    // If not, then we are viewing an other client entity, check whether it is in corpse mode.
+//    if ((ent->current.effects & EntityEffectType::Corpse) == 0) {
+//        // No corpse, and modelIndex #255 indicating that we are dealing with a client entity.
+//        if (ent->current.modelIndex == 255) {
+//            // If the entity number matches our client number, we're good to go.
+//            if (ent->current.number == cl->clientNumber) {
+//                return true;
+//            } 
+//
+//            // Otherwise we'll fetch the number of currently being chased client and see if that matches with this entity's number instead.
+//            const int16_t chase = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
+//
+//            // Oh boy, it matched, someone is really happy right now.
+//            if (ent->current.number == chase) {
+//                return true;
+//            }
+//        }
+//    }
+//
+//    // All bets are off, this is no client entity which we are viewing.
+//    return false;
+//}
 //-------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Executed whenever a server frame entity event is receieved.
 **/
-void ClientGameEntities::ServerEntityEvent(int32_t number) {
+void ClientGameEntities::PacketEntityEvent(int32_t number) {
     // Ensure entity number is in bounds.
     if (number < 0 || number > MAX_ENTITIES) {
         Com_WPrint("ClientGameEntities::Event caught an OOB Entity ID: %i\n", number);
@@ -517,7 +563,7 @@ void ClientGameEntities::AddPacketEntities() {
     int32_t autoAnimation = BASE_FRAMERATE * cl->time / BASE_FRAMETIME_1000;
 
 
-	ClientGameworld *gameWorld = GetGameworld();
+	ClientGameWorld *gameWorld = GetGameWorld();
 
     // Iterate from 0 till the amount of entities present in the current frame.
     for (int32_t pointerNumber = 0; pointerNumber < cl->frame.numEntities; pointerNumber++) {
@@ -969,7 +1015,7 @@ void ClientGameEntities::AddPacketEntities() {
 //
 //    }
 //
-//	ClientGameworld *gameWorld = GetGameworld();
+//	ClientGameWorld *gameWorld = GetGameWorld();
 //	GameEntityVector gameEntities = gameWorld->GetGameEntities();
 //
 //    // Iterate from 0 till the amount of entities present in the current frame.

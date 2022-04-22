@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// CoopGamemode.cpp
+// CoopGameMode.cpp
 //
 //
 */
@@ -16,18 +16,18 @@
 #include "../Entities/Base/SVGBasePlayer.h"
 
 // Game Mode.
-#include "CoopGamemode.h"
+#include "CoopGameMode.h"
 
 // World.
-#include "../World/ServerGameworld.h"
+#include "../World/ServerGameWorld.h"
 
 //
 // Constructor/Deconstructor.
 //
-CoopGamemode::CoopGamemode() : DefaultGamemode() {
+CoopGameMode::CoopGameMode() : DefaultGameMode() {
 
 }
-CoopGamemode::~CoopGamemode() {
+CoopGameMode::~CoopGameMode() {
 
 }
 
@@ -36,28 +36,28 @@ CoopGamemode::~CoopGamemode() {
 //
 //
 
-qboolean CoopGamemode::CanSaveGame(qboolean isDedicatedServer) {
+qboolean CoopGameMode::CanSaveGame(qboolean isDedicatedServer) {
     // Can't save deathmatch games.
     return true;
 }
 
 //
 //===============
-// CoopGamemode::CanDamage
+// CoopGameMode::CanDamage
 //
 // Template function serves as an example atm.
 //===============
 //
-qboolean CoopGamemode::CanDamage(IServerGameEntity* target, IServerGameEntity* inflictor) {
-    // Let it be to DefaultGamemode. :)
-    return DefaultGamemode::CanDamage(target, inflictor);
+qboolean CoopGameMode::CanDamage(IServerGameEntity* target, IServerGameEntity* inflictor) {
+    // Let it be to DefaultGameMode. :)
+    return DefaultGameMode::CanDamage(target, inflictor);
 }
 
 //===============
-// CoopGamemode::ClientUpdateObituary.
+// CoopGameMode::ClientUpdateObituary.
 // 
 //===============
-void CoopGamemode::ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) {
+void CoopGameMode::ClientUpdateObituary(IServerGameEntity* self, IServerGameEntity* inflictor, IServerGameEntity* attacker) {
     std::string message; // String stating what happened to whichever entity. "suicides", "was squished" etc.
     std::string messageAddition; // String stating what is additioned to it, "'s shrapnell" etc. Funny stuff.
 
@@ -209,11 +209,11 @@ void CoopGamemode::ClientUpdateObituary(IServerGameEntity* self, IServerGameEnti
 }
 
 //===============
-// CoopGamemode::RespawnClient
+// CoopGameMode::RespawnClient
 // 
 // Respawns a client after intermission and hitting a button.
 //===============
-void CoopGamemode::RespawnClient(SVGBasePlayer* player) {
+void CoopGameMode::RespawnClient(SVGBasePlayer* player) {
     // Spectator's don't leave bodies
     if (player->GetMoveType() != MoveType::Spectator) {
 	    SpawnClientCorpse(player);
@@ -241,11 +241,11 @@ void CoopGamemode::RespawnClient(SVGBasePlayer* player) {
 }
 
 //===============
-// CoopGamemode::RespawnAllClients
+// CoopGameMode::RespawnAllClients
 //
 // Respawn all valid client entities who's health is < 0.
 //===============
-void CoopGamemode::RespawnAllClients() {
+void CoopGameMode::RespawnAllClients() {
     // Respawn all valid client entities who's health is < 0.
     for (auto& player : game.world->GetGameEntityRange<0, MAX_EDICTS>()
         | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>())
@@ -257,11 +257,11 @@ void CoopGamemode::RespawnAllClients() {
 }
 
 //===============
-// CoopGamemode::ClientDeath
+// CoopGameMode::ClientDeath
 // 
 // Does nothing for this game mode.
 //===============
-void CoopGamemode::ClientDeath(SVGBasePlayer *player) {
+void CoopGameMode::ClientDeath(SVGBasePlayer *player) {
     // Ensure the client is valid.
     if (!player) {
         return;
@@ -289,14 +289,14 @@ void CoopGamemode::ClientDeath(SVGBasePlayer *player) {
 }
 
 //===============
-// CoopGamemode::StorePlayerPersistentData
+// CoopGameMode::StorePlayerPersistentData
 // 
 // Some information that should be persistant, like health,
 // is still stored in the edict structure, so it needs to
 // be mirrored out to the client structure before all the
 // edicts are wiped.
 //===============
-void CoopGamemode::StorePlayerPersistentData(void) {
+void CoopGameMode::StorePlayerPersistentData(void) {
     // Acquire pointer to the current game's clients.
 	ServerClient* gameClients = game.GetClients();
 	// Pointer to the POD Entities.
@@ -317,11 +317,11 @@ void CoopGamemode::StorePlayerPersistentData(void) {
 }
 
 //===============
-// CoopGamemode::RespawnClient
+// CoopGameMode::RespawnClient
 // 
 // // Fetch client data that was stored between previous entity wipe session
 //===============
-void CoopGamemode::RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) {
+void CoopGameMode::RestorePlayerPersistentData(SVGBaseEntity* player, ServerClient* client) {
     if (!player || !client) {
         return;
     }

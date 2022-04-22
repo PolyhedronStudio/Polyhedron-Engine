@@ -4,10 +4,10 @@
 *
 *	@file
 *
-*	The Gameworld class exists to create, destroy and keep track of entity their lifetimes.
+*	The GameWorld class exists to create, destroy and keep track of entity their lifetimes.
 *	(including but not limited to, player entities, explosions, gibs and debris.)
 * 
-*	Aside from that it also households the currently active Gamemode.
+*	Aside from that it also households the currently active GameMode.
 *
 ***/
 #pragma once
@@ -15,7 +15,7 @@
 // Pre-declare.
 class SGEntityHandle;
 class ISharedGameEntity;
-class IGamemode;
+class IGameMode;
 class Worldspawn;
 
 
@@ -25,17 +25,17 @@ class Worldspawn;
 * 
 *	@details 
 **/
-class IGameworld {
+class IGameWorld {
 public:
     /**
 	*	@brief Default constructor.
 	**/
-    IGameworld() = default;
+    IGameWorld() = default;
 
     /**
 	*	@brief Default destructor
 	**/
-    virtual ~IGameworld() = default;
+    virtual ~IGameWorld() = default;
 
 public:
     /**
@@ -52,15 +52,15 @@ public:
     /**
 	*	@brief	Creates the correct gamemode object instance based on the gamemode cvar.
 	**/
-    virtual void SetupGamemode() = 0;
+    virtual void SetupGameMode() = 0;
     /**
 	*	@brief	Destroys the current gamemode object.
 	**/
-    virtual void DestroyGamemode() = 0;
+    virtual void DestroyGameMode() = 0;
     /**
 	*	@return A pointer to the current active game mode.
 	**/
-    virtual IGamemode* GetGamemode() = 0;
+    virtual IGameMode* GetGameMode() = 0;
 
 
 
@@ -251,7 +251,7 @@ public:
 
 private:
     //! Currently active game mode.
-    IGamemode* currentGamemode = nullptr;
+    IGameMode* currentGameMode = nullptr;
 
     //! Clients array, allocated to the size of maxclients cvar.
     ServerClient *clients = nullptr;

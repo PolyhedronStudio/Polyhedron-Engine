@@ -22,7 +22,7 @@
 // Shared Entity Interface.
 #include "Entities/ISharedGameEntity.h"
 
-//! This is the actual Gameworld POD array with a size based on which GameModule we are building for.
+//! This is the actual GameWorld POD array with a size based on which GameModule we are building for.
 using PODGameWorldArray = PODEntity[MAX_POD_ENTITIES];
 
 //! std::span for PODEntity* objects.

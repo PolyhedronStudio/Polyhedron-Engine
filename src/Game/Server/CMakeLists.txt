@@ -105,9 +105,9 @@ SET(SRC_SVGAME
 	Entities/Light.cpp
 	Entities/Worldspawn.cpp
 
-	Gamemodes/DefaultGamemode.cpp
-	Gamemodes/CoopGamemode.cpp
-	Gamemodes/DeathMatchGamemode.cpp
+	GameModes/DefaultGameMode.cpp
+	GameModes/CoopGameMode.cpp
+	GameModes/DeathMatchGameMode.cpp
 
 	Physics/Physics.cpp
 	Physics/StepMove.cpp
@@ -117,7 +117,7 @@ SET(SRC_SVGAME
 
 	Utilities/SVGTraceResult.cpp
 
-	World/ServerGameworld.cpp
+	World/ServerGameWorld.cpp
 	#SVGame.def
 	
 )
@@ -193,17 +193,17 @@ SET(HEADERS_SVGAME
 	Entities/Light.h
 	Entities/Worldspawn.h
 
-	Gamemodes/DefaultGamemode.h
-	Gamemodes/CoopGamemode.h
-	Gamemodes/DeathMatchGamemode.h
-	Gamemodes/IGamemode.h
+	GameModes/DefaultGameMode.h
+	GameModes/CoopGameMode.h
+	GameModes/DeathMatchGameMode.h
+	GameModes/IGameMode.h
 
 	Player/Animations.h
 	Player/Client.h
 
 	Utilities/SVGTraceResult.h
 
-	World/ServerGameworld.h
+	World/ServerGameWorld.h
 	#SVGame.def
 
 )

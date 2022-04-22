@@ -25,14 +25,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //#include "Entities/Base/SVGEntityHandle.h"
 //#include "Entities/Base/SVGBasePlayer.h"
 
-// Gamemodes.
-#include "Gamemodes/IGamemode.h"
-#include "Gamemodes/DefaultGamemode.h"
-#include "Gamemodes/CoopGamemode.h"
-#include "Gamemodes/DeathMatchGamemode.h"
+// GameModes.
+#include "GameModes/IGameMode.h"
+#include "GameModes/DefaultGameMode.h"
+#include "GameModes/CoopGameMode.h"
+#include "GameModes/DeathMatchGameMode.h"
 
-// Gameworld.
-#include "World/ServerGameworld.h"
+// GameWorld.
+#include "World/ServerGameWorld.h"
 
 // Player related.
 #include "Player/Client.h"      // Include Player Client header.
@@ -56,7 +56,7 @@ int snd_fry;
 //-----------------
 // CVars.
 //-----------------
-// Gamemode and Server settings.
+// GameMode and Server settings.
 cvar_t* gamemode = nullptr;  // Stores the gamemode string: "singleplayer", "deathmatch", "coop"
 cvar_t* gamemodeflags = nullptr;
 cvar_t* skill = nullptr;
@@ -162,7 +162,7 @@ void SVG_ShutdownGame(void) {
 
 // TODO: Move elsewhere...
 qboolean SVG_CanSaveGame(qboolean isDedicatedServer) { 
-    IGamemode* gamemode = GetGamemode();
+    IGameMode* gamemode = GetGameMode();
 
     if (!gamemode)
         return false;
@@ -330,7 +330,7 @@ static void SVG_SetupCVars() {
 //
 void SVG_SpawnEntities(const char* mapName, const char* entities, const char* spawnpoint) {
     // Acquire game world pointer.
-    ServerGameworld* gameworld = GetGameworld();
+    ServerGameWorld* gameworld = GetGameWorld();
 
     // Spawn entities.
     gameworld->SpawnFromBSPString(mapName, entities, spawnpoint);
@@ -345,7 +345,7 @@ void SVG_SpawnEntities(const char* mapName, const char* entities, const char* sp
 //
 void SVG_ClientEndServerFrames(void)
 {
-    ServerGameworld* gameworld = GetGameworld();
+    ServerGameWorld* gameworld = GetGameWorld();
 
     // Acquire server entities array.
     Entity* serverEntities = gameworld->GetPODEntities();
@@ -361,7 +361,7 @@ void SVG_ClientEndServerFrames(void)
         Entity *entity = &serverEntities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
         // Acquire player entity pointer.
-        SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(entity, true, true);
+        SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(entity, true, true);
 
         // Sanity check.
         if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
@@ -375,7 +375,7 @@ void SVG_ClientEndServerFrames(void)
         ServerClient *client = player->GetClient();
 
         // Notify game mode about this client ending its server frame.
-        gameworld->GetGamemode()->ClientEndServerFrame(player, client);
+        gameworld->GetGameMode()->ClientEndServerFrame(player, client);
     }
 }
 
@@ -393,7 +393,7 @@ void SVG_EndDMLevel(void)
     static const char *seps = " ,\n\r";
 
     // Stay on same level flag
-    if ((int)gamemodeflags->value & GamemodeFlags::SameLevel) {
+    if ((int)gamemodeflags->value & GameModeFlags::SameLevel) {
         SVG_HUD_BeginIntermission(nullptr);//SVG_CreateTargetChangeLevel(level.mapName));
         return;
     }
@@ -524,7 +524,7 @@ void SVG_RunFrame(void) {
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
         //SVG_ExitLevel();
-        GetGamemode()->OnLevelExit();
+        GetGameMode()->OnLevelExit();
         return;
     }
 
@@ -609,7 +609,7 @@ void SVG_RunFrame(void) {
             }
 
             // Last but not least, begin its server frame.
-            GetGamemode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(gameEntity), client);
+            GetGameMode()->ClientBeginServerFrame(dynamic_cast<SVGBasePlayer*>(gameEntity), client);
 
             // Continue to next iteration.
             continue;

@@ -11,7 +11,7 @@
 
 #include "../Base/SVGBaseEntity.h"
 
-#include "../../Gamemodes/IGamemode.h"
+#include "../../GameModes/IGameMode.h"
 
 #include "TargetExplosion.h"
 
@@ -55,7 +55,7 @@ void TargetExplosion::ExplosionThink() {
 	gi.MSG_WriteVector3( GetOrigin(), false );
 	gi.Multicast( GetOrigin(), Multicast::PHS );
 
-	GetGamemode()->InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
+	GetGameMode()->InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
 	const Frametime save = GetDelayTime();
 	SetDelayTime( 0s );

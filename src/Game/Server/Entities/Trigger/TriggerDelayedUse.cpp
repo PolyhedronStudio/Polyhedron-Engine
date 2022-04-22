@@ -19,8 +19,8 @@
 // Delayed use.
 #include "TriggerDelayedUse.h"
 
-// Gameworld.
-#include "../../World/ServerGameworld.h"
+// GameWorld.
+#include "../../World/ServerGameWorld.h"
 //
 // Spawn Flags.
 // 
@@ -129,5 +129,5 @@ void TriggerDelayedUse::TriggerDelayedUseThink() {
 	UseTargets(GetActivator());
 
 	// Free this entity.
-	GetGameworld()->FreePODEntity(GetPODEntity());
+	GetGameWorld()->FreePODEntity(GetPODEntity());
 }

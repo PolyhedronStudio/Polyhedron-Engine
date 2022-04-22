@@ -13,7 +13,7 @@
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Deathmatch Game Mode.
-#include "../../Gamemodes/DeathMatchGamemode.h"
+#include "../../GameModes/DeathMatchGameMode.h"
 
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
@@ -23,7 +23,7 @@
 #include "../Base/SVGBasePlayer.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 // Beretta.
 #include "ItemWeaponBeretta.h"
@@ -296,7 +296,7 @@ void ItemWeaponBeretta::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SV
 **/
 qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(other, true, true);
+    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(other, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
@@ -330,7 +330,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
     }
 
     // Set a respawn think for after 2 seconds.
-    if (!GetGamemode()->IsClass<DefaultGamemode>()) {
+    if (!GetGameMode()->IsClass<DefaultGameMode>()) {
         SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
         SetNextThinkTime(level.time + 2s);
     }
@@ -343,7 +343,7 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
 **/
 void ItemWeaponBeretta::InstanceWeaponBerettaUse(SVGBaseEntity* user, SVGBaseItem* item) { 
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameworld::ValidateEntity(user, true, true);
+    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(user, true, true);
 
     // Sanity check.
     if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {

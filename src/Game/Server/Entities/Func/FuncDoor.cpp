@@ -19,8 +19,8 @@
 #include "FuncAreaportal.h"
 #include "FuncDoor.h"
 
-#include "../../Gamemodes/IGamemode.h"
-#include "../../World/ServerGameworld.h"
+#include "../../GameModes/IGameMode.h"
+#include "../../World/ServerGameWorld.h"
 
 //===============
 // FuncDoor::ctor
@@ -62,7 +62,7 @@ void FuncDoor::Spawn() {
     if ( !GetSpeed() ) {
         SetSpeed( 100.0f );
     }
-    //if ( GetGamemode()->IsClass( GamemodeDeathmatch::ClassInfo ) ) {
+    //if ( GetGameMode()->IsClass( GameModeDeathmatch::ClassInfo ) ) {
     //    SetSpeed( GetSpeed() * 2.0f );
     //}
     if ( !GetAcceleration() ) {
@@ -233,7 +233,7 @@ void FuncDoor::DoorBlocked( IServerGameEntity* other ) {
 
     if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
         // Give it a chance to go away on its own terms (like gibs)
-        GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
+        GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
 
         // If it's still there, nuke it
         if ( other->GetHealth() > 0 || other->GetSolid() != Solid::Not ) {
@@ -241,7 +241,7 @@ void FuncDoor::DoorBlocked( IServerGameEntity* other ) {
         }
     }
 
-    GetGamemode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+    GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 
     if ( GetSpawnFlags() & SF_Crusher ) {
         return;
@@ -548,7 +548,7 @@ void FuncDoor::UseAreaportals( bool open ) const {
     }
 
     SVGBaseEntity* ent = nullptr;
-    for (auto& areaPortalEntity : GetGameworld()->GetGameEntityRange<0, MAX_EDICTS>() | 
+    for (auto& areaPortalEntity : GetGameWorld()->GetGameEntityRange<0, MAX_EDICTS>() | 
         cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::IsSubclassOf<FuncAreaportal>() | cef::HasKeyValue("targetname", targetStr)) {
 	    dynamic_cast<FuncAreaportal*>(areaPortalEntity)->ActivatePortal(open);
     }

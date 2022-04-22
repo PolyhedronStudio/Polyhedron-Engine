@@ -41,7 +41,7 @@ SET(SRC_CLGAME
 
 	Utilities/CLGTraceResult.cpp
 
-	World/ClientGameworld.cpp
+	World/ClientGameWorld.cpp
 
 	Exports/Core.cpp
 	Exports/Entities.cpp
@@ -64,7 +64,6 @@ SET(SRC_CLGAME
 
 	ClientGameLocals.cpp
 	Debug.cpp
-	Entities.cpp
 	Main.cpp
 	TemporaryEntities.cpp
 
@@ -114,11 +113,10 @@ SET(HEADERS_CLGAME
 
 	Utilities/CLGTraceResult.h
 
-	World/ClientGameworld.h
+	World/ClientGameWorld.h
 
 	ClientGameLocals.h
 	Debug.h
-	Entities.h
 	Main.h
 	TemporaryEntities.h
 )

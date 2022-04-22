@@ -13,7 +13,7 @@
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
 
-#include "../../Gamemodes/IGamemode.h"
+#include "../../GameModes/IGameMode.h"
 
 #include "TriggerHurt.h"
 
@@ -158,7 +158,7 @@ void TriggerHurt::TriggerHurtTouch(IServerGameEntity* self, IServerGameEntity* o
 	else
 		damageFlags = 0;
 
-	GetGamemode()->InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
+	GetGameMode()->InflictDamage(other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), GetDamage(), damageFlags, MeansOfDeath::TriggerHurt);
 }
 
 //

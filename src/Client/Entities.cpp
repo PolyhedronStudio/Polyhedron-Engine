@@ -215,7 +215,7 @@ static void ServerEntity_UpdateState(const EntityState &state)
 *   @brief  Notifies the client game about an entity event to execute.
 **/
 static void ServerEntity_FireEvent(int number) {
-    CL_GM_ServerEntityEvent(number);
+    CL_GM_PacketEntityEvent(number);
 }
 
 

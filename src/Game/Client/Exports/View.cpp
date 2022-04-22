@@ -9,7 +9,7 @@
 ***/
 #include "../ClientGameLocals.h"
 
-#include "../Entities.h"
+// Temporary Entities.
 #include "../TemporaryEntities.h"
 
 // Effects.

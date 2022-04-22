@@ -8,7 +8,7 @@
 *
 ***/
 #include "../ServerGameLocals.h"
-#include "../World/ServerGameworld.h"
+#include "../World/ServerGameWorld.h"
 
 
 /**
@@ -34,7 +34,7 @@ SVGTraceResult::SVGTraceResult(TraceResult& traceResult) :
 	offsets[7] = traceResult.offsets[7];
 
 	// If an entity has been found, look it up in our client entities and assign it.
-	ServerGameworld *gameWorld = GetGameworld();
+	ServerGameWorld *gameWorld = GetGameWorld();
 	GameEntityVector &gameEntities = gameWorld->GetGameEntities();
 
 	if (traceResult.ent) {
@@ -86,7 +86,7 @@ SVGTraceResult::SVGTraceResult(const TraceResult& traceResult) :
 	offsets[7] = traceResult.offsets[7];
 
 	// If an entity has been found, look it up in our client entities and assign it.
-	ServerGameworld *gameWorld = GetGameworld();
+	ServerGameWorld *gameWorld = GetGameWorld();
 	GameEntityVector &gameEntities = gameWorld->GetGameEntities();
 
 	if (traceResult.ent) {
@@ -97,7 +97,7 @@ SVGTraceResult::SVGTraceResult(const TraceResult& traceResult) :
 		const uint32_t index = tracePODEntity->currentState.number;
 
 		// Look up both the POD and Game Enties into our gameworld to make sure we got the proper pointers.
-		ServerGameworld *gameWorld = GetGameworld();
+		ServerGameWorld *gameWorld = GetGameWorld();
 		gameEntity	= gameWorld->GetGameEntityByIndex(index);
 		podEntity	= gameWorld->GetPODEntityByIndex(index);
 

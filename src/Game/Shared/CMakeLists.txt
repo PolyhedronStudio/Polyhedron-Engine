@@ -9,7 +9,7 @@
 SET(SRC_SHAREDGAME
 	Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
 
-	World/IGameworld.cpp
+	World/IGameWorld.cpp
 
 	PMove.cpp
 	SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
@@ -24,7 +24,7 @@ SET(HEADERS_SHAREDGAME
 	Entities/TypeInfo.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/TypeInfo.h 
 	Entities.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities.h 
 
-	World/IGameworld.h
+	World/IGameWorld.h
 	
 	PMove.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.h 
 	Protocol.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Protocol.h 

@@ -16,8 +16,8 @@
 
 #include "FuncExplosive.h"
 
-#include "../../Gamemodes/IGamemode.h"
-#include "../../World/ServerGameworld.h"
+#include "../../GameModes/IGameMode.h"
+#include "../../World/ServerGameWorld.h"
 
 //===============
 // FuncExplosive::FuncExplosive
@@ -81,7 +81,7 @@ void FuncExplosive::ExplosiveDeath( IServerGameEntity* inflictor, IServerGameEnt
     SetTakeDamage( TakeDamage::No );
 
     if ( GetDamage() ) {
-        GetGamemode()->InflictRadiusDamage( this, attacker, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive );
+        GetGameMode()->InflictRadiusDamage( this, attacker, GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive );
     }
 
     // Velocity = attack direction * 150
@@ -103,7 +103,7 @@ void FuncExplosive::ExplosiveDeath( IServerGameEntity* inflictor, IServerGameEnt
             chunkorigin[0] = origin[0] + crandom() * size[0] * 0.5f;
             chunkorigin[1] = origin[0] + crandom() * size[1] * 0.5f;
             chunkorigin[2] = origin[0] + crandom() * size[2] * 0.5f;
-            GetGameworld()->ThrowDebris( this, "models/objects/debris1/tris.md2", chunkorigin, 1 );
+            GetGameWorld()->ThrowDebris( this, "models/objects/debris1/tris.md2", chunkorigin, 1 );
         }
     }
 
@@ -116,7 +116,7 @@ void FuncExplosive::ExplosiveDeath( IServerGameEntity* inflictor, IServerGameEnt
         chunkorigin[0] = origin[0] + crandom() * size[0] * 0.5f;
         chunkorigin[1] = origin[0] + crandom() * size[1] * 0.5f;
         chunkorigin[2] = origin[0] + crandom() * size[2] * 0.5f;
-        GetGameworld()->ThrowDebris( this, "models/objects/debris2/tris.md2", chunkorigin, 2 );
+        GetGameWorld()->ThrowDebris( this, "models/objects/debris2/tris.md2", chunkorigin, 2 );
     }
 
     UseTargets( attacker );

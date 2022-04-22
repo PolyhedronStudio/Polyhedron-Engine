@@ -2,23 +2,23 @@
 // LICENSE HERE.
 
 //
-// DeathmatchGamemode.h
+// DeathmatchGameMode.h
 //
 // Deathmatch game mode.
 //
 */
 #pragma once
 
-#include "IGamemode.h"
-#include "DefaultGamemode.h"
+#include "IGameMode.h"
+#include "DefaultGameMode.h"
 
-class DeathmatchGamemode : public DefaultGamemode {
+class DeathmatchGameMode : public DefaultGameMode {
 public:
     //
     // Constructor/Deconstructor.
     //
-    DeathmatchGamemode();
-    virtual ~DeathmatchGamemode() override;
+    DeathmatchGameMode();
+    virtual ~DeathmatchGameMode() override;
 
     //
     // Server Related.

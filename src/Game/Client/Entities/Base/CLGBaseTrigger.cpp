@@ -8,9 +8,6 @@
 * 
 ***/
 #include "../../ClientGameLocals.h"	// SVGame.
-//#include "../../Effects.h"			// Effects.
-#include "../../Entities.h"			// Entities.
-//#include "../../Utilities.h"		// Util funcs.
 
 // Class Entities.
 #include "CLGBasePacketEntity.h"

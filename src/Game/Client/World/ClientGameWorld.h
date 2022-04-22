@@ -4,7 +4,7 @@
 *
 *	@file
 *
-*	Gameworld class for managing entity lifetime. 
+*	GameWorld class for managing entity lifetime. 
 *	(Creation, Destruction, Spawning etc.)
 * 
 *	Aside from managing entity lifetimes, it is also the general keeper of the
@@ -15,33 +15,32 @@
 #pragma once
 
 // Pre-define.
-class SVGBaseEntity;
+class IGameMode;
+class IGameWorld;
+class IClientGameEntity;
 class SGEntityHandle;
+class CLGBasePacketEntity;
+class CLGBaseLocalEntity;
 class Worldspawn;
-class IGamemode;
-class IServerGameEntity;
-#include "../Entities/IClientGameEntity.h"
 
-#include "../../../Game/Shared/World/IGameworld.h"
-#include "../Entities.h"
-//#include "../Entities/Worldspawn.h"
+#include "../../../Game/Shared/World/IGameWorld.h"
 
 /**
 *	@brief GameWorld regulates the lifetime management of all entities.
 * 
 *	@details 
 **/
-class ClientGameworld : public IGameworld {
+class ClientGameWorld : public IGameWorld {
 public:
     /**
 	*	@brief Default constructor.
 	**/
-    ClientGameworld() = default;
+    ClientGameWorld() = default;
 
     /**
 	*	@brief Default destructor
 	**/
-    ~ClientGameworld() = default;
+    ~ClientGameWorld() = default;
 
 public:
     /**
@@ -58,15 +57,15 @@ public:
     /**
 	*	@brief	Creates the correct gamemode object instance based on the gamemode cvar.
 	**/
-    void SetupGamemode();
+    void SetupGameMode();
     /**
 	*	@brief	Destroys the current gamemode object.
 	**/
-    void DestroyGamemode();
+    void DestroyGameMode();
     /**
 	*	@return A pointer to the current active game mode.
 	**/
-    inline IGamemode* GetGamemode() { return currentGamemode; }
+    inline IGameMode* GetGameMode() { return currentGameMode; }
 
 
 
@@ -192,7 +191,7 @@ public:
     * 
     *   @return A valid pointer to the entity's SVGBasePlayer game entity. nullptr on failure.
     **/
-    static SVGBaseEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
+    static IClientGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
 
     /**
@@ -280,7 +279,7 @@ private:
     ServerClient *clients = nullptr;
 
 	//! Currently active game mode.
-    IGamemode* currentGamemode = nullptr;
+    IGameMode* currentGameMode = nullptr;
 
 
     

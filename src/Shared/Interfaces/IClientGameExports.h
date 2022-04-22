@@ -82,7 +82,7 @@ public:
     /**
     *   @brief  Executed whenever a server frame entity event is receieved.
     **/
-    virtual void ServerEntityEvent(int32_t number) = 0;
+    virtual void PacketEntityEvent(int32_t number) = 0;
 
     /**
     *   @brief  Executed whenever a local client entity event is set.

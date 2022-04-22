@@ -17,7 +17,7 @@
 #include "../Func/FuncDoor.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 // Trigger Auto Door.
 #include "TriggerAutoDoor.h"
@@ -74,7 +74,7 @@ void TriggerAutoDoor::AutoDoorTouch( IServerGameEntity* self, IServerGameEntity*
 // TriggerAutoDoor::Create
 //===============
 TriggerAutoDoor* TriggerAutoDoor::Create( SVGBaseEntity* ownerEntity, vec3_t ownerMins, vec3_t ownerMaxs ) {
-    TriggerAutoDoor* autoDoor = GetGameworld()->CreateGameEntity<TriggerAutoDoor>();
+    TriggerAutoDoor* autoDoor = GetGameWorld()->CreateGameEntity<TriggerAutoDoor>();
 	autoDoor->SetOwner( ownerEntity );
 	autoDoor->SetMaxs( ownerMaxs );
 	autoDoor->SetMins( ownerMins );

@@ -16,7 +16,6 @@
 
 // Base Client Game Functionality.
 #include "../Debug.h"
-#include "../Entities.h"
 #include "../TemporaryEntities.h"
 
 // Export classes.
@@ -383,7 +382,7 @@ void CLGBaseLocalEntity::Remove()
 /**
 *   @brief  Callback method to use for freeing this entity. It calls upon Remove()
 **/
-void CLGBaseLocalEntity::CLGLocalClientEntityThinkFree(void) {
+void CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree(void) {
 	//CLG_FreeEntity(serverEntity);
 	Remove();
 }

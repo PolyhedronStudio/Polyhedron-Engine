@@ -269,9 +269,9 @@ struct ArmorType {
 
 
 /**
-*   @brief  Gamemode specific flags such as FixedFOV, InstantItems, No Friendly Fire etc.
+*   @brief  GameMode specific flags such as FixedFOV, InstantItems, No Friendly Fire etc.
 **/
-struct GamemodeFlags {
+struct GameModeFlags {
     static constexpr int16_t NoHealthItems      = (1 << 0);
     static constexpr int16_t NoItems            = (1 << 1);
     static constexpr int16_t NoFallingDamage    = (1 << 2);

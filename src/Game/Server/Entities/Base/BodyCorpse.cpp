@@ -17,7 +17,7 @@
 #include "BodyCorpse.h"
 
 // World.
-#include "../../World/ServerGameworld.h"
+#include "../../World/ServerGameWorld.h"
 
 // Constructor/Deconstructor.
 BodyCorpse::BodyCorpse(PODEntity *svEntity)
@@ -115,7 +115,7 @@ void BodyCorpse::BodyCorpseDie(IServerGameEntity* inflictor, IServerGameEntity* 
 
         // Toss gibs.
         for (int32_t i = 0; i < 4; i++) {
-            GetGameworld()->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+            GetGameWorld()->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
         }
 
         // Ensure its origin goes -48, it is a lame hack but hey...
