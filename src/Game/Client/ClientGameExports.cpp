@@ -168,7 +168,7 @@ void ClientGameExports::ClientPacketEntityDeltaFrame() {
         level.time = svTime + FRAMERATE_MS;
     }
 
-	level.time = clTime;
+	//level.time = clTime;
 
 //level.time = clTime;
 //    level.time = GameTime(cl->serverTime);
