@@ -235,18 +235,7 @@ void CLGBaseLocalEntity::UpdateFromState(const EntityState& state) {
 }
 
 /**
-*   @returen True if the entity is still in the current frame.
-**/
-//const qboolean CLGBaseLocalEntity::IsInUse() {
-//    if (podEntity) {
-//        return cl->frame.number == podEntity->serverFrame;
-//    } else {
-//        false;
-//    }
-//}
-
-/**
-*   @brief  Stub.
+*   @return	Human-readable string classname.
 **/
 const std::string CLGBaseLocalEntity::GetClassname() {
     // Returns this classname, the base entity.

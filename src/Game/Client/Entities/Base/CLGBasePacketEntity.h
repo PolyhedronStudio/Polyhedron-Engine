@@ -465,7 +465,11 @@ public:
 
         return false;
     }
-    virtual void            SetInUse(const qboolean inUse) {};
+    virtual void            SetInUse(const qboolean inUse) {
+		if (podEntity) {
+			podEntity->inUse = inUse;
+		}
+	};
 
     /**
     *   @brief Get/Set: Kill Target.

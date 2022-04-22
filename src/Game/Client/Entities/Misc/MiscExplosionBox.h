@@ -21,7 +21,7 @@ public:
     //DefineMapClass( "misc_client_explobox", MiscExplosionBox, CLGBaseLocalEntity ); // Should be CLGBaseTrigger inherited.
 	DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseTrigger ); // Should be CLGBaseTrigger inherited.
     
-																			   /**
+	/**
     *	Interface functions. 
     **/
     void Precache() override;

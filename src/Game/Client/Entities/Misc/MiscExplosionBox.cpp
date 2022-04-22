@@ -156,14 +156,14 @@ void MiscExplosionBox::Think() {
 	//ClientGameWorld *gameWorld = GetGameWorld();
 	//PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(GetNumber());
 	////
-	//if (podEntity) {
+	if (podEntity) {
 
-	//	podEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
-	//	podEntity->currentState.oldOrigin = vec3_mix(clientEntity->previousState.oldOrigin, clientEntity->currentState.oldOrigin, cl->lerpFraction);
+		podEntity->currentState.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
+		podEntity->currentState.oldOrigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
 	////
 	//	SetRenderEffects(RenderEffects::Beam);
 	//	//Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
-	//}
+	}
 }
 
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {
@@ -261,7 +261,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     vec3_t save = GetOrigin();
 
     // Set the new origin.
-    SetOrigin(vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize()));
+    vec3_t debrisSpawnOrigin = vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize());
 
     // Throw several "debris1/tris.md2" chunks.
     SpawnDebris1Chunk();
@@ -368,24 +368,26 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
    
 	// Safety checks.
     if (!other || other == this) {
-		Com_DPrint("Explobox: %i is touching a other == this or !other\n", GetNumber());
+		//Com_DPrint("Explobox: %i is touching a other == this or !other\n", GetNumber());
 		return;
     }
 
     // Ground entity checks.
     if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
-		if (other->GetGroundEntity() && other->GetGroundEntity() == this) {
-			Com_DPrint("Explobox(#%i) has GroundEntity(#%i)\n", other->GetNumber());
-		} else {
-			Com_DPrint("Explobox(#%i) has no GroundEntity\n", GetNumber());
-		}
-		return;
+		////if (other->GetGroundEntity()) {
+		////	Com_DPrint("Explobox(#%i) has GroundEntity(#%i)\n", other->GetNumber());
+		////} else {
+		////	Com_DPrint("Explobox(#%i) has no GroundEntity\n", GetNumber());
+		////}
+		//return;
     }
 	
 	//Com_DPrint("ExplosionBox: %i is touching: other.GetNumber() = %i\n", GetNumber(), other->GetNumber());
-	//if (other->GetNumber() == 23) {
-	//	Com_DPrint("Client Entity is touching Barrel: (#%i)\n");
-	//}
+	if (other->GetNumber() == cl->frame.clientNumber + 1) {
+		Com_DPrint("Client Entity(#%i) is touching Barrel: (#%i)\n", other->GetNumber(), GetNumber());
+	} else {
+		return;
+	}
 
     // Calculate ratio to use.
     double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));
@@ -396,8 +398,10 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
     // Calculate yaw to use based on direction.
     double yaw = vec3_to_yaw(dir);
 
+	Com_DPrint("Origin before pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
     // Last but not least, move a step ahead.
     CLG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+	Com_DPrint("Origin after pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
 }
 
 

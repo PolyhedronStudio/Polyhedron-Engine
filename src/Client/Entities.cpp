@@ -591,6 +591,9 @@ void CL_DeltaFrame(void)
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();
     }
+	
+    // Call into client game its delta frame function.
+    CL_GM_ClientPacketEntityDeltaFrame();
 
     if (cls.demo.playback) {
         // this delta has nothing to do with local viewAngles,
@@ -609,8 +612,6 @@ void CL_DeltaFrame(void)
     // Check for prediction errors.
     CL_CheckPredictionError();
 
-    // Call into client game its delta frame function.
-    CL_GM_ClientPacketEntityDeltaFrame();
 }
 
 

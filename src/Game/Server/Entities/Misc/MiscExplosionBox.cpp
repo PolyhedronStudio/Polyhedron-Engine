@@ -235,7 +235,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     vec3_t save = GetOrigin();
 
     // Set the new origin.
-    SetOrigin(vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize()));
+    vec3_t debrisSpawnOrigin = (vec3_fmaf(GetAbsoluteMin(), 0.5f, GetSize()));
 
     // Throw several "debris1/tris.md2" chunks.
     SpawnDebris1Chunk();
@@ -266,7 +266,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     SpawnDebris2Chunk();
 
     // Reset origin to saved origin.
-    SetOrigin(save);
+    //SetOrigin(save);
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
     if (GetGroundEntity()) {

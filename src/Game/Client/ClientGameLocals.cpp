@@ -100,11 +100,11 @@ GameEntityVector CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t
     // Boxed server entities set by gi.BoxEntities.
     Entity* boxedPODEntities[MAX_CLIENT_POD_ENTITIES];
 
-    // Vector of the boxed class entities to return.
-    GameEntityVector boxedClassEntities;
+    // Vector of the boxed game entities to return.
+    GameEntityVector boxedGameEntities;
 
-    // Acquire pointer to the class entities array.
-    GameEntityVector &gameEntities = game.world->GetGameEntities();
+	// Acquire gameworld.
+	ClientGameWorld *gameWorld = GetGameWorld();
 
     // Ensure the listCount can't exceed the max edicts.
     if (listCount > MAX_CLIENT_POD_ENTITIES) {
@@ -116,15 +116,19 @@ GameEntityVector CLG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t
 
     // Go through the boxed entities list, and store there classEntities (SVGBaseEntity aka baseEntities).
     for (int32_t i = 0; i < numEntities; i++) {
+		// Acquire entity number.
 		const int32_t entityNumber = boxedPODEntities[i]->clientEntityNumber;
+		
+		// Get GameEntity.
+		GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(entityNumber);
 
-        if (gameEntities[entityNumber] != nullptr) {
-            boxedClassEntities.push_back(gameEntities[entityNumber]);
+        if (gameEntity != nullptr) {
+            boxedGameEntities.push_back(gameEntity);
         }
     }
 
     // Return our boxed base entities vector.
-    return boxedClassEntities;
+    return boxedGameEntities;
 }
 
 /**

@@ -535,9 +535,19 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
         if (!(contentMask & BrushContents::DeadMonster) && (touchEntity->serverFlags & EntityServerFlags::DeadMonster)) {
             continue;
 		}
+		vec3_t traceAngles = vec3_zero();
+		vec3_t traceOrigin = vec3_zero();
+        if (touchEntity->currentState.solid == PACKED_BBOX) {
+            // Setup angles and origin for our trace.
+            traceAngles = touchEntity->currentState.angles;
+            traceOrigin = touchEntity->currentState.origin;
+        } else {
+            traceAngles = vec3_zero(); //solidEntity->currentState.angles;
+            traceOrigin = touchEntity->currentState.origin;
+        }
 
         // Might intersect, so do an exact clip
-		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, SV_HullForEntity(touchEntity), contentMask, touchEntity->currentState.origin, touchEntity->currentState.angles);
+		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, SV_HullForEntity(touchEntity), contentMask, traceOrigin, traceAngles);
 
 		// Finalize trace results and clip to entity.
         CM_ClipEntity(tr, &trace, touchEntity);

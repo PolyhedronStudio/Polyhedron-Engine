@@ -107,9 +107,9 @@ public:
     **/
     //virtual const qboolean  IsInUse() final;
 
-    /**
-    *   @return A string containing the entity's classname.
-    **/
+	/**
+	*   @return	Human-readable string classname.
+	**/
     virtual const std::string GetClassname() final;
     /**
     *   @return An uint32_t containing the hashed classname string.

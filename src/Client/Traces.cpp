@@ -129,7 +129,7 @@ void CL_ClipMoveToLocalClientEntities(const vec3_t &start, const vec3_t &mins, c
                 headNode = CM_HeadnodeForBox(solidEntity->currentState.mins, solidEntity->currentState.maxs);
             }
 
-            traceAngles = solidEntity->currentState.angles;
+            traceAngles = vec3_zero(); //solidEntity->currentState.angles;
             traceOrigin = solidEntity->currentState.origin;
         }
 
@@ -167,7 +167,7 @@ const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t
     trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.bsp->nodes, contentMask, traceOrigin, traceAngles);
 
     // Set trace entity.
-    trace.ent = reinterpret_cast<PODEntity*>(&cl.solidEntities[0]);
+    trace.ent = reinterpret_cast<PODEntity*>(&cs.entities[0]);
 
 	if (trace.fraction == 0) {
         return trace;   // Blocked by the world
@@ -224,30 +224,59 @@ static void CL_AreaEntities_r() {
 	//} else {
  //       start = &node->triggerEdicts;
 	//}
-	for (int i = 0; i < cl.numSolidEntities; i++) {
-		PODEntity *solidEntity = cl.solidEntities[i];
+	if (areaType == AreaEntities::Solid) {
+		for (int i = 0; i < cl.numSolidEntities; i++) {
+			PODEntity *solidEntity = cl.solidEntities[i];
 
-		if (!solidEntity) {
-			continue;
+			if (!solidEntity) {
+				continue;
+			}
+
+			if (solidEntity->absMin[0] > areaMaxs[0]
+				|| solidEntity->absMin[1] > areaMaxs[1]
+				|| solidEntity->absMin[2] > areaMaxs[2]
+				|| solidEntity->absMax[0] < areaMins[0]
+				|| solidEntity->absMax[1] < areaMins[1]
+				|| solidEntity->absMax[2] < areaMins[2]) {
+				continue;        // not touching
+			}
+
+			if (areaCount == areaMaxCount) {
+				Com_WPrintf("CL_AreaEntities: MAXCOUNT\n");
+				return;
+			}
+
+			areaList[areaCount] = solidEntity;
+			areaCount++;
 		}
+	} 
 
-        if (solidEntity->absMin[0] > areaMaxs[0]
-            || solidEntity->absMin[1] > areaMaxs[1]
-            || solidEntity->absMin[2] > areaMaxs[2]
-            || solidEntity->absMax[0] < areaMins[0]
-            || solidEntity->absMax[1] < areaMins[1]
-            || solidEntity->absMax[2] < areaMins[2]) {
-            continue;        // not touching
+	if (areaType == AreaEntities::LocalSolid) {
+		for (int i = 0; i < cl.numSolidLocalEntities; i++) {
+			PODEntity *solidEntity = cl.solidLocalEntities[i];
+
+			if (!solidEntity) {
+				continue;
+			}
+
+			if (solidEntity->absMin[0] > areaMaxs[0]
+				|| solidEntity->absMin[1] > areaMaxs[1]
+				|| solidEntity->absMin[2] > areaMaxs[2]
+				|| solidEntity->absMax[0] < areaMins[0]
+				|| solidEntity->absMax[1] < areaMins[1]
+				|| solidEntity->absMax[2] < areaMins[2]) {
+				continue;        // not touching
+			}
+
+			if (areaCount == areaMaxCount) {
+				Com_WPrintf("CL_AreaEntities: MAXCOUNT\n");
+				return;
+			}
+
+			areaList[areaCount] = solidEntity;
+			areaCount++;
 		}
-
-        if (areaCount == areaMaxCount) {
-            Com_WPrintf("CL_AreaEntities: MAXCOUNT\n");
-            return;
-        }
-
-        areaList[areaCount] = solidEntity;
-		areaCount++;
-	}
+	} 
  //   LIST_FOR_EACH(PODEntity, check, start, area) {
  //       if (!check || check->solid == Solid::Not) {
  //           continue;        // deactivated

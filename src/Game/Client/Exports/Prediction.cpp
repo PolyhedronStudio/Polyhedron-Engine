@@ -22,17 +22,20 @@ void PlayerFrameTouch(PlayerMove *pm) {
 	ClientGameWorld *gameWorld = GetGameWorld();
 
 	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
-	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->clientNumber + 1); // Client.
+	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->frame.clientNumber + 1); // Client.
 	if (player && pm && cl->bsp) {//}&& cl->cm.cache) {
 		//const int32_t playerMoveType = player->GetMoveType();
   //      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
             // Trigger touch logic. 
 			player->SetOrigin(pm->state.origin);
 			player->SetMins(pm->mins);
-			player->SetMins(pm->maxs);
+			player->SetMaxs(pm->maxs);
 
             UTIL_TouchTriggers(player);
+			const std::string absMinStr = vec3_to_str(player->GetAbsoluteMin());
+			const std::string absMaxStr = vec3_to_str(player->GetAbsoluteMax());
 
+			Com_DPrint("Player->absMin = %s, player->absMax = %s\n", absMinStr.c_str(), absMaxStr.c_str());
             // Solid touch logic.
             int32_t i = 0;
             int32_t j = 0;
@@ -49,6 +52,9 @@ void PlayerFrameTouch(PlayerMove *pm) {
 
                 SGEntityHandle other(pm->touchedEntities[i]);
                 if (!other || !*other) {
+					if (pm->touchedEntities[i] != nullptr) {
+						//Com_DPrint("Skipped dispatching player touch to entity(#%i)\n", pm->touchedEntities[i]->clientEntityNumber);;
+					}
                     continue;
                 }
 
@@ -184,7 +190,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         UpdateClientSoundSpecialEffects(&pm);
 
 		// Execute touch callbacks and "predict" other entities.		
-		PlayerFrameTouch(&pm);
+		//PlayerFrameTouch(&pm);
 
         // Save for error detection
         cl->moveCommand.prediction.origin = pm.state.origin;

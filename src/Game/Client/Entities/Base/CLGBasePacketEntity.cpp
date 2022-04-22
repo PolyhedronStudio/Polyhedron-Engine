@@ -88,6 +88,13 @@ void CLGBasePacketEntity::PostSpawn() {
 *   @brief  General entity thinking routine.
 **/
 void CLGBasePacketEntity::Think() {
+	if (GetNumber() == cl->frame.clientNumber + 1) {
+		SetOrigin(cl->playerEntityOrigin);
+		SetOldOrigin(cl->playerEntityOrigin);
+		SetAngles(cl->playerEntityAngles);
+		Com_DPrint("Set angle and origin for client: %i\n", cl->frame.clientNumber + 1);
+	}
+
 	// Safety check.
     if (thinkFunction == nullptr) {
 		return;
