@@ -561,7 +561,7 @@ public:
 				}
 
 				// Link it for collision testing.
-				LinkEntity();
+				//LinkEntity();
 			}
 
 			// Update model index.

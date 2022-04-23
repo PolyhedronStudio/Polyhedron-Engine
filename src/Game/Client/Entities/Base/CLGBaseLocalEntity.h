@@ -325,8 +325,10 @@ public:
     **/
     virtual inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) override {
 		if (podEntity) {
-			podEntity->currentState.mins = mins;
-			podEntity->currentState.maxs = maxs;
+			SetMins(mins);
+			SetMaxs(maxs);
+			//podEntity->currentState.mins = mins;
+			//podEntity->currentState.maxs = maxs;
 		}
     }
 
@@ -519,6 +521,7 @@ public:
     virtual void            SetMaxs(const vec3_t& maxs) {
 		if (podEntity) {
 			podEntity->currentState.maxs = maxs;
+			podEntity->maxs = maxs;
 		}
 	};
     /**
@@ -538,6 +541,7 @@ public:
 	};
     virtual void            SetMins(const vec3_t& mins) {
 		if (podEntity) {
+			podEntity->mins = mins;
 			podEntity->currentState.mins = mins;
 		}
 	};
@@ -568,6 +572,8 @@ public:
 
 			// Update model index.
 			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
+			//Com_DPrint("DEBUG MODEL: %i for %s\n", clgi.R_RegisterModel(model.c_str()), model.c_str());
+			//SetModelIndex(cl->drawModels[ clgi.R_RegisterModel(model.c_str()) ]);
 		}
 	};
 

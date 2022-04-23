@@ -73,7 +73,7 @@ void MiscClientExplosionBox::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::None);
+    SetMoveType(MoveType::Step);
 
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -109,8 +109,6 @@ void MiscClientExplosionBox::Spawn() {
 
     SetDieCallback(&MiscClientExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscClientExplosionBox::ExplosionBoxTouch);
-	const EntityState &x = GetState();
-	Com_DPrint("misc_client_explobox = %i\n", x.number);
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
     SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxThink);
@@ -132,8 +130,14 @@ void MiscClientExplosionBox::Think() {
 
 	// Interpolate origin?
 	PODEntity *clientEntity = GetPODEntity();
-	//Com_DPrint("YO DAWG THINKING STRAIGHT FROM THA MISC_CLIENT_EXPLOBOX YO %i\n", clientEntity->clientEntityNumber);
-	clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	if (clientEntity) {
+		Com_DPrint("misc_client_explobox(#%i) - model(#%i) - origin(%s)\n", clientEntity->clientEntityNumber, clientEntity->currentState.modelIndex, Vec3ToString(clientEntity->currentState.origin));
+	}
+	//if (clientEntity) {
+		//clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	//} else {
+	//	Com_DPrint("Local misc_client_explobox with NO!!! podEntity\n");
+	//}
 	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
 	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 }
@@ -348,7 +352,13 @@ void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientG
 		return;
     }
 	
-	//Com_DPrint("Touching explobox: %i\n", GetNumber());
+	PODEntity *podOther = other->GetPODEntity();
+	if (podOther) {
+		Com_DPrint("misc_client_explobox(#%i) is touching podEntity: (#%i)\n", GetNumber());
+	} else {
+		Com_DPrint("misc_client_explobox(#%i) is NOT!!!!! touching any podEntity\n");
+	}
+	
 
     // Calculate ratio to use.
     double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));

@@ -404,7 +404,7 @@ void ClientGameEntities::AddPacketEntities() {
         GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(localEntityNumber);
 		
 		// Setup the render entity ID for the renderer.
-        const int32_t refreshEntityID = RESERVED_ENTITIY_COUNT + localEntityNumber; //clientEntity->clientEntityNumber + RESERVED_ENTITIY_COUNT + localEntityNumber;
+        const int32_t refreshEntityID = clientEntity->clientEntityNumber; //clientEntity->clientEntityNumber + RESERVED_ENTITIY_COUNT + localEntityNumber;
 		
 		if (!gameEntity) {
 			// Ouche..?

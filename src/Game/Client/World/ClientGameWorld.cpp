@@ -239,7 +239,7 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 	char *com_token = nullptr; // Token pointer.
 	PODEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
     uint32_t entityIndex = maxClients + 9; // We start from the max clients.         
-	uint32_t localEntityIndex = MAX_PACKET_ENTITIES + 3; // TODO: That RESERVED_COUNT thingy.
+	uint32_t localEntityIndex = MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; // TODO: That RESERVED_COUNT thingy.
 
 	// Acquire gameworld and entity arrays.
 	ClientGameWorld *gameWorld = GetGameWorld();
