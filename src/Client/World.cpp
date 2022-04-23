@@ -104,8 +104,8 @@ void CL_ClearWorld()
     memset(cl_areanodes, 0, sizeof(cl_areanodes));
     cl_numareanodes = 0;
 
-    if (cl.bsp) {
-        cm = &cl.bsp->models[0];//&cl.cm.cache->models[0];
+    if (cl.bsp && cl.cm.cache) {
+        cm = &cl.bsp->models[0];
         CL_CreateAreaNode(0, cm->mins, cm->maxs);
     }
 
@@ -122,21 +122,21 @@ void CL_ClearWorld()
 **/
 qboolean CL_EntityIsVisible(cm_t *cm, Entity *ent, byte *mask)
 {
-    int i;
+    //int i;
 
-    if (ent->numClusters == -1) {
-        // too many leafs for individual check, go by headNode
-        return CM_HeadnodeVisible(CM_NodeNum(cm, ent->headNode), mask);
-    }
+    //if (ent->numClusters == -1) {
+    //    // too many leafs for individual check, go by headNode
+    //    return CM_HeadnodeVisible(CM_NodeNum(cm, ent->headNode), mask);
+    //}
 
-    // check individual leafs
-    for (i = 0; i < ent->numClusters; i++) {
-        if (Q_IsBitSet(mask, ent->clusterNumbers[i])) {
-            return true;
-        }
-    }
+    //// check individual leafs
+    //for (i = 0; i < ent->numClusters; i++) {
+    //    if (Q_IsBitSet(mask, ent->clusterNumbers[i])) {
+    //        return true;
+    //    }
+    //}
 
-    return false;  // not visible
+    return true;  // not visible
 }
 
 /**
@@ -149,8 +149,9 @@ void CL_World_LinkEntity(cm_t *cm, Entity *ent)
     int32_t	clusters[MAX_TOTAL_ENT_LEAFS];
     int32_t area = 0;
     mnode_t *topnode = nullptr;
-
-    // set the size
+	if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
+	return;		
+	}// set the size
 	ent->size = ent->maxs - ent->mins;
 
     // set the abs box
@@ -279,12 +280,12 @@ void CL_PF_World_LinkEntity(Entity *ent) {
     }
 
 	// Ensure a map is loaded properly in our cache.
-    if (!cl.cm.cache) {
+	if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
         return;
     }
 
 	// Find the actual server entity.
-    int32_t entityNumber = ent->clientEntityNumber; //NUM_FOR_EDICT(ent);
+    int32_t entityNumber = ent->currentState.number; //NUM_FOR_EDICT(ent);
     //PODEntity *clientEntity = &cs.entities[entityNumber];
 
     // Encode the size into the entity_state for client prediction reaspms/
@@ -358,8 +359,11 @@ void CL_PF_World_LinkEntity(Entity *ent) {
 	    //if (ent->solid == Solid::Trigger) {
 		//    List_Append(&node->triggerLocalClientEdicts, &ent->area);
 		//} else {
-		if (ent->solid != Solid::Trigger) {
-	        List_Append(&node->solidLocalClientEdicts, &ent->area);
+	    if (ent->solid == Solid::Trigger) {
+		    List_Append(&node->triggerEdicts, &ent->area);
+		} else {
+	        List_Append(&node->solidEdicts, &ent->area);
+			List_Append(&node->solidLocalClientEdicts, &ent->area);
 		}
 		//}
 	} else {
@@ -367,6 +371,8 @@ void CL_PF_World_LinkEntity(Entity *ent) {
 		    List_Append(&node->triggerEdicts, &ent->area);
 		} else {
 	        List_Append(&node->solidEdicts, &ent->area);
+
+						List_Append(&node->solidLocalClientEdicts, &ent->area);
 		}
 	}
 }
@@ -379,22 +385,23 @@ static void CL_World_AreaEntities_r(areanode_t *node) {
     list_t *start = nullptr;
     PODEntity *check = nullptr;
 
-	if (!node) {
+	if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
 		return;
 	}
+
     // touch linked edicts
- //   if (areaType == AreaEntities::Solid) {
- //       start = &node->solidEdicts;
-	//} else if (areaType == AreaEntities::LocalSolid) {
-	//	start = &node->solidLocalClientEdicts;
-	//} else {
- //       start = &node->triggerEdicts;
-	//}
-    if (areaType == AreaEntities::LocalSolid) {
+    if (areaType == AreaEntities::Solid) {
+        start = &node->solidEdicts;
+	} else if (areaType == AreaEntities::LocalSolid) {
 		start = &node->solidLocalClientEdicts;
 	} else {
-        start = &node->solidEdicts;
+        start = &node->triggerEdicts;
 	}
+ //   if (areaType == AreaEntities::LocalSolid) {
+	//	start = &node->solidLocalClientEdicts;
+	//} else {
+ //       start = &node->solidEdicts;
+	//}
 
     LIST_FOR_EACH(PODEntity, check, start, area) {
         if (!check || check->solid == Solid::Not) {
@@ -440,7 +447,9 @@ int32_t CL_World_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity 
     areaMaxCount = maxcount;
     areaType = areatype;
 
-    CL_World_AreaEntities_r(cl_areanodes);
+if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
+	    CL_World_AreaEntities_r(cl_areanodes);
+	}
 
     return areaCount;
 	//return 0;
@@ -455,15 +464,18 @@ int32_t CL_World_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity 
 **/
 static mnode_t *CL_World_HullForEntity(Entity *ent)
 {
+	if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
+		return nullptr;
+	}
     if (ent->solid == Solid::BSP) {
         int32_t i = ent->currentState.modelIndex - 1;
 
         // Explicit hulls in the BSP model.
-        if (i <= 0 || i >= cl.cm.cache->nummodels) {
+        if (i <= 0 || i >= cl.bsp->nummodels) {
             Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
 		}
 
-        return cl.cm.cache->models[i].headNode;
+        return cl.clipModels[i]->headNode;//cl.cm.cache->models[i].headNode;
     }
 
     // create a temp hull from bounding box sizes
@@ -482,13 +494,13 @@ int32_t CL_World_PointContents(const vec3_t &point)
     static PODEntity     *touch[MAX_CLIENT_POD_ENTITIES], *hit = nullptr;
     
 	// Ensure all is sane.
-    if (!cl.cm.cache || !cl.cm.cache->nodes) {
+    if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
         Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
 		return 0;
 	}
 
     // get base contents from world
-    int32_t contents = CM_PointContents(point, cl.cm.cache->nodes);
+    int32_t contents = CM_PointContents(point, cl.bsp->nodes);
 
     // or in contents from all the other entities
     int32_t numberOfAreaEntities = CL_World_AreaEntities(point, point, touch, MAX_CLIENT_POD_ENTITIES, AreaEntities::Solid);
@@ -498,7 +510,9 @@ int32_t CL_World_PointContents(const vec3_t &point)
         PODEntity*hit = touch[i];
 
         // Might intersect, so do an exact clip
-        contents |= CM_TransformedPointContents(point, CL_World_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+		if (hit != nullptr) {
+			contents |= CM_TransformedPointContents(point, CL_World_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+		}
     }
 
     return contents;
@@ -565,13 +579,13 @@ static void CL_World_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins,
 *			Passedict and edicts owned by passedict are explicitly skipped from being checked.
 **/
 const TraceResult CL_World_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *passedict, int32_t contentMask) {
-    if (!cl.bsp || !cl.cm.cache) {
+    if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
         //Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
 		return TraceResult();
     }
 
     // clip to world
-    TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.cm.cache->nodes, contentMask, vec3_zero(), vec3_zero());
+    TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, cl.bsp->nodes, contentMask, vec3_zero(), vec3_zero());
     trace.ent = ge->entities;
     if (trace.fraction == 0) {
         return trace;   // Blocked by the world

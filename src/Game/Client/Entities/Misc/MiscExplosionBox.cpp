@@ -68,16 +68,11 @@ void MiscExplosionBox::Precache() {
 //===============
 //
 void MiscExplosionBox::Spawn() {
-	//Com_DPrint("MISC_EXPLOBOX WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!\n");
     // Always call parent class method.
     Base::Spawn();
 
-	// Spawning MiscExplosionBox Pack
-	if (podEntity) {
-		Com_DPrint("Spawning MiscExplosionBox PacketEntity(#%i), ServerFrame(#%i)\n", GetNumber(), podEntity->serverFrame);
-	} else {
-		Com_DPrint("SPAWNING MISCEXPLO WITHOUT PODENTITY?\n");
-	}
+	// Set InUse.
+	SetInUse(true);
 
     // Set solid.
     SetSolid(Solid::OctagonBox);
@@ -119,16 +114,12 @@ void MiscExplosionBox::Spawn() {
 
     // Setup our MiscExplosionBox callbacks.
     SetUseCallback(&MiscExplosionBox::ExplosionBoxUse);
-
     SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
-	const EntityState &x = GetState();
-	//Com_DPrint("misc_explobox = %i\n", x.number);
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
-    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
-	SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
-	SetInUse(true);
+    SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
+
     // Link the entity to world, for collision testing.
     LinkEntity();
 }
@@ -160,7 +151,7 @@ void MiscExplosionBox::Think() {
 
 		podEntity->currentState.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
 		podEntity->currentState.oldOrigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
-	////
+		podEntity->currentState.renderEffects = RenderEffects::Beam;
 	//	SetRenderEffects(RenderEffects::Beam);
 	//	//Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
 	}
@@ -368,26 +359,19 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
    
 	// Safety checks.
     if (!other || other == this) {
-		//Com_DPrint("Explobox: %i is touching a other == this or !other\n", GetNumber());
+		Com_DPrint("Explobox: %i is touching a other == this or !other\n", GetNumber());
 		return;
     }
 
     // Ground entity checks.
     if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
-		if (other->GetGroundEntity()) {
-			Com_DPrint("Explobox(#%i) has GroundEntity(#%i)\n", other->GetNumber());
-		} else {
-			Com_DPrint("Explobox(#%i) has no GroundEntity\n", GetNumber());
-		}
-		//return;
+		return;
     }
 	
 	//Com_DPrint("ExplosionBox: %i is touching: other.GetNumber() = %i\n", GetNumber(), other->GetNumber());
 	if (other->GetNumber() == cl->frame.clientNumber + 1) {
-		Com_DPrint("Client Entity(#%i) is touching Barrel: (#%i)\n", other->GetNumber(), GetNumber());
-	}/* else {
-		return;
-	}*/
+	//	Com_DPrint("PlayerEnt(#%i) is touching: (#%i)\n", other->GetNumber(), GetNumber());
+	}
 
     // Calculate ratio to use.
     double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));
@@ -400,7 +384,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
 
 	//Com_DPrint("Origin before pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
     // Last but not least, move a step ahead.
-    CLG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 	//Com_DPrint("Origin after pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
 }
 

@@ -542,7 +542,7 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
             traceAngles = touchEntity->currentState.angles;
             traceOrigin = touchEntity->currentState.origin;
         } else {
-            traceAngles = vec3_zero(); //solidEntity->currentState.angles;
+            traceAngles = touchEntity->currentState.angles; // vec3_zero();
             traceOrigin = touchEntity->currentState.origin;
         }
 

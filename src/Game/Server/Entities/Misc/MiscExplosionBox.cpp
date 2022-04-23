@@ -359,7 +359,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
     double yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+    SVG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 }
 
 

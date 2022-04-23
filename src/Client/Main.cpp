@@ -2906,6 +2906,9 @@ void CL_UpdateFrameTimes(void)
 **/
 static uint64_t clFrameResidual = 0;
 uint64_t CL_RunGameFrame(uint64_t msec) {
+    if (cls.connectionState < ClientConnectionState::Active) {
+		return 0;	
+	}
 #if USE_CLIENT
     if (host_speeds->integer)
         timeBeforeClientGame = Sys_Milliseconds();
@@ -3036,13 +3039,13 @@ uint64_t CL_Frame(uint64_t msec)
         CL_DemoFrame(main_extra);
     }
 
-	// Let client side entities do their thing.
-	CL_RunGameFrame(main_extra);
-
     // Calculate local time
 	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         CL_SetClientTime();
     }
+	
+	// Let client side entities do their thing.
+	CL_RunGameFrame(main_extra);
 
 #if USE_AUTOREPLY
     // Check for version reply

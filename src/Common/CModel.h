@@ -25,12 +25,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_MAP_AREA_BYTES      (MAX_MAP_AREAS / 8)
 #define MAX_MAP_PORTAL_BYTES    MAX_MAP_AREA_BYTES
 
-typedef struct {
+struct cm_t {
     bsp_t       *cache;
     int         *floodnums;     // if two areas have equal floodnums,
                                 // they are connected
     qboolean    *portalopen;
-} cm_t;
+};
 
 // WatIsDeze: Added for cgame dll, it doesn't need these functions.
 #ifndef CGAME_INCLUDE
@@ -75,21 +75,18 @@ typedef struct {
     mnode_t *CM_HeadnodeForBox(const vec3_t &mins, const vec3_t &maxs);
     mnode_t *CM_HeadnodeForOctagon(const vec3_t &mins, const vec3_t &maxs);
 
-
     // returns an ORed contents mask
-    int         CM_PointContents(const vec3_t &p, mnode_t *headNode);
-    int         CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode,
-                                            const vec3_t &origin, const vec3_t &angles);
+    int CM_PointContents(const vec3_t &p, mnode_t *headNode);
+    int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t &origin, const vec3_t &angles);
 
     const TraceResult CM_BoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushmask);
     const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end, const vec3_t &mins, const vec3_t &maxs, mnode_t *headNode, int32_t brushMask, const vec3_t &origin = vec3_zero(), const vec3_t& angles = vec3_zero());
-    void        CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct PODEntity *ent);
+    void CM_ClipEntity(TraceResult *dst, const TraceResult *src, struct PODEntity *ent);
 
     // call with topnode set to the headNode, returns with topnode
     // set to the first node that splits the box
-    int         CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list,
-                            int listsize, mnode_t **topnode);
-    mleaf_t     *CM_PointLeaf(cm_t *cm, const vec3_t &p);
+    int CM_BoxLeafs(cm_t *cm, const vec3_t &mins, const vec3_t &maxs, mleaf_t **list, int listsize, mnode_t **topnode);
+    mleaf_t *CM_PointLeaf(cm_t *cm, const vec3_t &p);
 
     #define CM_LeafContents(leaf)   (leaf)->contents
     #define CM_LeafCluster(leaf)    (leaf)->cluster

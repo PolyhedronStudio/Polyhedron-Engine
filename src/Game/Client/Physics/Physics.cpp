@@ -169,57 +169,6 @@ void CLG_BoundVelocity(IClientGameEntity *ent)
 // Runs entity thinking code for this frame if necessary
 //===============
 extern qboolean CLG_RunThink(IClientGameEntity *ent);
-//{
-//    if (!ent) {
-//	    CLG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
-//        return false;
-//    }
-//
-//    // Fetch think time.
-//    GameTime nextThinkTime = ent->GetNextThinkTime();
-//
-//	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
-//		return true;
-//    }
-//
-//    // Reset think time before thinking.
-//    ent->SetNextThinkTime(GameTime::zero());
-//
-//#if _DEBUG
-//    if ( !ent->HasThinkCallback() ) {
-//        // Write the index, programmers may look at that thing first
-//        std::string errorString = "";
-//        if (ent->GetPODEntity()) {
-//            errorString += "entity (index " + std::to_string(ent->GetNumber());
-//        } else {
-//            errorString += "entity has no ServerEntity ";
-//        }
-//
-//        // Write the targetname as well, if it exists
-//        if ( !ent->GetTargetName().empty() ) {
-//            errorString += ", name '" + ent->GetTargetName() + "'";
-//        }
-//
-//        // Write down the C++ class name too
-//        errorString += ", class '";
-//        errorString += ent->GetTypeInfo()->classname;
-//        errorString += "'";
-//
-//        // Close it off and state what's actually going on
-//        errorString += ") has a nullptr think callback \n";
-//    //    
-//        //gi.Error( errorString.c_str() );
-//
-//        // Return true.
-//        return true;
-//    }
-//#endif
-//
-//    // Last but not least, let the entity execute its think behavior callback.
-//    ent->Think();
-//
-//    return false;
-//}
 
 //===============
 // CLG_Impact
@@ -584,7 +533,7 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
 		PODEntity *podCheck = cl->solidEntities[e];
-		if (e > cl->numSolidEntities) {
+		if (e >= cl->numSolidEntities) {
 			podCheck = cl->solidLocalEntities[e];
 		}
 	    SGEntityHandle checkHandle = podCheck;
@@ -612,11 +561,11 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             || moveType == MoveType::Spectator)
             continue;
 
-		if (!check->GetLinkCount()) {
-			continue; // Not linked in naywhere.
-		}
-        //if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
-         //   continue;       // not linked in anywhere
+		//if (!check->GetLinkCount()) {
+		//	continue; // Not linked in naywhere.
+		//}
+        if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
+            continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
         if (check->GetGroundEntity() != pusher) {

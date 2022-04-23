@@ -187,6 +187,10 @@ static void ServerEntity_UpdateState(const EntityState &state)
         entityOrigin = cl.frame.playerState.pmove.origin;
     }
 
+
+	// Assign its clientEntity number.
+	clEntity->clientEntityNumber = state.number;
+
     // Was this entity in our previous frame, or not?
     if (ServerEntity_IsNew(clEntity)) {
         // Wasn't in last update, so initialize some things.
@@ -198,12 +202,9 @@ static void ServerEntity_UpdateState(const EntityState &state)
 
     // Assign the fresh new received server frame number that belongs to this frame.
     clEntity->serverFrame = cl.frame.number;
-
-    // Assign the fresh new received state as the entity's current.
+	
+	// Assign the fresh new received state as the entity's current.
     clEntity->currentState = state;
-
-	// Assign its clientEntity number.
-	clEntity->clientEntityNumber = state.number;
 
     // work around Q2PRO server bandwidth optimization
     if (isPlayerEntity) {
@@ -611,7 +612,6 @@ void CL_DeltaFrame(void)
 
     // Check for prediction errors.
     CL_CheckPredictionError();
-
 }
 
 

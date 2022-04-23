@@ -158,18 +158,34 @@ void ClientGameExports::ClientFrame() {
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameExports::ClientPacketEntityDeltaFrame() {
-    // Run the entity prediction logic for the next frame.
+	    // Run the entity prediction logic for the next frame.
     GameTime svTime = GameTime(cl->serverTime);
     GameTime clTime = GameTime(cl->time);
 
+    //if (com_timedemo->integer) {
+    //    level.time = clTime;
+    //    return;
+    //}
+
+    GameTime prevtime = svTime - FRAMERATE_MS;
     if (clTime > svTime) {
-        level.time = svTime;
-    } else {
+    //    SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.serverTime);
+        //cl.time = cl.serverTime;
+		level.time = svTime;
+    //    cl.lerpFraction = 1.0f;
+    } else if (clTime < svTime) {
+    //    SHOWCLAMP(1, "low clamp %i\n", prevtime - cl.time);
         level.time = svTime + FRAMERATE_MS;
+        
+    } else {
+        level.time = clTime;
     }
 
-	//level.time = clTime;
-
+    //if (clTime > svTime) {
+    //    level.time = svTime;
+    //} else {
+    //    level.time = svTime + FRAMERATE_MS;
+    //}
 //level.time = clTime;
 //    level.time = GameTime(cl->serverTime);
 
@@ -188,6 +204,7 @@ void ClientGameExports::ClientLocalEntityFrame() {
 *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 **/
 void ClientGameExports::ClientPredictEntitiesFrame() {
+
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
     entities->RunPackEntitiesPredictionFrame();
 }

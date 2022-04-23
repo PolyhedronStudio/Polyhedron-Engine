@@ -129,7 +129,7 @@ void CL_ClipMoveToLocalClientEntities(const vec3_t &start, const vec3_t &mins, c
                 headNode = CM_HeadnodeForBox(solidEntity->currentState.mins, solidEntity->currentState.maxs);
             }
 
-            traceAngles = vec3_zero(); //solidEntity->currentState.angles;
+            traceAngles = solidEntity->currentState.angles; // vec3_zero();
             traceOrigin = solidEntity->currentState.origin;
         }
 
