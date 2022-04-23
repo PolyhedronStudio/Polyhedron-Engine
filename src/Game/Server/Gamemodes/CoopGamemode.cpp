@@ -247,7 +247,7 @@ void CoopGameMode::RespawnClient(SVGBasePlayer* player) {
 //===============
 void CoopGameMode::RespawnAllClients() {
     // Respawn all valid client entities who's health is < 0.
-    for (auto& player : game.world->GetGameEntityRange<0, MAX_EDICTS>()
+    for (auto& player : game.world->GetGameEntityRange<0, MAX_WIRED_POD_ENTITIES>()
         | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>())
     {
         if (player->GetHealth() < 0) {

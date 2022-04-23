@@ -471,7 +471,7 @@ typedef struct {
     int     deltaYaw;
 #endif
 } pushed_t;
-pushed_t    pushed[MAX_EDICTS], *pushed_p;
+pushed_t    pushed[MAX_CLIENT_POD_ENTITIES], *pushed_p;
 
 IClientGameEntity *obstacle = nullptr;
 
@@ -693,75 +693,76 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 //
 void CLG_Physics_Pusher(SGEntityHandle &entityHandle)
 {
-//    vec3_t      move, amove;
-//    IClientGameEntity     *part = nullptr, *mv = nullptr;
-//
-//    // Assign handle to base entity.
-//    IClientGameEntity* ent = *entityHandle;
-//
-//    // Ensure it is a valid entity.
-//    if (!ent) {
-//    	CLG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
-//        return;
-//    }
-//
-//    // if not a team captain, so movement will be handled elsewhere
-//    if (ent->GetFlags() & EntityFlags::TeamSlave)
-//        return;
-//
-//    // make sure all team slaves can move before commiting
-//    // any moves or calling any Think functions
-//    // if the move is Blocked, all moved objects will be backed out
-////retry:
-//    pushed_p = pushed;
-//    for (part = ent ; part ; part = part->GetTeamChainEntity()) {
-//        // Fetch pusher part, its Velocity.
-//        vec3_t partVelocity = part->GetVelocity();
-//
-//        // Fetch pusher part, its Angular Velocity.
-//        vec3_t partAngularVelocity = part->GetAngularVelocity();
-//
-//        if (partVelocity.x || partVelocity.y || partVelocity.z ||
-//            partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
-//        {
-//            // object is moving
-//            move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
-//            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
-//
-//            SGEntityHandle partHandle(part);
-//            if (!CLG_Push(partHandle, move, amove))
-//                break;  // move was Blocked
-//        }
-//    }
-//    if (pushed_p > &pushed[MAX_EDICTS]) {
-//        //gi.Error("pushed_p > &pushed[MAX_EDICTS], memory corrupted");
-//	}
-//
-//    if (part) {
-//        // the move failed, bump all nextThinkTime times and back out moves
-//        for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
-//            if (mv->GetNextThinkTime() > GameTime::zero()) {
-//                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);// 1_hz);
-//            }
-//        }
-//
-//        // if the pusher has a "Blocked" function, call it
-//        // otherwise, just stay in place until the obstacle is gone
-//        if (obstacle) {
-//            part->DispatchBlockedCallback(obstacle);
-//        }
-//
+    vec3_t      move, amove;
+    IClientGameEntity     *part = nullptr, *mv = nullptr;
+
+    // Assign handle to base entity.
+    IClientGameEntity* ent = *entityHandle;
+
+    // Ensure it is a valid entity.
+    if (!ent) {
+    	CLG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // if not a team captain, so movement will be handled elsewhere
+    if (ent->GetFlags() & EntityFlags::TeamSlave)
+        return;
+
+    // make sure all team slaves can move before commiting
+    // any moves or calling any Think functions
+    // if the move is Blocked, all moved objects will be backed out
+retry:
+    pushed_p = pushed;
+    for (part = ent ; part ; part = part->GetTeamChainEntity()) {
+        // Fetch pusher part, its Velocity.
+        vec3_t partVelocity = part->GetVelocity();
+
+        // Fetch pusher part, its Angular Velocity.
+        vec3_t partAngularVelocity = part->GetAngularVelocity();
+
+        if (partVelocity.x || partVelocity.y || partVelocity.z ||
+            partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
+        {
+            // object is moving
+            move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
+            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
+
+            SGEntityHandle partHandle(part);
+            if (!CLG_Push(partHandle, move, amove))
+                break;  // move was Blocked
+        }
+    }
+    if (pushed_p > &pushed[MAX_CLIENT_POD_ENTITIES]) {
+        //gi.Error("pushed_p > &pushed[MAX_CLIENT_POD_ENTITIES], memory corrupted");
+	}
+
+    if (part) {
+        // the move failed, bump all nextThinkTime times and back out moves
+        for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
+            if (mv->GetNextThinkTime() > GameTime::zero()) {
+                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);// 1_hz);
+            }
+        }
+
+        // if the pusher has a "Blocked" function, call it
+        // otherwise, just stay in place until the obstacle is gone
+        if (obstacle) {
+            part->DispatchBlockedCallback(obstacle);
+        }
+
 //#if 0
-//        // if the pushed entity went away and the pusher is still there
-//        if (!obstacle->inUse && part->inUse)
-//            goto retry;
+        // if the pushed entity went away and the pusher is still there
+        if ((obstacle && !obstacle->IsInUse()) && (part && part->IsInUse())) {
+            goto retry;
+		}
 //#endif
-//    } else {
-//        // the move succeeded, so call all Think functions
-//        for (part = ent ; part ; part = part->GetTeamChainEntity()) {
-//            CLG_RunThink(part);
-//        }
-//    }
+    } else {
+        // the move succeeded, so call all Think functions
+        for (part = ent ; part ; part = part->GetTeamChainEntity()) {
+            CLG_RunThink(part);
+        }
+    }
 }
 
 //==================================================================
@@ -904,7 +905,10 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
             }
         }
 
-        //ent->DispatchTouchCallback(ent, trace.gameEntity, &trace.plane, trace.surface);
+		// This used to be commented in the origina lcode as well, somehow... it does work
+		//if (trace.gameEntity) {
+	    //    ent->DispatchTouchCallback(ent, trace.gameEntity, &trace.plane, trace.surface);
+		//}
     }
 
     // Check for water transition, first fetch the OLD contents mask.

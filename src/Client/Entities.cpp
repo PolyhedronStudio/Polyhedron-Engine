@@ -234,7 +234,7 @@ static void ServerEntity_FireEvent(int number) {
 static inline void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState &state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
-    clEntity->clientEntityNumber = 2048 + (++entity_ctr); //state.number; // used to be: clEntity->id = ++entity_ctr;
+    clEntity->clientEntityNumber = MAX_WIRED_POD_ENTITIES + (++entity_ctr); //state.number; // used to be: clEntity->id = ++entity_ctr;
     clEntity->trailCount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
@@ -337,9 +337,9 @@ static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 **/
 static void LocalEntity_Update(const EntityState &state)
 {
-	// Ensure that its state number is higher than MAX_PACKET_ENTITIES
-	if (state.number < MAX_PACKET_ENTITIES) {
-		Com_DPrintf("Warning (%s): state.number(#%i) < MAX_PACKET_ENTITIES\n", __func__, state.number);
+	// Ensure that its state number is between MAX_SERVER_POD_ENTITIES and MAX_WIRED_POD_ENTITIES
+	if (state.number < MAX_WIRED_POD_ENTITIES) {
+		Com_DPrintf("Warning (%s): state.number(#%i) < MAX_WIRED_POD_ENTITIES\n", __func__, state.number);
 		return;
 	}
 
@@ -347,9 +347,13 @@ static void LocalEntity_Update(const EntityState &state)
     PODEntity *clEntity = &cs.entities[state.number];
 
     // Add entity to the solids list if it has a solid.
-    if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
-        cl.numSolidLocalEntities++;
-		cl.solidLocalEntities[cl.numSolidLocalEntities++] = clEntity;
+    if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidLocalEntities < MAX_PACKET_ENTITIES) {
+        // Increment num solid local entities.
+		cl.numSolidLocalEntities++;
+
+		// Remember to subtract MAX_WIRED_POD_ENTITIES to get the actual array index.
+		const int32_t solidLocalEntityIndex = cl.numSolidLocalEntities;
+		cl.solidLocalEntities[solidLocalEntityIndex] = clEntity;
 
 		// For non BRUSH models...
         if (state.solid != PACKED_BBOX) {
@@ -358,6 +362,9 @@ static void LocalEntity_Update(const EntityState &state)
 			clEntity->maxs = state.maxs;
         }
     }
+
+	// Assign its clientEntity number.
+	clEntity->clientEntityNumber = state.number;
 
     // Was this entity in our previous frame, or not?
     //if (LocalEntity_IsNew(clEntity)) {
@@ -373,7 +380,7 @@ static void LocalEntity_Update(const EntityState &state)
 
     // Assign the fresh new received state as the entity's current.
 	//clEntity->previousState = clEntity->currentState;
-	//clEntity->currentState = state;
+	clEntity->currentState = state;
 	clEntity->clientEntityNumber = state.number;
 }
 
@@ -573,7 +580,7 @@ void CL_DeltaFrame(void)
 
 	// The local entities start indexed from MAX_SERVER_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
-	for (int32_t i = 2048; i < MAX_CLIENT_POD_ENTITIES; i++) {
+	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
 		//if (i < totalLocalEntities) {}
 		EntityState &localEntityState = cs.entities[i].currentState;
 
@@ -639,7 +646,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
     vec3_t mid = vec3_zero();
     vec3_t org = vec3_zero();
 
-    if (entnum < 0 || entnum >= MAX_EDICTS) {
+    if (entnum < 0 || entnum >= MAX_WIRED_POD_ENTITIES) {
         Com_Error(ErrorType::Drop, "%s: bad entnum: %d", __func__, entnum);
     }
 
@@ -676,7 +683,7 @@ vec3_t CL_GetEntitySoundVelocity(int ent)
 {
 	PODEntity *old;
     vec3_t vel = vec3_zero();
-	if ((ent < 0) || (ent >= MAX_EDICTS))
+	if ((ent < 0) || (ent >= MAX_WIRED_POD_ENTITIES))
 	{
 		Com_Error(ErrorType::Drop, "CL_GetEntitySoundVelocity: bad ent");
 	}

@@ -326,7 +326,7 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
 void ClientGameServerMessage::ParseMuzzleFlashPacket(int32_t mask) {
     // Parse entity number.
     int32_t entity = clgi.MSG_ReadInt16();
-    if (entity < 1 || entity >= MAX_EDICTS) {
+    if (entity < 1 || entity >= MAX_WIRED_POD_ENTITIES) {
         Com_Error(ErrorType::Drop, "%s: bad entity", __func__);
     }
 

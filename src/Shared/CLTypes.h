@@ -291,7 +291,7 @@ struct ClientState {
     int32_t numSolidLocalEntities = 0;
 
     //! Entity Baseline States. These are where to start working from.
-    EntityState entityBaselines[MAX_EDICTS];//= {};
+    EntityState entityBaselines[MAX_WIRED_POD_ENTITIES];//= {};
 
     //! The actual current Entity States.
     EntityState entityStates[MAX_PARSE_ENTITIES]; // DO NOT initialize this using {} or VS2022 will stall your machine and give a nasty stack error.

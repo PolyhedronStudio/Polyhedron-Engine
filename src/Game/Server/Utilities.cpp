@@ -82,7 +82,7 @@ void UTIL_TouchTriggers(IServerGameEntity *ent)
         return;
 
     // Fetch the boxed entities.
-    GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Triggers);
+    GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_WIRED_POD_ENTITIES, AreaEntities::Triggers);
 
     // Do some extra sanity checks on the touched entity list. It is possible to have 
     // an entity be removed before we get to it (kill triggered).
@@ -116,7 +116,7 @@ void G_TouchSolids(IServerGameEntity *ent)
 	return;
 
     // Fetch the boxed entities.
-    GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_EDICTS, AreaEntities::Solid);
+    GameEntityVector touched = SVG_BoxEntities(ent->GetAbsoluteMin(), ent->GetAbsoluteMax(), MAX_WIRED_POD_ENTITIES, AreaEntities::Solid);
 
     // Do some extra sanity checks on the touched entity list. It is possible to have
     // an entity be removed before we get to it (kill triggered).

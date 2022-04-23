@@ -524,7 +524,7 @@ void DeathmatchGameMode::RespawnClient(SVGBasePlayer* player) {
 *   @brief  Respawn all valid client entities who's health is < 0.
 **/
 void DeathmatchGameMode::RespawnAllClients() {
-    for (auto& player : game.world->GetGameEntityRange(0, MAX_EDICTS) | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>()) {
+    for (auto& player : game.world->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES) | cef::Standard | cef::HasClient | cef::IsSubclassOf<SVGBasePlayer>()) {
         if (player->GetHealth() < 0) {
             RespawnClient(dynamic_cast<SVGBasePlayer*>(player));
         }

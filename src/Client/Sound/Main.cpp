@@ -1055,7 +1055,7 @@ as the entities are sent to the client
 static void S_AddLoopSounds(void)
 {
     int         i, j;
-    int         sounds[MAX_EDICTS];
+    int         sounds[MAX_WIRED_POD_ENTITIES];
     int         left, right, left_total, right_total;
     channel_t   *ch;
     sfx_t       *sfx;

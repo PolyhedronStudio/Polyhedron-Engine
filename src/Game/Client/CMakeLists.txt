@@ -35,7 +35,7 @@ SET(SRC_CLGAME
 	
 	Entities/Monsters/MonsterTestDummy.cpp
 
-	Entities/GameEntityList.cpp
+	#Entities/GameEntityList.cpp
 	Entities/IClientGameEntity.cpp
 	Entities/Worldspawn.cpp
 
@@ -89,7 +89,7 @@ SET(HEADERS_CLGAME
 
 	Entities/Monsters/MonsterTestDummy.h
 
-	Entities/GameEntityList.h
+	#Entities/GameEntityList.h
 	Entities/IClientGameEntity.h
 	Entities/Worldspawn.h
 

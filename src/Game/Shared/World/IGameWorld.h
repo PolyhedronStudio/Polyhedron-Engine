@@ -258,7 +258,7 @@ private:
     //! Assigned the value of the latched cvar maxclients. Makes for easier access.
     int32_t maxClients = 0;
 
-    //! Assigned the clamped(MAX_EDICTS) value of the latched cvar maxentities. Makes for easier access.
+    //! Assigned the clamped(MAX_WIRED_POD_ENTITIES) value of the latched cvar maxentities. Makes for easier access.
     int32_t maxEntities = 0;
 
 

@@ -36,9 +36,9 @@ extern IClientGameExports* cge;
 static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityNumber, EntityState  *oldEntityState, uint32_t byteMask) {
     EntityState *entityState = nullptr;
 
-    // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
-    if (svFrame->numEntities >= MAX_EDICTS) {
-        Com_Error(ErrorType::Drop, "%s: MAX_EDICTS exceeded", __func__);
+    // suck up to MAX_WIRED_POD_ENTITIES for servers that don't cap at MAX_PACKET_ENTITIES
+    if (svFrame->numEntities >= MAX_WIRED_POD_ENTITIES) {
+        Com_Error(ErrorType::Drop, "%s: MAX_WIRED_POD_ENTITIES exceeded", __func__);
     }
 
     entityState = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
@@ -90,7 +90,7 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
         // Read out entity number, whether to remove it or not, and its byteMask.
         newnum = MSG_ReadEntityNumber(&removeEntity, &byteMask);
 
-        if (newnum < 0 || newnum >= MAX_EDICTS) {
+        if (newnum < 0 || newnum >= MAX_WIRED_POD_ENTITIES) {
             Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, newnum);
         }
 
@@ -402,7 +402,7 @@ static void CL_ParseConfigstring(int index)
 
 static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
 {
-    if (index < 1 || index >= MAX_EDICTS) {
+    if (index < 1 || index >= MAX_WIRED_POD_ENTITIES) {
         Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
     }
 #ifdef _DEBUG
@@ -582,7 +582,7 @@ static void CL_ParseStartSoundPacket(void)
         // entity relative
         channel = MSG_ReadInt16();//MSG_ReadShort();
         entity = channel >> 3;
-        if (entity < 0 || entity >= MAX_EDICTS)
+        if (entity < 0 || entity >= MAX_WIRED_POD_ENTITIES)
             Com_Error(ErrorType::Drop, "%s: bad entity: %d", __func__, entity);
         snd.entity = entity;
         snd.channel = channel & 7;

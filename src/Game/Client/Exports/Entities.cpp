@@ -35,11 +35,6 @@ extern qhandle_t cl_mod_laser;
 extern qhandle_t cl_mod_dmspot;
 extern qhandle_t cl_sfx_footsteps[4];
 
-// Use a static entity ID on some things because the renderer relies on EntityID to match between meshes
-// between the current and previous frames.
-static constexpr int32_t RESERVED_ENTITIY_GUN = 2049;
-static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 2050;
-static constexpr int32_t RESERVED_ENTITIY_COUNT = 2051;
 
 
 /**
@@ -53,236 +48,12 @@ static constexpr int32_t RESERVED_ENTITIY_COUNT = 2051;
 **/
 qboolean ClientGameEntities::SpawnFromBSPString(const char* bspString) {
 	ClientGameWorld *gameWorld = GetGameWorld();
-	return gameWorld->SpawnFromBSPString("mapname", bspString, nullptr);
-	// Clear level state.
-    //level = {};
-
-    // Clear out our entity list in case it is holding some from a previous session.
- //   gameEntityList.Clear();
- //   
- //   // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
- //   // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
- //   //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
- //   //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
- //   //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
- //  // return false;
- //   // 
- //   //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
- //   //     // COMMENT THIS LINE TO FIX THIS CODE AGAIN.
- //   // 
- //   // 
-	//// Prepare our player game entity.
- //   //PreparePlayer();
-
- //   // Parsing state variables.
-	//qboolean isParsing = true; // We'll keep on parsing until this is set to false.
-	//qboolean parsedSuccessfully = false;// This gets set to false the immediate moment we run into parsing trouble.
-	//char *com_token = nullptr; // Token pointer.
-	//PODEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
- //   uint32_t entityIndex = 13;	// Entity index for shared with server entities (regular type)
-	//uint32_t localEntityIndex = MAX_PACKET_ENTITIES + 3; // Local entity index for local only client entities.
-
-	//// Engage parsing.
-	//while (!!isParsing == true) {
-	//	// Parse the opening brace.
-	//	com_token = COM_Parse(&bspString);
-
- //       // Break out when we're done and there is no string data left to parse.
-	//	if (!bspString) {
-	//		break;
-	//	}
-
- //       // If the token isn't a {, something is off.
-	//	if (com_token[0] != '{') {
-	//	    Com_Error(ErrorType::Drop, "SpawnFromBSPString: found %s when expecting {", com_token);
-	//		return false;
-	//	}
-
-	//	// Now we've got the reserved server entity to use, let's parse the entity.
-	//	EntityDictionary parsedKeyValues;
- //       parsedSuccessfully = ParseEntityString(&bspString, parsedKeyValues);
-
-	//	// Pick the first entity there is, start asking for 
-	//	if (!clientEntity) {
-	//		clientEntity = cs->entities;
-	//	} else {
-	//		// See if it has a classname, and if that one contains _client_
-	//		if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "misc_client_explobox") {
-	//			localEntityIndex++;
-	//			clientEntity = &cs->entities[localEntityIndex];
-	//			clientEntity->clientEntityNumber = localEntityIndex;
-	//			clientEntity->currentState.number = localEntityIndex;
-	//			clientEntity->isLocal = true;
-	//			if (localEntityIndex < MAX_PACKET_ENTITIES) {
-	//				Com_Error(ErrorType::Drop, ("SpawnFromBSPString: localEntityIndex < MAX_EDICTS\n"));
-	//			}
-	//		} else {
-
-	//			entityIndex++;
-	//			clientEntity = &cs->entities[entityIndex];
-	//			clientEntity->clientEntityNumber = entityIndex;
-	//			clientEntity->currentState.number = entityIndex;
-	//			if (entityIndex > MAX_EDICTS) {
-	//				Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_EDICTS\n"));
-	//			}
-	//		}
-	//	}
-
-	//	// Assign parsed dictionary to entity.
-	//	clientEntity->entityDictionary = parsedKeyValues;
-
-	//	// Allocate the game entity, and call its spawn.
-	//	bool spawnedSuccessfully = true;
-	//	if (!CreateGameEntityFromDictionary(clientEntity, clientEntity->entityDictionary)) {
-	//		spawnedSuccessfully = false;
-	//	}
-	//	else {
-	//		// Acquire GameEntity.
-	//		GameEntity *gameEntity = static_cast<GameEntity*>(clientEntity->gameEntity);
-	//		gameEntity->Precache();
-	//		gameEntity->Spawn();
-	//	}
-
-	//	// If we failed to parse the entity properly, zero this one back out.
-	//	if (!parsedSuccessfully || !spawnedSuccessfully) {
-	//		const int32_t clientEntityNumber = clientEntity->clientEntityNumber;
-
-	//		//*clEntity = { .clientEntityNumber = clientEntityNumber };
-	//		*clientEntity = {};
-	//		clientEntity->clientEntityNumber = clientEntityNumber;
-
-	//		//return false;
-	//	}
-	//}
-
-	// Post spawn entities.
-	//for (auto& gameEntity : classEntities) {
-	//	if (gameEntity) {
-	//		gameEntity->PostSpawn();
-	//	}
-	//}
-
-	//// Find and hook team slaves.
-	//FindTeams();
-
-	// Initialize player trail...
-	// SVG_PlayerTrail_Init
-
-	//return parsedSuccessfully;
-}
-
-
-/**
-*	@brief	Parses the BSP Entity string and places the results in the client
-*			entity dictionary.
-**/
-qboolean ClientGameEntities::ParseEntityString(const char** data, EntityDictionary &parsedKeyValues) {
-	// False until proven otherwise.
-	qboolean parsedSuccessfully = false;
-
-	// Key value ptrs.
-	char *key = nullptr, *value = nullptr;
-
-	// Go through all the dictionary pairs.
-  	while (1) {
-		// Parse the key.
-		key = COM_Parse(data);
-		
-		// If we hit a }, it means we're done parsing, break out of this loop.
-		if (key[0] == '}') {
-			break;
-		}
-
-		// If we are at the end of the string without a closing brace, error out.
-		if (!*data) {
-			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-			return false;
-		}
-
-		// Parse the value.
-		value = COM_Parse(data);
-
-		// If we are at the end of the string without a closing brace, error out.
-		if (!*data) {
-			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-			return false;
-		}
-
-		// Ensure we had a value.
-		if (value[0] == '}') {
-			Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
-			return false;
-		   }
-
-		// We successfully managed to parse this entity.
-		parsedSuccessfully = true;
-
-		// keynames with a leading underscore are used for utility comments,
-		// and are immediately discarded by quake
-		if (key[0] == '_') {
-			continue;
-		}
-
-		// Insert the key/value into the dictionary.
-		Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
-		//if (clEntity) {
-			parsedKeyValues.try_emplace(std::string(key),std::string(value));// = value;
-		//}
+	if (gameWorld) {
+		return gameWorld->SpawnFromBSPString("mapname", bspString, nullptr);
+	} else {
+		return false;
 	}
-
-	// Return the result.
-	return parsedSuccessfully;
 }
-
-/**
-*   @brief  Allocates the game entity determined by the classname key, and
-*           then does a precache before spawning the game entity.
-**/
-qboolean ClientGameEntities::CreateGameEntityFromDictionary(PODEntity* clEntity, EntityDictionary &dictionary) {
-//    // Get client side entity number.
-//    int32_t stateNumber = clEntity->clientEntityNumber;
-//
-//    // If it does not have a classname key we're in for trouble.
-//    if (!dictionary.contains("classname")) {
-//	   // Error out.
-//	   Com_EPrint("%s: Can't spawn parsed server entity #%i due to a missing classname key.\n");
-//		
-//	   // Failed.
-//	   return false;
-//    }
-//
-//    // Actually spawn the game entity.
-//    IClientGameEntity *gameEntity = gameEntityList.AllocateFromClassname(dictionary["classname"], clEntity);
-//	
-//    // This only happens if something went badly wrong. (It shouldn't.)
-//    if (!gameEntity) {
-//		// Reset the client entity.
-////		*clEntity = { .clientEntityNumber = stateNumber };//FreeClientEntity(clEntity);
-//		*clEntity = {};
-//		clEntity->clientEntityNumber = stateNumber;
-//
-//		// Failed.
-//		Com_DPrint("Warning: Spawning entity(%s) failed.\n", clEntity->entityDictionary["classname"].c_str());
-//		return false;
-//	}
-//
-//    // Initialise the entity with its respected keyvalue properties
-//    for (const auto& keyValueEntry : clEntity->entityDictionary) {
-//		gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
-//	}
-//
-//    // Precache and spawn the entity.
-//    gameEntity->Precache();
-//    gameEntity->Spawn();
-
-	ClientGameWorld *gameWorld = GetGameWorld();
-	//gameWorld->CreateGameEntity
-
-    // Success.
-    return true;
-}
-
-//---------------------------------------------------------------------------------------
 
 /**
 *   @brief  When the client receives state updates it calls into this function so we can update
@@ -449,7 +220,7 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 	}
 
 	// Iterate through our local client side entities.
-    for (int32_t localEntityNumber = 2048 + 3; localEntityNumber < MAX_POD_ENTITIES; localEntityNumber++) {
+    for (int32_t localEntityNumber = LOCAL_ENTITIES_START_INDEX; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
         // Acquire game entity object.
         GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(localEntityNumber);
 
@@ -622,7 +393,7 @@ void ClientGameEntities::AddPacketEntities() {
 
 
   ////  // Iterate from 0 till the amount of entities present in the current frame.
-    for (int32_t localEntityNumber = 2048; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
+    for (int32_t localEntityNumber = LOCAL_ENTITIES_START_INDEX; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
         PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(localEntityNumber);
 		// Get the current state of the given entity index.
 		EntityState *entityState = &clientEntity->currentState;
@@ -1480,7 +1251,7 @@ void ClientGameEntities::AddViewEntities() {
     //    gunRenderEntity.oldframe = currentPlayerState->gunAnimationEndFrame;
     //}
 
-    gunRenderEntity.id = RESERVED_ENTITIY_GUN;
+    gunRenderEntity.id = RESERVED_LOCAL_ENTITIY_ID_GUN;
 
     // If there is no model to render, there is no need to continue.
     if (!gunRenderEntity.model) {

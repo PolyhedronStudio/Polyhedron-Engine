@@ -177,7 +177,6 @@ const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t
     CL_ClipMoveToEntities(start, mins, maxs, end, reinterpret_cast<PODEntity*>(skipEntity), contentMask, &trace);
 	CL_ClipMoveToLocalClientEntities(start, mins, maxs, end, reinterpret_cast<PODEntity*>(skipEntity), contentMask, &trace);
 
-
     return trace;
 }
 

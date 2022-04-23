@@ -117,7 +117,7 @@ static constexpr int32_t  HEARTBEAT_SECONDS = 300;
 static constexpr uint32_t SV_BASELINES_SHIFT = 6;
 static constexpr uint32_t SV_BASELINES_PER_CHUNK = (1 << SV_BASELINES_SHIFT);
 static constexpr uint32_t SV_BASELINES_MASK = (SV_BASELINES_PER_CHUNK - 1);
-static constexpr uint32_t SV_BASELINES_CHUNKS = (MAX_EDICTS >> SV_BASELINES_SHIFT);
+static constexpr uint32_t SV_BASELINES_CHUNKS = (MAX_WIRED_POD_ENTITIES >> SV_BASELINES_SHIFT);
 
 // Server FPS
 constexpr uint32_t SV_FRAMERATE = BASE_FRAMERATE;
@@ -170,7 +170,7 @@ typedef struct {
 
     char    configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
 
-    server_entity_t entities[MAX_EDICTS];
+    server_entity_t entities[MAX_WIRED_POD_ENTITIES];
 
     uint64_t    tracecount;
 } server_t;

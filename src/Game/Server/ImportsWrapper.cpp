@@ -66,7 +66,7 @@ void SVG_Sound(IServerGameEntity* ent, int32_t channel, int32_t soundIndex, floa
 **/
 std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount, int32_t areaType) {
     // Boxed server entities set by gi.BoxEntities.
-    Entity* boxedServerEntities[MAX_EDICTS];
+    Entity* boxedServerEntities[MAX_WIRED_POD_ENTITIES];
 
     // Vector of the boxed class entities to return.
     GameEntityVector boxedClassEntities;
@@ -75,8 +75,8 @@ std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t
     GameEntityVector gameEntities = game.world->GetGameEntities();
 
     // Ensure the listCount can't exceed the max edicts.
-    if (listCount > MAX_EDICTS) {
-        listCount = MAX_EDICTS;
+    if (listCount > MAX_WIRED_POD_ENTITIES) {
+        listCount = MAX_WIRED_POD_ENTITIES;
     }
 
     // Box the entities.

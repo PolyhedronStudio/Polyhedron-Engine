@@ -548,7 +548,7 @@ void FuncDoor::UseAreaportals( bool open ) const {
     }
 
     SVGBaseEntity* ent = nullptr;
-    for (auto& areaPortalEntity : GetGameWorld()->GetGameEntityRange<0, MAX_EDICTS>() | 
+    for (auto& areaPortalEntity : GetGameWorld()->GetGameEntityRange<0, MAX_WIRED_POD_ENTITIES>() | 
         cef::IsValidPointer | cef::HasServerEntity | cef::InUse | cef::IsSubclassOf<FuncAreaportal>() | cef::HasKeyValue("targetname", targetStr)) {
 	    dynamic_cast<FuncAreaportal*>(areaPortalEntity)->ActivatePortal(open);
     }

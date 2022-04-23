@@ -23,7 +23,23 @@ class CLGBasePacketEntity;
 class CLGBaseLocalEntity;
 class Worldspawn;
 
+// GameWorld Interface.
 #include "../../../Game/Shared/World/IGameWorld.h"
+
+
+/***
+*	Configuration of reserved entity types, and the start of the local entity indexes.
+***/
+//! Use a static entity ID on some things because the renderer relies on EntityID to match between meshes
+//! between the current and previous frames.
+static constexpr int32_t RESERVED_LOCAL_ENTITIY_ID_GUN = 0;
+static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 1;
+static constexpr int32_t RESERVED_ENTITIY_COUNT = 2;
+
+//! The actual start of the local entities index.
+static constexpr int32_t LOCAL_ENTITIES_START_INDEX = MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT;
+
+
 
 /**
 *	@brief GameWorld regulates the lifetime management of all entities.
@@ -272,7 +288,7 @@ public:
 private:
     //! Assigned the value of the latched cvar maxclients. Makes for easier access.
     int32_t maxClients = 0;
-	//! Assigned the clamped(MAX_EDICTS) value of the latched cvar maxentities. Makes for easier access.
+	//! Assigned the clamped(MAX_WIRED_POD_ENTITIES) value of the latched cvar maxentities. Makes for easier access.
     int32_t maxEntities = 0;
 
 	//! Clients array, allocated to the size of maxclients cvar.
@@ -296,10 +312,10 @@ private:
 
 private:
     //// Array storing the POD server entities.
-    //Entity serverEntities[MAX_EDICTS];
+    //Entity serverEntities[MAX_WIRED_POD_ENTITIES];
 
     ////! Array for storing the server game's class entities.
-    //GameEntity* gameEntities[MAX_EDICTS];
+    //GameEntity* gameEntities[MAX_WIRED_POD_ENTITIES];
 
     ////! Total number of actively spawned entities.
     //int32_t numberOfEntities = 0;

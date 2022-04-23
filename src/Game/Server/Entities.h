@@ -11,7 +11,7 @@
 *	They are best used whenever there is a need for acquiring, or looping, over a set range of entities.
 *	An example usage of that is:
 * 
-*	for (auto &entity : GetGameEntityRange(0, MAX_EDICTS)
+*	for (auto &entity : GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
 *			| cef::Standard	// This automatically checks for whether the pointer is valid, inUse = true, and whether the gameEntity pointer is valid also.
 *			| cef::HasKeyValue("target", "value")) { // Filters out any entity not having a key: target, value: targetValue.
 *		// Do something with the entity... entity->Remove(); // Remove it for example.

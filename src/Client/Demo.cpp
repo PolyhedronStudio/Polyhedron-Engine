@@ -418,7 +418,7 @@ static void CL_Record_f(void)
     }
 
     // entityBaselines
-    for (i = 1; i < MAX_EDICTS; i++) {
+    for (i = 1; i < MAX_WIRED_POD_ENTITIES; i++) {
         ent = &cl.entityBaselines[i];
         if (!ent->number)
             continue;

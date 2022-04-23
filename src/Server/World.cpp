@@ -463,7 +463,7 @@ static mnode_t *SV_HullForEntity(Entity *ent)
 **/
 int32_t SV_PointContents(const vec3_t &point)
 {
-    static Entity     *touch[MAX_EDICTS], *hit = nullptr;
+    static Entity     *touch[MAX_WIRED_POD_ENTITIES], *hit = nullptr;
     
 	// Ensure all is sane.
     if (!sv.cm.cache || !sv.cm.cache->nodes) {
@@ -475,7 +475,7 @@ int32_t SV_PointContents(const vec3_t &point)
     int32_t contents = CM_PointContents(point, sv.cm.cache->nodes);
 
     // or in contents from all the other entities
-    int32_t numberOfAreaEntities = SV_AreaEntities(point, point, touch, MAX_EDICTS, AreaEntities::Solid);
+    int32_t numberOfAreaEntities = SV_AreaEntities(point, point, touch, MAX_WIRED_POD_ENTITIES, AreaEntities::Solid);
 
     for (int32_t i = 0; i < numberOfAreaEntities; i++) {
 		// Acquire touch entity.
@@ -507,9 +507,9 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
         }
     }
 
-	static Entity *touchEntityList[MAX_EDICTS];
+	static Entity *touchEntityList[MAX_WIRED_POD_ENTITIES];
 	Entity *touchEntity = nullptr;
-    int32_t numberOfAreaEntities = SV_AreaEntities(boxMins, boxMaxs, touchEntityList, MAX_EDICTS, AreaEntities::Solid);
+    int32_t numberOfAreaEntities = SV_AreaEntities(boxMins, boxMaxs, touchEntityList, MAX_WIRED_POD_ENTITIES, AreaEntities::Solid);
 
     // Be careful, it is possible to have an entity in this list removed before we get to it (killtriggered)
     for (int32_t i = 0; i < numberOfAreaEntities; i++) {

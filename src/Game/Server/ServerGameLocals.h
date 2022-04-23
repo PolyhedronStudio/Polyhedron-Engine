@@ -487,7 +487,7 @@ void SVG_RunEntity(SGEntityHandle &entityHandle);
 // TODO: All these go elsewhere, sometime, as does most...
 void SVG_SetConfigString(const int32_t &configStringIndex, const std::string &configString);
 
-std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_EDICTS, int32_t areaType = AreaEntities::Solid);
+std::vector<IServerGameEntity*> SVG_BoxEntities(const vec3_t& mins, const vec3_t& maxs, int32_t listCount = MAX_WIRED_POD_ENTITIES, int32_t areaType = AreaEntities::Solid);
 
 qhandle_t SVG_PrecacheModel(const std::string& filename);
 qhandle_t SVG_PrecacheImage(const std::string& filename);

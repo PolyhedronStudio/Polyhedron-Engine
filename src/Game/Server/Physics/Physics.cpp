@@ -483,7 +483,7 @@ typedef struct {
     int     deltaYaw;
 #endif
 } pushed_t;
-pushed_t    pushed[MAX_EDICTS], *pushed_p;
+pushed_t    pushed[MAX_WIRED_POD_ENTITIES], *pushed_p;
 
 IServerGameEntity *obstacle = nullptr;
 
@@ -716,7 +716,7 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
     // make sure all team slaves can move before commiting
     // any moves or calling any Think functions
     // if the move is Blocked, all moved objects will be backed out
-//retry:
+retry:
     pushed_p = pushed;
     for (part = ent ; part ; part = part->GetTeamChainEntity()) {
         // Fetch pusher part, its Velocity.
@@ -737,8 +737,8 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
                 break;  // move was Blocked
         }
     }
-    if (pushed_p > &pushed[MAX_EDICTS])
-        gi.Error("pushed_p > &pushed[MAX_EDICTS], memory corrupted");
+    if (pushed_p > &pushed[MAX_WIRED_POD_ENTITIES])
+        gi.Error("pushed_p > &pushed[MAX_WIRED_POD_ENTITIES], memory corrupted");
 
     if (part) {
         // the move failed, bump all nextThinkTime times and back out moves
@@ -754,11 +754,12 @@ void SVG_Physics_Pusher(SGEntityHandle &entityHandle)
             part->DispatchBlockedCallback(obstacle);
         }
 
-#if 0
+//#if 0
         // if the pushed entity went away and the pusher is still there
-        if (!obstacle->inUse && part->inUse)
+        if ((obstacle && !obstacle->IsInUse()) && (part && part->IsInUse())) {
             goto retry;
-#endif
+		}
+//#endif
     } else {
         // the move succeeded, so call all Think functions
         for (part = ent ; part ; part = part->GetTeamChainEntity()) {
@@ -901,7 +902,10 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
             }
         }
 
-        //ent->DispatchTouchCallback(ent, trace.gameEntity, &trace.plane, trace.surface);
+		// This used to be commented in the origina lcode as well, somehow... it does work
+		//if (trace.gameEntity) {
+	    //    ent->DispatchTouchCallback(ent, trace.gameEntity, &trace.plane, trace.surface);
+		//}
     }
 
     // Check for water transition, first fetch the OLD contents mask.

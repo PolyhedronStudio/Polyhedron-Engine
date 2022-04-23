@@ -1051,7 +1051,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
         }
 
         // Invalid number? Error out.
-        if (from->number < 1 || from->number >= MAX_EDICTS) {
+        if (from->number < 1 || from->number >= MAX_WIRED_POD_ENTITIES) {
             Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, from->number);
         }
 
@@ -1063,7 +1063,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
     }
 
     // Entity number sanity check.
-    if (to->number < 1 || to->number >= MAX_EDICTS) {
+    if (to->number < 1 || to->number >= MAX_WIRED_POD_ENTITIES) {
         Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, to->number);
     }
 
@@ -1359,7 +1359,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
     }
 
     // Ensure the number is valid.
-    if (number < 1 || number >= MAX_EDICTS) {
+    if (number < 1 || number >= MAX_WIRED_POD_ENTITIES) {
         Com_Error(ErrorType::Drop, "%s: bad entity number: %d", __func__, number);
     }
 

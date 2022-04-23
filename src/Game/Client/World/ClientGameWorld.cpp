@@ -88,13 +88,13 @@ void ClientGameWorld::DestroyGameMode() {
 *			are set to nullptr. Also does a clamp on maxEntities for sanity.
 **/
 void ClientGameWorld::PrepareEntities() {
-    // 2048 for server entities, and 2048 more for... whichever.
+    // 1024 for wired entities, and 3072 more for... whichever.
     gameEntities.resize(MAX_CLIENT_POD_ENTITIES);
 
     // To ensure that slot 0 is in use, keeps indexes correct.
 //    gameEntities.push_back(nullptr);
  //   // Clamp it just in case.
-//   int32_t maxEntities = Clampi(MAX_EDICTS, (int)maximumclients->value + 1, MAX_EDICTS);
+//   int32_t maxEntities = Clampi(MAX_WIRED_POD_ENTITIES, (int)maximumclients->value + 1, MAX_WIRED_POD_ENTITIES);
 
  //   // Setup the globals entities pointer and max entities value so
 	//// that the server can access it.
@@ -269,8 +269,8 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
   //          clientEntity = &cs->entities[entityIndex];
 
 
-  //          if (entityIndex > MAX_EDICTS) {
-  //              Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_EDICTS\n"));
+  //          if (entityIndex > MAX_WIRED_POD_ENTITIES) {
+  //              Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_WIRED_POD_ENTITIES\n"));
   //          }
 		//}
 
@@ -300,15 +300,15 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 				clientEntity->isLocal = true;
 				clientEntity->inUse = true;
 
-				if (localEntityIndex < MAX_PACKET_ENTITIES) {
-					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: localEntityIndex < MAX_EDICTS\n"));
+				if (localEntityIndex < MAX_WIRED_POD_ENTITIES) {
+					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: (localEntityIndex < MAX_WIRED_POD_ENTITIES) detected\n"));
 				}
 			// Worldspawn.
 			} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
 				entityIndex++;
 				clientEntity = gameWorld->GetPODEntityByIndex(0);
 				if (!clientEntity) {
-					Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", entityIndex);
+					Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n");
 					return false;
 				}
 				clientEntity->clientEntityNumber = 0;
@@ -327,8 +327,8 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 				clientEntity->currentState.number = entityIndex;
 				clientEntity->previousState.number = entityIndex;
 				clientEntity->isLocal = false;
-				if (entityIndex > MAX_EDICTS) {
-					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_EDICTS\n"));
+				if (entityIndex > MAX_WIRED_POD_ENTITIES) {
+					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_WIRED_POD_ENTITIES\n"));
 				}
 			}
 		//}
@@ -346,7 +346,7 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 				.previousState = {
 					.number = clientEntityNumber		// Same for previousState number.
 				},
-				.isLocal = (clientEntityNumber > 2048 ? true : false),
+				.isLocal = (clientEntityNumber > MAX_WIRED_POD_ENTITIES ? true : false),
 				.inUse = false,
 				.clientEntityNumber = clientEntityNumber, // Last but not least, the actual clientEntityNumber.
 			};
@@ -927,6 +927,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 
 		// Spawn if needed.
 		if (clEntity->gameEntity) {
+			// TODO: Use a SpawnFromState function here instead.
 			clEntity->gameEntity->Spawn();
 		}
 

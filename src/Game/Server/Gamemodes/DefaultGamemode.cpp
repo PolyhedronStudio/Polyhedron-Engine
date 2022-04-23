@@ -263,7 +263,7 @@ GameEntityVector DefaultGameMode::FindBaseEnitiesWithinRadius(const vec3_t& orig
     GameEntityVector radiusEntities;
 
     // Iterate over all entities, see who is nearby, and who is not.
-    for (auto* radiusEntity : game.world->GetGameEntityRange<0, MAX_EDICTS>()
+    for (auto* radiusEntity : game.world->GetGameEntityRange<0, MAX_WIRED_POD_ENTITIES>()
          | cef::Standard
          | cef::WithinRadius(origin, radius, excludeSolidFlags)) {
 
@@ -1498,7 +1498,7 @@ void DefaultGameMode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
     IServerGameEntity *spawnPoint = nullptr;
 
     // Find a spawn point that has a targetname matching game.spawnpoint.
-    auto targetSpawnPoints = game.world->GetGameEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>() | cef::HasKeyValue("targetname", game.spawnpoint);
+    auto targetSpawnPoints = game.world->GetGameEntityRange<0, MAX_WIRED_POD_ENTITIES>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>() | cef::HasKeyValue("targetname", game.spawnpoint);
 
     // First try and find the one with the targetname.
     for (auto& entity : targetSpawnPoints) {
@@ -1513,7 +1513,7 @@ void DefaultGameMode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
     if (!spawnPoint) {
         // TODO: Improve this, find a method to select random from a range. (Or wrap something similar up.)
 	    std::vector<IServerGameEntity*> spawnVector;
-        auto spawnPoints = game.world->GetGameEntityRange<0, MAX_EDICTS>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>();
+        auto spawnPoints = game.world->GetGameEntityRange<0, MAX_WIRED_POD_ENTITIES>() | cef::Standard | cef::IsSubclassOf<InfoPlayerStart>();
         for (auto& entity : spawnPoints) { spawnVector.push_back(entity); }
 
         // Select random spawn point.

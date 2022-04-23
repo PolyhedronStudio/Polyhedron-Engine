@@ -940,7 +940,7 @@ static channel_t *AL_FindLoopingSound(int entnum, sfx_t *sfx)
 static void AL_AddLoopSounds(void)
 {
 	int         i;
-	int         sounds[MAX_EDICTS];
+	int         sounds[MAX_WIRED_POD_ENTITIES];
 	channel_t   *ch, *ch2;
 	sfx_t       *sfx;
 	sfxcache_t  *sc;

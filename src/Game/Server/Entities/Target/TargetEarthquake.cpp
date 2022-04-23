@@ -72,7 +72,7 @@ void TargetEarthquake::QuakeThink() {
         lastQuakeTime = duration_cast<GameTime>(level.time + 0.5s);
     }
 
-    for (auto& entity : GetGameWorld()->GetGameEntityRange(0, MAX_EDICTS)
+    for (auto& entity : GetGameWorld()->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
          | cef::Standard | cef::HasClient | cef::HasGroundEntity ) 
     {
         vec3_t newVelocity {

@@ -507,7 +507,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
     //    break;
 
     //case F_EDICT:
-    //    write_index(f, *(void **)p, sizeof(Entity), g_entities, MAX_EDICTS - 1);
+    //    write_index(f, *(void **)p, sizeof(Entity), g_entities, MAX_WIRED_POD_ENTITIES - 1);
     //    break;
     //case F_CLIENT:
     //    write_index(f, *(void **)p, sizeof(ServerClient), game.clients, game.GetMaxClients() - 1);
@@ -800,7 +800,7 @@ void SVG_ReadGame(const char *filename)
         fclose(f);
         gi.Error("Savegame has bad maximumclients");
     }
-    if (game.GetMaxEntities() <= game.GetMaxClients() || game.GetMaxEntities() > MAX_EDICTS) {
+    if (game.GetMaxEntities() <= game.GetMaxClients() || game.GetMaxEntities() > MAX_WIRED_POD_ENTITIES) {
         fclose(f);
         gi.Error("Savegame has bad maxEntities");
     }

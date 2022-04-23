@@ -17,8 +17,8 @@ class CLGBasePacketEntity;
 *
 *   Manages allocation and destruction of client game class entities.
 * 
-*   The first 2048 slots are reserved strictly for server entities only.
-*   The second 2048 slots are reserved for client side only entities.
+*   The first 1024 slots are reserved strictly for server entities only.
+*   The second 3072 slots are reserved for client side only entities.
 *   
 *   Since we're dealing with incoming packets telling us the state of each entity in frame, 
 *   we'll have to carefully manage which states belong to what entities. The entity classname
