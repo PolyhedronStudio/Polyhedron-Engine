@@ -2743,7 +2743,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		vkpt_refdef.bsp_mesh_world.world_aabb.maxs,
 		shadowmap_view_proj,
 		&shadowmap_depth_scale,
-		ref_mode.enable_accumulation && num_accumulated_frames > 1);
+		!!((ref_mode.enable_accumulation) && (num_accumulated_frames > 1)));
 
 	vkpt_god_rays_prepare_ubo(
 		ubo,
@@ -2753,7 +2753,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		shadowmap_view_proj,
 		shadowmap_depth_scale);
 
-	qboolean god_rays_enabled = vkpt_god_rays_enabled(&sun_light) && render_world;
+	qboolean god_rays_enabled = !!((vkpt_god_rays_enabled(&sun_light)) && (render_world));
 
 	VkSemaphore transfer_semaphores[VKPT_MAX_GPUS];
 	VkSemaphore trace_semaphores[VKPT_MAX_GPUS];

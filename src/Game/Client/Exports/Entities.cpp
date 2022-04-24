@@ -21,9 +21,9 @@
 // Effects.
 #include "../Effects/ParticleEffects.h"
 
-// Ents.
-#include "../Entities/GameEntityList.h"
+// Entitiess.
 #include "../Entities/Base/CLGBasePacketEntity.h"
+#include "../Entities/Base/CLGBaseLocalEntity.h"
 
 // World.
 #include "../World/ClientGameWorld.h"
@@ -408,6 +408,7 @@ void ClientGameEntities::AddPacketEntities() {
 		
 		if (!gameEntity) {
 			// Ouche..?
+
 			continue;
 		}
 

@@ -244,6 +244,21 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 	// Acquire gameworld and entity arrays.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
+	// First 3 reserved entities.
+	for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
+		clientEntity = gameWorld->GetPODEntityByIndex(i);
+		if (!clientEntity) {
+		Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", i);
+		return false;
+		}
+		clientEntity->clientEntityNumber = i;
+		clientEntity->currentState.number = i;
+		clientEntity->previousState.number = i;
+		clientEntity->isLocal = true;
+		clientEntity->inUse = false;
+	} 
+
+
 	// Engage parsing.
 	while (!!isParsing == true) {
 		// Parse the opening brace.

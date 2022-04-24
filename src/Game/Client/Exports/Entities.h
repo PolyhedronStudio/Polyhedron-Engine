@@ -20,9 +20,6 @@
 // Base Local Entity.
 #include "../Entities/Base/CLGBaseLocalEntity.h"
 
-// Entity List.
-#include "../Entities/GameEntityList.h"
-
 // World.
 #include "../World/ClientGameWorld.h"
 
@@ -91,7 +88,7 @@ public:
 	**/
 	void RunPackEntitiesPredictionFrame();
 
-    inline CLGEntityVector &GetGameEntities() {
+    inline GameEntityVector &GetGameEntities() {
 		ClientGameWorld *gameWorld = GetGameWorld();
 		if (gameWorld) {
 			return gameWorld->GetGameEntities();

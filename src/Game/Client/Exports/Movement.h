@@ -33,11 +33,12 @@ public:
     **/
     void FinalizeFrameMovementCommand() final;
 
-        /**
+	/**
     *   @brief  Each frame we sample the user input and configure the ClientMoveCommand
     *           which is then sent to the server.
     **/
     ClientMoveCommand moveCommand = {};
+
 private:
     /**
     *   @brief  Register input messages and binds them to a callback function.

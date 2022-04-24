@@ -659,8 +659,21 @@ void CL_ClearState(void)
     //memset(&cs.entities, 0, sizeof(cs.entities));
     // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
     //cl = {};
-    for (int32_t i = 0; i < MAX_ENTITIES; i++) {
-        cs.entities[i] = {};
+    for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
+		PODEntity *podEntity = &cs.entities[i];
+		(*podEntity) = {
+			// Ensure the states are assigned the correct entityNumber.
+			.currentState = {
+				.number = i,
+			},
+			.previousState = {
+				.number = i,
+			},
+
+			// And ensure our main identifier has the correct entityNumber set.
+			.clientEntityNumber = i,
+		};
+
     }
 
     // In case we are more than connected, reset it to just connected.
@@ -3043,9 +3056,7 @@ uint64_t CL_Frame(uint64_t msec)
 	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         CL_SetClientTime();
     }
-	
-	// Let client side entities do their thing.
-	CL_RunGameFrame(main_extra);
+
 
 #if USE_AUTOREPLY
     // Check for version reply
@@ -3054,6 +3065,9 @@ uint64_t CL_Frame(uint64_t msec)
 
     // Resend a connection request if necessary
     CL_CheckForResend();
+		
+	// Let client side entities do their thing.
+	CL_RunGameFrame(main_extra);
 
     // Read user intentions
     CL_UpdateCmd(main_extra);

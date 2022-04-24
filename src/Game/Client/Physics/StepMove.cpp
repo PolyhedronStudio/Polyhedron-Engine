@@ -26,10 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Base Entity.
 #include "../Entities/Base/CLGBasePacketEntity.h"
 
-// GameEntity list.
-#include "../Entities/GameEntityList.h"
-//#include "../Utilities.h"
-
 // UP-STEP height in "Quake Units". This is used commonly all over for each stepmove entity.
 // TODO: In the future it is likely one would want to be able to set this property to a custom
 // value for each entity type.

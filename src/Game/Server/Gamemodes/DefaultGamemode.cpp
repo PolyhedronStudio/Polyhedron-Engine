@@ -61,7 +61,7 @@ void DefaultGameMode::OnLevelExit() {
     Entity* podEntities = game.world->GetPODEntities();
     
     // Acquire game entities pointer.
-    GameEntityVector gameEntities = game.world->GetGameEntities();
+    GameEntityVector &gameEntities = game.world->GetGameEntities();
 
     // Create the command to use for switching to the next game map.
     std::string command = "gamemap \"";

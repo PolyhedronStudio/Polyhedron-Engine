@@ -572,6 +572,9 @@ public:
 
 			// Update model index.
 			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
+
+			// Link it for collision testing.
+			//LinkEntity();
 			//Com_DPrint("DEBUG MODEL: %i for %s\n", clgi.R_RegisterModel(model.c_str()), model.c_str());
 			//SetModelIndex(cl->drawModels[ clgi.R_RegisterModel(model.c_str()) ]);
 		}
@@ -918,11 +921,6 @@ private:
     //! Refresh Entity Object.
     r_entity_t refreshEntity = {};
 
-    // Client Class Entities maintain their own states. (Get copied in from updates.)
-    EntityState currentState = {};
-    EntityState previousState = {};
-
-
 
 public:
     /**
@@ -992,7 +990,7 @@ public:
 	/**
 	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
 	**/
-	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction);
+	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
 private:
 	virtual void ProcessSkeletalAnimationForTime(uint64_t time);
