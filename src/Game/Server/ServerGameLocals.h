@@ -187,7 +187,7 @@ struct EntitySpawnFlags {
 
 
 static constexpr int32_t MELEE_DISTANCE = 80;
-static constexpr int32_t BODY_QUEUE_SIZE = 8;
+
 
 /**
 *   Take Damage.

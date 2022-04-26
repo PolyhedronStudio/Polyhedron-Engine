@@ -211,17 +211,7 @@ qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* en
 			return false;
 		}
 
-		//// Pick the first entity there is, start asking for 
-		//if (!podEntity) {
-		//	podEntity = podEntities;
-		//} else {
-		//	podEntity = GetUnusedPODEntity();
-		//}
-
-
-
-
-		//////
+		// SpawnKeys.
 		SpawnKeyValues parsedKeyValues;
         parsedSuccessfully = ParseEntityString(&entities, parsedKeyValues);
 
@@ -255,9 +245,7 @@ qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* en
 			podEntity = GetUnusedPODEntity(true);
 		}
 
-		// Acquire a POD Entity.
-		//PODEntity *podEntity = GetPODEntityByIndex(entityIndex);
-
+		// Ensure the POD Entity is a valid ptr.
 		if (!podEntity) {
 			parsedSuccessfully = false;
 			continue;

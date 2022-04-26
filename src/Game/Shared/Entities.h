@@ -22,6 +22,10 @@
 // Shared Entity Interface.
 #include "Entities/ISharedGameEntity.h"
 
+
+/**
+*	Using ... = Types.
+**/
 //! This is the actual GameWorld POD array with a size based on which GameModule we are building for.
 using PODGameWorldArray = PODEntity[MAX_POD_ENTITIES];
 
@@ -33,3 +37,10 @@ using PODEntityVector = std::vector<PODEntity*>;
 using GameEntitySpan = std::span<GameEntity*>;
 //! std::vector for GameEntity* derived objects.
 using GameEntityVector = std::vector<GameEntity*>;
+
+
+/**
+*	Shared Constants.
+**/
+//! Size of the dead body entity queue.
+static constexpr int32_t BODY_QUEUE_SIZE = 8;

@@ -115,7 +115,7 @@ void ClientGameWorld::PrepareClients() {
 	cvar_t *maximumclients = clgi.Cvar_Get("maxclients", nullptr, 0);
 	
 	if (maximumclients && maximumclients->integer) {
-	maxClients = maximumclients->integer;
+		maxClients = maximumclients->integer;
 		Com_DPrint("MAXIMUM CLIENTS YOOOO DAWG================%i\n", maximumclients->integer);
 	}
 
@@ -131,44 +131,46 @@ void ClientGameWorld::PrepareClients() {
 **/
 void ClientGameWorld::PreparePlayers() {
 	// Allocate a classentity for each client in existence.
-	for (int32_t i = 0; i < maxClients; i++) {//maxClients + 1; i++) {
-		const int32_t entityNumber = i + 1;
+	for (int32_t i = 1; i < maxClients + 1; i++) {//maxClients + 1; i++) {
+		const int32_t entityNumber = i;
 
 		// Acquire POD entity.
 		PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
 
-		podEntity->currentState.number = entityNumber;
-		podEntity->previousState.number = entityNumber;
-		podEntity->clientEntityNumber = entityNumber;
-		podEntity->gameEntity = nullptr; // TODO: ??
-
-		// Create a CLGBasePacketEntity.
-		podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity");//CreateGameEntity<CLGBasePacketEntity>(podEntity, false);
-
-		// They aren't in use of course, and they come from the server.
-		podEntity->inUse = false;
-		podEntity->isLocal = false;
+		// Setup the entity.
+		(*podEntity) = {
+			.currentState {
+				.number = entityNumber,
+			},
+			.previousState = {
+				.number = entityNumber,
+			},
+			.isLocal = false,
+			.inUse = false,
+			.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
+			.clientEntityNumber = entityNumber,
+		};
 	}
 
-	// Prepare body queue.
-	for (int32_t i = maxClients; i <= maxClients + 8; i++) {//maxClients + 1; i++) {
-		const int32_t entityNumber = i + 1;
+	//// Prepare body queue.
+	//for (int32_t i = maxClients; i <= maxClients + BODY_QUEUE_SIZE; i++) {//maxClients + 1; i++) {
+	//	const int32_t entityNumber = i + 1;
 
-		// Acquire POD entity.
-		PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
+	//	// Acquire POD entity.
+	//	PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
 
-		podEntity->currentState.number = entityNumber;
-		podEntity->previousState.number = entityNumber;
-		podEntity->clientEntityNumber = entityNumber;
-		podEntity->gameEntity = nullptr; // TODO: ??
+	//	podEntity->currentState.number = entityNumber;
+	//	podEntity->previousState.number = entityNumber;
+	//	podEntity->clientEntityNumber = entityNumber;
+	//	podEntity->gameEntity = nullptr; // TODO: ??
 
-		// Create a CLGBasePacketEntity.
-		podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity");//CreateGameEntity<CLGBasePacketEntity>(podEntity, false);
+	//	// Create a CLGBasePacketEntity.
+	//	podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity");//CreateGameEntity<CLGBasePacketEntity>(podEntity, false);
 
-		// They aren't in use of course, and they come from the server.
-		podEntity->inUse = false;
-		podEntity->isLocal = false;
-	}
+	//	// They aren't in use of course, and they come from the server.
+	//	podEntity->inUse = false;
+	//	podEntity->isLocal = false;
+	//}
 
 
 		//// Allocate player client game entity
@@ -185,7 +187,34 @@ void ClientGameWorld::PreparePlayers() {
   //  }
 }
 
+/**
+*	@brief	Reserves the game's body queue entity slots.
+**/
+void ClientGameWorld::PrepareBodyQueue() {
+    // Reserve some spots for dead player bodies for coop / deathmatch
+    //level.bodyQue = 0;
+	int32_t startRange = maxClients + 1;
+	int32_t endRange = startRange + BODY_QUEUE_SIZE;
+    for (int32_t entityNumber = startRange; entityNumber < endRange; entityNumber++) {
 
+		// Acquire POD entity.
+		PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
+
+		// Setup the entity.
+		(*podEntity) = {
+			.currentState {
+				.number = entityNumber,
+			},
+			.previousState = {
+				.number = entityNumber,
+			},
+			.isLocal = false,
+			.inUse = false,
+			.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
+			.clientEntityNumber = entityNumber,
+		};
+    }
+}
 
 /**
 *	@brief	Parses the 'entities' string and assigns each parsed entity to the
@@ -233,30 +262,33 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 	// Occupy player entity slots for future use.
     PreparePlayers();
 
+	// Reserve dead body queue slots.
+	PrepareBodyQueue();
+
     // Parsing state variables.
 	qboolean isParsing = true; // We'll keep on parsing until this is set to false.
 	qboolean parsedSuccessfully = false;// This gets set to false the immediate moment we run into parsing trouble.
 	char *com_token = nullptr; // Token pointer.
 	PODEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
-    uint32_t packetEntityIndex = maxClients + 9; // We start from the max clients.         
+    uint32_t packetEntityIndex = maxClients + 1 + BODY_QUEUE_SIZE; // We start from the max clients.         
 	uint32_t localEntityIndex = MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; // TODO: That RESERVED_COUNT thingy.
 
 	// Acquire gameworld and entity arrays.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
-	// First 3 reserved entities.
-	for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
-		clientEntity = gameWorld->GetPODEntityByIndex(i);
-		if (!clientEntity) {
-		Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", i);
-		return false;
-		}
-		clientEntity->clientEntityNumber = i;
-		clientEntity->currentState.number = i;
-		clientEntity->previousState.number = i;
-		clientEntity->isLocal = true;
-		clientEntity->inUse = false;
-	} 
+	//// First 3 reserved entities.
+	//for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
+	//	clientEntity = gameWorld->GetPODEntityByIndex(i);
+	//	if (!clientEntity) {
+	//	Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", i);
+	//	return false;
+	//	}
+	//	clientEntity->clientEntityNumber = i;
+	//	clientEntity->currentState.number = i;
+	//	clientEntity->previousState.number = i;
+	//	clientEntity->isLocal = true;
+	//	clientEntity->inUse = false;
+	//} 
 
 
 	// Engage parsing.
@@ -275,26 +307,7 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 			return false;
 		}
 
-		//// Pick the first entity there is, start asking for 
-		//if (!clientEntity) {
-		//	clientEntity = cs->entities;
-		//} else {
-
-  //          entityIndex++;
-  //          clientEntity = &cs->entities[entityIndex];
-
-
-  //          if (entityIndex > MAX_WIRED_POD_ENTITIES) {
-  //              Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_WIRED_POD_ENTITIES\n"));
-  //          }
-		//}
-
-		//// Now we've got the reserved client entity to use, let's parse the entity.
-  //      ParseEntityString(&entities, clientEntity);
-		// Now we've got the reserved client entity to use, let's parse the entity.
-        //ParseEntityString(&bspString, clientEntity);
-		// Now we've got the reserved server entity to use, let's parse the entity.
-		// Now we've got the reserved server entity to use, let's parse the entity.
+		// SpawnKeys.
 		SpawnKeyValues parsedKeyValues;
         parsedSuccessfully = ParseEntityString(&bspString, parsedKeyValues);
 
@@ -304,141 +317,60 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 		// This is the actual entity index that's in use.
 		uint32_t entityIndex = 0;
 
+		// POD Entity.
+		PODEntity *podEntity = nullptr;
+		
 		// If the dictionary has a classname, and it has client_ residing in it, change the entity index to use.
 		if (parsedKeyValues.contains("classname") && (parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)) {
 			// Increment local entity count.
 			localEntityIndex++;
-			entityIndex = localEntityIndex;
+		//	//entityIndex = localEntityIndex;
 
-			// Entity is local.
+		//	// Entity is local.
 			isLocal = true;
+			podEntity = GetUnusedPODEntity(false);
 		} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
+		//if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
 			// Just use 0 index.
-			entityIndex = 0;
+			//entityIndex = 0;
+			podEntity = GetPODEntityByIndex(0);
 		} else {
 			// Increment packet entity count. 
 			packetEntityIndex++;
-			entityIndex = packetEntityIndex;
+			//entityIndex = packetEntityIndex;
+			podEntity = GetUnusedPODEntity(true);
 		}
 
 		// Acquire a POD Entity.
-		PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(entityIndex);
+		//PODEntity *podEntity = GetPODEntityByIndex(entityIndex);
 
-		if (!clientEntity) {
+		if (!podEntity) {
 			parsedSuccessfully = false;
 			continue;
 		}
 
 		// Setup basic POD data.
-		clientEntity->clientEntityNumber	= entityIndex;
-		clientEntity->currentState.number	= entityIndex;
-		clientEntity->previousState.number	= entityIndex;
-		clientEntity->isLocal	= isLocal;
-		clientEntity->inUse		= true;
+		//podEntity->clientEntityNumber	= entityIndex;
+		podEntity->isLocal	= isLocal;
 				
 		// Try and create the game entity from dictionary, and precache/spawn it.
-		if (!CreateGameEntityFromDictionary(clientEntity, parsedKeyValues)) {
-			FreePODEntity(clientEntity);
+		if (!CreateGameEntityFromDictionary(podEntity, parsedKeyValues)) {
+			FreePODEntity(podEntity);
 			parsedSuccessfully = false;
 			continue;
 		}
 
 		// Precache & Spawn.
-		clientEntity->gameEntity->Precache();
-		clientEntity->gameEntity->Spawn();
+		podEntity->gameEntity->Precache();
+		podEntity->gameEntity->Spawn();
 
 		// If it was a local entity, be sure to prepare its previousState.
 		if (isLocal) {
-			clientEntity->previousState = clientEntity->currentState;
+			//podEntity->previousState = podEntity->currentState;
 		}
 		
 		// Assign parsed dictionary to entity.
-		clientEntity->spawnKeyValues = parsedKeyValues;
-
-
-
-		//SpawnKeyValues parsedKeyValues;
-  //      parsedSuccessfully = ParseEntityString(&bspString, parsedKeyValues);
-
-		//// Pick the first entity there is, start asking for 
-		////if (!clientEntity) {
-		////	clientEntity = cs->entities;
-		////} else {
-		//	// See if it has a classname, and if that one contains _client_
-		//	if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "misc_client_explobox") {
-		//		localEntityIndex++;
-		//		clientEntity = gameWorld->GetPODEntityByIndex(localEntityIndex);
-		//		if (!clientEntity) {
-		//			Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", localEntityIndex);
-		//			return false;
-		//		}
-		//		clientEntity->clientEntityNumber = localEntityIndex;
-		//		clientEntity->currentState.number = localEntityIndex;
-		//		clientEntity->previousState.number = localEntityIndex;
-		//		clientEntity->isLocal = true;
-		//		clientEntity->inUse = true;
-
-		//		if (localEntityIndex < MAX_WIRED_POD_ENTITIES) {
-		//			Com_Error(ErrorType::Drop, ("SpawnFromBSPString: (localEntityIndex < MAX_WIRED_POD_ENTITIES) detected\n"));
-		//		}
-		//	// Worldspawn.
-		//	} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
-		//		entityIndex++;
-		//		clientEntity = gameWorld->GetPODEntityByIndex(0);
-		//		if (!clientEntity) {
-		//			Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n");
-		//			return false;
-		//		}
-		//		clientEntity->clientEntityNumber = 0;
-		//		clientEntity->currentState.number = 0;
-		//		clientEntity->previousState.number = 0;
-		//		clientEntity->isLocal = false;
-		//		clientEntity->inUse = true;
-		//	} else {
-		//		entityIndex++;
-		//		clientEntity = gameWorld->GetPODEntityByIndex(entityIndex);
-		//		if (!clientEntity) {
-		//			Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", entityIndex);
-		//			return false;
-		//		}
-		//		clientEntity->clientEntityNumber = entityIndex;
-		//		clientEntity->currentState.number = entityIndex;
-		//		clientEntity->previousState.number = entityIndex;
-		//		clientEntity->isLocal = false;
-		//		if (entityIndex > MAX_WIRED_POD_ENTITIES) {
-		//			Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_WIRED_POD_ENTITIES\n"));
-		//		}
-		//	}
-		////}
-
-		//// Allocate the game entity, and call its spawn.
-		//if (!CreateGameEntityFromDictionary(clientEntity, parsedKeyValues)) {
-		//	// Store whether it was local or not.
-		//	const qboolean isLocal = clientEntity->isLocal;
-		//	int32_t clientEntityNumber = clientEntity->clientEntityNumber;
-
-		//	(*clientEntity) = {
-		//		.currentState = {
-		//			.number = clientEntityNumber,	// We want to ensure its currentState number matches the index.
-		//		},
-		//		.previousState = {
-		//			.number = clientEntityNumber		// Same for previousState number.
-		//		},
-		//		.isLocal = (clientEntityNumber > MAX_WIRED_POD_ENTITIES ? true : false),
-		//		.inUse = false,
-		//		.clientEntityNumber = clientEntityNumber, // Last but not least, the actual clientEntityNumber.
-		//	};
-		//	parsedSuccessfully = false;
-		//}
-		//		
-		//// Precache and spawn the entity.
-		//if (clientEntity->gameEntity) {
-		//	clientEntity->gameEntity->Precache();
-		//	clientEntity->gameEntity->Spawn();
-		//}
-
-		//// Assign parsed dictionary to entity.
-		//clientEntity->spawnKeyValues = parsedKeyValues;
+		podEntity->spawnKeyValues = parsedKeyValues;
 	}
 
 	// Post spawn entities.
@@ -469,6 +401,53 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 *	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 **/
 PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) { 
+	// We'll loop until from maxclients + 1(world entity) till the numberOfEntities 
+	// has been reached. If we never managed to return a pointer to a valid server 
+	// entity right now, we're going to have to increase the amount of entities in use. 
+	// 
+	// However, this ONLY proceeds if we haven't already hit the maximum entity count.
+	int32_t rangeStart		= (isWired ? (maxClients + 1) + BODY_QUEUE_SIZE : MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT);
+	int32_t rangeMaximum	= (isWired ? MAX_WIRED_POD_ENTITIES : MAX_CLIENT_POD_ENTITIES);
+
+	// Loop through the range to find a free unused POD Entity.
+	int32_t podEntityIndex = 0;
+	for (int32_t podEntityIndex = rangeStart; podEntityIndex < rangeMaximum; podEntityIndex++) {
+		// Fetch POD Entity.
+		PODEntity *podEntity = GetPODEntityByIndex(podEntityIndex);
+
+        // The first couple seconds of server time can involve a lot of
+        // freeing and allocating, so relax the replacement policy
+	    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
+            // Set entity to "inUse".
+			podEntity->inUse = true;
+			
+			// Ensure the entity is set to be local/non-local.
+			podEntity->isLocal = (isWired ? false : true);
+
+			// Ensure the entity number is set correctly.
+			podEntity->clientEntityNumber = podEntityIndex;
+			podEntity->currentState.number = podEntityIndex;//podEntity - podEntities;
+			// If it is a local entity...
+			if (!isWired) {
+				podEntity->previousState.number = podEntityIndex;
+			}
+			
+			if (podEntityIndex >= numberOfEntities) {
+				numberOfEntities = podEntityIndex;
+			}
+
+			// Return the newly found POD entity pointer.
+			return podEntity;
+        }
+    }
+
+	// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
+    if (podEntityIndex >= (isWired ? MAX_WIRED_POD_ENTITIES : MAX_CLIENT_POD_ENTITIES)) {// maxEntities) {
+        Com_Error( ErrorType::Drop, "ClientGameWorld::GetUnusedPODEntity: no free edicts");
+		return nullptr;
+	}
+
+	return nullptr;
  //   // Incrementor, declared here so we can access it later on.
 	//int32_t i = 0;
 

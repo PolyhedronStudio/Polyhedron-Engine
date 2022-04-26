@@ -307,7 +307,10 @@ private:
     *	@brief Prepares the game's client entities with a base player game entity.
     **/
     void PreparePlayers();
-
+	/**
+	*	@brief	Reserves the game's body queue entity slots.
+	**/
+	void PrepareBodyQueue();
 
 private:
     //// Array storing the POD server entities.

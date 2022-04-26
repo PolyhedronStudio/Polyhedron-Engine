@@ -68,6 +68,11 @@ public:
     void ParsePlayerSkin(char* name, char* model, char* skin, const char* s);
 
 
+    /**
+    *	@brief	These are here temporarily, they should probably move over to gameworld itself...
+    */
+    int32_t         numberOfEntities = 0;     // current number, <= maxEntities
+    int32_t         maxEntities = 0;
 private:
     /**
     *   @brief  Load client specific model media.
