@@ -238,7 +238,7 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 	qboolean parsedSuccessfully = false;// This gets set to false the immediate moment we run into parsing trouble.
 	char *com_token = nullptr; // Token pointer.
 	PODEntity *clientEntity = nullptr; // Pointer to the client entity we intend to employ.
-    uint32_t entityIndex = maxClients + 9; // We start from the max clients.         
+    uint32_t packetEntityIndex = maxClients + 9; // We start from the max clients.         
 	uint32_t localEntityIndex = MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; // TODO: That RESERVED_COUNT thingy.
 
 	// Acquire gameworld and entity arrays.
@@ -294,88 +294,151 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 		// Now we've got the reserved client entity to use, let's parse the entity.
         //ParseEntityString(&bspString, clientEntity);
 		// Now we've got the reserved server entity to use, let's parse the entity.
-		EntityDictionary parsedKeyValues;
-        parsedSuccessfully = ParseEntityStringNew(&bspString, parsedKeyValues);
+		// Now we've got the reserved server entity to use, let's parse the entity.
+		SpawnKeyValues parsedKeyValues;
+        parsedSuccessfully = ParseEntityString(&bspString, parsedKeyValues);
 
-		// Pick the first entity there is, start asking for 
-		//if (!clientEntity) {
-		//	clientEntity = cs->entities;
-		//} else {
-			// See if it has a classname, and if that one contains _client_
-			if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "misc_client_explobox") {
-				localEntityIndex++;
-				clientEntity = gameWorld->GetPODEntityByIndex(localEntityIndex);
-				if (!clientEntity) {
-					Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", localEntityIndex);
-					return false;
-				}
-				clientEntity->clientEntityNumber = localEntityIndex;
-				clientEntity->currentState.number = localEntityIndex;
-				clientEntity->previousState.number = localEntityIndex;
-				clientEntity->isLocal = true;
-				clientEntity->inUse = true;
+		// Is this entity local?
+		bool isLocal = false;
+		
+		// This is the actual entity index that's in use.
+		uint32_t entityIndex = 0;
 
-				if (localEntityIndex < MAX_WIRED_POD_ENTITIES) {
-					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: (localEntityIndex < MAX_WIRED_POD_ENTITIES) detected\n"));
-				}
-			// Worldspawn.
-			} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
-				entityIndex++;
-				clientEntity = gameWorld->GetPODEntityByIndex(0);
-				if (!clientEntity) {
-					Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n");
-					return false;
-				}
-				clientEntity->clientEntityNumber = 0;
-				clientEntity->currentState.number = 0;
-				clientEntity->previousState.number = 0;
-				clientEntity->isLocal = false;
-				clientEntity->inUse = true;
-			} else {
-				entityIndex++;
-				clientEntity = gameWorld->GetPODEntityByIndex(entityIndex);
-				if (!clientEntity) {
-					Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", entityIndex);
-					return false;
-				}
-				clientEntity->clientEntityNumber = entityIndex;
-				clientEntity->currentState.number = entityIndex;
-				clientEntity->previousState.number = entityIndex;
-				clientEntity->isLocal = false;
-				if (entityIndex > MAX_WIRED_POD_ENTITIES) {
-					Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_WIRED_POD_ENTITIES\n"));
-				}
-			}
+		// If the dictionary has a classname, and it has client_ residing in it, change the entity index to use.
+		if (parsedKeyValues.contains("classname") && (parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)) {
+			// Increment local entity count.
+			localEntityIndex++;
+			entityIndex = localEntityIndex;
+
+			// Entity is local.
+			isLocal = true;
+		} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
+			// Just use 0 index.
+			entityIndex = 0;
+		} else {
+			// Increment packet entity count. 
+			packetEntityIndex++;
+			entityIndex = packetEntityIndex;
+		}
+
+		// Acquire a POD Entity.
+		PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(entityIndex);
+
+		if (!clientEntity) {
+			parsedSuccessfully = false;
+			continue;
+		}
+
+		// Setup basic POD data.
+		clientEntity->clientEntityNumber	= entityIndex;
+		clientEntity->currentState.number	= entityIndex;
+		clientEntity->previousState.number	= entityIndex;
+		clientEntity->isLocal	= isLocal;
+		clientEntity->inUse		= true;
+				
+		// Try and create the game entity from dictionary, and precache/spawn it.
+		if (!CreateGameEntityFromDictionary(clientEntity, parsedKeyValues)) {
+			FreePODEntity(clientEntity);
+			parsedSuccessfully = false;
+			continue;
+		}
+
+		// Precache & Spawn.
+		clientEntity->gameEntity->Precache();
+		clientEntity->gameEntity->Spawn();
+
+		// If it was a local entity, be sure to prepare its previousState.
+		if (isLocal) {
+			clientEntity->previousState = clientEntity->currentState;
+		}
+		
+		// Assign parsed dictionary to entity.
+		clientEntity->spawnKeyValues = parsedKeyValues;
+
+
+
+		//SpawnKeyValues parsedKeyValues;
+  //      parsedSuccessfully = ParseEntityString(&bspString, parsedKeyValues);
+
+		//// Pick the first entity there is, start asking for 
+		////if (!clientEntity) {
+		////	clientEntity = cs->entities;
+		////} else {
+		//	// See if it has a classname, and if that one contains _client_
+		//	if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "misc_client_explobox") {
+		//		localEntityIndex++;
+		//		clientEntity = gameWorld->GetPODEntityByIndex(localEntityIndex);
+		//		if (!clientEntity) {
+		//			Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", localEntityIndex);
+		//			return false;
+		//		}
+		//		clientEntity->clientEntityNumber = localEntityIndex;
+		//		clientEntity->currentState.number = localEntityIndex;
+		//		clientEntity->previousState.number = localEntityIndex;
+		//		clientEntity->isLocal = true;
+		//		clientEntity->inUse = true;
+
+		//		if (localEntityIndex < MAX_WIRED_POD_ENTITIES) {
+		//			Com_Error(ErrorType::Drop, ("SpawnFromBSPString: (localEntityIndex < MAX_WIRED_POD_ENTITIES) detected\n"));
+		//		}
+		//	// Worldspawn.
+		//	} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
+		//		entityIndex++;
+		//		clientEntity = gameWorld->GetPODEntityByIndex(0);
+		//		if (!clientEntity) {
+		//			Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n");
+		//			return false;
+		//		}
+		//		clientEntity->clientEntityNumber = 0;
+		//		clientEntity->currentState.number = 0;
+		//		clientEntity->previousState.number = 0;
+		//		clientEntity->isLocal = false;
+		//		clientEntity->inUse = true;
+		//	} else {
+		//		entityIndex++;
+		//		clientEntity = gameWorld->GetPODEntityByIndex(entityIndex);
+		//		if (!clientEntity) {
+		//			Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", entityIndex);
+		//			return false;
+		//		}
+		//		clientEntity->clientEntityNumber = entityIndex;
+		//		clientEntity->currentState.number = entityIndex;
+		//		clientEntity->previousState.number = entityIndex;
+		//		clientEntity->isLocal = false;
+		//		if (entityIndex > MAX_WIRED_POD_ENTITIES) {
+		//			Com_Error(ErrorType::Drop, ("SpawnFromBSPString: entityIndex > MAX_WIRED_POD_ENTITIES\n"));
+		//		}
+		//	}
+		////}
+
+		//// Allocate the game entity, and call its spawn.
+		//if (!CreateGameEntityFromDictionary(clientEntity, parsedKeyValues)) {
+		//	// Store whether it was local or not.
+		//	const qboolean isLocal = clientEntity->isLocal;
+		//	int32_t clientEntityNumber = clientEntity->clientEntityNumber;
+
+		//	(*clientEntity) = {
+		//		.currentState = {
+		//			.number = clientEntityNumber,	// We want to ensure its currentState number matches the index.
+		//		},
+		//		.previousState = {
+		//			.number = clientEntityNumber		// Same for previousState number.
+		//		},
+		//		.isLocal = (clientEntityNumber > MAX_WIRED_POD_ENTITIES ? true : false),
+		//		.inUse = false,
+		//		.clientEntityNumber = clientEntityNumber, // Last but not least, the actual clientEntityNumber.
+		//	};
+		//	parsedSuccessfully = false;
+		//}
+		//		
+		//// Precache and spawn the entity.
+		//if (clientEntity->gameEntity) {
+		//	clientEntity->gameEntity->Precache();
+		//	clientEntity->gameEntity->Spawn();
 		//}
 
-		// Allocate the game entity, and call its spawn.
-		if (clientEntity && !CreateGameEntityFromDictionary(clientEntity, parsedKeyValues)) {
-			// Store whether it was local or not.
-			const qboolean isLocal = clientEntity->isLocal;
-			int32_t clientEntityNumber = clientEntity->clientEntityNumber;
-
-			(*clientEntity) = {
-				.currentState = {
-					.number = clientEntityNumber,	// We want to ensure its currentState number matches the index.
-				},
-				.previousState = {
-					.number = clientEntityNumber		// Same for previousState number.
-				},
-				.isLocal = (clientEntityNumber > MAX_WIRED_POD_ENTITIES ? true : false),
-				.inUse = false,
-				.clientEntityNumber = clientEntityNumber, // Last but not least, the actual clientEntityNumber.
-			};
-			parsedSuccessfully = false;
-		}
-				
-		// Precache and spawn the entity.
-		if (clientEntity->gameEntity) {
-			clientEntity->gameEntity->Precache();
-			clientEntity->gameEntity->Spawn();
-		}
-
-		// Assign parsed dictionary to entity.
-		clientEntity->entityDictionary = parsedKeyValues;
+		//// Assign parsed dictionary to entity.
+		//clientEntity->spawnKeyValues = parsedKeyValues;
 	}
 
 	// Post spawn entities.
@@ -405,7 +468,7 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 * 
 *	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 **/
-PODEntity* ClientGameWorld::GetUnusedPODEntity() { 
+PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) { 
  //   // Incrementor, declared here so we can access it later on.
 	//int32_t i = 0;
 
@@ -515,86 +578,14 @@ void ClientGameWorld::FindTeams() {
         }
     }
 
-    Com_DPrint("%i teams with %i entities\n", c, c2);
+    Com_DPrintf("ClientGameWorld: Found (#%i) Teams with (#%i) of total Entities.\n", c, c2);
 }
 
 /**
 *	@brief	Parses the BSP Entity string and places the results in the server
 *			entity dictionary.
 **/
-qboolean ClientGameWorld::ParseEntityString(const char** data, PODEntity *podEntity) {
-    // False until proven otherwise.
-    qboolean parsedSuccessfully = false;
-
-    // Key value ptrs.
-    char *key = nullptr, *value = nullptr;
-
-    // Go through all the dictionary pairs.
-    while (1) {
-	    // Parse the key.
-	    key = COM_Parse(data);
-		
-	    // If we hit a }, it means we're done parsing, break out of this loop.
-	    if (key[0] == '}') {
-		    break;
-	    }
-
-	    // If we are at the end of the string without a closing brace, error out.
-	    if (!*data) {
-		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-		    return false;
-	    }
-
-	    // Parse the value.
-	    value = COM_Parse(data);
-
-	    // If we are at the end of the string without a closing brace, error out.
-	    if (!*data) {
-		    Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
-		    return false;
-	    }
-
-	    // Ensure we had a value.
-	    if (value[0] == '}') {
-		    Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
-		    return false;
-	    }
-
-	    // We successfully managed to parse this entity.
-	    parsedSuccessfully = true;
-
-	    // keynames with a leading underscore are used for utility comments,
-	    // and are immediately discarded by quake
-	    if (key[0] == '_') {
-		    continue;
-	    }
-
-	    // Insert the key/value into the dictionary.
-	    Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
-	    if (podEntity) {
-            podEntity->entityDictionary.try_emplace(std::string(key),std::string(value));// = value;
-        }
-    }
-
-    // If we failed to parse the entity properly, zero this one back out.
-    if (!parsedSuccessfully) {
-        int32_t clientEntityNumber = podEntity->clientEntityNumber;
-
-	    //*clEntity = { .clientEntityNumber = clientEntityNumber };
-		*podEntity = {};
-		podEntity->clientEntityNumber = clientEntityNumber;
-
-	    return false;
-    }
-
-	return parsedSuccessfully;
-}
-
-/**
-*	@brief	Parses the BSP Entity string and places the results in the server
-*			entity dictionary.
-**/
-qboolean ClientGameWorld::ParseEntityStringNew(const char** data, EntityDictionary &parsedKeyValues) {
+qboolean ClientGameWorld::ParseEntityString(const char** data, SpawnKeyValues &parsedKeyValues) {
 	// False until proven otherwise.
 	qboolean parsedSuccessfully = false;
 
@@ -642,10 +633,7 @@ qboolean ClientGameWorld::ParseEntityStringNew(const char** data, EntityDictiona
 		}
 
 		// Insert the key/value into the dictionary.
-		Com_DPrint("Parsed client entity, key='%s', value='%s'\n", key, value);
-		//if (clEntity) {
-			parsedKeyValues.try_emplace(std::string(key),std::string(value));// = value;
-		//}
+		parsedKeyValues.try_emplace(std::string(key),std::string(value));// = value;
 	}
 
 	// Return the result.
@@ -656,14 +644,14 @@ qboolean ClientGameWorld::ParseEntityStringNew(const char** data, EntityDictiona
 *   @brief  Allocates the game entity determined by the classname key, and
 *           then does a precache before spawning the game entity.
 **/
-qboolean ClientGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary) {
+qboolean ClientGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, SpawnKeyValues &dictionary) {
     // Get client side entity number.
     const int32_t clientEntityNumber = podEntity->clientEntityNumber;
 
     // If it does not have a classname key we're in for trouble.
     if (!dictionary.contains("classname") || dictionary["classname"].empty()) {
 		// For the ClientGame we only do some simple warning print.
-		Com_WPrint("%s: Can't spawn ClientGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", __func__, clientEntityNumber);
+		Com_WPrint("CLGWarning: Can't spawn ClientGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", __func__, clientEntityNumber);
 		return false;
     }
 
@@ -687,7 +675,7 @@ qboolean ClientGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, E
 		//podEntity->clientEntityNumber = stateNumber;
 
 		// Failed.
-		Com_DPrint("Warning: Spawning entity(%s) failed.\n", dictionary["classname"].c_str());
+		Com_DPrint("CLGWarning: Spawning entity(%s) failed.\n", dictionary["classname"].c_str());
 		return false;
 	}
 	
@@ -724,7 +712,7 @@ GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
 	// Warn if a slot is already occupied.
     if (gameEntities[stateNumber] != nullptr) {
 		// Warn.
-		Com_DPrint("WARNING: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n", classname.c_str(), stateNumber);
+		Com_DPrint("CLGWarning: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n", classname.c_str(), stateNumber);
 
 		// Return nullptr.
 		return nullptr;
@@ -737,7 +725,7 @@ GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
 		// Then try finding it by the C++ class name
 		if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
 			// Warn.
-		    Com_DPrint("WARNING: unknown entity '%s'\n", classname.c_str());
+		    Com_DPrint("CLGWarning: unknown entity '%s'\n", classname.c_str());
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -752,9 +740,9 @@ GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
-			Com_DPrint("WARNING: tried to allocate an abstract class '%s'\n", info->classname);
+			Com_DPrint("CLGWarning: tried to allocate an abstract class '%s'\n", info->classname);
 		} else if (!info->IsMapSpawnable()) {
-		    Com_DPrint("WARNING: tried to allocate a code-only class '%s'\n", info->classname);
+		    Com_DPrint("CLGWarning: tried to allocate a code-only class '%s'\n", info->classname);
 		}
     }
 
@@ -822,7 +810,7 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
     // Sanity check.
     if (!podEntity) {
-		Com_DPrint("WARNING: tried to %s on a nullptr PODEntity!\n", __func__);
+		Com_DPrint("CLGWarning: tried to %s on a nullptr PODEntity!\n", __func__);
 		return false;
     }
 
@@ -911,7 +899,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 			if (clEntity->gameEntity) {
 				static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
 			} else {
-				Com_DPrint("Warning: hashed classnames and/or state and entity number mismatch:\n currentHash: %s, previousHash: %s, %i, %i\n", currentHashedClassname, previousHashedClassname, state.number, clEntity->clientEntityNumber);
+				Com_DPrint("CLGWarning: hashed classnames and/or state and entity number mismatch:\n currentHash: %s, previousHash: %s, %i, %i\n", currentHashedClassname, previousHashedClassname, state.number, clEntity->clientEntityNumber);
 			}
 
 			return static_cast<IClientGameEntity*>(clEntity->gameEntity);
@@ -927,7 +915,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 		// 
 		if ((info = TypeInfo::GetInfoByName("CLGBasePacketEntity")) == nullptr) {
 			// Warn.
-		    Com_DPrint("Warning: info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n");
+		    Com_DPrint("CLGWarning: info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n");
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -948,7 +936,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 
 		// If it isn't a nullptr...
 		if (!clEntity->gameEntity ) {
-			Com_DPrint("Warning: GameEntityList.InsertAt failed.\n");
+			Com_DPrint("CLGWarning: GameEntityList.InsertAt failed.\n");
 			return nullptr;
 			//classEntity = new CLGBasePacketEntity(clEntity);
 		}
@@ -961,9 +949,9 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
-			Com_DPrint("Warning: tried to allocate an abstract class '%s' (hash #%i) \n", info->classname, currentHashedClassname);
+			Com_DPrint("CLGWarning: tried to allocate an abstract class '%s' (hash #%i) \n", info->classname, currentHashedClassname);
 		} else if (!info->IsMapSpawnable()) {
-		    Com_DPrint("Warning: tried to allocate a code-only class '%s' (hash #%i) \n", info->classname, currentHashedClassname);
+		    Com_DPrint("CLGWarning: tried to allocate a code-only class '%s' (hash #%i) \n", info->classname, currentHashedClassname);
 		}
     }
 
@@ -985,7 +973,7 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
-        Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
+        Com_DPrint("CLGWarning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
 
         return false;
     }
@@ -996,7 +984,7 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 
 	// Debug.
 	if (!clgEntity) {
-		Com_DPrint("Warning: ClientGameEntities::UpdateFromState had a nullptr returned from gameEntityList.UpdateGameEntityFromState\n");
+		Com_DPrint("CLGWarning: ClientGameEntities::UpdateFromState had a nullptr returned from gameEntityList.UpdateGameEntityFromState\n");
 	}
 
   //  // 

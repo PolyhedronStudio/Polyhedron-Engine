@@ -309,7 +309,7 @@ public:
     /**
     *   @brief Get: Entity Dictionary.
     **/
-    virtual inline EntityDictionary &GetEntityDictionary() override { return podEntity->entityDictionary; }
+    virtual inline SpawnKeyValues &GetEntityDictionary() override { return podEntity->spawnKeyValues; }
 
     /**
     *   @brief Get/Set: Event ID

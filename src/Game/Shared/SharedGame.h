@@ -41,7 +41,7 @@ using GameEntity = IClientGameEntity;;
 using PODEntity = PODEntity;
 
 //! Entity Dictionary.
-using EntityDictionary = std::map<std::string, std::string>;
+using SpawnKeyValues = std::map<std::string, std::string>;
 
 //! Maximum amount of POD Entities.
 static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
@@ -56,7 +56,7 @@ class IServerGameEntity;
 using GameEntity = IServerGameEntity;
 
 //! Entity Dictionary.
-using EntityDictionary = std::map<std::string, std::string>;
+using SpawnKeyValues = std::map<std::string, std::string>;
 
 //! SVGame needed includes.
 #define GAME_INCLUDE

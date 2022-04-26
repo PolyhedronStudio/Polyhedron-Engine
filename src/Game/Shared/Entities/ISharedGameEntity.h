@@ -279,7 +279,7 @@ public:
     /**
     *   @brief Get: Entity Dictionary.
     **/
-    virtual EntityDictionary &GetEntityDictionary() = 0;
+    virtual SpawnKeyValues &GetEntityDictionary() = 0;
 
     /**
     *   @brief Get/Set: Event ID

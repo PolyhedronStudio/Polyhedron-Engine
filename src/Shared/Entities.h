@@ -24,7 +24,7 @@ static constexpr int32_t MAX_ENT_CLUSTERS = 16;
 /**
 *   @brief  An std::map storing an entity's key/value dictionary.
 **/
-using EntityDictionary = std::map<std::string, std::string>;
+using SpawnKeyValues = std::map<std::string, std::string>;
 
 
 /**
@@ -94,7 +94,7 @@ struct PODEntity {
     ISharedGameEntity* gameEntity = nullptr;
 
     //! Dictionary containing the initial key:value entity properties.
-    EntityDictionary entityDictionary;
+    SpawnKeyValues spawnKeyValues;
 
     //! Actual sv.time when this entity was freed.
     GameTime freeTime = GameTime::zero();

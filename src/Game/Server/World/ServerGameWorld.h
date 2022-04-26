@@ -94,15 +94,14 @@ public:
 
 
     /**
-	*	@brief	Parses the 'entites' string and assigns each parsed entity to the
-	*			first free server entity slot there is. After doing so, allocates
-	*			a game entity based on the 'classname' of the parsed entity.
+	*	@brief	Parses the 'entities' string in order to create, precache and spawn
+	*			a GameEntity which matches to the entity's set classname.
 	**/
     qboolean SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint);
     /**
 	*	@brief	Looks for the first free server entity in our buffer.
 	* 
-	*	@details	Either finds a free server entity, or initializes a new one.
+	*	@details	Either finds a POD server entity, or initializes a new one.
     *				Try to avoid reusing an entity that was recently freed, because it
     *				can cause the client to Think the entity morphed into something else
     *				instead of being removed and recreated, which can cause interpolated
@@ -110,7 +109,7 @@ public:
 	* 
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
-    Entity* GetUnusedPODEntity();
+    PODEntity* GetUnusedPODEntity(bool isWired = true) final;
 
     /**
 	*   @brief  Creates and assigns a game entity to the given server entity based on the classname.
@@ -174,46 +173,6 @@ public:
     static SVGBaseEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
 
-
-    ///**
-    //*   @brief Selectively acquire a list of Entity* derived objects using entity filters.
-    //* 
-    //*   @return Returns a span containing all the entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //template<std::size_t start, std::size_t count> inline auto GetServerEntityRange() -> std::span<Entity, count> {
-    //    return std::span(serverEntities).subspan(start, count); //return std::span(serverEntities).subspan<start, count>(); 
-    //}
-    ///**
-    //*   @brief Selectively acquire a list of SVGBaseEntity* derived objects using game entity filters.
-    //* 
-    //*   @return Returns a span containing all the base entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //template<std::size_t start, std::size_t count> inline auto GetGameEntityRange() -> GameEntitySpan {
-    //    return GameEntitySpan(gameEntities).subspan(start, count); //return std::span(gameEntities).subspan<start, count>(); 
-    //}
-    ///**
-    //*   @brief Selectively acquire a list of Entity* derived objects using entity filters. Use the templated version where possible.
-    //* 
-    //*   @return Returns a span containing all the entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //inline PODEntitySpan GetServerEntityRange(std::size_t start, std::size_t count) { 
-    //    return PODEntitySpan(serverEntities).subspan(start, count); 
-    //}
-    ///**
-    //*   @brief Selectively acquire a list of SVGBaseEntity* derived objects using game entity filters. Use the templated version where possible.
-    //* 
-    //*   @return Returns a span containing all the base entities from the range of [start] to [start + count]
-    //*           that passed the filter process.
-    //**/
-    //inline GameEntitySpan GetGameEntityRange(std::size_t start, std::size_t count) {
-    //    return GameEntitySpan(gameEntities).subspan(start, count); 
-    //}
-
-
-
     /**
 	*	@return	A pointer to the server entities array.
 	**/
@@ -224,7 +183,7 @@ public:
     *   @return A pointer of the server entity located at index.
     **/
     inline Entity* GetPODEntityByIndex(uint32_t index) {
-        if (index < 0 || index >= MAX_POD_ENTITIES) {
+        if (index < 0 || index >= MAX_WIRED_POD_ENTITIES) {
             return nullptr; 
         }
 	    return &podEntities[index];
@@ -240,7 +199,7 @@ public:
     *   @return A pointer of the server entity located at index.
     **/
     inline GameEntity* GetGameEntityByIndex(int32_t index) {
-    	if (index < 0 || index >= MAX_POD_ENTITIES) {
+    	if (index < 0 || index >= MAX_WIRED_POD_ENTITIES) {
     	    return nullptr;
 	    }
 	    return gameEntities[index];
@@ -260,19 +219,6 @@ public:
         return dynamic_cast<Worldspawn*>(gameEntities[0]); 
     }
 
-
-
-    ///**
-    //*   @brief  Spawns a debris model entity at the given origin.
-    //*   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
-    //**/
-    //void ThrowDebris(SVGBaseEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed);
-
-    ///**
-    //*   @brief  Spawns a gib model entity flying at random velocities and directions.
-    //*   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
-    //*/
-    //void ThrowGib(SVGBaseEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType);
     /**
     *   @brief  Spawns a debris model entity at the given origin.
     *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
@@ -299,7 +245,6 @@ private:
 	//! Currently active game mode.
     IGameMode* currentGameMode = nullptr;
 
-
     
 private:
     /**
@@ -310,7 +255,10 @@ private:
     *	@brief Prepares the game's client entities with a base player game entity.
     **/
     void PreparePlayers();
-
+	/**
+	*	@brief	Reserves the game's body queue entity slots.
+	**/
+	void PrepareBodyQueue();
 
 private:
     // Array storing the POD server entities.
@@ -347,13 +295,13 @@ private:
 	*			entity dictionary.
 	*	@return	True in case it succeeded parsing the entity string.
 	**/
-    qboolean ParseEntityString(const char** data, PODEntity *svEntity);
+    qboolean ParseEntityString(const char** data, SpawnKeyValues &parsedKeyValues);
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    qboolean CreateGameEntityFromDictionary(PODEntity *svEntity, EntityDictionary &dictionary);
+    qboolean CreateGameEntityFromDictionary(PODEntity *svEntity, SpawnKeyValues &dictionary);
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.

@@ -92,7 +92,7 @@ void ServerGameWorld::DestroyGameMode() {
 **/
 void ServerGameWorld::PrepareEntities() {
     // Clamp it just in case.
-    int32_t maxEntities = Clampi(MAX_POD_ENTITIES, (int)maximumclients->value + 1, MAX_POD_ENTITIES);
+    int32_t maxEntities = Clampi(MAX_WIRED_POD_ENTITIES, (int)maximumclients->value + 1, MAX_WIRED_POD_ENTITIES);
 
     // Setup the globals entities pointer and max entities value so
 	// that the server can access it.
@@ -143,7 +143,18 @@ void ServerGameWorld::PreparePlayers() {
     }
 }
 
+/**
+*	@brief	Reserves the game's body queue entity slots.
+**/
+void ServerGameWorld::PrepareBodyQueue() {
+    // Reserve some spots for dead player bodies for coop / deathmatch
+    level.bodyQue = 0;
+    for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
+	    Entity* ent = GetUnusedPODEntity();
 
+        //ent->classname = "bodyque";
+    }
+}
 
 /**
 *	@brief	Parses the 'entities' string and assigns each parsed entity to the
@@ -173,17 +184,18 @@ qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* en
 	// Spawn SVGBasePlayer classes for each reserved client entity.
     PreparePlayers();
 
+	// Reserve dead body queue slots.
+	PrepareBodyQueue();
+
 	// We'll keep on parsing until this is set to false.
 	qboolean isParsing = true;
-	
 	// This gets set to false the immediate moment we run into parsing trouble.
 	qboolean parsedSuccessfully = false;
-
 	// Token pointer.
 	char *com_token = nullptr;
 
-	// Pointer to the pod entity we intend to employ.
-	Entity *podEntity = nullptr;
+    uint32_t packetEntityIndex = 0; // We start from the max clients.         
+	uint32_t localEntityIndex = MAX_WIRED_POD_ENTITIES; // TODO: That RESERVED_COUNT thingy.
 
 	// Engage parsing.
 	while (!!isParsing == true) {
@@ -199,20 +211,80 @@ qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* en
 			return false;
 		}
 
-		// Pick the first entity there is, start asking for 
-		if (!podEntity) {
-			podEntity = podEntities;
+		//// Pick the first entity there is, start asking for 
+		//if (!podEntity) {
+		//	podEntity = podEntities;
+		//} else {
+		//	podEntity = GetUnusedPODEntity();
+		//}
+
+
+
+
+		//////
+		SpawnKeyValues parsedKeyValues;
+        parsedSuccessfully = ParseEntityString(&entities, parsedKeyValues);
+
+		// Is this entity local?
+		bool isLocal = false;
+		
+		// This is the actual entity index that's in use.
+		uint32_t entityIndex = 0;
+
+		// POD Entity.
+		PODEntity *podEntity = nullptr;
+		
+		// If the dictionary has a classname, and it has client_ residing in it, change the entity index to use.
+		//if (parsedKeyValues.contains("classname") && (parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)) {
+		//	// Increment local entity count.
+		//	localEntityIndex++;
+		//	//entityIndex = localEntityIndex;
+
+		//	// Entity is local.
+		//	isLocal = true;
+		//	podEntity = GetUnusedPODEntity(false);
+		//} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
+		if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
+			// Just use 0 index.
+			//entityIndex = 0;
+			podEntity = GetPODEntityByIndex(0);
 		} else {
-			podEntity = GetUnusedPODEntity();
+			// Increment packet entity count. 
+			packetEntityIndex++;
+			//entityIndex = packetEntityIndex;
+			podEntity = GetUnusedPODEntity(true);
 		}
 
-		// Now we've got the reserved POD entity to use, let's parse the entity.
-		ParseEntityString(&entities, podEntity);
+		// Acquire a POD Entity.
+		//PODEntity *podEntity = GetPODEntityByIndex(entityIndex);
 
-		// Allocate the game entity, and call its spawn.
-		if (!CreateGameEntityFromDictionary(podEntity, podEntity->entityDictionary)) {
+		if (!podEntity) {
 			parsedSuccessfully = false;
+			continue;
 		}
+
+		// Setup basic POD data.
+		//podEntity->clientEntityNumber	= entityIndex;
+		podEntity->isLocal	= isLocal;
+				
+		// Try and create the game entity from dictionary, and precache/spawn it.
+		if (!CreateGameEntityFromDictionary(podEntity, parsedKeyValues)) {
+			FreePODEntity(podEntity);
+			parsedSuccessfully = false;
+			continue;
+		}
+
+		// Precache & Spawn.
+		podEntity->gameEntity->Precache();
+		podEntity->gameEntity->Spawn();
+
+		// If it was a local entity, be sure to prepare its previousState.
+		if (isLocal) {
+			//podEntity->previousState = podEntity->currentState;
+		}
+		
+		// Assign parsed dictionary to entity.
+		podEntity->spawnKeyValues = parsedKeyValues;
 	}
 
 	// Post spawn entities.
@@ -242,52 +314,107 @@ qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* en
 * 
 *	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 **/
-Entity* ServerGameWorld::GetUnusedPODEntity() { 
-    // Incrementor, declared here so we can access it later on.
-	int32_t i = 0;
-
-	// Acquire a pointer to the first POD entity to start checking from.
-	PODEntity *podEntity = &podEntities[maxClients + 1];
-
+PODEntity* ServerGameWorld::GetUnusedPODEntity(bool isWired) { 
 	// We'll loop until from maxclients + 1(world entity) till the numberOfEntities 
 	// has been reached. If we never managed to return a pointer to a valid server 
 	// entity right now, we're going to have to increase the amount of entities in use. 
 	// 
 	// However, this ONLY proceeds if we haven't already hit the maximum entity count.
-	for (int32_t i = maxClients + 1; i < numberOfEntities; i++, podEntity++) {
+	int32_t rangeStart		= (isWired ? maxClients + 1 : MAX_WIRED_POD_ENTITIES);
+	int32_t rangeMaximum	= (isWired ? MAX_WIRED_POD_ENTITIES : MAX_SERVER_POD_ENTITIES);
+
+	// Loop through the range to find a free unused POD Entity.
+	int32_t podEntityIndex = 0;
+	for (int32_t podEntityIndex = rangeStart; podEntityIndex < rangeMaximum; podEntityIndex++) {
+		// Fetch POD Entity.
+		PODEntity *podEntity = GetPODEntityByIndex(podEntityIndex);
+
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
 	    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
-            //SVG_InitEntity(serverEntity);
             // Set entity to "inUse".
 			podEntity->inUse = true;
 			
-			// Set the entity state number.
-			podEntity->currentState.number = podEntity - podEntities;
+			// Ensure the entity is set to be local/non-local.
+			podEntity->isLocal = (isWired ? false : true);
+
+			// Ensure the state number is set correctly.
+			podEntity->currentState.number = podEntityIndex;//podEntity - podEntities;
 			
+			if (podEntityIndex >= numberOfEntities) {
+				numberOfEntities++;
+				globals.numberOfEntities = numberOfEntities;
+			}
+
 			// Return the newly found POD entity pointer.
 			return podEntity;
         }
     }
 
 	// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
-    if (i >= maxEntities) {
+    if (podEntityIndex >= (isWired ? MAX_WIRED_POD_ENTITIES : MAX_SERVER_POD_ENTITIES)) {// maxEntities) {
         gi.Error("ServerGameWorld::GetUnusedPODEntity: no free edicts");
 		return nullptr;
 	}
 
-    // If we've gotten past the gi.Error, it means we can safely increase the number of entities.
-    numberOfEntities++;
-	globals.numberOfEntities = numberOfEntities;
+	return nullptr;
+ //   // If we've gotten past the gi.Error, it means we can safely increase the number of entities.
+ //   numberOfEntities++;
+	//globals.numberOfEntities = numberOfEntities;
 
-    // Set entity to "inUse".
-    podEntity->inUse = true;
+ //   // Set entity to "inUse".
+ //   podEntity->inUse = true;
 
-    // Set the entity state number.
-    podEntity->currentState.number = podEntity - podEntities;
+ //   // Set the entity state number.
+ //   podEntity->currentState.number = podEntity - podEntities;
 
-    // Return the POD entity.
-    return podEntity;
+ //   // Return the POD entity.
+ //   return podEntity;
+	//   // Incrementor, declared here so we can access it later on.
+	//int32_t i = 0;
+
+	//// Acquire a pointer to the first POD entity to start checking from.
+	//PODEntity *podEntity = &podEntities[maxClients + 1];
+
+	//// We'll loop until from maxclients + 1(world entity) till the numberOfEntities 
+	//// has been reached. If we never managed to return a pointer to a valid server 
+	//// entity right now, we're going to have to increase the amount of entities in use. 
+	//// 
+	//// However, this ONLY proceeds if we haven't already hit the maximum entity count.
+	//for (int32_t i = maxClients + 1; i < numberOfEntities; i++, podEntity++) {
+ //       // The first couple seconds of server time can involve a lot of
+ //       // freeing and allocating, so relax the replacement policy
+	//    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
+ //           //SVG_InitEntity(serverEntity);
+ //           // Set entity to "inUse".
+	//		podEntity->inUse = true;
+	//		
+	//		// Set the entity state number.
+	//		podEntity->currentState.number = podEntity - podEntities;
+	//		
+	//		// Return the newly found POD entity pointer.
+	//		return podEntity;
+ //       }
+ //   }
+
+	//// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
+ //   if (i >= maxEntities) {
+ //       gi.Error("ServerGameWorld::GetUnusedPODEntity: no free edicts");
+	//	return nullptr;
+	//}
+
+ //   // If we've gotten past the gi.Error, it means we can safely increase the number of entities.
+ //   numberOfEntities++;
+	//globals.numberOfEntities = numberOfEntities;
+
+ //   // Set entity to "inUse".
+ //   podEntity->inUse = true;
+
+ //   // Set the entity state number.
+ //   podEntity->currentState.number = podEntity - podEntities;
+
+ //   // Return the POD entity.
+ //   return podEntity;
 }
 
 /**
@@ -351,48 +478,50 @@ void ServerGameWorld::FindTeams() {
         }
     }
 
-    gi.DPrintf("%i teams with %i entities\n", c, c2);
+    gi.DPrintf("ServerGameWorld: Found (#%i) Teams with (#%i) of total Entities.\n", c, c2);
 }
 
 /**
 *	@brief	Parses the BSP Entity string and places the results in the server
 *			entity dictionary.
 **/
-qboolean ServerGameWorld::ParseEntityString(const char** data, PODEntity *podEntity) {
-    // False until proven otherwise.
-    qboolean parsedSuccessfully = false;
+qboolean ServerGameWorld::ParseEntityString(const char** data, SpawnKeyValues &parsedKeyValues) {
+	// False until proven otherwise.
+	qboolean parsedSuccessfully = false;
 
 	// Key value ptrs.
-    char *key = nullptr, *value = nullptr;
+	char *key = nullptr, *value = nullptr;
 
-    // Go through all the dictionary pairs.
-    while (1) {
+	// Go through all the dictionary pairs.
+  	while (1) {
 		// Parse the key.
 		key = COM_Parse(data);
 		
 		// If we hit a }, it means we're done parsing, break out of this loop.
 		if (key[0] == '}') {
-		    break;
+			break;
 		}
+
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-		    gi.Error("%s: EOF without closing brace", __func__);
-		    return false;
+			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+			return false;
 		}
 
 		// Parse the value.
 		value = COM_Parse(data);
+
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-		    gi.Error("%s: EOF without closing brace", __func__);
+			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
 			return false;
 		}
 
 		// Ensure we had a value.
 		if (value[0] == '}') {
-		    gi.Error("%s: closing brace without value for key %s", __func__, key);
+			Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
 			return false;
-		}
+		   }
 
 		// We successfully managed to parse this entity.
 		parsedSuccessfully = true;
@@ -400,17 +529,11 @@ qboolean ServerGameWorld::ParseEntityString(const char** data, PODEntity *podEnt
 		// keynames with a leading underscore are used for utility comments,
 		// and are immediately discarded by quake
 		if (key[0] == '_') {
-		    continue;
+			continue;
 		}
 
 		// Insert the key/value into the dictionary.
-		podEntity->entityDictionary[key] = value;
-    }
-
-	// If we failed to parse the entity properly, zero this one back out.
-    if (!parsedSuccessfully) {
-		*podEntity = {};
-		return false;
+		parsedKeyValues.try_emplace(std::string(key),std::string(value));// = value;
 	}
 
 	// Return the result.
@@ -421,11 +544,11 @@ qboolean ServerGameWorld::ParseEntityString(const char** data, PODEntity *podEnt
 *   @brief  Allocates the game entity determined by the classname key, and
 *           then does a precache before spawning the game entity.
 **/
-qboolean ServerGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary) {
+qboolean ServerGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, SpawnKeyValues &dictionary) {
 
 	// We do need a PODEntity of course.
 	if (!podEntity) {
-		gi.Error("%s: Called __func__ with a nullptr PODEntity!\n");
+		gi.Error("SVGWarning: Called %s with a nullptr PODEntity!\n", __func__);
 		return false;
 	}
 
@@ -433,31 +556,30 @@ qboolean ServerGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, E
     int32_t stateNumber = podEntity->currentState.number;
 
 	// It needs the classname key, as well as it needs to have a value for it, how else can we spawn a game entity?
-    if (!podEntity->entityDictionary.contains("classname") || podEntity->entityDictionary["classname"].empty()) {
+    if (!dictionary.contains("classname") || dictionary["classname"].empty()) {
 		// For the server game we error out in this case, it can't go on since it is the actual game master.
-		gi.Error("%s: Can't spawn ServerGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", __func__, stateNumber);
+		gi.Error("SVGWarning: Can't spawn ServerGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", stateNumber);
 		return false;
     }
 
 	// Actually spawn the game entity.
-    IServerGameEntity *gameEntity = static_cast<IServerGameEntity*>(podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, podEntity->entityDictionary["classname"]));
+    IServerGameEntity *gameEntity = CreateGameEntityFromClassname(podEntity, dictionary["classname"]);
 
     // Something went wrong with allocating the game entity.
     if (!gameEntity) {
 		// Free/reset the PODEntity for reusal.
-		FreePODEntity(podEntity);
-		gi.DPrintf("Warning: Spawning entity(%s) failed.\n", podEntity->entityDictionary["classname"]);
+		//FreePODEntity(podEntity);
+		gi.DPrintf("SVGWarning: Spawning entity(%s) failed.\n", dictionary["classname"]);
 		return false;
     }
 
+	// Assign game entity to POD entity.
+	podEntity->gameEntity = gameEntity;
+
     // Initialise the entity with its respected keyvalue properties
     for (const auto& keyValueEntry : dictionary) {
-		podEntity->gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
-    }
-
-    // Precache and spawn the entity.
-    gameEntity->Precache();
-	gameEntity->Spawn();
+		gameEntity->SpawnKey(keyValueEntry.first, keyValueEntry.second);
+	}
 
 	// Success.
 	return true;
@@ -484,7 +606,7 @@ GameEntity *ServerGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
 	// Warn if a slot is already occupied.
     if (gameEntities[stateNumber] != nullptr) {
 		// Warn.
-		gi.DPrintf("WARNING: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n");
+		gi.DPrintf("SVGWarning: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n");
 
 		// Return nullptr.
 		return nullptr;
@@ -497,7 +619,7 @@ GameEntity *ServerGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
 		// Then try finding it by the C++ class name
 		if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
 			// Warn.
-		    gi.DPrintf("WARNING: unknown entity '%s'\n", classname.c_str());
+		    gi.DPrintf("SVGWarning: unknown entity '%s'\n", classname.c_str());
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -512,9 +634,9 @@ GameEntity *ServerGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
-			gi.DPrintf("WARNING: tried to allocate an abstract class '%s'\n", info->classname);
+			gi.DPrintf("SVGWarning: tried to allocate an abstract class '%s'\n", info->classname);
 		} else if (!info->IsMapSpawnable()) {
-		    gi.DPrintf("WARNING: tried to allocate a code-only class '%s'\n", info->classname);
+		    gi.DPrintf("SVGWarning: tried to allocate a code-only class '%s'\n", info->classname);
 		}
     }
 
@@ -580,7 +702,7 @@ void ServerGameWorld::FreePODEntity(PODEntity* podEntity) {
 qboolean ServerGameWorld::FreeGameEntity(PODEntity* podEntity) {
     // Sanity check.
     if (!podEntity) {
-		gi.DPrintf("WARNING: tried to %s on a nullptr PODEntity!\n", __func__);
+		gi.DPrintf("SVGWarning: tried to %s on a nullptr PODEntity!\n", __func__);
 		return false;
     }
 

@@ -404,7 +404,7 @@ public:
     /**
     *   @brief Get: Entity Dictionary.
     **/
-    virtual EntityDictionary &GetEntityDictionary() { return podEntity->entityDictionary; };
+    virtual SpawnKeyValues &GetEntityDictionary() { return podEntity->spawnKeyValues; };
 
     /**
     *   @brief Get/Set: Event ID

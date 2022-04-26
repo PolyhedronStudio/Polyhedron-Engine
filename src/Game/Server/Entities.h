@@ -92,7 +92,7 @@ namespace PODEntityFilters {
 
 	inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
 		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](PODEntity& ent) {
-			auto& dictionary = ent.entityDictionary;
+			auto& dictionary = ent.spawnKeyValues;
 
 			if (dictionary.find(fieldKey) != dictionary.end()) {
 				if (dictionary[fieldKey] == fieldValue) {

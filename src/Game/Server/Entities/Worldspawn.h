@@ -108,7 +108,7 @@ private:
 //    IClientGameEntity *gameEntity;
 //
 //    //! Key/Value entity dictionary.
-//    EntityDictionary entityDictionary;
+//    SpawnKeyValues spawnKeyValues;
 //
 //    //! Actual sv.time when this entity was freed.
 //    GameTime freeTime = GameTime::zero();

@@ -284,13 +284,7 @@ void Worldspawn::Spawn() {
     SetClipMask(0);
     //---------------
 
-    // Reserve some spots for dead player bodies for coop / deathmatch
-    level.bodyQue = 0;
-    for (int i = 0; i < BODY_QUEUE_SIZE; i++) {
-	    Entity* ent = GetGameWorld()->GetUnusedPODEntity();
 
-        //ent->classname = "bodyque";
-    }
 
     // Configure item name configstrings.
     //SVG_SetItemNames();

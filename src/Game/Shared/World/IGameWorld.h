@@ -100,7 +100,7 @@ public:
 	* 
 	*	@return	If successful, a valid pointer to the entity. If not, a nullptr.
 	**/
-    virtual PODEntity* GetUnusedPODEntity() = 0; // Rename to: QueryForPODEntity
+    virtual PODEntity* GetUnusedPODEntity(bool isWired = true) = 0; // Rename to: QueryForPODEntity
 
  //   /**
 	//*   @brief  Creates and assigns a game entity to the given server entity based on the classname.
@@ -309,13 +309,13 @@ protected:
 	*			entity dictionary.
 	*	@return	True in case it succeeded parsing the entity string.
 	**/
-    virtual qboolean ParseEntityString(const char** data, PODEntity *podEntity) = 0;
+    virtual qboolean ParseEntityString(const char** data, SpawnKeyValues &parsedKeyValues) = 0;
 
     /**
     *   @brief  Allocates the game entity determined by the classname key, and
     *           then does a precache before spawning the game entity.
     **/
-    virtual qboolean CreateGameEntityFromDictionary(PODEntity *podEntity, EntityDictionary &dictionary) = 0;
+    virtual qboolean CreateGameEntityFromDictionary(PODEntity *podEntity, SpawnKeyValues &dictionary) = 0;
 
     /**
     *	@brief	Seeks through the type info system for a class registered under the classname string.
