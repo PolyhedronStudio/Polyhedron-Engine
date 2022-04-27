@@ -29,6 +29,9 @@ SET(SRC_CLIENT
 	${PATH_SRC}/Client/View.cpp
 	${PATH_SRC}/Client/World.cpp
 
+	${PATH_SRC}/Client/Entities/LocalEntities.cpp
+	${PATH_SRC}/Client/Entities/PacketEntities.cpp
+
 	${PATH_SRC}/Client/UI/Demos.cpp
 	${PATH_SRC}/Client/UI/Menu.cpp
 	${PATH_SRC}/Client/UI/PlayerConfig.cpp
@@ -79,7 +82,8 @@ SET(SRC_CLIENT_HTTP
 )
 SET(HEADERS_CLIENT
 	${PATH_SRC}/Client/Client.h
-	${PATH_SRC}/Client/ClientGame.cpp
+	#${PATH_SRC}/Client/ClientGame.h
+	${PATH_SRC}/Client/Entities.h
 	${PATH_SRC}/Client/GameModule.h
 	${PATH_SRC}/Client/Input.h
 	${PATH_SRC}/Client/Keys.h
@@ -87,6 +91,9 @@ SET(HEADERS_CLIENT
 	${PATH_SRC}/Client/UI.h
 	${PATH_SRC}/Client/Video.h
 	${PATH_SRC}/Client/World.h
+
+	${PATH_SRC}/Client/Entities/LocalEntities.h
+	${PATH_SRC}/Client/Entities/PacketEntities.h
 
 	${PATH_SRC}/Client/UI/UI.h
 

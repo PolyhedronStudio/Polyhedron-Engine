@@ -1674,9 +1674,16 @@ static void CL_Precache_f(void)
 
     S_StopAllSounds();
 
+	if (!cls.demo.playback) {
+		if (cl.bsp) {
+			CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
+		}
+	}
+
     // Demos use different precache sequence
     if (cls.demo.playback) {
         CL_RegisterBspModels();
+		CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
         CL_PrepareMedia();
         CL_LoadState(LOAD_NONE);
         cls.connectionState = ClientConnectionState::Precached;

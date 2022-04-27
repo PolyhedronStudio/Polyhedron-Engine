@@ -102,9 +102,39 @@ void ClientGameWorld::PrepareEntities() {
  //   globals.maxEntities = this->maxEntities = maxEntities;
 
  //   // Ensure, all base entities are nullptrs. Just to be save.
-	for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		gameEntities[i] = nullptr;
-	}
+	//for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
+	//	gameEntities[i] = nullptr;
+	//}
+
+ //   // Delete class entities if they are allocated, and reset the client entity to a zero state.
+    for (int32_t i = 0; i < MAX_POD_ENTITIES; i++) {
+		// Store fields we want to keep from the PODEntity.
+		PODEntity backupPODEntity = podEntities[i];
+
+		// Delete game entity.
+		if (gameEntities.size() > i && gameEntities[i]) {
+			// Notify about deallocation.
+			gameEntities[i]->OnDeallocate();
+
+			// Clean memory.
+		    delete gameEntities[i];
+			gameEntities[i] = nullptr;
+		}
+
+		// Reset client PODEntity to a fresh state.
+		const bool isLocal = (i > MAX_WIRED_POD_ENTITIES ? true : false);
+		podEntities[i] = {
+			.currentState = {
+				.number = i,	// We want to ensure its currentState number matches the index.
+			},
+			.previousState = {
+				.number = i		// Same for previousState number.
+			},
+			.isLocal = isLocal,
+			.inUse = false,
+			.clientEntityNumber = i, // Last but not least, the actual clientEntityNumber.
+		};
+    }
 }
 
 /**
@@ -222,42 +252,8 @@ void ClientGameWorld::PrepareBodyQueue() {
 *			a game entity based on the 'classname' of the parsed entity.
 **/
 qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bspString, const char* spawnpoint) {
-	//// Clear level state.
+	// Clear level state.
     level = {};
-
- //   // Delete class entities if they are allocated, and reset the client entity to a zero state.
-    for (int32_t i = 0; i < MAX_POD_ENTITIES; i++) {
-		// Store fields we want to keep from the PODEntity.
-		PODEntity backupPODEntity = podEntities[i];
-
-		// Delete game entity.
-		if (gameEntities.size() > i && gameEntities[i]) {
-			// Notify about deallocation.
-			gameEntities[i]->OnDeallocate();
-
-			// Clean memory.
-		    delete gameEntities[i];
-			gameEntities[i] = nullptr;
-		}
-
-		// Reset client PODEntity to a fresh state.
-		const bool isLocal = (i > MAX_PACKET_ENTITIES ? true : false);
-		podEntities[i] = {
-			.currentState = {
-				.number = i,	// We want to ensure its currentState number matches the index.
-			},
-			.previousState = {
-				.number = i		// Same for previousState number.
-			},
-			.isLocal = isLocal,
-			.inUse = false,
-			.clientEntityNumber = i, // Last but not least, the actual clientEntityNumber.
-		};
-    }
-
-	//// Copy in the map name and designated spawnpoint(if any.)
- //   strncpy(level.mapName, mapName, sizeof(level.mapName) - 1);
- //   strncpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint) - 1);
 
 	// Occupy player entity slots for future use.
     PreparePlayers();
