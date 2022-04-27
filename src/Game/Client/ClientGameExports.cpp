@@ -196,7 +196,7 @@ void ClientGameExports::ClientPacketEntityDeltaFrame() {
 /**
 *   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
 **/
-void ClientGameExports::ClientLocalEntityFrame() {
+void ClientGameExports::ClientLocalEntitiesFrame() {
 	entities->RunLocalEntitiesFrame();
 }
 

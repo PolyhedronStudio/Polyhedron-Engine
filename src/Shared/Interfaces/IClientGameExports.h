@@ -392,7 +392,7 @@ public:
 	/**
 	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
 	**/
-	virtual void ClientLocalEntityFrame() = 0;
+	virtual void ClientLocalEntitiesFrame() = 0;
 
     /**
     *   @brief  Called when a disconnect even occures. Including those for Com_Error

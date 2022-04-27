@@ -840,9 +840,9 @@ void CL_GM_ClientPacketEntityDeltaFrame(void) {
 *   @brief  Called each time the client has parsed a valid frame. 
 *           Handle per VALID frame basis things here.
 **/
-void CL_GM_ClientLocalEntityFrame(void) {
+void CL_GM_ClientLocalEntitiesFrame(void) {
     if (cge) {
-        cge->ClientLocalEntityFrame();
+        cge->ClientLocalEntitiesFrame();
     }
 }
 

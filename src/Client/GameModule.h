@@ -30,7 +30,7 @@ float		CL_GM_CalcFOV(float fov_x, float width, float height);
 void		CL_GM_ClientUpdateOrigin(void);
 void		CL_GM_ClientBegin(void);
 void		CL_GM_ClientPacketEntityDeltaFrame(void);
-void		CL_GM_ClientLocalEntityFrame(void);
+void		CL_GM_ClientLocalEntitiesFrame(void);
 void		CL_GM_ClientFrame(void);
 void		CL_GM_ClientDisconnect(void);
 void		CL_GM_ClientClearState(void);

@@ -189,19 +189,21 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 
     // Iterate up till the amount of entities active in the current frame.
     for (int32_t entityNumber = 0; entityNumber < cl->frame.numEntities; entityNumber++) {
-        // Acquire game entity object.
-        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(12 + entityNumber);
+		// Fetch the entity index.
+        const int32_t entityIndex = (cl->frame.firstEntity + entityNumber) & PARSE_ENTITIES_MASK;
+		// Get PODEntity.
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
+		// Get GameEnity.
+        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(entityIndex);//gameWorld->GetGameEntityByIndex(12 + entityNumber);
 
         // If invalid for whichever reason, warn and continue to next iteration.
-        if (!gameEntity) {
+        if (!podEntity || !gameEntity) {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
 
         // Run it for a frame.
-        // Acquire game entity object.
-        PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityNumber);
-
+        // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
 		CLG_RunServerEntity(handle);
     }
@@ -220,20 +222,23 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 	}
 
 	// Iterate through our local client side entities.
-    for (int32_t localEntityNumber = LOCAL_ENTITIES_START_INDEX; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
-        // Acquire game entity object.
-        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(localEntityNumber);
+    for (int32_t localEntityNumber = MAX_WIRED_POD_ENTITIES; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
+		// Fetch the entity index.
+        const int32_t entityIndex = localEntityNumber;
+		// Get PODEntity.
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
+		// Get GameEnity.
+        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(entityIndex);//gameWorld->GetGameEntityByIndex(12 + entityNumber);
 
-        // If invalid for whichever reason, continue to next iteration.
-        if (!gameEntity) {
+        // If invalid for whichever reason, warn and continue to next iteration.
+        if (!podEntity || !gameEntity) {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
-        } else {
+        }
 
-			// Run it for a frame.
-			SGEntityHandle handle = gameEntity;
-			CLG_RunLocalClientEntity(handle);
-		}
+		// Run it for a frame.
+		SGEntityHandle handle = gameEntity;
+		CLG_RunLocalClientEntity(handle);
     }
 }
 

@@ -76,7 +76,7 @@ public:
 	/**
 	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
 	**/
-	void ClientLocalEntityFrame() final;
+	void ClientLocalEntitiesFrame() final;
     /**
     *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
     **/
