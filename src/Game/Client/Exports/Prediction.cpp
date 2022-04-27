@@ -253,25 +253,8 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 **/
 TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end) {
     TraceResult cmTrace;
-
-	ClientGameWorld *gameWorld = GetGameWorld();
-
-	// Get the actual client player entity number.
-	GameEntity *passGameEntity = nullptr;
-	//PODEntity *passPODEntity = nullptr;
-	if (gameWorld) {
-		passGameEntity = gameWorld->GetGameEntityByIndex(cl->frame.clientNumber + 1);
-	}
-	
-	// Use a different tracing mask for being alive and being dead.
-	if (passGameEntity && passGameEntity->GetHealth() > 0) {
-        return clgi.Trace(start, mins, maxs, end, 0, BrushContentsMask::PlayerSolid);
-    } else {
-        return clgi.Trace(start, mins, maxs, end, 0, BrushContentsMask::DeadSolid);
-    } 
-
-	// Older trace code didn't adjust to a need of DeadSolid like the server entity also does.
-//    cmTrace = clgi.Trace(start, mins, maxs, end, 0, BrushContentsMask::PlayerSolid);
+    
+    cmTrace = clgi.Trace(start, mins, maxs, end, 0, BrushContentsMask::PlayerSolid);
 
     return cmTrace;
 }
