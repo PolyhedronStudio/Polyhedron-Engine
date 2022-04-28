@@ -454,34 +454,21 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         //
         // Frame Animation Effects.
         //
-        if (rentEntityEffects & EntityEffectType::AnimCycleFrames01hz2)
+        if (rentEntityEffects & EntityEffectType::AnimCycleFrames01hz2) {
             refreshEntity.frame = autoAnimation & 1;
-        else if (rentEntityEffects & EntityEffectType::AnimCycleFrames23hz2)
+		} else if (rentEntityEffects & EntityEffectType::AnimCycleFrames23hz2) {
             refreshEntity.frame = 2 + (autoAnimation & 1);
-        else if (rentEntityEffects & EntityEffectType::AnimCycleAll2hz)
+		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll2hz) {
             refreshEntity.frame = autoAnimation;
-        else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz)
+		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
             refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
-	    else {
+		} else {
 			//
-			// Frame Animation Effects.
+			//	Skeletal Animation Progressing.
 			//
-			if (rentEntityEffects & EntityEffectType::AnimCycleFrames01hz2) {
-				refreshEntity.frame = autoAnimation & 1;
-			} else if (rentEntityEffects & EntityEffectType::AnimCycleFrames23hz2) {
-				refreshEntity.frame = 2 + (autoAnimation & 1);
-			} else if (rentEntityEffects & EntityEffectType::AnimCycleAll2hz) {
-				refreshEntity.frame = autoAnimation;
-			} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
-				refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
-			} else {
-				//
-				//	Skeletal Animation Progressing.
-				//
-				// Setup the proper lerp and model frame to render this pass.
-				// Moved into the if statement's else case up above.
-				ProcessSkeletalAnimationForTime(cl->serverTime);
-			}
+			// Setup the proper lerp and model frame to render this pass.
+			// Moved into the if statement's else case up above.
+			ProcessSkeletalAnimationForTime(cl->serverTime);
         }
         
 

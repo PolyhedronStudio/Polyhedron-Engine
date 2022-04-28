@@ -396,8 +396,7 @@ void ClientGameEntities::AddPacketEntities() {
 		gameEntity->PrepareRefreshEntity(refreshEntityID, currentEntityState, previousEntityState, cl->lerpFraction);
     }
 
-
-  ////  // Iterate from 0 till the amount of entities present in the current frame.
+	// Iterate from 0 till the amount of entities present in the current frame.
     for (int32_t localEntityNumber = LOCAL_ENTITIES_START_INDEX; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
         PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(localEntityNumber);
 		// Get the current state of the given entity index.
@@ -406,7 +405,7 @@ void ClientGameEntities::AddPacketEntities() {
 		EntityState *previousEntityState = &clientEntity->previousState;
 
 		// Get the game entity belonging to this entity.
-        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(localEntityNumber);
+        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(clientEntity->clientEntityNumber);
 		
 		// Setup the render entity ID for the renderer.
         const int32_t refreshEntityID = clientEntity->clientEntityNumber; //clientEntity->clientEntityNumber + RESERVED_ENTITIY_COUNT + localEntityNumber;
@@ -416,6 +415,10 @@ void ClientGameEntities::AddPacketEntities() {
 
 			continue;
 		}
+
+		//if (localEntityNumber > 1040) {
+		//	return;
+		//}
 
 		// Go on.
 		gameEntity->PrepareRefreshEntity(refreshEntityID, entityState, previousEntityState, cl->lerpFraction);

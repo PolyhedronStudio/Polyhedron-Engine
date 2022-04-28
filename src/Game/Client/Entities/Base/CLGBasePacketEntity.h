@@ -412,6 +412,8 @@ public:
     virtual const uint8_t   GetEventID() override { 
 		if (podEntity) { 
 			return podEntity->currentState.eventID; 
+		} else {
+			return 0;
 		}
 	};
     virtual void            SetEventID(const uint8_t eventID) override {

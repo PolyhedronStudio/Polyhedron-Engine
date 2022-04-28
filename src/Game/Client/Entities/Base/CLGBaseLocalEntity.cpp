@@ -408,6 +408,10 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 		return;
 	}
 
+	if (refreshEntityID == 1028) {
+		int myBreak = 10;
+	}
+
     // Client Info.
     ClientInfo*  clientInfo = nullptr;
     // Entity specific rentEntityEffects. (Such as whether to rotate or not.)
@@ -429,7 +433,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
         // Fetch the entity index.
         const int32_t entityIndex = podEntity->clientEntityNumber;
         // Setup the render entity ID for the renderer.
-        refreshEntity.id = podEntity->clientEntityNumber;// + RESERVED_ENTITIY_COUNT;
+        refreshEntity.id = refreshEntityID;// + RESERVED_ENTITIY_COUNT;
 
         //
         // Effects.
@@ -437,39 +441,26 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
         // Fetch the rentEntityEffects of current entity.
         rentEntityEffects = currentState->effects;
         // Fetch the render rentEntityEffects of current entity.
-        rentRenderEffects= currentState->renderEffects;
+        rentRenderEffects = currentState->renderEffects;
 
         //
         // Frame Animation Effects.
         //
-        if (rentEntityEffects & EntityEffectType::AnimCycleFrames01hz2)
+        if (rentEntityEffects & EntityEffectType::AnimCycleFrames01hz2) {
             refreshEntity.frame = autoAnimation & 1;
-        else if (rentEntityEffects & EntityEffectType::AnimCycleFrames23hz2)
+		} else if (rentEntityEffects & EntityEffectType::AnimCycleFrames23hz2) {
             refreshEntity.frame = 2 + (autoAnimation & 1);
-        else if (rentEntityEffects & EntityEffectType::AnimCycleAll2hz)
+		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll2hz) {
             refreshEntity.frame = autoAnimation;
-        else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz)
+		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
             refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
-	    else {
+		} else {
 			//
-			// Frame Animation Effects.
+			//	Skeletal Animation Progressing.
 			//
-			if (rentEntityEffects & EntityEffectType::AnimCycleFrames01hz2) {
-				refreshEntity.frame = autoAnimation & 1;
-			} else if (rentEntityEffects & EntityEffectType::AnimCycleFrames23hz2) {
-				refreshEntity.frame = 2 + (autoAnimation & 1);
-			} else if (rentEntityEffects & EntityEffectType::AnimCycleAll2hz) {
-				refreshEntity.frame = autoAnimation;
-			} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
-				refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
-			} else {
-				//
-				//	Skeletal Animation Progressing.
-				//
-				// Setup the proper lerp and model frame to render this pass.
-				// Moved into the if statement's else case up above.
-				ProcessSkeletalAnimationForTime(cl->serverTime);
-			}
+			// Setup the proper lerp and model frame to render this pass.
+			// Moved into the if statement's else case up above.
+			ProcessSkeletalAnimationForTime(cl->serverTime);
         }
         
 
@@ -499,7 +490,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
                 refreshEntity.oldorigin = cl->playerEntityOrigin;
             } else {
                 // Ohterwise, just neatly interpolate the origin.
-                refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
+                refreshEntity.origin = vec3_mix(refreshEntity.origin, podEntity->currentState.origin, cl->lerpFraction);
                 // Neatly copy it as the refreshEntity's oldorigin.
                 refreshEntity.oldorigin = refreshEntity.origin;
             }
@@ -551,7 +542,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
                 // Default entity skin number handling behavior.
                 refreshEntity.skinNumber = currentState->skinNumber;
                 refreshEntity.skin = 0;
-                refreshEntity.model = cl->drawModels[currentState->modelIndex];
+                refreshEntity.model = currentState->modelIndex;//cl->drawModels[currentState->modelIndex];
 
                 // Disable shadows on lasers and dm spots.
                 if (refreshEntity.model == cl_mod_laser || refreshEntity.model == cl_mod_dmspot)
@@ -591,7 +582,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
             refreshEntity.angles = cl->playerEntityAngles;
         } else {
             // Otherwise, lerp angles by default.
-            refreshEntity.angles = vec3_mix(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
+            refreshEntity.angles = vec3_mix(refreshEntity.angles, podEntity->currentState.angles, cl->lerpFraction);//vec3_mix(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (currentState->modelIndex == 255 && cl_rollhack->integer) {
@@ -715,7 +706,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
                     }
                 }
             } else {
-                refreshEntity.model = cl->drawModels[currentState->modelIndex2];
+                refreshEntity.model = currentState->modelIndex2;//cl->drawModels[currentState->modelIndex2];
             }
 
 
@@ -736,7 +727,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
         // 
         // Add an entity to the current rendering frame that has model index 3 attached to it.
         if (currentState->modelIndex3) {
-            refreshEntity.model = cl->drawModels[currentState->modelIndex3];
+            refreshEntity.model = currentState->modelIndex3;//cl->drawModels[currentState->modelIndex3];
             clge->view->AddRenderEntity(refreshEntity);
         }
 
@@ -746,7 +737,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
         // 
         // Add an entity to the current rendering frame that has model index 4 attached to it.
         if (currentState->modelIndex4) {
-            refreshEntity.model = cl->drawModels[currentState->modelIndex4];
+            refreshEntity.model = currentState->modelIndex4; //cl->drawModels[currentState->modelIndex4];
             clge->view->AddRenderEntity(refreshEntity);
         }
 
