@@ -124,18 +124,18 @@ void ClientGameWorld::PrepareEntities() {
 		}
 
 		// Reset client PODEntity to a fresh state.
-		//const bool isLocal = (i > MAX_WIRED_POD_ENTITIES ? true : false);
-		//podEntities[i] = {
-		//	.currentState = {
-		//		.number = i,	// We want to ensure its currentState number matches the index.
-		//	},
-		//	.previousState = {
-		//		.number = i		// Same for previousState number.
-		//	},
-		//	.isLocal = isLocal,
-		//	.inUse = false,
-		//	.clientEntityNumber = i, // Last but not least, the actual clientEntityNumber.
-		//};
+		const bool isLocal = (i > MAX_WIRED_POD_ENTITIES ? true : false);
+		podEntities[i] = {
+			.currentState = {
+				.number = i,	// We want to ensure its currentState number matches the index.
+			},
+			.previousState = {
+				.number = i		// Same for previousState number.
+			},
+			.isLocal = isLocal,
+			.inUse = false,
+			.clientEntityNumber = i, // Last but not least, the actual clientEntityNumber.
+		};
     }
 }
 
@@ -169,7 +169,7 @@ void ClientGameWorld::PreparePlayers() {
 		// Acquire POD entity.
 		PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
 
-		//// Setup the entity.
+		// Setup the entity.
 		(*podEntity) = {
 			.currentState {
 				.number = entityNumber,
@@ -297,20 +297,31 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 	// Acquire gameworld and entity arrays.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
-	//// First 3 reserved entities.
-	//for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
-	//	clientEntity = gameWorld->GetPODEntityByIndex(i);
-	//	if (!clientEntity) {
-	//	Com_Error(ErrorType::Drop, "PrepareBSPEntities: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", i);
-	//	return false;
-	//	}
-	//	clientEntity->clientEntityNumber = i;
-	//	clientEntity->currentState.number = i;
-	//	clientEntity->previousState.number = i;
-	//	clientEntity->isLocal = true;
-	//	clientEntity->inUse = false;
-	//} 
+	// First 3 reserved entities.
+	for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
+		PODEntity *reservedPODEntity = GetUnusedPODEntity(false);
+		
+		// Create a base local entity for these reserved ones for now.
+		GameEntity *gameEntity = CreateGameEntity<CLGBaseLocalEntity>(reservedPODEntity, false, true);
+		//gameEntity->SetInUse(false);
 
+		//// Acquire POD entity.
+		//PODEntity *podEntity = GetPODEntityByIndex(i);
+
+		//// Setup the entity.
+		//(*podEntity) = {
+		//	.currentState {
+		//		.number = i,
+		//	},
+		//	.previousState = {
+		//		.number = i,
+		//	},
+		//	.isLocal = false,
+		//	.inUse = false,
+		//	.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
+		//	.clientEntityNumber = i,
+		//};
+	} 
 
 	// Engage parsing.
 	while (!!isParsing == true) {

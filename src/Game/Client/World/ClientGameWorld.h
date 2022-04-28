@@ -128,37 +128,51 @@ public:
     *
     *   @return A pointer to the game entity on success, nullptr on failure.
     **/
-    template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *svEntity = nullptr, bool allocateNewPODEntity = true) {
+    template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *podEntity = nullptr, bool allocateNewPODEntity = true, bool isWired = true) {
         // Class entity to be returned.
         entityClass* gameEntity = nullptr;
 
         // If a null entity was passed, create a new one
-	    if (svEntity == nullptr) {
+	    if (podEntity == nullptr) {
             if (allocateNewPODEntity) {
-                svEntity = GetUnusedPODEntity();
+                podEntity = GetUnusedPODEntity(isWired);
+
+				if (!podEntity) {
+					Com_DPrint("CLGWarning (CreateGameEntity): GetUnusedPODENtity(%s) returned (nullptr)! Expect trouble!\n", (isWired ? "isWired = true" : "isWired = false"));
+					return nullptr;
+				}
             } else {
-                Com_DPrint("WARNING: tried to spawn a game entity when the edict is null\n");
+                Com_DPrint("CLGWarning (CreateGameEntity): Tried to spawn a GameEntity on a (nullptr) PODEntity!\n");
                 return nullptr;
             }
         }
+
+		// Get actual entity number.
+		const int32_t entityNumber = podEntity->clientEntityNumber;
         
         // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
         if (entityClass::ClassInfo.AllocateInstance) {
-            if (nullptr == gameEntities[svEntity->currentState.number]) {
+            if (nullptr == gameEntities[entityNumber]) {
 				// Entities that aren't in the type info system will error out here
-				gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(svEntity));
+				gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(podEntity));
     
-				// Be sure ti set its classname.
+				// Be sure to set its classname.
 				gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
 
-				// Store the svEntity's game entity pointer.
-				svEntity->gameEntity = gameEntity;
-
-				gameEntities[svEntity->currentState.number] = gameEntity;
+				// Assign game entity pointers.
+				podEntity->gameEntity = gameEntities[entityNumber] = gameEntity;
             } else {
-                Com_DPrint("ERROR: edict %i is already taken\n", svEntity->currentState.number);
+				// Debug Warn.
+                Com_DPrint("CLGWarning (CreateGameEntity): PODEntity(#%i) is already taken\n", entityNumber);
+				return nullptr;
             }
-        }
+		} else {
+			// Debug Warn.
+			Com_DPrint("CLGWarning (CreateGameEntity): ClassInfo '%s' has a (nullptr) AllocateInstance function.\n", entityClass::ClassInfo.mapClass);
+			return nullptr;
+		}
+
+		// If all went well, we can return our new created game entity.
         return gameEntity;
     }
     

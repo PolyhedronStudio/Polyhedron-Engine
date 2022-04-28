@@ -65,9 +65,11 @@ void MiscClientExplosionBox::Precache() {
 //===============
 //
 void MiscClientExplosionBox::Spawn() {
-	Com_DPrint("MISC_CLIENT_EXPLOBOX WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!\n");
     // Always call parent class method.
     Base::Spawn();
+
+	// Debug Print.
+	Com_DPrint("CLGLocalSpawnEntity: %s (#%i)\n", GetClassname().c_str(), GetNumber());
 
     // Set solid.
     SetSolid(Solid::OctagonBox);
@@ -131,7 +133,7 @@ void MiscClientExplosionBox::Think() {
 	// Interpolate origin?
 	PODEntity *clientEntity = GetPODEntity();
 	if (clientEntity) {
-		Com_DPrint("misc_client_explobox(#%i) - model(#%i) - origin(%s)\n", clientEntity->clientEntityNumber, clientEntity->currentState.modelIndex, Vec3ToString(clientEntity->currentState.origin));
+	//	Com_DPrint("misc_client_explobox(#%i) - model(#%i) - origin(%s)\n", clientEntity->clientEntityNumber, clientEntity->currentState.modelIndex, Vec3ToString(clientEntity->currentState.origin));
 	}
 	//if (clientEntity) {
 		//clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
