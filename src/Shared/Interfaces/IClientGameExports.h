@@ -65,7 +65,7 @@ public:
     * 
     *   @return True on success.
     **/
-    virtual qboolean SpawnFromBSPString(const char* entities) = 0;
+    virtual qboolean PrepareBSPEntities(const char* entities) = 0;
 
     /**
     *   @brief  When the client receives state updates it calls into this function so we can update
@@ -371,6 +371,11 @@ public:
     *   Frame & State related
     * 
     ****/
+	/**
+	*   @brief  Called right after connecting to a (loopback-)server and succesfully 
+	*			loaded up the BSP map data. This gives it a chance to initialize game objects.
+	**/
+	virtual void ClientConnect() = 0;
     /**
     *   @brief  Called after all downloads are done. (Aka, a map has started.)
     *           Not used for demos.

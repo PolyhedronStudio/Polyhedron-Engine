@@ -100,6 +100,34 @@ static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityS
 **/
 static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 {
+	// Last received frame was invalid.
+    if (!cl.oldframe.valid) {
+        return true;
+    }
+
+    // Wasn't in last received frame.
+    if (clEntity->serverFrame != cl.frame.number) {//cl.oldframe.number + 1) {
+        return true;
+    }
+
+    // Developer option, always new.
+    if (cl_nolerp->integer == 2) {
+        return true;
+    }
+
+    // Developer option, lerp from last received frame.
+    if (cl_nolerp->integer == 3) {
+        return false;
+    }
+
+    //// Previous server frame was dropped.
+    //if (cl.oldframe.number != cl.frame.number - 1) {
+    //    return true;
+    //}
+
+    // No conditions met, so it wasn't in our previous frame.
+    return false;
+
     //// Last received frame was invalid.
     //if (!cl.oldframe.valid) {
     //    return true;
@@ -126,7 +154,7 @@ static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
     //}
 
     // No conditions met, so it wasn't in our previous frame.
-    return false;
+//    return false;
 }
 
 /**
@@ -165,20 +193,20 @@ void LocalEntity_Update(const EntityState &state)
 	clEntity->clientEntityNumber = state.number;
 
     // Was this entity in our previous frame, or not?
-    //if (LocalEntity_IsNew(clEntity)) {
-    //    // Wasn't in last update, so initialize some things.
-    //    LocalEntity_UpdateNew(clEntity, state, state.origin);
-    //} else {
+    if (LocalEntity_IsNew(clEntity)) {
+        // Wasn't in last update, so initialize some things.
+        LocalEntity_UpdateNew(clEntity, state, state.origin);
+    } else {
         // It already exists, update it accordingly.
         LocalEntity_UpdateExisting(clEntity, state, state.origin);
-    //}
+    }
 
     // Assign the fresh new received server frame number that belongs to this frame.
     clEntity->serverFrame = cl.frame.number;
 
     // Assign the fresh new received state as the entity's current.
 	//clEntity->previousState = clEntity->currentState;
-	clEntity->currentState = state;
+	//clEntity->currentState = state;
 	clEntity->clientEntityNumber = state.number;
 }
 

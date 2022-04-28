@@ -147,7 +147,7 @@ void Worldspawn::Spawn() {
     SetModelIndex(1);               // World model is always index 1
     SetClipMask(0);
     //---------------
-
+	Com_DPrint("CLGInfo: Spawned Client Worldspawn!\n");
     //// Reserve some spots for dead player bodies for coop / deathmatch
     //level.bodyQue = 0;
     //for (int i = 0; i < BODY_QUEUE_SIZE; i++) {

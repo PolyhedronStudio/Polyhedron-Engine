@@ -55,6 +55,11 @@ public:
     *   Frame & State related
     * 
     ****/
+	/**
+	*   @brief  Called right after connecting to a (loopback-)server and succesfully 
+	*			loaded up the BSP map data. This gives it a chance to initialize game objects.
+	**/
+	void ClientConnect() final;
     /**
     *   @brief  Called after all downloads are done. (Aka, a map has started.)
     *           Not used for demos.

@@ -97,7 +97,7 @@ public:
 	*	@brief	Parses the 'entities' string in order to create, precache and spawn
 	*			a GameEntity which matches to the entity's set classname.
 	**/
-    qboolean SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint);
+    qboolean PrepareBSPEntities(const char* mapName, const char* entities, const char* spawnpoint);
     /**
 	*	@brief	Looks for the first free server entity in our buffer.
 	* 

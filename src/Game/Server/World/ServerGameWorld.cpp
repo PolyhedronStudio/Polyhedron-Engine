@@ -161,7 +161,7 @@ void ServerGameWorld::PrepareBodyQueue() {
 *			first free POD entity slot there is. After doing so, allocates
 *			a game entity based on the 'classname' of the parsed entity.
 **/
-qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* entities, const char* spawnpoint) {
+qboolean ServerGameWorld::PrepareBSPEntities(const char* mapName, const char* entities, const char* spawnpoint) {
 	// Clear level state.
     level = {};
 
@@ -207,7 +207,7 @@ qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* en
 		}
 
 		if (com_token[0] != '{') {
-			gi.Error("SpawnFromBSPString: found %s when expecting {", com_token);
+			gi.Error("PrepareBSPEntities: found %s when expecting {", com_token);
 			return false;
 		}
 
@@ -225,16 +225,16 @@ qboolean ServerGameWorld::SpawnFromBSPString(const char* mapName, const char* en
 		PODEntity *podEntity = nullptr;
 		
 		// If the dictionary has a classname, and it has client_ residing in it, change the entity index to use.
-		//if (parsedKeyValues.contains("classname") && (parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)) {
-		//	// Increment local entity count.
-		//	localEntityIndex++;
+		if (parsedKeyValues.contains("classname") && (parsedKeyValues["classname"].find("client_") != std::string::npos || parsedKeyValues["classname"].find("_client") != std::string::npos)) {
+			// Increment local entity count.
+			localEntityIndex++;
 		//	//entityIndex = localEntityIndex;
 
 		//	// Entity is local.
-		//	isLocal = true;
-		//	podEntity = GetUnusedPODEntity(false);
-		//} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
-		if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
+			isLocal = true;
+			//podEntity = GetUnusedPODEntity(false);
+		} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
+		//if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
 			// Just use 0 index.
 			//entityIndex = 0;
 			podEntity = GetPODEntityByIndex(0);

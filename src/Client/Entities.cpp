@@ -215,30 +215,11 @@ void CL_DeltaFrame(void)
         EntityState &state = cl.entityStates[stateIndex];
 
         // Update the entity state. (Updates current and previous state.)
-        ServerEntity_UpdateState(state);
+        PacketEntity_UpdateState(state);
 
         // Fire entity event.
-        ServerEntity_FireEvent(state.number);
+        PacketEntity_FireEvent(state.number);
     }
-
-	// The local entities start indexed from MAX_SERVER_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
-	// We'll be processing them here.
-	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		//if (i < totalLocalEntities) {}
-		EntityState &localEntityState = cs.entities[i].currentState;
-
-		// I guess it has to come from somewhere right?
-		//localEntityState.number = i;
-		//cs.entities[i].clientEntityNumber = i;
-		//localEntityState.eventID = 0;
-
-		// Update local entity.
-		LocalEntity_Update(localEntityState);
-
-		// Fire local entity events.
-		LocalEntity_FireEvent(localEntityState.number);
-		localEntityState.eventID = 0;
-	}
 
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();

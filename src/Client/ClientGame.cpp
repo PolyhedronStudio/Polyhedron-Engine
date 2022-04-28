@@ -712,6 +712,7 @@ void CL_InitGameProgs(void)
 //
 //=============================================================================
 //
+
 /**
 *   @brief  Spawns local client side class entities.
 **/
@@ -719,7 +720,7 @@ qboolean CL_GM_SpawnEntitiesFromBSPString(const char* bspString) {
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-	        return entities->SpawnFromBSPString(bspString);
+	        return entities->PrepareBSPEntities(bspString);
         }
     }
 
@@ -806,6 +807,17 @@ void CL_GM_ClientUpdateOrigin(void) {
     if (cge) {
         cge->ClientUpdateOrigin();
     }
+}
+
+/**
+*	@brief	Let the Client Game Module know we connected. This gives it a chance to create
+*			objects that are relevant to the client game right before all settles and the
+*			client game begins.
+**/
+void CL_GM_ClientConnect() {
+	if (cge) {
+		cge->ClientConnect();
+	}
 }
 
 /**

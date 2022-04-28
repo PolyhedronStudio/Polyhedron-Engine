@@ -32,7 +32,7 @@
 * 
 *   @return True if the entity comes from an optimized packet, false otherwise.
 **/
-static inline qboolean ServerEntity_IsPlayer(const EntityState& state) {
+static inline qboolean PacketEntity_IsPlayer(const EntityState& state) {
     if (state.number != cl.frame.clientNumber + 1)
         return false;
 
@@ -45,7 +45,7 @@ static inline qboolean ServerEntity_IsPlayer(const EntityState& state) {
 /**
 *   @brief  Creates a new entity based on the newly received entity state.
 **/
-static inline void ServerEntity_UpdateNew(PODEntity *clEntity, const EntityState &state, const vec3_t &origin)
+static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState &state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
     clEntity->clientEntityNumber = state.number; // used to be: clEntity->id = ++entity_ctr;
@@ -74,7 +74,7 @@ static inline void ServerEntity_UpdateNew(PODEntity *clEntity, const EntityState
 /**
 *   @brief  Updates an existing entity using the newly received state for it.
 **/
-static inline void ServerEntity_UpdateExisting(PODEntity *clEntity, const EntityState &state, const vec_t *origin)
+static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const EntityState &state, const vec_t *origin)
 {
     // Fetch event ID.
     int32_t eventID = state.eventID;
@@ -117,7 +117,7 @@ static inline void ServerEntity_UpdateExisting(PODEntity *clEntity, const Entity
 *               - cl_nolerp 2, forced by developer option.
 *           False when none of the above conditions are met or cl_nolerp is set to 3:
 **/
-static inline qboolean ServerEntity_IsNew(const PODEntity *clEntity)
+static inline qboolean PacketEntity_IsNew(const PODEntity *clEntity)
 {
     // Last received frame was invalid.
     if (!cl.oldframe.valid) {
@@ -152,7 +152,7 @@ static inline qboolean ServerEntity_IsNew(const PODEntity *clEntity)
 *   @brief  Updates the entity belonging to the entity state. If it doesn't
 *           exist yet, it'll create it.
 **/
-void ServerEntity_UpdateState(const EntityState &state)
+void PacketEntity_UpdateState(const EntityState &state)
 {
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
     PODEntity *clEntity = &cs.entities[state.number];
@@ -170,7 +170,7 @@ void ServerEntity_UpdateState(const EntityState &state)
     }
 
     // Work around Q2PRO server bandwidth optimization.
-    const bool isPlayerEntity = ServerEntity_IsPlayer(state);
+    const bool isPlayerEntity = PacketEntity_IsPlayer(state);
 
     // Fetch the entity's origin.
     vec3_t entityOrigin = state.origin;
@@ -183,12 +183,12 @@ void ServerEntity_UpdateState(const EntityState &state)
 	clEntity->clientEntityNumber = state.number;
 
     // Was this entity in our previous frame, or not?
-    if (ServerEntity_IsNew(clEntity)) {
+    if (PacketEntity_IsNew(clEntity)) {
         // Wasn't in last update, so initialize some things.
-        ServerEntity_UpdateNew(clEntity, state, entityOrigin);
+        PacketEntity_UpdateNew(clEntity, state, entityOrigin);
     } else {
         // It already exists, update it accordingly.
-        ServerEntity_UpdateExisting(clEntity, state, entityOrigin);
+        PacketEntity_UpdateExisting(clEntity, state, entityOrigin);
     }
 
     // Assign the fresh new received server frame number that belongs to this frame.
@@ -206,6 +206,6 @@ void ServerEntity_UpdateState(const EntityState &state)
 /**
 *   @brief  Notifies the client game about an entity event to execute.
 **/
-void ServerEntity_FireEvent(int32_t number) {
+void PacketEntity_FireEvent(int32_t number) {
     CL_GM_PacketEntityEvent(number);
 }

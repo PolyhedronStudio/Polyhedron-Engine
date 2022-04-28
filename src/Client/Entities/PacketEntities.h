@@ -13,9 +13,9 @@
 *   @brief  Updates the entity belonging to the entity state. If it doesn't
 *           exist yet, it'll create it.
 **/
-void ServerEntity_UpdateState(const EntityState &state);
+void PacketEntity_UpdateState(const EntityState &state);
 
 /**
 *   @brief  Notifies the client game about an entity event to execute.
 **/
-void ServerEntity_FireEvent(int32_t number);
+void PacketEntity_FireEvent(int32_t number);

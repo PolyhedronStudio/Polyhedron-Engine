@@ -1388,6 +1388,7 @@ static void CL_ConnectionlessPacket(void)
         cls.connectionState = ClientConnectionState::Connected;
         cls.connect_count = 0;
         strcpy(cl.mapName, mapName);   // for levelshot screen
+
         return;
     }
 
@@ -1674,18 +1675,11 @@ static void CL_Precache_f(void)
 
     S_StopAllSounds();
 
-	if (!cls.demo.playback) {
-		if (cl.bsp) {
-			CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
-		}
-	}
-
     // Demos use different precache sequence
     if (cls.demo.playback) {
         CL_RegisterBspModels();
-		CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
         CL_PrepareMedia();
-        CL_LoadState(LOAD_NONE);
+		CL_LoadState(LOAD_NONE);
         cls.connectionState = ClientConnectionState::Precached;
         return;
     }
@@ -2924,39 +2918,59 @@ void CL_UpdateFrameTimes(void)
 /**
 *	@brief	"Runs"/"Moves Forward" the Server Game Module for another frame.
 **/
+#include "Entities/LocalEntities.h"
 static uint64_t clFrameResidual = 0;
 uint64_t CL_RunGameFrame(uint64_t msec) {
     if (cls.connectionState < ClientConnectionState::Active) {
 		return 0;	
 	}
-//#if USE_CLIENT
-//    if (host_speeds->integer)
-//        timeBeforeClientGame = Sys_Milliseconds();
-//#endif
-//	// move autonomous things around if enough time has passed
-//    clFrameResidual += msec;
-//    if (clFrameResidual < CL_FRAMETIME) {
-//        return CL_FRAMETIME - clFrameResidual;
-//    }
+#if USE_CLIENT
+    if (host_speeds->integer)
+        timeBeforeClientGame = Sys_Milliseconds();
+#endif
+	// move autonomous things around if enough time has passed
+    clFrameResidual += msec;
+    if (clFrameResidual < CL_FRAMETIME) {
+        return CL_FRAMETIME - clFrameResidual;
+    }
+	
+	// The local entities start indexed from MAX_SERVER_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
+	// We'll be processing them here.
+	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
+		//if (i < totalLocalEntities) {}
+		//EntityState &localEntityState = cs.entities[i].currentState;
+
+		// I guess it has to come from somewhere right?
+		//localEntityState.number = i;
+		//cs.entities[i].clientEntityNumber = i;
+		//localEntityState.eventID = 0;
+
+		// Update local entity.
+		LocalEntity_Update(cs.entities[i].currentState);
+
+		// Fire local entity events.
+		LocalEntity_FireEvent(cs.entities[i].currentState.number);
+		cs.entities[i].currentState.eventID = 0;
+	}
 
 	//CL_GM_ClientPacketEntityDeltaFrame();
 	CL_GM_ClientLocalEntitiesFrame();
 
-//#if USE_CLIENT
-//    if (host_speeds->integer)
-//        timeAfterClientGame = Sys_Milliseconds();
-//#endif
-//	// decide how long to sleep next frame
-//    clFrameResidual -= CL_FRAMETIME;
-//    if (clFrameResidual < CL_FRAMETIME) {
-//        return CL_FRAMETIME - clFrameResidual;
-//    }
-//
-//	// don't accumulate bogus residual
-//    if (clFrameResidual > 250) {
-//        Com_DDDPrintf("Reset residual %u\n", clFrameResidual);
-//        clFrameResidual = 100;
-//    }
+#if USE_CLIENT
+    if (host_speeds->integer)
+        timeAfterClientGame = Sys_Milliseconds();
+#endif
+	// decide how long to sleep next frame
+    clFrameResidual -= CL_FRAMETIME;
+    if (clFrameResidual < CL_FRAMETIME) {
+        return CL_FRAMETIME - clFrameResidual;
+    }
+
+	// don't accumulate bogus residual
+    if (clFrameResidual > 250) {
+        Com_DDDPrintf("Reset residual %u\n", clFrameResidual);
+        clFrameResidual = 100;
+    }
 
 	return 0;
 }
@@ -3072,15 +3086,15 @@ uint64_t CL_Frame(uint64_t msec)
 
     // Resend a connection request if necessary
     CL_CheckForResend();
-		
-	// Let client side entities do their thing.
-	if (phys_frame) {
-		CL_RunGameFrame(main_extra);
-	}
+
 
     // Read user intentions
     CL_UpdateCmd(main_extra);
-
+			
+	// Let client side entities do their thing.
+	//if (phys_frame) {
+		CL_RunGameFrame(main_extra);
+	//}
     // Finalize pending cmd
     phys_frame |= cl.sendPacketNow;
 

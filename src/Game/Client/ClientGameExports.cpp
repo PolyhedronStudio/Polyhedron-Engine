@@ -108,17 +108,41 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 }
 #endif
 
-/**
-*   @brief  Called after all downloads are done. (Aka, a map has started.)
-*           Not used for demos.
-**/
-void ClientGameExports::ClientBegin() {
+
+/////
+/////	When I wake up, I gotz to add in the ClientConnected and perhaps a ClientPrecache function. This is where the entities
+/////	whether local or a packet entity to be, should both precache. Spawning should probably happen though right before clientbegin...
+/////
+/////	If we don't, we got no GameWorld to work with.
+
+/////
+
+
+	/**
+	*   @brief  Called right after connecting to a (loopback-)server and succesfully 
+	*			loaded up the BSP map data. This gives it a chance to initialize game objects.
+	**/
+void ClientGameExports::ClientConnect() {
 	// Setup a fresh game locals object.
 	game = ClientGameLocals{};
 	game.Initialize();
 
     // Reset level locals.
     level = LevelLocals{};
+    level.time = GameTime(cl->serverTime);
+}
+
+/**
+*   @brief  Called after all downloads are done. (Aka, a map has started.)
+*           Not used for demos.
+**/
+void ClientGameExports::ClientBegin() {
+	//// Setup a fresh game locals object.
+	//game = ClientGameLocals{};
+	//game.Initialize();
+
+ //   // Reset level locals.
+ //   level = LevelLocals{};
     level.time = GameTime(cl->serverTime);
 }
 

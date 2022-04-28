@@ -109,7 +109,7 @@ public:
 	*	@brief	Parses the 'entities' string in order to create, precache and spawn
 	*			a GameEntity which matches to the entity's set classname.
 	**/
-    qboolean SpawnFromBSPString(const char* mapName, const char* bspString, const char* spawnpoint) final;
+    qboolean PrepareBSPEntities(const char* mapName, const char* bspString, const char* spawnpoint) final;
     /**
 	*	@brief	Looks for the first free server entity in our buffer.
 	* 
@@ -123,45 +123,44 @@ public:
 	**/
     PODEntity* GetUnusedPODEntity(bool isWired = true) final;
 
- //   /**
-	//*   @brief  Creates and assigns a game entity to the given server entity based on the classname.
- //   *
- //   *   @return A pointer to the game entity on success, nullptr on failure.
- //   **/
- //   template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *podEntity = nullptr, bool allocateNewServerEntity = true) {
- //       // Class entity to be returned.
- //       entityClass* gameEntity = nullptr;
+    /**
+	*   @brief  Creates and assigns a game entity to the given server entity based on the classname.
+    *
+    *   @return A pointer to the game entity on success, nullptr on failure.
+    **/
+    template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *svEntity = nullptr, bool allocateNewPODEntity = true) {
+        // Class entity to be returned.
+        entityClass* gameEntity = nullptr;
 
- //    //   // If a null entity was passed, create a new one
-	//    if (podEntity == nullptr) {
- //           if (allocateNewServerEntity) {
- //               podEntity = GetUnusedPODEntity();
- //           } else {
- //               Com_DPrint("WARNING: tried to spawn a game entity when the edict is null\n");
- //               return nullptr;
- //           }
- //       }
- //       
- //       // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
- //       if (entityClass::ClassInfo.AllocateInstance) {
-	//	    // Entities that aren't in the type info system will error out here
-	//		gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(podEntity));
- //   
-	//		// Be sure to set its classname.
-	//		gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
+        // If a null entity was passed, create a new one
+	    if (svEntity == nullptr) {
+            if (allocateNewPODEntity) {
+                svEntity = GetUnusedPODEntity();
+            } else {
+                Com_DPrint("WARNING: tried to spawn a game entity when the edict is null\n");
+                return nullptr;
+            }
+        }
+        
+        // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
+        if (entityClass::ClassInfo.AllocateInstance) {
+            if (nullptr == gameEntities[svEntity->currentState.number]) {
+				// Entities that aren't in the type info system will error out here
+				gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(svEntity));
+    
+				// Be sure ti set its classname.
+				gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
 
-	//		// Store the podEntity's game entity pointer.
-	//		podEntity->gameEntity = gameEntity;
+				// Store the svEntity's game entity pointer.
+				svEntity->gameEntity = gameEntity;
 
-	//		if (gameEntities[podEntity->currentState.number] == nullptr) {
-	//			gameEntities[podEntity->currentState.number] = gameEntity;
-	//		} else {
-	//			Com_DPrint("ERROR: edict %i is already taken\n", podEntity->currentState.number);
-	//		}
-	//	}
-
- //       return gameEntity;
- //   }
+				gameEntities[svEntity->currentState.number] = gameEntity;
+            } else {
+                Com_DPrint("ERROR: edict %i is already taken\n", svEntity->currentState.number);
+            }
+        }
+        return gameEntity;
+    }
     
 
 	/**

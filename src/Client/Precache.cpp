@@ -105,19 +105,28 @@ void CL_PrepareMedia(void)
     if (!cl.mapName[0])
         return;     // no map loaded
 
-
     // register models, pics, and skins
     R_BeginRegistration(cl.mapName);
     // register sounds.
     S_BeginRegistration();
 
+    // Ensure to register these too, for client side prediction.
+    CL_RegisterBspModels();  
+
+	// Inquire the game module to spawn all its entities, so that it may too load its data.
+	if (cl.bsp) {
+		// Let the client game module know we "connected" right here so it can
+		// make use of the BSP data and initialize its 'world' properly.
+		CL_GM_ClientConnect();
+
+		// Give it a chance to precache and spawn its entities.
+		CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
+	}
+
     // PH: Pass over loading to the CG Module so it can actively
     // manage the load state. This is useful for load screen information.
     CL_GM_LoadWorldMedia();
 
-    // Ensure to register these too, for client side prediction.
-    CL_RegisterBspModels();
-    
     // The sound engine can now free unneeded stuff
     S_EndRegistration();
 

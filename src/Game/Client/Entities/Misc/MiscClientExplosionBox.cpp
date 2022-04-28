@@ -131,7 +131,7 @@ void MiscClientExplosionBox::Think() {
 	// Interpolate origin?
 	PODEntity *clientEntity = GetPODEntity();
 	if (clientEntity) {
-		//Com_DPrint("misc_client_explobox(#%i) - model(#%i) - origin(%s)\n", clientEntity->clientEntityNumber, clientEntity->currentState.modelIndex, Vec3ToString(clientEntity->currentState.origin));
+		Com_DPrint("misc_client_explobox(#%i) - model(#%i) - origin(%s)\n", clientEntity->clientEntityNumber, clientEntity->currentState.modelIndex, Vec3ToString(clientEntity->currentState.origin));
 	}
 	//if (clientEntity) {
 		//clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);

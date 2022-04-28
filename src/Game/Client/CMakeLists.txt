@@ -26,9 +26,11 @@ SET(SRC_CLGAME
 	Effects/Particles/Teleporter.cpp
 	Effects/Particles/WaterSplash.cpp
 
-	Entities/Base/CLGBasePacketEntity.cpp
-	Entities/Base/CLGBaseTrigger.cpp
 	Entities/Base/CLGBaseLocalEntity.cpp
+	Entities/Base/CLGBasePacketEntity.cpp
+	Entities/Base/CLGBasePlayer.cpp
+	Entities/Base/CLGBaseTrigger.cpp
+	
 
 	Entities/Misc/MiscExplosionBox.cpp
 	Entities/Misc/MiscClientExplosionBox.cpp
@@ -80,10 +82,11 @@ SET(HEADERS_CLGAME
 	Effects/ParticleEffects.h
 	Effects/Particles.h
 
-	Entities/Base/CLGBasePacketEntity.h
-	Entities/Base/CLGBaseTrigger.h
 	Entities/Base/CLGBaseLocalEntity.h
-
+	Entities/Base/CLGBasePacketEntity.h
+	Entities/Base/CLGBasePlayer.h
+	Entities/Base/CLGBaseTrigger.h
+	
 	Entities/Misc/MiscExplosionBox.h
 	Entities/Misc/MiscClientExplosionBox.h
 

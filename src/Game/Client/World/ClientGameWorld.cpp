@@ -8,9 +8,11 @@
 // Core.
 #include "../ClientGameLocals.h"
 
-// Entities.
+// Exports.
 #include "../Exports/Entities.h"
 
+// Entities.
+#include "../Entities/Base/CLGBasePlayer.h"
 // GameModes.
 //#include "../GameModes/IGameMode.h"
 //#include "../GameModes/DefaultGameMode.h"
@@ -122,18 +124,18 @@ void ClientGameWorld::PrepareEntities() {
 		}
 
 		// Reset client PODEntity to a fresh state.
-		const bool isLocal = (i > MAX_WIRED_POD_ENTITIES ? true : false);
-		podEntities[i] = {
-			.currentState = {
-				.number = i,	// We want to ensure its currentState number matches the index.
-			},
-			.previousState = {
-				.number = i		// Same for previousState number.
-			},
-			.isLocal = isLocal,
-			.inUse = false,
-			.clientEntityNumber = i, // Last but not least, the actual clientEntityNumber.
-		};
+		//const bool isLocal = (i > MAX_WIRED_POD_ENTITIES ? true : false);
+		//podEntities[i] = {
+		//	.currentState = {
+		//		.number = i,	// We want to ensure its currentState number matches the index.
+		//	},
+		//	.previousState = {
+		//		.number = i		// Same for previousState number.
+		//	},
+		//	.isLocal = isLocal,
+		//	.inUse = false,
+		//	.clientEntityNumber = i, // Last but not least, the actual clientEntityNumber.
+		//};
     }
 }
 
@@ -149,8 +151,8 @@ void ClientGameWorld::PrepareClients() {
 		Com_DPrint("MAXIMUM CLIENTS YOOOO DAWG================%i\n", maximumclients->integer);
 	}
 
-//    maxClients = maximumclients->value;
-//    clients = (ServerClient*)gi.TagMalloc(maxClients * sizeof(clients[0]), TAG_GAME);  // CPP: Cast
+    //maxClients = maximumclients->value;
+    clients = (ServerClient*)clgi.Z_TagMalloc(maxClients * sizeof(clients[0]), memtag_t::TAG_GENERAL);  // CPP: Cast
 
     // Current total number of entities in our game = world + maximum clients.
 //    globals.numberOfEntities = numberOfEntities = maxClients + 1;
@@ -167,7 +169,7 @@ void ClientGameWorld::PreparePlayers() {
 		// Acquire POD entity.
 		PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
 
-		// Setup the entity.
+		//// Setup the entity.
 		(*podEntity) = {
 			.currentState {
 				.number = entityNumber,
@@ -180,6 +182,26 @@ void ClientGameWorld::PreparePlayers() {
 			.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
 			.clientEntityNumber = entityNumber,
 		};
+		
+		//// We can fetch the number based on subtracting these two pointers.
+		//podEntity->clientEntityNumber = podEntity - podEntities;
+		//podEntity->currentState.number = podEntity->clientEntityNumber;
+
+		//// Allocate player client game entity
+		//CLGBasePlayer* playerClientEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false);
+
+		//if (playerClientEntity) {
+		//	// Be sure to reset their inuse, after all, they aren't in use.
+		//	playerClientEntity->SetInUse(false);
+
+		//	// Fetch client index.
+		//	const int32_t clientIndex = i - 1;  // Same as the older: podEntities - podEntities - 1;
+
+		//	// Assign the designated client to this SVGBasePlayer entity.
+		//	//playerClientEntity->SetClient(&clients[clientIndex]);
+		//} else {
+		//	Com_DPrint("CLGWarning: ClientGameWorld failed to prepare playerClientEntity(#%i)\n", entityNumber);
+		//}
 	}
 
 	//// Prepare body queue.
@@ -251,7 +273,7 @@ void ClientGameWorld::PrepareBodyQueue() {
 *			first free client entity slot there is. After doing so, allocates
 *			a game entity based on the 'classname' of the parsed entity.
 **/
-qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bspString, const char* spawnpoint) {
+qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bspString, const char* spawnpoint) {
 	// Clear level state.
     level = {};
 
@@ -276,7 +298,7 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 	//for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
 	//	clientEntity = gameWorld->GetPODEntityByIndex(i);
 	//	if (!clientEntity) {
-	//	Com_Error(ErrorType::Drop, "SpawnFromBSPString: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", i);
+	//	Com_Error(ErrorType::Drop, "PrepareBSPEntities: gameWorld->GetPODEntityByIndex(%i) returned nullptr\n", i);
 	//	return false;
 	//	}
 	//	clientEntity->clientEntityNumber = i;
@@ -299,7 +321,7 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 
         // If the token isn't a {, something is off.
 		if (com_token[0] != '{') {
-		    Com_Error(ErrorType::Drop, "SpawnFromBSPString: found %s when expecting {", com_token);
+		    Com_Error(ErrorType::Drop, "PrepareBSPEntities: found %s when expecting {", com_token);
 			return false;
 		}
 
@@ -325,6 +347,10 @@ qboolean ClientGameWorld::SpawnFromBSPString(const char* mapName, const char* bs
 		//	// Entity is local.
 			isLocal = true;
 			podEntity = GetUnusedPODEntity(false);
+
+			if (!podEntity) {
+				Com_DPrint("WTF IS THIS SHIT?\n");
+			}
 		} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
 		//if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
 			// Just use 0 index.

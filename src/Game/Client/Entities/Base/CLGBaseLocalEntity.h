@@ -325,10 +325,8 @@ public:
     **/
     virtual inline void SetBoundingBox(const vec3_t& mins, const vec3_t& maxs) override {
 		if (podEntity) {
-			SetMins(mins);
-			SetMaxs(maxs);
-			//podEntity->currentState.mins = mins;
-			//podEntity->currentState.maxs = maxs;
+			podEntity->currentState.mins = mins;
+			podEntity->currentState.maxs = maxs;
 		}
     }
 
@@ -521,7 +519,7 @@ public:
     virtual void            SetMaxs(const vec3_t& maxs) {
 		if (podEntity) {
 			podEntity->currentState.maxs = maxs;
-			podEntity->maxs = maxs;
+			//podEntity->maxs = maxs;
 		}
 	};
     /**
@@ -541,7 +539,7 @@ public:
 	};
     virtual void            SetMins(const vec3_t& mins) {
 		if (podEntity) {
-			podEntity->mins = mins;
+			//podEntity->mins = mins;
 			podEntity->currentState.mins = mins;
 		}
 	};
@@ -775,8 +773,7 @@ public:
     virtual const vec3_t&   GetSize() { 
 		if (podEntity) {
 			return podEntity->size;
-		}
-		else {
+		} else {
 			return ZeroVec3;
 		};
 	};
