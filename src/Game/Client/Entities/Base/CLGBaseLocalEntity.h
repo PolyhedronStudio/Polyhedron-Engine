@@ -562,10 +562,10 @@ public:
 				if (inlineModel) {
 					podEntity->mins = inlineModel->mins;
 					podEntity->maxs = inlineModel->maxs;
+					
+					// Link it for collision testing.
+					LinkEntity();
 				}
-
-				// Link it for collision testing.
-				LinkEntity();
 			}
 
 			// Update model index.

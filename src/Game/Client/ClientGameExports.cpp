@@ -171,25 +171,9 @@ void ClientGameExports::ClientClearState() {
 *   @brief  Called each client frame. Handle per frame basis things here.
 **/
 void ClientGameExports::ClientFrame() {
-    // Advance local effects.
-    DynamicLights::RunFrame();
-#if USE_LIGHTSTYLES
-    LightStyles::RunFrame();
-#endif
-}
-
-/**
-*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
-**/
-void ClientGameExports::ClientPacketEntityDeltaFrame() {
-	    // Run the entity prediction logic for the next frame.
+	// Run the entity prediction logic for the next frame.
     GameTime svTime = GameTime(cl->serverTime);
     GameTime clTime = GameTime(cl->time);
-
-    //if (com_timedemo->integer) {
-    //    level.time = clTime;
-    //    return;
-    //}
 
     GameTime prevtime = svTime - FRAMERATE_MS;
     if (clTime > svTime) {
@@ -205,14 +189,17 @@ void ClientGameExports::ClientPacketEntityDeltaFrame() {
         level.time = clTime;
     }
 
-    //if (clTime > svTime) {
-    //    level.time = svTime;
-    //} else {
-    //    level.time = svTime + FRAMERATE_MS;
-    //}
-//level.time = clTime;
-//    level.time = GameTime(cl->serverTime);
+    // Advance local effects.
+    DynamicLights::RunFrame();
+#if USE_LIGHTSTYLES
+    LightStyles::RunFrame();
+#endif
+}
 
+/**
+*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
+**/
+void ClientGameExports::ClientPacketEntityDeltaFrame() {
    // Low and behold, time to run the ClientGame Entity logic for another single frame.
    entities->RunPacketEntitiesDeltaFrame();
 }

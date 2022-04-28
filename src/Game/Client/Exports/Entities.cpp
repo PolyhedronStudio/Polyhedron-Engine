@@ -202,6 +202,9 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
             continue;
         }
 
+		// Let the world know about the current entity we're running.
+		level.currentEntity = gameEntity;
+
         // Run it for a frame.
         // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
@@ -235,6 +238,9 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
+		
+		// Let the world know about the current entity we're running.
+		level.currentEntity = gameEntity;
 
 		// Run it for a frame.
 		SGEntityHandle handle = gameEntity;

@@ -826,7 +826,7 @@ void SVG_Physics_Noclip(SGEntityHandle &entityHandle) {
 **/
 void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Assign handle to base entity.
-    IServerGameEntity* ent = *entityHandle;
+    GameEntity* ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!ent) {
@@ -837,12 +837,15 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Regular thinking
     SVG_RunThink(ent);
     
-    if (!ent->IsInUse())
+	// After giving it a chance to think, we only proceed if it's still "inUse" for this frame.
+    if (!ent->IsInUse()) {
         return;
+	}
 
     // If not a team captain, so movement will be handled elsewhere
-    if (ent->GetFlags() & EntityFlags::TeamSlave)
+    if (ent->GetFlags() & EntityFlags::TeamSlave) {
         return;
+	}
 
     // IF we're moving up, we know we're not on-ground, that's for sure :)
     if (ent->GetVelocity().z > 0) {
@@ -878,8 +881,9 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Move origin
     vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
     SVGTraceResult trace = SVG_PushEntity(ent, move);
-    if (!ent->IsInUse())
+    if (!ent->IsInUse()) {
         return;
+	}
 
     if (trace.fraction < 1) {
         float backOff = 1.f;
@@ -915,16 +919,18 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     qboolean isInWater = ent->GetWaterType() & BrushContentsMask::Liquid;
 
     // Store waterlevel.
-    if (isInWater)
+    if (isInWater) {
         ent->SetWaterLevel(1);
-    else
+	} else {
         ent->SetWaterLevel(0);
+	}
 
     // Determine what sound to play.
-    if (!wasInWater && isInWater)
+    if (!wasInWater && isInWater) {
         gi.PositionedSound(oldOrigin, game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
-    else if (wasInWater && !isInWater)
+	} else if (wasInWater && !isInWater) {
         gi.PositionedSound(ent->GetOrigin(), game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+	}
 
     // Move teamslaves
     for (IServerGameEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {

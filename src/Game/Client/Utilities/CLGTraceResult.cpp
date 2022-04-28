@@ -25,6 +25,7 @@ CLGTraceResult::CLGTraceResult(TraceResult& traceResult) :
 	startSolid(traceResult.startSolid),
 	surface(traceResult.surface)
 {
+	// Store offsets. this is ugly but yeah...
 	offsets[0] = traceResult.offsets[0];
 	offsets[1] = traceResult.offsets[1];
 	offsets[2] = traceResult.offsets[2];
@@ -34,32 +35,24 @@ CLGTraceResult::CLGTraceResult(TraceResult& traceResult) :
 	offsets[6] = traceResult.offsets[6];
 	offsets[7] = traceResult.offsets[7];
 
-	// If an entity has been found, look it up in our client entities and assign it.
-	GameEntityVector &gameEntities = clge->entities->GetGameEntities();
-
+	
 	if (traceResult.ent) {
-		// Cast to PODEntity.
-		PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+		// Get the actual game entity.
+		ClientGameWorld *gameWorld = GetGameWorld();
 
-		// Acquire number.
-		const uint32_t index = podEntity->currentState.number;
-
-		// Look for entity. (Should be done using gameworld get by index...)
-		if (index < gameEntities.size() && gameEntities[index] != NULL) {
-			gameEntity = gameEntities[index];
-		} else {
-			// Default to Worldspawn instead.
-			gameEntity = gameEntities[0];
-		}
-
-		// Assign the podEntity.
-		this->podEntity = podEntity;
+		// Set POD and Game Entities.
+		podEntity = traceResult.ent;
+		gameEntity = gameWorld->GetGameEntityByIndex(podEntity->clientEntityNumber);
 	} else {
-		// Default to Worldspawn instead.
-		gameEntity = gameEntities[0];
+		// Get the actual game entity.
+		ClientGameWorld *gameWorld = GetGameWorld();
+
+		// Get Worldspawn Game and POD -Enity.
+		gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+		podEntity = gameWorld->GetWorldspawnPODEntity();
 
 		// POD Entity still needs to be set to worldspawn.
-		podEntity = nullptr;
+		//podEntity = nullptr;
 	}
 }
 
@@ -68,7 +61,7 @@ CLGTraceResult::CLGTraceResult(TraceResult& traceResult) :
 * @param traceResult A const reference to the trace result.
 **/
 CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
-		allSolid(traceResult.allSolid),
+	allSolid(traceResult.allSolid),
 	contents(traceResult.contents),
 	endPosition(traceResult.endPosition),
 	fraction(traceResult.fraction),
@@ -85,33 +78,88 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 	offsets[6] = traceResult.offsets[6];
 	offsets[7] = traceResult.offsets[7];
 
-	// If an entity has been found, look it up in our client entities and assign it.
-	GameEntityVector &gameEntities = clge->entities->GetGameEntities();
+	ClientGameWorld *gameWorld = GetGameWorld();
 
-	if (traceResult.ent) {
-		// Cast to PODEntity.
-		PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+	if (gameWorld) {
+		GameEntityVector &gameEntities = gameWorld->GetGameEntities();
 
-		// Acquire number.
-		const uint32_t index = podEntity->currentState.number;
+		if (traceResult.ent) {
+			// Cast to PODEntity.
+			PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
 
-		// Look for entity. (Should be done using gameworld get by index...)
-		if (index < gameEntities.size() && gameEntities[index] != NULL) {
-			gameEntity = gameEntities[index];
+			// Acquire number.
+			const uint32_t index = podEntity->currentState.number;
+
+			// Look for entity. (Should be done using gameworld get by index...)
+			if (index < gameEntities.size() && gameEntities[index] != NULL) {
+				gameEntity = gameEntities[index];
+			} else {
+				// Default to Worldspawn instead.
+				gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+				// POD Entity still needs to be set to worldspawn.
+				podEntity = gameWorld->GetWorldspawnPODEntity();
+			}
+
+			// Assign the podEntity.
+			this->podEntity = podEntity;
 		} else {
 			// Default to Worldspawn instead.
-			gameEntity = gameEntities[0];
+			gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+
+			// POD Entity still needs to be set to worldspawn.
+			podEntity = gameWorld->GetWorldspawnPODEntity();
 		}
-
-		// Assign the podEntity.
-		this->podEntity = podEntity;
 	} else {
-		// Default to Worldspawn instead.
-		gameEntity = gameEntities[0];
-
-		// POD Entity still needs to be set to worldspawn.
-		podEntity = nullptr;
+		podEntity = traceResult.ent;
+		gameEntity = nullptr;
 	}
+
+	//if (traceResult.ent) {
+	//	// Get the actual game entity.
+	//	ClientGameWorld *gameWorld = GetGameWorld();
+
+	//	// Set POD and Game Entities.
+	//	podEntity = traceResult.ent;
+	//	gameEntity = gameWorld->GetGameEntityByIndex(podEntity->clientEntityNumber);
+	//} else {
+	//	// Get the actual game entity.
+	//	ClientGameWorld *gameWorld = GetGameWorld();
+
+	//	// Get Worldspawn Game and POD -Enity.
+	//	gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+	//	podEntity = gameWorld->GetWorldspawnPODEntity();
+
+	//	// POD Entity still needs to be set to worldspawn.
+	//	//podEntity = nullptr;
+	//}
+
+	//// If an entity has been found, look it up in our client entities and assign it.
+	//GameEntityVector &gameEntities = clge->entities->GetGameEntities();
+
+	//if (traceResult.ent) {
+	//	// Cast to PODEntity.
+	//	PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+
+	//	// Acquire number.
+	//	const uint32_t index = podEntity->currentState.number;
+
+	//	// Look for entity. (Should be done using gameworld get by index...)
+	//	if (index < gameEntities.size() && gameEntities[index] != NULL) {
+	//		gameEntity = gameEntities[index];
+	//	} else {
+	//		// Default to Worldspawn instead.
+	//		gameEntity = gameEntities[0];
+	//	}
+
+	//	// Assign the podEntity.
+	//	this->podEntity = podEntity;
+	//} else {
+	//	// Default to Worldspawn instead.
+	//	gameEntity = gameEntities[0];
+
+	//	// POD Entity still needs to be set to worldspawn.
+	//	podEntity = nullptr;
+	//}
 }
 
 /**

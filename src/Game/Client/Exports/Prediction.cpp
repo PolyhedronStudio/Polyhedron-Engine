@@ -206,16 +206,41 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 	//const int32_t playerMoveType = player->GetMoveType();
 	//      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
 		// Setup origin, mins and maxs for UTIL_TouchTriggers as well as the ground entity.
-		player->SetOrigin(pm->state.origin);
-		player->SetMins(pm->mins);
-		player->SetMaxs(pm->maxs);
+		//player->SetOrigin(pm->state.origin);
+		//player->SetMins(pm->mins);
+		//player->SetMaxs(pm->maxs);
+	// Update entity properties based on results of the player move simulation.
+        player->SetOrigin(pm->state.origin);
+        player->SetVelocity(pm->state.velocity);
+        player->SetMins(pm->mins);
+        player->SetMaxs(pm->maxs);
+        player->SetViewHeight(pm->state.viewOffset[2]);
+        player->SetWaterLevel(pm->waterLevel);
+        player->SetWaterType(pm->waterType);
+		
+		// Let the world know about the current entity we're running.
+		level.currentEntity = player;
 
+        // Check for jumping sound.
+        //if (player->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+        //    SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
+        //    player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
+        //}
+        
+        // Use an entity handle to validate and store the new ground entity after pmove.
+        SGEntityHandle groundEntityHandle = pm->groundEntityPtr;
+        if (*groundEntityHandle && groundEntityHandle.Get()) {
+            player->SetGroundEntity(*groundEntityHandle);
+            player->SetGroundEntityLinkCount(groundEntityHandle->GetLinkCount());
+        } else {
+            player->SetGroundEntity(nullptr);
+        }
 
-		PODEntity *playerGroundPODEntity = pm->groundEntityPtr;
-		if (playerGroundPODEntity) {
-			GameEntity *playerGroundGameEntity = gameWorld->GetGameEntityByIndex(playerGroundPODEntity->clientEntityNumber);
-			player->SetGroundEntity(playerGroundGameEntity);
-		}
+		//PODEntity *playerGroundPODEntity = pm->groundEntityPtr;
+		//if (playerGroundPODEntity) {
+		//	GameEntity *playerGroundGameEntity = gameWorld->GetGameEntityByIndex(playerGroundPODEntity->clientEntityNumber);
+		//	player->SetGroundEntity(playerGroundGameEntity);
+		//}
 
 		// Dispatch touch trigger callbacks on the player entity for each touched entity.
 		UTIL_TouchTriggers(player);

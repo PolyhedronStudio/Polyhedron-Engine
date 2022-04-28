@@ -75,7 +75,7 @@ void MiscClientExplosionBox::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
+    SetMoveType(MoveType::TossSlide);
 
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
@@ -349,7 +349,7 @@ void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientG
     }
 
     // Ground entity checks.
-    if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
+    if (other->GetGroundEntity() == this) {
 		//Com_DPrint("Touching explobox !other->GetGroundEntity: %i\n", GetNumber());
 		return;
     }

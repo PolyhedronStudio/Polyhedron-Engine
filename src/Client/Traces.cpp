@@ -181,42 +181,171 @@ const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t
 }
 
 void CL_LinkEntity(PODEntity* entity) {
-	if (entity) {
-		// set the size
-		entity->size = entity->maxs - entity->mins;
-
-		// set the abs box
-		if (entity->solid == Solid::BSP &&
-			(entity->currentState.angles[0] || entity->currentState.angles[1] || entity->currentState.angles[2])) {
-			// expand for rotation
-			float   max, v;
-			int     i;
-
-			max = 0;
-			for (i = 0; i < 3; i++) {
-				v = fabs(entity->mins[i]);
-				if (v > max)
-					max = v;
-				v = fabs(entity->maxs[i]);
-				if (v > max)
-					max = v;
-			}
-			for (i = 0; i < 3; i++) {
-				entity->absMin[i] = entity->currentState.origin[i] - max;
-				entity->absMax[i] = entity->currentState.origin[i] + max;
-			}
-		} else {
-			// normal
-			entity->absMin = entity->currentState.origin + entity->mins; //VectorAdd(entity->currentState.origin, entity->mins, entity->absMin);
-			entity->absMax = entity->currentState.origin + entity->maxs; //VectorAdd(entity->currentState.origin, entity->maxs, entity->absMax);
-		}
-
-		// because movement is clipped an epsilon away from an actual edge,
-		// we must fully check even when bounding boxes don't quite touch
-
-
-		entity->linkCount++;
+	// Unlink from previous old position.
+	//if (ent->area.prev) {
+	if (entity && entity->linkCount) {
+        CL_UnlinkEntity(entity);
 	}
+
+	// Ensure it isn't the worldspawn entity itself.
+    if (entity->clientEntityNumber == 0) {
+        return;        // Don't add the world
+	}
+
+	// Ensure it is in use.
+    if (!entity || !entity->inUse) {
+        Com_DPrintf("%s: entity %d is not in use\n", __func__, entity->clientEntityNumber);
+        return;
+    }
+
+	// Ensure a map is loaded properly in our cache.
+    if (!cl.bsp || cl.bsp->nodes) {
+        return;
+    }
+
+	// Find the actual server entity.
+    //int32_t entityNumber = NUM_FOR_EDICT(ent);
+    //server_entity_t *serverEntity = &sv.entities[entityNumber];
+
+    // Encode the size into the entity_state for client prediction reaspms/
+    switch (entity->solid) {
+    case Solid::BoundingBox:
+        if ((entity->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(entity->mins, entity->maxs)) {
+            entity->currentState.solid = 0;
+        } else {
+			entity->currentState.mins = entity->mins;
+			entity->currentState.maxs = entity->maxs;
+        }
+        break;
+    case Solid::OctagonBox:
+        if ((entity->serverFlags & EntityServerFlags::DeadMonster) || VectorCompare(entity->mins, entity->maxs)) {
+            entity->currentState.solid = 0;
+        } else {
+			entity->currentState.solid = Solid::OctagonBox; //MSG_PackBoundingBox32(entity->mins, entity->maxs);
+			entity->currentState.mins = entity->mins;
+			entity->currentState.maxs = entity->maxs;
+        }
+        break;
+    case Solid::BSP:
+        entity->currentState.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
+		entity->currentState.mins = vec3_zero();
+		entity->currentState.maxs = vec3_zero();
+        break;
+    default:
+        entity->currentState.solid = 0;
+		entity->currentState.mins = vec3_zero();
+		entity->currentState.maxs = vec3_zero();
+        break;
+    }
+
+    //SV_LinkEntity(&sv.cm, ent);
+	if (entity->solid == Solid::BSP &&
+		(entity->currentState.angles[0] || entity->currentState.angles[1] || entity->currentState.angles[2])) {
+		// expand for rotation
+		float   max, v;
+		int     i;
+
+		max = 0;
+		for (i = 0; i < 3; i++) {
+			v = fabs(entity->mins[i]);
+			if (v > max)
+				max = v;
+			v = fabs(entity->maxs[i]);
+			if (v > max)
+				max = v;
+		}
+		for (i = 0; i < 3; i++) {
+			entity->absMin[i] = entity->currentState.origin[i] - max;
+			entity->absMax[i] = entity->currentState.origin[i] + max;
+		}
+	} else {
+		// normal
+		entity->absMin = entity->currentState.origin + entity->mins; //VectorAdd(entity->currentState.origin, entity->mins, entity->absMin);
+		entity->absMax = entity->currentState.origin + entity->maxs; //VectorAdd(entity->currentState.origin, entity->maxs, entity->absMax);
+	}
+
+    // If first time, make sure oldOrigin is valid.
+    if (!entity->linkCount) {
+        entity->currentState.oldOrigin = entity->currentState.origin;
+    }
+    entity->linkCount++;
+
+	// 
+    if (entity->solid == Solid::Not) {
+        return;
+	}
+
+	//// Find the first node that the ent's box crosses.
+ //   areanode_t *node = sv_areanodes;
+ //   while (1) {
+	//	if (node->axis == -1) {
+ //           break;
+	//	}
+ //       if (ent->absMin[node->axis] > node->dist) {
+ //           node = node->children[0];
+	//	} else if (ent->absMax[node->axis] < node->dist) {
+ //           node = node->children[1];
+	//	} else {
+ //           break; // Crosses the node
+	//	}
+ //   }
+
+ //   // Link it in
+ //   if (ent->solid == Solid::Trigger) {
+ //       List_Append(&node->triggerEdicts, &ent->area);
+	//} else {
+ //       List_Append(&node->solidEdicts, &ent->area);
+	//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//if (entity) {
+	//	// set the size
+	//	entity->size = entity->maxs - entity->mins;
+
+	//	// set the abs box
+	//	if (entity->solid == Solid::BSP &&
+	//		(entity->currentState.angles[0] || entity->currentState.angles[1] || entity->currentState.angles[2])) {
+	//		// expand for rotation
+	//		float   max, v;
+	//		int     i;
+
+	//		max = 0;
+	//		for (i = 0; i < 3; i++) {
+	//			v = fabs(entity->mins[i]);
+	//			if (v > max)
+	//				max = v;
+	//			v = fabs(entity->maxs[i]);
+	//			if (v > max)
+	//				max = v;
+	//		}
+	//		for (i = 0; i < 3; i++) {
+	//			entity->absMin[i] = entity->currentState.origin[i] - max;
+	//			entity->absMax[i] = entity->currentState.origin[i] + max;
+	//		}
+	//	} else {
+	//		// normal
+	//		entity->absMin = entity->currentState.origin + entity->mins; //VectorAdd(entity->currentState.origin, entity->mins, entity->absMin);
+	//		entity->absMax = entity->currentState.origin + entity->maxs; //VectorAdd(entity->currentState.origin, entity->maxs, entity->absMax);
+	//	}
+
+	//	// because movement is clipped an epsilon away from an actual edge,
+	//	// we must fully check even when bounding boxes don't quite touch
+
+
+	//	entity->linkCount++;
+	//}
 }
 void CL_UnlinkEntity(PODEntity* entity) {
 	if (entity) {
@@ -260,7 +389,7 @@ static void CL_AreaEntities_r() {
 		for (int i = 0; i < cl.numSolidEntities; i++) {
 			PODEntity *solidEntity = cl.solidEntities[i];
 
-			if (!solidEntity) {
+			if (!solidEntity || solidEntity->solid == Solid::Not) {
 				continue;
 			}
 
@@ -287,7 +416,7 @@ static void CL_AreaEntities_r() {
 		for (int i = 0; i < cl.numSolidLocalEntities; i++) {
 			PODEntity *solidEntity = cl.solidLocalEntities[i];
 
-			if (!solidEntity) {
+			if (!solidEntity || solidEntity->solid == Solid::Not) {
 				continue;
 			}
 

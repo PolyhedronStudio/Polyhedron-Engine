@@ -2931,8 +2931,6 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
         return CL_FRAMETIME - clFrameResidual;
     }
 	
-	// Give the client game module a chance to run its local entities for a frame.
-	CL_GM_ClientLocalEntitiesFrame();
 
 	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
@@ -2946,7 +2944,9 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 		// Reset the actual entities eventID.
 		cs.entities[i].currentState.eventID = 0;
 	}
-
+	
+	// Give the client game module a chance to run its local entities for a frame.
+	CL_GM_ClientLocalEntitiesFrame();
 	//CL_GM_ClientPacketEntityDeltaFrame();
 	
 

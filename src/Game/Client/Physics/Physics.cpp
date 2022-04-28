@@ -129,19 +129,16 @@ void UTIL_TouchTriggers(IClientGameEntity *ent) {
 IClientGameEntity *CLG_TestEntityPosition(IClientGameEntity *ent)
 {
     CLGTraceResult trace;
-    int32_t clipMask = 0;
+    int32_t clipMask = BrushContentsMask::Solid;
 
     if (ent->GetClipMask()) {
 	    clipMask = ent->GetClipMask();
-    } else {
-        clipMask = BrushContentsMask::Solid;
     }
-
     trace = CLG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
 
     if (trace.startSolid) {
 		ClientGameWorld *gameWorld = GetGameWorld();
-	    return static_cast<IClientGameEntity*>(gameWorld->GetWorldspawnGameEntity());
+	    return gameWorld->GetWorldspawnGameEntity();
     }
 
     return trace.gameEntity;
@@ -181,9 +178,14 @@ void CLG_Impact(IClientGameEntity *entityA, CLGTraceResult *trace)
 //  CollisionPlane    backplane;
 
     // Return in case there is no entity to to test with (invalid pointer.)
-    if (!entityA) {
-        Com_DPrint("Warning: Tried to call CLG_Impact with a nullptr entity!\n");
-    }
+    //if (!entityA) {
+    //    Com_DPrint("Warning: Tried to call CLG_Impact with a nullptr entity!\n");
+    //}
+
+	if (!trace) {
+		Com_DPrint("Warning: Tried to call CLG_Impact with a nullptr trace!\n");
+		return;
+	}
 
     // If the impact came from a trace, set entityB to this ent.
     if (trace && trace->gameEntity) {
@@ -211,7 +213,7 @@ void CLG_Impact(IClientGameEntity *entityA, CLGTraceResult *trace)
 // Slide off of the impacting object returns new velocity.
 //===============
 //
-static vec3_t ClipVelocity(const vec3_t in, const vec3_t normal, float bounce) {
+static vec3_t ClipVelocity(const vec3_t &in, const vec3_t& normal, float bounce) {
 
     float backoff = vec3_dot(in, normal);
 
@@ -424,8 +426,8 @@ void CLG_AddGravity(IClientGameEntity *ent)
 //
 CLGTraceResult CLG_PushEntity(IClientGameEntity *ent, vec3_t push)
 {
-    CLGTraceResult trace;
-    int     mask;
+	CLGTraceResult trace = {};
+    int     mask = 0;
 
     // Calculate start for push.
     vec3_t start = ent->GetOrigin();
@@ -441,7 +443,9 @@ retry:
 
     trace = CLG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
-    ent->SetOrigin(trace.endPosition);
+	if (ent->GetMoveType() != MoveType::Push || !trace.startSolid) {
+	    ent->SetOrigin(trace.endPosition);
+	}
     ent->LinkEntity();
 
     if (trace.fraction != 1.0) {
@@ -528,14 +532,17 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 
 // see if any solid entities are inside the final position
     //IClientGameEntity** classEntities = clge->entities->GetGameEntities();
-	GameEntityVector &classEntities = clge->entities->GetGameEntities();
-    for (e = 1; e < cl->numSolidEntities + cl->numSolidLocalEntities; e++) {
+	//GameEntityVector &classEntities = clge->entities->GetGameEntities();
+    //for (e = 1; e < cl->numSolidEntities + cl->numSolidLocalEntities; e++) {
+	for (e = 1; e < MAX_CLIENT_POD_ENTITIES; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-		PODEntity *podCheck = cl->solidEntities[e];
-		if (e >= cl->numSolidEntities) {
-			podCheck = cl->solidLocalEntities[e];
-		}
+		//PODEntity *podCheck = cl->solidEntities[e];
+		//if (e >= cl->numSolidEntities) {
+		//	podCheck = cl->solidLocalEntities[e];
+		//}
+		ClientGameWorld *gameWorld = GetGameWorld();
+		PODEntity *podCheck = gameWorld->GetPODEntityByIndex(e);
 	    SGEntityHandle checkHandle = podCheck;
 
         if (!checkHandle) {
@@ -552,20 +559,22 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
         vec3_t absMin = check->GetAbsoluteMin();
         vec3_t absMax = check->GetAbsoluteMax();
 
-        if (!isInUse)
+        if (!isInUse) {
             continue;
+		}
         if (moveType == MoveType::Push
             || moveType == MoveType::Stop
             || moveType == MoveType::None
             || moveType == MoveType::NoClip
-            || moveType == MoveType::Spectator)
+            || moveType == MoveType::Spectator) {
             continue;
+		}
 
-		//if (!check->GetLinkCount()) {
-		//	continue; // Not linked in naywhere.
-		//}
-        if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
-            continue;       // not linked in anywhere
+		if (!check->GetPODEntity() || !check->GetLinkCount()) {
+			continue; // Not linked in naywhere.
+		}
+        //if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
+        //    continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
         if (check->GetGroundEntity() != pusher) {
@@ -823,7 +832,7 @@ void CLG_Physics_Noclip(SGEntityHandle &entityHandle) {
 **/
 void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Assign handle to base entity.
-    IClientGameEntity* ent = *entityHandle;
+    GameEntity* ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if (!ent) {
@@ -834,12 +843,15 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Regular thinking
     CLG_RunThink(ent);
     
-    if (!ent->IsInUse())
+	// After giving it a chance to think, we only proceed if it's still "inUse" for this frame.
+    if (!ent->IsInUse()) {
         return;
+	}
 
     // If not a team captain, so movement will be handled elsewhere
-    if (ent->GetFlags() & EntityFlags::TeamSlave)
+    if (ent->GetFlags() & EntityFlags::TeamSlave) {
         return;
+	}
 
     // IF we're moving up, we know we're not on-ground, that's for sure :)
     if (ent->GetVelocity().z > 0) {
@@ -853,7 +865,7 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
         }
     }
 
-    // If onground, return without moving
+    // If onground, return without moving in case movetype != TossSlide
     if (*ent->GetGroundEntity() && ent->GetMoveType() != MoveType::TossSlide) {
         return;
     }
@@ -865,9 +877,9 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
     CLG_BoundVelocity(ent);
 
     // Add gravity
-    if (ent->GetMoveType() != MoveType::Fly
-        && ent->GetMoveType() != MoveType::FlyMissile)
+    if (ent->GetMoveType() != MoveType::Fly && ent->GetMoveType() != MoveType::FlyMissile) {
         CLG_AddGravity(ent);
+	}
 
     // Move angles
     ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
@@ -875,8 +887,9 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
     // Move origin
     vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
     CLGTraceResult trace = CLG_PushEntity(ent, move);
-    if (!ent->IsInUse())
+    if (!ent->IsInUse()) {
         return;
+	}
 
     if (trace.fraction < 1) {
         float backOff = 1.f;
@@ -919,19 +932,21 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
     qboolean isInWater = ent->GetWaterType() & BrushContentsMask::Liquid;
 
     // Store waterlevel.
-    if (isInWater)
+    if (isInWater) {
         ent->SetWaterLevel(1);
-    else
+	} else {
         ent->SetWaterLevel(0);
+	}
 
     // Determine what sound to play.
-    if (!wasInWater && isInWater)
+    if (!wasInWater && isInWater) {
         clgi.S_StartSound(&oldOrigin,  ent->GetState().number, SoundChannel::Auto, clgi.S_RegisterSound("misc/h2ohit1.wav"), 1, 1, 0);
-    else if (wasInWater && !isInWater)
+	} else if (wasInWater && !isInWater) {
         clgi.S_StartSound(&ent->GetOrigin(), ent->GetState().number, SoundChannel::Auto, clgi.S_RegisterSound("misc/h2ohit1.wav"), 1, 1, 0);
+	}
 
     // Move teamslaves
-    for (IClientGameEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
+    for (GameEntity *slave = ent->GetTeamChainEntity(); slave; slave = slave->GetTeamChainEntity()) {
         // Set origin and link them in.
         slave->SetOrigin(ent->GetOrigin());
         slave->LinkEntity();

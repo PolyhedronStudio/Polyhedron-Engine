@@ -555,11 +555,8 @@ public:
     **/
     virtual const std::string&  GetModel() override { return model; };
     virtual void                SetModel(const std::string &model) override {
-		// Set the actual entity model.
-		if (podEntity) {
 			// Set modelstr.
 			this->model = model;
-
 
 			// If it is an inline model, get the size information for it.
 			if (model[0] == '*') {
@@ -568,17 +565,14 @@ public:
 				if (inlineModel) {
 					podEntity->mins = inlineModel->mins;
 					podEntity->maxs = inlineModel->maxs;
+					
+					// Link it for collision testing.
+					LinkEntity();
 				}
-
-				// Link it for collision testing.
-				LinkEntity();
 			}
 
 			// Update model index.
 			SetModelIndex(clgi.R_RegisterModel(model.c_str()));
-			// Link it for collision testing.
-			//LinkEntity();
-		}
 	};
 
     /**
