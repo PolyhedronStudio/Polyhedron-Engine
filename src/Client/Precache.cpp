@@ -120,7 +120,7 @@ void CL_PrepareMedia(void)
 		CL_GM_ClientConnect();
 
 		// Give it a chance to precache and spawn its entities.
-		CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
+		CL_GM_SpawnEntitiesFromBSPString(cl.mapName, cl.bsp->entityString);
 	}
 
     // PH: Pass over loading to the CG Module so it can actively

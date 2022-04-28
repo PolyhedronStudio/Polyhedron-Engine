@@ -215,6 +215,16 @@ public:
 struct LevelLocals  {
     //! Current sum of total frame time taken.
     GameTime time = GameTime::zero();
+
+    //std::string levelName;  //! The descriptive name (Outer Base, etc)
+    std::string mapName;    //! The server name (base1, etc)
+    //char nextMap[MAX_QPATH];    //! Go here when fraglimit is hit
+
+    // The current entity that is actively being ran from SVG_RunFrame.
+    GameEntity *currentEntity = nullptr;
+
+    // Index for the que pile of dead bodies.
+    int32_t bodyQue = 0;
 };
 
 

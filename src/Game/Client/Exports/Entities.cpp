@@ -46,10 +46,10 @@ extern qhandle_t cl_sfx_footsteps[4];
 * 
 *   @return True on success.
 **/
-qboolean ClientGameEntities::PrepareBSPEntities(const char* bspString) {
+qboolean ClientGameEntities::PrepareBSPEntities(const char *mapName, const char* bspString) {
 	ClientGameWorld *gameWorld = GetGameWorld();
 	if (gameWorld) {
-		return gameWorld->PrepareBSPEntities(cl.mapName, bspString, nullptr);
+		return gameWorld->PrepareBSPEntities(mapName, bspString, nullptr);
 	} else {
 		return false;
 	}

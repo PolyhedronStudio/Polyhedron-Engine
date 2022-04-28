@@ -37,7 +37,7 @@ public:
     * 
     *   @return True on success.
     **/
-    qboolean PrepareBSPEntities(const char* entities) final;
+    qboolean PrepareBSPEntities(const char *mapName, const char* entities) final;
 
     /**
     *   @brief  When the client receives state updates it calls into this function so we can update

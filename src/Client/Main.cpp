@@ -1691,9 +1691,6 @@ static void CL_Precache_f(void)
 
 	// Check whether to set the client into a connected state right after spawning the client side world entities.
     if (cls.connectionState != ClientConnectionState::Precached) {
-		// Spawn client side Bsp Map Entities.
-		//CL_GM_SpawnEntitiesFromBSPString(cl.bsp->entityString);
-
 		cls.connectionState = ClientConnectionState::Connected;
     }
 }
@@ -2934,27 +2931,24 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
         return CL_FRAMETIME - clFrameResidual;
     }
 	
-	// The local entities start indexed from MAX_SERVER_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
+	// Give the client game module a chance to run its local entities for a frame.
+	CL_GM_ClientLocalEntitiesFrame();
+
+	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
 	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		//if (i < totalLocalEntities) {}
-		//EntityState &localEntityState = cs.entities[i].currentState;
-
-		// I guess it has to come from somewhere right?
-		//localEntityState.number = i;
-		//cs.entities[i].clientEntityNumber = i;
-		//localEntityState.eventID = 0;
-
 		// Update local entity.
 		LocalEntity_Update(cs.entities[i].currentState);
 
 		// Fire local entity events.
 		LocalEntity_FireEvent(cs.entities[i].currentState.number);
+
+		// Reset the actual entities eventID.
 		cs.entities[i].currentState.eventID = 0;
 	}
 
 	//CL_GM_ClientPacketEntityDeltaFrame();
-	CL_GM_ClientLocalEntitiesFrame();
+	
 
 #if USE_CLIENT
     if (host_speeds->integer)

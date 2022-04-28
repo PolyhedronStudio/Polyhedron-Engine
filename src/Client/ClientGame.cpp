@@ -716,11 +716,11 @@ void CL_InitGameProgs(void)
 /**
 *   @brief  Spawns local client side class entities.
 **/
-qboolean CL_GM_SpawnEntitiesFromBSPString(const char* bspString) { 
+qboolean CL_GM_SpawnEntitiesFromBSPString(const char *mapName, const char* bspString) { 
     if (cge) {
         IClientGameExportEntities *entities = cge->GetEntityInterface();
         if (entities) {
-	        return entities->PrepareBSPEntities(bspString);
+	        return entities->PrepareBSPEntities(mapName, bspString);
         }
     }
 

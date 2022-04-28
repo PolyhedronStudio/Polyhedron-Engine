@@ -275,7 +275,10 @@ void ClientGameWorld::PrepareBodyQueue() {
 **/
 qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bspString, const char* spawnpoint) {
 	// Clear level state.
-    level = {};
+    level = {
+		// Mapname.
+		.mapName = mapName,
+	};
 
 	// Occupy player entity slots for future use.
     PreparePlayers();

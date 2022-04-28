@@ -65,7 +65,7 @@ public:
     * 
     *   @return True on success.
     **/
-    virtual qboolean PrepareBSPEntities(const char* entities) = 0;
+    virtual qboolean PrepareBSPEntities(const char *mapName, const char* entities) = 0;
 
     /**
     *   @brief  When the client receives state updates it calls into this function so we can update
