@@ -225,7 +225,7 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 //===============
 void GibEntity::GibEntityThink() {
     // Increase frame and set a new think time.
-    SetAnimationFrame(GetAnimationFrame() + 1);
+    SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
     SetNextThinkTime(level.time + FRAMETIME);
 
     // Play frames for these meshes, cut the crap at frame 10.

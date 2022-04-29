@@ -453,14 +453,17 @@ retry:
 
     trace = SVG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
-    ent->SetOrigin(trace.endPosition);
+	//if (ent->GetMoveType() == MoveType::Push || !trace.startSolid) {
+	    ent->SetOrigin(trace.endPosition);
+	//}
+    //ent->SetOrigin(trace.endPosition);
     ent->LinkEntity();
 
     if (trace.fraction != 1.0) {
         SVG_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (!trace.gameEntity->IsInUse() && ent->IsInUse()) {
+        if (!trace.gameEntity->IsInUse() && ent->GetMoveType() == MoveType::Push && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin(start);
             ent->LinkEntity();

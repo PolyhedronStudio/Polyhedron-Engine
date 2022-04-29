@@ -35,13 +35,29 @@
 **/
 //! Actual game entity type for the ClientGame module.
 class IClientGameEntity;
-using GameEntity = IClientGameEntity;;
+using GameEntity = IClientGameEntity;
 
 //! POD Entity for the ServerGame module.
 using PODEntity = PODEntity;
 
 //! Entity Dictionary.
 using SpawnKeyValues = std::map<std::string, std::string>;
+
+
+//! Gameworld.
+class ClientGameWorld;
+using SGGameWorld = ClientGameWorld;
+
+//! Trace Results
+struct CLGTraceResult;
+using SGTraceResult = CLGTraceResult;
+//! Trace Function.
+/**
+*	@brief	ClientGame Trace function. Supports Game Entities.
+**/
+//extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
+//using SGTrace = CLG_Trace;
+#define SGTrace CLG_Trace;
 
 //! Maximum amount of POD Entities.
 static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
@@ -65,6 +81,17 @@ using SpawnKeyValues = std::map<std::string, std::string>;
 
 //! POD Entity for the ServerGame module.
 using PODEntity = PODEntity;
+
+//! Gameworld.
+class ServerGameWorld;
+using SGGameWorld = ServerGameWorld;
+
+//! Trace Results
+struct SVGTraceResult;
+using SGTraceResult = SVGTraceResult;
+//! Trace Function.
+//extern auto SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
+#define SGTrace SVG_Trace;
 
 //! Maximum amount of POD Entities.
 static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;

@@ -9,6 +9,13 @@
 SET(SRC_SHAREDGAME
 	Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
 
+#	Physics/MoveTypes/MoveTypeLinearProjectile.cpp
+#	Physics/MoveTypes/MoveTypeNone.cpp
+#	Physics/MoveTypes/MoveTypePusher.cpp
+#	Physics/MoveTypes/MoveTypeToss.cpp
+#	Physics/MoveTypes/MoveTypeTossSlide.cpp
+#	Physics/Physics.cpp
+
 	World/IGameWorld.cpp
 
 	PMove.cpp
@@ -23,6 +30,8 @@ SET(HEADERS_SHAREDGAME
 	Entities/SGEntityHandle.h  #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.h 
 	Entities/TypeInfo.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/TypeInfo.h 
 	Entities.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities.h 
+
+#	Physics/Physics.h
 
 	World/IGameWorld.h
 	

@@ -182,11 +182,11 @@ void LocalEntity_Update(const EntityState &state)
 		cl.solidLocalEntities[solidLocalEntityIndex] = clEntity;
 
 		// For non BRUSH models...
-        if (state.solid != PACKED_BBOX) {
+        //if (state.solid != PACKED_BBOX) {
             // Update the actual bounding box.
             clEntity->mins = state.mins;
 			clEntity->maxs = state.maxs;
-        }
+        //}
     }
 
 	// Assign its clientEntity number.

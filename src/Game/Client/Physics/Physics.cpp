@@ -443,16 +443,16 @@ retry:
 
     trace = CLG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
-	if (ent->GetMoveType() != MoveType::Push || !trace.startSolid) {
+	//if (ent->GetMoveType() == MoveType::Push || !trace.startSolid) {
 	    ent->SetOrigin(trace.endPosition);
-	}
+	//}
     ent->LinkEntity();
 
     if (trace.fraction != 1.0) {
         CLG_Impact(ent, &trace);
 
         // if the pushed entity went away and the pusher is still there
-        if (trace.gameEntity && !trace.gameEntity->IsInUse() && ent->IsInUse()) {
+        if (!trace.gameEntity->IsInUse() && ent->GetMoveType() == MoveType::Push && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin(start);
             ent->LinkEntity();
@@ -531,19 +531,29 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
     pusher->LinkEntity();
 
 // see if any solid entities are inside the final position
-    //IClientGameEntity** classEntities = clge->entities->GetGameEntities();
+ //   //IClientGameEntity** classEntities = clge->entities->GetGameEntities();
 	//GameEntityVector &classEntities = clge->entities->GetGameEntities();
-    //for (e = 1; e < cl->numSolidEntities + cl->numSolidLocalEntities; e++) {
-	for (e = 1; e < MAX_CLIENT_POD_ENTITIES; e++) {
+ //   //for (e = 1; e < cl->numSolidEntities + cl->numSolidLocalEntities; e++) {
+	//for (e = 1; e < MAX_CLIENT_POD_ENTITIES; e++) {
+ //       // Fetch the base entity and ensure it is valid.
+ //       //check = g_baseEntities[e];
+	//	//PODEntity *podCheck = cl->solidEntities[e];
+	//	//if (e >= cl->numSolidEntities) {
+	//	//	podCheck = cl->solidLocalEntities[e];
+	//	//}
+	//	ClientGameWorld *gameWorld = GetGameWorld();
+	//	PODEntity *podCheck = gameWorld->GetPODEntityByIndex(e);
+	//    SGEntityHandle checkHandle = podCheck;
+	// see if any solid entities are inside the final position
+    GameEntityVector gameEntities  = game.world->GetGameEntities();
+    for (e = 1; e < MAX_CLIENT_POD_ENTITIES; e++) {
         // Fetch the base entity and ensure it is valid.
         //check = g_baseEntities[e];
-		//PODEntity *podCheck = cl->solidEntities[e];
-		//if (e >= cl->numSolidEntities) {
-		//	podCheck = cl->solidLocalEntities[e];
-		//}
-		ClientGameWorld *gameWorld = GetGameWorld();
-		PODEntity *podCheck = gameWorld->GetPODEntityByIndex(e);
-	    SGEntityHandle checkHandle = podCheck;
+		PODEntity *podCheck = cl->solidEntities[e];
+		if (e >= cl->numSolidEntities) {
+			podCheck = cl->solidLocalEntities[e];
+		}
+	    SGEntityHandle checkHandle = gameEntities[e];
 
         if (!checkHandle) {
     		CLG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");
@@ -760,12 +770,12 @@ retry:
             part->DispatchBlockedCallback(obstacle);
         }
 
-//#if 0
+#if 0
         // if the pushed entity went away and the pusher is still there
         if ((obstacle && !obstacle->IsInUse()) && (part && part->IsInUse())) {
             goto retry;
 		}
-//#endif
+#endif
     } else {
         // the move succeeded, so call all Think functions
         for (part = ent ; part ; part = part->GetTeamChainEntity()) {

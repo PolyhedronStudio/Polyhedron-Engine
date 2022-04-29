@@ -167,7 +167,7 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 **/
 CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t& contentMask) {
     // Fetch POD Entity to use for pass entity testing.
-    PODEntity* clientPODEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : NULL);
+    PODEntity* clientPODEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : 0);
 
 	// Execute and return the actual trace.
     return clgi.Trace(start, mins, maxs, end, (struct PODEntity*)clientPODEntity, contentMask);
