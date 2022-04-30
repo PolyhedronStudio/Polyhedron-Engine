@@ -163,7 +163,8 @@ public:
 static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
-static constexpr Frametime FRAMETIME = FRAMETIME_S;
+//static constexpr Frametime FRAMETIME = FRAMETIME_S;
+#define FRAMETIME FRAMETIME_S
 
 //! Memory tags to allow dynamic memory to be cleaned up
 static constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll

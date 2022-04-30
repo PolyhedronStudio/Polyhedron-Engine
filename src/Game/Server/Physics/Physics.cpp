@@ -454,7 +454,9 @@ retry:
     trace = SVG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
 	//if (ent->GetMoveType() == MoveType::Push || !trace.startSolid) {
-	    ent->SetOrigin(trace.endPosition);
+	if (!trace.startSolid) {
+		ent->SetOrigin(trace.endPosition);
+	}
 	//}
     //ent->SetOrigin(trace.endPosition);
     ent->LinkEntity();
@@ -516,12 +518,12 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 	    return false;
     }
 
-    // Find the bounding box
+    // Find the bounding box.
     vec3_t mins = pusher->GetAbsoluteMin() + move;
     vec3_t maxs = pusher->GetAbsoluteMax() + move;
 
     // We need this for pushing things later
-    VectorSubtract(vec3_zero(), amove, org);
+    org = vec3_negate(amove);
     AngleVectors(org, &forward, &right, &up);
 
     // Save the pusher's original position

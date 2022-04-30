@@ -41,7 +41,7 @@ SVGTraceResult::SVGTraceResult(TraceResult& traceResult) :
 
 		if (traceResult.ent) {
 			// Cast to PODEntity.
-			PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+			PODEntity *podEntity = static_cast<PODEntity*>(traceResult.ent);
 
 			// Acquire number.
 			const uint32_t index = podEntity->currentState.number;
@@ -51,7 +51,7 @@ SVGTraceResult::SVGTraceResult(TraceResult& traceResult) :
 				gameEntity = gameEntities[index];
 			} else {
 				// Default to Worldspawn instead.
-				gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+				gameEntity = static_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
 				// POD Entity still needs to be set to worldspawn.
 				podEntity = gameWorld->GetWorldspawnPODEntity();
 			}
@@ -60,7 +60,7 @@ SVGTraceResult::SVGTraceResult(TraceResult& traceResult) :
 			this->podEntity = podEntity;
 		} else {
 			// Default to Worldspawn instead.
-			gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+			gameEntity = static_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
 
 			// POD Entity still needs to be set to worldspawn.
 			podEntity = gameWorld->GetWorldspawnPODEntity();
@@ -71,7 +71,7 @@ SVGTraceResult::SVGTraceResult(TraceResult& traceResult) :
 	}
 	//if (traceResult.ent) {
 	//	// Cast to PODEntity.
-	//	PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+	//	PODEntity *podEntity = static_cast<PODEntity*>(traceResult.ent);
 
 	//	// Acquire number.
 	//	const uint32_t index = podEntity->currentState.number;
@@ -125,7 +125,7 @@ SVGTraceResult::SVGTraceResult(const TraceResult& traceResult) :
 
 	if (traceResult.ent) {
 		// Cast to PODEntity.
-		PODEntity *tracePODEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+		PODEntity *tracePODEntity = static_cast<PODEntity*>(traceResult.ent);
 
 		// Acquire index number.
 		const uint32_t index = tracePODEntity->currentState.number;

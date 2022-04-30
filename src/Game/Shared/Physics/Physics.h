@@ -30,7 +30,7 @@ struct MoveState {
 
 	vec3_t gravityDir = vec3_zero();
 	float slideBounce = 0.f;
-	ISharedGameEntity *groundEntity = nullptr;
+	GameEntity *groundEntity = nullptr;
 
 	ISharedGameEntity *passEntity = nullptr;
 	int32_t contentMask = 0;

@@ -59,10 +59,10 @@ struct CLGTraceResult {
 	//! The impacted PODEntity, or a nullptr.
 	PODEntity *podEntity = nullptr;
     //! The impacted GameEntity, or nullptr.
-    GameEntity *gameEntity = nullptr;
+    IClientGameEntity *gameEntity = nullptr;
 };
 
 /**
 *	@brief	ClientGame Trace function. Supports Game Entities.
 **/
-CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
+CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask);

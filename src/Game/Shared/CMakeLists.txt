@@ -14,7 +14,7 @@ SET(SRC_SHAREDGAME
 #	Physics/MoveTypes/MoveTypePusher.cpp
 #	Physics/MoveTypes/MoveTypeToss.cpp
 #	Physics/MoveTypes/MoveTypeTossSlide.cpp
-#	Physics/Physics.cpp
+	Physics/Physics.cpp
 
 	World/IGameWorld.cpp
 
@@ -31,7 +31,7 @@ SET(HEADERS_SHAREDGAME
 	Entities/TypeInfo.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/TypeInfo.h 
 	Entities.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities.h 
 
-#	Physics/Physics.h
+	Physics/Physics.h
 
 	World/IGameWorld.h
 	

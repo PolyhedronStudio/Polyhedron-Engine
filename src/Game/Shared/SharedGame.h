@@ -12,123 +12,17 @@
 // Include general shared header.
 #include "../../Shared/Shared.h"
 
-/**
-*	Predeclare the actual game entity type that we intend to use depending on which game module
-*	this file is being compiled along with.
-**/
-#ifdef SHAREDGAME_CLIENTGAME //! Start of ClientGame Specifics.
-// Needed define for said includes.
-#define CGAME_INCLUDE 1
-
-// Needed includes.
-#include "../../Common/CModel.h"
-#include "../../Common/Cmd.h"
-#include "../../Common/Msg.h"
-#include "../../Common/Protocol.h"
-
-#include "../../Shared/SVGame.h"
-#include "../../Shared/Refresh.h"
-#include "../../Shared/CLTypes.h"
-#include "../../Shared/CLGame.h"
-/**
-*	Predeclarations.
-**/
-//! Actual game entity type for the ClientGame module.
-class IClientGameEntity;
-using GameEntity = IClientGameEntity;
-
-//! POD Entity for the ServerGame module.
-using PODEntity = PODEntity;
-
-//! Entity Dictionary.
-using SpawnKeyValues = std::map<std::string, std::string>;
 
 
-//! Gameworld.
-class ClientGameWorld;
-using SGGameWorld = ClientGameWorld;
-
-//! Trace Results
-struct CLGTraceResult;
-using SGTraceResult = CLGTraceResult;
-//! Trace Function.
-/**
-*	@brief	ClientGame Trace function. Supports Game Entities.
-**/
-//extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
-//using SGTrace = CLG_Trace;
-#define SGTrace CLG_Trace;
-
-//! Maximum amount of POD Entities.
-static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
-
-#endif //! End of ClientGame Specifics.
-#ifdef SHAREDGAME_SERVERGAME //! Start of ServerGame Specifics.
-/**
-*	Predeclarations.
-**/
-//! Actual game entity type for the ServerGame module.
-class IServerGameEntity;
-using GameEntity = IServerGameEntity;
-
-//! Entity Dictionary.
-using SpawnKeyValues = std::map<std::string, std::string>;
-
-//! SVGame needed includes.
-#define GAME_INCLUDE
-//#include "../../Common/Common.h"
-#include "../../Shared/SVGame.h"
-
-//! POD Entity for the ServerGame module.
-using PODEntity = PODEntity;
-
-//! Gameworld.
-class ServerGameWorld;
-using SGGameWorld = ServerGameWorld;
-
-//! Trace Results
-struct SVGTraceResult;
-using SGTraceResult = SVGTraceResult;
-//! Trace Function.
-//extern auto SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
-#define SGTrace SVG_Trace;
-
-//! Maximum amount of POD Entities.
-static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
-
-#endif //! End of ServerGame Specifics.
-
-
-/**
-*   Protocol
-**/
-#include "Protocol.h"
-
-
-/**
-*   Skeletal Animation
-**/
-#include "SkeletalAnimation.h"
-
-
-/**
-*   Game Time Utilities.
-**/
-#include "Time.h"
-
-
-/**
-*   Entity Framework
-**/
-#include "Entities.h"
-
-
-/**
-*   Protocol
-**/
-#include "PMove.h"
-
-
+/***
+*
+*
+*
+*	Game Definitions that are shared across both modules.
+*
+*
+*
+***/
 /**
 *   Entity Move Types.
 **/
@@ -473,6 +367,8 @@ struct MuzzleFlashType {
     //! Shows a SuperShotgun muzzleflash effect.
     static constexpr uint8_t SuperShotgun   = 19;
 };
+
+
 /**
 *   @brief  Monster entity specific muzzleflash types.
 **/
@@ -490,3 +386,177 @@ struct RenderDrawFlags {
     static constexpr int32_t InfraRedGoggles = 4;
     static constexpr int32_t UVGoggles = 8;
 };
+
+
+
+
+/***
+*
+*
+*
+*	Using =, Predeclarations, and specific (Client-/Server-)Game includes.
+*
+*
+*
+***/
+/**
+*	Predeclare the actual game entity type that we intend to use depending on which game module
+*	this file is being compiled along with.
+**/
+//! Predeclared for game locals include files.
+class SGEntityHandle;
+
+/**
+*	Include needed headers for building SharedGame code for the ClientGame module.
+*
+*	Very ugly, but currently needed includes. Something that came of the old, needs to be cleaned in the future.
+**/
+#ifdef SHAREDGAME_CLIENTGAME
+/**
+*	Includes:
+**/
+// Needed define for said includes.
+#define CGAME_INCLUDE 1
+// Needed includes.
+#include "../../Common/CModel.h"
+#include "../../Common/Cmd.h"
+#include "../../Common/Msg.h"
+#include "../../Common/Protocol.h"
+#include "../../Shared/SVGame.h"
+#include "../../Shared/Refresh.h"
+#include "../../Shared/CLTypes.h"
+#include "../../Shared/CLGame.h"
+#endif
+
+//! Actual game entity type for the ClientGame module.
+class IClientGameEntity;
+//! GameWorld.
+class ClientGameWorld;
+//! TraceResult.
+struct CLGTraceResult;
+
+
+/**
+*	Using:
+**/
+//! Using: GameEntity
+using GameEntity	= IClientGameEntity;
+//! Using GameWorld.
+using SGGameWorld	= ClientGameWorld;
+//! Using: Trace Results
+using SGTraceResult	= CLGTraceResult;
+
+
+
+
+
+// Included ClientGameLocals.
+#include "../Client/ClientGameLocals.h"
+
+// Include IClientGameEntity.
+#include "../Client/Entities/IClientGameEntity.h"
+
+/**
+*	Functions:
+**/
+//! Trace Function.
+//extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
+//using SGTrace = CLG_Trace;
+#define SGTrace CLG_Trace;
+
+
+/**
+*	ConstExpr:
+**/
+//! Maximum amount of POD Entities.
+static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
+
+#endif //! End of ClientGame Specifics.
+/**
+*
+*	SHAREDGAME: ServerGame
+*
+*	Here we place predeclarations, using =, and include minimal necessities.
+*
+**/
+#ifdef SHAREDGAME_SERVERGAME
+/**
+*	Predeclarations:
+**/
+//! Actual game entity type for the ServerGame module.
+class IServerGameEntity;
+//! GameWorld.
+class ServerGameWorld;
+//! TraceResult.
+struct SVGTraceResult;
+
+
+/**
+*	Type Using:
+**/
+//! Using: GameEntity.
+using GameEntity = IServerGameEntity;
+//! Using: GameWorld.
+using SGGameWorld = ServerGameWorld;
+//! Using: Trace Results.
+using SGTraceResult = SVGTraceResult;
+
+
+/**
+*	Includes:
+**/
+//! SVGame needed includes.
+#define GAME_INCLUDE
+#include "../../Shared/SVGame.h"
+//! ServerGameLocals.
+#include "../Server/ServerGameLocals.h"
+//! IServerGameEntity.
+#include "../Server/Entities/IServerGameEntity.h"
+//! Utilities.
+
+
+/**
+*	Functions:
+**/
+//! Trace Function.
+//extern auto SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
+#define SGTrace SVG_Trace;
+
+
+/**
+*	ConstExpr:
+**/
+//! Maximum amount of POD Entities.
+static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
+
+#endif //! End of ServerGame Specifics.
+
+
+/**
+*   Protocol
+**/
+#include "Protocol.h"
+
+
+/**
+*   Skeletal Animation
+**/
+#include "SkeletalAnimation.h"
+
+
+/**
+*   Game Time Utilities.
+**/
+#include "Time.h"
+
+
+/**
+*   Entity Framework
+**/
+#include "Entities.h"
+
+
+/**
+*   Protocol
+**/
+#include "PMove.h"

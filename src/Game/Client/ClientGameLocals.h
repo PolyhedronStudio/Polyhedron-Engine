@@ -61,8 +61,9 @@ static constexpr int32_t	CLG_FRAMEDIV	= BASE_FRAMERATE / 10.0;
 static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
-static constexpr Frametime FRAMETIME = FRAMETIME_S;
-
+//static constexpr Frametime FRAMETIME = FRAMETIME_S;
+//using FRAMETIME = FRAMETIME_S;
+#define FRAMETIME FRAMETIME_S
 
 
 /**
@@ -221,7 +222,7 @@ struct LevelLocals  {
     //char nextMap[MAX_QPATH];    //! Go here when fraglimit is hit
 
     // The current entity that is actively being ran from SVG_RunFrame.
-    GameEntity *currentEntity = nullptr;
+    IClientGameEntity *currentEntity = nullptr;
 
     // Index for the que pile of dead bodies.
     int32_t bodyQue = 0;

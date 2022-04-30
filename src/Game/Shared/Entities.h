@@ -44,3 +44,4 @@ using GameEntityVector = std::vector<GameEntity*>;
 **/
 //! Size of the dead body entity queue.
 static constexpr int32_t BODY_QUEUE_SIZE = 8;
+

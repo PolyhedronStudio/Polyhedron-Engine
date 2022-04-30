@@ -10,6 +10,9 @@
 #include "../ClientGameLocals.h"
 #include "../Exports/Entities.h"
 
+// It has to know about Worldspawn.
+#include "../Entities/Worldspawn.h"
+
 
 
 /**
@@ -48,7 +51,7 @@ CLGTraceResult::CLGTraceResult(TraceResult& traceResult) :
 		ClientGameWorld *gameWorld = GetGameWorld();
 
 		// Get Worldspawn Game and POD -Enity.
-		gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+		gameEntity = static_cast<IClientGameEntity*>(gameWorld->GetWorldspawnGameEntity());
 		podEntity = gameWorld->GetWorldspawnPODEntity();
 
 		// POD Entity still needs to be set to worldspawn.
@@ -81,11 +84,11 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 	ClientGameWorld *gameWorld = GetGameWorld();
 
 	if (gameWorld) {
-		GameEntityVector &gameEntities = gameWorld->GetGameEntities();
+		std::vector<IClientGameEntity*> &gameEntities = gameWorld->GetGameEntities();
 
 		if (traceResult.ent) {
 			// Cast to PODEntity.
-			PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+			PODEntity *podEntity = static_cast<PODEntity*>(traceResult.ent);
 
 			// Acquire number.
 			const uint32_t index = podEntity->currentState.number;
@@ -95,7 +98,7 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 				gameEntity = gameEntities[index];
 			} else {
 				// Default to Worldspawn instead.
-				gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+				gameEntity = static_cast<IClientGameEntity*>(gameWorld->GetWorldspawnGameEntity());
 				// POD Entity still needs to be set to worldspawn.
 				podEntity = gameWorld->GetWorldspawnPODEntity();
 			}
@@ -104,7 +107,7 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 			this->podEntity = podEntity;
 		} else {
 			// Default to Worldspawn instead.
-			gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+			gameEntity = static_cast<IClientGameEntity*>(gameWorld->GetWorldspawnGameEntity());
 
 			// POD Entity still needs to be set to worldspawn.
 			podEntity = gameWorld->GetWorldspawnPODEntity();
@@ -126,7 +129,7 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 	//	ClientGameWorld *gameWorld = GetGameWorld();
 
 	//	// Get Worldspawn Game and POD -Enity.
-	//	gameEntity = reinterpret_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+	//	gameEntity = static_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
 	//	podEntity = gameWorld->GetWorldspawnPODEntity();
 
 	//	// POD Entity still needs to be set to worldspawn.
@@ -138,7 +141,7 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 
 	//if (traceResult.ent) {
 	//	// Cast to PODEntity.
-	//	PODEntity *podEntity = reinterpret_cast<PODEntity*>(traceResult.ent);
+	//	PODEntity *podEntity = static_cast<PODEntity*>(traceResult.ent);
 
 	//	// Acquire number.
 	//	const uint32_t index = podEntity->currentState.number;
@@ -165,7 +168,7 @@ CLGTraceResult::CLGTraceResult(const TraceResult& traceResult) :
 /**
 *	@brief	ClientGame Trace function. Supports Game Entities.
 **/
-CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipGameEntity, const int32_t& contentMask) {
+CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* skipGameEntity, const int32_t& contentMask) {
     // Fetch POD Entity to use for pass entity testing.
     PODEntity* clientPODEntity = (skipGameEntity ? skipGameEntity->GetPODEntity() : 0);
 
