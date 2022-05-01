@@ -695,7 +695,7 @@ retry:
 *	@brief	Contains data of entities that are pushed by MoveType::Push objects. (BrushModels usually.)
 **/
 struct PushedGameEntityState {
-	SGEntityHandle entityHandle;
+	GameEntity *entityHandle;
 	vec3_t origin = vec3_zero();
 	vec3_t angles = vec3_zero();
 	float deltaYaw = 0.f;
@@ -723,10 +723,10 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 	mat3_t axis;
 	vec3_t org, org2, move2;*/
 
-	if (!gePusher ) {
+	if (!gePusher || !lastPushedState ) {
 		return false;
 	}
-	PushedGameEntityState *pushed;
+
     // Calculate the exact the bounding box
     const vec3_t mins = gePusher->GetAbsoluteMin() + move;
     const vec3_t maxs = gePusher->GetAbsoluteMax() + move;
@@ -878,7 +878,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 		// twice, it goes back to the original position
 		for( PushedGameEntityState *pushedState = lastPushedState - 1; pushedState >= lastPushedState; pushedState-- ) {
 	        // Fetch pusher's game entity.
-            GameEntity* pusherEntity = *pushedState->entityHandle;
+            GameEntity* pusherEntity = pushedState->entityHandle;
 
             // Ensure we are dealing with a valid pusher entity.
             if (!pusherEntity) {
@@ -903,7 +903,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 	// see if anything we moved has touched a trigger
 	for( PushedGameEntityState *pushedState = lastPushedState - 1; pushedState >= lastPushedState; pushedState-- ) {
         // Fetch pusher's base entity.
-        GameEntity* pusherEntity = *pushedState->entityHandle;
+        GameEntity* pusherEntity = pushedState->entityHandle;
 
         // Ensure we are dealing with a valid pusher entity.
 	    if (!pusherEntity) {
@@ -911,7 +911,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
             continue;
 	    }
 
-	    SG_TouchTriggers(*pushedState->entityHandle);
+	    SG_TouchTriggers(pushedState->entityHandle);
 	}
 
 	return true;
@@ -1081,16 +1081,16 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	}
 
 	// Refresh the ground entity for said MoveType entities:
-	//if( ent->movetype == MOVETYPE_BOUNCE || ent->movetype == MOVETYPE_BOUNCEGRENADE ) {
+	if( ent->GetMoveType() == MoveType::Bounce) {/*MOVETYPE_BOUNCE || ent->movetype == MOVETYPE_BOUNCEGRENADE ) {*/
 		if( ent->GetVelocity().z > 0.1f) {
 			ent->SetGroundEntity(nullptr);
 		}
-	//}
+	}
 
 	// Check whether the ground entity has disappeared(aka not in use).
 	GameEntity *entGroundEntity = *ent->GetGroundEntity();
 	//	if( ent->groundentity && ent->groundentity != world && !ent->groundentity->r.inuse ) {
-	if (entGroundEntity && entGroundEntity != (GameEntity*)gameWorld->GetWorldspawnGameEntity() && !entGroundEntity->IsInUse()) {
+	if (entGroundEntity && !entGroundEntity->IsInUse()) {
 		ent->SetGroundEntity(nullptr); //ent->groundentity = NULL;
 	}
 
@@ -1098,7 +1098,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	float oldSpeed = vec3_length( ent->GetVelocity() );
 
 	// Check if the ent still has a valid ground entity.
-	if ( ent->GetGroundEntity() ) {
+	if ( ent->GetGroundEntity() && ent->GetMoveType() != MoveType::TossSlide ) {
 		// Exit if there's no velocity(speed) activity.
 		if( !oldSpeed ) {
 			return;
@@ -1407,7 +1407,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	CheckSVCvars();
 
 	// Get GameEntity from handle.
-    GameEntity *ent = reinterpret_cast<GameEntity*>(*entityHandle);
+    GameEntity *ent = dynamic_cast<GameEntity*>(*entityHandle);
 
     if (!ent) {
 	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
@@ -1456,15 +1456,21 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
         break;
 	// SG_Physics_Toss:
         case MoveType::Toss:
+		case MoveType::TossSlide:
         case MoveType::Bounce:
         case MoveType::Fly:
         case MoveType::FlyMissile:
 	        SG_Physics_Toss(entityHandle);
         break;
 	// SG_BoxSlideMove:
-		case MoveType::TossSlide:
-			//	SG_BoxSlideMove( ent, ent->r.clipmask ? ent->r.clipmask : MASK_PLAYERSOLID, 1.01f, 10 );
-		break;
+		//case MoveType::TossSlide: {
+		//	GameEntity *geTossSlider = *entityHandle;
+		//	if (geTossSlider) {
+		//		const int32_t geClipMask = geTossSlider->GetClipMask();
+		//		SG_BoxSlideMove( ent, ( geClipMask ? geClipMask : BrushContentsMask::PlayerSolid ), 1.01f, 10 );
+		//	}
+		//break;
+		//}
 	default:
 		//	G_Error( "SV_Physics: bad movetype %i", (int)ent->movetype );
 		break;

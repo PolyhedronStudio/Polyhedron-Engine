@@ -16,6 +16,9 @@
 
 // Entities.
 #include "../Entities/Base/CLGBasePlayer.h"
+#include "../Entities/DebrisEntity.h"
+#include "../Entities/GibEntity.h"
+
 // GameModes.
 //#include "../GameModes/IGameMode.h"
 //#include "../GameModes/DefaultGameMode.h"
@@ -1071,7 +1074,7 @@ IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityH
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
 void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
-	//DebrisEntity::Create(debrisser, gibModel, origin, speed); 
+	DebrisEntity::Create(debrisser, gibModel, origin, speed); 
 }
 
 /**
@@ -1079,5 +1082,5 @@ void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &gibM
 *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
 */
 void ClientGameWorld::ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) { 
-	//GibEntity::Create(gibber, gibModel, damage, gibType);
+	GibEntity::Create(gibber, gibModel, damage, gibType);
 }

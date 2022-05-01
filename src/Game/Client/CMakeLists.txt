@@ -31,7 +31,6 @@ SET(SRC_CLGAME
 	Entities/Base/CLGBasePlayer.cpp
 	Entities/Base/CLGBaseTrigger.cpp
 	
-
 	Entities/Misc/MiscExplosionBox.cpp
 	Entities/Misc/MiscClientExplosionBox.cpp
 	Entities/Misc/MiscClientModel.cpp
@@ -40,6 +39,8 @@ SET(SRC_CLGAME
 
 	#Entities/GameEntityList.cpp
 	Entities/IClientGameEntity.cpp
+	Entities/DebrisEntity.cpp
+	Entities/GibEntity.cpp
 	Entities/Worldspawn.cpp
 
 	Utilities/CLGTraceResult.cpp
@@ -96,6 +97,8 @@ SET(HEADERS_CLGAME
 
 	#Entities/GameEntityList.h
 	Entities/IClientGameEntity.h
+	Entities/DebrisEntity.h
+	Entities/GibEntity.h
 	Entities/Worldspawn.h
 
 	Exports/Core.h

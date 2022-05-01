@@ -230,6 +230,9 @@ void FuncDoor::DoorShotOpen( IServerGameEntity* inflictor, IServerGameEntity* at
 // FuncDoor::DoorBlocked
 //===============
 void FuncDoor::DoorBlocked( IServerGameEntity* other ) {
+	if (!other) {
+		return;
+	}
 
     if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
         // Give it a chance to go away on its own terms (like gibs)
