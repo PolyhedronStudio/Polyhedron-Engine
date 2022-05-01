@@ -9,8 +9,9 @@
 ***/
 #pragma once
 
-// Predeclare.
-struct gclient_s;
+// Required.
+#include "../../../Shared/Shared.h"
+#include "TypeInfo.h"
 
 /**
 *   ISharedGameEntity

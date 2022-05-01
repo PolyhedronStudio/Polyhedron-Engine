@@ -10,8 +10,13 @@
 #pragma once
 
 // Include general shared header.
-#define GAME_INCLUDE
-#
+#ifdef SHAREDGAME_SERVERGAME
+#define GAME_INCLUDE 1
+#endif
+#ifdef SHAREDGAME_CLIENTGAME
+#define CGAME_INCLUDE 1
+#endif
+
 #include "../../Shared/Shared.h"
 
 
@@ -448,7 +453,8 @@ using GameEntity	= IClientGameEntity;
 using SGGameWorld	= ClientGameWorld;
 //! Using: Trace Results
 using SGTraceResult	= CLGTraceResult;
-
+//! Using: TouchTriggers
+//using SGTouchTriggers = UTIL_TouchTriggers;
 
 
 
@@ -509,7 +515,7 @@ using SGTraceResult = SVGTraceResult;
 *	Includes:
 **/
 //! SVGame needed includes.
-#define GAME_INCLUDE
+//#define GAME_INCLUDE
 #include "../../Shared/SVGame.h"
 //! ServerGameLocals.
 #include "../Server/ServerGameLocals.h"

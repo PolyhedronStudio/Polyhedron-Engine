@@ -170,18 +170,24 @@ void SG_AddGroundFriction( GameEntity *sharedGameEntity, float friction ) {
 /**
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *sharedGameEntity, int32_t contentMask, float slideBounce, float friction ) {
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float slideBounce, float friction ) {
 	int32_t i;
 	MoveState entMove = {};
 	int32_t blockedMask = 0;
 
-	float oldVelocity = VectorLength( ent->velocity );
+	if (!geSlider) {
+		SG_PhysicsEntityWPrint(__func__, "[start]", "geSlider is (nullptr)!\n");
+		return 0;
+	}
+
+	// Store current velocity as old velocity.
+	float oldVelocity = VectorLength( geSlider->GetVelocity() );
 
 	// Apply gravitational force if no ground entity is set. Otherwise, apply ground friction forces.
-	if( !sharedGameEntity->GetGroundEntity() ) {
-		SG_AddGravity( sharedGameEntity );
+	if( !geSlider->GetGroundEntity() ) {
+		SG_AddGravity( geSlider );
 	} else { // horizontal friction
-		SG_AddGroundFriction( sharedGameEntity, friction );
+		SG_AddGroundFriction( geSlider, friction );
 	}
 
 	// Initialize our move state.
@@ -191,20 +197,20 @@ const int32_t SG_BoxSlideMove( GameEntity *sharedGameEntity, int32_t contentMask
 	// When the entity isn't idle, move its properties over into our move state.
 	if( oldVelocity > 0 ) {
 		// Setup physical properties.
-		entMove.origin = sharedGameEntity->GetOrigin();
-		entMove.velocity = sharedGameEntity->GetVelocity();
-		entMove.mins = sharedGameEntity->GetMins();
-		entMove.maxs = sharedGameEntity->GetMaxs();
+		entMove.origin = geSlider->GetOrigin();
+		entMove.velocity = geSlider->GetVelocity();
+		entMove.mins = geSlider->GetMins();
+		entMove.maxs = geSlider->GetMaxs();
 		/*VectorCopy( ent->s.origin, entMove.origin );
 		VectorCopy( ent->velocity, entMove.velocity );
 		VectorCopy( ent->r.mins, entMove.mins );
 		VectorCopy( ent->r.maxs, entMove.maxs );*/
 		entMove.gravityDir = vec3_t{ 0.f, 0.f, -1.f };
 		entMove.slideBounce = slideBounce;
-		entMove.groundEntity = (* sharedGameEntity->GetGroundEntity());
+		entMove.groundEntity = ( *geSlider->GetGroundEntity() );
 
 		// Setup passing entity and contentmask.
-		entMove.passEntity = sharedGameEntity;
+		entMove.passEntity = geSlider;
 		entMove.contentMask = contentMask;
 
 		entMove.remainingTime = FRAMETIME_S.count();
@@ -213,12 +219,12 @@ const int32_t SG_BoxSlideMove( GameEntity *sharedGameEntity, int32_t contentMask
 		blockedMask = GS_SlideMove( &entMove );
 
 		// Update our entity with the resulting values.
-		sharedGameEntity->SetOrigin(entMove.origin); //VectorCopy( entMove.origin, ent->s.origin );
-		sharedGameEntity->SetVelocity(entMove.velocity); //VectorCopy( entMove.velocity, ent->velocity );
-		sharedGameEntity->SetGroundEntity(entMove.groundEntity);
+		geSlider->SetOrigin(entMove.origin); //VectorCopy( entMove.origin, ent->s.origin );
+		geSlider->SetVelocity(entMove.velocity); //VectorCopy( entMove.velocity, ent->velocity );
+		geSlider->SetGroundEntity(entMove.groundEntity);
 
 		// Link entity in.
-		sharedGameEntity->LinkEntity();
+		geSlider->LinkEntity();
 
 		//GClip_LinkEntity( ent );
 	}
@@ -239,32 +245,32 @@ const int32_t SG_BoxSlideMove( GameEntity *sharedGameEntity, int32_t contentMask
 			}
 
 			//G_CallTouch( other, ent, NULL, 0 );
-			otherEntity->DispatchTouchCallback(otherEntity, sharedGameEntity, nullptr, nullptr);
+			otherEntity->DispatchTouchCallback(otherEntity, geSlider, nullptr, nullptr);
 
 			// if self touch function, fire up touch and if freed stop
 			// It may have been deleted after all.
-			if (sharedGameEntity) {
+			if (geSlider) {
 				//G_CallTouch( ent, other, NULL, 0 );
-				sharedGameEntity->DispatchTouchCallback(sharedGameEntity, otherEntity, nullptr, nullptr);
+				geSlider->DispatchTouchCallback(geSlider, otherEntity, nullptr, nullptr);
 			}
 
 			// It may have been freed by the touch function.
-			if( sharedGameEntity->IsInUse()) {
+			if( geSlider->IsInUse()) {
 				break;
 			}
 		}
 	}
 
 	// If it's still in use, search for ground.
-	if (sharedGameEntity && sharedGameEntity->IsInUse()) {
+	if (geSlider && geSlider->IsInUse()) {
 		// Check for ground entity.
-		SG_CheckGround( sharedGameEntity );
+		SG_CheckGround( geSlider );
 
 		// We've found ground.
-		if( sharedGameEntity->GetGroundEntity() && vec3_length(sharedGameEntity->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
+		if( geSlider->GetGroundEntity() && vec3_length(geSlider->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
 			// Zero out velocities.
-			sharedGameEntity->SetVelocity(vec3_zero());
-			sharedGameEntity->SetAngularVelocity(vec3_zero());
+			geSlider->SetVelocity(vec3_zero());
+			geSlider->SetAngularVelocity(vec3_zero());
 
 			// Stop.
 			SG_CallStop( ent );
@@ -296,20 +302,22 @@ const int32_t SG_BoxSlideMove( GameEntity *sharedGameEntity, int32_t contentMask
 *	@brief	Tests whether the entity position would be trapped in a Solid.
 *	@return	(nullptr) in case it is free from being trapped. Worldspawn entity otherwise.
 **/
-SVGBaseEntity *SG_TestEntityPosition(IServerGameEntity *ent) {
+SVGBaseEntity *SG_TestEntityPosition(GameEntity *geTestSubject) {
     SVGTraceResult trace;
     int32_t clipMask = 0;
 
-    if (ent->GetClipMask()) {
-	    clipMask = ent->GetClipMask();
+    if (geTestSubject->GetClipMask()) {
+	    clipMask = geTestSubject->GetClipMask();
     } else {
         clipMask = BrushContentsMask::Solid;
     }
 
-    trace = SVG_Trace(ent->GetOrigin(), ent->GetMins(), ent->GetMaxs(), ent->GetOrigin(), ent, clipMask);
+    trace = SVG_Trace(geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask);
 
     if (trace.startSolid) {
-	    return dynamic_cast<SVGBaseEntity*>(game.world->GetWorldspawnGameEntity());
+		SGGameWorld *gameWorld = GetGameWorld();
+
+	    return dynamic_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
     }
 
     return nullptr;
@@ -318,10 +326,10 @@ SVGBaseEntity *SG_TestEntityPosition(IServerGameEntity *ent) {
 /**
 *	@brief	Keep entity velocity within bounds.
 **/
-static void SG_CheckVelocity( GameEntity *sharedGameEntity ) {
+static void SG_CheckVelocity( GameEntity *geCheck ) {
 	
 	// Get Velocity.
-	const vec3_t entityVelocity = sharedGameEntity->GetVelocity();
+	const vec3_t entityVelocity = geCheck->GetVelocity();
 
 	// Get velocity vector length.
 	float scale = vec3_length( entityVelocity );
@@ -333,7 +341,7 @@ static void SG_CheckVelocity( GameEntity *sharedGameEntity ) {
 		scale = sv_maxvelocity->value / scale;
 
 		// Scale and set new velocity.
-		sharedGameEntity->SetVelocity(vec3_scale(entityVelocity, scale));
+		geCheck->SetVelocity(vec3_scale(entityVelocity, scale));
 	}
 }
 
@@ -1006,7 +1014,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	float oldSpeed = vec3_length( ent->GetVelocity() );
 
 	// Check if the ent still has a valid ground entity.
-	if( ent->GetGroundEntity() ) {
+	if ( ent->GetGroundEntity() ) {
 		// Exit if there's no velocity(speed) activity.
 		if( !oldSpeed ) {
 			return;
@@ -1045,7 +1053,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 			acceldir = vec3_scale( acceldir, ent->accel * FRAMETIME_S.count() );
 
 			// Add directional acceleration to velocity.
-			ent->SetVelocity(ent->GetVelocity() + acceldir)://VectorAdd( ent->velocity, acceldir, ent->velocity );
+			ent->SetVelocity(ent->GetVelocity() + acceldir);//VectorAdd( ent->velocity, acceldir, ent->velocity );
 		}
 	}
 

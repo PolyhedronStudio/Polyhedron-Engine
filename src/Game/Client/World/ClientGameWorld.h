@@ -304,7 +304,7 @@ private:
     int32_t maxEntities = 0;
 
 	//! Clients array, allocated to the size of maxclients cvar.
-    ServerClient *clients = nullptr;
+    gclient_s *clients = nullptr;
 
 	//! Currently active game mode.
     IGameMode* currentGameMode = nullptr;

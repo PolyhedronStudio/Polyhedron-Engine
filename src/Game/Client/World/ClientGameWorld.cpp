@@ -5,6 +5,9 @@
 *	@file
 *
 ***/
+// Shared.
+#include "../../Shared/SharedGame.h"
+
 // Core.
 #include "../ClientGameLocals.h"
 

@@ -18,7 +18,7 @@
 
 // Because we define the full size ServerClient and Entity structures in this file
 // we define GAME_INCLUDE so that SVGame.h does not define the short server-visible variety.
-#define GAME_INCLUDE
+//#define GAME_INCLUDE
 #include "../../Shared/Shared.h"
 #include "../../Shared/List.h"
 struct gclient_s;

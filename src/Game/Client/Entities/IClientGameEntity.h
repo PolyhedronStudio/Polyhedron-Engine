@@ -9,6 +9,11 @@
 ***/
 #pragma once
 
+// GameLocals.
+#include "../ClientGameLocals.h"
+
+// SharedGame Entity Interface.
+#include "../../Shared/Entities/ISharedGameEntity.h"
 
 /**
 *   IClientGameEntity
