@@ -171,7 +171,7 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
 **/
 void CLG_RunServerEntity(SGEntityHandle &entityHandle);
 void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle);
-
+#include "../../Shared/Physics/Physics.h"
 /**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
@@ -208,7 +208,8 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
         // Run it for a frame.
         // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
-		CLG_RunServerEntity(handle);
+		SG_RunEntity(handle);
+//		CLG_RunServerEntity(handle);
     }
 }
 
@@ -244,7 +245,8 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 
 		// Run it for a frame.
 		SGEntityHandle handle = gameEntity;
-		CLG_RunLocalClientEntity(handle);
+		//CLG_RunLocalClientEntity(handle);
+		SG_RunEntity(handle);
     }
 }
 

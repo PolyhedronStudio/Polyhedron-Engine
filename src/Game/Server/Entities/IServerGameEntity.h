@@ -110,6 +110,33 @@ public:
 
 
 
+    /**
+    *
+    *
+    *   For Physics Entities.
+    *
+    *
+    **/
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetAcceleration() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetDeceleration() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline const vec3_t& GetEndPosition() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetSpeed() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline const vec3_t& GetStartPosition() = 0;
 
 
 

@@ -12,13 +12,31 @@
 // Shared Game.
 #include "../SharedGame.h"
 
+#ifdef SHAREDGAME_SERVERGAME 
+	#include "../../Server/ServerGameLocals.h"
+	#include "../../Server/World/ServerGameWorld.h"
+#endif
+#ifdef SHAREDGAME_CLIENTGAME
+	#include "../../Client/ClientGameLocals.h"
+	#include "../../Client/World/ClientGameWorld.h"
+#endif
+
 // Physics.
 #include "Physics.h"
+#include "SlideMove.h"
 
 // TODO: This needs some fixing hehe... ugly method but hey.
+#ifdef SHAREDGAME_SERVERGAME
 extern cvar_t *sv_maxvelocity;
 extern cvar_t *sv_gravity;
+void CheckSVCvars() {
 
+}
+#endif
+
+#ifdef SHAREDGAME_CLIENTGAME
+static cvar_t *sv_maxvelocity = nullptr;
+static cvar_t *sv_gravity = nullptr;
 static inline void CheckSVCvars() {
 	if (!sv_maxvelocity) {
 		#ifdef SHAREDGAME_CLIENTGAME
@@ -31,7 +49,7 @@ static inline void CheckSVCvars() {
 		#endif
 	}
 }
-
+#endif
 //========================================================================
 
 void SG_PhysicsEntityWPrint(const std::string &functionName, const std::string &functionSector, const std::string& message) {
@@ -100,6 +118,8 @@ static inline vec3_t GS_ClipVelocity( const vec3_t &inVelocity, const vec3_t &no
 			outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
 		}
 	}
+
+	return outVelocity;
 	//#endif GS_SLIDEMOVE_CLAMPING
 	//for( i = 0; i < 3; i++ ) {
 	//	change = normal[i] * backoff;
@@ -123,7 +143,7 @@ static inline vec3_t GS_ClipVelocity( const vec3_t &inVelocity, const vec3_t &no
 /**
 *	@brief	Applies 'downward' gravity forces to the entity.
 **/
-static void SG_AddGravity( GameEntity *sharedGameEntity ) {
+void SG_AddGravity( GameEntity *sharedGameEntity ) {
     // Fetch velocity.
     vec3_t velocity = sharedGameEntity->GetVelocity();
 
@@ -164,6 +184,76 @@ void SG_AddGroundFriction( GameEntity *sharedGameEntity, float friction ) {
 
 		// Update velocity.
 		sharedGameEntity->SetVelocity(vec3_fmaf(velocity, -fspeed, frictionVec));
+	}
+}
+
+/**
+*
+**/
+/*
+* G_SolidMaskForEnt
+*/
+int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity ) {
+	if (!gameEntity) {
+		return BrushContentsMask::Solid;
+	}
+
+	const int32_t geClipMask = gameEntity->GetClipMask();
+	return (geClipMask ? geClipMask : BrushContentsMask::Solid);
+}
+/**
+*
+**/
+void SG_CheckGround( GameEntity *geCheck ) {
+	if (!geCheck) {
+		return;
+	}
+
+	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
+		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntityLinkCount(0);
+		return;
+	}
+
+	if( geCheck->GetClient()  && geCheck->GetVelocity().z > 180) {
+		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntityLinkCount(0);
+		return;
+	}
+
+	// if the hull point one-quarter unit down is solid the entity is on ground
+	const vec3_t geOrigin = geCheck->GetOrigin();
+	vec3_t traceEndPoint = {
+		geOrigin.x,
+		geOrigin.y,
+		geOrigin.z - 0.25f
+	};
+
+	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck));
+
+	// check steepness
+	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
+		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntityLinkCount(0);
+		return;
+	}
+
+	if( ( geCheck->GetVelocity().z > 1 && !geCheck->GetClient()) && !traceResult.startSolid) {
+		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntityLinkCount(0);
+		return;
+	}
+
+	if( !traceResult.startSolid && !traceResult.allSolid ) {
+		//VectorCopy( trace.endpos, ent->s.origin );
+		geCheck->SetGroundEntity(traceResult.gameEntity);
+		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
+		
+		vec3_t geCheckVelocity = geCheck->GetVelocity();
+		if( geCheckVelocity.z < 0) {
+			geCheckVelocity.z = 0;
+			geCheck->SetVelocity(geCheckVelocity);
+		}
 	}
 }
 
@@ -216,7 +306,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 		entMove.remainingTime = FRAMETIME_S.count();
 
 		// Execute actual slide movement.
-		blockedMask = GS_SlideMove( &entMove );
+		blockedMask = SG_SlideMove( &entMove );
 
 		// Update our entity with the resulting values.
 		geSlider->SetOrigin(entMove.origin); //VectorCopy( entMove.origin, ent->s.origin );
@@ -233,7 +323,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 	if( contentMask != 0 ) {
 		GameEntity *otherEntity = nullptr;
 		//GClip_TouchTriggers( ent );
-		UTIL_TouchTriggers(otherEntity);
+		SG_TouchTriggers(otherEntity);
 
 		// touch other objects
 		for( int32_t i = 0; i < entMove.numTouchEntities; i++ ) {
@@ -262,18 +352,18 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 	}
 
 	// If it's still in use, search for ground.
-	if (geSlider && geSlider->IsInUse()) {
+	if ( geSlider && geSlider->IsInUse() ) {
 		// Check for ground entity.
 		SG_CheckGround( geSlider );
 
 		// We've found ground.
 		if( geSlider->GetGroundEntity() && vec3_length(geSlider->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
 			// Zero out velocities.
-			geSlider->SetVelocity(vec3_zero());
-			geSlider->SetAngularVelocity(vec3_zero());
+			geSlider->SetVelocity( vec3_zero() );
+			geSlider->SetAngularVelocity( vec3_zero() );
 
 			// Stop.
-			SG_CallStop( ent );
+			//geSlider->DispatchStopCallback(geSlider, oldVelocity, oldAngularVelocity );
 		}
 	}
 
@@ -302,9 +392,8 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 *	@brief	Tests whether the entity position would be trapped in a Solid.
 *	@return	(nullptr) in case it is free from being trapped. Worldspawn entity otherwise.
 **/
-SVGBaseEntity *SG_TestEntityPosition(GameEntity *geTestSubject) {
-    SVGTraceResult trace;
-    int32_t clipMask = 0;
+GameEntity *SG_TestEntityPosition(GameEntity *geTestSubject) {
+	int32_t clipMask = 0;
 
     if (geTestSubject->GetClipMask()) {
 	    clipMask = geTestSubject->GetClipMask();
@@ -312,12 +401,12 @@ SVGBaseEntity *SG_TestEntityPosition(GameEntity *geTestSubject) {
         clipMask = BrushContentsMask::Solid;
     }
 
-    trace = SVG_Trace(geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask);
+    SGTraceResult trace = SG_Trace(geTestSubject->GetOrigin(), geTestSubject->GetMins(), geTestSubject->GetMaxs(), geTestSubject->GetOrigin(), geTestSubject, clipMask);
 
     if (trace.startSolid) {
 		SGGameWorld *gameWorld = GetGameWorld();
 
-	    return dynamic_cast<GameEntity*>(gameWorld->GetWorldspawnGameEntity());
+	    return (GameEntity*)(gameWorld->GetWorldspawnGameEntity());
     }
 
     return nullptr;
@@ -373,7 +462,7 @@ static void SG_CheckVelocity( GameEntity *geCheck ) {
 /**
 *	@brief	Called when two entities have touched so we can safely call their touch callback functions.
 **/
-void SG_Impact( GameEntity *entityA, const SGTrace &trace ) {
+void SG_Impact( GameEntity *entityA, const SGTraceResult &traceResult ) {
 	// Get gameWorld pointer.
 	SGGameWorld *gameWorld = GetGameWorld();
 
@@ -382,14 +471,14 @@ void SG_Impact( GameEntity *entityA, const SGTrace &trace ) {
 		// Com_DPrint(
 	}
 
-	if( trace->ent != gameWorld->GetWorldSpawnGameEntity() ) {
+	if( traceResult.gameEntity != (GameEntity*)gameWorld->GetWorldspawnGameEntity() ) {
 		// Entity to dispatch against.
-		GameEntity *entityB = trace->ent;
+		GameEntity *entityB = traceResult.gameEntity;
 
 		// Execute touch functionality for entityA if its solid is not a Solid::Not.
 		if (entityA->GetSolid() != Solid::Not) {
 			//e1->DispatchTouchCallback(e1, e2, &trace->plane, trace->surface);
-			entityA->DispatchTouchCallback(entityA, entityB, &trace->plane, trace->surface);
+			entityA->DispatchTouchCallback(entityA, entityB, (CollisionPlane*)& traceResult.plane, traceResult.surface);
 		}
 
 		// Execute touch functionality for entityB exists, and is not a Solid::Not.
@@ -457,7 +546,7 @@ int SV_FlyMove( edict_t *ent, float time, int mask ) {
 		}
 		hit = &game.edicts[trace.ent];
 
-		if( ISWALKABLEPLANE( &trace.plane ) ) {
+		if( IsWalkablePlane( &trace.plane ) ) {
 			blocked |= 1; // floor
 			if( hit->r.solid == SOLID_BSP ) {
 				ent->groundentity = hit;
@@ -538,20 +627,20 @@ int SV_FlyMove( edict_t *ent, float time, int mask ) {
 
 
 /*
-* SV_PushEntity
+* SG_PushEntity
 *
 * Does not change the entities velocity at all
 */
-static TraceResult SG_PushEntity( GameEntity *sharedGameEntity, const vec3_t &pushOffset ) {
+static SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset ) {
 	// Entity clipping mask.
-	const int32_t entityClipMask = sharedGameEntity->GetClipMask();
+	const int32_t entityClipMask = gePushEntity->GetClipMask();
 	// Entity movetype.
 	// Actual trace results.
 	SGTraceResult traceResult = {};
 	// Set to the clipping mask of the entity if it has one set, 'Solid' otherwise.
 	int32_t traceClipMask = BrushContentsMask::Solid;
 	// Start trace point.
-	const vec3_t traceStart = sharedGameEntity->GetOrigin();
+	const vec3_t traceStart = gePushEntity->GetOrigin();
 	// End trace point.
 	const vec3_t traceEnd = traceStart + pushOffset;
 	
@@ -564,39 +653,39 @@ retry:
 	}
 
 	// Execute trace.
-	traceResult = SG_Trace(traceStart, sharedGameEntity->GetMins(), sharedGameEntity()->GetMaxs(), traceEnd, sharedGameEntity, traceClipMask);
+	traceResult = SG_Trace(traceStart, gePushEntity->GetMins(), gePushEntity->GetMaxs(), traceEnd, gePushEntity, traceClipMask);
 	//G_Trace4D( &trace, start, ent->r.mins, ent->r.maxs, end, ent, clipMask, ent->timeDelta );
 	
-	if( sharedGameEntity->GetMoveType() == MoveType::Push || !trace.startsolid) {
-		ent->SetOrigin(trace.endPosition);
+	if( gePushEntity->GetMoveType() == MoveType::Push || !traceResult.startSolid) {
+		gePushEntity->SetOrigin(traceResult.endPosition);
 		//VectorCopy( trace.endpos, ent->s.origin );
 	}
 
 	// Link entity.
-	sharedGameEntity->LinkEntity();
+	gePushEntity->LinkEntity();
 
 	// Impact response.
-	if( trace.fraction < 1.0 ) {
+	if ( traceResult.fraction < 1.0 ) {
 		// Trigger impact touch callbacks.
-		SG_Impact( sharedGameEntity, traceResult );
+		SG_Impact( gePushEntity, traceResult );
 
 		// if the pushed entity went away and the pusher is still there
 		GameEntity *traceResultGameEntity = traceResult.gameEntity;
 		//if( !game.edicts[trace.ent].r.inuse && ent->movetype == MOVETYPE_PUSH && ent->r.inuse ) {
-		if (traceResultGameEntity && !traceResultGameEntity.IsInUse() 
-			&& sharedGameEntity->GetMoveType() == MoveType::Push && sharedGameEntity.IsInUse()
+		if (traceResultGameEntity && !traceResultGameEntity->IsInUse() 
+			&& gePushEntity->GetMoveType() == MoveType::Push && gePushEntity->IsInUse()
 		) {
 			// move the pusher back and try again
-			sharedGameEntity->SetOrigin(start);
-			sharedGameEntity->LinkEntity();
+			gePushEntity->SetOrigin(traceStart);
+			gePushEntity->LinkEntity();
 			//GClip_LinkEntity( ent );
 			goto retry;
 		}
 	}
 
 	//if( ent->r.inuse ) {
-	if (sharedGameEntity->IsInUse()) {
-		UTIL_TouchTriggers( sharedGameEntity );
+	if (gePushEntity->IsInUse()) {
+		SG_TouchTriggers( gePushEntity );
 	}
 
 	return traceResult;
@@ -609,7 +698,7 @@ struct PushedGameEntityState {
 	SGEntityHandle entityHandle;
 	vec3_t origin = vec3_zero();
 	vec3_t angles = vec3_zero();
-	float yaw = 0.f;
+	float deltaYaw = 0.f;
 	// This is used as velocity wtf?
 	vec3_t playerMoveOrigin = vec3_zero();
 };
@@ -617,7 +706,7 @@ struct PushedGameEntityState {
 //! List of pushed entities to use.
 //PushedEntityState pushedEntityStates[MAX]
 static PushedGameEntityState pushedGameEntities[4096];
-static PushedGameEntityState *lastPushedPointer = nullptr;
+static PushedGameEntityState *lastPushedState = nullptr;
 //pushed_t pushed[MAX_EDICTS], *pushed_p;
 static GameEntity *pushObstacle = nullptr;
 
@@ -626,33 +715,38 @@ static GameEntity *pushObstacle = nullptr;
 *	@brief	Objects need to be moved back on a failed push, otherwise 
 *			riders would continue to slide.
 **/
-static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &angularMove ) {
+static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &angularMove ) {
 	/*int i, e;
 	edict_t *check, *block;
 	vec3_t mins, maxs;
 	pushed_t *p;
 	mat3_t axis;
 	vec3_t org, org2, move2;*/
-	PushedGameEntityState *gePushed;
+
+	if (!gePusher ) {
+		return false;
+	}
+	PushedGameEntityState *pushed;
     // Calculate the exact the bounding box
-    const vec3_t mins = pusher->GetAbsoluteMin() + move;
-    const vec3_t maxs = pusher->GetAbsoluteMax() + move;
+    const vec3_t mins = gePusher->GetAbsoluteMin() + move;
+    const vec3_t maxs = gePusher->GetAbsoluteMax() + move;
 
     // We need this for pushing things later
-    org = vec3_negate(amove);
+    vec3_t org = vec3_negate(angularMove);
+	vec3_t forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
     AngleVectors(org, &forward, &right, &up);
 
 	// Save the pusher's original position.
-	gePushed->entityHandle = gePusher;
-	gePushed->origin = gePusher->GetOrigin();
-	gePushed->angles = gePusher->GetAngles();
+	lastPushedState->entityHandle = gePusher;
+	lastPushedState->origin = gePusher->GetOrigin();
+	lastPushedState->angles = gePusher->GetAngles();
 	if (gePusher->GetClient()) {
 		// Store velocity. I know, it's named origin wtf?.
-		gePushed->playerMoveOrigin = gePusher->GetClient()->playerState.pmove.velocity;
+		lastPushedState->playerMoveOrigin = gePusher->GetClient()->playerState.pmove.velocity;
 		// Store delta yaw angle.
-		gePushed->deltaYaw = gePusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
+		lastPushedState->deltaYaw = gePusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
 	}
-	gePushed++;
+	lastPushedState++;
 
 	// move the pusher to its final position
     gePusher->SetOrigin(gePusher->GetOrigin() + move);
@@ -694,13 +788,13 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 
 
 		// See whether the entity's ground entity is the actual pusher entity.
-		if ( geCheck->GetGroundEntity() != gePusher ) {
+		if ( *(geCheck->GetGroundEntity()) != gePusher ) {
 			// If it's not, check whether at least the bounding box intersects.
-			if ( (absMin[0] >= maxs[0]) 
-				(absMin[1] >= maxs[1])
-				(absMax[2] >= mins[2])
-				(absMax[0] >= mins[0])
-				(absMax[1] >= mins[1])
+			if ( (absMin[0] >= maxs[0]) &&
+				(absMin[1] >= maxs[1]) &&
+				(absMax[2] >= mins[2]) &&
+				(absMax[0] >= mins[0]) &&
+				(absMax[1] >= mins[1]) &&
 				(absMax[2] >= mins[2])) {
 				continue;
 			}
@@ -717,15 +811,10 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 			//VectorCopy( check->s.origin, pushed_p->origin );
 			//VectorCopy( check->s.angles, pushed_p->angles );
 			//pushed_p++;
-			gePushed->entityHandle = geCheck;
-			gePushed->origin = geCheck->GetOrigin();
-			gePushed->angles = geCheck->GetAngles();
-#if USE_SMOOTH_DELTA_ANGLES
-            if (geCheck->GetClient()) {
-                pushed_p->deltaYaw = geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
-			}
-#endif
-			gePushed++;
+			lastPushedState->entityHandle = geCheck;
+			lastPushedState->origin = geCheck->GetOrigin();
+			lastPushedState->angles = geCheck->GetAngles();
+			lastPushedState++;
 
 			// Try moving the contacted entity
 			geCheck->SetOrigin(geCheck->GetOrigin() + move);
@@ -734,15 +823,15 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
                 geCheck->GetClient()->playerState.pmove.origin += move;
-				geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += amove[vec3_t::Yaw];
+				geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
             }
 #endif
 			// Figure movement due to the pusher's amove.
 			const vec3_t org = geCheck->GetOrigin() - gePusher->GetOrigin(); //VectorSubtract( check->s.origin, pusher->s.origin, org );
 			const vec3_t org2 = {
-				.x = vec3_dot(org, forward);
-				.y = vec3_dot(org, right);
-				.z = vec3_dot(org, up);
+				vec3_dot(org, forward),
+				vec3_dot(org, right),
+				vec3_dot(org, up),
 			};
 			const vec3_t move2 = org2 - org;
 			geCheck->SetOrigin(geCheck->GetOrigin() + move2);
@@ -757,8 +846,8 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 				}
 			//}
 
-			int32_t isBlocked = SG_TestEntityPosition( geCheck );
-			if( !isBlocked ) {
+			GameEntity *geBlocked = SG_TestEntityPosition( geCheck );
+			if( !geBlocked ) {
 				// pushed ok
 				//GClip_LinkEntity( check );
 				geCheck->LinkEntity();
@@ -769,13 +858,13 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 				// try to fix block
 				// if it is ok to leave in the old position, do it
 				// this is only relevant for riding entities, not pushed
-				geCheck->SetOrigin(geCheck->GetOrigin() - move):
-				geCheck->SetOrigin(geCheck->GetOrigin() - move2):
+				geCheck->SetOrigin(geCheck->GetOrigin() - move);
+				geCheck->SetOrigin(geCheck->GetOrigin() - move2);
 				//VectorSubtract( check->s.origin, move, check->s.origin );
 				//VectorSubtract( check->s.origin, move2, check->s.origin );
-				isBlocked = SG_TestEntityPosition( geCheck );
-				if( !isBlocked ) {
-					gePushed--;
+				geBlocked = SG_TestEntityPosition( geCheck );
+				if( !geBlocked ) {
+					lastPushedState--;
 					continue;
 				}
 			}
@@ -784,19 +873,12 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 		// Save obstacle so we can call its blocked callback.
 		pushObstacle = geCheck;
 
-		// Move back any entities we already moved.
-		// We iterate backwards, so if the same entity was pushed twice it goes back to its original position.
-	}
-
-		// save off the obstacle so we can call the block function
-		obstacle = check;
-
 		// move back any entities we already moved
 		// go backwards, so if the same entity was pushed
 		// twice, it goes back to the original position
-		for( GameEntity *pushed = gePushed - 1; p >= gePushed; p-- ) {
+		for( PushedGameEntityState *pushedState = lastPushedState - 1; pushedState >= lastPushedState; pushedState-- ) {
 	        // Fetch pusher's game entity.
-            GameEntity* pusherEntity = *p->entityHandle;
+            GameEntity* pusherEntity = *pushedState->entityHandle;
 
             // Ensure we are dealing with a valid pusher entity.
             if (!pusherEntity) {
@@ -804,11 +886,12 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
                 continue;
             }
 
-            pusherEntity->SetOrigin(p->origin);
-            pusherEntity->SetAngles(p->angles);
+            pusherEntity->SetOrigin(pushedState->origin);
+            pusherEntity->SetAngles(pushedState->angles);
 #if USE_SMOOTH_DELTA_ANGLES
             if (pusherEntity->GetClient()) {
-                pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
+				pusherEntity->SetOrigin(pusherEntity->GetClient()->playerState.pmove.origin);
+                pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = pushedState->deltaYaw;
             }
 #endif
             pusherEntity->LinkEntity();
@@ -818,9 +901,9 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 
 	//FIXME: is there a better way to handle this?
 	// see if anything we moved has touched a trigger
-	for( GameEntity *pushed = gePushed - 1; p >= gePushed; p-- ) {
+	for( PushedGameEntityState *pushedState = lastPushedState - 1; pushedState >= lastPushedState; pushedState-- ) {
         // Fetch pusher's base entity.
-        GameEntity* pusherEntity = *p->entityHandle;
+        GameEntity* pusherEntity = *pushedState->entityHandle;
 
         // Ensure we are dealing with a valid pusher entity.
 	    if (!pusherEntity) {
@@ -828,7 +911,7 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
             continue;
 	    }
 
-	    UTIL_TouchTriggers(*p->entityHandle);
+	    SG_TouchTriggers(*pushedState->entityHandle);
 	}
 
 	return true;
@@ -838,9 +921,6 @@ static bool SV_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 *	@brief Pushes all objects except for brush models. 
 **/
 static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
-	vec3_t move, amove;
-	edict_t *part, *mover;
-
 	GameEntity *gePusher = *gePusherHandle;
     // Ensure it is a valid entity.
     if (!gePusher ) {
@@ -857,9 +937,10 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 	// any moves or calling any think functions
 	// if the move is blocked, all moved objects will be backed out
 	//retry:
-	gePushed = pushedGameEntities;
+	PushedGameEntityState *gePushed = pushedGameEntities;
 
-	for( GameEntity *gePushPart = gePusher; gePushPart; gePushPart = gePushPart->GetTeamChainEntity() ) {
+	GameEntity *gePushPart = nullptr;
+	for( gePushPart = gePusher; gePushPart; gePushPart = gePushPart->GetTeamChainEntity() ) {
 		// Get pusher part velocity.
 		const vec3_t partVelocity = gePushPart->GetVelocity();
 
@@ -877,8 +958,8 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 		//} else {
 			const vec3_t move = vec3_scale(gePushPart->GetVelocity(), FRAMETIME.count()); //VectorScale( part->velocity, FRAMETIME, move );
 			const vec3_t amove = vec3_scale(gePushPart->GetAngularVelocity(), FRAMETIME.count()); //VectorScale( part->avelocity, FRAMETIME, amove );
-			SGEntityHandle partHandle(gePushPart);
-			if (!SVG_Push(partHandle, move, amove)) {
+
+			if (!SG_Push(gePushPart, move, amove)) {
 				break;  // Move was Blocked.
 			}
 	   //}
@@ -893,7 +974,7 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 		// the move failed, bump all nextthink times and back out moves
 		for( GameEntity *mover = gePusher; mover; mover = mover->GetTeamChainEntity() ) {
 			auto nextThinkTime = mover->GetNextThinkTime();
-			if( nextThinkTime > GameTime::Zero()) {
+			if( nextThinkTime > GameTime::zero()) {
 				mover->SetNextThinkTime(nextThinkTime + FRAMETIME_S);
 //				mover->nextThink += game.frametime;
 			}
@@ -901,8 +982,8 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 
 		// if the pusher has a "blocked" function, call it
 		// otherwise, just stay in place until the obstacle is gone
-        if (obstacle) {
-            part->DispatchBlockedCallback(obstacle);
+        if (gePushPart) {
+            gePushPart->DispatchBlockedCallback(pushObstacle);
         }
 #if 0
 
@@ -932,7 +1013,7 @@ void SG_Physics_None(SGEntityHandle& entityHandle) {
     }
 
     // Run think method.
-    SG_RunThink(gameEntity);
+   // SG_RunThink(gameEntity);
 }
 
 
@@ -940,7 +1021,7 @@ void SG_Physics_None(SGEntityHandle& entityHandle) {
 *   @brief  Executes MoveType::Noclip, behavior on said entity meaning it
 *           does not clip to world, or respond to other entities.
 **/
-void SG_Physics_Noclip(SGEntityHandle &entityHandle) {
+void SG_Physics_NoClip(SGEntityHandle &entityHandle) {
     // Assign handle to base entity.
     GameEntity* gameEntity = *entityHandle;
 
@@ -951,9 +1032,9 @@ void SG_Physics_Noclip(SGEntityHandle &entityHandle) {
     }
 
     // regular thinking
-    if (!SVG_RunThink(gameEntity)) {
-        return;
-	}
+ //   if (!SG_RunThink(gameEntity)) {
+ //       return;
+	//}
     if (!gameEntity->IsInUse()) {
         return;
 	}
@@ -982,7 +1063,10 @@ void SG_Physics_Noclip(SGEntityHandle &entityHandle) {
 *           said entity.
 **/
 static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
-    // Assign handle to base entity.
+    // Get Gameworld.
+	SGGameWorld *gameWorld = GetGameWorld();
+
+	// Assign handle to base entity.
     GameEntity* ent = *entityHandle;
 
     // Ensure it is a valid entity.
@@ -1004,9 +1088,9 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	//}
 
 	// Check whether the ground entity has disappeared(aka not in use).
-	const GameEntity *entGroundEntity = ent->GetGroundEntity();
+	GameEntity *entGroundEntity = *ent->GetGroundEntity();
 	//	if( ent->groundentity && ent->groundentity != world && !ent->groundentity->r.inuse ) {
-	if (entGroundEntity && entGroundEntity != gameWorld->GetWorldSpawnGameEntity() && !entGroundEntity->IsInUse()) {
+	if (entGroundEntity && entGroundEntity != (GameEntity*)gameWorld->GetWorldspawnGameEntity() && !entGroundEntity->IsInUse()) {
 		ent->SetGroundEntity(nullptr); //ent->groundentity = NULL;
 	}
 
@@ -1021,7 +1105,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 		}
 
 		// Special movetype Toss behavior.
-		if( ent->GetMoveType() == MOVETYPE_TOSS) {
+		if( ent->GetMoveType() == MoveType::Toss) {
 			// 8 = 1 Unit on the Quake scale I think.
 			if( ent->GetVelocity().z >= 8) {
 				// it's moving in-air so unset the ground entity.
@@ -1031,7 +1115,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 				ent->SetVelocity(vec3_zero());
 				ent->SetAngularVelocity(vec3_zero());
 				// Dispatch Stop callback.
-				ent->DispatchStopCallback(); //G_CallStop( ent );		
+				//ent->DispatchStopCallback(); //G_CallStop( ent );		
 				return;
 			}
 		}
@@ -1049,8 +1133,8 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 		} else {
 			//VectorNormalize2
 			vec3_t acceldir = vec3_zero();
-			VectorNormalize2( ent->velocity, acceldir );
-			acceldir = vec3_scale( acceldir, ent->accel * FRAMETIME_S.count() );
+			VectorNormalize2( ent->GetVelocity(), acceldir);
+			acceldir = vec3_scale( acceldir, ent->GetAcceleration()  * FRAMETIME_S.count());
 
 			// Add directional acceleration to velocity.
 			ent->SetVelocity(ent->GetVelocity() + acceldir);//VectorAdd( ent->velocity, acceldir, ent->velocity );
@@ -1066,10 +1150,10 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	}
 
 	// Hacks
-	if( ent->s.type != ET_PLASMA && ent->s.type != ET_ROCKET ) {
-		// move angles
-		VectorMA( ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles );
-	}
+	//if( ent->s.type != ET_PLASMA && ent->s.type != ET_ROCKET ) {
+	//	// move angles
+	//	VectorMA( ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles );
+	//}
 
 	// move origin
 	const vec3_t move = vec3_scale( ent->GetVelocity(), FRAMETIME_S.count() ); //VectorScale( ent->velocity, FRAMETIME, move );
@@ -1083,26 +1167,28 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	if( traceResult.fraction < 1.0f ) {
 		const int32_t entMoveType = ent->GetMoveType();
 
+		// 1 = default backOff value.
+		float backOff = 1;
+
+		// Adjust value for specific moveTypes.
 		if( entMoveType == MoveType::Bounce) {
-			backoff = 1.5;
-		} else if( entMoveType == MoveType::BounceGrenade) {
-			backoff = 1.4;
-		} else {
-			backoff = 1;
-		}
+			backOff = 1.5;
+		}/* else if( entMoveType == MoveType::BounceGrenade) {
+			backOff = 1.4;
+		} */
 
 		// Clip velocity.
-		ent->SetVelocity(GS_ClipVelocity( ent->GetVelocity(), trace.plane.normal, backoff ));
+		ent->SetVelocity(SG_ClipVelocity( ent->GetVelocity(), traceResult.plane.normal, backOff ));
 
 		// stop if on ground
 
-		if( entMoveType == MoveType::Bounce || entMoveType -- MoveType::BounceGrenade ) {
+		if( entMoveType == MoveType::Bounce ) {// || entMoveType == MoveType::BounceGrenade ) {
 			// stop dead on allsolid
 
 			// LA: hopefully will fix grenades bouncing down slopes
 			// method taken from Darkplaces sourcecode
-			if( trace.allSolid ||
-				( ISWALKABLEPLANE( &trace.plane ) && fabsf( vec3_dot( trace.plane.normal, ent->GetVelocity() ) ) < 60 ) ) {
+			if( traceResult.allSolid ||
+				( IsWalkablePlane( traceResult.plane ) && fabsf( vec3_dot( traceResult.plane.normal, ent->GetVelocity() ) ) < 60 ) ) {
 				GameEntity *geTrace = traceResult.gameEntity;
 				// Update ground entity.
 				ent->SetGroundEntity(geTrace);
@@ -1113,7 +1199,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 				ent->SetAngularVelocity(vec3_zero());
 
 				// Dispatch a Stop callback.
-				ent->DispatchStopCallback(); //G_CallStop( ent );
+				//ent->DispatchStopCallback(); //G_CallStop( ent );
 			}
 		} else {
 			// in movetype_toss things stop dead when touching ground
@@ -1124,8 +1210,8 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 #else
 
 			// Walkable or trapped inside solid brush
-			if( traceResult.allSolid || ISWALKABLEPLANE( &trace.plane ) ) {
-				GameEntity *geTrace = (traceResult.gameEntity ? traceResult.gameEntity : gameWorld->GetWorldSpawnGameEntity());
+			if( traceResult.allSolid || IsWalkablePlane( traceResult.plane ) ) {
+				GameEntity *geTrace = (traceResult.gameEntity ? traceResult.gameEntity : (GameEntity*)gameWorld->GetWorldspawnGameEntity());
 				// Update ground entity.
 				ent->SetGroundEntity(geTrace);
 				ent->SetGroundEntityLinkCount((geTrace ? geTrace->GetLinkCount() : 0));
@@ -1135,7 +1221,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 				ent->SetAngularVelocity(vec3_zero());
 
 				// Dispatch a Stop callback.
-				ent->DispatchStopCallback(); //G_CallStop( ent );
+				//ent->DispatchStopCallback(); //G_CallStop( ent );
 			}
 		}
 	}
@@ -1148,7 +1234,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 
 	// Get content type for current origin.
 	const int32_t pointContentType = SG_PointContents(ent->GetOrigin());
-	const bool isInWater = (pointContentType & BrushContentsMask::Liquid;
+	const bool isInWater = (pointContentType & BrushContentsMask::Liquid);
 
 	// Set the watertype(or whichever the contents are.)
 	ent->SetWaterType(pointContentType);
@@ -1166,11 +1252,19 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	}
 
 	// Play transitioning sounds.
-	if( !wasInwater && isInwater ) {
-		SG_PositionedSound( old_origin, CHAN_AUTO, SG_SoundIndex( S_HIT_WATER ), ATTN_IDLE );
-	} else if( wasInwater && !isInwater ) {
-		SG_PositionedSound( ent->GetOrigin(), CHAN_AUTO, SG_SoundIndex(S_HIT_WATER), ATTN_IDLE);
+#ifdef SHAREDGAME_SERVERGAME
+    // Determine what sound to play.
+    if (!wasInWater && isInWater) {
+        gi.PositionedSound(oldOrigin, game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+	} else if (wasInWater && !isInWater) {
+        gi.PositionedSound(ent->GetOrigin(), game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
 	}
+#endif
+	//if( !wasInWater && isInWater ) {
+	//	SG_PositionedSound( oldOrigin, SoundChannel::Auto, SG_SoundIndex( S_HIT_WATER ), Attenuation::Idle );
+	//} else if( wasInWater && !isInWater ) {
+	//	SG_PositionedSound( ent->GetOrigin(), SoundChannel::Auto, SG_SoundIndex(S_HIT_WATER), Attenuation::Idle );
+	//}
 
 	// Move followers.
 	for( GameEntity *follower = ent->GetTeamChainEntity(); follower; follower = follower->GetTeamChainEntity() ) {
@@ -1253,6 +1347,61 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 * G_RunEntity
 *
 */
+//#ifdef SHAREDGAME_SERVERGAME
+// Runs entity thinking code for this frame if necessary
+//===============
+qboolean SG_RunThink(GameEntity *geThinker) {
+    if (!geThinker) {
+	    SG_PhysicsEntityWPrint(__func__, "[start of]", "geThinker is (nullptr)!\n");
+        return false;
+    }
+
+    // Fetch think time.
+    GameTime nextThinkTime = geThinker->GetNextThinkTime();
+
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+		return true;
+    }
+
+    // Reset think time before thinking.
+    geThinker->SetNextThinkTime(GameTime::zero());
+
+#if _DEBUG
+    if ( !geThinker->HasThinkCallback() ) {
+        // Write the index, programmers may look at that thing first
+        std::string errorString = "";
+        if (geThinker->GetPODEntity()) {
+            errorString += "entity (index " + std::to_string(geThinker->GetNumber());
+        } else {
+            errorString += "entity has no PODEntity ";
+        }
+
+        // Write the targetname as well, if it exists
+        if ( !geThinker->GetTargetName().empty() ) {
+            errorString += ", name '" + geThinker->GetTargetName() + "'";
+        }
+
+        // Write down the C++ class name too
+        errorString += ", class '";
+        errorString += geThinker->GetTypeInfo()->classname;
+        errorString += "'";
+
+        // Close it off and state what's actually going on
+        errorString += ") has a nullptr think callback \n";
+    //    
+        //gi.Error( errorString.c_str() );
+
+        // Return true.
+        return true;
+    }
+#endif
+
+    // Last but not least, let the entity execute its think behavior callback.
+    geThinker->Think();
+
+    return false;
+}
+
 void SG_RunEntity(SGEntityHandle &entityHandle) {
 	// TODO: Make this less hacky ofc, get normal sane access to cvars.
 	CheckSVCvars();
@@ -1279,7 +1428,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 
 	// only team captains decide the think, and they make think their team members when they do
 	if( !( ent->GetFlags() & EntityFlags::TeamSlave)) {
-		for( GameEntity *gePart = ent; gePart ; gePart = gePart->GetTeamChainEntityEntity()) {
+		for( GameEntity *gePart = ent; gePart ; gePart = gePart->GetTeamChainEntity()) {
 			SG_RunThink( gePart );
 		}
 	}

@@ -55,7 +55,7 @@ struct PODEntity {
 	*	World related info, used for optimizing tracing and proper VIS.
 	**/
 	//! Linked to a division node or leaf
-    list_t area;
+	list_t area = {};
 
     //! If numClusters is -1, use headNode instead.
     int32_t numClusters = 0;

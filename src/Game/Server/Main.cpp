@@ -517,6 +517,7 @@ SVG_RunFrame
 Advances the world by FRAMETIME(for 50hz=0.019) seconds
 ================
 */
+#include "../Shared/Physics/Physics.h"
 void SVG_RunFrame(void) {
     // Add the time it takes to simulate a ServerGame frame to our level.time value.
     level.time += FRAMERATE_MS;
@@ -616,7 +617,8 @@ void SVG_RunFrame(void) {
         }
 
         // Last but not least, "run" process the entity.
-	    SVG_RunEntity(entityHandle);
+	    //SVG_RunEntity(entityHandle);
+		SG_RunEntity(entityHandle);
     }
 
     // See if it is time to end a deathmatch.

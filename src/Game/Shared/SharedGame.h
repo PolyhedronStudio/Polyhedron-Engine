@@ -452,7 +452,7 @@ using GameEntity	= IClientGameEntity;
 //! Using GameWorld.
 using SGGameWorld	= ClientGameWorld;
 //! Using: Trace Results
-using SGTraceResult	= CLGTraceResult;
+//using SGTraceResult	= CLGTraceResult;
 //! Using: TouchTriggers
 //using SGTouchTriggers = UTIL_TouchTriggers;
 
@@ -469,9 +469,9 @@ using SGTraceResult	= CLGTraceResult;
 *	Functions:
 **/
 //! Trace Function.
-//extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
+//extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask);//extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
 //using SGTrace = CLG_Trace;
-#define SGTrace CLG_Trace;
+//#define SGTrace CLG_Trace;
 
 
 /**
@@ -508,7 +508,7 @@ using GameEntity = IServerGameEntity;
 //! Using: GameWorld.
 using SGGameWorld = ServerGameWorld;
 //! Using: Trace Results.
-using SGTraceResult = SVGTraceResult;
+//using SGTraceResult = SVGTraceResult;
 
 
 /**
@@ -529,9 +529,9 @@ using SGTraceResult = SVGTraceResult;
 **/
 //! Trace Function.
 //extern auto SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* passent, const int32_t& contentMask);
-#define SGTrace SVG_Trace;
-
-
+//#define SGTrace SVG_Trace;
+//extern SVGTraceResult SVG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, GameEntity* skipEntity, const int32_t& contentMask);
+//using SGTrace = SVG_Trace;
 /**
 *	ConstExpr:
 **/
@@ -557,6 +557,12 @@ static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
 *   Game Time Utilities.
 **/
 #include "Time.h"
+
+
+/**
+*	Tracing.
+**/
+#include "Tracing.h"
 
 
 /**

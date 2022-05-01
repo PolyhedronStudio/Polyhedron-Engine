@@ -15,11 +15,13 @@ SET(SRC_SHAREDGAME
 #	Physics/MoveTypes/MoveTypeToss.cpp
 #	Physics/MoveTypes/MoveTypeTossSlide.cpp
 	Physics/Physics.cpp
+	Physics/SlideMove.cpp
 
 	World/IGameWorld.cpp
 
 	PlayerMove.cpp
 	SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
+	Tracing.cpp
 )
 
 ###########
@@ -32,6 +34,7 @@ SET(HEADERS_SHAREDGAME
 	Entities.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities.h 
 
 	Physics/Physics.h
+	Physics/SlideMove.h
 
 	World/IGameWorld.h
 	
@@ -40,6 +43,7 @@ SET(HEADERS_SHAREDGAME
 	SkeletalAnimation.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.h 
 	SharedGame.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SharedGame.h 
 	Time.h
+	Tracing.h
 )
 
 #

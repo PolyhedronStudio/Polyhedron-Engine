@@ -902,6 +902,36 @@ public:
     virtual void            SetYawSpeed(const float yawSpeed) override { this->yawSpeed = yawSpeed; };
 
 
+    /**
+    *
+    *
+    *   Placeholders for BaseMover.
+    *
+    *
+    **/
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetAcceleration() { return 0.f; }
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetDeceleration() { return 0.f; }
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline const vec3_t& GetEndPosition() { return ZeroVec3; }
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float    GetSpeed() { return 0.f; }
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline const vec3_t& GetStartPosition() { return ZeroVec3; }
+
+
+
     /***
     *
     * 

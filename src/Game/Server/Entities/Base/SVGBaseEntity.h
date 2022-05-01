@@ -629,7 +629,7 @@ public:
     /**
     *
     *
-    *   Placeholders for SVGBaseMover.
+    *   Placeholders for BaseMover.
     *
     *
     **/
