@@ -13,11 +13,7 @@
 #pragma once
 
 // Forward declare the entity handle object class.
-class SVGEntityHandle;
-
-
-// Incldue ServerGame Entity Interface.
-#include "../IServerGameEntity.h"
+class SGEntityHandle;
 
 /**
 *   SVGBaseEntity

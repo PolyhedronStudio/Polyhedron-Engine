@@ -18,7 +18,7 @@ class IServerGameEntity;
 *	@return	A valid pointer if the POD Entity is pointing to one. nullptr otherwise.
 **/
 #ifdef SHAREDGAME_SERVERGAME
-#include "../../Server/Entities/IServerGameEntity.h"
+//#include "../../Server/Entities/IServerGameEntity.h"
 static IServerGameEntity* GetGameEntity(PODEntity* podEntity) {
     // Reinterpret cast the gameEntity pointer.
     if (podEntity) {
@@ -34,7 +34,7 @@ static IServerGameEntity* GetGameEntity(PODEntity* podEntity) {
 }
 #endif
 #ifdef SHAREDGAME_CLIENTGAME
-#include "../../Client/Entities/IClientGameEntity.h"
+//#include "../../Client/Entities/IClientGameEntity.h"
 static IClientGameEntity* GetGameEntity(PODEntity* podEntity) {
     // Reinterpret cast the gameEntity pointer.
     if (podEntity) {

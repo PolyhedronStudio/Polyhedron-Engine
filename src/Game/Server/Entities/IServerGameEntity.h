@@ -14,11 +14,12 @@
 
 // GameLocals.
 #include "../ServerGameLocals.h"
+//#include "../../Shared/SharedGame.h"
 // SharedGame Entity Interface.
-//#include "Game/Shared/SharedGame.h"
+#include "../../Shared/Entities/ISharedGameEntity.h"
 
 
-
+class ISharedGameEntity;
 
 /**
 *   IClientGameEntity

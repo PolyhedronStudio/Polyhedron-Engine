@@ -671,6 +671,6 @@ protected:
 
 
 protected:
-	//! Pointer to the client entity which owns this game entity.
+	//! Pointer to the entity which owns this game entity.
     PODEntity *podEntity = nullptr;
 };

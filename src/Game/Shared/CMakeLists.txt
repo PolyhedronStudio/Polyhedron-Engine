@@ -18,7 +18,7 @@ SET(SRC_SHAREDGAME
 
 	World/IGameWorld.cpp
 
-	PMove.cpp
+	PlayerMove.cpp
 	SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
 )
 
@@ -35,7 +35,7 @@ SET(HEADERS_SHAREDGAME
 
 	World/IGameWorld.h
 	
-	PMove.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.h 
+	PlayerMove.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.h 
 	Protocol.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Protocol.h 
 	SkeletalAnimation.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.h 
 	SharedGame.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SharedGame.h 

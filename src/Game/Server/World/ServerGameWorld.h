@@ -19,8 +19,10 @@ class SVGBaseEntity;
 class SGEntityHandle;
 class Worldspawn;
 class IGameMode;
+class ISharedGameEntity;
 class IServerGameEntity;
-#include "../Entities/IServerGameEntity.h"
+
+#include "../ServerGameLocals.h"
 
 #include "../../../Game/Shared/World/IGameWorld.h"
 

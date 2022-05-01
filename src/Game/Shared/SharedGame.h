@@ -10,6 +10,8 @@
 #pragma once
 
 // Include general shared header.
+#define GAME_INCLUDE
+#
 #include "../../Shared/Shared.h"
 
 
@@ -405,6 +407,7 @@ struct RenderDrawFlags {
 **/
 //! Predeclared for game locals include files.
 class SGEntityHandle;
+class ISharedGameEntity;
 
 /**
 *	Include needed headers for building SharedGame code for the ClientGame module.
@@ -426,7 +429,7 @@ class SGEntityHandle;
 #include "../../Shared/Refresh.h"
 #include "../../Shared/CLTypes.h"
 #include "../../Shared/CLGame.h"
-#endif
+//#endif
 
 //! Actual game entity type for the ClientGame module.
 class IClientGameEntity;
@@ -559,4 +562,4 @@ static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
 /**
 *   Protocol
 **/
-#include "PMove.h"
+#include "PlayerMove.h"
