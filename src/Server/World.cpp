@@ -103,22 +103,21 @@ static areanode_t *SV_CreateAreaNode(int depth, const vec3_t &mins, const vec3_t
 **/
 void SV_ClearWorld(void)
 {
-    mmodel_t *cm;
-    Entity *ent;
-    int i;
-
     memset(sv_areanodes, 0, sizeof(sv_areanodes));
     sv_numareanodes = 0;
 
     if (sv.cm.cache) {
-        cm = &sv.cm.cache->models[0];
+        mmodel_t *cm = &sv.cm.cache->models[0];
         SV_CreateAreaNode(0, cm->mins, cm->maxs);
     }
 
     // make sure all entities are unlinked
-    for (i = 0; i < ge->maxEntities; i++) {
-        ent = EDICT_NUM(i);
-        ent->area.prev = ent->area.next = NULL;
+    //for (i = 0; i < ge->maxEntities; i++) {
+	for (int i = 0; i < MAX_SERVER_POD_ENTITIES; i++) {
+        Entity *ent = EDICT_NUM(i);
+		if (ent) {
+	        ent->area.prev = ent->area.next = NULL;
+		}
     }
 }
 

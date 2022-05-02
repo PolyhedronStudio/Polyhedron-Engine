@@ -57,8 +57,10 @@ public:
 		TypeFlag_None = 0,
 		// Cannot be allocated
 		TypeFlag_Abstract = 1 << 0,
-		// Can be spawned in the map
-		TypeFlag_MapSpawn = 1 << 1
+		// Can be spawned in the map during map load.
+		TypeFlag_MapSpawn = 1 << 1,
+		// Can be spawned in the map during gameplay.
+		TypeFlag_GameSpawn = 1 << 2
 	};
 
 public:
@@ -98,6 +100,10 @@ public:
 		return !IsAbstract() && typeFlags & TypeFlag_MapSpawn;
 	}
 
+	bool IsGameSpawnable() const {
+		return !IsAbstract() && typeFlags & TypeFlag_GameSpawn;
+	}
+
 	bool IsAbstract() const {
 		return typeFlags & TypeFlag_Abstract;
 	}
@@ -107,16 +113,25 @@ public:
 	*			characters.
 	**/
 	static uint32_t HashClassnameString(const char* s, size_t len, unsigned size) {
-		uint32_t hash = 0;
-		while (*s && len--) {
-			uint32_t c = PH_ToLower(*s++);
-			hash = 127 * hash + c;
-		}
+		// Winning answer from: https://stackoverflow.com/a/7666577 DJB2 hashing.
+        unsigned long hash = 5381;
+        int c;
 
-		hash = (hash >> 20) ^(hash >> 10) ^ hash;
-		return hash & (size - 1);
-	}
+        while (c = *s++)
+            hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+        return hash;
+    	//uint32_t hash = 0;
+		//while (*s && len--) {
+		//	uint32_t c = PH_ToLower(*s++);
+		//	hash = 127 * hash + c;
+		//}
+
+		//hash = (hash >> 20) ^(hash >> 10) ^ hash;
+		//return hash & (size - 1);
 	
+	}
+		
 	// Get type info by map classname
 	static TypeInfo* GetInfoByMapName( const char* name ) { 
 		if ( nullptr == name ) {
@@ -238,6 +253,21 @@ static GameEntity* AllocateInstance( PODEntity* entity ) {		\
 	return baseEntity;											\
 }																\
 __DeclareTypeInfo( mapClassName, #classname, #superClass, TypeInfo::TypeFlag_MapSpawn, &classname::AllocateInstance );
+
+// Declares and initialises the type information for this class, so it can be spawned during gameplay. 
+// NOTE: multiple inheritance not supported
+// @param mapClassName (string) - the map classname of this entity, used during entity spawning
+// @param classname (symbol) - the internal C++ class name
+// @param superClass (symbol) - the class this entity class inherits from
+#define DefineGameClass( classname, superClass )	\
+using Base = superClass;										\
+static GameEntity* AllocateInstance( PODEntity* entity ) {		\
+	classname *baseEntity = new classname( entity );			\
+	baseEntity->SetClassname(#classname);						\
+	entity->isLocal = true;										\
+	return baseEntity;											\
+}																\
+__DeclareTypeInfo( #classname, #classname, #superClass, TypeInfo::TypeFlag_GameSpawn, &classname::AllocateInstance );
 
 
 ///////////// OLD MACRO, Kept around just in case.

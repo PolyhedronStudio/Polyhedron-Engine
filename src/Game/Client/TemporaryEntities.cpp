@@ -1061,7 +1061,16 @@ void CLG_ParseTempEntity(void)
 
 // ---------------------- START OF: Client Side Debris / Gibs ---------------------- 
 	case TempEntityEvent::BodyGib: {
-			TE_SpawnGibs(teParameters.position1, teParameters.velocity, teParameters.count);
+			ClientGameWorld *gameWorld = GetGameWorld();
+			if (!gameWorld) {
+				break;
+			}
+
+			GameEntity *gibber = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+			if (gibber) {
+				TE_SpawnGibs(gibber->GetOrigin(), gibber->GetVelocity(), teParameters.count);
+			}
 		break;
 	}
 // ---------------------- END OF: Client Side Debris / Gibs ---------------------- 

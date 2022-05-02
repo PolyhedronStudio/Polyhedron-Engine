@@ -771,7 +771,14 @@ SVGBaseEntity* ServerGameWorld::ValidateEntity(const SGEntityHandle &entityHandl
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
 void ServerGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
-	DebrisEntity::Create(debrisser, gibModel, origin, speed); 
+	//DebrisEntity::Create(debrisser, gibModel, origin, speed); 
+    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
+    gi.MSG_WriteUint8(TempEntityEvent::DebrisGib);//WriteByte(TempEntityEvent::Blood);
+    gi.MSG_WriteUint16(debrisser->GetNumber());
+	//gi.MSG_WriteVector3(gibber->GetVelocity(), false);
+    gi.MSG_WriteUint8(1 /*count*/);
+	gi.MSG_WriteUint8(speed);
+    gi.Multicast(debrisser->GetOrigin(), Multicast::PVS);
 }
 
 /**
@@ -786,8 +793,8 @@ void ServerGameWorld::ThrowGib(GameEntity* gibber, const std::string& gibModel, 
 	}
     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
     gi.MSG_WriteUint8(TempEntityEvent::BodyGib);//WriteByte(TempEntityEvent::Blood);
-    gi.MSG_WriteVector3(gibber->GetOrigin(), false);
-	gi.MSG_WriteVector3(gibber->GetVelocity(), false);
+    gi.MSG_WriteUint16(gibber->GetNumber());
+	//gi.MSG_WriteVector3(gibber->GetVelocity(), false);
     gi.MSG_WriteUint8(count);
     gi.Multicast(gibber->GetOrigin(), Multicast::PVS);
 }

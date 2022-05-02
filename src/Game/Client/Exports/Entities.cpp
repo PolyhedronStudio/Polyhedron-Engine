@@ -209,6 +209,19 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
         // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
 		SG_RunEntity(handle);
+
+
+		// Update the podEntity's hashedClassname for the next frame.
+		if (podEntity) {
+			podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+			
+			if (podEntity->gameEntity) {
+				// Keep it up to date with whatever the game entities type info 
+				podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+			} else {
+				podEntity->currentState.hashedClassname = 0;
+			}
+		}
 //		CLG_RunServerEntity(handle);
     }
 }
@@ -247,6 +260,17 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		SGEntityHandle handle = gameEntity;
 		//CLG_RunLocalClientEntity(handle);
 		SG_RunEntity(handle);
+
+		if (podEntity) {
+			podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+			
+			if (podEntity->gameEntity) {
+				// Keep it up to date with whatever the game entities type info 
+				podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+			} else {
+				podEntity->currentState.hashedClassname = 0;
+			}
+		}
     }
 }
 

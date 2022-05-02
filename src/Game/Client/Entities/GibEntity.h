@@ -24,7 +24,11 @@ private:
     virtual ~GibEntity();
 
 public:
-    DefineClass(GibEntity, CLGBaseLocalEntity);
+	DefineGameClass( GibEntity, CLGBaseLocalEntity);
+	//DefineClass( GibEntity, IClientGameEntity);
+	//DefineMapClass( "GibEntity", CLGBaseLocalEntity, IClientGameEntity);
+	//DefineGameClass( GibEntity, IClientGameEntity);
+    //DefineGameClass("GibEntity", GibEntity, CLGBaseLocalEntity);
 
     //
     // Interface functions. 

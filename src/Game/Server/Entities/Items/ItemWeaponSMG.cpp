@@ -244,7 +244,7 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::None);
 
                 // Debug Print.
-                gi.DPrintf("SMG Anim::Holster(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
+                //gi.DPrintf("SMG Anim::Holster(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
             break;
         case WeaponState::Draw:
                 // Remove IsHolstered flag.
@@ -257,11 +257,11 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("SMG Anim::Draw(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
+                //gi.DPrintf("SMG Anim::Draw(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
             break;
         case WeaponState::Idle:          
                 // Debug print.
-                gi.DPrintf("SMG Anim::Idle(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
+                //gi.DPrintf("SMG Anim::Idle(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
             break;
         case WeaponState::Reload: 
                 // Reload clip.
@@ -274,7 +274,7 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("SMG Anim::Reload(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
+                //gi.DPrintf("SMG Anim::Reload(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
             break;
         case WeaponState::PrimaryFire:
                 // Remove state processing flag because we'll queue idle state next. .
@@ -284,7 +284,7 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("SMG Anim::PrimaryFire(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
+                //gi.DPrintf("SMG Anim::PrimaryFire(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
             break;
         case WeaponState::SecondaryFire:
                 // Remove state processing flag because we'll queue idle state next. .
@@ -294,7 +294,7 @@ void ItemWeaponSMG::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SVG
                 weaponSMG->InstanceWeaponQueueNextState(player, weaponSMG, client, WeaponState::Idle);
 
                 // Debug Print.
-                gi.DPrintf("SMG Anim::SecondaryFire(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
+                //gi.DPrintf("SMG Anim::SecondaryFire(started: %i) (finished: %i)\n", client->playerState.gunAnimationStartTime, level.time.count());
             break;
         default:
 //                gi.DPrintf("SMG State::Default(started: %i) finished animating at time: %i\n", client->playerState.gunAnimationStartTime, level.timeStamp);

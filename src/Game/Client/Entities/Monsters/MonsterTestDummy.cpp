@@ -73,6 +73,10 @@ void MonsterTestDummy::FrameThink() {
 	if (podEntity) {
 	//	Com_DPrint("[clEntity: #%i - svEntity: #%i - Class: %s - Hash: %i] is Thinking\n", clEntity->clientEntityNumber, clEntity->current.number, GetClassname().c_str(), GetHashedClassname());
 	}
+	
+	// Here we should probably animate this sucker eh?
+	SetNextThinkTime(level.time + FRAMETIME_S);
+	SetThinkCallback(&MonsterTestDummy::FrameThink);
 }
 /**
 *   @brief  General entity thinking routine.
@@ -80,10 +84,6 @@ void MonsterTestDummy::FrameThink() {
 void MonsterTestDummy::Think() {
 	// Do Base Thinking.
 	Base::Think();
-
-	// Here we should probably animate this sucker eh?
-	SetNextThinkTime(level.time + FRAMETIME_S);
-	SetThinkCallback(&MonsterTestDummy::FrameThink);
 }
 
 /**

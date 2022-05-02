@@ -161,7 +161,8 @@ void ClientGameWorld::PrepareClients() {
     clients = (ServerClient*)clgi.Z_TagMalloc(maxClients * sizeof(clients[0]), memtag_t::TAG_GENERAL);  // CPP: Cast
 
     // Current total number of entities in our game = world + maximum clients.
-//    globals.numberOfEntities = numberOfEntities = maxClients + 1;
+    numberOfEntities = maxClients + 1;
+	//globals.numberOfEntities = numberOfEntities;
 }
 
 /**
@@ -170,23 +171,23 @@ void ClientGameWorld::PrepareClients() {
 void ClientGameWorld::PreparePlayers() {
 	// Allocate a classentity for each client in existence.
 	for (int32_t i = 1; i < maxClients + 1; i++) {//maxClients + 1; i++) {
-		const int32_t entityNumber = i;
+		//const int32_t entityNumber = i;
 
 		// Acquire POD entity.
-		PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
+		PODEntity *podEntity = GetPODEntityByIndex(i);
 
 		// Setup the entity.
 		(*podEntity) = {
 			.currentState {
-				.number = entityNumber,
+				.number = i,
 			},
 			.previousState = {
-				.number = entityNumber,
+				.number = i,
 			},
 			.isLocal = false,
-			.inUse = false,
-			.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
-			.clientEntityNumber = entityNumber,
+			.inUse = true,
+			.gameEntity = CreateGameEntity<CLGBasePacketEntity>(podEntity, false, true), //CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
+			.clientEntityNumber = i,
 		};
 		
 		//// We can fetch the number based on subtracting these two pointers.
@@ -267,8 +268,8 @@ void ClientGameWorld::PrepareBodyQueue() {
 				.number = entityNumber,
 			},
 			.isLocal = false,
-			.inUse = false,
-			.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
+			.inUse = true,
+			.gameEntity = CreateGameEntity<CLGBasePacketEntity>(podEntity, false, true),//CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
 			.clientEntityNumber = entityNumber,
 		};
     }
@@ -303,30 +304,31 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 	// Acquire gameworld and entity arrays.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
-	// First 3 reserved entities.
+	//// First 3 reserved entities.
 	for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
-		PODEntity *reservedPODEntity = GetUnusedPODEntity(false);
-		
-		// Create a base local entity for these reserved ones for now.
-		GameEntity *gameEntity = CreateGameEntity<CLGBaseLocalEntity>(reservedPODEntity, false, true);
-		//gameEntity->SetInUse(false);
+	//	PODEntity *reservedPODEntity = GetUnusedPODEntity(false);
+	//	
+	//	// Create a base local entity for these reserved ones for now.
+	//	auto *gameEntity = CreateGameEntity<CLGBaseLocalEntity>(reservedPODEntity, false, false);
+	//	gameEntity->SetInUse(false);
 
-		//// Acquire POD entity.
-		//PODEntity *podEntity = GetPODEntityByIndex(i);
+	//	//// Acquire POD entity.
+		PODEntity *podEntity = GetPODEntityByIndex(i);
 
-		//// Setup the entity.
-		//(*podEntity) = {
-		//	.currentState {
-		//		.number = i,
-		//	},
-		//	.previousState = {
-		//		.number = i,
-		//	},
-		//	.isLocal = false,
-		//	.inUse = false,
-		//	.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
-		//	.clientEntityNumber = i,
-		//};
+		// Setup the entity.
+		(*podEntity) = {
+			.currentState {
+				.number = i,
+			},
+			.previousState = {
+				.number = i,
+			},
+			.isLocal = false,
+			.inUse = false,
+			//.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBaseLocalEntity"),
+			.gameEntity = nullptr,
+			.clientEntityNumber = i,
+		};
 	} 
 
 	// Engage parsing.
@@ -453,13 +455,13 @@ PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) {
 
 	// Loop through the range to find a free unused POD Entity.
 	int32_t podEntityIndex = 0;
-	for (int32_t podEntityIndex = rangeStart; podEntityIndex < rangeMaximum; podEntityIndex++) {
+	for (int32_t podEntityIndex = rangeStart; podEntityIndex < rangeMaximum + 1; podEntityIndex++) {
 		// Fetch POD Entity.
 		PODEntity *podEntity = GetPODEntityByIndex(podEntityIndex);
 
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-	    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
+	    if (!podEntity->inUse && (podEntity->freeTime == GameTime::zero() || podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
             // Set entity to "inUse".
 			podEntity->inUse = true;
 			
@@ -945,7 +947,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
-    if (info->AllocateInstance != nullptr && info->IsMapSpawnable()) {
+    if (info->AllocateInstance != nullptr && (info->IsMapSpawnable() || info->IsGameSpawnable())) {
 		// Allocate and return a pointer to the new game entity object.
 		clEntity->gameEntity = gameEntities[state.number] = info->AllocateInstance(clEntity); //InsertAt(state.number, info->AllocateInstance(clEntity));
 

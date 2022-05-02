@@ -432,6 +432,8 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
     int32_t autoAnimation = BASE_FRAMERATE * cl->time / BASE_FRAMETIME_1000;
 
 
+
+
         // C++20: Had to be placed here because of label skip.
         int32_t baseEntityFlags = 0;
 

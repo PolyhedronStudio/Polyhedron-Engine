@@ -34,7 +34,9 @@ public:
     virtual ~CLGBaseLocalEntity() = default;
 
     // Runtime type information
-	DefineMapClass( "CLGBaseLocalEntity", CLGBaseLocalEntity, IClientGameEntity);
+	DefineGameClass( CLGBaseLocalEntity, IClientGameEntity);
+	//DefineClass( CLGBaseLocalEntity, IClientGameEntity);
+	//DefineMapClass( "CLGBaseLocalEntity", CLGBaseLocalEntity, IClientGameEntity);
 
     //// Checks if this entity class is exactly the given class
     //// @param entityClass: an entity class which must inherint from SVGBaseEntity
@@ -553,7 +555,6 @@ public:
 		if (podEntity) {
 			// Set modelstr.
 			this->model = model;
-
 
 			// If it is an inline model, get the size information for it.
 			if (model[0] == '*') {

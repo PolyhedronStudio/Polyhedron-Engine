@@ -128,7 +128,7 @@ public:
     *   @return Returns true if GameEntity* != nullptr, its POD Entity pointer != nullptr, 
     *           and their entity index number matches.
     **/
-    bool operator==(const ISharedGameEntity*);
+    bool operator==(const ISharedGameEntity* gameEntity);
 
     /**
     *   @brief Used to check whether this entity handle has a valid server entity.

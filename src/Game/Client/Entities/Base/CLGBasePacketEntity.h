@@ -36,7 +36,10 @@ public:
     virtual ~CLGBasePacketEntity() = default;
 
     // Runtime type information
-	DefineMapClass( "CLGBasePacketEntity", CLGBasePacketEntity, IClientGameEntity);
+	DefineGameClass( CLGBasePacketEntity, IClientGameEntity);
+	//DefineClass( CLGBasePacketEntity, IClientGameEntity);
+	//DefineMapClass( "CLGBasePacketEntity", CLGBaseLocalEntity, IClientGameEntity);
+	//DefineGameClass( CLGBasePacketEntity, IClientGameEntity);
 
     //// Checks if this entity class is exactly the given class
     //// @param entityClass: an entity class which must inherint from SVGBaseEntity

@@ -202,7 +202,7 @@ bool SGEntityHandle::operator==(const ISharedGameEntity* gameEntity) {
 	    return false;
     }
 
-    PODEntity* podEntity = const_cast<ISharedGameEntity*>(gameEntity)->GetPODEntity();
+    const PODEntity* podEntity = const_cast<ISharedGameEntity*>(gameEntity)->GetPODEntity();
 
     if (!podEntity) {
 		return false;

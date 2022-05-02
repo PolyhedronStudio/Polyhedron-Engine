@@ -69,11 +69,6 @@ void SVGBaseEntity::PostSpawn() {
 *	By default it only executes the 'Think' callback in case we have any set.
 **/
 void SVGBaseEntity::Think() {
-	// Update current state of server entity's hash classname??
-	if (podEntity) {
-		podEntity->currentState.hashedClassname = GetTypeInfo()->hashedMapClass;
-	}
-
 	// Safety check.
 	if (thinkFunction == nullptr)
 		return;

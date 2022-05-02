@@ -29,7 +29,11 @@ public:
     virtual ~CLGBasePlayer() = default;
 
     // Runtime type information
-	DefineMapClass( "SVGBasePlayer", CLGBasePlayer, CLGBasePacketEntity);
+	DefineGameClass( CLGBasePlayer, CLGBasePacketEntity);
+	//DefineClass( CLGBasePacketEntity, IClientGameEntity);
+	//DefineMapClass( "CLGBasePacketEntity", CLGBaseLocalEntity, IClientGameEntity);
+	//DefineGameClass( CLGBasePacketEntity, IClientGameEntity);
+//	DefineGameClass( "SVGBasePlayer", CLGBasePlayer, CLGBasePacketEntity);
 
 
     /**

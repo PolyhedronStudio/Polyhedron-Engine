@@ -43,8 +43,11 @@ static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
 *   @brief  Used by game modes to spawn server side gibs.
 **/
 GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType) {
-    // Create a gib entity.
-    GibEntity* gibEntity = GetGameWorld()->CreateGameEntity<GibEntity>(nullptr, true, false);
+    
+	PODEntity *localGibEntity = GetGameWorld()->GetUnusedPODEntity(false);
+
+	// Create a gib entity.
+    GibEntity* gibEntity = GetGameWorld()->CreateGameEntity<GibEntity>(localGibEntity , false, false);
 
     // Set size.
     //vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
@@ -80,7 +83,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     float velocityScale = 1.f;
 
     // Is it an organic gib type?
-    if (gibType == 0) { //GibType::Organic) {
+    if (gibType == GibType::Organic) {
     	// Different move type for organic gibs.
 	    gibEntity->SetMoveType(MoveType::Toss);
 

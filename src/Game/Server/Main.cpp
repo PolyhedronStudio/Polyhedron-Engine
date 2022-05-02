@@ -538,18 +538,14 @@ void SVG_RunFrame(void) {
     GameEntityVector gameEntities = game.world->GetGameEntities();
 
     // Loop through the server entities, and run the base entity frame if any exists.
-    for (int32_t i = 0; i < globals.numberOfEntities; i++) {
+    for (int32_t i = 1; i < globals.numberOfEntities; i++) {
         // Acquire state number.
         int32_t stateNumber = serverEntities[i].currentState.number;
 
-        // Ensure it is even there.
-        if (gameEntities[i] == nullptr) {
-            continue;
-        }
+		PODEntity *podEntity = game.world->GetPODEntityByIndex(i);
 
         // Use an entity handle to safely acquire pointers to the corresponding entity.
-	    SGEntityHandle entityHandle = gameEntities[i];
-
+	    SGEntityHandle entityHandle = game.world->GetGameEntityByIndex(i);
 
         //if (!gameEntity || !gameEntity->IsInUse()) {
         if (!(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
@@ -563,7 +559,7 @@ void SVG_RunFrame(void) {
         //    continue;
 
         // Admer: entity was marked for removal at the previous tick
-        if (*entityHandle && entityHandle && (entityHandle->GetServerFlags() & EntityServerFlags::Remove)) {
+        if (entityHandle.Get() && *entityHandle && (entityHandle->GetServerFlags() & EntityServerFlags::Remove)) {
             // Free server entity.
             game.world->FreePODEntity(entityHandle.Get());
 
@@ -584,7 +580,7 @@ void SVG_RunFrame(void) {
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-	    SGEntityHandle groundEntity = gameEntity->GetGroundEntity();
+	    SGEntityHandle groundEntity = *gameEntity->GetGroundEntity();
         if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             gameEntity->SetGroundEntity(nullptr);
@@ -619,6 +615,22 @@ void SVG_RunFrame(void) {
         // Last but not least, "run" process the entity.
 	    //SVG_RunEntity(entityHandle);
 		SG_RunEntity(entityHandle);
+
+		// Update the hashed game entity classname (if there is any.)
+		if (podEntity) {
+			podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+			
+			if (podEntity->gameEntity) {
+				// Keep it up to date with whatever the game entities type info 
+				podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+			} else {
+				podEntity->currentState.hashedClassname = 0;
+			}
+		}
+		//if (podEntity->gameEntity) {
+		//	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+		//	podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+		//}
     }
 
     // See if it is time to end a deathmatch.

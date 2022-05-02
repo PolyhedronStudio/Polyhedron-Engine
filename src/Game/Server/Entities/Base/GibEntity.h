@@ -24,7 +24,7 @@ private:
     virtual ~GibEntity();
 
 public:
-    DefineClass(GibEntity, SVGBaseEntity);
+    DefineGameClass(GibEntity, SVGBaseEntity);
 
     //
     // Interface functions. 

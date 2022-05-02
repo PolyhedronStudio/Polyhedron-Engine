@@ -762,17 +762,18 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 		// Get the entity to check position for.
 		GameEntity *geCheck = gameWorld->GetGameEntityByIndex(i);
 
+		// Skip Checks.
+		if (!geCheck || !geCheck->IsInUse()) {
+			// Skip if it's not in use.
+			continue;
+		}
+
 		// Get some data.
 		const bool IsInUse = geCheck->IsInUse();
 		const int32_t moveType = geCheck->GetMoveType();
 		const vec3_t absMin = geCheck->GetAbsoluteMin();
 		const vec3_t absMax = geCheck->GetAbsoluteMax();
 
-		// Skip Checks.
-		if (!geCheck || !geCheck->IsInUse()) {
-			// Skip if it's not in use.
-			continue;
-		}
 		if (moveType == MoveType::Push ||
 			moveType == MoveType::Stop ||
 			moveType == MoveType::None || 
@@ -795,7 +796,13 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 				(absMax[2] >= mins[2]) &&
 				(absMax[0] >= mins[0]) &&
 				(absMax[1] >= mins[1]) &&
-				(absMax[2] >= mins[2])) {
+				(absMax[2] >= mins[2])) {            // see if the ent needs to be tested
+   //         if (absMin[0] >= maxs[0]
+   //             || absMin[1] >= maxs[1]
+   //             || absMin[2] >= maxs[2]
+   //             || absMax[0] <= mins[0]
+   //             || absMax[1] <= mins[1]
+   //             || absMax[2] <= mins[2]) {
 				continue;
 			}
 
@@ -1407,10 +1414,15 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	CheckSVCvars();
 
 	// Get GameEntity from handle.
+    if (!(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
+        SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+		return;
+    }
+
     GameEntity *ent = dynamic_cast<GameEntity*>(*entityHandle);
 
     if (!ent) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an entity handle that still has a broken game entity ptr!\n");
         return;
     }
 
@@ -1427,10 +1439,15 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	//}
 
 	// only team captains decide the think, and they make think their team members when they do
-	if( !( ent->GetFlags() & EntityFlags::TeamSlave)) {
-		for( GameEntity *gePart = ent; gePart ; gePart = gePart->GetTeamChainEntity()) {
+	if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
+		for (GameEntity* gePart = ent; gePart != nullptr; gePart = gePart->GetTeamChainEntity()) {
 			SG_RunThink( gePart );
 		}
+		//for( GameEntity *gePart = ent; gePart ; gePart = (gePart ? gePart->GetTeamChainEntity() : nullptr)) {
+		//	if (gePart) {
+		//		SG_RunThink( gePart );
+		//	}
+		//}
 	}
 
 	switch( moveType ) {
