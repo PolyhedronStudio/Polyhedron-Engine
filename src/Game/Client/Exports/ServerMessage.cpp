@@ -249,6 +249,27 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
     teParameters.type = clgi.MSG_ReadUint8();
 
     switch (teParameters.type) {
+		/**
+		*	For now, Gibs are TEs, might change in the future.
+		*	
+		*	...
+		**/
+		case TempEntityEvent::BodyGib: {
+			teParameters.position1 = clgi.MSG_ReadVector3(false); // Position for Gib spawning.
+			teParameters.velocity = clgi.MSG_ReadVector3(false); // Position for Gib spawning.
+			teParameters.count = clgi.MSG_ReadUint8(); // Would anyone spawn more than 255 gibs in a single TE?? Doubt it lol.
+			break;
+		}
+		case TempEntityEvent::DebrisGib: {
+			teParameters.position1 = clgi.MSG_ReadVector3(false); // Position for Debris spawning.
+			teParameters.count = clgi.MSG_ReadUint8(); // Would anyone spawn more than 255 gibs in a single TE?? Doubt it lol.
+			teParameters.debrisGibType = clgi.MSG_ReadUint8(); // Debris Type.
+			break;
+		}
+
+        /**
+		*	The cases below are what's left over from the classical old TE work. 
+        **/
         case TempEntityEvent::Blaster:
         case TempEntityEvent::Gunshot:
         case TempEntityEvent::Shotgun:
@@ -308,13 +329,6 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
             teParameters.position1 = clgi.MSG_ReadVector3(false);
             teParameters.dir = clgi.MSG_ReadVector3(false);
             break;
-
-		case TempEntityEvent::BodyGib: {
-			int32_t gibType = clgi.MSG_ReadInt16();
-			vec3_t gibOrigin = clgi.MSG_ReadVector3(false);
-
-			break;
-		}
         default:
             Com_Error(ErrorType::Drop, "%s: bad type", __func__);
     }

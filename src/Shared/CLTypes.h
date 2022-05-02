@@ -74,6 +74,16 @@ static constexpr uint32_t NOEXP_ROCKET = 2;
 // Used for parsing EFFECTS in the client.
 //
 struct tent_params_t {
+	/**
+	*	New Properties.
+	**/
+    vec3_t velocity = vec3_zero();
+
+	int32_t debrisGibType = 0;	//! Type of specific Debris Gib..
+
+    /**
+    *	Classical Q2 TE Properties.
+    **/
     int32_t type = 0;
     vec3_t position1 = vec3_zero();
     vec3_t position2 = vec3_zero();

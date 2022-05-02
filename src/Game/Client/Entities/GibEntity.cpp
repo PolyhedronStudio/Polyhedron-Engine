@@ -42,24 +42,29 @@ static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
 /**
 *   @brief  Used by game modes to spawn server side gibs.
 **/
-GibEntity* GibEntity::Create(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) {
+GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType) {
     // Create a gib entity.
-    GibEntity* gibEntity = GetGameWorld()->CreateGameEntity<GibEntity>();
+    GibEntity* gibEntity = GetGameWorld()->CreateGameEntity<GibEntity>(nullptr, true, false);
 
     // Set size.
-    vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
+    //vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
+	vec3_t size = vec3_scale(vec3_t{64.f, 64.f, 64.f}, 0.5f);
     gibEntity->SetSize(size);
 
     // Generate the origin to start from.
-    vec3_t origin = gibber->GetAbsoluteMin() + gibber->GetSize();
+    //vec3_t origin = gibber->GetAbsoluteMin() + gibber->GetSize();
 
-    // Add some random values to it, so they all differ.
-    origin.x += crandom() * size.x;
-    origin.y += crandom() * size.y;
-    origin.z += crandom() * size.z;
+    //// Add some random values to it, so they all differ.
+    //origin.x += crandom() * size.x;
+    //origin.y += crandom() * size.y;
+    //origin.z += crandom() * size.z;
 
     // Set the origin.
-    gibEntity->SetOrigin(origin);
+	gibEntity->SetOrigin(vec3_t{
+		origin.x + crandom() * size.x,
+		origin.y + crandom() * size.y,
+		origin.z + crandom() * size.z,
+	});
 
     // Set the model.
     gibEntity->SetModel(gibModel);
@@ -94,7 +99,7 @@ GibEntity* GibEntity::Create(GameEntity* gibber, const std::string& gibModel, in
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
     // adding it on to 'velocityDamage' its old value.
-    vec3_t gibVelocity = vec3_fmaf(gibber->GetVelocity(), velocityScale, velocityDamage);
+    vec3_t gibVelocity = vec3_fmaf(velocity, velocityScale, velocityDamage);
 
     // Be sure to clip our velocity, just in case.
     gibEntity->ClipGibVelocity(velocityDamage);

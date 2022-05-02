@@ -114,9 +114,9 @@ void BodyCorpse::BodyCorpseDie(IServerGameEntity* inflictor, IServerGameEntity* 
         SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
         // Toss gibs.
-        for (int32_t i = 0; i < 4; i++) {
-            GetGameWorld()->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-        }
+//        for (int32_t i = 0; i < 4; i++) {
+            GetGameWorld()->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 4, damage, GibType::Organic);
+        //}
 
         // Ensure its origin goes -48, it is a lame hack but hey...
         vec3_t origin = GetOrigin();

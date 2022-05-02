@@ -310,10 +310,7 @@ void MiscServerModel::MiscServerModelDie(IServerGameEntity* inflictor, IServerGa
 
     // Throw some gibs around, true horror oh boy.
     ServerGameWorld* gameworld = GetGameWorld();
-    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+    gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 4, damage, GibType::Organic);
 
     //SVG_ThrowClientHead(this, damage);
     SetEndFrame(119.f);

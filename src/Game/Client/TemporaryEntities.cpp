@@ -19,6 +19,9 @@
 #include "Effects/Particles.h"
 #include "Effects/ParticleEffects.h"
 
+// ClientGameWorld.
+#include "World/ClientGameWorld.h"
+
 //
 // CVars.
 //
@@ -1011,6 +1014,10 @@ static void CLG_RailTrail(void)
 	}
 }
 
+
+/**
+*	
+**/
 static void dirtoangles(vec3_t angles)
 {
 	angles[0] = acosf(teParameters.dir[2]) / M_PI * 180.f;
@@ -1025,13 +1032,24 @@ static void dirtoangles(vec3_t angles)
 }
 
 
-//
-//===============
-// CLG_ParseTempEntity
-// 
-// Parses a temporary entity message and acts accordingly.
-//===============
-//
+/**
+*	@brief	Parses a temporary entity message and acts accordingly.
+**/
+static void TE_SpawnGibs(const vec3_t &origin, const vec3_t &velocity, int32_t count) {
+    // Throw some gibs around, true horror oh boy.
+    ClientGameWorld* gameWorld = GetGameWorld();
+
+	// Let's go bonkers!
+	for (int32_t i = 0; i < count; i++) {
+		int32_t damage = 50;
+	    gameWorld->ThrowGib(origin, velocity, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+	}
+}
+
+
+/**
+*	@brief	Parses a temporary entity message and acts accordingly.
+**/
 static const byte splash_color[] = { 0x00, 0xe0, 0xb0, 0x50, 0xd0, 0xe0, 0xe8 };
 
 void CLG_ParseTempEntity(void)
@@ -1040,6 +1058,15 @@ void CLG_ParseTempEntity(void)
 	int r;
 
 	switch (teParameters.type) {
+
+// ---------------------- START OF: Client Side Debris / Gibs ---------------------- 
+	case TempEntityEvent::BodyGib: {
+			TE_SpawnGibs(teParameters.position1, teParameters.velocity, teParameters.count);
+		break;
+	}
+// ---------------------- END OF: Client Side Debris / Gibs ---------------------- 
+
+
 	case TempEntityEvent::Blood:          // bullet hitting flesh
 		if (!(cl_disable_particles->integer & NOPART_BLOOD))
 		{
@@ -1148,24 +1175,6 @@ void CLG_ParseTempEntity(void)
 		//FIXME : replace or remove this sound
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		break;
-
-
-// ---------------------- START OF: Client Side Debris / Gibs ---------------------- 
-	case TempEntityEvent::BodyGib:
-			
-		break;
-// ---------------------- END OF: Client Side Debris / Gibs ---------------------- 
-
-
-
-
-
-
-
-
-
-
-
 	//case TempEntityEvent::TeleportEffect:
 	//	ParticleEffects::TeleportEffect(teParameters.position1);
 	//	break;

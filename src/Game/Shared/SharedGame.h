@@ -30,6 +30,37 @@
 *
 *
 ***/
+
+
+/**
+*   Take Damage.
+**/
+struct TakeDamage {
+    //! Will NOT take damage if hit.
+    static constexpr int32_t No     = 0;  
+    //! WILL take damage if hit
+    static constexpr int32_t Yes    = 1;
+    //! When auto targeting is enabled, it'll recognizes this
+    static constexpr int32_t Aim    = 2; 
+};
+
+/**
+*   Dead Flags.
+**/
+struct DeadFlags {
+    static constexpr int32_t Alive = 0;
+    static constexpr int32_t Dead = 1;
+};
+
+/**
+*   Gib Types.
+**/
+struct GibType {
+    static constexpr int32_t Organic = 0;
+    static constexpr int32_t Metallic = 1;
+};
+
+
 /**
 *   Entity Move Types.
 **/
@@ -306,11 +337,10 @@ struct TempEntityEvent {
     //! Same as Explosion1, but without particles.
     static constexpr uint8_t NoParticleExplosion1 = 24;
 
-	//! General body gibbing.
+	//! Spawns body gibs of said count.
 	static constexpr uint8_t BodyGib = 30;
-
-	//! General debris gibbing.
-	static constexpr uint8_t Debris = 30;
+	//! Spawns debris gibs of said count and said debris type.
+	static constexpr uint8_t DebrisGib = 31;
 
     //! General sparks particle effect.
     static constexpr uint8_t Sparks = 50;

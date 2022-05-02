@@ -190,25 +190,7 @@ struct EntitySpawnFlags {
 static constexpr int32_t MELEE_DISTANCE = 80;
 
 
-/**
-*   Take Damage.
-**/
-struct TakeDamage {
-    //! Will NOT take damage if hit.
-    static constexpr int32_t No     = 0;  
-    //! WILL take damage if hit
-    static constexpr int32_t Yes    = 1;
-    //! When auto targeting is enabled, it'll recognizes this
-    static constexpr int32_t Aim    = 2; 
-};
 
-/**
-*   Dead Flags.
-**/
-struct DeadFlags {
-    static constexpr int32_t Alive = 0;
-    static constexpr int32_t Dead = 1;
-};
 
 /**
 *   Combat Ranges.
@@ -220,13 +202,7 @@ struct CombatRange {
     static constexpr int32_t Far    = 3;
 };
 
-/**
-*   Gib Types.
-**/
-struct GibType {
-    static constexpr int32_t Organic = 0;
-    static constexpr int32_t Metallic = 1;
-};
+
 
 ////monster ai flags
 //struct 

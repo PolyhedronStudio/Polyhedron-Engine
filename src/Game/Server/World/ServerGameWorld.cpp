@@ -778,6 +778,16 @@ void ServerGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &gibM
 *   @brief  Spawns a gib model entity flying at random velocities and directions.
 *   @param  gibber Pointer to the entity that is being gibbed. It is used to calculate bbox size of the gibs.
 */
-void ServerGameWorld::ThrowGib(GameEntity* gibber, const std::string& gibModel, int32_t damage, int32_t gibType) { 
-	GibEntity::Create(gibber, gibModel, damage, gibType);
+void ServerGameWorld::ThrowGib(GameEntity* gibber, const std::string& gibModel, uint32_t count, int32_t damage, int32_t gibType) { 
+	//GibEntity::Create(gibber, gibModel, damage, gibType);
+	if (!gibber) {
+		gi.DPrintf("SVGWarning: (%s): *gibber is (nullptr)!\n", __func__);
+		return;
+	}
+    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
+    gi.MSG_WriteUint8(TempEntityEvent::BodyGib);//WriteByte(TempEntityEvent::Blood);
+    gi.MSG_WriteVector3(gibber->GetOrigin(), false);
+	gi.MSG_WriteVector3(gibber->GetVelocity(), false);
+    gi.MSG_WriteUint8(count);
+    gi.Multicast(gibber->GetOrigin(), Multicast::PVS);
 }

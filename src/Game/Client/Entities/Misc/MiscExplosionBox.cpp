@@ -147,14 +147,14 @@ void MiscExplosionBox::Think() {
 	//ClientGameWorld *gameWorld = GetGameWorld();
 	//PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(GetNumber());
 	////
-	if (podEntity) {
+	//if (podEntity) {
 
-		podEntity->currentState.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
-		podEntity->currentState.oldOrigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
-		podEntity->currentState.renderEffects = RenderEffects::Beam;
-	//	SetRenderEffects(RenderEffects::Beam);
-	//	//Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
-	}
+	//	podEntity->currentState.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
+	//	podEntity->currentState.oldOrigin = vec3_mix(podEntity->previousState.oldOrigin, podEntity->currentState.oldOrigin, cl->lerpFraction);
+	//	podEntity->currentState.renderEffects = RenderEffects::Beam;
+	////	SetRenderEffects(RenderEffects::Beam);
+	////	//Com_DPrint("MiscExploBox #%i: lerpOrigin = %f %f %f, prevOrigin=%f %f %f curOrigin=%f %f %f\n", clientEntity->clientEntityNumber, clientEntity->lerpOrigin.x, clientEntity->lerpOrigin.y, clientEntity->lerpOrigin.z, clientEntity->previousState.origin.x, clientEntity->previousState.origin.y, clientEntity->previousState.origin.z, clientEntity->currentState.origin.x, clientEntity->currentState.origin.y, clientEntity->currentState.origin.z);
+	//}
 }
 
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {

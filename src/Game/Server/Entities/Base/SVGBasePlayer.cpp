@@ -207,10 +207,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
         // Throw some gibs around, true horror oh boy.
         // Get gameworld pointer.
 	    ServerGameWorld* gameworld = GetGameWorld();
-        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
-        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", damage, GibType::Organic);
+        gameworld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 4, damage, GibType::Organic);
         SVG_ThrowClientHead(this, damage);
 
         // Can't take damage if we're already busted.
