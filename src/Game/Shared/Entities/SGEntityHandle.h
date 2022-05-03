@@ -34,7 +34,7 @@ template<typename T> static inline T CastHandle(const SGEntityHandle& bridge) { 
 *   to assign the pointer to an SVG/CLG -BaseEntity use the * operator. 
 *
 *   Using the * operator also allows for executing logical boolean checks such as:
-*   if (*someEntity->GetGroundEntity()) { ... } 
+*   if (*someEntity->GetGroundEntityHandle()) { ... } 
 *   Where GetGroundEntity returns an EntityHandle.
 *   
 * 

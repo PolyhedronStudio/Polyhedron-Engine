@@ -274,7 +274,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 	float oldVelocity = VectorLength( geSlider->GetVelocity() );
 
 	// Apply gravitational force if no ground entity is set. Otherwise, apply ground friction forces.
-	if( !geSlider->GetGroundEntity() ) {
+	if( !geSlider->GetGroundEntityHandle() ) {
 		SG_AddGravity( geSlider );
 	} else { // horizontal friction
 		SG_AddGroundFriction( geSlider, friction );
@@ -297,7 +297,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 		VectorCopy( ent->r.maxs, entMove.maxs );*/
 		entMove.gravityDir = vec3_t{ 0.f, 0.f, -1.f };
 		entMove.slideBounce = slideBounce;
-		entMove.groundEntity = ( *geSlider->GetGroundEntity() );
+		entMove.groundEntity = ( *geSlider->GetGroundEntityHandle() );
 
 		// Setup passing entity and contentmask.
 		entMove.passEntity = geSlider;
@@ -357,7 +357,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 		SG_CheckGround( geSlider );
 
 		// We've found ground.
-		if( geSlider->GetGroundEntity() && vec3_length(geSlider->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
+		if( geSlider->GetGroundEntityHandle() && vec3_length(geSlider->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
 			// Zero out velocities.
 			geSlider->SetVelocity( vec3_zero() );
 			geSlider->SetAngularVelocity( vec3_zero() );
@@ -789,7 +789,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 
 
 		// See whether the entity's ground entity is the actual pusher entity.
-		if ( *(geCheck->GetGroundEntity()) != gePusher ) {
+		if ( *(geCheck->GetGroundEntityHandle()) != gePusher ) {
 			// If it's not, check whether at least the bounding box intersects.
 			if ( (absMin[0] >= maxs[0]) &&
 				(absMin[1] >= maxs[1]) &&
@@ -812,7 +812,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 			}
 		}
 		
-		if( ( gePusher->GetMoveType() == MoveType::Push) || (geCheck->GetGroundEntity() == gePusher)) {
+		if( ( gePusher->GetMoveType() == MoveType::Push) || (geCheck->GetGroundEntityHandle() == gePusher)) {
 			// Move this entity.
 			//pushed_p->ent = check;
 			//VectorCopy( check->s.origin, pushed_p->origin );
@@ -848,7 +848,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 
 			//if( geCheck->GetMoveType() != MoveType::BounceGrenade ) {
 				// may have pushed them off an edge
-				if( geCheck->GetGroundEntity() != gePusher) {
+				if( geCheck->GetGroundEntityHandle() != gePusher) {
 					geCheck->SetGroundEntity(nullptr);
 				}
 			//}
@@ -1095,7 +1095,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	}
 
 	// Check whether the ground entity has disappeared(aka not in use).
-	GameEntity *entGroundEntity = *ent->GetGroundEntity();
+	GameEntity *entGroundEntity = *ent->GetGroundEntityHandle();
 	//	if( ent->groundentity && ent->groundentity != world && !ent->groundentity->r.inuse ) {
 	if (entGroundEntity && !entGroundEntity->IsInUse()) {
 		ent->SetGroundEntity(nullptr); //ent->groundentity = NULL;
@@ -1105,7 +1105,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	float oldSpeed = vec3_length( ent->GetVelocity() );
 
 	// Check if the ent still has a valid ground entity.
-	if ( ent->GetGroundEntity() && ent->GetMoveType() != MoveType::TossSlide ) {
+	if ( ent->GetGroundEntityHandle() && ent->GetMoveType() != MoveType::TossSlide ) {
 		// Exit if there's no velocity(speed) activity.
 		if( !oldSpeed ) {
 			return;
@@ -1152,7 +1152,7 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	SG_CheckVelocity( ent );
 
 	// Add gravitational forces.
-	if( ent->GetMoveType()  != MoveType::Fly && !ent->GetGroundEntity()) {
+	if( ent->GetMoveType()  != MoveType::Fly && !ent->GetGroundEntityHandle()) {
 		SG_AddGravity( ent );
 	}
 

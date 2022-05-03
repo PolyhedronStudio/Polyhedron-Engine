@@ -67,7 +67,7 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
         o[2] = targ->currentState.origin[2] + 20;
 
     // jump animation lifts
-    if (!targ->gameEntity->GetGroundEntity())
+    if (!(*targ->gameEntity->GetGroundEntityHandle()))
         o[2] += 16;
 
     trace = gi.Trace(ownerv, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid);

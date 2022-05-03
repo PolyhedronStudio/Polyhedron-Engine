@@ -777,7 +777,7 @@ void SVGBasePlayer::UpdateEvent() {
     }
 
     // Are we on-ground and "speeding" hard enough?
-    if (GetGroundEntity() && bobMove.XYSpeed > 225) {
+    if (GetGroundEntityHandle() && bobMove.XYSpeed > 225) {
         // Do a footstep, from left, to right, left, to right.
         // Do the Bob!
         if ((int)(client->bobTime + bobMove.move) != bobMove.cycle ) {
@@ -909,10 +909,10 @@ void SVGBasePlayer::CheckFallingDamage()
     // Calculate delta velocity.
     vec3_t velocity = GetVelocity();
 
-    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!GetGroundEntity())) {
+    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!GetGroundEntityHandle())) {
         delta = client->oldVelocity[2];
     } else {
-        if (!GetGroundEntity())
+        if (!GetGroundEntityHandle())
             return;
         delta = velocity[2] - client->oldVelocity[2];
     }
@@ -1504,7 +1504,7 @@ void SVGBasePlayer::UpdateAnimationFrame() {
     if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic) {
         goto newanim;
     }
-    if (!GetGroundEntity() && client->animation.priorityAnimation <= PlayerAnimation::Wave) {
+    if (!GetGroundEntityHandle() && client->animation.priorityAnimation <= PlayerAnimation::Wave) {
         goto newanim;
     }
 
@@ -1528,7 +1528,7 @@ void SVGBasePlayer::UpdateAnimationFrame() {
 
     if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
         // Return in case of no ground entity, how can one jump otherwise?
-        if (!GetGroundEntity()) {
+        if (!GetGroundEntityHandle()) {
             return;
         }
         // Silly old Q2 animation stuff.
@@ -1545,7 +1545,7 @@ newanim:
     client->animation.isRunning = isRunning;
 
     // Got ground?
-    if (!GetGroundEntity()) {
+    if (!GetGroundEntityHandle()) {
         // Jump.
         client->animation.priorityAnimation = PlayerAnimation::Jump;
         if (GetAnimationFrame() != FRAME_jump2) {

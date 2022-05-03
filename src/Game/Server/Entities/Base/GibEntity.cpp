@@ -243,7 +243,7 @@ void GibEntity::GibEntityThink() {
 void GibEntity::GibEntityTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     vec3_t  right;
 
-    if (!GetGroundEntity())
+    if (!GetGroundEntityHandle())
         return;
 
     // Reset touch callback to nullptr.

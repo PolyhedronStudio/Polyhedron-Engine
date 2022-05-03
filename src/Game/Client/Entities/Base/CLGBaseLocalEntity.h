@@ -438,8 +438,9 @@ public:
     *   @brief Get/Set: Ground Entity
     **/
     // TODO TODO TODO: Fix it so it returns the actual ground entity....
-	virtual SGEntityHandle  GetGroundEntity() { return groundEntity; }; //SGEntityHandle(); };
-    virtual void            SetGroundEntity(GameEntity* groundEntity) { this->groundEntity = groundEntity; };
+    inline SGEntityHandle   &GetGroundEntityHandle() override { return groundEntityHandle; }
+	inline PODEntity		*GetGroundPODEntity() override { return groundEntityHandle.Get(); }
+	inline void             SetGroundEntity(GameEntity* groundEntity) { groundEntityHandle = (groundEntity ? groundEntity->GetPODEntity() : nullptr); } //this->groundEntity = groundEntity; }
 
     /**
     *   @brief Get/Set: Ground Entity Link Count
@@ -1146,6 +1147,7 @@ protected:
     IClientGameEntity* enemyEntity      = nullptr;
     //! Ground entity we're standing on.
     IClientGameEntity* groundEntity     = nullptr;
+	SGEntityHandle	groundEntityHandle;
     //! Old enemy.
     IClientGameEntity* oldEnemyEntity   = nullptr;
     //! Owner. (Such as, did the player fire a blaster bolt? If so, the owner is...)

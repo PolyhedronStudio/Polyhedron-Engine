@@ -269,7 +269,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     //SetOrigin(save);
 
     // Depending on whether we have a ground entity or not, we determine which explosion to use.
-    if (GetGroundEntity()) {
+    if (GetGroundEntityHandle()) {
         gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::Explosion1);//WriteByte(TempEntityEvent::Explosion1);
         gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
@@ -345,7 +345,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
     }
 
     // Ground entity checks.
-    if (!other->GetGroundEntity() || other->GetGroundEntity() == this) {
+    if (!other->GetGroundEntityHandle() || other->GetGroundEntityHandle() == this) {
 	    return;
     }
 

@@ -625,7 +625,7 @@ void DefaultGameMode::SpawnClientCorpse(SVGBaseEntity* ent) {
     bodyGameEntity->SetClipMask(ent->GetClipMask());
     bodyGameEntity->SetOwner(ent->GetOwner());
     bodyGameEntity->SetMoveType(ent->GetMoveType());
-    //bodyGameEntity->SetGroundEntity(ent->GetGroundEntity());
+    //bodyGameEntity->SetGroundEntity(ent->GetGroundEntityHandle());
 
     // Set the die callback, and set its take damage.
     bodyGameEntity->SetDieCallback(&BodyCorpse::BodyCorpseDie);
@@ -809,17 +809,17 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
 
         // Start at beginning of cycle again (See the else if statement.)
         client->bobTime = 0;
-    } else if (player->GetGroundEntity() || player->GetWaterLevel() == 2) {
+    } else if (player->GetGroundEntityHandle() || player->GetWaterLevel() == 2) {
         // So bobbing only cycles when on ground.
         if (bobMoveCycle.XYSpeed > 450)
             bobMoveCycle.move = 0.25;
         else if (bobMoveCycle.XYSpeed > 210)
             bobMoveCycle.move = 0.125;
-        else if (!player->GetGroundEntity() && player->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100)
+        else if (!player->GetGroundEntityHandle() && player->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100)
             bobMoveCycle.move = 0.225;
         else if (bobMoveCycle.XYSpeed > 100)
             bobMoveCycle.move = 0.0825;
-        else if (!player->GetGroundEntity() && player->GetWaterLevel() == 2)
+        else if (!player->GetGroundEntityHandle() && player->GetWaterLevel() == 2)
             bobMoveCycle.move = 0.1625;
         else
             bobMoveCycle.move = 0.03125;
@@ -949,7 +949,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         // Copy over the pmove state from the latest player state.
         PlayerMove pm       = {};
         pm.moveCommand      = *moveCommand;
-        pm.groundEntityPtr  = player->GetGroundEntity().Get();
+        pm.groundEntityPtr  = player->GetGroundEntityHandle().Get();
         pm.state            = client->playerState.pmove;
         pm.state.origin     = player->GetOrigin();
         pm.state.velocity   = player->GetVelocity();
@@ -974,7 +974,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         player->SetWaterType(pm.waterType);
 
         // Check for jumping sound.
-        if (player->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+        if (player->GetGroundEntityHandle() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
             SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
             player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
         }

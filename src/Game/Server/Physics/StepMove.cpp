@@ -423,7 +423,7 @@ qboolean SVG_StepMove_Walk(IServerGameEntity* ent, float yaw, float dist)
 {
     vec3_t  move;
 
-    if (!ent->GetGroundEntity() && !(ent->GetFlags() & (EntityFlags::Fly | EntityFlags::Swim)))
+    if (!ent->GetGroundEntityHandle() && !(ent->GetFlags() & (EntityFlags::Fly | EntityFlags::Swim)))
         return false;
 
     yaw = yaw * M_PI * 2 / 360;

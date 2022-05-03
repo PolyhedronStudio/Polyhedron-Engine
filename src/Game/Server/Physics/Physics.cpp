@@ -577,7 +577,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             continue;       // not linked in anywhere
 
         // if the entity is standing on the pusher, it will definitely be moved
-        if (check->GetGroundEntity() != pusher) {
+        if (check->GetGroundEntityHandle() != pusher) {
             // see if the ent needs to be tested
             if (absMin[0] >= maxs[0]
                 || absMin[1] >= maxs[1]
@@ -593,7 +593,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             
         }
 
-        if ((pusher->GetMoveType() == MoveType::Push) || (check->GetGroundEntity() == pusher)) {
+        if ((pusher->GetMoveType() == MoveType::Push) || (check->GetGroundEntityHandle() == pusher)) {
             // move this entity
             pushed_p->entityHandle = check;
             pushed_p->origin = check->GetOrigin();  //VectorCopy(check->state.origin, pushed_p->origin);
@@ -623,7 +623,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
             check->SetOrigin(check->GetOrigin() + move2);//VectorAdd(check->state.origin, move2, check->state.origin);
 
             // may have pushed them off an edge
-            if (check->GetGroundEntity() != pusher)
+            if (check->GetGroundEntityHandle() != pusher)
                 check->SetGroundEntity(nullptr);
 
             block = SVG_TestEntityPosition(check);
@@ -858,14 +858,14 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     }
 
     // Check for the groundEntity going away
-    if (*ent->GetGroundEntity()) {
-        if (!ent->GetGroundEntity()->IsInUse()) {
+    if (*ent->GetGroundEntityHandle()) {
+        if (!ent->GetGroundEntityHandle()->IsInUse()) {
             ent->SetGroundEntity(nullptr);
         }
     }
 
     // If onground, return without moving
-    if (*ent->GetGroundEntity() && ent->GetMoveType() != MoveType::TossSlide) {
+    if (*ent->GetGroundEntityHandle() && ent->GetMoveType() != MoveType::TossSlide) {
         return;
     }
 
@@ -1028,7 +1028,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
     }
 
     // Retrieve ground entity.
-    IServerGameEntity* groundEntity = *ent->GetGroundEntity();
+    IServerGameEntity* groundEntity = *ent->GetGroundEntityHandle();
 
     // If we have no ground entity.
     if (!groundEntity) {
@@ -1145,7 +1145,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
             return;
 
         // Check for whether to play a land sound.
-        if (ent->GetGroundEntity()) {
+        if (ent->GetGroundEntityHandle()) {
             if (!wasOnGround) {
                 if (hitSound) {
                     SVG_Sound(ent, 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);

@@ -222,7 +222,7 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 		level.currentEntity = player;
 
         // Check for jumping sound.
-        //if (player->GetGroundEntity() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+        //if (player->GetGroundEntityHandle() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
         //    SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
         //    player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
         //}

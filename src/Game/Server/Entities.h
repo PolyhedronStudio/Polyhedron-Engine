@@ -57,7 +57,7 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether a base entity has a groundentity set.
 	*   @return Returns true in case the GameEntity has a groundentity set.
 	**/
-	inline bool GameEntityHasGroundEntity(ISharedGameEntity* ent) { return ent->GetGroundEntity(); }
+	inline bool GameEntityHasGroundEntity(ISharedGameEntity* ent) { return ent->GetGroundEntityHandle(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a serverentity set.
 	*   @return Returns true in case the GameEntity has a serverentity set.
