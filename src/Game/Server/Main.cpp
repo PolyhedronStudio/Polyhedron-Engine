@@ -580,7 +580,7 @@ void SVG_RunFrame(void) {
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-	    SGEntityHandle groundEntity = *gameEntity->GetGroundEntity();
+	    SGEntityHandle groundEntity = gameEntity->GetGroundEntity();
         if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
             // Reset ground entity.
             gameEntity->SetGroundEntity(nullptr);

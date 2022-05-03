@@ -765,7 +765,7 @@ GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
 		if (info->IsAbstract()) {
 			Com_DPrint("CLGWarning: tried to allocate an abstract class '%s'\n", info->classname);
 		} else if (!info->IsMapSpawnable()) {
-		    Com_DPrint("CLGWarning: tried to allocate a code-only class '%s'\n", info->classname);
+		    Com_DPrint("CLGWarning: %s tried to allocate a code-only class '%s'\n", __func__, info->classname);
 		}
     }
 
@@ -922,11 +922,17 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 			if (clEntity->gameEntity) {
 				static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
 			} else {
-				Com_DPrint("CLGWarning: hashed classnames and/or state and entity number mismatch:\n currentHash: %s, previousHash: %s, %i, %i\n", currentHashedClassname, previousHashedClassname, state.number, clEntity->clientEntityNumber);
+				// Do nothing. 
+				Com_DPrint("CLG (%s): PODEntity(%i) had a (nullptr) GameEntity\n", __func__, state.number, clEntity->clientEntityNumber);
 			}
 
 			return static_cast<IClientGameEntity*>(clEntity->gameEntity);
 		}
+	} else {
+		// Debug Print.
+		//if (state.number != clEntity->clientEntityNumber) {
+		//	Com_DPrint("CLG (%s): state.number(%i) mismatched clEntity->clientEntityNumber(%i)\n", __func__, state.number, clEntity->clientEntityNumber);
+		//}
 	}
 
     // New type info-based spawning system, to replace endless string comparisons
@@ -938,7 +944,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 		// 
 		if ((info = TypeInfo::GetInfoByName("CLGBasePacketEntity")) == nullptr) {
 			// Warn.
-		    Com_DPrint("CLGWarning: info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n");
+		    Com_DPrint("CLG (%s): info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n");
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -959,7 +965,9 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 
 		// If it isn't a nullptr...
 		if (!clEntity->gameEntity ) {
-			Com_DPrint("CLGWarning: GameEntityList.InsertAt failed.\n");
+			// Inform us about what entity failed exactly.
+			const char *classname = (info->IsMapSpawnable() ? info->mapClass : info->classname);
+			Com_DPrint("CLG (%s): Failed to spawn GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber);
 			return nullptr;
 			//classEntity = new CLGBasePacketEntity(clEntity);
 		}
@@ -970,11 +978,13 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 		// Return game entity.
 		return static_cast<IClientGameEntity*>(clEntity->gameEntity);
     } else {
+		// Inform us about what entity failed exactly.
+		const char *classname = (info->IsMapSpawnable() ? info->mapClass : info->classname);
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
-			Com_DPrint("CLGWarning: tried to allocate an abstract class '%s' (hash #%i) \n", info->classname, currentHashedClassname);
+			Com_DPrint("CLG (%s): Tried to allocate an 'abstract class' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber);
 		} else if (!info->IsMapSpawnable()) {
-		    Com_DPrint("CLGWarning: tried to allocate a code-only class '%s' (hash #%i) \n", info->classname, currentHashedClassname);
+		    Com_DPrint("CLG (%s): Tried to allocate a 'code-only' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber);
 		}
     }
 
@@ -996,7 +1006,7 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
-        Com_DPrint("CLGWarning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
+        Com_DPrint("CLG (%s): Called with a clEntity(nullptr)!\n", __func__);
 
         return false;
     }
@@ -1007,7 +1017,7 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 
 	// Debug.
 	if (!clgEntity) {
-		Com_DPrint("CLGWarning: ClientGameEntities::UpdateFromState had a nullptr returned from gameEntityList.UpdateGameEntityFromState\n");
+		Com_DPrint("CLG (%s): Had a (nullptr) returned from UpdateGameEntityFromState!\n", __func__);
 	}
 
   //  // 
@@ -1024,9 +1034,9 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
         if (podEntity) {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
         } else {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, state.number, mapClass, hashedMapClass);
         }
     }
 #endif
@@ -1075,8 +1085,8 @@ IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityH
 *   @brief  Spawns a debris model entity at the given origin.
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
-void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
-	DebrisEntity::Create(debrisser, gibModel, origin, speed); 
+void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &debrisModel, const vec3_t& origin, float speed) { 
+	DebrisEntity::Create(debrisser, debrisModel, origin, speed); 
 }
 
 /**

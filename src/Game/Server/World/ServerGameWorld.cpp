@@ -770,14 +770,18 @@ SVGBaseEntity* ServerGameWorld::ValidateEntity(const SGEntityHandle &entityHandl
 *   @brief  Spawns a debris model entity at the given origin.
 *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
 **/
-void ServerGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &gibModel, const vec3_t& origin, float speed) { 
+void ServerGameWorld::ThrowDebris(GameEntity* debrisser, const int32_t debrisModelIndex, const vec3_t& origin, float speed) { 
 	//DebrisEntity::Create(debrisser, gibModel, origin, speed); 
-    gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
+	gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
     gi.MSG_WriteUint8(TempEntityEvent::DebrisGib);//WriteByte(TempEntityEvent::Blood);
     gi.MSG_WriteUint16(debrisser->GetNumber());
-	//gi.MSG_WriteVector3(gibber->GetVelocity(), false);
-    gi.MSG_WriteUint8(1 /*count*/);
-	gi.MSG_WriteUint8(speed);
+	// Write a debris model index.
+	gi.MSG_WriteUint8(debrisModelIndex);
+	// We subtract the debrisser->origin from the spawn origin of debris to
+	// wire it as a half-float.
+	gi.MSG_WriteVector3(debrisser->GetOrigin() - origin, true);
+	// Speed will in most cases be a float of 0 to 2. So encode it as an Uint8.
+	gi.MSG_WriteUint8(speed * 255);
     gi.Multicast(debrisser->GetOrigin(), Multicast::PVS);
 }
 

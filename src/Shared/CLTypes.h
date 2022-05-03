@@ -78,7 +78,10 @@ struct tent_params_t {
 	*	New Properties.
 	**/
     vec3_t velocity = vec3_zero();
+	float speed = 0.f;
+	int32_t modelIndex1 = 0;
 
+	// Debris Specific.
 	int32_t debrisGibType = 0;	//! Type of specific Debris Gib..
 
     /**

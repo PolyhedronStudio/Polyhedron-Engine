@@ -225,7 +225,7 @@ public:
     *   @brief  Spawns a debris model entity at the given origin.
     *   @param  debrisser Pointer to an entity where it should acquire a debris its velocity from.
     **/
-    void ThrowDebris(GameEntity* debrisser, const std::string& gibModel, const vec3_t& origin, float speed);
+    void ThrowDebris(GameEntity* debrisser, const int32_t debrisModelIndex, const vec3_t& origin, float speed);
 
     /**
     *   @brief  Sends a TempEntityEvent to all clients about spawning #(count) of body gibs.

@@ -97,11 +97,11 @@ public:
 	}
 
 	bool IsMapSpawnable() const {
-		return !IsAbstract() && typeFlags & TypeFlag_MapSpawn;
+		return !IsAbstract() && (typeFlags & TypeFlag_MapSpawn);
 	}
 
 	bool IsGameSpawnable() const {
-		return !IsAbstract() && typeFlags & TypeFlag_GameSpawn;
+		return !IsAbstract() && (typeFlags & TypeFlag_GameSpawn);
 	}
 
 	bool IsAbstract() const {

@@ -261,9 +261,13 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
 			break;
 		}
 		case TempEntityEvent::DebrisGib: {
-			teParameters.position1 = clgi.MSG_ReadVector3(false); // Position for Debris spawning.
-			teParameters.count = clgi.MSG_ReadUint8(); // Would anyone spawn more than 255 gibs in a single TE?? Doubt it lol.
-			teParameters.debrisGibType = clgi.MSG_ReadUint8(); // Debris Type.
+			teParameters.entity1 = clgi.MSG_ReadUint16(); // Position for Gib spawning.
+			// We add the position1(debris spawn offset origin) to the spawn origin of debrisser entity.
+			teParameters.position1 = clgi.MSG_ReadVector3(true);
+			// It is not the actual model index, but the debris modeL.
+			teParameters.modelIndex1 = clgi.MSG_ReadUint8();
+			// Speed will in most cases be a float of 0 to 2. So encode it as an Uint8.
+			teParameters.speed = static_cast<float>(clgi.MSG_ReadUint8()) / 255.f;
 			break;
 		}
 

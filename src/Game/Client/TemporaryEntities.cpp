@@ -1046,6 +1046,27 @@ static void TE_SpawnGibs(const vec3_t &origin, const vec3_t &velocity, int32_t c
 	}
 }
 
+/**
+*	@brief	Speaks to the actual GameWorld in order to spawn the debris entity.
+**/
+static void TE_SpawnDebris(GameEntity *geDebrisser, const int32_t debrisModelIndex, const vec3_t &origin, const float speed) {
+    // Throw some debris around, madness!
+    ClientGameWorld* gameWorld = GetGameWorld();
+
+	// Default.
+	std::string debrisModel = "models/objects/debris1/tris.md2";
+
+	if (debrisModelIndex == 1) {
+		debrisModel = "models/objects/debris1/tris.md2";
+	} else if (debrisModelIndex == 2) {
+		debrisModel = "models/objects/debris2/tris.md2";
+	} else if (debrisModelIndex == 3) {
+		debrisModel = "models/objects/debris3/tris.md2";
+	}
+	// Let's go bonkers!
+    gameWorld->ThrowDebris(geDebrisser, debrisModel, origin, speed);
+}
+
 
 /**
 *	@brief	Parses a temporary entity message and acts accordingly.
@@ -1073,6 +1094,28 @@ void CLG_ParseTempEntity(void)
 			}
 		break;
 	}
+	case TempEntityEvent::DebrisGib: {
+			ClientGameWorld *gameWorld = GetGameWorld();
+			if (!gameWorld) {
+				break;
+			}
+
+			GameEntity *geDebrisser = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+			if (geDebrisser) {
+				const vec3_t teOrigin = geDebrisser->GetOrigin() + teParameters.position1;
+				const int32_t teDebrisModelIndex = teParameters.modelIndex1;
+				const float teSpeed = teParameters.speed;
+
+				TE_SpawnDebris(geDebrisser, teDebrisModelIndex, teOrigin, teSpeed);
+			}
+		break;
+	}
+			//teParameters.entity1 = clgi.MSG_ReadUint16(); // Position for Gib spawning.
+			//// We add the position1(debris spawn offset origin) to the spawn origin of debrisser entity.
+			//teParameters.position1 = clgi.MSG_ReadVector3(true);
+			//// Speed will in most cases be a float of 0 to 2. So encode it as an Uint8.
+			//teParameters.speed = static_cast<float>(clgi.MSG_ReadUint8()) / 255.f;
 // ---------------------- END OF: Client Side Debris / Gibs ---------------------- 
 
 

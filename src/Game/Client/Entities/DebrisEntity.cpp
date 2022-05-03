@@ -45,8 +45,14 @@ void DebrisEntity::DebrisEntityDie(GameEntity* inflictor, GameEntity* attacker, 
 *   @param  debrisser The entity that is about to spawn debris.
 **/
 DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t& origin, float speed) {
-    // Chunk Entity.
-    DebrisEntity* debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>();
+	PODEntity *localDebrisEntity = GetGameWorld()->GetUnusedPODEntity(false);
+
+	// Create a gib entity.
+    DebrisEntity *debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>(localDebrisEntity, false, false);
+
+
+	//// Chunk Entity.
+    //DebrisEntity* debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>();
 
     // Set the origin.
     debrisEntity->SetOrigin(origin);

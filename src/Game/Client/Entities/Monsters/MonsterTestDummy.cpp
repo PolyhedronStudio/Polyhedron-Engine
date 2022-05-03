@@ -90,7 +90,7 @@ void MonsterTestDummy::Think() {
 *   @brief  Act upon the parsed key and value.
 **/
 void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value) {
-
+	Base::SpawnKey(key, value);
 }
 
 

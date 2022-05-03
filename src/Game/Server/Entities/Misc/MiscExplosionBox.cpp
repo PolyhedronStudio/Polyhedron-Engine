@@ -388,7 +388,7 @@ void MiscExplosionBox::SpawnDebris1Chunk() {
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Throw debris!
-    gameworld->ThrowDebris(this, "models/objects/debris1/tris.md2", origin, speed);
+    gameworld->ThrowDebris(this, 1, origin, speed);
 }
 
 
@@ -414,7 +414,7 @@ void MiscExplosionBox::SpawnDebris2Chunk() {
     vec3_t origin = GetOrigin() + randomDirection * GetSize();
 
     // Last but not least, throw debris.
-    GetGameWorld()->ThrowDebris(this, "models/objects/debris2/tris.md2", origin, speed);
+    GetGameWorld()->ThrowDebris(this, 2, origin, speed);
 }
 
 //
@@ -429,5 +429,5 @@ void MiscExplosionBox::SpawnDebris3Chunk(const vec3_t &origin) {
     float speed = 1.75 * (float)GetDamage() / 200.0f;
 
     // Throw debris!
-    GetGameWorld()->ThrowDebris(this, "models/objects/debris3/tris.md2", origin, speed);
+    GetGameWorld()->ThrowDebris(this, 3, origin, speed);
 }
