@@ -16,77 +16,13 @@
 #include "Physics.h"
 #include "SlideMove.h"
 
-//#define CHECK_TRAPPED
-#define GS_SLIDEMOVE_CLAMPING
-
-#define STOP_EPSILON    0.1
-
-
-// box slide movement code (not used for player)
-#define MAX_SLIDEMOVE_CLIP_PLANES   16
-
-#define SLIDEMOVE_PLANEINTERACT_EPSILON 0.05
-#define SLIDEMOVEFLAG_PLANE_TOUCHED 16
-#define SLIDEMOVEFLAG_WALL_BLOCKED  8
-#define SLIDEMOVEFLAG_TRAPPED       4
-#define SLIDEMOVEFLAG_BLOCKED       2   // it was blocked at some point, doesn't mean it didn't slide along the blocking object
-#define SLIDEMOVEFLAG_MOVED     1
 
 //#define IsGroundPlane( normal, gravityDir ) ( DotProduct( normal, gravityDir ) < -0.45f )
 
 //==================================================
-// SNAP AND CLIP ORIGIN AND VELOCITY
-//==================================================
-
-/**
-*	@return	Clipped by normal velocity.
-**/
-inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce ) {
-	float backoff = vec3_dot( inVelocity, normal );
-
-	if( backoff <= 0 ) {
-		backoff *= overbounce;
-	} else {
-		backoff /= overbounce;
-	}
-
-	// Calculate out velocity vector.
-	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backoff ) );
-
-	// SlideMove clamp it.
-	//#ifdef GS_SLIDEMOVE_CLAMPING
-	{
-		float oldSpeed = vec3_length(inVelocity);
-		float newSpeed = vec3_length(outVelocity);
-
-		if (newSpeed > oldSpeed) {
-			outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
-		}
-	}
-	return outVelocity;
-	//#endif GS_SLIDEMOVE_CLAMPING
-	//for( i = 0; i < 3; i++ ) {
-	//	change = normal[i] * backoff;
-	//	out[i] = in[i] - change;
-	//}
-	//#ifdef GS_SLIDEMOVE_CLAMPING
-	//	{
-	//		float oldspeed, newspeed;
-	//		oldspeed = VectorLength( in );
-	//		newspeed = VectorLength( out );
-	//		if( newspeed > oldspeed ) {
-	//			VectorNormalize( out );
-	//			VectorScale( out, oldspeed, out );
-	//		}
-	//	}
-	//#endif
-}
-
-
-//==================================================
 
 ///*
-//* GS_LinearMovement
+//* SG_LinearMovement
 //*/
 //int GS_LinearMovement( const entity_state_t *ent, int64_t time, vec3_t dest ) {
 //	vec3_t dist;
@@ -116,27 +52,68 @@ inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, f
 //}
 //
 ///*
-//* GS_LinearMovementDelta
+//* SG_LinearMovementDelta
 //*/
-//void GS_LinearMovementDelta( const entity_state_t *ent, int64_t oldTime, int64_t curTime, vec3_t dest ) {
+//void SG_LinearMovementDelta( const entity_state_t *ent, int64_t oldTime, int64_t curTime, vec3_t dest ) {
 //	vec3_t p1, p2;
 //	GS_LinearMovement( ent, oldTime, p1 );
 //	GS_LinearMovement( ent, curTime, p2 );
 //	VectorSubtract( p2, p1, dest );
 //}
 
+/**
+*	@return	Clipped by normal velocity.
+**/
+inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce ) {
+	float backoff = vec3_dot( inVelocity, normal );
+
+	if( backoff <= 0 ) {
+		backoff *= overbounce;
+	} else {
+		backoff /= overbounce;
+	}
+
+	// Calculate out velocity vector.
+	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backoff ) );
+
+	// SlideMove clamp it.
+#ifdef SG_SLIDEMOVE_CLAMPING
+	{
+		float oldSpeed = vec3_length(inVelocity);
+		float newSpeed = vec3_length(outVelocity);
+
+		if (newSpeed > oldSpeed) {
+			outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
+		}
+	}
+#endif
+	return outVelocity;
+}
+
+
+
 //==================================================
 // SLIDE MOVE
 //
 // Note: groundentity info should be up to date when calling any slide move function
 //==================================================
-
-/*
-* GS_AddTouchEnt
-*/
+/**
+*	@brief	If within limits: Adds the geToucher GameEntity to the MoveState's touching entities list.
+**/
 static void SG_AddTouchEnt( MoveState *moveState, GameEntity *geToucher ) {
 
 	if( !moveState || !geToucher || moveState->numTouchEntities >= 32 || geToucher->GetNumber() < 0) {
+		// Warn print:
+		if (!geToucher) {
+			SG_PhysicsEntityWPrint(__func__, "[start]", "Trying to add a (nullptr) GameEntity\n" );
+		} else if (geToucher->GetNumber() < 0) {
+			SG_PhysicsEntityWPrint(__func__, "[start]", "Trying to add an invalid GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i) number\n" );
+		} else if (!moveState) {
+			SG_PhysicsEntityWPrint(__func__, "[start]", "moveState == (nullptr) while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)\n" );
+		} else if (moveState->numTouchEntities >= 32) {
+			SG_PhysicsEntityWPrint(__func__, "[start]", "moveState->numTouchEntities >= 32 while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)\n" );
+		}
+		
 		return;
 	}
 
@@ -152,9 +129,11 @@ static void SG_AddTouchEnt( MoveState *moveState, GameEntity *geToucher ) {
 	moveState->numTouchEntities++;
 }
 
-/*
-* SG_ClearClippingPlanes
-*/
+/**
+*	@brief	Clears the MoveState's clipping plane list. 
+*			(Does not truly vec3_zero them, just sets numClipPlanes to 0. Adding a 
+*			new clipping plane will overwrite the old values.)
+**/
 static void SG_ClearClippingPlanes( MoveState *moveState ) {
 	if (!moveState) {
 		return;
@@ -163,49 +142,44 @@ static void SG_ClearClippingPlanes( MoveState *moveState ) {
 	moveState->numClipPlanes = 0;
 }
 
-/*
-* GS_ClipVelocityToClippingPlanes
-*/
+/**
+*	@brief	Clips the moveState's velocity to all the normals stored in its current clipping plane normal list.
+**/
 static void SG_ClipVelocityToClippingPlanes( MoveState *moveState ) {
 	int i;
 
 	for( int32_t i = 0; i < moveState->numClipPlanes; i++ ) {
-		if( vec3_dot( moveState->velocity, moveState->clipPlaneNormals[i] ) > (FLT_EPSILON - 1.0f) ) {
-			continue; // looking in the same direction than the velocity
-		}
-//#ifndef TRACEVICFIX
-//#ifndef TRACE_NOAXIAL
-//		// this is a hack, cause non axial planes can return invalid positions in trace endpos
-//		if( SetPlaneType( moveState->clipPlaneNormals[i] ) == PLANE_NONAXIAL ) {
-//			// offset the origin a little bit along the plane normal
-//			moveState->origin = vec3_fmaf( moveState->origin, 0.05, moveState->clipPlaneNormals[i] );
-//		}
-//#endif
-//#endif
+		const vec3_t &clipPlaneNormal = moveState->clipPlaneNormals[i];
 
-		moveState->velocity = SG_ClipVelocity( moveState->velocity, moveState->clipPlaneNormals[i], moveState->slideBounce );
+		// Skip if its looking in the same direction than the velocity,
+		if( vec3_dot( moveState->velocity, clipPlaneNormal ) > (FLT_EPSILON - 1.0f) ) {
+			continue;
+		}
+
+		// Clip velocity to the clipping plane normal.
+		moveState->velocity = SG_ClipVelocity( moveState->velocity, clipPlaneNormal, moveState->slideBounce );
 	}
 }
 
-/*
-* GS_AddClippingPlane
-*/
+/**
+*	@brief	If the list hasn't exceeded MAX_SLIDEMOVE_CLIP_PLANES: Adds the plane normal to the MoveState's clipping plane normals list.
+**/
 static void SG_AddClippingPlane( MoveState *moveState, const vec3_t &planeNormal ) {
-	int i;
+	// Ensure we stay within limits of MAX_SLIDEMOVE_CLIP_PLANES . Warn if we don't.
+	if( moveState->numClipPlanes + 1 == MAX_SLIDEMOVE_CLIP_PLANES ) {
+		SG_PhysicsEntityWPrint(__func__, "[end]", "MAX_SLIDEMOVE_CLIP_PLANES reached\n" );
+		return;
+	}
 
-	// see if we are already clipping to this plane
-	for( i = 0; i < moveState->numClipPlanes; i++ ) {
+	// See if we are already clipping to this plane.
+	for( int32_t i = 0; i < moveState->numClipPlanes; i++ ) {
 		if( vec3_dot( planeNormal, moveState->clipPlaneNormals[i] ) > (FLT_EPSILON - 1.0f) ) {
 			return;
 		}
 	}
 
-	if( moveState->numClipPlanes + 1 == MAX_SLIDEMOVE_CLIP_PLANES ) {
-		SG_PhysicsEntityWPrint(__func__, "[end]", "GS_AddTouchPlane: MAX_SLIDEMOVE_CLIP_PLANES reached\n" );
-	}
-
-	// add the plane
-	VectorCopy( planeNormal, moveState->clipPlaneNormals[moveState->numClipPlanes] );
+	// Add the plane.
+	moveState->clipPlaneNormals[moveState->numClipPlanes] = planeNormal;
 	moveState->numClipPlanes++;
 }
 
@@ -222,33 +196,33 @@ static int SG_SlideMoveClipMove( MoveState *moveState /*, const bool stepping*/ 
 		if( traceResult.gameEntity ) {
 			SG_AddTouchEnt( moveState, traceResult.gameEntity );
 		}
-		return blockedMask | SLIDEMOVEFLAG_TRAPPED;
+		return blockedMask | SlideMoveFlags::Trapped;
 	}
 
-	if( traceResult.fraction == 1.0f ) { // was able to cleanly perform the full move
-		moveState->origin = traceResult.endPosition; //VectorCopy( trace.endpos, moveState->origin );
+	if( traceResult.fraction == 1.0f ) { // Was able to cleanly perform the full move.
+		moveState->origin = traceResult.endPosition;
 		moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );
-		return blockedMask | SLIDEMOVEFLAG_MOVED;
+		return blockedMask | SlideMoveFlags::Moved;
 	}
 
-	if( traceResult.fraction < 1.0f ) { // wasn't able to make the full move
+	if( traceResult.fraction < 1.0f ) { // Wasn't able to make the full move.
 		SG_AddTouchEnt( moveState, traceResult.gameEntity );
-		blockedMask |= SLIDEMOVEFLAG_PLANE_TOUCHED;
+		blockedMask |= SlideMoveFlags::PlaneTouched;
 
 		// move what can be moved
 		if( traceResult.fraction > 0.0 ) {
 			moveState->origin = traceResult.endPosition;
 			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );
-			blockedMask |= SLIDEMOVEFLAG_MOVED;
+			blockedMask |= SlideMoveFlags::Moved;
 		}
 
 		// if the plane is a wall and stepping, try to step it up
 		if( !IsWalkablePlane( traceResult.plane ) ) {
-			//if( stepping && GS_StepUp( move ) ) {
+			//if( stepping && SG_StepUp( move ) ) {
 			//	return blockedmask;  // solved : don't add the clipping plane
 			//}
 			//else {
-			blockedMask |= SLIDEMOVEFLAG_WALL_BLOCKED;
+			blockedMask |= SlideMoveFlags::WallBlocked;
 			//}
 		}
 
@@ -258,16 +232,24 @@ static int SG_SlideMoveClipMove( MoveState *moveState /*, const bool stepping*/ 
 	return blockedMask;
 }
 
-/*
-* GS_SlideMove
-*/
+/**
+*	@brief	Executes a SlideMove for the current entity by clipping its velocity to the touching plane' normals.
+*	@return	The blockedMask with the following possible flags, which when set mean:
+*			- SlideMoveFlags::PlaneTouched	:	The move has touched a plane.
+*			- SlideMoveFlags::WallBlocked	:	The move got blocked by a wall.
+*			- SlideMoveFlags::Trapped			:	The move failed, and resulted in the moveState getting trapped.
+*												When this is set the last valid Origin is stored in the MoveState.
+*			- SLIDEMOVEFLAG_BLOCKED			:	The move got blocked.
+*			- SlideMoveFlags::Moved			:	The move succeeded.
+**/
 int32_t SG_SlideMove( MoveState *moveState ) {
 	static constexpr int32_t MAX_SLIDEMOVE_ATTEMPTS = 8;
 	int32_t blockedMask = 0;
 
-	// if the velocity is too small, just stop
-	if( VectorLength( moveState->velocity ) < STOP_EPSILON ) {
-		VectorClear( moveState->velocity );
+	// If the velocity is too small, just stop.
+	if( vec3_length( moveState->velocity ) < SLIDEMOVE_STOP_EPSILON ) {
+		// Zero out its velocity.
+		moveState->velocity = vec3_zero();
 		moveState->remainingTime = 0;
 		return 0;
 	}
@@ -275,45 +257,51 @@ int32_t SG_SlideMove( MoveState *moveState ) {
 	const vec3_t originalVelocity = moveState->velocity;
 	vec3_t lastValidOrigin = moveState->origin;
 
+	// Reset clipping plane list for the current 'SlideMove' that we're about to execute.
 	SG_ClearClippingPlanes( moveState );
 	moveState->numTouchEntities = 0;
 
 	for( int32_t count = 0; count < MAX_SLIDEMOVE_ATTEMPTS; count++ ) {
-		// get the original velocity and clip it to all the planes we got in the list
+		// Get the original velocity and clip it to all the planes we got in the list.
 		moveState->velocity = originalVelocity;
 		SG_ClipVelocityToClippingPlanes( moveState );
+
+		// Process the actual slide move for the moveState.
 		blockedMask = SG_SlideMoveClipMove( moveState /*, stepping*/ );
 
-#ifdef CHECK_TRAPPED
+#ifdef SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES
 		{
-			trace_t trace;
-			module_Trace( &trace, moveState->origin, moveState->mins, moveState->maxs, moveState->origin, moveState->passent, moveState->contentmask, 0 );
-			if( trace.startsolid ) {
-				blockedmask |= SLIDEMOVEFLAG_TRAPPED;
+			//trace_t trace;
+			//module_Trace( &trace, moveState->origin, moveState->mins, moveState->maxs, moveState->origin, moveState->passent, moveState->contentmask, 0 );
+			SGTraceResult traceResult = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, moveState->origin, moveState->passEntity, moveState->contentMask );
+			if( traceResult.startSolid ) {
+				blockedMask |= SlideMoveFlags::Trapped;
 			}
 		}
 #endif
 
-		// can't continue
-		if( blockedMask & SLIDEMOVEFLAG_TRAPPED ) {
-#ifdef CHECK_TRAPPED
-			SG_PhysicsEntityWPrint(__func__, "[end]", "GS_SlideMove SLIDEMOVEFLAG_TRAPPED\n" );
+		// Can't continue.
+		if( blockedMask & SlideMoveFlags::Trapped ) {
+#ifdef SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES
+			SG_PhysicsEntityWPrint(__func__, "[end]", "SlideMoveFlags::Trapped\n" );
 #endif
 			moveState->remainingTime = 0.0f;
-			VectorCopy( lastValidOrigin, moveState->origin );
+			// Copy back in the last valid origin we had, because the move had failed.
+			moveState->origin = lastValidOrigin;
 			return blockedMask;
 		}
 
+		// Update the last validOrigin to the current moveState origin.
 		lastValidOrigin = moveState->origin;
 
-		// touched a plane, re-clip velocity and retry
-		if( blockedMask & SLIDEMOVEFLAG_PLANE_TOUCHED ) {
+		// Touched a plane, re-clip velocity and retry.
+		if( blockedMask & SlideMoveFlags::PlaneTouched ) {
 			continue;
 		}
 
-		// if it didn't touch anything the move should be completed
+		// If it didn't touch anything the move should be completed
 		if( moveState->remainingTime > 0.0f ) {
-			SG_PhysicsEntityWPrint(__func__, "[end]", "slidemove finished with remaining time\n" );
+			SG_PhysicsEntityWPrint(__func__, "[end]", "Slidemove finished with remaining time\n" );
 			moveState->remainingTime = 0.0f;
 		}
 

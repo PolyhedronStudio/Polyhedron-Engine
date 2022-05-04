@@ -81,7 +81,10 @@ void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up)
 
 //#endif  // USE_CLIENT
 
-const vec3_t bytedirs[NUMVERTEXNORMALS] = {
+/**
+*	@brief Normalized Direction Vector Table. Used for ByteToDir and DirToByte for finding the best matching normal.
+*/
+const vec3_t normalizedByteDirectionTable[NUMVERTEXNORMALS] = {
     {-0.525731, 0.000000, 0.850651},
     {-0.442863, 0.238856, 0.864188},
     {-0.295242, 0.000000, 0.955423},
@@ -248,19 +251,22 @@ const vec3_t bytedirs[NUMVERTEXNORMALS] = {
 
 int DirToByte(const vec3_t &dir)
 {
-    int     i, best;
-    float   d, bestd;
+    //int     i, best;
+    //float   d, bestd;
 
-    if (!dir) {
+	// Return.
+    if (!dir.x && !dir.y && !dir.z) {
         return 0;
     }
 
-    bestd = 0;
-    best = 0;
-    for (i = 0; i < NUMVERTEXNORMALS; i++) {
-        d = DotProduct(dir, bytedirs[i]);
-        if (d > bestd) {
-            bestd = d;
+	// The best matching dot product.
+    float bestDot = 0;
+	// Index of the normal matching said dot product.
+    int32_t best = 0;
+    for (int32_t i = 0; i < NUMVERTEXNORMALS; i++) {
+        float dot = vec3_dot(dir, normalizedByteDirectionTable[i]);
+        if (dot > bestDot) {
+            bestDot = dot;
             best = i;
         }
     }
@@ -268,13 +274,14 @@ int DirToByte(const vec3_t &dir)
     return best;
 }
 
-#if 0
-void ByteToDir(int index, vec3_t dir)
-{
-    if (index < 0 || index >= NUMVERTEXNORMALS) {
-        Com_Error(ErrorType::Fatal, "ByteToDir: illegal index");
-    }
-
-    VectorCopy(bytedirs[index], dir);
+/**
+*	@brief	Sets the direction vector to the normalized pre-generated direction vector that matches its 'byteindex'.
+**/
+void ByteToDirection(int byteIndex, vec3_t &direction) {
+    if (byteIndex < 0 || byteIndex >= NUMVERTEXNORMALS) {
+        direction = vec3_zero();
+	}
+	else {
+		direction = normalizedByteDirectionTable[byteIndex];
+	}
 }
-#endif

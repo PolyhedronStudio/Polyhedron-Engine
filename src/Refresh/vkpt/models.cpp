@@ -394,9 +394,9 @@ qerror_t MOD_LoadMD2_RTX(model_t* model, const void* rawdata, size_t length, con
 			val = src_vert->lightnormalindex;
 
 			if (val < NUMVERTEXNORMALS) {
-				(*dst_nrm)[0] = bytedirs[val][0];
-				(*dst_nrm)[1] = bytedirs[val][1];
-				(*dst_nrm)[2] = bytedirs[val][2];
+				(*dst_nrm)[0] = normalizedByteDirectionTable[val][0];
+				(*dst_nrm)[1] = normalizedByteDirectionTable[val][1];
+				(*dst_nrm)[2] = normalizedByteDirectionTable[val][2];
 			}
 
 			for (int k = 0; k < 3; k++) {

@@ -555,7 +555,7 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 		if (e >= cl->numSolidEntities) {
 			podCheck = cl->solidLocalEntities[e];
 		}
-	    SGEntityHandle checkHandle = gameEntities[e];
+	    SGEntityHandle checkHandle = podCheck;
 
         if (!checkHandle) {
     		CLG_PhysicsEntityWPrint(__func__, "[solid entity loop]", "got an invalid entity handle!\n");

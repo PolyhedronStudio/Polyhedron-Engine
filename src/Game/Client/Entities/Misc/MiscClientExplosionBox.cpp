@@ -363,7 +363,7 @@ void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientG
 	
 
     // Calculate ratio to use.
-    double ratio = (static_cast<double>(200) / static_cast<double>(GetMass()));
+    double ratio = (other->GetMass() / static_cast<double>(GetMass()));
 
     // Calculate direction.
     vec3_t dir = GetOrigin() - other->GetOrigin();

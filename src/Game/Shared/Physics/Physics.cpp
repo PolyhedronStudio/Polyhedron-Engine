@@ -715,13 +715,22 @@ static GameEntity *pushObstacle = nullptr;
 *	@brief	Objects need to be moved back on a failed push, otherwise 
 *			riders would continue to slide.
 **/
-static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &angularMove ) {
+static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec3_t &angularMove ) {
 	/*int i, e;
 	edict_t *check, *block;
 	vec3_t mins, maxs;
 	pushed_t *p;
 	mat3_t axis;
 	vec3_t org, org2, move2;*/
+
+	// Get GameEntity from handle.
+    if (!entityHandle || !(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
+        //SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+		return false;
+    }
+
+	// Get gePusher.
+	GameEntity *gePusher = (*entityHandle);
 
 	if (!gePusher || !lastPushedState ) {
 		return false;
@@ -740,7 +749,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 	lastPushedState->entityHandle = gePusher;
 	lastPushedState->origin = gePusher->GetOrigin();
 	lastPushedState->angles = gePusher->GetAngles();
-	if (gePusher->GetClient()) {
+	if ( gePusher->GetClient() ) {
 		// Store velocity. I know, it's named origin wtf?.
 		lastPushedState->playerMoveOrigin = gePusher->GetClient()->playerState.pmove.velocity;
 		// Store delta yaw angle.
@@ -758,7 +767,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 
 	// See if any solid entities are inside the final position.
 	SGGameWorld *gameWorld = GetGameWorld();
-	for (int32_t i = 1; i < 4096; i++) {
+	for ( int32_t i = 1; i < 4096; i++ ) {
 		// Get the entity to check position for.
 		GameEntity *geCheck = gameWorld->GetGameEntityByIndex(i);
 
@@ -769,7 +778,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 		}
 
 		// Get some data.
-		const bool IsInUse = geCheck->IsInUse();
+		const bool isInUse = geCheck->IsInUse();
 		const int32_t moveType = geCheck->GetMoveType();
 		const vec3_t absMin = geCheck->GetAbsoluteMin();
 		const vec3_t absMax = geCheck->GetAbsoluteMax();
@@ -796,7 +805,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 				(absMax[2] >= mins[2]) &&
 				(absMax[0] >= mins[0]) &&
 				(absMax[1] >= mins[1]) &&
-				(absMax[2] >= mins[2])) {            // see if the ent needs to be tested
+				(absMax[2] >= mins[2]) ) {            // See if the ent needs to be tested
    //         if (absMin[0] >= maxs[0]
    //             || absMin[1] >= maxs[1]
    //             || absMin[2] >= maxs[2]
@@ -812,7 +821,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 			}
 		}
 		
-		if( ( gePusher->GetMoveType() == MoveType::Push) || (geCheck->GetGroundEntityHandle() == gePusher)) {
+		if( (gePusher->GetMoveType() == MoveType::Push) || (geCheck->GetGroundEntityHandle() == gePusher) ) {
 			// Move this entity.
 			//pushed_p->ent = check;
 			//VectorCopy( check->s.origin, pushed_p->origin );
@@ -826,7 +835,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 			// Try moving the contacted entity
 			geCheck->SetOrigin(geCheck->GetOrigin() + move);
 #if USE_SMOOTH_DELTA_ANGLES
-            if (geCheck->GetClient()) {
+            if ( geCheck->GetClient() ) {
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
                 geCheck->GetClient()->playerState.pmove.origin += move;
@@ -848,7 +857,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
 
 			//if( geCheck->GetMoveType() != MoveType::BounceGrenade ) {
 				// may have pushed them off an edge
-				if( geCheck->GetGroundEntityHandle() != gePusher) {
+				if( geCheck->GetGroundEntityHandle() != gePusher ) {
 					geCheck->SetGroundEntity(nullptr);
 				}
 			//}
@@ -888,7 +897,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
             GameEntity* pusherEntity = pushedState->entityHandle;
 
             // Ensure we are dealing with a valid pusher entity.
-            if (!pusherEntity) {
+            if ( !pusherEntity ) {
     		    SG_PhysicsEntityWPrint(__func__, "[move back loop]", "got an invalid entity handle!\n");
                 continue;
             }
@@ -896,7 +905,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
             pusherEntity->SetOrigin(pushedState->origin);
             pusherEntity->SetAngles(pushedState->angles);
 #if USE_SMOOTH_DELTA_ANGLES
-            if (pusherEntity->GetClient()) {
+            if ( pusherEntity->GetClient() ) {
 				pusherEntity->SetOrigin(pusherEntity->GetClient()->playerState.pmove.origin);
                 pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = pushedState->deltaYaw;
             }
@@ -913,7 +922,7 @@ static bool SG_Push( GameEntity *gePusher, const vec3_t &move, const vec3_t &ang
         GameEntity* pusherEntity = pushedState->entityHandle;
 
         // Ensure we are dealing with a valid pusher entity.
-	    if (!pusherEntity) {
+	    if ( !pusherEntity ) {
 		    SG_PhysicsEntityWPrint(__func__, "[was moved loop] ", "got an invalid entity handle!\n");
             continue;
 	    }
@@ -935,18 +944,20 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
         return;
     }
 
-    // if not a team captain, so movement will be handled elsewhere
-    if (gePusher ->GetFlags() & EntityFlags::TeamSlave) {
-        return;
-	}
+ //   // if not a team captain, so movement will be handled elsewhere
+ //   if (gePusher ->GetFlags() & EntityFlags::TeamSlave) {
+ //       return;
+	//}
 
-	// make sure all team followers can move before commiting
+	// Make sure all team followers can move before commiting
 	// any moves or calling any think functions
-	// if the move is blocked, all moved objects will be backed out
+	// If the move is blocked, all moved objects will be backed out
 	//retry:
 	PushedGameEntityState *gePushed = pushedGameEntities;
 
 	GameEntity *gePushPart = nullptr;
+    GameEntity *gePart = nullptr, *geMove = nullptr;
+
 	for( gePushPart = gePusher; gePushPart; gePushPart = gePushPart->GetTeamChainEntity() ) {
 		// Get pusher part velocity.
 		const vec3_t partVelocity = gePushPart->GetVelocity();
@@ -966,7 +977,8 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 			const vec3_t move = vec3_scale(gePushPart->GetVelocity(), FRAMETIME.count()); //VectorScale( part->velocity, FRAMETIME, move );
 			const vec3_t amove = vec3_scale(gePushPart->GetAngularVelocity(), FRAMETIME.count()); //VectorScale( part->avelocity, FRAMETIME, amove );
 
-			if (!SG_Push(gePushPart, move, amove)) {
+			SGEntityHandle partHandle(gePushPart);
+			if (!SG_Push(partHandle, move, amove)) {
 				break;  // Move was Blocked.
 			}
 	   //}
@@ -982,7 +994,7 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 		for( GameEntity *mover = gePusher; mover; mover = mover->GetTeamChainEntity() ) {
 			auto nextThinkTime = mover->GetNextThinkTime();
 			if( nextThinkTime > GameTime::zero()) {
-				mover->SetNextThinkTime(nextThinkTime + FRAMETIME_S);
+				mover->SetNextThinkTime(nextThinkTime + FRAMERATE_MS);
 //				mover->nextThink += game.frametime;
 			}
 		}
@@ -999,7 +1011,13 @@ static void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 			goto retry;
 		}
 #endif
-	}
+	} else {
+        // the move succeeded, so call all Think functions
+        for (gePart = gePusher ; gePart ; gePart = gePart->GetTeamChainEntity()) {
+			extern qboolean SG_RunThink(GameEntity *geThinker);
+            SG_RunThink(gePart);
+        }
+    }
 }
 
 //==================================================================
@@ -1082,13 +1100,18 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
         return;
     }
 
+	// Has to be in use.
+    if (!ent->IsInUse()) {
+        return;
+	}
+
     // If not a team captain, so movement will be handled elsewhere
     if (ent->GetFlags() & EntityFlags::TeamSlave) {
         return;
 	}
 
 	// Refresh the ground entity for said MoveType entities:
-	if( ent->GetMoveType() == MoveType::Bounce) {/*MOVETYPE_BOUNCE || ent->movetype == MOVETYPE_BOUNCEGRENADE ) {*/
+	if( ent->GetMoveType() == MoveType::Bounce || ent->GetMoveType() == MoveType::TossSlide) {/*MOVETYPE_BOUNCE || ent->movetype == MOVETYPE_BOUNCEGRENADE ) {*/
 		if( ent->GetVelocity().z > 0.1f) {
 			ent->SetGroundEntity(nullptr);
 		}
@@ -1414,7 +1437,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	CheckSVCvars();
 
 	// Get GameEntity from handle.
-    if (!(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
+    if (!entityHandle || !(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
         SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
 		return;
     }
@@ -1439,7 +1462,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	//}
 
 	// only team captains decide the think, and they make think their team members when they do
-	if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
+	//if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
 		for (GameEntity* gePart = ent; gePart != nullptr; gePart = gePart->GetTeamChainEntity()) {
 			SG_RunThink( gePart );
 		}
@@ -1448,7 +1471,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 		//		SG_RunThink( gePart );
 		//	}
 		//}
-	}
+	//}
 
 	switch( moveType ) {
 	// SG_Physics_None:

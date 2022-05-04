@@ -181,6 +181,18 @@ const TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t
 }
 
 void CL_LinkEntity(PODEntity* entity) {
+
+
+	// Ensure it is in use.
+    if (!entity) {
+        Com_DPrintf("%s: PODEntity == (nullptr)!\n", __func__);
+        return;
+    }
+	if (!entity->inUse) {
+        Com_DPrintf("%s: PODEntity(#i)->inUse == false!!\n", __func__, entity->clientEntityNumber);
+		return;
+	}
+
 	// Unlink from previous old position.
 	//if (ent->area.prev) {
 	if (entity && entity->linkCount) {
@@ -191,12 +203,6 @@ void CL_LinkEntity(PODEntity* entity) {
     if (entity->clientEntityNumber == 0) {
         return;        // Don't add the world
 	}
-
-	// Ensure it is in use.
-    if (!entity || !entity->inUse) {
-        Com_DPrintf("%s: entity %d is not in use\n", __func__, entity->clientEntityNumber);
-        return;
-    }
 
 	// Ensure a map is loaded properly in our cache.
     if (!cl.bsp || cl.bsp->nodes) {
@@ -275,86 +281,72 @@ void CL_LinkEntity(PODEntity* entity) {
         return;
 	}
 
-	//// Find the first node that the ent's box crosses.
- //   areanode_t *node = sv_areanodes;
- //   while (1) {
-	//	if (node->axis == -1) {
- //           break;
-	//	}
- //       if (ent->absMin[node->axis] > node->dist) {
- //           node = node->children[0];
-	//	} else if (ent->absMax[node->axis] < node->dist) {
- //           node = node->children[1];
-	//	} else {
- //           break; // Crosses the node
-	//	}
- //   }
-
- //   // Link it in
- //   if (ent->solid == Solid::Trigger) {
- //       List_Append(&node->triggerEdicts, &ent->area);
-	//} else {
- //       List_Append(&node->solidEdicts, &ent->area);
-	//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//if (entity) {
-	//	// set the size
-	//	entity->size = entity->maxs - entity->mins;
-
-	//	// set the abs box
-	//	if (entity->solid == Solid::BSP &&
-	//		(entity->currentState.angles[0] || entity->currentState.angles[1] || entity->currentState.angles[2])) {
-	//		// expand for rotation
-	//		float   max, v;
-	//		int     i;
-
-	//		max = 0;
-	//		for (i = 0; i < 3; i++) {
-	//			v = fabs(entity->mins[i]);
-	//			if (v > max)
-	//				max = v;
-	//			v = fabs(entity->maxs[i]);
-	//			if (v > max)
-	//				max = v;
-	//		}
-	//		for (i = 0; i < 3; i++) {
-	//			entity->absMin[i] = entity->currentState.origin[i] - max;
-	//			entity->absMax[i] = entity->currentState.origin[i] + max;
-	//		}
-	//	} else {
-	//		// normal
-	//		entity->absMin = entity->currentState.origin + entity->mins; //VectorAdd(entity->currentState.origin, entity->mins, entity->absMin);
-	//		entity->absMax = entity->currentState.origin + entity->maxs; //VectorAdd(entity->currentState.origin, entity->maxs, entity->absMax);
-	//	}
-
-	//	// because movement is clipped an epsilon away from an actual edge,
-	//	// we must fully check even when bounding boxes don't quite touch
-
-
-	//	entity->linkCount++;
-	//}
+	if (entity->isLocal) {
+		cl.solidLocalEntities[cl.numSolidLocalEntities++] = entity;
+	}
 }
+
+/**
+*	@brief	Unlinked the PODEntity.
+**/
 void CL_UnlinkEntity(PODEntity* entity) {
 	if (entity) {
 		entity->linkCount = 0;
 	}
 }
 
+/**
+*	@return	Returns a headNode that can be used for testing or clipping an
+*			entity's BoundingBox or OctagonBox of mins/maxs size.
+**/
+static mnode_t *CL_HullForEntity(Entity *ent)
+{
+    if (ent->solid == Solid::BSP) {
+        int32_t i = ent->currentState.modelIndex - 1;
+
+        // Explicit hulls in the BSP model.
+        if (i <= 0 || i >= sv.cm.cache->nummodels) {
+            Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
+		}
+
+        return sv.cm.cache->models[i].headNode;
+    }
+
+    // create a temp hull from bounding box sizes
+    if (ent->solid == Solid::OctagonBox) {
+        return CM_HeadnodeForOctagon(ent->mins, ent->maxs);
+    } else {
+        return CM_HeadnodeForBox(ent->mins, ent->maxs);
+    }
+}
+
+/**
+*	@return	Returns the bit flags of what contents are there at position 'point'.
+**/
 int32_t CL_PointContents(const vec3_t& point) {
-	return CM_TransformedPointContents(point, cl.bsp->nodes, vec3_zero(), vec3_zero());
+    static PODEntity     *touch[MAX_WIRED_POD_ENTITIES], *hit = nullptr;
+    
+	// Ensure all is sane.
+    if (!cl.bsp || !cl.bsp->nodes) {
+		//Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
+		return 0;
+	}
+
+    // get base contents from world
+    int32_t contents = CM_PointContents(point, cl.bsp->nodes);
+
+    // or in contents from all the other entities
+    int32_t numberOfAreaEntities = CL_AreaEntities(point, point, touch, MAX_WIRED_POD_ENTITIES, AreaEntities::Solid);
+
+    for (int32_t i = 0; i < numberOfAreaEntities; i++) {
+		// Acquire touch entity.
+        Entity *hit = touch[i];
+
+        // Might intersect, so do an exact clip
+        contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+    }
+
+    return contents;
 }
 
 
@@ -374,17 +366,7 @@ static int32_t areaMaxCount	= 0;
 static int32_t areaType		= 0;
 
 static void CL_AreaEntities_r() {
-    //list_t *start = nullptr;
-    //PODEntity *check = nullptr;
-
-    // touch linked edicts
- //   if (areaType == AreaEntities::Solid) {
- //       start = &node->solidEdicts;
-	//} else if (areaType == AreaEntities::LocalSolid) {
-	//	start = &node->solidLocalClientEdicts;
-	//} else {
- //       start = &node->triggerEdicts;
-	//}
+	// Packet Entities.
 	if (areaType == AreaEntities::Solid) {
 		for (int i = 0; i < cl.numSolidEntities; i++) {
 			PODEntity *solidEntity = cl.solidEntities[i];
@@ -411,8 +393,8 @@ static void CL_AreaEntities_r() {
 			areaCount++;
 		}
 	} 
-
-	if (areaType == AreaEntities::LocalSolid) {
+	// Local Client Only entities that got Linked.
+	else if (areaType == AreaEntities::LocalSolid) {
 		for (int i = 0; i < cl.numSolidLocalEntities; i++) {
 			PODEntity *solidEntity = cl.solidLocalEntities[i];
 
@@ -437,28 +419,7 @@ static void CL_AreaEntities_r() {
 			areaList[areaCount] = solidEntity;
 			areaCount++;
 		}
-	} 
- //   LIST_FOR_EACH(PODEntity, check, start, area) {
- //       if (!check || check->solid == Solid::Not) {
- //           continue;        // deactivated
-	//	}
- //       if (check->absMin[0] > areaMaxs[0]
- //           || check->absMin[1] > areaMaxs[1]
- //           || check->absMin[2] > areaMaxs[2]
- //           || check->absMax[0] < areaMins[0]
- //           || check->absMax[1] < areaMins[1]
- //           || check->absMax[2] < areaMins[2]) {
- //           continue;        // not touching
-	//	}
-
- //       if (areaCount == areaMaxCount) {
- //           Com_WPrintf("CL_AreaEntities: MAXCOUNT\n");
- //           return;
- //       }
-
- //       areaList[areaCount] = check;
-	//	areaCount++;
-	//}
+	}
 }
 
 /**

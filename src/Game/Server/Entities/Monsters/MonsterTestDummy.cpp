@@ -28,8 +28,8 @@
 // Constructor/Deconstructor.
 //
 MonsterTestDummy::MonsterTestDummy(PODEntity *svEntity) : Base(svEntity) { 
-	const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
-	uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
+	//const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
+	//uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
 	//gi.DPrintf("SVG Spawned: svNumber=#%i mapClass=%s hashedMapClass=#%i\n", svEntity->state.number, mapClass, hashedMapClass);
 }
@@ -68,7 +68,7 @@ void MonsterTestDummy::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
+    SetMoveType(MoveType::TossSlide);
 
     // Since this is a "monster", after all...
     SetServerFlags(EntityServerFlags::Monster);
@@ -96,7 +96,7 @@ void MonsterTestDummy::Spawn() {
     // Set entity to allow taking damage.
     SetTakeDamage(TakeDamage::Yes);
 
-    //// Setup our MonsterTestDummy callbacks.
+    // Setup our MonsterTestDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
     SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
 

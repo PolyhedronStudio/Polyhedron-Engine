@@ -71,7 +71,7 @@ static areanode_t *CL_CreateAreaNode(int depth, const vec3_t &mins, const vec3_t
         return anode;
     }
 
-    VectorSubtract(maxs, mins, size);
+    size = maxs - mins;
     if (size[0] > size[1]) {
         anode->axis = 0;
 	} else {
@@ -79,10 +79,10 @@ static areanode_t *CL_CreateAreaNode(int depth, const vec3_t &mins, const vec3_t
 	}
 
     anode->dist = 0.5 * (maxs[anode->axis] + mins[anode->axis]);
-    mins1 = mins;//VectorCopy(mins, mins1);
-    mins2 = mins;//VectorCopy(mins, mins2);
-	maxs1 = maxs;//VectorCopy(maxs, maxs1);
-	maxs2 = maxs;//VectorCopy(maxs, maxs2);
+    mins1 = mins;
+    mins2 = mins;
+	maxs1 = maxs;
+	maxs2 = maxs;
 
     maxs1[anode->axis] = mins2[anode->axis] = anode->dist;
 
@@ -149,9 +149,13 @@ void CL_World_LinkEntity(cm_t *cm, Entity *ent)
     int32_t	clusters[MAX_TOTAL_ENT_LEAFS];
     int32_t area = 0;
     mnode_t *topnode = nullptr;
-	if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
-	return;		
-	}// set the size
+
+	// Ensure map is loaded.
+	if (!cl.bsp ||!cl.bsp->nodes) {
+		return;		
+	}
+	
+	// set the size
 	ent->size = ent->maxs - ent->mins;
 
     // set the abs box
@@ -170,12 +174,12 @@ void CL_World_LinkEntity(cm_t *cm, Entity *ent)
             if (v > max)
                 max = v;
         }
-        for (i = 0; i < 3; i++) {
-            ent->absMin[i] = ent->currentState.origin[i] - max;
-            ent->absMax[i] = ent->currentState.origin[i] + max;
-        }
+
+		// Calcualte absMin and absMax for rotated BSP Entity.
+		ent->absMin = ent->currentState.origin - vec3_t{max, max, max};
+		ent->absMax = ent->currentState.origin + vec3_t{max, max, max};
     } else {
-        // normal
+        // Normal.
         ent->absMin = ent->currentState.origin + ent->mins; //VectorAdd(ent->currentState.origin, ent->mins, ent->absMin);
         ent->absMax = ent->currentState.origin + ent->maxs; //VectorAdd(ent->currentState.origin, ent->maxs, ent->absMax);
     }

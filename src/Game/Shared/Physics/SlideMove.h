@@ -12,6 +12,7 @@
 // Shared Game.
 #include "../SharedGame.h"
 
+
 /**
 *	@return	Clipped by normal velocity.
 **/

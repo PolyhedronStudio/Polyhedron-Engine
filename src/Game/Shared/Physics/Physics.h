@@ -9,13 +9,46 @@
 ***/
 #pragma once
 
+// Shared Game.
+#include "../SharedGame.h"
+
+
 /**
 *	SlideBox Configuration.
 **/
 //! Maximum amount of planes to clip against when executing a SlideBox movement.
-static constexpr int32_t MAX_SLIDEMOVE_CLIP_PLANES = 16;
+static constexpr int32_t MAX_SLIDEMOVE_CLIP_PLANES	= 16;
 //! Maximum amount of entities that can be touched at the same time.
-static constexpr int32_t MAX_SLIDEMOVE_TOUCH = 32;
+static constexpr int32_t MAX_SLIDEMOVE_TOUCH		= 32;
+
+//! SlideMove 'Stop Epsilon' for velocities that are nearing 0.
+static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
+
+//! Uncomment for printing Debug Information Output when a SlideMove gets trapped.
+//#define SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES
+//! Comment to disable SlideMove velocity clamping.
+#define SG_SLIDEMOVE_CLAMPING
+
+
+
+/***
+*
+*
+*	SlideMove Flags and Functions.
+*
+*
+***/
+/**
+*	@brief The possible flags returned from executing a SlideMove on a MoveState.
+**/
+struct SlideMoveFlags {
+	static constexpr int32_t PlaneTouched	= 16;
+	static constexpr int32_t WallBlocked	= 8;
+	static constexpr int32_t Trapped		= 4;
+	//! When Blocekd flag is set, it doesn't mean it didn't slide along the blocking object.
+	static constexpr int32_t Blocked		= 2;
+	static constexpr int32_t Moved			= 1;
+};
 
 
 /**
@@ -41,22 +74,6 @@ struct MoveState {
 	int32_t numTouchEntities = 0;
 	GameEntity *touchEntites[MAX_SLIDEMOVE_TOUCH];
 };
-
-
-
-/***
-*
-*	License here.
-*
-*	@file
-*
-*	Both the ClientGame and the ServerGame modules share the same general Physics code.
-* 
-***/
-#pragma once
-
-// Shared Game.
-#include "../SharedGame.h"
 
 
 //========================================================================

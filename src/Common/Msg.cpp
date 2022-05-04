@@ -627,7 +627,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // PM Delta Angles.
     if (flags & PS_PM_DELTA_ANGLES) {
-	    to->pmove.deltaAngles = MSG_ReadVector3(false);
+	    to->pmove.deltaAngles = MSG_ReadVector3(true);
     }
 
     // View Offset.
@@ -642,7 +642,12 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // View Angles X Y Z.
     if (flags & PS_PM_VIEW_ANGLES) {
-	    to->pmove.viewAngles = MSG_ReadVector3(false);
+	    //to->pmove.viewAngles = MSG_ReadVector3(false);
+		to->pmove.viewAngles = {
+			ShortToFloatAngle(MSG_ReadUint16()),
+			ShortToFloatAngle(MSG_ReadUint16()),
+			ShortToFloatAngle(MSG_ReadUint16()),
+		};
     }
 
     //
@@ -689,10 +694,14 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // Blend.
     if (flags & PS_BLEND) {
-        to->blend[0] = MSG_ReadHalfFloat();
-        to->blend[1] = MSG_ReadHalfFloat();
-        to->blend[2] = MSG_ReadHalfFloat();
-        to->blend[3] = MSG_ReadHalfFloat();
+        //to->blend[0] = MSG_ReadHalfFloat();
+        //to->blend[1] = MSG_ReadHalfFloat();
+        //to->blend[2] = MSG_ReadHalfFloat();
+        //to->blend[3] = MSG_ReadHalfFloat();
+		to->blend[0] = (MSG_ReadUint8() * (1.0f / 255));
+		to->blend[1] = (MSG_ReadUint8() * (1.0f / 255));
+		to->blend[2] = (MSG_ReadUint8() * (1.0f / 255));
+		to->blend[3] = (MSG_ReadUint8() * (1.0f / 255));
     }
 
     // FOV.
@@ -923,7 +932,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_PM_DELTA_ANGLES) {
-        MSG_WriteVector3(to->pmove.deltaAngles, false);
+        MSG_WriteVector3(to->pmove.deltaAngles, true);
     }
 
     //
@@ -938,7 +947,10 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_PM_VIEW_ANGLES) {
-        MSG_WriteVector3(to->pmove.viewAngles, false);
+		MSG_WriteUint16(FloatAngleToShort(to->pmove.viewAngles.x));
+		MSG_WriteUint16(FloatAngleToShort(to->pmove.viewAngles.y));
+		MSG_WriteUint16(FloatAngleToShort(to->pmove.viewAngles.z));
+        //MSG_WriteVector3(to->pmove.viewAngles, false);
     }
 
     if (playerStateFlags & PS_KICKANGLES) {
@@ -977,7 +989,11 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_BLEND) {
-        MSG_WriteVector4(to->blend, true);
+        //MSG_WriteVector4(to->blend, true);
+		MSG_WriteUint8(to->blend[0] * 255);
+		MSG_WriteUint8(to->blend[1] * 255);
+		MSG_WriteUint8(to->blend[2] * 255);
+		MSG_WriteUint8(to->blend[3] * 255);
     }
   
     if (playerStateFlags & PS_FOV) {
@@ -1086,7 +1102,6 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
             byteMask |= EntityMessageBits::OriginZ;
         }
 
-        // N&C: Full float precision.
         if (!EqualEpsilonf(to->angles[0], from->angles[0])) {
             byteMask |= EntityMessageBits::AngleX;
         }
@@ -1288,15 +1303,15 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Angle X.
     if (byteMask & EntityMessageBits::AngleX) {
-	    MSG_WriteFloat(to->angles[0]);
+	    MSG_WriteHalfFloat(to->angles[0]);
     }
     // Write out the Angle Y.
     if (byteMask & EntityMessageBits::AngleY) {
-	    MSG_WriteFloat(to->angles[1]);
+	    MSG_WriteHalfFloat(to->angles[1]);
     }
     // Write out the Angle Z.
     if (byteMask & EntityMessageBits::AngleZ) {
-	    MSG_WriteFloat(to->angles[2]);
+	    MSG_WriteHalfFloat(to->angles[2]);
     }
 
     // Write out the Old Origin.
@@ -1433,13 +1448,13 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Angle.
     if (byteMask & EntityMessageBits::AngleX) {
-	    to->angles[0] = MSG_ReadFloat();
+	    to->angles[0] = MSG_ReadHalfFloat();
     }
     if (byteMask & EntityMessageBits::AngleY) {
-    	to->angles[1] = MSG_ReadFloat();
+    	to->angles[1] = MSG_ReadHalfFloat();
     }
     if (byteMask & EntityMessageBits::AngleZ) {
-	    to->angles[2] = MSG_ReadFloat();
+	    to->angles[2] = MSG_ReadHalfFloat();
     }
 
     // Old Origin.

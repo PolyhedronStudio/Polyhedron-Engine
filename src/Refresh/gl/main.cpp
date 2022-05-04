@@ -957,7 +957,7 @@ static void GL_InitTables(void)
     int i;
 
     for (i = 0; i < NUMVERTEXNORMALS; i++) {
-        v = bytedirs[i];
+        v = normalizedByteDirectionTable[i];
         lat = acosf(v[2]);
         lng = atan2f(v[1], v[0]);
         gl_static.latlngtab[i][0] = lat * (255.0f / (2 * M_PI));

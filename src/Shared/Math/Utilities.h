@@ -173,92 +173,58 @@ static inline uint32_t RandomRangeui(uint32_t begin, uint32_t end) {
     return begin + (rand() % (end - begin) + begin);
 }
 
-//
-//===============
-// Minf
-// 
-// Returns the minimim of 'a' and 'b'.
-//===============
-//
+/**
+*	@return	The minimim of 'a' and 'b'.
+**/
 static inline float Minf(float a, float b) {
     return a < b ? a : b;
 }
 
-//
-//===============
-// Mini
-// 
-// Returns the minimim of 'a' and 'b'.
-//===============
-//
+/**
+*	@return	The minimum of 'a' and 'b'.
+**/
 static inline int32_t Mini(int32_t a, int32_t b) {
     return a < b ? a : b;
 }
 
-//
-//===============
-// Maxf
-// 
-// Returns the maximum of 'a' and 'b'.
-//===============
-//
+/**
+*	@return	The maximum of 'a' and 'b'.
+**/
 static inline float Maxf(float a, float b) {
     return a > b ? a : b;
 }
 
-
-//
-//===============
-// Maxi
-// 
-// Returns the maximum int of 'a' and 'b'.
-//===============
-//
+/**
+*	@return	The maximum int of 'a' and 'b'.
+**/
 static inline int32_t Maxi(int32_t a, int32_t b) {
     return a > b ? a : b;
 }
 
-//
-//===============
-// Mixf
-// 
-// Returns the linear interpolation of 'a' and 'b' using the specified fraction.
-//===============
-//
+/**
+*	@return	The linear interpolation of 'a' and 'b' using the specified fraction.
+**/
 static inline float Mixf(float a, float b, float mix) {
     return std::fmaf(a, mix, b - a);
 }
 
-//
-//===============
-// Clampf
-// 
-// Returns the value 'f', clamped to the specified 'min' and 'max'.
-//===============
-//
+/**
+*	@return	The the value 'f', clamped to the specified 'min' and 'max'.
+**/
 static inline float Clampf(float f, float min = 0.f, float max = 1.f) {
     return Minf(Maxf(f, min), max);
 }
 
-//
-//===============
-// Clampi
-// 
-// Returns the value 'i', clamped to the specified 'min' and 'max'.
-//===============
-//
+/**
+*	@return	The value 'i', clamped to the specified 'min' and 'max'.
+**/
 static inline int Clampi(int i, int min, int max) {
     return Mini(Maxi(i, min), max);
 }
 
-
-//
-//===============
-// ClampEuler
-// 
-// The angle `theta` circularly clamped.
-//===============
-//
+/**
+*	@return	The angle `theta` circularly clamped.
+**/
 static inline float ClampEuler(float theta) {
     while (theta >= 360.f)
         theta -= 360.f;
@@ -268,36 +234,24 @@ static inline float ClampEuler(float theta) {
     return theta;
 }
 
-//
-//===============
-// Smoothf
-// 
-// Returns the Hermite interpolation of 'f'.
-//===============
-//
+/**
+*	@return	The Hermite interpolation of 'f'.
+**/
 static inline float Smoothf(float f, float min, float max) {
     const float s = Clampf((f - min) / (max - min), 0.f, 1.f);
     return s * s * (3.f - 2.f * s);
 }
 
-//
-//===============
-// EqualEpsilonf
-// 
-// Returns true if `std""fabsf(a - b) <= epsilon`.
-//===============
-//
+/**
+*	@return	true if `std""fabsf(a - b) <= epsilon`.
+**/
 static inline bool EqualEpsilonf(float a, float b, float epsilon = FLT_EPSILON) {
     return fabs(a - b) <= epsilon;
 }
 
-//
-//===============
-// npo32
-// 
-// Returns whether the value of k is npot32
-//===============
-//
+/**
+*	@return	true if the value of k is npot32
+**/
 static inline unsigned npot32(unsigned k)
 {
     if (k == 0)
@@ -313,29 +267,22 @@ static inline unsigned npot32(unsigned k)
     return k + 1;
 }
 
-//
-//===============
-// LerpAngle
-// 
-// Linearly interpolate the fraction between a2 and a1.
-//===============
-//
-static inline float LerpAngle(float a2, float a1, float frac)
-{
-    if (a1 - a2 > 180)
+/**
+*	@brief	Linearly interpolate the fraction between a2 and a1.
+**/
+static inline float LerpAngle(float a2, float a1, float frac) {
+    if (a1 - a2 > 180) {
         a1 -= 360;
-    if (a1 - a2 < -180)
+	}
+    if (a1 - a2 < -180) {
         a1 += 360;
+	}
     return a2 + frac * (a1 - a2);
 }
 
-//
-//===============
-// AngleMod
-// 
-// Short angle modular.
-//===============
-//
+/**
+*	@brief	Short angle modular.
+**/
 static inline float AngleMod(float a) {
     a = fmodf(a, 360.f);// (360.0 / 65536) * ((int32_t) (a * (65536 / 360.0)) & 65535);
 

@@ -177,7 +177,7 @@ SGTraceResult SG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& ma
 **/
 const int32_t SG_PointContents(const vec3_t &point) {
 #ifdef SHAREDGAME_SERVERGAME
-    return gi.PointContents(point);
+	return gi.PointContents(point);
 #endif
 #ifdef SHAREDGAME_CLIENTGAME
     return clgi.PointContents(point);

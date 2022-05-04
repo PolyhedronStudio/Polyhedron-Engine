@@ -52,4 +52,4 @@
 // TODO: These should ultimately be removed and/or replaced.
 //-----------------
 #define NUMVERTEXNORMALS    162
-extern const vec3_t bytedirs[NUMVERTEXNORMALS];
+extern const vec3_t normalizedByteDirectionTable[NUMVERTEXNORMALS];
