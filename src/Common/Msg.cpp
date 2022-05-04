@@ -1303,15 +1303,18 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Angle X.
     if (byteMask & EntityMessageBits::AngleX) {
-	    MSG_WriteHalfFloat(to->angles[0]);
+	    MSG_WriteUint16(FloatAngleToShort(to->angles[0]));
+		//MSG_WriteHalfFloat(to->angles[0]);
     }
     // Write out the Angle Y.
     if (byteMask & EntityMessageBits::AngleY) {
-	    MSG_WriteHalfFloat(to->angles[1]);
+		MSG_WriteUint16(FloatAngleToShort(to->angles[1]));
+		//MSG_WriteHalfFloat(to->angles[1]);
     }
     // Write out the Angle Z.
     if (byteMask & EntityMessageBits::AngleZ) {
-	    MSG_WriteHalfFloat(to->angles[2]);
+	    MSG_WriteUint16(FloatAngleToShort(to->angles[2]));
+		//MSG_WriteHalfFloat(to->angles[2]);
     }
 
     // Write out the Old Origin.
@@ -1448,13 +1451,13 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Angle.
     if (byteMask & EntityMessageBits::AngleX) {
-	    to->angles[0] = MSG_ReadHalfFloat();
+		to->angles[0] = ShortToFloatAngle(MSG_ReadUint16());
     }
     if (byteMask & EntityMessageBits::AngleY) {
-    	to->angles[1] = MSG_ReadHalfFloat();
+		to->angles[1] = ShortToFloatAngle(MSG_ReadUint16());
     }
     if (byteMask & EntityMessageBits::AngleZ) {
-	    to->angles[2] = MSG_ReadHalfFloat();
+		to->angles[2] = ShortToFloatAngle(MSG_ReadUint16());
     }
 
     // Old Origin.
