@@ -213,7 +213,8 @@ static void fire_lead(SVGBaseEntity *self, const vec3_t& start, const vec3_t& ai
                     gi.MSG_WriteUint8(TempEntityEvent::Splash);//gi.WriteByte(TempEntityEvent::Splash);
                     gi.MSG_WriteUint8(8);//gi.WriteByte(8);
                     gi.MSG_WriteVector3(tr.endPosition, false);
-                    gi.MSG_WriteVector3(tr.plane.normal, false);
+                    //gi.MSG_WriteVector3(tr.plane.normal, false);
+					gi.MSG_WriteUint8(DirectionToByte(tr.plane.normal));
                     gi.MSG_WriteUint8(color);//gi.WriteByte(color);
                     gi.Multicast(tr.endPosition, Multicast::PVS);
                 }

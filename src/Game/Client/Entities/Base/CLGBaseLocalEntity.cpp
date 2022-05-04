@@ -264,7 +264,12 @@ uint32_t CLGBaseLocalEntity::GetHashedClassname() {
 void CLGBaseLocalEntity::OnDeallocate() {
 
 }
+/**
+*	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
+**/
+void CLGBaseLocalEntity::OnEventID(uint8_t eventID) {
 
+}
 
 
 /***

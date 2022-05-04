@@ -82,8 +82,8 @@ void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up)
 //#endif  // USE_CLIENT
 
 /**
-*	@brief Normalized Direction Vector Table. Used for ByteToDir and DirToByte for finding the best matching normal.
-*/
+*	@brief Normalized Direction Vector Look-Up Table. Used for ByteToDir and DirToByte for finding the best matching normal.
+**/
 const vec3_t normalizedByteDirectionTable[NUMVERTEXNORMALS] = {
     {-0.525731, 0.000000, 0.850651},
     {-0.442863, 0.238856, 0.864188},
@@ -249,11 +249,11 @@ const vec3_t normalizedByteDirectionTable[NUMVERTEXNORMALS] = {
     {-0.688191, -0.587785, -0.425325},
 };
 
-int DirToByte(const vec3_t &dir)
-{
-    //int     i, best;
-    //float   d, bestd;
 
+/**
+*	@return The byteIndex of the normalized direction vector lookup table that closest matches the direction vector.
+**/
+int32_t DirectionToByte(const vec3_t &dir) {
 	// Return.
     if (!dir.x && !dir.y && !dir.z) {
         return 0;
@@ -275,9 +275,9 @@ int DirToByte(const vec3_t &dir)
 }
 
 /**
-*	@brief	Sets the direction vector to the normalized pre-generated direction vector that matches its 'byteindex'.
+*	@brief	Gets the direction vector to the normalized direction vector table, positioned at 'byteindex'.
 **/
-void ByteToDirection(int byteIndex, vec3_t &direction) {
+void ByteToDirection(int32_t byteIndex, vec3_t &direction) {
     if (byteIndex < 0 || byteIndex >= NUMVERTEXNORMALS) {
         direction = vec3_zero();
 	}

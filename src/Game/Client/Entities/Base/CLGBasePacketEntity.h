@@ -150,7 +150,10 @@ public:
     *   @brief  Gets called right before the moment of deallocation happens.
     **/
     virtual void OnDeallocate() override;
-
+	/**
+	*	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
+	**/
+	virtual void OnEventID(uint8_t eventID) override;
 
 
     /**

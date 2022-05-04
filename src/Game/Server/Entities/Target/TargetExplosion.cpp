@@ -52,7 +52,7 @@ void TargetExplosion::ExplosionUse( IServerGameEntity* other, IServerGameEntity*
 void TargetExplosion::ExplosionThink() {
 	gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte( ServerGameCommand::TempEntityEvent );
 	gi.MSG_WriteUint8(TempEntityEvent::Explosion1);//WriteByte( TempEntityEvent::Explosion1 );
-	gi.MSG_WriteVector3( GetOrigin(), false );
+	gi.MSG_WriteUint16(GetNumber());//gi.MSG_WriteVector3( GetOrigin(), false );
 	gi.Multicast( GetOrigin(), Multicast::PHS );
 
 	GetGameMode()->InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);

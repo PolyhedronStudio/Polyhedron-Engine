@@ -338,40 +338,69 @@ void ClientGameEntities::PacketEntityEvent(int32_t number) {
     if (number < 0 || number > MAX_ENTITIES) {
         Com_WPrint("ClientGameEntities::Event caught an OOB Entity ID: %i\n", number);
         return;
-    }
+	}
 
-    // Fetch the client entity.
-    PODEntity* clientEntity = &cs->entities[number];
+	// Get GameWorld.
+	ClientGameWorld *gameWorld = GetGameWorld();
 
-    // EF_TELEPORTER acts like an event, but is not cleared each frame
-    if ((clientEntity->currentState.effects & EntityEffectType::Teleporter)) {
-        ParticleEffects::Teleporter(clientEntity->currentState.origin);
-    }
+    // Get the Game Entity.
+	GameEntity *geEventTarget = gameWorld->GetGameEntityByIndex(number);
 
-    // Switch to specific execution based on a unique Event ID.
-    switch (clientEntity->currentState.eventID) {
-        case EntityEvent::ItemRespawn:
-            clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("items/respawn1.wav"), 1, Attenuation::Idle, 0);
-            ParticleEffects::ItemRespawn(clientEntity->currentState.origin);
-            break;
-        case EntityEvent::PlayerTeleport:
-            clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("misc/tele1.wav"), 1, Attenuation::Idle, 0);
-            ParticleEffects::Teleporter(clientEntity->currentState.origin);
-            break;
-        case EntityEvent::Footstep:
-            if (cl_footsteps->integer)
-                clgi.S_StartSound(NULL, number, SoundChannel::Body, cl_sfx_footsteps[rand() & 3], 1, Attenuation::Normal, 0);
-            break;
-        case EntityEvent::FallShort:
-            clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("player/land1.wav"), 1, Attenuation::Normal, 0);
-            break;
-        case EntityEvent::Fall:
-            clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall2.wav"), 1, Attenuation::Normal, 0);
-            break;
-        case EntityEvent::FallFar:
-            clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall1.wav"), 1, Attenuation::Normal, 0);
-            break;
-    }
+	// Get the POD Entity.
+	// TODO: Add support for events that aren't just GameEntity specific, but can instead also
+	// rely on just a plain old PODEntity. Do so by using the last bit, if set, it's a POD Event.
+	PODEntity *podEventTarget = gameWorld->GetPODEntityByIndex(number);
+
+	// Only proceed if both type of entities are existent. Warn otherwise.
+	if (!podEventTarget) {
+		Com_WPrint("(%s): podEventTarget is (nullptr)!\n", __func__);
+		return;
+	}
+
+	// If valid, move on, if not, then prepare for horrible feelings of doom of course.
+	if (!geEventTarget) {
+		Com_WPrint("(%s): geEventTarget for number(#%i) is (nullptr)!\n", __func__, number);
+		return;
+	}
+
+	// With a valid entity we can notify it about its new received event.
+	geEventTarget->OnEventID(podEventTarget->currentState.eventID);
+
+	//// Fetch the client entity.
+ //   PODEntity* clientEntity = &cs->entities[number];
+
+	//// TODO: Add support for events that aren't just GameEntity specific, but can instead also
+	//// rely on just a plain old PODEntity. Do so by using the last bit, if set, it's a POD Event.
+
+ //   // EF_TELEPORTER acts like an event, but is not cleared each frame
+ //   if ((clientEntity->currentState.effects & EntityEffectType::Teleporter)) {
+ //       ParticleEffects::Teleporter(clientEntity->currentState.origin);
+ //   }
+
+ //   // Switch to specific execution based on a unique Event ID.
+ //   switch (clientEntity->currentState.eventID) {
+ //       case EntityEvent::ItemRespawn:
+ //           clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("items/respawn1.wav"), 1, Attenuation::Idle, 0);
+ //           ParticleEffects::ItemRespawn(clientEntity->currentState.origin);
+ //           break;
+ //       case EntityEvent::PlayerTeleport:
+ //           clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("misc/tele1.wav"), 1, Attenuation::Idle, 0);
+ //           ParticleEffects::Teleporter(clientEntity->currentState.origin);
+ //           break;
+ //       case EntityEvent::Footstep:
+ //           if (cl_footsteps->integer)
+ //               clgi.S_StartSound(NULL, number, SoundChannel::Body, cl_sfx_footsteps[rand() & 3], 1, Attenuation::Normal, 0);
+ //           break;
+ //       case EntityEvent::FallShort:
+ //           clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("player/land1.wav"), 1, Attenuation::Normal, 0);
+ //           break;
+ //       case EntityEvent::Fall:
+ //           clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall2.wav"), 1, Attenuation::Normal, 0);
+ //           break;
+ //       case EntityEvent::FallFar:
+ //           clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall1.wav"), 1, Attenuation::Normal, 0);
+ //           break;
+ //   }
 }
 
 /**

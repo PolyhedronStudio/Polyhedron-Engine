@@ -48,8 +48,20 @@
 //-----------------
 #include "Math/Quaternion.h"
 
+
+
+
 //-----------------
-// TODO: These should ultimately be removed and/or replaced.
+// Specific Byte and Direction Vector Utilities.
 //-----------------
 #define NUMVERTEXNORMALS    162
 extern const vec3_t normalizedByteDirectionTable[NUMVERTEXNORMALS];
+
+/**
+*	@return The byteIndex of the normalized direction vector lookup table that closest matches the direction vector.
+**/
+int32_t DirectionToByte(const vec3_t &dir);
+/**
+*	@brief	Gets the direction vector to the normalized direction vector table, positioned at 'byteindex'.
+**/
+void ByteToDirection(int32_t byteIndex, vec3_t &direction);

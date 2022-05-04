@@ -88,13 +88,17 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
 //=================
 void SVG_BecomeExplosion1(IServerGameEntity *self)
 {
+	if (!self) {
+		// Warn?
+		return;
+	}
     // Fetch origin.
     vec3_t origin = self->GetOrigin();
 
     // Execute a TE effect.
     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent); // Write Byte.
     gi.MSG_WriteUint8(TempEntityEvent::Explosion1); //WriteByte(TempEntityEvent::Explosion1);
-    gi.MSG_WriteVector3(origin, false);
+    gi.MSG_WriteUint16(self->GetNumber()); //gi.MSG_WriteVector3(origin, false);
     gi.Multicast(origin, Multicast::PVS);
 
     // Queue for removal.
@@ -109,12 +113,17 @@ void SVG_BecomeExplosion1(IServerGameEntity *self)
 //=================
 void SVG_BecomeExplosion2(IServerGameEntity*self)
 {
+	if (!self) {
+		// Warn?
+		return;
+	}
+
     // Fetch origin.
     vec3_t origin = self->GetOrigin();
 
     // Execute a TE effect.
     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
     gi.MSG_WriteUint8(TempEntityEvent::Explosion2);//WriteByte(TempEntityEvent::Explosion2);
-    gi.MSG_WriteVector3(origin, false);
+    gi.MSG_WriteUint16(self->GetNumber());//gi.MSG_WriteVector3(origin, false);
     gi.Multicast(origin, Multicast::PVS);
 }

@@ -137,9 +137,9 @@ void BlasterBolt::BlasterBoltTouch(IServerGameEntity* self, IServerGameEntity* o
         gi.MSG_WriteVector3( self->GetOrigin(), false );//WriteVector3(self->GetOrigin());
 
         if (!plane) {
-            gi.MSG_WriteVector3( vec3_zero(), false );//WriteVector3(vec3_zero());
+            gi.MSG_WriteUint8(DirectionToByte(vec3_zero()));//gi.MSG_WriteVector3( vec3_zero(), false );//WriteVector3(vec3_zero());
         } else {
-            gi.MSG_WriteVector3( plane->normal, false );//WriteVector3(plane->normal);
+            gi.MSG_WriteUint8(DirectionToByte(plane->normal));//gi.MSG_WriteVector3( plane->normal, false );//WriteVector3(plane->normal);
         }
 
         vec3_t origin = self->GetOrigin();

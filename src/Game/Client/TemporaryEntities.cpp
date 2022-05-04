@@ -234,12 +234,11 @@ static explosion_t* CLG_AllocExplosion(void)
 	return oldest;
 }
 
-static explosion_t* CLG_PlainExplosion(qboolean big)
-{
+static explosion_t* CLG_PlainExplosion(qboolean big, const vec3_t &origin) {
 	explosion_t* ex;
 
 	ex = CLG_AllocExplosion();
-	VectorCopy(teParameters.position1, ex->ent.origin);
+	ex->ent.origin = origin; //VectorCopy(teParameters.position1, ex->ent.origin);
 	ex->type = explosion_t::ex_poly; // CPP: Enum
 	ex->ent.flags = RenderEffects::FullBright;
 	ex->start = cl->serverTime - CLG_FRAMETIME;
@@ -1078,15 +1077,12 @@ void CLG_ParseTempEntity(void)
 	explosion_t* ex;
 	int r;
 
+	ClientGameWorld *gameWorld = GetGameWorld();
+
 	switch (teParameters.type) {
 
-// ---------------------- START OF: Client Side Debris / Gibs ---------------------- 
+// ---------------------- START OF: Client Side Debris / Explosions / Gibs ---------------------- 
 	case TempEntityEvent::BodyGib: {
-			ClientGameWorld *gameWorld = GetGameWorld();
-			if (!gameWorld) {
-				break;
-			}
-
 			GameEntity *gibber = gameWorld->GetGameEntityByIndex(teParameters.entity1);
 
 			if (gibber) {
@@ -1095,11 +1091,6 @@ void CLG_ParseTempEntity(void)
 		break;
 	}
 	case TempEntityEvent::DebrisGib: {
-			ClientGameWorld *gameWorld = GetGameWorld();
-			if (!gameWorld) {
-				break;
-			}
-
 			GameEntity *geDebrisser = gameWorld->GetGameEntityByIndex(teParameters.entity1);
 
 			if (geDebrisser) {
@@ -1116,7 +1107,77 @@ void CLG_ParseTempEntity(void)
 			//teParameters.position1 = clgi.MSG_ReadVector3(true);
 			//// Speed will in most cases be a float of 0 to 2. So encode it as an Uint8.
 			//teParameters.speed = static_cast<float>(clgi.MSG_ReadUint8()) / 255.f;
-// ---------------------- END OF: Client Side Debris / Gibs ---------------------- 
+
+// ------------------------------------  EXPLOSIONS  ---------------------------------------//
+
+	case TempEntityEvent::PlainExplosion: {
+		GameEntity *geExploder = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+		if (geExploder) {
+			const vec3_t teOrigin = geExploder->GetOrigin();
+			CLG_PlainExplosion(false, teOrigin);
+		}
+		break;
+	}
+
+	case TempEntityEvent::Explosion2: {
+		GameEntity *geExploder = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+		if (geExploder) {
+			const vec3_t teOrigin = geExploder->GetOrigin();
+			
+			ex = CLG_PlainExplosion(false, teOrigin);
+			if (!cl_explosion_sprites->integer)
+			{
+				ex->frames = 19;
+				ex->baseFrame = 30;
+			}
+			
+			ParticleEffects::ExplosionSparks(teOrigin);
+			clgi.S_StartSound(&teOrigin, 0, 0, cl_sfx_grenexp, 1, Attenuation::Normal, 0);
+		}
+
+		break;
+	}
+	case TempEntityEvent::Explosion1: {
+		GameEntity *geExploder = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+		if (geExploder) {
+			const vec3_t teOrigin = geExploder->GetOrigin();
+
+			CLG_PlainExplosion(false, teOrigin);
+			ParticleEffects::ExplosionSparks(teOrigin);
+			clgi.S_StartSound(&teOrigin, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
+		}
+		break;
+	}
+
+	case TempEntityEvent::NoParticleExplosion1: {
+		GameEntity *geExploder = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+		if (geExploder) {
+			const vec3_t teOrigin = geExploder->GetOrigin();
+
+			CLG_PlainExplosion(false, teOrigin);
+			clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
+		}
+		break;
+	}
+
+	case TempEntityEvent::BigExplosion1: {
+		GameEntity *geExploder = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+		if (geExploder) {
+			const vec3_t teOrigin = geExploder->GetOrigin();
+
+			ex = CLG_PlainExplosion(true, teOrigin);
+			clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
+		}
+		break;
+	}
+
+
+// ---------------------- END OF: Client Side Debris / Explosions / Gibs ---------------------- 
 
 
 	case TempEntityEvent::Blood:          // bullet hitting flesh
@@ -1170,43 +1231,12 @@ void CLG_ParseTempEntity(void)
 		}
 		break;
 
-	case TempEntityEvent::Explosion2:
-		ex = CLG_PlainExplosion(false);
-		if (!cl_explosion_sprites->integer)
-		{
-			ex->frames = 19;
-			ex->baseFrame = 30;
-		}
-		ParticleEffects::ExplosionSparks(teParameters.position1);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_grenexp, 1, Attenuation::Normal, 0);
-		break;
-
-	case TempEntityEvent::Explosion1:
-		CLG_PlainExplosion(false);
-		ParticleEffects::ExplosionSparks(teParameters.position1);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
-		break;
-
-	case TempEntityEvent::NoParticleExplosion1:
-		CLG_PlainExplosion(false);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
-		break;
-
-	case TempEntityEvent::BigExplosion1:
-		ex = CLG_PlainExplosion(true);
-		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
-		break;
-
 	case TempEntityEvent::BubbleTrailA:
 		ParticleEffects::BubbleTrailA(teParameters.position1, teParameters.position2);
 		break;
 
 	case TempEntityEvent::DebugTrail:
 		CLG_DrawDebugLine(teParameters.position1, teParameters.position2);
-		break;
-
-	case TempEntityEvent::PlainExplosion:
-		CLG_PlainExplosion(false);
 		break;
 
 	case TempEntityEvent::ForceWall:

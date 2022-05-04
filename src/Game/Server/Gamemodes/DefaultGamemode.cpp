@@ -594,7 +594,8 @@ void DefaultGameMode::SpawnClientCorpse(SVGBaseEntity* ent) {
         gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::Blood);//WriteByte(TempEntityEvent::Blood);
         gi.MSG_WriteVector3(bodyEntity->currentState.origin, false);
-        gi.MSG_WriteVector3(vec3_zero(), false);
+        //gi.MSG_WriteVector3(vec3_zero(), false);
+		gi.MSG_WriteUint8(DirectionToByte(vec3_zero()));
         gi.Multicast(bodyEntity->currentState.origin, Multicast::PVS);
     }
 
@@ -651,7 +652,8 @@ void DefaultGameMode::SpawnTempDamageEntity(int32_t type, const vec3_t& origin, 
     gi.MSG_WriteUint8(type);//WriteByte(type);
     //  gi.WriteByte (damage); // <-- This was legacy crap, might wanna implement it ourselves eventually.
     gi.MSG_WriteVector3(origin, false);
-    gi.MSG_WriteVector3(normal, false);
+	gi.MSG_WriteUint8(DirectionToByte(normal));
+    //gi.MSG_WriteVector3(normal, false);
     gi.Multicast(origin, Multicast::PVS);
 }
 

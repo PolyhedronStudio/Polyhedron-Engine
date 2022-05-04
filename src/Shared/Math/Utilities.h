@@ -50,14 +50,14 @@
 *   @brief  Encodes the floating point angle to a short. Note: Loss of precision.
 *   @return The short angle after encoding the float to a short.
 **/
-static inline short FloatAngleToShort(float angle) { 
+static inline short FloatAngle2Short(float angle) { 
     return ((int32_t)((angle)*65536 / 360) & 65535);
 }
 /**
 *   @brief  Decodes the short angle to a floating point value.
 *   @return The float angle after decoding the float to a short.
 **/
-static inline float ShortToFloatAngle(short angle) {
+static inline float Short2FloatAngle(short angle) {
     return ((angle) * (360.0f / 65536));
 }
 
@@ -65,47 +65,34 @@ static inline float ShortToFloatAngle(short angle) {
 *   @brief  Encodes the floating point angle to a byte. Note: Loss of precision.
 *   @return The byte angle after encoding the float to a byte.
 **/
-static inline short FloatAngleToByte(float angle) { 
+static inline short FloatAngle2Byte(float angle) { 
     return ((int32_t)((angle)*256 / 360) & 255);
 }
 /**
 *   @brief  Decodes the byte angle to a floating point value.
 *   @return The float angle after decoding the float to a byte.
 **/
-static inline float ByteToFloatAngle(short angle) {
+static inline float Byte2FloatAngle(short angle) {
     return ((angle) * (360.0f / 256));
 }
 
-
-//
-//===============
-// Degrees
-// 
-// Returns the radians in degrees.
-//===============
-//
+/**
+*	@brief	Returns the radians in degrees.
+**/
 static inline float Degrees(float radians) {
     return radians * DegreesScalar;
 }
 
-//
-//===============
-// Radians
-// 
-// Returns the degrees in radians.
-//===============
-//
+/**
+*	@brief	Returns the degrees in radians.
+**/
 static inline float Radians(float degrees) {
     return degrees * RadiansScalar;
 }
 
-//
-//===============
-// Radians
-// 
-// Does a sinf, cosf, for the radians, useful utility. (used in vec3_vectors)
-//===============
-//
+/**
+*	@brief	Does a sinf, cosf, for the radians, useful utility. (used in vec3_vectors)
+**/
 static inline void SinCosRadians(const float radians, float  &s, float &c) {
     s = sinf(radians);
     c = cosf(radians);

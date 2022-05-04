@@ -109,7 +109,7 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
                     gi.MSG_WriteUint8(TempEntityEvent::Splash);//gi.WriteByte(TempEntityEvent::Splash);
                     gi.MSG_WriteUint8(8);//gi.WriteByte(8);
                     gi.MSG_WriteVector3(trace.endPosition, false);
-                    gi.MSG_WriteVector3(trace.plane.normal, false);
+                    gi.MSG_WriteUint8(DirectionToByte(trace.plane.normal));//gi.MSG_WriteVector3(trace.plane.normal, false);
                     gi.MSG_WriteUint8(splashType);//gi.WriteByte(color);
                     gi.Multicast(trace.endPosition, Multicast::PVS);
                 }
@@ -143,8 +143,9 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
                     gi.MSG_WriteUint8(te_impact);//WriteByte(te_impact);
                     gi.MSG_WriteVector3(trace.endPosition, false);
-                    gi.MSG_WriteVector3(trace.plane.normal, false);
-                    gi.Multicast(trace.endPosition, Multicast::PVS);
+                    //gi.MSG_WriteVector3(trace.plane.normal, false);
+                    gi.MSG_WriteUint8(DirectionToByte(trace.plane.normal));
+					gi.Multicast(trace.endPosition, Multicast::PVS);
 
                     // If a player, make a player noise.
                     if (player->GetClient()) {

@@ -642,12 +642,12 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // View Angles X Y Z.
     if (flags & PS_PM_VIEW_ANGLES) {
-	    //to->pmove.viewAngles = MSG_ReadVector3(false);
-		to->pmove.viewAngles = {
-			ShortToFloatAngle(MSG_ReadUint16()),
-			ShortToFloatAngle(MSG_ReadUint16()),
-			ShortToFloatAngle(MSG_ReadUint16()),
-		};
+	    to->pmove.viewAngles = MSG_ReadVector3(false);
+		//to->pmove.viewAngles = {
+		//	Short2FloatAngle(MSG_ReadUint16()),
+		//	Short2FloatAngle(MSG_ReadUint16()),
+		//	Short2FloatAngle(MSG_ReadUint16()),
+		//};
     }
 
     //
@@ -947,10 +947,10 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_PM_VIEW_ANGLES) {
-		MSG_WriteUint16(FloatAngleToShort(to->pmove.viewAngles.x));
-		MSG_WriteUint16(FloatAngleToShort(to->pmove.viewAngles.y));
-		MSG_WriteUint16(FloatAngleToShort(to->pmove.viewAngles.z));
-        //MSG_WriteVector3(to->pmove.viewAngles, false);
+		//MSG_WriteUint16(FloatAngle2Short(to->pmove.viewAngles.x));
+		//MSG_WriteUint16(FloatAngle2Short(to->pmove.viewAngles.y));
+		//MSG_WriteUint16(FloatAngle2Short(to->pmove.viewAngles.z));
+        MSG_WriteVector3(to->pmove.viewAngles, false);
     }
 
     if (playerStateFlags & PS_KICKANGLES) {
@@ -1303,17 +1303,18 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Angle X.
     if (byteMask & EntityMessageBits::AngleX) {
-	    MSG_WriteUint16(FloatAngleToShort(to->angles[0]));
+	    MSG_WriteFloat(to->angles.x);
+		//MSG_WriteUint16(FloatAngle2Short(to->angles[0]));
 		//MSG_WriteHalfFloat(to->angles[0]);
     }
     // Write out the Angle Y.
     if (byteMask & EntityMessageBits::AngleY) {
-		MSG_WriteUint16(FloatAngleToShort(to->angles[1]));
+		MSG_WriteFloat(to->angles.y);
 		//MSG_WriteHalfFloat(to->angles[1]);
     }
     // Write out the Angle Z.
     if (byteMask & EntityMessageBits::AngleZ) {
-	    MSG_WriteUint16(FloatAngleToShort(to->angles[2]));
+	    MSG_WriteFloat(to->angles.z);
 		//MSG_WriteHalfFloat(to->angles[2]);
     }
 
@@ -1451,13 +1452,13 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Angle.
     if (byteMask & EntityMessageBits::AngleX) {
-		to->angles[0] = ShortToFloatAngle(MSG_ReadUint16());
+		to->angles[0] = MSG_ReadFloat();
     }
     if (byteMask & EntityMessageBits::AngleY) {
-		to->angles[1] = ShortToFloatAngle(MSG_ReadUint16());
+		to->angles[1] = MSG_ReadFloat();
     }
     if (byteMask & EntityMessageBits::AngleZ) {
-		to->angles[2] = ShortToFloatAngle(MSG_ReadUint16());
+		to->angles[2] = MSG_ReadFloat();
     }
 
     // Old Origin.

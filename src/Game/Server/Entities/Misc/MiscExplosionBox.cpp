@@ -272,7 +272,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     if (GetGroundEntityHandle()) {
         gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::Explosion1);//WriteByte(TempEntityEvent::Explosion1);
-        gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
+        gi.MSG_WriteUint16(GetNumber());//gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());						
         gi.Multicast(GetOrigin(), Multicast::PHS);
 
         GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
@@ -284,7 +284,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     } else {
         gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//WriteByte(ServerGameCommand::TempEntityEvent);
         gi.MSG_WriteUint8(TempEntityEvent::Explosion2);//WriteByte(TempEntityEvent::Explosion2);
-        gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
+        gi.MSG_WriteUint16(GetNumber());   //gi.MSG_WriteVector3(GetOrigin(), false);//WriteVector3(GetOrigin());
         gi.Multicast(GetOrigin(), Multicast::PHS);
 
         GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);

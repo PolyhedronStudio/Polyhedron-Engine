@@ -286,13 +286,13 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
         case TempEntityEvent::BulletSparks:
         case TempEntityEvent::ElectricSparks:
             teParameters.position1 = clgi.MSG_ReadVector3(false);
-            teParameters.dir = clgi.MSG_ReadVector3(false);
+            ByteToDirection(clgi.MSG_ReadUint8(), teParameters.dir);//clgi.MSG_ReadVector3(false);
             break;
 
         case TempEntityEvent::Splash:
             teParameters.count = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
             teParameters.position1 = clgi.MSG_ReadVector3(false);
-            teParameters.dir = clgi.MSG_ReadVector3(false);
+            ByteToDirection(clgi.MSG_ReadUint8(), teParameters.dir);//clgi.MSG_ReadVector3(false);
             teParameters.color = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
             break;
 
@@ -309,7 +309,8 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
         case TempEntityEvent::BigExplosion1:
         case TempEntityEvent::PlainExplosion:
         case TempEntityEvent::TeleportEffect:
-            teParameters.position1 = clgi.MSG_ReadVector3(false);
+            teParameters.entity1 = clgi.MSG_ReadUint16();
+			//teParameters.position1 = clgi.MSG_ReadVector3(false);
             break;
 
         case TempEntityEvent::ForceWall:
@@ -322,7 +323,8 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
             teParameters.entity1 = clgi.MSG_ReadInt16();//clgi.MSG_ReadShort();
             teParameters.count = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
             teParameters.position1 = clgi.MSG_ReadVector3(false);
-            teParameters.dir = clgi.MSG_ReadVector3(false);
+            //teParameters.dir = clgi.MSG_ReadVector3(false);
+			ByteToDirection(clgi.MSG_ReadUint8(), teParameters.dir);
             teParameters.color = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
             teParameters.entity2 = clgi.MSG_ReadInt16(); //clgi.MSG_ReadShort();
             if (teParameters.entity1 != -1) {
@@ -334,7 +336,8 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
             teParameters.entity1 = clgi.MSG_ReadInt16();//clgi.MSG_ReadShort();
             teParameters.count = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
             teParameters.position1 = clgi.MSG_ReadVector3(false);
-            teParameters.dir = clgi.MSG_ReadVector3(false);
+            //teParameters.dir = clgi.MSG_ReadVector3(false);
+			ByteToDirection(clgi.MSG_ReadUint8(), teParameters.dir);
             break;
         default:
             Com_Error(ErrorType::Drop, "%s: bad type", __func__);
