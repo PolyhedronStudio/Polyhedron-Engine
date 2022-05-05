@@ -1382,19 +1382,27 @@ static void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 //===============
 qboolean SG_RunThink(GameEntity *geThinker) {
     if (!geThinker) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "geThinker is (nullptr)!\n");
+	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
         return false;
     }
 
     // Fetch think time.
     GameTime nextThinkTime = geThinker->GetNextThinkTime();
 
+    // Should we think at all? 
+    // Condition A: Below 0, aka -(1+) means no thinking.
+    // Condition B: > level.time, means we're still waiting before we can think.
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
 		return true;
     }
 
     // Reset think time before thinking.
     geThinker->SetNextThinkTime(GameTime::zero());
+
+	if (!geThinker) {
+	    SG_PhysicsEntityWPrint(__func__, "[start of]", "geThinker is (nullptr)!\n");
+        return false;
+    }
 
 #if _DEBUG
     if ( !geThinker->HasThinkCallback() ) {

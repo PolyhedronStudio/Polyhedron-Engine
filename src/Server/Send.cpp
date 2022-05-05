@@ -333,14 +333,15 @@ void SV_Multicast(const vec3_t &origin, int32_t to) {
 /**
 *	@brief	Add message data.
 **/
+static void SV_AddMessagePacket(client_t *client, byte *data, size_t len, qboolean reliable);
 static void SV_AddMessage(client_t *client, byte *data, size_t len, qboolean reliable) {
-	//    if (reliable) {
+	if (reliable) {
         // Don't packetize, netchan level will do fragmentation as needed
         SZ_Write(&client->netChan->message, data, len);
-    //} else {
-    //    // Still have to packetize, relative sounds need special processing
-    //    add_msg_packet(client, data, len, false);
-    //}
+    } else {
+        // Still have to packetize, relative sounds need special processing
+        SV_AddMessagePacket(client, data, len, false);
+    }
 }
 
 /**

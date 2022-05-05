@@ -627,7 +627,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // PM Delta Angles.
     if (flags & PS_PM_DELTA_ANGLES) {
-	    to->pmove.deltaAngles = MSG_ReadVector3(true);
+	    to->pmove.deltaAngles = MSG_ReadVector3(false);
     }
 
     // View Offset.
@@ -932,7 +932,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_PM_DELTA_ANGLES) {
-        MSG_WriteVector3(to->pmove.deltaAngles, true);
+        MSG_WriteVector3(to->pmove.deltaAngles, false);
     }
 
     //
@@ -1421,7 +1421,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Skinnum.
     if (byteMask & EntityMessageBits::Skin) { 
-        to->skinNumber = MSG_ReadUint16();
+        to->skinNumber = MSG_ReadInt16();
     }
 
     // Effects.
