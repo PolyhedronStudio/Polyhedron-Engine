@@ -123,7 +123,7 @@ struct EntityState {
     
     //    Events might be easier to use with regards to possible predictions?
     //! Server start time of current animation.
-    int32_t animationStartTime = 0;
+    uint64_t animationStartTime = 0;
     //! Animation Start Frame
     uint16_t animationStartFrame = 1;
     //! Animation End Frame

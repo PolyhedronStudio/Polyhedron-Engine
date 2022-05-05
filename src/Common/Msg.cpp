@@ -692,7 +692,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
     }
 
     if (flags & PS_GUNANIMATION_TIME_START) {
-	    to->gunAnimationStartTime = MSG_ReadIntBase128();
+	    to->gunAnimationStartTime = MSG_ReadUintBase128();
     }
     if (flags & PS_GUNANIMATION_FRAME_START) {
 	    to->gunAnimationStartFrame = MSG_ReadUint16();
@@ -990,7 +990,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_GUNANIMATION_TIME_START) {
-	    MSG_WriteIntBase128(to->gunAnimationStartTime);
+	    MSG_WriteUintBase128(to->gunAnimationStartTime);
     }
     if (playerStateFlags & PS_GUNANIMATION_FRAME_START) {
 	    MSG_WriteUint16(to->gunAnimationStartFrame);
@@ -1075,6 +1075,9 @@ int32_t MSG_ReadEntityNumber(bool* remove, uint32_t* byteMask) {
     number = (int32_t)MSG_ReadIntBase128();
     *byteMask = MSG_ReadUintBase128();
 
+	if (number > 4000) {
+		Com_DPrintf("OH MIJN GOD WAS DIT DAH? LOL\n");
+	}
     if (number < 0) {
 		number *= -1;
 		*remove = true;
@@ -1380,7 +1383,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Animation Start Time.
     if (byteMask & EntityMessageBits::AnimationTimeStart) {
-	    MSG_WriteIntBase128(to->animationStartTime);
+	    MSG_WriteUintBase128(to->animationStartTime);
     }
     // Write out the Animation Start Frame.
     if (byteMask & EntityMessageBits::AnimationFrameStart) {
@@ -1523,7 +1526,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
     }
 
     if (byteMask & EntityMessageBits::AnimationTimeStart) {
-	    to->animationStartTime = MSG_ReadIntBase128();
+	    to->animationStartTime = MSG_ReadUintBase128();
     }
     if (byteMask & EntityMessageBits::AnimationFrameStart) {
 	    to->animationStartFrame = MSG_ReadUint16();
