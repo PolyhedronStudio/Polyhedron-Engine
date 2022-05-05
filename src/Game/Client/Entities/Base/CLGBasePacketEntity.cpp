@@ -237,6 +237,27 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 }
 
 /**
+*	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
+**/
+void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
+	SetOrigin(state.origin);
+	SetAngles(state.angles);
+	SetOldOrigin(state.oldOrigin);
+	SetModelIndex(state.modelIndex);
+	SetModelIndex2(state.modelIndex2);
+	SetModelIndex3(state.modelIndex3);
+	SetModelIndex4(state.modelIndex4);
+	SetSkinNumber(state.skinNumber);
+	SetEffects(state.effects);
+	SetRenderEffects(state.renderEffects);
+	SetSolid(state.solid);
+	SetMins(state.mins);
+	SetMaxs(state.maxs);
+	SetSound(state.sound);
+	SetEventID(state.eventID);
+}
+
+/**
 *   @returen True if the entity is still in the current frame.
 **/
 //const qboolean CLGBasePacketEntity::IsInUse() {
@@ -280,7 +301,7 @@ void CLGBasePacketEntity::OnDeallocate() {
 /**
 *	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
 **/
-void CLGBasePacketEntity::OnEventID(uint8_t eventID) {
+void CLGBasePacketEntity::OnEventID(uint32_t eventID) {
     // EF_TELEPORTER acts like an event, but is not cleared each frame
     if ((GetEffects()  & EntityEffectType::Teleporter)) {
         ParticleEffects::Teleporter(GetOrigin());

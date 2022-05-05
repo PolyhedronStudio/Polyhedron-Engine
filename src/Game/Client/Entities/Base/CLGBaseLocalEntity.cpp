@@ -236,6 +236,13 @@ void CLGBaseLocalEntity::UpdateFromState(const EntityState& state) {
 }
 
 /**
+*	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
+**/
+void CLGBaseLocalEntity::SpawnFromState(const EntityState& state) {
+	
+}
+
+/**
 *   @return	Human-readable string classname.
 **/
 const std::string CLGBaseLocalEntity::GetClassname() {
@@ -268,7 +275,7 @@ void CLGBaseLocalEntity::OnDeallocate() {
 /**
 *	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
 **/
-void CLGBaseLocalEntity::OnEventID(uint8_t eventID) {
+void CLGBaseLocalEntity::OnEventID(uint32_t eventID) {
     // EF_TELEPORTER acts like an event, but is not cleared each frame
     if ((GetEffects()  & EntityEffectType::Teleporter)) {
         ParticleEffects::Teleporter(GetOrigin());

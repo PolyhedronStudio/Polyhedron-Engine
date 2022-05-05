@@ -63,6 +63,10 @@ public:
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
     virtual void UpdateFromState(const EntityState &state) = 0;
+	/**
+	*	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
+	**/
+	virtual void SpawnFromState(const EntityState &state) = 0;
 
     /**
     *   @returen True if the entity is still in the current frame.
@@ -109,7 +113,7 @@ public:
 	/**
 	*	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
 	**/
-	virtual void OnEventID(uint8_t eventID) = 0;
+	virtual void OnEventID(uint32_t eventID) = 0;
 
 
     /**

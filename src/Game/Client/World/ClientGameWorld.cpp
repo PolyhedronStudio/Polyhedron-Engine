@@ -786,10 +786,10 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
     }
 
     // Unlink entity from world.
-    //gi.UnlinkEntity(podEntity);
+    clgi.UnlinkEntity(podEntity);
 
     // Get entity number.
-    int32_t entityNumber = podEntity->clientEntityNumber;
+    const int32_t entityNumber = podEntity->clientEntityNumber;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
 	static constexpr int32_t BODY_QUEUE_SIZE = 8;
@@ -879,6 +879,9 @@ qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
 		delete gameEntities[entityNumber];
 		gameEntities[entityNumber] = nullptr;
 
+		// Warn.
+		Com_WPrint("(%s): PODEntity(%i) had an invalid game entity pointer set.\n", __func__);
+
 		// Freed game entity.
 		freedGameEntity = true;
     }
@@ -960,7 +963,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 		// Spawn if needed.
 		if (clEntity->gameEntity) {
 			// TODO: Use a SpawnFromState function here instead.
-			clEntity->gameEntity->Spawn();
+			static_cast<IClientGameEntity*>(clEntity->gameEntity)->SpawnFromState(state);
 		}
 
 		// If it isn't a nullptr...

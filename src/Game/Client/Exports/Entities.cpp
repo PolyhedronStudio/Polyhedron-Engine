@@ -55,12 +55,15 @@ qboolean ClientGameEntities::PrepareBSPEntities(const char *mapName, const char*
 }
 
 /**
-*   @brief  When the client receives state updates it calls into this function so we can update
-*           the game entity belonging to the server side entity(defined by state.number).
-* 
-*           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
-*           always update its PODEntity pointer to the appropriate new one instead.
-* 
+*   @brief  When the client receives packet entity state updates it calls into this function 
+*			to update the game entity belonging to the server side entity. (defined by state.number).
+*
+*			When the state belongs to a new PODEntity, however it happens to have a similar matching
+*			hashed classname as the previous PODEntity, we only update its pointer.
+*
+*           If however, the hashed classname differs, we allocate a new one matching the new hashed 
+*			classname instead. 
+*
 *   @return True on success, false in case of trouble. (Should never happen, and if it does,
 *           well... file an issue lmao.)
 **/
@@ -203,7 +206,7 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 
 		// Let the world know about the current entity we're running.
 		level.currentEntity = gameEntity;
-
+		
         // Run it for a frame.
         // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
@@ -364,48 +367,51 @@ void ClientGameEntities::PacketEntityEvent(int32_t number) {
 
 	// With a valid entity we can notify it about its new received event.
 	if (podEventTarget->currentState.eventID != 0) {
-		Com_DPrint("(%s): eventID != 0 for PODEntity(#%i)! podEntityTarget=(%s), geEntityTarget=(%s)\n", __func__, number, (podEventTarget ? podEventTarget->clientEntityNumber : -1), (geEventTarget ? geEventTarget->GetNumber() : -1));
+		//Com_DPrint("(%s): eventID != 0 for PODEntity(#%i)! podEntityTarget=(%s), geEntityTarget=(%s)\n", __func__, number, (podEventTarget ? podEventTarget->clientEntityNumber : -1), (geEventTarget ? geEventTarget->GetNumber() : -1));
 	} else {
-		Com_DPrint("(%s): PODEntity(#%i): eventID(#%i) origin(%s), oldOrigin(%s)\n", __func__, number, podEventTarget->currentState.eventID, Vec3ToString(podEventTarget->currentState.origin), Vec3ToString(podEventTarget->currentState.oldOrigin));
+		//Com_DPrint("(%s): PODEntity(#%i): eventID(#%i) origin(%s), oldOrigin(%s)\n", __func__, number, podEventTarget->currentState.eventID, Vec3ToString(podEventTarget->currentState.origin), Vec3ToString(podEventTarget->currentState.oldOrigin));
 	}
 
-	geEventTarget->OnEventID(podEventTarget->currentState.eventID);
+	PODEntity* clientEntity = &cs->entities[number];
+	geEventTarget->OnEventID(clientEntity->currentState.eventID);
 
 	//// Fetch the client entity.
- //   PODEntity* clientEntity = &cs->entities[number];
+    //PODEntity* clientEntity = &cs->entities[number];
 
 	//// TODO: Add support for events that aren't just GameEntity specific, but can instead also
 	//// rely on just a plain old PODEntity. Do so by using the last bit, if set, it's a POD Event.
 
- //   // EF_TELEPORTER acts like an event, but is not cleared each frame
- //   if ((clientEntity->currentState.effects & EntityEffectType::Teleporter)) {
- //       ParticleEffects::Teleporter(clientEntity->currentState.origin);
- //   }
+    //// EF_TELEPORTER acts like an event, but is not cleared each frame
+    //if ((clientEntity->currentState.effects & EntityEffectType::Teleporter)) {
+    //    ParticleEffects::Teleporter(clientEntity->currentState.origin);
+    //}
 
- //   // Switch to specific execution based on a unique Event ID.
- //   switch (clientEntity->currentState.eventID) {
- //       case EntityEvent::ItemRespawn:
- //           clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("items/respawn1.wav"), 1, Attenuation::Idle, 0);
- //           ParticleEffects::ItemRespawn(clientEntity->currentState.origin);
- //           break;
- //       case EntityEvent::PlayerTeleport:
- //           clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("misc/tele1.wav"), 1, Attenuation::Idle, 0);
- //           ParticleEffects::Teleporter(clientEntity->currentState.origin);
- //           break;
- //       case EntityEvent::Footstep:
- //           if (cl_footsteps->integer)
- //               clgi.S_StartSound(NULL, number, SoundChannel::Body, cl_sfx_footsteps[rand() & 3], 1, Attenuation::Normal, 0);
- //           break;
- //       case EntityEvent::FallShort:
- //           clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("player/land1.wav"), 1, Attenuation::Normal, 0);
- //           break;
- //       case EntityEvent::Fall:
- //           clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall2.wav"), 1, Attenuation::Normal, 0);
- //           break;
- //       case EntityEvent::FallFar:
- //           clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall1.wav"), 1, Attenuation::Normal, 0);
- //           break;
- //   }
+   // // Switch to specific execution based on a unique Event ID.
+   // switch (clientEntity->currentState.eventID) {
+   //     case EntityEvent::ItemRespawn:
+   //         clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("items/respawn1.wav"), 1, Attenuation::Idle, 0);
+   //         ParticleEffects::ItemRespawn(clientEntity->currentState.origin);
+   //         break;
+   //     case EntityEvent::PlayerTeleport:
+   //         clgi.S_StartSound(NULL, number, SoundChannel::Weapon, clgi.S_RegisterSound("misc/tele1.wav"), 1, Attenuation::Idle, 0);
+   //         ParticleEffects::Teleporter(clientEntity->currentState.origin);
+   //         break;
+   //     case EntityEvent::Footstep:
+   //         if (cl_footsteps->integer) {
+			//	extern qhandle_t   cl_sfx_footsteps[4];
+			//	clgi.S_StartSound(NULL, number, SoundChannel::Body, cl_sfx_footsteps[rand() & 3], 1, Attenuation::Normal, 0);
+			//}
+   //         break;
+   //     case EntityEvent::FallShort:
+   //         clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("player/land1.wav"), 1, Attenuation::Normal, 0);
+   //         break;
+   //     case EntityEvent::Fall:
+   //         clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall2.wav"), 1, Attenuation::Normal, 0);
+   //         break;
+   //     case EntityEvent::FallFar:
+   //         clgi.S_StartSound(NULL, number, SoundChannel::Auto, clgi.S_RegisterSound("*fall1.wav"), 1, Attenuation::Normal, 0);
+   //         break;
+   // }
 }
 
 /**
