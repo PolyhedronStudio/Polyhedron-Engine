@@ -606,7 +606,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
     }
 
     // Read the flag bits.
-    uint32_t flags = static_cast<uint32_t>(MSG_ReadInt32());
+    uint32_t flags = MSG_ReadUintBase128();
 
     //
     // Parse movement related state data.
@@ -920,7 +920,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     //
     // write it
     //
-    MSG_WriteInt32(playerStateFlags);
+    MSG_WriteUintBase128(playerStateFlags);
 
     //
     // write the PlayerMoveState
