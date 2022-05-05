@@ -33,7 +33,6 @@
 extern qhandle_t cl_mod_powerscreen;
 extern qhandle_t cl_mod_laser;
 extern qhandle_t cl_mod_dmspot;
-extern qhandle_t cl_sfx_footsteps[4];
 
 
 
@@ -364,6 +363,12 @@ void ClientGameEntities::PacketEntityEvent(int32_t number) {
 	}
 
 	// With a valid entity we can notify it about its new received event.
+	if (podEventTarget->currentState.eventID != 0) {
+		Com_DPrint("(%s): eventID != 0 for PODEntity(#%i)! podEntityTarget=(%s), geEntityTarget=(%s)\n", __func__, number, (podEventTarget ? podEventTarget->clientEntityNumber : -1), (geEventTarget ? geEventTarget->GetNumber() : -1));
+	} else {
+		Com_DPrint("(%s): PODEntity(#%i): eventID(#%i) origin(%s), oldOrigin(%s)\n", __func__, number, podEventTarget->currentState.eventID, Vec3ToString(podEventTarget->currentState.origin), Vec3ToString(podEventTarget->currentState.oldOrigin));
+	}
+
 	geEventTarget->OnEventID(podEventTarget->currentState.eventID);
 
 	//// Fetch the client entity.

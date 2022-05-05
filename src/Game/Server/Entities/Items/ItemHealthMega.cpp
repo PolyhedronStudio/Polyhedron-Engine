@@ -68,7 +68,7 @@ void ItemHealthMega::Spawn() {
     //SetModelIndex(SVG_PrecacheModel("models/items/healing/large/tris.md3"));
 
     // Set render effects to be glowy.
-    SetRenderEffects(GetRenderEffects() | RenderEffects::Glow | RenderEffects::DebugBoundingBox);
+    //SetRenderEffects(GetRenderEffects() | RenderEffects::Glow | RenderEffects::DebugBoundingBox);
 
     // Set default values in case we have none.
     if (!GetMass()) {

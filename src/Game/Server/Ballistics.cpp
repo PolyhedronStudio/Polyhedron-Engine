@@ -107,10 +107,10 @@ static void Ballistics_FireBullet(SVGBasePlayer *player, const vec3_t& start, co
                 if (splashType != SplashType::Unknown) {
                     gi.MSG_WriteUint8(ServerGameCommand::TempEntityEvent);//gi.WriteByte(ServerGameCommand::TempEntityEvent);
                     gi.MSG_WriteUint8(TempEntityEvent::Splash);//gi.WriteByte(TempEntityEvent::Splash);
-                    gi.MSG_WriteUint8(8);//gi.WriteByte(8);
+                    gi.MSG_WriteUint8(8); // Count.
                     gi.MSG_WriteVector3(trace.endPosition, false);
                     gi.MSG_WriteUint8(DirectionToByte(trace.plane.normal));//gi.MSG_WriteVector3(trace.plane.normal, false);
-                    gi.MSG_WriteUint8(splashType);//gi.WriteByte(color);
+                    gi.MSG_WriteUint8(splashType); // "Color".
                     gi.Multicast(trace.endPosition, Multicast::PVS);
                 }
 

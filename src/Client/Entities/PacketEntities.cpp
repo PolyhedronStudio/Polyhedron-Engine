@@ -76,8 +76,8 @@ static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState
 **/
 static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const EntityState &state, const vec_t *origin)
 {
-    // Fetch event ID.
-    int32_t eventID = state.eventID;
+    // Get event ID.
+    const int32_t eventID = state.eventID;
 
     if (state.modelIndex != clEntity->currentState.modelIndex
         || state.modelIndex2 != clEntity->currentState.modelIndex2
@@ -177,7 +177,6 @@ void PacketEntity_UpdateState(const EntityState &state)
     if (isPlayerEntity) {
         entityOrigin = cl.frame.playerState.pmove.origin;
     }
-
 
 	// Assign its clientEntity number.
 	clEntity->clientEntityNumber = state.number;

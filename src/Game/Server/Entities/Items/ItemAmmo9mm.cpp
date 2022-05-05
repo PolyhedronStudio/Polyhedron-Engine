@@ -69,7 +69,7 @@ void ItemAmmo9mm::Spawn() {
     SetEffects(GetEffects() | EntityEffectType::Rotate);
 
     // Set render effects to be glowy.
-    SetRenderEffects(GetRenderEffects() | RenderEffects::Glow | RenderEffects::DebugBoundingBox);
+    //SetRenderEffects(GetRenderEffects() | RenderEffects::Glow | RenderEffects::DebugBoundingBox);
 
     // Set default values in case we have none.
     if (!GetMass()) {

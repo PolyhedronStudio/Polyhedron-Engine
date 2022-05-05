@@ -1159,7 +1159,7 @@ void CLG_ParseTempEntity(void)
 			const vec3_t teOrigin = geExploder->GetOrigin();
 
 			CLG_PlainExplosion(false, teOrigin);
-			clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
+			clgi.S_StartSound(&teOrigin, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
 		}
 		break;
 	}
@@ -1171,7 +1171,7 @@ void CLG_ParseTempEntity(void)
 			const vec3_t teOrigin = geExploder->GetOrigin();
 
 			ex = CLG_PlainExplosion(true, teOrigin);
-			clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
+			clgi.S_StartSound(&teOrigin, 0, 0, cl_sfx_explosion, 1, Attenuation::Normal, 0);
 		}
 		break;
 	}
@@ -1257,9 +1257,14 @@ void CLG_ParseTempEntity(void)
 		//FIXME : replace or remove this sound
 		clgi.S_StartSound(&teParameters.position1, 0, 0, cl_sfx_lashit, 1, Attenuation::Normal, 0);
 		break;
-	//case TempEntityEvent::TeleportEffect:
-	//	ParticleEffects::TeleportEffect(teParameters.position1);
-	//	break;
+	case TempEntityEvent::TeleportEffect: {
+		GameEntity *geTeleporter = gameWorld->GetGameEntityByIndex(teParameters.entity1);
+
+		if (geTeleporter) {
+			ParticleEffects::Teleporter(geTeleporter->GetOrigin());
+		}
+		break;
+	}
 
 	default:
 		Com_Error(ErrorType::Drop, "%s: bad type", __func__);

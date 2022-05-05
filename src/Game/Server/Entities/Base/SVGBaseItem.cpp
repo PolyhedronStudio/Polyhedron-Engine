@@ -64,7 +64,7 @@ void SVGBaseItem::Spawn() {
     SVG_SetConfigString(ConfigStrings::Items + itemIdentifier, displayString);
 
     // Set solid.
-    SetSolid(Solid::Trigger);
+    SetSolid(Solid::OctagonBox);
 
     // Set move type.
     SetMoveType(MoveType::Toss);

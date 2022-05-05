@@ -30,7 +30,8 @@
 // Base Entity.
 #include "CLGBasePacketEntity.h"
 
-
+//! Here for OnEvent handling.
+extern qhandle_t cl_sfx_footsteps[4];
 
 //! Used for returning vectors from a const vec3_t & reference.
 vec3_t CLGBasePacketEntity::ZeroVec3 = vec3_zero();
@@ -280,7 +281,35 @@ void CLGBasePacketEntity::OnDeallocate() {
 *	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
 **/
 void CLGBasePacketEntity::OnEventID(uint8_t eventID) {
+    // EF_TELEPORTER acts like an event, but is not cleared each frame
+    if ((GetEffects()  & EntityEffectType::Teleporter)) {
+        ParticleEffects::Teleporter(GetOrigin());
+    }
 
+    // Switch to specific execution based on a unique Event ID.
+    switch (eventID) {
+        case EntityEvent::ItemRespawn:
+            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Weapon, clgi.S_RegisterSound("items/respawn1.wav"), 1, Attenuation::Idle, 0);
+            ParticleEffects::ItemRespawn(GetOrigin());
+            break;
+        case EntityEvent::PlayerTeleport:
+            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Weapon, clgi.S_RegisterSound("misc/tele1.wav"), 1, Attenuation::Idle, 0);
+            ParticleEffects::Teleporter(GetOrigin());
+            break;
+        case EntityEvent::Footstep:
+            if (cl_footsteps->integer)
+                clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Body, cl_sfx_footsteps[rand() & 3], 1, Attenuation::Normal, 0);
+            break;
+        case EntityEvent::FallShort:
+            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("player/land1.wav"), 1, Attenuation::Normal, 0);
+            break;
+        case EntityEvent::Fall:
+            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("*fall2.wav"), 1, Attenuation::Normal, 0);
+            break;
+        case EntityEvent::FallFar:
+            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("*fall1.wav"), 1, Attenuation::Normal, 0);
+            break;
+    }
 }
 
 /***
