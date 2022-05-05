@@ -167,6 +167,10 @@ void MSG_WriteUint16( uint32_t c );
 **/
 void MSG_WriteInt32( int32_t c );
 /**
+*   @brief Writes an unsigned 32 bit integer.
+**/
+void MSG_WriteUint32( uint32_t c );
+/**
 *   @brief Writes a 64 bit integer.
 **/
 void MSG_WriteInt64( int64_t c );
@@ -239,6 +243,10 @@ uint16_t MSG_ReadUint16();
 *   @return 32 bit integer.
 **/
 int32_t MSG_ReadInt32();
+/**
+*   @return 32 bit unsigned integer.
+**/
+uint32_t MSG_ReadUint32();
 /**
 *   @return 64 bit integer.
 **/

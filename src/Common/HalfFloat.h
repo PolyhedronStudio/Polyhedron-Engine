@@ -86,9 +86,9 @@ static inline uint16_t float_to_half(float i) {
     static constexpr FP32 f16max = { (127 + 16) << 23 };
     static constexpr FP32 denorm_magic = { ((127 - 15) + (23 - 10) + 1) << 23 };
     static constexpr uint32_t sign_mask = 0x80000000u;
-    uint32_t sign;
+    uint32_t sign = 0;
     uint16_t o = { 0 };
-    FP32 f;
+	FP32 f = { 0 };
 
     f.f = i;
     sign = f.u & sign_mask;

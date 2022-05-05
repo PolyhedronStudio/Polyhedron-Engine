@@ -121,6 +121,17 @@ void MSG_WriteInt32( int32_t c ) {
 }
 
 /**
+*   @brief Writes a 32 bit integer.
+**/
+void MSG_WriteUint32( uint32_t c ) {
+	uint8_t *buf = ( uint8_t* )SZ_GetSpace( &msg_write, 4 );
+	buf[0] = ( uint8_t )( c & 0xff );
+	buf[1] = ( uint8_t )( ( c >> 8 ) & 0xff );
+	buf[2] = ( uint8_t )( ( c >> 16 ) & 0xff );
+	buf[3] = ( uint8_t )( c >> 24 );
+}
+
+/**
 *   @brief Writes a 64 bit integer.
 **/
 void MSG_WriteInt64( int64_t c ) {
@@ -329,6 +340,23 @@ uint16_t MSG_ReadUint16() {
 *   @return 32 bit integer.
 **/
 int32_t MSG_ReadInt32() {
+    uint8_t *buf = MSG_ReadData(4);
+
+    if (!buf) {
+        return -1;
+    }
+
+    return buf[0] 
+		| (buf[1] << 8) 
+		| (buf[2] << 16) 
+		| (buf[3] << 24);
+    //return buf[3] | (buf[2] << 8) | (buf[1] << 16) | (buf[0] << 24);
+}
+
+/**
+*   @return 32 bit unsigned integer.
+**/
+uint32_t MSG_ReadUint32() {
     uint8_t *buf = MSG_ReadData(4);
 
     if (!buf) {
@@ -627,7 +655,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // PM Delta Angles.
     if (flags & PS_PM_DELTA_ANGLES) {
-	    to->pmove.deltaAngles = MSG_ReadVector3(false);
+	    to->pmove.deltaAngles = MSG_ReadVector3(true);
     }
 
     // View Offset.
@@ -642,7 +670,7 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
 
     // View Angles X Y Z.
     if (flags & PS_PM_VIEW_ANGLES) {
-	    to->pmove.viewAngles = MSG_ReadVector3(false);
+	    to->pmove.viewAngles = MSG_ReadVector3(true);
 		//to->pmove.viewAngles = {
 		//	Short2FloatAngle(MSG_ReadUint16()),
 		//	Short2FloatAngle(MSG_ReadUint16()),
@@ -932,7 +960,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
     }
 
     if (playerStateFlags & PS_PM_DELTA_ANGLES) {
-        MSG_WriteVector3(to->pmove.deltaAngles, false);
+        MSG_WriteVector3(to->pmove.deltaAngles, true);
     }
 
     //
@@ -950,7 +978,7 @@ int MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t
 		//MSG_WriteUint16(FloatAngle2Short(to->pmove.viewAngles.x));
 		//MSG_WriteUint16(FloatAngle2Short(to->pmove.viewAngles.y));
 		//MSG_WriteUint16(FloatAngle2Short(to->pmove.viewAngles.z));
-        MSG_WriteVector3(to->pmove.viewAngles, false);
+        MSG_WriteVector3(to->pmove.viewAngles, true);
     }
 
     if (playerStateFlags & PS_KICKANGLES) {
@@ -1285,7 +1313,7 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Render Effects.
     if (byteMask & EntityMessageBits::HashedClassname) {
-	    MSG_WriteInt32(to->hashedClassname);
+	    MSG_WriteUint32(to->hashedClassname);
     }
 
     // Write out the Origin X.
@@ -1303,19 +1331,19 @@ void MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32
 
     // Write out the Angle X.
     if (byteMask & EntityMessageBits::AngleX) {
-	    MSG_WriteFloat(to->angles.x);
+	    //MSG_WriteFloat(to->angles.x);
 		//MSG_WriteUint16(FloatAngle2Short(to->angles[0]));
-		//MSG_WriteHalfFloat(to->angles[0]);
+		MSG_WriteHalfFloat(to->angles[0]);
     }
     // Write out the Angle Y.
     if (byteMask & EntityMessageBits::AngleY) {
-		MSG_WriteFloat(to->angles.y);
-		//MSG_WriteHalfFloat(to->angles[1]);
+		//MSG_WriteFloat(to->angles.y);
+		MSG_WriteHalfFloat(to->angles[1]);
     }
     // Write out the Angle Z.
     if (byteMask & EntityMessageBits::AngleZ) {
-	    MSG_WriteFloat(to->angles.z);
-		//MSG_WriteHalfFloat(to->angles[2]);
+	    //MSG_WriteFloat(to->angles.z);
+		MSG_WriteHalfFloat(to->angles[2]);
     }
 
     // Write out the Old Origin.
@@ -1436,7 +1464,7 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // HashedClassname.
     if (byteMask & EntityMessageBits::HashedClassname) {
-	    to->hashedClassname = MSG_ReadInt32();
+	    to->hashedClassname = MSG_ReadUint32();
     }
 
     // Origin.
@@ -1452,13 +1480,13 @@ void MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t numb
 
     // Angle.
     if (byteMask & EntityMessageBits::AngleX) {
-		to->angles[0] = MSG_ReadFloat();
+		to->angles[0] = MSG_ReadHalfFloat();
     }
     if (byteMask & EntityMessageBits::AngleY) {
-		to->angles[1] = MSG_ReadFloat();
+		to->angles[1] = MSG_ReadHalfFloat();
     }
     if (byteMask & EntityMessageBits::AngleZ) {
-		to->angles[2] = MSG_ReadFloat();
+		to->angles[2] = MSG_ReadHalfFloat();
     }
 
     // Old Origin.
@@ -1560,13 +1588,13 @@ int MSG_WriteDeltaClientMoveCommand(const ClientMoveCommand* from, const ClientM
     MSG_WriteUint8(bits);
 
     if (bits & UserCommandBits::AngleX) {
-        MSG_WriteFloat(cmd->input.viewAngles[0]);
+        MSG_WriteHalfFloat(cmd->input.viewAngles[0]);
     }
     if (bits & UserCommandBits::AngleY) {
-        MSG_WriteFloat(cmd->input.viewAngles[1]);
+        MSG_WriteHalfFloat(cmd->input.viewAngles[1]);
     }
     if (bits & UserCommandBits::AngleZ) {
-        MSG_WriteFloat(cmd->input.viewAngles[2]);
+        MSG_WriteHalfFloat(cmd->input.viewAngles[2]);
     }
 
     if (bits & UserCommandBits::Forward) {
@@ -1613,13 +1641,13 @@ void MSG_ReadDeltaClientMoveCommand(const ClientMoveCommand* from, ClientMoveCom
 
     // Read current angles.
     if (bits & UserCommandBits::AngleX) {
-        to->input.viewAngles[0] = MSG_ReadFloat();
+        to->input.viewAngles[0] = MSG_ReadHalfFloat();
     }
     if (bits & UserCommandBits::AngleY) {
-        to->input.viewAngles[1] = MSG_ReadFloat();
+        to->input.viewAngles[1] = MSG_ReadHalfFloat();
     }
     if (bits & UserCommandBits::AngleZ) {
-        to->input.viewAngles[2] = MSG_ReadFloat();
+        to->input.viewAngles[2] = MSG_ReadHalfFloat();
     }
 
     // Read movement.
