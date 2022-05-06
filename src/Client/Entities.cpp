@@ -268,7 +268,7 @@ vec3_t CL_GetEntitySoundOrigin(int entnum) {
     vec3_t mid = vec3_zero();
     vec3_t org = vec3_zero();
 
-    if (entnum < 0 || entnum >= MAX_WIRED_POD_ENTITIES) {
+    if (entnum < 0 || entnum >= MAX_CLIENT_POD_ENTITIES) {
         Com_Error(ErrorType::Drop, "%s: bad entnum: %d", __func__, entnum);
     }
 

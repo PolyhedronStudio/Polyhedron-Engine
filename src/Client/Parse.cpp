@@ -418,11 +418,8 @@ static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
 // bytes, entire game state is compressed into a single stream.
 static void CL_ParseGamestate(void)
 {
-    int32_t index = 0;
-    uint32_t byteMask = 0;
-
     while (msg_read.readCount < msg_read.currentSize) {
-        index = MSG_ReadInt16();//MSG_ReadShort();
+        int16_t index = MSG_ReadInt16();//MSG_ReadShort();
         if (index == ConfigStrings::MaxConfigStrings) {
             break;
         }
@@ -432,7 +429,8 @@ static void CL_ParseGamestate(void)
     while (msg_read.readCount < msg_read.currentSize) {
         //index = MSG_ParseEntityBits(&byteMask);
         bool remove = false;
-        index = MSG_ReadEntityNumber(&remove, &byteMask);
+		uint32_t byteMask = 0;
+		const int32_t index = MSG_ReadEntityNumber(&remove, &byteMask);
         if (!index) {
             break;
         }
@@ -580,7 +578,7 @@ static void CL_ParseStartSoundPacket(void)
 
     if (flags & SoundCommandBits::Entity) {
         // entity relative
-        channel = MSG_ReadInt16();//MSG_ReadShort();
+        channel = MSG_ReadUint16();//MSG_ReadShort();
         entity = channel >> 3;
         if (entity < 0 || entity >= MAX_WIRED_POD_ENTITIES)
             Com_Error(ErrorType::Drop, "%s: bad entity: %d", __func__, entity);
@@ -752,8 +750,8 @@ static void CL_ParseZPacket(void)
         Com_Error(ErrorType::Drop, "%s: recursively entered", __func__);
     }
 
-    inlen = MSG_ReadUint16();//MSG_ReadWord();
-    outlen = MSG_ReadUint16();//MSG_ReadWord();
+    inlen = MSG_ReadInt16();//MSG_ReadWord();
+    outlen = MSG_ReadInt16();//MSG_ReadWord();
 
     if (inlen == -1 || outlen == -1 || msg_read.readCount + inlen > msg_read.currentSize) {
         Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);

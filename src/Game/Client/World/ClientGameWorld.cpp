@@ -323,7 +323,7 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 			.previousState = {
 				.number = i,
 			},
-			.isLocal = false,
+			.isLocal = true,
 			.inUse = false,
 			//.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBaseLocalEntity"),
 			.gameEntity = nullptr,

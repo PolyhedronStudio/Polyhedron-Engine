@@ -591,7 +591,7 @@ static void PF_StartSound(Entity *edict, int channel,
             if (flags & SoundCommandBits::Offset)
                 MSG_WriteUint8(timeofs * 1000); //MSG_WriteByte(timeofs * 1000);
 
-            MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);
+            MSG_WriteUint16(sendchan);//MSG_WriteShort(sendchan);
             MSG_WriteVector3(origin);
 
             SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
@@ -651,7 +651,7 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     CHECK_PARAMS
 
     ent = NUM_FOR_EDICT(entity);
-
+	
     sendchan = (ent << 3) | (channel & 7);
 
     // always send the entity number for channel overrides
@@ -674,7 +674,7 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     if (flags & SoundCommandBits::Offset)
         MSG_WriteUint8(timeofs * 1000);//MSG_WriteByte(timeofs * 1000);
     
-    MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);
+    MSG_WriteUint16(sendchan);//MSG_WriteShort(sendchan);
     MSG_WriteVector3(origin);
 
     // if the sound doesn't attenuate,send it to everyone

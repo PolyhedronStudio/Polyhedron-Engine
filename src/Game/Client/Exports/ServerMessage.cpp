@@ -290,10 +290,10 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
             break;
 
         case TempEntityEvent::Splash:
-            teParameters.count = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
+            teParameters.count = clgi.MSG_ReadUint8();
             teParameters.position1 = clgi.MSG_ReadVector3(false);
             ByteToDirection(clgi.MSG_ReadUint8(), teParameters.dir);//clgi.MSG_ReadVector3(false);
-            teParameters.color = clgi.MSG_ReadUint8();//clgi.MSG_ReadByte();
+            teParameters.color = clgi.MSG_ReadUint8();
             break;
 
         case TempEntityEvent::DebugTrail:
