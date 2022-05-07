@@ -415,6 +415,17 @@ void CLGBasePacketEntity::DispatchTakeDamageCallback(IClientGameEntity* other, f
 	(this->*takeDamageFunction)(other, kick, damage);
 }
 
+/**
+*   @brief  Dispatches 'Stop' callback.
+**/
+void CLGBasePacketEntity::DispatchStopCallback() {
+	// Safety check.
+	if (stopFunction == nullptr)
+		return;
+
+	// Execute 'Stop' callback function.
+	(this->*stopFunction)();
+}
 
 
 /**

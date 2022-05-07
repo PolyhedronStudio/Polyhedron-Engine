@@ -36,6 +36,12 @@ void		CL_GM_ClientUpdateOrigin(void);
 void		CL_GM_ClientConnect();
 void		CL_GM_ClientBegin(void);
 void		CL_GM_ClientPacketEntityDeltaFrame(void);
+/**
+*   @brief  Runs the local entity logic for a single client game frame.
+*	@return	The current actual hashed classname of the PODEntity's game object. 
+*			If it has no object, 0 will be returned instead.
+**/
+uint32_t	CL_GM_GetHashedGameEntityClassname(PODEntity *podEntity);
 void		CL_GM_ClientLocalEntitiesFrame(void);
 void		CL_GM_ClientFrame(void);
 void		CL_GM_ClientDisconnect(void);

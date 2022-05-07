@@ -276,7 +276,17 @@ void SVGBaseEntity::DispatchTakeDamageCallback(IServerGameEntity* other, float k
 	(this->*takeDamageFunction)(other, kick, damage);
 }
 
+/**
+*   @brief  Dispatches 'Stop' callback.
+**/
+void SVGBaseEntity::DispatchStopCallback() {
+	// Safety check.
+	if (stopFunction == nullptr)
+		return;
 
+	// Execute 'Stop' callback function.
+	(this->*stopFunction)();
+}
 
 
 /**

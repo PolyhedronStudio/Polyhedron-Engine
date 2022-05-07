@@ -272,7 +272,7 @@ public:
             return ZeroVec3;
         }
     };
-    virtual void SetAbsoluteMin(const vec3_t &absMin) {
+    virtual void SetAbsoluteMin(const vec3_t &absMin) override {
         if (podEntity) {
             podEntity->absMin = absMin;
         }
@@ -297,8 +297,8 @@ public:
     /**
     *   @brief Get/Set: Activator
     **/
-    virtual GameEntity* GetActivator() { return nullptr; };
-    virtual void SetActivator(GameEntity* activator) {};
+    virtual GameEntity* GetActivator() override { return nullptr; };
+    virtual void SetActivator(GameEntity* activator) override {};
 
     /**
     *   @brief Get/Set: Angles
@@ -350,7 +350,7 @@ public:
     /**
     *   @brief Get: Entity Client
     **/
-    virtual gclient_s* GetClient() { return 0; };
+    virtual gclient_s* GetClient() override { return 0; };
 
     /**
     *   @brief Get/Set: Clip Mask
@@ -371,38 +371,38 @@ public:
     /**
     *   @brief Get/Set: Count
     **/
-    virtual const int32_t   GetCount() { return 0; };
-    virtual void            SetCount(const int32_t count) {};
+    virtual const int32_t   GetCount() override { return 0; };
+    virtual void            SetCount(const int32_t count) override {};
 
     /**
     *   @brief Get/Set: Damage
     **/
-    virtual const int32_t   GetDamage() { return 0; };
-    virtual void            SetDamage(const int32_t damage) {};
+    virtual const int32_t   GetDamage() override { return 0; };
+    virtual void            SetDamage(const int32_t damage) override {};
 
     /**
     *   @brief Get/Set: Dead Flag
     **/
-    virtual const int32_t   GetDeadFlag() { return 0; };
-    virtual void            SetDeadFlag(const int32_t deadFlag) {};
+    virtual const int32_t   GetDeadFlag() override { return 0; };
+    virtual void            SetDeadFlag(const int32_t deadFlag) override {};
 
     /**
     *   @brief Get/Set: Delay Time
     **/
-    virtual const Frametime&    GetDelayTime() { return delayTime; };
-    virtual void                SetDelayTime(const Frametime &delayTime) { this->delayTime = delayTime; };
+    virtual const Frametime&    GetDelayTime() override { return delayTime; };
+    virtual void                SetDelayTime(const Frametime &delayTime) override { this->delayTime = delayTime; };
 
     /**
     *   @brief Get/Set: Effects
     **/
-    virtual const uint32_t  GetEffects() { 
+    virtual const uint32_t  GetEffects() override { 
 		if (podEntity) {
 			return podEntity->currentState.effects; 
 		} else {
 			return 0;
 		}
 	};
-    virtual void            SetEffects(const uint32_t effects) {
+    virtual void            SetEffects(const uint32_t effects) override {
 		if (podEntity) {
 			podEntity->currentState.effects = effects;
 		}
@@ -411,37 +411,37 @@ public:
     /**
     *   @brief Get/Set: Enemy
     **/
-    virtual GameEntity*    GetEnemy() { return 0; };
-    virtual void            SetEnemy(GameEntity* enemy) {};
+    virtual GameEntity*    GetEnemy() override { return 0; };
+    virtual void            SetEnemy(GameEntity* enemy) override {};
 
     /**
     *   @brief Get: Entity Dictionary.
     **/
-    virtual SpawnKeyValues &GetEntityDictionary() { return podEntity->spawnKeyValues; };
+    virtual SpawnKeyValues &GetEntityDictionary() override { return podEntity->spawnKeyValues; };
 
     /**
     *   @brief Get/Set: Event ID
     **/
-    virtual const uint8_t   GetEventID() { return 0; };
-    virtual void            SetEventID(const uint8_t eventID) {};
+    virtual const uint8_t   GetEventID() override { return podEntity->currentState.eventID; };
+	virtual void            SetEventID(const uint8_t eventID) override { if (podEntity) { podEntity->currentState.eventID = eventID; } };
 
     /**
     *   @brief Get/Set: Flags
     **/
-    virtual const int32_t   GetFlags() { return flags; };
-    virtual void            SetFlags(const int32_t flags) { this->flags = flags; };
+    virtual const int32_t   GetFlags() override { return flags; };
+    virtual void            SetFlags(const int32_t flags) override { this->flags = flags; };
 
     /**
     *   @brief Get/Set: Animation Frame
     **/
-    virtual const float     GetAnimationFrame() { return 0.f; };
-    virtual void            SetAnimationFrame(const float frame) {};
+    virtual const float     GetAnimationFrame() override { return 0.f; };
+    virtual void            SetAnimationFrame(const float frame) override {};
 
     /**
     *   @brief Get/Set: Gravity
     **/
-    virtual const float     GetGravity() { return gravity; };
-    virtual void            SetGravity(const float gravity) { this->gravity = gravity; };
+    virtual const float     GetGravity() override { return gravity; };
+    virtual void            SetGravity(const float gravity) override { this->gravity = gravity; };
 
     /**
     *   @brief Get/Set: Ground Entity
@@ -454,20 +454,20 @@ public:
     /**
     *   @brief Get/Set: Ground Entity Link Count
     **/
-    virtual int32_t         GetGroundEntityLinkCount() { return groundEntityLinkCount; };
-    virtual void            SetGroundEntityLinkCount(int32_t groundEntityLinkCount) { this->groundEntityLinkCount = groundEntityLinkCount; };
+    virtual int32_t         GetGroundEntityLinkCount() override { return groundEntityLinkCount; };
+    virtual void            SetGroundEntityLinkCount(int32_t groundEntityLinkCount) override { this->groundEntityLinkCount = groundEntityLinkCount; };
 
     /**
     *   @brief Get/Set: Health
     **/
-    virtual const int32_t   GetHealth() { return health; };
-    virtual void            SetHealth(const int32_t health) { this->health = health; };
+    virtual const int32_t   GetHealth() override { return health; };
+    virtual void            SetHealth(const int32_t health) override { this->health = health; };
 
     /**
     *   @brief Get/Set: Ideal Yaw Angle.
     **/
-    virtual const float     GetIdealYawAngle() { return idealYawAngle; };
-    virtual void            SetIdealYawAngle(const float idealYawAngle) { this->idealYawAngle = idealYawAngle; };
+    virtual const float     GetIdealYawAngle() override { return idealYawAngle; };
+    virtual void            SetIdealYawAngle(const float idealYawAngle) override { this->idealYawAngle = idealYawAngle; };
 
     /**
     *   @brief Is/Set: In Use.
@@ -479,7 +479,7 @@ public:
 
         return false;
     }
-    virtual void            SetInUse(const qboolean inUse) {
+    virtual void            SetInUse(const qboolean inUse) override {
         if (podEntity) {
             podEntity->inUse = inUse;
         }
@@ -488,20 +488,20 @@ public:
     /**
     *   @brief Get/Set: Kill Target.
     **/
-    virtual const std::string&  GetKillTarget() { return killTargetStr; };
-    virtual void                SetKillTarget(const std::string& killTarget) { killTargetStr = killTarget;};
+    virtual const std::string&  GetKillTarget() override { return killTargetStr; };
+    virtual void                SetKillTarget(const std::string& killTarget) override { killTargetStr = killTarget;};
 
     /**
     *   @brief Get/Set: Link Count.
     **/
-    virtual const int32_t   GetLinkCount() { 
+    virtual const int32_t   GetLinkCount() override { 
 		if (podEntity) {
 			return podEntity->linkCount; 
 		} else {
 			return 0;
 		}
 	};
-    virtual void            SetLinkCount(const int32_t linkCount) { 
+    virtual void            SetLinkCount(const int32_t linkCount) override { 
 		if (podEntity) {
 			podEntity->linkCount = linkCount; 
 		}
@@ -510,25 +510,25 @@ public:
     /**
     *   @brief Get/Set: Mass
     **/
-    virtual int32_t         GetMass() { return mass; };
-    virtual void            SetMass(const int32_t mass) { this->mass = mass; };
+    virtual int32_t         GetMass() override { return mass; };
+    virtual void            SetMass(const int32_t mass) override { this->mass = mass; };
 
     /**
     *   @brief Get/Set: Max Health
     **/
-    virtual const int32_t   GetMaxHealth() { return maxHealth; };
-    virtual void            SetMaxHealth(const int32_t maxHealth) { this->maxHealth = maxHealth; };
+    virtual const int32_t   GetMaxHealth() override { return maxHealth; };
+    virtual void            SetMaxHealth(const int32_t maxHealth) override { this->maxHealth = maxHealth; };
 
     /**
     *   @brief Get/Set: Bounding Box 'Maxs'
     **/
-    virtual const vec3_t&   GetMaxs() { 
+    virtual const vec3_t&   GetMaxs() override { 
 		if (podEntity) {
 			return podEntity->currentState.maxs;
 		}
 		return ZeroVec3;
 	};
-    virtual void            SetMaxs(const vec3_t& maxs) {
+    virtual void            SetMaxs(const vec3_t& maxs) override {
 		if (podEntity) {
 			podEntity->currentState.maxs = maxs;
 			//podEntity->maxs = maxs;
@@ -537,19 +537,19 @@ public:
     /**
     *   @brief Get/Set: Message
     **/
-    virtual const std::string&  GetMessage() { return EmptyString; };
-    virtual void                SetMessage(const std::string& message) {};
+    virtual const std::string&  GetMessage() override { return EmptyString; };
+    virtual void                SetMessage(const std::string& message) override {};
 
     /**
     *   @brief Get/Set: Bounding Box 'Mins'
     **/
-    virtual const vec3_t&   GetMins() { 
+    virtual const vec3_t&   GetMins() override { 
 		if (podEntity) {
 			return podEntity->currentState.mins;
 		}
 		return ZeroVec3;
 	};
-    virtual void            SetMins(const vec3_t& mins) {
+    virtual void            SetMins(const vec3_t& mins) override {
 		if (podEntity) {
 			//podEntity->mins = mins;
 			podEntity->currentState.mins = mins;
@@ -559,8 +559,8 @@ public:
     /**
     *   @brief Get/Set: Model
     **/
-    virtual const std::string&  GetModel() { return model; };
-    virtual void                SetModel(const std::string &model) {
+    virtual const std::string&  GetModel() override { return model; };
+    virtual void                SetModel(const std::string &model) override {
 		// Set the actual entity model.
 		if (podEntity) {
 			// Set modelstr.
@@ -592,14 +592,14 @@ public:
     /**
     *   @brief Get/Set: Model Index 1
     **/
-    virtual const int32_t   GetModelIndex() { 
+    virtual const int32_t   GetModelIndex() override { 
 		if (podEntity) {
 			return podEntity->currentState.modelIndex;
 		} else {
 			return 0; 
 		}
 	};
-    virtual void            SetModelIndex(const int32_t index) {
+    virtual void            SetModelIndex(const int32_t index) override {
 		if (podEntity) {
 			podEntity->currentState.modelIndex = index;
 		}
@@ -607,14 +607,14 @@ public:
     /**
     *   @brief Get/Set: Model Index 2
     **/
-    virtual const int32_t   GetModelIndex2() { 
+    virtual const int32_t   GetModelIndex2() override { 
 		if (podEntity) {
 			return podEntity->currentState.modelIndex2;
 		} else {
 			return 0; 
 		}
 	};
-    virtual void            SetModelIndex2(const int32_t index) {
+    virtual void            SetModelIndex2(const int32_t index) override {
 		if (podEntity) {
 			podEntity->currentState.modelIndex2 = index;
 		}
@@ -622,14 +622,14 @@ public:
     /**
     *   @brief Get/Set: Model Index 3
     **/
-    virtual const int32_t   GetModelIndex3() { 
+    virtual const int32_t   GetModelIndex3() override { 
 		if (podEntity) {
 			return podEntity->currentState.modelIndex3;
 		} else {
 			return 0; 
 		}
 	};
-    virtual void            SetModelIndex3(const int32_t index) {
+    virtual void            SetModelIndex3(const int32_t index) override {
 		if (podEntity) {
 			podEntity->currentState.modelIndex3 = index;
 		}
@@ -637,14 +637,14 @@ public:
     /**
     *   @brief Get/Set: Model Index 4
     **/
-    virtual const int32_t   GetModelIndex4() { 
+    virtual const int32_t   GetModelIndex4() override { 
 		if (podEntity) {
 			return podEntity->currentState.modelIndex4;
 		} else {
 			return 0; 
 		}
 	}
-    virtual void            SetModelIndex4(const int32_t index) { 
+    virtual void            SetModelIndex4(const int32_t index) override { 
 		if (podEntity) {
 			podEntity->currentState.modelIndex4 = index;
 		}
@@ -653,8 +653,8 @@ public:
     /**
     *   @brief Get/Set: Move Type.
     **/
-	virtual const int32_t   GetMoveType() { return moveType; };
-    virtual void			SetMoveType(const int32_t moveType) { this->moveType = moveType; };
+	virtual const int32_t   GetMoveType() override { return moveType; };
+    virtual void			SetMoveType(const int32_t moveType) override { this->moveType = moveType; };
 
     /**
     *   @brief Get/Set:     NextThink Time.
@@ -665,26 +665,26 @@ public:
     /**
     *   @brief Get/Set:     Noise Index A
     **/
-    virtual const int32_t   GetNoiseIndexA() { return noiseIndexA; };
-    virtual void            SetNoiseIndexA(const int32_t noiseIndexA) { this->noiseIndexA = noiseIndexA; };
+    virtual const int32_t   GetNoiseIndexA() override { return noiseIndexA; };
+    virtual void            SetNoiseIndexA(const int32_t noiseIndexA) override { this->noiseIndexA = noiseIndexA; };
 
     /**
     *   @brief Get/Set:     Noise Index B
     **/
-    virtual const int32_t   GetNoiseIndexB() { return noiseIndexB; };
-    virtual void            SetNoiseIndexB(const int32_t noiseIndexB) { this->noiseIndexB = noiseIndexB; };
+    virtual const int32_t   GetNoiseIndexB() override{ return noiseIndexB; };
+    virtual void            SetNoiseIndexB(const int32_t noiseIndexB) override { this->noiseIndexB = noiseIndexB; };
 
     /**
     *   @brief Get/Set:     State Number
     **/
-    virtual const int32_t   GetNumber() { 
+    virtual const int32_t   GetNumber() override { 
 		if (podEntity) {
 			return podEntity->clientEntityNumber;
 		} else {
 			return 0;
 		}
 	};
-    virtual void            SetNumber(const int32_t number) {
+    virtual void            SetNumber(const int32_t number) override {
 		if (podEntity) {
 			podEntity->clientEntityNumber = number;
 			podEntity->currentState.number = number;
@@ -694,20 +694,20 @@ public:
     /**
     *   @brief Get/Set:     Old Enemy Entity
     **/
-    virtual GameEntity*		GetOldEnemy() { return oldEnemyEntity; }
-    virtual void            SetOldEnemy(IClientGameEntity* oldEnemy) { this->oldEnemyEntity = oldEnemy; };
+    virtual GameEntity*		GetOldEnemy() override { return oldEnemyEntity; }
+    virtual void            SetOldEnemy(IClientGameEntity* oldEnemy) override { this->oldEnemyEntity = oldEnemy; };
 
     /**
     *   @brief Get/Set:     Old Origin
     **/
-    virtual const vec3_t&   GetOldOrigin() { 
+    virtual const vec3_t&   GetOldOrigin() override { 
 		if (podEntity) {
 			return podEntity->currentState.oldOrigin;
 		} else {
 			return ZeroVec3;
 		}
 	};
-    virtual void            SetOldOrigin(const vec3_t& oldOrigin) {
+    virtual void            SetOldOrigin(const vec3_t& oldOrigin) override {
 		if (podEntity) {
 			podEntity->currentState.oldOrigin = oldOrigin;
 		}
@@ -716,14 +716,14 @@ public:
     /**
     *   @brief Get/Set:     Origin
     **/
-    virtual const vec3_t&   GetOrigin() { 
+    virtual const vec3_t&   GetOrigin() override { 
 		if (podEntity) {
 			return podEntity->currentState.origin;
 		} else {
 			return ZeroVec3;
 		}
 	};
-    virtual void            SetOrigin(const vec3_t& origin) {
+    virtual void            SetOrigin(const vec3_t& origin) override {
 		if (podEntity) {
 			podEntity->currentState.origin = origin;
 		}
@@ -732,20 +732,20 @@ public:
     /**
     *   @brief Get/Set:     Owner Entity
     **/
-    virtual GameEntity*		GetOwner() { return ownerEntity; };
-    virtual void            SetOwner(IClientGameEntity* owner) { ownerEntity = owner; };
+    virtual GameEntity*		GetOwner() override { return ownerEntity; };
+    virtual void            SetOwner(IClientGameEntity* owner) override { ownerEntity = owner; };
 
     /**
     *   @brief Get/Set:     Render Effects
     **/
-    virtual const int32_t   GetRenderEffects() { 
+    virtual const int32_t   GetRenderEffects() override { 
 		if (podEntity) {
 			return podEntity->currentState.renderEffects;
 		} else {
 			return 0;
 		}
 	};
-    virtual void            SetRenderEffects(const int32_t renderEffects) {
+    virtual void            SetRenderEffects(const int32_t renderEffects) override {
 		if (podEntity) {
 			podEntity->currentState.renderEffects = renderEffects;
 		}
@@ -754,25 +754,25 @@ public:
     // Get the 'pathTarget' entity value.
     // Overridden by PathCorner
     // TODO: replace this ugly workaround with some component system
-    virtual const char*     GetPathTarget() { return EmptyString.c_str(); };
+    virtual const char*     GetPathTarget() override { return EmptyString.c_str(); };
 
     /**
     *   @brief Get/Set:     Server Flags
     **/
-    virtual const int32_t   GetServerFlags() { return 0; };
-    virtual void            SetServerFlags(const int32_t serverFlags) {};
+    virtual const int32_t   GetServerFlags() override { return 0; };
+    virtual void            SetServerFlags(const int32_t serverFlags) override {};
 
     /**
     *   @brief Get/Set:     Skin Number
     **/
-    virtual const int32_t   GetSkinNumber() { 
+    virtual const int32_t   GetSkinNumber() override{ 
 		if (podEntity) {
 			return podEntity->currentState.skinNumber;
 		} else {
 			return 0;
 		}
 	};
-    virtual void            SetSkinNumber(const int32_t skinNumber) {
+    virtual void            SetSkinNumber(const int32_t skinNumber) override {
 		if (podEntity) {
 			podEntity->currentState.skinNumber = skinNumber;
 		}
@@ -781,14 +781,14 @@ public:
     /**
     *   @brief Get/Set:     Entity Size
     **/
-    virtual const vec3_t&   GetSize() { 
+    virtual const vec3_t&   GetSize() override { 
 		if (podEntity) {
 			return podEntity->size;
 		} else {
 			return ZeroVec3;
 		};
 	};
-    virtual void            SetSize(const vec3_t& size) {
+    virtual void            SetSize(const vec3_t& size) override {
 		if (podEntity) {
 			podEntity->size = size;
 		}
@@ -797,14 +797,14 @@ public:
     /**
     *   @brief Get/Set:     Solid
     **/
-    virtual const uint32_t  GetSolid() { 
+    virtual const uint32_t  GetSolid() override { 
 		if (podEntity) {
 			return podEntity->currentState.solid;
 		} else {
 			return 0;
 		}
 	};
-    virtual void            SetSolid(const uint32_t solid) {
+    virtual void            SetSolid(const uint32_t solid) override {
 		if (podEntity) {
 			podEntity->currentState.solid = solid;
 		}
@@ -813,14 +813,14 @@ public:
     /**
     *   @brief Get/Set:     Sound.
     **/
-    virtual const int32_t   GetSound() { 
+    virtual const int32_t   GetSound() override { 
 		if (podEntity) {
 			return podEntity->currentState.sound;
 		} else {
 			return 0;
 		}
 	};
-    virtual void            SetSound(const int32_t sound) {
+    virtual void            SetSound(const int32_t sound) override {
 		if (podEntity) {
 			podEntity->currentState.sound = sound;
 		}
@@ -829,92 +829,92 @@ public:
     /**
     *   @brief Get/Set:     Spawn Flags
     **/
-    virtual const int32_t   GetSpawnFlags() { return spawnFlags; };
-    virtual void            SetSpawnFlags(const int32_t spawnFlags) { this->spawnFlags = spawnFlags; };
+    virtual const int32_t   GetSpawnFlags() override { return spawnFlags; };
+    virtual void            SetSpawnFlags(const int32_t spawnFlags) override { this->spawnFlags = spawnFlags; };
 
     /**
     *   @brief Get/Set:     Entity State
     **/
-    virtual const EntityState&   GetState() { return podEntity->currentState; };
-    virtual void                 SetState(const EntityState &state) { podEntity->currentState = state; };
+    virtual const EntityState&   GetState() override { return podEntity->currentState; };
+    virtual void                 SetState(const EntityState &state) override { podEntity->currentState = state; };
 
     /**
     *   @brief Get/Set:     Style
     **/
-    virtual const int32_t   GetStyle() { return style; };
-    virtual void            SetStyle(const int32_t style) { this->style = style; };
+    virtual const int32_t   GetStyle() override { return style; };
+    virtual void            SetStyle(const int32_t style) override { this->style = style; };
 
     /**
     *   @brief Get/Set:     Take Damage
     **/
-    virtual const int32_t   GetTakeDamage() { return takeDamage; };
-    virtual void            SetTakeDamage(const int32_t takeDamage) { this->takeDamage = takeDamage; };
+    virtual const int32_t   GetTakeDamage() override { return takeDamage; };
+    virtual void            SetTakeDamage(const int32_t takeDamage) override { this->takeDamage = takeDamage; };
     
     /**
     *   @brief Get/Set:     Target
     **/
-    virtual const std::string&   GetTarget() { return targetStr; };
-    virtual void                 SetTarget(const std::string& target) { this->targetStr = target; };
+    virtual const std::string&   GetTarget() override { return targetStr; };
+    virtual void                 SetTarget(const std::string& target) override { this->targetStr = target; };
 
     /**
     *   @brief Get/Set:     Target Name
     **/
-    virtual const std::string&   GetTargetName() { return targetNameStr; };
-    virtual void                 SetTargetName(const std::string& targetName) { this->targetNameStr = targetName; };
+    virtual const std::string&   GetTargetName() override { return targetNameStr; };
+    virtual void                 SetTargetName(const std::string& targetName) override { this->targetNameStr = targetName; };
 
     /**
     *   @brief Get/Set:     Team
     **/
-    virtual const std::string&   GetTeam() { return teamStr; };
-    virtual void                 SetTeam(const std::string &team) { this->teamStr = team;};
+    virtual const std::string&   GetTeam() override { return teamStr; };
+    virtual void                 SetTeam(const std::string &team) override { this->teamStr = team;};
 
     /**
     *   @brief Get/Set:     Team Chain
     **/
-    virtual IClientGameEntity*	GetTeamChainEntity() { return this->teamChainEntity; }
-    virtual void				SetTeamChainEntity(GameEntity* entity) { this->teamChainEntity = teamChainEntity; };
+    virtual IClientGameEntity*	GetTeamChainEntity() override { return this->teamChainEntity; }
+    virtual void				SetTeamChainEntity(GameEntity* entity) override { this->teamChainEntity = teamChainEntity; };
 
     /**
     *   @brief Get/Set:     Team Master
     **/
-    virtual IClientGameEntity*	GetTeamMasterEntity() { return teamMasterEntity; };
-    virtual void				SetTeamMasterEntity(IClientGameEntity* entity) { this->teamMasterEntity = teamMasterEntity; };
+    virtual IClientGameEntity*	GetTeamMasterEntity() override { return teamMasterEntity; };
+    virtual void				SetTeamMasterEntity(IClientGameEntity* entity) override { this->teamMasterEntity = teamMasterEntity; };
 
     /**
     *   @brief Get/Set:     Velocity
     **/
-    virtual const vec3_t&   GetVelocity() { return velocity; };
-    virtual void            SetVelocity(const vec3_t &velocity) { this->velocity = velocity; };
+    virtual const vec3_t&   GetVelocity() override { return velocity; };
+    virtual void            SetVelocity(const vec3_t &velocity) override { this->velocity = velocity; };
 
     /**
     *   @brief Get/Set:     View Height
     **/
-    virtual const int32_t   GetViewHeight() { return viewHeight; };
-    virtual void            SetViewHeight(const int32_t height) { this->viewHeight = height; };
+    virtual const int32_t   GetViewHeight() override { return viewHeight; };
+    virtual void            SetViewHeight(const int32_t height) override { this->viewHeight = height; };
 
     /**
     *   @brief Get/Set:     Wait Time
     **/
-    virtual const Frametime&    GetWaitTime() { return waitTime; }
-    virtual void                SetWaitTime(const Frametime &waitTime) { this->waitTime = waitTime; };
+    virtual const Frametime&    GetWaitTime() override { return waitTime; }
+    virtual void                SetWaitTime(const Frametime &waitTime) override { this->waitTime = waitTime; };
 
     /**
     *   @brief Get/Set:     Water Level
     **/
-    virtual const int32_t   GetWaterLevel() { return waterLevel; };
-    virtual void            SetWaterLevel(const int32_t waterLevel) { this->waterLevel = waterLevel; };
+    virtual const int32_t   GetWaterLevel() override { return waterLevel; };
+    virtual void            SetWaterLevel(const int32_t waterLevel) override { this->waterLevel = waterLevel; };
 
     /**
     *   @brief Get/Set:     Water Type
     **/
-    virtual const int32_t   GetWaterType() { return waterType; }
-    virtual void            SetWaterType(const int32_t waterType) { this->waterType = waterType; };
+    virtual const int32_t   GetWaterType() override { return waterType; }
+    virtual void            SetWaterType(const int32_t waterType) override{ this->waterType = waterType; };
 
     /**
     *   @brief Get/Set:     Yaw Speed
     **/
-    virtual const float     GetYawSpeed() { return yawSpeed; };
-    virtual void            SetYawSpeed(const float yawSpeed) { this->yawSpeed = yawSpeed; };
+    virtual const float     GetYawSpeed() override { return yawSpeed; };
+    virtual void            SetYawSpeed(const float yawSpeed) override { this->yawSpeed = yawSpeed; };
 
 
 
@@ -986,7 +986,7 @@ public:
     *   @param  other:      
     *   @param  activator:  
     **/
-    void DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator);
+    void DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator) override;
     /**
     *   @brief  Dispatches 'Use' callback.
     *   @param  inflictor:  
@@ -994,12 +994,12 @@ public:
     *   @param  damage:     
     *   @param  pointer:    
     **/
-    void DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
+    void DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) override;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  other:  
     **/
-    void DispatchBlockedCallback(IClientGameEntity* other);
+    void DispatchBlockedCallback(IClientGameEntity* other) override;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  self:   
@@ -1007,14 +1007,18 @@ public:
     *   @param  plane:  
     *   @param  surf:   
     **/
-    void DispatchTouchCallback(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    void DispatchTouchCallback(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) override;
     /**
     *   @brief  Dispatches 'TakeDamage' callback.
     *   @param  other:
     *   @param  kick:
     *   @param  damage:
     **/
-    void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage);
+    void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) override;
+    /**
+    *   @brief  Dispatches 'Stop' callback.
+    **/
+    void DispatchStopCallback() override;
 
 
     /***
@@ -1030,7 +1034,7 @@ public:
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
 private:
-	virtual void ProcessSkeletalAnimationForTime(uint64_t time);
+	virtual void ProcessSkeletalAnimationForTime(uint64_t time) ;
 
 
 protected:

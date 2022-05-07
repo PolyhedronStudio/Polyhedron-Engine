@@ -991,7 +991,8 @@ public:
     using TakeDamageCallbackPointer = void(IClientGameEntity::*)(IClientGameEntity* other, float kick, int32_t damage);
     //! 'Die' Callback Pointer.
     using DieCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
-
+    //! 'Stop' Callback Pointer. (Gets dispatched when an entity's physics movement has come to has stoppped, come to an end.)
+    using StopCallbackPointer		= void(IClientGameEntity::*)();
 
     /**
     *   @brief  Dispatches 'Use' callback.
@@ -1027,7 +1028,10 @@ public:
     *   @param  damage:
     **/
     virtual void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) override;
-
+    /**
+    *   @brief  Dispatches 'Stop' callback.
+    **/
+    virtual void DispatchStopCallback() override;
 
 
 protected:

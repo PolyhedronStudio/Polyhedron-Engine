@@ -61,17 +61,20 @@ public:
     *
     **/
     //! 'Think' Callback Pointer. (Gets dispatched by an entity's Think method based on nextThinkTime.)
-    using ThinkCallbackPointer      = void(IServerGameEntity::*)(void);
+    using ThinkCallbackPointer      = void(GameEntity::*)(void);
     //! 'Use' Callback Pointer.
-    using UseCallbackPointer        = void(IServerGameEntity::*)(IServerGameEntity* other, IServerGameEntity* activator);
+    using UseCallbackPointer        = void(GameEntity::*)(GameEntity* other, GameEntity* activator);
     //! 'Touch' Callback Pointer.
-    using TouchCallbackPointer      = void(IServerGameEntity::*)(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    using TouchCallbackPointer      = void(GameEntity::*)(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     //! 'Blocked' Callback Pointer.
-    using BlockedCallbackPointer    = void(IServerGameEntity::*)(IServerGameEntity* other);
+    using BlockedCallbackPointer    = void(GameEntity::*)(GameEntity* other);
     //! 'Damage' Callback Pointer.
-    using TakeDamageCallbackPointer = void(IServerGameEntity::*)(IServerGameEntity* other, float kick, int32_t damage);
+    using TakeDamageCallbackPointer = void(GameEntity::*)(GameEntity* other, float kick, int32_t damage);
     //! 'Die' Callback Pointer.
-    using DieCallbackPointer        = void(IServerGameEntity::*)(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
+    using DieCallbackPointer        = void(GameEntity::*)(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
+    //! 'Stop' Callback Pointer. (Gets dispatched when an entity's physics movement has come to has stoppped, come to an end.)
+    using StopCallbackPointer		= void(GameEntity::*)();
+
 
     /**
     *   @brief  Dispatches 'Use' callback.
@@ -107,7 +110,10 @@ public:
     *   @param  damage:
     **/
     virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) = 0;
-
+    /**
+    *   @brief  Dispatches 'Stop' callback.
+    **/
+    virtual void DispatchStopCallback() = 0;
 
 
     /**
@@ -236,19 +242,39 @@ public:
         return (dieFunction != nullptr ? true : false);
     }
 
+    /**
+    *   @brief  Sets the 'Stop' callback function.
+    **/
+    template<typename function>
+    inline void SetStopCallback(function f)
+    {
+        stopFunction = static_cast<StopCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'Die' callback set. False if it is nullptr.
+    **/
+    inline const qboolean HasStopCallback() {
+        return (stopFunction != nullptr ? true : false);
+    }
+
 
 
 protected:
     /**
     *   Dispatch Callback Function Pointers.
     **/
-    ThinkCallbackPointer        thinkFunction       = nullptr;
-    UseCallbackPointer          useFunction         = nullptr;
-    TouchCallbackPointer        touchFunction       = nullptr;
-    BlockedCallbackPointer      blockedFunction     = nullptr;
+	// General game event callbacks.
+	ThinkCallbackPointer        thinkFunction       = nullptr;
     TakeDamageCallbackPointer   takeDamageFunction  = nullptr;
     DieCallbackPointer          dieFunction         = nullptr;
+	
+	// Interaction callbacks.
+	UseCallbackPointer          useFunction         = nullptr;
 
+	// Physics Callbacks.
+	TouchCallbackPointer        touchFunction       = nullptr;
+    BlockedCallbackPointer      blockedFunction     = nullptr;
+	StopCallbackPointer         stopFunction        = nullptr;
 
 
 private:

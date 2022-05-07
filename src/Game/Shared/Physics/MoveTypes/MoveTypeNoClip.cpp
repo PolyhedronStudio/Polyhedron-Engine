@@ -39,9 +39,9 @@ extern cvar_t *GetSVGravity();
 //========================================================================
 
 /**
-*	@brief Logic for MoveType::(None, PlayerMove): Gives the entity a chance to 'Think', does not execute any physics logic.
+*	@brief Logic for MoveType::(NoClip): Moves the entity based on angular- and regular- velocity. Does not clip to world or entities.
 **/
-void SG_Physics_None(SGEntityHandle& entityHandle) {
+void SG_Physics_NoClip(SGEntityHandle &entityHandle) {
     // Assign handle to base entity.
     GameEntity* gameEntity = *entityHandle;
 
@@ -51,6 +51,16 @@ void SG_Physics_None(SGEntityHandle& entityHandle) {
         return;
     }
 
-    // Run think method.
-   // SG_RunThink(gameEntity);
+    // regular thinking
+ //   if (!SG_RunThink(gameEntity)) {
+ //       return;
+	//}
+    if (!gameEntity->IsInUse()) {
+        return;
+	}
+
+    gameEntity->SetAngles(vec3_fmaf(gameEntity->GetAngles(), FRAMETIME.count(), gameEntity->GetAngularVelocity()));
+    gameEntity->SetOrigin(vec3_fmaf(gameEntity->GetOrigin(), FRAMETIME.count(), gameEntity->GetVelocity()));
+
+    gameEntity->LinkEntity();
 }

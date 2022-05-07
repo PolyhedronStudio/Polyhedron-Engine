@@ -18,4 +18,9 @@ void LocalEntity_Update(const EntityState &state);
 /**
 *   @brief  Notifies the client game about an entity event to execute.
 **/
-void LocalEntity_FireEvent(int32_t number);
+void LocalEntity_FireEvent(EntityState &state);
+
+/**
+*   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
+**/
+void LocalEntity_SetHashedClassname(PODEntity* podEntity, EntityState& state);

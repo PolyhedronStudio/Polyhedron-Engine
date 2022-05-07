@@ -38,6 +38,8 @@ public:
     void ExplosionBoxDropToFloor(void);
     void ExplosionBoxDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
     void ExplosionBoxTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+	void ExplosionBoxStop();
+
 
     // Set when exploding, after a minor delay.
     void MiscExplosionBoxExplode(void);

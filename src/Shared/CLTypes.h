@@ -300,7 +300,7 @@ struct ClientState {
     int32_t numSolidEntities = 0;
 
     //! Solid Local Entities, these are REBUILT during EACH FRAME.
-    PODEntity *solidLocalEntities[MAX_PACKET_ENTITIES];// = {};
+    PODEntity *solidLocalEntities[3072];// = {};
     int32_t numSolidLocalEntities = 0;
 
     //! Entity Baseline States. These are where to start working from.

@@ -403,7 +403,8 @@ static void CL_ParseConfigstring(int index)
 static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
 {
     if (index < 1 || index >= MAX_WIRED_POD_ENTITIES) {
-        Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
+        //Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
+		return;
     }
 #ifdef _DEBUG
     if (cl_shownet->integer > 2) {

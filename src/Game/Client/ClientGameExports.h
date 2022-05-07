@@ -82,6 +82,10 @@ public:
 	*   @brief  Gives Local Entities a chance to think. Called synchroniously to the server frames.
 	**/
 	void ClientLocalEntitiesFrame() final;
+	/**
+	*	@return	The GameEntity's hashed classname value, 0 if it has no GameEntity.
+	**/
+	uint32_t GetHashedGameEntityClassname(PODEntity *podEntity) final;
     /**
     *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
     **/

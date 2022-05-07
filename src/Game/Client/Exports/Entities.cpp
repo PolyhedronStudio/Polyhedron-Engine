@@ -211,19 +211,17 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
         // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
 		SG_RunEntity(handle);
-
-
-		// Update the podEntity's hashedClassname for the next frame.
-		if (podEntity) {
-			podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
-			
-			if (podEntity->gameEntity) {
-				// Keep it up to date with whatever the game entities type info 
-				podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
-			} else {
-				podEntity->currentState.hashedClassname = 0;
-			}
-		}
+		//// Update the podEntity's hashedClassname for the next frame.
+		//if (podEntity) {
+		//	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+		//	
+		//	if (podEntity->gameEntity) {
+		//		// Keep it up to date with whatever the game entities type info 
+		//		podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+		//	} else {
+		//		podEntity->currentState.hashedClassname = 0;
+		//	}
+		//}
 //		CLG_RunServerEntity(handle);
     }
 }
@@ -250,7 +248,7 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
         GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(entityIndex);//gameWorld->GetGameEntityByIndex(12 + entityNumber);
 
         // If invalid for whichever reason, warn and continue to next iteration.
-        if (!podEntity || !gameEntity) {
+        if (!podEntity || !gameEntity || !podEntity->inUse) {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
@@ -262,18 +260,23 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		SGEntityHandle handle = gameEntity;
 		//CLG_RunLocalClientEntity(handle);
 		SG_RunEntity(handle);
-
-		if (podEntity) {
-			podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
-			
-			if (podEntity->gameEntity) {
-				// Keep it up to date with whatever the game entities type info 
-				podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
-			} else {
-				podEntity->currentState.hashedClassname = 0;
-			}
-		}
     }
+}
+
+/**
+*	@return	The GameEntity's hashed classname value, 0 if it has no GameEntity.
+**/
+uint32_t ClientGameEntities::GetHashedGameEntityClassname(PODEntity* podEntity) {
+	if (podEntity) {
+		if (podEntity->gameEntity) {
+			// Keep it up to date with whatever the game entities type info 
+			return podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+		} else {
+			return 0;
+		}
+	}
+
+	return 0; // This should never happen of.
 }
 
 /**

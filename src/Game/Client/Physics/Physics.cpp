@@ -553,7 +553,7 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
         //check = g_baseEntities[e];
 		PODEntity *podCheck = cl->solidEntities[e];
 		if (e >= cl->numSolidEntities) {
-			podCheck = cl->solidLocalEntities[e];
+			podCheck = cl->solidLocalEntities[e - cl->numSolidLocalEntities];
 		}
 	    SGEntityHandle checkHandle = podCheck;
 

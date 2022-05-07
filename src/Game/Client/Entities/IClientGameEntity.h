@@ -135,6 +135,9 @@ public:
     using TakeDamageCallbackPointer = void(IClientGameEntity::*)(IClientGameEntity* other, float kick, int32_t damage);
     //! 'Die' Callback Pointer.
     using DieCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
+    //! 'Stop' Callback Pointer. (Gets dispatched when an entity's physics movement has come to has stoppped, come to an end.)
+    using StopCallbackPointer		= void(IClientGameEntity::*)();
+
 
     /**
     *   @brief  Dispatches 'Use' callback.
@@ -170,7 +173,10 @@ public:
     *   @param  damage:
     **/
     virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) = 0;
-
+    /**
+    *   @brief  Dispatches 'Stop' callback.
+    **/
+    virtual void DispatchStopCallback() = 0;
 
 
     /**
@@ -312,16 +318,35 @@ public:
         return (dieFunction != nullptr ? true : false);
     }
 
-
+    /**
+    *   @brief  Sets the 'Stop' callback function.
+    **/
+    template<typename function>
+    inline void SetStopCallback(function f)
+    {
+        stopFunction = static_cast<StopCallbackPointer>(f);
+    }
+    /**
+    *   @return True if it has a 'Die' callback set. False if it is nullptr.
+    **/
+    inline const qboolean HasStopCallback() {
+        return (stopFunction != nullptr ? true : false);
+    }
 
 protected:
     /**
     *   Dispatch Callback Function Pointers.
     **/
-    ThinkCallbackPointer        thinkFunction       = nullptr;
-    UseCallbackPointer          useFunction         = nullptr;
-    TouchCallbackPointer        touchFunction       = nullptr;
-    BlockedCallbackPointer      blockedFunction     = nullptr;
+	// General game event callbacks.
+	ThinkCallbackPointer        thinkFunction       = nullptr;
     TakeDamageCallbackPointer   takeDamageFunction  = nullptr;
     DieCallbackPointer          dieFunction         = nullptr;
+	
+	// Interaction callbacks.
+	UseCallbackPointer          useFunction         = nullptr;
+
+	// Physics Callbacks.
+	TouchCallbackPointer        touchFunction       = nullptr;
+    BlockedCallbackPointer      blockedFunction     = nullptr;
+	StopCallbackPointer         stopFunction        = nullptr;
 };

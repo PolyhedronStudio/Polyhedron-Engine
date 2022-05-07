@@ -859,6 +859,16 @@ void CL_GM_ClientLocalEntitiesFrame(void) {
 }
 
 /**
+*	@return	The current actual hashed classname of the PODEntity's game object. 
+*			If it has no object, 0 will be returned instead.
+**/
+uint32_t CL_GM_GetHashedGameEntityClassname(PODEntity *podEntity) {
+    if (cge) {
+        return cge->GetHashedGameEntityClassname(podEntity);
+    }
+}
+
+/**
 *   @brief  Called when the client disconnects, including by Com_Error etc.
 **/
 void CL_GM_ClientDisconnect(void) {

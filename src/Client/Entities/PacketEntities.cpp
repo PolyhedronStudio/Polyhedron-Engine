@@ -203,6 +203,22 @@ void PacketEntity_UpdateState(const EntityState &state)
 }
 
 /**
+*   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
+**/
+void PacketEntity_SetHashedClassname(PODEntity* podEntity, EntityState& state) {
+	// Only continue IF we got a podEntity.
+	if (!podEntity) {
+		return;
+	}
+
+	// No matter what, ensure that the previous frame hashed classname is set to our current.
+	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+
+	//Retreive and update its current/(possibly, new) hashedClassname after this frame.
+	podEntity->currentState.hashedClassname = CL_GM_GetHashedGameEntityClassname(podEntity); 
+}
+
+/**
 *   @brief  Notifies the client game about an entity event to execute.
 **/
 void PacketEntity_FireEvent(int32_t number) {

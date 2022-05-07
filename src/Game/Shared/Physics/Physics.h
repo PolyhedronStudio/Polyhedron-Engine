@@ -25,10 +25,9 @@ static constexpr int32_t MAX_SLIDEMOVE_TOUCH		= 32;
 static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 
 //! Uncomment for printing Debug Information Output when a SlideMove gets trapped.
-//#define SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES
+/*#define SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES*/
 //! Comment to disable SlideMove velocity clamping.
 #define SG_SLIDEMOVE_CLAMPING
-
 
 
 /***
@@ -49,7 +48,6 @@ struct SlideMoveFlags {
 	static constexpr int32_t Blocked		= 2;
 	static constexpr int32_t Moved			= 1;
 };
-
 
 /**
 *	@brief	Contains the status of an entities physics move state.
@@ -79,12 +77,17 @@ struct MoveState {
 //========================================================================
 
 void SG_PhysicsEntityWPrint(const std::string &functionName, const std::string &functionSector, const std::string& message);
+
+//================================================================================
+
 /*
 * GS_ClipVelocity
 */
 vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce );
-
-//================================================================================
+/**
+*	@brief	Keep entity velocity within bounds.
+**/
+void SG_CheckVelocity( GameEntity *geCheck );
 
 /**
 *	@brief	Applies 'downward' gravity forces to the entity.
@@ -96,12 +99,19 @@ void SG_AddGravity( GameEntity *sharedGameEntity );
 **/
 void SG_AddGroundFriction( GameEntity *sharedGameEntity, float friction );
 
+/**
+*	@brief	Pushes the entity. Does not change the entities velocity at all
+**/
+SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset );
 
 /**
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
 const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float slideBounce, float friction );
 
+/**
+*	@brief	Utility function that determines whether a plane is too steep to walk on or not.
+**/
 static inline bool IsWalkablePlane(const CollisionPlane& plane) {
 	return plane.normal.z >= 0.7f ? true : false;
 }
@@ -122,7 +132,26 @@ static inline bool IsWalkablePlane(const CollisionPlane& plane) {
 //
 //solid_edge items only clip against bsp models.
 
+/**
+*	@brief Logic for MoveType::(None, PlayerMove): Gives the entity a chance to 'Think', does not execute any physics logic.
+**/
+void SG_Physics_None(SGEntityHandle& entityHandle);
+/**
+*	@brief Logic for MoveType::(NoClip): Moves the entity based on angular- and regular- velocity. Does not clip to world or entities.
+**/
+void SG_Physics_NoClip(SGEntityHandle &entityHandle);
 
+/**
+*	@brief Logic for MoveType::(Toss, TossSlide, Bounce, Fly and FlyMissile)
+**/
+void SG_Physics_Toss(SGEntityHandle& entityHandle);
+
+/**
+*	@brief Logic for MoveType::(Push, Stop): Pushes all objects except for brush models. 
+**/
+void SG_Physics_Pusher( SGEntityHandle &gePusherHandle );
+
+//================================================================================
 /**
 *	@brief	Tests whether the entity position would be trapped in a Solid.
 *	@return	(nullptr) in case it is free from being trapped. Worldspawn entity otherwise.

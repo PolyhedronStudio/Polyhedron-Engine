@@ -32,7 +32,8 @@
 static inline void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState &state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
-    clEntity->clientEntityNumber = MAX_WIRED_POD_ENTITIES + (++entity_ctr); //state.number; // used to be: clEntity->id = ++entity_ctr;
+    
+	clEntity->clientEntityNumber = state.number; //MAX_WIRED_POD_ENTITIES + (++entity_ctr); //state.number; // used to be: clEntity->id = ++entity_ctr;
     clEntity->trailCount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
@@ -63,15 +64,16 @@ static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityS
     // Fetch event ID.
     int32_t eventID = state.eventID;
 
-    if (state.modelIndex != clEntity->currentState.modelIndex
-        || state.modelIndex2 != clEntity->currentState.modelIndex2
-        || state.modelIndex3 != clEntity->currentState.modelIndex3
-        || state.modelIndex4 != clEntity->currentState.modelIndex4
+    if (//state.hashedClassname != clEntity->previousState.hashedClassname
+		state.modelIndex != clEntity->previousState.modelIndex
+        || state.modelIndex2 != clEntity->previousState.modelIndex2
+        || state.modelIndex3 != clEntity->previousState.modelIndex3
+        || state.modelIndex4 != clEntity->previousState.modelIndex4
         || eventID == EntityEvent::PlayerTeleport
         || eventID == EntityEvent::OtherTeleport
-        || fabsf(origin[0] - clEntity->currentState.origin[0]) > 512
-        || fabsf(origin[1] - clEntity->currentState.origin[1]) > 512
-        || fabsf(origin[2] - clEntity->currentState.origin[2]) > 512
+        || fabsf(origin[0] - clEntity->previousState.origin[0]) > 512
+        || fabsf(origin[1] - clEntity->previousState.origin[1]) > 512
+        || fabsf(origin[2] - clEntity->previousState.origin[2]) > 512
         || cl_nolerp->integer == 1) 
     {
         // Some data changes will force no lerping.
@@ -87,6 +89,7 @@ static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityS
 
     // Shuffle the last state to previous
     clEntity->previousState = clEntity->currentState;
+	clEntity->lerpOrigin = origin;
 }
 
 /**
@@ -100,30 +103,36 @@ static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityS
 **/
 static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 {
-	// Last received frame was invalid.
+	////// Last received frame was invalid.
     if (!cl.oldframe.valid) {
         return true;
     }
 
-    // Wasn't in last received frame.
+	// Wasn't in last local frame.
     if (clEntity->serverFrame != cl.frame.number) {//cl.oldframe.number + 1) {
         return true;
     }
 
-    // Developer option, always new.
+	// Hashname changed.
+	if (clEntity->currentState.hashedClassname != clEntity->previousState.hashedClassname) {
+		return true;
+	}
+
+
+ //   // Developer option, always new.
     if (cl_nolerp->integer == 2) {
         return true;
     }
 
-    // Developer option, lerp from last received frame.
+ //   // Developer option, lerp from last received frame.
     if (cl_nolerp->integer == 3) {
         return false;
     }
 
-    //// Previous server frame was dropped.
-    //if (cl.oldframe.number != cl.frame.number - 1) {
-    //    return true;
-    //}
+ ////   //// Previous server frame was dropped.
+ ////   //if (cl.oldframe.number != cl.frame.number - 1) {
+ ////   //    return true;
+ //   //}
 
     // No conditions met, so it wasn't in our previous frame.
     return false;
@@ -163,56 +172,79 @@ static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 **/
 void LocalEntity_Update(const EntityState &state)
 {
-	// Ensure that its state number is between MAX_SERVER_POD_ENTITIES and MAX_WIRED_POD_ENTITIES
+	// Ensure that its state number is > MAX_WIRED_POD_ENTITIES
 	if (state.number < MAX_WIRED_POD_ENTITIES) {
-		Com_DPrintf("Warning (%s): state.number(#%i) < MAX_WIRED_POD_ENTITIES\n", __func__, state.number);
+		Com_DPrintf("(%s): state.number(#%i) < MAX_WIRED_POD_ENTITIES\n", __func__, state.number);
 		return;
 	}
 
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
     PODEntity *clEntity = &cs.entities[state.number];
+	
+	// Ensure client entity number matches the state.
+	if (clEntity->clientEntityNumber != state.number) {
+		Com_DPrintf("(%s): (clEntity->clientEntityNumber != state.number): Correcting clEntity->clientEntityNumber. \n");
+		clEntity->clientEntityNumber = state.number;
+	}
 
-    // Add entity to the solids list if it has a solid.
-    if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidLocalEntities < MAX_PACKET_ENTITIES) {
-        // Increment num solid local entities.
-		cl.numSolidLocalEntities++;
+	clEntity->currentState.oldOrigin = clEntity->currentState.origin;
 
-		// Remember to subtract MAX_WIRED_POD_ENTITIES to get the actual array index.
-		const int32_t solidLocalEntityIndex = cl.numSolidLocalEntities;
-		cl.solidLocalEntities[solidLocalEntityIndex] = clEntity;
+  //  // Add entity to the solids list if it has a solid.
+  //  if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidLocalEntities < 3072) {
+  //      // Increment num solid local entities.
+		//cl.numSolidLocalEntities++;
 
-		// For non BRUSH models...
-        //if (state.solid != PACKED_BBOX) {
-            // Update the actual bounding box.
-            clEntity->mins = state.mins;
-			clEntity->maxs = state.maxs;
-        //}
-    }
+		//// Remember to subtract MAX_WIRED_POD_ENTITIES to get the actual array index.
+		//const int32_t solidLocalEntityIndex = (cl.numSolidLocalEntities < 3072 ? cl.numSolidLocalEntities : 3071);
+		//cl.solidLocalEntities[solidLocalEntityIndex] = clEntity;
 
-	// Assign its clientEntity number.
-	clEntity->clientEntityNumber = state.number;
+		//// For non BRUSH models...
+  //      if (state.solid != PACKED_BBOX) {
+  //          // Update the actual bounding box.
+  //          clEntity->mins = state.mins;
+		//	clEntity->maxs = state.maxs;
+  //      }
+  //  }
 
     // Was this entity in our previous frame, or not?
     if (LocalEntity_IsNew(clEntity)) {
         // Wasn't in last update, so initialize some things.
         LocalEntity_UpdateNew(clEntity, state, state.origin);
     } else {
-        // It already exists, update it accordingly.
+        // Updates the current and previous state so lerping won't hurt.
         LocalEntity_UpdateExisting(clEntity, state, state.origin);
     }
 
     // Assign the fresh new received server frame number that belongs to this frame.
     clEntity->serverFrame = cl.frame.number;
-
+	
     // Assign the fresh new received state as the entity's current.
-	//clEntity->previousState = clEntity->currentState;
-	//clEntity->currentState = state;
-	clEntity->clientEntityNumber = state.number;
+	clEntity->currentState = state;
+}
+
+/**
+*   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
+**/
+void LocalEntity_SetHashedClassname(PODEntity* podEntity, EntityState& state) {
+	// Only continue IF we got a podEntity.
+	if (!podEntity) {
+		return;
+	}
+
+	// No matter what, ensure that the previous frame hashed classname is set to our current.
+	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+
+	//Retreive and update its current/(possibly, new) hashedClassname after this frame.
+	podEntity->currentState.hashedClassname = CL_GM_GetHashedGameEntityClassname(podEntity); 
 }
 
 /**
 *   @brief  Notifies the client game about an entity event to execute.
 **/
-void LocalEntity_FireEvent(int32_t number) {
-    CL_GM_LocalEntityEvent(number);
+void LocalEntity_FireEvent(EntityState &state) {
+	// Let the LocalEntities react to events.
+	CL_GM_LocalEntityEvent(state.number);
+	
+	// Reset the actual entities eventID.
+	state.eventID = 0;
 }

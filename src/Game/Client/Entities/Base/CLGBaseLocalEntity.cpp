@@ -390,6 +390,17 @@ void CLGBaseLocalEntity::DispatchTakeDamageCallback(IClientGameEntity* other, fl
 	(this->*takeDamageFunction)(other, kick, damage);
 }
 
+/**
+*   @brief  Dispatches 'Stop' callback.
+**/
+void CLGBaseLocalEntity::DispatchStopCallback() {
+	// Safety check.
+	if (stopFunction == nullptr)
+		return;
+
+	// Execute 'Stop' callback function.
+	(this->*stopFunction)();
+}
 
 
 /**
@@ -531,9 +542,9 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
                 refreshEntity.oldorigin = cl->playerEntityOrigin;
             } else {
                 // Ohterwise, just neatly interpolate the origin.
-                refreshEntity.origin = vec3_mix(refreshEntity.origin, podEntity->currentState.origin, cl->lerpFraction);
+                refreshEntity.origin = currentState->origin; //vec3_mix(refreshEntity.origin, podEntity->currentState.origin, cl->lerpFraction);
                 // Neatly copy it as the refreshEntity's oldorigin.
-                refreshEntity.oldorigin = refreshEntity.origin;
+                refreshEntity.oldorigin = currentState->origin;
             }
         }
 

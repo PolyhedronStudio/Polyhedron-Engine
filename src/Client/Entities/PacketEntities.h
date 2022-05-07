@@ -19,3 +19,8 @@ void PacketEntity_UpdateState(const EntityState &state);
 *   @brief  Notifies the client game about an entity event to execute.
 **/
 void PacketEntity_FireEvent(int32_t number);
+
+/**
+*   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
+**/
+void PacketEntity_SetHashedClassname(PODEntity* podEntity, EntityState& state);

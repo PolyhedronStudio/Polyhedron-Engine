@@ -964,6 +964,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 		if (clEntity->gameEntity) {
 			// TODO: Use a SpawnFromState function here instead.
 			static_cast<IClientGameEntity*>(clEntity->gameEntity)->SpawnFromState(state);
+
 		}
 
 		// If it isn't a nullptr...

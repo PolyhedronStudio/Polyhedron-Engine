@@ -104,9 +104,11 @@ void MiscExplosionBox::Spawn() {
 
     // Setup our MiscExplosionBox callbacks.
     SetUseCallback(&MiscExplosionBox::ExplosionBoxUse);
-
-    SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
+	SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
+
+	// Physics callbacks.
+	SetStopCallback(&MiscExplosionBox::ExplosionBoxStop);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + 2.f * FRAMETIME);
@@ -362,6 +364,9 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
     SVG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 }
 
+void MiscExplosionBox::ExplosionBoxStop() {
+	gi.DPrintf("ExplosionBox STOP! :-)\n");
+}
 
 //
 //===============

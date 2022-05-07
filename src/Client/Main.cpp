@@ -2931,22 +2931,35 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
         return CL_FRAMETIME - clFrameResidual;
     }
 	
-
+		
 	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
-	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		// Update local entity.
-		LocalEntity_Update(cs.entities[i].currentState);
-
-		// Fire local entity events.
-		LocalEntity_FireEvent(cs.entities[i].currentState.number);
-
-		// Reset the actual entities eventID.
-		cs.entities[i].currentState.eventID = 0;
-	}
+	cl.numSolidLocalEntities = 0;
 	
+	// First give the ClientGame module a chance to "predict" its packet entities for a frame.
+	CL_GM_ClientPacketEntityDeltaFrame();
+
 	// Give the client game module a chance to run its local entities for a frame.
 	CL_GM_ClientLocalEntitiesFrame();
+
+	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
+		// Get entity pointer.
+		PODEntity *podEntity = &cs.entities[i];
+
+		//if (!podEntity->inUse) {
+		//	continue;
+		//}
+
+		// Update local entity.
+		LocalEntity_Update(podEntity->currentState);
+
+		// Run the Client Game entity for a frame.		
+		LocalEntity_SetHashedClassname(podEntity, podEntity->currentState);
+
+		// Fire local entity events.
+		LocalEntity_FireEvent(podEntity->currentState);
+	}
+
 	//CL_GM_ClientPacketEntityDeltaFrame();
 	
 
@@ -3086,9 +3099,9 @@ uint64_t CL_Frame(uint64_t msec)
     CL_UpdateCmd(main_extra);
 			
 	// Let client side entities do their thing.
-	//if (phys_frame) {
-		CL_RunGameFrame(main_extra);
-	//}
+	if (phys_frame) {
+		CL_RunGameFrame(phys_extra);
+	}
     // Finalize pending cmd
     phys_frame |= cl.sendPacketNow;
 

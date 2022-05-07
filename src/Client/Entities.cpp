@@ -197,13 +197,18 @@ void CL_DeltaFrame(void)
 
     // Rebuild the list of solid entities for this frame
     cl.numSolidEntities = 0;
-	cl.numSolidLocalEntities = 0;
 
     // Initialize position of the player's own entity from playerstate.
     // this is needed in situations when player entity is invisible, but
     // server sends an effect referencing its origin (such as MuzzleFlashType::Login, etc)
     PODEntity *playerClientEntity = &cs.entities[cl.frame.clientNumber + 1];
     Com_PlayerToEntityState(&cl.frame.playerState, &playerClientEntity->currentState);
+	
+	
+    // Call into client game module its delta frame function.
+	// This gives packet entities a chance to "predict" the next frame before
+	// the current data arrives.
+
 
 	// Process the entities that are 'in-frame' of the received server game frame packet data.
     for (int32_t i = 0; i < cl.frame.numEntities; i++) {
@@ -213,6 +218,12 @@ void CL_DeltaFrame(void)
 
         // Update the entity state. (Updates current and previous state.)
         PacketEntity_UpdateState(state);
+		
+		// Get entity pointer.
+		PODEntity *podEntity = &cs.entities[state.number];
+
+		// Run the Client Game entity for a frame.		
+		PacketEntity_SetHashedClassname(podEntity, podEntity->currentState);
 
         // Fire entity event.
         PacketEntity_FireEvent(state.number);
@@ -221,9 +232,6 @@ void CL_DeltaFrame(void)
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();
     }
-	
-    // Call into client game its delta frame function.
-    CL_GM_ClientPacketEntityDeltaFrame();
 
     if (cls.demo.playback) {
         // this delta has nothing to do with local viewAngles,

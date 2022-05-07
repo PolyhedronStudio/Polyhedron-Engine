@@ -166,11 +166,44 @@ public:
     *
     *
     **/
+    /**
+    *   @brief  Dispatches 'Use' callback.
+    *   @param  other:      
+    *   @param  activator:  
+    **/
     virtual void DispatchUseCallback(IServerGameEntity* other, IServerGameEntity* activator) override;
+    /**
+    *   @brief  Dispatches 'Use' callback.
+    *   @param  inflictor:  
+    *   @param  attacker:   
+    *   @param  damage:     
+    *   @param  pointer:    
+    **/
     virtual void DispatchDieCallback(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) override;
+    /**
+    *   @brief  Dispatches 'Block' callback.
+    *   @param  other:  
+    **/
     virtual void DispatchBlockedCallback(IServerGameEntity* other) override;
+    /**
+    *   @brief  Dispatches 'Block' callback.
+    *   @param  self:   
+    *   @param  other:  
+    *   @param  plane:  
+    *   @param  surf:   
+    **/
     virtual void DispatchTouchCallback(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) override;
+    /**
+    *   @brief  Dispatches 'TakeDamage' callback.
+    *   @param  other:
+    *   @param  kick:
+    *   @param  damage:
+    **/
     virtual void DispatchTakeDamageCallback(IServerGameEntity* other, float kick, int32_t damage) override;
+    /**
+    *   @brief  Dispatches 'Stop' callback.
+    **/
+    virtual void DispatchStopCallback() override;
 
 
 
