@@ -83,7 +83,7 @@ void SG_PhysicsEntityWPrint(const std::string &functionName, const std::string &
 /*
 * GS_ClipVelocity
 */
-vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce );
+vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, const float overbounce );
 /**
 *	@brief	Keep entity velocity within bounds.
 **/
@@ -97,7 +97,12 @@ void SG_AddGravity( GameEntity *sharedGameEntity );
 /**
 *	@brief	Apply ground friction forces to entity.
 **/
-void SG_AddGroundFriction( GameEntity *sharedGameEntity, float friction );
+void SG_AddGroundFriction( GameEntity *sharedGameEntity, const float friction );
+
+/**
+*	@brief	Processes rotational friction calculations.
+**/
+void SG_AddRotationalFriction(SGEntityHandle entityHandle);
 
 /**
 *	@brief	Pushes the entity. Does not change the entities velocity at all
@@ -107,7 +112,12 @@ SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset 
 /**
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float slideBounce, float friction );
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction );
+
+/**
+*	@brief	Checks if this entity should have a groundEntity set or not.
+**/
+void SG_CheckGround( GameEntity *geCheck );
 
 /**
 *	@brief	Utility function that determines whether a plane is too steep to walk on or not.
@@ -162,8 +172,15 @@ GameEntity *SG_TestEntityPosition(GameEntity *geTestSubject);
 *	@brief	Called when two entities have touched so we can safely call their touch callback functions.
 **/
 void SG_Impact( GameEntity *entityA, const SGTraceResult &trace );
-/*
-* G_RunEntity
-*
-*/
+
+/**
+*	@brief	Processes active game and physics logic of this entity for the current time/frame.
+**/
 void SG_RunEntity(SGEntityHandle &entityHandle);
+
+/**
+*	@brief	Gives the entity a chance to process 'Think' callback logic if the
+*			time is there for it to do so.
+*	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
+**/
+qboolean SG_RunThink(GameEntity *geThinker);

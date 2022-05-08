@@ -54,6 +54,9 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
         return;
     }
 
+	// Let the entity think.
+	SG_RunThink(ent);
+
 	// Has to be in use.
     if (!ent->IsInUse()) {
         return;
@@ -188,7 +191,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 		} else {
 			// in movetype_toss things stop dead when touching ground
 #if 0
-			G_CheckGround( ent );
+			SG_CheckGround( ent );
 
 			if( ent->groundentity ) {
 #else

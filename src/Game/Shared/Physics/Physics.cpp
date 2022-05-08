@@ -163,7 +163,7 @@ void SG_AddGravity( GameEntity *sharedGameEntity ) {
 /**
 *	@brief	Apply ground friction forces to entity.
 **/
-void SG_AddGroundFriction( GameEntity *sharedGameEntity, float friction ) {
+void SG_AddGroundFriction( GameEntity *sharedGameEntity, const float friction ) {
 	if (!sharedGameEntity) {
 		Com_DPrintf("SGWarning: %s called with sharedGameEntity(nullptr)!\n", __func__);
 	}
@@ -193,6 +193,50 @@ void SG_AddGroundFriction( GameEntity *sharedGameEntity, float friction ) {
 	}
 }
 
+static constexpr float STEPMOVE_STOPSPEED = 100.f;
+static constexpr float STEPMOVE_FRICTION = 6.f;
+static constexpr float STEPMOVE_WATERFRICTION = 1.f;
+
+/**
+*	@brief	Processes rotational friction calculations.
+**/
+void SG_AddRotationalFriction(SGEntityHandle entityHandle) { 
+	// Assign handle to base entity.
+    GameEntity *ent = *entityHandle;
+
+    // Ensure it is a valid entity.
+    if (!ent) {
+	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // Acquire the rotational velocity first.
+    vec3_t angularVelocity = ent->GetAngularVelocity();
+
+    // Set angles in proper direction.
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity));
+
+    // Calculate adjustment to apply.
+    float adjustment = FRAMETIME.count() * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
+
+    // Apply adjustments.
+    angularVelocity = ent->GetAngularVelocity();
+    for (int32_t n = 0; n < 3; n++) {
+        if (angularVelocity[n] > 0) {
+            angularVelocity[n] -= adjustment;
+            if (angularVelocity[n] < 0)
+                angularVelocity[n] = 0;
+        } else {
+            angularVelocity[n] += adjustment;
+            if (angularVelocity[n] > 0)
+                angularVelocity[n] = 0;
+        }
+    }
+
+    // Last but not least, set the new angularVelocity.
+    ent->SetAngularVelocity(angularVelocity);
+}
+
 /**
 *
 **/
@@ -207,8 +251,9 @@ int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity ) {
 	const int32_t geClipMask = gameEntity->GetClipMask();
 	return (geClipMask ? geClipMask : BrushContentsMask::Solid);
 }
+
 /**
-*
+*	@brief	Checks if this entity should have a groundEntity set or not.
 **/
 void SG_CheckGround( GameEntity *geCheck ) {
 	if (!geCheck) {
@@ -221,7 +266,7 @@ void SG_CheckGround( GameEntity *geCheck ) {
 		return;
 	}
 
-	if( geCheck->GetClient()  && geCheck->GetVelocity().z > 180) {
+	if( geCheck->GetClient() && geCheck->GetVelocity().z > 100) {//180) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
@@ -266,7 +311,7 @@ void SG_CheckGround( GameEntity *geCheck ) {
 /**
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float slideBounce, float friction ) {
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction ) {
 	int32_t i;
 	MoveState entMove = {};
 	int32_t blockedMask = 0;
@@ -309,7 +354,9 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, int32_t contentMask, float 
 		entMove.passEntity = geSlider;
 		entMove.contentMask = contentMask;
 
-		entMove.remainingTime = FRAMETIME_S.count();
+		Frametime remainingTime = level.time;
+
+		entMove.remainingTime = FRAMETIME.count(); //remainingTime.count();//level.time.count() + 1.f * FRAMETIME_S.count();//(float)(level.time.count() * FRAMETIME_S.count());
 
 		// Execute actual slide movement.
 		blockedMask = SG_SlideMove( &entMove );
@@ -439,31 +486,6 @@ void SG_CheckVelocity( GameEntity *geCheck ) {
 		geCheck->SetVelocity(vec3_scale(entityVelocity, scale));
 	}
 }
-
-///**
-//* SG_RunThink
-//*
-//* Runs thinking code for this frame if necessary.
-//**/
-//static void SG_RunThink( edict_t *ent ) {
-//	int64_t thinktime;
-//
-//	thinktime = ent->nextThink;
-//	if( thinktime <= 0 ) {
-//		return;
-//	}
-//	if( thinktime > level.time ) {
-//		return;
-//	}
-//
-//	ent->nextThink = 0;
-//
-//	if( ISEVENTENTITY( &ent->s ) ) { // events do not think
-//		return;
-//	}
-//
-//	G_CallThink( ent );
-//}
 
 /**
 *	@brief	Called when two entities have touched so we can safely call their touch callback functions.
@@ -702,17 +724,183 @@ int SV_FlyMove( edict_t *ent, float time, int mask ) {
 //============================================================================
 
 
-/*
-* G_RunEntity
-*
-*/
-//#ifdef SHAREDGAME_SERVERGAME
-// Runs entity thinking code for this frame if necessary
+//
 //===============
+// SVG_Physics_Step
+//
+// Monsters freefall when they don't have a ground entity, otherwise
+// all movement is done with discrete steps.
+//
+// This is also used for objects that have become still on the ground, but
+// will fall if the floor is pulled out from under them.
+// FIXME: is this true ?
+//===============
+//
+void SG_Physics_Step(SGEntityHandle &entityHandle)
+{
+    // Stores whether to play a "surface hit" sound.
+    qboolean    hitSound = false;
+
+    // Check if handle is valid.    
+    GameEntity *ent = *entityHandle;
+
+    if (!ent) {
+	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+        return;
+    }
+
+    // Retrieve ground entity.
+    GameEntity* groundEntity = *ent->GetGroundEntityHandle();
+
+    // If we have no ground entity.
+    if (!groundEntity) {
+        // Ensure we check if we aren't on one in this frame already.
+        SG_CheckGround(ent);
+    }
+
+    //if (!groundEntity) {
+    //    return;
+    //}
+
+    // Store whether we had a ground entity at all.
+    qboolean wasOnGround = (groundEntity ? true : false);
+
+    // Bound our velocity within sv_maxvelocity limits.
+    SG_CheckVelocity(ent);
+
+    // Check for angular velocities. If found, add rotational friction.
+    vec3_t angularVelocity = ent->GetAngularVelocity();
+
+    if (angularVelocity.x || angularVelocity.y || angularVelocity.z)
+        SG_AddRotationalFriction(ent);
+
+    // Re-ensure we fetched its latest angular velocity.
+    angularVelocity = ent->GetAngularVelocity();
+
+    // Add gravity except for: 
+    // - Flying monsters
+    // - Swimming monsters who are in the water
+    if (!wasOnGround) {
+        // If it is not a flying monster, we are done.
+        if (!(ent->GetFlags() & EntityFlags::Fly)) {
+            // In case the swim mosnter is not in water...
+            if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetWaterLevel() > 2))) {
+                // Determine whether to play a "hit sound".
+                if (ent->GetVelocity().z < sv_gravity->value * -0.1) {
+                    hitSound = true;
+                }
+
+                // Add gravity in case the monster is not in water, it can't fly, so it falls.
+                if (ent->GetWaterLevel() == 0) {
+                    SG_AddGravity(ent);
+                }
+            }
+        }
+    }
+
+    // Friction for flying monsters that have been given vertical velocity
+    if ((ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0)) {
+        const float speed = fabs(ent->GetVelocity().z);
+        const float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
+        const float friction = STEPMOVE_FRICTION / 3;
+        float newSpeed = speed - (FRAMETIME.count() * control * friction);
+        if (newSpeed < 0) {
+            newSpeed = 0;
+		}
+        newSpeed /= speed;
+        const vec3_t velocity = ent->GetVelocity();
+        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newSpeed });
+    }
+
+    // Friction for flying monsters that have been given vertical velocity
+    if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
+        const float speed = fabs(ent->GetVelocity().z);
+        const float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
+        float newSpeed = speed - (FRAMETIME.count() * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
+        if (newSpeed < 0) {
+            newSpeed = 0;
+		}
+        newSpeed /= speed;
+        const vec3_t velocity = ent->GetVelocity();
+        ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newSpeed });
+    }
+
+    // In case we have velocity, execute movement logic.
+    if (ent->GetVelocity().z || ent->GetVelocity().y || ent->GetVelocity().x) {
+        // apply friction
+        // let dead monsters who aren't completely onground slide
+        if ((wasOnGround) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
+            if (!(ent->GetHealth() <= 0.0)) {
+                vec3_t vel = ent->GetVelocity();
+                const float speed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
+                if (speed) {
+                    const float friction = STEPMOVE_FRICTION;
+                    const float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
+                    float newSpeed = speed - FRAMETIME.count() * control * friction;
+
+                    if (newSpeed < 0) {
+                        newSpeed = 0;
+					}
+                    newSpeed /= speed;
+
+                    vel[0] *= newSpeed;
+                    vel[1] *= newSpeed;
+
+                    // Set the velocity.
+                    ent->SetVelocity(vel);
+                }
+            }
+
+        // Default mask is solid.
+        int32_t mask = BrushContentsMask::Solid;
+
+        // In case of a monster, monstersolid.
+        if (ent->GetServerFlags() & EntityServerFlags::Monster) {
+            mask = BrushContentsMask::MonsterSolid;
+		}
+        
+        // Execute "BoxSlideMove", essentially also our water move.
+        SG_BoxSlideMove(ent, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10 );
+		//SVG_FlyMove(ent, FRAMETIME.count(), mask);
+
+        // Link.
+        ent->LinkEntity();
+
+		// Execute touch triggers.
+        SG_TouchTriggers(ent);
+
+        // Can't continue if this entity wasn't in use.
+        if ( !ent->IsInUse( ) ) {
+            return;
+		}
+
+#ifdef SHAREDGAME_SERVERGAME
+        // Check for whether to play a land sound.
+        if ( ent->GetGroundEntityHandle() ) {
+            if ( !wasOnGround ) {
+                if ( hitSound ) {
+                    SVG_Sound(ent, 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
+                }
+            }
+        }
+#endif
+    }
+
+    // Last but not least, give the entity a chance to think for this frame.
+    SG_RunThink(ent);
+}
+
+//============================================================================
+
+/**
+*	@brief	Gives the entity a chance to process 'Think' callback logic if the
+*			time is there for it to do so.
+*	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
+**/
 qboolean SG_RunThink(GameEntity *geThinker) {
     if (!geThinker) {
 	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
-        return false;
+        return true;
     }
 
     // Fetch think time.
@@ -798,17 +986,17 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	//	ent->timeDelta = 0;
 	//}
 
-	// only team captains decide the think, and they make think their team members when they do
-	//if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
-		for (GameEntity* gePart = ent; gePart != nullptr; gePart = gePart->GetTeamChainEntity()) {
-			SG_RunThink( gePart );
-		}
-		//for( GameEntity *gePart = ent; gePart ; gePart = (gePart ? gePart->GetTeamChainEntity() : nullptr)) {
-		//	if (gePart) {
-		//		SG_RunThink( gePart );
-		//	}
-		//}
-	//}
+	//// only team captains decide the think, and they make think their team members when they do
+	////if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
+	//	for (GameEntity* gePart = ent; gePart != nullptr; gePart = gePart->GetTeamChainEntity()) {
+	//		SG_RunThink( gePart );
+	//	}
+	//	//for( GameEntity *gePart = ent; gePart ; gePart = (gePart ? gePart->GetTeamChainEntity() : nullptr)) {
+	//	//	if (gePart) {
+	//	//		SG_RunThink( gePart );
+	//	//	}
+	//	//}
+	////}
 
 	switch( moveType ) {
 	// SG_Physics_None:
@@ -820,7 +1008,13 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	// SG_Physics_Pusher:
 		case MoveType::Push:
         case MoveType::Stop:
+#ifdef SHAREDGAME_CLIENTGAME
+			if (entityHandle.ID() == 0) {
+				SG_Physics_Pusher(entityHandle);
+			}
+#else
 	        SG_Physics_Pusher(entityHandle);
+#endif
         break;
 	// SG_Physics_NoClip:
         case MoveType::NoClip:
@@ -829,7 +1023,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
         break;
 	// SG_Physics_Step:
         case MoveType::Step:
-            //SG_Physics_Step(entityHandle);
+            SG_Physics_Step(entityHandle);
         break;
 	// SG_Physics_Toss:
         case MoveType::Toss:

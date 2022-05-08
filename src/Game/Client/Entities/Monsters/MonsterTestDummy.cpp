@@ -203,8 +203,9 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     //    SVG_StepMove_CheckGround(this);
     //}
     // Check for ground.
-	extern void CLG_StepMove_CheckGround(IClientGameEntity* ent);
-    CLG_StepMove_CheckGround(this);
+	//extern void CLG_StepMove_CheckGround(IClientGameEntity* ent);
+    //SG_StepMove_CheckGround(this);
+	SG_CheckGround(this);
     // Link entity back in.
     LinkEntity();
 

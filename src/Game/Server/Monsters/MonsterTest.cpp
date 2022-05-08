@@ -282,7 +282,7 @@ void MiscServerModel::MiscServerModelThink(void) {
     LinkEntity();
     
     // Check for ground.
-    SVG_StepMove_CheckGround(this);
+    SG_CheckGround();//SVG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);

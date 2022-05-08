@@ -208,7 +208,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     LinkEntity();
 
     // Do a check ground for the step move of this pusher.
-    SVG_StepMove_CheckGround(this);
+    SG_CheckGround(this);//SVG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
     //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
@@ -365,7 +365,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
 }
 
 void MiscExplosionBox::ExplosionBoxStop() {
-	gi.DPrintf("ExplosionBox STOP! :-)\n");
+	//gi.DPrintf("ExplosionBox STOP! :-)\n");
 }
 
 //

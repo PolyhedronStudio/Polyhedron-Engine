@@ -52,5 +52,5 @@ void SG_Physics_None(SGEntityHandle& entityHandle) {
     }
 
     // Run think method.
-   // SG_RunThink(gameEntity);
+    SG_RunThink(gameEntity);
 }

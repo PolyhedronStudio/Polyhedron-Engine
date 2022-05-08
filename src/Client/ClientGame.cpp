@@ -866,6 +866,7 @@ uint32_t CL_GM_GetHashedGameEntityClassname(PODEntity *podEntity) {
     if (cge) {
         return cge->GetHashedGameEntityClassname(podEntity);
     }
+	return 0;
 }
 
 /**

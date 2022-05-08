@@ -222,7 +222,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     LinkEntity();
 
     // Do a check ground for the step move of this pusher.
-    CLG_StepMove_CheckGround(this);
+    SG_CheckGround(this);//CLG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
     //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);

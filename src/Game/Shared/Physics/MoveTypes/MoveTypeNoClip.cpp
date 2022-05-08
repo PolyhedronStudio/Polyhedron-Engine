@@ -51,12 +51,12 @@ void SG_Physics_NoClip(SGEntityHandle &entityHandle) {
         return;
     }
 
-    // regular thinking
- //   if (!SG_RunThink(gameEntity)) {
- //       return;
-	//}
-    if (!gameEntity->IsInUse()) {
-        return;
+	// regular thinking
+	if (SG_RunThink(gameEntity)) {
+		return;
+	}
+	if (!gameEntity->IsInUse()) {
+		return;
 	}
 
     gameEntity->SetAngles(vec3_fmaf(gameEntity->GetAngles(), FRAMETIME.count(), gameEntity->GetAngularVelocity()));

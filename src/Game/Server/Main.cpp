@@ -510,6 +510,19 @@ void SVG_CheckDMRules(void)
 }
 
 
+void SVG_UpdateHashedClassName(PODEntity *podEntity) {
+	if (podEntity) {
+		podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
+		
+		if (podEntity->gameEntity) {
+			// Keep it up to date with whatever the game entities type info 
+			podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
+		} else {
+			podEntity->currentState.hashedClassname = 0;
+		}
+	}
+}
+
 /*
 ================
 SVG_RunFrame
@@ -580,17 +593,19 @@ void SVG_RunFrame(void) {
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-	    SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
-        if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
-            // Reset ground entity.
-            gameEntity->SetGroundEntity(nullptr);
+		//if (!gameEntity->GetClient()) {
+			SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
+			if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+				// Reset ground entity.
+				gameEntity->SetGroundEntity(nullptr);
 
-            // Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-            if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
-                // Check for a new ground entity that resides below this entity.
-                SVG_StepMove_CheckGround(gameEntity);
-            }
-        }
+				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
+				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+					// Check for a new ground entity that resides below this entity.
+					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
+				}
+			}
+		//}
 
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= game.GetMaxClients()) {
@@ -616,21 +631,8 @@ void SVG_RunFrame(void) {
 	    //SVG_RunEntity(entityHandle);
 		SG_RunEntity(entityHandle);
 
-		// Update the hashed game entity classname (if there is any.)
-		if (podEntity) {
-			podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
-			
-			if (podEntity->gameEntity) {
-				// Keep it up to date with whatever the game entities type info 
-				podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
-			} else {
-				podEntity->currentState.hashedClassname = 0;
-			}
-		}
-		//if (podEntity->gameEntity) {
-		//	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
-		//	podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
-		//}
+		// Update the entities Hashed Classname, it might've changed during logic processing.
+		SVG_UpdateHashedClassName(podEntity);
     }
 
     // See if it is time to end a deathmatch.

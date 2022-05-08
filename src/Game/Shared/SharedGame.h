@@ -605,3 +605,8 @@ static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
 *   Protocol
 **/
 #include "PlayerMove.h"
+
+/**
+*	Physics
+**/
+#include "Physics/Physics.h"

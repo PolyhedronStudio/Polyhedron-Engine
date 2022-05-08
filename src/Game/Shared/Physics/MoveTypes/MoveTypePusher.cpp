@@ -349,28 +349,33 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 	GameEntity *gePusher = *gePusherHandle;
     // Ensure it is a valid entity.
-    if (!gePusher ) {
+    if ( !gePusher ) {
     	SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
         return;
     }
 
- //   // if not a team captain, so movement will be handled elsewhere
- //   if (gePusher ->GetFlags() & EntityFlags::TeamSlave) {
- //       return;
-	//}
+    // if not a team captain, so movement will be handled elsewhere
+	if ( gePusher->GetFlags() & EntityFlags::TeamSlave ) {
+        return;
+	}
 
 	// Make sure all team followers can move before commiting
 	// any moves or calling any think functions
 	// If the move is blocked, all moved objects will be backed out
-	//retry:
+
 	PushedGameEntityState *gePushed = pushedGameEntities;
 
 	GameEntity *gePushPart = nullptr;
     GameEntity *gePart = nullptr, *geMove = nullptr;
+retry:
+	gePushed = pushedGameEntities;
 
+	gePushPart = nullptr;
+    gePart = nullptr;
+	geMove = nullptr;
 	for( gePushPart = gePusher; gePushPart; gePushPart = gePushPart->GetTeamChainEntity() ) {
 		// Get pusher part velocity.
-		const vec3_t partVelocity = gePushPart->GetVelocity();
+		const vec3_t partVelocity = gePushPart->GetVelocity( );
 
 		// Get pusher part Angular Velocity.
 		const vec3_t partAngularVelocity = gePushPart->GetAngularVelocity();
@@ -388,7 +393,7 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 			const vec3_t amove = vec3_scale(gePushPart->GetAngularVelocity(), FRAMETIME.count()); //VectorScale( part->avelocity, FRAMETIME, amove );
 
 			SGEntityHandle partHandle(gePushPart);
-			if (!SG_Push(partHandle, move, amove)) {
+			if ( !SG_Push(partHandle, move, amove) ) {
 				break;  // Move was Blocked.
 			}
 	   //}
@@ -411,20 +416,23 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 
 		// if the pusher has a "blocked" function, call it
 		// otherwise, just stay in place until the obstacle is gone
-        if (gePushPart) {
+        if (gePushPart && pushObstacle) {
             gePushPart->DispatchBlockedCallback(pushObstacle);
         }
-#if 0
+//#if 0
 
 		// if the obstacle went away and the pusher is still there
-		if( !obstacle->r.inuse && part->r.inuse ) {
-			goto retry;
+		//if( !obstacle->r.inuse && part->r.inuse ) {
+		//	goto retry;
+		//}
+        // if the pushed entity went away and the pusher is still there
+        if ((pushObstacle && !pushObstacle->IsInUse()) && (gePushPart && gePushPart->IsInUse())) {
+            goto retry;
 		}
-#endif
+//#endif
 	} else {
         // the move succeeded, so call all Think functions
         for (gePart = gePusher ; gePart ; gePart = gePart->GetTeamChainEntity()) {
-			extern qboolean SG_RunThink(GameEntity *geThinker);
             SG_RunThink(gePart);
         }
     }

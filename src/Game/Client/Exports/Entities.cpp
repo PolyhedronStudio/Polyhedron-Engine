@@ -207,6 +207,24 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 		// Let the world know about the current entity we're running.
 		level.currentEntity = gameEntity;
 		
+        // Store previous(old) origin.
+        gameEntity->SetOldOrigin(gameEntity->GetOrigin());
+
+        // If the ground entity moved, make sure we are still on it
+		//if (!gameEntity->GetClient()) {
+			SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
+			if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+				// Reset ground entity.
+				gameEntity->SetGroundEntity(nullptr);
+
+				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
+				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+					// Check for a new ground entity that resides below this entity.
+					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
+				}
+			}
+		//}
+
         // Run it for a frame.
         // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
@@ -255,6 +273,24 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		
 		// Let the world know about the current entity we're running.
 		level.currentEntity = gameEntity;
+
+        // Store previous(old) origin.
+        gameEntity->SetOldOrigin(gameEntity->GetOrigin());
+
+        // If the ground entity moved, make sure we are still on it
+		//if (!gameEntity->GetClient()) {
+			SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
+			if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+				// Reset ground entity.
+				gameEntity->SetGroundEntity(nullptr);
+
+				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
+				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+					// Check for a new ground entity that resides below this entity.
+					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
+				}
+			}
+		//}
 
 		// Run it for a frame.
 		SGEntityHandle handle = gameEntity;

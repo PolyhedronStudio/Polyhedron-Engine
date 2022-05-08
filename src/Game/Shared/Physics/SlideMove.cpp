@@ -64,7 +64,7 @@
 /**
 *	@return	Clipped by normal velocity.
 **/
-inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce ) {
+inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, const float overbounce ) {
 	float backoff = vec3_dot( inVelocity, normal );
 
 	if( backoff <= 0 ) {

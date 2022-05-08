@@ -337,7 +337,7 @@ void SVGBaseItem::BaseItemDropToFloor() {
     SetOrigin(trace.endPosition);
 
     // Check for ground.
-    SVG_StepMove_CheckGround(this);
+    SG_CheckGround(this);//SVG_StepMove_CheckGround(this);
 
     // If the entity has a team...
     //if (!GetTeam().empty()) {

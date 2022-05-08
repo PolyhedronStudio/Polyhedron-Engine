@@ -68,7 +68,7 @@ void MonsterTestDummy::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::TossSlide);
+    SetMoveType(MoveType::Step);
 
     // Since this is a "monster", after all...
     SetServerFlags(EntityServerFlags::Monster);
@@ -101,7 +101,7 @@ void MonsterTestDummy::Spawn() {
     SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2s);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -208,33 +208,70 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     //
     // Calculate direction.
     //
-    //if (GetHealth() > 0) {
-    //    vec3_t currentMoveAngles = GetAngles();
+    if (GetHealth() > 0) {
+		// Get direction vector.
+		vec3_t direction = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
+		
+		// Cancel uit the Z direction.
+		direction.z = 0;
 
-	   // // Direction vector between player and other entity.
-	   // vec3_t wishMoveAngles = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
+		// Set model angles to euler converted direction.
+		SetAngles(vec3_euler(direction));
 
-	   // // Teehee
-	   // vec3_t newModelAngles = vec3_euler(wishMoveAngles);
-	   // newModelAngles.x = 0;
+		// Set velocity to head into direction.
+		const vec3_t normalizedDir = vec3_normalize(direction);
+		const vec3_t oldVelocity = GetVelocity();
+		const vec3_t wishVelocity = vec3_t {
+			125.f * normalizedDir.x,
+			125.f * normalizedDir.y,
+			oldVelocity.z
+		};
+		SetVelocity(wishVelocity);
 
-	   // SetAngles(newModelAngles);
+		//      vec3_t currentMoveAngles = GetAngles();
 
-	   // // Calculate yaw to use based on direction.
-	   // float yaw = vec3_to_yaw(wishMoveAngles);
+	 //   // Direction vector between player and other entity.
+	 //   vec3_t wishMoveAngles = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
 
-	   // // Last but not least, move a step ahead.
+	 //   // Teehee
+	 //   vec3_t newModelAngles = vec3_euler(wishMoveAngles);
+	 //   newModelAngles.x = 0;
+
+		//// Assign model angles.
+	 //   SetAngles(newModelAngles);
+
+
+	 //   // Calculate yaw to use based on direction.
+	 //   float yaw = vec3_to_yaw(wishMoveAngles);
+		//    yaw = yaw * M_PI * 2 / 360;
+		//	
+
+		//// Calculate directional velocity.
+		//const vec3_t moveVelocity = vec3_t { 20.0f, 0.f, 0.f } * vec3_normalize(newModelAngles);
+		//SetVelocity(moveVelocity);
+		//SetVelocity({
+		//	cosf(yaw) * 90.f,
+		//	sinf(yaw) * 90.f,
+		//	GetVelocity().z,
+		//});
+	}
+	    // Last but not least, move a step ahead.
 	   // SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
     //    
     //    // Check for ground.
     //    SVG_StepMove_CheckGround(this);
     //}
+
+
     // Check for ground.
-    SVG_StepMove_CheckGround(this);
+    //SVG_StepMove_CheckGround(this);
+	SG_CheckGround(this);
     // Link entity back in.
     LinkEntity();
 
-    // Setup its next think time, for a frame ahead.
+	// Setup next think callback.
+    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
+    // Setup the next think time.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
 }
 
