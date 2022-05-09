@@ -68,7 +68,7 @@ void MonsterTestDummy::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
+    SetMoveType(MoveType::BoxSlideMove);
 
     // Since this is a "monster", after all...
     SetServerFlags(EntityServerFlags::Monster);

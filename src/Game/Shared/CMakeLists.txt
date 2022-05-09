@@ -9,6 +9,7 @@
 SET(SRC_SHAREDGAME
 	Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
 
+	Physics/MoveTypes/MoveTypeBoxSlideMove.cpp
 	Physics/MoveTypes/MoveTypeLinearProjectile.cpp
 	Physics/MoveTypes/MoveTypeNoClip.cpp
 	Physics/MoveTypes/MoveTypeNone.cpp

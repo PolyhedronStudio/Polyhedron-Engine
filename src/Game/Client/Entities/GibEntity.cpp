@@ -85,7 +85,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     // Is it an organic gib type?
     if (gibType == GibType::Organic) {
     	// Different move type for organic gibs.
-	    gibEntity->SetMoveType(MoveType::Toss);
+	    gibEntity->SetMoveType(MoveType::TossSlide);
 
 	    // Most of all, we setup a touch callback too ofc.
 	    gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);

@@ -100,11 +100,6 @@ void SG_AddGravity( GameEntity *sharedGameEntity );
 void SG_AddGroundFriction( GameEntity *sharedGameEntity, const float friction );
 
 /**
-*	@brief	Processes rotational friction calculations.
-**/
-void SG_AddRotationalFriction(SGEntityHandle entityHandle);
-
-/**
 *	@brief	Pushes the entity. Does not change the entities velocity at all
 **/
 SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset );
@@ -113,6 +108,11 @@ SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset 
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
 const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction );
+
+/**
+*	@return	The proper Solid mask to use for the passed game entity.
+**/
+int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity );
 
 /**
 *	@brief	Checks if this entity should have a groundEntity set or not.
@@ -150,6 +150,14 @@ void SG_Physics_None(SGEntityHandle& entityHandle);
 *	@brief Logic for MoveType::(NoClip): Moves the entity based on angular- and regular- velocity. Does not clip to world or entities.
 **/
 void SG_Physics_NoClip(SGEntityHandle &entityHandle);
+
+/**
+*	@brief	Performs a velocity based 'slidebox' movement for general NPC's.
+*			If FL_SWIM or FL_FLY are not set, it'll check whether there is any
+*			ground at all, if it has been removed the monster will be pushed
+*			downwards due to gravity effect kicking in.
+**/
+void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle);
 
 /**
 *	@brief Logic for MoveType::(Toss, TossSlide, Bounce, Fly and FlyMissile)
