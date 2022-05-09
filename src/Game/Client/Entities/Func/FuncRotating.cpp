@@ -1,20 +1,23 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client-Side FuncPlat Entity Support.
+*
+***/
+#include "../../ClientGameLocals.h"
+//#include "../../Effects.h"
+//#include "../../Entities.h"
+//#include "../../Utilities.h"
+//#include "../../Physics/SlideMove.h"
 
-// FuncRotating.cpp
-*/
+#include "../Base/CLGBasePacketEntity.h"
+#include "../Base/CLGBaseTrigger.h"
+#include "../Base/CLGBaseMover.h"
 
-#include "../../ServerGameLocals.h"
-#include "../../Effects.h"
-#include "../../Entities.h"
-#include "../../Utilities.h"
-#include "../../Physics/StepMove.h"
-
-#include "../Base/SVGBaseEntity.h"
-#include "../Base/SVGBaseTrigger.h"
-#include "../Base/SVGBaseMover.h"
-
-#include "../../GameModes/IGameMode.h"
+//#include "../../GameModes/IGameMode.h"
 #include "FuncRotating.h"
 
 //===============
@@ -48,7 +51,7 @@ void FuncRotating::Spawn() {
 	}
 
 	SetSolid(Solid::BSP);
-	SetModel(GetModel());
+	//SetModel(GetModel());
 	SetMoveType((GetSpawnFlags() & SF_StopOnBlock) ? MoveType::Stop : MoveType::Push);
 
 	if ( GetSpawnFlags() & SF_Reverse ) {
@@ -82,14 +85,14 @@ void FuncRotating::Spawn() {
 //===============
 // FuncRotating::RotatorBlocked
 //===============
-void FuncRotating::RotatorBlocked( IServerGameEntity* other ) {
-	GetGameMode()->InflictDamage( other, this, this, vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+void FuncRotating::RotatorBlocked( GameEntity* other ) {
+	//GetGameMode()->InflictDamage( other, this, this, vec3_zero(), GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 }
 
 //===============
 // FuncRotating::RotatorHurtTouch
 //===============
-void FuncRotating::RotatorHurtTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
+void FuncRotating::RotatorHurtTouch( GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
 	if ( vec3_length( GetAngularVelocity() ) ) {
 		RotatorBlocked( other );
 	}
@@ -98,7 +101,7 @@ void FuncRotating::RotatorHurtTouch( IServerGameEntity* self, IServerGameEntity*
 //===============
 // FuncRotating::RotatorUse
 //===============
-void FuncRotating::RotatorUse( IServerGameEntity* other, IServerGameEntity* activator ) {
+void FuncRotating::RotatorUse( GameEntity* other, GameEntity* activator ) {
 	if ( !vec3_equal( GetAngularVelocity(), vec3_zero() ) ) {
 		SetSound( 0 );
 		SetAngularVelocity( vec3_zero() );

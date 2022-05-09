@@ -372,7 +372,8 @@ typedef struct client_s {
     size_t msg_dynamic_bytes;      // total size of dynamic memory allocated
 
     // per-client baseline chunks
-    EntityState *entityBaselines[SV_BASELINES_CHUNKS];
+    EntityState *entityBaselines;//[SV_BASELINES_CHUNKS];
+	int32_t     num_baselines, allocated_baselines;
 
     // server state pointers (hack for MVD channels implementation)
     char *configstrings = 0;

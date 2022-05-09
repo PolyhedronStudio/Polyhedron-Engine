@@ -92,12 +92,17 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
             flags = (EntityStateMessageFlags)(client->esFlags | MSG_ES_FORCE | MSG_ES_NEWENTITY); // CPP: Cast
-            oldent = client->entityBaselines[newnum >> SV_BASELINES_SHIFT];
-            if (oldent) {
-                oldent += (newnum & SV_BASELINES_MASK);
+			if (newnum < client->num_baselines) {
+                oldent = &client->entityBaselines[newnum];
             } else {
                 oldent = &nullEntityState;
             }
+																								  //oldent = client->entityBaselines[newnum >> SV_BASELINES_SHIFT];
+            //if (oldent) {
+            //    oldent += (newnum & SV_BASELINES_MASK);
+            //} else {
+            //    oldent = &nullEntityState;
+            //}
             if (newnum == clientEntityNum) {
                 flags = (EntityStateMessageFlags)(flags | MSG_ES_FIRSTPERSON); // CPP: Cast flags |= MSG_ES_FIRSTPERSON;
                 newent->origin = oldent->origin;

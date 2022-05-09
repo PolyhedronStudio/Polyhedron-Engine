@@ -27,7 +27,7 @@ CLGBaseTrigger::CLGBaseTrigger(PODEntity *clEntity) : Base(clEntity) {}
 *	
 **/
 void CLGBaseTrigger::InitBrushTrigger() {
-	SetModel(GetModel());
+	//SetModel(GetModel());
 	SetMoveType(MoveType::None);
 	SetSolid(Solid::Trigger);
 	

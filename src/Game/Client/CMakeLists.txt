@@ -28,9 +28,14 @@ SET(SRC_CLGAME
 
 	Entities/Base/CLGBaseLocalEntity.cpp
 	Entities/Base/CLGBasePacketEntity.cpp
+
+	Entities/Base/CLGBaseMover.cpp
 	Entities/Base/CLGBasePlayer.cpp
 	Entities/Base/CLGBaseTrigger.cpp
 	
+	Entities/Func/FuncPlat.cpp
+	Entities/Func/FuncRotating.cpp
+
 	Entities/Misc/MiscExplosionBox.cpp
 	Entities/Misc/MiscClientExplosionBox.cpp
 	Entities/Misc/MiscClientModel.cpp
@@ -86,9 +91,14 @@ SET(HEADERS_CLGAME
 
 	Entities/Base/CLGBaseLocalEntity.h
 	Entities/Base/CLGBasePacketEntity.h
+
+	Entities/Base/CLGBaseMover.h
 	Entities/Base/CLGBasePlayer.h
 	Entities/Base/CLGBaseTrigger.h
 	
+	Entities/Func/FuncPlat.h
+	Entities/Func/FuncRotating.h
+
 	Entities/Misc/MiscExplosionBox.h
 	Entities/Misc/MiscClientExplosionBox.h
 	Entities/Misc/MiscClientModel.h

@@ -136,3 +136,45 @@ void Com_LPrintf(int32_t printType, const char* fmt, ...) {
     clgi.Com_LPrintf(printType, "%s", buffer);
     va_end(args);
 }
+
+
+/**
+*
+*
+*   Client Game Specific Functions.
+*
+*
+**/
+/**
+*	@brief	... Sound.
+**/
+void CLG_Sound(GameEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset) {
+    if (!ent)
+        return;
+
+	// Todo: Fix...
+
+	//clgi.S_StartSound(origin, entityNumber, channel, soundIndex, volume, attenuation, timeOffset);
+}
+
+/**
+*	@brief	Precaches the model and returns the model index qhandle_t.
+**/
+qhandle_t CLG_PrecacheModel(const std::string& filename) {
+    return 0; //clgi.R_RegisterModel(filename.c_str());
+}
+
+/**
+*	@brief	Precaches the image and returns the image index qhandle_t.
+**/
+qhandle_t CLG_PrecacheImage(const std::string& filename) {
+    //return clgi.R_RegisterPic2(filename.c_str());
+	return 0;
+}
+
+/**
+*	@brief	Precaches the sound and returns the sound index qhandle_t.
+**/
+qhandle_t CLG_PrecacheSound(const std::string& filename) {
+    return 0;//return clgi.S_RegisterSound(filename.c_str());
+}

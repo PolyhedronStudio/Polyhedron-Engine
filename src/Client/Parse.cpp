@@ -90,7 +90,7 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
         // Read out entity number, whether to remove it or not, and its byteMask.
         newnum = MSG_ReadEntityNumber(&removeEntity, &byteMask);
 
-        if (newnum < 0 || newnum >= MAX_WIRED_POD_ENTITIES) {
+        if (newnum < 0 || newnum >= MAX_PACKET_ENTITIES) {
             Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, newnum);
         }
 
@@ -402,8 +402,8 @@ static void CL_ParseConfigstring(int index)
 
 static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
 {
-    if (index < 1 || index >= MAX_WIRED_POD_ENTITIES) {
-        //Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
+    if (index < 1 || index >= MAX_PACKET_ENTITIES) {
+        Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
 		return;
     }
 #ifdef _DEBUG

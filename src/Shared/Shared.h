@@ -390,7 +390,7 @@ struct ConfigStrings {
 
 // Some mods actually exploit ConfigStrings::StatusBar to take space up to ConfigStrings::Unused
 inline static uint32_t CS_SIZE(uint32_t cs) {
-    return ((cs) >= ConfigStrings::StatusBar && (cs) < ConfigStrings::Unused ? \
+    return ((cs) >= ConfigStrings::StatusBar && (cs) < ConfigStrings::Unused ? 
         MAX_QPATH * (ConfigStrings::Unused - (cs)) : MAX_QPATH);
 }
 

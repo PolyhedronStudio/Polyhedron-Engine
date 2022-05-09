@@ -347,7 +347,12 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 *	@brief Logic for MoveType::(Push, Stop): Pushes all objects except for brush models. 
 **/
 void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
+	if (!gePusherHandle.Get() || !*gePusherHandle) {
+		return;
+	}
+	// Get GameEntity from Handle.
 	GameEntity *gePusher = *gePusherHandle;
+
     // Ensure it is a valid entity.
     if ( !gePusher ) {
     	SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
@@ -362,17 +367,17 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 	// Make sure all team followers can move before commiting
 	// any moves or calling any think functions
 	// If the move is blocked, all moved objects will be backed out
-
-	PushedGameEntityState *gePushed = pushedGameEntities;
+	lastPushedState = pushedGameEntities;
 
 	GameEntity *gePushPart = nullptr;
     GameEntity *gePart = nullptr, *geMove = nullptr;
 retry:
-	gePushed = pushedGameEntities;
+	lastPushedState = pushedGameEntities;
 
 	gePushPart = nullptr;
     gePart = nullptr;
 	geMove = nullptr;
+
 	for( gePushPart = gePusher; gePushPart; gePushPart = gePushPart->GetTeamChainEntity() ) {
 		// Get pusher part velocity.
 		const vec3_t partVelocity = gePushPart->GetVelocity( );
@@ -400,7 +405,7 @@ retry:
 		}
 	}
 
-	if( gePushed > &pushedGameEntities[4096] ) {
+	if( lastPushedState > &pushedGameEntities[4096] ) {
 		//G_Error( "pushed_p > &pushed[MAX_EDICTS], memory corrupted" );
 	}
 
@@ -426,7 +431,7 @@ retry:
 		//	goto retry;
 		//}
         // if the pushed entity went away and the pusher is still there
-        if ((pushObstacle && !pushObstacle->IsInUse()) && (gePushPart && gePushPart->IsInUse())) {
+        if ((pushObstacle && !pushObstacle->IsInUse()) ) {
             goto retry;
 		}
 //#endif

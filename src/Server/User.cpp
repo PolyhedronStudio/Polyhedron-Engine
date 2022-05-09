@@ -87,21 +87,22 @@ baseline will be transmitted
 */
 static void create_baselines(void)
 {
-    int        i;
-    Entity    *ent;
-    EntityState *base, **chunk;
-
-    // clear entityBaselines from previous level
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->entityBaselines[i];
-        if (!base) {
-            continue;
+    // clear baselines from previous level
+    if (sv_client->entityBaselines) {
+        if (ge->numberOfEntities > sv_client->allocated_baselines) {
+            sv_client->allocated_baselines = ge->numberOfEntities;
+            sv_client->entityBaselines = (EntityState*)Z_Realloc(sv_client->entityBaselines, sizeof(*sv_client->entityBaselines) * sv_client->allocated_baselines);
         }
-        memset(base, 0, sizeof(*base) * SV_BASELINES_PER_CHUNK);
+
+        sv_client->num_baselines = ge->numberOfEntities;
+        memset(sv_client->entityBaselines, 0, sizeof(*sv_client->entityBaselines) * sv_client->num_baselines);
+    } else {
+        sv_client->num_baselines = sv_client->allocated_baselines = ge->numberOfEntities;
+        sv_client->entityBaselines = (EntityState*)SV_Mallocz(sizeof(*sv_client->entityBaselines) * sv_client->num_baselines);
     }
 
-    for (i = 1; i < sv_client->pool->numberOfEntities; i++) {
-        ent = EDICT_POOL(sv_client, i);
+    for (int i = 1; i < ge->numberOfEntities; i++) {
+        Entity *ent = EDICT_NUM(i);
 
         if (!ent->inUse) {
             continue;
@@ -111,17 +112,18 @@ static void create_baselines(void)
             continue;
         }
 
-        ent->currentState.number = i;
+		sv_client->entityBaselines[i] = ent->currentState;
+        //ent->currentState.number = i;
 
-        chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
-        if (*chunk == NULL) {
-            *chunk = (EntityState*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
-        }
+        //chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
+        //if (*chunk == NULL) {
+        //    *chunk = (EntityState*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
+        //}
 
-        base = *chunk + (i & SV_BASELINES_MASK);
-        *base = ent->currentState;
+        //base = *chunk + (i & SV_BASELINES_MASK);
+        //*base = ent->currentState;
 
-        base->solid = sv.entities[i].solid32;
+        //base->solid = sv.entities[i].solid32;
     }
 }
 
@@ -168,12 +170,14 @@ static void write_plain_baselines(void)
     EntityState *base;
 
     // write a packet full of data
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->entityBaselines[i];
-        if (!base) {
-            continue;
-        }
-        for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+    //for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
+    //    base = sv_client->entityBaselines[i];
+    //    if (!base) {
+    //        continue;
+    //    }
+    //    for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+	for (i = 0, base = sv_client->entityBaselines; i < sv_client->num_baselines; i++, base++) {
+
             if (base->number) {
                 // check if this baseline will overflow
                 if (msg_write.currentSize + 64 > sv_client->netChan->maximumPacketLength) {
@@ -183,8 +187,8 @@ static void write_plain_baselines(void)
                 MSG_WriteUint8(ServerCommand::SpawnBaseline);//MSG_WriteByte(ServerCommand::SpawnBaseline);
                 write_baseline(base);
             }
-            base++;
-        }
+      //      base++;
+    //    }
     }
 
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
@@ -221,18 +225,20 @@ static void write_compressed_gamestate(void)
     MSG_WriteInt16(ConfigStrings::MaxConfigStrings);   //MSG_WriteShort(ConfigStrings::MaxConfigStrings);   // end of configstrings
 
     // write entityBaselines
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->entityBaselines[i];
-        if (!base) {
-            continue;
-        }
+    //for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
+    //    base = sv_client->entityBaselines[i];
+    //    if (!base) {
+    //        continue;
+    //    }
 
-        for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+    //    for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+	for (i = 0, base = sv_client->entityBaselines; i < sv_client->num_baselines; i++, base++) {
+
             if (base->number) {
                 write_baseline(base);
             }
-            base++;
-        }
+            //base++;
+    //    }
     }
     MSG_WriteInt16(0);//MSG_WriteShort(0);   // end of entityBaselines
 

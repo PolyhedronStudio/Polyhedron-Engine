@@ -801,13 +801,13 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	// SG_Physics_Pusher:
 		case MoveType::Push:
         case MoveType::Stop:
-#ifdef SHAREDGAME_CLIENTGAME
-			if (entityHandle.ID() == 0) {
-				SG_Physics_Pusher(entityHandle);
-			}
-#else
+//#ifdef SHAREDGAME_CLIENTGAME
+//			if (entityHandle.ID() == 0) {
+//				SG_Physics_Pusher(entityHandle);
+//			}
+//#else
 	        SG_Physics_Pusher(entityHandle);
-#endif
+//#endif
         break;
 	// SG_Physics_NoClip:
         case MoveType::NoClip:

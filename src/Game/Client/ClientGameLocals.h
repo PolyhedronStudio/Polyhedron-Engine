@@ -302,6 +302,35 @@ void Com_Error(int32_t errorType, const char* fmt, ...);
 void Com_LPrintf(int32_t printType, const char* fmt, ...);
 
 
+/**
+*
+*
+*   Client Game Specific Functions.
+*
+*
+**/
+/**
+*	@brief	... Sound.
+**/
+void CLG_Sound(GameEntity* ent, int32_t channel, int32_t soundIndex, float volume, float attenuation, float timeOffset);
+
+/**
+*	@brief	Precaches the model and returns the model index qhandle_t.
+**/
+qhandle_t CLG_PrecacheModel(const std::string& filename);
+
+/**
+*	@brief	Precaches the image and returns the image index qhandle_t.
+**/
+qhandle_t CLG_PrecacheImage(const std::string& filename);
+
+/**
+*	@brief	Precaches the sound and returns the sound index qhandle_t.
+**/
+qhandle_t CLG_PrecacheSound(const std::string& filename);
+
+
+
 /***
 *
 *

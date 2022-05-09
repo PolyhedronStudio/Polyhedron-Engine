@@ -9,7 +9,9 @@
 ***/
 #pragma once
 
-class CLGBasePacketEntity;
+// Client Game GameEntity Interface.
+#include "CLGBasePacketEntity.h"
+
 
 class CLGBaseTrigger : public CLGBasePacketEntity {
 public:

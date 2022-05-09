@@ -309,6 +309,10 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 			}
 		}
 
+
+	//
+	//	Seemingly needs re-enabling only after we got func_plat etc to work again.
+	//
 	//if (trace.fraction == 1)
 	//{
 	//// if monster had the ground pulled out, go ahead and fall

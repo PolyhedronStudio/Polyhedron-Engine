@@ -1,14 +1,23 @@
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client-Side FuncPlat Entity Support.
+*
+***/
 #pragma once
 
-class SVGBaseEntity;
-class SVGBaseMover;
+class CLGBaseEntity;
+class CLGBaseMover;
 
-class FuncRotating : public SVGBaseMover {
+class FuncRotating : public CLGBaseMover {
 public:
 	FuncRotating( Entity* entity );
 	virtual ~FuncRotating() = default;
 
-	DefineMapClass( "func_rotating", FuncRotating, SVGBaseMover );
+	DefineMapClass( "func_rotating", FuncRotating, CLGBaseMover );
 
 	// Spawn flags
 	static constexpr int32_t SF_StartOn = 1 << 0;
@@ -24,7 +33,7 @@ public:
 
 	void SpawnKey(const std::string& key, const std::string& value) override;
 
-	void RotatorBlocked( IServerGameEntity* other );
-	void RotatorHurtTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
-	void RotatorUse( IServerGameEntity* other, IServerGameEntity* activator );
+	void RotatorBlocked( GameEntity* other );
+	void RotatorHurtTouch( GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf );
+	void RotatorUse( GameEntity* other, GameEntity* activator );
 };
