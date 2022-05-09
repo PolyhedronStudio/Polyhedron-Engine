@@ -53,24 +53,40 @@ struct SlideMoveFlags {
 *	@brief	Contains the status of an entities physics move state.
 **/
 struct MoveState {
-	vec3_t velocity = vec3_zero();
-	vec3_t origin = vec3_zero();
-	vec3_t mins = vec3_zero();
-	vec3_t maxs = vec3_zero();
-	float remainingTime = 0.f;
+	//! Physical Properties.
+	vec3_t velocity	= vec3_zero();
+	vec3_t origin	= vec3_zero();
+	vec3_t mins		= vec3_zero();
+	vec3_t maxs		= vec3_zero();
 
-	vec3_t gravityDir = vec3_zero();
-	float slideBounce = 0.f;
-	GameEntity *groundEntity = nullptr;
+	//! Remaining time that's left for this move in this frame.
+	float	remainingTime	=  0.f;
 
-	GameEntity *passEntity = nullptr;
+	//! Direction of gravity.
+	vec3_t	gravityDir	= vec3_zero();
+	//! Slide Bounce Factor.
+	float	slideBounce	= 0.f;
+
+	//! Ground Entity.
+	int32_t		groundEntityLinkCount	= 0;
+	GameEntity	*groundEntity			= nullptr;
+
+	//! Entity that we're trying to move around.
+	GameEntity *moveEntity = nullptr;
+	//! Entity to skip when executing traces. (Usually the same entity as moveEntity.)
+	GameEntity *skipEntity = nullptr;
+
+	//! Entity Flags and Content Mask.
+	int32_t entityFlags = 0;
 	int32_t contentMask = 0;
 
+	//! Number of, and normals of each plane we want to clip against to.
 	int32_t numClipPlanes = 0;
-	vec3_t clipPlaneNormals[MAX_SLIDEMOVE_CLIP_PLANES];
+	vec3_t	clipPlaneNormals[MAX_SLIDEMOVE_CLIP_PLANES];
 
-	int32_t numTouchEntities = 0;
-	GameEntity *touchEntites[MAX_SLIDEMOVE_TOUCH];
+	//! Number of, and pointers to the entities we touched and want to dispatch a 'Touch' callback to.
+	int32_t		numTouchEntities = 0;
+	GameEntity	*touchEntites[MAX_SLIDEMOVE_TOUCH];
 };
 
 

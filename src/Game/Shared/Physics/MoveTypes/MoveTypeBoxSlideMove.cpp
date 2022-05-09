@@ -85,22 +85,27 @@ static void SG_AddRotationalFriction(SGEntityHandle entityHandle) {
 /**
 *	@brief	Checks if this entity should have a groundEntity set or not.
 **/
-static void SG_StepMove_CheckForGround( GameEntity *geCheck ) {
+static void SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
 	if (!geCheck) {
+		// Warn, or just remove check its already tested elsewhere?
 		return;
 	}
 
+	// In case of a flying or swimming monster there's no need to check for ground.
+	// If anything we clear out the ground pointer in case the entity did acquire
+	// flying skills.
 	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
-	if( geCheck->GetClient() && geCheck->GetVelocity().z > 100) {//180) {
-		geCheck->SetGroundEntity(nullptr);
-		geCheck->SetGroundEntityLinkCount(0);
-		return;
-	}
+	//// In case the entity has a client and its velocity is high
+	//if( geCheck->GetClient() && geCheck->GetVelocity().z > 100) {//180) {
+	//	geCheck->SetGroundEntity(nullptr);
+	//	geCheck->SetGroundEntityLinkCount(0);
+	//	return;
+	//}
 
 	// if the hull point one-quarter unit down is solid the entity is on ground
 	const vec3_t geOrigin = geCheck->GetOrigin();
@@ -110,30 +115,38 @@ static void SG_StepMove_CheckForGround( GameEntity *geCheck ) {
 		geOrigin.z - 0.25f
 	};
 
+	// Execute ground seek trace.
 	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck));
 
-	// check steepness
+
+	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
-	if( ( geCheck->GetVelocity().z > 1 && !geCheck->GetClient()) && !traceResult.startSolid) {
+	// If velocity is up, and the actual trace result did not start inside of a solid, it means we have no ground.
+	const vec3_t geCheckVelocity = geCheck->GetVelocity();
+	if( geCheckVelocity.z > 1 && !traceResult.startSolid ) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
+	// The trace did not start, or end inside of a solid.
 	if( !traceResult.startSolid && !traceResult.allSolid ) {
 		//VectorCopy( trace.endpos, ent->s.origin );
 		geCheck->SetGroundEntity(traceResult.gameEntity);
 		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
-		
-		vec3_t geCheckVelocity = geCheck->GetVelocity();
-		if( geCheckVelocity.z < 0) {
-			geCheckVelocity.z = 0;
-			geCheck->SetVelocity(geCheckVelocity);
+
+		// Since we've found ground, we make sure that any negative Z velocity is zero-ed out.
+		if( geCheckVelocity .z < 0) {
+			geCheck->SetVelocity({ 
+				geCheckVelocity.x,
+				geCheckVelocity.y,
+				0
+			});
 		}
 	}
 }
@@ -142,23 +155,26 @@ static void SG_StepMove_CheckForGround( GameEntity *geCheck ) {
 *	@brief	Starts performing the BoxSlide move process.
 **/
 const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction ) {
-	int32_t i;
+	// The structure containing the current state of the move we're trying to perform.
 	MoveState entMove = { };
+
+	// The mask containing a set of SlideMoveFlags describing the outcome of this move.
 	int32_t blockedMask = 0;
 
+	// Warn and exit in case our entity is invalid.
 	if ( !geSlider ) {
 		SG_PhysicsEntityWPrint(__func__, "[start]", "geSlider is (nullptr)!\n");
 		return 0;
 	}
 
 	// Store current velocity as old velocity.
-	float oldVelocity = VectorLength( geSlider->GetVelocity() );
+	float oldVelocity = vec3_length( geSlider->GetVelocity() );
 
 	// Apply gravitational force if no ground entity is set. Otherwise, apply ground friction forces.
 	if( !geSlider->GetGroundEntityHandle( ) ) {
 		SG_AddGravity( geSlider );
-	} else { // horizontal friction
-		SG_AddGroundFriction( geSlider, friction );
+	} else {
+		SG_AddGroundFriction( geSlider, friction ); // Horizontal Friction.
 	}
 
 	// Initialize our move state.
@@ -172,7 +188,8 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		entMove.remainingTime = FRAMETIME.count( );
 
 		// Setup general properties.
-		entMove.passEntity		= geSlider;
+		entMove.skipEntity		= geSlider;
+		entMove.entityFlags		= geSlider->GetFlags();
 		entMove.contentMask		= contentMask;
 		entMove.gravityDir		= vec3_t { 0.f, 0.f, -1.f };
 		entMove.slideBounce		= slideBounce;
@@ -192,10 +209,12 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 
 		}
 
-		// Update our entity with the resulting values.
+		// Update our entity with the resulting values, including its flags.
+		geSlider->SetFlags(entMove.entityFlags);
 		geSlider->SetOrigin(entMove.origin);
 		geSlider->SetVelocity(entMove.velocity);
 		geSlider->SetGroundEntity(entMove.groundEntity);
+		geSlider->SetGroundEntityLinkCount(entMove.groundEntityLinkCount);		
 
 		// Link entity in.
 		geSlider->LinkEntity();
@@ -207,7 +226,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		//GClip_TouchTriggers( ent );
 		SG_TouchTriggers(geSlider);
 
-		// touch other objects
+		// Dispatch 'Touch' callback functions to all touched entities residing in our moveState.
 		for( int32_t i = 0; i < entMove.numTouchEntities; i++ ) {
 			otherEntity = entMove.touchEntites[i];
 			
@@ -216,18 +235,16 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 				continue;
 			}
 
-			//G_CallTouch( other, ent, NULL, 0 );
+			// Call Touch for the other entity right before calling touch on geSlider.
 			otherEntity->DispatchTouchCallback(otherEntity, geSlider, nullptr, nullptr);
 
-			// if self touch function, fire up touch and if freed stop
-			// It may have been deleted after all.
 			if (geSlider) {
-				//G_CallTouch( ent, other, NULL, 0 );
+				// Now call Touch on geSlider.
 				geSlider->DispatchTouchCallback(geSlider, otherEntity, nullptr, nullptr);
 			}
 
-			// It may have been freed by the touch function.
-			if( geSlider->IsInUse()) {
+			// Check if it may have been freed by the touch function, if so, break out.
+			if( !geSlider->IsInUse() ) {
 				break;
 			}
 		}
@@ -236,7 +253,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	// If it's still in use, search for ground.
 	if ( geSlider && geSlider->IsInUse() ) {
 		// Check for ground entity.
-		SG_StepMove_CheckForGround( geSlider );
+		SG_BoxSlideMove_CheckForGround( geSlider );
 
 		// Set it to a halt in case velocity becomes too low, this way it won't look odd.
 		if( geSlider->GetGroundEntityHandle() && vec3_length(geSlider->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
@@ -276,7 +293,7 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
     // If we have no ground entity.
     if (!groundEntity) {
         // Ensure we check if we aren't on one in this frame already.
-        SG_StepMove_CheckForGround(ent);
+        SG_BoxSlideMove_CheckForGround(ent);
     }
 
     //if (!groundEntity) {
@@ -349,9 +366,8 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
 
     // In case we have velocity, execute movement logic.
     if (ent->GetVelocity().z || ent->GetVelocity().y || ent->GetVelocity().x) {
-        // apply friction
-        // let dead monsters who aren't completely onground slide
-        if ((wasOnGround) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
+        // Apply friction: Let dead NPCs who aren't completely onground slide.
+        if ((wasOnGround) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly))) {
             if (!(ent->GetHealth() <= 0.0)) {
                 vec3_t vel = ent->GetVelocity();
                 const float speed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
@@ -372,6 +388,7 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
                     ent->SetVelocity(vel);
                 }
             }
+		}
 
         // Default mask is solid.
         int32_t mask = BrushContentsMask::Solid;

@@ -16,50 +16,7 @@
 #include "Physics.h"
 #include "SlideMove.h"
 
-
-//#define IsGroundPlane( normal, gravityDir ) ( DotProduct( normal, gravityDir ) < -0.45f )
-
 //==================================================
-
-///*
-//* SG_LinearMovement
-//*/
-//int GS_LinearMovement( const entity_state_t *ent, int64_t time, vec3_t dest ) {
-//	vec3_t dist;
-//	int moveTime;
-//	float moveFrac;
-//
-//	moveTime = time - ent->linearMovementTimeStamp;
-//	if( moveTime < 0 ) {
-//		moveTime = 0;
-//	}
-//
-//	if( ent->linearMovementDuration ) {
-//		if( moveTime > (int)ent->linearMovementDuration ) {
-//			moveTime = ent->linearMovementDuration;
-//		}
-//
-//		VectorSubtract( ent->linearMovementEnd, ent->linearMovementBegin, dist );
-//		moveFrac = (float)moveTime / (float)ent->linearMovementDuration;
-//		Q_clamp( moveFrac, 0, 1 );
-//		VectorMA( ent->linearMovementBegin, moveFrac, dist, dest );
-//	} else {
-//		moveFrac = moveTime * 0.001f;
-//		VectorMA( ent->linearMovementBegin, moveFrac, ent->linearMovementVelocity, dest );
-//	}
-//
-//	return moveTime;
-//}
-//
-///*
-//* SG_LinearMovementDelta
-//*/
-//void SG_LinearMovementDelta( const entity_state_t *ent, int64_t oldTime, int64_t curTime, vec3_t dest ) {
-//	vec3_t p1, p2;
-//	GS_LinearMovement( ent, oldTime, p1 );
-//	GS_LinearMovement( ent, curTime, p2 );
-//	VectorSubtract( p2, p1, dest );
-//}
 
 /**
 *	@return	Clipped by normal velocity.
@@ -89,86 +46,6 @@ inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, c
 #endif
 	return outVelocity;
 }
-
-
-
-/////////////////////////////////////////////////////////////////////////
-// UP-STEP height in "Quake Units". This is used commonly all over for each stepmove entity.
-// TODO: In the future it is likely one would want to be able to set this property to a custom
-// value for each entity type.
-#define STEPSIZE    18
-
-/*
-=============
-SVG_StepMove_CheckBottom
-
-Returns false if any part of the bottom of the entity is off an edge that
-is not a staircase.
-
-=============
-*/
-static int c_yes, c_no;
-
-qboolean SG_SlideMove_CheckBottom( MoveState* moveState ) {
-    vec3_t  start, stop;
-    SGTraceResult trace;
-    int32_t x, y;
-    float   mid, bottom;
-
-    vec3_t mins = moveState->origin + moveState->mins; //VectorAdd(ent->currentState.origin, ent->mins, mins);
-    vec3_t maxs = moveState->origin + moveState->maxs; //VectorAdd(ent->currentState.origin, ent->maxs, maxs);
-
-
-                                                     // if all of the points under the corners are solid world, don't bother
-                                                     // with the tougher checks
-                                                     // the corners must be within 16 of the midpoint
-    start[2] = mins[2] - 1;
-    for (x = 0; x <= 1; x++)
-        for (y = 0; y <= 1; y++) {
-            start[0] = x ? maxs[0] : mins[0];
-            start[1] = y ? maxs[1] : mins[1];
-            if (SG_PointContents(start) != BrushContents::Solid)
-                goto realcheck;
-        }
-
-    c_yes++;
-    return true;        // we got out easy
-
-realcheck:
-    c_no++;
-    //
-    // check it for real...
-    //
-    start[2] = mins[2];
-
-    // the midpoint must be within 16 of the bottom
-    start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
-    start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
-    stop[2] = start[2] - 2 * STEPSIZE;
-    trace = SG_Trace(start, vec3_zero(), vec3_zero(), stop, moveState->passEntity, BrushContentsMask::MonsterSolid);
-
-    if (trace.fraction == 1.0)
-        return false;
-    mid = bottom = trace.endPosition[2];
-
-    // the corners must be within 16 of the midpoint
-    for (x = 0; x <= 1; x++)
-        for (y = 0; y <= 1; y++) {
-            start[0] = stop[0] = x ? maxs[0] : mins[0];
-            start[1] = stop[1] = y ? maxs[1] : mins[1];
-
-            trace = SG_Trace(start, vec3_zero(), vec3_zero(), stop, moveState->passEntity, BrushContentsMask::MonsterSolid);
-
-            if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
-                bottom = trace.endPosition[2];
-            if (trace.fraction == 1.0 || mid - trace.endPosition[2] > STEPSIZE)
-                return false;
-        }
-
-    c_yes++;
-    return true;
-}
-/////////////////////////////////////////
 
 //==================================================
 // SLIDE MOVE
@@ -276,7 +153,7 @@ static bool SG_StepUp( MoveState *moveState ) {
 	// See if we should step down.
 	if ( moveState->groundEntity && moveState->velocity.z <= 0 ) {
 		const vec3_t down = vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down( ) );
-		const SGTraceResult downTrace = SG_Trace(moveState->origin, moveState->mins, moveState->maxs, down, moveState->passEntity, moveState->contentMask );
+		const SGTraceResult downTrace = SG_Trace(moveState->origin, moveState->mins, moveState->maxs, down, moveState->skipEntity, moveState->contentMask );
 
 		// Check if we should step down or not.
 		if ( !downTrace.allSolid ) {
@@ -295,7 +172,7 @@ static bool SG_StepUp( MoveState *moveState ) {
     const vec3_t vel1 = moveState->velocity;
 
     const vec3_t up = vec3_fmaf( org0, PM_STEP_HEIGHT, vec3_up() );
-    const SGTraceResult upTrace = SG_Trace( org0, moveState->mins, moveState->maxs, up, moveState->passEntity, moveState->contentMask );
+    const SGTraceResult upTrace = SG_Trace( org0, moveState->mins, moveState->maxs, up, moveState->skipEntity, moveState->contentMask );
 
     if ( !upTrace.allSolid ) {
         // Step from the higher position, with the original velocity
@@ -307,7 +184,7 @@ static bool SG_StepUp( MoveState *moveState ) {
 
         // Settle to the new ground, keeping the step if and only if it was successful
         const vec3_t down = vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
-        const SGTraceResult downTrace = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, down, moveState->passEntity, moveState->contentMask );
+        const SGTraceResult downTrace = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, down, moveState->skipEntity, moveState->contentMask );
 
         if ( !downTrace.allSolid && ( downTrace.podEntity && downTrace.plane.normal.z >= PM_STEP_NORMAL ) ) { //PM_CheckStep(&downTrace)) {
             // Quake2 trick jump secret sauce
@@ -346,7 +223,7 @@ static bool SG_StepUp( MoveState *moveState ) {
 static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping ) {
 	int32_t blockedMask = 0;
 	const vec3_t endPosition = vec3_fmaf( moveState->origin, moveState->remainingTime, moveState->velocity );
-	SGTraceResult traceResult = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, endPosition, moveState->passEntity, moveState->contentMask );
+	SGTraceResult traceResult = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, endPosition, moveState->skipEntity, moveState->contentMask );
 	
 	if( traceResult.allSolid ) {
 		if( traceResult.gameEntity ) {
@@ -429,7 +306,7 @@ int32_t SG_SlideMove( MoveState *moveState ) {
 		{
 			//trace_t trace;
 			//module_Trace( &trace, moveState->origin, moveState->mins, moveState->maxs, moveState->origin, moveState->passent, moveState->contentmask, 0 );
-			SGTraceResult traceResult = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, moveState->origin, moveState->passEntity, moveState->contentMask );
+			SGTraceResult traceResult = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, moveState->origin, moveState->skipEntity, moveState->contentMask );
 			if( traceResult.startSolid ) {
 				blockedMask |= SlideMoveFlags::Trapped;
 			}

@@ -180,7 +180,8 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
     // Setup the next think time.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
 }
-    //===============
+
+//===============
 // MonsterTestDummy::MonsterTestDummyThink
 //
 // Think callback, to execute the needed physics for this pusher object.
