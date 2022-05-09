@@ -35,6 +35,79 @@ extern void CheckSVCvars();
 extern cvar_t *GetSVMaxVelocity();
 extern cvar_t *GetSVGravity();
 #endif
+
+
+
+
+
+
+
+//==================================================
+// The following should actually be more monster code.
+//==================================================
+bool SG_SlideMove_CheckBottom(GameEntity* geCheck) {
+    vec3_t  start, stop;
+    SGTraceResult trace;
+    int32_t x, y;
+    float   mid, bottom;
+
+    vec3_t mins = geCheck->GetOrigin() + geCheck->GetMins(); //VectorAdd(geCheck->currentState.origin, geCheck->mins, mins);
+    vec3_t maxs = geCheck->GetOrigin() + geCheck->GetMaxs(); //VectorAdd(geCheck->currentState.origin, geCheck->maxs, maxs);
+
+
+    // if all of the points under the corners are solid world, don't bother
+    // with the tougher checks
+    // the corners must be within 16 of the midpoint
+    start[2] = mins[2] - 1;
+    for (x = 0; x <= 1; x++) {
+        for (y = 0; y <= 1; y++) {
+            start[0] = x ? maxs[0] : mins[0];
+            start[1] = y ? maxs[1] : mins[1];
+            if (SG_PointContents(start) != BrushContents::Solid) {
+                goto realcheck;
+			}
+        }
+	}
+
+    return true;        // we got out easy
+
+realcheck:
+    //
+    // check it for real...
+    //
+    start[2] = mins[2];
+
+    // the midpoint must be within 16 of the bottom
+    start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
+    start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
+    stop[2] = start[2] - 2 * PM_STEP_HEIGHT;
+    trace = SG_Trace(start, vec3_zero(), vec3_zero(), stop, geCheck, SG_SolidMaskForGameEntity(geCheck));
+
+    if (trace.fraction == 1.0) {
+        return false;
+	}
+    mid = bottom = trace.endPosition[2];
+
+    // The corners must be within 16 of the midpoint.
+    for (x = 0; x <= 1; x++) {
+        for (y = 0; y <= 1; y++) {
+            start[0] = stop[0] = x ? maxs[0] : mins[0];
+            start[1] = stop[1] = y ? maxs[1] : mins[1];
+
+            trace = SG_Trace(start, vec3_zero(), vec3_zero(), stop, geCheck, SG_SolidMaskForGameEntity(geCheck));
+
+            if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
+                bottom = trace.endPosition[2];
+            if (trace.fraction == 1.0 || mid - trace.endPosition[2] > PM_STEP_HEIGHT)
+                return false;
+        }
+	}
+
+    return true;
+}
+
+//==================================================
+
 //========================================================================
 
 
@@ -45,12 +118,12 @@ static constexpr float STEPMOVE_WATERFRICTION = 1.f;
 /**
 *	@brief	Processes rotational friction calculations.
 **/
-static void SG_AddRotationalFriction(SGEntityHandle entityHandle) { 
+static void SG_AddRotationalFriction( SGEntityHandle entityHandle ) { 
 	// Assign handle to base entity.
     GameEntity *ent = *entityHandle;
 
     // Ensure it is a valid entity.
-    if (!ent) {
+    if ( !ent ) {
 	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
         return;
     }
@@ -59,7 +132,7 @@ static void SG_AddRotationalFriction(SGEntityHandle entityHandle) {
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
     // Set angles in proper direction.
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity));
+    ent->SetAngles( vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity) );
 
     // Calculate adjustment to apply.
     float adjustment = FRAMETIME.count() * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
@@ -79,7 +152,7 @@ static void SG_AddRotationalFriction(SGEntityHandle entityHandle) {
     }
 
     // Last but not least, set the new angularVelocity.
-    ent->SetAngularVelocity(angularVelocity);
+    ent->SetAngularVelocity( angularVelocity );
 }
 
 /**
@@ -167,7 +240,8 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		return 0;
 	}
 
-	// Store current velocity as old velocity.
+	// Store old origin and velocity.
+	const vec3_t oldOrigin = geSlider->GetOrigin();
 	float oldVelocity = vec3_length( geSlider->GetVelocity() );
 
 	// Apply gravitational force if no ground entity is set. Otherwise, apply ground friction forces.
@@ -209,12 +283,92 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 
 		}
 
-		// Update our entity with the resulting values, including its flags.
-		geSlider->SetFlags(entMove.entityFlags);
-		geSlider->SetOrigin(entMove.origin);
-		geSlider->SetVelocity(entMove.velocity);
-		geSlider->SetGroundEntity(entMove.groundEntity);
-		geSlider->SetGroundEntityLinkCount(entMove.groundEntityLinkCount);		
+		// This is set to false whenever one of the following checks failed:
+		// - Water Check:	We don't want these entities to just walk into a pool of water.
+		// - Edge Check:	Unless the edge is of a legit staircase height, we don't want the
+		//					NPC entity to blindly walk off of it.
+		// - 
+		bool setOrigin = true;
+
+		//----------------------------
+		// CHECK: Water Check
+		//----------------------------
+		// To prevent this entity from going into the water. We assume that if 
+		// its waterLevel already was 0, we'll maintain it at 0.
+		//----------------------------
+		if (geSlider->GetWaterLevel()  == 0) {
+			vec3_t point = {
+				entMove.origin.x,
+				entMove.origin.y,
+				entMove.origin.z + entMove.mins.z - 1,
+			};
+			const int32_t pointContents = SG_PointContents(point);
+
+			if (pointContents & BrushContentsMask::Liquid) {
+				return false;
+			}
+		}
+
+	//if (trace.fraction == 1)
+	//{
+	//// if monster had the ground pulled out, go ahead and fall
+	//	if ( ent->flags & FL_PARTIALGROUND )
+	//	{
+	//		VectorAdd (ent->s.origin, move, ent->s.origin);
+	//		if (relink)
+	//		{
+	//			GClip_LinkEntity (ent);
+	//			GClip_TouchTriggers (ent);
+	//		}
+	//		ent->groundentity = NULL;
+	//		return true;
+	//	}
+	//
+	//	return false;		// walked off an edge
+	//}
+
+		//-----------------
+		// Set origin early on to do special ledge checking.
+		//-----------------
+		if ( setOrigin ) {
+			geSlider->SetOrigin( entMove.origin );
+		}
+
+		//----------------------------
+		// CHECK: Edge Check
+		//----------------------------
+		// Prevents the Entity from falling off of non-stair-case edges by resorting to its old origin.
+		//----------------------------
+		// Check to see if we aren't actually moving off a ledge that does not comply to being a stair.
+		if ( entMove.velocity.z >= 0 && !SG_SlideMove_CheckBottom(geSlider) ) {
+			// TODO: It's never set anyhow, and I suppose... well we'll see.
+			if ( geSlider->GetFlags( ) & EntityFlags::PartiallyOnGround ) {
+				// Entity had floor mostly pulled out from underneath it and is trying to correct.
+				geSlider->LinkEntity( );
+
+				// Touch Triggers.
+				SG_TouchTriggers( geSlider );
+
+				// Not sure if to set it here as well...
+				blockedMask |= SlideMoveFlags::EdgeBlocked;
+
+				// TODO: If we do keep this block, we gotta move the code below this statement
+				// into an else statement since we don't want to return from here.
+				// return true;
+			}
+
+			// Add Edge Blocked flag.
+			blockedMask |= SlideMoveFlags::EdgeBlocked;
+
+			// Set origin back to old 
+			geSlider->SetOrigin( oldOrigin );
+		}
+
+		// Update the entity with the resulting moveState values.
+		geSlider->SetVelocity( entMove.velocity );
+		geSlider->SetFlags( entMove.entityFlags );
+		geSlider->SetGroundEntity( entMove.groundEntity );
+		geSlider->SetGroundEntityLinkCount( entMove.groundEntityLinkCount );		
 
 		// Link entity in.
 		geSlider->LinkEntity();
@@ -224,7 +378,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	if( contentMask != 0 ) {
 		GameEntity *otherEntity = nullptr;
 		//GClip_TouchTriggers( ent );
-		SG_TouchTriggers(geSlider);
+		SG_TouchTriggers( geSlider );
 
 		// Dispatch 'Touch' callback functions to all touched entities residing in our moveState.
 		for( int32_t i = 0; i < entMove.numTouchEntities; i++ ) {
@@ -236,11 +390,11 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 			}
 
 			// Call Touch for the other entity right before calling touch on geSlider.
-			otherEntity->DispatchTouchCallback(otherEntity, geSlider, nullptr, nullptr);
+			otherEntity->DispatchTouchCallback( otherEntity, geSlider, nullptr, nullptr );
 
-			if (geSlider) {
+			if ( geSlider ) {
 				// Now call Touch on geSlider.
-				geSlider->DispatchTouchCallback(geSlider, otherEntity, nullptr, nullptr);
+				geSlider->DispatchTouchCallback( geSlider, otherEntity, nullptr, nullptr );
 			}
 
 			// Check if it may have been freed by the touch function, if so, break out.

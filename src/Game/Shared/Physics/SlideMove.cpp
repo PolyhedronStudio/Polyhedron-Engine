@@ -5,6 +5,8 @@
 *	@file
 *
 *	BoxSlide Movement implementation for SharedGame Physics.
+*
+*	NOTE: The GroundEntity info has to be up to date before pulling off a SlideMove.
 * 
 ***/
 #pragma once
@@ -16,7 +18,6 @@
 #include "Physics.h"
 #include "SlideMove.h"
 
-//==================================================
 
 /**
 *	@return	Clipped by normal velocity.
@@ -48,10 +49,13 @@ inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, c
 }
 
 //==================================================
-// SLIDE MOVE
-//
-// Note: groundentity info should be up to date when calling any slide move function
-//==================================================
+
+
+
+
+
+
+
 /**
 *	@brief	If within limits: Adds the geToucher GameEntity to the MoveState's touching entities list.
 **/
@@ -222,9 +226,12 @@ static bool SG_StepUp( MoveState *moveState ) {
 **/
 static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping ) {
 	int32_t blockedMask = 0;
+
+	// Trace for the current remainingTime, by MA-ing the move velocity.
 	const vec3_t endPosition = vec3_fmaf( moveState->origin, moveState->remainingTime, moveState->velocity );
 	SGTraceResult traceResult = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, endPosition, moveState->skipEntity, moveState->contentMask );
 	
+	// If the result was all solid, escape and add SlideMoveFlags::Trapped to our blockedMask.
 	if( traceResult.allSolid ) {
 		if( traceResult.gameEntity ) {
 			SG_AddTouchEnt( moveState, traceResult.gameEntity );
@@ -232,33 +239,42 @@ static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping )
 		return blockedMask | SlideMoveFlags::Trapped;
 	}
 
+	// Was able to perform the full move without any interruptions.
 	if( traceResult.fraction == 1.0f ) { // Was able to cleanly perform the full move.
 		moveState->origin = traceResult.endPosition;
 		moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );
 		return blockedMask | SlideMoveFlags::Moved;
 	}
 
+	// Unable to make the full move.
 	if( traceResult.fraction < 1.0f ) { // Wasn't able to make the full move.
+
+		// Add the touched entity to our list.
 		SG_AddTouchEnt( moveState, traceResult.gameEntity );
+		// Add SlideMoveFlags::planeTouched to our blockedMask.
 		blockedMask |= SlideMoveFlags::PlaneTouched;
 
-		// move what can be moved
+		// Move the 'fraction' that we at least can move.
 		if( traceResult.fraction > 0.0 ) {
+			// Assign origin.
 			moveState->origin = traceResult.endPosition;
+			// Subtract remainintg time.
 			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );
+			// We've finished our move, add the SlideMoveFlags::Moved flag to our blockedMask.
 			blockedMask |= SlideMoveFlags::Moved;
 		}
 
-		// if the plane is a wall and stepping, try to step it up
+		// If the plane is a wall however, and we're 'stepping', try to step up the wall.
 		if( !IsWalkablePlane( traceResult.plane ) ) {
+			// Step up/over the wall, otherwise add SlideMoveFlags::WalLBlocked flag to our blockedMask.
 			if( stepping && SG_StepUp( moveState ) ) {
 				return blockedMask;  // solved : don't add the clipping plane
-			}
-			else {
+			} else {
 				blockedMask |= SlideMoveFlags::WallBlocked;
 			}
 		}
 
+		// If we've reached this point, it's clear this is one of our planes to clip against.
 		SG_AddClippingPlane( moveState, traceResult.plane.normal );
 	}
 

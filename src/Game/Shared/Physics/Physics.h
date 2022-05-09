@@ -45,7 +45,7 @@ struct SlideMoveFlags {
 	static constexpr int32_t WallBlocked	= 8;
 	static constexpr int32_t Trapped		= 4;
 	//! When Blocekd flag is set, it doesn't mean it didn't slide along the blocking object.
-	static constexpr int32_t Blocked		= 2;
+	static constexpr int32_t EdgeBlocked	= 2;
 	static constexpr int32_t Moved			= 1;
 };
 
