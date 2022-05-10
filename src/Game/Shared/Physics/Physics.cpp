@@ -755,7 +755,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	CheckSVCvars();
 
 	// Get GameEntity from handle.
-    if (!entityHandle || !(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
+    if (!entityHandle || !(*entityHandle) || !entityHandle.Get()) {
         SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
 		return;
     }
@@ -780,7 +780,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	//}
 
 	//// only team captains decide the think, and they make think their team members when they do
-	////if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
+	//if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
 	//	for (GameEntity* gePart = ent; gePart != nullptr; gePart = gePart->GetTeamChainEntity()) {
 	//		SG_RunThink( gePart );
 	//	}
@@ -794,20 +794,21 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	switch( moveType ) {
 	// SG_Physics_None:
 		case MoveType::None:
-		case MoveType::PlayerMove:
+		//case MoveType::PlayerMove:
 	        SG_Physics_None(entityHandle);
         break;
 	
 	// SG_Physics_Pusher:
 		case MoveType::Push:
         case MoveType::Stop:
-//#ifdef SHAREDGAME_CLIENTGAME
+#ifdef SHAREDGAME_CLIENTGAME
 //			if (entityHandle.ID() == 0) {
 //				SG_Physics_Pusher(entityHandle);
 //			}
-//#else
+		SG_Physics_None(entityHandle);
+#else
 	        SG_Physics_Pusher(entityHandle);
-//#endif
+#endif
         break;
 	// SG_Physics_NoClip:
         case MoveType::NoClip:

@@ -558,7 +558,6 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
         
         // Execute "BoxSlideMove", essentially also our water move.
         SG_BoxSlideMove(ent, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10 );
-		//SVG_FlyMove(ent, FRAMETIME.count(), mask);
 
         // Link.
         ent->LinkEntity();

@@ -146,7 +146,7 @@ static void SG_AddClippingPlane( MoveState *moveState, const vec3_t &planeNormal
 *	@brief	Handles checking whether an entity can step up a brush or not. (Or entity, of course.)
 *	@return	True if the move stepped up.
 **/
-static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping );
+static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping );
 static bool SG_StepUp( MoveState *moveState ) {
     // Store pre-move parameters
     const vec3_t org0 = moveState->origin;
@@ -191,7 +191,6 @@ static bool SG_StepUp( MoveState *moveState ) {
         const SGTraceResult downTrace = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, down, moveState->skipEntity, moveState->contentMask );
 
         if ( !downTrace.allSolid && ( downTrace.podEntity && downTrace.plane.normal.z >= PM_STEP_NORMAL ) ) { //PM_CheckStep(&downTrace)) {
-            // Quake2 trick jump secret sauce
 #if 0            
 			if ( (moveState->groundEntity) || vel0.z < PM_SPEED_UP ) {
 #endif
@@ -224,7 +223,7 @@ static bool SG_StepUp( MoveState *moveState ) {
 /**
 *	@brief	GS_Performs a substep of the actual SG_SlideMove
 **/
-static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping ) {
+static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping ) {
 	int32_t blockedMask = 0;
 
 	// Trace for the current remainingTime, by MA-ing the move velocity.
@@ -239,8 +238,8 @@ static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping )
 		return blockedMask | SlideMoveFlags::Trapped;
 	}
 
-	// Was able to perform the full move without any interruptions.
-	if( traceResult.fraction == 1.0f ) { // Was able to cleanly perform the full move.
+	// Was able to perform the full move cleanly without any interruptions.
+	if( traceResult.fraction == 1.0f ) {
 		moveState->origin = traceResult.endPosition;
 		moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );
 		return blockedMask | SlideMoveFlags::Moved;
@@ -248,7 +247,6 @@ static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping )
 
 	// Unable to make the full move.
 	if( traceResult.fraction < 1.0f ) { // Wasn't able to make the full move.
-
 		// Add the touched entity to our list.
 		SG_AddTouchEnt( moveState, traceResult.gameEntity );
 		// Add SlideMoveFlags::planeTouched to our blockedMask.
@@ -268,8 +266,10 @@ static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping )
 		if( !IsWalkablePlane( traceResult.plane ) ) {
 			// Step up/over the wall, otherwise add SlideMoveFlags::WalLBlocked flag to our blockedMask.
 			if( stepping && SG_StepUp( moveState ) ) {
-				return blockedMask;  // solved : don't add the clipping plane
+				// Return blockedMask. We won't be adding the clipping plane.
+				return blockedMask;
 			} else {
+				// Add SliideMoveFlags::WallBlocked flag.
 				blockedMask |= SlideMoveFlags::WallBlocked;
 			}
 		}
@@ -278,6 +278,7 @@ static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping )
 		SG_AddClippingPlane( moveState, traceResult.plane.normal );
 	}
 
+	// Return blockedmask.
 	return blockedMask;
 }
 
@@ -288,7 +289,7 @@ static int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping )
 *			- SlideMoveFlags::WallBlocked	:	The move got blocked by a wall.
 *			- SlideMoveFlags::Trapped			:	The move failed, and resulted in the moveState getting trapped.
 *												When this is set the last valid Origin is stored in the MoveState.
-*			- SLIDEMOVEFLAG_BLOCKED			:	The move got blocked.
+*			- SlideMoveFlags::EdgeBlocked	:	The move got blocked by an edge. (In other words, there was no legitimate step to perform.)
 *			- SlideMoveFlags::Moved			:	The move succeeded.
 **/
 int32_t SG_SlideMove( MoveState *moveState ) {

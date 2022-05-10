@@ -31,7 +31,7 @@ public:
     //
     // Class Definition.
     //
-    DefineMapClass( "func_platz", FuncPlat, CLGBaseMover );
+    DefineMapClass( "func_platzz", FuncPlat, CLGBaseMover );
 
     //
     // Spawn flags

@@ -51,7 +51,7 @@ void FuncRotating::Spawn() {
 	}
 
 	SetSolid(Solid::BSP);
-	//SetModel(GetModel());
+	SetModel(GetModel());
 	SetMoveType((GetSpawnFlags() & SF_StopOnBlock) ? MoveType::Stop : MoveType::Push);
 
 	if ( GetSpawnFlags() & SF_Reverse ) {

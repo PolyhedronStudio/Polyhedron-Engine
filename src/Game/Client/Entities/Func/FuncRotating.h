@@ -17,7 +17,7 @@ public:
 	FuncRotating( Entity* entity );
 	virtual ~FuncRotating() = default;
 
-	DefineMapClass( "func_rotating", FuncRotating, CLGBaseMover );
+	DefineMapClass( "func_rotatingzz", FuncRotating, CLGBaseMover );
 
 	// Spawn flags
 	static constexpr int32_t SF_StartOn = 1 << 0;
