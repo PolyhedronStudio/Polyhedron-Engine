@@ -81,7 +81,7 @@ void TriggerMultiple::Spawn() {
 	SetUseCallback(&TriggerMultiple::TriggerMultipleUse);
 
 	// Default to 0.
-	SetNextThinkTime(0s);
+	SetNextThinkTime(GameTime::zero());
 
 	LinkEntity();
 }
@@ -161,7 +161,7 @@ void TriggerMultiple::Trigger(IServerGameEntity *activator) {
 //===============
 //
 void TriggerMultiple::TriggerMultipleThinkWait() {
-	SetNextThinkTime(0s);
+	SetNextThinkTime(GameTime::zero());
 }
 
 //

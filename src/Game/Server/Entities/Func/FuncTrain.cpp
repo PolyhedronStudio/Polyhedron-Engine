@@ -71,7 +71,7 @@ void FuncTrain::Spawn() {
 	LinkEntity();
 
 	if (!GetTarget().empty()) {
-	    SetNextThinkTime(level.time + 1.0f * FRAMETIME);
+	    SetNextThinkTime(level.time + FRAMERATE_MS);
 	    SetThinkCallback(&FuncTrain::FindNextTarget);
 	} else {
 	    gi.DPrintf("func_train without a target at %s\n", vec3_to_cstr(GetAbsoluteCenter()));
@@ -145,7 +145,7 @@ void FuncTrain::FindNextTarget() {
 		}
 
 		if (GetSpawnFlags() & SF_StartOn) {
-			SetNextThinkTime( level.time + 1.0f * FRAMETIME );
+			SetNextThinkTime( level.time + FRAMERATE_MS );
 			SetThinkCallback( &FuncTrain::NextCornerThink );
 			SetActivator(this);
 		}
@@ -188,7 +188,7 @@ void FuncTrain::TrainUse( IServerGameEntity* other, IServerGameEntity* activator
 			ResumePath();
 		} else {
 			// Go to next path_corner.
-		    SetNextThinkTime(level.time + 1 * FRAMETIME);
+		    SetNextThinkTime(level.time + FRAMERATE_MS);
 		    SetThinkCallback(&FuncTrain::NextCornerThink);
 			NextCornerThink();
 		}
@@ -293,14 +293,14 @@ void FuncTrain::WaitAtCorner() {
 	}
 
 	if ( moveInfo.wait != Frametime::zero() ) {
-		if ( moveInfo.wait > 0s ) {
+		if ( moveInfo.wait > GameTime::zero() ) {
 			SetNextThinkTime( level.time + moveInfo.wait );
 			SetThinkCallback( &FuncTrain::NextCornerThink );
 		} else if ( GetSpawnFlags() & SF_Toggled ) {
 			NextCornerThink();
 		    SetSpawnFlags(GetSpawnFlags() & ~SF_StartOn);
 			SetVelocity( vec3_zero() );
-			SetNextThinkTime( 0s );
+			SetNextThinkTime( GameTime::zero() );
 		}
 
 		if ( !(GetFlags() & EntityFlags::TeamSlave) ) {

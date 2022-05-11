@@ -210,10 +210,10 @@ void CLGBaseMover::BrushMoveFinal() {
 	}
 
 	// Move only as far as to clear the remaining distance
-	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMETIME.count() ) );
+	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.remainingDistance / FRAMERATE_MS.count() ) );
 
 	SetThinkCallback( &CLGBaseMover::BrushMoveDone );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + FRAMERATE_MS );
 }
 
 //===============
@@ -223,18 +223,18 @@ void CLGBaseMover::BrushMoveBegin() {
 	float frames;
 
 	// It's time to stop
-	if ( (moveInfo.speed * FRAMETIME.count()) >= moveInfo.remainingDistance ) {
+	if ( (moveInfo.speed * FRAMERATE_MS.count()) >= moveInfo.remainingDistance ) {
 		BrushMoveFinal();
 		return;
 	}
 
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.speed ) );
 
-	frames = floor( (moveInfo.remainingDistance / moveInfo.speed) / FRAMETIME.count() );
-	moveInfo.remainingDistance -= frames * moveInfo.speed * FRAMETIME.count();
+	frames = floor( (moveInfo.remainingDistance / moveInfo.speed) / FRAMERATE_MS.count() );
+	moveInfo.remainingDistance -= frames * moveInfo.speed * FRAMERATE_MS.count();
 
 	SetThinkCallback( &CLGBaseMover::BrushMoveFinal );
-	SetNextThinkTime( level.time + Frametime(frames * FRAMETIME.count()) );
+	SetNextThinkTime( level.time + frames * FRAMERATE_MS );
 }
 
 //===============
@@ -253,14 +253,14 @@ void CLGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 			BrushMoveBegin();
 		} else {
 			SetThinkCallback( &CLGBaseMover::BrushMoveBegin );
-			SetNextThinkTime( level.time + 1.f * FRAMETIME );
+			SetNextThinkTime( level.time + FRAMERATE_MS );
 		}
 	} else {
 		// Accelerative movement
 		mi.currentSpeed = 0;
 
 		SetThinkCallback( &CLGBaseMover::BrushAccelerateThink );
-		SetNextThinkTime( level.time + 1.f * FRAMETIME );
+		SetNextThinkTime( level.time + FRAMERATE_MS );
 	}
 }
 
@@ -289,10 +289,10 @@ void CLGBaseMover::BrushAngleMoveFinal() {
 		return;
 	}
 
-	SetAngularVelocity( vec3_scale( move, 1.0f / FRAMETIME.count() ) );
+	SetAngularVelocity( vec3_scale( move, 1.0f / FRAMERATE_MS.count() ) );
 
 	SetThinkCallback( &CLGBaseMover::BrushAngleMoveDone );
-	SetNextThinkTime( level.time + FRAMETIME );
+	SetNextThinkTime( level.time + FRAMERATE_MS );
 }
 
 //===============
@@ -313,18 +313,18 @@ void CLGBaseMover::BrushAngleMoveBegin() {
 	length = vec3_length( destinationDelta );
 	travelTime = length / moveInfo.speed;
 
-	if ( travelTime < FRAMETIME.count() ) {
+	if ( travelTime < FRAMERATE_MS.count() ) {
 		BrushAngleMoveFinal();
 		return;
 	}
 
-	frames = floor( travelTime / FRAMETIME.count() );
+	frames = floor( travelTime / FRAMERATE_MS.count() );
 
 	// Get the velocity by scaling the delta vector by the time spent traveling
 	SetAngularVelocity( vec3_scale( destinationDelta, 1.0f / travelTime ) );
 
 	SetThinkCallback( &CLGBaseMover::BrushAngleMoveFinal );
-	SetNextThinkTime( level.time + frames * FRAMETIME );
+	SetNextThinkTime( level.time + frames * FRAMERATE_MS );
 }
 
 //===============
@@ -338,7 +338,7 @@ void CLGBaseMover::BrushAngleMoveCalc( PushMoveEndFunction* function ) {
 		BrushAngleMoveBegin();
 	} else {
 		SetThinkCallback( &CLGBaseMover::BrushAngleMoveBegin );
-		SetNextThinkTime( level.time + 1.f * FRAMETIME );
+		SetNextThinkTime( level.time + FRAMERATE_MS );
 	}
 }
 
@@ -459,7 +459,7 @@ void CLGBaseMover::BrushAccelerateThink() {
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * BASE_FRAMERATE ) );
 
 	SetThinkCallback( &CLGBaseMover::BrushAccelerateThink );
-	SetNextThinkTime( level.time + 1.f * FRAMETIME );
+	SetNextThinkTime( level.time + FRAMERATE_MS );
 }
 
 //===============

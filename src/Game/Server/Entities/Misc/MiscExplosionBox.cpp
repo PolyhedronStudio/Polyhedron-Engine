@@ -280,7 +280,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         const Frametime save = GetDelayTime();
-        SetDelayTime(0s);
+        SetDelayTime(GameTime::zero());
         UseTargets(GetActivator());
         SetDelayTime(save);
     } else {
@@ -292,7 +292,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
         GetGameMode()->InflictRadiusDamage(this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
         const Frametime save = GetDelayTime();
-        SetDelayTime(0s);
+        SetDelayTime(GameTime::zero());
         UseTargets(GetActivator());
         SetDelayTime(save);
     }

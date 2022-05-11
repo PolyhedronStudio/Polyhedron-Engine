@@ -253,14 +253,14 @@ void SVGBaseMover::BrushMoveCalc( const vec3_t& destination, PushMoveEndFunction
 			BrushMoveBegin();
 		} else {
 			SetThinkCallback( &SVGBaseMover::BrushMoveBegin );
-			SetNextThinkTime( level.time + 1.f * FRAMETIME );
+			SetNextThinkTime( level.time + FRAMERATE_MS );
 		}
 	} else {
 		// Accelerative movement
 		mi.currentSpeed = 0;
 
 		SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
-		SetNextThinkTime( level.time + 1.f * FRAMETIME );
+		SetNextThinkTime( level.time + FRAMERATE_MS );
 	}
 }
 
@@ -338,7 +338,7 @@ void SVGBaseMover::BrushAngleMoveCalc( PushMoveEndFunction* function ) {
 		BrushAngleMoveBegin();
 	} else {
 		SetThinkCallback( &SVGBaseMover::BrushAngleMoveBegin );
-		SetNextThinkTime( level.time + 1.f * FRAMETIME );
+		SetNextThinkTime( level.time + FRAMERATE_MS );
 	}
 }
 
@@ -459,7 +459,7 @@ void SVGBaseMover::BrushAccelerateThink() {
 	SetVelocity( vec3_scale( moveInfo.dir, moveInfo.currentSpeed * BASE_FRAMERATE ) );
 
 	SetThinkCallback( &SVGBaseMover::BrushAccelerateThink );
-	SetNextThinkTime( level.time + 1.f * FRAMETIME );
+	SetNextThinkTime( level.time + FRAMERATE_MS );
 }
 
 //===============

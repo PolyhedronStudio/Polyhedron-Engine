@@ -80,7 +80,7 @@ void FuncTimer::TimerUse( IServerGameEntity* other, IServerGameEntity* activator
 
 	// If on, turn it off
 	if ( nextThinkTime != GameTime::zero() ) {
-		SetNextThinkTime( 0s );
+		SetNextThinkTime( GameTime::zero() );
 		return;
 	}
 

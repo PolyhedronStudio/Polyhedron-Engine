@@ -58,7 +58,7 @@ void TargetExplosion::ExplosionThink() {
 	GetGameMode()->InflictRadiusDamage( this, GetActivator(), GetDamage(), nullptr, GetDamage() + 40.0f, MeansOfDeath::Explosive);
 
 	const Frametime save = GetDelayTime();
-	SetDelayTime( 0s );
+	SetDelayTime( GameTime::zero() );
 	UseTargets();
 	SetDelayTime( save );
 }

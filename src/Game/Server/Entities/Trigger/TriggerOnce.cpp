@@ -123,7 +123,7 @@ void TriggerOnce::Trigger(IServerGameEntity* activator) {
 //===============
 //
 void TriggerOnce::TriggerOnceThinkWait() {
-	SetNextThinkTime(0s);
+	SetNextThinkTime(GameTime::zero());
 }
 
 //
