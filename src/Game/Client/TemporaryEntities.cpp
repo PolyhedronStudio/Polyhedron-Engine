@@ -1055,7 +1055,7 @@ static void TE_SpawnDebris(GameEntity *geDebrisser, const int32_t debrisModelInd
 	// Default.
 	std::string debrisModel = "models/objects/debris1/tris.md2";
 
-	if (debrisModelIndex == 1) {
+	if (!debrisModelIndex || debrisModelIndex == 1) {
 		debrisModel = "models/objects/debris1/tris.md2";
 	} else if (debrisModelIndex == 2) {
 		debrisModel = "models/objects/debris2/tris.md2";

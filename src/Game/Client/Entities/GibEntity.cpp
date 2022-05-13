@@ -20,6 +20,7 @@
 
 // World.
 #include "../World/ClientGameWorld.h"
+static int32_t sm_meat_index = 0;
 
 static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
     // Pick random velocities.
@@ -49,9 +50,13 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
 	// Create a gib entity.
     GibEntity* gibEntity = GetGameWorld()->CreateGameEntity<GibEntity>(localGibEntity , false, false);
 
-    // Set size.
+	if (!sm_meat_index) {
+		sm_meat_index = CLG_PrecacheModel("models/objects/gibs/sm_meat/tris.md2");
+	}
+
+	// Set size.
     //vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
-	vec3_t size = vec3_scale(vec3_t{64.f, 64.f, 64.f}, 0.5f);
+	vec3_t size = vec3_scale(vec3_t{16.f, 16.f, 56.f}, 0.5f);
     gibEntity->SetSize(size);
 
     // Generate the origin to start from.
@@ -248,16 +253,21 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 //
 //===============
 void GibEntity::GibEntityThink() {
-    // Increase frame and set a new think time.
-    SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
+	// Next Think.
+	SetThinkCallback(&GibEntity::GibEntityThink);
     SetNextThinkTime(level.time + FRAMETIME);
+    
+	// Increase frame and set a new think time.
+    SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
 
     // Play frames for these meshes, cut the crap at frame 10.
     if (GetAnimationFrame() == 10) {
 		SetEffects(0);
         SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
-        SetNextThinkTime(level.time + 8s + GameTime(Randomui() * 10));
+        SetNextThinkTime(level.time + 8s + Randomui() * 10s);
     }
+
+	SG_CheckGround(this);
 }
 
 //===============
@@ -270,6 +280,7 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
     if (!GetGroundEntityHandle())
         return;
 
+
     // Reset touch callback to nullptr.
     SetTouchCallback(nullptr);
 
@@ -281,11 +292,11 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
         vec3_vectors(normalAngles, NULL, &right, NULL);
         vec3_t right = vec3_euler(GetState().angles);
 
-        //if (GetModelIndex() == sm_meat_index) {
-            SetAnimationFrame(GetAnimationFrame() + 1);
+        if (GetModelIndex() == sm_meat_index) {
+            SetAnimationFrame(GetAnimationFrame() + FRAMETIME.count());
             SetThinkCallback(&GibEntity::GibEntityThink);
             SetNextThinkTime(level.time + FRAMETIME);
-        //}
+        }
     }
 }
 

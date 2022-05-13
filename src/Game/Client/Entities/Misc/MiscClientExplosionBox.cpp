@@ -77,6 +77,9 @@ void MiscClientExplosionBox::Spawn() {
     // Set move type.
     SetMoveType(MoveType::TossSlide);
 
+    // Since this is a "monster", after all...
+    //SetServerFlags(EntityServerFlags::Monster);
+
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
@@ -141,11 +144,11 @@ void MiscClientExplosionBox::Think() {
 	//	Com_DPrint("Local misc_client_explobox with NO!!! podEntity\n");
 	//}
 	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
-	//clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
+	clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 }
 
 void MiscClientExplosionBox::ExplosionBoxThink(void) {
-	SetNextThinkTime(level.time + 1 * FRAMETIME);
+	SetNextThinkTime(level.time + FRAMERATE_MS);
 	SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxThink);
 }
 
@@ -210,8 +213,8 @@ void MiscClientExplosionBox::ExplosionBoxDropToFloor(void) {
     SG_CheckGround(this); //CLG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
-    //SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
-    //SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
+    SetNextThinkTime(level.time + FRAMETIME);
 
     // Do a check ground for the step move of this pusher.
     //CLG_StepMove_CheckGround(this);

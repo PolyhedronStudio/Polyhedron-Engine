@@ -812,9 +812,9 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 		},
 		// It has no Game Entity anymore.
 		.gameEntity = nullptr,
-		//// Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
-		//// If we don't, we risk the chance of a client lerping between an older entity that
-		//// was taking up this current slot.
+		// Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
+		// If we don't, we risk the chance of a client lerping between an older entity that
+		// was taking up this current slot.
 		.freeTime = level.time,
 		// And ensure our main identifier has the correct entityNumber set.
 		.clientEntityNumber = entityNumber,

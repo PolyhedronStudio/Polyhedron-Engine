@@ -64,7 +64,8 @@ static inline void CheckSVCvars() {
 #endif
 //========================================================================
 
-void SG_PhysicsEntityWPrint(const std::string &functionName, const std::string &functionSector, const std::string& message) {
+void SG_Physics_PrintWarning(const std::string& message) {
+//void SG_Physics_PrintWarning(const std::string& message, const std::string &functionName = ) {
     // Only continue if developer warnings for physics are enabled.
     //extern cvar_t* dev_show_physwarnings;
     //if (!dev_show_physwarnings->integer) {
@@ -72,36 +73,18 @@ void SG_PhysicsEntityWPrint(const std::string &functionName, const std::string &
     //}
 
     // Show warning.
-    std::string warning = "SGPhysics Warning: (";
-    warning += functionName;
-    warning += ")[ ";
-    warning += functionSector;
-    warning += "]: ";
+#ifdef SHAREDGAME_CLIENTGAME
+	std::string warning = "SGPhysics(Client[";
+#endif
+#ifdef SHAREDGAME_SERVERGAME
+	std::string warning =  "SGPhysics(Servber[";
+#endif
+//    warning += functionName;
+	warning += "]): ";
     warning += message;
     warning += "\n";
-    //Com_DPrint(warning.c_str());
- //   // Write the index, programmers may look at that thing first
- //   std::string errorString = "";
- //   if (ent->GetPODEntity()) {
-	//errorString += "entity (index " + std::to_string(ent->GetNumber());
- //   } else {
-	//errorString += "entity has no ServerEntity ";
- //   }
 
- //   // Write the targetname as well, if it exists
- //   if (!ent->GetTargetName().empty()) {
-	//errorString += ", name '" + ent->GetTargetName() + "'";
- //   }
-
- //   // Write down the C++ class name too
- //   errorString += ", class '";
- //   errorString += ent->GetTypeInfo()->classname;
- //   errorString += "'";
-
- //   // Close it off and state what's actually going on
- //   errorString += ") has a nullptr think callback \n";
- //   //
- //   gi.Error(errorString.c_str());
+	Com_DPrintf(warning.c_str());
 }
 
 //================================================================================
@@ -121,7 +104,7 @@ static inline vec3_t GS_ClipVelocity( const vec3_t &inVelocity, const vec3_t &no
 	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backoff ) );
 
 	// SlideMove clamp it.
-	//#ifdef GS_SLIDEMOVE_CLAMPING
+	#ifdef SG_SLIDEMOVE_CLAMPING
 	{
 		float oldSpeed = vec3_length(inVelocity);
 		float newSpeed = vec3_length(outVelocity);
@@ -130,24 +113,10 @@ static inline vec3_t GS_ClipVelocity( const vec3_t &inVelocity, const vec3_t &no
 			outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
 		}
 	}
+	#endif
 
 	return outVelocity;
-	//#endif GS_SLIDEMOVE_CLAMPING
-	//for( i = 0; i < 3; i++ ) {
-	//	change = normal[i] * backoff;
-	//	out[i] = in[i] - change;
-	//}
-	//#ifdef GS_SLIDEMOVE_CLAMPING
-	//	{
-	//		float oldspeed, newspeed;
-	//		oldspeed = VectorLength( in );
-	//		newspeed = VectorLength( out );
-	//		if( newspeed > oldspeed ) {
-	//			VectorNormalize( out );
-	//			VectorScale( out, oldspeed, out );
-	//		}
-	//	}
-	//#endif
+
 }
 
 //================================================================================
@@ -169,12 +138,12 @@ void SG_AddGravity( GameEntity *sharedGameEntity ) {
 /**
 *	@brief	Apply ground friction forces to entity.
 **/
-void SG_AddGroundFriction( GameEntity *sharedGameEntity, const float friction ) {
-	if (!sharedGameEntity) {
-		Com_DPrintf("SGWarning: %s called with sharedGameEntity(nullptr)!\n", __func__);
+void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction ) {
+	if (!geGroundFriction) {
+		SG_Physics_PrintWarning(std::string(__func__) + "called with geGroundFriction(nullptr)!");
 	}
 
-	const vec3_t geVelocity = sharedGameEntity->GetVelocity();
+	const vec3_t geVelocity = geGroundFriction->GetVelocity();
 	vec3_t groundVelocity = {
 		geVelocity.x,
 		geVelocity.y,
@@ -192,10 +161,10 @@ void SG_AddGroundFriction( GameEntity *sharedGameEntity, const float friction ) 
 		}
 
 		// Actual velocity.
-		const vec3_t velocity = sharedGameEntity->GetVelocity();
+		const vec3_t velocity = geGroundFriction->GetVelocity();
 
 		// Update velocity.
-		sharedGameEntity->SetVelocity(vec3_fmaf(velocity, -fspeed, frictionVec));
+		geGroundFriction->SetVelocity(vec3_fmaf(velocity, -fspeed, frictionVec));
 	}
 }
 
@@ -267,127 +236,14 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	}
 }
 
-/**
-*	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
-**/
-//const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction ) {
-//	int32_t i;
-//	MoveState entMove = {};
-//	int32_t blockedMask = 0;
-//
-//	if (!geSlider) {
-//		SG_PhysicsEntityWPrint(__func__, "[start]", "geSlider is (nullptr)!\n");
-//		return 0;
-//	}
-//
-//	// Store current velocity as old velocity.
-//	float oldVelocity = VectorLength( geSlider->GetVelocity() );
-//
-//	// Apply gravitational force if no ground entity is set. Otherwise, apply ground friction forces.
-//	if( !geSlider->GetGroundEntityHandle() ) {
-//		SG_AddGravity( geSlider );
-//	} else { // horizontal friction
-//		SG_AddGroundFriction( geSlider, friction );
-//	}
-//
-//	// Initialize our move state.
-//	entMove.numClipPlanes		= 0;
-//	entMove.numTouchEntities	= 0;
-//
-//	// When the entity isn't idle, move its properties over into our move state.
-//	if( oldVelocity > 0 ) {
-//		// Setup remaining move time.
-//		Frametime remainingTime = level.time;
-//		entMove.remainingTime	= FRAMETIME.count();
-//
-//		// Setup general properties.
-//		entMove.passEntity		= geSlider;
-//		entMove.contentMask		= contentMask;
-//		entMove.gravityDir		= vec3_t { 0.f, 0.f, -1.f };
-//		entMove.slideBounce		= slideBounce;
-//		entMove.groundEntity	= ( *geSlider->GetGroundEntityHandle() );
-//
-//		// Setup Physical properties.
-//		entMove.origin			= geSlider->GetOrigin( );
-//		entMove.velocity		= geSlider->GetVelocity( );
-//		entMove.mins			= geSlider->GetMins( );
-//		entMove.maxs			= geSlider->GetMaxs( );
-//
-//		// Execute actual slide movement.
-//		blockedMask = SG_SlideMove( &entMove );
-//
-//		// If we got blocked, we'll check to see if we can step over it.
-//		if (blockedMask & SlideMoveFlags::WallBlocked) {
-//
-//		}
-//
-//		// Update our entity with the resulting values.
-//		geSlider->SetOrigin(entMove.origin);
-//		geSlider->SetVelocity(entMove.velocity);
-//		geSlider->SetGroundEntity(entMove.groundEntity);
-//
-//		// Link entity in.
-//		geSlider->LinkEntity();
-//	}
-//
-//	// Execute touch callbacks.
-//	if( contentMask != 0 ) {
-//		GameEntity *otherEntity = nullptr;
-//		//GClip_TouchTriggers( ent );
-//		SG_TouchTriggers(geSlider);
-//
-//		// touch other objects
-//		for( int32_t i = 0; i < entMove.numTouchEntities; i++ ) {
-//			otherEntity = entMove.touchEntites[i];
-//			
-//			// Don't touch projectiles.
-//			if( !otherEntity ) { //|| otherEntity->GetFlags() & PROJECTILE_THING_FLAG) {
-//				continue;
-//			}
-//
-//			//G_CallTouch( other, ent, NULL, 0 );
-//			otherEntity->DispatchTouchCallback(otherEntity, geSlider, nullptr, nullptr);
-//
-//			// if self touch function, fire up touch and if freed stop
-//			// It may have been deleted after all.
-//			if (geSlider) {
-//				//G_CallTouch( ent, other, NULL, 0 );
-//				geSlider->DispatchTouchCallback(geSlider, otherEntity, nullptr, nullptr);
-//			}
-//
-//			// It may have been freed by the touch function.
-//			if( geSlider->IsInUse()) {
-//				break;
-//			}
-//		}
-//	}
-//
-//	// If it's still in use, search for ground.
-//	if ( geSlider && geSlider->IsInUse() ) {
-//		// Check for ground entity.
-//		SG_CheckGround( geSlider );
-//
-//		// Set it to a halt in case velocity becomes too low, this way it won't look odd.
-//		if( geSlider->GetGroundEntityHandle() && vec3_length(geSlider->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
-//			// Zero out velocities.
-//			geSlider->SetVelocity( vec3_zero() );
-//			geSlider->SetAngularVelocity( vec3_zero() );
-//
-//			// Stop.
-//			geSlider->DispatchStopCallback( );
-//		}
-//	}
-//
-//	return blockedMask;
-//}
-
-
 
 //================================================================================
 
-//pushmove objects do not obey gravity, and do not interact with each other or trigger fields, but block normal movement and push normal objects when they move.
+// Types of entities:
+// "PushMove":	Is used by world brush entities: func_button, func_door, func_plat, func_train, etc.
+//				It does NOT obey gravity, and does not intersect with each other. All it does is push other entities, and damage them or stop, when blocked.
 //
-//onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects
+// "Toss":	OnGround is set when they come to a complete rest.
 //
 //doors, plats, etc are SOLID_BSP, and MOVETYPE_PUSH
 //bonus items are SOLID_TRIGGER touch, and MOVETYPE_TOSS
@@ -475,15 +331,147 @@ void SG_Impact( GameEntity *entityA, const SGTraceResult &traceResult ) {
 	}
 }
 
-/*
-* SV_FlyMove
-*
-* The basic solid body movement clip that slides along multiple planes
-* Returns the clipflags if the velocity was modified (hit something solid)
-* 1 = floor
-* 2 = wall / step
-* 4 = dead stop
-*/
+
+
+/**
+*	@brief	Gives the entity a chance to process 'Think' callback logic if the
+*			time is there for it to do so.
+*	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
+**/
+qboolean SG_RunThink(GameEntity *geThinker) {
+    if (!geThinker) {
+	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!");
+        return true;
+    }
+
+    // Fetch think time.
+    GameTime nextThinkTime = geThinker->GetNextThinkTime();
+
+    // Should we think at all? 
+    // Condition A: Below 0, aka -(1+) means no thinking.
+    // Condition B: > level.time, means we're still waiting before we can think.
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+		return true;
+    }
+
+    // Reset think time before thinking.
+    geThinker->SetNextThinkTime(GameTime::zero());
+
+	if (!geThinker) {
+	    SG_Physics_PrintWarning("*geThinker is (nullptr)!");
+        return false;
+    }
+
+#if _DEBUG
+    if ( !geThinker->HasThinkCallback() ) {
+		SG_Physics_PrintWarning("GameEntity(#" + std::to_string(geThinker->GetNumber()) + ")[" + geThinker->GetTypeInfo()->mapClass + "] has no Think callback set.");
+        return true;
+    }
+#endif
+
+    // Last but not least, let the entity execute its think behavior callback.
+    geThinker->Think();
+
+    return false;
+}
+
+void SG_RunEntity(SGEntityHandle &entityHandle) {
+	// TODO: Make this less hacky ofc, get normal sane access to cvars.
+	CheckSVCvars();
+
+	// Get GameEntity from handle.
+    if (!entityHandle || !(*entityHandle) || !entityHandle.Get()) {
+        SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
+		return;
+    }
+
+    GameEntity *ent = dynamic_cast<GameEntity*>(*entityHandle);
+
+    if (!ent) {
+	    SG_Physics_PrintWarning( std::string(__func__) + "got an entity handle that still has a broken game entity ptr!" );
+        return;
+    }
+
+    // Execute the proper physics that belong to its movetype.
+    const int32_t moveType = ent->GetMoveType();
+
+	//if( ISEVENTENTITY( &ent->s ) ) { // events do not think
+	//	return;
+	//}
+
+	//if( ent->timeDelta && !( ent->r.svflags & SVF_PROJECTILE ) ) {
+	//	G_Printf( "Warning: G_RunEntity 'Fixing timeDelta on non projectile entity" );
+	//	ent->timeDelta = 0;
+	//}
+
+	//// only team captains decide the think, and they make think their team members when they do
+	//if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
+	//	for (GameEntity* gePart = ent; gePart != nullptr; gePart = gePart->GetTeamChainEntity()) {
+	//		SG_RunThink( gePart );
+	//	}
+	//	//for( GameEntity *gePart = ent; gePart ; gePart = (gePart ? gePart->GetTeamChainEntity() : nullptr)) {
+	//	//	if (gePart) {
+	//	//		SG_RunThink( gePart );
+	//	//	}
+	//	//}
+	////}
+
+	switch( moveType ) {
+	// SG_Physics_None:
+		case MoveType::None:
+		case MoveType::PlayerMove:
+	        SG_Physics_None(entityHandle);
+        break;
+	
+	// SG_Physics_Pusher:
+		case MoveType::Push:
+        case MoveType::Stop:
+	        SG_Physics_Pusher(entityHandle);
+        break;
+	// SG_Physics_NoClip:
+        case MoveType::NoClip:
+        case MoveType::Spectator:
+	        SG_Physics_NoClip(entityHandle);
+        break;
+	// SG_Physics_Step:
+        case MoveType::Step:
+            //SG_Physics_Step(entityHandle);
+			SG_Physics_None(entityHandle);
+        break;
+	// SG_Physics_BoxSlideMove:
+		case MoveType::BoxSlideMove:
+			SG_Physics_BoxSlideMove(entityHandle);
+			break;
+	// SG_Physics_Toss:
+        case MoveType::Toss:
+		case MoveType::TossSlide:
+        case MoveType::Bounce:
+        case MoveType::Fly:
+        case MoveType::FlyMissile:
+	        SG_Physics_Toss(entityHandle);
+        break;
+	// SG_BoxSlideMove:
+		//case MoveType::TossSlide: {
+		//	GameEntity *geTossSlider = *entityHandle;
+		//	if (geTossSlider) {
+		//		const int32_t geClipMask = geTossSlider->GetClipMask();
+		//		SG_BoxSlideMove( ent, ( geClipMask ? geClipMask : BrushContentsMask::PlayerSolid ), 1.01f, 10 );
+		//	}
+		//break;
+		//}
+	default:
+		//	G_Error( "SV_Physics: bad movetype %i", (int)ent->movetype );
+		break;
+	}
+}
+
+/**
+*	@brief	The basic solid body movement clip that slides along multiple planes
+*	@return	The clipflags if the velocity was modified (hit something solid)
+*			1 = floor
+*			2 = wall / step
+*			4 = dead stop
+**/
 #if 0
 #define MAX_CLIP_PLANES 5
 int SV_FlyMove( edict_t *ent, float time, int mask ) {
@@ -603,275 +591,119 @@ int SV_FlyMove( edict_t *ent, float time, int mask ) {
 
 	return blocked;
 }
-#endif
-
-//===============================================================================
-//
-//PUSHMOVE
-//
-//===============================================================================
-
-
-//==================================================================
-
-
-
-
-//==============================================================================
-//
-//TOSS / BOUNCE
-//
-//==============================================================================
-
-
-
-//============================================================================
-
-//void SV_Physics_LinearProjectile( edict_t *ent, int lookAheadTime ) {
-//	// if not a team captain movement will be handled elsewhere
-//	if( ent->flags & FL_TEAMFOLLOWER ) {
-//		return;
-//	}
-//
-//	const int old_waterLevel = ent->waterlevel;
-//	const int mask = ( ent->r.clipmask ) ? ent->r.clipmask : MASK_SOLID;
-//
-//	const float startLineParam = ( ent->s.linearMovementPrevServerTime - ent->s.linearMovementTimeStamp ) * 0.001f;
-//	ent->s.linearMovementPrevServerTime = game.serverTime;
-//	const float endLineParam = ( lookAheadTime + game.serverTime - ent->s.linearMovementTimeStamp ) * 0.001f;
-//
-//	vec3_t start, end;
-//	VectorMA( ent->s.linearMovementBegin, startLineParam, ent->s.linearMovementVelocity, start );
-//	VectorMA( ent->s.linearMovementBegin, endLineParam, ent->s.linearMovementVelocity, end );
-//
-//	// Make sure the segments that are checked every frame overlap by a unit.
-//	// This is not obligatory but let's ensure they make a continuous joint segment.
-//	const float squareSpeed = VectorLengthSquared( ent->s.linearMovementVelocity );
-//	if( squareSpeed > 1 ) {
-//		const float invSpeed = 1.0f / std::sqrt( squareSpeed );
-//		vec3_t velocityDir;
-//		VectorScale( ent->s.linearMovementVelocity, invSpeed, velocityDir );
-//		VectorSubtract( start, velocityDir, start );
-//		VectorAdd( end, velocityDir, end );
-//	}
-//
-//	trace_t trace;
-//	G_Trace4D( &trace, start, ent->r.mins, ent->r.maxs, end, ent, mask, ent->timeDelta );
-//	VectorCopy( trace.endpos, ent->s.origin );
-//	GClip_LinkEntity( ent );
-//	SV_Impact( ent, &trace );
-//
-//	if( !ent->r.inuse ) { // the projectile may be freed if touched something
-//		return;
-//	}
-//
-//	// update some data required for the transmission
-//	//VectorCopy( ent->velocity, ent->s.linearMovementVelocity );
-//
-//	GClip_TouchTriggers( ent );
-//	ent->groundentity = NULL; // projectiles never have ground entity
-//	ent->waterlevel = ( G_PointContents4D( ent->s.origin, ent->timeDelta ) & MASK_WATER ) ? true : false;
-//
-//	if( !old_waterLevel && ent->waterlevel ) {
-//		G_PositionedSound( start, CHAN_AUTO, trap_SoundIndex( S_HIT_WATER ), ATTN_IDLE );
-//	} else if( old_waterLevel && !ent->waterlevel ) {
-//		G_PositionedSound( ent->s.origin, CHAN_AUTO, trap_SoundIndex( S_HIT_WATER ), ATTN_IDLE );
-//	}
-//}
-
-//============================================================================
-
-
-
-//============================================================================
 
 /**
-*	@brief	Gives the entity a chance to process 'Think' callback logic if the
-*			time is there for it to do so.
-*	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
+*	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
-qboolean SG_RunThink(GameEntity *geThinker) {
-    if (!geThinker) {
-	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!\n");
-        return true;
-    }
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction ) {
+	int32_t i;
+	MoveState entMove = {};
+	int32_t blockedMask = 0;
 
-    // Fetch think time.
-    GameTime nextThinkTime = geThinker->GetNextThinkTime();
-
-    // Should we think at all? 
-    // Condition A: Below 0, aka -(1+) means no thinking.
-    // Condition B: > level.time, means we're still waiting before we can think.
-	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
-		return true;
-    }
-
-    // Reset think time before thinking.
-    geThinker->SetNextThinkTime(GameTime::zero());
-
-	if (!geThinker) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "geThinker is (nullptr)!\n");
-        return false;
-    }
-
-#if _DEBUG
-    if ( !geThinker->HasThinkCallback() ) {
-        // Write the index, programmers may look at that thing first
-        std::string errorString = "";
-        if (geThinker->GetPODEntity()) {
-            errorString += "entity (index " + std::to_string(geThinker->GetNumber());
-        } else {
-            errorString += "entity has no PODEntity ";
-        }
-
-        // Write the targetname as well, if it exists
-        if ( !geThinker->GetTargetName().empty() ) {
-            errorString += ", name '" + geThinker->GetTargetName() + "'";
-        }
-
-        // Write down the C++ class name too
-        errorString += ", class '";
-        errorString += geThinker->GetTypeInfo()->classname;
-        errorString += "'";
-
-        // Close it off and state what's actually going on
-        errorString += ") has a nullptr think callback \n";
-    //    
-        //gi.Error( errorString.c_str() );
-
-        // Return true.
-        return true;
-    }
-#endif
-
-    // Last but not least, let the entity execute its think behavior callback.
-    geThinker->Think();
-
-    return false;
-}
-
-void SG_RunEntity(SGEntityHandle &entityHandle) {
-	// TODO: Make this less hacky ofc, get normal sane access to cvars.
-	CheckSVCvars();
-
-	// Get GameEntity from handle.
-    if (!entityHandle || !(*entityHandle) || !entityHandle.Get()) {
-        SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
-		return;
-    }
-
-    GameEntity *ent = dynamic_cast<GameEntity*>(*entityHandle);
-
-    if (!ent) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an entity handle that still has a broken game entity ptr!\n");
-        return;
-    }
-
-    // Execute the proper physics that belong to its movetype.
-    const int32_t moveType = ent->GetMoveType();
-
-	//if( ISEVENTENTITY( &ent->s ) ) { // events do not think
-	//	return;
-	//}
-
-	//if( ent->timeDelta && !( ent->r.svflags & SVF_PROJECTILE ) ) {
-	//	G_Printf( "Warning: G_RunEntity 'Fixing timeDelta on non projectile entity\n" );
-	//	ent->timeDelta = 0;
-	//}
-
-	//// only team captains decide the think, and they make think their team members when they do
-	//if(ent && !( ent->GetFlags() & EntityFlags::TeamSlave)) {
-	//	for (GameEntity* gePart = ent; gePart != nullptr; gePart = gePart->GetTeamChainEntity()) {
-	//		SG_RunThink( gePart );
-	//	}
-	//	//for( GameEntity *gePart = ent; gePart ; gePart = (gePart ? gePart->GetTeamChainEntity() : nullptr)) {
-	//	//	if (gePart) {
-	//	//		SG_RunThink( gePart );
-	//	//	}
-	//	//}
-	////}
-
-	switch( moveType ) {
-	// SG_Physics_None:
-		case MoveType::None:
-		//case MoveType::PlayerMove:
-	        SG_Physics_None(entityHandle);
-        break;
-	
-	// SG_Physics_Pusher:
-		case MoveType::Push:
-        case MoveType::Stop:
-#ifdef SHAREDGAME_CLIENTGAME
-//			if (entityHandle.ID() == 0) {
-//				SG_Physics_Pusher(entityHandle);
-//			}
-		SG_Physics_None(entityHandle);
-#else
-	        SG_Physics_Pusher(entityHandle);
-#endif
-        break;
-	// SG_Physics_NoClip:
-        case MoveType::NoClip:
-        case MoveType::Spectator:
-	        SG_Physics_NoClip(entityHandle);
-        break;
-	// SG_Physics_Step:
-        case MoveType::Step:
-            //SG_Physics_Step(entityHandle);
-			SG_Physics_None(entityHandle);
-        break;
-	// SG_Physics_BoxSlideMove:
-		case MoveType::BoxSlideMove:
-			SG_Physics_BoxSlideMove(entityHandle);
-			break;
-	// SG_Physics_Toss:
-        case MoveType::Toss:
-		case MoveType::TossSlide:
-        case MoveType::Bounce:
-        case MoveType::Fly:
-        case MoveType::FlyMissile:
-	        SG_Physics_Toss(entityHandle);
-        break;
-	// SG_BoxSlideMove:
-		//case MoveType::TossSlide: {
-		//	GameEntity *geTossSlider = *entityHandle;
-		//	if (geTossSlider) {
-		//		const int32_t geClipMask = geTossSlider->GetClipMask();
-		//		SG_BoxSlideMove( ent, ( geClipMask ? geClipMask : BrushContentsMask::PlayerSolid ), 1.01f, 10 );
-		//	}
-		//break;
-		//}
-	default:
-		//	G_Error( "SV_Physics: bad movetype %i", (int)ent->movetype );
-		break;
-		//case MoveType::None:
-		//case MoveType::NoClip: // only used for clients, that use pmove
-		//	SV_Physics_None( ent );
-		//	break;
-		//case MOVETYPE_PLAYER:
-		//	SV_Physics_None( ent );
-		//	break;
-		//case MoveType::Push:
-		//case MoveType::Stop:
-		//	SV_Physics_Pusher( ent );
-		//	break;
-		//case MOVETYPE_BOUNCE:
-		//case MOVETYPE_BOUNCEGRENADE:
-		//	SV_Physics_Toss( ent );
-		//	break;
-		//case MOVETYPE_TOSS:
-		//	SV_Physics_Toss( ent );
-		//	break;
-		//case MOVETYPE_FLY:
-		//	SV_Physics_Toss( ent );
-		//	break;
-		//case MOVETYPE_LINEARPROJECTILE:
-		//	SV_Physics_LinearProjectile( ent, 0 );
-		//	break;
-		//case MOVETYPE_TOSSSLIDE:
-		//	G_BoxSlideMove( ent, ent->r.clipmask ? ent->r.clipmask : MASK_PLAYERSOLID, 1.01f, 10 );
-		//	break;
-		//default:
-		
+	if (!geSlider) {
+		SG_PhysicsEntityWPrint(__func__, "[start]", "geSlider is (nullptr)!");
+		return 0;
 	}
+
+	// Store current velocity as old velocity.
+	float oldVelocity = VectorLength( geSlider->GetVelocity() );
+
+	// Apply gravitational force if no ground entity is set. Otherwise, apply ground friction forces.
+	if( !geSlider->GetGroundEntityHandle() ) {
+		SG_AddGravity( geSlider );
+	} else { // horizontal friction
+		SG_AddGroundFriction( geSlider, friction );
+	}
+
+	// Initialize our move state.
+	entMove.numClipPlanes		= 0;
+	entMove.numTouchEntities	= 0;
+
+	// When the entity isn't idle, move its properties over into our move state.
+	if( oldVelocity > 0 ) {
+		// Setup remaining move time.
+		Frametime remainingTime = level.time;
+		entMove.remainingTime	= FRAMETIME.count();
+
+		// Setup general properties.
+		entMove.passEntity		= geSlider;
+		entMove.contentMask		= contentMask;
+		entMove.gravityDir		= vec3_t { 0.f, 0.f, -1.f };
+		entMove.slideBounce		= slideBounce;
+		entMove.groundEntity	= ( *geSlider->GetGroundEntityHandle() );
+
+		// Setup Physical properties.
+		entMove.origin			= geSlider->GetOrigin( );
+		entMove.velocity		= geSlider->GetVelocity( );
+		entMove.mins			= geSlider->GetMins( );
+		entMove.maxs			= geSlider->GetMaxs( );
+
+		// Execute actual slide movement.
+		blockedMask = SG_SlideMove( &entMove );
+
+		// If we got blocked, we'll check to see if we can step over it.
+		if (blockedMask & SlideMoveFlags::WallBlocked) {
+
+		}
+
+		// Update our entity with the resulting values.
+		geSlider->SetOrigin(entMove.origin);
+		geSlider->SetVelocity(entMove.velocity);
+		geSlider->SetGroundEntity(entMove.groundEntity);
+
+		// Link entity in.
+		geSlider->LinkEntity();
+	}
+
+	// Execute touch callbacks.
+	if( contentMask != 0 ) {
+		GameEntity *otherEntity = nullptr;
+		//GClip_TouchTriggers( ent );
+		SG_TouchTriggers(geSlider);
+
+		// touch other objects
+		for( int32_t i = 0; i < entMove.numTouchEntities; i++ ) {
+			otherEntity = entMove.touchEntites[i];
+			
+			// Don't touch projectiles.
+			if( !otherEntity ) { //|| otherEntity->GetFlags() & PROJECTILE_THING_FLAG) {
+				continue;
+			}
+
+			//G_CallTouch( other, ent, NULL, 0 );
+			otherEntity->DispatchTouchCallback(otherEntity, geSlider, nullptr, nullptr);
+
+			// if self touch function, fire up touch and if freed stop
+			// It may have been deleted after all.
+			if (geSlider) {
+				//G_CallTouch( ent, other, NULL, 0 );
+				geSlider->DispatchTouchCallback(geSlider, otherEntity, nullptr, nullptr);
+			}
+
+			// It may have been freed by the touch function.
+			if( geSlider->IsInUse()) {
+				break;
+			}
+		}
+	}
+
+	// If it's still in use, search for ground.
+	if ( geSlider && geSlider->IsInUse() ) {
+		// Check for ground entity.
+		SG_CheckGround( geSlider );
+
+		// Set it to a halt in case velocity becomes too low, this way it won't look odd.
+		if( geSlider->GetGroundEntityHandle() && vec3_length(geSlider->GetVelocity()) <= 1.f && oldVelocity > 1.f) {
+			// Zero out velocities.
+			geSlider->SetVelocity( vec3_zero() );
+			geSlider->SetAngularVelocity( vec3_zero() );
+
+			// Stop.
+			geSlider->DispatchStopCallback( );
+		}
+	}
+
+	return blockedMask;
 }
+
+#endif

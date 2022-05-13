@@ -74,7 +74,7 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
 
     // Set up the thinking machine.
     debrisEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
-    debrisEntity->SetNextThinkTime(level.time + 5s + Frametime(random() * 5));
+    debrisEntity->SetNextThinkTime(level.time + 5s + random() * 5s);
 
     // Setup the other properties.
     debrisEntity->SetAnimationFrame(0);

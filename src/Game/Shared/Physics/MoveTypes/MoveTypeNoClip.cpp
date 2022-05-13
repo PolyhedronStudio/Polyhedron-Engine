@@ -47,7 +47,7 @@ void SG_Physics_NoClip(SGEntityHandle &entityHandle) {
 
     // Ensure it is a valid entity.
     if (!gameEntity) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
         return;
     }
 

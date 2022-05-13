@@ -51,11 +51,11 @@ static struct {
 *   in Pm_Init. They are referenced in a few other places e.g. to create effects
 *   at a certain body position on the player model.
 **/
-const vec3_t PM_MINS = { -16.f, -16.f, -24.f };
-const vec3_t PM_MAXS = { 16.f,  16.f,  32.f };
+const vec3_t PM_MINS = { -16.f, -16.f, -46.f };
+const vec3_t PM_MAXS = { 16.f,  16.f,  44.f };
 
-static const vec3_t PM_DEAD_MINS = { -16.f, -16.f, -24.f };
-static const vec3_t PM_DEAD_MAXS = { 16.f,  16.f,  -4.f };
+static const vec3_t PM_DEAD_MINS = { -15.f, -15.f, -24.f };
+static const vec3_t PM_DEAD_MAXS = { 15.f,  15.f,  -4.f };
 
 static const vec3_t PM_GIBLET_MINS = { -8.f, -8.f, -8.f };
 static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };

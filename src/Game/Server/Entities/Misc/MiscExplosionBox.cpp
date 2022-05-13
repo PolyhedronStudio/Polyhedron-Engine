@@ -71,7 +71,7 @@ void MiscExplosionBox::Spawn() {
 
     // Set move type.
     SetMoveType(MoveType::TossSlide);
-
+	
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 

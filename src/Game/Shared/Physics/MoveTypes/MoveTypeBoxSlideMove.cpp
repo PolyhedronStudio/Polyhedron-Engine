@@ -124,7 +124,7 @@ static void SG_AddRotationalFriction( SGEntityHandle entityHandle ) {
 
     // Ensure it is a valid entity.
     if ( !ent ) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
         return;
     }
 
@@ -236,7 +236,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 
 	// Warn and exit in case our entity is invalid.
 	if ( !geSlider ) {
-		SG_PhysicsEntityWPrint(__func__, "[start]", "geSlider is (nullptr)!\n");
+		SG_Physics_PrintWarning( std::string(__func__) + "*geSlider is (nullptr)!" );
 		return 0;
 	}
 
@@ -441,7 +441,7 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
     GameEntity *ent = *entityHandle;
 
     if (!ent) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
         return;
     }
 
@@ -509,7 +509,7 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
         ent->SetVelocity({ velocity.x, velocity.y, velocity.z * newSpeed });
     }
 
-    // Friction for flying monsters that have been given vertical velocity
+    // Friction for swimming monsters that have been given vertical velocity
     if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
         const float speed = fabs(ent->GetVelocity().z);
         const float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;

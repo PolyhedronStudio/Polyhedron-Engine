@@ -64,13 +64,13 @@ static void SG_AddTouchEnt( MoveState *moveState, GameEntity *geToucher ) {
 	if( !moveState || !geToucher || moveState->numTouchEntities >= 32 || geToucher->GetNumber() < 0) {
 		// Warn print:
 		if (!geToucher) {
-			SG_PhysicsEntityWPrint(__func__, "[start]", "Trying to add a (nullptr) GameEntity\n" );
+			SG_Physics_PrintWarning( std::string(__func__) + "Trying to add a(nullptr) GameEntity" );
 		} else if (geToucher->GetNumber() < 0) {
-			SG_PhysicsEntityWPrint(__func__, "[start]", "Trying to add an invalid GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i) number\n" );
+			SG_Physics_PrintWarning( std::string(__func__) + "Trying to add an invalid GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i) number" );
 		} else if (!moveState) {
-			SG_PhysicsEntityWPrint(__func__, "[start]", "moveState == (nullptr) while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)\n" );
+			SG_Physics_PrintWarning( std::string(__func__) + "moveState == (nullptr) while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)" );
 		} else if (moveState->numTouchEntities >= 32) {
-			SG_PhysicsEntityWPrint(__func__, "[start]", "moveState->numTouchEntities >= 32 while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)\n" );
+			SG_Physics_PrintWarning( std::string(__func__) + "moveState->numTouchEntities >= 32 while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)" );
 		}
 		
 		return;
@@ -126,7 +126,7 @@ static void SG_ClipVelocityToClippingPlanes( MoveState *moveState ) {
 static void SG_AddClippingPlane( MoveState *moveState, const vec3_t &planeNormal ) {
 	// Ensure we stay within limits of MAX_SLIDEMOVE_CLIP_PLANES . Warn if we don't.
 	if( moveState->numClipPlanes + 1 == MAX_SLIDEMOVE_CLIP_PLANES ) {
-		SG_PhysicsEntityWPrint(__func__, "[end]", "MAX_SLIDEMOVE_CLIP_PLANES reached\n" );
+		SG_Physics_PrintWarning( std::string(__func__) + "MAX_SLIDEMOVE_CLIP_PLANES reached" );
 		return;
 	}
 
@@ -152,6 +152,7 @@ static bool SG_StepUp( MoveState *moveState ) {
     const vec3_t org0 = moveState->origin;
     const vec3_t vel0 = moveState->velocity;
 
+	// Slide move, but skip stair testing the plane that we skipped by calling into this function.
 	SG_SlideMoveClipMove( moveState, false );
 
 	// See if we should step down.
@@ -163,11 +164,9 @@ static bool SG_StepUp( MoveState *moveState ) {
 		if ( !downTrace.allSolid ) {
 
 			// Check if it is a legitimate stair case.
-			if (downTrace.podEntity && !downTrace.plane.normal.z >= PM_STEP_NORMAL) {
-			//if ( SG_SlideMove_CheckBottom( moveState ) ) {
+			if (downTrace.podEntity && !downTrace.plane.normal.z >= PM_STEP_NORMAL ) {
 				moveState->origin = downTrace.endPosition;
 			}
-			//}
 		}
 	}
 
@@ -183,9 +182,9 @@ static bool SG_StepUp( MoveState *moveState ) {
         moveState->origin = upTrace.endPosition;
         moveState->velocity = vel0;
 
+		// Slide move, but skip stair testing the plane that we skipped by calling into this function.
 		SG_SlideMoveClipMove( moveState, false );
-        //PM_StepSlideMove_();
-
+        
         // Settle to the new ground, keeping the step if and only if it was successful
         const vec3_t down = vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
         const SGTraceResult downTrace = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, down, moveState->skipEntity, moveState->contentMask );
@@ -195,17 +194,14 @@ static bool SG_StepUp( MoveState *moveState ) {
 			if ( (moveState->groundEntity) || vel0.z < PM_SPEED_UP ) {
 #endif
 				//if ( SG_SlideMove_CheckBottom( moveState ) ) {
-					// Yeah... I knwo.
+					// Yeah... I know.
 					moveState->origin = downTrace.endPosition;
 				//}
-				// Calculate step height.
-				//moveState->stepHeight = moveState->origin.z - moveState-> 
 #if 0
 			} else {
 				// Set it back?
-//                moveState->origin = org1;
-//				return false;
-				//pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
+				//moveState->origin = org1;
+				//float step = org1.z - org0.z;
             }
 #endif
 
@@ -333,7 +329,7 @@ int32_t SG_SlideMove( MoveState *moveState ) {
 		// Can't continue.
 		if( blockedMask & SlideMoveFlags::Trapped ) {
 #ifdef SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES
-			SG_PhysicsEntityWPrint(__func__, "[end]", "SlideMoveFlags::Trapped\n" );
+			SG_Physics_PrintWarning( std::string(__func__) + "SlideMoveFlags::Trapped" );
 #endif
 			moveState->remainingTime = 0.0f;
 			// Copy back in the last valid origin we had, because the move had failed.
@@ -351,7 +347,7 @@ int32_t SG_SlideMove( MoveState *moveState ) {
 
 		// If it didn't touch anything the move should be completed
 		if( moveState->remainingTime > 0.0f ) {
-			SG_PhysicsEntityWPrint(__func__, "[end]", "Slidemove finished with remaining time\n" );
+			SG_Physics_PrintWarning( std::string(__func__) + "Slidemove finished with remaining time" );
 			moveState->remainingTime = 0.0f;
 		}
 

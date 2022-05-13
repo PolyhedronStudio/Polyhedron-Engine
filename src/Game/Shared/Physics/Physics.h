@@ -92,7 +92,7 @@ struct MoveState {
 
 //========================================================================
 
-void SG_PhysicsEntityWPrint(const std::string &functionName, const std::string &functionSector, const std::string& message);
+void SG_Physics_PrintWarning(const std::string& message);
 
 //================================================================================
 

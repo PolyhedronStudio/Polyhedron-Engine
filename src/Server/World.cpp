@@ -481,7 +481,11 @@ int32_t SV_PointContents(const vec3_t &point)
         Entity *hit = touch[i];
 
         // Might intersect, so do an exact clip
-        contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+#ifdef CFG_CM_ALLOW_ROTATING_BOXES
+			contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+#else
+			contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->currentState.origin, vec3_zero());//hit->currentState.angles);
+#endif
     }
 
     return contents;
@@ -541,8 +545,12 @@ static void SV_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
             traceAngles = touchEntity->currentState.angles;
             traceOrigin = touchEntity->currentState.origin;
         } else {
-            traceAngles = touchEntity->currentState.angles; // vec3_zero();
-            traceOrigin = touchEntity->currentState.origin;
+#ifdef CFG_CM_ALLOW_ROTATING_BOXES
+			traceAngles = touchEntity->currentState.angles;
+#else
+			traceAngles = vec3_zero();//traceAngles = touchEntity->currentState.angles; // vec3_zero();
+#endif
+			traceOrigin = touchEntity->currentState.origin;
         }
 
         // Might intersect, so do an exact clip

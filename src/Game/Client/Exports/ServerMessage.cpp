@@ -265,9 +265,9 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
 			// It is not the actual model index, but the debris modeL.
 			teParameters.modelIndex1 = clgi.MSG_ReadUint8();
 			teParameters.position1 = vec3_t {
-				static_cast<float>(clgi.MSG_ReadInt8() * 8),
-				static_cast<float>(clgi.MSG_ReadInt8() * 8),
-				static_cast<float>(clgi.MSG_ReadInt8() * 8),
+				static_cast<float>(clgi.MSG_ReadInt8()),
+				static_cast<float>(clgi.MSG_ReadInt8()),
+				static_cast<float>(clgi.MSG_ReadInt8()),
 			};
 			// Speed will in most cases be a float of 0 to 2. So encode it as an Uint8.
 			teParameters.speed = static_cast<float>(clgi.MSG_ReadUint8()) / 255.f;

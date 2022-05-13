@@ -50,7 +50,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // Ensure it is a valid entity.
     if (!ent) {
-    	SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+    	SG_Physics_PrintWarning(std::string(__func__) + "got an invalid entity handle!");
         return;
     }
 
@@ -226,11 +226,6 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	// Set the watertype(or whichever the contents are.)
 	ent->SetWaterType(pointContentType);
 	
-	// never allow items in CONTENTS_NODROP
-	//if( ent->item && ( ent->watertype & CONTENTS_NODROP ) ) {
-	//	G_FreeEdict( ent );
-	//	return;
-	//}
 	// Update entity's waterlevel.
 	if( isInWater ) {
 		ent->SetWaterLevel(1);
@@ -261,14 +256,4 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 		// Link follower.
 		follower->LinkEntity();
 	}
-
-	// Hacks
-	//if( ent->s.type == ET_PLASMA || ent->s.type == ET_ROCKET ) {
-	//	if( const auto squaredSpeed = VectorLengthSquared( ent->velocity ); squaredSpeed > 1.0f ) {
-	//		vec3_t velocityDir { ent->velocity[0], ent->velocity[1], ent->velocity[2] };
-	//		const float invSpeed = 1.0f / std::sqrt( squaredSpeed );
-	//		VectorScale( velocityDir, invSpeed, velocityDir );
-	//		VecToAngles( velocityDir, ent->s.angles );
-	//	}
-	//}
 }

@@ -409,7 +409,7 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
     octagonHull.planes[13].dist     = CalculateOctagonPlaneDist(octagonHull.planes[13], size[0], size[1], true);
 
     octagonHull.planes[14].normal   = vec3_t{-cosa, sina, 0.f};
-    octagonHull.planes[14].dist     = CalculateOctagonPlaneDist(octagonHull.planes[14], size[0], size[1], true);
+    octagonHull.planes[14].dist     = -CalculateOctagonPlaneDist(octagonHull.planes[14], size[0], size[1], true);
     octagonHull.planes[15].normal   = vec3_t{-cosa, sina, 0.f};
     octagonHull.planes[15].dist     = CalculateOctagonPlaneDist(octagonHull.planes[15], size[0], size[1]);
 
@@ -419,7 +419,7 @@ mnode_t* CM_HeadnodeForOctagon(const vec3_t& mins, const vec3_t& maxs) {
     octagonHull.planes[17].dist     = CalculateOctagonPlaneDist(octagonHull.planes[17], size[0], size[1], true);
 
     octagonHull.planes[18].normal   = vec3_t{cosa, -sina, 0.f};
-    octagonHull.planes[18].dist     = CalculateOctagonPlaneDist(octagonHull.planes[18], size[0], size[1], true);
+    octagonHull.planes[18].dist     = -CalculateOctagonPlaneDist(octagonHull.planes[18], size[0], size[1], true);
     octagonHull.planes[19].normal   = vec3_t{cosa, -sina, 0.f};
     octagonHull.planes[19].dist     = CalculateOctagonPlaneDist(octagonHull.planes[19], size[0], size[1]);
 
@@ -1039,7 +1039,7 @@ int CM_TransformedPointContents(const vec3_t &p, mnode_t *headNode, const vec3_t
         RotatePoint(p_l, axis);
     }
 
-    return BSP_PointLeaf(headNode, p_l)->contents;
+    return CM_PointContents(p_l, headNode);
 }
 
 /**

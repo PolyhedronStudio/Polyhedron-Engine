@@ -155,6 +155,7 @@ void SVGBaseMover::SetMoveDirection(const vec3_t& angles, const qboolean resetAn
 		moveDirection = MOVEDIR_DOWN;
 	} else {
 		AngleVectors(angles, &moveDirection, NULL, NULL);
+		//SetAngles(angles);
 	}
 
 	// Admer: is this really intended? Some entities may control their angle
@@ -234,7 +235,7 @@ void SVGBaseMover::BrushMoveBegin() {
 	moveInfo.remainingDistance -= frames * moveInfo.speed * FRAMETIME.count();
 
 	SetThinkCallback( &SVGBaseMover::BrushMoveFinal );
-	SetNextThinkTime( level.time + Frametime(frames * FRAMETIME.count()) );
+	SetNextThinkTime( level.time + frames * FRAMETIME);//Frametime(frames * FRAMETIME.count()) );
 }
 
 //===============

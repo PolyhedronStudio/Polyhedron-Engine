@@ -65,7 +65,11 @@ static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const
                 headNode = CM_HeadnodeForBox(solidEntity->currentState.mins, solidEntity->currentState.maxs);
             }
 
-            traceAngles = solidEntity->currentState.angles;
+#ifdef CFG_CM_ALLOW_ROTATING_BOXES
+			traceAngles = solidEntity->currentState.angles;
+#else
+			traceAngles = vec3_zero();
+#endif
             traceOrigin = solidEntity->currentState.origin;
         }
 
@@ -129,7 +133,11 @@ void CL_ClipMoveToLocalClientEntities(const vec3_t &start, const vec3_t &mins, c
                 headNode = CM_HeadnodeForBox(solidEntity->currentState.mins, solidEntity->currentState.maxs);
             }
 
-            traceAngles = solidEntity->currentState.angles; // vec3_zero();
+#ifdef CFG_CM_ALLOW_ROTATING_BOXES
+			traceAngles = solidEntity->currentState.angles;
+#else
+			traceAngles = vec3_zero();
+#endif
             traceOrigin = solidEntity->currentState.origin;
         }
 
@@ -343,7 +351,11 @@ int32_t CL_PointContents(const vec3_t& point) {
         Entity *hit = touch[i];
 
         // Might intersect, so do an exact clip
-        contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+#ifdef CFG_CM_ALLOW_ROTATING_BOXES
+			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
+#else
+			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, vec3_zero());//hit->currentState.angles);
+#endif
     }
 
     return contents;

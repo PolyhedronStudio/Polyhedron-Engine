@@ -67,7 +67,7 @@ void CLGBaseLocalEntity::Precache() {
 *   @brief  Called when it is time to spawn this entity.
 **/
 void CLGBaseLocalEntity::Spawn() {
-
+	SetInUse(true);
 }
 /**
 *   @brief  Called when it is time to respawn this entity.

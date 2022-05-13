@@ -62,7 +62,7 @@ retry:
     trace = SG_Trace(start, ent->GetMins(), ent->GetMaxs(), end, ent, mask);
 
 	//if (ent->GetMoveType() == MoveType::Push || !trace.startSolid) {
-	if (!trace.startSolid) {
+	if (!trace.startSolid) {//if (!trace.startSolid) {
 		ent->SetOrigin(trace.endPosition);
 	}
 	//}
@@ -184,7 +184,7 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 
     // Ensure it is a valid entity.
     if (!gePusher) {
-	    SG_PhysicsEntityWPrint(__func__, "[start of]", "called with an invalid entity handle!\n");
+	    SG_Physics_PrintWarning( std::string(__func__) + "called with an invalid entity handle!" );
 	    return false;
     }
 
@@ -246,13 +246,18 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 		// Entity has to be linked in.
 #if SHAREDGAME_CLIENTGAME
 		if ( !geCheck->GetLinkCount() ) {
+		//if ( !geCheck->GetPODEntity()->area.prev ) {
 #endif
 #if SHAREDGAME_SERVERGAME
         if ( !geCheck->GetPODEntity()->area.prev ) {
 #endif
             continue;       // not linked in anywhere
+#if SHAREDGAME_CLIENTGAME
 		}
-
+#endif
+#if SHAREDGAME_SERVERGAME
+		}
+#endif
         // if the entity is standing on the pusher, it will definitely be moved
         if ( geCheck->GetGroundEntityHandle() != gePusher ) {
             // see if the ent needs to be tested
@@ -346,7 +351,7 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 
             // Ensure we are dealing with a valid pusher entity.
             if (!pusherEntity) {
-    		    SG_PhysicsEntityWPrint(__func__, "[move back loop]", "got an invalid entity handle!\n");
+    		    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
                 continue;
             }
 
@@ -355,7 +360,12 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 #if USE_SMOOTH_DELTA_ANGLES
             if (pusherEntity->GetClient()) {
                 pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = p->deltaYaw;
-            }
+			}
+			else {
+				vec3_t newAngles = pusherEntity->GetAngles();
+				newAngles[vec3_t::Yaw] = p->deltaYaw;
+				pusherEntity->SetAngles(newAngles);
+			}
 #endif
 			// Link Entity back in.
             pusherEntity->LinkEntity();
@@ -371,7 +381,7 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 
         // Ensure we are dealing with a valid pusher entity.
 	    if (!pusherEntity) {
-		    SG_PhysicsEntityWPrint(__func__, "[was moved loop] ", "got an invalid entity handle!\n");
+		    SG_Physics_PrintWarning(std::string(__func__) + "got an invalid entity handle!");
             continue;
 	    }
 
@@ -617,7 +627,7 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 
     // Ensure it is a valid entity.
     if (!ent) {
-    	SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
+    	SG_Physics_PrintWarning(std::string(__func__) + "got an invalid entity handle!");
         return;
     }
 

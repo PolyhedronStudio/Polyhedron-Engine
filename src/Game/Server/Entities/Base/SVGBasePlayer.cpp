@@ -373,18 +373,9 @@ void SVGBasePlayer::WeaponThink() {
     // Let the player's active weapon "think" for this frame.
     SVGBaseItemWeapon *activeWeapon = SVGBaseItemWeapon::GetWeaponInstanceByID(client->persistent.inventory.activeWeaponID);
 
-    //if (client->persistent.inventory.nextWeaponID) {
-    //    ChangeWeapon(client->persistent.inventory.nextWeaponID);
-    //} else {
     if (activeWeapon) {//}&& client->weaponState.shouldThink) {
 	    activeWeapon->InstanceWeaponThink(this, activeWeapon, client);
     }
-//    }
-
-    // If the WeaponState is Down(Done holstering), or Finished(with shooting for example), we're allowed to change weapons.
-    //if (client->persistent.inventory.nextWeaponID) {
-    //    ChangeWeapon(client->persistent.inventory.nextWeaponID);
-    //}
 }
 
 /**

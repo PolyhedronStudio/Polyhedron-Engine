@@ -438,7 +438,7 @@ void CLGBasePacketEntity::DispatchStopCallback() {
 /**
 *   @brief  Marks the entity to be removed in the next client frame. This is preferred to CLG_FreeEntity, 
 *           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
-*           on us during the current server game frame we're processing.
+*           on us during the current client game frame we're processing.
 **/
 void CLGBasePacketEntity::Remove()
 {
@@ -508,7 +508,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         // Fetch the entity index.
         const int32_t entityIndex = podEntity->clientEntityNumber;
         // Setup the render entity ID for the renderer.
-        refreshEntity.id = podEntity->clientEntityNumber;// + RESERVED_ENTITIY_COUNT;
+        refreshEntity.id = refreshEntityID;// + RESERVED_ENTITIY_COUNT;
 
         //
         // Effects.

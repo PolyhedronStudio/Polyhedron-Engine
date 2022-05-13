@@ -46,20 +46,20 @@ struct PushMoveInfo {
     int32_t endSoundIndex = 0;
 
     // Mover configuration.
-    float acceleration = 0.f;
-    float speed = 0.f;
-    float deceleration = 0.f;
-    float distance = 0.f;
+    double acceleration = 0.f;
+    double speed = 0.f;
+    double deceleration = 0.f;
+    double distance = 0.f;
     Frametime wait = Frametime::zero();
 
     // State data
     int32_t state = 0;
     vec3_t dir = vec3_zero();
-    float currentSpeed = 0.f;
-    float moveSpeed = 0.f;
-    float nextSpeed = 0.f;
-    float remainingDistance = 0.f;
-    float deceleratedDistance = 0.f;
+    double currentSpeed = 0.f;
+    double moveSpeed = 0.f;
+    double nextSpeed = 0.f;
+    double remainingDistance = 0.f;
+    double deceleratedDistance = 0.f;
 
     // Callback function to use when the move has ended.
     PushMoveEndFunction* OnEndFunction = nullptr;

@@ -784,9 +784,9 @@ void ServerGameWorld::ThrowDebris(GameEntity* debrisser, const int32_t debrisMod
 	//const vec3_t offsetScale = { 64.f, 64.f, 64.f };
 	const vec3_t debrisOffset = (debrisser->GetOrigin() - origin);
 	const vec3_t wireOffset = debrisOffset;// * offsetScale;
-	gi.MSG_WriteInt8(wireOffset.x / 8);
-	gi.MSG_WriteInt8(wireOffset.y / 8);
-	gi.MSG_WriteInt8(wireOffset.z / 8);
+	gi.MSG_WriteInt8(wireOffset.x);
+	gi.MSG_WriteInt8(wireOffset.y);
+	gi.MSG_WriteInt8(wireOffset.z);
 
 	//gi.MSG_WriteVector3(debrisser->GetOrigin() - origin, true);
 	// Speed will in most cases be a float of 0 to 2. So encode it as an Uint8.

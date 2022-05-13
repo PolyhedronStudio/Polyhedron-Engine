@@ -122,19 +122,19 @@ void CL_ClearWorld()
 **/
 qboolean CL_EntityIsVisible(cm_t *cm, Entity *ent, byte *mask)
 {
-    //int i;
+    int i;
 
-    //if (ent->numClusters == -1) {
-    //    // too many leafs for individual check, go by headNode
-    //    return CM_HeadnodeVisible(CM_NodeNum(cm, ent->headNode), mask);
-    //}
+    if (ent->numClusters == -1) {
+        // too many leafs for individual check, go by headNode
+        return CM_HeadnodeVisible(CM_NodeNum(cm, ent->headNode), mask);
+    }
 
-    //// check individual leafs
-    //for (i = 0; i < ent->numClusters; i++) {
-    //    if (Q_IsBitSet(mask, ent->clusterNumbers[i])) {
-    //        return true;
-    //    }
-    //}
+    // check individual leafs
+    for (i = 0; i < ent->numClusters; i++) {
+        if (Q_IsBitSet(mask, ent->clusterNumbers[i])) {
+            return true;
+        }
+    }
 
     return true;  // not visible
 }

@@ -179,6 +179,20 @@ public:
     virtual void DispatchStopCallback() = 0;
 
 
+	/**
+	*	
+	*
+	*	Client Side Physics.
+	*
+	*
+	**/
+    /**
+    *   @brief Get/Set:     Client Entity Flags
+    **/
+	virtual const int32_t   GetClientFlags() = 0;
+	virtual void            SetClientFlags(const int32_t clientFlags) = 0;
+
+
     /**
     *
     *
@@ -189,23 +203,23 @@ public:
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline float GetAcceleration() = 0;
+    virtual float GetAcceleration() = 0;
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline float GetDeceleration() = 0;
+    virtual float GetDeceleration() = 0;
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline const vec3_t& GetEndPosition() = 0;
+    virtual const vec3_t& GetEndPosition() = 0;
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline float GetSpeed() = 0;
+    virtual float GetSpeed() = 0;
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline const vec3_t& GetStartPosition() = 0;
+    virtual const vec3_t& GetStartPosition() = 0;
 
 
 

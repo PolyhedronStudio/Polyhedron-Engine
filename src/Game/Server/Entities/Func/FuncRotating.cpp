@@ -29,23 +29,21 @@ FuncRotating::FuncRotating( Entity* entity )
 //===============
 void FuncRotating::Spawn() {
 
-	// Be sure to set angles first before calling Base::Spawn because
-    // a func_door already does SetMoveAngles for us.
-    SetAngles(vec3_zero());
+	// Allow for angles to determine direction.
+	SetMoveDirection(vec3_normalize(GetAngles()));
 
-    Base::Spawn();
+	// Reset Angles.
+	SetAngles(vec3_zero());
 
 	// TODO: Implement properly. Someone, feel free to submit a PR :)
 	// Set the axis of rotation, support custom axes as well
-    moveDirection = vec3_zero();
-	//if ( GetSpawnFlags() & SF_YAxis ) {
-	    //SetMoveDirection(vec3_t { 0.0f, 0.0f, 1.0f }, false);
-		moveDirection.z = 1.f;
-	//} else if ( GetSpawnFlags() & SF_XAxis ) {
-	//    moveDirection.x = 1.f;//SetMoveDirection(vec3_t { 1.0f, 0.0f, 0.0f }, false);
-	//} else {// if ( !vec3_length( moveDirection ) ) { // moveDirection can be automatically set with 
-	//	moveDirection.y = 1.f;//SetMoveDirection(vec3_t { 0.0f, 1.0f, 1.0f }, false);  // keyvalues, so make sure to account for that
-	//}
+	if ( GetSpawnFlags() & SF_XAxis ) {
+	    SetMoveDirection(vec3_t { 0.0f, 0.0f, 1.0f }, true);
+	} else if ( GetSpawnFlags() & SF_YAxis ) {
+		SetMoveDirection(vec3_t { 1.0f, 0.0f, 0.0f }, true);
+	} else if ( !vec3_length( moveDirection ) ) { // If moveDirection had no specific angles or X/Y flag set, default to Z.
+		SetMoveDirection(vec3_t { 0.0f, 1.0f, 0.0f }, true);
+	}
 
 	SetSolid(Solid::BSP);
 	SetModel(GetModel());

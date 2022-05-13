@@ -160,8 +160,6 @@ void MiscExplosionBox::Think() {
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
-
-
 }
 
 //===============
