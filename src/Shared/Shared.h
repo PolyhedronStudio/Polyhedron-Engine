@@ -401,7 +401,7 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 *	Player Move - Shared between Client, Server, and Game Modules.
 *
 ***/
-#include "PMove.h"
+#include "PlayerMove.h"
 
 
 
@@ -453,7 +453,7 @@ typedef struct file_info_s {
 *	Collision Detection.
 *
 ***/
-#include "Collision.h"
+#include "CollisionModel.h"
 
 
 

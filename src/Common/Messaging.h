@@ -317,11 +317,11 @@ int32_t MSG_ReadEntityNumber(bool* remove, uint32_t* byteMask);
 /**
 *   @brief
 **/
-void    MSG_WriteDeltaEntity(const EntityState* from, const EntityState* to, uint32_t entityStateMessageFlags);
+void    MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, uint32_t entityStateMessageFlags);
 /**
 *   @brief
 **/
-void    MSG_ParseDeltaEntity(const EntityState* from, EntityState* to, int32_t number, uint32_t byteMask, uint32_t entityStateFlags);
+void    MSG_ParseDeltaEntityState(const EntityState* from, EntityState* to, int32_t number, uint32_t byteMask, uint32_t entityStateFlags);
 
 
 

@@ -161,7 +161,7 @@ static void write_baseline(EntityState *base)
 {
     EntityStateMessageFlags flags = (EntityStateMessageFlags)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
-    MSG_WriteDeltaEntity(NULL, base, flags);
+    MSG_WriteDeltaEntityState(NULL, base, flags);
 }
 
 static void write_plain_baselines(void)

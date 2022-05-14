@@ -7,7 +7,7 @@
 # Sources #
 ###########
 SET(SRC_SHAREDGAME
-	Entities/SGEntityHandle.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.cpp
+	Entities/SGEntityHandle.cpp
 
 	Physics/MoveTypes/MoveTypeBoxSlideMove.cpp
 	Physics/MoveTypes/MoveTypeLinearProjectile.cpp
@@ -21,7 +21,7 @@ SET(SRC_SHAREDGAME
 	World/IGameWorld.cpp
 
 	PlayerMove.cpp
-	SkeletalAnimation.cpp # SkeletalAnimation.cpp # ${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.cpp
+	SkeletalAnimation.cpp 
 	Tracing.cpp
 )
 
@@ -29,20 +29,20 @@ SET(SRC_SHAREDGAME
 # Headers #
 ###########
 SET(HEADERS_SHAREDGAME
-	Entities/ISharedGameEntity.h # ${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/ISharedGameEntity.h 
-	Entities/SGEntityHandle.h  #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/SGEntityHandle.h 
-	Entities/TypeInfo.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities/TypeInfo.h 
-	Entities.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Entities.h 
+	Entities/ISharedGameEntity.h 
+	Entities/SGEntityHandle.h  
+	Entities/TypeInfo.h 
+	Entities.h 
 
 	Physics/Physics.h
 	Physics/SlideMove.h
 
 	World/IGameWorld.h
 	
-	PlayerMove.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/PMove.h 
-	Protocol.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/Protocol.h 
-	SkeletalAnimation.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SkeletalAnimation.h 
-	SharedGame.h #${CMAKE_SOURCE_DIR}/src/Game/Shared/SharedGame.h 
+	PlayerMove.h 
+	Protocol.h 
+	SkeletalAnimation.h 
+	SharedGame.h 
 	Time.h
 	Tracing.h
 )

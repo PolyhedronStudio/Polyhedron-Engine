@@ -32,7 +32,7 @@
 #include "../../Shared/Shared.h"
 #include "../Common.h"
 #include "../CVar.h"
-#include "../Msg.h"
+#include "../Messaging.h"
 #include "NetChan.h"
 #include "Net.h"
 #include "../Protocol.h"

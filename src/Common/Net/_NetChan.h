@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef NET_CHAN_H
 #define NET_CHAN_H
 
-#include "Common/Msg.h"
+#include "Common/Messaging.h"
 #include "Common/Net/Net.h"
 #include "Common/SizeBuffer.h"
 

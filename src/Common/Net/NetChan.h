@@ -31,7 +31,7 @@
 ***/
 #pragma once
 
-#include "Common/Msg.h"
+#include "Common/Messaging.h"
 #include "Common/Net/Net.h"
 #include "Common/SizeBuffer.h"
 

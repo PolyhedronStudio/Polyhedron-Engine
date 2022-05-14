@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Common/Bsp.h"
 #include "Common/Cmd.h"
 #include "Common/CVar.h"
-#include "Common/CModel.h"
+#include "Common/CollisionModel.h"
 #include "Common/Common.h"
 #include "Common/Zone.h"
 #include "System/Hunk.h"

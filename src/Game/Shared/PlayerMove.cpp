@@ -1414,13 +1414,14 @@ static void PM_Init(PlayerMove * pmove) {
 static void PM_ClampAngles(void) {
     // Copy the command angles into the outgoing state
     // Do we need this check per se?
-    //if (pm->state.flags & PMF_TIME_TELEPORT) {
-	   // pm->viewAngles[vec3_t::PYR::Yaw] = pm->moveCommand.input.viewAngles[vec3_t::PYR::Yaw] + pm->state.deltaAngles[vec3_t::PYR::Yaw];
-	   // pm->viewAngles[vec3_t::PYR::Pitch] = 0;
-	   // pm->viewAngles[vec3_t::PYR::Roll] = 0;
-    //} else {
+	if (pm->state.flags & PMF_TIME_TELEPORT) {
+		//pm->state.viewAngles = pm->moveCommand.input.viewAngles;
+		pm->viewAngles[vec3_t::PYR::Yaw] = pm->moveCommand.input.viewAngles[vec3_t::PYR::Yaw] + pm->state.deltaAngles[vec3_t::PYR::Yaw];
+	    pm->viewAngles[vec3_t::PYR::Pitch] = 0;
+	    pm->viewAngles[vec3_t::PYR::Roll] = 0;
+    } else {
 	    pm->viewAngles = pm->moveCommand.input.viewAngles + pm->state.deltaAngles;
-    //}
+    }
 
     // Clamp pitch to prevent the player from looking up or down more than 90º
     if (pm->viewAngles.x > 90.0f && pm->viewAngles.x < 270.0f) {

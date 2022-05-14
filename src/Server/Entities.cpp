@@ -83,7 +83,7 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
                 newent->angles = oldent->angles;
             }
 
-            MSG_WriteDeltaEntity(oldent, newent, flags);
+            MSG_WriteDeltaEntityState(oldent, newent, flags);
             oldindex++;
             newindex++;
             continue;
@@ -109,14 +109,14 @@ static void SV_EmitPacketEntities(client_t *client, ClientFrame   *from, ClientF
                 newent->angles = oldent->angles;
             }
 
-            MSG_WriteDeltaEntity(oldent, newent, flags);
+            MSG_WriteDeltaEntityState(oldent, newent, flags);
             newindex++;
             continue;
         }
 
         if (newnum > oldnum) {
             // the old entity isn't present in the new message
-            MSG_WriteDeltaEntity(oldent, NULL, MSG_ES_FORCE);
+            MSG_WriteDeltaEntityState(oldent, NULL, MSG_ES_FORCE);
             oldindex++;
             continue;
         }

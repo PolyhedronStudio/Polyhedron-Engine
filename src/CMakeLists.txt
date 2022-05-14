@@ -5,6 +5,136 @@
 ###############################################################################
 SET(PATH_SRC ${CMAKE_CURRENT_SOURCE_DIR})
 
+
+
+
+#
+#	Shared Folder.	
+#
+SET(SRC_SHARED
+	${PATH_SRC}/Shared/Math/Plane.cpp
+	${PATH_SRC}/Shared/Math/Vector3.cpp
+
+	# Interfaces
+	${PATH_SRC}/Shared/Math.cpp
+	${PATH_SRC}/Shared/Shared.cpp
+)
+
+SET(HEADERS_SHARED
+	# Formats.
+	${PATH_SRC}/Shared/Formats/Bsp.h 
+	${PATH_SRC}/Shared/Formats/Iqm.h 
+	${PATH_SRC}/Shared/Formats/Md2.h 
+	${PATH_SRC}/Shared/Formats/Md3.h 
+	${PATH_SRC}/Shared/Formats/Pak.h 
+	${PATH_SRC}/Shared/Formats/Pcx.h 
+	${PATH_SRC}/Shared/Formats/Sp2.h 
+	${PATH_SRC}/Shared/Formats/Wal.h 
+
+	# Interfaces
+	${PATH_SRC}/Shared/Interfaces/IClientGameExports.h
+	${PATH_SRC}/Shared/Interfaces/IClientGameImports.h
+	${PATH_SRC}/Shared/Interfaces/IServerGameExports.h
+	${PATH_SRC}/Shared/Interfaces/IServerGameImports.h
+
+	# Math lib.
+	${PATH_SRC}/Shared/Math/Color.h
+	${PATH_SRC}/Shared/Math/Matrix3.h
+	${PATH_SRC}/Shared/Math/Matrix4.h
+	${PATH_SRC}/Shared/Math/Plane.h
+	${PATH_SRC}/Shared/Math/Rectangle.h
+	${PATH_SRC}/Shared/Math/Quaternion.h
+	${PATH_SRC}/Shared/Math/Utilities.h
+	${PATH_SRC}/Shared/Math/Vector2.h
+	${PATH_SRC}/Shared/Math/Vector3.h
+	${PATH_SRC}/Shared/Math/Vector4.h
+	${PATH_SRC}/Shared/Math/Vector5.h
+	
+	# Other shared lib functionalities.
+	${PATH_SRC}/Shared/CLGame.h
+	${PATH_SRC}/Shared/CLTypes.h
+	${PATH_SRC}/Shared/CollisionModel.h
+	${PATH_SRC}/Shared/Common.h
+	${PATH_SRC}/Shared/Config.h
+	${PATH_SRC}/Shared/Endian.h 
+	${PATH_SRC}/Shared/Entities.h 
+	${PATH_SRC}/Shared/Keys.h 
+	${PATH_SRC}/Shared/KeyValue.h 
+	${PATH_SRC}/Shared/List.h 
+	${PATH_SRC}/Shared/Math.h 
+	${PATH_SRC}/Shared/Messaging.h 
+	${PATH_SRC}/Shared/Platform.h
+	${PATH_SRC}/Shared/PlayerMove.h
+	${PATH_SRC}/Shared/QString.h
+	${PATH_SRC}/Shared/Refresh.h 
+	${PATH_SRC}/Shared/Shared.h 
+	${PATH_SRC}/Shared/Sound.h 
+	${PATH_SRC}/Shared/Strings.h
+	${PATH_SRC}/Shared/SVGame.h 
+	${PATH_SRC}/Shared/TickRate.h 
+	${PATH_SRC}/Shared/UI.h 
+)
+
+SET(SRC_COMMON
+	${PATH_SRC}/Common/Bsp.cpp
+	${PATH_SRC}/Common/Cmd.cpp
+	${PATH_SRC}/Common/CollisionModel.cpp
+	${PATH_SRC}/Common/Common.cpp
+	${PATH_SRC}/Common/CVar.cpp
+	${PATH_SRC}/Common/Error.cpp
+	${PATH_SRC}/Common/Field.cpp
+	${PATH_SRC}/Common/Fifo.cpp
+	${PATH_SRC}/Common/Files.cpp
+	${PATH_SRC}/Common/Huffman.cpp
+	${PATH_SRC}/Common/MDFour.cpp
+	${PATH_SRC}/Common/Messaging.cpp
+	${PATH_SRC}/Common/Prompt.cpp
+	${PATH_SRC}/Common/SizeBuffer.cpp
+	#${PATH_SRC}/Common/Tests.cpp
+	${PATH_SRC}/Common/Utilities.cpp
+	${PATH_SRC}/Common/Zone.cpp
+
+	${PATH_SRC}/Common/Hashes/Crc32.cpp
+
+	${PATH_SRC}/Common/Messaging/MessageReadWrite.cpp
+	${PATH_SRC}/Common/Messaging/ParseDeltaClientMoveCommand.cpp
+	${PATH_SRC}/Common/Messaging/ParseDeltaEntityState.cpp
+	${PATH_SRC}/Common/Messaging/ParseDeltaPlayerState.cpp
+	${PATH_SRC}/Common/Messaging/WriteDeltaClientMoveCommand.cpp
+	${PATH_SRC}/Common/Messaging/WriteDeltaEntityState.cpp
+	${PATH_SRC}/Common/Messaging/WriteDeltaPlayerState.cpp
+
+	${PATH_SRC}/Common/Net/NetChan.cpp
+	${PATH_SRC}/Common/Net/Net.cpp
+)
+SET(HEADERS_COMMON
+	${PATH_SRC}/Common/Bsp.h
+	${PATH_SRC}/Common/Cmd.h
+	${PATH_SRC}/Common/CollisionModel.h
+	${PATH_SRC}/Common/Common.h
+	${PATH_SRC}/Common/CVar.h
+	${PATH_SRC}/Common/Error.h
+	${PATH_SRC}/Common/Field.h
+	${PATH_SRC}/Common/Fifo.h
+	${PATH_SRC}/Common/Files.h
+	${PATH_SRC}/Common/HalfFloat.h
+	${PATH_SRC}/Common/Huffman.h
+	${PATH_SRC}/Common/MDFour.h
+	${PATH_SRC}/Common/Messaging.h
+	${PATH_SRC}/Common/PlayerMove.h
+	${PATH_SRC}/Common/Prompt.h
+	${PATH_SRC}/Common/Protocol.h
+	${PATH_SRC}/Common/SizeBuffer.h
+	${PATH_SRC}/Common/Tests.h
+	${PATH_SRC}/Common/Utilities.h
+	${PATH_SRC}/Common/Zone.h
+
+	${PATH_SRC}/Common/Net/INetNToP.h
+	${PATH_SRC}/Common/Net/INetPToN.h
+	${PATH_SRC}/Common/Net/Win.h
+	
+	${PATH_SRC}/Common/Hashes/Crc32.h
+)
 #
 #	Client Sources.
 #
@@ -122,50 +252,7 @@ SET(HEADERS_SERVER
 )
 
 ###################### Common.
-SET(SRC_COMMON
-	${PATH_SRC}/Common/Bsp.cpp
-	${PATH_SRC}/Common/Cmd.cpp
-	${PATH_SRC}/Common/CModel.cpp
-	${PATH_SRC}/Common/Common.cpp
-	${PATH_SRC}/Common/CVar.cpp
-	${PATH_SRC}/Common/Error.cpp
-	${PATH_SRC}/Common/Field.cpp
-	${PATH_SRC}/Common/Fifo.cpp
-	${PATH_SRC}/Common/Files.cpp
-	${PATH_SRC}/Common/Huffman.cpp
-	${PATH_SRC}/Common/MDFour.cpp
-	${PATH_SRC}/Common/Msg.cpp
-	${PATH_SRC}/Common/Prompt.cpp
-	${PATH_SRC}/Common/SizeBuffer.cpp
-	${PATH_SRC}/Common/Utilities.cpp
-	${PATH_SRC}/Common/Zone.cpp
 
-	${PATH_SRC}/Common/Hashes/Crc32.cpp
-
-	${PATH_SRC}/Common/Net/NetChan.cpp
-	${PATH_SRC}/Common/Net/Net.cpp
-)
-SET(HEADERS_COMMON
-	${PATH_SRC}/Common/Net/INetNToP.h
-	${PATH_SRC}/Common/Net/INetPToN.h
-	${PATH_SRC}/Common/Net/Win.h
-	
-	${PATH_SRC}/Common/Hashes/Crc32.h
-)
-
-###################### Format.
-#SET(SRC_FORMAT
-#)
-#SET(HEADERS_COMMON
-#	../inc/Format/Bsp.h
-#	../inc/Format/Iqm.h
-#	../inc/Format/Md2.h
-#	../inc/Format/Md3.h
-#	../inc/Format/Pak.h
-#	../inc/Format/Pcx.h
-#	../inc/Format/Sp2.h
-#	../inc/Format/Wal.h
-#)
 
 ###################### Refresh.
 SET(SRC_REFRESH
@@ -198,70 +285,6 @@ SET(SRC_GL
 SET(HEADERS_GL
 	${PATH_SRC}/Refresh/gl/arbfp.h
 	${PATH_SRC}/Refresh/gl/gl.h
-)
-
-
-
-#
-#	Shared Folder.	
-#
-SET(SRC_SHARED
-	${PATH_SRC}/Shared/Math/Plane.cpp
-	${PATH_SRC}/Shared/Math/Vector3.cpp
-
-	# Interfaces
-	${PATH_SRC}/Shared/Math.cpp
-	${PATH_SRC}/Shared/Shared.cpp
-)
-
-SET(HEADERS_SHARED
-	# Formats.
-	${PATH_SRC}/Shared/Formats/Bsp.h 
-	${PATH_SRC}/Shared/Formats/Iqm.h 
-	${PATH_SRC}/Shared/Formats/Md2.h 
-	${PATH_SRC}/Shared/Formats/Md3.h 
-	${PATH_SRC}/Shared/Formats/Pak.h 
-	${PATH_SRC}/Shared/Formats/Pcx.h 
-	${PATH_SRC}/Shared/Formats/Sp2.h 
-	${PATH_SRC}/Shared/Formats/Wal.h 
-
-	# Interfaces
-	${PATH_SRC}/Shared/Interfaces/IClientGameExports.h
-	${PATH_SRC}/Shared/Interfaces/IClientGameImports.h
-	${PATH_SRC}/Shared/Interfaces/IServerGameExports.h
-	${PATH_SRC}/Shared/Interfaces/IServerGameImports.h
-
-	# Math lib.
-	${PATH_SRC}/Shared/Math/Color.h
-	${PATH_SRC}/Shared/Math/Matrix3.h
-	${PATH_SRC}/Shared/Math/Matrix4.h
-	${PATH_SRC}/Shared/Math/Plane.h
-	${PATH_SRC}/Shared/Math/Rectangle.h
-	${PATH_SRC}/Shared/Math/Utilities.h
-	${PATH_SRC}/Shared/Math/Vector2.h
-	${PATH_SRC}/Shared/Math/Vector3.h
-	${PATH_SRC}/Shared/Math/Vector4.h
-	${PATH_SRC}/Shared/Math/Vector5.h
-	
-	# Other shared lib functionalities.
-	${PATH_SRC}/Shared/CLGame.h
-	${PATH_SRC}/Shared/CLTypes.h
-	${PATH_SRC}/Shared/Collision.h
-	${PATH_SRC}/Shared/Common.h
-	${PATH_SRC}/Shared/Config.h
-	${PATH_SRC}/Shared/Endian.h 
-	${PATH_SRC}/Shared/Keys.h 
-	${PATH_SRC}/Shared/List.h 
-	${PATH_SRC}/Shared/Math.h 
-	${PATH_SRC}/Shared/Messaging.h 
-	${PATH_SRC}/Shared/Platform.h
-	${PATH_SRC}/Shared/QString.h
-	${PATH_SRC}/Shared/Refresh.h 
-	${PATH_SRC}/Shared/Shared.h 
-	${PATH_SRC}/Shared/Strings.h
-	${PATH_SRC}/Shared/SVGame.h 
-	${PATH_SRC}/Shared/TickRate.h 
-	${PATH_SRC}/Shared/UI.h 
 )
 
 

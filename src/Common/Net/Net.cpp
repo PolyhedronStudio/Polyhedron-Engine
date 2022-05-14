@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef _DEBUG
 #include "../Files.h"
 #endif
-#include "../Msg.h"
+#include "../Messaging.h"
 #include "../Net/Net.h"
 #include "../Protocol.h"
 #include "../Zone.h"

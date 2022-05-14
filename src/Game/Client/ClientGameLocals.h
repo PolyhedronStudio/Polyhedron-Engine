@@ -21,9 +21,9 @@
 #include "../../Shared/Refresh.h"
 
 // Common.
-#include "../../Common/CModel.h"
+#include "../../Common/CollisionModel.h"
 #include "../../Common/Cmd.h"
-#include "../../Common/Msg.h"
+#include "../../Common/Messaging.h"
 #include "../../Common/Protocol.h"
 
 // Shared Client Type & Game Header.

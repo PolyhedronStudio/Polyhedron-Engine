@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "../Shared/Shared.h"
 #include "Fifo.h"
-#include "Msg.h"
+#include "Messaging.h"
 
 size_t FIFO_Read(fifo_t *fifo, void *buffer, size_t len)
 {

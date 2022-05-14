@@ -13,11 +13,11 @@
 #include "Refresh.h"
 
 #include "../Common/Bsp.h"
-#include "../Common/CModel.h"
+#include "../Common/CollisionModel.h"
 #include "../Common/Bsp.h"
 #include "../Common/Cmd.h"
 #include "../Common/Protocol.h"
-#include "../Common/CModel.h"
+#include "../Common/CollisionModel.h"
 #include "../Common/Common.h"
 /**
 *   Contains states for the KeyBindings.

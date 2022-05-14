@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Shared/Shared.h"
 #include "Common/Common.h"
 #include "Common/CVar.h"
-#include "Common/Msg.h"
+#include "Common/Messaging.h"
 #include "Common/enet/netchan.h"
 #include "Common/Net/Net.h"
 #include "Common/Protocol.h"

@@ -52,7 +52,7 @@ static inline void CL_ParseDeltaEntity(ServerFrame  *svFrame, int32_t newEntityN
     }
 #endif
 
-    MSG_ParseDeltaEntity(oldEntityState, entityState, newEntityNumber, byteMask, cl.entityStateFlags);
+    MSG_ParseDeltaEntityState(oldEntityState, entityState, newEntityNumber, byteMask, cl.entityStateFlags);
 
     // Shuffle previous origin to old
     if (!(byteMask & EntityMessageBits::OldOrigin) && !(entityState->renderEffects & RenderEffects::Beam))
@@ -412,7 +412,7 @@ static void CL_ParseBaseline(int32_t index, uint32_t byteMask)
         Com_LPrintf(PrintType::Developer, "\n");
     }
 #endif
-    MSG_ParseDeltaEntity(NULL, &cl.entityBaselines[index], index, byteMask, cl.entityStateFlags);
+    MSG_ParseDeltaEntityState(NULL, &cl.entityBaselines[index], index, byteMask, cl.entityStateFlags);
 }
 
 // instead of wasting space for ServerCommand::ConfigString and ServerCommand::SpawnBaseline

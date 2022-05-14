@@ -460,9 +460,9 @@ class ISharedGameEntity;
 // Needed define for said includes.
 #define CGAME_INCLUDE 1
 // Needed includes.
-#include "../../Common/CModel.h"
+#include "../../Common/CollisionModel.h"
 #include "../../Common/Cmd.h"
-#include "../../Common/Msg.h"
+#include "../../Common/Messaging.h"
 #include "../../Common/Protocol.h"
 #include "../../Shared/SVGame.h"
 #include "../../Shared/Refresh.h"

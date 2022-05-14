@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Bsp.h"
 #include "Cmd.h"
-#include "CModel.h"
+#include "CollisionModel.h"
 #include "Common.h"
 #include "CVar.h"
 #include "Error.h"
@@ -34,7 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Files.h"
 #include "Huffman.h"
 #include "MDFour.h"
-#include "Msg.h"
+#include "Messaging.h"
 #include "Net/Net.h"
 #include "Net/NetChan.h"
 //#include "pmove.h"

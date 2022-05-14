@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Shared/Shared.h"
 #include "../Shared/List.h"
 #include "CVar.h"
-#include "CModel.h"
+#include "CollisionModel.h"
 #include "Cmd.h"
 #include "Common.h"
 #include "Files.h"

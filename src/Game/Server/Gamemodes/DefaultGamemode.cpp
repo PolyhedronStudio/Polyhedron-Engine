@@ -1527,7 +1527,7 @@ void DefaultGameMode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
     // Assign origin and raise us up 9 on the z axis to ensure we are never stuck on something.
     if (spawnPoint) {
         origin = spawnPoint->GetOrigin();
-        origin.z += 9;
+        origin.z += 1;
         angles = spawnPoint->GetAngles();
     } else {
         // We might as well error out at this point.
@@ -1548,14 +1548,6 @@ void DefaultGameMode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
 void DefaultGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
     // Acquire pointer to game clients.
     ServerClient* gameClients = game.GetClients();
-    
-    // Find a spawn point
-    vec3_t  spawnOrigin = vec3_zero();
-    vec3_t  spawnAngles = vec3_zero();
-
-    SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
-    player->SetOrigin(spawnOrigin);
-    player->SetAngles(spawnAngles);
 
     // Acquire the new client index belonging to this entity.
     int32_t clientIndex = player->GetNumber() - 1; //ent - g_entities - 1;
@@ -1593,21 +1585,18 @@ void DefaultGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
     client->respawn = respawnData;
 
     // Spawn the client again using spawn instead of respawn. (Respawn serves a different use.)
-    //SVGBasePlayer* player = dynamic_cast<SVGBasePlayer*>(ent->gameEntity);
     player->Spawn();
 
     // Copy some data from the client to the entity
     RestorePlayerPersistentData(player, client);
 
-    // Update the client pointer this entity belongs to.
+    // Update the client pointer to match with the client index.
     client = &gameClients[clientIndex];
+    // Ready to roll, let's assign it.
     player->SetClient(client);
  
     // Clear playerstate values.
     client->playerState = {};
-
-    // Setup player move origin to spawnpoint origin.
-    client->playerState.pmove.origin = spawnOrigin;
 
     if (((int)gamemodeflags->value & GameModeFlags::FixedFOV)) {
         client->playerState.fov = 90;
@@ -1620,14 +1609,27 @@ void DefaultGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
         }
     }
 
-    // Set entity state origins and angles.
-    player->SetOrigin(spawnOrigin + vec3_t { 0.f, 0.f, 1.f });
-    player->SetOldOrigin(player->GetOrigin());
-    player->SetAngles(vec3_t { 0.f, spawnAngles[vec3_t::Yaw], 0.f });
+	// Find and select a random spawn point.
+    vec3_t  spawnOrigin = vec3_zero();
+    vec3_t  spawnAngles = vec3_zero();
+    SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
 
-    // Set aim angles and player move delta angles based on spawn and last received view angles.
-    client->playerState.pmove.deltaAngles = spawnAngles - client->respawn.commandViewAngles;
-    client->aimAngles = player->GetAngles();
+	// Set the actual player spawn origin. Offset of 1 unit off the ground.
+    player->SetOrigin(spawnOrigin);
+	// We set the oldOrigin too, since we're spawning at and NOT lerping from a location.
+    player->SetOldOrigin(player->GetOrigin());
+	// Set the entity rotation to spawn angle yaw.
+	player->SetAngles(vec3_t { 0.f, spawnAngles[vec3_t::Yaw], 0.f });
+	  
+	// Setup player move origin to spawnpoint origin.	
+    client->playerState.pmove.origin = spawnOrigin;
+	// Calculate the delta angles of the client.
+	client->playerState.pmove.deltaAngles = spawnAngles - client->respawn.commandViewAngles;
+	// Set the player move state's directional view angles, and the client's aim angles to those of the player entity.
+	client->playerState.pmove.viewAngles = player->GetAngles();
+	client->oldViewAngles = player->GetAngles();
+	client->aimAngles = player->GetAngles();
+
 
     // spawn a spectator in case the client was/is one.
     if (client->persistent.isSpectator) {
