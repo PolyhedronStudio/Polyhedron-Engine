@@ -15,7 +15,7 @@ public:
     MonsterTestDummy(PODEntity* clEntity);
     virtual ~MonsterTestDummy() = default;
 
-    DefineMapClass("monster_testxxdummy", MonsterTestDummy, CLGBasePacketEntity);
+    DefineMapClass("xmonster_testdummy", MonsterTestDummy, CLGBasePacketEntity);
 
 
     /**

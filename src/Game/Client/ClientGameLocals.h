@@ -58,7 +58,7 @@ static constexpr int32_t	CLG_FRAMEDIV	= BASE_FRAMERATE / 10.0;
 
 // THESE SHOULD NOT BE ADDED TO IMPORTS.
 //! MS Frametime for animations.
-static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
+//static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
 //static constexpr Frametime FRAMETIME = FRAMETIME_S;

@@ -156,18 +156,18 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
         }
     }
 
-    if (to->animationStartTime != from->animationStartTime) { 
+    if (to->currentAnimation.startTime != from->currentAnimation.startTime) { 
         byteMask |= EntityMessageBits::AnimationTimeStart;
     }
-    if (to->animationStartFrame != from->animationStartFrame) {
-	    byteMask |= EntityMessageBits::AnimationFrameStart;
+    if (to->currentAnimation.animationIndex != from->currentAnimation.animationIndex) {
+	    byteMask |= EntityMessageBits::AnimationIndex;
     }
-    if (to->animationEndFrame != from->animationEndFrame) {
-	    byteMask |= EntityMessageBits::AnimationFrameEnd;
-    }
-    if (to->animationFramerate != from->animationFramerate) {
-	    byteMask |= EntityMessageBits::AnimationFrameTime;
-    }
+    //if (to->animationEndFrame != from->animationEndFrame) {
+	   // byteMask |= EntityMessageBits::AnimationFrameEnd;
+    //}
+    //if (to->animationFramerate != from->animationFramerate) {
+	   // byteMask |= EntityMessageBits::AnimationFrameTime;
+    //}
     
     //
     // write the message
@@ -320,18 +320,18 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
 
     // Write out the Animation Start Time.
     if (byteMask & EntityMessageBits::AnimationTimeStart) {
-	    MSG_WriteUintBase128(to->animationStartTime);
+	    MSG_WriteUintBase128(to->currentAnimation.startTime);
     }
     // Write out the Animation Start Frame.
-    if (byteMask & EntityMessageBits::AnimationFrameStart) {
-	    MSG_WriteUint16(to->animationStartFrame);
+    if (byteMask & EntityMessageBits::AnimationIndex) {
+	    MSG_WriteUint8(to->currentAnimation.animationIndex);
     }
-    // Write out the Animation End Frame.
-    if (byteMask & EntityMessageBits::AnimationFrameEnd) {
-	    MSG_WriteUint16(to->animationEndFrame);
-    }
-    // Write out the Animation Frame Time.
-    if (byteMask & EntityMessageBits::AnimationFrameTime) {
-    	MSG_WriteHalfFloat(to->animationFramerate);
-    }
+    //// Write out the Animation End Frame.
+    //if (byteMask & EntityMessageBits::AnimationFrameEnd) {
+	   // MSG_WriteUint16(to->animationEndFrame);
+    //}
+    //// Write out the Animation Frame Time.
+    //if (byteMask & EntityMessageBits::AnimationFrameTime) {
+    //	MSG_WriteHalfFloat(to->animationFramerate);
+    //}
 }

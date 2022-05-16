@@ -82,11 +82,11 @@ void MonsterTestDummy::Spawn() {
     SetTakeDamage(TakeDamage::Yes);
 
     // Setup our MonsterTestDummy callbacks.
-    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
+    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
     //SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2s);
+    SetNextThinkTime(level.time + FRAMETIME);
 
     // Link the entity to world, for collision testing.
     SetInUse(true);
@@ -110,10 +110,6 @@ void MonsterTestDummy::Respawn() { Base::Respawn(); }
 void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
-
-    GetPODEntity()->currentState.animationStartTime = GameTime(level.time + 1s).count();
-    //GetPODEntity()->state.animationFramerate = 60;
-
 }
 
 //===============
@@ -153,64 +149,26 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
     // Setup the next think time.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
 }
-    //===============
+
+//===============
 // MonsterTestDummy::MonsterTestDummyThink
 //
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MonsterTestDummy::MonsterTestDummyThink(void) {
 
-    // Advance the dummy animation for a frame.
+	// Advance the dummy animation for a frame.
     // Set here how fast you want the tick rate to be.
     // Set here how fast you want the tick rate to be.
     static constexpr uint32_t ANIM_HZ = 30.0;
 
-    // Calclate all related values we need to make it work smoothly even if we have
-    // a nice 250fps, the game must run at 50fps.
-    //static constexpr uint32_t ANIM_FRAMERATE = ANIM_HZ;
-    //static constexpr double   ANIM_FRAMETIME = 1000.0 / ANIM_FRAMERATE;
-    //static constexpr double   ANIM_1_FRAMETIME = 1.0 / ANIM_FRAMETIME;
-    //static constexpr double   ANIM_FRAMETIME_1000 = ANIM_FRAMETIME / 1000.0;
-    //float nextFrame = GetAnimationFrame();
-    //nextFrame += (32.f * ANIM_1_FRAMETIME);
-    //if (nextFrame > 33) {
-	   // nextFrame = 2;
-    //}
-    //SetAnimationFrame(nextFrame);
-
-    //
-    // Calculate direction.
-    //
-    //if (GetHealth() > 0) {
-    //    vec3_t currentMoveAngles = GetAngles();
-
-	   // // Direction vector between player and other entity.
-	   // vec3_t wishMoveAngles = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
-
-	   // // Teehee
-	   // vec3_t newModelAngles = vec3_euler(wishMoveAngles);
-	   // newModelAngles.x = 0;
-
-	   // SetAngles(newModelAngles);
-
-	   // // Calculate yaw to use based on direction.
-	   // float yaw = vec3_to_yaw(wishMoveAngles);
-
-	   // // Last but not least, move a step ahead.
-	   // SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
-    //    
-    //    // Check for ground.
-    //    SVG_StepMove_CheckGround(this);
-    //}
-    // Check for ground.
-	//extern void CLG_StepMove_CheckGround(IClientGameEntity* ent);
     //SG_StepMove_CheckGround(this);
 	SG_CheckGround(this);
     // Link entity back in.
     LinkEntity();
 
     // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME);
 }
 
 //===============

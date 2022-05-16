@@ -105,7 +105,6 @@ public:
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
 private:
-	virtual void ProcessSkeletalAnimationForTime(uint64_t time) override;
 
 public:
 

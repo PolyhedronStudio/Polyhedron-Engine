@@ -15,6 +15,7 @@
 class SVGBaseEntity;
 class SVGBaseTrigger;
 //class SVGBaseAnimated;
+class SVGBaseSkeletalAnimator;
 class SVGBaseMonster;
 
 
@@ -31,13 +32,32 @@ public:
     *   Interface functions.
     *
     **/
-    void Precache() override;
-    void Spawn() override;
-    void Respawn() override;
-    void PostSpawn() override;
-    void Think() override;
+    /**
+    *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
+    **/
+    virtual void Precache() override;    // Precaches data.
+    /**
+    *   @brief  Called when it is time to spawn this entity.
+    **/
+    virtual void Spawn() override;       // Spawns the entity.
+    /**
+    *   @brief  Called when it is time to respawn this entity.
+    **/
+    virtual void Respawn() override;     // Respawns the entity.
+    /**
+    *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
+    **/
+    virtual void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
+    /**
+    *   @brief  General entity thinking routine.
+    **/
+    virtual void Think() override;
 
-    void SpawnKey(const std::string& key, const std::string& value) override;
+    /**
+    *   @brief  Act upon the parsed key and value.
+    **/
+    virtual void SpawnKey(const std::string& key, const std::string& value) override; // Called for each key:value when parsing the entity dictionary.
+
 
 
     /**

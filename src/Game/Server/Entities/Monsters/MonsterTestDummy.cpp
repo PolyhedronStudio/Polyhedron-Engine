@@ -15,6 +15,7 @@
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
+#include "../Base/SVGBaseSkeletalAnimator.h"
 #include "../Base/SVGBaseMonster.h"
 
 // World.
@@ -91,7 +92,7 @@ void MonsterTestDummy::Spawn() {
     }
     
     // Setup the start frame to animate from.
-    SetAnimationFrame(0);
+    SetAnimationFrame(110);
     
     // Set entity to allow taking damage.
     SetTakeDamage(TakeDamage::Yes);
@@ -101,7 +102,7 @@ void MonsterTestDummy::Spawn() {
     SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -124,10 +125,6 @@ void MonsterTestDummy::Respawn() { Base::Respawn(); }
 void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
-
-    GetPODEntity()->currentState.animationStartTime = GameTime(level.time + 1s).count();
-    //GetPODEntity()->state.animationFramerate = 60;
-
 }
 
 //===============
@@ -146,39 +143,49 @@ void MonsterTestDummy::Think() {
 void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value) {
     EntityState* state = &GetPODEntity()->currentState;
 
-    if (key == "startframe") { 
-        // This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
-        int32_t parsedInt = 0;
-	    ParseKeyValue(key, value, parsedInt);
-        state->animationStartFrame = parsedInt;
-    } else if (key == "endframe") {
-	// This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
-	    int32_t parsedInt = 0;
-	    ParseKeyValue(key, value, parsedInt);
-	    state->animationEndFrame = parsedInt;
-    } else if (key == "framerate") {
-	    float parsedFloat = 0.f;
-	    ParseKeyValue(key, value, parsedFloat);
-	    state->animationFramerate = parsedFloat;        
-    } else if (key == "animindex") {
-    } else if (key == "skin") {
-    } else if (key == "health") {
-        int32_t parsedInt = 0;
-        ParseKeyValue(key, value, parsedInt);
-        SetHealth(parsedInt);
-    } else {
+ //   if (key == "startframe") { 
+ //       // This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
+ //       int32_t parsedInt = 0;
+	//    ParseKeyValue(key, value, parsedInt);
+ //       state->animationStartFrame = parsedInt;
+ //   } else if (key == "endframe") {
+	//// This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
+	//    int32_t parsedInt = 0;
+	//    ParseKeyValue(key, value, parsedInt);
+	//    state->animationEndFrame = parsedInt;
+ //   } else if (key == "framerate") {
+	//    float parsedFloat = 0.f;
+	//    ParseKeyValue(key, value, parsedFloat);
+	//    state->animationFramerate = parsedFloat;        
+ //   } else if (key == "animindex") {
+ //   } else if (key == "skin") {
+ //   } else if (key == "health") {
+ //       int32_t parsedInt = 0;
+ //       ParseKeyValue(key, value, parsedInt);
+ //       SetHealth(parsedInt);
+ //   } else {
 	    Base::SpawnKey(key, value);
-    }
+//    }
 }
 
 /////
 // Starts the animation.
 // 
+static uint64_t startz = 0;
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
+	// Set the animation.
+	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+	animationState->animationIndex = 1;
+	animationState->startFrame = 1;
+	animationState->endFrame = 62;
+	animationState->frameTime = ANIMATION_FRAMETIME;
+	animationState->startTime = startz = level.time.count() + FRAMETIME.count();
+	animationState->loopCount = 0;
+	animationState->forceLoop = true;
 
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME);
 }
 
 //===============
@@ -223,11 +230,30 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 		const vec3_t normalizedDir = vec3_normalize(direction);
 		const vec3_t oldVelocity = GetVelocity();
 		const vec3_t wishVelocity = vec3_t {
-			125.f * normalizedDir.x,
-			125.f * normalizedDir.y,
+			92.f * normalizedDir.x,
+			92.f * normalizedDir.y,
 			oldVelocity.z
 		};
 		SetVelocity(wishVelocity);
+
+			// Set the animation.
+	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+	animationState->animationIndex = 1;
+	animationState->startFrame = 1;
+	animationState->endFrame = 62;
+	animationState->frameTime = ANIMATION_FRAMETIME;
+	animationState->startTime = startz = level.time.count() + FRAMETIME.count();
+	animationState->loopCount = 0;
+	animationState->forceLoop = true;
+
+			// Set the animation.
+	//EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+	//animationState->startFrame = 1;
+	//animationState->endFrame = 62;
+	//animationState->frameTime = 10;
+	//animationState->startTime = startz;
+	//animationState->loopCount = 0;
+	//animationState->forceLoop = true;
 
 		//      vec3_t currentMoveAngles = GetAngles();
 
@@ -273,7 +299,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 	// Setup next think callback.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME);
 }
 
 //===============

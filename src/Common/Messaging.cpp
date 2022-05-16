@@ -101,7 +101,7 @@ void MSG_ShowDeltaEntityBits(uint32_t byteMask)
     S(Solid, "solid");
     S(AnimationFrame, "animationFrame");
     S(AnimationTimeStart, "animationTimeStart");
-    S(AnimationFrameStart, "animationFrameStart");
+    S(AnimationIndex, "animationFrameStart");
     S(AnimationFrameEnd, "animationFrameEnd");
     S(AnimationFrameTime, "animationFrameTime");
     S(Skin, "skin");

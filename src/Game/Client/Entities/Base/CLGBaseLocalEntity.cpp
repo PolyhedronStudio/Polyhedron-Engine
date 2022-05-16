@@ -429,23 +429,34 @@ void CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree(void) {
 }
 
 
-void CLGBaseLocalEntity::ProcessSkeletalAnimationForTime(uint64_t time) {
-	// Acquire state references.
-	EntityState &currentState = podEntity->currentState;
-	EntityState &previousState = podEntity->previousState;
+void CLGBaseLocalEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
+	// Get state references.
+	EntityState &currentState	= podEntity->currentState;
+	EntityState &previousState	= podEntity->previousState;
 
-	// Process the animation.
-	refreshEntity.oldframe = previousState.animationFrame;
-    refreshEntity.backlerp = 1.0 - SG_FrameForTime(&refreshEntity.frame,
-        GameTime(time),                                     // Current Time.
-        GameTime(currentState.animationStartTime),           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
-        currentState.animationFramerate,           // Current frame time.
-        currentState.animationStartFrame,          // Start frame.
-        currentState.animationEndFrame,            // End frame.
-        0,                                                  // Loop count.
-        true                                                // Force loop
+	// Get Animation State references.
+	EntityAnimationState &currentAnimation	= currentState.currentAnimation;
+	//EntityAnimationState &previousAnimation	= currentState.previousAnimation;
+
+	// Backup previous animation for this entity state.
+	currentState.previousAnimation = currentAnimation;
+	EntityAnimationState &previousAnimation	= currentState.previousAnimation;
+
+	// And start processing the new, current state.
+    currentAnimation.backLerp = 1.0 - SG_FrameForTime(&currentAnimation.frame, // Pointer to frame storage variable.
+        GameTime(time),							// Current Time.
+        GameTime(currentAnimation.startTime),	// Animation Start time.
+        currentAnimation.frameTime,				// Animation Frame Time.
+        currentAnimation.startFrame,			// Start frame.
+        currentAnimation.endFrame,				// End frame.
+        currentAnimation.loopCount,				// Loop count.
+        currentAnimation.forceLoop				// Force loop
     );
-    currentState.animationFrame = refreshEntity.frame;
+
+	// Now we've updated our animation state, pass it over to our refresh entity.
+	refreshEntity.backlerp	= currentAnimation.backLerp;
+	refreshEntity.frame		= currentAnimation.frame;
+	refreshEntity.oldframe	= previousAnimation.frame;
 }
 /**
 *	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
@@ -512,7 +523,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 			//
 			// Setup the proper lerp and model frame to render this pass.
 			// Moved into the if statement's else case up above.
-			ProcessSkeletalAnimationForTime(cl->serverTime);
+			ProcessSkeletalAnimationForTime(GameTime(cl->serverTime));
         }
         
 

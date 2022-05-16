@@ -69,7 +69,24 @@ void CLGBasePacketEntity::Precache() {
 *   @brief  Called when it is time to spawn this entity.
 **/
 void CLGBasePacketEntity::Spawn() {
+	const EntityState &state = GetState();
 
+	if (state.currentAnimation.animationIndex != 0) {
+		// Refresh animation.
+		refreshAnimation.animationIndex = state.currentAnimation.animationIndex;
+		refreshAnimation.startTime		= state.currentAnimation.startTime;
+		refreshAnimation.frameTime = ANIMATION_FRAMETIME;
+		refreshAnimation.startFrame	= 1;
+		refreshAnimation.endFrame	= 62;
+		refreshAnimation.forceLoop	= true;
+		refreshAnimation.loopCount	= 0;
+
+		// Setup same think for the next frame.
+		SetNextThinkTime(level.time + FRAMETIME);
+		SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
+
+		Com_DPrint("%s (Number: #%i): Set (animationIndex:%i), (nextThinkTime:%i)\n", __func__, state.number, state.currentAnimation.animationIndex, GetNextThinkTime());
+	}
 }
 /**
 *   @brief  Called when it is time to respawn this entity.
@@ -82,7 +99,6 @@ void CLGBasePacketEntity::Respawn() {
 *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
 **/
 void CLGBasePacketEntity::PostSpawn() {
-
 }
 
 /**
@@ -233,7 +249,22 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
 void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
+	if (state.currentAnimation.animationIndex!= 0) {
+		// Refresh animation.
+		refreshAnimation.animationIndex = state.currentAnimation.animationIndex;
+		refreshAnimation.startTime		= state.currentAnimation.startTime;
+		refreshAnimation.frameTime = ANIMATION_FRAMETIME;
+		refreshAnimation.startFrame	= 1;
+		refreshAnimation.endFrame	= 62;
+		refreshAnimation.forceLoop	= true;
+		refreshAnimation.loopCount	= 0;
 
+		// Setup same think for the next frame.
+		SetNextThinkTime(level.time + FRAMETIME);
+		SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
+
+		Com_DPrint("%s (Number: #%i): Set (animationIndex:%i), (nextThinkTime:%i)\n", __func__, state.number, state.currentAnimation.animationIndex, GetNextThinkTime());
+	}
 }
 
 /**
@@ -255,6 +286,23 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 	SetMaxs(state.maxs);
 	SetSound(state.sound);
 	SetEventID(state.eventID);
+
+	if (state.currentAnimation.animationIndex != 0) {
+		// Refresh animation.
+		refreshAnimation.animationIndex = state.currentAnimation.animationIndex;
+		refreshAnimation.startTime		= state.currentAnimation.startTime;
+		refreshAnimation.frameTime = ANIMATION_FRAMETIME;
+		refreshAnimation.startFrame	= 1;
+		refreshAnimation.endFrame	= 62;
+		refreshAnimation.forceLoop	= true;
+		refreshAnimation.loopCount	= 0;
+
+		// Setup same think for the next frame.
+		SetNextThinkTime(level.time + FRAMETIME);
+		SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
+
+		Com_DPrint("%s (Number: #%i): Set (animationIndex:%i), (nextThinkTime:%i)\n", __func__, state.number, state.currentAnimation.animationIndex, GetNextThinkTime());
+	}
 }
 
 /**
@@ -298,6 +346,7 @@ uint32_t CLGBasePacketEntity::GetHashedClassname() {
 void CLGBasePacketEntity::OnDeallocate() {
 
 }
+
 /**
 *	@brief	Gets called in order to process the newly received EventID. (It also gets called when EventID == 0.)
 **/
@@ -453,25 +502,87 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 	Remove();
 }
 
+/**
+*	@brief	Used by default in order to process entity state data such as animations.
+**/
+void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
+	// Setup same think for the next frame.
+	SetNextThinkTime(level.time + FRAMETIME);
+	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 
-void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(uint64_t time) {
-	// Acquire state references.
-	EntityState &currentState = podEntity->currentState;
-	EntityState &previousState = podEntity->previousState;
+	const EntityAnimationState &animationState = podEntity->currentState.currentAnimation;
 
-	// Process the animation.
-	refreshEntity.oldframe = previousState.animationFrame;
-    refreshEntity.backlerp = 1.0 - SG_FrameForTime(&refreshEntity.frame,
-        GameTime(time),                                     // Current Time.
-        GameTime(currentState.animationStartTime),           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
-        currentState.animationFramerate,           // Current frame time.
-        currentState.animationStartFrame,          // Start frame.
-        currentState.animationEndFrame,            // End frame.
-        0,                                                  // Loop count.
-        true                                                // Force loop
-    );
-    currentState.animationFrame = refreshEntity.frame;
+	if (animationState .animationIndex != 0) {
+		refreshAnimation.animationIndex = animationState.animationIndex;
+		refreshAnimation.startTime = animationState.startTime;
+		refreshAnimation.frameTime = ANIMATION_FRAMETIME;
+		refreshAnimation.startFrame	= 1;
+		refreshAnimation.endFrame	= 62;
+		refreshAnimation.forceLoop	= true;
+		refreshAnimation.loopCount	= 0;
+	}
+
+	const EntityState &state = GetState();
+	Com_DPrint("%s (Number: #%i): Set (animationIndex:%i), (nextThinkTime:%i)\n", __func__, state.number, state.currentAnimation.animationIndex, GetNextThinkTime());
 }
+
+/**
+* 
+(
+*   Skeletal Animation
+* 
+*
+**/
+void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
+	// Get state references.
+	EntityState *currentState	= &podEntity->currentState;
+	EntityState *previousState	= &podEntity->previousState;
+
+	// Get Animation State references.
+	EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
+	EntityAnimationState *previousAnimation	= &currentState->previousAnimation;
+
+	// Store current animation as previous animation.
+	*previousAnimation = *currentAnimation;
+
+	if (time <= GameTime::zero()) {
+		return;
+	}
+
+	//// Has the animation index changed? If so, lookup the new animation.
+	//// TODO: Move to a separate function.
+	//if (currentAnimation->animationIndex != previousAnimation->animationIndex) {
+		// Initialize a fresh received animation state.
+		//refreshAnimation.startTime = currentAnimation->startTime;
+		//refreshAnimation = *currentAnimation;
+
+		// Last but not least, look up the animation and set its properties.
+	//}
+
+	// Get GameTime of animation startTime.
+	const GameTime animationStartTime = GameTime(refreshAnimation.startTime);
+
+	// Process the backlerp for the current animation.
+	refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
+		time,
+		animationStartTime,
+		refreshAnimation.frameTime,
+		refreshAnimation.startFrame,
+		refreshAnimation.endFrame,
+		refreshAnimation.loopCount,
+		refreshAnimation.forceLoop
+	);
+}
+
+
+
+/**
+* 
+(
+*   Refresh Entity Setup.
+* 
+*
+**/
 /**
 *	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
 **/
@@ -533,9 +644,17 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			//
 			//	Skeletal Animation Progressing.
 			//
+			// Setup the refresh entity frames.
+			refreshEntity.oldframe	= refreshAnimation.frame;
+
 			// Setup the proper lerp and model frame to render this pass.
 			// Moved into the if statement's else case up above.
-			ProcessSkeletalAnimationForTime(cl->serverTime);
+			ProcessSkeletalAnimationForTime(GameTime(cl->serverTime));
+
+			refreshEntity.frame		= refreshAnimation.frame;
+
+			// The backlerp.
+			refreshEntity.backlerp	= refreshAnimation.backLerp;
         }
         
 

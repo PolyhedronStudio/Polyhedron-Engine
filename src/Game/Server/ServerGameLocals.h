@@ -160,7 +160,7 @@ public:
 //==================================================================
 
 //! MS Frametime for animations.
-static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
+//static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
 //static constexpr Frametime FRAMETIME = FRAMETIME_S;

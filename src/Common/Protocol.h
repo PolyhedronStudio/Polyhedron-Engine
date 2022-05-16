@@ -238,7 +238,7 @@ struct EntityMessageBits {
     static constexpr uint32_t Sound                 = (1 << 8);  //! Sound
     static constexpr uint32_t AnimationFrame        = (1 << 9);  //! Animation Frame for anything BUT skeletal models.
     static constexpr uint32_t AnimationTimeStart    = (1 << 10); //! The animation starting frame.
-    static constexpr uint32_t AnimationFrameStart   = (1 << 11); //! Animation Start Frame.
+    static constexpr uint32_t AnimationIndex		= (1 << 11); //! Animation Start Frame.
     static constexpr uint32_t AnimationFrameEnd     = (1 << 12); //! Animation End Frame.
     static constexpr uint32_t AnimationFrameTime    = (1 << 13); //! Animation Speed
     static constexpr uint32_t Skin                  = (1 << 14); //! Model Skin.

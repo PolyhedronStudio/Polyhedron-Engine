@@ -11,23 +11,21 @@
 
 class SVGBaseEntity;
 class SVGBaseTrigger;
+class SVGBaseSkeletalAnimator;
 
-class SVGBaseMonster : public SVGBaseTrigger {
+class SVGBaseMonster : public SVGBaseSkeletalAnimator {
 public:
     /***
     * 
     *   Weapon Item callback function pointers.
     *
     ***/
-    //using WeaponThinkCallbackPointer = void (SVGBaseMonster::*)(SVGBaseEntity* user);
-
-
     //! Constructor/Deconstructor.
     SVGBaseMonster(PODEntity *svEntity);
     virtual ~SVGBaseMonster();
 
     //! Abstract Class TypeInfo registry.
-    DefineAbstractClass(SVGBaseMonster, SVGBaseTrigger);
+    DefineAbstractClass(SVGBaseMonster, SVGBaseSkeletalAnimator);
 
 
     /***
@@ -35,21 +33,14 @@ public:
     *   Interface functions.
     *
     ***/
-    virtual void Think() override;
-    virtual void Precache() override;
-    virtual void Spawn() override;
+    void Precache() override;
+    void Spawn() override;
+    void PostSpawn() override;
+	void Respawn() override;
+    void Think() override;
 
-    // Overrided to automatically fetch model handle.
-    inline void SetModelIndex(const int32_t& index) { 
-        // Base set model index.
-        Base::SetModelIndex(index);
+    void SpawnKey(const std::string& key, const std::string& value) override;
 
-        // Acquire handle.
-	    //modelHandle = gi.GetModelByHandle(index);
-    }
-
-    // Animation functions.
-    virtual void IsProcessingState();
 
     /***
     * 
@@ -57,59 +48,15 @@ public:
     * 
     ***/
 
-    /**
-    *   @return The maximum ammo cap limit to carry around for this ammo type.
-    **/
-    // Set animation.
-    virtual inline void SetAnimation(uint32_t index) {
-	    
-
-        animationIndex = index;
-        animationStartTime = level.time;
-    }
-
-    // Set framerate. (1.0f = fps of iqm.)
-    virtual inline void SetAnimationFrametime(Frametime frametime) {
-        animationFrametime = frametime;
-    }
-    //virtual uint32_t GetCapLimit() { return 0; }
     
 
 public:
-    // Sets the 'WeaponThink' callback function.
-    //template<typename function>
-    //inline void SetWeaponThinkCallback(function f)
-    //{
-    //    weaponThinkFunction = static_cast<WeaponThinkCallbackPointer>(f);
-    //}
-    //inline qboolean HasWeaponThinkCallback() {
-    //    return (weaponThinkFunction != nullptr ? true : false);
-    //}
+
 
 protected:
-    /***
-    * 
-    *   Animation State Related.
-    *
-    ***/
-
-    //! The index of the animation we're playing. (0 = static or none)
-    short animationIndex = 0;
-
-    //! The time the current(thus also last) animation started.
-    Frametime animationStartTime = Frametime::zero();
-
-    //! The time an animation frame takes the current animation is playing at.
-    Frametime animationFrametime = 1s;
-
-    //! Are we animating?
-    qboolean isAnimating = false;
-
-
     /***
     * 
     *   Monster Logic function pointers.
     *
     ***/
-    //WeaponThinkCallbackPointer  weaponThinkFunction = nullptr;
 };

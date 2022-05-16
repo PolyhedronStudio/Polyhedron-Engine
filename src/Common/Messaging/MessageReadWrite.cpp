@@ -612,9 +612,6 @@ int32_t MSG_ReadEntityNumber(bool* remove, uint32_t* byteMask) {
     number = (int32_t)MSG_ReadIntBase128();
     *byteMask = MSG_ReadUintBase128();
 
-	if (number > 4000) {
-		Com_DPrintf("OH MIJN GOD WAS DIT DAH? LOL\n");
-	}
     if (number < 0) {
 		number *= -1;
 		*remove = true;

@@ -122,26 +122,6 @@ void CLGBasePlayer::OnDeallocate() {
 
 }
 
-
-void CLGBasePlayer::ProcessSkeletalAnimationForTime(uint64_t time) {
-	// Acquire state references.
-	EntityState &currentState = podEntity->currentState;
-	EntityState &previousState = podEntity->previousState;
-
-	// Process the animation.
-	refreshEntity.oldframe = previousState.animationFrame;
-    refreshEntity.backlerp = 1.0 - SG_FrameForTime(&refreshEntity.frame,
-        GameTime(time),                                     // Current Time.
-        GameTime(currentState.animationStartTime),           // Animation Start time. (TODO: This needs to changed to a stored cl->time of the moment where the animation event got through.)
-        currentState.animationFramerate,           // Current frame time.
-        currentState.animationStartFrame,          // Start frame.
-        currentState.animationEndFrame,            // End frame.
-        0,                                                  // Loop count.
-        true                                                // Force loop
-    );
-    currentState.animationFrame = refreshEntity.frame;
-}
-
 /**
 *	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
 **/

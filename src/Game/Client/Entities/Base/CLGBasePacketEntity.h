@@ -956,7 +956,10 @@ public:
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
 private:
-	virtual void ProcessSkeletalAnimationForTime(uint64_t time) ;
+	/**
+	*	@brief Processes and prepares for the refresh entity, the currentAnimation state for the point in 'time'.
+	**/
+	virtual void ProcessSkeletalAnimationForTime(const GameTime &time);
 
 protected:
 	/**
@@ -969,7 +972,11 @@ protected:
     //! Refresh Entity Object.
     r_entity_t refreshEntity = {};
 
-
+	//
+	// Animations.
+	//
+	//! This state gets set freshly to a baseline animation state determined by the 'wired' animationIndex.
+	EntityAnimationState refreshAnimation = {};
 
 public:
     /**
@@ -1186,4 +1193,9 @@ public:
     *   @brief  Callback for assigning when "no thinking" behavior is wished for.
     **/
     void CLGBasePacketEntityThinkNull() { }
+
+	/**
+	*	@brief	Used by default in order to process entity state data such as animations.
+	**/
+	void CLGBasePacketEntityThinkStandard(void);
 };

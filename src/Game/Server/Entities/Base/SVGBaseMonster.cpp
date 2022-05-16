@@ -15,6 +15,7 @@
 // Server Game Base Entity.
 #include "SVGBaseEntity.h"
 #include "SVGBaseTrigger.h"
+#include "SVGBaseSkeletalAnimator.h"
 #include "SVGBaseItem.h"
 #include "SVGBasePlayer.h"
 
@@ -42,7 +43,25 @@ void SVGBaseMonster::Precache() {
 /**
 *   @brief 
 **/
-void SVGBaseMonster::Spawn() { Base::Spawn(); }
+void SVGBaseMonster::Spawn() { 
+	Base::Spawn(); 
+}
+
+
+
+/**
+*   @brief 
+**/
+void SVGBaseMonster::PostSpawn() { 
+	Base::Spawn(); 
+}
+
+/**
+*   @brief 
+**/
+void SVGBaseMonster::Respawn() { 
+	Base::Respawn(); 
+}
 
 /**
 *   @brief Override think method to add in animation processing.
@@ -50,9 +69,13 @@ void SVGBaseMonster::Spawn() { Base::Spawn(); }
 void SVGBaseMonster::Think() { 
 	// Base think.
 	Base::Think();
+}
 
-	// Now go and process animations.
-	IsProcessingState();
+/**
+*   @brief 
+**/
+void SVGBaseMonster::SpawnKey(const std::string& key, const std::string& value) { 
+	Base::SpawnKey(key, value); 
 }
 
 
@@ -61,12 +84,3 @@ void SVGBaseMonster::Think() {
 *   Entity functions.
 *
 ***/
-/**
-*   @brief Takes care of server side animation processing.
-*	@details	The server also does animation processing in order to determine
-*				whether an animation has finished or not, this is all part of
-*				managing animation states.
-**/
-void SVGBaseMonster::IsProcessingState() {
-
-}

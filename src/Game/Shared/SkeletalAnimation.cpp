@@ -58,7 +58,7 @@ double SG_FrameForTime( int32_t *frame, const GameTime &currentTimestamp, const 
 			// Calculate current frame.
 			currentFrame -= loopingFrames * numberOfLoops;
 
-			// Special frame fraction handling.
+			// Special frame fraction handling to play an animation just once.
 			if( loopingFrames == 1 ) {
 				frameFraction = 1.0;
 			}

@@ -86,6 +86,40 @@ struct EntityEvent {
 };
 
 /**
+*	@brief	Animation State Object for the PODEntity.
+**/
+struct EntityAnimationState {
+	/**
+	*	The following are sent over the wire.
+	**/
+	//! Animation Index that
+	uint32_t animationIndex = 0;
+	//! Server time of the start of the animation.
+	uint64_t startTime = 0;
+
+	/**
+	*	The following are used to keep track and process the animation.
+	*
+	*	None of these are sent over the wire.
+	**/
+	//! Current animation frame.
+	int32_t		frame = 0;
+	//! Animation frametime.
+	float		frameTime = 0;
+	//! Backlerp
+	double		backLerp = 0;
+
+	//! Animation start IQM frame number.
+	uint32_t	startFrame = 0;
+	//! Animation end IQM frame number.
+	uint32_t	endFrame = 0;
+	//! 0 means to play on forever, but do return -1.
+	uint32_t	loopCount = 0;
+	//! When force loop is set it'll never return a -1 event.
+	bool		forceLoop = 0;
+};
+
+/**
 *   EntityState is the information conveyed from the server
 *   in an update message about entities that the client will
 *   need to render in some way
@@ -121,19 +155,29 @@ struct EntityState {
 
     //+++ Get the below working first, then do the on top, use events??
     
-    //    Events might be easier to use with regards to possible predictions?
-    //! Server start time of current animation.
-    uint64_t animationStartTime = 0;
-    //! Animation Start Frame
-    uint16_t animationStartFrame = 1;
-    //! Animation End Frame
-    uint16_t animationEndFrame = 2;
-    //! Current animation playback framerate.
-    float animationFramerate = 30.f;
-    //! Amount of loops to do.
-    uint8_t animationLoopCount = 0;
-    //! Force loop?
-    uint8_t animationForceLoop = false;
+    ////    Events might be easier to use with regards to possible predictions?
+    ////! Server start time of current animation.
+    //uint64_t animationStartTime = 0;
+    ////! Animation Start Frame
+    //uint16_t animationStartFrame = 0;
+    ////! Animation End Frame
+    //uint16_t animationEndFrame = 0;
+    ////! Current animation playback framerate.
+    //float animationFramerate = 0;
+    ////! Amount of loops to do.
+    //uint8_t animationLoopCount = 0;
+    ////! Force loop?
+    //uint8_t animationForceLoop = false;
+
+	/**
+	*	An Entity State, stores two Animation States:
+	*		- An Entity State is a specific moment in time, with key data representing the entity itself.
+	*		- Because of the above, we want to store which animation was current, and previous, at THAT moment in time.
+	**/
+	//! Current Animation for the moment in time of EntityState.
+	EntityAnimationState currentAnimation	= {};
+	//! Previous Animation for the moment in time of EntityState.
+	EntityAnimationState previousAnimation	={};
 
     //--- Part of the old frame code :P
     

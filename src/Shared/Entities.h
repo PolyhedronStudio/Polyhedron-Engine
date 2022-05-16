@@ -35,9 +35,16 @@ using SpawnKeyValues = std::map<std::string, std::string>;
 *				the server, best not do that.)
 **/
 struct PODEntity {
+	/**
+	*	The State object and parts of the Client are sent 'over the wire'.
+	**/
     //! Actual entity state member, a POD type that contains all data that is actually networked.
 	EntityState currentState = {};
 	EntityState previousState = {}; //! CL: Previous state.
+
+	//! Animation State members.
+	//EntityAnimationState currentAnimationState = {};
+	//EntityAnimationState previousAnimationState = {};
 
     //! NULL if not a player. The server expects the first part of gclient_s to
     //! be a PlayerState but the rest of it is opaque
@@ -84,6 +91,7 @@ struct PODEntity {
     //! Absolute world transform bounding box.
     vec3_t absMin = vec3_zero(), absMax = vec3_zero(), size = vec3_zero();
     
+
 	/**
 	*	Data that the gamemodules set and a client/server may need to know of.
 	**/
@@ -101,6 +109,7 @@ struct PODEntity {
 
     // Move this to clientInfo?
     int32_t lightLevel = 0;
+
 
 	/**
 	*	Client/ClientGame only fields.

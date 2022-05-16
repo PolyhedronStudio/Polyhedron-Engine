@@ -28,6 +28,7 @@ SET(SRC_SVGAME
 	Entities/Base/SVGBaseMonster.cpp
 	Entities/Base/SVGBaseMover.cpp
 	Entities/Base/SVGBasePlayer.cpp
+	Entities/Base/SVGBaseSkeletalAnimator.cpp
 	Entities/Base/BodyCorpse.cpp
 	Entities/Base/DebrisEntity.cpp
 	Entities/Base/GibEntity.cpp
