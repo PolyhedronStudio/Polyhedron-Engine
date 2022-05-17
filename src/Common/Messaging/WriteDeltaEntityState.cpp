@@ -113,6 +113,10 @@ void MSG_WriteDeltaEntityState(const EntityState* from, const EntityState* to, u
     if (to->solid != from->solid) {
 	    byteMask |= EntityMessageBits::Solid;
     }
+
+    if (to->solid != from->solid) {
+	    byteMask |= EntityMessageBits::Solid;
+    }
     
 	if (to->solid != PACKED_BBOX && (!vec3_equal(to->mins, from->mins) || !vec3_equal(to->maxs, from->maxs))) {
         byteMask |= EntityMessageBits::Bounds;

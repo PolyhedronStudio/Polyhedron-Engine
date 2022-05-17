@@ -70,7 +70,6 @@ void CLGBasePacketEntity::Precache() {
 **/
 void CLGBasePacketEntity::Spawn() {
 	const EntityState &state = GetState();
-
 	if (state.currentAnimation.animationIndex != 0) {
 		// Refresh animation.
 		refreshAnimation.animationIndex = state.currentAnimation.animationIndex;
@@ -249,6 +248,22 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
 void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
+	SetOrigin(state.origin);
+	SetAngles(state.angles);
+	SetOldOrigin(state.oldOrigin);
+	SetModelIndex(state.modelIndex);
+	SetModelIndex2(state.modelIndex2);
+	SetModelIndex3(state.modelIndex3);
+	SetModelIndex4(state.modelIndex4);
+	SetSkinNumber(state.skinNumber);
+	SetEffects(state.effects);
+	SetRenderEffects(state.renderEffects);
+	SetSolid(state.solid);
+	SetMins(state.mins);
+	SetMaxs(state.maxs);
+	SetSound(state.sound);
+	SetEventID(state.eventID);
+
 	if (state.currentAnimation.animationIndex!= 0) {
 		// Refresh animation.
 		refreshAnimation.animationIndex = state.currentAnimation.animationIndex;

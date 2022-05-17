@@ -480,19 +480,7 @@ void ClientGameEntities::LocalEntityEvent(int32_t number) {
 *           Also applies special rendering effects to them where desired.
 **/
 void ClientGameEntities::AddPacketEntities() {
-
-    //// Client Info.
-    //ClientInfo*  clientInfo = nullptr;
-    //// Entity specific effects. (Such as whether to rotate or not.)
-    //int32_t effects = 0;
-    //// Entity render effects. (Shells and the like.)
-    //uint32_t renderEffects = 0;
-    // Bonus items rotate at a fixed rate
-    float autoRotate = AngleMod(cl->time * BASE_1_FRAMETIME);
-    // Brush models can auto animate their frames
-    int32_t autoAnimation = BASE_FRAMERATE * cl->time / BASE_FRAMETIME_1000;
-
-
+	// Get Gameworld, we're about to iterate.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
     // Iterate from 0 till the amount of entities present in the current frame.
@@ -504,13 +492,13 @@ void ClientGameEntities::AddPacketEntities() {
 		// Get the actual entity number.
 		const int32_t entityNumber = currentEntityState->number;
 		// Get the actual entity to process based on the entity's state index number.
-        PODEntity *clientEntity = &cs->entities[entityNumber]; 		//PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(entityNumber);
+        PODEntity *clientEntity = &cs->entities[entityNumber];
 		// Get the game entity to inquire.
         GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(clientEntity->clientEntityNumber);
 		// Get a const reference to the previous entity state.
 		EntityState *previousEntityState = &clientEntity->previousState;
 		// Setup the render entity ID for the renderer.
-        const int32_t refreshEntityID = clientEntity->clientEntityNumber; //clientEntity->clientEntityNumber + RESERVED_ENTITIY_COUNT + localEntityNumber;
+        const int32_t refreshEntityID = clientEntity->clientEntityNumber;
 
 		if (!gameEntity) {
 			// Ouche..?
@@ -534,17 +522,13 @@ void ClientGameEntities::AddPacketEntities() {
         GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(clientEntity->clientEntityNumber);
 		
 		// Setup the render entity ID for the renderer.
-        const int32_t refreshEntityID = clientEntity->clientEntityNumber; //clientEntity->clientEntityNumber + RESERVED_ENTITIY_COUNT + localEntityNumber;
+        const int32_t refreshEntityID = clientEntity->clientEntityNumber;
 		
 		if (!gameEntity) {
 			// Ouche..?
 
 			continue;
 		}
-
-		//if (localEntityNumber > 1040) {
-		//	return;
-		//}
 
 		// Go on.
 		gameEntity->PrepareRefreshEntity(refreshEntityID, entityState, previousEntityState, cl->lerpFraction);

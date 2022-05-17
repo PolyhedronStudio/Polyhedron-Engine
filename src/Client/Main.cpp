@@ -2936,9 +2936,6 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 	// We'll be processing them here.
 	cl.numSolidLocalEntities = 0;
 	
-	// First give the ClientGame module a chance to "predict" its packet entities for a frame.
-	CL_GM_ClientPacketEntityDeltaFrame();
-
 	// Give the client game module a chance to run its local entities for a frame.
 	CL_GM_ClientLocalEntitiesFrame();
 
@@ -2960,7 +2957,7 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 		LocalEntity_FireEvent(podEntity->currentState);
 	}
 
-	//CL_GM_ClientPacketEntityDeltaFrame();
+	CL_GM_ClientPacketEntityDeltaFrame();
 	
 
 #if USE_CLIENT

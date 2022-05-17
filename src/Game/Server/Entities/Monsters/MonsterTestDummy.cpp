@@ -236,59 +236,16 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 		};
 		SetVelocity(wishVelocity);
 
-			// Set the animation.
-	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-	animationState->animationIndex = 1;
-	animationState->startFrame = 1;
-	animationState->endFrame = 62;
-	animationState->frameTime = ANIMATION_FRAMETIME;
-	animationState->startTime = startz = level.time.count() + FRAMETIME.count();
-	animationState->loopCount = 0;
-	animationState->forceLoop = true;
-
-			// Set the animation.
-	//EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-	//animationState->startFrame = 1;
-	//animationState->endFrame = 62;
-	//animationState->frameTime = 10;
-	//animationState->startTime = startz;
-	//animationState->loopCount = 0;
-	//animationState->forceLoop = true;
-
-		//      vec3_t currentMoveAngles = GetAngles();
-
-	 //   // Direction vector between player and other entity.
-	 //   vec3_t wishMoveAngles = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
-
-	 //   // Teehee
-	 //   vec3_t newModelAngles = vec3_euler(wishMoveAngles);
-	 //   newModelAngles.x = 0;
-
-		//// Assign model angles.
-	 //   SetAngles(newModelAngles);
-
-
-	 //   // Calculate yaw to use based on direction.
-	 //   float yaw = vec3_to_yaw(wishMoveAngles);
-		//    yaw = yaw * M_PI * 2 / 360;
-		//	
-
-		//// Calculate directional velocity.
-		//const vec3_t moveVelocity = vec3_t { 20.0f, 0.f, 0.f } * vec3_normalize(newModelAngles);
-		//SetVelocity(moveVelocity);
-		//SetVelocity({
-		//	cosf(yaw) * 90.f,
-		//	sinf(yaw) * 90.f,
-		//	GetVelocity().z,
-		//});
+		// Set the animation.
+		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+		animationState->animationIndex = 1;
+		animationState->startFrame = 1;
+		animationState->endFrame = 62;
+		animationState->frameTime = ANIMATION_FRAMETIME;
+		animationState->startTime = startz = level.time.count() + FRAMETIME.count();
+		animationState->loopCount = 0;
+		animationState->forceLoop = true;
 	}
-	    // Last but not least, move a step ahead.
-	   // SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
-    //    
-    //    // Check for ground.
-    //    SVG_StepMove_CheckGround(this);
-    //}
-
 
     // Check for ground.
     //SVG_StepMove_CheckGround(this);
@@ -327,7 +284,7 @@ void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServer
     gameWorld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);
 
     // Setup the next think and think time.
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME);
 
     // Set think function.
     SetThinkCallback(&MonsterTestDummy::SVGBaseEntityThinkFree);

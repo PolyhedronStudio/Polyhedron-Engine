@@ -214,8 +214,20 @@ public:
 *           ugly darn copy of..
 **/
 struct LevelLocals  {
-    //! Current sum of total frame time taken.
+	//! Current sum of total frame time taken.
     GameTime time = GameTime::zero();
+	
+	////! The current serverTime.
+ //   GameTime curServerTime = GameTime::zero();
+	////! The previous serverTime.
+	//GameTime prevServerTime = GameTime::zero();
+
+	//! The next serverTime.
+	GameTime nextServerTime = GameTime::zero();
+	//! The current serverTime.
+    GameTime curServerTime = GameTime::zero();
+	//! The previous serverTime.
+	GameTime prevServerTime = GameTime::zero();
 
     //std::string levelName;  //! The descriptive name (Outer Base, etc)
     std::string mapName;    //! The server name (base1, etc)

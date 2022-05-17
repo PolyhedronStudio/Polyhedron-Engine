@@ -32,7 +32,9 @@ SET(SRC_CLGAME
 	Entities/Base/CLGBaseMover.cpp
 	Entities/Base/CLGBasePlayer.cpp
 	Entities/Base/CLGBaseTrigger.cpp
-	
+
+	Entities/Func/FuncDoor.cpp
+	Entities/Func/FuncDoorRotating.cpp	
 	Entities/Func/FuncPlat.cpp
 	Entities/Func/FuncRotating.cpp
 
@@ -95,7 +97,9 @@ SET(HEADERS_CLGAME
 	Entities/Base/CLGBaseMover.h
 	Entities/Base/CLGBasePlayer.h
 	Entities/Base/CLGBaseTrigger.h
-	
+
+	Entities/Func/FuncDoor.h
+	Entities/Func/FuncDoorRotating.h
 	Entities/Func/FuncPlat.h
 	Entities/Func/FuncRotating.h
 

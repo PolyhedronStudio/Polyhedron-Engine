@@ -350,7 +350,12 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     // Should we think at all? 
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
+#ifdef SHAREDGAME_CLIENTGAME
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.nextServerTime) {
+#endif
+#ifdef SHAREDGAME_SERVERGAME
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
+#endif
 		return true;
     }
 

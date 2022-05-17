@@ -175,7 +175,14 @@ void ClientGameExports::ClientFrame() {
     GameTime svTime = GameTime(cl->serverTime);
     GameTime clTime = GameTime(cl->time);
 
-    GameTime prevtime = svTime - FRAMERATE_MS;
+	// Previous server time.
+    //GameTime prevtime = svTime - FRAMERATE_MS;
+
+	// Set server times.
+	level.prevServerTime	= level.curServerTime;
+	level.curServerTime		= svTime;
+	level.nextServerTime	= svTime + FRAMERATE_MS;
+
     if (clTime > svTime) {
     //    SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.serverTime);
         //cl.time = cl.serverTime;

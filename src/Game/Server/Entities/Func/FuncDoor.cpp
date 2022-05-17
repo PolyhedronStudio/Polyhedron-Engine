@@ -330,8 +330,13 @@ void FuncDoor::DoorGoUp( IServerGameEntity* activator ) {
         SetSound( moveInfo.middleSoundIndex );
     }
 
+	// Update our MoveInfo state.
     moveInfo.state = MoverState::Up;
 
+	// Set EventID.
+	SetEventID(1);
+	gi.DPrintf("%s: Setting (eventID: #%i, 'DOOR_OPEN')!\n", __func__, GetEventID());
+	// Start the door its 'Go Up' process.
     DoGoUp();
     UseTargets( activator );
     UseAreaportals( true );
@@ -353,8 +358,15 @@ void FuncDoor::DoorGoDown() {
         SetHealth( GetMaxHealth() );
     }
 
+	// Update our MoveInfo state.
     moveInfo.state = MoverState::Down;
-    DoGoDown();
+	
+	// Set EventID.
+	SetEventID(2);
+	gi.DPrintf("%s: Setting (eventID: #%i, 'DOOR_CLOSE')!\n", __func__, GetEventID());
+
+	// Start the door its 'Go Down' process.
+	DoGoDown();
 }
 
 //===============
@@ -597,7 +609,7 @@ void FuncDoor::SpawnKey(const std::string& key, const std::string& value) {
         ParseKeyValue(key, value, parsedString);
 
         // Assign.
-        //SetTeam(parsedString);
+        SetTeam(parsedString);
     }
     // Parent class spawnkey.
     else {

@@ -32,9 +32,9 @@ class Worldspawn;
 ***/
 //! Use a static entity ID on some things because the renderer relies on EntityID to match between meshes
 //! between the current and previous frames.
-static constexpr int32_t RESERVED_LOCAL_ENTITIY_ID_GUN = 0;
-static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 1;
-static constexpr int32_t RESERVED_ENTITIY_COUNT = 2;
+static constexpr int32_t RESERVED_LOCAL_ENTITIY_ID_GUN = 1;
+static constexpr int32_t RESERVED_ENTITIY_SHADERBALLS = 2;
+static constexpr int32_t RESERVED_ENTITIY_COUNT = 3;
 
 //! The actual start of the local entities index.
 static constexpr int32_t LOCAL_ENTITIES_START_INDEX = MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT;
