@@ -465,6 +465,7 @@ void CL_InitGameProgs(void)
     importAPI.CheckForIgnore = CL_CheckForIgnore;
     importAPI.CheckForIP = CL_CheckForIP;
 
+	importAPI.CL_HullForEntity = CL_HullForEntity;
 	importAPI.LinkEntity = _wrp_CL_LinkEntity;
 	importAPI.World_LinkEntity = _wrp_CL_World_LinkEntity;
 	importAPI.UnlinkEntity = _wrp_CL_UnlinkEntity;

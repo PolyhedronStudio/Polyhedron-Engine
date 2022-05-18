@@ -949,12 +949,12 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         client->playerState.pmove.gravity = sv_gravity->value;
 
         // Copy over the pmove state from the latest player state.
-        PlayerMove pm       = {};
-        pm.moveCommand      = *moveCommand;
-        pm.groundEntityPtr  = player->GetGroundEntityHandle().Get();
-        pm.state            = client->playerState.pmove;
-        pm.state.origin     = player->GetOrigin();
-        pm.state.velocity   = player->GetVelocity();
+        PlayerMove pm         = {};
+        pm.moveCommand        = *moveCommand;
+        pm.groundEntityNumber = (player->GetGroundPODEntity() ? player->GetGroundPODEntity()->currentState.number : -1); //	pm.groundEntityPtr  = player->GetGroundEntityHandle().Get();
+        pm.state              = client->playerState.pmove;
+        pm.state.origin       = player->GetOrigin();
+        pm.state.velocity     = player->GetVelocity();
         
         // Set trace callbacks.
         pm.Trace            = PM_Trace;
@@ -976,19 +976,33 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         player->SetWaterType(pm.waterType);
 
         // Check for jumping sound.
-        if (player->GetGroundEntityHandle() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
-            SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
-            player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
+		SGEntityHandle previousGroundEntityHandle = player->GetGroundEntityHandle();
+
+		if (previousGroundEntityHandle && previousGroundEntityHandle.Get() && *previousGroundEntityHandle) {
+			if (pm.groundEntityNumber == -1 && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+				SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
+				player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
+			}
         }
-        
-        // Use an entity handle to validate and store the new ground entity after pmove.
-        SGEntityHandle groundEntityHandle = pm.groundEntityPtr;
-        if (*groundEntityHandle && groundEntityHandle.Get()) {
-            player->SetGroundEntity(*groundEntityHandle);
-            player->SetGroundEntityLinkCount(groundEntityHandle->GetLinkCount());
-        } else {
-            player->SetGroundEntity(nullptr);
-        }
+
+		// Resolve the perhaps new Ground Entity.
+		ServerGameWorld *gameWorld = GetGameWorld();
+		if (gameWorld) {
+			// Get the ground POD Entity that matches the groundEntityNumber. 
+			PODEntity *podGroundEntity = gameWorld->GetPODEntityByIndex(pm.groundEntityNumber);
+
+			// Use an entity handle to validate and store the retreived groundEntity.
+			SGEntityHandle groundEntityHandle = podGroundEntity;
+			
+			if (groundEntityHandle && groundEntityHandle.Get() && *groundEntityHandle) {
+				player->SetGroundEntity(*groundEntityHandle);
+				player->SetGroundEntityLinkCount(groundEntityHandle->GetGroundEntityLinkCount());//podGameEntity->GetGroundEntityLinkCount());
+			} else {
+				player->SetGroundEntity(nullptr);
+			}
+		} else {
+			player->SetGroundEntity(nullptr);
+		}
 
         // Copy over the user command angles so they are stored for respawns.
         // (Used when going into a new map etc.)

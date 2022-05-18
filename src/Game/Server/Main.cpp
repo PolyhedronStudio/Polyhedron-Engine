@@ -361,15 +361,15 @@ void SVG_ClientEndServerFrames(void)
         Entity *entity = &serverEntities[stateNumber]; // WID: 1 +, because 0 == Worldspawn.
 
         // Acquire player entity pointer.
-        SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(entity, true, true);
+        GameEntity *validGameEntity = ServerGameWorld::ValidateEntity(entity, true, true);
 
         // Sanity check.
-        if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+        if (!validGameEntity|| !validGameEntity->IsSubclassOf<SVGBasePlayer>()) {
             continue;
         }
 
         // Save to cast now.
-        SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
+        SVGBasePlayer *player = static_cast<SVGBasePlayer*>(validGameEntity);
 
         // Acquire server client.
         ServerClient *client = player->GetClient();

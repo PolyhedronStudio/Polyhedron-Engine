@@ -494,7 +494,7 @@ static void PM_StepSlideMove(void)
 **/
 static qboolean PM_CheckTrickJump(void) {
     // False in the following conditions.
-    if (pm->groundEntityPtr) { return false; }
+    if (pm->groundEntityNumber != -1) { return false; }
     if (playerMoveLocals.previousVelocity.z < PM_SPEED_UP) { return false; }
     if (pm->moveCommand.input.upMove < 1) { return false; }
     if (pm->state.flags & PMF_JUMP_HELD) { return false; }
@@ -561,7 +561,7 @@ static qboolean PM_CheckJump(void) {
 
     // clear the ground indicators
     pm->state.flags &= ~PMF_ON_GROUND;
-    pm->groundEntityPtr = NULL;
+	pm->groundEntityNumber = -1;//    pm->groundEntityPtr = NULL;
 
     // we can trick jump soon
     pm->state.flags |= PMF_TIME_TRICK_START;
@@ -663,7 +663,7 @@ static qboolean PM_CheckLadder(void) {
         pm->state.flags |= PMF_ON_LADDER;
 
         // No ground entity, obviously.
-        pm->groundEntityPtr = NULL;
+        pm->groundEntityNumber = -1;//	pm->groundEntityPtr = NULL;
 
         // Remove ducked and possible ON_GROUND flags.
         pm->state.flags &= ~(PMF_ON_GROUND | PMF_DUCKED);
@@ -810,7 +810,7 @@ static void PM_CheckGround(void) {
     if (trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL) {
 
         // If we had no ground, then handle landing events
-        if (!pm->groundEntityPtr) {
+        if (pm->groundEntityNumber == -1) {//	if (!pm->groundEntityPtr) {
 
             // Any landing terminates the water jump
             if (pm->state.flags & PMF_TIME_WATER_JUMP) {
@@ -841,7 +841,15 @@ static void PM_CheckGround(void) {
 
         // Save a reference to the ground
         pm->state.flags |= PMF_ON_GROUND;
-        pm->groundEntityPtr = trace.ent;
+		if (trace.ent) {//	pm->groundEntityPtr = trace.ent;
+#ifdef SHAREDGAME_CLIENTGAME
+			pm->groundEntityNumber = trace.ent->clientEntityNumber;
+#endif
+#ifdef SHAREDGAME_SERVERGAME
+			pm->groundEntityNumber = trace.ent->currentState.number;
+#endif
+		}
+        
 
         // Sink down to it if not trick jumping
         if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
@@ -850,7 +858,7 @@ static void PM_CheckGround(void) {
         }
     } else {
         pm->state.flags &= ~PMF_ON_GROUND;
-        pm->groundEntityPtr = NULL;
+        pm->groundEntityNumber = -1;//	pm->groundEntityPtr = NULL;
     }
 
     // Always touch the entity, even if we couldn't stand on it
@@ -977,7 +985,7 @@ static void PM_ApplyCurrents(void) {
     }
 
     // add conveyer belt velocities
-    if (pm->groundEntityPtr) {
+    if (pm->groundEntityNumber != -1) {//	if (pm->groundEntityPtr) {
         if (playerMoveLocals.groundTrace.contents & BrushContents::Current0) {
             current.x += 1.0;
         }

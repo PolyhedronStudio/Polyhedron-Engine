@@ -85,14 +85,14 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     pm.PointContents = PM_PointContents;
 
     // Restore ground entity for this frame.
-    pm.groundEntityPtr = cl->predictedState.groundEntityPtr;
+    pm.groundEntityNumber = cl->predictedState.groundEntityNumber; //	pm.groundEntityPtr = cl->predictedState.groundEntityPtr;
 
     // Copy current state to pmove
     pm.state = cl->frame.playerState.pmove;
 #if USE_SMOOTH_DELTA_ANGLES
     pm.state.deltaAngles = clge->view->GetViewCamera()->GetViewDeltaAngles(); //cl->deltaAngles;
 #endif
-
+	
     // Run frames in order.
     while (++acknowledgedCommandIndex <= currentCommandIndex) {
         // Fetch the command.
@@ -113,7 +113,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
             // Update player move client side audio effects.
             UpdateClientSoundSpecialEffects(&pm);
 			
-			// Execute touch callbacks and "predict" other entities.		
+			// Execute touch callbacks and "predict" against other entities.
 			DispatchPredictedTouchCallbacks(&pm);
         }
 
@@ -136,12 +136,11 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
         // Update player move client side audio effects.
         UpdateClientSoundSpecialEffects(&pm);
 
-		// Execute touch callbacks and "predict" other entities.		
+		// Execute touch callbacks and "predict" against other entities.		
 		DispatchPredictedTouchCallbacks(&pm);
 
         // Save for error detection
         cl->moveCommand.prediction.origin = pm.state.origin;
-
     }
 
     // Copy results out for rendering
@@ -156,7 +155,7 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
     cl->predictedState.stepOffset = pm.state.stepOffset;
     cl->predictedState.viewAngles = pm.viewAngles;
 
-    cl->predictedState.groundEntityPtr = pm.groundEntityPtr;
+    cl->predictedState.groundEntityNumber = pm.groundEntityNumber; //	cl->predictedState.groundEntityPtr = pm.groundEntityPtr;
 }
 
 /**
@@ -220,27 +219,25 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 		
 		// Let the world know about the current entity we're running.
 		level.currentEntity = player;
-
-        // Check for jumping sound.
-        //if (player->GetGroundEntityHandle() && !pm.groundEntityPtr && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
-        //    SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
-        //    player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
-        //}
         
         // Use an entity handle to validate and store the new ground entity after pmove.
-        SGEntityHandle groundEntityHandle = pm->groundEntityPtr;
-        if (*groundEntityHandle && groundEntityHandle.Get()) {
-            player->SetGroundEntity(*groundEntityHandle);
-            player->SetGroundEntityLinkCount(groundEntityHandle->GetLinkCount());
-        } else {
-            player->SetGroundEntity(nullptr);
-        }
+        // Get the ground POD Entity that matches the groundEntityNumber. 
+        // Get the ground POD Entity that matches the groundEntityNumber. 
+		ClientGameWorld *gameWorld = GetGameWorld();
 
-		//PODEntity *playerGroundPODEntity = pm->groundEntityPtr;
-		//if (playerGroundPODEntity) {
-		//	GameEntity *playerGroundGameEntity = gameWorld->GetGameEntityByIndex(playerGroundPODEntity->clientEntityNumber);
-		//	player->SetGroundEntity(playerGroundGameEntity);
-		//}
+		if (gameWorld) {
+			// Get the ground POD Entity that matches the groundEntityNumber. 
+			SGEntityHandle groundEntityHandle = gameWorld->GetPODEntityByIndex(pm->groundEntityNumber);
+
+			if (ClientGameWorld::ValidateEntity(groundEntityHandle)) {
+				player->SetGroundEntity(*groundEntityHandle);
+				player->SetGroundEntityLinkCount(groundEntityHandle->GetGroundEntityLinkCount());//podGameEntity->GetGroundEntityLinkCount());
+			} else {
+				player->SetGroundEntity(nullptr);
+			}
+		} else {
+			player->SetGroundEntity(nullptr);
+		}
 
 		// Dispatch touch trigger callbacks on the player entity for each touched entity.
 		UTIL_TouchTriggers(player);
@@ -288,6 +285,7 @@ TraceResult ClientGamePrediction::PM_Trace(const vec3_t& start, const vec3_t& mi
 *   @brief  Player Move Simulation PointContents Wrapper.
 **/
 int32_t ClientGamePrediction::PM_PointContents(const vec3_t &point) {
+	// Get world brush contents at 'point' coordinate.
     PODEntity* ent = nullptr;
     mmodel_t* cmodel = nullptr;
 
@@ -309,5 +307,6 @@ int32_t ClientGamePrediction::PM_PointContents(const vec3_t &point) {
             ent->currentState.angles);
     }
 
+	// Return.
     return contents;
 }

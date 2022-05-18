@@ -177,16 +177,16 @@ void ItemWeaponNone::InstanceWeaponOnAnimationFinished(SVGBasePlayer* player, SV
 **/
 void ItemWeaponNone::InstanceWeaponNoneUse(SVGBaseEntity* user, SVGBaseItem* item) { 
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(user, true, true);
+    GameEntity *validGameEntity = ServerGameWorld::ValidateEntity(user, true, true);
 
     // Sanity check.
-    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+    if (!validGameEntity || !validGameEntity->IsSubclassOf<SVGBasePlayer>()) {
         gi.DPrintf("Warning: InstanceWeaponNoneUse called without a valid SVGBasePlayer pointer.\n");
         return;
     }
 
     // Save to cast now.
-    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
+    SVGBasePlayer *player = static_cast<SVGBasePlayer*>(validGameEntity);
 
     // Make sure it is a valid None item.
     if (!item || !item->IsClass<ItemWeaponNone>()) {

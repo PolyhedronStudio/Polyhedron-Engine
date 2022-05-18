@@ -1052,35 +1052,36 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 *   @brief	Utility function so we can acquire a valid entity pointer. It operates
 *			by using an entity handle in order to make sure that it has a valid
 *			server and game entity object.
+*			
+*			Use this whenever you are dealing with an EntityHandle and want to make
+*			sure it still points to an active and valid (Game/POD)-entity pointer.
+*
 *	@param	requireValidClient	Expands the check to make sure the entity's client isn't set to nullptr.
 *	@param	requireInUse		Expands the check to make sure the entity has its inUse set to true.
 * 
 *   @return A valid pointer to the entity game entity. nullptr on failure.
 **/
 IClientGameEntity* ClientGameWorld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
- //   // Ensure the entity is valid.
- //   if (!*entityHandle || (!entityHandle.Get() ||
-	//		(
-	//			!(requireClient == true ? (entityHandle.Get()->client != nullptr ? true : false) : true) 
-	//			&& !(requireInUse == true ? entityHandle.Get()->inUse : true)) 
-	//		)
-	//	)
-	//{
-	//	return nullptr;
- //   }
+	// Ensure the handle is valid.
+	if (!entityHandle || 
+			!(
+				// Check for non nullptr client pointer.
+				( requireClient == true ? ( entityHandle.Get()->client != nullptr ? true : false ) : true ) &&
+				// Check for inUse.
+				( requireInUse == true ? entityHandle.Get()->inUse : true )  
+			)
+		)
+	{
+		return nullptr;
+	}
 
- //   // It's lame, but without requiring a const entity handle, we can't pass
-	//// in any pointers to (server-)entity types.
-	//SGEntityHandle castHandle = static_cast<SGEntityHandle>(entityHandle);
-	//
-	//// Ensure it is of class type player.
- //   if (!castHandle->IsSubclassOf<SVGBasePlayer>()) {
-	//	return nullptr;
- //   }
-
- //   // We've got a definite valid player entity here. Return it.
- //   return dynamic_cast<SVGBasePlayer*>(*castHandle);
-	return nullptr;
+	// It's lame, but without requiring a const entity handle, we can't pass
+	// in any pointers to (server-)entity types.
+	return (* const_cast< SGEntityHandle& >( entityHandle ) );
+}
+//! Non const version of ValidateEntity, uses a const cast to call and return the results of the const version.
+IClientGameEntity* ClientGameWorld::ValidateEntity(SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
+	return ValidateEntity(const_cast<const SGEntityHandle&>(entityHandle), requireClient, requireInUse);
 }
 
 

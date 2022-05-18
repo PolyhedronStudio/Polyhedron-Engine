@@ -23,6 +23,7 @@ static IServerGameEntity* GetGameEntity(PODEntity* podEntity) {
     // Reinterpret cast the gameEntity pointer.
     if (podEntity) {
 	    if (podEntity->gameEntity != nullptr) {
+			// Static Cast, since ultimately unless we're a buffoon, this pointer is valid.
 	        return static_cast<IServerGameEntity*>(podEntity->gameEntity);
 	    } else {
 	        return nullptr;
@@ -148,6 +149,7 @@ PODEntity* SGEntityHandle::Set(PODEntity* entity) {
 *	@return	The entityID stored in this handle.
 **/
 const uint32_t SGEntityHandle::ID() { return entityID; }
+const uint32_t SGEntityHandle::ID() const { return entityID; }
 
 /**
 *	@brief * operator implementations.
@@ -197,13 +199,13 @@ GameEntity* SGEntityHandle::operator->() const { return (GameEntity*)GetGameEnti
 *   @return Returns true if GameEntity* != nullptr, its podEntity pointer 
 *           != nullptr, and their entity index number matches.
 **/
-bool SGEntityHandle::operator==(const ISharedGameEntity* gameEntity) {
+bool SGEntityHandle::operator == (const ISharedGameEntity* gameEntity) {
     if (!gameEntity) {
 	    return false;
     }
 
     PODEntity* podEntity = const_cast<ISharedGameEntity*>(gameEntity)->GetPODEntity();
-
+	
     if (!podEntity) {
 		return false;
     }
@@ -220,6 +222,45 @@ bool SGEntityHandle::operator==(const ISharedGameEntity* gameEntity) {
 }
 
 /**
-*   @brief Used to check whether this entity handle has a valid server entity.
+*   @brief Used to check whether this entity handle is valid valid server entity.
 **/
-SGEntityHandle::operator bool() { return (podEntity != nullptr); }
+SGEntityHandle::operator bool() {
+	// Ensure the POD Entity is a valid pointer, and matches the stored ID(Entity Number).
+	bool validPODEntity = Get();
+
+	// When valid, move on to test for a valid gameEntity pointer.
+	if (validPODEntity) {
+		// Get the pointer if valid.
+		GameEntity *validGameEntity = GetGameEntity(podEntity);
+
+		// The Game Entity is valid ONLY if its Number matches the stored ID(Entity Number).
+		if (validGameEntity && validGameEntity->GetNumber() == ID()) {
+			return true;
+		}
+	}
+	
+	// Return false, it's not valid.
+	return false;
+}
+
+/**
+*   @brief Used to check whether this entity handle is valid valid server entity.
+**/
+SGEntityHandle::operator bool() const {
+	// Ensure the POD Entity is a valid pointer, and matches the stored ID(Entity Number).
+	bool validPODEntity = Get();
+
+	// When valid, move on to test for a valid gameEntity pointer.
+	if (validPODEntity) {
+		// Get the pointer if valid.
+		GameEntity *validGameEntity = GetGameEntity(podEntity);
+
+		// The Game Entity is valid ONLY if its Number matches the stored ID(Entity Number).
+		if (validGameEntity && validGameEntity->GetNumber() == ID()) {
+			return true;
+		}
+	}
+	
+	// Return false, it's not valid.
+	return false;
+}

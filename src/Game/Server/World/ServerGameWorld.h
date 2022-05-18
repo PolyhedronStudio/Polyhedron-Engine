@@ -172,7 +172,7 @@ public:
     * 
     *   @return A valid pointer to the entity's SVGBasePlayer game entity. nullptr on failure.
     **/
-    static SVGBaseEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
+    static IServerGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
 
     /**

@@ -913,16 +913,16 @@ void SVG_ClientCommand(PODEntity *svEntity) {
     //
     //
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(svEntity, true, true);
+    GameEntity *validGameEntity = ServerGameWorld::ValidateEntity(svEntity, true, true);
 
     // Sanity check.
-    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+    if (!validGameEntity || !validGameEntity->IsSubclassOf<SVGBasePlayer>()) {
         gi.DPrintf("Warning: SVG_ClientCommand called on svEntity(#%i) without a valid SVGBasePlayer pointer.\n");
         return;
     }
 
     // Save to cast now.
-    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
+    SVGBasePlayer *player = static_cast<SVGBasePlayer*>(validGameEntity);
 
     // Fetch its client pointer.
     ServerClient *client = player->GetClient();

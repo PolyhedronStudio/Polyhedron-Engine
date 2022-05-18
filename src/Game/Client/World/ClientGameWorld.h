@@ -209,18 +209,21 @@ public:
     **/
     qboolean FreeGameEntity(PODEntity* podEntity) override;
 
-
-    /**
-    *   @brief	Utility function so we can acquire a valid SVGBasePlayer*. It operates
-    *			by using an entity handle in order to make sure that it has a valid
-    *			server and game entity object.
-    *	@param	requireValidClient	Expands the check to make sure the entity's client isn't set to nullptr.
-    *	@param	requireInUse		Expands the check to make sure the entity has its inUse set to true.
-    * 
-    *   @return A valid pointer to the entity's SVGBasePlayer game entity. nullptr on failure.
-    **/
+	/**
+	*   @brief	Utility function so we can acquire a valid entity pointer. It operates
+	*			by using an entity handle in order to make sure that it has a valid
+	*			server and game entity object.
+	*			
+	*			Use this whenever you are dealing with an EntityHandle and want to make
+	*			sure it still points to an active and valid (Game/POD)-entity pointer.
+	*
+	*	@param	requireValidClient	Expands the check to make sure the entity's client isn't set to nullptr.
+	*	@param	requireInUse		Expands the check to make sure the entity has its inUse set to true.
+	* 
+	*   @return A valid pointer to the entity game entity. nullptr on failure.
+	**/
     static IClientGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
-
+	static IClientGameEntity* ValidateEntity(SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
     /**
 	*	@return	A pointer to the server entities array.

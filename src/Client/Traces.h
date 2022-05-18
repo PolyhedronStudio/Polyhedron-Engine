@@ -20,6 +20,12 @@ void CL_UnlinkEntity(PODEntity *entity);
 int32_t CL_PointContents(const vec3_t &point);
 
 /**
+*	@return	Returns a headNode that can be used for testing or clipping an
+*			entity's BoundingBox or OctagonBox of mins/maxs size.
+**/
+mnode_t *CL_HullForEntity(PODEntity *podEntity);
+
+/**
 *	@brief	Looks up all areas residing in the mins/maxs box of said areaType (solid, or triggers).
 *	@return	Number of entities found and stored in the list.
 **/

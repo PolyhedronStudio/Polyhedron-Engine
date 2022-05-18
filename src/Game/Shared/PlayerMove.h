@@ -155,7 +155,8 @@ struct PlayerMove {
     int32_t numTouchedEntities;
 
     // Pointer to the entity that is below the player. (out)
-    struct PODEntity* groundEntityPtr;
+    //struct PODEntity* groundEntityPtr;
+	int32_t groundEntityNumber = 0;
 
     // Clamped, and including kick and delta (out)
     vec3_t viewAngles = vec3_zero();

@@ -296,16 +296,16 @@ void ItemWeaponBeretta::InstanceWeaponProcessIdleState(SVGBasePlayer* player, SV
 **/
 qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(other, true, true);
+    GameEntity *validGameEntity = ServerGameWorld::ValidateEntity(other, true, true);
 
     // Sanity check.
-    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+    if (!validGameEntity || !validGameEntity->IsSubclassOf<SVGBasePlayer>()) {
         gi.DPrintf("Warning: InstanceWeaponSMGUse called without a valid SVGBasePlayer pointer.\n");
         return false;
     }
 
     // Save to cast now.
-    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
+    SVGBasePlayer *player = static_cast<SVGBasePlayer*>(validGameEntity);
 
     // Save to fetch client now.
     ServerClient *client = player->GetClient();
@@ -343,16 +343,16 @@ qboolean ItemWeaponBeretta::WeaponBerettaPickup(IServerGameEntity *other) {
 **/
 void ItemWeaponBeretta::InstanceWeaponBerettaUse(SVGBaseEntity* user, SVGBaseItem* item) { 
     // Acquire player entity pointer.
-    SVGBaseEntity *validEntity = ServerGameWorld::ValidateEntity(user, true, true);
+    GameEntity *validGameEntity = ServerGameWorld::ValidateEntity(user, true, true);
 
     // Sanity check.
-    if (!validEntity || !validEntity->IsSubclassOf<SVGBasePlayer>()) {
+    if (!validGameEntity || !validGameEntity->IsSubclassOf<SVGBasePlayer>()) {
         gi.DPrintf("Warning: InstanceWeaponBerettaUse called without a valid SVGBasePlayer pointer.\n");
         return;
     }
 
     // Save to cast now.
-    SVGBasePlayer *player = dynamic_cast<SVGBasePlayer*>(validEntity);
+    SVGBasePlayer *player = static_cast<SVGBasePlayer*>(validGameEntity);
 
     // Make sure it is a valid Beretta item.
     if (!item || !item->IsClass<ItemWeaponBeretta>()) {

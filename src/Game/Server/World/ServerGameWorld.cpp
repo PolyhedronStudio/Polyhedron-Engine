@@ -739,29 +739,46 @@ qboolean ServerGameWorld::FreeGameEntity(PODEntity* podEntity) {
 * 
 *   @return A valid pointer to the entity game entity. nullptr on failure.
 **/
-SVGBaseEntity* ServerGameWorld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
-    // Ensure the entity is valid.
-    if (!*entityHandle || (!entityHandle.Get() ||
-			(
-				!(requireClient == true ? (entityHandle.Get()->client != nullptr ? true : false) : true) 
-				&& !(requireInUse == true ? entityHandle.Get()->inUse : true)) 
+IServerGameEntity* ServerGameWorld::ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient, bool requireInUse) {
+	// Ensure the handle is valid.
+	if (!entityHandle || 
+			!(
+				// Check for non nullptr client pointer.
+				( requireClient == true ? ( entityHandle.Get()->client != nullptr ? true : false ) : true ) &&
+				// Check for inUse.
+				( requireInUse == true ? entityHandle.Get()->inUse : true )  
 			)
 		)
 	{
 		return nullptr;
-    }
+	}
 
-    // It's lame, but without requiring a const entity handle, we can't pass
+	// It's lame, but without requiring a const entity handle, we can't pass
 	// in any pointers to (server-)entity types.
-	SGEntityHandle castHandle = static_cast<SGEntityHandle>(entityHandle);
-	
-	// Ensure it is of class type player.
-    if (!castHandle->IsSubclassOf<SVGBasePlayer>()) {
-		return nullptr;
-    }
+	return (* const_cast< SGEntityHandle& >( entityHandle ) );
 
-    // We've got a definite valid player entity here. Return it.
-    return dynamic_cast<SVGBasePlayer*>(*castHandle);
+	//   // Ensure the entity is valid.
+ //   if (!*entityHandle || (!entityHandle.Get() ||
+	//		(
+	//			!(requireClient == true ? (entityHandle.Get()->client != nullptr ? true : false) : true) 
+	//			&& !(requireInUse == true ? entityHandle.Get()->inUse : true)) 
+	//		)
+	//	)
+	//{
+	//	return nullptr;
+ //   }
+
+ //   // It's lame, but without requiring a const entity handle, we can't pass
+	//// in any pointers to (server-)entity types.
+	//SGEntityHandle castHandle = static_cast<SGEntityHandle>(entityHandle);
+	//
+	//// Ensure it is of class type player.
+ //   if (!castHandle->IsSubclassOf<SVGBasePlayer>()) {
+	//	return nullptr;
+ //   }
+
+ //   // We've got a definite valid player entity here. Return it.
+ //   return dynamic_cast<SVGBasePlayer*>(*castHandle);
 }
 
 

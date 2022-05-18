@@ -102,6 +102,7 @@ public:
 	*	@return	The entityID stored in this handle.
 	**/
     const uint32_t ID();
+	const uint32_t ID() const;
 
     /**
 	*	@brief * operator implementations.
@@ -114,7 +115,7 @@ public:
 	*			If no valid GameEntity and POD Entity pointer are passed it unsets
 	*			the current handle to nullptr and entityID = 0.
 	**/
-    ISharedGameEntity* operator=(ISharedGameEntity* gameEntity);
+    ISharedGameEntity* operator=( ISharedGameEntity* gameEntity );
 
     /**
     *	@brief	Used to access the game entity its methods.
@@ -128,12 +129,13 @@ public:
     *   @return Returns true if GameEntity* != nullptr, its POD Entity pointer != nullptr, 
     *           and their entity index number matches.
     **/
-    bool operator==(const ISharedGameEntity* gameEntity);
+    bool operator==( const ISharedGameEntity* gameEntity);
 
     /**
     *   @brief Used to check whether this entity handle has a valid server entity.
     **/
     operator bool();
+	operator bool() const;
 
 private:
     //! Actual pointer referring to the POD Entity.

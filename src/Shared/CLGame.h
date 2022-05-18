@@ -240,8 +240,13 @@ extern "C" {
         // Add scanned out IP address to circular array of recent addresses.
         void            (*CheckForIP) (const char* s);
 
+		/**
+		*	@return	Returns a headNode of mins/maxs size that can be used for testing or clipping an
+		*			entity's BoundingBox or OctagonBox.
+		**/
+		mnode_t *(*CL_HullForEntity) ( PODEntity* podEntity );
 		// Links a client side entity.
-		void (*LinkEntity)(PODEntity *podEntity);
+		void (*LinkEntity) ( PODEntity *podEntity );
 		// Links a client side entity.
 		void (*World_LinkEntity)(PODEntity *podEntity);
 		// Unlinks a client side entity.
