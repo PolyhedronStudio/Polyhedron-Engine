@@ -184,50 +184,61 @@ int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity ) {
 *	@brief	Checks if this entity should have a groundEntity set or not.
 **/
 void SG_CheckGround( GameEntity *geCheck ) {
+	// Actual offset to determine for when a Hull is on-ground.
+	static constexpr float groundOffset = 0.25f;
+
+	// Sanity Check.
 	if (!geCheck) {
 		return;
 	}
 
+	// Check For: (EntityFlags::Swim | EntityFlags::Fly)
+	// If an entity suddenly has the Swim, or Fly flag set, unset its ground entity
+	// and return. It does not need GroundEntity behavior.
 	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
+	// Check For: Client Entity.
 	if( geCheck->GetClient() && geCheck->GetVelocity().z > 100) {//180) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
-	// if the hull point one-quarter unit down is solid the entity is on ground
+	// If the hull point one-quarter unit down is solid the entity is on ground.
 	const vec3_t geOrigin = geCheck->GetOrigin();
 	vec3_t traceEndPoint = {
 		geOrigin.x,
 		geOrigin.y,
-		geOrigin.z - 0.25f
+		geOrigin.z - groundOffset 
 	};
 
 	SGTraceResult traceResult = SG_Trace( geOrigin, geCheck->GetMins(), geCheck->GetMaxs(), traceEndPoint, geCheck, SG_SolidMaskForGameEntity(geCheck));
 
-	// check steepness
+	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
+	// Unset Ground Entity For Non Clients: When the trace result was not in a solid, and the velocity is > 1.
 	if( ( geCheck->GetVelocity().z > 1 && !geCheck->GetClient()) && !traceResult.startSolid) {
 		geCheck->SetGroundEntity(nullptr);
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
+	// If it did not start in a solid, and it's not stopping inside of a solid...
 	if( !traceResult.startSolid && !traceResult.allSolid ) {
-		//VectorCopy( trace.endpos, ent->s.origin );
+		// We must've hit some entity, so set it.
 		geCheck->SetGroundEntity(traceResult.gameEntity);
 		geCheck->SetGroundEntityLinkCount(traceResult.gameEntity ? traceResult.gameEntity->GetLinkCount() : 0); //ent->groundentity_linkcount = ent->groundentity->linkcount;
 		
+		// Since we hit ground, zero out the Z velocity in case it is lower than 0.
 		vec3_t geCheckVelocity = geCheck->GetVelocity();
 		if( geCheckVelocity.z < 0) {
 			geCheckVelocity.z = 0;
@@ -385,7 +396,8 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	CheckSVCvars();
 
 	// Get GameEntity from handle.
-    if (!entityHandle || !(*entityHandle) || !entityHandle.Get()) {
+    //if (!entityHandle || !(*entityHandle) || !entityHandle.Get()) {
+	if (!SGGameWorld::ValidateEntity(entityHandle)) {
         SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
 		return;
     }

@@ -240,7 +240,7 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 		}
 
 		// Dispatch touch trigger callbacks on the player entity for each touched entity.
-		UTIL_TouchTriggers(player);
+		SG_TouchTriggers(player);
 
 		// Solid touch logic.
 		int32_t i = 0;
@@ -257,7 +257,7 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 			}
 
 			SGEntityHandle other(pm->touchedEntities[i]);
-			if (!other || !*other) {
+			if (!ClientGameWorld::ValidateEntity(other)) {
 				//if (pm->touchedEntities[i] != nullptr) {
 				//	Com_DPrint("Skipped dispatching player touch to entity(#%i)\n", pm->touchedEntities[i]->clientEntityNumber);;
 				//}

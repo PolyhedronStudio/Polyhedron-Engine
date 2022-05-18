@@ -301,7 +301,7 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
                 geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
 			} else {
 				vec3_t angles = geCheck->GetAngles();
-				angles[vec3_t::Yaw] = angularMove[vec3_t::Yaw];
+				angles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
 				geCheck->SetAngles(angles);
 			}
 #endif
@@ -619,28 +619,29 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 *	@brief Logic for MoveType::(Push, Stop): Pushes all objects except for brush models. 
 **/
 void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
-	    vec3_t      move, amove;
-    GameEntity     *part = nullptr, *mv = nullptr;
-
     // Assign handle to base entity.
-    GameEntity* ent = *gePusherHandle;
+    GameEntity* gePusher = *gePusherHandle;
+
+	// Used also after the for loop, so declared here.
+	GameEntity *part = nullptr;
 
     // Ensure it is a valid entity.
-    if (!ent) {
+    if (!gePusher) {
     	SG_Physics_PrintWarning(std::string(__func__) + "got an invalid entity handle!");
         return;
     }
 
     // if not a team captain, so movement will be handled elsewhere
-    if (ent->GetFlags() & EntityFlags::TeamSlave)
+    if (gePusher->GetFlags() & EntityFlags::TeamSlave) {
         return;
+	}
 
     // make sure all team slaves can move before commiting
     // any moves or calling any Think functions
     // if the move is Blocked, all moved objects will be backed out
 retry:
     lastPushedState = pushedGameEntities;
-    for (part = ent ; part ; part = part->GetTeamChainEntity()) {
+    for (part = gePusher ; part ; part = part->GetTeamChainEntity()) {
         // Fetch pusher part, its Velocity.
         vec3_t partVelocity = part->GetVelocity();
 
@@ -651,11 +652,11 @@ retry:
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
             // object is moving
-            move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
-            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
+            vec3_t move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
+            vec3_t angularMove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
 
             SGEntityHandle partHandle(part);
-            if (!SG_Push(partHandle, move, amove))
+            if (!SG_Push(partHandle, move, angularMove))
                 break;  // move was Blocked
         }
     }
@@ -665,7 +666,7 @@ retry:
 
     if (part) {
         // the move failed, bump all nextThinkTime times and back out moves
-        for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
+        for (GameEntity *mv = gePusher ; mv ; mv = mv->GetTeamChainEntity()) {
             if (mv->GetNextThinkTime() > GameTime::zero()) {
                 mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);// 1_hz);
             }
@@ -685,7 +686,7 @@ retry:
 //#endif
     } else {
         // the move succeeded, so call all Think functions
-        for (part = ent ; part ; part = part->GetTeamChainEntity()) {
+        for (part = gePusher ; part ; part = part->GetTeamChainEntity()) {
             SG_RunThink(part);
         }
     }

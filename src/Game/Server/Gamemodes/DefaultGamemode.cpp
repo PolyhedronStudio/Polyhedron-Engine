@@ -786,13 +786,21 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     //
     vec3_t newAngles = player->GetAngles();
 
-    if (client->aimAngles[vec3_t::Pitch] > 180)
-        newAngles[vec3_t::Pitch] = (-360 + client->aimAngles[vec3_t::Pitch]) / 3;
+	if (client->playerState.pmove.viewAngles[vec3_t::Pitch] > 180)
+        newAngles[vec3_t::Pitch] = (-360 + client->playerState.pmove.viewAngles[vec3_t::Pitch]) / 3;
     else
-        newAngles[vec3_t::Pitch] = client->aimAngles[vec3_t::Pitch] / 3;
-    newAngles[vec3_t::Yaw] = client->aimAngles[vec3_t::Yaw];
+        newAngles[vec3_t::Pitch] = client->playerState.pmove.viewAngles[vec3_t::Pitch] / 3;
+    newAngles[vec3_t::Yaw] = client->playerState.pmove.viewAngles[vec3_t::Yaw];
     newAngles[vec3_t::Roll] = 0;
     newAngles[vec3_t::Roll] = player->CalculateRoll(newAngles, player->GetVelocity()) * 4;
+
+    //if (client->aimAngles[vec3_t::Pitch] > 180)
+    //    newAngles[vec3_t::Pitch] = (-360 + client->aimAngles[vec3_t::Pitch]) / 3;
+    //else
+    //    newAngles[vec3_t::Pitch] = client->aimAngles[vec3_t::Pitch] / 3;
+    //newAngles[vec3_t::Yaw] = client->aimAngles[vec3_t::Yaw];
+    //newAngles[vec3_t::Roll] = 0;
+    //newAngles[vec3_t::Roll] = player->CalculateRoll(newAngles, player->GetVelocity()) * 4;
 
     // Last but not least, after having calculated the Pitch, Yaw, and Roll, set the new angles.
     player->SetAngles(newAngles);
@@ -805,23 +813,26 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     // Without * FRAMETIME = XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
     bobMoveCycle.XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
+	// Do we have a valid ground entity?
+	bool isValidGroundEntity = ServerGameWorld::ValidateEntity(player->GetGroundEntityHandle());
+
     if (bobMoveCycle.XYSpeed < 5 || !(client->playerState.pmove.flags & PMF_ON_GROUND)) {
         // Special handling for when not on ground.
         bobMoveCycle.move = 0;
 
         // Start at beginning of cycle again (See the else if statement.)
         client->bobTime = 0;
-    } else if (player->GetGroundEntityHandle() || player->GetWaterLevel() == 2) {
+    } else if (isValidGroundEntity || player->GetWaterLevel() == 2) {
         // So bobbing only cycles when on ground.
         if (bobMoveCycle.XYSpeed > 450)
             bobMoveCycle.move = 0.25;
         else if (bobMoveCycle.XYSpeed > 210)
             bobMoveCycle.move = 0.125;
-        else if (!player->GetGroundEntityHandle() && player->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100)
+        else if (!isValidGroundEntity&& player->GetWaterLevel() == 2 && bobMoveCycle.XYSpeed > 100)
             bobMoveCycle.move = 0.225;
         else if (bobMoveCycle.XYSpeed > 100)
             bobMoveCycle.move = 0.0825;
-        else if (!player->GetGroundEntityHandle() && player->GetWaterLevel() == 2)
+        else if (!isValidGroundEntity && player->GetWaterLevel() == 2)
             bobMoveCycle.move = 0.1625;
         else
             bobMoveCycle.move = 0.03125;
@@ -978,7 +989,8 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         // Check for jumping sound.
 		SGEntityHandle previousGroundEntityHandle = player->GetGroundEntityHandle();
 
-		if (previousGroundEntityHandle && previousGroundEntityHandle.Get() && *previousGroundEntityHandle) {
+		// If the previous frame had a ground entity set, but after moving we don't, play a jump sound.
+		if (ServerGameWorld::ValidateEntity(previousGroundEntityHandle)) {
 			if (pm.groundEntityNumber == -1 && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
 				SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
 				player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
@@ -989,12 +1001,9 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 		ServerGameWorld *gameWorld = GetGameWorld();
 		if (gameWorld) {
 			// Get the ground POD Entity that matches the groundEntityNumber. 
-			PODEntity *podGroundEntity = gameWorld->GetPODEntityByIndex(pm.groundEntityNumber);
+			SGEntityHandle groundEntityHandle = gameWorld->GetPODEntityByIndex(pm.groundEntityNumber);
 
-			// Use an entity handle to validate and store the retreived groundEntity.
-			SGEntityHandle groundEntityHandle = podGroundEntity;
-			
-			if (groundEntityHandle && groundEntityHandle.Get() && *groundEntityHandle) {
+			if (ServerGameWorld::ValidateEntity(groundEntityHandle)) {
 				player->SetGroundEntity(*groundEntityHandle);
 				player->SetGroundEntityLinkCount(groundEntityHandle->GetGroundEntityLinkCount());//podGameEntity->GetGroundEntityLinkCount());
 			} else {
@@ -1030,7 +1039,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         // Execute touch callbacks as long as movetype isn't noclip, or spectator.
         if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
             // Trigger touch logic. 
-            UTIL_TouchTriggers(player);
+            SG_TouchTriggers(player);
 
             // Solid touch logic.
             int32_t i = 0;
@@ -1047,7 +1056,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
                 }
 
                 SGEntityHandle other(pm.touchedEntities[i]);
-                if (!other || !*other) {
+                if (!ServerGameWorld::ValidateEntity(other)) {
                     continue;
                 }
 
@@ -1631,19 +1640,32 @@ void DefaultGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
 	// Set the actual player spawn origin. Offset of 1 unit off the ground.
     player->SetOrigin(spawnOrigin);
 	// We set the oldOrigin too, since we're spawning at and NOT lerping from a location.
-    player->SetOldOrigin(player->GetOrigin());
+    player->SetOldOrigin(spawnOrigin);
 	// Set the entity rotation to spawn angle yaw.
-	player->SetAngles(vec3_t { 0.f, spawnAngles[vec3_t::Yaw], 0.f });
-	  
+	const vec3_t spawnViewAngles = { 
+		0.f, 
+		AngleMod( spawnAngles[vec3_t::Yaw] ), 
+		0.f 
+	};
+	player->SetAngles( spawnViewAngles );
+
 	// Setup player move origin to spawnpoint origin.	
     client->playerState.pmove.origin = spawnOrigin;
+	// Set the player move state's directional view angles.
+	client->playerState.pmove.viewAngles = spawnViewAngles;
 	// Calculate the delta angles of the client.
-	client->playerState.pmove.deltaAngles = spawnAngles - client->respawn.commandViewAngles;
-	// Set the player move state's directional view angles, and the client's aim angles to those of the player entity.
-	client->playerState.pmove.viewAngles = player->GetAngles();
-	client->oldViewAngles = player->GetAngles();
-	client->aimAngles = player->GetAngles();
+	client->playerState.pmove.deltaAngles = client->playerState.pmove.viewAngles - client->respawn.commandViewAngles;
+	client->oldViewAngles = spawnViewAngles;
+	client->aimAngles = spawnViewAngles;
 
+	//self->s.angles[PITCH] = 0;
+	//self->s.angles[YAW] = anglemod( spawn_angles[YAW] );
+	//self->s.angles[ROLL] = 0;
+	//VectorCopy( self->s.angles, client->ps.viewangles );
+
+	//// set the delta angle
+	//for( i = 0; i < 3; i++ )
+	//	client->ps.pmove.delta_angles[i] = ANGLE2SHORT( client->ps.viewangles[i] ) - client->ucmd.angles[i];
 
     // spawn a spectator in case the client was/is one.
     if (client->persistent.isSpectator) {

@@ -97,10 +97,6 @@ void DeathmatchGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
     vec3_t  spawnOrigin = vec3_zero();
     vec3_t  spawnAngles = vec3_zero();
 
-    // Select the clients spawn point.
-    SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
-    player->SetOrigin(spawnOrigin);
-    player->SetAngles(spawnAngles);
 
     // Acquire the new client index belonging to this entity.
     int32_t clientIndex = player->GetNumber() - 1;  //ent - g_entities - 1;
@@ -159,22 +155,30 @@ void DeathmatchGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
 
     // Set gun index to whichever was persistent in the previous map (if there was one).
     client->playerState.gunIndex = 0;  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
+	
+    // Select the clients spawn point.
+    SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);
 
 	// Set the actual player spawn origin. Offset of 1 unit off the ground.
     player->SetOrigin(spawnOrigin);
 	// We set the oldOrigin too, since we're spawning at and NOT lerping from a location.
-    player->SetOldOrigin(player->GetOrigin());
+    player->SetOldOrigin(spawnOrigin);
 	// Set the entity rotation to spawn angle yaw.
-	player->SetAngles(vec3_t { 0.f, spawnAngles[vec3_t::Yaw], 0.f });
-	  
+	const vec3_t spawnViewAngles = { 
+		0.f, 
+		AngleMod( spawnAngles[vec3_t::Yaw] ), 
+		0.f 
+	};
+	player->SetAngles( spawnViewAngles );
+
 	// Setup player move origin to spawnpoint origin.	
     client->playerState.pmove.origin = spawnOrigin;
+	// Set the player move state's directional view angles.
+	client->playerState.pmove.viewAngles = spawnViewAngles;
 	// Calculate the delta angles of the client.
-	client->playerState.pmove.deltaAngles = spawnAngles - client->respawn.commandViewAngles;
-	// Set the player move state's directional view angles, and the client's aim angles to those of the player entity.
-	client->playerState.pmove.viewAngles = player->GetAngles();
-	client->oldViewAngles = player->GetAngles();
-	client->aimAngles = player->GetAngles();
+	client->playerState.pmove.deltaAngles = client->playerState.pmove.viewAngles - client->respawn.commandViewAngles;
+	client->oldViewAngles = spawnViewAngles;
+	client->aimAngles = spawnViewAngles;
 
     // spawn a spectator in case the client was/is one.
     if (client->persistent.isSpectator) {
@@ -188,7 +192,7 @@ void DeathmatchGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
         player->SetMoveType(MoveType::Spectator);
 
         // No solid.
-        player->SetSolid(Solid::BoundingBox);
+        player->SetSolid(Solid::OctagonBox);
 
         // NoClient flag, aka, do not send this entity to other clients. It is invisible to them.
     	player->SetServerFlags(player->GetServerFlags() | EntityServerFlags::NoClient);

@@ -768,7 +768,7 @@ void SVGBasePlayer::UpdateEvent() {
     }
 
     // Are we on-ground and "speeding" hard enough?
-    if (GetGroundEntityHandle() && bobMove.XYSpeed > 225) {
+    if (ServerGameWorld::ValidateEntity(GetGroundEntityHandle()) && bobMove.XYSpeed > 225) {
         // Do a footstep, from left, to right, left, to right.
         // Do the Bob!
         if ((int)(client->bobTime + bobMove.move) != bobMove.cycle ) {
@@ -897,14 +897,18 @@ void SVGBasePlayer::CheckFallingDamage()
     if (GetMoveType() == MoveType::NoClip || GetMoveType() == MoveType::Spectator)
         return;
 
+	// Validate our groundentity handle.
+	bool isValidGroundEntity = ServerGameWorld::ValidateEntity(GetGroundEntityHandle());
+
     // Calculate delta velocity.
     vec3_t velocity = GetVelocity();
 
-    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!GetGroundEntityHandle())) {
+    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!isValidGroundEntity)) {
         delta = client->oldVelocity[2];
     } else {
-        if (!GetGroundEntityHandle())
-            return;
+        if (!isValidGroundEntity) {
+			return;
+		}
         delta = velocity[2] - client->oldVelocity[2];
     }
     delta = (delta * delta * 0.0001);
@@ -940,8 +944,9 @@ void SVGBasePlayer::CheckFallingDamage()
         }
         SetDebouncePainTime(level.time);   // no normal pain sound
         damage = (delta - 30) / 2;
-        if (damage < 1)
+        if (damage < 1) {
             damage = 1;
+		}
         dir = { 0.f, 0.f, 1.f };
 
         //if (!deathmatch->value || 
