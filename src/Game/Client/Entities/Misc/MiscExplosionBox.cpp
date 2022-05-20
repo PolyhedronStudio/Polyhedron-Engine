@@ -365,6 +365,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
     }
 
     // Ground entity checks.
+	GameEntity *groundEntity = ClientGameWorld::ValidateEntity( other->GetGroundEntityHandle() );
     if (!other->GetGroundEntityHandle() || other->GetGroundEntityHandle() == this) {
 		return;
     }

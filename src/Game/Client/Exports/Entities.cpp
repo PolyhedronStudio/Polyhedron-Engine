@@ -212,10 +212,10 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 
         // If the ground entity moved, make sure we are still on it
 		//if (!gameEntity->GetClient()) {
-			SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
-			if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
+			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
 				// Reset ground entity.
-				gameEntity->SetGroundEntity(nullptr);
+				gameEntity->SetGroundEntity( SGEntityHandle() );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
 				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
@@ -294,10 +294,10 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 
         // If the ground entity moved, make sure we are still on it
 		//if (!gameEntity->GetClient()) {
-			SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
-			if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
+			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
 				// Reset ground entity.
-				gameEntity->SetGroundEntity(nullptr);
+				gameEntity->SetGroundEntity( SGEntityHandle() );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
 				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {

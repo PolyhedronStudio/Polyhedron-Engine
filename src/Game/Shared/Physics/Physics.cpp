@@ -196,14 +196,14 @@ void SG_CheckGround( GameEntity *geCheck ) {
 	// If an entity suddenly has the Swim, or Fly flag set, unset its ground entity
 	// and return. It does not need GroundEntity behavior.
 	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
-		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntity( SGEntityHandle() );
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
 	// Check For: Client Entity.
-	if( geCheck->GetClient() && geCheck->GetVelocity().z > 100) {//180) {
-		geCheck->SetGroundEntity(nullptr);
+	if( geCheck->GetClient() && geCheck->GetVelocity().z > 180) { // > 100
+		geCheck->SetGroundEntity( SGEntityHandle() );
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
@@ -220,14 +220,14 @@ void SG_CheckGround( GameEntity *geCheck ) {
 
 	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
-		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntity( SGEntityHandle() );
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
 	// Unset Ground Entity For Non Clients: When the trace result was not in a solid, and the velocity is > 1.
 	if( ( geCheck->GetVelocity().z > 1 && !geCheck->GetClient()) && !traceResult.startSolid) {
-		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntity( SGEntityHandle() );
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
@@ -362,7 +362,7 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
-	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.nextServerTime) {
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) { //nextThinkTime > level.nextServerTime) {
 #endif
 #ifdef SHAREDGAME_SERVERGAME
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
@@ -402,7 +402,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 		return;
     }
 
-    GameEntity *ent = dynamic_cast<GameEntity*>(*entityHandle);
+    GameEntity *ent = SGGameWorld::ValidateEntity( entityHandle );
 
     if (!ent) {
 	    SG_Physics_PrintWarning( std::string(__func__) + "got an entity handle that still has a broken game entity ptr!" );

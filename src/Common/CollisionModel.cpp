@@ -996,8 +996,7 @@ recheck:
 /**
 *   @brief  Check for what brush contents reside at vec3 'p' inside given node list.
 **/
-int CM_PointContents(const vec3_t &p, mnode_t *headNode)
-{
+int CM_PointContents(const vec3_t &p, mnode_t *headNode) {
     if (!headNode) {
         return 0;
     }

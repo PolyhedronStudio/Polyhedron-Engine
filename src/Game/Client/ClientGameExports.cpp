@@ -338,6 +338,7 @@ void ClientGameExports::ClientUpdateOrigin() {
     }
     cl->playerEntityAngles[vec3_t::Pitch] = cl->playerEntityAngles[vec3_t::Pitch] / 3;
 
+
     // Update the client's 3D Sound Spatialization Origin values. This is a nescessity for the game 
     // in order to properly play sound effects.
     clgi.UpdateSoundSpatializationOrigin(cl->refdef.vieworg, viewCamera->GetForwardViewVector(), viewCamera->GetRightViewVector(), viewCamera->GetUpViewVector());

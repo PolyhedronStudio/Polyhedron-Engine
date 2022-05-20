@@ -959,10 +959,14 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         // Update player move's gravity state.
         client->playerState.pmove.gravity = sv_gravity->value;
 
+		// Validate the ground entity we acquire based on the groundEntityNumber.
+		GameEntity *validGroundEntity = ServerGameWorld::ValidateEntity(player->GetGroundPODEntity());
+		const int32_t groundEntityNumber = (validGroundEntity ? validGroundEntity->GetNumber() : -1);
+
         // Copy over the pmove state from the latest player state.
         PlayerMove pm         = {};
         pm.moveCommand        = *moveCommand;
-        pm.groundEntityNumber = (player->GetGroundPODEntity() ? player->GetGroundPODEntity()->currentState.number : -1); //	pm.groundEntityPtr  = player->GetGroundEntityHandle().Get();
+        pm.groundEntityNumber = groundEntityNumber;
         pm.state              = client->playerState.pmove;
         pm.state.origin       = player->GetOrigin();
         pm.state.velocity     = player->GetVelocity();
@@ -987,11 +991,11 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         player->SetWaterType(pm.waterType);
 
         // Check for jumping sound.
-		SGEntityHandle previousGroundEntityHandle = player->GetGroundEntityHandle();
+		GameEntity *gePreviousGroundEntity = ServerGameWorld::ValidateEntity( player->GetGroundEntityHandle() );
 
 		// If the previous frame had a ground entity set, but after moving we don't, play a jump sound.
-		if (ServerGameWorld::ValidateEntity(previousGroundEntityHandle)) {
-			if (pm.groundEntityNumber == -1 && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+		if (gePreviousGroundEntity) {
+			if (pm.groundEntityNumber >= 0 && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
 				SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
 				player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
 			}
@@ -999,18 +1003,19 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 
 		// Resolve the perhaps new Ground Entity.
 		ServerGameWorld *gameWorld = GetGameWorld();
-		if (gameWorld) {
-			// Get the ground POD Entity that matches the groundEntityNumber. 
-			SGEntityHandle groundEntityHandle = gameWorld->GetPODEntityByIndex(pm.groundEntityNumber);
+		if ( gameWorld ) {
+			GameEntity *geGround = gameWorld->GetGameEntityByIndex(pm.groundEntityNumber);
 
-			if (ServerGameWorld::ValidateEntity(groundEntityHandle)) {
-				player->SetGroundEntity(*groundEntityHandle);
-				player->SetGroundEntityLinkCount(groundEntityHandle->GetGroundEntityLinkCount());//podGameEntity->GetGroundEntityLinkCount());
-			} else {
-				player->SetGroundEntity(nullptr);
+			if (geGround) {
+				player->SetGroundEntity(geGround);
+				player->SetGroundEntityLinkCount(geGround->GetLinkCount());
+			}
+			else {
+				player->SetGroundEntity(SGEntityHandle() );
+				player->SetGroundEntityLinkCount(0);
 			}
 		} else {
-			player->SetGroundEntity(nullptr);
+			player->SetGroundEntity( SGEntityHandle() );
 		}
 
         // Copy over the user command angles so they are stored for respawns.
@@ -1020,7 +1025,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         client->respawn.commandViewAngles[2] = moveCommand->input.viewAngles[2];
 
         // Special treatment for angles in case we are dead. Target the killer entity yaw angle.
-        if (player->GetDeadFlag() != DeadFlags::Alive) {
+        if ( player->GetDeadFlag() != DeadFlags::Alive ) {
             client->playerState.pmove.viewAngles[vec3_t::Roll] = 40;
             client->playerState.pmove.viewAngles[vec3_t::Pitch] = -15;
             client->playerState.pmove.viewAngles[vec3_t::Yaw] = client->killerYaw;
@@ -1037,7 +1042,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         int32_t playerMoveType = player->GetMoveType();
 
         // Execute touch callbacks as long as movetype isn't noclip, or spectator.
-        if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
+        if ( playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator ) {
             // Trigger touch logic. 
             SG_TouchTriggers(player);
 
@@ -1055,31 +1060,41 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
                     continue;   // duplicated
                 }
 
-                SGEntityHandle other(pm.touchedEntities[i]);
-                if (!ServerGameWorld::ValidateEntity(other)) {
-                    continue;
-                }
+				// Get POD Entity of touched entity using Gameworld.
+				ServerGameWorld *gameWorld = GetGameWorld();
+				// Get Touched Entity number.
+				const int32_t touchedEntityNumber = pm.touchedEntities[i];
 
-                other->DispatchTouchCallback(*other, player, NULL, NULL);
-            }
+				// Get the POD Entity.
+				PODEntity *podTouchEntity = gameWorld->GetPODEntityByIndex( touchedEntityNumber );
 
-        }
+				// Create our Entity Handle.
+				SGEntityHandle ehOther(podTouchEntity);
+
+				GameEntity *geOther = ServerGameWorld::ValidateEntity( ehOther );
+				if (!geOther) {
+					continue;
+				}
+
+				geOther->DispatchTouchCallback( geOther, player, NULL, NULL );
+            } // for (i = 0 ; i < pm.numTouchedEntities; i++) {
+        } // if ( playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator ) {
     }
 
     // Update client button bits.
-    SetClientButtonBits(client, moveCommand);
+    SetClientButtonBits( client, moveCommand );
 
     // save light level the player is standing on for
     // monster sighting AI
     //ent->lightLevel = moveCommand->input.lightLevel;
 
     // Fire weapon from final position if needed
-    if (client->latchedButtons & ButtonBits::PrimaryFire) {
-        if (client->respawn.isSpectator) {
+    if ( client->latchedButtons & ButtonBits::PrimaryFire ) {
+        if ( client->respawn.isSpectator ) {
 
             client->latchedButtons = 0;
 
-            if (client->chaseTarget) {
+            if ( client->chaseTarget ) {
                 client->chaseTarget = NULL;
                 client->playerState.pmove.flags &= ~PMF_NO_PREDICTION;
             } else {
@@ -1091,21 +1106,21 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
             //player->WeaponThink();
         }
     } else {
-	    if (!client->respawn.isSpectator) {
+	    if ( !client->respawn.isSpectator ) {
 	        //player->WeaponThink();
 	    }
     }
 
     // Act on the jump key(which sets upMove), used to change spectator targets.
-    if (client->respawn.isSpectator) {
-        if (moveCommand->input.upMove >= 10) {
+    if ( client->respawn.isSpectator ) {
+        if ( moveCommand->input.upMove >= 10 ) {
             // When jump isn't held yet in the player move flags..
-            if (!(client->playerState.pmove.flags & PMF_JUMP_HELD)) {
+            if ( !(client->playerState.pmove.flags & PMF_JUMP_HELD) ) {
                 // We add the jump held bit.
                 client->playerState.pmove.flags |= PMF_JUMP_HELD;
 
                 // So we can change chase target.
-                if (client->chaseTarget) {
+                if ( client->chaseTarget ) {
     //                SVG_ChaseNext(player);
                 } else {
   //                  SVG_GetChaseTarget(player);

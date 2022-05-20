@@ -318,7 +318,7 @@ public:
     // TODO TODO TODO: Fix it so it returns the actual ground entity....
     virtual SGEntityHandle   &GetGroundEntityHandle() = 0;
 	virtual PODEntity		 *GetGroundPODEntity() = 0;
-	virtual void             SetGroundEntity(GameEntity* groundEntity) = 0;
+	virtual void             SetGroundEntity(const SGEntityHandle &ehGroundEntity) = 0;
 
 
     /**

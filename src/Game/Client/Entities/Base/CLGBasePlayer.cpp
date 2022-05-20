@@ -76,6 +76,8 @@ void CLGBasePlayer::PostSpawn() {
 **/
 void CLGBasePlayer::Think() {
 	Base::Think();
+
+	Com_DPrint("CLGBasePlayer(#%i): is thinking man!\n", GetNumber());
 }
 
 /**

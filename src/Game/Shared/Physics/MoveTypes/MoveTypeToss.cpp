@@ -70,7 +70,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	// Refresh the ground entity for said MoveType entities:
 	if( ent->GetMoveType() == MoveType::Bounce || ent->GetMoveType() == MoveType::TossSlide) {/*MOVETYPE_BOUNCE || ent->movetype == MOVETYPE_BOUNCEGRENADE ) {*/
 		if( ent->GetVelocity().z > 0.1f) {
-			ent->SetGroundEntity(nullptr);
+			ent->SetGroundEntity( SGEntityHandle() );
 		}
 	}
 
@@ -78,7 +78,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	GameEntity *entGroundEntity = *ent->GetGroundEntityHandle();
 	//	if( ent->groundentity && ent->groundentity != world && !ent->groundentity->r.inuse ) {
 	if (entGroundEntity && !entGroundEntity->IsInUse()) {
-		ent->SetGroundEntity(nullptr); //ent->groundentity = NULL;
+		ent->SetGroundEntity( SGEntityHandle() ); //ent->groundentity = NULL;
 	}
 
 	// Calculate old speed based on velocity vec length.
@@ -96,7 +96,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 			// 8 = 1 Unit on the Quake scale I think.
 			if( ent->GetVelocity().z >= 8) {
 				// it's moving in-air so unset the ground entity.
-				ent->SetGroundEntity(nullptr);
+				ent->SetGroundEntity( SGEntityHandle() );
 			} else {
 				// Otherwise, let it fall to a stop.
 				ent->SetVelocity(vec3_zero());
@@ -121,7 +121,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 			//VectorNormalize2
 			vec3_t acceldir = vec3_zero();
 			VectorNormalize2( ent->GetVelocity(), acceldir);
-			acceldir = vec3_scale( acceldir, ent->GetAcceleration()  * FRAMETIME_S.count());
+			acceldir = vec3_scale( acceldir, ent->GetAcceleration()  * FRAMETIME.count());
 
 			// Add directional acceleration to velocity.
 			ent->SetVelocity(ent->GetVelocity() + acceldir);//VectorAdd( ent->velocity, acceldir, ent->velocity );
@@ -143,7 +143,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	//}
 
 	// move origin
-	const vec3_t move = vec3_scale( ent->GetVelocity(), FRAMETIME_S.count() ); //VectorScale( ent->velocity, FRAMETIME, move );
+	const vec3_t move = vec3_scale( ent->GetVelocity(), FRAMETIME.count() ); //VectorScale( ent->velocity, FRAMETIME, move );
 
 	SGTraceResult traceResult = SG_PushEntity( ent, move );
 	if( !ent->IsInUse() ) {

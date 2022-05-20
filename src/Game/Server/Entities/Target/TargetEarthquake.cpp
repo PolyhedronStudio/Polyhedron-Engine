@@ -81,7 +81,7 @@ void TargetEarthquake::QuakeThink() {
             severity * (100.0f / entity->GetMass())
         };
         newVelocity += entity->GetVelocity();
-        entity->SetGroundEntity( nullptr );
+        entity->SetGroundEntity( SGEntityHandle() );
         entity->SetVelocity( newVelocity );
     }
 

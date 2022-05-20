@@ -369,7 +369,7 @@ public:
     **/
     inline SGEntityHandle   &GetGroundEntityHandle() override { return groundEntityHandle; }
 	inline PODEntity		*GetGroundPODEntity() override { return groundEntityHandle.Get(); }
-	inline void             SetGroundEntity(GameEntity* groundEntity) { groundEntityHandle = (groundEntity ? groundEntity->GetPODEntity() : nullptr); } //this->groundEntity = groundEntity; }
+	inline void             SetGroundEntity(const SGEntityHandle &ehGroundEntity) { groundEntityHandle = ehGroundEntity; } //this->groundEntity = groundEntity; }
 
     /**
     *   @brief Get/Set: Ground Entity Link Count

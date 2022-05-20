@@ -277,7 +277,7 @@ void GibEntity::GibEntityThink() {
 void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
     vec3_t  right;
 
-    if (!GetGroundEntityHandle())
+    if (!ClientGameWorld::ValidateEntity(GetGroundEntityHandle()))
         return;
 
 

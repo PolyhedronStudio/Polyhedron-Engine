@@ -79,7 +79,8 @@ struct ClientMoveCommand {
 
     struct {
         uint64_t simulationTime;    // The simulation time when prediction was run
-        vec3_t origin;              // The predicted origin for this command
-        vec3_t error;               // The prediction error for this command
+        vec3_t origin;              // The predicted origin for this command.
+		vec3_t velocity;              // The predicted velocity for this command.
+        vec3_t error;               // The prediction error for this command.
     } prediction;
 };

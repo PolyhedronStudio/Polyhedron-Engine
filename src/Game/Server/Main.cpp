@@ -597,7 +597,7 @@ void SVG_RunFrame(void) {
 			SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
 			if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
 				// Reset ground entity.
-				gameEntity->SetGroundEntity(nullptr);
+				gameEntity->SetGroundEntity( SGEntityHandle() );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
 				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {

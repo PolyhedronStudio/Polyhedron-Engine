@@ -205,9 +205,6 @@ void CL_DeltaFrame(void)
     Com_PlayerToEntityState(&cl.frame.playerState, &playerClientEntity->currentState);
 	
 	
-    // Call into client game module its delta frame function.
-	// This gives packet entities a chance to "predict" the next frame before
-	// the current data arrives.
 
 
 	// Process the entities that are 'in-frame' of the received server game frame packet data.
@@ -228,7 +225,10 @@ void CL_DeltaFrame(void)
         // Fire entity event.
         PacketEntity_FireEvent(state.number);
     }
-
+	    // Call into client game module its delta frame function.
+	// This gives packet entities a chance to "predict" the next frame before
+	// the current data arrives.
+	CL_GM_ClientPacketEntityDeltaFrame();
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();
     }

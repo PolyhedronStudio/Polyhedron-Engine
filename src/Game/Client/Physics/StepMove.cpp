@@ -26,16 +26,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Base Entity.
 #include "../Entities/Base/CLGBasePacketEntity.h"
 
+// World.
+#include "../World/ClientGameWorld.h"
+
 // UP-STEP height in "Quake Units". This is used commonly all over for each stepmove entity.
 // TODO: In the future it is likely one would want to be able to set this property to a custom
 // value for each entity type.
-#define STEPSIZE    18
+static constexpr int32_t STEPSIZE    = 18;
 
 //extern CLGTraceResult CLG_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, IClientGameEntity* passent, const int32_t& contentMask) ;
-extern void UTIL_TouchTriggers(IClientGameEntity *ent);
-//static void UTIL_TouchTriggers(IClientGameEntity *ent)
-//{
-//}
 /*
 =============
 CLG_StepMove_CheckBottom
@@ -117,7 +116,7 @@ void CLG_StepMove_CheckGround(IClientGameEntity* ent)
         return;
 
     if (ent->GetVelocity().z > 100) {
-        ent->SetGroundEntity(nullptr);
+        ent->SetGroundEntity( SGEntityHandle() );
         return;
     }
 
@@ -131,7 +130,7 @@ void CLG_StepMove_CheckGround(IClientGameEntity* ent)
     // check steepness
     //if ((trace.plane.normal[2] < 0.7 && !trace.allSolid)
     if ((trace.plane.normal[2] < 0.7 && !trace.allSolid) || (!trace.gameEntity)) {
-        ent->SetGroundEntity(nullptr);
+        ent->SetGroundEntity( SGEntityHandle() );
         return;
     }
 
@@ -233,7 +232,7 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
 
                 if (relink) {
                     ent->LinkEntity();
-                    UTIL_TouchTriggers(ent);
+                    SG_TouchTriggers(ent);
                 }
                 return true;
             }
@@ -288,9 +287,9 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
             ent->SetOrigin(ent->GetOrigin() + move);
             if (relink) {
                 ent->LinkEntity();
-                UTIL_TouchTriggers(ent);
+                SG_TouchTriggers(ent);
             }
-            ent->SetGroundEntity(nullptr);
+            ent->SetGroundEntity( SGEntityHandle() );
             return true;
         }
 
@@ -307,7 +306,7 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
             // and is trying to correct
             if (relink) {
                 ent->LinkEntity();
-                UTIL_TouchTriggers(ent);
+                SG_TouchTriggers(ent);
             }
             return true;
         }
@@ -324,7 +323,7 @@ qboolean CLG_MoveStep(IClientGameEntity* ent, vec3_t move, qboolean relink)
     // the move is ok
     if (relink) {
         ent->LinkEntity();
-        UTIL_TouchTriggers(ent);
+        SG_TouchTriggers(ent);
     }
 
     return true;
@@ -414,11 +413,11 @@ qboolean SV_StepDirection(CLGBasePacketEntity* ent, float yaw, float dist)
             ent->SetOrigin(oldOrigin);
         }
         ent->LinkEntity();
-        UTIL_TouchTriggers(ent);
+        SG_TouchTriggers(ent);
         return true;
     }
     ent->LinkEntity();
-    UTIL_TouchTriggers(ent);
+    SG_TouchTriggers(ent);
     return false;
 }
 
@@ -431,8 +430,10 @@ qboolean CLG_StepMove_Walk(IClientGameEntity* ent, float yaw, float dist)
 {
     vec3_t  move;
 
-    if (!(*ent->GetGroundEntityHandle()) && !(ent->GetFlags() & (EntityFlags::Fly | EntityFlags::Swim)))
+	GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity( ent->GetGroundEntityHandle() );
+    if ( !( geGroundEntity ) && !( ent->GetFlags() & (EntityFlags::Fly | EntityFlags::Swim) ) ) {
         return false;
+	}
 
     yaw = yaw * M_PI * 2 / 360;
 

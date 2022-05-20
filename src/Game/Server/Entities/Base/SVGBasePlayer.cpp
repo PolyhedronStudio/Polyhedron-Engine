@@ -78,7 +78,7 @@ void SVGBasePlayer::Spawn() {
     Base::Spawn();
 
     // When spawned, we aren't on any ground, make sure of that.
-    SetGroundEntity(nullptr);
+    SetGroundEntity(SGEntityHandle());
     // Set up the client entity accordingly.
     SetTakeDamage(TakeDamage::Aim);
     // Fresh movetype and solid.
@@ -1489,47 +1489,53 @@ void SVGBasePlayer::UpdateAnimationFrame() {
         return;
     }
 
+	// Validate our groundentity handle.
+	bool isValidGroundEntity = ServerGameWorld::ValidateEntity( GetGroundEntityHandle() );
+
     // Are we ducking?
-    qboolean isDucking = (client->playerState.pmove.flags & PMF_DUCKED ? true : false);
-    qboolean isRunning = (bobMove.XYSpeed ? true : false);
+    qboolean isDucking = ( client->playerState.pmove.flags & PMF_DUCKED ? true : false );
+    qboolean isRunning = ( bobMove.XYSpeed ? true : false );
 
     // Transition to new animation of necessary.
-    if (isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death) {
+    if ( isDucking != client->animation.isDucking && client->animation.priorityAnimation < PlayerAnimation::Death ) {
         goto newanim;
     }
-    if (isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic) {
+    if ( isRunning != client->animation.isRunning && client->animation.priorityAnimation == PlayerAnimation::Basic ) {
         goto newanim;
     }
-    if (!GetGroundEntityHandle() && client->animation.priorityAnimation <= PlayerAnimation::Wave) {
+    if ( !isValidGroundEntity && client->animation.priorityAnimation <= PlayerAnimation::Wave ) {
         goto newanim;
     }
 
     // Reverse animation if it is prioritized.
-    if (client->animation.priorityAnimation == PlayerAnimation::Reverse) {
-        if (GetAnimationFrame() > client->animation.endFrame) {
-            SetAnimationFrame(GetAnimationFrame() - 0.2f);
+    if ( client->animation.priorityAnimation == PlayerAnimation::Reverse ) {
+        if ( GetAnimationFrame() > client->animation.endFrame ) {
+            SetAnimationFrame( GetAnimationFrame() - 0.2f );
+
             return;
         }
     // Otherwise continue the animation playback.
-    } else if (GetAnimationFrame() < client->animation.endFrame) {
+    } else if ( GetAnimationFrame() < client->animation.endFrame ) {
         // Continue an animation
-        SetAnimationFrame(GetAnimationFrame() + 0.2f);
+        SetAnimationFrame( GetAnimationFrame() + 0.2f );
+
         return;
     }
 
     // Return in case of death.
-    if (client->animation.priorityAnimation == PlayerAnimation::Death) {
+    if ( client->animation.priorityAnimation == PlayerAnimation::Death ) {
+
         return;     // stay there
     }
 
-    if (client->animation.priorityAnimation == PlayerAnimation::Jump) {
+    if ( client->animation.priorityAnimation == PlayerAnimation::Jump ) {
         // Return in case of no ground entity, how can one jump otherwise?
-        if (!GetGroundEntityHandle()) {
+        if ( !GetGroundEntityHandle() ) {
             return;
         }
         // Silly old Q2 animation stuff.
         client->animation.priorityAnimation = PlayerAnimation::Wave;
-        SetAnimationFrame(FRAME_jump3);
+        SetAnimationFrame( FRAME_jump3 );
         client->animation.endFrame = FRAME_jump6;
         return;
     }
@@ -1541,31 +1547,31 @@ newanim:
     client->animation.isRunning = isRunning;
 
     // Got ground?
-    if (!GetGroundEntityHandle()) {
+    if ( !isValidGroundEntity ) {
         // Jump.
         client->animation.priorityAnimation = PlayerAnimation::Jump;
-        if (GetAnimationFrame() != FRAME_jump2) {
-            SetAnimationFrame(FRAME_jump1);
+        if ( GetAnimationFrame() != FRAME_jump2 ) {
+            SetAnimationFrame( FRAME_jump1 );
         }
         client->animation.endFrame = FRAME_jump2;
     // Keep running.
-    } else if (isRunning) {
+    } else if ( isRunning ) {
         // Running
-        if (isDucking) {
-            SetAnimationFrame(FRAME_crwalk1);
+        if ( isDucking ) {
+            SetAnimationFrame( FRAME_crwalk1 );
             client->animation.endFrame = FRAME_crwalk6;
         } else {
-            SetAnimationFrame(FRAME_run1);
+            SetAnimationFrame( FRAME_run1 );
             client->animation.endFrame = FRAME_run6;
         }
     // Standing animations.
     } else {
         // standing
-        if (isDucking) {
-            SetAnimationFrame(FRAME_crstnd01);
+        if ( isDucking ) {
+            SetAnimationFrame( FRAME_crstnd01 );
             client->animation.endFrame = FRAME_crstnd19;
         } else {
-            SetAnimationFrame(FRAME_stand01);
+            SetAnimationFrame( FRAME_stand01 );
             client->animation.endFrame = FRAME_stand40;
         }
     }

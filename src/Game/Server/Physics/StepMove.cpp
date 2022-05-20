@@ -108,7 +108,7 @@ void SVG_StepMove_CheckGround(IServerGameEntity* ent)
         return;
 
     if (ent->GetVelocity().z > 100) {
-        ent->SetGroundEntity(nullptr);
+        ent->SetGroundEntity( SGEntityHandle() );
         return;
     }
 
@@ -122,7 +122,7 @@ void SVG_StepMove_CheckGround(IServerGameEntity* ent)
     // check steepness
     //if ((trace.plane.normal[2] < 0.7 && !trace.allSolid)
     if ((trace.plane.normal[2] < 0.7 && !trace.allSolid) || (!trace.gameEntity)) {
-        ent->SetGroundEntity(nullptr);
+        ent->SetGroundEntity( SGEntityHandle() );
         return;
     }
 
@@ -281,7 +281,7 @@ qboolean SVG_MoveStep(IServerGameEntity* ent, vec3_t move, qboolean relink)
                 ent->LinkEntity();
                 UTIL_TouchTriggers(ent);
             }
-            ent->SetGroundEntity(nullptr);
+            ent->SetGroundEntity( SGEntityHandle() );
             return true;
         }
 

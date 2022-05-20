@@ -35,6 +35,7 @@ static IServerGameEntity* GetGameEntity(PODEntity* podEntity) {
 }
 #endif
 #ifdef SHAREDGAME_CLIENTGAME
+#include "../../Client/World/ClientGameWorld.h"
 //#include "../../Client/Entities/IClientGameEntity.h"
 static IClientGameEntity* GetGameEntity(PODEntity* podEntity) {
     // Reinterpret cast the gameEntity pointer.
@@ -42,7 +43,9 @@ static IClientGameEntity* GetGameEntity(PODEntity* podEntity) {
 	    if (podEntity->gameEntity != nullptr) {
 	        return static_cast<IClientGameEntity*>(podEntity->gameEntity);
 	    } else {
-	        return nullptr;
+			SGGameWorld *gameWorld = GetGameWorld();
+			return gameWorld->GetGameEntityByIndex(podEntity->clientEntityNumber);
+	        //return nullptr;
 	    }
     }
 

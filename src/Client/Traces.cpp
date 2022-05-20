@@ -203,7 +203,7 @@ void CL_LinkEntity(PODEntity* entity) {
 
 	// Unlink from previous old position.
 	//if (ent->area.prev) {
-	if (entity) {//}&& entity->linkCount) {
+	if (entity && entity->linkCount) {
         CL_UnlinkEntity(entity);
 	}
 
@@ -307,24 +307,24 @@ void CL_UnlinkEntity(PODEntity* entity) {
 *	@return	Returns a headNode that can be used for testing or clipping an
 *			entity's BoundingBox or OctagonBox of mins/maxs size.
 **/
-mnode_t *CL_HullForEntity(PODEntity *podEntity) {
-    if (podEntity->solid == Solid::BSP) {
-        int32_t i = podEntity->currentState.modelIndex - 1;
+ mnode_t *CL_HullForEntity(Entity *ent)
+{
+    if (ent->solid == Solid::BSP) {
+        int32_t i = ent->currentState.modelIndex - 1;
 
         // Explicit hulls in the BSP model.
-        if (i <= 0 || i >= cl.bsp->nummodels) {
+        if (i <= 0 || i >= sv.cm.cache->nummodels) {
             Com_Error(ErrorType::Drop, "%s: inline model %d out of range", __func__, i);
 		}
 
-		return cl.clipModels[i]->headNode;
-        //return cl.bsp->models[i].headNode;
+        return sv.cm.cache->models[i].headNode;
     }
 
     // create a temp hull from bounding box sizes
-    if (podEntity->solid == Solid::OctagonBox) {
-        return CM_HeadnodeForOctagon(podEntity->mins, podEntity->maxs);
+    if (ent->solid == Solid::OctagonBox) {
+        return CM_HeadnodeForOctagon(ent->mins, ent->maxs);
     } else {
-        return CM_HeadnodeForBox(podEntity->mins, podEntity->maxs);
+        return CM_HeadnodeForBox(ent->mins, ent->maxs);
     }
 }
 
@@ -341,10 +341,10 @@ int32_t CL_PointContents(const vec3_t& point) {
 	}
 
     // get base contents from world
-    int32_t contents = CM_PointContents( point, cl.bsp->nodes );
+    int32_t contents = CM_PointContents(point, cl.bsp->nodes);
 
     // or in contents from all the other entities
-    int32_t numberOfAreaEntities = CL_AreaEntities( point, point, touch, MAX_WIRED_POD_ENTITIES, AreaEntities::Solid );
+    int32_t numberOfAreaEntities = CL_AreaEntities(point, point, touch, MAX_WIRED_POD_ENTITIES, AreaEntities::Solid);
 
     for (int32_t i = 0; i < numberOfAreaEntities; i++) {
 		// Acquire touch entity.
@@ -352,7 +352,7 @@ int32_t CL_PointContents(const vec3_t& point) {
 
         // Might intersect, so do an exact clip
 #ifdef CFG_CM_ALLOW_ROTATING_BOXES
-			contents |= CM_TransformedPointContents( point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles );
+			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
 #else
 			contents |= CM_TransformedPointContents(point, CL_HullForEntity(hit), hit->currentState.origin, vec3_zero());//hit->currentState.angles);
 #endif

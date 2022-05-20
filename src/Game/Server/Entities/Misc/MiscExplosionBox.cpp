@@ -341,21 +341,26 @@ void MiscExplosionBox::ExplosionBoxDie(IServerGameEntity* inflictor, IServerGame
 //===============
 //
 void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+	// Validate 'other' first.
+	GameEntity *geValidatedOther = ServerGameWorld::ValidateEntity(other);
+
     // Safety checks.
-    if (!other || other == this) {
+    if ( !geValidatedOther || geValidatedOther == this ) {
 	    return;
     }
 
     // Ground entity checks.
-    if (!other->GetGroundEntityHandle() || other->GetGroundEntityHandle() == this) {
+	GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity( geValidatedOther->GetGroundEntityHandle() );
+
+    if ( !geGroundEntity || geGroundEntity == this ) {
 	    return;
     }
 
     // Calculate ratio to use.
-    double ratio = (static_cast<double>(other->GetMass()) / static_cast<double>(GetMass()));
+    double ratio = (static_cast<double>(geValidatedOther->GetMass()) / static_cast<double>(GetMass()));
 
     // Calculate direction.
-    vec3_t dir = GetOrigin() - other->GetOrigin();
+    vec3_t dir = GetOrigin() - geValidatedOther->GetOrigin();
 
     // Calculate yaw to use based on direction.
     double yaw = vec3_to_yaw(dir);

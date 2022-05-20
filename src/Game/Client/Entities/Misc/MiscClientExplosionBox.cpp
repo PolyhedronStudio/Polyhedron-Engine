@@ -21,7 +21,7 @@
 #include "MiscClientExplosionBox.h"
 
 //#include "../../GameModes/IGameMode.h"
-//#include "../../World/GameWorld.h"
+#include "../../World/ClientGameWorld.h"
 
 //
 // Constructor/Deconstructor.
@@ -352,7 +352,7 @@ void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientG
     }
 
     // Ground entity checks.
-    if (other->GetGroundEntityHandle() == this) {
+    if (ClientGameWorld::ValidateEntity(other->GetGroundEntityHandle()) == this) {
 		//Com_DPrint("Touching explobox !other->GetGroundEntity: %i\n", GetNumber());
 		return;
     }

@@ -115,10 +115,21 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
 			
 			// Execute touch callbacks and "predict" against other entities.
 			DispatchPredictedTouchCallbacks(&pm);
+
+			//// What if we try and set it here?
+			//GameEntity *playerEntity = GetGameWorld()->GetGameEntityByIndex(cl->frame.clientNumber + 1);
+			//playerEntity->SetOrigin(pm.state.origin);
+			//playerEntity->SetAngles(pm.state.viewAngles);
         }
 
         // Save for error detection
         cmd->prediction.origin = pm.state.origin;
+
+		// Get Game World.
+		//ClientGameWorld *gameWorld = GetGameWorld();
+		//auto *playerEntity = gameWorld->GetClientGameEntity();
+		//playerEntity->SetOrigin(pm.state.origin);
+		//playerEntity->SetAngles(pm.state.viewAngles);
     }
 
     // Run pending cmd
@@ -141,6 +152,13 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
 
         // Save for error detection
         cl->moveCommand.prediction.origin = pm.state.origin;
+
+		// What if we try and set it here?
+		// Get Game World.
+		//ClientGameWorld *gameWorld = GetGameWorld();
+		//auto *playerEntity = gameWorld->GetClientGameEntity();
+		//playerEntity->SetOrigin(pm.state.origin);
+		//playerEntity->SetAngles(pm.state.viewAngles);
     }
 
     // Copy results out for rendering
@@ -200,8 +218,8 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 	ClientGameWorld *gameWorld = GetGameWorld();
 
 	// Execute touch callbacks as long as movetype isn't noclip, or spectator.
-	GameEntity *player = gameWorld->GetGameEntityByIndex(cl->frame.clientNumber + 1); // Client.
-	if (player && pm && cl->bsp) {//}&& cl->cm.cache) {
+	auto *gePlayer = gameWorld->GetClientGameEntity();
+	if (gePlayer && pm && cl->bsp) {//}&& cl->cm.cache) {
 	//const int32_t playerMoveType = player->GetMoveType();
 	//      if (playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator) {
 		// Setup origin, mins and maxs for UTIL_TouchTriggers as well as the ground entity.
@@ -209,62 +227,70 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 		//player->SetMins(pm->mins);
 		//player->SetMaxs(pm->maxs);
 	// Update entity properties based on results of the player move simulation.
-        player->SetOrigin(pm->state.origin);
-        player->SetVelocity(pm->state.velocity);
-        player->SetMins(pm->mins);
-        player->SetMaxs(pm->maxs);
-        player->SetViewHeight(pm->state.viewOffset[2]);
-        player->SetWaterLevel(pm->waterLevel);
-        player->SetWaterType(pm->waterType);
-		
+        gePlayer->SetOrigin(pm->state.origin);
+        gePlayer->SetVelocity(pm->state.velocity);
+        gePlayer->SetMins(pm->mins);
+        gePlayer->SetMaxs(pm->maxs);
+        gePlayer->SetViewHeight(pm->state.viewOffset[2]);
+        gePlayer->SetWaterLevel(pm->waterLevel);
+        gePlayer->SetWaterType(pm->waterType);
 		// Let the world know about the current entity we're running.
-		level.currentEntity = player;
+		level.currentEntity = gePlayer;
         
         // Use an entity handle to validate and store the new ground entity after pmove.
         // Get the ground POD Entity that matches the groundEntityNumber. 
         // Get the ground POD Entity that matches the groundEntityNumber. 
+		// Resolve the perhaps new Ground Entity.
 		ClientGameWorld *gameWorld = GetGameWorld();
-
 		if (gameWorld) {
-			// Get the ground POD Entity that matches the groundEntityNumber. 
-			SGEntityHandle groundEntityHandle = gameWorld->GetPODEntityByIndex(pm->groundEntityNumber);
+			Com_DPrint("(%s): GroundEntity(#%i)\n", __func__, pm->groundEntityNumber);
+			GameEntity *geGround = gameWorld->GetGameEntityByIndex(pm->groundEntityNumber);
 
-			if (ClientGameWorld::ValidateEntity(groundEntityHandle)) {
-				player->SetGroundEntity(*groundEntityHandle);
-				player->SetGroundEntityLinkCount(groundEntityHandle->GetGroundEntityLinkCount());//podGameEntity->GetGroundEntityLinkCount());
-			} else {
-				player->SetGroundEntity(nullptr);
+			if (geGround) {
+				gePlayer->SetGroundEntity(geGround);
+				gePlayer->SetGroundEntityLinkCount(geGround->GetLinkCount());
+			}
+			else {
+				gePlayer->SetGroundEntity(SGEntityHandle() );
+				gePlayer->SetGroundEntityLinkCount(0);
 			}
 		} else {
-			player->SetGroundEntity(nullptr);
+			gePlayer->SetGroundEntity( SGEntityHandle() );
+			gePlayer->SetGroundEntityLinkCount(0);
 		}
 
 		// Dispatch touch trigger callbacks on the player entity for each touched entity.
-		SG_TouchTriggers(player);
+		SG_TouchTriggers( gePlayer );
 
 		// Solid touch logic.
 		int32_t i = 0;
 		int32_t j = 0;
             
-		for (i = 0 ; i < pm->numTouchedEntities; i++) {
-			for (j = 0 ; j < i ; j++) {
-				if (pm->touchedEntities[j] == pm->touchedEntities[i]) {
+		for ( i = 0 ; i < pm->numTouchedEntities; i++ ) {
+			for ( j = 0 ; j < i ; j++ ) {
+				// Don't touch ourselves  twice either.
+				if ( pm->touchedEntities[j] == pm->touchedEntities[i] ) {
 					break;
 				}
 			}
-			if (j != i) {
+			// No need to duplicate touch events.
+			if ( j != i ) {
 				continue;   // duplicated
 			}
 
-			SGEntityHandle other(pm->touchedEntities[i]);
-			if (!ClientGameWorld::ValidateEntity(other)) {
-				//if (pm->touchedEntities[i] != nullptr) {
-				//	Com_DPrint("Skipped dispatching player touch to entity(#%i)\n", pm->touchedEntities[i]->clientEntityNumber);;
-				//}
+			// Get Touched Entity number.
+			const int32_t touchedEntityNumber = pm->touchedEntities[i];
+
+			// Get and validate our touched entity.
+			GameEntity *geOther = ClientGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( touchedEntityNumber ) );
+
+			// Continue in case it's invalid.
+			if ( !geOther ) {
 				continue;
 			}
 
-			other->DispatchTouchCallback(*other, player, NULL, NULL);
+			// Dispatch Touch.
+			geOther->DispatchTouchCallback( geOther, gePlayer, NULL, NULL );
 		}
 	//} if playermovetype thing
 	}

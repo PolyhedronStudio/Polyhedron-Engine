@@ -29,11 +29,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "StepMove.h"
 
 
-
-
-
-
-
 static cvar_t *sv_maxvelocity = nullptr;
 static cvar_t *sv_gravity= nullptr;
 
@@ -289,7 +284,7 @@ int CLG_FlyMove(IClientGameEntity *ent, float time, int mask)
 
     time_left = time;
 
-    ent->SetGroundEntity(nullptr);
+    ent->SetGroundEntity( SGEntityHandle() );
     for (bumpcount = 0 ; bumpcount < numbumps ; bumpcount++) {
         //for (i = 0 ; i < 3 ; i++)
         //    end[i] = ent->state.origin[i] + time_left * ent->velocity[i];
@@ -588,31 +583,36 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
         //if (check->GetPODEntity() && !check->GetPODEntity()->area.prev)
         //    continue;       // not linked in anywhere
 
+		// Check GroundEntity.
+		GameEntity *geCheckGroundEntity = SGGameWorld::ValidateEntity( check->GetGroundEntityHandle() );
+
         // if the entity is standing on the pusher, it will definitely be moved
-        if (check->GetGroundEntityHandle() != pusher) {
+        if (geCheckGroundEntity != pusher) {
             // see if the ent needs to be tested
             if (absMin[0] >= maxs[0]
                 || absMin[1] >= maxs[1]
                 || absMin[2] >= maxs[2]
                 || absMax[0] <= mins[0]
                 || absMax[1] <= mins[1]
-                || absMax[2] <= mins[2])
+                || absMax[2] <= mins[2]) {
                 continue;
+			}
 
             // see if the ent's bbox is inside the pusher's final position
-            if (!CLG_TestEntityPosition(check))
+            if ( !CLG_TestEntityPosition(check) ) {
                 continue;
-            
+			}            
         }
 
-        if ((pusher->GetMoveType() == MoveType::Push) || (check->GetGroundEntityHandle() == pusher)) {
+        if ( ( pusher->GetMoveType() == MoveType::Push ) || ( geCheckGroundEntity == pusher ) ) {
             // move this entity
             pushed_p->ent = check;
             pushed_p->origin = check->GetOrigin();  //VectorCopy(check->state.origin, pushed_p->origin);
             pushed_p->angles = check->GetAngles(); //VectorCopy(check->state.angles, pushed_p->angles);
 #if USE_SMOOTH_DELTA_ANGLES
-            if (check->GetClient())
+            if ( check->GetClient() ) {
                 pushed_p->deltaYaw = check->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
+			}
 #endif
             pushed_p++;
 
@@ -636,7 +636,7 @@ qboolean CLG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 
             // may have pushed them off an edge
             if (check->GetGroundEntityHandle() != pusher)
-                check->SetGroundEntity(nullptr);
+                check->SetGroundEntity( SGEntityHandle() );
 
             block = CLG_TestEntityPosition(check);
             if (!block) {
@@ -772,12 +772,12 @@ retry:
             part->DispatchBlockedCallback(obstacle);
         }
 
-#if 0
+//#if 0
         // if the pushed entity went away and the pusher is still there
         if ((obstacle && !obstacle->IsInUse()) && (part && part->IsInUse())) {
             goto retry;
 		}
-#endif
+//#endif
     } else {
         // the move succeeded, so call all Think functions
         for (part = ent ; part ; part = part->GetTeamChainEntity()) {
@@ -867,13 +867,13 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // IF we're moving up, we know we're not on-ground, that's for sure :)
     if (ent->GetVelocity().z > 0) {
-        ent->SetGroundEntity(nullptr);
+        ent->SetGroundEntity( SGEntityHandle() );
     }
 
     // Check for the groundEntity going away
     if (*ent->GetGroundEntityHandle()) {
         if (!ent->GetGroundEntityHandle()->IsInUse()) {
-            ent->SetGroundEntity(nullptr);
+            ent->SetGroundEntity( SGEntityHandle() );
         }
     }
 
@@ -922,7 +922,7 @@ void CLG_Physics_Toss(SGEntityHandle& entityHandle) {
 		            ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
 				}
 				else {
-					ent->SetGroundEntity(nullptr);
+					ent->SetGroundEntity( SGEntityHandle() );
 		            ent->SetGroundEntityLinkCount(0);
 				}
                 ent->SetVelocity(vec3_zero());
@@ -1048,12 +1048,12 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
     }
 
     // Retrieve ground entity.
-    IClientGameEntity* groundEntity = *ent->GetGroundEntityHandle();
+    IClientGameEntity* groundEntity = SGGameWorld::ValidateEntity( ent->GetGroundEntityHandle() );
 
     // If we have no ground entity.
-    if (!groundEntity) {
+    if ( !groundEntity ) {
         // Ensure we check if we aren't on one in this frame already.
-        CLG_StepMove_CheckGround(ent);
+        CLG_StepMove_CheckGround( ent );
     }
 
     //if (!groundEntity) {
@@ -1061,15 +1061,15 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
     //}
 
     // Store whether we had a ground entity at all.
-    qboolean wasOnGround = (groundEntity ? true : false);
+    qboolean wasOnGround = ( groundEntity ? true : false );
 
     // Bound our velocity within sv_maxvelocity limits.
-    CLG_BoundVelocity(ent);
+    CLG_BoundVelocity( ent );
 
     // Check for angular velocities. If found, add rotational friction.
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
-    if (angularVelocity.x || angularVelocity.y || angularVelocity.z)
+    if ( angularVelocity.x || angularVelocity.y || angularVelocity.z )
         CLG_AddRotationalFriction(ent);
 
     // Re-ensure we fetched its latest angular velocity.
@@ -1078,18 +1078,18 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
     // Add gravity except for: 
     // - Flying monsters
     // - Swimming monsters who are in the water
-    if (!wasOnGround) {
+    if ( !wasOnGround ) {
         // If it is not a flying monster, we are done.
-        if (!(ent->GetFlags() & EntityFlags::Fly)) {
+        if ( !(ent->GetFlags() & EntityFlags::Fly) ) {
             // In case the swim mosnter is not in water...
-            if (!((ent->GetFlags() & EntityFlags::Swim) && (ent->GetWaterLevel() > 2))) {
+            if ( !( (ent->GetFlags() & EntityFlags::Swim) && (ent->GetWaterLevel() > 2) ) ) {
                 // Determine whether to play a "hit sound".
-                if (ent->GetVelocity().z < sv_gravity->value * -0.1) {
+                if ( ent->GetVelocity().z < sv_gravity->value * -0.1 ) {
                     hitSound = true;
                 }
 
                 // Add gravity in case the monster is not in water, it can't fly, so it falls.
-                if (ent->GetWaterLevel() == 0) {
+                if ( ent->GetWaterLevel() == 0 ) {
                     CLG_AddGravity(ent);
                 }
             }
@@ -1097,7 +1097,7 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
     }
 
     // Friction for flying monsters that have been given vertical velocity
-    if ((ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0)) {
+    if ( (ent->GetFlags() & EntityFlags::Fly) && (ent->GetVelocity().z != 0) ) {
         float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float friction = STEPMOVE_FRICTION / 3;
@@ -1110,7 +1110,7 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
     }
 
     // Friction for flying monsters that have been given vertical velocity
-    if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
+    if ( (ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0) ) {
         float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float newSpeed = speed - (FRAMETIME.count() * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
@@ -1122,11 +1122,11 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
     }
 
     // In case we have velocity, execute movement logic.
-    if (ent->GetVelocity().z || ent->GetVelocity().y || ent->GetVelocity().x) {
+    if ( ent->GetVelocity().z || ent->GetVelocity().y || ent->GetVelocity().x ) {
         // apply friction
         // let dead monsters who aren't completely onground slide
-        if ((wasOnGround) || (ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)))
-            if (!(ent->GetHealth() <= 0.0)) {
+        if ( (wasOnGround) || ( ent->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) )
+            if ( !(ent->GetHealth() <= 0.0) ) {
                 vec3_t vel = ent->GetVelocity();
                 float speed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1]);
                 if (speed) {
@@ -1161,13 +1161,14 @@ void CLG_Physics_Step(SGEntityHandle &entityHandle)
         UTIL_TouchTriggers(ent);
 
         // Can't continue if this entity wasn't in use.
-        if (!ent->IsInUse())
+        if ( !ent->IsInUse() ) {
             return;
+		}
 
         // Check for whether to play a land sound.
-        if (ent->GetGroundEntityHandle()) {
-            if (!wasOnGround) {
-                if (hitSound) {
+        if ( SGGameWorld::ValidateEntity( ent->GetGroundEntityHandle() ) ) {
+            if ( !wasOnGround ) {
+                if ( hitSound ) {
                     clgi.S_StartLocalSound("world/land.wav");
                 }
             }
@@ -1212,6 +1213,7 @@ void CLG_RunServerEntity(SGEntityHandle &entityHandle)
 	        CLG_Physics_Pusher(entityHandle);
         break;
         case MoveType::None:
+		//case MoveType::PlayerMove:
 	        CLG_Physics_None(entityHandle);
         break;
         case MoveType::NoClip:

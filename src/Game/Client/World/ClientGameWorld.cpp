@@ -186,7 +186,7 @@ void ClientGameWorld::PreparePlayers() {
 			},
 			.isLocal = false,
 			.inUse = true,
-			.gameEntity = CreateGameEntity<CLGBasePacketEntity>(podEntity, false, true), //CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
+			.gameEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false, true), //CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
 			.clientEntityNumber = i,
 		};
 		
@@ -851,7 +851,7 @@ qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
 		// Remove the gameEntity reference
 		gameEntity->SetLinkCount(0);
 		gameEntity->SetGroundEntityLinkCount(0);
-		gameEntity->SetGroundEntity(nullptr);
+		gameEntity->SetGroundEntity( SGEntityHandle() );
 		gameEntity->SetPODEntity(nullptr);
 
 		// Reset POD entity's game entity pointer.
@@ -872,7 +872,7 @@ qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
 		GameEntity *gameEntity = gameEntities[entityNumber];
 		gameEntity->SetLinkCount(0);
 		gameEntity->SetGroundEntityLinkCount(0);
-		gameEntity->SetGroundEntity(nullptr);
+		gameEntity->SetGroundEntity( SGEntityHandle() );
 		gameEntity->SetPODEntity(nullptr);
 
 		// Free it.
@@ -1084,7 +1084,12 @@ IClientGameEntity* ClientGameWorld::ValidateEntity(SGEntityHandle &entityHandle,
 	return ValidateEntity(const_cast<const SGEntityHandle&>(entityHandle), requireClient, requireInUse);
 }
 
-
+/**
+*	@return	Pointer to the current client game entity.
+**/
+GameEntity* ClientGameWorld::GetClientGameEntity() {
+	return GetGameEntityByIndex(cl->frame.clientNumber + 1);
+}
 
 /**
 *   @brief  Spawns a debris model entity at the given origin.

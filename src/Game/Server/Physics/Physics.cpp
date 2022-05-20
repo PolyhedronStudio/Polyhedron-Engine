@@ -299,7 +299,7 @@ int SVG_FlyMove(IServerGameEntity *ent, float time, int mask)
 
     time_left = time;
 
-    ent->SetGroundEntity(nullptr);
+    ent->SetGroundEntity( SGEntityHandle() );
     for (bumpcount = 0 ; bumpcount < numbumps ; bumpcount++) {
         //for (i = 0 ; i < 3 ; i++)
         //    end[i] = ent->state.origin[i] + time_left * ent->velocity[i];
@@ -624,7 +624,7 @@ qboolean SVG_Push(SGEntityHandle &entityHandle, vec3_t move, vec3_t amove)
 
             // may have pushed them off an edge
             if (check->GetGroundEntityHandle() != pusher)
-                check->SetGroundEntity(nullptr);
+                check->SetGroundEntity( SGEntityHandle() );
 
             block = SVG_TestEntityPosition(check);
             if (!block) {
@@ -854,13 +854,13 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // IF we're moving up, we know we're not on-ground, that's for sure :)
     if (ent->GetVelocity().z > 0) {
-        ent->SetGroundEntity(nullptr);
+        ent->SetGroundEntity( SGEntityHandle() );
     }
 
     // Check for the groundEntity going away
     if (*ent->GetGroundEntityHandle()) {
         if (!ent->GetGroundEntityHandle()->IsInUse()) {
-            ent->SetGroundEntity(nullptr);
+            ent->SetGroundEntity( SGEntityHandle() );
         }
     }
 

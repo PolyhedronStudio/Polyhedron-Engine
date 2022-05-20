@@ -63,12 +63,14 @@ void SVG_UpdateChaseCam(SVGBasePlayer *ent)
     VectorNormalize(forward);
     VectorMA(ownerv, -30, forward, o);
 
-    if (o[2] < targ->currentState.origin[2] + 20)
+    if (o[2] < targ->currentState.origin[2] + 20) {
         o[2] = targ->currentState.origin[2] + 20;
+	}
 
     // jump animation lifts
-    if (!(*targ->gameEntity->GetGroundEntityHandle()))
+    if ( !ServerGameWorld::ValidateEntity( *targ->gameEntity->GetGroundEntityHandle() ) ) {
         o[2] += 16;
+	}
 
     trace = gi.Trace(ownerv, vec3_zero(), vec3_zero(), o, targ, BrushContentsMask::Solid);
 

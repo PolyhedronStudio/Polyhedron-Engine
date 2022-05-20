@@ -317,14 +317,14 @@ void PF_LinkEntity(Entity *ent) {
         break;
     case Solid::BSP:
         ent->currentState.solid = PACKED_BBOX;      // a Solid::BoundingBox will never create this value
-		ent->currentState.mins = vec3_zero();
-		ent->currentState.maxs = vec3_zero();
+		//ent->currentState.mins = vec3_zero();
+		//ent->currentState.maxs = vec3_zero();
 		serverEntity->solid32 = PACKED_BBOX;     // FIXME: use 255?
         break;
     default:
         ent->currentState.solid = 0;
-		ent->currentState.mins = vec3_zero();
-		ent->currentState.maxs = vec3_zero();
+		//ent->currentState.mins = vec3_zero();
+		//ent->currentState.maxs = vec3_zero();
 		serverEntity->solid32 = 0;
         break;
     }
@@ -484,7 +484,7 @@ int32_t SV_PointContents(const vec3_t &point)
 #ifdef CFG_CM_ALLOW_ROTATING_BOXES
 			contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);
 #else
-			contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->currentState.origin, vec3_zero());//hit->currentState.angles);
+			contents |= CM_TransformedPointContents(point, SV_HullForEntity(hit), hit->currentState.origin, hit->currentState.angles);//hit->currentState.angles);
 #endif
     }
 

@@ -151,7 +151,7 @@ struct PlayerMove {
 	PlayerMoveState state = {};
 
     // Entities touched (out)
-    struct PODEntity *touchedEntities[PM_MAX_TOUCH_ENTS];
+    int32_t touchedEntities[PM_MAX_TOUCH_ENTS];
     int32_t numTouchedEntities;
 
     // Pointer to the entity that is below the player. (out)

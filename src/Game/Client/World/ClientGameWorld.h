@@ -225,6 +225,11 @@ public:
     static IClientGameEntity* ValidateEntity(const SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 	static IClientGameEntity* ValidateEntity(SGEntityHandle &entityHandle, bool requireClient = false, bool requireInUse = false);
 
+	/**
+	*	@return	Pointer to the current client game entity.
+	**/
+	GameEntity* GetClientGameEntity();
+
     /**
 	*	@return	A pointer to the server entities array.
 	**/

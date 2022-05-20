@@ -2936,6 +2936,9 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 	// We'll be processing them here.
 	cl.numSolidLocalEntities = 0;
 	
+	// Run the received packet entities for a frame so we can "predict".
+	//CL_GM_ClientPacketEntityDeltaFrame();
+
 	// Give the client game module a chance to run its local entities for a frame.
 	CL_GM_ClientLocalEntitiesFrame();
 
@@ -2956,8 +2959,6 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 		// Fire local entity events.
 		LocalEntity_FireEvent(podEntity->currentState);
 	}
-
-	CL_GM_ClientPacketEntityDeltaFrame();
 	
 
 #if USE_CLIENT
@@ -3091,14 +3092,17 @@ uint64_t CL_Frame(uint64_t msec)
     // Resend a connection request if necessary
     CL_CheckForResend();
 
-
     // Read user intentions
     CL_UpdateCmd(main_extra);
 			
 	// Let client side entities do their thing.
 	if (phys_frame) {
+
+
+		// Run the actual local game.
 		CL_RunGameFrame(phys_extra);
 	}
+
     // Finalize pending cmd
     phys_frame |= cl.sendPacketNow;
 

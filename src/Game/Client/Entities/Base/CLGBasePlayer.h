@@ -104,6 +104,22 @@ public:
 	**/
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
+
+
+
+
+
+    /**
+    *   @brief Get: Entity Client
+    **/
+    virtual gclient_s* GetClient() override { return &dummyClient; };
+
+protected:
+	/**
+	*	Temporary Dummy Client.
+	**/
+	ServerClient dummyClient;
+
 private:
 
 public:

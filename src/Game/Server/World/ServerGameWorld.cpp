@@ -706,7 +706,7 @@ qboolean ServerGameWorld::FreeGameEntity(PODEntity* podEntity) {
 		IServerGameEntity* gameEntity = static_cast<IServerGameEntity*>(podEntity->gameEntity);
 
 		// Remove the gameEntity reference
-		gameEntity->SetGroundEntity(nullptr);
+		gameEntity->SetGroundEntity( SGEntityHandle() );
 		gameEntity->SetLinkCount(0);
 		gameEntity->SetGroundEntityLinkCount(0);
 		gameEntity->SetPODEntity(nullptr);

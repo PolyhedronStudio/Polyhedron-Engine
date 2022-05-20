@@ -449,7 +449,7 @@ public:
     // TODO TODO TODO: Fix it so it returns the actual ground entity....
     inline SGEntityHandle   &GetGroundEntityHandle() override { return groundEntityHandle; }
 	inline PODEntity		*GetGroundPODEntity() override { return groundEntityHandle.Get(); }
-	inline void             SetGroundEntity(GameEntity* groundEntity) { groundEntityHandle = (groundEntity ? groundEntity->GetPODEntity() : nullptr); } //this->groundEntity = groundEntity; }
+	inline void             SetGroundEntity(const SGEntityHandle &groundEntity) { groundEntityHandle = groundEntity; } //this->groundEntity = groundEntity; }
 
     /**
     *   @brief Get/Set: Ground Entity Link Count

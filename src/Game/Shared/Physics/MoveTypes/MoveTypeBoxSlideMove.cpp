@@ -168,14 +168,14 @@ static void SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
 	// If anything we clear out the ground pointer in case the entity did acquire
 	// flying skills.
 	if( geCheck->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) {
-		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntity( SGEntityHandle() );
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
 
 	//// In case the entity has a client and its velocity is high
 	//if( geCheck->GetClient() && geCheck->GetVelocity().z > 100) {//180) {
-	//	geCheck->SetGroundEntity(nullptr);
+	//	geCheck->SetGroundEntity( SGEntityHandle() );
 	//	geCheck->SetGroundEntityLinkCount(0);
 	//	return;
 	//}
@@ -194,7 +194,7 @@ static void SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
 
 	// Check steepness.
 	if( !IsWalkablePlane( traceResult.plane ) && !traceResult.startSolid ) {
-		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntity( SGEntityHandle() );
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}
@@ -202,7 +202,7 @@ static void SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
 	// If velocity is up, and the actual trace result did not start inside of a solid, it means we have no ground.
 	const vec3_t geCheckVelocity = geCheck->GetVelocity();
 	if( geCheckVelocity.z > 1 && !traceResult.startSolid ) {
-		geCheck->SetGroundEntity(nullptr);
+		geCheck->SetGroundEntity( SGEntityHandle() );
 		geCheck->SetGroundEntityLinkCount(0);
 		return;
 	}

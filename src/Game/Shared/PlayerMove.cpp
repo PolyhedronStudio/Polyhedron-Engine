@@ -168,7 +168,12 @@ static void PM_TouchEntity(struct PODEntity* ent) {
 
     // Only touch entity if we aren't at the maximum limit yet.
     if (pm->numTouchedEntities < PM_MAX_TOUCH_ENTS && ent) {
-        pm->touchedEntities[pm->numTouchedEntities] = ent;
+#ifdef SHAREDGAME_CLIENTGAME
+        pm->touchedEntities[pm->numTouchedEntities] = ent->clientEntityNumber;
+#endif
+#ifdef SHAREDGAME_SERVERGAME
+		pm->touchedEntities[pm->numTouchedEntities] = ent->currentState.number;
+#endif
         pm->numTouchedEntities++;
     }
     else {
@@ -848,7 +853,9 @@ static void PM_CheckGround(void) {
 #ifdef SHAREDGAME_SERVERGAME
 			pm->groundEntityNumber = trace.ent->currentState.number;
 #endif
-		}
+		}/* else {
+			pm->groundEntityNumber = -1;
+		}*/
         
 
         // Sink down to it if not trick jumping
