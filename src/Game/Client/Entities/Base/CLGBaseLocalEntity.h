@@ -1157,7 +1157,7 @@ protected:
     *   Entity pointers.
     **/
     //! Current active enemy, NULL if not any.    
-    IClientGameEntity* enemyEntity      = nullptr;
+    IClientGameEntity* geEnemyEntity      = nullptr;
     //! Ground entity we're standing on.
     IClientGameEntity* groundEntity     = nullptr;
 	SGEntityHandle	groundEntityHandle;

@@ -547,34 +547,30 @@ void SVG_RunFrame(void) {
     // "even the world gets a chance to Think", it does.
     //
     // Acquire server and class entities arrays.
-    Entity* serverEntities = game.world->GetPODEntities();
-    GameEntityVector gameEntities = game.world->GetGameEntities();
-
+    
+    //GameEntityVector gameEntities = game.world->GetGameEntities();
+	ServerGameWorld *gameWorld = GetGameWorld();
+	//Entity* serverEntities = gameWorld->GetPODEntities();
     // Loop through the server entities, and run the base entity frame if any exists.
     for (int32_t i = 1; i < globals.numberOfEntities; i++) {
         // Acquire state number.
-        int32_t stateNumber = serverEntities[i].currentState.number;
+        //int32_t stateNumber = serverEntities[i].currentState.number;
+		int32_t stateNumber = globals.entities[i].currentState.number;
 
-		PODEntity *podEntity = game.world->GetPODEntityByIndex(i);
-
-        // Use an entity handle to safely acquire pointers to the corresponding entity.
-	    SGEntityHandle entityHandle = game.world->GetGameEntityByIndex(i);
-
-        //if (!gameEntity || !gameEntity->IsInUse()) {
-        if (!(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
+		const int32_t entityIndex = stateNumber;
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
+		GameEntity *gameEntity = ServerGameWorld::ValidateEntity(podEntity);
+		
+		// If invalid for whichever reason, warn and continue to next iteration.
+        if (!podEntity || !gameEntity || !podEntity->inUse) {
+            //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
 
-        // Acquire the game entity.
-        GameEntity *gameEntity = *entityHandle;
-        // Don't go on if it isn't in use.
-        //if (!serverEntity->IsInUse())
-        //    continue;
-
         // Admer: entity was marked for removal at the previous tick
-        if (entityHandle.Get() && *entityHandle && (entityHandle->GetServerFlags() & EntityServerFlags::Remove)) {
+        if (podEntity && gameEntity && (gameEntity->GetServerFlags() & EntityServerFlags::Remove)) {
             // Free server entity.
-            game.world->FreePODEntity(entityHandle.Get());
+            game.world->FreePODEntity(podEntity);
 
             // Be sure to unset the server entity on this SVGBaseEntity for the current frame.
             // 
@@ -586,6 +582,7 @@ void SVG_RunFrame(void) {
             continue;
         }
 
+
         // Let the level data know which entity we are processing right now.
         level.currentEntity = gameEntity;
 
@@ -593,19 +590,19 @@ void SVG_RunFrame(void) {
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-		//if (!gameEntity->GetClient()) {
-			SGEntityHandle groundEntity = gameEntity->GetGroundEntityHandle();
-			if (groundEntity.Get() && *groundEntity && (groundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+		if (!gameEntity->GetClient()) {
+			GameEntity *geGroundEntity = ServerGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
+			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
 				// Reset ground entity.
-				gameEntity->SetGroundEntity( SGEntityHandle() );
+				//gameEntity->SetGroundEntity( SGEntityHandle() );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+				//if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
 					// Check for a new ground entity that resides below this entity.
 					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
-				}
+				//}
 			}
-		//}
+		}
 
         // Time to begin a server frame for all of our clients. (This has to ha
         if (i > 0 && i <= game.GetMaxClients()) {
@@ -629,6 +626,7 @@ void SVG_RunFrame(void) {
 
         // Last but not least, "run" process the entity.
 	    //SVG_RunEntity(entityHandle);
+		SGEntityHandle entityHandle = gameEntity;
 		SG_RunEntity(entityHandle);
 
 		// Update the entities Hashed Classname, it might've changed during logic processing.

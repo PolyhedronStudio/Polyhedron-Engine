@@ -121,23 +121,23 @@ void FuncDoorRotating::OnEventID(uint32_t eventID) {
 //		auto *playerEntity = GetGameWorld()->GetGameEntityByIndex(1);
 	switch( eventID ) {
 	case 1: //: DOOR_OPEN:
-		//Com_DPrint("%s: Received (eventID: #%i, 'DOOR_OPEN')!\n", __func__, eventID);
+		Com_DPrint("%s: Received (eventID: #%i, 'DOOR_OPEN')!\n", __func__, eventID);
 
 		// Start now so we can catch up to last frame.
 		//DoGoUp();
 		//DoGoUp();
-		//DoorGoUp( playerEntity );
+		DoorGoUp( playerEntity );
 
 
 		//DoorUse(playerEntity, nullptr);
 		break;
 	case 2: //: DOOR_CLOSE.
-		//Com_DPrint("%s: Received (eventID: #%i, 'DOOR_CLOSE')!\n", __func__, eventID);
+		Com_DPrint("%s: Received (eventID: #%i, 'DOOR_CLOSE')!\n", __func__, eventID);
 		// Start now, so we can catch up to last frame.
 		//DoGoDown();
 		//DoGoDown();
 
-		//DoorGoDown( );
+		DoorGoDown( );
 		break;
 	default:
 

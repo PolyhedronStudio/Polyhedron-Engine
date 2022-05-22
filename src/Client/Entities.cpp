@@ -203,9 +203,6 @@ void CL_DeltaFrame(void)
     // server sends an effect referencing its origin (such as MuzzleFlashType::Login, etc)
     PODEntity *playerClientEntity = &cs.entities[cl.frame.clientNumber + 1];
     Com_PlayerToEntityState(&cl.frame.playerState, &playerClientEntity->currentState);
-	
-	
-
 
 	// Process the entities that are 'in-frame' of the received server game frame packet data.
     for (int32_t i = 0; i < cl.frame.numEntities; i++) {
@@ -225,10 +222,7 @@ void CL_DeltaFrame(void)
         // Fire entity event.
         PacketEntity_FireEvent(state.number);
     }
-	    // Call into client game module its delta frame function.
-	// This gives packet entities a chance to "predict" the next frame before
-	// the current data arrives.
-	CL_GM_ClientPacketEntityDeltaFrame();
+
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();
     }
@@ -246,6 +240,11 @@ void CL_DeltaFrame(void)
 
     // Update player state between previous and current frame.
     Player_UpdateStates(&cl.oldframe, &cl.frame, 1);
+		
+	// Call into client game module its delta frame function.
+	// This gives packet entities a chance to "predict" the next frame before
+	// the current data arrives.
+	//CL_GM_ClientPacketEntityDeltaFrame();
 
     // Check for prediction errors.
     CL_CheckPredictionError();

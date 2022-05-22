@@ -132,19 +132,6 @@ void MiscClientExplosionBox::Spawn() {
 void MiscClientExplosionBox::Think() {
     // Always call parent class method.
     Base::Think();
-
-	// Interpolate origin?
-	PODEntity *clientEntity = GetPODEntity();
-	if (clientEntity) {
-	//	Com_DPrint("misc_client_explobox(#%i) - model(#%i) - origin(%s)\n", clientEntity->clientEntityNumber, clientEntity->currentState.modelIndex, Vec3ToString(clientEntity->currentState.origin));
-	}
-	//if (clientEntity) {
-		//clientEntity->currentState.origin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
-	//} else {
-	//	Com_DPrint("Local misc_client_explobox with NO!!! podEntity\n");
-	//}
-	//SetRenderEffects(RenderEffects::Beam | RenderEffects::DebugBoundingBox);
-	clientEntity->lerpOrigin = vec3_mix(clientEntity->previousState.origin, clientEntity->currentState.origin, cl->lerpFraction);
 }
 
 void MiscClientExplosionBox::ExplosionBoxThink(void) {
@@ -213,8 +200,8 @@ void MiscClientExplosionBox::ExplosionBoxDropToFloor(void) {
     SG_CheckGround(this); //CLG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
-    SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
-    SetNextThinkTime(level.time + FRAMETIME);
+    //SetThinkCallback(&MiscClientExplosionBox::ExplosionBoxDropToFloor);
+    //SetNextThinkTime(level.time + FRAMETIME);
 
     // Do a check ground for the step move of this pusher.
     //CLG_StepMove_CheckGround(this);
@@ -344,38 +331,32 @@ void MiscClientExplosionBox::ExplosionBoxDie(IClientGameEntity* inflictor, IClie
 //===============
 //
 void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
-   
-	// Safety checks.
-    if (!other || other == this) {
-		//Com_DPrint("Touching explobox !other: %i\n", GetNumber());
-		return;
+	// Validate 'other' first.
+	GameEntity *geValidatedOther = ClientGameWorld::ValidateEntity(other);
+
+    // Safety checks.
+    if ( !geValidatedOther || geValidatedOther == this ) {
+	    return;
     }
 
     // Ground entity checks.
-    if (ClientGameWorld::ValidateEntity(other->GetGroundEntityHandle()) == this) {
-		//Com_DPrint("Touching explobox !other->GetGroundEntity: %i\n", GetNumber());
-		return;
+	GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity( geValidatedOther->GetGroundEntityHandle() );
+
+    if ( !geGroundEntity || geGroundEntity == this ) {
+	    return;
     }
-	
-	PODEntity *podOther = other->GetPODEntity();
-	//if (podOther) {
-	//	Com_DPrint("misc_client_explobox(#%i) is touching podEntity: (#%i)\n", GetNumber());
-	//} else {
-	//	Com_DPrint("misc_client_explobox(#%i) is NOT!!!!! touching any podEntity\n");
-	//}
-	
 
     // Calculate ratio to use.
-    double ratio = (other->GetMass() / static_cast<double>(GetMass()));
+    double ratio = (static_cast<double>(geValidatedOther->GetMass()) / static_cast<double>(GetMass()));
 
     // Calculate direction.
-    vec3_t dir = GetOrigin() - other->GetOrigin();
+    vec3_t dir = GetOrigin() - geValidatedOther->GetOrigin();
 
     // Calculate yaw to use based on direction.
     double yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    CLG_StepMove_Walk(this, yaw, (20.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 }
 
 

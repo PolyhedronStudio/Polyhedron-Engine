@@ -130,21 +130,21 @@ qboolean SVG_FireHit(SVGBaseEntity *self, vec3_t &aim, int32_t damage, int32_t k
 	}
 
     // Do our special form of knockback here
-    IServerGameEntity* enemyEntity = self->GetEnemy();
+    IServerGameEntity* geEnemyEntity = self->GetEnemy();
 
     // Calculate knockback velocity based on hit point.
-    vec3_t knockbackVelocity = vec3_fmaf(enemyEntity->GetAbsoluteMin(), 0.5, enemyEntity->GetSize());
+    vec3_t knockbackVelocity = vec3_fmaf(geEnemyEntity->GetAbsoluteMin(), 0.5, geEnemyEntity->GetSize());
     knockbackVelocity = vec3_normalize(knockbackVelocity - point);
     
     // Add knockback velocity to the current entity velocity.
-    knockbackVelocity = vec3_fmaf(enemyEntity->GetVelocity(), kick, knockbackVelocity);
+    knockbackVelocity = vec3_fmaf(geEnemyEntity->GetVelocity(), kick, knockbackVelocity);
     
     // Last but not least, set the knockback velocity as the actual velocity of the enemy entity.
-    enemyEntity->SetVelocity(knockbackVelocity);
+    geEnemyEntity->SetVelocity(knockbackVelocity);
 
     // Ensure there is no ground entity set anymore in case velocity is UPWARDS.
-    if (enemyEntity->GetVelocity().z > 0)
-        enemyEntity->SetGroundEntity( SGEntityHandle() );
+    if (geEnemyEntity->GetVelocity().z > 0)
+        geEnemyEntity->SetGroundEntity( SGEntityHandle() );
 
     return true;
 }

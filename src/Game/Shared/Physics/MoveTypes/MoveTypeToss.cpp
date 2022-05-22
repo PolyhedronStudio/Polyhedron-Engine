@@ -75,7 +75,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	}
 
 	// Check whether the ground entity has disappeared(aka not in use).
-	GameEntity *entGroundEntity = *ent->GetGroundEntityHandle();
+	GameEntity *entGroundEntity = SGGameWorld::ValidateEntity( ent->GetGroundEntityHandle() );
 	//	if( ent->groundentity && ent->groundentity != world && !ent->groundentity->r.inuse ) {
 	if (entGroundEntity && !entGroundEntity->IsInUse()) {
 		ent->SetGroundEntity( SGEntityHandle() ); //ent->groundentity = NULL;
@@ -85,7 +85,8 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	float oldSpeed = vec3_length( ent->GetVelocity() );
 
 	// Check if the ent still has a valid ground entity.
-	if ( ent->GetGroundEntityHandle() && ent->GetMoveType() != MoveType::TossSlide ) {
+	entGroundEntity = SGGameWorld::ValidateEntity( ent->GetGroundEntityHandle() );
+	if ( entGroundEntity && ent->GetMoveType() != MoveType::TossSlide ) {
 		// Exit if there's no velocity(speed) activity.
 		if( !oldSpeed ) {
 			return;

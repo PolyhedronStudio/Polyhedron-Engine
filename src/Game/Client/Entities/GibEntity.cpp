@@ -78,7 +78,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     gibEntity->SetModel(gibModel);
 
     // Set solid and other properties.
-    gibEntity->SetSolid(Solid::Not);
+    gibEntity->SetSolid(Solid::OctagonBox);
     gibEntity->SetEffects(gibEntity->GetEffects() | EntityEffectType::Gib);
     gibEntity->SetFlags(gibEntity->GetFlags() | EntityFlags::NoKnockBack);
     gibEntity->SetTakeDamage(1);
@@ -90,10 +90,10 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     // Is it an organic gib type?
     if (gibType == GibType::Organic) {
     	// Different move type for organic gibs.
-	    gibEntity->SetMoveType(MoveType::TossSlide);
+	    gibEntity->SetMoveType(MoveType::Toss);
 
 	    // Most of all, we setup a touch callback too ofc.
-	    gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
+	    //gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
 
 	    // Adjust the velocity scale.
 	    velocityScale = 0.5f;
@@ -110,10 +110,10 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     vec3_t gibVelocity = vec3_fmaf(velocity, velocityScale, velocityDamage);
 
     // Be sure to clip our velocity, just in case.
-    gibEntity->ClipGibVelocity(velocityDamage);
+    gibEntity->ClipGibVelocity(gibVelocity);
 
     // Last but not least, set our velocity.
-    gibEntity->SetVelocity(velocityDamage);
+    gibEntity->SetVelocity(gibVelocity);
     
     // Generate angular velocity.
     vec3_t angularVelocity = { Randomui() * 600.f, Randomui() * 600.f, Randomui() * 600.f };
@@ -122,8 +122,8 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     gibEntity->SetAngularVelocity(angularVelocity);
 
     // Setup the Gib think function and its think time.
-    gibEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
-    gibEntity->SetNextThinkTime(level.time + 10s + GameTime(Randomui() * 10));
+    //gibEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
+    //gibEntity->SetNextThinkTime(level.time + 10s + GameTime(Randomui() * 10));
 
     // Link entity into the world.
     gibEntity->LinkEntity();
@@ -263,11 +263,12 @@ void GibEntity::GibEntityThink() {
     // Play frames for these meshes, cut the crap at frame 10.
     if (GetAnimationFrame() == 10) {
 		SetEffects(0);
-        SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
-        SetNextThinkTime(level.time + 8s + Randomui() * 10s);
+       // SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
+        //SetNextThinkTime(level.time + 8s + Randomui() * 10s);
     }
 
-	SG_CheckGround(this);
+	//SG_CheckGround(this);
+	SG_AddGravity(this);
 }
 
 //===============

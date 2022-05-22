@@ -71,6 +71,7 @@ SET(SRC_SVGAME
 	#Entities/Misc/MiscTeleporter.cpp
 	#Entities/Misc/MiscTeleporterDest.cpp
 
+	Entities/Monsters/MonsterStepDummy.cpp
 	Entities/Monsters/MonsterTestDummy.cpp
 
 	Entities/Path/PathCorner.cpp
@@ -171,12 +172,17 @@ SET(HEADERS_SVGAME
 
 	Entities/Misc/MiscExplosionBox.h
 	Entities/Misc/MiscServerModel.h
+
+	Entities/Monsters/MonsterStepDummy.h
 	Entities/Monsters/MonsterTestDummy.h
+
 	Entities/Path/PathCorner.h
+
 	Entities/Target/TargetEarthquake.h
 	Entities/Target/TargetExplosion.h
 	Entities/Target/TargetSpeaker.h
 	Entities/Target/TargetTempEntity.h
+
 	Entities/Trigger/TriggerAlways.h
 	Entities/Trigger/TriggerAutoDoor.h
 	Entities/Trigger/TriggerAutoPlatform.h
@@ -188,6 +194,7 @@ SET(HEADERS_SVGAME
 	Entities/Trigger/TriggerOnce.h
 	Entities/Trigger/TriggerPush.h
 	Entities/Trigger/TriggerRelay.h
+
 	Entities/Weaponry/BlasterBolt.h
 
 	Entities/IServerGameEntity.h

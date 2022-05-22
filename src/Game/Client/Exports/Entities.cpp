@@ -193,13 +193,13 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
     for (int32_t entityNumber = 0; entityNumber < cl->frame.numEntities; entityNumber++) {
 		// Fetch the entity index.
         const int32_t entityIndex = (cl->frame.firstEntity + entityNumber) & PARSE_ENTITIES_MASK;
-		// Get PODEntity.
+
+		// Get POD Entity, and validate it to get our Game Entity.
 		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
-		// Get GameEnity.
-        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(entityIndex);//gameWorld->GetGameEntityByIndex(12 + entityNumber);
+		GameEntity *gameEntity = ClientGameWorld::ValidateEntity(podEntity);
 
         // If invalid for whichever reason, warn and continue to next iteration.
-        if (!podEntity || !gameEntity) {
+        if (!podEntity || !gameEntity || !podEntity->inUse) {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
@@ -211,36 +211,23 @@ void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-		//if (!gameEntity->GetClient()) {
+		if (!gameEntity->GetClient()) {
 			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
 			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
 				// Reset ground entity.
-				gameEntity->SetGroundEntity( SGEntityHandle() );
+				//gameEntity->SetGroundEntity( SGEntityHandle() );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+				//if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
 					// Check for a new ground entity that resides below this entity.
 					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
-				}
+				//}
 			}
-		//}
+		}
 
         // Run it for a frame.
-        // Acquire game entity object.    
 		SGEntityHandle handle = podEntity;
 		SG_RunEntity(handle);
-		//// Update the podEntity's hashedClassname for the next frame.
-		//if (podEntity) {
-		//	podEntity->previousState.hashedClassname = podEntity->currentState.hashedClassname;
-		//	
-		//	if (podEntity->gameEntity) {
-		//		// Keep it up to date with whatever the game entities type info 
-		//		podEntity->currentState.hashedClassname = podEntity->gameEntity->GetTypeInfo()->hashedMapClass;
-		//	} else {
-		//		podEntity->currentState.hashedClassname = 0;
-		//	}
-		//}
-//		CLG_RunServerEntity(handle);
     }
 }
 
@@ -258,19 +245,16 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 
 	// Iterate through our local client side entities.
     for (int32_t localEntityNumber = MAX_WIRED_POD_ENTITIES; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
-		// Fetch the entity index.
-        const int32_t entityIndex = localEntityNumber;
-		// Get PODEntity.
+		const int32_t entityIndex = localEntityNumber;
 		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
-		// Get GameEnity.
-        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(entityIndex);//gameWorld->GetGameEntityByIndex(12 + entityNumber);
-
-        // If invalid for whichever reason, warn and continue to next iteration.
+		GameEntity *gameEntity = ClientGameWorld::ValidateEntity(podEntity);
+		
+		// If invalid for whichever reason, warn and continue to next iteration.
         if (!podEntity || !gameEntity || !podEntity->inUse) {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
-		
+
         // Admer: entity was marked for removal at the previous tick
         if (podEntity && gameEntity && (gameEntity->GetClientFlags() & EntityServerFlags::Remove)) {
             // Free server entity.
@@ -293,23 +277,22 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
         gameEntity->SetOldOrigin(gameEntity->GetOrigin());
 
         // If the ground entity moved, make sure we are still on it
-		//if (!gameEntity->GetClient()) {
+		if (!gameEntity->GetClient()) {
 			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
 			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
 				// Reset ground entity.
-				gameEntity->SetGroundEntity( SGEntityHandle() );
+				//gameEntity->SetGroundEntity( SGEntityHandle() );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
-				if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
+				//if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
 					// Check for a new ground entity that resides below this entity.
 					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
-				}
+				//}
 			}
-		//}
+		}
 
 		// Run it for a frame.
 		SGEntityHandle handle = gameEntity;
-		//CLG_RunLocalClientEntity(handle);
 		SG_RunEntity(handle);
     }
 }

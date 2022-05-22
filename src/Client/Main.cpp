@@ -2937,10 +2937,7 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 	cl.numSolidLocalEntities = 0;
 	
 	// Run the received packet entities for a frame so we can "predict".
-	//CL_GM_ClientPacketEntityDeltaFrame();
-
-	// Give the client game module a chance to run its local entities for a frame.
-	CL_GM_ClientLocalEntitiesFrame();
+	CL_GM_ClientPacketEntityDeltaFrame();
 
 	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
 		// Get entity pointer.
@@ -2960,6 +2957,8 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 		LocalEntity_FireEvent(podEntity->currentState);
 	}
 	
+	// Give the client game module a chance to run its local entities for a frame.
+	CL_GM_ClientLocalEntitiesFrame();
 
 #if USE_CLIENT
     if (host_speeds->integer)
@@ -3154,9 +3153,6 @@ uint64_t CL_Frame(uint64_t msec)
         R_FRAMES++;
 
 run_fx:
-        // Update audio after the 3D view was drawn
-        S_Update();
-
         // Advance local game effects for next frame
         if (host_speeds->integer) {
             timeBeforeClientGame = Sys_Milliseconds();
@@ -3165,6 +3161,9 @@ run_fx:
         if (host_speeds->integer) {
             timeAfterClientGame = Sys_Milliseconds();
         }
+        
+		// Update audio after the 3D view was drawn
+        S_Update();
 
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_20) {

@@ -234,6 +234,7 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
         gePlayer->SetViewHeight(pm->state.viewOffset[2]);
         gePlayer->SetWaterLevel(pm->waterLevel);
         gePlayer->SetWaterType(pm->waterType);
+
 		// Let the world know about the current entity we're running.
 		level.currentEntity = gePlayer;
         
@@ -243,7 +244,7 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 		// Resolve the perhaps new Ground Entity.
 		ClientGameWorld *gameWorld = GetGameWorld();
 		if (gameWorld) {
-			Com_DPrint("(%s): GroundEntity(#%i)\n", __func__, pm->groundEntityNumber);
+			//Com_DPrint("(%s): GroundEntity(#%i)\n", __func__, pm->groundEntityNumber);
 			GameEntity *geGround = gameWorld->GetGameEntityByIndex(pm->groundEntityNumber);
 
 			if (geGround) {
