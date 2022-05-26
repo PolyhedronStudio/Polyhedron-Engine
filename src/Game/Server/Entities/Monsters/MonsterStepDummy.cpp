@@ -263,6 +263,12 @@ void MonsterStepDummy::MonsterStepDummyThink(void) {
 				// Reset to old position, so it can turn some more.
 				SetOrigin(oldOrigin);
 			}
+
+			if ( !StepMove_CheckBottom() ) {
+				StepMove_FixCheckBottom();
+				// Reset to old position, so it can turn some more.
+				SetOrigin(oldOrigin);
+			}
 		}
 
 		// Link entity.
@@ -272,9 +278,7 @@ void MonsterStepDummy::MonsterStepDummyThink(void) {
 		SG_TouchTriggers( this );
 	}    
 	
-	if ( !StepMove_CheckBottom() ) {
-		StepMove_FixCheckBottom();
-	}
+
 
 	CategorizePosition();
 

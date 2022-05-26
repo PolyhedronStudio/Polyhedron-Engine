@@ -43,6 +43,9 @@ static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 *	@brief The possible flags returned from executing a SlideMove on a MoveState.
 **/
 struct SlideMoveFlags {
+	static constexpr int32_t SteppedUp		= 64;
+	static constexpr int32_t SteppedDown	= 32;
+
 	static constexpr int32_t PlaneTouched	= 16;
 	static constexpr int32_t WallBlocked	= 8;
 	static constexpr int32_t Trapped		= 4;

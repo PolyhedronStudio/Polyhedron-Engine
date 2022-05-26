@@ -253,8 +253,11 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 		vec3_t direction = geGoal->GetOrigin() - GetOrigin();
 		// Cancel uit the Z direction.
 		direction.z = 0;
+		// if (flags::FLY {
+		// //direction.z = 0;
+		// }
 		// Prepare ideal yaw angle to rotate to.
-		SetIdealYawAngle( vec3_to_yaw( direction ) );
+		SetIdealYawAngle( vec3_to_yaw( { direction.x, direction.y, 0.f } ) );
 
 
 		//
@@ -274,7 +277,10 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 			const vec3_t wishVelocity = vec3_t {
 				62.f * normalizedDir.x,
 				62.f * normalizedDir.y,
-				oldVelocity.z
+				oldVelocity.z,
+				// if (Flags::Fly) {
+				//33.f * normalizedDir.z,
+				// }
 			};
 			SetVelocity(wishVelocity);
 		} else {
@@ -282,7 +288,10 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 			const vec3_t wishVelocity = vec3_t {
 				92.f * normalizedDir.x,
 				92.f * normalizedDir.y,
-				oldVelocity.z
+				oldVelocity.z,
+				// if (Flags::Fly) {
+				//33.f * normalizedDir.z,
+				// }
 			};
 			SetVelocity(wishVelocity);
 		}
