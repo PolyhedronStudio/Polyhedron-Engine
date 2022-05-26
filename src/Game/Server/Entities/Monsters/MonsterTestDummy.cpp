@@ -214,27 +214,78 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     //SetAnimationFrame(nextFrame);
 
     //
-    // Calculate direction.
+    // Move if alive.
     //
     if (GetHealth() > 0) {
-		// Get direction vector.
-		vec3_t direction = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
+		//
+		// Goal Management.
+		//
+		// Setup Client as our enemy.
+		//GameEntity *geClientEnemy = GetGameWorld()->GetGameEntities()[1]; // Client.
+		//SetEnemy(geClientEnemy);
+		//SetGoalEntity(geClientEnemy);
+
+		// Our Goal entity is either...:
+		// 1: Goal
+		// 2: Enemy
+		// 3: None.
+		GameEntity *geGoal = GetGoalEntity();
+
+		if (!geGoal) {
+			geGoal = GetEnemy();
+
+			if (!geGoal) {
+				geGoal = GetGameWorld()->GetGameEntities()[1];
+
+				// if !geGoal .. geGoal = ... ?
+			}
+		}
 		
+		//
+		// Yaw Speed.
+		//
+		SetYawSpeed(20.f);
+
+		//
+		// Direction.
+		//
+		// Get direction vector.
+		vec3_t direction = geGoal->GetOrigin() - GetOrigin();
 		// Cancel uit the Z direction.
 		direction.z = 0;
+		// Prepare ideal yaw angle to rotate to.
+		SetIdealYawAngle( vec3_to_yaw( direction ) );
 
-		// Set model angles to euler converted direction.
-		SetAngles(vec3_euler(direction));
 
-		// Set velocity to head into direction.
-		const vec3_t normalizedDir = vec3_normalize(direction);
+		//
+		// Yaw Angle.
+		//
+		// Get the delta between wished for and current yaw angles.
+		const float deltaYawAngle = TurnToIdealYawAngle( );
+
+		//if ( !( deltaYawAngle > 5 && deltaYawAngle < 355 ) ) {
 		const vec3_t oldVelocity = GetVelocity();
-		const vec3_t wishVelocity = vec3_t {
-			92.f * normalizedDir.x,
-			92.f * normalizedDir.y,
-			oldVelocity.z
-		};
-		SetVelocity(wishVelocity);
+		const vec3_t normalizedDir = vec3_normalize(direction);
+		
+		// Move slower if the ideal yaw angle is out of range.
+		// (Gives a more 'realistic' turning effect).
+		if (deltaYawAngle > 45 && deltaYawAngle < 315) {
+			// Set velocity to head into direction.
+			const vec3_t wishVelocity = vec3_t {
+				62.f * normalizedDir.x,
+				62.f * normalizedDir.y,
+				oldVelocity.z
+			};
+			SetVelocity(wishVelocity);
+		} else {
+			// Set velocity to head into direction.
+			const vec3_t wishVelocity = vec3_t {
+				92.f * normalizedDir.x,
+				92.f * normalizedDir.y,
+				oldVelocity.z
+			};
+			SetVelocity(wishVelocity);
+		}
 
 		// Set the animation.
 		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;

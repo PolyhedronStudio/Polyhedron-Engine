@@ -330,7 +330,7 @@ inline const vec3_t vec3_euler(const vec3_t &dir) {
     }
     else {
         if (dir.x) {
-            yaw = Degrees(atan2f(dir.y, dir.x));
+            yaw = Degrees( atan2f( dir.y, dir.x) );
         }
         else if (dir.y > 0.f) {
             yaw = 90.f;
@@ -343,8 +343,8 @@ inline const vec3_t vec3_euler(const vec3_t &dir) {
             yaw += 360.f;
         }
 
-        const float forward = sqrtf(dir.x * dir.x + dir.y * dir.y);
-        pitch = Degrees(atan2f(dir.z, forward));
+        const float forward = sqrtf( dir.x * dir.x + dir.y * dir.y );
+        pitch = Degrees( atan2f( dir.z, forward ) );
 
         if (pitch < 0.f) {
             pitch += 360.f;
@@ -366,21 +366,19 @@ inline const vec3_t vec3_euler(const vec3_t &dir) {
 //===============
 //
 inline const float vec3_to_yaw(const vec3_t& dir) {
-    float   yaw;
+    float   yaw = 0.f;
 
-    if (/*vec[YAW] == 0 &&*/ dir[vec3_t::PYR::Pitch] == 0) {
-        yaw = 0.f;
-
+    if ( /*vec[YAW] == 0 &&*/ dir[vec3_t::PYR::Pitch] == 0 ) {
         if (dir[vec3_t::PYR::Yaw] > 0) {
             yaw = 90.f;
         } else if (dir[vec3_t::PYR::Yaw] < 0) {
             yaw = -90.f;
         }
-    }
-    else {
-        yaw = (int)(atan2(dir[vec3_t::PYR::Yaw], dir[vec3_t::PYR::Pitch]) * 180.f / M_PI);
-        if (yaw < 0)
+    } else {
+        yaw = (int)Degrees( atan2( dir[vec3_t::PYR::Yaw], dir[vec3_t::PYR::Pitch] ) );
+        if (yaw < 0) {
             yaw += 360.f;
+		}
     }
 
     return yaw;

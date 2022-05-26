@@ -774,7 +774,7 @@ void SVGBasePlayer::UpdateEvent() {
         if ((int)(client->bobTime + bobMove.move) != bobMove.cycle ) {
             SetEventID(EntityEvent::Footstep);
         } else {
-            Com_DPrintf("client->bobTime + bobMove[%i]\nbobMove.cycle[%i]\n-----------------\n");
+            //gi.DPrintf("client->bobTime + bobMove[%i]\nbobMove.cycle[%i]\n-----------------\n");
         }
     }
 }

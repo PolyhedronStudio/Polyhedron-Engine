@@ -74,17 +74,49 @@ void SG_Physics_PrintWarning(const std::string& message) {
 
     // Show warning.
 #ifdef SHAREDGAME_CLIENTGAME
-	std::string warning = "SGPhysics(Client[";
+	std::string warning = "SGPhysics(Client) Warning:";
 #endif
 #ifdef SHAREDGAME_SERVERGAME
-	std::string warning =  "SGPhysics(Servber[";
+	std::string warning =  "SGPhysics(Server) Warning:";
 #endif
 //    warning += functionName;
 	warning += "]): ";
     warning += message;
     warning += "\n";
 
+#ifdef SHAREDGAME_CLIENTGAME
 	Com_DPrintf(warning.c_str());
+#endif
+#ifdef SHAREDGAME_SERVERGAME
+	gi.DPrintf(warning.c_str());
+#endif
+}
+
+void SG_Physics_PrintDeveloper(const std::string& message) {
+//void SG_Physics_PrintWarning(const std::string& message, const std::string &functionName = ) {
+    // Only continue if developer warnings for physics are enabled.
+    //extern cvar_t* dev_show_physwarnings;
+    //if (!dev_show_physwarnings->integer) {
+    //    return;
+    //}
+
+    // Show warning.
+#ifdef SHAREDGAME_CLIENTGAME
+	std::string devmessage = "SGPhysics(Client) Developer: ";
+#endif
+#ifdef SHAREDGAME_SERVERGAME
+	std::string devmessage =  "SGPhysics(Server) Developer: ";
+#endif
+//    warning += functionName;
+    devmessage += message;
+    devmessage += "\n";
+
+#ifdef SHAREDGAME_CLIENTGAME
+	Com_DPrintf(devmessage.c_str());
+#endif
+#ifdef SHAREDGAME_SERVERGAME
+	gi.DPrintf(devmessage.c_str());
+#endif
 }
 
 //================================================================================
@@ -104,7 +136,7 @@ static inline vec3_t GS_ClipVelocity( const vec3_t &inVelocity, const vec3_t &no
 	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backoff ) );
 
 	// SlideMove clamp it.
-	#ifdef SG_SLIDEMOVE_CLAMPING
+#if defined(SG_SLIDEMOVE_CLAMPING) && SG_SLIDEMOVE_CLAMPING == 1
 	{
 		float oldSpeed = vec3_length(inVelocity);
 		float newSpeed = vec3_length(outVelocity);
@@ -185,7 +217,7 @@ int32_t SG_SolidMaskForGameEntity( GameEntity *gameEntity ) {
 **/
 void SG_CheckGround( GameEntity *geCheck ) {
 	// Actual offset to determine for when a Hull is on-ground.
-	static constexpr float groundOffset = 0.25f;
+	static constexpr float groundOffset = 0.3125f;
 
 	// Sanity Check.
 	if (!geCheck) {

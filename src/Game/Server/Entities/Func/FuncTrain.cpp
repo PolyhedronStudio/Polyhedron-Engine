@@ -45,7 +45,7 @@ void FuncTrain::Spawn() {
 	// Re-ensure proper move and solid type.
 	SetMoveType( MoveType::Push );
 	SetSolid( Solid::BSP );
-	SetModel(GetModel());
+	SetModel( GetModel() );
 
 	// Use trigger callback.
 	SetUseCallback(&FuncTrain::TrainUse);
@@ -133,10 +133,10 @@ void FuncTrain::FindNextTarget() {
 		//	return;
 		//}
 		// Set target to path corner.
-	    SetTarget(pathCorner->GetTarget());
+	    SetTarget( pathCorner->GetTarget() );
 
 
-		SetOrigin(pathCorner->GetOrigin() - GetMins());
+		SetOrigin( pathCorner->GetOrigin() - GetMins() );
 		LinkEntity();
 
 		// This train has no name, trigger it immediately

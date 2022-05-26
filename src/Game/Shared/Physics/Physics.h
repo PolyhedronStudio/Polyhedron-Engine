@@ -26,8 +26,10 @@ static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 
 //! Uncomment for printing Debug Information Output when a SlideMove gets trapped.
 /*#define SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES*/
+//! Uncomment for printing Debug blockMask results of SlideMoves.
+#define SG_SLIDEMOVE_DEBUG_BLOCKMASK 1
 //! Comment to disable SlideMove velocity clamping.
-#define SG_SLIDEMOVE_CLAMPING
+#define SG_SLIDEMOVE_CLAMPING 1
 
 
 /***
@@ -68,25 +70,26 @@ struct MoveState {
 	float	slideBounce	= 0.f;
 
 	//! Ground Entity.
-	int32_t		groundEntityLinkCount	= 0;
-	GameEntity	*groundEntity			= nullptr;
+	int32_t	groundEntityLinkCount	= 0;
+	//GameEntity	*groundEntity			= nullptr;
+	int32_t	groundEntityNumber = -1;
 
 	//! Entity that we're trying to move around.
-	GameEntity *moveEntity = nullptr;
+	int32_t	moveEntityNumber = -1;	//GameEntity *moveEntity = nullptr;
 	//! Entity to skip when executing traces. (Usually the same entity as moveEntity.)
-	GameEntity *skipEntity = nullptr;
+	int32_t	skipEntityNumber = -1;//GameEntity *skipEntity = nullptr;
 
 	//! Entity Flags and Content Mask.
-	int32_t entityFlags = 0;
-	int32_t contentMask = 0;
+	int32_t	entityFlags = 0;
+	int32_t	contentMask = 0;
 
 	//! Number of, and normals of each plane we want to clip against to.
 	int32_t numClipPlanes = 0;
 	vec3_t	clipPlaneNormals[MAX_SLIDEMOVE_CLIP_PLANES];
 
 	//! Number of, and pointers to the entities we touched and want to dispatch a 'Touch' callback to.
-	int32_t		numTouchEntities = 0;
-	GameEntity	*touchEntites[MAX_SLIDEMOVE_TOUCH];
+	int32_t	numTouchEntities = 0;
+	int32_t	touchEntites[MAX_SLIDEMOVE_TOUCH];
 };
 
 
@@ -123,7 +126,7 @@ SGTraceResult SG_PushEntity( GameEntity *gePushEntity, const vec3_t &pushOffset 
 /**
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction );
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, MoveState &boxSlideMove  );
 
 /**
 *	@return	The proper Solid mask to use for the passed game entity.

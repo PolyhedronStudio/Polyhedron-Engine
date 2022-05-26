@@ -67,42 +67,32 @@ void MonsterStepDummy::Spawn() {
 
     // Set solid.
     SetSolid(Solid::OctagonBox);
-
-    // Set move type.
+	// Set move type.
     SetMoveType(MoveType::Step);
-
-    // Since this is a "monster", after all...
+	// Since this is a "monster", after all...
 	//SetFlags(EntityFlags::Fly);
     SetServerFlags(EntityServerFlags::Monster);
-
-    // Set clip mask.
+	// Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     // Set the barrel model, and model index.
     SetModel("models/monsters/stepdummy/stepdummy.iqm");
-
-    // Set the bounding box.
+	// Set the bounding box.
     SetBoundingBox({ -16, -16, 0 }, { 16, 16, 52 });
 
-    // Set default values in case we have none.
-    if (!GetMass()) {
-	    SetMass(200);
-    }
-    if (!GetHealth()) {
-	    SetHealth(200);
-    }
-    
+	// Entity is alive.
+	SetDeadFlag(DeadFlags::Alive);
     // Set entity to allow taking damage.
     SetTakeDamage(TakeDamage::Yes);
 
-    // Setup our MonsterStepDummy callbacks.
-    SetThinkCallback(&MonsterStepDummy::MonsterStepDummyStartAnimation);
+    // Set default values in case we have none.
+    if (!GetMass()) { SetMass(200); }
+    if (!GetHealth()) { SetHealth(200); }
+    
+	// Setup callbacks.
     SetDieCallback(&MonsterStepDummy::MonsterStepDummyDie);
 
-    // Setup the next think time.
-    SetNextThinkTime(level.time + FRAMETIME);
-
-    // Link the entity to world, for collision testing.
+	// Link the entity to world, for collision testing.
     LinkEntity();
 }
 
@@ -120,7 +110,26 @@ void MonsterStepDummy::Respawn() { Base::Respawn(); }
 //
 //===============
 //
-void MonsterStepDummy::PostSpawn() { Base::PostSpawn(); }
+void MonsterStepDummy::PostSpawn() { 
+	Base::PostSpawn(); 
+	
+	// TEMP CODE: SET THE GOAL AND ENEMY ENTITY.
+	ServerGameWorld *gw = GetGameWorld();
+	for (auto* geGoalEntity : GetGameWorld()->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
+		| cef::IsValidPointer
+		| cef::HasServerEntity
+		| cef::InUse
+		| cef::HasKeyValue("goalentity", strGoalEntity)) {
+			SetGoalEntity(geGoalEntity);
+			SetEnemy(geGoalEntity);
+
+			gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoalEntity->GetTargetName().c_str());
+	}
+
+    // Setup our MonsterStepDummy callbacks.
+    SetThinkCallback(&MonsterStepDummy::MonsterStepDummyStartAnimation);
+    SetNextThinkTime(level.time + FRAMETIME);
+}
 //===============
 // MonsterStepDummy::Think
 //
@@ -133,7 +142,18 @@ void MonsterStepDummy::Think() { Base::Think(); }
 //
 //===============
 void MonsterStepDummy::SpawnKey(const std::string& key, const std::string& value) {
-	Base::SpawnKey(key, value);
+	// We're using this for testing atm.
+	if ( key == "goalentity" ) {
+		// Parsed string.
+		std::string parsedString = "";
+		ParseKeyValue(key, value, parsedString);
+
+		// Assign.
+		strGoalEntity = parsedString;
+		gi.DPrintf("MonsterStepDummy(GoalEntity: %s)\n", value.c_str());
+	} else {
+		Base::SpawnKey(key, value);
+	}
 }
 
 /////
@@ -188,63 +208,75 @@ void MonsterStepDummy::MonsterStepDummyStartAnimation(void) {
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MonsterStepDummy::MonsterStepDummyThink(void) {
-    // First, ensure our origin is +1 off the floor.
-    //vec3_t newOrigin = GetOrigin() + vec3_t{
-    //    0.f, 0.f, 1.f
-    //};
-
-    //SetOrigin(newOrigin);
-    
-    //// Calculate the end origin to use for tracing.
-    //vec3_t end = newOrigin + vec3_t{
-    //    0, 0, -256.f
-    //};
-    //
-    //
-    //// Exceute the trace.
-    //SVGTraceResult trace = SVG_Trace(newOrigin, GetMins(), GetMaxs(), end, this, BrushContentsMask::MonsterSolid);
-    //
-    //// Return in case we hit anything.
-    //if (trace.fraction == 1 || trace.allSolid)
-    //    return;
-    //
-    //// Set new entity origin.
-	
-
-	//gi.DPrintf("YawSpeed: %f\n", GetYawSpeed());
-
     //
     // Calculate direction.
     //
-    if (GetHealth() > 0) {
+    if (GetDeadFlag() != DeadFlags::Dead) {
+		// Store old origin so we can reset it in case we aren't turned into a wished for yaw angle yet.
+		const vec3_t oldOrigin = GetOrigin();
+		const vec3_t oldAngles = GetAngles();
+
 		// Yaw Speed.
-		SetYawSpeed(10.f / BASE_FRAMEDIVIDER);
+		SetYawSpeed(20.f);
 
 		// Setup Client as our enemy.
-		GameEntity *geClientEnemy = GetGameWorld()->GetGameEntities()[1]; // Client.
-		SetEnemy(geClientEnemy);
-		SetGoalEntity(geClientEnemy);
+		//GameEntity *geClientEnemy = GetGameWorld()->GetGameEntities()[1]; // Client.
+		//SetEnemy(geClientEnemy);
+		//SetGoalEntity(geClientEnemy);
 
+		// Our Goal entity is either...:
+		// 1: Goal
+		// 2: Enemy
+		// 3: None.
+		GameEntity *geGoal = GetGoalEntity();
+
+		if (!geGoal) {
+			geGoal = GetEnemy();
+
+			if (!geGoal) {
+				geGoal = GetGameWorld()->GetGameEntities()[1];
+
+				// if !geGoal .. geGoal = ... ?
+			}
+		}
+
+		//
         // Direction vector between player and other entity.
-        vec3_t wishDir = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
+		//
+        vec3_t wishDir = geGoal->GetOrigin() - GetOrigin();
 		wishDir.z = 0;
-		
-		// Set Model Angles.
-		SetAngles(vec3_euler(wishDir));
-		gi.DPrintf("wishDir: %f %f %f\n", wishDir.x, wishDir.y, wishDir.z);
-		
-		// Calculate yaw to use based on direction.
-	    float yaw = vec3_to_yaw(wishDir);
-		
-        // Last but not least, move a step ahead.
-        StepMove_WalkDirection(yaw, 90.f );//(0.1f / BASE_FRAMEDIVIDER) * (200.f / 200.f));
-	}    
 
-	LinkEntity();
+		//
+		// Calculate yaw to use based on direction.
+		//
+	    float yaw = vec3_to_yaw(wishDir);
+		// Set ideal Yaw Angle and turn to it.
+		SetIdealYawAngle(yaw);
+		// Turn to angles.
+		float deltaYawAngle = TurnToIdealYawAngle();
+
+		//
+		// (Step-)Move into direction.
+		//
+		if ( StepMove_WalkDirection(yaw, 90.f) ) {
+			if ( deltaYawAngle > 45 && deltaYawAngle < 315 ) {
+				// Reset to old position, so it can turn some more.
+				SetOrigin(oldOrigin);
+			}
+		}
+
+		// Link entity.
+		LinkEntity();
+
+		// Touch Triggers.
+		SG_TouchTriggers( this );
+	}    
 	
 	if ( !StepMove_CheckBottom() ) {
 		StepMove_FixCheckBottom();
 	}
+
+	CategorizePosition();
 
     // Check for ground.   
 	SG_CheckGround( this );
@@ -253,69 +285,6 @@ void MonsterStepDummy::MonsterStepDummyThink(void) {
     SetThinkCallback(&MonsterStepDummy::MonsterStepDummyThink);
     // Setup the next think time.
     SetNextThinkTime(level.time + FRAMETIME);
-
- //   // Advance the dummy animation for a frame.
- //   // Set here how fast you want the tick rate to be.
- //   // Set here how fast you want the tick rate to be.
- //   static constexpr uint32_t ANIM_HZ = 30.0;
-
- //   // Calclate all related values we need to make it work smoothly even if we have
- //   // a nice 250fps, the game must run at 50fps.
- //   //static constexpr uint32_t ANIM_FRAMERATE = ANIM_HZ;
- //   //static constexpr double   ANIM_FRAMETIME = 1000.0 / ANIM_FRAMERATE;
- //   //static constexpr double   ANIM_1_FRAMETIME = 1.0 / ANIM_FRAMETIME;
- //   //static constexpr double   ANIM_FRAMETIME_1000 = ANIM_FRAMETIME / 1000.0;
- //   //float nextFrame = GetAnimationFrame();
- //   //nextFrame += (32.f * ANIM_1_FRAMETIME);
- //   //if (nextFrame > 33) {
-	//   // nextFrame = 2;
- //   //}
- //   //SetAnimationFrame(nextFrame);
-
- //   //
- //   // Calculate direction.
- //   //
- //   if (GetHealth() > 0) {
-	//	// Get direction vector.
-	//	vec3_t direction = GetGameWorld()->GetGameEntities()[1]->GetOrigin() - GetOrigin();
-	//	
-	//	// Cancel uit the Z direction.
-	//	direction.z = 0;
-
-	//	// Set model angles to euler converted direction.
-	//	SetAngles(vec3_euler(direction));
-
-	//	// Set velocity to head into direction.
-	//	const vec3_t normalizedDir = vec3_normalize(direction);
-	//	const vec3_t oldVelocity = GetVelocity();
-	//	const vec3_t wishVelocity = vec3_t {
-	//		92.f * normalizedDir.x,
-	//		92.f * normalizedDir.y,
-	//		oldVelocity.z
-	//	};
-	//	SetVelocity(wishVelocity);
-
-	//	// Set the animation.
-	//	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-	//	animationState->animationIndex = 1;
-	//	animationState->startFrame = 1;
-	//	animationState->endFrame = 62;
-	//	animationState->frameTime = ANIMATION_FRAMETIME;
-	//	animationState->startTime = startz = level.time.count() + FRAMETIME.count();
-	//	animationState->loopCount = 0;
-	//	animationState->forceLoop = true;
-	//}
-
- //   // Check for ground.
- //   //SVG_StepMove_CheckGround(this);
-	//SG_CheckGround(this);
- //   // Link entity back in.
- //   LinkEntity();
-
-	//// Setup next think callback.
- //   SetThinkCallback(&MonsterStepDummy::MonsterStepDummyThink);
- //   // Setup the next think time.
- //   SetNextThinkTime(level.time + FRAMETIME);
 }
 
 //===============

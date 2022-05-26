@@ -79,6 +79,110 @@ void SVGBaseMonster::SpawnKey(const std::string& key, const std::string& value) 
 }
 
 
+
+/***
+*
+*	Monster Entity Functions.
+*
+***/
+/**
+*	@brief	Categorizes what other contents the entity resides in. (Water, Lava, or...)
+**/
+void SVGBaseMonster::CategorizePosition() {
+	// WaterLevel: Feet.
+	vec3_t point = GetOrigin();
+	point.z += GetMins().z + 1.f;
+
+	// Get contents at point.
+	int32_t contents = SG_PointContents(point);
+
+	// We're not in water, no need to further test.
+	if ( !( contents& BrushContents::Water ) ) {
+		SetWaterLevel(WaterLevel::None);
+		SetWaterType(0);
+		return;
+	}
+
+	// Store water type.
+	SetWaterType(contents);
+	SetWaterLevel(1);
+
+	// WaterLevel: Waist.
+	point.z += 40.f;
+
+	// Get contents at point.
+	contents = SG_PointContents(point);
+
+	// We're not in water, no need to further test.
+	if ( !( contents & BrushContents::Water ) ) {
+		SetWaterType(2);
+		return;
+	}
+
+	// WaterLevel: Waist.
+	point.z += 45.f;
+
+	// Get contents at point.
+	contents = SG_PointContents(point);
+
+	// We're not in water, no need to further test.
+	if ( !( contents & BrushContents::Water ) ) {
+		SetWaterType(3);
+		return;
+	}
+	
+}
+
+/**
+*	@brief	Rotates/Turns the monster into the Ideal Yaw angle direction.
+*	@return	The delta yaw angles of this Turn.
+**/
+float SVGBaseMonster::TurnToIdealYawAngle() {
+	// Get current(and to be, previous) Angles.
+	const vec3_t _previousAngles = GetAngles();
+
+	// Angle Mod the current angles and compare to Ideal Yaw angle.
+	float _currentYawAngle = AngleMod( _previousAngles[vec3_t::Yaw] );
+	float _idealYawAngle = GetIdealYawAngle();
+		
+	if ( _currentYawAngle == _idealYawAngle) {
+		return 0.f;
+	}
+
+	// We're not at ideal yaw angle yet, so we'll calculate how
+	// far to move it, and at what speed.
+	float _yawMove = _idealYawAngle - _currentYawAngle;
+	float _yawTurningSpeed = GetYawSpeed();
+
+	if ( _idealYawAngle > _currentYawAngle) {
+		if ( _yawMove >= 180.f) {
+			_yawMove = _yawMove - 360.f;
+		}
+	} else {
+		if ( _yawMove <= -180.f ) {
+			_yawMove = _yawMove + 360.f;
+		}
+	}
+	if ( _yawMove > 0.f ) {
+		if ( _yawMove > _yawTurningSpeed ) {
+			_yawMove = _yawTurningSpeed;
+		}
+	} else {
+		if ( _yawMove < -_yawTurningSpeed ) {
+			_yawMove = - _yawTurningSpeed;
+		}
+	}
+
+	// Set the new angles, Angle Modding the Yaw.
+	SetAngles( { _previousAngles.x, AngleMod( _currentYawAngle + _yawMove * FRAMETIME.count() * _yawTurningSpeed ), _previousAngles.z});
+
+	// Return delta angles.
+	return GetAngles()[vec3_t::Yaw] - GetIdealYawAngle();
+}
+
+
+
+	
 /***
 * 
 *   Step Entity functions.
@@ -107,11 +211,11 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
 	// Calculate wished for origin.
     const vec3_t newOrigin = oldOrigin + stepOffset;
 	
-	gi.DPrintf("---------------------\n");
+//	gi.DPrintf("---------------------\n");
 
     // Flying monsters don't step up.
     if ( GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) {
-		gi.DPrintf("In if ( GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) )\n");
+		//gi.DPrintf("In if ( GetFlags() & (EntityFlags::Swim | EntityFlags::Fly) ) )\n");
         // Try one move with vertical motion, then one without.
         for ( int32_t i = 0; i < 2; i++ ) {
 			vec3_t stepOrigin = GetOrigin() + stepOffset;
@@ -254,27 +358,27 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
     vec3_t endOrigin = stepOrigin;
     endOrigin.z -= stepsize * 2;
 
-	gi.DPrintf("oldOrigin: %f %f %f\n", oldOrigin.x, oldOrigin.y, oldOrigin.z);
-	gi.DPrintf("endOrigin: %f %f %f\n", endOrigin.x, endOrigin.y, endOrigin.z);
-	gi.DPrintf("stepOrigin: %f %f %f\n", stepOrigin.x, stepOrigin.y, stepOrigin.z);
+	//gi.DPrintf("oldOrigin: %f %f %f\n", oldOrigin.x, oldOrigin.y, oldOrigin.z);
+	//gi.DPrintf("endOrigin: %f %f %f\n", endOrigin.x, endOrigin.y, endOrigin.z);
+	//gi.DPrintf("stepOrigin: %f %f %f\n", stepOrigin.x, stepOrigin.y, stepOrigin.z);
 
     SGTraceResult trace = SG_Trace( stepOrigin, GetMins(), GetMaxs(), endOrigin, this, BrushContentsMask::MonsterSolid);
 
     // TODO: Make a flag for whether this stepmove entity should check for steps.
     if ( trace.allSolid ) {
-		gi.DPrintf("%s : %i : return false\n", __func__, 258);
+		//gi.DPrintf("%s : %i : return false\n", __func__, 258);
         return false;
 	}
 
     if ( trace.startSolid ) {
         stepOrigin.z -= stepsize;
         trace = SG_Trace( stepOrigin, GetMins(), GetMaxs(), endOrigin, this, BrushContentsMask::MonsterSolid);
-		gi.DPrintf("%s : %i : trace = SG_Trace(...)\n", __func__, 258);
+		//gi.DPrintf("%s : %i : trace = SG_Trace(...)\n", __func__, 258);
         // TODO: Make a flag for whether this stepmove entity should check for steps.
         //if (trace.allSolid || trace.startSolid)
         //    return false;
         if (trace.allSolid || trace.startSolid) {
-			gi.DPrintf("%s : %i : return false\n", __func__, 279);
+			//gi.DPrintf("%s : %i : return false\n", __func__, 279);
             return false;
 		}
     }
@@ -292,7 +396,7 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
 		// Failed the move if we're not in water, but we did hit it.
         int32_t brushContents = SG_PointContents( testPosition );
         if ( (brushContents & BrushContentsMask::Liquid) ) {
-			gi.DPrintf("In if ( (brushContents & BrushContentsMask::Liquid) ) {\n");
+			//gi.DPrintf("In if ( (brushContents & BrushContentsMask::Liquid) ) {\n");
 			// Failure.
 			return false;
 		}
@@ -313,13 +417,13 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
 			// Unset Ground Entity.
             SetGroundEntity( SGEntityHandle() );
 
-			gi.DPrintf("%s : %i : return true\n", __func__, 308);
+			//gi.DPrintf("%s : %i : return true\n", __func__, 308);
 			// Success.
             return true;
         }
 
 	    // TODO: Make a flag for whether this stepmove entity should check for steps.
-		gi.DPrintf("%s : %i : return false\n", __func__, 314);
+		//gi.DPrintf("%s : %i : return false\n", __func__, 314);
         return false;       //return false; // walked off an edge
     }
 
@@ -334,7 +438,7 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
                 SG_TouchTriggers( this );
             }
 
-			gi.DPrintf("%s : %i : return true\n", __func__, 329);
+			//gi.DPrintf("%s : %i : return true\n", __func__, 329);
 			// Success.
             return true;
         }
@@ -342,7 +446,7 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
 		// Revert to old Origin.
 		SetOrigin(oldOrigin);
 
-		gi.DPrintf("%s : %i : return false\n", __func__, 337);
+		//gi.DPrintf("%s : %i : return false\n", __func__, 337);
 		// Failure.
 		return false;
     }
@@ -360,7 +464,7 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
         SG_TouchTriggers( this );
     }
 
-	gi.DPrintf("%s : %i : return true: %f %f %f\n", __func__, 355, GetOrigin().x, GetOrigin().y, GetOrigin().z);
+	//gi.DPrintf("%s : %i : return true: %f %f %f\n", __func__, 355, GetOrigin().x, GetOrigin().y, GetOrigin().z);
     return true;
 }
 
@@ -371,16 +475,7 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
 *	@return	True if successful, false otherwise.
 **/
 const bool SVGBaseMonster::StepMove_WalkDirection(const float yawDirectionAngle, const float stepDistance) {
-	// Set the ideal yaw angle.
-	SetIdealYawAngle(yawDirectionAngle);
-
-	// Correct yaw angle to steer towards the yawDirectionAngle
-	const double idYawA = GetIdealYawAngle();
-	StepMove_CorrectYawAngle( );
-
-	// Calculate yaw angle
-	const double idYawB = GetIdealYawAngle();
-    const double radYaw = Radians(GetIdealYawAngle() );
+    const double radYaw = Radians( yawDirectionAngle );
 
 	// Calculate the stepOffset vector into the 'yaw direction'.
 	const vec3_t stepOffset = {
@@ -389,107 +484,14 @@ const bool SVGBaseMonster::StepMove_WalkDirection(const float yawDirectionAngle,
 		0.f
 	};
 
-	// Print.
-	gi.DPrintf("idYawA: %f, idYawB: %f, radYaw: %f, stepOffset.x %f, stepOffset.y %f\n", idYawA, idYawB, radYaw, stepOffset.x, stepOffset.y);
-
-	// Store old origin so we can reset it in case we aren't turned into a wished for yaw angle yet.
-	const vec3_t oldOrigin = GetOrigin();
-	const vec3_t oldAngles = GetAngles();
-
-	// Try the StepMove.
-	if ( StepMove_Step( stepOffset, false ) ) {
-		// Get the delta between wished for and current yaw angles.
-		const float deltaYawAngle = GetAngles()[vec3_t::Yaw] - GetIdealYawAngle();
-
-
-		        if (!stepDistance || vec3_distance(GetOrigin(), oldOrigin) >= stepDistance * (1.f / 16.f)) {
-		// // Not turned far enough, reset our entity to its old origin.
-		if (deltaYawAngle > 45 && deltaYawAngle < 315) {
-			SetOrigin(oldOrigin);
-			gi.DPrintf("Delta=%f Set Old Origin... \n", deltaYawAngle, stepOffset.x,stepOffset.y,stepOffset.z);
-		} else {
-			gi.DPrintf("Delta=%f\n", deltaYawAngle, stepOffset.x,stepOffset.y,stepOffset.z);
-		}
-				}
-
-		// Link Entity back in.
-		LinkEntity();
-
-		// Perform a touch triggers.
-		SG_TouchTriggers(this);
-
-		// Return true, because even though we did not move yet because of the yaw angle, the move was a valid one.
-		return true;
-	}
-
-	// Link entity back in.
-	LinkEntity();
-
-	// Perform a touch triggers.
-	SG_TouchTriggers(this);
-
-	// Failure.
-	return false;
-}
-
-/**
-*	@brief	Tries to correct the Yaw Angle to that which is desired (The 'idealYawAngle').
-*
-*	@todo	Should move to monster code.
-**/
-void SVGBaseMonster::StepMove_CorrectYawAngle( ) {
-	// Get 'current' Angles.
-	vec3_t currentAngles = GetAngles();
-
-	// Get 'current' Yaw Angle.
-	float currentYawAngle = AngleMod( currentAngles[vec3_t::Yaw] );
-
-	// Get the 'Ideal' Yaw Angle we want to face to before stepping.
-	float idealYawAngle = GetIdealYawAngle();
-
-	// If it's already the ideal angle, leave it be.
-	if ( currentYawAngle == idealYawAngle ) {
-		return;
-	}
-
-	// Get the specific yaw angle direction to turn to this frame.
-	float yawMoveDirection = idealYawAngle - currentYawAngle;
-
-	// Get Yaw Turning Speed.
-	float yawTurningSpeed = GetYawSpeed();
-
-	// Correct large angles.
-	if ( idealYawAngle > currentYawAngle ) {
-		// Positive direction.
-		if ( yawMoveDirection >= 180 ) {
-			yawMoveDirection = yawMoveDirection - 360;
-		}
-	// Negative direction.
-	} else if ( yawMoveDirection >= -180 ) {
-		yawMoveDirection = yawMoveDirection + 360;
-	}
-
-	// Adjust yaw turning speed to our move direction.
-	if ( yawMoveDirection > 0 && yawMoveDirection > yawTurningSpeed ) {
-		// Positive direction.
-		if ( yawMoveDirection > yawTurningSpeed ) {
-			yawMoveDirection = yawTurningSpeed;
-		}
-	// Negative direction.
-	} else if ( yawMoveDirection < -yawTurningSpeed ) {
-		yawMoveDirection = -yawTurningSpeed;
-	}
-
-	// Update current angles.
-	currentAngles[vec3_t::Yaw] = AngleMod( currentYawAngle + yawMoveDirection );
-
-	// Set angles.
-	SetAngles( currentAngles );
+	// Return the results of the move.
+	return StepMove_Step( stepOffset, false );
 }
 
 void SVGBaseMonster::StepMove_FixCheckBottom() {
 	SetFlags( GetFlags() | EntityFlags::PartiallyOnGround );
 }
+
 const bool SVGBaseMonster::StepMove_CheckBottom() {
 	//vec3_t	mins, maxs, start, stop;
 	SVGTraceResult trace;

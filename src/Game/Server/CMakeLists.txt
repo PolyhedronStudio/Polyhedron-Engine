@@ -33,20 +33,6 @@ SET(SRC_SVGAME
 	Entities/Base/DebrisEntity.cpp
 	Entities/Base/GibEntity.cpp
 
-	#Entities/Info/InfoNotNull.cpp
-	Entities/Info/InfoNull.cpp
-	Entities/Info/InfoPlayerCoop.cpp
-	Entities/Info/InfoPlayerDeathmatch.cpp
-	Entities/Info/InfoPlayerIntermission.cpp
-	Entities/Info/InfoPlayerStart.cpp
-
-	Entities/Items/ItemAmmo9mm.cpp
-	Entities/Items/ItemHealthMega.cpp
-	Entities/Items/ItemWeaponKnife.cpp
-	Entities/Items/ItemWeaponBeretta.cpp
-	Entities/Items/ItemWeaponNone.cpp
-	Entities/Items/ItemWeaponSMG.cpp
-
 	Entities/Func/FuncAreaportal.cpp
 	Entities/Func/FuncButton.cpp
 	#Entities/Func/FuncConveyor.cpp
@@ -61,6 +47,20 @@ SET(SRC_SVGAME
 	Entities/Func/FuncTrain.cpp 
 	Entities/Func/FuncWall.cpp
 	#Entities/Func/FuncWater.cpp
+
+	Entities/Info/InfoNotNull.cpp
+	Entities/Info/InfoNull.cpp
+	Entities/Info/InfoPlayerCoop.cpp
+	Entities/Info/InfoPlayerDeathmatch.cpp
+	Entities/Info/InfoPlayerIntermission.cpp
+	Entities/Info/InfoPlayerStart.cpp
+
+	Entities/Items/ItemAmmo9mm.cpp
+	Entities/Items/ItemHealthMega.cpp
+	Entities/Items/ItemWeaponKnife.cpp
+	Entities/Items/ItemWeaponBeretta.cpp
+	Entities/Items/ItemWeaponNone.cpp
+	Entities/Items/ItemWeaponSMG.cpp
 
 	#Entities/Misc/MiscExplobox.cpp
 	#Entities/Misc/MiscGibArm.cpp 
@@ -158,6 +158,7 @@ SET(HEADERS_SVGAME
 	Entities/Func/FuncWall.h
 
 	#Entities/Info/InfoNull.h - Only has a .cpp file.
+	Entities/Info/InfoNotNull.h
 	Entities/Info/InfoPlayerCoop.h
 	Entities/Info/InfoPlayerDeathmatch.h
 	Entities/Info/InfoPlayerIntermission.h

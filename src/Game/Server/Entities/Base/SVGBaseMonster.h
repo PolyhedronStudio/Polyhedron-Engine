@@ -47,11 +47,24 @@ public:
     *   Monster Entity Functions.
     * 
     ***/
-	    //! Goal Entity.
+	//
+	//! Goal Entity.
+	//
     GameEntity* geGoalEntity = nullptr;
+	std::string strGoalEntity = "";
 	virtual void SetGoalEntity(GameEntity *geGoalEntity) { this->geGoalEntity = geGoalEntity; }
 	virtual GameEntity *GetGoalEntity() { return this->geGoalEntity; }
 
+	/**
+	*	@brief	Categorizes what other contents the entity resides in. (Water, Lava, or...)
+	**/
+	void CategorizePosition();
+
+	/**
+	*	@brief	Rotates/Turns the monster into the Ideal Yaw angle direction.
+	*	@return	The delta yaw angles of this Turn.
+	**/
+	virtual float TurnToIdealYawAngle();
 
 
     /***
@@ -80,22 +93,18 @@ public:
 	const bool StepMove_Step( const vec3_t &stepOffset, bool relink = false );
 
 protected:
-	/**
-	*	@brief	Tries to correct the Yaw Angle to that which is desired (The 'idealYawAngle').
-	*
-	*	@todo	Should move to monster code.
-	**/
-	void StepMove_CorrectYawAngle( );
-
-
 	const bool StepMove_CheckBottom( );
 	void StepMove_FixCheckBottom( );
+
+
+
 	/***
 	*
 	*	SlideBox Entity Functions.
 	*
 	***/
-	    
+
+
 
 public:
 

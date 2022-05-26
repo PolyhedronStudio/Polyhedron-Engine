@@ -68,32 +68,32 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether a base entity has a client attached to it.
 	*   @return Returns true in case the GameEntity has a client attached to it.
 	**/
-	inline bool GameEntityHasClient(ISharedGameEntity* ent) { return ent->GetClient(); }
+	inline bool GameEntityHasClient(GameEntity* ent) { return ent->GetClient(); }
 	/**
 	*   @brief Filter method for checking whether a base entity has a groundentity set.
 	*   @return Returns true in case the GameEntity has a groundentity set.
 	**/
-	inline bool GameEntityHasGroundEntity(ISharedGameEntity* ent) { return ent->GetGroundEntityHandle(); }
+	inline bool GameEntityHasGroundEntity(GameEntity* ent) { return ent->GetGroundEntityHandle(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a serverentity set.
 	*   @return Returns true in case the GameEntity has a serverentity set.
 	**/
-	inline bool GameEntityHasPODEntity(ISharedGameEntity* ent) { return ent->GetPODEntity(); }
+	inline bool GameEntityHasPODEntity(GameEntity* ent) { return ent->GetPODEntity(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a given targetname.
 	*   @return Returns true if the GameEntity has a given targetname.
 	**/
-	inline bool GameEntityHasTargetName(ISharedGameEntity* ent) { return ent->GetTargetName() != "" && !ent->GetTargetName().empty(); }
+	inline bool GameEntityHasTargetName(GameEntity* ent) { return ent->GetTargetName() != "" && !ent->GetTargetName().empty(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity is in use.
 	*   @return Returns true if the GameEntity is in use.
 	**/
-	inline bool GameEntityInUse(ISharedGameEntity* ent) { return ent->IsInUse(); }
+	inline bool GameEntityInUse(GameEntity* ent) { return ent->IsInUse(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity is a valid pointer or not.
 	*   @return Returns true if the GameEntity is a valid pointer. (Non nullptr)
 	**/
-	inline bool GameEntityIsValidPointer(ISharedGameEntity* ent) { return ent != nullptr; }
+	inline bool GameEntityIsValidPointer(GameEntity* ent) { return ent != nullptr; }
 };
 
 
@@ -139,12 +139,12 @@ namespace GameEntityFilters {
 
 	// TODO: Move these functions over into EntityFilterFunctions.
 	inline auto HasClassName(const std::string& classname) {
-		return std::ranges::views::filter([classname /*need a copy!*/](ISharedGameEntity* ent) { return ent->GetClassname() == classname; });
+		return std::ranges::views::filter([classname /*need a copy!*/](GameEntity* ent) { return ent->GetClassname() == classname; });
 	}
 
 	inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
-		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](ISharedGameEntity* ent) {
-			auto& dictionary = ent->GetEntityDictionary();
+		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](GameEntity* ent) {
+			auto&& dictionary = ent->GetEntityDictionary();
 
 			if (dictionary.find(fieldKey) != dictionary.end()) {
 				if (dictionary[fieldKey] == fieldValue) {
@@ -157,15 +157,15 @@ namespace GameEntityFilters {
 	}
 
 	template<typename ClassType> auto IsClassOf() {
-		return std::ranges::views::filter([](ISharedGameEntity* ent) { return ent->IsClass<ClassType>(); });
+		return std::ranges::views::filter([](GameEntity* ent) { return ent->IsClass<ClassType>(); });
 	}
 
 	template<typename ClassType> auto IsSubclassOf() {
-		return std::ranges::views::filter([](ISharedGameEntity* ent) { return ent->IsSubclassOf<ClassType>(); });
+		return std::ranges::views::filter([](GameEntity* ent) { return ent->IsSubclassOf<ClassType>(); });
 	}
 
 	inline auto WithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags) {
-		return std::ranges::views::filter([origin, radius, excludeSolidFlags /*need a copy!*/](ISharedGameEntity* ent) {
+		return std::ranges::views::filter([origin, radius, excludeSolidFlags /*need a copy!*/](GameEntity* ent) {
 			// Find distances between entity origins.
 			vec3_t entityOrigin = origin - (ent->GetOrigin() + vec3_scale(ent->GetMins() + ent->GetMaxs(), 0.5f));
 
