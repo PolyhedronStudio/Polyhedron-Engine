@@ -327,7 +327,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		//	const SGTraceResult downTrace = SG_Trace(slideMoveState.origin, slideMoveState.mins, slideMoveState.maxs, down, geSlider, slideMoveState.contentMask );
 
 		//	if ( downTrace.fraction >= 1.0f && !downTrace.podEntity ) {
-		//		blockedMask |= SlideMoveFlags::EdgeBlocked;
+		//		blockedMask |= SlideMoveFlags::EdgeMoved;
 		//	}
 
 		//	// If it's not all in a solid, and the fraction is < 1, then we are stepping down
@@ -343,7 +343,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		//		}
 		//	} else {
 		//		// Add flag to our mask.
-		//	//	blockedMask |= SlideMoveFlags::EdgeBlocked;
+		//	//	blockedMask |= SlideMoveFlags::EdgeMoved;
 		//	}
 		//}
 
@@ -371,7 +371,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 			//	blockedMask |= SG_SlideMove( &slideMoveState );
 
 			//	// If we've moved, AND, did not get blocked.
-			//	if ( (blockedMask & SlideMoveFlags::Moved) && !(blockedMask & SlideMoveFlags::EdgeBlocked) ) {
+			//	if ( (blockedMask & SlideMoveFlags::Moved) && !(blockedMask & SlideMoveFlags::EdgeMoved) ) {
 			//		// Settle to the new ground, keeping the step if and only if it was successful
 			//		const vec3_t down = vec3_fmaf( slideMoveState.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
 			//		const SGTraceResult downTrace = SG_Trace( slideMoveState.origin, slideMoveState.mins, slideMoveState.maxs, down, geSlider, slideMoveState.contentMask );
@@ -577,6 +577,14 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
 	MoveState slideMoveState;
     int32_t blockedMask = SG_BoxSlideMove( geBoxSlide, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
 
+	if ( blockedMask & SlideMoveFlags::EdgeMoved) {
+		//slideMoveState.velocity.z = vel0.z;
+		
+		//slideMoveState.origin = org0;
+		// Resort to old origin.
+		//slideMoveState.origin = org0; //{ org0.x, org0.y, slideMoveState.origin.z };
+		//slideMoveState.
+	}
 	#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
 	if (blockedMask != 0) {
 		std::string blockMaskString = "SlideMove Entity(#" + std::to_string(geBoxSlide->GetNumber()) + ") blockMask: (";
@@ -585,7 +593,7 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
 		if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += "PlaneTouched, "; }
 		if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += "WallBlocked, "; }
 		if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
-		if (blockedMask & SlideMoveFlags::EdgeBlocked) { blockMaskString += "EdgeBlocked, "; }
+		if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += "EdgeMoved, "; }
 		if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved "; }
 		blockMaskString += ")";
 		
@@ -777,7 +785,7 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
 			//		SG_TouchTriggers( geSlider );
 
 			//		// Not sure if to set it here as well...
-			//		blockedMask |= SlideMoveFlags::EdgeBlocked;
+			//		blockedMask |= SlideMoveFlags::EdgeMoved;
 
 			//		// TODO: If we do keep this block, we gotta move the code below this statement
 			//		// into an else statement since we don't want to return from here.
@@ -785,7 +793,7 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
 			//	}
 
 			//	// Add Edge Blocked flag.
-			//	blockedMask |= SlideMoveFlags::EdgeBlocked;
+			//	blockedMask |= SlideMoveFlags::EdgeMoved;
 
 			//	// Set origin back to old 
 			//	geSlider->SetOrigin( oldOrigin );

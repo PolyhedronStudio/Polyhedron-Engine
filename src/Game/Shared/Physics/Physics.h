@@ -50,7 +50,7 @@ struct SlideMoveFlags {
 	static constexpr int32_t WallBlocked	= 8;
 	static constexpr int32_t Trapped		= 4;
 	//! When Blocekd flag is set, it doesn't mean it didn't slide along the blocking object.
-	static constexpr int32_t EdgeBlocked	= 2;
+	static constexpr int32_t EdgeMoved	= 2;
 	static constexpr int32_t Moved			= 1;
 };
 
@@ -72,6 +72,8 @@ struct MoveState {
 	//! Slide Bounce Factor.
 	float	slideBounce	= 0.f;
 
+	//! Ground Entity Trace. Updated during the move processing.
+	SGTraceResult groundTrace;
 	//! Ground Entity.
 	int32_t	groundEntityLinkCount	= 0;
 	//GameEntity	*groundEntity			= nullptr;
