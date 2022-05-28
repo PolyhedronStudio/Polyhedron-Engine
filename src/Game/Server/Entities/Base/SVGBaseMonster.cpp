@@ -44,7 +44,13 @@ void SVGBaseMonster::Precache() {
 *   @brief 
 **/
 void SVGBaseMonster::Spawn() { 
-	Base::Spawn(); 
+	// Base Spawn.
+	Base::Spawn();
+
+	// Set ClipMask to MonsterSolid.
+	SetClipMask( BrushContentsMask::MonsterSolid );
+	// Set Monster ServerFlag.
+	SetServerFlags( EntityServerFlags::Monster );
 }
 
 

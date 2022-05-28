@@ -355,6 +355,10 @@ static const int32_t SG_SlideMove_CheckEdgeMove(const vec3_t& start, const vec3_
 
 		if ( !( geEndGroundEntity && groundEntityNumber != geEndGroundEntity->GetNumber() ) ) {
 			if (startTrace.plane.dist != endTrace.plane.dist) {
+				// If the fraction is less than 1, it means we could step on it.
+				if ( IsWalkablePlane( endTrace.plane ) && endTrace.fraction < 1.0f ) {
+					blockedMask |= SlideMoveFlags::CanStepDown;
+				}
 				if ( !IsWalkablePlane( endTrace.plane) ) {
 					blockedMask |= SlideMoveFlags::EdgeMoved;
 				}
@@ -391,13 +395,14 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 	SGTraceResult	slideTrace		= SG_Trace( moveState->origin, moveState->mins, moveState->maxs, slideTraceEnd, geSkip, moveState->contentMask );
 	
 	// Problem: If the result was all solid, something unintended happened. 
-	// Return with an added SlideMoveFlags::Trapped to our blockedMask.
-	//
-	// Solution: Let the entity itself handle this.
+	// Return with an added SlideMoveFlags::Trapped to our blockedMask so that the Entiy can handle it himself.
 	if( slideTrace.allSolid ) {
 		if( slideTrace.gameEntity ) {
 			SG_AddTouchEnt( moveState, slideTrace.gameEntity );
 		}
+		// Subtract total fraction of remaining time.
+		moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
+
 		return blockedMask | SlideMoveFlags::Trapped;
 	}
 
@@ -421,8 +426,17 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 		// Add the touched entity to our list.
 		SG_AddTouchEnt( moveState, slideTrace.gameEntity );
 
-		// Add SlideMoveFlags::planeTouched to our blockedMask.
-		blockedMask |= SlideMoveFlags::PlaneTouched;
+		// If the touched entity was no world entity, add EntityTouched flag instead of PlaneTouched.
+		if ( slideTrace.gameEntity && slideTrace.gameEntity->GetNumber() >= 0) {
+			// Add SlideMoveFlags::EntityTouched to our blockedMask.
+			blockedMask |= SlideMoveFlags::EntityTouched;
+		}
+
+		// If the trace had a valid plane, add Plane Touched.
+		if ( slideTrace.plane.dist ) {
+			// Add SlideMoveFlags::planeTouched to our blockedMask.
+			blockedMask |= SlideMoveFlags::PlaneTouched;
+		}
 
 		// Move the 'fraction' that we at least can move.
 		if( slideTrace.fraction > 0.0 ) {
@@ -434,6 +448,7 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 
 			// Subtract remainint time.
 			moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
+
 			// We've finished our move, add the SlideMoveFlags::Moved flag to our blockedMask.
 			blockedMask |= SlideMoveFlags::Moved;
 		}
@@ -444,7 +459,7 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 			if( stepping ) { //}&& SG_StepUp(moveState) ) {
 				// Return blockedMask. We won't be adding the clipping plane.
 				//return blockedMask;
-				blockedMask |= SlideMoveFlags::SteppedUp;
+				return blockedMask |= SlideMoveFlags::CanStepUp;
 			} else {
 				// Add SlideMoveFlags::WallBlocked flag.
 				blockedMask |= SlideMoveFlags::WallBlocked;

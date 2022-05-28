@@ -43,14 +43,24 @@ static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 *	@brief The possible flags returned from executing a SlideMove on a MoveState.
 **/
 struct SlideMoveFlags {
-	static constexpr int32_t SteppedUp		= 64;
-	static constexpr int32_t SteppedDown	= 32;
+	//! Set whenever the move is capable of stepping up.
+	static constexpr int32_t CanStepUp		= 64;
+	//! Set whenever the movei s capable of stepping down.
+	static constexpr int32_t CanStepDown	= 32;
 
+	//! Set whenever we've touched any entity that is not WorldSpawn.
+	static constexpr int32_t EntityTouched	= 32;
+	//! Set whenever we've touched a brush plane.
 	static constexpr int32_t PlaneTouched	= 16;
-	static constexpr int32_t WallBlocked	= 8;
-	static constexpr int32_t Trapped		= 4;
+
 	//! When Blocekd flag is set, it doesn't mean it didn't slide along the blocking object.
-	static constexpr int32_t EdgeMoved	= 2;
+	static constexpr int32_t WallBlocked	= 8;
+	//! NOTE: Set only in case of trouble. It shouldn't happen.
+	static constexpr int32_t Trapped		= 4;
+
+	//! Set if the move became groundless, and was unable to step down to new floor.
+	static constexpr int32_t EdgeMoved		= 2;
+	//! Set whenever the move has been completed for the remainingTime.
 	static constexpr int32_t Moved			= 1;
 };
 

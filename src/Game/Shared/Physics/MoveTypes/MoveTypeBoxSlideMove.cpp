@@ -588,11 +588,14 @@ void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
 	#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
 	if (blockedMask != 0) {
 		std::string blockMaskString = "SlideMove Entity(#" + std::to_string(geBoxSlide->GetNumber()) + ") blockMask: (";
-		if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += "SteppedUp, "; }
-		if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += "SteppedDown, "; }
+		if (blockedMask & SlideMoveFlags::CanStepUp) { blockMaskString += "CanStepUp, "; }
+		if (blockedMask & SlideMoveFlags::CanStepDown) { blockMaskString += "CanStepDown, "; }
+
+		if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += "EntityTouched, "; }
 		if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += "PlaneTouched, "; }
 		if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += "WallBlocked, "; }
 		if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
+		
 		if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += "EdgeMoved, "; }
 		if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved "; }
 		blockMaskString += ")";
