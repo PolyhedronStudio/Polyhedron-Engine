@@ -294,7 +294,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 
 	// Get GameWorld.
 	SGGameWorld *gameWorld = GetGameWorld();
-
+		SG_CheckGround(this);
 	/**
 	*	Step #2:	If there is a valid ground entity, store that we're 'on-ground'.
 	*				If there is no valid ground entity, check and see if we've got one for this frame.

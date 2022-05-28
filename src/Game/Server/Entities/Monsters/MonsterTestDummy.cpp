@@ -209,7 +209,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
     // Check for ground.
     //SVG_StepMove_CheckGround(this);
-	SG_CheckGround(this);
+//	SG_CheckGround(this);
     // Link entity back in.
     LinkEntity();
 
