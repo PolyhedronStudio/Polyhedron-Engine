@@ -78,7 +78,7 @@ void MiscServerModel::Spawn() {
     SetSolid(Solid::BoundingBox);
 
     // Set move type.
-    SetMoveType(MoveType::Step);
+    SetMoveType(MoveType::StepMove);
 
     // Since this is a "monster", after all...
     SetServerFlags(EntityServerFlags::Monster);

@@ -37,7 +37,7 @@ doors, plats, etc are Solid::BSP, and MoveType::Push
 bonus items are Solid::Trigger touch, and MoveType::Toss
 corpses are Solid::Not and MoveType::Toss
 crates are Solid::BoundingBox and MoveType::Toss
-walking monsters are SOLID_SLIDEBOX and MoveType::Step
+walking monsters are SOLID_SLIDEBOX and MoveType::StepMove
 flying/floating monsters are SOLID_SLIDEBOX and MoveType::Fly
 
 solid_edge items only clip against bsp models.
@@ -1191,7 +1191,7 @@ void SVG_RunEntity(SGEntityHandle &entityHandle)
         case MoveType::Spectator:
 	        SVG_Physics_Noclip(entityHandle);
         break;
-        case MoveType::Step:
+        case MoveType::StepMove:
             SVG_Physics_Step(entityHandle);
         break;
         case MoveType::Toss:

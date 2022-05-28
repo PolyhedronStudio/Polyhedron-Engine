@@ -4,7 +4,10 @@
 *
 *	@file
 *
-*	Base monster class. Use this for animating NPC's etc.
+*	Slide Movement based Monster Class. Inherit from this to utilize Step Move functionality for your
+*	non controllable (-character) entities.
+*
+*	Comes with all basic kung-fu.
 *
 ***/
 #pragma once
@@ -13,7 +16,7 @@ class SVGBaseEntity;
 class SVGBaseTrigger;
 class SVGBaseSkeletalAnimator;
 
-class SVGBaseMonster : public SVGBaseSkeletalAnimator {
+class SVGBaseSlideMonster : public SVGBaseSkeletalAnimator {
 public:
     /***
     * 
@@ -21,11 +24,11 @@ public:
     *
     ***/
     //! Constructor/Deconstructor.
-    SVGBaseMonster(PODEntity *svEntity);
-    virtual ~SVGBaseMonster();
+    SVGBaseSlideMonster(PODEntity *svEntity);
+    virtual ~SVGBaseSlideMonster();
 
     //! Abstract Class TypeInfo registry.
-    DefineAbstractClass(SVGBaseMonster, SVGBaseSkeletalAnimator);
+    DefineAbstractClass(SVGBaseSlideMonster, SVGBaseSkeletalAnimator);
 
 
     /***
@@ -47,6 +50,12 @@ public:
     *   Monster Entity Functions.
     * 
     ***/
+	/**
+	*
+	**/
+	virtual void Move_NavigateToTarget();
+
+
 	//
 	//! Goal Entity.
 	//
@@ -69,32 +78,16 @@ public:
 
     /***
     * 
-    *   Step Entity functions.
+    *   Slide Move Functionality:
     * 
     ***/
 public:
-	/**
-	*	@brief	Walks(By 'stepping') the entity 'dist' distance into the given yaw angle direction.
-	*	@param	yawTurnAngle	The angle to turn and step into.
-	*	@param	stepDistance	The distance to step towards the yawTurnAngle with.
-	*	@return	True if successful, false otherwise.
-	**/
-	const bool StepMove_WalkDirection( const float yawDirectionAngle, const float stepDistance );
+	const int32_t SlideMove();
 
-	/**
-	*	@brief	This is the actual SG_Stepmove implementation. Tries to move
-	*			the entity a given distance over a second while trying to 
-	*			step over and off obstacles if needed. It is influenced by
-	*			and dependent on the game's tick rate.
-	*
-	*	@return	False if the move has failed and the entity remains at its position.
-	*			True otherwise.
-	**/
-	const bool StepMove_Step( const vec3_t &stepOffset, bool relink = false );
 
 protected:
-	const bool StepMove_CheckBottom( );
-	void StepMove_FixCheckBottom( );
+	const bool SlideMove_CheckBottom( );
+	void SlideMove_FixCheckBottom( );
 
 
 

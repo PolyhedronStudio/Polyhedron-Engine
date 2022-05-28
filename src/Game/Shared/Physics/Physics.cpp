@@ -484,12 +484,12 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	        SG_Physics_NoClip(entityHandle);
         break;
 	// SG_Physics_Step:
-        case MoveType::Step:
+        case MoveType::StepMove:
             //SG_Physics_Step(entityHandle);
 			SG_Physics_None(entityHandle);
         break;
 	// SG_Physics_BoxSlideMove:
-		case MoveType::BoxSlideMove:
+		case MoveType::SlideMove:
 			SG_Physics_BoxSlideMove(entityHandle);
 			break;
 	// SG_Physics_Toss:

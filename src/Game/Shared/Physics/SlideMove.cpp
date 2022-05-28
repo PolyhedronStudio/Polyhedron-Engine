@@ -28,76 +28,76 @@
 #include "SlideMove.h"
 
 
-void SlideMove_FixCheckBottom( GameEntity *geCheck ) {
-	geCheck->SetFlags( geCheck->GetFlags() | EntityFlags::PartiallyOnGround );
-}
-#define STEPSIZE 18
-const bool SlideMove_CheckBottom( MoveState *moveState ) {
-	// Get the moveEntity.
-	SGGameWorld *gameWorld = GetGameWorld();
-	GameEntity *geCheck = SGGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( moveState->moveEntityNumber ) );
-	
-	//vec3_t	mins, maxs, start, stop;
-	SGTraceResult trace;
-	int32_t 		x, y;
-	float	mid, bottom;
-
-	const vec3_t origin = moveState->origin;
-	vec3_t mins = origin + moveState->mins;
-	vec3_t maxs = origin + moveState->maxs;
-	
-// if all of the points under the corners are solid world, don't bother
-// with the tougher checks
-// the corners must be within 16 of the midpoint
-	vec3_t start, stop;
-
-	start[2] = mins[2] - 1;
-	for	(x=0 ; x<=1 ; x++)
-		for	(y=0 ; y<=1 ; y++)
-		{
-			start[0] = x ? maxs[0] : mins[0];
-			start[1] = y ? maxs[1] : mins[1];
-			if (SG_PointContents (start) != BrushContents::Solid) {
-				goto realcheck;
-			}
-		}
-
-	return true;		// we got out easy
-
-realcheck:
+//void SlideMove_FixCheckBottom( GameEntity *geCheck ) {
+//	geCheck->SetFlags( geCheck->GetFlags() | EntityFlags::PartiallyOnGround );
+//}
+//#define STEPSIZE 18
+//const bool SlideMove_CheckBottom( MoveState *moveState ) {
+//	// Get the moveEntity.
+//	SGGameWorld *gameWorld = GetGameWorld();
+//	GameEntity *geCheck = SGGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( moveState->moveEntityNumber ) );
+//	
+//	//vec3_t	mins, maxs, start, stop;
+//	SGTraceResult trace;
+//	int32_t 		x, y;
+//	float	mid, bottom;
 //
-// check it for real...
+//	const vec3_t origin = moveState->origin;
+//	vec3_t mins = origin + moveState->mins;
+//	vec3_t maxs = origin + moveState->maxs;
+//	
+//	// if all of the points under the corners are solid world, don't bother
+//	// with the tougher checks
+//	// the corners must be within 16 of the midpoint
+//	vec3_t start, stop;
 //
-	start[2] = mins[2];
-	
-// the midpoint must be within 16 of the bottom
-	start[0] = stop[0] = (mins[0] + maxs[0])*0.5;
-	start[1] = stop[1] = (mins[1] + maxs[1])*0.5;
-	stop[2] = start[2] - 2*STEPSIZE;
-	trace = SG_Trace (start, vec3_zero(), vec3_zero(), stop, geCheck, BrushContentsMask::MonsterSolid);
-
-	if (trace.fraction == 1.0) {
-		return false;
-	}
-	mid = bottom = trace.endPosition[2];
-	
-// the corners must be within 16 of the midpoint	
-	for	(x=0 ; x<=1 ; x++)
-		for	(y=0 ; y<=1 ; y++)
-		{
-			start[0] = stop[0] = x ? maxs[0] : mins[0];
-			start[1] = stop[1] = y ? maxs[1] : mins[1];
-			
-			trace = SG_Trace (start, vec3_zero(), vec3_zero(), stop, geCheck, BrushContentsMask::MonsterSolid);
-			
-			if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
-				bottom = trace.endPosition[2];
-			if (trace.fraction == 1.0 || mid - trace.endPosition[2] > STEPSIZE)
-				return false;
-		}
-
-	return true;
-}
+//	start[2] = mins[2] - 1;
+//	for	(x=0 ; x<=1 ; x++)
+//		for	(y=0 ; y<=1 ; y++)
+//		{
+//			start[0] = x ? maxs[0] : mins[0];
+//			start[1] = y ? maxs[1] : mins[1];
+//			if (SG_PointContents (start) != BrushContents::Solid) {
+//				goto realcheck;
+//			}
+//		}
+//
+//	return true;		// we got out easy
+//
+//realcheck:
+//	//
+//	// check it for real...
+//	//
+//	start[2] = mins[2];
+//	
+//	// the midpoint must be within 16 of the bottom
+//	start[0] = stop[0] = (mins[0] + maxs[0])*0.5;
+//	start[1] = stop[1] = (mins[1] + maxs[1])*0.5;
+//	stop[2] = start[2] - 2*STEPSIZE;
+//	trace = SG_Trace (start, vec3_zero(), vec3_zero(), stop, geCheck, BrushContentsMask::MonsterSolid);
+//
+//	if (trace.fraction == 1.0) {
+//		return false;
+//	}
+//	mid = bottom = trace.endPosition[2];
+//	
+//	// the corners must be within 16 of the midpoint	
+//	for	(x=0 ; x<=1 ; x++)
+//		for	(y=0 ; y<=1 ; y++)
+//		{
+//			start[0] = stop[0] = x ? maxs[0] : mins[0];
+//			start[1] = stop[1] = y ? maxs[1] : mins[1];
+//			
+//			trace = SG_Trace (start, vec3_zero(), vec3_zero(), stop, geCheck, BrushContentsMask::MonsterSolid);
+//			
+//			if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
+//				bottom = trace.endPosition[2];
+//			if (trace.fraction == 1.0 || mid - trace.endPosition[2] > STEPSIZE)
+//				return false;
+//		}
+//
+//	return true;
+//}
 
 /**
 *	@return	Clipped by normal velocity.
@@ -398,11 +398,20 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 	// Return with an added SlideMoveFlags::Trapped to our blockedMask so that the Entiy can handle it himself.
 	if( slideTrace.allSolid ) {
 		if( slideTrace.gameEntity ) {
+			// Add Touch Entity to our list.
 			SG_AddTouchEnt( moveState, slideTrace.gameEntity );
+
+			// If the touched entity was no world entity, add EntityTouched flag instead of PlaneTouched.
+			if ( slideTrace.gameEntity->GetNumber() > 0) {
+				// Add SlideMoveFlags::EntityTouched to our blockedMask.
+				blockedMask |= SlideMoveFlags::EntityTouched;
+			}
 		}
-		// Subtract total fraction of remaining time.
+
+		// Subtract total fraction that we've moved from our remaining time.
 		moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
 
+		// Return with an additional Trapped flag.
 		return blockedMask | SlideMoveFlags::Trapped;
 	}
 
@@ -427,15 +436,15 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 		SG_AddTouchEnt( moveState, slideTrace.gameEntity );
 
 		// If the touched entity was no world entity, add EntityTouched flag instead of PlaneTouched.
-		if ( slideTrace.gameEntity && slideTrace.gameEntity->GetNumber() >= 0) {
+		if ( slideTrace.gameEntity && slideTrace.gameEntity->GetNumber() > 0) {
 			// Add SlideMoveFlags::EntityTouched to our blockedMask.
 			blockedMask |= SlideMoveFlags::EntityTouched;
-		}
-
-		// If the trace had a valid plane, add Plane Touched.
-		if ( slideTrace.plane.dist ) {
-			// Add SlideMoveFlags::planeTouched to our blockedMask.
-			blockedMask |= SlideMoveFlags::PlaneTouched;
+		} else  {
+			// If the trace had a valid plane, add Plane Touched.
+			if ( slideTrace.plane.dist ) {
+				// Add SlideMoveFlags::planeTouched to our blockedMask.
+				blockedMask |= SlideMoveFlags::PlaneTouched;
+			}
 		}
 
 		// Move the 'fraction' that we at least can move.
@@ -449,7 +458,7 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 			// Subtract remainint time.
 			moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
 
-			// We've finished our move, add the SlideMoveFlags::Moved flag to our blockedMask.
+			// Add the SlideMoveFlags::Moved flag to our blockedMask.
 			blockedMask |= SlideMoveFlags::Moved;
 		}
 

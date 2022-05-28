@@ -25,7 +25,8 @@ SET(SRC_SVGAME
 	Entities/Base/SVGBaseItemAmmo.cpp
 	Entities/Base/SVGBaseItemWeapon.cpp
 	Entities/Base/SVGBaseTrigger.cpp
-	Entities/Base/SVGBaseMonster.cpp
+	Entities/Base/SVGBaseSlideMonster.cpp
+	Entities/Base/SVGBaseStepMonster.cpp
 	Entities/Base/SVGBaseMover.cpp
 	Entities/Base/SVGBasePlayer.cpp
 	Entities/Base/SVGBaseSkeletalAnimator.cpp
@@ -139,7 +140,8 @@ SET(HEADERS_SVGAME
 	Entities/Base/SVGBaseItemAmmo.h
 	Entities/Base/SVGBaseItemWeapon.h
 	Entities/Base/SVGBaseTrigger.h
-	Entities/Base/SVGBaseMonster.h
+	Entities/Base/SVGBaseSlideMonster.h
+	Entities/Base/SVGBaseStepMonster.h
 	Entities/Base/SVGBaseMover.h
 	Entities/Base/SVGBasePlayer.h
 	Entities/Base/BodyCorpse.h

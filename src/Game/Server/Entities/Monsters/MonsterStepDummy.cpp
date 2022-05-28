@@ -16,7 +16,7 @@
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseSkeletalAnimator.h"
-#include "../Base/SVGBaseMonster.h"
+#include "../Base/SVGBaseStepMonster.h"
 
 // World.
 #include "../../World/ServerGameWorld.h"
@@ -65,29 +65,11 @@ void MonsterStepDummy::Spawn() {
     // Always call parent class method.
     Base::Spawn();
 
-    // Set solid.
-    SetSolid(Solid::OctagonBox);
-	// Set move type.
-    SetMoveType(MoveType::Step);
-	// Since this is a "monster", after all...
-	//SetFlags(EntityFlags::Fly);
-    SetServerFlags(EntityServerFlags::Monster);
-	// Set clip mask.
-    SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
-
     // Set the barrel model, and model index.
     SetModel("models/monsters/stepdummy/stepdummy.iqm");
 	// Set the bounding box.
     SetBoundingBox({ -16, -16, 0 }, { 16, 16, 52 });
 
-	// Entity is alive.
-	SetDeadFlag(DeadFlags::Alive);
-    // Set entity to allow taking damage.
-    SetTakeDamage(TakeDamage::Yes);
-
-    // Set default values in case we have none.
-    if (!GetMass()) { SetMass(200); }
-    if (!GetHealth()) { SetHealth(200); }
     
 	// Setup callbacks.
     SetDieCallback(&MonsterStepDummy::MonsterStepDummyDie);

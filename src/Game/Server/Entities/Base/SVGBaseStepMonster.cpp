@@ -20,12 +20,12 @@
 #include "SVGBasePlayer.h"
 
 // Base Item Weapon.
-#include "SVGBaseMonster.h"
+#include "SVGBaseStepMonster.h"
 #define STEPSIZE 18
 
 //! Constructor/Destructor.
-SVGBaseMonster::SVGBaseMonster(PODEntity *svEntity) : Base(svEntity) { }
-SVGBaseMonster::~SVGBaseMonster() { }
+SVGBaseStepMonster::SVGBaseStepMonster(PODEntity *svEntity) : Base(svEntity) { }
+SVGBaseStepMonster::~SVGBaseStepMonster() { }
 
 
 /***
@@ -36,21 +36,35 @@ SVGBaseMonster::~SVGBaseMonster() { }
 /**
 *   @brief 
 **/
-void SVGBaseMonster::Precache() { 
+void SVGBaseStepMonster::Precache() { 
 	Base::Precache();
 }
 
 /**
 *   @brief 
 **/
-void SVGBaseMonster::Spawn() { 
+void SVGBaseStepMonster::Spawn() { 
 	// Base Spawn.
 	Base::Spawn();
 
-	// Set ClipMask to MonsterSolid.
-	SetClipMask( BrushContentsMask::MonsterSolid );
-	// Set Monster ServerFlag.
-	SetServerFlags( EntityServerFlags::Monster );
+	// Use an Octagon Shaped Hull by default. Allows for more realistic character sliding.
+    SetSolid( Solid::OctagonBox );
+	// Set move type.
+    SetMoveType( MoveType::StepMove );
+	// Notify the server this is, specifically a monster, by adding the Monster flag.
+    SetServerFlags( EntityServerFlags::Monster );
+	// Set clip mask to Monster and Player solid.
+	// (Clip to Monster specific brushes, and those that players clip to as well.)
+    SetClipMask( BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid );
+
+	// Entity is alive.
+	SetDeadFlag( DeadFlags::Alive );
+    // Set entity to allow taking damage.
+    SetTakeDamage( TakeDamage::Yes );
+
+    // Set default values in case we have none.
+    if (!GetMass()) { SetMass( 200 ); }
+    if (!GetHealth()) { SetHealth( 200 ); }
 }
 
 
@@ -58,21 +72,21 @@ void SVGBaseMonster::Spawn() {
 /**
 *   @brief 
 **/
-void SVGBaseMonster::PostSpawn() { 
+void SVGBaseStepMonster::PostSpawn() { 
 	Base::Spawn(); 
 }
 
 /**
 *   @brief 
 **/
-void SVGBaseMonster::Respawn() { 
+void SVGBaseStepMonster::Respawn() { 
 	Base::Respawn(); 
 }
 
 /**
 *   @brief Override think method to add in animation processing.
 **/
-void SVGBaseMonster::Think() { 
+void SVGBaseStepMonster::Think() { 
 	// Base think.
 	Base::Think();
 }
@@ -80,7 +94,7 @@ void SVGBaseMonster::Think() {
 /**
 *   @brief 
 **/
-void SVGBaseMonster::SpawnKey(const std::string& key, const std::string& value) { 
+void SVGBaseStepMonster::SpawnKey(const std::string& key, const std::string& value) { 
 	Base::SpawnKey(key, value); 
 }
 
@@ -94,7 +108,7 @@ void SVGBaseMonster::SpawnKey(const std::string& key, const std::string& value) 
 /**
 *	@brief	Categorizes what other contents the entity resides in. (Water, Lava, or...)
 **/
-void SVGBaseMonster::CategorizePosition() {
+void SVGBaseStepMonster::CategorizePosition() {
 	// WaterLevel: Feet.
 	vec3_t point = GetOrigin();
 	point.z += GetMins().z + 1.f;
@@ -143,7 +157,7 @@ void SVGBaseMonster::CategorizePosition() {
 *	@brief	Rotates/Turns the monster into the Ideal Yaw angle direction.
 *	@return	The delta yaw angles of this Turn.
 **/
-float SVGBaseMonster::TurnToIdealYawAngle() {
+float SVGBaseStepMonster::TurnToIdealYawAngle() {
 	// Get current(and to be, previous) Angles.
 	const vec3_t _previousAngles = GetAngles();
 
@@ -203,7 +217,7 @@ float SVGBaseMonster::TurnToIdealYawAngle() {
 *	@return	False if the move has failed and the entity remains at its position.
 *			True otherwise.
 **/
-const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) {
+const bool SVGBaseStepMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) {
     //float       dz;
     //SVGTraceResult    trace;
     //int         i;
@@ -480,7 +494,7 @@ const bool SVGBaseMonster::StepMove_Step(const vec3_t &stepOffset, bool relink) 
 *	@param	stepDistance		The distance to step towards the yawTurnAngle with.
 *	@return	True if successful, false otherwise.
 **/
-const bool SVGBaseMonster::StepMove_WalkDirection(const float yawDirectionAngle, const float stepDistance) {
+const bool SVGBaseStepMonster::StepMove_WalkDirection(const float yawDirectionAngle, const float stepDistance) {
     const double radYaw = Radians( yawDirectionAngle );
 
 	// Calculate the stepOffset vector into the 'yaw direction'.
@@ -494,11 +508,11 @@ const bool SVGBaseMonster::StepMove_WalkDirection(const float yawDirectionAngle,
 	return StepMove_Step( stepOffset, false );
 }
 
-void SVGBaseMonster::StepMove_FixCheckBottom() {
+void SVGBaseStepMonster::StepMove_FixCheckBottom() {
 	SetFlags( GetFlags() | EntityFlags::PartiallyOnGround );
 }
 
-const bool SVGBaseMonster::StepMove_CheckBottom() {
+const bool SVGBaseStepMonster::StepMove_CheckBottom() {
 	//vec3_t	mins, maxs, start, stop;
 	SVGTraceResult trace;
 	int32_t 		x, y;

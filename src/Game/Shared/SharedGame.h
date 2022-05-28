@@ -80,9 +80,9 @@ struct MoveType {
     static constexpr int32_t PlayerMove = 10;    // Gravity. (Player Movement entities use this.)
 
 	//! This entity makes use of the step movement physics.
-    static constexpr int32_t Step			= 11;    // Fixed distance per frame, impacted by gravity, supports special edge handling.
+    static constexpr int32_t StepMove	= 11;    // Fixed distance per frame, impacted by gravity, supports special edge handling.
 	//! Velocity based, box slide movement, optional stepping. Reacts to gravity unless FL_FLY or FL_SWIM is set.
-	static constexpr int32_t BoxSlideMove	= 12;
+	static constexpr int32_t SlideMove	= 12;
 	//! Similar to step movement however it does not care for gravity.
     static constexpr int32_t Fly        = 13; // TODO: Make this a flag for BoxSlideMove...
     
@@ -614,3 +614,5 @@ static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
 *	Physics
 **/
 #include "Physics/Physics.h"
+#include "Physics/SlideMove.h"
+#include "Physics/StepMove.h"
