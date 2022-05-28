@@ -102,52 +102,39 @@ void SVGBaseSlideMonster::SpawnKey(const std::string& key, const std::string& va
 
 
 void SVGBaseSlideMonster::Move_NavigateToTarget() {
-		//
-		// Goal Management.
-		//
-		// Setup Client as our enemy.
-		//GameEntity *geClientEnemy = GetGameWorld()->GetGameEntities()[1]; // Client.
-		//SetEnemy(geClientEnemy);
-		//SetGoalEntity(geClientEnemy);
+		/**
+		*	#1: Very Cheap, WIP, Debug, pick the goal entity. lol.
+		**/
+		GameEntity *geMoveGoal= GetGoalEntity();
 
-		// Our Goal entity is either...:
-		// 1: Goal
-		// 2: Enemy
-		// 3: None.
-		GameEntity *geGoal = GetGoalEntity();
+		if (!geMoveGoal) {
+			geMoveGoal = GetEnemy();
 
-		if (!geGoal) {
-			geGoal = GetEnemy();
-
-			if (!geGoal) {
-				geGoal = GetGameWorld()->GetGameEntities()[1];
+			if (!geMoveGoal) {
+				geMoveGoal = GetGameWorld()->GetGameEntities()[1];
 
 				// if !geGoal .. geGoal = ... ?
 			}
 		}
 		
-		//
-		// Yaw Speed.
-		//
-		SetYawSpeed(20.f);
-
-		//
-		// Direction.
-		//
+		/**
+		*	#1: Calculate the direction to head into, and set the yaw angle and its turning speed.
+		**/
 		// Get direction vector.
-		vec3_t direction = geGoal->GetOrigin() - GetOrigin();
-		// Cancel uit the Z direction.
-		direction.z = 0;
-		// if (flags::FLY {
-		// //direction.z = 0;
-		// }
+		vec3_t direction = geMoveGoal->GetOrigin() - GetOrigin();
+		// Cancel uit the Z direction for non flying monsters.
+		direction.z = (GetFlags() & EntityFlags::Fly ? direction.z : 0);
+		// if (flags::FLY { /* DO NOT CANCEL OUT Z */ }
+		// Default speed.
+		SetYawSpeed(20.f);
 		// Prepare ideal yaw angle to rotate to.
 		SetIdealYawAngle( vec3_to_yaw( { direction.x, direction.y, 0.f } ) );
 
 
-		//
-		// Yaw Angle.
-		//
+		/**
+		*	#2: Turn to the ideal yaw angle, and calculate our move velocity.
+		*		If the yaw angle is too large, slow down the velocity.
+		**/		
 		// Get the delta between wished for and current yaw angles.
 		const float deltaYawAngle = TurnToIdealYawAngle( );
 
@@ -160,29 +147,28 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 		if (deltaYawAngle > 45 && deltaYawAngle < 315) {
 			// Set velocity to head into direction.
 			const vec3_t wishVelocity = vec3_t {
-				62.f * normalizedDir.x,
-				62.f * normalizedDir.y,
-				oldVelocity.z,
-				// if (Flags::Fly) {
-				//33.f * normalizedDir.z,
-				// }
+				62.f * normalizedDir.x,	62.f * normalizedDir.y, 
+				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
 			};
 			SetVelocity(wishVelocity);
 		} else {
 			// Set velocity to head into direction.
-			const vec3_t wishVelocity = vec3_t {
-				92.f * normalizedDir.x,
-				92.f * normalizedDir.y,
-				oldVelocity.z,
-				// if (Flags::Fly) {
-				//33.f * normalizedDir.z,
-				// }
+			const vec3_t wishVelocity = vec3_t { 
+				92.f * normalizedDir.x,	92.f * normalizedDir.y,
+				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
 			};
 			SetVelocity(wishVelocity);
 		}
-	// Perform our slide move.
-	SlideMove();
+
+		/**
+		*	#3: Start moving our Monster ass.
+		**/
+		// Perform our slide move.
+		SlideMove();
 }
+
+
+
 
 /***
 *
@@ -284,10 +270,24 @@ float SVGBaseSlideMonster::TurnToIdealYawAngle() {
 	return GetAngles()[vec3_t::Yaw] - GetIdealYawAngle();
 }
 
-static constexpr float STEPMOVE_STOPSPEED = 100.f;
-static constexpr float STEPMOVE_FRICTION = 6.f;
-static constexpr float STEPMOVE_WATERFRICTION = 1.f;
 
+
+/***
+*
+*	Slide Movement Functions:
+*
+***/
+static constexpr float SLIDEMOVE_STOP_SPEED = 100.f;
+static constexpr float SLIDEMOVE_FRICTION = 6.f;
+static constexpr float SLIDEMOVE_WATER_FRICTION = 1.f;
+
+/**
+*	@brief	Performs a basic SlideMove by setting up a SlideMoveState and calling into
+*			SlideMove physics.
+*			
+*			It'll try and step down, as well as step up stairs. If it's non steppable,
+*			it resorts to sliding along the edge "crease".
+**/
 const int32_t SVGBaseSlideMonster::SlideMove() {
     // Stores whether to play a "surface hit" sound.
     qboolean    hitSound = false;
@@ -371,8 +371,8 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 		// Friction for Vertical Velocity.
 		if ( ( GetVelocity().z != 0 ) ) {
 			const float speed = fabs( GetVelocity().z );
-			const float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-			const float friction = STEPMOVE_FRICTION / 3;
+			const float control = speed < SLIDEMOVE_STOP_SPEED ? SLIDEMOVE_STOP_SPEED : speed;
+			const float friction = SLIDEMOVE_FRICTION / 3;
 			float newSpeed = speed - ( FRAMETIME.count() * control * friction );
 			if ( newSpeed < 0 ) {
 				newSpeed = 0;
@@ -388,8 +388,8 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 		// Friction for swimming monsters that have been given vertical velocity
 		if ( ( GetFlags() & EntityFlags::Swim ) && ( GetVelocity().z != 0 ) ) {
 			const float speed = fabs( GetVelocity().z );
-			const float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-			float newSpeed = speed - ( FRAMETIME.count() * control * STEPMOVE_WATERFRICTION * GetWaterLevel() );
+			const float control = speed < SLIDEMOVE_STOP_SPEED ? SLIDEMOVE_STOP_SPEED : speed;
+			float newSpeed = speed - ( FRAMETIME.count() * control * SLIDEMOVE_WATER_FRICTION * GetWaterLevel() );
 			if (newSpeed < 0) {
 				newSpeed = 0;
 			}
@@ -409,8 +409,8 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	//              vec3_t newVelocity = geBoxSlide->GetVelocity();
 	//              const float speed = sqrtf( newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1] );
 	//              if (speed) {
-	//                  const float friction = STEPMOVE_FRICTION;
-	//                  const float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
+	//                  const float friction = SLIDEMOVE_FRICTION;
+	//                  const float control = speed < SLIDEMOVE_STOP_SPEED ? SLIDEMOVE_STOP_SPEED : speed;
 	//                  float newSpeed = speed - FRAMETIME.count() * control * friction;
 
 	//                  if (newSpeed < 0) {
@@ -441,7 +441,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	const vec3_t org0 = GetOrigin();
 
     // Execute "BoxSlideMove", essentially also our water move.
-	MoveState slideMoveState;
+	SlideMoveState slideMoveState;
     int32_t blockedMask = SG_BoxSlideMove( this, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
 
 	if ( blockedMask & SlideMoveFlags::EdgeMoved) {

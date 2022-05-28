@@ -39,7 +39,7 @@ static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 *
 ***/
 /**
-*	@brief The possible flags returned from executing a SlideMove on a MoveState.
+*	@brief The possible flags returned from executing a SlideMove on a SlideMoveState.
 **/
 struct SlideMoveFlags {
 	//! Set whenever the move is capable of stepping up.
@@ -66,7 +66,7 @@ struct SlideMoveFlags {
 /**
 *	@brief	Contains the status of an entities physics move state.
 **/
-struct MoveState {
+struct SlideMoveState {
 	//! Physical Properties.
 	vec3_t velocity	= vec3_zero();
 	vec3_t origin	= vec3_zero();
@@ -115,12 +115,12 @@ vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float ov
 /*
 * GS_SlideMove
 */
-int32_t SG_SlideMove( MoveState *moveState );
+int32_t SG_SlideMove( SlideMoveState *moveState );
 
 /**
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, MoveState &boxSlideMove  );
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideMoveState &boxSlideMove  );
 
 /**
 *	@brief	Checks if this entity should have a groundEntity set or not.

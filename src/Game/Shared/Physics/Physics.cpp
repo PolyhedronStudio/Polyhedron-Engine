@@ -647,7 +647,7 @@ int SV_FlyMove( edict_t *ent, float time, int mask ) {
 **/
 const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction ) {
 	int32_t i;
-	MoveState entMove = {};
+	SlideMoveState entMove = {};
 	int32_t blockedMask = 0;
 
 	if (!geSlider) {

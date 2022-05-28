@@ -32,7 +32,7 @@
 //	geCheck->SetFlags( geCheck->GetFlags() | EntityFlags::PartiallyOnGround );
 //}
 //#define STEPSIZE 18
-//const bool SlideMove_CheckBottom( MoveState *moveState ) {
+//const bool SlideMove_CheckBottom( SlideMoveState *moveState ) {
 //	// Get the moveEntity.
 //	SGGameWorld *gameWorld = GetGameWorld();
 //	GameEntity *geCheck = SGGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( moveState->moveEntityNumber ) );
@@ -137,9 +137,9 @@ inline vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, c
 
 
 /**
-*	@brief	If within limits: Adds the geToucher GameEntity to the MoveState's touching entities list.
+*	@brief	If within limits: Adds the geToucher GameEntity to the SlideMoveState's touching entities list.
 **/
-static void SG_AddTouchEnt( MoveState *moveState, GameEntity *geToucher ) {
+static void SG_AddTouchEnt( SlideMoveState *moveState, GameEntity *geToucher ) {
 	// Get the touch entity number for storing in our touch entity list.
 	int32_t touchEntityNumber = (geToucher ? geToucher->GetNumber() : -1);
 
@@ -171,11 +171,11 @@ static void SG_AddTouchEnt( MoveState *moveState, GameEntity *geToucher ) {
 }
 
 /**
-*	@brief	Clears the MoveState's clipping plane list. 
+*	@brief	Clears the SlideMoveState's clipping plane list. 
 *			(Does not truly vec3_zero them, just sets numClipPlanes to 0. Adding a 
 *			new clipping plane will overwrite the old values.)
 **/
-static void SG_ClearClippingPlanes( MoveState *moveState ) {
+static void SG_ClearClippingPlanes( SlideMoveState *moveState ) {
 	if (!moveState) {
 		return;
 	}
@@ -186,7 +186,7 @@ static void SG_ClearClippingPlanes( MoveState *moveState ) {
 /**
 *	@brief	Clips the moveState's velocity to all the normals stored in its current clipping plane normal list.
 **/
-static void SG_ClipVelocityToClippingPlanes( MoveState *moveState ) {
+static void SG_ClipVelocityToClippingPlanes( SlideMoveState *moveState ) {
 	for( int32_t i = 0; i < moveState->numClipPlanes; i++ ) {
 		// Get const ref to our clip plane normal.
 		const vec3_t &clipPlaneNormal = moveState->clipPlaneNormals[i];
@@ -202,9 +202,9 @@ static void SG_ClipVelocityToClippingPlanes( MoveState *moveState ) {
 }
 
 /**
-*	@brief	If the list hasn't exceeded MAX_SLIDEMOVE_CLIP_PLANES: Adds the plane normal to the MoveState's clipping plane normals list.
+*	@brief	If the list hasn't exceeded MAX_SLIDEMOVE_CLIP_PLANES: Adds the plane normal to the SlideMoveState's clipping plane normals list.
 **/
-static void SG_AddClippingPlane( MoveState *moveState, const vec3_t &planeNormal ) {
+static void SG_AddClippingPlane( SlideMoveState *moveState, const vec3_t &planeNormal ) {
 	// Ensure we stay within limits of MAX_SLIDEMOVE_CLIP_PLANES . Warn if we don't.
 	if( moveState->numClipPlanes + 1 == MAX_SLIDEMOVE_CLIP_PLANES ) {
 		SG_Physics_PrintWarning( std::string(__func__) + "MAX_SLIDEMOVE_CLIP_PLANES reached" );
@@ -227,8 +227,8 @@ static void SG_AddClippingPlane( MoveState *moveState, const vec3_t &planeNormal
 *	@brief	Handles checking whether an entity can step up a brush or not. (Or entity, of course.)
 *	@return	True if the move stepped up.
 **/
-static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping );
-static bool SG_StepUp( MoveState *moveState ) {
+static const int32_t SG_SlideMoveClipMove( SlideMoveState *moveState, const bool stepping );
+static bool SG_StepUp( SlideMoveState *moveState ) {
     // Store pre-move parameters
     const vec3_t org0 = moveState->origin;
     const vec3_t vel0 = moveState->velocity;
@@ -372,7 +372,7 @@ static const int32_t SG_SlideMove_CheckEdgeMove(const vec3_t& start, const vec3_
 /**
 *	@brief	GS_Performs a substep of the actual SG_SlideMove
 **/
-static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool stepping ) {
+static const int32_t SG_SlideMoveClipMove( SlideMoveState *moveState, const bool stepping ) {
 	// Contains all flags indicating the results of this moveState's move.
 	int32_t blockedMask = 0;
 
@@ -495,11 +495,11 @@ static const int32_t SG_SlideMoveClipMove( MoveState *moveState, const bool step
 *			- SlideMoveFlags::PlaneTouched	:	The move has touched a plane.
 *			- SlideMoveFlags::WallBlocked	:	The move got blocked by a wall.
 *			- SlideMoveFlags::Trapped		:	The move failed, and resulted in the moveState getting trapped.
-*												When this is set the last valid Origin is stored in the MoveState.
+*												When this is set the last valid Origin is stored in the SlideMoveState.
 *			- SlideMoveFlags::EdgeMoved	:	The move got blocked by an edge. (In other words, there was no legitimate step to perform.)
 *			- SlideMoveFlags::Moved			:	The move succeeded.
 **/
-int32_t SG_SlideMove( MoveState *moveState ) {
+int32_t SG_SlideMove( SlideMoveState *moveState ) {
 	static constexpr int32_t MAX_SLIDEMOVE_ATTEMPTS = 18;
 	//! Keeps score of the 
 	int32_t blockedMask = 0;

@@ -233,7 +233,7 @@ int32_t SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
 /**
 *	@brief	Starts performing the BoxSlide move process.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, MoveState &slideMoveState ) {
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideMoveState &slideMoveState ) {
 	/**
 	*	Ensure our SlideMove Game Entity is non (nullptr).
 	**/
@@ -258,10 +258,10 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	int32_t groundEntityNumber = (geGroundEntity ? geGroundEntity->GetNumber() : -1);
 
 	/**
-	*	Setup our MoveState structure. Keeps track of state for the current frame's move we're about to perform.
+	*	Setup our SlideMoveState structure. Keeps track of state for the current frame's move we're about to perform.
 	**/
 	// The structure containing the current state of the move we're trying to perform.
-	//MoveState slideMoveState = { 
+	//SlideMoveState slideMoveState = { 
 	slideMoveState = {
 		// Geometric Attributes.
 		.velocity = geSlider->GetVelocity(),

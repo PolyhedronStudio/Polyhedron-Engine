@@ -23,6 +23,7 @@ void SG_Physics_PrintWarning(const std::string& message);
 * GS_ClipVelocity
 */
 vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, const float overbounce );
+
 /**
 *	@brief	Keep entity velocity within bounds.
 **/
