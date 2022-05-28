@@ -123,7 +123,7 @@ void SG_Physics_PrintDeveloper(const std::string& message) {
 /*
 * GS_ClipVelocity
 */
-static inline vec3_t GS_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce ) {
+vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce ) {
 	float backoff = vec3_dot( inVelocity, normal );
 
 	if( backoff <= 0 ) {
@@ -145,10 +145,9 @@ static inline vec3_t GS_ClipVelocity( const vec3_t &inVelocity, const vec3_t &no
 			outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
 		}
 	}
-	#endif
+#endif
 
 	return outVelocity;
-
 }
 
 //================================================================================
