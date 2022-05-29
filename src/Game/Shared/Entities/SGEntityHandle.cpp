@@ -18,16 +18,19 @@ class IServerGameEntity;
 *	@return	A valid pointer if the POD Entity is pointing to one. nullptr otherwise.
 **/
 #ifdef SHAREDGAME_SERVERGAME
+#include "../../Server/World/ServerGameWorld.h"
 //#include "../../Server/Entities/IServerGameEntity.h"
 static IServerGameEntity* GetGameEntity(PODEntity* podEntity) {
     // Reinterpret cast the gameEntity pointer.
     if (podEntity) {
-	    if (podEntity->gameEntity != nullptr) {
-			// Static Cast, since ultimately unless we're a buffoon, this pointer is valid.
-	        return static_cast<IServerGameEntity*>(podEntity->gameEntity);
-	    } else {
-	        return nullptr;
-	    }
+		SGGameWorld *gameWorld = GetGameWorld();
+		return gameWorld->GetGameEntityByIndex(podEntity->currentState.number);
+		//if (podEntity->gameEntity != nullptr) {
+		//	// Static Cast, since ultimately unless we're a buffoon, this pointer is valid.
+		//	return static_cast<IServerGameEntity*>(podEntity->gameEntity);
+		//} else {
+		//	return nullptr;
+		//}
     }
 
     // Return nullptr.
@@ -40,13 +43,15 @@ static IServerGameEntity* GetGameEntity(PODEntity* podEntity) {
 static IClientGameEntity* GetGameEntity(PODEntity* podEntity) {
     // Reinterpret cast the gameEntity pointer.
     if (podEntity) {
-	    if (podEntity->gameEntity != nullptr) {
-	        return static_cast<IClientGameEntity*>(podEntity->gameEntity);
-	    } else {
-			SGGameWorld *gameWorld = GetGameWorld();
-			return gameWorld->GetGameEntityByIndex(podEntity->clientEntityNumber);
-	        //return nullptr;
-	    }
+		SGGameWorld *gameWorld = GetGameWorld();
+		return gameWorld->GetGameEntityByIndex(podEntity->clientEntityNumber);
+		//  if (podEntity->gameEntity != nullptr) {
+		//      return static_cast<IClientGameEntity*>(podEntity->gameEntity);
+		//  } else {
+		//		SGGameWorld *gameWorld = GetGameWorld();
+		//		return gameWorld->GetGameEntityByIndex(podEntity->clientEntityNumber);
+		//      //return nullptr;
+		//  }
     }
 
     // Return nullptr.
@@ -229,12 +234,12 @@ bool SGEntityHandle::operator == (const ISharedGameEntity* gameEntity) {
 **/
 SGEntityHandle::operator bool() {
 	// Ensure the POD Entity is a valid pointer, and matches the stored ID(Entity Number).
-	bool validPODEntity = Get();
+	bool validPODEntity = (Get() ? true: false);
 
 	// When valid, move on to test for a valid gameEntity pointer.
 	if (validPODEntity) {
 		// Get the pointer if valid.
-		GameEntity *validGameEntity = GetGameEntity(podEntity);
+		GameEntity *validGameEntity = GetGameEntity(Get());
 
 		// The Game Entity is valid ONLY if its Number matches the stored ID(Entity Number).
 		if (validGameEntity && validGameEntity->GetNumber() == ID()) {
@@ -251,12 +256,12 @@ SGEntityHandle::operator bool() {
 **/
 SGEntityHandle::operator bool() const {
 	// Ensure the POD Entity is a valid pointer, and matches the stored ID(Entity Number).
-	bool validPODEntity = Get();
+	bool validPODEntity = (Get() ? true: false);
 
 	// When valid, move on to test for a valid gameEntity pointer.
 	if (validPODEntity) {
 		// Get the pointer if valid.
-		GameEntity *validGameEntity = GetGameEntity(podEntity);
+		GameEntity *validGameEntity = GetGameEntity(Get());
 
 		// The Game Entity is valid ONLY if its Number matches the stored ID(Entity Number).
 		if (validGameEntity && validGameEntity->GetNumber() == ID()) {

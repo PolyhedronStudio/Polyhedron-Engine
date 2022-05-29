@@ -43,9 +43,9 @@ static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 **/
 struct SlideMoveFlags {
 	//! Set whenever the move is capable of stepping up.
-	static constexpr int32_t CanStepUp		= 64;
+	static constexpr int32_t SteppedUp		= 128;
 	//! Set whenever the movei s capable of stepping down.
-	static constexpr int32_t CanStepDown	= 32;
+	static constexpr int32_t SteppedDown	= 64;
 
 	//! Set whenever we've touched any entity that is not WorldSpawn.
 	static constexpr int32_t EntityTouched	= 32;

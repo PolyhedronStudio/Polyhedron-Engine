@@ -80,7 +80,6 @@ void SG_Physics_PrintWarning(const std::string& message) {
 	std::string warning =  "SGPhysics(Server) Warning:";
 #endif
 //    warning += functionName;
-	warning += "]): ";
     warning += message;
     warning += "\n";
 

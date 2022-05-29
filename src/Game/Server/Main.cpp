@@ -559,7 +559,8 @@ void SVG_RunFrame(void) {
 
 		const int32_t entityIndex = stateNumber;
 		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
-		GameEntity *gameEntity = ServerGameWorld::ValidateEntity(podEntity);
+		SGEntityHandle geHandle = podEntity;
+		GameEntity *gameEntity = ServerGameWorld::ValidateEntity( geHandle );
 		
 		// If invalid for whichever reason, warn and continue to next iteration.
         if (!podEntity || !gameEntity || !podEntity->inUse) {

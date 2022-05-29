@@ -198,36 +198,36 @@ static const int32_t SM_CheckForEdge(const vec3_t& start, const vec3_t& end, con
 	// Mask that gets set the resulting move flags.
 	int32_t blockedMask = 0;
 
-	// Calculate the end point for the start ground trace.
-	const vec3_t  startTraceEnd  = vec3_fmaf( start, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
-	SGTraceResult startTrace = SG_Trace( start, mins, maxs, startTraceEnd, geSkip, contentMask );
+	//// Calculate the end point for the start ground trace.
+	//const vec3_t  startTraceEnd  = vec3_fmaf( start, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+	//SGTraceResult startTrace = SG_Trace( start, mins, maxs, startTraceEnd, geSkip, contentMask );
 
-	const vec3_t  endTraceEnd  = vec3_fmaf( end, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
-	SGTraceResult endTrace = SG_Trace( end, mins, maxs, endTraceEnd, geSkip, contentMask );
+	//const vec3_t  endTraceEnd  = vec3_fmaf( end, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+	//SGTraceResult endTrace = SG_Trace( end, mins, maxs, endTraceEnd, geSkip, contentMask );
 
-	// If we had ground entity.
-	if ( groundEntityNumber != -1 ) {
-		// Check if it is a different one from the current ground.
-		GameEntity *geStartGroundEntity = SGGameWorld::ValidateEntity( startTrace.gameEntity );
-		GameEntity *geEndGroundEntity = SGGameWorld::ValidateEntity( endTrace.gameEntity );
+	//// If we had ground entity.
+	//if ( groundEntityNumber != -1 ) {
+	//	// Check if it is a different one from the current ground.
+	//	GameEntity *geStartGroundEntity = SGGameWorld::ValidateEntity( startTrace.gameEntity );
+	//	GameEntity *geEndGroundEntity = SGGameWorld::ValidateEntity( endTrace.gameEntity );
 
-		// See if the ground that we had, still matches with our start point.
-		if ( !( geStartGroundEntity && groundEntityNumber != geStartGroundEntity->GetNumber() ) ) {
-			// blockedMask |= SlideMoveFlags::StartedOnNewGround
-		}
+	//	// See if the ground that we had, still matches with our start point.
+	//	if ( !( geStartGroundEntity && groundEntityNumber != geStartGroundEntity->GetNumber() ) ) {
+	//		// blockedMask |= SlideMoveFlags::StartedOnNewGround
+	//	}
 
-		if ( !( geEndGroundEntity && groundEntityNumber != geEndGroundEntity->GetNumber() ) ) {
-			if (startTrace.plane.dist != endTrace.plane.dist) {
-				// If the fraction is less than 1, it means we could step on it.
-				if ( IsWalkablePlane( endTrace.plane ) && endTrace.fraction < 1.0f ) {
-					blockedMask |= SlideMoveFlags::CanStepDown;
-				}
-				if ( !IsWalkablePlane( endTrace.plane) ) {
-					blockedMask |= SlideMoveFlags::EdgeMoved;
-				}
-			}
-		}
-	}
+	//	if ( !( geEndGroundEntity && groundEntityNumber != geEndGroundEntity->GetNumber() ) ) {
+	//		if (startTrace.plane.dist != endTrace.plane.dist) {
+	//			// If the fraction is less than 1, it means we could step on it.
+	//			if ( IsWalkablePlane( endTrace.plane ) && endTrace.fraction < 1.0f ) {
+	//				blockedMask |= SlideMoveFlags::CanStepDown;
+	//			}
+	//			if ( !IsWalkablePlane( endTrace.plane) ) {
+	//				blockedMask |= SlideMoveFlags::EdgeMoved;
+	//			}
+	//		}
+	//	}
+	//}
 
 	return blockedMask;
 }
@@ -303,6 +303,8 @@ static bool SG_StepDown( SlideMoveState *moveState ) {
 				moveState->origin = downTraceB.endPosition;
 
 				return true;
+			} else {
+				return false;
 			}
 			//}
 		}
@@ -341,8 +343,9 @@ static bool SG_StepUp( SlideMoveState *moveState ) {
 		if ( !downTraceB.allSolid ) {
 
 			// Check if it is a legitimate stair case.
-			if (downTraceB.podEntity && IsWalkablePlane(downTraceB.plane) ) {
+			if ((downTraceB.podEntity != downTraceA.podEntity || downTraceA.plane.dist != downTraceB.plane.dist) && IsWalkablePlane(downTraceB.plane) ) {
 				moveState->origin = downTraceB.endPosition;
+								SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: firstDownTrace");
 			}
 		}
 	}
@@ -360,26 +363,22 @@ static bool SG_StepUp( SlideMoveState *moveState ) {
         moveState->velocity = vel0;
 
 		SM_SlideClipMove( moveState, false );
-        //PM_StepSlideMove_();
+        
+		//PM_StepSlideMove_();
 
         // Settle to the new ground, keeping the step if and only if it was successful
         const vec3_t down = vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
         const SGTraceResult downTrace = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, down, geSkip, moveState->contentMask );
 
-        if ( !downTrace.allSolid ) { //PM_CheckStep(&downTrace)) {
-            // Quake2 trick jump secret sauce
-//#if 0            
-			if ( (geGroundEntity) || vel0.z < PM_SPEED_UP ) {
-//#endif
-				//if ( SG_SlideMove_CheckBottom( moveState ) ) {
-					// Yeah... I knwo.
+        if ( !downTrace.allSolid ) {
+     
+			if ( (geGroundEntity && IsWalkablePlane( downTrace.plane ) ) ) {// || vel0.z < PM_SPEED_UP) {
+				SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: secondDownTrace - Position Set");
+
 					moveState->origin = downTrace.endPosition;
-				//}
-				// Calculate step height.
-				//moveState->stepHeight = moveState->origin.z - moveState-> 
-//#if 0
 			} else {
 				// Set it back?
+				return false;
 //                moveState->origin = org1;
 //				return false;
 				//pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
@@ -393,6 +392,8 @@ static bool SG_StepUp( SlideMoveState *moveState ) {
 	// Save end results.
     moveState->origin = org1;
     moveState->velocity = vel1;
+			
+	SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: Made it till the end");
 
 	return false;
 }
@@ -420,6 +421,7 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 	if( traceResult.allSolid ) {
 		// Add the entity trapping us to our touch list.
 		if( traceResult.gameEntity ) {
+			// Touched an other entity.
 			SM_AddTouchEntity( moveState, traceResult.gameEntity );
 		}
 
@@ -429,11 +431,16 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 
 	// Managed to move without any complications.
 	if( traceResult.fraction == 1.0f ) {
-		//if( !( stepping && SG_StepUp( moveState ) ) ) {
+		if( ( stepping && SG_StepDown( moveState ) ) ) {
 			moveState->origin = traceResult.endPosition;
 			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );
-		//}
-		return blockedMask | SlideMoveFlags::Moved;
+			blockedMask |= SlideMoveFlags::SteppedDown;
+		} else {
+			moveState->origin = traceResult.endPosition;
+			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );	
+			return blockedMask | SlideMoveFlags::Moved;
+		}
+		
 	}
 
 	// Wasn't able to make the full move.
@@ -455,7 +462,7 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 		if( !IsWalkablePlane( traceResult.plane ) ) {
 			// If SG_StepUp returns true, it means the move stepped.
 			if( stepping && SG_StepUp( moveState ) ) {
-				return blockedMask;
+				return blockedMask | SlideMoveFlags::SteppedUp;
 			} else {
 				blockedMask |= SlideMoveFlags::WallBlocked;
 			}

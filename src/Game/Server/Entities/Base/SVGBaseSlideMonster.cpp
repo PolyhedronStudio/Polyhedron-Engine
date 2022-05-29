@@ -440,56 +440,60 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	const vec3_t vel0 = GetVelocity();
 	const vec3_t org0 = GetOrigin();
 
-    // Execute "BoxSlideMove", essentially also our water move.
-	SlideMoveState slideMoveState;
-    int32_t blockedMask = SG_BoxSlideMove( this, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
+		// Execute "BoxSlideMove", essentially also our water move.
+		SlideMoveState slideMoveState;
+		int32_t blockedMask = SG_BoxSlideMove( this, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
 
-	if ( blockedMask & SlideMoveFlags::EdgeMoved) {
-		//slideMoveState.velocity.z = vel0.z;
+		if ( blockedMask & SlideMoveFlags::EdgeMoved) {
+			//slideMoveState.velocity.z = vel0.z;
 		
-		//slideMoveState.origin = org0;
-		// Resort to old origin.
-		//slideMoveState.origin = org0; //{ org0.x, org0.y, slideMoveState.origin.z };
-		//slideMoveState.
-	}
-	#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
-	if (blockedMask != 0) {
-		std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (";
-		if (blockedMask & SlideMoveFlags::CanStepUp) { blockMaskString += "CanStepUp, "; }
-		if (blockedMask & SlideMoveFlags::CanStepDown) { blockMaskString += "CanStepDown, "; }
+			//slideMoveState.origin = org0;
+			// Resort to old origin.
+			//slideMoveState.origin = org0; //{ org0.x, org0.y, slideMoveState.origin.z };
+			//slideMoveState.
+		}
+		
+	if (GetHealth() > 0) {
+#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
+		if (blockedMask != 0) {
+			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (";
+			if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += "SteppedUp, "; }
+			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += "SteppedDown, "; }
 
-		if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += "EntityTouched, "; }
-		if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += "PlaneTouched, "; }
-		if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += "WallBlocked, "; }
-		if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
+			if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += "EntityTouched, "; }
+			if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += "PlaneTouched, "; }
+			if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += "WallBlocked, "; }
+			if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
 		
-		if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += "EdgeMoved, "; }
-		if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved "; }
-		blockMaskString += ")";
+			if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += "EdgeMoved, "; }
+			if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved "; }
+			blockMaskString += ")";
 		
-		gi.DPrintf( "%s\n", blockMaskString.c_str());
-	} else {
-		std::string blockMaskString = "SlideMove Entity(#%i) blockMask: (0)\n";
-		gi.DPrintf( "%s\n", blockMaskString.c_str());
-	}
+			gi.DPrintf( "%s\n", blockMaskString.c_str());
+		} else {
+			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (0)\n";
+			gi.DPrintf( "%s\n", blockMaskString.c_str());
+		}
 #endif
-	/**
-	*	Step #6:	- The Move has been Performed: Update Entity Attributes.
-	**/
-	// Double validate ground entity at this moment in time.
-	GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( slideMoveState.groundEntityNumber ) );
+	}
+		/**
+		*	Step #6:	- The Move has been Performed: Update Entity Attributes.
+		**/
+		// Double validate ground entity at this moment in time.
+		GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( slideMoveState.groundEntityNumber ) );
 
-	// Update the entity with the resulting moveState values.
-	SetOrigin( slideMoveState.origin );
-	SetVelocity( slideMoveState.velocity );
-	SetMins( slideMoveState.mins );
-	SetMaxs( slideMoveState.maxs );
-	SetFlags( slideMoveState.entityFlags );
-	SetGroundEntity( geNewGroundEntity );
-	SetGroundEntityLinkCount( slideMoveState.groundEntityLinkCount );
+		// Update the entity with the resulting moveState values.
+		SetOrigin( slideMoveState.origin );
+		SetVelocity( slideMoveState.velocity );
+		SetMins( slideMoveState.mins );
+		SetMaxs( slideMoveState.maxs );
+		SetFlags( slideMoveState.entityFlags );
+		SetGroundEntity( geNewGroundEntity );
+		SetGroundEntityLinkCount( slideMoveState.groundEntityLinkCount );
 
-	// Link entity in.
-	LinkEntity();
+		// Link entity in.
+		LinkEntity();
+	
 
 	/**
 	*	Step #5:	- Prevent us from moving into water if we're not a swimming monster.

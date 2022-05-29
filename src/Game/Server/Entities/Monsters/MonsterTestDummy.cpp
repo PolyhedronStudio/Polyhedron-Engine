@@ -99,6 +99,23 @@ void MonsterTestDummy::Respawn() { Base::Respawn(); }
 void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
+	
+	// TEMP CODE: SET THE GOAL AND ENEMY ENTITY.
+	ServerGameWorld *gw = GetGameWorld();
+	for (auto* geGoalEntity : GetGameWorld()->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
+		| cef::IsValidPointer
+		| cef::HasServerEntity
+		| cef::InUse
+		| cef::HasKeyValue("goalentity", strGoalEntity)) {
+			SetGoalEntity(geGoalEntity);
+			SetEnemy(geGoalEntity);
+
+			gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoalEntity->GetTargetName().c_str());
+	}
+
+    // Setup our MonsterStepDummy callbacks.
+    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
+    SetNextThinkTime(level.time + FRAMETIME);
 }
 
 //===============
@@ -115,31 +132,19 @@ void MonsterTestDummy::Think() {
 //
 //===============
 void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value) {
-    EntityState* state = &GetPODEntity()->currentState;
 
- //   if (key == "startframe") { 
- //       // This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
- //       int32_t parsedInt = 0;
-	//    ParseKeyValue(key, value, parsedInt);
- //       state->animationStartFrame = parsedInt;
- //   } else if (key == "endframe") {
-	//// This is a lame hack so I can debug this from TB, set an animation index should always be done using SetAnimation
-	//    int32_t parsedInt = 0;
-	//    ParseKeyValue(key, value, parsedInt);
-	//    state->animationEndFrame = parsedInt;
- //   } else if (key == "framerate") {
-	//    float parsedFloat = 0.f;
-	//    ParseKeyValue(key, value, parsedFloat);
-	//    state->animationFramerate = parsedFloat;        
- //   } else if (key == "animindex") {
- //   } else if (key == "skin") {
- //   } else if (key == "health") {
- //       int32_t parsedInt = 0;
- //       ParseKeyValue(key, value, parsedInt);
- //       SetHealth(parsedInt);
- //   } else {
-	    Base::SpawnKey(key, value);
-//    }
+	// We're using this for testing atm.
+	if ( key == "goalentity" ) {
+		// Parsed string.
+		std::string parsedString = "";
+		ParseKeyValue(key, value, parsedString);
+
+		// Assign.
+		strGoalEntity = parsedString;
+		gi.DPrintf("MonsterTestDummy(GoalEntity: %s)\n", value.c_str());
+	} else {
+		Base::SpawnKey(key, value);
+	}
 }
 
 /////
