@@ -42,6 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/Formats/Md2.h"
 #include "Shared/Formats/Md3.h"
 #include "Shared/Formats/Sp2.h"
+#include "Common/Models/Models.h"
 #include "material.h"
 #include <assert.h>
 

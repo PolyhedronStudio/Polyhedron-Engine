@@ -89,33 +89,34 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	   
 // } model_t;
 
-extern model_t      r_models[];
-extern int          r_numModels;
-
-extern int registration_sequence;
-
-// these are implemented in r_models.c
-void MOD_FreeUnused(void);
-void MOD_FreeAll(void);
-void MOD_Init(void);
-void MOD_Shutdown(void);
-
-model_t *MOD_ForHandle(qhandle_t h);
+//extern model_t      r_models[];
+//extern int          r_numModels;
+//
+//extern int registration_sequence;
+//
+//// these are implemented in r_models.c
+//void MOD_FreeUnused(void);
+//void MOD_FreeAll(void);
+//void MOD_Init(void);
+//void MOD_Shutdown(void);
+//
+//model_t *MOD_ForHandle(qhandle_t h);
+//qhandle_t R_RegisterModel(const char *name);
+//
+//struct dmd2header_s;
+//qerror_t MOD_ValidateMD2(struct dmd2header_s *header, size_t length);
+//
+//qerror_t MOD_LoadIQM_Base(model_t* mod, const void* rawdata, size_t length, const char* mod_name);
+//qboolean R_ComputeIQMTransforms(const iqm_model_t* model, const r_entity_t* entity, float* pose_matrices);
+//
+//// these are implemented in [gl,sw]_models.c
+//typedef qerror_t(*mod_load_t)(model_t*, const void*, size_t, const char*);
+//extern qerror_t(*MOD_LoadMD2)(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+//#if USE_MD3
+//extern qerror_t(*MOD_LoadMD3)(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+//#endif
+//extern qerror_t(*MOD_LoadIQM)(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+//extern void (*MOD_Reference)(model_t *model);
 qhandle_t R_RegisterModel(const char *name);
-
-struct dmd2header_s;
-qerror_t MOD_ValidateMD2(struct dmd2header_s *header, size_t length);
-
-qerror_t MOD_LoadIQM_Base(model_t* mod, const void* rawdata, size_t length, const char* mod_name);
-qboolean R_ComputeIQMTransforms(const iqm_model_t* model, const r_entity_t* entity, float* pose_matrices);
-
-// these are implemented in [gl,sw]_models.c
-typedef qerror_t(*mod_load_t)(model_t*, const void*, size_t, const char*);
-extern qerror_t(*MOD_LoadMD2)(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-#if USE_MD3
-extern qerror_t(*MOD_LoadMD3)(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-#endif
-extern qerror_t(*MOD_LoadIQM)(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-extern void (*MOD_Reference)(model_t *model);
 
 #endif // MODELS_H

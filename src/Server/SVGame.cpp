@@ -50,7 +50,7 @@ static int PF_FindIndex(const char *name, int start, int max)
 
     if (i == max)
         Com_Error(ErrorType::Drop, "PF_FindIndex: overflow");
-
+	
     PF_configstring(i + start, name);
 
     return i;

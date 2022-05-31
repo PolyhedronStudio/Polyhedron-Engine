@@ -344,6 +344,17 @@ typedef struct model_s {
 
     iqm_model_t* iqmData;
 
+	//// Polyhedron IQM Data? For Game Modules?
+	//struct IQMGameData {
+	//	struct IQMAnimation {
+	//		const std::string name;
+	//		uint32_t first_frame = 0;
+	//		uint32_t num_frames = 0;
+	//		qboolean loop = false;
+	//	};
+	//	std::map<std::string, IQMAnimation> 
+	//} iqmGameData;
+
     int num_light_polys;
     light_poly_t* light_polys;
 } model_t;

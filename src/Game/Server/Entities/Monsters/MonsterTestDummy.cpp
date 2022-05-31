@@ -53,6 +53,7 @@ void MonsterTestDummy::Precache() {
 
     // Precache test dummy model.
     SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
+
 }
 
 //

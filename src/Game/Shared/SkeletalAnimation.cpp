@@ -10,6 +10,44 @@
 #include "SharedGame.h"
 
 
+/**
+*	@return	Game compatible IQM data.
+**/
+SkeletalModelData SG_SKM_GenerateModelData(model_t* model) {
+	// Our final model data to return.
+	SkeletalModelData skm;
+
+	if (!model) {
+		// TODO: Warn.
+		return skm;
+	}
+
+	// Get our animation data sorted out nicely.
+	for (uint32_t animationIndex = 0; animationIndex < model->iqmData->num_animations; animationIndex++) {
+		iqm_anim_t* animationData = &model->iqmData->animations[animationIndex];
+
+		// TODO: Do proper error checking for existing keys and warn.
+		skm.animations[animationData->name] = {
+			.index = animationIndex,
+			.name = animationData->name,
+			.startFrame = animationData->first_frame,
+			.endFrame = animationData->num_frames,
+			.loopingFrames = 0,
+			.forceLoop = (animationData->loop == 1 ? true : false),
+		};
+		//const char* name = (const char*)header + header->ofs_text + src->name;
+		//strncpy(dst->name, name, sizeof(dst->name));
+		//dst->name[sizeof(dst->name) - 1] = 0;
+
+		//dst->first_frame = src->first_frame;
+		//dst->num_frames = src->num_frames;
+		////dst->framerate = src->framerate;
+		//dst->loop = (src->flags & IQM_LOOP) != 0;
+	}
+
+	// Return our data.
+	return skm;
+}
 
 /**
 * @brief	Calculates the current frame for the current time since the start time stamp.

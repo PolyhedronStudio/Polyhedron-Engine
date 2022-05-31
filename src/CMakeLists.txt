@@ -94,6 +94,9 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/Utilities.cpp
 	${PATH_SRC}/Common/Zone.cpp
 
+	${PATH_SRC}/Common/Models/Iqm.cpp
+	${PATH_SRC}/Common/Models/Models.cpp
+
 	${PATH_SRC}/Common/Hashes/Crc32.cpp
 
 	${PATH_SRC}/Common/Messaging/MessageReadWrite.cpp
@@ -240,7 +243,7 @@ SET(SRC_SERVER
 	${PATH_SRC}/Server/SVGame.cpp
 	${PATH_SRC}/Server/Init.cpp
 	${PATH_SRC}/Server/Main.cpp
-
+	${PATH_SRC}/Server/Models.cpp
 	${PATH_SRC}/Server/Send.cpp
 	${PATH_SRC}/Server/User.cpp
 	${PATH_SRC}/Server/World.cpp
