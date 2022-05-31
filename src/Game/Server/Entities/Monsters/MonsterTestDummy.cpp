@@ -52,7 +52,7 @@ void MonsterTestDummy::Precache() {
     Base::Precache();
 
     // Precache test dummy model.
-    SVG_PrecacheModel("models/monsters/testdummy/testdummy.iqm");
+    SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
 }
 
 //
@@ -66,10 +66,10 @@ void MonsterTestDummy::Spawn() {
     Base::Spawn();
 
     // Set the barrel model, and model index.
-    SetModel("models/monsters/testdummy/testdummy.iqm");
+    SetModel("models/monsters/slidedummy/slidedummy.iqm");
 
     // Set the bounding box.
-    SetBoundingBox({ -16, -16, 0 }, { 16, 16, 52 });
+    SetBoundingBox({ -16, -16, 0 }, { 16, 16, 90 });
 
     // Setup our MonsterTestDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
@@ -155,8 +155,8 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
 	// Set the animation.
 	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
 	animationState->animationIndex = 1;
-	animationState->startFrame = 1;
-	animationState->endFrame = 62;
+	animationState->startFrame = 0;
+	animationState->endFrame = 71;
 	animationState->frameTime = ANIMATION_FRAMETIME;
 	animationState->startTime = startz = level.time.count() + FRAMETIME.count();
 	animationState->loopCount = 0;
@@ -200,13 +200,13 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// Set the animation.
 		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-		animationState->animationIndex = 1;
-		animationState->startFrame = 1;
-		animationState->endFrame = 62;
-		animationState->frameTime = ANIMATION_FRAMETIME;
-		animationState->startTime = startz = level.time.count() + FRAMETIME.count();
-		animationState->loopCount = 0;
-		animationState->forceLoop = true;
+		//animationState->animationIndex = 1;
+		//animationState->startFrame = 0;
+		//animationState->endFrame = 140;
+		//animationState->frameTime = ANIMATION_FRAMETIME;
+		//animationState->startTime = startz = level.time.count() + FRAMETIME.count();
+		//animationState->loopCount = 0;
+		//animationState->forceLoop = true;
 
 		// Navigate to goal.
 		Move_NavigateToTarget( );

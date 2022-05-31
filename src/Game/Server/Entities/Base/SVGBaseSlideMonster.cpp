@@ -147,14 +147,14 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 		if (deltaYawAngle > 45 && deltaYawAngle < 315) {
 			// Set velocity to head into direction.
 			const vec3_t wishVelocity = vec3_t {
-				62.f * normalizedDir.x,	62.f * normalizedDir.y, 
+				52.f * normalizedDir.x,	52.f * normalizedDir.y, 
 				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
 			};
 			SetVelocity(wishVelocity);
 		} else {
 			// Set velocity to head into direction.
 			const vec3_t wishVelocity = vec3_t { 
-				92.f * normalizedDir.x,	92.f * normalizedDir.y,
+				72.f * normalizedDir.x,	72.f * normalizedDir.y,
 				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
 			};
 			SetVelocity(wishVelocity);
