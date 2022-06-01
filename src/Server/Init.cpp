@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Server.h"
+#include "Models.h"
 #include "../Client/Client.h"
 
 ServerStatic svs;                // persistant server info
@@ -152,6 +153,9 @@ void SV_SpawnServer(MapCommand *cmd)
     CM_FreeMap(&sv.cm);
     SV_FreeFile(sv.entityString);
 
+	// Free Unused Models.
+	SV_Model_FreeUnused();
+
     // Wipe the entire per-level structure
     //memset(&sv, 0, sizeof(sv));
     sv = {};
@@ -215,8 +219,11 @@ void SV_SpawnServer(MapCommand *cmd)
     // map initialization
     sv.serverState = ServerState::Loading;
 
+	SV_Model_BeginRegistrationSequence();
     // load and spawn all other entities
     ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
+
+	SV_Model_EndRegistrationSequence();
 
     // Run 2 frames times SERVER_RATE_MULTIPLIER to allow everything to settle.
     for (int32_t i = 0; i < 10; i++) {//SERVER_RATE_MULTIPLIER; i++) {

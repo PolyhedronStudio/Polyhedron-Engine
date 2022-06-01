@@ -52,8 +52,12 @@ void MonsterTestDummy::Precache() {
     Base::Precache();
 
     // Precache test dummy model.
-    SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
+    modelHandle = SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
+	qhandle_t modelID = gi.PrecacheServerModel("models/monsters/slidedummy/slidedummy.iqm");
 
+	model_t *model = gi.GetModelByHandle(modelID);
+
+	SG_SKM_GenerateModelData(model);
 }
 
 //

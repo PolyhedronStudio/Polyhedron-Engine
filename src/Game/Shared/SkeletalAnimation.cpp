@@ -27,7 +27,7 @@ SkeletalModelData SG_SKM_GenerateModelData(model_t* model) {
 		iqm_anim_t* animationData = &model->iqmData->animations[animationIndex];
 
 		// TODO: Do proper error checking for existing keys and warn.
-		skm.animations[animationData->name] = {
+		SkeletalAnimation animation = skm.animations[animationData->name] = {
 			.index = animationIndex,
 			.name = animationData->name,
 			.startFrame = animationData->first_frame,
@@ -35,6 +35,19 @@ SkeletalModelData SG_SKM_GenerateModelData(model_t* model) {
 			.loopingFrames = 0,
 			.forceLoop = (animationData->loop == 1 ? true : false),
 		};
+
+		// Output animation data.
+#ifdef SHAREDGAME_SERVERGAME
+		gi.DPrintf("(%s): idx=%i, start=%i, end=%i, loopFrames=%i, loop=%s, name=%s\n",
+			__func__,
+			animationIndex,
+			animation.startFrame,
+			animation.endFrame,
+			animation.loopingFrames,
+			animation.forceLoop == true ? "true" : "false",
+			animationData->name);
+#endif
+
 		//const char* name = (const char*)header + header->ofs_text + src->name;
 		//strncpy(dst->name, name, sizeof(dst->name));
 		//dst->name[sizeof(dst->name) - 1] = 0;

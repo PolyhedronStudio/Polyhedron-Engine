@@ -290,7 +290,8 @@ static void SV_Map(qboolean restart) {
 
     // any error will drop from this point
     if ((sv.serverState != ServerState::Game && sv.serverState != ServerState::Pic && sv.serverState != ServerState::Cinematic) || restart) {
-        SV_InitGame();    // the game is just starting
+        //SV_Model_FreeUnused();
+		SV_InitGame();    // the game is just starting
     } /*else {
         extern cvar_t* sv_maxclients;
         Entity *ent;

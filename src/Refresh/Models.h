@@ -28,7 +28,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "System/Hunk.h"
 #include "Common/Error.h"
 
-#define MOD_Malloc(size)    Hunk_Alloc(&model->hunk, size)
+
+//#define MOD_Malloc(size)    Hunk_Alloc(&model->hunk, size)
 
 #define MAX_ALIAS_SKINS     32
 #define MAX_ALIAS_VERTS     4096

@@ -57,6 +57,13 @@ get_model_class(const char *name)
 		return MCLASS_REGULAR;
 }
 
+/**
+*	@brief Replaces the old MOD_Alloc macro.
+**/
+void* R_MOD_Alloc(memhunk_t *hunk, size_t size) {
+	return Hunk_Alloc(hunk, size);
+}
+
 qhandle_t R_RegisterModel(const char *name) {
 	char normalized[MAX_QPATH];
 	qhandle_t index;
@@ -158,7 +165,7 @@ qhandle_t R_RegisterModel(const char *name) {
 	memcpy(model->name, normalized, namelen + 1);
 	model->registration_sequence = registration_sequence;
 
-	ret = load(model, rawdata, filelen, name);
+	ret = load(model, R_MOD_Alloc, rawdata, filelen, name);
 
 	FS_FreeFile(rawdata);
 

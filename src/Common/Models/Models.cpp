@@ -231,7 +231,7 @@ get_model_class(const char *name)
 		return MCLASS_REGULAR;
 }
 #if USE_CLIENT
-qerror_t MOD_LoadSP2(model_t* model, const void* rawdata, size_t length, const char* mod_name)
+qerror_t MOD_LoadSP2(model_t* model, ModelMemoryAllocateCallback modelAllocate, const void* rawdata, size_t length, const char* mod_name)
 {
 	dsp2header_t header;
 	dsp2frame_t *src_frame;
@@ -266,7 +266,7 @@ qerror_t MOD_LoadSP2(model_t* model, const void* rawdata, size_t length, const c
 	Hunk_Begin(&model->hunk, 0x10000);
 	model->type = model_s::MOD_SPRITE; // CPP: Enum
 
-	model->spriteframes = (mspriteframe_s*)MOD_Malloc(sizeof(mspriteframe_t) * header.numframes); // CPP: Cast
+	model->spriteframes = (mspriteframe_s*)modelAllocate(&model->hunk, sizeof(mspriteframe_t) * header.numframes); // CPP: Cast
 	model->numframes = header.numframes;
 
 	src_frame = (dsp2frame_t *)((byte *)rawdata + sizeof(dsp2header_t));

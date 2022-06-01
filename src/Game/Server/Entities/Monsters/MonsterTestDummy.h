@@ -62,9 +62,15 @@ public:
 
     /**
     *
-    *   TestDummy functions.
+    *   TestDummy Temporary WIP Area.
     *
-    **/    
+    **/
+	/**
+	*	This stores the model data for now.
+	**/
+	qhandle_t modelHandle;
+	SkeletalModelData skm;
+
     /**
     *   @brief
     **/

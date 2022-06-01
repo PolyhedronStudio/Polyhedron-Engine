@@ -819,9 +819,9 @@ void IMG_Unload_RTX(image_t *image);
 byte *IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes);
 float *IMG_ReadPixelsHDR_RTX(int* width, int* height);
 
-qerror_t MOD_LoadMD2_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadMD3_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD2_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD3_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadIQM_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name);
 void MOD_Reference_RTX(model_t *model);
 
 #endif  /*__VKPT_H__*/

@@ -17,7 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Server.h"
+#include "Models.h"
 #include "Client/Input.h"
+#include "Common/Models/Models.h"
 
 LIST_DECL(sv_masterlist);   // address of group servers
 LIST_DECL(sv_banlist);
@@ -1990,6 +1992,10 @@ void sv_sec_timeout_changed(cvar_t *self)
 
 void SV_Init(void)
 {
+	// Call into our Server "Model" system. Which in return initializes the
+	// "Common" model cache system.
+	SV_Model_Init();
+
     SV_InitOperatorCommands();
 
     SV_RegisterSavegames();
@@ -2169,6 +2175,9 @@ void SV_Shutdown(const char *finalmsg, int32_t errorType)
     CM_FreeMap(&sv.cm);
     SV_FreeFile(sv.entityString);
     memset(&sv, 0, sizeof(sv));
+
+	// Free Model System.
+	SV_Model_Shutdown();
 
     // free server static data
     Z_Free(svs.clientPool);

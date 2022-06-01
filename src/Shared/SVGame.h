@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include "Refresh.h"
 #include "List.h"
 
 //
@@ -89,7 +90,6 @@ struct gclient_s {
 #endif      // GAME_INCLUDE
 
 //===============================================================
-
 //
 // functions provided by the main engine
 //
@@ -139,6 +139,9 @@ typedef struct {
     int (*ModelIndex)(const char *name);
     int (*SoundIndex)(const char *name);
     int (*ImageIndex)(const char *name);
+
+	qhandle_t (*PrecacheServerModel)(const char *name);
+	model_t* (*GetModelByHandle) (qhandle_t handle);
 
     void (*SetModel)(Entity *ent, const char *name);
 

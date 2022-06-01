@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // sv_game.c -- interface to the game dll
 
 #include "Server.h"
+#include "Models.h"
 #include "../Client/Client.h"
 
 ServerGameExports    *ge;
@@ -311,6 +312,19 @@ static q_noreturn void PF_error(const char *fmt, ...)
     Com_Error(ErrorType::Drop, "Game Error: %s", msg);
 }
 
+/**
+*	@brief	Loads in an IQM model that can be used server-side.
+**/
+static qhandle_t PF_PrecacheModel(const char *name) {
+	return SV_Model_PrecacheModel(name);
+}
+
+/**
+*	@return	A pointer to the model structure for given handle. (nullptr) on failure.
+**/
+static model_t *PF_GetModelByHandle(qhandle_t handle) {
+	return SV_Model_ForHandle(handle);
+}
 
 /*
 =================
@@ -346,7 +360,6 @@ static void PF_setmodel(Entity *ent, const char *name)
 PF_configstring
 
 If game is actively running, broadcasts configstring change.
-Archived in MVD stream.
 ===============
 */
 static void PF_configstring(int index, const char *val)
@@ -883,13 +896,17 @@ void SV_InitGameProgs(void)
     importAPI.BoxEntities = SV_AreaEntities;
     importAPI.Trace = SV_Trace;
     importAPI.PointContents = SV_PointContents;
-    importAPI.SetModel = PF_setmodel;
+
     importAPI.InPVS = PF_InPVS;
     importAPI.InPHS = PF_InPHS;
 
     importAPI.ModelIndex = PF_ModelIndex;
     importAPI.SoundIndex = PF_SoundIndex;
     importAPI.ImageIndex = PF_ImageIndex;
+	
+	importAPI.PrecacheServerModel = PF_PrecacheModel;
+	importAPI.GetModelByHandle = PF_GetModelByHandle;
+	importAPI.SetModel = PF_setmodel;
 
     importAPI.configstring = PF_configstring;
     importAPI.Sound = PF_StartSound;

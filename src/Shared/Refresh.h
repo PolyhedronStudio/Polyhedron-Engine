@@ -48,6 +48,9 @@
 
 #define DLIGHT_CUTOFF       64
 
+// Used to allow for client/server using their own memory allocation.
+using ModelMemoryAllocateCallback = void*(*)(memhunk_t *hunk, size_t size);
+
 typedef struct r_entity_s {
     //
     // Model.
