@@ -71,6 +71,12 @@ public:
 	qhandle_t modelHandle;
 	SkeletalModelData skm;
 
+	/**
+	*	@brief	Switches the animation by blending from the current animation into the next.
+	*	@return	
+	**/
+	bool SwitchAnimation(const std::string &name);
+
     /**
     *   @brief
     **/

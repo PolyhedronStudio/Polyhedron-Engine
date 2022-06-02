@@ -37,6 +37,19 @@ MonsterTestDummy::MonsterTestDummy(PODEntity *svEntity) : Base(svEntity) {
 
 MonsterTestDummy::~MonsterTestDummy() { }
 
+/**
+*
+*   TestDummy Temporary WIP Area.
+*
+**/
+/**
+*	@brief	Switches the animation by blending from the current animation into the next.
+*	@return	
+**/
+bool SwitchAnimation(const std::string& name) {
+	return true;
+}
+
 
 //
 // Interface functions.
@@ -51,13 +64,15 @@ void MonsterTestDummy::Precache() {
     // Always call parent class method.
     Base::Precache();
 
-    // Precache test dummy model.
+    // Precache the model for clients. (Gets passed to the config string.)
     modelHandle = SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
-	qhandle_t modelID = gi.PrecacheServerModel("models/monsters/slidedummy/slidedummy.iqm");
 
-	model_t *model = gi.GetModelByHandle(modelID);
+	// Precache the model for the server: Required to be able to process animations properly.
+	qhandle_t serverModelHandle = gi.PrecacheServerModel("models/monsters/slidedummy/slidedummy.iqm");
 
-	SG_SKM_GenerateModelData(model);
+	// Get the model data pointer and generate game friendly model data using it.
+	model_t *model = gi.GetModelByHandle(serverModelHandle);
+	skm = SG_SKM_GenerateModelData(model);
 }
 
 //
@@ -74,7 +89,7 @@ void MonsterTestDummy::Spawn() {
     SetModel("models/monsters/slidedummy/slidedummy.iqm");
 
     // Set the bounding box.
-    SetBoundingBox({ -16, -16, 0 }, { 16, 16, 90 });
+    //SetBoundingBox({ -16, -16, -41 }, { 16, 16, 43 });
 
     // Setup our MonsterTestDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
@@ -205,13 +220,47 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// Set the animation.
 		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-		//animationState->animationIndex = 1;
-		//animationState->startFrame = 0;
-		//animationState->endFrame = 140;
-		//animationState->frameTime = ANIMATION_FRAMETIME;
-		//animationState->startTime = startz = level.time.count() + FRAMETIME.count();
-		//animationState->loopCount = 0;
-		//animationState->forceLoop = true;
+		
+		// Get animation data.
+		const int32_t animationFrame = animationState->frame;
+		if (animationFrame >= 0 && skm.boundingBoxes.size() > animationFrame) {
+			vec3_t mins = skm.boundingBoxes[animationState->frame].mins;
+			vec3_t maxs = skm.boundingBoxes[animationState->frame].maxs;
+			//mins = { mins.z, mins.y, mins.x };
+			//maxs = { maxs.z, maxs.y, maxs.x };
+			float depth = fabs(maxs.x) + fabs(mins.x);
+			depth /= 2.f;
+			mins.x = - depth;
+			maxs.x = depth;
+			float width = fabs(maxs.y) + fabs(mins.y);
+			width /= 2.f;
+			mins.y = - width;
+			maxs.y = width;
+
+			vec3_t oldMins = GetMins();
+			vec3_t oldMaxs = GetMaxs();
+
+			static GameTime lastTime = GameTime::zero();
+			if (lastTime == GameTime::zero()) {
+				lastTime = level.time;
+			}
+			mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+			maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+			if (lastTime != GameTime::zero()) {
+				lastTime = level.time;
+			}
+			gi.DPrintf("%f %f %f, %f %f %f\n",
+				mins.x,
+				mins.y,
+				mins.z,
+				maxs.x,
+				maxs.y,
+				maxs.z);
+
+			SetMins(mins);
+			SetMaxs(maxs);
+			LinkEntity();
+		}
 
 		// Navigate to goal.
 		Move_NavigateToTarget( );

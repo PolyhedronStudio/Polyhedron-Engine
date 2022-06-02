@@ -15,7 +15,7 @@ public:
     MonsterTestDummy(PODEntity* clEntity);
     virtual ~MonsterTestDummy() = default;
 
-    DefineMapClass("xmonster_testdummy", MonsterTestDummy, CLGBasePacketEntity);
+    DefineMapClass("monster_testdummy", MonsterTestDummy, CLGBasePacketEntity);
 
 
     /**
@@ -51,12 +51,19 @@ public:
 
 
 
+	/**
+	*	Temp Skeletal stuff.
+	**/
+	qhandle_t modelHandle;
+	SkeletalModelData skm;
+
+
     /***
     *
     *   Client Game Entity Functions.
     *
     ***/
-    // TEMP
+	// TEMP
     void MonsterTestDummyThink(void);
     void MonsterTestDummyStartAnimation(void);
     void MonsterTestDummyDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);

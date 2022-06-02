@@ -39,7 +39,10 @@ void MonsterTestDummy::Precache() {
     Base::Precache();
 
     // Precache test dummy model.
-    clgi.R_RegisterModel("models/monsters/testdummy/testdummy.iqm");
+    qhandle_t modelID = clgi.R_RegisterModel("models/monsters/testdummy/testdummy.iqm");
+	
+	model_t *model = clgi.MOD_ForHandle(modelID);
+	skm = SG_SKM_GenerateModelData(model);
 }
 
 //
@@ -68,7 +71,7 @@ void MonsterTestDummy::Spawn() {
     SetModel("models/monsters/testdummy/testdummy.iqm");
 
     // Set the bounding box.
-    SetBoundingBox({ -16, -16, 0 }, { 16, 16, 52 });
+    //SetBoundingBox({ -16, -16, -41 }, { 16, 16, 43 });
 
     // Set default values in case we have none.
     if (!GetMass()) {
@@ -161,7 +164,46 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     // Set here how fast you want the tick rate to be.
     // Set here how fast you want the tick rate to be.
     static constexpr uint32_t ANIM_HZ = 30.0;
+	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+	const int32_t animationFrame = animationState->frame;
+	if (animationFrame >= 0 && skm.boundingBoxes.size() > animationFrame) {
+		vec3_t mins = skm.boundingBoxes[animationState->frame].mins;
+		vec3_t maxs = skm.boundingBoxes[animationState->frame].maxs;
+		//mins = { mins.z, mins.y, mins.x };
+		//maxs = { maxs.z, maxs.y, maxs.x };
+		float depth = fabs(maxs.x) + fabs(mins.x);
+		depth /= 2.f;
+		mins.x = - depth;
+		maxs.x = depth;
+		float width = fabs(maxs.y) + fabs(mins.y);
+		width /= 2.f;
+		mins.y = - width;
+		maxs.y = width;
 
+		vec3_t oldMins = GetMins();
+		vec3_t oldMaxs = GetMaxs();
+
+		static GameTime lastTime = GameTime::zero();
+		if (lastTime == GameTime::zero()) {
+			lastTime = level.time;
+		}
+		mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+		maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+		if (lastTime != GameTime::zero()) {
+			lastTime = level.time;
+		}
+		//gi.DPrintf("%f %f %f, %f %f %f\n",
+		//	mins.x,
+		//	mins.y,
+		//	mins.z,
+		//	maxs.x,
+		//	maxs.y,
+		//	maxs.z);
+
+		SetMins(mins);
+		SetMaxs(maxs);
+		LinkEntity();
+	}
     //SG_StepMove_CheckGround(this);
 	SG_CheckGround(this);
     // Link entity back in.

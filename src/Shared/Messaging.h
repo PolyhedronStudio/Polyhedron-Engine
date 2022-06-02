@@ -111,7 +111,7 @@ struct EntityAnimationState {
 
 	//! Animation start IQM frame number.
 	uint32_t	startFrame = 0;
-	//! Animation end IQM frame number.
+	//! Animation end IQM frame number. (start + number of frames.)
 	uint32_t	endFrame = 0;
 	//! 0 means to play on forever, but do return -1.
 	uint32_t	loopCount = 0;
