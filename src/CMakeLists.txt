@@ -261,7 +261,7 @@ SET(HEADERS_SERVER
 SET(SRC_REFRESH
 	${PATH_SRC}/Refresh/images.cpp
 	${PATH_SRC}/Refresh/models.cpp
-	${PATH_SRC}/Refresh/model_iqm.cpp
+	#${PATH_SRC}/Refresh/model_iqm.cpp
 	${PATH_SRC}/Refresh/stb/stb.cpp
 )
 SET(HEADERS_REFRESH

@@ -315,8 +315,8 @@ static q_noreturn void PF_error(const char *fmt, ...)
 /**
 *	@brief	Loads in an IQM model that can be used server-side.
 **/
-static qhandle_t PF_PrecacheModel(const char *name) {
-	return SV_Model_PrecacheModel(name);
+static qhandle_t PF_PrecacheSkeletalModelData(const char *name) {
+	return SV_Model_PrecacheSkeletalModelData(name);
 }
 
 /**
@@ -904,7 +904,7 @@ void SV_InitGameProgs(void)
     importAPI.SoundIndex = PF_SoundIndex;
     importAPI.ImageIndex = PF_ImageIndex;
 	
-	importAPI.PrecacheServerModel = PF_PrecacheModel;
+	importAPI.PrecacheSkeletalModelData = PF_PrecacheSkeletalModelData;
 	importAPI.GetModelByHandle = PF_GetModelByHandle;
 	importAPI.SetModel = PF_setmodel;
 

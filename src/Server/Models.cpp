@@ -216,7 +216,7 @@ void SV_Model_Shutdown() {
 	Cmd_RemoveCommand("servermodellist");
 }
 
-qhandle_t SV_Model_PrecacheModel(const char* name) {
+qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {
 	char normalized[MAX_QPATH];
 	qhandle_t index;
 	size_t namelen;
