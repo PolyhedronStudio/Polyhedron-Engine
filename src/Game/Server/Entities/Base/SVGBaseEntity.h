@@ -449,7 +449,7 @@ public:
         gi.SetModel(podEntity, model.c_str());
 
         // Set model index.
-        SetModelIndex(gi.ModelIndex(model.c_str()));
+        SetModelIndex(gi.PrecacheModel(model.c_str()));
     }
 
     /**

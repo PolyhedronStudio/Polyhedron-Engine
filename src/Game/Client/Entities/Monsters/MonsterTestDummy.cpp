@@ -41,8 +41,8 @@ void MonsterTestDummy::Precache() {
     // Precache test dummy model.
     qhandle_t modelID = clgi.R_RegisterModel("models/monsters/testdummy/testdummy.iqm");
 	
-	model_t *model = clgi.MOD_ForHandle(modelID);
-	skm = SG_SKM_GenerateModelData(model);
+	model_t *model = clgi.CL_Model_GetModelByHandle(modelID);
+//	skm = SKM_GenerateModelData(model);
 }
 
 //
@@ -231,7 +231,7 @@ void MonsterTestDummy::MonsterTestDummyDie(GameEntity* inflictor, GameEntity* at
     SetSolid(Solid::Not);
     LinkEntity();
     // Play a nasty gib sound, yughh :)
-    //SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
+    //SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
     //ClientGameWorld* gameWorld = GetGameWorld();

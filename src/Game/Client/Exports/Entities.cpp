@@ -594,7 +594,7 @@ void ClientGameEntities::AddPacketEntities() {
 //	    else {
 //    	    //// Fetch the iqm animation index data.
 //         //   if (clientEntity->currentState.animationIndex != 0 && clientEntity->currentState.modelIndex != 0) {
-//		       // model_t* iqmData = clgi.MOD_ForHandle(clientEntity->currentState.modelIndex);
+//		       // model_t* iqmData = clgi.CL_Model_GetModelByHandle(clientEntity->currentState.modelIndex);
 //
 //         //       if (iqmData) {
 //			      //  Com_DPrint("WOW!!!\n");
@@ -799,7 +799,7 @@ void ClientGameEntities::AddPacketEntities() {
 //        // Add dlights for flares
 //        //model_t* model;
 //        //if (renderEntity.model && !(renderEntity.model & 0x80000000) &&
-//        //    (model = clgi.MOD_ForHandle(renderEntity.model)))
+//        //    (model = clgi.CL_Model_GetModelByHandle(renderEntity.model)))
 //        //{
 //        //    if (model->model_class == MCLASS_FLARE)
 //        //    {
@@ -976,7 +976,7 @@ void ClientGameEntities::AddPacketEntities() {
 //	    else {
 //    	    //// Fetch the iqm animation index data.
 //         //   if (clientEntity->currentState.animationIndex != 0 && clientEntity->currentState.modelIndex != 0) {
-//		       // model_t* iqmData = clgi.MOD_ForHandle(clientEntity->currentState.modelIndex);
+//		       // model_t* iqmData = clgi.CL_Model_GetModelByHandle(clientEntity->currentState.modelIndex);
 //
 //         //       if (iqmData) {
 //			      //  Com_DPrint("WOW!!!\n");
@@ -1181,7 +1181,7 @@ void ClientGameEntities::AddPacketEntities() {
 //        // Add dlights for flares
 //        //model_t* model;
 //        //if (renderEntity.model && !(renderEntity.model & 0x80000000) &&
-//        //    (model = clgi.MOD_ForHandle(renderEntity.model)))
+//        //    (model = clgi.CL_Model_GetModelByHandle(renderEntity.model)))
 //        //{
 //        //    if (model->model_class == MCLASS_FLARE)
 //        //    {

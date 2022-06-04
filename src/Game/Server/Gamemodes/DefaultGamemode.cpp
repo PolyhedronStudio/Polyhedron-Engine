@@ -996,7 +996,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 		// If the previous frame had a ground entity set, but after moving we don't, play a jump sound.
 		if (gePreviousGroundEntity) {
 			if (pm.groundEntityNumber >= 0 && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
-				SVG_Sound(player, SoundChannel::Voice, gi.SoundIndex("*jump1.wav"), 1, Attenuation::Normal, 0);
+				SVG_Sound(player, SoundChannel::Voice, gi.PrecacheSound("*jump1.wav"), 1, Attenuation::Normal, 0);
 				player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
 			}
         }

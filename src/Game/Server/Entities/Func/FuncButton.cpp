@@ -48,7 +48,7 @@ void FuncButton::Spawn() {
 
 	// If the mapper didn't specify a sound
 	if ( GetSound() != 1 ) {
-		moveInfo.startSoundIndex = gi.SoundIndex( "switches/butn2.wav" );
+		moveInfo.startSoundIndex = gi.PrecacheSound( "switches/butn2.wav" );
 	} // If the mapper didn't specify speed, set it to 40 u/s
 	if ( !GetSpeed() ) {
 		SetSpeed( 40.0f );

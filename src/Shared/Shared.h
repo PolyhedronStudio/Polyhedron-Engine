@@ -394,6 +394,13 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
         MAX_QPATH * (ConfigStrings::Unused - (cs)) : MAX_QPATH);
 }
 
+/***
+*
+*	Internal Skeletal Model Data (-Game Friendly.)
+*
+***/
+#include "SkeletalModelData.h"
+
 
 
 /***

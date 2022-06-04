@@ -345,7 +345,11 @@ typedef struct model_s {
 	qboolean sprite_fxft;
 	qboolean sprite_fxlt;
 
+	// IQM Data.
     iqm_model_t* iqmData;
+
+	// Skeletal Model Data.
+	struct SkeletalModelData *skeletalModelData;
 
 	//// Polyhedron IQM Data? For Game Modules?
 	//struct IQMGameData {

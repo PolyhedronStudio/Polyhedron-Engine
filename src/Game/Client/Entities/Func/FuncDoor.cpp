@@ -103,7 +103,7 @@ void FuncDoor::Spawn() {
     } else if ( GetTargetName().empty() ) {
     // If the mapper did NOT specify a targetname, then make this 
     // door openable by touching it.
-        //gi.SoundIndex( MessageSoundPath );
+        //gi.PrecacheSound( MessageSoundPath );
 		CLG_PrecacheSound( MessageSoundPath );
         SetTouchCallback( &FuncDoor::DoorTouch );
     }
@@ -298,7 +298,7 @@ void FuncDoor::DoorTouch( GameEntity* self, GameEntity* other, CollisionPlane* p
 
     if ( !messageStr.empty() ) {
         //gi.CenterPrintf( other->GetPODEntity(), "%s", messageStr.c_str() );
-        //gi.Sound( other->GetPODEntity(), SoundChannel::Auto, gi.SoundIndex( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
+        //gi.Sound( other->GetPODEntity(), SoundChannel::Auto, gi.PrecacheSound( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
     }
 
     DispatchUseCallback(GetOwner(), other);

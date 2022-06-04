@@ -19,81 +19,117 @@
 #include "Shared/Formats/Sp2.h"
 #include "Shared/Formats/Iqm.h"
 
+
+
+//================================================================================
 // TODO: Move elsewhere, also for MD2 and MD3.
 qerror_t MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+//================================================================================
 
-/**
-*	The following is compile only with dedicated server builds.
-*
-*	For a client build, it has them defined elsewhere.
-**/
-//#if USE_SERVER && !USE_CLIENT
-////model_t      r_models[];
-////int          r_numModels;
-
-//#endif
-#define MAX_SVMODELS 512
-model_t			sv_models[MAX_SVMODELS];
-int32_t			sv_numModels = 0;
-
-#if USE_SERVER && !USE_CLIENT
-int registration_sequence = 0;
-#endif
+//! Server Side Model Registration Sequence:
+//! Each time a map change occurs it increments the sequence.
+//! All models that have an unmatching sequence afterwards are freed.
 int32_t sv_registration_sequence = 1;
 
+//! Server Side Model maximum.
+static constexpr int32_t MAX_SVMODELS = 512;
+//! Server Side Model Data.
+model_t			sv_models[MAX_SVMODELS];
+//! Number of total loaded server side model data.
+int32_t			sv_numModels = 0;
+
+//! Client Side storage of our internal Skeletal Model Data.
+//! Indexed by the same handle as the r_models model it belongs to.
+SkeletalModelData sv_skeletalModels[MAX_SVMODELS];
+
+
 
 /**
-*	Empty place-holders for when building WITH client.
+*
+*	Registration Sequence.
+*
 **/
-//#if USE_SERVER && USE_CLIENT
-void SV_Model_BeginRegistrationSequence() {
-	sv_registration_sequence++;
-}
-void SV_Model_EndRegistrationSequence() {
-	SV_Model_FreeUnused();
-}
-
+/**
+*	@brief	Callback for allocating Server Side Memory when loading model data.
+**/
 void *SV_Model_MemoryAllocate(memhunk_t *hunk, size_t size) {
 	return Hunk_Alloc(hunk, size);// Z_TagMalloc(size, TAG_SERVER);
 }
 
+/**
+*	@brief	Begins a new registration sequence for the server model cache.
+**/
+void SV_Model_BeginRegistrationSequence() {
+	// Increase registration sequence.
+	sv_registration_sequence++;
+}
+
+/**
+*	@brief	Ends the registration sequence, and frees all unused(non referenced) model cache data.
+**/
+void SV_Model_EndRegistrationSequence() {
+	// Free Unused data.
+	SV_Model_FreeUnused();
+}
+
+/**
+*	@brief	Finds the first free slot in line and returns a pointer to its
+*			model data object.
+*	@return	A pointer to a model_t. A (nullptr) on failure.
+**/
 model_t *SV_Model_Alloc(void)
 {
-	model_t *model;
-	int i;
+	model_t *model = nullptr;
+	int32_t i = 0;
 
+	// Find the first free slot.
 	for (i = 0, model = sv_models; i < sv_numModels; i++, model++) {
+		// Found it, our pointer is set, so break out of our loop.
 		if (!model->type) {
 			break;
 		}
 	}
 
+	// If there was no earlier on freed slot.
 	if (i == sv_numModels) {
+		// Ensure we aren't exceeding cache size.
 		if (sv_numModels == MAX_SVMODELS) {
-			return NULL;
+			return nullptr;
 		}
+		// Good to go, increase the number of models we got.
 		sv_numModels++;
 	}
 
+	// And, if we got to here, return the pointer.
 	return model;
 }
 
+/**
+*	@brief	Scans through all models to see if their names match, returning a pointer to it.
+*	@return	Pointer to the model in the cache which has a matching name. (nullptr) otherwise.
+*/
 model_t* SV_Model_Find(const char* name) {
-	model_t *model;
-	int i;
+	model_t *model = nullptr;
+	int32_t i = 0;
 
 	for (i = 0, model = sv_models; i < sv_numModels; i++, model++) {
+		// If it isn't free, skip on to the next index.
 		if (!model->type) {
 			continue;
 		}
+		// Names match, return our pointer.
 		if (!FS_pathcmp(model->name, name)) {
 			return model;
 		}
 	}
 
-	return NULL;
+	// If we got here, we didn 't find it.
+	return nullptr;
 }
 
+/**
+*	@brief	List all cached Server Model Data.
+**/
 void SV_Model_List_f(void)
 {
 	static const char types[] = "FASE"; // CPP: Cast - was types[4] = "FASE";
@@ -117,6 +153,9 @@ void SV_Model_List_f(void)
 	Com_Printf("Total server resident: %" PRIz "\n", bytes); // CPP: String fix.
 }
 
+/**
+*	@brief	Free all unused model cache data.
+**/
 void SV_Model_FreeUnused() {
 	model_t *model;
 	int i;
@@ -137,6 +176,10 @@ void SV_Model_FreeUnused() {
 		}
 	}
 }
+
+/**
+*	@brief	Free all Server Model Data.
+**/
 void SV_Model_FreeAll() {
 	model_t *model;
 	int i;
@@ -154,6 +197,10 @@ void SV_Model_FreeAll() {
 	sv_numModels = 0;
 }
 
+/**
+*	@brief	References a model so that it won't get unloaded after the registration sequence.
+*			(This is called by PF_PrecacheSkeletalModelData)
+**/
 void SV_Model_Reference(model_t* model) {
 	int mesh_idx, skin_idx, frame_idx;
 
@@ -182,27 +229,34 @@ void SV_Model_Reference(model_t* model) {
 	model->registration_sequence = sv_registration_sequence;
 }
 
+/**
+*	@brief	Finds a model that has a matching handle.
+*	@return A pointer to the model. (nullptr) on failure.
+*/
 model_t *SV_Model_ForHandle(qhandle_t handle) {
-	model_t *model;
-
+	// Need a valid handle.
 	if (!handle) {
 		return NULL;
 	}
 
+	// Ensure handle is within boundaries.
 	if (handle < 0 || handle > sv_numModels) {
-		int x = 10;
-
 		Com_Error(ErrorType::Drop, "%s: %d out of range", __func__, handle);
 	}
 
-	model = &sv_models[handle - 1];
+	// Ensure it's not a free slot handle.
+	model_t *model = &sv_models[handle - 1];
 	if (!model->type) {
-		return NULL;
+		return nullptr;
 	}
 
+	// Got it.
 	return model;
 }
 
+/**
+*	@brief	Initializes server side model caching system.
+**/
 void SV_Model_Init() {
 	if (sv_numModels) {
 		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, r_numModels);
@@ -211,6 +265,9 @@ void SV_Model_Init() {
 	Cmd_AddCommand("servermodellist", SV_Model_List_f);
 }
 
+/**
+*	@brief	Shutsdown server side model caching, clears all memory.
+**/
 void SV_Model_Shutdown() {
 	SV_Model_FreeAll();
 	Cmd_RemoveCommand("servermodellist");
@@ -335,7 +392,7 @@ qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {
 	Hunk_Begin(&model->hunk, 0x4000000);
 	model->type = model_t::MOD_ALIAS;
 
-	// Client uses Hunk_Alloc (Used to be a define MOD_Alloc).
+	// Client uses Hunk_Alloc (Used to be a define CL_Model_Alloc).
 	ret = load(model, SV_Model_MemoryAllocate, rawdata, filelen, name);
 	FS_FreeFile(rawdata);
 
@@ -345,12 +402,22 @@ qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {
 		goto fail1;
 	}
 
+
+// TODO: Check for special model type stuff here.
 //#if USE_CLIENT && !USE_SERVER
 //	model->model_class = get_model_class(model->name);
 //#endif
 
 done:
+	// Calculate the index.
 	index = (model - sv_models) + 1;
+
+	// Assign the skeletal model data struct as a pointer to this model_t
+	model->skeletalModelData = &sv_skeletalModels[index];
+
+	// Generate Skeletal Model Data.
+	SKM_GenerateModelData(model);
+
 	return index;
 fail2:
 	FS_FreeFile(rawdata);

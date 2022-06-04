@@ -58,7 +58,7 @@ void TriggerHurt::Spawn() {
 	// Initialize Brush Trigger.
 	InitBrushTrigger();
 
-	//self->noiseIndexA = gi.SoundIndex("world/electro.wav");
+	//self->noiseIndexA = gi.PrecacheSound("world/electro.wav");
 	//self->Touch = hurt_touch;
 	SetTouchCallback(&TriggerHurt::TriggerHurtTouch);
 

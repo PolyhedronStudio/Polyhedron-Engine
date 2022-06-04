@@ -708,7 +708,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
         // Add dlights for flares
         //model_t* model;
         //if (refreshEntity.model && !(refreshEntity.model & 0x80000000) &&
-        //    (model = clgi.MOD_ForHandle(refreshEntity.model)))
+        //    (model = clgi.CL_Model_GetModelByHandle(refreshEntity.model)))
         //{
         //    if (model->model_class == MCLASS_FLARE)
         //    {

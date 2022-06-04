@@ -36,7 +36,7 @@ void TargetEarthquake::Spawn() {
     SetThinkCallback( &TargetEarthquake::QuakeThink );
     SetUseCallback( &TargetEarthquake::QuakeUse );
 
-    SetNoiseIndexA( gi.SoundIndex( "world/quake.wav" ) );
+    SetNoiseIndexA( gi.PrecacheSound( "world/quake.wav" ) );
 }
 
 //===============

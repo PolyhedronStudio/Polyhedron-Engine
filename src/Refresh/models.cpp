@@ -58,7 +58,7 @@ get_model_class(const char *name)
 }
 
 /**
-*	@brief Replaces the old MOD_Alloc macro.
+*	@brief Replaces the old CL_Model_Alloc macro.
 **/
 void* R_MOD_Alloc(memhunk_t *hunk, size_t size) {
 	return Hunk_Alloc(hunk, size);
@@ -100,7 +100,7 @@ qhandle_t R_RegisterModel(const char *name) {
 
 	// see if it's already loaded
 	char* extension = normalized + namelen - 4; // C++20: Moved up in case we need to.
-	model = MOD_Find(normalized);
+	model = CL_Model_Find(normalized);
 	if (model) {
 		MOD_Reference(model);
 		goto done;
@@ -156,7 +156,7 @@ qhandle_t R_RegisterModel(const char *name) {
 		goto fail2;
 	}
 
-	model = MOD_Alloc();
+	model = CL_Model_Alloc();
 	if (!model) {
 		ret = Q_ERR_OUT_OF_SLOTS;
 		goto fail2;
@@ -191,7 +191,7 @@ fail1:
 	return 0;
 }
 
-//model_t *MOD_ForHandle(qhandle_t h)
+//model_t *CL_Model_GetModelByHandle(qhandle_t h)
 //{
 //	model_t *model;
 //
@@ -211,18 +211,18 @@ fail1:
 //	return model;
 //}
 
-//void MOD_Init(void)
+//void CL_Model_Init(void)
 //{
 //	if (r_numModels) {
 //		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, r_numModels);
 //	}
 //
-//	Cmd_AddCommand("modellist", MOD_List_f);
+//	Cmd_AddCommand("modellist", CL_Model_List_f);
 //}
 //
-//void MOD_Shutdown(void)
+//void CL_Model_Shutdown(void)
 //{
-//	MOD_FreeAll();
+//	CL_Model_FreeAll();
 //	Cmd_RemoveCommand("modellist");
 //}
 

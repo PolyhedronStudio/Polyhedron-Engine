@@ -32,8 +32,8 @@ FuncExplosive::FuncExplosive( Entity* entity )
 void FuncExplosive::Spawn() {
     SetMoveType( MoveType::Push );
     
-    gi.ModelIndex( "models/objects/debris1/tris.md2" );
-    gi.ModelIndex( "models/objects/debris2/tris.md2" );
+    gi.PrecacheModel( "models/objects/debris1/tris.md2" );
+    gi.PrecacheModel( "models/objects/debris2/tris.md2" );
     SetModel( GetModel() );
 
     if ( GetSpawnFlags() & SF_StartDeactivated ) {

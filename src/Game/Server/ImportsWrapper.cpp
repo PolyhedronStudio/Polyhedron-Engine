@@ -164,7 +164,7 @@ void SVG_SetConfigString(const int32_t& configStringIndex, const std::string& co
 //===============
 //
 qhandle_t SVG_PrecacheModel(const std::string& filename) {
-    return gi.ModelIndex(filename.c_str());
+    return gi.PrecacheModel(filename.c_str());
 }
 
 //
@@ -175,7 +175,7 @@ qhandle_t SVG_PrecacheModel(const std::string& filename) {
 //===============
 //
 qhandle_t SVG_PrecacheImage(const std::string& filename) {
-    return gi.ImageIndex(filename.c_str());
+    return gi.PrecacheImage(filename.c_str());
 }
 
 //
@@ -186,5 +186,5 @@ qhandle_t SVG_PrecacheImage(const std::string& filename) {
 //===============
 //
 qhandle_t SVG_PrecacheSound(const std::string& filename) {
-    return gi.SoundIndex(filename.c_str());
+    return gi.PrecacheSound(filename.c_str());
 }

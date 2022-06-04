@@ -466,7 +466,7 @@ static void GL_DrawEntities(int mask)
             continue;
         }
 
-        model = MOD_ForHandle(ent->model);
+        model = CL_Model_GetModelByHandle(ent->model);
         if (!model) {
             GL_DrawNullModel();
             continue;
@@ -994,7 +994,7 @@ static void GL_PostInit(void)
 
     GL_SetDefaultState();
     GL_InitImages();
-    MOD_Init();
+    CL_Model_Init();
 }
 
 // ==============================================================================
@@ -1071,7 +1071,7 @@ void R_Shutdown_GL(qboolean total)
 
     GL_FreeWorld();
     GL_ShutdownImages();
-    MOD_Shutdown();
+    CL_Model_Shutdown();
 
     if (gl_vertex_buffer_object->modified) {
         // disable buffer objects after map is freed
@@ -1124,7 +1124,7 @@ R_EndRegistration
 void R_EndRegistration_GL(const char *name)
 {
     IMG_FreeUnused();
-    MOD_FreeUnused();
+    CL_Model_FreeUnused();
     Scrap_Upload();
     gl_static.registering = false;
 }

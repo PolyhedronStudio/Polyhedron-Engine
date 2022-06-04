@@ -1943,7 +1943,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 			else
 				process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert); /* embedded in bsp */
 		} 		else 		{
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
@@ -1984,7 +1984,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 		if (entity->model & 0x80000000) 		{
 			process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert);
 		} 		else 		{
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_TRANSPARENT, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 		}
@@ -2000,7 +2000,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 		if (entity->model & 0x80000000) 		{
 			process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert);
 		} 		else 		{
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_MASKED, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 		}
@@ -2013,7 +2013,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	if (first_person_model) 	{
 		for (int i = 0; i < viewer_model_num; i++) 		{
 			const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 		}
@@ -2027,7 +2027,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	const uint32_t viewer_weapon_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < viewer_weapon_num; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
-		const model_t* model = MOD_ForHandle(entity->model);
+		const model_t* model = CL_Model_GetModelByHandle(entity->model);
 		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 
@@ -2041,7 +2041,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	const uint32_t explosion_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < explosion_num; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
-		const model_t* model = MOD_ForHandle(entity->model);
+		const model_t* model = CL_Model_GetModelByHandle(entity->model);
 		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 	}
@@ -3509,7 +3509,7 @@ R_Init_RTX(qboolean total)
 
 	IMG_Init();
 	IMG_GetPalette();
-	MOD_Init();
+	CL_Model_Init();
 	
 	if(!init_vulkan()) {
 		Com_Error(ErrorType::Fatal, "Couldn't initialize Vulkan.\n");
@@ -3583,7 +3583,7 @@ R_Shutdown_RTX(qboolean total)
 	}
 
 	IMG_Shutdown();
-	MOD_Shutdown(); // todo: currently leaks memory, need to clear submeshes
+	CL_Model_Shutdown(); // todo: currently leaks memory, need to clear submeshes
 	VID_Shutdown();
 }
 
@@ -3970,7 +3970,7 @@ R_EndRegistration_RTX(const char *name)
 	vkpt_physical_sky_endRegistration();
 
 	IMG_FreeUnused();
-	MOD_FreeUnused();
+	CL_Model_FreeUnused();
 	MAT_FreeUnused();
 }
 

@@ -58,14 +58,14 @@ void TriggerCounter::CounterUse( IServerGameEntity* other, IServerGameEntity* ac
 	if ( count ) {
 		if ( !(GetSpawnFlags() & SF_NoMessage) ) {
 			gi.CenterPrintf( activator->GetPODEntity(), "%u more to go...", count );
-			gi.Sound( activator->GetPODEntity(), SoundChannel::Auto, gi.SoundIndex( "misc/talk1.wav" ), 1.0f, Attenuation::Normal, 0.0f );
+			gi.Sound( activator->GetPODEntity(), SoundChannel::Auto, gi.PrecacheSound( "misc/talk1.wav" ), 1.0f, Attenuation::Normal, 0.0f );
 		}
 		return;
 	}
 
 	if ( !(GetSpawnFlags() & SF_NoMessage) ) {
 		gi.CenterPrintf( activator->GetPODEntity(), "Sequence completed!" );
-		gi.Sound( activator->GetPODEntity(), SoundChannel::Auto, gi.SoundIndex( "misc/talk1.wav" ), 1.0f, Attenuation::Normal, 0.0f );
+		gi.Sound( activator->GetPODEntity(), SoundChannel::Auto, gi.PrecacheSound( "misc/talk1.wav" ), 1.0f, Attenuation::Normal, 0.0f );
 	}
 
 	SetActivator(activator);

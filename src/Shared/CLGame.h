@@ -650,7 +650,7 @@ extern "C" {
         qhandle_t       (*R_RegisterSkin) (const char *name);
 
         // Returns a pointer to the model based on the given handle.
-        model_t         *(*MOD_ForHandle) (qhandle_t h);
+        model_t         *(*CL_Model_GetModelByHandle) (qhandle_t h);
 
         //---------------------------------------------------------------------
         // Rendering.

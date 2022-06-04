@@ -369,7 +369,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
         client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 0;
         client->playerState.stats[PlayerStats::PrimaryAmmo]     = 0;
     } else {
-        client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 1;//gi.ImageIndex(item->icon);
+        client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 1;//gi.PrecacheImage(item->icon);
         client->playerState.stats[PlayerStats::PrimaryAmmo]     = client->persistent.inventory.items[client->primaryAmmoIndex];
     }
 
@@ -380,7 +380,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
         client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 0;
         client->playerState.stats[PlayerStats::SecondaryAmmo]     = 0;
     } else {
-        client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 1;//gi.ImageIndex(item->icon);
+        client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 1;//gi.PrecacheImage(item->icon);
         client->playerState.stats[PlayerStats::SecondaryAmmo]     = client->persistent.inventory.items[client->secondaryAmmoIndex];
     }
 
@@ -434,7 +434,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     //if (client->persistent.selectedItem == -1) {
 	   // client->playerState.stats[STAT_SELECTED_ICON] = 0;
     //} else {
-    //	client->playerState.stats[STAT_SELECTED_ICON] = 0;  //gi.ImageIndex(itemlist[ent->client->persistent.selectedItem].icon);
+    //	client->playerState.stats[STAT_SELECTED_ICON] = 0;  //gi.PrecacheImage(itemlist[ent->client->persistent.selectedItem].icon);
     //}
     //
     client->playerState.stats[PlayerStats::SelectedItemIcon]    = 0;
@@ -471,7 +471,7 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     // help icon / current weapon if not shown
     //
     if ((client->persistent.hand == CENTER_HANDED || client->playerState.fov > 91) && client->persistent.inventory.activeWeaponID) {
-        //ent->client->playerState.stats[STAT_HELPICON] = gi.ImageIndex(ent->client->persistent.activeWeapon->GetItemIcon());
+        //ent->client->playerState.stats[STAT_HELPICON] = gi.PrecacheImage(ent->client->persistent.activeWeapon->GetItemIcon());
 	    client->playerState.stats[PlayerStats::HelpIcon] = 0;
     } else {
         client->playerState.stats[PlayerStats::HelpIcon] = 0;

@@ -644,7 +644,7 @@ void CL_InitGameProgs(void)
     importAPI.R_RegisterFont = _wrp_R_RegisterFont;
     importAPI.R_RegisterSkin = _wrp_R_RegisterSkin;
 
-    importAPI.MOD_ForHandle = MOD_ForHandle;
+    importAPI.CL_Model_GetModelByHandle = CL_Model_GetModelByHandle;
 
     // Rendering
     importAPI.R_AddDecal = _wrp_R_AddDecal;

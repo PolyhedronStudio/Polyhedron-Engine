@@ -287,7 +287,7 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
 
     // Did we get a plane passed?
     if (plane) {
-        //CLG_Sound(this, SoundChannel::Voice, gi.SoundIndex("misc/fhit3.wav"), 1, Attenuation::Normal, 0);
+        //CLG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("misc/fhit3.wav"), 1, Attenuation::Normal, 0);
 
         vec3_t normalAngles = vec3_euler(plane->normal);
         vec3_vectors(normalAngles, NULL, &right, NULL);

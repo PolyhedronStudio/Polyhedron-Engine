@@ -28,7 +28,7 @@ TriggerPush::TriggerPush( Entity* entity )
 //===============
 void TriggerPush::Spawn() {
 	if ( !WindSound ) {
-		WindSound = gi.SoundIndex( "misc/windfly.wav" );
+		WindSound = gi.PrecacheSound( "misc/windfly.wav" );
 	}
 
 	InitBrushTrigger();

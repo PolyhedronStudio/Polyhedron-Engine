@@ -65,7 +65,7 @@ void TriggerAlways::Spawn() {
 	InitPointTrigger();
 
 	
-	//self->noiseIndexA = gi.SoundIndex("world/electro.wav");
+	//self->noiseIndexA = gi.PrecacheSound("world/electro.wav");
 	SetTouchCallback(&TriggerAlways::TriggerAlwaysTouch);
 
 	// In case the entity can be "used", set it to hurt those who use it as well.

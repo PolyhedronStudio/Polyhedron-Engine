@@ -202,7 +202,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
     // In case our health went under -40, shred this body to gibs!
     if (GetHealth() < -40) {
         // Play a nasty gib sound, yughh :)
-        SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
+        SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
         // Throw some gibs around, true horror oh boy.
         // Get gameworld pointer.
@@ -239,7 +239,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
                 SetAnimationEndFrame(FRAME_death308);
                 break;
             }
-            SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex(va("*death%i.wav", (rand() % 4) + 1)), 1, Attenuation::Normal, 0);
+            SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound(va("*death%i.wav", (rand() % 4) + 1)), 1, Attenuation::Normal, 0);
         }
     }
 
@@ -990,11 +990,11 @@ void SVGBasePlayer::CheckWorldEffects()
     if (!oldWaterLevel && waterLevel) {
         PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
         if (GetWaterType() & BrushContents::Lava) {
-            SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/lava_in.wav"), 1, Attenuation::Normal, 0);
+            SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("player/lava_in.wav"), 1, Attenuation::Normal, 0);
         } else if (GetWaterType() & BrushContents::Slime) {
-            SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/watr_in.wav"), 1, Attenuation::Normal, 0);
+            SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("player/watr_in.wav"), 1, Attenuation::Normal, 0);
         } else if (GetWaterType() & BrushContents::Water) {
-            SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/watr_in.wav"), 1, Attenuation::Normal, 0);
+            SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("player/watr_in.wav"), 1, Attenuation::Normal, 0);
         }
         
         SetFlags(GetFlags() | EntityFlags::InWater);
@@ -1006,24 +1006,24 @@ void SVGBasePlayer::CheckWorldEffects()
     // Just completely exited a water volume sound effect.
     if (oldWaterLevel && ! waterLevel) {
         PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
-        SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/watr_out.wav"), 1, Attenuation::Normal, 0);
+        SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("player/watr_out.wav"), 1, Attenuation::Normal, 0);
         SetFlags(GetFlags() & ~EntityFlags::InWater);
     }
 
     // Head just going under water effect.
     if (oldWaterLevel != 3 && waterLevel == 3) {
-        SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("player/watr_un.wav"), 1, Attenuation::Normal, 0);
+        SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("player/watr_un.wav"), 1, Attenuation::Normal, 0);
     }
 
     // Head just coming out of water effect.
     if (oldWaterLevel == 3 && waterLevel != 3) {
         if (GetAirFinishedTime() < level.time) {
             // gasp for air
-            SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/gasp1.wav"), 1, Attenuation::Normal, 0);
+            SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("player/gasp1.wav"), 1, Attenuation::Normal, 0);
             PlayerNoise(this, GetOrigin(), PlayerNoiseType::Self);
         } else  if (GetAirFinishedTime() < level.time + 11s) {
             // just break surface
-            SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/gasp2.wav"), 1, Attenuation::Normal, 0);
+            SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("player/gasp2.wav"), 1, Attenuation::Normal, 0);
         }
     }
 
@@ -1043,11 +1043,11 @@ void SVGBasePlayer::CheckWorldEffects()
 
                 // play a gurp sound instead of a normal pain sound
                 if (GetHealth() <= GetDamage()) {
-                    SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/drown1.wav"), 1, Attenuation::Normal, 0);
+                    SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("player/drown1.wav"), 1, Attenuation::Normal, 0);
                 } else if (rand() & 1) {
-                    SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("*gurp1.wav"), 1, Attenuation::Normal, 0);
+                    SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("*gurp1.wav"), 1, Attenuation::Normal, 0);
                 } else {
-                    SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("*gurp2.wav"), 1, Attenuation::Normal, 0);
+                    SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("*gurp2.wav"), 1, Attenuation::Normal, 0);
                 }
 
                 SetDebouncePainTime(level.time);
@@ -1066,9 +1066,9 @@ void SVGBasePlayer::CheckWorldEffects()
             if (GetHealth() > 0
                 && GetDebouncePainTime() <= level.time) {
                 if (rand() & 1)
-                    SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/burn1.wav"), 1, Attenuation::Normal, 0);
+                    SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("player/burn1.wav"), 1, Attenuation::Normal, 0);
                 else
-                    SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex("player/burn2.wav"), 1, Attenuation::Normal, 0);
+                    SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound("player/burn2.wav"), 1, Attenuation::Normal, 0);
                 SetDebouncePainTime(level.time + 1s);
             }
 
@@ -1167,7 +1167,7 @@ void SVGBasePlayer::ApplyDamageFeedback() {
         }
 
         // Play pain sound based on damage taken.
-        SVG_Sound(this, SoundChannel::Voice, gi.SoundIndex(va("*pain%i_%i.wav", l, r)), 1, Attenuation::Normal, 0);
+        SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound(va("*pain%i_%i.wav", l, r)), 1, Attenuation::Normal, 0);
     }
 
     // The total alpha of the blend is always proportional to count.

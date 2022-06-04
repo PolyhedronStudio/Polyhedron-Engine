@@ -306,7 +306,7 @@ void MiscServerModel::MiscServerModelDie(SVGBaseEntity* inflictor, SVGBaseEntity
     SetSolid(Solid::Not);
     LinkEntity();
     // Play a nasty gib sound, yughh :)
-    SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
+    SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
     GameWorld* gameworld = GetGameWorld();

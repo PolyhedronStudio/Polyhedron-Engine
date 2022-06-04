@@ -247,7 +247,7 @@ static explosion_t* CLG_PlainExplosion(qboolean big, const vec3_t &origin) {
 	ex->ent.angles[1] = rand() % 360;
 
 	int model_idx = rand() % (sizeof(cl_mod_explosions) / sizeof(*cl_mod_explosions));
-	model_t* sprite_model = clgi.MOD_ForHandle(cl_mod_explosions[model_idx]);
+	model_t* sprite_model = clgi.CL_Model_GetModelByHandle(cl_mod_explosions[model_idx]);
 
 	if (cl_explosion_sprites->integer && !big && sprite_model)
 	{
@@ -1343,51 +1343,51 @@ void CLG_RegisterTempEntityModels(void)
 	//
 	// Configure certain models to be a vertical spriteParameters.
 	//
-	model_t* model = clgi.MOD_ForHandle(cl_mod_explode);
+	model_t* model = clgi.CL_Model_GetModelByHandle(cl_mod_explode);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_smoke);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_smoke);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_flash);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_flash);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_parasite_segment);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_parasite_segment);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_grapple_cable);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_grapple_cable);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_explo4);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_explo4);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_powerscreen);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_powerscreen);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_laser);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_laser);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_dmspot);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_dmspot);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_lightning);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_lightning);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_heatbeam);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_heatbeam);
 	if (model)
 		model->sprite_vertical = true;
 
-	model = clgi.MOD_ForHandle(cl_mod_explo4_big);
+	model = clgi.CL_Model_GetModelByHandle(cl_mod_explo4_big);
 	if (model)
 		model->sprite_vertical = true;
 }

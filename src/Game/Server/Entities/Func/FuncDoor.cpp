@@ -38,9 +38,9 @@ void FuncDoor::Precache() {
 
     // Set up the default sounds
     if ( GetSound() != 1 ) {
-        moveInfo.startSoundIndex = gi.SoundIndex( "doors/dr1_strt.wav" );
-        moveInfo.middleSoundIndex = gi.SoundIndex( "doors/dr1_mid.wav" );
-        moveInfo.endSoundIndex = gi.SoundIndex( "doors/dr1_end.wav" );
+        moveInfo.startSoundIndex = gi.PrecacheSound( "doors/dr1_strt.wav" );
+        moveInfo.middleSoundIndex = gi.PrecacheSound( "doors/dr1_mid.wav" );
+        moveInfo.endSoundIndex = gi.PrecacheSound( "doors/dr1_end.wav" );
     }
 }
 
@@ -107,7 +107,7 @@ void FuncDoor::Spawn() {
     } else if ( GetTargetName().empty() ) {
     // If the mapper did NOT specify a targetname, then make this 
     // door openable by touching it.
-        gi.SoundIndex( MessageSoundPath );
+        gi.PrecacheSound( MessageSoundPath );
         SetTouchCallback( &FuncDoor::DoorTouch );
     }
 
@@ -301,7 +301,7 @@ void FuncDoor::DoorTouch( IServerGameEntity* self, IServerGameEntity* other, Col
 
     if ( !messageStr.empty() ) {
         gi.CenterPrintf( other->GetPODEntity(), "%s", messageStr.c_str() );
-        gi.Sound( other->GetPODEntity(), SoundChannel::Auto, gi.SoundIndex( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
+        gi.Sound( other->GetPODEntity(), SoundChannel::Auto, gi.PrecacheSound( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
     }
 
     DispatchUseCallback(GetOwner(), other);

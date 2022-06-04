@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Server.h"
 #include "Models.h"
+#include "Shared/SkeletalModelData.h"
 #include "../Client/Client.h"
 
 ServerGameExports    *ge;
@@ -57,17 +58,17 @@ static int PF_FindIndex(const char *name, int start, int max)
     return i;
 }
 
-static int PF_ModelIndex(const char *name)
+static int PF_PrecacheModel(const char *name)
 {
     return PF_FindIndex(name, ConfigStrings::Models, MAX_MODELS);
 }
 
-static int PF_SoundIndex(const char *name)
+static int PF_PrecacheSound(const char *name)
 {
     return PF_FindIndex(name, ConfigStrings::Sounds, MAX_SOUNDS);
 }
 
-static int PF_ImageIndex(const char *name)
+static int PF_PrecacheImage(const char *name)
 {
     return PF_FindIndex(name, ConfigStrings::Images, MAX_IMAGES);
 }
@@ -322,8 +323,36 @@ static qhandle_t PF_PrecacheSkeletalModelData(const char *name) {
 /**
 *	@return	A pointer to the model structure for given handle. (nullptr) on failure.
 **/
-static model_t *PF_GetModelByHandle(qhandle_t handle) {
-	return SV_Model_ForHandle(handle);
+static model_t *PF_GetServerModelByHandle(qhandle_t handle) {
+	model_t *model = SV_Model_ForHandle(handle);
+
+	if (!model) {
+		// TODO: Warn.
+		return nullptr;
+	}
+
+	//if (model->skeletalModelData) {
+		//return &model->skeletalModelData;
+	//}
+	return model;
+}
+
+/**
+*	@return	A pointer to the model structure for given handle. (nullptr) on failure.
+**/
+static SkeletalModelData *PF_GetSkeletalModelDataByHandle(qhandle_t handle) {
+	model_t *model = SV_Model_ForHandle(handle);
+
+	if (!model) {
+		// TODO: Warn.
+		return nullptr;
+	}
+
+	if (model->skeletalModelData) {
+		return model->skeletalModelData;
+	}
+
+	return nullptr;
 }
 
 /*
@@ -341,7 +370,7 @@ static void PF_setmodel(Entity *ent, const char *name)
     if (!name)
         Com_Error(ErrorType::Drop, "PF_setmodel: NULL");
 
-    i = PF_ModelIndex(name);
+    i = PF_PrecacheModel(name);
 
     ent->currentState.modelIndex = i;
 
@@ -900,12 +929,13 @@ void SV_InitGameProgs(void)
     importAPI.InPVS = PF_InPVS;
     importAPI.InPHS = PF_InPHS;
 
-    importAPI.ModelIndex = PF_ModelIndex;
-    importAPI.SoundIndex = PF_SoundIndex;
-    importAPI.ImageIndex = PF_ImageIndex;
+    importAPI.PrecacheModel = PF_PrecacheModel;
+    importAPI.PrecacheSound = PF_PrecacheSound;
+    importAPI.PrecacheImage = PF_PrecacheImage;
 	
-	importAPI.PrecacheSkeletalModelData = PF_PrecacheSkeletalModelData;
-	importAPI.GetModelByHandle = PF_GetModelByHandle;
+	importAPI.PrecacheServerModel = PF_PrecacheSkeletalModelData;
+	importAPI.GetServerModelByHandle = PF_GetServerModelByHandle;
+	importAPI.GetSkeletalModelDataByHandle = PF_GetSkeletalModelDataByHandle;
 	importAPI.SetModel = PF_setmodel;
 
     importAPI.configstring = PF_configstring;

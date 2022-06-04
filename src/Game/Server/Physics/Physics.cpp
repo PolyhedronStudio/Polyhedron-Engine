@@ -932,9 +932,9 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // Determine what sound to play.
     if (!wasInWater && isInWater) {
-        gi.PositionedSound(oldOrigin, game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(oldOrigin, game.world->GetPODEntities(), SoundChannel::Auto, gi.PrecacheSound("misc/h2ohit1.wav"), 1, 1, 0);
 	} else if (wasInWater && !isInWater) {
-        gi.PositionedSound(ent->GetOrigin(), game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->GetOrigin(), game.world->GetPODEntities(), SoundChannel::Auto, gi.PrecacheSound("misc/h2ohit1.wav"), 1, 1, 0);
 	}
 
     // Move teamslaves
@@ -1148,7 +1148,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
         if (ent->GetGroundEntityHandle()) {
             if (!wasOnGround) {
                 if (hitSound) {
-                    SVG_Sound(ent, 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
+                    SVG_Sound(ent, 0, gi.PrecacheSound("world/land.wav"), 1, 1, 0);
                 }
             }
         }

@@ -111,7 +111,7 @@ void BodyCorpse::BodyCorpseDie(IServerGameEntity* inflictor, IServerGameEntity* 
     // In case health is low enough...
     if (GetHealth() < -40) {
         // Play sound.
-        SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
+        SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
         // Toss gibs.
 //        for (int32_t i = 0; i < 4; i++) {

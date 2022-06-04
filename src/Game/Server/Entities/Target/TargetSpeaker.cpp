@@ -33,7 +33,7 @@ void TargetSpeaker::Spawn() {
         soundFile += ".wav";
     }
 
-    SetNoiseIndexA( gi.SoundIndex( soundFile.c_str() ) );
+    SetNoiseIndexA( gi.PrecacheSound( soundFile.c_str() ) );
 
     if ( attenuation == -1.0f ) {
         attenuation = 0.0f;

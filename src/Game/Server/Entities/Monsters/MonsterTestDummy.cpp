@@ -68,11 +68,9 @@ void MonsterTestDummy::Precache() {
     modelHandle = SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
 
 	// Precache the model for the server: Required to be able to process animations properly.
-	qhandle_t serverModelHandle = gi.PrecacheSkeletalModelData("models/monsters/slidedummy/slidedummy.iqm");
-
-	// Get the model data pointer and generate game friendly model data using it.
-	model_t *model = gi.GetModelByHandle(serverModelHandle);
-	skm = SG_SKM_GenerateModelData(model);
+	qhandle_t serverModelHandle = gi.PrecacheServerModel("models/monsters/slidedummy/slidedummy.iqm");
+	//skm = SKM_GenerateModelData(gi.GetServerModelByHandle(skeletalModelHandle));
+	skm = gi.GetSkeletalModelDataByHandle(serverModelHandle);
 }
 
 //
@@ -89,7 +87,7 @@ void MonsterTestDummy::Spawn() {
     SetModel("models/monsters/slidedummy/slidedummy.iqm");
 
     // Set the bounding box.
-    //SetBoundingBox({ -16, -16, -41 }, { 16, 16, 43 });
+    SetBoundingBox({ -16, -16, -41 }, { 16, 16, 43 });
 
     // Setup our MonsterTestDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
@@ -220,48 +218,48 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// Set the animation.
 		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-		
+	/*
 		//// Get animation data.
-		//const int32_t animationFrame = animationState->frame;
-		//if (animationFrame >= 0 && skm.boundingBoxes.size() > animationFrame) {
-		//	vec3_t mins = skm.boundingBoxes[animationState->frame].mins;
-		//	vec3_t maxs = skm.boundingBoxes[animationState->frame].maxs;
-		//	//mins = { mins.z, mins.y, mins.x };
-		//	//maxs = { maxs.z, maxs.y, maxs.x };
-		//	float depth = fabs(maxs.x) + fabs(mins.x);
-		//	depth /= 2.f;
-		//	mins.x = - depth;
-		//	maxs.x = depth;
-		//	float width = fabs(maxs.y) + fabs(mins.y);
-		//	width /= 2.f;
-		//	mins.y = - width;
-		//	maxs.y = width;
+		const int32_t animationFrame = animationState->frame;
+		if (animationFrame >= 0 && skm->boundingBoxes.size() > animationFrame) {
+			vec3_t mins = skm->boundingBoxes[animationState->frame].mins;
+			vec3_t maxs = skm->boundingBoxes[animationState->frame].maxs;
+			//mins = { mins.z, mins.y, mins.x };
+			//maxs = { maxs.z, maxs.y, maxs.x };
+			float depth = fabs(maxs.x) + fabs(mins.x);
+			depth /= 2.f;
+			mins.x = - depth;
+			maxs.x = depth;
+			float width = fabs(maxs.y) + fabs(mins.y);
+			width /= 2.f;
+			mins.y = - width;
+			maxs.y = width;
 
-		//	vec3_t oldMins = GetMins();
-		//	vec3_t oldMaxs = GetMaxs();
+			vec3_t oldMins = GetMins();
+			vec3_t oldMaxs = GetMaxs();
 
-		//	static GameTime lastTime = GameTime::zero();
-		//	if (lastTime == GameTime::zero()) {
-		//		lastTime = level.time;
-		//	}
-		//	mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-		//	maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-		//	if (lastTime != GameTime::zero()) {
-		//		lastTime = level.time;
-		//	}
-		//	gi.DPrintf("%f %f %f, %f %f %f\n",
-		//		mins.x,
-		//		mins.y,
-		//		mins.z,
-		//		maxs.x,
-		//		maxs.y,
-		//		maxs.z);
+			static GameTime lastTime = GameTime::zero();
+			if (lastTime == GameTime::zero()) {
+				lastTime = level.time;
+			}
+			mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+			maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+			if (lastTime != GameTime::zero()) {
+				lastTime = level.time;
+			}
+			gi.DPrintf("%f %f %f, %f %f %f\n",
+				mins.x,
+				mins.y,
+				mins.z,
+				maxs.x,
+				maxs.y,
+				maxs.z);
 
-		//	SetMins(mins);
-		//	SetMaxs(maxs);
-		//	LinkEntity();
-		//}
-
+			SetMins(mins);
+			SetMaxs(maxs);
+			LinkEntity();
+		}
+		*/
 		// Navigate to goal.
 		Move_NavigateToTarget( );
 	}
@@ -296,7 +294,7 @@ void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServer
     SetSolid(Solid::Not);
     LinkEntity();
     // Play a nasty gib sound, yughh :)
-    SVG_Sound(this, SoundChannel::Body, gi.SoundIndex("misc/udeath.wav"), 1, Attenuation::Normal, 0);
+    SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
     ServerGameWorld* gameWorld = GetGameWorld();

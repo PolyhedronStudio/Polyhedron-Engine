@@ -136,12 +136,13 @@ typedef struct {
     void (* q_noreturn q_printf(1, 2) Error)(const char *fmt, ...);
 
     // the *index functions create configstrings and some internal server state
-    int (*ModelIndex)(const char *name);
-    int (*SoundIndex)(const char *name);
-    int (*ImageIndex)(const char *name);
+    int (*PrecacheModel)(const char *name);
+    int (*PrecacheSound)(const char *name);
+    int (*PrecacheImage)(const char *name);
 
-	qhandle_t (*PrecacheSkeletalModelData)(const char *name);
-	model_t* (*GetModelByHandle) (qhandle_t handle);
+	qhandle_t (*PrecacheServerModel)(const char *name);
+	model_t* (*GetServerModelByHandle) (qhandle_t handle);
+	SkeletalModelData *(*GetSkeletalModelDataByHandle) (qhandle_t handle);
 
     void (*SetModel)(Entity *ent, const char *name);
 

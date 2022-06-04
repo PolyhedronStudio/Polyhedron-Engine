@@ -15,9 +15,9 @@ SET(SRC_SHARED
 	${PATH_SRC}/Shared/Math/Plane.cpp
 	${PATH_SRC}/Shared/Math/Vector3.cpp
 
-	# Interfaces
 	${PATH_SRC}/Shared/Math.cpp
 	${PATH_SRC}/Shared/Shared.cpp
+	${PATH_SRC}/Shared/SkeletalModelData.cpp
 )
 
 SET(HEADERS_SHARED
@@ -68,6 +68,7 @@ SET(HEADERS_SHARED
 	${PATH_SRC}/Shared/QString.h
 	${PATH_SRC}/Shared/Refresh.h 
 	${PATH_SRC}/Shared/Shared.h 
+	${PATH_SRC}/Shared/SkeletalModelData.h 
 	${PATH_SRC}/Shared/Sound.h 
 	${PATH_SRC}/Shared/Strings.h
 	${PATH_SRC}/Shared/SVGame.h 
@@ -95,7 +96,6 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/Zone.cpp
 
 	${PATH_SRC}/Common/Models/Iqm.cpp
-	${PATH_SRC}/Common/Models/Models.cpp
 
 	${PATH_SRC}/Common/Hashes/Crc32.cpp
 
@@ -153,6 +153,7 @@ SET(SRC_CLIENT
 	${PATH_SRC}/Client/Input.cpp
 	${PATH_SRC}/Client/Keys.cpp
 	${PATH_SRC}/Client/Main.cpp
+	${PATH_SRC}/Client/Models.cpp
 	${PATH_SRC}/Client/Parse.cpp
 	${PATH_SRC}/Client/Precache.cpp
 	${PATH_SRC}/Client/Predict.cpp
@@ -219,6 +220,7 @@ SET(HEADERS_CLIENT
 	${PATH_SRC}/Client/Entities.h
 	${PATH_SRC}/Client/GameModule.h
 	${PATH_SRC}/Client/Input.h
+	${PATH_SRC}/Client/Models.h
 	${PATH_SRC}/Client/Keys.h
 	${PATH_SRC}/Client/Traces.h
 	${PATH_SRC}/Client/UI.h
@@ -535,7 +537,9 @@ IF(WIN32)
 		${SRC_SHARED} ${HEADERS_SHARED}
 		${SRC_WINDOWS} ${HEADERS_WINDOWS}
 		${SRC_SERVER} ${HEADERS_SERVER}
-	${PATH_SRC}/Client/null.cpp
+
+		${PATH_SRC}/Client/null.cpp
+
 		#System/sdl2/time.cpp
 		System/Resources/polyhedron_dedicated.rc
 	)
@@ -560,7 +564,8 @@ ELSE()
 		${SRC_SHARED} ${HEADERS_SHARED}
 		${SRC_UNIX}
 		${SRC_SERVER} ${HEADERS_SERVER}
-	${PATH_SRC}/Client/Null.cpp
+		
+		${PATH_SRC}/Client/Null.cpp
 	)
 ENDIF()
 

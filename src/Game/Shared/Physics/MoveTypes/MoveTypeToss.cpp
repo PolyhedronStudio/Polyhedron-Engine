@@ -238,9 +238,9 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 #ifdef SHAREDGAME_SERVERGAME
     // Determine what sound to play.
     if (!wasInWater && isInWater) {
-        gi.PositionedSound(oldOrigin, game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(oldOrigin, game.world->GetPODEntities(), SoundChannel::Auto, gi.PrecacheSound("misc/h2ohit1.wav"), 1, 1, 0);
 	} else if (wasInWater && !isInWater) {
-        gi.PositionedSound(ent->GetOrigin(), game.world->GetPODEntities(), SoundChannel::Auto, gi.SoundIndex("misc/h2ohit1.wav"), 1, 1, 0);
+        gi.PositionedSound(ent->GetOrigin(), game.world->GetPODEntities(), SoundChannel::Auto, gi.PrecacheSound("misc/h2ohit1.wav"), 1, 1, 0);
 	}
 #endif
 	//if( !wasInWater && isInWater ) {

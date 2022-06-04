@@ -32,20 +32,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Refresh/Images.h"
 #include "Refresh/Models.h"
 
-// during registration it is possible to have more models than could actually
+//! Client Side Model Registration Sequence:
+//! Each time a map change occurs it increments the sequence.
+//! All models that have an unmatching sequence afterwards are freed.
+
+// During a registration it is possible to have more models than could actually
 // be referenced during gameplay, because we don't want to free anything until
 // we are sure we won't need it.
-#define MAX_RMODELS     (MAX_MODELS * 2)
+static constexpr int32_t MAX_RMODELS = MAX_MODELS * 2;
 
+//! Client Side Model Registration Sequence:
+//! Each time a map change occurs it increments the sequence.
+//! All models that have an unmatching sequence afterwards are freed.
+int32_t registration_sequence = 0;
+
+//! Refresh Model Data.
 model_t      r_models[MAX_RMODELS];
-int          r_numModels;
+//! Number of total models we got.
+int32_t          r_numModels = 0;
+//! Client Side storage of our internal Skeletal Model Data.
+//! Indexed by the same handle as the r_models model it belongs to.
+SkeletalModelData r_skeletalModels[MAX_RMODELS];
+
 
 #if USE_CLIENT
 extern cvar_t *vid_rtx;
 extern cvar_t *gl_use_hd_assets;
 #endif
 
-model_t *MOD_Alloc(void)
+model_t *CL_Model_Alloc(void)
 {
 	model_t *model;
 	int i;
@@ -66,7 +81,7 @@ model_t *MOD_Alloc(void)
 	return model;
 }
 
-model_t *MOD_Find(const char *name)
+model_t *CL_Model_Find(const char *name)
 {
 	model_t *model;
 	int i;
@@ -83,7 +98,7 @@ model_t *MOD_Find(const char *name)
 	return NULL;
 }
 
-void MOD_List_f(void)
+void CL_Model_List_f(void)
 {
 	static const char types[] = "FASE"; // CPP: Cast - was types[4] = "FASE";
 	int     i, count;
@@ -106,7 +121,7 @@ void MOD_List_f(void)
 	Com_Printf("Total resident: %" PRIz "\n", bytes); // CPP: String fix.
 }
 
-void MOD_FreeUnused(void)
+void CL_Model_FreeUnused(void)
 {
 	model_t *model;
 	int i;
@@ -127,7 +142,7 @@ void MOD_FreeUnused(void)
 	}
 }
 
-void MOD_FreeAll(void)
+void CL_Model_FreeAll(void)
 {
 	model_t *model;
 	int i;
@@ -335,7 +350,7 @@ qerror_t MOD_LoadSP2(model_t* model, ModelMemoryAllocateCallback modelAllocate, 
 	return Q_ERR_SUCCESS;
 }
 #endif
-model_t *MOD_ForHandle(qhandle_t h)
+model_t *CL_Model_GetModelByHandle(qhandle_t h)
 {
 	model_t *model;
 
@@ -355,18 +370,18 @@ model_t *MOD_ForHandle(qhandle_t h)
 	return model;
 }
 
-void MOD_Init(void)
+void CL_Model_Init(void)
 {
 	if (r_numModels) {
 		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, r_numModels);
 	}
 
-	Cmd_AddCommand("modellist", MOD_List_f);
+	Cmd_AddCommand("modellist", CL_Model_List_f);
 }
 
-void MOD_Shutdown(void)
+void CL_Model_Shutdown(void)
 {
-	MOD_FreeAll();
+	CL_Model_FreeAll();
 	Cmd_RemoveCommand("modellist");
 }
 

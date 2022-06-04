@@ -142,6 +142,25 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 		const vec3_t oldVelocity = GetVelocity();
 		const vec3_t normalizedDir = vec3_normalize(direction);
 		
+		// Calculate the velocity based on the distance we're going to travel.
+		const EntityState &state = GetState();
+		int32_t animationStartFrame = state.currentAnimation.startFrame;
+		int32_t animationEndframe = state.currentAnimation.endFrame;
+		int32_t animationFrame = state.currentAnimation.frame - state.currentAnimation.startFrame;
+
+		// See if this exists in the distances of...
+		auto &frameDistances = skm->animations["walk"].frameDistances;
+
+		if (animationFrame < state.currentAnimation.endFrame) {
+			// Yeah...
+			// Calculate velocity.
+			const vec3_t moveVelocity = vec3_t{
+				frameDistances[animationFrame],
+				frameDistances[animationFrame],
+				oldVelocity.z
+			} * vec3_t{ normalizedDir.x, normalizedDir.y, 0.f};
+			SetVelocity(moveVelocity);
+		}
 		// Move slower if the ideal yaw angle is out of range.
 		// (Gives a more 'realistic' turning effect).
 		if (deltaYawAngle > 45 && deltaYawAngle < 315) {
@@ -150,14 +169,14 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 				52.f * normalizedDir.x,	52.f * normalizedDir.y, 
 				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
 			};
-			SetVelocity(wishVelocity);
+			//SetVelocity(wishVelocity);
 		} else {
 			// Set velocity to head into direction.
 			const vec3_t wishVelocity = vec3_t { 
 				72.f * normalizedDir.x,	72.f * normalizedDir.y,
 				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
 			};
-			SetVelocity(wishVelocity);
+			//SetVelocity(wishVelocity);
 		}
 
 		/**
@@ -605,7 +624,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
         if ( geNewGroundEntity ) {
             if ( !wasOnGround ) {
                 if ( hitSound ) {
-                    SVG_Sound(this, 0, gi.SoundIndex("world/land.wav"), 1, 1, 0);
+                    SVG_Sound(this, 0, gi.PrecacheSound("world/land.wav"), 1, 1, 0);
                 }
             }
         }

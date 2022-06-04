@@ -154,7 +154,7 @@ void DeathmatchGameMode::PlacePlayerInGame(SVGBasePlayer *player) {
     }
 
     // Set gun index to whichever was persistent in the previous map (if there was one).
-    client->playerState.gunIndex = 0;  //gi.ModelIndex(client->persistent.activeWeapon->viewModel);
+    client->playerState.gunIndex = 0;  //gi.PrecacheModel(client->persistent.activeWeapon->viewModel);
 	
     // Select the clients spawn point.
     SelectPlayerSpawnPoint(player, spawnOrigin, spawnAngles);

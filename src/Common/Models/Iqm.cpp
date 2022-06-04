@@ -651,6 +651,15 @@ qerror_t MOD_LoadIQM_Base(model_t* model, ModelMemoryAllocateCallback modelAlloc
 	return Q_ERR_SUCCESS;
 }
 
+
+
+/**
+*
+*
+*	Animation Processing Logic.
+*
+*
+**/
 /*
 =================
 R_ComputeIQMTransforms
@@ -712,4 +721,120 @@ qboolean R_ComputeIQMTransforms(const iqm_model_t* model, const r_entity_t* enti
 	}
 
 	return true;
+}
+
+/**
+*	@brief	Compute pose transformations for the given model + data
+*			relativeJoints` must have enough room for iqmModel->num_poses
+**/
+void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *model, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints) {
+	// Get IQM Data.
+	const iqm_model_t *iqmModel = model->iqmData;
+	// Get our Skeletal Model Data.
+	SkeletalModelData *skmData = model->skeletalModelData;
+	// Relative Joints.
+	iqm_transform_t* relativeJoint = relativeJoints;
+
+	// Current Frame.
+	currentFrame = iqmModel->num_frames ? (currentFrame % (int) iqmModel->num_frames) : 0;
+	// Old Frame.
+	oldFrame = iqmModel->num_frames ? (oldFrame % (int) iqmModel->num_frames) : 0;
+
+	// Copy or lerp animation currentFrame pose
+	if (oldFrame == currentFrame)
+	{
+		const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
+		for (uint32_t pose_idx = 0; pose_idx < iqmModel->num_poses; pose_idx++, pose++, relativeJoint++)
+		{
+			// Do we have skeletal model data?
+			if (skmData && pose_idx == skmData->rootJointIndex) {
+//			if (pose_idx == iqmModel->root_id)
+				VectorClear(relativeJoint->translate);
+				VectorSet(relativeJoint->scale, 1, 1, 1);
+				QuatCopy(pose->rotate, relativeJoint->rotate);
+				continue;
+			}
+
+			VectorCopy(pose->translate, relativeJoint->translate);
+			VectorCopy(pose->scale, relativeJoint->scale);
+			QuatCopy(pose->rotate, relativeJoint->rotate);
+		}
+	}
+	else
+	{
+		const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
+		const iqm_transform_t* oldpose = &iqmModel->poses[oldFrame * iqmModel->num_poses];
+		for (uint32_t pose_idx = 0; pose_idx < iqmModel->num_poses; pose_idx++, oldpose++, pose++, relativeJoint++)
+		{
+			// Do we have skeletal model data?
+			if (skmData && pose_idx == skmData->rootJointIndex) {
+//			if (pose_idx == iqmModel->root_id)
+				VectorClear(relativeJoint->translate);
+				VectorSet(relativeJoint->scale, 1, 1, 1);
+				QuatCopy(pose->rotate, relativeJoint->rotate);
+				continue;
+			}
+
+			relativeJoint->translate[0] = oldpose->translate[0] * backLerp + pose->translate[0] * lerp;
+			relativeJoint->translate[1] = oldpose->translate[1] * backLerp + pose->translate[1] * lerp;
+			relativeJoint->translate[2] = oldpose->translate[2] * backLerp + pose->translate[2] * lerp;
+
+			relativeJoint->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
+			relativeJoint->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
+			relativeJoint->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
+
+			QuatSlerp(oldpose->rotate, pose->rotate, lerp, relativeJoint->rotate);
+		}
+	}
+}
+
+/**
+*	@brief	Compute local space matrices for the given pose transformations.
+*			this is the "fast path" for when world space is not necessary.
+**/
+void MOD_ComputeIQMLocalSpaceMatricesFromRelative(/*const iqm_model_t* model*/const model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices) {
+	// Get IQM Data.
+	const iqm_model_t *iqmModel = model->iqmData;
+	// Get our Skeletal Model Data.
+	SkeletalModelData *skmData = model->skeletalModelData;
+	
+	// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
+	const iqm_transform_t *relativeJoint = relativeJoints;
+	const int* jointParent = iqmModel->jointParents;
+	const float* invBindMat = iqmModel->invBindJoints;
+	float* poseMat = poseMatrices;
+	for (uint32_t pose_idx = 0; pose_idx < iqmModel->num_poses; pose_idx++, relativeJoint++, jointParent++, invBindMat += 12, poseMat += 12) {
+		float mat1[12], mat2[12];
+
+		JointToMatrix(relativeJoint->rotate, relativeJoint->scale, relativeJoint->translate, mat1);
+
+		if (*jointParent >= 0) {
+			Matrix34Multiply(&iqmModel->bindJoints[(*jointParent) * 12], mat1, mat2);
+			Matrix34Multiply(mat2, invBindMat, mat1);
+			Matrix34Multiply(&poseMatrices[(*jointParent) * 12], mat1, poseMat);
+		} else {
+			Matrix34Multiply(mat1, invBindMat, poseMat);
+		}
+	}
+}
+
+/**
+*	@brief	Compute world space matrices for the given pose transformations.
+**/
+void MOD_ComputeIQMWorldSpaceMatricesFromRelative(/*const iqm_model_t* model*/const model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices) {
+	// Get IQM Data.
+	const iqm_model_t *iqmModel = model->iqmData;
+	// Get our Skeletal Model Data.
+	SkeletalModelData *skmData = model->skeletalModelData;
+
+	MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJoints, poseMatrices);
+
+	float *poseMat = iqmModel->bindJoints;
+	float *outPose = poseMatrices;
+
+	for (size_t i = 0; i < iqmModel->num_poses; i++, poseMat += 12, outPose += 12) {
+		float inPose[12];
+		memcpy(inPose, outPose, sizeof(inPose));
+		Matrix34Multiply(inPose, poseMat, outPose);
+	}
 }
