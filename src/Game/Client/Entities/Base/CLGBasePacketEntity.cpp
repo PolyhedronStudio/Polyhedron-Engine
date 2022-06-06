@@ -656,8 +656,11 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 	//// Has the animation index changed? If so, lookup the new animation.
 	//// TODO: Move to a separate function.
 	const int32_t currentAnimationIndex = currentAnimation->animationIndex;
-	const int32_t previousAnimationIndex = previousAnimation->animationIndex;
+	//const int32_t previousAnimationIndex = previousAnimation->animationIndex;
+	// Use refresh instead. It's the most actual state anyhow.
+	const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
 
+	// In case the animation switched, adjust our refresh animation data.
 	if (currentAnimationIndex != refreshAnimation.animationIndex) {
 		// See whether we got skm data, and if the animation index is valid and save to use.
 		if (skm && skm->animations.size() > currentAnimation->animationIndex) {
@@ -669,11 +672,13 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 			refreshAnimation.startFrame = skmAnimation->startFrame;
 			refreshAnimation.endFrame = skmAnimation->endFrame;
 			refreshAnimation.forceLoop = true;//currentAnimation->forceLoop;
-			refreshAnimation.frameTime = 16; //..currentAnimation->frameTime;
+			refreshAnimation.frameTime = skmAnimation->frametime;
 			refreshAnimation.startTime = currentAnimation->startTime;
 			refreshAnimation.loopCount = 0;//currentAnimation->loopCount;
 
-		Com_DPrint("Animation: Set to %i %s\n", skmAnimation->index, skmAnimation->name.c_str());
+			// Debug Output:
+			const std::string previousAnimationName = skm->animations[previousAnimationIndex]->name;
+			Com_DPrint("SwitchAnimation(Entity: #%i): From (#%i)(%s) to (#%i)(%s)\n", GetNumber(), previousAnimationIndex, previousAnimationName.c_str(), skmAnimation->index, skmAnimation->name.c_str());
 		}
 		
 		// Initialize a fresh received animation state.

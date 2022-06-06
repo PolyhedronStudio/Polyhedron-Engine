@@ -102,161 +102,181 @@ void SVGBaseSlideMonster::SpawnKey(const std::string& key, const std::string& va
 
 
 void SVGBaseSlideMonster::Move_NavigateToTarget() {
-		/**
-		*	#1: Very Cheap, WIP, Debug, pick the goal entity. lol.
-		**/
-		GameEntity *geMoveGoal= GetGoalEntity();
+	/**
+	*	#1: Very Cheap, WIP, Debug, pick the goal entity. lol.
+	**/
+	GameEntity *geMoveGoal= GetGoalEntity();
+
+	if (!geMoveGoal) {
+		geMoveGoal = GetEnemy();
 
 		if (!geMoveGoal) {
-			geMoveGoal = GetEnemy();
+			geMoveGoal = GetGameWorld()->GetGameEntities()[1];
 
-			if (!geMoveGoal) {
-				geMoveGoal = GetGameWorld()->GetGameEntities()[1];
-
-				// if !geGoal .. geGoal = ... ?
-			}
+			// if !geGoal .. geGoal = ... ?
 		}
+	}
 		
-		/**
-		*	#1: Calculate the direction to head into, and set the yaw angle and its turning speed.
-		**/
-		// Get direction vector.
-		vec3_t direction = geMoveGoal->GetOrigin() - GetOrigin();
-		// Cancel uit the Z direction for non flying monsters.
-		direction.z = (GetFlags() & EntityFlags::Fly ? direction.z : 0);
-		// if (flags::FLY { /* DO NOT CANCEL OUT Z */ }
-		// Default speed.
-		SetYawSpeed(20.f);
-		// Prepare ideal yaw angle to rotate to.
-		SetIdealYawAngle( vec3_to_yaw( { direction.x, direction.y, 0.f } ) );
+	/**
+	*	#1: Calculate the direction to head into, and set the yaw angle and its turning speed.
+	**/
+	// Get direction vector.
+	vec3_t direction = geMoveGoal->GetOrigin() - GetOrigin();
+	// Cancel uit the Z direction for non flying monsters.
+	direction.z = (GetFlags() & EntityFlags::Fly ? direction.z : 0);
+	// if (flags::FLY { /* DO NOT CANCEL OUT Z */ }
+	// Default speed.
+	SetYawSpeed(20.f);
+	// Prepare ideal yaw angle to rotate to.
+	SetIdealYawAngle( vec3_to_yaw( { direction.x, direction.y, 0.f } ) );
 
 
-		/**
-		*	#2: Turn to the ideal yaw angle, and calculate our move velocity.
-		*		If the yaw angle is too large, slow down the velocity.
-		**/		
-		// Get State.
-		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+	/**
+	*	#2: Turn to the ideal yaw angle, and calculate our move velocity.
+	*		If the yaw angle is too large, slow down the velocity.
+	**/		
+	// Get State.
+	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
 		
-		// Get Animation Index.
-		int32_t animationIndex = (animationState->animationIndex <= skm->animations.size() ? animationState->animationIndex : 0);
+	// Get Animation Index.
+	int32_t animationIndex = (animationState->animationIndex <= skm->animations.size() ? animationState->animationIndex : 0);
 
-		// Get the delta between wished for and current yaw angles.
-		const float deltaYawAngle = TurnToIdealYawAngle( );
+	// Get the delta between wished for and current yaw angles.
+	const float deltaYawAngle = TurnToIdealYawAngle( );
 
-		if ( deltaYawAngle > 45 && deltaYawAngle < 315 ) {
-			// Should we switch to a different animation like turning?
-			/*if (deltaYawAngle)*/
-			// Switch if this wasn't our current animation yet.
-			if ( skm->animationMap["run_stairs_up"].index != animationIndex ) {
-				SwitchAnimation("run_stairs_up");
-			}
-		} else {
-			if ( skm->animationMap["walk_standard"].index != animationIndex ) {
-				SwitchAnimation("walk_standard");
+	if ( deltaYawAngle > 45 && deltaYawAngle < 315 ) {
+		// Should we switch to a different animation like turning?
+		/*if (deltaYawAngle)*/
+		// Switch if this wasn't our current animation yet.
+		if ( skm->animationMap["walk_turn_left"].index != animationIndex ) {
+			animationIndex = SwitchAnimation("walk_turn_left");
+		}
+	} else {
+		if ( skm->animationMap["walk_standard"].index != animationIndex ) {
+			if  (podEntity->currentState.currentAnimation.frame == -1 || 
+				podEntity->currentState.currentAnimation.frame >= podEntity->currentState.currentAnimation.endFrame) {
+					animationIndex = SwitchAnimation("walk_standard");
 			}
 		}
+	}
 
-		//if ( !( deltaYawAngle > 5 && deltaYawAngle < 355 ) ) {
-		const vec3_t oldVelocity = GetVelocity();
-		const vec3_t normalizedDir = vec3_normalize(direction);
-
-		// Refresh Animation Index.
-		animationIndex = (animationState->animationIndex <= skm->animations.size() ? animationState->animationIndex : 0);
+	//if ( !( deltaYawAngle > 5 && deltaYawAngle < 355 ) ) {
+	const vec3_t oldVelocity = GetVelocity();
+	const vec3_t normalizedDir = vec3_normalize(direction);
 
 
+	int32_t animationStartFrame = animationState->startFrame;
+	int32_t animationEndframe = animationState->endFrame;
+	int32_t animationFrame = animationState->frame - animationState->startFrame;
 
-		int32_t animationStartFrame = animationState->startFrame;
-		int32_t animationEndframe = animationState->endFrame;
-		int32_t animationFrame = animationState->frame - animationState->startFrame;
+	gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+		gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+			gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+				gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+	// Get the total distance traveled for each frame, and also the
+	// actual translation of the "root" (in our case the hip joint:06-06-2022)
+	auto &frameDistances = skm->animations[animationIndex]->frameDistances;
+	auto &frameTranslates= skm->animations[animationIndex]->frameTranslates;
 
-		// Get the total distance traveled for each frame, and also the
-		// actual translation of the "root" (in our case the hip joint:06-06-2022)
-		auto &frameDistances = skm->animations[animationIndex]->frameDistances;
-		auto &frameTranslates= skm->animations[animationIndex]->frameTranslates;
-
-		// Get the translation for this animation move frame.
-		const vec3_t moveTranslate = ( frameTranslates.size() > animationFrame ? frameTranslates[animationFrame] : vec3_zero() );
-		// Get the total move distance (vec3_length of a - b) for this animation move frame.
-		const float moveDistance = ( frameTranslates.size() > animationFrame ? frameDistances[animationFrame] : 0.f );
+	// Get the translation for this animation move frame.
+	const vec3_t moveTranslate = ( frameTranslates.size() > animationFrame ? frameTranslates[animationFrame] : vec3_zero() );
+	// Get the total move distance (vec3_length of a - b) for this animation move frame.
+	const double moveDistance = ( frameTranslates.size() > animationFrame ? frameDistances[animationFrame] : 0.f );
 
 
-		if (animationFrame <= animationState->endFrame) {
-			// Acts as a velocity multiplier and is determined by the Yaw Angle.
-			const float moveSpeed = ( deltaYawAngle > 45 && deltaYawAngle < 315 ? 1.15f : 1.825f );
+	if (animationFrame <= animationState->endFrame) {
+		// Acts as a velocity multiplier and is determined by the Yaw Angle.
+//		const double moveSpeed = ( deltaYawAngle > 45 && deltaYawAngle < 315 ? 1.15f : 1.825f );
+		const double moveSpeed = 64.015f;
 
-			// Create our move distance vector and multiply by moveSpeed
-			const vec3_t vDistance = vec3_t { moveDistance * moveSpeed, moveDistance * moveSpeed, 0.f };
-			// Ignore the Z translation, it might get us "stuck" after all.
-			const vec3_t vTranslate = vec3_t { moveTranslate.x, moveTranslate.y, 0.f };
-			// Get ourselves a normalized direction without Z.
-			const vec3_t vDirection = vec3_t { normalizedDir.x, normalizedDir.y, 0.f };
-			// Calculate the total moveVelocity into the normal's direction.
-			vec3_t moveVelocity = (vDistance + vTranslate) * vDirection;
+		// Create our move distance vector and multiply by moveSpeed
+		const vec3_t vDistance = { (float)(moveSpeed * moveDistance), (float)(moveSpeed * moveDistance), 0.f };
+		// Ignore the Z translation, it might get us "stuck" after all.
+		const vec3_t vTranslate = vec3_t { moveTranslate.x, moveTranslate.y, 0.f };
+		// Get ourselves a normalized direction without Z.
+		const vec3_t vDirection = vec3_t { normalizedDir.x, normalizedDir.y, 0.f };
+		// Calculate the total moveVelocity into the normal's direction.
+		vec3_t moveVelocity = (vDistance + vTranslate) * vDirection;
 
-			// Last but not least, we want to maintain our old Z velocity.
-			moveVelocity.z = oldVelocity.z;
+		// Last but not least, we want to maintain our old Z velocity.
+		moveVelocity.z = oldVelocity.z;
 
-			// And let's go!.
-			SetVelocity(moveVelocity);
+		// And let's go!.
+		SetVelocity(moveVelocity);
 
-			// Debug Output:
-			//gi.DPrintf("Frame(#%i): { %f, %f, %f }\n",
-			//	animationFrame,
-			//	moveVelocity.x,
-			//	moveVelocity.y,
-			//	moveVelocity.z
-			//);
+		// Debug Output:
+		//gi.DPrintf("Frame(#%i): { %f, %f, %f }\n",
+		//	animationFrame,
+		//	moveVelocity.x,
+		//	moveVelocity.y,
+		//	moveVelocity.z
+		//);
+	}
+	// Move slower if the ideal yaw angle is out of range.
+	// (Gives a more 'realistic' turning effect).
+	//if (deltaYawAngle > 45 && deltaYawAngle < 315) {
+	//if (animationFrame <= state.currentAnimation.endFrame) {
+	//	// Get moved frame distance. (vec3_length of traversed distance.)
+	//	const float frameDistance = frameDistances[animationFrame];
+	//	// Calculate velocity based on distance traversed per frame.
+	//	const vec3_t moveVelocity = vec3_t{
+	//		frameDistance * normalizedDir.x,
+	//		frameDistance* normalizedDir.y,
+	//		(GetFlags() & EntityFlags::Fly ? frameDistances[animationFrame] * normalizedDir.z : oldVelocity.z),
+	//	};
+
+	//	SetVelocity(moveVelocity);
+	//}
+	//	// Set velocity to head into direction.
+	//	//const vec3_t wishVelocity = vec3_t {
+	//	//	52.f * normalizedDir.x,	52.f * normalizedDir.y, 
+	//	//	(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
+	//	//};
+	//	//SetVelocity(wishVelocity);
+	//} else {
+	//if (animationFrame <= state.currentAnimation.endFrame) {
+	//	// Get moved frame distance. (vec3_length of traversed distance.)
+	//	// Multiply it by 0.65 so the character "slow down".
+	//	const float frameDistance = frameDistances[animationFrame] * 0.65f;
+	//	// Calculate velocity based on distance traversed per frame.
+	//	const vec3_t moveVelocity = vec3_t{
+	//		frameDistance * normalizedDir.x,
+	//		frameDistance* normalizedDir.y,
+	//		(GetFlags() & EntityFlags::Fly ? frameDistances[animationFrame] * normalizedDir.z : oldVelocity.z),
+	//	};
+
+	//	SetVelocity(moveVelocity);
+	//}
+	//	// Set velocity to head into direction.
+	//	//const vec3_t wishVelocity = vec3_t { 
+	//	//	72.f * normalizedDir.x,	72.f * normalizedDir.y,
+	//	//	(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
+	//	//};
+	//	//SetVelocity(wishVelocity);
+	//}
+
+	/**
+	*	#3: Start moving our Monster ass.
+	**/
+	// Perform our slide move.
+	const int32_t slideMoveMask = SlideMove();
+
+		// Check the mask for animation switching.
+	if ( (slideMoveMask & SlideMoveFlags::SteppedUp) ) {
+		gi.DPrintf("STEPPED UP DAWG\n");
+		if ( skm->animationMap["run_stairs_up"].index != animationIndex ) {
+			animationIndex = SwitchAnimation("run_stairs_up");
 		}
-		// Move slower if the ideal yaw angle is out of range.
-		// (Gives a more 'realistic' turning effect).
-		//if (deltaYawAngle > 45 && deltaYawAngle < 315) {
-		//if (animationFrame <= state.currentAnimation.endFrame) {
-		//	// Get moved frame distance. (vec3_length of traversed distance.)
-		//	const float frameDistance = frameDistances[animationFrame];
-		//	// Calculate velocity based on distance traversed per frame.
-		//	const vec3_t moveVelocity = vec3_t{
-		//		frameDistance * normalizedDir.x,
-		//		frameDistance* normalizedDir.y,
-		//		(GetFlags() & EntityFlags::Fly ? frameDistances[animationFrame] * normalizedDir.z : oldVelocity.z),
-		//	};
+	}
 
-		//	SetVelocity(moveVelocity);
-		//}
-		//	// Set velocity to head into direction.
-		//	//const vec3_t wishVelocity = vec3_t {
-		//	//	52.f * normalizedDir.x,	52.f * normalizedDir.y, 
-		//	//	(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
-		//	//};
-		//	//SetVelocity(wishVelocity);
-		//} else {
-		//if (animationFrame <= state.currentAnimation.endFrame) {
-		//	// Get moved frame distance. (vec3_length of traversed distance.)
-		//	// Multiply it by 0.65 so the character "slow down".
-		//	const float frameDistance = frameDistances[animationFrame] * 0.65f;
-		//	// Calculate velocity based on distance traversed per frame.
-		//	const vec3_t moveVelocity = vec3_t{
-		//		frameDistance * normalizedDir.x,
-		//		frameDistance* normalizedDir.y,
-		//		(GetFlags() & EntityFlags::Fly ? frameDistances[animationFrame] * normalizedDir.z : oldVelocity.z),
-		//	};
-
-		//	SetVelocity(moveVelocity);
-		//}
-		//	// Set velocity to head into direction.
-		//	//const vec3_t wishVelocity = vec3_t { 
-		//	//	72.f * normalizedDir.x,	72.f * normalizedDir.y,
-		//	//	(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
-		//	//};
-		//	//SetVelocity(wishVelocity);
-		//}
-
-		/**
-		*	#3: Start moving our Monster ass.
-		**/
-		// Perform our slide move.
-		SlideMove();
+	if ( (slideMoveMask & SlideMoveFlags::SteppedDown) ) {
+		gi.DPrintf("STEPPED UP DAWG\n");
+		if ( skm->animationMap["walk_stairs_down"].index != animationIndex ) {
+			animationIndex = SwitchAnimation("walk_stairs_down");
+		}
+	}
 }
+
 
 
 
@@ -531,36 +551,33 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	const vec3_t vel0 = GetVelocity();
 	const vec3_t org0 = GetOrigin();
 
-		// Execute "BoxSlideMove", essentially also our water move.
-		SlideMoveState slideMoveState;
-		int32_t blockedMask = SG_BoxSlideMove( this, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
+	// Execute "BoxSlideMove", essentially also our water move.
+	SlideMoveState slideMoveState;
+	int32_t blockedMask = SG_BoxSlideMove( this, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
 
-		if ( blockedMask & SlideMoveFlags::EdgeMoved) {
-			//slideMoveState.velocity.z = vel0.z;
-		
-			//slideMoveState.origin = org0;
-			// Resort to old origin.
-			//slideMoveState.origin = org0; //{ org0.x, org0.y, slideMoveState.origin.z };
-			//slideMoveState.
-		}
+	if ( blockedMask & SlideMoveFlags::EdgeMoved) {
+
+	}
 		
 	if (GetHealth() > 0) {
 #if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
 		if (blockedMask != 0) {
 			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (";
-			if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += "SteppedUp, "; }
-			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += "SteppedDown, "; }
-
-			if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += "EntityTouched, "; }
-			if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += "PlaneTouched, "; }
 			if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += "WallBlocked, "; }
 			if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
 		
-			if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += "EdgeMoved, "; }
+
 			if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved "; }
+			if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += ", EdgeMoved, "; }
+			
+			if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += ", EntityTouched"; }
+			if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += ", PlaneTouched"; }
+
+			if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += ", SteppedUp"; }
+			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += ", SteppedDown"; }
 			blockMaskString += ")";
 		
-			//gi.DPrintf( "%s\n", blockMaskString.c_str());
+			gi.DPrintf( "%s\n", blockMaskString.c_str());
 		} else {
 			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (0)\n";
 			//gi.DPrintf( "%s\n", blockMaskString.c_str());
@@ -683,26 +700,26 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 		}
 	}
 
-		// Execute touch triggers.
-        SG_TouchTriggers( this );
+	// Execute touch triggers.
+    SG_TouchTriggers( this );
 
-        // Can't continue if this entity wasn't in use.
-        if ( IsInUse( ) ) {
-            return 0;
-		}
+    // Can't continue if this entity wasn't in use.
+    if ( !IsInUse( ) ) {
+        return blockedMask;
+	}
 
 #ifdef SHAREDGAME_SERVERGAME
-        // Check for whether to play a land sound.
-        if ( geNewGroundEntity ) {
-            if ( !wasOnGround ) {
-                if ( hitSound ) {
-                    SVG_Sound(this, 0, gi.PrecacheSound("world/land.wav"), 1, 1, 0);
-                }
+    // Check for whether to play a land sound.
+    if ( geNewGroundEntity ) {
+        if ( !wasOnGround ) {
+            if ( hitSound ) {
+                SVG_Sound(this, 0, gi.PrecacheSound("world/land.wav"), 1, 1, 0);
             }
         }
+    }
 #endif
 
-		return 0;
+	return blockedMask;
 }
 
 void SVGBaseSlideMonster::SlideMove_FixCheckBottom() {

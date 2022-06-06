@@ -98,9 +98,9 @@ public:
 
 	/**
 	*	@brief	Switches the animation by blending from the current animation into the next.
-	*	@return	
+	*	@return	The animation index on success, -1 on failure.
 	**/
-	bool SwitchAnimation(const std::string &name);
+	int32_t SwitchAnimation(const std::string &name);
 
     /***
     * 

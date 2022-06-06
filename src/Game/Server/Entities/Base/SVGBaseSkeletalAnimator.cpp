@@ -111,15 +111,15 @@ void SVGBaseSkeletalAnimator::ProcessSkeletalAnimationForTime(const GameTime &ti
 
 /**
 *	@brief	Switches the animation by blending from the current animation into the next.
-*	@return	True if succesfull, false otherwise.
+*	@return	The animation index on success, -1 on failure.
 **/
-bool SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
+int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	if (!skm) {
-		return false;
+		return -1;
 	}
 
 	if (!skm->animationMap.contains(name)) {
-		return false;
+		return -1;
 	}
 
 	// Get state pointer.
@@ -137,5 +137,5 @@ bool SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	currentAnimationState->forceLoop = animation->forceLoop;
 	currentAnimationState->startTime = level.time.count();
 
-	return true;
+	return animation->index;
 }

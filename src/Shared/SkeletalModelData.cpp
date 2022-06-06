@@ -119,6 +119,7 @@ void SKM_GenerateModelData(model_t* model) {
 			.endFrame = animationData->first_frame + animationData->num_frames,
 			.numFrames = animationData->num_frames,
 			.loopingFrames = 0,
+			.frametime = BASE_FRAMETIME,
 			.forceLoop = true, //(animationData->loop == 1 ? true : false)
 		});
 		// Resize our vec if needed.
@@ -129,18 +130,25 @@ void SKM_GenerateModelData(model_t* model) {
 
 		// Calculate distances.
 		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
+			vec3_t offsetFrom;
 			for (int32_t i = animation->startFrame; i <= animation->endFrame; i++) {
 				const iqm_transform_t *pose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
 
-				//if (absolute) {
-					//animation.frameDistances.push_back(pose->translate);
-				//} else {
-					vec3_t offsetFrom;
+
+
 					vec3_t translate;
-					VectorSubtract(offsetFrom, pose->translate, translate);
-					VectorCopy(pose->translate, offsetFrom);
-					animation->frameDistances.push_back(vec3_length(translate));
-					animation->frameTranslates.push_back(translate);
+					if (i >= animation->startFrame + 2) {
+						VectorSubtract(offsetFrom, pose->translate, translate);
+						VectorCopy(pose->translate, offsetFrom);
+						animation->frameDistances.push_back(vec3_dlength(translate));
+						animation->frameTranslates.push_back(vec3_negate(translate));
+					}
+					else {
+						offsetFrom = pose->translate;
+						animation->frameDistances.push_back(0.f);
+						animation->frameTranslates.push_back(vec3_zero());
+					}
+
 				//}
 			}
 		}

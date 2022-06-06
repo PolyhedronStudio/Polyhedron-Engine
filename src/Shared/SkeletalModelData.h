@@ -97,7 +97,7 @@ struct SkeletalAnimation {
 	*	Physical Properties.
 	**/
 	//! The total distances travelled by the root bone per frame.
-	std::vector<float> frameDistances;
+	std::vector<double> frameDistances;
 	//! The translates of root bone per frame.
 	std::vector<vec3_t> frameTranslates;
 };

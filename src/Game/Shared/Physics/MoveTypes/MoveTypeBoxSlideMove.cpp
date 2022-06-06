@@ -297,16 +297,6 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	};
 
 	/**
-	*	Begin Movement by applying gravity if there's no covered ground, otherwise apply ground friction.
-	**/
-	//// Apply gravitational force if no ground entity is set. Otherwise, apply ground friction forces.
-	//if( !geGroundEntity) {
-	//	SG_AddGravity( geSlider );
-	//} else {
-	//	SG_AddGroundFriction( geSlider, friction ); // Horizontal Friction.
-	//}
-
-	/**
 	*	If the geSlider entity has any velocty, we'll start attempting to move it around.
 	**/
 	// Stores the Result Move Flags after the move has completed.
@@ -319,34 +309,8 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		**/
 		blockedMask = SG_SlideMove( &slideMoveState );
 		
-	const vec3_t org0 = slideMoveState.origin;
-	const vec3_t vel0 = slideMoveState.velocity;
-		//// Step down.
-		//if (geGroundEntity && slideMoveState.velocity.z <= 0.1) {
-		//	const vec3_t down = vec3_fmaf( slideMoveState.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down( ) );
-		//	const SGTraceResult downTrace = SG_Trace(slideMoveState.origin, slideMoveState.mins, slideMoveState.maxs, down, geSlider, slideMoveState.contentMask );
-
-		//	if ( downTrace.fraction >= 1.0f && !downTrace.podEntity ) {
-		//		blockedMask |= SlideMoveFlags::EdgeMoved;
-		//	}
-
-		//	// If it's not all in a solid, and the fraction is < 1, then we are stepping down
-		//	// a stair or something of sorts. Fraction > 1 means we're stepping down a ledge.
-		//	if ( !downTrace.allSolid ) {
-		//		// Check if it is a legitimate stair case.
-		//		if (downTrace.podEntity && !(downTrace.plane.normal.z >= PM_STEP_NORMAL) ) {
-		//		//if ( SG_SlideMove_CheckBottom( moveState ) ) {
-		//			slideMoveState.origin = downTrace.endPosition;
-
-		//			// Add flag to our mask.
-		//			blockedMask |= SlideMoveFlags::SteppedDown;
-		//		}
-		//	} else {
-		//		// Add flag to our mask.
-		//	//	blockedMask |= SlideMoveFlags::EdgeMoved;
-		//	}
-		//}
-
+		const vec3_t org0 = slideMoveState.origin;
+		const vec3_t vel0 = slideMoveState.velocity;
 
 		// Got blocked by a wall...
 		if (blockedMask & SlideMoveFlags::WallBlocked) {
@@ -355,44 +319,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 
 		// We touched something, try and step over it.
 		if ( (blockedMask & SlideMoveFlags::PlaneTouched) ) {
-			//const vec3_t org1 = slideMoveState.origin;
-			//const vec3_t vel1 = slideMoveState.velocity;
 
-			//const vec3_t up = vec3_fmaf( org0, PM_STEP_HEIGHT, vec3_up() );
-			//const SGTraceResult upTrace = SG_Trace( org0, slideMoveState.mins, slideMoveState.maxs, up, geSlider, slideMoveState.contentMask );
-
-			//// There is open space to start moving from up above us.
-			//if ( !upTrace.allSolid ) {
-			//	// Slide Move from the higher position, using the original velocity
-			//	slideMoveState.origin = upTrace.endPosition;
-			//	slideMoveState.velocity = vel0;
-
-			//	// SlideMove and addition our mask.
-			//	blockedMask |= SG_SlideMove( &slideMoveState );
-
-			//	// If we've moved, AND, did not get blocked.
-			//	if ( (blockedMask & SlideMoveFlags::Moved) && !(blockedMask & SlideMoveFlags::EdgeMoved) ) {
-			//		// Settle to the new ground, keeping the step if and only if it was successful
-			//		const vec3_t down = vec3_fmaf( slideMoveState.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
-			//		const SGTraceResult downTrace = SG_Trace( slideMoveState.origin, slideMoveState.mins, slideMoveState.maxs, down, geSlider, slideMoveState.contentMask );
-
-			//		if ( !downTrace.allSolid && downTrace.podEntity && ( downTrace.plane.normal.z >= PM_STEP_NORMAL ) ) { //PM_CheckStep(&downTrace)) {
-			//			slideMoveState.origin = downTrace.endPosition;
-			//			blockedMask |= SlideMoveFlags::SteppedUp;
-			//		} else {
-			//			// Store interpolation height.
-
-			//		}
-			//	} else {
-			//		// Store back to old origin and velocity if we never got here.
-			//		slideMoveState.origin = org0;
-			//		slideMoveState.velocity = vel0;
-			//	}
-			//} else {
-			//	// Store back to old origin and velocity if we never got here.
-			//	slideMoveState.origin = org0;
-			//	slideMoveState.velocity = vel0;
-			//}
 		}
 	}
 

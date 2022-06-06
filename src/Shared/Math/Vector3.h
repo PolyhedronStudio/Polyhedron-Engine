@@ -658,6 +658,9 @@ inline float vec3_length_squared(const vec3_t &v) {
 inline float vec3_length(const vec3_t &v) {
     return sqrtf(vec3_length_squared(v));
 }
+inline double vec3_dlength(const vec3_t &v) {
+    return sqrtf((double)vec3_length_squared(v));
+}
 
 //
 //===============
