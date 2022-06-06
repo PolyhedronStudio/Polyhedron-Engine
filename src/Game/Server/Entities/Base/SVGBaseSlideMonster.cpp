@@ -135,31 +135,53 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 		*	#2: Turn to the ideal yaw angle, and calculate our move velocity.
 		*		If the yaw angle is too large, slow down the velocity.
 		**/		
+		// Get State.
+		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+		
+		// Get Animation Index.
+		int32_t animationIndex = (animationState->animationIndex <= skm->animations.size() ? animationState->animationIndex : 0);
+
 		// Get the delta between wished for and current yaw angles.
 		const float deltaYawAngle = TurnToIdealYawAngle( );
+
+		if ( deltaYawAngle > 45 && deltaYawAngle < 315 ) {
+			// Should we switch to a different animation like turning?
+			/*if (deltaYawAngle)*/
+			// Switch if this wasn't our current animation yet.
+			if ( skm->animationMap["run_stairs_up"].index != animationIndex ) {
+				SwitchAnimation("run_stairs_up");
+			}
+		} else {
+			if ( skm->animationMap["walk_standard"].index != animationIndex ) {
+				SwitchAnimation("walk_standard");
+			}
+		}
 
 		//if ( !( deltaYawAngle > 5 && deltaYawAngle < 355 ) ) {
 		const vec3_t oldVelocity = GetVelocity();
 		const vec3_t normalizedDir = vec3_normalize(direction);
-		
-		// Calculate the velocity based on the distance we're going to travel.
-		const EntityState &state = GetState();
-		int32_t animationStartFrame = state.currentAnimation.startFrame;
-		int32_t animationEndframe = state.currentAnimation.endFrame;
-		int32_t animationFrame = state.currentAnimation.frame - state.currentAnimation.startFrame;
 
-		//// See if this exists in the distances of...
-		//auto &frameDistances = skm->animationMap["walk_standard"].frameDistances;
+		// Refresh Animation Index.
+		animationIndex = (animationState->animationIndex <= skm->animations.size() ? animationState->animationIndex : 0);
+
+
+
+		int32_t animationStartFrame = animationState->startFrame;
+		int32_t animationEndframe = animationState->endFrame;
+		int32_t animationFrame = animationState->frame - animationState->startFrame;
+
 		// Get the total distance traveled for each frame, and also the
 		// actual translation of the "root" (in our case the hip joint:06-06-2022)
-		auto &frameDistances = skm->animationMap["walk_standard"].frameDistances;
-		auto &frameTranslates= skm->animationMap["walk_standard"].frameTranslates;
+		auto &frameDistances = skm->animations[animationIndex]->frameDistances;
+		auto &frameTranslates= skm->animations[animationIndex]->frameTranslates;
 
 		// Get the translation for this animation move frame.
 		const vec3_t moveTranslate = ( frameTranslates.size() > animationFrame ? frameTranslates[animationFrame] : vec3_zero() );
 		// Get the total move distance (vec3_length of a - b) for this animation move frame.
 		const float moveDistance = ( frameTranslates.size() > animationFrame ? frameDistances[animationFrame] : 0.f );
-		if (animationFrame <= state.currentAnimation.endFrame) {
+
+
+		if (animationFrame <= animationState->endFrame) {
 			// Acts as a velocity multiplier and is determined by the Yaw Angle.
 			const float moveSpeed = ( deltaYawAngle > 45 && deltaYawAngle < 315 ? 1.15f : 1.825f );
 
@@ -179,12 +201,12 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 			SetVelocity(moveVelocity);
 
 			// Debug Output:
-			gi.DPrintf("Frame(#%i): { %f, %f, %f }\n",
-				animationFrame,
-				moveVelocity.x,
-				moveVelocity.y,
-				moveVelocity.z
-			);
+			//gi.DPrintf("Frame(#%i): { %f, %f, %f }\n",
+			//	animationFrame,
+			//	moveVelocity.x,
+			//	moveVelocity.y,
+			//	moveVelocity.z
+			//);
 		}
 		// Move slower if the ideal yaw angle is out of range.
 		// (Gives a more 'realistic' turning effect).

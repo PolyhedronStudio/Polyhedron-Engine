@@ -658,7 +658,7 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 	const int32_t currentAnimationIndex = currentAnimation->animationIndex;
 	const int32_t previousAnimationIndex = previousAnimation->animationIndex;
 
-	if (currentAnimationIndex != previousAnimationIndex) {
+	if (currentAnimationIndex != refreshAnimation.animationIndex) {
 		// See whether we got skm data, and if the animation index is valid and save to use.
 		if (skm && skm->animations.size() > currentAnimation->animationIndex) {
 			// Get a pointer to the animation data.
@@ -669,7 +669,7 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 			refreshAnimation.startFrame = skmAnimation->startFrame;
 			refreshAnimation.endFrame = skmAnimation->endFrame;
 			refreshAnimation.forceLoop = true;//currentAnimation->forceLoop;
-			refreshAnimation.frameTime = 10; //..currentAnimation->frameTime;
+			refreshAnimation.frameTime = 16; //..currentAnimation->frameTime;
 			refreshAnimation.startTime = currentAnimation->startTime;
 			refreshAnimation.loopCount = 0;//currentAnimation->loopCount;
 
