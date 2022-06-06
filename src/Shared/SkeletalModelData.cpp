@@ -131,13 +131,13 @@ void SKM_GenerateModelData(model_t* model) {
 		// Calculate distances.
 		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
 			vec3_t offsetFrom;
-			for (int32_t i = animation->startFrame; i <= animation->endFrame; i++) {
+			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
 				const iqm_transform_t *pose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
 
 
 
 					vec3_t translate;
-					if (i >= animation->startFrame + 2) {
+					if (i > animation->startFrame) {
 						VectorSubtract(offsetFrom, pose->translate, translate);
 						VectorCopy(pose->translate, offsetFrom);
 						animation->frameDistances.push_back(vec3_dlength(translate));
@@ -148,12 +148,32 @@ void SKM_GenerateModelData(model_t* model) {
 						animation->frameDistances.push_back(0.f);
 						animation->frameTranslates.push_back(vec3_zero());
 					}
-
 				//}
 			}
 		}
+		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loopFrames=%i, loop=%s):\n",
+			animationIndex,
+			animationData->name, //animation.name, Since, temp var and .c_str()
+			animation->startFrame,
+			animation->endFrame,
+			animation->numFrames,
+			animation->loopingFrames,
+			animation->forceLoop == true ? "true" : "false");
+
+		for (int i = 0; i < animation->frameDistances.size(); i++) {
+					// Debug OutPut:
+					int32_t frameIndex = i;
+					Com_DPrintf("Frame(#%i): Translate=(%f,%f,%f), Distance=%f\n", 
+						frameIndex,
+						animation->frameTranslates[frameIndex].x,
+						animation->frameTranslates[frameIndex].y,
+						animation->frameTranslates[frameIndex].z,
+						animation->frameDistances[frameIndex]						
+					);
+		}
+
 		// Output animation data.
-#if SHAREDGAME_SERVERGAME && DEBUG_MODEL_DATA
+//#if SHAREDGAME_SERVERGAME && DEBUG_MODEL_DATA
 		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loopFrames=%i, loop=%s)\n",
 			animationIndex,
 			animationData->name, //animation.name, Since, temp var and .c_str()
@@ -162,7 +182,7 @@ void SKM_GenerateModelData(model_t* model) {
 			animation->numFrames,
 			animation->loopingFrames,
 			animation->forceLoop == true ? "true" : "false");
-#endif
+//#endif
 	}
 
 	/**
