@@ -22,7 +22,8 @@
 #include "Client.h"
 #include "Server/Server.h"
 #include "Refresh/Models.h"
-#include "Common/Models/Models.h"
+//#include "Common/Models/Models.h"
+#include "Models.h"
 // (Client/Game) related.
 #include "GameModule.h"   // TODO: How come it can find client.h??
 #include "Sound/Sound.h"

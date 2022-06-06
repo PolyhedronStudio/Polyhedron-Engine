@@ -18,10 +18,10 @@
 #include "System/Hunk.h"
 #include "Common/Error.h"
 
-//! Maximum allowed Alias Model Skins.
-static constexpr int32_t MAX_ALIAS_SKINS = 32;
-//! Maximum allowed Alias Model Verts.
-static constexpr int32_t MAX_ALIAS_VERTS = 4096;
+////! Maximum allowed Alias Model Skins.
+//static constexpr int32_t MAX_ALIAS_SKINS = 32;
+////! Maximum allowed Alias Model Verts.
+//static constexpr int32_t MAX_ALIAS_VERTS = 4096;
 
 // WID: In case you came here for some refresh work, updating etc, these have been moved to Shared.
 // needs to know about these:
@@ -66,11 +66,11 @@ extern void (*MOD_Reference)(model_t *model);
 //!
 // Compute pose transformations for the given model + data
 // `relativeJoints` must have enough room for model->num_poses
-void MOD_ComputeIQMRelativeJoints(const iqm_model_t* model, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
+void MOD_ComputeIQMRelativeJoints(const model_t* model, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
 
 // Compute local space matrices for the given pose transformations.
 // this is the "fast path" for when world space is not necessary.
-void MOD_ComputeIQMLocalSpaceMatricesFromRelative(const iqm_model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices);
+void MOD_ComputeIQMLocalSpaceMatricesFromRelative(const model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices);
 
 // Compute world space matrices for the given pose transformations.
-void MOD_ComputeIQMWorldSpaceMatricesFromRelative(const iqm_model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices);
+void MOD_ComputeIQMWorldSpaceMatricesFromRelative(const model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices);

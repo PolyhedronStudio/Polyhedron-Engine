@@ -15,7 +15,7 @@ public:
     MonsterTestDummy(PODEntity* clEntity);
     virtual ~MonsterTestDummy() = default;
 
-    DefineMapClass("monster_testdummy", MonsterTestDummy, CLGBasePacketEntity);
+    DefineMapClass("xmonster_testdummy", MonsterTestDummy, CLGBasePacketEntity);
 
 
     /**
@@ -54,8 +54,8 @@ public:
 	/**
 	*	Temp Skeletal stuff.
 	**/
-	qhandle_t modelHandle;
-	SkeletalModelData skm;
+	//qhandle_t modelHandle;
+	//SkeletalModelData *skm;
 
 
     /***

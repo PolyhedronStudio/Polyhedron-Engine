@@ -10,7 +10,8 @@
 ***/
 #include "Server.h"
 #include "Models.h"
-#include "Common/Models/Models.h"
+//#include "Common/Models/Models.h"
+#include "Client/Models.h"
 #include "System/Hunk.h"
 #include "Shared/Formats/Md2.h"
 #if USE_MD3
@@ -149,7 +150,7 @@ void SV_Model_List_f(void)
 		bytes += model->hunk.mapped;
 		count++;
 	}
-	Com_Printf("Total server models: %d (out of %d slots)\n", count, r_numModels);
+	Com_Printf("Total server models: %d (out of %d slots)\n", count, sv_numModels);
 	Com_Printf("Total server resident: %" PRIz "\n", bytes); // CPP: String fix.
 }
 
@@ -259,7 +260,7 @@ model_t *SV_Model_ForHandle(qhandle_t handle) {
 **/
 void SV_Model_Init() {
 	if (sv_numModels) {
-		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, r_numModels);
+		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, sv_numModels);
 	}
 
 	Cmd_AddCommand("servermodellist", SV_Model_List_f);
@@ -413,7 +414,7 @@ done:
 	index = (model - sv_models) + 1;
 
 	// Assign the skeletal model data struct as a pointer to this model_t
-	model->skeletalModelData = &sv_skeletalModels[index];
+	model->skeletalModelData = &sv_skeletalModels[index - 1];
 
 	// Generate Skeletal Model Data.
 	SKM_GenerateModelData(model);

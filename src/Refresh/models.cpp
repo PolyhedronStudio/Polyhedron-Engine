@@ -22,7 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Shared/List.h"
 #include "Common/Common.h"
 #include "Common/Files.h"
-#include "Common/Models/Models.h"
+#include "Client/Models.h"
+//#include "Common/Models/Models.h"
 #include "System/Hunk.h"
 #include "Shared/Formats/Md2.h"
 #if USE_MD3
@@ -35,6 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern cvar_t *vid_rtx;
 extern cvar_t *gl_use_hd_assets;
+extern SkeletalModelData r_skeletalModels[];
 
 static model_class_t
 get_model_class(const char *name)
@@ -182,6 +184,15 @@ done:
 	int register_model_dirty;
 	register_model_dirty = 1;
 #endif
+
+	//// Assign the skeletal model data struct as a pointer to this model_t
+	//if (!model->skeletalModelData) {
+	//	model->skeletalModelData = &r_skeletalModels[index - 1];
+
+	//	// Generate Skeletal Model Data.
+	//	SKM_GenerateModelData(model);
+	//}
+
 	return index;
 
 fail2:

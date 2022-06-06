@@ -41,8 +41,6 @@ cvar_t      *vid_displaylist;
 // Original comment: Leftover from the q2rtx code, this variable maintains the sound effect parsing parameters...
 snd_params_t    snd;
 
-// used in gl and vkpt renderers
-int registration_sequence; // CPP: Extern
 
 #define MODE_GEOMETRY   1
 #define MODE_FULLSCREEN 2

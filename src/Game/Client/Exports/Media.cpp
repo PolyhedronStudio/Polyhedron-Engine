@@ -70,7 +70,7 @@ void ClientGameMedia::LoadWorld() {
     for (i = 2; i < MAX_MODELS; i++) {
         // Fetch string (filename).
         filename = cl->configstrings[ConfigStrings::Models + i];
-        // Ensure it has a name.
+        // Stop the second we ran into an empty config string.
         if (!filename[0]) {
             break;
         }

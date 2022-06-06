@@ -438,8 +438,6 @@ void CLGBaseLocalEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
 	EntityAnimationState &currentAnimation	= currentState.currentAnimation;
 	//EntityAnimationState &previousAnimation	= currentState.previousAnimation;
 
-	// Backup previous animation for this entity state.
-	currentState.previousAnimation = currentAnimation;
 	EntityAnimationState &previousAnimation	= currentState.previousAnimation;
 
 	// And start processing the new, current state.
@@ -455,8 +453,13 @@ void CLGBaseLocalEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
 
 	// Now we've updated our animation state, pass it over to our refresh entity.
 	refreshEntity.backlerp	= currentAnimation.backLerp;
+	refreshEntity.oldframe	= refreshEntity.frame;
 	refreshEntity.frame		= currentAnimation.frame;
-	refreshEntity.oldframe	= previousAnimation.frame;
+
+
+	
+	// Backup previous animation for this entity state.
+	currentState.previousAnimation = currentAnimation;
 }
 /**
 *	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.

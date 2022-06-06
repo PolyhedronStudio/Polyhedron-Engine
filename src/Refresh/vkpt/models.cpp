@@ -42,7 +42,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/Formats/Md2.h"
 #include "Shared/Formats/Md3.h"
 #include "Shared/Formats/Sp2.h"
-#include "Common/Models/Models.h"
+#include "Client/Models.h"
+//#include "Common/Models/Models.h"
 #include "material.h"
 #include <assert.h>
 
@@ -674,6 +675,7 @@ fail:
 }
 #endif
 
+extern SkeletalModelData r_skeletalModels[];
 qerror_t MOD_LoadIQM_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name) {
 	Hunk_Begin(&model->hunk, 0x4000000);
 	model->type = model_t::MOD_ALIAS;
@@ -684,6 +686,10 @@ qerror_t MOD_LoadIQM_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc,
 		Hunk_Free(&model->hunk);
 		return res;
 	}
+
+	// LOAD SKM DATA?
+	model->skeletalModelData = &r_skeletalModels[(model - r_models) + 1];
+	SKM_GenerateModelData(model);
 
 	char base_path[MAX_QPATH];
 	COM_FilePath(mod_name, base_path, sizeof(base_path));

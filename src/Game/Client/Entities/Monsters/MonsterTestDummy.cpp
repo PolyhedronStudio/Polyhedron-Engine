@@ -39,10 +39,7 @@ void MonsterTestDummy::Precache() {
     Base::Precache();
 
     // Precache test dummy model.
-    qhandle_t modelID = clgi.R_RegisterModel("models/monsters/testdummy/testdummy.iqm");
-	
-	model_t *model = clgi.CL_Model_GetModelByHandle(modelID);
-//	skm = SKM_GenerateModelData(model);
+
 }
 
 //
@@ -52,14 +49,16 @@ void MonsterTestDummy::Precache() {
 //===============
 //
 void MonsterTestDummy::Spawn() {
-    // Always call parent class method.
-    Base::Spawn();
 
+	//clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
+	// Always call parent class method.
+    Base::Spawn();
+		
     // Set solid.
     SetSolid(Solid::OctagonBox);
 
-    // Set move type.
-    SetMoveType(MoveType::TossSlide);
+    //// Set move type.
+    SetMoveType(MoveType::SlideMove);
 
     // Since this is a "monster", after all...
     SetServerFlags(EntityServerFlags::Monster);
@@ -67,8 +66,8 @@ void MonsterTestDummy::Spawn() {
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
-    // Set the barrel model, and model index.
-    SetModel("models/monsters/testdummy/testdummy.iqm");
+    //// Set the barrel model, and model index.
+    SetModel("models/monsters/slidedummy/slidedummy.iqm");
 
     // Set the bounding box.
     //SetBoundingBox({ -16, -16, -41 }, { 16, 16, 43 });
@@ -113,6 +112,8 @@ void MonsterTestDummy::Respawn() { Base::Respawn(); }
 void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
+
+
 }
 
 //===============
@@ -148,6 +149,7 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 // 
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
 
+
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);
@@ -166,46 +168,45 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     static constexpr uint32_t ANIM_HZ = 30.0;
 	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
 	const int32_t animationFrame = animationState->frame;
-	if (animationFrame >= 0 && skm.boundingBoxes.size() > animationFrame) {
-		vec3_t mins = skm.boundingBoxes[animationState->frame].mins;
-		vec3_t maxs = skm.boundingBoxes[animationState->frame].maxs;
-		//mins = { mins.z, mins.y, mins.x };
-		//maxs = { maxs.z, maxs.y, maxs.x };
-		float depth = fabs(maxs.x) + fabs(mins.x);
-		depth /= 2.f;
-		mins.x = - depth;
-		maxs.x = depth;
-		float width = fabs(maxs.y) + fabs(mins.y);
-		width /= 2.f;
-		mins.y = - width;
-		maxs.y = width;
+	if (animationFrame >= 0 && skm->boundingBoxes.size() > animationFrame) {
+			//vec3_t mins = skm->boundingBoxes[animationState->frame].mins;
+			//vec3_t maxs = skm->boundingBoxes[animationState->frame].maxs;
+			////mins = { mins.z, mins.y, mins.x };
+			////maxs = { maxs.z, maxs.y, maxs.x };
+			//float depth = fabs(maxs.x) + fabs(mins.x);
+			//depth /= 2.f;
+			//mins.x = - depth;
+			//maxs.x = depth;
+			//float width = fabs(maxs.y) + fabs(mins.y);
+			//width /= 2.f;
+			//mins.y = - width;
+			//maxs.y = width;
+			//float height = fabs(maxs.z) + fabs(mins.z);
+			//height /= 2.f;
+			//maxs.z = Minf(0.f, -height);
+			////mins.z = Minsf() - height;
+			//maxs.z = height;
 
-		vec3_t oldMins = GetMins();
-		vec3_t oldMaxs = GetMaxs();
+			//vec3_t oldMins = GetMins();
+			//vec3_t oldMaxs = GetMaxs();
 
-		static GameTime lastTime = GameTime::zero();
-		if (lastTime == GameTime::zero()) {
-			lastTime = level.time;
-		}
-		mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-		maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-		if (lastTime != GameTime::zero()) {
-			lastTime = level.time;
-		}
-		//gi.DPrintf("%f %f %f, %f %f %f\n",
-		//	mins.x,
-		//	mins.y,
-		//	mins.z,
-		//	maxs.x,
-		//	maxs.y,
-		//	maxs.z);
+			//static GameTime lastTime = GameTime::zero();
+			//if (lastTime == GameTime::zero()) {
+			//	lastTime = level.time;
+			//}
+			//mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+			//maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+			//if (lastTime != GameTime::zero()) {
+			//	lastTime = level.time;
+			//}
 
-		SetMins(mins);
-		SetMaxs(maxs);
-		LinkEntity();
+
+			//SetMins(mins);
+			//SetMaxs(maxs);
+			//LinkEntity();
 	}
     //SG_StepMove_CheckGround(this);
-	SG_CheckGround(this);
+	//SG_CheckGround(this);
     // Link entity back in.
     LinkEntity();
 

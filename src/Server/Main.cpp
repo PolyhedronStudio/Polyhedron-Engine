@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Server.h"
 #include "Models.h"
 #include "Client/Input.h"
-#include "Common/Models/Models.h"
+//#include "Common/Models/Models.h"
 
 LIST_DECL(sv_masterlist);   // address of group servers
 LIST_DECL(sv_banlist);

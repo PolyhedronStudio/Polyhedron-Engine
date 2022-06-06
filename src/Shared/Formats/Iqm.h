@@ -18,9 +18,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#ifndef __IQM_H__
-#define __IQM_H__
+#pragma once
 
+/**
+*
+*
+*	The following is the actual IQM file structur.
+*
+*	Scroll down to find the actual in-engine representation that is used
+*	to work with.
+*
+*
+**/
 #define IQM_MAGIC "INTERQUAKEMODEL"
 #define IQM_VERSION 2
 
@@ -116,4 +125,67 @@ typedef struct iqmbounds {
     float xyradius, radius;
 } iqmBounds_t;
 
-#endif
+
+
+/**
+*
+*
+*	The following is the internal in-engine data representation of the IQM
+*	model data.
+*
+*
+**/
+typedef struct {
+    vec3_t translate;
+    quat_t rotate;
+    vec3_t scale;
+} iqm_transform_t;
+
+typedef struct {
+    char name[MAX_QPATH];
+    uint32_t first_frame;
+    uint32_t num_frames;
+    qboolean loop;
+} iqm_anim_t;
+
+// inter-quake-model
+typedef struct {
+    uint32_t num_vertexes;
+    uint32_t num_triangles;
+    uint32_t num_frames;
+    uint32_t num_meshes;
+    uint32_t num_joints;
+    uint32_t num_poses;
+    uint32_t num_animations;
+    struct iqm_mesh_s* meshes;
+
+    uint32_t* indices;
+
+    // vertex arrays
+    float* positions;
+    float* texcoords;
+    float* normals;
+    float* tangents;
+    byte* colors;
+    byte* blend_indices; // byte4 per vertex
+    float* blend_weights; // float4 per vertex
+
+    char* jointNames;
+    int* jointParents;
+    float* bindJoints; // [num_joints * 12]
+    float* invBindJoints; // [num_joints * 12]
+    iqm_transform_t* poses; // [num_frames * num_poses]
+    float* bounds;
+
+    iqm_anim_t* animations;
+} iqm_model_t;
+
+// inter-quake-model mesh
+typedef struct iqm_mesh_s {
+    char name[MAX_QPATH];
+    char material[MAX_QPATH];
+    iqm_model_t* data;
+    uint32_t first_vertex, num_vertexes;
+    uint32_t first_triangle, num_triangles;
+    uint32_t first_influence, num_influences;
+} iqm_mesh_t;

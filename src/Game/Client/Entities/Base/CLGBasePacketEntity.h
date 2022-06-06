@@ -113,6 +113,13 @@ public:
 	**/
 	virtual void SpawnFromState(const EntityState &state) override;
 
+	/**
+	*	@brief	Switches the animation by blending from the current animation into the next.
+	*	@return	True if succesfull, false otherwise.
+	**/
+	bool SwitchAnimation(const std::string &name);
+	bool SwitchAnimation(int32_t animationIndex);
+
     /**
     *   @returen True if the entity is still in the current frame.
     **/
@@ -946,7 +953,7 @@ public:
     /***
     *
     * 
-    *   Refresh Related Functions.
+    *   Refresh Related Functions & Variables.
     *
     * 
     ***/
@@ -954,6 +961,10 @@ public:
 	*	@brief	Gives the entity a chance to prepare the 'RefreshEntity' for the current rendered frame.
 	**/
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
+
+protected:
+	//! Skeletal Model Data pointer. Needs to be loaded on request. DIYS
+	SkeletalModelData *skm = nullptr;
 
 private:
 	/**

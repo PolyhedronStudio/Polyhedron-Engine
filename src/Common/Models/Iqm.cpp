@@ -741,16 +741,13 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 	oldFrame = iqmModel->num_frames ? (oldFrame % (int) iqmModel->num_frames) : 0;
 
 	// Copy or lerp animation currentFrame pose
-	if (oldFrame == currentFrame)
-	{
+	if (oldFrame == currentFrame) {
 		const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
-		for (uint32_t pose_idx = 0; pose_idx < iqmModel->num_poses; pose_idx++, pose++, relativeJoint++)
-		{
+		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, pose++, relativeJoint++) {
 			// Do we have skeletal model data?
-			if (skmData && pose_idx == skmData->rootJointIndex) {
-//			if (pose_idx == iqmModel->root_id)
+			if (skmData && poseIndex == skmData->rootJointIndex) {
 				VectorClear(relativeJoint->translate);
-				VectorSet(relativeJoint->scale, 1, 1, 1);
+				VectorCopy(pose->scale, relativeJoint->scale);
 				QuatCopy(pose->rotate, relativeJoint->rotate);
 				continue;
 			}
@@ -764,13 +761,14 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 	{
 		const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
 		const iqm_transform_t* oldpose = &iqmModel->poses[oldFrame * iqmModel->num_poses];
-		for (uint32_t pose_idx = 0; pose_idx < iqmModel->num_poses; pose_idx++, oldpose++, pose++, relativeJoint++)
+		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, oldpose++, pose++, relativeJoint++)
 		{
 			// Do we have skeletal model data?
-			if (skmData && pose_idx == skmData->rootJointIndex) {
-//			if (pose_idx == iqmModel->root_id)
+			if (skmData && poseIndex == skmData->rootJointIndex) {
 				VectorClear(relativeJoint->translate);
-				VectorSet(relativeJoint->scale, 1, 1, 1);
+				relativeJoint->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
+				relativeJoint->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
+				relativeJoint->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
 				QuatCopy(pose->rotate, relativeJoint->rotate);
 				continue;
 			}

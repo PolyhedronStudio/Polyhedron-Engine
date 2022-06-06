@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/Formats/Iqm.h"
 #include "Refresh/Images.h"
 #include "Refresh/Models.h"
+#include "Models.h"
 
 //! Client Side Model Registration Sequence:
 //! Each time a map change occurs it increments the sequence.

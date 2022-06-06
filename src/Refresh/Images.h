@@ -98,7 +98,7 @@ typedef struct image_s {
 extern image_t  r_images[MAX_RIMAGES];
 extern int      r_numImages;
 
-extern int registration_sequence;
+//extern int registration_sequence;
 
 #define R_NOTEXTURE &r_images[0]
 

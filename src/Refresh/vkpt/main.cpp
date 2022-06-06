@@ -1797,7 +1797,27 @@ static void process_regular_entity(
 			return;
 		}
 
-		R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
+		// For non skeletal model data.
+		if (!model->skeletalModelData) {
+			R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
+		} else if (model->skeletalModelData) {
+			float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
+
+			iqm_transform_t relativeJoints[IQM_MAX_JOINTS];
+
+			MOD_ComputeIQMRelativeJoints(model, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJoints);
+
+			//if (model->spin_id != -1 && entity->spin_angle) {
+			//	quat_t spin_quat = { 0, 0, 0, 1 };
+			//	QuatRotateY(spin_quat, spin_quat, entity->spin_angle);
+			//	QuatMultiply(relativeJoints[model->spin_id].rotate, relativeJoints[model->spin_id].rotate, spin_quat);
+			//}
+
+			MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJoints, pose_mat);
+			MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJoints, pose_mat);
+
+			*iqm_matrix_offset += (int)model->iqmData->num_poses;
+		}
 
 		*iqm_matrix_offset += (int)model->iqmData->num_poses;
 	}

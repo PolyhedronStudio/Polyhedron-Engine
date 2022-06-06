@@ -345,7 +345,7 @@ static bool SG_StepUp( SlideMoveState *moveState ) {
 			// Check if it is a legitimate stair case.
 			if ((downTraceB.podEntity != downTraceA.podEntity || downTraceA.plane.dist != downTraceB.plane.dist) && IsWalkablePlane(downTraceB.plane) ) {
 				moveState->origin = downTraceB.endPosition;
-								SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: firstDownTrace");
+				//SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: firstDownTrace");
 			}
 		}
 	}
@@ -373,7 +373,7 @@ static bool SG_StepUp( SlideMoveState *moveState ) {
         if ( !downTrace.allSolid ) {
      
 			if ( (geGroundEntity && IsWalkablePlane( downTrace.plane ) ) ) {// || vel0.z < PM_SPEED_UP) {
-				SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: secondDownTrace - Position Set");
+				//SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: secondDownTrace - Position Set");
 
 					moveState->origin = downTrace.endPosition;
 			} else {
@@ -393,7 +393,7 @@ static bool SG_StepUp( SlideMoveState *moveState ) {
     moveState->origin = org1;
     moveState->velocity = vel1;
 			
-	SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: Made it till the end");
+	//SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: Made it till the end");
 
 	return false;
 }

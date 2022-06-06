@@ -87,7 +87,7 @@ void MonsterTestDummy::Spawn() {
     SetModel("models/monsters/slidedummy/slidedummy.iqm");
 
     // Set the bounding box.
-    SetBoundingBox({ -16, -16, -41 }, { 16, 16, 43 });
+    SetBoundingBox({ -16, -16, -46 }, { 16, 16, 44 });
 
     // Setup our MonsterTestDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
@@ -170,15 +170,18 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 // 
 static uint64_t startz = 0;
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-	// Set the animation.
-	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-	animationState->animationIndex = 1;
-	animationState->startFrame = 0;
-	animationState->endFrame = 71;
-	animationState->frameTime = ANIMATION_FRAMETIME;
-	animationState->startTime = startz = level.time.count() + FRAMETIME.count();
-	animationState->loopCount = 0;
-	animationState->forceLoop = true;
+	//
+	
+	//// Set the animation.
+	//EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
+	//animationState->animationIndex = 1;
+	//animationState->startFrame = 3;
+	//animationState->endFrame = 72;
+	//animationState->frameTime = 16;
+	//animationState->startTime = startz = level.time.count() + FRAMETIME.count();
+	//animationState->loopCount = 0;
+	//animationState->forceLoop = true;
+	SwitchAnimation("walk_standard");
 
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
@@ -218,48 +221,54 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// Set the animation.
 		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-	/*
+	
 		//// Get animation data.
 		const int32_t animationFrame = animationState->frame;
 		if (animationFrame >= 0 && skm->boundingBoxes.size() > animationFrame) {
-			vec3_t mins = skm->boundingBoxes[animationState->frame].mins;
-			vec3_t maxs = skm->boundingBoxes[animationState->frame].maxs;
-			//mins = { mins.z, mins.y, mins.x };
-			//maxs = { maxs.z, maxs.y, maxs.x };
-			float depth = fabs(maxs.x) + fabs(mins.x);
-			depth /= 2.f;
-			mins.x = - depth;
-			maxs.x = depth;
-			float width = fabs(maxs.y) + fabs(mins.y);
-			width /= 2.f;
-			mins.y = - width;
-			maxs.y = width;
-
-			vec3_t oldMins = GetMins();
-			vec3_t oldMaxs = GetMaxs();
-
-			static GameTime lastTime = GameTime::zero();
-			if (lastTime == GameTime::zero()) {
-				lastTime = level.time;
-			}
-			mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-			maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-			if (lastTime != GameTime::zero()) {
-				lastTime = level.time;
-			}
-			gi.DPrintf("%f %f %f, %f %f %f\n",
-				mins.x,
-				mins.y,
-				mins.z,
-				maxs.x,
-				maxs.y,
-				maxs.z);
-
-			SetMins(mins);
-			SetMaxs(maxs);
-			LinkEntity();
+//			vec3_t mins = skm->boundingBoxes[animationState->frame].mins;
+//			vec3_t maxs = skm->boundingBoxes[animationState->frame].maxs;
+//			//mins = { mins.z, mins.y, mins.x };
+//			//maxs = { maxs.z, maxs.y, maxs.x };
+//			float depth = fabs(maxs.x) + fabs(mins.x);
+//			depth /= 2.f;
+//			mins.x = - depth;
+//			maxs.x = depth;
+//			float width = fabs(maxs.y) + fabs(mins.y);
+//			width /= 2.f;
+//			mins.y = - width;
+//			maxs.y = width;
+//			float height = fabs(maxs.z) + fabs(mins.z);
+////			height /= 2.f;
+//			//maxs.z = Minf(0.f, -height);
+//			//mins.z = Minsf() - height;
+//			mins.z = 0;
+//			maxs.z = height;
+//
+//			vec3_t oldMins = GetMins();
+//			vec3_t oldMaxs = GetMaxs();
+//
+//			static GameTime lastTime = GameTime::zero();
+//			if (lastTime == GameTime::zero()) {
+//				lastTime = level.time;
+//			}
+//			mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+//			maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+//			if (lastTime != GameTime::zero()) {
+//				lastTime = level.time;
+//			}
+//			//gi.DPrintf("%f %f %f, %f %f %f\n",
+//			//	mins.x,
+//			//	mins.y,
+//			//	mins.z,
+//			//	maxs.x,
+//			//	maxs.y,
+//			//	maxs.z);
+//
+//			SetMins(mins);
+//			SetMaxs(maxs);
+//			//LinkEntity();
 		}
-		*/
+		
 		// Navigate to goal.
 		Move_NavigateToTarget( );
 	}

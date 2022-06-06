@@ -30,7 +30,8 @@ static constexpr int32_t SKM_MAX_JOINTS = IQM_MAX_JOINTS;
 **/
 struct SkeletalModelData {
 	//! TODO: Indexed by name, should be a hash map instead?
-	std::map<std::string, SkeletalAnimation> animations;
+	std::map<std::string, SkeletalAnimation> animationMap;
+	std::vector<SkeletalAnimation*> animations;
 
 	//! Bones, key names, index values.
 	std::map<std::string, int32_t> boneNameIndices;
@@ -97,6 +98,8 @@ struct SkeletalAnimation {
 	**/
 	//! The total distances travelled by the root bone per frame.
 	std::vector<float> frameDistances;
+	//! The translates of root bone per frame.
+	std::vector<vec3_t> frameTranslates;
 };
 
 /**

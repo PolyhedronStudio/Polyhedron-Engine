@@ -148,36 +148,86 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 		int32_t animationEndframe = state.currentAnimation.endFrame;
 		int32_t animationFrame = state.currentAnimation.frame - state.currentAnimation.startFrame;
 
-		// See if this exists in the distances of...
-		auto &frameDistances = skm->animations["walk"].frameDistances;
+		//// See if this exists in the distances of...
+		//auto &frameDistances = skm->animationMap["walk_standard"].frameDistances;
+		// Get the total distance traveled for each frame, and also the
+		// actual translation of the "root" (in our case the hip joint:06-06-2022)
+		auto &frameDistances = skm->animationMap["walk_standard"].frameDistances;
+		auto &frameTranslates= skm->animationMap["walk_standard"].frameTranslates;
 
-		if (animationFrame < state.currentAnimation.endFrame) {
-			// Yeah...
-			// Calculate velocity.
-			const vec3_t moveVelocity = vec3_t{
-				frameDistances[animationFrame],
-				frameDistances[animationFrame],
-				oldVelocity.z
-			} * vec3_t{ normalizedDir.x, normalizedDir.y, 0.f};
+		// Get the translation for this animation move frame.
+		const vec3_t moveTranslate = ( frameTranslates.size() > animationFrame ? frameTranslates[animationFrame] : vec3_zero() );
+		// Get the total move distance (vec3_length of a - b) for this animation move frame.
+		const float moveDistance = ( frameTranslates.size() > animationFrame ? frameDistances[animationFrame] : 0.f );
+		if (animationFrame <= state.currentAnimation.endFrame) {
+			// Acts as a velocity multiplier and is determined by the Yaw Angle.
+			const float moveSpeed = ( deltaYawAngle > 45 && deltaYawAngle < 315 ? 1.15f : 1.825f );
+
+			// Create our move distance vector and multiply by moveSpeed
+			const vec3_t vDistance = vec3_t { moveDistance * moveSpeed, moveDistance * moveSpeed, 0.f };
+			// Ignore the Z translation, it might get us "stuck" after all.
+			const vec3_t vTranslate = vec3_t { moveTranslate.x, moveTranslate.y, 0.f };
+			// Get ourselves a normalized direction without Z.
+			const vec3_t vDirection = vec3_t { normalizedDir.x, normalizedDir.y, 0.f };
+			// Calculate the total moveVelocity into the normal's direction.
+			vec3_t moveVelocity = (vDistance + vTranslate) * vDirection;
+
+			// Last but not least, we want to maintain our old Z velocity.
+			moveVelocity.z = oldVelocity.z;
+
+			// And let's go!.
 			SetVelocity(moveVelocity);
+
+			// Debug Output:
+			gi.DPrintf("Frame(#%i): { %f, %f, %f }\n",
+				animationFrame,
+				moveVelocity.x,
+				moveVelocity.y,
+				moveVelocity.z
+			);
 		}
 		// Move slower if the ideal yaw angle is out of range.
 		// (Gives a more 'realistic' turning effect).
-		if (deltaYawAngle > 45 && deltaYawAngle < 315) {
-			// Set velocity to head into direction.
-			const vec3_t wishVelocity = vec3_t {
-				52.f * normalizedDir.x,	52.f * normalizedDir.y, 
-				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
-			};
-			//SetVelocity(wishVelocity);
-		} else {
-			// Set velocity to head into direction.
-			const vec3_t wishVelocity = vec3_t { 
-				72.f * normalizedDir.x,	72.f * normalizedDir.y,
-				(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
-			};
-			//SetVelocity(wishVelocity);
-		}
+		//if (deltaYawAngle > 45 && deltaYawAngle < 315) {
+		//if (animationFrame <= state.currentAnimation.endFrame) {
+		//	// Get moved frame distance. (vec3_length of traversed distance.)
+		//	const float frameDistance = frameDistances[animationFrame];
+		//	// Calculate velocity based on distance traversed per frame.
+		//	const vec3_t moveVelocity = vec3_t{
+		//		frameDistance * normalizedDir.x,
+		//		frameDistance* normalizedDir.y,
+		//		(GetFlags() & EntityFlags::Fly ? frameDistances[animationFrame] * normalizedDir.z : oldVelocity.z),
+		//	};
+
+		//	SetVelocity(moveVelocity);
+		//}
+		//	// Set velocity to head into direction.
+		//	//const vec3_t wishVelocity = vec3_t {
+		//	//	52.f * normalizedDir.x,	52.f * normalizedDir.y, 
+		//	//	(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
+		//	//};
+		//	//SetVelocity(wishVelocity);
+		//} else {
+		//if (animationFrame <= state.currentAnimation.endFrame) {
+		//	// Get moved frame distance. (vec3_length of traversed distance.)
+		//	// Multiply it by 0.65 so the character "slow down".
+		//	const float frameDistance = frameDistances[animationFrame] * 0.65f;
+		//	// Calculate velocity based on distance traversed per frame.
+		//	const vec3_t moveVelocity = vec3_t{
+		//		frameDistance * normalizedDir.x,
+		//		frameDistance* normalizedDir.y,
+		//		(GetFlags() & EntityFlags::Fly ? frameDistances[animationFrame] * normalizedDir.z : oldVelocity.z),
+		//	};
+
+		//	SetVelocity(moveVelocity);
+		//}
+		//	// Set velocity to head into direction.
+		//	//const vec3_t wishVelocity = vec3_t { 
+		//	//	72.f * normalizedDir.x,	72.f * normalizedDir.y,
+		//	//	(GetFlags() & EntityFlags::Fly ? 33.f * normalizedDir.z : oldVelocity.z ) 
+		//	//};
+		//	//SetVelocity(wishVelocity);
+		//}
 
 		/**
 		*	#3: Start moving our Monster ass.
@@ -488,10 +538,10 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 			if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved "; }
 			blockMaskString += ")";
 		
-			gi.DPrintf( "%s\n", blockMaskString.c_str());
+			//gi.DPrintf( "%s\n", blockMaskString.c_str());
 		} else {
 			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (0)\n";
-			gi.DPrintf( "%s\n", blockMaskString.c_str());
+			//gi.DPrintf( "%s\n", blockMaskString.c_str());
 		}
 #endif
 	}

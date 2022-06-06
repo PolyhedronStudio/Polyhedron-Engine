@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Shared/Formats/Wal.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
-
+#include "Client/Models.h"
 #include <assert.h>
 
 #define R_COLORMAP_PCX    "pics/colormap.pcx"
@@ -51,6 +51,7 @@ void stbi_write(void *context, void *data, int size)
 
 extern cvar_t* vid_rtx;
 extern cvar_t* gl_use_hd_assets;
+
 
 /*
 ====================================================================

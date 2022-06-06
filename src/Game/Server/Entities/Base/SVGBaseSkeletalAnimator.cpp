@@ -98,7 +98,7 @@ void SVGBaseSkeletalAnimator::ProcessSkeletalAnimationForTime(const GameTime &ti
 	*previousAnimation = *currentAnimation;
 
 	// And start processing the new, current state.
-    currentAnimation->backLerp = 1.0 - SG_FrameForTime(&currentAnimation->frame, // Pointer to frame storage variable.
+    currentAnimation->backLerp = 1.0f - SG_FrameForTime(&currentAnimation->frame, // Pointer to frame storage variable.
         GameTime(time),                        // Current Time.
         GameTime(currentAnimation->startTime), // Animation Start time.
         currentAnimation->frameTime,  // Animation Frame Time.
@@ -107,4 +107,35 @@ void SVGBaseSkeletalAnimator::ProcessSkeletalAnimationForTime(const GameTime &ti
         currentAnimation->loopCount,  // Loop count.
         currentAnimation->forceLoop   // Force loop
     );
+}
+
+/**
+*	@brief	Switches the animation by blending from the current animation into the next.
+*	@return	True if succesfull, false otherwise.
+**/
+bool SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
+	if (!skm) {
+		return false;
+	}
+
+	if (!skm->animationMap.contains(name)) {
+		return false;
+	}
+
+	// Get state pointer.
+	EntityState *currentState	= &podEntity->currentState;
+	// Get animation state.
+	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
+	
+	// Get our animation.
+	SkeletalAnimation *animation = &skm->animationMap[name];
+	currentAnimationState->animationIndex = animation->index;
+	currentAnimationState->endFrame = animation->endFrame;
+	currentAnimationState->startFrame = animation->startFrame;
+	currentAnimationState->frameTime = animation->frametime;
+	currentAnimationState->loopCount = animation->loopingFrames;
+	currentAnimationState->forceLoop = animation->forceLoop;
+	currentAnimationState->startTime = level.time.count();
+
+	return true;
 }
