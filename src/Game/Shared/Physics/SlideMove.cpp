@@ -375,9 +375,7 @@ static bool SG_StepUp( SlideMoveState *moveState ) {
         if ( !downTrace.allSolid ) {
      
 			if ( (geGroundEntity && IsWalkablePlane( downTrace.plane ) ) ) {// || vel0.z < PM_SPEED_UP) {
-				SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: secondDownTrace - Position Set");
-
-
+			//	SG_Physics_PrintDeveloper("SlideMove Entity(#" + std::to_string(moveState->moveEntityNumber) + ") SG_StepUp: secondDownTrace - Position Set");
 				return true;
 					//moveState->origin = org1;
 					
@@ -493,7 +491,7 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 * 
 ***/
 /**
-*	@brief	Executes a SlideMove for the current entity by clipping its velocity to the touching plane' normals.
+*	@brief	Executes a SlideMove for the current moveState by clipping its velocity to the touching plane' normals.
 *	@return	The blockedMask with the following possible flags, which when set mean:
 *			- SlideMoveFlags::PlaneTouched	:	The move has touched a plane.
 *			- SlideMoveFlags::WallBlocked	:	The move got blocked by a wall.

@@ -117,8 +117,8 @@ public:
 	*	@brief	Switches the animation by blending from the current animation into the next.
 	*	@return	True if succesfull, false otherwise.
 	**/
-	bool SwitchAnimation(const std::string &name);
-	bool SwitchAnimation(int32_t animationIndex);
+	//bool SwitchAnimation(const std::string &name, const GameTime &startTime);
+	bool SwitchAnimation(int32_t animationIndex, const GameTime &startTime);
 
     /**
     *   @returen True if the entity is still in the current frame.

@@ -168,19 +168,7 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 /////
 // Starts the animation.
 // 
-static uint64_t startz = 0;
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-	//
-	
-	//// Set the animation.
-	//EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-	//animationState->animationIndex = 1;
-	//animationState->startFrame = 3;
-	//animationState->endFrame = 72;
-	//animationState->frameTime = 16;
-	//animationState->startTime = startz = level.time.count() + FRAMETIME.count();
-	//animationState->loopCount = 0;
-	//animationState->forceLoop = true;
 	SwitchAnimation("walk_standard");
 
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
@@ -194,88 +182,14 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MonsterTestDummy::MonsterTestDummyThink(void) {
-
-    // Advance the dummy animation for a frame.
-    // Set here how fast you want the tick rate to be.
-    // Set here how fast you want the tick rate to be.
-    static constexpr uint32_t ANIM_HZ = 30.0;
-
-    // Calclate all related values we need to make it work smoothly even if we have
-    // a nice 250fps, the game must run at 50fps.
-    //static constexpr uint32_t ANIM_FRAMERATE = ANIM_HZ;
-    //static constexpr double   ANIM_FRAMETIME = 1000.0 / ANIM_FRAMERATE;
-    //static constexpr double   ANIM_1_FRAMETIME = 1.0 / ANIM_FRAMETIME;
-    //static constexpr double   ANIM_FRAMETIME_1000 = ANIM_FRAMETIME / 1000.0;
-    //float nextFrame = GetAnimationFrame();
-    //nextFrame += (32.f * ANIM_1_FRAMETIME);
-    //if (nextFrame > 33) {
-	   // nextFrame = 2;
-    //}
-    //SetAnimationFrame(nextFrame);
-
     //
     // Move if alive.
     //
     if (GetHealth() > 0) {
-
-
-		// Set the animation.
-		EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
-	
-		//// Get animation data.
-		const int32_t animationFrame = animationState->frame;
-		if (animationFrame >= 0 && skm->boundingBoxes.size() > animationFrame) {
-//			vec3_t mins = skm->boundingBoxes[animationState->frame].mins;
-//			vec3_t maxs = skm->boundingBoxes[animationState->frame].maxs;
-//			//mins = { mins.z, mins.y, mins.x };
-//			//maxs = { maxs.z, maxs.y, maxs.x };
-//			float depth = fabs(maxs.x) + fabs(mins.x);
-//			depth /= 2.f;
-//			mins.x = - depth;
-//			maxs.x = depth;
-//			float width = fabs(maxs.y) + fabs(mins.y);
-//			width /= 2.f;
-//			mins.y = - width;
-//			maxs.y = width;
-//			float height = fabs(maxs.z) + fabs(mins.z);
-////			height /= 2.f;
-//			//maxs.z = Minf(0.f, -height);
-//			//mins.z = Minsf() - height;
-//			mins.z = 0;
-//			maxs.z = height;
-//
-//			vec3_t oldMins = GetMins();
-//			vec3_t oldMaxs = GetMaxs();
-//
-//			static GameTime lastTime = GameTime::zero();
-//			if (lastTime == GameTime::zero()) {
-//				lastTime = level.time;
-//			}
-//			mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-//			maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-//			if (lastTime != GameTime::zero()) {
-//				lastTime = level.time;
-//			}
-//			//gi.DPrintf("%f %f %f, %f %f %f\n",
-//			//	mins.x,
-//			//	mins.y,
-//			//	mins.z,
-//			//	maxs.x,
-//			//	maxs.y,
-//			//	maxs.z);
-//
-//			SetMins(mins);
-//			SetMaxs(maxs);
-//			//LinkEntity();
-		}
-		
 		// Navigate to goal.
 		Move_NavigateToTarget( );
 	}
 
-    // Check for ground.
-    //SVG_StepMove_CheckGround(this);
-//	SG_CheckGround(this);
     // Link entity back in.
     LinkEntity();
 

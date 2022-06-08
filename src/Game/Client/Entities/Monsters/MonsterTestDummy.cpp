@@ -148,8 +148,6 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 // Starts the animation.
 // 
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-
-
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
     SetNextThinkTime(level.time + 1.f * FRAMETIME);

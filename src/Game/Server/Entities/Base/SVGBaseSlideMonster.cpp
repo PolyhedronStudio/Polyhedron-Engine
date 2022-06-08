@@ -138,45 +138,42 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 	// Get State.
 	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
 		
-	// Get Animation Index.
-	int32_t animationIndex = (animationState->animationIndex <= skm->animations.size() ? animationState->animationIndex : 0);
 
 	// Get the delta between wished for and current yaw angles.
 	const float deltaYawAngle = TurnToIdealYawAngle( );
 
-	if ( deltaYawAngle > 45 && deltaYawAngle < 315 ) {
+//	if ( deltaYawAngle > 45 && deltaYawAngle < 315 ) {
 		// Should we switch to a different animation like turning?
 		/*if (deltaYawAngle)*/
 		// Switch if this wasn't our current animation yet.
-		if ( skm->animationMap["walk_turn_left"].index != animationIndex ) {
-			animationIndex = SwitchAnimation("walk_turn_left");
-		}
-	} else {
-		if ( skm->animationMap["walk_standard"].index != animationIndex ) {
+		//if ( skm->animationMap["walk_turn_left"].index != animationIndex ) {
+		//	animationIndex = SwitchAnimation("walk_turn_left");
+		//}
+//	} else {
+	int32_t setAnimationIndex = animationState->animationIndex;
+		if ( skm->animationMap["walk_standard"].index != setAnimationIndex ) {
 			if  (podEntity->currentState.currentAnimation.frame == -1 || 
 				podEntity->currentState.currentAnimation.frame >= podEntity->currentState.currentAnimation.endFrame) {
-					animationIndex = SwitchAnimation("walk_standard");
+					setAnimationIndex = SwitchAnimation("walk_standard");
 			}
 		}
-	}
 
 	//if ( !( deltaYawAngle > 5 && deltaYawAngle < 355 ) ) {
 	const vec3_t oldVelocity = GetVelocity();
 	const vec3_t normalizedDir = vec3_normalize(direction);
 
+	const int32_t animationStartFrame = animationState->startFrame;
+	const int32_t animationEndframe = animationState->endFrame;
+	const int32_t animationFrame = animationState->frame - animationStartFrame;
 
-	int32_t animationStartFrame = animationState->startFrame;
-	int32_t animationEndframe = animationState->endFrame;
-	int32_t animationFrame = animationState->frame - animationState->startFrame;
-
-	gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
-		gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
-			gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
-				gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+	//gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+	//	gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+	//		gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
+	//			gi.DPrintf("ANIMFRAME=%i\n", animationFrame);
 	// Get the total distance traveled for each frame, and also the
 	// actual translation of the "root" (in our case the hip joint:06-06-2022)
-	auto &frameDistances = skm->animations[animationIndex]->frameDistances;
-	auto &frameTranslates= skm->animations[animationIndex]->frameTranslates;
+	auto &frameDistances = skm->animations[setAnimationIndex]->frameDistances;
+	auto &frameTranslates= skm->animations[setAnimationIndex]->frameTranslates;
 
 	// Get the translation for this animation move frame.
 	const vec3_t moveTranslate = ( frameTranslates.size() > animationFrame ? frameTranslates[animationFrame] : vec3_zero() );
@@ -184,7 +181,7 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 	const double moveDistance = ( frameTranslates.size() > animationFrame ? frameDistances[animationFrame] : 0.f );
 
 
-	if (animationFrame <= animationState->endFrame) {
+	if (animationFrame < animationState->endFrame) {
 		// Acts as a velocity multiplier and is determined by the Yaw Angle.
 //		const double moveSpeed = ( deltaYawAngle > 45 && deltaYawAngle < 315 ? 1.15f : 1.825f );
 		const double moveSpeed = 64.015f;
@@ -212,6 +209,7 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 		//	moveVelocity.z
 		//);
 	}
+
 	// Move slower if the ideal yaw angle is out of range.
 	// (Gives a more 'realistic' turning effect).
 	//if (deltaYawAngle > 45 && deltaYawAngle < 315) {
@@ -261,20 +259,24 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 	// Perform our slide move.
 	const int32_t slideMoveMask = SlideMove();
 
-		// Check the mask for animation switching.
+	// Check the mask for animation switching.
 	if ( (slideMoveMask & SlideMoveFlags::SteppedUp) ) {
-		gi.DPrintf("STEPPED UP DAWG\n");
-		if ( skm->animationMap["run_stairs_up"].index != animationIndex ) {
-			animationIndex = SwitchAnimation("run_stairs_up");
+	//	gi.DPrintf("STEPPED UP DAWG\n");
+		if ( skm->animationMap["run_stairs_up"].index != setAnimationIndex ) {
+			setAnimationIndex = SwitchAnimation("run_stairs_up");
 		}
 	}
 
 	if ( (slideMoveMask & SlideMoveFlags::SteppedDown) ) {
-		gi.DPrintf("STEPPED UP DAWG\n");
-		if ( skm->animationMap["walk_stairs_down"].index != animationIndex ) {
-			animationIndex = SwitchAnimation("walk_stairs_down");
+	//	gi.DPrintf("STEPPED DOWN DAWG\n");
+		if ( skm->animationMap["walk_stairs_down"].index != setAnimationIndex ) {
+			setAnimationIndex = SwitchAnimation("walk_stairs_down");
 		}
 	}
+
+	// Debug Output:
+
+	gi.DPrintf("SV_Entity(#%i): AnimationIndex(#%i), AnimationFrame(#%i)\n", GetState().number, setAnimationIndex, animationFrame);
 }
 
 
@@ -577,7 +579,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += ", SteppedDown"; }
 			blockMaskString += ")";
 		
-			gi.DPrintf( "%s\n", blockMaskString.c_str());
+			//gi.DPrintf( "%s\n", blockMaskString.c_str());
 		} else {
 			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (0)\n";
 			//gi.DPrintf( "%s\n", blockMaskString.c_str());

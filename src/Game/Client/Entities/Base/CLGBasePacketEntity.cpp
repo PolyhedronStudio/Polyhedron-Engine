@@ -264,26 +264,28 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 	SetSound(state.sound);
 	SetEventID(state.eventID);
 
-	SwitchAnimation(state.currentAnimation.animationIndex);
-	//EntityAnimationState *animState = &podEntity->currentState.currentAnimation;
-	//animState->animationIndex = state.currentAnimation.animationIndex;
-	//animState->startTime = state.currentAnimation.startTime;
-	//if (state.currentAnimation.animationIndex != 0) {
-	//	// Refresh animation.
-	//	refreshAnimation.animationIndex = state.currentAnimation.animationIndex;
-	//	refreshAnimation.startTime		= state.currentAnimation.startTime;
-	//	refreshAnimation.frameTime = ANIMATION_FRAMETIME;
-	//	refreshAnimation.startFrame	= 1;
-	//	refreshAnimation.endFrame	= 62;
-	//	refreshAnimation.forceLoop	= true;
-	//	refreshAnimation.loopCount	= 0;
+	Com_DPrint("Entity(#%i): AnimIndex=(#%i)\n", state.number, state.currentAnimation.animationIndex);
 
-	//	// Setup same think for the next frame.
+	// Get Model Handle.
+//	if (state.number == 14) {
+	if (state.modelIndex != 255 && state.modelIndex > 0 && !skm) {
+		qhandle_t modelHandle = clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
+		
+		model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
+
+		SKM_GenerateModelData(model);
+
+		skm = model->skeletalModelData;
+
+	}
+
+	if ( state.currentAnimation.startTime != 0 ) {
+		SwitchAnimation(state.currentAnimation.animationIndex, GameTime(state.currentAnimation.startTime));
+	}
+
+	// Setup same think for the next frame.
 	SetNextThinkTime(level.time + FRAMETIME);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
-
-	//	Com_DPrint("%s (Number: #%i): Set (animationIndex:%i), (nextThinkTime:%i)\n", __func__, state.number, state.currentAnimation.animationIndex, GetNextThinkTime());
-	//}
 }
 
 /**
@@ -306,75 +308,75 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 	SetSound(state.sound);
 	SetEventID(state.eventID);
 
+
 	// Get Model Handle.
-	if (state.modelIndex != 255 && state.modelIndex > 0) {
-			qhandle_t modelHandle = clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
-	model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
-//	skm = SKM_GenerateModelData(model);
-	SKM_GenerateModelData(model);
-	skm = model->skeletalModelData;
-		//if (m) {
-		//	skm = m->skeletalModelData;
-		//}
+	//if (state.number == 14) {
+	if (state.modelIndex != 255 && state.modelIndex > 0 && !skm) {
+		qhandle_t modelHandle = clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
+		
+		model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
+
+		SKM_GenerateModelData(model);
+
+		skm = model->skeletalModelData;
+
 	}
 
-	SwitchAnimation(state.currentAnimation.animationIndex);
-	
+	if ( state.currentAnimation.startTime != 0 ) {
+		SwitchAnimation(state.currentAnimation.animationIndex, GameTime(state.currentAnimation.startTime));
+	}
+	//}
+
 	//	// Setup same think for the next frame.
 	SetNextThinkTime(level.time + FRAMETIME);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
-
-	//if (state.currentAnimation.animationIndex != 0) {
-	//}
-	//	// Refresh animation.
-	//	refreshAnimation.animationIndex = state.currentAnimation.animationIndex;
-	//	refreshAnimation.startTime		= state.currentAnimation.startTime;
-	//	refreshAnimation.frameTime = ANIMATION_FRAMETIME;
-	//	refreshAnimation.startFrame	= 1;
-	//	refreshAnimation.endFrame	= 62;
-	//	refreshAnimation.forceLoop	= true;
-	//	refreshAnimation.loopCount	= 0;
-
-	//	// Setup same think for the next frame.
-	//	SetNextThinkTime(level.time + FRAMETIME);
-	//	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
-
-	//	Com_DPrint("%s (Number: #%i): Set (animationIndex:%i), (nextThinkTime:%i)\n", __func__, state.number, state.currentAnimation.animationIndex, GetNextThinkTime());
-	//}
 }
 
 /**
 *	@brief	Switches the animation by blending from the current animation into the next.
 *	@return	True if succesfull, false otherwise.
 **/
-bool CLGBasePacketEntity::SwitchAnimation(const std::string& name) {
-	if (!skm) {
-		return false;
-	}
-
-	if (!skm->animationMap.contains(name)) {
-		return false;
-	}
-
-	// Get state pointer.
-	EntityState *currentState	= &podEntity->currentState;
-	// Get animation state.
-	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
-	
-	// Get our animation.
-	SkeletalAnimation *animation = &skm->animationMap[name];
-	currentAnimationState->animationIndex = animation->index;
-	currentAnimationState->endFrame = animation->endFrame;
-	currentAnimationState->startFrame = animation->startFrame;
-	currentAnimationState->frameTime = animation->frametime;
-	currentAnimationState->loopCount = animation->loopingFrames;
-	currentAnimationState->forceLoop = animation->forceLoop;
-	currentAnimationState->startTime = level.time.count();
-
-	return true;
-}
-bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex) {
-	
+//bool CLGBasePacketEntity::SwitchAnimation(const std::string& name, const GameTime &startTime = GameTime::zero()) {
+//	if (!skm) {
+//		return false;
+//	}
+//
+//	if (!skm->animationMap.contains(name)) {
+//		return false;
+//	}
+//
+//	// Get state pointer.
+//	EntityState *currentState	= &podEntity->currentState;
+//	EntityState *previousState	= &podEntity->previousState;
+//	// Get animation state.
+//	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
+//	EntityAnimationState *previousAnimationState = &previousState->currentAnimation;
+//
+//	// Get our animation.
+//	SkeletalAnimation *animation = &skm->animationMap[name];
+//
+//	if (!animation) {
+//		return false;
+//	}
+//
+//
+//
+////	if (currentAnimationState->animationIndex != previousAnimationState->animationIndex) {
+//
+//		//currentAnimationState->animationIndex = animation->index;
+//		//currentAnimationState->animationIndex = animation->index;
+//		currentAnimationState->endFrame = animation->endFrame;
+//		currentAnimationState->startFrame = animation->startFrame;
+//		currentAnimationState->frameTime = animation->frametime;
+//		currentAnimationState->loopCount = 0;//animation->loopingFrames;
+//		currentAnimationState->forceLoop = true;//animation->forceLoop;
+//		currentAnimationState->startTime = startTime.count();
+////	}
+//
+//	return true;
+//}
+bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime &startTime = GameTime::zero()) {
+	Com_DPrint("SwitchAnimation CALLED !! Index(#%i) startTime(#%i)\n", animationIndex, startTime.count());
 	if (!skm) {
 		Com_DPrint("SwitchAnimation: No SKM Data present.\n", animationIndex);
 		return false;
@@ -387,27 +389,47 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex) {
 
 	// Get state pointer.
 	EntityState *currentState	= &podEntity->currentState;
+	EntityState *previousState	= &podEntity->previousState;
+
 	// Get animation state.
 	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
-	
-	// Get our animation.
-	SkeletalAnimation *animation = skm->animations[animationIndex];
-	currentAnimationState->animationIndex = animation->index;
-	currentAnimationState->endFrame = animation->endFrame;
-	currentAnimationState->startFrame = animation->startFrame;
-	currentAnimationState->frameTime = animation->frametime;
-	currentAnimationState->loopCount = animation->loopingFrames;
-	currentAnimationState->forceLoop = animation->forceLoop;
-	currentAnimationState->startTime = level.time.count();
+	EntityAnimationState *previousAnimationState = &currentState->previousAnimation;
 
-	//Com_DPrint("SwitchAnimation: startFrame=%i endFrame=%i frameTime=%f loopCount=%i forceLoop=%s startTime=%i\n", 
-	//	animationIndex,
-	//	currentAnimationState->startFrame,
-	//	currentAnimationState->endFrame,
-	//	currentAnimationState->frameTime,
-	//	currentAnimationState->loopCount,
-	//	currentAnimationState->forceLoop == true ? "true" : "false",
-	//	currentAnimationState->startTime );
+
+	//// Has the animation index changed? If so, lookup the new animation.
+	//// TODO: Move to a separate function.
+	const int32_t currentAnimationIndex = currentAnimationState->animationIndex;
+	//const int32_t previousAnimationIndex = previousAnimation->animationIndex;
+	// Use refresh instead. It's the most actual state anyhow.
+	const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
+
+	// In case the animation switched, adjust our refresh animation data.
+	if (animationIndex != previousState->currentAnimation.animationIndex) {
+		//// See whether we got skm data, and if the animation index is valid and save to use.
+		if (skm && skm->animations.size() > animationIndex) {
+			// Get a pointer to the animation data.
+			SkeletalAnimation *skmAnimation = skm->animations[animationIndex];
+			
+			// Reinitialize our refresh entity.
+			refreshAnimation.animationIndex = animationIndex;
+			refreshEntity.oldframe = refreshAnimation.endFrame;
+			refreshAnimation.frame = skmAnimation->startFrame;
+			refreshAnimation.startFrame = skmAnimation->startFrame;
+			refreshAnimation.endFrame = skmAnimation->endFrame - 1;
+			refreshAnimation.forceLoop = true;//currentAnimation->forceLoop;
+			refreshAnimation.frameTime = skmAnimation->frametime;
+			refreshAnimation.startTime = currentAnimationState->startTime;
+			refreshAnimation.loopCount = 0;//currentAnimation->loopCount;
+		
+			// Update animation states for this frame's current entity state.
+			*previousAnimationState = *currentAnimationState;
+
+			// Debug Output:
+			const std::string previousAnimationName = skm->animations[previousAnimationIndex]->name;
+			Com_DPrint("SwitchAnimation(Entity: #%i): From (#%i)(%s) to (#%i)(%s)\n", GetNumber(), previousAnimationIndex, previousAnimationName.c_str(), skmAnimation->index, skmAnimation->name.c_str());
+		}
+		
+	}
 
 	return true;
 }
@@ -612,24 +634,13 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 *	@brief	Used by default in order to process entity state data such as animations.
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
-	// Setup same think for the next frame.
+
+
+
+
+		// Setup same think for the next frame.
 	SetNextThinkTime(level.time + FRAMETIME);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
-
-	//const EntityAnimationState &animationState = podEntity->currentState.currentAnimation;
-
-	//if (animationState.animationIndex != 0) {
-	//	refreshAnimation.animationIndex = animationState.animationIndex;
-	//	refreshAnimation.startTime = animationState.startTime;
-	//	refreshAnimation.frameTime = ANIMATION_FRAMETIME;
-	//	refreshAnimation.startFrame	= 1;
-	//	refreshAnimation.endFrame	= 62;
-	//	refreshAnimation.forceLoop	= true;
-	//	refreshAnimation.loopCount	= 0;
-	//}
-
-	//const EntityState &state = GetState();
-	//Com_DPrint("%s (Number: #%i): Set (animationIndex:%i), (nextThinkTime:%i)\n", __func__, state.number, state.currentAnimation.animationIndex, GetNextThinkTime());
 }
 
 /**
@@ -646,58 +657,26 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 
 	// Get Animation State references.
 	EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
-	EntityAnimationState *previousAnimation	= &currentState->previousAnimation;
+	EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
 
 
 	if (time <= GameTime::zero()) {
 		return;
 	}
 
-	//// Has the animation index changed? If so, lookup the new animation.
-	//// TODO: Move to a separate function.
-	const int32_t currentAnimationIndex = currentAnimation->animationIndex;
-	//const int32_t previousAnimationIndex = previousAnimation->animationIndex;
-	// Use refresh instead. It's the most actual state anyhow.
-	const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
+	// Did any animation state data change?
+	if (currentAnimation->startTime != previousAnimation->startTime) {
+		Com_DPrint("%s: animationIndex(#%i), refreshAnimationIndex(#%i)\n", 
+			__func__,
+			currentAnimation->animationIndex,
+			previousAnimation->animationIndex);
 
-	// In case the animation switched, adjust our refresh animation data.
-	if (currentAnimationIndex != refreshAnimation.animationIndex) {
-		// See whether we got skm data, and if the animation index is valid and save to use.
-		if (skm && skm->animations.size() > currentAnimation->animationIndex) {
-			// Get a pointer to the animation data.
-			SkeletalAnimation *skmAnimation = skm->animations[currentAnimationIndex];
-			
-			// Reinitialize our refresh entity.
-			refreshAnimation.animationIndex = skmAnimation->index;
-			refreshAnimation.startFrame = skmAnimation->startFrame;
-			refreshAnimation.endFrame = skmAnimation->endFrame;
-			refreshAnimation.forceLoop = true;//currentAnimation->forceLoop;
-			refreshAnimation.frameTime = skmAnimation->frametime;
-			refreshAnimation.startTime = currentAnimation->startTime;
-			refreshAnimation.loopCount = 0;//currentAnimation->loopCount;
-
-			// Debug Output:
-			const std::string previousAnimationName = skm->animations[previousAnimationIndex]->name;
-			Com_DPrint("SwitchAnimation(Entity: #%i): From (#%i)(%s) to (#%i)(%s)\n", GetNumber(), previousAnimationIndex, previousAnimationName.c_str(), skmAnimation->index, skmAnimation->name.c_str());
-		}
-		
-		// Initialize a fresh received animation state.
-		//refreshAnimation.startTime = currentAnimation->startTime;
-		//refreshAnimation = *currentAnimation;
-
-		// Last but not least, look up the animation and set its properties.
-		
-	// Store current animation as previous animation.
-	*previousAnimation = *currentAnimation;
+		SwitchAnimation(currentAnimation->animationIndex, GameTime(currentAnimation->startTime));
 	}
-
-	// Get GameTime of animation startTime.
-	const GameTime animationStartTime = GameTime(refreshAnimation.startTime);
-
-	// Process the backlerp for the current animation.
+	// Process the animation, like we would do any time.
 	refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
 		time,
-		animationStartTime,
+		GameTime(refreshAnimation.startTime),
 		refreshAnimation.frameTime,
 		refreshAnimation.startFrame,
 		refreshAnimation.endFrame,
@@ -705,9 +684,95 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		refreshAnimation.forceLoop
 	);
 
-	//if (refreshAnimation.frame == 0) {
-	//	refreshAnimation.frame = refreshAnimation.startFrame;
+	//if ( refreshEntity.id == 14 && skm ) { //} && (refreshEntity.frame == -1 || refreshEntity.frame == 0) ) {
+	//	Com_DPrint("RefreshEntity(#%i) - animationIndex(%i), startFrame(#%i), endFrame(#%i), frameTime(%f) startTime(%i)\n",
+	//		refreshEntity.id,
+	//		refreshAnimation.animationIndex,
+	//		refreshAnimation.startFrame, refreshAnimation.endFrame,
+	//		refreshAnimation.frameTime, refreshAnimation.startFrame);
 	//}
+
+	// Store current animation as previous animation.
+	//*previousAnimation = *currentAnimation;
+
+	// Update new frame.
+	//refreshEntity.frame		= refreshAnimation.frame;
+	//refreshEntity.backlerp	= refreshAnimation.backLerp;
+
+	//// Get state references.
+	//EntityState *currentState	= &podEntity->currentState;
+	//EntityState *previousState	= &podEntity->previousState;
+
+	//// Get Animation State references.
+	//EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
+	//EntityAnimationState *previousAnimation	= &currentState->previousAnimation;
+
+
+	//if (time <= GameTime::zero()) {
+	//	return;
+	//}
+	//	
+	//// We first set it to the frame we had rendered last.
+	//// It may get overridden depending on an animation switch.
+	//refreshEntity.oldframe = refreshEntity.frame;
+
+	////// Has the animation index changed? If so, lookup the new animation.
+	////// TODO: Move to a separate function.
+	//const int32_t currentAnimationIndex = currentAnimation->animationIndex;
+	////const int32_t previousAnimationIndex = previousAnimation->animationIndex;
+	//// Use refresh instead. It's the most actual state anyhow.
+	//const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
+
+	//// In case the animation switched, adjust our refresh animation data.
+	//if (currentAnimationIndex != previousState->currentAnimation.animationIndex) {
+	//	// See whether we got skm data, and if the animation index is valid and save to use.
+	//	if (skm && skm->animations.size() > currentAnimation->animationIndex) {
+	//		// Get a pointer to the animation data.
+	//		SkeletalAnimation *skmAnimation = skm->animations[currentAnimationIndex];
+	//		
+	//		// Store the next frame as previousAnimation.endFrame so it can blend nicely?
+	//		refreshEntity.oldframe = (refreshEntity.frame != -1 ? refreshEntity.frame : refreshAnimation.endFrame );
+
+	//		// Store current animation as previous animation.
+	//		*previousAnimation = *currentAnimation;
+
+	//		// Reinitialize our refresh animation data.
+	//		refreshAnimation.animationIndex = skmAnimation->index;
+	//		//refreshAnimation.frame = skmAnimation->startFrame;
+	//		refreshAnimation.startFrame = skmAnimation->startFrame;
+	//		refreshAnimation.endFrame = skmAnimation->endFrame;
+	//		refreshAnimation.forceLoop = true;//currentAnimation->forceLoop;
+	//		refreshAnimation.frameTime = skmAnimation->frametime;
+	//		refreshAnimation.startTime = currentAnimation->startTime;
+	//		refreshAnimation.loopCount = 0;//currentAnimation->loopCount;
+
+	//		// Debug Output:
+	//		const std::string previousAnimationName = skm->animations[previousAnimationIndex]->name;
+	//		Com_DPrint("SwitchAnimation(Entity: #%i): From (#%i)(%s) to (#%i)(%s)\n", GetNumber(), previousAnimationIndex, previousAnimationName.c_str(), skmAnimation->index, skmAnimation->name.c_str());
+	//	} else {
+	//		
+	//	}
+	//} else {
+
+	//}
+
+	//// Get GameTime of animation startTime.
+	//const GameTime animationStartTime = GameTime(refreshAnimation.startTime);
+
+	//// Process the backlerp for the current animation.
+	//refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
+	//	time,
+	//	animationStartTime,
+	//	refreshAnimation.frameTime,
+	//	refreshAnimation.startFrame,
+	//	refreshAnimation.endFrame,
+	//	refreshAnimation.loopCount,
+	//	refreshAnimation.forceLoop
+	//);
+
+	//// Update new frame.
+	//refreshEntity.frame = refreshAnimation.frame;
+	//refreshEntity.backlerp = refreshAnimation.backLerp;
 }
 
 

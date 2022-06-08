@@ -114,28 +114,44 @@ void SVGBaseSkeletalAnimator::ProcessSkeletalAnimationForTime(const GameTime &ti
 *	@return	The animation index on success, -1 on failure.
 **/
 int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
-	if (!skm) {
-		return -1;
-	}
-
-	if (!skm->animationMap.contains(name)) {
-		return -1;
-	}
-
 	// Get state pointer.
 	EntityState *currentState	= &podEntity->currentState;
 	// Get animation state.
 	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
-	
-	// Get our animation.
+
+	// Can't switch animations if we got no skm.
+	if (!skm) {
+		currentAnimationState->animationIndex = 0;
+		return 0;
+	}
+
+	// Can't switch without containing information info matching the name.
+	if (!skm->animationMap.contains(name)) {
+		currentAnimationState->animationIndex = 0;
+		return 0;
+	}
+
+	// Get animation.
 	SkeletalAnimation *animation = &skm->animationMap[name];
+
+	// If we're already in this animation, return index but don't reset it.
+	if (animation->index == currentAnimationState->animationIndex) {
+		return animation->index;
+	}
+
+	// Wired Data:
 	currentAnimationState->animationIndex = animation->index;
-	currentAnimationState->endFrame = animation->endFrame;
+	currentAnimationState->startTime = level.time.count();
+
+	// Non-Wired Data:
+	//currentAnimationState->frame = animation->startFrame;
 	currentAnimationState->startFrame = animation->startFrame;
+	currentAnimationState->endFrame = animation->endFrame;
 	currentAnimationState->frameTime = animation->frametime;
 	currentAnimationState->loopCount = animation->loopingFrames;
 	currentAnimationState->forceLoop = animation->forceLoop;
-	currentAnimationState->startTime = level.time.count();
+
+	ProcessSkeletalAnimationForTime(level.time);
 
 	return animation->index;
 }
