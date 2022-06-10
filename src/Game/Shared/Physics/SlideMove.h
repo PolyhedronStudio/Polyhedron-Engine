@@ -41,32 +41,55 @@ static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 /**
 *	@brief The possible flags returned from executing a SlideMove on a SlideMoveState.
 **/
+struct SlideMoveMoveFlags {
+	static constexpr int32_t Ducked					= (1 << 0);  // Player is ducked
+	static constexpr int32_t Jumped					= (1 << 1);  // Player jumped
+	//static constexpr int32_t JumpHeld				= (1 << 2);  // Player's jump key is down
+	static constexpr int32_t OnGround				= (1 << 3);  // Player is on ground
+	static constexpr int32_t OnLadder				= (1 << 4);  // Player is on ladder
+	static constexpr int32_t UnderWater				= (1 << 5);  // Player is under water
+	static constexpr int32_t TimePushed				= (1 << 6);  // Time before can seek ground
+	static constexpr int32_t TimeWaterJump			= (1 << 7);  // Time before control
+	static constexpr int32_t TimeLand				= (1 << 9);  // Time before jump eligible
+};
+
 struct SlideMoveFlags {
+	// Blabla
+	static constexpr int32_t FoundGround	= (1 << 0);
+	static constexpr int32_t OnGround		= (1 << 1);
+	static constexpr int32_t LostGround		= (1 << 2);
+
 	//! Set whenever the move is capable of stepping up.
-	static constexpr int32_t SteppedUp		= 0x00000001;
+	static constexpr int32_t SteppedUp		= (1 << 3);
 	//! Set whenever the movei s capable of stepping down.
-	static constexpr int32_t SteppedDown	= 0x00000010;
+	static constexpr int32_t SteppedDown	= (1 << 4);
 
 	//! Set whenever we've touched any entity that is not WorldSpawn.
-	static constexpr int32_t EntityTouched	= 0x00000100;
+	static constexpr int32_t EntityTouched	= (1 << 5);
 	//! Set whenever we've touched a brush plane.
-	static constexpr int32_t PlaneTouched	= 0x00001000;
+	static constexpr int32_t PlaneTouched	= (1 << 6);
 
 	//! When Blocekd flag is set, it doesn't mean it didn't slide along the blocking object.
-	static constexpr int32_t WallBlocked	= 0x00010000;
+	static constexpr int32_t WallBlocked	= (1 << 7);
 	//! NOTE: Set only in case of trouble. It shouldn't happen.
-	static constexpr int32_t Trapped		= 0x00100000;
+	static constexpr int32_t Trapped		= (1 << 8);
 
 	//! Set if the move became groundless, and was unable to step down to new floor.
-	static constexpr int32_t EdgeMoved		= 0x01000000;
+	static constexpr int32_t EdgeMoved		= (1 << 9);
 	//! Set whenever the move has been completed for the remainingTime.
-	static constexpr int32_t Moved			= 0x10000000;
+	static constexpr int32_t Moved			= (1 << 10);
 };
 
 /**
 *	@brief	Contains the status of an entities physics move state.
 **/
 struct SlideMoveState {
+	//! Original Physical Properties.
+	vec3_t originalVelocity	= vec3_zero();
+	vec3_t originalOrigin	= vec3_zero();
+	vec3_t originalMins		= vec3_zero();
+	vec3_t originalMaxs		= vec3_zero();
+
 	//! Physical Properties.
 	vec3_t velocity	= vec3_zero();
 	vec3_t origin	= vec3_zero();
@@ -104,6 +127,14 @@ struct SlideMoveState {
 	//! Number of, and pointers to the entities we touched and want to dispatch a 'Touch' callback to.
 	int32_t	numTouchEntities = 0;
 	int32_t	touchEntites[MAX_SLIDEMOVE_TOUCH];
+	
+	//! Move State flags: Store state like on-ground etc.
+	int32_t moveFlags = 0;
+	//! Set to miliseconds to maintain (if needed) flag state.
+	int32_t moveFlagTime = 0;
+
+	//! ClipMove Block Flags.
+	int32_t clipMoveFlags = 0;
 };
 
 

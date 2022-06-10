@@ -120,15 +120,14 @@ void MonsterTestDummy::PostSpawn() {
 	
 	// TEMP CODE: SET THE GOAL AND ENEMY ENTITY.
 	ServerGameWorld *gw = GetGameWorld();
-	for (auto* geGoalEntity : GetGameWorld()->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
+	for (auto* geGoal : GetGameWorld()->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
 		| cef::IsValidPointer
 		| cef::HasServerEntity
-		| cef::InUse
-		| cef::HasKeyValue("goalentity", strGoalEntity)) {
-			SetGoalEntity(geGoalEntity);
-			SetEnemy(geGoalEntity);
+		| cef::HasKeyValue("targetname", strGoalEntity)) {
+			SetGoalEntity(geGoal);
+			SetEnemy(geGoal);
 
-			gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoalEntity->GetTargetName().c_str());
+			gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoal->GetTargetName().c_str());
 	}
 
     // Setup our MonsterStepDummy callbacks.

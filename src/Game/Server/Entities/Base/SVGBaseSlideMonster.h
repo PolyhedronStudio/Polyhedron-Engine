@@ -61,7 +61,7 @@ public:
 	//
     GameEntity* geGoalEntity = nullptr;
 	std::string strGoalEntity = "";
-	virtual void SetGoalEntity(GameEntity *geGoalEntity) { this->geGoalEntity = geGoalEntity; }
+	virtual void SetGoalEntity(GameEntity *geGoal) { this->geGoalEntity = geGoal; }
 	virtual GameEntity *GetGoalEntity() { return this->geGoalEntity; }
 
 	/**

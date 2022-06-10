@@ -276,7 +276,7 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 
 	// Debug Output:
 
-	gi.DPrintf("SV_Entity(#%i): AnimationIndex(#%i), AnimationFrame(#%i)\n", GetState().number, setAnimationIndex, animationFrame);
+//	gi.DPrintf("SV_Entity(#%i): AnimationIndex(#%i), AnimationFrame(#%i)\n", GetState().number, setAnimationIndex, animationFrame);
 }
 
 
@@ -569,20 +569,20 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 			if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
 		
 
-			if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved "; }
-			if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += ", EdgeMoved, "; }
+			if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved, "; }
+			if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += "EdgeMoved, "; }
 			
-			if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += ", EntityTouched"; }
-			if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += ", PlaneTouched"; }
+			if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += "EntityTouched, "; }
+			if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += "PlaneTouched, "; }
 
-			if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += ", SteppedUp"; }
-			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += ", SteppedDown"; }
+			if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += "SteppedUp, "; }
+			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += "SteppedDown, "; }
 			blockMaskString += ")";
 		
-			//gi.DPrintf( "%s\n", blockMaskString.c_str());
+			gi.DPrintf( "%s\n", blockMaskString.c_str());
 		} else {
 			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (0)\n";
-			//gi.DPrintf( "%s\n", blockMaskString.c_str());
+			gi.DPrintf( "%s\n", blockMaskString.c_str());
 		}
 #endif
 	}

@@ -45,6 +45,29 @@ using GameEntityVector = std::vector<GameEntity*>;
 //! Size of the dead body entity queue.
 static constexpr int32_t BODY_QUEUE_SIZE = 8;
 
+/**
+*	@return	If the pointer is valid, either clientEntityNumber or the current state
+*			server entity number. -1 otherwise.
+**/
+static inline int32_t SG_GetEntityNumber(GameEntity* geEntity) {
+	if (!geEntity) {
+		return -1;
+	}
+
+	return geEntity->GetNumber();
+}
+static inline int32_t SG_GetEntityNumber(PODEntity *podEntity) {
+	if (!podEntity) {
+		return -1;
+	}
+
+#if SHAREDGAME_CLIENTGAME
+	return podEntity->clientEntityNumber;
+#endif
+#if SHAREDGAME_SERVERGAME
+	return podEntity->currentState.number;
+#endif
+}
 
 //! Namespace containing the actual filter function implementations.
 namespace EntityFilterFunctions {

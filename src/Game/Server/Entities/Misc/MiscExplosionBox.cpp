@@ -81,9 +81,9 @@ void MiscExplosionBox::Spawn() {
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
-        { -16.f, -16.f, 0.f },
+        { -17.f, -17.f, 0.f },
         // Maxs.
-        { 16.f, 16.f, 40.f }
+        { 17.f, 17.f, 58.f }
     );
 
     //SetRenderEffects(GetRenderEffects() | RenderEffects::DebugBoundingBox);

@@ -299,7 +299,7 @@ static constexpr int32_t    MAX_CLIP_PLANES = 20;   // Maximum amount of planes 
 
 static qboolean PM_StepSlideMove_(void)
 {
-    const int32_t numBumps = MAX_CLIP_PLANES - 1;
+    const int32_t numBumps = MAX_CLIP_PLANES - 2;
     vec3_t planes[MAX_CLIP_PLANES];
     int32_t bump;
 
@@ -1424,7 +1424,7 @@ static void PM_Init(PlayerMove * pmove) {
 }
 
 /**
-*   @brief  Clamp angles with deltas. Ensure they pitch doesn't exceed 90 or 270
+*   @brief  Clamp angles with deltas. Ensure the pitch wraps around and stays within 90 to 270
 **/
 static void PM_ClampAngles(void) {
     // Copy the command angles into the outgoing state
@@ -1565,3 +1565,104 @@ void PMove(PlayerMove * pmove)
     // Check for view step changes, if so, interpolate.
     PM_CheckViewStep();
 }
+
+
+
+
+	//// store pre-move parameters
+	//const vec3_t org0 = pm->s.origin;
+	//const vec3_t vel0 = pm->s.velocity;
+
+	//vec3_t orgs[2], vels[2];
+	//int32_t i;
+
+	//// try two movements - one from our current position, and one
+	//// from STEP_HEIGHT above. store the results for later
+	//for (i = 0; i < 2; i++) {
+
+	// 111111111111111111111111111111111111111111111111111111111
+	//	if (i == 1) {
+	//		const vec3_t up = Vec3_Fmaf(org0, PM_STEP_HEIGHT, Vec3_Up());
+	//		const cm_trace_t step_up = Pm_Trace(org0, up, pm->bounds);
+
+	//		if (step_up.all_solid) {
+	//			break;
+	//		}
+
+	//		// step from the higher position, with the original velocity
+	//		pm->s.origin = step_up.end;
+	//		pm->s.velocity = vel0;
+	//	}
+	////////////////////////////////////////////////////////////////////
+
+	//	// attempt to move
+	//	Pm_SlideMove();
+
+	// 111111111111111111111111111111111111111111111111111111111
+	//	if (i == 1) {
+	//		// settle downwards
+	//		const vec3_t down = Vec3_Fmaf(pm->s.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, Vec3_Down());
+	//		const cm_trace_t step_down = Pm_Trace(pm->s.origin, down, pm->bounds);
+
+	//		pm->s.origin = step_down.end;
+	//000000000000000000000000000000000000000000000000000000000
+	//	} else {
+
+	//		// attempt to step down to remain on ground
+	//		if ((pm->s.flags & PMF_ON_GROUND) && pm->cmd.up <= 0) {
+
+	//			const vec3_t down = Vec3_Fmaf(pm->s.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, Vec3_Down());
+	//			const cm_trace_t step_down = Pm_Trace(pm->s.origin, down, pm->bounds);
+
+	//			if (Pm_CheckStep(&step_down)) {
+	//				Pm_StepDown(&step_down);
+	//			}
+	//		}
+	//	}
+	// 222222222222222222222222222222222222222
+	//	orgs[i] = pm->s.origin;
+	//	vels[i] = pm->s.velocity;
+
+	//0000000000000000000000000000000000
+	//	if (i == 0) {
+	//		pm->s.origin = org0;
+	//		pm->s.velocity = vel0;
+	//	}
+	//}
+
+	//// main move was blocked somehow
+	//if (i == 0) {
+	//	pm->s.origin = org0;
+	//	pm->s.velocity = vel0;
+	//	return;
+	//} else if (i == 1) {
+	//	// the upwards move failed, so only use the lower move
+	//	pm->s.origin = orgs[0];
+	//	pm->s.velocity = vels[0];
+	//} else {
+	//	float dist0 = Vec3_DistanceSquared(org0, orgs[0]);
+	//	float dist1 = Vec3_DistanceSquared(org0, orgs[1]);
+
+	//	// pick the one that went farther; if both went the full distance,
+	//	// we'll prefer the upper one
+	//	if (dist0 > dist1) {
+	//		pm->s.origin = orgs[0];
+	//		pm->s.velocity = vels[0];
+	//	} else {
+	//		pm->s.origin = orgs[1];
+	//		pm->s.velocity = vels[1];
+
+	//		// settle to the new ground, keeping the step if and only if it was successful
+	//		const vec3_t down = Vec3_Fmaf(pm->s.origin, PM_GROUND_DIST, Vec3_Down());
+	//		const cm_trace_t step_down = Pm_Trace(pm->s.origin, down, pm->bounds);
+
+	//		if (Pm_CheckStep(&step_down)) {
+	//			// Quake2 trick jump secret sauce
+	//			if ((pm->s.flags & PMF_ON_GROUND) || vel0.z < PM_SPEED_UP) {
+	//				Pm_StepDown(&step_down);
+	//			} else {
+	//				pm->step = pm->s.origin.z - pm_locals.previous_origin.z;
+	//			}
+	//		}
+	//	}
+	//}
