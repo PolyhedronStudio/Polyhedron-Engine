@@ -89,9 +89,9 @@ void MiscExplosionBox::Spawn() {
     // Set the bounding box.
     SetBoundingBox(
         // Mins.
-        { -17.f, -17.f, 0.f },
+        { -16.f, -16.f, 0.f },
         // Maxs.
-        { 17.f, 17.f, 58.f }
+        { 16.f, 16.f, 58.f }
     );
 	//if (podEntity && podEntity->clientEntityNumber == 2052) {
 	//	SetInUse(true);

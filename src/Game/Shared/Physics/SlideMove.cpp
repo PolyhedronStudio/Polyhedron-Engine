@@ -40,8 +40,9 @@
 ***/
 /**
 *	@brief	If within limits: Adds the geToucher GameEntity to the SlideMoveState's touching entities list.
+*	@return	The touch entity number. -1 if it's invalid, or has already been added.
 **/
-static void SM_AddTouchEntity( SlideMoveState *moveState, GameEntity *geToucher ) {
+static int32_t SM_AddTouchEntity( SlideMoveState *moveState, GameEntity *geToucher ) {
 	// Get the touch entity number for storing in our touch entity list.
 	int32_t touchEntityNumber = (geToucher ? geToucher->GetNumber() : -1);
 
@@ -57,19 +58,22 @@ static void SM_AddTouchEntity( SlideMoveState *moveState, GameEntity *geToucher 
 			SG_Physics_PrintWarning( std::string(__func__) + "moveState->numTouchEntities >= 32 while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)" );
 		}
 		
-		return;
+		return -1;
 	}
 
 	// See if it is already added.
 	for( int32_t i = 0; i < moveState->numTouchEntities; i++ ) {
 		if( moveState->touchEntites[i] == touchEntityNumber ) {
-			return;
+			return -1;
 		}
 	}
 
 	// Otherwise, add the entity to our touched list.
 	moveState->touchEntites[moveState->numTouchEntities] = touchEntityNumber;
 	moveState->numTouchEntities++;
+
+	// Last but not least, return its number.
+	return touchEntityNumber;
 }
 
 /**
@@ -201,10 +205,10 @@ static const int32_t SM_CheckForEdge(const vec3_t& start, const vec3_t& end, con
 	int32_t blockedMask = 0;
 
 	//// Calculate the end point for the start ground trace.
-	//const vec3_t  startTraceEnd  = vec3_fmaf( start, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+	//const vec3_t  startTraceEnd  = vec3_fmaf( start, SLIDEMOVE_STEP_HEIGHT + SLIDEMOVE_GROUND_DISTANCE, vec3_down() );
 	//SGTraceResult startTrace = SG_Trace( start, mins, maxs, startTraceEnd, geSkip, contentMask );
 
-	//const vec3_t  endTraceEnd  = vec3_fmaf( end, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+	//const vec3_t  endTraceEnd  = vec3_fmaf( end, SLIDEMOVE_STEP_HEIGHT + SLIDEMOVE_GROUND_DISTANCE, vec3_down() );
 	//SGTraceResult endTrace = SG_Trace( end, mins, maxs, endTraceEnd, geSkip, contentMask );
 
 	//// If we had ground entity.
@@ -271,32 +275,32 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
     }
 
     // Perform ground seek trace.
-    const vec3_t downTraceEnd = moveState->origin + vec3_t{ 0.f, 0.f, -PM_GROUND_DIST };
+    const vec3_t downTraceEnd = moveState->origin + vec3_t{ 0.f, 0.f, -SLIDEMOVE_GROUND_DISTANCE };
 	SGTraceResult downTraceResult = SM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &downTraceEnd );
 	    
 	// Store our ground trace result.
 	moveState->groundTrace = downTraceResult;
 
     // If we hit an upward facing plane, make it our ground
-    if ( downTraceResult.gameEntity && downTraceResult.plane.normal.z >= PM_STEP_NORMAL ) {
+    if ( downTraceResult.gameEntity && IsWalkablePlane( downTraceResult.plane ) ) {
 
         // If we had no ground, then handle landing events
         if ( moveState->groundEntityNumber == -1 ) {//	if (!pm->groundEntityPtr) {
 			// Any landing terminates the water jump
-            if ( moveState->moveFlags & PMF_TIME_WATER_JUMP ) {
+            if ( moveState->moveFlags & SlideMoveMoveFlags::TimeWaterJump ) {
                 moveState->moveFlags &= ~SlideMoveMoveFlags::TimeWaterJump;
                 moveState->moveFlagTime = 0;
             }
 
             // Hard landings disable jumping briefly
-            if ( moveState->originalVelocity.z <= PM_SPEED_LAND ) {
+            if ( moveState->originalVelocity.z <= SLIDEMOVE_SPEED_LAND ) {
                 moveState->moveFlags |= PMF_TIME_LAND;
                 moveState->moveFlagTime = 1;
 
-                if ( moveState->originalVelocity.z <= PM_SPEED_FALL ) {
+                if ( moveState->originalVelocity.z <= SLIDEMOVE_SPEED_FALL ) {
                     moveState->moveFlagTime = 16;
 
-                    if ( moveState->originalVelocity.z <= PM_SPEED_FALL_FAR ) {
+                    if ( moveState->originalVelocity.z <= SLIDEMOVE_SPEED_FALL_FAR ) {
                         moveState->moveFlagTime = 256;
                     }
                 }
@@ -307,6 +311,7 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
 
         // Save a reference to the ground
         moveState->moveFlags |= SlideMoveMoveFlags::OnGround;
+	
 		if (downTraceResult.podEntity) {//	pm->groundEntityPtr = trace.ent;
 			moveState->groundEntityNumber = SG_GetEntityNumber( downTraceResult.podEntity );
 		} else {
@@ -315,15 +320,15 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
 
 		// "Sink down" to our ground.
 		moveState->origin = downTraceResult.endPosition;
-		moveState->velocity = SM_ClipVelocity(moveState->velocity, downTraceResult.plane.normal, PM_CLIP_BOUNCE);
+		moveState->velocity = SM_ClipVelocity(moveState->velocity, downTraceResult.plane.normal, SLIDEMOVE_CLIP_BOUNCE);
 	} else {
 		// Definitely, NOT, on ground.
         moveState->moveFlags &= SlideMoveMoveFlags::OnGround;
-		moveState->groundEntityNumber = -1;//	pm->groundEntityPtr = NULL;
+		moveState->groundEntityNumber = -1;
     }
 
     // Always touch the entity, even if we couldn't stand on it
-    SM_AddTouchEntity(moveState, downTraceResult.gameEntity);
+    SM_AddTouchEntity( moveState, downTraceResult.gameEntity );
 }
 
 /**
@@ -342,9 +347,6 @@ static const int32_t SM_CheckStep( SlideMoveState* moveState, const SGTraceResul
 					)
 			)
 		{
-			// Adjust our origin.
-			//moveState->origin = downTraceResult.endPosition;
-
 			// Return true.
 			return true;
 		} else {
@@ -375,57 +377,124 @@ static const int32_t SM_CheckForGroundStep( SlideMoveState* moveState ) {
 	return -1;
 }
 
-bool SM_StepToTrace( SlideMoveState *moveState, const SGTraceResult &traceResult ) {
-	// Set current origin to the trace end position.
-	moveState->origin = traceResult.endPosition;
+bool _SM_StepDownOrEdgeMove_StepDown( SlideMoveState* moveState, const SGTraceResult &traceResult ) {
+    // Store pre-move parameters
+    const vec3_t org0 = moveState->origin;
+    const vec3_t vel0 = moveState->velocity;
 				
 	// Only return true if it was high enough to "step".
-	const float stepHeight = fabs( moveState->origin.z - moveState->originalOrigin.z );
+	const float stepHeight = moveState->origin.z - moveState->originalOrigin.z;
+	const float absoluteStepHeight = fabs(stepHeight);
 
-	if (fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN) {
+
+	SM_SlideClipMove( moveState, false );
+
+
+	if (absoluteStepHeight>= SLIDEMOVE_STEP_HEIGHT_MIN) {
+
+		moveState->origin = traceResult.endPosition;
+
+		//if (stepHeight > 0) {
+		//	// We'll add velocity to try and move to the step.
+		//	moveState->velocity.z -= absoluteStepHeight;
+
+		//} else {
+		//	moveState->velocity.z += absoluteStepHeight;
+		//}
+		//// Move.
+
+
 		//moveState->stepHeight = stepHeight;
-		//return true;
+		return true;
+	} else {
+		//moveState->origin = traceResult.endPosition;
+		//return true; // Return false to prevent animating.?
+//		return true;
 	}
 	//} else {
 	//	return false;
 	//}
-	return true;
+	return false;
+}
+
+bool _SM_StepUp_ToFloor( SlideMoveState *moveState, const SGTraceResult &traceResult ) {
+	//// Set current origin to the trace end position.
+	//moveState->origin = traceResult.endPosition;
+				
+	// Only return true if it was high enough to "step".
+	const float stepHeight = moveState->origin.z - traceResult.endPosition.z;
+	const float absoluteStepHeight = fabs(stepHeight);
+
+	if (absoluteStepHeight >= SLIDEMOVE_STEP_HEIGHT_MIN) {
+
+		if (stepHeight > 0) {
+			// We'll add velocity to try and move to the step.
+			moveState->velocity.z += absoluteStepHeight;
+
+		} else {
+			moveState->velocity.z -= absoluteStepHeight;
+		}
+		// Move.
+		SM_SlideClipMove( moveState, false );
+
+		//moveState->stepHeight = stepHeight;
+		return true;
+	} else {
+
+		moveState->origin = traceResult.endPosition;
+		return true;
+		//return true; // Return false to prevent animating.?
+//		return true;
+	}
+	//} else {
+	//	return false;
+	//}
+	return false;
 }
 
 /**
-*	@brief	Handles checking whether an entity can step down or not. (If it has lost ground, try and step down.)
+*	@brief	Checks whether we're stepping off a legit step, or moving off an edge and about to
+*			fall down.
+*	@return	Either 0 if no step or edge move could be made. Otherwise, SlideMoveFlags::SteppedDown 
+*			or SlideMoveFlags::EdgeMoved.
 **/
-static bool _SM_StepDown( SlideMoveState *moveState ) {
+static int32_t _SM_EdgeStepMove( SlideMoveState *moveState ) {
     // Store pre-move parameters
     const vec3_t org0 = moveState->origin;
     const vec3_t vel0 = moveState->velocity;
 
 	SM_SlideClipMove( moveState, false );
 
-	if ( !(moveState->moveFlags & SlideMoveMoveFlags::OnGround) && vel0.z <= PM_STOP_EPSILON ) {
+	if ( !(moveState->moveFlags & SlideMoveMoveFlags::OnGround) && vel0.z <= SLIDEMOVE_STOP_EPSILON  ) {
 		// Try to settle to the ground.
-		const vec3_t downTraceEnd = vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+		const vec3_t downTraceEnd = vec3_fmaf( moveState->origin, SLIDEMOVE_STEP_HEIGHT + SLIDEMOVE_GROUND_DISTANCE, vec3_down() );
 		const SGTraceResult downTraceResult = SM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &downTraceEnd );
 		
 		if ( SM_CheckStep( moveState, downTraceResult) ) {
-		//if ( !(moveState->moveFlags & SlideMoveMoveFlags::OnGround) || moveState->velocity.z < PM_SPEED_UP ) {
-			SM_StepToTrace( moveState, downTraceResult );
-			return true;
-		//}
-			//SM_StepToTrace( moveState, downTraceResult );
-			//return true;
+			// In case we'd like to not step for register min step height steps.
+			if (_SM_StepDownOrEdgeMove_StepDown( moveState, downTraceResult ) ) {
+				// If we were falling after an edge move, return a fall down instead.
+				//if ( ) {
+				//return SlideMoveFlags::FallSteppedDown;
+				//} else {
+				return SlideMoveFlags::SteppedDown;
+				//}
+			} else {
+				// Step here, but without animation so dun return flag?
+				//return SlideMoveFlags::EdgeMoved;
+
+			}
 		} else {
-			// EDGE? ;-)
-			//moveState->origin = org0;
-			//moveState->velocity = vel0;
+			// We moved over the edge, about to drop down.
+			return SlideMoveFlags::EdgeMoved;
 		}
 	} else {
-		//moveState->origin = org0;
-		//moveState->velocity = vel0;
+		moveState->origin = org0;
+		moveState->velocity = vel0;
 	}
 
-	// Can't step.
-	return false;
+	// Can't step or move off an edge.
+	return 0;
 }
 
 /**
@@ -441,7 +510,7 @@ static bool _SM_StepUp( SlideMoveState *moveState ) {
 	const vec3_t vel0 = moveState->velocity;
 
 	// Up Wards trace end point.
-	const vec3_t upTraceEnd = vec3_fmaf( org0, PM_STEP_HEIGHT, vec3_up() );
+	const vec3_t upTraceEnd = vec3_fmaf( org0, SLIDEMOVE_STEP_HEIGHT, vec3_up() );
 	// Perform trace.
 	const SGTraceResult upTraceResult = SM_Trace( moveState, &org0, &moveState->mins, &moveState->maxs, &upTraceEnd );
 	
@@ -467,19 +536,18 @@ static bool _SM_StepUp( SlideMoveState *moveState ) {
 	*			- When not complying: Return false and revert to original origin & velocity.
 	**/
 	// Up Wards trace end point.
-	const vec3_t downTraceEnd = vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+	const vec3_t downTraceEnd = vec3_fmaf( moveState->origin, SLIDEMOVE_STEP_HEIGHT + SLIDEMOVE_GROUND_DISTANCE, vec3_down() );
 	// Perform Trace.
 	const SGTraceResult downTraceResult = SM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &downTraceEnd );
 		
 	// If the ground trace result complies to all conditions, step to it.
 	if ( SM_CheckStep( moveState, downTraceResult ) ) {
-		if ( (moveState->moveFlags & SlideMoveMoveFlags::OnGround) || moveState->velocity.z < PM_SPEED_UP ) {
-			SM_StepToTrace( moveState, downTraceResult );
+		if ( (moveState->moveFlags & SlideMoveMoveFlags::OnGround) || moveState->velocity.z < SLIDEMOVE_SPEED_UP ) {
+			_SM_StepUp_ToFloor(moveState, downTraceResult);
 			return true;
 		}
-		//return true;
 	}
-
+	
 	// Move failed, reset original origin and velocity.
 	moveState->origin = org0;
 	moveState->velocity = vel0;
@@ -520,18 +588,35 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 		return blockedMask;
 	}
 
-	// Managed to move without any complications.
+	// This move had no obstalces getting in its way, however...
 	if( traceResult.fraction == 1.0f ) {
-		// We know we've moved
+		// We know we've moved.
 		blockedMask |= SlideMoveFlags::Moved;
 
-		if( stepping && _SM_StepDown( moveState ) ) {
-			//moveState->origin = traceResult.endPosition;
-			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );	
-			//if ( !(moveState->clipMoveFlags & SlideMoveFlags::SteppedUp ) ) {
-				blockedMask |= SlideMoveFlags::SteppedDown;
-			//}
-			return blockedMask;
+		// Move ourselves, and see whether we are moving onto a step, or off an edge.
+		//moveState->origin = traceResult.endPosition;
+
+		// Test for Step/Edge if requested.
+		const int32_t edgeStepMask = ( stepping == true ? _SM_EdgeStepMove( moveState) : 0 );
+
+		// Stepping solution:
+		if ( stepping && edgeStepMask != 0) {
+				// Revert move origin.
+				//moveState->origin = traceResult.endPositio
+			// If we are edge moving, revert move and clip to normal?
+			if ( edgeStepMask & SlideMoveFlags::EdgeMoved ) {
+				//moveState->origin = moveState->originalOrigin;
+				// Keep our velocity, and clip it to our directional normal.
+				//const vec3_t direction = 
+			} else {
+			//	moveState->origin = traceResult.endPosition;
+			}
+
+			// Move all the way.
+			//moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );	
+
+			return edgeStepMask;
+		// Non stepping solution:
 		} else {
 			moveState->origin = traceResult.endPosition;
 			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );	
@@ -542,8 +627,13 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 	// Wasn't able to make the full move.
 	if( traceResult.fraction < 1.0f ) {
 		// Add the touched entity to our list of touched entities.
-		SM_AddTouchEntity( moveState, traceResult.gameEntity );
-				
+		const int32_t entityNumber = SM_AddTouchEntity( moveState, traceResult.gameEntity );
+		
+		// -1 = invalid, 0 = world entity, anything above is a legit touchable entity.
+		if (entityNumber > 0) {
+			blockedMask |= SlideMoveFlags::EntityTouched;
+		}
+
 		// Add a specific flag to our blockedMask stating we bumped into something.
 		blockedMask |= SlideMoveFlags::PlaneTouched;
 
@@ -554,7 +644,7 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 			blockedMask |= SlideMoveFlags::Moved;
 		}
 
-		// If we bumped into a non walkable plane(We'll consider it to be a wall.), try and up on top of it.
+		// If we bumped into a non walkable plane(We'll consider it to be a wall.), try end up on top of it.
 		if( !IsWalkablePlane( traceResult.plane ) ) {
 			vec3_t oldOrg = moveState->origin;
 			vec3_t oldVel = moveState->velocity;
@@ -565,8 +655,8 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 			} else {
 				blockedMask |= SlideMoveFlags::WallBlocked;
 			}
-			moveState->origin = oldOrg;
-			moveState->velocity = oldVel;
+			//moveState->origin = oldOrg;
+			//moveState->velocity = oldVel;
 		}
 
 		// Add plane normal to clipping plane list: We didn't step, the plane(assuming wall) blocked us.
@@ -696,7 +786,9 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 		// Update the last validOrigin to the current moveState origin.
 		lastValidOrigin = moveState->origin;
 
-		if ( ( slideMoveResultMask & SlideMoveFlags::SteppedDown ) || ( slideMoveResultMask & SlideMoveFlags::SteppedUp ) ) {
+		if ( (slideMoveResultMask & SlideMoveFlags::EdgeMoved) ||
+			( slideMoveResultMask & SlideMoveFlags::SteppedDown ) || 
+			( slideMoveResultMask & SlideMoveFlags::SteppedUp ) ) {
 			continue;
 		}
 
@@ -827,13 +919,13 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 //	// See if we should step down.
 //	if ( geGroundEntity && moveState->velocity.z <= 0.1f ) {
 //		// Trace downwards.
-//		const vec3_t down = vec3_fmaf( org0 , PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down( ) );
+//		const vec3_t down = vec3_fmaf( org0 , SLIDEMOVE_STEP_HEIGHT + SLIDEMOVE_GROUND_DISTANCE, vec3_down( ) );
 //		const SGTraceResult downTrace = SG_Trace(org0, moveState->mins, moveState->maxs, down, geSkip, moveState->contentMask );
 //
 //		// Check if we should step down or not.
 //		if ( !downTrace.allSolid ) {
 //			// Check if it is a legitimate stair case.
-//			if (downTrace.podEntity && !(downTrace.plane.normal.z >= PM_STEP_NORMAL) ) {
+//			if (downTrace.podEntity && !(downTrace.plane.normal.z >= SLIDEMOVE_STEP_NORMAL) ) {
 //				moveState->origin = downTrace.endPosition;
 //			}
 //		}
@@ -847,7 +939,7 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 //    const vec3_t org1 = moveState->origin;
 //    const vec3_t vel1 = moveState->velocity;
 //
-//    const vec3_t up = vec3_fmaf( org1, PM_STEP_HEIGHT, vec3_up() );
+//    const vec3_t up = vec3_fmaf( org1, SLIDEMOVE_STEP_HEIGHT, vec3_up() );
 //    const SGTraceResult upTrace = SG_Trace( org1, moveState->mins, moveState->maxs, up, geSkip, moveState->contentMask );
 //
 //    if ( !upTrace.allSolid ) {
@@ -862,15 +954,15 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 //		*	Settle to Ground.
 //		**/
 //        // Settle to the new ground, keeping the step if and only if it was successful
-//        const vec3_t down = vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+//        const vec3_t down = vec3_fmaf( moveState->origin, SLIDEMOVE_STEP_HEIGHT + SLIDEMOVE_GROUND_DISTANCE, vec3_down() );
 //        const SGTraceResult downTrace = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, down, geSkip, moveState->contentMask );
 //
-//        if ( !downTrace.allSolid && downTrace.plane.normal.z >= PM_STEP_NORMAL ) { //PM_CheckStep(&downTrace)) {
+//        if ( !downTrace.allSolid && downTrace.plane.normal.z >= SLIDEMOVE_STEP_NORMAL ) { //SLIDEMOVE_CheckStep(&downTrace)) {
 //            // Quake2 trick jump secret sauce
 ////#if 0     
 //			//SGGameWorld *gameWorld = GetGameWorld();
 //			//GameEntity *geGroundEntity = SGGameWorld::ValidateEntity(gameWorld->GetPODEntityByIndex(moveState->groundEntityNumber));
-//			//if ( (geGroundEntity) || vel0.z < PM_SPEED_UP ) {
+//			//if ( (geGroundEntity) || vel0.z < SLIDEMOVE_SPEED_UP ) {
 ////#endif
 //				//if ( !SlideMove_CheckBottom( moveState ) ) {
 //					// Yeah... I knwo.
@@ -914,7 +1006,7 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 //			SGTraceResult	&previousGroundTrace		= moveState->groundTrace;
 //
 //			// Trace for the current remainingTime, by MA-ing the move velocity.
-//			const vec3_t	endPosition				= vec3_fmaf( moveState->origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down() );
+//			const vec3_t	endPosition				= vec3_fmaf( moveState->origin, SLIDEMOVE_STEP_HEIGHT + SLIDEMOVE_GROUND_DISTANCE, vec3_down() );
 //			SGTraceResult	newGroundTraceResult	= SG_Trace( moveState->origin, moveState->mins, moveState->maxs, endPosition, geSkip, moveState->contentMask );
 //
 //			/**

@@ -88,7 +88,7 @@ void MonsterTestDummy::Spawn() {
 
     // Set the bounding box.
     SetBoundingBox({ -16, -16, -46 }, { 16, 16, 44 });
-
+	SetRenderEffects(RenderEffects::FrameLerp);
     // Setup our MonsterTestDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
     SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);

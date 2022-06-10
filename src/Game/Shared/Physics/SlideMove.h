@@ -22,6 +22,30 @@ static constexpr int32_t MAX_SLIDEMOVE_TOUCH		= 32;
 
 //! SlideMove 'Stop Epsilon' for velocities that are nearing 0.
 static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
+//! Bounce Velocity Clipping value.
+static constexpr float SLIDEMOVE_CLIP_BOUNCE		= 1.01f;
+
+//! SlideMove 'Minimal Step Height'. If a step exceeds it, it'll resort to NOT positioning the entity, but have it
+// drop by gravity instead.
+static constexpr float SLIDEMOVE_STEP_HEIGHT_MIN	= 4.0f;
+
+//! The actual maximum step height a slidemove is allowed to step.
+static constexpr float SLIDEMOVE_STEP_HEIGHT = 18.0f;
+
+//! The distance between a slide move and the ground. (An offset, to prevent trouble.)
+static constexpr float SLIDEMOVE_GROUND_DISTANCE = 0.25f;
+
+//! Determins the minimum speed value for Z velocity before determinging a slidemove should bother with floor logic.
+static constexpr float SLIDEMOVE_SPEED_UP = 0.1f;
+
+
+static constexpr float SLIDEMOVE_SPEED_LAND			= -280.f;
+static constexpr float SLIDEMOVE_SPEED_FALL			= -700.f;
+static constexpr float SLIDEMOVE_SPEED_FALL_FAR		= -900.f;
+
+
+
+
 
 //! Uncomment for printing Debug Information Output when a SlideMove gets trapped.
 /*#define SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES*/
