@@ -118,14 +118,14 @@ static constexpr float STEPMOVE_WATERFRICTION = 1.f;
 /**
 *	@brief	Processes rotational friction calculations.
 **/
-void SG_AddRotationalFriction( SGEntityHandle entityHandle ) { 
+const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle ) { 
 	// Assign handle to base entity.
     GameEntity *ent = *entityHandle;
 
     // Ensure it is a valid entity.
     if ( !ent ) {
 	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
-        return;
+        return vec3_zero();
     }
 
     // Acquire the rotational velocity first.
@@ -151,8 +151,8 @@ void SG_AddRotationalFriction( SGEntityHandle entityHandle ) {
         }
     }
 
-    // Last but not least, set the new angularVelocity.
-    ent->SetAngularVelocity( angularVelocity );
+	// Return the angular velocity.
+	return angularVelocity;
 }
 
 /**

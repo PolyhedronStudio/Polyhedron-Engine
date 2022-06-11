@@ -402,51 +402,49 @@ static constexpr float SLIDEMOVE_WATER_FRICTION = 1.f;
 *			it resorts to sliding along the edge "crease".
 **/
 const int32_t SVGBaseSlideMonster::SlideMove() {
-    // Stores whether to play a "surface hit" sound.
-    qboolean    hitSound = false;
-
 	// Get GameWorld.
 	SGGameWorld *gameWorld = GetGameWorld();
-		SG_CheckGround(this);
-	/**
-	*	Step #2:	If there is a valid ground entity, store that we're 'on-ground'.
-	*				If there is no valid ground entity, check and see if we've got one for this frame.
-	**/
-    // Get ground entity.
-    GameEntity* geGroundEntity = SGGameWorld::ValidateEntity( GetGroundEntityHandle() );
+
+	// Get Entity Flags.
+	const int32_t entityFlags = GetFlags();
+	// Get WaterLevel.
+	const int32_t waterLevel = GetWaterLevel();
+    // Default mask is solid.
+    const int32_t moveClipMask = GetClipMask();
+	// Store a copy of our previous moveState just to be sure.
+	const SlideMoveState previousMoveState = slideMoveState;
+	// TODO: THIS WE SHOULD NOT NEED!!
+	slideMoveState = {};
 
     // Store whether we had a ground entity at all.
     const qboolean wasOnGround = ( slideMoveState.groundEntityNumber != -1 ? true : false );
+    // Stores whether to play a "surface hit" sound.
+    qboolean    hitSound = false;
+
 
 	/**
-	*	Step #3:	- Check and clamp our Velocity.
+	*	Step #0:	- Check and clamp our Velocity.
 	*				- Apply Rotation Friction to Angular Velocity.
 	*				- Apply Ground Friction to Velocity
-	*				- LASTLY: Apply Gravity:
-	*							- For Walking Monsters	: Gravity if not on ground, ground friction otherwise.
-	*							- For Swimming Monsters	: Gravity if not in water (Try and fall into water.)
-	*							- For Flying Monsters	: ...
+	*				- Apply Gravity:
+	*					* For Walking Monsters	: Gravity if not on ground, ground friction otherwise.
+	*					* For Swimming Monsters	: Gravity if not in water (Try and fall into water.)
+	*					* For Flying Monsters	: ...
 	**/
 	const float oldVelocityLength = vec3_length( GetVelocity() );
 
 	// Bound our velocity within sv_maxvelocity limits.
 	SG_CheckVelocity( this );
 
-    // Check for angular velocities. If found, add rotational friction.
+    // Get angular velocity for applying rotational friction.
     vec3_t angularVelocity = GetAngularVelocity();
 
+	// If we got any angular velocity, apply friction.
     if (angularVelocity.x || angularVelocity.y || angularVelocity.z) {
-        SG_AddRotationalFriction( this );
+		SG_AddRotationalFriction( this );
 	}
 
-    // Re-ensure we fetched its latest angular velocity.
-    angularVelocity = GetAngularVelocity();
-
-	// Get EntityFlags.
-	const int32_t entityFlags = GetFlags();
-	const int32_t waterLevel = GetWaterLevel();
-
-	// ## Walking Monsters:
+	// - Walking Monsters:
 	if ( !wasOnGround ) {
 		// In case of: Walking Monsters:
 		if ( !( entityFlags & EntityFlags::Fly ) && !( entityFlags & EntityFlags::Swim ) ) {
@@ -465,25 +463,28 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 		static constexpr int32_t FRICTION = 10;
 		SG_AddGroundFriction( this, FRICTION );
 	}
-
-	// ## Flying Monsters:
+	// - Flying Monsters:
     if ( ( GetFlags() & EntityFlags::Fly ) ) {
 		// Friction for Vertical Velocity.
 		if ( ( GetVelocity().z != 0 ) ) {
+			// Calculate: Speed, Control, Friction.
 			const float speed = fabs( GetVelocity().z );
 			const float control = speed < SLIDEMOVE_STOP_SPEED ? SLIDEMOVE_STOP_SPEED : speed;
 			const float friction = SLIDEMOVE_FRICTION / 3;
+
+			// Calculate: new Speed.
 			float newSpeed = speed - ( FRAMETIME.count() * control * friction );
 			if ( newSpeed < 0 ) {
 				newSpeed = 0;
 			}
 			newSpeed /= speed;
+
+			// Calculate new velocity based on old velocity.
 			const vec3_t velocity = GetVelocity();
 			SetVelocity( { velocity.x, velocity.y, velocity.z * newSpeed } );
 		}
 	}
-
-	// ## Swimming Monsters:
+	// - Swimming Monsters:
 	if ( ( GetFlags() & EntityFlags::Swim ) ) {
 		// Friction for swimming monsters that have been given vertical velocity
 		if ( ( GetFlags() & EntityFlags::Swim ) && ( GetVelocity().z != 0 ) ) {
@@ -498,7 +499,6 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 			SetVelocity({ velocity.x, velocity.y, velocity.z * newSpeed });
 		}
     }
-
 	//  /**
 	//  *	@brief //      // Apply friction: Let dead NPCs who aren't completely onground slide.
 	//  **/
@@ -512,43 +512,149 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	//                  const float friction = SLIDEMOVE_FRICTION;
 	//                  const float control = speed < SLIDEMOVE_STOP_SPEED ? SLIDEMOVE_STOP_SPEED : speed;
 	//                  float newSpeed = speed - FRAMETIME.count() * control * friction;
-
 	//                  if (newSpeed < 0) {
 	//                      newSpeed = 0;
-	//			}
+	//              }
 	//                  newSpeed /= speed;
-
 	//                  newVelocity[0] *= newSpeed;
 	//                  newVelocity[1] *= newSpeed;
-
 	//                  // Set the velocity.
 	//                  geBoxSlide->SetVelocity( newVelocity );
 	//              }
 	//          }
+	//      }
+	//  }
+
+
+	/**
+	*	Step #1:	- Get appropriate Clip Mask.
+	*				- Try and perform our slide move: Including, if wished for, stepping down/up.
+	*				- ?
+	**/
+	// With the previous state stored for reversion in case of need, we'll perform the new move.
+	const int32_t blockedMask = SG_BoxSlideMove( 
+		this, 
+		( moveClipMask ? moveClipMask : BrushContentsMask::PlayerSolid ), 
+		SLIDEMOVE_CLIP_BOUNCE, 
+		SLIDEMOVE_FRICTION, 
+		slideMoveState 
+	);
+	#ifdef SG_SLIDEMOVE_DEBUG_BLOCKMASK && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
+	{
+		DebugPrint(blockedMask);
+	}
+	#endif
+
+
+	/**
+	*	Step #2:	- The Move has been Performed: Update Entity Attributes.
+	**/
+	// Double validate ground entity at this moment in time.
+	GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( slideMoveState.groundEntityNumber ) );
+
+	// Update the entity with the resulting moveState values.
+	SetOrigin( slideMoveState.origin );
+	SetVelocity( slideMoveState.velocity );
+	SetMins( slideMoveState.mins );
+	SetMaxs( slideMoveState.maxs );
+	SetFlags( slideMoveState.entityFlags );
+	SetGroundEntity( geNewGroundEntity );
+	SetGroundEntityLinkCount( slideMoveState.groundEntityLinkCount );
+
+	// Link entity in.
+	LinkEntity();
+	
+
+	/**
+	*	Step #3:	- Execute Touch Callbacks in case we add any blockedMask set.
+	**/
+	// Execute touch callbacks.
+	if( blockedMask != 0 ) {
+		GameEntity *otherEntity = nullptr;
+
+		// Call Touch Triggers on our slide box entity for its new position.
+		SG_TouchTriggers( this );
+
+		// Dispatch 'Touch' callback functions to all touched entities we caught and stored in our moveState.
+		for( int32_t i = 0; i < slideMoveState.numTouchEntities; i++ ) {
+			otherEntity = gameWorld->GetGameEntityByIndex( slideMoveState.touchEntites[i] );
+			
+			// Don't touch projectiles.
+			if( !otherEntity || !otherEntity->IsInUse() ) { //|| otherEntity->GetFlags() & PROJECTILE_THING_FLAG) {
+				continue;
+			}
+
+			// First dispatch a touch on the object we're hitting.
+			otherEntity->DispatchTouchCallback( otherEntity, this, nullptr, nullptr );
+
+			// Now dispatch a touch callback for THIS entity.
+			DispatchTouchCallback( this, otherEntity, nullptr, nullptr );
+
+			// In case touch callbacks caused it to be non 'in-use', return blockedMask since we're done.
+			// -> old behavior: break out of the loop.
+			if( !IsInUse() ) {
+				return blockedMask;
+				//break; // TODO: Should we do a break or just return here?
+			}
+		}
+	}
+
+
+	/**
+	*	Step #5:	- If still in use, check for ground, and see if our velocity came to a halt
+	*				so we can safely trigger a Stop Dispatch callback.
+	**/
+	//// Assuming we're still in use, set ourselves to a halt if 
+	//if ( IsInUse() ) {
+	//	// Check for ground entity.
+	//	int32_t groundEntityNumber = SG_BoxSlideMove_CheckForGround( this );
+
+	//	// Revalidate it
+	//	GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( groundEntityNumber ) );
+
+	//	// Set it to a halt in case velocity becomes too low, this way it won't look odd.
+	//	if( geNewGroundEntity && vec3_length( GetVelocity() ) <= 1.f && oldVelocityLength > 1.f ) {
+	//		// Zero out velocities.
+	//		SetVelocity( vec3_zero() );
+	//		SetAngularVelocity( vec3_zero() );
+
+	//		// Stop.
+	//		DispatchStopCallback( );
+	//	}
+	//}
+	// Execute touch triggers (Since entities might move during touch callbacks, we might've
+	// hit new entities.)
+    SG_TouchTriggers( this );
+
+    // Can't continue if this entity wasn't in use.
+    //if ( !IsInUse( ) ) {
+    //    return blockedMask;
 	//}
 
 
 	/**
-	*	Step #4:	- Get appropriate Clip Mask.
-	*				- Try and perform our slide move: Including, if wished for, stepping down/up.
-	*				- ?
+	*	#6:	In case we need to play any audio for this entity, do so.
 	**/
-    // Default mask is solid.
-    int32_t mask = GetClipMask();
-        
-	// Store old velocity for stepping.
-	const vec3_t vel0 = GetVelocity();
-	const vec3_t org0 = GetOrigin();
+    // Check for whether to play a land sound.
+    if ( geNewGroundEntity ) {
+        if ( !wasOnGround ) {
+            if ( hitSound ) {
+                SVG_Sound(this, 0, gi.PrecacheSound("world/land.wav"), 1, 1, 0);
+            }
+        }
+    }
 
-	// Execute "BoxSlideMove", essentially also our water move.
-	slideMoveState = {};
-	int32_t blockedMask = SG_BoxSlideMove( this, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
 
-	if ( blockedMask & SlideMoveFlags::EdgeMoved) {
+	/**
+	*	#7: We're done, return blockedMask.
+	**/
+	return blockedMask;
+}
 
-	}
-		
-	if (GetHealth() > 0) {
+/**
+*	@brief	Useful for debugging slidemoves, enable on an entity by setting spawnflag 128
+**/
+void SVGBaseSlideMonster::DebugPrint(const int32_t blockedMask) {
 #if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
 		if (blockedMask != 0) {
 			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (";
@@ -573,143 +679,6 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 			gi.DPrintf( "%s\n", blockMaskString.c_str());
 		}
 #endif
-	}
-		/**
-		*	Step #6:	- The Move has been Performed: Update Entity Attributes.
-		**/
-		// Double validate ground entity at this moment in time.
-		GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( slideMoveState.groundEntityNumber ) );
-
-		// Update the entity with the resulting moveState values.
-		SetOrigin( slideMoveState.origin );
-		SetVelocity( slideMoveState.velocity );
-		SetMins( slideMoveState.mins );
-		SetMaxs( slideMoveState.maxs );
-		SetFlags( slideMoveState.entityFlags );
-		SetGroundEntity( geNewGroundEntity );
-		SetGroundEntityLinkCount( slideMoveState.groundEntityLinkCount );
-
-		// Link entity in.
-		LinkEntity();
-	
-
-	/**
-	*	Step #5:	- Prevent us from moving into water if we're not a swimming monster.
-	*				- Try and perform our slide move: Including, if wished for, stepping down/up.
-	*				- ?
-	**/
-		//// This is set to false whenever one of the following checks failed:
-		//// - Water Check:	We don't want these entities to just walk into a pool of water.
-		//// - Edge Check:	Unless the edge is of a legit staircase height, we don't want the
-		////					NPC entity to blindly walk off of it.
-		//// - 
-		//bool setOrigin = true;
-
-	//----------------------------
-	// CHECK: Water Check
-	//----------------------------
-	// To prevent this entity from going into the water. We assume that if 
-	// its waterLevel already was 0, we'll maintain it at 0.
-	//----------------------------
-	if ( !( entityFlags & EntityFlags::Swim ) ) {
-		if ( GetWaterLevel() == 0 ) {
-			vec3_t point = {
-				slideMoveState.origin.x,
-				slideMoveState.origin.y,
-				slideMoveState.origin.z + slideMoveState.mins.z - 1,
-			};
-			const int32_t pointContents = SG_PointContents(point);
-
-			if (pointContents & BrushContentsMask::Liquid) {
-				// TODO: ?? DO SOMETHING, MOVE FAILED.
-				//return false;
-			}
-		}
-	}
-
-	//----------------------------
-	// CHECK: Edge Check
-	//----------------------------
-	// Notify entity it hit an edge/a ledge.
-	//----------------------------
-
-
-	
-	/**
-	*	Step #7:	- Execute Touch Callbacks in case we add any blockedMask set.
-	**/
-	// Execute touch callbacks.
-	if( blockedMask != 0 ) {
-		GameEntity *otherEntity = nullptr;
-
-		// Call Touch Triggers on our slide box entity for its new position.
-		SG_TouchTriggers( this );
-
-		// Dispatch 'Touch' callback functions to all touched entities we caught and stored in our moveState.
-		for( int32_t i = 0; i < slideMoveState.numTouchEntities; i++ ) {
-			otherEntity = gameWorld->GetGameEntityByIndex( slideMoveState.touchEntites[i] );
-			
-			// Don't touch projectiles.
-			if( !otherEntity || !otherEntity->IsInUse() ) { //|| otherEntity->GetFlags() & PROJECTILE_THING_FLAG) {
-				continue;
-			}
-
-			// Call Touch for the other entity right before calling touch on geSlider.
-			otherEntity->DispatchTouchCallback( otherEntity, this, nullptr, nullptr );
-
-			DispatchTouchCallback( this, otherEntity, nullptr, nullptr );
-
-			// Check if it may have been freed by the touch function, if so, break out.
-			if( !IsInUse() ) {
-				break;
-			}
-		}
-	}
-
-
-	/**
-	*	Step #8:	- If still in use, check for ground, and see if our velocity came to a halt
-	*				so we can safely trigger a Stop Dispatch callback.
-	**/
-	// If it's still in use, search for ground.
-	if ( IsInUse() ) {
-		// Check for ground entity.
-		int32_t groundEntityNumber = SG_BoxSlideMove_CheckForGround( this );
-
-		// Revalidate it
-		GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( groundEntityNumber ) );
-
-		// Set it to a halt in case velocity becomes too low, this way it won't look odd.
-		if( geNewGroundEntity && vec3_length( GetVelocity() ) <= 1.f && oldVelocityLength > 1.f ) {
-			// Zero out velocities.
-			SetVelocity( vec3_zero() );
-			SetAngularVelocity( vec3_zero() );
-
-			// Stop.
-			DispatchStopCallback( );
-		}
-	}
-
-	// Execute touch triggers.
-    SG_TouchTriggers( this );
-
-    // Can't continue if this entity wasn't in use.
-    if ( !IsInUse( ) ) {
-        return blockedMask;
-	}
-
-#ifdef SHAREDGAME_SERVERGAME
-    // Check for whether to play a land sound.
-    if ( geNewGroundEntity ) {
-        if ( !wasOnGround ) {
-            if ( hitSound ) {
-                SVG_Sound(this, 0, gi.PrecacheSound("world/land.wav"), 1, 1, 0);
-            }
-        }
-    }
-#endif
-
-	return blockedMask;
 }
 
 void SVGBaseSlideMonster::SlideMove_FixCheckBottom() {

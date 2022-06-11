@@ -189,4 +189,4 @@ int32_t SG_BoxSlideMove_CheckForGround( GameEntity *geCheck );
 /**
 *	@brief	Processes rotational friction calculations.
 **/
-void SG_AddRotationalFriction( SGEntityHandle entityHandle );
+const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle );

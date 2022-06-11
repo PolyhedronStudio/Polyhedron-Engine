@@ -160,7 +160,10 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	currentAnimationState->loopCount = animation->loopingFrames;
 	currentAnimationState->forceLoop = animation->forceLoop;
 
-	//ProcessSkeletalAnimationForTime(level.time);
+	// Engage the switch by being ahead of time and processing the animation we just set for
+	// the current moment in time. The state will then be adjusted meaning that the client receives
+	// the new animation data the first frame he gets from us.
+	ProcessSkeletalAnimationForTime(level.time);
 
 	return animation->index;
 }

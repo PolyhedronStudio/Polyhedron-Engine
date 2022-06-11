@@ -82,9 +82,21 @@ public:
     * 
     ***/
 public:
+	/**
+	*	@brief	Prepare, Perform and process a slidemove frame for this monster.
+	*	@return	A mask containing the final slide move results. (Blocked, stepped, etc.)
+	**/
 	const int32_t SlideMove();
+
+	/**
+	*	@brief	Useful for debugging slidemoves, enable on an entity by setting spawnflag 128
+	**/
+	void DebugPrint(const int32_t blockedMask = 0);
+
 private:
+	// Actual slide move state we're operating with.
 	SlideMoveState slideMoveState;
+
 
 protected:
 	const bool SlideMove_CheckBottom( );
