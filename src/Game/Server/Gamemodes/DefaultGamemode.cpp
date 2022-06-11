@@ -1039,7 +1039,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         player->LinkEntity();
 
         // Get player move type.
-        int32_t playerMoveType = player->GetMoveType();
+        const int32_t playerMoveType = player->GetMoveType();
 
         // Execute touch callbacks as long as movetype isn't noclip, or spectator.
         if ( playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator ) {
@@ -1087,8 +1087,66 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
     // save light level the player is standing on for
     // monster sighting AI
     //ent->lightLevel = moveCommand->input.lightLevel;
+	/**
+	*	If the player sent us a Use button action, scan for which entity he
+	*	has targetted and dispatch its use callback.
+	**/
+	if ( client->latchedButtons & ButtonBits::Use ) {
+		// Get Aim Angles.
+		const vec3_t aimAngles = client->aimAngles + client->kickAngles;
 
-    // Fire weapon from final position if needed
+		// Calculate forward and right vectors.
+        vec3_t forward = vec3_zero(), right = vec3_zero();
+        AngleVectors( aimAngles, &forward, &right, NULL );
+
+		// Calculate traceStart by projecting an offset vector from player origin.
+		const vec3_t originOffset = { 0, 8, static_cast<float>(player->GetViewHeight() - 8) };
+        const vec3_t useTraceStart = SVG_ProjectSource( player->GetOrigin(), originOffset, forward, right );
+
+		// Calculate traceEnd starting from the traceStart .
+		const vec3_t useTraceEnd	= vec3_fmaf( useTraceStart, 64, forward );
+
+		// Trace Mask.
+		const int32_t	useTraceMask	= BrushContentsMask::PlayerSolid | BrushContentsMask::MonsterSolid;
+
+		// Perform trace.
+		const SGTraceResult useTraceResult = SG_Trace( useTraceStart, vec3_zero(), vec3_zero(), useTraceEnd, player, useTraceMask );
+		
+		// Fetch entity.
+		const int32_t useEntityNumber = SG_GetEntityNumber(useTraceResult.gameEntity);
+
+		// If we got an entity, get a pointer to it for dispatching.
+		if (useEntityNumber > 0) {
+			// Get GameWorld.
+			SGGameWorld *gameWorld = GetGameWorld();
+			// Get 'Use' entity.
+			GameEntity *geUse = gameWorld->GetGameEntityByIndex( useEntityNumber );
+
+			// If valid pointer, and allows for use, dispatch a callback.
+			if ( geUse && geUse->IsInUse() ) {
+				geUse->DispatchUseCallback( geUse, player );
+			}
+		}
+		
+		// Remove 'Use' button bit.
+		client->latchedButtons &= ~ButtonBits::Use;
+
+#if 1
+		const char *startStr = Vec3ToString(useTraceStart);
+		const char *endStr = Vec3ToString(useTraceEnd);
+		const char *endPositionStr = Vec3ToString(useTraceResult.endPosition);
+		gi.DPrintf("PlayerUse - Entity(#%i): traceStart(%s), traceEnd(%s), traceEndPoint(%s)\n",
+			useEntityNumber,
+			startStr,
+			endStr,
+			endPositionStr
+		);
+#endif
+	}
+
+	/**
+	*	Fire weapon from final position if needed
+	**/
     if ( client->latchedButtons & ButtonBits::PrimaryFire ) {
         if ( client->respawn.isSpectator ) {
 

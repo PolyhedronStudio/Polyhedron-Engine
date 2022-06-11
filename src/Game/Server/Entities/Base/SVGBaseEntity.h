@@ -622,6 +622,12 @@ public:
     virtual IServerGameEntity*   GetTeamMasterEntity() override { return teamMasterEntity; }
     virtual void                 SetTeamMasterEntity(IServerGameEntity* entity) override { teamMasterEntity = entity; }
 
+	/**
+	*	@brief Get/Set:     Use Flags that determine if, and how a player can use this entity. (Toggle, continuous, single button.)
+	**/
+	virtual const int32_t        GetUseEntityFlags() { return useEntityFlags; }
+	virtual void                 GetUseEntityFlags(const int32_t useFlags) { this->useEntityFlags = useFlags; }
+
     /**
     *   @brief Get/Set:     Velocity
     **/
@@ -704,7 +710,8 @@ protected:
     int32_t flags = 0;
     //! Entity spawn flags (Such as, is this a dropped item?)
     int32_t spawnFlags = 0;
-
+	//! Entity 'use' flags. Determines how the player can 'Use' interact with this entity.
+	int32_t useEntityFlags = 0;
     
     /**
     *   Entity Strings/Targetnames.

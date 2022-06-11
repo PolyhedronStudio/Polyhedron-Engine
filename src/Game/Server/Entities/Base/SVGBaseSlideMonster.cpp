@@ -615,11 +615,9 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 			// Now dispatch a touch callback for THIS entity.
 			DispatchTouchCallback( this, otherEntity, nullptr, nullptr );
 
-			// In case touch callbacks caused it to be non 'in-use', return blockedMask since we're done.
-			// -> old behavior: break out of the loop.
+			// In case touch callbacks caused it to be non 'in-use':
 			if( !IsInUse() ) {
-				return blockedMask;
-				//break; // TODO: Should we do a break or just return here?
+				break; // Break here.
 			}
 		}
 	}
