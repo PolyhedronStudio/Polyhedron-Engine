@@ -414,7 +414,8 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	// Store a copy of our previous moveState just to be sure.
 	const SlideMoveState previousMoveState = slideMoveState;
 	// TODO: THIS WE SHOULD NOT NEED!!
-	slideMoveState = {};
+	slideMoveState = { .moveFlags = previousMoveState.moveFlags,
+	.moveFlagTime = previousMoveState.moveFlagTime };
 
     // Store whether we had a ground entity at all.
     const qboolean wasOnGround = ( slideMoveState.groundEntityNumber != -1 ? true : false );
@@ -539,11 +540,24 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 		SLIDEMOVE_FRICTION, 
 		slideMoveState 
 	);
-	#ifdef SG_SLIDEMOVE_DEBUG_BLOCKMASK && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
+	#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && (SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1)
 	{
 		DebugPrint(blockedMask);
 	}
 	#endif
+
+	// Ideally in a perfect world we'd never get trapped, but Quake and all its derivatives
+	// are of course perfectly beautiful creatures from bottomless pits where no developer
+	// should ever want to be found, dead... or alive.
+	//
+	// So... I present to you the following bold and ugly motherfucking hack:
+	if ( (blockedMask & SlideMoveFlags::Trapped) ) {
+		// The reason we do this here is that even though we inspect for trapped inside
+		// the SlideMove repeatedly, it performs on a sub-level. This statement catches
+		// the worst of the worst situations and will resort to old origin and velocity.
+		slideMoveState.origin	= previousMoveState.origin;
+		slideMoveState.velocity	= previousMoveState.velocity;
+	}
 
 
 	/**
@@ -558,8 +572,15 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	SetMins( slideMoveState.mins );
 	SetMaxs( slideMoveState.maxs );
 	SetFlags( slideMoveState.entityFlags );
-	SetGroundEntity( geNewGroundEntity );
-	SetGroundEntityLinkCount( slideMoveState.groundEntityLinkCount );
+
+	if (slideMoveState.groundEntityNumber != -1 && geNewGroundEntity) {
+		SetGroundEntity( geNewGroundEntity );
+		SetGroundEntityLinkCount( geNewGroundEntity->GetLinkCount() );
+	} else {
+		SetGroundEntity( SGEntityHandle() );
+		SetGroundEntityLinkCount( 0 );
+	}
+
 
 	// Link entity in.
 	LinkEntity();

@@ -368,7 +368,54 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
 *	@brief	Categorizes the position of the current slide move.
 **/
 static void SM_CategorizePosition( SlideMoveState *moveState ) {
+	// Get Origin, we'll need it.
+	vec3_t pointOrigin = moveState->origin;
 
+	//
+	// Test For 'Feet':.
+	//
+	// Add 1, to test for feet.
+	pointOrigin.z += 1.f;
+
+	// Get contents at point.
+	int32_t pointContents = SG_PointContents( pointOrigin );
+
+	// We're not in water, no need to further test.
+	if ( !( pointContents & BrushContents::Water ) ) {
+		moveState->waterLevel	= WaterLevel::None;
+		moveState->waterType	= 0;
+		return;
+	}
+
+	// Store water type.
+	moveState->waterType	= pointContents;
+	moveState->waterLevel	= WaterLevel::Feet;
+
+	//
+	// Test For 'Waist' by climbing up the Z axis.
+	//
+	pointOrigin.z += 40.f;
+
+	// Get contents at point.
+	pointContents = SG_PointContents( pointOrigin );
+
+	// We're not in water, no need to further test.
+	if ( !( pointContents & BrushContents::Water ) ) {
+		moveState->waterLevel = WaterLevel::Waist;
+	}
+
+	// WaterLevel: Head Under.
+	pointOrigin.z += 45.f;
+
+	// Get contents at point.
+	pointContents = SG_PointContents( pointOrigin );
+
+	// We're not in water, no need to further test.
+	if ( !( pointContents & BrushContents::Water ) ) {
+		moveState->waterLevel = WaterLevel::Under;
+		return;
+	}
+	
 }
 
 
@@ -391,14 +438,12 @@ const bool SM_StepDownOrEdgeMove_StepDown( SlideMoveState* moveState, const SGTr
     // Store pre-move parameters
     const vec3_t org0 = moveState->origin;
     const vec3_t vel0 = moveState->velocity;
-				
-	// Only return true if it was high enough to "step".
-	const float stepHeight = moveState->origin.z - moveState->originalOrigin.z;
-	const float absoluteStepHeight = fabs(stepHeight);
-
 
 	//SM_SlideClipMove( moveState, false );
 
+	// Only return true if it was high enough to "step".
+	const float stepHeight = moveState->origin.z - traceResult.endPosition.z;
+	const float absoluteStepHeight = fabs(stepHeight);
 
 	if (absoluteStepHeight <= SLIDEMOVE_STEP_HEIGHT) {
 		moveState->origin = traceResult.endPosition;
@@ -494,7 +539,8 @@ static int32_t SM_StepDown_StepEdge( SlideMoveState *moveState ) {
 const bool SM_StepUp_ToFloor( SlideMoveState *moveState, const SGTraceResult &traceResult ) {
 	//// Set current origin to the trace end position.
 	moveState->origin = traceResult.endPosition;
-				
+	
+	SM_SlideClipMove( moveState, false );
 	// Only return true if it was high enough to "step".
 	const float stepHeight = moveState->origin.z - traceResult.endPosition.z;
 	const float absoluteStepHeight = fabs(stepHeight);
@@ -772,23 +818,16 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 		// Add the slide move result mask to our blocked mask.
 		blockedMask |= slideMoveResultMask;
 
+		// Debugging for being trapped.
 		#ifdef SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES
-		// Get GameWorld.
-		SGGameWorld	*gameWorld		= GetGameWorld();
-		// Get Skip Entity for trace testing.
-		GameEntity	*geSkip			= SGGameWorld::ValidateEntity(gameWorld->GetPODEntityByIndex(moveState->skipEntityNumber));
-
-		SGTraceResult traceResult = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, moveState->origin, geSkip, moveState->contentMask );
+		SGTraceResult traceResult = SM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &moveState->origin );
 		if( traceResult.startSolid ) {
-			blockedMask |= SlideMoveFlags::Trapped;
+			SG_Physics_PrintWarning( std::string(__func__) + "SlideMoveFlags::Trapped" );
 		}
 		#endif
 
 		// Can't continue.
-		if( slideMoveResultMask & SlideMoveFlags::Trapped ) {
-			#ifdef SM_SLIDEMOVE_DEBUG_TRAPPED_MOVES
-			SG_Physics_PrintWarning( std::string(__func__) + "SlideMoveFlags::Trapped" );
-			#endif
+		if( blockedMask & SlideMoveFlags::Trapped ) {
 			// Move is invalid, unset remaining time.
 			moveState->remainingTime = 0.0f;
 
@@ -796,14 +835,14 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 			moveState->origin = lastValidOrigin;
 			
 			// Break out of the loop and finish the move.
-			blockedMask |= slideMoveResultMask;
-			break; //return blockedMask | slideMoveResultMask;
+			//blockedMask |= slideMoveResultMask;
+			return blockedMask;
 		}
 
 		// Update the last validOrigin to the current moveState origin.
 		lastValidOrigin = moveState->origin;
 
-		if (// (slideMoveResultMask & SlideMoveFlags::EdgeMoved) ||
+		if ( (slideMoveResultMask & SlideMoveFlags::EdgeMoved) ||
 				( slideMoveResultMask & SlideMoveFlags::SteppedDown )
 				|| ( slideMoveResultMask & SlideMoveFlags::SteppedUp ) 
 			) 

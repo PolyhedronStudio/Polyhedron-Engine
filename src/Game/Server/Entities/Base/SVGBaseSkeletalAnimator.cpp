@@ -153,7 +153,7 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	currentAnimationState->startTime = level.time.count();
 
 	// Non-Wired Data:
-	//currentAnimationState->frame = animation->startFrame;
+	currentAnimationState->frame = animation->startFrame;
 	currentAnimationState->startFrame = animation->startFrame;
 	currentAnimationState->endFrame = animation->endFrame;
 	currentAnimationState->frameTime = animation->frametime;

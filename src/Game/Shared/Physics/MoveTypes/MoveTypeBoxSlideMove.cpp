@@ -272,13 +272,15 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		.mins = geSlider->GetMins(),
 		.maxs = geSlider->GetMaxs(),
 		
-		// The remaining time: Set to FRAMETIME(The time a frame takes.). Meaning, we move over time through frame.
-		.remainingTime = FRAMETIME.count(),
-
 		// Gravity Direction.
 		.gravityDir = vec3_down(),
 		// Slide Bounce Value.
 		.slideBounce = slideBounce,
+
+
+		// The remaining time: Set to FRAMETIME(The time a frame takes.). Meaning, we move over time through frame.
+		.remainingTime = FRAMETIME.count(),
+
 
 		.groundTrace = slideMoveState.groundTrace,
 		// Ground Entity Link Count, if any Ground Entity is set, 0 otherwise.

@@ -123,13 +123,13 @@ struct SlideMoveState {
 	vec3_t mins		= vec3_zero();
 	vec3_t maxs		= vec3_zero();
 
-	//! Remaining time that's left for this move in this frame.
-	float	remainingTime	=  0.f;
-
 	//! Direction of gravity.
 	vec3_t	gravityDir	= vec3_zero();
 	//! Slide Bounce Factor.
 	float	slideBounce	= 0.f;
+
+	//! Remaining time that's left for this move in this frame.
+	float	remainingTime	=  0.f;
 
 	//! Ground Entity Trace. Updated during the move processing.
 	SGTraceResult groundTrace;
@@ -147,6 +147,13 @@ struct SlideMoveState {
 	int32_t	entityFlags = 0;
 	int32_t	contentMask = 0;
 
+	//! Set by categorize position, used to determine what "brush" we are in. (This means open space too, yes.)
+	int32_t categorizedContent = 0;
+	//! Keeps track of the water type we're in.
+	int32_t waterType	= 0;
+	//! Keeps track of the water level we reside in.
+	int32_t waterLevel	= 0;
+
 	//! Number of, and normals of each plane we want to clip against to.
 	int32_t numClipPlanes = 0;
 	vec3_t	clipPlaneNormals[MAX_SLIDEMOVE_CLIP_PLANES];
@@ -156,12 +163,9 @@ struct SlideMoveState {
 	int32_t	touchEntites[MAX_SLIDEMOVE_TOUCH];
 	
 	//! Move State flags: Store state like on-ground etc.
-	int32_t moveFlags = 0;
+	int32_t moveFlags		= 0;
 	//! Set to miliseconds to maintain (if needed) flag state.
-	int32_t moveFlagTime = 0;
-
-	//! ClipMove Block Flags.
-	int32_t clipMoveFlags = 0;
+	int32_t moveFlagTime	= 0;
 };
 
 
