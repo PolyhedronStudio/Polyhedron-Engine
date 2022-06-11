@@ -88,20 +88,23 @@ struct SlideMoveFlags {
 	//! Set whenever the movei s capable of stepping down.
 	static constexpr int32_t SteppedDown	= (1 << 4);
 
+	//!
+	static constexpr int32_t SteppedDownFall =(1 << 5);
+
 	//! Set whenever we've touched any entity that is not WorldSpawn.
-	static constexpr int32_t EntityTouched	= (1 << 5);
+	static constexpr int32_t EntityTouched	= (1 << 6);
 	//! Set whenever we've touched a brush plane.
-	static constexpr int32_t PlaneTouched	= (1 << 6);
+	static constexpr int32_t PlaneTouched	= (1 << 7);
 
 	//! When Blocekd flag is set, it doesn't mean it didn't slide along the blocking object.
-	static constexpr int32_t WallBlocked	= (1 << 7);
+	static constexpr int32_t WallBlocked	= (1 << 8);
 	//! NOTE: Set only in case of trouble. It shouldn't happen.
-	static constexpr int32_t Trapped		= (1 << 8);
+	static constexpr int32_t Trapped		= (1 << 9);
 
 	//! Set if the move became groundless, and was unable to step down to new floor.
-	static constexpr int32_t EdgeMoved		= (1 << 9);
+	static constexpr int32_t EdgeMoved		= (1 << 10);
 	//! Set whenever the move has been completed for the remainingTime.
-	static constexpr int32_t Moved			= (1 << 10);
+	static constexpr int32_t Moved			= (1 << 11);
 };
 
 /**

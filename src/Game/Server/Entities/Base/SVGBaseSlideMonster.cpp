@@ -416,20 +416,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
     GameEntity* geGroundEntity = SGGameWorld::ValidateEntity( GetGroundEntityHandle() );
 
     // Store whether we had a ground entity at all.
-    const qboolean wasOnGround = ( geGroundEntity ? true : false );
-
-	// Defaults to -1.
-	int32_t groundEntityNumber = -1;
-
-    // If we have no ground entity.
-    if ( !geGroundEntity ) {
-        // Ensure we check if we aren't on one in this frame already. If so, store its number for our
-		// movement below.
-        groundEntityNumber = SG_BoxSlideMove_CheckForGround( this );
-    } else {
-		groundEntityNumber = geGroundEntity->GetNumber();
-	}
-
+    const qboolean wasOnGround = ( slideMoveState.groundEntityNumber != -1 ? true : false );
 
 	/**
 	*	Step #3:	- Check and clamp our Velocity.
@@ -554,7 +541,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	const vec3_t org0 = GetOrigin();
 
 	// Execute "BoxSlideMove", essentially also our water move.
-	SlideMoveState slideMoveState;
+	slideMoveState = {};
 	int32_t blockedMask = SG_BoxSlideMove( this, ( mask ? mask : BrushContentsMask::PlayerSolid ), 1.01f, 10, slideMoveState );
 
 	if ( blockedMask & SlideMoveFlags::EdgeMoved) {
@@ -577,6 +564,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 
 			if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += "SteppedUp, "; }
 			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += "SteppedDown, "; }
+			if (blockedMask & SlideMoveFlags::SteppedDownFall) { blockMaskString += "SteppedDownFall, "; }
 			blockMaskString += ")";
 		
 			gi.DPrintf( "%s\n", blockMaskString.c_str());

@@ -131,7 +131,16 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 		return 0;
 	}
 
-	// Get animation.
+	// Get AnimationMap.
+	auto animationMap = &skm->animationMap;
+
+	// Fail if this animation is non existent.
+	if ( !animationMap->contains( name ) ) {
+		currentAnimationState->animationIndex = 0;
+		return 0;
+	}
+
+	// Get the name matching animation specific info.
 	SkeletalAnimation *animation = &skm->animationMap[name];
 
 	// If we're already in this animation, return index but don't reset it.
@@ -151,7 +160,7 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	currentAnimationState->loopCount = animation->loopingFrames;
 	currentAnimationState->forceLoop = animation->forceLoop;
 
-	ProcessSkeletalAnimationForTime(level.time);
+	//ProcessSkeletalAnimationForTime(level.time);
 
 	return animation->index;
 }

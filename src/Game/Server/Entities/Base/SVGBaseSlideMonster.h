@@ -83,7 +83,8 @@ public:
     ***/
 public:
 	const int32_t SlideMove();
-
+private:
+	SlideMoveState slideMoveState;
 
 protected:
 	const bool SlideMove_CheckBottom( );

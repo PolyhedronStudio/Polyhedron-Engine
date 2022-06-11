@@ -262,6 +262,9 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	**/
 	// The structure containing the current state of the move we're trying to perform.
 	//SlideMoveState slideMoveState = { 
+	const int32_t moveFlags = slideMoveState.moveFlags;
+	const int32_t moveFlagTime = slideMoveState.moveFlagTime;
+
 	slideMoveState = {
 		// Geometric Attributes.
 		.velocity = geSlider->GetVelocity(),
@@ -277,6 +280,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		// Slide Bounce Value.
 		.slideBounce = slideBounce,
 
+		.groundTrace = slideMoveState.groundTrace,
 		// Ground Entity Link Count, if any Ground Entity is set, 0 otherwise.
 		.groundEntityLinkCount = (groundEntityNumber >= 0 ? geSlider->GetGroundEntityLinkCount() : 0),
 		// Number of the ground entity that's set on geSlider.
@@ -294,6 +298,9 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		// Zero clip planes and/or entities are touched at a clean move state.
 		.numClipPlanes = 0,
 		.numTouchEntities = 0,
+
+		.moveFlags = moveFlags,
+		.moveFlagTime = moveFlagTime
 	};
 
 	/**
@@ -303,7 +310,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	int32_t blockedMask = 0;
 
 
-	if( oldVelocityLength > 0 ) {
+	//if( oldVelocityLength > 0 ) {
 		/**
 		*	Step #1: Start attempting to slide move at our velocity.
 		**/
@@ -321,7 +328,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		if ( (blockedMask & SlideMoveFlags::PlaneTouched) ) {
 
 		}
-	}
+	//}
 
 	return blockedMask;
 }
