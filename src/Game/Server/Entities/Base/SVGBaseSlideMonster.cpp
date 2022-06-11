@@ -542,7 +542,9 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	);
 	#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && (SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1)
 	{
-		DebugPrint(blockedMask);
+		if ( (GetSpawnFlags() & 128) ) {
+			DebugPrint(blockedMask);
+		}
 	}
 	#endif
 
@@ -572,6 +574,8 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	SetMins( slideMoveState.mins );
 	SetMaxs( slideMoveState.maxs );
 	SetFlags( slideMoveState.entityFlags );
+	SetWaterLevel( slideMoveState.waterLevel );
+	SetWaterType( slideMoveState.waterType );
 
 	if (slideMoveState.groundEntityNumber != -1 && geNewGroundEntity) {
 		SetGroundEntity( geNewGroundEntity );
@@ -678,7 +682,7 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 void SVGBaseSlideMonster::DebugPrint(const int32_t blockedMask) {
 #if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
 		if (blockedMask != 0) {
-			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (";
+			std::string blockMaskString = std::to_string(GetSpawnFlags()) + "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (";
 			if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += "WallBlocked, "; }
 			if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
 		

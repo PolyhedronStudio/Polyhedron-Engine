@@ -297,6 +297,13 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		.entityFlags = geSlider->GetFlags(),
 		.contentMask = contentMask,
 
+		// Entity 'Categorization'.
+		.categorizedContent = 0,
+		//! Keeps track of the water type we're in.
+		.waterType	= geSlider->GetWaterType(),
+		//! Keeps track of the water level we reside in.
+		.waterLevel	= geSlider->GetWaterLevel(),
+
 		// Zero clip planes and/or entities are touched at a clean move state.
 		.numClipPlanes = 0,
 		.numTouchEntities = 0,

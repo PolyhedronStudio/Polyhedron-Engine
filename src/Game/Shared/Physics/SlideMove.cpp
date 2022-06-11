@@ -467,8 +467,8 @@ const bool SM_StepDownOrEdgeMove_StepDown( SlideMoveState* moveState, const SGTr
 **/
 static int32_t SM_StepDown_StepEdge( SlideMoveState *moveState ) {
     // Store pre-move parameters
-    //const vec3_t org0 = moveState->origin;
-    //const vec3_t vel0 = moveState->velocity;
+    const vec3_t org0 = moveState->origin;
+    const vec3_t vel0 = moveState->velocity;
 
 	// Move ahead.
 	SM_SlideClipMove( moveState, false );
@@ -484,7 +484,7 @@ static int32_t SM_StepDown_StepEdge( SlideMoveState *moveState ) {
 		// See if there's something we can step properly on.
 		if ( SM_CheckStep( moveState, downTraceResult) ) {
 			// Check whether we're stepping down on stairs, or falling off an edge instead.
-			if (SM_StepDownOrEdgeMove_StepDown( moveState, downTraceResult ) ) {
+			if ( SM_StepDownOrEdgeMove_StepDown( moveState, downTraceResult ) ) {
 				// If we were falling after an edge move, return a fall down instead.
 				//if ( ) { return SlideMoveFlags::FallSteppedDown; } else {
 				return SlideMoveFlags::SteppedDown;
