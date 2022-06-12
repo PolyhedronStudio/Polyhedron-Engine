@@ -85,29 +85,29 @@ struct SlideMoveMoveFlags {
 struct SlideMoveFlags {
 	// Blabla
 
-
-	//! Set whenever the move is capable of stepping up.
-	static constexpr int32_t SteppedUp		= (1 << 3);
-	//! Set whenever the movei s capable of stepping down.
-	static constexpr int32_t SteppedDown	= (1 << 4);
-
-	//!
-	static constexpr int32_t SteppedDownFall =(1 << 5);
-
-	//! Set whenever we've touched any entity that is not WorldSpawn.
-	static constexpr int32_t EntityTouched	= (1 << 6);
-	//! Set whenever we've touched a brush plane.
-	static constexpr int32_t PlaneTouched	= (1 << 7);
-
-	//! When Blocekd flag is set, it doesn't mean it didn't slide along the blocking object.
-	static constexpr int32_t WallBlocked	= (1 << 8);
-	//! NOTE: Set only in case of trouble. It shouldn't happen.
-	static constexpr int32_t Trapped		= (1 << 9);
-
-	//! Set if the move became groundless, and was unable to step down to new floor.
-	static constexpr int32_t EdgeMoved		= (1 << 10);
 	//! Set whenever the move has been completed for the remainingTime.
-	static constexpr int32_t Moved			= (1 << 11);
+	static constexpr int32_t Moved			= (1 << 1);
+
+	//! Set when the move steps up.
+	static constexpr int32_t SteppedUp		= (1 << 2);
+	//! Set when the move steps down.
+	static constexpr int32_t SteppedDown	= (1 << 3);
+	//! Set if the move became groundless, and was unable to step down to new floor.
+	static constexpr int32_t SteppedEdge	= (1 << 4);
+	//! Set if the move resulted in stepping to ground while falling down.
+	static constexpr int32_t SteppedFall	= (1 << 5);
+
+	//! Set when the move has no ground resulting in gravity affecting the move and falling down.
+	static constexpr int32_t FallingDown	= (1 << 20);
+
+	//! Set when an entity has been touched.
+	static constexpr int32_t EntityTouched	= (1 << 28);
+	//! Set when we've touched a brush plane that we can't move ahead into, to clip velocity to it and try again.
+	static constexpr int32_t PlaneTouched	= (1 << 29);
+	//! Set if something is blocking our path. NOTE: It doesn't mean it didn't slide along the blocking object.
+	static constexpr int32_t WallBlocked	= (1 << 30);
+	//! NOTE: Set only in case of trouble. It shouldn't happen.
+	static constexpr int32_t Trapped		= (1 << 31);
 };
 
 /**
@@ -185,7 +185,7 @@ int32_t SG_SlideMove( SlideMoveState *moveState );
 /**
 *	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideMoveState &boxSlideMove  );
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideMoveState *boxSlideMove  );
 
 /**
 *	@brief	Checks if this entity should have a groundEntity set or not.

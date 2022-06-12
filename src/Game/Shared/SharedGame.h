@@ -30,8 +30,6 @@
 *
 *
 ***/
-
-
 /**
 *   Take Damage.
 **/
@@ -116,6 +114,19 @@ struct EntityFlags {
     static constexpr int32_t PowerArmor     = 4096;     //! Power armor (if any) is active
     static constexpr int32_t Respawn        = 0x80000000;   //! Used for item respawning
 };
+
+/**
+*   @brief Use Entity Flags. Determine how a player can interact with this entity by 'Using' it.
+**/
+struct UseEntityFlags {
+	//! Default, this entity can not be 'Use' interacted with.
+    static constexpr int32_t Not			= 0;
+	//! Takes repeated 'Use' key hit presses to dispatch 'Use' callbacks.
+    static constexpr int32_t Toggle			= 2;
+	//! Takes a single 'Use' key press, which when hold will dispatch a 'Use' callback each frame.
+    static constexpr int32_t Hold			= 4;
+};
+
 
 
 /**

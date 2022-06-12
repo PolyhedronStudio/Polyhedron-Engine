@@ -626,7 +626,7 @@ public:
 	*	@brief Get/Set:     Use Flags that determine if, and how a player can use this entity. (Toggle, continuous, single button.)
 	**/
 	virtual const int32_t        GetUseEntityFlags() { return useEntityFlags; }
-	virtual void                 GetUseEntityFlags(const int32_t useFlags) { this->useEntityFlags = useFlags; }
+	virtual void                 SetUseEntityFlags(const int32_t useFlags) { this->useEntityFlags = useFlags; }
 
     /**
     *   @brief Get/Set:     Velocity

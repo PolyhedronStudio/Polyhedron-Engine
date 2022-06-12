@@ -421,8 +421,9 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 	// Store a copy of our previous moveState just to be sure.
 	const SlideMoveState previousMoveState = slideMoveState;
 	// TODO: THIS WE SHOULD NOT NEED!!
-	slideMoveState = { .moveFlags = previousMoveState.moveFlags,
-	.moveFlagTime = previousMoveState.moveFlagTime };
+	//slideMoveState = { 
+	//	.moveFlags = previousMoveState.moveFlags,
+	//	.moveFlagTime = previousMoveState.moveFlagTime };
 
     // Store whether we had a ground entity at all.
     const qboolean wasOnGround = ( slideMoveState.groundEntityNumber != -1 ? true : false );
@@ -545,12 +546,17 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 		( moveClipMask ? moveClipMask : BrushContentsMask::PlayerSolid ), 
 		SLIDEMOVE_CLIP_BOUNCE, 
 		SLIDEMOVE_FRICTION, 
-		slideMoveState 
+		&slideMoveState 
 	);
+
 	#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && (SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1)
 	{
+		const int32_t entityNumber = GetNumber();
+
+		// Only output if the spawnflag is set to do so.
 		if ( (GetSpawnFlags() & 128) ) {
-			DebugPrint(blockedMask);
+
+			DebugPrint(entityNumber, blockedMask, previousMoveBlockedMask, slideMoveState.moveFlags, slideMoveState.moveFlagTime);
 		}
 	}
 	#endif
@@ -684,34 +690,70 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 /**
 *	@brief	Useful for debugging slidemoves, enable on an entity by setting spawnflag 128
 **/
-void SVGBaseSlideMonster::DebugPrint(const int32_t blockedMask) {
+void SVGBaseSlideMonster::DebugPrint(const int32_t entityNumber, const int32_t blockedMask, const int32_t previousBlockedMask, const int32_t moveFlags, const int32_t moveFlagTime) {
 #if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
-	std::string blockMaskString = "SlideMove(#" + std::to_string(GetNumber()) + ") MASK:";
-	if (blockedMask != 0) {
-		if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += " WallBlocked"; }
-		if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += " Trapped"; }
-		if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += " Moved"; }
-		if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += " EdgeMoved"; }
-		if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += " EntityTouched"; }
-		if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += " PlaneTouched"; }
-		if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += " SteppedUp"; }
-		if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += " SteppedDown"; }
-		if (blockedMask & SlideMoveFlags::SteppedDownFall) { blockMaskString += " SteppedDownFall"; }
-	} else {
-		blockMaskString += " 0";
+	// We only want to print if anything changed, otherwise we spam the console, we don't want to,
+	// simply because the ideal places for spam are on social-media instead :P
+	if ( blockedMask != previousBlockedMask ){
+		return;
 	}
-	blockMaskString += " FLAGS: ";
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::FoundGround) { blockMaskString += " FoundGround"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::OnGround) { blockMaskString += " OnGround"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::LostGround) { blockMaskString += " LostGround"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::Ducked) { blockMaskString += " Ducked"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::Jumped) { blockMaskString += " Jumped"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::OnLadder) { blockMaskString += " OnLadder"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::UnderWater) { blockMaskString += " UnderWater"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::TimePushed) { blockMaskString += " TimePushed"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::TimeWaterJump) { blockMaskString += " TimeWaterJump"; }
-	if (slideMoveState.moveFlags & SlideMoveMoveFlags::TimeLand) { blockMaskString += " TimeLand"; }
-	gi.DPrintf( "%s\n", blockMaskString.c_str());
+
+	// Debug Output Strings.
+	std::string blockedMaskStr = "";
+	std::string moveFlagsStr = "";
+
+	/**
+	*	BlockedMaskStr.
+	**/
+	// Fill up the blockMaskStr with matching stringified flag names.
+	if ( blockedMask & SlideMoveFlags::Moved ) { blockedMaskStr += "Moved"; }
+	
+	if ( blockedMask & SlideMoveFlags::SteppedUp ) { blockedMaskStr += "SteppedUp"; }
+	if ( blockedMask & SlideMoveFlags::SteppedDown ) { blockedMaskStr += "SteppedDown"; }
+	if ( blockedMask & SlideMoveFlags::SteppedEdge ) { blockedMaskStr += "SteppedEdge"; }
+	if ( blockedMask & SlideMoveFlags::SteppedFall ) { blockedMaskStr += "SteppedFall"; }
+
+	if ( blockedMask & SlideMoveFlags::FallingDown ) { blockedMaskStr += "FallingDown"; }
+
+	if ( blockedMask & SlideMoveFlags::EntityTouched ) { blockedMaskStr += "EntityTouched"; }
+	if ( blockedMask & SlideMoveFlags::PlaneTouched ) { blockedMaskStr += "PlaneTouched"; }
+	if ( blockedMask & SlideMoveFlags::WallBlocked ) { blockedMaskStr += "WallBlocked"; }
+	if ( blockedMask & SlideMoveFlags::Trapped ) { blockedMaskStr += "Trapped"; }
+
+	/**
+	*	MoveFlags.
+	**/
+	// Fill up the movedFlagStr with matching stringified flag names.
+	if ( blockedMask & SlideMoveMoveFlags::FoundGround ) { moveFlagsStr += "FoundGround"; }
+	if ( blockedMask & SlideMoveMoveFlags::OnGround ) { moveFlagsStr += "OnGround"; }
+	if ( blockedMask & SlideMoveMoveFlags::LostGround ) { moveFlagsStr += "LostGround"; }
+
+	if ( blockedMask & SlideMoveMoveFlags::Ducked ) { moveFlagsStr += "Ducked"; }
+	if ( blockedMask & SlideMoveMoveFlags::Jumped ) { moveFlagsStr += "Jumped"; }
+
+	if ( blockedMask & SlideMoveMoveFlags::OnLadder ) { moveFlagsStr += "OnLadder"; }
+	if ( blockedMask & SlideMoveMoveFlags::UnderWater ) { moveFlagsStr += "UnderWater"; }
+
+	if ( blockedMask & SlideMoveMoveFlags::TimePushed ) { moveFlagsStr += "TimePushed"; }
+	if ( blockedMask & SlideMoveMoveFlags::TimeWaterJump ) { moveFlagsStr += "TimeWaterJump"; }
+	if ( blockedMask & SlideMoveMoveFlags::TimeLand ) { moveFlagsStr += "TimeLand"; }
+
+
+	/**
+	*	Print info!
+	**/
+	std::string debugStr = "Entity(#";
+	debugStr += std::to_string( entityNumber );
+	debugStr += ") (Blockmask: ";
+	debugStr += blockedMaskStr;
+	debugStr += ") (MoveFlags: )";
+	debugStr += moveFlagsStr;
+	debugStr += ") (MoveFlagTime: ";
+	debugStr += std::to_string(moveFlagTime);
+	debugStr += ")\n";//(MoveFlags: % s) (MoveFlagTime: % i)\n";
+
+	gi.DPrintf(debugStr.c_str());
+//	gi.DPrintf( debugStr.c_str(), blockedMaskStr.c_str(), moveFlagsStr.c_str(), moveFlagTime );
 #endif
 }
 

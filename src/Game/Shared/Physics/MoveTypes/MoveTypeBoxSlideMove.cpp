@@ -233,7 +233,7 @@ int32_t SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
 /**
 *	@brief	Starts performing the BoxSlide move process.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideMoveState &slideMoveState ) {
+const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideMoveState *slideMoveState ) {
 	/**
 	*	Ensure our SlideMove Game Entity is non (nullptr).
 	**/
@@ -262,16 +262,22 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	**/
 	// The structure containing the current state of the move we're trying to perform.
 	//SlideMoveState slideMoveState = { 
-	const int32_t moveFlags = slideMoveState.moveFlags;
-	const int32_t moveFlagTime = slideMoveState.moveFlagTime;
-	SGTraceResult res = slideMoveState.groundTrace;
+	const int32_t oldMoveFlags		= slideMoveState->moveFlags;
+	const int32_t oldMoveFlagTime	= slideMoveState->moveFlagTime;
+	SGTraceResult oldGroundTrace	= slideMoveState->groundTrace;
 
-	slideMoveState = {
-		// Geometric Attributes.
-		.velocity = geSlider->GetVelocity(),
-		.origin = geSlider->GetOrigin(),
-		.mins = geSlider->GetMins(),
-		.maxs = geSlider->GetMaxs(),
+	*slideMoveState = {
+		// Original Physical Attributes.
+		.originalVelocity	= geSlider->GetVelocity(),
+		.originalOrigin		= geSlider->GetOrigin(),
+		.originalMins		= geSlider->GetMins(),
+		.originalMaxs		= geSlider->GetMaxs(),
+
+		// Working State & Final Move Attributes.
+		.velocity	= geSlider->GetVelocity(),
+		.origin		= geSlider->GetOrigin(),
+		.mins		= geSlider->GetMins(),
+		.maxs		= geSlider->GetMaxs(),
 		
 		// Gravity Direction.
 		.gravityDir = vec3_down(),
@@ -283,7 +289,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		.remainingTime = FRAMETIME.count(),
 
 
-		.groundTrace = slideMoveState.groundTrace,
+		.groundTrace = oldGroundTrace,
 		// Ground Entity Link Count, if any Ground Entity is set, 0 otherwise.
 		.groundEntityLinkCount = (groundEntityNumber >= 0 ? geSlider->GetGroundEntityLinkCount() : 0),
 		// Number of the ground entity that's set on geSlider.
@@ -309,8 +315,8 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		.numClipPlanes = 0,
 		.numTouchEntities = 0,
 
-		.moveFlags = moveFlags,
-		.moveFlagTime = moveFlagTime
+		.moveFlags = oldMoveFlags,
+		.moveFlagTime = oldMoveFlagTime
 	};
 
 	/**
@@ -324,10 +330,10 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 		/**
 		*	Step #1: Start attempting to slide move at our velocity.
 		**/
-		blockedMask = SG_SlideMove( &slideMoveState );
+		blockedMask = SG_SlideMove( slideMoveState );
 		
-		const vec3_t org0 = slideMoveState.origin;
-		const vec3_t vel0 = slideMoveState.velocity;
+		const vec3_t org0 = slideMoveState->origin;
+		const vec3_t vel0 = slideMoveState->velocity;
 
 		// Got blocked by a wall...
 		if (blockedMask & SlideMoveFlags::WallBlocked) {

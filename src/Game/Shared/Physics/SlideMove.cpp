@@ -215,7 +215,7 @@ static void SM_UpdateMoveFlagsTime(SlideMoveState* moveState) {
     // or falling off a ledge/slope, by the duration of the command.
 	//
 	// We do so by simulating it how the player does, we take FRAMETIME_MS.
-    if ( moveState->moveFlagTime ) {
+    if ( moveState->moveFlagTime && moveState->moveFlagTime > 0 ) {
 		// Clear the timer and timed flags.
         if ( moveState->moveFlagTime <= FRAMERATE_MS.count() ) {
             moveState->moveFlags	&= ~SlideMoveMoveFlags::TimeMask;
@@ -462,26 +462,26 @@ static void SM_CategorizePosition( SlideMoveState *moveState ) {
 *				- Either step on a "staircase".
 *				- Or move right off the edge and go into a free fall.
 *	@return	True in case it stepped down. False if the step was higher than SLIDEMOVE_STEP_HEIGHT
-*			move right off the edge and allow us to fall down.
+*			"step" right off the edge and allow us to fall down.
 **/
-const bool SM_StepDownOrEdgeMove_StepDown( SlideMoveState* moveState, const SGTraceResult &traceResult ) {
+const bool SM_StepDownOrStepEdge_StepDown( SlideMoveState* moveState, const SGTraceResult &traceResult ) {
     // Store pre-move parameters
     const vec3_t org0 = moveState->origin;
     const vec3_t vel0 = moveState->velocity;
 
-	//SM_SlideClipMove( moveState, false );
+	
 
 	// Only return true if it was high enough to "step".
 	const float stepHeight = moveState->origin.z - traceResult.endPosition.z;
 	const float absoluteStepHeight = fabs(stepHeight);
 
-	if (absoluteStepHeight <= SLIDEMOVE_STEP_HEIGHT) {
+	if (absoluteStepHeight <= SLIDEMOVE_STEP_HEIGHT && IsWalkablePlane(traceResult.plane) ) {
 		moveState->origin = traceResult.endPosition;
-
+		SM_SlideClipMove( moveState, false );
 		//moveState->stepHeight = stepHeight;
 		return true;
 	} else {
-		//moveState->origin = traceResult.endPosition;
+		//moveState->stepHeight = stepHeight;
 		//return true; // Return false to prevent animating.?
 	}
 
@@ -493,7 +493,7 @@ const bool SM_StepDownOrEdgeMove_StepDown( SlideMoveState* moveState, const SGTr
 *	@brief	Checks whether we're stepping off a legit step, or moving off an edge and about to
 *			fall down.
 *	@return	Either 0 if no step or edge move could be made. Otherwise, SlideMoveFlags::SteppedDown 
-*			or SlideMoveFlags::EdgeMoved.
+*			or SlideMoveFlags::SteppedEdge.
 **/
 static int32_t SM_StepDown_StepEdge( SlideMoveState *moveState ) {
     // Store pre-move parameters
@@ -511,42 +511,92 @@ static int32_t SM_StepDown_StepEdge( SlideMoveState *moveState ) {
 		// Perform trace.
 		const SGTraceResult downTraceResult = SM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &downTraceEnd );
 		
-		// See if there's something we can step properly on.
+		// See if there's any ground changes, demanding us to check if we can step to new ground.
 		if ( SM_CheckStep( moveState, downTraceResult) ) {
-			// Check whether we're stepping down on stairs, or falling off an edge instead.
-			if ( SM_StepDownOrEdgeMove_StepDown( moveState, downTraceResult ) ) {
-				// If we were falling after an edge move, return a fall down instead.
-				//if ( ) { return SlideMoveFlags::FallSteppedDown; } else {
-				//				return SlideMoveFlags::SteppedDown; }
-				// Fall down stepping.
+			// Check whether we're stepping down to stairsteps, or stepping off an edge instead.
+			if ( SM_StepDownOrStepEdge_StepDown( moveState, downTraceResult ) ) {
+				// To remain consistent, we unset the LostGround flag here since essentially
+				// when walking down the stairs you are unlikely to walk down with both foot off-ground
+				// at the same time, right?
+				moveState->moveFlags &= ~SlideMoveMoveFlags::LostGround;
+
+				// If we were falling, we did step but not from a stair case situation.
 				if ( (moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
 					// Unset the time land flag.
 					moveState->moveFlags &= ~SlideMoveMoveFlags::TimeLand;
 
-					// Return stepped fall down.
-					return SlideMoveFlags::SteppedDownFall;
+					// Return we stepped to ground from a fall.
+					return SlideMoveFlags::SteppedFall;
 				} else {
 					// Return regular SteppedDown.
 					return SlideMoveFlags::SteppedDown;
 				}
 			} else {
 
-				//return SlideMoveFlags::EdgeMoved; // Step here, but without animation so dun return flag?
-			}
-		} else {
-			// Set a time land flag so we can determine what landing animation to use.
-			if ( !(moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
-				// Set TimeLand flag.
-				moveState->moveFlags |= SlideMoveMoveFlags::TimeLand;
+				if ( !(moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
+					// Unset the time land flag.
+					moveState->moveFlags |= SlideMoveMoveFlags::TimeLand;
 
-				// We moved over the edge, about to drop down.
-				return SlideMoveFlags::EdgeMoved;
-			} else {
-				// If the flag is already set, we don't want to return yet another EdgeMoved flag.
-				// TODO: Return a FallDown MoveFlag? Or, just Moved? Might be useful for game state, it's data after all.
+					// Return we stepped to ground from a fall.
+					return SlideMoveFlags::SteppedEdge;
+				} else {
+					// We shouldn't reach this point.
+				}
 			}
+			//	if ( (moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
+			//		return SlideMoveFlags::FallingDown;
+			//	}
+				//// Set a time land flag so we can determine what landing animation to use.
+			//if ( !(moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
+			//	// Set TimeLand flag.
+			//	moveState->moveFlags |= SlideMoveMoveFlags::TimeLand;
+
+			//	// We moved over the edge, about to drop down.
+			//	return SlideMoveFlags::SteppedEdge;
+			//} else {
+			//	// If the flag is already set, we don't want to return yet another SteppedEdge flag.
+			//	// TODO: Return a FallDown MoveFlag? Or, just Moved? Might be useful for game state, it's data after all.
+			//}
+			//}
+		} else {
+			// If we got here, we are falling, or on-ground as is, there was no step.
+			//if ( !(moveState->moveFlags & SlideMoveMoveFlags::OnGround) && !(moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
+			//	// Set the time land flag.
+			//	moveState->moveFlags |= SlideMoveMoveFlags::TimeLand;
+			//}
+
+			// 
+			if ( !(moveState->moveFlags & SlideMoveMoveFlags::OnGround) ) {
+				if ( !(moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
+					// Unset the time land flag.
+					moveState->moveFlags |= SlideMoveMoveFlags::TimeLand;
+				}
+				return SlideMoveFlags::FallingDown;
+					// Return we stepped to ground from a fall.
+					//return SlideMoveFlags::SteppedEdge;
+				//} else {
+				//	// Return we are falling.
+				//	return SlideMoveFlags::FallingDown;
+				//}
+			}
+
+			// Set a time land flag so we can determine what landing animation to use.
+			//if ( !(moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
+			//	// Set TimeLand flag.
+			//	moveState->moveFlags |= SlideMoveMoveFlags::TimeLand;
+
+			//	// We moved over the edge, about to drop down.
+			//	return SlideMoveFlags::SteppedEdge;
+			//} else {
+			//	// If the flag is already set, we don't want to return yet another SteppedEdge flag.
+			//	// TODO: Return a FallDown MoveFlag? Or, just Moved? Might be useful for game state, it's data after all.
+			//}
 		}
 	} else {
+
+			if (moveState->moveFlags & SlideMoveMoveFlags::TimeLand) {
+				return SlideMoveFlags::FallingDown;
+			}
 		//moveState->origin = org0;	//moveState->velocity = vel0;
 	}
 
@@ -700,7 +750,7 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 			// Revert move origin.
 			//moveState->origin = traceResult.endPositio
 			// If we are edge moving, revert move and clip to normal?
-			if ( edgeStepMask & SlideMoveFlags::EdgeMoved ) {
+			if ( edgeStepMask & SlideMoveFlags::SteppedEdge ) {
 				//moveState->origin = moveState->originalOrigin;
 				// Keep our velocity, and clip it to our directional normal.
 				//const vec3_t direction = 
@@ -773,13 +823,7 @@ static const int32_t SM_SlideClipMove( SlideMoveState *moveState, const bool ste
 ***/
 /**
 *	@brief	Executes a SlideMove for the current moveState by clipping its velocity to the touching plane' normals.
-*	@return	The blockedMask with the following possible flags, which when set mean:
-*			- SlideMoveFlags::PlaneTouched	:	The move has touched a plane.
-*			- SlideMoveFlags::WallBlocked	:	The move got blocked by a wall.
-*			- SlideMoveFlags::Trapped		:	The move failed, and resulted in the moveState getting trapped.
-*												When this is set the last valid Origin is stored in the SlideMoveState.
-*			- SlideMoveFlags::EdgeMoved	:	The move got blocked by an edge. (In other words, there was no legitimate step to perform.)
-*			- SlideMoveFlags::Moved			:	The move succeeded.
+*	@return	A "blocked" mask containing the move result flags( SlideMoveFlags )
 **/
 int32_t SG_SlideMove( SlideMoveState *moveState ) {
 	/**
@@ -878,7 +922,7 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 		// Update the last validOrigin to the current moveState origin.
 		lastValidOrigin = moveState->origin;
 
-		if ( (slideMoveResultMask & SlideMoveFlags::EdgeMoved) ||
+		if ( (slideMoveResultMask & SlideMoveFlags::SteppedEdge) ||
 				( slideMoveResultMask & SlideMoveFlags::SteppedDown )
 				|| ( slideMoveResultMask & SlideMoveFlags::SteppedUp ) 
 			) 
@@ -1136,7 +1180,7 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 //				moveState->remainingTime = (moveState->remainingTime / wishedDistance) * movedDistance;
 //					//SM_AddClippingPlane( moveState, negatedNormal );
 //				moveState->entityFlags |= EntityFlags::PartiallyOnGround;
-//				return blockedMask |= SlideMoveFlags::EdgeMoved;
+//				return blockedMask |= SlideMoveFlags::SteppedEdge;
 //			}
 //			/**
 //			*	#3: Test for the new ground to see if we should step on it.
@@ -1194,8 +1238,8 @@ int32_t SG_SlideMove( SlideMoveState *moveState ) {
 //	//				debugstr += std::to_string(normalizedDirection.y) + " ";
 //	//				debugstr += std::to_string(normalizedDirection.z) + " \n";
 //	//				SG_Physics_PrintWarning(debugstr);
-//					// Add SlideMoveFlags::EdgeMoved mask flag.
-//					//return blockedMask |= SlideMoveFlags::EdgeMoved;
+//					// Add SlideMoveFlags::SteppedEdge mask flag.
+//					//return blockedMask |= SlideMoveFlags::SteppedEdge;
 //					//// Calculate remaining time.
 //					//moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
 //				}

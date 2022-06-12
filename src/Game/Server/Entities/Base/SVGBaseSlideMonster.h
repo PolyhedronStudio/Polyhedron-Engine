@@ -91,10 +91,13 @@ public:
 	/**
 	*	@brief	Useful for debugging slidemoves, enable on an entity by setting spawnflag 128
 	**/
-	void DebugPrint(const int32_t blockedMask = 0);
+	void DebugPrint(const int32_t entityNumber, const int32_t blockedMask, const int32_t previousBlockedMask, const int32_t moveFlags, const int32_t moveFlagTime);
 
 private:
-	// Actual slide move state we're operating with.
+	//! Only set for debug printing purposes. Can be ignored.
+	int32_t previousMoveBlockedMask = 0;
+
+	//! Actual slide move state we're operating with.
 	SlideMoveState slideMoveState;
 
 

@@ -85,17 +85,21 @@ void MonsterTestDummy::Spawn() {
 
     // Set the barrel model, and model index.
     SetModel( "models/monsters/slidedummy/slidedummy.iqm" );
-
+	
     // Set the bounding box.
     SetBoundingBox( { -16, -16, -46 }, { 16, 16, 44 } );
 	SetRenderEffects( RenderEffects::FrameLerp );
-    // Setup our MonsterTestDummy callbacks.
-	SetUseCallback( &MonsterTestDummy::MonsterTestDummyUse );
-    SetThinkCallback( &MonsterTestDummy::MonsterTestDummyStartAnimation );
+
+    // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.
     SetDieCallback( &MonsterTestDummy::MonsterTestDummyDie );
 
-    // Setup the next think time.
-    SetNextThinkTime(level.time + FRAMETIME);
+	// Make it so that the player can toggle '+use' this monster.
+	SetUseEntityFlags( UseEntityFlags::Toggle );
+	SetUseCallback( &MonsterTestDummy::MonsterTestDummyUse );
+
+	// Setup thinking.
+    SetThinkCallback( &MonsterTestDummy::MonsterTestDummyThink );
+	SetNextThinkTime(level.time + FRAMETIME);
 
     // Link the entity to world, for collision testing.
     LinkEntity();

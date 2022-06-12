@@ -145,6 +145,18 @@ public:
     virtual inline const vec3_t& GetStartPosition() = 0;
 
 
+	/**
+	*
+	*
+	*	For Usable Entities (Those that can get Use triggered by the '+use' action.)
+	*
+	*
+	**/
+	/**
+	*	@brief Get/Set:     Use Flags that determine if, and how a player can use this entity. (Toggle, continuous, single button.)
+	**/
+	virtual const int32_t        GetUseEntityFlags() = 0;
+	virtual void                 SetUseEntityFlags(const int32_t useFlags) = 0;
 
 public:
     /**

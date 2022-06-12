@@ -1122,14 +1122,32 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 			// Get 'Use' entity.
 			GameEntity *geUse = gameWorld->GetGameEntityByIndex( useEntityNumber );
 
-			// If valid pointer, and allows for use, dispatch a callback.
-			if ( geUse && geUse->IsInUse() ) {
-				geUse->DispatchUseCallback( player, player );
+			// The geUse pointer is valid, inspect whether it can truly be "Used".
+			if (geUse) {
+				// Figure out if this entity is active( in use ).
+				const bool isInUse = geUse->IsInUse();
+				// Get the entity use flags to determine how to operate from here on.
+				const int32_t useEntityFlags = geUse->GetUseEntityFlags();
+
+				// Use it once, requiring the '+use' action to be released again.
+				if (useEntityFlags & UseEntityFlags::Toggle) {
+					// Get 
+					geUse->DispatchUseCallback( player, player );
+
+					// Remove 'Use' button bit.
+					client->latchedButtons &= ~ButtonBits::Use;
+				}
+				// Hold usage simply means we don't release the '+use' action.
+				if (useEntityFlags & UseEntityFlags::Hold) {
+					// Get 
+					geUse->DispatchUseCallback( player, player );
+
+					// Remove 'Use' button bit.
+					//client->latchedButtons &= ~ButtonBits::Use;
+				}
+
 			}
 		}
-		
-		// Remove 'Use' button bit.
-		client->latchedButtons &= ~ButtonBits::Use;
 
 #if 1
 		const char *startStr = Vec3ToString(useTraceStart);

@@ -79,6 +79,12 @@ void FuncButton::Spawn() {
 		SetTouchCallback( &FuncButton::ButtonTouch );
 	}
 
+	// Allow the '+use' action to use this button.
+	if (GetSpawnFlags() & 128) {
+		SetUseEntityFlags( UseEntityFlags::Toggle );
+	}
+
+	// Set use callback.
 	SetUseCallback( &FuncButton::ButtonUse );
 
 	// Set up moveInfo stuff
