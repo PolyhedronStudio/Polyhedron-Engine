@@ -111,9 +111,10 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 		geMoveGoal = GetEnemy();
 
 		if (!geMoveGoal) {
-			geMoveGoal = GetGameWorld()->GetGameEntities()[1];
-
-			// if !geGoal .. geGoal = ... ?
+			// TEMPORARY:
+			/*SetVelocity(vec3_zero());
+			SlideMove();
+			return;*/
 		}
 	}
 		
@@ -121,7 +122,7 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 	*	#1: Calculate the direction to head into, and set the yaw angle and its turning speed.
 	**/
 	// Get direction vector.
-	vec3_t direction = geMoveGoal->GetOrigin() - GetOrigin();
+	vec3_t direction = ( geMoveGoal ? ( geMoveGoal->GetOrigin() - GetOrigin() ) : vec3_zero() );
 	// Cancel uit the Z direction for non flying monsters.
 	direction.z = (GetFlags() & EntityFlags::Fly ? direction.z : 0);
 	// if (flags::FLY { /* DO NOT CANCEL OUT Z */ }
@@ -257,6 +258,12 @@ void SVGBaseSlideMonster::Move_NavigateToTarget() {
 	*	#3: Start moving our Monster ass.
 	**/
 	// Perform our slide move.
+	if (!geMoveGoal) {
+		vec3_t vel = GetVelocity();
+		vel.x = 0;
+		vel.y = 0;
+		SetVelocity(vel);
+	}
 	const int32_t slideMoveMask = SlideMove();
 
 	// Check the mask for animation switching.
@@ -679,28 +686,32 @@ const int32_t SVGBaseSlideMonster::SlideMove() {
 **/
 void SVGBaseSlideMonster::DebugPrint(const int32_t blockedMask) {
 #if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
-		if (blockedMask != 0) {
-			std::string blockMaskString = std::to_string(GetSpawnFlags()) + "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (";
-			if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += "WallBlocked, "; }
-			if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += "Trapped, "; }
-		
-
-			if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += "Moved, "; }
-			if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += "EdgeMoved, "; }
-			
-			if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += "EntityTouched, "; }
-			if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += "PlaneTouched, "; }
-
-			if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += "SteppedUp, "; }
-			if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += "SteppedDown, "; }
-			if (blockedMask & SlideMoveFlags::SteppedDownFall) { blockMaskString += "SteppedDownFall, "; }
-			blockMaskString += ")";
-		
-			gi.DPrintf( "%s\n", blockMaskString.c_str());
-		} else {
-			std::string blockMaskString = "SlideMove Entity(#" + std::to_string(GetNumber()) + ") blockMask: (0)\n";
-			gi.DPrintf( "%s\n", blockMaskString.c_str());
-		}
+	std::string blockMaskString = "SlideMove(#" + std::to_string(GetNumber()) + ") MASK:";
+	if (blockedMask != 0) {
+		if (blockedMask & SlideMoveFlags::WallBlocked) { blockMaskString += " WallBlocked"; }
+		if (blockedMask & SlideMoveFlags::Trapped) { blockMaskString += " Trapped"; }
+		if (blockedMask & SlideMoveFlags::Moved) { blockMaskString += " Moved"; }
+		if (blockedMask & SlideMoveFlags::EdgeMoved) { blockMaskString += " EdgeMoved"; }
+		if (blockedMask & SlideMoveFlags::EntityTouched) { blockMaskString += " EntityTouched"; }
+		if (blockedMask & SlideMoveFlags::PlaneTouched) { blockMaskString += " PlaneTouched"; }
+		if (blockedMask & SlideMoveFlags::SteppedUp) { blockMaskString += " SteppedUp"; }
+		if (blockedMask & SlideMoveFlags::SteppedDown) { blockMaskString += " SteppedDown"; }
+		if (blockedMask & SlideMoveFlags::SteppedDownFall) { blockMaskString += " SteppedDownFall"; }
+	} else {
+		blockMaskString += " 0";
+	}
+	blockMaskString += " FLAGS: ";
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::FoundGround) { blockMaskString += " FoundGround"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::OnGround) { blockMaskString += " OnGround"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::LostGround) { blockMaskString += " LostGround"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::Ducked) { blockMaskString += " Ducked"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::Jumped) { blockMaskString += " Jumped"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::OnLadder) { blockMaskString += " OnLadder"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::UnderWater) { blockMaskString += " UnderWater"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::TimePushed) { blockMaskString += " TimePushed"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::TimeWaterJump) { blockMaskString += " TimeWaterJump"; }
+	if (slideMoveState.moveFlags & SlideMoveMoveFlags::TimeLand) { blockMaskString += " TimeLand"; }
+	gi.DPrintf( "%s\n", blockMaskString.c_str());
 #endif
 }
 

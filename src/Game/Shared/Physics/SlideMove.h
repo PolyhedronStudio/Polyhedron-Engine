@@ -66,22 +66,25 @@ static constexpr float SLIDEMOVE_SPEED_FALL_FAR		= -900.f;
 *	@brief The possible flags returned from executing a SlideMove on a SlideMoveState.
 **/
 struct SlideMoveMoveFlags {
-	static constexpr int32_t Ducked					= (1 << 0);  // Player is ducked
-	static constexpr int32_t Jumped					= (1 << 1);  // Player jumped
-	//static constexpr int32_t JumpHeld				= (1 << 2);  // Player's jump key is down
-	static constexpr int32_t OnGround				= (1 << 3);  // Player is on ground
-	static constexpr int32_t OnLadder				= (1 << 4);  // Player is on ladder
-	static constexpr int32_t UnderWater				= (1 << 5);  // Player is under water
-	static constexpr int32_t TimePushed				= (1 << 6);  // Time before can seek ground
-	static constexpr int32_t TimeWaterJump			= (1 << 7);  // Time before control
-	static constexpr int32_t TimeLand				= (1 << 9);  // Time before jump eligible
+	static constexpr int32_t FoundGround	= (1 << 0); // Mover found new ground.
+	static constexpr int32_t OnGround		= (1 << 1); // Mover is on ground.
+	static constexpr int32_t LostGround		= (1 << 2); // Mover lost ground.
+
+	static constexpr int32_t Ducked					= (1 << 4);  // Mover ducked.
+	static constexpr int32_t Jumped					= (1 << 5);  // Mover jumped.
+	//static constexpr int32_t JumpHeld				= (1 << 6);  // Mover's jump key is down.
+	static constexpr int32_t OnLadder				= (1 << 7);  // Mover is on ladder.
+	static constexpr int32_t UnderWater				= (1 << 8);  // Mover is under water.
+	static constexpr int32_t TimePushed				= (1 << 9);  // Time before can seek ground.
+	static constexpr int32_t TimeWaterJump			= (1 << 10);  // Time before control.
+	static constexpr int32_t TimeLand				= (1 << 11);  // Time before jump eligible.
+
+	static constexpr int32_t TimeMask = (TimePushed | TimeWaterJump | TimeLand);
 };
 
 struct SlideMoveFlags {
 	// Blabla
-	static constexpr int32_t FoundGround	= (1 << 0);
-	static constexpr int32_t OnGround		= (1 << 1);
-	static constexpr int32_t LostGround		= (1 << 2);
+
 
 	//! Set whenever the move is capable of stepping up.
 	static constexpr int32_t SteppedUp		= (1 << 3);

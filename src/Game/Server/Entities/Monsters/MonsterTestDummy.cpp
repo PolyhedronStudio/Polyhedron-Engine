@@ -84,14 +84,15 @@ void MonsterTestDummy::Spawn() {
     Base::Spawn();
 
     // Set the barrel model, and model index.
-    SetModel("models/monsters/slidedummy/slidedummy.iqm");
+    SetModel( "models/monsters/slidedummy/slidedummy.iqm" );
 
     // Set the bounding box.
-    SetBoundingBox({ -16, -16, -46 }, { 16, 16, 44 });
-	SetRenderEffects(RenderEffects::FrameLerp);
+    SetBoundingBox( { -16, -16, -46 }, { 16, 16, 44 } );
+	SetRenderEffects( RenderEffects::FrameLerp );
     // Setup our MonsterTestDummy callbacks.
-    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
-    SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
+	SetUseCallback( &MonsterTestDummy::MonsterTestDummyUse );
+    SetThinkCallback( &MonsterTestDummy::MonsterTestDummyStartAnimation );
+    SetDieCallback( &MonsterTestDummy::MonsterTestDummyDie );
 
     // Setup the next think time.
     SetNextThinkTime(level.time + FRAMETIME);
@@ -161,6 +162,32 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 		gi.DPrintf("MonsterTestDummy(GoalEntity: %s)\n", value.c_str());
 	} else {
 		Base::SpawnKey(key, value);
+	}
+}
+
+
+/**
+*	@brief	Toggles whether to follow its activator or stay put.
+**/
+void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGameEntity* activator) {
+	// Get Goal Entity number.
+	GameEntity *geGoal = GetGoalEntity();
+	const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
+
+	// Get Activator Entity number.
+	const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
+
+	if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
+		// UseEntity(#%i): 'Use' Dispatched by Client(#%i).\n
+		gi.DPrintf("UseEntity(#%i, \"monster_testdummy\"): New GoalEntity(#%i) set by client dispatched 'Use' callback.\n",
+			GetNumber(),
+			activatorEntityNumber);
+
+		SetGoalEntity(activator);
+		SetEnemy(activator);
+	} else {
+		SetGoalEntity( nullptr );
+		SetEnemy( nullptr );
 	}
 }
 

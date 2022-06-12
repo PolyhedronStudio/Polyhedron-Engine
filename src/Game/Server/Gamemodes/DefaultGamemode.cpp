@@ -1124,7 +1124,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 
 			// If valid pointer, and allows for use, dispatch a callback.
 			if ( geUse && geUse->IsInUse() ) {
-				geUse->DispatchUseCallback( geUse, player );
+				geUse->DispatchUseCallback( player, player );
 			}
 		}
 		

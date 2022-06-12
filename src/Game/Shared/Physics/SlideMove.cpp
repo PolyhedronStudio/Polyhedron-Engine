@@ -197,18 +197,34 @@ static void SM_ClearClippingPlanes( SlideMoveState *moveState ) {
 **/
 static void SM_UpdateMoveFlags( SlideMoveState* moveState ) {
 	// Check and unset if needed: FoundGround and LostGround flags. (You can't find it twice in two frames, or lose it twice, can ya?)
-	if ( (moveState->moveFlags & SlideMoveFlags::FoundGround) ) {
-		moveState->moveFlags &= ~SlideMoveFlags::FoundGround;
+	if ( (moveState->moveFlags & SlideMoveMoveFlags::FoundGround) ) {
+		moveState->moveFlags &= ~SlideMoveMoveFlags::FoundGround;
 	}
-	if ( (moveState->moveFlags & SlideMoveFlags::LostGround) ) {
-		moveState->moveFlags &= ~SlideMoveFlags::LostGround;
+	if ( (moveState->moveFlags & SlideMoveMoveFlags::LostGround) ) {
+		moveState->moveFlags &= ~SlideMoveMoveFlags::LostGround;
+	}
+	if ( (moveState->moveFlags & SlideMoveMoveFlags::OnGround) ) {
+		moveState->moveFlags &= ~SlideMoveMoveFlags::OnGround;
 	}
 }
 /**
 *	@brief	Updates the moveFlags timer.
 **/
 static void SM_UpdateMoveFlagsTime(SlideMoveState* moveState) {
-
+    // Decrement the movement timer, used for "dropping" the player, landing after jumps, 
+    // or falling off a ledge/slope, by the duration of the command.
+	//
+	// We do so by simulating it how the player does, we take FRAMETIME_MS.
+    if ( moveState->moveFlagTime ) {
+		// Clear the timer and timed flags.
+        if ( moveState->moveFlagTime <= FRAMERATE_MS.count() ) {
+            moveState->moveFlags	&= ~SlideMoveMoveFlags::TimeMask;
+            moveState->moveFlagTime	= 0;
+        } else {
+			// Or just decrement the timer.
+            moveState->moveFlagTime	-= FRAMERATE_MS.count();
+        }
+    }
 }
 
 /**
@@ -298,6 +314,9 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
         return;
     }
 
+	// Backup our previous ground trace entity number.
+	int32_t oldgroundEntityNumber = moveState->groundEntityNumber;
+
     // Perform ground seek trace.
     const vec3_t downTraceEnd = moveState->origin + vec3_t{ 0.f, 0.f, -SLIDEMOVE_GROUND_DISTANCE };
 	SGTraceResult downTraceResult = SM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &downTraceEnd );
@@ -307,8 +326,7 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
 
     // If we hit an upward facing plane, make it our ground
     if ( downTraceResult.gameEntity && IsWalkablePlane( downTraceResult.plane ) ) {
-
-        // If we had no ground, then handle landing events
+		// If we had no ground, set FoundGround flag and handle landing events.
         if ( moveState->groundEntityNumber == -1 ) {
 			// Any landing terminates the water jump
             if ( moveState->moveFlags & SlideMoveMoveFlags::TimeWaterJump ) {
@@ -320,19 +338,19 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
             }
 
             // Engage TimeLand flag state if we're falling down hard enough to demand a landing response.
-            if ( moveState->originalVelocity.z <= SLIDEMOVE_SPEED_LAND ) {
+            if ( moveState->velocity.z <= SLIDEMOVE_SPEED_LAND ) {
 				// Set TimeLand flag.
                 moveState->moveFlags |= SlideMoveMoveFlags::TimeLand;
 				// Set TimeLand time to: '1'.
                 moveState->moveFlagTime = 1;
 
 				// Falling down rough.
-                if ( moveState->originalVelocity.z <= SLIDEMOVE_SPEED_FALL ) {
+                if ( moveState->velocity.z <= SLIDEMOVE_SPEED_FALL ) {
                     // Set TimeLand time to: '16'.
 					moveState->moveFlagTime = 16;
 
 					// Faling down hard.
-                    if ( moveState->originalVelocity.z <= SLIDEMOVE_SPEED_FALL_FAR ) {
+                    if ( moveState->velocity.z <= SLIDEMOVE_SPEED_FALL_FAR ) {
 						// Set TimeLand time to: '256'.
                         moveState->moveFlagTime = 256;
                     }
@@ -340,10 +358,18 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
             } else {
 				// Nothing.
             }
-        }
 
-		// Set our FoundGround, and of course, OnGround flags.
-        moveState->moveFlags |= SlideMoveMoveFlags::OnGround | SlideMoveFlags::FoundGround;
+			// Set our FoundGround, and of course, OnGround flags.
+			moveState->moveFlags |= SlideMoveMoveFlags::FoundGround;
+        } else {
+			// Unset the found ground flag since it can't find it if already on it.
+			if ( moveState->moveFlags & SlideMoveMoveFlags::FoundGround ) {
+				moveState->moveFlags &= ~SlideMoveMoveFlags::FoundGround;
+			}
+		}
+
+		// Set our OnGround flags.
+        moveState->moveFlags |= SlideMoveMoveFlags::OnGround;
 		// Store ground entity number.
 		moveState->groundEntityNumber = SG_GetEntityNumber( downTraceResult.podEntity );
 
@@ -352,13 +378,17 @@ static void SM_CheckGround( SlideMoveState *moveState ) {
 		// Clip our velocity to the ground floor plane.
 		moveState->velocity = SM_ClipVelocity(moveState->velocity, downTraceResult.plane.normal, SLIDEMOVE_CLIP_BOUNCE);
 	} else {
-		// Unset OnGround flag, since we're N.O.T on ground.
-        moveState->moveFlags &= SlideMoveMoveFlags::OnGround;
 		// Set LostGround flag, to notify we lost track of it.
-		moveState->moveFlags |= SlideMoveFlags::LostGround;
+		if (moveState->moveFlags & SlideMoveMoveFlags::OnGround) {
+			moveState->moveFlags |= SlideMoveMoveFlags::LostGround;
+		}
+
+		// Unset OnGround flag, since we're N.O.T on ground.
+		moveState->moveFlags &= ~SlideMoveMoveFlags::OnGround;
+
 		// Unset entity number.
 		moveState->groundEntityNumber = -1;
-    }
+	}
 
     // Always touch the entity, even if we couldn't stand on it
     SM_AddTouchEntity( moveState, downTraceResult.gameEntity );
@@ -487,14 +517,20 @@ static int32_t SM_StepDown_StepEdge( SlideMoveState *moveState ) {
 			if ( SM_StepDownOrEdgeMove_StepDown( moveState, downTraceResult ) ) {
 				// If we were falling after an edge move, return a fall down instead.
 				//if ( ) { return SlideMoveFlags::FallSteppedDown; } else {
-				return SlideMoveFlags::SteppedDown;
-			} else {
+				//				return SlideMoveFlags::SteppedDown; }
+				// Fall down stepping.
 				if ( (moveState->moveFlags & SlideMoveMoveFlags::TimeLand) ) {
+					// Unset the time land flag.
 					moveState->moveFlags &= ~SlideMoveMoveFlags::TimeLand;
 
 					// Return stepped fall down.
 					return SlideMoveFlags::SteppedDownFall;
+				} else {
+					// Return regular SteppedDown.
+					return SlideMoveFlags::SteppedDown;
 				}
+			} else {
+
 				//return SlideMoveFlags::EdgeMoved; // Step here, but without animation so dun return flag?
 			}
 		} else {

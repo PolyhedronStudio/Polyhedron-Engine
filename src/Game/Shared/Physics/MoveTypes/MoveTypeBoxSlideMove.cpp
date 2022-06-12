@@ -264,6 +264,7 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	//SlideMoveState slideMoveState = { 
 	const int32_t moveFlags = slideMoveState.moveFlags;
 	const int32_t moveFlagTime = slideMoveState.moveFlagTime;
+	SGTraceResult res = slideMoveState.groundTrace;
 
 	slideMoveState = {
 		// Geometric Attributes.

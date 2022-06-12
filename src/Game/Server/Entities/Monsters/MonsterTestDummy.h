@@ -77,7 +77,8 @@ public:
     *   Callback functions.
     *
     **/  
-    //void MonsterTestBoxUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
+    void MonsterTestDummyUse( IServerGameEntity* caller, IServerGameEntity* activator );
+	//void MonsterTestBoxUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
     void MonsterTestDummyThink(void);
     void MonsterTestDummyStartAnimation(void);
     void MonsterTestDummyDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
