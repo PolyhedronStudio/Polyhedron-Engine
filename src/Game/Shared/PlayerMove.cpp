@@ -846,16 +846,18 @@ static void PM_CheckGround(void) {
 
         // Save a reference to the ground
         pm->state.flags |= PMF_ON_GROUND;
-		if (trace.ent) {//	pm->groundEntityPtr = trace.ent;
-#ifdef SHAREDGAME_CLIENTGAME
-			pm->groundEntityNumber = trace.ent->clientEntityNumber;
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-			pm->groundEntityNumber = trace.ent->currentState.number;
-#endif
-		}/* else {
-			pm->groundEntityNumber = -1;
-		}*/
+		pm->groundEntityNumber = SG_GetEntityNumber(trace.ent);
+
+//		if (trace.ent) {//	pm->groundEntityPtr = trace.ent;
+//#ifdef SHAREDGAME_CLIENTGAME
+//			pm->groundEntityNumber = trace.ent->clientEntityNumber;
+//#endif
+//#ifdef SHAREDGAME_SERVERGAME
+//			pm->groundEntityNumber = SG_GetEntityNumber(trace.ent);
+//#endif
+//		}/* else {
+//			pm->groundEntityNumber = -1;
+//		}*/
         
 
         // Sink down to it if not trick jumping

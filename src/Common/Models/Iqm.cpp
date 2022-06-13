@@ -746,7 +746,9 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, pose++, relativeJoint++) {
 			// Do we have skeletal model data?
 			if (skmData && poseIndex == skmData->rootJointIndex) {
-				VectorClear(relativeJoint->translate);
+				//VectorClear(relativeJoint->translate);
+				relativeJoint->translate.x = 0;
+				relativeJoint->translate.y = 0;
 				VectorCopy(pose->scale, relativeJoint->scale);
 				QuatCopy(pose->rotate, relativeJoint->rotate);
 				continue;
@@ -765,7 +767,9 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 		{
 			// Do we have skeletal model data?
 			if (skmData && poseIndex == skmData->rootJointIndex) {
-				VectorClear(relativeJoint->translate);
+				//VectorClear(relativeJoint->translate);
+				relativeJoint->translate.x = 0;
+				relativeJoint->translate.y = 0;
 				relativeJoint->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
 				relativeJoint->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
 				relativeJoint->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;

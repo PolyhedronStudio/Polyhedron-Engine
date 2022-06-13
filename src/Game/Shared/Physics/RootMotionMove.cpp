@@ -197,15 +197,15 @@ static void RM_ClearClippingPlanes( RootMotionMoveState *moveState ) {
 **/
 static void RM_RefreshMoveFlags( RootMotionMoveState* moveState ) {
 	// Check and unset if needed: FoundGround and LostGround flags. (You can't find it twice in two frames, or lose it twice, can ya?)
-	if ( (moveState->moveFlags & RootMotionMoveFlags::FoundGround) ) {
-		moveState->moveFlags &= ~RootMotionMoveFlags::FoundGround;
-	}
-	if ( (moveState->moveFlags & RootMotionMoveFlags::LostGround) ) {
-		moveState->moveFlags &= ~RootMotionMoveFlags::LostGround;
-	}
-	//if ( (moveState->moveFlags & RootMotionMoveFlags::OnGround) ) {
-	//	moveState->moveFlags &= ~RootMotionMoveFlags::OnGround;
+	//if ( (moveState->moveFlags & RootMotionMoveFlags::FoundGround) ) {
+	//	moveState->moveFlags &= ~RootMotionMoveFlags::FoundGround;
 	//}
+	//if ( (moveState->moveFlags & RootMotionMoveFlags::LostGround) ) {
+	//	moveState->moveFlags &= ~RootMotionMoveFlags::LostGround;
+	//}
+	if ( (moveState->moveFlags & RootMotionMoveFlags::OnGround) ) {
+		moveState->moveFlags &= ~RootMotionMoveFlags::OnGround;
+	}
 }
 /**
 *	@brief	Updates the moveFlags timer.
@@ -289,10 +289,12 @@ static const int32_t RM_CheckStep( RootMotionMoveState* moveState, const SGTrace
 /***
 *
 *
-*	Sliding Ground Work.
+*	Support Routines:
 *
 *
 ***/
+static const bool RM_ScanStepUp( RootMotionMoveState *moveState );
+
 /**
 *	@brief	Checks whether this entity is 100% on-ground or not.
 *	@return	Mask containing the RootMotionMoveResult.
@@ -306,13 +308,26 @@ static const int32_t RM_CheckBottom(const vec3_t& start, const vec3_t& end, cons
 }
 
 /**
+*	@brief	Scans for steps ahead so we can anticipate.
+*	@return	A resultMask with possibly the StepUpAhead or DownStepAhead flag set.
+**/
+static int32_t RM_ScanSteps( RootMotionMoveState *moveState, const int32_t &resultMask ) {
+	int32_t scanResults = 0;
+
+	if ( RM_ScanStepUp(moveState) ) {
+		scanResults |= RootMotionMoveResult::StepUpAhead;	
+	}
+
+	return resultMask | scanResults;
+}
+/**
 *	@brief	Checks whether the RootMotionMoveState is having any ground below its feet or not.
 **/
 static void RM_CheckGround( RootMotionMoveState *moveState ) {
     // If we jumped, or been pushed, do not attempt to seek ground
-    if ( moveState->moveFlags & ( RootMotionMoveFlags::Jumped ) ){// | RootMotionMoveFlags::OnGround ) ) {
-        return;
-    }
+    //if ( moveState->moveFlags & ( RootMotionMoveFlags::Jumped ) ){// | RootMotionMoveFlags::OnGround ) ) {
+    //    return;
+    //}
 
 	// Backup our previous ground trace entity number.
 	int32_t oldgroundEntityNumber = moveState->groundEntityNumber;
@@ -370,6 +385,7 @@ static void RM_CheckGround( RootMotionMoveState *moveState ) {
 
 		// Set our OnGround flags.
         moveState->moveFlags |= RootMotionMoveFlags::OnGround;
+
 		// Store ground entity number.
 		moveState->groundEntityNumber = SG_GetEntityNumber( downTraceResult.podEntity );
 
@@ -705,6 +721,86 @@ static bool RM_StepUp_StepUp( RootMotionMoveState *moveState ) {
 }
 
 
+/***
+*
+*
+*	'Up' Step Scanning:
+*
+*
+***/
+static SGTraceResult RM_ScanStepup_TraceForward( RootMotionMoveState* moveState ) {
+	// Get direction by normalizing velocity.
+	const vec3_t scanDirection = vec3_normalize( moveState->velocity );
+	// Get distance to scan ahead.
+	const float scanDistance = 32.f; // TODO: Get specified distance from moveState.
+	// Calculate the end point to trace into.
+	const vec3_t scanEndPoint = vec3_fmaf( moveState->origin, scanDistance, scanDirection );
+
+	// Trace the move.
+	return RM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &scanEndPoint );
+}
+static SGTraceResult RM_ScanStepUp_TraceUp( RootMotionMoveState *moveState, const vec3_t &forwardTraceEndPoint ) {
+	// Up Wards trace end point.
+	const vec3_t upTraceEnd = vec3_fmaf( forwardTraceEndPoint, ROOTMOTION_MOVE_STEP_HEIGHT, vec3_up() );
+	// Perform trace.
+	return RM_Trace( moveState, &forwardTraceEndPoint, &moveState->mins, &moveState->maxs, &upTraceEnd );
+}
+static const bool RM_ScanStepUp_TraceGround( RootMotionMoveState *moveState, const vec3_t &upTraceEndPoint ) {
+	/**
+	*	#2: Try and settle to the ground by testing with RM_CheckStep:
+	*			- When not complying: Return true and settle to the ground.
+	*			- When not complying: Return false and revert to original origin & velocity.
+	**/
+	// Up Wards trace end point.
+	const vec3_t downTraceEnd = vec3_fmaf( upTraceEndPoint, ROOTMOTION_MOVE_STEP_HEIGHT + ROOTMOTION_MOVE_GROUND_DISTANCE, vec3_down() );
+	// Perform Trace.
+	const SGTraceResult downTraceResult = RM_Trace( moveState, &upTraceEndPoint, &moveState->mins, &moveState->maxs, &downTraceEnd );
+		
+	// If the ground trace result complies to all conditions, step to it.
+	if ( RM_CheckStep( moveState, downTraceResult ) ) {
+		//if ( (moveState->moveFlags & RootMotionMoveFlags::OnGround) || moveState->velocity.z < ROOTMOTION_MOVE_SPEED_UP ) {
+			return true;
+		//}
+	}
+
+	return false;
+}
+
+/**
+*	Scans for another 'Up' step a specified distance ahead.
+**/
+const bool RM_ScanStepUp( RootMotionMoveState *moveState ) {
+	// Perform forward trace.
+	SGTraceResult forwardTraceResult = RM_ScanStepup_TraceForward( moveState );
+
+	// When this happens, chances are you got a shitty day coming up.
+	if( forwardTraceResult.allSolid ) {
+		// TODO: ??
+	}
+
+	// We scanned straight ahead, no objects we can step on.
+	if( forwardTraceResult.fraction == 1.0f ) {
+		return false;
+	}
+
+	// We hit something.
+	if( forwardTraceResult.fraction < 1.0f ) {
+		// See if we can step over it.
+		SGTraceResult upTraceResult = RM_ScanStepUp_TraceUp( moveState, forwardTraceResult.endPosition );
+		
+		// If it is all solid, we can't step up, so no steps ahead.
+		if (upTraceResult.allSolid) {
+			return false;
+		}
+
+		// If we also found ground, we got a step ahead of us.
+		return RM_ScanStepUp_TraceGround( moveState, upTraceResult.endPosition );
+	}
+
+	// Should never happen but...
+	return false;
+}
+
 
 /***
 *
@@ -947,6 +1043,9 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 	/**
 	*	#4: Done moving, check for ground, and 'categorize' our position.
 	**/
+	// Before checking for new ground, see if there is any step ahead.
+	moveResultMask |= RM_ScanSteps( moveState, moveResultMask );
+
 	// Once again, check for ground.
 	RM_CheckGround( moveState );
 

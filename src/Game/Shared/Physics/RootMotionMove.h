@@ -103,6 +103,9 @@ struct RootMotionMoveResult {
 	//! Set if the move resulted in stepping to ground while falling down.
 	static constexpr int32_t SteppedFall	= (1 << 5);
 
+	//! Set when scanning for steps ahead found a step up.
+	static constexpr int32_t StepUpAhead	= (1 << 6);
+
 	//! Set when the move has no ground resulting in gravity affecting the move and falling down.
 	static constexpr int32_t FallingDown	= (1 << 20);
 

@@ -18,6 +18,9 @@
 #include "../Base/SVGBaseSkeletalAnimator.h"
 #include "../Base/SVGBaseRootMotionMonster.h"
 
+// GameMode.
+#include "../../GameModes/IGameMode.h"
+
 // World.
 #include "../../World/ServerGameWorld.h"
 
@@ -87,8 +90,8 @@ void MonsterTestDummy::Spawn() {
     SetModel( "models/monsters/slidedummy/slidedummy.iqm" );
 	
     // Set the bounding box.
-    SetBoundingBox( { -16, -16, -46 }, { 16, 16, 44 } );
-	SetRenderEffects( RenderEffects::FrameLerp );
+    SetBoundingBox( { -16, -16, -49 }, { 16, 16, 41 } );
+	//SetRenderEffects( RenderEffects::FrameLerp );
 
     // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.
     SetDieCallback( &MonsterTestDummy::MonsterTestDummyDie );
@@ -212,21 +215,19 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MonsterTestDummy::MonsterTestDummyThink(void) {
-    //
-    // Move if alive.
-    //
-    if (GetHealth() > 0) {
+	// Only do logic if alive.
+	if (!GetGameMode()->IsDeadEntity(this)) {
 		// Navigate to goal.
 		Move_NavigateToTarget( );
+
+		// Link entity back in.
+		LinkEntity();
+
+		// Setup next think callback.
+		SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
+		// Setup the next think time.
+		SetNextThinkTime(level.time + FRAMETIME);
 	}
-
-    // Link entity back in.
-    LinkEntity();
-
-	// Setup next think callback.
-    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
-    // Setup the next think time.
-    SetNextThinkTime(level.time + FRAMETIME);
 }
 
 //===============
