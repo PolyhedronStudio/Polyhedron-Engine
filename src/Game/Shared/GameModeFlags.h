@@ -33,3 +33,19 @@ struct GameModeFlags {
     //! Whether to use a fixed Field Of View or not.
     static constexpr int16_t FixedFOV           = (1 << 5);
 };
+
+///**
+//*   @brief  GameMode specific flags such as FixedFOV, InstantItems, No Friendly Fire etc.
+//**/
+//struct GameModeFlags {
+//    static constexpr int16_t NoHealthItems      = (1 << 0);
+//    static constexpr int16_t NoItems            = (1 << 1);
+//    static constexpr int16_t NoFallingDamage    = (1 << 2);
+//    static constexpr int16_t SameLevel          = (1 << 3);
+//    static constexpr int16_t SkinTeams          = (1 << 4);
+//    static constexpr int16_t ModelTeams         = (1 << 5);
+//    static constexpr int16_t NoFriendlyFire     = (1 << 6);
+//    static constexpr int16_t ForceRespawn       = (1 << 7);
+//    static constexpr int16_t InfiniteAmmo       = (1 << 8);
+//    static constexpr int16_t FixedFOV           = (1 << 9);
+//};

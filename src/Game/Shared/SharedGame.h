@@ -59,99 +59,15 @@ struct GibType {
 };
 
 
-/**
-*   Entity Move Types.
-**/
-struct MoveType {
-    //! An entity that never moves at all.
-    static constexpr int32_t None       = 0;
-    //! Spectator movement allows for flying around like noclip, but it does clip to BSP.
-    static constexpr int32_t Spectator  = 1;
-    //! Similar to spectator movement however it does not clip.
-    static constexpr int32_t NoClip     = 2;
-    //! No clip to world, push on box contact.
-    static constexpr int32_t Push = 3;
-    //! No clip to world, stops on box contact
-    static constexpr int32_t Stop = 4;
+//! MoveTypes.
+#include "MoveTypes.h"
 
-    //! This entity makes use of the player movement code. 
-    static constexpr int32_t PlayerMove = 10;    // Gravity. (Player Movement entities use this.)
+//! Entity Flags.
+#include "EntityFlags.h"
 
-	//! This entity makes use of the step movement physics.
-    static constexpr int32_t StepMove	= 11;    // Fixed distance per frame, impacted by gravity, supports special edge handling.
-	//! Velocity based, box slide movement, optional stepping. Reacts to gravity unless FL_FLY or FL_SWIM is set.
-	static constexpr int32_t SlideMove	= 12;
-	//! Similar to step movement however it does not care for gravity.
-    static constexpr int32_t Fly        = 13; // TODO: Make this a flag for BoxSlideMove...
-    
-	//! Similar to step fly movement, but with an extra size bounding box for hitting other entities. It's for missiles after all.
-    static constexpr int32_t FlyMissile = 14;
-    //! Toss is used for when dropping items, dying entities etc. It simply does basic velocity and gravity movement.
-    static constexpr int32_t Toss       = 15;
-    //! Similar to Toss but doesn't halt to a stop when having landed on-ground.
-    static constexpr int32_t TossSlide  = 16;
-    //! Similar to Toss but bounces back from the impacted surface instead.
-    static constexpr int32_t Bounce     = 17;
-};
+//! Button Bits.
+#include "ButtonBits.h"
 
-
-/**
-*   @brief Entity Flags. These are set in-game during gameplay.
-**/
-struct EntityFlags {
-    static constexpr int32_t Fly            = 1;
-    static constexpr int32_t Swim           = 2;        //! Implied immunity to drowining
-    static constexpr int32_t ImmuneLaser    = 4;
-    static constexpr int32_t InWater        = 8;
-    static constexpr int32_t GodMode        = 16;
-    static constexpr int32_t NoTarget       = 32;
-    static constexpr int32_t ImmuneToSlime  = 64;
-    static constexpr int32_t ImmuneToLava   = 128;
-    static constexpr int32_t PartiallyOnGround = 256;   //! Not all corners are valid
-    static constexpr int32_t WaterJump      = 512;      //! Player jumping out of water
-    static constexpr int32_t TeamSlave      = 1024;     //! Not the first on the team
-    static constexpr int32_t NoKnockBack    = 2048;
-    static constexpr int32_t PowerArmor     = 4096;     //! Power armor (if any) is active
-    static constexpr int32_t Respawn        = 0x80000000;   //! Used for item respawning
-};
-
-/**
-*   @brief Use Entity Flags. Determine how a player can interact with this entity by 'Using' it.
-**/
-struct UseEntityFlags {
-	//! Default, this entity can not be 'Use' interacted with.
-    static constexpr int32_t Not			= 0;
-	//! Takes repeated 'Use' key hit presses to dispatch 'Use' callbacks.
-    static constexpr int32_t Toggle			= 2;
-	//! Takes a single 'Use' key press, which when hold will dispatch a 'Use' callback each frame.
-    static constexpr int32_t Hold			= 4;
-};
-
-
-
-/**
-*   @brief  These are used for game logic. They are set in clg_input.cpp. One is free
-*           to use up the remaining slots for their own custom needs.
-**/
-struct ButtonBits {
-    //! Button bit for when a player is primary firing.
-    static constexpr uint8_t PrimaryFire    = (1 << 0);
-    //! Button bit for when a player is secondary firing.
-    static constexpr uint8_t SecondaryFire  = (1 << 1);
-    //! Button bit for when a player is reloading its weapon.
-    static constexpr uint8_t Reload         = (1 << 4);
-    //! Button bit for when a player is using an entity.
-    //! TODO: This is currently still unimplemented. Should replace "auto touch" buttons etc.
-    static constexpr uint8_t Use            = (1 << 2);
-    //! Button bit that is set when a player is moving.
-    static constexpr uint8_t Walk           = (1 << 3);
-    //! Unused 0.
-    static constexpr uint8_t Unused0        = (1 << 5);
-    //! Unused 1.
-    static constexpr uint8_t Unused1        = (1 << 6);
-    //! Set when any button is pressed.
-    static constexpr uint8_t Any = (1 << 7);
-};
 
 
 /**
@@ -169,66 +85,11 @@ struct ButtonBits {
 //    static constexpr uint8_t Shotgun    = 3;
 //};
 
-/**
-*   @brief  Used to determine the state a weapon is currently in.
-**/
-struct WeaponState {
-    //! None state, meaning it has no logic to process.
-    static constexpr int32_t None = 0;
-    //! Draw state, when set it'll process a draw animation.
-    static constexpr int32_t Holster = 1;
-    //! Holster state, when set it'll process a holster animation.
-    static constexpr int32_t Draw = 2;
-    //! Idle state, when set it'll play idle animations at random intervals.
-    static constexpr int32_t Idle = 3;
-    //! Reload, when set it'll try and reload.
-    static constexpr int32_t Reload = 4;
-    //! Primary Fire. Speaks for itself.
-    static constexpr int32_t PrimaryFire = 5;
-    //! Secondary Fire. This too, speaks for itself.
-    static constexpr int32_t SecondaryFire = 6;
-};
+//! Weapon States.
+#include "WeaponStates.h"
 
-/**
-*   @brief Item identifiers.
-**/
-struct ItemID { 
-    /***
-    * Weapons.
-    ***/
-    //! Bare hands.
-    static constexpr uint32_t Barehands     = 1;
-    //! Pistol.
-    static constexpr uint32_t Beretta       = 2;
-    //! SMG.
-    static constexpr uint32_t SMG           = 3;
-    //! Shotgun.
-    static constexpr uint32_t Shotgun       = 4;
-    //! Last item slot that can be used for weapons.
-    static constexpr uint32_t MaxWeapons    = 64;
-
-    /***
-    * Ammo.
-    ***/
-    //! 9 millimeter ammo.
-    static constexpr uint32_t Ammo9mm       = 65;
-    //! 9 millimeter ammo.
-    static constexpr uint32_t MaxAmmos      = 85;    
-
-    /***
-    * Medical Stats Items.
-    ***/
-    //! Mega Health.
-    static constexpr uint32_t MegaHealth = 86;
-
-    /**
-    *   ... :-)
-    **/
-    //! Total amount of items.
-    static constexpr uint32_t Total = 87; 
-    //! Maximum amount of allowed items.
-    static constexpr uint32_t Maximum = 255;
-};
+//! Item IDs.
+#include "ItemIDs.h"
 
 /**
 *   Armor Types.
@@ -242,21 +103,8 @@ struct ArmorType {
 };
 
 
-/**
-*   @brief  GameMode specific flags such as FixedFOV, InstantItems, No Friendly Fire etc.
-**/
-struct GameModeFlags {
-    static constexpr int16_t NoHealthItems      = (1 << 0);
-    static constexpr int16_t NoItems            = (1 << 1);
-    static constexpr int16_t NoFallingDamage    = (1 << 2);
-    static constexpr int16_t SameLevel          = (1 << 3);
-    static constexpr int16_t SkinTeams          = (1 << 4);
-    static constexpr int16_t ModelTeams         = (1 << 5);
-    static constexpr int16_t NoFriendlyFire     = (1 << 6);
-    static constexpr int16_t ForceRespawn       = (1 << 7);
-    static constexpr int16_t InfiniteAmmo       = (1 << 8);
-    static constexpr int16_t FixedFOV           = (1 << 9);
-};
+// GameMode Flags.
+#include "GameModeFlags.h"
 
 
 /**
@@ -625,5 +473,5 @@ static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
 *	Physics
 **/
 #include "Physics/Physics.h"
-#include "Physics/SlideMove.h"
+#include "Physics/RootMotionMove.h"
 #include "Physics/StepMove.h"

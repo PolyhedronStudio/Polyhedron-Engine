@@ -16,7 +16,7 @@
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseSkeletalAnimator.h"
-#include "../Base/SVGBaseSlideMonster.h"
+#include "../Base/SVGBaseRootMotionMonster.h"
 
 // World.
 #include "../../World/ServerGameWorld.h"

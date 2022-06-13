@@ -41,79 +41,25 @@ extern cvar_t *GetSVGravity();
 
 
 
+/**
+*	@brief	Performs a velocity based 'Root Motion' movement for general NPC's.
+*			If EntityFlags::Swim or EntityFlags::Fly are not set, it'll be affected
+*			by gravity and perform continious ground and step checks in order
+*			to navigate the terrain properly.
+**/
+void SG_Physics_RootMotionMove(SGEntityHandle &entityHandle) {
+    // Assign handle to base entity.
+    GameEntity* gameEntity = *entityHandle;
 
-//==================================================
-// The following should actually be more monster code.
-//==================================================
-bool SG_SlideMove_CheckBottom(GameEntity* geCheck) {
-    vec3_t  start, stop;
-    SGTraceResult trace;
-    int32_t x, y;
-    float   mid, bottom;
+    // Ensure it is a valid entity.
+    if (!gameEntity) {
+	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
+        return;
+    }
 
-    vec3_t mins = geCheck->GetOrigin() + geCheck->GetMins(); //VectorAdd(geCheck->currentState.origin, geCheck->mins, mins);
-    vec3_t maxs = geCheck->GetOrigin() + geCheck->GetMaxs(); //VectorAdd(geCheck->currentState.origin, geCheck->maxs, maxs);
-
-
-    // if all of the points under the corners are solid world, don't bother
-    // with the tougher checks
-    // the corners must be within 16 of the midpoint
-    start[2] = mins[2] - 1;
-    for (x = 0; x <= 1; x++) {
-        for (y = 0; y <= 1; y++) {
-            start[0] = x ? maxs[0] : mins[0];
-            start[1] = y ? maxs[1] : mins[1];
-            if (SG_PointContents(start) != BrushContents::Solid) {
-                goto realcheck;
-			}
-        }
-	}
-
-    return true;        // we got out easy
-
-realcheck:
-    //
-    // check it for real...
-    //
-    start[2] = mins[2];
-
-    // the midpoint must be within 16 of the bottom
-    start[0] = stop[0] = (mins[0] + maxs[0]) * 0.5;
-    start[1] = stop[1] = (mins[1] + maxs[1]) * 0.5;
-    stop[2] = start[2] - 2 * PM_STEP_HEIGHT;
-    trace = SG_Trace(start, vec3_zero(), vec3_zero(), stop, geCheck, SG_SolidMaskForGameEntity(geCheck));
-
-    if (trace.fraction == 1.0) {
-        return false;
-	}
-    mid = bottom = trace.endPosition[2];
-
-    // The corners must be within 16 of the midpoint.
-    for (x = 0; x <= 1; x++) {
-        for (y = 0; y <= 1; y++) {
-            start[0] = stop[0] = x ? maxs[0] : mins[0];
-            start[1] = stop[1] = y ? maxs[1] : mins[1];
-
-            trace = SG_Trace(start, vec3_zero(), vec3_zero(), stop, geCheck, SG_SolidMaskForGameEntity(geCheck));
-
-            if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
-                bottom = trace.endPosition[2];
-            if (trace.fraction == 1.0 || mid - trace.endPosition[2] > PM_STEP_HEIGHT)
-                return false;
-        }
-	}
-
-    return true;
+    // Run think method.
+    SG_RunThink(gameEntity);
 }
-
-//==================================================
-
-//========================================================================
-
-
-static constexpr float STEPMOVE_STOPSPEED = 100.f;
-static constexpr float STEPMOVE_FRICTION = 6.f;
-static constexpr float STEPMOVE_WATERFRICTION = 1.f;
 
 /**
 *	@brief	Processes rotational friction calculations.
@@ -135,7 +81,7 @@ const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle ) {
     ent->SetAngles( vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity) );
 
     // Calculate adjustment to apply.
-    float adjustment = FRAMETIME.count() * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
+    float adjustment = FRAMETIME.count() * ROOTMOTION_MOVE_STOP_SPEED * ROOTMOTION_MOVE_GROUND_FRICTION;
 
     // Apply adjustments.
     angularVelocity = ent->GetAngularVelocity();
@@ -159,7 +105,7 @@ const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle ) {
 *	@brief	Checks if this entity should have a groundEntity set or not.
 *	@return	The number of the ground entity this entity is covering ground on.
 **/
-int32_t SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
+int32_t SG_RootMotionMove_CheckForGround( GameEntity *geCheck ) {
 	if (!geCheck) {
 		// Warn, or just remove check its already tested elsewhere?
 		return -1;
@@ -231,9 +177,9 @@ int32_t SG_BoxSlideMove_CheckForGround( GameEntity *geCheck ) {
 }
 
 /**
-*	@brief	Starts performing the BoxSlide move process.
+*	@brief	Starts performing the RootMotion move process.
 **/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, RootMotionMoveState *slideMoveState ) {
+const int32_t SG_RootMotion_PerformMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, RootMotionMoveState *rootMotionMoveState ) {
 	/**
 	*	Ensure our SlideMove Game Entity is non (nullptr).
 	**/
@@ -261,12 +207,12 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	*	Setup our RootMotionMoveState structure. Keeps track of state for the current frame's move we're about to perform.
 	**/
 	// The structure containing the current state of the move we're trying to perform.
-	//RootMotionMoveState slideMoveState = { 
-	const int32_t oldMoveFlags		= slideMoveState->moveFlags;
-	const int32_t oldMoveFlagTime	= slideMoveState->moveFlagTime;
-	SGTraceResult oldGroundTrace	= slideMoveState->groundTrace;
+	//RootMotionMoveState rootMotionMoveState = { 
+	const int32_t oldMoveFlags		= rootMotionMoveState->moveFlags;
+	const int32_t oldMoveFlagTime	= rootMotionMoveState->moveFlagTime;
+	SGTraceResult oldGroundTrace	= rootMotionMoveState->groundTrace;
 
-	*slideMoveState = {
+	*rootMotionMoveState = {
 		// Original Physical Attributes.
 		.originalVelocity	= geSlider->GetVelocity(),
 		.originalOrigin		= geSlider->GetOrigin(),
@@ -323,48 +269,29 @@ const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, 
 	*	If the geSlider entity has any velocty, we'll start attempting to move it around.
 	**/
 	// Stores the Result Move Flags after the move has completed.
-	int32_t blockedMask = 0;
+	int32_t moveResultMask = 0;
 
 
 	//if( oldVelocityLength > 0 ) {
 		/**
-		*	Step #1: Start attempting to Root Motion Move at our velocity.
+		*	Step #1: Start attempting to slide move at our velocity.
 		**/
-		blockedMask = SG_SlideMove( slideMoveState );
+		moveResultMask = SG_RootMotion_MoveFrame( rootMotionMoveState );
 		
-		const vec3_t org0 = slideMoveState->origin;
-		const vec3_t vel0 = slideMoveState->velocity;
+		const vec3_t org0 = rootMotionMoveState->origin;
+		const vec3_t vel0 = rootMotionMoveState->velocity;
 
 		// Got blocked by a wall...
-		if (blockedMask & SlideMoveFlags::WallBlocked) {
+		if ( (moveResultMask & RootMotionMoveResult::WallBlocked) ) {
 
 		}
 
 		// We touched something, try and step over it.
-		if ( (blockedMask & SlideMoveFlags::PlaneTouched) ) {
+		if ( (moveResultMask & RootMotionMoveResult::PlaneTouched) ) {
 
 		}
 	//}
 
-	return blockedMask;
+	return moveResultMask;
 }
 
-/**
-*	@brief	Performs a velocity based 'slidebox' movement for general NPC's.
-*			If FL_SWIM or FL_FLY are not set, it'll check whether there is any
-*			ground at all, if it has been removed the monster will be pushed
-*			downwards due to gravity effect kicking in.
-**/
-void SG_Physics_BoxSlideMove(SGEntityHandle &entityHandle) {
-    // Assign handle to base entity.
-    GameEntity* gameEntity = *entityHandle;
-
-    // Ensure it is a valid entity.
-    if (!gameEntity) {
-	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
-        return;
-    }
-
-    // Run think method.
-    SG_RunThink(gameEntity);
-}

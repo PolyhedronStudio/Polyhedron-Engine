@@ -23,7 +23,7 @@
 
 // Physics.
 #include "../Physics.h"
-#include "../SlideMove.h"
+#include "../RootMotionMove.h"
 
 // TODO: This needs some fixing hehe... ugly method but hey.
 #ifdef SHAREDGAME_SERVERGAME

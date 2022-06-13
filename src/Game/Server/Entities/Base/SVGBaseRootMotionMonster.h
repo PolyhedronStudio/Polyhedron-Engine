@@ -4,8 +4,18 @@
 *
 *	@file
 *
-*	Slide Movement based Monster Class. Inherit from this to utilize Step Move functionality for your
-*	non controllable (-character) entities.
+*	Root Motion MOvement Monster class. Utilize with a skeletal IQM model that has a bone named "root"
+*	which determines how far to step in the current animation frame. 
+*
+*	By zero-ing out the root bone's translation ONLY when rendering, we create a more visually appealing
+*	movement effect. Instead, we only take the translation into consideration for the physics.
+*
+*	The translation offsets between each frame, as well as the actual distance(vec3_length) are
+*	calculated by the client and server during load time. When rendering the root bone's translation
+*	is zero-ed out and only the actual offset between frames is applied.
+*
+*	The result is no more 'ice-skating' monsters, replaced by monsters that actually can stick their feet
+*	to the ground.
 *
 *	Comes with all basic kung-fu.
 *
@@ -102,8 +112,8 @@ private:
 
 
 protected:
-	const bool SlideMove_CheckBottom( );
-	void SlideMove_FixCheckBottom( );
+	const bool RootMotionMove_CheckBottom( );
+	void RootMotionMove_FixCheckBottom( );
 
 
 

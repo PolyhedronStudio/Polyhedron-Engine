@@ -16,16 +16,16 @@ class SVGBaseEntity;
 class SVGBaseTrigger;
 //class SVGBaseAnimated;
 class SVGBaseSkeletalAnimator;
-class SVGBaseSlideMonster;
+class SVGBaseRootMotionMonster;
 
 
-class MonsterTestDummy : public SVGBaseSlideMonster {
+class MonsterTestDummy : public SVGBaseRootMotionMonster {
 public:
     //! Constructor/Deconstructor.
     MonsterTestDummy(PODEntity *svEntity);
     virtual ~MonsterTestDummy();
 
-    DefineMapClass("monster_testdummy", MonsterTestDummy, SVGBaseSlideMonster);
+    DefineMapClass("monster_testdummy", MonsterTestDummy, SVGBaseRootMotionMonster);
 
     /**
     *

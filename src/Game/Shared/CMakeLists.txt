@@ -9,14 +9,14 @@
 SET(SRC_SHAREDGAME
 	Entities/SGEntityHandle.cpp
 
-	Physics/MoveTypes/MoveTypeBoxSlideMove.cpp
+	Physics/MoveTypes/MoveTypeRootMotionMove.cpp
 	Physics/MoveTypes/MoveTypeLinearProjectile.cpp
 	Physics/MoveTypes/MoveTypeNoClip.cpp
 	Physics/MoveTypes/MoveTypeNone.cpp
 	Physics/MoveTypes/MoveTypePusher.cpp
 	Physics/MoveTypes/MoveTypeToss.cpp
 	Physics/Physics.cpp
-	Physics/SlideMove.cpp
+	Physics/RootMotionMove.cpp
 
 	World/IGameWorld.cpp
 
@@ -35,7 +35,7 @@ SET(HEADERS_SHAREDGAME
 	Entities.h 
 
 	Physics/Physics.h
-	Physics/SlideMove.h
+	Physics/RootMotionMove.h
 
 	World/IGameWorld.h
 	

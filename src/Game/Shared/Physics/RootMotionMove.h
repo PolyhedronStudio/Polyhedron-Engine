@@ -16,43 +16,49 @@
 *	SlideBox Configuration.
 **/
 //! Maximum amount of planes to clip against when executing a SlideBox movement.
-static constexpr int32_t MAX_SLIDEMOVE_CLIP_PLANES	= 16;
+static constexpr int32_t MAX_ROOTMOTION_MOVE_CLIP_PLANES	= 16;
 //! Maximum amount of entities that can be touched at the same time.
-static constexpr int32_t MAX_SLIDEMOVE_TOUCH		= 32;
+static constexpr int32_t MAX_ROOTMOTION_MOVE_TOUCH		= 32;
 
-//! SlideMove 'Stop Epsilon' for velocities that are nearing 0.
-static constexpr float SLIDEMOVE_STOP_EPSILON		= 0.1f;
 //! Bounce Velocity Clipping value.
-static constexpr float SLIDEMOVE_CLIP_BOUNCE		= 1.01f;
-
-//! SlideMove 'Minimal Step Height'. If a step exceeds it, it'll resort to NOT positioning the entity, but have it
-// drop by gravity instead.
-static constexpr float SLIDEMOVE_STEP_HEIGHT_MIN	= 4.0f;
+static constexpr float ROOTMOTION_MOVE_CLIP_BOUNCE		= 1.01f;
+//! SlideMove 'Stop Epsilon' for velocities that are nearing 0.
+static constexpr float ROOTMOTION_MOVE_STOP_EPSILON		= 0.1f;
 
 //! The actual maximum step height a slidemove is allowed to step.
-static constexpr float SLIDEMOVE_STEP_HEIGHT = 18.0f;
+static constexpr float ROOTMOTION_MOVE_STEP_HEIGHT = 18.0f;
+//! SlideMove 'Minimal Step Height'. If a step exceeds it, it'll resort to NOT positioning the entity, but have it
+// drop by gravity instead.
+static constexpr float ROOTMOTION_MOVE_STEP_HEIGHT_MIN	= 4.0f;
 
-//! The distance between a slide move and the ground. (An offset, to prevent trouble.)
-static constexpr float SLIDEMOVE_GROUND_DISTANCE = 0.25f;
+//! The distance between a root motion move's bounding box and the ground. (An offset we stick to, preventing getting stuck.)
+static constexpr float ROOTMOTION_MOVE_GROUND_DISTANCE = 0.25f;
 
+//! Friction for ground movement.
+static constexpr float ROOTMOTION_MOVE_GROUND_FRICTION = 6.f;
+//! Friction for water movement.
+static constexpr float ROOTMOTION_MOVE_WATER_FRICTION = 1.f;
+
+//! The Stop speed, at which it decreases to a halt.
+static constexpr float ROOTMOTION_MOVE_STOP_SPEED = 100.f;
 //! Determins the minimum speed value for Z velocity before determinging a slidemove should bother with floor logic.
-static constexpr float SLIDEMOVE_SPEED_UP = 0.1f;
+static constexpr float ROOTMOTION_MOVE_SPEED_UP = 0.1f;
 
-
-static constexpr float SLIDEMOVE_SPEED_LAND			= -280.f;
-static constexpr float SLIDEMOVE_SPEED_FALL			= -700.f;
-static constexpr float SLIDEMOVE_SPEED_FALL_FAR		= -900.f;
+//! Fall time speeds.
+static constexpr float ROOTMOTION_MOVE_SPEED_LAND			= -280;
+static constexpr float ROOTMOTION_MOVE_SPEED_FALL			= -700;
+static constexpr float ROOTMOTION_MOVE_SPEED_FALL_FAR		= -900;
 
 
 
 
 
 //! Uncomment for printing Debug Information Output when a SlideMove gets trapped.
-/*#define SG_SLIDEMOVE_DEBUG_TRAPPED_MOVES*/
+/*#define SG_ROOTMOTION_MOVE_DEBUG_TRAPPED_MOVES*/
 //! Uncomment for printing Debug blockMask results of SlideMoves.
-#define SG_SLIDEMOVE_DEBUG_BLOCKMASK 1
+#define SG_ROOTMOTION_MOVE_DEBUG_BLOCKMASK 1
 //! Comment to disable SlideMove velocity clamping.
-#define SG_SLIDEMOVE_CLAMPING 1
+#define SG_ROOTMOTION_MOVE_CLAMPING 1
 
 
 /***
@@ -63,9 +69,9 @@ static constexpr float SLIDEMOVE_SPEED_FALL_FAR		= -900.f;
 *
 ***/
 /**
-*	@brief The possible flags returned from executing a SlideMove on a SlideMoveState.
+*	@brief The possible flags returned from executing a SlideMove on a RootMotionMoveState.
 **/
-struct SlideMoveMoveFlags {
+struct RootMotionMoveFlags {
 	static constexpr int32_t FoundGround	= (1 << 0); // Mover found new ground.
 	static constexpr int32_t OnGround		= (1 << 1); // Mover is on ground.
 	static constexpr int32_t LostGround		= (1 << 2); // Mover lost ground.
@@ -82,7 +88,7 @@ struct SlideMoveMoveFlags {
 	static constexpr int32_t TimeMask = (TimePushed | TimeWaterJump | TimeLand);
 };
 
-struct SlideMoveFlags {
+struct RootMotionMoveResult {
 	// Blabla
 
 	//! Set whenever the move has been completed for the remainingTime.
@@ -113,7 +119,7 @@ struct SlideMoveFlags {
 /**
 *	@brief	Contains the status of an entities physics move state.
 **/
-struct SlideMoveState {
+struct RootMotionMoveState {
 	//! Original Physical Properties.
 	vec3_t originalVelocity	= vec3_zero();
 	vec3_t originalOrigin	= vec3_zero();
@@ -159,11 +165,11 @@ struct SlideMoveState {
 
 	//! Number of, and normals of each plane we want to clip against to.
 	int32_t numClipPlanes = 0;
-	vec3_t	clipPlaneNormals[MAX_SLIDEMOVE_CLIP_PLANES];
+	vec3_t	clipPlaneNormals[MAX_ROOTMOTION_MOVE_CLIP_PLANES];
 
 	//! Number of, and pointers to the entities we touched and want to dispatch a 'Touch' callback to.
 	int32_t	numTouchEntities = 0;
-	int32_t	touchEntites[MAX_SLIDEMOVE_TOUCH];
+	int32_t	touchEntites[MAX_ROOTMOTION_MOVE_TOUCH];
 	
 	//! Move State flags: Store state like on-ground etc.
 	int32_t moveFlags		= 0;
@@ -176,24 +182,24 @@ struct SlideMoveState {
 *	@return	Clipped by normal velocity.
 **/
 vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce );
-
-/*
-* GS_SlideMove
-*/
-int32_t SG_SlideMove( SlideMoveState *moveState );
-
-/**
-*	@brief	Calls GS_SlideMove for the SharedGameEntity and triggers touch functions of touched entities.
-**/
-const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, SlideMoveState *boxSlideMove  );
-
 /**
 *	@brief	Checks if this entity should have a groundEntity set or not.
 *	@return	The number of the ground entity this entity is covering ground on.
 **/
 int32_t SG_BoxSlideMove_CheckForGround( GameEntity *geCheck );
-
 /**
 *	@brief	Processes rotational friction calculations.
 **/
 const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle );
+
+
+/**
+*	@brief	Performs the actual movement making use of SG_RootMotion_MoveFrame.
+*	@return	An int32_t containing the move result mask ( RootMotionMoveResult Flags )
+**/
+const int32_t SG_RootMotion_PerformMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction, RootMotionMoveState *boxSlideMove  );
+/**
+*	@brief	Executes a Root Motion Move for the current moveState by clipping its velocity to the touching plane' normals.
+*	@return	An int32_t containing the move result mask ( RootMotionMoveResult Flags )
+**/
+int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState );

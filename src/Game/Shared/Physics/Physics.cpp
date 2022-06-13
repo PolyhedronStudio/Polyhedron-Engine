@@ -23,7 +23,7 @@
 
 // Physics.
 #include "Physics.h"
-#include "SlideMove.h"
+#include "RootMotionMove.h"
 
 // TODO: This needs some fixing hehe... ugly method but hey.
 #ifdef SHAREDGAME_SERVERGAME
@@ -486,9 +486,9 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
             //SG_Physics_Step(entityHandle);
 			SG_Physics_None(entityHandle);
         break;
-	// SG_Physics_BoxSlideMove:
-		case MoveType::SlideMove:
-			SG_Physics_BoxSlideMove(entityHandle);
+	// SG_Physics_RootMotionMove:
+		case MoveType::RootMotionMove:
+			SG_Physics_RootMotionMove(entityHandle);
 			break;
 	// SG_Physics_Toss:
         case MoveType::Toss:
@@ -645,7 +645,7 @@ int SV_FlyMove( edict_t *ent, float time, int mask ) {
 **/
 const int32_t SG_BoxSlideMove( GameEntity *geSlider, const int32_t contentMask, const float slideBounce, const float friction ) {
 	int32_t i;
-	SlideMoveState entMove = {};
+	RootMotionMoveState entMove = {};
 	int32_t blockedMask = 0;
 
 	if (!geSlider) {
