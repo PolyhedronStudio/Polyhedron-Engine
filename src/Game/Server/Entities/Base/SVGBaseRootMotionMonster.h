@@ -101,7 +101,7 @@ public:
 	/**
 	*	@brief	Useful for debugging slidemoves, enable on an entity by setting spawnflag 128
 	**/
-	void DebugPrint(const int32_t entityNumber, const int32_t blockedMask, const int32_t previousBlockedMask, const int32_t moveFlags, const int32_t moveFlagTime);
+	void DebugPrint(const int32_t entityNumber, const int32_t resultMask, const int32_t previousResultMask, const int32_t moveFlags, const int32_t moveFlagTime);
 
 private:
 	//! Only set for debug printing purposes. Can be ignored.

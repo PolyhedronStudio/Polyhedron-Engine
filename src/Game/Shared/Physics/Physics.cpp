@@ -135,7 +135,7 @@ vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float ov
 	vec3_t outVelocity = ( inVelocity - vec3_scale( normal, backoff ) );
 
 	// SlideMove clamp it.
-#if defined(SG_SLIDEMOVE_CLAMPING) && SG_SLIDEMOVE_CLAMPING == 1
+#if defined(SG_ROOTMOTION_MOVE_CLAMPING) && SG_ROOTMOTION_MOVE_CLAMPING == 1
 	{
 		float oldSpeed = vec3_length(inVelocity);
 		float newSpeed = vec3_length(outVelocity);

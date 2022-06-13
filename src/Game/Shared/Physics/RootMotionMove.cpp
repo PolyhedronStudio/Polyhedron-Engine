@@ -195,7 +195,7 @@ static void RM_ClearClippingPlanes( RootMotionMoveState *moveState ) {
 /**
 *	@brief	Called at the start of RootMotionMove. Inspects and unsets previous frame flags if need be.
 **/
-static void RM_UpdateMoveFlags( RootMotionMoveState* moveState ) {
+static void RM_RefreshMoveFlags( RootMotionMoveState* moveState ) {
 	// Check and unset if needed: FoundGround and LostGround flags. (You can't find it twice in two frames, or lose it twice, can ya?)
 	if ( (moveState->moveFlags & RootMotionMoveFlags::FoundGround) ) {
 		moveState->moveFlags &= ~RootMotionMoveFlags::FoundGround;
@@ -203,14 +203,14 @@ static void RM_UpdateMoveFlags( RootMotionMoveState* moveState ) {
 	if ( (moveState->moveFlags & RootMotionMoveFlags::LostGround) ) {
 		moveState->moveFlags &= ~RootMotionMoveFlags::LostGround;
 	}
-	if ( (moveState->moveFlags & RootMotionMoveFlags::OnGround) ) {
-		moveState->moveFlags &= ~RootMotionMoveFlags::OnGround;
-	}
+	//if ( (moveState->moveFlags & RootMotionMoveFlags::OnGround) ) {
+	//	moveState->moveFlags &= ~RootMotionMoveFlags::OnGround;
+	//}
 }
 /**
 *	@brief	Updates the moveFlags timer.
 **/
-static void RM_UpdateMoveFlagsTime(RootMotionMoveState* moveState) {
+static void RM_RefreshMoveFlagsTime(RootMotionMoveState* moveState) {
     // Decrement the movement timer, used for "dropping" the player, landing after jumps, 
     // or falling off a ledge/slope, by the duration of the command.
 	//
@@ -854,10 +854,10 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 	*	#1: Check, update and if need be correct the current move state before moving.
 	**/
 	// Update Move Flags.
-	RM_UpdateMoveFlags( moveState );
+	RM_RefreshMoveFlags( moveState );
 	
 	// Update Move Flags Time.
-	RM_UpdateMoveFlagsTime( moveState);
+	RM_RefreshMoveFlagsTime( moveState);
 
 	// Check for ground.
 	RM_CheckGround( moveState );

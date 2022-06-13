@@ -537,7 +537,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	*				- ?
 	**/
 	// With the previous state stored for reversion in case of need, we'll perform the new move.
-	const int32_t blockedMask = SG_RootMotion_PerformMove( 
+	const int32_t moveResultMask = SG_RootMotion_PerformMove( 
 		this, 
 		( moveClipMask ? moveClipMask : BrushContentsMask::PlayerSolid ), 
 		ROOTMOTION_MOVE_CLIP_BOUNCE, 
@@ -545,14 +545,14 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 		&rootMotionMoveState 
 	);
 
-	#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && (SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1)
+	#if defined(SG_ROOTMOTION_MOVE_DEBUG_RESULTMASK) && (SG_ROOTMOTION_MOVE_DEBUG_RESULTMASK == 1)
 	{
 		const int32_t entityNumber = GetNumber();
 
 		// Only output if the spawnflag is set to do so.
 		if ( (GetSpawnFlags() & 128) ) {
 
-			DebugPrint(entityNumber, blockedMask, previousMoveBlockedMask, rootMotionMoveState.moveFlags, rootMotionMoveState.moveFlagTime);
+			DebugPrint(entityNumber, moveResultMask, previousMoveResultMask, rootMotionMoveState.moveFlags, rootMotionMoveState.moveFlagTime);
 		}
 	}
 	#endif
@@ -562,7 +562,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	// should ever want to be found, dead... or alive.
 	//
 	// So... I present to you the following bold and ugly motherfucking hack:
-	if ( (blockedMask & RootMotionMoveResult::Trapped) ) {
+	if ( ( moveResultMask & RootMotionMoveResult::Trapped) ) {
 		// The reason we do this here is that even though we inspect for trapped inside
 		// the RootMotionMove repeatedly, it performs on a sub-level. This statement catches
 		// the worst of the worst situations and will resort to old origin and velocity.
@@ -603,7 +603,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	*	Step #3:	- Execute Touch Callbacks in case we add any blockedMask set.
 	**/
 	// Execute touch callbacks.
-	if( blockedMask != 0 ) {
+	if( moveResultMask != 0 ) {
 		GameEntity *otherEntity = nullptr;
 
 		// Call Touch Triggers on our slide box entity for its new position.
@@ -680,59 +680,59 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	/**
 	*	#7: We're done, return blockedMask.
 	**/
-	return blockedMask;
+	return moveResultMask;
 }
 
 /**
 *	@brief	Useful for debugging slidemoves, enable on an entity by setting spawnflag 128
 **/
-void SVGBaseRootMotionMonster::DebugPrint(const int32_t entityNumber, const int32_t blockedMask, const int32_t previousBlockedMask, const int32_t moveFlags, const int32_t moveFlagTime) {
-#if defined(SG_SLIDEMOVE_DEBUG_BLOCKMASK) && SG_SLIDEMOVE_DEBUG_BLOCKMASK == 1
+void SVGBaseRootMotionMonster::DebugPrint(const int32_t entityNumber, const int32_t resultMask, const int32_t previousResultMask, const int32_t moveFlags, const int32_t moveFlagTime) {
+#if defined(SG_ROOTMOTION_MOVE_DEBUG_RESULTMASK) && SG_ROOTMOTION_MOVE_DEBUG_RESULTMASK == 1
 	// We only want to print if anything changed, otherwise we spam the console, we don't want to,
 	// simply because the ideal places for spam are on social-media instead :P
-	if ( blockedMask != previousBlockedMask ){
+	if ( resultMask != previousResultMask ){
 		return;
 	}
 
 	// Debug Output Strings.
-	std::string blockedMaskStr = "";
+	std::string resultMaskStr = "";
 	std::string moveFlagsStr = "";
 
 	/**
 	*	BlockedMaskStr.
 	**/
 	// Fill up the blockMaskStr with matching stringified flag names.
-	if ( blockedMask & RootMotionMoveResult::Moved ) { blockedMaskStr += "Moved"; }
+	if ( resultMask & RootMotionMoveResult::Moved ) { resultMaskStr += "Moved"; }
 	
-	if ( blockedMask & RootMotionMoveResult::SteppedUp ) { blockedMaskStr += "SteppedUp"; }
-	if ( blockedMask & RootMotionMoveResult::SteppedDown ) { blockedMaskStr += "SteppedDown"; }
-	if ( blockedMask & RootMotionMoveResult::SteppedEdge ) { blockedMaskStr += "SteppedEdge"; }
-	if ( blockedMask & RootMotionMoveResult::SteppedFall ) { blockedMaskStr += "SteppedFall"; }
+	if ( resultMask & RootMotionMoveResult::SteppedUp ) { resultMaskStr += "SteppedUp"; }
+	if ( resultMask & RootMotionMoveResult::SteppedDown ) { resultMaskStr += "SteppedDown"; }
+	if ( resultMask & RootMotionMoveResult::SteppedEdge ) { resultMaskStr += "SteppedEdge"; }
+	if ( resultMask & RootMotionMoveResult::SteppedFall ) { resultMaskStr += "SteppedFall"; }
 
-	if ( blockedMask & RootMotionMoveResult::FallingDown ) { blockedMaskStr += "FallingDown"; }
+	if ( resultMask & RootMotionMoveResult::FallingDown ) { resultMaskStr += "FallingDown"; }
 
-	if ( blockedMask & RootMotionMoveResult::EntityTouched ) { blockedMaskStr += "EntityTouched"; }
-	if ( blockedMask & RootMotionMoveResult::PlaneTouched ) { blockedMaskStr += "PlaneTouched"; }
-	if ( blockedMask & RootMotionMoveResult::WallBlocked ) { blockedMaskStr += "WallBlocked"; }
-	if ( blockedMask & RootMotionMoveResult::Trapped ) { blockedMaskStr += "Trapped"; }
+	if ( resultMask & RootMotionMoveResult::EntityTouched ) { resultMaskStr += "EntityTouched"; }
+	if ( resultMask & RootMotionMoveResult::PlaneTouched ) { resultMaskStr += "PlaneTouched"; }
+	if ( resultMask & RootMotionMoveResult::WallBlocked ) { resultMaskStr += "WallBlocked"; }
+	if ( resultMask & RootMotionMoveResult::Trapped ) { resultMaskStr += "Trapped"; }
 
 	/**
 	*	MoveFlags.
 	**/
 	// Fill up the movedFlagStr with matching stringified flag names.
-	if ( blockedMask & RootMotionMoveMoveFlags::FoundGround ) { moveFlagsStr += "FoundGround"; }
-	if ( blockedMask & RootMotionMoveMoveFlags::OnGround ) { moveFlagsStr += "OnGround"; }
-	if ( blockedMask & RootMotionMoveMoveFlags::LostGround ) { moveFlagsStr += "LostGround"; }
+	if ( resultMask & RootMotionMoveFlags::FoundGround ) { moveFlagsStr += "FoundGround"; }
+	if ( resultMask & RootMotionMoveFlags::OnGround ) { moveFlagsStr += "OnGround"; }
+	if ( resultMask & RootMotionMoveFlags::LostGround ) { moveFlagsStr += "LostGround"; }
 
-	if ( blockedMask & RootMotionMoveMoveFlags::Ducked ) { moveFlagsStr += "Ducked"; }
-	if ( blockedMask & RootMotionMoveMoveFlags::Jumped ) { moveFlagsStr += "Jumped"; }
+	if ( resultMask & RootMotionMoveFlags::Ducked ) { moveFlagsStr += "Ducked"; }
+	if ( resultMask & RootMotionMoveFlags::Jumped ) { moveFlagsStr += "Jumped"; }
 
-	if ( blockedMask & RootMotionMoveMoveFlags::OnLadder ) { moveFlagsStr += "OnLadder"; }
-	if ( blockedMask & RootMotionMoveMoveFlags::UnderWater ) { moveFlagsStr += "UnderWater"; }
+	if ( resultMask & RootMotionMoveFlags::OnLadder ) { moveFlagsStr += "OnLadder"; }
+	if ( resultMask & RootMotionMoveFlags::UnderWater ) { moveFlagsStr += "UnderWater"; }
 
-	if ( blockedMask & RootMotionMoveMoveFlags::TimePushed ) { moveFlagsStr += "TimePushed"; }
-	if ( blockedMask & RootMotionMoveMoveFlags::TimeWaterJump ) { moveFlagsStr += "TimeWaterJump"; }
-	if ( blockedMask & RootMotionMoveMoveFlags::TimeLand ) { moveFlagsStr += "TimeLand"; }
+	if ( resultMask & RootMotionMoveFlags::TimePushed ) { moveFlagsStr += "TimePushed"; }
+	if ( resultMask & RootMotionMoveFlags::TimeWaterJump ) { moveFlagsStr += "TimeWaterJump"; }
+	if ( resultMask & RootMotionMoveFlags::TimeLand ) { moveFlagsStr += "TimeLand"; }
 
 
 	/**
@@ -741,7 +741,7 @@ void SVGBaseRootMotionMonster::DebugPrint(const int32_t entityNumber, const int3
 	std::string debugStr = "Entity(#";
 	debugStr += std::to_string( entityNumber );
 	debugStr += ") (Blockmask: ";
-	debugStr += blockedMaskStr;
+	debugStr += resultMaskStr;
 	debugStr += ") (MoveFlags: )";
 	debugStr += moveFlagsStr;
 	debugStr += ") (MoveFlagTime: ";
@@ -749,7 +749,7 @@ void SVGBaseRootMotionMonster::DebugPrint(const int32_t entityNumber, const int3
 	debugStr += ")\n";//(MoveFlags: % s) (MoveFlagTime: % i)\n";
 
 	gi.DPrintf(debugStr.c_str());
-//	gi.DPrintf( debugStr.c_str(), blockedMaskStr.c_str(), moveFlagsStr.c_str(), moveFlagTime );
+//	gi.DPrintf( debugStr.c_str(), resultMaskStr.c_str(), moveFlagsStr.c_str(), moveFlagTime );
 #endif
 }
 
