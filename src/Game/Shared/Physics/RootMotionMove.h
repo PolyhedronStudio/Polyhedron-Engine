@@ -72,9 +72,9 @@ static constexpr float ROOTMOTION_MOVE_SPEED_FALL_FAR		= -900;
 *	@brief The possible flags returned from executing a SlideMove on a RootMotionMoveState.
 **/
 struct RootMotionMoveFlags {
-	static constexpr int32_t FoundGround	= (1 << 0); // Mover found new ground.
-	static constexpr int32_t OnGround		= (1 << 1); // Mover is on ground.
-	static constexpr int32_t LostGround		= (1 << 2); // Mover lost ground.
+	static constexpr int32_t FoundGround	= (1 << 1); // Mover found new ground.
+	static constexpr int32_t OnGround		= (1 << 2); // Mover is on ground.
+	static constexpr int32_t LostGround		= (1 << 3); // Mover lost ground.
 
 	static constexpr int32_t Ducked					= (1 << 4);  // Mover ducked.
 	static constexpr int32_t Jumped					= (1 << 5);  // Mover jumped.
@@ -85,7 +85,7 @@ struct RootMotionMoveFlags {
 	static constexpr int32_t TimeWaterJump			= (1 << 10);  // Time before control.
 	static constexpr int32_t TimeLand				= (1 << 11);  // Time before jump eligible.
 
-	static constexpr int32_t TimeMask = (TimePushed | TimeWaterJump | TimeLand);
+	static constexpr int32_t TimeMask = (RootMotionMoveFlags::TimePushed | RootMotionMoveFlags::TimeWaterJump | RootMotionMoveFlags::TimeLand);
 };
 
 struct RootMotionMoveResult {
@@ -105,6 +105,10 @@ struct RootMotionMoveResult {
 
 	//! Set when scanning for steps ahead found a step up.
 	static constexpr int32_t StepUpAhead	= (1 << 6);
+	//! Set when scanning for steps ahead found a step down.
+	static constexpr int32_t StepDownAhead	= (1 << 7);
+	//! Set when scanning for steps ahead found an edge ahead.
+	static constexpr int32_t StepEdgeAhead	= (1 << 8);
 
 	//! Set when the move has no ground resulting in gravity affecting the move and falling down.
 	static constexpr int32_t FallingDown	= (1 << 20);

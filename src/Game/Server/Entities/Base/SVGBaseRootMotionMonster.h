@@ -56,82 +56,187 @@ public:
 
 
 	/***
-    * 
-    *   Monster Entity Functions.
-    * 
-    ***/
-	/**
 	*
-	**/
-	virtual void Move_NavigateToTarget();
-
-
-	//
-	//! Goal Entity.
-	//
-    GameEntity* geGoalEntity = nullptr;
-	std::string strGoalEntity = "";
-	virtual void SetGoalEntity(GameEntity *geGoal) { this->geGoalEntity = geGoal; }
-	virtual GameEntity *GetGoalEntity() { return this->geGoalEntity; }
-
-	/**
-	*	@brief	Categorizes what other contents the entity resides in. (Water, Lava, or...)
-	**/
-	void CategorizePosition();
-
-	/**
-	*	@brief	Rotates/Turns the monster into the Ideal Yaw angle direction.
-	*	@return	The delta yaw angles of this Turn.
-	**/
-	virtual float TurnToIdealYawAngle();
-
-
-    /***
-    * 
-    *   Slide Move Functionality:
-    * 
-    ***/
+	*
+	*	Animation Functionality:
+	*
+	*
+	***/
 public:
+	/**
+	*	@return	A pointer to the current animation state.
+	**/
+	const EntityAnimationState *GetCurrentAnimationState();
+	/**
+	*	@return	Calculates a 0 starting index based current frame for the given
+	*			animation state.
+	**/
+	const int32_t GetAnimationStateFrame( const EntityAnimationState *animationState );
+
+	/**
+	*	@brief	Sets the 'translate' vector to the value of the requested frame number 
+	*			'root bone's' translation
+	*	@return	True if the 'translate' frame data exists. False otherwise.
+	**/
+	const bool GetAnimationFrameTranslate( const int32_t animationIndex, const int32_t animationFrame, vec3_t& rootBoneTranslation );
+	const bool GetAnimationFrameTranslate( const std::string &animationName, const int32_t animationFrame, vec3_t& rootBoneTranslation );
+	/**
+	*	@brief	Sets the 'distance' double to the value of the requested frame number 
+	*			'root bone's' translation distance. (vec3_dlength)
+	*	@return	True if the 'distance' frame data exists. False otherwise.
+	**/
+	const bool GetAnimationFrameDistance( const int32_t animationIndex, const int32_t animationFrame, double &rootBoneDistance );
+	const bool GetAnimationFrameDistance( const std::string &animationName, const int32_t animationFrame, double &rootBoneDistance );
+
+	/**
+	*	@brief	Updates, and(if needed) switches to a new animation.
+	**/
+	void RefreshAnimationState();
+	
+	/**
+	*	@brief
+	**/
+	const bool AnimationFinished( const EntityAnimationState *animationState );
+	/**
+	*	@brief
+	**/
+	const bool CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t indexA, const int32_t indexB );
+	/**
+	*	@brief
+	**/
+	const bool HasExoticMoveResults( const int32_t resultsMask );
+private:
+
+
+protected:
+
+
+
+	/***
+	*
+	*
+	*	Move Functionality:
+	*
+	*
+	***/
+public:
+	/**
+	*	@brief	Sets the 'speed' multiplier value for the small velocities which
+	*			are generated based on the 'root bone' translational distances.
+	**/
+	inline void SetMoveSpeed(const double newMoveSpeed) { moveSpeed = newMoveSpeed; }
+	inline double GetMoveSpeed() { return moveSpeed; }
+
 	/**
 	*	@brief	Prepare, Perform and process a root bone motion move frame for this monster.
 	*	@return	A mask containing the final Root Motion Move results. (Blocked, stepped, etc.)
 	**/
 	const int32_t PerformRootMotionMove();
-
 	/**
 	*	@brief	Useful for debugging slidemoves, enable on an entity by setting spawnflag 128
 	**/
 	void DebugPrint(const int32_t entityNumber, const int32_t resultMask, const int32_t previousResultMask, const int32_t moveFlags, const int32_t moveFlagTime);
 
+
 private:
+	//! Current Move Result Mask.
+	int32_t currentMoveResultMask	= 0;
+	//! Previous Move Result Mask.
+	int32_t previousMoveResultMask	= 0;
+
+	//! Move Speed.
+	double moveSpeed = 0.;
 	//! Only set for debug printing purposes. Can be ignored.
-	int32_t previousMoveResultMask = 0;
-
+	//int32_t previousMoveResultMask = 0;
 	//! Actual Root Motion Move state we're operating with.
-	RootMotionMoveState rootMotionMoveState;
+	RootMotionMoveState currentMoveState;
+	//! Actual Root Motion Move state we're operating with.
+	RootMotionMoveState previousMoveState;
 
+	/**
+	*	@brief	Applies the state data (origin, velocity, etc) to this entity's state.
+	**/
+	void ApplyMoveState( RootMotionMoveState *moveState );
 
 protected:
+	/**
+	*	@brief 
+	**/
 	const bool RootMotionMove_CheckBottom( );
+	/**
+	*	@brief 
+	**/
 	void RootMotionMove_FixCheckBottom( );
 
 
 
 	/***
 	*
-	*	SlideBox Entity Functions.
+	*
+	*	Monster Logic function pointers.
+	*
 	*
 	***/
+public:
+	//
+	//! Goal Entity.
+	//
+	/**
+	*	@brief	Sets the goal entity to reach out for. Note that, a goal
+	*			is NOT an enemy, however it can be. The enemy pointer is used
+	*			for which enemy this monster currently is targetting.
+	*
+	*			A goal is an entity he is trying to head out for.
+	*			Even though they can be the same, the enemy pointer is for combat,
+	*			and goal pointer is for navigation.
+	*			
+	*			TODO: 
+	**/
+	virtual void SetGoalEntity(GameEntity *geGoal) { this->geGoalEntity = geGoal; }
 
+	/**
+	*	@return	A pointer to what is our Goal entity to try and reach out for.
+	**/
+	virtual GameEntity *GetGoalEntity() { return this->geGoalEntity; }
+
+	/**
+	*	@brief	Rotates/Turns the monster a frame into the Ideal Yaw angle direction.
+	*	@return	The delta yaw angles of this Turn.
+	**/
+	virtual float TurnToIdealYawAngle();
+
+
+private:
+	//! Goal entity to try and reach out to.
+	GameEntity* geGoalEntity = nullptr;
+
+protected:
+	//! Stores parsed targetname of said goal entity.
+	std::string strGoalEntity = "";
+
+
+	/***
+	*
+	*
+	*
+	*	Navigation Support Routines:
+	*
+	*
+	*
+	***/
+public:
+	/**
+	*
+	**/
+	virtual const int32_t NavigateToOrigin( const vec3_t &navigationOrigin );
+
+private:
+
+
+protected:
 
 
 public:
 
 
-protected:
-    /***
-    * 
-    *   Monster Logic function pointers.
-    *
-    ***/
 };

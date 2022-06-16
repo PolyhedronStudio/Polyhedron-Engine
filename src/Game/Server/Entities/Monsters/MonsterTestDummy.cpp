@@ -91,7 +91,6 @@ void MonsterTestDummy::Spawn() {
 	
     // Set the bounding box.
     SetBoundingBox( { -16, -16, -49 }, { 16, 16, 41 } );
-	//SetRenderEffects( RenderEffects::FrameLerp );
 
     // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.
     SetDieCallback( &MonsterTestDummy::MonsterTestDummyDie );
@@ -150,6 +149,35 @@ void MonsterTestDummy::PostSpawn() {
 void MonsterTestDummy::Think() {
     // Always call parent class method.
     Base::Think();
+
+	/**
+	*	The idea is to write hard think logic here.
+	*	Use think callbacks to setup logic changing operations.
+	*
+	*	This should work considering our system navigates to origins.
+	**/
+	// First try our Goal Entity.
+	GameEntity *geMoveGoal = GetGoalEntity();
+
+	// There's no specific move goal set.
+	if (!geMoveGoal) {
+		// See if we got enemy.
+		geMoveGoal = GetEnemy();
+
+		if (!geMoveGoal) {
+			// Y U HEF NO ENEMY?
+			
+			// TEMPORARY:
+			/*SetVelocity(vec3_zero());
+			RootMotionMove();
+			return;*/
+		}
+	}
+
+	// Set our Yaw Speed.
+	SetYawSpeed(20.f);
+	// Set our Move Speed. (It is the actual sum of distance traversed in units.)
+	SetMoveSpeed(64.015f);
 }
 
 //===============
@@ -217,8 +245,23 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
 void MonsterTestDummy::MonsterTestDummyThink(void) {
 	// Only do logic if alive.
 	if (!GetGameMode()->IsDeadEntity(this)) {
+		/**
+		*	#0: Very Cheap, WIP, Debug, pick the goal entity. lol.
+		**/
+		GameEntity *geMoveGoal= GetGoalEntity();
+
+		if (!geMoveGoal) {
+			geMoveGoal = GetEnemy();
+		}
+
+		// Now get the move origin to head into.
+		const vec3_t navigationOrigin = ( geMoveGoal ? geMoveGoal->GetOrigin() : vec3_zero() );
+
 		// Navigate to goal.
-		Move_NavigateToTarget( );
+		NavigateToOrigin( navigationOrigin );
+
+		// Refresh Monster Animation State.
+		RefreshAnimationState();
 
 		// Link entity back in.
 		LinkEntity();
@@ -237,26 +280,27 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 //===============
 //
 void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
-    // Entity is dying, it can't take any more damage.
+	// Get Gameworld.
+	ServerGameWorld* gameWorld = GetGameWorld();
+
+	// Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
 
     // Attacker becomes this entity its "activator".
     SetActivator(attacker);
 
-    // Set movetype to dead, solid dead.
+    // Set the dead body to tossslide, no solid collision, and link to world for collision.
     SetMoveType(MoveType::TossSlide);
     SetSolid(Solid::Not);
     LinkEntity();
+
     // Play a nasty gib sound, yughh :)
     SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
-    ServerGameWorld* gameWorld = GetGameWorld();
     gameWorld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);
 
     // Setup the next think and think time.
     SetNextThinkTime(level.time + FRAMETIME);
-
-    // Set think function.
-    SetThinkCallback(&MonsterTestDummy::SVGBaseEntityThinkFree);
+	SetThinkCallback(&MonsterTestDummy::SVGBaseEntityThinkFree);
 }
