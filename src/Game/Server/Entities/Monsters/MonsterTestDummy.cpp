@@ -205,7 +205,7 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 *	@brief	Toggles whether to follow its activator or stay put.
 **/
 void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGameEntity* activator) {
-	// Get Goal Entity number.
+	////// Get Goal Entity number.
 	GameEntity *geGoal = GetGoalEntity();
 	const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
 
