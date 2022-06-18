@@ -313,13 +313,12 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 	//if (state.number == 14) {
 	if (state.modelIndex != 255 && state.modelIndex > 0 && !skm) {
 		qhandle_t modelHandle = clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
-		
 		model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
-
 		SKM_GenerateModelData(model);
-
 		skm = model->skeletalModelData;
-
+		skm->animationMap["run_stairs_up"].rootBoneAxisFlags = 
+			SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | 
+			SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
 	}
 
 	if ( state.currentAnimation.startTime != 0 ) {
@@ -408,7 +407,7 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 		// See whether we got skm data, and if the animation index is valid and save to use.
 		if (skm && skm->animations.size() > animationIndex) {
 			// Ensure that the refresh entity starts its 'oldframe' at the previous animation's 'endframe'.
-			refreshEntity.oldframe = refreshAnimation.endFrame;
+			//refreshEntity.oldframe = refreshAnimation.endFrame;
 			
 			// Get a pointer to the animation data.
 			SkeletalAnimation *skmAnimation = skm->animations[animationIndex];
@@ -417,7 +416,7 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 			refreshAnimation.animationIndex = animationIndex;
 			refreshAnimation.frame = skmAnimation->startFrame;
 			refreshAnimation.startFrame = skmAnimation->startFrame;
-			refreshAnimation.endFrame = skmAnimation->endFrame - 1;
+			refreshAnimation.endFrame = skmAnimation->endFrame;
 			refreshAnimation.forceLoop = true;//currentAnimation->forceLoop;
 			refreshAnimation.frameTime = skmAnimation->frametime;
 			refreshAnimation.startTime = currentAnimationState->startTime;
@@ -647,7 +646,7 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
 
 /**
 * 
-(
+*
 *   Skeletal Animation
 * 
 *
@@ -668,11 +667,6 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 
 	// Did any animation state data change?
 	if (currentAnimation->startTime != previousAnimation->startTime) {
-		//Com_DPrint("%s: animationIndex(#%i), refreshAnimationIndex(#%i)\n", 
-		//	__func__,
-		//	currentAnimation->animationIndex,
-		//	previousAnimation->animationIndex);
-
 		SwitchAnimation(currentAnimation->animationIndex, GameTime(currentAnimation->startTime));
 	}
 	// Process the animation, like we would do any time.
@@ -754,24 +748,41 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
             refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
 		} else {
-			//
-			//	Skeletal Animation Progressing.
-			//
+			// TODO: This needs tidying, this whole function obviously still does lol.
+			// If we got skeletal model data..
+			if ( skm ) {
+				// See which animation we are at:
+				const int32_t animationIndex = currentState->currentAnimation.animationIndex;
+
+				if ( animationIndex >= 0 && animationIndex < skm->animations.size() ) { 
+					auto *animationData = skm->animations[animationIndex];
+
+					refreshEntity.rootBoneAxisFlags = animationData->rootBoneAxisFlags;
+				} else {
+					refreshEntity.rootBoneAxisFlags = 0;
+				}
+			}
 
 			//
-			//	Skeletal Animation Progressing.
+			//	Skeletal Animation Processing.
 			//
 			// Setup the refresh entity frames.
 			refreshEntity.oldframe	= refreshAnimation.frame;
 
 			// Setup the proper lerp and model frame to render this pass.
 			// Moved into the if statement's else case up above.
-			ProcessSkeletalAnimationForTime(GameTime(cl->serverTime));
+			ProcessSkeletalAnimationForTime(GameTime(cl->time));
 
-			refreshEntity.frame		= refreshAnimation.frame;
+			// Don't allow it to go below 0, instead set it to old frame.
+			if (refreshAnimation.frame < 0) {
+				//refreshEntity.frame = refreshEntity.oldframe;
+			} else {
+				// Set animation frame.
+				refreshEntity.frame		= refreshAnimation.frame;
 
-			// The backlerp.
-			refreshEntity.backlerp	= refreshAnimation.backLerp;
+				// We only change the backlerp in case it is not the same old frame.
+				refreshEntity.backlerp	= refreshAnimation.backLerp;
+			}
         }
         
 

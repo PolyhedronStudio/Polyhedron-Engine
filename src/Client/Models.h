@@ -66,7 +66,7 @@ extern void (*MOD_Reference)(model_t *model);
 //!
 // Compute pose transformations for the given model + data
 // `relativeJoints` must have enough room for model->num_poses
-void MOD_ComputeIQMRelativeJoints(const model_t* model, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
+void MOD_ComputeIQMRelativeJoints(const model_t* model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
 
 // Compute local space matrices for the given pose transformations.
 // this is the "fast path" for when world space is not necessary.

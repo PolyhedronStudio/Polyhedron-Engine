@@ -159,11 +159,6 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
 // Think callback, to execute the needed physics for this pusher object.
 //===============
 void MonsterTestDummy::MonsterTestDummyThink(void) {
-
-	// Advance the dummy animation for a frame.
-    // Set here how fast you want the tick rate to be.
-    // Set here how fast you want the tick rate to be.
-    static constexpr uint32_t ANIM_HZ = 30.0;
 	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
 	const int32_t animationFrame = animationState->frame;
 	if (animationFrame >= 0 && skm->boundingBoxes.size() > animationFrame) {

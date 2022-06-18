@@ -130,26 +130,79 @@ void SKM_GenerateModelData(model_t* model) {
 
 		// Calculate distances.
 		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
-			vec3_t offsetFrom;
-			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
-				const iqm_transform_t *pose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
+			// The offset between frames.
+			vec3_t offsetFrom = vec3_zero();
 
+			// Used to store the total translation distance from startFrame to end Frame,
+			// We use this in order to calculate the appropriate distance between start and end frame.
+			// (Ie, assuming an animation loops, we need that.)
+			vec3_t totalTranslateDistance = vec3_zero();
 
+			// Start and end pose pointers.
+			const iqm_transform_t *startPose = &model->iqmData->poses[skm->rootJointIndex + (animation->startFrame * model->iqmData->num_poses)];
+			const iqm_transform_t *endPose = &model->iqmData->poses[skm->rootJointIndex + ((animation->endFrame - animation->startFrame) * model->iqmData->num_poses)];
 
-					vec3_t translate;
-					if (i > animation->startFrame) {
-						VectorSubtract(offsetFrom, pose->translate, translate);
-						VectorCopy(pose->translate, offsetFrom);
-						animation->frameDistances.push_back(vec3_dlength(translate));
-						animation->frameTranslates.push_back(vec3_negate(translate));
-					}
-					else {
-						offsetFrom = pose->translate;
-						animation->frameDistances.push_back(0.f);
-						animation->frameTranslates.push_back(vec3_zero());
-					}
-				//}
+			// Get the start and end pose translations.
+			const vec3_t startFrameTranslate	= startPose->translate;
+			const vec3_t endFrameTranslate		= endPose->translate;
+
+			// We count(sum) the final total translation of all frames between start and end so we can use
+			// this to calculate their translational offsets with. (Otherwise we'd get minmally 2 frames where
+			// no motion takes place, this looks choppy.) 
+			vec3_t totalTranslation = vec3_zero();
+			for (int32_t i = animation->startFrame; i <= animation->endFrame; i++) {
+				// Get the Frame Pose.
+				const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
+
+				// Special Case: First frame has no offset really.
+				if (i == animation->startFrame) {
+					const vec3_t totalStartTranslation = startFrameTranslate; //- endFrameTranslate;
+					// Push the total traversed frame distance.
+					animation->frameDistances.push_back( vec3_dlength( totalStartTranslation ) );
+
+					// Push the total translation between each frame.					
+					animation->frameTranslates.push_back( totalStartTranslation );
+				// Special Case: Take the total offset, subtract it from the end frame, and THEN
+				} else if (i == animation->endFrame) {
+					// 
+					const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
+						
+					// Push the total traversed frame distance.
+					animation->frameDistances.push_back( vec3_dlength( totalBackTranslation ) );
+
+					// Push the total translation between each frame.					
+					animation->frameTranslates.push_back( totalBackTranslation );
+
+					// Store our new offsetFrom to the current pose's translate.
+					//offsetFrom = pose->translate;
+
+					// Get total offset from end to start
+
+				// General Case: Set the offset we'll be coming from next frame.
+				} else {
+						
+					// Calculate translation between the two frames.
+					const vec3_t translate = offsetFrom - framePose->translate;
+
+					// Add it to our sum.
+					totalTranslation += translate; // or offsetfrom?
+
+					// Push the total traversed frame distance.
+					animation->frameDistances.push_back(vec3_dlength(translate));
+
+					// Push the total translation between each frame.					
+					animation->frameTranslates.push_back(translate);
+
+					// Store our new offsetFrom to the current pose's translate.
+					offsetFrom = framePose->translate;
+				}
 			}
+		}
+
+		// Sum up all frame distances into one single value.
+		animation->animationDistance = 0.0;
+		for (auto& distance : animation->frameDistances) {
+			animation->animationDistance += distance;
 		}
 		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loopFrames=%i, loop=%s):\n",
 			animationIndex,

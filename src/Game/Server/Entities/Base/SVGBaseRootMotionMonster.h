@@ -74,19 +74,25 @@ public:
 	const int32_t GetAnimationStateFrame( const EntityAnimationState *animationState );
 
 	/**
-	*	@brief	Sets the 'translate' vector to the value of the requested frame number 
-	*			'root bone's' translation
+	*	@brief	Sets the 'translate' vector to the value of the 'root bone's' requested frame number 
+	*			translation
 	*	@return	True if the 'translate' frame data exists. False otherwise.
 	**/
 	const bool GetAnimationFrameTranslate( const int32_t animationIndex, const int32_t animationFrame, vec3_t& rootBoneTranslation );
 	const bool GetAnimationFrameTranslate( const std::string &animationName, const int32_t animationFrame, vec3_t& rootBoneTranslation );
 	/**
-	*	@brief	Sets the 'distance' double to the value of the requested frame number 
-	*			'root bone's' translation distance. (vec3_dlength)
+	*	@brief	Sets the 'distance' double to the value of the 'root bones' requested frame number 
+	*			translation distance. (vec3_dlength)
 	*	@return	True if the 'distance' frame data exists. False otherwise.
 	**/
 	const bool GetAnimationFrameDistance( const int32_t animationIndex, const int32_t animationFrame, double &rootBoneDistance );
 	const bool GetAnimationFrameDistance( const std::string &animationName, const int32_t animationFrame, double &rootBoneDistance );
+	/**
+	*	@brief	Calculated the move speed of the root bone for the given 'moveDistance' and moveTranslate.
+	*	@return	Value of the calculated move speed.
+	**/
+	const double GetMoveSpeedForTranslatedDistance(const double &moveDistance, const vec3_t &moveTranslate, const double &unitScale = 1.0);
+
 
 	/**
 	*	@brief	Updates, and(if needed) switches to a new animation.
@@ -100,7 +106,7 @@ public:
 	/**
 	*	@brief
 	**/
-	const bool CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t indexA, const int32_t indexB );
+	const bool CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t wishedAnimationIndex );
 	/**
 	*	@brief
 	**/
@@ -211,8 +217,8 @@ private:
 	GameEntity* geGoalEntity = nullptr;
 
 protected:
-	//! Stores parsed targetname of said goal entity.
-	std::string strGoalEntity = "";
+	//! Stores parsed monster goal targetname.
+	std::string strMonsterGoalTarget = "";
 
 
 	/***

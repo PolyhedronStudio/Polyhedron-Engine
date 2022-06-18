@@ -746,7 +746,7 @@ static SGTraceResult RM_ScanStepDown_TraceForward( RootMotionMoveState* moveStat
 	// Get direction by normalizing velocity.
 	const vec3_t scanDirection = vec3_normalize( moveState->velocity );
 	// Get distance to scan ahead.
-	const float scanDistance = 16.f; // TODO: Get specified distance from moveState.
+	const float scanDistance = 18.f; // TODO: Get specified distance from moveState.
 	// Calculate the end point to trace into.
 	const vec3_t scanEndPoint = vec3_fmaf( moveState->origin, scanDistance, scanDirection );
 
@@ -875,7 +875,7 @@ static SGTraceResult RM_ScanStepUp_TraceForward( RootMotionMoveState* moveState 
 	// Get direction by normalizing velocity.
 	const vec3_t scanDirection = vec3_normalize( moveState->velocity );
 	// Get distance to scan ahead.
-	const float scanDistance = 18.f; // TODO: Get specified distance from moveState.
+	const float scanDistance = 24.f; // TODO: Get specified distance from moveState.
 	// Calculate the end point to trace into.
 	const vec3_t scanEndPoint = vec3_fmaf( moveState->origin, scanDistance, scanDirection );
 
@@ -966,7 +966,6 @@ const int32_t RM_ScanStepUp( RootMotionMoveState *moveState ) {
 	// Should never happen but...
 	return 0;
 }
-
 
 /***
 *
@@ -1062,7 +1061,7 @@ static const int32_t RM_SlideClipMove( RootMotionMoveState *moveState, const boo
 			// Try and step up the obstacle if we can: If we did, return with an additional SteppedUp flag set.
 			if (stepping && RM_StepUp_StepUp(moveState)) {
 				// Remove time?
-				moveState->remainingTime = 0.f;
+				//moveState->remainingTime = 0.f;
 				return moveResultMask | RootMotionMoveResult::SteppedUp;
 			} else {
 				// We hit something that we can't step up on: Add an addition WalLBlocked flag.
@@ -1131,19 +1130,21 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 	/**
 	*	#2: Add clipping planes from ground (if on-ground), and our own velocity.
 	**/
-	//if ( moveState->moveFlags & RootMotionMoveFlags::OnGround ) {
-	//	RM_AddClippingPlane( moveState, moveState->groundTrace.plane.normal );
-	//}
+	// If the velocity is too small, just stop.
+	if( vec3_dlength( moveState->velocity ) < 0.00001f) {// ROOTMOTION_MOVE_STOP_EPSILON ) {
+		SG_Physics_PrintWarning("TEH VELOCITY = " + std::to_string(vec3_dlength(moveState->velocity)) + "\n");
 
-	// Also don't turn against our original velocity.
-	//RM_AddClippingPlane( moveState, moveState->velocity );
-
-	//// If the velocity is too small, just stop.
-	//if( vec3_length( moveState->velocity ) < 0.01f) {// ROOTMOTION_MOVE_STOP_EPSILON ) {
-	//	// Zero out its velocity.
-	//	moveState->velocity = vec3_zero();
-	//	moveState->remainingTime = 0;
-	//	return 0;
+		// Zero out its velocity.
+		moveState->velocity = vec3_zero();
+		moveState->remainingTime = 0;
+		return 0;
+	}
+			
+	// Check for up steps.
+	int32_t scanResultMask = 0;
+	//int32_t scanResultMask = RM_ScanStepDown( moveState );
+	//if ( !scanResultMask ) {
+	//	scanResultMask = RM_ScanStepUp( moveState );
 	//}
 
 	/**
@@ -1184,16 +1185,18 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 			return moveResultMask;
 		}
 
-		// Update the last validOrigin to the current moveState origin.
+		// Update the last 'valid' origin and velocity to their respective new values.
 		lastValidOrigin = moveState->origin;
+		lastValidVelocity = moveState->velocity;
 
-		if ( (slideMoveResultMask & RootMotionMoveResult::SteppedEdge) ||
-				( slideMoveResultMask & RootMotionMoveResult::SteppedDown )
-				|| ( slideMoveResultMask & RootMotionMoveResult::SteppedUp ) 
-			) 
-		{
-			continue;
-		}
+
+		//if ( (slideMoveResultMask & RootMotionMoveResult::SteppedEdge) //||
+		//	//	( slideMoveResultMask & RootMotionMoveResult::SteppedDown )
+		//		//|| ( slideMoveResultMask & RootMotionMoveResult::SteppedUp ) 
+		//	) 
+		//{
+		//	continue;
+		//}
 
 		// Touched a plane, re-clip velocity and retry.
 		if( slideMoveResultMask & RootMotionMoveResult::PlaneTouched ) {
@@ -1222,310 +1225,282 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 	
 	// Categorize our position.
 	RM_CategorizePosition( moveState );
-		
-	// Check for up steps.
-	int32_t scanResultMask = RM_ScanStepDown( moveState );
-	if ( !scanResultMask ) {
-		scanResultMask = RM_ScanStepUp( moveState );
-	}
-	//moveResultMask |= RM_ScanStepUp(moveState);
-	//// See if there is any step down ahead.
-	//moveResultMask |= RM_ScanStepDown( moveState );
-
-		
-
 
 	/**
 	*	#: DONE! Return the results, at last.
 	**/
-	return moveResultMask | scanResultMask;
+	return moveResultMask;
 }
 
-
-
-
-//void RootMotionMove_FixCheckBottom( GameEntity *geCheck ) {
-//	geCheck->SetFlags( geCheck->GetFlags() | EntityFlags::PartiallyOnGround );
-//}
-//#define STEPSIZE 18
-//const bool RootMotionMove_CheckBottom( RootMotionMoveState *moveState ) {
-//	// Get the moveEntity.
-//	SGGameWorld *gameWorld = GetGameWorld();
-//	GameEntity *geCheck = SGGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( moveState->moveEntityNumber ) );
-//	
-//	//vec3_t	mins, maxs, start, stop;
-//	SGTraceResult trace;
-//	int32_t 		x, y;
-//	float	mid, bottom;
-//
-//	const vec3_t origin = moveState->origin;
-//	vec3_t mins = origin + moveState->mins;
-//	vec3_t maxs = origin + moveState->maxs;
-//	
-//	// if all of the points under the corners are solid world, don't bother
-//	// with the tougher checks
-//	// the corners must be within 16 of the midpoint
-//	vec3_t start, stop;
-//
-//	start[2] = mins[2] - 1;
-//	for	(x=0 ; x<=1 ; x++)
-//		for	(y=0 ; y<=1 ; y++)
-//		{
-//			start[0] = x ? maxs[0] : mins[0];
-//			start[1] = y ? maxs[1] : mins[1];
-//			if (RM_PointContents (start) != BrushContents::Solid) {
-//				goto realcheck;
-//			}
-//		}
-//
-//	return true;		// we got out easy
-//
-//realcheck:
-//	//
-//	// check it for real...
-//	//
-//	start[2] = mins[2];
-//	
-//	// the midpoint must be within 16 of the bottom
-//	start[0] = stop[0] = (mins[0] + maxs[0])*0.5;
-//	start[1] = stop[1] = (mins[1] + maxs[1])*0.5;
-//	stop[2] = start[2] - 2*STEPSIZE;
-//	trace = SG_Trace (start, vec3_zero(), vec3_zero(), stop, geCheck, BrushContentsMask::MonsterSolid);
-//
-//	if (trace.fraction == 1.0) {
-//		return false;
-//	}
-//	mid = bottom = trace.endPosition[2];
-//	
-//	// the corners must be within 16 of the midpoint	
-//	for	(x=0 ; x<=1 ; x++)
-//		for	(y=0 ; y<=1 ; y++)
-//		{
-//			start[0] = stop[0] = x ? maxs[0] : mins[0];
-//			start[1] = stop[1] = y ? maxs[1] : mins[1];
-//			
-//			trace = SG_Trace (start, vec3_zero(), vec3_zero(), stop, geCheck, BrushContentsMask::MonsterSolid);
-//			
-//			if (trace.fraction != 1.0 && trace.endPosition[2] > bottom)
-//				bottom = trace.endPosition[2];
-//			if (trace.fraction == 1.0 || mid - trace.endPosition[2] > STEPSIZE)
-//				return false;
-//		}
-//
-//	return true;
-//}
-
-
+///***
+//*
+//*
+//*	RootMotionMove 'Clip Moving'.
+//*
+//*
+//***/
 ///**
-//*	@brief	Handles checking whether an entity can step up a brush or not. (Or entity, of course.)
-//*	@return	True if the move stepped up.
+//*	@brief	Performs the move, adding its colliding plane(s) to our clipping last.
 //**/
-//static const int32_t RM_SlideClipMove( RootMotionMoveState *moveState, const bool stepping );
-//static bool RM_StepUp( RootMotionMoveState *moveState ) {
-//    // Store pre-move parameters
-//    const vec3_t org0 = moveState->origin;
-//    const vec3_t vel0 = moveState->velocity;
+//static const int32_t RM_SlideClipMove( RootMotionMoveState *moveState, const bool stepping ) {
+//	// Returned containing all move flags that were set during this move.
+//	int32_t moveResultMask = 0;
+//	// Calculate the wished for move end position.
+//	const vec3_t endPosition = vec3_fmaf( moveState->origin, moveState->remainingTime, moveState->velocity );
+//	// Trace the move.
+//	SGTraceResult traceResult = RM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &endPosition );
+//	
+//	// When this happens, chances are you got a shitty day coming up.
+//	if( traceResult.allSolid ) {
+//		// Add the entity trapping us to our touch list.
+//		if( traceResult.gameEntity ) {
+//			// Touched an other entity.
+//			RM_AddTouchEntity( moveState, traceResult.gameEntity );
+//		}
 //
-//	// Slide move, but skip stair testing the plane that we skipped by calling into this function.
-//	RM_SlideClipMove( moveState, false );
+//		// Notify we're trapped.
+//		moveResultMask |= RootMotionMoveResult::Trapped;
+//		return moveResultMask;
+//	}
 //
-//	/**
-//	*	Step Down.
-//	**/
-//	// Get GameWorld.
-//	SGGameWorld	*gameWorld		= GetGameWorld();
-//	// Get ground entity.
-//	GameEntity	*geGroundEntity	= SGGameWorld::ValidateEntity(gameWorld->GetPODEntityByIndex(moveState->groundEntityNumber));
-//	// Get Skip Entity for trace testing.
-//	GameEntity	*geSkip			= SGGameWorld::ValidateEntity(gameWorld->GetPODEntityByIndex(moveState->skipEntityNumber));
+//	// This move had no obstalces getting in its way, however...
+//	if( traceResult.fraction == 1.0f ) {
+//		// Move ourselves, and see whether we are moving onto a step, or off an edge.
+//		moveState->origin = traceResult.endPosition;
 //
-//	// See if we should step down.
-//	if ( geGroundEntity && moveState->velocity.z <= 0.1f ) {
-//		// Trace downwards.
-//		const vec3_t down = vec3_fmaf( org0 , ROOTMOTION_MOVE_STEP_HEIGHT + ROOTMOTION_MOVE_GROUND_DISTANCE, vec3_down( ) );
-//		const SGTraceResult downTrace = SG_Trace(org0, moveState->mins, moveState->maxs, down, geSkip, moveState->contentMask );
+//		// Test for Step/Edge if requested.
+//		const int32_t edgeStepMask = ( stepping == true ? RM_StepDown_StepEdge( moveState) : 0 );
 //
-//		// Check if we should step down or not.
-//		if ( !downTrace.allSolid ) {
-//			// Check if it is a legitimate stair case.
-//			if (downTrace.podEntity && !(downTrace.plane.normal.z >= ROOTMOTION_MOVE_STEP_NORMAL) ) {
-//				moveState->origin = downTrace.endPosition;
+//		// Stepping solution:
+//		if ( stepping && edgeStepMask != 0) {
+//			// Revert move origin.
+//			//moveState->origin = traceResult.endPositio
+//			// If we are edge moving, revert move and clip to normal?
+//			if ( edgeStepMask & RootMotionMoveResult::SteppedEdge ) {
+//				//moveState->origin = moveState->originalOrigin;
+//				// Keep our velocity, and clip it to our directional normal.
+//				//const vec3_t direction = 
+//			} else {
+//				//	moveState->origin = traceResult.endPosition;
 //			}
+//
+//			// Move all the way.
+//			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );	
+//			// Subtract remaining time.
+//			//moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );	
+//
+//			return moveResultMask | edgeStepMask;
+//		// Non stepping solution:
+//		} else {
+//			// Flawless move: Set new origin.
+//			moveState->origin = traceResult.endPosition;
+//			// Subtract remaining time.
+//			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );	
+//			// Return moveResultMask with an addition Moved flag.
+//			return moveResultMask | RootMotionMoveResult::Moved;
 //		}
 //	}
 //
+//	// Wasn't able to make the full move.
+//	if( traceResult.fraction < 1.0f ) {
+//		// Add the touched entity to our list of touched entities.
+//		const int32_t entityNumber = RM_AddTouchEntity( moveState, traceResult.gameEntity );
+//		
+//		// -1 = invalid, 0 = world entity, anything above is a legit touchable entity.
+//		if (entityNumber > 0) {
+//			moveResultMask |= RootMotionMoveResult::EntityTouched;
+//		}
+//
+//		// Add a specific flag to our moveResultMask stating we bumped into something.
+//		moveResultMask |= RootMotionMoveResult::PlaneTouched;
+//
+//		// Move up covered fraction which is up till the trace result's endPosition.
+//		if( traceResult.fraction > 0.0 ) {
+//			moveState->origin = traceResult.endPosition;
+//			moveState->remainingTime -= ( traceResult.fraction * moveState->remainingTime );
+//			moveResultMask |= RootMotionMoveResult::Moved;
+//		}
+//
+//		// If we bumped into a non walkable plane(We'll consider it to be a wall.), try end up on top of it.
+//		if( !IsWalkablePlane( traceResult.plane ) ) {
+//			// Try and step up the obstacle if we can: If we did, return with an additional SteppedUp flag set.
+//			if (stepping && RM_StepUp_StepUp(moveState)) {
+//				// Remove time?
+//				//moveState->remainingTime = 0.f;
+//				return moveResultMask | RootMotionMoveResult::SteppedUp;
+//			} else {
+//				// We hit something that we can't step up on: Add an addition WalLBlocked flag.
+//				moveResultMask |= RootMotionMoveResult::WallBlocked;
+//			}
+//		}
+//
+//		// We never had a move without conflict, and failed to step up the conflicting plane:
+//		// Add the resulting hit-traced plane normal to clipping plane list:
+//		RM_AddClippingPlane( moveState, traceResult.plane.normal );
+//	}
+//
+//	return moveResultMask;
+//}
+//
+//
+//
+///***
+//*
+//*
+//*	RootMotionMove Public API.
+//*
+//*
+//***/
+///**
+//*	@brief	Executes a Root Motion Move for the current moveState by clipping its velocity to the touching plane' normals.
+//*	@return	An int32_t containing the move result mask ( RootMotionMoveResult Flags )
+//**/
+//int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
+//	/**
+//	*	#0: Prepare the move.
+//	**/
+//	//! Maximum amount of planes to clip against.
+//	static constexpr int32_t MAX_CLIP_PLANES = 20;
+//	//! Maximum Root Motion Move attempt's we're about to try.
+//	static constexpr int32_t MAX_ROOTMOTION_MOVE_ATTEMPTS = MAX_CLIP_PLANES - 2;
+//	//! The final resulting move result mask of this slide move.
+//	int32_t moveResultMask = 0;
+//
+//	// Store the original Origin and Velocity for Sliding and possible reversion.
+//	const vec3_t originalOrigin		= moveState->origin;
+//	const vec3_t originalVelocity	= moveState->velocity;
+//
+//	// The 'last valid' origin and velocity, they are set after each valid slide attempt.
+//	vec3_t lastValidOrigin		= moveState->origin;
+//	vec3_t lastValidVelocity	= moveState->velocity;
+//
+//	// Clear clipping planes.
+//	RM_ClearClippingPlanes( moveState );
+//	// Clear touched entities.
+//	RM_ClearTouchEntities( moveState );
+//
 //
 //	/**
-//	*	Step Over.
+//	*	#1: Check, update and if need be correct the current move state before moving.
 //	**/
-//    // If we are blocked, we will try to step over the obstacle.
-//    const vec3_t org1 = moveState->origin;
-//    const vec3_t vel1 = moveState->velocity;
-//
-//    const vec3_t up = vec3_fmaf( org1, ROOTMOTION_MOVE_STEP_HEIGHT, vec3_up() );
-//    const SGTraceResult upTrace = SG_Trace( org1, moveState->mins, moveState->maxs, up, geSkip, moveState->contentMask );
-//
-//    if ( !upTrace.allSolid ) {
-//        // Step from the higher position, with the original velocity
-//        moveState->origin = upTrace.endPosition;
-//        moveState->velocity = vel0;
-//
-//		// Slide move, but skip stair testing the plane that we skipped by calling into this function.
-//		RM_SlideClipMove( moveState, true );
-//
-//		/**
-//		*	Settle to Ground.
-//		**/
-//        // Settle to the new ground, keeping the step if and only if it was successful
-//        const vec3_t down = vec3_fmaf( moveState->origin, ROOTMOTION_MOVE_STEP_HEIGHT + ROOTMOTION_MOVE_GROUND_DISTANCE, vec3_down() );
-//        const SGTraceResult downTrace = SG_Trace( moveState->origin, moveState->mins, moveState->maxs, down, geSkip, moveState->contentMask );
-//
-//        if ( !downTrace.allSolid && downTrace.plane.normal.z >= ROOTMOTION_MOVE_STEP_NORMAL ) { //ROOTMOTION_MOVE_CheckStep(&downTrace)) {
-//            // Quake2 trick jump secret sauce
-////#if 0     
-//			//SGGameWorld *gameWorld = GetGameWorld();
-//			//GameEntity *geGroundEntity = SGGameWorld::ValidateEntity(gameWorld->GetPODEntityByIndex(moveState->groundEntityNumber));
-//			//if ( (geGroundEntity) || vel0.z < ROOTMOTION_MOVE_SPEED_UP ) {
-////#endif
-//				//if ( !RootMotionMove_CheckBottom( moveState ) ) {
-//					// Yeah... I knwo.
-//					moveState->origin = downTrace.endPosition;
-//					moveState->velocity = vel1;
-//					if (geGroundEntity) {
-//						moveState->groundEntityNumber = geGroundEntity->GetNumber();
-//						moveState->groundEntityLinkCount = geGroundEntity->GetLinkCount();
-//					}
-//				//}
-//				// Calculate step height.
-//				//moveState->stepHeight = moveState->origin.z - moveState-> 
-////#if 0
-//			//} else {
-//			//	//// Set it back?
-//   // //            moveState->origin = org0;
-//			//	//moveState->velocity = vel0;
-//			//	//return false;
-//			//	//pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
-//   //         }
-////#endif
-//			return true;
-//		}
-//    }
+//	// Update Move Flags.
+//	RM_RefreshMoveFlags( moveState );
 //	
-//	// Save end results.
-//    moveState->origin = org1;
-//    moveState->velocity = vel1;
+//	// Update Move Flags Time.
+//	RM_RefreshMoveFlagsTime( moveState);
 //
-//	return false;
-//}
-
-
-
-
-//		{
-//			/**
-//			*	#0: Store previousGroundTrace reference and trace to new ground.
-//			**/
-//			// Get a reference to our previous ground trace.
-//			SGTraceResult	&previousGroundTrace		= moveState->groundTrace;
+//	// Check for ground.
+//	RM_CheckGround( moveState );
 //
-//			// Trace for the current remainingTime, by MA-ing the move velocity.
-//			const vec3_t	endPosition				= vec3_fmaf( moveState->origin, ROOTMOTION_MOVE_STEP_HEIGHT + ROOTMOTION_MOVE_GROUND_DISTANCE, vec3_down() );
-//			SGTraceResult	newGroundTraceResult	= SG_Trace( moveState->origin, moveState->mins, moveState->maxs, endPosition, geSkip, moveState->contentMask );
+//	/**
+//	*	#2: Add clipping planes from ground (if on-ground), and our own velocity.
+//	**/
+//	//if ( moveState->moveFlags & RootMotionMoveFlags::OnGround ) {
+//	//	RM_AddClippingPlane( moveState, moveState->groundTrace.plane.normal );
+//	//}
 //
-//			/**
-//			*	#1: Get and Validate Ground Game Entities. Check and store if they differed.
-//			**/
-//			// Validate both ground entities, previous and new.
-//			GameEntity *gePreviousGround		= previousGroundTrace.gameEntity;
-//			GameEntity *geNewGround				= newGroundTraceResult.gameEntity;
-//			GameEntity *geValidPreviousGround	= (gePreviousGround ? SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( gePreviousGround->GetNumber() ) ) : nullptr);
-//			GameEntity *geValidNewGround		= (geNewGround ? SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( geNewGround->GetNumber() ) ) : nullptr);
+//	// Also don't turn against our original velocity.
+//	//RM_AddClippingPlane( moveState, moveState->velocity );
 //
-//			// If their numbers differ, it means we got new ground to step down to.
-//			bool newGroundEntity = false;
+//	//// If the velocity is too small, just stop.
+//	//if( vec3_length( moveState->velocity ) < 0.01f) {// ROOTMOTION_MOVE_STOP_EPSILON ) {
+//	//	// Zero out its velocity.
+//	//	moveState->velocity = vec3_zero();
+//	//	moveState->remainingTime = 0;
+//	//	return 0;
+//	//}
+//			
+//	// Check for up steps.
+//	int32_t scanResultMask = RM_ScanStepDown( moveState );
+//	if ( !scanResultMask ) {
+//		scanResultMask = RM_ScanStepUp( moveState );
+//	}
+//	/**
+//	*	#3: Start moving by clipping velocities to all planes we touch.
+//	**/
+//	for( int32_t count = 0; count < MAX_ROOTMOTION_MOVE_ATTEMPTS; count++ ) {
+//		// Get the original velocity and clip it to all the planes we got in the list.
+//		moveState->velocity = originalVelocity;
 //
-//			if ( ( geValidPreviousGround && geValidNewGround ) && ( geValidPreviousGround->GetNumber() != geValidNewGround->GetNumber() ) ) {
-//				newGroundEntity = true;
-//			}
+//		// Clip the velocity to the current list of clipping planes.
+//		RM_ClipVelocityToClippingPlanes( moveState );
 //
-//			if ( moveState->groundEntityNumber != -1 && !RootMotionMove_CheckBottom( moveState ) ) {
-//				
+//		// Retreive resulting move result mask from performing a slide clip move with 'stepping' logic enabled.
+//		const bool enableStepping = true;
+//		const int32_t slideMoveResultMask = RM_SlideClipMove(moveState, enableStepping);
+//		
+//		// Add the slide move result mask to our move result mask.
+//		moveResultMask |= slideMoveResultMask;
 //
-//float movedDistance		 = 0.f;
-//float wishedDistance	= 0.f;
-//const vec3_t normalizedDirection = vec3_normalize_length( oldOrigin - slideTraceEnd, wishedDistance );
-//const vec3_t negatedNormal = vec3_negate( normalizedDirection );
-//const vec3_t normalizedDirectionx = vec3_normalize_length( oldOrigin - moveState->origin, movedDistance);
-//
-//				moveState->velocity = vec3_cross( moveState->velocity, negatedNormal );
-//				moveState->remainingTime = (moveState->remainingTime / wishedDistance) * movedDistance;
-//					//RM_AddClippingPlane( moveState, negatedNormal );
-//				moveState->entityFlags |= EntityFlags::PartiallyOnGround;
-//				return moveResultMask |= RootMotionMoveResult::SteppedEdge;
-//			}
-//			/**
-//			*	#3: Test for the new ground to see if we should step on it.
-//			**/
-//			if (newGroundEntity || newGroundTraceResult.plane.dist != previousGroundTrace.plane.dist) {
-//				// We've got new ground. See if it's a walkable plane.
-//				if ( IsWalkablePlane( newGroundTraceResult.plane ) ) {
-//					// Subtract total fraction of remaining time.
-//					moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
-//
-//					// Step down to it.
-//					moveState->origin = newGroundTraceResult.endPosition;
-//
-//					// Make sure to store the new ground entity information.
-//					moveState->groundTrace = newGroundTraceResult;
-//
-//					// Update the entity number and aspect.
-//					if (geNewGround) {
-//						moveState->groundEntityNumber		= geValidNewGround->GetNumber();
-//						moveState->groundEntityLinkCount	= geValidNewGround->GetLinkCount();
-//					} else {
-//						moveState->groundEntityNumber		= -1;
-//						moveState->groundEntityLinkCount	= 0;
-//					}
-//
-//					// Add RootMotionMoveResult::SteppedDown flag to our moveResultMask and return.
-//					return moveResultMask | RootMotionMoveResult::SteppedDown | RootMotionMoveResult::Moved;
-//				} else {
-//					// Since we're being blocked by an edge, meaning:
-//					// "An empty space, something we can't "realistically" step down to."
-//					//
-//					// We take the direction normal we are moving into, and add that as a 
-//					// "fake" clipping plane.
-//
-//					// Get the length, of the total wished for distance to move.
-//	//				float movedDistance = 0.f;
-//	//				const vec3_t normalizedDirection = vec3_normalize_length( oldOrigin - slideTraceEnd, movedDistance );
-//	//				const vec3_t negatedNormal = vec3_negate( normalizedDirection );
-//
-//	//				// Adjust origin back to old.
-//	//				//moveState->origin = oldOrigin;
-//	//				//moveState->velocity = RM_ClipVelocity( moveState->velocity, negatedNormal, moveState->slideBounce );
-//
-//	//				// Adjust move time to the fraction of what we've moved.
-//	//				moveState->remainingTime -= ( (movedDistance / moveState->remainingTime) * moveState->remainingTime );
-//
-//	//				// Get direction of the trace.
-//	////				const vec3_t directionNormal = vec3_negate( vec3_normalize( oldOrigin - slideTraceEnd ) );
-//
-//	//				// If we've reached this point, it's clear this is one of our planes to clip against.
-//	//				RM_AddClippingPlane( moveState, negatedNormal );
-//
-//	//				std::string debugstr = "Edge Clipped to plane normal: ";
-//	//				debugstr += std::to_string(normalizedDirection.x) + " ";
-//	//				debugstr += std::to_string(normalizedDirection.y) + " ";
-//	//				debugstr += std::to_string(normalizedDirection.z) + " \n";
-//	//				SG_Physics_PrintWarning(debugstr);
-//					// Add RootMotionMoveResult::SteppedEdge mask flag.
-//					//return moveResultMask |= RootMotionMoveResult::SteppedEdge;
-//					//// Calculate remaining time.
-//					//moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
-//				}
-//			} else {
-//				// Subtract total fraction of remaining time.
-//				moveState->remainingTime -= ( slideTrace.fraction * moveState->remainingTime );
-//			}
+//		// Debugging for being trapped.
+//		#ifdef SG_ROOTMOTION_MOVE_DEBUG_TRAPPED_MOVES
+//		SGTraceResult traceResult = RM_Trace( moveState, &moveState->origin, &moveState->mins, &moveState->maxs, &moveState->origin );
+//		if( traceResult.startSolid ) {
+//			SG_Physics_PrintWarning( std::string(__func__) + "RootMotionMoveResult::Trapped" );
 //		}
+//		#endif
+//
+//		// Can't continue.
+//		if( moveResultMask & RootMotionMoveResult::Trapped ) {
+//			// Move is invalid, unset remaining time.
+//			moveState->remainingTime = 0.0f;
+//
+//			// Copy back in the last valid origin we had, because the move had failed.
+//			moveState->origin = lastValidOrigin;
+//			
+//			// Break out of the loop and finish the move.
+//			//moveResultMask |= slideMoveResultMask;
+//			return moveResultMask;
+//		}
+//
+//		// Update the last validOrigin to the current moveState origin.
+//		lastValidOrigin = moveState->origin;
+//
+//		if ( (slideMoveResultMask & RootMotionMoveResult::SteppedEdge) //||
+//			//	( slideMoveResultMask & RootMotionMoveResult::SteppedDown )
+//				//|| ( slideMoveResultMask & RootMotionMoveResult::SteppedUp ) 
+//			) 
+//		{
+//			continue;
+//		}
+//
+//		// Touched a plane, re-clip velocity and retry.
+//		if( slideMoveResultMask & RootMotionMoveResult::PlaneTouched ) {
+//			//moveResultMask &= ~RootMotionMoveResult::PlaneTouched;
+//			continue;
+//		}
+//		// Touched an entity, re-clip velocity and retry.
+//		if( slideMoveResultMask & RootMotionMoveResult::EntityTouched ) {
+//			//moveResultMask &= ~RootMotionMoveResult::PlaneTouched;
+//			continue;
+//		}
+//
+//		// If it didn't touch anything the move should be completed
+//		if( moveState->remainingTime > 0.0f ) {
+//			SG_Physics_PrintWarning( std::string(__func__) + "Slidemove finished with remaining time" );
+//			moveState->remainingTime = 0.0f;
+//		}
+//		break;
+//	}	
+//	
+//	/**
+//	*	#4: Done moving, check for ground, and 'categorize' our position.
+//	**/
+//	// Once again, check for ground.
+//	RM_CheckGround( moveState );
+//	
+//	// Categorize our position.
+//	RM_CategorizePosition( moveState );
+//
+//	//moveResultMask |= RM_ScanStepUp(moveState);
+//	//// See if there is any step down ahead.
+//	//moveResultMask |= RM_ScanStepDown( moveState );
+//
+//		
+//
+//
+//	/**
+//	*	#: DONE! Return the results, at last.
+//	**/
+//	return moveResultMask | scanResultMask;
+//}

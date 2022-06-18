@@ -96,10 +96,26 @@ struct SkeletalAnimation {
 	/**
 	*	Physical Properties.
 	**/
+	//! The sum of total distance travelled by the root bone per frame.
+	double animationDistance = 0.0;
 	//! The total distances travelled by the root bone per frame.
 	std::vector<double> frameDistances;
 	//! The translates of root bone per frame.
 	std::vector<vec3_t> frameTranslates;
+	//! Root Bone Axis Flags. 
+	struct RootBoneAxisFlags {
+		//! When generating the poses it'll zero out the X axis of the root bone's translation vector.
+		static constexpr int32_t ZeroXTranslation = (1 << 1);
+		//! When generating the poses it'll zero out the Y axis of the root bone's translation vector.
+		static constexpr int32_t ZeroYTranslation = (1 << 2);
+		//! When generating the poses it'll zero out the Z axis of the root bone's translation vector.
+		static constexpr int32_t ZeroZTranslation = (1 << 3);
+
+		//! The default is to only zero out X and Y for the root motion system.
+		static constexpr int32_t DefaultTranslationMask = (ZeroXTranslation | ZeroYTranslation);
+	};
+	//! Tells the skeletal animation system how to treat our root bone for this animation.
+	int32_t rootBoneAxisFlags = RootBoneAxisFlags::DefaultTranslationMask;
 };
 
 /**

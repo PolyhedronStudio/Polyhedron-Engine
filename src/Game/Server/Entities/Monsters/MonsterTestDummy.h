@@ -88,5 +88,5 @@ public:
     //void MonsterTestBoxExplode(void);
 
 private:
-
+	int32_t animationToSwitchTo = 0;
 };

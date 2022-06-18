@@ -128,9 +128,13 @@ const int32_t SVGBaseRootMotionMonster::GetAnimationStateFrame( const EntityAnim
 	const int32_t animationFrame = animationState->frame;
 
 	// We need to be careful, if an animation has passed its end-frame at the
-	// current moment in time, it's index is set to -1. So take that into account.
+	// current moment in time, it's index is set to -1. We ensure to return the end frame for
+	// proper logic use.
 	if (animationFrame == -1) {
 		// TODO: gi.DPrintf("");
+		std::string errstr= __func__;
+		errstr+= ": error: animationFrame=" + std::to_string(animationFrame) + "\n";
+		SVG_DPrint(errstr);
 		return -1;
 	}
 
@@ -141,8 +145,8 @@ const int32_t SVGBaseRootMotionMonster::GetAnimationStateFrame( const EntityAnim
 }
 
 /**
-*	@brief	Sets the 'translate' vector to the value of the requested frame number 
-*			'root bone's' translation
+*	@brief	Sets the 'translate' vector to the value of the 'root bone's' requested frame number 
+*			translation
 *	@return	True if the 'translate' frame data exists. False otherwise.
 **/
 const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t animationIndex, const int32_t animationFrame, vec3_t& rootBoneTranslation ) {
@@ -169,7 +173,6 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t a
 
 	// Ensure the frame is within bounds of the pre-calculated translates.
 	if ( animationFrame < 0 || animationFrame >= frameTranslates.size() ) {
-		// TODO: gi.DPrintf(..)
 		rootBoneTranslation = vec3_zero();
 		return false;
 	} else {
@@ -196,8 +199,8 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const std::stri
 	return GetAnimationFrameTranslate( animationName, animationFrame, rootBoneTranslation );
 }
 /**
-*	@brief	Sets the 'distance' double to the value of the requested frame number 
-*			'root bone's' translation distance. (vec3_dlength)
+*	@brief	Sets the 'distance' double to the value of the 'root bones' requested frame number 
+*			translation distance. (vec3_dlength)
 *	@return	True if the 'distance' frame data exists. False otherwise.
 **/
 const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const int32_t animationIndex, const int32_t animationFrame, double &rootBoneDistance ) {
@@ -251,6 +254,19 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const std::strin
 	return GetAnimationFrameDistance( animationName, animationFrame, rootBoneDistance );
 }
 
+/**
+*	@brief	Calculated the move speed of the root bone for the given 'moveDistance' and moveTranslate.
+*	@return	Value of the calculated move speed.
+**/
+const double SVGBaseRootMotionMonster::GetMoveSpeedForTranslatedDistance(const double &moveDistance, const vec3_t &moveTranslate, const double &unitScale) {
+	// Calculate move distance scaled to Quake units.
+	const double scaledMoveDistance = unitScale * moveDistance;
+
+	// Calculate move speed.
+	return scaledMoveDistance / vec3_dlength(moveTranslate);
+}
+
+
 // TODO: Add in class or so, whatever, but not here.
 // Also this function might just better accept an animationstate...
 const bool SVGBaseRootMotionMonster::AnimationFinished( const EntityAnimationState *animationState ) {
@@ -272,8 +288,8 @@ const bool SVGBaseRootMotionMonster::AnimationFinished( const EntityAnimationSta
 }
 // Returns true if we should switch. Does a check if the other animation has finished playing before actually performing the switch.
 // It stores the animation to switch to, ensuring that next time we call it might give us a GO.
-const bool SVGBaseRootMotionMonster::CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t indexA, const int32_t indexB ) {
-	if ( indexA != indexB ) {
+const bool SVGBaseRootMotionMonster::CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t wishedAnimationIndex ) {
+	if ( animationState->animationIndex != wishedAnimationIndex ) {
 		if ( AnimationFinished( animationState ) ) {
 			return true;
 		}
@@ -329,114 +345,114 @@ const bool SVGBaseRootMotionMonster::HasExoticMoveResults( const int32_t results
 *			
 **/
 void SVGBaseRootMotionMonster::RefreshAnimationState() {
-	// Get current animation state.
-	const EntityAnimationState *currentAnimationState = GetCurrentAnimationState();
-	
-	// Re-explain: current = what we got
-	// new = what we set it to
-	// 
-	int32_t currentAnimationIndex	= currentAnimationState->animationIndex;
-	int32_t newAnimationIndex		= 0;
-	
-	// Get the frame and end frame.
-	const int32_t animationEndFrame	= currentAnimationState->endFrame;
-	const int32_t animationFrame	= currentAnimationState->frame;
-
-	// Are we coming from an animation that just finished last frame?
-	const bool animationFinished	= AnimationFinished( currentAnimationState );
-	// Gather animation indexes. TODO: Don't look these up constantly, that's bothersome.
-	// Walk.
-	const int32_t standardWalkIndex		= skm->animationMap["walk_standard"].index;
-	// Stairs Up
-	const int32_t walkStairsUpIndex		= skm->animationMap["run_stairs_up"].index;	// Yes, I am aware it is atm named run_stairs_up, sue me.
-	// Stairs Down.
-	const int32_t walkStairsDownIndex	= skm->animationMap["walk_stairs_down"].index;
-
-	// There's two things we need to take care of:
-	//		- Animations end playing, when they do, they either hit its end frame or reached
-	//		  a value of -1 due to it being time based. When this happens, we need to see
-	//		  if we should replay the animation or resort to walking/running.
-	//		- 
+	//// Get current animation state.
+	//const EntityAnimationState *currentAnimationState = GetCurrentAnimationState();
 	//
+	//// Re-explain: current = what we got
+	//// new = what we set it to
+	//// 
+	//int32_t currentAnimationIndex	= currentAnimationState->animationIndex;
+	//int32_t newAnimationIndex		= 0;
 	//
+	//// Get the frame and end frame.
+	//const int32_t animationEndFrame	= currentAnimationState->endFrame;
+	//const int32_t animationFrame	= currentAnimationState->frame;
+
+	//// Are we coming from an animation that just finished last frame?
+	//const bool animationFinished	= AnimationFinished( currentAnimationState );
+	//// Gather animation indexes. TODO: Don't look these up constantly, that's bothersome.
+	//// Walk.
+	//const int32_t standardWalkIndex		= skm->animationMap["walk_standard"].index;
+	//// Stairs Up
+	//const int32_t walkStairsUpIndex		= skm->animationMap["run_stairs_up"].index;	// Yes, I am aware it is atm named run_stairs_up, sue me.
+	//// Stairs Down.
+	//const int32_t walkStairsDownIndex	= skm->animationMap["walk_stairs_down"].index;
+
+	//// There's two things we need to take care of:
+	////		- Animations end playing, when they do, they either hit its end frame or reached
+	////		  a value of -1 due to it being time based. When this happens, we need to see
+	////		  if we should replay the animation or resort to walking/running.
+	////		- 
+	////
+	////
+	////
+
+	///**
+	//*	#0:	Gather information about if we are stepping, and if there are any
+	//*		steps ahead of us or not.
+	//**/
+	//// If we got no exotic move results, 
+	//bool hasExoticResults = HasExoticMoveResults( currentMoveResultMask );
 	//
+	//// Get step information for previous move results.
+	//bool previousStepUpAhead	= (previousMoveResultMask & RootMotionMoveResult::StepUpAhead);
+	//bool previousSteppedUp		= (previousMoveResultMask & RootMotionMoveResult::SteppedUp);
+	//bool previousStepDownAhead	= (previousMoveResultMask & RootMotionMoveResult::StepDownAhead);
+	//bool previousSteppedDown	= (previousMoveResultMask & RootMotionMoveResult::SteppedDown);
 
-	/**
-	*	#0:	Gather information about if we are stepping, and if there are any
-	*		steps ahead of us or not.
-	**/
-	// If we got no exotic move results, 
-	bool hasExoticResults = HasExoticMoveResults( currentMoveResultMask );
-	
-	// Get step information for previous move results.
-	bool previousStepUpAhead	= (previousMoveResultMask & RootMotionMoveResult::StepUpAhead);
-	bool previousSteppedUp		= (previousMoveResultMask & RootMotionMoveResult::SteppedUp);
-	bool previousStepDownAhead	= (previousMoveResultMask & RootMotionMoveResult::StepDownAhead);
-	bool previousSteppedDown	= (previousMoveResultMask & RootMotionMoveResult::SteppedDown);
+	//// Get step information for current move results.
+	//bool currentStepUpAhead		= (currentMoveResultMask & RootMotionMoveResult::StepUpAhead);
+	//bool currentSteppedUp		= (currentMoveResultMask & RootMotionMoveResult::SteppedUp);
+	//bool currentStepDownAhead	= (currentMoveResultMask & RootMotionMoveResult::StepDownAhead);
+	//bool currentSteppedDown		= (currentMoveResultMask & RootMotionMoveResult::SteppedDown);
 
-	// Get step information for current move results.
-	bool currentStepUpAhead		= (currentMoveResultMask & RootMotionMoveResult::StepUpAhead);
-	bool currentSteppedUp		= (currentMoveResultMask & RootMotionMoveResult::SteppedUp);
-	bool currentStepDownAhead	= (currentMoveResultMask & RootMotionMoveResult::StepDownAhead);
-	bool currentSteppedDown		= (currentMoveResultMask & RootMotionMoveResult::SteppedDown);
+	//// Are we playing stair animations at all?
+	//bool isAnimStairsDown	= ( currentAnimationIndex == walkStairsDownIndex ? true : false );
+	//bool isAnimStairsUp		= ( currentAnimationIndex == walkStairsUpIndex ? true : false  );
 
-	// Are we playing stair animations at all?
-	bool isAnimStairsDown	= ( currentAnimationIndex == walkStairsDownIndex ? true : false );
-	bool isAnimStairsUp		= ( currentAnimationIndex == walkStairsUpIndex ? true : false  );
+	//// Are we playing walk animation?
+	//bool isAnimWalking = ( currentAnimationIndex == standardWalkIndex ? true : false );
 
-	// Are we playing walk animation?
-	bool isAnimWalking = ( currentAnimationIndex == standardWalkIndex ? true : false );
+	///*if (currentAnimationIndex != standardWalkIndex) {
+	//	currentAnimationIndex = SwitchAnimation( "walk_standard" );
+	//}*/
 
-	/*if (currentAnimationIndex != standardWalkIndex) {
-		currentAnimationIndex = SwitchAnimation( "walk_standard" );
-	}*/
+	//// If we are playing walking animation.
+	///**
+	//*	#1: Stairs Down:
+	//**/	
+	//if ( ( currentStepDownAhead && currentSteppedDown ) ||
+	//	currentStepDownAhead ) {
+	//	// Only set it if:
+	//	// - A: We got no new animation set yet.
+	//	// - B: We aren't playing the animation already.
+	//	if ( !newAnimationIndex && !isAnimStairsDown ) {
+	//		newAnimationIndex = SwitchAnimation ("walk_stairs_down" );
+	//	}
+	//}
+	//// See if we are playing it, and if we are, whether we should prepare to cancel it.
+	//else if ( isAnimStairsDown ) {
+	//	 if ( !currentStepDownAhead && !currentSteppedDown ) {
+	//		if ( !newAnimationIndex ) {
+	//			if ( animationFinished && currentAnimationIndex != standardWalkIndex) {
+	//				newAnimationIndex = SwitchAnimation("walk_standard");
+	//			}
+	//		}
+	//	 }
+	//}
 
-	// If we are playing walking animation.
-	/**
-	*	#1: Stairs Down:
-	**/	
-	if ( ( currentStepDownAhead && currentSteppedDown ) ||
-		currentStepDownAhead ) {
-		// Only set it if:
-		// - A: We got no new animation set yet.
-		// - B: We aren't playing the animation already.
-		if ( !newAnimationIndex && !isAnimStairsDown ) {
-			newAnimationIndex = SwitchAnimation ("walk_stairs_down" );
-		}
-	}
-	// See if we are playing it, and if we are, whether we should prepare to cancel it.
-	else if ( isAnimStairsDown ) {
-		 if ( !currentStepDownAhead && !currentSteppedDown ) {
-			if ( !newAnimationIndex ) {
-				if ( animationFinished && currentAnimationIndex != standardWalkIndex) {
-					newAnimationIndex = SwitchAnimation("walk_standard");
-				}
-			}
-		 }
-	}
-
-	/**
-	*	#2: Stairs Up:
-	**/
-	// See if we should start playing stairs up.
-	if ( previousStepUpAhead && currentSteppedUp ) {
-		// Only set it if:
-		// - A: We got no new animation set yet.
-		// - B: We aren't playing the animation already.
-		if (!newAnimationIndex && !isAnimStairsUp) {
-			newAnimationIndex = SwitchAnimation ("run_stairs_up" );
-		}
-	}
-	// See if we are playing it, and if we are, whether we should prepare to cancel it.
-	else if ( isAnimStairsUp ) {
-		if ( !currentStepUpAhead && !currentSteppedUp ) {
-			if (!newAnimationIndex && !isAnimWalking) {
-				if (animationFinished && currentAnimationIndex != standardWalkIndex ) {
-					newAnimationIndex = SwitchAnimation("walk_standard");
-				}
-			}
-		}
-	}
+	///**
+	//*	#2: Stairs Up:
+	//**/
+	//// See if we should start playing stairs up.
+	//if ( previousStepUpAhead && currentSteppedUp ) {
+	//	// Only set it if:
+	//	// - A: We got no new animation set yet.
+	//	// - B: We aren't playing the animation already.
+	//	if (!newAnimationIndex && !isAnimStairsUp) {
+	//		newAnimationIndex = SwitchAnimation ("run_stairs_up" );
+	//	}
+	//}
+	//// See if we are playing it, and if we are, whether we should prepare to cancel it.
+	//else if ( isAnimStairsUp ) {
+	//	if ( !currentStepUpAhead && !currentSteppedUp ) {
+	//		if (!newAnimationIndex && !isAnimWalking) {
+	//			if (animationFinished && currentAnimationIndex != standardWalkIndex ) {
+	//				newAnimationIndex = SwitchAnimation("walk_standard");
+	//			}
+	//		}
+	//	}
+	//}
 
 
 	/**
@@ -999,36 +1015,71 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Get the animation frame we're at right now.
 	const int32_t animationFrame = GetAnimationStateFrame( animationState );
 
+	//
 	// Get the 'root bone' translation offset for this move's animation frame.
-	vec3_t moveTranslate = vec3_zero();
-	const bool frameHasTranslate = GetAnimationFrameTranslate( animationIndex, animationFrame, moveTranslate );
+	vec3_t frameTranslate = vec3_zero();
+	const bool frameHasTranslate = GetAnimationFrameTranslate( animationIndex, animationFrame, frameTranslate );
 	// Get the total move distance (vec3_length of a - b) for this animation move frame.
-	double moveDistance = 0.0;
-	const bool frameHasDistance	= GetAnimationFrameDistance( animationIndex, animationFrame, moveDistance );
+	double frameDistance = 0.0;
+	const bool frameHasDistance	= GetAnimationFrameDistance( animationIndex, animationFrame, frameDistance );
+	
+	// Calculate move speed. (The number 68.598419 comes from animation data itself
+	// and likely needs to be looked at and/or made a constant standard all over.)
+	static constexpr double rbFrameMoveUnitScale = 68.598419;
+	const double frameMoveSpeed = GetMoveSpeedForTranslatedDistance( frameDistance, frameTranslate, rbFrameMoveUnitScale );
+
+	// UGLY HACK
+	//double moveSpeed = 0.0;
+	//// Check if the animation index is valid.
+	//if ( !(animationIndex < 0 || animationIndex >= skm->animations.size() ) ) {
+	//	// Get our current animation state.
+	//	const EntityAnimationState *animationState = GetCurrentAnimationState();
+
+	//	// It is valid, get a hold of the animation data.
+	//	auto *animationData = skm->animations[animationIndex];
+
+	//	// Calculate move distance scaled to Quake units.
+	//	static constexpr double unitSize = 68.598419; // This is what it was scaled with in Blender, coming from Mixamo.
+	//	const double scaledMoveDistance = unitSize * moveDistance;
+
+	//	// Calculate move speed.
+	//	moveSpeed = scaledMoveDistance / vec3_dlength(moveTranslate);
+	//}
+	// END OF
 
 	/**
 	*	#3: Calculate the new MoveVelocity to use for this frame.
 	**/
-	// Move Speed is used as a multiplier on the small calculated velocity's.
-	const double moveSpeed = GetMoveSpeed();
 	// Get the current velocity stored as "oldVelocity".
 	const vec3_t oldVelocity = GetVelocity();
-	// Normalize the direction vector.
-	const vec3_t normalizedDir = vec3_normalize(direction);
 
-	// Create our move distance vector and multiply by moveSpeed
-	const vec3_t vDistance = { (float)(moveSpeed * moveDistance), (float)(moveSpeed * moveDistance), 0.f };
-	// Ignore the Z translation, it might get us "stuck" after all.
-	const vec3_t vTranslate = vec3_t { moveTranslate.x, moveTranslate.y, 0.f };
+
+	// Normalize the direction vector.
+	const vec3_t vNormalizedDirection = vec3_normalize( direction );
 	// Get ourselves a normalized direction without Z.
-	const vec3_t vDirection = vec3_t { normalizedDir.x, normalizedDir.y, 0.f };
+	const vec3_t vDirectionXY	= vec3_t { vNormalizedDirection.x, vNormalizedDirection.y, 0.f };
+	// Create our move's distance vector by setting its x and y to the rbFrameMoveSpeed (Meaning we got the distance to travel per frame.)
+	const vec3_t vDistance		= vec3_t { (float)( frameMoveSpeed ), (float)( frameMoveSpeed ), 0.f } * vDirectionXY;
+	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
+	const vec3_t vTranslate		= vec3_t { -frameTranslate.x, -frameTranslate.y, 0.f } * vDirectionXY;
+
 	// Calculate the total moveVelocity into the normal's direction.
-	vec3_t moveVelocity = (vDistance + vTranslate) * vDirection;
+	vec3_t moveVelocity = vDistance + vTranslate;
 	// Last but not least, we want to maintain our old Z velocity.
 	moveVelocity.z = oldVelocity.z;
 	// And let's go!.
 	SetVelocity(moveVelocity);
-
+	
+	// OLD VELOCITY CALCULATION:
+	//// Create our move distance vector and multiply by moveSpeed
+	//const vec3_t vDistance = { (float)(rbFrameMoveSpeed), (float)(rbFrameMoveSpeed), 0.f };
+	//// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
+	//const vec3_t vTranslate = vec3_t { moveTranslate.x * (float)FRAMETIME.count(), moveTranslate.y * (float)FRAMETIME.count(), 0.f};
+	//// Get ourselves a normalized direction without Z.
+	//const vec3_t vDirection = vec3_t { normalizedDir.x, normalizedDir.y, 0.f };
+	//// Calculate the total moveVelocity into the normal's direction.
+	//vec3_t moveVelocity = (vDistance + vTranslate) * vDirection;
+	// EOF OLD VELOCITY CALCULATION.
 
 	/**
 	*	#4: Let's begin performing our root motion movement.

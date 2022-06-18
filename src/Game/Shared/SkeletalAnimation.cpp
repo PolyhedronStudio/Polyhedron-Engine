@@ -43,7 +43,7 @@ double SG_FrameForTime( int32_t *frame, const GameTime &currentTimestamp, const 
 	uint32_t currentFrame = startFrame + frameCount;
 
 	// If current frame is higher than last frame...
-	if( currentFrame > endFrame ) {
+	if( currentFrame >= endFrame ) {
 		if( forceLoop && !loopingFrames ) {
 			loopingFrames = endFrame - startFrame;
 		}

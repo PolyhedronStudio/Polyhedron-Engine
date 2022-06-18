@@ -74,6 +74,7 @@ void MonsterTestDummy::Precache() {
 	qhandle_t serverModelHandle = gi.PrecacheServerModel("models/monsters/slidedummy/slidedummy.iqm");
 	//skm = SKM_GenerateModelData(gi.GetServerModelByHandle(skeletalModelHandle));
 	skm = gi.GetSkeletalModelDataByHandle(serverModelHandle);
+
 }
 
 //
@@ -90,7 +91,7 @@ void MonsterTestDummy::Spawn() {
     SetModel( "models/monsters/slidedummy/slidedummy.iqm" );
 	
     // Set the bounding box.
-    SetBoundingBox( { -16, -16, -49 }, { 16, 16, 41 } );
+    SetBoundingBox( { -16, -16, 0 }, { 16, 16, 90 } );
 
     // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.
     SetDieCallback( &MonsterTestDummy::MonsterTestDummyDie );
@@ -130,7 +131,7 @@ void MonsterTestDummy::PostSpawn() {
 	for (auto* geGoal : GetGameWorld()->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
 		| cef::IsValidPointer
 		| cef::HasServerEntity
-		| cef::HasKeyValue("targetname", strGoalEntity)) {
+		| cef::HasKeyValue("targetname", strMonsterGoalTarget)) {
 			SetGoalEntity(geGoal);
 			SetEnemy(geGoal);
 
@@ -176,8 +177,9 @@ void MonsterTestDummy::Think() {
 
 	// Set our Yaw Speed.
 	SetYawSpeed(20.f);
+
 	// Set our Move Speed. (It is the actual sum of distance traversed in units.)
-	SetMoveSpeed(64.015f);
+	//SetMoveSpeed(64.015f);
 }
 
 //===============
@@ -187,13 +189,13 @@ void MonsterTestDummy::Think() {
 void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value) {
 
 	// We're using this for testing atm.
-	if ( key == "goalentity" ) {
+	if ( key == "monstergoaltarget" ) {
 		// Parsed string.
 		std::string parsedString = "";
 		ParseKeyValue(key, value, parsedString);
 
 		// Assign.
-		strGoalEntity = parsedString;
+		strMonsterGoalTarget = parsedString;
 		gi.DPrintf("MonsterTestDummy(GoalEntity: %s)\n", value.c_str());
 	} else {
 		Base::SpawnKey(key, value);
@@ -205,33 +207,80 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 *	@brief	Toggles whether to follow its activator or stay put.
 **/
 void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGameEntity* activator) {
-	////// Get Goal Entity number.
-	GameEntity *geGoal = GetGoalEntity();
-	const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
+	//////// Get Goal Entity number.
+	//GameEntity *geGoal = GetGoalEntity();
+	//const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
 
-	// Get Activator Entity number.
-	const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
+	//// Get Activator Entity number.
+	//const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
+	int animationIndexA = skm->animationMap["walk_standard"].index;
+	int animationIndexB = skm->animationMap["walk_stairs_down"].index;
+	int animationIndexC = skm->animationMap["run_stairs_up"].index;
 
-	if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
+	//if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
+		// Get current animation, switch to next.
+		int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
+
+		const char *animName;
+		if (animationIndex == animationIndexA) {
+			animName = "walk_stairs_down";
+			SwitchAnimation("walk_stairs_down");
+			animationToSwitchTo = animationIndexB; //SwitchAnimation("walk_stairs_down");
+		}
+		else if (animationIndex == animationIndexB) {
+			animName = "run_stairs_up";
+			SwitchAnimation("run_stairs_up");
+			animationToSwitchTo = animationIndexC; //SwitchAnimation("run_stairs_up");
+		}
+		else if (animationIndex == animationIndexC) {
+			animName = "walk_standard";
+			//SetMoveSpeed(64 / );
+			SwitchAnimation("walk_standard");
+			animationToSwitchTo = animationIndexA;//SwitchAnimation("walk_standard");
+		}
+		else {
+			animName = "walk_standard";
+			animationToSwitchTo = SwitchAnimation("walk_standard");
+		}
+
+		//// See if the index incremented has valid animation data.
+		//const int32_t nextAnimationIndex = (animationIndex + 1 < skm->animations.size() ? animationIndex + 1 : 0);
+
+		//const char *animName;
+		//if ( nextAnimationIndex < skm->animations.size() ) {
+		//	if ( skm->animations[nextAnimationIndex] ) {
+		//		// Get pointer to it.
+		//		auto *animationData = skm->animations[nextAnimationIndex];
+		//		animName = animationData->name.c_str();
+		//		// Switch.
+		//		SwitchAnimation(animationData->name);
+		//	}
+		//}
+		//gi.DPrintf("UseEntity(#%i, \"monster_testdummy\"): Animation(\"%s\"#%i) set by client dispatched 'Use' callback.\n",
+		//	GetNumber(),
+		//	animName,
+		//	animationIndex);
+
 		// UseEntity(#%i): 'Use' Dispatched by Client(#%i).\n
-		gi.DPrintf("UseEntity(#%i, \"monster_testdummy\"): New GoalEntity(#%i) set by client dispatched 'Use' callback.\n",
-			GetNumber(),
-			activatorEntityNumber);
+	//	gi.DPrintf("UseEntity(#%i, \"monster_testdummy\"): New GoalEntity(#%i) and Animation(\"%s\"#%i) set by client dispatched 'Use' callback.\n",
+	//		GetNumber(),
+	//		activatorEntityNumber,
+	//		animName,
+	//		animationIndex);
 
-		SetGoalEntity(activator);
-		SetEnemy(activator);
-	} else {
-		SetGoalEntity( nullptr );
-		SetEnemy( nullptr );
-	}
+	//	SetGoalEntity(activator);
+	//	SetEnemy(activator);
+	//} else {
+	//	SetGoalEntity( nullptr );
+	//	SetEnemy( nullptr );
+	//}
 }
 
 /////
 // Starts the animation.
 // 
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-	SwitchAnimation("walk_standard");
-
+	//SwitchAnimation("walk_standard");
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
     SetNextThinkTime(level.time + FRAMETIME);
@@ -260,8 +309,19 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 		// Navigate to goal.
 		NavigateToOrigin( navigationOrigin );
 
+		// Get our current animation state.
+		const EntityAnimationState *animationState = GetCurrentAnimationState();
+
+		// Now go and process animations.
+		if (CanSwitchAnimation(animationState, animationToSwitchTo)) {
+			const std::string animName = skm->animations[animationToSwitchTo]->name;
+			SwitchAnimation(animName);
+		} else {
+			ProcessSkeletalAnimationForTime(level.time);
+		}
+
 		// Refresh Monster Animation State.
-		RefreshAnimationState();
+		//RefreshAnimationState();
 
 		// Link entity back in.
 		LinkEntity();

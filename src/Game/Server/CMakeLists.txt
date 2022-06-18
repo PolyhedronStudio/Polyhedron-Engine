@@ -76,6 +76,8 @@ SET(SRC_SVGAME
 	Entities/Monsters/MonsterTestDummy.cpp
 
 	Entities/Path/PathCorner.cpp
+	Entities/Path/PathMonsterGoal.cpp
+
 	#Entities/Target/TargetBlaster.cpp
 	#Entities/Target/TargetChangelevel.cpp
 	#Entities/Target/TargetCrosslevel_target.cpp

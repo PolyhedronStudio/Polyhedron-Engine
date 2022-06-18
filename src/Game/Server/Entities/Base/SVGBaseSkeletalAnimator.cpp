@@ -71,9 +71,6 @@ void SVGBaseSkeletalAnimator::SpawnKey(const std::string& key, const std::string
 void SVGBaseSkeletalAnimator::Think() { 
 	// Base think.
 	Base::Think();
-
-	// Now go and process animations.
-	ProcessSkeletalAnimationForTime(level.time);
 }
 
 
