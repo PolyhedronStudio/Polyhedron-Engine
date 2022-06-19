@@ -184,6 +184,11 @@ struct RootMotionMoveState {
 	int32_t moveFlagTime	= 0;
 };
 
+/**
+*	@brief	Performs a ground/step-move trace to determine whether we can step, or fall off an edge.
+*	@todo	Move this elsewhere.
+**/
+SGTraceResult RM_Trace( RootMotionMoveState* moveState, const vec3_t *origin = nullptr, const vec3_t *mins = nullptr, const vec3_t *maxs = nullptr, const vec3_t *end = nullptr, const int32_t skipEntityNumber = -1, const int32_t contentMask = -1  );
 
 /**
 *	@return	Clipped by normal velocity.

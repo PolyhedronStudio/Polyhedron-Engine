@@ -75,6 +75,10 @@ void MonsterTestDummy::Precache() {
 	//skm = SKM_GenerateModelData(gi.GetServerModelByHandle(skeletalModelHandle));
 	skm = gi.GetSkeletalModelDataByHandle(serverModelHandle);
 
+	// Zero out Z Axis for Run Stairs Up animation.
+	skm->animationMap["run_stairs_up"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+	skm->animationMap["walk_standard"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["walk_stairs_down"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
 }
 
 //
@@ -225,22 +229,30 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 		if (animationIndex == animationIndexA) {
 			animName = "walk_stairs_down";
 			SwitchAnimation("walk_stairs_down");
-			animationToSwitchTo = animationIndexB; //SwitchAnimation("walk_stairs_down");
+			animationToSwitchTo = animationIndexB;
 		}
 		else if (animationIndex == animationIndexB) {
+
+			//SetOrigin(GetOrigin() + vec3_t{0.f, 0.f, 45.f});
+			//SetMins({ -16.f, -16.f, -45.f });
+			//SetMaxs({ 16.f, 16.f, 45.f});
+
 			animName = "run_stairs_up";
 			SwitchAnimation("run_stairs_up");
-			animationToSwitchTo = animationIndexC; //SwitchAnimation("run_stairs_up");
+			animationToSwitchTo = animationIndexC;
 		}
 		else if (animationIndex == animationIndexC) {
+			//SetOrigin(GetOrigin() + vec3_t{0.f, 0.f, -45.f});
+			//SetMins({ -16.f, -16.f, 0.f });
+			//SetMaxs({ 16.f, 16.f, 90.f});
 			animName = "walk_standard";
-			//SetMoveSpeed(64 / );
 			SwitchAnimation("walk_standard");
-			animationToSwitchTo = animationIndexA;//SwitchAnimation("walk_standard");
-		}
-		else {
+			animationToSwitchTo = animationIndexA;
+		} else {
 			animName = "walk_standard";
 			animationToSwitchTo = SwitchAnimation("walk_standard");
+			//SetMins({ -16.f, -16.f, 0.f });
+			//SetMaxs({ 16.f, 16.f, 90.f});
 		}
 
 		//// See if the index incremented has valid animation data.
@@ -312,23 +324,23 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 		// Get our current animation state.
 		const EntityAnimationState *animationState = GetCurrentAnimationState();
 
-		// Now go and process animations.
+		// If we got a new animation to switch to, ensure we are allowed to switch before doing so.
 		if (CanSwitchAnimation(animationState, animationToSwitchTo)) {
 			const std::string animName = skm->animations[animationToSwitchTo]->name;
 			SwitchAnimation(animName);
+		//.Otherwise keep processing the current animation frame for time.
 		} else {
 			ProcessSkeletalAnimationForTime(level.time);
 		}
 
+		// Link us back in.
+		LinkEntity();
+
 		// Refresh Monster Animation State.
 		//RefreshAnimationState();
 
-		// Link entity back in.
-		LinkEntity();
-
 		// Setup next think callback.
 		SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
-		// Setup the next think time.
 		SetNextThinkTime(level.time + FRAMETIME);
 	}
 }

@@ -245,6 +245,25 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 * 
 ***/
 /**
+*	@TODO:	This following process has to happen elsewhere, but we keep it here for
+*			prototyping at this moment.
+**/
+static void UpdateSkeletalModelDataFromState(SkeletalModelData *skm, const EntityState& state) {
+		//skm->animationMap["run_stairs_up"].rootBoneAxisFlags = 
+		//	SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;// | 
+		//	//SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+
+	// Zero out X axis: DEPTH. This maintains the model rendering appropriately
+	// at our origin point.
+	skm->animationMap["run_stairs_up"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+	skm->animationMap["walk_standard"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	skm->animationMap["walk_stairs_down"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+
+	//skm->animationMap["run_stairs_up"].rootBoneAxisFlags = 
+	//		SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | 
+		//	SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+}
+/**
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
 void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
@@ -266,17 +285,16 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 
 	Com_DPrint("Entity(#%i): AnimIndex=(#%i)\n", state.number, state.currentAnimation.animationIndex);
 
-	// Get Model Handle.
-//	if (state.number == 14) {
+	// This should go elsewhere, but alas prototyping atm.
+	//if (state.number == 14) {
 	if (state.modelIndex != 255 && state.modelIndex > 0 && !skm) {
 		qhandle_t modelHandle = clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
-		
 		model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
-
 		SKM_GenerateModelData(model);
-
 		skm = model->skeletalModelData;
-
+		
+		// Yes...
+		UpdateSkeletalModelDataFromState(skm, state);
 	}
 
 	if ( state.currentAnimation.startTime != 0 ) {
@@ -309,16 +327,16 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 	SetEventID(state.eventID);
 
 
-	// Get Model Handle.
+	// This should go elsewhere, but alas prototyping atm.
 	//if (state.number == 14) {
 	if (state.modelIndex != 255 && state.modelIndex > 0 && !skm) {
 		qhandle_t modelHandle = clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
 		model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
 		SKM_GenerateModelData(model);
 		skm = model->skeletalModelData;
-		skm->animationMap["run_stairs_up"].rootBoneAxisFlags = 
-			SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		
+		// Yes...
+		UpdateSkeletalModelDataFromState(skm, state);
 	}
 
 	if ( state.currentAnimation.startTime != 0 ) {

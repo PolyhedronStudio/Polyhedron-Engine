@@ -173,10 +173,30 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t a
 
 	// Ensure the frame is within bounds of the pre-calculated translates.
 	if ( animationFrame < 0 || animationFrame >= frameTranslates.size() ) {
+		// Can't find Translation data.
 		rootBoneTranslation = vec3_zero();
+		// Failure.
 		return false;
 	} else {
 		rootBoneTranslation = frameTranslates[animationFrame];
+
+		// See if there are any specific rootBoneAxisFlags set.
+		const int32_t rootBoneAxisFlags = animationData->rootBoneAxisFlags;
+
+		// Zero out X Axis.
+		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+			rootBoneTranslation.x = 0.0;
+		}
+		// Zero out Y Axis.
+		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+			rootBoneTranslation.y = 0.0;
+		}
+		// Zero out Z Axis.
+		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+			rootBoneTranslation.z = 0.0;
+		}
+
+		// Success.
 		return true;
 	}
 
@@ -681,7 +701,6 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 		}
 	}
 	#endif
-
 	// Ideally in a perfect world we'd never get trapped, but Quake and all its derivatives
 	// are of course perfectly beautiful creatures from bottomless pits where no developer
 	// should ever want to be found, dead... or alive.
@@ -705,7 +724,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	ApplyMoveState( &currentMoveState );
 	// Link entity in.
 	LinkEntity();
-	
+
 	/**
 	*	Step #3:	- Execute Touch Callbacks in case we add any blockedMask set.
 	**/
@@ -1054,6 +1073,11 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	const vec3_t oldVelocity = GetVelocity();
 
 
+	// We do want Z distance though.
+	//vDistance.z = (float)( frameMoveSpeed );
+	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
+	//const vec3_t vTranslate		= vec3_t { -frameTranslate.x, -frameTranslate.y, -frameTranslate.z } * vDirectionXY;
+
 	// Normalize the direction vector.
 	const vec3_t vNormalizedDirection = vec3_normalize( direction );
 	// Get ourselves a normalized direction without Z.
@@ -1062,11 +1086,23 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	const vec3_t vDistance		= vec3_t { (float)( frameMoveSpeed ), (float)( frameMoveSpeed ), 0.f } * vDirectionXY;
 	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
 	const vec3_t vTranslate		= vec3_t { -frameTranslate.x, -frameTranslate.y, 0.f } * vDirectionXY;
-
 	// Calculate the total moveVelocity into the normal's direction.
 	vec3_t moveVelocity = vDistance + vTranslate;
-	// Last but not least, we want to maintain our old Z velocity.
+
+	//// It is valid, get a hold of the animation data.
+	//auto *animationData = skm->animations[animationIndex];
+
+	//if (animationData->name == "run_stairs_up") {
+	//	// Last but not least, we want to maintain our old Z velocity.
+	//	moveVelocity.z = -frameTranslate.z * (float)( frameMoveSpeed );
+	//} else {
+	//	// Last but not least, we want to maintain our old Z velocity.
+	//	moveVelocity.z = oldVelocity.z;
+	//}
+
+	// Old Velocity for Z Axis (Maintain darn gravity)
 	moveVelocity.z = oldVelocity.z;
+
 	// And let's go!.
 	SetVelocity(moveVelocity);
 	

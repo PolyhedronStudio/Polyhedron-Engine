@@ -230,7 +230,7 @@ static void RM_RefreshMoveFlagsTime(RootMotionMoveState* moveState) {
 /**
 *	@brief	Performs a ground/step-move trace to determine whether we can step, or fall off an edge.
 **/
-static SGTraceResult RM_Trace( RootMotionMoveState* moveState, const vec3_t *origin = nullptr, const vec3_t *mins = nullptr, const vec3_t *maxs = nullptr, const vec3_t *end = nullptr, const int32_t skipEntityNumber = -1, const int32_t contentMask = -1  ) {
+SGTraceResult RM_Trace( RootMotionMoveState* moveState, const vec3_t *origin, const vec3_t *mins, const vec3_t *maxs, const vec3_t *end, const int32_t skipEntityNumber, const int32_t contentMask ) {
 	/**
 	*	#0: Determine whether to use move state or custom values.
 	**/

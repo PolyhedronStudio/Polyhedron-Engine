@@ -114,6 +114,7 @@ struct SkeletalAnimation {
 		//! The default is to only zero out X and Y for the root motion system.
 		static constexpr int32_t DefaultTranslationMask = (ZeroXTranslation | ZeroYTranslation);
 	};
+
 	//! Tells the skeletal animation system how to treat our root bone for this animation.
 	int32_t rootBoneAxisFlags = RootBoneAxisFlags::DefaultTranslationMask;
 };

@@ -276,20 +276,105 @@ const int32_t SG_RootMotion_PerformMove( GameEntity *geSlider, const int32_t con
 		/**
 		*	Step #1: Start attempting to slide move at our velocity.
 		**/
-		moveResultMask = SG_RootMotion_MoveFrame( rootMotionMoveState );
-		
+		// Start Origin and Velocity.
 		const vec3_t org0 = rootMotionMoveState->origin;
 		const vec3_t vel0 = rootMotionMoveState->velocity;
 
-		// Got blocked by a wall...
-		if ( (moveResultMask & RootMotionMoveResult::WallBlocked) ) {
+		// Move.
+		moveResultMask = SG_RootMotion_MoveFrame( rootMotionMoveState );
 
-		}
+		//if ( (moveResultMask & RootMotionMoveResult::Trapped) ) { //} || !(moveResultMask & RootMotionMoveResult::Moved)) {
+		//	return -1;
+		//}
+		//// if ( ... moveResultMask ... & Flags::Trapped)
+		//// return ?
+		//// endif
 
-		// We touched something, try and step over it.
-		if ( (moveResultMask & RootMotionMoveResult::PlaneTouched) ) {
+		///**
+		//*	Step #2: Try and move from origin.z + stepheight.
+		//**/
+		//// Origin and Velocity after the first move.
+		//const vec3_t org1 = rootMotionMoveState->origin;
+		//const vec3_t vel1 = rootMotionMoveState->velocity;
 
-		}
+		//// Calculate 'Up' trace point.
+		//const vec3_t upTraceEnd = vec3_fmaf( rootMotionMoveState->origin, ROOTMOTION_MOVE_STEP_HEIGHT, vec3_up() );
+		//// Perform 'Up' trace.
+		//const SGTraceResult upTraceResult = RM_Trace( 
+		//	rootMotionMoveState, 
+		//	&upTraceEnd, 
+		//	&rootMotionMoveState->mins, 
+		//	&rootMotionMoveState->maxs, 
+		//	&upTraceEnd);
+
+		//// If it's all solid, we can't step up.
+		//if ( upTraceResult.allSolid ) {
+		//	// return.
+		//	return -1;
+		//}
+
+		//// See if we can move from the up position with original velocity.
+		//rootMotionMoveState->origin = upTraceResult.endPosition;
+		//rootMotionMoveState->velocity = org0;
+
+		//// Move.
+		//// The remaining time: Set to FRAMETIME(The time a frame takes.). Meaning, we move over time through frame.
+		//rootMotionMoveState->remainingTime = FRAMETIME.count(),
+		//moveResultMask = SG_RootMotion_MoveFrame( rootMotionMoveState );
+
+		//if ( (moveResultMask & RootMotionMoveResult::Trapped) ) { //|| !(moveResultMask & RootMotionMoveResult::Moved)) {
+		//	return -1;
+		//}
+
+		///**
+		//*	Step #3: Push down to find ground. 
+		//**/
+		//const vec3_t org2 = rootMotionMoveState->origin;
+		//const vec3_t vel2 = rootMotionMoveState->velocity;
+
+		//const bool onGround = (SG_GetEntityNumber( rootMotionMoveState->groundTrace.podEntity ) != -1 ? true : false);
+
+		//vec3_fmaf( org2, (onGround ? ROOTMOTION_MOVE_STEP_HEIGHT : ROOTMOTION_MOVE_STEP_HEIGHT * 2), vec3_down() );
+		//const vec3_t downTraceEnd = org2 + vec3_t { 
+		//	0.f, 
+		//	0.f, 
+		//	(onGround ? ROOTMOTION_MOVE_STEP_HEIGHT : ROOTMOTION_MOVE_STEP_HEIGHT * 2)
+		//};
+		//// Perform 'Down' trace.
+		//const SGTraceResult downTraceResult = RM_Trace( 
+		//	rootMotionMoveState, 
+		//	&rootMotionMoveState->origin, 
+		//	&rootMotionMoveState->mins, 
+		//	&rootMotionMoveState->maxs, 
+		//	&downTraceEnd);
+
+		//if (!downTraceResult.allSolid) {
+		//	rootMotionMoveState->origin = downTraceResult.endPosition;
+		//} 
+
+		//const vec3_t up = rootMotionMoveState->origin;
+
+		//// See which went furthest.
+		//// decide which one went farther
+		//double down_dist = (org1[0] - org0[0]) * (org1[0] - org0[0])
+		//	+ (org1[1] - org0[1]) * (org1[1] - org0[1]);
+		//double up_dist = (up[0] - org1[0]) * (up[0] - org1[0])
+		//	+ (up[1] - org1[1]) * (up[1] - org1[1]);
+
+		//if (down_dist > up_dist || downTraceResult.plane.normal[2] < 0.7) {
+		//	rootMotionMoveState->origin = org2;
+		//	rootMotionMoveState->velocity = vel2;
+		//	return moveResultMask;
+		//}
+
+		////!! Special case
+		//// if we were walking along a plane, then we need to copy the Z over
+		//rootMotionMoveState->velocity[2] = vel2[2];
+
+		//// Got blocked by a wall...
+		//if ( (moveResultMask & RootMotionMoveResult::WallBlocked) ) {
+		//	// We'll try and step over it.
+
 	//}
 
 	return moveResultMask;
