@@ -833,6 +833,9 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 				} else {
 					refreshEntity.rootBoneAxisFlags = 0;
 				}
+
+				// TEMPORARILY: ANIMATION POSE BLEND TEST
+				refreshEntity.rootBoneAxisFlagsB = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
 			}
 
 			//
@@ -850,17 +853,20 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			if (refreshAnimation.frame < 0) {
 				//refreshEntity.frame = refreshEntity.oldframe;
 			} else {
-				if (refreshAnimationB.frame < 0) {
-
-				} else {
-					refreshEntity.frameB = refreshAnimationB.frame;
-				}
-
 				// Set animation frame.
 				refreshEntity.frame		= refreshAnimation.frame;
 
 				// We only change the backlerp in case it is not the same old frame.
 				refreshEntity.backlerp	= refreshAnimation.backLerp;
+			}
+
+			if (refreshAnimationB.frame < 0) {
+
+			} else {
+				refreshEntity.frameB = refreshAnimationB.frame;
+
+				// We only change the backlerp in case it is not the same old frame.
+				refreshEntity.backlerpB	= refreshAnimationB.backLerp;
 			}
         }
         

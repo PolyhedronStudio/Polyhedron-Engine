@@ -78,11 +78,14 @@ typedef struct r_entity_s {
 	//	SKM Related.
 	//
 	int32_t rootBoneAxisFlags = 0;
+	int32_t rootBoneAxisFlagsB = 0;
 
     //
     // Misc.
     //
     float               backlerp;   // 0.0 = current, 1.0 = old
+	float				backlerpB;
+
     int                 skinNumber;    // also used as RenderEffects::Beam's palette index,
                                     // -1 => use rgba
 

@@ -66,6 +66,8 @@ extern void (*MOD_Reference)(model_t *model);
 //!
 void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp);
 
+void MOD_ApplyRootBoneAxisFlags(const model_t *model, const int32_t rootBoneAxisFlags, const int32_t rootBoneNumber, iqm_transform_t *bonePoses, float fraction, float lerp, float backlerp );
+
 // Compute pose transformations for the given model + data
 // `relativeJoints` must have enough room for model->num_poses
 void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
