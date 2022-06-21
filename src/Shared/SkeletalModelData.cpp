@@ -11,6 +11,15 @@
 
 #define DEBUG_MODEL_DATA 1
 
+
+
+/**
+*
+*
+*	Human Friendly Skeletal Model Data. Cached by server and client.
+*
+*
+**/
 /**
 *	@return	Game compatible skeletal model data including: animation name, 
 *			and frame data, bounding box data(per frame), and joints(name, index, parentindex)
@@ -75,25 +84,24 @@ void SKM_GenerateModelData(model_t* model) {
 		}
 	}
 // Debug Info:
-#if DEBUG_MODEL_DATA
+#if DEBUG_MODEL_DATA == 1
 	for (int32_t i = 0; i < skm->numberOfJoints; i++) {
 		SkeletalModelData::Joint *joint = &skm->jointArray[i];
 		
 		if (joint->parentIndex >= 0 && joint->parentIndex < skm->numberOfJoints) {
 			SkeletalModelData::Joint *parentJoint = &skm->jointArray[joint->parentIndex];
 
-			//Com_DPrintf("Joint(#%i, %s): parentJoint(%i, %s)\n",
-			//	joint->index,
-			//	joint->name.c_str(),
-			//	joint->parentIndex,
-			//	parentJoint->name.c_str()
-			//);
-
+			Com_DPrintf("Joint(#%i, %s): parentJoint(%i, %s)\n",
+				joint->index,
+				joint->name.c_str(),
+				joint->parentIndex,
+				parentJoint->name.c_str()
+			);
 		} else {
-			//Com_DPrintf("Joint(#%i, %s): parentJoint(none)\n",
-			//	joint->index,
-			//	joint->name.c_str()
-			//);			
+			Com_DPrintf("Joint(#%i, %s): parentJoint(none)\n",
+				joint->index,
+				joint->name.c_str()
+			);			
 		}
 	}
 #endif
@@ -102,8 +110,8 @@ void SKM_GenerateModelData(model_t* model) {
 	*	Animations:
 	**/
 // Debug Info:
-#if DEBUG_MODEL_DATA
-		//Com_DPrintf("Animations:\n");
+#if DEBUG_MODEL_DATA == 2
+	Com_DPrintf("Animations:\n");
 #endif
 	// Get our animation data sorted out nicely.
 	for (uint32_t animationIndex = 0; animationIndex < model->iqmData->num_animations; animationIndex++) {
@@ -172,12 +180,6 @@ void SKM_GenerateModelData(model_t* model) {
 
 					// Push the total translation between each frame.					
 					animation->frameTranslates.push_back( totalBackTranslation );
-
-					// Store our new offsetFrom to the current pose's translate.
-					//offsetFrom = pose->translate;
-
-					// Get total offset from end to start
-
 				// General Case: Set the offset we'll be coming from next frame.
 				} else {
 						
@@ -204,70 +206,195 @@ void SKM_GenerateModelData(model_t* model) {
 		for (auto& distance : animation->frameDistances) {
 			animation->animationDistance += distance;
 		}
-		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loopFrames=%i, loop=%s):\n",
+#if DEBUG_MODEL_DATA == 1
+		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%d):\n",
 			animationIndex,
 			animationData->name, //animation.name, Since, temp var and .c_str()
 			animation->startFrame,
 			animation->endFrame,
 			animation->numFrames,
+			animation->forceLoop == true ? "true" : "false",
 			animation->loopingFrames,
-			animation->forceLoop == true ? "true" : "false");
-
+			animation->animationDistance);
+#endif
 		for (int i = 0; i < animation->frameDistances.size(); i++) {
-					// Debug OutPut:
-					int32_t frameIndex = i;
-					Com_DPrintf("Frame(#%i): Translate=(%f,%f,%f), Distance=%f\n", 
-						frameIndex,
-						animation->frameTranslates[frameIndex].x,
-						animation->frameTranslates[frameIndex].y,
-						animation->frameTranslates[frameIndex].z,
-						animation->frameDistances[frameIndex]						
-					);
+			// Debug OutPut:
+			int32_t frameIndex = i;
+			Com_DPrintf("	Frame(#%i): Translate=(%f,%f,%f), Distance=%f\n", 
+				frameIndex,
+				animation->frameTranslates[frameIndex].x,
+				animation->frameTranslates[frameIndex].y,
+				animation->frameTranslates[frameIndex].z,
+				animation->frameDistances[frameIndex]						
+			);
 		}
-
-		// Output animation data.
-//#if SHAREDGAME_SERVERGAME && DEBUG_MODEL_DATA
-		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loopFrames=%i, loop=%s)\n",
-			animationIndex,
-			animationData->name, //animation.name, Since, temp var and .c_str()
-			animation->startFrame,
-			animation->endFrame,
-			animation->numFrames,
-			animation->loopingFrames,
-			animation->forceLoop == true ? "true" : "false");
-//#endif
 	}
 
 	/**
 	*	Model Bounds:
 	**/
 // Debug info:
-#if DEBUG_MODEL_DATA
-	//Com_DPrintf("SG_SKM_GenerateModelData(%s) -> {\n");
-	//Com_DPrintf("BoundingBoxes:\n");
+#if DEBUG_MODEL_DATA == 1
+	Com_DPrintf("BoundingBoxes:\n");
 #endif
 	// Get the Model Bounds for each frame.
 	float *bounds = model->iqmData->bounds;
 
 	if (bounds) {
-		for (int32_t frameIndex = 1; frameIndex < model->iqmData->num_frames; frameIndex++) {
+		for (int32_t frameIndex = 0; frameIndex < model->iqmData->num_frames; frameIndex++) {
 			SkeletalModelData::BoundingBox box;
 			box.mins = { bounds[0], bounds[1], bounds[2] };
 			box.maxs = { bounds[3], bounds[4], bounds[5] };
 			bounds+= 6;
 		
 	// Debug Info:
-	#if DEBUG_MODEL_DATA
-			//Com_DPrintf("	Frame (#%i):	(mins.x=%f, mins.y=%f, mins.z=%f), (maxs.x=%f, maxs.y=%f, maxs.z=%f)\n",
-			//	frameIndex,
-			//	box.mins.x, box.mins.y, box.mins.z,
-			//	box.maxs.x, box.maxs.y, box.maxs.z
-			//);
-	#endif
+#if DEBUG_MODEL_DATA == 1
+	Com_DPrintf("	Frame (#%i): (mins.x=%f, mins.y=%f, mins.z=%f), (maxs.x=%f, maxs.y=%f, maxs.z=%f)\n",
+		frameIndex,
+		box.mins.x, box.mins.y, box.mins.z,
+		box.maxs.x, box.maxs.y, box.maxs.z
+	);
+#endif
 			skm->boundingBoxes.push_back(box);
 		}
 	}
 
 	// Return our data.
 	//return skm;
+}
+
+
+
+/**
+*
+*
+*	Entity Skeleton
+*
+*
+**/
+/**
+*	@brief	Generates a Linear Bone List, as well as a BoneNode Tree Hierachy, using the current
+*			actual SkeletalModelData.
+**/
+static void CreateBoneTreeNode(SkeletalModelData* skm, EntitySkeleton* es, int32_t boneNumber, EntitySkeletonBoneNode *parentNode = nullptr ) {
+	// Go over all joints, if the parent number matches, enlist it in our bone children array.
+	//int32_t boneChildren[SKM_MAX_JOINTS];
+	//int32_t childCount = 0;
+
+	//for (int32_t jointIndex = 0; jointIndex < es->bones.size(); jointIndex++) {
+	//	// If the parent number matches.
+	//	if (es->bones[jointIndex].parentNumber == boneNumber) {
+	//		// Store the jointIndex in our list of found children.
+	//		boneChildren[childCount] = jointIndex;
+
+	//		// Next up, increment child count.
+	//		childCount++;
+	//	}
+	//}
+	// Pointer to the actual Bone Tree Node.
+	EntitySkeletonBoneNode *boneTreeNode = ( parentNode ? parentNode : &es->boneTree );
+
+	//// If it's not the first bone, get the parent node, push back a new node, 
+	//// and assign it to our boneNode pointer.
+	//if (!parentNode) {
+	//	const int32_t parentBoneNumber = es->bones[boneNumber].parentNumber;
+	//	// Get parent node.
+	//	EntitySkeletonBoneNode *boneTreeParentNode = es->bones[parentBoneNumber].boneNode;
+
+
+	//	// Assign pointer to child node.
+	//	boneTreeNode = &boneTreeParentNode->boneChildren.back();
+	//}
+
+	// Assign Bone Number to the Bone Tree Node.
+	boneTreeNode->boneNumber = boneNumber;
+
+	// Now we can assign the node's pointer to that of our bones linear list.
+	if (boneNumber != -1) {
+		es->bones[boneNumber].boneNode = boneTreeNode;
+	}
+
+	// Create a node tree list for each of our child bones.
+	//if (childCount) {
+	//	for (int32_t childIndex = 0; childIndex < childCount; childIndex++) {
+	//		// Recursively create a node tree for each child's own children.
+	//		CreateBoneTreeNode( skm, es, boneChildren[childIndex] );
+	//	}
+	//}
+	// Go over all joints, if the parent number matches, enlist it in our bone children array.
+	for (int32_t jointIndex = 0; jointIndex < es->bones.size(); jointIndex++) {
+		// If the parent number matches.
+		const int32_t parentNumber = es->bones[jointIndex].parentNumber;
+
+		if (parentNumber >= 0 && parentNumber == boneNumber) {
+			// So we can add a node to its children that points to the current bone.
+			boneTreeNode->boneChildren.push_back({
+				.boneNumber = boneNumber
+			});
+
+			// Create a tree for the child bone.
+			CreateBoneTreeNode( skm, es, boneNumber, boneTreeNode );
+			//// Store the jointIndex in our list of found children.
+			//boneChildren[childCount] = jointIndex;
+
+			//// Next up, increment child count.
+			//childCount++;
+		}
+	}
+}
+
+/**
+*	@brief	Sets up an entity skeleton using the specified skeletal model data.
+**/
+const bool SKM_CreateEntitySkeletonFrom( SkeletalModelData* skm, EntitySkeleton* es ) {
+	// Ensure we got valid pointers, oh my.
+	if ( !skm || !es ) {
+		// Warn?
+		return false;
+	}
+
+	/**
+	*	#0: Clear any old skeleton data if there was any.
+	**/
+	// Scan our linear bone list and check each bone's boneNode for children, and clear those out.
+	for ( int32_t i = 0; i < es->bones.size(); i++ ) {
+		// Get boneNode pointer.
+		EntitySkeletonBoneNode *boneNode = es->bones[i].boneNode;
+
+		// Make sure it is valid.
+		if ( boneNode ) {
+			// Clear children.
+			boneNode->boneChildren.clear();
+			// Reset bone number.
+			boneNode->boneNumber = -1;
+		}
+	}
+
+	// Clear out Linear Bone List.
+	es->bones.clear();
+
+	/**
+	*	#1: Generate a new bones list by copying over needed joint information to build our skeleton with.
+	**/
+	// Resize the skeleton's bones array to proper size.
+	es->bones.resize( skm->numberOfJoints );
+
+	// Copy over specific joint data.
+	for ( auto &joint : skm->jointArray ) {
+		if ( joint.index < es->bones.size() ) {
+			es->bones[joint.index] = {
+				.name = joint.name,
+				.parentNumber = joint.parentIndex,
+				.boneNode = nullptr,
+			};
+		}
+	}
+
+	/**
+	*	#2: Generate the BoneNode Tree Hierachy for our Linear Bone List and set their node pointers.
+	**/
+	CreateBoneTreeNode( skm, es, skm->rootJointIndex );
+
+	// Done.
+	return true;
 }

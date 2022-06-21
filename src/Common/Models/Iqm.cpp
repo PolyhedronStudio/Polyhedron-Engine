@@ -739,11 +739,52 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 	// Relative Joints.
 	iqm_transform_t* relativeJoint = relativeJoints;
 
+	if (!iqmModel) {
+		return;
+	}
+
 	// Current Frame.
 	currentFrame = iqmModel->num_frames ? (currentFrame % (int) iqmModel->num_frames) : 0;
 	// Old Frame.
 	oldFrame = iqmModel->num_frames ? (oldFrame % (int) iqmModel->num_frames) : 0;
 
+	// Copy or lerp animation currentFrame pose
+	//if (oldFrame == currentFrame) {
+	//	const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
+	//	for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, pose++, relativeJoint++) {
+	//		// Do we have skeletal model data?
+	//		if (skmData && poseIndex == skmData->rootJointIndex) {
+	//			// Copy over the pose's translation.
+	//			relativeJoint->translate = pose->translate;
+
+	//			// See whether to cancel/zero out any axis.
+	//			if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+	//				relativeJoint->translate.x = 0.0;
+	//			}
+	//			if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+	//				relativeJoint->translate.y = 0.0;
+	//			}
+	//			if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+	//				relativeJoint->translate.z = 0.0;
+	//			}
+
+	//			// Copy over the pose's scale.
+	//			relativeJoint->scale = pose->scale;
+	//			// Copy over the pose's rotation.
+	//			QuatCopy(pose->rotate, relativeJoint->rotate);
+	//			
+	//			// Skip regular treatment.
+	//			continue;
+	//		}
+
+	//		// Copy over the pose's translation.
+	//		relativeJoint->translate = pose->translate;
+	//		// Copy over the pose's scale.
+	//		relativeJoint->scale = pose->scale;
+	//		// Copy over the pose's rotation.
+	//		QuatCopy(pose->rotate, relativeJoint->rotate);
+	//	}
+	//}
 	// Copy or lerp animation currentFrame pose
 	if (oldFrame == currentFrame) {
 		const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
@@ -780,9 +821,8 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 			// Copy over the pose's rotation.
 			QuatCopy(pose->rotate, relativeJoint->rotate);
 		}
-	}
-	else
-	{
+
+	} else {
 		const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
 		const iqm_transform_t* oldpose = &iqmModel->poses[oldFrame * iqmModel->num_poses];
 		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, oldpose++, pose++, relativeJoint++)
@@ -813,7 +853,9 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 				relativeJoint->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
 
 				// Copy over the pose's rotation.
-				QuatCopy(pose->rotate, relativeJoint->rotate);
+				//QuatCopy(pose->rotate, relativeJoint->rotate);
+				// Slerp rotation.
+				QuatSlerp(oldpose->rotate, pose->rotate, lerp, relativeJoint->rotate);
 
 				// Skip regular treatment.
 				continue;
@@ -833,6 +875,102 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 			QuatSlerp(oldpose->rotate, pose->rotate, lerp, relativeJoint->rotate);
 		}
 	}
+}
+
+/*
+* CG_RecurseBlendSkeletalBone
+* Combine 2 different poses in one from a given root bone
+*/
+//void CG_RecurseBlendSkeletalBone( bonepose_t *inboneposes, bonepose_t *outboneposes, bonenode_t *bonenode, float frac ) {
+//	int i;
+//	bonepose_t *inbone, *outbone;
+//
+//	if( bonenode->bonenum != -1 ) {
+//		inbone = inboneposes + bonenode->bonenum;
+//		outbone = outboneposes + bonenode->bonenum;
+//		if( frac == 1 ) {
+//			memcpy( &outboneposes[bonenode->bonenum], &inboneposes[bonenode->bonenum], sizeof( bonepose_t ) );
+//		} else {
+//			// blend current node pose
+//			DualQuat_Lerp( inbone->dualquat, outbone->dualquat, frac, outbone->dualquat );
+//		}
+//	}
+//
+//	for( i = 0; i < bonenode->numbonechildren; i++ ) {
+//		if( bonenode->bonechildren[i] ) {
+//			CG_RecurseBlendSkeletalBone( inboneposes, outboneposes, bonenode->bonechildren[i], frac );
+//		}
+//	}
+//}
+/**
+*	@brief	Combine 2 different poses in one from a given root bone.
+**/
+void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float lerp, float backlerp) {
+	// Get 
+	if (boneNumber != -1) {
+		iqm_transform_t *inBone = inBonePoses + boneNumber;
+		iqm_transform_t *outBone = outBonePoses + boneNumber;
+
+		if (lerp == 1) {
+			memcpy( &outBonePoses[boneNumber], &inBonePoses[boneNumber], sizeof(iqm_transform_t) );
+		} else {
+			outBone->translate[0] = inBone->translate[0] * backlerp + outBone->translate[0] * lerp;
+			outBone->translate[1] = inBone->translate[1] * backlerp + outBone->translate[1] * lerp;
+			outBone->translate[2] = inBone->translate[2] * backlerp + outBone->translate[2] * lerp;
+
+			outBone->scale[0] = inBone->scale[0] * backlerp + outBone->scale[0] * lerp;
+			outBone->scale[1] = inBone->scale[1] * backlerp + outBone->scale[1] * lerp;
+			outBone->scale[2] = inBone->scale[2] * backlerp + outBone->scale[2] * lerp;
+
+			QuatSlerp(inBone->rotate, outBone->rotate, lerp, outBone->rotate);
+		}
+	}
+	
+	//
+	// This badly needs a bone hierachy instead of this crap lmao.
+	//
+	if (model->iqmData) {
+		auto *iqmData = model->iqmData;
+
+		for ( int32_t jointIndex = 0; jointIndex < iqmData->num_joints; jointIndex++ ) {
+			//// Get the parent joints.
+			//const int32_t jointParentIndex = (jointIndex == 0 ? -1 : model->iqmData->jointParents[jointIndex]);
+
+			//// Create our joint object.
+			//SkeletalModelData::Joint jointData = {
+			//	.name = parsedJointNames[jointIndex],
+			//	.index = jointIndex,
+			//	.parentIndex = jointParentIndex,
+			//};
+			//// Store our joint in our list.
+			//skm->jointMap[jointData.name] = jointData;
+			//if (jointData.index < 256) {
+			//	skm->jointArray[jointData.index] = jointData;
+			//} else {
+			//	// TODO: Warn.
+			//}
+
+			//// If we are dealing with the "root" bone, store it.
+			//if (jointData.name == "root") {
+			//	skm->rootJointIndex = jointIndex;
+			//}
+
+			const int32_t parentIndex = model->iqmData->jointParents[jointIndex];
+
+			if (parentIndex != -1 && parentIndex == boneNumber) {
+				MOD_RecursiveBlendFromBone( model, inBonePoses, outBonePoses, jointIndex, lerp, backlerp );
+			}
+			//iqmData->jointParents;
+			//iqmData->bindJoints
+		}
+	}
+	//// TODO: We need a decent bone hierachy for this, we got none of that right now so...
+	//for (int32_t i = 0; i < numberOfChildBones; i++) {
+	//	int32_t childBoneNumber = 0;
+
+	//	// Blend from here.
+	//	MOD_RecursiveBlendFromBone( inBonePoses, outBonePoses, childBoneNumber, lerp, backlerp );
+	//}
 }
 
 /**

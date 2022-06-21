@@ -62,11 +62,13 @@ extern qerror_t(*MOD_LoadIQM)(model_t* model, ModelMemoryAllocateCallback modelA
 extern void (*MOD_Reference)(model_t *model);
 
 //!
-//! Taken from N&C.
+//! Skeletal animation blending funcs.
 //!
+void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float lerp, float backlerp);
+
 // Compute pose transformations for the given model + data
 // `relativeJoints` must have enough room for model->num_poses
-void MOD_ComputeIQMRelativeJoints(const model_t* model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
+void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
 
 // Compute local space matrices for the given pose transformations.
 // this is the "fast path" for when world space is not necessary.

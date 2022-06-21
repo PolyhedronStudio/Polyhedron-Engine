@@ -25,6 +25,14 @@ struct SkeletalAnimation;
 //static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 static constexpr int32_t SKM_MAX_JOINTS = IQM_MAX_JOINTS;
 
+
+/**
+*
+*
+*	Human Friendly Skeletal Model Data. Cached by server and client.
+*
+*
+**/
 /**
 *	@brief	Game Module friendly IQM Data: Animations, BoundingBox per frame, and Joint data.
 **/
@@ -62,6 +70,109 @@ struct SkeletalModelData {
 	std::array<Joint, SKM_MAX_JOINTS> jointArray;
 };
 
+/**
+*	@return	Game compatible skeletal model data including: animation name, 
+*			and frame data, bounding box data(per frame), and joints(name, index, parentindex)
+**/
+void SKM_GenerateModelData(model_t* model);
+
+
+
+/**
+*
+*
+*	Entity Skeleton: Each entity using a skeletal model can generate an Entity Skeleton
+*	for use of performing animation pose blending magic with.
+*
+*
+**/
+/**
+*	@brief	Bone Node storing its number and pointers to its child bone
+*			nodes. Used for maintaining an actual bone tree hierachy.			
+**/
+struct EntitySkeletonBoneNode {
+	//! Actual bone number of this node.
+	int32_t boneNumber = 0;
+
+	//! Pointers to children bone nodes. (size == total num of bones)
+	std::vector<EntitySkeletonBoneNode> boneChildren;
+};
+
+/**
+*	@brief	Stores partial generated copy of non spatial bone data that 
+*			was contained in the Skeletal Model Data at the actual time 
+*			of creating this skeleton.
+*
+*			In case of changing a model, this needs to be regenerated.
+*			
+**/
+struct EntitySkeletonBone {
+	//! Actual string bone name.
+	std::string name;
+
+	//! Parent bone number.
+	int32_t parentNumber = 0;
+
+	//! Pointer to the bone node in our tree hierachy.
+	EntitySkeletonBoneNode *boneNode;
+};
+
+/**
+*	@brief	Skeleton consisting of the current frame's blend combined bone poses
+*			to use for rendering and/or in-game bone position work.
+*
+*			
+**/
+struct EntitySkeleton {
+	//! Pointer to the internal model data. (Also used to retreive the SKM data from there.)
+	model_t *model;
+
+	//! Stores a list of all bones we got in our entity's skeleton.
+	std::vector<EntitySkeletonBone> bones;
+
+	//! Stores the bones as an actual tree hierachy.
+	EntitySkeletonBoneNode boneTree;
+
+
+};
+
+/**
+*	@brief	Sets up an entity skeleton using the specified skeletal model data.
+**/
+const bool SKM_CreateEntitySkeletonFrom(SkeletalModelData *skm, EntitySkeleton *es);
+
+
+/**
+*
+*
+*	Bone Poses
+*
+*
+**/
+/**
+*	@brief Currently is just iqm_transform_t, there's nothing to it.
+**/
+using EntitySkeletonBonePose = iqm_transform_t;
+//struct EntitySkeletonBonePose {
+//	iqm_transform_t transform;
+//};
+
+
+
+/**
+*
+*
+*	Animation Data: It says parsed from, it is not so, it comes from the IQM
+*	file itself only right now.
+*
+*	Contains extra precalculated data regarding the total animation distance
+*	traveled per animation, the exact distance and translation of the root
+*	bone per frame.
+*
+*	On top of that, the root bone can be set render specific flags. (RootBoneAxisFlags)
+*
+*
+**/
 /**
 *	@brief	Parsed from the modelname.cfg file. Stores specific data that
 *			belongs to an animation. Such as: frametime, loop or no loop.
@@ -118,9 +229,3 @@ struct SkeletalAnimation {
 	//! Tells the skeletal animation system how to treat our root bone for this animation.
 	int32_t rootBoneAxisFlags = RootBoneAxisFlags::DefaultTranslationMask;
 };
-
-/**
-*	@return	Game compatible skeletal model data including: animation name, 
-*			and frame data, bounding box data(per frame), and joints(name, index, parentindex)
-**/
-void SKM_GenerateModelData(model_t* model);

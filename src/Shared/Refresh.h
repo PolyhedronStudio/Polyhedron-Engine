@@ -66,11 +66,13 @@ typedef struct r_entity_s {
     //
     vec3_t              origin;  // The entity origin -  also used as RenderEffects::Beam's "from"
     int                 frame;   // The entity frame - also used as RenderEffects::Beam's diameter
+	int                 frameB;   // The entity frame - also used as RenderEffects::Beam's diameter
     //
     // Previous data for lerping
     //
     vec3_t              oldorigin;  // The old entity origin - also used as RenderEffects::Beam's "to"
     int                 oldframe;   // The old entity frame.
+	int                 oldframeB;   // The old entity frame.
 
 	//
 	//	SKM Related.

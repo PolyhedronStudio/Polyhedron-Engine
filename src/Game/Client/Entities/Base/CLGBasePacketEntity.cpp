@@ -259,6 +259,8 @@ static void UpdateSkeletalModelDataFromState(SkeletalModelData *skm, const Entit
 	skm->animationMap["walk_standard"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
 	skm->animationMap["walk_stairs_down"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
 
+
+
 	//skm->animationMap["run_stairs_up"].rootBoneAxisFlags = 
 	//		SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | 
 		//	SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
@@ -292,9 +294,27 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 		model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
 		SKM_GenerateModelData(model);
 		skm = model->skeletalModelData;
+		// Build Unique Entity's own Skeleton for Animation Pose Blending.
+		//SKM_CreateEntitySkeletonFrom( skm, &entitySkeleton );
 		
 		// Yes...
 		UpdateSkeletalModelDataFromState(skm, state);
+
+		//
+		// TEMPORARILY - FOR BLENDING TEST.
+		//
+		// Get a pointer to the animation data.
+		SkeletalAnimation *skmAnimation = &skm->animationMap["run_stairs_up"];
+
+		// Reinitialize our refresh entity.
+		refreshAnimationB.animationIndex = skmAnimation->index;
+		refreshAnimationB.frame = skmAnimation->startFrame;
+		refreshAnimationB.startFrame = skmAnimation->startFrame;
+		refreshAnimationB.endFrame = skmAnimation->endFrame;
+		refreshAnimationB.forceLoop = true;//currentAnimation->forceLoop;
+		refreshAnimationB.frameTime = skmAnimation->frametime;
+		refreshAnimationB.startTime = cl->time;
+		refreshAnimationB.loopCount = 0;//currentAnimation->loopCount;
 	}
 
 	if ( state.currentAnimation.startTime != 0 ) {
@@ -332,11 +352,31 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 	if (state.modelIndex != 255 && state.modelIndex > 0 && !skm) {
 		qhandle_t modelHandle = clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
 		model_t *model = clgi.CL_Model_GetModelByHandle(modelHandle);
+
 		SKM_GenerateModelData(model);
 		skm = model->skeletalModelData;
-		
+
+		// Build Unique Entity's own Skeleton for Animation Pose Blending.
+		//SKM_CreateEntitySkeletonFrom( skm, &entitySkeleton );
+
 		// Yes...
 		UpdateSkeletalModelDataFromState(skm, state);
+
+		//
+		// TEMPORARILY - FOR BLENDING TEST.
+		//
+		// Get a pointer to the animation data.
+		SkeletalAnimation *skmAnimation = &skm->animationMap["run_stairs_up"];
+
+		// Reinitialize our refresh entity.
+		refreshAnimationB.animationIndex = skmAnimation->index;
+		refreshAnimationB.frame = skmAnimation->startFrame;
+		refreshAnimationB.startFrame = skmAnimation->startFrame;
+		refreshAnimationB.endFrame = skmAnimation->endFrame;
+		refreshAnimationB.forceLoop = true;//currentAnimation->forceLoop;
+		refreshAnimationB.frameTime = skmAnimation->frametime;
+		refreshAnimationB.startTime = cl->time;
+		refreshAnimationB.loopCount = 0;//currentAnimation->loopCount;
 	}
 
 	if ( state.currentAnimation.startTime != 0 ) {
@@ -697,6 +737,20 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		refreshAnimation.loopCount,
 		refreshAnimation.forceLoop
 	);
+
+	//
+	// TEMPORARILY - For Blending Test.
+	// 
+	// Process the animation, like we would do any time.
+	refreshAnimationB.backLerp = 1.0 - SG_FrameForTime(&refreshAnimationB.frame,
+		time,
+		GameTime(refreshAnimationB.startTime),
+		refreshAnimationB.frameTime,
+		refreshAnimationB.startFrame,
+		refreshAnimationB.endFrame,
+		refreshAnimationB.loopCount,
+		refreshAnimationB.forceLoop
+	);
 }
 
 
@@ -782,10 +836,11 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			}
 
 			//
-			//	Skeletal Animation Processing.
+			//	Skeletal Animation Processing. - The RefreshAnimationB stuff is TEMPORARILY for Blend testing.
 			//
 			// Setup the refresh entity frames.
 			refreshEntity.oldframe	= refreshAnimation.frame;
+			refreshEntity.oldframeB	= refreshAnimationB.frame;
 
 			// Setup the proper lerp and model frame to render this pass.
 			// Moved into the if statement's else case up above.
@@ -795,6 +850,12 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			if (refreshAnimation.frame < 0) {
 				//refreshEntity.frame = refreshEntity.oldframe;
 			} else {
+				if (refreshAnimationB.frame < 0) {
+
+				} else {
+					refreshEntity.frameB = refreshAnimationB.frame;
+				}
+
 				// Set animation frame.
 				refreshEntity.frame		= refreshAnimation.frame;
 

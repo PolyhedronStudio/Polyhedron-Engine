@@ -95,6 +95,16 @@ public:
 
 
 
+	/***
+	*
+	*
+	*	Skeletal Animation Related.
+	*
+	*
+	***/
+	//! Actual skeleton unique to this entity.
+	EntitySkeleton entitySkeleton;
+
     /***
     *
     * 
@@ -102,7 +112,6 @@ public:
     *
     * 
     ***/
-
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
@@ -988,6 +997,7 @@ protected:
 	//
 	//! This state gets set freshly to a baseline animation state determined by the 'wired' animationIndex.
 	EntityAnimationState refreshAnimation = {};
+	EntityAnimationState refreshAnimationB = {};
 
 public:
     /**
