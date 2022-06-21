@@ -1809,6 +1809,8 @@ static void process_regular_entity(
 			// AnimationB: Relative Joint data for the current frame. (Could cache this too I suppose.)
 			iqm_transform_t relativeJointsB[IQM_MAX_JOINTS];
 
+			// Final output
+			iqm_transform_t relativeJointsC[IQM_MAX_JOINTS];
 
 			// Get pose mat pointer.
 			float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
@@ -1818,12 +1820,29 @@ static void process_regular_entity(
 			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frameB, entity->oldframeB, 1.0f - entity->backlerp, entity->backlerp, relativeJointsB);
 			
 			// From Bone 2:
-			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 2, 1.0f - entity->backlerp, entity->backlerp);
+			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 2, 1.0f, 1.0f - entity->backlerp, entity->backlerp);
 			// From Bone 3:
-			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f - entity->backlerp, entity->backlerp);
+			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f, 1.0f - entity->backlerp, entity->backlerp);
 
 			MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
 			MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+
+			//// Compute Joints: Relative, World, and Local matrices.
+			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsC);
+			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
+			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frameB, entity->oldframeB, 1.0f - entity->backlerp, entity->backlerp, relativeJointsB);
+			//
+			//const float fraction = 1.0;
+
+			//// From Bone 2:
+			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 2, fraction, 1.0f - entity->backlerp, entity->backlerp);
+			//// From Bone 3:
+			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 3, fraction, 1.0f - entity->backlerp, entity->backlerp);
+
+			//MOD_RecursiveBlendFromBone(model, relativeJointsC, relativeJointsA, 0, fraction, 1.0f - entity->backlerp, entity->backlerp);
+
+			//MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+			//MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
 
 			*iqm_matrix_offset += (int)model->iqmData->num_poses;
 		}

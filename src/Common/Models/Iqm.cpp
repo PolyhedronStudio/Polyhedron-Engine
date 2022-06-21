@@ -905,13 +905,13 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 /**
 *	@brief	Combine 2 different poses in one from a given root bone.
 **/
-void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float lerp, float backlerp) {
+void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp) {
 	// Get 
 	if (boneNumber != -1) {
 		iqm_transform_t *inBone = inBonePoses + boneNumber;
 		iqm_transform_t *outBone = outBonePoses + boneNumber;
 
-		if (lerp == 1) {
+		if (fraction == 1) {
 			memcpy( &outBonePoses[boneNumber], &inBonePoses[boneNumber], sizeof(iqm_transform_t) );
 		} else {
 			outBone->translate[0] = inBone->translate[0] * backlerp + outBone->translate[0] * lerp;
@@ -957,8 +957,8 @@ void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePos
 
 			const int32_t parentIndex = model->iqmData->jointParents[jointIndex];
 
-			if (parentIndex != -1 && parentIndex == boneNumber) {
-				MOD_RecursiveBlendFromBone( model, inBonePoses, outBonePoses, jointIndex, lerp, backlerp );
+			if (parentIndex >= 0 && parentIndex == boneNumber) {
+				MOD_RecursiveBlendFromBone( model, inBonePoses, outBonePoses, jointIndex, fraction, lerp, backlerp );
 			}
 			//iqmData->jointParents;
 			//iqmData->bindJoints

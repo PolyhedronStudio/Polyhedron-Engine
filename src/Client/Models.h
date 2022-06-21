@@ -64,7 +64,7 @@ extern void (*MOD_Reference)(model_t *model);
 //!
 //! Skeletal animation blending funcs.
 //!
-void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float lerp, float backlerp);
+void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp);
 
 // Compute pose transformations for the given model + data
 // `relativeJoints` must have enough room for model->num_poses
