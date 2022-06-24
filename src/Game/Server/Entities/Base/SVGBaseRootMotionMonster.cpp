@@ -1008,17 +1008,35 @@ realcheck:
 **/
 const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigationOrigin ) {
 	/**
+	*	#0: Gather required data needed to process a frame for navigating.
+	**/
+	// Get the animation state data.
+	const EntityAnimationState *animationState = GetCurrentAnimationState();
+	// Get the animation index.
+	const int32_t animationIndex = animationState->animationIndex;
+	// Get the animation frame we're at right now.
+	// (We ensure it is within bounds to either 0 or endFrame when exceeding.)
+	const int32_t animationFrame = GetAnimationStateFrame( animationState );
+
+	const bool traverseZAxis = (
+		!(GetFlags() & EntityFlags::Fly) && !(GetFlags() & EntityFlags::Swim)
+	) ? true : false;
+
+	/**
 	*	#0: Calculate the direction to head into, and set the yaw angle and its turning speed.
 	**/
-	vec3_t direction = navigationOrigin - GetOrigin();
-
-	// Cancel uit the Z direction for non flying monsters.
-	if ( !(GetFlags() & EntityFlags::Fly) ) {
-		direction.z = 0.0f;
-	}
+	// Determine whether to enable Z Axis or not.
+	const vec3_t vOriginalDirection = vec3_direction( navigationOrigin, GetOrigin() );//navigationOrigin - GetOrigin();
+	
+	// Calculate the desired final move direction. (Ignore Z Axis if need be.)
+	const vec3_t vNavigateDirection = { 
+		vOriginalDirection.x, 
+		vOriginalDirection.y,
+		( traverseZAxis == false ? vOriginalDirection.z : 0.0f )
+	};
 
 	// Prepare ideal yaw angle to rotate to.
-	SetIdealYawAngle( vec3_to_yaw( { direction.x, direction.y, 0.f } ) );
+	SetIdealYawAngle( vec3_to_yaw( vOriginalDirection ) );
 
 
 	/**
@@ -1028,17 +1046,18 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Get the delta between wished for and current yaw angles.
 	const float deltaYawAngle = TurnToIdealYawAngle( );
 
+	//if ( !(animationIndex == skm->animationMap["WalkForwardRight"].index
+	//	|| animationIndex == skm->animationMap["WalkForwardLeft"].index 
+	//	|| animationIndex == skm->animationMap["WalkLeft"].index
+	//	|| animationIndex == skm->animationMap["WalkRight"].index 
+	//) ) {
+		//deltaYawAngle = TurnToIdealYawAngle( );
+//	}
+
+
 	/**
 	*	#2: Gather needed animation state info.
 	**/
-	// Get the animation state data.
-	const EntityAnimationState *animationState = GetCurrentAnimationState();
-	// Get the animation index.
-	const int32_t animationIndex = animationState->animationIndex;
-	// Get the animation frame we're at right now.
-	const int32_t animationFrame = GetAnimationStateFrame( animationState );
-
-	//
 	// Get the 'root bone' translation offset for this move's animation frame.
 	vec3_t frameTranslate = vec3_zero();
 	const bool frameHasTranslate = GetAnimationFrameTranslate( animationIndex, animationFrame, frameTranslate );
@@ -1046,101 +1065,44 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	double frameDistance = 0.0;
 	const bool frameHasDistance	= GetAnimationFrameDistance( animationIndex, animationFrame, frameDistance );
 	
-	// Calculate move speed. (The number 68.598419 comes from animation data itself
-	// and likely needs to be looked at and/or made a constant standard all over.)
-	double rbFrameMoveUnitScale = skm->animations[animationIndex]->animationDistance;
-	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( rbFrameMoveUnitScale, frameDistance, 1.5 );
+	// Calculate the actual move speed based for the current animation frame.
+	const double totalTraversedDistance = skm->animations[animationIndex]->animationDistance;
 
-	// UGLY HACK
-	//double moveSpeed = 0.0;
-	//// Check if the animation index is valid.
-	//if ( !(animationIndex < 0 || animationIndex >= skm->animations.size() ) ) {
-	//	// Get our current animation state.
-	//	const EntityAnimationState *animationState = GetCurrentAnimationState();
+	float frameTimeThing = ANIMATION_FRAMETIME / 4;
+	if (animationIndex == skm->animationMap["RunForward"].index) {
+		frameTimeThing = ANIMATION_FRAMETIME;
+	}
+	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( totalTraversedDistance, frameDistance, frameTimeThing);
 
-	//	// It is valid, get a hold of the animation data.
-	//	auto *animationData = skm->animations[animationIndex];
-
-	//	// Calculate move distance scaled to Quake units.
-	//	static constexpr double unitSize = 68.598419; // This is what it was scaled with in Blender, coming from Mixamo.
-	//	const double scaledMoveDistance = unitSize * moveDistance;
-
-	//	// Calculate move speed.
-	//	moveSpeed = scaledMoveDistance / vec3_dlength(moveTranslate);
-	//}
-	// END OF
 
 	/**
 	*	#3: Calculate the new MoveVelocity to use for this frame.
 	**/
-	// Get the current velocity stored as "oldVelocity".
-	const vec3_t oldVelocity = GetVelocity();
+	// Normalize our direction 
+	const vec3_t vDirectionNormal = vNavigateDirection;
 
-
-	// We do want Z distance though.
-	//vDistance.z = (float)( frameMoveSpeed );
-	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
-	//const vec3_t vTranslate		= vec3_t { -frameTranslate.x, -frameTranslate.y, -frameTranslate.z } * vDirectionXY;
-
-	//// Get translation without Z.
-	//const vec3_t vTranslateNoZ = { -frameTranslate.x, -frameTranslate.y, 0.0f /* -frameTranslate.x */};
-
-	//// Normalize the direction vector.
-	//const vec3_t vNormalizedDirection = vec3_normalize( direction );
-	//// Get ourselves a normalized direction without Z.
-	//const vec3_t vDirectionXY	= vec3_t{ vNormalizedDirection.x, vNormalizedDirection.y, 0.f };
-	//// Get ourselves our frame move direction
-	//vec3_t vFrameMoveDirectionXY	= vec3_normalize( vTranslateNoZ );
-	//vFrameMoveDirectionXY.z = 0;
-	//// Create our move's distance vector by setting its x and y to the rbFrameMoveSpeed (Meaning we got the distance to travel per frame.)
-
-	//const vec3_t vDistance		= vec3_t{ (float)( frameMoveSpeed ), 0.f, 0.f };
-	//// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
-	//const vec3_t vTranslate		= vTranslateNoZ * vFrameMoveDirectionXY;
-	//// Calculate the total moveVelocity into the normal's direction.
-	//vec3_t moveVelocity = (vTranslateNoZ) * vDirectionXY; //(vTranslate) + (vDistance * vDirectionXY); // vec3_zero();//
-
-	const vec3_t vNormalizedDirection = vec3_normalize( direction );
-	// Get ourselves a normalized direction without Z.
-	const vec3_t vDirectionXY	= vec3_t { vNormalizedDirection.x, vNormalizedDirection.y, 0.f };
 	// Create our move's distance vector by setting its x and y to the rbFrameMoveSpeed (Meaning we got the distance to travel per frame.)
-	const vec3_t vDistance		= vec3_t { (float)( frameMoveSpeed ), (float)( frameMoveSpeed ), 0.f } * vDirectionXY;
+	const vec3_t vDistance		= vec3_t { (float)( frameMoveSpeed ), (float)( frameMoveSpeed ), 0.f };// * vNavigateDirection;
+
 	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
 	const vec3_t vTranslate		= vec3_t { frameTranslate.x, frameTranslate.y, 0.f };
 	// Get frame translate move direction.
-	const vec3_t vTranslateDir	= vec3_normalize( vTranslate );
-
-	// Calculate the total moveVelocity into the normal's direction.
-	vec3_t moveVelocity = vDistance + (vTranslate * vec3_normalize(frameTranslate));
-
-	//// It is valid, get a hold of the animation data.
-	//auto *animationData = skm->animations[animationIndex];
-
-	//if (animationData->name == "PistolIdleTense") {
-	//	// Last but not least, we want to maintain our old Z velocity.
-	//	moveVelocity.z = -frameTranslate.z * (float)( frameMoveSpeed );
-	//} else {
-	//	// Last but not least, we want to maintain our old Z velocity.
-	//	moveVelocity.z = oldVelocity.z;
-	//}
-
-	// Old Velocity for Z Axis (Maintain darn gravity)
-	moveVelocity.z = oldVelocity.z;
+	const vec3_t vTranslateDir	= vec3_normalize( ( vTranslate ) );
 	
-	gi.DPrintf("Velocity Debug (Frame #%i, frameMoveSpeed=%f, frameMoveDistance=%f):\n", 
-		animationFrame,
-		frameMoveSpeed,
-		frameDistance
-	);
-	gi.DPrintf("	moveVelocity(%f,%f,%f),	vTranslate(%f,%f,%f)\n	vDistance(%f,%f,%f),\n	vTranslateDir(%f,%f,%f)\n",
-		moveVelocity.x, moveVelocity.y, moveVelocity.z,
-		vTranslate.x, vTranslate.y, vTranslate.z,
-		vDistance.x, vDistance.y, vDistance.z,
-		vTranslateDir.x, vTranslateDir.y, vTranslateDir.z
-	);
 
-	// And let's go!.
-	SetVelocity(moveVelocity);
+
+////Progress animation frames based on root bone distance
+//const vec3_t vAnimationFullTranslation      = vRootBonePositionLastFrame - vRootBonePositionFirstFrame; //Only needed once per animation (walk, stairs_up, stairs_down)
+//const float fAnimationFullDistance          = vec3_magnitude( vAnimationFullTranslation ); //Also only needed once
+//const float fDistancePerFrame               = fAnimationFullDistance / float(iAnimationFrameAmount); //Assuming rootbone changes position more or less linear over the full anim, if not, calculate this per in-between frame
+//
+////fCurrentRatioBetweenCurrentFrameAndNextFrame => current blend factor of current>next frame in 0.0-1.0, where 0.0 => 100% current and 1.0 => 100% next frame
+//const vec3_t vAnimationLocalTranslation     = vRootBonePositionCurrentFrame + (vRootBonePositionNextFrame - vRootBonePositionCurrentFrame) * fCurrentRatioBetweenCurrentFrameAndNextFrame;
+//const float fAnimationLocalDistance         = vec3_magnitude( vAnimationLocalTranslation );
+//const float fAmountOfFrameProgressByDist    = ( fAnimationLocalDistance / fAnimationFullDistance ) / fDistancePerFrame;
+//
+////Expectation: the faster the character goes, the faster the animation speed. Eliminating skating effect of feet on ground.
+//PROGRESS_FRAME_FOR_CURRENT_ANIMATION_BY(fAmountOfFrameProgressByDist);
 	
 	// OLD VELOCITY CALCULATION:
 	//// Create our move distance vector and multiply by moveSpeed
@@ -1154,7 +1116,61 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// EOF OLD VELOCITY CALCULATION.
 
 	/**
-	*	#4: Let's begin performing our root motion movement.
+	*	#4: (Apply Gravity here for now...) Let's begin performing our root motion movement.
 	**/
+	// Get the current velocity stored as "oldVelocity".
+	const vec3_t oldVelocity = GetVelocity();
+
+	// Calculate the total moveVelocity into the normal's direction.
+	vec3_t moveVelocity = vec3_zero(); //( vDistance * vTranslateDir ) * ( vTranslate * vTranslateDir );// (vTranslate * vec3_normalize(frameTranslate));
+	
+// Allow for strafing support in exceptional cases.
+	vec3_t vStrafeDistance = vec3_zero();
+	if (animationIndex == skm->animationMap["WalkForwardRight"].index
+		|| animationIndex == skm->animationMap["WalkForwardLeft"].index 
+		|| animationIndex == skm->animationMap["WalkLeft"].index
+		|| animationIndex == skm->animationMap["WalkRight"].index 
+	) {
+		const vec3_t vNormalizedAngles = vec3_normalize( vec3_euler( GetAngles() ) );
+
+		//const vec3_t vStrafeDirection = vec3_negate( vec3_normalize( vec3_cross( vec3_up(), GetAngles() ) ) );
+		
+		moveVelocity = (vTranslate + vDistance) * vNormalizedAngles - vDirectionNormal;// * vStrafeDirection;
+		
+	} else {
+		moveVelocity = (vTranslate + vDistance ) * vDirectionNormal;
+	}
+
+	if (animationIndex == skm->animationMap["TPose"].index
+		|| animationIndex == skm->animationMap["Idle"].index 
+		|| animationIndex == skm->animationMap["IdleAiming"].index
+		|| animationIndex == skm->animationMap["RifleAim"].index 
+		|| animationIndex == skm->animationMap["RifleFire"].index 
+		|| animationIndex == skm->animationMap["WalkingToDying"].index 
+		
+	) {
+		moveVelocity = { 0.f, 0.f, oldVelocity.z };
+	}
+	//TPose,Idle,IdleAiming,RifleAim,RifleFire,
+	//moveVelocity += vStrafeDistance;
+
+	// Old Velocity for Z Axis (Maintain darn gravity)
+	moveVelocity.z = oldVelocity.z;
+	
+	//gi.DPrintf("Velocity Debug (Frame #%i, frameMoveSpeed=%f, frameMoveDistance=%f):\n", 
+	//	animationFrame,
+	//	frameMoveSpeed,
+	//	frameDistance
+	//);
+	//gi.DPrintf("	moveVelocity(%f,%f,%f),	vTranslate(%f,%f,%f)\n	vDistance(%f,%f,%f),\n	vTranslateDir(%f,%f,%f)\n",
+	//	moveVelocity.x, moveVelocity.y, moveVelocity.z,
+	//	vTranslate.x, vTranslate.y, vTranslate.z,
+	//	vDistance.x, vDistance.y, vDistance.z,
+	//	vTranslateDir.x, vTranslateDir.y, vTranslateDir.z
+	//);
+
+	// And let's go!.
+	SetVelocity(moveVelocity);
+
 	return PerformRootMotionMove();
 }

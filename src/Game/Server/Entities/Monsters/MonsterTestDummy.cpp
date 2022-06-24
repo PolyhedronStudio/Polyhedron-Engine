@@ -97,21 +97,39 @@ void MonsterTestDummy::Precache() {
 	//
 	if (skm) {
 		for (int32_t i = 0; i < skm->animations.size(); i++) {
-			skm->animations[i]->rootBoneAxisFlags = 0;//SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+			skm->animations[i]->rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
 		}
 
-	skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		//TPose,Idle,IdleAiming,RifleAim,RifleFire,WalkForward,WalkForwardLeft,WalkForwardRight,WalkingToDying,WalkLeft,WalkRight
+		const int32_t ZeroAllAxis = ( SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation );
+		skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;// |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->animationMap["Idle"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->animationMap["IdleAiming"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->animationMap["RifleAim"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->animationMap["RifleFire"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->animationMap["Waving"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->animationMap["Reloading"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
 
-	skm->animationMap["PistolIdleTense"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-	skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-	skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-	
-	skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		skm->animationMap["RunForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+		skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+		skm->animationMap["WalkForwardLeft"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		skm->animationMap["WalkForwardRight"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		skm->animationMap["WalkingToDying"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+		skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+																											   //skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+	//skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
 
-	skm->animationMap["PistolWhip"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	skm->animationMap["Reload"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+	//skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	//skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	//
+	//skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+
+	//skm->animationMap["PistolWhip"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["Reload"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
 
 		// Pistol Walk Forward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
 		// for by physics.
@@ -287,51 +305,59 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 *	@brief	Toggles whether to follow its activator or stay put.
 **/
 void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGameEntity* activator) {
-	//////// Get Goal Entity number.
-	//GameEntity *geGoal = GetGoalEntity();
-	//const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
+	// Get Goal Entity number.
+	GameEntity *geGoal = GetGoalEntity();
 
-	//// Get Activator Entity number.
-	//const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
-	//if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
-	//	// Get current animation, switch to next.
-	int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
+	const int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
 
-		//// See if the index incremented has valid animation data.
-		const int32_t nextAnimationIndex = (animationIndex + 1 < skm->animations.size() ? animationIndex + 1 : 0);
+	if (animationIndex == skm->animationMap["WalkForward"].index) {
+		SwitchAnimation("RunForward");
+	} else 	if (animationIndex == skm->animationMap["RunForward"].index) {
+		SwitchAnimation("Idle");
+	} else 	if (animationIndex == skm->animationMap["Idle"].index) {
+		SwitchAnimation("WalkForward");
+	} else 	{ //if (animationIndex == skm->animationMap["WalkForward"].index) {
+		SwitchAnimation("WalkForward");
+	}
 
-	//if (nextAnimationIndex != )
-		const std::string animName = skm->animations[nextAnimationIndex]->name;
-		SwitchAnimation(animName);
-
-		//const char *animName;
-		//if ( nextAnimationIndex < skm->animations.size() ) {
-		//	if ( skm->animations[nextAnimationIndex] ) {
-		//		// Get pointer to it.
-		//		auto *animationData = skm->animations[nextAnimationIndex];
-		//		animName = animationData->name.c_str();
-		//		// Switch.
-		//		SwitchAnimation(animationData->name);
-		//	}
-		//}
-		//gi.DPrintf("UseEntity(#%i, \"monster_testdummy\"): Animation(\"%s\"#%i) set by client dispatched 'Use' callback.\n",
-		//	GetNumber(),
-		//	animName,
-		//	animationIndex);
-
-		// UseEntity(#%i): 'Use' Dispatched by Client(#%i).\n
-	//	gi.DPrintf("UseEntity(#%i, \"monster_testdummy\"): New GoalEntity(#%i) and Animation(\"%s\"#%i) set by client dispatched 'Use' callback.\n",
-	//		GetNumber(),
-	//		activatorEntityNumber,
-	//		animName,
-	//		animationIndex);
-
-	//	SetGoalEntity(activator);
-	//	SetEnemy(activator);
-	//} else {
-	//	SetGoalEntity( nullptr );
-	//	SetEnemy( nullptr );
-	//}
+//	// Get ent numbers for easy comparison.
+//	const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
+//	const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
+//
+//
+//	if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
+//		// Get current animation, switch to next.
+//		const int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
+//
+//		//// See if the index incremented has valid animation data.
+//		const int32_t nextAnimationIndex = (animationIndex + 1 < skm->animations.size() ? animationIndex + 1 : 5);
+//
+//	//if (nextAnimationIndex != )
+//		const std::string animName = skm->animations[nextAnimationIndex]->name;
+//		SwitchAnimation(animName);
+//		
+//		gi.DPrintf("UseEntity(#%i, \"monster_testdummy\"): Animation(\"%s\"#%i) set by client dispatched 'Use' callback.\n",
+//			GetNumber(),
+//			animName.c_str(),
+//			nextAnimationIndex);
+//
+//		// Make activator the goal and enemy.
+//		//if (! (nextAnimationIndex == skm->animationMap["WalkForwardRight"].index
+//		//	|| nextAnimationIndex == skm->animationMap["WalkForwardLeft"].index 
+//		//	|| nextAnimationIndex == skm->animationMap["WalkLeft"].index
+//		//	|| nextAnimationIndex == skm->animationMap["WalkRight"].index) ) {
+//
+//			SetGoalEntity(activator);
+//			SetEnemy(activator);
+////		}
+//	//	else {
+//		//	SetGoalEntity( nullptr );
+//	//		SetEnemy( nullptr );
+//		//}
+//	} else {
+//		SetGoalEntity( nullptr );
+//		SetEnemy( nullptr );
+//	}
 }
 
 /////

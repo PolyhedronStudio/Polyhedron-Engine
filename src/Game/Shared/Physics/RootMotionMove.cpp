@@ -1131,7 +1131,7 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 	*	#2: Add clipping planes from ground (if on-ground), and our own velocity.
 	**/
 	// If the velocity is too small, just stop.
-	if( vec3_dlength( moveState->velocity ) < 0.00001f) {// ROOTMOTION_MOVE_STOP_EPSILON ) {
+	if( vec3_dlength( moveState->velocity ) < 0.000001f) {// ROOTMOTION_MOVE_STOP_EPSILON ) {
 		SG_Physics_PrintWarning("TEH VELOCITY = " + std::to_string(vec3_dlength(moveState->velocity)) + "\n");
 
 		// Zero out its velocity.

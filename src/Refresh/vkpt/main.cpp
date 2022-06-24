@@ -1815,7 +1815,9 @@ static void process_regular_entity(
 			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, relativeJointsB);
 			
 			// From Bone 2:
-//			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 2, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+			if (entity->frameB != -1) {
+				MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 4, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+			}
 			// From Bone 3:
 //			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
 

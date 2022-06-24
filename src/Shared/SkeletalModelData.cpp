@@ -138,8 +138,7 @@ void SKM_GenerateModelData(model_t* model) {
 
 		// Calculate distances.
 		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
-			// The offset between frames.
-			vec3_t offsetFrom = vec3_zero();
+
 
 			// Used to store the total translation distance from startFrame to end Frame,
 			// We use this in order to calculate the appropriate distance between start and end frame.
@@ -148,7 +147,9 @@ void SKM_GenerateModelData(model_t* model) {
 
 			// Start and end pose pointers.
 			const iqm_transform_t *startPose = &model->iqmData->poses[ skm->rootJointIndex + ( animation->startFrame * model->iqmData->num_poses ) ];
-			const iqm_transform_t *endPose = &model->iqmData->poses[skm->rootJointIndex + ((animation->endFrame - animation->startFrame) * model->iqmData->num_poses)];
+			
+			
+			const iqm_transform_t *endPose = (animation->startFrame == 0 ? startPose : &model->iqmData->poses[skm->rootJointIndex + ( (animation->endFrame - 1) * model->iqmData->num_poses)] );
 
 			// Get the start and end pose translations.
 			const vec3_t startFrameTranslate	= startPose->translate;
@@ -157,37 +158,48 @@ void SKM_GenerateModelData(model_t* model) {
 			// We count(sum) the final total translation of all frames between start and end so we can use
 			// this to calculate their translational offsets with. (Otherwise we'd get minmally 2 frames where
 			// no motion takes place, this looks choppy.) 
-			vec3_t totalTranslationSum = vec3_zero();
+			//vec3_t totalTranslationSum = vec3_zero();
+						// The offset between frames.
+			vec3_t offsetFrom = vec3_zero();
 			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
 				// Get the Frame Pose.
 				const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
 
 				// Special Case: First frame has no offset really.
 				if (i == animation->startFrame) {
-					const vec3_t totalStartTranslation = startFrameTranslate - endFrameTranslate;
+					//const vec3_t totalStartTranslation = endFrameTranslate - startFrameTranslate;
 					// Push the total traversed frame distance.
-					animation->frameDistances.push_back( vec3_dlength( totalStartTranslation ) );
+					const vec3_t frameTranslate = offsetFrom - framePose->translate;
+
+					animation->frameDistances.push_back( vec3_length( frameTranslate ) );
 
 					// Push the total translation between each frame.					
-					animation->frameTranslates.push_back( totalStartTranslation );
+					animation->frameTranslates.push_back( frameTranslate );
 
 					// Prepare offsetFrom with the current pose's translate for calculating next frame.
-					offsetFrom = totalStartTranslation;
+					offsetFrom = framePose->translate;
 
-					totalTranslationSum += totalStartTranslation;
+					//totalTranslationSum += totalStartTranslation;
 				// Special Case: Take the total offset, subtract it from the end frame, and THEN
-				} else if (i == animation->endFrame - 1) {
-					// 
-					const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate; //startFrameTranslate - endFrameTranslate;
-					//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
+				
+				//} else if (i == animation->endFrame) {
+				//	// 
+				//	const vec3_t frameTranslate = startFrameTranslate - endFrameTranslate; //*offsetFrom -*/ framePose->translate;
+				//	const double frameDistance = vec3_distance_squared( startFrameTranslate, endFrameTranslate ); 
 
-					// Push the total traversed frame distance.
-					animation->frameDistances.push_back( vec3_dlength( totalBackTranslation ) );
+				//	const vec3_t totalBackTranslation = frameTranslate - offsetFrom; //startFrameTranslate - endFrameTranslate;
+				//	//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
 
-					// Push the total translation between each frame.					
-					animation->frameTranslates.push_back( totalBackTranslation );
+				//	// Push the total traversed frame distance.
+				//	animation->frameDistances.push_back( frameDistance );//vec3_dlength( totalBackTranslation ) );
 
-					totalTranslationSum += totalBackTranslation;	
+				//	// Push the total translation between each frame.					
+				//	animation->frameTranslates.push_back( totalBackTranslation );
+
+					// Calculate the full animation distance.
+					//animation->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate ); 
+
+					//totalTranslationSum += totalBackTranslation;	
 				// General Case: Set the offset we'll be coming from next frame.
 				} else {
 						
@@ -196,7 +208,7 @@ void SKM_GenerateModelData(model_t* model) {
 					//const vec3_t translate = offsetFrom - framePose->translate;
 
 					// Calculate the distance between the two frame translations.
-					const double frameDistance = vec3_dlength( translate );
+					const double frameDistance = vec3_distance_squared( offsetFrom, framePose->translate ); //vec3_dlength( translate );
 
 					// Push the total traversed frame distance.
 					animation->frameDistances.push_back( frameDistance );
@@ -205,18 +217,19 @@ void SKM_GenerateModelData(model_t* model) {
 					animation->frameTranslates.push_back( translate );
 
 					// Increment our total translation sum.
-					totalTranslationSum += translate; // or offsetfrom?
+					//totalTranslationSum += translate; // or offsetfrom?
 
 					// Prepare offsetFrom with the current pose's translate for calculating next frame.
 					offsetFrom = framePose->translate;
 				}
 			}
-						
+
 			// Sum up all frame distances into one single value.
-			animation->animationDistance = vec3_dlength(totalTranslationSum); //0.0;
-			//for (auto& distance : animation->frameDistances) {
-			//	animation->animationDistance += distance;
-			//}
+			//vec3_dlength(totalTranslationSum); //0.0;
+			animation->animationDistance = 0.0;
+			for (auto& distance : animation->frameDistances) {
+				animation->animationDistance += distance;
+			}
 		}
 
 #if DEBUG_MODEL_DATA == 1
@@ -254,7 +267,7 @@ void SKM_GenerateModelData(model_t* model) {
 	float *bounds = model->iqmData->bounds;
 
 	if (bounds) {
-		for (int32_t frameIndex = 0; frameIndex < model->iqmData->num_frames; frameIndex++) {
+		for (int32_t frameIndex = 01; frameIndex < model->iqmData->num_frames; frameIndex++) {
 			SkeletalModelData::BoundingBox box;
 			box.mins = { bounds[0], bounds[1], bounds[2] };
 			box.maxs = { bounds[3], bounds[4], bounds[5] };
@@ -305,7 +318,7 @@ static void CreateBoneTreeNode(SkeletalModelData* skm, EntitySkeleton* es, int32
 	//	}
 	//}
 	// Pointer to the actual Bone Tree Node.
-	EntitySkeletonBoneNode *boneTreeNode = ( parentNode ? parentNode : &es->boneTree );
+	EntitySkeletonBoneNode *boneTreeNode = ( parentNode != nullptr ? parentNode : &es->boneTree );
 
 	//// If it's not the first bone, get the parent node, push back a new node, 
 	//// and assign it to our boneNode pointer.
@@ -322,10 +335,15 @@ static void CreateBoneTreeNode(SkeletalModelData* skm, EntitySkeleton* es, int32
 	// Assign Bone Number to the Bone Tree Node.
 	boneTreeNode->boneNumber = boneNumber;
 
-	// Now we can assign the node's pointer to that of our bones linear list.
-	if (boneNumber != -1) {
+	if (boneNumber >= 0) {
 		es->bones[boneNumber].boneNode = boneTreeNode;
+
 	}
+
+	// Now we can assign the node's pointer to that of our bones linear list.
+	//if (boneNumber != -1) {
+		
+	//}
 
 	// Create a node tree list for each of our child bones.
 	//if (childCount) {
@@ -339,7 +357,7 @@ static void CreateBoneTreeNode(SkeletalModelData* skm, EntitySkeleton* es, int32
 		// If the parent number matches.
 		const int32_t parentNumber = es->bones[jointIndex].parentNumber;
 
-		if (parentNumber >= 0 && parentNumber == boneNumber) {
+		if (( parentNumber >= 0 && boneNumber>= 0 ) && parentNumber == boneNumber) {
 			// So we can add a node to its children that points to the current bone.
 			boneTreeNode->boneChildren.push_back({
 				.boneNumber = boneNumber
@@ -390,12 +408,19 @@ const bool SKM_CreateEntitySkeletonFrom( SkeletalModelData* skm, EntitySkeleton*
 	*	#1: Generate a new bones list by copying over needed joint information to build our skeleton with.
 	**/
 	// Resize the skeleton's bones array to proper size.
-	es->bones.resize( skm->numberOfJoints );
+	es->bones.resize( skm->numberOfJoints + 1);
 
 	// Copy over specific joint data.
 	for ( auto &joint : skm->jointArray ) {
-		if ( joint.index < es->bones.size() ) {
+		if ( joint.index >= 0 && joint.index < es->bones.size() ) {
 			es->bones[joint.index] = {
+				.name = joint.name,
+				.parentNumber = joint.parentIndex,
+				.boneNode = nullptr,
+			};
+		}
+		if ( joint.index == -1 ) {
+			es->bones[skm->rootJointIndex] = {
 				.name = joint.name,
 				.parentNumber = joint.parentIndex,
 				.boneNode = nullptr,

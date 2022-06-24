@@ -23,7 +23,7 @@ using Frametime = std::chrono::duration<double>;
 static constexpr uint64_t   BASE_HZ = 60;
 
 // Calclate all related values we need to make it work smoothly even if we have
-// a nice 250fps, the game must run at 50fps.
+// a nice 250fps, the game must run at 60fps.
 static constexpr uint64_t   BASE_FRAMERATE = BASE_HZ;
 
 //! Non-integral Frametime in Milliseconds, stored as double precision.

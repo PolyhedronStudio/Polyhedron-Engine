@@ -56,7 +56,7 @@ static constexpr float ROOTMOTION_MOVE_SPEED_FALL_FAR		= -900;
 //! Uncomment for printing Debug Information Output when a SlideMove gets trapped.
 /*#define SG_ROOTMOTION_MOVE_DEBUG_TRAPPED_MOVES*/
 //! Uncomment for printing Debug blockMask results of SlideMoves.
-#define SG_ROOTMOTION_MOVE_DEBUG_RESULTMASK 1
+#define SG_ROOTMOTION_MOVE_DEBUG_RESULTMASK 0
 //! Comment to disable SlideMove velocity clamping.
 #define SG_ROOTMOTION_MOVE_CLAMPING 1
 
