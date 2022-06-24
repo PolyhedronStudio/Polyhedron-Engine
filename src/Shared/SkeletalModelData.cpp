@@ -173,6 +173,8 @@ void SKM_GenerateModelData(model_t* model) {
 
 					// Prepare offsetFrom with the current pose's translate for calculating next frame.
 					offsetFrom = totalStartTranslation;
+
+					totalTranslationSum += totalStartTranslation;
 				// Special Case: Take the total offset, subtract it from the end frame, and THEN
 				} else if (i == animation->endFrame - 1) {
 					// 
@@ -184,6 +186,8 @@ void SKM_GenerateModelData(model_t* model) {
 
 					// Push the total translation between each frame.					
 					animation->frameTranslates.push_back( totalBackTranslation );
+
+					totalTranslationSum += totalBackTranslation;	
 				// General Case: Set the offset we'll be coming from next frame.
 				} else {
 						
@@ -207,13 +211,14 @@ void SKM_GenerateModelData(model_t* model) {
 					offsetFrom = framePose->translate;
 				}
 			}
+						
+			// Sum up all frame distances into one single value.
+			animation->animationDistance = vec3_dlength(totalTranslationSum); //0.0;
+			//for (auto& distance : animation->frameDistances) {
+			//	animation->animationDistance += distance;
+			//}
 		}
 
-		// Sum up all frame distances into one single value.
-		animation->animationDistance = 0.0;
-		for (auto& distance : animation->frameDistances) {
-			animation->animationDistance += distance;
-		}
 #if DEBUG_MODEL_DATA == 1
 		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
 			animationIndex,
