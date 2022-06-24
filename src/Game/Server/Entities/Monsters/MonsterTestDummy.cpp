@@ -71,14 +71,87 @@ void MonsterTestDummy::Precache() {
     modelHandle = SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
 
 	// Precache the model for the server: Required to be able to process animations properly.
-	qhandle_t serverModelHandle = gi.PrecacheServerModel("models/monsters/slidedummy/slidedummy.iqm");
-	//skm = SKM_GenerateModelData(gi.GetServerModelByHandle(skeletalModelHandle));
+	qhandle_t serverModelHandle = gi.PrecacheSkeletalModelData("models/monsters/slidedummy/slidedummy.iqm");
+	
+	//
+	// TODO:	All skeletal functionality should go into client and server, neatly
+	//			put into a "Game API".
+	//
+	//			Each entity needs to be able to acquire a copy of skeletal model data
+	//			for its own self. Making the whole EntitySkeleton redundant to be as
+	//			a separate object acting on its own. In short: EntitySkeleton gets replaced
+	//			and encapsulated by SkeletalModelData.
+	//
+	//			The use of caching here might be, example: Let's say we have a certain animation
+	//			that we want to have certain bones relocated, we want to cache this for performance
+	//			as well as memory reasons. Without having unique SKM data, all entities
+	//			would now suffer from those relocated bones, while unwished for.
+	//
 	skm = gi.GetSkeletalModelDataByHandle(serverModelHandle);
 
-	// Zero out Z Axis for Run Stairs Up animation.
-	skm->animationMap["run_stairs_up"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-	skm->animationMap["walk_standard"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-	skm->animationMap["walk_stairs_down"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+
+	//
+	//	TODO:	Eventually, we need some animation.cfg like file because it's just simpler to work
+	//			with. Not to mention it allows for a workflow where Blender Action names do not
+	//			matter, but we just use the .cfg file to define these things ourselves.
+	//
+	if (skm) {
+		for (int32_t i = 0; i < skm->animations.size(); i++) {
+			skm->animations[i]->rootBoneAxisFlags = 0;//SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		}
+
+	skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+
+	skm->animationMap["PistolIdleTense"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+	skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	
+	skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+
+	skm->animationMap["PistolWhip"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	skm->animationMap["Reload"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+
+		// Pistol Walk Forward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
+		// for by physics.
+		//if ( skm->animationMap.contains( "WalkForward" ) ) {
+		//	skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//}
+
+		//// Pistol Walk Backward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
+		//// for by physics.
+		//if ( skm->animationMap.contains( "PistolWalkBackward") ) {
+		//	skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//}
+
+		//// Pistol Run Forward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
+		//// for by physics.
+		//if ( skm->animationMap.contains( "PistolRunForward" ) ) {
+		//	skm->animationMap["PistolRunForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//}
+		//// Pistol Run Backward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
+		//// for by physics.
+		//if ( skm->animationMap.contains( "PistolRunBackward" ) ) {
+		//	skm->animationMap["PistolRunBackward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//}
+
+		//// Pistol Strafe Left: ZeroX. - We only want sideways, meaning left/right, to be accounted for by physics.
+		//if ( skm->animationMap.contains( "WalkLeft" ) ) {
+		//	skm->animationMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		//}
+		//// Pistol Strafe Right: ZeroX. - We only want sideways, meaning left/right, to be accounted for by physics.
+		//if ( skm->animationMap.contains( "WalkRight" ) ) {
+		//	skm->animationMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		//}
+
+		//// We do NOT want idle to move at all.
+		//if ( skm->animationMap.contains( "PistolIdleTense" ) ) {
+		//	skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		//}
+	}
+	
+	//skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
 }
 
 //
@@ -95,7 +168,7 @@ void MonsterTestDummy::Spawn() {
     SetModel( "models/monsters/slidedummy/slidedummy.iqm" );
 	
     // Set the bounding box.
-    SetBoundingBox( { -16, -16, 0 }, { 16, 16, 90 } );
+    SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
 
     // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.
     SetDieCallback( &MonsterTestDummy::MonsterTestDummyDie );
@@ -107,6 +180,8 @@ void MonsterTestDummy::Spawn() {
 	// Setup thinking.
     SetThinkCallback( &MonsterTestDummy::MonsterTestDummyThink );
 	SetNextThinkTime(level.time + FRAMETIME);
+	//SwitchAnimation("PistolIdleTense");
+	//MonsterTestDummyUse(this, this);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -182,6 +257,7 @@ void MonsterTestDummy::Think() {
 	// Set our Yaw Speed.
 	SetYawSpeed(20.f);
 
+
 	// Set our Move Speed. (It is the actual sum of distance traversed in units.)
 	//SetMoveSpeed(64.015f);
 }
@@ -217,46 +293,16 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 
 	//// Get Activator Entity number.
 	//const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
-	int animationIndexA = skm->animationMap["walk_standard"].index;
-	int animationIndexB = skm->animationMap["walk_stairs_down"].index;
-	int animationIndexC = skm->animationMap["run_stairs_up"].index;
-
 	//if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
-		// Get current animation, switch to next.
-		int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
-
-		const char *animName;
-		if (animationIndex == animationIndexA) {
-			animName = "walk_stairs_down";
-			SwitchAnimation("walk_stairs_down");
-			animationToSwitchTo = animationIndexB;
-		}
-		else if (animationIndex == animationIndexB) {
-
-			//SetOrigin(GetOrigin() + vec3_t{0.f, 0.f, 45.f});
-			//SetMins({ -16.f, -16.f, -45.f });
-			//SetMaxs({ 16.f, 16.f, 45.f});
-
-			animName = "run_stairs_up";
-			SwitchAnimation("run_stairs_up");
-			animationToSwitchTo = animationIndexC;
-		}
-		else if (animationIndex == animationIndexC) {
-			//SetOrigin(GetOrigin() + vec3_t{0.f, 0.f, -45.f});
-			//SetMins({ -16.f, -16.f, 0.f });
-			//SetMaxs({ 16.f, 16.f, 90.f});
-			animName = "walk_standard";
-			SwitchAnimation("walk_standard");
-			animationToSwitchTo = animationIndexA;
-		} else {
-			animName = "walk_standard";
-			animationToSwitchTo = SwitchAnimation("walk_standard");
-			//SetMins({ -16.f, -16.f, 0.f });
-			//SetMaxs({ 16.f, 16.f, 90.f});
-		}
+	//	// Get current animation, switch to next.
+	int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
 
 		//// See if the index incremented has valid animation data.
-		//const int32_t nextAnimationIndex = (animationIndex + 1 < skm->animations.size() ? animationIndex + 1 : 0);
+		const int32_t nextAnimationIndex = (animationIndex + 1 < skm->animations.size() ? animationIndex + 1 : 0);
+
+	//if (nextAnimationIndex != )
+		const std::string animName = skm->animations[nextAnimationIndex]->name;
+		SwitchAnimation(animName);
 
 		//const char *animName;
 		//if ( nextAnimationIndex < skm->animations.size() ) {
@@ -292,7 +338,7 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 // Starts the animation.
 // 
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-	//SwitchAnimation("walk_standard");
+	//SwitchAnimation("WalkForward");
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
     SetNextThinkTime(level.time + FRAMETIME);

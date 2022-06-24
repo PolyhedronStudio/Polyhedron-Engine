@@ -140,7 +140,7 @@ typedef struct {
     int (*PrecacheSound)(const char *name);
     int (*PrecacheImage)(const char *name);
 
-	qhandle_t (*PrecacheServerModel)(const char *name);
+	qhandle_t (*PrecacheSkeletalModelData)(const char *name);
 	model_t* (*GetServerModelByHandle) (qhandle_t handle);
 	SkeletalModelData *(*GetSkeletalModelDataByHandle) (qhandle_t handle);
 

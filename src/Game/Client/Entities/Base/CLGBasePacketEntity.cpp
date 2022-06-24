@@ -249,19 +249,35 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 *			prototyping at this moment.
 **/
 static void UpdateSkeletalModelDataFromState(SkeletalModelData *skm, const EntityState& state) {
-		//skm->animationMap["run_stairs_up"].rootBoneAxisFlags = 
+		//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = 
 		//	SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;// | 
 		//	//SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
 
 	// Zero out X axis: DEPTH. This maintains the model rendering appropriately
 	// at our origin point.
-	skm->animationMap["run_stairs_up"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-	skm->animationMap["walk_standard"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	skm->animationMap["walk_stairs_down"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+
+	for (auto& anim : skm->animationMap) {
+		anim.second.rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation; //SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;  //SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation | SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+	}
+	//skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+
+	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation; 
+	//
+	//// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+//	skm->animationMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	//skm->animationMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	//
+	//skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+
+	//skm->animationMap["PistolWhip"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["Reload"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["Reload"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
 
 
 
-	//skm->animationMap["run_stairs_up"].rootBoneAxisFlags = 
+	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = 
 	//		SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | 
 		//	SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
 }
@@ -304,7 +320,7 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 		// TEMPORARILY - FOR BLENDING TEST.
 		//
 		// Get a pointer to the animation data.
-		SkeletalAnimation *skmAnimation = &skm->animationMap["run_stairs_up"];
+		SkeletalAnimation *skmAnimation = &skm->animationMap["Reload"];
 
 		// Reinitialize our refresh entity.
 		refreshAnimationB.animationIndex = skmAnimation->index;
@@ -366,7 +382,7 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 		// TEMPORARILY - FOR BLENDING TEST.
 		//
 		// Get a pointer to the animation data.
-		SkeletalAnimation *skmAnimation = &skm->animationMap["run_stairs_up"];
+		SkeletalAnimation *skmAnimation = &skm->animationMap["Reload"];
 
 		// Reinitialize our refresh entity.
 		refreshAnimationB.animationIndex = skmAnimation->index;
@@ -835,7 +851,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 				}
 
 				// TEMPORARILY: ANIMATION POSE BLEND TEST
-				refreshEntity.rootBoneAxisFlagsB = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+				//refreshEntity.rootBoneAxisFlagsB = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
 			}
 
 			//

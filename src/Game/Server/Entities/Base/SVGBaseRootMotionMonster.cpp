@@ -121,27 +121,23 @@ const int32_t SVGBaseRootMotionMonster::GetAnimationStateFrame( const EntityAnim
 	// Return 0 in case there is no valid state data.
 	if ( !animationState ) {
 		// TODO: gi.DPrintf("");
-		return -1;
-	}
-
-	// Get current animation frame.
-	const int32_t animationFrame = animationState->frame;
-
-	// We need to be careful, if an animation has passed its end-frame at the
-	// current moment in time, it's index is set to -1. We ensure to return the end frame for
-	// proper logic use.
-	if (animationFrame == -1) {
-		// TODO: gi.DPrintf("");
-		std::string errstr= __func__;
-		errstr+= ": error: animationFrame=" + std::to_string(animationFrame) + "\n";
-		SVG_DPrint(errstr);
-		return -1;
+		return 0;
 	}
 
 	// Get animation start frame.
 	const int32_t animationStartFrame = animationState->startFrame;
+	// Get animation End frame.
+	const int32_t animationEndFrame = animationState->endFrame - animationState->startFrame;
+	// Get current animation frame.
+	int32_t animationFrame = animationState->frame;
+
+	// Ensure if it is -1, it means animation ended so we must be stuck in end frame.
+	if (animationFrame == -1) {
+		animationFrame = animationEndFrame;
+	}
+
 	// Subtract from current frame to get and return the 0 start index based frame number.
-	return animationState->frame - animationStartFrame;
+	return Clampf(animationState->frame - animationStartFrame, 0, animationEndFrame );
 }
 
 /**
@@ -275,15 +271,23 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const std::strin
 }
 
 /**
-*	@brief	Calculated the move speed of the root bone for the given 'moveDistance' and moveTranslate.
+*	@brief	Calculated the move speed of the root bone for the given 'totalMoveDistance' and moveTranslate.
 *	@return	Value of the calculated move speed.
 **/
-const double SVGBaseRootMotionMonster::GetMoveSpeedForTranslatedDistance(const double &moveDistance, const vec3_t &moveTranslate, const double &unitScale) {
+const double SVGBaseRootMotionMonster::GetMoveSpeedForTraversedFrameDistance(const double &totalMoveDistance, const float &frameMoveDistance, const double &unitScale) {
 	// Calculate move distance scaled to Quake units.
-	const double scaledMoveDistance = unitScale * moveDistance;
+	const double scaledMoveDistance = totalMoveDistance * unitScale; //moveDistance * unitScale;
+
+	// Length of move translate.
+	const double moveFrameMoveDistance = frameMoveDistance; //vec3_dlength(moveTranslate);
 
 	// Calculate move speed.
-	return scaledMoveDistance / vec3_dlength(moveTranslate);
+	if (scaledMoveDistance == 0) {
+		//return 0;
+	} else if (moveFrameMoveDistance == 0) {
+		return 0;
+	}
+	return scaledMoveDistance / moveFrameMoveDistance;
 }
 
 
@@ -382,11 +386,11 @@ void SVGBaseRootMotionMonster::RefreshAnimationState() {
 	//const bool animationFinished	= AnimationFinished( currentAnimationState );
 	//// Gather animation indexes. TODO: Don't look these up constantly, that's bothersome.
 	//// Walk.
-	//const int32_t standardWalkIndex		= skm->animationMap["walk_standard"].index;
+	//const int32_t standardWalkIndex		= skm->animationMap["WalkForward"].index;
 	//// Stairs Up
-	//const int32_t walkStairsUpIndex		= skm->animationMap["run_stairs_up"].index;	// Yes, I am aware it is atm named run_stairs_up, sue me.
+	//const int32_t walkStairsUpIndex		= skm->animationMap["PistolIdleTense"].index;	// Yes, I am aware it is atm named run_stairs_up, sue me.
 	//// Stairs Down.
-	//const int32_t walkStairsDownIndex	= skm->animationMap["walk_stairs_down"].index;
+	//const int32_t walkStairsDownIndex	= skm->animationMap["Reload"].index;
 
 	//// There's two things we need to take care of:
 	////		- Animations end playing, when they do, they either hit its end frame or reached
@@ -424,7 +428,7 @@ void SVGBaseRootMotionMonster::RefreshAnimationState() {
 	//bool isAnimWalking = ( currentAnimationIndex == standardWalkIndex ? true : false );
 
 	///*if (currentAnimationIndex != standardWalkIndex) {
-	//	currentAnimationIndex = SwitchAnimation( "walk_standard" );
+	//	currentAnimationIndex = SwitchAnimation( "WalkForward" );
 	//}*/
 
 	//// If we are playing walking animation.
@@ -437,7 +441,7 @@ void SVGBaseRootMotionMonster::RefreshAnimationState() {
 	//	// - A: We got no new animation set yet.
 	//	// - B: We aren't playing the animation already.
 	//	if ( !newAnimationIndex && !isAnimStairsDown ) {
-	//		newAnimationIndex = SwitchAnimation ("walk_stairs_down" );
+	//		newAnimationIndex = SwitchAnimation ("Reload" );
 	//	}
 	//}
 	//// See if we are playing it, and if we are, whether we should prepare to cancel it.
@@ -445,7 +449,7 @@ void SVGBaseRootMotionMonster::RefreshAnimationState() {
 	//	 if ( !currentStepDownAhead && !currentSteppedDown ) {
 	//		if ( !newAnimationIndex ) {
 	//			if ( animationFinished && currentAnimationIndex != standardWalkIndex) {
-	//				newAnimationIndex = SwitchAnimation("walk_standard");
+	//				newAnimationIndex = SwitchAnimation("WalkForward");
 	//			}
 	//		}
 	//	 }
@@ -460,7 +464,7 @@ void SVGBaseRootMotionMonster::RefreshAnimationState() {
 	//	// - A: We got no new animation set yet.
 	//	// - B: We aren't playing the animation already.
 	//	if (!newAnimationIndex && !isAnimStairsUp) {
-	//		newAnimationIndex = SwitchAnimation ("run_stairs_up" );
+	//		newAnimationIndex = SwitchAnimation ("PistolIdleTense" );
 	//	}
 	//}
 	//// See if we are playing it, and if we are, whether we should prepare to cancel it.
@@ -468,7 +472,7 @@ void SVGBaseRootMotionMonster::RefreshAnimationState() {
 	//	if ( !currentStepUpAhead && !currentSteppedUp ) {
 	//		if (!newAnimationIndex && !isAnimWalking) {
 	//			if (animationFinished && currentAnimationIndex != standardWalkIndex ) {
-	//				newAnimationIndex = SwitchAnimation("walk_standard");
+	//				newAnimationIndex = SwitchAnimation("WalkForward");
 	//			}
 	//		}
 	//	}
@@ -1044,8 +1048,8 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	
 	// Calculate move speed. (The number 68.598419 comes from animation data itself
 	// and likely needs to be looked at and/or made a constant standard all over.)
-	static constexpr double rbFrameMoveUnitScale = 68.598419;
-	const double frameMoveSpeed = GetMoveSpeedForTranslatedDistance( frameDistance, frameTranslate, rbFrameMoveUnitScale );
+	double rbFrameMoveUnitScale = skm->animations[animationIndex]->animationDistance;
+	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( rbFrameMoveUnitScale, frameDistance, 1.5 );
 
 	// UGLY HACK
 	//double moveSpeed = 0.0;
@@ -1078,21 +1082,41 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
 	//const vec3_t vTranslate		= vec3_t { -frameTranslate.x, -frameTranslate.y, -frameTranslate.z } * vDirectionXY;
 
-	// Normalize the direction vector.
+	//// Get translation without Z.
+	//const vec3_t vTranslateNoZ = { -frameTranslate.x, -frameTranslate.y, 0.0f /* -frameTranslate.x */};
+
+	//// Normalize the direction vector.
+	//const vec3_t vNormalizedDirection = vec3_normalize( direction );
+	//// Get ourselves a normalized direction without Z.
+	//const vec3_t vDirectionXY	= vec3_t{ vNormalizedDirection.x, vNormalizedDirection.y, 0.f };
+	//// Get ourselves our frame move direction
+	//vec3_t vFrameMoveDirectionXY	= vec3_normalize( vTranslateNoZ );
+	//vFrameMoveDirectionXY.z = 0;
+	//// Create our move's distance vector by setting its x and y to the rbFrameMoveSpeed (Meaning we got the distance to travel per frame.)
+
+	//const vec3_t vDistance		= vec3_t{ (float)( frameMoveSpeed ), 0.f, 0.f };
+	//// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
+	//const vec3_t vTranslate		= vTranslateNoZ * vFrameMoveDirectionXY;
+	//// Calculate the total moveVelocity into the normal's direction.
+	//vec3_t moveVelocity = (vTranslateNoZ) * vDirectionXY; //(vTranslate) + (vDistance * vDirectionXY); // vec3_zero();//
+
 	const vec3_t vNormalizedDirection = vec3_normalize( direction );
 	// Get ourselves a normalized direction without Z.
 	const vec3_t vDirectionXY	= vec3_t { vNormalizedDirection.x, vNormalizedDirection.y, 0.f };
 	// Create our move's distance vector by setting its x and y to the rbFrameMoveSpeed (Meaning we got the distance to travel per frame.)
 	const vec3_t vDistance		= vec3_t { (float)( frameMoveSpeed ), (float)( frameMoveSpeed ), 0.f } * vDirectionXY;
 	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
-	const vec3_t vTranslate		= vec3_t { -frameTranslate.x, -frameTranslate.y, 0.f } * vDirectionXY;
+	const vec3_t vTranslate		= vec3_t { frameTranslate.x, frameTranslate.y, 0.f };
+	// Get frame translate move direction.
+	const vec3_t vTranslateDir	= vec3_normalize( vTranslate );
+
 	// Calculate the total moveVelocity into the normal's direction.
-	vec3_t moveVelocity = vDistance + vTranslate;
+	vec3_t moveVelocity = vDistance + (vTranslate * vec3_normalize(frameTranslate));
 
 	//// It is valid, get a hold of the animation data.
 	//auto *animationData = skm->animations[animationIndex];
 
-	//if (animationData->name == "run_stairs_up") {
+	//if (animationData->name == "PistolIdleTense") {
 	//	// Last but not least, we want to maintain our old Z velocity.
 	//	moveVelocity.z = -frameTranslate.z * (float)( frameMoveSpeed );
 	//} else {
@@ -1102,6 +1126,18 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 
 	// Old Velocity for Z Axis (Maintain darn gravity)
 	moveVelocity.z = oldVelocity.z;
+	
+	gi.DPrintf("Velocity Debug (Frame #%i, frameMoveSpeed=%f, frameMoveDistance=%f):\n", 
+		animationFrame,
+		frameMoveSpeed,
+		frameDistance
+	);
+	gi.DPrintf("	moveVelocity(%f,%f,%f),	vTranslate(%f,%f,%f)\n	vDistance(%f,%f,%f),\n	vTranslateDir(%f,%f,%f)\n",
+		moveVelocity.x, moveVelocity.y, moveVelocity.z,
+		vTranslate.x, vTranslate.y, vTranslate.z,
+		vDistance.x, vDistance.y, vDistance.z,
+		vTranslateDir.x, vTranslateDir.y, vTranslateDir.z
+	);
 
 	// And let's go!.
 	SetVelocity(moveVelocity);

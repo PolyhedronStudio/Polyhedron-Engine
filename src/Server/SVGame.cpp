@@ -933,7 +933,7 @@ void SV_InitGameProgs(void)
     importAPI.PrecacheSound = PF_PrecacheSound;
     importAPI.PrecacheImage = PF_PrecacheImage;
 	
-	importAPI.PrecacheServerModel = PF_PrecacheSkeletalModelData;
+	importAPI.PrecacheSkeletalModelData = PF_PrecacheSkeletalModelData;
 	importAPI.GetServerModelByHandle = PF_GetServerModelByHandle;
 	importAPI.GetSkeletalModelDataByHandle = PF_GetSkeletalModelDataByHandle;
 	importAPI.SetModel = PF_setmodel;

@@ -62,7 +62,7 @@ void SKM_GenerateModelData(model_t* model) {
 	// Get our Joint data sorted out nicely.
 	for (int32_t jointIndex = 0; jointIndex < model->iqmData->num_joints; jointIndex++) {
 		// Get the parent joints.
-		const int32_t jointParentIndex = (jointIndex == 0 ? -1 : model->iqmData->jointParents[jointIndex]);
+		const const int32_t jointParentIndex = (jointIndex == 0 ? -1 : model->iqmData->jointParents[jointIndex]);
 
 		// Create our joint object.
 		SkeletalModelData::Joint jointData = {
@@ -79,7 +79,7 @@ void SKM_GenerateModelData(model_t* model) {
 		}
 
 		// If we are dealing with the "root" bone, store it.
-		if (jointData.name == "root") {
+		if (jointData.name == "mixamorig8:Hips") {
 			skm->rootJointIndex = jointIndex;
 		}
 	}
@@ -147,7 +147,7 @@ void SKM_GenerateModelData(model_t* model) {
 			vec3_t totalTranslateDistance = vec3_zero();
 
 			// Start and end pose pointers.
-			const iqm_transform_t *startPose = &model->iqmData->poses[skm->rootJointIndex + (animation->startFrame * model->iqmData->num_poses)];
+			const iqm_transform_t *startPose = &model->iqmData->poses[ skm->rootJointIndex + ( animation->startFrame * model->iqmData->num_poses ) ];
 			const iqm_transform_t *endPose = &model->iqmData->poses[skm->rootJointIndex + ((animation->endFrame - animation->startFrame) * model->iqmData->num_poses)];
 
 			// Get the start and end pose translations.
@@ -157,24 +157,28 @@ void SKM_GenerateModelData(model_t* model) {
 			// We count(sum) the final total translation of all frames between start and end so we can use
 			// this to calculate their translational offsets with. (Otherwise we'd get minmally 2 frames where
 			// no motion takes place, this looks choppy.) 
-			vec3_t totalTranslation = vec3_zero();
-			for (int32_t i = animation->startFrame; i <= animation->endFrame; i++) {
+			vec3_t totalTranslationSum = vec3_zero();
+			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
 				// Get the Frame Pose.
 				const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
 
 				// Special Case: First frame has no offset really.
 				if (i == animation->startFrame) {
-					const vec3_t totalStartTranslation = startFrameTranslate; //- endFrameTranslate;
+					const vec3_t totalStartTranslation = startFrameTranslate - endFrameTranslate;
 					// Push the total traversed frame distance.
 					animation->frameDistances.push_back( vec3_dlength( totalStartTranslation ) );
 
 					// Push the total translation between each frame.					
 					animation->frameTranslates.push_back( totalStartTranslation );
+
+					// Prepare offsetFrom with the current pose's translate for calculating next frame.
+					offsetFrom = totalStartTranslation;
 				// Special Case: Take the total offset, subtract it from the end frame, and THEN
-				} else if (i == animation->endFrame) {
+				} else if (i == animation->endFrame - 1) {
 					// 
-					const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
-						
+					const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate; //startFrameTranslate - endFrameTranslate;
+					//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
+
 					// Push the total traversed frame distance.
 					animation->frameDistances.push_back( vec3_dlength( totalBackTranslation ) );
 
@@ -185,17 +189,21 @@ void SKM_GenerateModelData(model_t* model) {
 						
 					// Calculate translation between the two frames.
 					const vec3_t translate = offsetFrom - framePose->translate;
+					//const vec3_t translate = offsetFrom - framePose->translate;
 
-					// Add it to our sum.
-					totalTranslation += translate; // or offsetfrom?
+					// Calculate the distance between the two frame translations.
+					const double frameDistance = vec3_dlength( translate );
 
 					// Push the total traversed frame distance.
-					animation->frameDistances.push_back(vec3_dlength(translate));
+					animation->frameDistances.push_back( frameDistance );
 
 					// Push the total translation between each frame.					
-					animation->frameTranslates.push_back(translate);
+					animation->frameTranslates.push_back( translate );
 
-					// Store our new offsetFrom to the current pose's translate.
+					// Increment our total translation sum.
+					totalTranslationSum += translate; // or offsetfrom?
+
+					// Prepare offsetFrom with the current pose's translate for calculating next frame.
 					offsetFrom = framePose->translate;
 				}
 			}
@@ -207,7 +215,7 @@ void SKM_GenerateModelData(model_t* model) {
 			animation->animationDistance += distance;
 		}
 #if DEBUG_MODEL_DATA == 1
-		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%d):\n",
+		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
 			animationIndex,
 			animationData->name, //animation.name, Since, temp var and .c_str()
 			animation->startFrame,
@@ -249,11 +257,11 @@ void SKM_GenerateModelData(model_t* model) {
 		
 	// Debug Info:
 #if DEBUG_MODEL_DATA == 1
-	Com_DPrintf("	Frame (#%i): (mins.x=%f, mins.y=%f, mins.z=%f), (maxs.x=%f, maxs.y=%f, maxs.z=%f)\n",
-		frameIndex,
-		box.mins.x, box.mins.y, box.mins.z,
-		box.maxs.x, box.maxs.y, box.maxs.z
-	);
+	//Com_DPrintf("	Frame (#%i): (mins.x=%f, mins.y=%f, mins.z=%f), (maxs.x=%f, maxs.y=%f, maxs.z=%f)\n",
+	//	frameIndex,
+	//	box.mins.x, box.mins.y, box.mins.z,
+	//	box.maxs.x, box.maxs.y, box.maxs.z
+	//);
 #endif
 			skm->boundingBoxes.push_back(box);
 		}

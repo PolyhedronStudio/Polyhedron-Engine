@@ -91,7 +91,7 @@ public:
 	*	@brief	Calculated the move speed of the root bone for the given 'moveDistance' and moveTranslate.
 	*	@return	Value of the calculated move speed.
 	**/
-	const double GetMoveSpeedForTranslatedDistance(const double &moveDistance, const vec3_t &moveTranslate, const double &unitScale = 1.0);
+	const double GetMoveSpeedForTraversedFrameDistance(const double &totalMoveDistance, const float &frameMoveDistance, const double &unitScale);
 
 
 	/**

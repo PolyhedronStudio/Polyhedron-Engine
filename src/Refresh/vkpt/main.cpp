@@ -1811,16 +1811,16 @@ static void process_regular_entity(
 			float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
 
 			// Compute Joints: Relative, World, and Local matrices.
-			MOD_ComputeIQMRelativeJoints(model, 0, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
-			MOD_ComputeIQMRelativeJoints(model, SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, relativeJointsB);
+			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
+			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, relativeJointsB);
 			
 			// From Bone 2:
-			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 2, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+//			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 2, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
 			// From Bone 3:
-			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+//			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
 
 			// Apply RootBoneAxisFlags for Translation.
-			MOD_ApplyRootBoneAxisFlags(model, entity->rootBoneAxisFlags, 0, relativeJointsA, 1.0f, 1.0f - entity->backlerp, entity->backlerp);
+			//MOD_ApplyRootBoneAxisFlags(model, entity->rootBoneAxisFlags, 0, relativeJointsA, 1.0f, 1.0f - entity->backlerp, entity->backlerp);
 
 			MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
 			MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);

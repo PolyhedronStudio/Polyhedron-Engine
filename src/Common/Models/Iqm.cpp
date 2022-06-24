@@ -789,30 +789,30 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 	if (oldFrame == currentFrame) {
 		const iqm_transform_t* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
 		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, pose++, relativeJoint++) {
-			//// Do we have skeletal model data?
-			//if (skmData && poseIndex == skmData->rootJointIndex) {
-			//	// Copy over the pose's translation.
-			//	relativeJoint->translate = pose->translate;
+			// Do we have skeletal model data?
+			if (skmData && poseIndex == skmData->rootJointIndex) {
+				// Copy over the pose's translation.
+				relativeJoint->translate = pose->translate;
 
-			//	// See whether to cancel/zero out any axis.
-			//	if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
-			//		relativeJoint->translate.x = 0.0;
-			//	}
-			//	if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
-			//		relativeJoint->translate.y = 0.0;
-			//	}
-			//	if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
-			//		relativeJoint->translate.z = 0.0;
-			//	}
+				// See whether to cancel/zero out any axis.
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+					relativeJoint->translate.x = 0.0;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+					relativeJoint->translate.y = 0.0;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+					relativeJoint->translate.z = 0.0;
+				}
 
-			//	// Copy over the pose's scale.
-			//	relativeJoint->scale = pose->scale;
-			//	// Copy over the pose's rotation.
-			//	QuatCopy(pose->rotate, relativeJoint->rotate);
-			//	
-			//	// Skip regular treatment.
-			//	continue;
-			//}
+				// Copy over the pose's scale.
+				relativeJoint->scale = pose->scale;
+				// Copy over the pose's rotation.
+				QuatCopy(pose->rotate, relativeJoint->rotate);
+				
+				// Skip regular treatment.
+				continue;
+			}
 
 			// Copy over the pose's translation.
 			relativeJoint->translate = pose->translate;
@@ -827,39 +827,39 @@ void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *mod
 		const iqm_transform_t* oldpose = &iqmModel->poses[oldFrame * iqmModel->num_poses];
 		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, oldpose++, pose++, relativeJoint++)
 		{
-			//// Do we have skeletal model data?
-			//if (skmData && poseIndex == skmData->rootJointIndex) {
-			//	
-			//	// Cancel out if the Zero*Translation flag is set, otherwise, calculate translation for that axis.
-			//	//if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
-			//	//	relativeJoint->translate.x = 0.0;
-			//	//} else {
-			//		relativeJoint->translate.x = oldpose->translate.x * backLerp + pose->translate.x * lerp;
-			//	//}
-			//	//if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
-			//	//	relativeJoint->translate.y = 0.0;
-			//	//} else {
-			//		relativeJoint->translate.y = oldpose->translate.y * backLerp + pose->translate.y * lerp;
-			//	//}
-			//	//if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
-			//	//	relativeJoint->translate.z = 0.0;
-			//	//} else {
-			//		relativeJoint->translate.z = oldpose->translate.z * backLerp + pose->translate.z * lerp;
-			//	//}
-			//	
-			//	// Calculate the Joint's pose scale.				
-			//	relativeJoint->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
-			//	relativeJoint->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
-			//	relativeJoint->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
+			// Do we have skeletal model data?
+			if (skmData && poseIndex == skmData->rootJointIndex) {
+				
+				// Cancel out if the Zero*Translation flag is set, otherwise, calculate translation for that axis.
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+					relativeJoint->translate.x = 0.0;
+				} else {
+					relativeJoint->translate.x = oldpose->translate.x * backLerp + pose->translate.x * lerp;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+					relativeJoint->translate.y = 0.0;
+				} else {
+					relativeJoint->translate.y = oldpose->translate.y * backLerp + pose->translate.y * lerp;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+					relativeJoint->translate.z = 0.0;
+				} else {
+					relativeJoint->translate.z = oldpose->translate.z * backLerp + pose->translate.z * lerp;
+				}
+				
+				// Calculate the Joint's pose scale.				
+				relativeJoint->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
+				relativeJoint->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
+				relativeJoint->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
 
-			//	// Copy over the pose's rotation.
-			//	//QuatCopy(pose->rotate, relativeJoint->rotate);
-			//	// Slerp rotation.
-			//	QuatSlerp(oldpose->rotate, pose->rotate, lerp, relativeJoint->rotate);
+				// Copy over the pose's rotation.
+				//QuatCopy(pose->rotate, relativeJoint->rotate);
+				// Slerp rotation.
+				QuatSlerp(oldpose->rotate, pose->rotate, lerp, relativeJoint->rotate);
 
-			//	// Skip regular treatment.
-			//	continue;
-			//}
+				// Skip regular treatment.
+				continue;
+			}
 
 			// Calculate translation.
 			relativeJoint->translate[0] = oldpose->translate[0] * backLerp + pose->translate[0] * lerp;
@@ -890,8 +890,7 @@ void MOD_ApplyRootBoneAxisFlags(const model_t* model, const int32_t rootBoneAxis
 	}
 			
 	// Do we have skeletal model data?
-	if (skmData) {
-
+	if (skmData && rootBoneNumber >= 0) {
 		// Get Root Bone Pose Transform.
 		iqm_transform_t *rootBone = bonePoses + rootBoneNumber;
 

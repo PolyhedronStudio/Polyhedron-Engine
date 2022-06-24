@@ -283,17 +283,20 @@ const int32_t SG_RootMotion_PerformMove( GameEntity *geSlider, const int32_t con
 		// Move.
 		moveResultMask = SG_RootMotion_MoveFrame( rootMotionMoveState );
 
-		//if ( (moveResultMask & RootMotionMoveResult::Trapped) ) { //} || !(moveResultMask & RootMotionMoveResult::Moved)) {
-		//	return -1;
-		//}
+		if ( (moveResultMask & RootMotionMoveResult::Trapped) ) { //} || !(moveResultMask & RootMotionMoveResult::Moved)) {
+			rootMotionMoveState->origin = org0;
+			rootMotionMoveState->velocity = vel0;
+			return -1;
+		}
+	//}
 		//// if ( ... moveResultMask ... & Flags::Trapped)
 		//// return ?
 		//// endif
 
-		///**
-		//*	Step #2: Try and move from origin.z + stepheight.
-		//**/
-		//// Origin and Velocity after the first move.
+		/**
+		*	Step #2: Try and move from origin.z + stepheight.
+		**/
+		/// Origin and Velocity after the first move.
 		//const vec3_t org1 = rootMotionMoveState->origin;
 		//const vec3_t vel1 = rootMotionMoveState->velocity;
 
