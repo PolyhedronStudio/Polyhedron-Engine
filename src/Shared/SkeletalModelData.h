@@ -209,6 +209,13 @@ struct SkeletalAnimation {
 	**/
 	//! The sum of total distance travelled by the root bone per frame.
 	double animationDistance = 0.0;
+
+	//! TODO: Add a decent Bone Access API and transform code using this to using that.
+	double frameStartDistance = 0.0;
+	double frameEndDistance = 0.0f;
+	//! Start Frame distance.
+	//! The total distances travelled by the root bone per frame.
+	std::vector<double> frameDistanceSum;
 	//! The total distances travelled by the root bone per frame.
 	std::vector<double> frameDistances;
 	//! The translates of root bone per frame.

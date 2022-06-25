@@ -9,8 +9,17 @@
 ***/
 #include "Shared.h"
 
-#define DEBUG_MODEL_DATA 1
 
+/**
+*
+*	Debug Configurations: 
+*
+*	In order to prevent an annoying flood of information to seek through, there is a unique 
+*	define to enable debug output specifically for each section of the data generation process.
+*
+**/
+#define DEBUG_MODEL_DATA 1
+#define DEBUG_MODEL_BOUNDINGBOX_DATA 0
 
 
 /**
@@ -138,29 +147,22 @@ void SKM_GenerateModelData(model_t* model) {
 
 		// Calculate distances.
 		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
-
-
-			// Used to store the total translation distance from startFrame to end Frame,
-			// We use this in order to calculate the appropriate distance between start and end frame.
-			// (Ie, assuming an animation loops, we need that.)
-			vec3_t totalTranslateDistance = vec3_zero();
-
 			// Start and end pose pointers.
 			const iqm_transform_t *startPose = &model->iqmData->poses[ skm->rootJointIndex + ( animation->startFrame * model->iqmData->num_poses ) ];
-			
-			
 			const iqm_transform_t *endPose = (animation->startFrame == 0 ? startPose : &model->iqmData->poses[skm->rootJointIndex + ( (animation->endFrame - 1) * model->iqmData->num_poses)] );
 
 			// Get the start and end pose translations.
 			const vec3_t startFrameTranslate	= startPose->translate;
 			const vec3_t endFrameTranslate		= endPose->translate;
 
-			// We count(sum) the final total translation of all frames between start and end so we can use
-			// this to calculate their translational offsets with. (Otherwise we'd get minmally 2 frames where
-			// no motion takes place, this looks choppy.) 
-			//vec3_t totalTranslationSum = vec3_zero();
-						// The offset between frames.
+			// Used to store the total translation distance from startFrame to end Frame,
+			// We use this in order to calculate the appropriate distance between start and end frame.
+			// (Ie, assuming an animation loops, we need that.)
+			vec3_t totalTranslateDistance = vec3_zero();
+
+			// The offset between the previous processed and the current processing frame.
 			vec3_t offsetFrom = vec3_zero();
+
 			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
 				// Get the Frame Pose.
 				const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
@@ -260,7 +262,7 @@ void SKM_GenerateModelData(model_t* model) {
 	*	Model Bounds:
 	**/
 // Debug info:
-#if DEBUG_MODEL_DATA == 1
+#if DEBUG_MODEL_BOUNDINGBOX_DATA == 1
 	Com_DPrintf("BoundingBoxes:\n");
 #endif
 	// Get the Model Bounds for each frame.
@@ -274,7 +276,7 @@ void SKM_GenerateModelData(model_t* model) {
 			bounds+= 6;
 		
 	// Debug Info:
-#if DEBUG_MODEL_DATA == 1
+#if DEBUG_MODEL_BOUNDINGBOX_DATA == 1
 	//Com_DPrintf("	Frame (#%i): (mins.x=%f, mins.y=%f, mins.z=%f), (maxs.x=%f, maxs.y=%f, maxs.z=%f)\n",
 	//	frameIndex,
 	//	box.mins.x, box.mins.y, box.mins.z,

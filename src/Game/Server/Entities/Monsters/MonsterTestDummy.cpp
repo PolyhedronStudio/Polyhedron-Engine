@@ -315,24 +315,29 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 	} else 	if (animationIndex == skm->animationMap["RunForward"].index) {
 		SwitchAnimation("Idle");
 	} else 	if (animationIndex == skm->animationMap["Idle"].index) {
-		SwitchAnimation("WalkForward");
+		SwitchAnimation("WalkForwardLeft");
+	} else 	if (animationIndex == skm->animationMap["WalkForwardLeft"].index) {
+		SwitchAnimation("WalkForwardRight");
+	} else 	if (animationIndex == skm->animationMap["WalkForwardRight"].index) {
+		SwitchAnimation("WalkRight");
+	} else 	if (animationIndex == skm->animationMap["WalkRight"].index) {
+		SwitchAnimation("WalkLeft");
 	} else 	{ //if (animationIndex == skm->animationMap["WalkForward"].index) {
 		SwitchAnimation("WalkForward");
 	}
 
 //	// Get ent numbers for easy comparison.
-//	const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
-//	const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
-//
-//
-//	if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
-//		// Get current animation, switch to next.
+	const int32_t goalEntityNumber = (geGoal ? geGoal->GetNumber() : -1);
+	const int32_t activatorEntityNumber = (activator ? activator->GetNumber() : -1);
+
+	if (activatorEntityNumber != -1 && goalEntityNumber != activatorEntityNumber) {
+		// Get current animation, switch to next.
 //		const int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
 //
 //		//// See if the index incremented has valid animation data.
 //		const int32_t nextAnimationIndex = (animationIndex + 1 < skm->animations.size() ? animationIndex + 1 : 5);
 //
-//	//if (nextAnimationIndex != )
+//	if (nextAnimationIndex != )
 //		const std::string animName = skm->animations[nextAnimationIndex]->name;
 //		SwitchAnimation(animName);
 //		
@@ -347,17 +352,29 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 //		//	|| nextAnimationIndex == skm->animationMap["WalkLeft"].index
 //		//	|| nextAnimationIndex == skm->animationMap["WalkRight"].index) ) {
 //
-//			SetGoalEntity(activator);
-//			SetEnemy(activator);
+			SetGoalEntity(activator);
+			SetEnemy(activator);
 ////		}
 //	//	else {
 //		//	SetGoalEntity( nullptr );
 //	//		SetEnemy( nullptr );
 //		//}
-//	} else {
+	} else {
+		// TEMP CODE: SET THE GOAL AND ENEMY ENTITY.
+		ServerGameWorld *gw = GetGameWorld();
+		for (auto* geGoal : GetGameWorld()->GetGameEntityRange(0, MAX_WIRED_POD_ENTITIES)
+			| cef::IsValidPointer
+			| cef::HasServerEntity
+			| cef::HasKeyValue("targetname", strMonsterGoalTarget)) {
+				SetGoalEntity(geGoal);
+				SetEnemy(geGoal);
+
+			//gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoal->GetTargetName().c_str());
+		}
+
 //		SetGoalEntity( nullptr );
 //		SetEnemy( nullptr );
-//	}
+	}
 }
 
 /////

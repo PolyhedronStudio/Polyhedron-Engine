@@ -1081,14 +1081,49 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Normalize our direction 
 	const vec3_t vDirectionNormal = vNavigateDirection;
 
-	// Create our move's distance vector by setting its x and y to the rbFrameMoveSpeed (Meaning we got the distance to travel per frame.)
-	const vec3_t vDistance		= vec3_t { (float)( frameMoveSpeed ), (float)( frameMoveSpeed ), 0.f };// * vNavigateDirection;
+	// Calculate the move's distance into its heading navigation direction.
+	const vec3_t vFrameMoveDistance		= vec3_t { 
+		(float)( frameMoveSpeed ), 
+		(float)( frameMoveSpeed ), 
+		(float)( frameMoveSpeed )
+	} * vNavigateDirection;
 
-	// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
-	const vec3_t vTranslate		= vec3_t { frameTranslate.x, frameTranslate.y, 0.f };
+	// Get the frame's translation without the Z axis.
+	const vec3_t vFrameTranslate		= vec3_t { frameTranslate.x, frameTranslate.y, 0.f };
 	// Get frame translate move direction.
-	const vec3_t vTranslateDir	= vec3_normalize( ( vTranslate ) );
+	const vec3_t vFrameTranslateDir		= vec3_normalize( ( vFrameTranslate ) );
 	
+	// Calculate the frame's final moveDistance for its translation directory.
+	const vec3_t vFrameMoveTranslate	= vFrameTranslate * vFrameTranslateDir;
+	
+	// Now calculate our final move velocity.
+	vec3_t moveVelocity = vFrameMoveTranslate + vFrameMoveDistance;//vec3_zero();
+	//vec3_t vStrafeDistance = vec3_zero();
+	//if (animationIndex == skm->animationMap["WalkForwardRight"].index
+	//	|| animationIndex == skm->animationMap["WalkForwardLeft"].index 
+	//	|| animationIndex == skm->animationMap["WalkLeft"].index
+	//	|| animationIndex == skm->animationMap["WalkRight"].index 
+	//) {
+	//	const vec3_t vNormalizedAngles = vec3_normalize( vec3_euler( GetAngles() ) );
+
+	//	//const vec3_t vStrafeDirection = vec3_negate( vec3_normalize( vec3_cross( vec3_up(), GetAngles() ) ) );
+	//	
+	//	moveVelocity = vFrameMoveTranslate + vFrameMoveDistance;// * vStrafeDirection;
+	//	
+	//} else {
+	//	moveVelocity = (vTranslate + vDistance ) * vDirectionNormal;
+	//}
+
+	if (animationIndex == skm->animationMap["TPose"].index
+		|| animationIndex == skm->animationMap["Idle"].index 
+		|| animationIndex == skm->animationMap["IdleAiming"].index
+		|| animationIndex == skm->animationMap["RifleAim"].index 
+		|| animationIndex == skm->animationMap["RifleFire"].index 
+		|| animationIndex == skm->animationMap["WalkingToDying"].index 
+		
+	) {
+		moveVelocity = vec3_zero();
+	}
 
 
 ////Progress animation frames based on root bone distance
@@ -1120,39 +1155,6 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	**/
 	// Get the current velocity stored as "oldVelocity".
 	const vec3_t oldVelocity = GetVelocity();
-
-	// Calculate the total moveVelocity into the normal's direction.
-	vec3_t moveVelocity = vec3_zero(); //( vDistance * vTranslateDir ) * ( vTranslate * vTranslateDir );// (vTranslate * vec3_normalize(frameTranslate));
-	
-// Allow for strafing support in exceptional cases.
-	vec3_t vStrafeDistance = vec3_zero();
-	if (animationIndex == skm->animationMap["WalkForwardRight"].index
-		|| animationIndex == skm->animationMap["WalkForwardLeft"].index 
-		|| animationIndex == skm->animationMap["WalkLeft"].index
-		|| animationIndex == skm->animationMap["WalkRight"].index 
-	) {
-		const vec3_t vNormalizedAngles = vec3_normalize( vec3_euler( GetAngles() ) );
-
-		//const vec3_t vStrafeDirection = vec3_negate( vec3_normalize( vec3_cross( vec3_up(), GetAngles() ) ) );
-		
-		moveVelocity = (vTranslate + vDistance) * vNormalizedAngles - vDirectionNormal;// * vStrafeDirection;
-		
-	} else {
-		moveVelocity = (vTranslate + vDistance ) * vDirectionNormal;
-	}
-
-	if (animationIndex == skm->animationMap["TPose"].index
-		|| animationIndex == skm->animationMap["Idle"].index 
-		|| animationIndex == skm->animationMap["IdleAiming"].index
-		|| animationIndex == skm->animationMap["RifleAim"].index 
-		|| animationIndex == skm->animationMap["RifleFire"].index 
-		|| animationIndex == skm->animationMap["WalkingToDying"].index 
-		
-	) {
-		moveVelocity = { 0.f, 0.f, oldVelocity.z };
-	}
-	//TPose,Idle,IdleAiming,RifleAim,RifleFire,
-	//moveVelocity += vStrafeDistance;
 
 	// Old Velocity for Z Axis (Maintain darn gravity)
 	moveVelocity.z = oldVelocity.z;

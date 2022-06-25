@@ -1132,8 +1132,6 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 	**/
 	// If the velocity is too small, just stop.
 	if( vec3_dlength( moveState->velocity ) < 0.000001f) {// ROOTMOTION_MOVE_STOP_EPSILON ) {
-		SG_Physics_PrintWarning("TEH VELOCITY = " + std::to_string(vec3_dlength(moveState->velocity)) + "\n");
-
 		// Zero out its velocity.
 		moveState->velocity = vec3_zero();
 		moveState->remainingTime = 0;
