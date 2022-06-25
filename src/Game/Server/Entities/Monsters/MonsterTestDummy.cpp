@@ -456,7 +456,7 @@ void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServer
     LinkEntity();
 
     // Play a nasty gib sound, yughh :)
-    SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
+    SVG_Sound(this, SoundChannel::Body, SVG_PrecacheSound("misc/gibdeath1.wav"), 1, Attenuation::Normal, 0);
 
     // Throw some gibs around, true horror oh boy.
     gameWorld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);

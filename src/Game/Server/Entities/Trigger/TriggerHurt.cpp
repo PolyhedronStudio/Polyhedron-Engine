@@ -67,6 +67,10 @@ void TriggerHurt::Spawn() {
 		SetDamage(5);
 	}
 
+	// In case it wasn't set, we set it.
+	if (GetDelayTime() == Frametime::zero()) {
+		SetDelayTime(Frametime(300ms));
+	}
 	// Make it solid trigger, or start off.
 	if (GetSpawnFlags() & SPAWNFLAG_START_OFF)
 		SetSolid(Solid::Not);	// Make it solid::not, meaning it can't be triggered.

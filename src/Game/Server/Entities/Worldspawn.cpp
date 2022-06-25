@@ -207,7 +207,7 @@ void Worldspawn::Precache() {
 
     SVG_PrecacheSound("misc/talk.wav");
 
-    SVG_PrecacheSound("misc/udeath.wav");
+    SVG_PrecacheSound("misc/gibdeath1.wav");
 
     // Gibs
     SVG_PrecacheSound("items/respawn1.wav");

@@ -202,7 +202,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
     // In case our health went under -40, shred this body to gibs!
     if (GetHealth() < -40) {
         // Play a nasty gib sound, yughh :)
-        SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/udeath.wav"), 1, Attenuation::Normal, 0);
+        SVG_Sound(this, SoundChannel::Body, gi.PrecacheSound("misc/gibdeath1.wav"), 1, Attenuation::Normal, 0);
 
         // Throw some gibs around, true horror oh boy.
         // Get gameworld pointer.
