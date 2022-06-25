@@ -217,19 +217,19 @@ void Worldspawn::Precache() {
     SVG_PrecacheSound("*death2.wav");
     SVG_PrecacheSound("*death3.wav");
     SVG_PrecacheSound("*death4.wav");
-    SVG_PrecacheSound("*fall1.wav");
-    SVG_PrecacheSound("*fall2.wav");
+    SVG_PrecacheSound("player/fall1.wav");
+    SVG_PrecacheSound("player/fall2.wav");
     SVG_PrecacheSound("*gurp1.wav");        // drowning damage
     SVG_PrecacheSound("*gurp2.wav");
-    SVG_PrecacheSound("*jump1.wav");        // player jump
-    SVG_PrecacheSound("*pain25_1.wav");
-    SVG_PrecacheSound("*pain25_2.wav");
-    SVG_PrecacheSound("*pain50_1.wav");
-    SVG_PrecacheSound("*pain50_2.wav");
-    SVG_PrecacheSound("*pain75_1.wav");
-    SVG_PrecacheSound("*pain75_2.wav");
-    SVG_PrecacheSound("*pain100_1.wav");
-    SVG_PrecacheSound("*pain100_2.wav");
+    SVG_PrecacheSound("player/jump1.wav");        // player jump
+    SVG_PrecacheSound("player/pain25_1.wav");
+    SVG_PrecacheSound("player/pain25_2.wav");
+    SVG_PrecacheSound("player/pain50_1.wav");
+    SVG_PrecacheSound("player/pain50_2.wav");
+    SVG_PrecacheSound("player/pain75_1.wav");
+    SVG_PrecacheSound("player/pain75_2.wav");
+    SVG_PrecacheSound("player/pain100_1.wav");
+    SVG_PrecacheSound("player/pain100_2.wav");
 
 
     //-------------------

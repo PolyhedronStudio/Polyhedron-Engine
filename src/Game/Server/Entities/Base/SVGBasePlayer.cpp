@@ -935,6 +935,7 @@ void SVGBasePlayer::CheckFallingDamage()
     client->fallTime = level.time + FALL_TIME;
 
     if (delta > 30) {
+		// Set eventID based on delta.
         if (GetHealth() > 0) {
             if (delta >= 55) {
                 SetEventID(EntityEvent::FallFar);
@@ -942,7 +943,9 @@ void SVGBasePlayer::CheckFallingDamage()
                 SetEventID(EntityEvent::Fall);
             }
         }
-        SetDebouncePainTime(level.time);   // no normal pain sound
+
+		// We set the debounce pain time to prevent regular pain sounds from playing.
+        SetDebouncePainTime(level.time);
         damage = (delta - 30) / 2;
         if (damage < 1) {
             damage = 1;
@@ -1167,7 +1170,7 @@ void SVGBasePlayer::ApplyDamageFeedback() {
         }
 
         // Play pain sound based on damage taken.
-        SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound(va("*pain%i_%i.wav", l, r)), 1, Attenuation::Normal, 0);
+        SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound(va("player/pain%i_%i.wav", l, r)), 1, Attenuation::Normal, 0);
     }
 
     // The total alpha of the blend is always proportional to count.

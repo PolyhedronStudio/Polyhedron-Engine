@@ -620,10 +620,10 @@ void CLGBasePacketEntity::OnEventID(uint32_t eventID) {
             clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("player/land1.wav"), 1, Attenuation::Normal, 0);
             break;
         case EntityEvent::Fall:
-            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("*fall2.wav"), 1, Attenuation::Normal, 0);
+            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("player/fall2.wav"), 1, Attenuation::Normal, 0);
             break;
         case EntityEvent::FallFar:
-            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("*fall1.wav"), 1, Attenuation::Normal, 0);
+            clgi.S_StartSound(NULL, GetNumber(), SoundChannel::Auto, clgi.S_RegisterSound("player/fall1.wav"), 1, Attenuation::Normal, 0);
             break;
     }
 }

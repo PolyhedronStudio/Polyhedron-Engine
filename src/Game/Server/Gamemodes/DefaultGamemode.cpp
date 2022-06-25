@@ -991,12 +991,13 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         player->SetWaterType(pm.waterType);
 
         // Check for jumping sound.
-		GameEntity *gePreviousGroundEntity = ServerGameWorld::ValidateEntity( player->GetGroundEntityHandle() );
+		GameEntity *gePlayerGroundEntity = ServerGameWorld::ValidateEntity( player->GetGroundEntityHandle() );
 
-		// If the previous frame had a ground entity set, but after moving we don't, play a jump sound.
-		if (gePreviousGroundEntity) {
-			if (pm.groundEntityNumber >= 0 && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
-				SVG_Sound(player, SoundChannel::Voice, gi.PrecacheSound("*jump1.wav"), 1, Attenuation::Normal, 0);
+		// If the player had a ground entity stored coming from its previous player move frame.
+		if (gePlayerGroundEntity) {
+			// And we lost ground in the current move, player our jump sound.
+			if (pm.groundEntityNumber == -1 && (pm.moveCommand.input.upMove >= 10) && (pm.waterLevel == 0)) {
+				SVG_Sound(player, SoundChannel::Voice, SVG_PrecacheSound("player/jump1.wav"), 1, Attenuation::Normal, 0);
 				player->PlayerNoise(player, player->GetOrigin(), PlayerNoiseType::Self);
 			}
         }
@@ -1084,10 +1085,10 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
     // Update client button bits.
     SetClientButtonBits( client, moveCommand );
 
-    // save light level the player is standing on for
-    // monster sighting AI
-    //ent->lightLevel = moveCommand->input.lightLevel;
+
 	/**
+	*	Use Functionality.
+	*
 	*	If the player sent us a Use button action, scan for which entity he
 	*	has targetted and dispatch its use callback.
 	**/
@@ -1149,17 +1150,17 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 			}
 		}
 
-#if 1
-		const char *startStr = Vec3ToString(useTraceStart);
-		const char *endStr = Vec3ToString(useTraceEnd);
-		const char *endPositionStr = Vec3ToString(useTraceResult.endPosition);
-		gi.DPrintf("PlayerUse - Entity(#%i): traceStart(%s), traceEnd(%s), traceEndPoint(%s)\n",
-			useEntityNumber,
-			startStr,
-			endStr,
-			endPositionStr
-		);
-#endif
+		//#if 1
+		//		const char *startStr = Vec3ToString(useTraceStart);
+		//		const char *endStr = Vec3ToString(useTraceEnd);
+		//		const char *endPositionStr = Vec3ToString(useTraceResult.endPosition);
+		//		gi.DPrintf("PlayerUse - Entity(#%i): traceStart(%s), traceEnd(%s), traceEndPoint(%s)\n",
+		//			useEntityNumber,
+		//			startStr,
+		//			endStr,
+		//			endPositionStr
+		//		);
+		//#endif
 	}
 
 	/**

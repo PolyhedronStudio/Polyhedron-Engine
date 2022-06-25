@@ -141,13 +141,18 @@ void TriggerHurt::TriggerHurtTouch(IServerGameEntity* self, IServerGameEntity* o
 	if (lastHurtTime > level.time)
 		return;
 
-	if (GetSpawnFlags() & SPAWNFLAG_SLOW_HURT)
+	// Get Duration in GameTime.
+	GameTime gtDuration = duration_cast< GameTime >( GetDelayTime() );
+	if (GetSpawnFlags() & SPAWNFLAG_SLOW_HURT) {
 		lastHurtTime = level.time + 1s;
-	else
-		lastHurtTime = level.time + duration_cast<GameTime>(FRAMETIME);
+	} else {
+		// Convert delayTime (FrameTime, good old 3.0 = 3 secs) to GameTime(ms).
+		lastHurtTime = level.time + gtDuration;
+		//GameTime((int64_t)(1000.0 * GetDelayTime().count()));
+	}
 
 	if (!(GetSpawnFlags()& SPAWNFLAG_SILENT)) {
-		if ((level.time % 1000ms) == GameTime::zero()) {
+		if ((level.time % gtDuration) == GameTime::zero()) {
 			SVG_Sound(other, SoundChannel::Auto, GetNoiseIndexA(), 1, Attenuation::Normal, 0);
 		}
 	}
