@@ -26,10 +26,12 @@
 **/
 class CLGBasePacketEntity : public IClientGameEntity {
 public:
-    /**
-    *
+	/***
+	*
+	*
     *   Constructor/Destructor AND TypeInfo related.
     *
+	*
     **/
     //! Constructor/Destructor.
     CLGBasePacketEntity(PODEntity *podEntity);
@@ -37,35 +39,20 @@ public:
 
     // Runtime type information
 	DefineGameClass( CLGBasePacketEntity, IClientGameEntity);
-	//DefineClass( CLGBasePacketEntity, IClientGameEntity);
-	//DefineMapClass( "CLGBasePacketEntity", CLGBaseLocalEntity, IClientGameEntity);
-	//DefineGameClass( CLGBasePacketEntity, IClientGameEntity);
 
-    //// Checks if this entity class is exactly the given class
-    //// @param entityClass: an entity class which must inherint from SVGBaseEntity
-    //template<typename entityClass>
-    //bool IsClass() const { // every entity has a ClassInfo, thanks to the DefineXYZ macro
-    //    return GetTypeInfo()->IsClass( entityClass::ClassInfo );
-    //}
-
-    //// Checks if this entity class is a subclass of another, or is the same class
-    //// @param entityClass: an entity class which must inherint from SVGBaseEntity
-    //template<typename entityClass>
-    //bool IsSubclassOf() const {
-    //    return GetTypeInfo()->IsSubclassOf( entityClass::ClassInfo );
-    //}
-
-    
-
-    //! Used for returning vectors from a const vec3_t & reference.
+	//! Used for returning vectors from a const vec3_t & reference.
     static vec3_t ZeroVec3;
     //! Used for returning strings from a const std::string & reference.
     static std::string EmptyString;
 
-    /**
-    *
+
+
+	/***
+	*
+	*
     *   ClientGame Entity Interface Functions.
     *
+	*
     **/
     /**
     *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
@@ -104,6 +91,8 @@ public:
 	***/
 	//! Actual skeleton unique to this entity.
 	EntitySkeleton entitySkeleton;
+
+
 
     /***
     *
@@ -981,6 +970,8 @@ private:
 	**/
 	virtual void ProcessSkeletalAnimationForTime(const GameTime &time);
 
+
+
 protected:
 	/**
 	*
@@ -998,6 +989,8 @@ protected:
 	//! This state gets set freshly to a baseline animation state determined by the 'wired' animationIndex.
 	EntityAnimationState refreshAnimation = {};
 	EntityAnimationState refreshAnimationB = {};
+
+
 
 public:
     /**
@@ -1060,6 +1053,7 @@ public:
     *   @brief  Dispatches 'Stop' callback.
     **/
     virtual void DispatchStopCallback() override;
+
 
 
 protected:

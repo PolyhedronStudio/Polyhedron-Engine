@@ -154,7 +154,7 @@ void ClientGameWorld::PrepareClients() {
 	
 	if (maximumclients && maximumclients->integer) {
 		maxClients = maximumclients->integer;
-		Com_DPrint("MAXIMUM CLIENTS YOOOO DAWG================%i\n", maximumclients->integer);
+		//Com_DPrint("ClientGameWorld::PrepareClients -> maxClients=#%i\n", maximumclients->integer);
 	}
 
     //maxClients = maximumclients->value;
@@ -189,61 +189,7 @@ void ClientGameWorld::PreparePlayers() {
 			.gameEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false, true), //CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
 			.clientEntityNumber = i,
 		};
-		
-		//// We can fetch the number based on subtracting these two pointers.
-		//podEntity->clientEntityNumber = podEntity - podEntities;
-		//podEntity->currentState.number = podEntity->clientEntityNumber;
-
-		//// Allocate player client game entity
-		//CLGBasePlayer* playerClientEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false);
-
-		//if (playerClientEntity) {
-		//	// Be sure to reset their inuse, after all, they aren't in use.
-		//	playerClientEntity->SetInUse(false);
-
-		//	// Fetch client index.
-		//	const int32_t clientIndex = i - 1;  // Same as the older: podEntities - podEntities - 1;
-
-		//	// Assign the designated client to this SVGBasePlayer entity.
-		//	//playerClientEntity->SetClient(&clients[clientIndex]);
-		//} else {
-		//	Com_DPrint("CLGWarning: ClientGameWorld failed to prepare playerClientEntity(#%i)\n", entityNumber);
-		//}
 	}
-
-	//// Prepare body queue.
-	//for (int32_t i = maxClients; i <= maxClients + BODY_QUEUE_SIZE; i++) {//maxClients + 1; i++) {
-	//	const int32_t entityNumber = i + 1;
-
-	//	// Acquire POD entity.
-	//	PODEntity *podEntity = GetPODEntityByIndex(entityNumber);
-
-	//	podEntity->currentState.number = entityNumber;
-	//	podEntity->previousState.number = entityNumber;
-	//	podEntity->clientEntityNumber = entityNumber;
-	//	podEntity->gameEntity = nullptr; // TODO: ??
-
-	//	// Create a CLGBasePacketEntity.
-	//	podEntity->gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity");//CreateGameEntity<CLGBasePacketEntity>(podEntity, false);
-
-	//	// They aren't in use of course, and they come from the server.
-	//	podEntity->inUse = false;
-	//	podEntity->isLocal = false;
-	//}
-
-
-		//// Allocate player client game entity
-		//SVGBasePlayer* playerClientEntity = CreateGameEntity<SVGBasePlayer>(podEntity, false);
-
-		//// Be sure to reset their inuse, after all, they aren't in use.
-		//playerClientEntity->SetInUse(false);
-
-		//// Fetch client index.
-		//const int32_t clientIndex = i - 1;  // Same as the older: podEntities - podEntities - 1;
-
-		//// Assign the designated client to this SVGBasePlayer entity.
-		//playerClientEntity->SetClient(&clients[clientIndex]);
-  //  }
 }
 
 /**
@@ -491,52 +437,6 @@ PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) {
 		return nullptr;
 	}
 
-	return nullptr;
- //   // Incrementor, declared here so we can access it later on.
-	//int32_t i = 0;
-
-	//// Acquire a pointer to the first client entity to start checking from.
-	//PODEntity *podEntity = &podEntities[maxClients + 1];
-
-	//// We'll loop until from maxclients + 1(world entity) till the numberOfEntities 
-	//// has been reached. If we never managed to return a pointer to a valid server 
-	//// entity right now, we're going to have to increase the amount of entities in use. 
-	//// 
-	//// However, this ONLY proceeds if we haven't already hit the maximum entity count.
-	//for (int32_t i = maxClients + 1; i < numberOfEntities; i++, podEntity++) {
- //       // The first couple seconds of server time can involve a lot of
- //       // freeing and allocating, so relax the replacement policy
-	//    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
- //           //SVG_InitEntity(serverEntity);
- //           // Set entity to "inUse".
-	//		podEntity->inUse = true;
-	//		
-	//		// Set the entity state number.
-	//		podEntity->state.number = podEntity - podEntities;
-	//		
-	//		// Return the newly found client entity pointer.
-	//		return podEntity;
- //       }
- //   }
-
-	//// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
- //   if (i >= maxEntities) {
- //       gi.Error("ClientGameWorld::GetUnusedPODEntity: no free edicts");
-	//	return nullptr;
-	//}
-
- //   // If we've gotten past the gi.Error, it means we can safely increase the number of entities.
- //   numberOfEntities++;
-	//globals.numberOfEntities = numberOfEntities;
-
- //   // Set entity to "inUse".
- //   podEntity->inUse = true;
-
- //   // Set the entity state number.
- //   podEntity->state.number = podEntity - podEntities;
-
- //   // Return the client entity.
- //   return podEntity;
 	return nullptr;
 }
 

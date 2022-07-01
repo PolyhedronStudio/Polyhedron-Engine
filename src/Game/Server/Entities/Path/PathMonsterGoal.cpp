@@ -94,7 +94,7 @@ void PathMonsterGoal::PathMonsterGoalTouch(IServerGameEntity* self, IServerGameE
 					SetActivator( other );
 				}
 
-				gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoal->GetTargetName().c_str());
+				//gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoal->GetTargetName().c_str());
 		}
 	} else {
 	

@@ -53,11 +53,18 @@ public:
     void LightThink(void);
 
 private:
-    // Custom lightstyle string.
-    std::string customLightStyle;
+	//! Actual Light States.
+	struct LightState {
+		//! Whenever this is its state, it means we're in "a" style. (Light is off.)
+		static constexpr int32_t Off	= 0;
+		//! In any other case, it is On. (It has a lightstyle higher than 'a').
+		static constexpr int32_t On		= 1;
+	};
+    //! Model Light State flags. (Is it currently off, or triggered?)
+    uint32_t lightState = LightState::On;
+	//! Stores this light's custom light style string. (If set.)
+	std::string customLightStyle = "";
 
-    // Light State flags. (Is it currently off, or triggered?)
-    uint32_t lightState;
 };
 
 

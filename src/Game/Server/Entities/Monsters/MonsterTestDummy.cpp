@@ -235,6 +235,7 @@ void MonsterTestDummy::PostSpawn() {
 			gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoal->GetTargetName().c_str());
 	}
 
+
     // Setup our MonsterStepDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
     SetNextThinkTime(level.time + FRAMETIME);
@@ -381,6 +382,15 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 // Starts the animation.
 // 
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
+	
+	// If we did not find our goal, switch to idle animation.
+	if ( !GetGoalEntity() ) {
+		SwitchAnimation( "Idle" );
+	// We did find it, so switch to walkforward.
+	} else {
+		SwitchAnimation( "WalkForward" );
+	}
+
 	//SwitchAnimation("WalkForward");
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.

@@ -18,7 +18,7 @@
 *	define to enable debug output specifically for each section of the data generation process.
 *
 **/
-#define DEBUG_MODEL_DATA 1
+#define DEBUG_MODEL_DATA 0
 #define DEBUG_MODEL_BOUNDINGBOX_DATA 0
 
 

@@ -774,7 +774,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 		GameEntity *geNewGroundEntity = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( groundEntityNumber ) );
 
 		// Set it to a halt in case velocity becomes too low, this way it won't look odd.
-		if( geNewGroundEntity && vec3_length( GetVelocity() ) <= 0.01f && oldVelocityLength > 1.f ) {
+		if( geNewGroundEntity && vec3_length( GetVelocity() ) <= 0.0001f && oldVelocityLength > 1.f ) {
 			// Zero out velocities.
 			SetVelocity( vec3_zero() );
 			SetAngularVelocity( vec3_zero() );

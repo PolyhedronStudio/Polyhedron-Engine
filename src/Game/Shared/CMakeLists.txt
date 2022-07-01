@@ -8,6 +8,7 @@
 ###########
 SET(SRC_SHAREDGAME
 	Entities/SGEntityHandle.cpp
+	Entities/SGBaseItem.cpp
 
 	Physics/MoveTypes/MoveTypeRootMotionMove.cpp
 	Physics/MoveTypes/MoveTypeLinearProjectile.cpp
@@ -31,6 +32,7 @@ SET(SRC_SHAREDGAME
 SET(HEADERS_SHAREDGAME
 	Entities/ISharedGameEntity.h 
 	Entities/SGEntityHandle.h  
+	Entities/SGBaseItem.h
 	Entities/TypeInfo.h 
 	Entities.h 
 

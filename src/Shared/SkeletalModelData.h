@@ -132,8 +132,6 @@ struct EntitySkeleton {
 
 	//! Stores the bones as an actual tree hierachy.
 	EntitySkeletonBoneNode boneTree;
-
-
 };
 
 /**

@@ -104,32 +104,34 @@ void MiscClientModel::Spawn() {
     SetBoundingBox(GetMins(), GetMaxs());
 
     // Set default values in case we have none.
-    if (!GetMass()) {
+    if ( !GetMass() ) {
         SetMass(40);
     }
-    if (!GetHealth()) {
+    if ( !GetHealth() ) {
         SetHealth(200);
     }
-    if (!GetDamage()) {
+    if ( !GetDamage() ) {
         SetDamage(150);
     }
 
     // Setup the start frame to animate from.
-    if (startFrame) {
-        SetAnimationFrame(startFrame);
-    } else {
-        SetAnimationFrame(0);
-    }
+    //if (startFrame) {
+    //    SetAnimationFrame(startFrame);
+    //} else {
+    //    SetAnimationFrame(0);
+    //}
+	
+	//SetStyle(5);
 
     // Set entity to allow taking damage.
-    SetTakeDamage(1);
+    SetTakeDamage( TakeDamage::No );
 
     //// Setup our MiscClientModel callbacks.
-    SetThinkCallback(&MiscClientModel::MiscServerModelThink);
-    SetDieCallback(&MiscClientModel::MiscServerModelDie);
+    SetThinkCallback( &MiscClientModel::MiscServerModelThink );
+    SetDieCallback( &MiscClientModel::MiscServerModelDie );
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime( level.time + 2.f * FRAMETIME );
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -178,41 +180,52 @@ void MiscClientModel::Think() {
 //===============
 void MiscClientModel::SpawnKey(const std::string& key, const std::string& value) {
     if (key == "model") {
-        ParseKeyValue(key, value, model);
+        ParseKeyValue( key, value, model );
     } else if (key == "boundingboxmins") {
-        ParseKeyValue(key, value, boundingBoxMins);
-        SetMins(boundingBoxMins);
+        ParseKeyValue( key, value, boundingBoxMins );
+        SetMins( boundingBoxMins );
     } else if (key == "boundingboxmaxs") {
-        ParseKeyValue(key, value, boundingBoxMaxs);
-        SetMaxs(boundingBoxMaxs);
+        ParseKeyValue( key, value, boundingBoxMaxs );
+        SetMaxs( boundingBoxMaxs );
     } else if (key == "endframe") {
-        ParseKeyValue(key, value, endFrame);
+        ParseKeyValue( key, value, endFrame );
     } else if (key == "startframe") {
-        ParseKeyValue(key, value, startFrame);
+        ParseKeyValue( key, value, startFrame );
     } else if (key == "mass") {
         uint32_t parsedMass = 0;
-        ParseKeyValue(key, value, parsedMass);
-        SetMass(parsedMass);
+        ParseKeyValue( key, value, parsedMass );
+        SetMass( parsedMass );
     } else if (key == "health") {
         uint32_t parsedHealth = 0;
-        ParseKeyValue(key, value, parsedHealth);
-        SetMaxHealth(parsedHealth);
-        SetHealth(parsedHealth);
+        ParseKeyValue( key, value, parsedHealth );
+        SetMaxHealth( parsedHealth );
+        SetHealth( parsedHealth );
     } else if (key == "effects") {
         uint32_t parsedEffects = 0;
-        ParseKeyValue(key, value, parsedEffects);
-        SetEffects(parsedEffects);
+        ParseKeyValue( key, value, parsedEffects );
+        SetEffects( parsedEffects);
     } else if (key == "rendereffects") {
         uint32_t parsedRenderEffects = 0;
-        ParseKeyValue(key, value, parsedRenderEffects);
-        SetRenderEffects(parsedRenderEffects);
-    } else if (key == "noise") {
+        ParseKeyValue( key, value, parsedRenderEffects );
+        SetRenderEffects( parsedRenderEffects );
+	} else if ( key == "style" ) {
+		uint32_t parsedStyle = 0;
+		
+		ParseKeyValue( key, value, parsedStyle );
+		SetStyle( parsedStyle );
+	/* } else if (key == "customLightStyle") {
+		std::string parsedCustomLightStyle = "";
+		
+		ParseKeyValue( key, value, parsedCustomLightStyle );
+		SetCustomLightStyle( parsedCustomLightStyle );
+    }*/
+	} else if (key == "noise") {
         std::string parsedNoisePath = "";
 
-        ParseKeyValue(key, value, parsedNoisePath);
+        ParseKeyValue( key, value, parsedNoisePath );
         noisePath = parsedNoisePath;
     } else {
-        Base::SpawnKey(key, value);
+        Base::SpawnKey( key, value );
     }
 }
 

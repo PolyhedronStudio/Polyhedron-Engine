@@ -230,7 +230,10 @@ void SG_TouchTriggers(GameEntity* geToucher) {
 		return;
 	}
 	// Dead things don't activate triggers!
-	if (geToucher && (geToucher->GetClient() || geToucher->GetServerFlags() & EntityServerFlags::Monster) && geToucher->GetHealth() <= 0) {
+	if ( geToucher &&
+		( ( geToucher->GetClient() ) || ( geToucher->GetServerFlags() & EntityServerFlags::Monster ) ) &&
+		geToucher->GetHealth() <= 0
+	) {
         return;
 	}
 

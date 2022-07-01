@@ -1046,7 +1046,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
         if ( playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator ) {
             // Trigger touch logic. 
             SG_TouchTriggers(player);
-
+		
             // Solid touch logic.
             int32_t i = 0;
             int32_t j = 0;
@@ -1079,7 +1079,7 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
 
 				geOther->DispatchTouchCallback( geOther, player, NULL, NULL );
             } // for (i = 0 ; i < pm.numTouchedEntities; i++) {
-        } // if ( playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator ) {
+       } // if ( playerMoveType != MoveType::NoClip && playerMoveType  != MoveType::Spectator ) {
     }
 
     // Update client button bits.

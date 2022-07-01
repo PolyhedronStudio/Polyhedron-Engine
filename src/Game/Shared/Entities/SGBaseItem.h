@@ -20,25 +20,35 @@
 class SVGBaseEntity;
 class SVGBaseTrigger;
 
-class SVGBaseItem : public SVGBaseTrigger {
+#if defined(SHAREDGAME_SERVERGAME)
+using SGBaseItemParentClass = SVGBaseTrigger;
+#endif
+#if defined(SHAREDGAME_CLIENTGAME)
+using SGBaseItemParentClass = CLGBaseLocalEntity;
+#endif
+
+class SGBaseItem : public SGBaseItemParentClass {
 public:
     /**
     * 
+	*
     *   Item callback function pointers.
     *
+	*
     ***/
-    using PickupCallbackPointer         = qboolean(SVGBaseItem::*)(IServerGameEntity *picker);
-    using UseInstanceCallbackPointer    = void(SVGBaseItem::*)(SVGBaseEntity *user, SVGBaseItem* item);
-    using DropCallbackPointer           = void(SVGBaseItem::*)(SVGBaseEntity* other);
+    using PickupCallbackPointer         = qboolean(SGBaseItem::*)(GameEntity *picker);
+    using UseInstanceCallbackPointer    = void(SGBaseItem::*)(GameEntity*user, SGBaseItem* item);
+    using DropCallbackPointer           = void(SGBaseItem::*)(GameEntity* other);
 
 
     //! Constructor/Deconstructor.
-    SVGBaseItem(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~SVGBaseItem();
+    SGBaseItem(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
+    virtual ~SGBaseItem();
 
 
     //! Abstract Class TypeInfo registry.
-    DefineAbstractClass( SVGBaseItem, SVGBaseTrigger );
+    DefineAbstractClass( SGBaseItem, SGBaseItemParentClass );
+
 
 
     /**
@@ -70,12 +80,14 @@ protected:
     virtual void InstanceSpawn();
 
 
-public:
 
+public:
     /**
     * 
+	*
     *   Get/Set.
     *
+	*
     ***/
     /**
     *   @return The unique item type identifier. Used to lookup in inventory.
@@ -90,60 +102,60 @@ public:
 
     /**
     * 
+	*
     *   Entity functions.
     *
+	*
     ***/
     /**
     *   @brief Engages this item in respawn mode waiting for the set delay to pass before respawning.
     **/
     virtual void SetRespawn(const Frametime& delay);
-
     /**
     *   @brief  Use for item instances, calls their "UseInstance" callback.
     * 
     *   @details    'UseInstance' is not to be confused with the general 'Use' dispatch 
     *               function for trigger callbacks.
     **/
-    virtual void UseInstance(SVGBaseEntity* user, SVGBaseItem* item);
+    virtual void UseInstance(GameEntity* user, SGBaseItem* item);
 
 
 
     /**
     * 
+	*
     *   Item Entity interface Callbacks.
     *
+	*
     ***/
     /**
     *   @brief Callback for when being triggered. Also known as "Use".
     **/
-    void BaseItemUse(IServerGameEntity* caller, IServerGameEntity* activator);
-
+    void BaseItemUse(GameEntity* caller, GameEntity* activator);
     /**
     *   @brief Callback for item instance usage.
     **/
-    void BaseItemUseInstance(SVGBaseEntity* user, SVGBaseItem* item);
-
+    void BaseItemUseInstance(GameEntity* user, SGBaseItem* item);
     /**
     *   @brief Callback for when an entity touches this item.
     **/
-    void BaseItemTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-
+    void BaseItemTouch(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     /**
     *   @brief Callback for executing drop to floor behavior.
     **/
     void BaseItemDropToFloor(void);
-
     /**
     *   @brief Callback meant to be used by SetThink so one can delay a call to Respawn.
     **/
     void BaseItemDoRespawn(void);
 
 
+
 protected:
     //! Static array holding space for each unique item ID. These instances are
     //! created at the start of the game and are used for callbacks. Each callback
     //! is served a pointer to the client's player entity when being fired.
-    static SVGBaseItem* itemInstances[ItemID::Maximum];
+    static SGBaseItem* itemInstances[ItemID::Maximum];
 
     //! A string index mapper to playerWeaponInstances.
     //!
@@ -158,6 +170,7 @@ protected:
 
     //! Respawn wait time.
     float respawnWaitTime = 0.f;
+
 
 
 protected:
@@ -182,22 +195,22 @@ protected:
     }
 
 
+
 public:
     /**
     *   @return Pointer to an item instance that is meant to be used for example, weapon logic.
     **/
-    static SVGBaseItem* GetItemInstanceByID(uint32_t identifier) {
+    static SGBaseItem* GetItemInstanceByID(uint32_t identifier) {
 	    if (identifier >= 0 && identifier <= ItemID::Maximum) {
 	        return itemInstances[identifier];
 	    } else {
 	        return nullptr;
         }
     }
-
     /**
     *   @return Pointer to an item instance that is meant to be used for example, weapon logic.
     **/
-    static SVGBaseItem* GetItemInstanceByLookupString(const std::string& name) {
+    static SGBaseItem* GetItemInstanceByLookupString(const std::string& name) {
 	    uint32_t identifier = 0;
 
         // First look it up in the instanceString map.
@@ -207,6 +220,7 @@ public:
 	        return nullptr;
         }
     }
+
 
 
 public:
@@ -226,11 +240,14 @@ public:
     inline qboolean HasDropCallback() { return (dropFunction != nullptr ? true : false); }
 
 
+
 protected:
     /**
     * 
+	*
     *   Callback function pointers.
-    *
+	*
+	*
     ***/
     PickupCallbackPointer       pickupFunction = nullptr;
     UseInstanceCallbackPointer  useInstanceFunction = nullptr;

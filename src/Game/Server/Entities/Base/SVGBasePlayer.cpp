@@ -239,7 +239,7 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
                 SetAnimationEndFrame(FRAME_death308);
                 break;
             }
-            SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound(va("*death%i.wav", (rand() % 4) + 1)), 1, Attenuation::Normal, 0);
+            SVG_Sound(this, SoundChannel::Voice, gi.PrecacheSound(va("player/death%i.wav", (rand() % 4) + 1)), 1, Attenuation::Normal, 0);
         }
     }
 

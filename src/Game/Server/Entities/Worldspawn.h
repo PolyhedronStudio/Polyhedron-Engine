@@ -34,6 +34,47 @@ public:
     //! Default gravity constant.
     static constexpr int32_t DEFAULT_GRAVITY = 875;
 
+	/**
+	* @brief	Set of preset lightStyle strings to use. These are stored here in order 
+	*			to have them located in a single location as well as to be able to retreive
+	*			them when triggering them on/off.
+	*
+	*			There's many unused left.
+	**/
+	static inline const std::array<std::string, 32> lightStylePresets = {
+		/* #0: Normal */							"m",
+		/* #1: 1st Flicker Variety */				"mmnmmommommnonmmonqnmmo",
+		/* #2: Slow Strong Pulse */					"abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba",
+		/* #3: 1st Candle Variety */				"mmmmmaaaaammmmmaaaaaabcdefgabcdefg",
+		/* #4: Fast Strobe */						"mamamamamama",
+		/* #5: Gentle Pulse */						"jklmnopqrstuvwxyzyxwvutsrqponmlkj",
+		/* #6: 2nd Flicker Variety */				"nmonqnmomnmomomno",
+		/* #7: 2nd Candle Variety */				"mmmaaaabcdefgmmmmaaaammmaamm",
+		/* #8: 3rd Candly Vaiety */					"mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa",
+		/* #9: Slow Strobe */						"aaaaaaaazzzzzzzz",
+		/* #10: Fluorescent Flicker */				"mmamammmmammamamaaamammma",
+		/* #11: Slow Pulse (No Fade To Black). */	"abcdefghijklmnopqrrqponmlkjihgfedcba",
+		/* #12: Unused */							"m",
+		/* #13: Unused */							"m",
+		/* #14: Unused */							"m",
+		/* #15: Unused */							"m",
+		/* #16: Unused */							"m",
+		/* #17: Unused */							"m",
+		/* #18: Unused */							"m",
+		/* #19: Unused */							"m",
+		/* #20: Unused */							"m",
+		/* #21: Unused */							"m",
+		/* #22: Unused */							"m",
+		/* #23: Unused */							"m",
+		/* #24: Unused */							"m",
+		/* #25: Unused */							"m",
+		/* #26: Unused */							"m",
+		/* #27: Unused */							"m",
+		/* #28: Unused */							"m",
+		/* #29: Unused */							"m",
+		/* #30: Unused */							"m",
+		/* #31: Unused */							"m",
+	};
 private:
     //! Parsed gravity from key/values. (Named globalGravity to prevent collision with baseentity gravity var.)
     int32_t globalGravity = 0;

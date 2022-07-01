@@ -490,20 +490,23 @@ struct PlayerStats {
     static constexpr uint32_t SecondaryAmmo     = 5;
     static constexpr uint32_t ClipAmmoIcon      = 6;
     static constexpr uint32_t ClipAmmo          = 7;
-    static constexpr uint32_t ArmorIcon         = 8;
-    static constexpr uint32_t Armor             = 9;
-    static constexpr uint32_t SelectedItemIcon  = 10;
-    static constexpr uint32_t PickupIcon        = 11;
-    static constexpr uint32_t PickupString      = 12;
-    static constexpr uint32_t TimerIcon         = 13;
-    static constexpr uint32_t Timer             = 14;
-    static constexpr uint32_t HelpIcon          = 15;
-    static constexpr uint32_t SelectedItem      = 16;
-    static constexpr uint32_t Layouts           = 17;
-    static constexpr uint32_t Frags             = 18;
-    static constexpr uint32_t Flashes           = 19; // Cleared each frame: 1 = health, 2 = armor, 3 = primary ammo, 4 = secondary ammo.
-    static constexpr uint32_t ChaseClientID     = 20;
-    static constexpr uint32_t IsSpectator       = 21;
+	static constexpr uint32_t Weapon			= 8;
+	static constexpr uint32_t WeaponTime		= 9;
+	static constexpr uint32_t PendingWeapon		= 10;
+    static constexpr uint32_t ArmorIcon         = 11;
+    static constexpr uint32_t Armor             = 12;
+    static constexpr uint32_t SelectedItemIcon  = 13;
+    static constexpr uint32_t PickupIcon        = 14;
+    static constexpr uint32_t PickupString      = 15;
+    static constexpr uint32_t TimerIcon         = 16;
+    static constexpr uint32_t Timer             = 17;
+    static constexpr uint32_t HelpIcon          = 18;
+    static constexpr uint32_t SelectedItem      = 19;
+    static constexpr uint32_t Layouts           = 20;
+    static constexpr uint32_t Frags             = 21;
+    static constexpr uint32_t Flashes           = 22; // Cleared each frame: 1 = health, 2 = armor, 3 = primary ammo, 4 = secondary ammo.
+    static constexpr uint32_t ChaseClientID     = 23;
+    static constexpr uint32_t IsSpectator       = 24;
 };
 
 /**

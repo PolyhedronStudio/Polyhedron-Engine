@@ -213,6 +213,15 @@ void CLGBaseLocalEntity::SpawnKey(const std::string& key, const std::string& val
 
 		// Set SpawnFlags.
 		SetSpawnFlags(parsedSpawnFlags);
+	}
+	// Style.
+	else if (key == "style") {
+		// Parse damage.
+		int32_t parsedStyle = 0;
+		ParseKeyValue( key, value, parsedStyle );
+
+		// Set SpawnFlags.
+		SetStyle( parsedStyle );
 	} else {
 	    Com_DPrint(std::string("Warning: Entity[#" + std::to_string(GetNumber()) + ":" + GetClassname() + "] has unknown Key/Value['" + key + "','" + value + "']\n").c_str());
 	}
@@ -508,6 +517,11 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
         rentEntityEffects = currentState->effects;
         // Fetch the render rentEntityEffects of current entity.
         rentRenderEffects = currentState->renderEffects;
+		
+		//
+		//	Model Light Styles.
+		//
+		refreshEntity.modelLightStyle = GetStyle();
 
         //
         // Frame Animation Effects.

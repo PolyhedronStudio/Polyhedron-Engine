@@ -359,41 +359,69 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
     /**
     *   Health.
     **/    
-    client->playerState.stats[PlayerStats::HealthIcon] = 0;
-    client->playerState.stats[PlayerStats::Health] = player->GetHealth();
+    client->playerState.stats[ PlayerStats::HealthIcon ]	= 0;
+    client->playerState.stats[ PlayerStats::Health ]		= player->GetHealth();
 
     /**
     *   Primary Ammo.
     **/
     if (!client->primaryAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
-        client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 0;
-        client->playerState.stats[PlayerStats::PrimaryAmmo]     = 0;
+        client->playerState.stats[ PlayerStats::PrimaryAmmoIcon ] = 0;
+        client->playerState.stats[ PlayerStats::PrimaryAmmo ]     = 0;
     } else {
-        client->playerState.stats[PlayerStats::PrimaryAmmoIcon] = 1;//gi.PrecacheImage(item->icon);
-        client->playerState.stats[PlayerStats::PrimaryAmmo]     = client->persistent.inventory.items[client->primaryAmmoIndex];
+        client->playerState.stats[ PlayerStats::PrimaryAmmoIcon ] = 1;//gi.PrecacheImage(item->icon);
+        client->playerState.stats[ PlayerStats::PrimaryAmmo ]     = client->persistent.inventory.items[client->primaryAmmoIndex];
     }
 
     /**
     *   Secondary Ammo.
     **/
-    if (!client->secondaryAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
-        client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 0;
-        client->playerState.stats[PlayerStats::SecondaryAmmo]     = 0;
+    if ( !client->secondaryAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+        client->playerState.stats[ PlayerStats::SecondaryAmmoIcon ] = 0;
+        client->playerState.stats[ PlayerStats::SecondaryAmmo ]     = 0;
     } else {
-        client->playerState.stats[PlayerStats::SecondaryAmmoIcon] = 1;//gi.PrecacheImage(item->icon);
-        client->playerState.stats[PlayerStats::SecondaryAmmo]     = client->persistent.inventory.items[client->secondaryAmmoIndex];
+        client->playerState.stats[ PlayerStats::SecondaryAmmoIcon ] = 1;//gi.PrecacheImage(item->icon);
+        client->playerState.stats[ PlayerStats::SecondaryAmmo ]     = client->persistent.inventory.items[client->secondaryAmmoIndex];
     }
 
     /**
     *   Clip Ammo.
     **/
-    if (!client->clipAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
-        client->playerState.stats[PlayerStats::ClipAmmoIcon] = 0;
-        client->playerState.stats[PlayerStats::ClipAmmo]     = 0;
+    if ( !client->clipAmmoIndex /* || !ent->client->persistent.inventory[ent->client->ammoIndex] */) {
+        client->playerState.stats[ PlayerStats::ClipAmmoIcon ] = 0;
+        client->playerState.stats[ PlayerStats::ClipAmmo ]     = 0;
     } else {
-        client->playerState.stats[PlayerStats::ClipAmmoIcon] = 1;
-        client->playerState.stats[PlayerStats::ClipAmmo]     = client->persistent.inventory.clipAmmo[client->clipAmmoIndex];
+        client->playerState.stats[ PlayerStats::ClipAmmoIcon ] = 1;
+        client->playerState.stats[ PlayerStats::ClipAmmo ]     = client->persistent.inventory.clipAmmo[client->clipAmmoIndex];
     }
+
+	/**
+	*	Pending Weapon.
+	**/
+	if ( !client->persistent.inventory.nextWeaponID ) {
+		client->playerState.stats[ PlayerStats::PendingWeapon ] = 0;
+	} else {
+		client->playerState.stats[ PlayerStats::PendingWeapon ] = !client->persistent.inventory.nextWeaponID;
+	}
+
+	/**
+	*	Weapon.
+	**/
+	if ( !client->persistent.inventory.activeWeaponID ) {
+		client->playerState.stats[ PlayerStats::Weapon ] = 0;
+	} else {
+		client->playerState.stats[ PlayerStats::Weapon ] = !client->persistent.inventory.activeWeaponID;
+	}
+
+	/**
+	*	Weapon Time.
+	**/	
+	if ( client->weaponState.timeStamp == GameTime::zero() ) {
+		client->playerState.stats[ PlayerStats::Weapon ] = 0;
+	} else {
+		client->playerState.stats[ PlayerStats::Weapon ] = !client->persistent.inventory.activeWeaponID;
+	}
+
 
     // Get active weapon.
     //SVGBaseItemWeapon* activeWeapon = player->GetActiveWeapon();

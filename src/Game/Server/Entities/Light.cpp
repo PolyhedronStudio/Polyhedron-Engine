@@ -1,26 +1,33 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Server Light Entity Implementation.
+*
+***/
+#include "../ServerGameLocals.h"
 
-//
-// Light.cpp
-//
-//
-*/
-
-// Core.
-#include "../ServerGameLocals.h"              // SVGame.
-#include "../Entities.h"
-
-// Entities.
+// Server Game Base Entity.
+#include "Base/SVGBaseEntity.h"
 #include "Base/SVGBaseTrigger.h"
+
+// World.
+#include "../World/ServerGameWorld.h"
+
+// WorldSpawn : For lightStylePresets.
+#include "Worldspawn.h"
+
+// Misc Server Model Entity.
 #include "Light.h"
 
 // SpawnFlags.
-#define START_OFF   1   
-#define TRIGGERABLE 2
+static constexpr int32_t START_OFF		= 1;   
+static constexpr int32_t TRIGGERABLE	= 2;
 
 // Constructor/Deconstructor.
-Light::Light(PODEntity *svEntity) : SVGBaseTrigger(svEntity), lightState(0) {
+Light::Light(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
 
 }
 Light::~Light() {
@@ -42,23 +49,39 @@ void Light::Spawn() {
     //    SVG_FreeEntity(self);
     //    return;
     //}
+	SetSolid( Solid::Not );
+	
+    // Fetch possible Light Style.
+    const int32_t _style = GetStyle();
+		
+	// Switch LightState On or Off depending on spawn flag that is set.
+	if ( GetSpawnFlags() & START_OFF ) {
+		// Our lightState is fully off.
+		lightState = LightState::Off;
 
-    // Fetch style.
-    uint32_t style = GetStyle();
+		// Set its lightstyle index to be "a" <-- lowest == off.
+        SVG_SetConfigString(ConfigStrings::Lights + _style, "a");		
+	} else {
+		// Our lightState is switched on.
+		lightState = LightState::On;
 
-    // Styles of 32 and above are meant to be used by the mappers.
-    if (style >= 32) {
-        SetUseCallback(&Light::LightUse);
+		// Built-in LightStyle Presets.
+		if (_style < 32) {
+			SVG_SetConfigString(ConfigStrings::Lights + _style, Worldspawn::lightStylePresets[_style] );
+		// Custom Mapper LightStyle.
+		} else {
+			SVG_SetConfigString(ConfigStrings::Lights + _style, GetCustomLightStyle());
+		}
+	}
 
-        if (GetSpawnFlags() & START_OFF)
-            SVG_SetConfigString(ConfigStrings::Lights + style, "a");
-        else
-            SVG_SetConfigString(ConfigStrings::Lights + style, GetCustomLightStyle());
-    }
+	// Set Use callback.
+	SetUseCallback( &Light::LightUse );
 
-    // Set default callbacks
+    // Set NextThink callback.
     SetThinkCallback(&Light::LightThink);
     SetNextThinkTime(level.time + FRAMETIME);
+
+	LinkEntity();
 }
 void Light::PostSpawn() {
     // Parent class PostSpawn.
@@ -70,23 +93,40 @@ void Light::Think() {
 }
 
 void Light::LightUse(IServerGameEntity* other, IServerGameEntity* activator) {
-    // Get spawnflags.
-    int32_t spawnFlags = GetSpawnFlags();
+    // Fetch possible Light Style.
+    const int32_t _style = GetStyle();
+		
+	// Switch LightState On or Off depending on spawn flag that is set.
+	if ( lightState == LightState::On ) {
+		SetSpawnFlags( GetSpawnFlags() | START_OFF );
+		// Our lightState is fully off.
+		lightState = LightState::Off;
 
-    // Fetch style.
-    uint32_t style = GetStyle();
+		// Set its lightstyle index to be "a" <-- lowest == off.
+        SVG_SetConfigString(ConfigStrings::Lights + _style, "a");		
+	} else {
+		SetSpawnFlags( GetSpawnFlags() & ~START_OFF );
+		// Our lightState is switched on.
+		lightState = LightState::On;
 
-    if (GetSpawnFlags() & START_OFF) {
-        // Switch style.
-        SVG_SetConfigString(ConfigStrings::Lights + style, GetCustomLightStyle());
+		// Built-in LightStyle Presets.
+		if (_style < 32) {
+			SVG_SetConfigString(ConfigStrings::Lights + _style, Worldspawn::lightStylePresets[style] );
+		// Custom Mapper LightStyle.
+		} else {
+			SVG_SetConfigString(ConfigStrings::Lights + _style, GetCustomLightStyle());
+		}
+	}
 
-        // Change spawnflags, the light is on after all.
-        SetSpawnFlags(spawnFlags & ~START_OFF);
-    }
-    else {
-        SVG_SetConfigString(ConfigStrings::Lights + style, "a");
-        SetSpawnFlags(spawnFlags | START_OFF);
-    }
+	// Fetch style string for debugging.
+	const std::string styleStr = ( style < 32 ? Worldspawn::lightStylePresets[_style] : GetCustomLightStyle() );
+
+	gi.DPrintf("MiscServerModel:Use(#%i): { lightState(%s) }, { lightStyle(#%i), str='%s' } \n",
+		GetNumber(),
+		lightState == LightState::On ? "\"On\"" : "\"Off\"",
+		_style,
+		styleStr.c_str()
+	);
 }
 
 //
@@ -121,7 +161,14 @@ void Light::SpawnKey(const std::string& key, const std::string& value) {
 
         // Assign.
         SetCustomLightStyle(parsedString);
-    }
+    } else if (key == "spawnflags") {
+		// Parse damage.
+		int32_t parsedSpawnFlags = 0;
+		ParseKeyValue(key, value, parsedSpawnFlags);
+
+		// Set SpawnFlags.
+		SetSpawnFlags(parsedSpawnFlags);
+	}
     // Parent class spawnkey.
     else {
         SVGBaseEntity::SpawnKey(key, value);

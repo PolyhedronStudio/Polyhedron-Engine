@@ -213,10 +213,10 @@ void Worldspawn::Precache() {
     SVG_PrecacheSound("items/respawn1.wav");
 
     // Sexed sounds
-    SVG_PrecacheSound("*death1.wav");
-    SVG_PrecacheSound("*death2.wav");
-    SVG_PrecacheSound("*death3.wav");
-    SVG_PrecacheSound("*death4.wav");
+    SVG_PrecacheSound("player/death1.wav");
+    SVG_PrecacheSound("player/death2.wav");
+    SVG_PrecacheSound("player/death3.wav");
+    SVG_PrecacheSound("player/death4.wav");
     SVG_PrecacheSound("player/fall1.wav");
     SVG_PrecacheSound("player/fall2.wav");
     SVG_PrecacheSound("*gurp1.wav");        // drowning damage
@@ -301,19 +301,9 @@ void Worldspawn::Spawn() {
 
     //---------------
     // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.
-    SVG_SetConfigString(ConfigStrings::Lights + 0, "m"); // 0 normal.
-    SVG_SetConfigString(ConfigStrings::Lights + 1, "mmnmmommommnonmmonqnmmo"); // 1 FLICKER (first variety).
-    SVG_SetConfigString(ConfigStrings::Lights + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba"); // 2 SLOW STRONG PULSE.
-    SVG_SetConfigString(ConfigStrings::Lights + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg"); // 3 CANDLE (first variety).
-    SVG_SetConfigString(ConfigStrings::Lights + 4, "mamamamamama"); // 4 FAST STROBE.
-    SVG_SetConfigString(ConfigStrings::Lights + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj"); // 5 GENTLE PULSE 1.
-    SVG_SetConfigString(ConfigStrings::Lights + 6, "nmonqnmomnmomomno"); // 6 FLICKER (second variety).
-    SVG_SetConfigString(ConfigStrings::Lights + 7, "mmmaaaabcdefgmmmmaaaammmaamm"); // 7 CANDLE (second variety).
-    SVG_SetConfigString(ConfigStrings::Lights + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa"); // 8 CANDLE (third variety).
-    SVG_SetConfigString(ConfigStrings::Lights + 9, "aaaaaaaazzzzzzzz"); // 9 SLOW STROBE (fourth variety).
-    SVG_SetConfigString(ConfigStrings::Lights + 10, "mmamammmmammamamaaamammma"); // 10 FLUORESCENT FLICKER.
-    SVG_SetConfigString(ConfigStrings::Lights + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba"); // 11 SLOW PULSE NOT FADE TO BLACK.
-
+	for (int32_t i = 0; i < lightStylePresets.size(); i++) {
+		SVG_SetConfigString( ConfigStrings::Lights + i, lightStylePresets[i] ); // 0 normal.
+	}
     // Styles starting at 32 and up to 62 are assigned by the light program for switchable lights.
 }
 

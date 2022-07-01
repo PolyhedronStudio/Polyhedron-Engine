@@ -1635,7 +1635,7 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 	VectorCopy(transformed, result); // vec4 -> vec3
 }
 
-static void instance_model_lights(int num_light_polys, const light_poly_t* light_polys, const float* transform) {
+static void instance_model_lights(int num_light_polys, const light_poly_t* light_polys, const float* transform, int lightStyle = -1) {
 	for (int nlight = 0; nlight < num_light_polys; nlight++) 	{
 		if (num_model_lights >= MAX_MODEL_LIGHTS) 		{
 			assert(!"Model light count overflow");
@@ -1661,7 +1661,15 @@ static void instance_model_lights(int num_light_polys, const light_poly_t* light
 		// Copy the other light properties
 		VectorCopy(src_light->color, dst_light->color);
 		dst_light->material = src_light->material;
-		dst_light->style = src_light->style;
+		//if ( lightStyle > 0 ) {
+		//	dst_light->style = lightStyle;
+		//} else {
+		if ( lightStyle > -1 ) {
+			dst_light->style = lightStyle;
+		} else {
+			dst_light->style = src_light->style;
+		}
+//		}		
 
 		num_model_lights++;
 	}
@@ -1994,6 +2002,22 @@ prepare_entities(EntityUploadInfo* upload_info) {
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
+			if (model->num_light_polys > 0 && entity->modelLightStyle > -1) {
+				//model->light_polys->style = entity->modelLightStyle;
+				instance_idx++;
+				model_instance_idx++;
+			}
+				//} else if (model->num_light_polys > 0) {
+			//	model_instance_idx++;
+			//	//model->light_polys->style = 0;
+			//}
+			//if (entity->modelLightStyle == 5 || entity->modelLightStyle == 36) {
+			//if (entity->modelLightStyle > 0) {
+			
+			//	model_instance_idx++;
+			//}
+			//}
+
 			if (entity->flags & RenderEffects::ViewerModel)
 				viewer_model_indices[viewer_model_num++] = i;
 			else if (entity->flags & RenderEffects::WeaponModel)
@@ -2016,8 +2040,23 @@ prepare_entities(EntityUploadInfo* upload_info) {
 				mat4_t transform;
 				const qboolean is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
 				create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
+				
+				// Model Light Styles.
+				//light_poly_t* src_light = model->light_polys + 0;
+				//if (entity->modelLightStyle > 0) {
+				//	for (int nlight = 0; nlight < model->num_light_polys; nlight++) {
+				//		light_poly_t* src_lightA = model->light_polys + nlight;
+				//		src_lightA->style = 5;//entity->modelLightStyle;
 
-				instance_model_lights(model->num_light_polys, model->light_polys, transform);
+				//	}
+				//}}
+
+				// Instance Model Lights.
+				if ( entity->modelLightStyle > -1 ) {
+					instance_model_lights( model->num_light_polys, model->light_polys, transform, entity->modelLightStyle );
+				} else {
+					instance_model_lights( model->num_light_polys, model->light_polys, transform );
+				}
 			}
 		}
 	}

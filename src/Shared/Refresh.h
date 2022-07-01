@@ -80,6 +80,7 @@ typedef struct r_entity_s {
 	int32_t rootBoneAxisFlags = 0;
 	int32_t rootBoneAxisFlagsB = 0;
 
+
     //
     // Misc.
     //
@@ -94,6 +95,8 @@ typedef struct r_entity_s {
 
     qhandle_t           skin;       // NULL for inline skin
     int                 flags;      // Flags.
+
+	int32_t				modelLightStyle = -1;
 
     int                 id;         // Entity ID.
 

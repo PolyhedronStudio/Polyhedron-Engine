@@ -134,8 +134,6 @@ void TriggerHurt::SpawnKey(const std::string& key, const std::string& value) {
 //===============
 //
 void TriggerHurt::TriggerHurtTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
-	gi.DPrintf("TriggerHurtTouch!\n");
-
 	if (this == other)
 		return;
 
