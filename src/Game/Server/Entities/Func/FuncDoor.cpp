@@ -104,11 +104,18 @@ void FuncDoor::Spawn() {
         SetTakeDamage( TakeDamage::Yes );
         SetDieCallback( &FuncDoor::DoorShotOpen );
         SetMaxHealth( GetHealth() );
-    } else if ( GetTargetName().empty() ) {
-    // If the mapper did NOT specify a targetname, then make this 
+	// If the mapper did NOT specify a targetname, then make this 
     // door openable by touching it.
-        gi.PrecacheSound( MessageSoundPath );
-        SetTouchCallback( &FuncDoor::DoorTouch );
+	} if ( GetTargetName().empty() ) {
+		// A use toggle opens it instead.
+		if ( GetSpawnFlags() == SF_UseTrigger ) {
+			gi.DPrintf("Yo dawg, I herd u liek toggling so I notified you dat flag iz set!\n");
+			SetUseEntityFlags( UseEntityFlags::Toggle );
+		} else {
+			gi.DPrintf("Yo dawg, I herd u liek toggling but it ain't happenin'! Spawnflags=%i\n", GetSpawnFlags());
+			SVG_PrecacheSound( MessageSoundPath );
+			SetTouchCallback( &FuncDoor::DoorTouch );
+		}
     }
 
     moveInfo.speed = GetSpeed();

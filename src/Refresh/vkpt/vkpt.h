@@ -432,8 +432,8 @@ typedef struct sun_light_s {
 	vec3_t direction_envmap;
 	vec3_t color;
 	float angular_size_rad;
-	qboolean use_physical_sky;
-	qboolean visible;
+	bool use_physical_sky;
+	bool visible;
 } sun_light_t;
 
 void mult_matrix_matrix(float* p, const mat4_t &a, const mat4_t &b);
@@ -723,7 +723,7 @@ VkResult vkpt_god_rays_create_pipelines();
 VkResult vkpt_god_rays_destroy_pipelines();
 VkResult vkpt_god_rays_update_images();
 VkResult vkpt_god_rays_noop();
-qboolean vkpt_god_rays_enabled(const sun_light_t* sun_light);
+bool vkpt_god_rays_enabled(const sun_light_t* sun_light);
 void vkpt_record_god_rays_trace_command_buffer(VkCommandBuffer command_buffer, int pass);
 void vkpt_record_god_rays_filter_command_buffer(VkCommandBuffer command_buffer);
 void vkpt_god_rays_prepare_ubo(

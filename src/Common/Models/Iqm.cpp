@@ -908,7 +908,7 @@ void MOD_ApplyRootBoneAxisFlags(const model_t* model, const int32_t rootBoneAxis
 }
 
 /**
-*	@brief	Combine 2 different poses in one from a given root bone.
+*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode.
 **/
 void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp) {
 	// Get 
@@ -917,10 +917,13 @@ void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePos
 		iqm_transform_t *outBone = outBonePoses + boneNumber;
 
 		if (fraction == 1) {
-			memcpy( &outBonePoses[boneNumber], &inBonePoses[boneNumber], sizeof(iqm_transform_t) );
+			outBonePoses[boneNumber] = inBonePoses[boneNumber];
+			//memcpy( &outBonePoses[boneNumber], &inBonePoses[boneNumber], sizeof(iqm_transform_t) );
 		} else if (lerp == 0) {
-			memcpy( &inBonePoses[boneNumber], &outBonePoses[boneNumber], sizeof(iqm_transform_t) );
+			inBonePoses[boneNumber] = outBonePoses[boneNumber];
+			//memcpy( &inBonePoses[boneNumber], &outBonePoses[boneNumber], sizeof(iqm_transform_t) );
 		} else {
+			// This is wrong.
 			/*outBone->translate[0] = inBone->translate[0] * backlerp + outBone->translate[0] * lerp;
 			outBone->translate[1] = inBone->translate[1] * backlerp + outBone->translate[1] * lerp;
 			outBone->translate[2] = inBone->translate[2] * backlerp + outBone->translate[2] * lerp;
@@ -934,13 +937,14 @@ void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePos
 			//
 			// This seems to literally, combine them.
 			//
-			outBone->translate[0] = outBone->translate[0] * backlerp + inBone->translate[0] * lerp;
-			outBone->translate[1] = outBone->translate[1] * backlerp + inBone->translate[1] * lerp;
-			outBone->translate[2] = outBone->translate[2] * backlerp + inBone->translate[2] * lerp;
-
-			outBone->scale[0] = outBone->scale[0] * backlerp + inBone->scale[0] * lerp;
-			outBone->scale[1] = outBone->scale[1] * backlerp + inBone->scale[1] * lerp;
-			outBone->scale[2] = outBone->scale[2] * backlerp + inBone->scale[2] * lerp;
+			outBone->translate = vec3_mix(outBone->translate, inBone->translate, lerp);
+			//outBone->translate[0] = outBone->translate[0] * backlerp + inBone->translate[0] * lerp;
+			//outBone->translate[1] = outBone->translate[1] * backlerp + inBone->translate[1] * lerp;
+			//outBone->translate[2] = outBone->translate[2] * backlerp + inBone->translate[2] * lerp;
+			outBone->scale = vec3_mix(outBone->scale, inBone->scale, lerp);
+			//outBone->scale[0] = outBone->scale[0] * backlerp + inBone->scale[0] * lerp;
+			//outBone->scale[1] = outBone->scale[1] * backlerp + inBone->scale[1] * lerp;
+			//outBone->scale[2] = outBone->scale[2] * backlerp + inBone->scale[2] * lerp;
 
 			QuatSlerp(outBone->rotate, inBone->rotate, lerp, outBone->rotate);
 		}

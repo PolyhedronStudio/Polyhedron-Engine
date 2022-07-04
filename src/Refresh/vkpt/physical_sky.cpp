@@ -473,7 +473,7 @@ reset_sun_color_buffer(VkCommandBuffer cmd_buf)
 	});
 }
 
-qboolean vkpt_physical_sky_needs_update()
+bool vkpt_physical_sky_needs_update()
 {
 	return skyNeedsUpdate;
 }
@@ -788,7 +788,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 }
 
 VkResult
-vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light, qboolean render_world)
+vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light, bool render_world)
 {
     PhysicalSkyDesc_t const * skyDesc = GetSkyPreset(physical_sky->integer);
 

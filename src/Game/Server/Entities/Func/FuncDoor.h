@@ -17,9 +17,11 @@ public:
     static constexpr int32_t SF_Reverse     = 1 << 1;
     static constexpr int32_t SF_Crusher     = 1 << 2;
     static constexpr int32_t SF_NoMonsters  = 1 << 3;
-    static constexpr int32_t SF_Toggle      = 1 << 4;
-    static constexpr int32_t SF_XAxis       = 1 << 5;
-    static constexpr int32_t SF_YAxis       = 1 << 6;
+	static constexpr int32_t SF_Animated	= 1 << 4;
+    static constexpr int32_t SF_Toggle      = 1 << 5;
+    static constexpr int32_t SF_XAxis       = 1 << 6;
+    static constexpr int32_t SF_YAxis       = 1 << 7;
+	static constexpr int32_t SF_UseTrigger	= 1 << 8; // Instead of touching the door, we use triggers it instead.
 
     static constexpr const char* MessageSoundPath = "misc/talk.wav";
 

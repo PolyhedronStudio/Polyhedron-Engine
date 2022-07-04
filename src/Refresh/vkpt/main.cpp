@@ -2729,7 +2729,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		return;
 
 	vkpt_refdef.fd = fd;
-	qboolean render_world = (fd->rdflags & RDF_NOWORLDMODEL) == 0;
+	bool render_world = (fd->rdflags & RDF_NOWORLDMODEL) == 0;
 
 	static float previous_time = -1.f;
 	float frame_time = min(1.f, max(0.f, fd->time - previous_time));
@@ -2775,13 +2775,20 @@ R_RenderFrame_RTX(refdef_t *fd)
 	vec3_t sky_matrix[3];
 	prepare_sky_matrix(fd->time, sky_matrix);
 
-	sun_light_t sun_light = { };
+	sun_light_t sun_light = {
+		.direction = vec3_zero(),
+		.direction_envmap = vec3_zero(),
+		.color = vec3_zero(),
+		.angular_size_rad = 0,
+		.use_physical_sky = false,
+		.visible = false,
+	};
 	if (render_world)
 	{
 		vkpt_evaluate_sun_light(&sun_light, sky_matrix, fd->time);
 
 		if (!vkpt_physical_sky_needs_update())
-			sun_light.visible = sun_light.visible && sun_visible_prev;
+			sun_light.visible = ( ( sun_light.visible > 0 && sun_visible_prev > 0 ) ? true : false );
 	}
 
 	reference_mode_t ref_mode;
@@ -2839,7 +2846,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		shadowmap_view_proj,
 		shadowmap_depth_scale);
 
-	qboolean god_rays_enabled = vkpt_god_rays_enabled(&sun_light) && render_world;
+	bool god_rays_enabled = vkpt_god_rays_enabled(&sun_light) && render_world;
 
 	VkSemaphore transfer_semaphores[VKPT_MAX_GPUS];
 	VkSemaphore trace_semaphores[VKPT_MAX_GPUS];

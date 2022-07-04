@@ -244,10 +244,6 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 *			prototyping at this moment.
 **/
 static void UpdateSkeletalModelDataFromState(SkeletalModelData *skm, EntitySkeleton *es, const EntityState& state) {
-		//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = 
-		//	SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;// | 
-		//	//SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-
 	// Zero out X axis: DEPTH. This maintains the model rendering appropriately
 	// at our origin point.
 
@@ -255,70 +251,49 @@ static void UpdateSkeletalModelDataFromState(SkeletalModelData *skm, EntitySkele
 		return;
 	}
 	
-	//SKM_CreateEntitySkeletonFrom( skm, es );
+	// Create our skeleton for this model.
+	SKM_CreateEntitySkeletonFrom( skm, es );
 
 	for (auto& anim : skm->animationMap) {
 		anim.second.rootBoneAxisFlags = 0;//SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation; //SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;  //SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation | SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
 	}
 
-			const int32_t ZeroAllAxis = ( SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation );
+	const int32_t ZeroAllAxis = ( SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation );
 
-		skm->animationMap["TPose"].rootBoneAxisFlags =
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["TPose"].rootBoneAxisFlags =
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
 
-			skm->animationMap["Idle"].rootBoneAxisFlags	=
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["IdleAiming"].rootBoneAxisFlags =
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["RifleAim"].rootBoneAxisFlags	=
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["Waving"].rootBoneAxisFlags =
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["Reloading"].rootBoneAxisFlags =
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+		skm->animationMap["Idle"].rootBoneAxisFlags	=
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["IdleAiming"].rootBoneAxisFlags =
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["RifleAim"].rootBoneAxisFlags	=
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["Waving"].rootBoneAxisFlags =
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["Reloading"].rootBoneAxisFlags =
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
 
-		skm->animationMap["WalkForward"].rootBoneAxisFlags		= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-		skm->animationMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	skm->animationMap["WalkForward"].rootBoneAxisFlags		= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	skm->animationMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
 
-		skm->animationMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
 
-		skm->animationMap["WalkLeft"].rootBoneAxisFlags			= SkeletalAnimation::SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["WalkForwardLeft"].rootBoneAxisFlags	= 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["WalkLeft"].rootBoneAxisFlags			= SkeletalAnimation::SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["WalkForwardLeft"].rootBoneAxisFlags	= 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
 
-		skm->animationMap["WalkRight"].rootBoneAxisFlags		= SkeletalAnimation::SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["WalkForwardRight"].rootBoneAxisFlags = 
-			SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation |
-			SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-							
-	//skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-
-	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation; 
-	//
-	//// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-//	skm->animationMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-	//skm->animationMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-	//
-	//skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-
-	//skm->animationMap["PistolWhip"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["Reload"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["Reload"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-
-
-
-	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = 
-	//		SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | 
-		//	SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+	skm->animationMap["WalkRight"].rootBoneAxisFlags		= SkeletalAnimation::SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	skm->animationMap["WalkForwardRight"].rootBoneAxisFlags = 
+		SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation |
+		SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
 }
 /**
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
@@ -425,6 +400,20 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 		return false;
 	}
 
+	// Can't switch to animation without SKM data.
+	if (!skm) {
+		Com_DPrint("SwitchAnimation: No SKM data present.\n");
+		return false;
+	}
+
+	if (animationIndex > skm->animations.size()) {
+		Com_DPrint("SwitchAnimation: animationIndex(%i) out of range for animations.size(%i)\n",
+			animationIndex,
+			skm->animations.size()
+		);
+		return false;
+	}
+
 	// Get state pointer.
 	EntityState *currentState	= &podEntity->currentState;
 	EntityState *previousState	= &podEntity->previousState;
@@ -441,57 +430,93 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 	// Use refresh instead. It's the most actual state anyhow.
 	const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
 
-	// In case the animation switched, adjust our refresh animation data.
-	if (animationIndex != previousAnimationIndex) {
-		// See whether we got skm data, and if the animation index is valid and save to use.
-		if (skm && skm->animations.size() > animationIndex) {		
-			// Get a pointer to the animation data.
-			SkeletalAnimation *skmAnimation = skm->animations[animationIndex];
+	// We change animations for our 'main timeline animation' if:
+	//	- animationIndex differs from our previous animation index.
+	//	AND
+	//	- the start time of the new animation to switch to differs from the current animation start time.
+	if ( animationIndex != previousAnimationIndex ) { //}&& startTime.count() != currentAnimationState->startTime) {
+		// Retreive animation data matching to animationIndex.
+		SkeletalAnimation *skmAnimation = skm->animations[animationIndex];
 
-			// Reinitialize our refresh entity.
-			refreshAnimation.animationIndex = animationIndex;
-			refreshAnimation.frame = skmAnimation->startFrame;
-			refreshAnimation.startFrame = skmAnimation->startFrame;
-			refreshAnimation.endFrame = skmAnimation->endFrame;
-			refreshAnimation.forceLoop = true;//currentAnimation->forceLoop;
-			refreshAnimation.frameTime = skmAnimation->frametime;
-			refreshAnimation.startTime = currentAnimationState->startTime;
-			refreshAnimation.loopCount = 0;//currentAnimation->loopCount;
+		// Update our refresh animation to new values.
+		refreshAnimation.animationIndex	= animationIndex;
+		refreshAnimation.frame			= skmAnimation->startFrame;	// TODO: Should we?? // Set current frame to start frame.
+		refreshAnimation.startFrame		= skmAnimation->startFrame;
+		refreshAnimation.endFrame		= skmAnimation->endFrame;
+		refreshAnimation.forceLoop		= true;	// TODO: Set to forceloop, but not for debugging atm. //currentAnimation->forceLoop;
+		refreshAnimation.frameTime		= skmAnimation->frametime;
+		refreshAnimation.startTime		= currentAnimationState->startTime;
+		refreshAnimation.loopCount		= 0;	// TODO: Set to loopcount, but not for debugging atm. //currentAnimation->loopCount;
 		
-			// Update animation states for this frame's current entity state.
-			*previousAnimationState = *currentAnimationState;
-		}
-		
-		//
-		// TEMPORARY.
-		//
-		if (animationIndex != previousAnimationIndex) {
-			// Get a pointer to the animation data.
-			if (animationIndex == skm->animationMap["WalkForward"].index) {
-				SkeletalAnimation *skmAnimation = &skm->animationMap["Waving"];
+		// Update animation states for this frame's current entity state.
+		*previousAnimationState = *currentAnimationState;
 
-				// Reinitialize our refresh entity.
-				refreshAnimationB.animationIndex = skmAnimation->index;
-				refreshAnimationB.frame = skmAnimation->startFrame;
-				refreshAnimationB.startFrame = skmAnimation->startFrame;
-				refreshAnimationB.endFrame = skmAnimation->endFrame;
-				refreshAnimationB.forceLoop = true;//currentAnimation->forceLoop;
-				refreshAnimationB.frameTime = skmAnimation->frametime;
-				refreshAnimationB.startTime = currentAnimationState->startTime; //cl->time;
-				refreshAnimationB.loopCount = 0;//currentAnimation->loopCount;
+		//
+		// TEMPORARY:	Sets the second additional timeline animation depending on animationIndex.
+		//
+		//				Eventually this goes elsewhere of course.
+		//
+		if (animationIndex == skm->animationMap["Idle"].index) {
+			// Retreive animation data.
+			SkeletalAnimation *skmAnimation = &skm->animationMap["Reloading"];
+
+			// In this case, we already got acknowledgement animation A changed, and all B animations
+			// depend on A. So for now, this is redundant.
+			//
+			// However, when this code goes elsewhere, it is still important to check if the times
+			// matched, or not.
+			if ( refreshAnimationB.startTime != currentAnimationState->startTime ) {
+				// Update our refresh animation to new values.
+				refreshAnimationB.animationIndex	= skmAnimation->index;
+				refreshAnimationB.frame				= skmAnimation->startFrame;
+				refreshAnimationB.startFrame		= skmAnimation->startFrame;
+				refreshAnimationB.endFrame			= skmAnimation->endFrame;
+				refreshAnimationB.forceLoop			= false;//currentAnimation->forceLoop;
+				refreshAnimationB.frameTime			= skmAnimation->frametime;
+				refreshAnimationB.startTime			= currentAnimationState->startTime; //cl->time;
+				refreshAnimationB.loopCount			= 1;//currentAnimation->loopCount;
 			}
-			if (animationIndex == skm->animationMap["Idle"].index) {
-				SkeletalAnimation *skmAnimation = &skm->animationMap["Reloading"];
+		// WalkForward plays a waving animation.
+		} else if (animationIndex == skm->animationMap["WalkForward"].index) {//} (animationIndex == skm->animationMap["WalkForward"].index) {
+			// Retreive animation data.
+			SkeletalAnimation *skmAnimation = &skm->animationMap["Waving"];
 
+			// In this case, we already got acknowledgement animation A changed, and all B animations
+			// depend on A. So for now, this is redundant.
+			//
+			// However, when this code goes elsewhere, it is still important to check if the times
+			// matched, or not.
+			if ( refreshAnimationB.startTime != currentAnimationState->startTime ) {
 				// Reinitialize our refresh entity.
-				refreshAnimationB.animationIndex = skmAnimation->index;
-				refreshAnimationB.frame = skmAnimation->startFrame;
-				refreshAnimationB.startFrame = skmAnimation->startFrame;
-				refreshAnimationB.endFrame = skmAnimation->endFrame;
-				refreshAnimationB.forceLoop = false;//currentAnimation->forceLoop;
-				refreshAnimationB.frameTime = skmAnimation->frametime;
-				refreshAnimationB.startTime = currentAnimationState->startTime; //cl->time;
-				refreshAnimationB.loopCount = 1;//currentAnimation->loopCount;
+				refreshAnimationB.animationIndex	= skmAnimation->index;
+				refreshAnimationB.frame				= skmAnimation->startFrame;
+				refreshAnimationB.startFrame		= skmAnimation->startFrame;
+				refreshAnimationB.endFrame			= skmAnimation->endFrame;
+				refreshAnimationB.forceLoop			= true;//currentAnimation->forceLoop;
+				refreshAnimationB.frameTime			= skmAnimation->frametime;
+				refreshAnimationB.startTime			= currentAnimationState->startTime; //cl->time;
+				refreshAnimationB.loopCount			= 0;//currentAnimation->loopCount;
+			}
+		// All other animations play the rifle aim animation.
+		} else {
+			// Retreive animation data.
+			SkeletalAnimation *skmAnimation = &skm->animationMap["RifleAim"];
+
+			// In this case, we already got acknowledgement animation A changed, and all B animations
+			// depend on A. So for now, this is redundant.
+			//
+			// However, when this code goes elsewhere, it is still important to check if the times
+			// matched, or not.
+			if ( refreshAnimationB.startTime != currentAnimationState->startTime ) {
+				// Reinitialize our refresh entity.
+				refreshAnimationB.animationIndex	= skmAnimation->index;
+				refreshAnimationB.frame				= skmAnimation->startFrame;
+				refreshAnimationB.startFrame		= skmAnimation->startFrame;
+				refreshAnimationB.endFrame			= skmAnimation->endFrame;
+				refreshAnimationB.forceLoop			= true;//currentAnimation->forceLoop;
+				refreshAnimationB.frameTime			= skmAnimation->frametime;
+				refreshAnimationB.startTime			= currentAnimationState->startTime; //cl->time;
+				refreshAnimationB.loopCount			= 0;//currentAnimation->loopCount;
 			}
 		}
 	}
@@ -731,6 +756,7 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 	if (currentAnimation->startTime != previousAnimation->startTime) {
 		SwitchAnimation(currentAnimation->animationIndex, GameTime(currentAnimation->startTime));
 	}
+
 	// Process the animation, like we would do any time.
 	refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
 		time,
