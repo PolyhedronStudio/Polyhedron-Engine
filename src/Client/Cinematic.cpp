@@ -21,8 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Client.h"
 #include "Client/Sound/Sound.h"
 #include "Client/Sound/Vorbis.h"
-#include "Common/Files.h"
-#include "refresh/images.h"
+#include "../Common/Files.h"
+#include "Refresh/Images.h"
 
 typedef struct
 {
@@ -372,7 +372,7 @@ qhandle_t SCR_ReadNextFrame(void)
     FS_Read(&size, 4, cin.file);
     size = LittleLong(size);
     if (size > sizeof(compressed) || size < 1)
-        Com_Error(ERR_DROP, "Bad compressed frame size");
+        Com_Error(ErrorType::Drop, "Bad compressed frame size");
     FS_Read(compressed, size, cin.file);
 
     // read sound

@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Client.h"
 #include "Client/GameModule.h"
+#include "../Server/Server.h"
 
 static byte     demo_buffer[MAX_PACKETLEN];
 
@@ -114,7 +115,7 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
             // not changed at all. Note that players are always 'newentities',
             // this updates their oldOrigin always and prevents warping in case
             // of packet loss.
-            MSG_WriteDeltaEntity(oldent, newent,
+            MSG_WriteDeltaEntityState(oldent, newent,
                                  (EntityStateMessageFlags)(newent->number <= cl.maximumClients ? MSG_ES_NEWENTITY : 0));   // CPP: WARNING: EntityStateMessageFlags cast.
             oldindex++;
             newindex++;
@@ -123,14 +124,14 @@ static void emit_packet_entities(ServerFrame *from, ServerFrame *to)
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            MSG_WriteDeltaEntity(&cl.entityBaselines[newnum], newent, (EntityStateMessageFlags)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: EntityStateMessageFlags cast.
+            MSG_WriteDeltaEntityState(&cl.entityBaselines[newnum], newent, (EntityStateMessageFlags)(MSG_ES_FORCE | MSG_ES_NEWENTITY));  // CPP: WARNING: EntityStateMessageFlags cast.
             newindex++;
             continue;
         }
 
         if (newnum > oldnum) {
             // the old entity isn't present in the new message
-            MSG_WriteDeltaEntity(oldent, NULL, MSG_ES_FORCE);
+            MSG_WriteDeltaEntityState(oldent, NULL, MSG_ES_FORCE);
             oldindex++;
             continue;
         }
@@ -417,7 +418,7 @@ static void CL_Record_f(void)
     }
 
     // entityBaselines
-    for (i = 1; i < MAX_EDICTS; i++) {
+    for (i = 1; i < MAX_WIRED_POD_ENTITIES; i++) {
         ent = &cl.entityBaselines[i];
         if (!ent->number)
             continue;
@@ -428,7 +429,7 @@ static void CL_Record_f(void)
         }
 
         MSG_WriteUint8(ServerCommand::SpawnBaseline);//MSG_WriteByte(ServerCommand::SpawnBaseline);
-        MSG_WriteDeltaEntity(NULL, ent, MSG_ES_FORCE);
+        MSG_WriteDeltaEntityState(NULL, ent, MSG_ES_FORCE);
     }
 
     MSG_WriteUint8(ServerCommand::StuffText);//MSG_WriteByte(ServerCommand::StuffText);
@@ -615,13 +616,13 @@ static void finish_demo(int ret)
 
     if (!s[0]) {
         if (ret == 0) {
-            Com_Error(ERR_DISCONNECT, "Demo finished");
+            Com_Error(ErrorType::Disconnect, "Demo finished");
         } else {
-            Com_Error(ERR_DROP, "Couldn't read demo: %s", Q_ErrorString(ret));
+            Com_Error(ErrorType::Drop, "Couldn't read demo: %s", Q_ErrorString(ret));
         }
     }
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     Cvar_Set("nextserver", "");
 
@@ -709,9 +710,9 @@ static void CL_PlayDemo_f(void)
     }
 
     // if running a local server, kill it and reissue
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     cls.demo.playback = f;
 
@@ -818,8 +819,8 @@ void CL_EmitDemoSnapshot(void)
     }
 
     // write layout
-    MSG_WriteUint8(ServerGameCommand::Layout);//MSG_WriteByte(ServerGameCommand::Layout);
-    MSG_WriteString(cl.layout);
+//    MSG_WriteUint8(ServerGameCommand::Layout);//MSG_WriteByte(ServerGameCommand::Layout);
+//    MSG_WriteString(cl.layout);
 
     // CPP: Cast void* to demosnap_t *
     snap = (demosnap_t*)Z_Malloc(sizeof(*snap) + msg_write.currentSize - 1);
@@ -1142,7 +1143,7 @@ void CL_CleanupDemos(void)
         FS_FCloseFile(cls.demo.playback);
 
         if (com_timedemo->integer && cls.demo.time_frames) {
-            unsigned msec = Sys_Milliseconds();
+            uint64_t msec = Sys_Milliseconds();
 
             if (msec > cls.demo.time_start) {
                 float sec = (msec - cls.demo.time_start) * 0.001f;

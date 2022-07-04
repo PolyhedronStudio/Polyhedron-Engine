@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "Server.h"
+#include "Models.h"
+#include "../Client/Client.h"
 
 ServerStatic svs;                // persistant server info
 server_t        sv;                 // local server
@@ -151,6 +153,9 @@ void SV_SpawnServer(MapCommand *cmd)
     CM_FreeMap(&sv.cm);
     SV_FreeFile(sv.entityString);
 
+	// Free Unused Models.
+	SV_Model_FreeUnused();
+
     // Wipe the entire per-level structure
     //memset(&sv, 0, sizeof(sv));
     sv = {};
@@ -214,11 +219,14 @@ void SV_SpawnServer(MapCommand *cmd)
     // map initialization
     sv.serverState = ServerState::Loading;
 
+	SV_Model_BeginRegistrationSequence();
     // load and spawn all other entities
     ge->SpawnEntities(sv.name, entityString, cmd->spawnpoint);
 
+	SV_Model_EndRegistrationSequence();
+
     // Run 2 frames times SERVER_RATE_MULTIPLIER to allow everything to settle.
-    for (int32_t i = 0; i < SERVER_RATE_MULTIPLIER; i++) {
+    for (int32_t i = 0; i < 10; i++) {//SERVER_RATE_MULTIPLIER; i++) {
         ge->RunFrame(); sv.frameNumber++;
         ge->RunFrame(); sv.frameNumber++;
     }
@@ -349,10 +357,10 @@ void SV_InitGame()
 
     if (svs.initialized) {
         // cause any connected clients to reconnect
-        SV_Shutdown("Server restarted\n", (ErrorType)(ERR_RECONNECT));
+        SV_Shutdown("Server restarted\n", ErrorType::Reconnect);
     } else {
         // make sure the client is down
-        CL_Disconnect(ERR_RECONNECT);
+        CL_Disconnect(ErrorType::Reconnect);
         SCR_BeginLoadingPlaque();
 
         CM_FreeMap(&sv.cm);
@@ -425,7 +433,7 @@ void SV_InitGame()
         NET_Config(NET_SERVER);
     }
 
-    svs.client_pool = (client_t*)SV_Mallocz(sizeof(client_t) * sv_maxclients->integer); // CPP: Cast
+    svs.clientPool = (client_t*)SV_Mallocz(sizeof(client_t) * sv_maxclients->integer); // CPP: Cast
 
     svs.num_entities = sv_maxclients->integer * UPDATE_BACKUP * MAX_PACKET_ENTITIES;
     svs.entities = (EntityState*)SV_Mallocz(sizeof(EntityState) * svs.num_entities);  // CPP: Cast
@@ -438,20 +446,20 @@ void SV_InitGame()
     svs.z.zfree = SV_zfree;
     if (deflateInit2(&svs.z, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
                      -MAX_WBITS, 9, Z_DEFAULT_STRATEGY) != Z_OK) {
-        Com_Error(ERR_FATAL, "%s: deflateInit2() failed", __func__);
+        Com_Error(ErrorType::Fatal, "%s: deflateInit2() failed", __func__);
     }
 #endif
 
     SV_InitGameProgs();
 
     // send heartbeat very soon
-    svs.last_heartbeat = -(HEARTBEAT_SECONDS - 5) * 1000;
+    svs.lastHeartBeat = -(HEARTBEAT_SECONDS - 5) * 1000;
 
     for (i = 0; i < sv_maxclients->integer; i++) {
-        client = svs.client_pool + i;
+        client = svs.clientPool + i;
         entnum = i + 1;
         ent = EDICT_NUM(entnum);
-        ent->state.number = entnum;
+        ent->currentState.number = entnum;
         client->edict = ent;
         client->number = i;
     }

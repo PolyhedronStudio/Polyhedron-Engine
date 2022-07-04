@@ -17,15 +17,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // cvar.c -- dynamic variable tracking
 
-#include "Shared/Shared.h"
-#include "Common/Cmd.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Files.h"
-#include "Common/Prompt.h"
-#include "Common/Utilities.h"
-#include "Common/Zone.h"
-#include "Client/Client.h"
+#include "../Shared/Shared.h"
+#include "Cmd.h"
+#include "Common.h"
+#include "CVar.h"
+#include "Files.h"
+#include "Prompt.h"
+#include "Utilities.h"
+#include "Zone.h"
+#include "../Client/Client.h"
 
 cvar_t  *cvar_vars;
 
@@ -275,7 +275,7 @@ cvar_t *Cvar_Get(const char *var_name, const char *var_value, int flags)
     size_t length;
 
     if (!var_name) {
-        Com_Error(ERR_FATAL, "Cvar_Get: NULL var_name");
+        Com_Error(ErrorType::Fatal, "Cvar_Get: NULL var_name");
     }
     if (!var_value) {
         return Cvar_FindVar(var_name);

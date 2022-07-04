@@ -17,9 +17,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // CPP: Required include for _ReturnAddress();
+#ifdef WIN32
 #include <intrin.h>
+#endif
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/Common.h"
 #include "Common/Zone.h"
 
@@ -101,13 +103,13 @@ static const char z_tagnames[TAG_MAX][8] = {
 static inline void Z_Validate(zhead_t *z, const char *func)
 {
     if (z->magic != Z_MAGIC) {
-        Com_Error(ERR_FATAL, "%s: bad magic", func);
+        Com_Error(ErrorType::Fatal, "%s: bad magic", func);
     }
     if (Z_TAIL_F(z) != Z_TAIL) {
-        Com_Error(ERR_FATAL, "%s: bad tail", func);
+        Com_Error(ErrorType::Fatal, "%s: bad tail", func);
     }
     if (z->tag == TAG_FREE) {
-        Com_Error(ERR_FATAL, "%s: bad tag", func);
+        Com_Error(ErrorType::Fatal, "%s: bad tag", func);
     }
 }
 
@@ -197,20 +199,20 @@ void *Z_Realloc(void *ptr, size_t size)
     Z_Validate(z, __func__);
 
     if (z->tag == TAG_STATIC) {
-        Com_Error(ERR_FATAL, "%s: couldn't realloc static memory", __func__);
+        Com_Error(ErrorType::Fatal, "%s: couldn't realloc static memory", __func__);
     }
 
     s = &z_stats[z->tag < TAG_MAX ? z->tag : TAG_FREE];
     s->bytes -= z->size;
 
     if (size > SIZE_MAX - Z_EXTRA - 3) {
-        Com_Error(ERR_FATAL, "%s: bad size", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad size", __func__);
     }
 
     size = (size + Z_EXTRA + 3) & ~3;
     z = (zhead_t*)realloc(z, size); // CPP: Cast
     if (!z) {
-        Com_Error(ERR_FATAL, "%s: couldn't realloc %" PRIz " bytes", __func__, size); // CPP: String fix
+        Com_Error(ErrorType::Fatal, "%s: couldn't realloc %" PRIz " bytes", __func__, size); // CPP: String fix
     }
 
     z->size = size;
@@ -285,17 +287,17 @@ void *Z_TagMalloc(size_t size, memtag_t tag)
     }
 
     if (tag == TAG_FREE) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad tag", __func__);
     }
 
     if (size > SIZE_MAX - Z_EXTRA - 3) {
-        Com_Error(ERR_FATAL, "%s: bad size", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad size", __func__);
     }
 
     size = (size + Z_EXTRA + 3) & ~3;
     z = (zhead_t*)malloc(size); // CPP: Cast
     if (!z) {
-        Com_Error(ERR_FATAL, "%s: couldn't allocate %" PRIz " bytes", __func__, size); // CPP: String fix.
+        Com_Error(ErrorType::Fatal, "%s: couldn't allocate %" PRIz " bytes", __func__, size); // CPP: String fix.
     }
     z->magic = Z_MAGIC;
     z->tag = tag;
@@ -358,7 +360,7 @@ void *Z_ReservedAlloc(size_t size)
     }
 
     if (size > z_reserved_total - z_reserved_inuse) {
-        Com_Error(ERR_FATAL, "%s: couldn't allocate %" PRIz " bytes", __func__, size); // CPP: String fix.
+        Com_Error(ErrorType::Fatal, "%s: couldn't allocate %" PRIz " bytes", __func__, size); // CPP: String fix.
     }
 
     ptr = z_reserved_data + z_reserved_inuse;

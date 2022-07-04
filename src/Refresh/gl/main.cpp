@@ -86,13 +86,13 @@ static void GL_SetupFrustum(void)
 {
     vec_t angle, sf, cf;
     vec3_t forward, left, up;
-    cplane_t *p;
+    CollisionPlane *p;
     int i;
 
     // right/left
     angle = Radians(glr.fd.fov_x / 2);
-    sf = std::sinf(angle);
-    cf = std::cosf(angle);
+    sf = sinf(angle);
+    cf = cosf(angle);
 
     VectorScale(glr.viewaxis[0], sf, forward);
     VectorScale(glr.viewaxis[1], cf, left);
@@ -102,8 +102,8 @@ static void GL_SetupFrustum(void)
 
     // top/bottom
     angle = Radians(glr.fd.fov_y / 2);
-    sf = std::sinf(angle);
-    cf = std::cosf(angle);
+    sf = sinf(angle);
+    cf = cosf(angle);
 
     VectorScale(glr.viewaxis[0], sf, forward);
     VectorScale(glr.viewaxis[2], cf, up);
@@ -130,10 +130,10 @@ glCullResult_t GL_CullBox(vec3_t bounds[2])
     cull = CULL_IN;
     for (i = 0; i < 4; i++) {
         bits = BoxOnPlaneSide(bounds[0], bounds[1], &glr.frustumPlanes[i]);
-        if (bits == BOX_BEHIND) {
+        if (bits == BoxPlane::Behind) {
             return CULL_OUT;
         }
-        if (bits != BOX_INFRONT) {
+        if (bits != BoxPlane::InFront) {
             cull = CULL_CLIP;
         }
     }
@@ -144,7 +144,7 @@ glCullResult_t GL_CullBox(vec3_t bounds[2])
 glCullResult_t GL_CullSphere(const vec3_t origin, float radius)
 {
     float dist;
-    cplane_t *p;
+    CollisionPlane *p;
     int i;
     glCullResult_t cull;
 
@@ -184,7 +184,7 @@ static inline void make_box_points(const vec3_t    origin,
 glCullResult_t GL_CullLocalBox(const vec3_t origin, vec3_t bounds[2])
 {
     vec3_t points[8];
-    cplane_t *p;
+    CollisionPlane *p;
     int i, j;
     vec_t dot;
     qboolean infront;
@@ -453,12 +453,12 @@ static void GL_DrawEntities(int mask)
             int index = ~ent->model;
 
             if (glr.fd.rdflags & RDF_NOWORLDMODEL) {
-                Com_Error(ERR_DROP, "%s: inline model without world",
+                Com_Error(ErrorType::Drop, "%s: inline model without world",
                           __func__);
             }
 
             if (index < 1 || index >= bsp->nummodels) {
-                Com_Error(ERR_DROP, "%s: inline model %d out of range",
+                Com_Error(ErrorType::Drop, "%s: inline model %d out of range",
                           __func__, index);
             }
 
@@ -466,7 +466,7 @@ static void GL_DrawEntities(int mask)
             continue;
         }
 
-        model = MOD_ForHandle(ent->model);
+        model = CL_Model_GetModelByHandle(ent->model);
         if (!model) {
             GL_DrawNullModel();
             continue;
@@ -482,7 +482,7 @@ static void GL_DrawEntities(int mask)
         case model_s::MOD_EMPTY: // CPP: Enum
             break;
         default:
-            Com_Error(ERR_FATAL, "%s: bad model type", __func__);
+            Com_Error(ErrorType::Fatal, "%s: bad model type", __func__);
         }
 
         if (gl_showorigins->integer) {
@@ -557,7 +557,7 @@ void R_RenderFrame_GL(refdef_t *fd)
     GL_Flush2D();
 
     if (!gl_static.world.cache && !(fd->rdflags & RDF_NOWORLDMODEL)) {
-        Com_Error(ERR_FATAL, "%s: NULL worldmodel", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL worldmodel", __func__);
     }
 
     glr.drawframe++;
@@ -957,15 +957,15 @@ static void GL_InitTables(void)
     int i;
 
     for (i = 0; i < NUMVERTEXNORMALS; i++) {
-        v = bytedirs[i];
-        lat = std::acosf(v[2]);
-        lng = std::atan2f(v[1], v[0]);
+        v = normalizedByteDirectionTable[i];
+        lat = acosf(v[2]);
+        lng = atan2f(v[1], v[0]);
         gl_static.latlngtab[i][0] = lat * (255.0f / (2 * M_PI));
         gl_static.latlngtab[i][1] = lng * (255.0f / (2 * M_PI));
     }
 
     for (i = 0; i < 256; i++) {
-        gl_static.sintab[i] = std::sinf(i * (2 * M_PI / 255.0f));
+        gl_static.sintab[i] = sinf(i * (2 * M_PI / 255.0f));
     }
 }
 
@@ -994,7 +994,7 @@ static void GL_PostInit(void)
 
     GL_SetDefaultState();
     GL_InitImages();
-    MOD_Init();
+    CL_Model_Init();
 }
 
 // ==============================================================================
@@ -1071,7 +1071,7 @@ void R_Shutdown_GL(qboolean total)
 
     GL_FreeWorld();
     GL_ShutdownImages();
-    MOD_Shutdown();
+    CL_Model_Shutdown();
 
     if (gl_vertex_buffer_object->modified) {
         // disable buffer objects after map is freed
@@ -1124,7 +1124,7 @@ R_EndRegistration
 void R_EndRegistration_GL(const char *name)
 {
     IMG_FreeUnused();
-    MOD_FreeUnused();
+    CL_Model_FreeUnused();
     Scrap_Upload();
     gl_static.registering = false;
 }

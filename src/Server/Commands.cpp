@@ -93,7 +93,7 @@ out:;
         // make sure the server is listed public
         Cvar_Set("public", "1");
 
-        svs.last_heartbeat = svs.realtime - HEARTBEAT_SECONDS * 1000;
+        svs.lastHeartBeat = svs.realTime - HEARTBEAT_SECONDS * 1000;
     }
 }
 
@@ -118,7 +118,7 @@ static void SV_ListMasters_f(void)
         } else if (!m->last_ack) {
             strcpy(buf, "never");
         } else {
-            Q_snprintf(buf, sizeof(buf), "%u", svs.realtime - m->last_ack);
+            Q_snprintf(buf, sizeof(buf), "%u", svs.realTime - m->last_ack);
         }
         adr = m->adr.port ? NET_AdrToString(&m->adr) : "error";
         Com_Printf("%3d %-21.21s %7s %-21s\n", ++i, m->name, buf, adr);
@@ -142,7 +142,7 @@ client_t *SV_GetPlayer(const char *s, qboolean partial)
             return NULL;
         }
 
-        other = &svs.client_pool[i];
+        other = &svs.clientPool[i];
         if (other->connectionState <= ConnectionState::Zombie) {
             Com_Printf("Client slot %d is not active.\n", i);
             return NULL;
@@ -280,7 +280,7 @@ static void SV_Map(qboolean restart) {
     if (!SV_ParseMapCmd(&cmd))
         return;
 
-    // save pending CM to be freed later if ERR_DROP is thrown
+    // save pending CM to be freed later if ErrorType::Drop is thrown
     Com_AbortFunc(abort_func, &cmd.cm);
 
     // wipe savegames
@@ -290,7 +290,8 @@ static void SV_Map(qboolean restart) {
 
     // any error will drop from this point
     if ((sv.serverState != ServerState::Game && sv.serverState != ServerState::Pic && sv.serverState != ServerState::Cinematic) || restart) {
-        SV_InitGame();    // the game is just starting
+        //SV_Model_FreeUnused();
+		SV_InitGame();    // the game is just starting
     } /*else {
         extern cvar_t* sv_maxclients;
         Entity *ent;
@@ -298,7 +299,7 @@ static void SV_Map(qboolean restart) {
         int32_t i = 0;
         int32_t entnum = 0;
         for (i = 0; i < sv_maxclients->integer; i++) {
-            client = svs.client_pool + i;
+            client = svs.clientPool + i;
             entnum = i + 1;
             ent = EDICT_NUM(entnum);
             ent->state.number = entnum;
@@ -371,7 +372,7 @@ static void SV_GameMap_f(void)
     // admin option to reload the game DLL or entire server
     if (sv_recycle->integer > 0) {
         if (sv_recycle->integer > 1) {
-            Com_Quit(NULL, ERR_RECONNECT);
+            Com_Quit(NULL, ErrorType::Reconnect);
         }
         SV_Map(true);
         return;
@@ -499,11 +500,11 @@ static void SV_Kick_f(void)
         return;
 
     SV_DropClient(sv_client, "?was kicked");
-    sv_client->lastMessage = svs.realtime;    // min case there is a funny zombie
+    sv_client->lastMessage = svs.realTime;    // min case there is a funny zombie
 
     // optionally ban their IP address
     if (!strcmp(Cmd_Argv(0), "kickban")) {
-        NetAdr *addr = &sv_client->netchan->remoteNetAddress;
+        NetAdr *addr = &sv_client->netChan->remoteNetAddress;
         if (addr->type == NA_IP || addr->type == NA_IP6) {
             AddressMatch *match = (AddressMatch*)Z_Malloc(sizeof(*match)); // CPP: Cast
             match->addr = *addr;
@@ -555,9 +556,9 @@ static void dump_clients(void)
         }
 
         Com_Printf("%-15.15s ", client->name);
-        Com_Printf("%7u ", svs.realtime - client->lastMessage);
+        Com_Printf("%7u ", svs.realTime - client->lastMessage);
         Com_Printf("%-21s ", NET_AdrToString(
-                       &client->netchan->remoteNetAddress));
+                       &client->netChan->remoteNetAddress));
         Com_Printf("%5" PRIz " ", client->rate);
         Com_Printf("%2i ", client->protocolVersion);
         Com_Printf("%3i ", client->movesPerSecond);
@@ -620,7 +621,7 @@ static void dump_time(void)
         "--- --------------- ---- --------\n");
 
     FOR_EACH_CLIENT(client) {
-        idle = (svs.realtime - client->lastActivity) / 1000;
+        idle = (svs.realTime - client->lastActivity) / 1000;
         if (idle > 9999)
             idle = 9999;
         Com_TimeDiff(buffer, sizeof(buffer),
@@ -635,14 +636,14 @@ static void dump_lag(void)
     client_t    *cl;
 
     Com_Printf(
-        "num name            PLs2c PLc2s Rmin Ravg Rmax dup\n"
-        "--- --------------- ----- ----- ---- ---- ---- ---\n");
+        "num name            PLs2c PLc2s Rmin Ravg Rmax dup scale\n"
+        "--- --------------- ----- ----- ---- ---- ---- --- -----\n");
 
     FOR_EACH_CLIENT(cl) {
-        Com_Printf("%3i %-15.15s %5.2f %5.2f %4d %4d %4d %3d\n",
+        Com_Printf("%3i %-15.15s %5.2f %5.2f %4d %4d %4d %3d %5.3f\n",
                    cl->number, cl->name, PL_S2C(cl), PL_C2S(cl),
                    cl->pingMinimum, AVG_PING(cl), cl->pingMaximum,
-                   cl->numpackets - 1);
+                   cl->numpackets - 1, cl->timescale);
     }
 }
 
@@ -657,7 +658,7 @@ static void dump_protocols(void)
     FOR_EACH_CLIENT(cl) {
         Com_Printf("%3i %-15.15s %5d %5d %6" PRIz "  %s  %s\n",
                    cl->number, cl->name, cl->protocolVersion, cl->protocolMinorVersion,
-                   cl->netchan->maximumPacketLength,
+                   cl->netChan->maximumPacketLength,
                    cl->has_zlib ? "yes" : "no ",
                    "1");
     }
@@ -726,7 +727,7 @@ static void SV_ConSay_f(void)
     }
 
     if (COM_DEDICATED) {
-        Com_LPrintf(PRINT_TALK, "console: %s\n", s);
+        Com_LPrintf(PrintType::Talk, "console: %s\n", s);
     }
 }
 
@@ -738,7 +739,7 @@ SV_Heartbeat_f
 */
 static void SV_Heartbeat_f(void)
 {
-    svs.last_heartbeat = svs.realtime - HEARTBEAT_SECONDS * 1000;
+    svs.lastHeartBeat = svs.realTime - HEARTBEAT_SECONDS * 1000;
 }
 
 
@@ -767,7 +768,7 @@ void SV_PrintMiscInfo(void)
                sv_client->versionString ? sv_client->versionString : "-");
     Com_Printf("protocol (maj/min)   %d/%d\n",
                sv_client->protocolVersion, sv_client->protocolMinorVersion);
-    Com_Printf("maxmsglen            %" PRIz "\n", sv_client->netchan->maximumPacketLength);
+    Com_Printf("maxmsglen            %" PRIz "\n", sv_client->netChan->maximumPacketLength);
     Com_Printf("zlib support         %s\n", sv_client->has_zlib ? "yes" : "no");
     Com_Printf("netchan type         %s\n", "1");
     Com_Printf("ping                 %d\n", sv_client->ping);
@@ -962,7 +963,7 @@ static void SV_KillServer_f(void)
         return;
     }
 
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 }
 
 /*

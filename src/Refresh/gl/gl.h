@@ -16,23 +16,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
-#include "Common/Bsp.h"
-#include "Common/Cmd.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Files.h"
-#include "Client/Video.h"
-#include "Client/Client.h"
-#include "refresh/refresh.h"
-#include "refresh/images.h"
-#include "refresh/models.h"
-#include "System/Hunk.h"
+#include "../../Shared/Shared.h"
+#include "../../Common/Bsp.h"
+#include "../../Common/Cmd.h"
+#include "../../Common/Common.h"
+#include "../../Common/CVar.h"
+#include "../../Common/Files.h"
+//#include "../../Common/Models/Models.h"
+#include "../../Client/Models.h"
+#include "../../Client/Video.h"
+#include "../../Client/Client.h"
+#include "../../Refresh/Refresh.h"
+#include "../../Refresh/Images.h"
+#include "../../Refresh/Models.h"
+#include "../../System/Hunk.h"
 
 #if USE_FIXED_LIBGL
-#include "QGL/Fixed.h"
+#include "qgl/fixed.h"
 #else
-#include "QGL/Dynamic.h"
+#include "qgl/dynamic.h"
 #endif
 
 /*
@@ -87,7 +89,7 @@ typedef struct {
 
     int             viewcluster1;
     int             viewcluster2;
-    cplane_t        frustumPlanes[4];
+    CollisionPlane        frustumPlanes[4];
     r_entity_t        *ent;
     qboolean        entrotated;
     vec3_t          entaxis[3];
@@ -530,7 +532,7 @@ void HQ2x_Init(void);
 
 /* models.c */
 
-qerror_t MOD_LoadMD2_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadMD3_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadIQM_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD2_GL(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD3_GL(model_t* model, ModelMemoryAllocateCallback modelAlloc,const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadIQM_GL(model_t* model, ModelMemoryAllocateCallback modelAlloc,const void* rawdata, size_t length, const char* mod_name);
 void MOD_Reference_GL(model_t *model);

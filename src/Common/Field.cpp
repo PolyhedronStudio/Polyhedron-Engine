@@ -20,13 +20,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // field.c
 //
 
-#include "Shared/Shared.h"
-#include "Common/Common.h"
-#include "Common/Field.h"
-#include "Client/Client.h"
-#include "Client/Keys.h"
-#include "Client/Video.h"
-#include "refresh/refresh.h"
+#include "../Shared/Shared.h"
+#include "Common.h"
+#include "Field.h"
+#include "../Client/Client.h"
+#include "../Client/Keys.h"
+#include "../Client/Video.h"
+#include "Refresh/Refresh.h"
 
 /*
 ================
@@ -88,7 +88,7 @@ qboolean IF_KeyEvent(inputField_t *field, int key)
         return false;
     }
     if (field->cursorPos >= field->maxChars) {
-        Com_Error(ERR_FATAL, "%s: bad cursorPos", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad cursorPos", __func__);
     }
 
     if (key == K_DEL) {
@@ -217,7 +217,7 @@ qboolean IF_CharEvent(inputField_t *field, int key)
         return false;
     }
     if (field->cursorPos >= field->maxChars) {
-        Com_Error(ERR_FATAL, "%s: bad cursorPos", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad cursorPos", __func__);
     }
 
     if (key < 32 || key > 127) {
@@ -265,7 +265,7 @@ int IF_Draw(inputField_t *field, int x, int y, int flags, qhandle_t font)
     }
 
     if (cursorPos >= field->maxChars) {
-        Com_Error(ERR_FATAL, "%s: bad cursorPos", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad cursorPos", __func__);
     }
 
     // scroll horizontally

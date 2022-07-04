@@ -16,9 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
-#include "Common/Fifo.h"
-#include "Common/Msg.h"
+#include "../Shared/Shared.h"
+#include "Fifo.h"
+#include "Messaging.h"
 
 size_t FIFO_Read(fifo_t *fifo, void *buffer, size_t len)
 {

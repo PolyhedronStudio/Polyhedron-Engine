@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // prompt.c
 //
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/Common.h"
 #include "Common/CVar.h"
 #include "Common/Field.h"

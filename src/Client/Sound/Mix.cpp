@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // snd_mix.c -- portable code to mix sounds for snd_dma.c
-
+#include "../../Shared/Shared.h"
 #include "Sound.h"
 
 #define    PAINTBUFFER_SIZE    2048
@@ -106,7 +106,7 @@ static void TransferPaintBuffer(samplepair_t *samp, int endTime)
 
         // write a fixed sine wave
         for (i = paintedtime; i < endTime; i++) {
-            samp[i].left = samp[i].right = std::sinf(i * 0.1) * 20000 * 256;
+            samp[i].left = samp[i].right = sinf(i * 0.1) * 20000 * 256;
         }
     }
 

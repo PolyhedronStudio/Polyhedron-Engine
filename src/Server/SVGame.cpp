@@ -18,6 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // sv_game.c -- interface to the game dll
 
 #include "Server.h"
+#include "Models.h"
+#include "Shared/SkeletalModelData.h"
+#include "../Client/Client.h"
 
 ServerGameExports    *ge;
 
@@ -48,24 +51,24 @@ static int PF_FindIndex(const char *name, int start, int max)
     }
 
     if (i == max)
-        Com_Error(ERR_DROP, "PF_FindIndex: overflow");
-
+        Com_Error(ErrorType::Drop, "PF_FindIndex: overflow");
+	
     PF_configstring(i + start, name);
 
     return i;
 }
 
-static int PF_ModelIndex(const char *name)
+static int PF_PrecacheModel(const char *name)
 {
     return PF_FindIndex(name, ConfigStrings::Models, MAX_MODELS);
 }
 
-static int PF_SoundIndex(const char *name)
+static int PF_PrecacheSound(const char *name)
 {
     return PF_FindIndex(name, ConfigStrings::Sounds, MAX_SOUNDS);
 }
 
-static int PF_ImageIndex(const char *name)
+static int PF_PrecacheImage(const char *name)
 {
     return PF_FindIndex(name, ConfigStrings::Images, MAX_IMAGES);
 }
@@ -93,7 +96,7 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
         goto clear;
     }
 
-    client = svs.client_pool + clientNumber;
+    client = svs.clientPool + clientNumber;
     if (client->connectionState <= ConnectionState::Zombie) {
         Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         goto clear;
@@ -111,9 +114,9 @@ static void PF_Unicast(Entity *ent, qboolean reliable)
         flags |= MSG_RELIABLE;
     }
 
-    if (cmd == ServerGameCommand::Layout) {
-        flags |= MSG_COMPRESS;
-    }
+    //if (cmd == ServerGameCommand::Layout) {
+    //    flags |= MSG_COMPRESS;
+    //}
 
     SV_ClientAddMessage(client, flags);
 
@@ -222,16 +225,16 @@ static void PF_cprintf(Entity *ent, int level, const char *fmt, ...)
     }
 
     if (!ent) {
-        Com_LPrintf(level == PRINT_CHAT ? PRINT_TALK : PRINT_ALL, "%s", msg);
+        Com_LPrintf(level == PRINT_CHAT ? PrintType::Talk : PrintType::All, "%s", msg);
         return;
     }
 
     clientNumber = NUM_FOR_EDICT(ent) - 1;
     if (clientNumber < 0 || clientNumber >= sv_maxclients->integer) {
-        Com_Error(ERR_DROP, "%s to a non-client %d", __func__, clientNumber);
+        Com_Error(ErrorType::Drop, "%s to a non-client %d", __func__, clientNumber);
     }
 
-    client = svs.client_pool + clientNumber;
+    client = svs.clientPool + clientNumber;
     if (client->connectionState <= ConnectionState::Zombie) {
         Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNumber);
         return;
@@ -307,9 +310,50 @@ static q_noreturn void PF_error(const char *fmt, ...)
     Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
     va_end(argptr);
 
-    Com_Error(ERR_DROP, "Game Error: %s", msg);
+    Com_Error(ErrorType::Drop, "Game Error: %s", msg);
 }
 
+/**
+*	@brief	Loads in an IQM model that can be used server-side.
+**/
+static qhandle_t PF_PrecacheSkeletalModelData(const char *name) {
+	return SV_Model_PrecacheSkeletalModelData(name);
+}
+
+/**
+*	@return	A pointer to the model structure for given handle. (nullptr) on failure.
+**/
+static model_t *PF_GetServerModelByHandle(qhandle_t handle) {
+	model_t *model = SV_Model_ForHandle(handle);
+
+	if (!model) {
+		// TODO: Warn.
+		return nullptr;
+	}
+
+	//if (model->skeletalModelData) {
+		//return &model->skeletalModelData;
+	//}
+	return model;
+}
+
+/**
+*	@return	A pointer to the model structure for given handle. (nullptr) on failure.
+**/
+static SkeletalModelData *PF_GetSkeletalModelDataByHandle(qhandle_t handle) {
+	model_t *model = SV_Model_ForHandle(handle);
+
+	if (!model) {
+		// TODO: Warn.
+		return nullptr;
+	}
+
+	if (model->skeletalModelData) {
+		return model->skeletalModelData;
+	}
+
+	return nullptr;
+}
 
 /*
 =================
@@ -324,11 +368,11 @@ static void PF_setmodel(Entity *ent, const char *name)
     mmodel_t    *mod;
 
     if (!name)
-        Com_Error(ERR_DROP, "PF_setmodel: NULL");
+        Com_Error(ErrorType::Drop, "PF_setmodel: NULL");
 
-    i = PF_ModelIndex(name);
+    i = PF_PrecacheModel(name);
 
-    ent->state.modelIndex = i;
+    ent->currentState.modelIndex = i;
 
 // if it is an inline model, get the size information for it
     if (name[0] == '*') {
@@ -345,7 +389,6 @@ static void PF_setmodel(Entity *ent, const char *name)
 PF_configstring
 
 If game is actively running, broadcasts configstring change.
-Archived in MVD stream.
 ===============
 */
 static void PF_configstring(int index, const char *val)
@@ -355,7 +398,7 @@ static void PF_configstring(int index, const char *val)
     char *dst;
 
     if (index < 0 || index >= ConfigStrings::MaxConfigStrings)
-        Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
+        Com_Error(ErrorType::Drop, "%s: bad index: %d", __func__, index);
 
     if (sv.serverState == ServerState::Dead) {
         Com_WPrintf("%s: not yet initialized\n", __func__);
@@ -369,7 +412,7 @@ static void PF_configstring(int index, const char *val)
     len = strlen(val);
     maxlen = (ConfigStrings::MaxConfigStrings- index) * MAX_QPATH;
     if (len >= maxlen) {
-        Com_Error(ERR_DROP,
+        Com_Error(ErrorType::Drop,
                   "%s: index %d overflowed: %" PRIz " > %" PRIz, // CPP: String fix.
                   __func__, index, len, maxlen - 1);
     }
@@ -419,7 +462,7 @@ static qboolean PF_inVIS(vec3_t p1, vec3_t p2, int vis)
     bsp_t *bsp = sv.cm.cache;
 
     if (!bsp) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
 
     leaf1 = BSP_PointLeaf(bsp->nodes, p1);
@@ -488,13 +531,13 @@ or the midpoint of the entity box for bmodels.
 
 #define CHECK_PARAMS \
     if (volume < 0 || volume > 1.0) \
-        Com_Error(ERR_DROP, "%s: volume = %f", __func__, volume); \
+        Com_Error(ErrorType::Drop, "%s: volume = %f", __func__, volume); \
     if (attenuation < 0 || attenuation > 4) \
-        Com_Error(ERR_DROP, "%s: attenuation = %f", __func__, attenuation); \
+        Com_Error(ErrorType::Drop, "%s: attenuation = %f", __func__, attenuation); \
     if (timeofs < 0 || timeofs > 0.255) \
-        Com_Error(ERR_DROP, "%s: timeofs = %f", __func__, timeofs); \
+        Com_Error(ErrorType::Drop, "%s: timeofs = %f", __func__, timeofs); \
     if (soundindex < 0 || soundindex >= MAX_SOUNDS) \
-        Com_Error(ERR_DROP, "%s: soundindex = %d", __func__, soundindex);
+        Com_Error(ErrorType::Drop, "%s: soundindex = %d", __func__, soundindex);
 
 static void PF_StartSound(Entity *edict, int channel,
                           int soundindex, float volume,
@@ -536,8 +579,8 @@ static void PF_StartSound(Entity *edict, int channel,
 
     // if the sound doesn't attenuate,send it to everyone
     // (global radio chatter, voiceovers, etc)
-    if (attenuation == ATTN_NONE) {
-        channel |= CHAN_NO_PHS_ADD;
+    if (attenuation == Attenuation::None) {
+        channel |= SoundChannel::IgnorePHS;
     }
 
     FOR_EACH_CLIENT(client) {
@@ -547,7 +590,7 @@ static void PF_StartSound(Entity *edict, int channel,
         }
 
         // PHS cull this sound
-        if (!(channel & CHAN_NO_PHS_ADD)) {
+        if (!(channel & SoundChannel::IgnorePHS)) {
             // get client viewpos
             ps = &client->edict->client->playerState;
             // N&C: FF Precision.
@@ -571,14 +614,14 @@ static void PF_StartSound(Entity *edict, int channel,
         // use the entity origin unless it is a bmodel
         if (edict->solid == Solid::BSP) {
             VectorAverage(edict->mins, edict->maxs, origin);
-            VectorAdd(edict->state.origin, origin, origin);
+            VectorAdd(edict->currentState.origin, origin, origin);
         } else {
-            VectorCopy(edict->state.origin, origin);
+            VectorCopy(edict->currentState.origin, origin);
         }
 
         // reliable sounds will always have position explicitly set,
         // as no one gurantees reliables to be delivered in time
-        if (channel & CHAN_RELIABLE) {
+        if (channel & SoundChannel::Reliable) {
             MSG_WriteUint8(ServerCommand::Sound); //MSG_WriteByte(ServerCommand::Sound);
             MSG_WriteUint8(flags | SoundCommandBits::Position);//MSG_WriteByte(flags | SoundCommandBits::Position);
             MSG_WriteUint8(soundindex); //MSG_WriteByte(soundindex);
@@ -590,7 +633,7 @@ static void PF_StartSound(Entity *edict, int channel,
             if (flags & SoundCommandBits::Offset)
                 MSG_WriteUint8(timeofs * 1000); //MSG_WriteByte(timeofs * 1000);
 
-            MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);
+            MSG_WriteUint16(sendchan);//MSG_WriteShort(sendchan);
             MSG_WriteVector3(origin);
 
             SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
@@ -617,14 +660,14 @@ static void PF_StartSound(Entity *edict, int channel,
         msg = LIST_FIRST(MessagePacket, &client->msg_free_list, entry);
 
         msg->currentSize = 0;
-        msg->flags = flags;
-        msg->index = soundindex;
-        msg->volume = volume * 255;
-        msg->attenuation = attenuation * 64;
-        msg->timeofs = timeofs * 1000;
-        msg->sendchan = sendchan;
+        msg->packet.ps.flags = flags;
+        msg->packet.ps.index = soundindex;
+        msg->packet.ps.volume = volume * 255;
+        msg->packet.ps.attenuation = attenuation * 64;
+        msg->packet.ps.timeofs = timeofs * 1000;
+        msg->packet.ps.sendchan = sendchan;
         // N&C: FF Precision.
-        VectorCopy(msg->pos, origin);
+        msg->packet.ps.pos = origin;
         //for (i = 0; i < 3; i++) {
         //    msg->pos[i] = origin[i] * 8;
         //}
@@ -646,11 +689,11 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     int     ent;
 
     if (!origin)
-        Com_Error(ERR_DROP, "%s: NULL origin", __func__);
+        Com_Error(ErrorType::Drop, "%s: NULL origin", __func__);
     CHECK_PARAMS
 
     ent = NUM_FOR_EDICT(entity);
-
+	
     sendchan = (ent << 3) | (channel & 7);
 
     // always send the entity number for channel overrides
@@ -673,19 +716,19 @@ static void PF_PositionedSound(vec3_t origin, Entity *entity, int channel,
     if (flags & SoundCommandBits::Offset)
         MSG_WriteUint8(timeofs * 1000);//MSG_WriteByte(timeofs * 1000);
     
-    MSG_WriteInt16(sendchan);//MSG_WriteShort(sendchan);
+    MSG_WriteUint16(sendchan);//MSG_WriteShort(sendchan);
     MSG_WriteVector3(origin);
 
     // if the sound doesn't attenuate,send it to everyone
     // (global radio chatter, voiceovers, etc)
-    if (attenuation == ATTN_NONE || (channel & CHAN_NO_PHS_ADD)) {
-        if (channel & CHAN_RELIABLE) {
+    if (attenuation == Attenuation::None || (channel & SoundChannel::IgnorePHS)) {
+        if (channel & SoundChannel::Reliable) {
             SV_Multicast(vec3_zero(), Multicast::All_R);
         } else {
             SV_Multicast(vec3_zero(), Multicast::All);
         }
     } else {
-        if (channel & CHAN_RELIABLE) {
+        if (channel & SoundChannel::Reliable) {
             SV_Multicast(origin, Multicast::PHS_R);
         } else {
             SV_Multicast(origin, Multicast::PHS);
@@ -726,7 +769,7 @@ static void PF_AddCommandString(const char *string)
 static void PF_SetAreaPortalState(int portalnum, qboolean open)
 {
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
     CM_SetAreaPortalState(&sv.cm, portalnum, open);
 }
@@ -734,7 +777,7 @@ static void PF_SetAreaPortalState(int portalnum, qboolean open)
 static qboolean PF_AreasConnected(int area1, int area2)
 {
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Error(ErrorType::Drop, "%s: no map loaded", __func__);
     }
     return CM_AreasConnected(&sv.cm, area1, area2);
 }
@@ -742,7 +785,7 @@ static qboolean PF_AreasConnected(int area1, int area2)
 static void *PF_TagMalloc(size_t size, unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad tag", __func__);
     }
     if (!size) {
         return NULL;
@@ -753,7 +796,7 @@ static void *PF_TagMalloc(size_t size, unsigned tag)
 static void PF_FreeTags(unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad tag", __func__);
     }
     Z_FreeTags((memtag_t)(tag + TAG_MAX)); // CPP: Cast
 }
@@ -861,7 +904,7 @@ void SV_InitGameProgs(void)
 
     // all paths failed
     if (!entry)
-        Com_Error(ERR_DROP, "Failed to load Server Game library");
+        Com_Error(ErrorType::Drop, "Failed to load Server Game library");
 
     // load a new game dll
     importAPI.apiversion = {
@@ -882,13 +925,18 @@ void SV_InitGameProgs(void)
     importAPI.BoxEntities = SV_AreaEntities;
     importAPI.Trace = SV_Trace;
     importAPI.PointContents = SV_PointContents;
-    importAPI.SetModel = PF_setmodel;
+
     importAPI.InPVS = PF_InPVS;
     importAPI.InPHS = PF_InPHS;
 
-    importAPI.ModelIndex = PF_ModelIndex;
-    importAPI.SoundIndex = PF_SoundIndex;
-    importAPI.ImageIndex = PF_ImageIndex;
+    importAPI.PrecacheModel = PF_PrecacheModel;
+    importAPI.PrecacheSound = PF_PrecacheSound;
+    importAPI.PrecacheImage = PF_PrecacheImage;
+	
+	importAPI.PrecacheSkeletalModelData = PF_PrecacheSkeletalModelData;
+	importAPI.GetServerModelByHandle = PF_GetServerModelByHandle;
+	importAPI.GetSkeletalModelDataByHandle = PF_GetSkeletalModelDataByHandle;
+	importAPI.SetModel = PF_setmodel;
 
     importAPI.configstring = PF_configstring;
     importAPI.Sound = PF_StartSound;
@@ -931,12 +979,12 @@ void SV_InitGameProgs(void)
 
     ge = entry(&importAPI);
     if (!ge) {
-        Com_Error(ERR_DROP, "Server Game DLL returned NULL exports");
+        Com_Error(ErrorType::Drop, "Server Game DLL returned NULL exports");
     }
 
     if (ge->apiversion.major != SVGAME_API_VERSION_MAJOR ||
         ge->apiversion.minor != SVGAME_API_VERSION_MINOR) {
-        Com_Error(ERR_DROP, "Server Game DLL is version %i.%i.%i, expected %i.%i.%i",
+        Com_Error(ErrorType::Drop, "Server Game DLL is version %i.%i.%i, expected %i.%i.%i",
             ge->apiversion.major, ge->apiversion.minor, ge->apiversion.point, SVGAME_API_VERSION_MAJOR, SVGAME_API_VERSION_MINOR, SVGAME_API_VERSION_POINT);
     }
 
@@ -944,13 +992,13 @@ void SV_InitGameProgs(void)
     ge->Init();
 
     // sanitize entitySize
-    if (ge->entitySize < sizeof(Entity) || ge->entitySize > SIZE_MAX / MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad size of Entity");
+    if (ge->entitySize < sizeof(Entity) || ge->entitySize > SIZE_MAX / MAX_WIRED_POD_ENTITIES) {
+        Com_Error(ErrorType::Drop, "Server Game DLL returned bad size of Entity");
     }
 
     // sanitize maxEntities
-    if (ge->entitySize <= sv_maxclients->integer || ge->entitySize > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Server Game DLL returned bad number of maxEntities %i   %i", ge->entitySize, sizeof(Entity));
+    if (ge->entitySize <= sv_maxclients->integer || ge->entitySize > MAX_WIRED_POD_ENTITIES) {
+        Com_Error(ErrorType::Drop, "Server Game DLL returned bad number of maxEntities %i   %i", ge->entitySize, sizeof(Entity));
     }
 }
 

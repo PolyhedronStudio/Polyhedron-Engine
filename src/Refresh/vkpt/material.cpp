@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "material.h"
 #include "vkpt.h"
-#include <Common/prompt.h>
+#include <Common/Prompt.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -221,7 +221,7 @@ static pbr_material_t* allocate_material() {
 			return mat;
 	}
 
-	Com_Error(ERR_FATAL, "Couldn't allocate a new material: insufficient r_materials slots.\n"
+	Com_Error(ErrorType::Fatal, "Couldn't allocate a new material: insufficient r_materials slots.\n"
 		"Increase MAX_PBR_MATERIALS and rebuild the engine.\n");
 	return NULL;
 }

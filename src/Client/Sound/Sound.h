@@ -17,11 +17,49 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // Sound.h -- private sound functions
+#pragma once
 
-#include "../Client.h"
+void S_Init(void);
+void S_Shutdown(void);
+
+// if origin is NULL, the sound will be dynamically sourced from the entity
+void S_StartSound(const vec3_t *origin, int entnum, int entchannel,
+                  qhandle_t sfx, float fvol, float attenuation, float timeofs);
+void S_ParseStartSound(void);
+void S_StartLocalSound(const char *s);
+void S_StartLocalSound_(const char *s);
+
+void S_FreeAllSounds(void);
+void S_StopAllSounds(void);
+void S_Update(void);
+
+void S_Activate(void);
+
+void S_BeginRegistration(void);
+qhandle_t S_RegisterSound(const char *sample);
+void S_EndRegistration(void);
+
+void S_RawSamples(int samples, int rate, int width,
+		int channels, byte *data, float volume);
+
+void S_UnqueueRawSamples();
+
+float S_GetLinearVolume(float perceptual);
+
+typedef enum {
+    SS_NOT,
+#if USE_SNDDMA
+    SS_DMA,
+#endif
+#if USE_OPENAL
+    SS_OAL
+#endif
+} sndstarted_t;
+
+extern sndstarted_t s_started;
 
 #if USE_SNDDMA
-#include "Client/Sound/DirectMemoryAccess.h"
+#include "DirectMemoryAccess.h"
 #endif
 
 // !!! if this is changed, the asm code must change !!!
@@ -103,32 +141,32 @@ typedef struct {
 */
 
 #if USE_SNDDMA
-void DMA_SoundInfo(void);
-qboolean DMA_Init(void);
-void DMA_Shutdown(void);
-void DMA_Activate(void);
-int DMA_DriftBeginofs(float timeofs);
-void DMA_ClearBuffer(void);
-void DMA_Update(void);
-#endif
+    void DMA_SoundInfo(void);
+    qboolean DMA_Init(void);
+    void DMA_Shutdown(void);
+    void DMA_Activate(void);
+    int DMA_DriftBeginofs(float timeofs);
+    void DMA_ClearBuffer(void);
+    void DMA_Update(void);
+#endif // #if USE_SNDDMA
 
 #if USE_OPENAL
-void AL_SoundInfo(void);
-qboolean AL_Init(void);
-void AL_Shutdown(void);
-sfxcache_t *AL_UploadSfx(sfx_t *s);
-void AL_DeleteSfx(sfx_t *s);
-void AL_StopChannel(channel_t *ch);
-void AL_PlayChannel(channel_t *ch);
-void AL_StopAllChannels(void);
-void AL_Update(void);
-void AL_RawSamples(int samples, int rate, int width, int channels, byte *data, float volume);
-void AL_RawSamplesVoice(int samples, int rate, int width, int channels, byte *data, float volume);
-void AL_UnqueueRawSamples();
+    void AL_SoundInfo(void);
+    qboolean AL_Init(void);
+    void AL_Shutdown(void);
+    sfxcache_t *AL_UploadSfx(sfx_t *s);
+    void AL_DeleteSfx(sfx_t *s);
+    void AL_StopChannel(channel_t *ch);
+    void AL_PlayChannel(channel_t *ch);
+    void AL_StopAllChannels(void);
+    void AL_Update(void);
+    void AL_RawSamples(int samples, int rate, int width, int channels, byte *data, float volume);
+    void AL_RawSamplesVoice(int samples, int rate, int width, int channels, byte *data, float volume);
+    void AL_UnqueueRawSamples();
 
-/* number of buffers in flight (needed for ogg) */
-extern int active_buffers;
-#endif
+    /* number of buffers in flight (needed for ogg) */
+    extern int active_buffers;
+#endif // #if USE_OPENAL
 
 //====================================================================
 
@@ -160,8 +198,8 @@ extern  wavinfo_t   s_info;
 
 extern cvar_t   *s_volume;
 extern cvar_t* s_doppler;
-extern cvar_t* s_reverb_preset;
-extern cvar_t* s_reverb_preset_autopick;
+//extern cvar_t* s_reverb_preset;
+//extern cvar_t* s_reverb_preset_autopick;
 extern cvar_t* s_reverb;
 extern cvar_t* s_voiceinput;
 extern cvar_t* s_voiceinput_volume;
@@ -174,7 +212,8 @@ extern cvar_t* s_occlusion_strength;
 #if USE_SNDDMA
 extern cvar_t   *s_khz;
 extern cvar_t   *s_testsound;
-#endif
+#endif // #if USE_SNDDMA
+
 extern cvar_t   *s_ambient;
 extern cvar_t   *s_show;
 
@@ -184,10 +223,12 @@ extern cvar_t   *s_show;
 sfx_t *S_SfxForHandle(qhandle_t hSfx);
 sfxcache_t *S_LoadSound(sfx_t *s);
 channel_t *S_PickChannel(int entnum, int entchannel);
+
 void S_IssuePlaysound(playsound_t *ps);
 void S_BuildSoundList(int *sounds);
+
 #if USE_SNDDMA
 void S_InitScaletable(void);
 void S_PaintChannels(int endTime);
-#endif
+#endif // #if USE_SNDDMA
 

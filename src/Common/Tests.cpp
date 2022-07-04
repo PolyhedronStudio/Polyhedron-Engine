@@ -16,24 +16,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/Bsp.h"
 #include "Common/Cmd.h"
 #include "Common/Common.h"
 #include "Common/Files.h"
-#include "Common/tests.h"
-#include "refresh/refresh.h"
+#include "Common/Tests.h"
+#include "Refresh/Refresh.h"
 #include "System/System.h"
 
 // test error shutdown procedures
 static void Com_Error_f(void)
 {
-    Com_Error(ERR_FATAL, "%s", Cmd_Argv(1));
+    Com_Error(ErrorType::Fatal, "%s", Cmd_Argv(1));
 }
 
 static void Com_ErrorDrop_f(void)
 {
-    Com_Error(ERR_DROP, "%s", Cmd_Argv(1));
+    Com_Error(ErrorType::Drop, "%s", Cmd_Argv(1));
 }
 
 static void Com_Freeze_f(void)

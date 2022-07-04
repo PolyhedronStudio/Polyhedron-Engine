@@ -139,7 +139,7 @@ static int debug_func(CURL *c, curl_infotype type, char *data, size_t size, void
             size = sizeof(buffer) - 1;
         memcpy(buffer, data, size);
         buffer[size] = 0;
-        Com_LPrintf(PRINT_DEVELOPER, "[HTTP] %s\n", buffer);
+        Com_LPrintf(PrintType::Developer, "[HTTP] %s\n", buffer);
     }
 
     return 0;
@@ -732,7 +732,7 @@ static dlhandle_t *find_handle(CURL *curl)
         }
     }
 
-    Com_Error(ERR_FATAL, "CURL handle not found for CURLMSG_DONE");
+    Com_Error(ErrorType::Fatal, "CURL handle not found for CURLMSG_DONE");
     return NULL;
 }
 
@@ -751,7 +751,7 @@ static qboolean finish_download(void)
     char        temp[MAX_OSPATH];
     qboolean    fatalError = false;
     const char  *err;
-    PrintType level;
+    int32_t printLevel;
 
     do {
         msg = curl_multi_info_read(curl_multi, &msgs_in_queue);
@@ -792,14 +792,14 @@ static qboolean finish_download(void)
 
             //404 is non-fatal unless accessing default repository
             if (response == 404 && (!download_default_repo || !dl->path[0])) {
-                level = PRINT_ALL;
+                printLevel = PrintType::All;
                 goto fail1;
             }
 
             //every other code is treated as fatal
             //not marking download as done since
             //we are falling back to UDP
-            level = PRINT_ERROR;
+            printLevel = PrintType::Error;
             fatalError = true;
             goto fail2;
 
@@ -808,19 +808,19 @@ static qboolean finish_download(void)
         case CURLE_COULDNT_RESOLVE_PROXY:
             //connection problems are fatal
             err = curl_easy_strerror(result);
-            level = PRINT_ERROR;
+            printLevel = PrintType::Error;
             fatalError = true;
             goto fail2;
 
         default:
             err = curl_easy_strerror(result);
-            level = PRINT_WARNING;
+            printLevel = PrintType::Warning;
 fail1:
             //we mark download as done even if it errored
             //to prevent multiple attempts.
             CL_FinishDownload(dl->queue);
 fail2:
-            Com_LPrintf(level,
+            Com_LPrintf(printLevel,
                         "[HTTP] %s [%s] [%d remaining file%s]\n",
                         dl->queue->path, err, cls.download.pending,
                         cls.download.pending == 1 ? "" : "s");

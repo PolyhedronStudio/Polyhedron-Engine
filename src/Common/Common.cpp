@@ -21,31 +21,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // common.c -- misc functions used in client and server
 //
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 
-#include "Common/Bsp.h"
-#include "Common/Cmd.h"
-#include "Common/CModel.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Error.h"
-#include "Common/Field.h"
-#include "Common/Fifo.h"
-#include "Common/Files.h"
-#include "Common/MDFour.h"
-#include "Common/Msg.h"
-#include "Common/Net/Net.h"
-#include "Common/Net/NetChan.h"
-//#include "Common/pmove.h"
-#include "Common/Prompt.h"
-#include "Common/Protocol.h"
-#include "Common/tests.h"
-#include "Common/Utilities.h"
-#include "Common/Zone.h"
+#include "Bsp.h"
+#include "Cmd.h"
+#include "CollisionModel.h"
+#include "Common.h"
+#include "CVar.h"
+#include "Error.h"
+#include "Field.h"
+#include "Fifo.h"
+#include "Files.h"
+#include "Huffman.h"
+#include "MDFour.h"
+#include "Messaging.h"
+#include "Net/Net.h"
+#include "Net/NetChan.h"
+//#include "pmove.h"
+#include "Prompt.h"
+#include "Protocol.h"
+#include "Tests.h"
+#include "Utilities.h"
+#include "Zone.h"
 
-#include "Client/Client.h"
-#include "Client/Keys.h"
-#include "Server/Server.h"
+#include "../Client/Client.h"
+#include "../Client/Keys.h"
+#include "../Server/Server.h"
 #include "System/System.h"
 
 #include <setjmp.h>
@@ -54,7 +55,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <Windows.h>
 #endif
 
-static jmp_buf  com_abortframe;    // an ERR_DROP occured, exit the entire frame
+static jmp_buf  com_abortframe;    // an ErrorType::Drop occured, exit the entire frame
 
 static void     (*com_abort_func)(void *);
 static void     *com_abort_arg;
@@ -111,12 +112,11 @@ cvar_t  *allow_download_others;
 
 cvar_t  *rcon_password;
 
-const char  com_version_string[] =
-    APPLICATION " " VERSION_STRING " " __DATE__ " " BUILDSTRING " " CPUSTRING;
 
-unsigned    com_framenum;
-unsigned    com_eventTime;
-unsigned    com_localTime;
+
+uint64_t    com_framenum;
+uint64_t    com_eventTime;
+uint64_t    com_localTime;
 qboolean    com_initialized;
 time_t      com_startTime;
 
@@ -124,10 +124,12 @@ time_t      com_startTime;
 cvar_t  *host_speeds;
 
 // host_speeds times
-unsigned    time_before_game;
-unsigned    time_after_game;
-unsigned    time_before_ref;
-unsigned    time_after_ref;
+uint64_t    timeBeforeServerGame;
+uint64_t    timeAfterServerGame;
+uint64_t    timeBeforeClientGame;
+uint64_t    timeAfterClientGame;
+uint64_t    timeBeforeRefresh;
+uint64_t    timeAfterRefresh;
 #endif
 
 /*
@@ -281,7 +283,7 @@ static size_t format_local_time(char *buffer, size_t size, const char *fmt)
     return strftime(buffer, size, fmt, tm);
 }
 
-static void logfile_write(PrintType type, const char *s)
+static void logfile_write(int32_t printType, const char *s)
 {
     char text[MAXPRINTMSG];
     char buf[MAX_QPATH];
@@ -294,12 +296,12 @@ static void logfile_write(PrintType type, const char *s)
         p = strchr(logfile_prefix->string, '@');
         if (p) {
             // expand it in place, hacky
-            switch (type) {
-            case PRINT_TALK:      *p = 'T'; break;
-            case PRINT_DEVELOPER: *p = 'D'; break;
-            case PRINT_WARNING:   *p = 'W'; break;
-            case PRINT_ERROR:     *p = 'E'; break;
-            case PRINT_NOTICE:    *p = 'N'; break;
+            switch (printType) {
+            case PrintType::Talk:      *p = 'T'; break;
+            case PrintType::Developer: *p = 'D'; break;
+            case PrintType::Warning:   *p = 'W'; break;
+            case PrintType::Error:     *p = 'E'; break;
+            case PrintType::Notice:    *p = 'N'; break;
             default:              *p = 'A'; break;
             }
         }
@@ -397,7 +399,7 @@ Both client and server can use this, and it will output
 to the apropriate place.
 =============
 */
-void Com_LPrintf(PrintType type, const char *fmt, ...)
+void Com_LPrintf(int32_t printType, const char *fmt, ...)
 {
     va_list     argptr;
     char        msg[MAXPRINTMSG];
@@ -414,7 +416,7 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
     len = Q_vscnprintf(msg, sizeof(msg), fmt, argptr);
     va_end(argptr);
 
-    if (type == PRINT_ERROR && !com_errorEntered && len) {
+    if (printType == PrintType::Error && !com_errorEntered && len) {
         size_t errlen = len;
 
         if (errlen >= sizeof(com_errorMsg)) {
@@ -434,21 +436,21 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
     if (rd_target) {
         Com_Redirect(msg, len);
     } else {
-        switch (type) {
-        case PRINT_TALK:
+        switch (printType) {
+        case PrintType::Talk:
             Com_SetColor(COLOR_NONE);
             break;
-        case PRINT_DEVELOPER:
+        case PrintType::Developer:
             Com_SetColor(COLOR_ALT);
             Com_SetColor(COLOR_ORANGE);
             break;
-        case PRINT_WARNING:
+        case PrintType::Warning:
             Com_SetColor(COLOR_ORANGE);
             break;
-        case PRINT_ERROR:
+        case PrintType::Error:
             Com_SetColor(COLOR_RED);
             break;
-        case PRINT_NOTICE:
+        case PrintType::Notice:
             Com_SetColor(COLOR_CYAN);
             break;
         default:
@@ -470,10 +472,10 @@ void Com_LPrintf(PrintType type, const char *fmt, ...)
 
         // logfile
         if (com_logFile) {
-            logfile_write(type, msg);
+            logfile_write(printType, msg);
         }
 
-        if (type) {
+        if (printType) {
             Com_SetColor(COLOR_NONE);
         }
     }
@@ -490,7 +492,7 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error(ErrorType code, const char *fmt, ...)
+void Com_Error(int32_t errorType, const char *fmt, ...)
 {
     char            msg[MAXERRORMSG];
     va_list         argptr;
@@ -498,7 +500,7 @@ void Com_Error(ErrorType code, const char *fmt, ...)
 
     // Prevent disconnecting to a black menu etc.
     #if CLIENT
-    //if(code == ERR_DISCONNECT) {
+    //if(code == ErrorType::Disconnect) {
     //    // Let's go haha.
     //    CL_OpenBSPMenu(true);
     //    CL_ForwardToServer();
@@ -541,10 +543,10 @@ void Com_Error(ErrorType code, const char *fmt, ...)
     // reset Com_Printf recursion level
     com_printEntered = 0;
 
-    if (code == ERR_DISCONNECT || code == ERR_RECONNECT) {
+    if (errorType == ErrorType::Disconnect || errorType == ErrorType::Reconnect) {
         Com_WPrintf("%s\n", com_errorMsg);
-        SV_Shutdown(va("Server was killed: %s\n", com_errorMsg), code);
-        CL_Disconnect(code);
+        SV_Shutdown(va("Server was killed: %s\n", com_errorMsg), errorType);
+        CL_Disconnect(errorType);
         goto abort;
     }
 
@@ -556,15 +558,15 @@ void Com_Error(ErrorType code, const char *fmt, ...)
 
     // make otherwise non-fatal errors fatal
     if (com_fatal_error && com_fatal_error->integer) {
-        code = ERR_FATAL;
+        errorType = ErrorType::Fatal;
     }
 
-    if (code == ERR_DROP) {
+    if (errorType == ErrorType::Drop) {
         Com_EPrintf("********************\n"
                     "ERROR: %s\n"
                     "********************\n", com_errorMsg);
-        SV_Shutdown(va("Server crashed: %s\n", com_errorMsg), ERR_DROP);
-        CL_Disconnect(ERR_DROP);
+        SV_Shutdown(va("Server crashed: %s\n", com_errorMsg), ErrorType::Drop);
+        CL_Disconnect(ErrorType::Drop);
         goto abort;
     }
 
@@ -572,7 +574,7 @@ void Com_Error(ErrorType code, const char *fmt, ...)
         FS_FPrintf(com_logFile, "FATAL: %s\n", com_errorMsg);
     }
 
-    SV_Shutdown(va("Server fatal crashed: %s\n", com_errorMsg), ERR_FATAL);
+    SV_Shutdown(va("Server fatal crashed: %s\n", com_errorMsg), ErrorType::Fatal);
     CL_Shutdown();
     NET_Shutdown();
     logfile_close();
@@ -610,10 +612,10 @@ Both client and server can use this, and it will
 do the apropriate things. This function never returns.
 =============
 */
-void Com_Quit(const char *reason, ErrorType type)
+void Com_Quit(const char *reason, int32_t errorType)
 {
     char buffer[MAX_STRING_CHARS];
-    const char* what = (type == ErrorType::ERR_DISCONNECT ? "restarted" : "quit"); // C++20: char *what = type == ERR_RECONNECT ? "restarted" : "quit";
+    const char* what = (errorType == ErrorType::Disconnect ? "restarted" : "quit"); // C++20: char *what = type == ErrorType::Reconnect ? "restarted" : "quit";
 
     if (reason && *reason) {
         Q_snprintf(buffer, sizeof(buffer),
@@ -623,7 +625,7 @@ void Com_Quit(const char *reason, ErrorType type)
                    "Server %s\n", what);
     }
 
-    SV_Shutdown(buffer, type);
+    SV_Shutdown(buffer, errorType);
     CL_Shutdown();
     NET_Shutdown();
     logfile_close();
@@ -635,13 +637,13 @@ void Com_Quit(const char *reason, ErrorType type)
 
 static void Com_Quit_f(void)
 {
-    Com_Quit(Cmd_Args(), ERR_DISCONNECT);
+    Com_Quit(Cmd_Args(), ErrorType::Disconnect);
 }
 
 #if !USE_CLIENT
 static void Com_Recycle_f(void)
 {
-    Com_Quit(Cmd_Args(), ERR_RECONNECT);
+    Com_Quit(Cmd_Args(), ErrorType::Reconnect);
 }
 #endif
 
@@ -927,7 +929,7 @@ void Qcommon_Init(int argc, char **argv)
 #ifdef _DEBUG
     developer = Cvar_Get("developer", "1", 0);
 #else
-    developer = Cvar_Get("developer", "0", 0);
+//    developer = Cvar_Get("developer", "0", 0);
 #endif
     timescale = Cvar_Get("timescale", "1", CVAR_CHEAT);
     fixedtime = Cvar_Get("fixedtime", "0", CVAR_CHEAT);
@@ -1025,9 +1027,10 @@ void Qcommon_Init(int argc, char **argv)
 
     // Print the engine version early so that it's definitely included in the console log.
     // The log file is opened during the execution of one of the config files above.
-    Com_LPrintf(PRINT_NOTICE, "\nEngine version: " APPLICATION " " LONG_VERSION_STRING ", built on " __DATE__ "\n\n");
+    Com_LPrintf(PrintType::Notice, "\nEngine version: " APPLICATION " " LONG_VERSION_STRING ", built on " __DATE__ "\n\n");
 
     Netchan_Init();
+	Huff_Init();
     NET_Init();
     BSP_Init();
     CM_Init();
@@ -1067,7 +1070,7 @@ void Qcommon_Init(int argc, char **argv)
     } else {
         Com_Printf("====== " PRODUCT " - Dedicated Server Initialized ======\n\n");
     }
-    Com_LPrintf(PRINT_NOTICE, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
+    Com_LPrintf(PrintType::Notice, APPLICATION " " VERSION_STRING ", " __DATE__ "\n");
 
     time(&com_startTime);
 
@@ -1082,27 +1085,27 @@ Qcommon_Frame
 void Qcommon_Frame(void)
 {
 #if USE_CLIENT
-    unsigned time_before, time_event, time_between, time_after;
-    unsigned clientrem;
+    uint64_t timeBefore, timeEvent, timeBetween, timeAfter;
+    uint64_t clientRemainingTime;
 #endif
-    unsigned oldtime, msec;
-    static unsigned remaining;
-    static float frac;
+    uint64_t oldtime, msec;
+    static uint64_t serverRemainingTime;
+    static double frac;
 
     if (setjmp(com_abortframe)) {
-        return;            // an ERR_DROP was thrown
+        return;            // an ErrorType::Drop was thrown
     }
 
 #if USE_CLIENT
-    time_before = time_event = time_between = time_after = 0;
+    timeBefore = timeEvent = timeBetween = timeAfter = 0;
 
     if (host_speeds->integer)
-        time_before = Sys_Milliseconds();
+        timeBefore = Sys_Milliseconds();
 #endif
 
     // sleep on network sockets when running a dedicated server
     // still do a select(), but don't sleep when running a client!
-    NET_Sleep(remaining);
+    NET_Sleep(serverRemainingTime);
 
     // calculate time spent running last frame and sleeping
     oldtime = com_eventTime;
@@ -1146,7 +1149,7 @@ void Qcommon_Frame(void)
 
 #if USE_CLIENT
     if (host_speeds->integer)
-        time_event = Sys_Milliseconds();
+        timeEvent = Sys_Milliseconds();
 #endif
 
     // run system console
@@ -1154,34 +1157,35 @@ void Qcommon_Frame(void)
 
     NET_UpdateStats();
 
-    remaining = SV_Frame(msec);
+    serverRemainingTime = SV_Frame(msec);
 
 #if USE_CLIENT
     if (host_speeds->integer)
-        time_between = Sys_Milliseconds();
+        timeBetween = Sys_Milliseconds();
 
-    clientrem = CL_Frame(msec);
-    if (remaining > clientrem) {
-        remaining = clientrem;
+    clientRemainingTime = CL_Frame(msec);
+    if (serverRemainingTime > clientRemainingTime) {
+        serverRemainingTime = clientRemainingTime;
     }
 
     if (host_speeds->integer)
-        time_after = Sys_Milliseconds();
+        timeAfter = Sys_Milliseconds();
 
     if (host_speeds->integer) {
-        int all, ev, sv, gm, cl, rf;
+        //int64_t all, ev, sv, gm, cl, rf;
 
-        all = time_after - time_before;
-        ev = time_event - time_before;
-        sv = time_between - time_event;
-        cl = time_after - time_between;
-        gm = time_after_game - time_before_game;
-        rf = time_after_ref - time_before_ref;
-        sv -= gm;
-        cl -= rf;
+        int64_t all = timeAfter - timeBefore;
+        int64_t ev = timeEvent - timeBefore;
+        int64_t sv = timeBetween - timeEvent;
+        int64_t cl = timeAfter - timeBetween;
+        int64_t svgm = timeAfterServerGame - timeBeforeServerGame;
+        int64_t clgm = timeAfterClientGame - timeBeforeClientGame;
+        int64_t rf = timeAfterRefresh - timeBeforeRefresh;
+        sv -= svgm;
+        cl -= rf - clgm;
 
-        Com_Printf("all:%3i ev:%3i sv:%3i gm:%3i cl:%3i rf:%3i\n",
-                   all, ev, sv, gm, cl, rf);
+        Com_Printf("all:%3i ev:%3i sv:%3i svgm:%3i cl:%3i rf:%3i clgm:%3i\n",
+                   all, ev, sv, svgm, cl, rf, clgm);
     }
 #endif
 }

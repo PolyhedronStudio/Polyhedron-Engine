@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// client/rmlui/rmlui.h
+// client/rmlui/RmlUI
 //
 //
 // RmlUI implementation.
@@ -13,7 +13,7 @@
 #include <SDL.h>
 
 // Include shared headers.
-#include "Shared/Shared.h"
+#include "../../Shared/Shared.h"
 
 // Initializes RMLUI.
 void RMLUI_Init(void);

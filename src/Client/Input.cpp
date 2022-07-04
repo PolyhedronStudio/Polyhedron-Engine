@@ -19,9 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Client.h"
 #include "Client/GameModule.h"
-#include "Shared/CLGame.h"
-#include "SharedGame/SharedGame.h"
-#include "system/Lirc.h"
+#include "../Shared/CLGame.h"
+#include "System/Lirc.h"
 
 static cvar_t    *cl_nodelta;
 static cvar_t    *cl_maxpackets;
@@ -62,9 +61,6 @@ typedef struct {
 static in_state_t   input;
 
 static cvar_t    *in_enable;
-#if USE_DINPUT
-static cvar_t    *in_direct;
-#endif
 static cvar_t    *in_grab;
 
 const inputAPI_t* IN_GetAPI()
@@ -178,11 +174,6 @@ IN_Shutdown
 */
 void IN_Shutdown(void)
 {
-#if USE_DINPUT
-    if (in_direct) {
-        in_direct->changed = NULL;
-    }
-#endif
     if (in_grab) {
         in_grab->changed = NULL;
     }
@@ -221,17 +212,6 @@ void IN_Init(void)
         return;
     }
 
-#if USE_DINPUT
-    in_direct = Cvar_Get("in_direct", "1", 0);
-    if (in_direct->integer) {
-        DI_FillAPI(&input.api);
-        ret = input.api.Init();
-        if (!ret) {
-            Cvar_Set("in_direct", "0");
-        }
-    }
-#endif
-
     if (!ret) {
         VID_FillInputAPI(&input.api);
         ret = input.api.Init();
@@ -240,10 +220,6 @@ void IN_Init(void)
             return;
         }
     }
-
-#if USE_DINPUT
-    in_direct->changed = in_changed_hard;
-#endif
 
     in_grab = Cvar_Get("in_grab", "1", 0);
     in_grab->changed = in_changed_soft;
@@ -371,9 +347,9 @@ void CL_FinalizeCmd(void)
     CL_GM_FinalizeFrameMoveCommand();
 }
 
-static inline qboolean ready_to_send(void)
+static inline qboolean CL_ReadyToSendInputPacket(void)
 {
-    unsigned msec;
+
 
     if (cl.sendPacketNow) {
         Com_DDPrintf("NET: if cl.sendPacketNow\n");
@@ -394,29 +370,30 @@ static inline qboolean ready_to_send(void)
         Com_DDPrintf("NET: cl_maxpackets->integer[%i] < BASE_FRAMERATE[%i]\n", cl_maxpackets->integer, BASE_FRAMERATE);
     }
 
-    msec = 1000 / cl_maxpackets->integer;
-    if (msec) {
-        int oldmsec = msec;
-        msec = 100 / (100 / msec);
-        Com_DDPrintf("NET: if msec { oldmsec[%i], msec[%i] }\n", oldmsec, msec);
+    uint32_t milliseconds = 1000 / cl_maxpackets->integer;
+    if (milliseconds) {
+        int32_t oldMilliseconds = milliseconds;
+        //milliseconds = 100 / (100 / milliseconds);
+		milliseconds = static_cast<int32_t>(32) / (static_cast<int32_t>(32)  / milliseconds);
+        Com_DDPrintf("NET: if msec { oldmsec[%i], msec[%i] }\n", oldMilliseconds, milliseconds);
     }
-    if (cls.realtime - cl.lastTransmitTime < msec) {
-        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return falses\n", cls.realtime, cl.lastTransmitTime, msec);
+    if (cls.realtime - cl.lastTransmitTime < milliseconds) {
+        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return falses\n", cls.realtime, cl.lastTransmitTime, milliseconds);
         return false;
     } else {
-        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return true;\n", cls.realtime, cl.lastTransmitTime, msec);
+        Com_DDPrintf("cls.realtime[%i], cls.lastTransmitTime[%ui], msec[%i] return true;\n", cls.realtime, cl.lastTransmitTime, milliseconds);
     }
 
     return true;
 }
 
-static inline qboolean ready_to_send_hacked(void)
+static inline qboolean CL_ReadyToSendInputPacket_Hacked(void)
 {
     if (cl.currentClientCommandNumber - cl.lastTransmitCmdNumberReal > 2) {
         return true; // can't drop more than 2 clientUserCommands
     }
 
-    return ready_to_send();
+    return CL_ReadyToSendInputPacket();
 }
 
 /*
@@ -439,7 +416,7 @@ static void CL_SendUserCommand(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
 
     // see if we are ready to send this packet
-    if (!ready_to_send_hacked()) {
+    if (!CL_ReadyToSendInputPacket_Hacked()) {
         cls.netChannel->outgoingSequence++; // just drop the packet
         return;
     }
@@ -488,7 +465,7 @@ static void CL_SendUserCommand(void)
     //
     // deliver the message
     //
-    currentSize = Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 1);
+    currentSize = Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 1, cls.realtime);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize); // C++20: String concat fix.
@@ -513,7 +490,7 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.currentClientCommandNumber;
     cl.lastTransmitCmdNumberReal = cl.currentClientCommandNumber;
 
-    currentSize = Netchan_Transmit(cls.netChannel, 0, NULL, 1);
+    currentSize = Netchan_Transmit(cls.netChannel, 0, NULL, 1, cls.realtime);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%" PRIz " ", currentSize);

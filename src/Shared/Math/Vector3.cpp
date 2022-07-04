@@ -3,7 +3,7 @@
 //
 // Shared/Math/vector3.cpp
 //
-#include "Shared/Shared.h"
+#include "../Shared.h"
 
 /*
 ==================
@@ -18,8 +18,8 @@ void SetupRotationMatrix(vec3_t* matrix, const vec3_t& dir, float degrees)
     vec_t   angle, s, c, one_c, xx, yy, zz, xy, yz, zx, xs, ys, zs;
 
     angle = Radians(degrees);
-    s = std::sinf(angle);
-    c = std::cosf(angle);
+    s = sinf(angle);
+    c = cosf(angle);
     one_c = 1.0F - c;
 
     xx = dir.xyz[0] * dir.xyz[0];

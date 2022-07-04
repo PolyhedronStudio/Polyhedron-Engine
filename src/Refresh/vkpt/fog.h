@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __FOG_H_
 #define __FOG_H_
 
-#include <Shared/shared.h>
+#include "../../Shared/Shared.h"
 
 typedef struct {
 	vec3_t point_a;

@@ -39,7 +39,7 @@ size_t playertouchmax;
 
 void SV_PreRunCmd(void)
 {
-    size_t max = (ge->numberOfEntities + 512 + 7) & ~7;
+    size_t max = (00 + 512 + 7) & ~7;
     if (max > playertouchmax)
     {
         playertouchmax = max;
@@ -47,9 +47,21 @@ void SV_PreRunCmd(void)
         playertouch = (byte*)Z_Malloc((playertouchmax >> 3) + 1); // CPP: Cast
     }
     memset(playertouch, 0, playertouchmax >> 3);
+    //std::size_t max = (ge->numberOfEntities + 512 + 7) & ~7;
+    //if (max > playertouchmax) {
+    //    playertouchmax = max;
+    //    delete []playertouch;
+    //    playertouch = new byte[(playertouchmax >>3) + 1];
+    //}
+    //for (int i = 0; i < playertouchmax; i++) {
+    //    playertouch[i] = {};
+    //}
 }
 void SV_RunCmdCleanup(void)
 {
+    //delete []playertouch;
+    //playertouch = nullptr;
+    //playertouchmax = 0;
     Z_Free(playertouch);
     playertouch = NULL;
     playertouchmax = 0;
@@ -75,41 +87,43 @@ baseline will be transmitted
 */
 static void create_baselines(void)
 {
-    int        i;
-    Entity    *ent;
-    EntityState *base, **chunk;
-
-    // clear entityBaselines from previous level
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->entityBaselines[i];
-        if (!base) {
-            continue;
+    // clear baselines from previous level
+    if (sv_client->entityBaselines) {
+        if (ge->numberOfEntities > sv_client->allocated_baselines) {
+            sv_client->allocated_baselines = ge->numberOfEntities;
+            sv_client->entityBaselines = (EntityState*)Z_Realloc(sv_client->entityBaselines, sizeof(*sv_client->entityBaselines) * sv_client->allocated_baselines);
         }
-        memset(base, 0, sizeof(*base) * SV_BASELINES_PER_CHUNK);
+
+        sv_client->num_baselines = ge->numberOfEntities;
+        memset(sv_client->entityBaselines, 0, sizeof(*sv_client->entityBaselines) * sv_client->num_baselines);
+    } else {
+        sv_client->num_baselines = sv_client->allocated_baselines = ge->numberOfEntities;
+        sv_client->entityBaselines = (EntityState*)SV_Mallocz(sizeof(*sv_client->entityBaselines) * sv_client->num_baselines);
     }
 
-    for (i = 1; i < sv_client->pool->numberOfEntities; i++) {
-        ent = EDICT_POOL(sv_client, i);
+    for (int i = 1; i < ge->numberOfEntities; i++) {
+        Entity *ent = EDICT_NUM(i);
 
         if (!ent->inUse) {
             continue;
         }
 
-        if (!ES_INUSE(&ent->state)) {
+        if (!ES_INUSE(&ent->currentState)) {
             continue;
         }
 
-        ent->state.number = i;
+		sv_client->entityBaselines[i] = ent->currentState;
+        //ent->currentState.number = i;
 
-        chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
-        if (*chunk == NULL) {
-            *chunk = (EntityState*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
-        }
+        //chunk = &sv_client->entityBaselines[i >> SV_BASELINES_SHIFT];
+        //if (*chunk == NULL) {
+        //    *chunk = (EntityState*)SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK); // CPP: Cast
+        //}
 
-        base = *chunk + (i & SV_BASELINES_MASK);
-        *base = ent->state;
+        //base = *chunk + (i & SV_BASELINES_MASK);
+        //*base = ent->currentState;
 
-        base->solid = sv.entities[i].solid32;
+        //base->solid = sv.entities[i].solid32;
     }
 }
 
@@ -130,7 +144,7 @@ static void write_plain_configstrings(void)
             length = MAX_QPATH;
         }
         // check if this configstring will overflow
-        if (msg_write.currentSize + length + 64 > sv_client->netchan->maximumPacketLength) {
+        if (msg_write.currentSize + length + 64 > sv_client->netChan->maximumPacketLength) {
             SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
         }
 
@@ -147,7 +161,7 @@ static void write_baseline(EntityState *base)
 {
     EntityStateMessageFlags flags = (EntityStateMessageFlags)(sv_client->esFlags | MSG_ES_FORCE); // CPP: Cast
 
-    MSG_WriteDeltaEntity(NULL, base, flags);
+    MSG_WriteDeltaEntityState(NULL, base, flags);
 }
 
 static void write_plain_baselines(void)
@@ -156,23 +170,25 @@ static void write_plain_baselines(void)
     EntityState *base;
 
     // write a packet full of data
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->entityBaselines[i];
-        if (!base) {
-            continue;
-        }
-        for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+    //for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
+    //    base = sv_client->entityBaselines[i];
+    //    if (!base) {
+    //        continue;
+    //    }
+    //    for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+	for (i = 0, base = sv_client->entityBaselines; i < sv_client->num_baselines; i++, base++) {
+
             if (base->number) {
                 // check if this baseline will overflow
-                if (msg_write.currentSize + 64 > sv_client->netchan->maximumPacketLength) {
+                if (msg_write.currentSize + 64 > sv_client->netChan->maximumPacketLength) {
                     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
                 }
 
                 MSG_WriteUint8(ServerCommand::SpawnBaseline);//MSG_WriteByte(ServerCommand::SpawnBaseline);
                 write_baseline(base);
             }
-            base++;
-        }
+      //      base++;
+    //    }
     }
 
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
@@ -182,7 +198,7 @@ static void write_plain_baselines(void)
 
 static void write_compressed_gamestate(void)
 {
-    SizeBuffer   *buf = &sv_client->netchan->message;
+    SizeBuffer   *buf = &sv_client->netChan->message;
     EntityState  *base;
     int         i, j;
     size_t      length;
@@ -209,18 +225,20 @@ static void write_compressed_gamestate(void)
     MSG_WriteInt16(ConfigStrings::MaxConfigStrings);   //MSG_WriteShort(ConfigStrings::MaxConfigStrings);   // end of configstrings
 
     // write entityBaselines
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->entityBaselines[i];
-        if (!base) {
-            continue;
-        }
+    //for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
+    //    base = sv_client->entityBaselines[i];
+    //    if (!base) {
+    //        continue;
+    //    }
 
-        for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+    //    for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+	for (i = 0, base = sv_client->entityBaselines; i < sv_client->num_baselines; i++, base++) {
+
             if (base->number) {
                 write_baseline(base);
             }
-            base++;
-        }
+            //base++;
+    //    }
     }
     MSG_WriteInt16(0);//MSG_WriteShort(0);   // end of entityBaselines
 
@@ -277,7 +295,7 @@ static inline void z_reset(byte *buffer)
 {
     deflateReset(&svs.z);
     svs.z.next_out = buffer;
-    svs.z.avail_out = (uInt)(sv_client->netchan->maximumPacketLength - 5);
+    svs.z.avail_out = (uInt)(sv_client->netChan->maximumPacketLength - 5);
 }
 
 static void write_compressed_configstrings(void)
@@ -400,7 +418,7 @@ void SV_New_f(void)
         Com_DPrintf("Going from ConnectionState::Assigned to ConnectionState::Connected for %s\n",
                     sv_client->name);
         sv_client->connectionState = ConnectionState::Connected;
-        sv_client->lastMessage = svs.realtime; // don't timeout
+        sv_client->lastMessage = svs.realTime; // don't timeout
         time(&sv_client->timeOfInitialConnect);
     } else if (sv_client->connectionState > ConnectionState::Connected) {
         Com_DPrintf("New not valid -- already primed\n");
@@ -409,7 +427,7 @@ void SV_New_f(void)
 
     // stuff some junk, drop them and expect them to be back soon
     if (sv_force_reconnect->string[0] && !sv_client->reconnectKey[0] &&
-        !NET_IsLocalAddress(&sv_client->netchan->remoteNetAddress)) {
+        !NET_IsLocalAddress(&sv_client->netChan->remoteNetAddress)) {
         stuff_junk();
         SV_DropClient(sv_client, NULL);
         return;
@@ -469,7 +487,7 @@ void SV_New_f(void)
 
 #if USE_ZLIB_PACKET_COMPRESSION // MSG: !! Changed from USE_ZLIB
     if (sv_client->has_zlib) {
-        //if (sv_client->netchan->type == NETCHAN_NEW) {
+        //if (sv_client->netChan->type == NETCHAN_NEW) {
             write_compressed_gamestate();
         //} else {
         //    // FIXME: Z_SYNC_FLUSH is not efficient for entityBaselines
@@ -522,6 +540,7 @@ void SV_Begin_f(void)
     sv_client->connectionState = ConnectionState::Spawned;
     sv_client->sendDelta = 0;
     sv_client->clientUserCommandMiliseconds = 1800;
+	sv_client->cmd_msec_used = 0;
     sv_client->suppressCount = 0;
     sv_client->http_download = false;
 
@@ -844,8 +863,9 @@ static void SV_Lag_f(void)
                     "RTT (min/avg/max):   %d/%d/%d ms\n"
                     "Server to client PL: %.2f%% (approx)\n"
                     "Client to server PL: %.2f%%\n",
+					"Timescale          : %.3f\n",
                     cl->name, cl->pingMinimum, AVG_PING(cl), cl->pingMaximum,
-                    PL_S2C(cl), PL_C2S(cl));
+                    PL_S2C(cl), PL_C2S(cl), cl->timescale);
 }
 
 #if USE_PACKETDUP
@@ -880,7 +900,7 @@ static void SV_CvarResult_f(void)
             v = (char*)Cmd_RawArgsFrom(2); // C++20: Added a cast.
             if (COM_DEDICATED) {
                 Com_Printf("%s[%s]: %s\n", sv_client->name,
-                           NET_AdrToString(&sv_client->netchan->remoteNetAddress), v);
+                           NET_AdrToString(&sv_client->netChan->remoteNetAddress), v);
             }
             sv_client->versionString = SV_CopyString(v);
         }
@@ -893,7 +913,7 @@ static void SV_CvarResult_f(void)
     } else if (!strcmp(c, "console")) {
         if (sv_client->consoleQueries > 0) {
             Com_Printf("%s[%s]: \"%s\" is \"%s\"\n", sv_client->name,
-                       NET_AdrToString(&sv_client->netchan->remoteNetAddress),
+                       NET_AdrToString(&sv_client->netChan->remoteNetAddress),
                        Cmd_Argv(2), Cmd_RawArgsFrom(3));
             sv_client->consoleQueries--;
         }
@@ -1005,7 +1025,7 @@ static void SV_ExecuteUserCommand(const char *s)
 
     if (!strcmp(c, "say") || !strcmp(c, "say_team")) {
         // don't timeout. only chat commands count as activity.
-        sv_client->lastActivity = svs.realtime;
+        sv_client->lastActivity = svs.realTime;
     }
 
     ge->ClientCommand(sv_player);
@@ -1033,6 +1053,7 @@ static inline void SV_ClientThink(ClientMoveCommand *cmd)
     ClientMoveCommand *old = &sv_client->lastClientUserCommand;
 
     sv_client->clientUserCommandMiliseconds -= cmd->input.msec;
+	sv_client->cmd_msec_used += cmd->input.msec;
     sv_client->numberOfMoves++;
 
     if (sv_client->clientUserCommandMiliseconds < 0 && sv_enforcetime->integer) {
@@ -1046,7 +1067,7 @@ static inline void SV_ClientThink(ClientMoveCommand *cmd)
         || cmd->input.rightMove != old->input.rightMove
         || cmd->input.upMove != old->input.upMove) {
         // don't timeout
-        sv_client->lastActivity = svs.realtime;
+        sv_client->lastActivity = svs.realTime;
     }
 
     ge->ClientThink(sv_player, cmd);
@@ -1112,7 +1133,7 @@ static void SV_ExecuteMove(void)
     SV_SetLastFrame(lastFrame);
     
     // Determine drop rate, on whether we should be predicting or not.
-    net_drop = sv_client->netchan->deltaFramePacketDrops;
+    net_drop = sv_client->netChan->deltaFramePacketDrops;
     if (net_drop > 2) {
         sv_client->frameFlags |= FrameFlags::ClientPredict;
     }

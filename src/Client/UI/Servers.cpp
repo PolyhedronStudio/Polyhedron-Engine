@@ -17,9 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "UI.h"
-#include "Common/Files.h"
-#include "Common/Net/Net.h"
-#include "Client/Video.h"
+#include "../../Common/Files.h"
+#include "../../Common/Net/Net.h"
+#include "../Video.h"
+#include "../Sound/Sound.h"
 #include "System/System.h"
 
 /*
@@ -71,7 +72,7 @@ typedef struct {
     menuList_t      players;
     void            *names[MAX_STATUS_SERVERS];
     const char            *args;  // C++20: STRING: Added const to char*
-    unsigned        timeStamp;
+    uint64_t        timeStamp;
     int             pingstage;
     int             pingindex;
     int             pingtime;

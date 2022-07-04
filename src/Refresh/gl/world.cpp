@@ -280,7 +280,7 @@ static void GL_MarkLeaves(void)
         tmp[2] += 16;
     }
     leaf = BSP_PointLeaf(bsp->nodes, tmp);
-    if (!(leaf->contents & CONTENTS_SOLID)) {
+    if (!(leaf->contents & BrushContents::Solid)) {
         cluster2 = leaf->cluster;
     }
 
@@ -409,7 +409,7 @@ void GL_DrawBspModel(mmodel_t *model)
         }
 
         // sky faces don't have their polygon built
-        if (face->drawflags & SURF_SKY) {
+        if (face->drawflags & SurfaceFlags::Sky) {
             continue;
         }
 
@@ -451,12 +451,12 @@ static inline qboolean GL_ClipNode(mnode_t *node, int *clipflags)
         if (flags & mask) {
             continue;
         }
-        bits = BoxOnPlaneSide(node->mins, node->maxs,
+        bits = BoxOnPlaneSide(node->bounds.mins, node->bounds.maxs,
                               &glr.frustumPlanes[i]);
-        if (bits == BOX_BEHIND) {
+        if (bits == BoxPlane::Behind) {
             return false;
         }
-        if (bits == BOX_INFRONT) {
+        if (bits == BoxPlane::InFront) {
             flags |= mask;
         }
     }
@@ -470,7 +470,7 @@ static inline void GL_DrawLeaf(mleaf_t *leaf)
 {
     mface_t **face, **last;
 
-    if (leaf->contents == CONTENTS_SOLID) {
+    if (leaf->contents == BrushContents::Solid) {
         return; // solid leaf
     }
     if (glr.fd.areaBits && !Q_IsBitSet(glr.fd.areaBits, leaf->area)) {
@@ -494,7 +494,7 @@ static inline void GL_DrawNode(mnode_t *node)
             continue;
         }
 
-        if (face->drawflags & SURF_SKY) {
+        if (face->drawflags & SurfaceFlags::Sky) {
             R_AddSkySurface(face);
             continue;
         }

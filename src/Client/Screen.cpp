@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "Client.h"
 #include "Client/GameModule.h"
-#include "refresh/images.h"
+#include "Refresh/Images.h"
 
 #define STAT_PICS       11
 #define STAT_MINUS      (STAT_PICS - 1)  // num frame for '-' stats digit
@@ -516,6 +516,12 @@ DEBUG STUFF
 ===============================================================================
 */
 
+static inline void SCR_Turtle_FrameFlag(int32_t &x, int32_t &y, int32_t f, const char *str) {
+    if (cl.frameFlags & f) {
+        SCR_DrawString(x, y, UI_ALTCOLOR, str);
+        y += CHAR_HEIGHT;
+    }
+}
 static void SCR_DrawTurtle(void)
 {
     int x, y;
@@ -529,24 +535,24 @@ static void SCR_DrawTurtle(void)
     x = CHAR_WIDTH;
     y = scr.hud_height - 11 * CHAR_HEIGHT;
 
-#define DF(f) \
-    if (cl.frameFlags & ##f) { \
-        SCR_DrawString(x, y, UI_ALTCOLOR, #f); \
-        y += CHAR_HEIGHT; \
-    }
+//#define DF(f) \
+//    if (cl.frameFlags & ##f) { \
+//        SCR_DrawString(x, y, UI_ALTCOLOR, #f); \
+//        y += CHAR_HEIGHT; \
+//    }
 
     if (scr_showturtle->integer > 1) {
-        DF(FrameFlags::Suppressed)
+        SCR_Turtle_FrameFlag(x, y, FrameFlags::Suppressed, "Suppressed");
     }
-    DF(FrameFlags::ClientPredict)
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::ClientPredict, "ClientPredict");
     if (scr_showturtle->integer > 1) {
-        DF(FrameFlags::ClientDrop)
-        DF(FrameFlags::ServerDrop)
+        SCR_Turtle_FrameFlag(x, y, FrameFlags::ClientDrop, "ClientDrop");
+        SCR_Turtle_FrameFlag(x, y, FrameFlags::ServerDrop, "ServerDrop");
     }
-    DF(FrameFlags::BadFrame)
-    DF(FrameFlags::OldFrame)
-    DF(FrameFlags::OldEntity)
-    DF(FrameFlags::NoDeltaFrame)
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::BadFrame, "BadFrame");
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::OldFrame, "OldFrame");
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::OldEntity, "OldEntity");
+    SCR_Turtle_FrameFlag(x, y, FrameFlags::NoDeltaFrame, "NoDeltaFrame");
 
 #undef DF
 }
@@ -563,8 +569,8 @@ static void SCR_DrawDebugStats(void)
     if (j <= 0)
         return;
 
-    if (j > MAX_STATS)
-        j = MAX_STATS;
+    if (j > MAX_PLAYERSTATS)
+        j = MAX_PLAYERSTATS;
 
     x = CHAR_WIDTH;
     y = (scr.hud_height - j * CHAR_HEIGHT) / 2;
@@ -660,27 +666,23 @@ SCR_TimeRefresh_f
 */
 static void SCR_TimeRefresh_f(void)
 {
-    int     i;
-    unsigned    start, stop;
-    float       time;
-
     if (cls.connectionState != ClientConnectionState::Active) {
         Com_Printf("No map loaded.\n");
         return;
     }
 
-    start = Sys_Milliseconds();
+    uint64_t start = Sys_Milliseconds();
 
     if (Cmd_Argc() == 2) {
         // run without page flipping
         R_BeginFrame();
-        for (i = 0; i < 128; i++) {
+        for (int32_t i = 0; i < 128; i++) {
             cl.refdef.viewAngles[1] = i / 128.0f * 360.0f;
             R_RenderFrame(&cl.refdef);
         }
         R_EndFrame();
     } else {
-        for (i = 0; i < 128; i++) {
+        for (int32_t i = 0; i < 128; i++) {
             cl.refdef.viewAngles[1] = i / 128.0f * 360.0f;
 
             R_BeginFrame();
@@ -689,8 +691,8 @@ static void SCR_TimeRefresh_f(void)
         }
     }
 
-    stop = Sys_Milliseconds();
-    time = (stop - start) * 0.001f;
+    uint64_t stop = Sys_Milliseconds();
+    double time = (stop - start) * 0.001f;
     Com_Printf("%f seconds (%f fps)\n", time, 128.0f / time);
 }
 
@@ -729,6 +731,9 @@ void SCR_RegisterMedia(void)
 
     scr.net_pic = R_RegisterPic("net");
     scr.font_pic = R_RegisterFont(scr_font->string);
+
+    // PH: Inform the CG Module about the registration of media.
+    CL_GM_RegisterScreenMedia();
 }
 
 static void scr_font_changed(cvar_t *self)
@@ -781,13 +786,16 @@ void SCR_Init(void)
 #endif
 
     Cmd_Register(scr_cmds);
-
-
     scr.initialized = true;
+
+    // Initialize Client Game Module screen.
+    //CL_GM_InitializeScreen();
 }
 
 void SCR_Shutdown(void)
 {
+    // Shutdown Client Game Module screen.
+    //CL_GM_ShutdownScreen();
     Cmd_Unregister(scr_cmds);
     scr.initialized = false;
 }
@@ -974,7 +982,7 @@ void SCR_UpdateScreen(void)
 
     // if the screen is disabled (loading plaque is up), do nothing at all
     if (cls.disable_screen) {
-        unsigned delta = Sys_Milliseconds() - cls.disable_screen;
+        uint64_t delta = Sys_Milliseconds() - cls.disable_screen;
 
         if (delta < 120 * 1000) {
             return;
@@ -985,26 +993,26 @@ void SCR_UpdateScreen(void)
     }
 
     if (recursive > 1) {
-        Com_Error(ERR_FATAL, "%s: recursively called", __func__);
+        Com_Error(ErrorType::Fatal, "%s: recursively called", __func__);
     }
 
     recursive++;
 
     R_BeginFrame();
 
-    // do 3D refresh drawing
+    // Render 3D View.
     SCR_DrawActive();
 
-    // draw main menu
+    // Render UI.
     UI_Draw(cls.realtime);
 
     // Draw RMLUI
     RMLUI_RenderFrame();
 
-    // draw console
+    // Draw console
     Con_DrawConsole();
 
-    // draw loading plaque
+    // Draw loading plaque
     SCR_DrawLoading();
 
 #ifdef _DEBUG

@@ -27,18 +27,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "vk_util.h"
 
-#include "Shared/Shared.h"
-#include "Common/Bsp.h"
-#include "Common/Cmd.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Files.h"
-#include "Client/Video.h"
-#include "Client/Client.h"
-#include "refresh/refresh.h"
-#include "refresh/images.h"
-#include "refresh/models.h"
-#include "System/Hunk.h"
+#include "../../Shared/Shared.h"
+#include "../../Common/Bsp.h"
+#include "../../Common/Cmd.h"
+#include "../../Common/Common.h"
+#include "../../Common/CVar.h"
+#include "../../Common/Files.h"
+//#include "../../Common/Models/Models.h"
+#include "../../Client/Models.h"
+#include "../../Client/Video.h"
+#include "../../Client/Client.h"
+#include "../../Refresh/Refresh.h"
+#include "../../Refresh/Images.h"
+#include "../../Refresh/Models.h"
+#include "../../System/Hunk.h"
 
 #include "shader/global_ubo.h"
 #include "shader/global_textures.h"
@@ -430,8 +432,8 @@ typedef struct sun_light_s {
 	vec3_t direction_envmap;
 	vec3_t color;
 	float angular_size_rad;
-	qboolean use_physical_sky;
-	qboolean visible;
+	bool use_physical_sky;
+	bool visible;
 } sun_light_t;
 
 void mult_matrix_matrix(float* p, const mat4_t &a, const mat4_t &b);
@@ -721,7 +723,7 @@ VkResult vkpt_god_rays_create_pipelines();
 VkResult vkpt_god_rays_destroy_pipelines();
 VkResult vkpt_god_rays_update_images();
 VkResult vkpt_god_rays_noop();
-qboolean vkpt_god_rays_enabled(const sun_light_t* sun_light);
+bool vkpt_god_rays_enabled(const sun_light_t* sun_light);
 void vkpt_record_god_rays_trace_command_buffer(VkCommandBuffer command_buffer, int pass);
 void vkpt_record_god_rays_filter_command_buffer(VkCommandBuffer command_buffer);
 void vkpt_god_rays_prepare_ubo(
@@ -818,9 +820,9 @@ void IMG_Unload_RTX(image_t *image);
 byte *IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes);
 float *IMG_ReadPixelsHDR_RTX(int* width, int* height);
 
-qerror_t MOD_LoadMD2_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadMD3_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-qerror_t MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD2_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadMD3_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name);
+qerror_t MOD_LoadIQM_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name);
 void MOD_Reference_RTX(model_t *model);
 
 #endif  /*__VKPT_H__*/

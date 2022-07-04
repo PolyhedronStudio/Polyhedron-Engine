@@ -19,10 +19,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_main.c  -- client main loop
 #include "RmlUI/RmlUI.h"
 
+#include "../Shared/Shared.h"
+#include "../Shared/CLTypes.h"
+
 #include "Client.h"
-#include "Client/UI/UI.h"
-#include "Client/Sound/Vorbis.h"
-#include "Client/GameModule.h"
+#include "../Server/Server.h"
+#include "UI/UI.h"
+#include "Sound/Vorbis.h"
+#include "GameModule.h"
+#include "Sound/Sound.h"
 
 cvar_t  *rcon_address;
 
@@ -465,11 +470,11 @@ usage:
     Q_strlcpy(cls.servername, server, sizeof(cls.servername));
 
     // if running a local server, kill it and reissue
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 
     NET_Config(NET_CLIENT);
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     cls.serverAddress = address;
     cls.serverProtocol = protocol;
@@ -524,11 +529,11 @@ static void CL_PassiveConnect_f(void)
     }
 
     // if running a local server, kill it and reissue
-    SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
+    SV_Shutdown("Server was killed.\n", ErrorType::Disconnect);
 
     NET_Config(NET_CLIENT);
 
-    CL_Disconnect(ERR_RECONNECT);
+    CL_Disconnect(ErrorType::Reconnect);
 
     if (!NET_GetAddress(NS_CLIENT, &address)) {
         return;
@@ -624,8 +629,8 @@ void CL_SetConnectionState (uint32_t connectionState) {
 // Sets the current load state of the client.
 //===============
 //
-void CL_SetLoadState (LoadState state) {
-    CL_LoadState(state);
+void CL_SetLoadState(int32_t loadState) {
+    CL_LoadState(loadState);
 }
 
 /*
@@ -644,13 +649,32 @@ void CL_ClearState(void)
 
     // Wipe the entire cl structure
     BSP_Free(cl.bsp);
+	// Unload collision model as well.
+	CM_FreeMap(&cl.cm);
+
+    //cl = ClientState();
     memset(&cl, 0, sizeof(cl));
-    memset(&cs.entities, 0, sizeof(cs.entities));
+    // 
+    //cs = ClientShared();
+    //memset(&cs.entities, 0, sizeof(cs.entities));
     // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
     //cl = {};
-    /*for (uint32_t i = 0; i < sizeof(cs.entities); i++) {
-        cs.entities[i] = {};
-    }*/
+    for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
+		PODEntity *podEntity = &cs.entities[i];
+		(*podEntity) = {
+			// Ensure the states are assigned the correct entityNumber.
+			.currentState = {
+				.number = i,
+			},
+			.previousState = {
+				.number = i,
+			},
+
+			// And ensure our main identifier has the correct entityNumber set.
+			.clientEntityNumber = i,
+		};
+
+    }
 
     // In case we are more than connected, reset it to just connected.
     if (cls.connectionState > ClientConnectionState::Connected) {
@@ -679,7 +703,7 @@ Sends a disconnect message to the server
 This is also called on Com_Error, so it shouldn't cause any errors
 =====================
 */
-void CL_Disconnect(ErrorType type)
+void CL_Disconnect(int32_t errorType)
 {
     if (!cls.connectionState) {
         return;
@@ -714,7 +738,7 @@ void CL_Disconnect(ErrorType type)
         MSG_WriteUint8(ClientCommand::StringCommand);//MSG_WriteByte(ClientCommand::StringCommand);
         MSG_WriteData("disconnect", 11);
 
-        Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3);
+        Netchan_Transmit(cls.netChannel, msg_write.currentSize, msg_write.data, 3, cls.realtime);
 
         SZ_Clear(&msg_write);
 
@@ -736,7 +760,7 @@ void CL_Disconnect(ErrorType type)
 
     cls.userinfo_modified = 0;
 
-    if (type == ERR_DISCONNECT || type == ERR_DROP) {
+    if (errorType == ErrorType::Disconnect || errorType == ErrorType::Drop) {
         //UI_OpenMenu(UIMENU_DEFAULT);
         Cmd_ExecuteCommand(&cl_cmdbuf);
 
@@ -768,7 +792,7 @@ static void CL_Disconnect_f(void)
     }
 
     if (cls.connectionState > ClientConnectionState::Disconnected) {
-        Com_Error(ERR_DISCONNECT, "Disconnected from server");
+        Com_Error(ErrorType::Disconnect, "Disconnected from server");
     }
 }
 
@@ -1080,7 +1104,7 @@ The server is changing levels
 static void CL_Reconnect_f(void)
 {
     if (cls.connectionState >= ClientConnectionState::Precached) {
-        CL_Disconnect(ERR_RECONNECT);
+        CL_Disconnect(ErrorType::Reconnect);
     }
 
     if (cls.connectionState >= ClientConnectionState::Connected) {
@@ -1333,7 +1357,7 @@ static void CL_ConnectionlessPacket(void)
                 if (*s) {
                     type = atoi(s); // CPP: int to (netchan_type_t)
                     if (type != 1) {
-                        Com_Error(ERR_DISCONNECT,
+                        Com_Error(ErrorType::Disconnect,
                                   "Server returned invalid netchan type");
                     }
                 }
@@ -1364,6 +1388,7 @@ static void CL_ConnectionlessPacket(void)
         cls.connectionState = ClientConnectionState::Connected;
         cls.connect_count = 0;
         strcpy(cl.mapName, mapName);   // for levelshot screen
+
         return;
     }
 
@@ -1595,17 +1620,17 @@ static int precache_spawncount;
 
 //
 //===============
-// CL_UpdateListenerOrigin
+// CL_UpdateSoundSpatializationOrigin
 //
 // Updates the listener_ variables, this is called by the CG Module its
 // CLG_RenderView function.
 //===============
 //
-void CL_UpdateListenerOrigin(void) {
-    VectorCopy(cl.refdef.vieworg, listener_origin);
-    VectorCopy(cl.v_forward, listener_forward);
-    VectorCopy(cl.v_right, listener_right);
-    VectorCopy(cl.v_up, listener_up);
+void CL_UpdateSoundSpatializationOrigin(const vec3_t &viewOrigin, const vec3_t &viewForward, const vec3_t &viewRight, const vec3_t &viewUp) {
+    listener_origin = viewOrigin;
+    listener_forward = viewForward;
+    listener_right = viewRight;
+    listener_up = viewUp;
 }
 
 /*
@@ -1621,9 +1646,6 @@ void CL_Begin(void)
 
     // PH: Prepare media loading.
     CL_PrepareMedia();
-
-    // TODO: Move over to the CG Module.
-    LOC_LoadLocations();
 
     // Set state to precached and send over a begin command.
     CL_LoadState(LOAD_NONE);
@@ -1657,7 +1679,7 @@ static void CL_Precache_f(void)
     if (cls.demo.playback) {
         CL_RegisterBspModels();
         CL_PrepareMedia();
-        CL_LoadState(LOAD_NONE);
+		CL_LoadState(LOAD_NONE);
         cls.connectionState = ClientConnectionState::Precached;
         return;
     }
@@ -1667,8 +1689,9 @@ static void CL_Precache_f(void)
     CL_ResetPrecacheCheck();
     CL_RequestNextDownload();
 
+	// Check whether to set the client into a connected state right after spawning the client side world entities.
     if (cls.connectionState != ClientConnectionState::Precached) {
-        cls.connectionState = ClientConnectionState::Connected;
+		cls.connectionState = ClientConnectionState::Connected;
     }
 }
 
@@ -1953,11 +1976,6 @@ static void CL_DumpStatusbar_f(void)
     dump_program(cl.configstrings[ConfigStrings::StatusBar], "status bar");
 }
 
-static void CL_DumpLayout_f(void)
-{
-    dump_program(cl.layout, "layout");
-}
-
 static const cmd_option_t o_writeconfig[] = {
     { "a", "aliases", "write aliases" },
     { "b", "bindings", "write bindings" },
@@ -2164,14 +2182,6 @@ static size_t CL_Material_Override_m(char* buffer, size_t size) {
     return Q_scnprintf(buffer, size, "%s", cl.refdef.feedback.view_material_override);
 }
 
-static size_t CL_ViewPos_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "(%.1f, %.1f, %.1f)", cl.refdef.vieworg[0], cl.refdef.vieworg[1], cl.refdef.vieworg[2]);
-}
-
-static size_t CL_ViewDir_m(char* buffer, size_t size) {
-    return Q_scnprintf(buffer, size, "(%.3f, %.3f, %.3f)", cl.v_forward[0], cl.v_forward[1], cl.v_forward[2]);
-}
-
 static size_t CL_HdrColor_m(char* buffer, size_t size) {
     const float* color = cl.refdef.feedback.hdr_color;
     return Q_scnprintf(buffer, size, "(%.5f, %.5f, %.5f)", color[0], color[1], color[2]);
@@ -2261,8 +2271,6 @@ void CL_RestartFilesystem(qboolean total)
 
         // Load client screen media first.
         SCR_RegisterMedia();
-        // PH: Inform the CG Module about the registration of media.
-        CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
     } else {
@@ -2322,8 +2330,6 @@ void CL_RestartRefresh(qboolean total)
         
         // Load client screen media first.
         SCR_RegisterMedia();
-        // PH: Inform the CG Module about the registration of media.
-        CL_GM_LoadScreenMedia();
         Con_RegisterMedia();
         UI_Init();
 
@@ -2462,19 +2468,6 @@ static void cl_allow_download_changed(cvar_t *self)
     }
 }
 
-// ugly hack for compatibility
-static void cl_chat_sound_changed(cvar_t *self)
-{
-    if (!*self->string)
-        self->integer = 0;
-    else if (!PH_StringCompare(self->string, "misc/talk.wav"))
-        self->integer = 1;
-    else if (!PH_StringCompare(self->string, "misc/talk1.wav"))
-        self->integer = 2;
-    else if (!self->integer && !COM_IsUint(self->string))
-        self->integer = 1;
-}
-
 static const cmdreg_t c_client[] = {
     { "cmd", CL_ForwardToServer_f },
     { "pause", CL_Pause_f },
@@ -2498,7 +2491,7 @@ static const cmdreg_t c_client[] = {
     { "unignorenick", CL_UnIgnoreNick_f, CL_IgnoreNick_c },
     { "dumpclients", CL_DumpClients_f },
     { "dumpstatusbar", CL_DumpStatusbar_f },
-    { "dumplayout", CL_DumpLayout_f },
+//    { "dumplayout", CL_DumpLayout_f },
     { "writeconfig", CL_WriteConfig_f, CL_WriteConfig_c },
 //    { "msgtab", CL_Msgtab_f, CL_Msgtab_g },
     { "vid_restart", CL_RestartRefresh_f },
@@ -2538,7 +2531,6 @@ static void CL_InitLocal(void)
     // Initialize the rest of the client.
     CL_RegisterInput();
     CL_InitDemos();
-    LOC_Init();
     CL_InitAscii();
     CL_InitDownloads();
 
@@ -2580,11 +2572,11 @@ static void CL_InitLocal(void)
     warn_on_fps_rounding(cl_maxfps);
     warn_on_fps_rounding(r_maxfps);
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
     cl_shownet = Cvar_Get("cl_shownet", "0", 0);
     cl_showmiss = Cvar_Get("cl_showmiss", "0", 0);
     cl_showclamp = Cvar_Get("showclamp", "0", 0);
-//#endif
+#endif
 
     cl_timeout = Cvar_Get("cl_timeout", "120", 0);
 
@@ -2623,18 +2615,11 @@ static void CL_InitLocal(void)
     Cmd_AddMacro("cl_pps", CL_Pps_m);   // packets per second
     Cmd_AddMacro("cl_ping", CL_Ping_m);
     Cmd_AddMacro("cl_lag", CL_Lag_m);
-    // PH: Moved over to the client game.
-    //Cmd_AddMacro("cl_health", CL_Health_m);
-    //Cmd_AddMacro("cl_ammo", CL_Ammo_m);
-    //Cmd_AddMacro("cl_armor", CL_Armor_m);
-    //Cmd_AddMacro("cl_weaponmodel", CL_WeaponModel_m);
 	Cmd_AddMacro("cl_cluster", CL_Cluster_m);
 	Cmd_AddMacro("cl_clusterthere", CL_ClusterThere_m);
 	Cmd_AddMacro("cl_lightpolys", CL_NumLightPolys_m);
 	Cmd_AddMacro("cl_material", CL_Material_m);
 	Cmd_AddMacro("cl_material_override", CL_Material_Override_m);
-	Cmd_AddMacro("cl_viewpos", CL_ViewPos_m);
-	Cmd_AddMacro("cl_viewdir", CL_ViewDir_m);
 	Cmd_AddMacro("cl_hdr_color", CL_HdrColor_m);
 	Cmd_AddMacro("cl_resolution_scale", CL_ResolutionScale_m);
 
@@ -2785,7 +2770,7 @@ static void CL_CheckTimeout(void)
     if (cls.errorReceived) {
         delta = 5000;
         if (com_localTime - cls.netChannel->lastReceivedTime > delta)  {
-            Com_Error(ERR_DISCONNECT, "Server connection was reset.");
+            Com_Error(ErrorType::Disconnect, "Server connection was reset.");
         }
     }
 #endif
@@ -2794,7 +2779,7 @@ static void CL_CheckTimeout(void)
     if (delta && com_localTime - cls.netChannel->lastReceivedTime > delta)  {
         // timeoutcount saves debugger
         if (++cl.timeoutCount > 5) {
-            Com_Error(ERR_DISCONNECT, "Server connection timed out.");
+            Com_Error(ErrorType::Disconnect, "Server connection timed out.");
         }
     } else {
         cl.timeoutCount = 0;
@@ -2906,7 +2891,7 @@ void CL_UpdateFrameTimes(void)
         sync_mode = SYNC_SLEEP_20;
     }
     else if (cls.active == ACT_RESTORED || cls.connectionState != ClientConnectionState::Active) {
-        // run at 60 fps if not active
+        // run at 60 fps if the client connection state isn't active
         main_msec = fps_to_msec(60);
         sync_mode = SYNC_SLEEP_60;
     }
@@ -2927,6 +2912,73 @@ void CL_UpdateFrameTimes(void)
 
 }
 
+/**
+*	@brief	"Runs"/"Moves Forward" the Server Game Module for another frame.
+**/
+#include "Entities/LocalEntities.h"
+static uint64_t clFrameResidual = 0;
+uint64_t CL_RunGameFrame(uint64_t msec) {
+    if (cls.connectionState < ClientConnectionState::Active) {
+		return 0;	
+	}
+#if USE_CLIENT
+    if (host_speeds->integer)
+        timeBeforeClientGame = Sys_Milliseconds();
+#endif
+	// move autonomous things around if enough time has passed
+    clFrameResidual += msec;
+    if (clFrameResidual < CL_FRAMETIME) {
+        return CL_FRAMETIME - clFrameResidual;
+    }
+	
+		
+	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
+	// We'll be processing them here.
+	cl.numSolidLocalEntities = 0;
+	
+	// Run the received packet entities for a frame so we can "predict".
+	CL_GM_ClientPacketEntityDeltaFrame();
+
+	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
+		// Get entity pointer.
+		PODEntity *podEntity = &cs.entities[i];
+
+		//if (!podEntity->inUse) {
+		//	continue;
+		//}
+
+		// Update local entity.
+		LocalEntity_Update(podEntity->currentState);
+
+		// Run the Client Game entity for a frame.		
+		LocalEntity_SetHashedClassname(podEntity, podEntity->currentState);
+
+		// Fire local entity events.
+		LocalEntity_FireEvent(podEntity->currentState);
+	}
+	
+	// Give the client game module a chance to run its local entities for a frame.
+	CL_GM_ClientLocalEntitiesFrame();
+
+#if USE_CLIENT
+    if (host_speeds->integer)
+        timeAfterClientGame = Sys_Milliseconds();
+#endif
+	// decide how long to sleep next frame
+    clFrameResidual -= CL_FRAMETIME;
+    if (clFrameResidual < CL_FRAMETIME) {
+        return CL_FRAMETIME - clFrameResidual;
+    }
+
+	// don't accumulate bogus residual
+    if (clFrameResidual > 250) {
+        Com_DDDPrintf("Reset residual %u\n", clFrameResidual);
+        clFrameResidual = 100;
+    }
+
+	return 0;
+}
+
 /*
 ==================
 CL_Frame
@@ -2935,14 +2987,15 @@ CL_Frame
 */
 unsigned int totaltime = 0;
 unsigned int lasttime = 0;
-unsigned CL_Frame(unsigned msec)
+uint64_t CL_Frame(uint64_t msec)
 {
     qboolean phys_frame = true, ref_frame = true;
 
-    time_after_ref = time_before_ref = 0;
+    timeAfterRefresh = timeBeforeRefresh = 0;
+	timeAfterClientGame = timeBeforeClientGame = 0;
 
     if (!cl_running->integer) {
-        return UINT_MAX;
+        return UINT64_MAX;
     }
 
     main_extra += msec;
@@ -2999,8 +3052,9 @@ unsigned CL_Frame(unsigned msec)
         break;
     }
 
-	if (cls.demo.playback && cl_renderdemo->integer && cl_paused->integer != 2)
+	if (cls.demo.playback && cl_renderdemo->integer && cl_paused->integer != 2) {
 		main_extra = main_msec;
+    }
 
     Com_DDDDPrintf("main_extra=%d ref_frame=%d ref_extra=%d "
                    "phys_frame=%d phys_extra=%d\n",
@@ -3010,20 +3064,24 @@ unsigned CL_Frame(unsigned msec)
     // Decide the simulation time
     cls.frameTime = main_extra * 0.001f;
 
-    if (cls.frameTime > 1.0 / 5)
+    if (cls.frameTime > 1.0 / 5) {
         cls.frameTime = 1.0 / 5;
+    }
 
 	if (!sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         cl.time += main_extra;
     }
 
     // Read next demo frame
-    if (cls.demo.playback)
+    if (cls.demo.playback) {
         CL_DemoFrame(main_extra);
+    }
 
     // Calculate local time
-	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2))
+	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
         CL_SetClientTime();
+    }
+
 
 #if USE_AUTOREPLY
     // Check for version reply
@@ -3035,9 +3093,18 @@ unsigned CL_Frame(unsigned msec)
 
     // Read user intentions
     CL_UpdateCmd(main_extra);
+			
+	// Let client side entities do their thing.
+	if (phys_frame) {
+
+
+		// Run the actual local game.
+		CL_RunGameFrame(phys_extra);
+	}
 
     // Finalize pending cmd
     phys_frame |= cl.sendPacketNow;
+
     if (phys_frame) {
         CL_FinalizeCmd();
         phys_extra -= phys_msec;
@@ -3059,7 +3126,8 @@ unsigned CL_Frame(unsigned msec)
     // Send pending clientUserCommands
     CL_SendCmd();
 
-    // Predict all unacknowledged movements
+	// Predict all unacknowledged movements
+    // UNCOMMENT IF IT BROKE ? Predict all unacknowledged movements
     CL_PredictMovement();
 
     Con_RunConsole();
@@ -3071,23 +3139,31 @@ unsigned CL_Frame(unsigned msec)
 
     if (ref_frame) {
         // Update the screen
-        if (host_speeds->integer)
-            time_before_ref = Sys_Milliseconds();
+        if (host_speeds->integer) {
+            timeBeforeRefresh = Sys_Milliseconds();
+        }
 
         SCR_UpdateScreen();
 
-        if (host_speeds->integer)
-            time_after_ref = Sys_Milliseconds();
+        if (host_speeds->integer) {
+            timeAfterRefresh = Sys_Milliseconds();
+        }
 
         ref_extra -= ref_msec;
         R_FRAMES++;
 
 run_fx:
-        // Update audio after the 3D view was drawn
-        S_Update();
-
         // Advance local game effects for next frame
+        if (host_speeds->integer) {
+            timeBeforeClientGame = Sys_Milliseconds();
+        }
         CL_GM_ClientFrame();
+        if (host_speeds->integer) {
+            timeAfterClientGame = Sys_Milliseconds();
+        }
+        
+		// Update audio after the 3D view was drawn
+        S_Update();
 
         SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_20) {
@@ -3096,9 +3172,14 @@ run_fx:
         goto run_fx;
     }
 
+	// Predict all unacknowledged movements
+    // UNCOMMENT IF IT BROKE ? Predict all unacknowledged movements
+	//CL_PredictMovement();
+
     // Check connection timeout
-    if (cls.netChannel)
+    if (cls.netChannel) {
         CL_CheckTimeout();
+    }
 
     C_FRAMES++;
 
@@ -3174,7 +3255,7 @@ void CL_Init(void)
 
 #if USE_ZLIB
     if (inflateInit2(&cls.z, -MAX_WBITS) != Z_OK) {
-        Com_Error(ERR_FATAL, "%s: inflateInit2() failed", __func__);
+        Com_Error(ErrorType::Fatal, "%s: inflateInit2() failed", __func__);
     }
 #endif
 
@@ -3227,7 +3308,7 @@ void CL_Shutdown(void)
     // PH: Notify the CG Module.
     CL_GM_Shutdown();
 
-    CL_Disconnect(ERR_FATAL);
+    CL_Disconnect(ErrorType::Fatal);
 
 #if USE_ZLIB
     inflateEnd(&cls.z);

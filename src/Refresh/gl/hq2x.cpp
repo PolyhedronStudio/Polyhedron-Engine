@@ -25,9 +25,9 @@ note: this is a clean reimplementation of the original HQ2x filter, which was
 written by Maxim Stepin (MaxSt). it is not 100% identical, but very similar.
 */
 
-#include "Shared/Shared.h"
-#include "Common/CVar.h"
-#include "refresh/images.h"
+#include "../../Shared/Shared.h"
+#include "../../Common/CVar.h"
+#include "../../Refresh/Images.h"
 
 static const uint8_t hqTable[256] = {
     1, 1, 2,  4, 1, 1, 2,  4, 3,  5,  7,  8, 3,  5, 13, 15,
@@ -182,7 +182,7 @@ static q_noinline uint32_t hq2x_blend(int rule, uint32_t E, uint32_t A, uint32_t
     case 16:
         return same(B, D) ? blend_14_1_1(E, D, B) : E;
     default:
-        Com_Error(ERR_FATAL, "%s: bad rule %d", __func__, rule);
+        Com_Error(ErrorType::Fatal, "%s: bad rule %d", __func__, rule);
         return 0;
     }
 }
@@ -349,7 +349,7 @@ static q_noinline void hq4x_blend(int rule, uint32_t *p00, uint32_t *p01, uint32
         *p11 = E;
         break;
     default:
-        Com_Error(ERR_FATAL, "%s: bad rule %d", __func__, rule);
+        Com_Error(ErrorType::Fatal, "%s: bad rule %d", __func__, rule);
         break;
     }
 }

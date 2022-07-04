@@ -17,9 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "UI.h"
-#include "Client/Input.h"
 #include "../Client.h"
-#include "Common/Prompt.h"
+#include "../Input.h"
+#include "../Sound/Sound.h"
+#include "../../Common/Prompt.h"
 
 uiStatic_t    uis;
 
@@ -166,7 +167,7 @@ void UI_PopMenu(void)
     menuFrameWork_t* menu;
 
     if (uis.menuDepth < 1)
-        Com_Error(ERR_FATAL, "UI_PopMenu: depth < 1");
+        Com_Error(ErrorType::Fatal, "UI_PopMenu: depth < 1");
 
     if (uis.menuDepth == 1 && CL_InBSPMenu()) {
         return;
@@ -259,7 +260,7 @@ void UI_OpenMenu(uiMenu_t type)
     case UIMENU_NONE:
         break;
     default:
-        Com_Error(ERR_FATAL, "UI_OpenMenu: bad menu");
+        Com_Error(ErrorType::Fatal, "UI_OpenMenu: bad menu");
         break;
     }
 

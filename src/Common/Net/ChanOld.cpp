@@ -16,10 +16,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/Common.h"
 #include "Common/CVar.h"
-#include "Common/Msg.h"
+#include "Common/Messaging.h"
 #include "Common/enet/netchan.h"
 #include "Common/Net/Net.h"
 #include "Common/Protocol.h"
@@ -86,10 +86,10 @@ static cvar_t       *showpackets;
 static cvar_t       *showdrop;
 #define SHOWPACKET(...) \
     if (showpackets->integer) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define SHOWDROP(...) \
     if (showdrop->integer) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #else
 #define SHOWPACKET(...)
 #define SHOWDROP(...)
@@ -115,7 +115,7 @@ Netchan_Init
 */
 void Netchan_Init(void)
 {
-    int     port;
+    int32_t     port;
 
 #ifdef _DEBUG
     showpackets = Cvar_Get("showpackets", "0", 0);

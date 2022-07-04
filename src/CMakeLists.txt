@@ -1,587 +1,399 @@
-cmake_minimum_required (VERSION 3.8)
-
 ###############################################################################
 ##
 ##			SOURCE AND HEADER FILE LISTS
 ##
 ###############################################################################
-###################### CLIENT GAME
-SET(SRC_CLGAME
-	CLGame/ClientGameExports.cpp
-	CLGame/ClientGameImports.cpp
+SET(PATH_SRC ${CMAKE_CURRENT_SOURCE_DIR})
 
-	CLGame/Exports/Core.cpp
-	CLGame/Exports/Entities.cpp
-	CLGame/Exports/Media.cpp
-	CLGame/Exports/Movement.cpp
-	CLGame/Exports/Prediction.cpp
-	CLGame/Exports/Screen.cpp
-	CLGame/Exports/ServerMessage.cpp
-	CLGame/Exports/View.cpp
 
-	CLGame/Debug.cpp
-	CLGame/Effects.cpp
-	CLGame/Entities.cpp
-	CLGame/Input.cpp
-	CLGame/Main.cpp
-	CLGame/Media.cpp
-	CLGame/NewEffects.cpp
-	CLGame/Parse.cpp
-	CLGame/Predict.cpp
-	CLGame/Screen.cpp
-	CLGame/TemporaryEntities.cpp
-	CLGame/View.cpp
 
-	CLGame/CLGame.def
+
+#
+#	Shared Folder.	
+#
+SET(SRC_SHARED
+	${PATH_SRC}/Shared/Math/Plane.cpp
+	${PATH_SRC}/Shared/Math/Vector3.cpp
+
+	${PATH_SRC}/Shared/Math.cpp
+	${PATH_SRC}/Shared/Shared.cpp
+	${PATH_SRC}/Shared/SkeletalModelData.cpp
 )
 
-SET(HEADERS_CLGAME
-	CLGame/ClientGameExports.h
-	CLGame/ClientGameImports.h
+SET(HEADERS_SHARED
+	# Formats.
+	${PATH_SRC}/Shared/Formats/Bsp.h 
+	${PATH_SRC}/Shared/Formats/Iqm.h 
+	${PATH_SRC}/Shared/Formats/Md2.h 
+	${PATH_SRC}/Shared/Formats/Md3.h 
+	${PATH_SRC}/Shared/Formats/Pak.h 
+	${PATH_SRC}/Shared/Formats/Pcx.h 
+	${PATH_SRC}/Shared/Formats/Sp2.h 
+	${PATH_SRC}/Shared/Formats/Wal.h 
 
-	CLGame/Exports/Core.h
-	CLGame/Exports/Entities.h
-	CLGame/Exports/Media.h
-	CLGame/Exports/Movement.h
-	CLGame/Exports/Prediction.h
-	CLGame/Exports/Screen.h
-	CLGame/Exports/ServerMessage.h
-	CLGame/Exports/View.h
+	# Interfaces
+	${PATH_SRC}/Shared/Interfaces/IClientGameExports.h
+	${PATH_SRC}/Shared/Interfaces/IClientGameImports.h
+	${PATH_SRC}/Shared/Interfaces/IServerGameExports.h
+	${PATH_SRC}/Shared/Interfaces/IServerGameImports.h
 
-	CLGame/Debug.h
-	CLGame/Effects.h
-	CLGame/Entities.h
-	CLGame/Input.h
-	CLGame/ClientGameLocal.h
-	CLGame/Main.h
-	CLGame/Media.h
-	CLGame/NewEffects.h
-	CLGame/Parse.h
-	CLGame/Predict.h
-	CLGame/Screen.h
-	CLGame/TemporaryEntities.h
-	CLGame/View.h
+	# Math lib.
+	${PATH_SRC}/Shared/Math/Color.h
+	${PATH_SRC}/Shared/Math/Matrix3.h
+	${PATH_SRC}/Shared/Math/Matrix4.h
+	${PATH_SRC}/Shared/Math/Plane.h
+	${PATH_SRC}/Shared/Math/Rectangle.h
+	${PATH_SRC}/Shared/Math/Quaternion.h
+	${PATH_SRC}/Shared/Math/Utilities.h
+	${PATH_SRC}/Shared/Math/Vector2.h
+	${PATH_SRC}/Shared/Math/Vector3.h
+	${PATH_SRC}/Shared/Math/Vector4.h
+	${PATH_SRC}/Shared/Math/Vector5.h
+	
+	# Other shared lib functionalities.
+	${PATH_SRC}/Shared/CLGame.h
+	${PATH_SRC}/Shared/CLTypes.h
+	${PATH_SRC}/Shared/CollisionModel.h
+	${PATH_SRC}/Shared/Common.h
+	${PATH_SRC}/Shared/Config.h
+	${PATH_SRC}/Shared/Endian.h 
+	${PATH_SRC}/Shared/Entities.h 
+	${PATH_SRC}/Shared/Keys.h 
+	${PATH_SRC}/Shared/KeyValue.h 
+	${PATH_SRC}/Shared/List.h 
+	${PATH_SRC}/Shared/Math.h 
+	${PATH_SRC}/Shared/Messaging.h 
+	${PATH_SRC}/Shared/Platform.h
+	${PATH_SRC}/Shared/PlayerMove.h
+	${PATH_SRC}/Shared/QString.h
+	${PATH_SRC}/Shared/Refresh.h 
+	${PATH_SRC}/Shared/Shared.h 
+	${PATH_SRC}/Shared/SkeletalModelData.h 
+	${PATH_SRC}/Shared/Sound.h 
+	${PATH_SRC}/Shared/Strings.h
+	${PATH_SRC}/Shared/SVGame.h 
+	${PATH_SRC}/Shared/TickRate.h 
+	${PATH_SRC}/Shared/UI.h 
 )
 
-# Server game DLL
-# Throw all sources in here, but group them elsewhere
-SET( SRC_SVGAME 
-	SVGame/ChaseCamera.cpp
-	SVGame/Commands.cpp
-	SVGame/Combat.cpp
-	SVGame/Effects.cpp
-	SVGame/Entities.cpp
-	SVGame/GameLocals.cpp
-	SVGame/Items.cpp
-	SVGame/ImportsWrapper.cpp
-	SVGame/Main.cpp
-	SVGame/Effects.cpp
-	SVGame/Save.cpp
-	SVGame/Spawn.cpp
-	SVGame/SVCommands.cpp
-	SVGame/Utilities.cpp
-	SVGame/Weapons.cpp 
-	SVGame/ai/MonsterAI.cpp
-	SVGame/Entities/Base/SVGBaseEntity.cpp
-	SVGame/Entities/Base/SVGBaseItem.cpp
-	SVGame/Entities/Base/SVGBaseItemAmmo.cpp
-	SVGame/Entities/Base/SVGBaseItemWeapon.cpp
-	SVGame/Entities/Base/SVGBaseTrigger.cpp
-	SVGame/Entities/Base/SVGBaseMonster.cpp
-	SVGame/Entities/Base/SVGBaseMover.cpp
-	SVGame/Entities/Base/SVGBasePlayer.cpp
-	SVGame/Entities/Base/SVGEntityHandle.cpp
-	SVGame/Entities/Base/BodyCorpse.cpp
-	SVGame/Entities/Base/DebrisEntity.cpp
-	SVGame/Entities/Base/GibEntity.cpp
+SET(SRC_COMMON
+	${PATH_SRC}/Common/Bsp.cpp
+	${PATH_SRC}/Common/Cmd.cpp
+	${PATH_SRC}/Common/CollisionModel.cpp
+	${PATH_SRC}/Common/Common.cpp
+	${PATH_SRC}/Common/CVar.cpp
+	${PATH_SRC}/Common/Error.cpp
+	${PATH_SRC}/Common/Field.cpp
+	${PATH_SRC}/Common/Fifo.cpp
+	${PATH_SRC}/Common/Files.cpp
+	${PATH_SRC}/Common/Huffman.cpp
+	${PATH_SRC}/Common/MDFour.cpp
+	${PATH_SRC}/Common/Messaging.cpp
+	${PATH_SRC}/Common/Prompt.cpp
+	${PATH_SRC}/Common/SizeBuffer.cpp
+	#${PATH_SRC}/Common/Tests.cpp
+	${PATH_SRC}/Common/Utilities.cpp
+	${PATH_SRC}/Common/Zone.cpp
 
-	#SVGame/Entities/Info/InfoNotNull.cpp
-	SVGame/Entities/Info/InfoNull.cpp
-	SVGame/Entities/Info/InfoPlayerCoop.cpp
-	SVGame/Entities/Info/InfoPlayerDeathmatch.cpp
-	SVGame/Entities/Info/InfoPlayerIntermission.cpp
-	SVGame/Entities/Info/InfoPlayerStart.cpp
-	SVGame/Entities/Items/ItemAmmo9mm.cpp
-	SVGame/Entities/Items/ItemHealthMega.cpp
-	SVGame/Entities/Items/ItemWeaponKnife.cpp
-	SVGame/Entities/Items/ItemWeaponBeretta.cpp
-	SVGame/Entities/Items/ItemWeaponNone.cpp
-	SVGame/Entities/Items/ItemWeaponSMG.cpp
-	SVGame/Entities/Func/FuncAreaportal.cpp
-	SVGame/Entities/Func/FuncButton.cpp
-	#SVGame/Entities/Func/FuncConveyor.cpp
-	SVGame/Entities/Func/FuncDoor.cpp 
-	SVGame/Entities/Func/FuncDoorRotating.cpp
-	SVGame/Entities/Func/FuncExplosive.cpp 
-	#SVGame/Entities/Func/FuncKillbox.cpp
-	#SVGame/Entities/Func/FuncObject.cpp
-	SVGame/Entities/Func/FuncPlat.cpp
-	SVGame/Entities/Func/FuncRotating.cpp
-	SVGame/Entities/Func/FuncTimer.cpp
-	SVGame/Entities/Func/FuncTrain.cpp 
-	SVGame/Entities/Func/FuncWall.cpp
-	#SVGame/Entities/Func/FuncWater.cpp
-	#SVGame/Entities/Misc/MiscExplobox.cpp
-	#SVGame/Entities/Misc/MiscGibArm.cpp 
-	#SVGame/Entities/Misc/MiscGibLeg.cpp 
-	#SVGame/Entities/Misc/MiscGibHead.cpp 
-	SVGame/Entities/Misc/MiscExplosionBox.cpp
-	SVGame/Entities/Misc/MiscServerModel.cpp
-	#SVGame/Entities/Misc/MiscTeleporter.cpp
-	#SVGame/Entities/Misc/MiscTeleporterDest.cpp
-	SVGame/Entities/Monsters/MonsterTestDummy.cpp
-	SVGame/Entities/Path/PathCorner.cpp
-	#SVGame/Entities/Target/TargetBlaster.cpp
-	#SVGame/Entities/Target/TargetChangelevel.cpp
-	#SVGame/Entities/Target/TargetCrosslevel_target.cpp
-	#SVGame/Entities/Target/TargetCrosslevel_trigger.cpp
-	SVGame/Entities/Target/TargetEarthquake.cpp
-	SVGame/Entities/Target/TargetExplosion.cpp
-	#SVGame/Entities/Target/TargetLightramp.cpp
-	#SVGame/Entities/Target/TargetSpawner.cpp
-	SVGame/Entities/Target/TargetSpeaker.cpp
-	#SVGame/Entities/Target/TargetSplash.cpp
-	SVGame/Entities/Target/TargetTempEntity.cpp
-	SVGame/Entities/Trigger/TriggerCounter.cpp
-	#SVGame/Entities/Trigger/TriggerElevator.cpp
-	SVGame/Entities/Trigger/TriggerGravity.cpp
-	#SVGame/Entities/Trigger/TriggerKey.cpp
-	#SVGame/Entities/Trigger/TriggerMonsterjump.cpp
-	SVGame/Entities/Trigger/TriggerPush.cpp
-	SVGame/Entities/Trigger/TriggerAlways.cpp
-	SVGame/Entities/Trigger/TriggerAutoDoor.cpp
-	SVGame/Entities/Trigger/TriggerAutoPlatform.cpp
-	SVGame/Entities/Trigger/TriggerDelayedUse.cpp
-	SVGame/Entities/Trigger/TriggerHurt.cpp
-	SVGame/Entities/Trigger/TriggerMultiple.cpp
-	SVGame/Entities/Trigger/TriggerOnce.cpp
-	SVGame/Entities/Trigger/TriggerRelay.cpp
-	SVGame/Entities/Weaponry/BlasterBolt.cpp
-	SVGame/Entities/Light.cpp
-	SVGame/Entities/Worldspawn.cpp
-	SVGame/Gamemodes/DefaultGamemode.cpp
-	SVGame/Gamemodes/CoopGamemode.cpp
-	SVGame/Gamemodes/DeathmatchGamemode.cpp
-	SVGame/Physics/Physics.cpp
-	SVGame/Physics/StepMove.cpp
-	SVGame/Player/Client.cpp
-	SVGame/Player/Hud.cpp
-	SVGame/Player/Trail.cpp
-	SVGame/Player/Player.cpp
-	SVGame/Player/View.cpp
-	SVGame/Player/Weapons.cpp
-	#SVGame/Weapons/Blaster.cpp
-	#SVGame/Weapons/Machinegun.cpp
-	#SVGame/Weapons/Shotgun.cpp
-	#SVGame/Weapons/SuperShotgun.cpp
-	SVGame/World/GameWorld.cpp
-    SVGame/svgame.def
-    )
-    
-    SET ( HEADERS_SVGAME
-	SVGame/ServerGameLocal.h
-	SVGame/ChaseCamera.h
-	SVGame/Effects.h
-	SVGame/Entities.h
-	SVGame/GameLocals.h
-	SVGame/TypeInfo.h
-	SVGame/Utilities.h
-	SVGame/AI/MonsterAI.h
-	SVGame/Entities/Base/SVGBaseEntity.h
-	SVGame/Entities/Base/SVGBaseItem.h
-	SVGame/Entities/Base/SVGBaseItemAmmo.h
-	SVGame/Entities/Base/SVGBaseItemWeapon.h
-	SVGame/Entities/Base/SVGBaseTrigger.h
-	SVGame/Entities/Base/SVGBaseMonster.h
-	SVGame/Entities/Base/SVGBaseMover.h
-	SVGame/Entities/Base/SVGBasePlayer.h
-	SVGame/Entities/Base/SVGEntityHandle.h
-	SVGame/Entities/Base/BodyCorpse.h
-	SVGame/Entities/Base/DebrisEntity.h
-	SVGame/Entities/Base/GibEntity.h
-	SVGame/Entities/Func/FuncAreaportal.h
-	SVGame/Entities/Func/FuncButton.h
-	SVGame/Entities/Func/FuncDoor.h
-	SVGame/Entities/Func/FuncDoorRotating.h
-	SVGame/Entities/Func/FuncExplosive.h
-	SVGame/Entities/Func/FuncPlat.h
-	SVGame/Entities/Func/FuncRotating.h
-	SVGame/Entities/Func/FuncTimer.h
-	SVGame/Entities/Func/FuncTrain.h
-	SVGame/Entities/Func/FuncWall.h
-	#SVGame/Entities/Info/InfoNull.h - Only has a .cpp file.
-	SVGame/Entities/Info/InfoPlayerCoop.h
-	SVGame/Entities/Info/InfoPlayerDeathmatch.h
-	SVGame/Entities/Info/InfoPlayerIntermission.h
-	SVGame/Entities/Info/InfoPlayerStart.h
-	
-	SVGame/Entities/Items/ItemAmmo9mm.h
-	
-	SVGame/Entities/Items/ItemHealthMega.h
-	
-	SVGame/Entities/Items/ItemWeaponKnife.h
-	SVGame/Entities/Items/ItemWeaponBeretta.h
-	SVGame/Entities/Items/ItemWeaponSMG.h
-	SVGame/Entities/Items/ItemWeaponNone.h
+	${PATH_SRC}/Common/Models/Iqm.cpp
 
-	SVGame/Entities/Misc/MiscExplosionBox.h
-	SVGame/Entities/Misc/MiscServerModel.h
-	SVGame/Entities/Monsters/MonsterTestDummy.h
-	SVGame/Entities/Path/PathCorner.h
-	SVGame/Entities/Target/TargetEarthquake.h
-	SVGame/Entities/Target/TargetExplosion.h
-	SVGame/Entities/Target/TargetSpeaker.h
-	SVGame/Entities/Target/TargetTempEntity.h
-	SVGame/Entities/Trigger/TriggerAlways.h
-	SVGame/Entities/Trigger/TriggerAutoDoor.h
-	SVGame/Entities/Trigger/TriggerAutoPlatform.h
-	SVGame/Entities/Trigger/TriggerCounter.h
-	SVGame/Entities/Trigger/TriggerDelayedUse.h
-	SVGame/Entities/Trigger/TriggerHurt.h
-	SVGame/Entities/Trigger/TriggerGravity.h
-	SVGame/Entities/Trigger/TriggerMultiple.h
-	SVGame/Entities/Trigger/TriggerOnce.h
-	SVGame/Entities/Trigger/TriggerPush.h
-	SVGame/Entities/Trigger/TriggerRelay.h
-	SVGame/Entities/weaponry/BlasterBolt.h
-	SVGame/Entities/Light.h
-	SVGame/Entities/Worldspawn.h
-	SVGame/Gamemodes/DefaultGamemode.h
-	SVGame/Gamemodes/CoopGamemode.h
-	SVGame/Gamemodes/DeathmatchGamemode.h
-	SVGame/Gamemodes/IGamemode.h
-	SVGame/Player/Animations.h
-	SVGame/Player/Client.h
-	SVGame/Player/Player.h
-	SVGame/Player/View.h
-	SVGame/Player/Weapons.h
-	SVGame/Weapons/Blaster.h
-	SVGame/Weapons/Machinegun.h
-	SVGame/Weapons/Shotgun.h
-	SVGame/Weapons/SuperShotgun.h
-	SVGame/World/GameWorld.h
-    SVGame/svgame.def
-    )
-    
-    ###################### Client.
+	${PATH_SRC}/Common/Hashes/Crc32.cpp
+
+	${PATH_SRC}/Common/Messaging/MessageReadWrite.cpp
+	${PATH_SRC}/Common/Messaging/ParseDeltaClientMoveCommand.cpp
+	${PATH_SRC}/Common/Messaging/ParseDeltaEntityState.cpp
+	${PATH_SRC}/Common/Messaging/ParseDeltaPlayerState.cpp
+	${PATH_SRC}/Common/Messaging/WriteDeltaClientMoveCommand.cpp
+	${PATH_SRC}/Common/Messaging/WriteDeltaEntityState.cpp
+	${PATH_SRC}/Common/Messaging/WriteDeltaPlayerState.cpp
+
+	${PATH_SRC}/Common/Net/NetChan.cpp
+	${PATH_SRC}/Common/Net/Net.cpp
+)
+SET(HEADERS_COMMON
+	${PATH_SRC}/Common/Bsp.h
+	${PATH_SRC}/Common/Cmd.h
+	${PATH_SRC}/Common/CollisionModel.h
+	${PATH_SRC}/Common/Common.h
+	${PATH_SRC}/Common/CVar.h
+	${PATH_SRC}/Common/Error.h
+	${PATH_SRC}/Common/Field.h
+	${PATH_SRC}/Common/Fifo.h
+	${PATH_SRC}/Common/Files.h
+	${PATH_SRC}/Common/HalfFloat.h
+	${PATH_SRC}/Common/Huffman.h
+	${PATH_SRC}/Common/MDFour.h
+	${PATH_SRC}/Common/Messaging.h
+	${PATH_SRC}/Common/PlayerMove.h
+	${PATH_SRC}/Common/Prompt.h
+	${PATH_SRC}/Common/Protocol.h
+	${PATH_SRC}/Common/SizeBuffer.h
+	${PATH_SRC}/Common/Tests.h
+	${PATH_SRC}/Common/Utilities.h
+	${PATH_SRC}/Common/Zone.h
+
+	${PATH_SRC}/Common/Net/INetNToP.h
+	${PATH_SRC}/Common/Net/INetPToN.h
+	${PATH_SRC}/Common/Net/Win.h
+	
+	${PATH_SRC}/Common/Hashes/Crc32.h
+)
+#
+#	Client Sources.
+#
 SET(SRC_CLIENT
-	Client/ASCII.cpp
-	Client/Console.cpp
-	Client/Cinematic.cpp
-	Client/ClientGame.cpp
-	Client/CRC.cpp
-	Client/Demo.cpp
-	Client/Download.cpp
-	Client/Entities.cpp
-	Client/input.cpp
-	Client/Keys.cpp
-	Client/Locations.cpp
-	Client/Main.cpp
-	Client/Parse.cpp
-	Client/Precache.cpp
-	Client/Predict.cpp
-	Client/Refresh.cpp
-	Client/Screen.cpp
-	Client/View.cpp
-	Client/UI/Demos.cpp
-	Client/UI/Menu.cpp
-	Client/UI/PlayerConfig.cpp
-	Client/UI/PlayerModels.cpp
-	Client/UI/Script.cpp
-	Client/UI/Servers.cpp
-	Client/UI/UI.cpp
-	Client/Sound/DirectMemoryAccess.cpp
-	Client/Sound/OpenAL.cpp
-	Client/Sound/Main.cpp
-	Client/Sound/Memory.cpp
-	Client/Sound/Mix.cpp
-	Client/Sound/OGG.cpp
-#	Client/Sound/QAL/fixed.c
-	Client/Sound/QAL/Dynamic.cpp
+	${PATH_SRC}/Client/ASCII.cpp
+	${PATH_SRC}/Client/Console.cpp
+	${PATH_SRC}/Client/Cinematic.cpp
+	${PATH_SRC}/Client/ClientGame.cpp
+	${PATH_SRC}/Client/CRC.cpp
+	${PATH_SRC}/Client/Demo.cpp
+	${PATH_SRC}/Client/Download.cpp
+	${PATH_SRC}/Client/Entities.cpp
+	${PATH_SRC}/Client/Input.cpp
+	${PATH_SRC}/Client/Keys.cpp
+	${PATH_SRC}/Client/Main.cpp
+	${PATH_SRC}/Client/Models.cpp
+	${PATH_SRC}/Client/Parse.cpp
+	${PATH_SRC}/Client/Precache.cpp
+	${PATH_SRC}/Client/Predict.cpp
+	${PATH_SRC}/Client/Refresh.cpp
+	${PATH_SRC}/Client/Screen.cpp
+	${PATH_SRC}/Client/Traces.cpp
+	${PATH_SRC}/Client/View.cpp
+	${PATH_SRC}/Client/World.cpp
+
+	${PATH_SRC}/Client/Entities/LocalEntities.cpp
+	${PATH_SRC}/Client/Entities/PacketEntities.cpp
+
+	${PATH_SRC}/Client/UI/Demos.cpp
+	${PATH_SRC}/Client/UI/Menu.cpp
+	${PATH_SRC}/Client/UI/PlayerConfig.cpp
+	${PATH_SRC}/Client/UI/PlayerModels.cpp
+	${PATH_SRC}/Client/UI/Script.cpp
+	${PATH_SRC}/Client/UI/Servers.cpp
+	${PATH_SRC}/Client/UI/UI.cpp
+
+	${PATH_SRC}/Client/Sound/DirectMemoryAccess.cpp
+	${PATH_SRC}/Client/Sound/OpenAL.cpp
+	${PATH_SRC}/Client/Sound/Main.cpp
+	${PATH_SRC}/Client/Sound/Memory.cpp
+	${PATH_SRC}/Client/Sound/Mix.cpp
+	${PATH_SRC}/Client/Sound/Ogg.cpp
+	
+	#${PATH_SRC}/Client/Sound/QAL/fixed.c
+	${PATH_SRC}/Client/Sound/QAL/Dynamic.cpp
 )
 # Required as a placeholder for certain Vulkan only related features.
 if (NOT CONFIG_VKPT_RENDERER AND CONFIG_GL_RENDERER)
 	set(SRC_CLIENT 
 		${SRC_CLIENT}
-		Client/NullGL.cpp
+	${PATH_SRC}/Client/NullGL.cpp
 	)
 endif()
 
 if (CONFIG_ENABLE_RMLUI)
-SET(SRC_CLIENT_RMLUI
-	Client/RmlUI/Interfaces/FileInterface.cpp
-	Client/RmlUI/Interfaces/FileInterface.h
-	Client/RmlUI/Interfaces/RenderInterface.cpp
-	Client/RmlUI/Interfaces/RenderInterface.h
-	Client/RmlUI/Interfaces/SystemInterface.cpp
-	Client/RmlUI/Interfaces/SystemInterface.h
-	Client/RmlUI/RmlUI.cpp
-	Client/RmlUI/RmlUI.h
-)
+	SET(SRC_CLIENT_RMLUI
+		${PATH_SRC}/Client/RmlUI/Interfaces/FileInterface.cpp
+		${PATH_SRC}/Client/RmlUI/Interfaces/FileInterface.h
+		${PATH_SRC}/Client/RmlUI/Interfaces/RenderInterface.cpp
+		${PATH_SRC}/Client/RmlUI/Interfaces/RenderInterface.h
+		${PATH_SRC}/Client/RmlUI/Interfaces/SystemInterface.cpp
+		${PATH_SRC}/Client/RmlUI/Interfaces/SystemInterface.h
+
+		${PATH_SRC}/Client/RmlUI/RmlUI.cpp
+		${PATH_SRC}/Client/RmlUI/RmlUI.h
+	)
 else()
-SET(SRC_CLIENT_RMLUI
-	Client/RmlUI/RmlUINull.cpp
-	Client/RmlUI/RmlUI.h
-)
+	SET(SRC_CLIENT_RMLUI
+		${PATH_SRC}/Client/RmlUI/RmlUINull.cpp
+		${PATH_SRC}/Client/RmlUI/RmlUI.h
+	)
 endif()
 
 SET(SRC_CLIENT_HTTP
-	Client/HTTP.cpp
+	${PATH_SRC}/Client/HTTP.cpp
 )
 SET(HEADERS_CLIENT
-	Client/Client.h
-	Client/UI/UI.h
-	Client/Sound/Sound.h
-	Client/Sound/QAL/Dynamic.h
-	Client/Sound/QAL/fixed.h
+	${PATH_SRC}/Client/Client.h
+	#${PATH_SRC}/Client/ClientGame.h
+	${PATH_SRC}/Client/Entities.h
+	${PATH_SRC}/Client/GameModule.h
+	${PATH_SRC}/Client/Input.h
+	${PATH_SRC}/Client/Models.h
+	${PATH_SRC}/Client/Keys.h
+	${PATH_SRC}/Client/Traces.h
+	${PATH_SRC}/Client/UI.h
+	${PATH_SRC}/Client/Video.h
+	${PATH_SRC}/Client/World.h
+
+	${PATH_SRC}/Client/Entities/LocalEntities.h
+	${PATH_SRC}/Client/Entities/PacketEntities.h
+
+	${PATH_SRC}/Client/UI/UI.h
+
+	${PATH_SRC}/Client/Sound/Sound.h
+	
+	${PATH_SRC}/Client/Sound/QAL/Dynamic.h
+	${PATH_SRC}/Client/Sound/QAL/Fixed.h
 )
 
 ###################### Server.
 SET(SRC_SERVER
-	Server/Commands.cpp
-	Server/Entities.cpp
-	Server/SVGame.cpp
-	Server/Init.cpp
-	Server/Main.cpp
+	${PATH_SRC}/Server/Commands.cpp
+	${PATH_SRC}/Server/Entities.cpp
+	${PATH_SRC}/Server/SVGame.cpp
+	${PATH_SRC}/Server/Init.cpp
+	${PATH_SRC}/Server/Main.cpp
+	${PATH_SRC}/Server/Models.cpp
+	${PATH_SRC}/Server/Send.cpp
+	${PATH_SRC}/Server/User.cpp
+	${PATH_SRC}/Server/World.cpp
 
-	Server/Send.cpp
-	Server/User.cpp
-	Server/World.cpp
-
-	Server/Save.cpp
+	${PATH_SRC}/Server/Save.cpp
 )
 SET(HEADERS_SERVER
-	Server/Server.h
+	${PATH_SRC}/Server/Server.h
 )
 
 ###################### Common.
-SET(SRC_COMMON
-	Common/Bsp.cpp
-	Common/Cmd.cpp
-	Common/CModel.cpp
-	Common/Common.cpp
-	Common/CVar.cpp
-	Common/Error.cpp
-	Common/Field.cpp
-	Common/Fifo.cpp
-	Common/Files.cpp
-	Common/MDFour.cpp
-	Common/Msg.cpp
-	Common/Prompt.cpp
-	Common/SizeBuffer.cpp
-	Common/Utilities.cpp
-	Common/Zone.cpp
 
-	Common/Hashes/Crc32.cpp
-
-	Common/Net/NetChan.cpp
-	Common/Net/Net.cpp
-
-	# These might have to go some day.
-	#Common/netq3/netchan.cpp
-	#Common/netq3/net.cpp
-)
-SET(HEADERS_COMMON
-	Common/Net/INetNToP.h
-	Common/Net/INetPToN.h
-	Common/Net/Win.h
-	
-	Common/Hashes/Crc32.h
-)
-
-###################### Format.
-#SET(SRC_FORMAT
-#)
-SET(HEADERS_COMMON
-	../inc/Format/Bsp.h
-	../inc/Format/Iqm.h
-	../inc/Format/Md2.h
-	../inc/Format/Md3.h
-	../inc/Format/Pak.h
-	../inc/Format/Pcx.h
-	../inc/Format/Sp2.h
-	../inc/Format/Wal.h
-)
 
 ###################### Refresh.
 SET(SRC_REFRESH
-	Refresh/images.cpp
-	Refresh/models.cpp
-	Refresh/model_iqm.cpp
-	Refresh/stb/stb.cpp
+	${PATH_SRC}/Refresh/images.cpp
+	${PATH_SRC}/Refresh/models.cpp
+	#${PATH_SRC}/Refresh/model_iqm.cpp
+	${PATH_SRC}/Refresh/stb/stb.cpp
 )
-
+SET(HEADERS_REFRESH
+	${PATH_SRC}/Refresh/Images.h
+	${PATH_SRC}/Refresh/Models.h
+	${PATH_SRC}/Refresh/Refresh.h
+)
 ###################### GL.
 SET(SRC_GL
-	Refresh/gl/draw.cpp
-	Refresh/gl/hq2x.cpp
-	Refresh/gl/images.cpp
-	Refresh/gl/main.cpp
-	Refresh/gl/mesh.cpp
-	Refresh/gl/models.cpp
-	Refresh/gl/sky.cpp
-	Refresh/gl/state.cpp
-	Refresh/gl/surf.cpp
-	Refresh/gl/tess.cpp
-	Refresh/gl/world.cpp
-	Refresh/gl/qgl/dynamic.cpp
-#	Refresh/gl/qgl/fixed.c
+	${PATH_SRC}/Refresh/gl/draw.cpp
+	${PATH_SRC}/Refresh/gl/hq2x.cpp
+	${PATH_SRC}/Refresh/gl/images.cpp
+	${PATH_SRC}/Refresh/gl/main.cpp
+	${PATH_SRC}/Refresh/gl/mesh.cpp
+	${PATH_SRC}/Refresh/gl/models.cpp
+	${PATH_SRC}/Refresh/gl/sky.cpp
+	${PATH_SRC}/Refresh/gl/state.cpp
+	${PATH_SRC}/Refresh/gl/surf.cpp
+	${PATH_SRC}/Refresh/gl/tess.cpp
+	${PATH_SRC}/Refresh/gl/world.cpp
+	${PATH_SRC}/Refresh/gl/qgl/dynamic.cpp
+#	${PATH_SRC}/Refresh/gl/qgl/fixed.c
 )
 SET(HEADERS_GL
-	Refresh/gl/arbfp.h
-	Refresh/gl/gl.h
+	${PATH_SRC}/Refresh/gl/arbfp.h
+	${PATH_SRC}/Refresh/gl/gl.h
 )
 
-###################### Shared Game Folder.
-SET(HEADERS_SHAREDGAME
-	../inc/SharedGame/PMove.h 
-	../inc/SharedGame/Protocol.h 
-	../inc/SharedGame/SharedGame.h 
-	../inc/SharedGame/SkeletalAnimation.h 
-)
-SET(SRC_SHAREDGAME
-	../src/SharedGame/PMove.cpp
-	../src/SharedGame/SkeletalAnimation.cpp
-)
 
-###################### Shared Folder.
-SET(HEADERS_SHARED
-	# Container lib.
-	../inc/Shared/Containers/IterableCArray.h
-
-	# Interfaces
-	../inc/Shared/Interfaces/IClientGameExports.h
-	../inc/Shared/Interfaces/IClientGameImports.h
-
-	# Math lib.
-	../inc/Shared/Math/color.h
-	../inc/Shared/Math/matrix3.h
-	../inc/Shared/Math/matrix4.h
-	../inc/Shared/Math/plane.h
-	../inc/Shared/Math/rectangle.h
-	../inc/Shared/Math/utilities.h
-	../inc/Shared/Math/vector2.h
-	../inc/Shared/Math/vector3.h
-	../inc/Shared/Math/vector4.h
-	../inc/Shared/Math/vector5.h
-	
-	# Other shared lib functionalities.
-	../inc/Shared/CLGame.h
-	../inc/Shared/CLTypes.h
-	../inc/Shared/Collision.h
-	../inc/Shared/Common.h
-	../inc/Shared/Config.h
-	../inc/Shared/Endian.h 
-	../inc/Shared/SVGame.h 
-	../inc/Shared/Keys.h 
-	../inc/Shared/List.h 
-	../inc/Shared/Math.h 
-	../inc/Shared/Messaging.h 
-	../inc/Shared/Platform.h
-	../inc/Shared/Refresh.h 
-	../inc/Shared/QString.h 
-	../inc/Shared/Strings.h
-	../inc/Shared/Shared.h 
-	../inc/Shared/TickRate.h 
-	../inc/Shared/UI.h 
-)
-SET(SRC_SHARED
-	Shared/Math/plane.cpp
-	Shared/Math/vector3.cpp
-
-	Shared/Math.cpp
-	Shared/shared.cpp
-)
-
-###################### UNIX Client Specific.
+#
+#	Unix
+#
 SET(SRC_UNIX
-	OS/Unix/Hunk.cpp
-	OS/Unix/System.cpp
-	OS/Unix/TTY.cpp
+	System/Unix/Hunk.cpp
+	System/Unix/System.cpp
+	System/Unix/TTY.cpp
+	System/SDL2/Time.cpp
 )
 SET(SRC_UNIX_CLIENT
-	OS/SDL2/Sound.cpp
-	OS/SDL2/Video.cpp
-	OS/SDL2/Time.cpp
+	System/SDL2/Sound.cpp
+	System/SDL2/Video.cpp
 )
 
-###################### Windows Client Specific.
+#
+#	Windows
+#
 SET(SRC_WINDOWS
-	OS/Windows/Debug.cpp
-	OS/Windows/Hunk.cpp
-	OS/Windows/System.cpp
+	System/Windows/Debug.cpp
+	System/Windows/Hunk.cpp
+	System/Windows/System.cpp
+
+	System/SDL2/Time.cpp
 )
 SET(SRC_WINDOWS_CLIENT
-	OS/Windows/Wave.cpp
-	OS/SDL2/Video.cpp
-	OS/SDL2/Time.cpp
+	#System/Windows/Wave.cpp
+	System/SDL2/Sound.cpp
+	System/SDL2/Video.cpp
 )
 SET(HEADERS_WINDOWS
-	OS/Windows/WGL.h
-	OS/Windows/GLImp.h
-	OS/Windows/Client.h
-	OS/Windows/Threads/Threads.h
+	System/Windows/WGL.h
+	System/Windows/GLImp.h
+	System/Windows/WinClient.h
+	System/Windows/Threads/Threads.h
 )
 
-###################### VKPT.
+
+
+#
+#	Vulkan Path Tracer
+#
 SET(SRC_VKPT
-	Refresh/vkpt/asvgf.cpp
-	Refresh/vkpt/bloom.cpp
-	Refresh/vkpt/bsp_mesh.cpp
-	Refresh/vkpt/cameras.cpp
-	Refresh/vkpt/conversion.cpp
-	Refresh/vkpt/draw.cpp
-	Refresh/vkpt/freecam.cpp
-	Refresh/vkpt/fog.cpp
-	Refresh/vkpt/fsr.cpp
-	Refresh/vkpt/main.cpp
-	Refresh/vkpt/material.cpp
-	Refresh/vkpt/matrix.cpp
-	Refresh/vkpt/mgpu.cpp
-	Refresh/vkpt/models.cpp
-	Refresh/vkpt/path_tracer.cpp
-	Refresh/vkpt/physical_sky.cpp
-	Refresh/vkpt/precomputed_sky.cpp
-	Refresh/vkpt/profiler.cpp
-	Refresh/vkpt/shadow_map.cpp
-	Refresh/vkpt/textures.cpp
-	Refresh/vkpt/tone_mapping.cpp
-	Refresh/vkpt/transparency.cpp
-	Refresh/vkpt/uniform_buffer.cpp
-	Refresh/vkpt/vertex_buffer.cpp
-	Refresh/vkpt/vk_util.cpp
-	Refresh/vkpt/buddy_allocator.cpp
-	Refresh/vkpt/device_memory_allocator.cpp
-	Refresh/vkpt/god_rays.cpp
+	${PATH_SRC}/Refresh/vkpt/asvgf.cpp
+	${PATH_SRC}/Refresh/vkpt/bloom.cpp
+	${PATH_SRC}/Refresh/vkpt/bsp_mesh.cpp
+	${PATH_SRC}/Refresh/vkpt/cameras.cpp
+	${PATH_SRC}/Refresh/vkpt/conversion.cpp
+	${PATH_SRC}/Refresh/vkpt/draw.cpp
+	${PATH_SRC}/Refresh/vkpt/freecam.cpp
+	${PATH_SRC}/Refresh/vkpt/fog.cpp
+	${PATH_SRC}/Refresh/vkpt/fsr.cpp
+	${PATH_SRC}/Refresh/vkpt/main.cpp
+	${PATH_SRC}/Refresh/vkpt/material.cpp
+	${PATH_SRC}/Refresh/vkpt/matrix.cpp
+	${PATH_SRC}/Refresh/vkpt/mgpu.cpp
+	${PATH_SRC}/Refresh/vkpt/models.cpp
+	${PATH_SRC}/Refresh/vkpt/path_tracer.cpp
+	${PATH_SRC}/Refresh/vkpt/physical_sky.cpp
+	${PATH_SRC}/Refresh/vkpt/precomputed_sky.cpp
+	${PATH_SRC}/Refresh/vkpt/profiler.cpp
+	${PATH_SRC}/Refresh/vkpt/shadow_map.cpp
+	${PATH_SRC}/Refresh/vkpt/textures.cpp
+	${PATH_SRC}/Refresh/vkpt/tone_mapping.cpp
+	${PATH_SRC}/Refresh/vkpt/transparency.cpp
+	${PATH_SRC}/Refresh/vkpt/uniform_buffer.cpp
+	${PATH_SRC}/Refresh/vkpt/vertex_buffer.cpp
+	${PATH_SRC}/Refresh/vkpt/vk_util.cpp
+	${PATH_SRC}/Refresh/vkpt/buddy_allocator.cpp
+	${PATH_SRC}/Refresh/vkpt/device_memory_allocator.cpp
+	${PATH_SRC}/Refresh/vkpt/god_rays.cpp
 )
 SET(HEADERS_VKPT
-	Refresh/vkpt/fsr/ffx_a.h
-	Refresh/vkpt/fsr/ffx_fsr1.h
+	${PATH_SRC}/Refresh/vkpt/fsr/ffx_a.h
+	${PATH_SRC}/Refresh/vkpt/fsr/ffx_fsr1.h
 
-    Refresh/vkpt/shader/constants.h
-    Refresh/vkpt/shader/global_textures.h
-    Refresh/vkpt/shader/global_ubo.h
-    Refresh/vkpt/shader/god_rays_shared.h
-    Refresh/vkpt/shader/light_lists.h
-    Refresh/vkpt/shader/path_tracer_hit_shaders.h
-    Refresh/vkpt/shader/path_tracer_rgen.h
-    Refresh/vkpt/shader/path_tracer.h
-    Refresh/vkpt/shader/sky.h
-    Refresh/vkpt/shader/vertex_buffer.h
+    ${PATH_SRC}/Refresh/vkpt/shader/constants.h
+    ${PATH_SRC}/Refresh/vkpt/shader/global_textures.h
+    ${PATH_SRC}/Refresh/vkpt/shader/global_ubo.h
+    ${PATH_SRC}/Refresh/vkpt/shader/god_rays_shared.h
+    ${PATH_SRC}/Refresh/vkpt/shader/light_lists.h
+    ${PATH_SRC}/Refresh/vkpt/shader/path_tracer_hit_shaders.h
+    ${PATH_SRC}/Refresh/vkpt/shader/path_tracer_rgen.h
+    ${PATH_SRC}/Refresh/vkpt/shader/path_tracer.h
+    ${PATH_SRC}/Refresh/vkpt/shader/sky.h
+    ${PATH_SRC}/Refresh/vkpt/shader/vertex_buffer.h
 
-	Refresh/vkpt/vkpt.h
-	Refresh/vkpt/vk_util.h
-	Refresh/vkpt/buddy_allocator.h
-	Refresh/vkpt/cameras.h
-	Refresh/vkpt/conversion.h
-	Refresh/vkpt/device_memory_allocator.h
-	Refresh/vkpt/fog.h
-	Refresh/vkpt/material.h
-	Refresh/vkpt/physical_sky.h
-	Refresh/vkpt/precomputed_sky.h
+	${PATH_SRC}/Refresh/vkpt/vkpt.h
+	${PATH_SRC}/Refresh/vkpt/vk_util.h
+	${PATH_SRC}/Refresh/vkpt/buddy_allocator.h
+	${PATH_SRC}/Refresh/vkpt/cameras.h
+	${PATH_SRC}/Refresh/vkpt/conversion.h
+	${PATH_SRC}/Refresh/vkpt/device_memory_allocator.h
+	${PATH_SRC}/Refresh/vkpt/fog.h
+	${PATH_SRC}/Refresh/vkpt/material.h
+	${PATH_SRC}/Refresh/vkpt/physical_sky.h
+	${PATH_SRC}/Refresh/vkpt/precomputed_sky.h
 )
 
-###################### Vulkan Shaders.
+#
+#	Vulkan Path Tracer Shaders
+#
 set(SRC_SHADERS
 	Refresh/vkpt/shader/animate_materials.comp
 	Refresh/vkpt/shader/god_rays_filter.comp
@@ -599,7 +411,7 @@ set(SRC_SHADERS
 	Refresh/vkpt/shader/asvgf_taau.comp
 	Refresh/vkpt/shader/asvgf_temporal.comp
 	Refresh/vkpt/shader/instance_geometry.comp
-	refresh/vkpt/shader/normalize_normal_map.comp
+	Refresh/vkpt/shader/normalize_normal_map.comp
 	Refresh/vkpt/shader/tone_mapping_histogram.comp
 	Refresh/vkpt/shader/tone_mapping_curve.comp
     Refresh/vkpt/shader/tone_mapping_apply.comp
@@ -616,7 +428,6 @@ set(SRC_SHADERS
 	Refresh/vkpt/shader/fsr_rcas_fp16.comp
 	Refresh/vkpt/shader/fsr_rcas_fp32.comp
 )
-
 set(SRC_RT_SHADERS
 	Refresh/vkpt/shader/primary_rays.rgen
 	Refresh/vkpt/shader/direct_lighting.rgen
@@ -632,10 +443,12 @@ set(SRC_RT_SHADERS
 	Refresh/vkpt/shader/reflect_refract.rgen
 )
 
-# Check for a shader compiler.
+#
+#	Check for a shader compiler.
+#
 if (CONFIG_VKPT_RENDERER)
 	IF(IS_64_BIT)
-		include(../cmake/compileShaders.cmake)
+		include(${CMAKE_SOURCE_DIR}/cmake/compileShaders.cmake)
 
 		foreach(s ${SRC_RT_SHADERS})
 			get_filename_component(shader_name ${s} NAME)
@@ -658,12 +471,15 @@ if (CONFIG_VKPT_RENDERER)
 	ENDIF()
 endif()
 
+#
 # Embed version number
+#
 ADD_DEFINITIONS(-DVERSION_MAJOR=${POLYHEDRON_VERSION_MAJOR})
 ADD_DEFINITIONS(-DVERSION_MINOR=${POLYHEDRON_VERSION_MINOR})
 ADD_DEFINITIONS(-DVERSION_POINT=${POLYHEDRON_VERSION_POINT})
 ADD_DEFINITIONS(-DVERSION_SHA=${POLYHEDRON_VERSION_SHA})
 ADD_DEFINITIONS(-DVERSION_BRANCH=${POLYHEDRON_VERSION_BRANCH})
+
 
 ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB)
 
@@ -671,66 +487,99 @@ IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
-# Optional build target.
+
+#
+#	ServerGame Module
+#
 if (CONFIG_BUILD_SV_GAME)
-	# Used for sharedgame code(such as pmove), so we can ifdef certain parts specific to client or server.	
-	ADD_DEFINITIONS(-DSHAREDGAME_SERVER=1)
-	# Add library.
-	ADD_LIBRARY(svgame SHARED ${SRC_SVGAME} ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-	# Add shared game include directory.
-	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ${HEADERS_SHAREDGAME}/)
+	add_subdirectory(Game/Server)
 endif()
 
-# Optional build target.
+
+#
+#	ClientGame Module
+#
 if (CONFIG_BUILD_CL_GAME)
-	# Used for sharedgame code(such as pmove), so we can ifdef certain parts specific to client or server.	
-	ADD_DEFINITIONS(-DSHAREDGAME_CLIENT=1)
-	# Add library.
-	ADD_LIBRARY(clgame SHARED ${SRC_CLGAME} ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-	# Add shared game include directory.
-	TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ${HEADERS_SHAREDGAME}/)
+	add_subdirectory(Game/Client)
 endif()
 
+
+#
+#	SharedGame Module
+#
+if (CONFIG_BUILD_CL_GAME OR CONFIG_BUILD_SV_GAME)
+	add_subdirectory(Game/Shared)
+endif()
+
+
+#
+#	Add Executable (client, server)
+#
 IF(WIN32)
-ADD_EXECUTABLE(client WIN32 
-	${SRC_CLIENT} ${HEADERS_CLIENT} 
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_REFRESH} ${SRC_SHADERS} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
-	${SRC_SERVER} ${HEADERS_SERVER}
-	OS/Resources/polyhedron.rc
-)
-ADD_EXECUTABLE(server 
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_WINDOWS} ${HEADERS_WINDOWS}
-	${SRC_SERVER} ${HEADERS_SERVER}
-	client/null.cpp
-	#OS/sdl2/time.cpp
-	OS/Resources/polyhedron_dedicated.rc
-)
+	#
+	#
+	#
+	ADD_EXECUTABLE(client WIN32 
+		${SRC_CLIENT} ${HEADERS_CLIENT} 
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_REFRESH} ${SRC_SHADERS} ${HEADERS_REFRESH}
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
+		${SRC_SERVER} ${HEADERS_SERVER}
+		System/Resources/polyhedron.rc
+	)
+
+	#
+	#	Win32 Server.
+	#
+	ADD_EXECUTABLE(server 
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_WINDOWS} ${HEADERS_WINDOWS}
+		${SRC_SERVER} ${HEADERS_SERVER}
+
+		${PATH_SRC}/Client/null.cpp
+
+		#System/sdl2/time.cpp
+		System/Resources/polyhedron_dedicated.rc
+	)
 ELSE()
-ADD_EXECUTABLE(client
-	${SRC_CLIENT} ${HEADERS_CLIENT} 
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_REFRESH} ${SRC_SHADERS} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_UNIX} ${SRC_UNIX_CLIENT}
-	${SRC_SERVER} ${HEADERS_SERVER}
-)
-ADD_EXECUTABLE(server
-	${SRC_COMMON} ${HEADERS_COMMON} 
-	${SRC_SHARED} ${HEADERS_SHARED}
-	${SRC_UNIX}
-	${SRC_SERVER} ${HEADERS_SERVER}
-	client/null.c
-)
+	#
+	#	Unix Client.
+	#
+	ADD_EXECUTABLE(client
+		${SRC_CLIENT} ${HEADERS_CLIENT} 
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_REFRESH} ${SRC_SHADERS} 
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_UNIX} ${SRC_UNIX_CLIENT}
+		${SRC_SERVER} ${HEADERS_SERVER}
+	)
+
+	#
+	#	Unix Server.
+	#
+	ADD_EXECUTABLE(server
+		${SRC_COMMON} ${HEADERS_COMMON} 
+		${SRC_SHARED} ${HEADERS_SHARED}
+		${SRC_UNIX}
+		${SRC_SERVER} ${HEADERS_SERVER}
+		
+		${PATH_SRC}/Client/Null.cpp
+	)
 ENDIF()
 
-TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_SERVER=1 USE_CLIENT=1)
-TARGET_COMPILE_DEFINITIONS(server PRIVATE USE_SERVER=1 USE_CLIENT=0)
 
+#
+#	Target Compile Definitions.
+#
+TARGET_COMPILE_DEFINITIONS(client PRIVATE cxx_std_20 USE_SERVER=1 USE_CLIENT=1)
+TARGET_COMPILE_DEFINITIONS(server PRIVATE cxx_std_20 USE_SERVER=1 USE_CLIENT=0)
+
+
+#
+#	CURL Build Configuration.
+#
 IF(CONFIG_USE_CURL)
 	ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB)
 
@@ -739,6 +588,11 @@ IF(CONFIG_USE_CURL)
 	TARGET_LINK_LIBRARIES(client libcurl)
 ENDIF()
 
+
+
+#
+#	RMLUI Build Configuration
+#
 IF(CONFIG_ENABLE_RMLUI)
  	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ${CMAKE_SOURCE_DIR}/extern/Nac-RmlUi/Include/)
@@ -749,15 +603,26 @@ ELSE()
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 ENDIF()
 
+
+
+#
+#	GLSLang Compiler
+#
 if (GLSLANG_COMPILER AND CONFIG_VKPT_RENDERER)
 	add_dependencies(client shaders)
 endif()
 
+#
+#	GL1.x Renderer Build Configuration
+#
 IF (CONFIG_GL_RENDERER)
 	TARGET_SOURCES(client PRIVATE ${SRC_GL} ${HEADERS_GL})
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE REF_GL=1 USE_REF=1)
 ENDIF()
 
+#
+#	VKPT Renderer Build Configuration
+#
 IF (CONFIG_VKPT_RENDERER)
 	TARGET_SOURCES(client PRIVATE ${SRC_VKPT} ${HEADERS_VKPT})
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ${CMAKE_SOURCE_DIR}/extern/Vulkan-Headers/include)
@@ -776,45 +641,51 @@ IF (CONFIG_VKPT_RENDERER)
 	ENDIF()
 ENDIF()
 
+#
+#	Client Link Libraries.
+#
 TARGET_LINK_LIBRARIES(client stb)
 TARGET_LINK_LIBRARIES(client tinyobjloader)
-#TARGET_LINK_LIBRARIES(server enet)
 
+
+
+#
+#	SOURCE GROUPING
+#
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_COMMON})
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_COMMON})
+#SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_COMMON})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_CLIENT})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_CLIENT})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SERVER})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SERVER})
 
-# Old SVGame source grouping - it just bundled *everything* into SVGame/sources and SVGame/headers, eugh -Admer
-#SOURCE_GROUP("svgame" FILES ${SRC_SVGAME})
-#SOURCE_GROUP("svgame" FILES ${HEADERS_SVGAME})
-
 # Source and header groups
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SVGAME} )
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SVGAME} )
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHAREDGAME} )
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SHAREDGAME} )
-
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_REFRESH} ${SRC_VKPT})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_VKPT})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHADERS})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SHARED})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SHARED})
+if (WIN32)
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_WINDOWS})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_WINDOWS})
+else()
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_UNIX})
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_UNIX})
-
+endif()
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES client/null.cpp )
 
+
+
+#
+#	WIN32 SPECIFICS
+#
 IF (WIN32)
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
 	TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../VC/inc)
-	TARGET_SOURCES(svgame PRIVATE OS/Resources/basepoly_sv.rc)
-	TARGET_SOURCES(clgame PRIVATE OS/Resources/basepoly_cl.rc)
+	TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../VC/inc)
+	TARGET_SOURCES(svgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_sv.rc)
+	TARGET_SOURCES(clgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_cl.rc)
 
 	TARGET_LINK_LIBRARIES(client winmm ws2_32)
 	TARGET_LINK_LIBRARIES(server winmm ws2_32)
@@ -825,36 +696,22 @@ IF (WIN32)
 	# macro redefinition, deprecation
 	target_compile_options(client PRIVATE /wd4005 /wd4996)
 	target_compile_options(server PRIVATE /wd4005 /wd4996)
-	target_compile_options(svgame PRIVATE /wd4005 /wd4996)
 
     ## Group the resource files too, so they don't end up in the ugly "Source Files" folder in VS
     SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES 
-        OS/Resources/polyhedron.rc 
-        OS/Resources/polyhedron.rc )
+        System/Resources/polyhedron.rc 
+        System/Resources/polyhedron.rc )
 ENDIF()
 
-TARGET_INCLUDE_DIRECTORIES(svgame PRIVATE ../inc)
-TARGET_INCLUDE_DIRECTORIES(clgame PRIVATE ../inc)
 
-TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
+
+#
+#	Client Build Configuration.
+#
+TARGET_INCLUDE_DIRECTORIES(client PUBLIC ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
-TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
-TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
-
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "/extern/stb/")
-
-# WATISDEZE: Do we still need this?
-# Use dynamic zlib for steam runtime
-# if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
-#     TARGET_LINK_LIBRARIES(client SDL2main SDL2-static z)
-#     TARGET_LINK_LIBRARIES(server SDL2main SDL2-static z)
-# else()
-# TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
-# TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
-# endif()
 TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
-TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
-
 SET_TARGET_PROPERTIES(client
     PROPERTIES
     OUTPUT_NAME "Polyhedron"
@@ -866,6 +723,14 @@ SET_TARGET_PROPERTIES(client
     DEBUG_POSTFIX ""
 )
 
+
+#
+#	Server Build Configuration.
+#
+#include_directories()
+TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
+TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
 SET_TARGET_PROPERTIES(server
     PROPERTIES
     OUTPUT_NAME "Polyhedron_Dedicated"
@@ -876,109 +741,3 @@ SET_TARGET_PROPERTIES(server
     RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin"
     DEBUG_POSTFIX ""
 )
-
-# Client Game
-if (CONFIG_BUILD_CL_GAME)
-	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-	SET_TARGET_PROPERTIES(clgame
-		PROPERTIES
-		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		PREFIX ""
-		DEBUG_POSTFIX ""
-	)
-endif()
-
-# Server Game
-if (CONFIG_BUILD_SV_GAME)
-	# Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
-	SET_TARGET_PROPERTIES(svgame
-		PROPERTIES
-		LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/bin/basepoly"
-		PREFIX ""
-		DEBUG_POSTFIX ""
-	)
-endif()
-
-# WATISDEZE: Do we still need this?
-# IF(CONFIG_LINUX_PACKAGING_SUPPORT)
-#     # Put the real game binary in /usr/share so we can have a wrapper in /usr/bin
-#     INSTALL(TARGETS client DESTINATION share/quake2rtx/bin COMPONENT shareware)
-#     INSTALL(TARGETS server DESTINATION games COMPONENT shareware)
-
-#     # Compress NVIDIA custom content
-#     INSTALL(CODE "set(SOURCE \"${CMAKE_SOURCE_DIR}\")"
-#         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_media.cmake"
-#         SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_shaders.cmake"
-#         COMPONENT shareware)
-#     INSTALL(TARGETS svgame DESTINATION share/quake2rtx/basenac COMPONENT shareware)
-
-#     # Package data files, including the shareware pak0 for demo levels
-#     set (SHAREWARE_DATA_FILES_LIST
-#         "${CMAKE_SOURCE_DIR}/basenac/q2rtx_media.pkz"
-#         "${CMAKE_SOURCE_DIR}/basenac/shaders.pkz"
-#         "${CMAKE_SOURCE_DIR}/basenac/blue_noise.pkz"
-#         "${CMAKE_SOURCE_DIR}/basenac/shareware/pak0.pak"
-#     )
-#     INSTALL(FILES
-#         ${SHAREWARE_DATA_FILES_LIST}
-#         DESTINATION share/quake2rtx/basenac
-#         COMPONENT shareware)
-
-#     # Package shareware player model
-#     INSTALL(DIRECTORY
-#         "${CMAKE_SOURCE_DIR}/basenac/shareware/players"
-#         DESTINATION share/quake2rtx/basenac
-#         COMPONENT shareware)
-
-#     # Package the legal and info files
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/license.txt"
-#         "${CMAKE_SOURCE_DIR}/notice.txt"
-#         "${CMAKE_SOURCE_DIR}/readme.md"
-#         "${CMAKE_SOURCE_DIR}/changelog.md"
-#         DESTINATION share/quake2rtx/
-#         COMPONENT shareware)
-
-#     # Package the icon/desktop file
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/q2rtx.desktop"
-#         DESTINATION share/applications/
-#         COMPONENT shareware)
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/q2rtx.png"
-#         DESTINATION share/pixmaps/
-#         COMPONENT shareware)
-
-#     # Install Client Wrapper
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/q2rtx.sh"
-#         DESTINATION games/
-#         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-#         COMPONENT shareware
-# 	RENAME q2rtx)
-
-#     # Install PAK file finder
-#     INSTALL(FILES
-#         "${CMAKE_SOURCE_DIR}/setup/find-retail-paks.sh"
-#         DESTINATION share/quake2rtx/bin
-#         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-#         COMPONENT shareware)
-# ENDIF()

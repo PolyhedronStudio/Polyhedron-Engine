@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
+#include "Shared.h"
 
 //#if USE_CLIENT || CGAME_INCLUDE
 
@@ -32,26 +32,30 @@ void vectoangles2(const vec3_t value1, vec3_t angles)
 
     if (value1[1] == 0 && value1[0] == 0) {
         yaw = 0;
-        if (value1[2] > 0)
+        if (value1[2] > 0) {
             pitch = 90;
-        else
+        } else {
             pitch = 270;
+        }
     }
     else {
-        if (value1[0])
-            yaw = std::atan2f(value1[1], value1[0]) * 180.f / M_PI;
-        else if (value1[1] > 0)
+        if (value1[0]) {
+            yaw = atan2f(value1[1], value1[0]) * 180.f / M_PI;
+        } else if (value1[1] > 0) {
             yaw = 90;
-        else
+        } else {
             yaw = 270;
+        }
 
-        if (yaw < 0)
+        if (yaw < 0) {
             yaw += 360;
+        }
 
-        forward = std::sqrtf(value1[0] * value1[0] + value1[1] * value1[1]);
-        pitch = std::atan2f(value1[2], forward) * 180.f / M_PI;
-        if (pitch < 0)
+        forward = sqrtf(value1[0] * value1[0] + value1[1] * value1[1]);
+        pitch = atan2f(value1[2], forward) * 180.f / M_PI;
+        if (pitch < 0) {
             pitch += 360;
+        }
     }
 
     angles[vec3_t::Pitch] = -pitch;
@@ -77,7 +81,10 @@ void MakeNormalVectors(const vec3_t& forward, vec3_t& right, vec3_t& up)
 
 //#endif  // USE_CLIENT
 
-const vec3_t bytedirs[NUMVERTEXNORMALS] = {
+/**
+*	@brief Normalized Direction Vector Look-Up Table. Used for ByteToDir and DirToByte for finding the best matching normal.
+**/
+const vec3_t normalizedByteDirectionTable[NUMVERTEXNORMALS] = {
     {-0.525731, 0.000000, 0.850651},
     {-0.442863, 0.238856, 0.864188},
     {-0.295242, 0.000000, 0.955423},
@@ -242,21 +249,24 @@ const vec3_t bytedirs[NUMVERTEXNORMALS] = {
     {-0.688191, -0.587785, -0.425325},
 };
 
-int DirToByte(const vec3_t &dir)
-{
-    int     i, best;
-    float   d, bestd;
 
-    if (!dir) {
+/**
+*	@return The byteIndex of the normalized direction vector lookup table that closest matches the direction vector.
+**/
+int32_t DirectionToByte(const vec3_t &dir) {
+	// Return.
+    if (!dir.x && !dir.y && !dir.z) {
         return 0;
     }
 
-    bestd = 0;
-    best = 0;
-    for (i = 0; i < NUMVERTEXNORMALS; i++) {
-        d = DotProduct(dir, bytedirs[i]);
-        if (d > bestd) {
-            bestd = d;
+	// The best matching dot product.
+    float bestDot = 0;
+	// Index of the normal matching said dot product.
+    int32_t best = 0;
+    for (int32_t i = 0; i < NUMVERTEXNORMALS; i++) {
+        float dot = vec3_dot(dir, normalizedByteDirectionTable[i]);
+        if (dot > bestDot) {
+            bestDot = dot;
             best = i;
         }
     }
@@ -264,13 +274,14 @@ int DirToByte(const vec3_t &dir)
     return best;
 }
 
-#if 0
-void ByteToDir(int index, vec3_t dir)
-{
-    if (index < 0 || index >= NUMVERTEXNORMALS) {
-        Com_Error(ERR_FATAL, "ByteToDir: illegal index");
-    }
-
-    VectorCopy(bytedirs[index], dir);
+/**
+*	@brief	Gets the direction vector to the normalized direction vector table, positioned at 'byteindex'.
+**/
+void ByteToDirection(int32_t byteIndex, vec3_t &direction) {
+    if (byteIndex < 0 || byteIndex >= NUMVERTEXNORMALS) {
+        direction = vec3_zero();
+	}
+	else {
+		direction = normalizedByteDirectionTable[byteIndex];
+	}
 }
-#endif

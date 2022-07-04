@@ -20,18 +20,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // bsp.c -- model loading
 
-#include "Shared/Shared.h"
-#include "Shared/list.h"
-#include "Common/CVar.h"
-#include "Common/Cmd.h"
-#include "Common/Common.h"
-#include "Common/Files.h"
-#include "Common/Bsp.h"
-#include "Common/Utilities.h"
-#include "Common/MDFour.h"
-#include "System/Hunk.h"
+#include "../Shared/Shared.h"
+#include "../Shared/List.h"
+#include "CVar.h"
+#include "CollisionModel.h"
+#include "Cmd.h"
+#include "Common.h"
+#include "Files.h"
+#include "Bsp.h"
+#include "Utilities.h"
+#include "MDFour.h"
+#include "../System/Hunk.h"
 
-extern mtexinfo_t nulltexinfo;
+//extern mtexinfo_t nulltexinfo;
+extern CollisionModel collisionModel;
 
 static cvar_t *map_visibility_patch;
 
@@ -170,11 +172,11 @@ LOAD(Texinfo)
 LOAD(Planes)
 {
     dplane_t    *in;
-    cplane_t    *out;
+    CollisionPlane    *out;
     int         i, j;
 
     bsp->numplanes = count;
-    bsp->planes = (cplane_t*)ALLOC(sizeof(*out) * count); // CPP: Cast
+    bsp->planes = (CollisionPlane*)ALLOC(sizeof(*out) * count); // CPP: Cast
 
     in = (dplane_t*)base; // CPP: Cast
     out = bsp->planes;
@@ -211,7 +213,7 @@ LOAD(BrushSides)
         out->plane = bsp->planes + planenum;
         texinfo = LittleShort(in->texinfo);
         if (texinfo == (uint16_t)-1) {
-            out->texinfo = &nulltexinfo;
+            out->texinfo = &collisionModel.nullTextureInfo;
         } else {
             if (texinfo >= bsp->numtexinfo) {
                 DEBUG("bad texinfo");
@@ -244,7 +246,7 @@ LOAD_EXT(BrushSides) {
         out->plane = bsp->planes + planenum;
         texinfo = LittleLong(in->texinfo);
         if (texinfo == (uint32_t)-1) {
-            out->texinfo = &nulltexinfo;
+            out->texinfo = &collisionModel.nullTextureInfo;
         }
         else {
             if (texinfo >= bsp->numtexinfo) {
@@ -727,8 +729,8 @@ LOAD(Leafs)
 #endif
     }
 
-    if (bsp->leafs[0].contents != CONTENTS_SOLID) {
-        DEBUG("map leaf 0 is not CONTENTS_SOLID");
+    if (bsp->leafs[0].contents != BrushContents::Solid) {
+        DEBUG("map leaf 0 is not BrushContents::Solid");
         return Q_ERR_INVALID_FORMAT;
     }
 
@@ -815,8 +817,8 @@ LOAD_EXT(Leafs) {
 #endif
     }
 
-    if (bsp->leafs[0].contents != CONTENTS_SOLID) {
-        DEBUG("map leaf 0 is not CONTENTS_SOLID");
+    if (bsp->leafs[0].contents != BrushContents::Solid) {
+        DEBUG("map leaf 0 is not BrushContents::Solid");
         return Q_ERR_INVALID_FORMAT;
     }
 
@@ -881,8 +883,8 @@ LOAD(Nodes)
         out->numfaces = numfaces;
 
         for (j = 0; j < 3; j++) {
-            out->mins[j] = (int16_t)LittleShort(in->mins[j]);
-            out->maxs[j] = (int16_t)LittleShort(in->maxs[j]);
+            out->bounds.mins[j] = (int16_t)LittleShort(in->mins[j]);
+            out->bounds.maxs[j] = (int16_t)LittleShort(in->maxs[j]);
         }
 
         out->parent = NULL;
@@ -951,8 +953,8 @@ LOAD_EXT(Nodes) {
         out->numfaces = numfaces;
 
         for (j = 0; j < 3; j++) {
-            out->mins[j] = LittleFloat(in->mins[j]);
-            out->maxs[j] = LittleFloat(in->maxs[j]);
+            out->bounds.mins[j] = LittleFloat(in->mins[j]);
+            out->bounds.maxs[j] = LittleFloat(in->maxs[j]);
         }
 
         out->parent = NULL;
@@ -1107,7 +1109,7 @@ typedef struct {
 static const lump_info_t bsp_lumps[] = {
     L(Visibility,   VISIBILITY,     byte,           byte),
     L(Texinfo,      TEXINFO,        dtexinfo_t,     mtexinfo_t),
-    L(Planes,       PLANES,         dplane_t,       cplane_t),
+    L(Planes,       PLANES,         dplane_t,       CollisionPlane),
     L(BrushSides,   BRUSHSIDES,     dbrushside_t,   mbrushside_t),
     L(Brushes,      BRUSHES,        dbrush_t,       mbrush_t),
     L(LeafBrushes,  LEAFBRUSHES,    uint16_t,       mbrush_t *),
@@ -1140,7 +1142,7 @@ static const lump_info_t bsp_lumps[] = {
 static const lump_info_t qbsp_lumps[] = {
     LS(Visibility,  VISIBILITY,     byte,           byte),
     LS(Texinfo,     TEXINFO,        dtexinfo_t,     mtexinfo_t),
-    LS(Planes,      PLANES,         dplane_t,       cplane_t),
+    LS(Planes,      PLANES,         dplane_t,       CollisionPlane),
     L(BrushSides,   BRUSHSIDES,     dbrushside_qbsp_t, mbrushside_t),
     LS(Brushes,     BRUSHES,        dbrush_t,       mbrush_t),
     L(LeafBrushes,  LEAFBRUSHES,    uint32_t,       mbrush_t*),
@@ -1309,7 +1311,7 @@ void BSP_Free(bsp_t *bsp)
         return;
     }
     if (bsp->refcount <= 0) {
-        Com_Error(ERR_FATAL, "%s: negative refcount", __func__);
+        Com_Error(ErrorType::Fatal, "%s: negative refcount", __func__);
     }
     if (--bsp->refcount == 0) {
 		if (bsp->pvs2_matrix)
@@ -1556,7 +1558,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 #endif
 
     if (!name || !bsp_p)
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
 
     *bsp_p = NULL;
 
@@ -1824,7 +1826,7 @@ byte *BSP_ClusterVis(bsp_t *bsp, byte *mask, int cluster, int vis)
         return (byte*)memset(mask, 0, bsp->visrowsize); // CPP: Cast
     }
     if (cluster < 0 || cluster >= bsp->vis->numclusters) {
-        Com_Error(ERR_DROP, "%s: bad cluster", __func__);
+        Com_Error(ErrorType::Drop, "%s: bad cluster", __func__);
     }
 
 	if (vis == DVIS_PVS2)
@@ -1937,14 +1939,14 @@ mmodel_t *BSP_InlineModel(bsp_t *bsp, const char *name)
     int     num;
 
     if (!bsp || !name) {
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Error(ErrorType::Drop, "%s: NULL", __func__);
     }
     if (name[0] != '*') {
-        Com_Error(ERR_DROP, "%s: bad name: %s", __func__, name);
+        Com_Error(ErrorType::Drop, "%s: bad name: %s", __func__, name);
     }
     num = atoi(name + 1);
     if (num < 1 || num >= bsp->nummodels) {
-        Com_Error(ERR_DROP, "%s: bad number: %d", __func__, num);
+        Com_Error(ErrorType::Drop, "%s: bad number: %d", __func__, num);
     }
 
     return &bsp->models[num];

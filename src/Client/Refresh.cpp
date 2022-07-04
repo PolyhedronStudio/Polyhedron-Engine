@@ -25,8 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client.h"
 #include "Client/GameModule.h"
 
-#include "refresh/images.h"
-#include "refresh/models.h"
+#include "Refresh/Images.h"
+#include "Refresh/Models.h"
 
 // Console variables that we need to access from this module
 cvar_t      *vid_rtx;
@@ -41,8 +41,6 @@ cvar_t      *vid_displaylist;
 // Original comment: Leftover from the q2rtx code, this variable maintains the sound effect parsing parameters...
 snd_params_t    snd;
 
-// used in gl and vkpt renderers
-int registration_sequence; // CPP: Extern
 
 #define MODE_GEOMETRY   1
 #define MODE_FULLSCREEN 2
@@ -310,7 +308,7 @@ void CL_InitRefresh(void)
 
     modelist = VID_GetDefaultModeList();
     if (!modelist) {
-        Com_Error(ERR_FATAL, "Couldn't initialize refresh: %s", Com_GetLastError());
+        Com_Error(ErrorType::Fatal, "Couldn't initialize refresh: %s", Com_GetLastError());
     }
 
     // Create the video variables so we know how to start the graphics drivers
@@ -352,7 +350,7 @@ void CL_InitRefresh(void)
 #endif
 
     if (!R_Init(true)) {
-        Com_Error(ERR_FATAL, "Couldn't initialize refresh: %s", Com_GetLastError());
+        Com_Error(ErrorType::Fatal, "Couldn't initialize refresh: %s", Com_GetLastError());
     }
 
     cls.ref_initialized = true;
@@ -372,9 +370,6 @@ void CL_InitRefresh(void)
 
     // Load client screen media first.
     SCR_RegisterMedia();
-
-    // PH: Inform the CG Module about the registration of media.
-    CL_GM_LoadScreenMedia();
 
     // Register the rest.
     UI_Init();
@@ -454,11 +449,11 @@ void(*IMG_Load)(image_t *image, byte *pic) = NULL;
 byte* (*IMG_ReadPixels)(int *width, int *height, int *rowbytes) = NULL;
 float* (*IMG_ReadPixelsHDR)(int* width, int* height) = NULL;
 
-qerror_t(*MOD_LoadMD2)(model_t* model, const void* rawdata, size_t length, const char* mod_name) = NULL;
+qerror_t(*MOD_LoadMD2)(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name) = NULL;
 #if USE_MD3
-qerror_t(*MOD_LoadMD3)(model_t* model, const void* rawdata, size_t length, const char* mod_name) = NULL;
+qerror_t(*MOD_LoadMD3)(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name) = NULL;
 #endif
-qerror_t(*MOD_LoadIQM)(model_t* model, const void* rawdata, size_t length, const char* mod_name) = NULL;
+qerror_t(*MOD_LoadIQM)(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name) = NULL;
 void(*MOD_Reference)(model_t* model) = NULL;
 
 float R_ClampScale(cvar_t *var)

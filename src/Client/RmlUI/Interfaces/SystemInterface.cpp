@@ -7,7 +7,7 @@
 // RmlUI PH System Interface implementation.
 //
 
-#include "../librmlui.h"
+#include "../LibRmlUI.h"
 
 // Client includes.
 #include "../../client.h"
@@ -15,7 +15,7 @@
 #include "client/gamemodule.h"
 
 // RmlUI includes.
-#include "../rmlui.h"
+#include "../RmlUI"
 
 /// Get the number of seconds elapsed since the start of the application
 /// @returns Seconds elapsed

@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 
 //
 //===============
@@ -30,14 +30,14 @@ void AngleVectors(const vec3_t& angles, vec3_t* forward, vec3_t* right, vec3_t* 
     float        sr, sp, sy, cr, cp, cy;
 
     angle = angles.xyz[vec3_t::Yaw] * (M_PI * 2 / 360);
-    sy = std::sinf(angle);
-    cy = std::cosf(angle);
+    sy = sinf(angle);
+    cy = cosf(angle);
     angle = angles.xyz[vec3_t::Pitch] * (M_PI * 2 / 360);
-    sp = std::sinf(angle);
-    cp = std::cosf(angle);
+    sp = sinf(angle);
+    cp = cosf(angle);
     angle = angles.xyz[vec3_t::Roll] * (M_PI * 2 / 360);
-    sr = std::sinf(angle);
-    cr = std::cosf(angle);
+    sr = sinf(angle);
+    cr = cosf(angle);
 
     if (forward) {
         forward->xyz[0] = cp * cy;
@@ -125,17 +125,26 @@ vec_t VectorNormalize2(const vec3_t& v, vec_t *out)
 
 }
 
-//
-//===============
-// ClearBounds
-// 
-// Clears the Min and Max bounds pointers. (Sets it to the largest around.
-// so it can later on add points to it if < ... etc.)
-//===============
-//
+/**
+*   @brief  Clears the Min and Max bounds pointers. (Sets it to the largest around.
+*           so it can later on add points to it if < ... etc.)
+**/
 void ClearBounds(vec3_t& mins, vec3_t& maxs) {
     mins.xyz[0] = mins.xyz[1] = mins.xyz[2] = 99999;
     maxs.xyz[0] = maxs.xyz[1] = maxs.xyz[2] = -99999;
+}
+
+/**
+*   @return True if the bounds(A and B) overlap each other.
+**/
+bool BoundsOverlap( const vec3_t &minsA, const vec3_t &maxsA, const vec3_t &minsB, const vec3_t &maxsB ) {
+	return ( minsA[0] <= maxsB[0] && 
+            minsA[1] <= maxsB[1] && 
+            minsA[2] <= maxsB[2] &&
+		    maxsA[0] >= minsB[0] && 
+            maxsA[1] >= minsB[1] && 
+            maxsA[2] >= minsB[2] 
+    );
 }
 
 //
@@ -191,8 +200,8 @@ vec_t RadiusFromBounds(const vec3_t& mins, const vec3_t& maxs) {
     vec_t   a, b;
 
     for (i = 0; i < 3; i++) {
-        a = std::fabsf(mins.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by std::fabs
-        b = std::fabsf(maxs.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by std::fabs
+        a = fabs(mins.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by std::fabs
+        b = fabs(maxs.xyz[i]); // MATHLIB: !! WARNING: Q_fabs replaced by std::fabs
         corner.xyz[i] = a > b ? a : b;
     }
 
@@ -214,7 +223,7 @@ char* COM_SkipPath(const char* pathname)
     char* last;
 
     if (!pathname) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     last = (char*)pathname;
@@ -262,7 +271,7 @@ char* COM_FileExtension(const char* in)
     const char* last;
 
     if (!in) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Error(ErrorType::Fatal, "%s: NULL", __func__);
     }
 
     s = in + strlen(in);
@@ -799,7 +808,7 @@ size_t Q_strlcat(char* dst, const char* src, size_t size)
     size_t ret, len = strlen(dst);
 
     if (len >= size) {
-        Com_Error(ERR_FATAL, "%s: already overflowed", __func__);
+        Com_Error(ErrorType::Fatal, "%s: already overflowed", __func__);
     }
 
     ret = Q_strlcpy(dst + len, src, size - len);
@@ -855,7 +864,7 @@ size_t Q_vsnprintf(char* dest, size_t size, const char* fmt, va_list argptr)
     int ret;
 
     if (size > INT_MAX)
-        Com_Error(ERR_FATAL, "%s: bad buffer size", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad buffer size", __func__);
 
 #ifdef _WIN32
     if (size) {

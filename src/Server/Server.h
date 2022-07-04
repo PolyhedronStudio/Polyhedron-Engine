@@ -16,32 +16,64 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // server.h
+#pragma once
 
-#include "Shared/Shared.h"
-#include "Shared/list.h"
-#include "Shared/svgame.h"
+#include "../Shared/Shared.h"
+#include "../Shared/List.h"
+#include "../Shared/SVGame.h"
 
-#include "Common/Bsp.h"
-#include "Common/Cmd.h"
-#include "Common/CModel.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Error.h"
-#include "Common/Files.h"
-#include "Common/Msg.h"
-#include "Common/Net/Net.h"
-#include "Common/Net/NetChan.h"
-#include "Common/Prompt.h"
-#include "Common/Protocol.h"
-#include "Common/Zone.h"
+#include "../Common/Bsp.h"
+#include "../Common/Cmd.h"
+#include "../Common/CollisionModel.h"
+#include "../Common/Common.h"
+#include "../Common/CVar.h"
+#include "../Common/Error.h"
+#include "../Common/Files.h"
+//#include "../Common/Models/Models.h"
+#include "../Common/Messaging.h"
+#include "../Common/Net/Net.h"
+#include "../Common/Net/NetChan.h"
+#include "../Common/Prompt.h"
+#include "../Common/Protocol.h"
+#include "../Common/Zone.h"
 
 #include "Client/Client.h"
-#include "Server/Server.h"
+//#include "Server/Server.h"
 #include "System/System.h"
 
 #if USE_ZLIB
 #include <zlib.h>
 #endif
+
+
+
+
+
+
+
+#if USE_ICMP
+void SV_ErrorEvent(NetAdr *from, int ee_errno, int ee_info);
+#endif
+void SV_Init(void);
+void SV_Shutdown(const char *finalmsg, int32_t errorType);
+unsigned SV_Frame(unsigned msec);
+#if USE_SYSCON
+void SV_SetConsoleTitle(void);
+#endif
+//void SV_ConsoleOutput(const char *msg);
+uint32_t		SV_GetServerState (void);                 // WATISDEZE: Added for client game dll
+void            SV_SetServerState (uint32_t serverSate); // WATISDEZE: Added for client game dll
+
+#if USE_CLIENT
+char *SV_GetSaveInfo(const char *dir);
+#endif
+
+// svgame.c
+
+
+// user.c
+void SV_PreRunCmd(void);
+void SV_RunCmdCleanup(void);
 
 //=============================================================================
 
@@ -54,7 +86,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef _DEBUG
 #define SV_DPrintf(level,...) \
     if (sv_debug && sv_debug->integer > level) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #else
 #define SV_DPrintf(...)
 #endif
@@ -86,7 +118,7 @@ static constexpr int32_t  HEARTBEAT_SECONDS = 300;
 static constexpr uint32_t SV_BASELINES_SHIFT = 6;
 static constexpr uint32_t SV_BASELINES_PER_CHUNK = (1 << SV_BASELINES_SHIFT);
 static constexpr uint32_t SV_BASELINES_MASK = (SV_BASELINES_PER_CHUNK - 1);
-static constexpr uint32_t SV_BASELINES_CHUNKS = (MAX_EDICTS >> SV_BASELINES_SHIFT);
+static constexpr uint32_t SV_BASELINES_CHUNKS = (MAX_WIRED_POD_ENTITIES >> SV_BASELINES_SHIFT);
 
 // Server FPS
 constexpr uint32_t SV_FRAMERATE = BASE_FRAMERATE;
@@ -99,38 +131,37 @@ constexpr uint32_t SV_FRAMESYNC = 1;
 static constexpr uint32_t MAX_TOTAL_ENT_LEAFS = 128;
 //=============================================================================
 
-//-----------------
-// A client ServerCommand::Frame message.
-//-----------------
+/**
+*   A client ServerCommand::Frame message.
+**/
 typedef struct {
-    int         number;
+    int64_t     number;
     unsigned    num_entities;
     unsigned    first_entity;
     PlayerState playerState;
-    int         clientNumber;
-    int         areaBytes;
-    byte        areaBits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
-    unsigned    sentTime;                   // for ping calculations
-    int         latency;
+    int32_t     clientNumber;
+    int32_t		areaBytes;
+    byte        areaBits[MAX_MAP_AREA_BYTES];  // PortalArea visibility bits.
+    uint64_t	sentTime;   // For ping calculations.
+    int64_t		latency;
 } ClientFrame;
 
-//-----------------
-// Server side Entity.
-//-----------------
+/**
+*   Server side Entity.
+**/
 typedef struct {
     int         solid32;
 } server_entity_t;
 
-
-//-----------------
-// Main server structure.
-//-----------------
+/**
+*   Main server structure.
+**/
 typedef struct {
-    int32_t serverState;    // precache commands are only valid during load
-    int32_t spawncount;     // random number generated each server spawn
+    int64_t serverState;    // precache commands are only valid during load
+    int64_t spawncount;     // random number generated each server spawn
 
-    int32_t  frameNumber;
-    uint32_t frameResidual;
+    int64_t  frameNumber;
+    uint64_t frameResidual;
 
     char    mapcmd[MAX_QPATH];          // ie: *intro.cin+base
 
@@ -140,40 +171,52 @@ typedef struct {
 
     char    configstrings[ConfigStrings::MaxConfigStrings][MAX_QPATH];
 
-    server_entity_t entities[MAX_EDICTS];
+    server_entity_t entities[MAX_WIRED_POD_ENTITIES];
 
-    unsigned    tracecount;
+    uint64_t    tracecount;
 } server_t;
 
-
+/**
+*   ConnectionState struct enum.
+**/
 struct ConnectionState {
-    static constexpr int32_t Free = 0;      // Can be reused for a new connection
-    static constexpr int32_t Zombie = 1;    // Client has been disconnected, but don't reuse
-                                            // Connection for a couple seconds
-    static constexpr int32_t Assigned = 2;  // Client_t assigned, but no data received from client yet
-    static constexpr int32_t Connected = 3; // Netchan fully established, but not in game yet
-    static constexpr int32_t Primed = 4;    // Sent serverdata, client is precaching
-    static constexpr int32_t Spawned = 5;   // Client is fully in game
+    static constexpr int32_t Free = 0;      //! Can be reused for a new connection.
+    static constexpr int32_t Zombie = 1;    //! Client has been disconnected, but don't reuse connection for a couple seconds.
+    static constexpr int32_t Assigned = 2;  //! Client_t assigned, but no data received from client yet.
+    static constexpr int32_t Connected = 3; //! Netchan fully established, but not in game yet.
+    static constexpr int32_t Primed = 4;    //! Sent serverdata, client is precaching.
+    static constexpr int32_t Spawned = 5;   //! Client is fully in game.
 };
 
-constexpr uint32_t MSG_POOLSIZE = 8192;
+/**
+*   Message Configuration.
+**/
+constexpr uint32_t MSG_POOLSIZE = 16384; // WID: WAS //8192 * 2;
 constexpr uint32_t MSG_TRESHOLD = (64 - 10);   // keep pmsg_s 64 bytes aligned
 
+/**
+*   Message Flags.
+**/
 constexpr uint32_t MSG_RELIABLE = 1;
-constexpr uint32_t MSG_CLEAR = 2;
+constexpr uint32_t MSG_CLEAR    = 2;
 constexpr uint32_t MSG_COMPRESS = 4;
 
+/**
+*   Maximum Sound Packets.
+**/
 constexpr uint32_t MAX_SOUND_PACKET = 14;
 
-//-----------------
-// The actual networking message packets.
-//-----------------
-typedef struct {
+
+/**
+*   The actual networking message packets.
+**/
+typedef struct MessagePacket_t {
     list_t              entry;
     uint16_t            currentSize;    // Zero means sound packet
-    union {
+    union PacketUnion {
         uint8_t         data[MSG_TRESHOLD];
-        struct {
+        struct PacketStructure {
+            PacketStructure() = default;
             uint8_t     flags;
             uint8_t     index;
             uint16_t    sendchan;
@@ -181,45 +224,65 @@ typedef struct {
             uint8_t     attenuation;
             uint8_t     timeofs;
             vec3_t      pos;     // Saved in case entity is freed
-        };
-    };
+        } ps;
+    } packet;
 } MessagePacket;
 
-// This is best to match the actual server game frame rate.
+//! This is best to match the actual server game frame rate.
 static constexpr uint32_t SERVER_MESSAGES_TICKRATE = BASE_FRAMERATE;
 
-// Used to divide for rate calculating.
+//! Used to divide for rate calculating.
 static constexpr uint32_t SERVER_RATE_DIVISOR = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
-// Used to multiply for rate user input drop calculating.
+//! Used to multiply for rate user input drop calculating.
 static constexpr uint32_t SERVER_RATE_MULTIPLIER = BASE_FRAMERATE / 10; // 50 / 10 = 5.
 
+
+/**
+*   Server Utility Macros.
+**/
+//! Loops over each client.
 #define FOR_EACH_CLIENT(client) \
     LIST_FOR_EACH(client_t, client, &sv_clientlist, entry)
 
+// Calculates ping for player server 2 client.
 #define PL_S2C(cl) (cl->framesSent ? \
     (1.0f - (float)cl->framesAcknowledged / cl->framesSent) * 100.0f : 0.0f)
-#define PL_C2S(cl) (cl->netchan->totalReceived ? \
-    ((float)cl->netchan->totalDropped / cl->netchan->totalReceived) * 100.0f : 0.0f)
+// Calculates ping for player client 2 server.
+#define PL_C2S(cl) (cl->netChan->totalReceived ? \
+    ((float)cl->netChan->totalDropped / cl->netChan->totalReceived) * 100.0f : 0.0f)
+// Averages the final ping value.
 #define AVG_PING(cl) (cl->averagePingCount ? \
     cl->averagePingTime / cl->averagePingCount : cl->ping)
 
+/**
+*  RateLimit
+**/
 typedef struct {
-    unsigned    time;
-    unsigned    credit;
-    unsigned    credit_cap;
-    unsigned    cost;
+    uint64_t    time;
+    uint64_t	credit;
+    uint64_t	credit_cap;
+    uint64_t	cost;
 } RateLimit;
 
+/**
+*   Client Data.
+* 
+*   A client can leave the server in one of the following four ways:
+*    - #1: Dropping properly by quiting or disconnecting.
+*    - #2: Timing out if no valid messages are received for timeout.value seconds.
+*    - #3: Getting kicked off by the server operator
+*    - #4: A program error, like an overflowed reliable buffer.
+**/
 typedef struct client_s {
     list_t entry;
 
-    // core info
-    int32_t connectionState;
-    Entity *edict;     // EDICT_NUM(clientnum+1)
-    int number;     // client slot number
+    // Core info
+    int32_t		connectionState = 0;
+    Entity		*edict;     // EDICT_NUM(clientnum+1)
+    int32_t		number;     // Client slot number.
 
-    // client flags
+    // Client flags.
     qboolean reconnected: 1;
     qboolean nodata: 1;
     qboolean has_zlib: 1;
@@ -229,72 +292,75 @@ typedef struct client_s {
 #endif
     qboolean http_download: 1;
 
-    // userinfo
-    char userinfo[MAX_INFO_STRING];  // name, etc
-    char name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
-    int32_t messageLevel;               // for filtering printed messages
-    size_t rate;
-    RateLimit ratelimitNameChange;       // for suppressing "foo changed name" flood
+    // Userinfo
+    char		userinfo[MAX_INFO_STRING];  // name, etc
+    char		name[MAX_CLIENT_NAME];      // extracted from userinfo, high bits masked
+    int32_t		messageLevel = 0;               // for filtering printed messages
+    size_t		rate;
+    RateLimit	ratelimitNameChange;       // for suppressing "foo changed name" flood
 
     // console var probes
-    char *versionString;
-    char reconnectKey[16];
-    char reconnectValue[16];
-    int32_t consoleQueries;
+    char		*versionString;
+    char		reconnectKey[16];
+    char		reconnectValue[16];
+    int64_t		consoleQueries = 0;
 
     // usercmd stuff
-    uint32_t    lastMessage;    // svs.realTime when packet was last received
-    uint32_t    lastActivity;   // svs.realTime when user activity was last seen
-    int32_t     lastFrame;      // for delta compression
-    ClientMoveCommand lastClientUserCommand;        // for filling in big drops
-    int32_t clientUserCommandMiliseconds;   // every seconds this is reset, if user
-                                            // commands exhaust it, assume time cheating
-    int32_t numberOfMoves;      // reset every 10 seconds
-    int32_t movesPerSecond;     // average movement FPS
+    uint64_t    lastMessage = 0;					// svs.realTime when packet was last received.
+    uint64_t    lastActivity = 0;					// svs.realTime when user activity was last seen.
+    int64_t		lastFrame = 0;						// For delta compression.
+    ClientMoveCommand lastClientUserCommand;		// For filling in big drops.
+    int64_t		clientUserCommandMiliseconds = 0;	// Every seconds this is reset, if user commands exhaust it, assume time cheating.
+    int64_t		numberOfMoves = 0;					// Reset every 10 seconds.
+    int64_t		movesPerSecond = 0;					// Average movement FPS.
 
-    // Networking PING.
-    int32_t ping;
-    int32_t pingMinimum;
-    int32_t pingMaximum;
+	// Timescale for usercmd stuff.
+	int32_t		cmd_msec_used = 0;	// UserCommand Time used so far for this frame.
+    float		timescale = 0;		// Time scale.
 
-    // Networking averages.
-    int32_t averagePingTime;
-    int32_t averagePingCount;
+    // Ping.
+    int64_t		ping = 0;
+    int64_t		pingMinimum = 0;
+    int64_t		pingMaximum = 0;
+
+    // Ping averages.
+    int64_t		averagePingTime = 0;
+    int64_t		averagePingCount = 0;
 
     // frame encoding
     ClientFrame frames[UPDATE_BACKUP];    // Updates can be delta'd from here
-    uint32_t framesSent;
-    uint32_t framesAcknowledged;
-    uint32_t framesNoDelta;
-    int32_t frameNumber;
+    uint64_t	framesSent = 0;
+    uint64_t	framesAcknowledged = 0;
+    uint64_t	framesNoDelta = 0;
+    int64_t		frameNumber = 0;
 
-    uint32_t frameFlags;
+    uint32_t frameFlags = 0;
 
     // rate dropping
     size_t messageSizes[SERVER_MESSAGES_TICKRATE]; // Used to rate drop normal packets
-    int32_t suppressCount; // Number of messages rate suppressed
+    int32_t suppressCount = 0; // Number of messages rate suppressed
     
     // Used to rate drop async packets
-    uint32_t sendTime;
-    uint32_t sendDelta;
+    uint64_t sendTime = 0;
+    uint64_t sendDelta = 0;
 
     // current download
     struct {
-        int32_t fileSize;   // total bytes (can't use EOF because of paks)
+        int32_t fileSize = 0;   // total bytes (can't use EOF because of paks)
         char *fileName;  // name of the file
 
-        byte *bytes;     // file being downloaded
-        int32_t bytesSent;  // bytes sent
+        byte *bytes = nullptr;     // file being downloaded
+        int32_t bytesSent = 0;  // bytes sent
 
-        int32_t command;    // svc_(z)download
+        int32_t command = 0;    // svc_(z)download
 
-        qboolean isPending;
+        qboolean isPending = 0;
     } download;
 
     // protocol stuff
-    int32_t challenge;              // Challenge of this user, randomly generated
-    int32_t protocolVersion;        // Major version
-    int32_t protocolMinorVersion;   // Minor version
+    int32_t challenge = 0;              // Challenge of this user, randomly generated
+    int32_t protocolVersion = 0;        // Major version
+    int32_t protocolMinorVersion = 0;   // Minor version
 
     EntityStateMessageFlags esFlags; // Entity protocol flags
 
@@ -302,57 +368,52 @@ typedef struct client_s {
     list_t msg_free_list;
     list_t msg_unreliable_list;
     list_t msg_reliable_list;
-    MessagePacket *msg_pool;
+    MessagePacket *msg_pool = nullptr;
     size_t msg_unreliable_bytes;   // total size of unreliable datagram
     size_t msg_dynamic_bytes;      // total size of dynamic memory allocated
 
     // per-client baseline chunks
-    EntityState *entityBaselines[SV_BASELINES_CHUNKS];
+    EntityState *entityBaselines;//[SV_BASELINES_CHUNKS];
+	int32_t     num_baselines, allocated_baselines;
 
     // server state pointers (hack for MVD channels implementation)
-    char *configstrings;
-    char *gamedir, *mapName;
-    EntityPool *pool;
-    cm_t *cm;
-    int32_t slot;
-    int32_t spawncount;
-    int32_t maximumClients;
+    char *configstrings = 0;
+    char *gamedir, *mapName = 0;
+    EntityPool *pool = 0;
+    cm_t *cm = nullptr;
+    int32_t slot = 0;
+    int32_t spawncount = 0;
+    int32_t maximumClients = 0;
 
-    // netchan type dependent methods
-    void (*AddMessage)(struct client_s *, byte *, size_t, qboolean);
-    void (*WriteFrame)(struct client_s *);
-    void (*WriteDatagram)(struct client_s *);
-
-    // netchan
-    NetChannel *netchan;
-    int32_t numpackets; // for that nasty packetdup hack
+    // Net Channel.
+    NetChannel *netChan = nullptr;
+    int32_t numpackets = 0; // For that nasty packetdup hack.
 
     // misc
-    time_t timeOfInitialConnect; // time of initial connect
-	int32_t lastValidCluster;
+    time_t timeOfInitialConnect = 0; // Time of initial connect.
+	int32_t lastValidCluster = 0;
 
 
 } client_t;
 
-// a client can leave the server in one of four ways:
-// dropping properly by quiting or disconnecting
-// timing out if no valid messages are received for timeout.value seconds
-// getting kicked off by the server operator
-// a program error, like an overflowed reliable buffer
-
 //=============================================================================
 
-// MAX_CHALLENGES is made large to prevent a denial
-// of service attack that could cycle all of them
-// out before legitimate users connected
+// MAX_CHALLENGES is made large to prevent a denial of service attack that could 
+// cycle all of them out before legitimate users connected.
 static constexpr uint32_t    MAX_CHALLENGES = 1024;
 
+/**
+*   Challenge Data.
+**/
 typedef struct {
     NetAdr adr;
-    uint32_t challenge;
-    uint32_t time;
+    uint32_t	challenge;
+    uint64_t	time;
 } Challenge;
 
+/**
+*   AddressMatch
+**/
 typedef struct {
     list_t      entry;
     NetAdr    addr;
@@ -362,12 +423,18 @@ typedef struct {
     char        comment[1];
 } AddressMatch;
 
+/**
+*   StuffText Commands.
+**/
 typedef struct {
     list_t  entry;
     int32_t len;
     char    string[1];
 } StuffTextCommand;
 
+/**
+*   Filter Actions.
+**/
 typedef enum {
     FA_IGNORE,
     FA_PRINT,
@@ -377,6 +444,9 @@ typedef enum {
     FA_MAX
 } FilterAction;
 
+/**
+*   Filter Commands.
+**/
 struct FilterCommand {
     list_t entry;
     
@@ -386,11 +456,14 @@ struct FilterCommand {
     char  string[1];
 };
 
+/**
+*   Master Server
+**/
 typedef struct {
     list_t entry;
     NetAdr adr;
 
-    uint32_t last_ack;
+    uint64_t last_ack;
     time_t last_resolved;
 
     char name[1];
@@ -412,24 +485,25 @@ typedef struct {
     LIST_FOR_EACH_SAFE(master_t, m, n, &sv_masterlist, entry)
 
 typedef struct server_static_s {
-    qboolean    initialized;        // sv_init has completed
-    unsigned    realtime;           // always increasing, no clamping, etc
+    qboolean    initialized;	//! sv_init has completed
+    uint64_t	realTime;		//! Always increasing, no clamping, etc.
 
-    client_t    *client_pool;       // [maximumclients]
+    client_t    *clientPool;	//! [maximumclients]
 
-    unsigned        num_entities;   // maximumclients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
-    unsigned        next_entity;    // next state to use
-    EntityState    *entities;      // [num_entities]
+    unsigned	num_entities;	//! maximumclients * UPDATE_BACKUP * MAX_PACKET_ENTITIES
+    unsigned	next_entity;    //! next state to use
+    EntityState    *entities;   //! [num_entities]
 
 #if USE_ZLIB
     z_stream        z;  // for compressing messages at once
 #endif
 
-    unsigned        last_heartbeat;
+    uint64_t		lastHeartBeat;
+	uint64_t		lastTimescaleCheck;
 
-    RateLimit     ratelimit_status;
-    RateLimit     ratelimit_auth;
-    RateLimit     ratelimit_rcon;
+    RateLimit     ratelimitStatus;
+    RateLimit     ratelimitAuth;
+    RateLimit     ratelimitRemoteCon;
 
     Challenge     challenges[MAX_CHALLENGES]; // to prevent invalid IPs from connecting
 } ServerStatic;
@@ -646,8 +720,7 @@ int SV_PointContents(const vec3_t &p);
 // returns the CONTENTS_* value from the world at the given point.
 // Quake 2 extends this to also check entities, to allow moving liquids
 
-trace_t q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end,
-                           Entity *passedict, int contentmask);
+const TraceResult q_gameabi SV_Trace(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, Entity *passedict, int32_t contentMask);
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allSolid will be set,

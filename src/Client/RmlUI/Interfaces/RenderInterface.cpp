@@ -9,13 +9,13 @@
 // Uses the refresh API and is render agnostic.
 //
 
-#include "../librmlui.h"
+#include "../LibRmlUI.h"
 
 // RmlUI includes.
-#include "../rmlui.h"
+#include "../RmlUI"
 
 // QGL.
-#include "../../src/refresh/gl/gl.h"
+#include "../../src/Refresh/gl/gl.h"
 
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F

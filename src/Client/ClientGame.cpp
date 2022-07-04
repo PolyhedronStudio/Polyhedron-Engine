@@ -21,12 +21,18 @@
 //
 #include "Client.h"
 #include "Server/Server.h"
-#include "refresh/models.h"
-
+#include "Refresh/Models.h"
+//#include "Common/Models/Models.h"
+#include "Models.h"
 // (Client/Game) related.
-#include "Client/GameModule.h"   // TODO: How come it can find client.h??
-#include "Shared/CLTypes.h"
-#include "Shared/CLGame.h"
+#include "GameModule.h"   // TODO: How come it can find client.h??
+#include "Sound/Sound.h"
+#include "../Shared/CLTypes.h"
+#include "../Shared/CLGame.h"
+
+// Traces & World.
+#include "Traces.h"
+#include "World.h"
 
 // Contains the functions being exported to client game dll.
 IClientGameExports *cge;
@@ -37,6 +43,7 @@ static void *cgame_library;
 // Cheesy externs..
 extern int CL_GetFps(void);
 extern int CL_GetResolutionScale(void);
+
 
 //
 //=============================================================================
@@ -55,10 +62,22 @@ int _wrp_GetServerState(void) {
     return cl.serverState;
 }
 
-unsigned _wrp_GetRealTime(void) {
+/**
+*   @brief  developer->integer determines the developer print level.
+*   @return The value of developer->integer.
+**/
+int32_t _wrp_GetDeveloperLevel(void) {
+#if _DEBUG
+    return (developer != nullptr ? developer->integer : 0);
+#else
+    return 0;
+#endif
+}
+
+uint64_t _wrp_GetRealTime(void) {
     return cls.realtime;
 }
-float _wrp_GetFrameTime(void) {
+double _wrp_GetFrameTime(void) {
     return cls.frameTime;
 }
 int _wrp_GetRFps(void) {
@@ -85,6 +104,29 @@ void _wrp_Cvar_Reset(cvar_t *var) {
 }
 
 // CMODEL
+mmodel_t *_wrp_BSP_InlineModel(const char *name) {
+	if (!cl.bsp) {
+		return nullptr;
+	}
+    
+	return BSP_InlineModel(cl.bsp, name);
+}
+void _wrp_CL_LinkEntity(PODEntity *podEntity) {
+    CL_LinkEntity(podEntity);
+}
+void _wrp_CL_UnlinkEntity(PODEntity *podEntity) {
+    CL_UnlinkEntity(podEntity);
+}
+void _wrp_CL_World_LinkEntity(PODEntity *podEntity) {
+    CL_PF_World_LinkEntity(podEntity);
+}
+void _wrp_CL_World_UnlinkEntity(PODEntity *podEntity) {
+    CL_World_UnlinkEntity(podEntity);
+}
+int32_t _wrp_CL_World_PointContents(const vec3_t &point) {
+    return CL_World_PointContents(point);
+}
+
 mmodel_t *_wrp_CM_InlineModel(cm_t *cm, const char *name) {
     return CM_InlineModel(cm, name);
 }
@@ -345,15 +387,8 @@ static void *CL_LoadGameLibrary(const char *game, const char *prefix)
 void CL_ShutdownGameProgs(void)
 {
     if (cge) {
-        delete cge->core;
-        delete cge->entities;
-        delete cge->media;
-        delete cge->movement;
-        delete cge->prediction;
-        delete cge->screen;
-        delete cge->serverMessage;
-        delete cge->view;
-        cge = NULL;
+        delete cge;
+        cge = nullptr;
     }
 
     if (cgame_library) {
@@ -393,7 +428,7 @@ void CL_InitGameProgs(void)
 
     // all paths failed
     if (!entry)
-        Com_Error(ERR_DROP, "Failed to load Client Game library");
+        Com_Error(ErrorType::Drop, "Failed to load Client Game library");
 
     // API Version.
     importAPI.apiversion = {
@@ -421,7 +456,9 @@ void CL_InitGameProgs(void)
 
     importAPI.IsDemoPlayback = _wrp_IsDemoPlayback;
 
-    importAPI.UpdateListenerOrigin = CL_UpdateListenerOrigin;
+    importAPI.GetDeveloperLevel = _wrp_GetDeveloperLevel;
+
+    importAPI.UpdateSoundSpatializationOrigin = CL_UpdateSoundSpatializationOrigin;
 
     importAPI.SetClientLoadState = CL_SetLoadState;
     importAPI.GetClienState = CL_GetConnectionState;
@@ -429,7 +466,17 @@ void CL_InitGameProgs(void)
     importAPI.CheckForIgnore = CL_CheckForIgnore;
     importAPI.CheckForIP = CL_CheckForIP;
 
+	importAPI.CL_HullForEntity = CL_HullForEntity;
+	importAPI.LinkEntity = _wrp_CL_LinkEntity;
+	importAPI.World_LinkEntity = _wrp_CL_World_LinkEntity;
+	importAPI.UnlinkEntity = _wrp_CL_UnlinkEntity;
+	importAPI.World_UnlinkEntity = _wrp_CL_World_UnlinkEntity;
+	importAPI.BoxEntities = CL_AreaEntities;
+	importAPI.World_BoxEntities = CL_World_AreaEntities;
+	importAPI.PointContents = CL_PointContents;
+	importAPI.World_PointContents = CL_World_PointContents;
     importAPI.Trace = CL_Trace;
+	importAPI.World_Trace = CL_World_Trace;
 
     // Command Buffer.
     importAPI.Cbuf_AddText = _wrp_Cbuf_AddText;
@@ -440,7 +487,8 @@ void CL_InitGameProgs(void)
     // Collision Model.
     importAPI.CM_HeadnodeForBox = CM_HeadnodeForBox;
     importAPI.CM_HeadnodeForOctagon= CM_HeadnodeForOctagon;
-    importAPI.CM_InlineModel = _wrp_CM_InlineModel;
+    importAPI.BSP_InlineModel = _wrp_BSP_InlineModel;
+	importAPI.CM_InlineModel = _wrp_CM_InlineModel;
     importAPI.CM_PointContents = CM_PointContents;
     importAPI.CM_TransformedPointContents = CM_TransformedPointContents;
     importAPI.CM_BoxTrace = CM_BoxTrace;
@@ -473,6 +521,8 @@ void CL_InitGameProgs(void)
 
     importAPI.Com_ErrorString = Q_ErrorString;
     importAPI.Com_GetEventTime = _prt_Com_GetEventTime;
+
+    importAPI.Com_HashStringLen = Com_HashStringLen;
 
     // Console.
     importAPI.Con_ClearNotify = Con_ClearNotify_f;
@@ -595,7 +645,7 @@ void CL_InitGameProgs(void)
     importAPI.R_RegisterFont = _wrp_R_RegisterFont;
     importAPI.R_RegisterSkin = _wrp_R_RegisterSkin;
 
-    importAPI.MOD_ForHandle = MOD_ForHandle;
+    importAPI.CL_Model_GetModelByHandle = CL_Model_GetModelByHandle;
 
     // Rendering
     importAPI.R_AddDecal = _wrp_R_AddDecal;
@@ -640,14 +690,16 @@ void CL_InitGameProgs(void)
     cge = entry(&importAPI);
 
     if (!cge) {
-        Com_Error(ERR_DROP, "Client Game DLL returned NULL exports");
+        Com_Error(ErrorType::Drop, "Client Game DLL returned NULL exports");
         return;
     }
 
-    if (cge->core->version.major != CGAME_API_VERSION_MAJOR ||
-        cge->core->version.minor != CGAME_API_VERSION_MINOR) {
-        Com_Error(ERR_DROP, "Client Game DLL is version %i.%i.%i, expected %i.%i.%i",
-            cge->core->version.major, cge->core->version.minor, cge->core->version.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
+    IClientGameExportCore *core = cge->GetCoreInterface();
+
+    if (!core || core->version.major != CGAME_API_VERSION_MAJOR ||
+        core->version.minor != CGAME_API_VERSION_MINOR) {
+        Com_Error(ErrorType::Drop, "Client Game DLL is version %i.%i.%i, expected %i.%i.%i",
+            core->version.major, core->version.minor, core->version.point, CGAME_API_VERSION_MAJOR, CGAME_API_VERSION_MINOR, CGAME_API_VERSION_POINT);
         return;
     }
 
@@ -663,468 +715,534 @@ void CL_InitGameProgs(void)
 //=============================================================================
 //
 
-//===============
-// CL_GM_SpawnClassEntities
-//
-// Spawns local client side class entities.
-//===============
-qboolean CL_GM_SpawnClassEntities(const char* entities) { 
-    if (cge && cge->entities) {
-	    return cge->entities->SpawnClassEntities(entities);
+/**
+*   @brief  Spawns local client side class entities.
+**/
+qboolean CL_GM_SpawnEntitiesFromBSPString(const char *mapName, const char* bspString) { 
+    if (cge) {
+        IClientGameExportEntities *entities = cge->GetEntityInterface();
+        if (entities) {
+	        return entities->PrepareBSPEntities(mapName, bspString);
+        }
     }
 
     return false;
 }
 
-//===============
-// CL_GM_DemoSeek
-// 
-// Called when the client is seeking in a demo playback.
-//===============
-void CL_GM_EntityEvent(int32_t number) {
-    if (cge && cge->entities)
-        cge->entities->Event(number);
-}
-
-//
-//===============
-// CL_GM_Init
-// 
-// Called by the client when it is ready initializing.
-//===============
-//
-void CL_GM_Init (void) {
-    if (cge && cge->core)
-        cge->core->Initialize();
-}
-
-//
-//===============
-// CL_GM_Shutdown
-//
-// Called by the client right before shutting down.
-//===============
-//
-void CL_GM_Shutdown (void) {
-    if (cge && cge->core)
-        cge->core->Shutdown(); 
-}
-
-//
-//===============
-// CL_GM_CalcFOV
-//
-// Called whenever the FOV has to be calculated.
-//===============
-//
-float CL_GM_CalcFOV(float fov_x, float width, float height) {
-    if (cge)
-        return cge->ClientCalculateFieldOfView(fov_x, width, height);
-    else
-        return 0.f;
-}
-
-//
-//===============
-// CL_GM_ClientUpdateOrigin
-// 
-// Called by the client in case it wants to update audio positioning.
-//===============
-//
-void CL_GM_ClientUpdateOrigin(void) {
-    if (cge)
-        cge->ClientUpdateOrigin();
-}
-
-//
-//===============
-// CL_GM_ClientBegin
-// 
-// Called after finishing in CL_Begin (aka after map load etc)
-//===============
-//
-void CL_GM_ClientBegin(void) {
-    if (cge)
-        cge->ClientBegin();
-}
-
-//
-//===============
-// CL_GM_ClientDeltaFrame
-// 
-// Called each time the client has parsed a valid frame. 
-// Handle per VALID frame basis things here.
-//===============
-//
-void CL_GM_ClientDeltaFrame(void) {
-    if (cge)
-        cge->ClientDeltaFrame();
-}
-
-//
-//===============
-// CL_GM_ClientFrame
-// 
-// Called each client frame. Handle per frame basis things here.
-//===============
-//
-void CL_GM_ClientFrame(void) {
-    if (cge)
-        cge->ClientFrame();
-}
-
-//
-//===============
-// CL_GM_ClientDisconnect
-// 
-// Called when the client disconnects, including by Com_Error etc.
-//===============
-//
-void CL_GM_ClientDisconnect(void) {
-    if (cge)
-        cge->ClientDisconnect();
-}
-
-//
-//===============
-// CL_GM_ClientClearState
-// 
-// Called when the client (and/is) disconnected for whichever reasons.
-//===============
-//
-void CL_GM_ClientClearState(void) {
-    if (cge)
-        cge->ClientClearState();
-}
-
-//
-//===============
-// CL_GM_DemoSeek
-// 
-// Called when the client is seeking in a demo playback.
-//===============
-//
-void CL_GM_DemoSeek(void) {
-    if (cge)
-        cge->DemoSeek();
-}
-
-//
-//===============
-// CL_GM_StartServerMessage 
-// 
-// Called by the client BEFORE all server messages have been parsed
-//===============
-//
-void CL_GM_StartServerMessage (void) {
-    if (cge && cge->serverMessage)
-        cge->serverMessage->Start();
-}
-
-//
-//===============
-// Breaks up playerskin into name (optional), model and skin components.
-// If model or skin are found to be invalid, replaces them with sane defaults.
-//===============
-//
-void CL_GM_ParsePlayerSkin(char* name, char* model, char* skin, const char* s) {
-    if (cge && cge->serverMessage)
-        cge->serverMessage->ParsePlayerSkin(name, model, skin, s);
-}
-
-//
-//===============
-// CL_GM_UpdateConfigString
-// 
-// Called when the engine is about to parse a configstring, we will
-// give the CG Module access to do with it as it pleases.
-//===============
-//
-qboolean CL_GM_UpdateConfigString (int32_t index, const char *str) {
-    if (cge && cge->serverMessage)
-        return cge->serverMessage->UpdateConfigString(index, str);
+/**
+*   @brief  Notifies the client game module that we should update/spawn an entity from a newly received state.
+**/
+qboolean CL_GM_CreateFromNewState(PODEntity* clEntity, const EntityState& state) {
+    if (cge) {
+        IClientGameExportEntities *entities = cge->GetEntityInterface();
+        if (entities) {
+	        return entities->UpdateGameEntityFromState(clEntity, state);
+        }
+    }
 
     return false;
 }
 
-//
-//===============
-// CL_GM_ClientUpdateUserInfo
-// 
-// Called when the engine has had a cvar changed that involved userinfo.
-// Think about skin, or name, etc.
-//===============
-//
+/**
+*   @brief  Executed whenever a server frame entity event is receieved.
+**/
+void CL_GM_PacketEntityEvent(int32_t number) {
+    if (cge) {
+        IClientGameExportEntities *entities = cge->GetEntityInterface();
+        if (entities) {
+            entities->PacketEntityEvent(number);
+        }
+    }
+}
+
+/**
+*   @brief  Called whenever a local client entity event is set.
+**/
+void CL_GM_LocalEntityEvent(int32_t number) {
+    if (cge) {
+        IClientGameExportEntities *entities = cge->GetEntityInterface();
+        if (entities) {
+            entities->LocalEntityEvent(number);
+        }
+    }
+}
+
+/**
+*   @brief  Called by the client when it is ready initializing.
+**/
+void CL_GM_Init (void) {
+    if (cge) {
+        IClientGameExportCore *core = cge->GetCoreInterface();
+        if (core) {
+            core->Initialize();
+        }
+    }
+}
+
+/**
+*   @brief  Called by the client right before shutting down.
+**/
+void CL_GM_Shutdown (void) {
+    if (cge) {
+        IClientGameExportCore *core = cge->GetCoreInterface();
+        if (core) {
+            core->Shutdown(); 
+        }
+    }
+}
+
+/**
+*   @brief  Called whenever the FOV has to be calculated.
+**/
+float CL_GM_CalcFOV(float fov_x, float width, float height) {
+    if (cge) {
+        return cge->ClientCalculateFieldOfView(fov_x, width, height);
+    } else {
+        return 0.f;
+    }
+}
+
+/**
+*   @brief  Called by the client in case it wants to update audio positioning.
+**/
+void CL_GM_ClientUpdateOrigin(void) {
+    if (cge) {
+        cge->ClientUpdateOrigin();
+    }
+}
+
+/**
+*	@brief	Let the Client Game Module know we connected. This gives it a chance to create
+*			objects that are relevant to the client game right before all settles and the
+*			client game begins.
+**/
+void CL_GM_ClientConnect() {
+	if (cge) {
+		cge->ClientConnect();
+	}
+}
+
+/**
+*   @brief  Called after finishing in CL_Begin (aka after map load etc)
+**/
+void CL_GM_ClientBegin(void) {
+    if (cge) {
+        cge->ClientBegin();
+    }
+}
+
+/**
+*   @brief  Called each client frame. Handle per frame basis things here.
+**/
+void CL_GM_ClientFrame(void) {
+    if (cge) {
+        cge->ClientFrame();
+    }
+}
+
+/**
+*   @brief  Called each time the client has parsed a valid frame. 
+*           Handle per VALID frame basis things here.
+**/
+void CL_GM_ClientPacketEntityDeltaFrame(void) {
+    if (cge) {
+        cge->ClientPacketEntityDeltaFrame();
+    }
+}
+
+/**
+*   @brief  Called each time the client has parsed a valid frame. 
+*           Handle per VALID frame basis things here.
+**/
+void CL_GM_ClientLocalEntitiesFrame(void) {
+    if (cge) {
+        cge->ClientLocalEntitiesFrame();
+    }
+}
+
+/**
+*	@return	The current actual hashed classname of the PODEntity's game object. 
+*			If it has no object, 0 will be returned instead.
+**/
+uint32_t CL_GM_GetHashedGameEntityClassname(PODEntity *podEntity) {
+    if (cge) {
+        return cge->GetHashedGameEntityClassname(podEntity);
+    }
+	return 0;
+}
+
+/**
+*   @brief  Called when the client disconnects, including by Com_Error etc.
+**/
+void CL_GM_ClientDisconnect(void) {
+    if (cge) {
+        cge->ClientDisconnect();
+    }
+}
+
+/**
+*   @brief  Called when the client (and/is) disconnected for whichever reasons.
+**/
+void CL_GM_ClientClearState(void) {
+    if (cge) {
+        cge->ClientClearState();
+    }
+}
+
+/**
+*   @brief  Called when the client is seeking in a demo playback.
+**/
+void CL_GM_DemoSeek(void) {
+    if (cge) {
+        cge->DemoSeek();
+    }
+}
+
+/**
+*   @brief  For debugging problems when out-of-date entity origin is referenced.
+**/
+void CL_GM_CheckEntityPresent(int32_t entityNumber, const std::string& what) {
+#if _DEBUG
+    if (cge) {
+        cge->CheckEntityPresent(entityNumber, what);
+    }
+#endif
+}
+
+/**
+*   @brief  Called by the client BEFORE all server messages have been parsed
+**/
+void CL_GM_StartServerMessage (void) {
+    if (cge) {
+        IClientGameExportServerMessage *serverMessage = cge->GetServerMessageInterface();
+
+        if (serverMessage) {
+            serverMessage->Start();
+        }
+    }
+}
+
+/**
+*   @brief  Breaks up playerskin into name (optional), model and skin components.
+*           If model or skin are found to be invalid, replaces them with sane defaults.
+**/
+void CL_GM_ParsePlayerSkin(char* name, char* model, char* skin, const char* s) {
+    if (cge) {
+        IClientGameExportServerMessage *serverMessage = cge->GetServerMessageInterface();
+
+        if (serverMessage) {
+            serverMessage->ParsePlayerSkin(name, model, skin, s);
+        }
+    }
+}
+
+/**
+*   @brief  Called when the engine is about to parse a configstring, we will
+*           give the CG Module access to do with it as it pleases.
+**/
+qboolean CL_GM_UpdateConfigString (int32_t index, const char *str) {
+    if (cge) {
+        IClientGameExportServerMessage *serverMessage = cge->GetServerMessageInterface();
+
+        if (serverMessage) {
+            return serverMessage->UpdateConfigString(index, str);
+        }
+    }
+
+    return false;
+}
+
+/**
+*   @brief  Called when the engine has had a cvar changed that involved userinfo.
+*           Think about skin, or name, etc.
+**/
 void CL_GM_ClientUpdateUserInfo(cvar_t* var, from_t from) {
     if (cge) {
 	    cge->ClientUpdateUserinfo(var, from);
     }
 }
 
-//
-//===============
-// CL_GM_ParseServerMessage
-// 
-// Parses command operations known to the game dll
-// Returns true if the message was parsed
-//===============
-//
+/**
+*   @brief  Parses command operations known to the game dll
+*   @return Returns true if the message was parsed, false otherwise.
+**/
 qboolean CL_GM_ParseServerMessage (int32_t serverCommand) {
-    if (cge && cge->serverMessage)
-        return cge->serverMessage->ParseMessage(serverCommand);
+    if (cge) {
+        IClientGameExportServerMessage *serverMessage = cge->GetServerMessageInterface();
+
+        if (serverMessage) {
+            return serverMessage->ParseMessage(serverCommand);
+        }
+    }
 
     return false;
 }
 
-//
-//===============
-// CL_GM_SeekDemoMessage
-// 
-// Parses command operations known to the game dll, but for
-// demo playback only. This means certain commands such as
-// ServerCommand::CenterPrint can be skipped.
-//===============
-//
+/**
+*   @brief  Parses command operations known to the client game module for demo playback only.
+*           ServerCommand::CenterPrint can be skipped.
+**/
 qboolean CL_GM_SeekDemoMessage (int32_t demoCommand) {
-    if (cge && cge->serverMessage)
-        return cge->serverMessage->SeekDemoMessage(demoCommand);
+    if (cge) {
+        IClientGameExportServerMessage *serverMessage = cge->GetServerMessageInterface();
+
+        if (serverMessage) {
+            return serverMessage->SeekDemoMessage(demoCommand);
+        }
+    }
 
     return false;
 }
 
-//
-//===============
-// CL_GM_EndServerMessage
-// 
-// Called by the client AFTER all server messages have been parsed
-//===============
-//
+/**
+*   @brief  Called by the client AFTER all server messages have been parsed
+**/
 void CL_GM_EndServerMessage () {
-    if (cge && cge->serverMessage)
-        cge->serverMessage->End(cls.realtime);
+    if (cge) {
+        IClientGameExportServerMessage *serverMessage = cge->GetServerMessageInterface();
+
+        if (serverMessage) {
+            serverMessage->End(cls.realtime);
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_CheckPredictionError
-// 
-// Called by the client to check for prediction errors.
-//===============
-//
-void CL_GM_CheckPredictionError(ClientMoveCommand *moveCommand) {
-    if (cge && cge->prediction)
-        cge->prediction->CheckPredictionError(moveCommand);
-}
-
-//
-//===============
-// CL_GM_BuildFrameMoveCommand
-// 
-// Called by the client to build up the movement command for
-// the current frame.
-//===============
-//
+/**
+*   @brief  Called by the client to build up the movement command for the current frame.
+**/
 void CL_GM_BuildFrameMoveCommand(int32_t msec) {
-    if (cge && cge->movement)
-        cge->movement->BuildFrameMovementCommand(msec);
+    if (cge) {
+        IClientGameExportMovement *movement = cge->GetMovementInterface();
+
+        if (movement) {
+            return movement->BuildFrameMovementCommand(msec);
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_FinalizeFrameMoveCommand
-// 
-// Called by the client to finalize the move command for this current
-// frame.
-//===============
-//
+/**
+*   @brief  Called by the client to finalize the move command for this current frame.
+**/
 void CL_GM_FinalizeFrameMoveCommand(void) {
-    if (cge && cge->movement)
-        cge->movement->FinalizeFrameMovementCommand();
+    if (cge) {
+        IClientGameExportMovement *movement = cge->GetMovementInterface();
+
+        if (movement) {
+            return movement->FinalizeFrameMovementCommand();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_PredictAngles
-// 
-// Called by the client to set prediction angles.
-//===============
-//
+
+/**
+*   @brief  Called by the client to check for prediction errors.
+**/
+void CL_GM_CheckPredictionError(ClientMoveCommand *moveCommand) {
+    if (cge) {
+        IClientGameExportPrediction *prediction = cge->GetPredictionInterface();
+
+        if (prediction) {
+            prediction->CheckPredictionError(moveCommand);
+        }
+    }
+}
+
+/**
+*   @brief  Called by the client to set prediction angles.
+**/
 void CL_GM_PredictAngles(void) {
-    if (cge && cge->prediction)
-        cge->prediction->PredictAngles();
+    if (cge) {
+        IClientGameExportPrediction *prediction = cge->GetPredictionInterface();
+
+        if (prediction) {
+            prediction->PredictAngles();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_PredictMovement
-// 
-// Called by the client to predict the actual movement.
-//===============
-//
+/**
+*   @brief  Called by the client to predict the actual movement.
+**/
 void CL_GM_PredictMovement(uint32_t ack, uint32_t current) {
-    if (cge && cge->prediction)
-        cge->prediction->PredictMovement(ack, current);
+    if (cge) {
+        IClientGameExportPrediction *prediction = cge->GetPredictionInterface();
+
+        if (prediction) {
+            prediction->PredictMovement(ack, current);
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_InitMedia
-// 
-// Call into the CG Module for notifying about "Init Media"
-//===============
-//
-void CL_GM_InitMedia(void)
+/**
+*   @brief  Call into the CG Module for notifying about "Init Media"
+**/
+void CL_GM_InitMedia(void) {
+    if (cge) {
+        IClientGameExportMedia *media = cge->GetMediaInterface();
+
+        if (media) {
+            media->Initialize();
+        }
+    }
+}
+
+/**
+*   @brief  Call into the CG Module for notifying about "Media Load State Name"
+**/
+const char *CL_GM_GetMediaLoadStateName(int32_t loadState)
 {
-    if (cge && cge->media)
-        cge->media->Initialize();
+    if (cge) {
+        IClientGameExportMedia *media = cge->GetMediaInterface();
+
+        if (media) {
+            return media->GetLoadStateName(loadState).c_str();
+        }
+    }
+
+    return "";
 }
 
-//
-//==============
-// GetMediaLoadStateName
-//
-// Call into the CG Module for notifying about "Media Load State Name"
-//===============
-//
-const char *CL_GM_GetMediaLoadStateName(LoadState state)
+/**
+*   @brief  Call into the CG Module for notifying about "Register Screen Media"
+**/
+void CL_GM_RegisterScreenMedia(void)
 {
-    if (cge && cge->media)
-        return cge->media->GetLoadStateName(state).c_str();
-    else
-        return "";
+    if (cge) {
+        IClientGameExportScreen *screen = cge->GetScreenInterface();
+
+        if (screen) {
+            screen->RegisterMedia();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_LoadScreenMedia
-// 
-// Call into the CG Module for notifying about "Register Screen Media"
-//===============
-//
-void CL_GM_LoadScreenMedia(void)
-{
-    if (cge && cge->media)
-        cge->media->LoadScreen();
-}
-
-//
-//===============
-// CL_GM_LoadWorldMedia
-// 
-// Call into the CG Module for notifying about "Register Screen Media"
-//===============
-//
+/**
+*   @brief  Call into the CG Module for notifying about "Register Screen Media"
+**/
 void CL_GM_LoadWorldMedia(void)
 {
-    if (cge && cge->media)
-        cge->media->LoadWorld();
+    if (cge) {
+        IClientGameExportMedia *media = cge->GetMediaInterface();
+
+        if (media) {
+            media->LoadWorld();
+        }
+    }
 }
 
-
-//
-//===============
-// CL_GM_ShutdownMedia
-// 
-// Call into the CG Module for notifying about "Shutdown Media"
-//===============
-//
+/**
+*   @brief  Call into the CG Module for notifying about "Shutdown Media"
+**/
 void CL_GM_ShutdownMedia (void) {
-    if (cge && cge->media)
-        cge->media->Shutdown();
+    if (cge) {
+        IClientGameExportMedia *media = cge->GetMediaInterface();
+
+        if (media) {
+            media->Shutdown();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_RenderScreen
-// 
-// Call into the CG Module for rendering the screen's 2D elements.
-//===============
-//
+/**
+*   @brief  Call into the CG Module for rendering the screen's 2D elements.
+**/
 void CL_GM_RenderScreen(void) {
-    if (cge && cge->screen)
-        cge->screen->RenderScreen();
+    if (cge) {
+        IClientGameExportScreen *screen = cge->GetScreenInterface();
+
+        if (screen) {
+            screen->RenderScreen();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_ScreenModeChanged
-// 
-// Call into the CG Module for notifying the screen mode changed.
-//===============
-//
+/**
+*   @brief  Call into the CG Module for notifying the screen mode changed.
+**/
 void CL_GM_ScreenModeChanged(void) {
-    if (cge && cge->screen)
-        cge->screen->ScreenModeChanged();
+    if (cge) {
+        IClientGameExportScreen *screen = cge->GetScreenInterface();
+
+        if (screen) {
+            screen->ScreenModeChanged();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_DrawLoadScreen
-// 
-// Call into the CG Module for notifying the screen mode changed.
-//===============
-//
+/**
+*   @brief  Call into the CG Module to render the load screen for us.
+**/
 void CL_GM_DrawLoadScreen(void) {
-    if (cge && cge->screen)
-        cge->screen->DrawLoadScreen();
+    if (cge) {
+        IClientGameExportScreen *screen = cge->GetScreenInterface();
+
+        if (screen) {
+            screen->DrawLoadScreen();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_DrawPauseScreen
-// 
-// Call into the CG Module for notifying the screen mode changed.
-//===============
-//
+/**
+*   @brief  Call into the CG Module to render the pause screen.
+**/
 void CL_GM_DrawPauseScreen(void) {
-    if (cge && cge->screen)
-        cge->screen->DrawPauseScreen();
+    if (cge) {
+        IClientGameExportScreen *screen = cge->GetScreenInterface();
+
+        if (screen) {
+            screen->DrawPauseScreen();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_RenderView
-// 
-// Call into the CG Module for notifying about "Clear Scene"
-//===============
-//
+/**
+*   @brief  Call into the CG Module for notifying about "Clear Scene"
+**/
 void CL_GM_ClearScene() {
-    if (cge && cge->view)
-        cge->view->ClearScene();
+    if (cge) {
+        IClientGameExportView *view = cge->GetViewInterface();
+
+        if (view) {
+            view->ClearScene();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_PreRenderView
-// 
-// Call into the CG Module for notifying about "Pre Render View"
-//===============
-//
+/**
+*   @brief  Call into the CG Module for notifying about "Pre Render View"
+**/
 void CL_GM_PreRenderView() {
-    if (cge && cge->view)
-        cge->view->PreRenderView();
+    if (cge) {
+        IClientGameExportView *view = cge->GetViewInterface();
+
+        if (view) {
+            view->PreRenderView();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_RenderView
-// 
-// Call into the CG Module for notifying about "Render View"
-//===============
-//
+/**
+*   @brief  Call into the CG Module for notifying about "Render View"
+**/
 void CL_GM_RenderView () {
-    if (cge && cge->view)
-        cge->view->RenderView();
+    if (cge) {
+        IClientGameExportView *view = cge->GetViewInterface();
+
+        if (view) {
+            view->RenderView();
+        }
+    }
 }
 
-//
-//===============
-// CL_GM_PostRenderView
-// 
-// Call into the CG Module for notifying about "Post Render"
-//===============
-//
+/**
+*   @brief  Call into the CG Module for notifying about "Post Render"
+**/
 void CL_GM_PostRenderView () {
-    if (cge && cge->view)
-        cge->view->PostRenderView();
+    if (cge) {
+        IClientGameExportView *view = cge->GetViewInterface();
+
+        if (view) {
+            view->PostRenderView();
+        }
+    }
 }

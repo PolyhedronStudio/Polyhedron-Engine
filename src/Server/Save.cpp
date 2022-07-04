@@ -352,11 +352,11 @@ static int read_server_file(void)
     if (!SV_ParseMapCmd(&cmd))
         return -1;
 
-    // save pending CM to be freed later if ERR_DROP is thrown
+    // save pending CM to be freed later if ErrorType::Drop is thrown
     Com_AbortFunc(abort_func, &cmd.cm);
 
     // any error will drop from this point
-    SV_Shutdown("Server restarted\n", ERR_RECONNECT);
+    SV_Shutdown("Server restarted\n", ErrorType::Reconnect);
 
     // the rest can't underflow
     msg_read.allowUnderflow = false;
@@ -368,11 +368,11 @@ static int read_server_file(void)
         if (!len)
             break;
         if (len >= MAX_QPATH)
-            Com_Error(ERR_DROP, "Savegame cvar name too long");
+            Com_Error(ErrorType::Drop, "Savegame cvar name too long");
 
         len = MSG_ReadStringBuffer(string, sizeof(string));//len = MSG_ReadString(string, sizeof(string));
         if (len >= sizeof(string))
-            Com_Error(ERR_DROP, "Savegame cvar value too long");
+            Com_Error(ErrorType::Drop, "Savegame cvar value too long");
 
         Cvar_UserSet(name, string);
     }
@@ -384,7 +384,7 @@ static int read_server_file(void)
     len = Q_snprintf(name, MAX_OSPATH,
                      "%s/%s/%s/game.ssv", fs_gamedir, sv_savedir->string, SAVE_CURRENT);
     if (len >= MAX_OSPATH)
-        Com_Error(ERR_DROP, "Savegame path too long");
+        Com_Error(ErrorType::Drop, "Savegame path too long");
 
     ge->ReadGame(name);
 
@@ -427,17 +427,17 @@ static int read_level_file(void)
             break;
 
         if (index < 0 || index > ConfigStrings::MaxConfigStrings)
-            Com_Error(ERR_DROP, "Bad savegame configstring index");
+            Com_Error(ErrorType::Drop, "Bad savegame configstring index");
 
         maxlen = CS_SIZE(index);
         len = MSG_ReadStringBuffer(sv.configstrings[index], maxlen);//len = MSG_ReadString(sv.configstrings[index], maxlen);
         if (len >= maxlen)
-            Com_Error(ERR_DROP, "Savegame configstring too long");
+            Com_Error(ErrorType::Drop, "Savegame configstring too long");
     }
 
     len = MSG_ReadUint8();//MSG_ReadByte();
     if (len > MAX_MAP_PORTAL_BYTES)
-        Com_Error(ERR_DROP, "Savegame portalbits too long");
+        Com_Error(ErrorType::Drop, "Savegame portalbits too long");
 
     SV_ClearWorld();
 
@@ -447,7 +447,7 @@ static int read_level_file(void)
     len = Q_snprintf(name, MAX_OSPATH, "%s/%s/%s/%s.sav",
                      fs_gamedir, sv_savedir->string, SAVE_CURRENT, sv.name);
     if (len >= MAX_OSPATH)
-        Com_Error(ERR_DROP, "Savegame path too long");
+        Com_Error(ErrorType::Drop, "Savegame path too long");
 
     ge->ReadLevel(name);
     return 0;
@@ -649,7 +649,7 @@ static void SV_Savegame_f(void)
         return;
     }
 
-    if (sv_maxclients->integer == 1 && svs.client_pool[0].edict->client->playerState.stats[PlayerStats::Health] <= 0) {
+    if (sv_maxclients->integer == 1 && svs.clientPool[0].edict->client->playerState.stats[PlayerStats::Health] <= 0) {
         Com_Printf("Can't savegame while dead!\n");
         return;
     }

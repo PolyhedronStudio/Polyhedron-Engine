@@ -19,9 +19,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // cl_null.c -- this file can stub out the entire client system
 // for pure dedicated servers
 
-#include "Shared/Shared.h"
-#include "Common/CVar.h"
-#include "Common/Bsp.h"
+#include "../Shared/Shared.h"
+#include "../Common/CVar.h"
+#include "../Common/Bsp.h"
 #include "Client/Client.h"
 
 static void Key_Bind_Null_f(void)

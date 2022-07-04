@@ -77,9 +77,9 @@ static void DrawSkyPolygon(int nump, vec3_t *vecs)
         v.y += vp[1];
         v.z += vp[2];
     }
-    av[0] = std::fabsf(v[0]);
-    av[1] = std::fabsf(v[1]);
-    av[2] = std::fabsf(v[2]);
+    av[0] = fabs(v[0]);
+    av[1] = fabs(v[1]);
+    av[2] = fabs(v[2]);
     if (av[0] > av[1] && av[0] > av[2]) {
         if (v[0] < 0)
             axis = 1;

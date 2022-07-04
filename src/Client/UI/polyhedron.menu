@@ -262,7 +262,6 @@ begin crosshair
     blank
     values "crosshair type" crosshair none cross dot angle
     pairs "crosshair scale" ch_scale 1x 1 2x 2 4x 4
-    toggle "color by health" ch_health
     range -p -f "%.0f%%" "red channel" ch_red 0 1
     range -p -f "%.0f%%" "green channel" ch_green 0 1
     range -p -f "%.0f%%" "blue channel" ch_blue 0 1
@@ -364,12 +363,12 @@ begin development
     field --width 32 "map" dev_map
     blank
 /*
-    values "Gamemode: " dev_gamemode \
+    values "GameMode: " dev_gamemode \
         singleplayer \
         deathmatch \
         coop
 */
-    pairs "Gamemode: " dev_gamemode \
+    pairs "GameMode: " dev_gamemode \
         Singleplayer singleplayer \
         Deathmatch deathmatch \
         Cooperative coop

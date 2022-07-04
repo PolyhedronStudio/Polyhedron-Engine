@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "UI.h"
-#include "Server/Server.h"
+#include "../../Server/Server.h"
 
 /*
 ===================================================================
@@ -44,7 +44,7 @@ Action_Init
 static void Action_Init(menuAction_t *a)
 {
     if (!a->generic.name) {
-        Com_Error(ERR_FATAL, "Action_Init: NULL a->generic.name");
+        Com_Error(ErrorType::Fatal, "Action_Init: NULL a->generic.name");
     }
 
     if ((a->generic.uiFlags & UI_CENTER) != UI_CENTER) {
@@ -105,7 +105,7 @@ Static_Init
 static void Static_Init(menuStatic_t *s)
 {
     if (!s->generic.name) {
-        Com_Error(ERR_FATAL, "Static_Init: NULL s->generic.name");
+        Com_Error(ErrorType::Fatal, "Static_Init: NULL s->generic.name");
     }
 
     if (!s->maxChars) {
@@ -196,7 +196,7 @@ static void Keybind_Init(menuKeybind_t *k)
     size_t len;
 
     if (!k->generic.name) {
-        Com_Error(ERR_FATAL, "Keybind_Init: NULL k->generic.name");
+        Com_Error(ErrorType::Fatal, "Keybind_Init: NULL k->generic.name");
     }
 
     k->generic.uiFlags &= ~(UI_LEFT | UI_RIGHT);
@@ -1786,7 +1786,7 @@ Menu_AddItem
 void Menu_AddItem(menuFrameWork_t *menu, void *item)
 {
     if (menu->nitems >= MAXMENUITEMS) {
-        Com_Error(ERR_FATAL, "Menu_AddItem: too many items");
+        Com_Error(ErrorType::Fatal, "Menu_AddItem: too many items");
     }
 
     menu->items[menu->nitems++] = item;
@@ -1884,7 +1884,7 @@ void Menu_Init(menuFrameWork_t *menu)
             Bitmap_Init((menuBitmap_t*)item); // CPP: Cast
             break;
         default:
-            Com_Error(ERR_FATAL, "Menu_Init: unknown item type");
+            Com_Error(ErrorType::Fatal, "Menu_Init: unknown item type");
             break;
         }
     }
@@ -2279,7 +2279,7 @@ void Menu_Draw(menuFrameWork_t *menu)
             Bitmap_Draw((menuBitmap_t*)item);// CPP: Cast
             break;
         default:
-            Com_Error(ERR_FATAL, "Menu_Draw: unknown item type");
+            Com_Error(ErrorType::Fatal, "Menu_Draw: unknown item type");
             break;
         }
 

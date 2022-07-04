@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 /* crc.c */
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 
 // this is a 16 bit, non-reflected CRC using the polynomial 0x1021
 // and the initial and final xor values shown below...  in other words, the
@@ -154,7 +154,7 @@ byte COM_BlockSequenceCRCByte(byte *base, size_t length, int sequence)
     unsigned short crc;
 
     if (sequence < 0)
-        Com_Error(ERR_DROP, "%s: sequence < 0", __func__);
+        Com_Error(ErrorType::Drop, "%s: sequence < 0", __func__);
 
     p = chktbl + (sequence % (sizeof(chktbl) - 4));
 

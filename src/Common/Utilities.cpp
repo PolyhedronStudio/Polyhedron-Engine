@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
+#include "../Shared/Shared.h"
 #include "Common/Utilities.h"
 
 /*
@@ -271,7 +271,7 @@ void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es)
     vec_t pitch;
 
     // PH: FF Precision.
-    VectorCopy(ps->pmove.origin, es->origin);
+    es->origin = ps->pmove.origin; //VectorCopy(ps->pmove.origin, es->origin);
     //VectorScale(ps->pmove.origin, 0.125f, es->origin);
 
     pitch = ps->pmove.viewAngles[vec3_t::Pitch];

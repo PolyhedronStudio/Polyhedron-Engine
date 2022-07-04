@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
-#include "Common/Error.h"
+#include "../Shared/Shared.h"
+#include "Error.h"
 
 static const char *const error_table[] = {
     "Unspecified error",
@@ -28,7 +28,7 @@ static const char *const error_table[] = {
     "Too many elements",
     "Too few elements",
     "Index out of range",
-    "Invalid quake path",
+    "Invalid Polyhedron path",
     "File name too short",
     "Unexpected end of file",
     "File too small",

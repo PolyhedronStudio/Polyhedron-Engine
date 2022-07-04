@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include <assert.h>
-#include "Shared/Shared.h"
 #include "vkpt.h"
 #include "vk_util.h"
 #include "conversion.h"
@@ -182,7 +181,7 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 		}
 		else if ((entities[i].model & 0x80000000) == 0)
 		{
-			const model_t* model = MOD_ForHandle(entities[i].model);
+			const model_t* model = CL_Model_GetModelByHandle(entities[i].model);
 			if (model && model->type == model_t::MOD_SPRITE)
 				++sprite_num;
 		}
@@ -641,7 +640,7 @@ static void write_sprite_geometry(const float* view_matrix, const r_entity_t* en
 		if (e->model & 0x80000000)
 			continue;
 
-		const model_t* model = MOD_ForHandle(e->model);
+		const model_t* model = CL_Model_GetModelByHandle(e->model);
 		if (!model || model->type != model_t::MOD_SPRITE)
 			continue;
 

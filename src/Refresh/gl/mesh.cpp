@@ -56,10 +56,10 @@ static void setup_dotshading(void)
 
     // matches the anormtab.h precalculations
     yaw = -Radians(glr.ent->angles[vec3_t::Yaw]);
-    cy = std::cosf(yaw);
-    sy = std::sinf(yaw);
-    cp = std::cosf(-M_PI / 4);
-    sp = std::sinf(-M_PI / 4);
+    cy = cosf(yaw);
+    sy = sinf(yaw);
+    cp = cosf(-M_PI / 4);
+    sp = sinf(-M_PI / 4);
     shadedir[0] = cp * cy;
     shadedir[1] = cp * sy;
     shadedir[2] = -sp;
@@ -388,7 +388,7 @@ static void setup_color(void)
         }
 
         if (flags & RenderEffects::Glow) {
-            f = 0.1f * std::sinf(glr.fd.time * 7);
+            f = 0.1f * sinf(glr.fd.time * 7);
             for (i = 0; i < 3; i++) {
                 m = color[i] * 0.8f;
                 color[i] += f;
@@ -449,7 +449,7 @@ static void draw_celshading(maliasmesh_t *mesh)
 static void setup_shadow(void)
 {
     GLfloat matrix[16], tmp[16];
-    cplane_t *plane;
+    CollisionPlane *plane;
     vec3_t dir;
 
     shadowmatrix[15] = 0;

@@ -17,18 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
-#include "Common/Bsp.h"
-#include "Common/Cmd.h"
-#include "Common/Common.h"
-#include "Common/cvar.h"
-#include "Common/Files.h"
-#include "Client/Video.h"
-#include "Client/Client.h"
-#include "refresh/refresh.h"
-#include "refresh/images.h"
-#include "refresh/models.h"
-#include "System/Hunk.h"
+
 #include "vkpt.h"
 #include "material.h"
 #include "fog.h"
@@ -282,7 +271,7 @@ vkpt_initialize_all(VkptInitFlags_t init_flags)
 		assert(init->is_initialized);
 
 		if (!init->is_initialized)
-		  Com_Error(ERR_FATAL, "Couldn't initialize %s.\n", init->name);
+		  Com_Error(ErrorType::Fatal, "Couldn't initialize %s.\n", init->name);
 	}
 
 	if ((VKPT_INIT_DEFAULT & init_flags) == init_flags)
@@ -871,7 +860,7 @@ init_vulkan()
 
 	if (result != VK_SUCCESS)
 	{
-		Com_Error(ERR_FATAL, "Failed to initialize a Vulkan instance.\nError code: %s", qvk_result_to_string(result));
+		Com_Error(ErrorType::Fatal, "Failed to initialize a Vulkan instance.\nError code: %s", qvk_result_to_string(result));
 		return false;
 	}
 
@@ -1029,7 +1018,7 @@ init_vulkan()
 	}
 	if (picked_device < 0)
 	{
-		Com_Error(ERR_FATAL, "No ray tracing capable GPU found.");
+		Com_Error(ErrorType::Fatal, "No ray tracing capable GPU found.");
 	}
 
 	qvk.physical_device = devices[picked_device];
@@ -1066,7 +1055,7 @@ init_vulkan()
 			int nfields = sscanf(cvar_min_driver_version_nvidia->string, "%u.%u", &required_major, &required_minor);
 			if (nfields == 2) 			{
 				if (driver_major < required_major || driver_major == required_major && driver_minor < required_minor) 				{
-					Com_Error(ERR_FATAL, "This game requires NVIDIA Graphics Driver version to be at least %u.%02u, "
+					Com_Error(ErrorType::Fatal, "This game requires NVIDIA Graphics Driver version to be at least %u.%02u, "
 						"while the installed version is %u.%02u.\nPlease update the NVIDIA Graphics Driver.",
 						required_major, required_minor, driver_major, driver_minor);
 				}
@@ -1090,7 +1079,7 @@ init_vulkan()
 			{
 				if (present_major < required_major || present_major == required_major && present_minor < required_minor || present_major == required_major && present_minor == required_minor && present_patch < required_patch)
 				{
-					Com_Error(ERR_FATAL, "This game requires AMD Radeon Software version to be at least %s, while the installed version is %s.\nPlease update the AMD Radeon Software.",
+					Com_Error(ErrorType::Fatal, "This game requires AMD Radeon Software version to be at least %s, while the installed version is %s.\nPlease update the AMD Radeon Software.",
 						cvar_min_driver_version_amd->string, driver_properties.driverInfo);
 				}
 			}
@@ -1151,7 +1140,7 @@ init_vulkan()
 	}
 
 	if (qvk.queue_idx_graphics < 0 || qvk.queue_idx_transfer < 0) {
-		Com_Error(ERR_FATAL, "Could not find a suitable Vulkan queue family!\n");
+		Com_Error(ErrorType::Fatal, "Could not find a suitable Vulkan queue family!\n");
 		return false;
 	}
 	
@@ -1328,7 +1317,7 @@ init_vulkan()
 	result = vkCreateDevice(qvk.physical_device, &dev_create_info, NULL, &qvk.device);
 	if (result != VK_SUCCESS)
 	{
-		Com_Error(ERR_FATAL, "Failed to create a Vulkan device.\nError code: %s", qvk_result_to_string(result));
+		Com_Error(ErrorType::Fatal, "Failed to create a Vulkan device.\nError code: %s", qvk_result_to_string(result));
 		return false;
 	}
 
@@ -1646,7 +1635,7 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 	VectorCopy(transformed, result); // vec4 -> vec3
 }
 
-static void instance_model_lights(int num_light_polys, const light_poly_t* light_polys, const float* transform) {
+static void instance_model_lights(int num_light_polys, const light_poly_t* light_polys, const float* transform, int lightStyle = -1) {
 	for (int nlight = 0; nlight < num_light_polys; nlight++) 	{
 		if (num_model_lights >= MAX_MODEL_LIGHTS) 		{
 			assert(!"Model light count overflow");
@@ -1672,7 +1661,15 @@ static void instance_model_lights(int num_light_polys, const light_poly_t* light
 		// Copy the other light properties
 		VectorCopy(src_light->color, dst_light->color);
 		dst_light->material = src_light->material;
-		dst_light->style = src_light->style;
+		//if ( lightStyle > 0 ) {
+		//	dst_light->style = lightStyle;
+		//} else {
+		if ( lightStyle > -1 ) {
+			dst_light->style = lightStyle;
+		} else {
+			dst_light->style = src_light->style;
+		}
+//		}		
 
 		num_model_lights++;
 	}
@@ -1808,9 +1805,56 @@ static void process_regular_entity(
 			return;
 		}
 
-		R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
+		// Use the good old R_ComputeIQMTransforms for when no extra skeletal model data was precached.
+		if (!model->skeletalModelData) {
+			R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
 
-		*iqm_matrix_offset += (int)model->iqmData->num_poses;
+			*iqm_matrix_offset += (int)model->iqmData->num_poses;
+		// Otherwise, take a special route.
+		} else if (model->skeletalModelData) {		
+			iqm_transform_t relativeJointsA[IQM_MAX_JOINTS];
+			iqm_transform_t relativeJointsB[IQM_MAX_JOINTS];
+
+			// Get pose mat pointer.
+			float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
+
+			// Compute Joints: Relative, World, and Local matrices.
+			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
+			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, relativeJointsB);
+			
+			// From Bone 2:
+			if (entity->frameB != -1) {
+				MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 4, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+			}
+			// From Bone 3:
+//			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+
+			// Apply RootBoneAxisFlags for Translation.
+			//MOD_ApplyRootBoneAxisFlags(model, entity->rootBoneAxisFlags, 0, relativeJointsA, 1.0f, 1.0f - entity->backlerp, entity->backlerp);
+
+			MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+			MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+
+			//// Compute Joints: Relative, World, and Local matrices.
+			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsC);
+			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
+			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frameB, entity->oldframeB, 1.0f - entity->backlerp, entity->backlerp, relativeJointsB);
+			//
+			//const float fraction = 1.0;
+
+			//// From Bone 2:
+			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 2, fraction, 1.0f - entity->backlerp, entity->backlerp);
+			//// From Bone 3:
+			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 3, fraction, 1.0f - entity->backlerp, entity->backlerp);
+
+			//MOD_RecursiveBlendFromBone(model, relativeJointsC, relativeJointsA, 0, fraction, 1.0f - entity->backlerp, entity->backlerp);
+
+			//MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+			//MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+
+			*iqm_matrix_offset += (int)model->iqmData->num_poses;
+		}
+
 	}
 
 	for (int i = 0; i < model->nummeshes; i++) {
@@ -1954,9 +1998,25 @@ prepare_entities(EntityUploadInfo* upload_info) {
 			else
 				process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert); /* embedded in bsp */
 		} 		else 		{
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			if (model == NULL || model->meshes == NULL)
 				continue;
+
+			if (model->num_light_polys > 0 && entity->modelLightStyle > -1) {
+				//model->light_polys->style = entity->modelLightStyle;
+				instance_idx++;
+				model_instance_idx++;
+			}
+				//} else if (model->num_light_polys > 0) {
+			//	model_instance_idx++;
+			//	//model->light_polys->style = 0;
+			//}
+			//if (entity->modelLightStyle == 5 || entity->modelLightStyle == 36) {
+			//if (entity->modelLightStyle > 0) {
+			
+			//	model_instance_idx++;
+			//}
+			//}
 
 			if (entity->flags & RenderEffects::ViewerModel)
 				viewer_model_indices[viewer_model_num++] = i;
@@ -1980,8 +2040,23 @@ prepare_entities(EntityUploadInfo* upload_info) {
 				mat4_t transform;
 				const qboolean is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
 				create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
+				
+				// Model Light Styles.
+				//light_poly_t* src_light = model->light_polys + 0;
+				//if (entity->modelLightStyle > 0) {
+				//	for (int nlight = 0; nlight < model->num_light_polys; nlight++) {
+				//		light_poly_t* src_lightA = model->light_polys + nlight;
+				//		src_lightA->style = 5;//entity->modelLightStyle;
 
-				instance_model_lights(model->num_light_polys, model->light_polys, transform);
+				//	}
+				//}}
+
+				// Instance Model Lights.
+				if ( entity->modelLightStyle > -1 ) {
+					instance_model_lights( model->num_light_polys, model->light_polys, transform, entity->modelLightStyle );
+				} else {
+					instance_model_lights( model->num_light_polys, model->light_polys, transform );
+				}
 			}
 		}
 	}
@@ -1995,7 +2070,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 		if (entity->model & 0x80000000) 		{
 			process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert);
 		} 		else 		{
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_TRANSPARENT, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 		}
@@ -2011,7 +2086,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 		if (entity->model & 0x80000000) 		{
 			process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert);
 		} 		else 		{
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_MASKED, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 		}
@@ -2024,7 +2099,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	if (first_person_model) 	{
 		for (int i = 0; i < viewer_model_num; i++) 		{
 			const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
-			const model_t* model = MOD_ForHandle(entity->model);
+			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
 				MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 		}
@@ -2038,7 +2113,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	const uint32_t viewer_weapon_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < viewer_weapon_num; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
-		const model_t* model = MOD_ForHandle(entity->model);
+		const model_t* model = CL_Model_GetModelByHandle(entity->model);
 		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 
@@ -2052,7 +2127,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	const uint32_t explosion_base_vertex_num = num_instanced_vert;
 	for (int i = 0; i < explosion_num; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
-		const model_t* model = MOD_ForHandle(entity->model);
+		const model_t* model = CL_Model_GetModelByHandle(entity->model);
 		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
 			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
 	}
@@ -2516,11 +2591,11 @@ prepare_ubo(refdef_t* fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 
 	int camera_cluster_contents = viewleaf ? viewleaf->contents : 0;
 
-	if (camera_cluster_contents & CONTENTS_WATER)
+	if (camera_cluster_contents & BrushContents::Water)
 		ubo->medium = MEDIUM_WATER;
-	else if (camera_cluster_contents & CONTENTS_SLIME)
+	else if (camera_cluster_contents & BrushContents::Slime)
 		ubo->medium = MEDIUM_SLIME;
-	else if (camera_cluster_contents & CONTENTS_LAVA)
+	else if (camera_cluster_contents & BrushContents::Lava)
 		ubo->medium = MEDIUM_LAVA;
 	else
 		ubo->medium = MEDIUM_NONE;
@@ -2654,7 +2729,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		return;
 
 	vkpt_refdef.fd = fd;
-	qboolean render_world = (fd->rdflags & RDF_NOWORLDMODEL) == 0;
+	bool render_world = (fd->rdflags & RDF_NOWORLDMODEL) == 0;
 
 	static float previous_time = -1.f;
 	float frame_time = min(1.f, max(0.f, fd->time - previous_time));
@@ -2700,13 +2775,20 @@ R_RenderFrame_RTX(refdef_t *fd)
 	vec3_t sky_matrix[3];
 	prepare_sky_matrix(fd->time, sky_matrix);
 
-	sun_light_t sun_light = { };
+	sun_light_t sun_light = {
+		.direction = vec3_zero(),
+		.direction_envmap = vec3_zero(),
+		.color = vec3_zero(),
+		.angular_size_rad = 0,
+		.use_physical_sky = false,
+		.visible = false,
+	};
 	if (render_world)
 	{
 		vkpt_evaluate_sun_light(&sun_light, sky_matrix, fd->time);
 
 		if (!vkpt_physical_sky_needs_update())
-			sun_light.visible = sun_light.visible && sun_visible_prev;
+			sun_light.visible = ( ( sun_light.visible > 0 && sun_visible_prev > 0 ) ? true : false );
 	}
 
 	reference_mode_t ref_mode;
@@ -2764,7 +2846,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		shadowmap_view_proj,
 		shadowmap_depth_scale);
 
-	qboolean god_rays_enabled = vkpt_god_rays_enabled(&sun_light) && render_world;
+	bool god_rays_enabled = vkpt_god_rays_enabled(&sun_light) && render_world;
 
 	VkSemaphore transfer_semaphores[VKPT_MAX_GPUS];
 	VkSemaphore trace_semaphores[VKPT_MAX_GPUS];
@@ -3386,7 +3468,7 @@ R_Init_RTX(qboolean total)
 	registration_sequence = 1;
 
 	if (!VID_Init(GAPI_VULKAN)) {
-		Com_Error(ERR_FATAL, "VID_Init failed\n");
+		Com_Error(ErrorType::Fatal, "VID_Init failed\n");
 		return false;
 	}
 
@@ -3520,10 +3602,10 @@ R_Init_RTX(qboolean total)
 
 	IMG_Init();
 	IMG_GetPalette();
-	MOD_Init();
+	CL_Model_Init();
 	
 	if(!init_vulkan()) {
-		Com_Error(ERR_FATAL, "Couldn't initialize Vulkan.\n");
+		Com_Error(ErrorType::Fatal, "Couldn't initialize Vulkan.\n");
 		return false;
 	}
 
@@ -3594,7 +3676,7 @@ R_Shutdown_RTX(qboolean total)
 	}
 
 	IMG_Shutdown();
-	MOD_Shutdown(); // todo: currently leaks memory, need to clear submeshes
+	CL_Model_Shutdown(); // todo: currently leaks memory, need to clear submeshes
 	VID_Shutdown();
 }
 
@@ -3935,7 +4017,7 @@ R_BeginRegistration_RTX(const char *name)
 	bsp_t *bsp;
 	qerror_t ret = BSP_Load(bsp_path, &bsp);
 	if(!bsp) {
-		Com_Error(ERR_DROP, "%s: couldn't load %s: %s", __func__, bsp_path, Q_ErrorString(ret));
+		Com_Error(ErrorType::Drop, "%s: couldn't load %s: %s", __func__, bsp_path, Q_ErrorString(ret));
 	}
 	bsp_world_model = bsp;
 	bsp_mesh_register_textures(bsp);
@@ -3981,7 +4063,7 @@ R_EndRegistration_RTX(const char *name)
 	vkpt_physical_sky_endRegistration();
 
 	IMG_FreeUnused();
-	MOD_FreeUnused();
+	CL_Model_FreeUnused();
 	MAT_FreeUnused();
 }
 

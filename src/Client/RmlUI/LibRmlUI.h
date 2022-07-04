@@ -1,7 +1,7 @@
 // LICENSE HERE.
 
 //
-// client/rmlui/rmlui.h
+// client/rmlui/RmlUI
 //
 //
 // RmlUI client includes. Handles save including of the RmlUi library headers.

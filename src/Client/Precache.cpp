@@ -22,8 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //
 
 #include "Client.h"
-#include "Client/GameModule.h"
-#include "Client/Sound/Vorbis.h"
+#include "GameModule.h"
+#include "Sound/Vorbis.h"
+#include "Sound/Sound.h"
 
 /*
 ================
@@ -53,9 +54,15 @@ void CL_RegisterBspModels(void)
     char *name;
     int i;
 
+	// Load Refresh BSP parts.
     ret = BSP_Load(cl.configstrings[ConfigStrings::Models+ 1], &cl.bsp);
-    if (cl.bsp == NULL) {
-        Com_Error(ERR_DROP, "Couldn't load %s: %s",
+
+	// Load collision model BSP parts.
+	//if (ret) {
+	ret = CM_LoadMap(&cl.cm, cl.configstrings[ConfigStrings::Models + 1]);
+	//}
+    if (cl.bsp == NULL || cl.cm.cache == NULL) {
+        Com_Error(ErrorType::Drop, "Couldn't load %s: %s",
                   cl.configstrings[ConfigStrings::Models+ 1], Q_ErrorString(ret));
     }
 
@@ -65,7 +72,7 @@ void CL_RegisterBspModels(void)
             Com_WPrintf("Local map version differs from demo: %i != %s\n",
                         cl.bsp->checksum, cl.configstrings[ConfigStrings::MapCheckSum]);
         } else {
-            Com_Error(ERR_DROP, "Local map version differs from server: %i != %s",
+            Com_Error(ErrorType::Drop, "Local map version differs from server: %i != %s",
                       cl.bsp->checksum, cl.configstrings[ConfigStrings::MapCheckSum]);
         }
     }
@@ -98,19 +105,28 @@ void CL_PrepareMedia(void)
     if (!cl.mapName[0])
         return;     // no map loaded
 
-
     // register models, pics, and skins
     R_BeginRegistration(cl.mapName);
     // register sounds.
     S_BeginRegistration();
 
+    // Ensure to register these too, for client side prediction.
+    CL_RegisterBspModels();  
+
+	// Inquire the game module to spawn all its entities, so that it may too load its data.
+	if (cl.bsp) {
+		// Let the client game module know we "connected" right here so it can
+		// make use of the BSP data and initialize its 'world' properly.
+		CL_GM_ClientConnect();
+
+		// Give it a chance to precache and spawn its entities.
+		CL_GM_SpawnEntitiesFromBSPString(cl.mapName, cl.bsp->entityString);
+	}
+
     // PH: Pass over loading to the CG Module so it can actively
     // manage the load state. This is useful for load screen information.
     CL_GM_LoadWorldMedia();
 
-    // Ensure to register these too, for client side prediction.
-    CL_RegisterBspModels();
-    
     // The sound engine can now free unneeded stuff
     S_EndRegistration();
 
@@ -154,7 +170,7 @@ void CL_UpdateConfigstring(int index)
         size_t len = strlen(s);
 
         if (len <= 9) {
-            Com_Error(ERR_DROP, "%s: bad world model: %s", __func__, s);
+            Com_Error(ErrorType::Drop, "%s: bad world model: %s", __func__, s);
         }
         memcpy(cl.mapName, s + 5, len - 9);   // skip "maps/"
         cl.mapName[len - 9] = 0; // cut off ".bsp"

@@ -16,7 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // snd_mem.c: sound caching
-
+#include "../../Shared/Shared.h"
+#include "../Client.h"
 #include "Sound.h"
 
 wavinfo_t s_info;

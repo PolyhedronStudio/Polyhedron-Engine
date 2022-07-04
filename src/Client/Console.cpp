@@ -548,9 +548,9 @@ void Con_SetColor(color_index_t color)
 CL_LoadState
 =================
 */
-void CL_LoadState(LoadState state)
+void CL_LoadState(int32_t loadState)
 {
-    con.loadstate = state;
+    con.loadstate = loadState;
     SCR_UpdateScreen();
     VID_PumpEvents();
 }
@@ -647,7 +647,7 @@ void Con_RegisterMedia(void)
             con.charsetImage = R_RegisterImage("conchars", IT_FONT, (imageflags_t)(IF_PERMANENT | IF_SRGB), &err); // CPP: cast imageflags_t
         }
         if (!con.charsetImage) {
-            Com_Error(ERR_FATAL, "Couldn't load pics/conchars.pcx: %s", Q_ErrorString(err));
+            Com_Error(ErrorType::Fatal, "Couldn't load pics/conchars.pcx: %s", Q_ErrorString(err));
         }
     }
 

@@ -16,7 +16,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "Shared/Shared.h"
 #include "vkpt.h"
 #include "vk_util.h"
 
@@ -393,10 +392,9 @@ static void update_descriptor_set()
 	vkUpdateDescriptorSets(qvk.device, LENGTH(writes), writes, 0, NULL);
 }
 
-qboolean vkpt_god_rays_enabled(const sun_light_t* sun_light)
+bool vkpt_god_rays_enabled(const sun_light_t* sun_light)
 {
-	return god_rays.enable->integer
-		&& god_rays.intensity->value > 0.f
-		&& sun_light->visible
-		&& !physical_sky_space->integer;  // god rays look weird in space because they also appear outside of the station
+	return ( ( god_rays.enable->integer != 0 && god_rays.intensity->value > 0.f && sun_light->visible != 0) ? true : false);
+
+		//&& !physical_sky_space->integer;  // god rays look weird in space because they also appear outside of the station
 }

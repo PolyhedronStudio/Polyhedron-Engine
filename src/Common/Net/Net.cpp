@@ -20,20 +20,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // net.c
 //
 
-#include "Shared/Shared.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Fifo.h"
+#include "../../Shared/Shared.h"
+#include "../Common.h"
+#include "../CVar.h"
+#include "../Fifo.h"
 #ifdef _DEBUG
-#include "Common/Files.h"
+#include "../Files.h"
 #endif
-#include "Common/Msg.h"
-#include "Common/Net/Net.h"
-#include "Common/Protocol.h"
-#include "Common/Zone.h"
-#include "Client/Client.h"
-#include "Server/Server.h"
-#include "System/System.h"
+#include "../Messaging.h"
+#include "../Net/Net.h"
+#include "../Protocol.h"
+#include "../Zone.h"
+#include "../../Client/Client.h"
+#include "../../Server/Server.h"
+#include "../../System/System.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -248,7 +248,7 @@ char *NET_BaseAdrToString(const NetAdr *a)
         else
             return strcpy(s, "<invalid>");
     default:
-        Com_Error(ERR_FATAL, "%s: bad address type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad address type", __func__);
     }
 
     return NULL;
@@ -651,9 +651,9 @@ static void NET_ErrorEvent(qsocket_t sock, NetAdr *from,
 
 // include our wrappers to hide platfrom-specific details
 #ifdef _WIN32
-#include "win.h"
+#include "Win.h"
 #else
-#include "unix.h"
+#include "Unix.h"
 #endif
 
 /*
@@ -876,7 +876,7 @@ qboolean NET_SendPacket(NetSource sock, const void *data,
         s = udp6_sockets[sock];
         break;
     default:
-        Com_Error(ERR_FATAL, "%s: bad address type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad address type", __func__);
     }
 
     if (s == -1)
@@ -1155,7 +1155,7 @@ static void NET_OpenServer(void)
     }
 #endif
 
-    Com_Error(ERR_FATAL, "Couldn't open dedicated server UDP port");
+    Com_Error(ErrorType::Fatal, "Couldn't open dedicated server UDP port");
 }
 
 static void NET_OpenServer6(void)

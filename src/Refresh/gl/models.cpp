@@ -17,9 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "gl.h"
-#include "Format/Md2.h"
-#include "Format/Md3.h"
-#include "Format/Sp2.h"
+#include "Shared/Formats/Md2.h"
+#include "Shared/Formats/Md3.h"
+#include "Shared/Formats/Sp2.h"
 
 #if MAX_ALIAS_VERTS > TESS_MAX_VERTICES
 #error TESS_MAX_VERTICES
@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #error TESS_MAX_INDICES
 #endif
 
-qerror_t MOD_LoadMD2_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name)
+qerror_t MOD_LoadMD2_GL(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name)
 {
     dmd2header_t    header;
     dmd2frame_t     *src_frame;
@@ -135,17 +135,17 @@ qerror_t MOD_LoadMD2_GL(model_t* model, const void* rawdata, size_t length, cons
     model->type = model_s::MOD_ALIAS; // CPP: Enum
     model->nummeshes = 1;
     model->numframes = header.num_frames;
-    model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t)); // CPP: Cast
-    model->frames = (maliasframe_s*)MOD_Malloc(header.num_frames * sizeof(maliasframe_t)); // CPP: Cast
+    model->meshes = (maliasmesh_s*)modelAlloc(&model->hunk, sizeof(maliasmesh_t)); // CPP: Cast
+    model->frames = (maliasframe_s*)modelAlloc(&model->hunk, header.num_frames * sizeof(maliasframe_t)); // CPP: Cast
 
     dst_mesh = model->meshes;
     dst_mesh->numtris = numindices / 3;
     dst_mesh->numindices = numindices;
     dst_mesh->numverts = numverts;
     dst_mesh->numskins = header.num_skins;
-    dst_mesh->verts = (maliasvert_t*)MOD_Malloc(numverts * header.num_frames * sizeof(maliasvert_t)); // CPP: Cast
-    dst_mesh->tcoords = (maliastc_t*)MOD_Malloc(numverts * sizeof(maliastc_t)); // CPP: Cast
-    dst_mesh->indices = (GLuint*)MOD_Malloc(numindices * sizeof(QGL_INDEX_TYPE)); // CPP: Cast
+    dst_mesh->verts = (maliasvert_t*)modelAlloc(&model->hunk, numverts * header.num_frames * sizeof(maliasvert_t)); // CPP: Cast
+    dst_mesh->tcoords = (maliastc_t*)modelAlloc(&model->hunk, numverts * sizeof(maliastc_t)); // CPP: Cast
+    dst_mesh->indices = (GLuint*)modelAlloc(&model->hunk, numindices * sizeof(QGL_INDEX_TYPE)); // CPP: Cast
 
     if (dst_mesh->numtris != header.num_tris) {
         Com_DPrintf("%s has %d bad triangles\n", model->name, header.num_tris - dst_mesh->numtris);
@@ -242,7 +242,7 @@ fail:
 }
 
 #if USE_MD3
-static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
+static qerror_t MOD_LoadMD3Mesh(model_t *model, ModelMemoryAllocateCallback modelAlloc, maliasmesh_t *mesh,
                                 const byte *rawdata, size_t length, size_t *offset_p)
 {
     dmd3mesh_t      header;
@@ -296,9 +296,9 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
     mesh->numindices = header.num_tris * 3;
     mesh->numverts = header.num_verts;
     mesh->numskins = header.num_skins;
-    mesh->verts = (maliasvert_t*)MOD_Malloc(sizeof(maliasvert_t) * header.num_verts * model->numframes); // CPP: Cast
-    mesh->tcoords = (maliastc_t*)MOD_Malloc(sizeof(maliastc_t) * header.num_verts); // CPP: Cast
-    mesh->indices = (GLuint*)MOD_Malloc(sizeof(QGL_INDEX_TYPE) * header.num_tris * 3); // CPP: Cast
+    mesh->verts = (maliasvert_t*)modelAlloc(&model->hunk, sizeof(maliasvert_t) * header.num_verts * model->numframes); // CPP: Cast
+    mesh->tcoords = (maliastc_t*)modelAlloc(&model->hunk, sizeof(maliastc_t) * header.num_verts); // CPP: Cast
+    mesh->indices = (GLuint*)modelAlloc(&model->hunk, sizeof(QGL_INDEX_TYPE) * header.num_tris * 3); // CPP: Cast
 
     // load all skins
     src_skin = (dmd3skin_t *)(rawdata + header.ofs_skins);
@@ -346,7 +346,7 @@ static qerror_t MOD_LoadMD3Mesh(model_t *model, maliasmesh_t *mesh,
     return Q_ERR_SUCCESS;
 }
 
-qerror_t MOD_LoadMD3_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name)
+qerror_t MOD_LoadMD3_GL(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name)
 {
     dmd3header_t    header;
     size_t          end, offset, remaining;
@@ -386,8 +386,8 @@ qerror_t MOD_LoadMD3_GL(model_t* model, const void* rawdata, size_t length, cons
     model->type = model_s::MOD_ALIAS; // CPP: Enum
     model->numframes = header.num_frames;
     model->nummeshes = header.num_meshes;
-    model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t) * header.num_meshes); // CPP: Cast
-    model->frames = (maliasframe_s*)MOD_Malloc(sizeof(maliasframe_t) * header.num_frames); // CPP: Cast
+    model->meshes = (maliasmesh_s*)modelAlloc(&model->hunk, sizeof(maliasmesh_t) * header.num_meshes); // CPP: Cast
+    model->frames = (maliasframe_s*)modelAlloc(&model->hunk, sizeof(maliasframe_t) * header.num_frames); // CPP: Cast
 
     // load all frames
     src_frame = (dmd3frame_t *)((byte *)rawdata + header.ofs_frames);
@@ -407,7 +407,7 @@ qerror_t MOD_LoadMD3_GL(model_t* model, const void* rawdata, size_t length, cons
     src_mesh = (const byte *)rawdata + header.ofs_meshes;
     remaining = length - header.ofs_meshes;
     for (i = 0; i < header.num_meshes; i++) {
-        ret = MOD_LoadMD3Mesh(model, &model->meshes[i], src_mesh, remaining, &offset);
+        ret = MOD_LoadMD3Mesh(model, modelAlloc, &model->meshes[i], src_mesh, remaining, &offset);
         if (ret)
             goto fail;
         src_mesh += offset;
@@ -423,11 +423,11 @@ fail:
 }
 #endif
 
-qerror_t MOD_LoadIQM_GL(model_t* model, const void* rawdata, size_t length, const char* mod_name) {
+qerror_t MOD_LoadIQM_GL(model_t* model, ModelMemoryAllocateCallback modelAlloc, const void* rawdata, size_t length, const char* mod_name) {
     Hunk_Begin(&model->hunk, 0x4000000);
     model->type = model_t::MOD_ALIAS;
 
-    qerror_t res = MOD_LoadIQM_Base(model, rawdata, length, mod_name);
+    qerror_t res = MOD_LoadIQM_Base(model, modelAlloc, rawdata, length, mod_name);
 
     if (res != Q_ERR_SUCCESS) 	{
         Hunk_Free(&model->hunk);
@@ -437,7 +437,7 @@ qerror_t MOD_LoadIQM_GL(model_t* model, const void* rawdata, size_t length, cons
     char base_path[MAX_QPATH];
     COM_FilePath(mod_name, base_path, sizeof(base_path));
 
-    model->meshes = (maliasmesh_s*)MOD_Malloc(sizeof(maliasmesh_t) * model->iqmData->num_meshes);
+    model->meshes = (maliasmesh_s*)modelAlloc(&model->hunk, sizeof(maliasmesh_t) * model->iqmData->num_meshes);
     model->nummeshes = (int)model->iqmData->num_meshes;
     model->numframes = 1; // these are baked frames, so that the VBO uploader will only make one copy of the vertices
 
@@ -528,7 +528,7 @@ void MOD_Reference_GL(model_t *model)
     case model_s::MOD_EMPTY: // CPP: Enum
         break;
     default:
-        Com_Error(ERR_FATAL, "%s: bad model type", __func__);
+        Com_Error(ErrorType::Fatal, "%s: bad model type", __func__);
     }
 
     model->registration_sequence = registration_sequence;

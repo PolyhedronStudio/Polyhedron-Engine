@@ -17,39 +17,40 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 // client.h -- primary header for client
+#pragma once
 
-#include "Shared/Shared.h"
-#include "Shared/list.h"
+#include "../Shared/Shared.h"
+#include "../Shared/List.h"
 
-#include "Common/Bsp.h"
-#include "Common/Cmd.h"
-#include "Common/CModel.h"
-#include "Common/Common.h"
-#include "Common/CVar.h"
-#include "Common/Field.h"
-#include "Common/Files.h"
-//#include "Common/pmove.h"
-#include "Common/Msg.h"
-#include "Common/Net/NetChan.h"
-#include "Common/Net/Net.h"
-#include "Common/Prompt.h"
-#include "Common/Protocol.h"
-#include "Common/SizeBuffer.h"
-#include "Common/Zone.h"
+#include "../Common/Bsp.h"
+#include "../Common/Cmd.h"
+#include "../Common/CollisionModel.h"
+#include "../Common/Common.h"
+#include "../Common/CVar.h"
+#include "../Common/Field.h"
+#include "../Common/Files.h"
+//#include "../Common/pmove.h"
+#include "../Common/Messaging.h"
+#include "../Common/Net/NetChan.h"
+#include "../Common/Net/Net.h"
+#include "../Common/Prompt.h"
+#include "../Common/Protocol.h"
+#include "../Common/SizeBuffer.h"
+#include "../Common/Utilities.h"
+#include "../Common/Zone.h"
 
-#include "System/System.h"
-#include "refresh/refresh.h"
-#include "Server/Server.h"
+#include "../System/System.h"
+#include "../Refresh/Refresh.h"
+#include "../Server/Server.h"
 
-#include "Client/Client.h"
-#include "Client/Input.h"
-#include "Client/Keys.h"
-#include "Client/Sound/Sound.h"
-#include "Client/UI.h"
-#include "Client/Video.h"
+#include "Input.h"
+#include "Keys.h"
+#include "Sound/Sound.h"
+#include "UI.h"
+#include "Video.h"
 
 // Shared Game includes.
-#include "SharedGame/Protocol.h"
+#include "Game/Shared/Protocol.h"
 
 #if USE_ZLIB
 #include <zlib.h>
@@ -60,7 +61,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // PH: Most structures related to the client have been moved over here.
 // They are shared to the client game dll, since it is tightly coupled.
-#include "Shared/CLTypes.h"
+#include "../Shared/CLTypes.h"
 
 // PH: TODO: REMOVE ONCE ALL OF THIS HAS MOVED TO THE GAME MODULE.
 extern    ClientState    cl;
@@ -122,6 +123,34 @@ typedef struct {
     char        path[1];
 } dlqueue_t;
 
+
+#define MAX_LOCAL_SERVERS   16
+#define MAX_STATUS_PLAYERS  64
+
+typedef struct {
+    char name[MAX_CLIENT_NAME];
+    int ping;
+    int score;
+} playerStatus_t;
+
+struct serverStatus_t {
+    char infostring[MAX_INFO_STRING];
+    playerStatus_t players[MAX_STATUS_PLAYERS];
+    int numPlayers;
+} ;
+
+typedef struct {
+    char map[MAX_QPATH];
+    char pov[MAX_CLIENT_NAME];
+    qboolean mvd;
+} demoInfo_t;
+
+typedef enum {
+    ACT_MINIMIZED,
+    ACT_RESTORED,
+    ACT_ACTIVATED
+} active_t;
+
 struct ClientStatic {
     int32_t    connectionState;
     keydest_t   key_dest;
@@ -129,16 +158,16 @@ struct ClientStatic {
     active_t    active;
 
     qboolean    ref_initialized;
-    unsigned    disable_screen;
+    uint64_t    disable_screen;
 
     int         userinfo_modified;
     cvar_t* userinfo_updates[MAX_PACKET_USERINFOS];
     // this is set each time a CVAR_USERINFO variable is changed
     // so that the client knows to send it to the server
 
-    int         framecount;
-    unsigned    realtime;           // always increasing, no clamping, etc
-    float       frameTime;          // seconds since last frame
+    int64_t     framecount = 0;
+    uint64_t    realtime = 0;           // always increasing, no clamping, etc
+    double      frameTime = 0.0;          // seconds since last frame
 
 // preformance measurement
 #define C_FPS   cls.measure.fps[0]
@@ -150,7 +179,7 @@ struct ClientStatic {
 #define M_FRAMES    cls.measure.frames[2]
 #define P_FRAMES    cls.measure.frames[3]
     struct {
-        unsigned    time;
+        uint64_t    time;
         int         frames[4];
         int         fps[4];
         int         ping;
@@ -159,7 +188,7 @@ struct ClientStatic {
     // connection information
     NetAdr    serverAddress;
     char        servername[MAX_OSPATH]; // name of server from original connect
-    unsigned    timeOfInitialConnect;           // for connection retransmits
+    uint64_t    timeOfInitialConnect;           // for connection retransmits
     int         connect_count;
     qboolean    passive;
 
@@ -203,8 +232,8 @@ struct ClientStatic {
     struct {
         qhandle_t   playback;
         qhandle_t   recording;
-        unsigned    time_start;
-        unsigned    time_frames;
+        uint64_t    time_start;
+        uint64_t    time_frames;
         int         last_server_frame;  // number of server frame the last ServerCommand::Frame was written
         int         frames_written;     // number of frames written to demo file
         int         frames_dropped;     // number of ServerCommand::Frames that didn't fit
@@ -246,13 +275,13 @@ extern cvar_t    *cl_nolerp;
 #ifdef _DEBUG
 #define SHOWNET(level, ...) \
     if (cl_shownet->integer > level) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define SHOWCLAMP(level, ...) \
     if (cl_showclamp->integer > level) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define SHOWMISS(...) \
     if (cl_showmiss->integer) \
-        Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
+        Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 extern cvar_t    *cl_shownet;
 extern cvar_t    *cl_showmiss;
 extern cvar_t    *cl_showclamp;
@@ -360,7 +389,7 @@ typedef struct console_s {
     NetAdr remoteNetAddress;
     char *remotePassword;
 
-    LoadState loadstate;
+    int32_t loadstate;
 } console_t;
 extern console_t con;
 //=============================================================================
@@ -371,7 +400,7 @@ extern console_t con;
 
 void CL_Init(void);
 void CL_Quit_f(void);
-void CL_Disconnect(ErrorType type);
+void CL_Disconnect(int32_t errorType);
 void CL_Begin(void);
 void CL_CheckForResend(void);
 void CL_ClearState(void);
@@ -385,7 +414,7 @@ qboolean CL_CheckForIgnore(const char* s);
 void CL_WriteConfig(void);
 uint32_t    CL_GetConnectionState (void);               // WATISDEZE Added for CG Module.
 void        CL_SetConnectionState (uint32_t state);     // WATISDEZE Added for CG Module.
-void        CL_SetLoadState (LoadState state);          // WATISDEZE Added for CG Module.
+void        CL_SetLoadState(int32_t loadState);          // WATISDEZE Added for CG Module.
 
 qboolean      CL_InBSPMenu();
 void          CL_LoadBSPMenuMap(qboolean force);
@@ -396,7 +425,7 @@ void          CL_CloseBSPMenu();
 // precache.c
 //
 void CL_ParsePlayerSkin(char *name, char *model, char *skin, const char *s);
-void CL_LoadState(LoadState state);
+void CL_LoadState(int32_t loadState);
 void CL_RegisterBspModels(void);
 void CL_PrepareMedia(void);
 void CL_UpdateConfigstring(int index);
@@ -448,13 +477,9 @@ void CL_SeekDemoMessage(void);
 //
 // entities.cpp
 //
-void CL_ClipMoveToEntities(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, ClientEntity* skipEntity, const int32_t contentMask, trace_t* cmDstTrace);
-trace_t CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, entity_s* skipEntity, const int32_t contentMask);
+void CL_ClipMoveToEntities(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask, TraceResult* cmDstTrace);
+//TraceResult CL_Trace(const vec3_t& start, const vec3_t& mins, const vec3_t& maxs, const vec3_t& end, PODEntity* skipEntity, const int32_t contentMask);
 void CL_DeltaFrame(void);
-
-#ifdef _DEBUG
-void CL_CheckEntityPresent(int entnum, const char *what);
-#endif
 
 // the sound code makes callbacks to the client for entitiy position
 // information, so entities can be dynamically re-spatialized
@@ -470,15 +495,6 @@ extern    qhandle_t gun_model;
 void V_Init(void);
 void V_Shutdown(void);
 void V_RenderView(void);
-//void V_AddEntity(r_entity_t *ent);
-//void V_AddParticle(rparticle_t *p);
-
-//void V_AddLight(const vec3_t &org, float intensity, float r, float g, float b);
-//void V_AddLightEx(const vec3_t& org, float intensity, float r, float g, float b, float radius);
-
-#if USE_LIGHTSTYLES
-void V_AddLightStyle(int style, const vec4_t &value);
-#endif
 
 //
 // predict.c
@@ -498,17 +514,6 @@ void CL_EmitDemoSnapshot(void);
 void CL_FirstDemoFrame(void);
 void CL_Stop_f(void);
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
-
-
-//
-// locs.c
-//
-void LOC_Init(void);
-void LOC_LoadLocations(void);
-void LOC_FreeLocations(void);
-void LOC_UpdateCvars(void);
-void LOC_AddLocationsToScene(void);
-
 
 //
 // console.c
@@ -550,30 +555,22 @@ extern rect_t      scr_vrect;        // position of render window
 void    SCR_Init(void);
 void    SCR_Shutdown(void);
 void    SCR_UpdateScreen(void);
-void    SCR_SizeUp(void);
-void    SCR_SizeDown(void);
-void    SCR_CenterPrint(const char *str);
 void    SCR_FinishCinematic(void);
 void    SCR_PlayCinematic(const char *name);
 void    SCR_RunCinematic();
 void    SCR_BeginLoadingPlaque(void);
 void    SCR_EndLoadingPlaque(void);
 void    SCR_DebugGraph(float value, int color);
-void    SCR_TouchPics(void);
 void    SCR_RegisterMedia(void);
 void    SCR_ModeChanged(void);
 void    SCR_LagSample(void);
 void    SCR_LagClear(void);
-void    SCR_SetCrosshairColor(void);
 qhandle_t SCR_GetFont(void);
 void    SCR_SetHudAlpha(float alpha);
 
 float   SCR_FadeAlpha(unsigned startTime, unsigned visTime, unsigned fadeTime);
 int     SCR_DrawStringEx(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font);
 void    SCR_DrawStringMulti(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font);
-
-void    SCR_ClearChatHUD_f(void);
-void    SCR_AddToChatHUD(const char *text);
 
 #ifdef _DEBUG
 void CL_AddNetgraph(void);
@@ -589,21 +586,21 @@ void CL_InitAscii(void);
 //
 // http.c
 //
-#if USE_CURL
+//#if USE_CURL
 void HTTP_Init(void);
 void HTTP_Shutdown(void);
 void HTTP_SetServer(const char *url);
 qerror_t HTTP_QueueDownload(const char *path, dltype_t type);
 void HTTP_RunDownloads(void);
 void HTTP_CleanupDownloads(void);
-#else
-#define HTTP_Init()                     (void)0
-#define HTTP_Shutdown()                 (void)0
-#define HTTP_SetServer(url)             (void)0
-#define HTTP_QueueDownload(path, type)  Q_ERR_NOSYS
-#define HTTP_RunDownloads()             (void)0
-#define HTTP_CleanupDownloads()         (void)0
-#endif
+//#else
+//#define HTTP_Init()                     (void)0
+//#define HTTP_Shutdown()                 (void)0
+//#define HTTP_SetServer(url)             (void)0
+//#define HTTP_QueueDownload(path, type)  Q_ERR_NOSYS
+//#define HTTP_RunDownloads()             (void)0
+//#define HTTP_CleanupDownloads()         (void)0
+//#endif
 
 //
 // gtv.c
@@ -613,3 +610,74 @@ void HTTP_CleanupDownloads(void);
 // crc.c
 //
 byte COM_BlockSequenceCRCByte(byte *base, size_t length, int sequence);
+
+
+
+#if USE_CLIENT
+
+
+qboolean CL_ProcessEvents(void);
+#if USE_ICMP
+void CL_ErrorEvent(NetAdr *from);
+#endif
+void CL_Init(void);
+void CL_InitGameModule(void);
+void CL_Disconnect(int32_t errorType);
+void CL_Shutdown(void);
+uint64_t CL_Frame(uint64_t msec);
+void CL_UpdateSoundSpatializationOrigin(const vec3_t &viewOrigin, const vec3_t &viewForward, const vec3_t &viewRight, const vec3_t &viewUp);
+void CL_RestartFilesystem(qboolean total);
+void CL_Activate(active_t active);
+void CL_UpdateUserinfo(cvar_t* var, from_t from);
+void CL_SendStatusRequest(const NetAdr *address);
+void CL_CheckForIP(const char* s);
+demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
+qboolean CL_CheatsOK(void);
+
+#if USE_CURL
+ssize_t HTTP_FetchFile(const char *url, void **data);
+#endif
+
+// adds the current command line as a ClientCommand::StringCommand to the client message.
+// things like godmode, noclip, etc, are commands directed to the server,
+// so when they are typed in at the console, they will need to be forwarded.
+qboolean CL_ForwardToServer(void);
+
+void Con_Init(void);
+void Con_SetColor(color_index_t color);
+void Con_Print(const char *text);
+void Con_Printf(const char *fmt, ...) q_printf(1, 2);
+void Con_Close(qboolean force);
+
+// this is in the client code, but can be used for debugging from server
+void SCR_DebugGraph(float value, int color);
+void SCR_BeginLoadingPlaque(void);
+void SCR_EndLoadingPlaque(void);
+void SCR_ModeChanged(void);
+void SCR_UpdateScreen(void);
+
+extern const uint32_t   colorTable[8];
+
+qboolean SCR_ParseColor(const char *s, color_t *color);
+
+
+#else // USE_CLIENT
+
+#define CL_Init()                       (void)0
+#define CL_Disconnect(type)             (void)0
+#define CL_Shutdown()                   (void)0
+#define CL_UpdateUserinfo(var, from)    (void)0
+#define CL_ErrorEvent(from)             (void)0
+#define CL_RestartFilesystem(total)     FS_Restart(total)
+#define CL_ForwardToServer()            false
+#define CL_CheatsOK()                   (!!Cvar_VariableInteger("cheats"))
+
+#define Con_Init()                      (void)0
+#define Con_SetColor(color)             (void)0
+#define Con_Print(text)                 (void)0
+
+#define SCR_DebugGraph(value, color)    (void)0
+#define SCR_BeginLoadingPlaque()        (void)0
+#define SCR_EndLoadingPlaque()          (void)0
+
+#endif // !USE_CLIENT

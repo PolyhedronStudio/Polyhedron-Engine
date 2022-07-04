@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "vkpt.h"
 #include "precomputed_sky.h"
-#include "refresh/refresh.h"
+#include "Refresh/Refresh.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 

@@ -1,13 +1,14 @@
 ## Polyhedron - A Q2RTX Engine Fork and a Game in one.
 [![Build Status](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml/badge.svg)](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml)
 
-Polyhedron Engine is a fork of the famous Q2RTX project by NVIDIA™. It is as its name states, the engine for the game Polyhedron. Its history comes from the Nail & Crescent project (If you are a Quake 1 fan, do check it out. Great team, great project). After having split up with them I was left with a bunch of code that wasn't representing anything anymore. So I set out to create a fun project of my own. Ultimately the concept is all about making this engine more modern and up to date. After all, what good is a fully path traced renderer without being able to develop proper game code with it?
+### What is Polyhedron Engine:
+Polyhedron Engine is a heavily modified fork of the famous Q2RTX project by NVIDIA™. Accompanied by a game project named Polyhedron. Its history comes from the Nail & Crescent project (If you are a Quake 1 fan, do check it out. Great team, great project). After the split up, all that was left was a bunch of code that didn't represent anything anymore. That's when Polyhedron was truly born. The game serves as an indirect roadmap towards deciding what to prioritize out of the features to add to the current technology. Its soul purpose is to evolve into a fully stand-alone SDK for RTX client/server -model games. After all, what good is a fully path traced renderer without introducing more modern features next to it?
 
 The engine requires a C++ 20 compatible compiler which is capable of compiling ranges. At the time of writing this it has only been tested with the latest VS2022 Preview release (17.2). Crossplatform support is there however, currently it has been a long while since anyone tested that. 
 
 This branch v040 aims to target a first release. Not so much a complete and finished game, but a release that enables other developers to either help out development, or fork it and do their own works with. This means that although there has never been any official release yet, v040 will be the first official release of Polyhedron Engine.
 
-### Key Changes made so far?
+### Key Changes made so far:
 - The capability of using modern C++ features where possible. We try to stick to a somewhat "Orthodox C++" approach and mainly use modern features where it makes darn sense to do so. Readability is important.
 - "where possible" means that we try to stick to a somewhat "Orthodox C++" approach.
 - Tick rate of 50hz. This allows for more precise and faster game logic.
@@ -52,6 +53,10 @@ The following features are intended to be completed before deploying an official
 
 ### Other future ideas:
 Even though the list for v0.4.0 is small, it's mainly targetting the nescessary things that are still lacking in order to actually be able to call itself a useable project again. With that said we can't deny the everlasting need for more, can we? So here's a list of things that demand more research and/or have been researched but simply not implemented yet.
+- Material System, even though one exists for the Vulkan Path Tracer, there is no functionality with regards to surface contents and their physical behavior. Reasons to add it are footstep audios, setting friction, one step closer to adding decals some day.
+- Decals: These can most likely be simulated by having some overlay that gets clipped accordingly to surfaces. Not perfect, and may still be prone to creating noise. Can't say until we try.
+- Material type defined footsteps.
+- Material type defined friction.
 - JoltPhysics support. Why? So far nobody has had luck replacing the good old tracing mechanics using PhysX, Bullet3D or other known libraries of its sort. JoltPhysics may play a valuable roll in this thanks to it being targeted to games 100%, fully open-source, and has an easy enough to use API. It allows for implementing custom broad and narrow phases which may play a part in the solution of this mystery.
 - RmlUI. Already exists in OpenGL mode, however for it to work nicely in both renderers it requires several small extensions to the R_DrawPic APIs. Including various modifications to the current Vulkan 2D rendering pipeline. The basics are already there however, just not finished. RmlUI will allow for us to use RML(HTML like layouts), and  RCSS(CSS3 like styling including transforms: Nice effects in menu's and HUDs.)
 - Add in UDP Packet Fragmenting support for up to 4 packets max, anything higher would be irrational and counter-act on the net code instead. This'll prevent the quite easily achieved net frame drops which ultimately ruin a game.

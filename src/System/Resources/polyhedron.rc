@@ -1,0 +1,52 @@
+#if HAVE_CONFIG_H
+#include "../../Shared/config.h"
+#endif
+
+#include <windows.h>
+
+#pragma code_page(65001)
+
+#ifdef _DEBUG
+#define VER_FILEFLAGS   VS_FF_DEBUG
+#else
+#define VER_FILEFLAGS   0x0L
+#endif
+
+#define VER_FILEDESCRIPTION_STR     "Polyhedron Client " LONG_VERSION_STRING
+#define VER_ORIGINALFILENAME_STR    "polyhedron.exe"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION     VERSION_MAJOR,VERSION_MINOR,VERSION_POINT,0
+    PRODUCTVERSION  VERSION_MAJOR,VERSION_MINOR,VERSION_POINT,0
+    FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+    FILEFLAGS       VER_FILEFLAGS
+    FILEOS          VOS_NT_WINDOWS32
+    FILETYPE        VFT_APP
+    FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "Polyhedron Studio"
+            VALUE "FileDescription", VER_FILEDESCRIPTION_STR
+            VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
+            VALUE "FileVersion", VERSION_STRING
+            VALUE "InternalName", "Polyhedron"
+            VALUE "LegalCopyright", "Copyright (C) 2020-2022, Polyhedron Studio. All rights reserved."
+            VALUE "ProductName", "Polyhedron Engine"
+            VALUE "ProductVersion", VERSION_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 0x4B0
+    END
+END
+
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
+
+100 ICON "polyhedron.ico"
+

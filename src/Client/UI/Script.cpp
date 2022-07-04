@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "UI.h"
-#include "Common/Files.h"
+#include "../../Common/Files.h"
 
 static menuSound_t Activate(menuCommon_t *self)
 {
