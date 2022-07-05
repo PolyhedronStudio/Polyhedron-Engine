@@ -135,10 +135,10 @@ void SKM_GenerateModelData(model_t* model) {
 			.startFrame = animationData->first_frame,
 			.endFrame = animationData->first_frame + animationData->num_frames,
 			.numFrames = animationData->num_frames,
-			.loopingFrames = 0,
 			.frametime = BASE_FRAMETIME,
+			.loopingFrames = 0,
 			.forceLoop = true, //(animationData->loop == 1 ? true : false)
-		});
+		 });
 		// Resize our vec if needed.
 		if (skm->animations.size() <= animationIndex) {
 			skm->animations.resize(animationIndex + 1);

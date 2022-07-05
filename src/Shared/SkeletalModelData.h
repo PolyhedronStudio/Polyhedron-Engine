@@ -102,18 +102,18 @@ struct SkeletalAnimation {
 	*	Animation Properties.
 	**/
 	//! Animation start IQM frame number.
-	uint32_t startFrame = 0;
+	uint32_t startFrame		= 0;
 	//! Animation end IQM frame number.
-	uint32_t endFrame = 0;
+	uint32_t endFrame		= 0;
 	//! Animation total number of IQM frames.
-	uint32_t	numFrames = 0;
+	uint32_t numFrames		= 0;
+	//! When not set in the config file, defaults to whichever ANIMATION_FRAMETIME is set to.
+	double frametime		= BASE_FRAMETIME;
 	//! Number of times the animation has to loop before it ends.
 	//! When set to '0', it'll play continuously until stopped by code.
-	uint32_t loopingFrames = 0;
-	//! When not set in the config file, defaults to whichever ANIMATION_FRAMETIME is set to.
-	double frametime = BASE_FRAMETIME;
+	uint32_t loopingFrames	= 0;
 	//! When 'true', force looping the animation. (It'll never trigger a stop event after each loop.)
-	bool forceLoop = false;
+	bool forceLoop			= false;
 
 	/**
 	*	Physical Properties.

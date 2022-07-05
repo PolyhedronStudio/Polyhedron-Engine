@@ -4,12 +4,14 @@
 *
 *	@file
 *
-*	ServerGame Exports Interface.
+*	ServerGame Exports Interface Declarations.
 * 
 ***/
 #pragma once
 
+// Predeclare PlayerMove struct.
 struct PlayerMove;
+
 
 /**
 *
@@ -59,7 +61,7 @@ public:
 
 /**
 *
-*   Client ServerGame Exports Interface.
+*   'Client' ServerGame Exports Interface.
 * 
 **/
 class IServerGameExportClient {
@@ -68,7 +70,7 @@ public:
     virtual ~IServerGameExportClient() = default;
 
     /**
-    *   @brief  
+    *   @brief  The client has connected, and is precaching data.
     **/
     virtual qboolean Connect(Entity *ent, char *userinfo) = 0;
     /**
@@ -76,19 +78,20 @@ public:
     **/
     virtual void Begin(Entity *ent) = 0;
     /**
-    *   @brief  
+    *   @brief  The client has finished loading and is ready to begin the game.
     **/
     virtual void UserinfoChanged(Entity *ent, char *userinfo) = 0;
     /**
-    *   @brief  
+    *   @brief  This client has disconnected.
     **/
     virtual void Disconnect(Entity *ent) = 0;
     /**
-    *   @brief  
+    *   @brief	This client has received a console command.
     **/
     virtual void Command(Entity *ent) = 0;
     /**
-    *   @brief  
+    *   @brief  Give the client time to 'think', as in, perform logic and physics updates.
+	*			This can get called multiple times a frame.
     **/
     virtual void Think(Entity *ent, ClientMoveCommand *cmd) = 0;
 };
@@ -113,13 +116,19 @@ public:
 
 /**
 *
-*   Save/Load ServerGame Exports Interface.
+*   GameState ServerGame Exports Interface.
 * 
 **/
-class IServerGameExportSaveLoad {
+class IServerGameExportGameState {
 public:
     //! Destructor.
-    virtual ~IServerGameExportSaveLoad() = default;
+    virtual ~IServerGameExportGameState() = default;
+
+    /**
+    *   @brief  Called every loadgame. Reads the previously stored persistent cross level
+    *           information of the world and its clients at that time.
+    **/
+    virtual void ReadGameState(const char *filename) = 0;
 
     /**
     *   @brief  Called every time a level is exited. Stores the persistent cross level 
@@ -127,11 +136,18 @@ public:
     **/
     virtual void WriteGameState(const char *filename, qboolean autoSave) = 0;
 
-    /**
-    *   @brief  Called every loadgame. Reads the previously stored persistent cross level
-    *           information of the world and its clients at that time.
-    **/
-    virtual void ReadGameState(const char *filename) = 0;
+};
+
+
+/**
+*
+*   LevelState SerGame Exports Interface.
+* 
+**/
+class IServerGameExportLevelState {
+public:
+    //! Destructor.
+    virtual ~IServerGameExportLevelState() = default;
 
     /**
     *   @brief  Called every save game. Stores all entity level state related information.
@@ -151,10 +167,10 @@ public:
 *   Main ServerGame Exports Interface.
 * 
 **/
-class IClientGameExports {
+class IServerGameExports {
 public:
     //! Default destructor.
-    virtual ~IClientGameExports() = default;
+    virtual ~IServerGameExports() = default;
 
 
     /***
@@ -165,17 +181,22 @@ public:
     /**
     *   @return A pointer to the client game's core interface.
     **/
-    virtual IClientGameExportCore *GetCoreInterface() = 0;
+    virtual IServerGameExportCore *GetCoreInterface() = 0;
 
     /**
     *   @return A pointer to the client game module's entities interface.
     **/
-    virtual IClientGameExportEntities *GetEntityInterface() = 0;
+    virtual IServerGameExportEntities *GetEntityInterface() = 0;
 
     /**
-    *   @return A pointer to the ServerGame module's save/load interface.
+    *   @return A pointer to the ServerGame module's GameState interface.
     **/
-    virtual IServerGameExportSaveLoad *GetSaveLoadInterface() = 0;
+    virtual IServberGameExportGameState *GetGameStateInterface() = 0;
+    
+	/**
+    *   @return A pointer to the ServerGame module's LevelState interface.
+    **/
+    virtual IServberGameExportGameState *GetLevelStateInterface() = 0;
 
     /**
     *   @return A pointer to the ServerGame module's client interface.

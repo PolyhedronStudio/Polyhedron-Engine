@@ -110,6 +110,12 @@ SET(SRC_SVGAME
 	Entities/Light.cpp
 	Entities/Worldspawn.cpp
 
+	Exports/Client.cpp
+	Exports/Core.cpp
+	Exports/Entities.cpp
+	Exports/GameState.cpp
+	Exports/LevelState.cpp
+
 	GameModes/DefaultGameMode.cpp
 	GameModes/CoopGameMode.cpp
 	GameModes/DeathMatchGameMode.cpp
@@ -206,6 +212,12 @@ SET(HEADERS_SVGAME
 	Entities/Light.h
 	Entities/Worldspawn.h
 
+	Exports/Client.h
+	Exports/Core.h
+	Exports/Entities.h
+	Exports/GameState.h
+	Exports/LevelState.h
+
 	GameModes/DefaultGameMode.h
 	GameModes/CoopGameMode.h
 	GameModes/DeathMatchGameMode.h
@@ -213,6 +225,8 @@ SET(HEADERS_SVGAME
 
 	Player/Animations.h
 	Player/Client.h
+
+	ServerGameExports.h
 
 	Utilities/SVGTraceResult.h
 

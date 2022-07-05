@@ -432,8 +432,8 @@ typedef struct sun_light_s {
 	vec3_t direction_envmap;
 	vec3_t color;
 	float angular_size_rad;
-	bool use_physical_sky;
-	bool visible;
+	qboolean use_physical_sky;
+	qboolean visible;
 } sun_light_t;
 
 void mult_matrix_matrix(float* p, const mat4_t &a, const mat4_t &b);
