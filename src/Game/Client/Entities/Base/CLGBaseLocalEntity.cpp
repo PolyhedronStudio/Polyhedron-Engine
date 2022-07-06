@@ -535,12 +535,39 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
             refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
 		} else {
-			//
-			//	Skeletal Animation Progressing.
-			//
+			// TODO: This needs tidying, this whole function obviously still does lol.
+			// If we got skeletal model data..
+			if ( skm ) {
+				// See which animation we are at:
+				const int32_t animationIndex = currentState->currentAnimation.animationIndex;
+
+				if ( animationIndex >= 0 && animationIndex < skm->animations.size() ) { 
+					auto *animationData = skm->animations[animationIndex];
+
+					refreshEntity.rootBoneAxisFlags = animationData->rootBoneAxisFlags;
+				} else {
+					refreshEntity.rootBoneAxisFlags = 0;
+				}
+			}
+
+			/**
+			*	Skeletal Animation Processing. - The RefreshAnimationB stuff is TEMPORARILY for Blend testing.
+			**/
+			// Setup the refresh entity frames.
+			refreshEntity.oldframe	= refreshAnimation.frame;
+			refreshEntity.oldframeB	= refreshAnimationB.frame;
+
 			// Setup the proper lerp and model frame to render this pass.
 			// Moved into the if statement's else case up above.
-			ProcessSkeletalAnimationForTime(GameTime(cl->serverTime));
+			ProcessSkeletalAnimationForTime(GameTime(cl->time));
+
+			// Main Animation Frame.
+			refreshEntity.frame		= refreshAnimation.frame;
+			refreshEntity.backlerp	= refreshAnimation.backLerp;
+
+			// Event Channel Animation Frame.
+			refreshEntity.frameB = refreshAnimationB.frame;
+			refreshEntity.backlerpB	= refreshAnimationB.backLerp;
         }
         
 

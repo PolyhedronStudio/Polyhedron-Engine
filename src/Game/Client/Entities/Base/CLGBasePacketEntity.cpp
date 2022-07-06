@@ -868,14 +868,11 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 				} else {
 					refreshEntity.rootBoneAxisFlags = 0;
 				}
-
-				// TEMPORARILY: ANIMATION POSE BLEND TEST
-				//refreshEntity.rootBoneAxisFlagsB = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
 			}
 
-			//
-			//	Skeletal Animation Processing. - The RefreshAnimationB stuff is TEMPORARILY for Blend testing.
-			//
+			/**
+			*	Skeletal Animation Processing. - The RefreshAnimationB stuff is TEMPORARILY for Blend testing.
+			**/
 			// Setup the refresh entity frames.
 			refreshEntity.oldframe	= refreshAnimation.frame;
 			refreshEntity.oldframeB	= refreshAnimationB.frame;
@@ -884,25 +881,13 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			// Moved into the if statement's else case up above.
 			ProcessSkeletalAnimationForTime(GameTime(cl->time));
 
-			// Don't allow it to go below 0, instead set it to old frame.
-			if (refreshAnimation.frame < 0) {
-				//refreshEntity.frame = refreshEntity.oldframe;
-			} else {
-				// Set animation frame.
-				refreshEntity.frame		= refreshAnimation.frame;
+			// Main Animation Frame.
+			refreshEntity.frame		= refreshAnimation.frame;
+			refreshEntity.backlerp	= refreshAnimation.backLerp;
 
-				// We only change the backlerp in case it is not the same old frame.
-				refreshEntity.backlerp	= refreshAnimation.backLerp;
-			}
-
-			if (refreshAnimationB.frame < 0) {
-
-			} else {
-				refreshEntity.frameB = refreshAnimationB.frame;
-
-				// We only change the backlerp in case it is not the same old frame.
-				refreshEntity.backlerpB	= refreshAnimationB.backLerp;
-			}
+			// Event Channel Animation Frame.
+			refreshEntity.frameB = refreshAnimationB.frame;
+			refreshEntity.backlerpB	= refreshAnimationB.backLerp;
         }
         
 

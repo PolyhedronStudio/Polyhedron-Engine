@@ -24,15 +24,15 @@ public:
     virtual ~IServerGameImportCore() = default;
     
 
-	///**
-	//*   @brief  Initializes the ServerGame module.
-	//*/
-	//virtual void Initialize() = 0;
+	/**
+	*   @brief  Initializes the ServerGame module.
+	**/
+	virtual void Initialize() = 0;
 
-	///**
-	//*   @brief  Shuts down the ServerGame module.
-	//*/
-	//virtual void Shutdown() = 0;
+	/**
+	*   @brief  Shuts down the ServerGame module.
+	**/
+	virtual void Shutdown() = 0;
 };
 
 

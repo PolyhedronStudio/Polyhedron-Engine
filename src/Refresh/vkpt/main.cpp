@@ -1807,50 +1807,28 @@ static void process_regular_entity(
 
 		// Use the good old R_ComputeIQMTransforms for when no extra skeletal model data was precached.
 		if (!model->skeletalModelData) {
-			R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
+			ES_ComputeAllTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
 
 			*iqm_matrix_offset += (int)model->iqmData->num_poses;
 		// Otherwise, take a special route.
 		} else if (model->skeletalModelData) {		
-			iqm_transform_t relativeJointsA[IQM_MAX_JOINTS];
-			iqm_transform_t relativeJointsB[IQM_MAX_JOINTS];
+			EntitySkeletonBonePose mainChannelBonePoses[IQM_MAX_JOINTS];
+			EntitySkeletonBonePose eventChannelBonePoses[IQM_MAX_JOINTS];
+			EntitySkeletonBonePose finalBonePoses[IQM_MAX_JOINTS];
 
 			// Get pose mat pointer.
 			float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
 
-			// Compute Joints: Relative, World, and Local matrices.
-			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
-			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, relativeJointsB);
+			// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
+			ES_LerpSkeletonPoses(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, mainChannelBonePoses);
+			ES_LerpSkeletonPoses(model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, eventChannelBonePoses);
 			
-			// From Bone 2:
-			if (entity->frameB != -1) {
-				MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 4, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
-			}
-			// From Bone 3:
-//			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+			// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+			ES_RecursiveBlendFromBone(model, eventChannelBonePoses, mainChannelBonePoses, 4, 0.5, 1.0f - entity->backlerpB, entity->backlerpB);
 
-			// Apply RootBoneAxisFlags for Translation.
-			//MOD_ApplyRootBoneAxisFlags(model, entity->rootBoneAxisFlags, 0, relativeJointsA, 1.0f, 1.0f - entity->backlerp, entity->backlerp);
-
-			MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
-			MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
-
-			//// Compute Joints: Relative, World, and Local matrices.
-			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsC);
-			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
-			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frameB, entity->oldframeB, 1.0f - entity->backlerp, entity->backlerp, relativeJointsB);
-			//
-			//const float fraction = 1.0;
-
-			//// From Bone 2:
-			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 2, fraction, 1.0f - entity->backlerp, entity->backlerp);
-			//// From Bone 3:
-			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 3, fraction, 1.0f - entity->backlerp, entity->backlerp);
-
-			//MOD_RecursiveBlendFromBone(model, relativeJointsC, relativeJointsA, 0, fraction, 1.0f - entity->backlerp, entity->backlerp);
-
-			//MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
-			//MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+			// Compute World and Local Pose Matrixes.
+			ES_ComputeWorldPoseTransforms(model, mainChannelBonePoses, pose_mat);
+			ES_ComputeLocalPoseTransforms(model, mainChannelBonePoses, pose_mat);
 
 			*iqm_matrix_offset += (int)model->iqmData->num_poses;
 		}

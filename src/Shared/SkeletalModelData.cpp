@@ -294,6 +294,139 @@ void SKM_GenerateModelData(model_t* model) {
 
 
 
+
+/**
+*
+*
+*	Temporary, these also reside in iqm.cpp and need to go to math lib.
+*
+*
+**/
+// "multiply" 3x4 matrices, these are assumed to be the top 3 rows
+// of a 4x4 matrix with the last row = (0 0 0 1)
+static void Matrix34Multiply(const float* a, const float* b, float* out) {
+	out[0] = a[0] * b[0] + a[1] * b[4] + a[2] * b[8];
+	out[1] = a[0] * b[1] + a[1] * b[5] + a[2] * b[9];
+	out[2] = a[0] * b[2] + a[1] * b[6] + a[2] * b[10];
+	out[3] = a[0] * b[3] + a[1] * b[7] + a[2] * b[11] + a[3];
+	out[4] = a[4] * b[0] + a[5] * b[4] + a[6] * b[8];
+	out[5] = a[4] * b[1] + a[5] * b[5] + a[6] * b[9];
+	out[6] = a[4] * b[2] + a[5] * b[6] + a[6] * b[10];
+	out[7] = a[4] * b[3] + a[5] * b[7] + a[6] * b[11] + a[7];
+	out[8] = a[8] * b[0] + a[9] * b[4] + a[10] * b[8];
+	out[9] = a[8] * b[1] + a[9] * b[5] + a[10] * b[9];
+	out[10] = a[8] * b[2] + a[9] * b[6] + a[10] * b[10];
+	out[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11];
+}
+
+static void JointToMatrix(const quat_t rot, const vec3_t scale, const vec3_t trans, float* mat) {
+	float xx = 2.0f * rot[0] * rot[0];
+	float yy = 2.0f * rot[1] * rot[1];
+	float zz = 2.0f * rot[2] * rot[2];
+	float xy = 2.0f * rot[0] * rot[1];
+	float xz = 2.0f * rot[0] * rot[2];
+	float yz = 2.0f * rot[1] * rot[2];
+	float wx = 2.0f * rot[3] * rot[0];
+	float wy = 2.0f * rot[3] * rot[1];
+	float wz = 2.0f * rot[3] * rot[2];
+
+	mat[0] = scale[0] * (1.0f - (yy + zz));
+	mat[1] = scale[0] * (xy - wz);
+	mat[2] = scale[0] * (xz + wy);
+	mat[3] = trans[0];
+	mat[4] = scale[1] * (xy + wz);
+	mat[5] = scale[1] * (1.0f - (xx + zz));
+	mat[6] = scale[1] * (yz - wx);
+	mat[7] = trans[1];
+	mat[8] = scale[2] * (xz - wy);
+	mat[9] = scale[2] * (yz + wx);
+	mat[10] = scale[2] * (1.0f - (xx + yy));
+	mat[11] = trans[2];
+}
+
+static void Matrix34Invert(const float* inMat, float* outMat) {
+	outMat[0] = inMat[0]; outMat[1] = inMat[4]; outMat[2] = inMat[8];
+	outMat[4] = inMat[1]; outMat[5] = inMat[5]; outMat[6] = inMat[9];
+	outMat[8] = inMat[2]; outMat[9] = inMat[6]; outMat[10] = inMat[10];
+
+	float invSqrLen, * v;
+	v = outMat + 0; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+	v = outMat + 4; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+	v = outMat + 8; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+
+	vec3_t trans;
+	trans[0] = inMat[3];
+	trans[1] = inMat[7];
+	trans[2] = inMat[11];
+
+	outMat[3] = -DotProduct(outMat + 0, trans);
+	outMat[7] = -DotProduct(outMat + 4, trans);
+	outMat[11] = -DotProduct(outMat + 8, trans);
+}
+
+static void QuatSlerp(const quat_t from, const quat_t _to, float fraction, quat_t out) {
+	// cos() of angle
+	float cosAngle = from[0] * _to[0] + from[1] * _to[1] + from[2] * _to[2] + from[3] * _to[3];
+
+	// negative handling is needed for taking shortest path (required for model joints)
+	quat_t to;
+	if (cosAngle < 0.0f) 	{
+		cosAngle = -cosAngle;
+		to[0] = -_to[0];
+		to[1] = -_to[1];
+		to[2] = -_to[2];
+		to[3] = -_to[3];
+	}
+	else 	{
+		QuatCopy(_to, to);
+	}
+
+	float backlerp, lerp;
+	if (cosAngle < 0.999999f) 	{
+		// spherical lerp (slerp)
+		const float angle = acosf(cosAngle);
+		const float sinAngle = sinf(angle);
+		backlerp = sinf((1.0f - fraction) * angle) / sinAngle;
+		lerp = sinf(fraction * angle) / sinAngle;
+	}
+	else 	{
+		// linear lerp
+		backlerp = 1.0f - fraction;
+		lerp = fraction;
+	}
+
+	out[0] = from[0] * backlerp + to[0] * lerp;
+	out[1] = from[1] * backlerp + to[1] * lerp;
+	out[2] = from[2] * backlerp + to[2] * lerp;
+	out[3] = from[3] * backlerp + to[3] * lerp;
+}
+
+static vec_t QuatNormalize2(const quat_t v, quat_t out) {
+	float length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
+
+	if (length > 0.f) 	{
+		/* writing it this way allows gcc to recognize that rsqrt can be used */
+		float ilength = 1 / sqrtf(length);
+		/* sqrt(length) = length * (1 / sqrt(length)) */
+		length *= ilength;
+		out[0] = v[0] * ilength;
+		out[1] = v[1] * ilength;
+		out[2] = v[2] * ilength;
+		out[3] = v[3] * ilength;
+	}
+	else 	{
+		out[0] = out[1] = out[2] = 0;
+		out[3] = -1;
+	}
+
+	return length;
+}
+
+
+
+
+
+
 /**
 *
 *
@@ -301,62 +434,6 @@ void SKM_GenerateModelData(model_t* model) {
 *
 *
 **/
-/**
-*	@brief	Generates a Linear Bone List, as well as a BoneNode Tree Hierachy, using the current
-*			actual SkeletalModelData.
-*
-*			@param boneNode	Pointer to the node which we check and see if it has any kids, of so, we assign them.
-*
-*			If boneIndex == -1, we take the root bone index instead.
-**/
-//static void CreateBoneTreeNode(SkeletalModelData* skm, EntitySkeleton* es, int32_t parentIndex, EntitySkeletonBoneNode *parentNode = nullptr ) {
-//	// If bonenumber == -1, we take the skm root bone number and the es boneTree node.
-//	if ( parentIndex == -1 ) {
-//		CreateBoneTreeNode( skm, es, skm->rootJointIndex, &es->boneTree );
-//		// Done.
-//		return;
-//	}
-//	
-//	// Ensure the bone number index is valid.
-//	if ( parentIndex < 0 || parentIndex > es->bones.size() ) {
-//		// TODO: Warn
-//		// SG_DPrint("Bone number out of range: %i %i %i %I ... details you know");
-//		return;
-//	}
-//
-//	// No boneNode? Wut?
-//	if ( !parentNode ) {
-//		// TODO: Warn that there is no parentNode given however there is a parentIndex.
-//		return;
-//	}
-//
-//
-//	// Start creating our tree, if parentNode == nullptr, we take the tree head.
-////	parentNode = ( parentNode == nullptr ? &es->boneTree : parentNode );
-//
-//	// Go through all bones, if their parentIndex matches our boneIndex, we add a
-//	// pointer to the hierachy.
-//	// (We do not use iterators here.)
-//	for (int32_t i = 0; i < es->bones.size(); i++) {
-//		// Get a reference to our bone.
-//		const EntitySkeletonBone &bone = es->bones[i];
-//
-//		// It matches, time to add it as our child.
-//		if ( bone.parentIndex == parentIndex ) {
-//			// Push back the child data.
-//			parentNode->childBoneNodes.push_back(EntitySkeletonBoneNode{
-//				.index = bone.index,
-//				.parentBoneNode = parentNode
-//			});
-//
-//			// Assign the last pushed child node pointer to the linear bone list.
-//			EntitySkeletonBoneNode *boneNode = es->bones[i].node = &parentNode->childBoneNodes.back();
-//
-//			// Recurse on.
-//			CreateBoneTreeNode( skm, es, bone.index, boneNode );
-//		}
-//	}
-//}
 /**
 *	@brief	Expects the boneTree's head node to already be set pointing at the
 *			root bone.
@@ -392,6 +469,9 @@ const bool ES_GenerateBoneTreeHierachy( SkeletalModelData *skm, EntitySkeleton *
 			// Add the bone as a child to our parentNode.
 			EntitySkeletonBoneNode &childNode = parentNode.AddChild( esBone );
 
+			// Add a pointer in our bone map to the node.
+			es->boneMap[esBone->name] = &childNode;
+
 			// Generate a tree hierachy for this bone as well.
 			ES_GenerateBoneTreeHierachy( skm, es, childNode );
 		} else {
@@ -415,22 +495,23 @@ const bool SKM_CreateEntitySkeletonFrom( SkeletalModelData* skm, EntitySkeleton*
 	/**
 	*	#0: Clear any old skeleton data if there was any.
 	**/
-	//// Scan our linear bone list and check each bone's boneNode for children, and clear those out.
-	//for ( int32_t i = 0; i < es->bones.size(); i++ ) {
-	//	// Get boneNode pointer.
-	//	EntitySkeletonBoneNode *boneNode = es->bones[i].boneNode;
+	// Scan our linear bone list and check each bone's boneNode for children, and clear those out.
+	for ( int32_t i = 0; i < es->bones.size(); i++ ) {
+		// Get boneNode pointer.
+		EntitySkeletonBoneNode *boneNode = es->bones[i].boneTreeNode;
 
-	//	// Make sure it is valid.
-	//	if ( boneNode ) {
-	//		// Clear children.
-	//		boneNode->boneChildren.clear();
-	//		// Reset bone number.
-	//		boneNode->boneIndex = -1;
-	//	}
-	//}
+		// Make sure it is valid.
+		if ( boneNode ) {
+			// Clear children.
+			boneNode->GetChildren().clear();
+		}
+	}
 
 	// Clear out Linear Bone List.
 	es->bones.clear();
+
+	// Clear out Bone Map.
+	es->boneMap.clear();
 
 	/**
 	*	#1:	Generate a linear bone list array for fast and easy index access.
@@ -445,6 +526,9 @@ const bool SKM_CreateEntitySkeletonFrom( SkeletalModelData* skm, EntitySkeleton*
 		if ( joint.index == skm->rootJointIndex ) {
 			// Point to root bone index, and keep parentNode as nullptr.
 			es->boneTree = EntitySkeletonBoneNode( &es->bones[joint.index], nullptr );
+
+			// Add it to our bone map.
+			es->boneMap[ joint.name ] = &es->boneTree;
 		}
 		// Otherwise, just fill in bone data without a tree node parent.
 		else if ( joint.index >= 0 && joint.index < es->bones.size() ) {
@@ -467,490 +551,331 @@ const bool SKM_CreateEntitySkeletonFrom( SkeletalModelData* skm, EntitySkeleton*
 	return true;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/***
+/**
 *
-*	License here.
 *
-*	@file
+*	Animation Processing Logic.
 *
-*	Skeletal Animation functionality.
 *
-***/
-//#pragma once
-//
-//
-///**
-//*	Needed for SKM_MAX_JOINTS
-//**/
-//#include "Refresh.h"
-//#include "Formats/Iqm.h"
-//
-///**
-//*	@brief	Pre...
-//**/
-//struct SkeletalAnimation;
-//
-////! MS Frametime for animations.
-////static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
-//static constexpr int32_t SKM_MAX_JOINTS = IQM_MAX_JOINTS;
-//
-//
-///**
-//*
-//*
-//*	Human Friendly Skeletal Model Data. Cached by server and client.
-//*
-//*
-//**/
-///**
-//*	@brief	Game Module friendly IQM Data: Animations, BoundingBox per frame, and Joint data.
-//**/
-//struct SkeletalModelData {
-//	//! TODO: Indexed by name, should be a hash map instead?
-//	std::map<std::string, SkeletalAnimation> animationMap;
-//	std::vector<SkeletalAnimation*> animations;
-//
-//	//! Bones, key names, index values.
-//	std::map<std::string, int32_t> boneNameIndices;
-//
-//	//! Bounding Boxes. Stores by frame index.
-//	struct BoundingBox {
-//		vec3_t mins;
-//		vec3_t maxs;
-//	};
-//	std::vector<BoundingBox> boundingBoxes;
-//
-//	//! Joint information. Stored by name indexing in a map, as well as numberical indexing in an array.
-//	struct Joint {
-//		//! Joint name.
-//		std::string name;
-//		//! Joint index.
-//		int32_t index = 0;
-//		//! Joint Parent Index.
-//		int32_t parentIndex = 0;
-//	};
-//	//! Total number of joints.
-//	uint32_t numberOfJoints = 0;
-//	//! Root Joint index.
-//	int32_t rootJointIndex = -1;
-//	//! String index joint data map.
-//	std::map<std::string, Joint> jointMap;
-//	//! Index based joint data array.
-//	std::array<Joint, SKM_MAX_JOINTS> jointArray;
-//};
-//
-///**
-//*	@return	Game compatible skeletal model data including: animation name, 
-//*			and frame data, bounding box data(per frame), and joints(name, index, parentindex)
-//**/
-//void SKM_GenerateModelData(model_t* model);
-//
-//
-//
-///**
-//*
-//*
-//*	Entity Skeleton: Each entity using a skeletal model can generate an Entity Skeleton
-//*	for use of performing animation pose blending magic with.
-//*
-//*
-//**/
-///**
-//*	@brief	Bone Node storing its number and pointers to its child bone
-//*			nodes. Used for maintaining an actual bone tree hierachy.			
-//**/
-//struct EntitySkeletonBoneNode {
-//	//! The bone its own index.
-//	int32_t index = 0;
-//
-//	//! Actual bone number of this node.
-//	//int32_t boneNumber = 0;
-//	EntitySkeletonBoneNode *parentBoneNode = nullptr;
-//
-//	//! Pointers to children bone nodes. (size == total num of bones)
-//	std::vector<EntitySkeletonBoneNode> childBoneNodes;
-//};
-//
-///**
-//*	@brief	Stores partial generated copy of non spatial bone data that 
-//*			was contained in the Skeletal Model Data at the actual time 
-//*			of creating this skeleton.			
-//*
-//*			To allow for fast access in the node tree by linear array indexing
-//*			we also store a pointer to its belonging node.
-//**/
-//struct EntitySkeletonBone {
-//	//! Actual string bone name.
-//	std::string name;
-//
-//	//! The bone its own number.
-//	int32_t index = 0;
-//
-//	//! Parent bone number.
-//	int32_t parentIndex = 0;
-//
-//	//! A pointer 
-//	EntitySkeletonBoneNode *node = nullptr;
-//};
-//
-///**
-//*	@brief	Skeleton consisting of the current frame's blend combined bone poses
-//*			to use for rendering and/or in-game bone position work.
-//*
-//*			When changing an entity's model, the skeleton needs to be regenerated.
-//**/
-//struct EntitySkeleton {
-//	//! Pointer to the internal model data. (Also used to retreive the SKM data from there.)
-//	model_t *model;
-//
-//	//! Stores a list of all bones we got in our entity's skeleton.
-//	std::vector<EntitySkeletonBone> bones;
-//
-//	//! Stores the bones as an actual tree hierachy.
-//	EntitySkeletonBoneNode boneTree;
-//};
-//
-///**
-//*	@brief	Sets up an entity skeleton using the specified skeletal model data.
-//**/
-//const bool SKM_CreateEntitySkeletonFrom(SkeletalModelData *skm, EntitySkeleton *es);
-//
-//
-///**
-//*
-//*
-//*	Bone Poses
-//*
-//*
-//**/
-///**
-//*	@brief Currently is just iqm_transform_t, there's nothing to it.
-//**/
-//using EntitySkeletonBonePose = iqm_transform_t;
-////struct EntitySkeletonBonePose {
-////	iqm_transform_t transform;
-////};
-//
-//
-//
-///**
-//*
-//*
-//*	Animation Data: It says parsed from, it is not so, it comes from the IQM
-//*	file itself only right now.
-//*
-//*	Contains extra precalculated data regarding the total animation distance
-//*	traveled per animation, the exact distance and translation of the root
-//*	bone per frame.
-//*
-//*	On top of that, the root bone can be set render specific flags. (RootBoneAxisFlags)
-//*
-//*
-//**/
-///**
-//*	@brief	Parsed from the modelname.cfg file. Stores specific data that
-//*			belongs to an animation. Such as: frametime, loop or no loop.
-//**/
-//struct SkeletalAnimation {
-//	/**
-//	*	Look-up Properties, (Name, index, IQM StartFrame, IQM EndFrame.)
-//	**/
-//	//! Actual animation look-up index.
-//	uint32_t index = 0;
-//	//! Actual animation loop-uk name.
-//	std::string name = "";
-//
-//
-//	/**
-//	*	Animation Properties.
-//	**/
-//	//! Animation start IQM frame number.
-//	uint32_t startFrame = 0;
-//	//! Animation end IQM frame number.
-//	uint32_t endFrame = 0;
-//	//! Animation total number of IQM frames.
-//	uint32_t	numFrames = 0;
-//	//! Number of times the animation has to loop before it ends.
-//	//! When set to '0', it'll play continuously until stopped by code.
-//	uint32_t loopingFrames = 0;
-//	//! When not set in the config file, defaults to whichever ANIMATION_FRAMETIME is set to.
-//	double frametime = BASE_FRAMETIME;
-//	//! When 'true', force looping the animation. (It'll never trigger a stop event after each loop.)
-//	bool forceLoop = false;
-//
-//	/**
-//	*	Physical Properties.
-//	**/
-//	//! The sum of total distance travelled by the root bone per frame.
-//	double animationDistance = 0.0;
-//
-//	//! TODO: Add a decent Bone Access API and transform code using this to using that.
-//	double frameStartDistance = 0.0;
-//	double frameEndDistance = 0.0f;
-//	//! Start Frame distance.
-//	//! The total distances travelled by the root bone per frame.
-//	std::vector<double> frameDistanceSum;
-//	//! The total distances travelled by the root bone per frame.
-//	std::vector<double> frameDistances;
-//	//! The translates of root bone per frame.
-//	std::vector<vec3_t> frameTranslates;
-//	//! Root Bone Axis Flags. 
-//	struct RootBoneAxisFlags {
-//		//! When generating the poses it'll zero out the X axis of the root bone's translation vector.
-//		static constexpr int32_t ZeroXTranslation = (1 << 1);
-//		//! When generating the poses it'll zero out the Y axis of the root bone's translation vector.
-//		static constexpr int32_t ZeroYTranslation = (1 << 2);
-//		//! When generating the poses it'll zero out the Z axis of the root bone's translation vector.
-//		static constexpr int32_t ZeroZTranslation = (1 << 3);
-//
-//		//! The default is to only zero out X and Y for the root motion system.
-//		static constexpr int32_t DefaultTranslationMask = (ZeroXTranslation | ZeroYTranslation);
-//	};
-//
-//	//! Tells the skeletal animation system how to treat our root bone for this animation.
-//	int32_t rootBoneAxisFlags = RootBoneAxisFlags::DefaultTranslationMask;
-//};
-//
-//
-//
-///**
-//*	@brief	Simple TreeNode Hierachy Template.
-//*
-//*			Each node keeps track of its parent while having unlimited amount of children.
-//*
-//**/
-//template < class T > 
-//class lstdTreeNodeParentPointer {
-//public:
-//	/**
-//	*
-//	*	Constructors/Destructor(s).
-//	*
-//	**/
-//	/**
-//	*	@brief	Default Constructor.
-//	**/
-//	lstdTreeNodeParentPointer()
-//	{
-//		this->parent = nullptr;
-//	}
-//	/**
-//	*	@brief	Default constructor accepting a const reference to the data to hold.
-//	**/
-//	lstdTreeNodeParentPointer( const T& data , lstdTreeNodeParentPointer* parent = nullptr )
-//	{
-//		this->data = data;
-//		this->parent = parent;
-//	}
-//	/**
-//	*	@brief	Copy Constructor.
-//	**/
-//	lstdTreeNodeParentPointer( const lstdTreeNodeParentPointer& node ) 
-//	{
-//		this->data = node.data;
-//		this->parent = node.parent;
-//		this->children = node.children;
-//		// fix the parent pointers
-//		for ( size_t i = 0 ; i < this->children.size() ; ++i )
-//		{
-//			this->children.at(i).parent = this;
-//		}
-//	}
-//	/**
-//	*	@brief	Copy assignment operator
-//	**/
-//    lstdTreeNodeParentPointer& operator=( const lstdTreeNodeParentPointer& node )
-//    {
-//		if ( this != &node ) 
-//		{
-//			this->data = node.data;
-//			this->parent = node.parent;
-//			this->children = node.children;
-//
-//			// Fix the parent pointers.
-//			for ( size_t i = 0 ; i < this->children.size() ; ++i )
-//			{
-//				this->children.at(i).parent = this;
-//			}
-//		}
-//		return *this;
-//    }
-//
-//	/**
-//	*	@brief	Usual virtual destructor.
-//	**/
-//	virtual ~lstdTreeNodeParentPointer(){
-//	}
-//
-//
-//	/**
-//	*
-//	*	Add/Remove Child Node Functions.
-//	*
-//	**/
-//	/**
-//	*	@brief	Adds a child node storing 'data' to this node's children.
-//	**/
-//	void AddChild( const T& data ) {
-//		this->children.push_back( lstdTreeNodeParentPointer( data , this ) );
-//	}
-//
-//	/**
-//	*	@brief	Remove a child node by value, note: if the node has multiple children with the same value, this will only delete the first child
-//	**/
-//	void RemoveChildByValue( const T& value ) {
-//		for ( size_t i = 0 ; i < this->children.size() ; ++i )
-//		{
-//			if ( this->children.at(i).data == value )
-//			{
-//				this->children.erase( this->children.begin()+i );
-//				return;
-//			}
-//		}
-//	}
-//
-//	/**
-//	*	@brief	Removes a child node by index.
-//	**/
-//	void RemoveChildByIndex( const int index ) {
-//		this->children.erase( this->children.begin()+index );
-//	}
-//
-//
-//	/**
-//	*
-//	*	Get/Set Functions.
-//	*
-//	**/
-//	/**
-//	*	@brief	Sets a new data value for this node.
-//	**/
-//	void SetData( const T& data ) {
-//		this->data = data;
-//	}
-//	/**
-//	*	@return	Reference to this node's data.
-//	**/
-//	T& GetData() {
-//		return this->data;
-//	}
-//	/**
-//	*	@return	Const Reference to this node's data.
-//	**/
-//	const T& GetValue() const {
-//		return this->data;
-//	}
-//
-//	/**
-//	*	@return	Reference to the parent node.
-//	**/
-//	lstdTreeNodeParentPointer& GetParent() {
-//		return *this->parent;
-//	}
-//	/**
-//	*	@return	Const Reference to the parent node.
-//	**/
-//	const lstdTreeNodeParentPointer& GetParent() const {
-//		return *this->parent;
-//	}
-//	
-//	/**
-//	*	@return	Reference to the child node vector.
-//	**/
-//	std::vector< lstdTreeNodeParentPointer >& GetChildren() {
-//		return this->children;
-//	}
-//	/**
-//	*	@return	Const Reference to the child node vector.
-//	**/
-//	const std::vector< lstdTreeNodeParentPointer >& GetChildren() const	{
-//		return this->children;
-//	}
-//
-//
-//private:
-//	//! Pointer to the parent node, if null, then this IS the parent node.
-//	lstdTreeNodeParentPointer* parent;
-//
-//	//! Vector containing all possible children of this node.
-//	std::vector< lstdTreeNodeParentPointer > children;
-//
-//	//! Actual data stored in this node.
-//	T data;
-//
-//
-//	// the type has to have an overloaded std::ostream << operator for print to work
-//	//void print( const int depth = 0 ) const
-//	//{
-//	//	std::string printStr = "";
-//
-//	//	for ( int i = 0 ; i < depth ; ++i )
-//	//	{
-//	//		if ( i != depth-1 ) printStr << "    ";
-//	//		else printStr << "|-- ";
-//	//	}
-//	//	printStr << this->t << "\n";
-//	//	// SG_DPrint...
-//	//	for ( size_t i = 0 ; i < this->children.size() ; ++i )
-//	//	{
-//	//		this->children.at(i).print( depth+1 );
-//	//	}
-//	//}
-//};
+**/
+/**
+*	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
+*
+*			Treats it no different than as if it were a regular alias model going from fram A to B.
+**/
+bool ES_ComputeAllTransforms( const iqm_model_t* model, const r_entity_t* entity, float* pose_matrices ) {
+	EntitySkeletonBonePose relativeBonePose[IQM_MAX_JOINTS];
+
+	EntitySkeletonBonePose* relativeBone = relativeBonePose;
+
+	const int frame = model->num_frames ? entity->frame % (int)model->num_frames : 0;
+	const int oldframe = model->num_frames ? entity->oldframe % (int)model->num_frames : 0;
+	const float backlerp = entity->backlerp;
+
+	// copy or lerp animation frame pose
+	if (oldframe == frame) {
+		const EntitySkeletonBonePose* pose = &model->poses[frame * model->num_poses];
+		for (uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, pose++, relativeBone++) {
+			relativeBone->translate = pose->translate;
+			relativeBone->scale = pose->scale;
+			QuatCopy(pose->rotate, relativeBone->rotate);
+		}
+	} else {
+		const float lerp = 1.0f - backlerp;
+		const EntitySkeletonBonePose* pose = &model->poses[frame * model->num_poses];
+		const EntitySkeletonBonePose* oldpose = &model->poses[oldframe * model->num_poses];
+		for ( uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, oldpose++, pose++, relativeBone++ ) {
+			relativeBone->translate[0] = oldpose->translate[0] * backlerp + pose->translate[0] * lerp;
+			relativeBone->translate[1] = oldpose->translate[1] * backlerp + pose->translate[1] * lerp;
+			relativeBone->translate[2] = oldpose->translate[2] * backlerp + pose->translate[2] * lerp;
+
+			relativeBone->scale[0] = oldpose->scale[0] * backlerp + pose->scale[0] * lerp;
+			relativeBone->scale[1] = oldpose->scale[1] * backlerp + pose->scale[1] * lerp;
+			relativeBone->scale[2] = oldpose->scale[2] * backlerp + pose->scale[2] * lerp;
+
+			QuatSlerp( oldpose->rotate, pose->rotate, lerp, relativeBone->rotate );
+		}
+	}
+
+	// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
+	relativeBone = relativeBonePose;
+	const int* jointParent = model->jointParents;
+	const float* invBindMat = model->invBindJoints;
+	float* poseMat = pose_matrices;
+	for ( uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, relativeBone++, jointParent++, invBindMat += 12, poseMat += 12 ) {
+		float mat1[12], mat2[12];
+
+		JointToMatrix( relativeBone->rotate, relativeBone->scale, relativeBone->translate, mat1 );
+
+		if (*jointParent >= 0) {
+			Matrix34Multiply( &model->bindJoints[(*jointParent) * 12], mat1, mat2 );
+			Matrix34Multiply( mat2, invBindMat, mat1 );
+			Matrix34Multiply( &pose_matrices[(*jointParent) * 12], mat1, poseMat );
+		} else {
+			Matrix34Multiply( mat1, invBindMat, poseMat );
+		}
+	}
+
+	return true;
+}
+
+/**
+*	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
+*			relative transform for all bones.
+*
+*			
+**/
+void ES_LerpSkeletonPoses( const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, EntitySkeletonBonePose *outBonePose ) {
+	// Get pointers to needed model data.
+	const iqm_model_t *iqmModel = model->iqmData;
+	// Get our Skeletal Model Data.
+	const SkeletalModelData *skmData = model->skeletalModelData;
+	// Relative Joints.
+	EntitySkeletonBonePose* relativeBonePose = outBonePose;
+
+	// Sanity Checks:
+	if (!iqmModel)	{ /* Todo: Warn */ return; }
+	if (!skmData)	{ /* Todo: Warn */ return; }
+	if (!relativeBonePose) { /* Todo: Warn */ return; }
+
+	// Current Frame.
+	//currentFrame = iqmModel->num_frames ? (currentFrame % (int) iqmModel->num_frames) : 0;
+	if (currentFrame > iqmModel->num_frames || currentFrame < 0) {
+		currentFrame = 0;
+		// Todo: Warn.
+	}
+	
+	// Old Frame.
+	//oldFrame = iqmModel->num_frames ? (oldFrame % (int) iqmModel->num_frames) : 0;
+	if (oldFrame > iqmModel->num_frames || oldFrame < 0) {
+		oldFrame = 0;
+		// Todo: Warn
+	}
+
+	// Copy or lerp animation currentFrame pose
+	if (oldFrame == currentFrame) {
+		const EntitySkeletonBonePose* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
+		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, pose++, relativeBonePose++) {
+			// Do we have skeletal model data?
+			if (skmData && poseIndex == skmData->rootJointIndex) {
+				// Copy over the pose's translation.
+				relativeBonePose->translate = pose->translate;
+
+				// See whether to cancel/zero out any axis.
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+					relativeBonePose->translate.x = 0.0;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+					relativeBonePose->translate.y = 0.0;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+					relativeBonePose->translate.z = 0.0;
+				}
+
+				// Copy over the pose's scale.
+				relativeBonePose->scale = pose->scale;
+				// Copy over the pose's rotation.
+				QuatCopy( pose->rotate, relativeBonePose->rotate );
+				
+				// Skip regular treatment.
+				continue;
+			}
+
+			// Copy over the pose's translation.
+			relativeBonePose->translate = pose->translate;
+			// Copy over the pose's scale.
+			relativeBonePose->scale = pose->scale;
+			// Copy over the pose's rotation.
+			QuatCopy( pose->rotate, relativeBonePose->rotate );
+		}
+
+	} else {
+		const EntitySkeletonBonePose* pose = &iqmModel->poses[currentFrame * iqmModel->num_poses];
+		const EntitySkeletonBonePose* oldpose = &iqmModel->poses[oldFrame * iqmModel->num_poses];
+		for (uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, oldpose++, pose++, relativeBonePose++)
+		{
+			// Do we have skeletal model data?
+			if (skmData && poseIndex == skmData->rootJointIndex) {
+				
+				// Cancel out if the Zero*Translation flag is set, otherwise, calculate translation for that axis.
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+					relativeBonePose->translate.x = 0.0;
+				} else {
+					relativeBonePose->translate.x = oldpose->translate.x * backLerp + pose->translate.x * lerp;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+					relativeBonePose->translate.y = 0.0;
+				} else {
+					relativeBonePose->translate.y = oldpose->translate.y * backLerp + pose->translate.y * lerp;
+				}
+				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+					relativeBonePose->translate.z = 0.0;
+				} else {
+					relativeBonePose->translate.z = oldpose->translate.z * backLerp + pose->translate.z * lerp;
+				}
+				
+				// Calculate the Joint's pose scale.				
+				relativeBonePose->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
+				relativeBonePose->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
+				relativeBonePose->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
+
+				// Copy over the pose's rotation.
+				//QuatCopy(pose->rotate, relativeBone->rotate);
+				// Slerp rotation.
+				QuatSlerp( oldpose->rotate, pose->rotate, lerp, relativeBonePose->rotate );
+
+				// Skip regular treatment.
+				continue;
+			}
+
+			// Calculate translation.
+			relativeBonePose->translate[0] = oldpose->translate[0] * backLerp + pose->translate[0] * lerp;
+			relativeBonePose->translate[1] = oldpose->translate[1] * backLerp + pose->translate[1] * lerp;
+			relativeBonePose->translate[2] = oldpose->translate[2] * backLerp + pose->translate[2] * lerp;
+
+			// Scale.
+			relativeBonePose->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
+			relativeBonePose->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
+			relativeBonePose->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
+
+			// Slerp rotation.
+			QuatSlerp( oldpose->rotate, pose->rotate, lerp, relativeBonePose->rotate );
+		}
+	}
+}
+
+// Apply Flags to Root Bone relatives for use after applying animations.
+void ES_ApplyRootBoneAxisFlags( const model_t* model, const int32_t rootBoneAxisFlags, const int32_t rootBoneNumber, EntitySkeletonBonePose* bonePoses, float fraction, float lerp, float backlerp ) {
+	
+	// Get IQM Data.
+	const iqm_model_t *iqmModel = model->iqmData;
+	// Get our Skeletal Model Data.
+	SkeletalModelData *skmData = model->skeletalModelData;
+	
+	if (!iqmModel) {
+		return;
+	}
+			
+	// Do we have skeletal model data?
+	if (skmData && rootBoneNumber >= 0) {
+		// Get Root Bone Pose Transform.
+		EntitySkeletonBonePose *rootBone = bonePoses + rootBoneNumber;
+
+		// Cancel out if the Zero*Translation flag is set, otherwise, calculate translation for that axis.
+		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+			rootBone->translate.x = 0.0;
+		}
+		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+			rootBone->translate.y = 0.0;
+		}
+		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+			rootBone->translate.z = 0.0;
+		}
+	}
+}
+
+/**
+*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode.
+*	@param	addBonePose		The actual animation that you want to blend in on top of inBonePoses.
+*	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
+**/
+void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp ) {
+	// Get 
+	if (boneNumber >= 0) {
+		iqm_transform_t *inBone = addBonePoses + boneNumber;
+		iqm_transform_t *outBone = addToBonePoses + boneNumber;
+
+		if (fraction == 1) {
+			*inBone = *outBone;
+		} else {
+			//
+			//	WID: Unsure if actually lerping these is favored.
+			//
+			// Lerp the already Lerped Translation.
+			//outBone->translate[0] = outBone->translate[0] * backlerp + inBone->translate[0] * lerp;
+			//outBone->translate[1] = outBone->translate[1] * backlerp + inBone->translate[1] * lerp;
+			//outBone->translate[2] = outBone->translate[2] * backlerp + inBone->translate[2] * lerp;
+
+			// Lerp the already Lerped Scale.
+			//outBone->scale[0] = outBone->scale[0] * backlerp + inBone->scale[0] * lerp;
+			//outBone->scale[1] = outBone->scale[1] * backlerp + inBone->scale[1] * lerp;
+			//outBone->scale[2] = outBone->scale[2] * backlerp + inBone->scale[2] * lerp;
+			
+			// Copy Translation.
+			outBone->translate = inBone->translate;
+
+			// Copy Scale.
+			outBone->scale = inBone->scale; //vec3_scale(inBone->scale, 1.175);
+
+			// Slerp the rotation at fraction.	
+			QuatSlerp(outBone->rotate, inBone->rotate, fraction, outBone->rotate);
+		}
+	}
+	
+	//
+	// This badly needs a bone hierachy instead of this crap lmao.
+	//
+	if (model->iqmData) {
+		auto *iqmData = model->iqmData;
+
+		for ( int32_t jointIndex = 0; jointIndex < iqmData->num_joints; jointIndex++ ) {
+			const int32_t parentIndex = model->iqmData->jointParents[jointIndex];
+
+			if (parentIndex >= 0 && parentIndex == boneNumber) {
+				ES_RecursiveBlendFromBone( model, addBonePoses, addToBonePoses, jointIndex, fraction, lerp, backlerp );
+			}
+		}
+	}
+}
+
+/**
+*	@brief	Compute local space matrices for the given pose transformations.
+*			This is enough to work with the pose itself. For rendering it needs
+*			an extra computing of its additional World Pose Transforms.
+**/
+void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePose, float *poseMatrices ) {
+	// Get IQM Data.
+	const iqm_model_t *iqmModel = model->iqmData;
+	// Get our Skeletal Model Data.
+	SkeletalModelData *skmData = model->skeletalModelData;
+	
+	// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
+	const iqm_transform_t *relativeJoint = bonePose;
+	const int* jointParent = iqmModel->jointParents;
+	const float* invBindMat = iqmModel->invBindJoints;
+	float* poseMat = poseMatrices;
+	for (uint32_t pose_idx = 0; pose_idx < iqmModel->num_poses; pose_idx++, relativeJoint++, jointParent++, invBindMat += 12, poseMat += 12) {
+		float mat1[12], mat2[12];
+
+		JointToMatrix(relativeJoint->rotate, relativeJoint->scale, relativeJoint->translate, mat1);
+
+		if (*jointParent >= 0) {
+			Matrix34Multiply(&iqmModel->bindJoints[(*jointParent) * 12], mat1, mat2);
+			Matrix34Multiply(mat2, invBindMat, mat1);
+			Matrix34Multiply(&poseMatrices[(*jointParent) * 12], mat1, poseMat);
+		} else {
+			Matrix34Multiply(mat1, invBindMat, poseMat);
+		}
+	}
+}
+
+/**
+*	@brief	Compute world space matrices for the given pose transformations.
+**/
+void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePose, float *poseMatrices ) {
+	// Get IQM Data.
+	const iqm_model_t *iqmModel = model->iqmData;
+	// Get our Skeletal Model Data.
+	SkeletalModelData *skmData = model->skeletalModelData;
+
+	ES_ComputeLocalPoseTransforms(model, bonePose, poseMatrices);
+
+	float *poseMat = iqmModel->bindJoints;
+	float *outPose = poseMatrices;
+
+	for (size_t i = 0; i < iqmModel->num_poses; i++, poseMat += 12, outPose += 12) {
+		float inPose[12];
+		memcpy(inPose, outPose, sizeof(inPose));
+		Matrix34Multiply(inPose, poseMat, outPose);
+	}
+}
