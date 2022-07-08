@@ -321,6 +321,12 @@ void _wrp_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
         Com_EPrintf("%s - Contains access to an invalid func_ptr\n", __func__);
     }
 }
+
+// TEMPORARY BONE CACHE.
+static EntitySkeletonBonePose *wrp_TBC_AcquireCachedMemoryBlock(const uint32_t size) {
+	return TBC_AcquireCachedMemoryBlock( cls.boneCache, size );
+}
+
 // SOUND
 extern void AL_SpecialEffect_Underwater_Disable();
 void _wrp_SFX_Underwater_Disable(void) {
@@ -670,6 +676,9 @@ void CL_InitGameProgs(void)
 
     // Screen.
     importAPI.SCR_UpdateScreen = SCR_UpdateScreen;
+
+	// Temporary Bone Cache.
+	importAPI.TBC_AcquireCachedMemoryBlock = wrp_TBC_AcquireCachedMemoryBlock;
 
     // System.
     importAPI.Sys_Milliseconds = Sys_Milliseconds;

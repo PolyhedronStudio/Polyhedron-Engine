@@ -561,62 +561,80 @@ const bool SKM_CreateEntitySkeletonFrom( SkeletalModelData* skm, EntitySkeleton*
 /**
 *	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
 *
-*			Treats it no different than as if it were a regular alias model going from fram A to B.
+*			Treats it no different than as if it were a regular alias model going from fram A to B. And does not make use
+*			of said node tree which is stored in the entity's skeleton.
 **/
-bool ES_ComputeAllTransforms( const iqm_model_t* model, const r_entity_t* entity, float* pose_matrices ) {
-	EntitySkeletonBonePose relativeBonePose[IQM_MAX_JOINTS];
+void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entity, float* pose_matrices ) {
+	// Temporary bone Pose.
+	EntitySkeletonBonePose temporaryBonePoses[IQM_MAX_JOINTS];
+	EntitySkeletonBonePose* relativeBone = temporaryBonePoses;
 
-	EntitySkeletonBonePose* relativeBone = relativeBonePose;
+	// Get IQM Model Data.
+	const iqm_model_t *iqmData = model->iqmData;
 
-	const int frame = model->num_frames ? entity->frame % (int)model->num_frames : 0;
-	const int oldframe = model->num_frames ? entity->oldframe % (int)model->num_frames : 0;
-	const float backlerp = entity->backlerp;
+	// Get current frame.
+	const int frame = iqmData->num_frames ? entity->frame % (int)iqmData->num_frames : 0;
+	// Get old frame.
+	const int oldframe = iqmData->num_frames ? entity->oldframe % (int)iqmData->num_frames : 0;
 
+	/**
+	*	#0: Compute relative bone transforms.
+	**/
 	// copy or lerp animation frame pose
 	if (oldframe == frame) {
-		const EntitySkeletonBonePose* pose = &model->poses[frame * model->num_poses];
-		for (uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, pose++, relativeBone++) {
-			relativeBone->translate = pose->translate;
-			relativeBone->scale = pose->scale;
-			QuatCopy(pose->rotate, relativeBone->rotate);
+		const EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
+		for (uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, pose++, relativeBone++) {
+			temporaryBonePoses->translate = pose->translate;
+			temporaryBonePoses->scale = pose->scale;
+			QuatCopy(pose->rotate, temporaryBonePoses->rotate);
 		}
 	} else {
-		const float lerp = 1.0f - backlerp;
-		const EntitySkeletonBonePose* pose = &model->poses[frame * model->num_poses];
-		const EntitySkeletonBonePose* oldpose = &model->poses[oldframe * model->num_poses];
-		for ( uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, oldpose++, pose++, relativeBone++ ) {
-			relativeBone->translate[0] = oldpose->translate[0] * backlerp + pose->translate[0] * lerp;
-			relativeBone->translate[1] = oldpose->translate[1] * backlerp + pose->translate[1] * lerp;
-			relativeBone->translate[2] = oldpose->translate[2] * backlerp + pose->translate[2] * lerp;
+		// Get back:erp.
+		const float backLerp = entity->backlerp;
+		// Get Lerp.
+		const float lerp = 1.0f - backLerp;
 
-			relativeBone->scale[0] = oldpose->scale[0] * backlerp + pose->scale[0] * lerp;
-			relativeBone->scale[1] = oldpose->scale[1] * backlerp + pose->scale[1] * lerp;
-			relativeBone->scale[2] = oldpose->scale[2] * backlerp + pose->scale[2] * lerp;
+		// Pose & Old Pose.
+		const EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
+		const EntitySkeletonBonePose* oldpose = &iqmData->poses[oldframe * iqmData->num_poses];
+
+		// Iterate and transform bones accordingly.
+		for ( uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, oldpose++, pose++, relativeBone++ ) {
+			relativeBone->translate[0] = oldpose->translate[0] * backLerp + pose->translate[0] * lerp;
+			relativeBone->translate[1] = oldpose->translate[1] * backLerp + pose->translate[1] * lerp;
+			relativeBone->translate[2] = oldpose->translate[2] * backLerp + pose->translate[2] * lerp;
+
+			relativeBone->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
+			relativeBone->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
+			relativeBone->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
 
 			QuatSlerp( oldpose->rotate, pose->rotate, lerp, relativeBone->rotate );
 		}
 	}
 
-	// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
-	relativeBone = relativeBonePose;
-	const int* jointParent = model->jointParents;
-	const float* invBindMat = model->invBindJoints;
-	float* poseMat = pose_matrices;
-	for ( uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, relativeBone++, jointParent++, invBindMat += 12, poseMat += 12 ) {
-		float mat1[12], mat2[12];
+	// Compute world, and local bone transforms.
+	ES_ComputeWorldPoseTransforms( model, temporaryBonePoses, pose_matrices );
+	ES_ComputeLocalPoseTransforms( model, temporaryBonePoses, pose_matrices );
+	//// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
+	//relativeBone = relativeBonePose;
+	//const int* jointParent = model->jointParents;
+	//const float* invBindMat = model->invBindJoints;
+	//float* poseMat = pose_matrices;
+	//for ( uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, relativeBone++, jointParent++, invBindMat += 12, poseMat += 12 ) {
+	//	float mat1[12], mat2[12];
 
-		JointToMatrix( relativeBone->rotate, relativeBone->scale, relativeBone->translate, mat1 );
+	//	JointToMatrix( relativeBone->rotate, relativeBone->scale, relativeBone->translate, mat1 );
 
-		if (*jointParent >= 0) {
-			Matrix34Multiply( &model->bindJoints[(*jointParent) * 12], mat1, mat2 );
-			Matrix34Multiply( mat2, invBindMat, mat1 );
-			Matrix34Multiply( &pose_matrices[(*jointParent) * 12], mat1, poseMat );
-		} else {
-			Matrix34Multiply( mat1, invBindMat, poseMat );
-		}
-	}
+	//	if (*jointParent >= 0) {
+	//		Matrix34Multiply( &model->bindJoints[(*jointParent) * 12], mat1, mat2 );
+	//		Matrix34Multiply( mat2, invBindMat, mat1 );
+	//		Matrix34Multiply( &pose_matrices[(*jointParent) * 12], mat1, poseMat );
+	//	} else {
+	//		Matrix34Multiply( mat1, invBindMat, poseMat );
+	//	}
+	//}
 
-	return true;
+	//return true;
 }
 
 /**
@@ -775,7 +793,9 @@ void ES_ApplyRootBoneAxisFlags( const model_t* model, const int32_t rootBoneAxis
 }
 
 /**
-*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode.
+*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode, using the given fraction as "intensity".
+*	@param	fraction		When set to 1.0, it blends in the animation at 100% intensity. Take 0.5 for example, 
+*							and a tpose(frac 0.5)+walk would have its arms half bend.
 *	@param	addBonePose		The actual animation that you want to blend in on top of inBonePoses.
 *	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
 **/
@@ -833,14 +853,14 @@ void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *ad
 *			This is enough to work with the pose itself. For rendering it needs
 *			an extra computing of its additional World Pose Transforms.
 **/
-void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePose, float *poseMatrices ) {
+void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices ) {
 	// Get IQM Data.
 	const iqm_model_t *iqmModel = model->iqmData;
 	// Get our Skeletal Model Data.
 	SkeletalModelData *skmData = model->skeletalModelData;
 	
 	// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
-	const iqm_transform_t *relativeJoint = bonePose;
+	const iqm_transform_t *relativeJoint = bonePoses;
 	const int* jointParent = iqmModel->jointParents;
 	const float* invBindMat = iqmModel->invBindJoints;
 	float* poseMat = poseMatrices;
@@ -862,13 +882,13 @@ void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBo
 /**
 *	@brief	Compute world space matrices for the given pose transformations.
 **/
-void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePose, float *poseMatrices ) {
+void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices ) {
 	// Get IQM Data.
 	const iqm_model_t *iqmModel = model->iqmData;
 	// Get our Skeletal Model Data.
 	SkeletalModelData *skmData = model->skeletalModelData;
 
-	ES_ComputeLocalPoseTransforms(model, bonePose, poseMatrices);
+	ES_ComputeLocalPoseTransforms(model, bonePoses, poseMatrices);
 
 	float *poseMat = iqmModel->bindJoints;
 	float *outPose = poseMatrices;

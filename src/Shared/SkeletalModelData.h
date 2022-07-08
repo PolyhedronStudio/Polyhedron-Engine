@@ -14,6 +14,7 @@
 *	Needed for SKM_MAX_JOINTS
 **/
 #include "Refresh.h"
+#include "EntitySkeleton.h"
 #include "Formats/Iqm.h"
 
 /**
@@ -155,236 +156,6 @@ struct SkeletalAnimation {
 void SKM_GenerateModelData(model_t* model);
 
 
-
-/**
-*
-*
-*	Entity Skeleton: Each entity using a skeletal model can generate an Entity Skeleton
-*	for use of performing animation pose blending magic with.
-*
-*
-**/
-/**
-*	@brief	Stores the actual data of each bone making up this Entity Skeleton.
-*			Including a pointer to a matching node in our Bone Tree Hierachy.
-**/
-class EntitySkeletonBoneNode;
-struct EntitySkeletonBone {
-	//! This bone's name.
-	std::string name = "";
-	//! This bone's parent index.
-	int32_t parentIndex = -1;	//! Defaults to -1, meaning, None.
-	//! This bone's index.
-	int32_t index = 0;
-	//! This bone's flags. (If any.)
-	int32_t flags = 0;
-
-	//! A pointer to the node matching this bone in our linear bone list.
-	EntitySkeletonBoneNode *boneTreeNode = nullptr;
-};
-
-/**
-*	@brief	Simple TreeNode Hierachy Template.
-*
-*			Each node keeps track of its parent while having unlimited amount of children.
-*
-**/
-//template < class T > 
-class EntitySkeletonBoneNode {
-public:
-	/**
-	*
-	*	Constructors/Destructor(s).
-	*
-	**/
-	/**
-	*	@brief	Default Constructor.
-	**/
-	EntitySkeletonBoneNode()
-	{
-		this->parent = nullptr;
-	}
-	/**
-	*	@brief	Default constructor accepting a const reference to the data to hold.
-	**/
-	EntitySkeletonBoneNode( EntitySkeletonBone *esBone, EntitySkeletonBoneNode* parentBoneNode = nullptr ) {
-		this->esBone = esBone;
-		this->parent = parentBoneNode;
-	}
-	/**
-	*	@brief	Copy Constructor.
-	**/
-	EntitySkeletonBoneNode( const EntitySkeletonBoneNode& node ) 
-	{
-		this->esBone = node.esBone;
-		this->parent = node.parent;
-		this->children = node.children;
-		// fix the parent pointers
-		for ( size_t i = 0 ; i < this->children.size() ; ++i )
-		{
-			this->children.at(i).parent = this;
-		}
-	}
-	/**
-	*	@brief	Copy assignment operator
-	**/
-    EntitySkeletonBoneNode& operator=( const EntitySkeletonBoneNode& node )
-    {
-		if ( this != &node ) 
-		{
-			this->esBone = node.esBone;
-			this->parent = node.parent;
-			this->children = node.children;
-
-			// Fix the parent pointers.
-			for ( size_t i = 0 ; i < this->children.size() ; ++i )
-			{
-				this->children.at(i).parent = this;
-			}
-		}
-		return *this;
-    }
-
-	/**
-	*	@brief	Usual virtual destructor.
-	**/
-	virtual ~EntitySkeletonBoneNode(){
-	}
-
-
-	/**
-	*
-	*	Add/Remove Child Node Functions.
-	*
-	**/
-	/**
-	*	@brief	Adds a child node storing 'data' to this node's children.
-	**/
-	EntitySkeletonBoneNode &AddChild( EntitySkeletonBone *esBone ) {
-		// Add the bone to our children vector.
-		this->children.emplace_back( EntitySkeletonBoneNode( esBone , this ) );
-
-		// Return a reference to it.
-		return children.back();
-	}
-
-	/**
-	*	@brief	Removes a child bone node if its boneIndex matches.
-	**/
-	void RemoveChildByBoneIndex( const int32_t boneIndex ) {
-		if ( boneIndex < children.size() ) {
-			children.erase( children.begin() + boneIndex );
-		}
-	}
-
-	/**
-	*	@brief	Removes a child bone node if its name matches.
-	**/
-	void RemoveChildByName( const std::string &boneName ) {
-		// Test function
-		auto removeIterator = std::remove_if(children.begin(), children.end(),
-			[&boneName]( const EntitySkeletonBoneNode &boneNode ) -> auto {
-				const EntitySkeletonBone *bone = boneNode.GetEntitySkeletonBone();
-
-				return (bone && bone->name == boneName);
-			}
-		);
-	}
-
-
-	/**
-	*
-	*	Get/Set Functions.
-	*
-	**/
-	/**
-	*	@return	Const Pointer to this node's matching Entity Skeleton Bone.
-	**/
-	EntitySkeletonBone *GetEntitySkeletonBone() {
-		return esBone;
-	}
-	/**
-	*	@return	Const Pointer to this node's matching Entity Skeleton Bone.
-	**/
-	const EntitySkeletonBone *GetEntitySkeletonBone() const {
-		return esBone;
-	}
-	/**
-	*	@return	Reference to the parent node.
-	**/
-	EntitySkeletonBoneNode &GetParent() {
-		return *this->parent;
-	}
-	/**
-	*	@return	Const Reference to the parent node.
-	**/
-	const EntitySkeletonBoneNode &GetParent() const {
-		return *this->parent;
-	}
-	
-	/**
-	*	@return	Reference to the child node vector.
-	**/
-	std::vector< EntitySkeletonBoneNode > &GetChildren() {
-		return this->children;
-	}
-	/**
-	*	@return	Const Reference to the child node vector.
-	**/
-	const std::vector< EntitySkeletonBoneNode > &GetChildren() const	{
-		return this->children;
-	}
-
-
-private:
-	//! Actual data stored in this node.
-	//T data;
-	EntitySkeletonBone *esBone = nullptr;
-
-	//! Pointer to the parent node, if null, then this IS the parent node.
-	EntitySkeletonBoneNode* parent = nullptr;
-	//! Vector containing all possible children of this node.
-	std::vector< EntitySkeletonBoneNode > children;
-
-
-	// the type has to have an overloaded std::ostream << operator for print to work
-	//void print( const int depth = 0 ) const
-	//{
-	//	std::string printStr = "";
-
-	//	for ( int i = 0 ; i < depth ; ++i )
-	//	{
-	//		if ( i != depth-1 ) printStr << "    ";
-	//		else printStr << "|-- ";
-	//	}
-	//	printStr << this->t << "\n";
-	//	// SG_DPrint...
-	//	for ( size_t i = 0 ; i < this->children.size() ; ++i )
-	//	{
-	//		this->children.at(i).print( depth+1 );
-	//	}
-	//}
-};
-
-/**
-*	@brief	Skeleton consisting of the current frame's blend combined bone poses
-*			to use for rendering and/or in-game bone position work.
-*
-*			When changing an entity's model, the skeleton needs to be regenerated.
-**/
-struct EntitySkeleton {
-	//! Pointer to the internal model data. (Also used to retreive the SKM data from there.)
-	model_t *model = nullptr;
-
-
-	//! A simple tree hierachy for working with this skeleton's bone data.
-	EntitySkeletonBoneNode boneTree;
-	//! A std::map making bone nodes easily accessable by their name. Generated after creating the bone Tree, and allows only distinct bone names.
-	std::map<std::string, EntitySkeletonBoneNode*> boneMap;
-	//! The actual skeleton bone data, stored linearly for fast access.
-	std::vector<EntitySkeletonBone> bones;
-};
-
 /**
 *	@brief	Sets up an entity skeleton using the specified skeletal model data.
 **/
@@ -392,30 +163,20 @@ const bool SKM_CreateEntitySkeletonFrom(SkeletalModelData *skm, EntitySkeleton *
 
 
 /**
-*
-*
-*	Bone Poses
-*
-*
-**/
-/**
-*	@brief Currently is just iqm_transform_t, there's nothing to it.
-**/
-using EntitySkeletonBonePose = iqm_transform_t;
-
-/**
 *	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
 *
 *			Treats it no different than as if it were a regular alias model going from fram A to B.
 **/
-bool ES_ComputeAllTransforms( const iqm_model_t* model, const r_entity_t* entity, float* pose_matrices );
+void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entity, float* pose_matrices );
+
+
 /**
 *	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
 *			relative transform for all bones.
 *
 *			
 **/
-void ES_LerpSkeletonPoses(/*const iqm_model_t* model*/const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, EntitySkeletonBonePose *outBonePose);
+void ES_LerpSkeletonPoses( const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, EntitySkeletonBonePose *outBonePose);
 /**
 *	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode.
 *	@param	inBonePose	A lerped bone poses that you want to blend the 'addBonePoses' animation on top of.
@@ -428,12 +189,12 @@ void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose* ad
 *			This is enough to work with the pose itself. For rendering it needs
 *			an extra computing of its additional World Pose Transforms.
 **/
-void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePose, float *poseMatrices );
+void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
 /**
 *	@brief	Compute world space matrices for the given pose transformations.
 **/
-void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePose, float *poseMatrices );
+void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
 /**
 *	@brief	Apply Flags to Root Bone relatives for use after applying animations.
 **/
-void ES_ApplyRootBoneAxisFlags( const model_t* model, const int32_t rootBoneAxisFlags, const int32_t rootBoneNumber, EntitySkeletonBonePose* bonePoses, float fraction, float lerp, float backlerp );
+//void ES_ApplyRootBoneAxisFlags( const model_t* model, const int32_t rootBoneAxisFlags, const int32_t rootBoneNumber, EntitySkeletonBonePose* bonePoses, float lerp, float backlerp );

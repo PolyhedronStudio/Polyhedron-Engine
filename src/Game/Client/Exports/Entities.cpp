@@ -459,10 +459,10 @@ void ClientGameEntities::LocalEntityEvent(int32_t number) {
 }
 
 /**
-*   @brief  Parse the server frame for server entities to add to our client view.
-*           Also applies special rendering effects to them where desired.
+*   @brief  Prepares all parsed server entities, as well as local entities for rendering
+*			of the current frame.
 **/
-void ClientGameEntities::AddPacketEntities() {
+void ClientGameEntities::PrepareRefreshEntities() {
 	// Get Gameworld, we're about to iterate.
 	ClientGameWorld *gameWorld = GetGameWorld();
 

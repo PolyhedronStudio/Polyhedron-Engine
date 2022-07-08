@@ -1797,38 +1797,47 @@ static void process_regular_entity(
 		*contains_transparent = false;
 
 	int iqm_matrix_index = -1;
-	if (model->iqmData && model->iqmData->num_poses) {
+	
+	// If the model data contains iqmdata, we take the IQM rendering path.
+	if ( model->iqmData && model->iqmData->num_poses ) {
+		// Get pose matrixes.
 		iqm_matrix_index = *iqm_matrix_offset;
 
+		// Ensure we aren't overflowing this buffer.
 		if (iqm_matrix_index + model->iqmData->num_poses > MAX_IQM_MATRICES) {
 			assert(!"IQM matrix buffer overflow");
 			return;
 		}
 
-		// Use the good old R_ComputeIQMTransforms for when no extra skeletal model data was precached.
-		if (!model->skeletalModelData) {
-			ES_ComputeAllTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
+		// If there is no Entity Skeleton presented, we take the StandardComputeTransforms route.
+		// This compute relative, world and local bone pose transforms.
+		if ( !model->skeletalModelData ) {
+			ES_StandardComputeTransforms( model, entity, iqm_matrix_data + (iqm_matrix_index * 12) );
 
 			*iqm_matrix_offset += (int)model->iqmData->num_poses;
 		// Otherwise, take a special route.
-		} else if (model->skeletalModelData) {		
+		} else if ( model->skeletalModelData ) {		
 			EntitySkeletonBonePose mainChannelBonePoses[IQM_MAX_JOINTS];
 			EntitySkeletonBonePose eventChannelBonePoses[IQM_MAX_JOINTS];
-			EntitySkeletonBonePose finalBonePoses[IQM_MAX_JOINTS];
 
 			// Get pose mat pointer.
 			float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
 
-			// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
-			ES_LerpSkeletonPoses(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, mainChannelBonePoses);
-			ES_LerpSkeletonPoses(model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, eventChannelBonePoses);
+			// Ensure that the bone pose pointer is set.
+			if ( entity->currentBonePoses ) {
+				//// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
+				//ES_LerpSkeletonPoses( model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, mainChannelBonePoses );
+				//ES_LerpSkeletonPoses( model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, eventChannelBonePoses );
 			
-			// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
-			ES_RecursiveBlendFromBone(model, eventChannelBonePoses, mainChannelBonePoses, 4, 0.5, 1.0f - entity->backlerpB, entity->backlerpB);
+				//// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+				//ES_RecursiveBlendFromBone( model, eventChannelBonePoses, mainChannelBonePoses, 4, 0.5, 1.0f - entity->backlerpB, entity->backlerpB );
 
-			// Compute World and Local Pose Matrixes.
-			ES_ComputeWorldPoseTransforms(model, mainChannelBonePoses, pose_mat);
-			ES_ComputeLocalPoseTransforms(model, mainChannelBonePoses, pose_mat);
+				// Compute World and Local Pose Matrixes.
+				ES_ComputeWorldPoseTransforms( model, entity->currentBonePoses, pose_mat );
+				ES_ComputeLocalPoseTransforms( model, entity->currentBonePoses, pose_mat );
+			} else {
+				ES_StandardComputeTransforms( model, entity, pose_mat );
+			}
 
 			*iqm_matrix_offset += (int)model->iqmData->num_poses;
 		}

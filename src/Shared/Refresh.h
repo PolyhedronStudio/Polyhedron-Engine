@@ -85,7 +85,7 @@ typedef struct r_entity_s {
 	//! The Entity's alpha, only applied if RenderEffects::Translucent is set.
     float		alpha	= 0.f;
 	//! Default Render Scale.
-	float	scale = 1.f;
+	float		scale	= 1.f;
 
 
 	/**
@@ -118,9 +118,10 @@ typedef struct r_entity_s {
 	*	Skeletal Model Animation
 	**/
 	//! A pointer to a temporary bone cache.
-	iqm_transform_t	*relativeFramePose	= nullptr;
+	iqm_transform_t	*currentBonePoses	= nullptr;
 	//! A pointer to a temporary bone cache.
-	iqm_transform_t *relativeFrameBPose = nullptr;
+	iqm_transform_t *oldBonePoses		= nullptr;
+
 
 	//! Root Bone Axis Flags for the Main Animation.
 	int32_t rootBoneAxisFlags	= 0;

@@ -690,6 +690,11 @@ extern "C" {
         void            (*SCR_UpdateScreen) (void);
 
         //---------------------------------------------------------------------
+        // Temporary Bone Cache
+        //---------------------------------------------------------------------
+		EntitySkeletonBonePose *(*TBC_AcquireCachedMemoryBlock) ( const uint32_t size );
+
+        //---------------------------------------------------------------------
         // Sound.
         //---------------------------------------------------------------------
         // Begins the sound registration process.

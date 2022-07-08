@@ -328,6 +328,9 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 			skm = model->skeletalModelData;
 
 			UpdateSkeletalModelDataFromState(skm, &entitySkeleton, state);
+
+			// TODO: Move elsewhere, this creation process is messed up atm.
+			entitySkeleton.model = state.modelIndex;
 		}
 	}
 
@@ -372,6 +375,9 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 			skm = model->skeletalModelData;
 
 			UpdateSkeletalModelDataFromState(skm, &entitySkeleton, state);
+
+			// TODO: Move elsewhere, this creation process is messed up atm.
+			entitySkeleton.model = state.modelIndex;
 		}
 	}
 
@@ -747,6 +753,9 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 	EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
 	EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
 
+	// Setup the refresh entity frames regardless of animation time return scenario.
+	refreshEntity.oldframe	= refreshAnimation.frame;
+	refreshEntity.oldframeB	= refreshAnimationB.frame;
 
 	if (time <= GameTime::zero()) {
 		return;
@@ -781,8 +790,90 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		refreshAnimationB.loopCount,
 		refreshAnimationB.forceLoop
 	);
+
+	// Main Channel Animation Frames.
+	refreshEntity.frame		= refreshAnimation.frame;
+	refreshEntity.backlerp	= refreshAnimation.backLerp;
+
+	// Event Channel Animation Frames.
+	refreshEntity.frameB	= refreshAnimationB.frame;
+	refreshEntity.backlerpB	= refreshAnimationB.backLerp;
 }
 
+/**
+*	@brief	Computes the Entity Skeleton's pose for the current refresh frame. In case of
+*			a desire to 'work' with these poses, whether it is to adjust or read data
+*			from them, override this method.
+*
+*			The actual bone poses are transformed to world and local space afterwards.
+*			This function only allows for calculating the relative transforms.
+*
+*	@param	
+**/
+void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses ) {
+	if (entitySkeleton.model == -1) {
+		return;
+	}
+
+	// Get model from handle.
+	model_t *modelPtr = clgi.CL_Model_GetModelByHandle( cl->drawModels[entitySkeleton.model] );
+	
+	// In case the model pointer is set, we assume this skeleton has been initialized.
+	// Of course, we check bones size too just to be sure :-)
+	if ( modelPtr  && modelPtr ->iqmData ) {
+		// Acquire a cache block.
+		EntitySkeletonBonePose *tempMainChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( modelPtr->iqmData->num_poses );
+		EntitySkeletonBonePose *tempEventChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( modelPtr->iqmData->num_poses );
+
+		// Ensure it is valid memory to use.
+		if ( tempMainChannelBonePoses != nullptr && tempEventChannelBonePoses != nullptr) {
+			// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
+			ES_LerpSkeletonPoses( modelPtr, 
+								 refreshEntity.rootBoneAxisFlags, 
+								 refreshEntity.frame, 
+								 refreshEntity.oldframe, 
+								 1.0f - refreshEntity.backlerp, 
+								 refreshEntity.backlerp, 
+								 tempMainChannelBonePoses
+			);
+
+			ES_LerpSkeletonPoses( modelPtr,
+								 refreshEntity.rootBoneAxisFlagsB, 
+								 refreshEntity.frameB, 
+								 refreshEntity.oldframeB, 
+								 1.0f - refreshEntity.backlerpB, 
+								 refreshEntity.backlerpB, 
+								 tempEventChannelBonePoses
+			);
+			
+			// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+			ES_RecursiveBlendFromBone( modelPtr,
+									  tempEventChannelBonePoses, 
+									  tempMainChannelBonePoses, 
+									  4, 
+									  0.5, 
+									  1.0f - refreshEntity.backlerpB, 
+									  refreshEntity.backlerpB 
+			
+			
+			);
+
+			// Last but not least...
+			refreshEntity.currentBonePoses = tempMainChannelBonePoses;
+
+			// Return.
+			return;
+			// Compute World and Local Pose Matrixes.
+			//ES_ComputeWorldPoseTransforms( model, entity->currentBonePoses, pose_mat );
+			//ES_ComputeLocalPoseTransforms( model, entity->currentBonePoses, pose_mat );
+		} else {
+			Com_DPrintf("Mofuckahs ain't got bone poses \n");
+		}
+	}
+
+	// If we got to here, we unset its ptr to be sure.
+	refreshEntity.currentBonePoses = nullptr;
+}
 
 
 /**
@@ -873,21 +964,12 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			/**
 			*	Skeletal Animation Processing. - The RefreshAnimationB stuff is TEMPORARILY for Blend testing.
 			**/
-			// Setup the refresh entity frames.
-			refreshEntity.oldframe	= refreshAnimation.frame;
-			refreshEntity.oldframeB	= refreshAnimationB.frame;
-
-			// Setup the proper lerp and model frame to render this pass.
-			// Moved into the if statement's else case up above.
+			// Process the Skeletal Animation Frames for the current client time. 
+			// (Based on animation start time.)
 			ProcessSkeletalAnimationForTime(GameTime(cl->time));
 
-			// Main Animation Frame.
-			refreshEntity.frame		= refreshAnimation.frame;
-			refreshEntity.backlerp	= refreshAnimation.backLerp;
-
-			// Event Channel Animation Frame.
-			refreshEntity.frameB = refreshAnimationB.frame;
-			refreshEntity.backlerpB	= refreshAnimationB.backLerp;
+			// Compute the Entity Skeleton Trasforms for Refresh Frame.
+			ComputeEntitySkeletonTransforms( nullptr );
         }
         
 

@@ -102,10 +102,10 @@ public:
     virtual void LocalEntityEvent(int32_t number) = 0;
 
     /**
-    *   @brief  Parse the server frame for server entities to add to our client view.
-    *           Also applies special rendering effects to them where desired.
+    *   @brief  Prepares all parsed server entities, as well as local entities for rendering
+	*			of the current frame.
     **/
-    virtual void AddPacketEntities() = 0;
+    virtual void PrepareRefreshEntities() = 0;
 
     /**
     *   @brief  Add the view weapon render entity to the screen. Can also be used for

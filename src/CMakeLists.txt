@@ -58,6 +58,7 @@ SET(HEADERS_SHARED
 	${PATH_SRC}/Shared/Config.h
 	${PATH_SRC}/Shared/Endian.h 
 	${PATH_SRC}/Shared/Entities.h 
+	${PATH_SRC}/Shared/EntitySkeleton.h 
 	${PATH_SRC}/Shared/Keys.h 
 	${PATH_SRC}/Shared/KeyValue.h 
 	${PATH_SRC}/Shared/List.h 
@@ -91,6 +92,7 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/Messaging.cpp
 	${PATH_SRC}/Common/Prompt.cpp
 	${PATH_SRC}/Common/SizeBuffer.cpp
+	${PATH_SRC}/Common/TemporaryBoneCache.cpp
 	#${PATH_SRC}/Common/Tests.cpp
 	${PATH_SRC}/Common/Utilities.cpp
 	${PATH_SRC}/Common/Zone.cpp
@@ -128,7 +130,8 @@ SET(HEADERS_COMMON
 	${PATH_SRC}/Common/Prompt.h
 	${PATH_SRC}/Common/Protocol.h
 	${PATH_SRC}/Common/SizeBuffer.h
-	${PATH_SRC}/Common/Tests.h
+	${PATH_SRC}/Common/TemporaryBoneCache.h
+	#${PATH_SRC}/Common/Tests.h
 	${PATH_SRC}/Common/Utilities.h
 	${PATH_SRC}/Common/Zone.h
 

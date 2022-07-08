@@ -682,6 +682,9 @@ void CL_ClearState(void)
         CL_CheckForPause();
         CL_UpdateFrameTimes();
     }
+	
+	// Even though it resides in client static, we do want to clear bone caches here.
+	TBC_ResetCache( cls.boneCache );
 
     // Unprotect game cvar
     fs_game->flags &= ~CVAR_ROM;
@@ -3000,6 +3003,9 @@ uint64_t CL_Frame(uint64_t msec)
 
     main_extra += msec;
     cls.realtime += msec;
+
+	// Clear cache for Temporary Bones.
+	TBC_ClearCache( cls.boneCache );
 
     CL_ProcessEvents();
 

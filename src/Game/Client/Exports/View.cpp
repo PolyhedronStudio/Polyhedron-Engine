@@ -55,7 +55,7 @@ void ClientGameView::RenderView() {
 
     // Add all entities of the last received(should be the current if all is stable)
     // server frame to the current frame view.
-    clge->entities->AddPacketEntities();
+    clge->entities->PrepareRefreshEntities();
 
     //
     // TODO: Not like how it is done right now haha. 

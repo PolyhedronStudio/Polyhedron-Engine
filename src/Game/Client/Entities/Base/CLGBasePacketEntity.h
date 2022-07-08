@@ -82,18 +82,6 @@ public:
 
 
 
-	/***
-	*
-	*
-	*	Skeletal Animation Related.
-	*
-	*
-	***/
-	//! Actual skeleton unique to this entity.
-	EntitySkeleton entitySkeleton;
-
-
-
     /***
     *
     * 
@@ -940,7 +928,7 @@ public:
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline float    GetSpeed() { return 0.f; }
+    virtual inline float GetSpeed() { return 0.f; }
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
@@ -961,6 +949,17 @@ public:
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
 protected:
+	//! Actual skeleton unique to this entity.
+	EntitySkeleton entitySkeleton;
+	
+	//! Collection of bonePose animation channels.
+	struct {
+		//! Stores the bone poses of the Main Animation Channel.
+		EntitySkeletonBonePose mainChannel;
+		//! Stores the bone poses of the Event Animation Channel.
+		EntitySkeletonBonePose eventChannel;
+	} animationBonePoses;
+
 	//! Skeletal Model Data pointer. Needs to be loaded on request. DIYS
 	SkeletalModelData *skm = nullptr;
 
@@ -970,7 +969,17 @@ private:
 	**/
 	virtual void ProcessSkeletalAnimationForTime(const GameTime &time);
 
-
+	/**
+	*	@brief	Computes the Entity Skeleton's pose for the current refresh frame. In case of
+	*			a desire to 'work' with these poses, whether it is to adjust or read data
+	*			from them, override this method.
+	*
+	*			The actual bone poses are transformed to world and local space afterwards.
+	*			This function only allows for calculating the relative transforms.
+	*
+	*	@param	
+	**/
+	virtual void ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses );
 
 protected:
 	/**

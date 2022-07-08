@@ -105,6 +105,9 @@ void CL_PrepareMedia(void)
     if (!cl.mapName[0])
         return;     // no map loaded
 
+	// We want to actually reset and clear the cache here as well.
+	TBC_ResetCache( cls.boneCache );
+
     // register models, pics, and skins
     R_BeginRegistration(cl.mapName);
     // register sounds.
