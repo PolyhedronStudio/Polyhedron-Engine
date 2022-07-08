@@ -846,11 +846,16 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 								 tempEventChannelBonePoses
 			);
 			
+			// Get the bone node for the 4th bone.
+			EntitySkeletonBoneNode fourthNode = &entitySkeleton.bones[4];
+			// It can also be done in the following way, however, I forgot its name atm.
+			//EntitySkeletonBoneNode hipNode = &entitySkeleton.boneMap["mixamo8:Hips"]; // Blind guess.
+
 			// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
 			ES_RecursiveBlendFromBone( modelPtr,
 									  tempEventChannelBonePoses, 
 									  tempMainChannelBonePoses, 
-									  4, 
+									  fourthNode, 
 									  0.5, 
 									  1.0f - refreshEntity.backlerpB, 
 									  refreshEntity.backlerpB 
@@ -863,9 +868,6 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 
 			// Return.
 			return;
-			// Compute World and Local Pose Matrixes.
-			//ES_ComputeWorldPoseTransforms( model, entity->currentBonePoses, pose_mat );
-			//ES_ComputeLocalPoseTransforms( model, entity->currentBonePoses, pose_mat );
 		} else {
 			Com_DPrintf("Mofuckahs ain't got bone poses \n");
 		}

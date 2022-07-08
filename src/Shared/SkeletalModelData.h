@@ -183,7 +183,7 @@ void ES_LerpSkeletonPoses( const model_t *model, const int32_t rootBoneAxisFlags
 *	@param	addBonePose	The actual animation that you want to blend in on top of inBonePoses.
 *	@param	outBonePose	Final resulting bone pose of addBonePoses blended on top of inBonePoses.
 **/
-void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose* addBonePoses, EntitySkeletonBonePose* addToBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp );
+void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode &boneNode, float fraction, float lerp, float backlerp );
 /**
 *	@brief	Compute local space matrices for the given pose transformations.
 *			This is enough to work with the pose itself. For rendering it needs

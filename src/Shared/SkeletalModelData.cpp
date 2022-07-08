@@ -799,9 +799,20 @@ void ES_ApplyRootBoneAxisFlags( const model_t* model, const int32_t rootBoneAxis
 *	@param	addBonePose		The actual animation that you want to blend in on top of inBonePoses.
 *	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
 **/
-void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp ) {
-	// Get 
-	if (boneNumber >= 0) {
+void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode &boneNode, float fraction, float lerp, float backlerp ) {
+	// Get the bone.
+	const EntitySkeletonBone *esBone = boneNode.GetEntitySkeletonBone();
+	
+	// If the bone is invalid, escape.
+	if ( !esBone ) {
+		// TODO: Warn.
+		return;
+	}
+	
+	// Get bone number.
+	const int32_t boneNumber = esBone->index;
+
+	if (esBone->index >= 0) {
 		iqm_transform_t *inBone = addBonePoses + boneNumber;
 		iqm_transform_t *outBone = addToBonePoses + boneNumber;
 
@@ -835,16 +846,19 @@ void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *ad
 	//
 	// This badly needs a bone hierachy instead of this crap lmao.
 	//
-	if (model->iqmData) {
-		auto *iqmData = model->iqmData;
+	//if (model->iqmData) {
+	//	auto *iqmData = model->iqmData;
 
-		for ( int32_t jointIndex = 0; jointIndex < iqmData->num_joints; jointIndex++ ) {
-			const int32_t parentIndex = model->iqmData->jointParents[jointIndex];
+	//	for ( int32_t jointIndex = 0; jointIndex < iqmData->num_joints; jointIndex++ ) {
+	//		const int32_t parentIndex = model->iqmData->jointParents[jointIndex];
 
-			if (parentIndex >= 0 && parentIndex == boneNumber) {
-				ES_RecursiveBlendFromBone( model, addBonePoses, addToBonePoses, jointIndex, fraction, lerp, backlerp );
-			}
-		}
+	//		if (parentIndex >= 0 && parentIndex == boneNumber) {
+	//			ES_RecursiveBlendFromBone( model, addBonePoses, addToBonePoses, jointIndex, fraction, lerp, backlerp );
+	//		}
+	//	}
+	//}
+	for ( auto &childBoneNode : boneNode.GetChildren() ) {
+		ES_RecursiveBlendFromBone( model, addBonePoses, addToBonePoses, childBoneNode, fraction, lerp, backlerp );
 	}
 }
 
