@@ -48,9 +48,9 @@ static constexpr int32_t MAX_RMODELS = MAX_MODELS * 2;
 int32_t registration_sequence = 0;
 
 //! Refresh Model Data.
-model_t      r_models[MAX_RMODELS];
+model_t		r_models[MAX_RMODELS];
 //! Number of total models we got.
-int32_t          r_numModels = 0;
+int32_t		r_numModels = 0;
 //! Client Side storage of our internal Skeletal Model Data.
 //! Indexed by the same handle as the r_models model it belongs to.
 SkeletalModelData r_skeletalModels[MAX_RMODELS];

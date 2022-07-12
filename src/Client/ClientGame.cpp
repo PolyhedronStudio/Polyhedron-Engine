@@ -322,10 +322,32 @@ void _wrp_R_DrawFill32(int x, int y, int w, int h, uint32_t color) {
     }
 }
 
+//-------------------------------------------------------------------------
+
+// Entity Skeleton.
+/**
+*	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
+*			relative transform for all bones.
+*
+*			
+**/
+void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePose *outBonePose, int32_t currentFrame, int32_t oldFrame, float backLerp, const int32_t rootBoneAxisFlags );
+
+/**
+*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode, using the given fraction as "intensity".
+*	@param	fraction		When set to 1.0, it blends in the animation at 100% intensity. Take 0.5 for example, 
+*							and a tpose(frac 0.5)+walk would have its arms half bend.
+*	@param	addBonePose		The actual animation that you want to blend in on top of inBonePoses.
+*	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
+**/
+void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction = 1.0f );
+
 // TEMPORARY BONE CACHE.
 static EntitySkeletonBonePose *wrp_TBC_AcquireCachedMemoryBlock(const uint32_t size) {
 	return TBC_AcquireCachedMemoryBlock( cls.boneCache, size );
 }
+
+//-------------------------------------------------------------------------
 
 // SOUND
 extern void AL_SpecialEffect_Underwater_Disable();
@@ -551,6 +573,10 @@ void CL_InitGameProgs(void)
 
     importAPI.Cvar_Variable_g = Cvar_Variable_g;
     importAPI.Cvar_Default_g = Cvar_Default_g;
+
+	importAPI.ES_LerpSkeletonPoses = ES_LerpSkeletonPoses;
+	importAPI.ES_RecursiveBlendFromBone = ES_RecursiveBlendFromBone;
+	importAPI.ES_CreateFromModel = ES_CreateFromModel;
 
     // Files.
     importAPI.FS_RenameFile = FS_RenameFile;

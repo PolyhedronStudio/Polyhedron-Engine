@@ -83,6 +83,7 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/CollisionModel.cpp
 	${PATH_SRC}/Common/Common.cpp
 	${PATH_SRC}/Common/CVar.cpp
+	${PATH_SRC}/Common/EntitySkeleton.cpp
 	${PATH_SRC}/Common/Error.cpp
 	${PATH_SRC}/Common/Field.cpp
 	${PATH_SRC}/Common/Fifo.cpp
@@ -118,6 +119,7 @@ SET(HEADERS_COMMON
 	${PATH_SRC}/Common/CollisionModel.h
 	${PATH_SRC}/Common/Common.h
 	${PATH_SRC}/Common/CVar.h
+	${PATH_SRC}/Common/EntitySkeleton.h
 	${PATH_SRC}/Common/Error.h
 	${PATH_SRC}/Common/Field.h
 	${PATH_SRC}/Common/Fifo.h

@@ -197,9 +197,7 @@ void MonsterTestDummy::Spawn() {
 
 	// Setup thinking.
     SetThinkCallback( &MonsterTestDummy::MonsterTestDummyThink );
-	SetNextThinkTime(level.time + FRAMETIME);
-	//SwitchAnimation("PistolIdleTense");
-	//MonsterTestDummyUse(this, this);
+	SetNextThinkTime(level.time + FRAMETIME_S);
 
     // Link the entity to world, for collision testing.
     LinkEntity();

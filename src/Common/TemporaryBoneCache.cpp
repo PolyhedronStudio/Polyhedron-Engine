@@ -99,11 +99,11 @@ EntitySkeletonBonePose *TBC_AcquireCachedMemoryBlock( TemporaryBoneCache &cache,
 	*	#1: Insert (actually initialize and allocate memory if it has not done so before.), and return address.
 	**/
 	// Insert into our container to initialize the needed memory.
-	cache.cache.insert( cache.cache.end(), _cleanBonePoses.begin(), _cleanBonePoses.end() );
+	return &(*cache.cache.insert(cache.cache.end(), _cleanBonePoses.begin(), _cleanBonePoses.begin() + size));
 
 	// Return actual address of said block in memory.
-	auto &&it = (cache.cache.end() - size);
+	//auto &it = &(*(cache.cache.end() - size));
 
 
-	return &(*it);
+	//return &(*(cache.cache.end() - size));
 }

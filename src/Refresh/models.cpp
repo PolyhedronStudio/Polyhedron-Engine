@@ -73,7 +73,7 @@ qhandle_t R_RegisterModel(const char *name) {
 	ssize_t filelen;
 	model_t *model;
 	byte *rawdata = NULL;
-	uint32_t ident;
+	uint32_t ident = 0;
 	mod_load_t load;
 	qerror_t ret;
 
@@ -169,6 +169,15 @@ qhandle_t R_RegisterModel(const char *name) {
 
 	ret = load(model, R_MOD_Alloc, rawdata, filelen, name);
 
+	// If we had no return values(no issues), identified model as IQM, and it has not
+	// had any SKM data yet, generate it.
+	if (!ret && ident == IQM_IDENT && !model->skeletalModelData) {
+		model->skeletalModelData = &r_skeletalModels[index - 1];
+
+		// Generate Skeletal Model Data.
+		SKM_GenerateModelData(model);
+	}
+
 	FS_FreeFile(rawdata);
 
 	if (ret) {
@@ -185,13 +194,7 @@ done:
 	register_model_dirty = 1;
 #endif
 
-	//// Assign the skeletal model data struct as a pointer to this model_t
-	//if (!model->skeletalModelData) {
-	//	model->skeletalModelData = &r_skeletalModels[index - 1];
 
-	//	// Generate Skeletal Model Data.
-	//	SKM_GenerateModelData(model);
-	//}
 
 	return index;
 

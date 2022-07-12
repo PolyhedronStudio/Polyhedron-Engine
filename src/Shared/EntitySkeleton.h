@@ -17,8 +17,18 @@
 /**
 *	Needed for ES_MAX_JOINTS
 **/
-#include "Refresh.h"
 #include "Formats/Iqm.h"
+
+/**
+*	@brief Currently is just iqm_transform_t, there's nothing to it.
+**/
+using EntitySkeletonBonePose = iqm_transform_t;
+
+/**
+*	
+**/
+#include "Refresh.h"
+
 
 
 
@@ -26,11 +36,6 @@
 *	@brief	Predeclare.
 **/
 struct SkeletalAnimation;
-
-/**
-*	@brief Currently is just iqm_transform_t, there's nothing to it.
-**/
-using EntitySkeletonBonePose = iqm_transform_t;
 
 
 
@@ -229,25 +234,6 @@ private:
 	EntitySkeletonBoneNode* parent = nullptr;
 	//! Vector containing all possible children of this node.
 	std::vector< EntitySkeletonBoneNode > children;
-
-
-	// the type has to have an overloaded std::ostream << operator for print to work
-	//void print( const int depth = 0 ) const
-	//{
-	//	std::string printStr = "";
-
-	//	for ( int i = 0 ; i < depth ; ++i )
-	//	{
-	//		if ( i != depth-1 ) printStr << "    ";
-	//		else printStr << "|-- ";
-	//	}
-	//	printStr << this->t << "\n";
-	//	// SG_DPrint...
-	//	for ( size_t i = 0 ; i < this->children.size() ; ++i )
-	//	{
-	//		this->children.at(i).print( depth+1 );
-	//	}
-	//}
 };
 
 
@@ -258,9 +244,8 @@ private:
 *			
 **/
 struct EntitySkeleton {
-	//! Pointer to the internal model data. (Also used to retreive the SKM data from there.)
-	qhandle_t model = -1;	// Skeleton is not usable/initialized if this is -1.
-
+	//! Pointer to the internal model data. When not set, the skeleton is unusable.
+	model_t *modelPtr = nullptr;
 
 	//! A simple tree hierachy for working with this skeleton's bone data.
 	EntitySkeletonBoneNode boneTree;
@@ -273,41 +258,42 @@ struct EntitySkeleton {
 /**
 *	@brief	Sets up an entity skeleton using the specified skeletal model data.
 **/
-const bool SKM_CreateEntitySkeletonFrom(SkeletalModelData *skm, EntitySkeleton *es);
+const bool ES_CreateFromModel( model_t *model, EntitySkeleton* es );
 
 
 
-/**
-*	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
-*
-*			Treats it no different than as if it were a regular alias model going from fram A to B.
-**/
-void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entity, float* pose_matrices );
-/**
-*	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
-*			relative transform for all bones.
-*
-*			
-**/
-void ES_LerpSkeletonPoses( const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, EntitySkeletonBonePose *outBonePose);
-/**
-*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode.
-*	@param	inBonePose	A lerped bone poses that you want to blend the 'addBonePoses' animation on top of.
-*	@param	addBonePose	The actual animation that you want to blend in on top of inBonePoses.
-*	@param	outBonePose	Final resulting bone pose of addBonePoses blended on top of inBonePoses.
-**/
-void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode &boneNode, float fraction, float lerp, float backlerp );
-/**
-*	@brief	Compute local space matrices for the given pose transformations.
-*			This is enough to work with the pose itself. For rendering it needs
-*			an extra computing of its additional World Pose Transforms.
-**/
-void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
-/**
-*	@brief	Compute world space matrices for the given pose transformations.
-**/
-void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
-/**
-*	@brief	Apply Flags to Root Bone relatives for use after applying animations.
-**/
-void ES_ApplyRootBoneAxisFlags( const model_t* model, const int32_t rootBoneAxisFlags, const int32_t rootBoneNumber, EntitySkeletonBonePose* bonePoses, float lerp, float backlerp );
+///**
+//*	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
+//*
+//*			Treats it no different than as if it were a regular alias model going from fram A to B. And does not make use
+//*			of said node tree which is stored in the entity's skeleton.
+//**/
+//void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entity, float* pose_matrices );
+///**
+//*	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
+//*			relative transform for all bones.
+//*
+//*			
+//**/
+//void ES_LerpSkeletonPoses( const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, EntitySkeletonBonePose *outBonePose );
+//
+///**
+//*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode, using the given fraction as "intensity".
+//*	@param	fraction		When set to 1.0, it blends in the animation at 100% intensity. Take 0.5 for example, 
+//*							and a tpose(frac 0.5)+walk would have its arms half bend.
+//*	@param	addBonePose		The actual animation that you want to blend in on top of inBonePoses.
+//*	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
+//**/
+//void ES_RecursiveBlendFromBone( const model_t *model, EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float fraction, float lerp, float backlerp );
+//
+///**
+//*	@brief	Compute local space matrices for the given pose transformations.
+//*			This is enough to work with the pose itself. For rendering it needs
+//*			an extra computing of its additional World Pose Transforms.
+//**/
+//void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+//
+///**
+//*	@brief	Compute world space matrices for the given pose transformations.
+//**/
+//void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
