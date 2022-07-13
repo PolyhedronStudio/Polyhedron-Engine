@@ -80,6 +80,11 @@ void ClientGameMedia::LoadWorld() {
         }
         // Register the model.
         cl->drawModels[i] = clgi.R_RegisterModel(filename);
+
+		if (cl->drawModels[i] < 0) {
+			Com_DPrint("Invalid drawmodel caught(#%i): %s\n", i, filename);
+
+		}
     }
 
     //

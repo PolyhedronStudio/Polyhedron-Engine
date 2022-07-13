@@ -70,7 +70,7 @@ EntitySkeletonBonePose *TBC_AcquireCachedMemoryBlock( TemporaryBoneCache &cache,
 	/**
 	*	#0: Ensure we can properly allocate this block of memory.
 	**/
-	const size_t sizeDemand = cache.cache.size() + size;
+	const size_t sizeDemand = cache.cache.size() + size - 1;
 	const size_t currentCapacity = cache.cache.capacity();
 
 	Com_Printf("--------------------\n");

@@ -522,20 +522,20 @@ void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkel
 			//
 			const float lerp = 1.0f - backlerp;
 			// Lerp the already Lerped Translation.
-			outBone->translate[0] = outBone->translate[0] * backlerp + inBone->translate[0] * lerp;
-			outBone->translate[1] = outBone->translate[1] * backlerp + inBone->translate[1] * lerp;
-			outBone->translate[2] = outBone->translate[2] * backlerp + inBone->translate[2] * lerp;
+			//outBone->translate[0] = outBone->translate[0] * backlerp + inBone->translate[0] * lerp;
+			//outBone->translate[1] = outBone->translate[1] * backlerp + inBone->translate[1] * lerp;
+			//outBone->translate[2] = outBone->translate[2] * backlerp + inBone->translate[2] * lerp;
 
 			// Lerp the already Lerped Scale.
-			outBone->scale[0] = outBone->scale[0] * backlerp + inBone->scale[0] * lerp;
-			outBone->scale[1] = outBone->scale[1] * backlerp + inBone->scale[1] * lerp;
-			outBone->scale[2] = outBone->scale[2] * backlerp + inBone->scale[2] * lerp;
+			//outBone->scale[0] = outBone->scale[0] * backlerp + inBone->scale[0] * lerp;
+			//outBone->scale[1] = outBone->scale[1] * backlerp + inBone->scale[1] * lerp;
+			//outBone->scale[2] = outBone->scale[2] * backlerp + inBone->scale[2] * lerp;
 			
 			// Copy Translation.
-			//outBone->translate = inBone->translate;
+			outBone->translate = inBone->translate;
 
 			// Copy Scale.
-			//outBone->scale = inBone->scale; //vec3_scale(inBone->scale, 1.175);
+			outBone->scale = inBone->scale; //vec3_scale(inBone->scale, 1.175);
 
 			// Slerp the rotation at fraction.	
 			QuatSlerp(outBone->rotate, inBone->rotate, fraction, outBone->rotate);

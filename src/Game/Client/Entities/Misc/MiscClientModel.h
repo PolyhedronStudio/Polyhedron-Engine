@@ -117,7 +117,7 @@ private:
 	//! The Custom LightStyle for light model entities.
 	std::string customLightStyle = "";
     //! Model Light State flags. (Is it currently off, or triggered?)
-    uint32_t lightState;
+    uint32_t lightState = 0;
 
     // The noise path that got parsed and is in use.
     std::string noisePath = "";

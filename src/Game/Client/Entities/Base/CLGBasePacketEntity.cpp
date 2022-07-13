@@ -256,6 +256,10 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 		return nullptr;
 	}
 
+	if (cl->drawModels[state.modelIndex] <= 0) {
+		return nullptr;
+	}
+
 	// Ok, let's fetch the model we got.
 	model_t *entityModel = clgi.CL_Model_GetModelByHandle( cl->drawModels[state.modelIndex] );
 
@@ -264,6 +268,10 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 	}
 	
 	SkeletalModelData *skm = entityModel->skeletalModelData;
+
+	if (!skm) {
+		return nullptr;
+	}
 
 	// Create our skeleton for this model.
 	clgi.ES_CreateFromModel( entityModel, es );

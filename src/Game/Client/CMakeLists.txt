@@ -68,8 +68,8 @@ SET(SRC_CLGAME
 
 	Input/KeyBinding.cpp
 
-	Physics/Physics.cpp
-	Physics/StepMove.cpp
+	#Physics/Physics.cpp
+	#Physics/StepMove.cpp
 
 	View/ViewCamera.cpp
 
@@ -129,7 +129,7 @@ SET(HEADERS_CLGAME
 
 	Input/KeyBinding.h
 	
-	Physics/StepMove.h
+	#Physics/StepMove.h
 
 	View/ViewCamera.h
 

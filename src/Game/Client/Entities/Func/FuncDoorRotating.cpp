@@ -5,7 +5,7 @@
 */
 
 #include "../../ClientGameLocals.h"
-#include "../../Physics/StepMove.h"
+//#include "../../Physics/StepMove.h"
 
 #include "../Base/CLGBasePacketEntity.h"
 #include "../Base/CLGBaseTrigger.h"

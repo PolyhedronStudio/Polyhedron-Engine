@@ -1990,7 +1990,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 				continue;
 
 			if (model->num_light_polys > 0 && entity->modelLightStyle > -1) {
-				//model->light_polys->style = entity->modelLightStyle;
+				model->light_polys->style = entity->modelLightStyle;
 				instance_idx++;
 				model_instance_idx++;
 			}

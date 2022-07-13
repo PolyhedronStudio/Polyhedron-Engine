@@ -361,6 +361,7 @@ model_t *CL_Model_GetModelByHandle(qhandle_t h)
 
 	if (h < 0 || h > r_numModels) {
 		Com_Error(ErrorType::Drop, "%s: %d out of range", __func__, h);
+
 	}
 
 	model = &r_models[h - 1];
