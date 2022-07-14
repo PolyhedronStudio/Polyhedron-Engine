@@ -888,6 +888,10 @@ void SV_InitGameProgs(void)
     // unload anything we have now
     SV_ShutdownGameProgs();
 
+	// Initialize server model system.
+	SV_Model_Shutdown();
+	SV_Model_Init();
+
     // for debugging or `proxy' mods
     if (sys_forcegamelib->string[0])
         entry = (ServerGameExports * (*)(ServerGameImports*))_SV_LoadGameLibrary(sys_forcegamelib->string); // CPP: DANGER: WARNING: Is this cast ok?

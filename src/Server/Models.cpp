@@ -133,7 +133,7 @@ model_t* SV_Model_Find(const char* name) {
 **/
 void SV_Model_List_f(void)
 {
-	static const char types[] = "FASE";
+	static const char types[] = "FASE"; // CPP: Cast - was types[4] = "FASE";
 	int     i, count;
 	model_t *model;
 	size_t  bytes;
