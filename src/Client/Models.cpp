@@ -107,6 +107,7 @@ void CL_Model_List_f(void)
 	size_t  bytes;
 
 	Com_Printf("------------------\n");
+	Com_Printf("Client model list:\n");
 	bytes = count = 0;
 
 	for (i = 0, model = r_models; i < r_numModels; i++, model++) {
@@ -378,12 +379,12 @@ void CL_Model_Init(void)
 		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, r_numModels);
 	}
 
-	Cmd_AddCommand("modellist", CL_Model_List_f);
+	Cmd_AddCommand("cl_modellist", CL_Model_List_f);
 }
 
 void CL_Model_Shutdown(void)
 {
 	CL_Model_FreeAll();
-	Cmd_RemoveCommand("modellist");
+	Cmd_RemoveCommand("cl_modellist");
 }
 

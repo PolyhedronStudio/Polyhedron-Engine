@@ -133,7 +133,7 @@ model_t* SV_Model_Find(const char* name) {
 **/
 void SV_Model_List_f(void)
 {
-	static const char types[] = "FASE"; // CPP: Cast - was types[4] = "FASE";
+	static const char types[] = "FASE";
 	int     i, count;
 	model_t *model;
 	size_t  bytes;
@@ -263,7 +263,7 @@ void SV_Model_Init() {
 		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, sv_numModels);
 	}
 
-	Cmd_AddCommand("servermodellist", SV_Model_List_f);
+	Cmd_AddCommand("sv_modellist", SV_Model_List_f);
 }
 
 /**
@@ -271,7 +271,7 @@ void SV_Model_Init() {
 **/
 void SV_Model_Shutdown() {
 	SV_Model_FreeAll();
-	Cmd_RemoveCommand("servermodellist");
+	Cmd_RemoveCommand("sv_modellist");
 }
 
 qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {

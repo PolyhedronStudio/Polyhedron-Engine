@@ -1992,10 +1992,6 @@ void sv_sec_timeout_changed(cvar_t *self)
 
 void SV_Init(void)
 {
-	// Call into our Server "Model" system. Which in return initializes the
-	// "Common" model cache system.
-	SV_Model_Init();
-
     SV_InitOperatorCommands();
 
     SV_RegisterSavegames();
@@ -2090,6 +2086,10 @@ void SV_Init(void)
 #if USE_SYSCON
     SV_SetConsoleTitle();
 #endif
+	
+	// Call into our Server "Model" system. Which in return initializes the
+	// "Common" model cache system.
+	SV_Model_Init();
 
     sv_registered = true;
 }

@@ -2072,6 +2072,11 @@ static void CL_Say_c(genctx_t *ctx, int argnum)
     CL_Name_g(ctx);
 }
 
+static void CL_SVModelList_c(genctx_t *ctx, int argnum)
+{
+    CL_Name_g(ctx);
+}
+
 static size_t CL_Mapname_m(char *buffer, size_t size)
 {
     return Q_strlcpy(buffer, cl.mapName, size);
@@ -2508,6 +2513,7 @@ static const cmdreg_t c_client[] = {
     // forwarded to the server
     { "say", NULL, CL_Say_c },
     { "say_team", NULL, CL_Say_c },
+	{ "sv_modellist", NULL, CL_SVModelList_c },
 
  //   { "wave" }, { "inven" }, { "kill" }, { "use" },
  //   { "drop" }, { "info" }, { "prog" },
