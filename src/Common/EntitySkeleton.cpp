@@ -296,51 +296,57 @@ const bool ES_CreateFromModel( model_t *model, EntitySkeleton* es ) {
 **/
 void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entity, float* pose_matrices ) {
 	// Temporary bone Pose.
-	EntitySkeletonBonePose temporaryBonePoses[IQM_MAX_JOINTS];
-	EntitySkeletonBonePose* relativeBone = temporaryBonePoses;
+	static EntitySkeletonBonePose temporaryBonePoses[IQM_MAX_JOINTS];
 
-	// Get IQM Model Data.
-	const iqm_model_t *iqmData = model->iqmData;
+	EntitySkeleton tempEs;
+	tempEs.modelPtr = const_cast<model_t*>(model);
 
-	// Get current frame.
-	const int frame = iqmData->num_frames ? entity->frame % (int)iqmData->num_frames : 0;
-	// Get old frame.
-	const int oldframe = iqmData->num_frames ? entity->oldframe % (int)iqmData->num_frames : 0;
+	ES_LerpSkeletonPoses( &tempEs, temporaryBonePoses, entity->frame, entity->oldframe, entity->backlerp, entity->rootBoneAxisFlags );
+	//// Relative bone we're computing for, pointing to an index in our temporary bone poses.
+	//EntitySkeletonBonePose* relativeBone = temporaryBonePoses;
 
-	/**
-	*	#0: Compute relative bone transforms.
-	**/
-	// copy or lerp animation frame pose
-	if (oldframe == frame) {
-		const EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
-		for (uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, pose++, relativeBone++) {
-			temporaryBonePoses->translate = pose->translate;
-			temporaryBonePoses->scale = pose->scale;
-			QuatCopy(pose->rotate, temporaryBonePoses->rotate);
-		}
-	} else {
-		// Get back:erp.
-		const float backLerp = entity->backlerp;
-		// Get Lerp.
-		const float lerp = 1.0f - backLerp;
+	//// Get IQM Model Data.
+	//const iqm_model_t *iqmData = model->iqmData;
 
-		// Pose & Old Pose.
-		const EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
-		const EntitySkeletonBonePose* oldpose = &iqmData->poses[oldframe * iqmData->num_poses];
+	//// Get current frame.
+	//const int frame = iqmData->num_frames ? entity->frame % (int)iqmData->num_frames : 0;
+	//// Get old frame.
+	//const int oldframe = iqmData->num_frames ? entity->oldframe % (int)iqmData->num_frames : 0;
 
-		// Iterate and transform bones accordingly.
-		for ( uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, oldpose++, pose++, relativeBone++ ) {
-			relativeBone->translate[0] = oldpose->translate[0] * backLerp + pose->translate[0] * lerp;
-			relativeBone->translate[1] = oldpose->translate[1] * backLerp + pose->translate[1] * lerp;
-			relativeBone->translate[2] = oldpose->translate[2] * backLerp + pose->translate[2] * lerp;
+	///**
+	//*	#0: Compute relative bone transforms.
+	//**/
+	//// copy or lerp animation frame pose
+	//if (oldframe == frame) {
+	//	EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
+	//	for (uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, pose++, relativeBone++) {
+	//		relativeBone->translate = pose->translate;
+	//		relativeBone->scale = pose->scale;
+	//		QuatCopy(pose->rotate, relativeBone->rotate);
+	//	}
+	//} else {
+	//	// Get back:erp.
+	//	const float backLerp = entity->backlerp;
+	//	// Get Lerp.
+	//	const float lerp = 1.0f - backLerp;
 
-			relativeBone->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
-			relativeBone->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
-			relativeBone->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
+	//	// Pose & Old Pose.
+	//	EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
+	//	EntitySkeletonBonePose* oldpose = &iqmData->poses[oldframe * iqmData->num_poses];
 
-			QuatSlerp( oldpose->rotate, pose->rotate, lerp, relativeBone->rotate );
-		}
-	}
+	//	// Iterate and transform bones accordingly.
+	//	for ( uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, oldpose++, pose++, relativeBone++ ) {
+	//		relativeBone->translate[0] = oldpose->translate[0] * backLerp + pose->translate[0] * lerp;
+	//		relativeBone->translate[1] = oldpose->translate[1] * backLerp + pose->translate[1] * lerp;
+	//		relativeBone->translate[2] = oldpose->translate[2] * backLerp + pose->translate[2] * lerp;
+
+	//		relativeBone->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
+	//		relativeBone->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
+	//		relativeBone->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
+
+	//		QuatSlerp( oldpose->rotate, pose->rotate, lerp, relativeBone->rotate );
+	//	}
+	//}
 
 	// Compute world, and local bone transforms.
 	ES_ComputeWorldPoseTransforms( model, temporaryBonePoses, pose_matrices );
@@ -427,6 +433,8 @@ void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePos
 			relativeBonePose->scale = pose->scale;
 			// Copy over the pose's rotation.
 			QuatCopy( pose->rotate, relativeBonePose->rotate );
+
+			continue;
 		}
 
 	} else {
@@ -540,12 +548,13 @@ void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkel
 			// Slerp the rotation at fraction.	
 			QuatSlerp(outBone->rotate, inBone->rotate, fraction, outBone->rotate);
 		}
+			
+		// Recursively blend all thise bone node's children.
+		for ( auto &childBoneNode : boneNode->GetChildren() ) {
+			ES_RecursiveBlendFromBone( addBonePoses, addToBonePoses, &childBoneNode, backlerp, fraction );
+		}
 	}
-	
-	// Recursively blend all thise bone node's children.
-	for ( auto &childBoneNode : boneNode->GetChildren() ) {
-		ES_RecursiveBlendFromBone( addBonePoses, addToBonePoses, &childBoneNode, backlerp, fraction );
-	}
+
 }
 
 /**

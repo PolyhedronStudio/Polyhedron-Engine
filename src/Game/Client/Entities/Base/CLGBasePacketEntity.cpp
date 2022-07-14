@@ -814,7 +814,7 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 		refreshEntity.currentBonePoses = nullptr;
 
 		// Print warning.
-		Com_DPrint("CLGBasePacketEntity::ComputeEntitySkeletonTransforms: Entity(#%i) has no model pointer set in its entitySkeleton.\n", GetNumber());
+		//Com_DPrint("CLGBasePacketEntity::ComputeEntitySkeletonTransforms: Entity(#%i) has no model pointer set in its entitySkeleton.\n", GetNumber());
 		return;
 	}
 
@@ -825,26 +825,26 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 	// TODO: This is test code yes.
 	const int32_t n = GetNumber();
 	if ( !(n == 13 || n == 23) ) {
-		// Acquire a pose cache memory block to work with for each animation we seek to blend..
-		EntitySkeletonBonePose *tempMainChannelBonePoses = clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+		//// Acquire a pose cache memory block to work with for each animation we seek to blend..
+		//EntitySkeletonBonePose *tempMainChannelBonePoses = clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
 
-		// Ensure it is valid memory to use.
-		if ( tempMainChannelBonePoses != nullptr ) {
-			// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
-			clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-									tempMainChannelBonePoses,
-									refreshEntity.frame, 
-									refreshEntity.oldframe, 
-									refreshEntity.backlerp, 
-									refreshEntity.rootBoneAxisFlags 							 
-			);
-
-			// Last but not least...
-			refreshEntity.currentBonePoses = tempMainChannelBonePoses;
-		} else {
+		//// Ensure it is valid memory to use.
+		//if ( tempMainChannelBonePoses != nullptr ) {
+		//	// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
+		//	clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
+		//							tempMainChannelBonePoses,
+		//							refreshEntity.frame, 
+		//							refreshEntity.oldframe, 
+		//							refreshEntity.backlerp, 
+		//							refreshEntity.rootBoneAxisFlags 							 
+		//	);
+		//	
+		//	// Last but not least...
+		//	refreshEntity.currentBonePoses = tempMainChannelBonePoses;
+		//} else {
 			// Ensure it is null.
 			refreshEntity.currentBonePoses = nullptr;
-		}
+//		}
 
 		// Escape.
 		return;
@@ -949,7 +949,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         // Fetch the rentEntityEffects of current entity.
         rentEntityEffects = currentState->effects;
         // Fetch the render rentEntityEffects of current entity.
-        rentRenderEffects= currentState->renderEffects;
+        rentRenderEffects = currentState->renderEffects;
 
 		//
 		//	Model Light Styles.

@@ -1639,7 +1639,8 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 
 static void instance_model_lights(int num_light_polys, const light_poly_t* light_polys, const float* transform, int lightStyle = -1) {
 	for (int nlight = 0; nlight < num_light_polys; nlight++) 	{
-		if (num_model_lights >= MAX_MODEL_LIGHTS) 		{
+		if (num_model_lights >= MAX_MODEL_LIGHTS)
+		{
 			assert(!"Model light count overflow");
 			break;
 		}
@@ -1663,17 +1664,44 @@ static void instance_model_lights(int num_light_polys, const light_poly_t* light
 		// Copy the other light properties
 		VectorCopy(src_light->color, dst_light->color);
 		dst_light->material = src_light->material;
-		//if ( lightStyle > 0 ) {
-		//	dst_light->style = lightStyle;
-		//} else {
-		if ( lightStyle > -1 ) {
-			dst_light->style = lightStyle;
-		} else {
-			dst_light->style = src_light->style;
-		}
-//		}		
+		dst_light->style = src_light->style;
 
 		num_model_lights++;
+		//		if (num_model_lights >= MAX_MODEL_LIGHTS) 		{
+//			assert(!"Model light count overflow");
+//			break;
+//		}
+//
+//		const light_poly_t* src_light = light_polys + nlight;
+//		light_poly_t* dst_light = model_lights + num_model_lights;
+//
+//		// Transform the light's positions and center
+//		transform_point(src_light->positions + 0, transform, dst_light->positions + 0);
+//		transform_point(src_light->positions + 3, transform, dst_light->positions + 3);
+//		transform_point(src_light->positions + 6, transform, dst_light->positions + 6);
+//		transform_point(src_light->off_center, transform, dst_light->off_center);
+//
+//		// Find the cluster based on the center. Maybe it's OK to use the model's cluster, need to test.
+//		dst_light->cluster = BSP_PointLeaf(bsp_world_model->nodes, dst_light->off_center)->cluster;
+//
+//		// We really need to map these lights to a cluster
+//		if (dst_light->cluster < 0)
+//			continue;
+//
+//		// Copy the other light properties
+//		VectorCopy(src_light->color, dst_light->color);
+//		dst_light->material = src_light->material;
+//		//if ( lightStyle > 0 ) {
+//		//	dst_light->style = lightStyle;
+//		//} else {
+//		if ( lightStyle > -1 ) {
+//			dst_light->style = lightStyle;
+//		} else {
+//			dst_light->style = src_light->style;
+//		}
+////		}		
+//
+//		num_model_lights++;
 	}
 }
 
@@ -1751,14 +1779,14 @@ static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int*
 	(*instance_idx)++;
 }
 
-static inline qboolean is_transparent_material(uint32_t material) {
+static inline bool is_transparent_material(uint32_t material) {
 	return MAT_IsKind(material, MATERIAL_KIND_SLIME)
 		|| MAT_IsKind(material, MATERIAL_KIND_WATER)
 		|| MAT_IsKind(material, MATERIAL_KIND_GLASS)
 		|| MAT_IsKind(material, MATERIAL_KIND_TRANSPARENT);
 }
 
-static inline qboolean is_masked_material(uint32_t material) {
+static inline bool is_masked_material(uint32_t material) {
 	const pbr_material_t* mat = MAT_ForIndex(material & MATERIAL_INDEX_MASK);
 
 	return mat && mat->image_mask;
@@ -1976,6 +2004,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + i;
 
+		// Specific path for BSP Model Entity processing.
 		if (entity->model & 0x80000000) 		{
 			const bsp_model_t* model = vkpt_refdef.bsp_mesh_world.models + (~entity->model);
 			if (model->masked)
@@ -1984,16 +2013,18 @@ prepare_entities(EntityUploadInfo* upload_info) {
 				transparent_model_indices[transparent_model_num++] = i;
 			else
 				process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert); /* embedded in bsp */
-		} 		else 		{
+
+		// This is not a BSP Model Entity, but a regular Model Entity.
+		} else {
 			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
-			if (model->num_light_polys > 0 && entity->modelLightStyle > -1) {
-				model->light_polys->style = entity->modelLightStyle;
-				instance_idx++;
-				model_instance_idx++;
-			}
+			//if (model->num_light_polys > 0 && entity->modelLightStyle > 0) {
+			//	//model->light_polys->style = entity->modelLightStyle;
+			//	instance_idx++;
+			//	model_instance_idx++;
+			//}
 				//} else if (model->num_light_polys > 0) {
 			//	model_instance_idx++;
 			//	//model->light_polys->style = 0;
@@ -2027,23 +2058,13 @@ prepare_entities(EntityUploadInfo* upload_info) {
 				mat4_t transform;
 				const qboolean is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
 				create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
-				
-				// Model Light Styles.
-				//light_poly_t* src_light = model->light_polys + 0;
-				//if (entity->modelLightStyle > 0) {
-				//	for (int nlight = 0; nlight < model->num_light_polys; nlight++) {
-				//		light_poly_t* src_lightA = model->light_polys + nlight;
-				//		src_lightA->style = 5;//entity->modelLightStyle;
-
-				//	}
-				//}}
 
 				// Instance Model Lights.
-				if ( entity->modelLightStyle > -1 ) {
-					instance_model_lights( model->num_light_polys, model->light_polys, transform, entity->modelLightStyle );
-				} else {
+				//if ( entity->modelLightStyle > -1 ) {
+				//	instance_model_lights( model->num_light_polys, model->light_polys, transform, entity->modelLightStyle );
+				//} else {
 					instance_model_lights( model->num_light_polys, model->light_polys, transform );
-				}
+//				}
 			}
 		}
 	}
