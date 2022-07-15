@@ -58,6 +58,9 @@ if (CONFIG_BUILD_CL_GAME)
 	TARGET_COMPILE_OPTIONS(clgame_sharedgame PUBLIC "-fPIC")
 	TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PUBLIC PATH_SHARED)
 
+	# Link in FMT Header only library.
+	target_link_libraries(clgame_sharedgame PUBLIC fmt::fmt-header-only)
+
 	# Win32 Specifics.
 	if (WIN32)
 		TARGET_COMPILE_OPTIONS(clgame_sharedgame PUBLIC /wd4005 /wd4996)
@@ -74,6 +77,9 @@ if (CONFIG_BUILD_SV_GAME)
 	TARGET_COMPILE_OPTIONS(svgame_sharedgame PUBLIC "-fPIC")
 	TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PUBLIC PATH_SHARED)
 	
+	# Link in FMT Header only library.
+	target_link_libraries(svgame_sharedgame PUBLIC fmt::fmt-header-only)
+
 	# Win32 Specifics.
 	if (WIN32)
 		TARGET_COMPILE_OPTIONS(svgame_sharedgame PUBLIC /wd4005 /wd4996)

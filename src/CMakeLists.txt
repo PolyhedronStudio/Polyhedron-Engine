@@ -649,8 +649,6 @@ ENDIF()
 #
 #	Client Link Libraries.
 #
-TARGET_LINK_LIBRARIES(client stb)
-TARGET_LINK_LIBRARIES(client tinyobjloader)
 
 
 
@@ -716,7 +714,7 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(client PUBLIC ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "/extern/stb/")
-TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
+TARGET_LINK_LIBRARIES(client  SDL2main SDL2-static zlibstatic stb tinyobjloader fmt-header-only)
 SET_TARGET_PROPERTIES(client
     PROPERTIES
     OUTPUT_NAME "Polyhedron"
@@ -735,7 +733,7 @@ SET_TARGET_PROPERTIES(client
 #include_directories()
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
-TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
+TARGET_LINK_LIBRARIES(server  SDL2main SDL2-static zlibstatic fmt-header-only)
 SET_TARGET_PROPERTIES(server
     PROPERTIES
     OUTPUT_NAME "Polyhedron_Dedicated"

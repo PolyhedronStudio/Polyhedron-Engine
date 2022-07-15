@@ -23,4 +23,4 @@ void SV_Model_Reference(model_t* model);
 
 model_t* SV_Model_Find(const char* name);
 model_t *SV_Model_ForHandle(qhandle_t handle);
-qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name);
+qhandle_t SV_Model_RegisterModel(const char* name);

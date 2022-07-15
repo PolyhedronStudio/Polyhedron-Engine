@@ -75,6 +75,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <chrono>
 
 
+
+/**
+*	FMT for Easy String Formatting.
+**/
+#include "fmt/format.h"
+
+
 /**
 *   System Endian include, if needed. 
 **/

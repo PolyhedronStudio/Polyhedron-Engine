@@ -246,15 +246,20 @@ endif()
 
 # Set the flag for SharedGame to build with ServerGame compatability in mind.
 TARGET_COMPILE_DEFINITIONS(svgame PUBLIC "cxx_std_20 -DSHAREDGAME_SERVERGAME=1")
+# Link in FMT Header only library.
+target_link_libraries(svgame PUBLIC fmt::fmt-header-only)
+
 
 # Include directories.
 TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC PATH_SHARED )
 # Include SharedGame Framework.
 TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC Game/Shared)
 
+
 # Source Groups.
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SVGAME} )
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SVGAME} )
+
 
 # Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
 SET_TARGET_PROPERTIES(svgame

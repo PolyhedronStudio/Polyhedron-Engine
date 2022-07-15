@@ -71,7 +71,7 @@ void MonsterTestDummy::Precache() {
     modelHandle = SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
 
 	// Precache the model for the server: Required to be able to process animations properly.
-	qhandle_t serverModelHandle = gi.PrecacheSkeletalModelData("models/monsters/slidedummy/slidedummy.iqm");
+	qhandle_t serverModelHandle = gi.RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
 	
 	//
 	// TODO:	All skeletal functionality should go into client and server, neatly

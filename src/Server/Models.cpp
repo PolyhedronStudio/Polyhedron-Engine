@@ -200,7 +200,7 @@ void SV_Model_FreeAll() {
 
 /**
 *	@brief	References a model so that it won't get unloaded after the registration sequence.
-*			(This is called by PF_PrecacheSkeletalModelData)
+*			(This is called by PF_RegisterModel)
 **/
 void SV_Model_Reference(model_t* model) {
 	int mesh_idx, skin_idx, frame_idx;
@@ -231,9 +231,9 @@ void SV_Model_Reference(model_t* model) {
 }
 
 /**
-*	@brief	Finds a model that has a matching handle.
+*	@brief	Finds the model which has a matching handle.
 *	@return A pointer to the model. (nullptr) on failure.
-*/
+**/
 model_t *SV_Model_ForHandle(qhandle_t handle) {
 	// Need a valid handle.
 	if (!handle) {
@@ -259,10 +259,12 @@ model_t *SV_Model_ForHandle(qhandle_t handle) {
 *	@brief	Initializes server side model caching system.
 **/
 void SV_Model_Init() {
+	// If numModels is set it means we failed to deallocate a resource, or worse, all of them.
 	if (sv_numModels) {
 		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, sv_numModels);
 	}
 
+	// Re-add the SV_Model_List_f command allowing us to inspect what models are loaded up.
 	Cmd_AddCommand("sv_modellist", SV_Model_List_f);
 }
 
@@ -270,11 +272,18 @@ void SV_Model_Init() {
 *	@brief	Shutsdown server side model caching, clears all memory.
 **/
 void SV_Model_Shutdown() {
+	// Free all our models from ram.
 	SV_Model_FreeAll();
+
+	// Remove the SV_Model_List_f command.
 	Cmd_RemoveCommand("sv_modellist");
 }
 
-qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {
+/**
+*	@brief	Loads and 'references' the model and generates developer friendly
+*			skeletal model data.
+**/
+qhandle_t SV_Model_RegisterModel(const char* name) {
 	char normalized[MAX_QPATH];
 	qhandle_t index;
 	size_t namelen;
@@ -317,43 +326,30 @@ qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {
 		return 0;
 	}
 
+	// See and find any already loaded model matching this normalized path.
 	model = SV_Model_Find(normalized);
 	if (model) {
-//#if USE_SERVER && !USE_CLIENT
+		// We 'reference' the model here, keeps it loaded, and go to 'done' label.
 		SV_Model_Reference(model);
-//#else
-		
-//#endif
 		goto done;
 	}
 
-#if USE_CLIENT && !USE_SERVER
-	if (namelen > 4 && (strcmp(extension, ".md2") == 0) && (vid_rtx && gl_use_hd_assets) && (vid_rtx->integer || gl_use_hd_assets->integer))
-#else
-	if (namelen > 4 && (strcmp(extension, ".md2") == 0))
-#endif
-	{
-		memcpy(extension, ".md3", 4);
+	// Try and load our model file.
+	filelen = FS_LoadFile(normalized, (void **)&rawdata);
 
-		filelen = FS_LoadFile(normalized, (void **)&rawdata);
-
-		memcpy(extension, ".md2", 4);
-	}
-
-	if (!rawdata)
-	{
-		filelen = FS_LoadFile(normalized, (void **)&rawdata);
-		if (!rawdata) {
-			// don't spam about missing models
-			if (filelen == Q_ERR_NOENT) {
-				return 0;
-			}
-
-			ret = filelen;
-			goto fail1;
+	// Handle failure.
+	if (!rawdata) {
+		// Don't spam about missing models.
+		if (filelen == Q_ERR_NOENT) {
+			return 0;
 		}
+
+		// Set ret to error returned from loadfile.
+		ret = filelen;
+		goto fail1;
 	}
 
+	// The file was too small to even contain data, notify us about that.
 	if (filelen < 4) {
 		ret = Q_ERR_FILE_TOO_SMALL;
 		goto fail2;
@@ -362,17 +358,9 @@ qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {
 	// check ident
 	ident = LittleLong(*(uint32_t *)rawdata);
 	switch (ident) {
-	case MD2_IDENT:
-		load = 0; //MOD_LoadMD2;
-		break;
-#if USE_MD3
-	case MD3_IDENT:
-		load = 0; //MOD_LoadMD3;
-		break;
-#endif
-	case SP2_IDENT:
-		load = 0; //MOD_LoadSP2;
-		break;
+	//case SP2_IDENT:
+	//	load = MOD_LoadSP2;
+	//	break;
 	case IQM_IDENT:
 		load = MOD_LoadIQM_Base;
 		break;
@@ -397,18 +385,16 @@ qhandle_t SV_Model_PrecacheSkeletalModelData(const char* name) {
 	ret = load(model, SV_Model_MemoryAllocate, rawdata, filelen, name);
 	FS_FreeFile(rawdata);
 
+	// Clear memory in csae of failure.
 	if (ret != Q_ERR_SUCCESS) {
 		Hunk_Free(&model->hunk);
 		memset(model, 0, sizeof(*model));
 		goto fail1;
 	}
-
-
-// TODO: Check for special model type stuff here.
-//#if USE_CLIENT && !USE_SERVER
-//	model->model_class = get_model_class(model->name);
-//#endif
-
+	
+	// TODO: Check for special model type stuff here.
+	//	model->model_class = get_model_class(model->name);
+	
 done:
 	// Calculate the index.
 	index = (model - sv_models) + 1;

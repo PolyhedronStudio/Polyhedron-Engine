@@ -862,7 +862,9 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
         if (!ent->GetGroundEntityHandle()->IsInUse()) {
             ent->SetGroundEntity( SGEntityHandle() );
         }
-    }
+	} else {
+		SG_CheckGround( ent );
+	}
 
     // If onground, return without moving
     if (*ent->GetGroundEntityHandle() && ent->GetMoveType() != MoveType::TossSlide) {
@@ -870,7 +872,7 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     }
 
     // Store ent->state.origin as the old origin
-    vec3_t oldOrigin = ent->GetOrigin();
+    const vec3_t oldOrigin = ent->GetOrigin();
 
     // Bound velocity within limits of sv_maxvelocity
     SVG_BoundVelocity(ent);
@@ -884,32 +886,84 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
     ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
 
     // Move origin
-    vec3_t move = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
-    SVGTraceResult trace = SVG_PushEntity(ent, move);
+    const vec3_t moveToOrigin = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
+
+	// Try and push move into new destined origin.
+    SVGTraceResult trace = SVG_PushEntity(ent, moveToOrigin);
     if (!ent->IsInUse()) {
         return;
 	}
 
     if (trace.fraction < 1) {
-        float backOff = 1.f;
+		// MoveType.
+		const int32_t moveType = ent->GetMoveType();
 
-        // More backOff if bouncing movetype.
-        if (ent->GetMoveType() == MoveType::Bounce) {
-            backOff = 1.5f;
-        }
+        // Backoff Bounce.
+		const float backOff = (moveType == MoveType::Bounce ? 1.5f : 1.f);
         
         // Clip new velocity.
         ent->SetVelocity(ClipVelocity(ent->GetVelocity(), trace.plane.normal, backOff));
 
-        // Stop if on ground
-        if (trace.plane.normal[2] > 0.7f) {
-	        if (ent->GetVelocity().z < 60.f || (ent->GetMoveType() != MoveType::Bounce)) {
-                ent->SetGroundEntity(trace.gameEntity);
-                ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
-                ent->SetVelocity(vec3_zero());
-                ent->SetAngularVelocity(vec3_zero());
-            }
-        }
+		// Store clipped velocity.
+		const vec3_t clippedVelocity = ent->GetVelocity();
+
+        // For move TossSlide we do special handling so it can apply currents as well.
+		if ( moveType == MoveType::TossSlide ) {
+			// Get ground brush contents.
+			const int32_t groundContents = trace.contents;
+
+			// New velocity that gets set depending on the current.
+			vec3_t groundCurrentVelocity = ent->GetVelocity();
+
+			if ( groundContents & BrushContents::Current0 ) {
+				groundCurrentVelocity.x += 1.0;
+			}
+			if ( groundContents & BrushContents::Current90 ) {
+				groundCurrentVelocity.y += 1.0;
+			}
+			if ( groundContents & BrushContents::Current180 ) {
+				groundCurrentVelocity.x -= 1.0;
+			}
+			if ( groundContents & BrushContents::Current270 ) {
+				groundCurrentVelocity.y -= 1.0;
+			}
+			if ( groundContents & BrushContents::CurrentUp ) {
+				groundCurrentVelocity.z += 1.0;
+			}
+			if ( groundContents & BrushContents::CurrentDown ) {
+				groundCurrentVelocity.z -= 1.0;
+			}
+
+			// Only apply the new 'currents' velocity if caught on a current surface.
+			if (!vec3_equal(groundCurrentVelocity, vec3_zero())) {
+				// Normalize ground current velocity.
+				groundCurrentVelocity = vec3_normalize(groundCurrentVelocity);
+			}
+
+			// Apply based on speed current.
+			constexpr float PHYS_SPEED_CURRENT = 100.f;
+
+			std::string printStr = "groundCurrentVelocity(#" + std::to_string(ent->GetNumber()) + "): "
+				+ std::to_string(groundCurrentVelocity.x) + ","
+				+ std::to_string(groundCurrentVelocity.y) + ","
+				+ std::to_string(groundCurrentVelocity.z) + "\n";
+
+			SG_Physics_PrintDeveloper( printStr );
+
+			ent->SetVelocity( vec3_fmaf( clippedVelocity, PHYS_SPEED_CURRENT, groundCurrentVelocity));
+
+		// Otherwise, execute regular stopping behavior.
+		} else {
+			if (trace.plane.normal[2] > 0.7f) {
+				if (ent->GetVelocity().z < 60.f || ent->GetMoveType() != MoveType::Bounce ) {
+					ent->SetGroundEntity(trace.gameEntity);
+					ent->SetGroundEntityLinkCount(trace.gameEntity->GetLinkCount());
+					ent->SetVelocity(vec3_zero());
+					ent->SetAngularVelocity(vec3_zero());
+				}
+			}
+		}
+
 
 		// This used to be commented in the origina lcode as well, somehow... it does work
 		//if (trace.gameEntity) {

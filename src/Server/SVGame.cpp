@@ -316,14 +316,14 @@ static q_noreturn void PF_error(const char *fmt, ...)
 /**
 *	@brief	Loads in an IQM model that can be used server-side.
 **/
-static qhandle_t PF_PrecacheSkeletalModelData(const char *name) {
-	return SV_Model_PrecacheSkeletalModelData(name);
+static qhandle_t PF_RegisterModel(const char *name) {
+	return SV_Model_RegisterModel(name);
 }
 
 /**
 *	@return	A pointer to the model structure for given handle. (nullptr) on failure.
 **/
-static model_t *PF_GetServerModelByHandle(qhandle_t handle) {
+static model_t *PF_GetModelByHandle(qhandle_t handle) {
 	model_t *model = SV_Model_ForHandle(handle);
 
 	if (!model) {
@@ -937,8 +937,8 @@ void SV_InitGameProgs(void)
     importAPI.PrecacheSound = PF_PrecacheSound;
     importAPI.PrecacheImage = PF_PrecacheImage;
 	
-	importAPI.PrecacheSkeletalModelData = PF_PrecacheSkeletalModelData;
-	importAPI.GetServerModelByHandle = PF_GetServerModelByHandle;
+	importAPI.RegisterModel = PF_RegisterModel;
+	importAPI.GetModelByHandle = PF_GetModelByHandle;
 	importAPI.GetSkeletalModelDataByHandle = PF_GetSkeletalModelDataByHandle;
 	importAPI.SetModel = PF_setmodel;
 

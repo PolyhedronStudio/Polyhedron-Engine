@@ -83,7 +83,6 @@ void ClientGameMedia::LoadWorld() {
 
 		if (cl->drawModels[i] < 0) {
 			Com_DPrint("Invalid drawmodel caught(#%i): %s\n", i, filename);
-
 		}
     }
 

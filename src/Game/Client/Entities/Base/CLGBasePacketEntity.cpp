@@ -814,7 +814,7 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 		refreshEntity.currentBonePoses = nullptr;
 
 		// Print warning.
-		//Com_DPrint("CLGBasePacketEntity::ComputeEntitySkeletonTransforms: Entity(#%i) has no model pointer set in its entitySkeleton.\n", GetNumber());
+		Com_DPrint("CLGBasePacketEntity::ComputeEntitySkeletonTransforms: Entity(#%i) has no model pointer set in its entitySkeleton.\n", GetNumber());
 		return;
 	}
 
