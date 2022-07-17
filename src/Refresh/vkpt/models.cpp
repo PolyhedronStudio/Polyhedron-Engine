@@ -687,14 +687,14 @@ qerror_t MOD_LoadIQM_RTX(model_t* model, ModelMemoryAllocateCallback modelAlloc,
 		return res;
 	}
 
-	// LOAD SKM DATA?
-	if ( !model->skeletalModelData ) {
-		// Acquire our matching r skeletal model slot.
-		model->skeletalModelData = &r_skeletalModels[(model - r_models) + 1];
+	//// LOAD SKM DATA?
+	//if ( !model->skeletalModelData ) {
+	//	// Acquire our matching r skeletal model slot.
+	//	model->skeletalModelData = &r_skeletalModels[(model - r_models) + 1];
 
-		// Generate SKM data.
-		SKM_GenerateModelData(model);
-	}
+	//	// Generate SKM data.
+	//	SKM_GenerateModelData(model);
+	//}
 
 	char base_path[MAX_QPATH];
 	COM_FilePath(mod_name, base_path, sizeof(base_path));

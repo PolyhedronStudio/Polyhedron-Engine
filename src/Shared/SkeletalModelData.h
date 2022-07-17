@@ -155,6 +155,12 @@ struct SkeletalAnimation {
 **/
 void SKM_GenerateModelData(model_t* model);
 
+/**
+*	@brief	Loads up a skeletal model configuration file and passes its buffer over
+*			to the parsing process. The process tokenizes the data and generates game
+*			code friendly POD to work with.
+**/
+bool SKM_LoadAndParseConfiguration( const std::string &filePath );
 
 /**
 *	@brief	Sets up an entity skeleton using the specified skeletal model data.

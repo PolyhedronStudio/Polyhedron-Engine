@@ -7,7 +7,8 @@
 *	Skeletal Animation functionality.
 *
 ***/
-#include "Shared.h"
+#include "Shared/Shared.h"
+#include "Common/Files.h"
 
 
 /**
@@ -290,4 +291,193 @@ void SKM_GenerateModelData(model_t* model) {
 
 	// Return our data.
 	//return skm;
+}
+
+/**
+*
+*
+*
+*	Animation Configuration Parsing:
+*	
+*	In order to properly deal with skeletal model file formats in a game code friendly way,
+*	we want to parse additional animation config files. These files can be used to configurate
+*	the following:
+*	- Animation "Actions", setting the properties of:
+*		[name]:		The name of this animation "action", used for indexing.
+*		[start]:	The first animation frame in the long iqm frame sequence range.
+*		[end]:		The last, final, end animation frame in the long iqm frame sequence range.
+*		[loopcount]:The loopcount, if 0 it only plays the animation once and stops at the last
+*					frame. It only replays itself if requested by the Game code.
+*		[frametime]:Amount of time each frame takes for this animation.
+*	- Tags which can be named and assigned to a bone. Each tag allows for specifying the following
+*	properties:
+*			[xOffset,yOffset,zOffset]: The offset relative to the bone's position.
+*			[ rotation offset? ]:
+*			[ rotation constraints ? ]:
+*	- Animation "Blends", each animation is composed of animation blends. Using animation blends
+*	it is possible to compose unique animations that combine multiple actions starting from a 
+*	specified bone node. The bone node can be indexed by number, as well as by name.
+*
+*	To compose an animation blend works like the following example:
+*	animation "walking_"
+*		blend "standard_walk" 1.0
+*		blend "reload
+*			
+*	
+*
+*
+*
+**/
+//! Contains a parsed token.
+struct SKMParsedToken {
+	//! Line number we found this token at.
+	int32_t line = 0;
+	//! Character offset number into our line at which we found this token at.
+	int32_t offset = 0;
+	//! Token character width. (To avoid having to request string size all the time.)
+	int32_t width = 0;
+
+	//! Actual token string.
+	std::string value = "";
+	//! Keeps track of specific token flags.
+	int32_t flags = 0;	// These are set to either cmd, string(if it was encased by quotes), int, float.
+						// In case of cmd, also a cmd index is set.
+};
+
+//! Contains our parsed tokens.
+struct SKMParsedResults {
+	std::vector<SKMParsedToken> tokens;
+};
+
+static SKMParsedResults skmParsedResults;
+
+/**
+*	@brief	Recursively tokenizes a buffer by spaces, and double quotes.
+**/
+static SKMParsedToken SKM_TokenizeStringSegment( const std::string &segment, const int32_t line = 0, const int32_t offset = 0, const int32_t width = 0 ) {
+	
+	// Flags that tell us what the actual content of this token is.
+	int32_t flags = 0;
+
+	Com_DPrintf("token [%s, line:%i, offset:%i, width:%i, flags:%s]\n",
+				segment.c_str(),
+				line,
+				offset,
+				width,
+				"");
+
+	// Create our return token by setting it up with our parsed data.
+	return SKMParsedToken{
+		.line = line,
+		.offset = offset,
+		.width = width,
+		.value = segment,
+		.flags = flags,
+	};
+}
+
+/**
+*	@brief	Parsed a Skeletal Model Configuration file for animation actions, tag and blend data.
+**/
+static bool SKM_ParseConfiguration( const std::string &cfgBuffer ) {
+	/**
+	*	#0:	Tokenize our buffer.
+	**/
+	// Keeps score of the amount of double quotes found. If the number returns 0 for % 2,
+	// it means we've found a matching closing bracket for the specific segment.
+	int32_t doubleQuoteCounter = 0;
+	// Keeps score of the line number.
+	int32_t segmentLine = 0;
+	// Stores our segment string value.
+	std::string segment;
+	// Create a string stream of our configuration string buffer.
+	std::stringstream stream_input(cfgBuffer);
+
+	// Debug output for testing tokenizing.
+	Com_DPrintf("===================================================\n");
+
+	// Start tokenizing by double quotes first.
+	while( std::getline(stream_input, segment, '\"') ) {
+		// Increment our double quote counter.
+		++doubleQuoteCounter;
+
+		// If % 2 == 0 then we've found a matching closing bracket.
+		if ( doubleQuoteCounter % 2 == 0 ) {
+			// If the segment isn't empty, add it to our parsed results.
+			if ( !segment.empty() ) {
+				SKM_TokenizeStringSegment( segment );
+				//std::cout << segment << std::endl;
+			}
+		} else {
+			// Create a string stream of our segment itself.
+			std::stringstream stream_segment(segment);
+
+			// The total string size, used to calculate the token segment offset with.
+			size_t segmentLength = segment.length();
+			// Stores the actual current segment offset.
+			size_t segmentOffset = 0;
+			// Tokenize it by spaces.
+			while( std::getline(stream_segment, segment, ' ') ) {
+				// Only consider the segment a legit token if it contains anything of value.
+				if ( !segment.empty() ) {
+					// Our offset is calculated by subtracting the current stream_segment character count.
+					const int32_t subtractedCharacterCount = stream_segment.gcount();
+					segmentOffset += segmentLength - subtractedCharacterCount;
+
+					// Our segment width is of course, the length of our segment string.
+					const int32_t segmentWidth = segment.length();
+
+					// This works 
+					SKM_TokenizeStringSegment( segment, segmentLine, segmentOffset, segmentWidth );
+					//std::cout << segment << std::endl;
+				}
+			}
+			
+			// Increment line.
+			segmentLine++;
+		}
+	}
+
+	// Debug output for testing tokenizing.
+	Com_DPrintf("===================================================\n");
+
+	return true;
+}
+
+/**
+*	@brief	Loads up a skeletal model configuration file and passes its buffer over
+*			to the parsing process. The process tokenizes the data and generates game
+*			code friendly POD to work with.
+**/
+bool SKM_LoadAndParseConfiguration( const std::string &filePath ) {
+    // Stores the actual buffer content.
+	char *fileBuffer; //, * data, * p;// , * cmd;
+    qerror_t ret = 0;
+
+	// Load file into buffer.
+	ret = FS_LoadFile( filePath.c_str(), (void **)&fileBuffer );
+
+    if ( !fileBuffer ) {
+        if ( ret != Q_ERR_NOENT ) {
+			// Generate our development output string using fmt.
+			const std::string devPrintStr = fmt::format(
+				"Couldn't load '{}': {}",
+				filePath,
+				Q_ErrorString( ret )
+			);
+			// Output.
+			Com_DPrintf(devPrintStr.c_str());
+        }
+		// Return failure.
+        return false;
+    }
+
+	// Start parsing our buffer.
+	SKM_ParseConfiguration( fileBuffer );
+
+	// We're done working with this file, free it from memory.
+	FS_FreeFile( fileBuffer );
+
+	// Return success.
+	return true;
 }

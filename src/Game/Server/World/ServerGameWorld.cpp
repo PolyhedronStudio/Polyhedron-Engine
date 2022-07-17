@@ -557,7 +557,7 @@ qboolean ServerGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, S
     if (!gameEntity) {
 		// Free/reset the PODEntity for reusal.
 		//FreePODEntity(podEntity);
-		gi.DPrintf("SVGWarning: Spawning entity(%s) failed.\n", dictionary["classname"]);
+		gi.DPrintf("SVGWarning: Spawning entity(%s) failed.\n", dictionary["classname"].c_str());
 		return false;
     }
 

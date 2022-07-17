@@ -17,7 +17,6 @@ SET(SRC_SHARED
 
 	${PATH_SRC}/Shared/Math.cpp
 	${PATH_SRC}/Shared/Shared.cpp
-	${PATH_SRC}/Shared/SkeletalModelData.cpp
 )
 
 SET(HEADERS_SHARED
@@ -93,6 +92,7 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/Messaging.cpp
 	${PATH_SRC}/Common/Prompt.cpp
 	${PATH_SRC}/Common/SizeBuffer.cpp
+	${PATH_SRC}/Common/SkeletalModelData.cpp
 	${PATH_SRC}/Common/TemporaryBoneCache.cpp
 	#${PATH_SRC}/Common/Tests.cpp
 	${PATH_SRC}/Common/Utilities.cpp
