@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Shared/List.h"
 #include "Common/Common.h"
 #include "Common/Files.h"
+#include "Common/SkeletalModelData.h"
 #include "Client/Models.h"
 //#include "Common/Models/Models.h"
 #include "System/Hunk.h"
@@ -181,7 +182,7 @@ qhandle_t R_RegisterModel(const char *name) {
 		memcpy(extension, ".skc", 4);
 
 		// Now, load up our SKM config file.
-		const bool result = SKM_LoadAndParseConfiguration( normalized );
+		const bool result = SKM_LoadAndParseConfiguration( model, normalized );
 		if (result) {
 			Com_DPrintf("Loaded up SKM Config file: %s\n", normalized );
 

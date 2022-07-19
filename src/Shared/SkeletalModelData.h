@@ -20,7 +20,8 @@
 /**
 *	@brief	Pre...
 **/
-struct SkeletalAnimation;
+struct SkeletalAnimationAction;
+struct SkeletalAnimationBlendAction;
 
 //! MS Frametime for animations.
 //static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
@@ -38,19 +39,36 @@ static constexpr int32_t SKM_MAX_JOINTS = IQM_MAX_JOINTS;
 *	@brief	Game Module friendly IQM Data: Animations, BoundingBox per frame, and Joint data.
 **/
 struct SkeletalModelData {
-	//! TODO: Indexed by name, should be a hash map instead?
-	std::map<std::string, SkeletalAnimation> animationMap;
-	std::vector<SkeletalAnimation*> animations;
+	/**
+	*	Action and BlendAction Data.
+	**/
+	//! Animation map for named indexing.
+	std::map<std::string, SkeletalAnimationAction> actionMap;
+	//! Animation vector, for numeric indexing, pointing to our map.
+	std::vector<SkeletalAnimationAction*> actions;
 
-	//! Bones, key names, index values.
-	std::map<std::string, int32_t> boneNameIndices;
+	//! Animation map for named indexing.
+	std::map<std::string, SkeletalAnimationBlendAction> blendActionMap;
+	//! Animation vector, for numeric indexing, pointing to our map.
+	std::vector<SkeletalAnimationBlendAction*> blendActions;
 
+
+	/**
+	*	Bounding Box Data.
+	**/
 	//! Bounding Boxes. Stores by frame index.
 	struct BoundingBox {
 		vec3_t mins;
 		vec3_t maxs;
 	};
 	std::vector<BoundingBox> boundingBoxes;
+
+
+	/**
+	*	Bone/Joint Data.
+	**/
+	//! Bones, key names, index values.
+	std::map<std::string, int32_t> boneNameIndices;
 
 	//! Joint information. Stored by name indexing in a map, as well as numberical indexing in an array.
 	struct Joint {
@@ -74,22 +92,23 @@ struct SkeletalModelData {
 /**
 *
 *
-*	Animation Data: It says parsed from, it is not so, it comes from the IQM
-*	file itself only right now.
+*	Animation Actions:
 *
-*	Contains extra precalculated data regarding the total animation distance
-*	traveled per animation, the exact distance and translation of the root
-*	bone per frame.
+*	An animation action consists out of a start and end frame which displays
+*	at frametime(ms) per frame. They all got a unique distinctive name for
+*	look-up operations.
 *
-*	On top of that, the root bone can be set render specific flags. (RootBoneAxisFlags)
-*
+*	An 'Action' can be the frames of a full walk forward animation, but also
+*	an idle reload animation. Together they can be blend together starting from
+*	a bone node, let's say the spine. Where the walk forward serves as the
+*	dominating animation, the reload animation blends in starting from the spine
+*	to bring in the final result: walk forward + reload animation.
 *
 **/
 /**
-*	@brief	Parsed from the modelname.cfg file. Stores specific data that
-*			belongs to an animation. Such as: frametime, loop or no loop.
+*	@brief	Parsed from modelname.sck animation action data structure.
 **/
-struct SkeletalAnimation {
+struct SkeletalAnimationAction {
 	/**
 	*	Look-up Properties, (Name, index, IQM StartFrame, IQM EndFrame.)
 	**/
@@ -125,9 +144,6 @@ struct SkeletalAnimation {
 	//! TODO: Add a decent Bone Access API and transform code using this to using that.
 	double frameStartDistance = 0.0;
 	double frameEndDistance = 0.0f;
-	//! Start Frame distance.
-	//! The total distances travelled by the root bone per frame.
-	std::vector<double> frameDistanceSum;
 	//! The total distances travelled by the root bone per frame.
 	std::vector<double> frameDistances;
 	//! The translates of root bone per frame.
@@ -150,19 +166,10 @@ struct SkeletalAnimation {
 };
 
 /**
-*	@return	Game compatible skeletal model data including: animation name, 
-*			and frame data, bounding box data(per frame), and joints(name, index, parentindex)
+*	@brief	Parsed from modelname.sck, contains the animation blend action data structure.
 **/
-void SKM_GenerateModelData(model_t* model);
-
-/**
-*	@brief	Loads up a skeletal model configuration file and passes its buffer over
-*			to the parsing process. The process tokenizes the data and generates game
-*			code friendly POD to work with.
-**/
-bool SKM_LoadAndParseConfiguration( const std::string &filePath );
-
-/**
-*	@brief	Sets up an entity skeleton using the specified skeletal model data.
-**/
-const bool ES_CreateFromModel( const model_t *model, EntitySkeleton *es );
+struct SkeletalAnimationBlendAction {
+	//! Stores the [indexes, fraction, bone index] of each blend action
+	//! in the same order as that they were placed in the configuration file.
+	std::vector< std::tuple< uint16_t, float, int32_t > > blendActions;
+};

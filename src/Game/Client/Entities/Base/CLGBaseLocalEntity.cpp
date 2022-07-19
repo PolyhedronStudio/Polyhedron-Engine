@@ -541,8 +541,8 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 				// See which animation we are at:
 				const int32_t animationIndex = currentState->currentAnimation.animationIndex;
 
-				if ( animationIndex >= 0 && animationIndex < skm->animations.size() ) { 
-					auto *animationData = skm->animations[animationIndex];
+				if ( animationIndex >= 0 && animationIndex < skm->actions.size() ) { 
+					auto *animationData = skm->actions[animationIndex];
 
 					refreshEntity.rootBoneAxisFlags = animationData->rootBoneAxisFlags;
 				} else {

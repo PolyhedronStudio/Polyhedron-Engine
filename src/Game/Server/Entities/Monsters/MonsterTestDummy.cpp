@@ -96,80 +96,80 @@ void MonsterTestDummy::Precache() {
 	//			matter, but we just use the .cfg file to define these things ourselves.
 	//
 	if (skm) {
-		for (int32_t i = 0; i < skm->animations.size(); i++) {
-			skm->animations[i]->rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		for (int32_t i = 0; i < skm->actions.size(); i++) {
+			skm->actions[i]->rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;//SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 		}
 
 		//TPose,Idle,IdleAiming,RifleAim,RifleFire,WalkForward,WalkForwardLeft,WalkForwardRight,WalkingToDying,WalkLeft,WalkRight
-		const int32_t ZeroAllAxis = ( SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation );
-		skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;// |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-		skm->animationMap["Idle"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-		skm->animationMap["IdleAiming"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-		skm->animationMap["RifleAim"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-		skm->animationMap["RifleFire"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-		skm->animationMap["Waving"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-		skm->animationMap["Reloading"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		const int32_t ZeroAllAxis = ( SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation );
+		skm->actionMap["TPose"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;// |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->actionMap["Idle"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->actionMap["IdleAiming"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->actionMap["RifleAim"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->actionMap["RifleFire"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->actionMap["Waving"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->actionMap["Reloading"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
 
-		skm->animationMap["RunForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["WalkForwardLeft"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-		skm->animationMap["WalkForwardRight"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-		skm->animationMap["WalkingToDying"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-		skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-		skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-																											   //skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
-	//skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask;
+		skm->actionMap["RunForward"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkForwardLeft"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
+		skm->actionMap["WalkForwardRight"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
+		skm->actionMap["WalkingToDying"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+		skm->actionMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+																											   //skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
+	//skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
 
-	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	//// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
-	//skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
-	//skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation;
+	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+	//// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
+	//skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+	//skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
 	//
-	//skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 
-	//skm->animationMap["PistolWhip"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["Reload"].rootBoneAxisFlags |= SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["PistolWhip"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+	//skm->animationMap["Reload"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 
 		// Pistol Walk Forward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
 		// for by physics.
 		//if ( skm->animationMap.contains( "WalkForward" ) ) {
-		//	skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//	skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 		//}
 
 		//// Pistol Walk Backward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
 		//// for by physics.
 		//if ( skm->animationMap.contains( "PistolWalkBackward") ) {
-		//	skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//	skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 		//}
 
 		//// Pistol Run Forward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
 		//// for by physics.
 		//if ( skm->animationMap.contains( "PistolRunForward" ) ) {
-		//	skm->animationMap["PistolRunForward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//	skm->animationMap["PistolRunForward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 		//}
 		//// Pistol Run Backward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
 		//// for by physics.
 		//if ( skm->animationMap.contains( "PistolRunBackward" ) ) {
-		//	skm->animationMap["PistolRunBackward"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation;
+		//	skm->animationMap["PistolRunBackward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 		//}
 
 		//// Pistol Strafe Left: ZeroX. - We only want sideways, meaning left/right, to be accounted for by physics.
 		//if ( skm->animationMap.contains( "WalkLeft" ) ) {
-		//	skm->animationMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		//	skm->animationMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 		//}
 		//// Pistol Strafe Right: ZeroX. - We only want sideways, meaning left/right, to be accounted for by physics.
 		//if ( skm->animationMap.contains( "WalkRight" ) ) {
-		//	skm->animationMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		//	skm->animationMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 		//}
 
 		//// We do NOT want idle to move at all.
 		//if ( skm->animationMap.contains( "PistolIdleTense" ) ) {
-		//	skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+		//	skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 		//}
 	}
 	
-	//skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;// | SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation;
+	//skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 }
 
 //
@@ -309,17 +309,17 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 
 	const int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
 
-	if (animationIndex == skm->animationMap["WalkForward"].index) {
+	if (animationIndex == skm->actionMap["WalkForward"].index) {
 		SwitchAnimation("RunForward");
-	} else 	if (animationIndex == skm->animationMap["RunForward"].index) {
+	} else 	if (animationIndex == skm->actionMap["RunForward"].index) {
 		SwitchAnimation("Idle");
-	} else 	if (animationIndex == skm->animationMap["Idle"].index) {
+	} else 	if (animationIndex == skm->actionMap["Idle"].index) {
 		SwitchAnimation("WalkForwardLeft");
-	} else 	if (animationIndex == skm->animationMap["WalkForwardLeft"].index) {
+	} else 	if (animationIndex == skm->actionMap["WalkForwardLeft"].index) {
 		SwitchAnimation("WalkForwardRight");
-	} else 	if (animationIndex == skm->animationMap["WalkForwardRight"].index) {
+	} else 	if (animationIndex == skm->actionMap["WalkForwardRight"].index) {
 		SwitchAnimation("WalkRight");
-	} else 	if (animationIndex == skm->animationMap["WalkRight"].index) {
+	} else 	if (animationIndex == skm->actionMap["WalkRight"].index) {
 		SwitchAnimation("WalkLeft");
 	} else 	{ //if (animationIndex == skm->animationMap["WalkForward"].index) {
 		SwitchAnimation("WalkForward");
@@ -423,7 +423,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// If we got a new animation to switch to, ensure we are allowed to switch before doing so.
 		if (CanSwitchAnimation(animationState, animationToSwitchTo)) {
-			const std::string animName = skm->animations[animationToSwitchTo]->name;
+			const std::string animName = skm->actions[animationToSwitchTo]->name;
 			SwitchAnimation(animName);
 		//.Otherwise keep processing the current animation frame for time.
 		} else {

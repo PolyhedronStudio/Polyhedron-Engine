@@ -132,6 +132,7 @@ SET(HEADERS_COMMON
 	${PATH_SRC}/Common/Prompt.h
 	${PATH_SRC}/Common/Protocol.h
 	${PATH_SRC}/Common/SizeBuffer.h
+	${PATH_SRC}/Common/SkeletalModelData.h
 	${PATH_SRC}/Common/TemporaryBoneCache.h
 	#${PATH_SRC}/Common/Tests.h
 	${PATH_SRC}/Common/Utilities.h

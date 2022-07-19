@@ -10,7 +10,7 @@
 ***/
 #include "Server.h"
 #include "Models.h"
-//#include "Common/Models/Models.h"
+#include "Common/SkeletalModelData.h"
 #include "Client/Models.h"
 #include "System/Hunk.h"
 #include "Shared/Formats/Md2.h"
@@ -404,6 +404,20 @@ done:
 
 	// Generate Skeletal Model Data.
 	SKM_GenerateModelData(model);
+
+		// This function needs rewriting but who am I... got 2 hands, so little time, right?
+	memcpy(extension, ".skc", 4);
+
+	// Now, load up our SKM config file.
+	if (SKM_LoadAndParseConfiguration( model, normalized )) {
+		Com_DPrintf("Loaded up SKM Config file: %s\n", normalized );
+
+	} else {
+		Com_DPrintf("Couldn't find/load SKM Config file: %s\n", normalized );
+	}
+
+	// Stuff back in iqm for sake.
+	memcpy(extension, ".iqm", 4);
 
 	return index;
 fail2:

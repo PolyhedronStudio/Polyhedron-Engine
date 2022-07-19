@@ -13,6 +13,11 @@
 
 
 /**
+*	@brief	Sets up an entity skeleton using the specified skeletal model data.
+**/
+const bool ES_CreateFromModel( const model_t *model, EntitySkeleton *es );
+
+/**
 *	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
 *
 *			Treats it no different than as if it were a regular alias model going from fram A to B. And does not make use

@@ -123,13 +123,13 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	}
 
 	// Can't switch without containing information info matching the name.
-	if (!skm->animationMap.contains(name)) {
+	if (!skm->actionMap.contains(name)) {
 		currentAnimationState->animationIndex = 0;
 		return 0;
 	}
 
 	// Get AnimationMap.
-	auto animationMap = &skm->animationMap;
+	auto animationMap = &skm->actionMap;
 
 	// Fail if this animation is non existent.
 	if ( !animationMap->contains( name ) ) {
@@ -138,7 +138,7 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	}
 
 	// Get the name matching animation specific info.
-	SkeletalAnimation *animation = &skm->animationMap[name];
+	SkeletalAnimationAction *animation = &skm->actionMap[name];
 
 	// If we're already in this animation, return index but don't reset it.
 	if (animation->index == currentAnimationState->animationIndex) {

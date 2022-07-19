@@ -78,15 +78,15 @@ public:
 	*			translation
 	*	@return	True if the 'translate' frame data exists. False otherwise.
 	**/
-	const bool GetAnimationFrameTranslate( const int32_t animationIndex, const int32_t animationFrame, vec3_t& rootBoneTranslation );
-	const bool GetAnimationFrameTranslate( const std::string &animationName, const int32_t animationFrame, vec3_t& rootBoneTranslation );
+	const bool GetAnimationFrameTranslate( const int32_t actionIndex, const int32_t actionFrame, vec3_t& rootBoneTranslation );
+	const bool GetAnimationFrameTranslate( const std::string &actionName, const int32_t actionFrame, vec3_t& rootBoneTranslation );
 	/**
 	*	@brief	Sets the 'distance' double to the value of the 'root bones' requested frame number 
 	*			translation distance. (vec3_dlength)
 	*	@return	True if the 'distance' frame data exists. False otherwise.
 	**/
-	const bool GetAnimationFrameDistance( const int32_t animationIndex, const int32_t animationFrame, double &rootBoneDistance );
-	const bool GetAnimationFrameDistance( const std::string &animationName, const int32_t animationFrame, double &rootBoneDistance );
+	const bool GetAnimationFrameDistance( const int32_t actionIndex, const int32_t actionFrame, double &rootBoneDistance );
+	const bool GetAnimationFrameDistance( const std::string &actionName, const int32_t actionFrame, double &rootBoneDistance );
 	/**
 	*	@brief	Calculated the move speed of the root bone for the given 'moveDistance' and moveTranslate.
 	*	@return	Value of the calculated move speed.
@@ -111,6 +111,8 @@ public:
 	*	@brief
 	**/
 	const bool HasExoticMoveResults( const int32_t resultsMask );
+
+
 private:
 
 

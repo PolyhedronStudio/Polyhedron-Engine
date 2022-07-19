@@ -408,13 +408,13 @@ void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePos
 				relativeBonePose->translate = pose->translate;
 
 				// See whether to cancel/zero out any axis.
-				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+				if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation) ) {
 					relativeBonePose->translate.x = 0.0;
 				}
-				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+				if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation) ) {
 					relativeBonePose->translate.y = 0.0;
 				}
-				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+				if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation) ) {
 					relativeBonePose->translate.z = 0.0;
 				}
 
@@ -446,17 +446,17 @@ void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePos
 			if (skmData && poseIndex == skmData->rootJointIndex) {
 				
 				// Cancel out if the Zero*Translation flag is set, otherwise, calculate translation for that axis.
-				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+				if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation) ) {
 					relativeBonePose->translate.x = 0.0;
 				} else {
 					relativeBonePose->translate.x = oldpose->translate.x * backLerp + pose->translate.x * lerp;
 				}
-				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+				if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation) ) {
 					relativeBonePose->translate.y = 0.0;
 				} else {
 					relativeBonePose->translate.y = oldpose->translate.y * backLerp + pose->translate.y * lerp;
 				}
-				if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+				if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation) ) {
 					relativeBonePose->translate.z = 0.0;
 				} else {
 					relativeBonePose->translate.z = oldpose->translate.z * backLerp + pose->translate.z * lerp;

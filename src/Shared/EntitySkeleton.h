@@ -35,7 +35,7 @@ using EntitySkeletonBonePose = iqm_transform_t;
 /**
 *	@brief	Predeclare.
 **/
-struct SkeletalAnimation;
+struct SkeletalAnimationAction;
 
 
 

@@ -9,7 +9,7 @@
 ***/
 #include "Shared/Shared.h"
 #include "Common/Files.h"
-
+#include "Common/SkeletalModelData.h"
 
 /**
 *
@@ -123,142 +123,142 @@ void SKM_GenerateModelData(model_t* model) {
 #if DEBUG_MODEL_DATA == 2
 	Com_DPrintf("Animations:\n");
 #endif
-	// Get our animation data sorted out nicely.
-	for (uint32_t animationIndex = 0; animationIndex < model->iqmData->num_animations; animationIndex++) {
-		// Raw Animation Data.
-		iqm_anim_t* animationData = &model->iqmData->animations[animationIndex];
-
-		// Game Friendly Animation Data.
-		// TODO: Do proper error checking for existing keys and warn.
-		SkeletalAnimation *animation = &(skm->animationMap[animationData->name] = {
-			.index = animationIndex,
-			.name = animationData->name,
-			.startFrame = animationData->first_frame,
-			.endFrame = animationData->first_frame + animationData->num_frames,
-			.numFrames = animationData->num_frames,
-			.frametime = BASE_FRAMETIME,
-			.loopingFrames = 0,
-			.forceLoop = true, //(animationData->loop == 1 ? true : false)
-		 });
-		// Resize our vec if needed.
-		if (skm->animations.size() <= animationIndex) {
-			skm->animations.resize(animationIndex + 1);
-		}
-		skm->animations[animationIndex] = animation;
-
-		// Calculate distances.
-		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
-			// Start and end pose pointers.
-			const iqm_transform_t *startPose = &model->iqmData->poses[ skm->rootJointIndex + ( animation->startFrame * model->iqmData->num_poses ) ];
-			const iqm_transform_t *endPose = (animation->startFrame == 0 ? startPose : &model->iqmData->poses[skm->rootJointIndex + ( (animation->endFrame - 1) * model->iqmData->num_poses)] );
-
-			// Get the start and end pose translations.
-			const vec3_t startFrameTranslate	= startPose->translate;
-			const vec3_t endFrameTranslate		= endPose->translate;
-
-			// Used to store the total translation distance from startFrame to end Frame,
-			// We use this in order to calculate the appropriate distance between start and end frame.
-			// (Ie, assuming an animation loops, we need that.)
-			vec3_t totalTranslateDistance = vec3_zero();
-
-			// The offset between the previous processed and the current processing frame.
-			vec3_t offsetFrom = vec3_zero();
-
-			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
-				// Get the Frame Pose.
-				const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
-
-				// Special Case: First frame has no offset really.
-				if (i == animation->startFrame) {
-					//const vec3_t totalStartTranslation = endFrameTranslate - startFrameTranslate;
-					// Push the total traversed frame distance.
-					const vec3_t frameTranslate = offsetFrom - framePose->translate;
-
-					animation->frameDistances.push_back( vec3_length( frameTranslate ) );
-
-					// Push the total translation between each frame.					
-					animation->frameTranslates.push_back( frameTranslate );
-
-					// Prepare offsetFrom with the current pose's translate for calculating next frame.
-					offsetFrom = framePose->translate;
-
-					//totalTranslationSum += totalStartTranslation;
-				// Special Case: Take the total offset, subtract it from the end frame, and THEN
-				
-				//} else if (i == animation->endFrame) {
-				//	// 
-				//	const vec3_t frameTranslate = startFrameTranslate - endFrameTranslate; //*offsetFrom -*/ framePose->translate;
-				//	const double frameDistance = vec3_distance_squared( startFrameTranslate, endFrameTranslate ); 
-
-				//	const vec3_t totalBackTranslation = frameTranslate - offsetFrom; //startFrameTranslate - endFrameTranslate;
-				//	//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
-
-				//	// Push the total traversed frame distance.
-				//	animation->frameDistances.push_back( frameDistance );//vec3_dlength( totalBackTranslation ) );
-
-				//	// Push the total translation between each frame.					
-				//	animation->frameTranslates.push_back( totalBackTranslation );
-
-					// Calculate the full animation distance.
-					//animation->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate ); 
-
-					//totalTranslationSum += totalBackTranslation;	
-				// General Case: Set the offset we'll be coming from next frame.
-				} else {
-						
-					// Calculate translation between the two frames.
-					const vec3_t translate = offsetFrom - framePose->translate;
-					//const vec3_t translate = offsetFrom - framePose->translate;
-
-					// Calculate the distance between the two frame translations.
-					const double frameDistance = vec3_distance_squared( offsetFrom, framePose->translate ); //vec3_dlength( translate );
-
-					// Push the total traversed frame distance.
-					animation->frameDistances.push_back( frameDistance );
-
-					// Push the total translation between each frame.					
-					animation->frameTranslates.push_back( translate );
-
-					// Increment our total translation sum.
-					//totalTranslationSum += translate; // or offsetfrom?
-
-					// Prepare offsetFrom with the current pose's translate for calculating next frame.
-					offsetFrom = framePose->translate;
-				}
-			}
-
-			// Sum up all frame distances into one single value.
-			//vec3_dlength(totalTranslationSum); //0.0;
-			animation->animationDistance = 0.0;
-			for (auto& distance : animation->frameDistances) {
-				animation->animationDistance += distance;
-			}
-		}
-
-#if DEBUG_MODEL_DATA == 1
-		Com_DPrintf("Animation(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
-			animationIndex,
-			animationData->name, //animation.name, Since, temp var and .c_str()
-			animation->startFrame,
-			animation->endFrame,
-			animation->numFrames,
-			animation->forceLoop == true ? "true" : "false",
-			animation->loopingFrames,
-			animation->animationDistance);
-
-		for (int i = 0; i < animation->frameDistances.size(); i++) {
-			// Debug OutPut:
-			int32_t frameIndex = i;
-			Com_DPrintf("	Frame(#%i): Translate=(%f,%f,%f), Distance=%f\n", 
-				frameIndex,
-				animation->frameTranslates[frameIndex].x,
-				animation->frameTranslates[frameIndex].y,
-				animation->frameTranslates[frameIndex].z,
-				animation->frameDistances[frameIndex]						
-			);
-		}
-#endif
-	}
+//	// Get our animation data sorted out nicely.
+//	for (uint32_t animationIndex = 0; animationIndex < model->iqmData->num_animations; animationIndex++) {
+//		// Raw Animation Data.
+//		iqm_anim_t* animationData = &model->iqmData->animations[animationIndex];
+//
+//		// Game Friendly Animation Data.
+//		// TODO: Do proper error checking for existing keys and warn.
+//		SkeletalAnimationAction *animation = &(skm->actionMap[animationData->name] = {
+//			.index = animationIndex,
+//			.name = animationData->name,
+//			.startFrame = animationData->first_frame,
+//			.endFrame = animationData->first_frame + animationData->num_frames,
+//			.numFrames = animationData->num_frames,
+//			.frametime = BASE_FRAMETIME,
+//			.loopingFrames = 0,
+//			.forceLoop = true, //(animationData->loop == 1 ? true : false)
+//		 });
+//		// Resize our vec if needed.
+//		if (skm->actions.size() <= animationIndex) {
+//			skm->actions.resize(animationIndex + 1);
+//		}
+//		skm->actions[animationIndex] = animation;
+//
+//		// Calculate distances.
+//		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
+//			// Start and end pose pointers.
+//			const iqm_transform_t *startPose = &model->iqmData->poses[ skm->rootJointIndex + ( animation->startFrame * model->iqmData->num_poses ) ];
+//			const iqm_transform_t *endPose = (animation->startFrame == 0 ? startPose : &model->iqmData->poses[skm->rootJointIndex + ( (animation->endFrame - 1) * model->iqmData->num_poses)] );
+//
+//			// Get the start and end pose translations.
+//			const vec3_t startFrameTranslate	= startPose->translate;
+//			const vec3_t endFrameTranslate		= endPose->translate;
+//
+//			// Used to store the total translation distance from startFrame to end Frame,
+//			// We use this in order to calculate the appropriate distance between start and end frame.
+//			// (Ie, assuming an animation loops, we need that.)
+//			vec3_t totalTranslateDistance = vec3_zero();
+//
+//			// The offset between the previous processed and the current processing frame.
+//			vec3_t offsetFrom = vec3_zero();
+//
+//			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
+//				// Get the Frame Pose.
+//				const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
+//
+//				// Special Case: First frame has no offset really.
+//				if (i == animation->startFrame) {
+//					//const vec3_t totalStartTranslation = endFrameTranslate - startFrameTranslate;
+//					// Push the total traversed frame distance.
+//					const vec3_t frameTranslate = offsetFrom - framePose->translate;
+//
+//					animation->frameDistances.push_back( vec3_length( frameTranslate ) );
+//
+//					// Push the total translation between each frame.					
+//					animation->frameTranslates.push_back( frameTranslate );
+//
+//					// Prepare offsetFrom with the current pose's translate for calculating next frame.
+//					offsetFrom = framePose->translate;
+//
+//					//totalTranslationSum += totalStartTranslation;
+//				// Special Case: Take the total offset, subtract it from the end frame, and THEN
+//				
+//				//} else if (i == animation->endFrame) {
+//				//	// 
+//				//	const vec3_t frameTranslate = startFrameTranslate - endFrameTranslate; //*offsetFrom -*/ framePose->translate;
+//				//	const double frameDistance = vec3_distance_squared( startFrameTranslate, endFrameTranslate ); 
+//
+//				//	const vec3_t totalBackTranslation = frameTranslate - offsetFrom; //startFrameTranslate - endFrameTranslate;
+//				//	//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
+//
+//				//	// Push the total traversed frame distance.
+//				//	animation->frameDistances.push_back( frameDistance );//vec3_dlength( totalBackTranslation ) );
+//
+//				//	// Push the total translation between each frame.					
+//				//	animation->frameTranslates.push_back( totalBackTranslation );
+//
+//					// Calculate the full animation distance.
+//					//animation->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate ); 
+//
+//					//totalTranslationSum += totalBackTranslation;	
+//				// General Case: Set the offset we'll be coming from next frame.
+//				} else {
+//						
+//					// Calculate translation between the two frames.
+//					const vec3_t translate = offsetFrom - framePose->translate;
+//					//const vec3_t translate = offsetFrom - framePose->translate;
+//
+//					// Calculate the distance between the two frame translations.
+//					const double frameDistance = vec3_distance_squared( offsetFrom, framePose->translate ); //vec3_dlength( translate );
+//
+//					// Push the total traversed frame distance.
+//					animation->frameDistances.push_back( frameDistance );
+//
+//					// Push the total translation between each frame.					
+//					animation->frameTranslates.push_back( translate );
+//
+//					// Increment our total translation sum.
+//					//totalTranslationSum += translate; // or offsetfrom?
+//
+//					// Prepare offsetFrom with the current pose's translate for calculating next frame.
+//					offsetFrom = framePose->translate;
+//				}
+//			}
+//
+//			// Sum up all frame distances into one single value.
+//			//vec3_dlength(totalTranslationSum); //0.0;
+//			animation->animationDistance = 0.0;
+//			for (auto& distance : animation->frameDistances) {
+//				animation->animationDistance += distance;
+//			}
+//		}
+//
+//#if DEBUG_MODEL_DATA == 1
+//		Com_DPrintf("Action(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
+//			animationIndex,
+//			animationData->name, //animation.name, Since, temp var and .c_str()
+//			animation->startFrame,
+//			animation->endFrame,
+//			animation->numFrames,
+//			animation->forceLoop == true ? "true" : "false",
+//			animation->loopingFrames,
+//			animation->animationDistance);
+//
+//		for (int i = 0; i < animation->frameDistances.size(); i++) {
+//			// Debug OutPut:
+//			int32_t frameIndex = i;
+//			Com_DPrintf("	Frame(#%i): Translate=(%f,%f,%f), Distance=%f\n", 
+//				frameIndex,
+//				animation->frameTranslates[frameIndex].x,
+//				animation->frameTranslates[frameIndex].y,
+//				animation->frameTranslates[frameIndex].z,
+//				animation->frameDistances[frameIndex]						
+//			);
+//		}
+//#endif
+//	}
 
 	/**
 	*	Model Bounds:
@@ -383,9 +383,13 @@ struct SKMParsedLine {
 	std::vector<SKMParsedToken> tokens;
 };
 
-//! Contains our parsed tokens.
-struct SKMParsedResults {
-	std::vector<SKMParsedToken> tokens;
+//! Maintains state of the current configuration parsing process.
+struct SKMParseState {
+	//! Keep score of how many actions we've got so far, and use this as their index value.
+	int32_t actionCount = 0;
+
+	//! Stores the parsed lines and their tokens for this parse configuration state.
+	std::vector<SKMParsedLine> parsedLines;
 };
 
 //! String list of all our existing commands.
@@ -466,7 +470,7 @@ static int32_t SKM_CategorizeTokenValue( const std::string &tokenValue ) {
 /**
 *	@brief	Tokenizes the SKMParsedLine its value and 
 **/
-static bool SKM_TokenizeParsedLine( SKMParsedLine &parsedLine, std::string &errorString ) {
+static bool SKM_TokenizeParsedLine( SKMParsedLine &parsedLine, SKMParseState &parseState, std::string &errorString ) {
 	/**
 	*	
 	**/
@@ -524,7 +528,7 @@ static bool SKM_TokenizeParsedLine( SKMParsedLine &parsedLine, std::string &erro
 *	@param	&lineTokens	A vector reference to push back all parsed lines on to.
 *	@return	The total amount of lines found in 'buffer'.
 **/
-static int32_t SKM_SplitLines( const std::string &buffer, std::vector<SKMParsedLine> &parsedLines) {
+static int32_t SKM_SplitLines( const std::string &buffer, SKMParseState &parseState ) {
 	//! Keeps track of total lines found.
 	int32_t totalLineCount = 0;
 
@@ -537,7 +541,7 @@ static int32_t SKM_SplitLines( const std::string &buffer, std::vector<SKMParsedL
 			const int32_t lineSize = currentPosition - previousPosition;
 
 			// Emplace our parsed line data.
-			parsedLines.emplace_back(SKMParsedLine{
+			parseState.parsedLines.emplace_back(SKMParsedLine{
 				.number = totalLineCount,
 				.width = lineSize,
 				// Trim the substring from all things that cause white spaces, on both left and right sides.
@@ -557,7 +561,7 @@ static int32_t SKM_SplitLines( const std::string &buffer, std::vector<SKMParsedL
 		const int32_t lineSize = previousPosition;
 
 		// Emplace our parsed line data.
-		parsedLines.emplace_back(SKMParsedLine{
+		parseState.parsedLines.emplace_back(SKMParsedLine{
 			.number = totalLineCount,
 			.width = lineSize,
 			// Trim the substring from all things that cause white spaces, on both left and right sides.
@@ -576,63 +580,309 @@ static int32_t SKM_SplitLines( const std::string &buffer, std::vector<SKMParsedL
 }
 
 /**
+*--------------------------- START OF SKM COMMAND FUNCTIONS -------------------------------
+**/
+/**
+*	@brief	Creates an action indexed by actionName assigning all the other properties to it.
+*			If a skeletal model 'root bone' has been set, it'll also pre-calculate the traversed
+*			distance of the action for later use in the root motion system.
+**/
+static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionName, const uint32_t actionIndex, const uint32_t start, const uint32_t end, int32_t loopCount, const float frameTime, std::string &errorString  ) {
+	// Get skeletal model data pointer.
+	SkeletalModelData *skm = model->skeletalModelData;
+	
+	// Find first, and last " of the action name, and remove them if found.
+	const size_t firstDoubleQuotePosition = actionName.find_first_of('"');
+	const size_t secondDoubleQuotePosition = actionName.find_last_of('"');
+
+	std::string sanitizedActionname = "";
+
+	if (firstDoubleQuotePosition != std::string::npos) {
+		if (secondDoubleQuotePosition != std::string::npos) {
+			sanitizedActionname = actionName.substr(firstDoubleQuotePosition + 1, secondDoubleQuotePosition - 1);
+		} else {
+			sanitizedActionname = actionName.substr(firstDoubleQuotePosition + 1);
+		}
+	} else {
+		if (secondDoubleQuotePosition != std::string::npos) {
+			sanitizedActionname = actionName.substr(secondDoubleQuotePosition - 1);
+		}
+	}
+
+
+	// First see if this specific action already exists.
+	if ( skm->actionMap.contains( sanitizedActionname ) ) {
+		errorString = "An action named: '" + sanitizedActionname + "' already exists!\n";
+		return false;
+	}
+
+	// Emplace the action data.
+	SkeletalAnimationAction *action = &( skm->actionMap[ sanitizedActionname ] = (SkeletalAnimationAction{
+		.index = actionIndex,
+		.startFrame = start,
+		.endFrame = end,
+		.numFrames = end - start,
+		.frametime = frameTime,
+		.loopingFrames = (uint32_t)(loopCount < 0 ? 0 : loopCount),
+		.forceLoop = (loopCount < 0 ? true : false)
+	}) );
+
+	// Add a pointer to it into our linear access actions list.
+	if ( skm->actions.size() <= actionIndex ) {
+		skm->actions.resize( actionIndex + 1 );
+	}
+	skm->actions[ actionIndex ] = action;
+
+	// Calculate distances.
+	if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
+		// Start and end pose pointers.
+		const iqm_transform_t *startPose = &model->iqmData->poses[ skm->rootJointIndex + ( action->startFrame * model->iqmData->num_poses ) ];
+		const iqm_transform_t *endPose = (action->startFrame == 0 ? startPose : &model->iqmData->poses[skm->rootJointIndex + ( (action->endFrame - 1) * model->iqmData->num_poses)] );
+
+		// Get the start and end pose translations.
+		const vec3_t startFrameTranslate	= startPose->translate;
+		const vec3_t endFrameTranslate		= endPose->translate;
+
+		// Used to store the total translation distance from startFrame to end Frame,
+		// We use this in order to calculate the appropriate distance between start and end frame.
+		// (Ie, assuming an animation loops, we need that.)
+		vec3_t totalTranslateDistance = vec3_zero();
+
+		// The offset between the previous processed and the current processing frame.
+		vec3_t offsetFrom = vec3_zero();
+
+		for (int32_t i = action->startFrame; i < action->endFrame; i++) {
+			// Get the Frame Pose.
+			const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
+
+			// Special Case: First frame has no offset really.
+			if (i == action->startFrame) {
+				//const vec3_t totalStartTranslation = endFrameTranslate - startFrameTranslate;
+				// Push the total traversed frame distance.
+				const vec3_t frameTranslate = offsetFrom - framePose->translate;
+
+				action->frameDistances.push_back( vec3_length( frameTranslate ) );
+
+				// Push the total translation between each frame.					
+				action->frameTranslates.push_back( frameTranslate );
+
+				// Prepare offsetFrom with the current pose's translate for calculating next frame.
+				offsetFrom = framePose->translate;
+
+				//totalTranslationSum += totalStartTranslation;
+			// Special Case: Take the total offset, subtract it from the end frame, and THEN
+				
+			//} else if (i == animation->endFrame) {
+			//	// 
+			//	const vec3_t frameTranslate = startFrameTranslate - endFrameTranslate; //*offsetFrom -*/ framePose->translate;
+			//	const double frameDistance = vec3_distance_squared( startFrameTranslate, endFrameTranslate ); 
+
+			//	const vec3_t totalBackTranslation = frameTranslate - offsetFrom; //startFrameTranslate - endFrameTranslate;
+			//	//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
+
+			//	// Push the total traversed frame distance.
+			//	animation->frameDistances.push_back( frameDistance );//vec3_dlength( totalBackTranslation ) );
+
+			//	// Push the total translation between each frame.					
+			//	animation->frameTranslates.push_back( totalBackTranslation );
+
+				// Calculate the full animation distance.
+				//animation->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate ); 
+
+				//totalTranslationSum += totalBackTranslation;	
+			// General Case: Set the offset we'll be coming from next frame.
+			} else {
+						
+				// Calculate translation between the two frames.
+				const vec3_t translate = offsetFrom - framePose->translate;
+				//const vec3_t translate = offsetFrom - framePose->translate;
+
+				// Calculate the distance between the two frame translations.
+				const double frameDistance = vec3_distance_squared( offsetFrom, framePose->translate ); //vec3_dlength( translate );
+
+				// Push the total traversed frame distance.
+				action->frameDistances.push_back( frameDistance );
+
+				// Push the total translation between each frame.					
+				action->frameTranslates.push_back( translate );
+
+				// Increment our total translation sum.
+				//totalTranslationSum += translate; // or offsetfrom?
+
+				// Prepare offsetFrom with the current pose's translate for calculating next frame.
+				offsetFrom = framePose->translate;
+			}
+		}
+
+		// Sum up all frame distances into one single value.
+		//vec3_dlength(totalTranslationSum); //0.0;
+		//action->animationDistance = 0.0;
+		//for (auto& distance : action->frameDistances) {
+		//	action->animationDistance += distance;
+		//}
+		action->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate );
+	}
+		//SkeletalAnimationAction *animation = &(skm->actionMap[animationData->name] = {
+		//	.index = animationIndex,
+		//	.name = animationData->name,
+		//	.startFrame = animationData->first_frame,
+		//	.endFrame = animationData->first_frame + animationData->num_frames,
+		//	.numFrames = animationData->num_frames,
+		//	.frametime = BASE_FRAMETIME,
+		//	.loopingFrames = 0,
+		//	.forceLoop = true, //(animationData->loop == 1 ? true : false)
+		// });
+		//// Resize our vec if needed.
+		//if (skm->actions.size() <= animationIndex) {
+		//	skm->actions.resize(animationIndex + 1);
+		//}
+		//skm->actions[animationIndex] = animation;
+
+	return true;
+}
+/**
+*------------------------------ EOF SKM COMMAND FUNCTIONS ---------------------------------
+**/
+/**
+*	@brief	Processes the parsed line its tokens, executing the specific command.
+**/
+static bool SKM_ProcessLineTokens( model_t *model, const SKMParsedLine &parsedLine, SKMParseState &parseState, std::string &errorString ) {
+	// Get token count.
+	const size_t tokenCount = parsedLine.tokens.size();
+	
+	// If this line has no tokens, scram.
+	if (!tokenCount) {
+		return false;
+	}
+
+	/**
+	*	#0:	See what the actual first token is, it 
+	**/
+	// We got ourselves a command identifier, good.
+	if (parsedLine.tokens[0].flags == SKMParsedToken::Flags::CommandIdentifier) {
+		// See if it is the action command.
+		if (parsedLine.tokens[0].value == "action") {
+			// We must ensure we got 4 tokens left.
+			if (parsedLine.tokens.size() >= 6) {
+				// Ok, we got 4 minimal left, let's extract them.
+				const std::string actionName = parsedLine.tokens[1].value;
+				int32_t startFrame = std::stoi(parsedLine.tokens[2].value);
+				int32_t endFrame = std::stoi(parsedLine.tokens[3].value);;
+				int32_t loopCount = std::stoi(parsedLine.tokens[4].value);
+				float frameTime = std::stof(parsedLine.tokens[5].value);;
+
+				// Process the Action command.
+				if (SKM_ProcessActionCommand(model, actionName, parseState.actionCount, startFrame, endFrame, loopCount, frameTime, errorString)) {
+					parseState.actionCount ++;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
+*	@brief	Processes the tokens for each parsed line of the configuration buffer.
+**/
+static bool SKM_ProcessParsedLines( model_t *model, SKMParseState &parseState, std::string &errorString ) {
+	/**
+	*	#0: Start iterating over each line.
+	**/
+	for ( auto &parsedLine : parseState.parsedLines ) {
+		// Process line tokens, return false in case of error. (In which case, errorstring is filled)
+		if ( !SKM_ProcessLineTokens( model, parsedLine, parseState, errorString ) ) {
+			return false;
+		}
+
+	}
+
+	return true;
+}
+
+/**
 *	@brief	Parsed a Skeletal Model Configuration file for animation actions, tag and blend data.
 **/
-static bool SKM_ParseConfiguration( const std::string &cfgBuffer ) {
+static bool SKM_ParseConfiguration( model_t *model, const std::string &cfgBuffer ) {
 	// Our parsed line container which we first parse all lines, then
 	// tokenize each line and store its tokens.
-	std::vector<SKMParsedLine> parsedLines;
+	//std::vector<SKMParsedLine> parsedLines;
+
+	// Our parser state.
+	SKMParseState parseState;
 
 	/**
 	*	#0:	First split by '\r\n' feeds.
 	**/
-	int32_t totalLinesParsed = SKM_SplitLines( cfgBuffer, parsedLines );
+	int32_t totalLinesParsed = SKM_SplitLines( cfgBuffer, parseState );
 
 	/**
 	*	#1: Now actually tokenize each line, storing the tokens in the parsed line.
 	**/
-	for ( auto &parsedLine : parsedLines ) {
-		// This string is set in case of any errors.
-		std::string errorString = "";
+for (auto &parsedLine : parseState.parsedLines ) {
+	// This string is set in case of any errors.
+	std::string errorString = "";
 
-		// Tokenize the current line.
-		if ( !SKM_TokenizeParsedLine( parsedLine, errorString ) ) {
-			// Something went wrong, output error.
-		}
+	// Tokenize the current line.
+	if ( !SKM_TokenizeParsedLine( parsedLine, parseState, errorString ) ) {
+		// Something went wrong, output error.
+		Com_DPrintf("%s:%s\n", __FUNCTION__, errorString.c_str());
+
+		// Return false.
+		return false;
 	}
-	// Debug output for testing tokenizing.
-	Com_DPrintf("===================================================\n");
-	Com_DPrintf("Tokenizing into lines, and each line into tokens based on spaces and tabs:\n");
-	// Iterate our tokenized line buffers.
-	for (auto &parsedLine : parsedLines ) {
+}
+
+/**
+*	#2: Start processing each line, generate skeletal model data based on the
+*		command arguments of that line.
+**/
+// This string is set in case of any errors.
+std::string errorString = "";
+if ( !SKM_ProcessParsedLines(model, parseState, errorString) ) {
+	// Something went wrong, output error.
+	Com_DPrintf("%s:%s\n", __FUNCTION__, errorString.c_str());
+
+	// Return false.
+	return false;
+}
+
+/**
+*	#3: Debug Output of our tokenization process.
+**/
+// Debug output for testing tokenizing.
+Com_DPrintf("===================================================\n");
+Com_DPrintf("Tokenizing into lines, and each line into tokens based on spaces and tabs:\n");
+// Iterate our tokenized line buffers.
+for (auto &parsedLine : parseState.parsedLines) {
 	//	// Tokenize this line for spaces and tabs.
 	//	auto lineTokens = SKM_StringTokenize( bufferLine, " \t" );
 
 	//	// Print line:
-		Com_DPrintf( "#%i:%s: {\n", parsedLine.number, parsedLine.value.c_str() );
-		for ( auto &token : parsedLine.tokens ) {
+	Com_DPrintf("#%i:%s: {\n", parsedLine.number, parsedLine.value.c_str());
+	for (auto &token : parsedLine.tokens) {
 
-			std::string flagStr = "";
+		std::string flagStr = "";
 
-			// Finish generating our debug flag mask by testing and adding string counterparts for all remaining 
-			// flags other than the QuoteString flag.
-			if ( token.flags & SKMParsedToken::Flags::CommandIdentifier )	{ flagStr += "CommandIdentifier "; }
-			if ( token.flags & SKMParsedToken::Flags::FloatNumber )			{ flagStr += "FloatNumber "; }
-			if ( token.flags & SKMParsedToken::Flags::IntegralNumber )		{ flagStr += "IntegralNumber "; }
-			if ( token.flags & SKMParsedToken::Flags::QuotedString )		{ flagStr += "QuotedString "; }
-			if ( token.flags & SKMParsedToken::Flags::Identifier )			{ flagStr += "Identifier "; }
+		// Finish generating our debug flag mask by testing and adding string counterparts for all remaining 
+		// flags other than the QuoteString flag.
+		if (token.flags & SKMParsedToken::Flags::CommandIdentifier) { flagStr += "CommandIdentifier "; }
+		if (token.flags & SKMParsedToken::Flags::FloatNumber) { flagStr += "FloatNumber "; }
+		if (token.flags & SKMParsedToken::Flags::IntegralNumber) { flagStr += "IntegralNumber "; }
+		if (token.flags & SKMParsedToken::Flags::QuotedString) { flagStr += "QuotedString "; }
+		if (token.flags & SKMParsedToken::Flags::Identifier) { flagStr += "Identifier "; }
 
-			// Do some debug output.
-			Com_DPrintf("   token: {%s}, flags: {%s} \n", token.value.c_str(), flagStr.c_str() );
-		}
-		// Debug output.
-		Com_DPrintf("}\n");
+		// Do some debug output.
+		Com_DPrintf("   token: {%s}, flags: {%s} \n", token.value.c_str(), flagStr.c_str());
 	}
-	
-	// Debug output for testing tokenizing.
-	Com_DPrintf("===================================================\n");
+	// Debug output.
+	Com_DPrintf("}\n");
+}
 
-	return true;
+// Debug output for testing tokenizing.
+Com_DPrintf("===================================================\n");
+
+return true;
 }
 
 /**
@@ -640,31 +890,55 @@ static bool SKM_ParseConfiguration( const std::string &cfgBuffer ) {
 *			to the parsing process. The process tokenizes the data and generates game
 *			code friendly POD to work with.
 **/
-bool SKM_LoadAndParseConfiguration( const std::string &filePath ) {
-    // Stores the actual buffer content.
+bool SKM_LoadAndParseConfiguration(model_t *model, const std::string &filePath) {
+	// Stores the actual buffer content.
 	char *fileBuffer; //, * data, * p;// , * cmd;
-    qerror_t ret = 0;
+	qerror_t ret = 0;
 
 	// Load file into buffer.
-	ret = FS_LoadFile( filePath.c_str(), (void **)&fileBuffer );
+	ret = FS_LoadFile(filePath.c_str(), (void **)&fileBuffer);
 
-    if ( !fileBuffer ) {
-        if ( ret != Q_ERR_NOENT ) {
+	if (!fileBuffer) {
+		if (ret != Q_ERR_NOENT) {
 			// Generate our development output string using fmt.
 			const std::string devPrintStr = fmt::format(
 				"Couldn't load '{}': {}",
 				filePath,
-				Q_ErrorString( ret )
+				Q_ErrorString(ret)
 			);
 			// Output.
 			Com_DPrintf(devPrintStr.c_str());
-        }
+		}
 		// Return failure.
-        return false;
-    }
+		return false;
+	}
 
 	// Start parsing our buffer.
-	SKM_ParseConfiguration( fileBuffer );
+	SKM_ParseConfiguration(model, fileBuffer);
+
+	//////////////////////////
+	// Debug Output.
+	SkeletalModelData *skm = model->skeletalModelData;
+
+	Com_DPrintf("------------------------------------------------------\n");
+	Com_DPrintf("Configuration resulted in the following action data:\n");
+	int32_t index = 0;
+	for (auto &iterator : skm->actionMap) {
+		const std::string name = iterator.first;
+		auto *action = &iterator.second;
+
+		Com_DPrintf("Action(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
+			action->index,
+			name.c_str(), //animation.name, Since, temp var and .c_str()
+			action->startFrame,
+			action->endFrame,
+			action->numFrames,
+			action->forceLoop == true ? "true" : "false",
+			action->loopingFrames,
+			action->animationDistance);
+	}
+	Com_DPrintf("------------------------------------------------------\n");
+	//////////////////
 
 	// We're done working with this file, free it from memory.
 	FS_FreeFile( fileBuffer );
