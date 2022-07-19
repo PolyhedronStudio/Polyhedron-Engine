@@ -385,8 +385,15 @@ struct SKMParsedLine {
 
 //! Maintains state of the current configuration parsing process.
 struct SKMParseState {
+	//! The current animation, set by animation command.
+	std::string animationName = "";
+
 	//! Keep score of how many actions we've got so far, and use this as their index value.
 	int32_t actionCount = 0;
+	//! Same, but then for blend actions.
+	int32_t blendActionCount = 0;
+	//! Same, but then for animations.
+	int32_t animationCount = 0;
 
 	//! Stores the parsed lines and their tokens for this parse configuration state.
 	std::vector<SKMParsedLine> parsedLines;
@@ -418,6 +425,34 @@ static inline const std::string StringRegex( const std::string &str, const std::
 }
 static inline const std::string StringRegexTrim( const std::string &str, const std::string &regularExpression = "^[ |\t|\n|\r|\v|\f]*|[ |\t|\n|\r|\v|\f]*$" ) {
 	return StringRegex( str, regularExpression );
+}
+
+/**
+*	@brief	Checks if the string has a quote at the start, and at the end, if so, removes them.
+*	@return	False in case the string was oddly sized.
+**/
+static inline const bool SKM_SanitizeQuotedString( std::string &identifier ) {
+	// Return false if empty.
+	if ( identifier.empty() ) {
+		return false;
+	}
+
+	// Check size.
+	if ( identifier.size() < 2 ) {
+		return false;
+	}
+
+	// Remove beginning " if found.
+	auto firstQuote = identifier.begin();
+	if ( *firstQuote == '"' ) {
+		identifier.erase( firstQuote );
+	}
+	auto secondQuote = (identifier.end() - 1);
+	if ( *secondQuote == '"') {
+		identifier.erase( secondQuote );
+	}
+	
+	return true;
 }
 //
 ///**
@@ -591,24 +626,10 @@ static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionN
 	// Get skeletal model data pointer.
 	SkeletalModelData *skm = model->skeletalModelData;
 	
-	// Find first, and last " of the action name, and remove them if found.
-	const size_t firstDoubleQuotePosition = actionName.find_first_of('"');
-	const size_t secondDoubleQuotePosition = actionName.find_last_of('"');
-
-	std::string sanitizedActionname = "";
-
-	if (firstDoubleQuotePosition != std::string::npos) {
-		if (secondDoubleQuotePosition != std::string::npos) {
-			sanitizedActionname = actionName.substr(firstDoubleQuotePosition + 1, secondDoubleQuotePosition - 1);
-		} else {
-			sanitizedActionname = actionName.substr(firstDoubleQuotePosition + 1);
-		}
-	} else {
-		if (secondDoubleQuotePosition != std::string::npos) {
-			sanitizedActionname = actionName.substr(secondDoubleQuotePosition - 1);
-		}
-	}
-
+	// TODO: I know, this is ugly and all not efficient, but we're not here right now to write proper
+	// parsing code like a bawss, we want skeletal animation going and it's been taking a while now.
+	std::string sanitizedActionname = actionName; 
+	SKM_SanitizeQuotedString( sanitizedActionname );
 
 	// First see if this specific action already exists.
 	if ( skm->actionMap.contains( sanitizedActionname ) ) {
@@ -740,6 +761,93 @@ static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionN
 
 	return true;
 }
+
+/**
+*	@brief	Creates an action indexed by actionName assigning all the other properties to it.
+*			If a skeletal model 'root bone' has been set, it'll also pre-calculate the traversed
+*			distance of the action for later use in the root motion system.
+**/
+static bool SKM_ProcessAnimationCommand( model_t *model, SKMParseState &parseState, const std::string &animationName, std::string &errorString  ) {
+	// Get skeletal model data pointer.
+	SkeletalModelData *skm = model->skeletalModelData;
+	
+	// Sanitize the name, and set our animation state.
+	parseState.animationName = animationName;
+	SKM_SanitizeQuotedString( parseState.animationName );
+
+	// Actually emplace the animation if nonexistent.
+	skm->animationMap[parseState.animationName] = {};
+	skm->animations.push_back(&skm->animationMap[parseState.animationName]);
+
+	return true;
+}
+
+/**
+*	@brief	
+**/
+static bool SKM_ProcessBlendActionCommand( model_t *model, SKMParseState &parseState, const std::string &actionName, float fraction, const std::string &boneName, std::string &errorString ) {
+	// Get skeletal model data pointer.
+	SkeletalModelData *skm = model->skeletalModelData;
+	
+	// Make sure that our parsing state has an animation index set, if not, we can't supply it a blend action.
+	if ( parseState.animationName.empty() ) {
+		errorString = "Can't perform a blend action without being assigned an animation to blend in to.";
+		return false;
+	}
+
+	// TODO: I know, this is ugly and all not efficient, but we're not here right now to write proper
+	// parsing code like a bawss, we want skeletal animation going and it's been taking a while now.
+	std::string sanitizedActionname = actionName; 
+	SKM_SanitizeQuotedString( sanitizedActionname );
+	std::string sanitizedBoneName = boneName; 
+	SKM_SanitizeQuotedString( sanitizedBoneName );
+
+	// See if the animation exists in the animation map.
+	if ( !skm->animationMap.contains( parseState.animationName ) ) {
+		errorString = "Tried to perform blend action for '" + parseState.animationName + "', but it is nonexistent.";
+		return false;
+	}
+
+	// Animation is existent, now find the action.
+	if ( skm->actionMap.contains(sanitizedActionname) ) {
+		// Get action index.
+		const int32_t actionIndex = skm->actionMap[sanitizedActionname].index;
+		
+		// If the bone name is empty, we assume it is a dominating animator.
+		if ( boneName.empty() ) { 
+				// We're ready, time to push back our blend action.
+				skm->animationMap[parseState.animationName].blendActions.push_front({
+					actionIndex,
+					fraction,
+					0
+				});
+		} else {
+			// Ensure the bone is existent.
+			if ( skm->jointMap.contains( sanitizedBoneName ) ) {
+				// Bone index.
+				const int32_t boneIndex = skm->jointMap[ sanitizedBoneName ].index;
+
+				// We're ready, time to push back our blend action.
+				skm->animationMap[parseState.animationName].blendActions.push_back({
+					actionIndex,
+					fraction,
+					boneIndex
+				});
+			} else {
+				errorString = "Couldn't find bone: '" + sanitizedBoneName + "'";
+				return false;
+			}
+		}
+
+
+	} else {
+		errorString = "Error finding '" + sanitizedActionname + "' for blendaction.";
+		return false;
+	}
+
+
+	return true;
+}
 /**
 *------------------------------ EOF SKM COMMAND FUNCTIONS ---------------------------------
 **/
@@ -759,22 +867,73 @@ static bool SKM_ProcessLineTokens( model_t *model, const SKMParsedLine &parsedLi
 	*	#0:	See what the actual first token is, it 
 	**/
 	// We got ourselves a command identifier, good.
-	if (parsedLine.tokens[0].flags == SKMParsedToken::Flags::CommandIdentifier) {
+	if ( parsedLine.tokens[0].flags == SKMParsedToken::Flags::CommandIdentifier ) {
 		// See if it is the action command.
-		if (parsedLine.tokens[0].value == "action") {
+		/**
+		*	Action
+		**/
+		if ( parsedLine.tokens[0].value == "action" ) {
 			// We must ensure we got 4 tokens left.
-			if (parsedLine.tokens.size() >= 6) {
+			if ( parsedLine.tokens.size() >= 5 ) {
 				// Ok, we got 4 minimal left, let's extract them.
 				const std::string actionName = parsedLine.tokens[1].value;
 				int32_t startFrame = std::stoi(parsedLine.tokens[2].value);
-				int32_t endFrame = std::stoi(parsedLine.tokens[3].value);;
+				int32_t endFrame = std::stoi(parsedLine.tokens[3].value);
 				int32_t loopCount = std::stoi(parsedLine.tokens[4].value);
-				float frameTime = std::stof(parsedLine.tokens[5].value);;
+				// Frame time token is optional, last argument.
+				float frameTime = ( parsedLine.tokens.size() >= 6 ? std::stof(parsedLine.tokens[5].value) : BASE_FRAMETIME );
 
 				// Process the Action command.
-				if (SKM_ProcessActionCommand(model, actionName, parseState.actionCount, startFrame, endFrame, loopCount, frameTime, errorString)) {
-					parseState.actionCount ++;
+				if ( SKM_ProcessActionCommand( model, actionName, parseState.actionCount, startFrame, endFrame, loopCount, frameTime, errorString) ) {
+					parseState.actionCount++;
+				} else {
+					return false;
 				}
+			} else {
+				// We got an error.
+				errorString = "Unexpected arguments found, expecting: \"actionName\" startFrame endFrame loopCount [frameTime:optionable]";
+				return false;
+			}
+		/**
+		*	Animation.
+		**/
+		} else if ( parsedLine.tokens[0].value == "animation" ) {
+			// We must ensure we got 4 tokens left.
+			if ( parsedLine.tokens.size() >= 2 ) {
+				const std::string animationName = parsedLine.tokens[1].value;
+
+				// Process the Animation command.
+				if ( SKM_ProcessAnimationCommand( model, parseState, animationName, errorString) ) {
+					parseState.animationCount++;
+				} else {
+					return false;
+				}
+			} else {
+				// We got an error.
+				errorString = "Unexpected arguments found, expecting: \"actionName\" startFrame endFrame loopCount [frameTime:optionable]";
+				return false;
+			}
+		/**
+		*	Blend Action
+		**/
+		} else if ( parsedLine.tokens[0].value == "blendaction" ) {
+			// We must ensure we got 4 tokens left.
+			if ( parsedLine.tokens.size() >= 3 ) {
+				// Ok, we got 3 minimal left, let's extract them.
+				const std::string blendActionName = parsedLine.tokens[1].value;
+				float fraction = std::stof( parsedLine.tokens[2].value );
+				const std::string boneName = (parsedLine.tokens.size() >= 4 ? parsedLine.tokens[3].value : "" );
+
+				// Process the Action command.
+				if ( SKM_ProcessBlendActionCommand( model, parseState, blendActionName, fraction, boneName, errorString) ) {
+					parseState.blendActionCount++;
+				} else {
+					return false;
+				}
+			} else {
+				// We got an error.
+				errorString = "Unexpected arguments found, expecting: \"actionName\" startFrame endFrame loopCount [frameTime:optionable]";
+				return false;
 			}
 		}
 	}
@@ -819,70 +978,70 @@ static bool SKM_ParseConfiguration( model_t *model, const std::string &cfgBuffer
 	/**
 	*	#1: Now actually tokenize each line, storing the tokens in the parsed line.
 	**/
-for (auto &parsedLine : parseState.parsedLines ) {
+	for (auto &parsedLine : parseState.parsedLines ) {
+		// This string is set in case of any errors.
+		std::string errorString = "";
+
+		// Tokenize the current line.
+		if ( !SKM_TokenizeParsedLine( parsedLine, parseState, errorString ) ) {
+			// Something went wrong, output error.
+			Com_DPrintf("%s:%s\n", __FUNCTION__, errorString.c_str());
+
+			// Return false.
+			return false;
+		}
+	}
+
+	/**
+	*	#2: Start processing each line, generate skeletal model data based on the
+	*		command arguments of that line.
+	**/
 	// This string is set in case of any errors.
 	std::string errorString = "";
-
-	// Tokenize the current line.
-	if ( !SKM_TokenizeParsedLine( parsedLine, parseState, errorString ) ) {
+	if ( !SKM_ProcessParsedLines(model, parseState, errorString) ) {
 		// Something went wrong, output error.
 		Com_DPrintf("%s:%s\n", __FUNCTION__, errorString.c_str());
 
 		// Return false.
 		return false;
 	}
-}
 
-/**
-*	#2: Start processing each line, generate skeletal model data based on the
-*		command arguments of that line.
-**/
-// This string is set in case of any errors.
-std::string errorString = "";
-if ( !SKM_ProcessParsedLines(model, parseState, errorString) ) {
-	// Something went wrong, output error.
-	Com_DPrintf("%s:%s\n", __FUNCTION__, errorString.c_str());
+	/**
+	*	#3: Debug Output of our tokenization process.
+	**/
+	// Debug output for testing tokenizing.
+	Com_DPrintf("===================================================\n");
+	Com_DPrintf("Tokenizing into lines, and each line into tokens based on spaces and tabs:\n");
+	// Iterate our tokenized line buffers.
+	for (auto &parsedLine : parseState.parsedLines) {
+		//	// Tokenize this line for spaces and tabs.
+		//	auto lineTokens = SKM_StringTokenize( bufferLine, " \t" );
 
-	// Return false.
-	return false;
-}
+		//	// Print line:
+		Com_DPrintf("#%i:%s: {\n", parsedLine.number, parsedLine.value.c_str());
+		for (auto &token : parsedLine.tokens) {
 
-/**
-*	#3: Debug Output of our tokenization process.
-**/
-// Debug output for testing tokenizing.
-Com_DPrintf("===================================================\n");
-Com_DPrintf("Tokenizing into lines, and each line into tokens based on spaces and tabs:\n");
-// Iterate our tokenized line buffers.
-for (auto &parsedLine : parseState.parsedLines) {
-	//	// Tokenize this line for spaces and tabs.
-	//	auto lineTokens = SKM_StringTokenize( bufferLine, " \t" );
+			std::string flagStr = "";
 
-	//	// Print line:
-	Com_DPrintf("#%i:%s: {\n", parsedLine.number, parsedLine.value.c_str());
-	for (auto &token : parsedLine.tokens) {
+			// Finish generating our debug flag mask by testing and adding string counterparts for all remaining 
+			// flags other than the QuoteString flag.
+			if (token.flags & SKMParsedToken::Flags::CommandIdentifier) { flagStr += "CommandIdentifier "; }
+			if (token.flags & SKMParsedToken::Flags::FloatNumber) { flagStr += "FloatNumber "; }
+			if (token.flags & SKMParsedToken::Flags::IntegralNumber) { flagStr += "IntegralNumber "; }
+			if (token.flags & SKMParsedToken::Flags::QuotedString) { flagStr += "QuotedString "; }
+			if (token.flags & SKMParsedToken::Flags::Identifier) { flagStr += "Identifier "; }
 
-		std::string flagStr = "";
-
-		// Finish generating our debug flag mask by testing and adding string counterparts for all remaining 
-		// flags other than the QuoteString flag.
-		if (token.flags & SKMParsedToken::Flags::CommandIdentifier) { flagStr += "CommandIdentifier "; }
-		if (token.flags & SKMParsedToken::Flags::FloatNumber) { flagStr += "FloatNumber "; }
-		if (token.flags & SKMParsedToken::Flags::IntegralNumber) { flagStr += "IntegralNumber "; }
-		if (token.flags & SKMParsedToken::Flags::QuotedString) { flagStr += "QuotedString "; }
-		if (token.flags & SKMParsedToken::Flags::Identifier) { flagStr += "Identifier "; }
-
-		// Do some debug output.
-		Com_DPrintf("   token: {%s}, flags: {%s} \n", token.value.c_str(), flagStr.c_str());
+			// Do some debug output.
+			Com_DPrintf("   token: {%s}, flags: {%s} \n", token.value.c_str(), flagStr.c_str());
+		}
+		// Debug output.
+		Com_DPrintf("}\n");
 	}
-	// Debug output.
-	Com_DPrintf("}\n");
-}
 
-// Debug output for testing tokenizing.
-Com_DPrintf("===================================================\n");
+	// Debug output for testing tokenizing.
+	Com_DPrintf("===================================================\n");
 
-return true;
+	return true;
 }
 
 /**
@@ -922,6 +1081,7 @@ bool SKM_LoadAndParseConfiguration(model_t *model, const std::string &filePath) 
 
 	Com_DPrintf("------------------------------------------------------\n");
 	Com_DPrintf("Configuration resulted in the following action data:\n");
+	Com_DPrintf("Actions:\n");
 	int32_t index = 0;
 	for (auto &iterator : skm->actionMap) {
 		const std::string name = iterator.first;
@@ -936,6 +1096,38 @@ bool SKM_LoadAndParseConfiguration(model_t *model, const std::string &filePath) 
 			action->forceLoop == true ? "true" : "false",
 			action->loopingFrames,
 			action->animationDistance);
+	}
+	Com_DPrintf("---:\n");
+	Com_DPrintf("Animations:\n");
+
+	int32_t i = 0;
+	for (auto &iterator : skm->animationMap) {
+		const std::string name = iterator.first;
+		auto *blendAction = &iterator.second;
+
+		Com_DPrintf("    Animation(#%i, %s):\n", i, name.c_str() );
+		int32_t j = 0;
+		for (auto &blendAction : blendAction->blendActions) {
+			const uint16_t actionIndex = std::get<0>(blendAction);
+			const float fraction = std::get<1>(blendAction);
+
+			SkeletalAnimationAction *action = skm->actions[ actionIndex ];
+			if (j == 0) {
+				// Get the actual action belonging to this
+				Com_DPrintf("        blendAction(#%i, %s, %f, [Animation Dominator]):\n", j, action->name.c_str(), fraction );
+			} else {
+				// Get bone index.
+				const float boneIndex = std::get<2>(blendAction);
+
+				// Get bone name.
+				const std::string boneName = skm->jointArray[boneIndex].name;
+
+				Com_DPrintf("        blendAction(#%i, %s, %f, From Bone: %s):\n", j, action->name.c_str(), fraction, boneName.c_str() );
+
+			}
+			j++;
+		}
+		i++;
 	}
 	Com_DPrintf("------------------------------------------------------\n");
 	//////////////////

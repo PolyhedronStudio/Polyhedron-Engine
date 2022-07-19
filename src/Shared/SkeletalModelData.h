@@ -20,6 +20,7 @@
 /**
 *	@brief	Pre...
 **/
+//struct SkeletalAnimation;
 struct SkeletalAnimationAction;
 struct SkeletalAnimationBlendAction;
 
@@ -42,16 +43,20 @@ struct SkeletalModelData {
 	/**
 	*	Action and BlendAction Data.
 	**/
-	//! Animation map for named indexing.
+	//! Action map for named indexing.
 	std::map<std::string, SkeletalAnimationAction> actionMap;
-	//! Animation vector, for numeric indexing, pointing to our map.
+	//! Action vector, for numeric indexing, pointing to our map.
 	std::vector<SkeletalAnimationAction*> actions;
 
-	//! Animation map for named indexing.
-	std::map<std::string, SkeletalAnimationBlendAction> blendActionMap;
-	//! Animation vector, for numeric indexing, pointing to our map.
-	std::vector<SkeletalAnimationBlendAction*> blendActions;
+	//! Blend Action map for named indexing.
+	//std::map<std::string, SkeletalAnimationBlendAction> blendActionMap;
+	//! Blend Action vector, for numeric indexing, pointing to our map.
+	//std::vector<SkeletalAnimationBlendAction*> blendActions;
 
+	//! Animation map for named indexing.
+	std::map<std::string, SkeletalAnimationBlendAction> animationMap;
+	//! Animation vector, for numeric indexing, pointer to our map.
+	std::vector<SkeletalAnimationBlendAction*> animations;
 
 	/**
 	*	Bounding Box Data.
@@ -171,5 +176,5 @@ struct SkeletalAnimationAction {
 struct SkeletalAnimationBlendAction {
 	//! Stores the [indexes, fraction, bone index] of each blend action
 	//! in the same order as that they were placed in the configuration file.
-	std::vector< std::tuple< uint16_t, float, int32_t > > blendActions;
+	std::deque< std::tuple< uint16_t, float, int32_t > > blendActions;
 };
