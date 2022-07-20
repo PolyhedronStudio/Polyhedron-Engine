@@ -391,15 +391,15 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 *	@brief	Switches the animation by blending from the current animation into the next.
 *	@return	True if succesfull, false otherwise.
 **/
-bool CLGBasePacketEntity::SwitchAnimation(int32_t actionIndex, const GameTime &startTime = GameTime::zero()) {
+bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime &startTime = GameTime::zero()) {
 	//Com_DPrint("SwitchAnimation CALLED !! Index(#%i) startTime(#%i)\n", animationIndex, startTime.count());
 	if (!skm) {
-		Com_DPrint("SwitchAnimation: No SKM Data present.\n", actionIndex);
+		Com_DPrint("SwitchAnimation: No SKM Data present.\n", animationIndex);
 		return false;
 	}
 
-	if (actionIndex < 0 || actionIndex > skm->actions.size()) {
-		Com_DPrint("SwitchAnimation: Failed, invalid index\n", actionIndex);
+	if (animationIndex < 0 || animationIndex > skm->animations.size()) {
+		Com_DPrint("SwitchAnimation: Failed, invalid index\n", animationIndex);
 		return false;
 	}
 
@@ -409,9 +409,9 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t actionIndex, const GameTime &s
 		return false;
 	}
 
-	if (actionIndex > skm->actions.size()) {
+	if (animationIndex > skm->animations.size()) {
 		Com_DPrint("SwitchAnimation: animationIndex(%i) out of range for animations.size(%i)\n",
-			actionIndex,
+			animationIndex,
 			skm->actions.size()
 		);
 		return false;
@@ -437,91 +437,28 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t actionIndex, const GameTime &s
 	//	- animationIndex differs from our previous animation index.
 	//	AND
 	//	- the start time of the new animation to switch to differs from the current animation start time.
-	if ( actionIndex != previousAnimationIndex ) { //}&& startTime.count() != currentAnimationState->startTime) {
+	if ( animationIndex != previousAnimationIndex ) { //}&& startTime.count() != currentAnimationState->startTime) {
+		// First get the actual animation, from there, get the first blend action, and then get the actual action * wooh *
+		SkeletalAnimation *skmAnimation= skm->animations[ animationIndex ];
+
+		// Get action index.
+		const uint16_t actionIndex = skmAnimation->blendActions[0].actionIndex;
+
 		// Retreive animation data matching to animationIndex.
-		SkeletalAnimationAction *skmAnimation = skm->actions[actionIndex];
+		SkeletalAnimationAction *skmAction= skm->actions[actionIndex];
 
 		// Update our refresh animation to new values.
 		refreshAnimation.animationIndex	= actionIndex;
-		refreshAnimation.frame			= skmAnimation->startFrame;	// TODO: Should we?? // Set current frame to start frame.
-		refreshAnimation.startFrame		= skmAnimation->startFrame;
-		refreshAnimation.endFrame		= skmAnimation->endFrame;
+		refreshAnimation.frame			= skmAction->startFrame;	// TODO: Should we?? // Set current frame to start frame.
+		refreshAnimation.startFrame		= skmAction->startFrame;
+		refreshAnimation.endFrame		= skmAction->endFrame;
 		refreshAnimation.forceLoop		= true;	// TODO: Set to forceloop, but not for debugging atm. //currentAnimation->forceLoop;
-		refreshAnimation.frameTime		= skmAnimation->frametime;
+		refreshAnimation.frameTime		= skmAction->frametime;
 		refreshAnimation.startTime		= startTime.count();
 		refreshAnimation.loopCount		= 0;	// TODO: Set to loopcount, but not for debugging atm. //currentAnimation->loopCount;
 		
 		// Update animation states for this frame's current entity state.
 		*previousAnimationState = *currentAnimationState;
-
-		//
-		// TEMPORARY:	Sets the second additional timeline animation depending on animationIndex.
-		//
-		//				Eventually this goes elsewhere of course.
-		//
-		if (actionIndex == skm->actionMap["Idle"].index) {
-			// Retreive animation data.
-			SkeletalAnimationAction *skmAnimationB = &skm->actionMap["Reloading"];
-
-			// In this case, we already got acknowledgement animation A changed, and all B animations
-			// depend on A. So for now, this is redundant.
-			//
-			// However, when this code goes elsewhere, it is still important to check if the times
-			// matched, or not.
-			if ( refreshAnimationB.startTime != startTime.count() ) {
-				// Update our refresh animation to new values.
-				refreshAnimationB.animationIndex	= skmAnimationB->index;
-				refreshAnimationB.frame				= skmAnimationB->startFrame;
-				refreshAnimationB.startFrame		= skmAnimationB->startFrame;
-				refreshAnimationB.endFrame			= skmAnimationB->endFrame;
-				refreshAnimationB.forceLoop			= false;//currentAnimation->forceLoop;
-				refreshAnimationB.frameTime			= skmAnimationB->frametime;
-				refreshAnimationB.startTime			= startTime.count(); //cl->time;
-				refreshAnimationB.loopCount			= 1;//currentAnimation->loopCount;
-			}
-		// WalkForward plays a waving animation.
-		} else if (actionIndex == skm->actionMap["WalkForward"].index) {//} (animationIndex == skm->animationMap["WalkForward"].index) {
-			// Retreive animation data.
-			SkeletalAnimationAction *skmAnimationB = &skm->actionMap["Waving"];
-
-			// In this case, we already got acknowledgement animation A changed, and all B animations
-			// depend on A. So for now, this is redundant.
-			//
-			// However, when this code goes elsewhere, it is still important to check if the times
-			// matched, or not.
-			if ( refreshAnimationB.startTime != startTime.count() ) {
-				// Reinitialize our refresh entity.
-				refreshAnimationB.animationIndex	= skmAnimationB->index;
-				refreshAnimationB.frame				= skmAnimationB->startFrame;
-				refreshAnimationB.startFrame		= skmAnimationB->startFrame;
-				refreshAnimationB.endFrame			= skmAnimationB->endFrame;
-				refreshAnimationB.forceLoop			= true;//currentAnimation->forceLoop;
-				refreshAnimationB.frameTime			= skmAnimationB->frametime;
-				refreshAnimationB.startTime			= startTime.count(); //cl->time;
-				refreshAnimationB.loopCount			= 0;//currentAnimation->loopCount;
-			}
-		// All other animations play the rifle aim animation.
-		} else {
-		//	// Retreive animation data.
-			SkeletalAnimationAction *skmAnimationB = &skm->actionMap["RifleAim"];
-
-			// In this case, we already got acknowledgement animation A changed, and all B animations
-			// depend on A. So for now, this is redundant.
-			//
-			// However, when this code goes elsewhere, it is still important to check if the times
-			// matched, or not.
-			if ( refreshAnimationB.startTime != startTime.count() ) {
-				// Reinitialize our refresh entity.
-				refreshAnimationB.animationIndex	= skmAnimationB->index;
-				refreshAnimationB.frame				= skmAnimationB->startFrame;
-				refreshAnimationB.startFrame		= skmAnimationB->startFrame;
-				refreshAnimationB.endFrame			= skmAnimationB->endFrame;
-				refreshAnimationB.forceLoop			= true;//currentAnimation->forceLoop;
-				refreshAnimationB.frameTime			= skmAnimationB->frametime;
-				refreshAnimationB.startTime			= currentAnimationState->startTime; //cl->time;
-				refreshAnimationB.loopCount			= 0;//currentAnimation->loopCount;
-			}
-		}
 	}
 
 	return true;
@@ -742,6 +679,60 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
 *
 **/
 void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
+	//// Get state references.
+	//EntityState *currentState	= &podEntity->currentState;
+	//EntityState *previousState	= &podEntity->previousState;
+
+	//// Get Animation State references.
+	//EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
+	//EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
+
+	//// Setup the refresh entity frames regardless of animation time return scenario.
+	//refreshEntity.oldframe	= refreshAnimation.frame;
+	//refreshEntity.oldframeB	= refreshAnimationB.frame;
+
+	//if (time <= GameTime::zero()) {
+	//	return;
+	//}
+
+	//// Did any animation state data change?
+	//if (currentAnimation->startTime != previousAnimation->startTime) {
+	//	SwitchAnimation(currentAnimation->animationIndex, GameTime(currentAnimation->startTime));
+	//}
+
+	//// Process the animation, like we would do any time.
+	//refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
+	//	time,
+	//	GameTime(refreshAnimation.startTime),
+	//	refreshAnimation.frameTime,
+	//	refreshAnimation.startFrame,
+	//	refreshAnimation.endFrame,
+	//	refreshAnimation.loopCount,
+	//	refreshAnimation.forceLoop
+	//);
+
+	////
+	//// TEMPORARILY - For Blending Test.
+	//// 
+	//// Process the animation, like we would do any time.
+	//refreshAnimationB.backLerp = 1.0 - SG_FrameForTime(&refreshAnimationB.frame,
+	//	time,
+	//	GameTime(refreshAnimationB.startTime),
+	//	refreshAnimationB.frameTime,
+	//	refreshAnimationB.startFrame,
+	//	refreshAnimationB.endFrame,
+	//	refreshAnimationB.loopCount,
+	//	refreshAnimationB.forceLoop
+	//);
+
+	//// Main Channel Animation Frames.
+	//refreshEntity.frame		= refreshAnimation.frame;
+	//refreshEntity.backlerp	= refreshAnimation.backLerp;
+
+	//// Event Channel Animation Frames.
+	//refreshEntity.frameB	= refreshAnimationB.frame;
+	//refreshEntity.backlerpB	= refreshAnimationB.backLerp;
+
 	// Get state references.
 	EntityState *currentState	= &podEntity->currentState;
 	EntityState *previousState	= &podEntity->previousState;
@@ -750,10 +741,7 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 	EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
 	EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
 
-	// Setup the refresh entity frames regardless of animation time return scenario.
-	refreshEntity.oldframe	= refreshAnimation.frame;
-	refreshEntity.oldframeB	= refreshAnimationB.frame;
-
+	// Ensure that the animation is actually allowed to start.
 	if (time <= GameTime::zero()) {
 		return;
 	}
@@ -763,38 +751,137 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		SwitchAnimation(currentAnimation->animationIndex, GameTime(currentAnimation->startTime));
 	}
 
-	// Process the animation, like we would do any time.
-	refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
-		time,
-		GameTime(refreshAnimation.startTime),
-		refreshAnimation.frameTime,
-		refreshAnimation.startFrame,
-		refreshAnimation.endFrame,
-		refreshAnimation.loopCount,
-		refreshAnimation.forceLoop
-	);
+	// See if we got skeletal model data.
+	const model_t *esModel = entitySkeleton.modelPtr;
 
-	//
-	// TEMPORARILY - For Blending Test.
-	// 
-	// Process the animation, like we would do any time.
-	refreshAnimationB.backLerp = 1.0 - SG_FrameForTime(&refreshAnimationB.frame,
-		time,
-		GameTime(refreshAnimationB.startTime),
-		refreshAnimationB.frameTime,
-		refreshAnimationB.startFrame,
-		refreshAnimationB.endFrame,
-		refreshAnimationB.loopCount,
-		refreshAnimationB.forceLoop
-	);
+	// Without an initialized entity skeleton, we just process the refreshanimation as is, covering the entire model.
+	if ( !esModel || !esModel->skeletalModelData ) {
+		// Store old frame.
+		refreshEntity.oldframe	= refreshAnimation.frame;
 
-	// Main Channel Animation Frames.
-	refreshEntity.frame		= refreshAnimation.frame;
-	refreshEntity.backlerp	= refreshAnimation.backLerp;
+		// Process the animation, like we would do any time.
+		refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
+			time,
+			GameTime(refreshAnimation.startTime),
+			refreshAnimation.frameTime,
+			refreshAnimation.startFrame,
+			refreshAnimation.endFrame,
+			refreshAnimation.loopCount,
+			refreshAnimation.forceLoop
+		);
 
-	// Event Channel Animation Frames.
-	refreshEntity.frameB	= refreshAnimationB.frame;
-	refreshEntity.backlerpB	= refreshAnimationB.backLerp;
+		// Store 
+		refreshEntity.frame		= refreshAnimation.frame;
+		refreshEntity.backlerp	= refreshAnimation.backLerp;
+
+	// If we've got model data for our skeleton, we take the path of calculating 'frame for time' of 
+	// each blend action in our current animation.
+	} else {
+		// Validate animation, and action indices.
+		SkeletalModelData *skm = esModel->skeletalModelData;
+
+		// Validate animation's size, we require at least 1 blend action.
+		if ( skm->animations.size() < 1 ) {
+			// TODO: Debug warning here.
+			refreshEntity.currentBonePoses = nullptr;
+			return;
+		}
+
+		// Get pointer to animation.
+		SkeletalAnimation *animation = skm->animations[ currentAnimation->animationIndex ];
+
+		// Validate blend actions size, we require at least 1 blend action.
+		if ( animation->blendActions.size() < 1 ) {
+			// TODO: Debug warning here.
+			refreshEntity.currentBonePoses = nullptr;
+			return;
+		}
+
+		// Get pointer to dominating blend action.
+		SkeletalAnimationBlendAction *dominatingBlendAction = &animation->blendActions[0];
+		
+		// Now get its actual action pointer information we seek.
+		SkeletalAnimationAction *dominatingAction = skm->actions[ dominatingBlendAction->actionIndex ];
+
+		// Dominating blend action operates directly on our refresh animation.
+		refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
+			time,
+			GameTime(refreshAnimation.startTime),
+			dominatingAction->frametime,
+			dominatingAction->startFrame,
+			dominatingAction->endFrame,
+			dominatingAction->loopingFrames,
+			dominatingAction->forceLoop
+		);
+
+		// Store 
+		refreshEntity.frame		= refreshAnimation.frame;
+		refreshEntity.backlerp	= refreshAnimation.backLerp;
+
+		// Go over all other blend actions, and acquire their data also.
+		for ( int32_t blendActionIndex = 1; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
+			// Get pointer to the 'sub dominating' blend action.
+			SkeletalAnimationBlendAction *subdominatingBlendAction = &animation->blendActions[ blendActionIndex ];
+
+			// Only proceed if once again, the index is valid.
+			if ( subdominatingBlendAction->actionIndex < skm->actions.size() ) {
+				// Now get its actual action pointer information we seek.
+				SkeletalAnimationAction *subdominatingAction = skm->actions[ subdominatingBlendAction->actionIndex ];
+
+				// One final bounds test:
+				if ( ( currentAnimation->animationIndex < entitySkeleton.blendActionAnimationStates.size() 
+					&& blendActionIndex < entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ].size() ) ) {
+					// We've got the action data, time to process its frame for time and store it into
+					// our distinct entity skeleton.
+					EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
+
+					// Be sure to store its old frame.
+					baState->oldFrame = baState->currentFrame;
+
+					// Now process the actual frame for time of this blend action state.
+					baState->backLerp = 1.0 - SG_FrameForTime(&baState->currentFrame,
+						time,
+						GameTime(refreshAnimation.startTime),
+						subdominatingAction->frametime,
+						subdominatingAction->startFrame,
+						subdominatingAction->endFrame,
+						subdominatingAction->loopingFrames,
+						subdominatingAction->forceLoop
+					);
+				} else {
+					// TODO: Debug warning here.
+					refreshEntity.currentBonePoses = nullptr;
+					return;
+				}
+			} else {
+				// TODO: Debug warning here.
+				refreshEntity.currentBonePoses = nullptr;
+				return;
+			}
+		}
+	}
+
+	////
+	//// TEMPORARILY - For Blending Test.
+	//// 
+	//// Process the animation, like we would do any time.
+	//refreshAnimationB.backLerp = 1.0 - SG_FrameForTime(&refreshAnimationB.frame,
+	//	time,
+	//	GameTime(refreshAnimationB.startTime),
+	//	refreshAnimationB.frameTime,
+	//	refreshAnimationB.startFrame,
+	//	refreshAnimationB.endFrame,
+	//	refreshAnimationB.loopCount,
+	//	refreshAnimationB.forceLoop
+	//);
+
+	//// Main Channel Animation Frames.
+	//refreshEntity.frame		= refreshAnimation.frame;
+	//refreshEntity.backlerp	= refreshAnimation.backLerp;
+
+	//// Event Channel Animation Frames.
+	//refreshEntity.frameB	= refreshAnimationB.frame;
+	//refreshEntity.backlerpB	= refreshAnimationB.backLerp;
 }
 
 /**
@@ -808,93 +895,284 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 *	@param	
 **/
 void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses ) {
-	// We need a model pointer set, otherwise there is no model data to use for transforming.
-	if (entitySkeleton.modelPtr == nullptr ) {
-		// Be sure to ensure it is set to nullptr.
-		refreshEntity.currentBonePoses = nullptr;
-
-		// Print warning.
-		//Com_DPrint("CLGBasePacketEntity::ComputeEntitySkeletonTransforms: Entity(#%i) has no model pointer set in its entitySkeleton.\n", GetNumber());
-		return;
-	}
-
 	// Get pointer.
 	const model_t *model = entitySkeleton.modelPtr;
 
-	// Execute default behavior if it has a skeleton, but it isn't our test dummy.
-	// TODO: This is test code yes.
-	const int32_t n = GetNumber();
-	if ( !(n == 13 || n == 23) ) {
-		//// Acquire a pose cache memory block to work with for each animation we seek to blend..
-		//EntitySkeletonBonePose *tempMainChannelBonePoses = clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+	// Get skeletal model data pointer.
+	const SkeletalModelData *skm = model->skeletalModelData;
 
-		//// Ensure it is valid memory to use.
-		//if ( tempMainChannelBonePoses != nullptr ) {
-		//	// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
-		//	clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-		//							tempMainChannelBonePoses,
-		//							refreshEntity.frame, 
-		//							refreshEntity.oldframe, 
-		//							refreshEntity.backlerp, 
-		//							refreshEntity.rootBoneAxisFlags 							 
-		//	);
-		//	
-		//	// Last but not least...
-		//	refreshEntity.currentBonePoses = tempMainChannelBonePoses;
-		//} else {
-			// Ensure it is null.
-			refreshEntity.currentBonePoses = nullptr;
-//		}
-
-		// Escape.
+	// Ensure we got both:
+	if (!skm) {
 		return;
 	}
 
-	// Acquire a pose cache memory block to work with for each animation we seek to blend..
-	EntitySkeletonBonePose *tempMainChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
-	EntitySkeletonBonePose *tempEventChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+	// We got SKM, let's see what we are up against.
+	// Get state references.
+	EntityState *currentState	= &podEntity->currentState;
+	EntityState *previousState	= &podEntity->previousState;
 
-	// Ensure it is valid memory to use.
-	if ( tempMainChannelBonePoses != nullptr && tempEventChannelBonePoses != nullptr) {
-		// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
-		clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-								tempMainChannelBonePoses,
-								refreshEntity.frame, 
-								refreshEntity.oldframe, 
-								refreshEntity.backlerp, 
-								refreshEntity.rootBoneAxisFlags 							 
-		);
-		clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-								tempEventChannelBonePoses,
-								refreshEntity.frameB, 
-								refreshEntity.oldframeB, 
-								refreshEntity.backlerpB, 
-								refreshEntity.rootBoneAxisFlagsB
-		);
-			
+	// Get Animation State references.
+	EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
 
-		// Other option: Get the node from our linear bone access list.
-		//EntitySkeletonBoneNode hipNode = &entitySkeleton.bones[4];
+	if (!skm->animations.size()) {
+		refreshEntity.currentBonePoses = nullptr;
+		return;
+	}
 
-		// See if it contains the spine node, if it does, start blending the animation from there.
-		if ( entitySkeleton.boneMap.contains("mixamorig8:Spine1") ) {
-			auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
+	// Get our animation data.
+	auto *animation = skm->animations[currentAnimation->animationIndex];
+	
+	/**
+	*	Main Animation Channel.
+	**/ 
 
-			// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
-			clgi.ES_RecursiveBlendFromBone( tempEventChannelBonePoses, 
-											tempMainChannelBonePoses, 
-											hipNode, 
-											refreshEntity.backlerpB, 
-											0.5f
-			);
+
+	// See if we got skeletal model data.
+	const model_t *esModel = entitySkeleton.modelPtr;
+
+	// Without an initialized entity skeleton, we just process the refreshanimation as is, covering the entire model.
+	if ( !esModel || !esModel->skeletalModelData ) {
+		//// Allocate our main bone pose channel.
+		//EntitySkeletonBonePose *tempMainChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+
+		//// Lerp the blend action skeleton pose.
+		//clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
+		//						tempMainChannelBonePoses,
+		//						refreshEntity.frame, 
+		//						refreshEntity.oldframe, 
+		//						refreshEntity.backlerp, 
+		//						refreshEntity.rootBoneAxisFlags 							 
+		//);
+		refreshEntity.currentBonePoses = nullptr;
+	} else {
+		// Validate animation, and action indices.
+		SkeletalModelData *skm = esModel->skeletalModelData;
+
+		// Get pointer to animation.
+		SkeletalAnimation *animation = skm->animations[ currentAnimation->animationIndex ];
+
+		// Validate blend actions size, we require at least 1 blend action.
+		if ( animation->blendActions.size() < 1 ) {
+			// TODO: Debug warning here.
+			refreshEntity.currentBonePoses = nullptr;
+			return;
 		}
 
-		// Last but not least...
-		refreshEntity.currentBonePoses = tempMainChannelBonePoses;
-	} else {
-		// Set to nullptr.
-		refreshEntity.currentBonePoses = nullptr;
+		// Get pointer to dominating blend action.
+		SkeletalAnimationBlendAction *dominatingBlendAction = &animation->blendActions[0];
+
+		// Ensure that it is in bounds. (Should be.)
+		if (!(entitySkeleton.blendActionAnimationStates.size() >= 1) || !(entitySkeleton.blendActionAnimationStates[0].size() >= 1)) {
+			refreshEntity.currentBonePoses = nullptr;
+			return;
+		}
+
+		// Allocate a cached memory block for the dominating blend action. (Our main action timeline.)
+		EntitySkeletonBonePose *dominatingBlendPose = clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+		
+		// Get the dominating blend action state.
+		EntitySkeletonBlendActionState *dominatingBlendActionState = &entitySkeleton.blendActionAnimationStates[0][0];
+
+		// Lerp the blend action skeleton pose.
+		clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
+									dominatingBlendPose,
+									refreshEntity.frame, 
+									refreshEntity.oldframe, 
+									refreshEntity.backlerp, 
+									refreshEntity.rootBoneAxisFlags
+		);
+
+		// Assign our currentbonePose pointer. It gets unset in case of any issues. (Better not render than glitch render.)
+		refreshEntity.currentBonePoses = dominatingBlendPose;
+
+		// Go over all other blend actions, and acquire their data also.
+		for ( int32_t blendActionIndex = 1; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
+			// Get pointer to the 'sub dominating' blend action.
+			SkeletalAnimationBlendAction *subdominatingBlendAction = &animation->blendActions[ blendActionIndex ];
+
+			// Only proceed if once again, the index is valid.
+			if ( subdominatingBlendAction->actionIndex < skm->actions.size() ) {
+				// Now get its actual action pointer information we seek.
+				SkeletalAnimationAction *subdominatingAction = skm->actions[ subdominatingBlendAction->actionIndex ];
+
+				// One final bounds test:
+				if ( currentAnimation->animationIndex < entitySkeleton.blendActionAnimationStates.size() 
+					&& blendActionIndex < entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ].size() ) {
+					// We've got the action data, time to process its frame for time and store it into
+					// our distinct entity skeleton.
+					EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
+
+					// Allocate our blend action bone pose channel.
+					EntitySkeletonBonePose *blendActionBonePose	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+					
+					// Lerp the blend action skeleton pose.
+					clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
+												blendActionBonePose,
+												baState->currentFrame, 
+												baState->oldFrame, 
+												baState->backLerp, 
+												refreshEntity.rootBoneAxisFlags
+					);
+
+					// Now, see if the node exists and blend right on top of it.
+					const int32_t boneNumber = subdominatingBlendAction->boneNumber;
+					const float fraction = subdominatingBlendAction->fraction;
+
+					// Bone exists.
+					if ( boneNumber < entitySkeleton.bones.size() ) {
+						auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
+						//auto boneNode = entitySkeleton.bones[boneNumber].boneTreeNode;
+
+						// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+						clgi.ES_RecursiveBlendFromBone( blendActionBonePose, 
+														dominatingBlendPose, 
+														hipNode, 
+														baState->backLerp, 
+														fraction
+						);
+
+						// Assign our currentbonePose pointer. It gets unset in case of any issues. (Better not render than glitch render.)
+						refreshEntity.currentBonePoses = dominatingBlendPose;
+					}
+				} else {
+					// TODO: Debug warning here.
+					refreshEntity.currentBonePoses = nullptr;
+					return;
+				}
+			} else {
+				// TODO: Debug warning here.
+				refreshEntity.currentBonePoses = nullptr;
+				return;
+			}
+		}
 	}
+	///**
+	//*	Finish the rest of the blend actions.
+	//**/
+	//if ( animation->blendActions.size() > 1 ) {
+	//	// Allocate our blend action bone pose channel.
+	//	EntitySkeletonBonePose *blendActionBonePose	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+
+	//	// Iterate over the blend actions.
+	//	for (int32_t i = 1; i < animation->blendActions.size(); i++) {
+	//		auto &blendAction = animation->blendActions[i];
+
+	//		const int32_t actionIndex = std::get<0>(blendAction);
+
+	//		// Get action data.
+	//		// TODO: Display warning or error out etc.
+	//		if (skm->actions.size() < actionIndex) {
+	//			continue;
+	//		}
+
+	//		// Get action.
+	//		SkeletalAnimationAction *action = skm->actions[actionIndex];
+
+	//		// Blend action refresh animation.
+	//		EntityAnimationState blendAnimation = {
+	//			.animationIndex = action->index,
+	//			.startTime = refreshAnimation.startTime,
+	//			.frame = 0,
+	//			.frameTime = (float)action->frametime,
+	//			.backLerp = 0,
+	//			.startFrame = action->startFrame,
+	//			.endFrame = action->endFrame - action->startFrame,
+	//			.loopCount = action->loopingFrames,
+	//			.forceLoop = action->forceLoop,
+	//		};
+
+	//		blendAnimation.backLerp = 1.0 - SG_FrameForTime(&blendAnimation.frame,
+	//			GameTime(cl->time),
+	//			GameTime(refreshAnimation.startTime),
+	//			blendAnimation.frameTime,
+	//			blendAnimation.startFrame,
+	//			blendAnimation.endFrame,
+	//			blendAnimation.loopCount,
+	//			blendAnimation.forceLoop
+	//		);
+
+	//		// Lerp the blend action skeleton pose.
+	//		clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
+	//								blendActionBonePose,
+	//								blendAnimation.frame, 
+	//								refreshEntity.oldframe, 
+	//								refreshEntity.backlerp, 
+	//								refreshEntity.rootBoneAxisFlags 							 
+	//		);
+
+	//		// Now, see if the node exists and blend right on top of it.
+	//		const int32_t boneNumber = std::get<2>( blendAction );;
+	//		const float fraction = std::get<1>( blendAction );
+
+	//		// Bone exists.
+	//		if ( boneNumber < entitySkeleton.bones.size() ) {
+	//			//auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
+	//			auto boneNode = entitySkeleton.bones[boneNumber].boneTreeNode;
+
+	//			// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+	//			clgi.ES_RecursiveBlendFromBone( blendActionBonePose	, 
+	//											tempMainChannelBonePoses, 
+	//											boneNode, 
+	//											refreshEntity.backlerp, 
+	//											fraction
+	//			);
+	//		}
+	//	}
+		//refreshEntity.currentBonePoses = tempMainChannelBonePoses;
+	//} else {
+		// Set to nullptr.
+	//	refreshEntity.currentBonePoses = nullptr;
+	//}
+
+
+	//// Get pointer.
+	//const model_t *model = entitySkeleton.modelPtr;
+
+	//// Acquire a pose cache memory block to work with for each animation we seek to blend..
+	//EntitySkeletonBonePose *tempMainChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+	//EntitySkeletonBonePose *tempEventChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
+
+	//// Ensure it is valid memory to use.
+	//if ( tempMainChannelBonePoses != nullptr && tempEventChannelBonePoses != nullptr) {
+	//	// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
+	//	clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
+	//							tempMainChannelBonePoses,
+	//							refreshEntity.frame, 
+	//							refreshEntity.oldframe, 
+	//							refreshEntity.backlerp, 
+	//							refreshEntity.rootBoneAxisFlags 							 
+	//	);
+	//	clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
+	//							tempEventChannelBonePoses,
+	//							refreshEntity.frameB, 
+	//							refreshEntity.oldframeB, 
+	//							refreshEntity.backlerpB, 
+	//							refreshEntity.rootBoneAxisFlagsB
+	//	);
+	//		
+
+	//	// Other option: Get the node from our linear bone access list.
+	//	//EntitySkeletonBoneNode hipNode = &entitySkeleton.bones[4];
+
+	//	// See if it contains the spine node, if it does, start blending the animation from there.
+	//	if ( entitySkeleton.boneMap.contains("mixamorig8:Spine1") ) {
+	//		auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
+
+	//		// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+	//		clgi.ES_RecursiveBlendFromBone( tempEventChannelBonePoses, 
+	//										tempMainChannelBonePoses, 
+	//										hipNode, 
+	//										refreshEntity.backlerpB, 
+	//										0.5f
+	//		);
+	//	}
+
+	//	// Last but not least...
+	//	refreshEntity.currentBonePoses = tempMainChannelBonePoses;
+	//} else {
+	//	// Set to nullptr.
+	//	refreshEntity.currentBonePoses = nullptr;
+	//}
 }
 
 
@@ -968,30 +1246,46 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
             refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
 		} else {
-			// TODO: This needs tidying, this whole function obviously still does lol.
-			// If we got skeletal model data..
+			// If we got Skeletal Model Data, take a special path for processing its animation states
+			// and computing the appropriate poses for it.
 			if ( skm ) {
 				// See which animation we are at:
 				const int32_t animationIndex = currentState->currentAnimation.animationIndex;
 
+				// Set the appropriate root bone axis flags that belong to our current animation.
+				// TODO: Move elsewhere.
 				if ( animationIndex >= 0 && animationIndex < skm->actions.size() ) { 
-					auto *animationData = skm->actions[animationIndex];
+					// TODO: This is incorrect, and needs fixing: Get the dominant blend action data 
+					// and use that action's rootbone flags.
+					//
+					// Ultimately however, we want to instead, have each animation assign its root bone (optional),
+					// and root bone axis flags.
+					auto *actionData = skm->actions[animationIndex];
 
-					refreshEntity.rootBoneAxisFlags = animationData->rootBoneAxisFlags;
+					refreshEntity.rootBoneAxisFlags = actionData->rootBoneAxisFlags;
 				} else {
 					refreshEntity.rootBoneAxisFlags = 0;
 				}
+
+				/**
+				*	Skeletal Animation Processing.
+				**/
+
+				// Make sure we got model data to work our transformations on.
+				if (entitySkeleton.modelPtr != nullptr ) {
+					// Process the skeletal animation blend action frames for the current client time. (Based on animation start time.)
+					ProcessSkeletalAnimationForTime(GameTime(cl->time));
+					// Compute the Entity Skeleton Trasforms for Refresh Frame.
+					ComputeEntitySkeletonTransforms( nullptr );
+				} else {
+					// Otherwise, unset the bone pose pointer and let the refresh module take its own course.
+					refreshEntity.currentBonePoses = nullptr;
+				}
+			// Otherwise, unset the bone pose pointer and let the refresh module take its own course.
+			} else {
+				// Unset boneposes pointer.
+				refreshEntity.currentBonePoses = nullptr;
 			}
-
-			/**
-			*	Skeletal Animation Processing. - The RefreshAnimationB stuff is TEMPORARILY for Blend testing.
-			**/
-			// Process the Skeletal Animation Frames for the current client time. 
-			// (Based on animation start time.)
-			ProcessSkeletalAnimationForTime(GameTime(cl->time));
-
-			// Compute the Entity Skeleton Trasforms for Refresh Frame.
-			ComputeEntitySkeletonTransforms( nullptr );
         }
         
 

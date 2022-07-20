@@ -243,6 +243,19 @@ private:
 *
 *			
 **/
+
+/**
+*	@brief	Maintains state of each blend action's animation process.
+**/
+struct EntitySkeletonBlendActionState {
+	//! Current frame.
+	int32_t currentFrame = 0;
+	//! 'Old' frame.
+	int32_t oldFrame = 0;
+	//! BackLerp.
+	float backLerp = 0.f;
+};
+
 struct EntitySkeleton {
 	//! Pointer to the internal model data. When not set, the skeleton is unusable.
 	model_t *modelPtr = nullptr;
@@ -253,6 +266,9 @@ struct EntitySkeleton {
 	std::map<std::string, EntitySkeletonBoneNode*> boneMap;
 	//! The actual skeleton bone data, stored linearly for fast access.
 	std::vector<EntitySkeletonBone> bones;
+
+	//! Stores EntityAnimationState data for all blend actions per animation.
+	std::vector<std::vector< EntitySkeletonBlendActionState > > blendActionAnimationStates;
 };
 
 /**

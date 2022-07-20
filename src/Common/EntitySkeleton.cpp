@@ -284,6 +284,27 @@ const bool ES_CreateFromModel( model_t *model, EntitySkeleton* es ) {
 	**/
 	ES_GenerateBoneTreeHierachy( skm, es, es->boneTree );
 
+	/**
+	*	#3: Prepare memory for all skeletal animation blend action states.
+	**/
+	// Resize the animation states vector.
+	es->blendActionAnimationStates.resize( skm->animations.size() );
+
+	// Go over each animation.
+	for ( int32_t animationIndex = 0; animationIndex < skm->animations.size(); animationIndex++ ) {
+		// Get animation pointer.
+		SkeletalAnimation *animation = skm->animations[animationIndex];
+
+		es->blendActionAnimationStates[animationIndex].resize( animation->blendActions.size() );
+
+		//// Go over each animation's blend actions.
+		//for ( int32_t blendActionIndex = 0; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
+		//	// 
+		//	for ( int32_t j = 0; j < skm->actions.size(); i++ ) {
+
+		//	}
+		//}
+	}
 	// Done.
 	return true;
 }

@@ -21,8 +21,9 @@
 *	@brief	Pre...
 **/
 //struct SkeletalAnimation;
-struct SkeletalAnimationAction;
 struct SkeletalAnimationBlendAction;
+struct SkeletalAnimationAction;
+struct SkeletalAnimation;
 
 //! MS Frametime for animations.
 //static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
@@ -54,9 +55,9 @@ struct SkeletalModelData {
 	//std::vector<SkeletalAnimationBlendAction*> blendActions;
 
 	//! Animation map for named indexing.
-	std::map<std::string, SkeletalAnimationBlendAction> animationMap;
+	std::map<std::string, SkeletalAnimation> animationMap;
 	//! Animation vector, for numeric indexing, pointer to our map.
-	std::vector<SkeletalAnimationBlendAction*> animations;
+	std::vector<SkeletalAnimation*> animations;
 
 	/**
 	*	Bounding Box Data.
@@ -171,10 +172,33 @@ struct SkeletalAnimationAction {
 };
 
 /**
-*	@brief	Parsed from modelname.sck, contains the animation blend action data structure.
+*	@brief	Stores the parsed data of each blend action.
 **/
 struct SkeletalAnimationBlendAction {
+	//! Index into our model's actions.
+	uint16_t actionIndex = 0;
+
+	//! The fraction of which to blend at.
+	float fraction = 0;
+
+	//! The bone index number.
+	int32_t boneNumber = 0;
+};
+
+/**
+*	@brief	Parsed from modelname.sck, contains the animation blend action data structure.
+**/
+struct SkeletalAnimation {
+	//! Stores the actual index.
+	int32_t index = 0;
+	//! Stores the root bone axis flags for this animation.
+	// TODO: Implement.
+	//int32_t rootBoneAxisFlags = 0;
+	//! Stores the root bone number for this animation.
+	// TODO: Let each animation assign their own root bone instead of to the ES itself.
+	//int32_t rootBoneNumber = 0;
+
 	//! Stores the [indexes, fraction, bone index] of each blend action
 	//! in the same order as that they were placed in the configuration file.
-	std::deque< std::tuple< uint16_t, float, int32_t > > blendActions;
+	std::deque< SkeletalAnimationBlendAction > blendActions;
 };

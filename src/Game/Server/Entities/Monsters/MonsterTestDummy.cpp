@@ -309,20 +309,18 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 
 	const int32_t animationIndex = podEntity->currentState.currentAnimation.animationIndex;
 
-	if (animationIndex == skm->actionMap["WalkForward"].index) {
-		SwitchAnimation("RunForward");
-	} else 	if (animationIndex == skm->actionMap["RunForward"].index) {
-		SwitchAnimation("Idle");
-	} else 	if (animationIndex == skm->actionMap["Idle"].index) {
-		SwitchAnimation("WalkForwardLeft");
-	} else 	if (animationIndex == skm->actionMap["WalkForwardLeft"].index) {
-		SwitchAnimation("WalkForwardRight");
-	} else 	if (animationIndex == skm->actionMap["WalkForwardRight"].index) {
-		SwitchAnimation("WalkRight");
-	} else 	if (animationIndex == skm->actionMap["WalkRight"].index) {
-		SwitchAnimation("WalkLeft");
-	} else 	{ //if (animationIndex == skm->animationMap["WalkForward"].index) {
+	if (animationIndex == skm->animationMap["Idle"].index) {
+		SwitchAnimation("IdleReload");
+	} else 	if (animationIndex == skm->animationMap["IdleReload"].index) {
+		SwitchAnimation("IdleWaving");
+	} else 	if (animationIndex == skm->animationMap["IdleWaving"].index) {
 		SwitchAnimation("WalkForward");
+	} else 	if (animationIndex == skm->animationMap["WalkForward"].index) {
+		SwitchAnimation("WalkForwardReload");
+	} else 	if (animationIndex == skm->animationMap["WalkForwardReload"].index) {
+		SwitchAnimation("WalkForwardWaving");
+	} else { //if (animationIndex == skm->animationMap["WalkForward"].index) {
+		SwitchAnimation("Idle");
 	}
 
 //	// Get ent numbers for easy comparison.

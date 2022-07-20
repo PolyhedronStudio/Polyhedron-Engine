@@ -776,7 +776,7 @@ static bool SKM_ProcessAnimationCommand( model_t *model, SKMParseState &parseSta
 	SKM_SanitizeQuotedString( parseState.animationName );
 
 	// Actually emplace the animation if nonexistent.
-	skm->animationMap[parseState.animationName] = {};
+	skm->animationMap[parseState.animationName] = { .index = parseState.animationCount };
 	skm->animations.push_back(&skm->animationMap[parseState.animationName]);
 
 	return true;
@@ -811,27 +811,27 @@ static bool SKM_ProcessBlendActionCommand( model_t *model, SKMParseState &parseS
 	// Animation is existent, now find the action.
 	if ( skm->actionMap.contains(sanitizedActionname) ) {
 		// Get action index.
-		const int32_t actionIndex = skm->actionMap[sanitizedActionname].index;
+		const uint16_t actionIndex = skm->actionMap[sanitizedActionname].index;
 		
 		// If the bone name is empty, we assume it is a dominating animator.
 		if ( boneName.empty() ) { 
 				// We're ready, time to push back our blend action.
 				skm->animationMap[parseState.animationName].blendActions.push_front({
-					actionIndex,
-					fraction,
-					0
+					.actionIndex = actionIndex,
+					.fraction = fraction,
+					.boneNumber = 0
 				});
 		} else {
 			// Ensure the bone is existent.
 			if ( skm->jointMap.contains( sanitizedBoneName ) ) {
 				// Bone index.
-				const int32_t boneIndex = skm->jointMap[ sanitizedBoneName ].index;
+				const uint16_t boneIndex = skm->jointMap[ sanitizedBoneName ].index;
 
 				// We're ready, time to push back our blend action.
 				skm->animationMap[parseState.animationName].blendActions.push_back({
-					actionIndex,
-					fraction,
-					boneIndex
+					.actionIndex = actionIndex,
+					.fraction = fraction,
+					.boneNumber = boneIndex
 				});
 			} else {
 				errorString = "Couldn't find bone: '" + sanitizedBoneName + "'";
@@ -1108,8 +1108,8 @@ bool SKM_LoadAndParseConfiguration(model_t *model, const std::string &filePath) 
 		Com_DPrintf("    Animation(#%i, %s):\n", i, name.c_str() );
 		int32_t j = 0;
 		for (auto &blendAction : blendAction->blendActions) {
-			const uint16_t actionIndex = std::get<0>(blendAction);
-			const float fraction = std::get<1>(blendAction);
+			const uint16_t actionIndex = blendAction.actionIndex;
+			const float fraction = blendAction.fraction;
 
 			SkeletalAnimationAction *action = skm->actions[ actionIndex ];
 			if (j == 0) {
@@ -1117,7 +1117,7 @@ bool SKM_LoadAndParseConfiguration(model_t *model, const std::string &filePath) 
 				Com_DPrintf("        blendAction(#%i, %s, %f, [Animation Dominator]):\n", j, action->name.c_str(), fraction );
 			} else {
 				// Get bone index.
-				const float boneIndex = std::get<2>(blendAction);
+				const int32_t boneIndex = blendAction.boneNumber;
 
 				// Get bone name.
 				const std::string boneName = skm->jointArray[boneIndex].name;
