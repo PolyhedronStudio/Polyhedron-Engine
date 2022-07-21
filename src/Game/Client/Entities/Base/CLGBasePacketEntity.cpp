@@ -281,44 +281,24 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 		anim.second.rootBoneAxisFlags = 0;//SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation; //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;  //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation | SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 	}
 
-	if ( state.number == 13 || state.number == 23 ) {
+	//if ( state.number == 13 || state.number == 23 ) {
 		const int32_t ZeroAllAxis = ( SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation );
-
-		skm->actionMap["TPose"].rootBoneAxisFlags =
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
 
 		skm->actionMap["Idle"].rootBoneAxisFlags	=
 			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
 			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["IdleAiming"].rootBoneAxisFlags =
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["RifleAim"].rootBoneAxisFlags	=
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["Waving"].rootBoneAxisFlags =
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["Reloading"].rootBoneAxisFlags =
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-
 		skm->actionMap["WalkForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-		skm->actionMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-
-		skm->actionMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-
-		skm->actionMap["WalkLeft"].rootBoneAxisFlags			= SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
 		skm->actionMap["WalkForwardLeft"].rootBoneAxisFlags	= 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-
-		skm->actionMap["WalkRight"].rootBoneAxisFlags		= SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["WalkForwardRight"].rootBoneAxisFlags = 
+		skm->actionMap["WalkForwardRight"].rootBoneAxisFlags =
 			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation |
 			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	}
+		skm->actionMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
+			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		skm->actionMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+	//}
 
 	 return skm;
 }
@@ -803,8 +783,21 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		// Now get its actual action pointer information we seek.
 		SkeletalAnimationAction *dominatingAction = skm->actions[ dominatingBlendAction->actionIndex ];
 
+		// Ensure that it is in bounds. (Should be.)
+		if ( !( entitySkeleton.blendActionAnimationStates.size() >= 1 ) || !( entitySkeleton.blendActionAnimationStates[0].size() >= 1) ) {
+			refreshEntity.currentBonePoses = nullptr;
+			return;
+		}
+
+		// We've got the action data, time to process its frame for time and store it into
+		// our distinct entity skeleton.
+		EntitySkeletonBlendActionState *dominatingBlendActionState = &entitySkeleton.blendActionAnimationStates[ 0 ][ 0 ];
+
+		// Store old frame.
+		dominatingBlendActionState->oldFrame = dominatingBlendActionState->currentFrame;
+
 		// Dominating blend action operates directly on our refresh animation.
-		refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
+		dominatingBlendActionState->backLerp = 1.0 - SG_FrameForTime(&dominatingBlendActionState->currentFrame,
 			time,
 			GameTime(refreshAnimation.startTime),
 			dominatingAction->frametime,
@@ -814,9 +807,12 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 			dominatingAction->forceLoop
 		);
 
-		// Store 
-		refreshEntity.frame		= refreshAnimation.frame;
-		refreshEntity.backlerp	= refreshAnimation.backLerp;
+		// While at it, make sure to apply the root bone axis flags as well.
+		refreshEntity.rootBoneAxisFlags = dominatingAction->rootBoneAxisFlags;
+
+		// Store animation data.
+		refreshEntity.frame		= dominatingBlendActionState->currentFrame;
+		refreshEntity.backlerp	= dominatingBlendActionState->backLerp;
 
 		// Go over all other blend actions, and acquire their data also.
 		for ( int32_t blendActionIndex = 1; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
@@ -976,9 +972,9 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 		// Lerp the blend action skeleton pose.
 		clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
 									dominatingBlendPose,
-									refreshEntity.frame, 
-									refreshEntity.oldframe, 
-									refreshEntity.backlerp, 
+									dominatingBlendActionState->currentFrame, 
+									dominatingBlendActionState->oldFrame, 
+									dominatingBlendActionState->backLerp, 
 									refreshEntity.rootBoneAxisFlags
 		);
 
@@ -1249,23 +1245,23 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			// If we got Skeletal Model Data, take a special path for processing its animation states
 			// and computing the appropriate poses for it.
 			if ( skm ) {
-				// See which animation we are at:
-				const int32_t animationIndex = currentState->currentAnimation.animationIndex;
+				//// See which animation we are at:
+				//const int32_t animationIndex = currentState->currentAnimation.animationIndex;
 
-				// Set the appropriate root bone axis flags that belong to our current animation.
-				// TODO: Move elsewhere.
-				if ( animationIndex >= 0 && animationIndex < skm->actions.size() ) { 
-					// TODO: This is incorrect, and needs fixing: Get the dominant blend action data 
-					// and use that action's rootbone flags.
-					//
-					// Ultimately however, we want to instead, have each animation assign its root bone (optional),
-					// and root bone axis flags.
-					auto *actionData = skm->actions[animationIndex];
+				//// Set the appropriate root bone axis flags that belong to our current animation.
+				//// TODO: Move elsewhere.
+				//if ( animationIndex >= 0 && animationIndex < skm->actions.size() ) { 
+				//	// TODO: This is incorrect, and needs fixing: Get the dominant blend action data 
+				//	// and use that action's rootbone flags.
+				//	//
+				//	// Ultimately however, we want to instead, have each animation assign its root bone (optional),
+				//	// and root bone axis flags.
+				//	auto *actionData = skm->actions[animationIndex];
 
-					refreshEntity.rootBoneAxisFlags = actionData->rootBoneAxisFlags;
-				} else {
-					refreshEntity.rootBoneAxisFlags = 0;
-				}
+				//	refreshEntity.rootBoneAxisFlags = actionData->rootBoneAxisFlags;
+				//} else {
+				//	refreshEntity.rootBoneAxisFlags = 0;
+				//}
 
 				/**
 				*	Skeletal Animation Processing.

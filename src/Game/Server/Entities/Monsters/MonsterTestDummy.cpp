@@ -312,13 +312,23 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 	if (animationIndex == skm->animationMap["Idle"].index) {
 		SwitchAnimation("IdleReload");
 	} else 	if (animationIndex == skm->animationMap["IdleReload"].index) {
-		SwitchAnimation("IdleWaving");
-	} else 	if (animationIndex == skm->animationMap["IdleWaving"].index) {
-		SwitchAnimation("WalkForward");
-	} else 	if (animationIndex == skm->animationMap["WalkForward"].index) {
-		SwitchAnimation("WalkForwardReload");
-	} else 	if (animationIndex == skm->animationMap["WalkForwardReload"].index) {
-		SwitchAnimation("WalkForwardWaving");
+		SwitchAnimation("IdleRifleAim");
+	} else 	if (animationIndex == skm->animationMap["IdleRifleAim"].index) {
+		SwitchAnimation("IdleRifleFire");
+	} else 	if (animationIndex == skm->animationMap["IdleRifleFire"].index) {
+		SwitchAnimation("Walk");
+	} else 	if (animationIndex == skm->animationMap["Walk"].index) {
+		SwitchAnimation("WalkReload");
+	} else 	if (animationIndex == skm->animationMap["WalkReload"].index) {
+		SwitchAnimation("WalkWaving");
+	} else 	if (animationIndex == skm->animationMap["WalkWaving"].index) {
+		SwitchAnimation("WalkRifleAim");
+	} else 	if (animationIndex == skm->animationMap["WalkRifleAim"].index) {
+		SwitchAnimation("WalkRifleFire");
+	} else 	if (animationIndex == skm->animationMap["WalkRifleFire"].index) {
+		SwitchAnimation("WalkingToDying");
+	} else 	if (animationIndex == skm->animationMap["WalkingToDying"].index) {
+		SwitchAnimation("RunForward");
 	} else { //if (animationIndex == skm->animationMap["WalkForward"].index) {
 		SwitchAnimation("Idle");
 	}
@@ -350,7 +360,7 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 //		//	|| nextAnimationIndex == skm->animationMap["WalkRight"].index) ) {
 //
 			SetGoalEntity(activator);
-			SetEnemy(activator);
+			//SetEnemy(activator);
 ////		}
 //	//	else {
 //		//	SetGoalEntity( nullptr );
@@ -364,7 +374,7 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 			| cef::HasServerEntity
 			| cef::HasKeyValue("targetname", strMonsterGoalTarget)) {
 				SetGoalEntity(geGoal);
-				SetEnemy(geGoal);
+				//SetEnemy(geGoal);
 
 			//gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoal->GetTargetName().c_str());
 		}
@@ -384,7 +394,7 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
 		SwitchAnimation( "Idle" );
 	// We did find it, so switch to walkforward.
 	} else {
-		SwitchAnimation( "WalkForward" );
+		SwitchAnimation( "Walk" );
 	}
 
 	//SwitchAnimation("WalkForward");
@@ -421,7 +431,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// If we got a new animation to switch to, ensure we are allowed to switch before doing so.
 		if (CanSwitchAnimation(animationState, animationToSwitchTo)) {
-			const std::string animName = skm->actions[animationToSwitchTo]->name;
+			const std::string animName = skm->animations[animationToSwitchTo]->name;
 			SwitchAnimation(animName);
 		//.Otherwise keep processing the current animation frame for time.
 		} else {

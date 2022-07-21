@@ -191,6 +191,8 @@ struct SkeletalAnimationBlendAction {
 struct SkeletalAnimation {
 	//! Stores the actual index.
 	int32_t index = 0;
+	//! Stores the name.
+	std::string name = "";
 	//! Stores the root bone axis flags for this animation.
 	// TODO: Implement.
 	//int32_t rootBoneAxisFlags = 0;

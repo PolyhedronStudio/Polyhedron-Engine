@@ -276,7 +276,7 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const std::strin
 **/
 const double SVGBaseRootMotionMonster::GetMoveSpeedForTraversedFrameDistance(const double &totalMoveDistance, const float &frameMoveDistance, const double &unitScale) {
 	// Calculate move distance scaled to Quake units.
-	const double scaledMoveDistance = totalMoveDistance / unitScale; //moveDistance * unitScale;
+	const double scaledMoveDistance = unitScale * frameMoveDistance; //moveDistance * unitScale;
 
 	// Length of move translate.
 	const double moveFrameMoveDistance = frameMoveDistance; //vec3_dlength(moveTranslate);
@@ -1068,14 +1068,10 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Calculate the actual move speed based for the current animation frame.
 	const double totalTraversedDistance = skm->actions[animationIndex]->animationDistance;
 
-	// TODO: Calcualte unit scale properly I guess.
-	double frameTimeThing = BASE_FRAMETIME;
-	if (animationIndex == skm->actionMap["RunForward"].index) {
-		//frameTimeThing = ANIMATION_FRAMETIME / 4;
-	}
-
+	// Calculate the Unit Scale based on FRAMETIME * 8 units = 1 pixel.
+	static constexpr double unitScale = BASE_FRAMETIME * 8.;
 	// Calculate frame move speed.
-	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( totalTraversedDistance, frameDistance, frameTimeThing );
+	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( totalTraversedDistance, frameDistance, unitScale );
 
 
 	/**
@@ -1117,12 +1113,12 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	//	moveVelocity = (vTranslate + vDistance ) * vDirectionNormal;
 	//}
 
-	if (animationIndex == skm->actionMap["TPose"].index
-		|| animationIndex == skm->actionMap["Idle"].index 
-		|| animationIndex == skm->actionMap["IdleAiming"].index
-		|| animationIndex == skm->actionMap["RifleAim"].index 
-		|| animationIndex == skm->actionMap["RifleFire"].index 
-		|| animationIndex == skm->actionMap["WalkingToDying"].index 
+	if (animationIndex == skm->animationMap["TPose"].index
+		|| animationIndex == skm->animationMap["Idle"].index 
+		|| animationIndex == skm->animationMap["IdleReload"].index
+		|| animationIndex == skm->animationMap["IdleRifleAim"].index 
+		|| animationIndex == skm->animationMap["IdleRifleFire"].index 
+		|| animationIndex == skm->animationMap["WalkingToDying"].index 
 		
 	) {
 		moveVelocity = vec3_zero();

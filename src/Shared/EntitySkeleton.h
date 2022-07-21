@@ -253,7 +253,7 @@ struct EntitySkeletonBlendActionState {
 	//! 'Old' frame.
 	int32_t oldFrame = 0;
 	//! BackLerp.
-	float backLerp = 0.f;
+	double backLerp = 0.f;
 };
 
 struct EntitySkeleton {

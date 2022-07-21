@@ -737,11 +737,11 @@ static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionN
 
 		// Sum up all frame distances into one single value.
 		//vec3_dlength(totalTranslationSum); //0.0;
-		//action->animationDistance = 0.0;
-		//for (auto& distance : action->frameDistances) {
-		//	action->animationDistance += distance;
-		//}
-		action->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate );
+		action->animationDistance = 0.0;
+		for (auto& distance : action->frameDistances) {
+			action->animationDistance += distance;
+		}
+		//action->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate );
 	}
 		//SkeletalAnimationAction *animation = &(skm->actionMap[animationData->name] = {
 		//	.index = animationIndex,
@@ -776,7 +776,10 @@ static bool SKM_ProcessAnimationCommand( model_t *model, SKMParseState &parseSta
 	SKM_SanitizeQuotedString( parseState.animationName );
 
 	// Actually emplace the animation if nonexistent.
-	skm->animationMap[parseState.animationName] = { .index = parseState.animationCount };
+	skm->animationMap[parseState.animationName] = { 
+		.index = parseState.animationCount,
+		.name = parseState.animationName
+	};
 	skm->animations.push_back(&skm->animationMap[parseState.animationName]);
 
 	return true;
