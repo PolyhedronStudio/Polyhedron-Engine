@@ -322,52 +322,8 @@ void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entit
 	EntitySkeleton tempEs;
 	tempEs.modelPtr = const_cast<model_t*>(model);
 
+	// Lerp skeleton poses.
 	ES_LerpSkeletonPoses( &tempEs, temporaryBonePoses, entity->frame, entity->oldframe, entity->backlerp, entity->rootBoneAxisFlags );
-	//// Relative bone we're computing for, pointing to an index in our temporary bone poses.
-	//EntitySkeletonBonePose* relativeBone = temporaryBonePoses;
-
-	//// Get IQM Model Data.
-	//const iqm_model_t *iqmData = model->iqmData;
-
-	//// Get current frame.
-	//const int frame = iqmData->num_frames ? entity->frame % (int)iqmData->num_frames : 0;
-	//// Get old frame.
-	//const int oldframe = iqmData->num_frames ? entity->oldframe % (int)iqmData->num_frames : 0;
-
-	///**
-	//*	#0: Compute relative bone transforms.
-	//**/
-	//// copy or lerp animation frame pose
-	//if (oldframe == frame) {
-	//	EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
-	//	for (uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, pose++, relativeBone++) {
-	//		relativeBone->translate = pose->translate;
-	//		relativeBone->scale = pose->scale;
-	//		QuatCopy(pose->rotate, relativeBone->rotate);
-	//	}
-	//} else {
-	//	// Get back:erp.
-	//	const float backLerp = entity->backlerp;
-	//	// Get Lerp.
-	//	const float lerp = 1.0f - backLerp;
-
-	//	// Pose & Old Pose.
-	//	EntitySkeletonBonePose* pose = &iqmData->poses[frame * iqmData->num_poses];
-	//	EntitySkeletonBonePose* oldpose = &iqmData->poses[oldframe * iqmData->num_poses];
-
-	//	// Iterate and transform bones accordingly.
-	//	for ( uint32_t pose_idx = 0; pose_idx < iqmData->num_poses; pose_idx++, oldpose++, pose++, relativeBone++ ) {
-	//		relativeBone->translate[0] = oldpose->translate[0] * backLerp + pose->translate[0] * lerp;
-	//		relativeBone->translate[1] = oldpose->translate[1] * backLerp + pose->translate[1] * lerp;
-	//		relativeBone->translate[2] = oldpose->translate[2] * backLerp + pose->translate[2] * lerp;
-
-	//		relativeBone->scale[0] = oldpose->scale[0] * backLerp + pose->scale[0] * lerp;
-	//		relativeBone->scale[1] = oldpose->scale[1] * backLerp + pose->scale[1] * lerp;
-	//		relativeBone->scale[2] = oldpose->scale[2] * backLerp + pose->scale[2] * lerp;
-
-	//		QuatSlerp( oldpose->rotate, pose->rotate, lerp, relativeBone->rotate );
-	//	}
-	//}
 
 	// Compute world, and local bone transforms.
 	ES_ComputeWorldPoseTransforms( model, temporaryBonePoses, pose_matrices );
@@ -418,6 +374,44 @@ void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePos
 
 	// Calculate lerp by backlerp.
 	const float lerp = 1.0f - backLerp;
+
+// DQ: ------------------- START
+	//const EntitySkeletonBonePose* currentFrameBonePose	= &iqmModel->poses[currentFrame * iqmModel->num_poses];
+	//const EntitySkeletonBonePose* oldFrameBonePose		= &iqmModel->poses[oldFrame * iqmModel->num_poses];
+
+	//if ( lerp == 1 ) {
+	//	// Do a direct copy instead.
+	//	outBonePose->dualquat = currentFrameBonePose->dualquat;
+	//} else if ( lerp == 0 ) {
+	//	// Do a direct copy instead.
+	//	outBonePose->dualquat = oldFrameBonePose->dualquat;
+	//} else {
+	//	// Lerp all bone poses.
+	//	for (int32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, outBonePose++, currentFrameBonePose++, oldFrameBonePose++ ) {
+	//		// Lerp.
+	//		dualquat_lerp( oldFrameBonePose.dualquat, currentFrameBonePose.dualquat, lerp, outBonePose->dualquat );
+
+	//		// NOTE: This might have to set the dualquat on old and current frame poses instead.
+	//		// If we got skeletal model data, see if we should apply any of its root bone axis flags.
+	//		if (skmData && poseIndex == skmData->rootJointIndex) {
+	//			vec3_t axisFlagTranslation = dualquat_get_translation( outBonePose.dualquat );
+	//			
+	//			// Cancel out if the Zero*Translation flag is set, otherwise, calculate translation for that axis.
+	//			if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation) ) {
+	//				axisFlagTranslation.x = 0.0;
+	//			}
+	//			if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation) ) {
+	//				axisFlagTranslation.y = 0.0;
+	//			}
+	//			if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation) ) {
+	//				axisFlagTranslation.z = 0.0;
+	//			}
+
+	//			dualquat_set_translation( outBonePose->dualquat );
+	//		}
+	//	}
+	//}
+// DQ: ------------------- END
 
 	// Copy or lerp animation currentFrame pose
 	if (oldFrame == currentFrame) {
@@ -543,6 +537,13 @@ void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkel
 		EntitySkeletonBonePose *inBone = addBonePoses + boneNumber;
 		EntitySkeletonBonePose *outBone = addToBonePoses + boneNumber;
 
+// DQ: ------------------- START
+		//if (fraction == 1) {
+		//	*outBone = *inBone;
+		//} else {
+		//	dualquat_lerp( inBone->dualquat, outBone->dualquat, fraction, outBone->dualquat );
+		//}
+// DQ: ------------------- END
 		if (fraction == 1) {
 			*outBone = *inBone;
 		} else {
@@ -560,6 +561,23 @@ void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkel
 			//outBone->scale[1] = outBone->scale[1] * backlerp + inBone->scale[1] * lerp;
 			//outBone->scale[2] = outBone->scale[2] * backlerp + inBone->scale[2] * lerp;
 			
+	//if( bonenode->bonenum != -1 ) {
+	//	inbone = inboneposes + bonenode->bonenum;
+	//	outbone = outboneposes + bonenode->bonenum;
+	//	if( frac == 1 ) {
+	//		memcpy( &outboneposes[bonenode->bonenum], &inboneposes[bonenode->bonenum], sizeof( bonepose_t ) );
+	//	} else {
+	//		// blend current node pose
+	//		DualQuat_Lerp( inbone->dualquat, outbone->dualquat, frac, outbone->dualquat );
+	//	}
+	//}
+
+	//for( i = 0; i < bonenode->numbonechildren; i++ ) {
+	//	if( bonenode->bonechildren[i] ) {
+	//		CG_RecurseBlendSkeletalBone( inboneposes, outboneposes, bonenode->bonechildren[i], frac );
+	//	}
+	//}
+
 			// Copy Translation.
 			outBone->translate = inBone->translate;
 
@@ -577,6 +595,51 @@ void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkel
 	}
 
 }
+
+//// DQ: ------------------- START
+///**
+//*	@brief	Transforms bone poses to parent bone pose space. (Mounts all bones into a skeleton.) 
+//**/
+//void ES_ComputePoseTransforms( const model_t *model, const EntitySkeletonBonePose *umountedPoses, float *poseDualQuaternions ) {
+//	if (!model || !model->iqmData) {
+//		// TODO: Warn.
+//		return;
+//	}
+//
+//	// Get IQM Data.
+//	const iqm_model_t *iqmModel = model->iqmData;
+//	
+//	// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
+//	const EntitySkeletonBonePose *bonePose = umountedPoses;
+//	EntitySkeletonBonePose *outBonePose = (EntitySkeletonBonePose*)poseDualQuaternions;
+//
+//	const int* jointParent = iqmModel->jointParents;
+//	const float* invBindMat = iqmModel->invBindJoints;
+//	float* poseDualQuat = poseDualQuaternions;
+//
+//	// Used as a temporary buffer pose.
+//	EntitySkeletonBonePose tempBonePose;
+//
+//	for ( uint32_t poseIndex = 0; poseIndex < iqmModel->num_poses; poseIndex++, bonePose++, jointParent++, invBindMat += 12, poseDualQuaternions += 8 ) {
+//
+//		//float mat1[12], mat2[12];
+//
+//		//JointToMatrix(relativeJoint->rotate, relativeJoint->scale, relativeJoint->translate, mat1);
+//
+//		if (*jointParent >= 0) {
+//			tempBonePose.dualquat = bonePose->dualquat;/* (
+//				( bonePose[0], bonePose[1], bonePose[2], bonePose[3] ),
+//				( bonePose[4], bonePose[5], bonePose[6], bonePose[7] )
+//			);*/
+//
+//			outBonePose->dualquat = dualquat_multiply( outBonePoses[*jointParent]->dualquat, tempBonePose.dualquat );
+//		} else {
+//			//Matrix34Multiply(mat1, invBindMat, poseMat);
+//			outBonePose->dualquat = bonePose->dualquat;
+//		}
+//	}
+//}
+//// DQ: ------------------- END
 
 /**
 *	@brief	Compute local space matrices for the given pose transformations.
