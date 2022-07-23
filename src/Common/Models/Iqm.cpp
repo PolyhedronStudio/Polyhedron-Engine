@@ -552,8 +552,30 @@ qerror_t MOD_LoadIQM_Base(model_t* model, ModelMemoryAllocateCallback modelAlloc
 		matInv = iqmData->invBindJoints;
 		joint = (const iqmJoint_t*)((const byte*)header + header->ofs_joints);
 		for (uint32_t joint_idx = 0; joint_idx < header->num_joints; joint_idx++, joint++) 		{
-			float baseFrame[12], invBaseFrame[12];
 
+// DQ: ------------------- START
+// We should calculate dualquats here:
+//
+//dualquat_t basePoses[i] = dualquat_from_quat3_vec3(joint->rotate, joint->translate);
+
+//// Scale is unused.
+
+//// Now reconstruct inverse bone pose.
+//if ( joint->parent >= 0 ) {
+//	// Pose and pointer.
+//	iqm_transform_t basePose, *parentBasePose = nullptr;
+//	iqmJoint_t *basePoses = joint; // This refers to joint = (const iqmJoint_t*)((const byte*)header + header->ofs_joints); line
+//	
+//	// Get pose ptrs.
+//	basePose = basePoses[i];
+//	parentBasePose = basePoses[joint->parent];
+
+//	// Multiply their dqs into our base pose, adding their translations.
+//	basePose.dualquat = dualquat_multiply( basePose.dualquat, parentBasePose.dualquat );
+//}
+// DQ: ------------------- End
+			float baseFrame[12], invBaseFrame[12];
+			
 			quat_t rotate;
 			QuatNormalize2(joint->rotate, rotate);
 
@@ -594,7 +616,21 @@ qerror_t MOD_LoadIQM_Base(model_t* model, ModelMemoryAllocateCallback modelAlloc
 				rotate[1] = pose->channeloffset[4]; if (pose->mask & 0x010) rotate[1] += (float)*framedata++ * pose->channelscale[4];
 				rotate[2] = pose->channeloffset[5]; if (pose->mask & 0x020) rotate[2] += (float)*framedata++ * pose->channelscale[5];
 				rotate[3] = pose->channeloffset[6]; if (pose->mask & 0x040) rotate[3] += (float)*framedata++ * pose->channelscale[6];
+	// DQ: ------------------- START
+	
+	// Starting from: rotate[3] = pose->channeloffset[6]; if (pose->mask & 0x040) rotate[3] += (float)*framedata++ * pose->channelscale[6];
+	// Do:
+	// Turn it into a quaternion.
+	//if (rotate[3] > 0) {
+	//	vec4_equal
+	//	rotate[3] = vec4_negate( rotate[3] );
+	//}
+	//rotate = vec4_normalize( rotate );
 
+	//// Scale is unused, so remove scale data.
+
+	//transform->dualquat = dualquat_from_quat_vec3( rotate, translate );
+	// DQ: ------------------- End
 				scale[0] = pose->channeloffset[7]; if (pose->mask & 0x080) scale[0] += (float)*framedata++ * pose->channelscale[7];
 				scale[1] = pose->channeloffset[8]; if (pose->mask & 0x100) scale[1] += (float)*framedata++ * pose->channelscale[8];
 				scale[2] = pose->channeloffset[9]; if (pose->mask & 0x200) scale[2] += (float)*framedata++ * pose->channelscale[9];
