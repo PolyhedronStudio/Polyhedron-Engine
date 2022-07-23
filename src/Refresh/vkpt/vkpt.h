@@ -266,6 +266,13 @@ typedef struct QVK_s {
 	BufferResource_t            buf_light_staging[MAX_FRAMES_IN_FLIGHT];
 	BufferResource_t            buf_light_stats[NUM_LIGHT_STATS_BUFFERS];
 
+	// DQ: ------------------- START
+	// We use DualQuats instead of matrices, 8 floats instead of 12.
+	BufferResource_t			buf_iqm_dualquats;
+	BufferResource_t			buf_iqm_dualquats_staging[MAX_FRAMES_IN_FLIGHT];
+	float*						iqm_dualquats_shadow;
+	float*						iqm_dualquats_prev;
+	// DQ: ------------------- END
 	BufferResource_t            buf_iqm_matrices;
 	BufferResource_t            buf_iqm_matrices_staging[MAX_FRAMES_IN_FLIGHT];
 	float*						iqm_matrices_shadow;

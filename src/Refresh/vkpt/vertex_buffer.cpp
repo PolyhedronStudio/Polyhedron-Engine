@@ -108,6 +108,22 @@ vkpt_iqm_matrix_buffer_upload_staging(VkCommandBuffer cmd_buf) {
 	return VK_SUCCESS;
 }
 
+// DQ: ------------------- START
+//VkResult
+//vkpt_iqm_dualquats_buffer_upload_staging(VkCommandBuffer cmd_buf) {
+//	BufferResource_t* staging = qvk.buf_iqm_dualquats_staging + qvk.current_frame_index;
+//
+//	assert(!staging->is_mapped);
+//
+//	VkBufferCopy copyRegion = {
+//		.size = sizeof(IqmDualQuatBuffer),
+//	};
+//	vkCmdCopyBuffer(cmd_buf, staging->buffer, qvk.buf_iqm_dualquats.buffer, 1, &copyRegion);
+//
+//	return VK_SUCCESS;
+//}
+// DQ: ------------------- END
+
 VkResult
 vkpt_vertex_buffer_upload_bsp_mesh_to_staging(bsp_mesh_t *bsp_mesh)
 {
@@ -680,6 +696,19 @@ vkpt_vertex_buffer_create()
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
+	// DQ: ------------------- START
+	//buffer_create(&qvk.buf_iqm_dualquats, sizeof(IqmMatrixBuffer),
+	//	VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+	//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	//for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++) 	{
+	//	buffer_create(qvk.buf_iqm_dualquats_staging + frame, sizeof(IqmDualQuatBuffer),
+	//		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	//		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	//}
+
+	//qvk.iqm_dualquats_shadow = (float*)Z_Mallocz(sizeof(IqmDualQuatBuffer));
+	//qvk.iqm_dualquats_prev = (float*)Z_Mallocz(sizeof(IqmDualQuatBuffer));
+	// DQ: ------------------- END
 	buffer_create(&qvk.buf_iqm_matrices, sizeof(IqmMatrixBuffer),
 		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -758,6 +787,12 @@ vkpt_vertex_buffer_create()
 	buf_info.range = sizeof(LightBuffer);
 	vkUpdateDescriptorSets(qvk.device, 1, &output_buf_write, 0, NULL);
 
+	// DQ: ------------------- START
+	//output_buf_write.dstBinding = IQM_MATRIX_BUFFER_BINDING_IDX;
+	//buf_info.buffer = qvk.buf_iqm_dualquats.buffer;
+	//buf_info.range = sizeof(IqmMatrixBuffer);
+	//vkUpdateDescriptorSets(qvk.device, 1, &output_buf_write, 0, NULL);
+	// DQ: ------------------- END
 	output_buf_write.dstBinding = IQM_MATRIX_BUFFER_BINDING_IDX;
 	buf_info.buffer = qvk.buf_iqm_matrices.buffer;
 	buf_info.range = sizeof(IqmMatrixBuffer);
@@ -860,10 +895,16 @@ vkpt_vertex_buffer_destroy()
 
 	buffer_destroy(&qvk.buf_light);
 	buffer_destroy(&qvk.buf_iqm_matrices);
+	// DQ: ------------------- START
+	//buffer_destroy(&qvk.buf_iqm_dualquats);
+	// DQ: ------------------- END
 	buffer_destroy(&qvk.buf_readback);
 	for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++)
 	{
 		buffer_destroy(qvk.buf_light_staging + frame);
+		// DQ: ------------------- START
+		// buffer_destroy(qvk.buf_iqm_dualquats_staging + frame);
+		// DQ: ------------------- END
 		buffer_destroy(qvk.buf_iqm_matrices_staging + frame);
 		buffer_destroy(qvk.buf_readback_staging + frame);
 	}
