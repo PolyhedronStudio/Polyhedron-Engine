@@ -1,29 +1,23 @@
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Vector 3 class and operation implementations.
+*
+*	The old legacy Q2 vector macros are defined at the very bottom of this file for
+*	compatibility with certain legacy pieces of code. (Mainly for vkpt.)
+***/
+#pragma once
 
-//
-// Shared/Math/vector3.h
-//
-// PH Math Library: Vector3
-// 
-// vec3_template is a templated union class which by use of several operators
-// allows for backwards compatibility support to most of the old Quake 2 based
-// legacy vector code.
-// 
-// The actual Q2 Vector Macros are defined at the bottom of this file and exist
-// for legacy code to still be compatible. For any new code, use the new and
-// more programmer friendly Vec3_ functions. To increase readability, a rule of
-// standard is to declare a vec3_t like so: vec3_t x = { 1.f, 0.f, 0.f };
-// 
-// To add, subtract, divide or multiply a vector, simply use the designated 
-//
-#ifndef __INC_SHARED_MATH_VECTOR3_H__
-#define __INC_SHARED_MATH_VECTOR3_H__
+// Shared header.
 #include "../Shared.h"
-//-----------------
-// Vector 3 type definiton. (X, Y, Z)
-//
-// The vector is implemented like a union class.
-//-----------------
+
+
+/**
+*	@brief Vector 3 type definiton: (X, Y, Z). The vector is implemented like a union class.
+**/
 template<typename T> struct vec3_template {
     union
     {
@@ -36,9 +30,9 @@ template<typename T> struct vec3_template {
         };
     };
 
-    //-----------------
-    // Constructors.
-    //-----------------
+    /**
+    *	Constructors.
+    **/
     // Default.
     vec3_template() { x = y = z = 0; }
 
@@ -56,10 +50,10 @@ template<typename T> struct vec3_template {
         Roll = 2
     };
 
-    //-----------------
-    // Operators.
-    //-----------------
-    // Pointer.
+    /**
+    *	Operators
+    **/    
+	// Pointer.
     inline operator T* () { 
         return &x;
     }
@@ -973,5 +967,3 @@ inline void RotatePoint(vec3_t& point, vec3_t* axis)
     point.y = vec3_dot(temp, axis[1]);
     point.z = vec3_dot(temp, axis[2]);
 }
-
-#endif // __INC__SHARED__MATH__VECTOR3_H__

@@ -555,7 +555,6 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 			**/
 			// Setup the refresh entity frames.
 			refreshEntity.oldframe	= refreshAnimation.frame;
-			refreshEntity.oldframeB	= refreshAnimationB.frame;
 
 			// Setup the proper lerp and model frame to render this pass.
 			// Moved into the if statement's else case up above.
@@ -564,10 +563,6 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 			// Main Animation Frame.
 			refreshEntity.frame		= refreshAnimation.frame;
 			refreshEntity.backlerp	= refreshAnimation.backLerp;
-
-			// Event Channel Animation Frame.
-			refreshEntity.frameB = refreshAnimationB.frame;
-			refreshEntity.backlerpB	= refreshAnimationB.backLerp;
         }
         
 

@@ -1024,14 +1024,14 @@ static float dotQuat(vec4_t const q0, vec4_t const q1)
     return q0[0]*q1[0] + q0[1]*q1[1] +  q0[2]*q1[2] +  q0[3]*q1[3];
 }
 
-static void normalizeQuat(vec4_t q)
+static void normalizeQuat(vec4_t &q)
 {
     float l = sqrtf(dotQuat(q, q));
     for (int i = 0; i < 4; ++i)
         q[i] /= l;
 }
 
-static void conjugateQuat(vec4_t q)
+static void conjugateQuat(vec4_t &q)
 {
     q[0] =  q[0];
     q[1] = -q[1];
@@ -1039,7 +1039,7 @@ static void conjugateQuat(vec4_t q)
     q[3] = -q[3];
 }
 
-static void inverseQuat(vec4_t q)
+static void inverseQuat(vec4_t &q)
 {
     float l2 = dotQuat(q, q);
     conjugateQuat(q);
@@ -1047,7 +1047,7 @@ static void inverseQuat(vec4_t q)
         q[i] /= l2;
 }
 
-static void quatMult(vec4_t const a, vec4_t const b, vec4_t result)
+static void quatMult(vec4_t const a, vec4_t const b, vec4_t &result)
 {
     result[0] = a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3];
     result[1] = a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2];
@@ -1055,7 +1055,7 @@ static void quatMult(vec4_t const a, vec4_t const b, vec4_t result)
     result[3] = a[0] * b[3] + a[3] * b[0] + a[1] * b[2] - a[2] * b[1];
 }
 
-void CalculateDirectionToSun(float DayOfYear, float TimeOfDay, float LatitudeDegrees, vec3_t result)
+void CalculateDirectionToSun(float DayOfYear, float TimeOfDay, float LatitudeDegrees, vec3_t &result)
 {
     const float AxialTilt = 23.439f;
     const float DaysInYear = 365.25f;

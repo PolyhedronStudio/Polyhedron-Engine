@@ -38,8 +38,9 @@ SET(HEADERS_SHARED
 
 	# Math lib.
 	${PATH_SRC}/Shared/Math/Color.h
-	${PATH_SRC}/Shared/Math/Matrix3.h
-	${PATH_SRC}/Shared/Math/Matrix4.h
+	${PATH_SRC}/Shared/Math/DualQuaternion.h
+	${PATH_SRC}/Shared/Math/Matrix3x3.h
+	${PATH_SRC}/Shared/Math/Matrix4x4.h
 	${PATH_SRC}/Shared/Math/Plane.h
 	${PATH_SRC}/Shared/Math/Rectangle.h
 	${PATH_SRC}/Shared/Math/Quaternion.h

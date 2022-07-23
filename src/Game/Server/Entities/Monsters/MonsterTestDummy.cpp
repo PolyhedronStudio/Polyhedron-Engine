@@ -73,6 +73,8 @@ void MonsterTestDummy::Precache() {
 	// Precache the model for the server: Required to be able to process animations properly.
 	qhandle_t serverModelHandle = gi.RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
 	
+	SVG_PrecacheModel("models/weapons/smg45/c_smg45.iqm");
+
 	//
 	// TODO:	All skeletal functionality should go into client and server, neatly
 	//			put into a "Game API".
@@ -117,59 +119,7 @@ void MonsterTestDummy::Precache() {
 		skm->actionMap["WalkingToDying"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
 		skm->actionMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 		skm->actionMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-																											   //skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
-	//skm->animationMap["TPose"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;//SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;
-
-	//skm->animationMap["PistolIdleTense"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-	//// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
-	//skm->animationMap["WalkLeft"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	//skm->animationMap["WalkRight"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-	//
-	//skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["WalkForward"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-
-	//skm->animationMap["PistolWhip"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-	//skm->animationMap["Reload"].rootBoneAxisFlags |= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-
-		// Pistol Walk Forward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
-		// for by physics.
-		//if ( skm->animationMap.contains( "WalkForward" ) ) {
-		//	skm->animationMap["WalkForward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-		//}
-
-		//// Pistol Walk Backward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
-		//// for by physics.
-		//if ( skm->animationMap.contains( "PistolWalkBackward") ) {
-		//	skm->animationMap["PistolWalkBackward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-		//}
-
-		//// Pistol Run Forward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
-		//// for by physics.
-		//if ( skm->animationMap.contains( "PistolRunForward" ) ) {
-		//	skm->animationMap["PistolRunForward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-		//}
-		//// Pistol Run Backward: ZeroY. - We only want movement into "depth", meaning forward/backward, to be accounted
-		//// for by physics.
-		//if ( skm->animationMap.contains( "PistolRunBackward" ) ) {
-		//	skm->animationMap["PistolRunBackward"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-		//}
-
-		//// Pistol Strafe Left: ZeroX. - We only want sideways, meaning left/right, to be accounted for by physics.
-		//if ( skm->animationMap.contains( "WalkLeft" ) ) {
-		//	skm->animationMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
-		//}
-		//// Pistol Strafe Right: ZeroX. - We only want sideways, meaning left/right, to be accounted for by physics.
-		//if ( skm->animationMap.contains( "WalkRight" ) ) {
-		//	skm->animationMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
-		//}
-
-		//// We do NOT want idle to move at all.
-		//if ( skm->animationMap.contains( "PistolIdleTense" ) ) {
-		//	skm->animationMap["PistolIdleTense"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
-		//}
 	}
-	
-	//skm->animationMap["TPose"].rootBoneAxisFlags = SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 }
 
 //
@@ -184,7 +134,7 @@ void MonsterTestDummy::Spawn() {
 
     // Set the barrel model, and model index.
     SetModel( "models/monsters/slidedummy/slidedummy.iqm" );
-	
+	SetModelIndex3( SVG_PrecacheModel("models/weapons/smg45/c_smg45.iqm") );
     // Set the bounding box.
     SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
 

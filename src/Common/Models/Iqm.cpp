@@ -87,7 +87,7 @@ static void Matrix34Invert(const float* inMat, float* outMat) {
 	outMat[11] = -DotProduct(outMat + 8, trans);
 }
 
-static void QuatSlerp(const quat_t from, const quat_t _to, float fraction, quat_t out) {
+static void QuatSlerp(const quat_t &from, const quat_t &_to, float fraction, quat_t &out) {
 	// cos() of angle
 	float cosAngle = from[0] * _to[0] + from[1] * _to[1] + from[2] * _to[2] + from[3] * _to[3];
 
@@ -124,7 +124,7 @@ static void QuatSlerp(const quat_t from, const quat_t _to, float fraction, quat_
 	out[3] = from[3] * backlerp + to[3] * lerp;
 }
 
-static vec_t QuatNormalize2(const quat_t v, quat_t out) {
+static vec_t QuatNormalize2(const quat_t &v, quat_t &out) {
 	float length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
 
 	if (length > 0.f) 	{

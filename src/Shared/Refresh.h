@@ -102,16 +102,10 @@ typedef struct r_entity_s {
 	**/
 	//! Entity's main animation frame. (This is also used for regular alias models and animated sprites/textures.)
 	int32_t	frame		= 0;
-	//! For Skeletal Animations, the frame of the Event Animation Channel animation that is being played.
-	int32_t	frameB		= 0;
 	//! Entity's main animation frame at the time of rendering our last frame.
     int32_t	oldframe	= 0;
-	//! Entity's Event Animation Channel frame at the time of rendering our last frame.
-	int32_t	oldframeB	= 0;
 	//! Main Animation Back LERP: 0.0 = current, 1.0 = old.
     float backlerp		= 0.f;
-	//! Animation Event Channel Back LERP: 0.0 = current, 1.0 = old.
-	float backlerpB		= 0.f;
 
 
 	/**
@@ -119,14 +113,9 @@ typedef struct r_entity_s {
 	**/
 	//! A pointer to a temporary bone cache.
 	iqm_transform_t	*currentBonePoses	= nullptr;
-	//! A pointer to a temporary bone cache.
-	iqm_transform_t *oldBonePoses		= nullptr;
-
 
 	//! Root Bone Axis Flags for the Main Animation.
 	int32_t rootBoneAxisFlags	= 0;
-	//! Root Bone Axis Flags for the Animation Event Channel.
-	int32_t rootBoneAxisFlagsB	= 0;
 
 } r_entity_t;
 

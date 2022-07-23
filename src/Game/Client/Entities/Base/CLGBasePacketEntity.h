@@ -99,13 +99,6 @@ public:
 	**/
 	virtual void SpawnFromState(const EntityState &state) override;
 
-	/**
-	*	@brief	Switches the animation by blending from the current animation into the next.
-	*	@return	True if succesfull, false otherwise.
-	**/
-	//bool SwitchAnimation(const std::string &name, const GameTime &startTime);
-	bool SwitchAnimation(int32_t animationIndex, const GameTime &startTime);
-
     /**
     *   @returen True if the entity is still in the current frame.
     **/
@@ -948,6 +941,22 @@ public:
 	**/
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
+	/**
+	*	@brief	Switches the animation by blending from the current animation into the next.
+	*	@return	True if succesfull, false otherwise.
+	**/
+	bool SwitchAnimation(int32_t animationIndex, const GameTime &startTime);
+
+	/**
+	*	@brief	This class implements a basic templated functionality that will assign
+	*			modelindex2,3 and 4 to their designated bone if this was set in an animation.
+	*
+	*			Inheirted classes can override this, call the Base class method and/or implement
+	*			their own functionalities here. Think of: Getting/setting a bone transform, 
+	*			and/or rendering effects/entities at a specific bone's transform.
+	**/
+	virtual void PostComputeSkeletonTransforms( EntitySkeletonBonePose *bonePoses );
+
 protected:
 	//! Actual skeleton unique to this entity.
 	EntitySkeleton entitySkeleton;
@@ -965,19 +974,39 @@ protected:
 
 private:
 	/**
-	*	@brief Processes and prepares for the refresh entity, the currentAnimation state for the point in 'time'.
+	*	@brief	Checks to see if we've received new animation data, and if the time
+	*			is there to switch to the next animation before processing all the
+	*			current frame numbers for the current time in animation.
+	*
+	*			Processing happens either without the entity skeleton, in which case
+	*			it is your typical alias model incrementing a linear list of frames
+	*			each for frameTime ms. 
+	*
+	*			If the model has had a .skc file loaded for itself and it succesfully
+	*			managed to create an Entity Skeleton for this entity then it'll calculate
+	*			the current frame of each separate blend action in order for later
+	*			lerp and blend computations.
 	**/
 	virtual void ProcessSkeletalAnimationForTime(const GameTime &time);
 
 	/**
-	*	@brief	Computes the Entity Skeleton's pose for the current refresh frame. In case of
-	*			a desire to 'work' with these poses, whether it is to adjust or read data
-	*			from them, override this method.
+	*	@brief	Checks to see if we've received new animation data, and if the time
+	*			is there to switch to the next animation before processing all the
+	*			current frame numbers for the current time in animation.
 	*
-	*			The actual bone poses are transformed to world and local space afterwards.
-	*			This function only allows for calculating the relative transforms.
+	*			Processing happens either without the entity skeleton, in which case
+	*			it acts as a typical alias model so we just calculate the lerped bonePose
+	*			for the current frame.
 	*
-	*	@param	
+	*			If the model has had a .skc file loaded for itself and it succesfully
+	*			managed to create an Entity Skeleton for this entity, it'll start to lerp
+	*			each action's bone poses. After which it traverses each blend action to
+	*			recursively blend from the specified bone at the given fraction. Ultimnately
+	*			giving us our final relative bone poses.
+	*
+	*			Local and World poses can be calculated if desired. TODO: Make it optionable
+	*			to skip the refresh module of doing so, and let us do it here.
+	*
 	**/
 	virtual void ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses );
 

@@ -412,7 +412,6 @@ extern "C" {
 		*			
 		**/
 		void		(*ES_LerpSkeletonPoses) ( EntitySkeleton *entitySkeleton, EntitySkeletonBonePose *outBonePose, int32_t currentFrame, int32_t oldFrame, float backLerp, const int32_t rootBoneAxisFlags );
-
 		/**
 		*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode, using the given fraction as "intensity".
 		*	@param	fraction		When set to 1.0, it blends in the animation at 100% intensity. Take 0.5 for example, 
@@ -421,6 +420,11 @@ extern "C" {
 		*	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
 		**/
 		void		(*ES_RecursiveBlendFromBone) ( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction );
+
+
+		void (*ES_ComputeLocalPoseTransforms)( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+		void (*ES_ComputeWorldPoseTransforms)( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+
 		/**
 		*	@brief	Sets up an entity skeleton using the specified skeletal model data.
 		*	@return	False on failure. True if successful.

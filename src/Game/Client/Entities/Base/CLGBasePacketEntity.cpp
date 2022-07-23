@@ -281,24 +281,23 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 		anim.second.rootBoneAxisFlags = 0;//SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation; //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;  //SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation | SkeletalAnimationAction::RootBoneAxisFlags::DefaultTranslationMask;// | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation;
 	}
 
-	//if ( state.number == 13 || state.number == 23 ) {
-		const int32_t ZeroAllAxis = ( SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation );
+	// TODO: Remove this after implementing a RootAxisFlags command for 
+	const int32_t ZeroAllAxis = ( SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation | SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation );
 
-		skm->actionMap["Idle"].rootBoneAxisFlags	=
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["WalkForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-		skm->actionMap["WalkForwardLeft"].rootBoneAxisFlags	= 
-		skm->actionMap["WalkForwardRight"].rootBoneAxisFlags =
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation |
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
-			SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
-		skm->actionMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
-	//}
+	skm->actionMap["Idle"].rootBoneAxisFlags	=
+		SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+	skm->actionMap["WalkForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
+	skm->actionMap["WalkForwardLeft"].rootBoneAxisFlags	= 
+	skm->actionMap["WalkForwardRight"].rootBoneAxisFlags =
+		SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation |
+		SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+	skm->actionMap["WalkLeft"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+	skm->actionMap["WalkRight"].rootBoneAxisFlags = SkeletalAnimationAction::SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+	skm->actionMap["WalkingToDying"].rootBoneAxisFlags	= SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+		SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation | 
+		SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation;
+	skm->actionMap["RunForward"].rootBoneAxisFlags		= SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation;
 
 	 return skm;
 }
@@ -367,82 +366,6 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
-/**
-*	@brief	Switches the animation by blending from the current animation into the next.
-*	@return	True if succesfull, false otherwise.
-**/
-bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime &startTime = GameTime::zero()) {
-	//Com_DPrint("SwitchAnimation CALLED !! Index(#%i) startTime(#%i)\n", animationIndex, startTime.count());
-	if (!skm) {
-		Com_DPrint("SwitchAnimation: No SKM Data present.\n", animationIndex);
-		return false;
-	}
-
-	if (animationIndex < 0 || animationIndex > skm->animations.size()) {
-		Com_DPrint("SwitchAnimation: Failed, invalid index\n", animationIndex);
-		return false;
-	}
-
-	// Can't switch to animation without SKM data.
-	if (!skm) {
-		Com_DPrint("SwitchAnimation: No SKM data present.\n");
-		return false;
-	}
-
-	if (animationIndex > skm->animations.size()) {
-		Com_DPrint("SwitchAnimation: animationIndex(%i) out of range for animations.size(%i)\n",
-			animationIndex,
-			skm->actions.size()
-		);
-		return false;
-	}
-
-	// Get state pointer.
-	EntityState *currentState	= &podEntity->currentState;
-	EntityState *previousState	= &podEntity->previousState;
-
-	// Get animation state.
-	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
-	EntityAnimationState *previousAnimationState = &currentState->previousAnimation;
-
-
-	//// Has the animation index changed? If so, lookup the new animation.
-	//// TODO: Move to a separate function.
-	//const int32_t currentAnimationIndex = currentAnimationState->animationIndex;
-	//const int32_t previousAnimationIndex = previousAnimation->animationIndex;
-	// Use refresh instead. It's the most actual state anyhow.
-	const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
-
-	// We change animations for our 'main timeline animation' if:
-	//	- animationIndex differs from our previous animation index.
-	//	AND
-	//	- the start time of the new animation to switch to differs from the current animation start time.
-	if ( animationIndex != previousAnimationIndex ) { //}&& startTime.count() != currentAnimationState->startTime) {
-		// First get the actual animation, from there, get the first blend action, and then get the actual action * wooh *
-		SkeletalAnimation *skmAnimation= skm->animations[ animationIndex ];
-
-		// Get action index.
-		const uint16_t actionIndex = skmAnimation->blendActions[0].actionIndex;
-
-		// Retreive animation data matching to animationIndex.
-		SkeletalAnimationAction *skmAction= skm->actions[actionIndex];
-
-		// Update our refresh animation to new values.
-		refreshAnimation.animationIndex	= actionIndex;
-		refreshAnimation.frame			= skmAction->startFrame;	// TODO: Should we?? // Set current frame to start frame.
-		refreshAnimation.startFrame		= skmAction->startFrame;
-		refreshAnimation.endFrame		= skmAction->endFrame;
-		refreshAnimation.forceLoop		= true;	// TODO: Set to forceloop, but not for debugging atm. //currentAnimation->forceLoop;
-		refreshAnimation.frameTime		= skmAction->frametime;
-		refreshAnimation.startTime		= startTime.count();
-		refreshAnimation.loopCount		= 0;	// TODO: Set to loopcount, but not for debugging atm. //currentAnimation->loopCount;
-		
-		// Update animation states for this frame's current entity state.
-		*previousAnimationState = *currentAnimationState;
-	}
-
-	return true;
-}
 /**
 *   @returen True if the entity is still in the current frame.
 **/
@@ -615,6 +538,7 @@ void CLGBasePacketEntity::DispatchStopCallback() {
 }
 
 
+
 /**
 * 
 (
@@ -651,68 +575,465 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
 
 
 
+/***
+*
+*
+*	Skeletal Animation.
+*
+*
+***/
 /**
-* 
+*	@brief	Switches the animation by blending from the current animation into the next.
+*	@return	True if succesfull, false otherwise.
+**/
+bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime &startTime = GameTime::zero()) {
+	//Com_DPrint("SwitchAnimation CALLED !! Index(#%i) startTime(#%i)\n", animationIndex, startTime.count());
+	if (!skm) {
+		Com_DPrint("SwitchAnimation: No SKM Data present.\n", animationIndex);
+		return false;
+	}
+
+	if (animationIndex < 0 || animationIndex > skm->animations.size()) {
+		Com_DPrint("SwitchAnimation: Failed, invalid index\n", animationIndex);
+		return false;
+	}
+
+	// Can't switch to animation without SKM data.
+	if (!skm) {
+		Com_DPrint("SwitchAnimation: No SKM data present.\n");
+		return false;
+	}
+
+	if (animationIndex > skm->animations.size()) {
+		Com_DPrint("SwitchAnimation: animationIndex(%i) out of range for animations.size(%i)\n",
+			animationIndex,
+			skm->actions.size()
+		);
+		return false;
+	}
+
+	// Get state pointer.
+	EntityState *currentState	= &podEntity->currentState;
+	EntityState *previousState	= &podEntity->previousState;
+
+	// Get animation state.
+	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
+	EntityAnimationState *previousAnimationState = &currentState->previousAnimation;
+
+
+	//// Has the animation index changed? If so, lookup the new animation.
+	//// TODO: Move to a separate function.
+	//const int32_t currentAnimationIndex = currentAnimationState->animationIndex;
+	//const int32_t previousAnimationIndex = previousAnimation->animationIndex;
+	// Use refresh instead. It's the most actual state anyhow.
+	const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
+
+	// We change animations for our 'main timeline animation' if:
+	//	- animationIndex differs from our previous animation index.
+	//	AND
+	//	- the start time of the new animation to switch to differs from the current animation start time.
+	if ( animationIndex != previousAnimationIndex ) { //}&& startTime.count() != currentAnimationState->startTime) {
+		// First get the actual animation, from there, get the first blend action, and then get the actual action * wooh *
+		SkeletalAnimation *skmAnimation= skm->animations[ animationIndex ];
+
+		// Get action index.
+		const uint16_t actionIndex = skmAnimation->blendActions[0].actionIndex;
+
+		// Retreive animation data matching to animationIndex.
+		SkeletalAnimationAction *skmAction= skm->actions[actionIndex];
+
+		// Update our refresh animation to new values.
+		refreshAnimation.animationIndex	= actionIndex;
+		refreshAnimation.frame			= skmAction->startFrame;	// TODO: Should we?? // Set current frame to start frame.
+		refreshAnimation.startFrame		= skmAction->startFrame;
+		refreshAnimation.endFrame		= skmAction->endFrame;
+		refreshAnimation.forceLoop		= true;	// TODO: Set to forceloop, but not for debugging atm. //currentAnimation->forceLoop;
+		refreshAnimation.frameTime		= skmAction->frametime;
+		refreshAnimation.startTime		= startTime.count();
+		refreshAnimation.loopCount		= 0;	// TODO: Set to loopcount, but not for debugging atm. //currentAnimation->loopCount;
+		
+		// Update animation states for this frame's current entity state.
+		*previousAnimationState = *currentAnimationState;
+	}
+
+	return true;
+}
+
+/**
+*	@brief	This class implements a basic templated functionality that will assign
+*			modelindex #2,#3 and #4 to their designated bone if this was set in an animation.
 *
-*   Skeletal Animation
-* 
+*			Inheirted classes can override this, call the Base class method and/or implement
+*			their own functionalities here. Think of: Getting/setting a bone transform, 
+*			and/or rendering effects/entities at a specific bone's transform.
+**/
+static void Matrix34Invert(const float* inMat, float* outMat) {
+	outMat[0] = inMat[0]; outMat[1] = inMat[4]; outMat[2] = inMat[8];
+	outMat[4] = inMat[1]; outMat[5] = inMat[5]; outMat[6] = inMat[9];
+	outMat[8] = inMat[2]; outMat[9] = inMat[6]; outMat[10] = inMat[10];
+
+	float invSqrLen, * v;
+	v = outMat + 0; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+	v = outMat + 4; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+	v = outMat + 8; invSqrLen = 1.0f / DotProduct(v, v); VectorScale(v, invSqrLen, v);
+
+	vec3_t trans;
+	trans[0] = inMat[3];
+	trans[1] = inMat[7];
+	trans[2] = inMat[11];
+
+	outMat[3] = -DotProduct(outMat + 0, trans);
+	outMat[7] = -DotProduct(outMat + 4, trans);
+	outMat[11] = -DotProduct(outMat + 8, trans);
+}
+static inline void
+mult_matrix_vector(vec4_t &v, const float *a, const vec4_t &b)
+{
+	int j;
+	for (j = 0; j < 4; j++) {
+		v[j] =
+			a[0 * 4 + j] * b[0] +
+			a[1 * 4 + j] * b[1] +
+			a[2 * 4 + j] * b[2] +
+			a[3 * 4 + j] * b[3];
+	}
+}
+
+static inline vec3_t transform_point(const float* p, const float* matrix)
+{
+	vec4_t point = { p[0], p[1], p[2], 1.f };
+	vec4_t transformed = vec4_zero();
+	mult_matrix_vector(transformed, matrix, point);
+	return vec3_t {transformed.x, transformed.y, transformed.z}; // vec4 -> vec3
+}
+static void
+create_entity_matrix(mat4_t &matrix, r_entity_t* e, qboolean enable_left_hand)
+{
+	vec3_t axis[3];
+	vec3_t origin;
+	origin[0] = (1.f-e->backlerp) * e->origin[0] + e->backlerp * e->oldorigin[0];
+	origin[1] = (1.f-e->backlerp) * e->origin[1] + e->backlerp * e->oldorigin[1];
+	origin[2] = (1.f-e->backlerp) * e->origin[2] + e->backlerp * e->oldorigin[2];
+
+	AnglesToAxis(e->angles, axis);
+
+	float scale = (e->scale > 0.f) ? e->scale : 1.f;
+
+	vec3_t scales = { scale, scale, scale };
+	if ((e->flags & RF_LEFTHAND) && enable_left_hand)
+	{
+		scales[1] *= -1.f;
+	}
+
+	matrix[0]  = axis[0][0] * scales[0];
+	matrix[4]  = axis[1][0] * scales[1];
+	matrix[8]  = axis[2][0] * scales[2];
+	matrix[12] = origin[0];
+
+	matrix[1]  = axis[0][1] * scales[0];
+	matrix[5]  = axis[1][1] * scales[1];
+	matrix[9]  = axis[2][1] * scales[2];
+	matrix[13] = origin[1];
+
+	matrix[2]  = axis[0][2] * scales[0];
+	matrix[6]  = axis[1][2] * scales[1];
+	matrix[10] = axis[2][2] * scales[2];
+	matrix[14] = origin[2];
+
+	matrix[3]  = 0.0f;
+	matrix[7]  = 0.0f;
+	matrix[11] = 0.0f;
+	matrix[15] = 1.0f;
+}
+static inline void
+mult_matrix_matrix(float *p, const mat4_t &a, const mat4_t &b)
+{
+	for(int32_t i = 0; i < 4; i++) {
+		for(int32_t j = 0; j < 4; j++) {
+			p[i * 4 + j] =
+				a[0 * 4 + j] * b[i * 4 + 0] +
+				a[1 * 4 + j] * b[i * 4 + 1] +
+				a[2 * 4 + j] * b[i * 4 + 2] +
+				a[3 * 4 + j] * b[i * 4 + 3];
+		}
+	}
+}
+
+// Temporary.
+static vec3_t prevAngles[2] = { vec3_zero(), vec3_zero() };
+// 0 = Entity ID 13
+// 1 = Entity ID 23
+void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *bonePoses) {
+	// Static buffer for stashing the local post transforms.
+	static float localPoseMatrices[SKM_MAX_JOINTS * 12];
+
+	// Get the current animation.
+	// Get state references.
+	EntityState *currentState	= &podEntity->currentState;
+	EntityState *previousState	= &podEntity->previousState;
+
+	// Get Animation State references.
+	EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
+	EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
+
+	// Model Index 3.
+	if (currentState->modelIndex3) {
+		// Seek right hand bone.
+		auto *rightHandeNode = entitySkeleton.boneMap["mixamorig8:RightHand"];
+
+		// Get the number.
+		const int32_t poseNumber = rightHandeNode->GetEntitySkeletonBone()->index;
+
+		// Get the transform.
+		EntitySkeletonBonePose *bonePose = &bonePoses[poseNumber];
+
+		// Now let's get funky, create a copy of what we had so far as to keep
+		// and make sure ith as the same properties.
+		r_entity_t refreshAttachmentEntity = refreshEntity;
+
+		// Set the modelindex3 model for this refresh entity.
+		refreshAttachmentEntity.model = cl->drawModels[ currentState->modelIndex3 ];
+
+		// 
+		//clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
+		//clgi.ES_ComputeLocalPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
+
+		//// Now read stuff out of our matrice.
+		//float *inMatrix = &localPoseMatrices[poseNumber * 12];
+		//float outMatrix[12];
+		//Matrix34Invert(inMatrix, outMatrix);
+		//
+		//mat3_t angleMatrix = matrix3_from_angles( 
+		//	refreshAttachmentEntity.angles
+		//);
+		//mat3_t finalMatrix = matrix3_multiply(outMatrix, angleMatrix);
+
+
+		//// Last but not least, position it at the bone pose origin.
+		//float mx = finalMatrix[3];
+		//float my = finalMatrix[7];
+		//float mz = finalMatrix[11];
+
+		//float _mx = finalMatrix[0];
+		//float _my = finalMatrix[4];
+		//float _mz = finalMatrix[8];
+		//		
+		////refreshAttachmentEntity.rootBoneAxisFlags = 0;
+		////refreshAttachmentEntity.origin.z += _mx;
+		//refreshAttachmentEntity.origin += { 
+		//	//mx, 
+		//	_mz,
+		//	_my,
+		//	_mx
+		//};
+
+		//refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
+		//refreshAttachmentEntity.currentBonePoses = nullptr;
+
+		// Compose the world and local pose matrices.
+		// TODO: We oughta only do this once.
+		clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
+		//clgi.ES_ComputeLocalPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
+
+		
+		// Generate entity matrix to transform the actual pose with.
+		mat4_t matEntity;
+		create_entity_matrix(matEntity, &refreshEntity, false);
+
+		/**
+		*	Set refresh attachment entity origin. (Adjust to entity world transforms.)
+		**/
+		// Get pointer to the bone's IQM 3x3 matrix.
+		float *matRefreshBonePose = &localPoseMatrices[poseNumber * 12];
+		// Convert to 4x4 matrix.
+		mat4_t matBonePose = {
+			{ matRefreshBonePose[0], matRefreshBonePose[4], matRefreshBonePose[8], 0},
+			{ matRefreshBonePose[1], matRefreshBonePose[5], matRefreshBonePose[9], 0},
+			{ matRefreshBonePose[2], matRefreshBonePose[6], matRefreshBonePose[10], 0},
+			{ matRefreshBonePose[3], matRefreshBonePose[7], matRefreshBonePose[11], 1}
+		};
+
+		// Get the bone origin's vector.
+		vec3_t boneOrigin = transform_point(vec3_zero(), matBonePose);
+		// Now rotate the origin about the entity's matrix.
+		vec3_t rotatedOrigin = transform_point(boneOrigin, matEntity);
+		refreshAttachmentEntity.origin = {
+			rotatedOrigin.x,
+			rotatedOrigin.y,
+			rotatedOrigin.z
+		};
+		refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
+
+		/**
+		*	Set refresh attachment entity angles. (Adjust to entity world transforms.)
+		**/
+		
+		//mat3_t matRotatedPoseBone	= matrix3_rotate( invMatrix, refreshEntity.angles.x, vec3_zero()); //matrix3_multiply(matRefreshBonePose, matRotateAngle);
+		vec3_t oldBoneAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
+
+		// Get bone pose angles.
+		//vec3_t boneAngles = matrix3_to_angles( matRotatedPoseBone );
+		
+		vec3_t entityAngles = matrix3_to_angles( &matEntity[0]);
+		mat4_t rotatedPose;
+		float invMatrix[12];
+		Matrix34Invert(matBonePose, invMatrix);
+		mult_matrix_matrix(rotatedPose, invMatrix, matEntity);
+
+		// Axis vectors of angles.
+		vec3_t axis[3];
+		AnglesToAxis({ 0, -refreshEntity.angles.y, 0 }, axis);
+		//AnglesToAxis({ -refreshEntity.angles.x, 0, 0 }, axis);
+
+		// Rotate bone pose around axis point.
+		vec3_t boneAngles = matrix3_to_angles( matRefreshBonePose );
+		RotatePoint(boneAngles, axis);
+
+		// Euler up.
+		boneAngles = vec3_euler ( vec3_normalize( boneAngles ) );
+
+		// lerp euler angles, store final angles as last previous angles.
+		vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngles, boneAngles, 1.0 - refreshAnimation.backLerp);
+		if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
+
+		// Set angles.
+		refreshAttachmentEntity.angles = finalBoneAngles;
+
+
+
+
+
+
+
+
+		///// THIS ALMOST WORKS <-- IT DOES NOT LERP?
+		//float invMatrix[12];
+		//Matrix34Invert(matBonePose, invMatrix);
+
+		//mat3_t matRotateAngle		= matrix3_from_angles( refreshAttachmentEntity.angles );
+		////mat3_t matRotatedPoseBone	= matrix3_rotate( invMatrix, refreshEntity.angles.x, vec3_zero()); //matrix3_multiply(matRefreshBonePose, matRotateAngle);
+
+		//// Get bone pose angles.
+		////vec3_t boneAngles = matrix3_to_angles( matRotatedPoseBone );
+		//vec3_t transformedAngles = vec3_normalize(transform_point(boneOrigin, matEntity));
+		//vec3_t boneAngles = matrix3_to_angles( invMatrix );
+
+		//vec3_t normalizedDir = vec3_normalize( refreshAttachmentEntity.angles );
+
+		//// Transform angles to our entity matrix.
+		//vec4_t v4boneAngles = { boneAngles.x, boneAngles.y, boneAngles.z, 1.f };
+		////vec4_t v4rotBoneAngles = vec4_zero();
+		//mult_matrix_vector(v4boneAngles, matRotateAngle, v4boneAngles);
+
+		//vec3_t rotBoneAngles = vec3_euler( boneAngles * transformedAngles ) ;//vec3_euler( { v4boneAngles.x, v4boneAngles.y, v4boneAngles.z } );// transform_point( boneAngles, matRotateAngle  );
+		////vec3_t rotBoneAngles = { v4boneAngles.x, v4boneAngles.y, v4boneAngles.z };// transform_point( boneAngles, matRotateAngle  );
+
+		//// Lerp angles between old and current.
+		//vec3_t oldBoneAngle = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
+		//vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngle, rotBoneAngles, 1.0 - refreshAnimation.backLerp);
+		//if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
+
+		//refreshAttachmentEntity.angles += finalBoneAngles;
+		/////////////////////////
+
+
+		//// Take local world pose matrix and invert it.
+		//float invMatrix[12];
+		//Matrix34Invert(matBonePose, invMatrix);
+		//// Rotate by refresh angles.
+		//mat3_t matRotateAngle		= matrix3_from_angles( refreshAttachmentEntity.angles );
+		//mat3_t matRotatedPoseBone	= matrix3_rotate( matBonePose, refreshAttachmentEntity.angles.x, refreshAttachmentEntity.origin); //matrix3_multiply(matRefreshBonePose, matRotateAngle);
+		////refreshAttachmentEntity.rootBoneAxisFlags = 0;
+		//// To get our angle, Convert to vector and apply angles.
+		////vec3_t matAngles =  matrix3_to_angles(matRefreshBonePose);
+		////refreshAttachmentEntity.angles.x += matAngles.x;
+		////refreshAttachmentEntity.angles.y += matAngles.y;
+		////refreshAttachmentEntity.angles.z += matAngles.z;
+
+		//vec3_t vecPoseBone = { matRotatedPoseBone[4], matRotatedPoseBone[8], matRotatedPoseBone[12] };
+		//vec3_t rotatedAngles = vec3_euler(transform_point(vecPoseBone, matRotateAngle ));
+		////refreshAttachmentEntity.origin.x += rotatedOrigin.x;
+		////refreshAttachmentEntity.origin.y += rotatedOrigin.y;
+		////refreshAttachmentEntity.origin.z += rotatedOrigin.z;
+		////refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
+		//
+		//vec3_t oldAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
+		//vec3_t matAngles =  vec3_euler( matrix3_to_angles(matRotatedPoseBone) );
+
+		////vec3_t finalAngles = vec3_mix_euler(oldAngles, matAngles, 1.0f - refreshAnimation.backLerp);
+		//vec3_t finalAngles = vec3_mix_euler(oldAngles, rotatedAngles, 1.0f - refreshAnimation.backLerp);
+		//if (GetNumber() == 13) {
+		//	prevAngles[0] = finalAngles;//finalAngles;
+		//} else {
+		//	prevAngles[1] = finalAngles;//finalAngles;
+		//}
+		//refreshAttachmentEntity.angles.x = finalAngles.x;
+		//refreshAttachmentEntity.angles.y = finalAngles.y;
+		//refreshAttachmentEntity.angles.z = finalAngles.z;
+		//
+		//
+		////// Get origin.
+		////vec3_t origin = { matRotatedPoseBone[4], matRotatedPoseBone[8], matRotatedPoseBone[12] };
+		////vec3_t rotatedOrigin = transform_point(origin, matRotateAngle );
+
+		//Com_DPrint( "--------- Entity(#%i) ---------\n", GetNumber() );
+		//Com_DPrint( "refAttachOrigin={%f,%f,%f}\n", boneOrigin.x, boneOrigin.y, boneOrigin.z );
+		//Com_DPrint( "refAttachRotAngles={%f,%f,%f}\n", matAngles.x, matAngles.y, matAngles.z );
+		//Com_DPrint( "refAttachRotOrigin={%f,%f,%f}\n", rotatedOrigin.x, rotatedOrigin.y, rotatedOrigin.z );
+
+
+		//---------------------
+		//vec3_t matTranslate = matrix3_transform_vector(matRotatedPoseBone, { 1, 1, 1} );
+		//refreshAttachmentEntity.origin.x += invMatrix[0];
+		//refreshAttachmentEntity.origin.y += invMatrix[4];
+		//refreshAttachmentEntity.origin.z += invMatrix[11];
+		//refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
+
+		// Add to our view.
+		clge->view->AddRenderEntity(refreshAttachmentEntity);
+
+		// The following rotates the bone and applies its rotations to the refresh entity's rotation.
+		// Left as example:
+		// Compose transforms.
+		//clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
+		//clgi.ES_ComputeLocalPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
+
+		//// Take local world pose matrix and invert it.
+		//float invMatrix[12];
+		//float *matPoseBone = &localPoseMatrices[poseNumber * 12];
+		//Matrix34Invert(matPoseBone, invMatrix);
+		//// Rotate by refresh angles.
+		//mat3_t matRotateAngle		= matrix3_from_angles( refreshAttachmentEntity.angles );
+		//mat3_t matRotatedPoseBone	= matrix3_multiply(invMatrix, matRotateAngle);
+
+		//// Convert to vector and apply angles.
+		//vec3_t matAngles = matrix3_to_angles(invMatrix);
+		//refreshAttachmentEntity.angles.x += matAngles.z;
+		//refreshAttachmentEntity.angles.y -= matAngles.y;
+		//refreshAttachmentEntity.angles.z += matAngles.x;
+	}
+
+	// Model Index 4.
+	if (currentState->modelIndex4) {
+
+	}
+}
+
+/**
+*	@brief	Checks to see if we've received new animation data, and if the time
+*			is there to switch to the next animation before processing all the
+*			current frame numbers for the current time in animation.
 *
+*			Processing happens either without the entity skeleton, in which case
+*			it is your typical alias model incrementing a linear list of frames
+*			each for frameTime ms. 
+*
+*			If the model has had a .skc file loaded for itself and it succesfully
+*			managed to create an Entity Skeleton for this entity then it'll calculate
+*			the current frame of each separate blend action in order for later
+*			lerp and blend computations.
 **/
 void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
-	//// Get state references.
-	//EntityState *currentState	= &podEntity->currentState;
-	//EntityState *previousState	= &podEntity->previousState;
-
-	//// Get Animation State references.
-	//EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
-	//EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
-
-	//// Setup the refresh entity frames regardless of animation time return scenario.
-	//refreshEntity.oldframe	= refreshAnimation.frame;
-	//refreshEntity.oldframeB	= refreshAnimationB.frame;
-
-	//if (time <= GameTime::zero()) {
-	//	return;
-	//}
-
-	//// Did any animation state data change?
-	//if (currentAnimation->startTime != previousAnimation->startTime) {
-	//	SwitchAnimation(currentAnimation->animationIndex, GameTime(currentAnimation->startTime));
-	//}
-
-	//// Process the animation, like we would do any time.
-	//refreshAnimation.backLerp = 1.0 - SG_FrameForTime(&refreshAnimation.frame,
-	//	time,
-	//	GameTime(refreshAnimation.startTime),
-	//	refreshAnimation.frameTime,
-	//	refreshAnimation.startFrame,
-	//	refreshAnimation.endFrame,
-	//	refreshAnimation.loopCount,
-	//	refreshAnimation.forceLoop
-	//);
-
-	////
-	//// TEMPORARILY - For Blending Test.
-	//// 
-	//// Process the animation, like we would do any time.
-	//refreshAnimationB.backLerp = 1.0 - SG_FrameForTime(&refreshAnimationB.frame,
-	//	time,
-	//	GameTime(refreshAnimationB.startTime),
-	//	refreshAnimationB.frameTime,
-	//	refreshAnimationB.startFrame,
-	//	refreshAnimationB.endFrame,
-	//	refreshAnimationB.loopCount,
-	//	refreshAnimationB.forceLoop
-	//);
-
-	//// Main Channel Animation Frames.
-	//refreshEntity.frame		= refreshAnimation.frame;
-	//refreshEntity.backlerp	= refreshAnimation.backLerp;
-
-	//// Event Channel Animation Frames.
-	//refreshEntity.frameB	= refreshAnimationB.frame;
-	//refreshEntity.backlerpB	= refreshAnimationB.backLerp;
-
 	// Get state references.
 	EntityState *currentState	= &podEntity->currentState;
 	EntityState *previousState	= &podEntity->previousState;
@@ -856,39 +1177,26 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 			}
 		}
 	}
-
-	////
-	//// TEMPORARILY - For Blending Test.
-	//// 
-	//// Process the animation, like we would do any time.
-	//refreshAnimationB.backLerp = 1.0 - SG_FrameForTime(&refreshAnimationB.frame,
-	//	time,
-	//	GameTime(refreshAnimationB.startTime),
-	//	refreshAnimationB.frameTime,
-	//	refreshAnimationB.startFrame,
-	//	refreshAnimationB.endFrame,
-	//	refreshAnimationB.loopCount,
-	//	refreshAnimationB.forceLoop
-	//);
-
-	//// Main Channel Animation Frames.
-	//refreshEntity.frame		= refreshAnimation.frame;
-	//refreshEntity.backlerp	= refreshAnimation.backLerp;
-
-	//// Event Channel Animation Frames.
-	//refreshEntity.frameB	= refreshAnimationB.frame;
-	//refreshEntity.backlerpB	= refreshAnimationB.backLerp;
 }
 
 /**
-*	@brief	Computes the Entity Skeleton's pose for the current refresh frame. In case of
-*			a desire to 'work' with these poses, whether it is to adjust or read data
-*			from them, override this method.
+*	@brief	Checks to see if we've received new animation data, and if the time
+*			is there to switch to the next animation before processing all the
+*			current frame numbers for the current time in animation.
 *
-*			The actual bone poses are transformed to world and local space afterwards.
-*			This function is meant to calculate the bones relative transforms.
+*			Processing happens either without the entity skeleton, in which case
+*			it acts as a typical alias model so we just calculate the lerped bonePose
+*			for the current frame.
 *
-*	@param	
+*			If the model has had a .skc file loaded for itself and it succesfully
+*			managed to create an Entity Skeleton for this entity, it'll start to lerp
+*			each action's bone poses. After which it traverses each blend action to
+*			recursively blend from the specified bone at the given fraction. Ultimnately
+*			giving us our final relative bone poses.
+*
+*			Local and World poses can be calculated if desired. TODO: Make it optionable
+*			to skip the refresh module of doing so, and let us do it here.
+*
 **/
 void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses ) {
 	// Get pointer.
@@ -916,29 +1224,13 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 	}
 
 	// Get our animation data.
-	auto *animation = skm->animations[currentAnimation->animationIndex];
+	SkeletalAnimation *animation = skm->animations[currentAnimation->animationIndex];
 	
-	/**
-	*	Main Animation Channel.
-	**/ 
-
-
 	// See if we got skeletal model data.
 	const model_t *esModel = entitySkeleton.modelPtr;
 
 	// Without an initialized entity skeleton, we just process the refreshanimation as is, covering the entire model.
 	if ( !esModel || !esModel->skeletalModelData ) {
-		//// Allocate our main bone pose channel.
-		//EntitySkeletonBonePose *tempMainChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
-
-		//// Lerp the blend action skeleton pose.
-		//clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-		//						tempMainChannelBonePoses,
-		//						refreshEntity.frame, 
-		//						refreshEntity.oldframe, 
-		//						refreshEntity.backlerp, 
-		//						refreshEntity.rootBoneAxisFlags 							 
-		//);
 		refreshEntity.currentBonePoses = nullptr;
 	} else {
 		// Validate animation, and action indices.
@@ -1042,133 +1334,6 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 			}
 		}
 	}
-	///**
-	//*	Finish the rest of the blend actions.
-	//**/
-	//if ( animation->blendActions.size() > 1 ) {
-	//	// Allocate our blend action bone pose channel.
-	//	EntitySkeletonBonePose *blendActionBonePose	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
-
-	//	// Iterate over the blend actions.
-	//	for (int32_t i = 1; i < animation->blendActions.size(); i++) {
-	//		auto &blendAction = animation->blendActions[i];
-
-	//		const int32_t actionIndex = std::get<0>(blendAction);
-
-	//		// Get action data.
-	//		// TODO: Display warning or error out etc.
-	//		if (skm->actions.size() < actionIndex) {
-	//			continue;
-	//		}
-
-	//		// Get action.
-	//		SkeletalAnimationAction *action = skm->actions[actionIndex];
-
-	//		// Blend action refresh animation.
-	//		EntityAnimationState blendAnimation = {
-	//			.animationIndex = action->index,
-	//			.startTime = refreshAnimation.startTime,
-	//			.frame = 0,
-	//			.frameTime = (float)action->frametime,
-	//			.backLerp = 0,
-	//			.startFrame = action->startFrame,
-	//			.endFrame = action->endFrame - action->startFrame,
-	//			.loopCount = action->loopingFrames,
-	//			.forceLoop = action->forceLoop,
-	//		};
-
-	//		blendAnimation.backLerp = 1.0 - SG_FrameForTime(&blendAnimation.frame,
-	//			GameTime(cl->time),
-	//			GameTime(refreshAnimation.startTime),
-	//			blendAnimation.frameTime,
-	//			blendAnimation.startFrame,
-	//			blendAnimation.endFrame,
-	//			blendAnimation.loopCount,
-	//			blendAnimation.forceLoop
-	//		);
-
-	//		// Lerp the blend action skeleton pose.
-	//		clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-	//								blendActionBonePose,
-	//								blendAnimation.frame, 
-	//								refreshEntity.oldframe, 
-	//								refreshEntity.backlerp, 
-	//								refreshEntity.rootBoneAxisFlags 							 
-	//		);
-
-	//		// Now, see if the node exists and blend right on top of it.
-	//		const int32_t boneNumber = std::get<2>( blendAction );;
-	//		const float fraction = std::get<1>( blendAction );
-
-	//		// Bone exists.
-	//		if ( boneNumber < entitySkeleton.bones.size() ) {
-	//			//auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
-	//			auto boneNode = entitySkeleton.bones[boneNumber].boneTreeNode;
-
-	//			// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
-	//			clgi.ES_RecursiveBlendFromBone( blendActionBonePose	, 
-	//											tempMainChannelBonePoses, 
-	//											boneNode, 
-	//											refreshEntity.backlerp, 
-	//											fraction
-	//			);
-	//		}
-	//	}
-		//refreshEntity.currentBonePoses = tempMainChannelBonePoses;
-	//} else {
-		// Set to nullptr.
-	//	refreshEntity.currentBonePoses = nullptr;
-	//}
-
-
-	//// Get pointer.
-	//const model_t *model = entitySkeleton.modelPtr;
-
-	//// Acquire a pose cache memory block to work with for each animation we seek to blend..
-	//EntitySkeletonBonePose *tempMainChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
-	//EntitySkeletonBonePose *tempEventChannelBonePoses	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
-
-	//// Ensure it is valid memory to use.
-	//if ( tempMainChannelBonePoses != nullptr && tempEventChannelBonePoses != nullptr) {
-	//	// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
-	//	clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-	//							tempMainChannelBonePoses,
-	//							refreshEntity.frame, 
-	//							refreshEntity.oldframe, 
-	//							refreshEntity.backlerp, 
-	//							refreshEntity.rootBoneAxisFlags 							 
-	//	);
-	//	clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
-	//							tempEventChannelBonePoses,
-	//							refreshEntity.frameB, 
-	//							refreshEntity.oldframeB, 
-	//							refreshEntity.backlerpB, 
-	//							refreshEntity.rootBoneAxisFlagsB
-	//	);
-	//		
-
-	//	// Other option: Get the node from our linear bone access list.
-	//	//EntitySkeletonBoneNode hipNode = &entitySkeleton.bones[4];
-
-	//	// See if it contains the spine node, if it does, start blending the animation from there.
-	//	if ( entitySkeleton.boneMap.contains("mixamorig8:Spine1") ) {
-	//		auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
-
-	//		// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
-	//		clgi.ES_RecursiveBlendFromBone( tempEventChannelBonePoses, 
-	//										tempMainChannelBonePoses, 
-	//										hipNode, 
-	//										refreshEntity.backlerpB, 
-	//										0.5f
-	//		);
-	//	}
-
-	//	// Last but not least...
-	//	refreshEntity.currentBonePoses = tempMainChannelBonePoses;
-	//} else {
-	//	// Set to nullptr.
-	//	refreshEntity.currentBonePoses = nullptr;
-	//}
 }
 
 
@@ -1245,24 +1410,6 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 			// If we got Skeletal Model Data, take a special path for processing its animation states
 			// and computing the appropriate poses for it.
 			if ( skm ) {
-				//// See which animation we are at:
-				//const int32_t animationIndex = currentState->currentAnimation.animationIndex;
-
-				//// Set the appropriate root bone axis flags that belong to our current animation.
-				//// TODO: Move elsewhere.
-				//if ( animationIndex >= 0 && animationIndex < skm->actions.size() ) { 
-				//	// TODO: This is incorrect, and needs fixing: Get the dominant blend action data 
-				//	// and use that action's rootbone flags.
-				//	//
-				//	// Ultimately however, we want to instead, have each animation assign its root bone (optional),
-				//	// and root bone axis flags.
-				//	auto *actionData = skm->actions[animationIndex];
-
-				//	refreshEntity.rootBoneAxisFlags = actionData->rootBoneAxisFlags;
-				//} else {
-				//	refreshEntity.rootBoneAxisFlags = 0;
-				//}
-
 				/**
 				*	Skeletal Animation Processing.
 				**/
@@ -1411,6 +1558,15 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
             }
         }
 
+		
+		//
+		//	Give it a chance to act on post computed transforms.
+		//
+		// Make sure we got "skeletal model data", an "entity skeleton", and computed bone pose transforms to work with.
+		if ( skm && entitySkeleton.modelPtr && refreshEntity.currentBonePoses != nullptr ) {
+			// Pass it our current generated boen poses.
+			PostComputeSkeletonTransforms( refreshEntity.currentBonePoses );
+		}
 
         //
         // Entity Effects for in case the entity is the actual client.
@@ -1547,20 +1703,20 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
         // ModelIndex3
         // 
         // Add an entity to the current rendering frame that has model index 3 attached to it.
-        if (currentState->modelIndex3) {
-            refreshEntity.model = cl->drawModels[currentState->modelIndex3];
-            clge->view->AddRenderEntity(refreshEntity);
-        }
+        //if (currentState->modelIndex3) {
+        //    refreshEntity.model = cl->drawModels[currentState->modelIndex3];
+        //    clge->view->AddRenderEntity(refreshEntity);
+        //}
 
 
-        //
-        // ModelIndex4
-        // 
-        // Add an entity to the current rendering frame that has model index 4 attached to it.
-        if (currentState->modelIndex4) {
-            refreshEntity.model = cl->drawModels[currentState->modelIndex4];
-            clge->view->AddRenderEntity(refreshEntity);
-        }
+        ////
+        //// ModelIndex4
+        //// 
+        //// Add an entity to the current rendering frame that has model index 4 attached to it.
+        //if (currentState->modelIndex4) {
+        //    refreshEntity.model = cl->drawModels[currentState->modelIndex4];
+        //    clge->view->AddRenderEntity(refreshEntity);
+        //}
 
 
         //
