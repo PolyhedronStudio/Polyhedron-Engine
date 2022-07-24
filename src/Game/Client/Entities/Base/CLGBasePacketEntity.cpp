@@ -745,11 +745,14 @@ create_entity_matrix(mat4_t &matrix, r_entity_t* e, qboolean enable_left_hand)
 	matrix[11] = 0.0f;
 	matrix[15] = 1.0f;
 }
-static inline void
-mult_matrix_matrix(float *p, const mat4_t &a, const mat4_t &b)
+
+static mat4_t
+mult_matrix_matrix(const mat4_t &a, const mat4_t &b)
 {
-	for(int32_t i = 0; i < 4; i++) {
-		for(int32_t j = 0; j < 4; j++) {
+	mat4_t p = mat4_identity();
+
+	for(int i = 0; i < 4; i++) {
+		for(int j = 0; j < 4; j++) {
 			p[i * 4 + j] =
 				a[0 * 4 + j] * b[i * 4 + 0] +
 				a[1 * 4 + j] * b[i * 4 + 1] +
@@ -757,6 +760,131 @@ mult_matrix_matrix(float *p, const mat4_t &a, const mat4_t &b)
 				a[3 * 4 + j] * b[i * 4 + 3];
 		}
 	}
+
+	return p;
+}
+
+static void
+inversee(const mat4_t &m, mat4_t &inv)
+{
+	inv[0] = m[5]  * m[10] * m[15] -
+	         m[5]  * m[11] * m[14] -
+	         m[9]  * m[6]  * m[15] +
+	         m[9]  * m[7]  * m[14] +
+	         m[13] * m[6]  * m[11] -
+	         m[13] * m[7]  * m[10];
+	
+	inv[1] = -m[1]  * m[10] * m[15] +
+	          m[1]  * m[11] * m[14] +
+	          m[9]  * m[2] * m[15] -
+	          m[9]  * m[3] * m[14] -
+	          m[13] * m[2] * m[11] +
+	          m[13] * m[3] * m[10];
+	
+	inv[2] = m[1]  * m[6] * m[15] -
+	         m[1]  * m[7] * m[14] -
+	         m[5]  * m[2] * m[15] +
+	         m[5]  * m[3] * m[14] +
+	         m[13] * m[2] * m[7] -
+	         m[13] * m[3] * m[6];
+	
+	inv[3] = -m[1] * m[6] * m[11] +
+	          m[1] * m[7] * m[10] +
+	          m[5] * m[2] * m[11] -
+	          m[5] * m[3] * m[10] -
+	          m[9] * m[2] * m[7] +
+	          m[9] * m[3] * m[6];
+	
+	inv[4] = -m[4]  * m[10] * m[15] +
+	          m[4]  * m[11] * m[14] +
+	          m[8]  * m[6]  * m[15] -
+	          m[8]  * m[7]  * m[14] -
+	          m[12] * m[6]  * m[11] +
+	          m[12] * m[7]  * m[10];
+	
+	inv[5] = m[0]  * m[10] * m[15] -
+	         m[0]  * m[11] * m[14] -
+	         m[8]  * m[2] * m[15] +
+	         m[8]  * m[3] * m[14] +
+	         m[12] * m[2] * m[11] -
+	         m[12] * m[3] * m[10];
+	
+	inv[6] = -m[0]  * m[6] * m[15] +
+	          m[0]  * m[7] * m[14] +
+	          m[4]  * m[2] * m[15] -
+	          m[4]  * m[3] * m[14] -
+	          m[12] * m[2] * m[7] +
+	          m[12] * m[3] * m[6];
+	
+	inv[7] = m[0] * m[6] * m[11] -
+	         m[0] * m[7] * m[10] -
+	         m[4] * m[2] * m[11] +
+	         m[4] * m[3] * m[10] +
+	         m[8] * m[2] * m[7] -
+	         m[8] * m[3] * m[6];
+	
+	inv[8] = m[4]  * m[9] * m[15] -
+	         m[4]  * m[11] * m[13] -
+	         m[8]  * m[5] * m[15] +
+	         m[8]  * m[7] * m[13] +
+	         m[12] * m[5] * m[11] -
+	         m[12] * m[7] * m[9];
+	
+	inv[9] = -m[0]  * m[9] * m[15] +
+	          m[0]  * m[11] * m[13] +
+	          m[8]  * m[1] * m[15] -
+	          m[8]  * m[3] * m[13] -
+	          m[12] * m[1] * m[11] +
+	          m[12] * m[3] * m[9];
+	
+	inv[10] = m[0]  * m[5] * m[15] -
+	          m[0]  * m[7] * m[13] -
+	          m[4]  * m[1] * m[15] +
+	          m[4]  * m[3] * m[13] +
+	          m[12] * m[1] * m[7] -
+	          m[12] * m[3] * m[5];
+	
+	inv[11] = -m[0] * m[5] * m[11] +
+	           m[0] * m[7] * m[9] +
+	           m[4] * m[1] * m[11] -
+	           m[4] * m[3] * m[9] -
+	           m[8] * m[1] * m[7] +
+	           m[8] * m[3] * m[5];
+	
+	inv[12] = -m[4]  * m[9] * m[14] +
+	           m[4]  * m[10] * m[13] +
+	           m[8]  * m[5] * m[14] -
+	           m[8]  * m[6] * m[13] -
+	           m[12] * m[5] * m[10] +
+	           m[12] * m[6] * m[9];
+	
+	inv[13] = m[0]  * m[9] * m[14] -
+	          m[0]  * m[10] * m[13] -
+	          m[8]  * m[1] * m[14] +
+	          m[8]  * m[2] * m[13] +
+	          m[12] * m[1] * m[10] -
+	          m[12] * m[2] * m[9];
+	
+	inv[14] = -m[0]  * m[5] * m[14] +
+	           m[0]  * m[6] * m[13] +
+	           m[4]  * m[1] * m[14] -
+	           m[4]  * m[2] * m[13] -
+	           m[12] * m[1] * m[6] +
+	           m[12] * m[2] * m[5];
+	
+	inv[15] = m[0] * m[5] * m[10] -
+	          m[0] * m[6] * m[9] -
+	          m[4] * m[1] * m[10] +
+	          m[4] * m[2] * m[9] +
+	          m[8] * m[1] * m[6] -
+	          m[8] * m[2] * m[5];
+
+	float det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+	det = 1.0f / det;
+
+	for(int i = 0; i < 16; i++)
+		inv[i] = inv[i] * det;
 }
 
 // Temporary.
@@ -802,54 +930,48 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		
 		// Generate entity matrix to transform the actual pose with.
 		mat4_t matEntity;
-		create_entity_matrix(matEntity, &refreshEntity, false);
+		refreshAttachmentEntity.origin = GetOrigin();
+		refreshAttachmentEntity.angles = GetAngles();
+		create_entity_matrix(matEntity, &refreshAttachmentEntity, false);
 
 		/**
-		*	Set refresh attachment entity origin. (Adjust to entity world transforms.)
+		*	Convert bone matrix to 4x4 matrix, rotate to entity angles, and get the 
+		*	translate & rotate of our bone.
 		**/
-		// Get pointer to the bone's IQM 3x3 matrix.
+		// Get our bone's 3x4 matrix.
 		float *matRefreshBonePose = &localPoseMatrices[poseNumber * 12];
-		// Convert to 4x4 matrix.
-		mat4_t matBonePose = {
-			{ matRefreshBonePose[0], matRefreshBonePose[4], matRefreshBonePose[8], 0},
-			{ matRefreshBonePose[1], matRefreshBonePose[5], matRefreshBonePose[9], 0},
-			{ matRefreshBonePose[2], matRefreshBonePose[6], matRefreshBonePose[10], 0},
-			{ matRefreshBonePose[3], matRefreshBonePose[7], matRefreshBonePose[11], 1}
-		};
 
-		// Get the bone origin's vector.
-		vec3_t boneOrigin = transform_point(vec3_zero(), matBonePose);
-		// Now rotate the origin about the entity's matrix.
-		vec3_t rotatedOrigin = transform_point(boneOrigin, matEntity);
-		refreshAttachmentEntity.origin = {
-			rotatedOrigin.x,
-			rotatedOrigin.y,
-			rotatedOrigin.z
+		// Convert to 4x4 matrix.
+		mat4_t matBonePose = mat4_from_mat3x4( matRefreshBonePose );
+		mat4_t matRotatedPoseBone = mult_matrix_matrix( matEntity, matBonePose );
+		
+		mat4_t matInvRotPoseBone;
+		inversee(matRotatedPoseBone, matInvRotPoseBone);
+
+		vec3_t translate = {
+			matRotatedPoseBone[12], matRotatedPoseBone[13], matRotatedPoseBone[14]
 		};
-		refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
+		vec3_t rotate = {
+			//matRotatedPoseBone[0], matRotatedPoseBone[4], matRotatedPoseBone[8]
+			//matRotatedPoseBone[1], matRotatedPoseBone[5], matRotatedPoseBone[9]
+			matInvRotPoseBone[8], matInvRotPoseBone[9], matInvRotPoseBone[10]
+		};
 
 		/**
-		*	Set refresh attachment entity angles. (Adjust to entity world transforms.)
+		*	Update our origin and slerp the attachment angles.
 		**/
-		// Rotation matrix.
-		mat4_t matRotate = mat4_rotate( refreshEntity.angles.x, 1, 0, 0 );
-		mat4_t matRotatedPoseBone = mat4_multiply_mat4( matBonePose, matRotate );
-
-		//mat3_t matRotatedPoseBone	= mat3_rotate( matBonePose, refreshEntity.angles.x, vec3_zero()); //mat3_multiply(matRefreshBonePose, matRotateAngle);
+		// Set the bone attachment's origin to the bone's translate coordinates.
+		refreshAttachmentEntity.origin = translate;
+		// Same for old origin.
+		refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
 		
-		vec3_t oldBoneAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
-
-		vec3_t rotation = {
-			matRotatedPoseBone[2],
-			matRotatedPoseBone[6],
-			matRotatedPoseBone[10]
-		};
-
-		// Euler up.
-		vec3_t boneAngles = vec3_euler ( vec3_normalize( rotation ) );
-
-		// lerp euler angles, store final angles as last previous angles.
+		// Get old angles, 
+		const vec3_t oldBoneAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
+		// Normalize rotation and get euler coordinates.
+		const vec3_t boneAngles = vec3_euler ( vec3_normalize( rotate ) );
+		// Lerp.
 		vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngles, boneAngles, 1.0 - refreshAnimation.backLerp);
+		// Store old angles.
 		if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
 
 		// Set angles.

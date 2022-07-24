@@ -124,6 +124,20 @@ static inline const mat4_t &&mat4_identity() {
 }
 
 /**
+*	@return	A matrix4x4 containing the matrix3x4.
+**/
+static inline const mat4_t &&mat4_from_mat3x4( const float *m3x4 ) {
+	return std::move(
+		mat4_t{
+			{ m3x4[0], m3x4[4], m3x4[8],	0.f },
+			{ m3x4[1], m3x4[5], m3x4[9],	0.f },
+			{ m3x4[2], m3x4[6], m3x4[10],	0.f },
+			{ m3x4[3], m3x4[7], m3x4[11],	1.f }
+		}
+	);
+}
+
+/**
 *	@return The resulting matrix of 'm1' * 'm2'
 **/
 static inline const mat4_t &&mat4_multiply_mat4(const mat4_t& a, const mat4_t& b) {
@@ -313,7 +327,7 @@ static inline const mat4_t &&mat4_rotate(vec_t angle, vec_t x, vec_t y, vec_t z 
 *	@return Amatrix that is translated by 'v'.
 **/
 static inline const mat4_t &&mat4_translate_vec3( const mat4_t &m, const vec3_t &v) {
-	mat4_t r = std::move( m );
+	mat4_t r = m;
 	r[12] = r[0] * v.x + r[4] * v.y + r[8]  * v.z + r[12];
 	r[13] = r[1] * v.x + r[5] * v.y + r[9]  * v.z + r[13];
 	r[14] = r[2] * v.x + r[6] * v.y + r[10] * v.z + r[14];
@@ -325,7 +339,7 @@ static inline const mat4_t &&mat4_translate_vec3( const mat4_t &m, const vec3_t 
 *	@return A matrix that is scaled by 'v'.
 **/
 static inline const mat4_t &&mat4_scale_vec3( const mat4_t &m, const vec3_t &v) {
-	mat4_t r = std::move( m );
+	mat4_t r = m;
 	r[0] *= v.x; r[4] *= v.y; r[8]  *= v.z;
 	r[1] *= v.x; r[5] *= v.y; r[9]  *= v.z;
 	r[2] *= v.x; r[6] *= v.y; r[10] *= v.z;
@@ -337,11 +351,7 @@ static inline const mat4_t &&mat4_scale_vec3( const mat4_t &m, const vec3_t &v) 
 *	@return The transposed matrix of m.
 **/
 static inline const mat4_t &&mat4_transpose( const mat4_t &m) {
-	//mat4_t out;
-	//out[0] = m[0]; out[1] = m[4]; out[2] = m[8]; out[3] = m[12];
-	//out[4] = m[1]; out[5] = m[5]; out[6] = m[9]; out[7] = m[13];
-	//out[8] = m[2]; out[9] = m[6]; out[10] = m[10]; out[11] = m[14];
-	//out[12] = m[3]; out[13] = m[7]; out[14] = m[11]; out[15] = m[15];
+
 	return std::move(
 		mat4_t(
 			{
