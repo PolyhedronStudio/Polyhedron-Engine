@@ -68,12 +68,16 @@ template<typename T> struct quat_template {
     /**
     *	Operators
     **/    
-		// Pointer.
+	/**
+	*	@brief	*(pointer) operator.
+	**/
     inline operator T* () { 
         return &xyzw[0];
     }
     
-    // Pointer cast to const float*
+	/**
+	*	@brief	const *(pointer) operator.
+	**/
     inline operator const T* () const { 
         return &xyzw[0];
     }

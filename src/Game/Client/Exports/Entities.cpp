@@ -660,7 +660,7 @@ void ClientGameEntities::AddViewEntities() {
     //}
 
     // Setup basic render entity flags for our view weapon.
-    gunRenderEntity.flags =  RenderEffects::DepthHack | RenderEffects::WeaponModel;
+    gunRenderEntity.flags =  RenderEffects::DepthHack | RenderEffects::WeaponModel | RenderEffects::MinimalLight;
     if (info_hand->integer == 1) {
         gunRenderEntity.flags |= RF_LEFTHAND;
     }

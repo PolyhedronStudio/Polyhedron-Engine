@@ -2488,7 +2488,7 @@ evaluate_taa_settings(const reference_mode_t* ref_mode) {
 }
 
 static void
-prepare_sky_matrix(float time, vec3_t sky_matrix[3])
+prepare_sky_matrix(float time, vec3_t *sky_matrix)
 {
 	if (sky_rotation != 0.f)
 	{
@@ -2503,7 +2503,7 @@ prepare_sky_matrix(float time, vec3_t sky_matrix[3])
 }
 
 static void
-prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
+prepare_camera(const vec3_t position, const vec3_t direction, float *data)
 {
 	vec3_t forward, right, up;
 	VectorCopy(direction, forward);

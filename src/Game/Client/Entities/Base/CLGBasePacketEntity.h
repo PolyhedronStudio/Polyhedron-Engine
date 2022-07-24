@@ -1039,26 +1039,26 @@ public:
     *
     **/
     //! 'Think' Callback Pointer. (Gets dispatched by an entity's Think method based on nextThinkTime.)
-    using ThinkCallbackPointer      = void(IClientGameEntity::*)(void);
+    using ThinkCallbackPointer      = void(GameEntity::*)(void);
     //! 'Use' Callback Pointer.
-    using UseCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* other, IClientGameEntity* activator);
+    using UseCallbackPointer        = void(GameEntity::*)(GameEntity* other, GameEntity* activator);
     //! 'Touch' Callback Pointer.
-    using TouchCallbackPointer      = void(IClientGameEntity::*)(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    using TouchCallbackPointer      = void(GameEntity::*)(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     //! 'Blocked' Callback Pointer.
-    using BlockedCallbackPointer    = void(IClientGameEntity::*)(IClientGameEntity* other);
+    using BlockedCallbackPointer    = void(GameEntity::*)(GameEntity* other);
     //! 'Damage' Callback Pointer.
-    using TakeDamageCallbackPointer = void(IClientGameEntity::*)(IClientGameEntity* other, float kick, int32_t damage);
+    using TakeDamageCallbackPointer = void(GameEntity::*)(GameEntity* other, float kick, int32_t damage);
     //! 'Die' Callback Pointer.
-    using DieCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
+    using DieCallbackPointer        = void(GameEntity::*)(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
     //! 'Stop' Callback Pointer. (Gets dispatched when an entity's physics movement has come to has stoppped, come to an end.)
-    using StopCallbackPointer		= void(IClientGameEntity::*)();
+    using StopCallbackPointer		= void(GameEntity::*)();
 
     /**
     *   @brief  Dispatches 'Use' callback.
     *   @param  other:      
     *   @param  activator:  
     **/
-    virtual void DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator) override;
+    virtual void DispatchUseCallback(GameEntity* other, GameEntity* activator) override;
     /**
     *   @brief  Dispatches 'Use' callback.
     *   @param  inflictor:  
@@ -1066,12 +1066,12 @@ public:
     *   @param  damage:     
     *   @param  pointer:    
     **/
-    virtual void DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) override;
+    virtual void DispatchDieCallback(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) override;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  other:  
     **/
-    virtual void DispatchBlockedCallback(IClientGameEntity* other) override;
+    virtual void DispatchBlockedCallback(GameEntity* other) override;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  self:   
@@ -1079,14 +1079,14 @@ public:
     *   @param  plane:  
     *   @param  surf:   
     **/
-    virtual void DispatchTouchCallback(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) override;
+    virtual void DispatchTouchCallback(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) override;
     /**
     *   @brief  Dispatches 'TakeDamage' callback.
     *   @param  other:
     *   @param  kick:
     *   @param  damage:
     **/
-    virtual void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) override;
+    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) override;
     /**
     *   @brief  Dispatches 'Stop' callback.
     **/

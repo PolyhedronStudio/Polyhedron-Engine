@@ -455,7 +455,7 @@ void CLGBasePacketEntity::OnEventID(uint32_t eventID) {
 *   @param  other:      
 *   @param  activator:  
 **/
-void CLGBasePacketEntity::DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator) {
+void CLGBasePacketEntity::DispatchUseCallback(GameEntity* other, GameEntity* activator) {
 	// Safety check.
 	if (useFunction == nullptr)
 		return;
@@ -471,7 +471,7 @@ void CLGBasePacketEntity::DispatchUseCallback(IClientGameEntity* other, IClientG
 *   @param  damage:     
 *   @param  pointer:    
 **/
-void CLGBasePacketEntity::DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) {
+void CLGBasePacketEntity::DispatchDieCallback(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) {
 	// Safety check.
 	if (dieFunction == nullptr)
 		return;
@@ -485,7 +485,7 @@ void CLGBasePacketEntity::DispatchDieCallback(IClientGameEntity* inflictor, ICli
 *   @brief  Dispatches 'Blocked' callback.
 *   @param  other:  
 **/
-void CLGBasePacketEntity::DispatchBlockedCallback(IClientGameEntity* other) {
+void CLGBasePacketEntity::DispatchBlockedCallback(GameEntity* other) {
 	// Safety check.
 	if (blockedFunction == nullptr)
 		return;
@@ -501,7 +501,7 @@ void CLGBasePacketEntity::DispatchBlockedCallback(IClientGameEntity* other) {
 *   @param  plane:  
 *   @param  surf:   
 **/
-void CLGBasePacketEntity::DispatchTouchCallback(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
+void CLGBasePacketEntity::DispatchTouchCallback(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) {
 	// Safety check.
 	if (touchFunction == nullptr)
 		return;
@@ -516,7 +516,7 @@ void CLGBasePacketEntity::DispatchTouchCallback(IClientGameEntity* self, IClient
 *   @param  kick:
 *   @param  damage:
 **/
-void CLGBasePacketEntity::DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) {
+void CLGBasePacketEntity::DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) {
 	// Safety check.
 	if (takeDamageFunction == nullptr)
 		return;
@@ -777,9 +777,9 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 	EntityAnimationState *previousAnimation	= &previousState->currentAnimation;
 
 	// Model Index 3.
-	if (currentState->modelIndex3) {
+	if ( currentState->modelIndex3 != 0 ) {
 		// Seek right hand bone.
-		auto *rightHandeNode = entitySkeleton.boneMap["mixamorig8:RightHand"];
+		EntitySkeletonBoneNode *rightHandeNode = entitySkeleton.boneMap["mixamorig8:RightHand"];
 
 		// Get the number.
 		const int32_t poseNumber = rightHandeNode->GetEntitySkeletonBone()->index;
@@ -793,42 +793,6 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 
 		// Set the modelindex3 model for this refresh entity.
 		refreshAttachmentEntity.model = cl->drawModels[ currentState->modelIndex3 ];
-
-		// 
-		//clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
-		//clgi.ES_ComputeLocalPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
-
-		//// Now read stuff out of our matrice.
-		//float *inMatrix = &localPoseMatrices[poseNumber * 12];
-		//float outMatrix[12];
-		//Matrix34Invert(inMatrix, outMatrix);
-		//
-		//mat3_t angleMatrix = matrix3_from_angles( 
-		//	refreshAttachmentEntity.angles
-		//);
-		//mat3_t finalMatrix = matrix3_multiply(outMatrix, angleMatrix);
-
-
-		//// Last but not least, position it at the bone pose origin.
-		//float mx = finalMatrix[3];
-		//float my = finalMatrix[7];
-		//float mz = finalMatrix[11];
-
-		//float _mx = finalMatrix[0];
-		//float _my = finalMatrix[4];
-		//float _mz = finalMatrix[8];
-		//		
-		////refreshAttachmentEntity.rootBoneAxisFlags = 0;
-		////refreshAttachmentEntity.origin.z += _mx;
-		//refreshAttachmentEntity.origin += { 
-		//	//mx, 
-		//	_mz,
-		//	_my,
-		//	_mx
-		//};
-
-		//refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
-		//refreshAttachmentEntity.currentBonePoses = nullptr;
 
 		// Compose the world and local pose matrices.
 		// TODO: We oughta only do this once.
@@ -867,150 +831,32 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		/**
 		*	Set refresh attachment entity angles. (Adjust to entity world transforms.)
 		**/
+		// Rotation matrix.
+		mat4_t matRotate = mat4_rotate( refreshEntity.angles.x, 1, 0, 0 );
+		mat4_t matRotatedPoseBone = mat4_multiply_mat4( matBonePose, matRotate );
+
+		//mat3_t matRotatedPoseBone	= mat3_rotate( matBonePose, refreshEntity.angles.x, vec3_zero()); //mat3_multiply(matRefreshBonePose, matRotateAngle);
 		
-		//mat3_t matRotatedPoseBone	= matrix3_rotate( invMatrix, refreshEntity.angles.x, vec3_zero()); //matrix3_multiply(matRefreshBonePose, matRotateAngle);
 		vec3_t oldBoneAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
 
-		// Get bone pose angles.
-		//vec3_t boneAngles = matrix3_to_angles( matRotatedPoseBone );
-		
-		vec3_t entityAngles = matrix3_to_angles( &matEntity[0]);
-		mat4_t rotatedPose;
-		float invMatrix[12];
-		Matrix34Invert(matBonePose, invMatrix);
-		mult_matrix_matrix(rotatedPose, invMatrix, matEntity);
-
-		// Axis vectors of angles.
-		vec3_t axis[3];
-		AnglesToAxis({ 0, -refreshEntity.angles.y, 0 }, axis);
-		//AnglesToAxis({ -refreshEntity.angles.x, 0, 0 }, axis);
-
-		// Rotate bone pose around axis point.
-		vec3_t boneAngles = matrix3_to_angles( matRefreshBonePose );
-		RotatePoint(boneAngles, axis);
+		vec3_t rotation = {
+			matRotatedPoseBone[2],
+			matRotatedPoseBone[6],
+			matRotatedPoseBone[10]
+		};
 
 		// Euler up.
-		boneAngles = vec3_euler ( vec3_normalize( boneAngles ) );
+		vec3_t boneAngles = vec3_euler ( vec3_normalize( rotation ) );
 
 		// lerp euler angles, store final angles as last previous angles.
 		vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngles, boneAngles, 1.0 - refreshAnimation.backLerp);
 		if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
 
 		// Set angles.
-		refreshAttachmentEntity.angles = finalBoneAngles;
-
-
-
-
-
-
-
-
-		///// THIS ALMOST WORKS <-- IT DOES NOT LERP?
-		//float invMatrix[12];
-		//Matrix34Invert(matBonePose, invMatrix);
-
-		//mat3_t matRotateAngle		= matrix3_from_angles( refreshAttachmentEntity.angles );
-		////mat3_t matRotatedPoseBone	= matrix3_rotate( invMatrix, refreshEntity.angles.x, vec3_zero()); //matrix3_multiply(matRefreshBonePose, matRotateAngle);
-
-		//// Get bone pose angles.
-		////vec3_t boneAngles = matrix3_to_angles( matRotatedPoseBone );
-		//vec3_t transformedAngles = vec3_normalize(transform_point(boneOrigin, matEntity));
-		//vec3_t boneAngles = matrix3_to_angles( invMatrix );
-
-		//vec3_t normalizedDir = vec3_normalize( refreshAttachmentEntity.angles );
-
-		//// Transform angles to our entity matrix.
-		//vec4_t v4boneAngles = { boneAngles.x, boneAngles.y, boneAngles.z, 1.f };
-		////vec4_t v4rotBoneAngles = vec4_zero();
-		//mult_matrix_vector(v4boneAngles, matRotateAngle, v4boneAngles);
-
-		//vec3_t rotBoneAngles = vec3_euler( boneAngles * transformedAngles ) ;//vec3_euler( { v4boneAngles.x, v4boneAngles.y, v4boneAngles.z } );// transform_point( boneAngles, matRotateAngle  );
-		////vec3_t rotBoneAngles = { v4boneAngles.x, v4boneAngles.y, v4boneAngles.z };// transform_point( boneAngles, matRotateAngle  );
-
-		//// Lerp angles between old and current.
-		//vec3_t oldBoneAngle = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
-		//vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngle, rotBoneAngles, 1.0 - refreshAnimation.backLerp);
-		//if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
-
-		//refreshAttachmentEntity.angles += finalBoneAngles;
-		/////////////////////////
-
-
-		//// Take local world pose matrix and invert it.
-		//float invMatrix[12];
-		//Matrix34Invert(matBonePose, invMatrix);
-		//// Rotate by refresh angles.
-		//mat3_t matRotateAngle		= matrix3_from_angles( refreshAttachmentEntity.angles );
-		//mat3_t matRotatedPoseBone	= matrix3_rotate( matBonePose, refreshAttachmentEntity.angles.x, refreshAttachmentEntity.origin); //matrix3_multiply(matRefreshBonePose, matRotateAngle);
-		////refreshAttachmentEntity.rootBoneAxisFlags = 0;
-		//// To get our angle, Convert to vector and apply angles.
-		////vec3_t matAngles =  matrix3_to_angles(matRefreshBonePose);
-		////refreshAttachmentEntity.angles.x += matAngles.x;
-		////refreshAttachmentEntity.angles.y += matAngles.y;
-		////refreshAttachmentEntity.angles.z += matAngles.z;
-
-		//vec3_t vecPoseBone = { matRotatedPoseBone[4], matRotatedPoseBone[8], matRotatedPoseBone[12] };
-		//vec3_t rotatedAngles = vec3_euler(transform_point(vecPoseBone, matRotateAngle ));
-		////refreshAttachmentEntity.origin.x += rotatedOrigin.x;
-		////refreshAttachmentEntity.origin.y += rotatedOrigin.y;
-		////refreshAttachmentEntity.origin.z += rotatedOrigin.z;
-		////refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
-		//
-		//vec3_t oldAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
-		//vec3_t matAngles =  vec3_euler( matrix3_to_angles(matRotatedPoseBone) );
-
-		////vec3_t finalAngles = vec3_mix_euler(oldAngles, matAngles, 1.0f - refreshAnimation.backLerp);
-		//vec3_t finalAngles = vec3_mix_euler(oldAngles, rotatedAngles, 1.0f - refreshAnimation.backLerp);
-		//if (GetNumber() == 13) {
-		//	prevAngles[0] = finalAngles;//finalAngles;
-		//} else {
-		//	prevAngles[1] = finalAngles;//finalAngles;
-		//}
-		//refreshAttachmentEntity.angles.x = finalAngles.x;
-		//refreshAttachmentEntity.angles.y = finalAngles.y;
-		//refreshAttachmentEntity.angles.z = finalAngles.z;
-		//
-		//
-		////// Get origin.
-		////vec3_t origin = { matRotatedPoseBone[4], matRotatedPoseBone[8], matRotatedPoseBone[12] };
-		////vec3_t rotatedOrigin = transform_point(origin, matRotateAngle );
-
-		//Com_DPrint( "--------- Entity(#%i) ---------\n", GetNumber() );
-		//Com_DPrint( "refAttachOrigin={%f,%f,%f}\n", boneOrigin.x, boneOrigin.y, boneOrigin.z );
-		//Com_DPrint( "refAttachRotAngles={%f,%f,%f}\n", matAngles.x, matAngles.y, matAngles.z );
-		//Com_DPrint( "refAttachRotOrigin={%f,%f,%f}\n", rotatedOrigin.x, rotatedOrigin.y, rotatedOrigin.z );
-
-
-		//---------------------
-		//vec3_t matTranslate = matrix3_transform_vector(matRotatedPoseBone, { 1, 1, 1} );
-		//refreshAttachmentEntity.origin.x += invMatrix[0];
-		//refreshAttachmentEntity.origin.y += invMatrix[4];
-		//refreshAttachmentEntity.origin.z += invMatrix[11];
-		//refreshAttachmentEntity.oldorigin = refreshAttachmentEntity.origin;
+		refreshAttachmentEntity.angles += finalBoneAngles;
 
 		// Add to our view.
 		clge->view->AddRenderEntity(refreshAttachmentEntity);
-
-		// The following rotates the bone and applies its rotations to the refresh entity's rotation.
-		// Left as example:
-		// Compose transforms.
-		//clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
-		//clgi.ES_ComputeLocalPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
-
-		//// Take local world pose matrix and invert it.
-		//float invMatrix[12];
-		//float *matPoseBone = &localPoseMatrices[poseNumber * 12];
-		//Matrix34Invert(matPoseBone, invMatrix);
-		//// Rotate by refresh angles.
-		//mat3_t matRotateAngle		= matrix3_from_angles( refreshAttachmentEntity.angles );
-		//mat3_t matRotatedPoseBone	= matrix3_multiply(invMatrix, matRotateAngle);
-
-		//// Convert to vector and apply angles.
-		//vec3_t matAngles = matrix3_to_angles(invMatrix);
-		//refreshAttachmentEntity.angles.x += matAngles.z;
-		//refreshAttachmentEntity.angles.y -= matAngles.y;
-		//refreshAttachmentEntity.angles.z += matAngles.x;
 	}
 
 	// Model Index 4.

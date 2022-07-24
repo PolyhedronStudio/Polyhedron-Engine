@@ -18,13 +18,6 @@
 const bool ES_CreateFromModel( const model_t *model, EntitySkeleton *es );
 
 /**
-*	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
-*
-*			Treats it no different than as if it were a regular alias model going from fram A to B. And does not make use
-*			of said node tree which is stored in the entity's skeleton.
-**/
-void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entity, float* pose_matrices );
-/**
 *	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
 *			relative transform for all bones.
 *
@@ -40,6 +33,18 @@ void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePos
 *	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
 **/
 void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction = 1.0f );
+
+/**
+*	@brief	Calculates the bone's 
+**/
+
+/**
+*	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.
+*
+*			Treats it no different than as if it were a regular alias model going from fram A to B. And does not make use
+*			of said node tree which is stored in the entity's skeleton.
+**/
+void ES_StandardComputeTransforms( const model_t* model, const r_entity_t* entity, float* pose_matrices );
 
 /**
 *	@brief	Compute local space matrices for the given pose transformations.

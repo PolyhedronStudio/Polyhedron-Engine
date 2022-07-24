@@ -1,22 +1,20 @@
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Matrix4x4 struct and operation implementations.
+*
+***/
+#pragma once
 
-//
-// Shared/Math/matrix4.h
-//
-// Polyhedron Math Library: Matrix4
-// 
-// Most of these functions have been lend from the QFusion project.
-//
-#ifndef __INC_SHARED_MATH_MATRIX4_H__
-#define __INC_SHARED_MATH_MATRIX4_H__
-
+// Shared header.
 #include "../Shared.h"
 
-//-----------------
-// Matrix 4x4 type definiton.
-//
-// The matrix is implemented like a union class.
-//-----------------
+/**
+*	@brief	4x4 Matrix type. Implemented as union struct.
+**/
 struct mat4_t {
 	union
 	{
@@ -36,9 +34,11 @@ struct mat4_t {
 		} rows;
 	} u = { };
 
-	//-----------------
-	// Constructors.
-	//-----------------
+
+
+    /**
+    *	Constructors.
+    **/
 	// Default.
 	mat4_t() {
 		// Set to identity by default.
@@ -67,18 +67,14 @@ struct mat4_t {
 		u.rows.d = vec4_t{ mat[12], mat[13], mat[14], mat[15] };
 	}
 
-	//-----------------
-	// Operators.
-	//-----------------
-	//// OPERATOR: =
-	//inline mat4_t operator=(const mat4_t& m) const
-	//{
-	//	return mat4_t{
-	//		m.rowA, m.rowB, m.rowC, m.rowD
-	//	};
-	//}
 
-	// OPERATOR: ==
+
+    /**
+    *	Operators
+    **/
+	/**
+	*	@brief	== operator.
+	**/
 	inline bool operator==(const mat4_t& m) const
 	{
 		return (u.rows.a[0] == m.u.rows.a[0] && m.u.rows.a[1] == m.u.rows.a[1] && m.u.rows.a[2] == m.u.rows.a[2] && u.rows.a[3] == m.u.rows.a[3]
@@ -87,7 +83,9 @@ struct mat4_t {
 				&& u.rows.d[0] == m.u.rows.d[0] && u.rows.d[1] == m.u.rows.d[1] && u.rows.d[2] == m.u.rows.d[2] && u.rows.d[3] == m.u.rows.d[3]);
 	}
 
-	// OPERATOR: !=
+	/**
+	*	@brief	!= operator.
+	**/
 	inline bool operator!=(const mat4_t& m) const
 	{
 		return (u.rows.a[0] != m.u.rows.a[0] && m.u.rows.a[1] != m.u.rows.a[1] && m.u.rows.a[2] != m.u.rows.a[2] && u.rows.a[3] != m.u.rows.a[3]
@@ -96,89 +94,116 @@ struct mat4_t {
 				&& u.rows.d[0] != m.u.rows.d[0] && u.rows.d[1] != m.u.rows.d[1] && u.rows.d[2] != m.u.rows.d[2] && u.rows.d[3] != m.u.rows.d[3]);
 	}
 
-	// Pointer.
+	/**
+	*	@brief	*(pointer) operator.
+	**/
 	inline operator float *() {
 		return &u.mat.matrix[0];
 	}
 
-	// Pointer cast to const float*
+	/**
+	*	@brief	const *(pointer) operator.
+	**/
 	inline operator const float* () const {
 		return &u.mat.matrix[0];
 	}
 };
 
-//===============
-// matrix4_identity
-// 
-// Returns an identity matrix
-//===============
-static inline mat4_t mat4_identity() {
-	return mat4_t {
-		{1.f, 0.f, 0.f, 0.f},
-		{0.f, 1.f, 0.f, 0.f},
-		{0.f, 0.f, 1.f, 0.f},
-		{0.f, 0.f, 0.f, 1.f},
-	};
+/**
+*	@return	An identity 4x4 matrix.
+**/
+static inline const mat4_t &&mat4_identity() {
+	return std::move(
+		mat4_t {
+			{1.f, 0.f, 0.f, 0.f},
+			{0.f, 1.f, 0.f, 0.f},
+			{0.f, 0.f, 1.f, 0.f},
+			{0.f, 0.f, 0.f, 1.f},
+		}
+	);
 }
 
-//===============
-// mat4_multiply_mat4
-//
-//===============
-static inline mat4_t mat4_multiply_mat4(const mat4_t& a, const mat4_t& b) {
+/**
+*	@return The resulting matrix of 'm1' * 'm2'
+**/
+static inline const mat4_t &&mat4_multiply_mat4(const mat4_t& a, const mat4_t& b) {
+	// Return matrix.
+	mat4_t m;
+
+	return std::move(
+		mat4_t(
+			// RowA:
+			{
+				/*m[0]*/ a[0] * b[0] + a[4] * b[1] + a[8] * b[2] + a[12] * b[3],
+				/*m[1]*/ a[1] * b[0] + a[5] * b[1] + a[9] * b[2] + a[13] * b[3],
+				/*m[2]*/ a[2] * b[0] + a[6] * b[1] + a[10] * b[2] + a[14] * b[3],
+				/*m[3]*/ a[3] * b[0] + a[7] * b[1] + a[11] * b[2] + a[15] * b[3],
+			},
+			// RowB:
+			{
+				/*m[4]*/ a[0] * b[4] + a[4] * b[5] + a[8] * b[6] + a[12] * b[7],
+				/*m[5]*/ a[1] * b[4] + a[5] * b[5] + a[9] * b[6] + a[13] * b[7],
+				/*m[6]*/ a[2] * b[4] + a[6] * b[5] + a[10] * b[6] + a[14] * b[7],
+				/*m[7]*/ a[3] * b[4] + a[7] * b[5] + a[11] * b[6] + a[15] * b[7],
+			},
+			// RowC:
+			{
+				/*m[8]*/ a[0] * b[8] + a[4] * b[9] + a[8] * b[10] + a[12] * b[11],
+				/*m[9]*/ a[1] * b[8] + a[5] * b[9] + a[9] * b[10] + a[13] * b[11],
+				/*m[10]*/a[2] * b[8] + a[6] * b[9] + a[10] * b[10] + a[14] * b[11],
+				/*m[11]*/a[3] * b[8] + a[7] * b[9] + a[11] * b[10] + a[15] * b[11],
+			},
+			// RowD:
+			{		
+				/*m[12]*/a[0] * b[12] + a[4] * b[13] + a[8] * b[14] + a[12] * b[15],
+				/*m[13]*/a[1] * b[12] + a[5] * b[13] + a[9] * b[14] + a[13] * b[15],
+				/*m[14]*/a[2] * b[12] + a[6] * b[13] + a[10] * b[14] + a[14] * b[15],
+				/*m[15]*/a[3] * b[12] + a[7] * b[13] + a[11] * b[14] + a[15] * b[15],
+			}
+		)
+	);
+}
+
+/**
+*	@brief	Performs a fast mat4 multiplication, skipping the 4th column of each row.
+**/
+static inline const mat4_t &&mat4_multiply_fast_mat4(const mat4_t& a, const mat4_t& b) {
 	// Return matrix.
 	mat4_t m;
 
 	// Multiply.
-	m[0]  = a[0] * b[0] + a[4] * b[1] + a[8] * b[2] + a[12] * b[3];
-	m[1]  = a[1] * b[0] + a[5] * b[1] + a[9] * b[2] + a[13] * b[3];
-	m[2]  = a[2] * b[0] + a[6] * b[1] + a[10] * b[2] + a[14] * b[3];
-	m[3]  = a[3] * b[0] + a[7] * b[1] + a[11] * b[2] + a[15] * b[3];
-	m[4]  = a[0] * b[4] + a[4] * b[5] + a[8] * b[6] + a[12] * b[7];
-	m[5]  = a[1] * b[4] + a[5] * b[5] + a[9] * b[6] + a[13] * b[7];
-	m[6]  = a[2] * b[4] + a[6] * b[5] + a[10] * b[6] + a[14] * b[7];
-	m[7]  = a[3] * b[4] + a[7] * b[5] + a[11] * b[6] + a[15] * b[7];
-	m[8]  = a[0] * b[8] + a[4] * b[9] + a[8] * b[10] + a[12] * b[11];
-	m[9]  = a[1] * b[8] + a[5] * b[9] + a[9] * b[10] + a[13] * b[11];
-	m[10] = a[2] * b[8] + a[6] * b[9] + a[10] * b[10] + a[14] * b[11];
-	m[11] = a[3] * b[8] + a[7] * b[9] + a[11] * b[10] + a[15] * b[11];
-	m[12] = a[0] * b[12] + a[4] * b[13] + a[8] * b[14] + a[12] * b[15];
-	m[13] = a[1] * b[12] + a[5] * b[13] + a[9] * b[14] + a[13] * b[15];
-	m[14] = a[2] * b[12] + a[6] * b[13] + a[10] * b[14] + a[14] * b[15];
-	m[15] = a[3] * b[12] + a[7] * b[13] + a[11] * b[14] + a[15] * b[15];
-
-	// Return matrix.
-	return m;
-}
-
-//===============
-// mat4_multiply_fast_mat4
-//
-//===============
-static inline mat4_t mat4_multiply_fast_mat4(const mat4_t& a, const mat4_t& b) {
-	// Return matrix.
-	mat4_t m;
-
-	// Multiply.
-	m[0]  = a[0] * b[0] + a[4] * b[1] + a[8] * b[2];
-	m[1]  = a[1] * b[0] + a[5] * b[1] + a[9] * b[2];
-	m[2]  = a[2] * b[0] + a[6] * b[1] + a[10] * b[2];
-	m[3]  = 0.0f;
-	m[4]  = a[0] * b[4] + a[4] * b[5] + a[8] * b[6];
-	m[5]  = a[1] * b[4] + a[5] * b[5] + a[9] * b[6];
-	m[6]  = a[2] * b[4] + a[6] * b[5] + a[10] * b[6];
-	m[7]  = 0.0f;
-	m[8]  = a[0] * b[8] + a[4] * b[9] + a[8] * b[10];
-	m[9]  = a[1] * b[8] + a[5] * b[9] + a[9] * b[10];
-	m[10] = a[2] * b[8] + a[6] * b[9] + a[10] * b[10];
-	m[11] = 0.0f;
-	m[12] = a[0] * b[12] + a[4] * b[13] + a[8] * b[14] + a[12];
-	m[13] = a[1] * b[12] + a[5] * b[13] + a[9] * b[14] + a[13];
-	m[14] = a[2] * b[12] + a[6] * b[13] + a[10] * b[14] + a[14];
-	m[15] = 1.0f;
-
-	// Return matrix.
-	return m;
+	return std::move( 
+		mat4_t (
+			// RowA:
+			{
+				a[0] * b[0] + a[4] * b[1] + a[8] * b[2],
+				a[1] * b[0] + a[5] * b[1] + a[9] * b[2],
+				a[2] * b[0] + a[6] * b[1] + a[10] * b[2],
+				0.0f
+			},
+			// RowB:
+			{
+				a[0] * b[4] + a[4] * b[5] + a[8] * b[6],
+				a[1] * b[4] + a[5] * b[5] + a[9] * b[6],
+				a[2] * b[4] + a[6] * b[5] + a[10] * b[6],
+				0.0f,
+			},
+			// RowC:
+			{
+				a[0] * b[8] + a[4] * b[9] + a[8] * b[10],
+				a[1] * b[8] + a[5] * b[9] + a[9] * b[10],
+				a[2] * b[8] + a[6] * b[9] + a[10] * b[10],
+				0.0f,
+			},
+			// RowB:
+			{
+				a[0] * b[12] + a[4] * b[13] + a[8] * b[14] + a[12],
+				a[1] * b[12] + a[5] * b[13] + a[9] * b[14] + a[13],
+				a[2] * b[12] + a[6] * b[13] + a[10] * b[14] + a[14],
+				1.0f,
+			}
+		)
+	);
 }
 
 //===============
@@ -190,9 +215,7 @@ static inline mat4_t mat4_multiply_fast_mat4(const mat4_t& a, const mat4_t& b) {
 // Adapted from code contributed to Mesa by David Moore (Mesa 7.6 under SGI Free License B - which is MIT/X11-type)
 // added helper for common subexpression elimination by eihrul, and other optimizations by div0
 //===============
-static inline qboolean mat4_invert( const mat4_t &in, mat4_t &out ) {
-	vec_t det;
-
+static inline const bool mat4_invert( const mat4_t &in, mat4_t &out ) {
 	// note: orientation does not matter, as transpose(invert(transpose(m))) == invert(m), proof:
 	//   transpose(invert(transpose(m))) * m
 	// = transpose(invert(transpose(m))) * transpose(transpose(m))
@@ -226,7 +249,7 @@ static inline qboolean mat4_invert( const mat4_t &in, mat4_t &out ) {
 
 	// calculate the determinant (as inverse == 1/det * adjoint, adjoint * m == identity * det,
 	// so this calculates the det)
-	det = m00 * out[0] + m10 * out[1] + m20 * out[2] + m30 * out[3];
+	vec_t det = m00 * out[0] + m10 * out[1] + m20 * out[2] + m30 * out[3];
 	if( det == 0.0f ) {
 		return false;
 	}
@@ -243,12 +266,10 @@ static inline qboolean mat4_invert( const mat4_t &in, mat4_t &out ) {
 	return true;
 }
 
-//===============
-// mat4_rotate
-//
-// Returns a matrix that is rotated by angle around the given axises.
-//===============
-static inline mat4_t mat4_rotate(vec_t angle, vec_t x, vec_t y, vec_t z ) {
+/**
+*	@return A matrix that is rotated by angle around the given axises.
+**/
+static inline const mat4_t &&mat4_rotate(vec_t angle, vec_t x, vec_t y, vec_t z ) {
 	// Return matrix.
 	mat4_t m;
 
@@ -279,129 +300,125 @@ static inline mat4_t mat4_rotate(vec_t angle, vec_t x, vec_t y, vec_t z ) {
 	t[3] = t[7] = t[11] = t[12] = t[13] = t[14] = 0;
 	t[15] = 1;
 
-	m.u.rows.a = b.u.rows.a;
-	m.u.rows.b = b.u.rows.b;
-	m.u.rows.c = b.u.rows.c;
-	m.u.rows.d = b.u.rows.d;
-	m = mat4_multiply_fast_mat4(b, t);
+	//m.u.rows.a = b.u.rows.a;
+	//m.u.rows.b = b.u.rows.b;
+	//m.u.rows.c = b.u.rows.c;
+	//m.u.rows.d = b.u.rows.d;
+	//m = mat4_multiply_fast_mat4(b, t);
 
-	return m;
+	return std::move( mat4_multiply_fast_mat4( b, t ) );
 }
 
-//===============
-// mat4_translate_vec3
-// 
-// Returns a matrix translated by the vector3.
-//===============
-static inline mat4_t mat4_translate_vec3( const mat4_t &m, const vec3_t &v) {
-	mat4_t r = m;
+/**
+*	@return Amatrix that is translated by 'v'.
+**/
+static inline const mat4_t &&mat4_translate_vec3( const mat4_t &m, const vec3_t &v) {
+	mat4_t r = std::move( m );
 	r[12] = r[0] * v.x + r[4] * v.y + r[8]  * v.z + r[12];
 	r[13] = r[1] * v.x + r[5] * v.y + r[9]  * v.z + r[13];
 	r[14] = r[2] * v.x + r[6] * v.y + r[10] * v.z + r[14];
 	r[15] = r[3] * v.x + r[7] * v.y + r[11] * v.z + r[15];
-	return r;
+	return std::move( r );
 }
 
-//===============
-// mat4_scale_vec3
-// 
-// Returns a matrix scaled by the vector3.
-//===============
-static inline mat4_t mat4_scale_vec3( const mat4_t &m, const vec3_t &v) {
-	mat4_t r = m;
+/**
+*	@return A matrix that is scaled by 'v'.
+**/
+static inline const mat4_t &&mat4_scale_vec3( const mat4_t &m, const vec3_t &v) {
+	mat4_t r = std::move( m );
 	r[0] *= v.x; r[4] *= v.y; r[8]  *= v.z;
 	r[1] *= v.x; r[5] *= v.y; r[9]  *= v.z;
 	r[2] *= v.x; r[6] *= v.y; r[10] *= v.z;
 	r[3] *= v.x; r[7] *= v.y; r[11] *= v.z;
-	return r;
+	return std::move( r );
 }
 
-//===============
-// mat4_transpose
-// 
-// Returns the transposed matrix of m.
-//===============
-static inline mat4_t mat4_transpose( const mat4_t &m) {
-	mat4_t out;
-	out[0] = m[0]; out[1] = m[4]; out[2] = m[8]; out[3] = m[12];
-	out[4] = m[1]; out[5] = m[5]; out[6] = m[9]; out[7] = m[13];
-	out[8] = m[2]; out[9] = m[6]; out[10] = m[10]; out[11] = m[14];
-	out[12] = m[3]; out[13] = m[7]; out[14] = m[11]; out[15] = m[15];
-	return out;
+/**
+*	@return The transposed matrix of m.
+**/
+static inline const mat4_t &&mat4_transpose( const mat4_t &m) {
+	//mat4_t out;
+	//out[0] = m[0]; out[1] = m[4]; out[2] = m[8]; out[3] = m[12];
+	//out[4] = m[1]; out[5] = m[5]; out[6] = m[9]; out[7] = m[13];
+	//out[8] = m[2]; out[9] = m[6]; out[10] = m[10]; out[11] = m[14];
+	//out[12] = m[3]; out[13] = m[7]; out[14] = m[11]; out[15] = m[15];
+	return std::move(
+		mat4_t(
+			{
+					m[0], m[4], m[8], m[12]
+			},
+			{
+					m[1], m[5], m[9], m[13]
+			},
+			{
+					m[2], m[6], m[10], m[14]
+			},
+			{
+					m[3], m[7], m[11], m[15]
+			}
+		)
+	);
 }
 
-//===============
-// mat4_to_vec3
-//
-// Returns a std::tuple containing:
-// [0] -> vec3_t translation
-// [1] -> vec3_t scale
-// [2] -> vec3_t rotation
-//===============
-static inline const std::tuple<vec3_t, vec3_t, vec3_t> mat4_to_vec3(const mat4_t& m) {
-	vec3_t translation;
-	vec3_t scale;
-	vec3_t rotation;
-
+/**
+*	@brief	Extracts the translate, scale and rotate aspects of the matrix.
+**/
+static inline void mat4_to_vec3( const mat4_t& m, vec3_t *translate = nullptr, vec3_t *scale = nullptr, vec3_t *rotate = nullptr ) {
 	// Translation.
-	translation.x = m[0];
-	translation.y = m[4];
-	translation.z = m[8];
+	if ( translate != nullptr ) {
+		*translate = { m[0], m[4], m[8] };
+	}
 	// Scale.
-	scale.x = m[1];
-	scale.y = m[5];
-	scale.z = m[9];
+	if ( scale != nullptr ) {
+		*scale = { m[1], m[5], m[9] };
+	}
 	// Rotation
-	rotation.x = m[2];
-	rotation.y = m[6];
-	rotation.z = m[10];
-
-	return std::make_tuple(translation, scale, rotation);
+	if ( rotate != nullptr ) {
+		*rotate = { m[2], m[6], m[10] };
+	}
 }
 
-//===============
-// mat4_multiply_vec4
-//
-// Returns a vec4_t multiplied by the matrix transform.
-//===============
-static inline vec4_t mat4_multiply_vec4( const mat4_t &m, const vec4_t &v) {
-	return vec4_t{
-		m[0] * v[0] + m[4] * v[1] + m[8] * v[2] + m[12] * v[3],
-		m[1] * v[0] + m[5] * v[1] + m[9] * v[2] + m[13] * v[3],
-		m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14] * v[3],
-		m[3] * v[0] + m[7] * v[1] + m[11] * v[2] + m[15] * v[3],
-	};
+/**
+*	@return Returns a vec4_t multiplied by the matrix transform.
+**/
+static inline const vec4_t &&mat4_multiply_vec4( const mat4_t &m, const vec4_t &v) {
+	return std::move(
+		vec4_t {
+			m[0] * v[0] + m[4] * v[1] + m[8] * v[2] + m[12] * v[3],
+			m[1] * v[0] + m[5] * v[1] + m[9] * v[2] + m[13] * v[3],
+			m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14] * v[3],
+			m[3] * v[0] + m[7] * v[1] + m[11] * v[2] + m[15] * v[3],
+		}
+	);
 }
 
-//===============
-// mat4_multiply_vec3
-//
-// Returns a vec3_t multiplied by the matrix transform.
-//===============
-static inline vec3_t mat4_multiply_vec3( const mat4_t m, const vec3_t v, vec3_t out ) {
-	return vec3_t{
-		m[0] * v[0] + m[4] * v[1] + m[8] * v[2],
-		m[1] * v[0] + m[5] * v[1] + m[9] * v[2],
-		m[2] * v[0] + m[6] * v[1] + m[10] * v[2],
-	};
+/**
+*	@return Returns a vec3_t multiplied by the matrix transform.
+**/
+static inline const vec3_t &&mat4_multiply_vec3( const mat4_t m, const vec3_t v, vec3_t out ) {
+	return std::move( 
+		vec3_t {
+			m[0] * v[0] + m[4] * v[1] + m[8] * v[2],
+			m[1] * v[0] + m[5] * v[1] + m[9] * v[2],
+			m[2] * v[0] + m[6] * v[1] + m[10] * v[2],
+		}
+	);
 }
 
-//===============
-// mat4_project_orthographic
-// 
-// Returns an orthogonal projection matrix.
-//===============
-static inline mat4_t mat4_project_orthographic(float l = 0.f, float r = 1280.f, float b = 720.f, float t = 0.f, float n = -10000.f, float f = 10000.f) {
-	return mat4_t {
-		//{2.f / (r - l), 0.f, 0.f, -(r + l) / (r - l)},
+/**
+*	@return An orthogonal projection matrix.
+**/
+static inline const mat4_t &&mat4_project_orthographic(float l = 0.f, float r = 1280.f, float b = 720.f, float t = 0.f, float n = -10000.f, float f = 10000.f) {
+	return std::move(
+		mat4_t (
+			//{2.f / (r - l), 0.f, 0.f, -(r + l) / (r - l)},
 		//{0.f, 2.f / (t - b), 0.f, -(t + b) / (t - b)},
 		//{0.f, 0.f, 2.f / (f - n), -(f + n) / (f - n)},
 		//{0.f, 0.f, 0.f, 1.f},
-		{2.0f / (r - l), 0.f, 0.f, 0.f},
-		{0.f, 2.0f / (b - t), 0.f, 0.f},
-		{0.f, 0.f, 1.0f / (n - f), 0.f},
-		{-(r + l) / (r - l), -(b + t) / (b - t), n / (n - f), 1.0f}
-	};
+			{2.0f / (r - l), 0.f, 0.f, 0.f},
+			{0.f, 2.0f / (b - t), 0.f, 0.f},
+			{0.f, 0.f, 1.0f / (n - f), 0.f},
+			{-(r + l) / (r - l), -(b + t) / (b - t), n / (n - f), 1.0f}
+		)
+	);
 }
-
-#endif // __INC_SHARED_MATH_MATRIX4_H__

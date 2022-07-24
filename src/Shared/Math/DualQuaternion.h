@@ -116,7 +116,7 @@ inline const dualquat_t dualquat_from_angles_axis( const vec3_t &angles, const v
 	//mat3_t axis;
 
 	// TODO: This should work also.
-	const mat3_t axis = matrix3_from_angles( angles );
+	const mat3_t axis = mat3_from_angles( angles );
 	// Aonvert angles to axis.
 	//AnglesToAxis( angles, axis );
 

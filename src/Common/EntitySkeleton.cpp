@@ -159,12 +159,6 @@ const bool ES_GenerateBoneTreeHierachy( const SkeletalModelData *skm, EntitySkel
 		return false;
 	}
 
-	// Ensure we got a parent node.
-	//if ( parentNode ) {
-	//	// Warn.
-	//	return;
-	//}
-
 	// Get the bone the parent is pointing to.
 	EntitySkeletonBone *esParentBone = parentNode.GetEntitySkeletonBone();
 
@@ -296,14 +290,6 @@ const bool ES_CreateFromModel( model_t *model, EntitySkeleton* es ) {
 		SkeletalAnimation *animation = skm->animations[animationIndex];
 
 		es->blendActionAnimationStates[animationIndex].resize( animation->blendActions.size() );
-
-		//// Go over each animation's blend actions.
-		//for ( int32_t blendActionIndex = 0; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
-		//	// 
-		//	for ( int32_t j = 0; j < skm->actions.size(); i++ ) {
-
-		//	}
-		//}
 	}
 	// Done.
 	return true;

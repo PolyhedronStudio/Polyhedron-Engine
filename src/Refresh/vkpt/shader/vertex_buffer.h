@@ -50,7 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define LIGHT_BUFFER_BINDING_IDX 2
 #define IQM_MATRIX_BUFFER_BINDING_IDX 3
 // DQ: ------------------- START
-//#define IQM_MATRIX_BUFFER_BINDING_IDX 3
+//#define IQM_DUALQUATERNION_BUFFER_BINDING_IDX 3
 // DQ: ------------------- END
 #define READBACK_BUFFER_BINDING_IDX 4
 #define TONE_MAPPING_BUFFER_BINDING_IDX 5
@@ -99,11 +99,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define IQM_MATRIX_BUFFER_LIST \
 	VERTEX_BUFFER_LIST_DO(float,    4, iqm_matrices,          (MAX_IQM_MATRICES)) \
 
-// DQ: ------------------- START
-//#define IQM_DUALQUAT_BUFFER_LIST \
-//	VERTEX_BUFFER_LIST_DO(float,    8, iqm_dualquats,          (MAX_IQM_MATRICES)) \
-// DQ: ------------------- START
-
 #define VERTEX_BUFFER_LIST_DO(type, dim, name, size) \
 	type name[ALIGN_SIZE_4(size, dim)];
 
@@ -126,6 +121,12 @@ struct IqmMatrixBuffer
 {
 	IQM_MATRIX_BUFFER_LIST
 };
+
+/* DQ: ------------------- START
+ Place this up above replace IQM_MATRIX_BUFFER_LIST
+#define IQM_DUALQUAT_BUFFER_LIST \
+	VERTEX_BUFFER_LIST_DO(float,    8, iqm_dualquats,          (MAX_IQM_MATRICES)) \
+DQ: ------------------- START*/
 // DQ: ------------------- START
 //struct IqmDualQuatBuffer
 //{
