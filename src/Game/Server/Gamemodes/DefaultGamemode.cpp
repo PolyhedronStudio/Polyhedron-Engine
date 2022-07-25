@@ -23,7 +23,7 @@
 #include "../Player/Animations.h"
 
 // Game Mode.
-#include "DefaultGameMode.h"
+#include "DefaultGamemode.h"
 
 // World.
 #include "../World/ServerGameWorld.h"

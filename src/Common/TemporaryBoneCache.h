@@ -18,7 +18,7 @@
 
 
 // We need to know about our EntitySkeletonBonePose type.
-#include "Shared/EntitySKeleton.h"
+#include "Shared/EntitySkeleton.h"
 
 /**
 *	@brief	Currently only contains our vector cache container.

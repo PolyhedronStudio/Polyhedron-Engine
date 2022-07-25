@@ -12,24 +12,28 @@
 #define __INC_SHARED_MATH_UTILITIES_H__
 
 #include "../Shared.h"
+#include <algorithm>
 
 // NAN Macro - Use for checking NAN errors.
 #define nanmask (255<<23)
 #define IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
 // Clamp.// These need to be replaced.
-#define clamp(a,b,c)    ((a)<(b)?(a)=(b):(a)>(c)?(a)=(c):(a))
+//#define clamp(a,b,c)    ((a)<(b)?(a)=(b):(a)>(c)?(a)=(c):(a))
+using std::clamp;
 #define cclamp(a,b,c)   ((b)>(c)?clamp(a,c,b):clamp(a,b,c))
 
 // These need to be replaced.
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif
+// #ifndef max
+// #define max(a,b) ((a)>(b)?(a):(b))
+// #endif
 
-// These need to be replaced.
-#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
+// // These need to be replaced.
+// #ifndef min
+// #define min(a,b) ((a)<(b)?(a):(b))
+// #endif
+using std::min;
+using std::max;
 
 // These need to be replaced.
 #define Q_IsBitSet(data, bit)   (((data)[(bit) >> 3] & (1 << ((bit) & 7))) != 0)

@@ -19,7 +19,7 @@ extern ClientShared cs;
 /**
 *	@brief	Clips the trace against all entities resulting in a final trace result.
 **/
-static void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
+void CL_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins, const vec3_t &maxs, const vec3_t &end, PODEntity *skipEntity, const int32_t contentMask, TraceResult *cmDstTrace) {
     // CM Source Trace.
     TraceResult         cmSrcTrace;
     // Head Node used for testing.

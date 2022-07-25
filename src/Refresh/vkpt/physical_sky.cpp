@@ -747,7 +747,7 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 				}
 				else
 					elevation = e;
-				elevation = max(-90, min(90, elevation));
+				elevation = max(-90.f, min(90.f, elevation));
 
 				skyNeedsUpdate = VK_TRUE;
 			}

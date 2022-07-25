@@ -1,0 +1,9 @@
+{
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "*.inc": "cpp"
+    },
+    "cmake.configureArgs": [
+        "-DVIDEO_WAYLAND:BOOL=OFF"
+    ]
+}

@@ -186,8 +186,8 @@ void update_transparency(VkCommandBuffer command_buffer, const float* view_matri
 				++sprite_num;
 		}
 	}
-	beam_num = min(beam_num, TR_BEAM_MAX_NUM);
-	sprite_num = min(sprite_num, TR_SPRITE_MAX_NUM);
+	beam_num = min(beam_num, static_cast<uint32_t>(TR_BEAM_MAX_NUM));
+	sprite_num = min(sprite_num, static_cast<uint32_t>(TR_SPRITE_MAX_NUM));
 
 	transparency.beam_num = beam_num;
 	transparency.particle_num = particle_num;

@@ -23,7 +23,7 @@
 #include "SVGBaseRootMotionMonster.h"
 
 // Game World.
-#include "../World/ServerGameWorld.h"
+#include "../../World/ServerGameWorld.h"
 
 #define STEPSIZE 18
 

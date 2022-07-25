@@ -398,7 +398,7 @@ static void setup_color(void)
         }
 
         for (i = 0; i < 3; i++) {
-            clamp(color[i], 0, 1);
+            clamp(color[i], 0.0f, 1.0f);
         }
     }
 

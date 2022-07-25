@@ -16,7 +16,7 @@
 
 // Base Slide Monster.
 #include "../Base/SVGBaseRootMotionMonster.h"
-#include "../World/ServerGameWorld.h"
+#include "../../World/ServerGameWorld.h"
 #include "PathMonsterGoal.h"
 
 //===============

@@ -1,5 +1,6 @@
 // License here.
 #pragma once
+#include <inttypes.h>
 
 struct ErrorType {
     //! Exit the entire game with a popup window.

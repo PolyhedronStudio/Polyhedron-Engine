@@ -1547,7 +1547,7 @@ static menuSound_t Slider_Click(menuSlider_t *s)
     int     x;
 
     pos = (s->curvalue - s->minvalue) / (s->maxvalue - s->minvalue);
-    clamp(pos, 0, 1);
+    clamp(pos, 0.0f, 1.0f);
 
     x = CHAR_WIDTH + (SLIDER_RANGE - 1) * CHAR_WIDTH * pos;
 
@@ -1589,7 +1589,7 @@ static menuSound_t Slider_MouseMove(menuSlider_t *s)
         return QMS_NOTHANDLED;
 
     pos = (uis.mouseCoords[0] - (s->generic.x + RCOLUMN_OFFSET + CHAR_WIDTH)) * (1.0f / (SLIDER_RANGE * CHAR_WIDTH));
-    clamp(pos, 0, 1);
+    clamp(pos, 0.0f, 1.0f);
 
     value = pos * (s->maxvalue - s->minvalue);
     steps = Q_rint(value / s->step);
@@ -1669,7 +1669,7 @@ static void Slider_Draw(menuSlider_t *s)
     UI_DrawChar(RCOLUMN_OFFSET + s->generic.x + i * CHAR_WIDTH + CHAR_WIDTH, s->generic.y, flags | UI_LEFT, 130);
 
     pos = (s->curvalue - s->minvalue) / (s->maxvalue - s->minvalue);
-    clamp(pos, 0, 1);
+    clamp(pos, 0.0f, 1.0f);
 
     UI_DrawChar(CHAR_WIDTH + RCOLUMN_OFFSET + s->generic.x + (SLIDER_RANGE - 1) * CHAR_WIDTH * pos, s->generic.y, flags | UI_LEFT, 131);
 

@@ -20,7 +20,7 @@
 #include "../Player/Weapons.h"
 
 // Game Mode.
-#include "DeathMatchGameMode.h"
+#include "DeathMatchGamemode.h"
 
 // World.
 #include "../World/ServerGameWorld.h"

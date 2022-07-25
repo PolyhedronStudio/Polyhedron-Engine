@@ -16,7 +16,7 @@
 #include "../Entities/Base/SVGBasePlayer.h"
 
 // Game Mode.
-#include "CoopGameMode.h"
+#include "CoopGamemode.h"
 
 // World.
 #include "../World/ServerGameWorld.h"

@@ -20,7 +20,7 @@
 #include <cassert>
 
 // Entity BaseLine State.
-static const EntityState       nullEntityState = {};
+// static const EntityState       nullEntityState = {};
 
 
 /**

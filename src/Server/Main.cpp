@@ -611,7 +611,7 @@ A connection request that did not come from the master
 */
 
 typedef struct {
-    int         protocolVersion; // major version
+    int32_t     protocolVersion; // major version
     int         protocolMinorVersion; // minor version
     int         qport;
     int         challenge;
@@ -1888,7 +1888,7 @@ void SV_UserinfoChanged(client_t *cl)
     val = Info_ValueForKey(cl->userinfo, "rate");
     if (*val) {
         cl->rate = atoi(val);
-        clamp(cl->rate, 600, 30000);
+        clamp(cl->rate, static_cast<size_t>(600), static_cast<size_t>(30000));
     } else {
         cl->rate = 30000;
     }

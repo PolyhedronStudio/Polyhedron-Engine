@@ -117,7 +117,7 @@ static void gl_anisotropy_changed(cvar_t *self)
         return;
 
     gl_filter_anisotropy = self->value;
-    clamp(gl_filter_anisotropy, 1, gl_config.maxAnisotropy);
+    clamp(gl_filter_anisotropy, 1.0f, gl_config.maxAnisotropy);
 
     // change all the existing mipmap texture objects
     for (i = 0, image = r_images; i < r_numImages; i++, image++) {
@@ -797,7 +797,7 @@ static void GL_InitParticleTexture(void)
             dst[0] = 255;
             dst[1] = 255;
             dst[2] = 255;
-            dst[3] = 255 * clamp(f, 0, 1);
+            dst[3] = 255 * clamp(f, 0.0f, 1.0f);
             dst += 4;
         }
     }
@@ -837,7 +837,7 @@ static void GL_InitBeamTexture(void)
             dst[0] = 255;
             dst[1] = 255;
             dst[2] = 255;
-            dst[3] = 255 * clamp(f, 0, 1);
+            dst[3] = 255 * clamp(f, 0.0f, 1.0f);
             dst += 4;
         }
     }

@@ -345,7 +345,7 @@ static qerror_t set_material_attribute(pbr_material_t* mat, const char* attribut
 			char* mat_base = slash ? slash + 1 : mat->name;
 
 			// concatenate: the value before the asterisk, material base name, the rest of the value
-			Q_strlcpy(svalue, value, min(asterisk - value + 1, sizeof(svalue)));
+			Q_strlcpy(svalue, value, min(static_cast<size_t>(asterisk - value + 1), sizeof(svalue)));
 			Q_strlcat(svalue, mat_base, sizeof(svalue));
 			Q_strlcat(svalue, asterisk + 1, sizeof(svalue));
 		} 		else

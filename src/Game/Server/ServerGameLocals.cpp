@@ -18,10 +18,10 @@
 #include "Entities/Base/SVGBasePlayer.h"
 
 // GameModes.
-#include "GameModes/IGameMode.h"
-#include "GameModes/DefaultGameMode.h"
-#include "GameModes/CoopGameMode.h"
-#include "GameModes/DeathMatchGameMode.h"
+#include "Gamemodes/IGamemode.h"
+#include "Gamemodes/DefaultGamemode.h"
+#include "Gamemodes/CoopGamemode.h"
+#include "Gamemodes/DeathMatchGamemode.h"
 
 // GameWorld.
 #include "World/ServerGameWorld.h"

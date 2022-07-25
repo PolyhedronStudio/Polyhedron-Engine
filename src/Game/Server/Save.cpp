@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Entities.h"
 
 // GameModes.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 // World.
 #include "World/ServerGameWorld.h"

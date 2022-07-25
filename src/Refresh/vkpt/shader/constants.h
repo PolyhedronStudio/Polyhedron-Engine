@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define HISTOGRAM_BINS 128
 
-#define EMISSIVE_TRANSFORM_BIAS -0.001
+#define EMISSIVE_TRANSFORM_BIAS -0.001f
 
 #define MAX_MIRROR_ROUGHNESS 0.02
 

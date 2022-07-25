@@ -20,7 +20,7 @@
 // Misc Explosion Box Entity.
 #include "MiscClientExplosionBox.h"
 
-//#include "../../GameModes/IGameMode.h"
+//#include "../../Gamemodes/IGamemode.h"
 #include "../../World/ClientGameWorld.h"
 
 //

@@ -254,7 +254,7 @@ void R_LightPoint_GL(const vec3_t &origin, vec3_t &color)
     GL_LightPoint(origin, color);
 
     for (i = 0; i < 3; i++) {
-        clamp(color[i], 0, 1);
+        clamp(color[i], 0.0f, 1.0f);
     }
 }
 

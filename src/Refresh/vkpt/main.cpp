@@ -2448,7 +2448,7 @@ evaluate_reference_mode(reference_mode_t* ref_mode)
 		if (cvar_pt_num_bounce_rays->value == 0.5f)
 			ref_mode->num_bounce_rays = 0.5f;
 		else
-			ref_mode->num_bounce_rays = max(0, min(2, round(cvar_pt_num_bounce_rays->value)));
+			ref_mode->num_bounce_rays = max(0.0f, min(2.0f, roundf(cvar_pt_num_bounce_rays->value)));
 		ref_mode->temporal_blend_factor = 0.f;
 		ref_mode->reflect_refract = max(0, cvar_pt_reflect_refract->integer);
 	}
@@ -3190,13 +3190,13 @@ static void drs_process()
 	if (representative_time < target_time * cvar_drs_adjust_up->value)
 	{
 		f += 0.5;
-		clamp(f, 1, 10);
+		clamp(f, 1.0, 10.0);
 		scale += (int)f;
 	}
 	else if (representative_time > target_time * cvar_drs_adjust_down->value)
 	{
 		f -= 0.5;
-		clamp(f, -1, -10);
+		clamp(f, -1.0, -10.0);
 		scale += f;
 	}
 
@@ -4079,7 +4079,7 @@ VkCommandBuffer vkpt_begin_command_buffer(cmd_buf_group_t* group)
 {
 	if (group->used_this_frame == group->count_per_frame)
 	{
-		uint32_t new_count = max(4, group->count_per_frame * 2);
+		uint32_t new_count = max(static_cast<uint32_t>(4), group->count_per_frame * 2);
 		VkCommandBuffer* new_buffers = (VkCommandBuffer*)Z_Mallocz(new_count * MAX_FRAMES_IN_FLIGHT * sizeof(VkCommandBuffer));
 
 		for (int frame = 0; frame < MAX_FRAMES_IN_FLIGHT; frame++)

@@ -814,7 +814,7 @@ static void AL_Spatialize(channel_t *ch)
 
 			final = ch->master_vol - ((1.0f - exp2(dist * dist)) * s_occlusion_strength->value);
 
-			qalSourcef(ch->srcnum, AL_GAIN, clamp(final, 0, 1));
+			qalSourcef(ch->srcnum, AL_GAIN, clamp(final, 0.0f, 1.0f));
 
 			if (!ch->autosound)
 				VectorCopy(trace.endPosition, origin);

@@ -14,7 +14,7 @@
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Deathmatch Game Mode.
-#include "../../GameModes/DeathMatchGameMode.h"
+#include "../../Gamemodes/DeathMatchGamemode.h"
 
 // Base class entities.
 #include "../Base/SVGBaseEntity.h"

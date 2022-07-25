@@ -19,7 +19,7 @@
 #include "FuncAreaportal.h"
 #include "FuncDoor.h"
 
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 #include "../../World/ServerGameWorld.h"
 
 //===============

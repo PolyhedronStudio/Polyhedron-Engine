@@ -17,7 +17,7 @@
 #include "GibEntity.h"
 
 // GameMode.
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 
 // World.
 #include "../../World/ServerGameWorld.h"
