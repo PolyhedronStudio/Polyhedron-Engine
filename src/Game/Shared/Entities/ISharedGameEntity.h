@@ -631,42 +631,42 @@ protected:
 };
 
 
-template<> auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, float &floatNumber) {
+template<> inline auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, float &floatNumber) {
     floatNumber = std::stof(value);
     return true;
 };
 /**
 *	@brief	Parses the key/value for the signed numbers, -/+ 
 **/
-template<> auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, int32_t &signedNumber) {
+template<> inline auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, int32_t &signedNumber) {
     signedNumber = std::stoi(value);
     return true;
 };
 /**
 *	@brief	Parses the key/value for the unsigned numbers(0 and up) type.
 **/
-template<> auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, uint32_t &unsignedNumber) {
+template<> inline auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, uint32_t &unsignedNumber) {
     unsignedNumber = std::stof(value);
     return true;
 };
 /**
 *	@brief	Parses the key/value for the string type.
 **/
-template<> auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, std::string &string) {
+template<> inline auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, std::string &string) {
     string = value;
     return true;
 };
 /**
 *	@brief	Parses the key/value for the Frametime type. (floating point time numbers. 0.1, 1.2 etc.)
 **/
-template<> auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, Frametime &frametime) {
+template<> inline auto ISharedGameEntity::ParseKeyValue(const std::string &key, const std::string &value, Frametime &frametime) {
     frametime = Frametime(std::stof(value));
     return true;
 };
 /**
 *	@brief	Parses the key/value for the vec3_t type.
 **/
-template<> auto ISharedGameEntity::ParseKeyValue(const std::string& key, const std::string& value, vec3_t& vector3) {
+template<> inline auto ISharedGameEntity::ParseKeyValue(const std::string& key, const std::string& value, vec3_t& vector3) {
     // Stores vector fields fetched from string. (Might be corrupted, so we're parsing this nicely.)
     std::vector<std::string> vectorFields;
 

@@ -15,15 +15,15 @@
 #include "../../ClientGameLocals.h"
 
 // Base Client Game Functionality.
-#include "../Debug.h"
-#include "../TemporaryEntities.h"
+#include "../../Debug.h"
+#include "../../TemporaryEntities.h"
 
 // Export classes.
-#include "../Exports/Entities.h"
-#include "../Exports/View.h"
+#include "../../Exports/Entities.h"
+#include "../../Exports/View.h"
 
 // Effects.
-#include "../Effects/ParticleEffects.h"
+#include "../../Effects/ParticleEffects.h"
 
 // Base Entity.
 #include "CLGBaseLocalEntity.h"
