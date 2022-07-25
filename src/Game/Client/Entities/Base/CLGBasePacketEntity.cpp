@@ -931,7 +931,7 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		// Generate entity matrix to transform the actual pose with.
 		mat4_t matEntity;
 		refreshAttachmentEntity.origin = GetOrigin();
-		refreshAttachmentEntity.angles = GetAngles();
+		refreshAttachmentEntity.angles = vec3_zero(); //GetAngles();
 		create_entity_matrix(matEntity, &refreshAttachmentEntity, false);
 
 		/**
@@ -944,17 +944,39 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		// Convert to 4x4 matrix.
 		mat4_t matBonePose = mat4_from_mat3x4( matRefreshBonePose );
 		mat4_t matRotatedPoseBone = mult_matrix_matrix( matEntity, matBonePose );
-		
-		mat4_t matInvRotPoseBone;
-		inversee(matRotatedPoseBone, matInvRotPoseBone);
 
 		vec3_t translate = {
 			matRotatedPoseBone[12], matRotatedPoseBone[13], matRotatedPoseBone[14]
 		};
+
+		//// Non Transposed.
+		//vec3_t rotate = vec3_zero();
+		//rotate[ vec3_t::PYR::Roll ] = Degrees( 
+		//	atan2( matRotatedPoseBone[6], matRotatedPoseBone[10] )
+		//);//roll = atan2(matRotatedPoseBone[6], matRotatedPoseBone[10])
+		//const float c2 = sqrt( matRotatedPoseBone[0]*matRotatedPoseBone[0] + matRotatedPoseBone[1]*matRotatedPoseBone[1] );
+		//rotate[ vec3_t::PYR::Pitch ] = Degrees(
+		//	atan2( -matRotatedPoseBone[2], c2 )
+		//);
+		//const float s1 = sin( rotate[vec3_t::PYR::Roll] ), c1 = cos( rotate[vec3_t::PYR::Roll] );
+		//rotate[ vec3_t::PYR::Yaw ] = Degrees(
+		//	atan2( s1*matRotatedPoseBone[8] - c1*matRotatedPoseBone[4], c1*matRotatedPoseBone[5]-s1*matRotatedPoseBone[9] )
+		//);
+		//
+		//// Transpoes.
+		//rotate[vec3_t::PYR::Roll] = Degrees( 
+		//	atan2(matRotatedPoseBone[9], matRotatedPoseBone[10])
+		//);
+		//const float _c2 = sqrt(matRotatedPoseBone[0]*matRotatedPoseBone[0] + matRotatedPoseBone[4]*matRotatedPoseBone[4]);
+		//rotate[vec3_t::PYR::Pitch] = Degrees( 
+		//	atan2(-matRotatedPoseBone[8], _c2)
+		//);
+		//const float _s1 = sin( rotate[vec3_t::PYR::Roll] ), _c1 = cos( rotate[vec3_t::PYR::Roll] );
+		//rotate[vec3_t::PYR::Yaw] = Degrees( 
+		//	atan2(_s1*matRotatedPoseBone[2] - _c1*matRotatedPoseBone[1], _c1*matRotatedPoseBone[5]-_s1*matRotatedPoseBone[6])
+		//);
 		vec3_t rotate = {
-			//matRotatedPoseBone[0], matRotatedPoseBone[4], matRotatedPoseBone[8]
-			//matRotatedPoseBone[1], matRotatedPoseBone[5], matRotatedPoseBone[9]
-			matInvRotPoseBone[8], matInvRotPoseBone[9], matInvRotPoseBone[10]
+			matRotatedPoseBone[4], matRotatedPoseBone[5], matRotatedPoseBone[6]
 		};
 
 		/**
@@ -968,14 +990,20 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		// Get old angles, 
 		const vec3_t oldBoneAngles = (GetNumber() == 13 ? prevAngles[0] : prevAngles[1]);
 		// Normalize rotation and get euler coordinates.
-		const vec3_t boneAngles = vec3_euler ( vec3_normalize( rotate ) );
+		const vec3_t boneAngles = vec3_euler( rotate );
 		// Lerp.
 		vec3_t finalBoneAngles = vec3_mix_euler( oldBoneAngles, boneAngles, 1.0 - refreshAnimation.backLerp);
 		// Store old angles.
 		if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
 
 		// Set angles.
-		refreshAttachmentEntity.angles += finalBoneAngles;
+		refreshAttachmentEntity.angles.x = 0.f;
+//		refreshAttachmentEntity.angles.x = AngleMod( finalBoneAngles.x );
+		refreshAttachmentEntity.angles.y = 0.f;AngleMod( finalBoneAngles.y );
+		refreshAttachmentEntity.angles.z = 0.f;AngleMod( finalBoneAngles.z );
+		//refreshAttachmentEntity.angles.x += AngleMod(finalBoneAngles.x);
+		//refreshAttachmentEntity.angles.y += AngleMod(finalBoneAngles.y);
+		//refreshAttachmentEntity.angles.z += AngleMod(finalBoneAngles.z);
 
 		// Add to our view.
 		clge->view->AddRenderEntity(refreshAttachmentEntity);
