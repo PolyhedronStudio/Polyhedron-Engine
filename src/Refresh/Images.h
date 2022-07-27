@@ -102,7 +102,6 @@ extern int      r_numImages;
 
 #define R_NOTEXTURE &r_images[0]
 
-extern uint32_t d_8to24table[256];
 
 // these are implemented in src/Refresh/Images.c
 void IMG_ReloadAll();
@@ -128,6 +127,8 @@ extern void (*IMG_Unload)(image_t *image);
 extern void (*IMG_Load)(image_t *image, byte *pic);
 extern byte* (*IMG_ReadPixels)(int *width, int *height, int *rowbytes);
 extern float* (*IMG_ReadPixelsHDR)(int* width, int* height);
+
+extern "C" uint32_t d_8to24table[256];
 
 #endif // IMAGES_H
 

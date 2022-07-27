@@ -714,6 +714,7 @@ static list_t   r_imageHash[RIMAGES_HASH];
 image_t     r_images[MAX_RIMAGES];
 int         r_numImages;
 
+extern "C" uint32_t    d_8to24table[256];
 uint32_t    d_8to24table[256];
 
 static const struct {

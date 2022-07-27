@@ -3177,7 +3177,6 @@ run_fx:
 		// Update audio after the 3D view was drawn
         S_Update();
 
-        SCR_RunCinematic();
     } else if (sync_mode == SYNC_SLEEP_20) {
         // Force audio and effects update if not rendering
         CL_GM_ClientUpdateOrigin();

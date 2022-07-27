@@ -562,7 +562,6 @@ void    SCR_Shutdown(void);
 void    SCR_UpdateScreen(void);
 void    SCR_FinishCinematic(void);
 void    SCR_PlayCinematic(const char *name);
-void    SCR_RunCinematic();
 void    SCR_BeginLoadingPlaque(void);
 void    SCR_EndLoadingPlaque(void);
 void    SCR_DebugGraph(float value, int color);
