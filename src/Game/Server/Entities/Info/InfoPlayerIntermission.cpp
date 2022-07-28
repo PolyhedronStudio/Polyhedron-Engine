@@ -16,9 +16,6 @@ InfoPlayerIntermission::InfoPlayerIntermission(PODEntity *svEntity)
     : InfoPlayerStart(svEntity) {
 
 }
-InfoPlayerIntermission::~InfoPlayerIntermission() {
-
-}
 
 // Interface functions. 
 //===============

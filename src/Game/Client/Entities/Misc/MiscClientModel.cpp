@@ -27,9 +27,6 @@ MiscClientModel::MiscClientModel(PODEntity *svEntity)
     : Base(svEntity) {
 
 }
-MiscClientModel::~MiscClientModel() {
-
-}
 
 
 

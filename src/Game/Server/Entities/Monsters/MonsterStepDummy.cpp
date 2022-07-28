@@ -35,8 +35,6 @@ MonsterStepDummy::MonsterStepDummy(PODEntity *svEntity) : Base(svEntity) {
 	//gi.DPrintf("SVG Spawned: svNumber=#%i mapClass=%s hashedMapClass=#%i\n", svEntity->state.number, mapClass, hashedMapClass);
 }
 
-MonsterStepDummy::~MonsterStepDummy() { }
-
 
 //
 // Interface functions.

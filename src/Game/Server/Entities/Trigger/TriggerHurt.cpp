@@ -30,9 +30,6 @@ static constexpr int32_t SPAWNFLAG_SLOW_HURT		= 16;
 TriggerHurt::TriggerHurt(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
 
 }
-TriggerHurt::~TriggerHurt() {
-
-}
 
 // Interface functions. 
 //

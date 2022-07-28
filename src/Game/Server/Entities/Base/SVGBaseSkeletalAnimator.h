@@ -38,7 +38,7 @@ public:
     ***/
     //! Constructor/Deconstructor.
     SVGBaseSkeletalAnimator(PODEntity *svEntity);
-    virtual ~SVGBaseSkeletalAnimator();
+    virtual ~SVGBaseSkeletalAnimator() = default;
 
     //! Abstract Class TypeInfo registry.
     DefineAbstractClass(SVGBaseSkeletalAnimator, SVGBaseTrigger);

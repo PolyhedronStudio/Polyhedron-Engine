@@ -32,8 +32,8 @@
 * 
 *   @return True if the entity comes from an optimized packet, false otherwise.
 **/
-static inline qboolean PacketEntity_IsPlayer(const EntityState& state) {
-    if (state.number != cl.frame.clientNumber + 1)
+static inline qboolean PacketEntity_IsPlayer(const EntityState* state) {
+    if (state->number != cl.frame.clientNumber + 1)
         return false;
 
     if (cl.frame.playerState.pmove.type >= EnginePlayerMoveType::Dead)
@@ -45,21 +45,29 @@ static inline qboolean PacketEntity_IsPlayer(const EntityState& state) {
 /**
 *   @brief  Creates a new entity based on the newly received entity state.
 **/
-static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState &state, const vec3_t &origin)
+static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState *state, const vec3_t &origin)
 {
     static int32_t entity_ctr = 0;
-    clEntity->clientEntityNumber = state.number; // used to be: clEntity->id = ++entity_ctr;
+	// Ensure it is not local anymore.
+	clEntity->isLocal = false;
+	// Update the client entity number to match the state's number.
+    clEntity->clientEntityNumber = state->number; // used to be: clEntity->id = ++entity_ctr;
+	// 
     clEntity->trailCount = 1024;
 
     // Notify the client game module that we've acquired from the server a fresh new entity to spawn.
-    CL_GM_CreateFromNewState(clEntity, state);
+	if (!CL_GM_CreateFromNewState(clEntity, state)) {
+		// It failed somehow, render the entity for not in use and escape.
+		clEntity->inUse = false;
+		return;
+	}
     
     // Duplicate the current state into the previous one, this way lerping won't hurt anything.
-    clEntity->previousState = state;
+    clEntity->previousState = *state;
 
     // Ensure that when the entity has been teleported we adjust its lerp origin.
-    if (state.eventID == EntityEvent::PlayerTeleport || state.eventID == EntityEvent::OtherTeleport
-       || (state.renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) 
+    if (state->eventID == EntityEvent::PlayerTeleport || state->eventID == EntityEvent::OtherTeleport
+       || (state->renderEffects & (RenderEffects::FrameLerp | RenderEffects::Beam))) 
     {
         // This entity has been teleported.
         clEntity->lerpOrigin = origin;
@@ -67,22 +75,22 @@ static inline void PacketEntity_UpdateNew(PODEntity *clEntity, const EntityState
     }
 
     // oldOrigin is valid for new entities, so use it as starting point for interpolating between.
-    clEntity->previousState.origin = state.oldOrigin;
-    clEntity->lerpOrigin = state.oldOrigin;
+    clEntity->previousState.origin = state->oldOrigin;
+    clEntity->lerpOrigin = state->oldOrigin;
 }
 
 /**
 *   @brief  Updates an existing entity using the newly received state for it.
 **/
-static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const EntityState &state, const vec_t *origin)
+static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const EntityState *state, const vec_t *origin)
 {
     // Get event ID.
-    const int32_t eventID = state.eventID;
+    const int32_t eventID = state->eventID;
 
-    if (state.modelIndex != clEntity->currentState.modelIndex
-        || state.modelIndex2 != clEntity->currentState.modelIndex2
-        || state.modelIndex3 != clEntity->currentState.modelIndex3
-        || state.modelIndex4 != clEntity->currentState.modelIndex4
+    if (state->modelIndex != clEntity->currentState.modelIndex
+        || state->modelIndex2 != clEntity->currentState.modelIndex2
+        || state->modelIndex3 != clEntity->currentState.modelIndex3
+        || state->modelIndex4 != clEntity->currentState.modelIndex4
         || eventID == EntityEvent::PlayerTeleport
         || eventID == EntityEvent::OtherTeleport
         || fabsf(origin[0] - clEntity->currentState.origin[0]) > 512
@@ -94,7 +102,7 @@ static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const Entity
         clEntity->trailCount = 1024;     // Used for diminishing rocket / grenade trails
 
         // Duplicate the current state so lerping doesn't hurt anything
-        clEntity->previousState = state;
+        clEntity->previousState = *state;
 
         // No lerping if teleported or morphed
         clEntity->lerpOrigin = origin;
@@ -105,7 +113,7 @@ static inline void PacketEntity_UpdateExisting(PODEntity *clEntity, const Entity
     clEntity->previousState = clEntity->currentState;
 
 	// Update entity number.
-	clEntity->clientEntityNumber = state.number;
+	clEntity->clientEntityNumber = state->number;
 }
 
 /**
@@ -152,20 +160,20 @@ static inline qboolean PacketEntity_IsNew(const PODEntity *clEntity)
 *   @brief  Updates the entity belonging to the entity state. If it doesn't
 *           exist yet, it'll create it.
 **/
-void PacketEntity_UpdateState(const EntityState &state)
+void PacketEntity_UpdateState(const EntityState *state)
 {
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
-    PODEntity *clEntity = &cs.entities[state.number];
+    PODEntity *clEntity = &cs.entities[state->number];
 
     // Add entity to the solids list if it has a solid.
-    if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
+    if (state->solid && state->number != cl.frame.clientNumber + 1 && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = clEntity;
 
 		// For non BRUSH models...
-        if (state.solid != PACKED_BBOX) {
+        if (state->solid != PACKED_BBOX) {
             // Update the actual bounding box.
-            clEntity->mins = state.mins;
-			clEntity->maxs = state.maxs; //MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
+            clEntity->mins = state->mins;
+			clEntity->maxs = state->maxs; //MSG_UnpackBoundingBox32(state.solid, clEntity->mins, clEntity->maxs);
         }
     }
 
@@ -173,13 +181,13 @@ void PacketEntity_UpdateState(const EntityState &state)
     const bool isPlayerEntity = PacketEntity_IsPlayer(state);
 
     // Fetch the entity's origin.
-    vec3_t entityOrigin = state.origin;
+    vec3_t entityOrigin = state->origin;
     if (isPlayerEntity) {
         entityOrigin = cl.frame.playerState.pmove.origin;
     }
 
 	// Assign its clientEntity number.
-	clEntity->clientEntityNumber = state.number;
+	clEntity->clientEntityNumber = state->number;
 
     // Was this entity in our previous frame, or not?
     if (PacketEntity_IsNew(clEntity)) {
@@ -194,7 +202,7 @@ void PacketEntity_UpdateState(const EntityState &state)
     clEntity->serverFrame = cl.frame.number;
 	
 	// Assign the fresh new received state as the entity's current.
-    clEntity->currentState = state;
+    clEntity->currentState = *state;
 
     // work around Q2PRO server bandwidth optimization
     if (isPlayerEntity) {
@@ -205,7 +213,7 @@ void PacketEntity_UpdateState(const EntityState &state)
 /**
 *   @brief  Ensures its hashedClassname is updated accordingly to that which matches the Game Entity.
 **/
-void PacketEntity_SetHashedClassname(PODEntity* podEntity, EntityState& state) {
+void PacketEntity_SetHashedClassname(PODEntity* podEntity, EntityState* state) {
 	// Only continue IF we got a podEntity.
 	if (!podEntity) {
 		return;

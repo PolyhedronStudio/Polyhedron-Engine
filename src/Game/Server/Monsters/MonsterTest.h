@@ -15,9 +15,9 @@ class MonsterTest : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
     MonsterTest(PODEntity *svEntity);
-    virtual ~MonsterTest();
+    virtual ~MonsterTest() = default;
 
-    DefineMapClass("misc_servermodel", MonsterTest, SVGBaseTrigger);
+    DefineMapClass("monstertest", MonsterTest, SVGBaseTrigger);
 
     //
     // Interface functions.

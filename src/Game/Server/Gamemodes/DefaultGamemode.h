@@ -15,7 +15,7 @@ class DefaultGameMode : public IGameMode {
 public:
     //! Constructor/Deconstructor.
     DefaultGameMode();
-    virtual ~DefaultGameMode() override;
+    virtual ~DefaultGameMode() = default;
 
     /***
     * Server Related.

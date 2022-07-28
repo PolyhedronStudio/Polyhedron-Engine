@@ -102,12 +102,12 @@ public:
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
-    virtual void UpdateFromState(const EntityState &state) override;
+    virtual void UpdateFromState(const EntityState *state) override;
 
 	/**
 	*	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
 	**/
-	virtual void SpawnFromState(const EntityState &state) override;
+	virtual void SpawnFromState(const EntityState *state) override;
 
     /**
     *   @returen True if the entity is still in the current frame.

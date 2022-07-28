@@ -15,9 +15,6 @@ InfoPlayerStart::InfoPlayerStart(PODEntity *svEntity)
     : SVGBaseEntity(svEntity) {
 
 }
-InfoPlayerStart::~InfoPlayerStart() {
-
-}
 
 // Interface functions. 
 //===============

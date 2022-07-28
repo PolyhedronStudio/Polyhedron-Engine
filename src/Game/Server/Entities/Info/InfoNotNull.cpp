@@ -15,9 +15,6 @@ InfoNotNull::InfoNotNull(PODEntity *svEntity)
     : Base(svEntity) {
 
 }
-InfoNotNull::~InfoNotNull() {
-
-}
 
 // Interface functions. 
 //===============

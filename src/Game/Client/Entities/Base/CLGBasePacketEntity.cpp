@@ -17,15 +17,15 @@
 #include "../../ClientGameLocals.h"
 
 // Base Client Game Functionality.
-#include "../Debug.h"
-#include "../TemporaryEntities.h"
+#include "../../Debug.h"
+#include "../../TemporaryEntities.h"
 
 // Export classes.
-#include "../Exports/Entities.h"
-#include "../Exports/View.h"
+#include "../../Exports/Entities.h"
+#include "../../Exports/View.h"
 
 // Effects.
-#include "../Effects/ParticleEffects.h"
+#include "../../Effects/ParticleEffects.h"
 
 // Base Entity.
 #include "CLGBasePacketEntity.h"
@@ -243,7 +243,7 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 *	@TODO:	This following process has to happen elsewhere, but we keep it here for
 *			prototyping at this moment.
 **/
-static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, const EntityState& state) {
+static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, const EntityState* state) {
 	// Zero out X axis: DEPTH. This maintains the model rendering appropriately
 	// at our origin point.
 
@@ -252,16 +252,16 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 	}
 	
 	// Treat elsewhere.
-	if ( state.modelIndex <= 0 || state.modelIndex == 255 ) {
+	if ( state->modelIndex <= 0 || state->modelIndex == 255 ) {
 		return nullptr;
 	}
 
-	if (cl->drawModels[state.modelIndex] <= 0) {
+	if (cl->drawModels[state->modelIndex] <= 0) {
 		return nullptr;
 	}
 
 	// Ok, let's fetch the model we got.
-	model_t *entityModel = clgi.CL_Model_GetModelByHandle( cl->drawModels[state.modelIndex] );
+	model_t *entityModel = clgi.CL_Model_GetModelByHandle( cl->drawModels[state->modelIndex] );
 
 	if ( !entityModel ) {
 		return nullptr;
@@ -304,28 +304,32 @@ static SkeletalModelData *UpdateSkeletalModelDataFromState(EntitySkeleton *es, c
 /**
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
-void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
-	SetOrigin(state.origin);
-	SetAngles(state.angles);
-	SetOldOrigin(state.oldOrigin);
-	SetModelIndex(state.modelIndex);
-	SetModelIndex2(state.modelIndex2);
-	SetModelIndex3(state.modelIndex3);
-	SetModelIndex4(state.modelIndex4);
-	SetSkinNumber(state.skinNumber);
-	SetEffects(state.effects);
-	SetRenderEffects(state.renderEffects);
-	SetSolid(state.solid);
-	SetMins(state.mins);
-	SetMaxs(state.maxs);
-	SetSound(state.sound);
-	SetEventID(state.eventID);
+void CLGBasePacketEntity::UpdateFromState(const EntityState* state) {
+	assert(state);
+	SetOrigin(state->origin);
+	SetAngles(state->angles);
+	SetOldOrigin(state->oldOrigin);
+	SetModelIndex(state->modelIndex);
+	SetModelIndex2(state->modelIndex2);
+	SetModelIndex3(state->modelIndex3);
+	SetModelIndex4(state->modelIndex4);
+	SetSkinNumber(state->skinNumber);
+	SetEffects(state->effects);
+	SetRenderEffects(state->renderEffects);
+	SetSolid(state->solid);
+	SetMins(state->mins);
+	SetMaxs(state->maxs);
+	SetSound(state->sound);
+	SetEventID(state->eventID);
 
+	if (cl->drawModels[ state->modelIndex ] == 29) {
+		Com_DPrintf("Entity(#%i) had drawModels[%i] = 29\n", state->number, state->modelIndex);
+	}
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
 
-	if ( state.currentAnimation.startTime != 0 ) {
-		SwitchAnimation(state.currentAnimation.animationIndex, GameTime(state.currentAnimation.startTime));
+	if ( state->currentAnimation.startTime != 0 ) {
+		SwitchAnimation(state->currentAnimation.animationIndex, GameTime(state->currentAnimation.startTime));
 	}
 
 	// Setup same think for the next frame.
@@ -336,29 +340,34 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState& state) {
 /**
 *	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
 **/
-void CLGBasePacketEntity::SpawnFromState(const EntityState& state) {
-	SetOrigin(state.origin);
-	SetAngles(state.angles);
-	SetOldOrigin(state.oldOrigin);
-	SetModelIndex(state.modelIndex);
-	SetModelIndex2(state.modelIndex2);
-	SetModelIndex3(state.modelIndex3);
-	SetModelIndex4(state.modelIndex4);
-	SetSkinNumber(state.skinNumber);
-	SetEffects(state.effects);
-	SetRenderEffects(state.renderEffects);
-	SetSolid(state.solid);
-	SetMins(state.mins);
-	SetMaxs(state.maxs);
-	SetSound(state.sound);
-	SetEventID(state.eventID);
+void CLGBasePacketEntity::SpawnFromState(const EntityState* state) {
+	if (!state) {
+		return;
+	}
+	SetOrigin(state->origin);
+	SetAngles(state->angles);
+	SetOldOrigin(state->oldOrigin);
+	SetModelIndex(state->modelIndex);
+	SetModelIndex2(state->modelIndex2);
+	SetModelIndex3(state->modelIndex3);
+	SetModelIndex4(state->modelIndex4);
+	SetSkinNumber(state->skinNumber);
+	SetEffects(state->effects);
+	SetRenderEffects(state->renderEffects);
+	SetSolid(state->solid);
+	SetMins(state->mins);
+	SetMaxs(state->maxs);
+	SetSound(state->sound);
+	SetEventID(state->eventID);
 
-
+	if (cl->drawModels[ state->modelIndex ] == 29) {
+		Com_DPrintf("Entity(#%i) had drawModels[%i] = 29\n", state->number, state->modelIndex);
+	}
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
 
-	if ( state.currentAnimation.startTime != 0 ) {
-		SwitchAnimation(state.currentAnimation.animationIndex, GameTime(state.currentAnimation.startTime));
+	if ( state->currentAnimation.startTime != 0 ) {
+		SwitchAnimation(state->currentAnimation.animationIndex, GameTime(state->currentAnimation.startTime));
 	}
 	
 	// Setup same think for the next frame.
@@ -925,8 +934,6 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		// Compose the world and local pose matrices.
 		// TODO: We oughta only do this once.
 		clgi.ES_ComputeWorldPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
-		//clgi.ES_ComputeLocalPoseTransforms( entitySkeleton.modelPtr, bonePoses, &localPoseMatrices[0]);
-
 		
 		// Generate entity matrix to transform the actual pose with.
 		mat4_t matEntity;
@@ -949,32 +956,7 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 			matRotatedPoseBone[12], matRotatedPoseBone[13], matRotatedPoseBone[14]
 		};
 
-		//// Non Transposed.
-		//vec3_t rotate = vec3_zero();
-		//rotate[ vec3_t::PYR::Roll ] = Degrees( 
-		//	atan2( matRotatedPoseBone[6], matRotatedPoseBone[10] )
-		//);//roll = atan2(matRotatedPoseBone[6], matRotatedPoseBone[10])
-		//const float c2 = sqrt( matRotatedPoseBone[0]*matRotatedPoseBone[0] + matRotatedPoseBone[1]*matRotatedPoseBone[1] );
-		//rotate[ vec3_t::PYR::Pitch ] = Degrees(
-		//	atan2( -matRotatedPoseBone[2], c2 )
-		//);
-		//const float s1 = sin( rotate[vec3_t::PYR::Roll] ), c1 = cos( rotate[vec3_t::PYR::Roll] );
-		//rotate[ vec3_t::PYR::Yaw ] = Degrees(
-		//	atan2( s1*matRotatedPoseBone[8] - c1*matRotatedPoseBone[4], c1*matRotatedPoseBone[5]-s1*matRotatedPoseBone[9] )
-		//);
-		//
-		//// Transpoes.
-		//rotate[vec3_t::PYR::Roll] = Degrees( 
-		//	atan2(matRotatedPoseBone[9], matRotatedPoseBone[10])
-		//);
-		//const float _c2 = sqrt(matRotatedPoseBone[0]*matRotatedPoseBone[0] + matRotatedPoseBone[4]*matRotatedPoseBone[4]);
-		//rotate[vec3_t::PYR::Pitch] = Degrees( 
-		//	atan2(-matRotatedPoseBone[8], _c2)
-		//);
-		//const float _s1 = sin( rotate[vec3_t::PYR::Roll] ), _c1 = cos( rotate[vec3_t::PYR::Roll] );
-		//rotate[vec3_t::PYR::Yaw] = Degrees( 
-		//	atan2(_s1*matRotatedPoseBone[2] - _c1*matRotatedPoseBone[1], _c1*matRotatedPoseBone[5]-_s1*matRotatedPoseBone[6])
-		//);
+
 		vec3_t rotate = {
 			matRotatedPoseBone[4], matRotatedPoseBone[5], matRotatedPoseBone[6]
 		};
@@ -997,13 +979,7 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		if (GetNumber() == 13) { prevAngles[0] = finalBoneAngles; } else { prevAngles[1] = finalBoneAngles; }
 
 		// Set angles.
-		refreshAttachmentEntity.angles.x = 0.f;
-//		refreshAttachmentEntity.angles.x = AngleMod( finalBoneAngles.x );
-		refreshAttachmentEntity.angles.y = 0.f;AngleMod( finalBoneAngles.y );
-		refreshAttachmentEntity.angles.z = 0.f;AngleMod( finalBoneAngles.z );
-		//refreshAttachmentEntity.angles.x += AngleMod(finalBoneAngles.x);
-		//refreshAttachmentEntity.angles.y += AngleMod(finalBoneAngles.y);
-		//refreshAttachmentEntity.angles.z += AngleMod(finalBoneAngles.z);
+		refreshAttachmentEntity.angles = finalBoneAngles;
 
 		// Add to our view.
 		clge->view->AddRenderEntity(refreshAttachmentEntity);

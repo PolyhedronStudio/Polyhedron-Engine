@@ -16,7 +16,7 @@ class MiscClientExplosionBox : public CLGBaseLocalEntity { // Should be: : publi
 public:
     // Constructor/Deconstructor.
     MiscClientExplosionBox(PODEntity* clEntity);
-    virtual ~MiscClientExplosionBox();
+    virtual ~MiscClientExplosionBox() = default;
 
     //DefineMapClass( "misc_client_explobox", MiscClientExplosionBox, CLGBaseLocalEntity ); // Should be CLGBaseTrigger inherited.
 	DefineMapClass( "misc_client_explobox", MiscClientExplosionBox, CLGBaseLocalEntity ); // Should be CLGBaseTrigger inherited.
@@ -34,7 +34,7 @@ public:
     /**
     *	Callback Functions.
     **/
-    void ExplosionBoxUse( IClientGameEntity* caller, IClientGameEntity* activator );
+    void ExplosionBoxUse(IClientGameEntity* caller, IClientGameEntity* activator );
     void ExplosionBoxDropToFloor(void);
     void ExplosionBoxDie(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
     void ExplosionBoxTouch(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);

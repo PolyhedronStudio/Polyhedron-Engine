@@ -90,7 +90,7 @@ public:
     *   @return True on success, false in case of trouble. (Should never happen, and if it does,
     *           well... file an issue lmao.)
     **/
-    virtual qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState &state) = 0;
+    virtual qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState *state) = 0;
 
     /**
     *   @brief  Executed whenever a server frame entity event is receieved.

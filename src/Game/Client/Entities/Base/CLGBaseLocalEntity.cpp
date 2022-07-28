@@ -15,15 +15,15 @@
 #include "../../ClientGameLocals.h"
 
 // Base Client Game Functionality.
-#include "../Debug.h"
-#include "../TemporaryEntities.h"
+#include "../../Debug.h"
+#include "../../TemporaryEntities.h"
 
 // Export classes.
-#include "../Exports/Entities.h"
-#include "../Exports/View.h"
+#include "../../Exports/Entities.h"
+#include "../../Exports/View.h"
 
 // Effects.
-#include "../Effects/ParticleEffects.h"
+#include "../../Effects/ParticleEffects.h"
 
 // Base Entity.
 #include "CLGBaseLocalEntity.h"
@@ -239,16 +239,15 @@ void CLGBaseLocalEntity::SpawnKey(const std::string& key, const std::string& val
 /**
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
-void CLGBaseLocalEntity::UpdateFromState(const EntityState& state) {
-    //previousState = currentState;
-    //currentState = state;
+void CLGBaseLocalEntity::UpdateFromState(const EntityState* state) {
+	// Empty for now.
 }
 
 /**
 *	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
 **/
-void CLGBaseLocalEntity::SpawnFromState(const EntityState& state) {
-	
+void CLGBaseLocalEntity::SpawnFromState(const EntityState* state) {
+	// Empty for now.
 }
 
 /**

@@ -27,9 +27,6 @@
 CoopGameMode::CoopGameMode() : DefaultGameMode() {
 
 }
-CoopGameMode::~CoopGameMode() {
-
-}
 
 //
 // Interface functions. 

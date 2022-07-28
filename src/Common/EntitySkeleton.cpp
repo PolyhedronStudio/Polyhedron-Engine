@@ -582,6 +582,69 @@ void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkel
 
 }
 
+/**
+*	@brief	Calculates, and returns the bone's absolute world transform.
+**/
+const EntitySkeletonBoneTransform &&ES_GetAbsoluteBoneTransform( EntitySkeleton *entitySkeleton, EntitySkeletonBonePose *bonePoses, int32_t boneNumber ) {
+	// acquire us an entity matrix. TODO: Generalize and implement proper mat4x4 functionality.
+	// mat4_t matEntity;
+	// create_entity_matrix(matEntity, ent);
+
+	// Ensure we got a bone number that is valid, otherwise we'll warn and return an identity transform.
+	if ( boneNumber < 0 || boneNumber > entitySkeleton->bones.size() ) {
+		// Com_LPrintf(WARN, "Invalid bonenumber yada yada");
+		return std::move( EntitySkeletonBoneTransform{ vec3_zero(), vec3_zero() } );
+	}
+
+
+	EntitySkeletonBonePose *bonePose = &bonePoses[ boneNumber * 12 ];
+    
+    //ModelMatrix = glm::scale(ModelMatrix, Scale);
+    //ModelMatrix = glm::rotate(ModelMatrix, rotAngle, Rotation);
+
+	// TEMP
+	//glm::vec3 boneTranslate = glm::vec3( bonePose->translate.x, bonePose->translate.y, bonePose->translate.z );
+	//glm::vec3 boneRotate = glm::vec3( bonePose->rotate.x, bonePose->rotate.y, bonePose->rotate.z );
+	//glm::vec3 boneScale = glm::vec3( bonePose->scale.x, bonePose->scale.y, bonePose->scale.z );
+	//// TEMP
+
+	//glm::mat4x4 matBonePose;
+	//matBonePose = glm::translate(matBonePose, boneTranslate );
+	//matBonePose = glm::translate(matBonePose, boneRotate );
+	//matBonePose = glm::translate(matBonePose, boneScale );
+
+	//glm::mat4x4 matEntity;
+	//matBonePose = glm::translate(matBonePose, entityTranslate );
+	//matBonePose = glm::translate(matBonePose, entityRotate );
+
+	//// final mat
+	//glm::mat4x4 matAbsoluteBonePose = matEntity * matBonePose;
+	//matBonePose = glm::translate(matBonePose, boneScale );
+	// Acquire our bone's 3x4 bone pose.
+	//
+	//float *bonePose = bonePoses[ boneNumber * 12 ];
+	//mat4_t matEntity;
+	// Convert to 4x4 matrix, and apply our entity matrix transforms.
+	mat4_t matBonePose;// = mat4_from_mat3x4( bonePose );
+	mat4_t matTransformedWorldBonePose;// = mat4_multiply_mat4( matEntity, matBonePose );
+
+	// Time to return our bone transform data.
+	return std::move( EntitySkeletonBoneTransform{
+		// Transform.
+		{ 
+			matTransformedWorldBonePose[12], 
+			matTransformedWorldBonePose[13], 
+			matTransformedWorldBonePose[14] 
+		},
+		// Euler Angles.
+		vec3_euler( { 
+			matTransformedWorldBonePose[4], 
+			matTransformedWorldBonePose[5], 
+			matTransformedWorldBonePose[6] 
+		} )
+	} );
+}
+
 //// DQ: ------------------- START
 ///**
 //*	@brief	Transforms bone poses to parent bone pose space. (Mounts all bones into a skeleton.) 

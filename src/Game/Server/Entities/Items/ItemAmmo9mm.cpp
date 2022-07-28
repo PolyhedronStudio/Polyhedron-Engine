@@ -32,10 +32,6 @@ ItemAmmo9mm::ItemAmmo9mm(PODEntity *svEntity, const std::string& displayString, 
     : Base(svEntity, displayString, identifier) {
 
 }
-ItemAmmo9mm::~ItemAmmo9mm() {
-
-}
-
 
 
 /**

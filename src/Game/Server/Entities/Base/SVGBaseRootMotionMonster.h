@@ -35,7 +35,7 @@ public:
     ***/
     //! Constructor/Deconstructor.
     SVGBaseRootMotionMonster(PODEntity *svEntity);
-    virtual ~SVGBaseRootMotionMonster();
+    virtual ~SVGBaseRootMotionMonster() = default;
 
     //! Abstract Class TypeInfo registry.
     DefineAbstractClass(SVGBaseRootMotionMonster, SVGBaseSkeletalAnimator);

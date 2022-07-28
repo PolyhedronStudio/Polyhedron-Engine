@@ -25,7 +25,7 @@ public:
     ***/
     //! Constructor/Deconstructor.
     SVGBaseStepMonster(PODEntity *svEntity);
-    virtual ~SVGBaseStepMonster();
+    virtual ~SVGBaseStepMonster() = default;
 
     //! Abstract Class TypeInfo registry.
     DefineAbstractClass(SVGBaseStepMonster, SVGBaseSkeletalAnimator);

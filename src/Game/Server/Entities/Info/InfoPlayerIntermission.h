@@ -15,7 +15,7 @@ class InfoPlayerIntermission : public InfoPlayerStart {
 public:
     // Constructor/Deconstructor.
     InfoPlayerIntermission(PODEntity *svEntity);
-    virtual ~InfoPlayerIntermission();
+    virtual ~InfoPlayerIntermission() = default;
 
     DefineMapClass( "info_player_intermission", InfoPlayerIntermission, InfoPlayerStart );
 

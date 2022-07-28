@@ -11,14 +11,14 @@
 
 // Base Client Game Functionality.
 //#include "../Debug.h"
-#include "../TemporaryEntities.h"
+#include "../../TemporaryEntities.h"
 
 // Export classes.
-#include "../Exports/Entities.h"
-#include "../Exports/View.h"
+#include "../../Exports/Entities.h"
+#include "../../Exports/View.h"
 
 // Effects.
-#include "../Effects/ParticleEffects.h"
+#include "../../Effects/ParticleEffects.h"
 
 // Base Player.
 #include "CLGBasePacketEntity.h"
@@ -56,6 +56,18 @@ void CLGBasePlayer::Precache() {
 **/
 void CLGBasePlayer::Spawn() {
 	Base::Spawn();
+
+	// Oh boy...
+	SetSolid( Solid::Not );
+	SetModelIndex( 0 );
+	SetRenderEffects( 0 );
+	SetEffects( 0 );
+	SetFlags( 0 );
+	SetServerFlags( 0 );
+	SetInUse( true );
+
+	SetNextThinkTime( level.time + FRAMETIME_S );
+	SetThinkCallback( &CLGBasePlayer::CLGBasePacketEntityThinkStandard );
 }
 /**
 *   @brief  Called when it is time to respawn this entity.
@@ -105,7 +117,7 @@ void CLGBasePlayer::SpawnKey(const std::string& key, const std::string& value) {
 /**
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
-void CLGBasePlayer::UpdateFromState(const EntityState& state) {
+void CLGBasePlayer::UpdateFromState(const EntityState* state) {
 
 }
 

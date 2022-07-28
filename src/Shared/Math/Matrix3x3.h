@@ -14,7 +14,7 @@
 
 
 /**
-*	@brief	4x4 Matrix type. Implemented as union struct.
+*	@brief	3x3 Matrix type. Implemented as union struct.
 **/
 struct mat3_t {
 	union
@@ -62,7 +62,7 @@ struct mat3_t {
 	}
 	mat3_t(const float * mat) {
 		u.rows.a =  vec3_t{ mat[0], mat[1], mat[2] };
-		u.rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
+ 		u.rows.b =  vec3_t{ mat[3], mat[4], mat[5] };
 		u.rows.c =  vec3_t{ mat[6], mat[7], mat[8] };
 	}
 

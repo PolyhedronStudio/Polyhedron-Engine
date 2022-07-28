@@ -27,10 +27,7 @@ static constexpr int32_t START_OFF		= 1;
 static constexpr int32_t TRIGGERABLE	= 2;
 
 // Constructor/Deconstructor.
-Light::Light(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
-
-}
-Light::~Light() {
+Light::Light(PODEntity *svEntity) : Base(svEntity) {
 
 }
 

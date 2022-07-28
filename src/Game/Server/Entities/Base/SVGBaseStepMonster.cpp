@@ -25,7 +25,6 @@
 
 //! Constructor/Destructor.
 SVGBaseStepMonster::SVGBaseStepMonster(PODEntity *svEntity) : Base(svEntity) { }
-SVGBaseStepMonster::~SVGBaseStepMonster() { }
 
 
 /***

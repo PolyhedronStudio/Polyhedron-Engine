@@ -17,7 +17,7 @@ class ItemWeaponBeretta : public SVGBaseItemWeapon {
 public:
     // Constructor/Deconstructor.
     ItemWeaponBeretta(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~ItemWeaponBeretta();
+    virtual ~ItemWeaponBeretta() = default;
 
     DefineItemMapClass("Beretta", "beretta", ItemID::Beretta, "item_weapon_beretta", ItemWeaponBeretta, SVGBaseItemWeapon);
 

@@ -269,6 +269,15 @@ static GameEntity* AllocateInstance( PODEntity* entity ) {		\
 }																\
 __DeclareTypeInfo( #classname, #classname, #superClass, TypeInfo::TypeFlag_GameSpawn, &classname::AllocateInstance );
 
+#define DefinePacketClass( classname, superClass )	\
+using Base = superClass;										\
+static GameEntity* AllocateInstance( PODEntity* entity ) {		\
+	classname *baseEntity = new classname( entity );			\
+	baseEntity->SetClassname(#classname);						\
+	entity->isLocal = false;									\
+	return baseEntity;											\
+}																\
+__DeclareTypeInfo( #classname, #classname, #superClass, TypeInfo::TypeFlag_GameSpawn, &classname::AllocateInstance );
 
 ///////////// OLD MACRO, Kept around just in case.
 // Declares type information the same as DefineMapClass, however it also registers an item's 

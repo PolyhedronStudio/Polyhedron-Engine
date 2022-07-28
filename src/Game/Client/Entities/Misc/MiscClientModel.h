@@ -15,7 +15,7 @@ class MiscClientModel : public CLGBaseLocalEntity {
 public:
     // Constructor/Deconstructor.
     MiscClientModel(PODEntity *svEntity);
-    virtual ~MiscClientModel();
+    virtual ~MiscClientModel() = default;
 
     DefineMapClass("misc_clientmodel", MiscClientModel, CLGBaseLocalEntity);
 

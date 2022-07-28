@@ -16,7 +16,7 @@ class ItemHealthMega : public SVGBaseItem {
 public:
     // Constructor/Deconstructor.
     ItemHealthMega(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~ItemHealthMega();
+    virtual ~ItemHealthMega() = default;
 
     DefineItemMapClass("Mega Health", "megahealth", ItemID::MegaHealth, "item_health_mega", ItemHealthMega, SVGBaseItem);
 

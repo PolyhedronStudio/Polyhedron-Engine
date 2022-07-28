@@ -248,10 +248,12 @@ endif()
 TARGET_COMPILE_DEFINITIONS(svgame PUBLIC "cxx_std_20 -DSHAREDGAME_SERVERGAME=1")
 # Link in FMT Header only library.
 target_link_libraries(svgame PUBLIC fmt::fmt-header-only)
-
+# Link in GLM headers.
+target_link_libraries(svgame PUBLIC glm)
 
 # Include directories.
-TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC PATH_SHARED )
+target_include_directories(svgame PRIVATE ${GLM_INCLUDE_DIRS} )
+TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC ${PATH_SHARED} )
 # Include SharedGame Framework.
 TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC Game/Shared)
 

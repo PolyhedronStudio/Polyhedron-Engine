@@ -208,19 +208,19 @@ void CL_DeltaFrame(void)
     for (int32_t i = 0; i < cl.frame.numEntities; i++) {
 		// Calculate the actual state index of this entity.
         const int32_t stateIndex = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
-        EntityState &state = cl.entityStates[stateIndex];
+        EntityState *state = &cl.entityStates[stateIndex];
 
         // Update the entity state. (Updates current and previous state.)
         PacketEntity_UpdateState(state);
 		
 		// Get entity pointer.
-		PODEntity *podEntity = &cs.entities[state.number];
+		PODEntity *podEntity = &cs.entities[state->number];
 
 		// Run the Client Game entity for a frame.		
-		PacketEntity_SetHashedClassname(podEntity, podEntity->currentState);
+		PacketEntity_SetHashedClassname(podEntity, &podEntity->currentState);
 
         // Fire entity event.
-        PacketEntity_FireEvent(state.number);
+        PacketEntity_FireEvent(state->number);
     }
 
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {

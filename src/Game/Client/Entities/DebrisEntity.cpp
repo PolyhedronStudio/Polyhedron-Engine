@@ -27,9 +27,6 @@ DebrisEntity::DebrisEntity(PODEntity *svEntity)
     : CLGBaseLocalEntity(svEntity) {
 
 }
-DebrisEntity::~DebrisEntity() {
-
-}
 
 /**
 *	@brief	Die callback.

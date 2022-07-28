@@ -28,10 +28,6 @@ MiscExplosionBox::MiscExplosionBox(PODEntity *svEntity)
     : Base(svEntity) {
 
 }
-MiscExplosionBox::~MiscExplosionBox() {
-
-}
-
 
 
 //

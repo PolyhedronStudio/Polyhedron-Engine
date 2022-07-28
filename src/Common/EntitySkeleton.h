@@ -35,8 +35,9 @@ void ES_LerpSkeletonPoses( EntitySkeleton *entitySkeleton, EntitySkeletonBonePos
 void ES_RecursiveBlendFromBone( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction = 1.0f );
 
 /**
-*	@brief	Calculates the bone's 
+*	@brief	Calculates, and returns the bone's absolute world transform.
 **/
+const EntitySkeletonBoneTransform &&ES_GetAbsoluteBoneTransform( EntitySkeleton *entitySkeleton, EntitySkeletonBonePose *bonePoses, int32_t boneNumber = 0 );
 
 /**
 *	@brief	Computes all matrices for this model, assigns the {[model->num_poses] 3x4 matrices} in the (pose_matrices) array.

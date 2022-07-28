@@ -197,7 +197,7 @@ void CL_UpdateConfigstring(int index)
     //    return;
     //}
     
-    if (index >= ConfigStrings::Models+ 2 && index < ConfigStrings::Models+ MAX_MODELS) {
+    if (index >= ConfigStrings::Models + 2 && index < ConfigStrings::Models + MAX_MODELS) {
         int i = index - ConfigStrings::Models;
 
         cl.drawModels[i] = R_RegisterModel(s);

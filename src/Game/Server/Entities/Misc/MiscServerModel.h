@@ -18,7 +18,7 @@ class MiscServerModel : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
     MiscServerModel(PODEntity *svEntity);
-    virtual ~MiscServerModel();
+    virtual ~MiscServerModel() = default;
 
     DefineMapClass("misc_servermodel", MiscServerModel, SVGBaseTrigger);
 

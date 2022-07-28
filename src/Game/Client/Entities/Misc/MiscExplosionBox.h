@@ -16,7 +16,7 @@ class MiscExplosionBox : public CLGBaseTrigger { // public CLGBasePacketEntity {
 public:
     // Constructor/Deconstructor.
     MiscExplosionBox(PODEntity* clEntity);
-    virtual ~MiscExplosionBox();
+    virtual ~MiscExplosionBox() = default;
 
     //DefineMapClass( "misc__explobox", MiscExplosionBox, CLGBasePacketEntity ); // Should be CLGBaseTrigger inherited.
 	DefineMapClass( "misc_explobox", MiscExplosionBox, CLGBaseTrigger ); // Should be CLGBaseTrigger inherited.

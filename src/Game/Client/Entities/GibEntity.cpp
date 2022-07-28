@@ -134,7 +134,6 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
 
 // Constructor/Deconstructor.
 GibEntity::GibEntity(PODEntity *svEntity) : CLGBaseLocalEntity(svEntity) { }
-GibEntity::~GibEntity() { }
 
 //
 //===============

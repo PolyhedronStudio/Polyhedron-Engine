@@ -18,7 +18,7 @@ public:
     // Constructor/Deconstructor.
     //
     DeathmatchGameMode();
-    virtual ~DeathmatchGameMode() override;
+    virtual ~DeathmatchGameMode() = default;
 
     //
     // Server Related.

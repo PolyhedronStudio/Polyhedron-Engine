@@ -36,9 +36,6 @@ TriggerAlways::TriggerAlways(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
 	//
 	//lastHurtTime = 0.f;
 }
-TriggerAlways::~TriggerAlways() {
-
-}
 
 // Interface functions. 
 //

@@ -31,9 +31,6 @@
 DeathmatchGameMode::DeathmatchGameMode() : DefaultGameMode() {
 
 }
-DeathmatchGameMode::~DeathmatchGameMode() {
-
-}
 
 //
 // Interface functions. 

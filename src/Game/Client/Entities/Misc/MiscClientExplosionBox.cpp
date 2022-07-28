@@ -30,9 +30,6 @@ MiscClientExplosionBox::MiscClientExplosionBox(PODEntity* clEntity)
     : Base(clEntity) {
 
 }
-MiscClientExplosionBox::~MiscClientExplosionBox() {
-
-}
 
 
 

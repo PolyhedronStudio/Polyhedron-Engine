@@ -56,7 +56,7 @@ public:
     /**
 	*	@brief Default destructor
 	**/
-    ~ClientGameWorld() = default;
+    virtual ~ClientGameWorld() = default;
 
 public:
     /**
@@ -124,7 +124,7 @@ public:
     PODEntity* GetUnusedPODEntity(bool isWired = true) final;
 
     /**
-	*   @brief  Creates and assigns a game entity to the given server entity based on the classname.
+	*   @brief  Creates and assigns a game entity to the given client entity based on the classname.
     *
     *   @return A pointer to the game entity on success, nullptr on failure.
     **/
@@ -184,7 +184,7 @@ public:
 	*
 	*   @return On success: A pointer to the ClientEntity's GameEntity, which may be newly allocated. On failure: A nullptr.
 	**/
-	GameEntity* UpdateGameEntityFromState(const EntityState& state, PODEntity* clEntity);
+	GameEntity* UpdateGameEntityFromState(const EntityState* state, PODEntity* clEntity);
 	/**
 	*   @brief  When the client receives state updates it calls into this function so we can update
 	*           the game entity belonging to the server side entity(defined by state.number).
@@ -194,7 +194,7 @@ public:
 	*   @return True on success, false in case of trouble. (Should never happen, and if it does,
 	*           well... file an issue lmao.)
 	**/
-	qboolean UpdateFromState(PODEntity *clEntity, const EntityState& state);
+	qboolean UpdateFromState(PODEntity *clEntity, const EntityState* state);
 	
 	/**
 	*   @brief  Frees the given server entity and its game entity in order to recycle it again.

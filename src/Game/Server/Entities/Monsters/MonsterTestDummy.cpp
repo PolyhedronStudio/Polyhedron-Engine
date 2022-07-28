@@ -38,7 +38,6 @@ MonsterTestDummy::MonsterTestDummy(PODEntity *svEntity) : Base(svEntity) {
 	//gi.DPrintf("SVG Spawned: svNumber=#%i mapClass=%s hashedMapClass=#%i\n", svEntity->state.number, mapClass, hashedMapClass);
 }
 
-MonsterTestDummy::~MonsterTestDummy() { }
 
 /**
 *

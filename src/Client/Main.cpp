@@ -143,12 +143,13 @@ void CL_CloseBSPMenu() {
 }
 
 void CL_LoadBSPMenuMap(qboolean force = false) {
-    // Open mainmenu map.
-    if (force == false) {
-        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
-    } else {
-        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
-    }
+	UI_OpenMenu(UIMENU_GAME);
+    //// Open mainmenu map.
+    //if (force == false) {
+    //    Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
+    //} else {
+    //    Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
+    //}
 }
 
 //======================================================================
@@ -2952,18 +2953,18 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 		// Get entity pointer.
 		PODEntity *podEntity = &cs.entities[i];
 
-		//if (!podEntity->inUse) {
-		//	continue;
-		//}
+		if (!podEntity->inUse) {
+			continue;
+		}
 
 		// Update local entity.
-		LocalEntity_Update(podEntity->currentState);
+		LocalEntity_Update(&podEntity->currentState);
 
 		// Run the Client Game entity for a frame.		
-		LocalEntity_SetHashedClassname(podEntity, podEntity->currentState);
+		LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
 
 		// Fire local entity events.
-		LocalEntity_FireEvent(podEntity->currentState);
+		LocalEntity_FireEvent(&podEntity->currentState);
 	}
 	
 	// Give the client game module a chance to run its local entities for a frame.

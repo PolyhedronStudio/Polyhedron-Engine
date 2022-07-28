@@ -91,8 +91,8 @@ extern void    (*R_ModeChanged)(int width, int height, int flags, int rowbytes, 
 // add decal to ring buffer
 extern void    (*R_AddDecal)(decal_t *d);
 
-extern qboolean (*R_InterceptKey)(unsigned key, qboolean down);
-extern qboolean (*R_IsHDR)();
+extern bool (*R_InterceptKey)(unsigned key, qboolean down);
+extern bool (*R_IsHDR)();
 
 #if REF_GL
 void R_RegisterFunctionsGL();

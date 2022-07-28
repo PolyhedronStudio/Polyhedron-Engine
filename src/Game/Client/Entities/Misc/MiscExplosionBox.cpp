@@ -18,7 +18,7 @@
 //#include "../Base/CLGBaseTrigger.h"
 
 // World.
-#include "../World/ClientGameWorld.h"
+#include "../../World/ClientGameWorld.h"
 
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
@@ -31,9 +31,6 @@
 //
 MiscExplosionBox::MiscExplosionBox(PODEntity* clEntity) 
     : Base(clEntity) {
-
-}
-MiscExplosionBox::~MiscExplosionBox() {
 
 }
 

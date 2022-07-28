@@ -35,10 +35,6 @@ ItemHealthMega::ItemHealthMega(PODEntity *svEntity, const std::string& displaySt
     : Base(svEntity, displayString, identifier) {
 
 }
-ItemHealthMega::~ItemHealthMega() {
-
-}
-
 
 
 /***

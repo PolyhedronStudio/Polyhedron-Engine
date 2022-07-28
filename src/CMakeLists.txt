@@ -592,7 +592,7 @@ IF(CONFIG_USE_CURL)
 
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_HTTP})
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_CURL=1)
-	TARGET_LINK_LIBRARIES(client libcurl)
+	TARGET_LINK_LIBRARIES(client PUBLIC libcurl)
 ENDIF()
 
 
@@ -604,7 +604,7 @@ IF(CONFIG_ENABLE_RMLUI)
  	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ${CMAKE_SOURCE_DIR}/extern/Nac-RmlUi/Include/)
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_RMLUI=1 RMLUI_STATIC_LIB)
-	TARGET_LINK_LIBRARIES(client RmlCore RmlDebugger RmlLua)
+	TARGET_LINK_LIBRARIES(client PUBLIC RmlCore RmlDebugger RmlLua)
 ELSE()
 	# These are set to supply the rmlui_null.cpp file.
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
@@ -642,9 +642,9 @@ IF (CONFIG_VKPT_RENDERER)
 		TARGET_COMPILE_DEFINITIONS(client PRIVATE VKPT_IMAGE_DUMPS)
 	ENDIF()
 	IF (WIN32)
-	TARGET_LINK_LIBRARIES(client vulkan-1)
+	TARGET_LINK_LIBRARIES(client PUBLIC vulkan-1)
 	ELSE ()
-	TARGET_LINK_LIBRARIES(client vulkan)
+	TARGET_LINK_LIBRARIES(client PUBLIC vulkan)
 	ENDIF()
 ENDIF()
 
@@ -692,8 +692,8 @@ IF (WIN32)
 	TARGET_SOURCES(svgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_sv.rc)
 	TARGET_SOURCES(clgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_cl.rc)
 
-	TARGET_LINK_LIBRARIES(client winmm ws2_32)
-	TARGET_LINK_LIBRARIES(server winmm ws2_32)
+	TARGET_LINK_LIBRARIES(client PUBLIC winmm ws2_32)
+	TARGET_LINK_LIBRARIES(server PUBLIC winmm ws2_32)
 
 	set_target_properties(client PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 	set_target_properties(server PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
@@ -716,7 +716,11 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(client PUBLIC ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "/extern/stb/")
-TARGET_LINK_LIBRARIES(client  SDL2main SDL2-static zlibstatic stb tinyobjloader fmt-header-only)
+target_include_directories(client PRIVATE ${GLM_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(client PUBLIC SDL2main SDL2-static zlibstatic stb tinyobjloader fmt-header-only)
+# Link in GLM headers.
+target_link_libraries(client PUBLIC glm)
+
 SET_TARGET_PROPERTIES(client
     PROPERTIES
     OUTPUT_NAME "Polyhedron"
@@ -735,7 +739,11 @@ SET_TARGET_PROPERTIES(client
 #include_directories()
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
-TARGET_LINK_LIBRARIES(server  SDL2main SDL2-static zlibstatic fmt-header-only)
+target_include_directories(server PRIVATE ${GLM_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(server PUBLIC SDL2main SDL2-static zlibstatic fmt-header-only)
+# Link in GLM headers.
+target_link_libraries(server PUBLIC glm)
+
 SET_TARGET_PROPERTIES(server
     PROPERTIES
     OUTPUT_NAME "Polyhedron_Dedicated"

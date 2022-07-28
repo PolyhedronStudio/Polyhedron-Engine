@@ -34,9 +34,6 @@ TriggerOnce::TriggerOnce(PODEntity *svEntity) : TriggerMultiple(svEntity) {
 	//
 	//lastHurtTime = 0.f;
 }
-TriggerOnce::~TriggerOnce() {
-
-}
 
 // Interface functions. 
 //

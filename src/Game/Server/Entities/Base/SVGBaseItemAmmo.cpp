@@ -27,9 +27,6 @@ SVGBaseItemAmmo::SVGBaseItemAmmo(PODEntity *svEntity, const std::string& display
     : Base(svEntity, displayString, identifier) {
 
 }
-SVGBaseItemAmmo::~SVGBaseItemAmmo() {
-
-}
 
 
 

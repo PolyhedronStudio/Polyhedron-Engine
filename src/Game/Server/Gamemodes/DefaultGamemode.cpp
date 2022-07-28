@@ -31,10 +31,7 @@
 //
 // Constructor/Deconstructor.
 //
-DefaultGameMode::DefaultGameMode() {
-
-}
-DefaultGameMode::~DefaultGameMode() {
+DefaultGameMode::DefaultGameMode() : IGameMode() {
 
 }
 

@@ -148,7 +148,7 @@ retry:
         SG_Impact(ent, trace);
 
         // if the pushed entity went away and the pusher is still there
-        if ( !trace.gameEntity->IsInUse() && ent->GetMoveType() == MoveType::Push && ent->IsInUse() ) {
+        if ( (!trace.gameEntity || !trace.gameEntity->IsInUse()) && ent->GetMoveType() == MoveType::Push && ent->IsInUse()) {
             // move the pusher back and try again
             ent->SetOrigin( start );
             ent->LinkEntity();

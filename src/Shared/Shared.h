@@ -75,12 +75,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <chrono>
 
 
+/**
+*	GLM - Better to use a solid math library than rolling our most likely prone to error custom one.
+**/
+//#define GLM_FORCE_RADIANS
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/matrix_inverse.hpp"
+
 
 /**
 *	FMT for Easy String Formatting.
 **/
 #include "fmt/format.h"
-
 
 /**
 *   System Endian include, if needed. 

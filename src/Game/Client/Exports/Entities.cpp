@@ -67,11 +67,18 @@ qboolean ClientGameEntities::PrepareBSPEntities(const char *mapName, const char*
 *   @return True on success, false in case of trouble. (Should never happen, and if it does,
 *           well... file an issue lmao.)
 **/
-qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, const EntityState& state) {
+qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, const EntityState* state) {
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
         Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
+
+        return false;
+    }
+    // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
+    if (!state) {
+        // Developer warning.
+        Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(state)!!\n");
 
         return false;
     }
@@ -99,13 +106,15 @@ qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, cons
 	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
         if (podEntity) {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state->number, mapClass, hashedMapClass);
         } else {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state->number, mapClass, hashedMapClass);
         }
 #endif
 		return true;
 	}
+
+	return false;
 }
 
 //===============

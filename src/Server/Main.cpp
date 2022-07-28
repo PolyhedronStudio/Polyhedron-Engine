@@ -124,7 +124,7 @@ void SV_RemoveClient(client_t *client)
 
 void SV_CleanClient(client_t *client)
 {
-    int i;
+//    int i;
 
     // close any existing donwload
     SV_CloseDownload(client);

@@ -15,7 +15,7 @@ class InfoPlayerDeathmatch : public InfoPlayerStart {
 public:
     // Constructor/Deconstructor.
     InfoPlayerDeathmatch(PODEntity *svEntity);
-    virtual ~InfoPlayerDeathmatch();
+    virtual ~InfoPlayerDeathmatch() = default;
 
     DefineMapClass( "info_player_deathmatch", InfoPlayerDeathmatch, InfoPlayerStart );
 

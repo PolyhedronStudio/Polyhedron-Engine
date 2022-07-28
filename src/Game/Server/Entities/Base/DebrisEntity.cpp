@@ -25,9 +25,6 @@ DebrisEntity::DebrisEntity(PODEntity *svEntity)
     : SVGBaseEntity(svEntity) {
 
 }
-DebrisEntity::~DebrisEntity() {
-
-}
 
 /**
 *	@brief	Die callback.

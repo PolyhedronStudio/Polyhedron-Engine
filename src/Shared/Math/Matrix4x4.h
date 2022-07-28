@@ -12,6 +12,38 @@
 // Shared header.
 #include "../Shared.h"
 
+
+/**
+*	Keeping this here, even though it didn't seem to work it should be how to 
+*	get ourselves proper euler angles without a fuzz from our matrix transforms.
+***
+//// Non Transposed.
+//vec3_t rotate = vec3_zero();
+//rotate[ vec3_t::PYR::Roll ] = Degrees( 
+//	atan2( matRotatedPoseBone[6], matRotatedPoseBone[10] )
+//);//roll = atan2(matRotatedPoseBone[6], matRotatedPoseBone[10])
+//const float c2 = sqrt( matRotatedPoseBone[0]*matRotatedPoseBone[0] + matRotatedPoseBone[1]*matRotatedPoseBone[1] );
+//rotate[ vec3_t::PYR::Pitch ] = Degrees(
+//	atan2( -matRotatedPoseBone[2], c2 )
+//);
+//const float s1 = sin( rotate[vec3_t::PYR::Roll] ), c1 = cos( rotate[vec3_t::PYR::Roll] );
+//rotate[ vec3_t::PYR::Yaw ] = Degrees(
+//	atan2( s1*matRotatedPoseBone[8] - c1*matRotatedPoseBone[4], c1*matRotatedPoseBone[5]-s1*matRotatedPoseBone[9] )
+//);
+//
+//// Transpoes.
+//rotate[vec3_t::PYR::Roll] = Degrees( 
+//	atan2(matRotatedPoseBone[9], matRotatedPoseBone[10])
+//);
+//const float _c2 = sqrt(matRotatedPoseBone[0]*matRotatedPoseBone[0] + matRotatedPoseBone[4]*matRotatedPoseBone[4]);
+//rotate[vec3_t::PYR::Pitch] = Degrees( 
+//	atan2(-matRotatedPoseBone[8], _c2)
+//);
+//const float _s1 = sin( rotate[vec3_t::PYR::Roll] ), _c1 = cos( rotate[vec3_t::PYR::Roll] );
+//rotate[vec3_t::PYR::Yaw] = Degrees( 
+//	atan2(_s1*matRotatedPoseBone[2] - _c1*matRotatedPoseBone[1], _c1*matRotatedPoseBone[5]-_s1*matRotatedPoseBone[6])
+//);
+**/
 /**
 *	@brief	4x4 Matrix type. Implemented as union struct.
 **/

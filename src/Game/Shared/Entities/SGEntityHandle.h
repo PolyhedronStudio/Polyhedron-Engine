@@ -79,7 +79,7 @@ public:
     /**
 	*	@brief Default destructor
 	**/
-    ~SGEntityHandle() = default;
+    virtual ~SGEntityHandle() = default;
 
 public:
     /**

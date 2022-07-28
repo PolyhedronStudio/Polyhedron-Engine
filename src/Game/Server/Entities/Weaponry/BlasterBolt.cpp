@@ -22,9 +22,6 @@ BlasterBolt::BlasterBolt(PODEntity *svEntity)
     : SVGBaseEntity(svEntity) {
 
 }
-BlasterBolt::~BlasterBolt() {
-
-}
 
 //
 //===============

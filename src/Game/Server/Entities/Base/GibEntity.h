@@ -21,7 +21,7 @@ public:
 private:
     //! Private constructor. Gibs are created using the Create function.
     GibEntity(PODEntity *svEntity);
-    virtual ~GibEntity();
+    virtual ~GibEntity() = default;
 
 public:
     DefineGameClass(GibEntity, SVGBaseEntity);

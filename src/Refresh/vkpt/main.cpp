@@ -4278,6 +4278,11 @@ void debug_output(const char* format, ...)
 #endif
 }
 
+static bool R_IsHDR_RTX()
+{
+	return qvk.surf_is_hdr;
+}
+
 void R_RegisterFunctionsRTX()
 {
 	R_Init = R_Init_RTX;
@@ -4306,9 +4311,11 @@ void R_RegisterFunctionsRTX()
 	R_ModeChanged = R_ModeChanged_RTX;
 	R_AddDecal = R_AddDecal_RTX;
 	R_InterceptKey = R_InterceptKey_RTX;
+	R_IsHDR = R_IsHDR_RTX;
 	IMG_Load = IMG_Load_RTX;
 	IMG_Unload = IMG_Unload_RTX;
 	IMG_ReadPixels = IMG_ReadPixels_RTX;
+	IMG_ReadPixelsHDR = IMG_ReadPixelsHDR_RTX;
 	MOD_LoadMD2 = MOD_LoadMD2_RTX;
 	MOD_LoadMD3 = MOD_LoadMD3_RTX;
 	MOD_LoadIQM = MOD_LoadIQM_RTX;

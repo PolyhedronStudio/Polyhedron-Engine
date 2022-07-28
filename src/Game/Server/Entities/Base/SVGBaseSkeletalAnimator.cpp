@@ -33,8 +33,6 @@
 
 //! Constructor/Destructor.
 SVGBaseSkeletalAnimator::SVGBaseSkeletalAnimator(PODEntity *svEntity) : Base(svEntity) { }
-SVGBaseSkeletalAnimator::~SVGBaseSkeletalAnimator() { }
-
 
 /***
 * 

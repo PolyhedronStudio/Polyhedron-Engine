@@ -16,7 +16,7 @@ public:
     // Constructor/Deconstructor.
     //
     CoopGameMode();
-    virtual ~CoopGameMode() override;
+    virtual ~CoopGameMode() = default;
 
     //
     // Server Related.

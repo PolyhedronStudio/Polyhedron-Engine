@@ -21,7 +21,7 @@ public:
 
 private:
     DebrisEntity(PODEntity *svEntity);
-    virtual ~DebrisEntity();
+    virtual ~DebrisEntity() = default;
 
 public:
     DefineClass(DebrisEntity, CLGBaseLocalEntity);

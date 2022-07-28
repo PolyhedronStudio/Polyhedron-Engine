@@ -34,9 +34,6 @@ SVGBaseItem::SVGBaseItem(PODEntity *svEntity, const std::string& displayString, 
     : Base(svEntity), displayString(displayString), itemIdentifier(identifier) {
 
 }
-SVGBaseItem::~SVGBaseItem() {
-
-}
 
 
 

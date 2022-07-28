@@ -24,9 +24,6 @@ BodyCorpse::BodyCorpse(PODEntity *svEntity)
     : SVGBaseEntity(svEntity) {
 
 }
-BodyCorpse::~BodyCorpse() {
-
-}
 
 //
 //===============

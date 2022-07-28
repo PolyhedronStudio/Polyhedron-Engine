@@ -120,7 +120,7 @@ void ClientGameWorld::PrepareEntities() {
 		PODEntity backupPODEntity = podEntities[i];
 
 		// Delete game entity.
-		if (gameEntities.size() > i && gameEntities[i]) {
+		if (i < gameEntities.size() && gameEntities[i] != nullptr) {
 			// Notify about deallocation.
 			gameEntities[i]->OnDeallocate();
 
@@ -130,7 +130,7 @@ void ClientGameWorld::PrepareEntities() {
 		}
 
 		// Reset client PODEntity to a fresh state.
-		const bool isLocal = (i > MAX_WIRED_POD_ENTITIES ? true : false);
+		const bool isLocal = (i >= MAX_WIRED_POD_ENTITIES ? true : false);
 		podEntities[i] = {
 			.currentState = {
 				.number = i,	// We want to ensure its currentState number matches the index.
@@ -154,7 +154,7 @@ void ClientGameWorld::PrepareClients() {
 	
 	if (maximumclients && maximumclients->integer) {
 		maxClients = maximumclients->integer;
-		//Com_DPrint("ClientGameWorld::PrepareClients -> maxClients=#%i\n", maximumclients->integer);
+		Com_DPrint("ClientGameWorld::PrepareClients -> maxClients=#%i\n", maximumclients->integer);
 	}
 
     //maxClients = maximumclients->value;
@@ -166,29 +166,42 @@ void ClientGameWorld::PrepareClients() {
 }
 
 /**
-*	@brief Prepares the game's client entities with a base player game entity.
+*	@brief Prepares the game's client entities with a CLGBasePlayer entity and a proper client pointer.
 **/
 void ClientGameWorld::PreparePlayers() {
 	// Allocate a classentity for each client in existence.
 	for (int32_t i = 1; i < maxClients + 1; i++) {//maxClients + 1; i++) {
-		//const int32_t entityNumber = i;
-
 		// Acquire POD entity.
 		PODEntity *podEntity = GetPODEntityByIndex(i);
+
+		// Delete previous classentity, if existent (older client perhaps).
+		// If it had no client pointer set, it was never a player client game entity so free it.
+		if ( podEntity->gameEntity && !podEntity->gameEntity->GetClient() ) {
+			FreeGameEntity( podEntity );
+		}
+
+		// Ensure our entity number which we're going to set is valid.
+		const int32_t clientEntityNumber = podEntity - podEntities;
+		// Previous state number.
+		const int32_t previousEntityNumber = podEntity->previousState.number;
 
 		// Setup the entity.
 		(*podEntity) = {
 			.currentState {
-				.number = i,
+				.number = clientEntityNumber,
 			},
 			.previousState = {
-				.number = i,
+				.number = previousEntityNumber,
 			},
+			.client = &clients[i - 1],
 			.isLocal = false,
-			.inUse = true,
-			.gameEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false, true), //CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
-			.clientEntityNumber = i,
+			.inUse = (i == cl->clientNumber ? true : false),
+			//.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePlayer"),
+			.clientEntityNumber = clientEntityNumber,
 		};
+
+		// Assign its gameclass since it needs a pointer to podEntity.
+		podEntity->gameEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false, true);
 	}
 }
 
@@ -209,12 +222,14 @@ void ClientGameWorld::PrepareBodyQueue() {
 		(*podEntity) = {
 			.currentState {
 				.number = entityNumber,
+				.modelIndex = 0,
 			},
 			.previousState = {
 				.number = entityNumber,
+				.modelIndex = 0,
 			},
 			.isLocal = false,
-			.inUse = true,
+			.inUse = false,
 			.gameEntity = CreateGameEntity<CLGBasePacketEntity>(podEntity, false, true),//CreateGameEntityFromClassname(podEntity, "CLGBasePacketEntity"),
 			.clientEntityNumber = entityNumber,
 		};
@@ -255,11 +270,8 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 	//	PODEntity *reservedPODEntity = GetUnusedPODEntity(false);
 	//	
 	//	// Create a base local entity for these reserved ones for now.
-	//	auto *gameEntity = CreateGameEntity<CLGBaseLocalEntity>(reservedPODEntity, false, false);
-	//	gameEntity->SetInUse(false);
-
 	//	//// Acquire POD entity.
-		PODEntity *podEntity = GetPODEntityByIndex(i);
+		PODEntity *podEntity = GetUnusedPODEntity(i);
 
 		// Setup the entity.
 		(*podEntity) = {
@@ -710,6 +722,8 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 		.previousState = {
 			.number = entityNumber,
 		},
+		// Ensure it is not in use.
+		.inUse = false,
 		// It has no Game Entity anymore.
 		.gameEntity = nullptr,
 		// Store the freeTime, so we can prevent allocating a new entity with this ID too soon.
@@ -797,7 +811,7 @@ qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
 *
 *   @return On success: A pointer to the ClientEntity's GameEntity, which may be newly allocated. On failure: A nullptr.
 **/
-GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state, PODEntity* clEntity) {
+GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState* state, PODEntity* clEntity) {
     // Start with a nice nullptr.
     IClientGameEntity* spawnEntity = nullptr;
 
@@ -805,31 +819,71 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
     if (!clEntity) {
 		return nullptr;
     }
+	if (!state) {
+		return nullptr;
+	}
 
+	/**
+	*	Firt see if the entity happens to be a client, in which case we return its game entity after
+	*	checking if it is an appropriate class type(CLGBasePlayer). If it happens to be anything else
+	*	we re-allocate a CLGBasePlayer and return its game entity pointer.
+	**/
     // Get entity state number.
-    const int32_t stateNumber = state.number;
+    const int32_t stateNumber = state->number;
 
+	// Special handling for player client entities, we don't want them to be changed into anything random
+	if ( stateNumber > 0 && stateNumber <= GetMaxClients() ) { 
+		// If the entity has a game entity and a pointer set to a 'dummy' client, we're good to go.
+		if ( clEntity->gameEntity && clEntity->gameEntity->GetClient() ) {
+			// Return its game entity.
+			return static_cast< IClientGameEntity* >( clEntity->gameEntity );
+		// Otherwise something is off, notify developer and error out.
+		} else {
+			// Warn about not having had a game entity. 
+			if ( !clEntity->gameEntity ) {
+				const std::string errorStr = fmt::format( "CLG ({}): PODEntity(#{}), state->number(#{}) which is meant to be a player client entity, has a (nullptr) game entity.", __func__, state->number, clEntity->clientEntityNumber );
+				Com_DPrintf( "%s\n", errorStr.c_str() );
+
+				// Assign its gameclass since it needs a pointer to podEntity.
+				clEntity->client = &clients[ clEntity - podEntities ];
+				clEntity->gameEntity = CreateGameEntity< CLGBasePlayer >( clEntity, false, true );
+				
+				return static_cast< IClientGameEntity* >( clEntity->gameEntity );
+				//Com_Error( ErrorType::Drop, errorStr.c_str() );
+			// Warn about not having had a game entity. 
+			} else if ( !clEntity->gameEntity->GetClient() ) {
+				const std::string errorStr = fmt::format( "CLG ({}): PODEntity(#{}), state->number(#{}) which is meant to be a player client entity, has a (nullptr) client.", __func__, state->number, clEntity->clientEntityNumber );
+				//Com_Error( ErrorType::Drop, errorStr.c_str() );
+				Com_DPrintf( "%s\n", errorStr.c_str() );
+			}
+		}	
+	}
+
+	/**
+	*	We're not dealing with a player client entity, so move ahead and start comparing the entity state's
+	*	current and previous hashed classnames. 
+	**/
 	// Acquire hashedClassname.
-	const uint32_t currentHashedClassname = state.hashedClassname;
+	const uint32_t currentHashedClassname = state->hashedClassname;
 
 	// If the previous and current entity number and game entity classname hash are a match, 
 	// update the current entity from state instead.
-	if (clEntity->gameEntity && stateNumber == clEntity->clientEntityNumber) {
+	if ( clEntity->gameEntity && stateNumber == clEntity->clientEntityNumber ) {
 		uint32_t previousHashedClassname = clEntity->previousState.hashedClassname;
 	
-		if (currentHashedClassname == previousHashedClassname) {
+		if ( currentHashedClassname == previousHashedClassname ) {
 			// Acquire a pointer to the already in-place game entity instead of allocating a new one.
-			clEntity->gameEntity = GetGameEntityByIndex(stateNumber);
+			clEntity->gameEntity = GetGameEntityByIndex( stateNumber );
 
 			// Update it based on state and return its pointer.
-			if (clEntity->gameEntity) {
-				static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
+			if ( clEntity->gameEntity ) {
+				static_cast< IClientGameEntity* >( clEntity->gameEntity )->UpdateFromState( state );
 			} else {
 				// Do nothing. 
-				Com_DPrint("CLG (%s): PODEntity(%i) had a (nullptr) GameEntity\n", __func__, state.number, clEntity->clientEntityNumber);
+				Com_DPrint( "CLG (%s): PODEntity(%i) had a (nullptr) GameEntity\n", __func__, state->number );
 			}
 
-			return static_cast<IClientGameEntity*>(clEntity->gameEntity);
+			return static_cast< IClientGameEntity* >( clEntity->gameEntity );
 		}
 	} else {
 		// Debug Print.
@@ -840,14 +894,14 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 
     // New type info-based spawning system, to replace endless string comparisons
     // First find it by the map name
-    TypeInfo* info = TypeInfo::GetInfoByHashedMapName(currentHashedClassname);
-    if (info == nullptr) {
+    TypeInfo* info = TypeInfo::GetInfoByHashedMapName( currentHashedClassname );
+    if ( info == nullptr ) {
 		// Then try finding it by the C++ class name. (USE THIS FOR SPAWNING BSP STRING ENTITIES.)
 		//if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
 		// 
-		if ((info = TypeInfo::GetInfoByName("CLGBasePacketEntity")) == nullptr) {
+		if ( ( info = TypeInfo::GetInfoByName( "CLGBasePacketEntity" ) ) == nullptr ) {
 			// Warn.
-		    Com_DPrint("CLG (%s): info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n");
+		    Com_DPrint( "CLG (%s): info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n" );
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -856,39 +910,39 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 
     // Don't freak out if the entity cannot be allocated, but do warn us about it, it's good to know.
     // Entity classes with 'DefineDummyMapClass' won't be reported here.
-    if (info->AllocateInstance != nullptr && (info->IsMapSpawnable() || info->IsGameSpawnable())) {
+    if ( info->AllocateInstance != nullptr && ( info->IsMapSpawnable() || info->IsGameSpawnable() ) ) {
 		// Allocate and return a pointer to the new game entity object.
-		clEntity->gameEntity = gameEntities[state.number] = info->AllocateInstance(clEntity); //InsertAt(state.number, info->AllocateInstance(clEntity));
+		clEntity->gameEntity = gameEntities[ state->number ] = info->AllocateInstance( clEntity ); //InsertAt(state.number, info->AllocateInstance(clEntity));
 
 		// Spawn if needed.
-		if (clEntity->gameEntity) {
+		if ( clEntity->gameEntity ) {
 			// TODO: Use a SpawnFromState function here instead.
-			static_cast<IClientGameEntity*>(clEntity->gameEntity)->SpawnFromState(state);
+			static_cast< IClientGameEntity* >( clEntity->gameEntity )->SpawnFromState( state );
 
 		}
 
 		// If it isn't a nullptr...
-		if (!clEntity->gameEntity ) {
+		if ( !clEntity->gameEntity ) {
 			// Inform us about what entity failed exactly.
-			const char *classname = (info->IsMapSpawnable() ? info->mapClass : info->classname);
-			Com_DPrint("CLG (%s): Failed to spawn GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber);
-			return nullptr;
-			//classEntity = new CLGBasePacketEntity(clEntity);
+			const char *classname = ( info->IsMapSpawnable() ? info->mapClass : info->classname );
+			Com_DPrint( "CLG (%s): Failed to spawn GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber );
+			//return nullptr;
+			clEntity->gameEntity = gameEntities[ state->number ] = new CLGBasePacketEntity( clEntity );
 		}
 
 		// Update its current state.
-		static_cast<IClientGameEntity*>(clEntity->gameEntity)->UpdateFromState(state);
+		static_cast< IClientGameEntity* >( clEntity->gameEntity )->UpdateFromState( state );
 
 		// Return game entity.
-		return static_cast<IClientGameEntity*>(clEntity->gameEntity);
+		return static_cast< IClientGameEntity* >( clEntity->gameEntity );
     } else {
 		// Inform us about what entity failed exactly.
-		const char *classname = (info->IsMapSpawnable() ? info->mapClass : info->classname);
+		const char *classname = ( info->IsMapSpawnable() ? info->mapClass : info->classname );
 		// Check and warn about what went wrong.
-		if (info->IsAbstract()) {
-			Com_DPrint("CLG (%s): Tried to allocate an 'abstract class' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber);
-		} else if (!info->IsMapSpawnable()) {
-		    Com_DPrint("CLG (%s): Tried to allocate a 'code-only' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber);
+		if ( info->IsAbstract() ) {
+			Com_DPrint( "CLG (%s): Tried to allocate an 'abstract class' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber );
+		} else if ( !info->IsMapSpawnable() ) {
+		    Com_DPrint( "CLG (%s): Tried to allocate a 'code-only' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber );
 		}
     }
 
@@ -906,7 +960,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState& state,
 *   @return True on success, false in case of trouble. (Should never happen, and if it does,
 *           well... file an issue lmao.)
 **/
-qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState& state) {
+qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState* state) {
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
@@ -938,9 +992,9 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
         if (podEntity) {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, podEntity->clientEntityNumber, state->number, mapClass, hashedMapClass);
         } else {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, state->number, mapClass, hashedMapClass);
         }
     }
 #endif

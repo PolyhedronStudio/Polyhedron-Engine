@@ -33,9 +33,6 @@ TriggerMultiple::TriggerMultiple(PODEntity *svEntity) : SVGBaseTrigger(svEntity)
 	//
 	//lastHurtTime = 0.f;
 }
-TriggerMultiple::~TriggerMultiple() {
-
-}
 
 // Interface functions. 
 //

@@ -32,7 +32,6 @@
 //! Constructor/Deconstructor.
 ItemWeaponSMG::ItemWeaponSMG(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) { }
-ItemWeaponSMG::~ItemWeaponSMG() { }
 
 
 /**

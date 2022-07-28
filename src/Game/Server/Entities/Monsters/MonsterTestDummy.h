@@ -23,7 +23,7 @@ class MonsterTestDummy : public SVGBaseRootMotionMonster {
 public:
     //! Constructor/Deconstructor.
     MonsterTestDummy(PODEntity *svEntity);
-    virtual ~MonsterTestDummy();
+    virtual ~MonsterTestDummy() = default;
 
     DefineMapClass("monster_testdummy", MonsterTestDummy, SVGBaseRootMotionMonster);
 

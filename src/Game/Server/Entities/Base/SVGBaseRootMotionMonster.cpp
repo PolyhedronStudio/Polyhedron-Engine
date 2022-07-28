@@ -23,13 +23,12 @@
 #include "SVGBaseRootMotionMonster.h"
 
 // Game World.
-#include "../World/ServerGameWorld.h"
+#include "../../World/ServerGameWorld.h"
 
 #define STEPSIZE 18
 
 //! Constructor/Destructor.
 SVGBaseRootMotionMonster::SVGBaseRootMotionMonster(PODEntity *svEntity) : Base(svEntity) { }
-SVGBaseRootMotionMonster::~SVGBaseRootMotionMonster() { }
 
 
 /***
@@ -500,7 +499,7 @@ float SVGBaseRootMotionMonster::TurnToIdealYawAngle() {
 	const vec3_t _previousAngles = GetAngles();
 
 	// Angle Mod the current angles and compare to Ideal Yaw angle.
-	float _currentYawAngle = AngleMod( _previousAngles[vec3_t::Yaw] );
+	float _currentYawAngle = _previousAngles[vec3_t::Yaw];
 	float _idealYawAngle = GetIdealYawAngle();
 		
 	if ( _currentYawAngle == _idealYawAngle) {
@@ -532,7 +531,7 @@ float SVGBaseRootMotionMonster::TurnToIdealYawAngle() {
 	}
 
 	// Set the new angles, Angle Modding the Yaw.
-	SetAngles( { _previousAngles.x, AngleMod( _currentYawAngle + _yawMove * FRAMETIME.count() * _yawTurningSpeed ), _previousAngles.z});
+	SetAngles( { _previousAngles.x, AngleMod(_currentYawAngle + _yawMove * (float)FRAMETIME.count() * _yawTurningSpeed), _previousAngles.z});
 
 	// Return delta angles.
 	return GetAngles()[vec3_t::Yaw] - GetIdealYawAngle();

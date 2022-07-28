@@ -155,10 +155,13 @@ endif()
 # Set the flag for SharedGame to build with ClientGame compatability in mind.
 target_compile_definitions(clgame PUBLIC "cxx_std_20 -DSHAREDGAME_CLIENTGAME=1")
 # Link in FMT Header only library.
-target_link_libraries(clgame fmt-header-only)
+target_link_libraries(clgame PUBLIC fmt::fmt-header-only)
+# Link in GLM headers.
+target_link_libraries(clgame PUBLIC glm)
 
 # Include directories.
-target_include_directories(clgame PUBLIC PATH_SHARED)
+target_include_directories(clgame PRIVATE ${GLM_INCLUDE_DIRS})
+target_include_directories(clgame PUBLIC ${PATH_SHARED})
 # Include SharedGame Framework.
 target_include_directories(clgame PUBLIC Game/Shared)
 
