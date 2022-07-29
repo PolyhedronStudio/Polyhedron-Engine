@@ -7,13 +7,10 @@
 //
 */
 #include "../../ClientGameLocals.h"          // SVGame.
-//#include "../../Effects.h"          // Effects.
-//#include "../../Utilities.h"            // Util funcs.
-#include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Server Game Base Entity.
 #include "../Base/CLGBaseLocalEntity.h"
-//#include "../Base/SVGBaseTrigger.h"
+//#include "../Base/CLGBaseTrigger.h"
 
 // World.
 #include "../../World/ClientGameWorld.h"
@@ -28,9 +25,6 @@
 //
 MiscClientModel::MiscClientModel(PODEntity *svEntity)
     : Base(svEntity) {
-
-}
-MiscClientModel::~MiscClientModel() {
 
 }
 
@@ -87,7 +81,9 @@ void MiscClientModel::Spawn() {
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     // Set the barrel model, and model index.
-    SetModel(model);
+    if ( !model.empty() ) {
+		SetModel( model );
+	}
 
     // Set noise ( in case one is precached. )
     if (precachedNoiseIndex) {
@@ -213,12 +209,12 @@ void MiscClientModel::SpawnKey(const std::string& key, const std::string& value)
 		
 		ParseKeyValue( key, value, parsedStyle );
 		SetStyle( parsedStyle );
-	/* } else if (key == "customLightStyle") {
+	} else if (key == "customLightStyle") {
 		std::string parsedCustomLightStyle = "";
 		
 		ParseKeyValue( key, value, parsedCustomLightStyle );
 		SetCustomLightStyle( parsedCustomLightStyle );
-    }*/
+    //}
 	} else if (key == "noise") {
         std::string parsedNoisePath = "";
 

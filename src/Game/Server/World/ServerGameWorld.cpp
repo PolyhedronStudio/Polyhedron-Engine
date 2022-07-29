@@ -15,10 +15,10 @@
 #include "../Entities/Base/GibEntity.h"
 
 // GameModes.
-#include "../GameModes/IGameMode.h"
-#include "../GameModes/DefaultGameMode.h"
-#include "../GameModes/CoopGameMode.h"
-#include "../GameModes/DeathMatchGameMode.h"
+#include "../Gamemodes/IGamemode.h"
+#include "../Gamemodes/DefaultGamemode.h"
+#include "../Gamemodes/CoopGamemode.h"
+#include "../Gamemodes/DeathMatchGamemode.h"
 
 // GameWorld.
 #include "../World/ServerGameWorld.h"
@@ -557,7 +557,7 @@ qboolean ServerGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, S
     if (!gameEntity) {
 		// Free/reset the PODEntity for reusal.
 		//FreePODEntity(podEntity);
-		gi.DPrintf("SVGWarning: Spawning entity(%s) failed.\n", dictionary["classname"]);
+		gi.DPrintf("SVGWarning: Spawning entity(%s) failed.\n", dictionary["classname"].c_str());
 		return false;
     }
 

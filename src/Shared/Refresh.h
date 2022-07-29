@@ -55,54 +55,68 @@ using ModelMemoryAllocateCallback = void*(*)(memhunk_t *hunk, size_t size);
 #include "Formats/Iqm.h"
 
 typedef struct r_entity_s {
-    //
-    // Model.
-    //
-    qhandle_t           model;   // The entity model - opaque type outside refresh
-    vec3_t              angles;  // The entity angles.
-
-    //
-    // Most recent data
-    //
-    vec3_t              origin;  // The entity origin -  also used as RenderEffects::Beam's "from"
-    int                 frame;   // The entity frame - also used as RenderEffects::Beam's diameter
-	int                 frameB;   // The entity frame - also used as RenderEffects::Beam's diameter
-    //
-    // Previous data for lerping
-    //
-    vec3_t              oldorigin;  // The old entity origin - also used as RenderEffects::Beam's "to"
-    int                 oldframe;   // The old entity frame.
-	int                 oldframeB;   // The old entity frame.
-
-	//
-	//	SKM Related.
-	//
-	int32_t rootBoneAxisFlags = 0;
-	int32_t rootBoneAxisFlagsB = 0;
+	/**
+	*	Entity ID, Temporary Entity Type.
+	**/
+	//! Refresh Entity ID.
+    int32_t	id			= 0;
+	//! Temporary Entity Type.
+	int32_t tent_type	= 0;
 
 
-    //
-    // Misc.
-    //
-    float               backlerp;   // 0.0 = current, 1.0 = old
-	float				backlerpB;
+	/**
+	*	Visual Appearance:
+	**/
+	//! Actual Render Flags.
+    int32_t		flags	= 0;
+	//! Entity Model Index.
+    qhandle_t	model			= 0;
+	//! In case this model is a light emitter, this configurates what lightstyle it should operate with.
+	int32_t		modelLightStyle = -1;
+	//! Actual handle containing the index of the skin we should be taking. (The skin number is considered a "sub skin").
+    qhandle_t	skin			= 0;
+	//! The Entity's skin number. Also used as RenderEffects::Beam's palette index, -1 => use rgba.
+    int32_t		skinNumber		= 0;
 
-    int                 skinNumber;    // also used as RenderEffects::Beam's palette index,
-                                    // -1 => use rgba
+	//! Actual entity rotation angles.
+    vec3_t		angles	= vec3_zero();
+	//! Optionable color overlay.
+	color_t		rgba	= { .u8 = { 255, 255, 255, 255 } };
+	//! The Entity's alpha, only applied if RenderEffects::Translucent is set.
+    float		alpha	= 0.f;
+	//! Default Render Scale.
+	float		scale	= 1.f;
 
-    float               alpha;      // ignore if RenderEffects::Translucent isn't set
-    color_t             rgba;
 
-    qhandle_t           skin;       // NULL for inline skin
-    int                 flags;      // Flags.
+	/**
+	*	Origin & OldOrigin:
+	**/
+    //! Entity Origin: Also used as RenderEffects::Beam's "from" point.
+	vec3_t	origin		= vec3_zero();
+	//! Old Entity Origin: Also used as RenderEffects::Beam's "to" point.
+	vec3_t	oldorigin	= vec3_zero();
+	
 
-	int32_t				modelLightStyle = -1;
+	/**
+	*	Animation LERPing.
+	**/
+	//! Entity's main animation frame. (This is also used for regular alias models and animated sprites/textures.)
+	int32_t	frame		= 0;
+	//! Entity's main animation frame at the time of rendering our last frame.
+    int32_t	oldframe	= 0;
+	//! Main Animation Back LERP: 0.0 = current, 1.0 = old.
+    float backlerp		= 0.f;
 
-    int                 id;         // Entity ID.
 
-	int                 tent_type;  // Temporary Entity Type.
+	/**
+	*	Skeletal Model Animation
+	**/
+	//! A pointer to a temporary bone cache.
+	iqm_transform_t	*currentBonePoses	= nullptr;
 
-	float               scale;      // Entity Scale.
+	//! Root Bone Axis Flags for the Main Animation.
+	int32_t rootBoneAxisFlags	= 0;
+
 } r_entity_t;
 
 typedef struct dlight_s {
@@ -208,20 +222,20 @@ typedef struct {
 // Added our own operator to the int32_t enum.
 //---------------------
 enum imageflags_t : int {
-    IF_NONE         = 0,
-    IF_PERMANENT    = (1 << 0),
-    IF_TRANSPARENT  = (1 << 1),
-    IF_PALETTED     = (1 << 2),
-    IF_UPSCALED     = (1 << 3),
-    IF_SCRAP        = (1 << 4),
-    IF_TURBULENT    = (1 << 5),
-    IF_REPEAT       = (1 << 6),
-    IF_NEAREST      = (1 << 7),
-    IF_OPAQUE       = (1 << 8),
-    IF_SRGB = (1 << 9),
-    IF_FAKE_EMISSIVE = (1 << 10),
-    IF_EXACT = (1 << 11),
-    IF_NORMAL_MAP = (1 << 12),
+    IF_NONE				= 0,
+    IF_PERMANENT		= (1 << 0),
+    IF_TRANSPARENT		= (1 << 1),
+    IF_PALETTED			= (1 << 2),
+    IF_UPSCALED			= (1 << 3),
+    IF_SCRAP			= (1 << 4),
+    IF_TURBULENT		= (1 << 5),
+    IF_REPEAT			= (1 << 6),
+    IF_NEAREST			= (1 << 7),
+    IF_OPAQUE			= (1 << 8),
+    IF_SRGB				= (1 << 9),
+    IF_FAKE_EMISSIVE	= (1 << 10),
+    IF_EXACT			= (1 << 11),
+    IF_NORMAL_MAP		= (1 << 12),
 
     // Image source indicator/requirement flags
     IF_SRC_BASE = (0x1 << 16),

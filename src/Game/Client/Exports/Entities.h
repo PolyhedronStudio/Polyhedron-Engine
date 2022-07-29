@@ -28,6 +28,9 @@
 //---------------------------------------------------------------------
 class ClientGameEntities : public IClientGameExportEntities {
 public:
+    //! Destructor.
+    virtual ~ClientGameEntities()  = default;
+
     /**
     *   @brief  Parses and spawns the local class entities in the BSP Entity String.
     * 
@@ -46,10 +49,9 @@ public:
     *           If the hashed classname differs, we allocate a new one instead. Also we ensure to 
     *           always update its PODEntity pointer to the appropriate new one instead.
     * 
-    *   @return True on success, false in case of trouble. (Should never happen, and if it does,
-    *           well... file an issue lmao.)
+    *   @return True on success, false in case of trouble.
     **/
-    qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState &state) final;
+    qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState *state) final;
 
     /**
     *   @brief  Executed whenever a server frame entity event is receieved.
@@ -62,10 +64,10 @@ public:
     void LocalEntityEvent(int32_t number) final;
 
     /**
-    *   @brief  Parse the server frame for server entities to add to our client view.
-    *           Also applies special rendering effects to them where desired.
+    *   @brief  Prepares all parsed server entities, as well as local entities for rendering
+	*			of the current frame.
     **/
-    void AddPacketEntities() final;
+    void PrepareRefreshEntities() final;
 
     /**
     *   @brief  Add the view weapon render entity to the screen. Can also be used for

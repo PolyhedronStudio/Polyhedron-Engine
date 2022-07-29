@@ -36,6 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Common/Prompt.h"
 #include "../Common/Protocol.h"
 #include "../Common/SizeBuffer.h"
+#include "../Common/TemporaryBoneCache.h"
 #include "../Common/Utilities.h"
 #include "../Common/Zone.h"
 
@@ -168,6 +169,10 @@ struct ClientStatic {
     int64_t     framecount = 0;
     uint64_t    realtime = 0;           // always increasing, no clamping, etc
     double      frameTime = 0.0;          // seconds since last frame
+
+	// Temporary Bone Cache, used for Skeletal Pose Blending.
+	TemporaryBoneCache boneCache;
+
 
 // preformance measurement
 #define C_FPS   cls.measure.fps[0]

@@ -14,7 +14,7 @@
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Deathmatch Game Mode.
-#include "../../GameModes/DeathMatchGameMode.h"
+#include "../../Gamemodes/DeathMatchGamemode.h"
 
 // Base class entities.
 #include "../Base/SVGBaseEntity.h"
@@ -32,10 +32,6 @@ ItemAmmo9mm::ItemAmmo9mm(PODEntity *svEntity, const std::string& displayString, 
     : Base(svEntity, displayString, identifier) {
 
 }
-ItemAmmo9mm::~ItemAmmo9mm() {
-
-}
-
 
 
 /**

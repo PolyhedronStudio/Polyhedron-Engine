@@ -82,18 +82,6 @@ public:
 
 
 
-	/***
-	*
-	*
-	*	Skeletal Animation Related.
-	*
-	*
-	***/
-	//! Actual skeleton unique to this entity.
-	EntitySkeleton entitySkeleton;
-
-
-
     /***
     *
     * 
@@ -104,19 +92,12 @@ public:
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
-    virtual void UpdateFromState(const EntityState &state) override;
+    virtual void UpdateFromState(const EntityState *state) override;
 
 	/**
 	*	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
 	**/
-	virtual void SpawnFromState(const EntityState &state) override;
-
-	/**
-	*	@brief	Switches the animation by blending from the current animation into the next.
-	*	@return	True if succesfull, false otherwise.
-	**/
-	//bool SwitchAnimation(const std::string &name, const GameTime &startTime);
-	bool SwitchAnimation(int32_t animationIndex, const GameTime &startTime);
+	virtual void SpawnFromState(const EntityState *state) override;
 
     /**
     *   @returen True if the entity is still in the current frame.
@@ -940,7 +921,7 @@ public:
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
-    virtual inline float    GetSpeed() { return 0.f; }
+    virtual inline float GetSpeed() { return 0.f; }
     /**
     *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
     **/
@@ -960,17 +941,74 @@ public:
 	**/
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
+	/**
+	*	@brief	Switches the animation by blending from the current animation into the next.
+	*	@return	True if succesfull, false otherwise.
+	**/
+	bool SwitchAnimation(int32_t animationIndex, const GameTime &startTime);
+
+	/**
+	*	@brief	This class implements a basic templated functionality that will assign
+	*			modelindex2,3 and 4 to their designated bone if this was set in an animation.
+	*
+	*			Inheirted classes can override this, call the Base class method and/or implement
+	*			their own functionalities here. Think of: Getting/setting a bone transform, 
+	*			and/or rendering effects/entities at a specific bone's transform.
+	**/
+	virtual void PostComputeSkeletonTransforms( EntitySkeletonBonePose *bonePoses );
+
 protected:
+	//! Actual skeleton unique to this entity.
+	EntitySkeleton entitySkeleton;
+	
+	//! Collection of bonePose animation channels.
+	struct {
+		//! Stores the bone poses of the Main Animation Channel.
+		EntitySkeletonBonePose mainChannel;
+		//! Stores the bone poses of the Event Animation Channel.
+		EntitySkeletonBonePose eventChannel;
+	} animationBonePoses;
+
 	//! Skeletal Model Data pointer. Needs to be loaded on request. DIYS
 	SkeletalModelData *skm = nullptr;
 
 private:
 	/**
-	*	@brief Processes and prepares for the refresh entity, the currentAnimation state for the point in 'time'.
+	*	@brief	Checks to see if we've received new animation data, and if the time
+	*			is there to switch to the next animation before processing all the
+	*			current frame numbers for the current time in animation.
+	*
+	*			Processing happens either without the entity skeleton, in which case
+	*			it is your typical alias model incrementing a linear list of frames
+	*			each for frameTime ms. 
+	*
+	*			If the model has had a .skc file loaded for itself and it succesfully
+	*			managed to create an Entity Skeleton for this entity then it'll calculate
+	*			the current frame of each separate blend action in order for later
+	*			lerp and blend computations.
 	**/
 	virtual void ProcessSkeletalAnimationForTime(const GameTime &time);
 
-
+	/**
+	*	@brief	Checks to see if we've received new animation data, and if the time
+	*			is there to switch to the next animation before processing all the
+	*			current frame numbers for the current time in animation.
+	*
+	*			Processing happens either without the entity skeleton, in which case
+	*			it acts as a typical alias model so we just calculate the lerped bonePose
+	*			for the current frame.
+	*
+	*			If the model has had a .skc file loaded for itself and it succesfully
+	*			managed to create an Entity Skeleton for this entity, it'll start to lerp
+	*			each action's bone poses. After which it traverses each blend action to
+	*			recursively blend from the specified bone at the given fraction. Ultimnately
+	*			giving us our final relative bone poses.
+	*
+	*			Local and World poses can be calculated if desired. TODO: Make it optionable
+	*			to skip the refresh module of doing so, and let us do it here.
+	*
+	**/
+	virtual void ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses );
 
 protected:
 	/**
@@ -1001,26 +1039,26 @@ public:
     *
     **/
     //! 'Think' Callback Pointer. (Gets dispatched by an entity's Think method based on nextThinkTime.)
-    using ThinkCallbackPointer      = void(IClientGameEntity::*)(void);
+    using ThinkCallbackPointer      = void(GameEntity::*)(void);
     //! 'Use' Callback Pointer.
-    using UseCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* other, IClientGameEntity* activator);
+    using UseCallbackPointer        = void(GameEntity::*)(GameEntity* other, GameEntity* activator);
     //! 'Touch' Callback Pointer.
-    using TouchCallbackPointer      = void(IClientGameEntity::*)(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
+    using TouchCallbackPointer      = void(GameEntity::*)(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
     //! 'Blocked' Callback Pointer.
-    using BlockedCallbackPointer    = void(IClientGameEntity::*)(IClientGameEntity* other);
+    using BlockedCallbackPointer    = void(GameEntity::*)(GameEntity* other);
     //! 'Damage' Callback Pointer.
-    using TakeDamageCallbackPointer = void(IClientGameEntity::*)(IClientGameEntity* other, float kick, int32_t damage);
+    using TakeDamageCallbackPointer = void(GameEntity::*)(GameEntity* other, float kick, int32_t damage);
     //! 'Die' Callback Pointer.
-    using DieCallbackPointer        = void(IClientGameEntity::*)(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point);
+    using DieCallbackPointer        = void(GameEntity::*)(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
     //! 'Stop' Callback Pointer. (Gets dispatched when an entity's physics movement has come to has stoppped, come to an end.)
-    using StopCallbackPointer		= void(IClientGameEntity::*)();
+    using StopCallbackPointer		= void(GameEntity::*)();
 
     /**
     *   @brief  Dispatches 'Use' callback.
     *   @param  other:      
     *   @param  activator:  
     **/
-    virtual void DispatchUseCallback(IClientGameEntity* other, IClientGameEntity* activator) override;
+    virtual void DispatchUseCallback(GameEntity* other, GameEntity* activator) override;
     /**
     *   @brief  Dispatches 'Use' callback.
     *   @param  inflictor:  
@@ -1028,12 +1066,12 @@ public:
     *   @param  damage:     
     *   @param  pointer:    
     **/
-    virtual void DispatchDieCallback(IClientGameEntity* inflictor, IClientGameEntity* attacker, int damage, const vec3_t& point) override;
+    virtual void DispatchDieCallback(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) override;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  other:  
     **/
-    virtual void DispatchBlockedCallback(IClientGameEntity* other) override;
+    virtual void DispatchBlockedCallback(GameEntity* other) override;
     /**
     *   @brief  Dispatches 'Block' callback.
     *   @param  self:   
@@ -1041,14 +1079,14 @@ public:
     *   @param  plane:  
     *   @param  surf:   
     **/
-    virtual void DispatchTouchCallback(IClientGameEntity* self, IClientGameEntity* other, CollisionPlane* plane, CollisionSurface* surf) override;
+    virtual void DispatchTouchCallback(GameEntity* self, GameEntity* other, CollisionPlane* plane, CollisionSurface* surf) override;
     /**
     *   @brief  Dispatches 'TakeDamage' callback.
     *   @param  other:
     *   @param  kick:
     *   @param  damage:
     **/
-    virtual void DispatchTakeDamageCallback(IClientGameEntity* other, float kick, int32_t damage) override;
+    virtual void DispatchTakeDamageCallback(GameEntity* other, float kick, int32_t damage) override;
     /**
     *   @brief  Dispatches 'Stop' callback.
     **/

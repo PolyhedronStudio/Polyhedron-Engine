@@ -15,7 +15,7 @@ class BlasterBolt : public SVGBaseEntity {
 public:
     // Constructor/Deconstructor.
     BlasterBolt(PODEntity *svEntity);
-    virtual ~BlasterBolt();
+    virtual ~BlasterBolt() = default;
 
     DefineClass( BlasterBolt, SVGBaseEntity );
 

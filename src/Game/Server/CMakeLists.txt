@@ -110,9 +110,15 @@ SET(SRC_SVGAME
 	Entities/Light.cpp
 	Entities/Worldspawn.cpp
 
-	GameModes/DefaultGameMode.cpp
+	Exports/Client.cpp
+	Exports/Core.cpp
+	Exports/Entities.cpp
+	Exports/GameState.cpp
+	Exports/LevelState.cpp
+
+	Gamemodes/DefaultGamemode.cpp
 	GameModes/CoopGameMode.cpp
-	GameModes/DeathMatchGameMode.cpp
+	Gamemodes/DeathMatchGamemode.cpp
 
 	Physics/Physics.cpp
 	Physics/StepMove.cpp
@@ -206,13 +212,21 @@ SET(HEADERS_SVGAME
 	Entities/Light.h
 	Entities/Worldspawn.h
 
-	GameModes/DefaultGameMode.h
-	GameModes/CoopGameMode.h
-	GameModes/DeathMatchGameMode.h
-	GameModes/IGameMode.h
+	Exports/Client.h
+	Exports/Core.h
+	Exports/Entities.h
+	Exports/GameState.h
+	Exports/LevelState.h
+
+	Gamemodes/DefaultGamemode.h
+	GameModes/CoopGamemode.h
+	Gamemodes/DeathMatchGamemode.h
+	Gamemodes/IGamemode.h
 
 	Player/Animations.h
 	Player/Client.h
+
+	ServerGameExports.h
 
 	Utilities/SVGTraceResult.h
 
@@ -232,15 +246,22 @@ endif()
 
 # Set the flag for SharedGame to build with ServerGame compatability in mind.
 TARGET_COMPILE_DEFINITIONS(svgame PUBLIC "cxx_std_20 -DSHAREDGAME_SERVERGAME=1")
+# Link in FMT Header only library.
+target_link_libraries(svgame PUBLIC fmt::fmt-header-only)
+# Link in GLM headers.
+target_link_libraries(svgame PUBLIC glm)
 
 # Include directories.
-TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC PATH_SHARED )
+target_include_directories(svgame PRIVATE ${GLM_INCLUDE_DIRS} )
+TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC ${PATH_SHARED} )
 # Include SharedGame Framework.
 TARGET_INCLUDE_DIRECTORIES(svgame PUBLIC Game/Shared)
+
 
 # Source Groups.
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_SVGAME} )
 SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_SVGAME} )
+
 
 # Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
 SET_TARGET_PROPERTIES(svgame

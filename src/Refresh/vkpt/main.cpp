@@ -38,6 +38,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <assert.h>
 
+#include "Common/EntitySkeleton.h"
+
 cvar_t *cvar_profiler = NULL;
 cvar_t* cvar_profiler_scale = NULL;
 cvar_t* cvar_hdr = NULL;
@@ -1637,7 +1639,8 @@ static inline void transform_point(const float* p, const float* matrix, float* r
 
 static void instance_model_lights(int num_light_polys, const light_poly_t* light_polys, const float* transform, int lightStyle = -1) {
 	for (int nlight = 0; nlight < num_light_polys; nlight++) 	{
-		if (num_model_lights >= MAX_MODEL_LIGHTS) 		{
+		if (num_model_lights >= MAX_MODEL_LIGHTS)
+		{
 			assert(!"Model light count overflow");
 			break;
 		}
@@ -1661,17 +1664,44 @@ static void instance_model_lights(int num_light_polys, const light_poly_t* light
 		// Copy the other light properties
 		VectorCopy(src_light->color, dst_light->color);
 		dst_light->material = src_light->material;
-		//if ( lightStyle > 0 ) {
-		//	dst_light->style = lightStyle;
-		//} else {
-		if ( lightStyle > -1 ) {
-			dst_light->style = lightStyle;
-		} else {
-			dst_light->style = src_light->style;
-		}
-//		}		
+		dst_light->style = src_light->style;
 
 		num_model_lights++;
+		//		if (num_model_lights >= MAX_MODEL_LIGHTS) 		{
+//			assert(!"Model light count overflow");
+//			break;
+//		}
+//
+//		const light_poly_t* src_light = light_polys + nlight;
+//		light_poly_t* dst_light = model_lights + num_model_lights;
+//
+//		// Transform the light's positions and center
+//		transform_point(src_light->positions + 0, transform, dst_light->positions + 0);
+//		transform_point(src_light->positions + 3, transform, dst_light->positions + 3);
+//		transform_point(src_light->positions + 6, transform, dst_light->positions + 6);
+//		transform_point(src_light->off_center, transform, dst_light->off_center);
+//
+//		// Find the cluster based on the center. Maybe it's OK to use the model's cluster, need to test.
+//		dst_light->cluster = BSP_PointLeaf(bsp_world_model->nodes, dst_light->off_center)->cluster;
+//
+//		// We really need to map these lights to a cluster
+//		if (dst_light->cluster < 0)
+//			continue;
+//
+//		// Copy the other light properties
+//		VectorCopy(src_light->color, dst_light->color);
+//		dst_light->material = src_light->material;
+//		//if ( lightStyle > 0 ) {
+//		//	dst_light->style = lightStyle;
+//		//} else {
+//		if ( lightStyle > -1 ) {
+//			dst_light->style = lightStyle;
+//		} else {
+//			dst_light->style = src_light->style;
+//		}
+////		}		
+//
+//		num_model_lights++;
 	}
 }
 
@@ -1749,14 +1779,14 @@ static void process_bsp_entity(const r_entity_t* entity, int* bsp_mesh_idx, int*
 	(*instance_idx)++;
 }
 
-static inline qboolean is_transparent_material(uint32_t material) {
+static inline bool is_transparent_material(uint32_t material) {
 	return MAT_IsKind(material, MATERIAL_KIND_SLIME)
 		|| MAT_IsKind(material, MATERIAL_KIND_WATER)
 		|| MAT_IsKind(material, MATERIAL_KIND_GLASS)
 		|| MAT_IsKind(material, MATERIAL_KIND_TRANSPARENT);
 }
 
-static inline qboolean is_masked_material(uint32_t material) {
+static inline bool is_masked_material(uint32_t material) {
 	const pbr_material_t* mat = MAT_ForIndex(material & MATERIAL_INDEX_MASK);
 
 	return mat && mat->image_mask;
@@ -1797,63 +1827,48 @@ static void process_regular_entity(
 		*contains_transparent = false;
 
 	int iqm_matrix_index = -1;
-	if (model->iqmData && model->iqmData->num_poses) {
+	
+	// If the model data contains iqmdata, we take the IQM rendering path.
+	if ( model->iqmData && model->iqmData->num_poses ) {
+		// Get pose matrixes.
 		iqm_matrix_index = *iqm_matrix_offset;
 
+		// Ensure we aren't overflowing this buffer.
 		if (iqm_matrix_index + model->iqmData->num_poses > MAX_IQM_MATRICES) {
 			assert(!"IQM matrix buffer overflow");
 			return;
 		}
 
-		// Use the good old R_ComputeIQMTransforms for when no extra skeletal model data was precached.
-		if (!model->skeletalModelData) {
-			R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
-
-			*iqm_matrix_offset += (int)model->iqmData->num_poses;
-		// Otherwise, take a special route.
-		} else if (model->skeletalModelData) {		
-			iqm_transform_t relativeJointsA[IQM_MAX_JOINTS];
-			iqm_transform_t relativeJointsB[IQM_MAX_JOINTS];
-
-			// Get pose mat pointer.
-			float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
-
-			// Compute Joints: Relative, World, and Local matrices.
-			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
-			MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, relativeJointsB);
+		// Ensure that the bone pose pointer is set.
+		if ( entity->currentBonePoses ) {
+			// Get Pose Matrixes pointer.
+			float *poseMatrices = iqm_matrix_data + (iqm_matrix_index * 12);
 			
-			// From Bone 2:
-			if (entity->frameB != -1) {
-				MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 4, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
-			}
-			// From Bone 3:
-//			MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsA, 3, 1.0f, 1.0f - entity->backlerpB, entity->backlerpB);
+			//// Compute Translate, Scale, Rotate for all Bones in the current pose frame.
+			//ES_LerpSkeletonPoses( model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, mainChannelBonePoses );
+			//ES_LerpSkeletonPoses( model, entity->rootBoneAxisFlagsB, entity->frameB, entity->oldframeB, 1.0f - entity->backlerpB, entity->backlerpB, eventChannelBonePoses );
+			
+			//// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
+			//ES_RecursiveBlendFromBone( model, eventChannelBonePoses, mainChannelBonePoses, 4, 0.5, 1.0f - entity->backlerpB, entity->backlerpB );
 
-			// Apply RootBoneAxisFlags for Translation.
-			//MOD_ApplyRootBoneAxisFlags(model, entity->rootBoneAxisFlags, 0, relativeJointsA, 1.0f, 1.0f - entity->backlerp, entity->backlerp);
-
-			MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
-			MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
-
-			//// Compute Joints: Relative, World, and Local matrices.
-			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsC);
-			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJointsA);
-			//MOD_ComputeIQMRelativeJoints(model, entity->rootBoneAxisFlags, entity->frameB, entity->oldframeB, 1.0f - entity->backlerp, entity->backlerp, relativeJointsB);
-			//
-			//const float fraction = 1.0;
-
-			//// From Bone 2:
-			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 2, fraction, 1.0f - entity->backlerp, entity->backlerp);
-			//// From Bone 3:
-			//MOD_RecursiveBlendFromBone(model, relativeJointsB, relativeJointsC, 3, fraction, 1.0f - entity->backlerp, entity->backlerp);
-
-			//MOD_RecursiveBlendFromBone(model, relativeJointsC, relativeJointsA, 0, fraction, 1.0f - entity->backlerp, entity->backlerp);
-
-			//MOD_ComputeIQMWorldSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
-			//MOD_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJointsA, pose_mat);
+			// Compute World and Local Pose Matrixes.
+			ES_ComputeWorldPoseTransforms( model, entity->currentBonePoses, poseMatrices );
+			ES_ComputeLocalPoseTransforms( model, entity->currentBonePoses, poseMatrices );
 
 			*iqm_matrix_offset += (int)model->iqmData->num_poses;
-		}
+		// If there is no Entity Skeleton presented, we take the StandardComputeTransforms route.
+		// This compute relative, world and local bone pose transforms.
+		} else {
+		//if ( !model->skeletalModelData ) {
+			// Get Pose Matrixes pointer.
+			float *poseMatrices = iqm_matrix_data + (iqm_matrix_index * 12);
+
+			// Compute standard transforms.
+			ES_StandardComputeTransforms( model, entity, poseMatrices );
+
+			// Increase our offset.
+			*iqm_matrix_offset += (int)model->iqmData->num_poses;
+		} 
 
 	}
 
@@ -1989,6 +2004,7 @@ prepare_entities(EntityUploadInfo* upload_info) {
 	for (int i = 0; i < vkpt_refdef.fd->num_entities; i++) 	{
 		const r_entity_t* entity = vkpt_refdef.fd->entities + i;
 
+		// Specific path for BSP Model Entity processing.
 		if (entity->model & 0x80000000) 		{
 			const bsp_model_t* model = vkpt_refdef.bsp_mesh_world.models + (~entity->model);
 			if (model->masked)
@@ -1997,16 +2013,18 @@ prepare_entities(EntityUploadInfo* upload_info) {
 				transparent_model_indices[transparent_model_num++] = i;
 			else
 				process_bsp_entity(entity, &bsp_mesh_idx, &instance_idx, &num_instanced_vert); /* embedded in bsp */
-		} 		else 		{
+
+		// This is not a BSP Model Entity, but a regular Model Entity.
+		} else {
 			const model_t* model = CL_Model_GetModelByHandle(entity->model);
 			if (model == NULL || model->meshes == NULL)
 				continue;
 
-			if (model->num_light_polys > 0 && entity->modelLightStyle > -1) {
-				//model->light_polys->style = entity->modelLightStyle;
-				instance_idx++;
-				model_instance_idx++;
-			}
+			//if (model->num_light_polys > 0 && entity->modelLightStyle > 0) {
+			//	//model->light_polys->style = entity->modelLightStyle;
+			//	instance_idx++;
+			//	model_instance_idx++;
+			//}
 				//} else if (model->num_light_polys > 0) {
 			//	model_instance_idx++;
 			//	//model->light_polys->style = 0;
@@ -2040,23 +2058,13 @@ prepare_entities(EntityUploadInfo* upload_info) {
 				mat4_t transform;
 				const qboolean is_viewer_weapon = (entity->flags & RenderEffects::WeaponModel) != 0;
 				create_entity_matrix(transform, (r_entity_t*)entity, is_viewer_weapon);
-				
-				// Model Light Styles.
-				//light_poly_t* src_light = model->light_polys + 0;
-				//if (entity->modelLightStyle > 0) {
-				//	for (int nlight = 0; nlight < model->num_light_polys; nlight++) {
-				//		light_poly_t* src_lightA = model->light_polys + nlight;
-				//		src_lightA->style = 5;//entity->modelLightStyle;
-
-				//	}
-				//}}
 
 				// Instance Model Lights.
-				if ( entity->modelLightStyle > -1 ) {
-					instance_model_lights( model->num_light_polys, model->light_polys, transform, entity->modelLightStyle );
-				} else {
+				//if ( entity->modelLightStyle > -1 ) {
+				//	instance_model_lights( model->num_light_polys, model->light_polys, transform, entity->modelLightStyle );
+				//} else {
 					instance_model_lights( model->num_light_polys, model->light_polys, transform );
-				}
+//				}
 			}
 		}
 	}
@@ -2480,7 +2488,7 @@ evaluate_taa_settings(const reference_mode_t* ref_mode) {
 }
 
 static void
-prepare_sky_matrix(float time, vec3_t sky_matrix[3])
+prepare_sky_matrix(float time, vec3_t *sky_matrix)
 {
 	if (sky_rotation != 0.f)
 	{
@@ -2495,7 +2503,7 @@ prepare_sky_matrix(float time, vec3_t sky_matrix[3])
 }
 
 static void
-prepare_camera(const vec3_t position, const vec3_t direction, mat4_t data)
+prepare_camera(const vec3_t position, const vec3_t direction, float *data)
 {
 	vec3_t forward, right, up;
 	VectorCopy(direction, forward);
@@ -4270,6 +4278,11 @@ void debug_output(const char* format, ...)
 #endif
 }
 
+static bool R_IsHDR_RTX()
+{
+	return qvk.surf_is_hdr;
+}
+
 void R_RegisterFunctionsRTX()
 {
 	R_Init = R_Init_RTX;
@@ -4298,9 +4311,11 @@ void R_RegisterFunctionsRTX()
 	R_ModeChanged = R_ModeChanged_RTX;
 	R_AddDecal = R_AddDecal_RTX;
 	R_InterceptKey = R_InterceptKey_RTX;
+	R_IsHDR = R_IsHDR_RTX;
 	IMG_Load = IMG_Load_RTX;
 	IMG_Unload = IMG_Unload_RTX;
 	IMG_ReadPixels = IMG_ReadPixels_RTX;
+	IMG_ReadPixelsHDR = IMG_ReadPixelsHDR_RTX;
 	MOD_LoadMD2 = MOD_LoadMD2_RTX;
 	MOD_LoadMD3 = MOD_LoadMD3_RTX;
 	MOD_LoadIQM = MOD_LoadIQM_RTX;

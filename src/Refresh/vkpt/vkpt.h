@@ -266,6 +266,13 @@ typedef struct QVK_s {
 	BufferResource_t            buf_light_staging[MAX_FRAMES_IN_FLIGHT];
 	BufferResource_t            buf_light_stats[NUM_LIGHT_STATS_BUFFERS];
 
+	// DQ: ------------------- START
+	// We use DualQuats instead of matrices, 8 floats instead of 12.
+	BufferResource_t			buf_iqm_dualquats;
+	BufferResource_t			buf_iqm_dualquats_staging[MAX_FRAMES_IN_FLIGHT];
+	float*						iqm_dualquats_shadow;
+	float*						iqm_dualquats_prev;
+	// DQ: ------------------- END
 	BufferResource_t            buf_iqm_matrices;
 	BufferResource_t            buf_iqm_matrices_staging[MAX_FRAMES_IN_FLIGHT];
 	float*						iqm_matrices_shadow;
@@ -432,8 +439,8 @@ typedef struct sun_light_s {
 	vec3_t direction_envmap;
 	vec3_t color;
 	float angular_size_rad;
-	bool use_physical_sky;
-	bool visible;
+	qboolean use_physical_sky;
+	qboolean visible;
 } sun_light_t;
 
 void mult_matrix_matrix(float* p, const mat4_t &a, const mat4_t &b);
@@ -813,7 +820,7 @@ void R_DrawFill8_RTX(int x, int y, int w, int h, int c);
 void R_DrawFill32_RTX(int x, int y, int w, int h, uint32_t color);
 void R_DrawChar_RTX(int x, int y, int flags, int c, qhandle_t font);
 int R_DrawString_RTX(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font);
-qboolean R_InterceptKey_RTX(unsigned key, qboolean down);
+bool R_InterceptKey_RTX(unsigned key, qboolean down);
 
 void IMG_Load_RTX(image_t *image, byte *pic);
 void IMG_Unload_RTX(image_t *image);

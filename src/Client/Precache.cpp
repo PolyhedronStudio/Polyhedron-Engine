@@ -105,6 +105,9 @@ void CL_PrepareMedia(void)
     if (!cl.mapName[0])
         return;     // no map loaded
 
+	// We want to actually reset and clear the cache here as well.
+	TBC_ResetCache( cls.boneCache );
+
     // register models, pics, and skins
     R_BeginRegistration(cl.mapName);
     // register sounds.
@@ -194,7 +197,7 @@ void CL_UpdateConfigstring(int index)
     //    return;
     //}
     
-    if (index >= ConfigStrings::Models+ 2 && index < ConfigStrings::Models+ MAX_MODELS) {
+    if (index >= ConfigStrings::Models + 2 && index < ConfigStrings::Models + MAX_MODELS) {
         int i = index - ConfigStrings::Models;
 
         cl.drawModels[i] = R_RegisterModel(s);

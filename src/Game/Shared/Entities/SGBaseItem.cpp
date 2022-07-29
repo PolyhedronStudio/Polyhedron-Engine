@@ -40,9 +40,6 @@ SGBaseItem::SGBaseItem(PODEntity *svEntity, const std::string& displayString, ui
     : Base(svEntity), displayString(displayString), itemIdentifier(identifier) {
 
 }
-SGBaseItem::~SGBaseItem() {
-
-}
 
 
 

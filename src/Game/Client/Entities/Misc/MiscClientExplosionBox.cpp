@@ -9,7 +9,7 @@
 #include "../../ClientGameLocals.h"          // CLGame.
 //#include "../../Effects.h"          // Effects.
 //#include "../../Utilities.h"            // Util funcs.
-#include "../../Physics/StepMove.h" // Stepmove funcs.
+//#include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Server Game Base Entity.
 #include "../Base/CLGBasePacketEntity.h"
@@ -20,7 +20,7 @@
 // Misc Explosion Box Entity.
 #include "MiscClientExplosionBox.h"
 
-//#include "../../GameModes/IGameMode.h"
+//#include "../../Gamemodes/IGamemode.h"
 #include "../../World/ClientGameWorld.h"
 
 //
@@ -28,9 +28,6 @@
 //
 MiscClientExplosionBox::MiscClientExplosionBox(PODEntity* clEntity) 
     : Base(clEntity) {
-
-}
-MiscClientExplosionBox::~MiscClientExplosionBox() {
 
 }
 
@@ -356,7 +353,7 @@ void MiscClientExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientG
     double yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+//    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 }
 
 

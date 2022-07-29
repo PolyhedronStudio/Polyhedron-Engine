@@ -25,7 +25,7 @@ public:
 
     //! Constructor/Deconstructor.
     SVGBaseItemWeapon(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~SVGBaseItemWeapon();
+    virtual ~SVGBaseItemWeapon() = default;
 
     //! Abstract Class TypeInfo registry.
     DefineAbstractClass(SVGBaseItemWeapon, SVGBaseItem);

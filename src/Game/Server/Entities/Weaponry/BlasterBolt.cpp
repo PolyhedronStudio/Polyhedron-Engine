@@ -13,16 +13,13 @@
 #include "../../Player/Animations.h"    // Include Player Client Animations.
 #include "../../Utilities.h"            // Util funcs.
 
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 // Class Entities.
 #include "BlasterBolt.h"
 
 // Constructor/Deconstructor.
 BlasterBolt::BlasterBolt(PODEntity *svEntity) 
     : SVGBaseEntity(svEntity) {
-
-}
-BlasterBolt::~BlasterBolt() {
 
 }
 

@@ -23,13 +23,12 @@
 #include "SVGBaseRootMotionMonster.h"
 
 // Game World.
-#include "../World/ServerGameWorld.h"
+#include "../../World/ServerGameWorld.h"
 
 #define STEPSIZE 18
 
 //! Constructor/Destructor.
 SVGBaseRootMotionMonster::SVGBaseRootMotionMonster(PODEntity *svEntity) : Base(svEntity) { }
-SVGBaseRootMotionMonster::~SVGBaseRootMotionMonster() { }
 
 
 /***
@@ -145,7 +144,7 @@ const int32_t SVGBaseRootMotionMonster::GetAnimationStateFrame( const EntityAnim
 *			translation
 *	@return	True if the 'translate' frame data exists. False otherwise.
 **/
-const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t animationIndex, const int32_t animationFrame, vec3_t& rootBoneTranslation ) {
+const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t actionIndex, const int32_t actionFrame, vec3_t& rootBoneTranslation ) {
 	// Need a valid skm.
 	if ( !skm ) {
 		// TODO: gi.DPrintf("");
@@ -153,7 +152,7 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t a
 	}
 
 	// Check if the animation index is valid.
-	if ( animationIndex < 0 || animationIndex >= skm->animations.size() ) {
+	if ( actionIndex < 0 || actionIndex >= skm->actions.size() ) {
 		// TODO: gi.DPrintf("");
 		return false;
 	}
@@ -162,33 +161,33 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t a
 	const EntityAnimationState *animationState = GetCurrentAnimationState();
 
 	// It is valid, get a hold of the animation data.
-	auto animationData = skm->animations[animationIndex];
+	auto animationData = skm->actions[actionIndex];
 
 	// We assume the pointer is not tempered with.
 	auto &frameTranslates= animationData->frameTranslates;
 
 	// Ensure the frame is within bounds of the pre-calculated translates.
-	if ( animationFrame < 0 || animationFrame >= frameTranslates.size() ) {
+	if ( actionIndex < 0 || actionIndex >= frameTranslates.size() ) {
 		// Can't find Translation data.
 		rootBoneTranslation = vec3_zero();
 		// Failure.
 		return false;
 	} else {
-		rootBoneTranslation = frameTranslates[animationFrame];
+		rootBoneTranslation = frameTranslates[actionIndex];
 
 		// See if there are any specific rootBoneAxisFlags set.
 		const int32_t rootBoneAxisFlags = animationData->rootBoneAxisFlags;
 
 		// Zero out X Axis.
-		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroXTranslation) ) {
+		if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroXTranslation) ) {
 			rootBoneTranslation.x = 0.0;
 		}
 		// Zero out Y Axis.
-		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroYTranslation) ) {
+		if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroYTranslation) ) {
 			rootBoneTranslation.y = 0.0;
 		}
 		// Zero out Z Axis.
-		if ( (rootBoneAxisFlags & SkeletalAnimation::RootBoneAxisFlags::ZeroZTranslation) ) {
+		if ( (rootBoneAxisFlags & SkeletalAnimationAction::RootBoneAxisFlags::ZeroZTranslation) ) {
 			rootBoneTranslation.z = 0.0;
 		}
 
@@ -199,7 +198,7 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const int32_t a
 	// Should not happen.
 	return false;
 }
-const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const std::string &animationName, const int32_t animationFrame, vec3_t& rootBoneTranslation ) {
+const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const std::string &actionName, const int32_t actionFrame, vec3_t& rootBoneTranslation ) {
 	// Need a valid skm.
 	if ( !skm ) {
 		// TODO: gi.DPrintf("");
@@ -207,19 +206,19 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameTranslate( const std::stri
 	}
 
 	// See if the animation data exists.
-	if ( !skm->animationMap.contains( animationName) ) {
+	if ( !skm->actionMap .contains( actionName ) ) {
 		// TODO: gi.DPrintf("");
 		return false;
 	}
 
-	return GetAnimationFrameTranslate( animationName, animationFrame, rootBoneTranslation );
+	return GetAnimationFrameTranslate( actionName, actionFrame, rootBoneTranslation );
 }
 /**
 *	@brief	Sets the 'distance' double to the value of the 'root bones' requested frame number 
 *			translation distance. (vec3_dlength)
 *	@return	True if the 'distance' frame data exists. False otherwise.
 **/
-const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const int32_t animationIndex, const int32_t animationFrame, double &rootBoneDistance ) {
+const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const int32_t actionIndex, const int32_t actionFrame, double &rootBoneDistance ) {
 	// Need a valid skm.
 	if ( !skm ) {
 		// TODO: gi.DPrintf("");
@@ -227,7 +226,7 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const int32_t an
 	}
 
 	// Check if the animation index is valid.
-	if ( animationIndex < 0 || animationIndex >= skm->animations.size() ) {
+	if ( actionIndex < 0 || actionIndex >= skm->actions.size() ) {
 		// TODO: gi.DPrintf("");
 		return false;
 	}
@@ -236,38 +235,38 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const int32_t an
 	const EntityAnimationState *animationState = GetCurrentAnimationState();
 
 	// It is valid, get a hold of the animation data.
-	auto *animationData = skm->animations[animationIndex];
+	auto *animationData = skm->actions[actionIndex];
 
 	// We assume the pointer is not tempered with.
 	auto &frameDistances = animationData->frameDistances;
 
 	// Ensure the frame is within bounds of the pre-calculated translates.
-	if ( animationFrame < 0 || animationFrame >= frameDistances.size() ) {
+	if ( actionFrame < 0 || actionFrame >= frameDistances.size() ) {
 		// TODO: gi.DPrintf(..)
 		rootBoneDistance = 0.0;
 		return false;
 	} else {
-		rootBoneDistance = frameDistances[animationFrame];
+		rootBoneDistance = frameDistances[actionFrame];
 		return true;
 	}
 
 	// Should not happen.
 	return false;
 }
-const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const std::string &animationName, const int32_t animationFrame, double &rootBoneDistance ) {
+const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const std::string &actionName, const int32_t actionFrame, double &rootBoneDistance ) {
 	// Need a valid skm.
 	if ( !skm ) {
 		// TODO: gi.DPrintf("");
 		return false;
 	}
 
-	// See if the animation data exists.
-	if ( !skm->animationMap.contains( animationName) ) {
+	// See if the action data exists.
+	if ( !skm->actionMap.contains( actionName ) ) {
 		// TODO: gi.DPrintf("");
 		return false;
 	}
 
-	return GetAnimationFrameDistance( animationName, animationFrame, rootBoneDistance );
+	return GetAnimationFrameDistance( actionName, actionFrame, rootBoneDistance );
 }
 
 /**
@@ -276,7 +275,7 @@ const bool SVGBaseRootMotionMonster::GetAnimationFrameDistance( const std::strin
 **/
 const double SVGBaseRootMotionMonster::GetMoveSpeedForTraversedFrameDistance(const double &totalMoveDistance, const float &frameMoveDistance, const double &unitScale) {
 	// Calculate move distance scaled to Quake units.
-	const double scaledMoveDistance = totalMoveDistance * unitScale; //moveDistance * unitScale;
+	const double scaledMoveDistance = unitScale * frameMoveDistance; //moveDistance * unitScale;
 
 	// Length of move translate.
 	const double moveFrameMoveDistance = frameMoveDistance; //vec3_dlength(moveTranslate);
@@ -500,7 +499,7 @@ float SVGBaseRootMotionMonster::TurnToIdealYawAngle() {
 	const vec3_t _previousAngles = GetAngles();
 
 	// Angle Mod the current angles and compare to Ideal Yaw angle.
-	float _currentYawAngle = AngleMod( _previousAngles[vec3_t::Yaw] );
+	float _currentYawAngle = _previousAngles[vec3_t::Yaw];
 	float _idealYawAngle = GetIdealYawAngle();
 		
 	if ( _currentYawAngle == _idealYawAngle) {
@@ -532,7 +531,7 @@ float SVGBaseRootMotionMonster::TurnToIdealYawAngle() {
 	}
 
 	// Set the new angles, Angle Modding the Yaw.
-	SetAngles( { _previousAngles.x, AngleMod( _currentYawAngle + _yawMove * FRAMETIME.count() * _yawTurningSpeed ), _previousAngles.z});
+	SetAngles( { _previousAngles.x, AngleMod(_currentYawAngle + _yawMove * (float)FRAMETIME.count() * _yawTurningSpeed), _previousAngles.z});
 
 	// Return delta angles.
 	return GetAngles()[vec3_t::Yaw] - GetIdealYawAngle();
@@ -1064,15 +1063,14 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Get the total move distance (vec3_length of a - b) for this animation move frame.
 	double frameDistance = 0.0;
 	const bool frameHasDistance	= GetAnimationFrameDistance( animationIndex, animationFrame, frameDistance );
-	
-	// Calculate the actual move speed based for the current animation frame.
-	const double totalTraversedDistance = skm->animations[animationIndex]->animationDistance;
 
-	float frameTimeThing = ANIMATION_FRAMETIME / 4;
-	if (animationIndex == skm->animationMap["RunForward"].index) {
-		frameTimeThing = ANIMATION_FRAMETIME;
-	}
-	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( totalTraversedDistance, frameDistance, frameTimeThing);
+	// Calculate the actual move speed based for the current animation frame.
+	const double totalTraversedDistance = skm->actions[animationIndex]->animationDistance;
+
+	// Calculate the Unit Scale based on FRAMETIME * 8 units = 1 pixel.
+	static constexpr double unitScale = BASE_FRAMETIME * 8.;
+	// Calculate frame move speed.
+	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( totalTraversedDistance, frameDistance, unitScale );
 
 
 	/**
@@ -1116,9 +1114,9 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 
 	if (animationIndex == skm->animationMap["TPose"].index
 		|| animationIndex == skm->animationMap["Idle"].index 
-		|| animationIndex == skm->animationMap["IdleAiming"].index
-		|| animationIndex == skm->animationMap["RifleAim"].index 
-		|| animationIndex == skm->animationMap["RifleFire"].index 
+		|| animationIndex == skm->animationMap["IdleReload"].index
+		|| animationIndex == skm->animationMap["IdleRifleAim"].index 
+		|| animationIndex == skm->animationMap["IdleRifleFire"].index 
 		|| animationIndex == skm->animationMap["WalkingToDying"].index 
 		
 	) {

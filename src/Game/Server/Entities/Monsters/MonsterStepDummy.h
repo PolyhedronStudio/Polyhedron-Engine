@@ -23,7 +23,7 @@ class MonsterStepDummy : public SVGBaseStepMonster {
 public:
     //! Constructor/Deconstructor.
     MonsterStepDummy(PODEntity *svEntity);
-    virtual ~MonsterStepDummy();
+    virtual ~MonsterStepDummy() = default;
 
     DefineMapClass("monster_stepdummy", MonsterStepDummy, SVGBaseStepMonster);
 

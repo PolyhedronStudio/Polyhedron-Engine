@@ -573,7 +573,7 @@ VkResult SkyLoadScatterParameters(SkyPreset preset)
 	}
 	else if (preset == SKY_STROGGOS)
 	{
-		Planet = "stroggos";
+		Planet = "earth"; // used to be: stroggos, but this looks radical
 		Constants = &Params_Stroggos;
 	}
 

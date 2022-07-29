@@ -394,7 +394,6 @@ static void update_descriptor_set()
 
 bool vkpt_god_rays_enabled(const sun_light_t* sun_light)
 {
-	return ( ( god_rays.enable->integer != 0 && god_rays.intensity->value > 0.f && sun_light->visible != 0) ? true : false);
-
+	return( god_rays.enable->integer != 0 && god_rays.intensity->value > 0.f && sun_light->visible != 0 ? true : false);
 		//&& !physical_sky_space->integer;  // god rays look weird in space because they also appear outside of the station
 }

@@ -41,9 +41,6 @@ TriggerDelayedUse::TriggerDelayedUse(PODEntity *svEntity)
 	//
 	//lastHurtTime = 0.f;
 }
-TriggerDelayedUse::~TriggerDelayedUse() {
-
-}
 
 // Interface functions. 
 //

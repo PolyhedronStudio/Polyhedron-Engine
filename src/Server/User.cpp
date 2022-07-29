@@ -166,7 +166,7 @@ static void write_baseline(EntityState *base)
 
 static void write_plain_baselines(void)
 {
-    int i, j;
+    int i;//, j;
     EntityState *base;
 
     // write a packet full of data
@@ -176,6 +176,7 @@ static void write_plain_baselines(void)
     //        continue;
     //    }
     //    for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
+
 	for (i = 0, base = sv_client->entityBaselines; i < sv_client->num_baselines; i++, base++) {
 
             if (base->number) {
@@ -200,8 +201,9 @@ static void write_compressed_gamestate(void)
 {
     SizeBuffer   *buf = &sv_client->netChan->message;
     EntityState  *base;
-    int         i, j;
-    size_t      length;
+//    int         i, j;
+	int32_t i = 0;
+	size_t      length;
     uint8_t     *patch;
     char        *string;
 

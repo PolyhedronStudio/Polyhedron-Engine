@@ -16,9 +16,6 @@ InfoPlayerDeathmatch::InfoPlayerDeathmatch(PODEntity *svEntity)
     : InfoPlayerStart(svEntity) {
 
 }
-InfoPlayerDeathmatch::~InfoPlayerDeathmatch() {
-
-}
 
 // Interface functions. 
 //===============

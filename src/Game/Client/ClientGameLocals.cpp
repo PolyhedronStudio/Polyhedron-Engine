@@ -11,7 +11,7 @@
 
 // ClientGame.
 #include "TemporaryEntities.h"
-#include "../World/ClientGameWorld.h"
+#include "World/ClientGameWorld.h"
 
 // ClientGameExports implementations.
 #include "Exports/Core.h"

@@ -16,7 +16,7 @@
 
 #include "../Trigger/TriggerAutoPlatform.h"
 
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 
 #include "FuncPlat.h"
 

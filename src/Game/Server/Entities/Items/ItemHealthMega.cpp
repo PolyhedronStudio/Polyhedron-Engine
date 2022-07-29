@@ -16,7 +16,7 @@
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Deathmatch Game Mode.
-#include "../../GameModes/DeathMatchGameMode.h"
+#include "../../Gamemodes/DeathMatchGamemode.h"
 
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
@@ -35,10 +35,6 @@ ItemHealthMega::ItemHealthMega(PODEntity *svEntity, const std::string& displaySt
     : Base(svEntity, displayString, identifier) {
 
 }
-ItemHealthMega::~ItemHealthMega() {
-
-}
-
 
 
 /***

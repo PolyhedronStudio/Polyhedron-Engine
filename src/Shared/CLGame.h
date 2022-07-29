@@ -402,6 +402,35 @@ extern "C" {
         void        (*Cvar_Variable_g) (genctx_t* ctx);
         void        (*Cvar_Default_g) (genctx_t* ctx);
 
+		//---------------------------------------------------------------------
+		// EntitySkeleton.
+		//---------------------------------------------------------------------
+		/**
+		*	@brief	Computes the LERP Pose result for in-between the old and current frame by calculating each 
+		*			relative transform for all bones.
+		*
+		*			
+		**/
+		void		(*ES_LerpSkeletonPoses) ( EntitySkeleton *entitySkeleton, EntitySkeletonBonePose *outBonePose, int32_t currentFrame, int32_t oldFrame, float backLerp, const int32_t rootBoneAxisFlags );
+		/**
+		*	@brief	Combine 2 poses into one by performing a recursive blend starting from the given boneNode, using the given fraction as "intensity".
+		*	@param	fraction		When set to 1.0, it blends in the animation at 100% intensity. Take 0.5 for example, 
+		*							and a tpose(frac 0.5)+walk would have its arms half bend.
+		*	@param	addBonePose		The actual animation that you want to blend in on top of inBonePoses.
+		*	@param	addToBonePose	A lerped bone pose which we want to blend addBonePoses animation on to.
+		**/
+		void		(*ES_RecursiveBlendFromBone) ( EntitySkeletonBonePose *addBonePoses, EntitySkeletonBonePose* addToBonePoses, EntitySkeletonBoneNode *boneNode, float backlerp, float fraction );
+
+
+		void (*ES_ComputeLocalPoseTransforms)( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+		void (*ES_ComputeWorldPoseTransforms)( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+
+		/**
+		*	@brief	Sets up an entity skeleton using the specified skeletal model data.
+		*	@return	False on failure. True if successful.
+		**/
+		const bool (*ES_CreateFromModel) ( model_t *model, EntitySkeleton* es );
+
         //---------------------------------------------------------------------
         // Filesystem.
         //---------------------------------------------------------------------
@@ -688,6 +717,11 @@ extern "C" {
         // of this CG Module, it can also be called explicitly to flush text to
         // the screen.
         void            (*SCR_UpdateScreen) (void);
+
+        //---------------------------------------------------------------------
+        // Temporary Bone Cache
+        //---------------------------------------------------------------------
+		EntitySkeletonBonePose *(*TBC_AcquireCachedMemoryBlock) ( const uint32_t size );
 
         //---------------------------------------------------------------------
         // Sound.

@@ -18,7 +18,7 @@ public:
 
     //! Constructor/Deconstructor.
     ItemAmmo9mm(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~ItemAmmo9mm();
+    virtual ~ItemAmmo9mm() = default;
 
     //! Abstract Class TypeInfo registry.
     DefineItemMapClass("9 Millimeter Ammo", "ammo_9mm", ItemID::Ammo9mm, "item_ammo_9mm", ItemAmmo9mm, SVGBaseItemAmmo);

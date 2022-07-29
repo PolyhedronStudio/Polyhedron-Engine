@@ -14,7 +14,7 @@ class InfoPlayerStart : public SVGBaseEntity {
 public:
     // Constructor/Deconstructor.
     InfoPlayerStart(PODEntity *svEntity);
-    virtual ~InfoPlayerStart();
+    virtual ~InfoPlayerStart() = default;
 
     DefineMapClass( "info_player_start", InfoPlayerStart, SVGBaseEntity );
 

@@ -13,7 +13,7 @@
 #include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Deathmatch Game Mode.
-#include "../../GameModes/DeathMatchGameMode.h"
+#include "../../Gamemodes/DeathMatchGamemode.h"
 
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
@@ -32,7 +32,6 @@
 //! Constructor/Deconstructor.
 ItemWeaponBeretta::ItemWeaponBeretta(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) { }
-ItemWeaponBeretta::~ItemWeaponBeretta() { }
 
 
 /**

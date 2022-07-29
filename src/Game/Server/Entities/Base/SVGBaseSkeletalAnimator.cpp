@@ -33,8 +33,6 @@
 
 //! Constructor/Destructor.
 SVGBaseSkeletalAnimator::SVGBaseSkeletalAnimator(PODEntity *svEntity) : Base(svEntity) { }
-SVGBaseSkeletalAnimator::~SVGBaseSkeletalAnimator() { }
-
 
 /***
 * 
@@ -117,13 +115,13 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
 
 	// Can't switch animations if we got no skm.
-	if (!skm) {
+	if ( !skm ) {
 		currentAnimationState->animationIndex = 0;
 		return 0;
 	}
 
 	// Can't switch without containing information info matching the name.
-	if (!skm->animationMap.contains(name)) {
+	if ( !skm->animationMap.contains(name) ) {
 		currentAnimationState->animationIndex = 0;
 		return 0;
 	}
@@ -149,13 +147,16 @@ int32_t SVGBaseSkeletalAnimator::SwitchAnimation(const std::string& name) {
 	currentAnimationState->animationIndex = animation->index;
 	currentAnimationState->startTime = level.time.count();
 
+	// Get the dominating blend action of said animation.
+	SkeletalAnimationAction *action = skm->actions[ animation->blendActions[0].actionIndex ];
+
 	// Non-Wired Data:
-	currentAnimationState->frame = animation->startFrame;
-	currentAnimationState->startFrame = animation->startFrame;
-	currentAnimationState->endFrame = animation->endFrame;
-	currentAnimationState->frameTime = animation->frametime;
-	currentAnimationState->loopCount = animation->loopingFrames;
-	currentAnimationState->forceLoop = animation->forceLoop;
+	currentAnimationState->frame = action->startFrame;
+	currentAnimationState->startFrame = action->startFrame;
+	currentAnimationState->endFrame = action->endFrame;
+	currentAnimationState->frameTime = action->frametime;
+	currentAnimationState->loopCount = action->loopingFrames;
+	currentAnimationState->forceLoop = action->forceLoop;
 
 	// Engage the switch by being ahead of time and processing the animation we just set for
 	// the current moment in time. The state will then be adjusted meaning that the client receives

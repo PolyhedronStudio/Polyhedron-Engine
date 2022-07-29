@@ -102,12 +102,12 @@ public:
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
-    virtual void UpdateFromState(const EntityState &state) override;
+    virtual void UpdateFromState(const EntityState *state) override;
 
 	/**
 	*	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
 	**/
-	virtual void SpawnFromState(const EntityState &state) override;
+	virtual void SpawnFromState(const EntityState *state) override;
 
     /**
     *   @returen True if the entity is still in the current frame.
@@ -947,17 +947,6 @@ public:
     virtual inline const vec3_t& GetStartPosition() { return ZeroVec3; }
 
 
-private:
-	/**
-	*
-	*
-	*	Client Specific.
-	*
-	*
-	**/
-    //! Refresh Entity Object.
-    r_entity_t refreshEntity = {};
-
 
 public:
     /**
@@ -1024,7 +1013,7 @@ public:
     /***
     *
     * 
-    *   Refresh Related Functions.
+    *   Refresh Related Functions & Variables.
     *
     * 
     ***/
@@ -1033,8 +1022,35 @@ public:
 	**/
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
+protected:
+	//! Skeletal Model Data pointer. Needs to be loaded on request. DIYS
+	SkeletalModelData *skm = nullptr;
+
 private:
-	virtual void ProcessSkeletalAnimationForTime(const GameTime &time) ;
+	/**
+	*	@brief Processes and prepares for the refresh entity, the currentAnimation state for the point in 'time'.
+	**/
+	virtual void ProcessSkeletalAnimationForTime(const GameTime &time);
+
+
+
+protected:
+	/**
+	*
+	*
+	*	Client Specific.
+	*
+	*
+	**/
+    //! Refresh Entity Object.
+    r_entity_t refreshEntity = {};
+
+	//
+	// Animations.
+	//
+	//! This state gets set freshly to a baseline animation state determined by the 'wired' animationIndex.
+	EntityAnimationState refreshAnimation = {};
+	EntityAnimationState refreshAnimationB = {};
 
 
 protected:

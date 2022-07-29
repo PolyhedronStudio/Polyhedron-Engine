@@ -50,7 +50,6 @@ struct dmd2header_s;
 qerror_t MOD_LoadSP2(model_t* model, ModelMemoryAllocateCallback modelAllocate, const void* rawdata, size_t length, const char* mod_name);
 qerror_t MOD_ValidateMD2(struct dmd2header_s *header, size_t length);
 qerror_t MOD_LoadIQM_Base(model_t* mod, ModelMemoryAllocateCallback modelAllocate, const void* rawdata, size_t length, const char* mod_name);
-qboolean R_ComputeIQMTransforms(const iqm_model_t* model, const r_entity_t* entity, float* pose_matrices);
 
 // these are implemented in [gl,sw]_models.c
 typedef qerror_t(*mod_load_t)(model_t*, ModelMemoryAllocateCallback modelAllocate, const void*, size_t, const char*);
@@ -60,21 +59,3 @@ extern qerror_t(*MOD_LoadMD3)(model_t* model, ModelMemoryAllocateCallback modelA
 #endif
 extern qerror_t(*MOD_LoadIQM)(model_t* model, ModelMemoryAllocateCallback modelAllocate, const void* rawdata, size_t length, const char* mod_name);
 extern void (*MOD_Reference)(model_t *model);
-
-//!
-//! Skeletal animation blending funcs.
-//!
-void MOD_RecursiveBlendFromBone(const model_t *model, iqm_transform_t* inBonePoses, iqm_transform_t* outBonePoses, int32_t boneNumber, float fraction, float lerp, float backlerp);
-
-void MOD_ApplyRootBoneAxisFlags(const model_t *model, const int32_t rootBoneAxisFlags, const int32_t rootBoneNumber, iqm_transform_t *bonePoses, float fraction, float lerp, float backlerp );
-
-// Compute pose transformations for the given model + data
-// `relativeJoints` must have enough room for model->num_poses
-void MOD_ComputeIQMRelativeJoints(/*const iqm_model_t* model*/const model_t *model, const int32_t rootBoneAxisFlags, int32_t currentFrame, int32_t oldFrame, float lerp, float backLerp, iqm_transform_t *relativeJoints);
-
-// Compute local space matrices for the given pose transformations.
-// this is the "fast path" for when world space is not necessary.
-void MOD_ComputeIQMLocalSpaceMatricesFromRelative(const model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices);
-
-// Compute world space matrices for the given pose transformations.
-void MOD_ComputeIQMWorldSpaceMatricesFromRelative(const model_t *model, const iqm_transform_t *relativeJoints, float *poseMatrices);

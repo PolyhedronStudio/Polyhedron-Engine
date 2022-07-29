@@ -17,7 +17,6 @@ SET(SRC_SHARED
 
 	${PATH_SRC}/Shared/Math.cpp
 	${PATH_SRC}/Shared/Shared.cpp
-	${PATH_SRC}/Shared/SkeletalModelData.cpp
 )
 
 SET(HEADERS_SHARED
@@ -39,8 +38,9 @@ SET(HEADERS_SHARED
 
 	# Math lib.
 	${PATH_SRC}/Shared/Math/Color.h
-	${PATH_SRC}/Shared/Math/Matrix3.h
-	${PATH_SRC}/Shared/Math/Matrix4.h
+	${PATH_SRC}/Shared/Math/DualQuaternion.h
+	${PATH_SRC}/Shared/Math/Matrix3x3.h
+	${PATH_SRC}/Shared/Math/Matrix4x4.h
 	${PATH_SRC}/Shared/Math/Plane.h
 	${PATH_SRC}/Shared/Math/Rectangle.h
 	${PATH_SRC}/Shared/Math/Quaternion.h
@@ -58,6 +58,7 @@ SET(HEADERS_SHARED
 	${PATH_SRC}/Shared/Config.h
 	${PATH_SRC}/Shared/Endian.h 
 	${PATH_SRC}/Shared/Entities.h 
+	${PATH_SRC}/Shared/EntitySkeleton.h 
 	${PATH_SRC}/Shared/Keys.h 
 	${PATH_SRC}/Shared/KeyValue.h 
 	${PATH_SRC}/Shared/List.h 
@@ -82,6 +83,7 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/CollisionModel.cpp
 	${PATH_SRC}/Common/Common.cpp
 	${PATH_SRC}/Common/CVar.cpp
+	${PATH_SRC}/Common/EntitySkeleton.cpp
 	${PATH_SRC}/Common/Error.cpp
 	${PATH_SRC}/Common/Field.cpp
 	${PATH_SRC}/Common/Fifo.cpp
@@ -91,6 +93,8 @@ SET(SRC_COMMON
 	${PATH_SRC}/Common/Messaging.cpp
 	${PATH_SRC}/Common/Prompt.cpp
 	${PATH_SRC}/Common/SizeBuffer.cpp
+	${PATH_SRC}/Common/SkeletalModelData.cpp
+	${PATH_SRC}/Common/TemporaryBoneCache.cpp
 	#${PATH_SRC}/Common/Tests.cpp
 	${PATH_SRC}/Common/Utilities.cpp
 	${PATH_SRC}/Common/Zone.cpp
@@ -116,6 +120,7 @@ SET(HEADERS_COMMON
 	${PATH_SRC}/Common/CollisionModel.h
 	${PATH_SRC}/Common/Common.h
 	${PATH_SRC}/Common/CVar.h
+	${PATH_SRC}/Common/EntitySkeleton.h
 	${PATH_SRC}/Common/Error.h
 	${PATH_SRC}/Common/Field.h
 	${PATH_SRC}/Common/Fifo.h
@@ -128,7 +133,9 @@ SET(HEADERS_COMMON
 	${PATH_SRC}/Common/Prompt.h
 	${PATH_SRC}/Common/Protocol.h
 	${PATH_SRC}/Common/SizeBuffer.h
-	${PATH_SRC}/Common/Tests.h
+	${PATH_SRC}/Common/SkeletalModelData.h
+	${PATH_SRC}/Common/TemporaryBoneCache.h
+	#${PATH_SRC}/Common/Tests.h
 	${PATH_SRC}/Common/Utilities.h
 	${PATH_SRC}/Common/Zone.h
 
@@ -585,7 +592,7 @@ IF(CONFIG_USE_CURL)
 
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_HTTP})
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_CURL=1)
-	TARGET_LINK_LIBRARIES(client libcurl)
+	TARGET_LINK_LIBRARIES(client PUBLIC libcurl)
 ENDIF()
 
 
@@ -597,7 +604,7 @@ IF(CONFIG_ENABLE_RMLUI)
  	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
 	TARGET_INCLUDE_DIRECTORIES(client PRIVATE ${CMAKE_SOURCE_DIR}/extern/Nac-RmlUi/Include/)
 	TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_RMLUI=1 RMLUI_STATIC_LIB)
-	TARGET_LINK_LIBRARIES(client RmlCore RmlDebugger RmlLua)
+	TARGET_LINK_LIBRARIES(client PUBLIC RmlCore RmlDebugger RmlLua)
 ELSE()
 	# These are set to supply the rmlui_null.cpp file.
 	TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_RMLUI})
@@ -635,17 +642,15 @@ IF (CONFIG_VKPT_RENDERER)
 		TARGET_COMPILE_DEFINITIONS(client PRIVATE VKPT_IMAGE_DUMPS)
 	ENDIF()
 	IF (WIN32)
-	TARGET_LINK_LIBRARIES(client vulkan-1)
+	TARGET_LINK_LIBRARIES(client PUBLIC vulkan-1)
 	ELSE ()
-	TARGET_LINK_LIBRARIES(client vulkan)
+	TARGET_LINK_LIBRARIES(client PUBLIC vulkan)
 	ENDIF()
 ENDIF()
 
 #
 #	Client Link Libraries.
 #
-TARGET_LINK_LIBRARIES(client stb)
-TARGET_LINK_LIBRARIES(client tinyobjloader)
 
 
 
@@ -687,8 +692,8 @@ IF (WIN32)
 	TARGET_SOURCES(svgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_sv.rc)
 	TARGET_SOURCES(clgame PRIVATE ${CMAKE_SOURCE_DIR}/src/System/Resources/basepoly_cl.rc)
 
-	TARGET_LINK_LIBRARIES(client winmm ws2_32)
-	TARGET_LINK_LIBRARIES(server winmm ws2_32)
+	TARGET_LINK_LIBRARIES(client PUBLIC winmm ws2_32)
+	TARGET_LINK_LIBRARIES(server PUBLIC winmm ws2_32)
 
 	set_target_properties(client PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 	set_target_properties(server PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
@@ -711,7 +716,11 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(client PUBLIC ../inc)
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "${ZLIB_INCLUDE_DIRS}")
 TARGET_INCLUDE_DIRECTORIES(client PRIVATE "/extern/stb/")
-TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
+target_include_directories(client PRIVATE ${GLM_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(client PUBLIC SDL2main SDL2-static zlibstatic stb tinyobjloader fmt-header-only)
+# Link in GLM headers.
+target_link_libraries(client PUBLIC glm)
+
 SET_TARGET_PROPERTIES(client
     PROPERTIES
     OUTPUT_NAME "Polyhedron"
@@ -730,7 +739,11 @@ SET_TARGET_PROPERTIES(client
 #include_directories()
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../inc)
 TARGET_INCLUDE_DIRECTORIES(server PRIVATE "${ZLIB_INCLUDE_DIRS}")
-TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
+target_include_directories(server PRIVATE ${GLM_INCLUDE_DIRS})
+TARGET_LINK_LIBRARIES(server PUBLIC SDL2main SDL2-static zlibstatic fmt-header-only)
+# Link in GLM headers.
+target_link_libraries(server PUBLIC glm)
+
 SET_TARGET_PROPERTIES(server
     PROPERTIES
     OUTPUT_NAME "Polyhedron_Dedicated"

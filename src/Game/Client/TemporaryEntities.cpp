@@ -73,7 +73,6 @@ qhandle_t   cl_mod_lightning;
 qhandle_t   cl_mod_heatbeam;
 qhandle_t   cl_mod_explo4_big;
 
-extern cvar_t* cvar_pt_particle_emissive;
 
 //extern qboolean SCR_ParseColor(const char* s, color_t* color);
 
@@ -942,7 +941,7 @@ static void CLG_RailSpiral(void)
 		p->alphavel = -1.0 / (cl_railtrail_time->value + frand() * 0.2);
 		p->color = -1;
 		p->rgba.u32 = railspiral_color.u32;
-		p->brightness = cvar_pt_particle_emissive->value;
+		p->brightness = Particles::GetParticleEmissiveFactor();
 		for (j = 0; j < 3; j++) {
 			p->org[j] = move[j] + dir[j] * cl_railspiral_radius->value;
 			p->vel[j] = dir[j] * 6;
@@ -986,7 +985,7 @@ static void CLG_RailLights(color_t color)
 	}
 }
 
-extern uint32_t d_8to24table[256];
+//extern uint32_t d_8to24table[256];
 extern cvar_t* cvar_pt_beam_lights;
 
 static void CLG_RailTrail(void)
@@ -995,7 +994,7 @@ static void CLG_RailTrail(void)
 
 	if (!cl_railtrail_type->integer)
 	{
-		rail_color.u32 = d_8to24table[0x74];
+		rail_color.u32 = 0xff0000; //d_8to24table[0x74];
 	}
 	else
 	{

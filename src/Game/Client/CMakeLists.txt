@@ -68,8 +68,8 @@ SET(SRC_CLGAME
 
 	Input/KeyBinding.cpp
 
-	Physics/Physics.cpp
-	Physics/StepMove.cpp
+	#Physics/Physics.cpp
+	#Physics/StepMove.cpp
 
 	View/ViewCamera.cpp
 
@@ -129,7 +129,7 @@ SET(HEADERS_CLGAME
 
 	Input/KeyBinding.h
 	
-	Physics/StepMove.h
+	#Physics/StepMove.h
 
 	View/ViewCamera.h
 
@@ -153,16 +153,23 @@ else()
 endif()
 
 # Set the flag for SharedGame to build with ClientGame compatability in mind.
-TARGET_COMPILE_DEFINITIONS(clgame PUBLIC "cxx_std_20 -DSHAREDGAME_CLIENTGAME=1")
+target_compile_definitions(clgame PUBLIC "cxx_std_20 -DSHAREDGAME_CLIENTGAME=1")
+# Link in FMT Header only library.
+target_link_libraries(clgame PUBLIC fmt::fmt-header-only)
+# Link in GLM headers.
+target_link_libraries(clgame PUBLIC glm)
 
 # Include directories.
-TARGET_INCLUDE_DIRECTORIES(clgame PUBLIC PATH_SHARED)
+target_include_directories(clgame PRIVATE ${GLM_INCLUDE_DIRS})
+target_include_directories(clgame PUBLIC ${PATH_SHARED})
 # Include SharedGame Framework.
-TARGET_INCLUDE_DIRECTORIES(clgame PUBLIC Game/Shared)
+target_include_directories(clgame PUBLIC Game/Shared)
+
 
 # Source Groups.
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_CLGAME} )
-SOURCE_GROUP( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_CLGAME} )
+source_group( TREE ${CMAKE_SOURCE_DIR} FILES ${SRC_CLGAME} )
+source_group( TREE ${CMAKE_SOURCE_DIR} FILES ${HEADERS_CLGAME} )
+
 
 # Specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
 SET_TARGET_PROPERTIES(clgame

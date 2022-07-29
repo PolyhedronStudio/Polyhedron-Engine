@@ -21,7 +21,7 @@
 #include "../Base/SVGBasePlayer.h"
 
 // Game mode.
-#include "../../GameModes/DefaultGameMode.h"
+#include "../../Gamemodes/DefaultGamemode.h"
 // Game world.
 #include "../../World/ServerGameWorld.h"
 
@@ -32,7 +32,6 @@
 //! Constructor/Deconstructor.
 ItemWeaponSMG::ItemWeaponSMG(PODEntity *svEntity, const std::string& displayString, uint32_t identifier) 
     : Base(svEntity, displayString, identifier) { }
-ItemWeaponSMG::~ItemWeaponSMG() { }
 
 
 /**

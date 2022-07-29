@@ -46,7 +46,7 @@ public:
     /**
 	*	@brief Default destructor
 	**/
-    ~ServerGameWorld() = default;
+    virtual ~ServerGameWorld() = default;
 
 public:
     /**

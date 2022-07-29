@@ -15,15 +15,15 @@
 #include "../../ClientGameLocals.h"
 
 // Base Client Game Functionality.
-#include "../Debug.h"
-#include "../TemporaryEntities.h"
+#include "../../Debug.h"
+#include "../../TemporaryEntities.h"
 
 // Export classes.
-#include "../Exports/Entities.h"
-#include "../Exports/View.h"
+#include "../../Exports/Entities.h"
+#include "../../Exports/View.h"
 
 // Effects.
-#include "../Effects/ParticleEffects.h"
+#include "../../Effects/ParticleEffects.h"
 
 // Base Entity.
 #include "CLGBaseLocalEntity.h"
@@ -44,7 +44,7 @@ std::string CLGBaseLocalEntity::EmptyString = "";
 **/
 //! Constructor/Destructor.
 CLGBaseLocalEntity::CLGBaseLocalEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEntity) {
-    this->podEntity = podEntity;
+	this->podEntity = podEntity;
 }
 
 
@@ -67,7 +67,7 @@ void CLGBaseLocalEntity::Precache() {
 *   @brief  Called when it is time to spawn this entity.
 **/
 void CLGBaseLocalEntity::Spawn() {
-	SetInUse(true);
+	//SetInUse(true);
 }
 /**
 *   @brief  Called when it is time to respawn this entity.
@@ -239,16 +239,15 @@ void CLGBaseLocalEntity::SpawnKey(const std::string& key, const std::string& val
 /**
 *   @brief  Updates the entity with the data of the newly passed EntityState object.
 **/
-void CLGBaseLocalEntity::UpdateFromState(const EntityState& state) {
-    //previousState = currentState;
-    //currentState = state;
+void CLGBaseLocalEntity::UpdateFromState(const EntityState* state) {
+	// Empty for now.
 }
 
 /**
 *	@brief	Gives the GameEntity a chance to Spawn itself appropriately based on state updates.
 **/
-void CLGBaseLocalEntity::SpawnFromState(const EntityState& state) {
-	
+void CLGBaseLocalEntity::SpawnFromState(const EntityState* state) {
+	// Empty for now.
 }
 
 /**
@@ -483,10 +482,6 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 		return;
 	}
 
-	if (refreshEntityID == 1028) {
-		int myBreak = 10;
-	}
-
     // Client Info.
     ClientInfo*  clientInfo = nullptr;
     // Entity specific rentEntityEffects. (Such as whether to rotate or not.)
@@ -535,12 +530,34 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 		} else if (rentEntityEffects & EntityEffectType::AnimCycleAll30hz) {
             refreshEntity.frame = (cl->time / 33.33f); // 30 fps ( /50 would be 20 fps, etc. )
 		} else {
-			//
-			//	Skeletal Animation Progressing.
-			//
+			// TODO: This needs tidying, this whole function obviously still does lol.
+			// If we got skeletal model data..
+			if ( skm ) {
+				// See which animation we are at:
+				const int32_t animationIndex = currentState->currentAnimation.animationIndex;
+
+				if ( animationIndex >= 0 && animationIndex < skm->actions.size() ) { 
+					auto *animationData = skm->actions[animationIndex];
+
+					refreshEntity.rootBoneAxisFlags = animationData->rootBoneAxisFlags;
+				} else {
+					refreshEntity.rootBoneAxisFlags = 0;
+				}
+			}
+
+			/**
+			*	Skeletal Animation Processing. - The RefreshAnimationB stuff is TEMPORARILY for Blend testing.
+			**/
+			// Setup the refresh entity frames.
+			refreshEntity.oldframe	= refreshAnimation.frame;
+
 			// Setup the proper lerp and model frame to render this pass.
 			// Moved into the if statement's else case up above.
-			ProcessSkeletalAnimationForTime(GameTime(cl->serverTime));
+			ProcessSkeletalAnimationForTime(GameTime(cl->time));
+
+			// Main Animation Frame.
+			refreshEntity.frame		= refreshAnimation.frame;
+			refreshEntity.backlerp	= refreshAnimation.backLerp;
         }
         
 

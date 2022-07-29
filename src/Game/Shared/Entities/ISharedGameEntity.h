@@ -615,49 +615,49 @@ protected:
 	template<typename T> auto ParseKeyValue(const std::string &key, const std::string &value, T &outValue) {
 		// Warning print...
 #if defined(SHAREDGAME_SERVERGAME)
-		Com_DPrint("Warning: svEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->currentState.number, typeid(T).name().c_str(), key.c_str());
+		Com_DPrintf("Warning: svEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->currentState.number, typeid(T).name(), key.c_str());
 #elif defined(SHAREDGAME_CLIENTGAME)
-		Com_DPrintf("Warning: clEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->clientEntityNumber, typeid(T).name().c_str(), key.c_str());
+		Com_DPrintf("Warning: clEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->clientEntityNumber, typeid(T).name(), key.c_str());
 #else
 		//Com_Print("Warning: Called specialized template function ParseKeyValue that wasn't compiled for client/server -game modules.\n");
 #endif
 	};
-	template<> auto ParseKeyValue(const std::string &key, const std::string &value, float &floatNumber) {
+	template<> inline auto ParseKeyValue(const std::string &key, const std::string &value, float &floatNumber) {
 		floatNumber = std::stof(value);
 		return true;
 	};
 	/**
 	*	@brief	Parses the key/value for the signed numbers, -/+ 
 	**/
-	template<> auto ParseKeyValue(const std::string &key, const std::string &value, int32_t &signedNumber) {
+	template<> inline auto ParseKeyValue(const std::string &key, const std::string &value, int32_t &signedNumber) {
 		signedNumber = std::stoi(value);
 		return true;
 	};
 	/**
 	*	@brief	Parses the key/value for the unsigned numbers(0 and up) type.
 	**/
-	template<> auto ParseKeyValue(const std::string &key, const std::string &value, uint32_t &unsignedNumber) {
+	template<> inline auto ParseKeyValue(const std::string &key, const std::string &value, uint32_t &unsignedNumber) {
 		unsignedNumber = std::stof(value);
 		return true;
 	};
 	/**
 	*	@brief	Parses the key/value for the string type.
 	**/
-	template<> auto ParseKeyValue(const std::string &key, const std::string &value, std::string &string) {
+	template<> inline auto ParseKeyValue(const std::string &key, const std::string &value, std::string &string) {
 		string = value;
 		return true;
 	};
 	/**
 	*	@brief	Parses the key/value for the Frametime type. (floating point time numbers. 0.1, 1.2 etc.)
 	**/
-	template<> auto ParseKeyValue(const std::string &key, const std::string &value, Frametime &frametime) {
+	template<> inline auto ParseKeyValue(const std::string &key, const std::string &value, Frametime &frametime) {
 		frametime = Frametime(std::stof(value));
 		return true;
 	};
 	/**
 	*	@brief	Parses the key/value for the vec3_t type.
 	**/
-	template<> auto ParseKeyValue(const std::string& key, const std::string& value, vec3_t& vector3) {
+	template<> inline auto ParseKeyValue(const std::string& key, const std::string& value, vec3_t& vector3) {
 		// Stores vector fields fetched from string. (Might be corrupted, so we're parsing this nicely.)
 		std::vector<std::string> vectorFields;
 

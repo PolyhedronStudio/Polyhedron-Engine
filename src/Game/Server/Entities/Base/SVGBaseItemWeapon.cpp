@@ -35,9 +35,6 @@ SVGBaseItemWeapon::SVGBaseItemWeapon(PODEntity *svEntity, const std::string& dis
     : Base(svEntity, displayString, identifier) {
 
 }
-SVGBaseItemWeapon::~SVGBaseItemWeapon() {
-
-}
 
 
 

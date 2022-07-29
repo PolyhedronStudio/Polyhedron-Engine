@@ -25,8 +25,8 @@
 //-----------------
 // Matrixes
 //-----------------
-#include "Math/Matrix3.h"
-#include "Math/Matrix4.h"
+#include "Math/Matrix3x3.h"
+#include "Math/Matrix4x4.h"
 
 //-----------------
 // Plane
@@ -44,10 +44,10 @@
 #include "Math/Rectangle.h"
 
 //-----------------
-// Quaternion.
+// Quaternions.
 //-----------------
 #include "Math/Quaternion.h"
-
+#include "Math/DualQuaternion.h"
 
 
 

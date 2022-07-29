@@ -9,7 +9,7 @@
 #include "../../ClientGameLocals.h"          // CLGame.
 //#include "../../Effects.h"          // Effects.
 //#include "../../Utilities.h"            // Util funcs.
-#include "../../Physics/StepMove.h" // Stepmove funcs.
+//#include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Server Game Base Entity.
 #include "../Base/CLGBasePacketEntity.h"
@@ -18,12 +18,12 @@
 //#include "../Base/CLGBaseTrigger.h"
 
 // World.
-#include "../World/ClientGameWorld.h"
+#include "../../World/ClientGameWorld.h"
 
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"
 
-//#include "../../GameModes/IGameMode.h"
+//#include "../../Gamemodes/IGamemode.h"
 //#include "../../World/GameWorld.h"
 
 //
@@ -31,9 +31,6 @@
 //
 MiscExplosionBox::MiscExplosionBox(PODEntity* clEntity) 
     : Base(clEntity) {
-
-}
-MiscExplosionBox::~MiscExplosionBox() {
 
 }
 
@@ -386,7 +383,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
 
 	//Com_DPrint("Origin before pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
     // Last but not least, move a step ahead.
-    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+//    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
 	//Com_DPrint("Origin after pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
 }
 

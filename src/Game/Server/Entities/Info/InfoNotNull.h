@@ -14,7 +14,7 @@ class InfoNotNull : public SVGBaseEntity {
 public:
     // Constructor/Deconstructor.
     InfoNotNull(PODEntity *svEntity);
-    virtual ~InfoNotNull();
+    virtual ~InfoNotNull() = default;
 
     DefineMapClass( "info_notnull", InfoNotNull, SVGBaseEntity );
 

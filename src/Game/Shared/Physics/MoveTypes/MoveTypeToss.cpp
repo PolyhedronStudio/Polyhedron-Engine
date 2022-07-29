@@ -113,9 +113,9 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	const vec3_t oldOrigin = ent->GetOrigin(); // VectorCopy( ent->s.origin, old_origin );
 
 	// As long as there's any acceleration at all, calculate it for the current frame.
-	if( ent->GetAcceleration()  != 0) {
+	if( ent->GetAcceleration() != 0) {
 		// Negative acceleration and a low velocity makes it come to a halt.
-		if( ent->GetAcceleration() < 0 && vec3_length(ent->GetVelocity()) < 50) {
+		if( ent->GetAcceleration() < 0 && vec3_length(ent->GetVelocity()) < 8) {
 			ent->SetVelocity(vec3_zero());
 			//VectorClear( ent->velocity );
 		} else {
@@ -152,7 +152,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	}
 
 	// In case the trace hit anything...
-	if( traceResult.fraction < 1.0f ) {
+	//if( traceResult.podEntity ) {
 		const int32_t entMoveType = ent->GetMoveType();
 
 		// 1 = default backOff value.
@@ -168,8 +168,10 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 		// Clip velocity.
 		ent->SetVelocity(SG_ClipVelocity( ent->GetVelocity(), traceResult.plane.normal, backOff ));
 
-		// stop if on ground
+		// Store clipped velocity.
+		const vec3_t clippedVelocity = ent->GetVelocity();
 
+		// stop if on ground
 		if( entMoveType == MoveType::Bounce ) {// || entMoveType == MoveType::BounceGrenade ) {
 			// stop dead on allsolid
 
@@ -190,28 +192,83 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 				ent->DispatchStopCallback( );
 			}
 		} else {
-			// in movetype_toss things stop dead when touching ground
-#if 0
-			SG_CheckGround( ent );
+			// Get ground brush contents.
+			const int32_t groundContents = traceResult.contents;
+			// Mask to use for 'current' contents.
+			const int32_t currentContentsMask = (BrushContents::Current0 | BrushContents::Current90 | BrushContents::Current180 | BrushContents::Current270 | BrushContents::CurrentUp | BrushContents::CurrentDown );
+			// For move TossSlide we do special handling so it can apply currents as well.
+			if ( entMoveType == MoveType::TossSlide && 
+				( groundContents & currentContentsMask ) == currentContentsMask ) {
+				// New velocity that gets set depending on the current.
+				vec3_t groundCurrentVelocity = vec3_zero();
 
-			if( ent->groundentity ) {
-#else
+				if ( groundContents & BrushContents::Current0 ) {
+					groundCurrentVelocity.x += 1.0;
+				}
+				if ( groundContents & BrushContents::Current90 ) {
+					groundCurrentVelocity.y += 1.0;
+				}
+				if ( groundContents & BrushContents::Current180 ) {
+					groundCurrentVelocity.x -= 1.0;
+				}
+				if ( groundContents & BrushContents::Current270 ) {
+					groundCurrentVelocity.y -= 1.0;
+				}
+				if ( groundContents & BrushContents::CurrentUp ) {
+					groundCurrentVelocity.z += 1.0;
+				}
+				if ( groundContents & BrushContents::CurrentDown ) {
+					groundCurrentVelocity.z -= 1.0;
+				}
 
-			// Walkable or trapped inside solid brush
-			if( traceResult.allSolid || IsWalkablePlane( traceResult.plane ) ) {
-				GameEntity *geTrace = (traceResult.gameEntity ? traceResult.gameEntity : (GameEntity*)gameWorld->GetWorldspawnGameEntity());
-				// Update ground entity.
-				ent->SetGroundEntity(geTrace);
-				ent->SetGroundEntityLinkCount((geTrace ? geTrace->GetLinkCount() : 0));
-#endif
-				// Zero out (angular-)velocities.
-				ent->SetVelocity(vec3_zero());
-				ent->SetAngularVelocity(vec3_zero());
+				// Only apply the new 'currents' velocity if caught on a current surface.
+				if (!vec3_equal(groundCurrentVelocity, vec3_zero())) {
+					// Normalize ground current velocity.
+					groundCurrentVelocity = vec3_normalize(groundCurrentVelocity);
 
-				// Dispatch a Stop callback.
-				ent->DispatchStopCallback( );
+					
+					// Apply based on speed current.
+					constexpr float PHYS_SPEED_CURRENT = 80.f;
+
+					std::string printStr = "groundCurrentVelocity(#" + std::to_string(ent->GetNumber()) + "): "
+						+ std::to_string(groundCurrentVelocity.x) + ","
+						+ std::to_string(groundCurrentVelocity.y) + ","
+						+ std::to_string(groundCurrentVelocity.z) + "\n";
+
+					SG_Physics_PrintDeveloper( printStr );
+
+					ent->SetVelocity( vec3_fmaf( clippedVelocity, PHYS_SPEED_CURRENT, groundCurrentVelocity));
+				}
+
+
+			// Otherwise, execute regular stopping behavior.
+			} else {
+
+				// in movetype_toss things stop dead when touching ground
+	#if 0
+				SG_CheckGround( ent );
+
+				if( ent->groundentity ) {
+	#else
+
+				// Walkable or trapped inside solid brush
+				if( traceResult.allSolid || IsWalkablePlane( traceResult.plane ) ) {
+					GameEntity *geTrace = ( traceResult.gameEntity ? traceResult.gameEntity : (GameEntity*)gameWorld->GetWorldspawnGameEntity() );
+					// Update ground entity.
+					ent->SetGroundEntity( geTrace );
+					ent->SetGroundEntityLinkCount( (geTrace ? geTrace->GetLinkCount() : 0) );
+	#endif
+					if (vec3_length(ent->GetVelocity()) < 0.0001f) {
+						// Zero out (angular-)velocities.
+						ent->SetVelocity( vec3_zero() );
+						ent->SetAngularVelocity( vec3_zero() );
+					}
+
+					// Dispatch a Stop callback.
+					ent->DispatchStopCallback( );
+				}
 			}
-		}
+		//}
 	}
 
     //

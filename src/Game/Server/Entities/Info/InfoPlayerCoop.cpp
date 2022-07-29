@@ -16,9 +16,6 @@ InfoPlayerCoop::InfoPlayerCoop(PODEntity *svEntity)
     : InfoPlayerStart(svEntity) {
 
 }
-InfoPlayerCoop::~InfoPlayerCoop() {
-
-}
 
 // Interface functions. 
 //===============

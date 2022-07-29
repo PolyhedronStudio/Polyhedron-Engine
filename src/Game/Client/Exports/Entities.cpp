@@ -67,11 +67,18 @@ qboolean ClientGameEntities::PrepareBSPEntities(const char *mapName, const char*
 *   @return True on success, false in case of trouble. (Should never happen, and if it does,
 *           well... file an issue lmao.)
 **/
-qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, const EntityState& state) {
+qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, const EntityState* state) {
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
         Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
+
+        return false;
+    }
+    // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
+    if (!state) {
+        // Developer warning.
+        Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(state)!!\n");
 
         return false;
     }
@@ -99,13 +106,15 @@ qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, cons
 	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
         if (podEntity) {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state->number, mapClass, hashedMapClass);
         } else {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state.number, mapClass, hashedMapClass);
+    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state->number, mapClass, hashedMapClass);
         }
 #endif
 		return true;
 	}
+
+	return false;
 }
 
 //===============
@@ -320,55 +329,6 @@ void ClientGameEntities::RunPackEntitiesPredictionFrame() {
 
 }
 
-///**
-//*   @brief  Gets us a pointer to the entity that is currently being viewed.
-//*           This could be an other client to in case of spectator mode.
-//**/
-//PODEntity* CLG_GetClientViewEntity(void) {
-//    // Default is of course our own client entity number.
-//    int32_t index = cl->clientNumber;
-//
-//    // However, faith has it that a chase client ID might be set, in which case we want to switch to its number instead.
-//    if (cl->frame.playerState.stats[PlayerStats::ChaseClientID]) {
-//        index = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
-//    }
-//
-//    return &cs->entities[index + 1];
-//}
-//
-///**
-//*   @return True if the specified entity is bound to the local client's view.
-//**/
-//qboolean CLG_IsClientViewEntity(const PODEntity* ent) {
-//    // If the entity number matches, then we're good.
-//    if (ent->current.number == cl->clientNumber + 1) {
-//        return true;
-//    }
-//
-//    // If not, then we are viewing an other client entity, check whether it is in corpse mode.
-//    if ((ent->current.effects & EntityEffectType::Corpse) == 0) {
-//        // No corpse, and modelIndex #255 indicating that we are dealing with a client entity.
-//        if (ent->current.modelIndex == 255) {
-//            // If the entity number matches our client number, we're good to go.
-//            if (ent->current.number == cl->clientNumber) {
-//                return true;
-//            } 
-//
-//            // Otherwise we'll fetch the number of currently being chased client and see if that matches with this entity's number instead.
-//            const int16_t chase = cl->frame.playerState.stats[PlayerStats::ChaseClientID] - ConfigStrings::PlayerSkins;
-//
-//            // Oh boy, it matched, someone is really happy right now.
-//            if (ent->current.number == chase) {
-//                return true;
-//            }
-//        }
-//    }
-//
-//    // All bets are off, this is no client entity which we are viewing.
-//    return false;
-//}
-//-------------------------------------------------------------------------------------------------------------------------
-
 /**
 *   @brief Executed whenever a server frame entity event is receieved.
 **/
@@ -459,10 +419,10 @@ void ClientGameEntities::LocalEntityEvent(int32_t number) {
 }
 
 /**
-*   @brief  Parse the server frame for server entities to add to our client view.
-*           Also applies special rendering effects to them where desired.
+*   @brief  Prepares all parsed server entities, as well as local entities for rendering
+*			of the current frame.
 **/
-void ClientGameEntities::AddPacketEntities() {
+void ClientGameEntities::PrepareRefreshEntities() {
 	// Get Gameworld, we're about to iterate.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
@@ -660,7 +620,7 @@ void ClientGameEntities::AddViewEntities() {
     //}
 
     // Setup basic render entity flags for our view weapon.
-    gunRenderEntity.flags =  RenderEffects::DepthHack | RenderEffects::WeaponModel;
+    gunRenderEntity.flags =  RenderEffects::DepthHack | RenderEffects::WeaponModel | RenderEffects::MinimalLight;
     if (info_hand->integer == 1) {
         gunRenderEntity.flags |= RF_LEFTHAND;
     }

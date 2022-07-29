@@ -13,7 +13,7 @@
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
 
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 
 #include "TriggerHurt.h"
 
@@ -28,9 +28,6 @@ static constexpr int32_t SPAWNFLAG_SLOW_HURT		= 16;
 
 // Constructor/Deconstructor.
 TriggerHurt::TriggerHurt(PODEntity *svEntity) : SVGBaseTrigger(svEntity) {
-
-}
-TriggerHurt::~TriggerHurt() {
 
 }
 

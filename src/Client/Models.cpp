@@ -48,9 +48,9 @@ static constexpr int32_t MAX_RMODELS = MAX_MODELS * 2;
 int32_t registration_sequence = 0;
 
 //! Refresh Model Data.
-model_t      r_models[MAX_RMODELS];
+model_t		r_models[MAX_RMODELS];
 //! Number of total models we got.
-int32_t          r_numModels = 0;
+int32_t		r_numModels = 0;
 //! Client Side storage of our internal Skeletal Model Data.
 //! Indexed by the same handle as the r_models model it belongs to.
 SkeletalModelData r_skeletalModels[MAX_RMODELS];
@@ -107,6 +107,7 @@ void CL_Model_List_f(void)
 	size_t  bytes;
 
 	Com_Printf("------------------\n");
+	Com_Printf("Client model list:\n");
 	bytes = count = 0;
 
 	for (i = 0, model = r_models; i < r_numModels; i++, model++) {
@@ -361,6 +362,7 @@ model_t *CL_Model_GetModelByHandle(qhandle_t h)
 
 	if (h < 0 || h > r_numModels) {
 		Com_Error(ErrorType::Drop, "%s: %d out of range", __func__, h);
+
 	}
 
 	model = &r_models[h - 1];
@@ -377,12 +379,12 @@ void CL_Model_Init(void)
 		Com_Error(ErrorType::Fatal, "%s: %d models not freed", __func__, r_numModels);
 	}
 
-	Cmd_AddCommand("modellist", CL_Model_List_f);
+	Cmd_AddCommand("cl_modellist", CL_Model_List_f);
 }
 
 void CL_Model_Shutdown(void)
 {
 	CL_Model_FreeAll();
-	Cmd_RemoveCommand("modellist");
+	Cmd_RemoveCommand("cl_modellist");
 }
 

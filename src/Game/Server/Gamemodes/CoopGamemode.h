@@ -2,13 +2,13 @@
 // LICENSE HERE.
 
 //
-// CoopGameMode.h
+// CoopGamemode.h
 //
 // Coop game mode to run, same as default mode but with coop rules.
 //
 */
-#include "IGameMode.h"
-#include "DefaultGameMode.h"
+#include "IGamemode.h"
+#include "DefaultGamemode.h"
 
 class CoopGameMode : public DefaultGameMode {
 public:
@@ -16,7 +16,7 @@ public:
     // Constructor/Deconstructor.
     //
     CoopGameMode();
-    virtual ~CoopGameMode() override;
+    virtual ~CoopGameMode() = default;
 
     //
     // Server Related.

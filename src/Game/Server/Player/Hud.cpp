@@ -28,10 +28,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Base/SVGBasePlayer.h"
 
 // GameModes.
-#include "../GameModes/IGameMode.h"
-//#include "../GameModes/DefaultGameMode.h"
-#include "../GameModes/CoopGameMode.h"
-#include "../GameModes/DeathMatchGameMode.h"
+#include "../Gamemodes/IGamemode.h"
+//#include "../Gamemodes/DefaultGamemode.h"
+#include "../Gamemodes/CoopGamemode.h"
+#include "../Gamemodes/DeathMatchGamemode.h"
 
 // World.
 #include "../World/ServerGameWorld.h"
@@ -106,7 +106,7 @@ void HUD_MoveClientToIntermission(Entity *ent)
 //================
 void SVG_HUD_BeginIntermission(Entity *targ)
 {
-    int     i, n;
+    int     i;//, n;
     Entity *client = nullptr;
 
     //

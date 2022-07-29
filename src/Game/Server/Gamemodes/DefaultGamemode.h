@@ -2,20 +2,20 @@
 // LICENSE HERE.
 
 //
-// DefaultGameMode.h
+// DefaultGamemode.h
 //
 // Default game mode to run, allows for all sorts of stuff.
 //
 */
 #pragma once
 
-#include "IGameMode.h"
+#include "IGamemode.h"
 
 class DefaultGameMode : public IGameMode {
 public:
     //! Constructor/Deconstructor.
     DefaultGameMode();
-    virtual ~DefaultGameMode() override;
+    virtual ~DefaultGameMode() = default;
 
     /***
     * Server Related.

@@ -25,7 +25,7 @@ class ClientGameExports : public IClientGameExports {
 public:
     //! Constructor
     ClientGameExports();
-    ~ClientGameExports();
+    virtual ~ClientGameExports();
     
     /****
     * 

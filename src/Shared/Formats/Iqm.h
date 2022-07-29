@@ -142,9 +142,15 @@ typedef struct {
 } iqm_transform_t;
 
 typedef struct {
+	//! Animation Name.
     char name[MAX_QPATH];
+	//! First frame index of this animation.
     uint32_t first_frame;
+	//! Total number of frames of this animation, first_Frame+num_frames = end.
     uint32_t num_frames;
+	//! Frametime of said IQM Animation.
+	float framerate;
+	//! To auto-loop, or not to auto-loop, that is tzhe questzion.
     qboolean loop;
 } iqm_anim_t;
 

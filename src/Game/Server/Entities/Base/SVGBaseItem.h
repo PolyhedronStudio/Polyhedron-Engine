@@ -34,7 +34,7 @@ public:
 
     //! Constructor/Deconstructor.
     SVGBaseItem(PODEntity *svEntity, const std::string& displayString, uint32_t identifier);
-    virtual ~SVGBaseItem();
+    virtual ~SVGBaseItem() = default;
 
 
     //! Abstract Class TypeInfo registry.

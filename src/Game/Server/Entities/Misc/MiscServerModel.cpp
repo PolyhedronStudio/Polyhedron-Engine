@@ -42,9 +42,6 @@ MiscServerModel::MiscServerModel( PODEntity *svEntity )
     : Base( svEntity ) {
 
 }
-MiscServerModel::~MiscServerModel() {
-
-}
 
 
 /**

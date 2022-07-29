@@ -81,11 +81,11 @@ void SCR_StopCinematic(void)
         FS_FCloseFile(cin.file);
         cin.file = 0;
     }
-    if (cin.hnodes1)
-    {
-        Z_Free(cin.hnodes1);
-        cin.hnodes1 = NULL;
-    }
+    //if (cin.hnodes1)
+    //{
+    //    Z_Free(cin.hnodes1);
+    //    cin.hnodes1 = NULL;
+    //}
 
     // switch the sample rate back to its original value if necessary
     if (cin.s_khz_original != 0)
@@ -117,314 +117,314 @@ void SCR_FinishCinematic(void)
 
 //==========================================================================
 
-/*
-==================
-SmallestNode1
-==================
-*/
-int	SmallestNode1(int numhnodes)
-{
-    int		i;
-    int		best, bestnode;
+///*
+//==================
+//SmallestNode1
+//==================
+//*/
+//int	SmallestNode1(int numhnodes)
+//{
+//    int		i;
+//    int		best, bestnode;
+//
+//    best = 99999999;
+//    bestnode = -1;
+//    for (i = 0; i < numhnodes; i++)
+//    {
+//        if (cin.h_used[i])
+//            continue;
+//        if (!cin.h_count[i])
+//            continue;
+//        if (cin.h_count[i] < best)
+//        {
+//            best = cin.h_count[i];
+//            bestnode = i;
+//        }
+//    }
+//
+//    if (bestnode == -1)
+//        return -1;
+//
+//    cin.h_used[bestnode] = true;
+//    return bestnode;
+//}
+//
+//
+///*
+//==================
+//Huff1TableInit
+//
+//Reads the 64k counts table and initializes the node trees
+//==================
+//*/
+//void Huff1TableInit(void)
+//{
+//    int		prev;
+//    int		j;
+//    int		*node, *nodebase;
+//    byte	counts[256];
+//    int		numhnodes;
+//
+//    // CPP: Cast to int*
+//    cin.hnodes1 = (int*)Z_Malloc(256 * 256 * 2 * 4);
+//    memset(cin.hnodes1, 0, 256 * 256 * 2 * 4);
+//
+//    for (prev = 0; prev < 256; prev++)
+//    {
+//        memset(cin.h_count, 0, sizeof(cin.h_count));
+//        memset(cin.h_used, 0, sizeof(cin.h_used));
+//
+//        // read a row of counts
+//        FS_Read(counts, sizeof(counts), cin.file);
+//        for (j = 0; j < 256; j++)
+//            cin.h_count[j] = counts[j];
+//
+//        // build the nodes
+//        numhnodes = 256;
+//        nodebase = cin.hnodes1 + prev * 256 * 2;
+//
+//        while (numhnodes != 511)
+//        {
+//            node = nodebase + (numhnodes - 256) * 2;
+//
+//            // pick two lowest counts
+//            node[0] = SmallestNode1(numhnodes);
+//            if (node[0] == -1)
+//                break;	// no more
+//
+//            node[1] = SmallestNode1(numhnodes);
+//            if (node[1] == -1)
+//                break;
+//
+//            cin.h_count[numhnodes] = cin.h_count[node[0]] + cin.h_count[node[1]];
+//            numhnodes++;
+//        }
+//
+//        cin.numhnodes1[prev] = numhnodes - 1;
+//    }
+//}
+//
+///*
+//==================
+//Huff1Decompress
+//==================
+//*/
+//cblock_t Huff1Decompress(cblock_t in)
+//{
+//    byte		*input;
+//    byte		*out_p;
+//    int			nodenum;
+//    int			count;
+//    cblock_t	out;
+//    int			inbyte;
+//    int			*hnodes, *hnodesbase;
+//    //int		i;
+//
+//        // get decompressed count
+//    count = in.data[0] + (in.data[1] << 8) + (in.data[2] << 16) + (in.data[3] << 24);
+//    input = in.data + 4;
+//    out_p = out.data = (byte*)Z_Malloc(count); // CPP: Cast to byte*
+//
+//    // read bits
+//
+//    hnodesbase = cin.hnodes1 - 256 * 2;	// nodes 0-255 aren't stored
+//
+//    hnodes = hnodesbase;
+//    nodenum = cin.numhnodes1[0];
+//    while (count)
+//    {
+//        inbyte = *input++;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//        //-----------
+//        if (nodenum < 256)
+//        {
+//            hnodes = hnodesbase + (nodenum << 9);
+//            *out_p++ = nodenum;
+//            if (!--count)
+//                break;
+//            nodenum = cin.numhnodes1[nodenum];
+//        }
+//        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
+//        inbyte >>= 1;
+//    }
+//
+//    if (input - in.data != in.count && input - in.data != in.count + 1)
+//    {
+//        Com_Printf("Decompression overread by %li", (input - in.data) - in.count);
+//    }
+//    out.count = out_p - out.data;
+//
+//    return out;
+//}
 
-    best = 99999999;
-    bestnode = -1;
-    for (i = 0; i < numhnodes; i++)
-    {
-        if (cin.h_used[i])
-            continue;
-        if (!cin.h_count[i])
-            continue;
-        if (cin.h_count[i] < best)
-        {
-            best = cin.h_count[i];
-            bestnode = i;
-        }
-    }
-
-    if (bestnode == -1)
-        return -1;
-
-    cin.h_used[bestnode] = true;
-    return bestnode;
-}
-
-
-/*
-==================
-Huff1TableInit
-
-Reads the 64k counts table and initializes the node trees
-==================
-*/
-void Huff1TableInit(void)
-{
-    int		prev;
-    int		j;
-    int		*node, *nodebase;
-    byte	counts[256];
-    int		numhnodes;
-
-    // CPP: Cast to int*
-    cin.hnodes1 = (int*)Z_Malloc(256 * 256 * 2 * 4);
-    memset(cin.hnodes1, 0, 256 * 256 * 2 * 4);
-
-    for (prev = 0; prev < 256; prev++)
-    {
-        memset(cin.h_count, 0, sizeof(cin.h_count));
-        memset(cin.h_used, 0, sizeof(cin.h_used));
-
-        // read a row of counts
-        FS_Read(counts, sizeof(counts), cin.file);
-        for (j = 0; j < 256; j++)
-            cin.h_count[j] = counts[j];
-
-        // build the nodes
-        numhnodes = 256;
-        nodebase = cin.hnodes1 + prev * 256 * 2;
-
-        while (numhnodes != 511)
-        {
-            node = nodebase + (numhnodes - 256) * 2;
-
-            // pick two lowest counts
-            node[0] = SmallestNode1(numhnodes);
-            if (node[0] == -1)
-                break;	// no more
-
-            node[1] = SmallestNode1(numhnodes);
-            if (node[1] == -1)
-                break;
-
-            cin.h_count[numhnodes] = cin.h_count[node[0]] + cin.h_count[node[1]];
-            numhnodes++;
-        }
-
-        cin.numhnodes1[prev] = numhnodes - 1;
-    }
-}
-
-/*
-==================
-Huff1Decompress
-==================
-*/
-cblock_t Huff1Decompress(cblock_t in)
-{
-    byte		*input;
-    byte		*out_p;
-    int			nodenum;
-    int			count;
-    cblock_t	out;
-    int			inbyte;
-    int			*hnodes, *hnodesbase;
-    //int		i;
-
-        // get decompressed count
-    count = in.data[0] + (in.data[1] << 8) + (in.data[2] << 16) + (in.data[3] << 24);
-    input = in.data + 4;
-    out_p = out.data = (byte*)Z_Malloc(count); // CPP: Cast to byte*
-
-    // read bits
-
-    hnodesbase = cin.hnodes1 - 256 * 2;	// nodes 0-255 aren't stored
-
-    hnodes = hnodesbase;
-    nodenum = cin.numhnodes1[0];
-    while (count)
-    {
-        inbyte = *input++;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-        //-----------
-        if (nodenum < 256)
-        {
-            hnodes = hnodesbase + (nodenum << 9);
-            *out_p++ = nodenum;
-            if (!--count)
-                break;
-            nodenum = cin.numhnodes1[nodenum];
-        }
-        nodenum = hnodes[nodenum * 2 + (inbyte & 1)];
-        inbyte >>= 1;
-    }
-
-    if (input - in.data != in.count && input - in.data != in.count + 1)
-    {
-        Com_Printf("Decompression overread by %li", (input - in.data) - in.count);
-    }
-    out.count = out_p - out.data;
-
-    return out;
-}
-
-extern uint32_t d_8to24table[256];
-
-/*
-==================
-SCR_ReadNextFrame
-==================
-*/
-qhandle_t SCR_ReadNextFrame(void)
-{
-    int		r;
-    int		command;
-    byte	samples[22050 / 14 * 4];
-    byte	compressed[0x20000];
-    int		size;
-    byte	*pic;
-    cblock_t	in, huf1;
-    int		start, end, count;
-
-    // read the next frame
-    r = FS_Read(&command, 4, cin.file);
-    if (r == 0)		// we'll give it one more chance
-        r = FS_Read(&command, 4, cin.file);
-
-    if (r != 4)
-        return 0;
-    command = LittleLong(command);
-    if (command == 2)
-        return 0;	// last frame marker
-
-    if (command == 1)
-    {	// read palette
-        FS_Read(cin.palette, sizeof(cin.palette), cin.file);
-        cin.palette_active = true;
-    }
-
-    // decompress the next frame
-    FS_Read(&size, 4, cin.file);
-    size = LittleLong(size);
-    if (size > sizeof(compressed) || size < 1)
-        Com_Error(ErrorType::Drop, "Bad compressed frame size");
-    FS_Read(compressed, size, cin.file);
-
-    // read sound
-    start = cin.frame_index*cin.s_rate / 14;
-    end = (cin.frame_index + 1)*cin.s_rate / 14;
-    count = end - start;
-
-    FS_Read(samples, count*cin.s_width*cin.s_channels, cin.file);
-
-    S_RawSamples(count, cin.s_rate, cin.s_width, cin.s_channels, samples, 1.0f);
-
-    in.data = compressed;
-    in.count = size;
-
-    huf1 = Huff1Decompress(in);
-
-    pic = huf1.data;
-
-    // CPP: Cast to uint32_t*
-    uint32_t* rgba = (uint32_t*)Z_Malloc(cin.width * cin.height * 4);
-    uint32_t* wptr = rgba;
-
-    for (int y = 0; y < cin.height; y++)
-    {
-        if (cin.palette_active)
-        {
-            for (int x = 0; x < cin.width; x++)
-            {
-                byte* src = cin.palette + (*pic) * 3;
-                *wptr = MakeColor(src[0], src[1], src[2], 255);
-                pic++;
-                wptr++;
-            }
-        }
-        else
-        {
-            for (int x = 0; x < cin.width; x++)
-            {
-                *wptr = d_8to24table[*pic];
-                pic++;
-                wptr++;
-            }
-        }
-    }
-
-    Z_Free(huf1.data);
-
-    cin.frame_index++;
-
-    const char* image_name = va("%s[%d]", cin.file_name, cin.frame_index);
-    return R_RegisterRawImage(image_name, cin.width, cin.height, (byte*)rgba, IT_SPRITE, IF_SRGB);
-}
+//extern uint32_t d_8to24table[256];
+//
+///*
+//==================
+//SCR_ReadNextFrame
+//==================
+//*/
+//qhandle_t SCR_ReadNextFrame(void)
+//{
+//    int		r;
+//    int		command;
+//    byte	samples[22050 / 14 * 4];
+//    byte	compressed[0x20000];
+//    int		size;
+//    byte	*pic;
+//    cblock_t	in, huf1;
+//    int		start, end, count;
+//
+//    // read the next frame
+//    r = FS_Read(&command, 4, cin.file);
+//    if (r == 0)		// we'll give it one more chance
+//        r = FS_Read(&command, 4, cin.file);
+//
+//    if (r != 4)
+//        return 0;
+//    command = LittleLong(command);
+//    if (command == 2)
+//        return 0;	// last frame marker
+//
+//    if (command == 1)
+//    {	// read palette
+//        FS_Read(cin.palette, sizeof(cin.palette), cin.file);
+//        cin.palette_active = true;
+//    }
+//
+//    // decompress the next frame
+//    FS_Read(&size, 4, cin.file);
+//    size = LittleLong(size);
+//    if (size > sizeof(compressed) || size < 1)
+//        Com_Error(ErrorType::Drop, "Bad compressed frame size");
+//    FS_Read(compressed, size, cin.file);
+//
+//    // read sound
+//    start = cin.frame_index*cin.s_rate / 14;
+//    end = (cin.frame_index + 1)*cin.s_rate / 14;
+//    count = end - start;
+//
+//    FS_Read(samples, count*cin.s_width*cin.s_channels, cin.file);
+//
+//    S_RawSamples(count, cin.s_rate, cin.s_width, cin.s_channels, samples, 1.0f);
+//
+//    in.data = compressed;
+//    in.count = size;
+//
+//    huf1 = Huff1Decompress(in);
+//
+//    pic = huf1.data;
+//
+//    // CPP: Cast to uint32_t*
+//    uint32_t* rgba = (uint32_t*)Z_Malloc(cin.width * cin.height * 4);
+//    uint32_t* wptr = rgba;
+//
+//    for (int y = 0; y < cin.height; y++)
+//    {
+//        if (cin.palette_active)
+//        {
+//            for (int x = 0; x < cin.width; x++)
+//            {
+//                byte* src = cin.palette + (*pic) * 3;
+//                *wptr = MakeColor(src[0], src[1], src[2], 255);
+//                pic++;
+//                wptr++;
+//            }
+//        }
+//        else
+//        {
+//            for (int x = 0; x < cin.width; x++)
+//            {
+//                *wptr = d_8to24table[*pic];
+//                pic++;
+//                wptr++;
+//            }
+//        }
+//    }
+//
+//    Z_Free(huf1.data);
+//
+//    cin.frame_index++;
+//
+//    const char* image_name = va("%s[%d]", cin.file_name, cin.frame_index);
+//    return R_RegisterRawImage(image_name, cin.width, cin.height, (byte*)rgba, IT_SPRITE, IF_SRGB);
+//}
 
 
 /*
@@ -435,7 +435,7 @@ SCR_RunCinematic
 */
 void SCR_RunCinematic(void)
 {
-    int		frame;
+    //int		frame;
 
     if (cin.start_time <= 0)
         return;
@@ -443,36 +443,36 @@ void SCR_RunCinematic(void)
     if (cin.frame_index == -1)
         return; // static image
 
-    if (cls.key_dest != KEY_GAME)
-    {
-        // pause if menu or console is up
-        cin.start_time = cls.realtime - cin.frame_index * 1000 / 14;
+    //if (cls.key_dest != KEY_GAME)
+    //{
+    //    // pause if menu or console is up
+    //    cin.start_time = cls.realtime - cin.frame_index * 1000 / 14;
 
-        S_UnqueueRawSamples();
+    //    S_UnqueueRawSamples();
 
-        return;
-    }
+    //    return;
+    //}
 
-    frame = (cls.realtime - cin.start_time)*14.0 / 1000;
-    if (frame <= cin.frame_index)
-        return;
-    if (frame > cin.frame_index + 1)
-    {
-        // Com_Printf("Dropped frame: %i > %i\n", frame, cin.frame_index + 1);
-        cin.start_time = cls.realtime - cin.frame_index * 1000 / 14;
-    }
+    //frame = (cls.realtime - cin.start_time)*14.0 / 1000;
+    //if (frame <= cin.frame_index)
+    //    return;
+    //if (frame > cin.frame_index + 1)
+    //{
+    //    // Com_Printf("Dropped frame: %i > %i\n", frame, cin.frame_index + 1);
+    //    cin.start_time = cls.realtime - cin.frame_index * 1000 / 14;
+    //}
 
-    R_UnregisterImage(cl.precaches.images[0]);
-    cl.precaches.images[0] = SCR_ReadNextFrame();
+    //R_UnregisterImage(cl.precaches.images[0]);
+    //cl.precaches.images[0] = SCR_ReadNextFrame();
 
-    if (!cl.precaches.images[0])
-    {
-        SCR_FinishCinematic();
-        cin.start_time = 1;	// hack to get the black screen behind loading
-        SCR_BeginLoadingPlaque();
-        cin.start_time = 0;
-        return;
-    }
+    //if (!cl.precaches.images[0])
+    //{
+    //    SCR_FinishCinematic();
+    //    cin.start_time = 1;	// hack to get the black screen behind loading
+    //    SCR_BeginLoadingPlaque();
+    //    cin.start_time = 0;
+    //    return;
+    //}
 }
 
 /*
@@ -483,8 +483,8 @@ SCR_PlayCinematic
 */
 void SCR_PlayCinematic(const char *name)
 {
-    int		width, height;
-    int		old_khz;
+    //int		width, height;
+    //int		old_khz;
 
     // make sure CD isn't playing music
     OGG_Stop();
@@ -504,49 +504,52 @@ void SCR_PlayCinematic(const char *name)
     }
     else if (!COM_CompareExtension(name, ".cin"))
     {
-        if (!Cvar_VariableValue("cl_cinematics"))
-        {
-            SCR_FinishCinematic();
-            return;
-        }
+		SCR_FinishCinematic();
+		Com_WPrintf( ".cin files are unsupported in Polyhedron.\n" );
+		return;
+		//if (!Cvar_VariableValue("cl_cinematics"))
+        //{
+        //    SCR_FinishCinematic();
+        //    return;
+        //}
 
-        Q_snprintf(cin.file_name, sizeof(cin.file_name), "video/%s", name);
+        //Q_snprintf(cin.file_name, sizeof(cin.file_name), "video/%s", name);
 
-        FS_FOpenFile(cin.file_name, &cin.file, FS_MODE_READ);
-        if (!cin.file)
-        {
-            Com_WPrintf("Cinematic \"%s\" not found. Skipping.\n", name);
-            SCR_FinishCinematic();
-            return;
-        }
+        //FS_FOpenFile(cin.file_name, &cin.file, FS_MODE_READ);
+        //if (!cin.file)
+        //{
+        //    Com_WPrintf("Cinematic \"%s\" not found. Skipping.\n", name);
+        //    SCR_FinishCinematic();
+        //    return;
+        //}
 
-        FS_Read(&width, 4, cin.file);
-        FS_Read(&height, 4, cin.file);
-        cin.width = LittleLong(width);
-        cin.height = LittleLong(height);
+        //FS_Read(&width, 4, cin.file);
+        //FS_Read(&height, 4, cin.file);
+        //cin.width = LittleLong(width);
+        //cin.height = LittleLong(height);
 
-        FS_Read(&cin.s_rate, 4, cin.file);
-        cin.s_rate = LittleLong(cin.s_rate);
-        FS_Read(&cin.s_width, 4, cin.file);
-        cin.s_width = LittleLong(cin.s_width);
-        FS_Read(&cin.s_channels, 4, cin.file);
-        cin.s_channels = LittleLong(cin.s_channels);
+        //FS_Read(&cin.s_rate, 4, cin.file);
+        //cin.s_rate = LittleLong(cin.s_rate);
+        //FS_Read(&cin.s_width, 4, cin.file);
+        //cin.s_width = LittleLong(cin.s_width);
+        //FS_Read(&cin.s_channels, 4, cin.file);
+        //cin.s_channels = LittleLong(cin.s_channels);
 
-        Huff1TableInit();
+        //Huff1TableInit();
 
-        cin.palette_active = false;
+        //cin.palette_active = false;
 
-        // switch to 22 khz sound if necessary
-        old_khz = Cvar_VariableValue("s_khz");
-        if (old_khz != cin.s_rate / 1000 && s_started == SS_DMA)
-        {
-            cin.s_khz_original = old_khz;
-            Cvar_Set("s_khz", va("%d", cin.s_rate / 1000));
-        }
+        //// switch to 22 khz sound if necessary
+        //old_khz = Cvar_VariableValue("s_khz");
+        //if (old_khz != cin.s_rate / 1000 && s_started == SS_DMA)
+        //{
+        //    cin.s_khz_original = old_khz;
+        //    Cvar_Set("s_khz", va("%d", cin.s_rate / 1000));
+        //}
 
-        cin.frame_index = 0;
-        cl.precaches.images[0] = SCR_ReadNextFrame();
-        cin.start_time = cls.realtime;
+        //cin.frame_index = 0;
+        //cl.precaches.images[0] = SCR_ReadNextFrame();
+        //cin.start_time = cls.realtime;
     }
     else
     {

@@ -27,9 +27,6 @@ DebrisEntity::DebrisEntity(PODEntity *svEntity)
     : CLGBaseLocalEntity(svEntity) {
 
 }
-DebrisEntity::~DebrisEntity() {
-
-}
 
 /**
 *	@brief	Die callback.
@@ -39,6 +36,23 @@ void DebrisEntity::DebrisEntityDie(GameEntity* inflictor, GameEntity* attacker, 
     Remove();
 }
 
+static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
+    // Pick random velocities.
+    vec3_t velocity = {
+        100.0f * crandom(),
+        100.0f * crandom(),
+        200.0f + 100.0f * random()
+    };
+
+    // Scale velocities.
+    if (damage < 50)
+        velocity = vec3_scale(velocity, 0.7f);
+    else
+        velocity = vec3_scale(velocity, 1.2f);
+
+    // Return.
+    return velocity;
+}
 
 /**
 *   @brief  Used by game modes to spawn server side gibs.
@@ -51,26 +65,45 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
     DebrisEntity *debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>(localDebrisEntity, false, false);
 
 
-	//// Chunk Entity.
-    //DebrisEntity* debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>();
+	// Set actual size of 
+    vec3_t size = vec3_scale(debrisser->GetSize() , 0.5f);
+    debrisEntity->SetSize(size);
 
     // Set the origin.
     debrisEntity->SetOrigin(origin);
 
     // Set the model.
     debrisEntity->SetModel(debrisModel);
+	//const float velocityScale = 1.f;
+ //   // Comment later...
+ //   const vec3_t velocityDamage = CalculateDamageVelocity(200);
+
+	//vec3_t velocity = vec3_t{ speed, speed, speed };
+ //   // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
+ //   // adding it on to 'velocityDamage' its old value.
+ //   vec3_t gibVelocity = vec3_fmaf( velocityDamage, velocityScale,  velocity );
+
+ //   // Be sure to clip our velocity, just in case.
+ //   ClipGibVelocity(gibVelocity);
+	//debrisEntity->SetMoveType(MoveType::TossSlide);
+ //   debrisEntity->SetVelocity(gibVelocity);
 
     // Calculate and set the velocity.
-    vec3_t velocity = { 100.f * crandom(), 100.f * crandom(), 100.f + 100.f * crandom() };
-    debrisEntity->SetVelocity(vec3_fmaf(debrisser->GetVelocity(), speed, velocity));
+    const vec3_t velocity = { 500.f * crandom(), 500.f * crandom(), 500.f + 200.f * crandom() };
+    debrisEntity->SetVelocity( vec3_fmaf( debrisser->GetVelocity(), speed, velocity ) );
+	Com_DPrint(" THIS IS AN ENTITY I WANT TO KNOW ITS SPEED=%f\n", speed);
 
     // Set Movetype and Solid.
     debrisEntity->SetMoveType(MoveType::Bounce);
-    debrisEntity->SetSolid(Solid::Not);
+    debrisEntity->SetSolid(Solid::OctagonBox);
 
     // Calculate and set angular velocity.
-    vec3_t angularVelocity = { random() * 600, random() * 600, random() * 600 };
-    debrisEntity->SetAngularVelocity(angularVelocity);
+    //vec3_t angularVelocity = { random() * 600, random() * 600, random() * 600 };
+    //debrisEntity->SetAngularVelocity(angularVelocity);
+    
+    // Generate and apply a random angular velocity.
+    const vec3_t angularVelocity = { Randomui() * 600.f, Randomui() * 600.f, Randomui() * 600.f };
+	debrisEntity->SetAngularVelocity(angularVelocity);
 
     // Set up the thinking machine.
     debrisEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
@@ -78,7 +111,7 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
 
     // Setup the other properties.
     debrisEntity->SetAnimationFrame(0);
-    debrisEntity->SetFlags(0);
+	debrisEntity->SetFlags(0);
     debrisEntity->SetTakeDamage(1);
     debrisEntity->SetDieCallback(&DebrisEntity::DebrisEntityDie);
 

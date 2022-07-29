@@ -16,7 +16,7 @@ public:
     // Constructor/Deconstructor.
     //
     TriggerAlways(PODEntity *svEntity);
-    virtual ~TriggerAlways();
+    virtual ~TriggerAlways() = default;
 
     DefineMapClass( "trigger_always", TriggerAlways, SVGBaseTrigger );
 

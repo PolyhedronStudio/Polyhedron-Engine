@@ -17,7 +17,7 @@
 #include "GibEntity.h"
 
 // GameMode.
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 
 // World.
 #include "../../World/ServerGameWorld.h"
@@ -104,8 +104,8 @@ GibEntity* GibEntity::Create(GameEntity* gibber, const std::string& gibModel, in
 
 
 // Constructor/Deconstructor.
-GibEntity::GibEntity(PODEntity *svEntity) : SVGBaseEntity(svEntity) { }
-GibEntity::~GibEntity() { }
+GibEntity::GibEntity(PODEntity *svEntity) : Base(svEntity) { }
+
 
 //
 //===============

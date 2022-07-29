@@ -56,7 +56,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
 
 	// Set size.
     //vec3_t size = vec3_scale(gibber->GetSize(), 0.5f);
-	vec3_t size = vec3_scale(vec3_t{16.f, 16.f, 56.f}, 0.5f);
+	const vec3_t size = vec3_scale(vec3_t{16.f, 16.f, 56.f}, 0.5f);
     gibEntity->SetSize(size);
 
     // Generate the origin to start from.
@@ -90,7 +90,7 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     // Is it an organic gib type?
     if (gibType == GibType::Organic) {
     	// Different move type for organic gibs.
-	    gibEntity->SetMoveType(MoveType::Toss);
+	    gibEntity->SetMoveType(MoveType::TossSlide);
 
 	    // Most of all, we setup a touch callback too ofc.
 	    //gibEntity->SetTouchCallback(&GibEntity::GibEntityTouch);
@@ -103,11 +103,11 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
     }
 
     // Comment later...
-    vec3_t velocityDamage = CalculateDamageVelocity(damage);
+    const vec3_t velocityDamage = CalculateDamageVelocity(damage);
 
     // Reassign 'velocityDamage' and multiply 'self->GetVelocity' to scale, and then
     // adding it on to 'velocityDamage' its old value.
-    vec3_t gibVelocity = vec3_fmaf(velocity, velocityScale, velocityDamage);
+    vec3_t gibVelocity = vec3_fmaf( velocityDamage, velocityScale, velocity );
 
     // Be sure to clip our velocity, just in case.
     gibEntity->ClipGibVelocity(gibVelocity);
@@ -134,7 +134,6 @@ GibEntity* GibEntity::Create(const vec3_t &origin, const vec3_t &velocity, const
 
 // Constructor/Deconstructor.
 GibEntity::GibEntity(PODEntity *svEntity) : CLGBaseLocalEntity(svEntity) { }
-GibEntity::~GibEntity() { }
 
 //
 //===============

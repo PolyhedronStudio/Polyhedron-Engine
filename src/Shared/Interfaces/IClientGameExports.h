@@ -1,41 +1,49 @@
-// License here.
-// 
-//
-// Interface that a client game dll his exports have to implement in order to
-// be fully coherent with the actual client loading it in.
-// 
-// WID: Time to re-adjust here with new files. I agree, at last.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ClientGame Exports Interface Declarations.
+* 
+***/
 #pragma once
 
+// Predeclare needed structs.
 struct PlayerMove;
 struct PODEntity;
 
-//---------------------------------------------------------------------
-// CORE Export Interface.
-//---------------------------------------------------------------------
+
+/**
+*
+*   Main ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportCore {
 public:
     virtual ~IClientGameExportCore() = default;
     
-    //---------------------------------------------------------------------
-	// API Version.
-	// 
-	// The version numbers will always be equal to those that were set in 
-	// CMake at the time of building the engine/game(dll/so) binaries.
-	// 
-	// In an ideal world, we comply to proper version releasing rules.
-	// For Polyhedron FPS, the general following rules apply:
-	// --------------------------------------------------------------------
-	// MAJOR: Ground breaking new features, you can expect anything to be 
-	// incompatible at that.
-	// 
-	// MINOR : Everytime we have added a new feature, or if the API between
-	// the Client / Server and belonging game counter-parts has actually 
-	// changed.
-	// 
-	// POINT : Whenever changes have been made, and the above condition 
-	// is not met.
-	//---------------------------------------------------------------------
+    /**
+	*	API Version.
+	*	
+	*	The version numbers will always be equal to those that were set in 
+	*	CMake at the time of building the engine/game(dll/so) binaries.
+	*	
+	*	In an ideal world, we comply to proper version releasing rules.
+	*	For Polyhedron FPS, the general following rules apply:
+	*	
+	*	--------------------------------------------------------------------
+	*
+	*	MAJOR: Ground breaking new features, you can expect anything to be 
+	*	incompatible at that.
+	*	
+	*	MINOR : Everytime we have added a new feature, or if the API between
+	*	the Client / Server and belonging game counter-parts has actually 
+	*	changed.
+	*	
+	*	POINT : Whenever changes have been made, and the above conditions
+	*	are not met.
+	**/
 	struct APIVersion {
 		int32_t major{ VERSION_MAJOR };
 		int32_t minor{ VERSION_MINOR };
@@ -49,13 +57,18 @@ public:
 	virtual void Shutdown() = 0;
 };
 
-//---------------------------------------------------------------------
-// ENTITY interface to implement. 
-//---------------------------------------------------------------------
+
+/**
+*
+*   Entity ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportEntities {
 public:
+    //! Destructor.
     virtual ~IClientGameExportEntities()  = default;
      
+
     /**
     *   @brief  Parses and spawns the local class entities in the BSP Entity String.
     * 
@@ -77,23 +90,22 @@ public:
     *   @return True on success, false in case of trouble. (Should never happen, and if it does,
     *           well... file an issue lmao.)
     **/
-    virtual qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState &state) = 0;
+    virtual qboolean UpdateGameEntityFromState(PODEntity *clEntity, const EntityState *state) = 0;
 
     /**
     *   @brief  Executed whenever a server frame entity event is receieved.
     **/
     virtual void PacketEntityEvent(int32_t number) = 0;
-
     /**
     *   @brief  Executed whenever a local client entity event is set.
     **/
     virtual void LocalEntityEvent(int32_t number) = 0;
 
     /**
-    *   @brief  Parse the server frame for server entities to add to our client view.
-    *           Also applies special rendering effects to them where desired.
+    *   @brief  Prepares all parsed server entities, as well as local entities for rendering
+	*			of the current frame.
     **/
-    virtual void AddPacketEntities() = 0;
+    virtual void PrepareRefreshEntities() = 0;
 
     /**
     *   @brief  Add the view weapon render entity to the screen. Can also be used for
@@ -102,21 +114,22 @@ public:
     virtual void AddViewEntities() = 0;
 };
 
-//---------------------------------------------------------------------
-// MEDIA interface.
-//---------------------------------------------------------------------
+
+/**
+*
+*   Media ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportMedia {
 public:
     //! Destructor.
     virtual ~IClientGameExportMedia() = default;
 
 
-
     /**
     *   @brief Called upon initialization of the renderer.
     **/
     virtual void Initialize() = 0;
-
     /**
     *   @brief Called when the client stops the renderer.
     * 
@@ -137,13 +150,17 @@ public:
     virtual void LoadWorld() = 0;
 };
 
-//---------------------------------------------------------------------
-// MOVEMENT interface.
-//---------------------------------------------------------------------
+
+/**
+*
+*   Movement ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportMovement {
 public:
     //! Destructor.
     virtual ~IClientGameExportMovement() = default;
+
 
     /**
     *   @brief  Called when the movement command needs to be build for the given
@@ -156,26 +173,49 @@ public:
     virtual void FinalizeFrameMovementCommand() = 0;
 };
 
-//---------------------------------------------------------------------
-// Predict Movement (Client Side)
-//---------------------------------------------------------------------
+
+/**
+*
+*   Prediction ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportPrediction {
 public:
+    //! Destructor.
     virtual ~IClientGameExportPrediction() = default;
 
-    virtual void CheckPredictionError(ClientMoveCommand* moveCommand) = 0;
-    virtual void PredictAngles() = 0;
-    virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
 
+	/**
+	*	@brief	Called to check and possibly 'fix' any prediction errors.
+	**/
+    virtual void CheckPredictionError(ClientMoveCommand* moveCommand) = 0;
+	/**
+	*	@brief	Called when the client wants to predict current angles.
+	**/
+	virtual void PredictAngles() = 0;
+	/**
+	*	@brief	Called when the client wants to predict movement from the last acknowledged move
+	*			command up to the last, and thus current move command.
+	**/
+	virtual void PredictMovement(uint32_t acknowledgedCommandIndex, uint32_t currentCommandIndex) = 0;
+
+	/**
+	*	@brief	Called later on by the engine to update sound positioning and its special effects.
+	**/
     virtual void UpdateClientSoundSpecialEffects(PlayerMove* pm) = 0;
 };
 
-//---------------------------------------------------------------------
-// Screen
-//---------------------------------------------------------------------
+
+/**
+*
+*   Screen ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportScreen {
 public:
+    //! Destructor.
     virtual ~IClientGameExportScreen() = default;
+
 
     /**
     *   @brief  Called when the engine decides to render the 2D display.
@@ -210,12 +250,17 @@ public:
     virtual void DrawPauseScreen() = 0;
 };
 
-//---------------------------------------------------------------------
-// ServerMessage Parsing.
-//---------------------------------------------------------------------
+
+/**
+*
+*   ServerMessage ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportServerMessage {
 public:
+    //! Destructor.
     virtual ~IClientGameExportServerMessage() = default;
+
 
     /**
     *   @brief  Breaks up playerskin into name(optional), modeland skin components.
@@ -248,28 +293,42 @@ public:
     virtual void End(int32_t realTime) = 0;
 };
 
-//---------------------------------------------------------------------
-// View
-//---------------------------------------------------------------------
+
+/**
+*
+*   View ClientGame Exports Interface.
+* 
+**/
 class IClientGameExportView {
 public:
+	//! Destructor.
     virtual ~IClientGameExportView() = default;
 
-    // Called right after the engine clears the scene, and begins a new one.
+
+	/**
+    *	@brief Called right after the engine clears the scene, and begins a new one.
+	**/
     virtual void PreRenderView() = 0;
-    // Called whenever the engine wants to clear the scene.
-    virtual void ClearScene() = 0;
-    // Called whenever the engine wants to render a valid frame.
-    virtual void RenderView() = 0;
-    // Called right after the engine renders the scene, and prepares to
-    // finish up its current frame loop iteration.
+	/**
+    *	@brief Called whenever the engine wants to clear the scene.
+	**/
+	virtual void ClearScene() = 0;
+	/**
+    *	@brief	Called whenever the engine wants to render a valid frame.
+	**/    
+	virtual void RenderView() = 0;
+	/**
+    *	@brief	Called right after the engine renders the scene, and prepares to
+	*			finish up its current frame loop iteration.
+	**/
     virtual void PostRenderView() = 0;
 };
 
-//---------------------------------------------------------------------
-// MAIN interface to implement. It holds pointers to actual sub interfaces,
-// which one of course has to implement as well.
-//---------------------------------------------------------------------
+/**
+*
+*   Main ClientGame Exports Interface.
+* 
+**/
 class IClientGameExports {
 public:
     //! Default destructor.

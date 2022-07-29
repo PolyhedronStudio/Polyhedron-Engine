@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Shared/List.h"
 #include "Common/Common.h"
 #include "Common/Files.h"
+#include "Common/SkeletalModelData.h"
 #include "Client/Models.h"
 //#include "Common/Models/Models.h"
 #include "System/Hunk.h"
@@ -73,7 +74,7 @@ qhandle_t R_RegisterModel(const char *name) {
 	ssize_t filelen;
 	model_t *model;
 	byte *rawdata = NULL;
-	uint32_t ident;
+	uint32_t ident = 0;
 	mod_load_t load;
 	qerror_t ret;
 
@@ -169,6 +170,30 @@ qhandle_t R_RegisterModel(const char *name) {
 
 	ret = load(model, R_MOD_Alloc, rawdata, filelen, name);
 
+	// If we had no return values(no issues), identified model as IQM, and it has not
+	// had any SKM data yet, generate it.
+	if (!ret && ident == IQM_IDENT && !model->skeletalModelData) {
+		model->skeletalModelData = &r_skeletalModels[(model - r_models) + 1];
+
+		// Generate Skeletal Model Data.
+		SKM_GenerateModelData(model);
+
+		// This function needs rewriting but who am I... got 2 hands, so little time, right?
+		memcpy(extension, ".skc", 4);
+
+		// Now, load up our SKM config file.
+		const bool result = SKM_LoadAndParseConfiguration( model, normalized );
+		if (result) {
+			Com_DPrintf("Loaded up SKM Config file: %s\n", normalized );
+
+		} else {
+			Com_DPrintf("Couldn't find/load SKM Config file: %s\n", normalized );
+		}
+
+		// Stuff back in iqm for sake.
+		memcpy(extension, ".iqm", 4);
+	}
+
 	FS_FreeFile(rawdata);
 
 	if (ret) {
@@ -185,13 +210,7 @@ done:
 	register_model_dirty = 1;
 #endif
 
-	//// Assign the skeletal model data struct as a pointer to this model_t
-	//if (!model->skeletalModelData) {
-	//	model->skeletalModelData = &r_skeletalModels[index - 1];
 
-	//	// Generate Skeletal Model Data.
-	//	SKM_GenerateModelData(model);
-	//}
 
 	return index;
 

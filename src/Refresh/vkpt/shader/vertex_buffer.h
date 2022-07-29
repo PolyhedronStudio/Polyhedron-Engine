@@ -30,6 +30,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_LIGHT_LIST_NODES    (1 << 19)
 
 #define MAX_IQM_MATRICES        32768
+// DQ: ------------------- START
+//#define MAX_IQM_DUALQUATS		32768
+// DQ: ------------------- END
 
 #define MAX_LIGHT_POLYS         4096
 #define LIGHT_POLY_VEC4S        4
@@ -46,6 +49,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MODEL_DYNAMIC_VERTEX_BUFFER_BINDING_IDX 1
 #define LIGHT_BUFFER_BINDING_IDX 2
 #define IQM_MATRIX_BUFFER_BINDING_IDX 3
+// DQ: ------------------- START
+//#define IQM_DUALQUATERNION_BUFFER_BINDING_IDX 3
+// DQ: ------------------- END
 #define READBACK_BUFFER_BINDING_IDX 4
 #define TONE_MAPPING_BUFFER_BINDING_IDX 5
 #define SUN_COLOR_BUFFER_BINDING_IDX 6
@@ -115,6 +121,18 @@ struct IqmMatrixBuffer
 {
 	IQM_MATRIX_BUFFER_LIST
 };
+
+/* DQ: ------------------- START
+ Place this up above replace IQM_MATRIX_BUFFER_LIST
+#define IQM_DUALQUAT_BUFFER_LIST \
+	VERTEX_BUFFER_LIST_DO(float,    8, iqm_dualquats,          (MAX_IQM_MATRICES)) \
+DQ: ------------------- START*/
+// DQ: ------------------- START
+//struct IqmDualQuatBuffer
+//{
+//	IQM_DUALQUAT_BUFFER_LIST
+//};
+// DQ: ------------------- END
 
 #undef VERTEX_BUFFER_LIST_DO
 

@@ -143,12 +143,13 @@ void CL_CloseBSPMenu() {
 }
 
 void CL_LoadBSPMenuMap(qboolean force = false) {
-    // Open mainmenu map.
-    if (force == false) {
-        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
-    } else {
-        Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
-    }
+	UI_OpenMenu(UIMENU_GAME);
+    //// Open mainmenu map.
+    //if (force == false) {
+    //    Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu");
+    //} else {
+    //    Cmd_ExecuteString(&cl_cmdbuf, "map mainmenu force");
+    //}
 }
 
 //======================================================================
@@ -660,20 +661,13 @@ void CL_ClearState(void)
     // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
     //cl = {};
     for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		PODEntity *podEntity = &cs.entities[i];
-		(*podEntity) = {
+		cs.entities[i] = {
 			// Ensure the states are assigned the correct entityNumber.
-			.currentState = {
-				.number = i,
-			},
-			.previousState = {
-				.number = i,
-			},
-
+			.currentState = { .number = i },
+			.previousState = { .number = i },
 			// And ensure our main identifier has the correct entityNumber set.
 			.clientEntityNumber = i,
 		};
-
     }
 
     // In case we are more than connected, reset it to just connected.
@@ -682,6 +676,9 @@ void CL_ClearState(void)
         CL_CheckForPause();
         CL_UpdateFrameTimes();
     }
+	
+	// Even though it resides in client static, we do want to clear bone caches here.
+	TBC_ResetCache( cls.boneCache );
 
     // Unprotect game cvar
     fs_game->flags &= ~CVAR_ROM;
@@ -726,8 +723,8 @@ void CL_Disconnect(int32_t errorType)
     }
 #endif
 
-    //cls.timeOfInitialConnect = 0;
-    //cls.connect_count = 0;
+    cls.timeOfInitialConnect = 0;
+    cls.connect_count = 0;
     cls.passive = false;
 #if USE_ICMP
     cls.errorReceived = false;
@@ -959,7 +956,7 @@ static void CL_ParsePrintMessage(void)
         NET_IsEqualBaseAdr(&net_from, &cls.serverAddress)) {
         Com_Printf("%s", string);
         cls.connectionState = ClientConnectionState::Challenging;
-        //cls.connect_count = 0;
+        cls.connect_count = 0;
         return;
     }
 
@@ -1275,7 +1272,7 @@ static void CL_ConnectionlessPacket(void)
         cls.challenge = atoi(Cmd_Argv(1));
         cls.connectionState = ClientConnectionState::Connecting;
         cls.timeOfInitialConnect -= CONNECT_INSTANT; // fire immediately
-        //cls.connect_count = 0;
+        cls.connect_count = 0;
 
         // Parse additional parameters
         int protocolFound = 0; // PH: Added in to ensure we find a protocol, otherwise warn the player.
@@ -2069,6 +2066,11 @@ static void CL_Say_c(genctx_t *ctx, int argnum)
     CL_Name_g(ctx);
 }
 
+static void CL_SVModelList_c(genctx_t *ctx, int argnum)
+{
+    CL_Name_g(ctx);
+}
+
 static size_t CL_Mapname_m(char *buffer, size_t size)
 {
     return Q_strlcpy(buffer, cl.mapName, size);
@@ -2505,6 +2507,7 @@ static const cmdreg_t c_client[] = {
     // forwarded to the server
     { "say", NULL, CL_Say_c },
     { "say_team", NULL, CL_Say_c },
+	{ "sv_modellist", NULL, CL_SVModelList_c },
 
  //   { "wave" }, { "inven" }, { "kill" }, { "use" },
  //   { "drop" }, { "info" }, { "prog" },
@@ -2943,18 +2946,18 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 		// Get entity pointer.
 		PODEntity *podEntity = &cs.entities[i];
 
-		//if (!podEntity->inUse) {
-		//	continue;
-		//}
+		if (!podEntity->inUse) {
+			continue;
+		}
 
 		// Update local entity.
-		LocalEntity_Update(podEntity->currentState);
+		LocalEntity_Update(&podEntity->currentState);
 
 		// Run the Client Game entity for a frame.		
-		LocalEntity_SetHashedClassname(podEntity, podEntity->currentState);
+		LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
 
 		// Fire local entity events.
-		LocalEntity_FireEvent(podEntity->currentState);
+		LocalEntity_FireEvent(&podEntity->currentState);
 	}
 	
 	// Give the client game module a chance to run its local entities for a frame.
@@ -3000,6 +3003,9 @@ uint64_t CL_Frame(uint64_t msec)
 
     main_extra += msec;
     cls.realtime += msec;
+
+	// Clear cache for Temporary Bones.
+	TBC_ClearCache( cls.boneCache );
 
     CL_ProcessEvents();
 

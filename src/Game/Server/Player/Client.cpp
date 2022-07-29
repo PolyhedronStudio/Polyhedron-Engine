@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Entities/Info/InfoPlayerStart.h"
 
 // Game modes.
-#include "../GameModes/IGameMode.h"
+#include "../Gamemodes/IGamemode.h"
 
 // World.
 #include "../World/ServerGameWorld.h"

@@ -21,7 +21,7 @@ class Light : public SVGBaseTrigger {
 public:
     // Constructor/Deconstructor.
     Light(PODEntity *svEntity);
-    virtual ~Light();
+    virtual ~Light() = default;
 
     DefineMapClass( "light", Light, SVGBaseTrigger );
 

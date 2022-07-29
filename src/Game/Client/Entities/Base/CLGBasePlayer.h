@@ -29,11 +29,22 @@ public:
     virtual ~CLGBasePlayer() = default;
 
     // Runtime type information
-	DefineGameClass( CLGBasePlayer, CLGBasePacketEntity);
-	//DefineClass( CLGBasePacketEntity, IClientGameEntity);
+	//DefinePacketClass( CLGBasePlayer, CLGBasePacketEntity);
+	DefineClass( CLGBasePlayer, CLGBasePacketEntity );
 	//DefineMapClass( "CLGBasePacketEntity", CLGBaseLocalEntity, IClientGameEntity);
-	//DefineGameClass( CLGBasePacketEntity, IClientGameEntity);
-//	DefineGameClass( "SVGBasePlayer", CLGBasePlayer, CLGBasePacketEntity);
+	//DefinePacketClass( CLGBasePlayer, CLGBasePacketEntity );
+	//DefineGameClass( CLGBasePlayer, CLGBasePacketEntity);
+
+	/***
+    * 
+    *   Callback functions.
+    *
+    ***/
+    /**
+    *   @brief  Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
+    **/
+    void CLGBasePlayerDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
+
 
 
     /**
@@ -69,6 +80,10 @@ public:
 
 
 	/***
+	*
+	***/
+
+	/***
     *
     * 
     *   OnEventCallbacks.
@@ -80,6 +95,8 @@ public:
     **/
     virtual void OnDeallocate() override;
 
+
+
     /***
     *
     * 
@@ -87,12 +104,10 @@ public:
     *
     * 
     ***/
-
     /**
     *   @brief  Updates the entity with the data of the newly passed EntityState object.
     **/
-    virtual void UpdateFromState(const EntityState &state) override;
-
+    virtual void UpdateFromState(const EntityState *state) override;
 
     /**
     *   @returen True if the entity is still in the current frame.
@@ -104,21 +119,16 @@ public:
 	**/
 	virtual void PrepareRefreshEntity(const int32_t refreshEntityID, EntityState *currentState, EntityState *previousState, float lerpFraction) override;
 
-
-
-
-
-
     /**
     *   @brief Get: Entity Client
     **/
-    virtual gclient_s* GetClient() override { return &dummyClient; };
+    virtual gclient_s* GetClient() override { return podEntity->client; };
 
 protected:
 	/**
 	*	Temporary Dummy Client.
 	**/
-	ServerClient dummyClient;
+
 
 private:
 
