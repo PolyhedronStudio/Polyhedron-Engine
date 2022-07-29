@@ -19,24 +19,24 @@ constexpr uint32_t MAX_MSGLEN = 0x8000;
 constexpr int32_t   PROTOCOL_VERSION_UNKNOWN = -1;
 
 // The DEFAULT version is the minimum allowed for connecting.
-constexpr uint32_t  PROTOCOL_VERSION_DEFAULT = 1340;
-constexpr uint32_t  PROTOCOL_VERSION_POLYHEDRON     = 1340;
+constexpr int32_t  PROTOCOL_VERSION_DEFAULT = 1340;
+constexpr int32_t  PROTOCOL_VERSION_POLYHEDRON     = 1340;
 
 // Minimum required "MINOR" protocol version for this client to be compatible to.
-constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_MINIMUM = 1337;
+constexpr int32_t PROTOCOL_VERSION_POLYHEDRON_MINIMUM = 1337;
 
 // The "FIRST" protocol version we ever had for Polyhedron.
-constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_FIRST   = 1337;
+constexpr int32_t PROTOCOL_VERSION_POLYHEDRON_FIRST   = 1337;
 
 // EXAMPLE of what an update would then resemble in our code. Ofc, We then also change
 // the PROTOCOL_VERSION_POLYHEDRON_CURRENT to accomodate.
-constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_FEATURE_UPDATE = 1341;
+constexpr int32_t PROTOCOL_VERSION_POLYHEDRON_FEATURE_UPDATE = 1341;
 
 // Current actual protocol version that is in use.
-constexpr uint32_t PROTOCOL_VERSION_POLYHEDRON_CURRENT = 1340;
+constexpr int32_t PROTOCOL_VERSION_POLYHEDRON_CURRENT = 1340;
 
 // This is used to ensure that the protocols in use match up, and support each other.
-static inline qboolean POLYHEDRON_PROTOCOL_SUPPORTED(uint32_t x) {
+static inline const qboolean POLYHEDRON_PROTOCOL_SUPPORTED(int32_t x) {
     return x >= PROTOCOL_VERSION_POLYHEDRON_MINIMUM && x <= PROTOCOL_VERSION_POLYHEDRON_CURRENT;
 }
 

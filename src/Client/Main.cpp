@@ -661,20 +661,13 @@ void CL_ClearState(void)
     // C++ Style, no more memset. I suppose I prefer this, if you do not, ouche.
     //cl = {};
     for (int32_t i = 0; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		PODEntity *podEntity = &cs.entities[i];
-		(*podEntity) = {
+		cs.entities[i] = {
 			// Ensure the states are assigned the correct entityNumber.
-			.currentState = {
-				.number = i,
-			},
-			.previousState = {
-				.number = i,
-			},
-
+			.currentState = { .number = i },
+			.previousState = { .number = i },
 			// And ensure our main identifier has the correct entityNumber set.
 			.clientEntityNumber = i,
 		};
-
     }
 
     // In case we are more than connected, reset it to just connected.
@@ -730,8 +723,8 @@ void CL_Disconnect(int32_t errorType)
     }
 #endif
 
-    //cls.timeOfInitialConnect = 0;
-    //cls.connect_count = 0;
+    cls.timeOfInitialConnect = 0;
+    cls.connect_count = 0;
     cls.passive = false;
 #if USE_ICMP
     cls.errorReceived = false;
@@ -963,7 +956,7 @@ static void CL_ParsePrintMessage(void)
         NET_IsEqualBaseAdr(&net_from, &cls.serverAddress)) {
         Com_Printf("%s", string);
         cls.connectionState = ClientConnectionState::Challenging;
-        //cls.connect_count = 0;
+        cls.connect_count = 0;
         return;
     }
 
@@ -1279,7 +1272,7 @@ static void CL_ConnectionlessPacket(void)
         cls.challenge = atoi(Cmd_Argv(1));
         cls.connectionState = ClientConnectionState::Connecting;
         cls.timeOfInitialConnect -= CONNECT_INSTANT; // fire immediately
-        //cls.connect_count = 0;
+        cls.connect_count = 0;
 
         // Parse additional parameters
         int protocolFound = 0; // PH: Added in to ensure we find a protocol, otherwise warn the player.

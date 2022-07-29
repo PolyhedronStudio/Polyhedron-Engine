@@ -203,7 +203,7 @@ void SV_Model_FreeAll() {
 *			(This is called by PF_RegisterModel)
 **/
 void SV_Model_Reference(model_t* model) {
-	int mesh_idx, skin_idx, frame_idx;
+	//int mesh_idx, skin_idx, frame_idx;
 
 	// TODO: Register materials used by models here?
 	switch (model->type) {

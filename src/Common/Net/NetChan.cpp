@@ -115,7 +115,7 @@ void Netchan_Init(void)
 NetChannel *Netchan_Setup(NetSource sock, const NetAdr *adr, int32_t qport, size_t maxPacketLength, int32_t protocol) {
     NetChannel *netChannel;
 
-    clamp(maxPacketLength, MIN_PACKETLEN, MAX_PACKETLEN_WRITABLE);
+    clamp(maxPacketLength, static_cast<long unsigned int>(MIN_PACKETLEN), static_cast<long unsigned int>(MAX_PACKETLEN_WRITABLE));
 
     netChannel = (NetChannel*)Z_TagMallocz(sizeof(*netChannel), // CPP: Cast
         sock == NS_SERVER ? TAG_SERVER : TAG_GENERAL);

@@ -20,7 +20,7 @@
 #include <cassert>
 
 // PlayerState BaseLine.
-static const PlayerState       nullPlayerState = {};
+const PlayerState       nullPlayerState = {};
 
 
 /**

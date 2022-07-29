@@ -17,7 +17,7 @@
 #include "../Base/CLGBaseTrigger.h"
 #include "../Base/CLGBaseMover.h"
 
-//#include "../../GameModes/IGameMode.h"
+//#include "../../Gamemodes/IGamemode.h"
 #include "FuncRotating.h"
 
 //===============

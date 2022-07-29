@@ -166,7 +166,7 @@ static void write_baseline(EntityState *base)
 
 static void write_plain_baselines(void)
 {
-    int i, j;
+    int i;//, j;
     EntityState *base;
 
     // write a packet full of data

@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Entities.h"
 
 // GameModes.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 // World.
 #include "World/ServerGameWorld.h"
@@ -474,7 +474,7 @@ static void write_index(FILE *f, void *p, size_t size, void *start, int max_inde
 static void write_field(FILE *f, const save_field_t *field, void *base)
 {
     void *p = (byte *)base + field->ofs;
-    int i;
+//    int i;
 
     //switch (field->type) {
     //case F_BYTE:
@@ -660,7 +660,7 @@ static void *read_index(FILE *f, size_t size, void *start, int max_index)
 static void read_field(FILE *f, const save_field_t *field, void *base)
 {
     void *p = (byte *)base + field->ofs;
-    int i;
+//    int i;
 
     //switch (field->type) {
     //case F_BYTE:

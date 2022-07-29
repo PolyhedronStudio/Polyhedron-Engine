@@ -985,7 +985,7 @@ static void CLG_RailLights(color_t color)
 	}
 }
 
-extern uint32_t d_8to24table[256];
+//extern uint32_t d_8to24table[256];
 extern cvar_t* cvar_pt_beam_lights;
 
 static void CLG_RailTrail(void)
@@ -994,7 +994,7 @@ static void CLG_RailTrail(void)
 
 	if (!cl_railtrail_type->integer)
 	{
-		rail_color.u32 = d_8to24table[0x74];
+		rail_color.u32 = 0xff0000; //d_8to24table[0x74];
 	}
 	else
 	{

@@ -20,7 +20,7 @@
 #include "../Base/SVGBasePlayer.h"
 
 // Game mode.
-#include "../../GameModes/DefaultGameMode.h"
+#include "../../Gamemodes/DefaultGamemode.h"
 // Game world.
 #include "../../World/ServerGameWorld.h"
 

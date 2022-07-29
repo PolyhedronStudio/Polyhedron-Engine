@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Entities.h"
 #include "Utilities.h"
 
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 vec3_t SVG_ProjectSource(const vec3_t &point, const vec3_t &distance, const vec3_t &forward, const vec3_t &right)
 {

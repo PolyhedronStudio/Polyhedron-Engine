@@ -26,10 +26,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //#include "Entities/Base/SVGBasePlayer.h"
 
 // GameModes.
-#include "GameModes/IGameMode.h"
-#include "GameModes/DefaultGameMode.h"
-#include "GameModes/CoopGameMode.h"
-#include "GameModes/DeathMatchGameMode.h"
+#include "Gamemodes/IGamemode.h"
+#include "Gamemodes/DefaultGamemode.h"
+#include "GameModes/CoopGamemode.h"
+#include "Gamemodes/DeathMatchGamemode.h"
 
 // GameWorld.
 #include "World/ServerGameWorld.h"
@@ -388,7 +388,7 @@ The timelimit or fraglimit has been exceeded
 */
 void SVG_EndDMLevel(void)
 {
-    Entity     *ent;
+    //Entity     *ent;
     char *s, *t, *f;
     static const char *seps = " ,\n\r";
 
@@ -424,9 +424,9 @@ void SVG_EndDMLevel(void)
         free(s);
     }
 
-    if (level.nextMap[0]) // go to a specific map
+    if (level.nextMap[0]) { // go to a specific map
         SVG_HUD_BeginIntermission(nullptr);//SVG_CreateTargetChangeLevel(level.mapName));
-    else {  // search for a changelevel
+	} else {  // search for a changelevel
         //ent = SVG_Find(NULL, FOFS(classname), "target_changelevel");
         //if (!ent) {
         //    // the map designer didn't include a changelevel,

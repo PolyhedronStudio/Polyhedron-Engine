@@ -14,7 +14,7 @@
 #include "../Base/SVGBaseTrigger.h"
 #include "../Base/SVGBaseMover.h"
 
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 #include "FuncRotating.h"
 
 //===============

@@ -9,8 +9,8 @@
 */
 #pragma once
 
-#include "IGameMode.h"
-#include "DefaultGameMode.h"
+#include "IGamemode.h"
+#include "DefaultGamemode.h"
 
 class DeathmatchGameMode : public DefaultGameMode {
 public:

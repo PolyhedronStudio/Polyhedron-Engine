@@ -154,7 +154,7 @@ pr_global_struct->trace_normal is set to the normal of the blocking wall
 //it again later in catagorize position?
 qboolean SVG_MoveStep(IServerGameEntity* ent, vec3_t move, qboolean relink)
 {
-    float       dz;
+//    float       dz;
     SVGTraceResult    trace;
     int         i;
     float       stepsize;

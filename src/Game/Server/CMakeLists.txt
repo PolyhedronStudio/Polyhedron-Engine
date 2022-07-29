@@ -116,9 +116,9 @@ SET(SRC_SVGAME
 	Exports/GameState.cpp
 	Exports/LevelState.cpp
 
-	GameModes/DefaultGameMode.cpp
+	Gamemodes/DefaultGamemode.cpp
 	GameModes/CoopGameMode.cpp
-	GameModes/DeathMatchGameMode.cpp
+	Gamemodes/DeathMatchGamemode.cpp
 
 	Physics/Physics.cpp
 	Physics/StepMove.cpp
@@ -218,10 +218,10 @@ SET(HEADERS_SVGAME
 	Exports/GameState.h
 	Exports/LevelState.h
 
-	GameModes/DefaultGameMode.h
-	GameModes/CoopGameMode.h
-	GameModes/DeathMatchGameMode.h
-	GameModes/IGameMode.h
+	Gamemodes/DefaultGamemode.h
+	GameModes/CoopGamemode.h
+	Gamemodes/DeathMatchGamemode.h
+	Gamemodes/IGamemode.h
 
 	Player/Animations.h
 	Player/Client.h

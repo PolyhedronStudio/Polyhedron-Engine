@@ -134,7 +134,7 @@ void KeyBinding::ClearKeyState() {
 *   @brief  Returns the fraction of the frame that the key was down.
 **/
 float KeyBinding::GetStateFraction() {
-    float val;
+//    float val;
 
     if (keyStateBits & ButtonState::Held) {
         // Acquire event time.

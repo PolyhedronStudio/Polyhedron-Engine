@@ -1169,7 +1169,7 @@ static qerror_t find_or_load_image(const char *name, size_t len,
     image_t         *image;
     byte            *pic;
     unsigned        hash;
-    imageformat_t   fmt;
+    //imageformat_t   fmt;
     qerror_t        ret = Q_ERR_NOENT;
 
     *image_p = NULL;

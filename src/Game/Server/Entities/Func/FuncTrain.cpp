@@ -14,7 +14,7 @@
 #include "../Path/PathCorner.h"
 #include "FuncTrain.h"
 
-#include "../../GameModes/IGameMode.h"
+#include "../../Gamemodes/IGamemode.h"
 #include "../../World/ServerGameWorld.h"
 
 //===============

@@ -2,7 +2,7 @@
 // LICENSE HERE.
 
 //
-// IGameMode.h
+// IGamemode.h
 //
 // GameMode interface class. Need a custom new gamemode? Implement this interface,
 // and you did yourself a pleasure. :)

@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //#include "Entities/Base/SVGBasePlayer.h"
 
 // Game Modes.
-#include "GameModes/IGameMode.h"
+#include "Gamemodes/IGamemode.h"
 
 // Game world.
 #include "World/ServerGameWorld.h"
