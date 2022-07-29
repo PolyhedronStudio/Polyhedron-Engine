@@ -91,7 +91,6 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
     // Calculate and set the velocity.
     const vec3_t velocity = { 500.f * crandom(), 500.f * crandom(), 500.f + 200.f * crandom() };
     debrisEntity->SetVelocity( vec3_fmaf( debrisser->GetVelocity(), speed, velocity ) );
-	Com_DPrint(" THIS IS AN ENTITY I WANT TO KNOW ITS SPEED=%f\n", speed);
 
     // Set Movetype and Solid.
     debrisEntity->SetMoveType(MoveType::Bounce);

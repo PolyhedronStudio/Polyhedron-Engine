@@ -66,7 +66,7 @@ void MiscExplosionBox::Spawn() {
     SetSolid(Solid::OctagonBox);
 
     // Set move type.
-    SetMoveType(MoveType::TossSlide);
+    SetMoveType(MoveType::Toss);
 	
     // Set clip mask.
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);

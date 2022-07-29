@@ -1,19 +1,21 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ServerGame BaseMover Entity.
+* 
+***/
+#include "../../ServerGameLocals.h"
+#include "../../Effects.h"
+#include "../../Entities.h"
+#include "../../Utilities.h"
 
-//
-// SVGBaseMover.cpp
-//
-//
-*/
-#include "../../ServerGameLocals.h"		// SVGame.
-#include "../../Effects.h"		// Effects.
-#include "../../Entities.h"		// Entities.
-#include "../../Utilities.h"		// Util funcs.
-
-// Class Entities.
 #include "SVGBaseTrigger.h"
 #include "SVGBaseMover.h"
+
+
 
 // Epsilon used for comparing floats.
 static constexpr float BASEMOVER_EPSILON = 0.03125;
@@ -23,63 +25,9 @@ SVGBaseMover::SVGBaseMover(PODEntity *svEntity) : Base(svEntity) {
 
 }
 
-// Interface functions. 
-//
-//===============
-// SVGBaseMover::Precache
-//
-//===============
-//
-void SVGBaseMover::Precache() {
-	Base::Precache();
-}
-
-//
-//===============
-// SVGBaseMover::Spawn
-//
-//===============
-//
-void SVGBaseMover::Spawn() {
-	Base::Spawn();
-}
-
-//
-//===============
-// SVGBaseMover::Respawn
-// 
-//===============
-//
-void SVGBaseMover::Respawn() {
-	Base::Respawn();
-}
-
-//
-//===============
-// SVGBaseMover::PostSpawn
-// 
-//===============
-//
-void SVGBaseMover::PostSpawn() {
-	Base::PostSpawn();
-}
-
-//
-//===============
-// SVGBaseMover::Think
-//
-//===============
-//
-void SVGBaseMover::Think() {
-	Base::Think();
-}
-
-//
-//===============
-// SVGBaseMover::SpawnKey
-//
-//===============
-//
+/**
+*	@brief	Additional spawnkeys for movers.
+**/
 void SVGBaseMover::SpawnKey(const std::string& key, const std::string& value) {
 	// Accel.
 	if (key == "accel") {

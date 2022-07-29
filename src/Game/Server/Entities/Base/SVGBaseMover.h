@@ -1,38 +1,43 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ServerGame BaseMover Entity.
+* 
+***/
+#pragma once
 
-//
-// SVGBaseMover.h
-//
-// Base move class, for buttons, platforms, anything that moves based on acceleration
-// OR, stepmoves.
-//
-*/
-#ifndef __SVGAME_ENTITIES_BASE_SVGBASEPUSHER_H__
-#define __SVGAME_ENTITIES_BASE_SVGBASEPUSHER_H__
 
-// Forward declare.
+
+// Predeclarations.
 class SVGBaseTrigger;
 
-// Callbacks used at the end of a pushmove action.
+
+/**
+*	Callbacks used at the end of a pushmove action.
+**/
 using PushMoveEndFunction = void(IServerGameEntity*);
 
 struct MoverState
 {
-    static constexpr uint32_t Top = 0U;
-    static constexpr uint32_t Bottom = 1U;
+	//! The mover's state when it has finished moving up, it is at the "top".
+	static constexpr uint32_t Top = 0U;
+	//! The mover's state when it has finished moving down, it is at the "bottom".
+	static constexpr uint32_t Bottom = 1U;
+	//! The mover's state when it is moving up.
     static constexpr uint32_t Up = 2U;
+	//! The mover's state when it is moving down.
     static constexpr uint32_t Down = 3U;
-
-
 };
 
-//-------------------
-// Contains data for keeping track of velocity based moving entities.
-// (In other words, entities that aren't a: Client or AI Player.
-//-------------------
+/**
+*	@brief	Contains data for keeping track of velocity based moving entities.
+*			(In other words, entities that aren't a: Client or AI Player.
+**/
 struct PushMoveInfo {
-    // Fixed data calculated at the spawn of a  basemover.
+    // Fixed data calculated at the spawn of a basemover.
     vec3_t startOrigin = vec3_zero();
     vec3_t startAngles = vec3_zero();
     vec3_t endOrigin = vec3_zero();
@@ -63,30 +68,32 @@ struct PushMoveInfo {
     PushMoveEndFunction* OnEndFunction = nullptr;
 };
 
+/**
+*	@brief	The base mover object is a triggerable object which consists out of a Solid::BSP solid type,
+*			and a MoveType::Push or MoveType::Stop.	It serves as a means to enable brushes to move, 
+*			accelerating to speed, and decelerating down to a halt. 
+*
+*			In case of a MoveType::Stop it'll stop and have its blocked callback triggered where as in
+*			case of a MoveType::Push it'll start pushing the blocking object around. All SVGBaseMover
+*			brush entities themselves do not collide interact with each other.
+**/
 class SVGBaseMover : public SVGBaseTrigger {
 public:
-    //
     // Constructor/Deconstructor.
-    //
     SVGBaseMover(PODEntity *svEntity);
     virtual ~SVGBaseMover() = default;
 
+	// Inherit from SVGBaseTrigger.
     DefineAbstractClass( SVGBaseMover, SVGBaseTrigger );
 
-    //
-    // Interface functions. 
-    //
-    virtual void Precache() override;    // Precaches data.
-    virtual void Spawn() override;       // Spawns the entity.
-    virtual void Respawn() override;     // Respawns the entity.
-    virtual void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    virtual void Think() override;       // General entity thinking routine.
-
+	/**
+	*	@brief	Additional spawnkeys for mover types.
+	**/
     virtual void SpawnKey(const std::string& key, const std::string& value)  override;
 
-    //
-    // Pusher functions.
-    //
+    /**
+	*	@brief
+	**/
     virtual void SetMoveDirection(const vec3_t& angles, const qboolean resetAngles = false);
 
     //
@@ -149,6 +156,8 @@ public:
         this->lip = lip;
     }
 
+
+
 protected:
     // Calculates and returns the destination point
     // ASSUMES: startPosition and moveDirection are set properly
@@ -174,6 +183,8 @@ protected:
 
     float       CalculateAccelerationDistance( float targetSpeed, float accelerationRate );
 
+
+
 protected:
 
     //
@@ -197,34 +208,4 @@ protected:
     PushMoveInfo moveInfo;
     // How far away to stop, from the destination
     float		lip{ 0.0f };
-    // Kill target when triggered.
-    //std::string killTargetStr;
-
-    // Message when triggered.
-    //std::string messageStr;
-
-    // Master trigger entity.
-    //std::string masterStr;
-
-    // Timestamp that the trigger has been called at.
-    //
-    // Entity pointers.
-    // 
-
-
-public:
-
-
-protected:
-    //
-    // Callback function pointers.
-    //
-    //ThinkCallbackPointer        thinkFunction;
-    //UseCallbackPointer          useFunction;
-    //TouchCallbackPointer        touchFunction;
-    //BlockedCallbackPointer      blockedFunction;
-    //TakeDamageCallbackPointer   takeDamageFunction;
-    //DieCallbackPointer          dieFunction;
 };
-
-#endif // __SVGAME_ENTITIES_BASE_CBASEENTITY_H__

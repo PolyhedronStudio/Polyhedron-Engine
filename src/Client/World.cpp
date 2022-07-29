@@ -366,7 +366,7 @@ void CL_PF_World_LinkEntity(Entity *ent) {
 	    if (ent->solid == Solid::Trigger) {
 		    List_Append(&node->triggerEdicts, &ent->area);
 		} else {
-	        List_Append(&node->solidEdicts, &ent->area);
+	       // List_Append(&node->solidEdicts, &ent->area);
 			List_Append(&node->solidLocalClientEdicts, &ent->area);
 		}
 		//}
@@ -376,7 +376,7 @@ void CL_PF_World_LinkEntity(Entity *ent) {
 		} else {
 	        List_Append(&node->solidEdicts, &ent->area);
 
-						List_Append(&node->solidLocalClientEdicts, &ent->area);
+			//			List_Append(&node->solidLocalClientEdicts, &ent->area);
 		}
 	}
 }
@@ -451,7 +451,7 @@ int32_t CL_World_AreaEntities(const vec3_t &mins, const vec3_t &maxs, PODEntity 
     areaMaxCount = maxcount;
     areaType = areatype;
 
-if (!cl.bsp || !cl.cm.cache || !cl.bsp) {
+	if ( cl.bsp && cl.cm.cache ) {
 	    CL_World_AreaEntities_r(cl_areanodes);
 	}
 
@@ -541,6 +541,8 @@ static void CL_World_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins,
         }
     }
 
+
+	// Solid list.
 	static PODEntity *touchEntityList[MAX_CLIENT_POD_ENTITIES];
 	PODEntity *touchEntity = nullptr;
     int32_t numberOfAreaEntities = CL_World_AreaEntities(boxMins, boxMaxs, touchEntityList, MAX_CLIENT_POD_ENTITIES, AreaEntities::Solid);
@@ -548,6 +550,41 @@ static void CL_World_ClipMoveToEntities(const vec3_t &start, const vec3_t &mins,
     // Be careful, it is possible to have an entity in this list removed before we get to it (killtriggered)
     for (int32_t i = 0; i < numberOfAreaEntities; i++) {
         touchEntity = touchEntityList[i];
+        if (touchEntity->solid == Solid::Not) {
+            continue;
+		}
+        if (touchEntity == passedict) {
+            continue;
+		}
+		if (tr->allSolid) {
+            return;
+		}
+        if (passedict) {
+            if (touchEntity->owner == passedict) {
+                continue;    // Don't clip against own missiles.
+			}
+            if (passedict->owner == touchEntity) {
+                continue;    // Don't clip against owner.
+			}
+        }
+
+        if (!(contentMask & BrushContents::DeadMonster) && (touchEntity->serverFlags & EntityServerFlags::DeadMonster)) {
+            continue;
+		}
+
+        // Might intersect, so do an exact clip
+		TraceResult trace = CM_TransformedBoxTrace(start, end, mins, maxs, CL_World_HullForEntity(touchEntity), contentMask, touchEntity->currentState.origin, touchEntity->currentState.angles);
+
+		// Finalize trace results and clip to entity.
+        CM_ClipEntity(tr, &trace, touchEntity);
+    }
+
+	static PODEntity *localTouchEntityList[MAX_CLIENT_POD_ENTITIES];
+    int32_t numberOfLocalAreaEntities = CL_World_AreaEntities(boxMins, boxMaxs, localTouchEntityList, MAX_CLIENT_POD_ENTITIES, AreaEntities::LocalSolid);
+
+    // Be careful, it is possible to have an entity in this list removed before we get to it (killtriggered)
+    for (int32_t i = 0; i < numberOfLocalAreaEntities; i++) {
+        touchEntity = localTouchEntityList[i];
         if (touchEntity->solid == Solid::Not) {
             continue;
 		}

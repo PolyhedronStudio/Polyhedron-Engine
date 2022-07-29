@@ -9,17 +9,15 @@
 ***/
 #pragma once
 
-// ServerGame Exports Interface. TODO: Obviously, still implement.
-//#include "Shared/Interfaces/IServerGameExports.h"
 
 // GameLocals.
 #include "../ServerGameLocals.h"
-//#include "../../Shared/SharedGame.h"
 // SharedGame Entity Interface.
 #include "../../Shared/Entities/ISharedGameEntity.h"
 
-
+// Predeclarations.
 class ISharedGameEntity;
+
 
 /**
 *   IClientGameEntity
@@ -48,9 +46,39 @@ public:
     *
     * 
     **/
-	//!
-	//!	None as of yet.
-	//!
+	/**
+	*	For Usable Entities (Those that can get Use triggered by the '+use' action.)
+	**/
+	/**
+	*	@brief Get/Set:     Use Flags that determine if, and how a player can use this entity. (Toggle, continuous, single button.)
+	**/
+	virtual const int32_t        GetUseEntityFlags() = 0;
+	virtual void                 SetUseEntityFlags(const int32_t useFlags) = 0;
+	
+	/**
+    *   For Physics Entities.
+    **/
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetAcceleration() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetDeceleration() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline const vec3_t& GetEndPosition() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline float GetSpeed() = 0;
+    /**
+    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
+    **/
+    virtual inline const vec3_t& GetStartPosition() = 0;
+
 
 
     /**
@@ -74,7 +102,6 @@ public:
     using DieCallbackPointer        = void(GameEntity::*)(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
     //! 'Stop' Callback Pointer. (Gets dispatched when an entity's physics movement has come to has stoppped, come to an end.)
     using StopCallbackPointer		= void(GameEntity::*)();
-
 
     /**
     *   @brief  Dispatches 'Use' callback.
@@ -115,49 +142,6 @@ public:
     **/
     virtual void DispatchStopCallback() = 0;
 
-
-    /**
-    *
-    *
-    *   For Physics Entities.
-    *
-    *
-    **/
-    /**
-    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    **/
-    virtual inline float GetAcceleration() = 0;
-    /**
-    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    **/
-    virtual inline float GetDeceleration() = 0;
-    /**
-    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    **/
-    virtual inline const vec3_t& GetEndPosition() = 0;
-    /**
-    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    **/
-    virtual inline float GetSpeed() = 0;
-    /**
-    *   @brief  Placeholder, implemented by SVGBaseMover, and derivates of that class.
-    **/
-    virtual inline const vec3_t& GetStartPosition() = 0;
-
-
-	/**
-	*
-	*
-	*	For Usable Entities (Those that can get Use triggered by the '+use' action.)
-	*
-	*
-	**/
-	/**
-	*	@brief Get/Set:     Use Flags that determine if, and how a player can use this entity. (Toggle, continuous, single button.)
-	**/
-	virtual const int32_t        GetUseEntityFlags() = 0;
-	virtual void                 SetUseEntityFlags(const int32_t useFlags) = 0;
-
 public:
     /**
     *
@@ -168,8 +152,7 @@ public:
     *   @brief  Sets the 'Think' callback function.
     **/
     template<typename function>
-    inline void SetThinkCallback(function f)
-    {
+    inline void SetThinkCallback(function f) {
         thinkFunction = static_cast<ThinkCallbackPointer>(f);
     }
     /**
@@ -183,8 +166,7 @@ public:
     *   @brief  Sets the 'Use' callback function.
     **/
     template<typename function>
-    inline void SetUseCallback(function f)
-    {
+    inline void SetUseCallback(function f) {
         useFunction = static_cast<UseCallbackPointer>(f);
     }
     /**
@@ -213,8 +195,7 @@ public:
     *   @brief  Sets the 'Blocked' callback function.
     **/
     template<typename function>
-    inline void SetBlockedCallback(function f)
-    {
+    inline void SetBlockedCallback(function f) {
         blockedFunction = static_cast<BlockedCallbackPointer>(f);
     }
     /**
@@ -228,8 +209,7 @@ public:
     *   @brief  Sets the 'SetTakeDamage' callback function.
     **/
     template<typename function>
-    inline void SetTakeDamageCallback(function f)
-    {
+    inline void SetTakeDamageCallback(function f) {
         takeDamageFunction = static_cast<TakeDamageCallbackPointer>(f);
     }
     /**
@@ -243,8 +223,7 @@ public:
     *   @brief  Sets the 'Die' callback function.
     **/
     template<typename function>
-    inline void SetDieCallback(function f)
-    {
+    inline void SetDieCallback(function f) {
         dieFunction = static_cast<DieCallbackPointer>(f);
     }
     /**
@@ -258,8 +237,7 @@ public:
     *   @brief  Sets the 'Stop' callback function.
     **/
     template<typename function>
-    inline void SetStopCallback(function f)
-    {
+    inline void SetStopCallback(function f) {
         stopFunction = static_cast<StopCallbackPointer>(f);
     }
     /**
@@ -268,8 +246,6 @@ public:
     inline const qboolean HasStopCallback() {
         return (stopFunction != nullptr ? true : false);
     }
-
-
 
 protected:
     /**
@@ -287,8 +263,4 @@ protected:
 	TouchCallbackPointer        touchFunction       = nullptr;
     BlockedCallbackPointer      blockedFunction     = nullptr;
 	StopCallbackPointer         stopFunction        = nullptr;
-
-
-private:
-
 };
