@@ -180,6 +180,10 @@ void ClientGameWorld::PreparePlayers() {
 			FreeGameEntity( podEntity );
 		}
 
+		// The only player client we set to in use from the get-go is our own playerclient,
+		// also referred to as view entity.
+		const bool isViewEntity = (i == cl->clientNumber + 1 ? true : false);
+
 		// Ensure our entity number which we're going to set is valid.
 		const int32_t clientEntityNumber = podEntity - podEntities;
 		// Previous state number.
@@ -195,13 +199,17 @@ void ClientGameWorld::PreparePlayers() {
 			},
 			.client = &clients[i - 1],
 			.isLocal = false,
-			.inUse = (i == cl->clientNumber ? true : false),
-			//.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBasePlayer"),
+			.inUse = isViewEntity,
+			.gameEntity = nullptr,
 			.clientEntityNumber = clientEntityNumber,
 		};
 
-		// Assign its gameclass since it needs a pointer to podEntity.
-		podEntity->gameEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false, true);
+		// Assign it a proper CLGBasePlayer class.
+		if (isViewEntity) {
+			podEntity->gameEntity = CreateGameEntity<CLGBasePlayer>(podEntity, false, true); //CreateGameEntityFromClassname(podEntity, "CLGBasePlayer");
+		} else {
+			podEntity->gameEntity = nullptr;
+		}
 	}
 }
 
@@ -267,11 +275,9 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 
 	//// First 3 reserved entities.
 	for (int i = MAX_WIRED_POD_ENTITIES; i < MAX_WIRED_POD_ENTITIES + RESERVED_ENTITIY_COUNT; i++) {
-	//	PODEntity *reservedPODEntity = GetUnusedPODEntity(false);
-	//	
-	//	// Create a base local entity for these reserved ones for now.
-	//	//// Acquire POD entity.
-		PODEntity *podEntity = GetUnusedPODEntity(i);
+
+		// Acquire POD entity.
+		PODEntity *podEntity = GetPODEntityByIndex(i); //GetUnusedPODEntity(false);
 
 		// Setup the entity.
 		(*podEntity) = {
@@ -283,10 +289,15 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 			},
 			.isLocal = true,
 			.inUse = false,
-			//.gameEntity = CreateGameEntityFromClassname(podEntity, "CLGBaseLocalEntity"),
 			.gameEntity = nullptr,
+			//.gameEntity = nullptr,
 			.clientEntityNumber = i,
 		};
+
+		//podEntity->gameEntity = CreateGameEntity<CLGBaseLocalEntity>( podEntity, false, false );
+
+		//podEntity->gameEntity->SetModelIndex( 0 );
+		//podEntity->gameEntity->LinkEntity();
 	} 
 
 	// Engage parsing.
@@ -327,10 +338,6 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 		//	// Entity is local.
 			isLocal = true;
 			podEntity = GetUnusedPODEntity(false);
-
-			if (!podEntity) {
-				Com_DPrint("WTF IS THIS SHIT?\n");
-			}
 		} else if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
 		//if (parsedKeyValues.contains("classname") && parsedKeyValues["classname"] == "worldspawn") {
 			// Just use 0 index.
@@ -368,7 +375,7 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 
 		// If it was a local entity, be sure to prepare its previousState.
 		if (isLocal) {
-			//podEntity->previousState = podEntity->currentState;
+			podEntity->previousState = podEntity->currentState;
 		}
 		
 		// Assign parsed dictionary to entity.
@@ -702,6 +709,7 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 
     // Get entity number.
     const int32_t entityNumber = podEntity->clientEntityNumber;
+	const int32_t previousEntityNumber = podEntity->previousState.number;
 
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
 	static constexpr int32_t BODY_QUEUE_SIZE = 8;
@@ -720,7 +728,7 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 			.number = entityNumber,
 		},
 		.previousState = {
-			.number = entityNumber,
+			.number = previousEntityNumber,
 		},
 		// Ensure it is not in use.
 		.inUse = false,
@@ -733,10 +741,7 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 		// And ensure our main identifier has the correct entityNumber set.
 		.clientEntityNumber = entityNumber,
 	};
-
-
-    //podEntity->freeTime = level.time;
-    //podEntity->gameEntity = nullptr;
+	
 }
 
 /**
@@ -841,8 +846,8 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState* state,
 		} else {
 			// Warn about not having had a game entity. 
 			if ( !clEntity->gameEntity ) {
-				const std::string errorStr = fmt::format( "CLG ({}): PODEntity(#{}), state->number(#{}) which is meant to be a player client entity, has a (nullptr) game entity.", __func__, state->number, clEntity->clientEntityNumber );
-				Com_DPrintf( "%s\n", errorStr.c_str() );
+				//const std::string errorStr = fmt::format( "CLG ({}): PODEntity(#{}), state->number(#{}) which is meant to be a player client entity, has a (nullptr) game entity.", __func__, state->number, clEntity->clientEntityNumber );
+				//Com_DPrint( "%s\n", errorStr.c_str() );
 
 				// Assign its gameclass since it needs a pointer to podEntity.
 				clEntity->client = &clients[ clEntity - podEntities ];
@@ -850,11 +855,12 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState* state,
 				
 				return static_cast< IClientGameEntity* >( clEntity->gameEntity );
 				//Com_Error( ErrorType::Drop, errorStr.c_str() );
+			} 
 			// Warn about not having had a game entity. 
-			} else if ( !clEntity->gameEntity->GetClient() ) {
-				const std::string errorStr = fmt::format( "CLG ({}): PODEntity(#{}), state->number(#{}) which is meant to be a player client entity, has a (nullptr) client.", __func__, state->number, clEntity->clientEntityNumber );
-				//Com_Error( ErrorType::Drop, errorStr.c_str() );
-				Com_DPrintf( "%s\n", errorStr.c_str() );
+			if ( clEntity->gameEntity && !clEntity->gameEntity->GetClient() ) {
+				//const std::string errorStr = fmt::format( "CLG ({}): PODEntity(#{}), state->number(#{}) which is meant to be a player client entity, has a (nullptr) client.", __func__, state->number, clEntity->clientEntityNumber );
+				//Com_DPrint( "%s\n", errorStr.c_str() );
+
 			}
 		}	
 	}

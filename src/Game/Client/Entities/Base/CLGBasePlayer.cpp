@@ -32,9 +32,7 @@
 **/
 //! Constructor/Destructor.
 CLGBasePlayer::CLGBasePlayer(PODEntity* podEntity) : Base(podEntity) {//}, podEntity(clEntity) {
-    
 }
-
 
 
 /**
@@ -56,19 +54,68 @@ void CLGBasePlayer::Precache() {
 **/
 void CLGBasePlayer::Spawn() {
 	Base::Spawn();
+	
+	// When spawned, we aren't on any ground, make sure of that.
+    SetGroundEntity(SGEntityHandle());
+    // Set up the client entity accordingly.
+    SetTakeDamage(TakeDamage::Aim);
+    // Fresh movetype and solid.
+    SetMoveType(MoveType::PlayerMove);
+    SetSolid(Solid::OctagonBox);
+    // Mass.
+    SetMass(200);
+    // Undead itself.
+    SetDeadFlag(DeadFlags::Alive);
+    // Set air finished time so it can respawn kindly.
+    //SetAirFinishedTime(level.time + 12s);
+    // Clip mask this client belongs to.
+    SetClipMask(BrushContentsMask::PlayerSolid);
+    // Fresh default model.
+    SetModel("players/male/tris.md2");
+	//SetModel( "models/monsters/stepdummy/stepdummy.iqm" );
+    /*ent->pain = player_pain;*/
+    // Fresh water level and type.
+    SetWaterLevel(0);
+    SetWaterType(0);
+    // Fresh flags.
+    SetFlags(GetFlags() & ~EntityFlags::NoKnockBack);
+    SetServerFlags(GetServerFlags() & ~EntityServerFlags::DeadMonster);
+    // Fresh player move bounding box.
+    SetMins(vec3_scale(PM_MINS, PM_SCALE));
+    SetMaxs(vec3_scale(PM_MAXS, PM_SCALE));
+    // Fresh view height.
+    SetViewHeight(22);
+    // Zero out velocity in case it had any at all.
+    SetVelocity(vec3_zero());
 
-	// Oh boy...
-	SetSolid( Solid::Not );
-	SetModelIndex( 0 );
-	SetRenderEffects( 0 );
-	SetEffects( 0 );
-	SetFlags( 0 );
-	SetServerFlags( 0 );
-	SetInUse( true );
+    // Fresh effects.
+    Base::SetEffects(0);
+
+    // Reset model indexes.
+    SetModelIndex(255); // Use the skin specified by its model.
+    SetModelIndex2(255);// Custom gun model.
+    SetSkinNumber(GetNumber() - 1);	 // Skin is client number. //    ent->currentState.skinNumber = ent - g_entities - 1; // sknum is player num and weapon number  // weapon number will be added in changeweapon
+    
+    // Fresh frame for animations.
+    SetAnimationFrame(0);
+	//SwitchAnimation(2, level.time);
+
+    // Set the die function.
+    //SetDieCallback(&CLGBasePlayer::CLGBasePlayerDie);
+
+    // Let it be known this client entity is in use again.
+    SetInUse(true);
+
 
 	SetNextThinkTime( level.time + FRAMETIME_S );
 	SetThinkCallback( &CLGBasePlayer::CLGBasePacketEntityThinkStandard );
 }
+
+void CLGBasePlayer::CLGBasePlayerDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) {
+
+}
+
+
 /**
 *   @brief  Called when it is time to respawn this entity.
 **/

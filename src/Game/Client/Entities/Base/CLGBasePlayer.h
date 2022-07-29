@@ -35,6 +35,17 @@ public:
 	//DefinePacketClass( CLGBasePlayer, CLGBasePacketEntity );
 	//DefineGameClass( CLGBasePlayer, CLGBasePacketEntity);
 
+	/***
+    * 
+    *   Callback functions.
+    *
+    ***/
+    /**
+    *   @brief  Callback that is fired any time the player dies. As such, it kindly takes care of doing this.
+    **/
+    void CLGBasePlayerDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
+
+
 
     /**
     *

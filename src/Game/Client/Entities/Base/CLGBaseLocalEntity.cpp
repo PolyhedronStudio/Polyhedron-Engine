@@ -44,7 +44,7 @@ std::string CLGBaseLocalEntity::EmptyString = "";
 **/
 //! Constructor/Destructor.
 CLGBaseLocalEntity::CLGBaseLocalEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEntity) {
-    this->podEntity = podEntity;
+	this->podEntity = podEntity;
 }
 
 
@@ -67,7 +67,7 @@ void CLGBaseLocalEntity::Precache() {
 *   @brief  Called when it is time to spawn this entity.
 **/
 void CLGBaseLocalEntity::Spawn() {
-	SetInUse(true);
+	//SetInUse(true);
 }
 /**
 *   @brief  Called when it is time to respawn this entity.
@@ -480,10 +480,6 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 	if (!podEntity) {
 		Com_DPrint("Warning: PrepareRefreshEntity has no valid podEntity pointer for refreshEntityID(#%i)!\n", refreshEntityID);
 		return;
-	}
-
-	if (refreshEntityID == 1028) {
-		int myBreak = 10;
 	}
 
     // Client Info.
