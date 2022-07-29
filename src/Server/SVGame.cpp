@@ -225,7 +225,7 @@ static void PF_cprintf(Entity *ent, int level, const char *fmt, ...)
     }
 
     if (!ent) {
-        Com_LPrintf(level == PRINT_CHAT ? PrintType::Talk : PrintType::All, "%s", msg);
+        Com_LPrintf(level == PRINT_CHAT ? PrintType::Talk : PrintType::Regular, "%s", msg);
         return;
     }
 
@@ -301,7 +301,7 @@ PF_error
 Abort the server with a game error
 ===============
 */
-static q_noreturn void PF_error(const char *fmt, ...)
+static q_noreturn void PF_error( int32_t errorType, const char *fmt, ...)
 {
     char        msg[MAXERRORMSG];
     va_list     argptr;
@@ -310,7 +310,7 @@ static q_noreturn void PF_error(const char *fmt, ...)
     Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
     va_end(argptr);
 
-    Com_Error(ErrorType::Drop, "Game Error: %s", msg);
+    Com_Error(ErrorType::Drop, "SVGame Error: %s", msg);
 }
 
 /**

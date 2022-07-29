@@ -1285,7 +1285,7 @@ void DefaultGameMode::ClientBegin(PODEntity *svEntity) {
         if (svEntity->gameEntity->IsSubclassOf<SVGBasePlayer>()) {
 	        player = dynamic_cast<SVGBasePlayer*>(svEntity->gameEntity);
         } else {
-	        gi.Error("ClientBegin called with an inUse entity that is not of type or derived from SVGBasePlayer\n");
+	        gi.Error(ErrorType::Drop, "SVGame Error: ClientBegin called with an inUse entity that is not of type or derived from SVGBasePlayer\n");
         }
 
         // The client has cleared the client side viewAngles upon
@@ -1643,7 +1643,7 @@ void DefaultGameMode::SelectPlayerSpawnPoint(SVGBasePlayer* player, vec3_t& orig
         angles = spawnPoint->GetAngles();
     } else {
         // We might as well error out at this point.
-        gi.Error("Couldn't find spawn point %s", game.spawnpoint);
+        gi.Error(ErrorType::Drop, "SVGame Error: Couldn't find spawn point %s", game.spawnpoint);
     }
 }
 

@@ -408,7 +408,7 @@ void ClientGameScreen::CenterPrint(const std::string& text) {
     }
 
     // Echo text to console.
-    Com_LPrintf(PrintType::All, "%s\n", screenData.centerString.c_str());
+    Com_LPrintf(PrintType::Regular, "%s\n", screenData.centerString.c_str());
 
     // Clear notify.
     clgi.Con_ClearNotify();

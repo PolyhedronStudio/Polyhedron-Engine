@@ -792,7 +792,7 @@ static qboolean finish_download(void)
 
             //404 is non-fatal unless accessing default repository
             if (response == 404 && (!download_default_repo || !dl->path[0])) {
-                printLevel = PrintType::All;
+                printLevel = PrintType::Regular;
                 goto fail1;
             }
 

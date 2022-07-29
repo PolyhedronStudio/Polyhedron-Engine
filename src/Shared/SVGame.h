@@ -133,7 +133,7 @@ typedef struct {
     // they connect, and changes are sent to all connected clients.
     void (*configstring)(int num, const char *string);
 
-    void (* q_noreturn q_printf(1, 2) Error)(const char *fmt, ...);
+    void (* q_noreturn q_printf(1, 2) Error)( int32_t errorType, const char *fmt, ...);
 
     // the *index functions create configstrings and some internal server state
     int (*PrecacheModel)(const char *name);

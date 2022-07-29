@@ -387,7 +387,7 @@ static const save_field_t gamefields[] = {
 static void write_data(void *buf, size_t len, FILE *f)
 {
     if (fwrite(buf, 1, len, f) != len) {
-        gi.Error("%s: couldn't write %" PRIz " bytes", __func__, len); // CPP: String fix.
+        gi.Error(ErrorType::Drop, "SVGame Error: %s: couldn't write %" PRIz " bytes", __func__, len); // CPP: String fix.
     }
 }
 
@@ -440,12 +440,12 @@ static void write_index(FILE *f, void *p, size_t size, void *start, int max_inde
     }
 
     if (p < start || (byte *)p > (byte *)start + max_index * size) {
-        gi.Error("%s: pointer out of range: %p", __func__, p);
+        gi.Error(ErrorType::Drop, "SVGame Error: %s: pointer out of range: %p\n", __func__, p);
     }
 
     diff = (byte *)p - (byte *)start;
     if (diff % size) {
-        gi.Error("%s: misaligned pointer: %p", __func__, p);
+        gi.Error(ErrorType::Drop, "SVGame Error: %s: misaligned pointer: %p\n", __func__, p);
     }
     write_int(f, (int)(diff / size));
 }
@@ -468,7 +468,7 @@ static void write_index(FILE *f, void *p, size_t size, void *start, int max_inde
 //    //    }
 //    //}
 //
-//    gi.Error("%s: unknown pointer: %p", __func__, p);
+//    gi.Error(ErrorType::Drop, "SVGame Error: %s: unknown pointer: %p", __func__, p);
 //}
 
 static void write_field(FILE *f, const save_field_t *field, void *base)
@@ -524,7 +524,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
     //    break;
 
     //default:
-        //gi.Error("%s: unknown field type", __func__);
+        //gi.Error(ErrorType::Drop, "SVGame Error: %s: unknown field type", __func__);
     //    break;
     //}
 }
@@ -541,7 +541,7 @@ static void write_fields(FILE *f, const save_field_t *fields, void *base)
 static void read_data(void *buf, size_t len, FILE *f)
 {
     if (fread(buf, 1, len, f) != len) {
-        gi.Error("%s: couldn't read %" PRIz " bytes", __func__, len); // CPP: String fix.
+        gi.Error(ErrorType::Drop, "SVGame Error: %s: couldn't read %" PRIz " bytes\n", __func__, len); // CPP: String fix.
     }
 }
 
@@ -587,7 +587,7 @@ static char *read_string(FILE *f)
     }
 
     if (len < 0 || len > 65536) {
-        gi.Error("%s: bad length", __func__);
+        gi.Error(ErrorType::Drop, "SVGame Error: %s: bad length\n", __func__);
     }
 
     s = (char*)gi.TagMalloc(len + 1, TAG_LEVEL); // CPP: Casts
@@ -603,7 +603,7 @@ static void read_zstring(FILE *f, char *s, size_t size)
 
     len = read_int(f);
     if (len < 0 || len >= size) {
-        gi.Error("%s: bad length", __func__);
+        gi.Error(ErrorType::Drop, "SVGame Error: %s: bad length\n", __func__);
     }
 
     read_data(s, len, f);
@@ -628,7 +628,7 @@ static void *read_index(FILE *f, size_t size, void *start, int max_index)
     }
 
     if (index < 0 || index > max_index) {
-        gi.Error("%s: bad index", __func__);
+        gi.Error(ErrorType::Drop, "SVGame Error: %s: bad index\n", __func__);
     }
 
     p = (byte *)start + index * size;
@@ -646,12 +646,12 @@ static void *read_index(FILE *f, size_t size, void *start, int max_index)
 //    }
 //
 //    //if (index < 0 || index >= num_save_ptrs) {
-//    //    gi.Error("%s: bad index", __func__);
+//    //    gi.Error(ErrorType::Drop, "SVGame Error: %s: bad index", __func__);
 //    //}
 //
 //    //ptr = &save_ptrs[index];
 //    //if (ptr->type != type) {
-//    //    gi.Error("%s: type mismatch", __func__);
+//    //    gi.Error(ErrorType::Drop, "SVGame Error: %s: type mismatch", __func__);
 //    //}
 //
 //    return ptr->ptr;
@@ -710,7 +710,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
     //    break;
 
     //default:
-    //    gi.Error("%s: unknown field type", __func__);
+    //    gi.Error(ErrorType::Drop, "SVGame Error: %s: unknown field type", __func__);
     //}
 }
 
@@ -753,7 +753,7 @@ void SVG_WriteGame(const char *filename, qboolean autosave)
 
     f = fopen(filename, "wb");
     if (!f)
-        gi.Error("Couldn't open %s", filename);
+        gi.Error(ErrorType::Drop, "SVGame Error: Couldn't open %s\n", filename);
 
     write_int(f, SAVE_MAGIC1);
     write_int(f, SAVE_VERSION);
@@ -779,18 +779,18 @@ void SVG_ReadGame(const char *filename)
 
     f = fopen(filename, "rb");
     if (!f)
-        gi.Error("Couldn't open %s", filename);
+        gi.Error(ErrorType::Drop, "SVGame Error: Couldn't open %s\n", filename);
 
     i = read_int(f);
     if (i != SAVE_MAGIC1) {
         fclose(f);
-        gi.Error("Not a save game");
+        gi.Error(ErrorType::Drop, "SVGame Error: Not a save game\n");
     }
 
     i = read_int(f);
     if (i != SAVE_VERSION) {
         fclose(f);
-        gi.Error("Savegame from an older version");
+        gi.Error(ErrorType::Drop, "SVGame Error: Savegame from an older version\n");
     }
 
     read_fields(f, gamefields, &game);
@@ -798,11 +798,11 @@ void SVG_ReadGame(const char *filename)
     // should agree with server's version
     if (game.GetMaxClients() != (int)maximumclients->value) {
         fclose(f);
-        gi.Error("Savegame has bad maximumclients");
+        gi.Error(ErrorType::Drop, "SVGame Error: Savegame has bad maximumclients\n");
     }
     if (game.GetMaxEntities() <= game.GetMaxClients() || game.GetMaxEntities() > MAX_WIRED_POD_ENTITIES) {
         fclose(f);
-        gi.Error("Savegame has bad maxEntities");
+        gi.Error(ErrorType::Drop, "SVGame Error: Savegame has bad maxEntities\n");
     }
 
     globals.entities = game.world->GetPODEntities();
@@ -833,7 +833,7 @@ void SVG_WriteLevel(const char *filename)
 
     f = fopen(filename, "wb");
     if (!f)
-        gi.Error("Couldn't open %s", filename);
+        gi.Error(ErrorType::Drop, "SVGame Error: Couldn't open %s\n", filename);
 
     write_int(f, SAVE_MAGIC2);
     write_int(f, SAVE_VERSION);
@@ -889,7 +889,7 @@ void SVG_ReadLevel(const char *filename)
 
     f = fopen(filename, "rb");
     if (!f)
-        gi.Error("Couldn't open %s", filename);
+        gi.Error(ErrorType::Drop, "SVGame Error: Couldn't open %s", filename);
 
     //memset(g_entities, 0, game.maxEntities * sizeof(g_entities[0]));
 
@@ -899,13 +899,13 @@ void SVG_ReadLevel(const char *filename)
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
         fclose(f);
-        gi.Error("Not a save game");
+        gi.Error(ErrorType::Drop, "SVGame Error: Not a save game\n");
     }
 
     i = read_int(f);
     if (i != SAVE_VERSION) {
         fclose(f);
-        gi.Error("Savegame from an older version");
+        gi.Error(ErrorType::Drop, "SVGame Error: Savegame from an older version\n");
     }
 
     // load the level locals
@@ -917,7 +917,7 @@ void SVG_ReadLevel(const char *filename)
         if (entnum == -1)
             break;
         if (entnum < 0 || entnum >= game.GetMaxEntities()) {
-            gi.Error("%s: bad entity number", __func__);
+            gi.Error(ErrorType::Drop, "SVGame Error: %s: bad entity number\n", __func__);
         }
         if (entnum >= globals.numberOfEntities)
             globals.numberOfEntities = entnum + 1;

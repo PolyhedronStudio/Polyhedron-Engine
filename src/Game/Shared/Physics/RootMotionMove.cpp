@@ -29,6 +29,34 @@
 
 
 
+/**
+*	@brief	Performs a ground/step-move trace to determine whether we can step, or fall off an edge.
+**/
+SGTraceResult RM_Trace( RootMotionMoveState* moveState, const vec3_t *origin, const vec3_t *mins, const vec3_t *maxs, const vec3_t *end, const int32_t skipEntityNumber = -1, const int32_t contentMask = -1 ) {
+	/**
+	*	#0: Determine whether to use move state or custom values.
+	**/
+	const vec3_t traceOrigin	= ( origin != nullptr ? *origin : moveState->origin );
+	const vec3_t traceMins		= ( mins != nullptr ? *mins: moveState->mins );
+	const vec3_t traceMaxs		= ( maxs != nullptr ? *maxs : moveState->maxs );
+	const vec3_t traceEnd		= ( end != nullptr ? *end : moveState->origin );
+
+	const int32_t traceSkipEntityNumber = ( skipEntityNumber != -1 ? skipEntityNumber : moveState->skipEntityNumber );
+	const int32_t traceContentMask = ( contentMask != -1 ? contentMask : moveState->contentMask );
+
+	/**
+	*	#1: Fetch needed skip entity.
+	**/
+	// Get Gameworld.
+	SGGameWorld *gameWorld = GetGameWorld();
+	// Acquire our skip trace entity.
+	GameEntity *geSkip = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( traceSkipEntityNumber ) );
+
+	// Perform and return trace results.
+	return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask );
+}
+
+
 /***
 *
 *	
@@ -225,33 +253,6 @@ static void RM_RefreshMoveFlagsTime(RootMotionMoveState* moveState) {
             moveState->moveFlagTime	-= FRAMERATE_MS.count();
         }
     }
-}
-
-/**
-*	@brief	Performs a ground/step-move trace to determine whether we can step, or fall off an edge.
-**/
-SGTraceResult RM_Trace( RootMotionMoveState* moveState, const vec3_t *origin, const vec3_t *mins, const vec3_t *maxs, const vec3_t *end, const int32_t skipEntityNumber, const int32_t contentMask ) {
-	/**
-	*	#0: Determine whether to use move state or custom values.
-	**/
-	const vec3_t traceOrigin	= ( origin != nullptr ? *origin : moveState->origin );
-	const vec3_t traceMins		= ( mins != nullptr ? *mins: moveState->mins );
-	const vec3_t traceMaxs		= ( maxs != nullptr ? *maxs : moveState->maxs );
-	const vec3_t traceEnd		= ( end != nullptr ? *end : moveState->origin );
-
-	const int32_t traceSkipEntityNumber = ( skipEntityNumber != -1 ? skipEntityNumber : moveState->skipEntityNumber );
-	const int32_t traceContentMask = ( contentMask != -1 ? contentMask : moveState->contentMask );
-
-	/**
-	*	#1: Fetch needed skip entity.
-	**/
-	// Get Gameworld.
-	SGGameWorld *gameWorld = GetGameWorld();
-	// Acquire our skip trace entity.
-	GameEntity *geSkip = SGGameWorld::ValidateEntity( gameWorld->GetGameEntityByIndex( traceSkipEntityNumber ) );
-
-	// Perform and return trace results.
-	return SG_Trace( traceOrigin, traceMins, traceMaxs, traceEnd, geSkip, traceContentMask );
 }
 
 /**

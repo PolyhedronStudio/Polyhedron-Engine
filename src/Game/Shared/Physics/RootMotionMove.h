@@ -185,20 +185,9 @@ struct RootMotionMoveState {
 };
 
 /**
-*	@brief	Performs a ground/step-move trace to determine whether we can step, or fall off an edge.
-*	@todo	Move this elsewhere.
-**/
-SGTraceResult RM_Trace( RootMotionMoveState* moveState, const vec3_t *origin = nullptr, const vec3_t *mins = nullptr, const vec3_t *maxs = nullptr, const vec3_t *end = nullptr, const int32_t skipEntityNumber = -1, const int32_t contentMask = -1  );
-
-/**
 *	@return	Clipped by normal velocity.
 **/
 vec3_t SG_ClipVelocity( const vec3_t &inVelocity, const vec3_t &normal, float overbounce );
-/**
-*	@brief	Checks if this entity should have a groundEntity set or not.
-*	@return	The number of the ground entity this entity is covering ground on.
-**/
-int32_t SG_BoxSlideMove_CheckForGround( GameEntity *geCheck );
 /**
 *	@brief	Processes rotational friction calculations.
 **/

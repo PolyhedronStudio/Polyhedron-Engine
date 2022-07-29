@@ -148,28 +148,8 @@ qboolean SVG_RunThink(IServerGameEntity *ent)
 
 #if _DEBUG
     if ( !ent->HasThinkCallback() ) {
-        // Write the index, programmers may look at that thing first
-        std::string errorString = "";
-        if (ent->GetPODEntity()) {
-            errorString += "entity (index " + std::to_string(ent->GetNumber());
-        } else {
-            errorString += "entity has no ServerEntity ";
-        }
-
-        // Write the targetname as well, if it exists
-        if ( !ent->GetTargetName().empty() ) {
-            errorString += ", name '" + ent->GetTargetName() + "'";
-        }
-
-        // Write down the C++ class name too
-        errorString += ", class '";
-        errorString += ent->GetTypeInfo()->classname;
-        errorString += "'";
-
-        // Close it off and state what's actually going on
-        errorString += ") has a nullptr think callback \n";
-    //    
-        gi.Error( errorString.c_str() );
+		const std::string errorString = fmt::format("Entity(#{}) has no 'Think' callback set!\n", ent->GetNumber() );
+        gi.Error( ErrorType::Drop, "SVGame Error: %s\n", errorString.c_str() );
 
         // Return true.
         return true;
@@ -743,7 +723,7 @@ retry:
         }
     }
     if (pushed_p > &pushed[MAX_WIRED_POD_ENTITIES])
-        gi.Error("pushed_p > &pushed[MAX_WIRED_POD_ENTITIES], memory corrupted");
+        gi.Error(ErrorType::Drop, "pushed_p > &pushed[MAX_WIRED_POD_ENTITIES], memory corrupted");
 
     if (part) {
         // the move failed, bump all nextThinkTime times and back out moves
@@ -1256,6 +1236,6 @@ void SVG_RunEntity(SGEntityHandle &entityHandle)
 	        SVG_Physics_Toss(entityHandle);
         break;
     default:
-        gi.Error("SV_Physics: bad moveType %i", ent->GetMoveType());
+        gi.Error(ErrorType::Drop, "SVGame Error: SV_Physics: bad moveType %i", ent->GetMoveType());
     }
 }

@@ -248,10 +248,9 @@ void Com_Error(int32_t errorType, const char *fmt, ...)
     Q_vsnprintf(text, sizeof(text), fmt, argptr);
     va_end(argptr);
 
-    gi.Error("%s", text);
+    gi.Error(ErrorType::Drop, "%s", text);
 }
 #endif
-
 
 //=============================================================================
 //

@@ -79,13 +79,13 @@ q_exported IClientGameExports* GetClientGameAPI(ClientGameImport* clgimp) {
 *
 *
 **/
-// Prints a message of type PrintType::All. Using variable arg formatting.
+// Prints a message of type PrintType::Regular. Using variable arg formatting.
 void Com_Print(const char *fmt, ...) {
     char buffer[MAX_STRING_CHARS];
     va_list args;
     va_start (args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
-    clgi.Com_LPrintf(PrintType::All, "%s", buffer);
+    clgi.Com_LPrintf(PrintType::Regular, "%s", buffer);
     va_end (args);
 }
 // Prints a message of type PrintType::Developer. Using variable arg formatting.

@@ -207,7 +207,7 @@ qboolean ServerGameWorld::PrepareBSPEntities(const char* mapName, const char* en
 		}
 
 		if (com_token[0] != '{') {
-			gi.Error("PrepareBSPEntities: found %s when expecting {", com_token);
+			gi.Error(ErrorType::Drop, "SVGame Error: PrepareBSPEntities: found %s when expecting {\n", com_token);
 			return false;
 		}
 
@@ -341,7 +341,7 @@ PODEntity* ServerGameWorld::GetUnusedPODEntity(bool isWired) {
 
 	// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
     if (podEntityIndex >= (isWired ? MAX_WIRED_POD_ENTITIES : MAX_SERVER_POD_ENTITIES)) {// maxEntities) {
-        gi.Error("ServerGameWorld::GetUnusedPODEntity: no free edicts");
+        gi.Error(ErrorType::Drop, "SVGame Error: ServerGameWorld::GetUnusedPODEntity: no free edicts\n");
 		return nullptr;
 	}
 
@@ -387,7 +387,7 @@ PODEntity* ServerGameWorld::GetUnusedPODEntity(bool isWired) {
 
 	//// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
  //   if (i >= maxEntities) {
- //       gi.Error("ServerGameWorld::GetUnusedPODEntity: no free edicts");
+ //       gi.Error(ErrorType::Drop, "SVGame Error: ServerGameWorld::GetUnusedPODEntity: no free edicts");
 	//	return nullptr;
 	//}
 
@@ -536,7 +536,7 @@ qboolean ServerGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, S
 
 	// We do need a PODEntity of course.
 	if (!podEntity) {
-		gi.Error("SVGWarning: Called %s with a nullptr PODEntity!\n", __func__);
+		gi.Error(ErrorType::Drop, "SVGame Error: Called %s with a nullptr PODEntity!\n", __func__);
 		return false;
 	}
 
@@ -546,7 +546,7 @@ qboolean ServerGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, S
 	// It needs the classname key, as well as it needs to have a value for it, how else can we spawn a game entity?
     if (!dictionary.contains("classname") || dictionary["classname"].empty()) {
 		// For the server game we error out in this case, it can't go on since it is the actual game master.
-		gi.Error("SVGWarning: Can't spawn ServerGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", stateNumber);
+		gi.Error(ErrorType::Drop, "SVGame Error: Can't spawn ServerGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", stateNumber);
 		return false;
     }
 

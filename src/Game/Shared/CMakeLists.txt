@@ -53,24 +53,39 @@ SET(HEADERS_SHAREDGAME
 #	SharedGame target for linking to ClientGame
 #
 if (CONFIG_BUILD_CL_GAME)
-	ADD_LIBRARY(clgame_sharedgame OBJECT ${HEADERS_CLGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-	TARGET_COMPILE_DEFINITIONS(clgame_sharedgame PUBLIC "cxx_std_20 -DSHAREDGAME_CLIENTGAME=1")
-	if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-		# For GCC/CLang compilers.
-		TARGET_COMPILE_OPTIONS(clgame_sharedgame PUBLIC "-fPIC")
-	endif()	
-	TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PUBLIC ${PATH_SHARED})
-	TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PRIVATE ${GLM_INCLUDE_DIRS})
 
-	# Link in FMT Header only library.
+	# Add CLGame SharedGame sources.
+	add_library(clgame_sharedgame OBJECT 
+		GameBindings/ClientBinding.cpp
+		GameBindings/ClientBinding.h
+
+		${HEADERS_CLGAME} 
+		${SRC_SHARED} 
+		${HEADERS_SHARED} 
+		${SRC_SHAREDGAME} 
+		${HEADERS_SHAREDGAME}
+	)
+
+	# C++ STD 20, and DSHAREDGAME_CLIENTGAME = 1
+	target_compile_definitions(clgame_sharedgame PUBLIC "cxx_std_20 -DSHAREDGAME_CLIENTGAME=1")
+	# When not using an MSVC compiler, assume G++/CLang and pass the "position independent code" flag
+	# which is a requirement for these compilers.
+	if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+		target_compile_options(clgame_sharedgame PUBLIC "-fPIC")
+	endif()	
+	# Ensure it has access to the include /src/Shared path.
+	target_include_directories(clgame_sharedgame PUBLIC ${PATH_SHARED})
+
+	# Lib: FMT
 	target_link_libraries(clgame_sharedgame PUBLIC fmt::fmt-header-only)
-	# Link in GLM headers.
+	# Lib: GLM
+	target_include_directories(clgame_sharedgame PRIVATE ${GLM_INCLUDE_DIRS})
 	target_link_libraries(clgame_sharedgame PUBLIC glm)
 
 	# Win32 Specifics.
 	if (WIN32)
-		TARGET_COMPILE_OPTIONS(clgame_sharedgame PUBLIC /wd4005 /wd4996)
-		TARGET_INCLUDE_DIRECTORIES(clgame_sharedgame PUBLIC ../../../VC/inc)
+		target_compile_options(clgame_sharedgame PUBLIC /wd4005 /wd4996)
+		target_include_directories(clgame_sharedgame PUBLIC ../../../VC/inc)
 	endif()	
 endif()
 
@@ -78,27 +93,39 @@ endif()
 #	SharedGame target for linking to ServerGame
 #
 if (CONFIG_BUILD_SV_GAME)
-	ADD_LIBRARY(svgame_sharedgame OBJECT ${HEADERS_SVGAME} ${SRC_SHARED} ${HEADERS_SHARED} ${SRC_SHAREDGAME} ${HEADERS_SHAREDGAME})
-	TARGET_COMPILE_DEFINITIONS(svgame_sharedgame PUBLIC "cxx_std_20 -DSHAREDGAME_SERVERGAME=1")
-	if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-		# For GCC/CLang compilers.
-		TARGET_COMPILE_OPTIONS(svgame_sharedgame PUBLIC "-fPIC")
-	endif()	
+	# Add SVGame SharedGame sources.
+	add_library(svgame_sharedgame OBJECT 
+		GameBindings/ServerBinding.cpp
+		GameBindings/ServerBinding.h
 
-	TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PUBLIC ${PATH_SHARED})
-	TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PRIVATE ${GLM_INCLUDE_DIRS})
+		${HEADERS_SVGAME} 
+		${SRC_SHARED} 
+		${HEADERS_SHARED} 
+		${SRC_SHAREDGAME} 
+		${HEADERS_SHAREDGAME}
+	)
+
+	# C++ STD 20, and SHAREDGAME_SERVERGAME = 1
+	target_compile_definitions(svgame_sharedgame PUBLIC "cxx_std_20 -DSHAREDGAME_SERVERGAME=1")
+	# When not using an MSVC compiler, assume G++/CLang and pass the "position independent code" flag
+	# which is a requirement for these compilers.
+	if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+		target_compile_options(svgame_sharedgame PUBLIC "-fPIC")
+	endif()	
+	# Ensure it has access to the include /src/Shared path.
+	target_include_directories(svgame_sharedgame PUBLIC ${PATH_SHARED})
 	
-	# Link in FMT Header only library.
+	# Lib: FMT
 	target_link_libraries(svgame_sharedgame PUBLIC fmt::fmt-header-only)
-	# Link in GLM headers.
+	# Lib: GLM
+	target_include_directories(svgame_sharedgame PRIVATE ${GLM_INCLUDE_DIRS})
 	target_link_libraries(svgame_sharedgame PUBLIC glm)
 
 	# Win32 Specifics.
 	if (WIN32)
-		TARGET_COMPILE_OPTIONS(svgame_sharedgame PUBLIC /wd4005 /wd4996)
-		TARGET_INCLUDE_DIRECTORIES(svgame_sharedgame PUBLIC ../../../VC/inc)
+		target_compile_options(svgame_sharedgame PUBLIC /wd4005 /wd4996)
+		target_include_directories(svgame_sharedgame PUBLIC ../../../VC/inc)
 	endif()
-	
 endif()
 
 #

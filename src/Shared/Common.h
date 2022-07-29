@@ -13,8 +13,8 @@ struct ErrorType {
 };
 
 struct PrintType {
-    //! General messages.
-    static constexpr int32_t All				= 0;
+    //! General regular printing.
+    static constexpr int32_t Regular			= 0;
     //! Print in green color.
     static constexpr int32_t Talk				= 1;
     //! Print in orange color.
@@ -59,7 +59,7 @@ q_noreturn q_printf(2, 3);
 #ifndef CGAME_INCLUDE
 void    Com_LPrintf(int32_t printType, const char* fmt, ...)
 q_printf(2, 3);
-#define Com_Printf(...) Com_LPrintf(PrintType::All, __VA_ARGS__)
+#define Com_Printf(...) Com_LPrintf(PrintType::Regular, __VA_ARGS__)
 #define Com_DPrintf(...) Com_LPrintf(PrintType::Developer, __VA_ARGS__)
 #define Com_WPrintf(...) Com_LPrintf(PrintType::Warning, __VA_ARGS__)
 #define Com_EPrintf(...) Com_LPrintf(PrintType::Error, __VA_ARGS__)
