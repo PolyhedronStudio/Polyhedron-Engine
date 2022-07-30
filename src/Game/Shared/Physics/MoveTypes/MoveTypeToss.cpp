@@ -50,7 +50,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 
     // Ensure it is a valid entity.
     if (!ent) {
-    	SG_Physics_PrintWarning(std::string(__func__) + "got an invalid entity handle!");
+	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
         return;
     }
 
@@ -229,14 +229,6 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 					
 					// Apply based on speed current.
 					constexpr float PHYS_SPEED_CURRENT = 80.f;
-
-					std::string printStr = "groundCurrentVelocity(#" + std::to_string(ent->GetNumber()) + "): "
-						+ std::to_string(groundCurrentVelocity.x) + ","
-						+ std::to_string(groundCurrentVelocity.y) + ","
-						+ std::to_string(groundCurrentVelocity.z) + "\n";
-
-					SG_Physics_PrintDeveloper( printStr );
-
 					ent->SetVelocity( vec3_fmaf( clippedVelocity, PHYS_SPEED_CURRENT, groundCurrentVelocity));
 				}
 

@@ -47,7 +47,7 @@ void SG_Physics_None(SGEntityHandle& entityHandle) {
 
     // Ensure it is a valid entity.
     if (!gameEntity) {
-	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
+	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
         return;
     }
 

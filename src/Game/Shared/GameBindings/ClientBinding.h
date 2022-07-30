@@ -10,10 +10,18 @@
 ***/
 #pragma once
 
-// Shared Game.
+//! The name of the module that is used for differentiating what module
+//! printed text.
+static constexpr const char *sharedModuleName = "SharedGame(CLG)";
+
+// Needed for the shared headers.
+#define CGAME_INCLUDE 1
+// Include shared headers.
+#include "../../../Shared/Shared.h"
+#include "../../../Shared/Refresh.h"
+
+// SharedGame.
 #include "../SharedGame.h"
-
-
 
 /***
 *

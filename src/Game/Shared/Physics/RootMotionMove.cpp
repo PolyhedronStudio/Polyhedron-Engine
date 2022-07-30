@@ -75,16 +75,18 @@ static int32_t RM_AddTouchEntity( RootMotionMoveState *moveState, GameEntity *ge
 	int32_t touchEntityNumber = (geToucher ? geToucher->GetNumber() : -1);
 
 	if( !moveState || !geToucher || moveState->numTouchEntities >= 32 || touchEntityNumber < 0) {
+#if _DEBUG
 		// Warn print:
 		if (!geToucher) {
-			SG_Physics_PrintWarning( std::string(__func__) + "Trying to add a(nullptr) GameEntity" );
+			SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): Trying to add a (nullptr) GameEntity.\n", __func__, sharedModuleName ) );
 		} else if (geToucher->GetNumber() < 0) {
-			SG_Physics_PrintWarning( std::string(__func__) + "Trying to add an invalid GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i) number" );
+			SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): Trying to add an invalid number GameEntity(#{})\n", __func__, sharedModuleName, geToucher->GetNumber() ) );
 		} else if (!moveState) {
-			SG_Physics_PrintWarning( std::string(__func__) + "moveState == (nullptr) while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)" );
+			SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): moveState == (nullptr) while trying to add GameEntity(#{})\n", __func__, sharedModuleName, geToucher->GetNumber() ) );
 		} else if (moveState->numTouchEntities >= 32) {
-			SG_Physics_PrintWarning( std::string(__func__) + "moveState->numTouchEntities >= 32 while trying to add GameEntity(#" + std::to_string(geToucher->GetNumber()) + "% i)" );
+			SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): moveState->numTouchEntities >= 32 while trying to add GameEntity(#{})\n", __func__, sharedModuleName, geToucher->GetNumber() ) );
 		}
+#endif
 		
 		return -1;
 	}
@@ -135,7 +137,7 @@ static const int32_t RM_SlideClipMove( RootMotionMoveState *moveState, const boo
 static void RM_AddClippingPlane( RootMotionMoveState *moveState, const vec3_t &planeNormal ) {
 	// Ensure we stay within limits of MAX_ROOTMOTION_MOVE_CLIP_PLANES . Warn if we don't.
 	if( moveState->numClipPlanes + 1 == MAX_ROOTMOTION_MOVE_CLIP_PLANES ) {
-		SG_Physics_PrintWarning( std::string(__func__) + "MAX_ROOTMOTION_MOVE_CLIP_PLANES reached" );
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): MAX_ROOTMOTION_MOVE_CLIP_PLANES reached!\n", __func__, sharedModuleName ) );
 		return;
 	}
 
@@ -1210,7 +1212,7 @@ int32_t SG_RootMotion_MoveFrame( RootMotionMoveState *moveState ) {
 
 		// If it didn't touch anything the move should be completed
 		if( moveState->remainingTime > 0.0f ) {
-			SG_Physics_PrintWarning( std::string(__func__) + "Slidemove finished with remaining time" );
+			SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): slidemove finished with remaining time({}) for GameEntity(#{})!\n", __func__, sharedModuleName, moveState->remainingTime, moveState->moveEntityNumber ) );
 			moveState->remainingTime = 0.0f;
 		}
 		break;

@@ -9,22 +9,8 @@
 ***/
 #pragma once
 
-
-
 /**
-*	Include general shared header.
-**/
-#ifdef SHAREDGAME_SERVERGAME
-#define GAME_INCLUDE 1
-#endif
-#ifdef SHAREDGAME_CLIENTGAME
-#define CGAME_INCLUDE 1
-#endif
-#include "../../Shared/Shared.h"
-#include "../../Shared/Refresh.h"
-
-/**
-*	Game DLL Wrapper Binding:
+*	SharedGame API Binding Implementations:
 **/
 #ifdef SHAREDGAME_CLIENTGAME
 #include "GameBindings/ClientBinding.h"

@@ -64,60 +64,6 @@ static inline void CheckSVCvars() {
 #endif
 //========================================================================
 
-void SG_Physics_PrintWarning(const std::string& message) {
-//void SG_Physics_PrintWarning(const std::string& message, const std::string &functionName = ) {
-    // Only continue if developer warnings for physics are enabled.
-    //extern cvar_t* dev_show_physwarnings;
-    //if (!dev_show_physwarnings->integer) {
-    //    return;
-    //}
-
-    // Show warning.
-#ifdef SHAREDGAME_CLIENTGAME
-	std::string warning = "SGPhysics(Client) Warning:";
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-	std::string warning =  "SGPhysics(Server) Warning:";
-#endif
-//    warning += functionName;
-    warning += message;
-    warning += "\n";
-
-#ifdef SHAREDGAME_CLIENTGAME
-	Com_DPrintf(warning.c_str());
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-	gi.DPrintf(warning.c_str());
-#endif
-}
-
-void SG_Physics_PrintDeveloper(const std::string& message) {
-//void SG_Physics_PrintWarning(const std::string& message, const std::string &functionName = ) {
-    // Only continue if developer warnings for physics are enabled.
-    //extern cvar_t* dev_show_physwarnings;
-    //if (!dev_show_physwarnings->integer) {
-    //    return;
-    //}
-
-    // Show warning.
-#ifdef SHAREDGAME_CLIENTGAME
-	std::string devmessage = "SGPhysics(Client) Developer: ";
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-	std::string devmessage =  "SGPhysics(Server) Developer: ";
-#endif
-//    warning += functionName;
-    devmessage += message;
-    devmessage += "\n";
-
-#ifdef SHAREDGAME_CLIENTGAME
-	Com_DPrintf(devmessage.c_str());
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-	gi.DPrintf(devmessage.c_str());
-#endif
-}
-
 //================================================================================
 /*
 * GS_ClipVelocity
@@ -170,7 +116,7 @@ void SG_AddGravity( GameEntity *sharedGameEntity ) {
 **/
 void SG_AddGroundFriction( GameEntity *geGroundFriction, const float friction ) {
 	if (!geGroundFriction) {
-		SG_Physics_PrintWarning(std::string(__func__) + "called with geGroundFriction(nullptr)!");
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): can't add ground friction, geGroundFriction == (nullptr)!\n", __func__, sharedModuleName ) );
 	}
 
 	const vec3_t geVelocity = geGroundFriction->GetVelocity();
@@ -380,9 +326,9 @@ void SG_Impact( GameEntity *entityA, const SGTraceResult &traceResult ) {
 *	@return	True if it failed. Yeah, odd, I know, it was that way, it stays that way for now.
 **/
 qboolean SG_RunThink(GameEntity *geThinker) {
-    if (!geThinker) {
-	    //SVG_PhysicsEntityWPrint(__func__, "[start of]", "nullptr entity!");
-        return true;
+	if (!geThinker) {
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): Can't perform thinking routine, *geThinker == (nullptr)!\n", __func__, sharedModuleName ) );
+		return true;
     }
 
     // Fetch think time.
@@ -404,19 +350,14 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     // Reset think time before thinking.
     geThinker->SetNextThinkTime(GameTime::zero());
 
-	if (!geThinker) {
-	    SG_Physics_PrintWarning("*geThinker is (nullptr)!");
-        return false;
-    }
-
 #if _DEBUG
     if ( !geThinker->HasThinkCallback() ) {
-		SG_Physics_PrintWarning("GameEntity(#" + std::to_string(geThinker->GetNumber()) + ")[" + geThinker->GetTypeInfo()->mapClass + "] has no Think callback set.");
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): GameEntity(#{})[{}]: can't perform 'Think' because there is no callback set.\n", __func__, sharedModuleName, geThinker->GetNumber(), geThinker->GetTypeInfo()->mapClass ) );
         return true;
     }
 #endif
-
-    // Last but not least, let the entity execute its think behavior callback.
+    // Still call upon think, it does a check for a set callback on itself, but since Think
+	// is a virtual method we want to make sure we call it regardless of.
     geThinker->Think();
 
     return false;
@@ -428,14 +369,14 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 
 	// Get GameEntity from handle.
 	if (!SGGameWorld::ValidateEntity(entityHandle)) {
-        SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
 		return;
     }
 
     GameEntity *ent = SGGameWorld::ValidateEntity( entityHandle );
 
     if (!ent) {
-	    SG_Physics_PrintWarning( std::string(__func__) + "got an entity handle that still has a broken game entity ptr!" );
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
         return;
     }
 

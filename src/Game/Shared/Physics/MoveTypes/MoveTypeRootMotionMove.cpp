@@ -53,7 +53,8 @@ void SG_Physics_RootMotionMove(SGEntityHandle &entityHandle) {
 
     // Ensure it is a valid entity.
     if (!gameEntity) {
-	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
+	    //SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
         return;
     }
 
@@ -70,7 +71,7 @@ const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle ) {
 
     // Ensure it is a valid entity.
     if ( !ent ) {
-	    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
+	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
         return vec3_zero();
     }
 
@@ -184,7 +185,7 @@ const int32_t SG_RootMotion_PerformMove( GameEntity *geSlider, const int32_t con
 	*	Ensure our SlideMove Game Entity is non (nullptr).
 	**/
 	if (!geSlider) {
-		SG_Physics_PrintWarning( std::string(__func__) + "*geSlider is (nullptr)!" );
+	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): Can't perform RootMotion move because *geSlider == (nullptr)!\n", __func__, sharedModuleName ) );
 		return 0;
 	}
 

@@ -12,11 +12,7 @@
 // Shared Game.
 #include "../SharedGame.h"
 
-//========================================================================
-// TODO: Remove.
-void SG_Physics_PrintWarning(const std::string& message);
-void SG_Physics_PrintDeveloper(const std::string& message);
-//================================================================================
+
 
 /**
 *

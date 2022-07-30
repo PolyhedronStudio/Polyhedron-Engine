@@ -615,9 +615,9 @@ protected:
 	template<typename T> auto ParseKeyValue(const std::string &key, const std::string &value, T &outValue) {
 		// Warning print...
 #if defined(SHAREDGAME_SERVERGAME)
-		Com_DPrintf("Warning: svEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->currentState.number, typeid(T).name(), key.c_str());
+		SG_Print( PrintType::Developer, fmt::format( "Warning: svEntity(#{}): Called ParseKeyValue called for type: '{}' on key: '{}', but its type needs implementation..\n", podEntity->currentState.number, typeid(T).name(), key.c_str() ) );
 #elif defined(SHAREDGAME_CLIENTGAME)
-		Com_DPrintf("Warning: clEntity(#%i): Called ParseKeyValue called for type: '%s' on key: '%s', but its type needs implementation..\n", podEntity->clientEntityNumber, typeid(T).name(), key.c_str());
+		SG_Print( PrintType::Developer, fmt::format( "Warning: clEntity(#{}) : Called ParseKeyValue called for type : '{}' on key : '{}', but its type needs implementation..\n", podEntity->clientEntityNumber, typeid(T).name(), key.c_str() ) );
 #else
 		//Com_Print("Warning: Called specialized template function ParseKeyValue that wasn't compiled for client/server -game modules.\n");
 #endif

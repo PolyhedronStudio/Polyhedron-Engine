@@ -180,7 +180,7 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 
     // Ensure it is a valid entity.
     if (!gePusher) {
-	    SG_Physics_PrintWarning( std::string(__func__) + "called with an invalid entity handle!" );
+	    SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
 	    return false;
     }
 
@@ -334,7 +334,7 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 
             // Ensure we are dealing with a valid pusher entity.
             if (!pusherEntity) {
-    		    SG_Physics_PrintWarning( std::string(__func__) + "got an invalid entity handle!" );
+				SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
                 continue;
             }
 
@@ -364,7 +364,7 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 
         // Ensure we are dealing with a valid pusher entity.
 	    if (!pusherEntity) {
-		    SG_Physics_PrintWarning(std::string(__func__) + "got an invalid entity handle!");
+			SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
             continue;
 	    }
 
@@ -373,229 +373,6 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
     }
 
     return true;
-
-//	// Get GameEntity from handle.
-//    if (!entityHandle || !(*entityHandle) || !entityHandle.Get() || !entityHandle.Get()->inUse) {
-//        //SG_PhysicsEntityWPrint(__func__, "[start of]", "got an invalid entity handle!\n");
-//		return false;
-//    }
-//
-//	// Get gePusher.
-//	GameEntity *gePusher = (*entityHandle);
-//
-//	if (!gePusher || !lastPushedEntityState ) {
-//		return false;
-//	}
-//
-//    // Calculate the exact the bounding box
-//    const vec3_t mins = gePusher->GetAbsoluteMin() + move;
-//    const vec3_t maxs = gePusher->GetAbsoluteMax() + move;
-//
-//    // We need this for pushing things later
-//    vec3_t org = vec3_negate(angularMove);
-//	vec3_t forward = vec3_zero(), right = vec3_zero(), up = vec3_zero();
-//    AngleVectors(org, &forward, &right, &up);
-//
-//	// Save the pusher's original position.
-//	lastPushedEntityState->entityHandle = gePusher;
-//	lastPushedEntityState->origin = gePusher->GetOrigin();
-//	lastPushedEntityState->angles = gePusher->GetAngles();
-//	if ( gePusher->GetClient() ) {
-//		// Store velocity. I know, it's named origin wtf?.
-//		lastPushedEntityState->playerMoveOrigin = gePusher->GetClient()->playerState.pmove.velocity;
-//		// Store delta yaw angle.
-//		lastPushedEntityState->deltaYaw = gePusher->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
-//	}
-//	lastPushedEntityState++;
-//
-//	// move the pusher to its final position
-//    gePusher->SetOrigin(gePusher->GetOrigin() + move);
-//    gePusher->SetAngles(gePusher->GetAngles() + angularMove);
-//    gePusher->LinkEntity();
-//
-//	// See if any solid entities are inside the final position.
-//	SGGameWorld *gameWorld = GetGameWorld();
-//	for ( int32_t i = 1; i < 4096; i++ ) {
-//		// Get the entity to check position for.
-//		GameEntity *geCheck = gameWorld->GetGameEntityByIndex(i);
-//
-//		// Skip Checks.
-//		if (!geCheck || !geCheck->IsInUse()) {
-//			// Skip if it's not in use.
-//			continue;
-//		}
-//
-//		// Get some data.
-//		const bool isInUse = geCheck->IsInUse();
-//		const int32_t moveType = geCheck->GetMoveType();
-//		const vec3_t absMin = geCheck->GetAbsoluteMin();
-//		const vec3_t absMax = geCheck->GetAbsoluteMax();
-//
-//		if (moveType == MoveType::Push ||
-//			moveType == MoveType::Stop ||
-//			moveType == MoveType::None || 
-//			moveType == MoveType::NoClip ||
-//			moveType == MoveType::Spectator) {
-//			// Skip if it's not having an appropriate MoveType.
-//			continue;	
-//		}	
-//
-//#ifdef SHAREDGAME_SERVERGAME
-//		if (!geCheck->GetPODEntity()->area.prev) {
-//#endif
-//#ifdef SHAREDGAME_CLIENTGAME
-////		if (!geCheck->GetLinkCount()) {
-//			if (1 == 1) {
-//#endif
-//			// If it's not linked in...
-//			continue;
-//		}
-//
-//
-//		// See whether the entity's ground entity is the actual pusher entity.
-//		if ( (geCheck->GetGroundEntityHandle()) != gePusher ) {
-//			// If it's not, check whether at least the bounding box intersects.
-//			//if ( (absMin[0] >= maxs[0]) &&
-//			//	(absMin[1] >= maxs[1]) &&
-//			//	(absMin[2] >= maxs[2]) &&
-//			//	(absMax[0] >= mins[0]) &&
-//			//	(absMax[1] >= mins[1]) &&
-//			//	(absMax[2] >= mins[2]) ) {            // See if the ent needs to be tested
-//            if ((!absMin[0] >= maxs[0]
-//                || absMin[1] >= maxs[1]
-//                || absMin[2] >= maxs[2]
-//                || absMax[0] <= mins[0]
-//                || absMax[1] <= mins[1]
-//                || absMax[2] <= mins[2])) {
-//				continue;
-//			}
-//
-//			// See if the ent's bbox is inside the pusher's final position.
-//			if( !SG_TestEntityPosition( geCheck ) ) {
-//				continue;
-//			}
-//		}
-//		
-//		if( (gePusher->GetMoveType() == MoveType::Push) || (geCheck->GetGroundEntityHandle() == gePusher) ) {
-//			// Move this entity.
-//			//pushed_p->ent = check;
-//			//VectorCopy( geCheck->s.origin, pushed_p->origin );
-//			//VectorCopy( geCheck->s.angles, pushed_p->angles );
-//			//pushed_p++;
-//			lastPushedEntityState->entityHandle = geCheck;
-//			lastPushedEntityState->origin = geCheck->GetOrigin();
-//			lastPushedEntityState->angles = geCheck->GetAngles();
-//#if USE_SMOOTH_DELTA_ANGLES
-//			if ( geCheck->GetClient() ) {
-//				lastPushedEntityState->deltaYaw = geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw];
-//			}
-//#endif
-//			lastPushedEntityState++;
-//
-//
-//			// Try moving the contacted entity
-//			geCheck->SetOrigin(geCheck->GetOrigin() + move);
-//#if USE_SMOOTH_DELTA_ANGLES
-//            if ( geCheck->GetClient() ) {
-//                // FIXME: doesn't rotate monsters?
-//                // FIXME: skuller: needs client side interpolation
-//                //geCheck->GetClient()->playerState.pmove.origin += move;
-//				geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
-//            }/* else {
-//				geCheck->SetAngles(geCheck->GetAngles() + angularMove);
-//			}*/
-//#endif
-//			// Figure movement due to the pusher's amove.
-//			const vec3_t org = geCheck->GetOrigin() - gePusher->GetOrigin(); //VectorSubtract( geCheck->s.origin, pusher->s.origin, org );
-//			const vec3_t org2 = {
-//				vec3_dot( org, forward ),
-//				vec3_dot( org, right ),
-//				vec3_dot( org, up ),
-//			};
-//			const vec3_t move2 = org2 - org;
-//			geCheck->SetOrigin( geCheck->GetOrigin() + move2 );
-//			//Matrix3_TransformVector( axis, org, org2 );
-//			//VectorSubtract( org2, org, move2 );
-//			//VectorAdd( geCheck->s.origin, move2, geCheck->s.origin );
-//
-//			//if( geCheck->GetMoveType() != MoveType::BounceGrenade ) {
-//				// may have pushed them off an edge
-//				if( geCheck->GetGroundEntityHandle() != gePusher ) {
-//					geCheck->SetGroundEntity( SGEntityHandle() );
-//				}
-//			//}
-//
-//			GameEntity *geBlocked = SG_TestEntityPosition( geCheck );
-//			if( !geBlocked ) {
-//				// pushed ok
-//				//GClip_LinkEntity( check );
-//				geCheck->LinkEntity();
-//
-//				// impact?
-//				continue;
-//			} //else {
-//				// try to fix block
-//				// if it is ok to leave in the old position, do it
-//				// this is only relevant for riding entities, not pushed
-//				geCheck->SetOrigin( geCheck->GetOrigin() - move );
-//				//geCheck->SetOrigin( geCheck->GetOrigin() - move2 );
-//				//VectorSubtract( geCheck->s.origin, move, geCheck->s.origin );
-//				//VectorSubtract( geCheck->s.origin, move2, geCheck->s.origin );
-//				geBlocked = SG_TestEntityPosition( geCheck );
-//				if( !geBlocked ) {
-//					lastPushedEntityState--;
-//					continue;
-//				}
-//		//	}
-//		}
-//
-//		// Save obstacle so we can call its blocked callback.
-//		pushObstacle = geCheck;
-//
-//		// move back any entities we already moved
-//		// go backwards, so if the same entity was pushed
-//		// twice, it goes back to the original position
-//		for( PushedEntityState *pushedState = lastPushedEntityState - 1; pushedState >= lastPushedEntityState; pushedState-- ) {
-//	        // Fetch pusher's game entity.
-//            GameEntity* pusherEntity = pushedState->entityHandle;
-//
-//            // Ensure we are dealing with a valid pusher entity.
-//            if ( !pusherEntity ) {
-//    		    SG_PhysicsEntityWPrint(__func__, "[move back loop]", "got an invalid entity handle!\n");
-//                continue;
-//            }
-//
-//            pusherEntity->SetOrigin(pushedState->origin);
-//            pusherEntity->SetAngles(pushedState->angles);
-//#if USE_SMOOTH_DELTA_ANGLES
-//            if ( pusherEntity->GetClient() ) {
-//				//pusherEntity->GetClient()->playerState.pmove.velocity = pushedState->playerMoveOrigin;
-//
-//				//pusherEntity->SetOrigin(pushedState->playerMoveOrigin);//pusherEntity->GetClient()->playerState.pmove.origin);
-//                pusherEntity->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] = pushedState->deltaYaw;
-//            }
-//#endif
-//            pusherEntity->LinkEntity();
-//		}
-//		return false;
-//	}
-//
-//	//FIXME: is there a better way to handle this?
-//	// see if anything we moved has touched a trigger
-//	for( PushedEntityState *pushedState = lastPushedEntityState - 1; pushedState >= lastPushedEntityState; pushedState-- ) {
-//        // Fetch pusher's base entity.
-//        GameEntity* pusherEntity = pushedState->entityHandle;
-//
-//        // Ensure we are dealing with a valid pusher entity.
-//	    if ( !pusherEntity ) {
-//		    SG_PhysicsEntityWPrint(__func__, "[was moved loop] ", "got an invalid entity handle!\n");
-//            continue;
-//	    }
-//
-//	    SG_TouchTriggers(pushedState->entityHandle);
-//	}
-//
-//	return true;
 }
 
 /**
@@ -610,7 +387,7 @@ void SG_Physics_Pusher( SGEntityHandle &gePusherHandle ) {
 
     // Ensure it is a valid entity.
     if (!ent) {
-    	SG_Physics_PrintWarning(std::string(__func__) + "got an invalid entity handle!");
+		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): got an invalid entity handle!\n", __func__, sharedModuleName ) );
         return;
     }
 

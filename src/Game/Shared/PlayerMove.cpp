@@ -18,6 +18,33 @@
 ***/
 #include "SharedGame.h"
 
+/**
+*	Player Move debugging ifdefs, uncomment to enable debug output
+*	for each distinct game module.
+**/
+#define DEBUG_SERVERGAME_PMOVE
+#define DEBUG_CLIENTGAME_PMOVE
+
+/**
+*	@brief	Debug Player Move output function, we don't want to clutter by outputting by default.
+**/
+static inline void PM_DebugPrint( const std::string &debugMsg, const std::string functionName = "" ) {
+	SG_Print( PrintType::Developer, fmt::format("{}({}): {}\n", functionName, sharedModuleName, debugMsg ) );
+}
+// ClientGame PM_Debug
+#if defined(DEBUG_CLIENTGAME_PMOVE) && defined(SHAREDGAME_CLIENTGAME)
+#define PM_Debug(message) PM_DebugPrint(#message, __func__);
+#else
+#define PM_Debug(message)
+#endif
+// ServerGame PM_Debug
+#if defined(DEBUG_SERVERGAME_PMOVE) && defined(SHAREDGAME_SERVERGAME)
+#define PM_Debug(message) PM_DebugPrint(#message, __func__);
+#else
+#define PM_Debug(message)
+#endif
+
+
 
 /**
 *   Pointer to the actual (client-/npc-)entity PlayerMove(PM) structure.
@@ -62,85 +89,6 @@ static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };
 
 
 /**
-*
-*
-*   (Debug) Utility Functions.
-*
-*
-**/
-
-/**
-*   Can be enabled on/off for client AND server indistinctively.
-**/
-#ifdef CGAME_INCLUDE
-#define DEBUG_CLIENT_PMOVE 1
-#if DEBUG_CLIENT_PMOVE == 1
-// Client debug output.
-static void CLGPM_Debug(const char* func, const char* fmt, ...) {
-    char buffer[MAX_STRING_CHARS];
-
-    va_list args;
-    va_start(args, fmt);
-
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    std::string str = "[CLG PM_Debug:";
-    str += func;
-    str += "] ";
-    str += buffer;
-    str += "\n";
-    Com_DPrintf(str.c_str());
-
-    va_end(args);
-}
-#define PM_Debug(...) CLGPM_Debug(__func__, __VA_ARGS__);
-#else
-static void CLGPM_Debug(const char* func, const char* fmt, ...) {
-
-    va_list args;
-    va_start(args, fmt);
-
-    va_end(args);
-    CLGPM_Debug
-#define PM_Debug(...) CLGPM_Debug(__func__, __VA_ARGS__);
-        //#define PM_Debug () void(0)
-#endif // PMOVE_DEBUG
-#else
-#define DEBUG_SERVER_PMOVE 1
-#if DEBUG_SERVER_PMOVE == 1
-static void SVGPM_Debug(const char* func, const char* fmt, ...) {
-    char buffer[MAX_STRING_CHARS];
-
-    va_list args;
-    va_start(args, fmt);
-
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    std::string str = "[SVGPM_Debug:{";
-    str += func;
-    str += "}] ";
-    str += buffer;
-    str += "\n";
-    Com_DPrintf(str.c_str());
-
-    va_end(args);
-}
-#define PM_Debug(...) SVGPM_Debug(__func__, __VA_ARGS__);
-#else
-// Server debug output.
-static void SVGPM_Debug(const char* func, const char* fmt, ...) {
-
-    va_list args;
-    va_start(args, fmt);
-
-    va_end(args);
-}
-#define PM_Debug(...) SVGPM_Debug(__func__, __VA_ARGS__);
-//#define PM_Debug (...) void(0)
-#endif // PMOVE_DEBUG
-#endif // CGAME_INCLUDE
-
-
-
-/**
 *   @brief  Slide off of the impacted plane.
 **/
 static vec3_t PM_ClipVelocity(const vec3_t &in, const vec3_t &normal, float bounce) {
@@ -162,7 +110,7 @@ static vec3_t PM_ClipVelocity(const vec3_t &in, const vec3_t &normal, float boun
 static void PM_TouchEntity(struct PODEntity* ent) {
     // Ensure it is valid.
     if (ent == NULL) {
-        PM_Debug("ent = NULL");
+		PM_Debug( "ent = NULL!" );
         return;
     }
 
@@ -178,7 +126,7 @@ static void PM_TouchEntity(struct PODEntity* ent) {
     }
     else {
         // Developer print.
-        PM_Debug("PM_MAX_TOUCH_ENTS(%i) amount of entities reached for this frame.", PM_MAX_TOUCH_ENTS);
+		PM_Debug( fmt::format("PM_MAX_TOUCH_ENTS({}) amount of entities reached for this frame.", PM_MAX_TOUCH_ENTS ) );
     }
 }
 
@@ -200,7 +148,7 @@ static bool PM_CheckStep(const TraceResult * trace) {
             //if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
                 return true;
 
-                // KEEP AROUND - //PM_Debug("PM_CheckStep: true");
+                // KEEP AROUND - //PM_Debug( "PM_CheckStep: true" );
             //}
         }
     }
@@ -221,9 +169,9 @@ static void PM_StepDown(const TraceResult * trace) {
     // Set step variable in case the absolute value of stepHeight is equal or heigher than PM_STEP_HEIGHT_MIN.
     if (fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN) {
         pm->step = stepHeight;
-        PM_Debug("Set pm->step to %f", pm->step);
+        PM_Debug( fmt::format( "Set pm->step to {}f.", pm->step ) );
     } else {
-        PM_Debug("Did not set pm->step");
+		PM_Debug( "Did not set pm->step." );
     }
 }
 
@@ -514,24 +462,22 @@ static qboolean PM_CheckTrickJump(void) {
 *   @return True if a jump occurs, false otherwise.
 **/
 static qboolean PM_CheckJump(void) {
-    // KEEP AROUND - //PM_Debug("PM_CheckJump");
-
     // Before allowing a new jump:
     // 1. Wait for landing damage to subside.
     if (pm->state.flags & PMF_TIME_LAND) {
-        PM_Debug("PM_CheckJump - PMF_TIME_LAND");
+		PM_Debug( "pm->state.flags & PMF_TIME_LAND" );
         return false;
     }
 
     // 2. Wait for jump key to be released
     if (pm->state.flags & PMF_JUMP_HELD) {
-        PM_Debug("PM_CheckJump - PMF_JUMP_HELD");
+		PM_Debug( "pm->state.flags & PMF_JUMP_HELD" );
         return false;
     }
 
     // 3. Check if, they didn't ask to jump.
     if (pm->moveCommand.input.upMove < 1) {
-        PM_Debug("PM_CheckJump - UPMOVE < 1");
+		PM_Debug( "pm->moveCommand.input.upMove < 1" );
         return false;
     }
 
@@ -550,9 +496,9 @@ static qboolean PM_CheckJump(void) {
         pm->state.flags &= ~PMF_TIME_TRICK_JUMP;
         pm->state.time = 0;
 
-        // KEEP AROUND - //PM_Debug("Trick jump: %i", pm->moveCommand.input.upMove);
+		// KEEP AROUND - //PM_Debug("Trick jump: {}", pm->moveCommand.input.upMove);
     } else {
-        // KEEP AROUND - //PM_Debug("Jump: %i", pm->moveCommand.input.upMove);
+        // KEEP AROUND - //PM_Debug("Jump: {}", pm->moveCommand.input.upMove);
     }
 
     if (pm->state.velocity.z < 0.0f) {
@@ -721,7 +667,7 @@ static qboolean PM_CheckWaterJump(void) {
         trace = PM_TraceCorrectAllSolid(pos, pm->mins, pm->maxs, position2);
 
         if (!(trace.ent && trace.plane.normal.z >= PM_STEP_NORMAL)) {
-            PM_Debug("Can't exit water: not a step\n");
+            PM_Debug("Can't exit water: not a step");
             return false;
         }
 
@@ -1035,8 +981,6 @@ static void PM_ApplyCurrents(void) {
 *   @brief  Called when the player is climbing a isClimbingLadder.
 **/
 static void PM_LadderMove(void) {
-    //PM_Debug("%s", Vec3ToString(pm->state.origin));
-
     PM_Friction();
 
     PM_ApplyCurrents();
@@ -1094,8 +1038,6 @@ static void PM_LadderMove(void) {
 *   @brief  Called when the player is jumping out of the water to a solid.
 **/
 static void PM_WaterJumpMove(void) {
-    //PM_Debug("%s\n", Vec3ToString(pm->state.origin));
-
     PM_Friction();
 
     PM_Gravity();
@@ -1121,14 +1063,11 @@ static void PM_WaterJumpMove(void) {
 *   @brief  Called for movements where player is in the water
 **/
 static void PM_WaterMove(void) {
-
-    if (PM_CheckWaterJump()) {
+	if (PM_CheckWaterJump()) {
         PM_WaterJumpMove();
         return;
     }
-
-    //PM_Debug("%s\n", Vec3ToString(pm->state.origin));
-
+	    
     // Apply friction, slowing rapidly when first entering the water
 	float speed = vec3_length(pm->state.velocity);
 
@@ -1186,10 +1125,7 @@ static void PM_WaterMove(void) {
 *   @brief  Called for movements where player is in air.
 **/
 static void PM_AirMove(void) {
-
-    PM_Debug("{%s}", Vec3ToString(pm->state.origin));
-
-    PM_Friction();
+	PM_Friction();
 
     PM_Gravity();
 
@@ -1228,8 +1164,6 @@ static void PM_AirMove(void) {
 *   @brief  Called for movements where player is on ground, regardless of water level.
 **/
 static void PM_WalkMove(void) {
-    PM_Debug("{%s}", Vec3ToString(pm->state.origin));
-
     // Check for beginning of a jump
     if (PM_CheckJump()) {
         PM_AirMove();
@@ -1300,8 +1234,6 @@ static void PM_WalkMove(void) {
 *   @brief  Handles special isSpectator movement.
 **/
 static void PM_SpectatorMove(void) {
-    //PM_Debug("%s", Vec3ToString(pm->state.origin));
-
     PM_Friction();
 
     // User intentions on X/Y/Z
@@ -1360,13 +1292,7 @@ static void PM_NoclipMove() {
 *   @brief  Freeze Player Movement.
 **/
 static void PM_FreezeMove(void) {
-    //PM_Debug("%s", Vec3ToString(pm->state.origin));
-         
-    // Wait wut? An empty functions?
-    //
-    // What else did you expect to find here?
-    //
-    // The miracles of the universe? Try the vkpt folder for that. :D <3
+	// Literally empty, hence, 'Freeze' move.
 }
 
 /**
@@ -1550,12 +1476,10 @@ void PMove(PlayerMove * pmove)
         PM_LadderMove();
     } else if (pm->state.flags & PMF_ON_GROUND) {
         PM_WalkMove();
-        // KEEP AROUND - //PM_Debug("Onground");
     } else if (pm->waterLevel > WaterLevel::Feet) {
         PM_WaterMove();
     } else {
         PM_AirMove();
-        // KEEP AROUND - //PM_Debug("Airmove");
     }
 
     // Check for ground at new spot.
@@ -1567,104 +1491,3 @@ void PMove(PlayerMove * pmove)
     // Check for view step changes, if so, interpolate.
     PM_CheckViewStep();
 }
-
-
-
-
-	//// store pre-move parameters
-	//const vec3_t org0 = pm->s.origin;
-	//const vec3_t vel0 = pm->s.velocity;
-
-	//vec3_t orgs[2], vels[2];
-	//int32_t i;
-
-	//// try two movements - one from our current position, and one
-	//// from STEP_HEIGHT above. store the results for later
-	//for (i = 0; i < 2; i++) {
-
-	// 111111111111111111111111111111111111111111111111111111111
-	//	if (i == 1) {
-	//		const vec3_t up = Vec3_Fmaf(org0, PM_STEP_HEIGHT, Vec3_Up());
-	//		const cm_trace_t step_up = Pm_Trace(org0, up, pm->bounds);
-
-	//		if (step_up.all_solid) {
-	//			break;
-	//		}
-
-	//		// step from the higher position, with the original velocity
-	//		pm->s.origin = step_up.end;
-	//		pm->s.velocity = vel0;
-	//	}
-	////////////////////////////////////////////////////////////////////
-
-	//	// attempt to move
-	//	Pm_SlideMove();
-
-	// 111111111111111111111111111111111111111111111111111111111
-	//	if (i == 1) {
-	//		// settle downwards
-	//		const vec3_t down = Vec3_Fmaf(pm->s.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, Vec3_Down());
-	//		const cm_trace_t step_down = Pm_Trace(pm->s.origin, down, pm->bounds);
-
-	//		pm->s.origin = step_down.end;
-	//000000000000000000000000000000000000000000000000000000000
-	//	} else {
-
-	//		// attempt to step down to remain on ground
-	//		if ((pm->s.flags & PMF_ON_GROUND) && pm->cmd.up <= 0) {
-
-	//			const vec3_t down = Vec3_Fmaf(pm->s.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, Vec3_Down());
-	//			const cm_trace_t step_down = Pm_Trace(pm->s.origin, down, pm->bounds);
-
-	//			if (Pm_CheckStep(&step_down)) {
-	//				Pm_StepDown(&step_down);
-	//			}
-	//		}
-	//	}
-	// 222222222222222222222222222222222222222
-	//	orgs[i] = pm->s.origin;
-	//	vels[i] = pm->s.velocity;
-
-	//0000000000000000000000000000000000
-	//	if (i == 0) {
-	//		pm->s.origin = org0;
-	//		pm->s.velocity = vel0;
-	//	}
-	//}
-
-	//// main move was blocked somehow
-	//if (i == 0) {
-	//	pm->s.origin = org0;
-	//	pm->s.velocity = vel0;
-	//	return;
-	//} else if (i == 1) {
-	//	// the upwards move failed, so only use the lower move
-	//	pm->s.origin = orgs[0];
-	//	pm->s.velocity = vels[0];
-	//} else {
-	//	float dist0 = Vec3_DistanceSquared(org0, orgs[0]);
-	//	float dist1 = Vec3_DistanceSquared(org0, orgs[1]);
-
-	//	// pick the one that went farther; if both went the full distance,
-	//	// we'll prefer the upper one
-	//	if (dist0 > dist1) {
-	//		pm->s.origin = orgs[0];
-	//		pm->s.velocity = vels[0];
-	//	} else {
-	//		pm->s.origin = orgs[1];
-	//		pm->s.velocity = vels[1];
-
-	//		// settle to the new ground, keeping the step if and only if it was successful
-	//		const vec3_t down = Vec3_Fmaf(pm->s.origin, PM_GROUND_DIST, Vec3_Down());
-	//		const cm_trace_t step_down = Pm_Trace(pm->s.origin, down, pm->bounds);
-
-	//		if (Pm_CheckStep(&step_down)) {
-	//			// Quake2 trick jump secret sauce
-	//			if ((pm->s.flags & PMF_ON_GROUND) || vel0.z < PM_SPEED_UP) {
-	//				Pm_StepDown(&step_down);
-	//			} else {
-	//				pm->step = pm->s.origin.z - pm_locals.previous_origin.z;
-	//			}
-	//		}
-	//	}
-	//}
