@@ -250,11 +250,6 @@ void ClientGameScreen::ScreenModeChanged() {
 *   @brief  Called when the client wants to render the loading screen.
 **/
 void ClientGameScreen::DrawLoadScreen() {
-    // Return in case of not having a valid load pic handle.
-    if (!screenData.loadPic) {
-        return;
-    }
-
     // Set scale to hud scale.
     clgi.R_SetScale(screenData.hudScale);
 
@@ -273,15 +268,11 @@ void ClientGameScreen::DrawLoadScreen() {
 *   @brief  Called when the client wants to render the pause screen.
 **/
 void ClientGameScreen::DrawPauseScreen() {
-    if (!screenData.pausePic) {
-        return;
-    }
-
     // Set scale to hud scale.
     clgi.R_SetScale(screenData.hudScale);
 	
 	// Draw text.
-	const vec2_t centerPosition = vec2_scale( screenData.hudSize * screenData.hudScale, 0.5 );
+	const vec2_t centerPosition = vec2_scale( screenData.hudSize, 0.5 );
 
 	clgi.R_SetColor( U32Colors::Polyhedron );
 	const std::string pauseStr = "[Paused]";
@@ -414,18 +405,18 @@ void ClientGameScreen::CenterPrint(const std::string& text) {
 *   @brief  Register screen media.
 **/
 void ClientGameScreen::RegisterMedia() {
-    // Pause & Load screen pics.
-    screenData.pausePic     = clgi.R_RegisterPic("pause.png");
-    screenData.loadPic      = clgi.R_RegisterPic("loading.png");
+    //// Pause & Load screen pics.
+    //screenData.pausePic     = clgi.R_RegisterPic("pause.png");
+    //screenData.loadPic      = clgi.R_RegisterPic("loading.png");
 
-    // TODO: Adjust R_ functions to use vec2_ts.
-    int32_t x = 0;
-    int32_t y = 0;
-    clgi.R_GetPicSize(&x, &y, screenData.pausePic);
-    screenData.pausePicSize = vec2_t{x, y};
+    //// TODO: Adjust R_ functions to use vec2_ts.
+    //int32_t x = 0;
+    //int32_t y = 0;
+    //clgi.R_GetPicSize(&x, &y, screenData.pausePic);
+    //screenData.pausePicSize = vec2_t{x, y};
 
-    clgi.R_GetPicSize(&x, &y, screenData.loadPic);
-    screenData.loadPicSize = vec2_t{x, y};
+    //clgi.R_GetPicSize(&x, &y, screenData.loadPic);
+    //screenData.loadPicSize = vec2_t{x, y};
 
     // Acquire handle to the font (already loaded by the client itself.)
     screenData.fontHandle = clgi.R_RegisterFont(scr_font->string);

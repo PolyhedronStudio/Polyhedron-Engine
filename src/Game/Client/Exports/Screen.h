@@ -90,20 +90,20 @@ public:
         qhandle_t   fontHandle      = 0;
 
         //! Handle to the image used for pause display.
-        qhandle_t   pausePic        = 0;
+        //qhandle_t   pausePic        = 0;
         //! Size of pause display image.
-        vec2_t      pausePicSize    = { 0, 0 };
+        //vec2_t      pausePicSize    = { 0, 0 };
 
         //! Handle to the image used for pause display.
-        qhandle_t   loadPic     = 0;
+        //qhandle_t   loadPic     = 0;
         //! Size of pause display image.
-        vec2_t      loadPicSize = { 0, 0 };
+        //vec2_t      loadPicSize = { 0, 0 };
 
         //! Handle to the crosshair picture in use.
         qhandle_t   crosshairPic    = 0;
         vec2_t      crosshairSize   = { 0, 0 };
         color_t     crosshairColor  = { 
-            .u32 = MakeColor(255, 255, 255, 255) // White's default.
+            .u32 = U32ColorFromRGBA(255, 255, 255, 255) // White's default.
         };
 
         //! Center String management.

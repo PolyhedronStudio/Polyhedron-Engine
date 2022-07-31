@@ -293,60 +293,38 @@ enum memtag_t {
 #include "UI.h"
 
 /**
-*   Color defines, modify these as you please for custom colors.
+*   @brief	Returns an uint32_t storing the RGBA color.
 **/
-//#define U32Colors::Black   MakeColor(  0,   0,   0, 255)
-//#define U32Colors::Red     MakeColor(215,  83,  65, 255)
-//#define U32Colors::Green   MakeColor( 41, 171, 135, 255)
-//#define U32Colors::Yellow  MakeColor(255, 255,   0, 255)
-//#define U32Colors::Orange  MakeColor(255, 165,   0, 255) // Used to be: U32_BLUE    MakeColor(  0,   0, 255, 255)
-//#define U32_CYAN    MakeColor(  0, 255, 255, 255)
-//#define U32Colors::Purple MakeColor(255,   0, 255, 255)
-//#define U32Colors::White   MakeColor(255, 255, 255, 255)
-
-//#define U32_POLYHEDRON	MakeColor( 41, 171, 135, 255)
-//#define U32_PINKRED MakeColor(255, 0,   85, 255)
-//#define U32_PINKRED MakeColor(255, 0,   85, 255)
-//
-//
-//#define U32Colors::Black		MakeColor(  0,   0,   0, 255)
-//#define U32Colors::Red			MakeColor(172,  50,  50, 255)
-//#define U32Colors::Green		MakeColor(110, 152,  49, 255) // 'Asda Green'.
-//#define U32Colors::Yellow		MakeColor(255, 222,   0, 255)
-//#define U32Colors::Orange		MakeColor(255,  95,   0, 255)
-//#define U32_BLUE		MakeColor(102, 196, 255, 255)
-//#define U32_CYAN		MakeColor(255,   0,  85, 255) //MakeColor(  0, 255, 255, 255)
-//#define U32Colors::Purple		MakeColor(147, 113, 110, 255) // Pink red, Used to be U32Colors::Purple, now complies as 'magenta'.
-//#define U32Colors::White		MakeColor(242, 248, 254, 255)	// Black coral //#define U32Colors::White		MakeColor(255, 255, 255, 255)
-//#define U32Colors::White		MakeColor(158, 170, 182, 255)	// Black coral //#define U32Colors::White		MakeColor(255, 255, 255, 255)
-
-static inline constexpr uint32_t _MakeColorFromRGBA( int32_t r, int32_t g, int32_t b, int32_t a = 255) {
+static inline constexpr uint32_t U32ColorFromRGBA( int32_t r, int32_t g, int32_t b, int32_t a = 255) {
 	return ( ((a) << 24) | ((b) << 16) | ((g) << 8) | (r) );
 }
 
+/**
+*   Color defines, used mainly for console.
+**/
 struct U32Colors {
 	//! 'Baby blue'-like.
-	static constexpr uint32_t Blue		= _MakeColorFromRGBA(   0, 174, 255, 255 );
+	static constexpr uint32_t Blue		= U32ColorFromRGBA(   0, 174, 255, 255 );
 	//! 'Green warm bright'-like.
-	static constexpr uint32_t Green		= _MakeColorFromRGBA(  43, 255,   0, 255 );
+	static constexpr uint32_t Green		= U32ColorFromRGBA(  43, 255,   0, 255 );
 	//! 'Yellow warm'-like.
-	static constexpr uint32_t Yellow	= _MakeColorFromRGBA( 255, 230,   0, 255 );
+	static constexpr uint32_t Yellow	= U32ColorFromRGBA( 255, 230,   0, 255 );
 	//! 'Orange warm'-like. 
-	static constexpr uint32_t Orange	= _MakeColorFromRGBA( 224, 127,   0, 255 );
+	static constexpr uint32_t Orange	= U32ColorFromRGBA( 224, 127,   0, 255 );
 	//! 'Pink warm purple'-like,
-	static constexpr uint32_t Purple	= _MakeColorFromRGBA( 255,   0,  85, 255 );
+	static constexpr uint32_t Purple	= U32ColorFromRGBA( 255,   0,  85, 255 );
 	//! 'Red warm'-like, Error color.
-	static constexpr uint32_t Red		= _MakeColorFromRGBA( 255,  12,   0, 255 );
+	static constexpr uint32_t Red		= U32ColorFromRGBA( 255,  12,   0, 255 );
 
 	//! Developer color.
-	static constexpr uint32_t Developer			= _MakeColorFromRGBA( 183, 130, 185, 255 );
+	static constexpr uint32_t Developer			= U32ColorFromRGBA( 183, 130, 185, 255 );
 	//! Developer Warning color.
-	static constexpr uint32_t DeveloperWarning	= _MakeColorFromRGBA( 255, 175, 127, 255 );
+	static constexpr uint32_t DeveloperWarning	= U32ColorFromRGBA( 255, 175, 127, 255 );
 	//! Generale 'White', slightly grey, serving as the default console color and 'chat' color.
-	static constexpr uint32_t White				= _MakeColorFromRGBA( 242, 248, 254, 255 );
+	static constexpr uint32_t White				= U32ColorFromRGBA( 242, 248, 254, 255 );
 
 	//! Actual Polyhedron green color.
-	static constexpr uint32_t Polyhedron		= _MakeColorFromRGBA(  23, 233, 164, 255 );
+	static constexpr uint32_t Polyhedron		= U32ColorFromRGBA(  23, 233, 164, 255 );
 };
 
 
