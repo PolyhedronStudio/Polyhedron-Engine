@@ -2933,7 +2933,6 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
     if (clFrameResidual < CL_FRAMETIME) {
         return CL_FRAMETIME - clFrameResidual;
     }
-	
 		
 	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
@@ -2942,26 +2941,29 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 	// Run the received packet entities for a frame so we can "predict".
 	CL_GM_ClientPacketEntityDeltaFrame();
 
-	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		// Get entity pointer.
-		PODEntity *podEntity = &cs.entities[i];
+	if ( sv_paused->integer == 0 ) {
+		for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
+			// Get entity pointer.
+			PODEntity *podEntity = &cs.entities[i];
 
-		if (!podEntity->inUse) {
-			continue;
+			if (!podEntity->inUse) {
+				continue;
+			}
+
+			// Update local entity.
+			LocalEntity_Update(&podEntity->currentState);
+
+			// Run the Client Game entity for a frame.		
+			LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
+
+			// Fire local entity events.
+			LocalEntity_FireEvent(&podEntity->currentState);
 		}
 
-		// Update local entity.
-		LocalEntity_Update(&podEntity->currentState);
-
-		// Run the Client Game entity for a frame.		
-		LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
-
-		// Fire local entity events.
-		LocalEntity_FireEvent(&podEntity->currentState);
+		// Give the client game module a chance to run its local entities for a frame.
+		CL_GM_ClientLocalEntitiesFrame();
 	}
-	//Com_LPrintf(PrintType::DeveloperWarning, "Testing this stuff..?\n");
-	// Give the client game module a chance to run its local entities for a frame.
-	CL_GM_ClientLocalEntitiesFrame();
+
 
 #if USE_CLIENT
     if (host_speeds->integer)
