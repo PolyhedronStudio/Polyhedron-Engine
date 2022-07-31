@@ -771,8 +771,8 @@ void R_DrawSetTransform_RTX(float* matrix) {
 void
 R_ClearColor_RTX(void)
 {
-	draw.colors[0].u32 = U32_WHITE;
-	draw.colors[1].u32 = U32_WHITE;
+	draw.colors[0].u32 = U32Colors::White;
+	draw.colors[1].u32 = U32Colors::White;
 }
 
 void
@@ -830,7 +830,7 @@ R_TileClear_RTX(int x, int y, int w, int h, qhandle_t pic)
 {
 	enqueue_stretch_pic(x, y, w, h,
 		x * DIV64, y * DIV64, (x + w) * DIV64, (y + h) * DIV64,
-		U32_WHITE, pic);
+		U32Colors::White, pic);
 }
 
 void

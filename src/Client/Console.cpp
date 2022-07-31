@@ -424,7 +424,24 @@ static void con_scale_changed(cvar_t *self)
     }
 }
 
+static void Con_TestColor_f() {
+	if (Cmd_Argc() != 4) {
+        Com_Printf("Usage: %s <r> <g> <b> <a>\n", Cmd_Argv(0));
+        return;
+    }
+
+	int32_t r = std::stoi( Cmd_Argv(1) );
+	int32_t g = std::stoi( Cmd_Argv(2) );
+	int32_t b = std::stoi( Cmd_Argv(3) );
+	int32_t a = std::stoi( Cmd_Argv(4) );
+
+	R_SetColor( MakeColor( r, g, b, a ) );
+}
+
 static const cmdreg_t c_console[] = {
+	// For testing what any RGB text looks like?
+	{ "testcolor", Con_TestColor_f },
+
     { "toggleconsole", Con_ToggleConsole_f },
     { "togglechat", Con_ToggleChat_f },
     { "togglechat2", Con_ToggleChat2_f },
@@ -818,7 +835,7 @@ static void Con_DrawSolidConsole(void)
 
 // draw arrows to show the buffer is backscrolled
     if (con.display != con.current) {
-        R_SetColor(U32_RED);
+        R_SetColor(U32Colors::Green);
         for (i = 1; i < con.linewidth / 2; i += 4) {
             R_DrawChar(i * CHAR_WIDTH, y, 0, '^', con.charsetImage);
         }
@@ -889,7 +906,9 @@ static void Con_DrawSolidConsole(void)
 
         // draw it
         y = vislines - CON_PRESTEP + CHAR_HEIGHT * 2;
+		R_SetColor( U32Colors::Polyhedron );
         R_DrawString(CHAR_WIDTH, y, 0, CON_LINEWIDTH, buffer, con.charsetImage);
+		R_ClearColor( );
     } else if (cls.connectionState == ClientConnectionState::Loading) {
         // draw loading state
         switch (con.loadstate) {
@@ -915,11 +934,17 @@ static void Con_DrawSolidConsole(void)
         }
 
         if (text) {
-            Q_snprintf(buffer, sizeof(buffer), "Loading %s...", text);
-
+            Q_snprintf(buffer, sizeof(buffer), "%s ", "Loading");
+			
             // draw it
             y = vislines - CON_PRESTEP + CHAR_HEIGHT * 2;
-            R_DrawString(CHAR_WIDTH, y, 0, CON_LINEWIDTH, buffer, con.charsetImage);
+            R_SetColor( U32Colors::Polyhedron );
+            x = R_DrawString(CHAR_WIDTH, y, 0, CON_LINEWIDTH, buffer, con.charsetImage);
+            Q_snprintf(buffer, sizeof(buffer), "%s...", text);
+			R_ClearColor( );
+			R_SetColor( U32Colors::White );
+			R_DrawString(x, y, 0, CON_LINEWIDTH, buffer, con.charsetImage);
+			R_ClearColor( );
         }
     }
 
@@ -940,7 +965,7 @@ static void Con_DrawSolidConsole(void)
             i = 17;
             break;
         }
-        R_SetColor(U32_YELLOW);
+        R_SetColor( U32Colors::Polyhedron );
         R_DrawChar(CHAR_WIDTH, y, 0, i, con.charsetImage);
         R_ClearColor();
 
@@ -960,7 +985,7 @@ static void Con_DrawSolidConsole(void)
         row++;
     }
 
-    R_SetColor(U32_CYAN);
+    R_SetColor( U32Colors::Polyhedron );
 
 // draw clock
     if (con_clock->integer) {

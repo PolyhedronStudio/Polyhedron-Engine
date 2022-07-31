@@ -811,12 +811,12 @@ static void GL_InitWhiteImage(void)
 {
     uint32_t pixel;
 
-    pixel = U32_WHITE;
+    pixel = MakeColor( 255, 255, 255, 255 );
     GL_ForceTexture(0, TEXNUM_WHITE);
     GL_Upload32((byte *)&pixel, 1, 1, 0, IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast
     GL_SetFilterAndRepeat(IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast
 
-    pixel = U32_BLACK;
+    pixel = MakeColor( 0, 0, 0, 255 );
     GL_ForceTexture(0, TEXNUM_BLACK);
     GL_Upload32((byte*)&pixel, 1, 1, 0, IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast
     GL_SetFilterAndRepeat(IT_SPRITE, (imageflags_t)(IF_REPEAT | IF_NEAREST)); // CPP: Cast

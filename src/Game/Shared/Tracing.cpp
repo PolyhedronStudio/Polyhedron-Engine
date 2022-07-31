@@ -75,32 +75,6 @@ SGTraceResult::SGTraceResult(TraceResult& traceResult) :
 		podEntity = traceResult.ent;
 		gameEntity = nullptr;
 	}
-	//if (traceResult.ent) {
-	//	// Cast to PODEntity.
-	//	PODEntity *podEntity = static_cast<PODEntity*>(traceResult.ent);
-
-	//	// Acquire number.
-	//	const uint32_t index = podEntity->currentState.number;
-
-	//	// Look for entity. (Should be done using gameworld get by index...)
-	//	if (index < gameEntities.size() && gameEntities[index] != NULL) {
-	//		gameEntity = gameEntities[index];
-	//	} else {
-	//		// Default to Worldspawn instead.
-	//		gameEntity = gameWorld->GetWorldspawnGameEntity();
-	//		// POD Entity still needs to be set to worldspawn.
-	//		podEntity = gameWorld->GetWorldspawnPODEntity();
-	//	}
-
-	//	// Assign the podEntity.
-	//	this->podEntity = podEntity;
-	//} else {
-	//	// Default to Worldspawn instead.
-	//	podEntity = gameWorld->GetWorldspawnGameEntity();
-
-	//	// POD Entity still needs to be set to worldspawn.
-	//	podEntity = gameWorld->GetWorldspawnPODEntity();
-	//}
 }
 
 /**

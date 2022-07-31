@@ -441,17 +441,25 @@ void Com_LPrintf(int32_t printType, const char *fmt, ...)
             Com_SetColor(COLOR_NONE);
             break;
         case PrintType::Developer:
-            Com_SetColor(COLOR_ALT);
-            Com_SetColor(COLOR_ORANGE);
+//          Com_SetColor(COLOR_ALT);
+            Com_SetColor(COLOR_NONE);
+            Com_SetColor(COLOR_DEVELOPER);
+			break;
+		case PrintType::DeveloperWarning:
+			Com_SetColor(COLOR_ALT);
+            Com_SetColor(COLOR_DEVELOPER_WARNING);
             break;
         case PrintType::Warning:
-            Com_SetColor(COLOR_ORANGE);
+			Com_SetColor(COLOR_NONE);
+			Com_SetColor(COLOR_ORANGE);
             break;
         case PrintType::Error:
-            Com_SetColor(COLOR_RED);
+            Com_SetColor(COLOR_NONE);
+			Com_SetColor(COLOR_RED);
             break;
         case PrintType::Notice:
-            Com_SetColor(COLOR_CYAN);
+            Com_SetColor(COLOR_NONE);
+			Com_SetColor(COLOR_POLYHEDRON);
             break;
         default:
             break;
@@ -499,13 +507,12 @@ void Com_Error(int32_t errorType, const char *fmt, ...)
     size_t          len;
 
     // Prevent disconnecting to a black menu etc.
-    #if CLIENT
-    //if(code == ErrorType::Disconnect) {
-    //    // Let's go haha.
-    //    CL_OpenBSPMenu(true);
-    //    CL_ForwardToServer();
-    //}
-    #endif
+#if CLIENT
+//if(code == ErrorType::Disconnect) {
+//    CL_OpenBSPMenu(true);
+//    CL_ForwardToServer();
+//}
+#endif
 
     // may not be entered recursively
     if (com_errorEntered) {
@@ -789,7 +796,7 @@ void Com_Color_g(genctx_t *ctx)
     int color;
 
     for (color = 0; color < 8; color++) {
-        if (!Prompt_AddMatch(ctx, colorNames[color])) {
+        if (!Prompt_AddMatch(ctx, colorStringTable[color])) {
             break;
         }
     }

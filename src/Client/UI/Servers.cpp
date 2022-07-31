@@ -200,7 +200,7 @@ static uint32_t ColorForStatus(const serverStatus_t *status)
     if (PH_StringCompare(Info_ValueForKey(status->infostring, "NoFake"), "ENABLED") == 0)
         return uis.color.disabled.u32;
 
-    return U32_WHITE;
+    return U32Colors::White;
 }
 
 /*
@@ -365,7 +365,7 @@ void UI_ErrorEvent(NetAdr *from)
     slot->status = serverslot_t::SLOT_ERROR;
     slot->address = address;
     slot->hostname = hostname;
-    slot->color = U32_WHITE;
+    slot->color = U32Colors::White;
     slot->numRules = 0;
     slot->numPlayers = 0;
     slot->timeStamp = timeStamp;
@@ -430,7 +430,7 @@ static menuSound_t PingSelected(void)
     slot->status = serverslot_t::SLOT_PENDING;
     slot->address = address;
     slot->hostname = hostname;
-    slot->color = U32_WHITE;
+    slot->color = U32Colors::White;
     slot->numRules = 0;
     slot->numPlayers = 0;
     slot->timeStamp = com_eventTime;
@@ -484,7 +484,7 @@ static void AddServer(const NetAdr *address, const char *hostname)
     slot->status = serverslot_t::SLOT_IDLE; // CPP:
     slot->address = *address;
     slot->hostname = UI_CopyString(hostname);
-    slot->color = U32_WHITE;
+    slot->color = U32Colors::White;
     slot->numRules = 0;
     slot->numPlayers = 0;
     slot->timeStamp = com_eventTime;

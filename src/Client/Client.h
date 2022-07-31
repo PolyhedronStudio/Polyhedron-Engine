@@ -661,7 +661,7 @@ void SCR_EndLoadingPlaque(void);
 void SCR_ModeChanged(void);
 void SCR_UpdateScreen(void);
 
-extern const uint32_t   colorTable[8];
+extern const uint32_t   colorTable[10];
 
 qboolean SCR_ParseColor(const char *s, color_t *color);
 

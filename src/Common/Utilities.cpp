@@ -19,13 +19,363 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../Shared/Shared.h"
 #include "Common/Utilities.h"
 
-/*
-==============================================================================
 
-                        WILDCARD COMPARE
+/***
+*
+*
+*	Various.
+*
+*
+***/
+//! Keep track of total paged memory.
+int    paged_total;
 
-==============================================================================
-*/
+/**
+*	@brief	Keep track of paged memory blocks.
+**/
+void Com_PageInMemory(void *buffer, size_t size)
+{
+    int        i;
+
+    for (i = size - 1; i > 0; i -= 4096)
+        paged_total += ((byte *)buffer)[i];
+}
+
+#if REF_GL
+/**
+*	@brief	Helper function to parse an OpenGL-style extension string.
+**/
+unsigned Com_ParseExtensionString(const char *s, const char *const extnames[])
+{
+    unsigned mask;
+    const char *p;
+    size_t l1, l2;
+    int i;
+
+    if (!s) {
+        return 0;
+    }
+
+    mask = 0;
+    while (*s) {
+        p = PH_StringCharNul(s, ' ');
+        l1 = p - s;
+        for (i = 0; extnames[i]; i++) {
+            l2 = strlen(extnames[i]);
+            if (l1 == l2 && !memcmp(s, extnames[i], l1)) {
+                mask |= 1 << i;
+                break;
+            }
+        }
+        if (!*p) {
+            break;
+        }
+        s = p + 1;
+    }
+
+    return mask;
+}
+#endif
+
+/**
+*	@brief	Restores entity origin and angles from player state
+**/
+void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es)
+{
+    vec_t pitch;
+
+    // PH: FF Precision.
+    es->origin = ps->pmove.origin; //VectorCopy(ps->pmove.origin, es->origin);
+    //VectorScale(ps->pmove.origin, 0.125f, es->origin);
+
+    pitch = ps->pmove.viewAngles[vec3_t::Pitch];
+    if (pitch > 180) {
+        pitch -= 360;
+    }
+    es->angles[vec3_t::Pitch] = pitch / 3;
+    es->angles[vec3_t::Yaw] = ps->pmove.viewAngles[vec3_t::Yaw];
+    es->angles[vec3_t::Roll] = 0;
+}
+
+
+
+/***
+*
+*
+*	Color indexing and parsing, for text display usage.
+*
+*
+***/
+//! Textual representation of all colors serving as a color matching table.
+const char *const colorStringTable[12] = {
+    "blue", "green", "yellow", "orange", 
+	"purple", "red", "white", 
+	
+	"dev",
+	"devwarn",
+
+	"polyhedron",
+    
+	"alt", 
+	"none"
+};
+
+/**
+*	@brief	Parses the color, the string can be a name in our names table, or 
+*			Returns COLOR_NONE in case of error.
+**/
+color_index_t Com_ParseColor(const char *s, color_index_t last)
+{
+    color_index_t i;
+
+    if (COM_IsUint(s)) {
+        i = (color_index_t)strtoul(s, NULL, 10); // CPP: Cast
+        return i > last ? COLOR_NONE : i;
+    }
+
+    for (i = (color_index_t)0; (color_index_t)i <= last; i = (color_index_t)((int)i + 1)) { // CPP: Cast - LOL
+        if (!strcmp(colorStringTable[i], s)) {
+            return i;
+        }
+    }
+
+    return COLOR_NONE;
+}
+
+
+
+/***
+*
+*
+*	String Format, and Time.
+*
+*
+***/
+#if USE_CLIENT
+/**
+*	@brief	Parses time/frame specification for seeking in demos. Does not check for integer overflow...
+**/
+qboolean Com_ParseTimespec(const char *s, int *frames)
+{
+    unsigned long c1, c2, c3;
+    char *p;
+
+    c1 = strtoul(s, &p, 10);
+    if (!*p) {
+        *frames = c1 * 10; // sec
+        return true;
+    }
+
+    if (*p == '.') {
+        c2 = strtoul(p + 1, &p, 10);
+        if (*p)
+            return false;
+        *frames = c1 * 10 + c2; // sec.frac
+        return true;
+    }
+
+    if (*p == ':') {
+        c2 = strtoul(p + 1, &p, 10);
+        if (!*p) {
+            *frames = c1 * 600 + c2 * 10; // min:sec
+            return true;
+        }
+
+        if (*p == '.') {
+            c3 = strtoul(p + 1, &p, 10);
+            if (*p)
+                return false;
+            *frames = c1 * 600 + c2 * 10 + c3; // min:sec.frac
+            return true;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+#endif
+
+/**
+*	@brief	Format the time in a human readable textual display string.
+**/
+size_t Com_FormatTime(char *buffer, size_t size, time_t t)
+{
+    int     sec, min, hour, day;
+
+    min = t / 60; sec = t % 60;
+    hour = min / 60; min %= 60;
+    day = hour / 24; hour %= 24;
+
+    if (day) {
+        return Q_scnprintf(buffer, size, "%d+%d:%02d.%02d", day, hour, min, sec);
+    }
+    if (hour) {
+        return Q_scnprintf(buffer, size, "%d:%02d.%02d", hour, min, sec);
+    }
+    return Q_scnprintf(buffer, size, "%02d.%02d", min, sec);
+}
+
+/**
+*	@brief	Format the time in a human readable textual display string.
+**/
+size_t Com_FormatTimeLong(char *buffer, size_t size, time_t t)
+{
+    int     sec, min, hour, day;
+    size_t  len;
+
+    if (!t) {
+        return Q_scnprintf(buffer, size, "0 secs");
+    }
+
+    min = t / 60; sec = t % 60;
+    hour = min / 60; min %= 60;
+    day = hour / 24; hour %= 24;
+
+    len = 0;
+
+    if (day) {
+        len += Q_scnprintf(buffer + len, size - len,
+                           "%d day%s%s", day, day == 1 ? "" : "s", (hour || min || sec) ? ", " : "");
+    }
+    if (hour) {
+        len += Q_scnprintf(buffer + len, size - len,
+                           "%d hour%s%s", hour, hour == 1 ? "" : "s", (min || sec) ? ", " : "");
+    }
+    if (min) {
+        len += Q_scnprintf(buffer + len, size - len,
+                           "%d min%s%s", min, min == 1 ? "" : "s", sec ? ", " : "");
+    }
+    if (sec) {
+        len += Q_scnprintf(buffer + len, size - len,
+                           "%d sec%s", sec, sec == 1 ? "" : "s");
+    }
+
+    return len;
+}
+
+/**
+*	@brief	Determine the time differences.
+**/
+size_t Com_TimeDiff(char *buffer, size_t size, time_t *p, time_t now)
+{
+    time_t diff;
+
+    if (*p > now) {
+        *p = now;
+    }
+    diff = now - *p;
+    return Com_FormatTime(buffer, size, diff);
+}
+
+/**
+*	@brief	Determine the time differences.
+**/
+size_t Com_TimeDiffLong(char *buffer, size_t size, time_t *p, time_t now)
+{
+    time_t diff;
+
+    if (*p > now) {
+        *p = now;
+    }
+    diff = now - *p;
+    return Com_FormatTimeLong(buffer, size, diff);
+}
+
+/**
+*	@brief	Format the amount of bytes into a readable textual display string format.
+**/
+size_t Com_FormatSize(char *dest, size_t destsize, off_t bytes)
+{
+    if (bytes >= 10000000) {
+        return Q_scnprintf(dest, destsize, "%dM", (int)(bytes / 1000000));
+    }
+    if (bytes >= 1000000) {
+        return Q_scnprintf(dest, destsize, "%.1fM", (float)bytes / 1000000);
+    }
+    if (bytes >= 1000) {
+        return Q_scnprintf(dest, destsize, "%dK", (int)(bytes / 1000));
+    }
+    if (bytes >= 0) {
+        return Q_scnprintf(dest, destsize, "%d", (int)bytes);
+    }
+    return Q_scnprintf(dest, destsize, "???");
+}
+
+/**
+*	@brief	Format the amount of bytes into a readable textual display string format.
+**/
+size_t Com_FormatSizeLong(char *dest, size_t destsize, off_t bytes)
+{
+    if (bytes >= 10000000) {
+        return Q_scnprintf(dest, destsize, "%d MB", (int)(bytes / 1000000));
+    }
+    if (bytes >= 1000000) {
+        return Q_scnprintf(dest, destsize, "%.1f MB", (float)bytes / 1000000);
+    }
+    if (bytes >= 1000) {
+        return Q_scnprintf(dest, destsize, "%d kB", (int)(bytes / 1000));
+    }
+    if (bytes >= 0) {
+        return Q_scnprintf(dest, destsize, "%d byte%s",
+                           (int)bytes, bytes == 1 ? "" : "s");
+    }
+    return Q_scnprintf(dest, destsize, "unknown size");
+}
+
+
+
+/***
+*
+*
+*	String Hashing.
+*
+*
+***/
+/**
+*	@brief	A case-sensitive simple string hash.
+**/
+unsigned Com_HashString(const char *s, unsigned size)
+{
+    unsigned hash, c;
+
+    hash = 0;
+    while (*s) {
+        c = *s++;
+        hash = 127 * hash + c;
+    }
+
+    hash = (hash >> 20) ^(hash >> 10) ^ hash;
+    return hash & (size - 1);
+}
+
+/**
+*	@brief	A case-insensitive version of Com_HashString that hashes up to 'len'
+*			characters.
+**/
+unsigned Com_HashStringLen(const char *s, size_t len, unsigned size)
+{
+    unsigned hash, c;
+
+    hash = 0;
+    while (*s && len--) {
+        c = PH_ToLower(*s++);
+        hash = 127 * hash + c;
+    }
+
+    hash = (hash >> 20) ^(hash >> 10) ^ hash;
+    return hash & (size - 1);
+}
+
+
+
+/***
+*
+*
+*	Wildcard Comparison.
+*
+*
+***/
 
 static qboolean match_raw(int c1, int c2, qboolean ignorecase)
 {
@@ -104,21 +454,16 @@ static const char *match_filter(const char *filter, const char *string,
     return ret;
 }
 
-/*
-=================
-Com_WildCmpEx
-
-Wildcard compare. Returns true if string matches the pattern, false otherwise.
-
-- 'term' is handled as an additional filter terminator (besides NUL).
-- '*' matches any substring, including the empty string, but prefers longest
-possible substrings.
-- '?' matches any single character except NUL.
-- '\\' can be used to escape any character, including itself. any special
-characters lose their meaning in this case.
-
-=================
-*/
+/**
+*	@brief	Wildcard compare. Returns true if string matches the pattern, false otherwise.
+*
+*	@detail	- 'term' is handled as an additional filter terminator (besides NUL).
+*			- '*' matches any substring, including the empty string, but prefers longest
+*			possible substrings.
+*			- '?' matches any single character except NUL.
+*			- '\\' can be used to escape any character, including itself. any special
+*			characters lose their meaning in this case.
+**/
 qboolean Com_WildCmpEx(const char *filter, const char *string,
                        int term, qboolean ignorecase)
 {
@@ -178,325 +523,3 @@ qboolean Com_WildCmpEx(const char *filter, const char *string,
     // match NUL at the end
     return !*string;
 }
-
-/*
-==============================================================================
-
-                        MISC
-
-==============================================================================
-*/
-
-const char *const colorNames[10] = {
-    "black", "red", "green", "yellow",
-    "orange", "cyan", "magenta", "white",
-    "alt", "none"
-};
-
-/*
-================
-Com_ParseColor
-
-Parses color name or index up to the maximum allowed index.
-Returns COLOR_NONE in case of error.
-================
-*/
-color_index_t Com_ParseColor(const char *s, color_index_t last)
-{
-    color_index_t i;
-
-    if (COM_IsUint(s)) {
-        i = (color_index_t)strtoul(s, NULL, 10); // CPP: Cast
-        return i > last ? COLOR_NONE : i;
-    }
-
-    for (i = (color_index_t)0; (color_index_t)i <= last; i = (color_index_t)((int)i + 1)) { // CPP: Cast - LOL
-        if (!strcmp(colorNames[i], s)) {
-            return i;
-        }
-    }
-
-    return COLOR_NONE;
-}
-
-#if REF_GL
-/*
-================
-Com_ParseExtensionString
-
-Helper function to parse an OpenGL-style extension string.
-================
-*/
-unsigned Com_ParseExtensionString(const char *s, const char *const extnames[])
-{
-    unsigned mask;
-    const char *p;
-    size_t l1, l2;
-    int i;
-
-    if (!s) {
-        return 0;
-    }
-
-    mask = 0;
-    while (*s) {
-        p = PH_StringCharNul(s, ' ');
-        l1 = p - s;
-        for (i = 0; extnames[i]; i++) {
-            l2 = strlen(extnames[i]);
-            if (l1 == l2 && !memcmp(s, extnames[i], l1)) {
-                mask |= 1 << i;
-                break;
-            }
-        }
-        if (!*p) {
-            break;
-        }
-        s = p + 1;
-    }
-
-    return mask;
-}
-#endif
-
-/*
-================
-Com_PlayerToEntityState
-
-Restores entity origin and angles from player state
-================
-*/
-void Com_PlayerToEntityState(const PlayerState *ps, EntityState *es)
-{
-    vec_t pitch;
-
-    // PH: FF Precision.
-    es->origin = ps->pmove.origin; //VectorCopy(ps->pmove.origin, es->origin);
-    //VectorScale(ps->pmove.origin, 0.125f, es->origin);
-
-    pitch = ps->pmove.viewAngles[vec3_t::Pitch];
-    if (pitch > 180) {
-        pitch -= 360;
-    }
-    es->angles[vec3_t::Pitch] = pitch / 3;
-    es->angles[vec3_t::Yaw] = ps->pmove.viewAngles[vec3_t::Yaw];
-    es->angles[vec3_t::Roll] = 0;
-}
-
-#if USE_CLIENT
-/*
-================
-Com_ParseTimespec
-
-Parses time/frame specification for seeking in demos.
-Does not check for integer overflow...
-================
-*/
-qboolean Com_ParseTimespec(const char *s, int *frames)
-{
-    unsigned long c1, c2, c3;
-    char *p;
-
-    c1 = strtoul(s, &p, 10);
-    if (!*p) {
-        *frames = c1 * 10; // sec
-        return true;
-    }
-
-    if (*p == '.') {
-        c2 = strtoul(p + 1, &p, 10);
-        if (*p)
-            return false;
-        *frames = c1 * 10 + c2; // sec.frac
-        return true;
-    }
-
-    if (*p == ':') {
-        c2 = strtoul(p + 1, &p, 10);
-        if (!*p) {
-            *frames = c1 * 600 + c2 * 10; // min:sec
-            return true;
-        }
-
-        if (*p == '.') {
-            c3 = strtoul(p + 1, &p, 10);
-            if (*p)
-                return false;
-            *frames = c1 * 600 + c2 * 10 + c3; // min:sec.frac
-            return true;
-        }
-
-        return false;
-    }
-
-    return false;
-}
-#endif
-
-/*
-================
-Com_HashString
-================
-*/
-unsigned Com_HashString(const char *s, unsigned size)
-{
-    unsigned hash, c;
-
-    hash = 0;
-    while (*s) {
-        c = *s++;
-        hash = 127 * hash + c;
-    }
-
-    hash = (hash >> 20) ^(hash >> 10) ^ hash;
-    return hash & (size - 1);
-}
-
-/*
-================
-Com_HashStringLen
-
-A case-insensitive version of Com_HashString that hashes up to 'len'
-characters.
-================
-*/
-unsigned Com_HashStringLen(const char *s, size_t len, unsigned size)
-{
-    unsigned hash, c;
-
-    hash = 0;
-    while (*s && len--) {
-        c = PH_ToLower(*s++);
-        hash = 127 * hash + c;
-    }
-
-    hash = (hash >> 20) ^(hash >> 10) ^ hash;
-    return hash & (size - 1);
-}
-
-/*
-===============
-Com_PageInMemory
-
-===============
-*/
-int    paged_total;
-
-void Com_PageInMemory(void *buffer, size_t size)
-{
-    int        i;
-
-    for (i = size - 1; i > 0; i -= 4096)
-        paged_total += ((byte *)buffer)[i];
-}
-
-size_t Com_FormatTime(char *buffer, size_t size, time_t t)
-{
-    int     sec, min, hour, day;
-
-    min = t / 60; sec = t % 60;
-    hour = min / 60; min %= 60;
-    day = hour / 24; hour %= 24;
-
-    if (day) {
-        return Q_scnprintf(buffer, size, "%d+%d:%02d.%02d", day, hour, min, sec);
-    }
-    if (hour) {
-        return Q_scnprintf(buffer, size, "%d:%02d.%02d", hour, min, sec);
-    }
-    return Q_scnprintf(buffer, size, "%02d.%02d", min, sec);
-}
-
-size_t Com_FormatTimeLong(char *buffer, size_t size, time_t t)
-{
-    int     sec, min, hour, day;
-    size_t  len;
-
-    if (!t) {
-        return Q_scnprintf(buffer, size, "0 secs");
-    }
-
-    min = t / 60; sec = t % 60;
-    hour = min / 60; min %= 60;
-    day = hour / 24; hour %= 24;
-
-    len = 0;
-
-    if (day) {
-        len += Q_scnprintf(buffer + len, size - len,
-                           "%d day%s%s", day, day == 1 ? "" : "s", (hour || min || sec) ? ", " : "");
-    }
-    if (hour) {
-        len += Q_scnprintf(buffer + len, size - len,
-                           "%d hour%s%s", hour, hour == 1 ? "" : "s", (min || sec) ? ", " : "");
-    }
-    if (min) {
-        len += Q_scnprintf(buffer + len, size - len,
-                           "%d min%s%s", min, min == 1 ? "" : "s", sec ? ", " : "");
-    }
-    if (sec) {
-        len += Q_scnprintf(buffer + len, size - len,
-                           "%d sec%s", sec, sec == 1 ? "" : "s");
-    }
-
-    return len;
-}
-
-size_t Com_TimeDiff(char *buffer, size_t size, time_t *p, time_t now)
-{
-    time_t diff;
-
-    if (*p > now) {
-        *p = now;
-    }
-    diff = now - *p;
-    return Com_FormatTime(buffer, size, diff);
-}
-
-size_t Com_TimeDiffLong(char *buffer, size_t size, time_t *p, time_t now)
-{
-    time_t diff;
-
-    if (*p > now) {
-        *p = now;
-    }
-    diff = now - *p;
-    return Com_FormatTimeLong(buffer, size, diff);
-}
-
-size_t Com_FormatSize(char *dest, size_t destsize, off_t bytes)
-{
-    if (bytes >= 10000000) {
-        return Q_scnprintf(dest, destsize, "%dM", (int)(bytes / 1000000));
-    }
-    if (bytes >= 1000000) {
-        return Q_scnprintf(dest, destsize, "%.1fM", (float)bytes / 1000000);
-    }
-    if (bytes >= 1000) {
-        return Q_scnprintf(dest, destsize, "%dK", (int)(bytes / 1000));
-    }
-    if (bytes >= 0) {
-        return Q_scnprintf(dest, destsize, "%d", (int)bytes);
-    }
-    return Q_scnprintf(dest, destsize, "???");
-}
-
-size_t Com_FormatSizeLong(char *dest, size_t destsize, off_t bytes)
-{
-    if (bytes >= 10000000) {
-        return Q_scnprintf(dest, destsize, "%d MB", (int)(bytes / 1000000));
-    }
-    if (bytes >= 1000000) {
-        return Q_scnprintf(dest, destsize, "%.1f MB", (float)bytes / 1000000);
-    }
-    if (bytes >= 1000) {
-        return Q_scnprintf(dest, destsize, "%d kB", (int)(bytes / 1000));
-    }
-    if (bytes >= 0) {
-        return Q_scnprintf(dest, destsize, "%d byte%s",
-                           (int)bytes, bytes == 1 ? "" : "s");
-    }
-    return Q_scnprintf(dest, destsize, "unknown size");
-}
-
-

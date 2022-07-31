@@ -155,7 +155,7 @@ void MiscExplosionBox::Think() {
 }
 
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+	SetNextThinkTime(level.time + 1.f * FRAMETIME);
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
 }
 
@@ -220,8 +220,8 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
     SG_CheckGround(this);//CLG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
-    //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
-    //SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME);
 
     // Do a check ground for the step move of this pusher.
     //CLG_StepMove_CheckGround(this);

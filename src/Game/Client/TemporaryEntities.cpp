@@ -83,7 +83,7 @@ static void cl_railcore_color_changed(cvar_t* self)
 		//Com_WPrint("Invalid value '%s' for '%s'\n", self->string, self->name);
 		Com_WPrint("Rail Color Parsing is currently unsupported.\n");	
 		clgi.Cvar_Reset(self);
-		railcore_color.u32 = U32_RED;
+		railcore_color.u32 = U32Colors::Red;
 	//}
 }
 
@@ -93,7 +93,7 @@ static void cl_railspiral_color_changed(cvar_t* self)
 		//Com_WPrint("Invalid value '%s' for '%s'\n", self->string, self->name);
 		Com_WPrint("Rail Color Parsing is currently unsupported.\n");
 		clgi. Cvar_Reset(self);
-		railspiral_color.u32 = U32_ORANGE;
+		railspiral_color.u32 = U32Colors::Orange;
 	//}
 }
 

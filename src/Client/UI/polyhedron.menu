@@ -117,10 +117,10 @@ begin photomode
 end
 
 begin video
-   //title "Video Setup"
+    title "Video Setup"
     background #6b7d69d0
     style --compact
-    banner m_banner_video
+    //banner m_banner_video
 	pairs "renderer" vid_rtx opengl 0 rtx 1
     values -s "use LEFT and RIGHT keys to select" "video mode" vid_fullscreen windowed $vid_modelist
     pairs "full screen display" vid_display $vid_displaylist
@@ -177,10 +177,10 @@ begin video
 end
 
 begin options
-    //title "Options"
+    title "Options"
     background #6b7d69d0
     style --compact
-    banner m_banner_options
+    //banner m_banner_options
     ifeq vid_rtx 1
         action "environment setup" pushmenu environment
     endif
@@ -325,8 +325,8 @@ end
 begin startserver
     background #6b7d69d0
     style --compact
-    //title "Start Server"
-    banner m_banner_start_server
+    title "Start Server"
+    //banner m_banner_start_server
     strings "initial map" _ui_nextserver $com_maplist
     field --integer --status "0 - no time limit" --width 3 "time limit" timelimit
     field --integer --status "0 - no frag limit" --width 3 "frag limit" fraglimit
@@ -340,7 +340,8 @@ end
 begin multiplayer
     background #6b7d69d0
     style --compact
-    banner m_banner_multiplayer
+    title "Multiplayer"
+	//banner m_banner_multiplayer
     ifeq fs_shareware 0
         action "browse q2servers.com" pushmenu servers "+http://q2servers.com/?raw=2"
         action "browse address book" pushmenu servers "favorites://" "file:///servers.lst" "broadcast://"
@@ -402,7 +403,8 @@ end
 begin loadgame
     background #6b7d69d0
     style --compact
-    banner m_banner_load_game
+    title "Load Game"
+	//banner m_banner_load_game
     loadgame save0
     blank
     loadgame quick
@@ -427,7 +429,8 @@ end
 begin savegame
     background #6b7d69d0
     style --compact
-    banner m_banner_save_game
+	title "Save Game"
+    //banner m_banner_save_game
     savegame save1
     savegame save2
     savegame save3
@@ -491,8 +494,8 @@ end*/
 begin addressbook
     background #6b7d69d0
     style --compact
-    //title "Address Book"
-    banner m_banner_addressbook
+    title "Address Book"
+    //banner m_banner_addressbook
     field --width 32 --center adr0
     field --width 32 --center adr1
     field --width 32 --center adr2

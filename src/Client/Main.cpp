@@ -2959,7 +2959,7 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
 		// Fire local entity events.
 		LocalEntity_FireEvent(&podEntity->currentState);
 	}
-	
+	//Com_LPrintf(PrintType::DeveloperWarning, "Testing this stuff..?\n");
 	// Give the client game module a chance to run its local entities for a frame.
 	CL_GM_ClientLocalEntitiesFrame();
 

@@ -89,9 +89,14 @@ static const char *const sb_nums[2][STAT_PICS] = {
     }
 };
 
-const uint32_t colorTable[8] = {
-    U32_BLACK, U32_RED, U32_GREEN, U32_YELLOW,
-    U32_ORANGE, U32_CYAN, U32_MAGENTA, U32_WHITE
+const uint32_t colorTable[10] = {
+    U32Colors::Blue, U32Colors::Green, U32Colors::Yellow, U32Colors::Orange, U32Colors::Purple, U32Colors::Red, 
+	
+	U32Colors::Developer,
+	U32Colors::DeveloperWarning,
+
+	U32Colors::White, 
+	U32Colors::Polyhedron
 };
 
 /*
@@ -232,7 +237,7 @@ qboolean SCR_ParseColor(const char *s, color_t *color)
     }
 
     // parse name or index
-    i = Com_ParseColor(s, COLOR_WHITE);
+    i = Com_ParseColor(s, COLOR_POLYHEDRON);
     if (i == COLOR_NONE) {
         return false;
     }
@@ -577,7 +582,7 @@ static void SCR_DrawDebugStats(void)
     for (i = 0; i < j; i++) {
         Q_snprintf(buffer, sizeof(buffer), "%2d: %d", i, cl.frame.playerState.stats[i]);
         if (cl.oldframe.playerState.stats[i] != cl.frame.playerState.stats[i]) {
-            R_SetColor(U32_RED);
+            R_SetColor(U32Colors::Red);
         }
         R_DrawString(x, y, 0, MAX_STRING_CHARS, buffer, scr.font_pic);
         R_ClearColor();
@@ -853,9 +858,7 @@ static void SCR_TileClear(void)
 
 //=============================================================================
 
-static void SCR_DrawPause(void)
-{/*
-    int x, y;*/
+static void SCR_DrawPause(void) {
 
     if (!sv_paused->integer)
         return;
@@ -867,8 +870,7 @@ static void SCR_DrawPause(void)
     CL_GM_DrawPauseScreen();
 }
 
-static void SCR_DrawLoading(void)
-{
+static void SCR_DrawLoading(void) {
     if (!scr.draw_loading)
         return;
 
@@ -877,14 +879,13 @@ static void SCR_DrawLoading(void)
     CL_GM_DrawLoadScreen();
 }
 
-static void SCR_Draw2D(void)
-{
+static void SCR_Draw2D(void) {
     if (scr_draw2d->integer <= 0)
         return;     // turn off for screenshots
 
     if (cls.key_dest & KEY_MENU)
         return;
-
+	SCR_DrawString(scr.hud_width, scr.hud_height, UI_RIGHT, "[PAUSED]");
     CL_GM_RenderScreen();
 
     SCR_DrawNet();

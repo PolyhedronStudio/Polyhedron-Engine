@@ -258,18 +258,13 @@ void ClientGameScreen::DrawLoadScreen() {
     // Set scale to hud scale.
     clgi.R_SetScale(screenData.hudScale);
 
-    // Calculate center of screen position for load pic.
-    vec2_t loadPicPosition = vec2_scale(
-        {
-            cl->refdef.width * screenData.hudScale - screenData.loadPicSize.x,
-            cl->refdef.height * screenData.hudScale - screenData.loadPicSize.y
-        },
-        0.5f
-    );
-    
-    // Draw load pic.
-    clgi.R_DrawPic(loadPicPosition.x, loadPicPosition.y, screenData.loadPic);
+	// Draw text.
+	const vec2_t centerPosition = vec2_scale( screenData.hudSize, 0.5 );
 
+	clgi.R_SetColor( U32Colors::Polyhedron );
+	const std::string loadStr = "[Loading..]";
+	DrawString( loadStr, centerPosition, UI_CENTER, loadStr.length() );
+	clgi.R_ClearColor();
     // Reset scale.
     clgi.R_SetScale(1.0f);
 }
@@ -284,13 +279,14 @@ void ClientGameScreen::DrawPauseScreen() {
 
     // Set scale to hud scale.
     clgi.R_SetScale(screenData.hudScale);
-    
-    // Calculate center of screen position for pause pic.
-    vec2_t pausePicPosition = vec2_scale(screenData.hudSize - screenData.pausePicSize, 0.5f);
+	
+	// Draw text.
+	const vec2_t centerPosition = vec2_scale( screenData.hudSize * screenData.hudScale, 0.5 );
 
-    // Draw pause pic.
-    clgi.R_DrawPic(pausePicPosition.x, pausePicPosition.y, screenData.pausePic);
-    
+	clgi.R_SetColor( U32Colors::Polyhedron );
+	const std::string pauseStr = "[Paused]";
+	DrawString( pauseStr, centerPosition, UI_CENTER, pauseStr.length() );
+	clgi.R_ClearColor();
     // Reset scale.
     clgi.R_SetScale(1.0f);
 }
@@ -578,7 +574,16 @@ void ClientGameScreen::DrawFPS() {
         Q_snprintf(buffer, MAX_QPATH, "%d FPS", fps);
     }
 
-    clgi.R_SetColor(~0u);
+    //clgi.R_SetColor(~0u);
+	if ( fps < 30 ) {
+		clgi.R_SetColor( U32Colors::Red );
+	} else if (fps < 60) {
+		clgi.R_SetColor( U32Colors::Orange );
+	} else if (fps < 120) {
+		clgi.R_SetColor( U32Colors::Yellow );
+	} else {
+		clgi.R_SetColor( U32Colors::Polyhedron );
+	}
     DrawString(buffer, {screenData.hudSize.x - 2.f, 1.f}, UI_RIGHT);
 
     clgi.R_SetScale(1.f);

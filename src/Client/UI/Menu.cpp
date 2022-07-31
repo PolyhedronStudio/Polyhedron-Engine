@@ -1459,7 +1459,7 @@ static void MenuList_Draw(menuList_t *l)
     }
 
     if (l->mlFlags & MLF_COLOR) {
-        R_SetColor(U32_WHITE);
+        R_SetColor(U32Colors::White);
     }
 }
 

@@ -267,8 +267,8 @@ void GL_Setup2D(void)
     GL_Ortho(0, r_config.width, r_config.height, 0, -1, 1);
     draw.scale = 1;
 
-    draw.colors[0].u32 = U32_WHITE;
-    draw.colors[1].u32 = U32_WHITE;
+    draw.colors[0].u32 = U32Colors::White;
+    draw.colors[1].u32 = U32Colors::White;
 
     if (draw.scissor) {
         qglDisable(GL_SCISSOR_TEST);

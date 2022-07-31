@@ -93,8 +93,8 @@ void GL_Blend(void)
 
 void R_ClearColor_GL(void)
 {
-    draw.colors[0].u32 = U32_WHITE;
-    draw.colors[1].u32 = U32_WHITE;
+    draw.colors[0].u32 = U32Colors::White;
+    draw.colors[1].u32 = U32Colors::White;
 }
 
 void R_SetAlpha_GL(float alpha)
@@ -195,7 +195,7 @@ void R_DrawPic_GL(int x, int y, qhandle_t pic)
 void R_TileClear_GL(int x, int y, int w, int h, qhandle_t pic)
 {
     GL_StretchPic(x, y, w, h, x * DIV64, y * DIV64,
-                  (x + w) * DIV64, (y + h) * DIV64, U32_WHITE, IMG_ForHandle(pic));
+                  (x + w) * DIV64, (y + h) * DIV64, MakeColor( 255, 255, 255, 255 ), IMG_ForHandle(pic));
 }
 
 void R_DrawFill8_GL(int x, int y, int w, int h, int c)
@@ -287,7 +287,7 @@ void Draw_Stringf(int x, int y, const char *fmt, ...)
         t = (c >> 4) * 0.0625f;
 
         GL_StretchPic(x, y, CHAR_WIDTH, CHAR_HEIGHT, s, t,
-                      s + 0.0625f, t + 0.0625f, U32_WHITE, r_charset);
+                      s + 0.0625f, t + 0.0625f, U32Colors::White, r_charset);
         x += CHAR_WIDTH;
     }
 }
@@ -343,14 +343,14 @@ void Draw_Lightmaps(void)
         x = i & 1;
         y = i >> 1;
         _GL_StretchPic(256 * x, 256 * y, 256, 256,
-                       0, 0, 1, 1, U32_WHITE, lm.texnums[i], 0);
+                       0, 0, 1, 1, MakeColor( 255, 255, 255, 255 ), lm.texnums[i], 0);
     }
 }
 
 void Draw_Scrap(void)
 {
     _GL_StretchPic(0, 0, 256, 256,
-                   0, 0, 1, 1, U32_WHITE, TEXNUM_SCRAP, IF_PALETTED | IF_TRANSPARENT);
+                   0, 0, 1, 1, MakeColor( 255, 255, 255, 255 ), TEXNUM_SCRAP, IF_PALETTED | IF_TRANSPARENT);
 }
 
 #endif

@@ -516,7 +516,7 @@ static uint32_t color_for_surface(mface_t *surf)
     if (surf->drawflags & SurfaceFlags::Warp)
         return gl_static.inverse_intensity_100;
 
-    return U32_WHITE;
+    return U32Colors::White;
 }
 
 static void build_surface_poly(mface_t *surf, vec_t *vbo)
