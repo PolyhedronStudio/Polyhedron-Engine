@@ -1122,7 +1122,7 @@ init_vulkan()
 	qvk.queue_idx_transfer = -1;
 
 	for(int i = 0; i < num_queue_families; i++) {
-		if(!queue_families[i].queueCount)
+		if(!queue_families || !queue_families[i].queueCount)
 			continue;
 		VkBool32 present_support = 0;
 		vkGetPhysicalDeviceSurfaceSupportKHR(qvk.physical_device, i, qvk.surface, &present_support);
@@ -2844,7 +2844,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 		vkpt_refdef.bsp_mesh_world.world_aabb.maxs,
 		shadowmap_view_proj,
 		&shadowmap_depth_scale,
-		ref_mode.enable_accumulation && num_accumulated_frames > 1);
+		(ref_mode.enable_accumulation != 0 && num_accumulated_frames > 1) );
 
 	vkpt_god_rays_prepare_ubo(
 		ubo,

@@ -1637,7 +1637,7 @@ static inline qboolean check_paused(void)
     if (com_timedemo->integer)
         goto resume;
 
-	if (!LIST_SINGLE(&sv_clientlist) && !Cvar_VariableInteger("coop"))
+	if (!LIST_SINGLE(&sv_clientlist) && !Cvar_VariableString("coop"))
         goto resume;
 
     if (!sv_paused->integer) {

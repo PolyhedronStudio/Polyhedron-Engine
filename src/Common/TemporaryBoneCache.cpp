@@ -73,8 +73,6 @@ EntitySkeletonBonePose *TBC_AcquireCachedMemoryBlock( TemporaryBoneCache &cache,
 	const size_t sizeDemand = cache.cache.size() + size - 1;
 	const size_t currentCapacity = cache.cache.capacity();
 
-//	Com_Printf("--------------------\n");
-//	Com_Printf( "TBC_AcquireCachedMemoryBlock: sizeDemand=%i, currentCapacity=%i\n", sizeDemand, currentCapacity );
 	// In case the size exceeds MAX_IQM_JOINTS, nullptr.
 	if ( size > IQM_MAX_JOINTS ) {
 		Com_DPrintf( "if ( size > IQM_MAX_JOINTS ) where size=%i\n", size );

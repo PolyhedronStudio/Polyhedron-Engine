@@ -480,7 +480,7 @@ void create_identity_matrix(float matrix[16])
 	matrix[MATRIX(3, 3)] = 1.0f;
 }
 
-void create_look_at_matrix(float matrix[16], vec3_t EyePosition, vec3_t EyeDirection, vec3_t UpDirection)
+void create_look_at_matrix(float matrix[16], vec3_t &EyePosition, vec3_t &EyeDirection, vec3_t &UpDirection)
 {
 	vec3_t f; 
 	VectorNormalize2(EyeDirection, f);

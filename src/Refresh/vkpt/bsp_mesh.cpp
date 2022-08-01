@@ -791,7 +791,7 @@ append_light_poly(int* num_lights, int* allocated, light_poly_t** lights) {
 	return *lights + (*num_lights)++;
 }
 
-static inline qboolean
+static inline const bool
 is_light_material(uint32_t material) {
 	return (material & MATERIAL_FLAG_LIGHT) != 0;
 }
@@ -1056,7 +1056,7 @@ collect_light_polys(bsp_mesh_t* wm, bsp_t* bsp, int model_idx, int* num_lights, 
 		{
 			pbr_material_t* current_material = texinfo->material;
 			do 			{
-				any_light_frame |= is_light_material(current_material->flags);
+				any_light_frame |= (qboolean)is_light_material(current_material->flags);
 				current_material = r_materials + current_material->next_frame;
 			} while (current_material != texinfo->material);
 		}
@@ -1832,11 +1832,11 @@ bsp_mesh_register_textures(bsp_t* bsp) {
 			qboolean synth_surface_material = ((info->c.flags & (SurfaceFlags::Light | SurfaceFlags::Sky | SurfaceFlags::NoDraw)) == SurfaceFlags::Light)
 				&& (info->radiance != 0);
 
-			qboolean is_warp_surface = (info->c.flags & SurfaceFlags::Warp) != 0;
+			bool is_warp_surface = (info->c.flags & SurfaceFlags::Warp) != 0;
 
-			qboolean material_custom = !mat->source_matfile[0];
+			bool material_custom = !mat->source_matfile[0];
 
-			synth_surface_material &= (cvar_pt_enable_surface_lights->integer >= 2) || material_custom;
+			synth_surface_material &= ((cvar_pt_enable_surface_lights->integer >= 2) || material_custom);
 			if (cvar_pt_enable_surface_lights_warp->integer == 0)
 				synth_surface_material &= !is_warp_surface;
 
