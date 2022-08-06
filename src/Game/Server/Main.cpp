@@ -526,7 +526,7 @@ void SVG_UpdateHashedClassName(PODEntity *podEntity) {
 ================
 SVG_RunFrame
 
-Advances the world by FRAMETIME(for 50hz=0.019) seconds
+Advances the world by FRAMETIME_S(for 50hz=0.019) seconds
 ================
 */
 #include "../Shared/Physics/Physics.h"

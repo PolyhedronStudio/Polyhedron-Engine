@@ -36,7 +36,7 @@ void FuncTimer::Spawn() {
 	SetThinkCallback( &FuncTimer::TimerThink );
 
 	if ( randomTime >= waitTime ) {
-		randomTime = waitTime - FRAMETIME;
+		randomTime = waitTime - FRAMETIME_S;
 		gi.DPrintf( "func_timer at %s has random >= wait\n", vec3_to_cstr( GetOrigin() ) );
 	}
 

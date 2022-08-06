@@ -9,8 +9,9 @@
 ***/
 #pragma once
 
-// Shared Game.
-#include "../../SharedGame.h"
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_SERVERGAME 
 	#include "../../../Server/ServerGameLocals.h"
@@ -79,10 +80,10 @@ const vec3_t SG_AddRotationalFriction( SGEntityHandle entityHandle ) {
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
     // Set angles in proper direction.
-    ent->SetAngles( vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity) );
+    ent->SetAngles( vec3_fmaf(ent->GetAngles(), FRAMETIME_S.count(), angularVelocity) );
 
     // Calculate adjustment to apply.
-    float adjustment = FRAMETIME.count() * ROOTMOTION_MOVE_STOP_SPEED * ROOTMOTION_MOVE_GROUND_FRICTION;
+    float adjustment = FRAMETIME_S.count() * ROOTMOTION_MOVE_STOP_SPEED * ROOTMOTION_MOVE_GROUND_FRICTION;
 
     // Apply adjustments.
     angularVelocity = ent->GetAngularVelocity();
@@ -232,8 +233,8 @@ const int32_t SG_RootMotion_PerformMove( GameEntity *geSlider, const int32_t con
 		.slideBounce = slideBounce,
 
 
-		// The remaining time: Set to FRAMETIME(The time a frame takes.). Meaning, we move over time through frame.
-		.remainingTime = FRAMETIME.count(),
+		// The remaining time: Set to FRAMETIME_S(The time a frame takes.). Meaning, we move over time through frame.
+		.remainingTime = FRAMETIME_S.count(),
 
 
 		.groundTrace = oldGroundTrace,
@@ -322,8 +323,8 @@ const int32_t SG_RootMotion_PerformMove( GameEntity *geSlider, const int32_t con
 		//rootMotionMoveState->velocity = org0;
 
 		//// Move.
-		//// The remaining time: Set to FRAMETIME(The time a frame takes.). Meaning, we move over time through frame.
-		//rootMotionMoveState->remainingTime = FRAMETIME.count(),
+		//// The remaining time: Set to FRAMETIME_S(The time a frame takes.). Meaning, we move over time through frame.
+		//rootMotionMoveState->remainingTime = FRAMETIME_S.count(),
 		//moveResultMask = SG_RootMotion_MoveFrame( rootMotionMoveState );
 
 		//if ( (moveResultMask & RootMotionMoveResult::Trapped) ) { //|| !(moveResultMask & RootMotionMoveResult::Moved)) {

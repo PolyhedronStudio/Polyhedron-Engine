@@ -21,6 +21,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef MODELS_H
 #define MODELS_H
 
+
+//! Maximum allowed Alias Model Skins.
+static constexpr int32_t MAX_ALIAS_SKINS = 32;
+//! Maximum allowed Alias Model Verts.
+static constexpr int32_t MAX_ALIAS_VERTS = 4096;
+
 //
 // models.h -- common models manager
 //
@@ -28,10 +34,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "System/Hunk.h"
 #include "Common/Error.h"
 
-//! Maximum allowed Alias Model Skins.
-static constexpr int32_t MAX_ALIAS_SKINS = 32;
-//! Maximum allowed Alias Model Verts.
-static constexpr int32_t MAX_ALIAS_VERTS = 4096;
 
 qhandle_t R_RegisterModel(const char *name);
 

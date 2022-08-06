@@ -9,8 +9,9 @@
 ***/
 #pragma once
 
-// Shared Game.
-#include "../../SharedGame.h"
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_SERVERGAME 
 	#include "../../../Server/ServerGameLocals.h"
@@ -59,8 +60,8 @@ void SG_Physics_NoClip(SGEntityHandle &entityHandle) {
 		return;
 	}
 
-    gameEntity->SetAngles(vec3_fmaf(gameEntity->GetAngles(), FRAMETIME.count(), gameEntity->GetAngularVelocity()));
-    gameEntity->SetOrigin(vec3_fmaf(gameEntity->GetOrigin(), FRAMETIME.count(), gameEntity->GetVelocity()));
+    gameEntity->SetAngles(vec3_fmaf(gameEntity->GetAngles(), FRAMETIME_S.count(), gameEntity->GetAngularVelocity()));
+    gameEntity->SetOrigin(vec3_fmaf(gameEntity->GetOrigin(), FRAMETIME_S.count(), gameEntity->GetVelocity()));
 
     gameEntity->LinkEntity();
 }

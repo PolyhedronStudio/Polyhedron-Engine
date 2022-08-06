@@ -12,7 +12,7 @@
 // Shared Game.
 #include "../SharedGame.h"
 
-
+struct SGTraceResult;
 
 /**
 *

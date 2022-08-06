@@ -89,7 +89,7 @@ void SVGBaseItem::Spawn() {
 
     // Start thinking after other entities have spawned. This allows for items to safely
     // drop on platforms etc.
-    SetNextThinkTime(level.time + 2.5f * FRAMETIME);
+    SetNextThinkTime(level.time + 2.5f * FRAMETIME_S);
     SetThinkCallback(&SVGBaseItem::BaseItemDropToFloor);
 
     // Link the entity to world, for collision testing.
@@ -344,7 +344,7 @@ void SVGBaseItem::BaseItemDropToFloor() {
     //    SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
     //    SetSolid(Solid::Not);
     //    if (this == GetTeamMasterEntity()) {
-    //        SetNextThinkTime(level.time + FRAMETIME);
+    //        SetNextThinkTime(level.time + FRAMETIME_S);
     //        SetThinkCallback(&SVGBaseItem::BaseItemDoRespawn);
     //    }
     //}

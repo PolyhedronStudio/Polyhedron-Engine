@@ -90,7 +90,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 	if (moveInfo->state == MoverState::Bottom) {
 		platformEntity->PlatformGoUp();
 	} else if (moveInfo->state == MoverState::Top) {
-		platformEntity->SetNextThinkTime(level.time + 1 * FRAMETIME);
+		platformEntity->SetNextThinkTime(level.time + 1 * FRAMETIME_S);
 	}
 
 	//if ( other->GetHealth() <= 0 ) {

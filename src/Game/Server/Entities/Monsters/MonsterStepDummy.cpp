@@ -108,7 +108,7 @@ void MonsterStepDummy::PostSpawn() {
 
     // Setup our MonsterStepDummy callbacks.
     SetThinkCallback(&MonsterStepDummy::MonsterStepDummyStartAnimation);
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 }
 //===============
 // MonsterStepDummy::Think
@@ -147,7 +147,7 @@ void MonsterStepDummy::MonsterStepDummyStartAnimation(void) {
 	animationState->startFrame = 1;
 	animationState->endFrame = 62;
 	animationState->frameTime = ANIMATION_FRAMETIME;
-	animationState->startTime = startz = level.time.count() + FRAMETIME.count();
+	animationState->startTime = startz = level.time.count() + FRAMETIME_S.count();
 	animationState->loopCount = 0;
 	animationState->forceLoop = true;
 
@@ -168,7 +168,7 @@ void MonsterStepDummy::MonsterStepDummyStartAnimation(void) {
     
     // Return in case we hit anything.
 	if (trace.fraction == 1 || trace.allSolid) {
-		Com_DPrintf("(%s): Bailed out for Floor Fall thing\n", __func__);
+		//Com_DPrintf("(%s): Bailed out for Floor Fall thing\n", __func__);
         return;
 	}
     
@@ -178,7 +178,7 @@ void MonsterStepDummy::MonsterStepDummyStartAnimation(void) {
 
     SetThinkCallback(&MonsterStepDummy::MonsterStepDummyThink);
     // Setup the next think time.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 
 }
 
@@ -268,7 +268,7 @@ void MonsterStepDummy::MonsterStepDummyThink(void) {
     // Setup its next think time, for a frame ahead.
     SetThinkCallback(&MonsterStepDummy::MonsterStepDummyThink);
     // Setup the next think time.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 }
 
 //===============
@@ -296,7 +296,7 @@ void MonsterStepDummy::MonsterStepDummyDie(IServerGameEntity* inflictor, IServer
     gameWorld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);
 
     // Setup the next think and think time.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 
     // Set think function.
     SetThinkCallback(&MonsterStepDummy::SVGBaseEntityThinkFree);

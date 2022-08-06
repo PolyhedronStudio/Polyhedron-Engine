@@ -19,6 +19,20 @@
 #include "../Common/Protocol.h"
 #include "../Common/CollisionModel.h"
 #include "../Common/Common.h"
+
+
+/**
+*	Client Load States that are common.
+**/
+enum LoadState {
+    LOAD_NONE,
+    LOAD_MAP,
+    LOAD_MODELS,
+    LOAD_IMAGES,
+    LOAD_CLIENTS,
+    LOAD_SOUNDS
+};
+
 /**
 *   Contains states for the KeyBindings.
 **/

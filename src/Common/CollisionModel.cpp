@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // cmodel.c -- model loading
 
-#include <Shared/Shared.h>
+#include "Shared/Shared.h"
 #include "Common/Bsp.h"
 #include "Common/Cmd.h"
 #include "Common/CVar.h"
@@ -1222,7 +1222,14 @@ const TraceResult CM_TransformedBoxTrace(const vec3_t &start, const vec3_t &end,
 	// Clamp fraction just to be sure.
 	traceWork.traceResult.fraction = Clampf(traceWork.traceResult.fraction, 0.0, 1.0);
 
-	// FIXME: offset plane distance?
+	//// [OFFSET ATTEMPT]:
+	//const float planeDist = traceWork.traceResult.plane.dist;
+	//const vec3_t planeNormal = traceWork.traceResult.plane.normal;
+	//const vec3_t unitPlaneNormal = vec3_normalize( planeNormal );
+	//const float offsetFraction = vec3_dot(vec3_scale( unitPlaneNormal, planeDist ), end);
+	//// [EOF OFFSET ATTEMPT]
+
+	// FIXME: offset plane distance? <--- we try this right above..
     traceWork.traceResult.endPosition = vec3_mix(start, end, traceWork.traceResult.fraction); // LerpVector(start, end, traceWork.traceResult.fraction, traceWork.traceResult.endPosition);
 
 	// Return trace result.

@@ -216,7 +216,7 @@ static inline qboolean NET_IsLanAddress(const NetAdr *adr)
 
 static inline qboolean NET_IsLocalAddress(const NetAdr *adr)
 {
-#if USE_CLIENT && USE_SERVER
+#if USE_CLIENT==1 && USE_SERVER==1
     if (adr->type == NA_LOOPBACK)
         return true;
 #endif

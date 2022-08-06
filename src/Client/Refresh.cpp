@@ -25,8 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Client.h"
 #include "Client/GameModule.h"
 
+#include "Refresh/Refresh.h"
 #include "Refresh/Images.h"
 #include "Refresh/Models.h"
+
 
 // Console variables that we need to access from this module
 cvar_t      *vid_rtx;
@@ -314,7 +316,7 @@ void CL_InitRefresh(void)
     // Create the video variables so we know how to start the graphics drivers
 
 	vid_rtx = Cvar_Get("vid_rtx", 
-#if REF_VKPT
+#if REF_VKPT==1
 		"1",
 #else
 		"0",
@@ -336,14 +338,14 @@ void CL_InitRefresh(void)
 
     Com_SetLastError(NULL);
 
-#if REF_GL && REF_VKPT
+#if REF_GL==1 && REF_VKPT==1
 	if (vid_rtx->integer)
 		R_RegisterFunctionsRTX();
 	else
 		R_RegisterFunctionsGL();
-#elif REF_GL
+#elif REF_GL==1
 	R_RegisterFunctionsGL();
-#elif REF_VKPT
+#elif REF_VKPT==1
 	R_RegisterFunctionsRTX();
 #else
 #error "REF_GL and REF_VKPT are both disabled, at least one has to be enabled"

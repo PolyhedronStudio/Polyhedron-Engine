@@ -51,7 +51,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Video.h"
 
 // Shared Game includes.
-#include "Game/Shared/Protocol.h"
+#include "../Game/Shared/Protocol.h"
 
 #if USE_ZLIB
 #include <zlib.h>

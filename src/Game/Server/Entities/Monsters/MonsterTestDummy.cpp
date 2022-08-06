@@ -185,7 +185,7 @@ void MonsterTestDummy::PostSpawn() {
 
     // Setup our MonsterStepDummy callbacks.
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 }
 
 //===============
@@ -349,7 +349,7 @@ void MonsterTestDummy::MonsterTestDummyStartAnimation(void) {
 	//SwitchAnimation("WalkForward");
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 }
 
 //===============
@@ -395,7 +395,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// Setup next think callback.
 		SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
-		SetNextThinkTime(level.time + FRAMETIME);
+		SetNextThinkTime(level.time + FRAMETIME_S);
 	}
 }
 
@@ -427,6 +427,6 @@ void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServer
     gameWorld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);
 
     // Setup the next think and think time.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&MonsterTestDummy::SVGBaseEntityThinkFree);
 }

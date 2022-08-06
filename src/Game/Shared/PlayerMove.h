@@ -93,20 +93,22 @@ static constexpr float PM_STEP_HEIGHT = 18.f; // The vertical distance afforded 
 static constexpr float PM_STEP_HEIGHT_MIN = 4.f;  // The smallest step that will be interpolated by the client.
 static constexpr float PM_STEP_NORMAL = 0.7f; // The minimum Z plane normal component required for standing.
 
-//-----------------
-// Player bounding box scaling. mins = VectorScale(PM_MINS, PM_SCALE)..
-//-----------------
+/**
+*	Player bounding box scaling. mins = VectorScale(PM_MINS, PM_SCALE)..
+**/
 constexpr float PM_SCALE = 1.f;
 
+/**
+*	Makes these accessable elsewhere.
+**/
 //! Actual player (bounding/octagon-)box mins.
 extern const vec3_t PM_MINS;
 //! Actual player (bounding/octagon-)maxs.
 extern const vec3_t PM_MAXS;
 
-//
-// Game-specific flags for PlayerMoveState.flags.
-//
-// Player Move Flags.
+/**
+*	Game-specific flags for PlayerMoveState.flags.
+**/
 static constexpr int32_t PMF_DUCKED             = (PMF_GAME << 0);  // Player is ducked
 static constexpr int32_t PMF_JUMPED             = (PMF_GAME << 1);  // Player jumped
 static constexpr int32_t PMF_JUMP_HELD          = (PMF_GAME << 2);  // Player's jump key is down
@@ -120,9 +122,9 @@ static constexpr int32_t PMF_TIME_LAND          = (PMF_GAME << 9); // Time befor
 static constexpr int32_t PMF_GIBLET             = (PMF_GAME << 10); // Player is a giblet
 static constexpr int32_t PMF_TIME_TRICK_START   = (PMF_GAME << 11); // Time until we can initiate a trick jump
 
-//
-// The mask of PlayerMoveState.flags affecting PlayerMoveState.time.
-//
+/**
+*	The mask of PlayerMoveState.flags affecting PlayerMoveState.time.
+**/
 static constexpr int32_t PMF_TIME_MASK = (
     PMF_TIME_PUSHED |
     PMF_TIME_TRICK_START |
@@ -130,19 +132,32 @@ static constexpr int32_t PMF_TIME_MASK = (
     PMF_TIME_TELEPORT
 );
 
-//
-// The maximum number of entities any single player movement can impact.
-//
+/**
+*	The maximum number of entities any single player movement can impact.
+**/
 static constexpr int32_t PM_MAX_TOUCH_ENTS = 32;
 
 
-//-------------------
-// The player movement structure provides context management between the
-// game modules and the player movement code.
-// 
-// (in), (out), (in/out) mark which way a variable goes. Copied in to the
-// state befor processing, or copied back out of the state after processing.
-//-------------------
+/**
+*   @brief  General player movement and capabilities classification.
+*           One can add custom types up till index 32.
+**/
+struct PlayerMoveType {
+    //! Default walking behavior, supports: Walking, jumping, falling, swimming, etc.
+    static constexpr uint8_t Normal     = 0;
+    //! Free-flying movement with acceleration and friction, no gravity.
+    static constexpr uint8_t Spectator  = 1;
+    //! Like Spectator, Free-Flying, but no clipping. Meaning you can move through walls and entities.
+    static constexpr uint8_t Noclip     = 2;
+};
+
+/**
+*	The player movement structure provides context management between the
+*	game modules and the player movement code.
+*	
+*	(in), (out), (in/out) mark which way a variable goes. Copied in to the
+*	state befor processing, or copied back out of the state after processing.
+**/
 struct PlayerMove {
     // Movement command (in)
 	ClientMoveCommand moveCommand = {};
@@ -151,7 +166,7 @@ struct PlayerMove {
 	PlayerMoveState state = {};
 
     // Entities touched (out)
-    int32_t touchedEntities[PM_MAX_TOUCH_ENTS];
+    SGTraceResult touchedEntityTraces[PM_MAX_TOUCH_ENTS];
     int32_t numTouchedEntities;
 
     // Pointer to the entity that is below the player. (out)

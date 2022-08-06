@@ -15,6 +15,12 @@
 // Forward declare the entity handle object class.
 class SGEntityHandle;
 
+// We needz thiz.
+#include "../../../Shared/Entities/SGEntityHandle.h"
+// We needz thiz.
+#include "../../../Shared/MoveTypes.h"
+#include "../../../Shared/WaterLevels.h"
+
 /**
 *   SVGBaseEntity
 **/

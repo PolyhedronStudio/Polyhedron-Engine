@@ -467,9 +467,9 @@ void CLGBaseMover::BrushAccelerateThink() {
 //===============
 float CLGBaseMover::CalculateAccelerationDistance( float targetSpeed, float accelerationRate ) {
 	if ( accelerationRate == 0.0f ) {
-		Com_DPrintf( "%s '%s': accelerationRate was 0!\n", 
+		SG_Print(PrintType::Developer, fmt::format("{} '{}': accelerationRate was 0!\n",
 					GetTypeInfo()->classname, 
-					GetTargetName().empty() ? "unnamed" : GetTargetName().c_str() );
+					GetTargetName().empty() ? "unnamed" : GetTargetName().c_str() ));
 		return 0.0f;
 	}
 	return (targetSpeed * ((targetSpeed / accelerationRate) + 1.0f) / 2.0f);

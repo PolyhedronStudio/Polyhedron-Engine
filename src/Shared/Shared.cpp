@@ -709,6 +709,24 @@ finish:
 
 ============================================================================
 */
+/*
+=============
+PH_StringCopyZ
+
+Safe strncpy that ensures a trailing zero
+=============
+*/
+inline void PH_StringCopyZ(char* dest, const char* src, int32_t destsize) {
+    if (!src) {
+        Com_Error(ErrorType::Fatal, "PH_StringCopyZ: NULL src");
+    }
+    if (destsize < 1) {
+        Com_Error(ErrorType::Fatal, "PH_StringCopyZ: destsize < 1");
+    }
+
+    strncpy(dest, src, destsize - 1);
+    dest[destsize - 1] = 0;
+}
 
 int PH_StringNumberCaseCompare(const char* s1, const char* s2, size_t n)
 {

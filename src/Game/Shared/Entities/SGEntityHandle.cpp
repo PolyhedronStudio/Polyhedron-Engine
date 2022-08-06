@@ -7,10 +7,9 @@
 *	EntityHandle implementation.
 *
 ***/
-// Shared Game include.
-#include "../SharedGame.h"
-
-class IServerGameEntity;
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 /**
 *	@brief	Helper function to acquire the GameEntity pointer from a server entity.

@@ -9,7 +9,9 @@
 ***/
 #pragma once
 
-#include "Entities.h"
+
+//! Shared.
+#include "../../Shared/Shared.h"
 
 /**
 *   ServerGame Trace Structure. Can consume a general Trace result.

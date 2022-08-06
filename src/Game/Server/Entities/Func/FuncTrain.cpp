@@ -106,7 +106,7 @@ void FuncTrain::PostSpawn() {
 	//}
 
 	//if ( spawnFlags & SF_StartOn ) {
-	//	SetNextThinkTime( level.time + FRAMETIME );
+	//	SetNextThinkTime( level.time + FRAMETIME_S );
 	//	SetThinkCallback( &FuncTrain::NextCornerThink );
 	//	SetActivator(this);
 	//}

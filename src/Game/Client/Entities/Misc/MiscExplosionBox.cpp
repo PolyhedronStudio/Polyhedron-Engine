@@ -114,7 +114,7 @@ void MiscExplosionBox::Spawn() {
     SetDieCallback(&MiscExplosionBox::ExplosionBoxDie);
     SetTouchCallback(&MiscExplosionBox::ExplosionBoxTouch);
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime(level.time + 2.f * FRAMETIME_S);
     SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
 
     // Link the entity to world, for collision testing.
@@ -155,7 +155,7 @@ void MiscExplosionBox::Think() {
 }
 
 void MiscExplosionBox::MiscExplosionBoxInterpolateThink() {
-	SetNextThinkTime(level.time + 1.f * FRAMETIME);
+	SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
 }
 
@@ -221,7 +221,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
 
     // Setup its next think time, for a frame ahead.
     SetThinkCallback(&MiscExplosionBox::MiscExplosionBoxInterpolateThink);
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
 
     // Do a check ground for the step move of this pusher.
     //CLG_StepMove_CheckGround(this);
@@ -311,7 +311,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     //}
 	//podEntity->inUse = true;
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
     //SetThinkCallback(&MiscExplosionBox::CLGBaseLocalEntityThinkFree);
 	SetThinkCallback(&MiscExplosionBox::CLGBasePacketEntityThinkFree);
 }
@@ -336,10 +336,10 @@ void MiscExplosionBox::ExplosionBoxDie(IClientGameEntity* inflictor, IClientGame
 	if (normalizedVelocity.z > 0.1) {
 		// Setup the next think and think time.
 		uint32_t nextThinkOffset = RandomRangeui(15, 35);
-		SetNextThinkTime(level.time + (float)nextThinkOffset * FRAMETIME);
+		SetNextThinkTime(level.time + (float)nextThinkOffset * FRAMETIME_S);
 	} else {
 		// Setup the next think and think time.
-		SetNextThinkTime(level.time + 2 * FRAMETIME);
+		SetNextThinkTime(level.time + 2 * FRAMETIME_S);
 	}
 
     // Set think function.
@@ -383,7 +383,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
 
 	//Com_DPrint("Origin before pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
     // Last but not least, move a step ahead.
-//    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+//    CLG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME_S.count()));
 	//Com_DPrint("Origin after pushing #(%i): %f %f %f\n", GetNumber(), GetOrigin().x, GetOrigin().y, GetOrigin().z);
 }
 

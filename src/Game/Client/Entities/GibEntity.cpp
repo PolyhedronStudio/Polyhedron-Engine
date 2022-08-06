@@ -6,6 +6,7 @@
 //
 //
 */
+
 #include "../ClientGameLocals.h"              // SVGame.
 #include "../Effects/ParticleEffects.h"              // Effects.
 //#include "../Entities.h"             // Entities.
@@ -16,10 +17,11 @@
 
 // Class Entities.
 #include "Base/CLGBaseLocalEntity.h"
-#include "GibEntity.h"
+#include "Game/Client/Entities/GibEntity.h"
 
 // World.
-#include "../World/ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
+
 static int32_t sm_meat_index = 0;
 
 static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
@@ -254,7 +256,7 @@ void GibEntity::ClipGibVelocity(vec3_t &velocity) {
 void GibEntity::GibEntityThink() {
 	// Next Think.
 	SetThinkCallback(&GibEntity::GibEntityThink);
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
     
 	// Increase frame and set a new think time.
     SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
@@ -293,9 +295,9 @@ void GibEntity::GibEntityTouch(GameEntity* self, GameEntity* other, CollisionPla
         vec3_t right = vec3_euler(GetState().angles);
 
         if (GetModelIndex() == sm_meat_index) {
-            SetAnimationFrame(GetAnimationFrame() + FRAMETIME.count());
+            SetAnimationFrame(GetAnimationFrame() + FRAMETIME_S.count());
             SetThinkCallback(&GibEntity::GibEntityThink);
-            SetNextThinkTime(level.time + FRAMETIME);
+            SetNextThinkTime(level.time + FRAMETIME_S);
         }
     }
 }

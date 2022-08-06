@@ -10,6 +10,10 @@
 #pragma once
 
 
+
+//! Shared header.
+#include "../../Shared/Shared.h"
+
 /**
 *   @brief Item identifiers.
 **/

@@ -17,7 +17,10 @@
 
 
 /**
-*   @details    An entity that has effects will be sent to the client even if it has a zero
+*   @details    Effects are things handled on the client side (lights, particles,
+*               frame animations) that happen constantly on a given entity.
+*
+*               NOTE: An entity that has effects will be sent to the client even if it has a zero
 *               index model.
 **/
 struct EntityEffectType {

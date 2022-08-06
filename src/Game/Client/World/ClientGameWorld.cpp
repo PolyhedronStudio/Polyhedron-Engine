@@ -5,9 +5,6 @@
 *	@file
 *
 ***/
-// Shared.
-#include "../../Shared/SharedGame.h"
-
 // Core.
 #include "../ClientGameLocals.h"
 
@@ -15,9 +12,9 @@
 #include "../Exports/Entities.h"
 
 // Entities.
-#include "../Entities/Base/CLGBasePlayer.h"
-#include "../Entities/DebrisEntity.h"
-#include "../Entities/GibEntity.h"
+#include "Game/Client/Entities/Base/CLGBasePlayer.h"
+#include "Game/Client/Entities/DebrisEntity.h"
+#include "Game/Client/Entities/GibEntity.h"
 
 // GameModes.
 //#include "../Gamemodes/IGamemode.h"
@@ -458,6 +455,8 @@ PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) {
 
 	return nullptr;
 }
+
+
 
 /**
 *   @brief Chain together all entities with a matching team field
@@ -1065,4 +1064,53 @@ void ClientGameWorld::ThrowDebris(GameEntity* debrisser, const std::string &debr
 */
 void ClientGameWorld::ThrowGib(const vec3_t &origin, const vec3_t &velocity, const std::string& gibModel, int32_t damage, int32_t gibType) { 
 	GibEntity::Create(origin, velocity, gibModel, damage, gibType);
+}
+
+
+/**
+*	@return	A pointer to the server entities array.
+**/
+PODEntity* ClientGameWorld::GetPODEntities() {
+	return &podEntities[0]; 
+}
+/**
+*   @return A pointer of the server entity located at index.
+**/
+PODEntity* ClientGameWorld::GetPODEntityByIndex(uint32_t index) {
+    if (index < 0 || index >= MAX_POD_ENTITIES) {
+        return nullptr; 
+    }
+	return &podEntities[index];
+}
+
+/**
+*	@return	A pointer to the class entities array.
+**/
+GameEntityVector &ClientGameWorld::GetGameEntities() {
+    return gameEntities;
+}	
+/**
+*   @return A pointer of the server entity located at index.
+**/
+GameEntity* ClientGameWorld::GetGameEntityByIndex(int32_t index) {
+	// Ensure ID is within bounds.
+	if (index < 0 || index >= MAX_POD_ENTITIES) {
+		return nullptr;
+	}
+
+	// Return game entity that belongs to this ID.
+	return gameEntities[index];
+}
+
+/**
+*   @return A pointer to the worldspawn game entity.
+**/
+PODEntity* ClientGameWorld::GetWorldspawnPODEntity() { 
+    return &podEntities[0]; 
+}
+/**
+*   @return A pointer to the worldspawn game entity.
+**/
+Worldspawn* ClientGameWorld::GetWorldspawnGameEntity() { 
+    return nullptr;//dynamic_cast<Worldspawn*>(gameEntities[0]); 
 }

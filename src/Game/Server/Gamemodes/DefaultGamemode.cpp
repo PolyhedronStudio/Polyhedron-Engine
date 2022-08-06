@@ -807,7 +807,7 @@ void DefaultGameMode::ClientEndServerFrame(SVGBasePlayer* player, ServerClient* 
     // bobbing based on that.
     //
     vec3_t playerVelocity = player->GetVelocity();
-    // Without * FRAMETIME = XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
+    // Without * FRAMETIME_S = XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
     bobMoveCycle.XYSpeed = sqrtf(playerVelocity[0] * playerVelocity[0] + playerVelocity[1] * playerVelocity[1]);
 
 	// Do we have a valid ground entity?
@@ -1048,20 +1048,22 @@ void DefaultGameMode::ClientThink(SVGBasePlayer* player, ServerClient* client, C
             int32_t i = 0;
             int32_t j = 0;
             
-            for (i = 0 ; i < pm.numTouchedEntities; i++) {
-                for (j = 0 ; j < i ; j++) {
-                    if (pm.touchedEntities[j] == pm.touchedEntities[i]) {
+            for ( i = 0; i < pm.numTouchedEntities; i++ ) {
+				// Skip touch events on the same entities.
+                for ( j = 0; j < i ; j++ ) {
+					const int32_t touchEntityNumberA = SG_GetEntityNumber( pm.touchedEntityTraces[j].podEntity );
+					const int32_t touchEntityNumberB = SG_GetEntityNumber( pm.touchedEntityTraces[i].podEntity );
+                    if ( touchEntityNumberA == touchEntityNumberB ) {
                         break;
                     }
                 }
-                if (j != i) {
-                    continue;   // duplicated
+				// 
+                if ( j != i ) {
+                    continue; // Duplicated.
                 }
 
-				// Get POD Entity of touched entity using Gameworld.
-				ServerGameWorld *gameWorld = GetGameWorld();
 				// Get Touched Entity number.
-				const int32_t touchedEntityNumber = pm.touchedEntities[i];
+				const int32_t touchedEntityNumber = SG_GetEntityNumber( pm.touchedEntityTraces[i].podEntity );
 
 				// Get the POD Entity.
 				PODEntity *podTouchEntity = gameWorld->GetPODEntityByIndex( touchedEntityNumber );

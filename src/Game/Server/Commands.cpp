@@ -57,7 +57,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 //    return ++p;
 //}
 
-static inline const std::string ClientTeam(IServerGameEntity* ent) {
+static inline const std::string ClientTeam(GameEntity* ent) {
     // No team name to return.
     if (!ent->GetClient())
 	    "";
@@ -82,7 +82,7 @@ static inline const std::string ClientTeam(IServerGameEntity* ent) {
     //return ++p;
 }
 
-qboolean SVG_OnSameTeam(IServerGameEntity *entityA, IServerGameEntity *entityB)
+qboolean SVG_OnSameTeam(GameEntity *entityA, GameEntity *entityB)
 {
     // TODO: Check in gameworld whether 
     if (!((int)(gamemodeflags->value) & (GameModeFlags::ModelTeams | GameModeFlags::SkinTeams)))

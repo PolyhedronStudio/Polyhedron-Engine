@@ -7,7 +7,15 @@
 *	Skeletal Animation functionality.
 *
 ***/
-#include "SharedGame.h"
+// Needed for the shared headers.
+#define CGAME_INCLUDE 1
+// Include shared headers.
+#include "Shared/Shared.h"
+#include "Shared/Refresh.h"
+
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 
 

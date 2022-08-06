@@ -193,7 +193,7 @@ float SVGBaseStepMonster::TurnToIdealYawAngle() {
 	}
 
 	// Set the new angles, Angle Modding the Yaw.
-	SetAngles( { _previousAngles.x, AngleMod( _currentYawAngle + _yawMove * FRAMETIME.count() * _yawTurningSpeed ), _previousAngles.z});
+	SetAngles( { _previousAngles.x, AngleMod( _currentYawAngle + _yawMove * FRAMETIME_S.count() * _yawTurningSpeed ), _previousAngles.z});
 
 	// Return delta angles.
 	return GetAngles()[vec3_t::Yaw] - GetIdealYawAngle();

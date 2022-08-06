@@ -5,7 +5,7 @@
 #pragma once
 
 // Export Interfaces.
-#include "../../Shared/Interfaces/IClientGameExports.h"
+#include "Shared/Interfaces/IClientGameExports.h"
 
 // Predeclare.
 class ClientGameCore;
@@ -109,7 +109,7 @@ public:
     /**
     *   @brief  Called when there is a needed retransmit of user info variables.
     **/
-    void ClientUpdateUserinfo(cvar_t* var, from_t from) final;
+    void ClientUpdateUserinfo(cvar_t* var, int32_t from) final;
 
 
     /****

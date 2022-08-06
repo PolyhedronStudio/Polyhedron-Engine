@@ -399,7 +399,7 @@ public:
     /**
 	*	@brief	Called when there is a needed retransmit of user info variables.
 	**/
-    virtual void ClientUpdateUserinfo(cvar_t* var, from_t from) = 0;
+    virtual void ClientUpdateUserinfo(cvar_t* var, int32_t from) = 0;
 
 
     /****

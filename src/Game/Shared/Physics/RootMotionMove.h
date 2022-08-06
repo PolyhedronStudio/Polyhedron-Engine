@@ -11,6 +11,9 @@
 
 // Shared Game.
 #include "../SharedGame.h"
+#include "../Tracing.h"
+
+struct SGTraceResult;
 
 /**
 *	SlideBox Configuration.

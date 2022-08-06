@@ -88,7 +88,7 @@ void MonsterTestDummy::Spawn() {
     //SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 
     // Link the entity to world, for collision testing.
     SetInUse(true);
@@ -150,7 +150,7 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
     SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
     // Setup the next think time.
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
 }
 
 //===============
@@ -187,8 +187,8 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 			//if (lastTime == GameTime::zero()) {
 			//	lastTime = level.time;
 			//}
-			//mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
-			//maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME.count());
+			//mins = vec3_mix(oldMins, mins, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME_S.count());
+			//maxs = vec3_mix(oldMaxs, maxs, ( (float)(( level.time - lastTime ).count()) ) * FRAMETIME_S.count());
 			//if (lastTime != GameTime::zero()) {
 			//	lastTime = level.time;
 			//}
@@ -204,7 +204,7 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
     LinkEntity();
 
     // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 }
 
 //===============
@@ -232,7 +232,7 @@ void MonsterTestDummy::MonsterTestDummyDie(GameEntity* inflictor, GameEntity* at
     //gameWorld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);
 
     // Setup the next think and think time.
-    //SetNextThinkTime(level.time + 1 * FRAMETIME);
+    //SetNextThinkTime(level.time + 1 * FRAMETIME_S);
 
     // Set think function.
     //SetThinkCallback(&MonsterTestDummy::CLGBasePacketEntityThinkFree);

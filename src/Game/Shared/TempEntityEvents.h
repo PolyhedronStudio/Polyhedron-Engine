@@ -48,11 +48,10 @@ struct TempEntityEvent {
     //! Same as Explosion1, but without particles.
     static constexpr uint8_t NoParticleExplosion1 = 24;
 
-	//! General body gibbing.
+	//! Spawns body gibs of said count.
 	static constexpr uint8_t BodyGib = 30;
-
-	//! General debris gibbing.
-	static constexpr uint8_t Debris = 30;
+	//! Spawns debris gibs of said count and said debris type.
+	static constexpr uint8_t DebrisGib = 31;
 
     //! General sparks particle effect.
     static constexpr uint8_t Sparks = 50;
@@ -80,6 +79,7 @@ struct TempEntityEvent {
 
     static constexpr uint8_t Max = 255;
 };
+
 
 /**
 *   @brief  Splash Type determining the effect to be displayed for the Flash TE.

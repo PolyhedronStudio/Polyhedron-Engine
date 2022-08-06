@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define STBI_FREE(p)              Z_Free(p)
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb_image.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION

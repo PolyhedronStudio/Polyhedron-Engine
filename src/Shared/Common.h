@@ -1,6 +1,11 @@
 // License here.
 #pragma once
 
+
+
+/**
+*	The error types signify what to do exactly with the error.
+**/
 struct ErrorType {
     //! Exit the entire game with a popup window.
     static constexpr int32_t Fatal      = 0;
@@ -12,6 +17,9 @@ struct ErrorType {
     static constexpr int32_t Reconnect  = 3;
 };
 
+/**
+*	Each print type has a specific style and intent.
+**/
 struct PrintType {
     //! General regular printing.
     static constexpr int32_t Regular			= 0;
@@ -27,19 +35,6 @@ struct PrintType {
     static constexpr int32_t Developer			= 6;
     //! Only print when cvar 'developer' >= 1
     static constexpr int32_t DeveloperWarning	= 7;
-};
-
-//
-// Contains the client load states, clg_local.h can expand upon it with custom
-// states. They can send a text name for the loading state to show in display.
-//
-enum LoadState {
-    LOAD_NONE,
-    LOAD_MAP,
-    LOAD_MODELS,
-    LOAD_IMAGES,
-    LOAD_CLIENTS,
-    LOAD_SOUNDS
 };
 
 //struct LoadState {

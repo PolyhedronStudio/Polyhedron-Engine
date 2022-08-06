@@ -79,17 +79,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *	GLM - Better to use a solid math library than rolling our most likely prone to error custom one.
 **/
 //#define GLM_FORCE_RADIANS
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/mat4x4.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/matrix_inverse.hpp"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 
 
 /**
 *	FMT for Easy String Formatting.
 **/
-#include "fmt/format.h"
+#include <fmt/format.h>
 
 /**
 *   System Endian include, if needed. 
@@ -210,34 +210,22 @@ static inline bool PH_IsSpecial(const char c) { return (c == '\r' || c == '\n' |
 
 
 /***
-* 
 *   Endian Swap Library.
-* 
 ***/
 #include "Endian.h"
 
-
 /***
-* 
 *   Math Library.
-* 
 ***/
 #include "Math.h"
 
-
 /***
-* 
 *   Tick Rate Configuration.
-* 
 ***/
 #include "TickRate.h"
 
-
-
 /***
-*
 *   Common Library.
-* 
 ***/
 #include "Common.h"
 
@@ -265,30 +253,18 @@ enum memtag_t {
     TAG_MAX
 };
 
-
-
 /***
-*
 *   Key / Value Info Strings 
-* 
 ***/
 #include "KeyValue.h"
 
-
-
 /***
-*
 *   User Input
-*  
 ***/
 #include "Keys.h"
 
-
-
 /***
-*
 *   User Interface.
-* 
 ***/
 #include "UI.h"
 
@@ -329,9 +305,7 @@ struct U32Colors {
 
 
 /***
-*
 *	Sound Channels & Attenuation
-* 
 ***/
 #include "Sound.h"
 
@@ -432,31 +406,19 @@ inline static uint32_t CS_SIZE(uint32_t cs) {
 }
 
 /***
-*
 *	Internal Skeletal Model Data (-Game Friendly.)
-*
 ***/
 #include "SkeletalModelData.h"
 
-
-
 /***
-*
 *	Player Move - Shared between Client, Server, and Game Modules.
-*
 ***/
 #include "PlayerMove.h"
 
-
-
 /***
-*
 *	Network Messaging.
-*
 ***/
 #include "Messaging.h"
-
-
 
 /***
 *
@@ -476,35 +438,27 @@ typedef struct file_info_s {
 
 
 /***
-*
 *	String Manipulation Utilities.
-*
 ***/
 #include "QString.h"
 #include "Strings.h"
 
 
 /***
-*
 *	C Style List.
-*
 ***/
 #include "List.h"
 
 
 /***
-*
-*	Collision Detection.
-*
+*	Collision Model.
 ***/
 #include "CollisionModel.h"
 
 
 
 /***
-*
 *	Entities & Related.
-*
 ***/
 #include "Entities.h"
 

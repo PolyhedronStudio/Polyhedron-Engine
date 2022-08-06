@@ -70,7 +70,7 @@ void CLGBasePacketEntity::Precache() {
 **/
 void CLGBasePacketEntity::Spawn() {
 	// Setup the standard default NextThink method.
-	SetNextThinkTime(level.time + FRAMETIME);
+	SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 /**
@@ -322,9 +322,6 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState* state) {
 	SetSound(state->sound);
 	SetEventID(state->eventID);
 
-	if (cl->drawModels[ state->modelIndex ] == 29) {
-		Com_DPrintf("Entity(#%i) had drawModels[%i] = 29\n", state->number, state->modelIndex);
-	}
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
 
@@ -333,7 +330,7 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState* state) {
 	}
 
 	// Setup same think for the next frame.
-	SetNextThinkTime(level.time + FRAMETIME);
+	SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
@@ -360,9 +357,6 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState* state) {
 	SetSound(state->sound);
 	SetEventID(state->eventID);
 
-	if (cl->drawModels[ state->modelIndex ] == 29) {
-		Com_DPrintf("Entity(#%i) had drawModels[%i] = 29\n", state->number, state->modelIndex);
-	}
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
 
@@ -371,7 +365,7 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState* state) {
 	}
 	
 	// Setup same think for the next frame.
-	SetNextThinkTime(level.time + FRAMETIME);
+	SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
@@ -578,7 +572,7 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
 	// Setup same think for the next frame.
-	SetNextThinkTime(level.time + FRAMETIME);
+	SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 

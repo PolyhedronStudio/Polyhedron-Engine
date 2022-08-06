@@ -145,7 +145,7 @@ void TriggerMultiple::Trigger(IServerGameEntity *activator) {
 		// We can't just remove (self) here, because this is a touch function
 		// called while looping through area links...
 		SetTouchCallback(nullptr);
-		SetNextThinkTime(level.time + FRAMETIME);
+		SetNextThinkTime(level.time + FRAMETIME_S);
 		SetThinkCallback(&TriggerMultiple::SVGBaseEntityThinkFree);
 	}
 }

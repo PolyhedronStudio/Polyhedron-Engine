@@ -51,7 +51,7 @@ function(compile_shader)
         message(FATAL_ERROR "compile_shader: OUTPUT_FILE_LIST argument missing")
     endif()
 
-    set(src_file "${CMAKE_CURRENT_SOURCE_DIR}/${params_SOURCE_FILE}")
+    set(src_file "${params_SOURCE_FILE}")
 
     if (params_OUTPUT_FILE_NAME)
         set(output_file_name ${params_OUTPUT_FILE_NAME})

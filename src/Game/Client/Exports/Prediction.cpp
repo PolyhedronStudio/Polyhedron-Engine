@@ -268,19 +268,21 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 		int32_t j = 0;
             
 		for ( i = 0 ; i < pm->numTouchedEntities; i++ ) {
-			for ( j = 0 ; j < i ; j++ ) {
-				// Don't touch ourselves  twice either.
-				if ( pm->touchedEntities[j] == pm->touchedEntities[i] ) {
-					break;
-				}
-			}
-			// No need to duplicate touch events.
-			if ( j != i ) {
-				continue;   // duplicated
-			}
+			// Skip touch events on the same entities.
+            for ( j = 0; j < i ; j++ ) {
+				const int32_t touchEntityNumberA = SG_GetEntityNumber( pm->touchedEntityTraces[j].podEntity );
+				const int32_t touchEntityNumberB = SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity );
+                if ( touchEntityNumberA == touchEntityNumberB ) {
+                    break;
+                }
+            }
+            if ( j != i ) {
+                continue; // Duplicated.
+            }
 
-			// Get Touched Entity number.
-			const int32_t touchedEntityNumber = pm->touchedEntities[i];
+				
+			// Get Touched Entity.
+			const int32_t touchedEntityNumber = SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity );
 
 			// Get and validate our touched entity.
 			GameEntity *geOther = ClientGameWorld::ValidateEntity( gameWorld->GetPODEntityByIndex( touchedEntityNumber ) );

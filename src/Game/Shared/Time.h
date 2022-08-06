@@ -11,6 +11,7 @@
 ***/
 #pragma once
 
+#include "../../Shared/Shared.h"
 
 //! Time of a game's frame.
 static constexpr Frametime FRAMETIME_S = Frametime(1.0f / BASE_HZ);

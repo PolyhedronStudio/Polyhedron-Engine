@@ -24,7 +24,7 @@ class CLGBaseLocalEntity;
 class Worldspawn;
 
 // GameWorld Interface.
-#include "../../../Game/Shared/World/IGameWorld.h"
+#include "Game/Shared/World/IGameWorld.h"
 
 
 /***
@@ -128,54 +128,53 @@ public:
     *
     *   @return A pointer to the game entity on success, nullptr on failure.
     **/
-    template<typename entityClass> inline entityClass* CreateGameEntity(PODEntity *podEntity = nullptr, bool allocateNewPODEntity = true, bool isWired = true) {
-        // Class entity to be returned.
-        entityClass* gameEntity = nullptr;
+    template<typename ClassType> inline ClassType* CreateGameEntity(PODEntity *podEntity, bool allocateNewPODEntity, bool isWired);
+	//	// Class entity to be returned.
+	//	ClassType* gameEntity = nullptr;
 
-        // If a null entity was passed, create a new one
-	    if (podEntity == nullptr) {
-            if (allocateNewPODEntity) {
-                podEntity = GetUnusedPODEntity(isWired);
+	//	// If a null entity was passed, create a new one
+	//	if (podEntity == nullptr) {
+	//		if (allocateNewPODEntity) {
+	//			podEntity = GetUnusedPODEntity(isWired);
 
-				if (!podEntity) {
-					Com_DPrint("CLGWarning (CreateGameEntity): GetUnusedPODENtity(%s) returned (nullptr)! Expect trouble!\n", (isWired ? "isWired = true" : "isWired = false"));
-					return nullptr;
-				}
-            } else {
-                Com_DPrint("CLGWarning (CreateGameEntity): Tried to spawn a GameEntity on a (nullptr) PODEntity!\n");
-                return nullptr;
-            }
-        }
+	//			if (!podEntity) {
+	//				SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): GetUnusedPODENtity({}) returned (nullptr)! Expect trouble!\n", (isWired ? "isWired = true" : "isWired = false") ) );
+	//				return nullptr;
+	//			}
+	//		} else {
+	//			SG_Print( PrintType::DeveloperWarning, "CLGWarning (CreateGameEntity): Tried to spawn a GameEntity on a (nullptr) PODEntity!\n" );
+	//			return nullptr;
+	//		}
+	//	}
 
-		// Get actual entity number.
-		const int32_t entityNumber = podEntity->clientEntityNumber;
-        
-        // Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
-        if (entityClass::ClassInfo.AllocateInstance) {
-            if (nullptr == gameEntities[entityNumber]) {
-				// Entities that aren't in the type info system will error out here
-				gameEntity = static_cast<entityClass*>(entityClass::ClassInfo.AllocateInstance(podEntity));
-    
-				// Be sure to set its classname.
-				gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
+	//	// Get actual entity number.
+	//	const int32_t entityNumber = podEntity->clientEntityNumber;
+ //       
+	//	// Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
+	//	if (ClassType::ClassInfo.AllocateInstance) {
+	//		if (nullptr == gameEntities[entityNumber]) {
+	//			// Entities that aren't in the type info system will error out here
+	//			gameEntity = static_cast<ClassType*>(ClassType::ClassInfo.AllocateInstance(podEntity));
+ //   
+	//			// Be sure to set its classname.
+	//			gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
 
-				// Assign game entity pointers.
-				podEntity->gameEntity = gameEntities[entityNumber] = gameEntity;
-            } else {
-				// Debug Warn.
-                Com_DPrint("CLGWarning (CreateGameEntity): PODEntity(#%i) is already taken\n", entityNumber);
-				return nullptr;
-            }
-		} else {
-			// Debug Warn.
-			Com_DPrint("CLGWarning (CreateGameEntity): ClassInfo '%s' has a (nullptr) AllocateInstance function.\n", entityClass::ClassInfo.mapClass);
-			return nullptr;
-		}
+	//			// Assign game entity pointers.
+	//			podEntity->gameEntity = gameEntities[entityNumber] = gameEntity;
+	//		} else {
+	//			// Debug Warn.
+	//			SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): PODEntity(#{}) is already taken\n", entityNumber ) );
+	//			return nullptr;
+	//		}
+	//	} else {
+	//		// Debug Warn.
+	//		SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): ClassInfo '{}' has a (nullptr) AllocateInstance function.\n", ClassType::ClassInfo.mapClass ) );
+	//		return nullptr;
+	//	}
 
-		// If all went well, we can return our new created game entity.
-        return gameEntity;
-    }
-    
+	//	// If all went well, we can return our new created game entity.
+	//	return gameEntity;
+	//}
 
 	/**
 	*   @brief  Creates a new GameEntity for the ClientEntity based on the passed state. If the 
@@ -233,50 +232,29 @@ public:
     /**
 	*	@return	A pointer to the server entities array.
 	**/
-    inline PODEntity* GetPODEntities() final { 
-		return &podEntities[0]; 
-	}
+    PODEntity* GetPODEntities() final;
     /**
     *   @return A pointer of the server entity located at index.
     **/
-    inline PODEntity* GetPODEntityByIndex(uint32_t index) final {
-        if (index < 0 || index >= MAX_POD_ENTITIES) {
-            return nullptr; 
-        }
-	    return &podEntities[index];
-    }
+    PODEntity* GetPODEntityByIndex(uint32_t index) final;
 
     /**
 	*	@return	A pointer to the class entities array.
 	**/
-    inline GameEntityVector &GetGameEntities() final {
-        return gameEntities;
-    }	
+    GameEntityVector &GetGameEntities() final;
 	/**
     *   @return A pointer of the server entity located at index.
     **/
-    inline GameEntity* GetGameEntityByIndex(int32_t index) final {
-		// Ensure ID is within bounds.
-		if (index < 0 || index >= MAX_POD_ENTITIES) {
-			return nullptr;
-		}
-
-		// Return game entity that belongs to this ID.
-		return gameEntities[index];
-    }
+    GameEntity* GetGameEntityByIndex(int32_t index) final;
 
     /**
 	*   @return A pointer to the worldspawn game entity.
 	**/
-    inline PODEntity* GetWorldspawnPODEntity() final { 
-        return &podEntities[0]; 
-    }
+    PODEntity* GetWorldspawnPODEntity() final;
     /**
 	*   @return A pointer to the worldspawn game entity.
 	**/
-    inline Worldspawn* GetWorldspawnGameEntity() final { 
-        return nullptr;//dynamic_cast<Worldspawn*>(gameEntities[0]); 
-    }
+    Worldspawn* GetWorldspawnGameEntity() final;
 
 
 
@@ -385,3 +363,58 @@ private:
     **/
     GameEntity* CreateGameEntityFromClassname(PODEntity *podEntity, const std::string& classname);
 };
+
+
+
+/**
+*   @brief  Creates and assigns a game entity to the given client entity based on the classname.
+*
+*   @return A pointer to the game entity on success, nullptr on failure.
+**/
+template<typename ClassType> ClassType* ClientGameWorld::CreateGameEntity(PODEntity *podEntity, bool allocateNewPODEntity, bool isWired) {
+	// Class entity to be returned.
+	ClassType* gameEntity = nullptr;
+
+	// If a null entity was passed, create a new one
+	if (podEntity == nullptr) {
+		if (allocateNewPODEntity) {
+			podEntity = GetUnusedPODEntity(isWired);
+
+			if (!podEntity) {
+			//	SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): GetUnusedPODENtity({}) returned (nullptr)! Expect trouble!\n", (isWired ? "isWired = true" : "isWired = false") ) );
+				return nullptr;
+			}
+		} else {
+		//	SG_Print( PrintType::DeveloperWarning, "CLGWarning (CreateGameEntity): Tried to spawn a GameEntity on a (nullptr) PODEntity!\n" );
+			return nullptr;
+		}
+	}
+
+	// Get actual entity number.
+	const int32_t entityNumber = podEntity->clientEntityNumber;
+        
+	// Abstract classes will have AllocateInstance as nullptr, hence we gotta check for that
+	if (ClassType::ClassInfo.AllocateInstance) {
+		if (nullptr == gameEntities[entityNumber]) {
+			// Entities that aren't in the type info system will error out here
+			gameEntity = static_cast<ClassType*>(ClassType::ClassInfo.AllocateInstance(podEntity));
+    
+			// Be sure to set its classname.
+			gameEntity->SetClassname(gameEntity->GetTypeInfo()->classname);
+
+			// Assign game entity pointers.
+			podEntity->gameEntity = gameEntities[entityNumber] = gameEntity;
+		} else {
+			// Debug Warn.
+		//	SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): PODEntity(#{}) is already taken\n", entityNumber ) );
+			return nullptr;
+		}
+	} else {
+		// Debug Warn.
+		//SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): ClassInfo '{}' has a (nullptr) AllocateInstance function.\n", ClassType::ClassInfo.mapClass ) );
+		return nullptr;
+	}
+
+	// If all went well, we can return our new created game entity.
+	return gameEntity;
+}

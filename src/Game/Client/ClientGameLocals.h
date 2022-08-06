@@ -16,28 +16,20 @@
 #define CGAME_INCLUDE 1
 
 // Shared.
-#include "../../Shared/Shared.h"
-#include "../../Shared/List.h"
-#include "../../Shared/Refresh.h"
+#include "Shared/Shared.h"
+#include "Shared/List.h"
+#include "Shared/Refresh.h"
+#include "Shared/SVGame.h"
 
-// Common.
+//// Common.
 #include "../../Common/CollisionModel.h"
 #include "../../Common/Cmd.h"
 #include "../../Common/Messaging.h"
 #include "../../Common/Protocol.h"
-
-// Shared Client Type & Game Header.
-#include "../../Shared/CLTypes.h"
-#include "../../Shared/CLGame.h"
-
-// Shared Game "Framework".
-#include "../Shared/SharedGame.h"
-
-// ClientGame Exports Interface.
-#include "../../Shared/Interfaces/IClientGameExports.h"
-
-// ClientGame Exports Implementation.
-#include "ClientGameExports.h"
+//
+//// Shared Client Type & Game Header.
+#include "Shared/CLTypes.h"
+#include "Shared/CLGame.h"
 
 
 
@@ -46,7 +38,21 @@
 **/
 class ClientGameExports;
 class ClientGameWorld;
+class IClientGameEntity;
+class ISharedGameEntity;
 
+#include "Game/Client/Entities/IClientGameEntity.h"
+#include "Game/Client/World/ClientGameWorld.h"
+
+/**
+*	SharedGame Framework.
+**/
+//! SharedGame.
+#include "Game/Shared/SharedGame.h"
+//! Entity Filters.
+#include "Game/Shared/Entities/EntityFilters.h"
+// ClientGame Exports Implementation.
+#include "ClientGameExports.h"
 
 
 /**
@@ -55,15 +61,6 @@ class ClientGameWorld;
 static constexpr double		CLG_FRAMETIME	= BASE_FRAMETIME;
 static constexpr double		CLG_1_FRAMETIME	= BASE_1_FRAMETIME;
 static constexpr int32_t	CLG_FRAMEDIV	= BASE_FRAMERATE / 10.0;
-
-// THESE SHOULD NOT BE ADDED TO IMPORTS.
-//! MS Frametime for animations.
-//static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
-
-//! Float time it takes to go over a frame. 
-//static constexpr Frametime FRAMETIME = FRAMETIME_S;
-//using FRAMETIME = FRAMETIME_S;
-#define FRAMETIME FRAMETIME_S
 
 
 /**
@@ -321,6 +318,20 @@ void Com_LPrintf(int32_t printType, const char* fmt, ...);
 *
 *
 **/
+/**
+*	@brief	Wraps around Com_Error.
+*	@param	errorType		One of the error types in ErrorType::
+*	@param	errorMessage	A string, possibly formatted using fmt::format.
+**/
+void CLG_Error( int32_t errorType, const std::string &errorMessage );
+
+/**
+*	@brief	Wraps around Com_LPrintf
+*	@param	printType		One of the print types in PrintType::
+*	@param	printMessage	A string, possibly formatted using fmt::format.
+**/
+void CLG_Print( int32_t printType, const std::string &printMessage );
+
 /**
 *	@brief	... Sound.
 **/

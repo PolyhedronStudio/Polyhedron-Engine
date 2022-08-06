@@ -309,7 +309,7 @@ public:
 	void ClientPacketEntityDeltaFrame();
 	void ClientFrame();
 	void ClientDisconnect();
-	void ClientUpdateUserinfo(cvar_t* var, from_t from);
+	void ClientUpdateUserinfo(cvar_t* var, int32_t from);
 	void SetClientLoadState(int32_t loadState);
 	uint32_t GetClientState();
 	qboolean CheckForIgnore(const std::string& str);

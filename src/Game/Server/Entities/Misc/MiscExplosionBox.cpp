@@ -107,7 +107,7 @@ void MiscExplosionBox::Spawn() {
 	SetStopCallback(&MiscExplosionBox::ExplosionBoxStop);
 
     // Setup the next think time.
-    SetNextThinkTime(level.time + 2.f * FRAMETIME);
+    SetNextThinkTime(level.time + 2.f * FRAMETIME_S);
     SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
 
     // Link the entity to world, for collision testing.
@@ -208,7 +208,7 @@ void MiscExplosionBox::ExplosionBoxDropToFloor(void) {
 
     // Setup its next think time, for a frame ahead.
     //SetThinkCallback(&MiscExplosionBox::ExplosionBoxDropToFloor);
-    //SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    //SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
 
     // Do a check ground for the step move of this pusher.
     //SVG_StepMove_CheckGround(this);
@@ -294,7 +294,7 @@ void MiscExplosionBox::MiscExplosionBoxExplode(void) {
     }
 
     // Ensure we have no more think callback pointer set when this entity has "died"
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
     SetThinkCallback(&MiscExplosionBox::SVGBaseEntityThinkFree);
 }
 
@@ -318,10 +318,10 @@ void MiscExplosionBox::ExplosionBoxDie(IServerGameEntity* inflictor, IServerGame
 	if (velocityLength > 0) {
 		// Setup the next think and think time.
 		uint32_t nextThinkOffset = RandomRangeui(15, 35);
-		SetNextThinkTime(level.time + (float)nextThinkOffset * FRAMETIME);
+		SetNextThinkTime(level.time + (float)nextThinkOffset * FRAMETIME_S);
 	} else {
 		// Setup the next think and think time.
-		SetNextThinkTime(level.time + 2 * FRAMETIME);
+		SetNextThinkTime(level.time + 2 * FRAMETIME_S);
 	}
 
 
@@ -362,7 +362,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IServerGameEntity* self, IServerGameEnt
     double yaw = vec3_to_yaw(dir);
 
     // Last but not least, move a step ahead.
-    SVG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME.count()));
+    SVG_StepMove_Walk(this, yaw, (30.0 / static_cast<double>(BASE_FRAMEDIVIDER) * ratio * FRAMETIME_S.count()));
 }
 
 void MiscExplosionBox::ExplosionBoxStop() {

@@ -17,8 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "UI.h"
-#include "../../Common/Files.h"
+#include "Client/UI/UI.h"
+#include "Common/Files.h"
+
 
 static menuSound_t Activate(menuCommon_t *self)
 {

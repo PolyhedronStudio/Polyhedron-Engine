@@ -1106,6 +1106,11 @@ WinMain
 */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
+    // previous instances do not exist in Win32
+    if (hPrevInstance) {
+        return 1;
+    }
+
     hGlobalInstance = hInstance;
 #ifndef UNICODE
     // TODO: wince support

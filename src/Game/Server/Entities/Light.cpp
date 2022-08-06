@@ -76,7 +76,7 @@ void Light::Spawn() {
 
     // Set NextThink callback.
     SetThinkCallback(&Light::LightThink);
-    SetNextThinkTime(level.time + FRAMETIME);
+    SetNextThinkTime(level.time + FRAMETIME_S);
 
 	LinkEntity();
 }

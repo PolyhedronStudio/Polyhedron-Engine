@@ -531,7 +531,7 @@ float SVGBaseRootMotionMonster::TurnToIdealYawAngle() {
 	}
 
 	// Set the new angles, Angle Modding the Yaw.
-	SetAngles( { _previousAngles.x, AngleMod(_currentYawAngle + _yawMove * (float)FRAMETIME.count() * _yawTurningSpeed), _previousAngles.z});
+	SetAngles( { _previousAngles.x, AngleMod(_currentYawAngle + _yawMove * (float)FRAMETIME_S.count() * _yawTurningSpeed), _previousAngles.z});
 
 	// Return delta angles.
 	return GetAngles()[vec3_t::Yaw] - GetIdealYawAngle();
@@ -618,7 +618,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 			const float friction = ROOTMOTION_MOVE_GROUND_FRICTION / 3;
 
 			// Calculate: new Speed.
-			float newSpeed = speed - ( FRAMETIME.count() * control * friction );
+			float newSpeed = speed - ( FRAMETIME_S.count() * control * friction );
 			if ( newSpeed < 0 ) {
 				newSpeed = 0;
 			}
@@ -635,7 +635,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 		if ( ( entityFlags & EntityFlags::Swim ) && ( GetVelocity().z != 0 ) ) {
 			const float speed = fabs( GetVelocity().z );
 			const float control = speed < ROOTMOTION_MOVE_STOP_SPEED ? ROOTMOTION_MOVE_STOP_SPEED : speed;
-			float newSpeed = speed - ( FRAMETIME.count() * control * ROOTMOTION_MOVE_WATER_FRICTION * GetWaterLevel() );
+			float newSpeed = speed - ( FRAMETIME_S.count() * control * ROOTMOTION_MOVE_WATER_FRICTION * GetWaterLevel() );
 			if (newSpeed < 0) {
 				newSpeed = 0;
 			}
@@ -656,7 +656,7 @@ const int32_t SVGBaseRootMotionMonster::PerformRootMotionMove() {
 	//              if (speed) {
 	//                  const float friction = ROOTMOTION_MOVE_GROUND_FRICTION;
 	//                  const float control = speed < ROOTMOTION_MOVE_STOP_SPEED ? ROOTMOTION_MOVE_STOP_SPEED : speed;
-	//                  float newSpeed = speed - FRAMETIME.count() * control * friction;
+	//                  float newSpeed = speed - FRAMETIME_S.count() * control * friction;
 	//                  if (newSpeed < 0) {
 	//                      newSpeed = 0;
 	//              }
@@ -1067,7 +1067,7 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Calculate the actual move speed based for the current animation frame.
 	const double totalTraversedDistance = skm->actions[animationIndex]->animationDistance;
 
-	// Calculate the Unit Scale based on FRAMETIME * 8 units = 1 pixel.
+	// Calculate the Unit Scale based on FRAMETIME_S * 8 units = 1 pixel.
 	static constexpr double unitScale = BASE_FRAMETIME * 8.;
 	// Calculate frame move speed.
 	const double frameMoveSpeed = GetMoveSpeedForTraversedFrameDistance( totalTraversedDistance, frameDistance, unitScale );
@@ -1141,7 +1141,7 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	//// Create our move distance vector and multiply by moveSpeed
 	//const vec3_t vDistance = { (float)(rbFrameMoveSpeed), (float)(rbFrameMoveSpeed), 0.f };
 	//// Ignore the Z translation, it might get us "stuck" after all. (We negate the x and y to get positive forward results.)
-	//const vec3_t vTranslate = vec3_t { moveTranslate.x * (float)FRAMETIME.count(), moveTranslate.y * (float)FRAMETIME.count(), 0.f};
+	//const vec3_t vTranslate = vec3_t { moveTranslate.x * (float)FRAMETIME_S.count(), moveTranslate.y * (float)FRAMETIME_S.count(), 0.f};
 	//// Get ourselves a normalized direction without Z.
 	//const vec3_t vDirection = vec3_t { normalizedDir.x, normalizedDir.y, 0.f };
 	//// Calculate the total moveVelocity into the normal's direction.

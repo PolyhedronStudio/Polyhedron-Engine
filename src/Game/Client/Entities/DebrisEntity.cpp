@@ -6,8 +6,10 @@
 //
 //
 */
-#include "../ClientGameLocals.h"              // SVGame.
-#include "../Effects/ParticleEffects.h"              // Effects.
+class DebrisEntity;
+
+#include "Game/Client/ClientGameLocals.h"              // SVGame.
+#include "Game/Client/Effects/ParticleEffects.h"              // Effects.
 //#include "../Entities.h"             // Entities.
 //#include "../../Player/Client.h"        // Player Client functions.
 //#include "../../Player/Animations.h"    // Include Player Client Animations.
@@ -15,11 +17,11 @@
 #define crandom()   (2.0f * (random() - 0.5f))
 
 // Class Entities.
-#include "Base/CLGBaseLocalEntity.h"
-#include "DebrisEntity.h"
+#include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
+#include "Game/Client/Entities/DebrisEntity.h"
 
 // World.
-#include "../World/ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 
 //! Constructor/Deconstructor.

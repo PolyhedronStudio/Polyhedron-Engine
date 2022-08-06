@@ -10,6 +10,3 @@
 #pragma once
 
 #include "ClientGameLocals.h"
-
-
-

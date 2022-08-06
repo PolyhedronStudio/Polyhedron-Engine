@@ -130,7 +130,7 @@ void BodyCorpse::BodyCorpseDie(IServerGameEntity* inflictor, IServerGameEntity* 
 
     // Set the ehrm.. think free thing.
     //SetThinkCallback(&SVGBaseEntity::SVGBaseEntityThinkFree);
-    //SetNextThinkTime(level.time + FRAMETIME);
+    //SetNextThinkTime(level.time + FRAMETIME_S);
     // Remove body.
     SetModelIndex(0);
     //Remove();

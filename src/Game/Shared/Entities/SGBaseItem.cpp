@@ -7,18 +7,27 @@
 *	SharedGame Base Item implementation.
 *
 ***/
-// Shared Game include.
-#include "../SharedGame.h"
+// Needed for the shared headers.
+#define CGAME_INCLUDE 1
+// Include shared headers.
+#include "Shared/Shared.h"
+#include "Shared/Refresh.h"
+
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_CLIENTGAME
 
 // Include CLGbasePacket and CLGBaseLocal Entity types.
+#include "../../Client/Entities/IClientGameEntity.h"
 #include "../../Client/Entities/Base/CLGBasePacketEntity.h"
 #include "../../Client/Entities/Base/CLGBaseLocalEntity.h"
 #include "../../Client/Entities/Base/CLGBasePlayer.h"
 using SGBasePlayer = CLGBasePlayer;
 #endif
 #ifdef SHAREDGAME_SERVERGAME 
+#include "../../Client/Entities/IServerGameEntity.h"
 #include "../../Server/Entities/Base/SVGBaseEntity.h"
 #include "../../Server/Entities/Base/SVGBaseTrigger.h"
 #include "../../Server/Entities/Base/SVGBasePlayer.h"
@@ -95,7 +104,7 @@ void SGBaseItem::Spawn() {
 
     //// Start thinking after other entities have spawned. This allows for items to safely
     //// drop on platforms etc.
-    //SetNextThinkTime(level.time + 2.5f * FRAMETIME);
+    //SetNextThinkTime(level.time + 2.5f * FRAMETIME_S);
     //SetThinkCallback(&SGBaseItem::BaseItemDropToFloor);
 
     //// Link the entity to world, for collision testing.
@@ -350,7 +359,7 @@ void SGBaseItem::BaseItemDropToFloor() {
  //   //    SetServerFlags(GetServerFlags() | EntityServerFlags::NoClient);
  //   //    SetSolid(Solid::Not);
  //   //    if (this == GetTeamMasterEntity()) {
- //   //        SetNextThinkTime(level.time + FRAMETIME);
+ //   //        SetNextThinkTime(level.time + FRAMETIME_S);
  //   //        SetThinkCallback(&SGBaseItem::BaseItemDoRespawn);
  //   //    }
  //   //}

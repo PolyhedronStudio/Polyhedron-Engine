@@ -492,7 +492,7 @@ qboolean ServerGameWorld::ParseEntityString(const char** data, SpawnKeyValues &p
 
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+			SG_Error( ErrorType::Drop, fmt::format("{}: EOF without closing brace", __func__ ) );
 			return false;
 		}
 
@@ -501,13 +501,13 @@ qboolean ServerGameWorld::ParseEntityString(const char** data, SpawnKeyValues &p
 
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+			SG_Error( ErrorType::Drop, fmt::format("{}: EOF without closing brace", __func__ ) );
 			return false;
 		}
 
 		// Ensure we had a value.
 		if (value[0] == '}') {
-			Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
+			SG_Error(ErrorType::Drop, fmt::format("{}: closing brace without value for key {}", __func__, key) );
 			return false;
 		   }
 

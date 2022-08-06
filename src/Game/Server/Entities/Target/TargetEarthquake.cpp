@@ -60,7 +60,7 @@ void TargetEarthquake::QuakeUse( IServerGameEntity* other, IServerGameEntity* ac
     
     lastQuakeTime = GameTime::zero();
     timeStamp = duration_cast<GameTime>(level.time + duration);
-    SetNextThinkTime( level.time + FRAMETIME );
+    SetNextThinkTime( level.time + FRAMETIME_S );
 }
 
 //===============
@@ -86,6 +86,6 @@ void TargetEarthquake::QuakeThink() {
     }
 
     if ( level.time < timeStamp ) {
-        SetNextThinkTime( level.time + 1 * FRAMETIME );
+        SetNextThinkTime( level.time + 1 * FRAMETIME_S );
     }
 }

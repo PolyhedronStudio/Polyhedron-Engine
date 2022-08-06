@@ -296,7 +296,7 @@ typedef struct model_s {
     // alias models
     int numframes;
     struct maliasframe_s *frames;
-#if USE_REF == REF_GL || USE_REF == REF_VKPT
+#if USE_REF==REF_GL || USE_REF==REF_VKPT
     int nummeshes;
     struct maliasmesh_s *meshes;
 	model_class_t model_class;

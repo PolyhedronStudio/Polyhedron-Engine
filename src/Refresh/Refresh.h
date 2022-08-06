@@ -94,11 +94,11 @@ extern void    (*R_AddDecal)(decal_t *d);
 extern bool (*R_InterceptKey)(unsigned key, qboolean down);
 extern bool (*R_IsHDR)();
 
-#if REF_GL
-void R_RegisterFunctionsGL();
+#if REF_GL==1
+extern void R_RegisterFunctionsGL();
 #endif
-#if REF_VKPT
-void R_RegisterFunctionsRTX();
+#if REF_VKPT==1
+extern void R_RegisterFunctionsRTX();
 #endif
 
 #endif // REFRESH_H

@@ -70,8 +70,8 @@ void SVG_ThrowClientHead(SVGBasePlayer* self, int damage) {
     // Bodies in the queue don't have a client anymore.
     ServerClient* client = self->GetClient();
     if (client) {
-        client->animation.priorityAnimation = PlayerAnimation::Death;
-        client->animation.endFrame = self->GetAnimationFrame();
+        //client->animation.priorityAnimation = PlayerAnimation::Death;
+        //client->animation.endFrame = self->GetAnimationFrame();
     } else {
         self->SetThinkCallback(nullptr);
         self->SetNextThinkTime(Frametime::zero());

@@ -9,8 +9,9 @@
 ***/
 #pragma once
 
-// Shared Game.
-#include "../../SharedGame.h"
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_SERVERGAME 
 	#include "../../../Server/ServerGameLocals.h"

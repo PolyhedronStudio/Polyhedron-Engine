@@ -192,7 +192,7 @@ void FuncPlat::PostSpawn() {
 //===============
 void FuncPlat::PlatformUse( GameEntity* other, GameEntity* activator ) {
     if (HasThinkCallback()) {
-        Com_DPrintf("FuncPlat already has a think callback! - returning!!\n");
+        SG_Print(PrintType::Developer, "FuncPlat already has a think callback! - returning!!\n");
         return;
     }
     PlatformGoDown();
@@ -318,7 +318,7 @@ void FuncPlat::HitBottom() {
 //===============
 void FuncPlat::OnPlatformHitTop( GameEntity* self ) {
     if (!self->IsSubclassOf<FuncPlat>()) {
-	    Com_DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
+	    SG_Print(PrintType::Developer, fmt::format("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber() ));
         return;
     }
     
@@ -332,7 +332,7 @@ void FuncPlat::OnPlatformHitTop( GameEntity* self ) {
 //===============
 void FuncPlat::OnPlatformHitBottom( GameEntity* self ) {
     if (!self->IsSubclassOf<FuncPlat>()) {
-	    Com_DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
+		SG_Print( PrintType::Developer, fmt::format( "Warning: In function {} entity #{} is not a subclass of func_plat\n", __func__, self->GetNumber() ) );
         return;
     }
     
@@ -449,7 +449,7 @@ void FuncPlat::SpawnPlatformTrigger() {
     for (GameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!teamMember->IsSubclassOf<CLGBaseMover>()) {
-	        Com_DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+	        SG_Print(PrintType::Developer, fmt::format("Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), teamMember->GetNumber() ));
 	        break;
 	    }
 

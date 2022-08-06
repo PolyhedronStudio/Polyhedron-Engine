@@ -19,7 +19,7 @@
 // Assertion.
 #include <cassert>
 
-#if USE_SERVER
+#if USE_SERVER==1
 /**
 *   @brief Read a client's delta move command.
 **/

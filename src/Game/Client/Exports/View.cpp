@@ -336,4 +336,8 @@ void ClientGameView::AddLightStyle(int32_t style, const vec4_t &rgba) {
     lightStyle.rgb.z    = rgba.z;
     lightStyle.white    = rgba.w;
 }
+#else
+void ClientGameView::AddLightStyle(int32_t style, const vec4_t &rgba) {
+
+}
 #endif

@@ -8,8 +8,7 @@
 // Contains utility functions used elsewhere by the math library, and/or in 
 // game and engine code. 
 //
-#ifndef __INC_SHARED_MATH_UTILITIES_H__
-#define __INC_SHARED_MATH_UTILITIES_H__
+#pragma once 
 
 #include "../Shared.h"
 
@@ -340,5 +339,3 @@ static inline int Q_gcd(int a, int b)
 #define crand()     ((rand() & 32767) * (2.0 / 32767) - 1)
 //#define crand()     Randomui()
 #define Q_rint(x)   ((x) < 0 ? ((int)((x) - 0.5f)) : ((int)((x) + 0.5f)))
-
-#endif // __INC_SHARED_MATH_UTILITIES_H__

@@ -9,8 +9,9 @@
 ***/
 #pragma once
 
-// Shared Game.
-#include "../../SharedGame.h"
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_SERVERGAME 
 	#include "../../../Server/ServerGameLocals.h"
@@ -122,7 +123,7 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 			//VectorNormalize2
 			vec3_t acceldir = vec3_zero();
 			VectorNormalize2( ent->GetVelocity(), acceldir);
-			acceldir = vec3_scale( acceldir, ent->GetAcceleration()  * FRAMETIME.count());
+			acceldir = vec3_scale( acceldir, ent->GetAcceleration()  * FRAMETIME_S.count());
 
 			// Add directional acceleration to velocity.
 			ent->SetVelocity(ent->GetVelocity() + acceldir);//VectorAdd( ent->velocity, acceldir, ent->velocity );
@@ -140,11 +141,11 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
 	// Hacks
 	//if( ent->s.type != ET_PLASMA && ent->s.type != ET_ROCKET ) {
 	//	// move angles
-	//	VectorMA( ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles );
+	//	VectorMA( ent->s.angles, FRAMETIME_S, ent->avelocity, ent->s.angles );
 	//}
 
 	// move origin
-	const vec3_t move = vec3_scale( ent->GetVelocity(), FRAMETIME.count() ); //VectorScale( ent->velocity, FRAMETIME, move );
+	const vec3_t move = vec3_scale( ent->GetVelocity(), FRAMETIME_S.count() ); //VectorScale( ent->velocity, FRAMETIME_S, move );
 
 	SGTraceResult traceResult = SG_PushEntity( ent, move );
 	if( !ent->IsInUse() ) {

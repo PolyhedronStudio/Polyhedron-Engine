@@ -127,7 +127,7 @@ void MiscClientModel::Spawn() {
     SetDieCallback( &MiscClientModel::MiscServerModelDie );
 
     // Setup the next think time.
-    SetNextThinkTime( level.time + 2.f * FRAMETIME );
+    SetNextThinkTime( level.time + 2.f * FRAMETIME_S );
 
     // Link the entity to world, for collision testing.
     LinkEntity();
@@ -284,7 +284,7 @@ void MiscClientModel::MiscServerModelThink(void) {
     //    float yaw = vec3_to_yaw(wishMoveAngles);
 
     //    // Last but not least, move a step ahead.
-    //    SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME);
+    //    SVG_StepMove_Walk(this, yaw, 90 * FRAMETIME_S);
     //}
 
     // Link entity back in.
@@ -294,7 +294,7 @@ void MiscClientModel::MiscServerModelThink(void) {
     //SVG_StepMove_CheckGround(this);
 
     // Setup its next think time, for a frame ahead.
-    SetNextThinkTime(level.time + 1.f * FRAMETIME);
+    SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
 }
 
 //===============
@@ -328,7 +328,7 @@ void MiscClientModel::MiscServerModelDie(GameEntity* inflictor, GameEntity* atta
     //SetEndFrame(119.f);
     //SetStartFrame(4.f);
     //// Setup the next think and think time.
-    SetNextThinkTime(level.time + 1 * FRAMETIME);
+    SetNextThinkTime(level.time + 1 * FRAMETIME_S);
 
     // Set think function.
     SetThinkCallback(&MiscClientModel::CLGBaseLocalEntityThinkFree);

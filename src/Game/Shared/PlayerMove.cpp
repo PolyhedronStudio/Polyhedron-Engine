@@ -16,14 +16,22 @@
 *   and execute the right movement according to that.
 * 
 ***/
-#include "SharedGame.h"
+// Needed for the shared headers.
+#define CGAME_INCLUDE 1
+// Include shared headers.
+#include "Shared/Shared.h"
+#include "Shared/Refresh.h"
+
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 /**
 *	Player Move debugging ifdefs, uncomment to enable debug output
 *	for each distinct game module.
 **/
-//#define DEBUG_SERVERGAME_PMOVE
-//#define DEBUG_CLIENTGAME_PMOVE
+#define DEBUG_SERVERGAME_PMOVE
+#define DEBUG_CLIENTGAME_PMOVE
 
 /**
 *	@brief	Debug Player Move output function, we don't want to clutter by outputting by default.
@@ -33,13 +41,13 @@ static inline void PM_DebugPrint( const std::string &debugMsg, const std::string
 }
 // ClientGame PM_Debug
 #if defined(DEBUG_CLIENTGAME_PMOVE) && defined(SHAREDGAME_CLIENTGAME)
-#define PM_Debug(message) PM_DebugPrint(#message, __func__);
+#define PM_Debug(message) PM_DebugPrint(message, __func__);
 #else
 #define PM_Debug(message)
 #endif
 // ServerGame PM_Debug
 #if defined(DEBUG_SERVERGAME_PMOVE) && defined(SHAREDGAME_SERVERGAME)
-#define PM_Debug(message) PM_DebugPrint(#message, __func__);
+#define PM_Debug(message) PM_DebugPrint(message, __func__);
 #else
 #define PM_Debug(message)
 #endif
@@ -107,27 +115,32 @@ static vec3_t PM_ClipVelocity(const vec3_t &in, const vec3_t &normal, float boun
 /**
 *   @brief  Marks the specified entity as touched.
 **/
-static void PM_TouchEntity(struct PODEntity* ent) {
-    // Ensure it is valid.
-    if (ent == NULL) {
-		PM_Debug( "ent = NULL!" );
-        return;
-    }
+static void PM_TouchEntity(const SGTraceResult &entityTrace) {
+	// Ensure it is valid.
+	if (entityTrace.podEntity == nullptr) {
+		PM_Debug("ent = (nullptr)");
+		return;
+	}
 
-    // Only touch entity if we aren't at the maximum limit yet.
-    if (pm->numTouchedEntities < PM_MAX_TOUCH_ENTS && ent) {
-#ifdef SHAREDGAME_CLIENTGAME
-        pm->touchedEntities[pm->numTouchedEntities] = ent->clientEntityNumber;
-#endif
-#ifdef SHAREDGAME_SERVERGAME
-		pm->touchedEntities[pm->numTouchedEntities] = ent->currentState.number;
-#endif
-        pm->numTouchedEntities++;
-    }
-    else {
-        // Developer print.
-		PM_Debug( fmt::format("PM_MAX_TOUCH_ENTS({}) amount of entities reached for this frame.", PM_MAX_TOUCH_ENTS ) );
-    }
+	// Only touch entity if we aren't at the maximum limit yet.
+	if ( pm->numTouchedEntities == PM_MAX_TOUCH_ENTS ) {
+		PM_Debug(fmt::format("Can't add touched entity, limit of PM_MAX_TOUCH_ENTS({}) is already hit.", PM_MAX_TOUCH_ENTS));
+		return;
+	}
+
+	// Get the proper entity number.
+	const int32_t touchEntityNumber = SG_GetEntityNumber( entityTrace.podEntity );
+
+	// See if we've already touched this entity before, if so, escape.
+	for ( int32_t i = 0; i < pm->numTouchedEntities; i++ ) {
+		if ( SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity ) == touchEntityNumber ) {
+			return;
+		}
+	}
+
+	// Add to our list and increment touched entity count.
+	pm->touchedEntityTraces[ pm->numTouchedEntities ] = entityTrace;
+	pm->numTouchedEntities++;
 }
 
 
@@ -181,10 +194,7 @@ static void PM_StepDown(const TraceResult * trace) {
 *           Returns the actual trace.
 **/
 const TraceResult PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & mins, const vec3_t & maxs, const vec3_t & end) {
-    // Disabled, for this we have no need. It seems to work fine at this moment without it.
-    // Not getting stuck into rotating objects or what have we....
-    // 
-    // And otherwise, we got this solution below, which... is seemingly slow in certain cases...
+	// For us this works fine with just a normal trace, not sure about... if we ever need it. Seems to make no difference other than performance (big time).
 #if 1
     return pm->Trace(start, mins, maxs, end);
 #else
@@ -297,7 +307,7 @@ static qboolean PM_StepSlideMove_(void)
         }
 
         // store a reference to the entity for firing game events
-        PM_TouchEntity(trace.ent);
+        PM_TouchEntity(trace);
 
         // record the impacted plane, or nudge velocity out along it
         if (PM_ImpactPlane(planes, numPlanes, trace.plane.normal)) {
@@ -817,7 +827,7 @@ static void PM_CheckGround(void) {
     }
 
     // Always touch the entity, even if we couldn't stand on it
-    PM_TouchEntity(trace.ent);
+    PM_TouchEntity(trace);
 }
 
 

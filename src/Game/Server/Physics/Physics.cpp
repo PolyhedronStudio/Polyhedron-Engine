@@ -393,7 +393,7 @@ void SVG_AddGravity(IServerGameEntity *ent)
     vec3_t velocity = ent->GetVelocity();
 
     // Apply gravity.
-    velocity.z -= ent->GetGravity() * sv_gravity->value * FRAMETIME.count();
+    velocity.z -= ent->GetGravity() * sv_gravity->value * FRAMETIME_S.count();
 
     // Apply new velocity to entity.
     ent->SetVelocity(velocity);
@@ -714,8 +714,8 @@ retry:
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
             // object is moving
-            move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
-            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
+            move = vec3_scale(part->GetVelocity(), FRAMETIME_S.count());
+            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME_S.count());
 
             SGEntityHandle partHandle(part);
             if (!SVG_Push(partHandle, move, amove))
@@ -793,8 +793,8 @@ void SVG_Physics_Noclip(SGEntityHandle &entityHandle) {
     if (!ent->IsInUse())
         return;
 
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
-    ent->SetOrigin(vec3_fmaf(ent->GetOrigin(), FRAMETIME.count(), ent->GetVelocity()));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME_S.count(), ent->GetAngularVelocity()));
+    ent->SetOrigin(vec3_fmaf(ent->GetOrigin(), FRAMETIME_S.count(), ent->GetVelocity()));
 
     ent->LinkEntity();
 }
@@ -863,10 +863,10 @@ void SVG_Physics_Toss(SGEntityHandle& entityHandle) {
         SVG_AddGravity(ent);
 
     // Move angles
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), ent->GetAngularVelocity()));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME_S.count(), ent->GetAngularVelocity()));
 
     // Move origin
-    const vec3_t moveToOrigin = vec3_scale(ent->GetVelocity(), FRAMETIME.count());
+    const vec3_t moveToOrigin = vec3_scale(ent->GetVelocity(), FRAMETIME_S.count());
 
 	// Try and push move into new destined origin.
     SVGTraceResult trace = SVG_PushEntity(ent, moveToOrigin);
@@ -1006,10 +1006,10 @@ void SVG_AddRotationalFriction(SGEntityHandle entityHandle) {
     vec3_t angularVelocity = ent->GetAngularVelocity();
 
     // Set angles in proper direction.
-    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME.count(), angularVelocity));
+    ent->SetAngles(vec3_fmaf(ent->GetAngles(), FRAMETIME_S.count(), angularVelocity));
 
     // Calculate adjustment to apply.
-    float adjustment = FRAMETIME.count() * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
+    float adjustment = FRAMETIME_S.count() * STEPMOVE_STOPSPEED * STEPMOVE_FRICTION;
 
     // Apply adjustments.
     angularVelocity = ent->GetAngularVelocity();
@@ -1108,7 +1108,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
         float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
         float friction = STEPMOVE_FRICTION / 3;
-        float newSpeed = speed - (FRAMETIME.count() * control * friction);
+        float newSpeed = speed - (FRAMETIME_S.count() * control * friction);
         if (newSpeed < 0)
             newSpeed = 0;
         newSpeed /= speed;
@@ -1120,7 +1120,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
     if ((ent->GetFlags() & EntityFlags::Swim) && (ent->GetVelocity().z != 0)) {
         float speed = fabs(ent->GetVelocity().z);
         float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-        float newSpeed = speed - (FRAMETIME.count() * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
+        float newSpeed = speed - (FRAMETIME_S.count() * control * STEPMOVE_WATERFRICTION * ent->GetWaterLevel());
         if (newSpeed < 0)
             newSpeed = 0;
         newSpeed /= speed;
@@ -1139,7 +1139,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
                 if (speed) {
                     float friction = STEPMOVE_FRICTION;
                     float control = speed < STEPMOVE_STOPSPEED ? STEPMOVE_STOPSPEED : speed;
-                    float newSpeed = speed - FRAMETIME.count() * control * friction;
+                    float newSpeed = speed - FRAMETIME_S.count() * control * friction;
 
                     if (newSpeed < 0)
                         newSpeed = 0;
@@ -1161,7 +1161,7 @@ void SVG_Physics_Step(SGEntityHandle &entityHandle)
             mask = BrushContentsMask::MonsterSolid;
         
         // Execute "FlyMove", essentially also our water move.
-        SVG_FlyMove(ent, FRAMETIME.count(), mask);
+        SVG_FlyMove(ent, FRAMETIME_S.count(), mask);
 
         // Link entity back for collision, and execute a check for touching triggers.
         ent->LinkEntity();

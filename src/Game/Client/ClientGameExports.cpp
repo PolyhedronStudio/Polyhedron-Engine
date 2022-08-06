@@ -347,7 +347,7 @@ void ClientGameExports::ClientUpdateOrigin() {
 /**
 *   @brief  Called when there is a needed retransmit of user info variables.
 **/
-void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, from_t from) {
+void ClientGameExports::ClientUpdateUserinfo(cvar_t* var, int32_t from) {
     // If there is a skin change, let's go for it.
     if (var == info_skin && from > FROM_CONSOLE) {
         char sk[MAX_QPATH];

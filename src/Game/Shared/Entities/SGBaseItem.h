@@ -17,6 +17,7 @@
 ***/
 #pragma once
 
+class IClientGameEntity;
 class SVGBaseEntity;
 class SVGBaseTrigger;
 

@@ -11,30 +11,37 @@
 ***/
 #pragma once
 
+// For SVGame.h
+#define GAME_INCLUDE
 
-// Shared includes.
-//#include "../../Shared/Shared.h"
-
-
-// Because we define the full size ServerClient and Entity structures in this file
-// we define GAME_INCLUDE so that SVGame.h does not define the short server-visible variety.
-//#define GAME_INCLUDE
 #include "../../Shared/Shared.h"
 #include "../../Shared/List.h"
-struct gclient_s;
-struct PODEntity;
-
+#include "../../Shared/SVGame.h"
 
 // The "gameversion" client command will print this including the compile date
 #define GAMEVERSION "basepoly"
 
+
 /**
 *	SharedGame Framework.
 **/
-#include "../Shared/SharedGame.h"
+//! The SharedGame functionality implementation for the ServerGame.
+//class IServerGameEntity;
+//! Server GameEntity Interface
+#include "Game/Shared/GameBindings/ServerBinding.h"
+//! The actual SharedGame includes.
+#include "Game/Shared/SharedGame.h"
+
+//! Entity Filters.
+#include "Game/Shared/Entities/EntityFilters.h"
+
+//#include "../Shared/SharedGame.h"
+//#include "../Shared/ItemIDs.h"
+//#include "../Shared/WeaponStates.h"
+
 
 /**
-*	ClientGame Trace Results.
+*	ServerGame Trace Results.
 **/
 #include "Utilities/SVGTraceResult.h"
 
@@ -163,8 +170,8 @@ public:
 //static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
-//static constexpr Frametime FRAMETIME = FRAMETIME_S;
-#define FRAMETIME FRAMETIME_S
+//static constexpr Frametime FRAMETIME_S = FRAMETIME_S;
+#define FRAMETIME_S FRAMETIME_S
 
 //! Memory tags to allow dynamic memory to be cleaned up
 static constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll

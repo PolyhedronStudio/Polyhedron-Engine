@@ -9,8 +9,9 @@
 ***/
 #pragma once
 
-// Shared Game.
-#include "../../SharedGame.h"
+// SharedGame header itself.
+#define SHAREDGAME_UNIT
+#include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_SERVERGAME 
 	#include "../../../Server/ServerGameLocals.h"
@@ -411,8 +412,8 @@ retry:
             partAngularVelocity.x || partAngularVelocity.y || partAngularVelocity.z) 
         {
             // object is moving
-            move = vec3_scale(part->GetVelocity(), FRAMETIME.count());
-            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME.count());
+            move = vec3_scale(part->GetVelocity(), FRAMETIME_S.count());
+            amove = vec3_scale(part->GetAngularVelocity(), FRAMETIME_S.count());
 
             SGEntityHandle partHandle(part);
             if (!SG_Push(partHandle, move, amove))
@@ -429,7 +430,7 @@ retry:
         // the move failed, bump all nextThinkTime times and back out moves
         for (mv = ent ; mv ; mv = mv->GetTeamChainEntity()) {
             if (mv->GetNextThinkTime() > GameTime::zero()) {
-                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);//);//FRAMETIME);// 1_hz);
+                mv->SetNextThinkTime(mv->GetNextThinkTime() + FRAMERATE_MS);//);//FRAMETIME_S);// 1_hz);
             }
         }
 
@@ -496,10 +497,10 @@ retry:
 //		//if( part->s.linearMovement ) {
 //		//	GS_LinearMovement( &part->s, game.serverTime, move );
 //		//	VectorSubtract( move, part->s.origin, move );
-//		//	VectorScale( part->avelocity, FRAMETIME, amove );
+//		//	VectorScale( part->avelocity, FRAMETIME_S, amove );
 //		//} else {
-//			const vec3_t velocity = vec3_scale(partVelocity, FRAMETIME.count()); //VectorScale( part->velocity, FRAMETIME, move );
-//			const vec3_t angularVelocity = vec3_scale(partAngularVelocity, FRAMETIME.count()); //VectorScale( part->avelocity, FRAMETIME, amove );
+//			const vec3_t velocity = vec3_scale(partVelocity, FRAMETIME_S.count()); //VectorScale( part->velocity, FRAMETIME_S, move );
+//			const vec3_t angularVelocity = vec3_scale(partAngularVelocity, FRAMETIME_S.count()); //VectorScale( part->avelocity, FRAMETIME_S, amove );
 //
 //			SGEntityHandle partHandle(gePushPart);
 //			if ( !SG_Push(partHandle, velocity, angularVelocity) ) {
