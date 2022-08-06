@@ -364,8 +364,6 @@ private:
     GameEntity* CreateGameEntityFromClassname(PODEntity *podEntity, const std::string& classname);
 };
 
-
-
 /**
 *   @brief  Creates and assigns a game entity to the given client entity based on the classname.
 *

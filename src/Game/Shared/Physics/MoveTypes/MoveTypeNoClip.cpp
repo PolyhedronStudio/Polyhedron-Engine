@@ -10,7 +10,6 @@
 #pragma once
 
 // SharedGame header itself.
-#define SHAREDGAME_UNIT
 #include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_SERVERGAME 

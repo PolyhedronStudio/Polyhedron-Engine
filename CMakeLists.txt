@@ -164,21 +164,18 @@ set( SRC_GAME_SERVER_DIR ${SRC_GAME_DIR}/Server )
 set( SRC_GAME_SERVER_DIR ${SRC_GAME_SERVER_DIR} ) #PARENT_SCOPE )
 
 ####
-##	Include build project script.
+##	Include Source/Header lists for all projects.
 ####
 include(SourceList.cmake)
 
 ####
-##	Client build project script.
+##	Client/Server build project script.
 ####
 include(Client.cmake)
-
-####
-##	Server build project script.
-####
 include(Server.cmake)
 
 ####
-##	ClientGame build project script.
+##	(Client/Server)-Game build project scripts.
 ####
 include(ClientGame.cmake)
+include(ServerGame.cmake)

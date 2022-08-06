@@ -10,17 +10,7 @@
 #pragma once
 
 // SharedGame header itself.
-#define SHAREDGAME_UNIT
 #include "Game/Shared/SharedGame.h"
-
-#ifdef SHAREDGAME_SERVERGAME 
-	#include "../../../Server/ServerGameLocals.h"
-	#include "../../../Server/World/ServerGameWorld.h"
-#endif
-#ifdef SHAREDGAME_CLIENTGAME
-	#include "../../../Client/ClientGameLocals.h"
-	#include "../../../Client/World/ClientGameWorld.h"
-#endif
 
 // Physics.
 #include "../Physics.h"

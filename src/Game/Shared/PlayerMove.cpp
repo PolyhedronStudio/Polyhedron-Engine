@@ -23,7 +23,7 @@
 #include "Shared/Refresh.h"
 
 // SharedGame header itself.
-#define SHAREDGAME_UNIT
+#define SHAREDGAME_UNIT_INCLUDE
 #include "Game/Shared/SharedGame.h"
 
 /**
@@ -40,18 +40,21 @@ static inline void PM_DebugPrint( const std::string &debugMsg, const std::string
 	SG_Print( PrintType::Developer, fmt::format("{}({}): {}\n", functionName, sharedModuleName, debugMsg ) );
 }
 // ClientGame PM_Debug
-#if defined(DEBUG_CLIENTGAME_PMOVE) && defined(SHAREDGAME_CLIENTGAME)
+#if  defined(SHAREDGAME_CLIENTGAME) && defined(DEBUG_CLIENTGAME_PMOVE)
 #define PM_Debug(message) PM_DebugPrint(message, __func__);
 #else
-#define PM_Debug(message)
+//#define PM_Debug(message)
 #endif
 // ServerGame PM_Debug
-#if defined(DEBUG_SERVERGAME_PMOVE) && defined(SHAREDGAME_SERVERGAME)
+#if defined(SHAREDGAME_SERVERGAME) && defined(DEBUG_SERVERGAME_PMOVE) 
 #define PM_Debug(message) PM_DebugPrint(message, __func__);
 #else
+//#define PM_Debug(message)
+#endif
+// Ensure it is defined as placeholder in case none are enabled.
+#ifndef PM_Debug
 #define PM_Debug(message)
 #endif
-
 
 
 /**

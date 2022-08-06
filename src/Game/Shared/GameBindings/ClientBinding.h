@@ -84,9 +84,9 @@ using GameEntityVector = std::vector<GameEntity*>;
 #include "Shared/CLTypes.h"
 #include "Shared/CLGame.h"
 
-//! When SHAREDGAME_UNIT is defined in a .cpp file it means we should
+//! When SHAREDGAME_UNIT_INCLUDE is defined in a .cpp file it means we should
 //! include the 'Module'-GameLocals.
-#ifdef SHAREDGAME_UNIT
+#ifdef SHAREDGAME_UNIT_INCLUDE
 #include "Game/Client/ClientGameLocals.h"
 #include "Game/Client/ClientGameImports.h"
 #endif

@@ -371,8 +371,8 @@ list( APPEND HEADERS_SERVER
 	"${SRC_SERVER_DIR}/Models.h"	
 	"${SRC_SERVER_DIR}/Server.h"
 )
-set( SRC_SERVER ${SRC_SERVER} PARENT_SCOPE )
-set( HEADERS_SERVER ${HEADERS_SERVER} PARENT_SCOPE )
+set( SRC_SERVER ${SRC_SERVER} ) #PARENT_SCOPE )
+set( HEADERS_SERVER ${HEADERS_SERVER} ) #PARENT_SCOPE )
 
 
 
@@ -613,9 +613,6 @@ if( CONFIG_BUILD_GAME_CLIENT )
 
 		"${SRC_GAME_CLIENT_DIR}/Input/KeyBinding.cpp"
 
-		#"${SRC_GAME_CLIENT_DIR}/Physics/Physics.cpp"
-		#"${SRC_GAME_CLIENT_DIR}/Physics/StepMove.cpp"
-
 		"${SRC_GAME_CLIENT_DIR}/View/ViewCamera.cpp"
 
 		"${SRC_GAME_CLIENT_DIR}/ClientGameExports.cpp"
@@ -624,8 +621,6 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Debug.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Main.cpp"
 		"${SRC_GAME_CLIENT_DIR}/TemporaryEntities.cpp"
-
-		#CLGame.def
 	)
 	# Specify Header files.
 	SET(HEADERS_GAME_CLIENT
@@ -656,7 +651,6 @@ if( CONFIG_BUILD_GAME_CLIENT )
 
 		"${SRC_GAME_CLIENT_DIR}/Entities/Monsters/MonsterTestDummy.h"
 
-		#"${SRC_GAME_CLIENT_DIR}/Entities/GameEntityList.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/IClientGameEntity.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/DebrisEntity.h"
 		"${SRC_GAME_CLIENT_DIR}/Entities/GibEntity.h"
@@ -676,8 +670,6 @@ if( CONFIG_BUILD_GAME_CLIENT )
 
 		"${SRC_GAME_CLIENT_DIR}/Input/KeyBinding.h"
 	
-		#Physics/StepMove.h"
-
 		"${SRC_GAME_CLIENT_DIR}/View/ViewCamera.h"
 
 		"${SRC_GAME_CLIENT_DIR}/Utilities/CLGTraceResult.h"
@@ -690,5 +682,239 @@ if( CONFIG_BUILD_GAME_CLIENT )
 		"${SRC_GAME_CLIENT_DIR}/Debug.h"
 		"${SRC_GAME_CLIENT_DIR}/Main.h"
 		"${SRC_GAME_CLIENT_DIR}/TemporaryEntities.h"
+	)
+endif()
+
+
+#############################################################################
+##  ServerGame Source and Header files.
+#############################################################################
+if( CONFIG_BUILD_GAME_SERVER )
+	# Specify Source files.
+	SET(SRC_GAME_SERVER
+		"${SRC_GAME_SERVER_DIR}/Ballistics.cpp"
+		"${SRC_GAME_SERVER_DIR}/ChaseCamera.cpp"
+		"${SRC_GAME_SERVER_DIR}/Commands.cpp"
+		"${SRC_GAME_SERVER_DIR}/Effects.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities.cpp"
+		"${SRC_GAME_SERVER_DIR}/ServerGameLocals.cpp"
+		"${SRC_GAME_SERVER_DIR}/ImportsWrapper.cpp"
+		"${SRC_GAME_SERVER_DIR}/Main.cpp"
+		"${SRC_GAME_SERVER_DIR}/Effects.cpp"
+		"${SRC_GAME_SERVER_DIR}/Save.cpp"
+		"${SRC_GAME_SERVER_DIR}/SVCommands.cpp"
+		"${SRC_GAME_SERVER_DIR}/Utilities.cpp"
+		"${SRC_GAME_SERVER_DIR}/Weapons.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseEntity.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItem.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemAmmo.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemWeapon.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseTrigger.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBasePlayer.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseSkeletalAnimator.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/BodyCorpse.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/DebrisEntity.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/GibEntity.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncAreaportal.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncButton.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncConveyor.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncDoor.cpp" 
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncDoorRotating.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncExplosive.cpp" 
+		#"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncKillbox.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncObject.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncPlat.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncRotating.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncTimer.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncTrain.cpp" 
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncWall.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncWater.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoNotNull.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoNull.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerCoop.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerDeathmatch.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerIntermission.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerStart.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemAmmo9mm.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemHealthMega.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponKnife.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponBeretta.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponNone.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponSMG.cpp"
+
+		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplobox.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscGibArm.cpp" 
+		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscGibLeg.cpp" 
+		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscGibHead.cpp" 
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplosionBox.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscServerModel.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscTeleporter.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscTeleporterDest.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterTestDummy.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathCorner.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathMonsterGoal.cpp"
+
+		#"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetBlaster.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetChangelevel.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetCrosslevel_target.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetCrosslevel_trigger.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetEarthquake.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetExplosion.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetLightramp.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetSpawner.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetSpeaker.cpp"
+		#Entities/Target/TargetSplash.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetTempEntity.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerCounter.cpp"
+		#Entities/Trigger/TriggerElevator.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerGravity.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerKey.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerMonsterjump.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerPush.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerAlways.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerAutoDoor.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerAutoPlatform.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerDelayedUse.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerHurt.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerMultiple.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerOnce.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerRelay.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Weaponry/BlasterBolt.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Light.cpp"
+		"${SRC_GAME_SERVER_DIR}/Entities/Worldspawn.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Exports/Client.cpp"
+		"${SRC_GAME_SERVER_DIR}/Exports/Core.cpp"
+		"${SRC_GAME_SERVER_DIR}/Exports/Entities.cpp"
+		"${SRC_GAME_SERVER_DIR}/Exports/GameState.cpp"
+		"${SRC_GAME_SERVER_DIR}/Exports/LevelState.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Gamemodes/DefaultGamemode.cpp"
+		"${SRC_GAME_SERVER_DIR}/GameModes/CoopGameMode.cpp"
+		"${SRC_GAME_SERVER_DIR}/Gamemodes/DeathMatchGamemode.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Physics/Physics.cpp"
+		"${SRC_GAME_SERVER_DIR}/Physics/StepMove.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Player/Client.cpp"
+		"${SRC_GAME_SERVER_DIR}/Player/Hud.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/Utilities/SVGTraceResult.cpp"
+
+		"${SRC_GAME_SERVER_DIR}/World/ServerGameWorld.cpp"
+		#"${SRC_GAME_SERVER_DIR}/SVGame.def
+	)
+	# Specify Header files.
+	SET(HEADERS_GAME_SERVER
+		"${SRC_GAME_SERVER_DIR}/Ballistics.h"
+		"${SRC_GAME_SERVER_DIR}/ChaseCamera.h"
+		"${SRC_GAME_SERVER_DIR}/Effects.h"
+		"${SRC_GAME_SERVER_DIR}/Entities.h"
+		"${SRC_GAME_SERVER_DIR}/ServerGameLocals.h"
+		"${SRC_GAME_SERVER_DIR}/TypeInfo.h"
+		"${SRC_GAME_SERVER_DIR}/Utilities.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseEntity.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItem.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemAmmo.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemWeapon.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseTrigger.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBasePlayer.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/BodyCorpse.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/DebrisEntity.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Base/GibEntity.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncAreaportal.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncButton.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncDoor.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncDoorRotating.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncExplosive.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncPlat.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncRotating.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncTimer.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncTrain.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Func/FuncWall.h"
+
+		#"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoNull.h" - Only has a .cpp file.
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoNotNull.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerCoop.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerDeathmatch.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerIntermission.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Info/InfoPlayerStart.h"
+	
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemAmmo9mm.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemHealthMega.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponKnife.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponBeretta.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponSMG.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Items/ItemWeaponNone.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplosionBox.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscServerModel.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterTestDummy.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathCorner.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetEarthquake.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetExplosion.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetSpeaker.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Target/TargetTempEntity.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerAlways.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerAutoDoor.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerAutoPlatform.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerCounter.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerDelayedUse.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerHurt.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerGravity.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerMultiple.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerOnce.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerPush.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Trigger/TriggerRelay.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/Weaponry/BlasterBolt.h"
+
+		"${SRC_GAME_SERVER_DIR}/Entities/IServerGameEntity.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Light.h"
+		"${SRC_GAME_SERVER_DIR}/Entities/Worldspawn.h"
+
+		"${SRC_GAME_SERVER_DIR}/Exports/Client.h"
+		"${SRC_GAME_SERVER_DIR}/Exports/Core.h"
+		"${SRC_GAME_SERVER_DIR}/Exports/Entities.h"
+		"${SRC_GAME_SERVER_DIR}/Exports/GameState.h"
+		"${SRC_GAME_SERVER_DIR}/Exports/LevelState.h"
+
+		"${SRC_GAME_SERVER_DIR}/Gamemodes/DefaultGamemode.h"
+		"${SRC_GAME_SERVER_DIR}/GameModes/CoopGamemode.h"
+		"${SRC_GAME_SERVER_DIR}/Gamemodes/DeathMatchGamemode.h"
+		"${SRC_GAME_SERVER_DIR}/Gamemodes/IGamemode.h"
+
+		"${SRC_GAME_SERVER_DIR}/Player/Animations.h"
+		"${SRC_GAME_SERVER_DIR}/Player/Client.h"
+
+		"${SRC_GAME_SERVER_DIR}/ServerGameExports.h"
+
+		"${SRC_GAME_SERVER_DIR}/Utilities/SVGTraceResult.h"
+
+		"${SRC_GAME_SERVER_DIR}/World/ServerGameWorld.h"
+		#"${SRC_GAME_SERVER_DIR}/SVGame.def
 	)
 endif()

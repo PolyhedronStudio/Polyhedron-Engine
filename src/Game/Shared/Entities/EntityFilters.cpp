@@ -8,11 +8,10 @@
 *
 ***/
 // SharedGame header itself.
-#define SHAREDGAME_UNIT
+#define SHAREDGAME_UNIT_INCLUDE
 #include "Game/Shared/SharedGame.h"
 
 #ifdef SHAREDGAME_CLIENTGAME
-
 // Include CLGbasePacket and CLGBaseLocal Entity types.
 #include "../../Client/Entities/IClientGameEntity.h"
 #include "../../Client/Entities/Base/CLGBasePacketEntity.h"

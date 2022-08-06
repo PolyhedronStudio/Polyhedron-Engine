@@ -88,7 +88,7 @@ struct GibType {
 #include "EntityFlags.h"
 
 //! Entity Filters.
-//#include "Entities/EntityFilters.h"
+#include "Entities/EntityFilters.h"
 // GameMode Flags.
 #include "GameModeFlags.h"
 

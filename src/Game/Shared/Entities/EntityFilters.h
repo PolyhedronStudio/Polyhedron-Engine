@@ -7,7 +7,6 @@
 #include "Shared/Refresh.h"
 
 // SharedGame header itself.
-#define SHAREDGAME_UNIT 1
 #include "Game/Shared/SharedGame.h"
 
 /**
