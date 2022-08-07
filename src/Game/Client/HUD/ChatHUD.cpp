@@ -1,11 +1,20 @@
-// Client Game.
-#include "../ClientGameLocals.h"
-
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game ChatHUD display implementation.
+* 
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 // ChatHUD.
-#include "ChatHUD.h"
-
+#include "Game/Client/HUD/ChatHUD.h"
 // Exports Interface Implementations.
-#include "../Exports/Screen.h"
+#include "Game/Client/Exports/Screen.h"
 
 
 

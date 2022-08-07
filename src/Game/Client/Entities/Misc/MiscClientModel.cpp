@@ -1,22 +1,27 @@
-/*
-// LICENSE HERE.
-
-//
-// MiscClientModel.cpp
-//
-//
-*/
-#include "../../ClientGameLocals.h"          // SVGame.
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Side Model -> Exists for client side world decorating without
+*	taking up an entity slot on the wire.
+*
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Server Game Base Entity.
-#include "../Base/CLGBaseLocalEntity.h"
+#include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 //#include "../Base/CLGBaseTrigger.h"
 
 // World.
-#include "../../World/ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 // Misc Server Model Entity.
-#include "MiscClientModel.h"
+#include "Game/Client/Entities/Misc/MiscClientModel.h"
 
 
 

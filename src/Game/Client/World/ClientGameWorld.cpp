@@ -5,11 +5,13 @@
 *	@file
 *
 ***/
-// Core.
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Exports.
-#include "../Exports/Entities.h"
+#include "Game/Client/Exports/Entities.h"
 
 // Entities.
 #include "Game/Client/Entities/Base/CLGBasePlayer.h"
@@ -23,7 +25,7 @@
 //#include "../Gamemodes/DeathMatchGamemode.h"
 
 // GameWorld.
-#include "ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 // Cvars.
 //extern cvar_t *gamemode;
@@ -151,7 +153,7 @@ void ClientGameWorld::PrepareClients() {
 	
 	if (maximumclients && maximumclients->integer) {
 		maxClients = maximumclients->integer;
-		Com_DPrint("ClientGameWorld::PrepareClients -> maxClients=#%i\n", maximumclients->integer);
+		CLG_Print( PrintType::Developer, fmt::format( "ClientGameWorld::PrepareClients -> maxClients=#{}\n", maximumclients->integer ) );
 	}
 
     //maxClients = maximumclients->value;
@@ -309,7 +311,8 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 
         // If the token isn't a {, something is off.
 		if (com_token[0] != '{') {
-		    Com_Error(ErrorType::Drop, "PrepareBSPEntities: found %s when expecting {", com_token);
+			std::string fmtArgComToken = com_token;
+		    CLG_Error( ErrorType::Drop, fmt::format( "PrepareBSPEntities: found {} when expecting ", fmtArgComToken ) );
 			return false;
 		}
 
@@ -449,7 +452,13 @@ PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) {
 
 	// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
     if (podEntityIndex >= (isWired ? MAX_WIRED_POD_ENTITIES : MAX_CLIENT_POD_ENTITIES)) {// maxEntities) {
-        Com_Error( ErrorType::Drop, "ClientGameWorld::GetUnusedPODEntity: no free edicts");
+		const std::string maxPodEntitiesTypeStr = (isWired ? "MAX_WIRED_POD_ENTITIES" : "MAX_CLIENT_POD_ENTITIES");
+		const int32_t maxPodEntitiesTypeNum = (isWired ? MAX_WIRED_POD_ENTITIES : MAX_CLIENT_POD_ENTITIES);
+        CLG_Error( ErrorType::Drop, fmt::format( "ClientGameWorld::GetUnusedPODEntity: no free edicts[podEntityIndex({}) > {}({})]", 
+			podEntityIndex,
+			maxPodEntitiesTypeStr,
+			maxPodEntitiesTypeNum
+		) );
 		return nullptr;
 	}
 
@@ -519,7 +528,7 @@ void ClientGameWorld::FindTeams() {
         }
     }
 
-    Com_DPrintf("ClientGameWorld: Found (#%i) Teams with (#%i) of total Entities.\n", c, c2);
+    CLG_Print( PrintType::Developer, fmt::format( "ClientGameWorld: Found (#{}) Teams with (#{}) of total Entities.\n", c, c2 ) );
 }
 
 /**
@@ -545,7 +554,7 @@ qboolean ClientGameWorld::ParseEntityString(const char** data, SpawnKeyValues &p
 
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+			CLG_Error( ErrorType::Drop, fmt::format( "{}: EOF without closing brace", __func__ ) );
 			return false;
 		}
 
@@ -554,13 +563,13 @@ qboolean ClientGameWorld::ParseEntityString(const char** data, SpawnKeyValues &p
 
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-			Com_Error(ErrorType::Drop, "%s: EOF without closing brace", __func__);
+			CLG_Error( ErrorType::Drop, fmt::format( "{}: EOF without closing brace", __func__ ) );
 			return false;
 		}
 
 		// Ensure we had a value.
 		if (value[0] == '}') {
-			Com_Error(ErrorType::Drop, "%s: closing brace without value for key %s", __func__, key);
+			CLG_Error( ErrorType::Drop, fmt::format( "{}: closing brace without value for key {}", __func__, key ) );
 			return false;
 		   }
 
@@ -592,7 +601,7 @@ qboolean ClientGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, S
     // If it does not have a classname key we're in for trouble.
     if (!dictionary.contains("classname") || dictionary["classname"].empty()) {
 		// For the ClientGame we only do some simple warning print.
-		Com_WPrint("CLGWarning: Can't spawn ClientGameEntity for PODEntity(#%i) due to a missing 'classname' key/value.\n", __func__, clientEntityNumber);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: Can't spawn ClientGameEntity for PODEntity(#{}) due to a missing 'classname' key/value.\n", clientEntityNumber ) );
 		return false;
     }
 
@@ -616,7 +625,7 @@ qboolean ClientGameWorld::CreateGameEntityFromDictionary(PODEntity *podEntity, S
 		//podEntity->clientEntityNumber = stateNumber;
 
 		// Failed.
-		Com_DPrint("CLGWarning: Spawning entity(%s) failed.\n", dictionary["classname"].c_str());
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: Spawning entity({}) failed.\n", dictionary["classname"].c_str() ) );
 		return false;
 	}
 	
@@ -653,7 +662,7 @@ GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
 	// Warn if a slot is already occupied.
     if (gameEntities[stateNumber] != nullptr) {
 		// Warn.
-		Com_DPrint("CLGWarning: trying to allocate game entity '%s' the slot #%i was pre-occupied.\n", classname.c_str(), stateNumber);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: trying to allocate game entity '{}' the slot #{} was pre-occupied.\n", classname.c_str(), stateNumber ) );
 
 		// Return nullptr.
 		return nullptr;
@@ -666,7 +675,7 @@ GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
 		// Then try finding it by the C++ class name
 		if ((info = TypeInfo::GetInfoByName(classname.c_str())) == nullptr) {
 			// Warn.
-		    Com_DPrint("CLGWarning: unknown entity '%s'\n", classname.c_str());
+		    CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: unknown entity '{}'\n", classname.c_str() ) );
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -681,9 +690,9 @@ GameEntity *ClientGameWorld::CreateGameEntityFromClassname(PODEntity *podEntity,
     } else {
 		// Check and warn about what went wrong.
 		if (info->IsAbstract()) {
-			Com_DPrint("CLGWarning: tried to allocate an abstract class '%s'\n", info->classname);
+			CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: %s tried to allocate an abstract class '{}'\n", __func__, info->classname ) );
 		} else if (!info->IsMapSpawnable()) {
-		    Com_DPrint("CLGWarning: %s tried to allocate a code-only class '%s'\n", __func__, info->classname);
+		    CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: %s tried to allocate a code-only class '%s'\n", __func__, info->classname ) );
 		}
     }
 
@@ -713,7 +722,7 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
     // Prevent freeing "special edicts". Clients, and the dead "client body queue".
 	static constexpr int32_t BODY_QUEUE_SIZE = 8;
     if (entityNumber <= game.GetMaxClients() + BODY_QUEUE_SIZE) {
-		Com_DPrint("Tried to free special edict: %i\n", entityNumber);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "Tried to free special edict: {}\n", entityNumber ) );
 		return;
     }
 
@@ -751,7 +760,7 @@ void ClientGameWorld::FreePODEntity(PODEntity* podEntity) {
 qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
     // Sanity check.
     if (!podEntity) {
-		Com_DPrint("CLGWarning: tried to %s on a nullptr PODEntity!\n", __func__);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning: tried to {} on a nullptr PODEntity!\n", __func__ ) );
 		return false;
     }
 
@@ -798,7 +807,7 @@ qboolean ClientGameWorld::FreeGameEntity(PODEntity* podEntity) {
 		gameEntities[entityNumber] = nullptr;
 
 		// Warn.
-		Com_WPrint("(%s): PODEntity(%i) had an invalid game entity pointer set.\n", __func__);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "({}): PODEntity(#{}) had an invalid game entity pointer set.\n", __func__, entityNumber ) );
 
 		// Freed game entity.
 		freedGameEntity = true;
@@ -885,7 +894,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState* state,
 				static_cast< IClientGameEntity* >( clEntity->gameEntity )->UpdateFromState( state );
 			} else {
 				// Do nothing. 
-				Com_DPrint( "CLG (%s): PODEntity(%i) had a (nullptr) GameEntity\n", __func__, state->number );
+				CLG_Print( PrintType::Developer, fmt::format( "CLG ({}): PODEntity({}) had a (nullptr) GameEntity\n", __func__, state->number ) );
 			}
 
 			return static_cast< IClientGameEntity* >( clEntity->gameEntity );
@@ -906,7 +915,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState* state,
 		// 
 		if ( ( info = TypeInfo::GetInfoByName( "CLGBasePacketEntity" ) ) == nullptr ) {
 			// Warn.
-		    Com_DPrint( "CLG (%s): info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n" );
+		    CLG_Print( PrintType::Developer, fmt::format( "CLG ({}): info = TypeInfo::GetInfoByName(\"CLGBasePacketEntity\")) == nullptr\n", __func__ ) );
 
 			// Bail out, we didn't find one.
 			return nullptr;
@@ -930,7 +939,7 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState* state,
 		if ( !clEntity->gameEntity ) {
 			// Inform us about what entity failed exactly.
 			const char *classname = ( info->IsMapSpawnable() ? info->mapClass : info->classname );
-			Com_DPrint( "CLG (%s): Failed to spawn GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber );
+			CLG_Print( PrintType::Developer, fmt::format( "CLG ({}): Failed to spawn GameEntity(classname: '{}' (HASH: #{}) for PODEntity(#{})\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber ) );
 			//return nullptr;
 			clEntity->gameEntity = gameEntities[ state->number ] = new CLGBasePacketEntity( clEntity );
 		}
@@ -945,9 +954,9 @@ GameEntity* ClientGameWorld::UpdateGameEntityFromState(const EntityState* state,
 		const char *classname = ( info->IsMapSpawnable() ? info->mapClass : info->classname );
 		// Check and warn about what went wrong.
 		if ( info->IsAbstract() ) {
-			Com_DPrint( "CLG (%s): Tried to allocate an 'abstract class' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber );
+			CLG_Print( PrintType::Developer, fmt::format( "CLG ({}): Tried to allocate an 'abstract class' GameEntity(classname: '{}' (HASH: #{}) for PODEntity(#{})\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber ) );
 		} else if ( !info->IsMapSpawnable() ) {
-		    Com_DPrint( "CLG (%s): Tried to allocate a 'code-only' GameEntity(classname: '%s' (HASH: #%ui) for PODEntity(%i)\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber );
+		    CLG_Print( PrintType::Developer, fmt::format( "CLG ({}): Tried to allocate a 'code-only' GameEntity(classname: '{}' (HASH: #{}) for PODEntity(#{})\n", __func__, classname, currentHashedClassname, clEntity->clientEntityNumber ) );
 		}
     }
 
@@ -969,7 +978,7 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
-        Com_DPrint("CLG (%s): Called with a clEntity(nullptr)!\n", __func__);
+        CLG_Print( PrintType::Developer, fmt::format( "CLG (%s): Called with a clEntity(nullptr)!\n", __func__ ) );
 
         return false;
     }
@@ -980,7 +989,7 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 
 	// Debug.
 	if (!clgEntity) {
-		Com_DPrint("CLG (%s): Had a (nullptr) returned from UpdateGameEntityFromState!\n", __func__);
+		CLG_Print( PrintType::Developer, fmt::format( "CLG (%s): Had a (nullptr) returned from UpdateGameEntityFromState!\n", __func__ ) );
 	}
 
   //  // 
@@ -997,9 +1006,9 @@ qboolean ClientGameWorld::UpdateFromState(PODEntity *clEntity, const EntityState
 	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
         if (podEntity) {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, podEntity->clientEntityNumber, state->number, mapClass, hashedMapClass);
+    	    CLG_Print( PrintType::Warning, fmt::format( "CLG ({}): clEntNumber={}, svEntNumber={}, mapClass={}, hashedMapClass={}\n", __func__, podEntity->clientEntityNumber, state->number, mapClass, hashedMapClass ) );
         } else {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG (%s): clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", __func__, state->number, mapClass, hashedMapClass);
+    	    CLG_Print( PrintType::Warning, fmt::format( "CLG ({}): clEntity=nullptr, svEntNumber={}, mapClass={}, hashedMapClass={}\n", __func__, state->number, mapClass, hashedMapClass ) );
         }
     }
 #endif

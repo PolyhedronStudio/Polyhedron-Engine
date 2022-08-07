@@ -7,12 +7,18 @@
 *	Heat Beam particle effect implementation.
 * 
 ***/
-#include "../../ClientGameLocals.h"
-
-#include "../Particles.h"
-#include "../ParticleEffects.h"
-
-#include "../../Exports/View.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! ClientGame World
+#include "Game/Client/World/ClientGameWorld.h"
+//! Actual particle system.
+#include "Game/Client/Effects/Particles.h"
+//! Actual effects.
+#include "Game/Client/Effects/ParticleEffects.h"
+//! Client View.
+#include "Game/Client/Exports/View.h"
 
 /**
 *   @brief  'Heat Beam' like particle effect.

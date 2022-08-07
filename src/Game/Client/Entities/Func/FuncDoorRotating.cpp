@@ -1,20 +1,21 @@
-/*
-// LICENSE HERE.
-
-// FuncDoorRotating.cpp
-*/
-
-#include "../../ClientGameLocals.h"
-//#include "../../Physics/StepMove.h"
-
-#include "../Base/CLGBasePacketEntity.h"
-#include "../Base/CLGBaseTrigger.h"
-#include "../Base/CLGBaseMover.h"
-
-#include "FuncDoor.h"
-#include "FuncDoorRotating.h"
-
-#include "../../World/ClientGameWorld.h"
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Side FuncDoorRotating -> Intented to be predicted someday.
+*
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! BaseMover.
+#include "Game/Client/Entities/Func/FuncDoor.h"
+#include "Game/Client/Entities/Func/FuncDoorRotating.h"
+//! Game World.
+#include "Game/Client/World/ClientGameWorld.h"
 
 //===============
 // FuncDoorRotating::ctor
@@ -121,7 +122,7 @@ void FuncDoorRotating::OnEventID(uint32_t eventID) {
 //		auto *playerEntity = GetGameWorld()->GetGameEntityByIndex(1);
 	switch( eventID ) {
 	case 1: //: DOOR_OPEN:
-		Com_DPrint("%s: Received (eventID: #%i, 'DOOR_OPEN')!\n", __func__, eventID);
+		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'DOOR_OPEN')!\n", __func__, eventID ) );
 
 		// Start now so we can catch up to last frame.
 		//DoGoUp();
@@ -132,7 +133,7 @@ void FuncDoorRotating::OnEventID(uint32_t eventID) {
 		//DoorUse(playerEntity, nullptr);
 		break;
 	case 2: //: DOOR_CLOSE.
-		Com_DPrint("%s: Received (eventID: #%i, 'DOOR_CLOSE')!\n", __func__, eventID);
+		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'DOOR_CLOSE')!\n", __func__, eventID ) );
 		// Start now, so we can catch up to last frame.
 		//DoGoDown();
 		//DoGoDown();

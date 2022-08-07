@@ -5,21 +5,18 @@
 *	@file
 *
 ***/
-// Core.
-#include "../ClientGameLocals.h"              // SVGame.
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Entities.
-// Server Game Base Entity.
-#include "Base/CLGBasePacketEntity.h"
+#include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
 //#include "../Base/CLGBaseTrigger.h"
-#include "Worldspawn.h"
-
-//// GameModes.
-//#include "../Gamemodes/IGamemode.h"
-//#include "../Gamemodes/DeathMatchGamemode.h"
+#include "Game/Client/Entities/Worldspawn.h"
 
 // World.
-#include "../World/ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 
 // Constructor/Deconstructor.
@@ -147,7 +144,7 @@ void Worldspawn::Spawn() {
     SetModelIndex(1);               // World model is always index 1
     SetClipMask(0);
     //---------------
-	Com_DPrint("CLGInfo: Spawned Client Worldspawn!\n");
+	CLG_Print( PrintType::Developer, "CLGInfo: Spawned Client Worldspawn!\n" );
     //// Reserve some spots for dead player bodies for coop / deathmatch
     //level.bodyQue = 0;
     //for (int i = 0; i < BODY_QUEUE_SIZE; i++) {

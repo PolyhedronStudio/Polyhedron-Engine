@@ -1,30 +1,29 @@
-/*
-// LICENSE HERE.
-
-//
-// MiscExplosionBox.cpp
-//
-//
-*/
-#include "../../ClientGameLocals.h"          // CLGame.
-//#include "../../Effects.h"          // Effects.
-//#include "../../Utilities.h"            // Util funcs.
-//#include "../../Physics/StepMove.h" // Stepmove funcs.
-
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Side MiscClientExplosionBox -> Here for testing local entity physics
+*	pretty much.
+*
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 // Server Game Base Entity.
-#include "../Base/CLGBasePacketEntity.h"
-#include "../Base/CLGBaseTrigger.h"
-#include "../Base/CLGBaseLocalEntity.h"
-//#include "../Base/CLGBaseTrigger.h"
-
-// World.
-#include "../../World/ClientGameWorld.h"
+#include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
+// Server Game Base Entity.
+#include "Game/Client/Entities/Base/CLGBaseTrigger.h"
+// Physics.
+#include "Game/Shared/Physics/Physics.h"
+//#include "../../Gamemodes/IGamemode.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 // Misc Explosion Box Entity.
-#include "MiscExplosionBox.h"
+#include "Game/Client/Entities/Misc/MiscExplosionBox.h"
 
-//#include "../../Gamemodes/IGamemode.h"
-//#include "../../World/GameWorld.h"
 
 //
 // Constructor/Deconstructor.
@@ -357,7 +356,7 @@ void MiscExplosionBox::ExplosionBoxTouch(IClientGameEntity* self, IClientGameEnt
    
 	// Safety checks.
     if (!other || other == this) {
-		Com_DPrint("Explobox: %i is touching a other == this or !other\n", GetNumber());
+		CLG_Print( PrintType::Developer, fmt::format( "Explobox: {} is touching a other == this or !other\n", GetNumber() ));
 		return;
     }
 

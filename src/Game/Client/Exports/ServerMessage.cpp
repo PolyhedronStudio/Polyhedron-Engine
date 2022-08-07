@@ -7,23 +7,25 @@
 *	Client Game ServerMessage Interface Implementation.
 * 
 ***/
-#include "../ClientGameLocals.h"
-
-// Temporary entities.
-#include "../TemporaryEntities.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // ChatHUD Objects.
-#include "../HUD/ChatHUD.h"
+#include "Game/Client/HUD/ChatHUD.h"
 
 // Effects.
-#include "../Effects/LightStyles.h"
-#include "../Effects/MuzzleFlashEffects.h"
+#include "Game/Client/Effects/LightStyles.h"
+#include "Game/Client/Effects/MuzzleFlashEffects.h"
 
 // Exports Implementations.
-#include "Entities.h"
-#include "Media.h"
-#include "Screen.h"
-#include "ServerMessage.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/Media.h"
+#include "Game/Client/Exports/Screen.h"
+#include "Game/Client/Exports/ServerMessage.h"
+
+#include "Game/Client/TemporaryEntities.h"
 
 /**
 *   @brief  Breaks up playerskin into name(optional), modeland skin components.
@@ -38,7 +40,7 @@ qboolean ClientGameServerMessage::ParsePlayerSkin(char* name, char* model, char*
     // overflow, but still check the length to be entirely fool-proof
     len = strlen(str);
     if (len >= MAX_QPATH) {
-        Com_Error(ErrorType::Drop, "%s: oversize playerskin", __func__);
+        CLG_Error(ErrorType::Drop, fmt::format( "{}: oversize playerskin", __func__ ) );
     }
 
     // isolate the player's name
@@ -340,7 +342,7 @@ void ClientGameServerMessage::ParseTempEntitiesPacket(void) {
 			ByteToDirection(clgi.MSG_ReadUint8(), teParameters.dir);
             break;
         default:
-            Com_Error(ErrorType::Drop, "%s: bad type", __func__);
+            CLG_Error( ErrorType::Drop, fmt::format( "{}: bad type({})", __func__, teParameters.type ) );
     }
 }
 
@@ -351,7 +353,7 @@ void ClientGameServerMessage::ParseMuzzleFlashPacket(int32_t mask) {
     // Parse entity number.
     int32_t entity = clgi.MSG_ReadInt16();
     if (entity < 1 || entity >= MAX_WIRED_POD_ENTITIES) {
-        Com_Error(ErrorType::Drop, "%s: bad entity", __func__);
+        CLG_Error( ErrorType::Drop, fmt::format( "{}: bad entity(#{})", __func__, entity ) );
     }
 
     // Parse weapon ID.
@@ -377,7 +379,7 @@ void ClientGameServerMessage::ParsePrint(void) {
     //SHOWNET(2, "    %i \"%s\"\n", level, s);
 
     if (printLevel != PRINT_CHAT) {
-        Com_Print("%s", stringBuffer);
+        CLG_Print( PrintType::Regular, fmt::format( "{}", stringBuffer ));
         if (!clgi.IsDemoPlayback()) {
             COM_strclr(stringBuffer);
             clgi.Cmd_ExecTrigger(stringBuffer);

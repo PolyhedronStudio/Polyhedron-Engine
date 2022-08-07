@@ -7,22 +7,25 @@
 *	Client Base Player Entity.
 * 
 ***/
-#include "../../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+
 
 // Base Client Game Functionality.
-//#include "../Debug.h"
-#include "../../TemporaryEntities.h"
+#include "Game/Client/Debug.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Export classes.
-#include "../../Exports/Entities.h"
-#include "../../Exports/View.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/View.h"
 
 // Effects.
-#include "../../Effects/ParticleEffects.h"
+#include "Game/Client/Effects/ParticleEffects.h"
 
-// Base Player.
-#include "CLGBasePacketEntity.h"
-#include "CLGBasePlayer.h"
+// Base Entity.
+#include "Game/Client/Entities/Base/CLGBasePlayer.h"
 
 
 /**
@@ -136,7 +139,7 @@ void CLGBasePlayer::PostSpawn() {
 void CLGBasePlayer::Think() {
 	Base::Think();
 
-	Com_DPrint("CLGBasePlayer(#%i): is thinking man!\n", GetNumber());
+	CLG_Print( PrintType::Developer, fmt::format( "CLGBasePlayer(#{}): is thinking man!\n", GetNumber() ) );
 }
 
 /**

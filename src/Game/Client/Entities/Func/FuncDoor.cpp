@@ -1,22 +1,23 @@
-/*
-// LICENSE HERE.
-
-// FuncDoor.cpp
-*/
-
-#include "../../ClientGameLocals.h"
-//#include "../../Physics/StepMove.h"
-
-#include "../Base/CLGBasePacketEntity.h"
-#include "../Base/CLGBaseTrigger.h"
-#include "../Base/CLGBaseMover.h"
-
-//#include "../Trigger/TriggerAutoDoor.h"
-
-//#include "FuncAreaportal.h"
-#include "FuncDoor.h"
-
-#include "../../World/ClientGameWorld.h"
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Side FuncDoor -> Intented to be predicted someday.
+*
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! BaseMover.
+#include "Game/Client/Entities/Base/CLGBaseMover.h"
+//#include "Game/Entities/Trigger/TriggerAutoDoor.h"
+//#include "Game/Entities/Func/FuncAreaportal.h"
+#include "Game/Client/Entities/Func/FuncDoor.h"
+//! Game World.
+#include "Game/Client/World/ClientGameWorld.h"
 
 //===============
 // FuncDoor::ctor
@@ -83,7 +84,7 @@ void FuncDoor::Spawn() {
 
     // This should never happen
     if ( GetStartPosition() == GetEndPosition() ) {
-        Com_DPrint( "WARNING: func_door has same start & end position\n" );
+        CLG_Print( PrintType::Developer, "WARNING: func_door has same start & end position\n" );
         return;
     }
 
@@ -158,7 +159,7 @@ void FuncDoor::DoorUse( GameEntity* other, GameEntity* activator ) {
 
     // This should never happen
     if ( GetStartPosition() == GetEndPosition() ) {
-        Com_DPrint( "WARNING: func_door has same start & end position\n" );
+        CLG_Print( PrintType::DeveloperWarning, "WARNING: func_door has same start & end position\n" );
         return;
     }
 
@@ -168,7 +169,7 @@ void FuncDoor::DoorUse( GameEntity* other, GameEntity* activator ) {
 	        for (GameEntity* ent = dynamic_cast<GameEntity*>(this); ent != nullptr; ent = ent->GetTeamChainEntity()) {
 		        // Check it is a derivate of base mover, if not, break out of this loop.
 		        if (!ent->IsSubclassOf<CLGBaseMover>()) {
-		            Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+		            CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), ent->GetNumber() ) );
 		            break;
 		        }
 
@@ -192,7 +193,7 @@ void FuncDoor::DoorUse( GameEntity* other, GameEntity* activator ) {
     for (GameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
         // Check it is a derivate of base mover, if not, break out of this loop.
         if (!ent->IsSubclassOf<CLGBaseMover>()) {
-	        Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+            CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), ent->GetNumber() ) );
             break;
         }
 
@@ -212,7 +213,8 @@ void FuncDoor::DoorShotOpen( GameEntity* inflictor, GameEntity* attacker, int da
     for (GameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!ent->IsSubclassOf<CLGBaseMover>()) {
-	        Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+            CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), ent->GetNumber() ) );
+	        //Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
 	        break;
 	    }
 
@@ -254,7 +256,7 @@ void FuncDoor::DoorBlocked( GameEntity* other ) {
 	        for (GameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 		        // Check it is a derivate of base mover, if not, break out of this loop.
 		        if (!ent->IsSubclassOf<CLGBaseMover>()) {
-		            Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+		            CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), ent->GetNumber() ) );
 		            break;
 		        }
 
@@ -267,7 +269,7 @@ void FuncDoor::DoorBlocked( GameEntity* other ) {
 	        for (GameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 		        // Check it is a derivate of base mover, if not, break out of this loop.
 		        if (!ent->IsSubclassOf<CLGBaseMover>()) {
-		            Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+                    CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), ent->GetNumber() ) );
 		            break;
 		        }
 
@@ -442,7 +444,7 @@ void FuncDoor::CalculateMoveSpeed() {
     for (GameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!ent->IsSubclassOf<CLGBaseMover>()) {
-	        Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+            CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), ent->GetNumber() ) );
 	        break;
 	    }
 
@@ -464,7 +466,7 @@ void FuncDoor::CalculateMoveSpeed() {
     for (GameEntity* ent = this; ent != nullptr; ent = ent->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!ent->IsSubclassOf<CLGBaseMover>()) {
-	        Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), ent->GetNumber());
+            CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), ent->GetNumber() ) );
 	        break;
 	    }
 
@@ -516,7 +518,7 @@ void FuncDoor::SpawnDoorTrigger() {
     for (GameEntity* teamMember = dynamic_cast<CLGBasePacketEntity*>(GetTeamChainEntity()); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!teamMember->IsSubclassOf<CLGBaseMover>()) {
-	        Com_DPrint("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+            CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), teamMember->GetNumber() ) );
 	        break;
 	    }
 

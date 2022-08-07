@@ -17,8 +17,7 @@
 #pragma once
 
 // Client Game GameEntity Interface.
-#include "../IClientGameEntity.h"
-
+#include "Game/Client/Entities/IClientGameEntity.h"
 
 
 /**

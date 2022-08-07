@@ -1,27 +1,33 @@
-/*
-// LICENSE HERE.
-
-//
-// MiscClientExplosionBox.cpp
-//
-//
-*/
-#include "../../ClientGameLocals.h"          // CLGame.
-//#include "../../Effects.h"          // Effects.
-//#include "../../Utilities.h"            // Util funcs.
-//#include "../../Physics/StepMove.h" // Stepmove funcs.
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Client Side MiscClientExplosionBox -> Here for testing local entity physics
+*	pretty much.
+*
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Server Game Base Entity.
-#include "../Base/CLGBasePacketEntity.h"
-#include "../Base/CLGBaseTrigger.h"
-#include "../Base/CLGBaseLocalEntity.h"
-//#include "../Base/CLGBaseTrigger.h"
+#include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
+#include "Game/Client/Entities/Base/CLGBaseTrigger.h"
+#include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 
-// Misc Explosion Box Entity.
-#include "MiscClientExplosionBox.h"
+// Physics.
+#include "Game/Shared/Physics/Physics.h"
 
 //#include "../../Gamemodes/IGamemode.h"
-#include "../../World/ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
+
+
+// Misc Explosion Box Entity.
+#include "Game/Client/Entities/Misc/MiscClientExplosionBox.h"
+
 
 //
 // Constructor/Deconstructor.
@@ -66,7 +72,7 @@ void MiscClientExplosionBox::Spawn() {
     Base::Spawn();
 
 	// Debug Print.
-	Com_DPrint("CLGLocalSpawnEntity: %s (#%i)\n", GetClassname().c_str(), GetNumber());
+	CLG_Print( PrintType::Developer, fmt::format( "CLGLocalSpawnEntity: {} (#{})\n", GetClassname().c_str(), GetNumber() ) );
 
     // Set solid.
     SetSolid(Solid::OctagonBox);

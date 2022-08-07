@@ -1,13 +1,18 @@
-// License here.
-// 
-//
-// ClientGameExports implementation.
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ClientGame Exports Implementation.
+* 
+***/
 #pragma once
 
-// Export Interfaces.
+// Interface Declarations.
 #include "Shared/Interfaces/IClientGameExports.h"
 
-// Predeclare.
+// Forward declarations.
 class ClientGameCore;
 class ClientGameEntities;
 class ClientGameMedia;
@@ -16,6 +21,7 @@ class ClientGamePrediction;
 class ClientGameScreen;
 class ClientGameServerMessage;
 class ClientGameView;
+
 
 /****
 *   @brief      Main client game exports interface implementation.
@@ -169,13 +175,13 @@ public:
     *   Client Game Interfaces Pointers.
     *
     ***/
-	ClientGameCore* core;
-    ClientGameEntities* entities;
-    ClientGameMedia* media;
-    ClientGameMovement* movement;
-    ClientGamePrediction* prediction;
-    ClientGameScreen* screen;
-    ClientGameServerMessage* serverMessage;
-    ClientGameView* view;
+	ClientGameCore* core = nullptr;
+    ClientGameEntities* entities = nullptr;
+    ClientGameMedia* media = nullptr;
+    ClientGameMovement* movement = nullptr;
+    ClientGamePrediction* prediction = nullptr;
+    ClientGameScreen* screen = nullptr;
+    ClientGameServerMessage* serverMessage = nullptr;
+    ClientGameView* view = nullptr;
 };
 

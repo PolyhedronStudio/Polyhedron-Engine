@@ -6,14 +6,13 @@
 //
 //
 */
-#include "../../ClientGameLocals.h"		// CLGame.
-//#include "../../Effects.h"				// Effects.
-//#include "../../Entities.h"				// Entities.
-//#include "../../Utilities.h"			// Util funcs.
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-// Class Entities.
-#include "CLGBaseTrigger.h"
-#include "CLGBaseMover.h"
+// Base Entity.
+#include "Game/Client/Entities/Base/CLGBaseMover.h"
 
 // Epsilon used for comparing floats.
 static constexpr float BASEMOVER_EPSILON = 0.03125;
@@ -467,9 +466,9 @@ void CLGBaseMover::BrushAccelerateThink() {
 //===============
 float CLGBaseMover::CalculateAccelerationDistance( float targetSpeed, float accelerationRate ) {
 	if ( accelerationRate == 0.0f ) {
-		SG_Print(PrintType::Developer, fmt::format("{} '{}': accelerationRate was 0!\n",
+		CLG_Print( PrintType::Developer, fmt::format("{} '{}': accelerationRate was 0!\n",
 					GetTypeInfo()->classname, 
-					GetTargetName().empty() ? "unnamed" : GetTargetName().c_str() ));
+					GetTargetName().empty() ? "unnamed" : GetTargetName().c_str() ) );
 		return 0.0f;
 	}
 	return (targetSpeed * ((targetSpeed / accelerationRate) + 1.0f) / 2.0f);

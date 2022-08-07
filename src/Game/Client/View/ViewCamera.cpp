@@ -4,17 +4,18 @@
 *
 *	@file
 *
-*	ClientGame ViewCamera Implementation.
+*	Client Game Key Binding Object.
 * 
 ***/
-// ClientGame Locals.
-#include "../ClientGameLocals.h"
-
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 // Exports classes.
-#include "../Exports/Entities.h"
-#include "../Exports/View.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/View.h"
 
-#include "ViewCamera.h"
+#include "Game/Client/View/ViewCamera.h"
 
 /**
 *   @brief  Sets up a firstperson view mode.

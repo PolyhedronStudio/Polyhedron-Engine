@@ -9,12 +9,11 @@
 ***/
 #pragma once
 
-// SharedGame header itself.
-#include "Game/Shared/SharedGame.h"
+//! Include the code base of the GameModule we're compiling against.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
 
 // Physics.
-#include "../Physics.h"
-#include "../RootMotionMove.h"
+#include "Game/Shared/Physics/Physics.h"
 
 // TODO: This needs some fixing hehe... ugly method but hey.
 #ifdef SHAREDGAME_SERVERGAME

@@ -7,26 +7,29 @@
 *	Client Game Entities Interface Implementation.
 * 
 ***/
-// Core.
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+
 
 // Base Client Game Functionality.
-#include "../Debug.h"
-#include "../TemporaryEntities.h"
+#include "Game/Client/Debug.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Export classes.
-#include "Entities.h"
-#include "View.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/View.h"
 
 // Effects.
-#include "../Effects/ParticleEffects.h"
+#include "Game/Client/Effects/ParticleEffects.h"
 
 // Entitiess.
-#include "../Entities/Base/CLGBasePacketEntity.h"
-#include "../Entities/Base/CLGBaseLocalEntity.h"
+#include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
+#include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 
 // World.
-#include "../World/ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 
 // WID: TODO: Gotta fix this one too.
@@ -71,14 +74,14 @@ qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, cons
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!clEntity) {
         // Developer warning.
-        Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
+        CLG_Print( PrintType::DeveloperWarning, "Warning: ClientGameEntities::UpdateFromState called with a nullptr(clEntity)!!\n");
 
         return false;
     }
     // Sanity check. Even though it shouldn't have reached this point of execution if the entity was nullptr.
     if (!state) {
         // Developer warning.
-        Com_DPrint("Warning: ClientGameEntities::UpdateFromState called with a nullptr(state)!!\n");
+        CLG_Print( PrintType::DeveloperWarning, "Warning: ClientGameEntities::UpdateFromState called with a nullptr(state)!!\n");
 
         return false;
     }
@@ -91,7 +94,7 @@ qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, cons
 
 	// Debug.
 	if (!clgEntity) {
-		Com_DPrint("Warning: ClientGameEntities::UpdateFromState had a nullptr returned from ClientGameWorld::UpdateGameEntityFromState\n");
+		CLG_Print( PrintType::DeveloperWarning, "Warning: ClientGameEntities::UpdateFromState had a nullptr returned from ClientGameWorld::UpdateGameEntityFromState\n");
 		return false;
 	} else {
 		//// Precache and spawn entity.
@@ -106,9 +109,9 @@ qboolean ClientGameEntities::UpdateGameEntityFromState(PODEntity *clEntity, cons
 	    uint32_t hashedMapClass = clgEntity->GetTypeInfo()->hashedMapClass; // hashed mapClass.
 
         if (podEntity) {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntNumber=%i, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", podEntity->clientEntityNumber, state->number, mapClass, hashedMapClass);
+    	    CLG_Print( PrintType::Warning, fmt::format( "CLG UpdateFromState: clEntNumber={}, svEntNumber={}, mapClass={}, hashedMapClass={}\n", podEntity->clientEntityNumber, state->number, mapClass, hashedMapClass) );
         } else {
-    	    clgi.Com_LPrintf(PrintType::Warning, "CLG UpdateFromState: clEntity=nullptr, svEntNumber=%i, mapClass=%s, hashedMapClass=%i\n", state->number, mapClass, hashedMapClass);
+    	    CLG_Print( PrintType::Warning, fmt::format( "CLG UpdateFromState: clEntity=nullptr, svEntNumber={}, mapClass={}, hashedMapClass={}\n", state->number, mapClass, hashedMapClass ) );
         }
 #endif
 		return true;
@@ -164,7 +167,7 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
         // Close it off and state what's actually going on
         errorString += ") has a nullptr think callback \n";
         
-        Com_WPrint( errorString.c_str() );
+        CLG_Print( PrintType::Warning, errorString.c_str() );
 
         // Return true.
         return true;
@@ -335,7 +338,7 @@ void ClientGameEntities::RunPackEntitiesPredictionFrame() {
 void ClientGameEntities::PacketEntityEvent(int32_t number) {
     // Ensure entity number is in bounds.
     if (number < 0 || number > MAX_ENTITIES) {
-        Com_WPrint("ClientGameEntities::Event caught an OOB Entity ID: %i\n", number);
+        CLG_Print( PrintType::DeveloperWarning, fmt::format( "ClientGameEntities::Event caught an OOB Entity(#{})\n", number ) );
         return;
 	}
 
@@ -352,13 +355,13 @@ void ClientGameEntities::PacketEntityEvent(int32_t number) {
 
 	// Only proceed if both type of entities are existent. Warn otherwise.
 	if (!podEventTarget) {
-		Com_WPrint("(%s): podEventTarget is (nullptr)!\n", __func__);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "({}): podEventTarget is (nullptr)!\n", __func__) );
 		return;
 	}
 
 	// If valid, move on, if not, then prepare for horrible feelings of doom of course.
 	if (!geEventTarget) {
-		Com_WPrint("(%s): geEventTarget for number(#%i) is (nullptr)!\n", __func__, number);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "({}): geEventTarget for number(#{}) is (nullptr)!\n", __func__, number ) );
 		return;
 	}
 

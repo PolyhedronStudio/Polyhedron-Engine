@@ -1,22 +1,25 @@
-#include "ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Temporary Entities.
-#include "TemporaryEntities.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Export Implementations.
-#include "Exports/Core.h"
-#include "Exports/Entities.h"
-#include "Exports/Media.h"
-#include "Exports/Movement.h"
-#include "Exports/Prediction.h"
-#include "Exports/Screen.h"
-#include "Exports/ServerMessage.h"
-#include "Exports/View.h"
+#include "Game/Client/Exports/Core.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/Media.h"
+#include "Game/Client/Exports/Movement.h"
+#include "Game/Client/Exports/Prediction.h"
+#include "Game/Client/Exports/Screen.h"
+#include "Game/Client/Exports/ServerMessage.h"
+#include "Game/Client/Exports/View.h"
 
 // Effects.
-#include "Effects/DynamicLights.h"
-#include "Effects/LightStyles.h"
-#include "Effects/Particles.h"
+#include "Game/Client/Effects/DynamicLights.h"
+#include "Game/Client/Effects/LightStyles.h"
+#include "Game/Client/Effects/Particles.h"
 
 //! Static 
 ClientGameExports *clge = nullptr;
@@ -57,7 +60,7 @@ ClientGameExports::~ClientGameExports()  {
 float ClientGameExports::ClientCalculateFieldOfView(float fieldOfViewX, float width, float height) {
     // Ensure field of view is within valid ranges.
     if (fieldOfViewX <= 0 || fieldOfViewX > 179)
-        Com_Error(ErrorType::Drop, "%s: bad fov: %f", __func__, fieldOfViewX);
+        CLG_Error( ErrorType::Drop, fmt::format( "{}: bad fov: {}", __func__, fieldOfViewX ) );
 
     // Calculate proper fov value.
     float x = width / tan(fieldOfViewX / 360.f * M_PI);
@@ -99,11 +102,11 @@ void ClientGameExports::CheckEntityPresent(int32_t entityNumber, const std::stri
 
     // If we got to this point, something is fishy.
     if (clEntity->serverFrame) {
-        Com_LPrintf(PrintType::Developer, "SERVER BUG: %s on entity %d last seen %d frames ago\n",
-                    what.c_str(), entityNumber, cl->frame.number - clEntity->serverFrame);
+        CLG_Print( PrintType::DeveloperWarning, fmt::format( "Malicious Server Entity: %s on entity %d last seen %d frames ago\n",
+                    what.c_str(), entityNumber, cl->frame.number - clEntity->serverFrame ) );
     } else {
-        Com_LPrintf(PrintType::Developer, "SERVER BUG: %s on entity %d never seen before\n",
-                    what.c_str(), entityNumber);
+        CLG_Print( PrintType::DeveloperWarning, fmt::format( "Malicious Server Entity:: %s on entity %d never seen before\n",
+                    what.c_str(), entityNumber ) );
     }
 }
 #endif

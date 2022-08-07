@@ -10,13 +10,8 @@
 ***/
 #pragma once
 
-
 // Client Game GameEntity Interface.
-#include "../IClientGameEntity.h"
-
-// Forward declare.
-class CLGBasePacketEntity;
-class CLGBaseTrigger;
+#include "Game/Client/Entities/Base/CLGBaseTrigger.h"
 
 // Callbacks used at the end of a pushmove action.
 using PushMoveEndFunction = void(GameEntity*);

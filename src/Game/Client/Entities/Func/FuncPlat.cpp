@@ -3,25 +3,22 @@
 *	License here.
 *
 *	@file
-*
-*	Client-Side FuncPlat Entity Support.
+* 
+*   Client Side FuncPlat -> Intented to be predicted someday.
 *
 ***/
-#include "../../ClientGameLocals.h"
-//#include "../../Effects.h"
-//#include "../../Entities.h"
-//#include "../../Utilities.h"
-//#include "../../Physics/RootMotionMove.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! BaseMover.
+#include "Game/Client/Entities/Base/CLGBaseMover.h"
+//#include "Game/Entities/Trigger/TriggerAutoDoor.h"
+//#include "Game/Entities/Func/FuncAreaportal.h"
+#include "Game/Client/Entities/Func/FuncPlat.h"
+//! Game World.
+#include "Game/Client/World/ClientGameWorld.h"
 
-#include "../Base/CLGBasePacketEntity.h"
-#include "../Base/CLGBaseTrigger.h"
-#include "../Base/CLGBaseMover.h"
-
-//#include "../Trigger/TriggerAutoPlatform.h"
-
-//#include "../../Gamemodes/IGamemode.h"
-
-#include "FuncPlat.h"
 
 //===============
 // FuncPlat::ctor
@@ -192,7 +189,7 @@ void FuncPlat::PostSpawn() {
 //===============
 void FuncPlat::PlatformUse( GameEntity* other, GameEntity* activator ) {
     if (HasThinkCallback()) {
-        SG_Print(PrintType::Developer, "FuncPlat already has a think callback! - returning!!\n");
+        CLG_Print(PrintType::Developer, "FuncPlat already has a think callback! - returning!!\n");
         return;
     }
     PlatformGoDown();
@@ -318,7 +315,7 @@ void FuncPlat::HitBottom() {
 //===============
 void FuncPlat::OnPlatformHitTop( GameEntity* self ) {
     if (!self->IsSubclassOf<FuncPlat>()) {
-	    SG_Print(PrintType::Developer, fmt::format("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber() ));
+	    CLG_Print( PrintType::Developer, fmt::format("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber() ));
         return;
     }
     
@@ -332,7 +329,7 @@ void FuncPlat::OnPlatformHitTop( GameEntity* self ) {
 //===============
 void FuncPlat::OnPlatformHitBottom( GameEntity* self ) {
     if (!self->IsSubclassOf<FuncPlat>()) {
-		SG_Print( PrintType::Developer, fmt::format( "Warning: In function {} entity #{} is not a subclass of func_plat\n", __func__, self->GetNumber() ) );
+		CLG_Print( PrintType::Developer, fmt::format( "Warning: In function {} entity #{} is not a subclass of func_plat\n", __func__, self->GetNumber() ) );
         return;
     }
     
@@ -449,7 +446,7 @@ void FuncPlat::SpawnPlatformTrigger() {
     for (GameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
 	    // Check it is a derivate of base mover, if not, break out of this loop.
 	    if (!teamMember->IsSubclassOf<CLGBaseMover>()) {
-	        SG_Print(PrintType::Developer, fmt::format("Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), teamMember->GetNumber() ));
+	        CLG_Print( PrintType::DeveloperWarning, fmt::format("Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), teamMember->GetNumber() ));
 	        break;
 	    }
 

@@ -11,7 +11,6 @@
 #pragma once
 
 
-
 /**
 *   Player Movement configuration.
 *   

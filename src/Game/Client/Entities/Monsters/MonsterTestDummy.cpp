@@ -3,17 +3,21 @@
 *	License here.
 *
 *	@file
-*
-*	Client Game EntityList implementation.
 * 
+*   Client Side Test Dummy Monster Implementation.
+*
 ***/
-#include "../../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+
 
 // Base Entity.
-#include "../Base/CLGBasePacketEntity.h"
+#include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
 
 // MonsterTestDummy
-#include "MonsterTestDummy.h"
+#include "Game/Client/Entities/Monsters/MonsterTestDummy.h"
 
 
 //

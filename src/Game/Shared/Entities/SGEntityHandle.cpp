@@ -7,8 +7,8 @@
 *	EntityHandle implementation.
 *
 ***/
-// SharedGame header itself.
-#include "Game/Shared/SharedGame.h"
+//! Include the code base of the GameModule we're compiling against.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
 
 /**
 *	@brief	Helper function to acquire the GameEntity pointer from a server entity.

@@ -7,20 +7,23 @@
 *   Client Game Temp Entities.
 *
 ***/
-#include "ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-#include "Debug.h"
-#include "TemporaryEntities.h"
+#include "Game/Client/Debug.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Exports.
-#include "Exports/View.h"
+#include "Game/Client/Exports/View.h"
 
-#include "Effects/DynamicLights.h"
-#include "Effects/Particles.h"
-#include "Effects/ParticleEffects.h"
+#include "Game/Client/Effects/DynamicLights.h"
+#include "Game/Client/Effects/Particles.h"
+#include "Game/Client/Effects/ParticleEffects.h"
 
 // ClientGameWorld.
-#include "World/ClientGameWorld.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 //
 // CVars.
@@ -81,7 +84,7 @@ static void cl_railcore_color_changed(cvar_t* self)
 	// TODO: Implement alternative methods for this of course.
 	//if (!SCR_ParseColor(self->string, &railcore_color)) {
 		//Com_WPrint("Invalid value '%s' for '%s'\n", self->string, self->name);
-		Com_WPrint("Rail Color Parsing is currently unsupported.\n");	
+		CLG_Print( PrintType::Warning, "Rail Color Parsing is currently unsupported.\n");	
 		clgi.Cvar_Reset(self);
 		railcore_color.u32 = U32Colors::Red;
 	//}
@@ -91,7 +94,7 @@ static void cl_railspiral_color_changed(cvar_t* self)
 {
 	//if (!SCR_ParseColor(self->string, &railspiral_color)) {
 		//Com_WPrint("Invalid value '%s' for '%s'\n", self->string, self->name);
-		Com_WPrint("Rail Color Parsing is currently unsupported.\n");
+		CLG_Print( PrintType::Warning, "Rail Color Parsing is currently unsupported.\n");
 		clgi. Cvar_Reset(self);
 		railspiral_color.u32 = U32Colors::Orange;
 	//}
@@ -1266,7 +1269,7 @@ void CLG_ParseTempEntity(void)
 	}
 
 	default:
-		Com_Error(ErrorType::Drop, "%s: bad type", __func__);
+		CLG_Error( ErrorType::Drop, fmt::format( "{}: bad type", __func__, teParameters.type ) );
 	}
 }
 

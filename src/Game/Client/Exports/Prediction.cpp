@@ -1,12 +1,24 @@
-#include "../ClientGameLocals.h"
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	ClientGame Player Prediction handling interface implementation.
+*
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-// Temporary Entities.
-#include "../TemporaryEntities.h"
+// Exports Interfaces.
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/Prediction.h"
+#include "Game/Client/Exports/View.h"
 
-// Exports.
-#include "Entities.h"
-#include "Prediction.h"
-#include "View.h"
+// ClientBinding to SharedGame for SG_GetEntityNumber utility.
+#include "Game/Shared/GameBindings/ClientBinding.h"
 
 // Distance that is allowed to be taken as a delta before we reset it.
 static const double MAX_DELTA_ORIGIN = (2400.0 * (1.00 / BASE_FRAMERATE));
@@ -43,7 +55,7 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
     const float len = vec3_length(out->error);
     if (len > .1) {
         if (len > MAX_DELTA_ORIGIN) {
-            Com_DPrint("CLG_PredictionError: if (len > MAX_DELTA_ORIGIN): %s\n", Vec3ToString(out->error));
+            CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLG_PredictionError: if (len > MAX_DELTA_ORIGIN): {}\n", Vec3ToString(out->error) ) );
 
             out->viewOrigin = in->origin;
             out->viewOffset = in->viewOffset;
@@ -53,7 +65,7 @@ void ClientGamePrediction::CheckPredictionError(ClientMoveCommand* moveCommand) 
             out->error = vec3_zero();
         }
         else {
-            Com_DPrint("CLG_PredictionError: %s\n", Vec3ToString(out->error));
+            CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLG_PredictionError: {}\n", Vec3ToString(out->error) ) );
         }
     }
 }

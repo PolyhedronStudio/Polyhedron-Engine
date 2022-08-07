@@ -27,66 +27,66 @@ static constexpr const char *sharedModuleName = "SharedGame(SVG)";
 /**
 *	ConstExpr:
 **/
-//! Maximum amount of POD Entities.
-static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
-
-/**
-*	ServerGame Predeclarations:
-**/
-//! Predeclare for ServerGameLocals include.
-class SGEntityHandle;
-//! Interface containing the shared game entity functionalities that are shared between game modules.
-class ISharedGameEntity;
-//! Actual game entity type for the ServerGame module.
-class IServerGameEntity;
-//! GameWorld.
-class ServerGameWorld;
-//! ServerGame TraceResult.
-struct SVGTraceResult;
-//! SharedGame TraceResult.
-struct SGTRaceResult;
-
-
-/**
-*	Define the 'using' SharedGame types for ServerGame usage.
-**/
-//! Using: GameEntity.
-using GameEntity = IServerGameEntity;
-//! Using: GameWorld.
-using SGGameWorld = ServerGameWorld;
-
-
-//! This is the actual GameWorld POD array with a size based on which GameModule we are building for.
-using PODGameWorldArray = PODEntity[MAX_POD_ENTITIES];
-
-//! std::span for PODEntity* objects.
-using PODEntitySpan = std::span<PODEntity>;
-//! std::vector for PODEntity* objects.
-using PODEntityVector = std::vector<PODEntity*>;
-//! std::span for GameEntity* derived objects.
-using GameEntitySpan = std::span<GameEntity*>;
-//! std::vector for GameEntity* derived objects.
-using GameEntityVector = std::vector<GameEntity*>;
-
-
-
-
-
-/**
-*	Includes:
-**/
-//! Type Info System.
-#include "../Entities/TypeInfo.h"
-//! Shared Entity Handle.
-#include "../Entities/SGEntityHandle.h"
-//! Shared Entity Interface.
-#include "../Entities/ISharedGameEntity.h"
-//! Server Game Entity Interface.
-#include "../../Server/Entities/IServerGameEntity.h"
-//! Shared World Interface.
-#include "../World/IGameWorld.h"
-
-
+////! Maximum amount of POD Entities.
+//static constexpr int32_t MAX_POD_ENTITIES = MAX_SERVER_POD_ENTITIES;
+//
+///**
+//*	ServerGame Predeclarations:
+//**/
+////! Predeclare for ServerGameLocals include.
+//class SGEntityHandle;
+////! Interface containing the shared game entity functionalities that are shared between game modules.
+//class ISharedGameEntity;
+////! Actual game entity type for the ServerGame module.
+//class IServerGameEntity;
+////! GameWorld.
+//class ServerGameWorld;
+////! ServerGame TraceResult.
+//struct SVGTraceResult;
+////! SharedGame TraceResult.
+//struct SGTRaceResult;
+//
+//
+///**
+//*	Define the 'using' SharedGame types for ServerGame usage.
+//**/
+////! Using: GameEntity.
+//using GameEntity = IServerGameEntity;
+////! Using: GameWorld.
+//using SGGameWorld = ServerGameWorld;
+//
+//
+////! This is the actual GameWorld POD array with a size based on which GameModule we are building for.
+//using PODGameWorldArray = PODEntity[MAX_POD_ENTITIES];
+//
+////! std::span for PODEntity* objects.
+//using PODEntitySpan = std::span<PODEntity>;
+////! std::vector for PODEntity* objects.
+//using PODEntityVector = std::vector<PODEntity*>;
+////! std::span for GameEntity* derived objects.
+//using GameEntitySpan = std::span<GameEntity*>;
+////! std::vector for GameEntity* derived objects.
+//using GameEntityVector = std::vector<GameEntity*>;
+//
+//
+//
+//
+//
+///**
+//*	Includes:
+//**/
+////! Type Info System.
+//#include "../Entities/TypeInfo.h"
+////! Shared Entity Handle.
+//#include "../Entities/SGEntityHandle.h"
+////! Shared Entity Interface.
+//#include "../Entities/ISharedGameEntity.h"
+////! Server Game Entity Interface.
+//#include "../../Server/Entities/IServerGameEntity.h"
+////! Shared World Interface.
+//#include "../World/IGameWorld.h"
+//
+//
 
 
 /***

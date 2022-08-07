@@ -1,11 +1,20 @@
-// Client Game.
-#include "../ClientGameLocals.h"
-
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game NumberHUD display implementation.
+* 
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 // ChatHUD.
-#include "NumberHUD.h"
-
+#include "Game/Client/HUD/NumberHUD.h"
 // Exports Interface Implementations.
-#include "../Exports/Screen.h"
+#include "Game/Client/Exports/Screen.h"
 
 
 
@@ -74,7 +83,7 @@ void NumberHUD::SetSecondaryNumber(int32_t value) {
 void NumberHUD::SetColor(const color_t& color, uint32_t element) {
 	// Ensure we're within bounds.
 	if (element >= TotalElements) {
-		Com_WPrint("Warning: Trying to set an invalid element index in NumberHUD\n");
+		CLG_Print( PrintType::Warning, "Trying to set an invalid element index in NumberHUD\n");
 		return;
 	}
 

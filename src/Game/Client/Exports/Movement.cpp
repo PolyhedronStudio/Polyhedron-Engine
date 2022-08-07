@@ -7,16 +7,19 @@
 *	ClientGame Movement and User Input handling interface implementation.
 *
 ***/
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-#include "../TemporaryEntities.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Exports Interfaces.
-#include "Movement.h"
-#include "View.h"
+#include "Game/Client/Exports/Movement.h"
+#include "Game/Client/Exports/View.h"
 
 // KeyBinding Object.
-#include "../Input/KeyBinding.h"
+#include "Game/Client/Input/KeyBinding.h"
 
 /**
 *   Player Input Key Binds.

@@ -9,10 +9,8 @@
 * 
 ***/
 // SharedGame header itself.
-#include "Game/Shared/SharedGame.h"
+#include "Game/Shared/GameBindings/GameModuleImports.h"
 
-
-extern clg_import_s clgi;
 
 /***
 *
@@ -46,7 +44,7 @@ void SG_Print( int32_t printType, const std::string &printMessage ) {
 /***
 *
 *
-*	Entity Functions.
+*	Utility Functions.
 *
 *
 ***/

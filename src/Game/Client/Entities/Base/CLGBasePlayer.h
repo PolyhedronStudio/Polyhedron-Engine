@@ -9,9 +9,8 @@
 ***/
 #pragma once
 
-// Client Game GameEntity Interface.
-#include "CLGBasePacketEntity.h"
-
+// Client 'Base' Packet Entity.
+#include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
 
 
 /**

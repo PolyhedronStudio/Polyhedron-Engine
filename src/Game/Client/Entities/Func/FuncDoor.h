@@ -1,6 +1,6 @@
 #pragma once
 
-class CLGBaseMover;
+#include "Game/Client/Entities/Base/CLGBaseMover.h"
 
 //===============
 // A standard, sliding door

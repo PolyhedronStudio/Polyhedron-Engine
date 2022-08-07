@@ -7,10 +7,17 @@
 *	Dirt and Sparks particle effect implementation.
 * 
 ***/
-#include "../../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! ClientGame World
+#include "Game/Client/World/ClientGameWorld.h"
+//! Actual particle system.
+#include "Game/Client/Effects/Particles.h"
+//! Actual effects.
+#include "Game/Client/Effects/ParticleEffects.h"
 
-#include "../Particles.h"
-#include "../ParticleEffects.h"
 
 /**
 *   @brief  'Dirt' and 'Sparks' like particle effect.

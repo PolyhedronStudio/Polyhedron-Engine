@@ -16,15 +16,9 @@
 *   and execute the right movement according to that.
 * 
 ***/
-// Needed for the shared headers.
-#define CGAME_INCLUDE 1
-// Include shared headers.
-#include "Shared/Shared.h"
-#include "Shared/Refresh.h"
-
-// SharedGame header itself.
-#define SHAREDGAME_UNIT_INCLUDE
-#include "Game/Shared/SharedGame.h"
+//! Include the code base of the GameModule we're compiling against.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
+#include "Game/Shared/PlayerMove.h"
 
 /**
 *	Player Move debugging ifdefs, uncomment to enable debug output

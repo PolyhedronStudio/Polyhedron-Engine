@@ -551,6 +551,8 @@ if( CONFIG_BUILD_GAME_CLIENT )
 	SET(SRC_GAME_CLIENT
 		"${SRC_GAME_CLIENT_DIR}/ClientGameExports.cpp"
 		"${SRC_GAME_CLIENT_DIR}/ClientGameImports.cpp"
+		"${SRC_GAME_CLIENT_DIR}/ClientGameLocals.cpp"
+		"${SRC_GAME_CLIENT_DIR}/ClientGameMain.cpp"
 
 		"${SRC_GAME_CLIENT_DIR}/Effects/DynamicLights.cpp"
 		"${SRC_GAME_CLIENT_DIR}/Effects/LightStyles.cpp"
@@ -615,17 +617,15 @@ if( CONFIG_BUILD_GAME_CLIENT )
 
 		"${SRC_GAME_CLIENT_DIR}/View/ViewCamera.cpp"
 
-		"${SRC_GAME_CLIENT_DIR}/ClientGameExports.cpp"
-		"${SRC_GAME_CLIENT_DIR}/ClientGameImports.cpp"
-		"${SRC_GAME_CLIENT_DIR}/ClientGameLocals.cpp"
-		"${SRC_GAME_CLIENT_DIR}/Debug.cpp"
-		"${SRC_GAME_CLIENT_DIR}/Main.cpp"
+		"${SRC_GAME_CLIENT_DIR}/Debug.cpp"		
 		"${SRC_GAME_CLIENT_DIR}/TemporaryEntities.cpp"
 	)
 	# Specify Header files.
 	SET(HEADERS_GAME_CLIENT
 		"${SRC_GAME_CLIENT_DIR}/ClientGameExports.h"
 		"${SRC_GAME_CLIENT_DIR}/ClientGameImports.h"
+		"${SRC_GAME_CLIENT_DIR}/ClientGameLocals.h"
+		"${SRC_GAME_CLIENT_DIR}/ClientGameMain.h"
 
 		"${SRC_GAME_CLIENT_DIR}/Effects/DynamicLights.h"
 		"${SRC_GAME_CLIENT_DIR}/Effects/LightStyles.h"
@@ -676,11 +676,7 @@ if( CONFIG_BUILD_GAME_CLIENT )
 
 		"${SRC_GAME_CLIENT_DIR}/World/ClientGameWorld.h"
 
-		"${SRC_GAME_CLIENT_DIR}/ClientGameExports.h"
-		"${SRC_GAME_CLIENT_DIR}/ClientGameImports.h"
-		"${SRC_GAME_CLIENT_DIR}/ClientGameLocals.h"
-		"${SRC_GAME_CLIENT_DIR}/Debug.h"
-		"${SRC_GAME_CLIENT_DIR}/Main.h"
+		"${SRC_GAME_CLIENT_DIR}/Debug.h"		
 		"${SRC_GAME_CLIENT_DIR}/TemporaryEntities.h"
 	)
 endif()

@@ -1,13 +1,8 @@
 #pragma once
 
-// Needed for the shared headers.
-#define CGAME_INCLUDE 1
-// Include shared headers.
-#include "Shared/Shared.h"
-#include "Shared/Refresh.h"
-
-// SharedGame header itself.
-#include "Game/Shared/SharedGame.h"
+class ISharedGameEntity;
+class IClientGameEntity;
+class IServerGameEntity;
 
 /**
 *
@@ -117,13 +112,15 @@ namespace GameEntityFilters {
 	inline auto HasClient = std::views::filter(&EntityFilterFunctions::GameEntityHasClient);
 
 	// TODO: Move these functions over into EntityFilterFunctions.
-	inline auto HasClassName(const std::string& classname) {
+	template<typename T1>
+	inline auto HasClassName(const T1& classname) {
 		return std::ranges::views::filter([classname /*need a copy!*/](GameEntity* ent) { return ent->GetClassname() == classname; });
 	}
 
-	inline auto HasKeyValue(const std::string& fieldKey, const std::string& fieldValue) {
+	template<typename T1, typename T2>
+	inline auto HasKeyValue(const T1& fieldKey, const T2& fieldValue) {
 		return std::ranges::views::filter([fieldKey, fieldValue /*need a copy!*/](GameEntity* ent) {
-			auto&& dictionary = ent->GetEntityDictionary();
+			auto dictionary = ent->GetEntityDictionary();
 
 			if (dictionary.find(fieldKey) != dictionary.end()) {
 				if (dictionary[fieldKey] == fieldValue) {
@@ -136,11 +133,19 @@ namespace GameEntityFilters {
 	}
 
 	template<typename ClassType> auto IsClassOf() {
-		return std::ranges::views::filter([](GameEntity* ent) { return ent->IsClass<ClassType>(); });
+		return std::ranges::views::filter(
+			[](GameEntity* ent) { 
+				return ent->IsClass<ClassType>(); 
+			}
+		);
 	}
 
 	template<typename ClassType> auto IsSubclassOf() {
-		return std::ranges::views::filter([](GameEntity* ent) { return ent->IsSubclassOf<ClassType>(); });
+		return std::ranges::views::filter(
+			[](GameEntity* ent) { 
+				return ent->IsSubclassOf<ClassType>(); 
+			}
+		);
 	}
 
 	inline auto WithinRadius(vec3_t origin, float radius, uint32_t excludeSolidFlags) {

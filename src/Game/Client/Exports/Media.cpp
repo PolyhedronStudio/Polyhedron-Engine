@@ -7,15 +7,18 @@
 *	Client Game Media Interface Implementation.
 * 
 ***/
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Temporay entities.
-#include "../TemporaryEntities.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Exports classes.
-#include "Media.h"
-#include "Screen.h"
-#include "View.h"
+#include "Game/Client/Exports/Media.h"
+#include "Game/Client/Exports/Screen.h"
+#include "Game/Client/Exports/View.h"
 
 
 //---------------
@@ -179,7 +182,7 @@ void ClientGameMedia::LoadAndConfigureSky(void)
     rotate = atof(cl->configstrings[ConfigStrings::SkyRotate]);
     if (sscanf(cl->configstrings[ConfigStrings::SkyAxis], "%f %f %f",
         &axis[0], &axis[1], &axis[2]) != 3) {
-        Com_DPrint("Couldn't parse ConfigStrings::SkyAxis\n");
+        CLG_Print( PrintType::Developer, "Couldn't parse ConfigStrings::SkyAxis\n" );
         VectorClear(axis);
     }
 
@@ -328,7 +331,7 @@ void ClientGameMedia::ParsePlayerSkin(char* name, char* model, char* skin, const
     // overflow, but still check the length to be entirely fool-proof
     len = strlen(s);
     if (len >= MAX_QPATH) {
-        Com_Error(ErrorType::Drop, "%s: oversize playerskin", __func__);
+        CLG_Error( ErrorType::Drop, fmt::format( "{}: oversize playerskin", __func__ ) );
     }
 
     // isolate the player's name

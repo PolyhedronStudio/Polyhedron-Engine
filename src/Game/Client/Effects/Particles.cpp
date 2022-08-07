@@ -7,14 +7,19 @@
 *	Client Game View Interface Implementation.
 * 
 ***/
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! ClientGame World
+#include "Game/Client/World/ClientGameWorld.h"
 
-#include "../TemporaryEntities.h"
+#include "Game/Client/TemporaryEntities.h"
 
-#include "../Exports/View.h"
+#include "Game/Client/Exports/View.h"
 
-#include "ParticleEffects.h"
-#include "Particles.h"
+#include "Game/Client/Effects/ParticleEffects.h"
+#include "Game/Client/Effects/Particles.h"
 
 
 //! Particle emissive factor.

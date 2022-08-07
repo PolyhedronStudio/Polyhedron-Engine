@@ -14,10 +14,11 @@
 ***/
 #pragma once
 
+// Needed for clgi.
+#include "Game/Client/ClientGameMain.h"
+
 // Client Game GameEntity Interface.
-#include "../IClientGameEntity.h"
-
-
+#include "Game/Client/Entities/IClientGameEntity.h"
 
 /**
 *   CLGBaseLocalEntity

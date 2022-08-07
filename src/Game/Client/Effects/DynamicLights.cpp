@@ -7,15 +7,18 @@
 *	Dynamic Light Management.
 * 
 ***/
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-#include "../TemporaryEntities.h"
+#include "Game/Client/TemporaryEntities.h"
 
-#include "../Exports/View.h"
+#include "Game/Client/Exports/View.h"
 
-#include "DynamicLights.h"
-#include "Particles.h"
-#include "ParticleEffects.h"
+#include "Game/Client/Effects/DynamicLights.h"
+#include "Game/Client/Effects/Particles.h"
+#include "Game/Client/Effects/ParticleEffects.h"
 
 
 //! Actual array storing our dynamic lights for the current game.

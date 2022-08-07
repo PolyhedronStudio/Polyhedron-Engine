@@ -14,7 +14,10 @@
 ***/
 #pragma once
 
-// Pre-define.
+
+/**
+*	Forward declare.
+**/
 class IGameMode;
 class IGameWorld;
 class IClientGameEntity;

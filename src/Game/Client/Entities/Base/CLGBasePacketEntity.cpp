@@ -14,21 +14,25 @@
 *	actions, then one should inherit from this class to provide its client-side counterpart. 
 * 
 ***/
-#include "../../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+
 
 // Base Client Game Functionality.
-#include "../../Debug.h"
-#include "../../TemporaryEntities.h"
+#include "Game/Client/Debug.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Export classes.
-#include "../../Exports/Entities.h"
-#include "../../Exports/View.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/View.h"
 
 // Effects.
-#include "../../Effects/ParticleEffects.h"
+#include "Game/Client/Effects/ParticleEffects.h"
 
 // Base Entity.
-#include "CLGBasePacketEntity.h"
+#include "Game/Client/Entities/Base/CLGBasePacketEntity.h"
 
 //! Here for OnEvent handling.
 extern qhandle_t cl_sfx_footsteps[4];
@@ -226,7 +230,7 @@ void CLGBasePacketEntity::SpawnKey(const std::string& key, const std::string& va
 	//	// Set SpawnFlags.
 	//	SetStyle( parsedStyle );
 	} else {
-	    Com_DPrint(std::string("Warning: Entity[#" + std::to_string(GetNumber()) + ":" + GetClassname() + "] has unknown Key/Value['" + key + "','" + value + "']\n").c_str());
+		CLG_Print(PrintType::DeveloperWarning, fmt::format("Warning: Entity[#{},{}] has unknown Key / Value['{}', '{}']\n", GetNumber(), GetClassname(), key, value) );
 	}
 }
 
@@ -592,26 +596,26 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
 bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime &startTime = GameTime::zero()) {
 	//Com_DPrint("SwitchAnimation CALLED !! Index(#%i) startTime(#%i)\n", animationIndex, startTime.count());
 	if (!skm) {
-		Com_DPrint("SwitchAnimation: No SKM Data present.\n", animationIndex);
+		CLG_Print( PrintType::Developer, "SwitchAnimation: No SKM Data present.\n");
 		return false;
 	}
 
 	if (animationIndex < 0 || animationIndex > skm->animations.size()) {
-		Com_DPrint("SwitchAnimation: Failed, invalid index\n", animationIndex);
+		CLG_Print( PrintType::Developer, fmt::format("SwitchAnimation: Failed, invalid index(#{}), total animation list size({})\n", animationIndex, skm->animations.size() ) );
 		return false;
 	}
 
 	// Can't switch to animation without SKM data.
 	if (!skm) {
-		Com_DPrint("SwitchAnimation: No SKM data present.\n");
+		CLG_Print( PrintType::Developer, "SwitchAnimation: No SKM data present.\n");
 		return false;
 	}
 
 	if (animationIndex > skm->animations.size()) {
-		Com_DPrint("SwitchAnimation: animationIndex(%i) out of range for animations.size(%i)\n",
+		CLG_Print( PrintType::Developer, fmt::format( "SwitchAnimation: animationIndex({}) out of range for animations.size({})\n",
 			animationIndex,
 			skm->actions.size()
-		);
+		) );
 		return false;
 	}
 
@@ -1319,7 +1323,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 
 	// If we don't have a PODEntity then we can't do anything.
 	if (!podEntity) {
-		Com_DPrint("Warning: PrepareRefreshEntity has no valid podEntity pointer for refreshEntityID(#%i)!\n", refreshEntityID);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: PrepareRefreshEntity has no valid podEntity pointer for refreshEntityID(#{})!\n", refreshEntityID ));
 		return;
 	}
 

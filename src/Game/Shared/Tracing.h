@@ -9,9 +9,7 @@
 ***/
 #pragma once
 
-
-//! Shared.
-#include "../../Shared/Shared.h"
+#include "Shared/Shared.h"
 
 /**
 *   ServerGame Trace Structure. Can consume a general Trace result.

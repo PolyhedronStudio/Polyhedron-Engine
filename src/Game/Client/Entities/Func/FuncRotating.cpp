@@ -3,22 +3,19 @@
 *	License here.
 *
 *	@file
-*
-*	Client-Side FuncPlat Entity Support.
+* 
+*   Client Side FuncRotating -> Intented to be predicted someday.
 *
 ***/
-#include "../../ClientGameLocals.h"
-//#include "../../Effects.h"
-//#include "../../Entities.h"
-//#include "../../Utilities.h"
-//#include "../../Physics/RootMotionMove.h"
-
-#include "../Base/CLGBasePacketEntity.h"
-#include "../Base/CLGBaseTrigger.h"
-#include "../Base/CLGBaseMover.h"
-
-//#include "../../Gamemodes/IGamemode.h"
-#include "FuncRotating.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! BaseMover.
+#include "Game/Client/Entities/Base/CLGBaseMover.h"
+#include "Game/Client/Entities/Func/FuncRotating.h"
+//! Game World.
+#include "Game/Client/World/ClientGameWorld.h"
 
 //===============
 // FuncRotating::ctor

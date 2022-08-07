@@ -9,84 +9,118 @@
 ***/
 #pragma once
 
-// Define CGAME_INCLUDE so that files such as:
-// Common/cmodel.h
-// Common/cmd.h
-//
+/**
+*	Include ClientGame Main header for all Shared/Common functionalities.
+**/
+/**
+*	Include Shared codebase with CGAME_INCLUDE defined.
+**/
 #define CGAME_INCLUDE 1
 
 // Shared.
 #include "Shared/Shared.h"
-#include "Shared/List.h"
-#include "Shared/Refresh.h"
-#include "Shared/SVGame.h"
-
-//// Common.
-#include "../../Common/CollisionModel.h"
-#include "../../Common/Cmd.h"
-#include "../../Common/Messaging.h"
-#include "../../Common/Protocol.h"
-//
-//// Shared Client Type & Game Header.
-#include "Shared/CLTypes.h"
-#include "Shared/CLGame.h"
-
+//#include "Game/Client/ClientGameMain.h"
 
 
 /**
-*	Predeclarations.
+*	ConstExpr:
 **/
-class ClientGameExports;
-class ClientGameWorld;
-class IClientGameEntity;
+//! Maximum amount of POD Entities.
+static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
+
+
+/**
+*	Interface/Base Entity Forward Declarations: For SharedGame inclusion.
+**/
+//! SharedGame Entity handles, read its header for its description.
+class SGEntityHandle;
+//! Interface containing the shared game entity functionalities that are shared between game modules.
 class ISharedGameEntity;
+//! Actual game entity type for the ClientGame module.
+class IClientGameEntity;
+//! Base entities.
+class CLGBasePacketEntity;
+class CLGBaseLocalEntity;
+class CLGBaseMover;
+class CLGBasePlayer;
+class CLGBaseTrigger;
+//! Worldspawn.
+class WorldSpawn;
 
+//! GameWorld.
+class ClientGameWorld;
+//! ClientGame TraceResult.
+struct CLGTraceResult;
+//! SharedGame TraceResult.
+struct SGTRaceResult;
+
+
+/**
+*	Define the 'using' SharedGame types for ClientGame usage.
+**/
+//! Set GameEntity to IClientGameEntity;
+using GameEntity	= IClientGameEntity;
+//! Set SGGameEntity to ClientGameWOrld;
+using SGGameWorld	= ClientGameWorld;
+//! Commented out: Since the ServerGame has no awareness over local client entities
+//using SGBaseLocalEntity = CLGBaseLocalEntity;
+//! Set SGBaseEntity to CLGBasePacketEntity.
+using SGBaseEntity = CLGBasePacketEntity;
+//! Set SGBasePlayer to CLGBasePlayer.
+using SGBaseMover = CLGBaseMover;
+//! Set SGBasePlayer to CLGBasePlayer.
+using SGBaseTrigger = CLGBaseTrigger;
+//! Set SGBasePlayer to CLGBasePlayer.
+using SGBasePlayer = CLGBasePlayer;
+
+//! Set the parent class for the SharedGame base item behaviors class.
+//! It is a local entity in the client game case as to perform possible
+//! client side logic.
+//! For the server side it is: using SGBaseItemParentClass = SVGBaseTrigger;
+using SGBaseItemParentClass = CLGBaseLocalEntity;
+
+
+/**
+*	Include the SharedGame codebase.
+**/
+//! TypeInfo system.
+#include "Game/Shared/Entities/TypeInfo.h"
+
+//! ISharedGameEntity Interface.
+#include "Game/Shared/Entities/ISharedGameEntity.h"
+//! IClientGameEntity Interface.
 #include "Game/Client/Entities/IClientGameEntity.h"
-#include "Game/Client/World/ClientGameWorld.h"
 
 /**
-*	SharedGame Framework.
+*	Define our (Shared/Client)-Game container types using the SharedGame 'using' types.
 **/
-//! SharedGame.
-#include "Game/Shared/SharedGame.h"
-//! Entity Filters.
+//! This is the actual GameWorld POD array with a size based on which GameModule we are building for.
+using PODGameWorldArray = PODEntity[MAX_POD_ENTITIES];
+//! std::span for PODEntity* objects.
+using PODEntitySpan = std::span<PODEntity>;
+//! std::vector for PODEntity* objects.
+using PODEntityVector = std::vector<PODEntity*>;
+//! std::span for GameEntity* derived objects.
+using GameEntitySpan = std::span<GameEntity*>;
+//! std::vector for GameEntity* derived objects.
+using GameEntityVector = std::vector<GameEntity*>;
+
+
+//! SharedGame: EntityHandle
+#include "Game/Shared/Entities/SGEntityHandle.h"
+//! SharedGame: Entity Filters.
 #include "Game/Shared/Entities/EntityFilters.h"
-// ClientGame Exports Implementation.
-#include "ClientGameExports.h"
+//! ClientGame: Needed for SharedGame BaseItem.
+#include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
+//! Tracing.
+#include "Game/Shared/Tracing.h"
+//! Skeletal Animation.
+#include "Game/Shared/SkeletalAnimation.h"
+//! Player Move.
+#include "Game/Shared/PlayerMove.h"
 
-
-/**
-*   ClientGame Frame Time.		// WID: TODO: Make these part of the ClientGameImports instead.
-**/
-static constexpr double		CLG_FRAMETIME	= BASE_FRAMETIME;
-static constexpr double		CLG_1_FRAMETIME	= BASE_1_FRAMETIME;
-static constexpr int32_t	CLG_FRAMEDIV	= BASE_FRAMERATE / 10.0;
-
-
-/**
-*	Custom load state enumerator.
-*	
-*	Rename LOAD_CUSTOM_# or add your own.
-*	Once the load stage is set, the client will inquire the
-*	CLG_GetMediaLoadStateName function for a matching display string.
-**/
-typedef enum {
-    LOAD_CUSTOM_START = LOAD_SOUNDS + 1,    // DO NOT TOUCH.
-    LOAD_CUSTOM_0,  // Let thy will be known, rename to your hearts content.
-    LOAD_CUSTOM_1,  // Let thy will be known, rename to your hearts content.
-    LOAD_CUSTOM_2   // Let thy will be known, rename to your hearts content.
-    // You can add more here if you desire so.
-} clg_load_state_t;
-
-
-
-/**
-*	Client player model settings.
-**/
-static constexpr int32_t CL_PLAYER_MODEL_DISABLED       = 0;
-static constexpr int32_t CL_PLAYER_MODEL_ONLY_GUN       = 1;
-static constexpr int32_t CL_PLAYER_MODEL_FIRST_PERSON   = 2;
-static constexpr int32_t CL_PLAYER_MODEL_THIRD_PERSON   = 3;
+//! SharedGame: BaseItem Entity.
+#include "Game/Shared/Entities/SGBaseItem.h"
 
 
 
@@ -260,58 +294,6 @@ ClientGameWorld* GetGameWorld();
 
 
 /**
-*	Core - Used take and give access from game module to client.
-**/
-//! Contains the function pointers being passed in from the engine.
-extern ClientGameImport clgi;
-//! Static export variable, lives as long as the client game dll lives.
-extern ClientGameExports* clge;
-//! Pointer to the actual client its state.
-extern ClientState      *cl;
-//! Pointer to the client shared data.
-extern ClientShared     *cs;
-
-
-
-/***
-*   
-*
-*	Console Printing.
-*
-*
-***/
-/**
-*	@brief	Common print text to screen function.
-**/
-void Com_Print(const char* fmt, ...);
-
-/**
-*	@brief	Common print debug text to screen function.
-**/
-void Com_DPrint(const char* fmt, ...);
-
-/**
-*	@brief	Common print warning text to screen function.
-**/
-void Com_WPrint(const char* fmt, ...);
-
-/**
-*	@brief	Common print error text to screen function.
-**/
-void Com_EPrint(const char* fmt, ...);
-
-/**
-*	@brief	Common print specific error type and text to screen function.
-**/
-void Com_Error(int32_t errorType, const char* fmt, ...);
-
-/**
-*	@brief	Common print text type of your choice to screen function.
-**/
-void Com_LPrintf(int32_t printType, const char* fmt, ...);
-
-
-/**
 *
 *
 *   Client Game Specific Functions.
@@ -354,50 +336,3 @@ qhandle_t CLG_PrecacheSound(const std::string& filename);
 
 
 
-/***
-*
-*
-*	CVars
-*
-*
-***/
-extern cvar_t* cl_chat_notify;
-extern cvar_t* cl_chat_sound;
-extern cvar_t* cl_chat_filter;
-
-extern cvar_t* cl_disable_explosions;
-extern cvar_t* cl_explosion_sprites;
-extern cvar_t* cl_explosion_frametime;
-extern cvar_t* cl_disable_particles;
-extern cvar_t* cl_footsteps;
-extern cvar_t* cl_gunalpha;
-extern cvar_t* cl_kickangles;
-extern cvar_t* cl_monsterfootsteps;
-extern cvar_t* cl_noglow;
-extern cvar_t* cl_noskins;
-extern cvar_t* cl_player_model;
-extern cvar_t* cl_predict;
-extern cvar_t* cl_rollhack;
-extern cvar_t* cl_thirdperson_angle;
-extern cvar_t* cl_thirdperson_range;
-extern cvar_t* cl_vwep;
-
-// Refresh... TODO: Move.
-extern cvar_t* cvar_pt_beam_lights;
-
-// Server.
-extern cvar_t* sv_paused;
-
-// User Info.
-extern cvar_t* info_fov;
-extern cvar_t* info_hand;
-extern cvar_t* info_msg;
-extern cvar_t* info_name;
-extern cvar_t* info_password;
-extern cvar_t* info_skin;
-extern cvar_t* info_spectator;
-extern cvar_t* info_uf;
-extern cvar_t* info_in_bspmenu;     // Is set to 1  at boot time when loading mainmenu.bsp, and is set 
-                                    // to 1 when disconnecting from a server hence, once again, loading mainmenu.bsp
-// Video.
-extern cvar_t* vid_rtx;     // 1 if we're in RTX mode, 0 if not.

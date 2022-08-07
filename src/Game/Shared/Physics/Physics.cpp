@@ -9,8 +9,8 @@
 ***/
 #pragma once
 
-// SharedGame header itself.
-#include "Game/Shared/SharedGame.h"
+//! Include the code base of the GameModule we're compiling against.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
 
 // Physics.
 #include "Physics.h"
@@ -394,7 +394,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	// SG_Physics_Step:
         case MoveType::StepMove:
             //SG_Physics_Step(entityHandle);
-			SG_Physics_None(entityHandle);
+			//SG_Physics_None(entityHandle);
         break;
 	// SG_Physics_RootMotionMove:
 		case MoveType::RootMotionMove:

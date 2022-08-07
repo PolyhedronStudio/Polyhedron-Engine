@@ -7,16 +7,9 @@
 *	Skeletal Animation functionality.
 *
 ***/
-// Needed for the shared headers.
-#define CGAME_INCLUDE 1
-// Include shared headers.
-#include "Shared/Shared.h"
-#include "Shared/Refresh.h"
-
-// SharedGame header itself.
-#include "Game/Shared/SharedGame.h"
-
-
+//! Include the code base of the GameModule we're compiling against.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
+#include "Game/Shared/SkeletalAnimation.h"
 
 /**
 * @brief	Calculates the current frame for the current time since the start time stamp.

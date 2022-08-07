@@ -12,21 +12,25 @@
 *	and spawned directly, local to the client only, by the ClientGameWorld itself during load time.
 * 
 ***/
-#include "../../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+
 
 // Base Client Game Functionality.
-#include "../../Debug.h"
-#include "../../TemporaryEntities.h"
+#include "Game/Client/Debug.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Export classes.
-#include "../../Exports/Entities.h"
-#include "../../Exports/View.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/View.h"
 
 // Effects.
-#include "../../Effects/ParticleEffects.h"
+#include "Game/Client/Effects/ParticleEffects.h"
 
 // Base Entity.
-#include "CLGBaseLocalEntity.h"
+#include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 
 //! Here for OnEvent handling.
 extern qhandle_t cl_sfx_footsteps[4];
@@ -223,7 +227,7 @@ void CLGBaseLocalEntity::SpawnKey(const std::string& key, const std::string& val
 		// Set SpawnFlags.
 		SetStyle( parsedStyle );
 	} else {
-	    Com_DPrint(std::string("Warning: Entity[#" + std::to_string(GetNumber()) + ":" + GetClassname() + "] has unknown Key/Value['" + key + "','" + value + "']\n").c_str());
+		CLG_Print(PrintType::DeveloperWarning, fmt::format("Warning: Entity[#{},{}] has unknown Key / Value['{}', '{}']\n", GetNumber(), GetClassname(), key, value) );
 	}
 }
 
@@ -478,7 +482,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
 
 	// If we don't have a PODEntity then we can't do anything.
 	if (!podEntity) {
-		Com_DPrint("Warning: PrepareRefreshEntity has no valid podEntity pointer for refreshEntityID(#%i)!\n", refreshEntityID);
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "Warning: PrepareRefreshEntity has no valid podEntity pointer for refreshEntityID(#{})!\n", refreshEntityID ) );
 		return;
 	}
 

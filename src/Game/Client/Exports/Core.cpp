@@ -7,15 +7,19 @@
 *	Client Game Core Interface Implementation.
 * 
 ***/
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-#include "../TemporaryEntities.h"
 
-#include "Core.h"
-#include "Media.h"
-#include "Movement.h"
+#include "Game/Client/TemporaryEntities.h"
 
-#include "../Effects/Particles.h"
+#include "Game/Client/Exports/Core.h"
+#include "Game/Client/Exports/Media.h"
+#include "Game/Client/Exports/Movement.h"
+
+#include "Game/Client/Effects/Particles.h"
 
 
 /**
@@ -27,7 +31,7 @@ static void CL_Skins_f(void) {
     ClientInfo* ci;
 
     if (clgi.GetClienState() < ClientConnectionState::Loading) {
-        Com_Print("Must be in a level to load skins.\n");
+        CLG_Print( PrintType::Warning, "Must be in a level to load skins.\n" );
         return;
     }
 
@@ -41,8 +45,8 @@ static void CL_Skins_f(void) {
         clge->media->LoadClientInfo(ci, s);
         if (!ci->model_name[0] || !ci->skin_name[0])
             ci = &cl->baseClientInfo;
-        Com_Print("client %d: %s --> %s/%s\n", i, s,
-            ci->model_name, ci->skin_name);
+        CLG_Print( PrintType::Developer, fmt::format( "client {}: {} --> {}/{}\n", i, s,
+            ci->model_name, ci->skin_name ) );
         clgi.SCR_UpdateScreen();
     }
 }
@@ -133,7 +137,7 @@ static const cmdreg_t cmd_cgmodule[] = {
 **/
 void ClientGameCore::Initialize() {
     // Begin init log.
-    Com_Print("\n%s\n", "==== InitCLGame ====");
+    CLG_Print( PrintType::Regular, "\n==== InitCLGame ====\n");
 
     // Register user input.
     clge->movement->RegisterInput();

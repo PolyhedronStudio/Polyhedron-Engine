@@ -7,33 +7,11 @@
 *	SharedGame Base Item implementation.
 *
 ***/
-// Needed for the shared headers.
-#define CGAME_INCLUDE 1
-// Include shared headers.
-#include "Shared/Shared.h"
-#include "Shared/Refresh.h"
+//! Include the code base of the GameModule we're compiling against.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
 
-// SharedGame header itself.
-#include "Game/Shared/SharedGame.h"
-
-#ifdef SHAREDGAME_CLIENTGAME
-
-// Include CLGbasePacket and CLGBaseLocal Entity types.
-#include "../../Client/Entities/IClientGameEntity.h"
-#include "../../Client/Entities/Base/CLGBasePacketEntity.h"
-#include "../../Client/Entities/Base/CLGBaseLocalEntity.h"
-#include "../../Client/Entities/Base/CLGBasePlayer.h"
-using SGBasePlayer = CLGBasePlayer;
-#endif
-#ifdef SHAREDGAME_SERVERGAME 
-#include "../../Client/Entities/IServerGameEntity.h"
-#include "../../Server/Entities/Base/SVGBaseEntity.h"
-#include "../../Server/Entities/Base/SVGBaseTrigger.h"
-#include "../../Server/Entities/Base/SVGBasePlayer.h"
-using SGBasePlayer = SVGBasePlayer;
-#endif
 // Item & ItemWeapon.
-#include "SGBaseItem.h"
+#include "Game/Shared/Entities/SGBaseItem.h"
 
 
 //! Used to store instances that are used for player weapon callbacks.

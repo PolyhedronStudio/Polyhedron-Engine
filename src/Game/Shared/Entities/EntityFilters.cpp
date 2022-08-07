@@ -7,25 +7,10 @@
 *	SharedGame Base Item implementation.
 *
 ***/
-// SharedGame header itself.
-#define SHAREDGAME_UNIT_INCLUDE
-#include "Game/Shared/SharedGame.h"
+//! Include the code base of the GameModule we're compiling against.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
 
-#ifdef SHAREDGAME_CLIENTGAME
-// Include CLGbasePacket and CLGBaseLocal Entity types.
-#include "../../Client/Entities/IClientGameEntity.h"
-#include "../../Client/Entities/Base/CLGBasePacketEntity.h"
-#include "../../Client/Entities/Base/CLGBaseLocalEntity.h"
-#include "../../Client/Entities/Base/CLGBasePlayer.h"
-using SGBasePlayer = CLGBasePlayer;
-#endif
-#ifdef SHAREDGAME_SERVERGAME 
-#include "../../Server/Entities/IServerGameEntity.h"
-#include "../../Server/Entities/Base/SVGBaseEntity.h"
-#include "../../Server/Entities/Base/SVGBaseTrigger.h"
-#include "../../Server/Entities/Base/SVGBasePlayer.h"
-using SGBasePlayer = SVGBasePlayer;
-#endif
+
 
 /**
 *

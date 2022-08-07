@@ -1,26 +1,32 @@
-/*
-// LICENSE HERE.
+/***
+*
+*	License here.
+*
+*	@file
+* 
+*   Local Client-Side Gib Entity, updates locally, does not receive state updates
+*	from over the wire. 
+*
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+//! ClientGame World.
+#include "Game/Client/World/ClientGameWorld.h"
+//! Particle effects.
+#include "Game/Client/Effects/ParticleEffects.h"
 
-//
-// GibEntity.cpp
-//
-//
-*/
-
-#include "../ClientGameLocals.h"              // SVGame.
-#include "../Effects/ParticleEffects.h"              // Effects.
-//#include "../Entities.h"             // Entities.
-//#include "../../Player/Client.h"        // Player Client functions.
-//#include "../../Player/Animations.h"    // Include Player Client Animations.
 #define random()    ((rand () & RAND_MAX) / ((float)RAND_MAX))
 #define crandom()   (2.0f * (random() - 0.5f))
 
+
+#include "Game/Shared/Physics/Physics.h"
+
 // Class Entities.
-#include "Base/CLGBaseLocalEntity.h"
+#include "Game/Client/Entities/Base/CLGBaseLocalEntity.h"
 #include "Game/Client/Entities/GibEntity.h"
 
-// World.
-#include "Game/Client/World/ClientGameWorld.h"
 
 static int32_t sm_meat_index = 0;
 

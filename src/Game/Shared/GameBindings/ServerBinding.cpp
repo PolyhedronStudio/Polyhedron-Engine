@@ -55,7 +55,7 @@ void SG_Print( int32_t printType, const std::string &printMessage ) {
 /***
 *
 *
-*	Entity Functions.
+*	Utility Functions.
 *
 *
 ***/

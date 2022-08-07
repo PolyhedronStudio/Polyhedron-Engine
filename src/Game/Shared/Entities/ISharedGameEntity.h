@@ -9,9 +9,10 @@
 ***/
 #pragma once
 
-// Required.
-#include "../../../Shared/Shared.h"
-#include "TypeInfo.h"
+//! Shared is included by either ServerGame or ClientGame itself.
+//#include "Shared/Shared.h"
+//! Include TypeInfo system.
+#include "Game/Shared/Entities/TypeInfo.h"
 
 /**
 *   ISharedGameEntity

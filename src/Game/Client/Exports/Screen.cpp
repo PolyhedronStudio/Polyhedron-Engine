@@ -30,12 +30,12 @@ void ClientGameScreen::Cmd_Sky_f() {
     int     argc = clgi.Cmd_Argc();
 
     if (argc < 2) { 
-        Com_Print("Usage: sky <basename> [rotate] [axis x y z]\n");
+        CLG_Print( PrintType::Regular, "Usage: sky <basename> [rotate] [axis x y z]\n");
         return;
     }
 
     if (clgi.GetClienState() != ClientConnectionState::Active) {
-        Com_Print("No map loaded.\n");
+        CLG_Print( PrintType::Regular, "No map loaded.\n");
         return;
     }
 
@@ -395,7 +395,7 @@ void ClientGameScreen::CenterPrint(const std::string& text) {
     }
 
     // Echo text to console.
-    Com_LPrintf(PrintType::Regular, "%s\n", screenData.centerString.c_str());
+    CLG_Print( PrintType::Regular, screenData.centerString.c_str() );
 
     // Clear notify.
     clgi.Con_ClearNotify();

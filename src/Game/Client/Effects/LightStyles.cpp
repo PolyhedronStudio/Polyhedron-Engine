@@ -7,13 +7,16 @@
 *	Light Style Management.
 * 
 ***/
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-#include "../TemporaryEntities.h"
+#include "Game/Client/TemporaryEntities.h"
 
-#include "../Exports/View.h"
+#include "Game/Client/Exports/View.h"
 
-#include "LightStyles.h"
+#include "Game/Client/Effects/LightStyles.h"
 
 #define USE_LIGHTSTYLES 1
 #if USE_LIGHTSTYLES
@@ -70,7 +73,7 @@ void LightStyles::Set(int32_t index, const char* style)
     ls = &styles[index];
     ls->length = strlen(style);
     if (ls->length > MAX_QPATH) {
-        Com_Error(ErrorType::Drop, "%s: oversize style", __func__);
+        CLG_Error( ErrorType::Drop, fmt::format( "{}: oversize style", __func__ ) );
     }
 
     for (i = 0; i < ls->length; i++) {

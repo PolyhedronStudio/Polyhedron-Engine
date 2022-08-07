@@ -17,16 +17,6 @@
 ***/
 #pragma once
 
-class IClientGameEntity;
-class SVGBaseEntity;
-class SVGBaseTrigger;
-
-#if defined(SHAREDGAME_SERVERGAME)
-using SGBaseItemParentClass = SVGBaseTrigger;
-#endif
-#if defined(SHAREDGAME_CLIENTGAME)
-using SGBaseItemParentClass = CLGBaseLocalEntity;
-#endif
 
 class SGBaseItem : public SGBaseItemParentClass {
 public:

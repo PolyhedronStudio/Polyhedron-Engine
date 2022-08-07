@@ -7,19 +7,22 @@
 *	Client Game View Interface Implementation.
 * 
 ***/
-#include "../ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Temporary Entities.
-#include "../TemporaryEntities.h"
+#include "Game/Client/TemporaryEntities.h"
 
 // Effects.
-#include "../Effects/DynamicLights.h"
-#include "../Effects/LightStyles.h"
-#include "../Effects/Particles.h"
+#include "Game/Client/Effects/DynamicLights.h"
+#include "Game/Client/Effects/LightStyles.h"
+#include "Game/Client/Effects/Particles.h"
 
 // Exports.
-#include "Entities.h"
-#include "View.h"
+#include "Game/Client/Exports/Entities.h"
+#include "Game/Client/Exports/View.h"
 
 
 /**
@@ -184,7 +187,7 @@ static void V_Viewpos_f(void)
     const vec3_t viewOrigin = viewCamera->GetViewOrigin();
     const vec3_t viewAngles = viewCamera->GetViewAngles();
 
-    Com_Print("(%i %i %i) : %i\n", (int32_t)viewOrigin.x, (int32_t)viewOrigin.y, (int32_t)viewOrigin.z, (int32_t)viewAngles[vec3_t::Yaw]);
+    CLG_Print( PrintType::Regular, fmt::format( "({} {} {}) : {}\n", (int32_t)viewOrigin.x, (int32_t)viewOrigin.y, (int32_t)viewOrigin.z, (int32_t)viewAngles[vec3_t::Yaw] ));
 }
 
 /**
@@ -286,7 +289,7 @@ bool ClientGameView::AddRenderParticle(const rparticle_t &renderParticle) {
 void ClientGameView::AddLight(const vec3_t& origin, const vec3_t &rgb, float intensity, float radius) {
     // We topped the dynamic light limit, developer print a warning and opt out.
     if (num_dlights >= MAX_DLIGHTS) {
-        Com_DPrint("Warning: client view num_dlights >= MAX_DLIGHTS\n");
+        CLG_Print( PrintType::DeveloperWarning, "Warning: client view num_dlights >= MAX_DLIGHTS\n");
         return;
     }
 
@@ -324,7 +327,7 @@ void ClientGameView::AddLight(const vec3_t& origin, const vec3_t &rgb, float int
 void ClientGameView::AddLightStyle(int32_t style, const vec4_t &rgba) {
     // Check for sanity.
     if (style < 0 || style >= MAX_LIGHTSTYLES) {
-        Com_Error(ErrorType::Drop, "Bad light style %i", style);
+        CLG_Error( ErrorType::Drop, fmt::format( "{}: Bad light style {}", __func__, style ) );
         return;
     }
 

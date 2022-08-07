@@ -9,7 +9,11 @@
 ***/
 #pragma once
 
-// Predeclare needed structs.
+
+
+/**
+*	Forward declare needed structs.
+**/
 struct PlayerMove;
 struct PODEntity;
 

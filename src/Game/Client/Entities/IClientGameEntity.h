@@ -9,11 +9,8 @@
 ***/
 #pragma once
 
-// GameLocals.
-#include "../ClientGameLocals.h"
-
-// SharedGame Entity Interface.
-#include "../../Shared/Entities/ISharedGameEntity.h"
+//! Required ISharedGameEntity include.
+#include "Game/Shared/Entities/ISharedGameEntity.h"
 
 /**
 *   IClientGameEntity

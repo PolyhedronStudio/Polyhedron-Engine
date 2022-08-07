@@ -7,11 +7,14 @@
 *   Client Game Main.
 *
 ***/
-#include "ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // ClientGame.
-#include "TemporaryEntities.h"
-#include "World/ClientGameWorld.h"
+//#include "Game/Client/TemporaryEntities.h"
+#include "Game/Client/World/ClientGameWorld.h"
 
 // ClientGameExports implementations.
 #include "Exports/Core.h"
@@ -22,68 +25,6 @@
 #include "Exports/Screen.h"
 #include "Exports/ServerMessage.h"
 #include "Exports/View.h"
-
-
-
-/**
-*   Contains the function pointers being passed in from the engine.
-**/
-ClientGameImport clgi;
-
-
-
-/**
-*   Pointer to the client frame state, and the client shared data.
-**/
-// Pointer to the actual client frame state.
-ClientState* cl     = nullptr;
-// Pointer to the actual client shared data.
-ClientShared* cs    = nullptr;
-
-
-
-/**
-*   Core CVars.
-**/
-cvar_t *cl_chat_notify          = nullptr;
-cvar_t *cl_chat_sound           = nullptr;
-cvar_t *cl_chat_filter          = nullptr;
-cvar_t *cl_disable_particles    = nullptr;
-cvar_t *cl_disable_explosions   = nullptr;
-cvar_t *cl_explosion_sprites    = nullptr;
-cvar_t *cl_explosion_frametime  = nullptr;
-cvar_t *cl_footsteps            = nullptr;
-cvar_t *cl_gunalpha             = nullptr;
-cvar_t *cl_kickangles           = nullptr;
-cvar_t *cl_monsterfootsteps     = nullptr;
-cvar_t *cl_noglow               = nullptr;
-cvar_t *cl_noskins              = nullptr;
-cvar_t *cl_player_model         = nullptr;
-cvar_t *cl_predict              = nullptr;
-cvar_t *cl_rollhack             = nullptr;
-cvar_t *cl_thirdperson_angle    = nullptr;
-cvar_t *cl_thirdperson_range    = nullptr;
-cvar_t *cl_vwep                 = nullptr;
-
-// Refresh.
-cvar_t* cvar_pt_beam_lights     = nullptr;
-
-// Server.
-cvar_t *sv_paused   = nullptr;
-
-// User Info.
-cvar_t *info_fov        = nullptr;
-cvar_t *info_hand       = nullptr;
-cvar_t *info_msg        = nullptr;
-cvar_t *info_name       = nullptr;
-cvar_t *info_password   = nullptr;
-cvar_t *info_skin       = nullptr;
-cvar_t *info_spectator  = nullptr;
-cvar_t *info_uf         = nullptr;
-cvar_t *info_in_bspmenu = nullptr; // Is set to 1  at boot time when loading mainmenu.bsp, and is set 
-                                // to 1 when disconnecting from a server hence, once again, loading mainmenu.bsp
-// Video.
-cvar_t* vid_rtx = nullptr;
 
 
 

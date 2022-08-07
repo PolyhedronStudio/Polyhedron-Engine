@@ -4,16 +4,24 @@
 *
 *	@file
 *
-*	ClientGame Tracing Utility. Takes care of handling entities appropriately.
-*
+*	Client Game Key Binding Object.
+* 
 ***/
-#include "../ClientGameLocals.h"
-#include "../Exports/Entities.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
+
+// ChatHUD.
+#include "Game/Client/Input/KeyBinding.h"
+// Entiites.
+#include "Game/Client/Exports/Entities.h"
 
 // It has to know about Worldspawn.
-#include "../Entities/Worldspawn.h"
+#include "Game/Client/Entities/Worldspawn.h"
 
-
+// Trace Result.
+#include "Game/Client/Utilities/CLGTraceResult.h"
 
 /**
 * @brief Constructs a ClientGame Trace Result from the engine's Common trace result.

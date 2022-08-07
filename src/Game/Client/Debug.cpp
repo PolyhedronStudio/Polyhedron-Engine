@@ -7,11 +7,13 @@
 *	Contains the implementations for debug rendering client information.
 *
 ***/
-// ClientGameLocals.
-#include "ClientGameLocals.h"
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! ClientGame Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
 // Used for debug rendering.
-#include "Effects/Particles.h"
+#include "Game/Client/Effects/Particles.h"
 
 
 

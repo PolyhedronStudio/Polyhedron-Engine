@@ -12,33 +12,49 @@ if( CONFIG_BUILD_GAME_CLIENT )
 	project(target-clgame VERSION "${POLYHEDRON_VERSION_MAJOR}.${POLYHEDRON_VERSION_MINOR}.${POLYHEDRON_VERSION_POINT}" )
 	# Add SHARED library.
 	if (WIN32)
-		add_library( clgame SHARED ${SRC_SYSTEM_DIR}/Resources/basepoly_cl.rc )
+		add_library( clgame SHARED "${SRC_SYSTEM_DIR}/Resources/basepoly_cl.rc" )
 	else()
 		add_library( clgame SHARED )
 	endif()
 
 	# Setup all Server target Sources.
+#	target_sources( clgame PUBLIC
+#		#${SRC_GAME_CLIENT_DIR}/clgame.def
+#		"${SRC_GAME_CLIENT}" "${HEADERS_GAME_CLIENT}"
+#		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.cpp"
+#		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.h"
+#		"${SRC_GAME_SHARED_DIR}/GameBindings/GameModuleImports.h"
+#		"${SRC_GAME_SHARED}" "${HEADERS_GAME_SHARED}"
+#	)
+#	target_sources( clgame PUBLIC 
+#		"${SRC_SHARED}" "${HEADERS_SHARED}"
+#	)
+	# Setup all Server target Sources.
 	target_sources( clgame PUBLIC
-		#${SRC_GAME_CLIENT_DIR}/clgame.def
-		${SRC_GAME_CLIENT} ${HEADERS_GAME_CLIENT}
-		${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.cpp
-		${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.h
-		${SRC_GAME_SHARED} ${HEADERS_GAME_SHARED}
+		"${SRC_GAME_CLIENT_DIR}/clgame.def"
+		"${SRC_GAME_CLIENT}" 
+		"${HEADERS_GAME_CLIENT}"
+		"${SRC_GAME_SHARED}" 
+		"${HEADERS_GAME_SHARED}"
 	)
-	target_sources( clgame PUBLIC 
-		${SRC_SHARED} ${HEADERS_SHARED}
+	target_sources( clgame PRIVATE 
+		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.h"
+		"${SRC_GAME_SHARED_DIR}/GameBindings/GameModuleImports.h"
+		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.cpp"
+		"${SRC_SHARED}" "${HEADERS_SHARED}"
 	)
+
 	# And also on any specific headers that require it.
 	set_source_files_properties(
-		${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.cpp
-		${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.h
+		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.cpp"
+		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.h"
 		COMPILE_OPTIONS 
 		"SHAREDGAME_UNIT_INCLUDE=1"
 	)
 	# Set the SHAREDGAME_UNIT_INCLUDE flags for all SharedGame source files.
 	set_source_files_properties(${SRC_GAME_SHARED} COMPILE_OPTIONS "SHAREDGAME_UNIT_INCLUDE=1")
 	# And also on any specific headers that require it.
-	set_source_files_properties(${SRC_GAME_SHARED_DIR}/Entities/EntityFilters.h COMPILE_OPTIONS "SHAREDGAME_UNIT_INCLUDE=1")
+	set_source_files_properties("${SRC_GAME_SHARED_DIR}/Entities/EntityFilters.h" COMPILE_OPTIONS "SHAREDGAME_UNIT_INCLUDE=1")
 
 	# Add include directories.
 	target_include_directories( clgame INTERFACE 

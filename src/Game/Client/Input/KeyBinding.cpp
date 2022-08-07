@@ -1,8 +1,19 @@
-// Client Game.
-#include "../ClientGameLocals.h"
+/***
+*
+*	License here.
+*
+*	@file
+*
+*	Client Game Key Binding Object.
+* 
+***/
+//! Main Headers.
+#include "Game/Client/ClientGameMain.h"
+//! Client Game Local headers.
+#include "Game/Client/ClientGameLocals.h"
 
-// ChatHUD.
-#include "KeyBinding.h"
+// KeyBinding.
+#include "Game/Client/Input/KeyBinding.h"
 
 
 /***
@@ -97,7 +108,7 @@ void KeyBinding::ProcessKeyDown() {
     } else if (!keys[1]) {
         keys[1] = key;
     } else {
-        Com_WPrint("Warning: Holding three keys down for a button is unsupported!\n");
+        CLG_Print( PrintType::DeveloperWarning, "Warning: Holding three keys down for a button is unsupported!\n");
         return;
     }
 
