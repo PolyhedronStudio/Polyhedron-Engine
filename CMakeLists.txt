@@ -178,4 +178,4 @@ include(Server.cmake)
 ##	(Client/Server)-Game build project scripts.
 ####
 include(ClientGame.cmake)
-#include(ServerGame.cmake)
+include(ServerGame.cmake)

@@ -3,8 +3,11 @@
 
 // PathCorner.cpp
 */
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
 
-#include "../../ServerGameLocals.h"
 #include "../../Entities.h"
 
 #include "PathCorner.h"

@@ -16,8 +16,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-// Core.
-#include "ServerGameLocals.h"          // Include SVGame header.
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 
 // Entities.
 #include "Entities.h"
@@ -213,6 +216,8 @@ q_exported ServerGameExports* GetServerGameAPI(ServerGameImports* import)
     return &globals;
 }
 }; // extern "C".
+
+
 
 //=============================================================================
 //

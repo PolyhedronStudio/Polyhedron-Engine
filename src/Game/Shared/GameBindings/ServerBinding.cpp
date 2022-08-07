@@ -4,24 +4,13 @@
 *
 *	@file
 *
-*	Implementations for the Shared Game(SG) that wrap around the Server Game(SVG) 
-*	functionalities required.
+*	Implementations for the SharedGame(SG) that wrap around the required ServerGame(SVG) 
+*	functionalities.
 * 
 ***/
+// SharedGame header itself.
+#include "Game/Shared/GameBindings/GameModuleImports.h"
 
-// Needed for the shared headers.
-#ifndef GAME_INCLUDE
-	#define GAME_INCLUDE 1
-#endif
-// Include shared headers.
-#include "../../../Shared/Shared.h"
-#include "../../../Shared/Refresh.h"
-#include "../../../Shared/SVGame.h"
-
-// SharedGame.
-#include "../SharedGame.h"
-
-extern ServerGameImports gi;
 
 /***
 *

@@ -5,8 +5,10 @@
 *	@file
 *
 ***/
-// Core.
-#include "../ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
 
 // Entities.
 #include "../Entities.h"
@@ -492,7 +494,7 @@ qboolean ServerGameWorld::ParseEntityString(const char** data, SpawnKeyValues &p
 
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-			SG_Error( ErrorType::Drop, fmt::format("{}: EOF without closing brace", __func__ ) );
+			Com_Error( ErrorType::Drop, fmt::format("{}: EOF without closing brace", __func__ ).c_str() );
 			return false;
 		}
 
@@ -501,13 +503,13 @@ qboolean ServerGameWorld::ParseEntityString(const char** data, SpawnKeyValues &p
 
 		// If we are at the end of the string without a closing brace, error out.
 		if (!*data) {
-			SG_Error( ErrorType::Drop, fmt::format("{}: EOF without closing brace", __func__ ) );
+			Com_Error( ErrorType::Drop, fmt::format("{}: EOF without closing brace", __func__ ).c_str() );
 			return false;
 		}
 
 		// Ensure we had a value.
 		if (value[0] == '}') {
-			SG_Error(ErrorType::Drop, fmt::format("{}: closing brace without value for key {}", __func__, key) );
+			Com_Error(ErrorType::Drop, fmt::format("{}: closing brace without value for key {}", __func__, key).c_str() );
 			return false;
 		   }
 

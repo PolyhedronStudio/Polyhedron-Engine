@@ -56,12 +56,12 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether a base entity has a client attached to it.
 	*   @return Returns true in case the GameEntity has a client attached to it.
 	**/
-	inline bool GameEntityHasClient(GameEntity* ent) { return ent->GetClient(); }
+//	inline bool GameEntityHasClient(GameEntity* ent) { return ent->GetClient(); }
 	/**
 	*   @brief Filter method for checking whether a base entity has a groundentity set.
 	*   @return Returns true in case the GameEntity has a groundentity set.
 	**/
-	inline bool GameEntityHasGroundEntity(GameEntity* ent) { return ent->GetGroundEntityHandle(); }
+	//inline bool GameEntityHasGroundEntity(GameEntity* ent) { return ent->GetGroundEntityHandle(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a serverentity set.
 	*   @return Returns true in case the GameEntity has a serverentity set.

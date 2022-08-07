@@ -1,4 +1,8 @@
-#include "ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "Entities.h"
 
 // Class Entities.

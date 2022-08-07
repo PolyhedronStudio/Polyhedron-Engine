@@ -7,7 +7,11 @@
 *	Server Model Entity Implementation.
 *
 ***/
-#include "../../ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../../Effects.h"
 #include "../../Utilities.h"
 #include "../../Physics/StepMove.h"

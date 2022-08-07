@@ -7,10 +7,18 @@
 *	See header for information.
 *
 ***/
-#include "../../ServerGameLocals.h"  // SVGame.
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"        // Util funcs.
 #include "../../Physics/StepMove.h" // Stepmove funcs.
+
+// Physics.
+#include "Game/Shared/Physics/Physics.h"
+#include "Game/Shared/Physics/RootMotionMove.h"
 
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"

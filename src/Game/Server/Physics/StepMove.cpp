@@ -17,8 +17,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // m_move.c -- monster movement
 
-// Core.
-#include "../ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../Entities.h"
 #include "../Utilities.h"
 

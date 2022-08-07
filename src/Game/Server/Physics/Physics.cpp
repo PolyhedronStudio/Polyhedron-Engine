@@ -16,10 +16,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-// Core.
-#include "../ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../Entities.h"
 #include "../Utilities.h"
+// Physics.
+#include "Game/Shared/Physics/Physics.h"
+//#include "Game/Shared/Physics/RootMotionMove.h"
 
 // Step Move physics.
 #include "StepMove.h"

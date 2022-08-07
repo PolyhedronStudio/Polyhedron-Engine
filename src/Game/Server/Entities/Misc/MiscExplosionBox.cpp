@@ -6,7 +6,11 @@
 //
 //
 */
-#include "../../ServerGameLocals.h"          // SVGame.
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"            // Util funcs.
 #include "../../Physics/StepMove.h" // Stepmove funcs.
@@ -14,6 +18,10 @@
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
+
+// Physics.
+#include "Game/Shared/Physics/Physics.h"
+#include "Game/Shared/Physics/RootMotionMove.h"
 
 // Misc Explosion Box Entity.
 #include "MiscExplosionBox.h"

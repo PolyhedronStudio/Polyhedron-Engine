@@ -7,8 +7,11 @@
 // This trigger will always fire.  It is activated by the world.
 //
 */
-// Core.
-#include "../../ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../../Effects.h"
 #include "../../Entities.h"
 #include "../../Utilities.h"

@@ -1,13 +1,8 @@
-// LICENSE HERE.
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
 
-//
-// misc.c
-//
-//
-// Contains misc definitions.
-//
-
-#include "ServerGameLocals.h"         // Include SVGame funcs.
 #include "Entities.h"
 #include "Utilities.h"           // Include Utilities funcs.
 #include "Effects.h"

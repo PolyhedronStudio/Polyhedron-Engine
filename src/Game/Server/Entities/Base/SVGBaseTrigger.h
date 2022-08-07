@@ -9,6 +9,9 @@
 ***/
 #pragma once
 
+// Required parent class include.
+#include "Game/Server/Entities/Base/SVGBaseEntity.h"
+
 class SVGBaseTrigger : public SVGBaseEntity {
 public:
     //

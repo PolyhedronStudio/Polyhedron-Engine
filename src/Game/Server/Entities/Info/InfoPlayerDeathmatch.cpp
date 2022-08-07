@@ -5,8 +5,11 @@
 // InfoPlayerDeathmatch.cpp
 //
 //
-*/
-#include "../../ServerGameLocals.h"              // SVGame.
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../Base/SVGBaseEntity.h"      // BaseEntity.
 #include "InfoPlayerStart.h"
 #include "InfoPlayerDeathmatch.h"            // Class.
@@ -58,3 +61,4 @@ void InfoPlayerDeathmatch::Think() {
 void InfoPlayerDeathmatch::SpawnKey(const std::string& key, const std::string& value) {
     Base::SpawnKey(key, value);
 }
+*/

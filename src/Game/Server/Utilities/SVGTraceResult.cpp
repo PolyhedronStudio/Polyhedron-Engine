@@ -7,7 +7,11 @@
 *	ClientGame Tracing Utility. Takes care of handling entities appropriately.
 *
 ***/
-#include "../ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+// Game World.
 #include "../World/ServerGameWorld.h"
 
 

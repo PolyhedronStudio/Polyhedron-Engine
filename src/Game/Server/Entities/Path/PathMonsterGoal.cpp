@@ -3,8 +3,11 @@
 
 // PathMonsterGoal.cpp
 */
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
 
-#include "../../ServerGameLocals.h"
 #include "../../Entities.h"
 
 // Base Entities.
@@ -13,6 +16,9 @@
 #include "../Base/SVGBaseSkeletalAnimator.h"
 #include "../Base/SVGBaseItem.h"
 #include "../Base/SVGBasePlayer.h"
+
+#include "Game/Shared/Physics/Physics.h"
+#include "Game/Shared/Physics/RootMotionMove.h"
 
 // Base Slide Monster.
 #include "../Base/SVGBaseRootMotionMonster.h"

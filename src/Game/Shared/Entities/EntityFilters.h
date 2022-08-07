@@ -43,12 +43,12 @@ namespace EntityFilterFunctions {
 	*   @brief Filter method for checking whether a GameEntity has a client attached to it.
 	*   @return Returns true in case the GameEntity has a client attached to it.
 	**/
-	inline bool GameEntityHasClient( GameEntity* geFilter );
+	inline bool GameEntityHasClient(GameEntity* ent) { return ent->GetClient(); }
 	/**
 	*   @brief Filter method for checking whether a GameEntity has a groundentity set.
 	*   @return Returns true in case the GameEntity has a groundentity set.
 	**/
-	inline bool GameEntityHasGroundEntity( GameEntity* geFilter );
+inline bool GameEntityHasGroundEntity(GameEntity* ent) { return ent->GetGroundEntityHandle(); }
 	/**
 	*	@brief	Checks the parsed bsp spawn string EntityDictionary for a matching key.
 	*	@return	True if it exists, false if it does not.

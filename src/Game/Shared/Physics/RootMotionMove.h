@@ -10,8 +10,8 @@
 #pragma once
 
 // Shared Game.
-#include "../SharedGame.h"
-#include "../Tracing.h"
+#include "Game/Shared/SharedGame.h"
+#include "Game/Shared/Tracing.h"
 
 struct SGTraceResult;
 

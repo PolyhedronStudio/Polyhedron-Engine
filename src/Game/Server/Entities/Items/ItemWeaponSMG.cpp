@@ -7,8 +7,11 @@
 *	SMG weapon implementation.
 *
 ***/
-// Main.
-#include "../../ServerGameLocals.h"  // SVGame.
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../../Ballistics.h"          // Effects.
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"        // Util funcs.

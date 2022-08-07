@@ -17,7 +17,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // g_utils.c -- misc utility functions for game module
 
-#include "ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "Entities.h"
 #include "Utilities.h"
 

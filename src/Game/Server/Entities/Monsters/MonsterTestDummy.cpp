@@ -7,22 +7,29 @@
 *	MonsterTestDummy implementation.
 *
 ***/
-#include "../../ServerGameLocals.h"
-#include "../../Effects.h"
-#include "../../Utilities.h"
-#include "../../Physics/StepMove.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
+#include "Game/Server/Effects.h"
+#include "Game/Server/Utilities.h"
+#include "Game/Server/Physics/StepMove.h"
+
+#include "Game/Shared/Physics/Physics.h"
+#include "Game/Shared/Physics/RootMotionMove.h"
 
 // Server Game Base Entity.
-#include "../Base/SVGBaseEntity.h"
-#include "../Base/SVGBaseTrigger.h"
-#include "../Base/SVGBaseSkeletalAnimator.h"
-#include "../Base/SVGBaseRootMotionMonster.h"
+#include "Game/Server/Entities/Base/SVGBaseEntity.h"
+#include "Game/Server/Entities/Base/SVGBaseTrigger.h"
+#include "Game/Server/Entities/Base/SVGBaseSkeletalAnimator.h"
+#include "Game/Server/Entities/Base/SVGBaseRootMotionMonster.h"
 
 // GameMode.
-#include "../../Gamemodes/IGamemode.h"
+#include "Game/Server/Gamemodes/IGamemode.h"
 
 // World.
-#include "../../World/ServerGameWorld.h"
+#include "Game/Server/World/ServerGameWorld.h"
 
 // Misc Server Model Entity.
 #include "MonsterTestDummy.h"

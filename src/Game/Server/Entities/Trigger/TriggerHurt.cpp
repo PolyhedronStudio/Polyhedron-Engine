@@ -6,7 +6,11 @@
 //
 //
 */
-#include "../../ServerGameLocals.h"     // SVGame.
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
+
 #include "../../Effects.h"     // Effects.
 #include "../../Utilities.h"       // Util funcs.
 

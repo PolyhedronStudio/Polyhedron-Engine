@@ -18,18 +18,6 @@ if( CONFIG_BUILD_GAME_CLIENT )
 	endif()
 
 	# Setup all Server target Sources.
-#	target_sources( clgame PUBLIC
-#		#${SRC_GAME_CLIENT_DIR}/clgame.def
-#		"${SRC_GAME_CLIENT}" "${HEADERS_GAME_CLIENT}"
-#		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.cpp"
-#		"${SRC_GAME_SHARED_DIR}/GameBindings/ClientBinding.h"
-#		"${SRC_GAME_SHARED_DIR}/GameBindings/GameModuleImports.h"
-#		"${SRC_GAME_SHARED}" "${HEADERS_GAME_SHARED}"
-#	)
-#	target_sources( clgame PUBLIC 
-#		"${SRC_SHARED}" "${HEADERS_SHARED}"
-#	)
-	# Setup all Server target Sources.
 	target_sources( clgame PUBLIC
 		"${SRC_GAME_CLIENT_DIR}/clgame.def"
 		"${SRC_GAME_CLIENT}" 

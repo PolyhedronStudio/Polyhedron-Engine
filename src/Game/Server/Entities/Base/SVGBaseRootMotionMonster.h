@@ -22,9 +22,17 @@
 ***/
 #pragma once
 
+/**
+*	Forward Declarations.
+**/
 class SVGBaseEntity;
 class SVGBaseTrigger;
 class SVGBaseSkeletalAnimator;
+
+/**
+*	RootMotion Move System.
+**/
+#include "Game/Shared/Physics/RootMotionMove.h"
 
 class SVGBaseRootMotionMonster : public SVGBaseSkeletalAnimator {
 public:

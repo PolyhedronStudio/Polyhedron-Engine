@@ -15,11 +15,17 @@
 // Forward declare the entity handle object class.
 class SGEntityHandle;
 
+class IServerGameEntity;
+
 // We needz thiz.
-#include "../../../Shared/Entities/SGEntityHandle.h"
+#include "Game/Shared/Entities/SGEntityHandle.h"
+
+// Server Game GameEntity Interface.
+#include "Game/Server/Entities/IServerGameEntity.h"
+
 // We needz thiz.
-#include "../../../Shared/MoveTypes.h"
-#include "../../../Shared/WaterLevels.h"
+//#include "../../../Shared/MoveTypes.h"
+//#include "../../../Shared/WaterLevels.h"
 
 /**
 *   SVGBaseEntity

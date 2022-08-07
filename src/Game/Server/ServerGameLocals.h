@@ -3,59 +3,122 @@
 *	License here.
 *
 *	@file
-*
-*	GameLocal class contains all of the game. Its world, entities, clients, items, etc.
-*   It stays persistently intact until the end of the game, when the dll is unloaded.
 * 
+*   Server Game Locals.
 *
 ***/
 #pragma once
 
-// For SVGame.h
-#define GAME_INCLUDE
+/**
+*	Include ServerGame Main header for all Shared/Common functionalities.
+**/
+/**
+*	Include Shared codebase with GAME_INCLUDE defined.
+**/
+#define GAME_INCLUDE 1
 
-#include "../../Shared/Shared.h"
-#include "../../Shared/List.h"
-#include "../../Shared/SVGame.h"
-
-// The "gameversion" client command will print this including the compile date
-#define GAMEVERSION "basepoly"
+// Shared.
+#include "Shared/Shared.h"
+//#include "Game/Server/ServerGameMain.h"
 
 
 /**
-*	SharedGame Framework.
+*	ConstExpr:
 **/
-//! The SharedGame functionality implementation for the ServerGame.
-//class IServerGameEntity;
-//! Server GameEntity Interface
-#include "Game/Shared/GameBindings/ServerBinding.h"
-//! The actual SharedGame includes.
-#include "Game/Shared/SharedGame.h"
+//! The "gameversion" client command will print this including the compile date
+#define GAMEVERSION "basepoly"
 
-//! Entity Filters.
+//! Maximum amount of POD Entities.
+static constexpr int32_t MAX_POD_ENTITIES = MAX_CLIENT_POD_ENTITIES;
+
+
+/**
+*	Interface/Base Entity Forward Declarations: For SharedGame inclusion.
+**/
+class SVGBaseEntity;
+class SVGBaseItem;
+class SVGBaseItemWeapon;
+class SVGBaseMover;
+class SVGBasePlayer;
+class SVGBaseTrigger;
+class WorldSpawn;
+class IGameWorld;
+class IGameMode;
+class ServerGameWorld;
+
+struct PODEntity;
+
+
+/**
+*	Define the 'using' SharedGame types for ServerGame usage.
+**/
+//! Set GameEntity to IServerGameEntity;
+using GameEntity	= IServerGameEntity;
+//! Set SGGameEntity to ServerGameWorld;
+using SGGameWorld	= ServerGameWorld;
+//! Commented out: Since the ServerGame has no awareness over local client entities
+//using SGBaseLocalEntity = CLGBaseLocalEntity;
+//! Set SGBaseEntity to SVGBasePacketEntity.
+using SGBaseEntity = SVGBaseEntity;
+//! Set SGBasePlayer to SVGMover
+using SGBaseMover = SVGBaseMover;
+//! Set SGBasePlayer to SVGTrigger;
+using SGBaseTrigger = SVGBaseTrigger;
+//! Set SGBasePlayer to CLGBasePlayer.
+using SGBasePlayer = SVGBasePlayer;
+
+//! Set the parent class for the SharedGame base item behaviors class.
+//! It is a trigger entity in the servergame case.
+//! For the server side it is: using SGBaseItemParentClass = SVGBaseTrigger;
+using SGBaseItemParentClass = SVGBaseTrigger;
+
+
+/**
+*	Include the SharedGame codebase.
+**/
+//! TypeInfo system.
+#include "Game/Shared/Entities/TypeInfo.h"
+//! SharedGame: EntityHandle
+#include "Game/Shared/Entities/SGEntityHandle.h"
+//! ISharedGameEntity Interface.
+#include "Game/Shared/Entities/ISharedGameEntity.h"
+//! IServerGameEntity Interface.
+#include "Game/Server/Entities/IServerGameEntity.h"
+
+/**
+*	Define our (Shared/Client)-Game container types using the SharedGame 'using' types.
+**/
+//! This is the actual GameWorld POD array with a size based on which GameModule we are building for.
+using PODGameWorldArray = PODEntity[MAX_POD_ENTITIES];
+//! std::span for PODEntity* objects.
+using PODEntitySpan = std::span<PODEntity>;
+//! std::vector for PODEntity* objects.
+using PODEntityVector = std::vector<PODEntity*>;
+//! std::span for GameEntity* derived objects.
+using GameEntitySpan = std::span<GameEntity*>;
+//! std::vector for GameEntity* derived objects.
+using GameEntityVector = std::vector<GameEntity*>;
+
+
+//! SharedGame: Entity Filters.
 #include "Game/Shared/Entities/EntityFilters.h"
+//! ServerGame: Needed for SharedGame BaseItem.
+#include "Game/Server/Entities/Base/SVGBaseTrigger.h"
+//! Tracing.
+#include "Game/Shared/Tracing.h"
+//! Skeletal Animation.
+#include "Game/Shared/SkeletalAnimation.h"
+//! Player Move.
+#include "Game/Shared/PlayerMove.h"
 
-//#include "../Shared/SharedGame.h"
-//#include "../Shared/ItemIDs.h"
-//#include "../Shared/WeaponStates.h"
-
+//! SharedGame: BaseItem Entity.
+#include "Game/Shared/Entities/SGBaseItem.h"
 
 /**
 *	ServerGame Trace Results.
 **/
 #include "Utilities/SVGTraceResult.h"
 
-
-// Predeclare.
-class SVGBaseEntity;
-class SVGBaseItem;
-class SVGBaseItemWeapon;
-class SVGBasePlayer;
-class IGameWorld;
-class IGameMode;
-class ServerGameWorld;
-
-struct PODEntity;
 
 
 //
@@ -163,19 +226,15 @@ public:
     qboolean autoSaved = false;
 };
 
-
-//==================================================================
-
 //! MS Frametime for animations.
 //static constexpr float ANIMATION_FRAMETIME = BASE_FRAMETIME;//FRAMERATE_MS;
 
 //! Float time it takes to go over a frame. 
 //static constexpr Frametime FRAMETIME_S = FRAMETIME_S;
-#define FRAMETIME_S FRAMETIME_S
+//#define FRAMETIME_S FRAMETIME_S
 
-//! Memory tags to allow dynamic memory to be cleaned up
-static constexpr int32_t TAG_GAME = 765;   // clear when unloading the dll
-static constexpr int32_t TAG_LEVEL = 766;  // clear when loading a new level
+//! Currently Unused: Units of Distance Melee attacks range for.
+static constexpr int32_t MELEE_DISTANCE = 80;
 
 //! View pitching times
 static constexpr Frametime DAMAGE_TIME = 0.5s;
@@ -194,11 +253,6 @@ struct EntitySpawnFlags {
 
 
 
-static constexpr int32_t MELEE_DISTANCE = 80;
-
-
-
-
 /**
 *   Combat Ranges.
 **/
@@ -209,39 +263,12 @@ struct CombatRange {
     static constexpr int32_t Far    = 3;
 };
 
-
-
-////monster ai flags
-//struct 
-//constexpr int32_t AI_STAND_GROUND = 0x00000001;
-//constexpr int32_t AI_TEMP_STAND_GROUND = 0x00000002;
-//constexpr int32_t AI_SOUND_TARGET = 0x00000004;
-//constexpr int32_t AI_LOST_SIGHT = 0x00000008;
-//constexpr int32_t AI_PURSUIT_LAST_SEEN = 0x00000010;
-//constexpr int32_t AI_PURSUE_NEXT = 0x00000020;
-//constexpr int32_t AI_PURSUE_TEMP = 0x00000040;
-//constexpr int32_t AI_HOLD_FRAME = 0x00000080;
-//constexpr int32_t AI_GOOD_GUY = 0x00000100;
-//constexpr int32_t AI_BRUTAL = 0x00000200;
-//constexpr int32_t AI_NOSTEP = 0x00000400;
-//constexpr int32_t AI_DUCKED = 0x00000800;
-//constexpr int32_t AI_COMBAT_POint32_t = 0x00001000;
-//constexpr int32_t AI_MEDIC = 0x00002000;
-//constexpr int32_t AI_RESURRECTING = 0x00004000;
-//
-////monster attack state
-//constexpr int32_t AS_STRAIGHT = 1;
-//constexpr int32_t AS_SLIDING = 2;
-//constexpr int32_t AS_MELEE = 3;
-//constexpr int32_t AS_MISSILE = 4;
-
 /**
 *   Player Handedness.
 **/
 constexpr int32_t RIGHT_HANDED = 0;
 constexpr int32_t LEFT_HANDED = 1;
 constexpr int32_t CENTER_HANDED = 2;
-
 
 /**
 *   Game specific server flags.
@@ -258,7 +285,6 @@ struct ServerFlags {
     static constexpr int32_t CrossTriggerMask   = 0x000000ff;
 };
 
-
 /**
 *   Player Noise Types.
 **/
@@ -271,7 +297,6 @@ struct PlayerNoiseType {
     static constexpr int32_t Impact = 2;
 };
 
-
 /**
 *   Item Flags.
 **/
@@ -283,7 +308,6 @@ struct ItemFlags {
     static constexpr int32_t IsKey = 16;
     static constexpr int32_t IsPowerUp = 32;
 };
-
 
 /**
 *	@brief	Stores level locals, from current time, to which entities are sighted.
@@ -343,18 +367,6 @@ ServerGameWorld* GetGameWorld();
 *   @return A pointer to the gamemode object. The man's little helper.
 **/
 IGameMode* GetGameMode();
-
-
-
-/**
-*	Core - Used take and give access from game module to server.
-**/
-extern  ServerGameImports gi;         // CLEANUP: These were game_import_t and game_export_T
-extern  ServerGameExports globals;    // CLEANUP: These were game_import_t and game_export_T
-
-
-
-
 
 // These too need to be taken care of.
 extern  int32_t sm_meat_index;
@@ -767,43 +779,3 @@ struct gclient_s {
 *
 *
 ***/
-extern  cvar_t  *deathmatch;
-extern  cvar_t  *coop;
-extern  cvar_t  *gamemodeflags;
-extern  cvar_t  *skill;
-extern  cvar_t  *fraglimit;
-extern  cvar_t  *timelimit;
-extern  cvar_t  *password;
-extern  cvar_t  *spectator_password;
-extern  cvar_t  *needpass;
-extern  cvar_t  *g_select_empty;
-extern  cvar_t  *dedicated;
-
-extern  cvar_t  *filterban;
-
-extern  cvar_t  *sv_gravity;
-extern  cvar_t  *sv_maxvelocity;
-
-extern  cvar_t  *gun_x, *gun_y, *gun_z;
-extern  cvar_t  *sv_rollspeed;
-extern  cvar_t  *sv_rollangle;
-
-extern  cvar_t  *run_pitch;
-extern  cvar_t  *run_roll;
-extern  cvar_t  *bob_up;
-extern  cvar_t  *bob_pitch;
-extern  cvar_t  *bob_roll;
-
-extern  cvar_t  *sv_cheats;
-extern  cvar_t  *maximumclients;
-extern  cvar_t  *maxspectators;
-
-extern  cvar_t  *flood_msgs;
-extern  cvar_t  *flood_persecond;
-extern  cvar_t  *flood_waitdelay;
-
-extern  cvar_t  *sv_maplist;
-
-extern  cvar_t  *sv_flaregun;
-
-extern  cvar_t  *cl_monsterfootsteps;

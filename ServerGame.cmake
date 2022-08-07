@@ -19,14 +19,17 @@ if( CONFIG_BUILD_GAME_SERVER )
 
 	# Setup all Server target Sources.
 	target_sources( svgame PUBLIC
-		#${SRC_GAME_SERVER_DIR}/svgame.def
-		${SRC_GAME_SERVER} ${HEADERS_GAME_SERVER}
-		${SRC_GAME_SHARED_DIR}/GameBindings/ServerBinding.cpp
-		${SRC_GAME_SHARED_DIR}/GameBindings/ServerBinding.h
-		${SRC_GAME_SHARED} ${HEADERS_GAME_SHARED}
+		"${SRC_GAME_SERVER_DIR}/svgame.def"
+		"${SRC_GAME_SERVER}"
+		"${HEADERS_GAME_SERVER}"
+		"${SRC_GAME_SHARED}"
+		"${HEADERS_GAME_SHARED}"
 	)
-	target_sources( svgame PUBLIC 
-		${SRC_SHARED} ${HEADERS_SHARED}
+	target_sources( svgame PRIVATE 
+		"${SRC_GAME_SHARED_DIR}/GameBindings/ServerBinding.h"
+		"${SRC_GAME_SHARED_DIR}/GameBindings/GameModuleImports.h"
+		"${SRC_GAME_SHARED_DIR}/GameBindings/ServerBinding.cpp"
+		"${SRC_SHARED}" "${HEADERS_SHARED}"
 	)
 
 	# And also on any specific headers that require it.

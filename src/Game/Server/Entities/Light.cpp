@@ -7,7 +7,10 @@
 *	Server Light Entity Implementation.
 *
 ***/
-#include "../ServerGameLocals.h"
+//! Main Headers.
+#include "Game/Server/ServerGameMain.h"
+//! Server Game Local headers.
+#include "Game/Server/ServerGameLocals.h"
 
 // Server Game Base Entity.
 #include "Base/SVGBaseEntity.h"

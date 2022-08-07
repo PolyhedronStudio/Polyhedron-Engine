@@ -11,9 +11,9 @@
 
 
 // GameLocals.
-#include "../ServerGameLocals.h"
+#include "Game/Server/ServerGameLocals.h"
 // SharedGame Entity Interface.
-#include "../../Shared/Entities/ISharedGameEntity.h"
+#include "Game/Shared/Entities/ISharedGameEntity.h"
 
 // Predeclarations.
 class ISharedGameEntity;

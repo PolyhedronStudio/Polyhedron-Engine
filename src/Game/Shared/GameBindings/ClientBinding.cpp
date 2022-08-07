@@ -4,8 +4,8 @@
 *
 *	@file
 *
-*	Implementations for the Client Game(CG) that wrap around the Client Game(CLG) 
-*	functionalities required.
+*	Implementations for the SharedGame(SG) that wrap around the required ClientGame(CLG) 
+*	functionalities.
 * 
 ***/
 // SharedGame header itself.
