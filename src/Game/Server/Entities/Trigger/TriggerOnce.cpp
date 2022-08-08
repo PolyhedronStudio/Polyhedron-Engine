@@ -103,6 +103,7 @@ void TriggerOnce::Think() {
 void TriggerOnce::SpawnKey(const std::string& key, const std::string& value) {
 	// This one can't be set, it is a trigger_once for a reason.
 	if (key == "wait") {
+
 		// TODO: Proper debug reporting.
 	} else {
 		// Parent class spawnkey.
@@ -138,7 +139,7 @@ void TriggerOnce::TriggerOnceTouch(IServerGameEntity* self, IServerGameEntity* o
 	if (this == other)
 		return;
 
-	gi.DPrintf("#1 Touched trigger once");
+	//gi.DPrintf("#1 Touched trigger once");
 	if (other->GetClient()) {
 		if (GetSpawnFlags() & 2)
 			return;
@@ -148,7 +149,7 @@ void TriggerOnce::TriggerOnceTouch(IServerGameEntity* self, IServerGameEntity* o
 	} else {
 		return;
 	}
-	gi.DPrintf("#2 Touched trigger once");
+	//gi.DPrintf("#2 Touched trigger once");
 
 	//if (!vec3_equal(self->moveDirection, vec3_zero())) {
 	//	vec3_t  forward;

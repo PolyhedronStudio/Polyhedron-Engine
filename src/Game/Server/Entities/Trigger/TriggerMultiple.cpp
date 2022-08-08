@@ -71,7 +71,7 @@ void TriggerMultiple::Spawn() {
 	else if (sound == 3)
 		SetNoiseIndexA(SVG_PrecacheSound("misc/trigger1.wav")); // Similar to gi.PrecacheSound.
 
-	if (GetWaitTime() == Frametime::zero()) {
+	if (GetWaitTime() == Frametime::zero() || GetWaitTime() == 0ms) {
 		SetWaitTime(0.2s);
 	}
 
@@ -139,7 +139,7 @@ void TriggerMultiple::Trigger(IServerGameEntity *activator) {
 	SetActivator(activator);
 	UseTargets(activator);
 
-	if (GetWaitTime() != Frametime::zero()) {
+	if (GetWaitTime() > 0ms) {
 		// Set our think callback to be "waiting".
 		SetThinkCallback(&TriggerMultiple::TriggerMultipleThinkWait);
 
@@ -149,6 +149,8 @@ void TriggerMultiple::Trigger(IServerGameEntity *activator) {
 		// We can't just remove (self) here, because this is a touch function
 		// called while looping through area links...
 		SetTouchCallback(nullptr);
+		
+		// Setting the think callback automatically lets it only trigger once here.
 		SetNextThinkTime(level.time + FRAMETIME_S);
 		SetThinkCallback(&TriggerMultiple::SVGBaseEntityThinkFree);
 	}

@@ -24,7 +24,7 @@
 *	Player Move debugging ifdefs, uncomment to enable debug output
 *	for each distinct game module.
 **/
-//#define DEBUG_SERVERGAME_PMOVE
+#define DEBUG_SERVERGAME_PMOVE
 //#define DEBUG_CLIENTGAME_PMOVE
 
 /**
@@ -57,6 +57,9 @@ static inline void PM_DebugPrint( const std::string &debugMsg, const std::string
 static PlayerMove* pm;
 cvar_t *developer;
 
+static constexpr float      MIN_STEP_NORMAL = 0.7;  // Can't step up onto very steep slopes.
+static constexpr int32_t    MAX_CLIP_PLANES = 20;   // Maximum amount of planes to clip to.
+
 /**
 *   All of the locals will be zeroed before each player move, just to make damn sure 
 *   we don't have any differences when running on the client or the server.
@@ -73,6 +76,13 @@ static struct {
     vec3_t      previousOrigin;
     vec3_t      previousVelocity;
     qboolean    isClimbingLadder;
+
+	// Touched clipping plane traces.
+	CollisionPlane clipPlanes[MAX_CLIP_PLANES];
+	// Original velocity to always make sure to never turn against to.
+	vec3_t turnAgainstVelocity = vec3_zero();
+	// Number of touched clipping planes.
+	int32_t numClipPlanes = 0;
 
     // Ground trace results.
     TraceResult groundTrace;
@@ -93,6 +103,14 @@ static const vec3_t PM_GIBLET_MINS = { -8.f, -8.f, -8.f };
 static const vec3_t PM_GIBLET_MAXS = { 8.f,  8.f,  8.f };
 
 
+
+/**
+*
+*
+*	Utilities:
+*
+*
+**/
 /**
 *   @brief  Slide off of the impacted plane.
 **/
@@ -105,84 +123,16 @@ static vec3_t PM_ClipVelocity(const vec3_t &in, const vec3_t &normal, float boun
     } else {
         backoff /= bounce;
     }
+	vec3_t outVelocity = in - vec3_scale(normal, backoff);
+	
+	//const float oldSpeed = vec3_length(in);
+	//const float newSpeed = vec3_length(outVelocity);
 
-    return in - vec3_scale(normal, backoff);
-}
-
-/**
-*   @brief  Marks the specified entity as touched.
-**/
-static void PM_TouchEntity(const SGTraceResult &entityTrace) {
-	// Ensure it is valid.
-	if (entityTrace.podEntity == nullptr) {
-		PM_Debug("ent = (nullptr)");
-		return;
-	}
-
-	// Only touch entity if we aren't at the maximum limit yet.
-	if ( pm->numTouchedEntities == PM_MAX_TOUCH_ENTS ) {
-		PM_Debug(fmt::format("Can't add touched entity, limit of PM_MAX_TOUCH_ENTS({}) is already hit.", PM_MAX_TOUCH_ENTS));
-		return;
-	}
-
-	// Get the proper entity number.
-	const int32_t touchEntityNumber = SG_GetEntityNumber( entityTrace.podEntity );
-
-	// See if we've already touched this entity before, if so, escape.
-	for ( int32_t i = 0; i < pm->numTouchedEntities; i++ ) {
-		if ( SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity ) == touchEntityNumber ) {
-			return;
-		}
-	}
-
-	// Add to our list and increment touched entity count.
-	pm->touchedEntityTraces[ pm->numTouchedEntities ] = entityTrace;
-	pm->numTouchedEntities++;
-}
-
-
-
-/**
-*
-* 
-*	STEP SLIDE MOVE
-*
-* 
-**/
-/**
-*   @brief  Check whether the player just stepped off of something, or not.
-**/
-static bool PM_CheckStep(const TraceResult * trace) {
-    if (!trace->allSolid) {
-        if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
-            //if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
-                return true;
-
-                // KEEP AROUND - //PM_Debug( "PM_CheckStep: true" );
-            //}
-        }
-    }
-
-    return false;
-}
-
-/**
-*   @brief  Steps the player down to the trace origin, calculated the stepHeight for interpolation.
-**/
-static void PM_StepDown(const TraceResult * trace) {
-    // Set current origin to the trace end position.
-    pm->state.origin = trace->endPosition;
-
-    // Calculate step height.
-    const float stepHeight = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
-
-    // Set step variable in case the absolute value of stepHeight is equal or heigher than PM_STEP_HEIGHT_MIN.
-    if (fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN) {
-        pm->step = stepHeight;
-        PM_Debug( fmt::format( "Set pm->step to {}f.", pm->step ) );
-    } else {
-		PM_Debug( "Did not set pm->step." );
-    }
+	//if (newSpeed > oldSpeed) {
+	//	outVelocity = vec3_scale(vec3_normalize(outVelocity), oldSpeed);
+	//}
+	
+    return outVelocity;
 }
 
 /**
@@ -230,6 +180,78 @@ const TraceResult PM_TraceCorrectAllSolid(const vec3_t & start, const vec3_t & m
 #endif
 }
 
+
+/**
+*
+*
+*	Touch Entities:
+*
+*
+**/
+/**
+*   @brief  Marks the specified entity as touched.
+**/
+static void PM_TouchEntity(const SGTraceResult &entityTrace) {
+	// Ensure it is valid.
+	if (entityTrace.podEntity == nullptr) {
+		PM_Debug("ent = (nullptr)");
+		return;
+	}
+
+	// Only touch entity if we aren't at the maximum limit yet.
+	if ( pm->numTouchedEntities == PM_MAX_TOUCH_ENTS ) {
+		PM_Debug(fmt::format("Can't add touched entity, limit of PM_MAX_TOUCH_ENTS({}) is already hit.", PM_MAX_TOUCH_ENTS));
+		return;
+	}
+
+	// Get the proper entity number.
+	const int32_t touchEntityNumber = SG_GetEntityNumber( entityTrace.podEntity );
+
+	// See if we've already touched this entity before, if so, escape.
+	for ( int32_t i = 0; i < pm->numTouchedEntities; i++ ) {
+		if ( SG_GetEntityNumber( pm->touchedEntityTraces[i].podEntity ) == touchEntityNumber ) {
+			return;
+		}
+	}
+
+	// Add to our list and increment touched entity count.
+	pm->touchedEntityTraces[ pm->numTouchedEntities ] = entityTrace;
+	pm->numTouchedEntities++;
+}
+
+
+
+/**
+*
+* 
+*	Clipping Planes:
+*
+* 
+**/
+/**
+*	@brief	Resets the number of touched clipping planes in the PlayerMoveLocals.
+**/
+static void PM_ClearClippingPlanes() {
+	// Reset number only.
+	playerMoveLocals.numClipPlanes = 0;
+}
+
+/**
+*	@brief	Store a plane for clipping.
+**/
+static void PM_AddClippingPlane( const CollisionPlane &plane ) {
+	// Only touch entity if we aren't at the maximum limit yet.
+	if ( playerMoveLocals.numClipPlanes == MAX_CLIP_PLANES ) {
+		PM_Debug(fmt::format("Can't add touched trace plane, limit of MAX_CLIP_PLANES({}) is already hit.", MAX_CLIP_PLANES ) );
+		return;
+	}
+
+	// Add to our list.
+	playerMoveLocals.clipPlanes[ playerMoveLocals.numClipPlanes ] = plane;
+	playerMoveLocals.numClipPlanes++;
+
+}
+
 /**
 *   @return True if `plane` is unique to `planes` and should be impacted, 
 *           return false otherwise.
@@ -245,35 +267,90 @@ static bool PM_ImpactPlane(vec3_t * planes, int32_t num_planes, const vec3_t & p
     return true;
 }
 
+
+
+/**
+*
+* 
+*	Stepping:
+*
+* 
+**/
+/**
+*   @brief  Check whether the player just stepped off of something, or not.
+**/
+static bool PM_CheckStep(const TraceResult * trace) {
+    if (!trace->allSolid) {
+        if (trace->ent && trace->plane.normal.z >= PM_STEP_NORMAL) {
+            //if (trace->ent != pm->groundEntityPtr || trace->plane.dist != playerMoveLocals.groundTrace.plane.dist) {
+                return true;
+
+                // KEEP AROUND - //PM_Debug( "PM_CheckStep: true" );
+            //}
+        }
+    }
+
+    return false;
+}
+
+/**
+*   @brief  Steps the player down to the trace origin, calculated the stepHeight for interpolation.
+**/
+static void PM_StepDown(const TraceResult * trace) {
+    // Set current origin to the trace end position.
+    pm->state.origin = trace->endPosition;
+
+    // Calculate step height.
+    const float stepHeight = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
+
+    // Set step variable in case the absolute value of stepHeight is equal or heigher than PM_STEP_HEIGHT_MIN.
+    if (fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN) {
+        pm->step = stepHeight;
+        PM_Debug( fmt::format( "Set pm->step to {}f.", pm->step ) );
+    } else {
+		PM_Debug( "Did not set pm->step." );
+    }
+}
+
+
+
+/**
+*
+* 
+*	Slide Move:
+*
+* 
+**/
 /**
 *   @brief  Calculates a new origin, velocity, and contact entities based on the
 *           movement command and world state. Returns true if not blocked.
 **/
-static constexpr float      MIN_STEP_NORMAL = 0.7;  // Can't step up onto very steep slopes.
-static constexpr int32_t    MAX_CLIP_PLANES = 20;   // Maximum amount of planes to clip to.
+static int32_t PM_SlideMove() {
+	//! Maximum amount of bumps to allow for.
+	const int32_t maxBumps = MAX_CLIP_PLANES - 2;
+	//! Keeps track of how many planes we bumped into.
+	int32_t bumpCount = 0;
 
-static qboolean PM_StepSlideMove_(void)
-{
-    const int32_t numBumps = MAX_CLIP_PLANES - 2;
-    vec3_t planes[MAX_CLIP_PLANES];
-    int32_t bump;
-
+	// Keep score of the remaining time we've got left of this frame in order
+	// to perform our move.
     float timeRemaining = playerMoveLocals.frameTime;
-    int32_t numPlanes = 0;
 
-    // never turn against our ground plane
-    if (pm->state.flags & PMF_ON_GROUND) {
-        planes[numPlanes] = playerMoveLocals.groundTrace.plane.normal;
-        numPlanes++;
+	// Clear (previous-)clipping planes.
+	PM_ClearClippingPlanes();
+
+    // Never turn against our ground plane
+    if ( pm->state.flags & PMF_ON_GROUND ) {
+		PM_AddClippingPlane( playerMoveLocals.groundTrace.plane );
     }
 
-    vec3_t primal_velocity = pm->state.velocity;
-
     // or our original velocity
-    planes[numPlanes] = vec3_normalize(pm->state.velocity);
-    numPlanes++;
+    //playerMoveLocals.turnAgainstVelocity = vec3_normalize( pm->state.velocity );
+	CollisionPlane velocityPlane;
+	velocityPlane.dist = 0;
+	velocityPlane.normal = vec3_normalize( pm->state.velocity );
+	PM_AddClippingPlane(velocityPlane);
 
-    for (bump = 0; bump < numBumps; bump++) {
+    for ( bumpCount = 0; bumpCount < maxBumps; bumpCount++ ) {
         if (timeRemaining < (FLT_EPSILON - 1.0f)) { // out of time
             break;
         }
@@ -293,77 +370,119 @@ static qboolean PM_StepSlideMove_(void)
         // if the trace succeeded, move some distance
         if (trace.fraction > (FLT_EPSILON - 1.0f)) {
             pm->state.origin = trace.endPosition;
-
-            // if the trace didn't hit anything, we're done
-            if (trace.fraction == 1.0f) {
-                break;
-            }
-
-            // update the movement time remaining
-            timeRemaining -= (timeRemaining * trace.fraction);
+        }
+        
+		// if the trace didn't hit anything, we're done
+        if (trace.fraction == 1.0f) {
+            break;
         }
 
         // store a reference to the entity for firing game events
         PM_TouchEntity(trace);
 
-        // record the impacted plane, or nudge velocity out along it
-        if (PM_ImpactPlane(planes, numPlanes, trace.plane.normal)) {
-            planes[numPlanes] = trace.plane.normal;
-            numPlanes++;
-        } else {
-            // if we've seen this plane before, nudge our velocity out along it
-            pm->state.velocity += trace.plane.normal;
-            continue;
-        }
+        // update the movement time remaining
+        timeRemaining -= (timeRemaining * trace.fraction);
+
+		// This should never happen, but still..
+		if (playerMoveLocals.numClipPlanes >= MAX_CLIP_PLANES) {
+			pm->state.velocity = vec3_zero();
+			return true;
+		}
+
+
+        //// record the impacted plane, or nudge velocity out along it
+        //if (PM_ImpactPlane(planes, numPlanes, trace.plane.normal)) {
+        //    planes[numPlanes] = trace.plane.normal;
+        //    numPlanes++;
+        //} else {
+        //    // if we've seen this plane before, nudge our velocity out along it
+        //    pm->state.velocity += trace.plane.normal;
+        //    continue;
+        //}
+
+		//
+		// if this is the same plane we hit before, nudge velocity
+		// out along it, which fixes some epsilon issues with
+		// non-axial planes
+		//
+		int32_t i = 0;
+		for ( i = 0 ; i < playerMoveLocals.numClipPlanes ; i++ ) {
+			// Get trace.
+			CollisionPlane *clipPlaneTrace = &playerMoveLocals.clipPlanes[i];
+			// Get dists and normals.
+			const float clipPlaneDist = clipPlaneTrace->dist;
+			const vec3_t &clipPlaneNormal = clipPlaneTrace->normal;
+
+			const float tracePlaneDist = trace.plane.dist;
+			const vec3_t tracePlaneNormal = trace.plane.normal;
+
+			if ( clipPlaneDist == tracePlaneDist ) {
+				//SetPlaneType( clipPlaneTrace );
+				//if ( trace.plane.type == PLANE_NON_AXIAL ) {
+					if ( vec3_dot( trace.plane.normal, playerMoveLocals.clipPlanes[i].normal ) > 0.99 ) {
+					
+						VectorAdd( trace.plane.normal, pm->state.velocity, pm->state.velocity );
+
+						//pm->state.velocity = PM_ClipVelocity( pm->state.velocity, playerMoveLocals.clipPlanes[i].normal, 1 );
+						break;
+					}
+				//}
+			}
+		}
+		if ( i < playerMoveLocals.numClipPlanes ) {
+			continue;
+		}
+
+		PM_AddClippingPlane( trace.plane );
 
         // and modify velocity, clipping to all impacted planes
-        for (int32_t i = 0; i < numPlanes; i++) {
+        for (int32_t i = 0; i < playerMoveLocals.numClipPlanes; i++) {
             vec3_t vel;
 
             // if velocity doesn't impact this plane, skip it
-            if (vec3_dot(pm->state.velocity, planes[i]) > (FLT_EPSILON - 1.0f)) {
+			if ( vec3_dot( pm->state.velocity, playerMoveLocals.clipPlanes[i].normal ) > ( FLT_EPSILON - 1.0f ) ) {
                 continue;
             }
 
             // slide along the plane
-            vel = PM_ClipVelocity(pm->state.velocity, planes[i], PM_CLIP_BOUNCE);
+            vel = PM_ClipVelocity( pm->state.velocity, playerMoveLocals.clipPlanes[i].normal, PM_CLIP_BOUNCE );
 
             // see if there is a second plane that the new move enters
-            for (int32_t j = 0; j < numPlanes; j++) {
+            for ( int32_t j = 0; j < playerMoveLocals.numClipPlanes; j++ ) {
                 vec3_t cross;
 
-                if (j == i) {
+                if ( j == i ) {
                     continue;
                 }
 
                 // if the clipped velocity doesn't impact this plane, skip it
-                if (vec3_dot(vel, planes[j]) > (FLT_EPSILON - 1.0f)) {
+                if ( vec3_dot(vel, playerMoveLocals.clipPlanes[j].normal) > ( FLT_EPSILON - 1.0f ) ) {
                     continue;
                 }
 
                 // we are now intersecting a second plane
-                vel = PM_ClipVelocity(vel, planes[j], PM_CLIP_BOUNCE);
+                vel = PM_ClipVelocity( vel, playerMoveLocals.clipPlanes[j].normal, PM_CLIP_BOUNCE );
 
                 // but if we clip against it without being deflected back, we're okay
-                if (vec3_dot(vel, planes[i]) > (FLT_EPSILON - 1.0f)) {
+                if ( vec3_dot( vel, playerMoveLocals.clipPlanes[i].normal ) > ( FLT_EPSILON - 1.0f ) ) {
                     continue;
                 }
 
                 // we must now slide along the crease (cross product of the planes)
-                cross = vec3_cross(planes[i], planes[j]);
-                cross = vec3_normalize(cross);
+                cross = vec3_cross( playerMoveLocals.clipPlanes[i].normal, playerMoveLocals.clipPlanes[j].normal );
+                cross = vec3_normalize( cross );
 
                 const float scale = vec3_dot(cross, pm->state.velocity);
                 vel = vec3_scale(cross, scale);
 
                 // see if there is a third plane the the new move enters
-                for (int32_t k = 0; k < numPlanes; k++) {
+                for (int32_t k = 0; k < playerMoveLocals.numClipPlanes; k++) {
 
                     if (k == i || k == j) {
                         continue;
                     }
 
-                    if (vec3_dot(vel, planes[k]) > (FLT_EPSILON - 1.0f)) {
+                    if (vec3_dot(vel, playerMoveLocals.clipPlanes[k].normal) > (FLT_EPSILON - 1.0f)) {
                         continue;
                     }
 
@@ -379,7 +498,7 @@ static qboolean PM_StepSlideMove_(void)
         }
     }
 
-    return bump == 0;
+    return (bumpCount != 0);
 }
 
 /**
@@ -391,52 +510,109 @@ static void PM_StepSlideMove(void)
     const vec3_t org0 = pm->state.origin;
     const vec3_t vel0 = pm->state.velocity;
 
-    // Attempt to move; if nothing blocks us, we're done
-    PM_StepSlideMove_();
+	/**
+	*	Attempt to move; if nothing blocks us, we're done
+	**/    
+    if ( PM_SlideMove() == 0 ) {
+		// Attempt to step down to remain on ground
+		if ((pm->state.flags & PMF_ON_GROUND) && pm->moveCommand.input.upMove <= 0) {
+			const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
+			const TraceResult downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
 
-    // Attempt to step down to remain on ground
-    if ((pm->state.flags & PMF_ON_GROUND) && pm->moveCommand.input.upMove <= 0) {
-        const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
-        const TraceResult downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
+			if (PM_CheckStep(&downTrace)) {
+				PM_StepDown(&downTrace);
+			}
+		}
+		return;
+	}
 
-        if (PM_CheckStep(&downTrace)) {
-            PM_StepDown(&downTrace);
-        }
-    }
 
-    // If we are blocked, we will try to step over the obstacle.
-    const vec3_t org1 = pm->state.origin;
-    const vec3_t vel1 = pm->state.velocity;
+	// Trace down to ground.
+    const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
+    const TraceResult downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
 
+	// Never step up when you still have up velocity.
+	// Interesting part is, what if we check for input instead?
+	// pm->moveCommand.input.upMove > 0 &&
+	if (pm->state.velocity.z <= 0 && (downTrace.fraction == 1.0 || vec3_dot(downTrace.plane.normal, vec3_up()) < 0.7)) {
+		return;
+	}
+	
+	const vec3_t org1 = pm->state.origin;
+	const vec3_t vel1 = pm->state.velocity;
+
+	// Trace if the player was a step height higher.
     const vec3_t up = vec3_fmaf(org0, PM_STEP_HEIGHT, vec3_up());
     const TraceResult upTrace = PM_TraceCorrectAllSolid(org0, pm->mins, pm->maxs, up);
 
-    if (!upTrace.allSolid) {
-        // Step from the higher position, with the original velocity
-        pm->state.origin = upTrace.endPosition;
-        pm->state.velocity = vel0;
+	if ( upTrace.allSolid ) {
+		PM_Debug("Can't step up here kiddo");
+		return;
+	}
 
-        PM_StepSlideMove_();
+	/**
+	*	Try and slide from above.
+	**/
+	const float stepSize = upTrace.endPosition.z - org0.z;
 
-        // Settle to the new ground, keeping the step if and only if it was successful
-        const vec3_t down = vec3_fmaf(pm->state.origin, PM_STEP_HEIGHT + PM_GROUND_DIST, vec3_down());
-        const TraceResult downTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, down);
+	pm->state.origin = upTrace.endPosition;
+	pm->state.velocity = vel0;
 
-        if (PM_CheckStep(&downTrace)) {
-            // Quake2 trick jump secret sauce
-            if ((pm->state.flags & PMF_ON_GROUND) || vel0.z < PM_SPEED_UP) {
-                PM_StepDown(&downTrace);
-            } else {
-                pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
-            }
+    PM_SlideMove();
 
-            return;
-        }
-    }
 
-    // Save end results.
-    pm->state.origin = org1;
-    pm->state.velocity = vel1;
+	/**
+	*	Push down to the ground.
+	**/
+	// Q3 used stepSize(instead of PM_STEP_HEIGHT) here, but that makes jumping look like climbing on top of things instead.
+	const vec3_t downB = vec3_fmaf(pm->state.origin, stepSize, vec3_down());
+	const TraceResult downTraceB = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, downB);
+
+	// If not all solid, update origin to end trace position.
+	if ( !downTraceB.allSolid ) {
+        if (downTraceB.ent && downTraceB.plane.normal.z >= PM_STEP_NORMAL ||
+		 SG_GetEntityNumber(downTraceB.ent) != pm->groundEntityNumber || downTraceB.plane.dist != playerMoveLocals.groundTrace.plane.dist) {
+			// Quake2 trick jump secret sauce
+			if ((pm->state.flags & PMF_ON_GROUND) || vel0.z < PM_SPEED_UP) {
+				// Set player origin.
+				pm->state.origin = downTraceB.endPosition;
+
+				// Set Step Height.
+				const float stepHeight = pm->state.origin.z - org0.z;
+				if (fabsf(stepHeight) >= PM_STEP_HEIGHT_MIN) {
+					pm->step = stepHeight;
+					PM_Debug( fmt::format( "Set pm->step to {}f.", pm->step ) );
+				} else {
+					PM_Debug( "Did not set pm->step." );
+				}
+			} else {
+				pm->step = pm->state.origin.z - org0.z;
+			}
+
+			//return;
+			//pm->step = pm->state.origin.z - playerMoveLocals.previousOrigin.z;
+		}
+
+	}
+
+	// If the fraction is < 1, clip against the plane.
+	if ( downTraceB.fraction < 1.0 ) {
+		//pm->state.origin = org1;
+		PM_ClipVelocity( pm->state.velocity, downTraceB.plane.normal, PM_CLIP_BOUNCE );
+	}
+
+	// Trace back to original position, if it can, don't step.
+	const TraceResult originalPosTrace = PM_TraceCorrectAllSolid(pm->state.origin, pm->mins, pm->maxs, org0);
+
+	if ( originalPosTrace.fraction == 1.0 ) {
+		// Use the original move
+		pm->state.origin = org1;
+
+		//pm->state.velocity = vel1;
+		pm->step = pm->state.origin.z - org0.z;
+
+		PM_Debug("Bend");
+	}
 }
 
 
@@ -444,7 +620,7 @@ static void PM_StepSlideMove(void)
 /**
 *
 * 
-*	MOVEMENT CONDITION CHECKS/HANDLING
+*	Movement Condition Handling:
 *
 * 
 **/
@@ -801,18 +977,6 @@ static void PM_CheckGround(void) {
         pm->state.flags |= PMF_ON_GROUND;
 		pm->groundEntityNumber = SG_GetEntityNumber(trace.ent);
 
-//		if (trace.ent) {//	pm->groundEntityPtr = trace.ent;
-//#ifdef SHAREDGAME_CLIENTGAME
-//			pm->groundEntityNumber = trace.ent->clientEntityNumber;
-//#endif
-//#ifdef SHAREDGAME_SERVERGAME
-//			pm->groundEntityNumber = SG_GetEntityNumber(trace.ent);
-//#endif
-//		}/* else {
-//			pm->groundEntityNumber = -1;
-//		}*/
-        
-
         // Sink down to it if not trick jumping
         if (!(pm->state.flags & PMF_TIME_TRICK_JUMP)) {
             pm->state.origin = trace.endPosition;
@@ -820,7 +984,7 @@ static void PM_CheckGround(void) {
         }
     } else {
         pm->state.flags &= ~PMF_ON_GROUND;
-        pm->groundEntityNumber = -1;//	pm->groundEntityPtr = NULL;
+        pm->groundEntityNumber = -1;
     }
 
     // Always touch the entity, even if we couldn't stand on it
@@ -1121,7 +1285,7 @@ static void PM_WaterMove(void) {
     PM_Accelerate(dir, speed, PM_ACCEL_WATER);
 
     if (pm->moveCommand.input.upMove > 0) {
-        PM_StepSlideMove_();
+        PM_SlideMove();
     }
     else {
         PM_StepSlideMove();
