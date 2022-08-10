@@ -1044,41 +1044,30 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 	// each blend action in our current animation.
 	} else {
 		// Validate animation, and action indices.
+		// Validate animation, and action indices.
 		SkeletalModelData *skm = esModel->skeletalModelData;
 
-		// Validate animation's size, we require at least 1 blend action.
-		if ( skm->animations.size() < 1 ) {
-			// TODO: Debug warning here.
-			refreshEntity.currentBonePoses = nullptr;
-			return;
-		}
-
-		// Get pointer to animation.
-		SkeletalAnimation *animation = skm->animations[ currentAnimation->animationIndex ];
-
-		// Validate blend actions size, we require at least 1 blend action.
-		if ( animation->blendActions.size() < 1 ) {
-			// TODO: Debug warning here.
+		// Get our animation data.
+		SkeletalAnimation *animation = GetAnimation( currentAnimation->animationIndex );
+		// We NEED an animation to work with...
+		if ( !animation ) {
 			refreshEntity.currentBonePoses = nullptr;
 			return;
 		}
 
 		// Get pointer to dominating blend action.
-		SkeletalAnimationBlendAction *dominatingBlendAction = &animation->blendActions[0];
-		
-		// Now get its actual action pointer information we seek.
-		SkeletalAnimationAction *dominatingAction = skm->actions[ dominatingBlendAction->actionIndex ];
+		SkeletalAnimationBlendAction *dominatingBlendAction = GetBlendAction( animation, 0 );
+		// Get the dominating blend action state.
+		EntitySkeletonBlendActionState *dominatingBlendActionState = GetBlendActionState( animation->index, 0 );
 
 		// Ensure that it is in bounds. (Should be.)
-		if ( !( entitySkeleton.blendActionAnimationStates.size() >= 1 ) || !( entitySkeleton.blendActionAnimationStates[0].size() >= 1) ) {
+		if ( !dominatingBlendAction || !dominatingBlendActionState ) {
 			refreshEntity.currentBonePoses = nullptr;
 			return;
 		}
 
-		// We've got the action data, time to process its frame for time and store it into
-		// our distinct entity skeleton.
-		EntitySkeletonBlendActionState *dominatingBlendActionState = &entitySkeleton.blendActionAnimationStates[ 0 ][ 0 ];
-
+		// Get the dominating action.
+		SkeletalAnimationAction *dominatingAction = GetAction( dominatingBlendAction->actionIndex );
 		// Store old frame.
 		dominatingBlendActionState->oldFrame = dominatingBlendActionState->currentFrame;
 
@@ -1104,19 +1093,26 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		// Go over all other blend actions, and acquire their data also.
 		for ( int32_t blendActionIndex = 1; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
 			// Get pointer to the 'sub dominating' blend action.
-			SkeletalAnimationBlendAction *subdominatingBlendAction = &animation->blendActions[ blendActionIndex ];
+			SkeletalAnimationBlendAction *subdominatingBlendAction = GetBlendAction( animation, blendActionIndex );
 
-			// Only proceed if once again, the index is valid.
-			if ( subdominatingBlendAction->actionIndex < skm->actions.size() ) {
+			// Only proceed if we got one.
+			if ( subdominatingBlendAction ) {
 				// Now get its actual action pointer information we seek.
-				SkeletalAnimationAction *subdominatingAction = skm->actions[ subdominatingBlendAction->actionIndex ];
+				SkeletalAnimationAction *subdominatingAction = GetAction( subdominatingBlendAction->actionIndex );
 
 				// One final bounds test:
-				if ( ( currentAnimation->animationIndex < entitySkeleton.blendActionAnimationStates.size() 
-					&& blendActionIndex < entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ].size() ) ) {
+				if ( subdominatingAction ) {
 					// We've got the action data, time to process its frame for time and store it into
 					// our distinct entity skeleton.
-					EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
+					EntitySkeletonBlendActionState *baState = GetBlendActionState( animation->index, blendActionIndex );
+					// We've got the action data, time to process its frame for time and store it into
+					// our distinct entity skeleton.
+					//EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
+					if ( !baState ) {
+						// TODO: Debug warning here.
+						refreshEntity.currentBonePoses = nullptr;
+						return;
+					}
 
 					// Be sure to store its old frame.
 					baState->oldFrame = baState->currentFrame;
@@ -1184,13 +1180,11 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 	// Get Animation State references.
 	EntityAnimationState *currentAnimation	= &currentState->currentAnimation;
 
+	// If we got no animations somehow, set bonepose ptr to nullptr and return.
 	if (!skm->animations.size()) {
 		refreshEntity.currentBonePoses = nullptr;
 		return;
 	}
-
-	// Get our animation data.
-	SkeletalAnimation *animation = skm->animations[currentAnimation->animationIndex];
 	
 	// See if we got skeletal model data.
 	const model_t *esModel = entitySkeleton.modelPtr;
@@ -1202,31 +1196,27 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 		// Validate animation, and action indices.
 		SkeletalModelData *skm = esModel->skeletalModelData;
 
-		// Get pointer to animation.
-		SkeletalAnimation *animation = skm->animations[ currentAnimation->animationIndex ];
-
-		// Validate blend actions size, we require at least 1 blend action.
-		if ( animation->blendActions.size() < 1 ) {
-			// TODO: Debug warning here.
+		// Get our animation data.
+		SkeletalAnimation *animation = GetAnimation( currentAnimation->animationIndex );
+		// We NEED an animation to work with...
+		if ( !animation ) {
 			refreshEntity.currentBonePoses = nullptr;
 			return;
 		}
 
 		// Get pointer to dominating blend action.
-		SkeletalAnimationBlendAction *dominatingBlendAction = &animation->blendActions[0];
+		SkeletalAnimationBlendAction *dominatingBlendAction = GetBlendAction( animation, 0 );
+		// Get the dominating blend action state.
+		EntitySkeletonBlendActionState *dominatingBlendActionState = GetBlendActionState( animation->index, 0 );
 
 		// Ensure that it is in bounds. (Should be.)
-		if (!(entitySkeleton.blendActionAnimationStates.size() >= 1) || !(entitySkeleton.blendActionAnimationStates[0].size() >= 1)) {
+		if ( !dominatingBlendActionState ) {
 			refreshEntity.currentBonePoses = nullptr;
 			return;
 		}
 
 		// Allocate a cached memory block for the dominating blend action. (Our main action timeline.)
 		EntitySkeletonBonePose *dominatingBlendPose = clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
-		
-		// Get the dominating blend action state.
-		EntitySkeletonBlendActionState *dominatingBlendActionState = &entitySkeleton.blendActionAnimationStates[0][0];
-
 		// Lerp the blend action skeleton pose.
 		clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
 									dominatingBlendPose,
@@ -1242,23 +1232,26 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 		// Go over all other blend actions, and acquire their data also.
 		for ( int32_t blendActionIndex = 1; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
 			// Get pointer to the 'sub dominating' blend action.
-			SkeletalAnimationBlendAction *subdominatingBlendAction = &animation->blendActions[ blendActionIndex ];
+			SkeletalAnimationBlendAction *subdominatingBlendAction = GetBlendAction( animation, blendActionIndex );
 
-			// Only proceed if once again, the index is valid.
-			if ( subdominatingBlendAction->actionIndex < skm->actions.size() ) {
+			// Only proceed if we got one.
+			if ( subdominatingBlendAction ) {
 				// Now get its actual action pointer information we seek.
-				SkeletalAnimationAction *subdominatingAction = skm->actions[ subdominatingBlendAction->actionIndex ];
+				SkeletalAnimationAction *subdominatingAction = GetAction( subdominatingBlendAction->actionIndex );
 
 				// One final bounds test:
-				if ( currentAnimation->animationIndex < entitySkeleton.blendActionAnimationStates.size() 
-					&& blendActionIndex < entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ].size() ) {
+				if ( subdominatingAction ) {
 					// We've got the action data, time to process its frame for time and store it into
 					// our distinct entity skeleton.
-					EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
+					EntitySkeletonBlendActionState *baState = GetBlendActionState( animation->index, blendActionIndex );
 
 					// Allocate our blend action bone pose channel.
 					EntitySkeletonBonePose *blendActionBonePose	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
-					
+					if ( !baState || !blendActionBonePose) {
+						refreshEntity.currentBonePoses = nullptr;
+						return;
+					}
+
 					// Lerp the blend action skeleton pose.
 					clgi.ES_LerpSkeletonPoses( &entitySkeleton, 
 												blendActionBonePose,
@@ -1300,6 +1293,126 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 			}
 		}
 	}
+}
+
+/***
+*
+*
+*	Utility Functions, for easy bounds checking and sorts of tasks alike.
+*
+*
+***/
+/**
+*	@brief	Utility function to test whether an animation is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+**/
+SkeletalAnimation *CLGBasePacketEntity::GetAnimation( const std::string &name ) {
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the name is nonexistent in our Animation map.
+	if ( !skm->animationMap.contains(name) ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimation.
+	return &skm->animationMap[ name ];
+}
+SkeletalAnimation *CLGBasePacketEntity::GetAnimation( const int32_t index ) {
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the index is out of bounds.
+	if ( index < 0 || index >= skm->animations.size() ) {
+		return nullptr;
+	}
+
+	// Return the pointer stored by index within the Animations vector.
+	return skm->animations[ index ];
+}
+
+/**
+*	@brief	Utility function to easily get a pointer to an Action by name or index.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+**/
+SkeletalAnimationAction *CLGBasePacketEntity::GetAction( const std::string &name ) {
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the name is nonexistent in our Action map.
+	if ( !skm->actionMap.contains(name) ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimationAction.
+	return &skm->actionMap[ name ];
+}
+SkeletalAnimationAction *CLGBasePacketEntity::GetAction( const int32_t index ) {
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the index is out of bounds.
+	if ( index < 0 || index >= skm->actions.size() ) {
+		return nullptr;
+	}
+
+	// Return the pointer stored by index within the Actions vector.
+	return skm->actions[ index ];
+}
+
+/**
+*	@brief	Utility function to test whether a BlendAction is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
+**/
+SkeletalAnimationBlendAction *CLGBasePacketEntity::GetBlendAction( SkeletalAnimation *animation, const int32_t index ) {
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) since we had no SkeletalAnimation to check on.
+	if ( !animation ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the index is out of bounds.
+	if ( index < 0 || index >= animation->blendActions.size() ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimationAction.
+	return &animation->blendActions[ index ];
+}
+
+/**
+*	@brief	Utility function to test whether a BlendActionState is existent and within range for the specified Animation.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
+**/
+EntitySkeletonBlendActionState *CLGBasePacketEntity::GetBlendActionState( const int32_t animationIndex, const int32_t blendActionIndex ) {
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the animationIndex is out of bounds.
+	if ( animationIndex < 0 || animationIndex >= entitySkeleton.blendActionAnimationStates.size() ) {
+		return nullptr;
+	}
+	// Return (nullptr) in case the blendActionIndex is out of bounds.
+	if ( blendActionIndex < 0 || blendActionIndex >= entitySkeleton.blendActionAnimationStates[ animationIndex ].size() ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimationAction.
+	return &entitySkeleton.blendActionAnimationStates[ animationIndex ][ blendActionIndex ];
 }
 
 

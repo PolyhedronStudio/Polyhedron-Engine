@@ -1009,6 +1009,41 @@ private:
 	**/
 	virtual void ComputeEntitySkeletonTransforms( EntitySkeletonBonePose *tempBonePoses );
 
+
+	/***
+	*
+	*
+	*	Utility Functions, for easy bounds checking and sorts of tasks alike.
+	*
+	*
+	***/
+	/**
+	*	@brief	Utility function to test whether an animation is existent and within range.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+	**/
+	SkeletalAnimation *GetAnimation( const std::string &name );
+	SkeletalAnimation *GetAnimation( const int32_t index );
+
+	/**
+	*	@brief	Utility function to easily get a pointer to an Action by name or index.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+	**/
+	SkeletalAnimationAction *GetAction( const std::string &name );
+	SkeletalAnimationAction *GetAction( const int32_t index );
+
+	/**
+	*	@brief	Utility function to test whether a BlendAction is existent and within range for the specified Animation.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
+	**/
+	SkeletalAnimationBlendAction *GetBlendAction( SkeletalAnimation *animation, const int32_t index );
+
+	/**
+	*	@brief	Utility function to test whether a BlendActionState is existent and within range for the specified Animation.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
+	**/
+	EntitySkeletonBlendActionState *GetBlendActionState( const int32_t animationIndex, const int32_t blendActionIndex );
+
+
 protected:
 	/**
 	*
