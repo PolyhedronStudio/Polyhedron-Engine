@@ -710,7 +710,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemWeapon.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseTrigger.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.cpp"
-		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBasePlayer.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseSkeletalAnimator.cpp"
@@ -756,7 +756,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscTeleporter.cpp"
 		#"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscTeleporterDest.cpp"
 
-		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.cpp"
 		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterTestDummy.cpp"
 
 		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathCorner.cpp"
@@ -804,8 +804,8 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/GameModes/CoopGameMode.cpp"
 		"${SRC_GAME_SERVER_DIR}/Gamemodes/DeathMatchGamemode.cpp"
 
-		"${SRC_GAME_SERVER_DIR}/Physics/Physics.cpp"
-		"${SRC_GAME_SERVER_DIR}/Physics/StepMove.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Physics/Physics.cpp"
+		#"${SRC_GAME_SERVER_DIR}/Physics/StepMove.cpp"
 
 		"${SRC_GAME_SERVER_DIR}/Player/Client.cpp"
 		"${SRC_GAME_SERVER_DIR}/Player/Hud.cpp"
@@ -834,7 +834,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseItemWeapon.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseTrigger.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseRootMotionMonster.h"
-		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.h"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseStepMonster.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBaseMover.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/SVGBasePlayer.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Base/BodyCorpse.h"
@@ -869,7 +869,7 @@ if( CONFIG_BUILD_GAME_SERVER )
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscExplosionBox.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Misc/MiscServerModel.h"
 
-		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.h"
+		#"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterStepDummy.h"
 		"${SRC_GAME_SERVER_DIR}/Entities/Monsters/MonsterTestDummy.h"
 
 		"${SRC_GAME_SERVER_DIR}/Entities/Path/PathCorner.h"

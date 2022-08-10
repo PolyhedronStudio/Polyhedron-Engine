@@ -14,7 +14,6 @@
 
 #include "../../Effects.h"
 #include "../../Utilities.h"
-#include "../../Physics/StepMove.h"
 
 // Server Game Base Entity.
 #include "../Base/SVGBaseEntity.h"

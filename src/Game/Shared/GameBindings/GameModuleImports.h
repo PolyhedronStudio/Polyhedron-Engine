@@ -57,7 +57,7 @@
 #include "Game/Server/Entities/Base/SVGBaseItemWeapon.h"
 #include "Game/Server/Entities/Base/SVGBaseSkeletalAnimator.h"
 #include "Game/Server/Entities/Base/SVGBaseRootMotionMonster.h"
-#include "Game/Server/Entities/Base/SVGBaseStepMonster.h"
+//#include "Game/Server/Entities/Base/SVGBaseStepMonster.h"
 #include "Game/Server/Entities/Base/SVGBasePlayer.h"
 
 //! SharedGame Client Bindings.

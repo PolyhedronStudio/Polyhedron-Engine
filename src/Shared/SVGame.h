@@ -29,12 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SVGAME_API_VERSION_POINT VERSION_POINT
 
 // edict->serverFlags
-struct EntityServerFlags {
-    static constexpr uint32_t NoClient      = 0x00000001;   // Don't send entity to clients, even if it has effects.
-    static constexpr uint32_t DeadMonster   = 0x00000002;   // Treat as BrushContents::DeadMonster for collision.
-    static constexpr uint32_t Monster       = 0x00000004;   // Treat as BrushContents::Monster for collision.
-    static constexpr uint32_t Remove        = 0x00000008;   // Delete the entity next tick.
-};
+
 
 
 

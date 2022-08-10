@@ -49,17 +49,26 @@ public:
     DefineAbstractClass(SVGBaseRootMotionMonster, SVGBaseSkeletalAnimator);
 
 
-    /***
-    * 
+    /**
+    *
     *   Interface functions.
     *
-    ***/
+    **/
+    /**
+    *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
+    **/
     virtual void Precache() override;
+    /**
+    *   @brief  Called when it is time to spawn this entity.
+    **/
     virtual void Spawn() override;
-    virtual void PostSpawn() override;
-	virtual void Respawn() override;
+    /**
+    *   @brief  General entity thinking routine.
+    **/
     virtual void Think() override;
-
+	/**
+    *   @brief  Act upon the parsed key and value.
+    **/
     virtual void SpawnKey(const std::string& key, const std::string& value) override;
 
 
@@ -79,50 +88,50 @@ public:
 	*	@return	Calculates a 0 starting index based current frame for the given
 	*			animation state.
 	**/
-	const int32_t GetAnimationStateFrame( const EntityAnimationState *animationState );
+	const int32_t GetAnimationStateRelativeFrame( const EntityAnimationState *animationState );
 
 	/**
 	*	@brief	Sets the 'translate' vector to the value of the 'root bone's' requested frame number 
 	*			translation
 	*	@return	True if the 'translate' frame data exists. False otherwise.
 	**/
-	const bool GetAnimationFrameTranslate( const int32_t actionIndex, const int32_t actionFrame, vec3_t& rootBoneTranslation );
-	const bool GetAnimationFrameTranslate( const std::string &actionName, const int32_t actionFrame, vec3_t& rootBoneTranslation );
+	const bool GetActionFrameTranslate( const int32_t actionIndex, const int32_t actionFrame, vec3_t& rootBoneTranslation );
+	const bool GetActionFrameTranslate( const std::string &actionName, const int32_t actionFrame, vec3_t& rootBoneTranslation );
 	/**
 	*	@brief	Sets the 'distance' double to the value of the 'root bones' requested frame number 
 	*			translation distance. (vec3_dlength)
 	*	@return	True if the 'distance' frame data exists. False otherwise.
 	**/
-	const bool GetAnimationFrameDistance( const int32_t actionIndex, const int32_t actionFrame, double &rootBoneDistance );
-	const bool GetAnimationFrameDistance( const std::string &actionName, const int32_t actionFrame, double &rootBoneDistance );
+	const bool GetActionFrameDistance( const int32_t actionIndex, const int32_t actionFrame, double &rootBoneDistance );
+	const bool GetActionFrameDistance( const std::string &actionName, const int32_t actionFrame, double &rootBoneDistance );
 	/**
 	*	@brief	Calculated the move speed of the root bone for the given 'moveDistance' and moveTranslate.
 	*	@return	Value of the calculated move speed.
 	**/
 	const double GetMoveSpeedForTraversedFrameDistance(const double &totalMoveDistance, const float &frameMoveDistance, const double &unitScale);
 
-
-	/**
-	*	@brief	Updates, and(if needed) switches to a new animation.
-	**/
-	void RefreshAnimationState();
-	
-	/**
-	*	@brief
-	**/
-	const bool AnimationFinished( const EntityAnimationState *animationState );
-	/**
-	*	@brief
-	**/
-	const bool CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t wishedAnimationIndex );
 	/**
 	*	@brief
 	**/
 	const bool HasExoticMoveResults( const int32_t resultsMask );
+	
+	/**
+	*	@brief
+	**/
+	virtual const bool AnimationFinished( const EntityAnimationState *animationState ) override;
+	/**
+	*	@brief
+	**/
+	virtual const bool CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t wishedAnimationIndex ) override;
+	/**
+	*	@brief	Updates, and(if needed) switches to a new animation.
+	**/
+	void RefreshAnimationState();
 
 
 private:
 
+	
 
 protected:
 
@@ -175,14 +184,6 @@ private:
 	void ApplyMoveState( RootMotionMoveState *moveState );
 
 protected:
-	/**
-	*	@brief 
-	**/
-	const bool RootMotionMove_CheckBottom( );
-	/**
-	*	@brief 
-	**/
-	void RootMotionMove_FixCheckBottom( );
 
 
 

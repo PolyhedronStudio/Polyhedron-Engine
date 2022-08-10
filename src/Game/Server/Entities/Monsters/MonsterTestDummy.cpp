@@ -14,7 +14,6 @@
 
 #include "Game/Server/Effects.h"
 #include "Game/Server/Utilities.h"
-#include "Game/Server/Physics/StepMove.h"
 
 #include "Game/Shared/Physics/Physics.h"
 #include "Game/Shared/Physics/RootMotionMove.h"
@@ -35,9 +34,9 @@
 #include "MonsterTestDummy.h"
 
 
-//
-// Constructor/Deconstructor.
-//
+/**
+*	@brief	Constructor
+**/
 MonsterTestDummy::MonsterTestDummy(PODEntity *svEntity) : Base(svEntity) { 
 	//const char *mapClass = GetTypeInfo()->mapClass; // typeinfo->classname = C++ classname.
 	//uint32_t hashedMapClass = GetTypeInfo()->hashedMapClass; // hashed mapClass.
@@ -51,33 +50,27 @@ MonsterTestDummy::MonsterTestDummy(PODEntity *svEntity) : Base(svEntity) {
 *   TestDummy Temporary WIP Area.
 *
 **/
+
+
+
+
 /**
-*	@brief	Switches the animation by blending from the current animation into the next.
-*	@return	
+*
+*   Interface functions.
+*
 **/
-bool SwitchAnimation(const std::string& name) {
-	return true;
-}
-
-
-//
-// Interface functions.
-//
-//
-//===============
-// MonsterTestDummy::Precache
-//
-//===============
-//
+/**
+*   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
+**/
 void MonsterTestDummy::Precache() {
     // Always call parent class method.
     Base::Precache();
 
     // Precache the model for clients. (Gets passed to the config string.)
-    modelHandle = SVG_PrecacheModel("models/monsters/slidedummy/slidedummy.iqm");
+    modelHandle = SVG_PrecacheModel("models/monsters/testdummy/testdummy.iqm");
 
 	// Precache the model for the server: Required to be able to process animations properly.
-	qhandle_t serverModelHandle = gi.RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
+	qhandle_t serverModelHandle = gi.RegisterModel("models/monsters/testdummy/testdummy.iqm");
 	
 	SVG_PrecacheModel("models/weapons/smg45/c_smg45.iqm");
 
@@ -128,51 +121,42 @@ void MonsterTestDummy::Precache() {
 	}
 }
 
-//
-//===============
-// MonsterTestDummy::Spawn
-//
-//===============
-//
+/**
+*   @brief  Called when it is time to spawn this entity.
+**/
 void MonsterTestDummy::Spawn() {
     // Always call parent class method.
     Base::Spawn();
 
     // Set the barrel model, and model index.
-    SetModel( "models/monsters/slidedummy/slidedummy.iqm" );
+    SetModel( "models/monsters/testdummy/testdummy.iqm" );
 	SetModelIndex3( SVG_PrecacheModel("models/weapons/smg45/c_smg45.iqm") );
     // Set the bounding box.
     SetBoundingBox( { -16, -16, 0 }, { 16, 16, 88 } );
 
     // Setup a die callback, this test dummy can die? Yeah bruh, it fo'sho can.
-    SetDieCallback( &MonsterTestDummy::MonsterTestDummyDie );
+    SetDieCallback( &MonsterTestDummy::DieCallback_FallDead );
 
 	// Make it so that the player can toggle '+use' this monster.
 	SetUseEntityFlags( UseEntityFlags::Toggle );
-	SetUseCallback( &MonsterTestDummy::MonsterTestDummyUse );
+	SetUseCallback( &MonsterTestDummy::UseCallback_EngageGoal );
 
 	// Setup thinking.
-    SetThinkCallback( &MonsterTestDummy::MonsterTestDummyThink );
+    SetThinkCallback( &MonsterTestDummy::ThinkCallback_General );
 	SetNextThinkTime(level.time + FRAMETIME_S);
 
     // Link the entity to world, for collision testing.
     LinkEntity();
 }
 
-//
-//===============
-// MonsterTestDummy::Respawn
-//
-//===============
-//
+/**
+*   @brief  Called when it is time to respawn this entity.
+**/
 void MonsterTestDummy::Respawn() { Base::Respawn(); }
 
-//
-//===============
-// MonsterTestDummy::PostSpawn
-//
-//===============
-//
+/**
+*   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
+**/
 void MonsterTestDummy::PostSpawn() {
     // Always call parent class method.
     Base::PostSpawn();
@@ -189,19 +173,39 @@ void MonsterTestDummy::PostSpawn() {
 			gi.DPrintf("Set Goal Entity for StepDummy: %s\n", geGoal->GetTargetName().c_str());
 	}
 
-
     // Setup our MonsterStepDummy callbacks.
-    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
+    SetThinkCallback(&MonsterTestDummy::Callback_DetermineSpawnAnimation);
     SetNextThinkTime(level.time + FRAMETIME_S);
 }
 
-//===============
-// MonsterTestDummy::Think
-//
-//===============
+/**
+*   @brief  General entity thinking routine.
+**/
 void MonsterTestDummy::Think() {
-    // Always call parent class method.
+ 	// Get our current animation state.
+	const EntityAnimationState *animationState = GetCurrentAnimationState();
+
+		// Get state pointer.
+	EntityState *currentState	= &podEntity->currentState;
+	EntityState *previousState	= &podEntity->previousState;
+
+	// Get animation state.
+	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
+	EntityAnimationState *previousAnimationState = &currentState->previousAnimation;
+	// If we got a new animation to switch to, ensure we are allowed to switch before doing so.
+	if (CanSwitchAnimation(currentAnimationState, animationToSwitchTo)) {
+		const std::string animName = skm->animations[animationToSwitchTo]->name;
+		SwitchAnimation(animName);
+		//ProcessSkeletalAnimationForTime(level.time);
+		//.Otherwise keep processing the current animation frame for time.
+	} else {
+		ProcessSkeletalAnimationForTime(level.time);
+	}
+
+	// Always call parent class method.
     Base::Think();
+
+
 
 	/**
 	*	The idea is to write hard think logic here.
@@ -230,15 +234,13 @@ void MonsterTestDummy::Think() {
 	// Set our Yaw Speed.
 	SetYawSpeed(20.f);
 
-
 	// Set our Move Speed. (It is the actual sum of distance traversed in units.)
 	//SetMoveSpeed(64.015f);
 }
 
-//===============
-// MonsterTestDummy::SpawnKey
-//
-//===============
+/**
+*   @brief  Act upon the parsed key and value.
+**/
 void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value) {
 
 	// We're using this for testing atm.
@@ -256,10 +258,27 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 }
 
 
+
 /**
-*	@brief	Toggles whether to follow its activator or stay put.
+*
+*   TestDummy Temporary WIP Area.
+*
 **/
-void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGameEntity* activator) {
+/**
+*   @brief
+**/
+
+
+
+/**
+*
+*   Callback functions.
+*
+**/  
+/**
+*	@brief	'Use' callback: Engages the test dummy to follow its 'User'.
+**/
+void MonsterTestDummy::UseCallback_EngageGoal(IServerGameEntity *other, IServerGameEntity* activator) {
 	// Get Goal Entity number.
 	GameEntity *geGoal = GetGoalEntity();
 
@@ -343,28 +362,26 @@ void MonsterTestDummy::MonsterTestDummyUse(IServerGameEntity *other, IServerGame
 /////
 // Starts the animation.
 // 
-void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-	
+void MonsterTestDummy::Callback_DetermineSpawnAnimation(void) { 
 	// If we did not find our goal, switch to idle animation.
 	if ( !GetGoalEntity() ) {
-		SwitchAnimation( "Idle" );
+		PrepareAnimation( "Idle" );
 	// We did find it, so switch to walkforward.
 	} else {
-		SwitchAnimation( "Walk" );
+		PrepareAnimation( "Walk" );
 	}
 
 	//SwitchAnimation("WalkForward");
-    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
+    SetThinkCallback(&MonsterTestDummy::ThinkCallback_General);
     // Setup the next think time.
     SetNextThinkTime(level.time + FRAMETIME_S);
 }
 
-//===============
-// MonsterTestDummy::MonsterTestDummyThink
-//
-// Think callback, to execute the needed physics for this pusher object.
-//===============
-void MonsterTestDummy::MonsterTestDummyThink(void) {
+/**
+*	@brief	'Think' callback: Check for animation updates, navigate to movegoal and process animations.
+**/
+void MonsterTestDummy::ThinkCallback_General(void) {
+
 	// Only do logic if alive.
 	if (!GetGameMode()->IsDeadEntity(this)) {
 		/**
@@ -381,59 +398,86 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 
 		// Navigate to goal.
 		NavigateToOrigin( navigationOrigin );
-
-		// Get our current animation state.
-		const EntityAnimationState *animationState = GetCurrentAnimationState();
-
-		// If we got a new animation to switch to, ensure we are allowed to switch before doing so.
-		if (CanSwitchAnimation(animationState, animationToSwitchTo)) {
-			const std::string animName = skm->animations[animationToSwitchTo]->name;
-			SwitchAnimation(animName);
-		//.Otherwise keep processing the current animation frame for time.
-		} else {
-			ProcessSkeletalAnimationForTime(level.time);
-		}
-
+		
 		// Link us back in.
 		LinkEntity();
 
-		// Refresh Monster Animation State.
-		//RefreshAnimationState();
-
-		// Setup next think callback.
-		SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
-		SetNextThinkTime(level.time + FRAMETIME_S);
 	}
+
+	// Setup next think callback.
+	SetThinkCallback(&MonsterTestDummy::ThinkCallback_General);
+	SetNextThinkTime(level.time + FRAMETIME_S);
 }
 
-//===============
-// MonsterTestDummy::MonsterTestDummyDie
-//
-// 'Die' callback, the explosion box has been damaged too much.
-//===============
-//
-void MonsterTestDummy::MonsterTestDummyDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
+/**
+*	@brief	'Die' callback: Switch animation to 'WalkingToDying' and leave the body until damaged enough to gib.
+**/
+void MonsterTestDummy::DieCallback_FallDead(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
 	// Get Gameworld.
 	ServerGameWorld* gameWorld = GetGameWorld();
-
-	// Entity is dying, it can't take any more damage.
-    SetTakeDamage(TakeDamage::No);
 
     // Attacker becomes this entity its "activator".
     SetActivator(attacker);
 
-    // Set the dead body to tossslide, no solid collision, and link to world for collision.
-    SetMoveType(MoveType::TossSlide);
-    SetSolid(Solid::Not);
+	// Switch to animation: 'WalkingToDying' so it looks like he's dropping dead.
+	//PrepareAnimation( "WalkingToDying" );
+	SwitchAnimation( "WalkingToDying" );
+	//PrepareAnimation( "WalkingToDying" );
+	//.Otherwise keep processing the current animation frame for time.
+	//ProcessSkeletalAnimationForTime(level.time);
+
+	// Set the dead body to tossslide.
+    SetMoveType(MoveType::Toss);
+
+	// Reset health so it can gib out if it dies "again".
+	SetMaxHealth(120);
+	SetHealth(120);
+	SetDeadFlag(DeadFlags::Dead); // 'Fake' being alive, so we can gib out.
+
+    // Change server flags, we're a dead monster now.
+    SetServerFlags( GetServerFlags() | EntityServerFlags::DeadMonster );
+
+	// Get old mins maxs to use for x/y coordinates.
+	//const vec3_t oldMaxs = GetMaxs();
+	//const vec3_t oldMins = GetMins();
+    // Set the bounding box.
+    SetBoundingBox( { -16, 0, 0 }, { 16, 88, 16 } );
+
     LinkEntity();
 
     // Play a nasty gib sound, yughh :)
-    SVG_Sound(this, SoundChannel::Body, SVG_PrecacheSound("misc/gibdeath1.wav"), 1, Attenuation::Normal, 0);
-
-    // Throw some gibs around, true horror oh boy.
-    gameWorld->ThrowGib(this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);
+//    SVG_Sound( this, SoundChannel::Body, SVG_PrecacheSound("misc/gibdeath1.wav"), 1, Attenuation::Normal, 0 );
+	//// Throw some gibs around, true horror oh boy.
+ //   gameWorld->ThrowGib( this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic );
 
     // Setup the next think and think time.
     SetNextThinkTime(level.time + FRAMETIME_S);
+	SetDieCallback( &MonsterTestDummy::Callback_MorphToClientGibs );
+}
+
+/**
+*	@brief	Prepares the entity for removement after spawning various client gib events.
+**/
+void MonsterTestDummy::Callback_MorphToClientGibs(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point) {
+    // Attacker becomes this entity its "activator".
+    SetActivator(attacker);
+
+	// Set dead flag, disable damage taking.
+	SetTakeDamage(TakeDamage::No);
+	SetDeadFlag(DeadFlags::Dead);
+
+	// Unset movetype and solid.
+    SetMoveType(MoveType::None);
+    SetSolid(Solid::Not);
+	// Relink it in for collision that way.
+    LinkEntity();
+
+	// Trigger spawn client side gib effects and play a nasty gib sound.
+	SVG_Sound( this, SoundChannel::Body, SVG_PrecacheSound("misc/gibdeath1.wav"), 1, Attenuation::Normal, 0);
+	ServerGameWorld* gameWorld = GetGameWorld();
+	gameWorld->ThrowGib( this, "models/objects/gibs/sm_meat/tris.md2", 12, damage, GibType::Organic);
+
+	// Prepare for removing entity on next game frame.
+	SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&MonsterTestDummy::SVGBaseEntityThinkFree);
 }

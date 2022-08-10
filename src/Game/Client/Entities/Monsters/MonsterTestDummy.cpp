@@ -54,7 +54,7 @@ void MonsterTestDummy::Precache() {
 //
 void MonsterTestDummy::Spawn() {
 
-	//clgi.R_RegisterModel("models/monsters/slidedummy/slidedummy.iqm");
+	//clgi.R_RegisterModel("models/monsters/testdummy/testdummy.iqm");
 	// Always call parent class method.
     Base::Spawn();
 		
@@ -71,7 +71,7 @@ void MonsterTestDummy::Spawn() {
     SetClipMask(BrushContentsMask::MonsterSolid | BrushContentsMask::PlayerSolid);
 
     //// Set the barrel model, and model index.
-    SetModel("models/monsters/slidedummy/slidedummy.iqm");
+    SetModel("models/monsters/testdummy/testdummy.iqm");
 
     // Set the bounding box.
     //SetBoundingBox({ -16, -16, -41 }, { 16, 16, 43 });
@@ -88,8 +88,8 @@ void MonsterTestDummy::Spawn() {
     SetTakeDamage(TakeDamage::Yes);
 
     // Setup our MonsterTestDummy callbacks.
-    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyStartAnimation);
-    //SetDieCallback(&MonsterTestDummy::MonsterTestDummyDie);
+    SetThinkCallback(&MonsterTestDummy::Callback_DetermineSpawnAnimation);
+    //SetDieCallback(&MonsterTestDummy::DieCallback_FallDead);
 
     // Setup the next think time.
     SetNextThinkTime(level.time + FRAMETIME_S);
@@ -151,18 +151,18 @@ void MonsterTestDummy::SpawnKey(const std::string& key, const std::string& value
 /////
 // Starts the animation.
 // 
-void MonsterTestDummy::MonsterTestDummyStartAnimation(void) { 
-    SetThinkCallback(&MonsterTestDummy::MonsterTestDummyThink);
+void MonsterTestDummy::Callback_DetermineSpawnAnimation(void) { 
+    SetThinkCallback(&MonsterTestDummy::ThinkCallback_General);
     // Setup the next think time.
     SetNextThinkTime(level.time + 1.f * FRAMETIME_S);
 }
 
 //===============
-// MonsterTestDummy::MonsterTestDummyThink
+// MonsterTestDummy::ThinkCallback_General
 //
 // Think callback, to execute the needed physics for this pusher object.
 //===============
-void MonsterTestDummy::MonsterTestDummyThink(void) {
+void MonsterTestDummy::ThinkCallback_General(void) {
 	EntityAnimationState *animationState = &podEntity->currentState.currentAnimation;
 	const int32_t animationFrame = animationState->frame;
 	if (animationFrame >= 0 && skm->boundingBoxes.size() > animationFrame) {
@@ -212,12 +212,12 @@ void MonsterTestDummy::MonsterTestDummyThink(void) {
 }
 
 //===============
-// MonsterTestDummy::MonsterTestDummyDie
+// MonsterTestDummy::DieCallback_FallDead
 //
 // 'Die' callback, the explosion box has been damaged too much.
 //===============
 //
-void MonsterTestDummy::MonsterTestDummyDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) {
+void MonsterTestDummy::DieCallback_FallDead(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point) {
     // Entity is dying, it can't take any more damage.
     SetTakeDamage(TakeDamage::No);
 

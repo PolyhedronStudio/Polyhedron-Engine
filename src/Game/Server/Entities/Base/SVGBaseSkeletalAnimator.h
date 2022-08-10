@@ -31,11 +31,6 @@ class SVGBaseTrigger;
 **/
 class SVGBaseSkeletalAnimator : public SVGBaseTrigger {
 public:
-    /***
-    * 
-    *   Weapon Item callback function pointers.
-    *
-    ***/
     //! Constructor/Deconstructor.
     SVGBaseSkeletalAnimator(PODEntity *svEntity);
     virtual ~SVGBaseSkeletalAnimator() = default;
@@ -50,22 +45,6 @@ public:
     *
     ***/
     /**
-    *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
-    **/
-    virtual void Precache() override;    // Precaches data.
-    /**
-    *   @brief  Called when it is time to spawn this entity.
-    **/
-    virtual void Spawn() override;       // Spawns the entity.
-    /**
-    *   @brief  Called when it is time to respawn this entity.
-    **/
-    virtual void Respawn() override;     // Respawns the entity.
-    /**
-    *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    **/
-    virtual void PostSpawn() override;   // PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
-    /**
     *   @brief  General entity thinking routine.
     **/
     virtual void Think() override;
@@ -77,40 +56,93 @@ public:
 
 
 
+	/**
+	*
+	*
+	*	Animation System:
+	*
+	*
+	**/
+	/**
+	*	@brief	Updates, and(if needed) switches to a new animation.
+	**/
+	//void RefreshAnimationState();
     /**
     *	@brief	Processes the animation for the current skeletal animation state.
     **/
     virtual void ProcessSkeletalAnimationForTime(const GameTime &time);
-
-	/**
-	*
-	*
-	*	WIP Area.
-	*
-	*
-	**/
-
-	/**
-	*	This stores the model data for now.
-	**/
-	qhandle_t modelHandle;
-	SkeletalModelData *skm;
-
+	
 	/**
 	*	@brief	Switches the animation by blending from the current animation into the next.
 	*	@return	The animation index on success, -1 on failure.
 	**/
 	int32_t SwitchAnimation(const std::string &name);
+	/**
+	*	@brief	Prepares an animation to switch to after the current active animation has
+	*			finished its current cycle from start to end -frame.
+	**/
+	int32_t PrepareAnimation(const std::string &name, const bool force = false);
 
-    /***
-    * 
-    *   Entity functions.
-    * 
-    ***/
+	/**
+	*	@brief
+	**/
+	virtual const bool AnimationFinished( const EntityAnimationState *animationState );
+	/**
+	*	@brief
+	**/
+	virtual const bool CanSwitchAnimation( const EntityAnimationState *animationState, const int32_t wishedAnimationIndex );
 
 
+
+
+
+
+
+
+	/***
+	*
+	*
+	*	Utility Functions, for easy bounds checking and sorts of tasks alike.
+	*
+	*
+	***/
+	/**
+	*	@brief	Utility function to test whether an animation is existent and within range.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+	**/
+	SkeletalAnimation *GetAnimation( const std::string &name );
+	SkeletalAnimation *GetAnimation( const int32_t index );
+
+	/**
+	*	@brief	Utility function to easily get a pointer to an Action by name or index.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+	**/
+	SkeletalAnimationAction *GetAction( const std::string &name );
+	SkeletalAnimationAction *GetAction( const int32_t index );
+
+	/**
+	*	@brief	Utility function to test whether a BlendAction is existent and within range for the specified Animation.
+	*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
+	**/
+	SkeletalAnimationBlendAction *GetBlendAction( SkeletalAnimation *animation, const int32_t index );
+
+
+
+	/**
+	*
+	*
+	*	This stores the model data for now.
+	*
+	*
+	**/
+	qhandle_t modelHandle;
+	SkeletalModelData *skm;
 
 public:
+	//! Animation to switch to.
+	int32_t animationToSwitchTo = -1;
+	//! ...
+	bool forcedAnimationSwitch = false;
 
 
 protected:

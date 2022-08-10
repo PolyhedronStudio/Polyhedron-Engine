@@ -24,7 +24,7 @@
 *	Player Move debugging ifdefs, uncomment to enable debug output
 *	for each distinct game module.
 **/
-#define DEBUG_SERVERGAME_PMOVE
+//#define DEBUG_SERVERGAME_PMOVE
 //#define DEBUG_CLIENTGAME_PMOVE
 
 /**

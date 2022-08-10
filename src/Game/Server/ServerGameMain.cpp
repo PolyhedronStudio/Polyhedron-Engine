@@ -41,7 +41,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Player/Client.h"      // Include Player Client header.
 
 // Physics related.
-#include "Physics/StepMove.h"
 
 
 //-----------------

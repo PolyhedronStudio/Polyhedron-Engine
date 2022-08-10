@@ -30,36 +30,46 @@ using SpawnKeyValues = std::map<std::string, std::string>;
 /**
 *   @brief  PODEntity is a POD Entity data structure shared across the client as well as the server.
 *           
-*   @details    Only a specific few set of members is strictly to either of the two and enclosed using
+*   @details	Only a specific few set of members is strictly to either of the two and enclosed using
 *				some ifdef. (Inheritance would be neater but there's still some C magic going on in
 *				the server, best not do that.)
 **/
 struct PODEntity {
 	/**
-	*	The State object and parts of the Client are sent 'over the wire'.
+	*	Entity State Data:
+	*
+	*	The server keeps a backup of the last(previous thus) entity state when creating a new one
+	*	based on the current frame that is being processed. In return, the client stores a previous
+	*	state for each newly received 'ServerCommand::Frame' message. Effectively using these to
+	*	interpolate from last to current frame over frametime itself.
 	**/
     //! Actual entity state member, a POD type that contains all data that is actually networked.
 	EntityState currentState = {};
 	EntityState previousState = {}; //! CL: Previous state.
 
+	//! When set it is the determinant for turning this entity into a client controlled entity.
+	//! If not set, the entity becomes a regular entity like any others and does not deal with any
+	//! means of a "player state".
+	struct gclient_s *client = nullptr;
+
+	//! Local entities are unique to each client itself and run in their own local client physics
+	//! simulations. When isLocal is true it means that the specific entity is NOT meant for being
+	//! sent over the wire.
+	// TODO: I suppose that this could actually just be dealt with by inspecting the entity number instead.
+	qboolean isLocal = false;
+	//! When an entity is 'inUse' it's open to being processed for each game frame. Do note that it
+	//! still gets sent to the client unless the NoClient flag is set.
+	//! If the 'freeTime' value is set this entity is ready for re-use after the required wait time has
+	//! passed in order to prevent client-side entity morphing/interpolation panic.
+    qboolean inUse = false;
+
 	//! Animation State members.
 	//EntityAnimationState currentAnimationState = {};
 	//EntityAnimationState previousAnimationState = {};
 
-    //! NULL if not a player. The server expects the first part of gclient_s to
-    //! be a PlayerState but the rest of it is opaque
-    struct gclient_s *client = nullptr;
-
-	//! When true it means this entity is not being processed for networking.
-	qboolean isLocal = false;
-    //! When an entity is not in use it isn't being processed for a game's frame.
-    //! If it also has a freeTime value assigned to it then it has been freed and its slot is
-    //! queued for future reusal.
-    qboolean inUse = false;
-
-
 	/**
-	*	World related info, used for optimizing tracing and proper VIS.
+	*	World Data: Members that are used for determining where we are in the PVS, used for tracing, and
+	*	net code..
 	**/
 	//! Linked to a division node or leaf
 	list_t area = {};
@@ -75,7 +85,7 @@ struct PODEntity {
 
 
 	/**
-	*	Collision Handling Properties.
+	*	Physical Properties.
 	**/
 	//! The type of 'Solid' this entity contains.
     uint32_t solid = 0;
@@ -93,7 +103,7 @@ struct PODEntity {
     
 
 	/**
-	*	Data that the gamemodules set and a client/server may need to know of.
+	*	Game Specific POD:
 	**/
 	//! Pointer to the owning entity (if any.)
     PODEntity *owner = nullptr;
@@ -134,7 +144,8 @@ struct PODEntity {
 
 
 /**
-*   Client Take Damage.
+*   @brief	Take Damage flags controls whether this entity should respond to ballistics or other means of getting
+*			harmed at all. 
 **/
 struct ClientTakeDamage {
     //! Will NOT take damage if hit.
@@ -145,7 +156,21 @@ struct ClientTakeDamage {
     static constexpr int32_t Aim    = 2; 
 };
 
-// edict->clientFlags
+/**
+*	@brief	Server Flags are specifically meant for how to deal with an entity behind the scenes.
+*			Prepare it for removing next frame, disable it from being sent to client, or change
+*			how it should be handled when being traced and clipped against.
+**/
+struct EntityServerFlags {
+    static constexpr uint32_t NoClient      = 0x00000001;   // Don't send entity to clients, even if it has effects.
+    static constexpr uint32_t DeadMonster   = 0x00000002;   // Treat as BrushContents::DeadMonster for collision.
+    static constexpr uint32_t Monster       = 0x00000004;   // Treat as BrushContents::Monster for collision.
+    static constexpr uint32_t Remove        = 0x00000008;   // Delete the entity next tick.
+};
+
+/**
+*	@brief	Client Entity Flags: With client-entities, comes in a similar fashion, also ClientEntityFlags.
+**/
 struct EntityClientFlags {
     //static constexpr uint32_t NoClient      = 0x00000001;   // Don't send entity to clients, even if it has effects.
     static constexpr uint32_t DeadMonster   = 0x00000002;   // Treat as BrushContents::DeadMonster for collision.
@@ -155,7 +180,8 @@ struct EntityClientFlags {
 
 /**
 *   @brief  Contains types of 'solid' 
-*           to use up the remaining slots for their own custom needs.
+*			The commentary for each Solid described the Shape/Nature of this solid,
+*			as well as when it triggers a Touch callback.
 **/
 struct Solid {
     static constexpr uint32_t Not           = 0;    //! No interaction with other objects.

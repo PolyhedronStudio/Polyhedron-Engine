@@ -64,9 +64,9 @@ public:
     *
     ***/
 	// TEMP
-    void MonsterTestDummyThink(void);
-    void MonsterTestDummyStartAnimation(void);
-    void MonsterTestDummyDie(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
+    void ThinkCallback_General(void);
+    void Callback_DetermineSpawnAnimation(void);
+    void DieCallback_FallDead(GameEntity* inflictor, GameEntity* attacker, int damage, const vec3_t& point);
     //void MonsterTestTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
 
 

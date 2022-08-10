@@ -77,16 +77,27 @@ public:
     *   Callback functions.
     *
     **/  
-    void MonsterTestDummyUse( IServerGameEntity* caller, IServerGameEntity* activator );
-	//void MonsterTestBoxUse(SVGBaseEntity* caller, SVGBaseEntity* activator);
-    void MonsterTestDummyThink(void);
-    void MonsterTestDummyStartAnimation(void);
-    void MonsterTestDummyDie(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
-    //void MonsterTestTouch(IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf);
-
-    // Set when exploding, after a minor delay.
-    //void MonsterTestBoxExplode(void);
+	/**
+	*	@brief	'Use' callback: Engages the test dummy to follow its 'User'.
+	**/
+    void UseCallback_EngageGoal( IServerGameEntity* caller, IServerGameEntity* activator );
+	/**
+	*	@brief	'Think' callback: Check for animation updates, navigate to movegoal and process animations.
+	**/
+    void ThinkCallback_General(void);
+	/**
+	*	@brief	'Die' callback: Switch animation to 'WalkingToDying' and leave the body until damaged enough to gib.
+	**/
+    void DieCallback_FallDead(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
+	/**
+	*	@brief	Temporary for determining and kicking off the animation to spawn with.
+	**/
+	void Callback_DetermineSpawnAnimation(void);
+	/**
+	*	@brief	Prepares the entity for removement after spawning various client gib events.
+	**/
+	void Callback_MorphToClientGibs(IServerGameEntity* inflictor, IServerGameEntity* attacker, int damage, const vec3_t& point);
 
 private:
-	int32_t animationToSwitchTo = 0;
+	
 };

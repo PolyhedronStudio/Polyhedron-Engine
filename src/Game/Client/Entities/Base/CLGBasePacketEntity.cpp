@@ -329,10 +329,7 @@ void CLGBasePacketEntity::UpdateFromState(const EntityState* state) {
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
 
-	if ( state->currentAnimation.startTime != 0 ) {
-		SwitchAnimation(state->currentAnimation.animationIndex, GameTime(state->currentAnimation.startTime));
-	}
-
+	
 	// Setup same think for the next frame.
 	SetNextThinkTime(level.time + FRAMETIME_S);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
@@ -364,9 +361,6 @@ void CLGBasePacketEntity::SpawnFromState(const EntityState* state) {
 	// This should go elsewhere, but alas prototyping atm.
 	skm = UpdateSkeletalModelDataFromState(&entitySkeleton, state);
 
-	if ( state->currentAnimation.startTime != 0 ) {
-		SwitchAnimation(state->currentAnimation.animationIndex, GameTime(state->currentAnimation.startTime));
-	}
 	
 	// Setup same think for the next frame.
 	SetNextThinkTime(level.time + FRAMETIME_S);
@@ -625,8 +619,8 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 
 	// Get animation state.
 	EntityAnimationState *currentAnimationState	= &currentState->currentAnimation;
-	EntityAnimationState *previousAnimationState = &currentState->previousAnimation;
-
+	EntityAnimationState *previousAnimationState = &previousState->currentAnimation;
+	//EntityAnimationState *previousAnimationState = &currentState->previousAnimation;
 
 	//// Has the animation index changed? If so, lookup the new animation.
 	//// TODO: Move to a separate function.
@@ -639,7 +633,7 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 	//	- animationIndex differs from our previous animation index.
 	//	AND
 	//	- the start time of the new animation to switch to differs from the current animation start time.
-	if ( animationIndex != previousAnimationIndex ) { //}&& startTime.count() != currentAnimationState->startTime) {
+	if ( animationIndex != currentAnimationState->animationIndex ) {
 		// First get the actual animation, from there, get the first blend action, and then get the actual action * wooh *
 		SkeletalAnimation *skmAnimation= skm->animations[ animationIndex ];
 
@@ -651,17 +645,18 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 
 		// Update our refresh animation to new values.
 		refreshAnimation.animationIndex	= actionIndex;
-		refreshAnimation.frame			= skmAction->startFrame;	// TODO: Should we?? // Set current frame to start frame.
+		refreshAnimation.frame			= currentAnimationState->frame;//skmAction->startFrame;	// TODO: Should we?? // Set current frame to start frame.
 		refreshAnimation.startFrame		= skmAction->startFrame;
 		refreshAnimation.endFrame		= skmAction->endFrame;
-		refreshAnimation.forceLoop		= true;	// TODO: Set to forceloop, but not for debugging atm. //currentAnimation->forceLoop;
+		refreshAnimation.forceLoop		= skmAction->forceLoop;	// TODO: Set to forceloop, but not for debugging atm. //currentAnimation->forceLoop;
 		refreshAnimation.frameTime		= skmAction->frametime;
-		refreshAnimation.startTime		= startTime.count();
-		refreshAnimation.loopCount		= 0;	// TODO: Set to loopcount, but not for debugging atm. //currentAnimation->loopCount;
-		
+		refreshAnimation.startTime		= currentAnimationState->startTime;//.count();
+		refreshAnimation.loopCount		= skmAction->loopingFrames;// (skmAction->loopingFrames < 0 ? 0 : skmAction->loopingFrames);	// TODO: Set to loopcount, but not for debugging atm. //currentAnimation->loopCount;
+
 		// Update animation states for this frame's current entity state.
 		*previousAnimationState = *currentAnimationState;
 	}
+
 
 	return true;
 }
@@ -936,7 +931,7 @@ void CLGBasePacketEntity::PostComputeSkeletonTransforms(EntitySkeletonBonePose *
 		// Generate entity matrix to transform the actual pose with.
 		mat4_t matEntity;
 		refreshAttachmentEntity.origin = GetOrigin();
-		refreshAttachmentEntity.angles = vec3_zero(); //GetAngles();
+		refreshAttachmentEntity.angles = GetAngles();
 		create_entity_matrix(matEntity, &refreshAttachmentEntity, false);
 
 		/**
@@ -1102,6 +1097,7 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		refreshEntity.rootBoneAxisFlags = dominatingAction->rootBoneAxisFlags;
 
 		// Store animation data.
+		refreshEntity.oldframe	= dominatingBlendActionState->oldFrame;
 		refreshEntity.frame		= dominatingBlendActionState->currentFrame;
 		refreshEntity.backlerp	= dominatingBlendActionState->backLerp;
 
@@ -1363,7 +1359,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 		//
 		//	Model Light Styles.
 		//
-		refreshEntity.modelLightStyle = -1;// GetStyle();
+		refreshEntity.modelLightStyle = GetStyle();
 
         //
         // Frame Animation Effects.
@@ -1383,11 +1379,10 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 				/**
 				*	Skeletal Animation Processing.
 				**/
-
 				// Make sure we got model data to work our transformations on.
 				if (entitySkeleton.modelPtr != nullptr ) {
 					// Process the skeletal animation blend action frames for the current client time. (Based on animation start time.)
-					ProcessSkeletalAnimationForTime(GameTime(cl->time));
+					ProcessSkeletalAnimationForTime(level.time); 
 					// Compute the Entity Skeleton Trasforms for Refresh Frame.
 					ComputeEntitySkeletonTransforms( nullptr );
 				} else {

@@ -14,7 +14,6 @@
 
 #include "../../Effects.h"          // Effects.
 #include "../../Utilities.h"        // Util funcs.
-#include "../../Physics/StepMove.h" // Stepmove funcs.
 
 // Physics.
 #include "Game/Shared/Physics/Physics.h"

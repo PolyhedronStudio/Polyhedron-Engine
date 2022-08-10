@@ -12,7 +12,6 @@
 #include "../../Effects.h"
 #include "../../Entities.h"
 #include "../../Utilities.h"
-#include "../../Physics/StepMove.h"
 
 #include "../Base/SVGBaseEntity.h"
 #include "../Base/SVGBaseTrigger.h"
@@ -112,7 +111,7 @@ void FuncDoor::Spawn() {
     // door openable by touching it.
 	} if ( GetTargetName().empty() ) {
 		// A use toggle opens it instead.
-		if ( GetSpawnFlags() == SF_UseTrigger ) {
+		if ( GetSpawnFlags() & SF_UseTrigger ) {
 			gi.DPrintf("Yo dawg, I herd u liek toggling so I notified you dat flag iz set!\n");
 			SetUseEntityFlags( UseEntityFlags::Toggle );
 		} else {
@@ -166,6 +165,7 @@ void FuncDoor::PostSpawn() {
 // FuncDoor::DoorUse
 //===============
 void FuncDoor::DoorUse( IServerGameEntity* other, IServerGameEntity* activator ) {
+	
     if ( GetFlags() & EntityFlags::TeamSlave ) {
         return;
     }
@@ -188,9 +188,8 @@ void FuncDoor::DoorUse( IServerGameEntity* other, IServerGameEntity* activator )
 
                 // Ensure it is a subclass of a door otherwise we can't tell it to go down.
                 if ( ent->IsSubclassOf<FuncDoor>() ) {
-                    // Unset message so it triggers its display only once.
-                    ent->SetMessage( "" );
-
+					// Unset message so it triggers its display only once.
+					ent->SetMessage( "" );
                     // WID: TODO: Add a flag for whether to unset touch callbacks after being used for the first time.
                     //ent->SetTouchCallback( nullptr );
                     static_cast<FuncDoor*>( ent )->DoorGoDown();
@@ -199,7 +198,19 @@ void FuncDoor::DoorUse( IServerGameEntity* other, IServerGameEntity* activator )
 
             // Escape out of this function.
             return;
-        }
+		} else {
+			// Centerprint message, if any.
+			const std::string &doorMsg = GetMessage();
+
+			// This here is for USE TOGGLE doors.
+			if ( !doorMsg.empty() ) {
+				SVG_CenterPrint( other, messageStr.c_str() );
+				SVG_Sound( other, SoundChannel::Auto, gi.PrecacheSound( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
+			}
+
+			// Unset message so it triggers its display only once.
+			SetMessage( "" );
+		}
     }
 
     // Trigger all paired movers.
@@ -214,7 +225,7 @@ void FuncDoor::DoorUse( IServerGameEntity* other, IServerGameEntity* activator )
             ent->SetMessage( "" );
             // WID: TODO: Add a flag for whether to unset touch callbacks after being used for the first time.
             //ent->SetTouchCallback( nullptr );
-	        static_cast<FuncDoor*>(ent)->DoorGoUp(dynamic_cast<SVGBaseEntity*>(activator));
+			static_cast<FuncDoor*>(ent)->DoorGoUp(dynamic_cast<SVGBaseEntity*>(activator));
         }
     }
 }
@@ -311,7 +322,7 @@ void FuncDoor::DoorTouch( IServerGameEntity* self, IServerGameEntity* other, Col
     debounceTouchTime = level.time + 5s;
 
     if ( !messageStr.empty() ) {
-        gi.CenterPrintf( other->GetPODEntity(), "%s", messageStr.c_str() );
+        gi.CenterPrintf( other->GetPODEntity(), "%s\n", messageStr.c_str() );
         gi.Sound( other->GetPODEntity(), SoundChannel::Auto, gi.PrecacheSound( MessageSoundPath ), 1.0f, Attenuation::Normal, 0.0f );
     }
 
@@ -600,7 +611,18 @@ void FuncDoor::SpawnKey(const std::string& key, const std::string& value) {
         // Assign.
         SetLip(parsedInteger);
     }
-    // Speed value.
+	// Messages.
+	else if (key == "message") {
+        // Parsed int.
+        std::string parsedString = "";
+
+        // Parse.
+        ParseKeyValue(key, value, parsedString);
+
+        // Assign.
+        SetMessage(parsedString);
+	}
+	// Speed value.
     else if (key == "speed") {
         // Parsed int.
         int32_t parsedInteger = 0;

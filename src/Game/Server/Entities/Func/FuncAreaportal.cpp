@@ -12,7 +12,6 @@
 #include "../../Effects.h"
 #include "../../Entities.h"
 #include "../../Utilities.h"
-#include "../../Physics/StepMove.h"
 
 #include "../Base/SVGBaseEntity.h"
 
