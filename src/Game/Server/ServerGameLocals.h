@@ -317,6 +317,8 @@ struct ItemFlags {
 **/
 struct LevelLocals  {
     //! Current level time in Milliseconds.
+	uint64_t frameNumber = 0;
+	//! Current level time in Milliseconds.
     GameTime time = GameTime::zero();
 
     char levelName[MAX_QPATH];  //! The descriptive name (Outer Base, etc)

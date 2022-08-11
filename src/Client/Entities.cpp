@@ -192,7 +192,7 @@ void CL_DeltaFrame(void)
     }
 
     // Set server time
-    int32_t frameNumber = cl.frame.number - cl.serverDelta;
+    int64_t frameNumber = cl.frame.number - cl.serverDelta;
     cl.serverTime = frameNumber * CL_FRAMETIME;
 
     // Rebuild the list of solid entities for this frame
@@ -244,7 +244,7 @@ void CL_DeltaFrame(void)
 	// Call into client game module its delta frame function.
 	// This gives packet entities a chance to "predict" the next frame before
 	// the current data arrives.
-	//CL_GM_ClientPacketEntityDeltaFrame();
+	CL_GM_ClientPacketEntityDeltaFrame();
 
     // Check for prediction errors.
     CL_CheckPredictionError();

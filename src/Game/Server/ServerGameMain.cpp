@@ -31,17 +31,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // GameModes.
 #include "Gamemodes/IGamemode.h"
 #include "Gamemodes/DefaultGamemode.h"
-#include "GameModes/CoopGamemode.h"
+#include "Gamemodes/CoopGamemode.h"
 #include "Gamemodes/DeathMatchGamemode.h"
 
 // GameWorld.
-#include "World/ServerGameWorld.h"
+#include "Game/Server/World/ServerGameWorld.h"
 
 // Player related.
-#include "Player/Client.h"      // Include Player Client header.
+#include "Game/Server/Player/Client.h"      // Include Player Client header.
 
 // Physics related.
-
+#include "Game/Shared/Physics/Physics.h"
 
 //-----------------
 // Global Game and Engine API Imports/Exports Variables.
@@ -533,14 +533,17 @@ SVG_RunFrame
 Advances the world by FRAMETIME_S(for 50hz=0.019) seconds
 ================
 */
-#include "../Shared/Physics/Physics.h"
+
 void SVG_RunFrame(void) {
-    // Add the time it takes to simulate a ServerGame frame to our level.time value.
-    level.time += FRAMERATE_MS;
+	// Increment and use the frame number to calculate the current level time with.
+	level.frameNumber++;
+    level.time += level.frameNumber * FRAMERATE_MS;
+
+	const std::string &dbgPrintStr = fmt::format( "level.time = GameTime( level.frameNumber * FRAMERATE_MS ) = ({})\n", level.time.count() );
+	gi.DPrintf( "%s\n", dbgPrintStr.c_str() );
 
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
-        //SVG_ExitLevel();
         GetGameMode()->OnLevelExit();
         return;
     }

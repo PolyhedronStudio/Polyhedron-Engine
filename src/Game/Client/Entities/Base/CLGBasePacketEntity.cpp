@@ -569,8 +569,9 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 *	@brief	Used by default in order to process entity state data such as animations.
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
+	CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
 	// Setup same think for the next frame.
-	SetNextThinkTime(level.time + FRAMETIME_S);
+	SetNextThinkTime(level.time + 16ms);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
@@ -625,34 +626,39 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 	//// Has the animation index changed? If so, lookup the new animation.
 	//// TODO: Move to a separate function.
 	//const int32_t currentAnimationIndex = currentAnimationState->animationIndex;
-	//const int32_t previousAnimationIndex = previousAnimation->animationIndex;
+	const int32_t previousAnimationIndex = previousAnimationState->animationIndex;
 	// Use refresh instead. It's the most actual state anyhow.
-	const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
+	//const int32_t previousAnimationIndex = refreshAnimation.animationIndex;
 
 	// We change animations for our 'main timeline animation' if:
 	//	- animationIndex differs from our previous animation index.
 	//	AND
 	//	- the start time of the new animation to switch to differs from the current animation start time.
-	if ( animationIndex != currentAnimationState->animationIndex ) {
-		// First get the actual animation, from there, get the first blend action, and then get the actual action * wooh *
-		SkeletalAnimation *skmAnimation= skm->animations[ animationIndex ];
+	if ( animationIndex != previousAnimationState->animationIndex || previousAnimationState->startTime != currentAnimationState->startTime ) {
+		// Get the animation.
+		SkeletalAnimation *skmAnimation = GetAnimation( animationIndex );
 
-		// Get action index.
-		const uint16_t actionIndex = skmAnimation->blendActions[0].actionIndex;
+		if ( !skmAnimation) {
+			// TODO: Warn?
+			return false;
+		}
+		SkeletalAnimationBlendAction *skmBlendAction = GetBlendAction( skmAnimation, 0 );
 
 		// Retreive animation data matching to animationIndex.
-		SkeletalAnimationAction *skmAction= skm->actions[actionIndex];
+		SkeletalAnimationAction *skmAction= GetAction( skmBlendAction->actionIndex );
 
 		// Update our refresh animation to new values.
-		refreshAnimation.animationIndex	= actionIndex;
-		refreshAnimation.frame			= currentAnimationState->frame;//skmAction->startFrame;	// TODO: Should we?? // Set current frame to start frame.
+		refreshAnimation.animationIndex	= animationIndex;
+		refreshAnimation.frame			= currentAnimationState->frame;
 		refreshAnimation.startFrame		= skmAction->startFrame;
 		refreshAnimation.endFrame		= skmAction->endFrame;
-		refreshAnimation.forceLoop		= skmAction->forceLoop;	// TODO: Set to forceloop, but not for debugging atm. //currentAnimation->forceLoop;
+		refreshAnimation.forceLoop		= skmAction->forceLoop;
 		refreshAnimation.frameTime		= skmAction->frametime;
-		refreshAnimation.startTime		= currentAnimationState->startTime;//.count();
-		refreshAnimation.loopCount		= skmAction->loopingFrames;// (skmAction->loopingFrames < 0 ? 0 : skmAction->loopingFrames);	// TODO: Set to loopcount, but not for debugging atm. //currentAnimation->loopCount;
-
+		// Since the serverTime we got on the client is an estimation and starts ticking the second the client joins,
+		// we have to set the startTime to whichever our level.time was at the moment this animation started switching.
+		refreshAnimation.startTime		= level.time.count();
+		refreshAnimation.loopCount		= skmAction->loopingFrames;
+		
 		// Update animation states for this frame's current entity state.
 		*previousAnimationState = *currentAnimationState;
 	}
@@ -1013,7 +1019,7 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 	}
 
 	// Did any animation state data change?
-	if (currentAnimation->startTime != previousAnimation->startTime) {
+	if (currentAnimation->startTime != previousAnimation->startTime || currentAnimation->animationIndex != previousAnimation->animationIndex) {
 		SwitchAnimation(currentAnimation->animationIndex, GameTime(currentAnimation->startTime));
 	}
 
@@ -1495,7 +1501,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
 				// Make sure we got model data to work our transformations on.
 				if (entitySkeleton.modelPtr != nullptr ) {
 					// Process the skeletal animation blend action frames for the current client time. (Based on animation start time.)
-					ProcessSkeletalAnimationForTime(level.time); 
+					ProcessSkeletalAnimationForTime( GameTime( cl->time ) ); 
 					// Compute the Entity Skeleton Trasforms for Refresh Frame.
 					ComputeEntitySkeletonTransforms( nullptr );
 				} else {

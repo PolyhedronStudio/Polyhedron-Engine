@@ -245,6 +245,7 @@ public:
 *           ugly darn copy of..
 **/
 struct LevelLocals  {
+	uint64_t frameNumber = 0;
 	//! Current sum of total frame time taken.
     GameTime time = GameTime::zero();
 	

@@ -31,6 +31,8 @@
 // World.
 #include "Game/Client/World/ClientGameWorld.h"
 
+// Physics
+#include "Game/Shared/Physics/Physics.h"
 
 // WID: TODO: Gotta fix this one too.
 extern qhandle_t cl_mod_powerscreen;
@@ -185,13 +187,20 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
 **/
 void CLG_RunServerEntity(SGEntityHandle &entityHandle);
 void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle);
-#include "../../Shared/Physics/Physics.h"
+
 /**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
 	// Unlike for the server game, the level's framenumber, time and timeStamp
-    // have already been calculated before reaching this point.
+	    GameTime svTime = GameTime(cl->serverTime);
+    GameTime clTime = GameTime(cl->time);
+
+	if (clTime > svTime) {
+		level.time = svTime;
+	} else {
+		level.time =  clTime;
+	}
 
 	// Get GameWorld.
 	ClientGameWorld *gameWorld = GetGameWorld();

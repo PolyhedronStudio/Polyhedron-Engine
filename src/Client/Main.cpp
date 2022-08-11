@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "Sound/Vorbis.h"
 #include "GameModule.h"
 #include "Sound/Sound.h"
+#include "Entities/LocalEntities.h"
 
 cvar_t  *rcon_address;
 
@@ -2681,15 +2682,13 @@ void CL_Activate(active_t active)
 
 static void CL_SetClientTime(void)
 {
-    int prevtime;
-
     if (com_timedemo->integer) {
         cl.time = cl.serverTime;
         cl.lerpFraction = 1.0f;
         return;
     }
 
-    prevtime = cl.serverTime - CL_FRAMETIME;
+    uint64_t prevtime = cl.serverTime - CL_FRAMETIME;
     if (cl.time > cl.serverTime) {
         SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.serverTime);
         cl.time = cl.serverTime;
@@ -2918,7 +2917,7 @@ void CL_UpdateFrameTimes(void)
 /**
 *	@brief	"Runs"/"Moves Forward" the Server Game Module for another frame.
 **/
-#include "Entities/LocalEntities.h"
+
 static uint64_t clFrameResidual = 0;
 uint64_t CL_RunGameFrame(uint64_t msec) {
     if (cls.connectionState < ClientConnectionState::Active) {
@@ -2928,18 +2927,20 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
     if (host_speeds->integer)
         timeBeforeClientGame = Sys_Milliseconds();
 #endif
-	// move autonomous things around if enough time has passed
-    clFrameResidual += msec;
-    if (clFrameResidual < CL_FRAMETIME) {
-        return CL_FRAMETIME - clFrameResidual;
-    }
+	////// move autonomous things around if enough time has passed
+ //   clFrameResidual += msec;
+ //   if (clFrameResidual < CL_FRAMETIME) {
+ //       return CL_FRAMETIME - clFrameResidual;
+ //   }
 		
 	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
 	cl.numSolidLocalEntities = 0;
 	
 	// Run the received packet entities for a frame so we can "predict".
-	CL_GM_ClientPacketEntityDeltaFrame();
+	//CL_GM_ClientPacketEntityDeltaFrame();
+    // Check for prediction errors.
+    //CL_CheckPredictionError();
 
 	if ( sv_paused->integer == 0 ) {
 		for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
@@ -2969,17 +2970,17 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
     if (host_speeds->integer)
         timeAfterClientGame = Sys_Milliseconds();
 #endif
-	// decide how long to sleep next frame
-    clFrameResidual -= CL_FRAMETIME;
-    if (clFrameResidual < CL_FRAMETIME) {
-        return CL_FRAMETIME - clFrameResidual;
-    }
+	//// decide how long to sleep next frame
+ //   clFrameResidual -= CL_FRAMETIME;
+ //   if (clFrameResidual < CL_FRAMETIME) {
+ //       return CL_FRAMETIME - clFrameResidual;
+ //   }
 
-	// don't accumulate bogus residual
-    if (clFrameResidual > 250) {
-        Com_DDDPrintf("Reset residual %u\n", clFrameResidual);
-        clFrameResidual = 100;
-    }
+	//// don't accumulate bogus residual
+	//if (clFrameResidual > 250) {
+	//	Com_DDDPrintf("Reset residual %u\n", clFrameResidual);
+	//	clFrameResidual = 100;
+	//}
 
 	return 0;
 }
@@ -3072,8 +3073,8 @@ uint64_t CL_Frame(uint64_t msec)
     // Decide the simulation time
     cls.frameTime = main_extra * 0.001f;
 
-    if (cls.frameTime > 1.0 / 5) {
-        cls.frameTime = 1.0 / 5;
+    if (cls.frameTime > 1.0 / 25) {
+        cls.frameTime = 1.0 / 25;
     }
 
 	if (!sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
@@ -3104,10 +3105,7 @@ uint64_t CL_Frame(uint64_t msec)
 			
 	// Let client side entities do their thing.
 	if (phys_frame) {
-
-
-		// Run the actual local game.
-		CL_RunGameFrame(phys_extra);
+		main_extra -= CL_RunGameFrame(main_msec);
 	}
 
     // Finalize pending cmd
@@ -3116,6 +3114,7 @@ uint64_t CL_Frame(uint64_t msec)
     if (phys_frame) {
         CL_FinalizeCmd();
         phys_extra -= phys_msec;
+
         M_FRAMES++;
 
         // Don't let the time go too far off

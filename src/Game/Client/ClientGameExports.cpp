@@ -145,8 +145,8 @@ void ClientGameExports::ClientBegin() {
 	//game.Initialize();
 
  //   // Reset level locals.
- //   level = LevelLocals{};
-    level.time = GameTime(cl->serverTime);
+    level = LevelLocals{};
+    level.time = GameTime(cl->time);
 }
 
 /**
@@ -174,30 +174,7 @@ void ClientGameExports::ClientClearState() {
 *   @brief  Called each client frame. Handle per frame basis things here.
 **/
 void ClientGameExports::ClientFrame() {
-	// Run the entity prediction logic for the next frame.
-    GameTime svTime = GameTime(cl->serverTime);
-    GameTime clTime = GameTime(cl->time);
 
-	// Previous server time.
-    //GameTime prevtime = svTime - FRAMERATE_MS;
-
-	// Set server times.
-	level.prevServerTime	= level.curServerTime;
-	level.curServerTime		= svTime;
-	level.nextServerTime	= svTime + FRAMERATE_MS;
-
-    if (clTime > svTime) {
-    //    SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.serverTime);
-        //cl.time = cl.serverTime;
-		level.time = svTime;
-    //    cl.lerpFraction = 1.0f;
-    } else if (clTime < svTime) {
-    //    SHOWCLAMP(1, "low clamp %i\n", prevtime - cl.time);
-        level.time = svTime + FRAMERATE_MS;
-        
-    } else {
-        level.time = clTime;
-    }
 
     // Advance local effects.
     DynamicLights::RunFrame();
@@ -210,8 +187,7 @@ void ClientGameExports::ClientFrame() {
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameExports::ClientPacketEntityDeltaFrame() {
-   // Low and behold, time to run the ClientGame Entity logic for another single frame.
-   entities->RunPacketEntitiesDeltaFrame();
+	entities->RunPacketEntitiesDeltaFrame();
 }
 
 /**
@@ -233,7 +209,6 @@ uint32_t ClientGameExports::GetHashedGameEntityClassname(PODEntity *podEntity) {
 *   @brief  Called for each prediction frame, so all entities can try and predict like the player does.
 **/
 void ClientGameExports::ClientPredictEntitiesFrame() {
-
     // Low and behold, time to run the ClientGame Entity logic for another single frame.
     entities->RunPackEntitiesPredictionFrame();
 }

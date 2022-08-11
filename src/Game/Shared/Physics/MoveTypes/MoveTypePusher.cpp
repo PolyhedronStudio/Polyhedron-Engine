@@ -219,8 +219,14 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
 
 		// Entity has to be linked in.
 #if SHAREDGAME_CLIENTGAME
-		if ( !geCheck->GetLinkCount() ) {
-		//if ( !geCheck->GetPODEntity()->area.prev ) {
+		//if ( !geCheck->GetLinkCount() ) {
+		if ( !geCheck->GetPODEntity()->area.prev ) {
+			auto client = geCheck->GetClient();
+			if (client) {
+				SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(#{})]: Not linked in anywhere", geCheck->GetNumber(), client->clientNumber ) );
+			} else {
+				SG_Print( PrintType::DeveloperWarning, fmt::format( "[Ent(#{}),Client(nullptr)]: Not linked in anywhere", geCheck->GetNumber() ) );
+			}
 #endif
 #if SHAREDGAME_SERVERGAME
         if ( !geCheck->GetPODEntity()->area.prev ) {
@@ -267,10 +273,24 @@ static bool SG_Push( SGEntityHandle &entityHandle, const vec3_t &move, const vec
             if (geCheck->GetClient()) {
                 // FIXME: doesn't rotate monsters?
                 // FIXME: skuller: needs client side interpolation
+				#ifdef SHAREDGAME_CLIENTGAME
+				SG_Print( PrintType::DeveloperWarning, fmt::format("[Ent(#{}) Client(#{})]:", geCheck->GetNumber(), geCheck->GetClient()->clientNumber, 
+						 angularMove[vec3_t::Pitch],
+						 angularMove[vec3_t::Yaw],
+						angularMove[vec3_t::Roll]
+					)
+				);
+				#endif
                 geCheck->GetClient()->playerState.pmove.deltaAngles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
 			} else {
 				vec3_t angles = geCheck->GetAngles();
 				angles[vec3_t::Yaw] += angularMove[vec3_t::Yaw];
+								SG_Print( PrintType::DeveloperWarning, fmt::format("[Ent(#{}) Client(nullptr)]:", geCheck->GetNumber(), 
+						 angularMove[vec3_t::Pitch],
+						 angularMove[vec3_t::Yaw],
+						angularMove[vec3_t::Roll]
+					)
+				);
 				geCheck->SetAngles(angles);
 			}
 #endif

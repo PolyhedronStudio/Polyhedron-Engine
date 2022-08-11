@@ -188,7 +188,7 @@ int32_t SVGBaseSkeletalAnimator::PrepareAnimation( const std::string &name, cons
 **/
 const bool SVGBaseSkeletalAnimator::AnimationFinished( const EntityAnimationState *animationState )  {
 		// Get the frame and end frame.
-	const int32_t animationStartFrame	= animationState->endFrame;
+	const int32_t animationStartFrame	= animationState->startFrame;
 	const int32_t animationEndFrame	= animationState->endFrame;
 	const int32_t animationFrame	= animationState->frame;
 	const float animationBacklerp = animationState->backLerp;
