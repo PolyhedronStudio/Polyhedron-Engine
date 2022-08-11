@@ -183,12 +183,6 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
 }
 
 /**
-*   @brief  Runs the client game module's entity logic for a single frame.
-**/
-void CLG_RunServerEntity(SGEntityHandle &entityHandle);
-void CLG_RunLocalClientEntity(SGEntityHandle &entityHandle);
-
-/**
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameEntities::RunPacketEntitiesDeltaFrame() {

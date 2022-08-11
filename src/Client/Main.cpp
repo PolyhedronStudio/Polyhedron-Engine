@@ -2928,10 +2928,10 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
         timeBeforeClientGame = Sys_Milliseconds();
 #endif
 	////// move autonomous things around if enough time has passed
- //   clFrameResidual += msec;
- //   if (clFrameResidual < CL_FRAMETIME) {
- //       return CL_FRAMETIME - clFrameResidual;
- //   }
+    //clFrameResidual += msec;
+    //if (clFrameResidual < CL_FRAMETIME) {
+    //    return CL_FRAMETIME - clFrameResidual;
+    //}
 		
 	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
@@ -2970,7 +2970,7 @@ uint64_t CL_RunGameFrame(uint64_t msec) {
     if (host_speeds->integer)
         timeAfterClientGame = Sys_Milliseconds();
 #endif
-	//// decide how long to sleep next frame
+	////// decide how long to sleep next frame
  //   clFrameResidual -= CL_FRAMETIME;
  //   if (clFrameResidual < CL_FRAMETIME) {
  //       return CL_FRAMETIME - clFrameResidual;
@@ -3105,6 +3105,7 @@ uint64_t CL_Frame(uint64_t msec)
 			
 	// Let client side entities do their thing.
 	if (phys_frame) {
+		// Run the actual local game.
 		main_extra -= CL_RunGameFrame(main_msec);
 	}
 

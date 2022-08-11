@@ -80,7 +80,6 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 		gi.DPrintf("Warning: entity #%i is not a func_plat.\n", ownerEntity->GetNumber());
 		return;
 	}
-	gi.DPrintf("TOUCHED PLATFORM TRIGGER22222222\n");
 
 	// It is save to cast the pointer.
 	FuncPlat* platformEntity = dynamic_cast<FuncPlat*>(ownerEntity);

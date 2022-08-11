@@ -329,7 +329,7 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
-	const auto nextFrameTime = (geThinker->GetPODEntity()->isLocal ? level.time : level.nextServerTime);
+	const auto nextFrameTime = level.time;
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > nextFrameTime ) { //nextThinkTime > level.nextServerTime) {
 #endif
 #ifdef SHAREDGAME_SERVERGAME

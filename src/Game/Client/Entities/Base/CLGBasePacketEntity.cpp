@@ -74,7 +74,7 @@ void CLGBasePacketEntity::Precache() {
 **/
 void CLGBasePacketEntity::Spawn() {
 	// Setup the standard default NextThink method.
-	SetNextThinkTime(level.time + FRAMETIME_S);
+	SetNextThinkTime(level.time + 16ms);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 /**
@@ -88,6 +88,10 @@ void CLGBasePacketEntity::Respawn() {
 *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
 **/
 void CLGBasePacketEntity::PostSpawn() {
+	
+	// Setup the standard default NextThink method.
+	SetNextThinkTime(level.time + 16ms);
+	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
 /**

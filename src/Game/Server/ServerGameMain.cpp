@@ -537,10 +537,7 @@ Advances the world by FRAMETIME_S(for 50hz=0.019) seconds
 void SVG_RunFrame(void) {
 	// Increment and use the frame number to calculate the current level time with.
 	level.frameNumber++;
-    level.time += level.frameNumber * FRAMERATE_MS;
-
-	const std::string &dbgPrintStr = fmt::format( "level.time = GameTime( level.frameNumber * FRAMERATE_MS ) = ({})\n", level.time.count() );
-	gi.DPrintf( "%s\n", dbgPrintStr.c_str() );
+    level.time += FRAMERATE_MS; //level.frameNumber * FRAMERATE_MS;
 
     // Check for whether an intermission point wants to exit this level.
     if (level.intermission.exitIntermission) {
