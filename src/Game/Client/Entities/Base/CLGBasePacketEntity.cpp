@@ -1058,7 +1058,7 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 		// Get pointer to dominating blend action.
 		SkeletalAnimationBlendAction *dominatingBlendAction = GetBlendAction( animation, 0 );
 		// Get the dominating blend action state.
-		EntitySkeletonBlendActionState *dominatingBlendActionState = GetBlendActionState( animation->index, 0 );
+		EntitySkeletonBlendActionState *dominatingBlendActionState = GetBlendActionState( currentAnimation->animationIndex, 0 );
 
 		// Ensure that it is in bounds. (Should be.)
 		if ( !dominatingBlendAction || !dominatingBlendActionState ) {
@@ -1104,10 +1104,10 @@ void CLGBasePacketEntity::ProcessSkeletalAnimationForTime(const GameTime &time) 
 				if ( subdominatingAction ) {
 					// We've got the action data, time to process its frame for time and store it into
 					// our distinct entity skeleton.
-					EntitySkeletonBlendActionState *baState = GetBlendActionState( animation->index, blendActionIndex );
+					//EntitySkeletonBlendActionState *baState = GetBlendActionState( currentAnimation->animationIndex, blendActionIndex );
 					// We've got the action data, time to process its frame for time and store it into
 					// our distinct entity skeleton.
-					//EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
+					EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
 					if ( !baState ) {
 						// TODO: Debug warning here.
 						refreshEntity.currentBonePoses = nullptr;
@@ -1207,7 +1207,7 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 		// Get pointer to dominating blend action.
 		SkeletalAnimationBlendAction *dominatingBlendAction = GetBlendAction( animation, 0 );
 		// Get the dominating blend action state.
-		EntitySkeletonBlendActionState *dominatingBlendActionState = GetBlendActionState( animation->index, 0 );
+		EntitySkeletonBlendActionState *dominatingBlendActionState = GetBlendActionState( currentAnimation->animationIndex, 0 );
 
 		// Ensure that it is in bounds. (Should be.)
 		if ( !dominatingBlendActionState ) {
@@ -1243,8 +1243,8 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 				if ( subdominatingAction ) {
 					// We've got the action data, time to process its frame for time and store it into
 					// our distinct entity skeleton.
-					EntitySkeletonBlendActionState *baState = GetBlendActionState( animation->index, blendActionIndex );
-
+					//EntitySkeletonBlendActionState *baState = GetBlendActionState( currentAnimation->animationIndex, blendActionIndex );
+										EntitySkeletonBlendActionState *baState = &entitySkeleton.blendActionAnimationStates[ currentAnimation->animationIndex ][ blendActionIndex ];
 					// Allocate our blend action bone pose channel.
 					EntitySkeletonBonePose *blendActionBonePose	= clgi.TBC_AcquireCachedMemoryBlock( model->iqmData->num_poses );
 					if ( !baState || !blendActionBonePose) {
@@ -1268,7 +1268,7 @@ void CLGBasePacketEntity::ComputeEntitySkeletonTransforms( EntitySkeletonBonePos
 					// Bone exists.
 					if ( boneNumber < entitySkeleton.bones.size() ) {
 						auto &hipNode = entitySkeleton.boneMap["mixamorig8:Spine1"]; // Blind guess.
-						//auto boneNode = entitySkeleton.bones[boneNumber].boneTreeNode;
+						//auto &boneNode = entitySkeleton.bones[boneNumber].boneTreeNode;
 
 						// Recursive blend the Bone animations starting from joint #4, between relativeJointsB and A. (A = src, and dest.)
 						clgi.ES_RecursiveBlendFromBone( blendActionBonePose, 

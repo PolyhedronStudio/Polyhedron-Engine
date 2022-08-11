@@ -420,8 +420,8 @@ void MonsterTestDummy::DieCallback_FallDead(IServerGameEntity* inflictor, IServe
     SetActivator(attacker);
 
 	// Switch to animation: 'WalkingToDying' so it looks like he's dropping dead.
-	//PrepareAnimation( "WalkingToDying" );
-	SwitchAnimation( "WalkingToDying" );
+	PrepareAnimation( "WalkingToDying", true );
+	//SwitchAnimation( "WalkingToDying" );
 	//PrepareAnimation( "WalkingToDying" );
 	//.Otherwise keep processing the current animation frame for time.
 	//ProcessSkeletalAnimationForTime(level.time);
