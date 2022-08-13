@@ -598,7 +598,7 @@ static void PM_StepSlideMove(void)
 	// If the fraction is < 1, clip against the plane.
 	if ( downTraceB.fraction < 1.0 ) {
 		//pm->state.origin = org1;
-		PM_ClipVelocity( pm->state.velocity, downTraceB.plane.normal, PM_CLIP_BOUNCE );
+		pm->state.velocity = PM_ClipVelocity( pm->state.velocity, downTraceB.plane.normal, PM_CLIP_BOUNCE );
 	}
 
 	// Trace back to original position, if it can, don't step.

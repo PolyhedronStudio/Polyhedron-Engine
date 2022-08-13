@@ -146,7 +146,7 @@ struct PlayerMoveType {
     static constexpr uint8_t Normal     = 0;
     //! Free-flying movement with acceleration and friction, no gravity.
     static constexpr uint8_t Spectator  = 1;
-    //! Like Spectator, Free-Flying, but no clipping. Meaning you can move through walls and entities.
+    //! Free-Flying like Spectator, excluding clipping to brushes. Meaning you can move through Entities and Walls.
     static constexpr uint8_t Noclip     = 2;
 };
 

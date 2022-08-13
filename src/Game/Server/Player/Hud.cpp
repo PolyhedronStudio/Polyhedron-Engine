@@ -419,9 +419,9 @@ void SVG_HUD_SetClientStats(SVGBasePlayer* player, ServerClient* client) {
 	*	Weapon Time.
 	**/	
 	if ( client->weaponState.timeStamp == GameTime::zero() ) {
-		client->playerState.stats[ PlayerStats::Weapon ] = 0;
+		client->playerState.stats[ PlayerStats::WeaponTime ] = 0;
 	} else {
-		client->playerState.stats[ PlayerStats::Weapon ] = !client->persistent.inventory.activeWeaponID;
+		client->playerState.stats[ PlayerStats::WeaponTime ] = static_cast<int16_t>( client->weaponState.timeStamp.count() );
 	}
 
 

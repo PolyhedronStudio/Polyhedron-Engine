@@ -90,7 +90,7 @@ void CLGBasePacketEntity::Respawn() {
 void CLGBasePacketEntity::PostSpawn() {
 	
 	// Setup the standard default NextThink method.
-	SetNextThinkTime(level.time + 16ms);
+	SetNextThinkTime(GameTime( cl->serverTime ) + 16ms);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 
@@ -574,8 +574,8 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
 	CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
-	// Setup same think for the next frame.
-	SetNextThinkTime(level.time + 16ms);
+	//// Setup same think for the next frame.
+	SetNextThinkTime(GameTime( cl->serverTime ) + 16ms);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
 }
 

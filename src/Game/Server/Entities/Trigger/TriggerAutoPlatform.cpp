@@ -51,14 +51,21 @@ void TriggerAutoPlatform::Spawn() {
 // TriggerAutoPlatform::AutoPlatformTouch
 //===============
 void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGameEntity* other, CollisionPlane* plane, CollisionSurface* surf ) {
-	bool isMonster = other->GetServerFlags() & EntityServerFlags::Monster;
-	// Alternatively, when we have a BaseMonster class:
-	// isMonster = other->IsSubclassOf<BaseMonster>();
-
 	// Only activate if we are a client.
-	if (!other->GetClient()) {
+	if ( !other ) { 
 		return;
 	}
+	
+	// Alternatively, when we have a DECENT BaseMonster class:
+	const bool isMonster = other->GetServerFlags() & EntityServerFlags::Monster;
+
+	if ( (!other->GetClient() && !isMonster) ) {
+		return;
+	}
+	// Unless the no monster flag is set
+	//if ( (GetOwner()->GetSpawnFlags() & FuncPlat::SF_NoMonsters) && (isMonster) ) {
+	//	return;
+	//}
 
 	// Don't activate if we're out of health.
 	if (other->GetHealth() <= 0) {
@@ -71,7 +78,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 	}
 
 	// Set new debounce time.
-	debounceTouchTime = level.time + 3s;
+	debounceTouchTime = level.time + 3s; // TODO: This is likely better eh? GetOwner()->GetWaitTime();
 
 	// Ensure that the owner is a func_plat.
 	IServerGameEntity* ownerEntity = GetEnemy();

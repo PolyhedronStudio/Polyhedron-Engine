@@ -1766,7 +1766,7 @@ processing are run even when server is not yet initalized.
 Returns amount of extra frameTime available for sleeping on IO.
 ==================
 */
-unsigned SV_Frame(unsigned msec)
+uint64_t SV_Frame(uint64_t msec)
 {
 #if USE_CLIENT
     timeBeforeServerGame = timeAfterServerGame = 0;

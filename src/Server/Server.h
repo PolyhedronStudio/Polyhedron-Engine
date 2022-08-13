@@ -56,7 +56,7 @@ void SV_ErrorEvent(NetAdr *from, int ee_errno, int ee_info);
 #endif
 void SV_Init(void);
 void SV_Shutdown(const char *finalmsg, int32_t errorType);
-unsigned SV_Frame(unsigned msec);
+uint64_t SV_Frame(uint64_t msec);
 #if USE_SYSCON
 void SV_SetConsoleTitle(void);
 #endif

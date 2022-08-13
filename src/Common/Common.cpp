@@ -1171,6 +1171,7 @@ void Qcommon_Frame(void)
         timeBetween = Sys_Milliseconds();
 
     clientRemainingTime = CL_Frame(msec);
+
     if (serverRemainingTime > clientRemainingTime) {
         serverRemainingTime = clientRemainingTime;
     }

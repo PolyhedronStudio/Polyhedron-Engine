@@ -66,39 +66,42 @@ void FuncPlat::Spawn() {
     SetUseCallback(&FuncPlat::PlatformUse);
 
     // Key/Value setup.
-    if (!GetSpeed()) {
+    if ( !GetSpeed() ) {
         SetSpeed(20.f);
     } else {
         SetSpeed(GetSpeed() * 0.1f);
     }
-    if (!GetAcceleration()) {
-        SetAcceleration(5.f);
+	if ( GetWaitTime() == GameTime::zero()) {
+		SetWaitTime( 3s );
+	}
+    if ( !GetAcceleration() ) {
+        SetAcceleration( 5.f );
     } else {
-        SetAcceleration(GetAcceleration() * 0.5f);
+        SetAcceleration( GetAcceleration() * 0.5f );
     }
-    if (!GetDeceleration()) {
-        SetDeceleration(5.f);
+    if ( !GetDeceleration()) {
+        SetDeceleration( 5.f );
     } else {
-        SetDeceleration(GetDeceleration() * 0.5f);
+        SetDeceleration( GetDeceleration() * 0.5f );
     }
-    if (!GetDamage()) {
-        SetDamage(2);
+    if ( !GetDamage() ) {
+        SetDamage( 2 );
     }
-    if (!GetLip()) {
-        SetLip(8);
+    if ( !GetLip() ) {
+        SetLip( 8 );
     }
 
     // Set start and end positions to origin.
-    SetStartPosition(GetOrigin());
-    SetEndPosition(GetOrigin());
+    SetStartPosition( GetOrigin() );
+    SetEndPosition( GetOrigin() );
 
-    if (GetHeight()) {
+    if ( GetHeight() ) {
 	    // Adjust endposition according to keyvalue set height.
-        SetEndPosition(GetEndPosition() - vec3_t{0.f, 0.f, GetHeight()});
+        SetEndPosition( GetEndPosition() - vec3_t{ 0.f, 0.f, GetHeight() } );
     } else {
         // Adjust endposition based on own calculated height.
-        SetEndPosition(GetEndPosition() - vec3_t{0.f, 0.f, (GetMaxs().z - GetMins().z) - GetLip()});
-        height = GetEndPosition().z;
+        SetEndPosition( GetEndPosition() - vec3_t{ 0.f, 0.f, (GetMaxs().z - GetMins().z) - GetLip() } );
+        SetHeight( GetEndPosition().z );
     }
 
     //const float height = GetHeight();
@@ -155,8 +158,16 @@ void FuncPlat::Spawn() {
 // FuncPlat::PostSpawn
 //===============
 void FuncPlat::PostSpawn() {
-    // We spawn this in post spawn so all other calculations have been prepared.
-    SpawnPlatformTrigger();
+	// Get our spawnflags.
+	const int32_t spawnFlags = GetSpawnFlags();
+
+	// Spawn the platform 'top' and 'bottom' triggers, unless their disable flags are set.
+    if ( !(spawnFlags & SF_Platform_DisableTopTouchTrigger) ) {
+		SpawnTopTouchTrigger();
+	}
+	if ( !(spawnFlags & SF_Platform_DisableBottomTouchTrigger) ) {
+		SpawnBottomTouchTrigger();
+	}
 
     // Calculate movement speed to use.
     CalculateMoveSpeed();
@@ -166,12 +177,21 @@ void FuncPlat::PostSpawn() {
     // by default the trigger starts in its up state.
     //
     // Otherwise position it in its endposition and set state to bottom.
-    if (!GetTargetName().empty()) {
-        moveInfo.state = MoverState::Up;
-    } else {
-        SetOrigin(GetEndPosition());
-        moveInfo.state = MoverState::Bottom;
-    }
+	//if (!GetTargetName().empty()) {
+ //       moveInfo.state = MoverState::Up;
+ //   } else {
+ //       SetOrigin(GetEndPosition());
+ //       moveInfo.state = MoverState::Bottom;
+ //   }
+	// Start at state up.
+	if ( (spawnFlags & SF_PlatformStartAtTop) ) {
+		moveInfo.state = MoverState::Top;
+	} else {
+		// Default to end(bottom) position.
+		SetOrigin( GetEndPosition() );
+		// Change its state.
+		moveInfo.state = MoverState::Bottom;
+	}
     
     // Setup move info.
     moveInfo.speed = GetSpeed();
@@ -294,8 +314,19 @@ void FuncPlat::HitTop() {
 
     moveInfo.state = MoverState::Top;
 
-    SetThinkCallback( &FuncPlat::PlatformGoDown );
-    SetNextThinkTime( level.time + 3s);
+	// When SF_PlatformToggle is set we..
+	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
+		// If the bottom trigger is disabled, we want it to go back up automatically instead of wait for a trigger.
+		if (GetSpawnFlags() & SF_Platform_DisableTopTouchTrigger) {
+			SetThinkCallback( &FuncPlat::PlatformGoDown );
+			SetNextThinkTime( level.time + GetWaitTime() );
+		} else {
+			SetThinkCallback( nullptr );
+		}
+	} else {
+		SetThinkCallback( &FuncPlat::PlatformGoDown );
+		SetNextThinkTime( level.time + GetWaitTime() );
+	}
 }
 
 //===============
@@ -308,8 +339,24 @@ void FuncPlat::HitBottom() {
         }
         SetSound( 0 );
     }
-    SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
+	
     moveInfo.state = MoverState::Bottom;
+
+	// When SF_PlatformToggle is set we..
+	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
+		//SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
+
+		// If the bottom trigger is disabled, we want it to go back up automatically instead of wait for a trigger.
+		if (GetSpawnFlags() & SF_Platform_DisableBottomTouchTrigger) {
+			SetThinkCallback( &FuncPlat::PlatformGoUp );
+			SetNextThinkTime( level.time + GetWaitTime() );
+		} else {
+			SetThinkCallback( nullptr );
+		}
+	} else {
+		SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
+	}
+
 }
 
 //===============
@@ -329,14 +376,14 @@ void FuncPlat::OnPlatformHitTop( IServerGameEntity* self ) {
 //===============
 // FuncPlat::OnPlatformHitBottom
 //===============
-void FuncPlat::OnPlatformHitBottom( IServerGameEntity* self ) {
-    if (!self->IsSubclassOf<FuncPlat>()) {
-	    gi.DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
-        return;
-    }
-    
-    // Cast.
-    FuncPlat* platEntity = static_cast<FuncPlat*>(self);
+void FuncPlat::OnPlatformHitBottom(IServerGameEntity *self) {
+	if (!self->IsSubclassOf<FuncPlat>()) {
+		gi.DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
+		return;
+	}
+
+	// Cast.
+	FuncPlat *platEntity = static_cast<FuncPlat *>(self);
 	platEntity->HitBottom();
 }
 
@@ -344,97 +391,85 @@ void FuncPlat::OnPlatformHitBottom( IServerGameEntity* self ) {
 // FuncPlat::CalculateMoveSpeed
 //===============
 void FuncPlat::CalculateMoveSpeed() {
-    //if ( GetFlags() & EntityFlags::TeamSlave ) {
-    //    return; // Only the team master does this
-    //}
+	//if ( GetFlags() & EntityFlags::TeamSlave ) {
+	//    return; // Only the team master does this
+	//}
 
-    //FuncPlat* ent = nullptr;
-    float min = 0.f;
-    float time = 0.f;
-    float newSpeed = 0.f;
-    float ratio = 0.f;
-    float distance = 0.f;
-    FuncPlat *ent = nullptr;
+	//FuncPlat* ent = nullptr;
+	float min = 0.f;
+	float time = 0.f;
+	float newSpeed = 0.f;
+	float ratio = 0.f;
+	float distance = 0.f;
+	FuncPlat *ent = nullptr;
 
-    // Find the smallest distance any member of the team will be moving
-    min = fabsf( moveInfo.distance );
-    for (ent = dynamic_cast<FuncPlat*>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat*>(ent->GetTeamChainEntity())) {
-        distance = fabsf( ent->moveInfo.distance );
-        if ( distance < min ) {
-            min = distance;
-        }
-    }
+	// Find the smallest distance any member of the team will be moving
+	min = fabsf(moveInfo.distance);
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+		distance = fabsf(ent->moveInfo.distance);
+		if (distance < min) {
+			min = distance;
+		}
+	}
 
-    time = min / GetSpeed();
+	time = min / GetSpeed();
 
-    // Adjust speeds so they will all complete at the same time
-    for (ent = dynamic_cast<FuncPlat*>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat*>(ent->GetTeamChainEntity())) {
-        newSpeed = fabsf( ent->moveInfo.distance ) / time;
-        ratio = newSpeed / ent->moveInfo.speed;
+	// Adjust speeds so they will all complete at the same time
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<SVGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+		newSpeed = fabsf(ent->moveInfo.distance) / time;
+		ratio = newSpeed / ent->moveInfo.speed;
 
-        if ( ent->moveInfo.acceleration == ent->moveInfo.speed ) {
-            ent->moveInfo.acceleration = newSpeed;
-        } else {
-            ent->moveInfo.acceleration *= ratio;
-        }
+		if (ent->moveInfo.acceleration == ent->moveInfo.speed) {
+			ent->moveInfo.acceleration = newSpeed;
+		} else {
+			ent->moveInfo.acceleration *= ratio;
+		}
 
-        if ( ent->moveInfo.deceleration == ent->moveInfo.speed ) {
-            ent->moveInfo.deceleration = newSpeed;
-        } else {
-            ent->moveInfo.deceleration *= ratio;
-        }
+		if (ent->moveInfo.deceleration == ent->moveInfo.speed) {
+			ent->moveInfo.deceleration = newSpeed;
+		} else {
+			ent->moveInfo.deceleration *= ratio;
+		}
 
-        // Update moveInfo variables and class member variables
-        ent->SetAcceleration( ent->moveInfo.acceleration );
-        ent->SetDeceleration( ent->moveInfo.deceleration );
-        ent->moveInfo.speed = newSpeed;
-        ent->SetSpeed( newSpeed );
-    }
+		// Update moveInfo variables and class member variables
+		ent->SetAcceleration(ent->moveInfo.acceleration);
+		ent->SetDeceleration(ent->moveInfo.deceleration);
+		ent->moveInfo.speed = newSpeed;
+		ent->SetSpeed(newSpeed);
+	}
 }
 
-//===============
-// FuncPlat::SpawnPlatformTrigger
-// 
-// Platforms have an invisible bounding box on them, which
-// is slightly smaller than the platform's bounding box.
-// 
-// This bad boy spawns it, so keep that in mind if you're running out of edict slots.
-//===============
-void FuncPlat::SpawnPlatformTrigger() {
-    // Get mins and max.
-    const vec3_t mins = GetMins();
-    const vec3_t maxs = GetMaxs();
+/**
+*	@brief	Spawns the invisible 'top' touch trigger box.
+**/
+void FuncPlat::SpawnTopTouchTrigger() {
+	// Get mins and max.
+	const vec3_t mins = GetMins();
+	const vec3_t maxs = GetMaxs();
 
-    // Start calculation of the new trigger mins/maxs.
-    vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
-    vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
-
+	// We'll need these to calculate the trigger mins/maxs with.
     const vec3_t startPosition = GetStartPosition();
     const vec3_t endPosition = GetEndPosition();
     const float& lip = GetLip();
 
+	// Start calculation of the new trigger mins/maxs.
+    vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
+    vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
+
+	gi.DPrintf("%s", "SPAWNTOPTOUCH BRUH\n");
     // Calculate a slightly larger box.
     triggerMins.x = mins.x + 25.f;
     triggerMins.y = mins.y + 25.f;
-    triggerMins.z = mins.z;
+    triggerMins.z = mins.z + GetHeight();
 
     triggerMaxs.x = maxs.x - 25.f;
     triggerMaxs.y = maxs.y - 25.f;
-    triggerMaxs.z = maxs.z + 8;
+    triggerMaxs.z = maxs.z + GetHeight() + 8;
 
     // Adjust height.
-
-
-    // For PlatLowTriggered state we need a different mins and maxs.
-    if (GetSpawnFlags() & SF_PlatLowTriggered) {
-
-		triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z) + lip;
-		triggerMaxs.z = triggerMins.z + 8;
-	} else {
-	    triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z + lip);
-	}
-
-    // Scale it.
+	//triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z + lip);
+	
+    // Ensure it is properly scaled on X and Y Axis. 
     if (triggerMaxs.x - triggerMins.x <= 0.f) {
         triggerMins.x = (mins.x + maxs.x) * 0.5f;
         triggerMaxs.x = triggerMins.x + 1;
@@ -457,7 +492,64 @@ void FuncPlat::SpawnPlatformTrigger() {
     }
     
     // At last, create platform trigger entity.
-    SVGBaseEntity *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
+    TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
+}
+
+/**
+*	@brief	Spawns the invisible 'bottom' touch trigger box.
+**/
+void FuncPlat::SpawnBottomTouchTrigger() {
+	// Get mins and max.
+	const vec3_t mins = GetMins();
+	const vec3_t maxs = GetMaxs();
+
+	// We'll need these to calculate the trigger mins/maxs with.
+    const vec3_t startPosition = GetStartPosition();
+    const vec3_t endPosition = GetEndPosition();
+    const float& lip = GetLip();
+
+	// Start calculation of the new trigger mins/maxs.
+    vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
+    vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
+
+	gi.DPrintf("%s", "SpawnBottomTouchTrigger BRUH\n");
+    // Calculate a slightly larger box.
+    triggerMins.x = mins.x + 25.f;
+    triggerMins.y = mins.y + 25.f;
+    triggerMins.z = mins.z;
+
+    triggerMaxs.x = maxs.x - 25.f;
+    triggerMaxs.y = maxs.y - 25.f;
+    triggerMaxs.z = maxs.z + 8;
+
+    // Adjust height.
+	triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z) + lip;
+	triggerMaxs.z = triggerMins.z + 8;
+
+    // Ensure it is properly scaled on X and Y Axis. 
+    if (triggerMaxs.x - triggerMins.x <= 0.f) {
+        triggerMins.x = (mins.x + maxs.x) * 0.5f;
+        triggerMaxs.x = triggerMins.x + 1;
+    }
+    if (triggerMaxs.y - triggerMins.y <= 0.f) {
+        triggerMins.y = (mins.y + maxs.y) * 0.5f;
+        triggerMaxs.y = triggerMins.y + 1;
+    }
+
+    // Add points to the generated bounding box for the trigger.
+    for (IServerGameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+	    // Check it is a derivate of base mover, if not, break out of this loop.
+	    if (!teamMember->IsSubclassOf<SVGBaseMover>()) {
+	        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+	        break;
+	    }
+
+        AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
+	    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+    }
+    
+    // At last, create platform trigger entity.
+    TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
 }
 
 //===============
