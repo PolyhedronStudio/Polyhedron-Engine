@@ -330,8 +330,8 @@ void    MSG_ParseDeltaEntityState(const EntityState* from, EntityState* to, int3
 *   PlayerState Write/Read Functions.
 *
 **/
-int32_t MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t flags);
-void    MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t extraflags);
+int32_t		MSG_WriteDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t flags);
+uint32_t	MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t extraflags);
 
 
 

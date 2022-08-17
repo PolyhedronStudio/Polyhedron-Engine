@@ -167,78 +167,70 @@ SV_WriteFrameToClient_Enhanced
 ==================
 */
 void SV_WriteFrameToClient(client_t *client) {
- 
-    ClientFrame  *frame, *oldframe;
-    PlayerState  *oldPlayerState;
-    uint32_t        extraflags;
-    int             delta, suppressed;
-    byte            *b1, *b2;
-    uint32_t        playerStateMessageFlags = 0;
-    int             clientEntityNum;
+    // This is the frame we are creating
+    ClientFrame *frame = &client->frames[client->frameNumber & UPDATE_MASK];
 
-    // this is the frame we are creating
-    frame = &client->frames[client->frameNumber & UPDATE_MASK];
+	// Set default 'no oldframe found' values for delta, and oldPlayerState.
+	PlayerState  *oldPlayerState = nullptr;
+    int32_t delta = 31;
 
-    // this is the frame we are delta'ing from
-    oldframe = SV_GetLastClientFrame(client);
-    if (oldframe) {
+	// If we got ourselves a frame to delta from then we adjust our delta and oldPlayerState respectively.
+    ClientFrame *oldframe = SV_GetLastClientFrame(client);
+    
+	if (oldframe) {
         oldPlayerState = &oldframe->playerState;
         delta = client->frameNumber - client->lastFrame;
-    } else {
-        oldPlayerState = NULL;
-        delta = 31;
     }
 
-    // first byte to be patched
-    b1 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
+	// Write out command, frame number, and frame delta value byte.
+	MSG_WriteUint8( ServerCommand::Frame );
+	MSG_WriteInt32( client->frameNumber );
+	MSG_WriteUint8( delta ); // I suppose that a byte is enough, is it?
 
-    MSG_WriteInt32((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));//MSG_WriteLong((client->frameNumber & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
+    // Bytes to patch when further down the road of this function.
+    byte *extraflagsByte = (byte*)SZ_GetSpace( &msg_write, 1 );
+	byte *surpressedByte = (byte*)SZ_GetSpace( &msg_write, 1 );
 
-    // second byte to be patched
-    b2 = (byte*)SZ_GetSpace(&msg_write, 1); // CPP: Cast
-
-    // send over the areaBits
-    MSG_WriteUint8(frame->areaBytes);//MSG_WriteByte(frame->areaBytes);
+    // Send over the areaBits.
+    MSG_WriteUint8(frame->areaBytes);
     MSG_WriteData(frame->areaBits, frame->areaBytes);
 
-    // ignore some parts of playerstate if not recording demo
-    if (frame->playerState.pmove.type < EnginePlayerMoveType::Dead) {
-        if (!(frame->playerState.pmove.flags & PMF_NO_PREDICTION)) {
-            playerStateMessageFlags |= MSG_PS_IGNORE_VIEWANGLES;
-        }
+    // Ugnore some parts of playerstate if not recording demo.
+    uint32_t playerStateMessageFlags = 0;
+	if ( ( frame->playerState.pmove.type < EnginePlayerMoveType::Dead ) && !( frame->playerState.pmove.flags & PMF_NO_PREDICTION ) ) {
+		playerStateMessageFlags = MSG_PS_IGNORE_VIEWANGLES;
     } else {
-        // lying dead on a rotating platform?
-        playerStateMessageFlags |= MSG_PS_IGNORE_DELTAANGLES;  // CPP: Cast
+        // Lying dead on a rotating platform?
+        playerStateMessageFlags = MSG_PS_IGNORE_DELTAANGLES;
     }
 
     // Fetch client entity number.
-    clientEntityNum = 0;
+    int32_t clientEntityNum = 0;
     if (frame->playerState.pmove.type < EnginePlayerMoveType::Dead) {
         clientEntityNum = frame->clientNumber + 1;
     }
-    suppressed = client->frameFlags;
+    uint32_t suppressed = client->frameFlags;
 
 
-    // delta encode the playerstate
-    extraflags = MSG_WriteDeltaPlayerstate(oldPlayerState, &frame->playerState, playerStateMessageFlags);
+    // Delta encode the playerstate and store any extra flags we might have to send because of it.
+    uint32_t extraflags = MSG_WriteDeltaPlayerstate(oldPlayerState, &frame->playerState, playerStateMessageFlags);
 
-    int clientNumber = oldframe ? oldframe->clientNumber : 0;
+	// Write client number in case it has changed. 
+    int32_t clientNumber = oldframe ? oldframe->clientNumber : 0;
     if (clientNumber != frame->clientNumber) {
         extraflags |= EPS_CLIENTNUM;
-        MSG_WriteUint8(frame->clientNumber);//MSG_WriteByte(frame->clientNumber);
+        MSG_WriteUint8(frame->clientNumber);
     }
 
-    // save 3 high bits of extraflags
-    *b1 = ServerCommand::Frame | (((extraflags & 0x70) << 1));
+	// Patch the extraflags and surpressed bytes.
+    *extraflagsByte = extraflags;
+    *surpressedByte = suppressed;
 
-    // save 4 low bits of extraflags
-    *b2 = (suppressed & SUPPRESSCOUNT_MASK) |
-          ((extraflags & 0x0F) << SUPPRESSCOUNT_BITS);
-
+	// Reset count and frame flags.
     client->suppressCount = 0;
     client->frameFlags = 0;
 
-    // delta encode the entities
+    // Delta encode and emit the entities.
     SV_EmitPacketEntities(client, oldframe, frame, clientEntityNum);
 }
 

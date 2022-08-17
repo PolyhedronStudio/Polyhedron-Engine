@@ -191,43 +191,43 @@ static void CL_ParsePacketEntities(ServerFrame *oldframe, ServerFrame *frame) {
     }
 }
 
-static void CL_ParseFrame(int extrabits)
-{
-    uint32_t bits, extraflags;
-    int     currentframe, deltaframe,
-            delta, suppressed;
-    ServerFrame  frame, *oldframe;
+static void CL_ParseFrame(int extrabits) {
+	// The frame we're processing.
+	ServerFrame  frame = {};
+	// Pointer to the last old frame.
+	ServerFrame *oldframe = nullptr;
+
+	// Pointer to 'from' playerstate.
     PlayerState  *from;
-    int     length;
+    int32_t length = 0;
 
-    memset(&frame, 0, sizeof(frame));
-
+	// Reset current frame flags.
     cl.frameFlags = 0;
 
-    extraflags = 0;
-    bits = static_cast<uint32_t>(MSG_ReadInt32());//MSG_ReadLong();
+	// Read frame number, and delta frame value.
+	int32_t currentframe = MSG_ReadInt32();
+	int32_t delta = MSG_ReadUint8();
 
-    currentframe = bits & FRAMENUM_MASK;
-    delta = bits >> FRAMENUM_BITS;
-
-    if (delta == 31) {
-        deltaframe = -1;
-    } else {
+	// Defaults to -1, and we only calculate it if delta isn't 31, in other words, a valid delta frame.
+	int32_t deltaframe = -1;
+	// Unless delta was 31, in which case we got invalid data so we make sure to reset deltaFrame to -1
+    if (delta != 31) {
         deltaframe = currentframe - delta;
     }
 
-    bits = MSG_ReadUint8();//MSG_ReadByte();
+	// Read in extra and surpressed flag bytes.
+	int32_t extraflags = MSG_ReadUint8();
+    int32_t suppressed = MSG_ReadUint8();
 
-    suppressed = bits & SUPPRESSCOUNT_MASK;
-    if (suppressed & FrameFlags::ClientPredict) {
-        // CLIENTDROP is implied, don't draw both
+	// CLIENTDROP is implied, don't draw both
+	if (suppressed & FrameFlags::ClientPredict) {
         suppressed &= ~FrameFlags::ClientDrop;
     }
-    cl.frameFlags |= suppressed;
+    
+	// Add surpressed frame flags.
+	cl.frameFlags |= suppressed;
 
-    extraflags = (extrabits << 4) | (bits >> SUPPRESSCOUNT_BITS);
-
-
+	// Assign proper frame number and delta frame.
     frame.number = currentframe;
     frame.delta = deltaframe;
 
@@ -274,86 +274,84 @@ static void CL_ParseFrame(int extrabits)
         cl.frameFlags |= FrameFlags::NoDeltaFrame;
     }
 
-    // read areaBits
-    length = MSG_ReadUint8();//MSG_ReadByte();
-    if (length) {
-        if (length < 0 || msg_read.readCount + length > msg_read.currentSize) {
-            Com_Error(ErrorType::Drop, "%s: read past end of message", __func__);
+    // Read areaBits
+    length = MSG_ReadUint8();
+    if ( length ) {
+        if ( length < 0 || msg_read.readCount + length > msg_read.currentSize ) {
+            Com_Error( ErrorType::Drop, "%s: read past end of message", __func__ );
         }
-        if (length > sizeof(frame.areaBits)) {
-            Com_Error(ErrorType::Drop, "%s: invalid areaBits length", __func__);
+        if ( length > sizeof( frame.areaBits ) ) {
+            Com_Error( ErrorType::Drop, "%s: invalid areaBits length", __func__ );
         }
-        memcpy(frame.areaBits, msg_read.data + msg_read.readCount, length);
+        memcpy( frame.areaBits, msg_read.data + msg_read.readCount, length );
         msg_read.readCount += length;
         frame.areaBytes = length;
     } else {
         frame.areaBytes = 0;
     }
+    SHOWNET( 2, "%3" PRIz ":playerinfo\n", msg_read.readCount - 1 );
 
-    // MSG: !! TODO: Look at demo code and see if we can remove NETCHAN_OLD.
-    //if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-    //    if (MSG_ReadByte() != ServerCommand::PlayerInfo) {
-    //        Com_Error(ErrorType::Drop, "%s: not playerinfo", __func__);
-    //    }
-    //}
-
-    SHOWNET(2, "%3" PRIz ":playerinfo\n", msg_read.readCount - 1);
-
-    // parse playerstate
-    //bits = MSG_ReadUint16();
-    MSG_ParseDeltaPlayerstate(from, &frame.playerState, extraflags);
+    // Parse playerstate
+    uint32_t bits = MSG_ParseDeltaPlayerstate( from, &frame.playerState, extraflags );
 #ifdef _DEBUG
-    if (cl_shownet->integer > 2 && (bits || extraflags)) {
-        MSG_ShowDeltaPlayerstateBits(bits, extraflags);
-        Com_LPrintf(PrintType::Developer, "\n");
+    if ( cl_shownet->integer > 2 && ( bits || extraflags ) ) {
+        MSG_ShowDeltaPlayerstateBits(bits, extraflags );
+        Com_LPrintf( PrintType::Developer, "\n" );
     }
 #endif
-    // parse clientNumber
-    if (extraflags & EPS_CLIENTNUM) {
-        frame.clientNumber = MSG_ReadUint8();//MSG_ReadByte();
-    } else if (oldframe) {
+
+    // Parse clientNumber if we need to, otherwise fetch it from the previous old frame.
+    if ( extraflags & EPS_CLIENTNUM ) {
+        frame.clientNumber = MSG_ReadUint8();
+    } else if ( oldframe ) {
         frame.clientNumber = oldframe->clientNumber;
     }
-
     SHOWNET(2, "%3" PRIz ":packetentities\n", msg_read.readCount - 1);
 
-    CL_ParsePacketEntities(oldframe, &frame);
+	// Parse all packet entities.
+    CL_ParsePacketEntities( oldframe, &frame );
 
-    // save the frame off in the backup array for later delta comparisons
-    cl.frames[currentframe & UPDATE_MASK] = frame;
+    // Save the frame off in the backup array for later delta comparisons.
+    cl.frames[ currentframe & UPDATE_MASK ] = frame;
 
 #ifdef _DEBUG
-    if (cl_shownet->integer > 2) {
+    if ( cl_shownet->integer > 2 ) {
         int rtt = 0;
-        if (cls.netChannel) {
+        if ( cls.netChannel ) {
             int seq = cls.netChannel->incomingAcknowledged & CMD_MASK;
             rtt = cls.realtime - cl.clientCommandHistory[seq].timeSent;
         }
-        Com_LPrintf(PrintType::Developer, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
-                    msg_read.readCount - 1, frame.number, frame.delta, rtt);
+        Com_LPrintf( PrintType::Developer, "%3" PRIz ":frame:%d  delta:%d  rtt:%d\n",   // CPP: String concat.
+                    msg_read.readCount - 1, frame.number, frame.delta, rtt );
     }
 #endif
 
-    if (!frame.valid) {
+	// Ensure the frame is valid before moving on.
+    if ( !frame.valid ) {
         cl.frame.valid = false;
         return; // do not change anything
     }
 
-    if (!frame.playerState.fov) {
+	// Prevent a bad FOV.
+    if ( !frame.playerState.fov ) {
         // fail out early to prevent spurious errors later
-        Com_Error(ErrorType::Drop, "%s: bad fov", __func__);
+        Com_Error( ErrorType::Drop, "%s: bad fov", __func__ );
     }
 
-    if (cls.connectionState < ClientConnectionState::Precached) {
+	// Don't start assigning and processing delta frames until all our data is cached.
+    if ( cls.connectionState < ClientConnectionState::Precached ) {
         return;
 	}
 
+	// Assign what currently still is set as the 'current frame' as our old frame.
     cl.oldframe = cl.frame;
+	// And assign the parsed frame data to our current frame.
     cl.frame = frame;
-
+	// Increase demo frame read count.
     cls.demo.frames_read++;
 
-    if (!cls.demo.seeking) {
+	// When not demo seeking ensure to call delta frame to properly process the game entities with.
+    if ( !cls.demo.seeking ) {
         CL_DeltaFrame();
 	}
 }

@@ -24,7 +24,7 @@
 /**
 *   @brief  Parses the delta packets of player states.
 **/
-void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t extraFlags) {
+uint32_t MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_t extraFlags) {
 
     // Sanity check. 
     if (!to) {
@@ -184,4 +184,6 @@ void MSG_ParseDeltaPlayerstate(const PlayerState* from, PlayerState* to, uint32_
             }
         }
     }
+
+	return flags;
 }
