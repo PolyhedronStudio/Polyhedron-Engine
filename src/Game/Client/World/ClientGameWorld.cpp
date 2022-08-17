@@ -399,9 +399,9 @@ qboolean ClientGameWorld::PrepareBSPEntities(const char* mapName, const char* bs
 }
 
 /**
-*	@brief	Looks for the first free client entity in our buffer.
+*	@brief	Looks for the first free entity in our buffer.
 * 
-*	@details	Either finds a free client entity, or initializes a new one.
+*	@details	Either finds a free entity, or initializes a new one.
 *				Try to avoid reusing an entity that was recently freed, because it
 *				can cause the client to Think the entity morphed into something else
 *				instead of being removed and recreated, which can cause interpolated
@@ -426,7 +426,8 @@ PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) {
 
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-	    if (!podEntity->inUse && (podEntity->freeTime == GameTime::zero() || podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
+	    //if (!podEntity->inUse && (podEntity->freeTime == GameTime::zero() || podEntity->freeTime < (std::chrono::duration_cast<GameTime>(FRAMETIME_S) * 2) || level.time - podEntity->freeTime > 500ms)) {
+		if (!podEntity->inUse && (podEntity->freeTime == GameTime::zero() || podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
             // Set entity to "inUse".
 			podEntity->inUse = true;
 			
@@ -436,9 +437,11 @@ PODEntity* ClientGameWorld::GetUnusedPODEntity(bool isWired) {
 			// Ensure the entity number is set correctly.
 			podEntity->clientEntityNumber = podEntityIndex;
 			podEntity->currentState.number = podEntityIndex;//podEntity - podEntities;
+			
 			// If it is a local entity...
 			if (!isWired) {
 				podEntity->previousState.number = podEntityIndex;
+				//podEntity->previousState = podEntity->currentState;
 			}
 			
 			if (podEntityIndex >= numberOfEntities) {

@@ -49,6 +49,8 @@ std::string CLGBaseLocalEntity::EmptyString = "";
 //! Constructor/Destructor.
 CLGBaseLocalEntity::CLGBaseLocalEntity(PODEntity* podEntity) : Base() {//}, podEntity(clEntity) {
 	this->podEntity = podEntity;
+	//podEntity->inUse = true;
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::CLGBaseLocalEntity({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 }
 
 
@@ -64,27 +66,27 @@ CLGBaseLocalEntity::CLGBaseLocalEntity(PODEntity* podEntity) : Base() {//}, podE
 *   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
 **/
 void CLGBaseLocalEntity::Precache() {
-
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::Precache({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 }
 
 /**
 *   @brief  Called when it is time to spawn this entity.
 **/
 void CLGBaseLocalEntity::Spawn() {
-	//SetInUse(true);
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::Spawn({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 }
 /**
 *   @brief  Called when it is time to respawn this entity.
 **/
 void CLGBaseLocalEntity::Respawn() {
-
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::Respawn({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 }
 
 /**
 *   @brief  PostSpawning is for handling entity references, since they may not exist yet during a spawn period.
 **/
 void CLGBaseLocalEntity::PostSpawn() {
-
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::PostSpawn({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 }
 
 /**
@@ -93,8 +95,11 @@ void CLGBaseLocalEntity::PostSpawn() {
 void CLGBaseLocalEntity::Think() {
 	// Safety check.
     if (thinkFunction == nullptr) {
+		//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::Think({}) Return: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 		return;
     }
+
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::Think({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 
 	// Execute 'Think' callback function.
 	(this->*thinkFunction)();
@@ -415,30 +420,6 @@ void CLGBaseLocalEntity::DispatchStopCallback() {
 }
 
 
-/**
-* 
-(
-*   Entity Utility callbacks that can be set as a nextThink function.
-* 
-*
-**/
-/**
-*   @brief  Marks the entity to be removed in the next client frame. This is preferred to CLG_FreeEntity, 
-*           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
-*           on us during the current server game frame we're processing.
-**/
-void CLGBaseLocalEntity::Remove()
-{
-	podEntity->clientFlags |= EntityServerFlags::Remove;
-}
-
-/**
-*   @brief  Callback method to use for freeing this entity. It calls upon Remove()
-**/
-void CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree(void) {
-	//CLG_FreeEntity(serverEntity);
-	Remove();
-}
 
 
 void CLGBaseLocalEntity::ProcessSkeletalAnimationForTime(const GameTime &time) {
@@ -590,11 +571,16 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
                 refreshEntity.origin = cl->playerEntityOrigin;
                 refreshEntity.oldorigin = cl->playerEntityOrigin;
             } else {
+                //// Ohterwise, just neatly interpolate the origin.
+                //refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
+                //// Neatly copy it as the refreshEntity's oldorigin.
+                //refreshEntity.oldorigin = refreshEntity.origin;
+
                 // Ohterwise, just neatly interpolate the origin.
-                refreshEntity.origin = currentState->origin; //vec3_mix(refreshEntity.origin, podEntity->currentState.origin, cl->lerpFraction);
+                refreshEntity.origin = vec3_mix(podEntity->previousState.origin, podEntity->currentState.origin, cl->lerpFraction);
                 // Neatly copy it as the refreshEntity's oldorigin.
-                refreshEntity.oldorigin = currentState->origin;
-            }
+                refreshEntity.oldorigin = refreshEntity.origin;
+			}
         }
 
 
@@ -683,7 +669,7 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
             refreshEntity.angles = cl->playerEntityAngles;
         } else {
             // Otherwise, lerp angles by default.
-            refreshEntity.angles = vec3_mix(refreshEntity.angles, podEntity->currentState.angles, cl->lerpFraction);//vec3_mix(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
+            refreshEntity.angles = vec3_mix_euler(refreshEntity.angles, podEntity->currentState.angles, cl->lerpFraction);//vec3_mix(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (currentState->modelIndex == 255 && cl_rollhack->integer) {
@@ -867,4 +853,41 @@ void CLGBaseLocalEntity::PrepareRefreshEntity(const int32_t refreshEntityID, Ent
     skip:
         // Assign refreshEntity origin to podEntity lerp origin in the case of a skip.
         podEntity->lerpOrigin = refreshEntity.origin;
+}
+
+
+
+/**
+* 
+(
+*   Entity Utility callbacks that can be set as a nextThink function.
+* 
+*
+**/
+/**
+*   @brief  Marks the entity to be removed in the next client frame. This is preferred to CLG_FreeEntity, 
+*           as it is safer. Prevents any handles or pointers that lead to this entity from turning invalid
+*           on us during the current server game frame we're processing.
+**/
+void CLGBaseLocalEntity::Remove()
+{
+	podEntity->clientFlags |= EntityServerFlags::Remove;
+}
+
+/**
+*   @brief  Callback method to use for freeing this entity. It calls upon Remove()
+**/
+void CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree(void) {
+	//CLG_FreeEntity(serverEntity);
+	Remove();
+}
+
+/**
+*	@brief	Used by default in order to process entity state data such as animations.
+**/
+void CLGBaseLocalEntity::CLGBaseLocalEntityThinkStandard(void) {
+	CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
+	//// Setup same think for the next frame.
+	SetNextThinkTime( level.time + FRAMERATE_MS);
+	SetThinkCallback( &CLGBaseLocalEntity::CLGBaseLocalEntityThinkStandard );
 }

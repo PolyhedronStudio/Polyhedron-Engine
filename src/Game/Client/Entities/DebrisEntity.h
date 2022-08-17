@@ -33,6 +33,7 @@ public:
 	*
 	*
 	**/
+	void DebrisEntityThink();
 	/**
 	*	@brief	Die callback.
 	**/

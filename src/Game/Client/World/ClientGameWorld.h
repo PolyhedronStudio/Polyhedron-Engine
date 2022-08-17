@@ -382,11 +382,11 @@ template<typename ClassType> ClassType* ClientGameWorld::CreateGameEntity(PODEnt
 			podEntity = GetUnusedPODEntity(isWired);
 
 			if (!podEntity) {
-			//	SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): GetUnusedPODENtity({}) returned (nullptr)! Expect trouble!\n", (isWired ? "isWired = true" : "isWired = false") ) );
+				CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): GetUnusedPODENtity({}) returned (nullptr)! Expect trouble!\n", (isWired ? "isWired = true" : "isWired = false") ) );
 				return nullptr;
 			}
 		} else {
-		//	SG_Print( PrintType::DeveloperWarning, "CLGWarning (CreateGameEntity): Tried to spawn a GameEntity on a (nullptr) PODEntity!\n" );
+			CLG_Print( PrintType::DeveloperWarning, "CLGWarning (CreateGameEntity): Tried to spawn a GameEntity on a (nullptr) PODEntity!\n" );
 			return nullptr;
 		}
 	}
@@ -407,12 +407,12 @@ template<typename ClassType> ClassType* ClientGameWorld::CreateGameEntity(PODEnt
 			podEntity->gameEntity = gameEntities[entityNumber] = gameEntity;
 		} else {
 			// Debug Warn.
-		//	SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): PODEntity(#{}) is already taken\n", entityNumber ) );
+			CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): PODEntity(#{}) is already taken\n", entityNumber ) );
 			return nullptr;
 		}
 	} else {
 		// Debug Warn.
-		//SG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): ClassInfo '{}' has a (nullptr) AllocateInstance function.\n", ClassType::ClassInfo.mapClass ) );
+		CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGWarning (CreateGameEntity): ClassInfo '{}' has a (nullptr) AllocateInstance function.\n", ClassType::ClassInfo.mapClass ) );
 		return nullptr;
 	}
 

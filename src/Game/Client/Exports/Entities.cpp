@@ -254,24 +254,32 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 	ClientGameWorld *gameWorld = GetGameWorld();
 
 	// This needs to be set of course.
-	if (!gameWorld) {
+	if ( !gameWorld ) {
 		return;
 	}
 
+	CLG_Print( PrintType::DeveloperWarning, fmt::format( "RunLocalEntitiesFrame: level.time({}), cl.time({}), cl.serverTime({}), cl.serverDelta({}), cl.serverFrame({})\n",
+			  level.time.count(), 
+			  cl->time, 
+			  cl->serverTime, 
+			  cl->serverDelta, 
+			  cl->frame.number ) 
+	);
+
 	// Iterate through our local client side entities.
-    for (int32_t localEntityNumber = MAX_WIRED_POD_ENTITIES; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
+    for ( int32_t localEntityNumber = MAX_WIRED_POD_ENTITIES; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++ ) {
 		const int32_t entityIndex = localEntityNumber;
-		PODEntity *podEntity = gameWorld->GetPODEntityByIndex(entityIndex);
-		GameEntity *gameEntity = ClientGameWorld::ValidateEntity(podEntity);
+		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( entityIndex );
+		GameEntity *gameEntity = ClientGameWorld::ValidateEntity( podEntity );
 		
 		// If invalid for whichever reason, warn and continue to next iteration.
-        if (!podEntity || !gameEntity || !podEntity->inUse) {
+        if ( !podEntity || !gameEntity || !podEntity->inUse ) {
             //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
 
         // Admer: entity was marked for removal at the previous tick
-        if (podEntity && gameEntity && (gameEntity->GetClientFlags() & EntityServerFlags::Remove)) {
+        if ( podEntity && gameEntity && ( gameEntity->GetClientFlags() & EntityServerFlags::Remove ) ) {
             // Free server entity.
             game.world->FreePODEntity(podEntity);
 
@@ -293,29 +301,29 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 
         // If the ground entity moved, make sure we are still on it
 		if (!gameEntity->GetClient()) {
-			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle());
-			if (geGroundEntity && (geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount())) {
+			GameEntity *geGroundEntity = ClientGameWorld::ValidateEntity(gameEntity->GetGroundEntityHandle() );
+			if ( geGroundEntity && ( geGroundEntity->GetLinkCount() != gameEntity->GetGroundEntityLinkCount() ) ) {
 				// Reset ground entity.
 				//gameEntity->SetGroundEntity( SGEntityHandle() );
 
 				// Ensure we only check for it in case it is required (ie, certain movetypes do not want this...)
 				//if (!(gameEntity->GetFlags() & (EntityFlags::Swim | EntityFlags::Fly)) && (gameEntity->GetServerFlags() & EntityServerFlags::Monster)) {
 					// Check for a new ground entity that resides below this entity.
-					SG_CheckGround(gameEntity); //SVG_StepMove_CheckGround(gameEntity);
+					SG_CheckGround( gameEntity ); //SVG_StepMove_CheckGround(gameEntity);
 				//}
 			}
 		}
 
 		// Run it for a frame.
 		SGEntityHandle handle = gameEntity;
-		SG_RunEntity(handle);
+		SG_RunEntity( handle );
     }
 }
 
 /**
 *	@return	The GameEntity's hashed classname value, 0 if it has no GameEntity.
 **/
-uint32_t ClientGameEntities::GetHashedGameEntityClassname(PODEntity* podEntity) {
+uint32_t ClientGameEntities::GetHashedGameEntityClassname( PODEntity* podEntity ) {
 	if (podEntity) {
 		if (podEntity->gameEntity) {
 			// Keep it up to date with whatever the game entities type info 
@@ -461,26 +469,26 @@ void ClientGameEntities::PrepareRefreshEntities() {
 
 	// Iterate from 0 till the amount of entities present in the current frame.
     for (int32_t localEntityNumber = LOCAL_ENTITIES_START_INDEX; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++) {
-        PODEntity *clientEntity = gameWorld->GetPODEntityByIndex(localEntityNumber);
+        PODEntity *clientEntity = gameWorld->GetPODEntityByIndex( localEntityNumber );
 		// Get the current state of the given entity index.
 		EntityState *entityState = &clientEntity->currentState;
 		// Get the previous state of the given entity index.
 		EntityState *previousEntityState = &clientEntity->previousState;
 
 		// Get the game entity belonging to this entity.
-        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex(clientEntity->clientEntityNumber);
+        GameEntity *gameEntity = gameWorld->GetGameEntityByIndex( clientEntity->clientEntityNumber );
 		
 		// Setup the render entity ID for the renderer.
         const int32_t refreshEntityID = clientEntity->clientEntityNumber;
 		
-		if (!gameEntity) {
+		if ( !gameEntity ) {
 			// Ouche..?
 
 			continue;
 		}
 
 		// Go on.
-		gameEntity->PrepareRefreshEntity(refreshEntityID, entityState, previousEntityState, cl->lerpFraction);
+		gameEntity->PrepareRefreshEntity( refreshEntityID, entityState, previousEntityState, cl->lerpFraction );
     }
 }
 
@@ -550,10 +558,9 @@ void ClientGameEntities::AddViewEntities() {
     for (int32_t i = 0; i < 3; i++) {
         gunRenderEntity.origin[i] = viewOrigin[i] + oldPlayerState->gunOffset[i] +
             cl->lerpFraction * (currentPlayerState->gunOffset[i] - oldPlayerState->gunOffset[i]);
-        gunRenderEntity.angles = viewAngles + vec3_mix_euler(oldPlayerState->gunAngles,
-                                                            currentPlayerState->gunAngles, cl->lerpFraction);
-    }
 
+    }
+	gunRenderEntity.angles = viewAngles + vec3_mix_euler(oldPlayerState->gunAngles, currentPlayerState->gunAngles, cl->lerpFraction);
     // Adjust for high fov.
     if (currentPlayerState->fov > 90) {
         vec_t ofs = (90 - currentPlayerState->fov) * 0.2f;

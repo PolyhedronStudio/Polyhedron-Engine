@@ -1095,8 +1095,8 @@ void Qcommon_Frame(void)
     uint64_t timeBefore, timeEvent, timeBetween, timeAfter;
     uint64_t clientRemainingTime;
 #endif
-    uint64_t oldtime, msec;
-    static uint64_t serverRemainingTime;
+    int64_t oldtime, msec;
+    static int64_t serverRemainingTime;
     static double frac;
 
     if (setjmp(com_abortframe)) {

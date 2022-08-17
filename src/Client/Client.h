@@ -73,8 +73,9 @@ extern    ClientShared   cs;
 // Client Specific FPS
 // 
 //=============================================================================
-static constexpr double CL_FRAMETIME    = BASE_FRAMETIME;
-static constexpr double CL_1_FRAMETIME  = BASE_1_FRAMETIME;
+static constexpr double CL_FRAMETIME		= BASE_FRAMETIME;
+static constexpr uint64_t CL_FRAMETIME_UI64 = static_cast<uint64_t>( BASE_FRAMETIME );
+static constexpr double CL_1_FRAMETIME		= BASE_1_FRAMETIME;
 static constexpr int32_t CL_FRAMEDIV = BASE_FRAMERATE / 10.0;
 
 

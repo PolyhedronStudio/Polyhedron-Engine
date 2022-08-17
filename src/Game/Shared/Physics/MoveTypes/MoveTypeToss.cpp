@@ -45,15 +45,15 @@ void SG_Physics_Toss(SGEntityHandle& entityHandle) {
     }
 
 	// Let the entity think.
-	SG_RunThink(ent);
+	SG_RunThink( ent );
 
 	// Has to be in use.
-    if (!ent->IsInUse()) {
+    if ( !ent->IsInUse() ) {
         return;
 	}
 
     // If not a team captain, so movement will be handled elsewhere
-    if (ent->GetFlags() & EntityFlags::TeamSlave) {
+    if ( ent->GetFlags() & EntityFlags::TeamSlave ) {
         return;
 	}
 

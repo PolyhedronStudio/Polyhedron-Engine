@@ -58,3 +58,37 @@ void ES_ComputeLocalPoseTransforms( const model_t *model, const EntitySkeletonBo
 *	@brief	Compute world space matrices for the given pose transformations.
 **/
 void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBonePose *bonePoses, float *poseMatrices );
+
+
+/***
+*
+*
+*	Utility Functions, for easy bounds checking and sorts of tasks alike.
+*
+*
+***/
+/**
+*	@brief	Utility function to test whether an animation is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+**/
+SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const std::string &name );
+SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const int32_t index );
+
+/**
+*	@brief	Utility function to easily get a pointer to an Action by name or index.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+**/
+SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const std::string &name );
+SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const int32_t index );
+
+/**
+*	@brief	Utility function to test whether a BlendAction is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
+**/
+SkeletalAnimationBlendAction *ES_GetBlendAction( EntitySkeleton *entitySkeleton, SkeletalAnimation *animation, const int32_t index );
+
+/**
+*	@brief	Utility function to test whether a BlendActionState is existent and within range for the specified Animation.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
+**/
+EntitySkeletonBlendActionState *ES_GetBlendActionState( EntitySkeleton *entitySkeleton, const int32_t animationIndex, const int32_t blendActionIndex );

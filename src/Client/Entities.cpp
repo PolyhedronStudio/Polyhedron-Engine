@@ -193,7 +193,7 @@ void CL_DeltaFrame(void)
 
     // Set server time
     int64_t frameNumber = cl.frame.number - cl.serverDelta;
-    cl.serverTime = frameNumber * CL_FRAMETIME;
+    cl.serverTime = frameNumber * CL_FRAMETIME_UI64;
 
     // Rebuild the list of solid entities for this frame
     cl.numSolidEntities = 0;
@@ -247,7 +247,7 @@ void CL_DeltaFrame(void)
 	CL_GM_ClientPacketEntityDeltaFrame();
 
     // Check for prediction errors.
-    CL_CheckPredictionError();
+    //CL_CheckPredictionError();
 }
 
 
@@ -312,7 +312,7 @@ vec3_t CL_GetEntitySoundVelocity(int ent)
 {
 	PODEntity *old;
     vec3_t vel = vec3_zero();
-	if ((ent < 0) || (ent >= MAX_WIRED_POD_ENTITIES))
+	if ((ent < 0) || (ent >= MAX_CLIENT_POD_ENTITIES))
 	{
 		Com_Error(ErrorType::Drop, "CL_GetEntitySoundVelocity: bad ent");
 	}

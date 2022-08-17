@@ -321,7 +321,8 @@ PODEntity* ServerGameWorld::GetUnusedPODEntity(bool isWired) {
 
         // The first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-	    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
+	    //if (!podEntity->inUse && (podEntity->freeTime < (std::chrono::duration_cast<GameTime>(FRAMETIME_S) * 2) || level.time - podEntity->freeTime > 500ms)) {
+		if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
             // Set entity to "inUse".
 			podEntity->inUse = true;
 			
@@ -348,63 +349,6 @@ PODEntity* ServerGameWorld::GetUnusedPODEntity(bool isWired) {
 	}
 
 	return nullptr;
- //   // If we've gotten past the gi.Error, it means we can safely increase the number of entities.
- //   numberOfEntities++;
-	//globals.numberOfEntities = numberOfEntities;
-
- //   // Set entity to "inUse".
- //   podEntity->inUse = true;
-
- //   // Set the entity state number.
- //   podEntity->currentState.number = podEntity - podEntities;
-
- //   // Return the POD entity.
- //   return podEntity;
-	//   // Incrementor, declared here so we can access it later on.
-	//int32_t i = 0;
-
-	//// Acquire a pointer to the first POD entity to start checking from.
-	//PODEntity *podEntity = &podEntities[maxClients + 1];
-
-	//// We'll loop until from maxclients + 1(world entity) till the numberOfEntities 
-	//// has been reached. If we never managed to return a pointer to a valid server 
-	//// entity right now, we're going to have to increase the amount of entities in use. 
-	//// 
-	//// However, this ONLY proceeds if we haven't already hit the maximum entity count.
-	//for (int32_t i = maxClients + 1; i < numberOfEntities; i++, podEntity++) {
- //       // The first couple seconds of server time can involve a lot of
- //       // freeing and allocating, so relax the replacement policy
-	//    if (!podEntity->inUse && (podEntity->freeTime < FRAMETIME_S * 2 || level.time - podEntity->freeTime > 500ms)) {
- //           //SVG_InitEntity(serverEntity);
- //           // Set entity to "inUse".
-	//		podEntity->inUse = true;
-	//		
-	//		// Set the entity state number.
-	//		podEntity->currentState.number = podEntity - podEntities;
-	//		
-	//		// Return the newly found POD entity pointer.
-	//		return podEntity;
- //       }
- //   }
-
-	//// Do a safety check to prevent crossing maximum entity limit. If we do, error out.
- //   if (i >= maxEntities) {
- //       gi.Error(ErrorType::Drop, "SVGame Error: ServerGameWorld::GetUnusedPODEntity: no free edicts");
-	//	return nullptr;
-	//}
-
- //   // If we've gotten past the gi.Error, it means we can safely increase the number of entities.
- //   numberOfEntities++;
-	//globals.numberOfEntities = numberOfEntities;
-
- //   // Set entity to "inUse".
- //   podEntity->inUse = true;
-
- //   // Set the entity state number.
- //   podEntity->currentState.number = podEntity - podEntities;
-
- //   // Return the POD entity.
- //   return podEntity;
 }
 
 /**

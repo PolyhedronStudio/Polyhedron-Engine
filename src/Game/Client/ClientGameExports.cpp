@@ -274,17 +274,41 @@ void ClientGameExports::ClientUpdateOrigin() {
     // View Angles.
     //
     // If not running a demo or on a locked frame, add the local angle movement.
-    if (clgi.IsDemoPlayback()) {
+    if ( clgi.IsDemoPlayback() ) {
         // Interpolate view angles.
         newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
-    } else if (currentPlayerState->pmove.type < EnginePlayerMoveType::Dead) {
+
+		//CLG_Print( PrintType::Developer, "ViewAngles: clgi.isdemoplayback();\n" );
+    } else if ( currentPlayerState->pmove.type < EnginePlayerMoveType::Dead ) {
         // Use predicted state view angles.
         newViewAngles = cl->predictedState.viewAngles;
-    } else {
-        // Interpolate view angles.
-        newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
-    }
+		//CLG_Print( PrintType::Developer, "ViewAngles: else if ( currentPlayerState->pmove.type < EnginePlayerMoveType::Dead ) {\n" );
+	} else if ( previousPlayerState->pmove.type < EnginePlayerMoveType::Dead ) { // { else if (ops->pmove.pm_type < PM_DEAD && cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
+        // Interpolate from our predicted angles.
+		newViewAngles = vec3_mix_euler( cl->predictedState.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction );
+		//CLG_Print( PrintType::Developer, "ViewAngles: } else if ( previousPlayerState->pmove.type < EnginePlayerMoveType::Dead ) { \n" );
+	} else {
+		//CLG_Print( PrintType::Developer, "ViewAngles: } else { \n" );
+		//	// lerp from predicted angles, since enhanced servers
+    //  // do not send viewangles each frame
+		newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
+	 }
     
+    //// if not running a demo or on a locked frame, add the local angle movement
+    //if (cls.demo.playback) {
+    //    LerpAngles(ops->viewangles, ps->viewangles, lerp, cl.refdef.viewangles);
+    //} else if (ps->pmove.pm_type < PM_DEAD) {
+    //    // use predicted values
+    //    VectorCopy(cl.predicted_angles, cl.refdef.viewangles);
+    //} else if (ops->pmove.pm_type < PM_DEAD && cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
+    //    // lerp from predicted angles, since enhanced servers
+    //    // do not send viewangles each frame
+    //    LerpAngles(cl.predicted_angles, ps->viewangles, lerp, cl.refdef.viewangles);
+    //} else {
+    //    // just use interpolated values
+    //    LerpAngles(ops->viewangles, ps->viewangles, lerp, cl.refdef.viewangles);
+    //}
+
     // Lerp between previous and current frame delta angles.
     const vec3_t newDeltaAngles = vec3_mix_euler(previousPlayerState->pmove.deltaAngles, currentPlayerState->pmove.deltaAngles, lerpFraction);
 

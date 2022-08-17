@@ -57,14 +57,14 @@ static inline void LocalEntity_UpdateNew(PODEntity *clEntity, const EntityState 
 }
 
 /**
-*   @brief  Updates an existing entity using the newly received state for it.
+*   @brief  Updates an existing entity and ensures that if it needs to lerp it can do so safely.
 **/
 static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityState *state, const vec_t *origin)
 {
     // Fetch event ID.
     int32_t eventID = state->eventID;
 
-    if (//state.hashedClassname != clEntity->previousState.hashedClassname
+    if (//state->hashedClassname != clEntity->previousState.hashedClassname
 		state->modelIndex != clEntity->previousState.modelIndex
         || state->modelIndex2 != clEntity->previousState.modelIndex2
         || state->modelIndex3 != clEntity->previousState.modelIndex3
@@ -104,66 +104,40 @@ static inline void LocalEntity_UpdateExisting(PODEntity *clEntity, const EntityS
 static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 {
 	// Last received frame was invalid.
-    if (!cl.oldframe.valid) {
+    if ( cl.frame.number == 0 ) {
         return true;
     }
 
 	// Wasn't in last local frame.
-    if (clEntity->serverFrame != cl.frame.number) {//cl.oldframe.number + 1) {
+    if ( clEntity->serverFrame != cl.frame.number ) {
+		const std::string wStr = fmt::format( "NEW Local entity(#{}) clEntity->serverFrame={}, cl.frame.number={}", clEntity->clientEntityNumber, clEntity->serverFrame, cl.oldframe.number );
+		Com_LPrintf( PrintType::DeveloperWarning,  "%s\n", wStr.c_str() );
         return true;
     }
 
 	// Hashname changed.
-	if (clEntity->currentState.hashedClassname != clEntity->previousState.hashedClassname) {
+	if ( clEntity->currentState.hashedClassname != clEntity->previousState.hashedClassname ) {
+		const std::string wStr = fmt::format( "Local entity(#{}) classname mismatch: {} != {}", clEntity->clientEntityNumber, clEntity->currentState.hashedClassname, clEntity->previousState.hashedClassname );
+		Com_LPrintf( PrintType::DeveloperWarning,  "%s\n", wStr.c_str() );
 		return true;
 	}
 
 
- //   // Developer option, always new.
-    if (cl_nolerp->integer == 2) {
+	// Developer option, always new.
+    if ( cl_nolerp->integer == 2 ) {
         return true;
     }
 
- //   // Developer option, lerp from last received frame.
-    if (cl_nolerp->integer == 3) {
+	// Developer option, lerp from last received frame.
+    if ( cl_nolerp->integer == 3 ) {
         return false;
     }
 
- ////   //// Previous server frame was dropped.
- ////   //if (cl.oldframe.number != cl.frame.number - 1) {
- ////   //    return true;
- //   //}
+	const std::string wStr = fmt::format( "Local entity(#{}) no conditiosn met", clEntity->clientEntityNumber );
+	Com_LPrintf( PrintType::DeveloperWarning,  "%s\n", wStr.c_str() );
 
     // No conditions met, so it wasn't in our previous frame.
     return false;
-
-    //// Last received frame was invalid.
-    //if (!cl.oldframe.valid) {
-    //    return true;
-    //}
-
-    //// Wasn't in last received frame.
-    //if (clEntity->serverFrame != cl.oldframe.number) {
-    //    return true;
-    //}
-
-    //// Developer option, always new.
-    //if (cl_nolerp->integer == 2) {
-    //    return true;
-    //}
-
-    //// Developer option, lerp from last received frame.
-    //if (cl_nolerp->integer == 3) {
-    //    return false;
-    //}
-
-    //// Previous server frame was dropped.
-    //if (cl.oldframe.number != cl.frame.number - 1) {
-    //    return true;
-    //}
-
-    // No conditions met, so it wasn't in our previous frame.
-//    return false;
 }
 
 /**
@@ -187,7 +161,6 @@ void LocalEntity_Update(const EntityState *state)
 		clEntity->clientEntityNumber = state->number;
 	}
 
-	clEntity->currentState.oldOrigin = clEntity->currentState.origin;
 
   //  // Add entity to the solids list if it has a solid.
   //  if (state.solid && state.number != cl.frame.clientNumber + 1 && cl.numSolidLocalEntities < 3072) {

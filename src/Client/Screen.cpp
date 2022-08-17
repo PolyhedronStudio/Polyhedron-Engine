@@ -64,8 +64,6 @@ static cvar_t   *scr_demobar;
 static cvar_t   *scr_font;
 static cvar_t   *scr_scale;
 
-extern cvar_t	*cl_renderdemo;
-
 #ifdef _DEBUG
 cvar_t      *scr_netgraph;
 cvar_t      *scr_timegraph;
@@ -948,8 +946,8 @@ static void SCR_DrawActive(void)
     scr.hud_height = r_config.height;
     scr.hud_width = r_config.width;
 	
-	if (!cl_renderdemo->integer)
-		SCR_DrawDemo();
+	// Draw demo view.
+	SCR_DrawDemo();
 
     SCR_CalcVrect();
 

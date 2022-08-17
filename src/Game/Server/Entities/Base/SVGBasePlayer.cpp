@@ -147,32 +147,32 @@ void SVGBasePlayer::SVGBasePlayerDie(IServerGameEntity* inflictor, IServerGameEn
     gclient_s* client = GetClient();
 
     // Clear out angular velocity.
-    SetAngularVelocity(vec3_zero());
+    SetAngularVelocity( vec3_zero() );
 
     // Can still take damage.
-    SetTakeDamage(TakeDamage::Yes);
+    SetTakeDamage( TakeDamage::Yes );
 
     // Let our dead body toss itself.
-    SetMoveType(MoveType::Toss);
+    SetMoveType( MoveType::Toss );
 
     // Remove the linked weapon model (third person thingy.)
-    SetModelIndex2(0);
+    SetModelIndex2( 0 );
 
     // Our effect type is now: CORPSE. Beautiful dead corpse :P
-    Base::SetEffects(EntityEffectType::Corpse);
+    Base::SetEffects( EntityEffectType::Corpse );
 
     // Fetch angles, only maintain the yaw, reset the others.
-    SetAngles(vec3_t{ 0.f, GetAngles()[vec3_t::PYR::Yaw], 0.f });
+    SetAngles( vec3_t{ 0.f, GetAngles()[ vec3_t::PYR::Yaw ], 0.f } );
 
     // Ensure our client entity is playing no sounds anymore.
-    Base::SetSound(0);
+    Base::SetSound( 0 );
     client->weaponSound = 0;
 
     // Retreive maxes, adjust height (z)
-    SetMaxs(GetMaxs() - vec3_t{ 0.f, 0.f, -8.f });
+    SetMaxs( GetMaxs() - vec3_t{ 0.f, 0.f, -8.f } );
 
     // Change server flags, we're a dead monster now.
-    SetServerFlags(GetServerFlags() | EntityServerFlags::DeadMonster);
+    SetServerFlags( GetServerFlags() | EntityServerFlags::DeadMonster );
 
     // If we're not dead yet, we got some death initializing to do.
     if (!GetDeadFlag()) {
@@ -891,65 +891,65 @@ void SVGBasePlayer::CheckFallingDamage()
     // to a valid client.
     ServerClient* client = GetClient();
 
-    if (!client) {
+    if ( !client ) {
         return;
     }
 
-    if (GetModelIndex() != 255)
+    if ( GetModelIndex() != 255 )
         return;     // not in the player model
 
-    if (GetMoveType() == MoveType::NoClip || GetMoveType() == MoveType::Spectator)
+    if ( GetMoveType() == MoveType::NoClip || GetMoveType() == MoveType::Spectator )
         return;
 
 	// Validate our groundentity handle.
-	bool isValidGroundEntity = ServerGameWorld::ValidateEntity(GetGroundEntityHandle());
+	bool isValidGroundEntity = ServerGameWorld::ValidateEntity( GetGroundEntityHandle() );
 
     // Calculate delta velocity.
     vec3_t velocity = GetVelocity();
 
-    if ((client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!isValidGroundEntity)) {
+    if ( (client->oldVelocity[2] < 0) && (velocity[2] > client->oldVelocity[2]) && (!isValidGroundEntity) ) {
         delta = client->oldVelocity[2];
     } else {
-        if (!isValidGroundEntity) {
+        if ( !isValidGroundEntity ) {
 			return;
 		}
         delta = velocity[2] - client->oldVelocity[2];
     }
-    delta = (delta * delta * 0.0001);
+    delta = ( delta * delta * 0.0001 );
 
     // never take falling damage if completely underwater
-    if (GetWaterLevel() == 3)
+    if ( GetWaterLevel() == 3 )
         return;
-    if (GetWaterLevel() == 2)
+    if ( GetWaterLevel() == 2 )
         delta *= 0.25;
-    if (GetWaterLevel() == 1)
+    if ( GetWaterLevel() == 1 )
         delta *= 0.5;
 
-    if (delta < 1)
+    if ( delta < 1 )
         return;
 
-    if (delta < 15 / 6) {
-        SetEventID(EntityEvent::Footstep);
+    if ( delta < 15 / 6 ) {
+        SetEventID( EntityEvent::Footstep );
         return;
     }
 
     client->fallValue = delta * 0.5;
-    if (client->fallValue > 40)
+    if ( client->fallValue > 40 )
         client->fallValue = 40;
     client->fallTime = level.time + FALL_TIME;
 
-    if (delta > 30) {
+    if ( delta > 30 ) {
 		// Set eventID based on delta.
-        if (GetHealth() > 0) {
-            if (delta >= 55) {
-                SetEventID(EntityEvent::FallFar);
+        if ( GetHealth() > 0 ) {
+            if ( delta >= 55 ) {
+                SetEventID( EntityEvent::FallFar );
             } else {
-                SetEventID(EntityEvent::Fall);
+                SetEventID( EntityEvent::Fall );
             }
         }
 
 		// We set the debounce pain time to prevent regular pain sounds from playing.
-        SetDebouncePainTime(level.time);
+        SetDebouncePainTime( level.time );
         damage = (delta - 30) / 2;
         if (damage < 1) {
             damage = 1;

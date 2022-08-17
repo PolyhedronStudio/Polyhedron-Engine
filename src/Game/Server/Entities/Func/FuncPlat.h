@@ -4,8 +4,19 @@
 *
 *	@file
 *
-*	ClientGame BaseTrigger Entity.
+*	ServerGame Entity: func_plat
+*
+*	A simple platform that can accelerate from idle to desired move speed and back.
+*	It creates two touch triggers at post spawn: 'top', and 'bottom'. These can be
+*	each distinctively be disabled by setting a SF_Disable***TouchTrigger spawnflag.
+*	
+*	By default the platform starts in its 'lowered' state and can be set to start
+*	in its 'raised' state by setting the SF_PlatformStartRaised spawnflag.
 * 
+*	When the platform has reached a passive state, 'lowered' or 'raised, it'll take
+*	the 'wait' SpawnKey as its duration for remaining in place before returning back
+*	to its original spawn state. To disable this behavior and wait for it to be re-
+*	triggered again you can set the SF_PlatformToggle flag.
 ***/
 #pragma once
 
@@ -42,16 +53,11 @@ public:
 	/**
 	*	Spawnflags.
 	**/
-    //! Old.
-	//static constexpr int32_t SF_PlatLowTriggered    = 1 << 1;
-	
-
-
 	//! Instead of waiting before moving to its opposite state(top or bottom), it requires a triggering of any sorts instead.
     static constexpr int32_t SF_PlatformToggle		= 1 << 2;
 	//! The platform's default position is set to its 'bottom' state position. This flag
 	//! revers that and uses the 'top' position instead.
-	static constexpr int32_t SF_PlatformStartAtTop	= 1 << 3;
+	static constexpr int32_t SF_PlatformStartRaised	= 1 << 3;
 	//! Disables the platform from being triggered on 'top' by Touch.
 	static constexpr int32_t SF_Platform_DisableTopTouchTrigger = 1 << 4;
 	//! Disables the platform from being triggered from 'bottom' by Touch.
@@ -60,6 +66,7 @@ public:
 	//! If either touch trigger direction is disabled, this flag Will stop the 
 	//! platform from automatically moving back after 'wait' time has passed.
 	static constexpr int32_t SF_Platform_DisableAutoReverse = 1 << 6;
+
 
 
     /**
@@ -88,49 +95,108 @@ public:
 
 
 	/**
-	*	SVGBaseMover Implementations.
+	*
+	*
+	*	FuncPLat
+	*
+	*
+	***/
+	/**
+	*	@return	The height that was either set by automatic calculation or SpawnKey.
 	**/
-    // Height.
     inline const float& GetHeight() {
         return this->height;
     }
-    inline void SetHeight(const float& height) {
+	/**
+	*	@brief	Sets the height for use in calculating the movement trajectum.
+	**/
+	inline void SetHeight(const float& height) {
         this->height = height;
     }
 
 
 
 protected:
-    //
-    // Callbacks for FuncPlat.
-    //
-    void        PlatformUse( IServerGameEntity* other, IServerGameEntity* activator );
-    void        PlatformBlocked( IServerGameEntity* other );
+	/**
+	*
+	*
+	*	Callbacks
+	*
+	*
+	**/
+	/**
+	*	@brief	'Use' callback: Will try to engage 'lower' or 'raise' movement depending on
+	*			the current residing state of the platform. If a Think method is already
+	*			set it'll do nothing but print a developer warning.
+	**/
+    void        Callback_Use( IServerGameEntity* other, IServerGameEntity* activator );
+	/**
+	*	@brief	'Blocked' callback:
+	**/
+	void        Callback_Blocked( IServerGameEntity* other );
     
-    void        PlatformGoUp();
-    void        PlatformGoDown();
+	/**
+	*	@brief	'EngageRaiseMove' callback: Engages the 'raise' movement process to return to
+	*			its lowered state by playing the 'startSoundIndex' and calling on the 'LowerPlatform'
+	*			callback. The 'LowerPlatform' callback will take control and continue setting itself
+	*			as the 'Think' callback until it has reached a passive state at the 'startPosition'.
+	**/
+	void        Callback_EngageRaiseMove();
+	/**
+	*	@brief	'EngageLowerMove' callback: Engages the 'lower' movement process to return to
+	*			its raised state by playing the 'startSoundIndex' and calling on the 'LowerPlatform'
+	*			callback. The 'LowerPlatform' callback will take control and continue setting itself
+	*			as the 'Think' callback until it has reached a passive state at the 'endPosition'.
+	**/
+	void        Callback_EngageLowerMove();
 
-    //
-    // Inner workings.
-    //
-    virtual void DoGoUp();
-    virtual void DoGoDown();
+	/**
+	*	@brief	'RaisePlatform' callback: Performs the platform 'raise' movement for the current 'think' frame.
+	**/
+    virtual void Callback_RaisePlatform();
+	/**
+	*	@brief	'LowerPlatform' callback: Performs the platform 'lower' movement for the current 'think' frame.
+	**/
+	virtual void Callback_LowerPlatform();
 
-    void        HitTop();
-    void        HitBottom();
+	/**
+	*	@brief	'ReachedRaisedPosition' callback: Will set movestate to 'Raised', play 'endSoundIndex' and set the needed
+	*			'Think' callback based on the SpawnFlags that were set.
+	**/
+    void        Callback_ReachedRaisedPosition();
+	/**
+	*	@brief	'ReachedLoweredPosition' callback: Will set movestate to 'Raised', play 'endSoundIndex' and set the needed
+	*			'Think' callback based on the SpawnFlags that were set.
+	**/
+	void        Callback_ReachedLoweredPosition();
 
-    //
-    // Callbacks for moveinfo.
-    // 
+	
+
+	/**
+	*
+	*
+	*	BaseMover Callbacks: TODO: Remnant of old days. Improve base mover class by
+	*	changing it to set and fire callbacks like we do anywhere else around. 
+	*
+	*
+	**/
     // These are leftovers from the legacy brush movement functions
     // Soon, we'll have a... better way... of doing this
     static void OnPlatformHitTop( IServerGameEntity* self );
     static void OnPlatformHitBottom( IServerGameEntity* self );
 
-    //
-    // Private Utilities.
-    //
-    void CalculateMoveSpeed();
+
+	/**
+	*
+	*
+	*	FuncPlat
+	*
+	*
+	**/
+	/**
+	*	@brief	Calculates the move speed for this platform.
+	**/
+	void CalculateMoveSpeed();
 	/**
 	*	@brief	Spawns the invisible 'top' touch trigger box.
 	**/

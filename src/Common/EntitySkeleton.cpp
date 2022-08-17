@@ -287,10 +287,34 @@ const bool ES_CreateFromModel( model_t *model, EntitySkeleton* es ) {
 	// Go over each animation.
 	for ( int32_t animationIndex = 0; animationIndex < skm->animations.size(); animationIndex++ ) {
 		// Get animation pointer.
-		SkeletalAnimation *animation = skm->animations[animationIndex];
+		SkeletalAnimation *animation = ES_GetAnimation( es, animationIndex );
 
-		es->blendActionAnimationStates[animationIndex].resize( animation->blendActions.size() );
+		if ( animation ) {
+
+			// Pre-allocate blend action animation states for each animation.
+			es->blendActionAnimationStates[ animationIndex ].resize( animation->blendActions.size() );
+			const size_t numberOfBlendActions = animation->blendActions.size();
+			if (es->blendActionAnimationStates[animationIndex].size() < numberOfBlendActions) {
+				es->blendActionAnimationStates[animationIndex].resize( numberOfBlendActions );
+			}
+
+			// Now go through the blendactions and their actions to fill in the proper start frames.
+			for ( int32_t blendActionIndex = 0; blendActionIndex < animation->blendActions.size(); blendActionIndex++ ) {
+				auto *blendAction = ES_GetBlendAction( es, animation, blendActionIndex );
+
+				if ( blendAction ) {
+					auto *action = ES_GetAction( es, blendAction->actionIndex );
+					auto *blendActionState = ES_GetBlendActionState( es, animationIndex, blendActionIndex );
+					
+					if ( blendActionState && action ) {
+						blendActionState->currentFrame	= action->startFrame;
+						blendActionState->oldFrame		= action->startFrame;
+					}
+				}
+			}
+		}
 	}
+
 	// Done.
 	return true;
 }
@@ -746,4 +770,162 @@ void ES_ComputeWorldPoseTransforms( const model_t *model, const EntitySkeletonBo
 		memcpy(inPose, outPose, sizeof(inPose));
 		Matrix34Multiply(inPose, poseMat, outPose);
 	}
+}
+
+
+
+/***
+*
+*
+*	Utility Functions, for easy bounds checking and sorts of tasks alike.
+*
+*
+***/
+/**
+*	@brief	Utility function to test whether an animation is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified action.
+**/
+SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const std::string &name ) {
+	// Make sure the skeleton and its model pointer are valid.
+	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+		return nullptr;
+	}
+	
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the name is nonexistent in our Animation map.
+	if ( !skm->animationMap.contains(name) ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimation.
+	return &skm->animationMap[ name ];
+}
+SkeletalAnimation *ES_GetAnimation( EntitySkeleton *entitySkeleton, const int32_t index ) {
+	// Make sure the skeleton and its model pointer are valid.
+	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+		return nullptr;
+	}
+	
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the index is out of bounds.
+	if ( index < 0 || index >= skm->animations.size() ) {
+		return nullptr;
+	}
+
+	// Return the pointer stored by index within the Animations vector.
+	return skm->animations[ index ];
+}
+
+/**
+*	@brief	Utility function to easily get a pointer to an Action by name or index.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified Action.
+**/
+SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const std::string &name ) {
+	// Make sure the skeleton and its model pointer are valid.
+	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+		return nullptr;
+	}
+	
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the name is nonexistent in our Action map.
+	if ( !skm->actionMap.contains(name) ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimationAction.
+	return &skm->actionMap[ name ];
+}
+SkeletalAnimationAction *ES_GetAction( EntitySkeleton *entitySkeleton, const int32_t index ) {
+	// Make sure the skeleton and its model pointer are valid.
+	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+		return nullptr;
+	}
+	
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the index is out of bounds.
+	if ( index < 0 || index >= skm->actions.size() ) {
+		return nullptr;
+	}
+
+	// Return the pointer stored by index within the Actions vector.
+	return skm->actions[ index ];
+}
+
+/**
+*	@brief	Utility function to test whether a BlendAction is existent and within range.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendAction action.
+**/
+SkeletalAnimationBlendAction *ES_GetBlendAction( EntitySkeleton *entitySkeleton, SkeletalAnimation *animation, const int32_t index ) {
+	// Make sure the skeleton and its model pointer are valid.
+	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+		return nullptr;
+	}
+	
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
+	if ( !skm ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) since we had no SkeletalAnimation to check on.
+	if ( !animation ) {
+		return nullptr;
+	}
+
+	// Return (nullptr) in case the index is out of bounds.
+	if ( index < 0 || index >= animation->blendActions.size() ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimationAction.
+	return &animation->blendActions[ index ];
+}
+
+/**
+*	@brief	Utility function to test whether a BlendActionState is existent and within range for the specified Animation.
+*	@return	(nullptr) on failure. Otherwise a pointer to the specified BlendActionState action.
+**/
+EntitySkeletonBlendActionState *ES_GetBlendActionState( EntitySkeleton *entitySkeleton, const int32_t animationIndex, const int32_t blendActionIndex ) {
+	// Make sure the skeleton and its model pointer are valid.
+	if ( !entitySkeleton && entitySkeleton->modelPtr ) {
+		return nullptr;
+	}
+	
+	// Return (nullptr) since we had no Skeletal Model Data to check on.
+	SkeletalModelData *skm = entitySkeleton->modelPtr->skeletalModelData;
+	if ( !skm ) {
+		return nullptr;
+	}
+	
+	// Return (nullptr) in case the animationIndex is out of bounds.
+	if ( animationIndex < 0 || animationIndex >= entitySkeleton->blendActionAnimationStates.size() ) {
+		return nullptr;
+	}
+	// Return (nullptr) in case the blendActionIndex is out of bounds.
+	if ( blendActionIndex < 0 || blendActionIndex >= entitySkeleton->blendActionAnimationStates[ animationIndex ].size() ) {
+		return nullptr;
+	}
+
+	// We're good, return a pointer to the SkeletalAnimationAction.
+	return &entitySkeleton->blendActionAnimationStates[ animationIndex ][ blendActionIndex ];
 }

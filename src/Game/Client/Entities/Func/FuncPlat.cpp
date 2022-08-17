@@ -20,31 +20,32 @@
 #include "Game/Client/World/ClientGameWorld.h"
 
 
-//===============
-// FuncPlat::ctor
-//===============
-FuncPlat::FuncPlat( Entity* entity ) 
-    : Base( entity ) {
 
+
+/**
+*	Constructor.
+**/
+FuncPlat::FuncPlat( Entity* entity ) : Base( entity ) {
 }
 
-//===============
-// FuncPlat::Precache
-//===============
+/**
+*   @brief  Called when it is time to 'precache' this entity's data. (Images, Models, Sounds.)
+**/
 void FuncPlat::Precache() {
+	// Be sure to call Precache on all Base classes.
     Base::Precache();
 
-    // Set up the default sounds
-    if ( GetSound() != 1 ) {
-        moveInfo.startSoundIndex = CLG_PrecacheSound("plats/pt1_strt.wav");
-        moveInfo.middleSoundIndex = CLG_PrecacheSound("plats/pt1_mid.wav");
-        moveInfo.endSoundIndex = CLG_PrecacheSound("plats/pt1_end.wav");
-    }
+    //// Set up the default sounds
+    //if ( GetSound() != 1 ) {
+    //    moveInfo.startSoundIndex = SVG_PrecacheSound("plats/pt1_strt.wav");
+    //    moveInfo.middleSoundIndex = SVG_PrecacheSound("plats/pt1_mid.wav");
+    //    moveInfo.endSoundIndex = SVG_PrecacheSound("plats/pt1_end.wav");
+    //}
 }
 
-//===============
-// FuncPlat::Spawn
-//===============
+/**
+*   @brief  Called when it is time to spawn this entity.
+**/
 void FuncPlat::Spawn() {
     // Zero out angles here for SetMoveDirection in Base::Spawn.
     SetAngles(vec3_zero());
@@ -53,122 +54,95 @@ void FuncPlat::Spawn() {
     Base::Spawn();
 
     // Basic properties.
-    //SetMoveDirection(GetAngles(), true);
+    //SetMoveDirection( GetAngles(), true );
     SetMoveType(MoveType::Push);
     SetSolid(Solid::BSP);
-    //SetModel(GetModel());
+    SetModel( GetModel() );
 
-    //SetThinkCallback( &CLGBasePacketEntity::CLGBaseEntityThinkNull );
-    SetBlockedCallback(&FuncPlat::PlatformBlocked);
-    SetUseCallback(&FuncPlat::PlatformUse);
+    //SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
+    SetBlockedCallback(&FuncPlat::Callback_Blocked);
+    SetUseCallback(&FuncPlat::Callback_Use);
 
-    // Key/Value setup.
-    if (!GetSpeed()) {
+    // Make sure to have default KeyValues set in case they were not set
+	// by the mapper.
+    if ( !GetSpeed() ) {
         SetSpeed(20.f);
     } else {
         SetSpeed(GetSpeed() * 0.1f);
     }
-    if (!GetAcceleration()) {
-        SetAcceleration(5.f);
+	if ( GetWaitTime() == Frametime::zero()) {
+		SetWaitTime( 3s );
+	}
+    if ( !GetAcceleration() ) {
+        SetAcceleration( 5.f );
     } else {
-        SetAcceleration(GetAcceleration() * 0.5f);
+        SetAcceleration( GetAcceleration() * 0.5f );
     }
-    if (!GetDeceleration()) {
-        SetDeceleration(5.f);
+    if ( !GetDeceleration()) {
+        SetDeceleration( 5.f );
     } else {
-        SetDeceleration(GetDeceleration() * 0.5f);
+        SetDeceleration( GetDeceleration() * 0.5f );
     }
-    if (!GetDamage()) {
-        SetDamage(2);
+    if ( !GetDamage() ) {
+        SetDamage( 2 );
     }
-    if (!GetLip()) {
-        SetLip(8);
+    if ( !GetLip() ) {
+        SetLip( 8 );
     }
 
     // Set start and end positions to origin.
-    SetStartPosition(GetOrigin());
-    SetEndPosition(GetOrigin());
+    SetStartPosition( GetOrigin() );
+    SetEndPosition( GetOrigin() );
 
-    if (GetHeight()) {
+
+	// For the 'Height' SpawnKey we got special behavior, a mapper can set it by himself to determine the
+	// height this platform trajectory travel.
+    if ( GetHeight() ) {
 	    // Adjust endposition according to keyvalue set height.
-        SetEndPosition(GetEndPosition() - vec3_t{0.f, 0.f, GetHeight()});
+        SetEndPosition( GetEndPosition() - vec3_t{ 0.f, 0.f, GetHeight() } );
     } else {
-        // Adjust endposition based on own calculated height.
-        SetEndPosition(GetEndPosition() - vec3_t{0.f, 0.f, (GetMaxs().z - GetMins().z) - GetLip()});
-        height = GetEndPosition().z;
+		// Calculate Height and EndPosition based on the actual mins, maxs and lip of this platform.
+        SetEndPosition( GetEndPosition() - vec3_t{ 0.f, 0.f, ( GetMaxs().z - GetMins().z) - GetLip() } );
+        SetHeight( GetEndPosition().z );
     }
 
-    //const float height = GetHeight();
-    //const vec3_t boundingBoxMins = GetMins();
-    //const vec3_t boundingBoxMaxs = GetMaxs();
-    //Com_DPrintf("startPosition = %s\n", vec3_to_str(startPosition).c_str());
-    //Com_DPrintf("endPosition = %s\n", vec3_to_str(endPosition).c_str());
-    ////startPosition.z += height + GetLip();
-    //if (height) {
-    //    endPosition.z -= height;
-    //} else {
-    //    endPosition.z -= (boundingBoxMaxs.z - boundingBoxMins.z) - GetLip();
-    //}
-
-    //moveInfo.distance = -(height + GetLip());
-    //vec3_t endp = CalculateEndPosition();
-    //endPosition.z = endp.z;
-    //SetEndPosition(endPosition);
-
-    //Com_DPrintf("height = %f\n", height);
-    //Com_DPrintf("startPosition = %s\n", vec3_to_str(startPosition).c_str());
-    //Com_DPrintf("endPosition = %s\n", vec3_to_str(endPosition).c_str());
-
-    //// This should never happen
-    //if (GetStartPosition() == GetEndPosition()) {
-    //    Com_DPrintf("WARNING: func_plat has same start & end position\n");
-    //    return;
-    //}
-
-    // If it has a targetname, it has to be triggered so set its state to be up.
-    //if (!GetTargetName().empty()) {
-    //    moveInfo.state = MoverState::Up;
-    //    SetMoveDirection(vec3_t{0.f, 1.f, 0.f});
-    //    moveInfo.distance = (height + GetLip());
-    //    endPosition = CalculateEndPosition();
-    //} else {
-    //    SetMoveDirection(vec3_t{0.f, -1.f, 0.f});
-    //    moveInfo.distance = (height + GetLip());
-    //    endPosition = CalculateEndPosition();
-    //    SetEndPosition(endPosition);
-    //    SetOrigin(endPosition);
-    //    moveInfo.state = MoverState::Bottom;
-    //}
-
-    //// To simplify logic elsewhere, make non-teamed doors into a team of one
+    // To simplify logic elsewhere, make non-teamed func_plats into a team of one
     if ( GetTeam().empty() ) {
         SetTeamMasterEntity( this );
     }
 
+	// We're done, link the entity in for collision.
     LinkEntity();
 }
 
-//===============
-// FuncPlat::PostSpawn
-//===============
+/**
+*   @brief  Spawn the distinct touch triggers if they aren't disabled, set the proper state to start with,
+*			calculate the move speed and fill in the basemover's MoveInfo settings.
+**/
 void FuncPlat::PostSpawn() {
-    // We spawn this in post spawn so all other calculations have been prepared.
-    SpawnPlatformTrigger();
+	//// Get our spawnflags.
+	//const int32_t spawnFlags = GetSpawnFlags();
+
+	//// Spawn the platform 'top' and 'bottom' triggers, unless their disable flags are set.
+ //   if ( !(spawnFlags & SF_Platform_DisableTopTouchTrigger) ) {
+	//	SpawnTopTouchTrigger();
+	//}
+	//if ( !(spawnFlags & SF_Platform_DisableBottomTouchTrigger) ) {
+	//	SpawnBottomTouchTrigger();
+	//}
 
     // Calculate movement speed to use.
     CalculateMoveSpeed();
 
-    // The way how plats work is that they need to be triggered by an other
-    // trigger of sorts in case they got a targetname. This means that
-    // by default the trigger starts in its up state.
-    //
-    // Otherwise position it in its endposition and set state to bottom.
-    if (!GetTargetName().empty()) {
-        moveInfo.state = MoverState::Up;
-    } else {
-        SetOrigin(GetEndPosition());
-        moveInfo.state = MoverState::Bottom;
-    }
+	// Start at state up.
+	if ( (spawnFlags & SF_PlatformStartRaised) ) {
+		moveInfo.state = MoverState::Top;
+	} else {
+		// Default to end(bottom) position.
+		SetOrigin( GetEndPosition() );
+		// Change its state.
+		moveInfo.state = MoverState::Bottom;
+	}
     
     // Setup move info.
     moveInfo.speed = GetSpeed();
@@ -184,278 +158,426 @@ void FuncPlat::PostSpawn() {
     LinkEntity();
 }
 
-//===============
-// FuncPlat::PlatformUse
-//===============
-void FuncPlat::PlatformUse( GameEntity* other, GameEntity* activator ) {
-    if (HasThinkCallback()) {
-        CLG_Print(PrintType::Developer, "FuncPlat already has a think callback! - returning!!\n");
-        return;
-    }
-    PlatformGoDown();
+/**
+*	@brief	Receive ServerGame Events, effectively allowing a slight client-side prediction.
+**/
+void FuncPlat::OnEventID( uint32_t eventID ) {
+	// TODO: Acquire the activator entity?
+	uint16_t activatorEntityNumber = 0;
+	
+	// Get Game World.
+	ClientGameWorld *gameWorld = GetGameWorld();
+	auto *playerEntity = gameWorld->GetClientGameEntity();
+//		auto *playerEntity = GetGameWorld()->GetGameEntityByIndex(1);
+	switch( eventID ) {
+	case 1: //: FUNC_PLAT_ENGAGE_LOWER_MOVE:
+		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_LOWER_MOVE')!\n", __func__, eventID ) );
+		// Start now so we can catch up to last frame.
+		Callback_EngageLowerMove();
+		Callback_LowerPlatform();
+		break;
+	case 2: //: FUNC_PLAT_ENGAGE_RAISE_MOVE:
+		CLG_Print( PrintType::Developer, fmt::format( "{}: Received (eventID: #{}, 'ENGAGE_RAISE_MOVE')!\n", __func__, eventID ) );
+		// Start now, so we can catch up to last frame.
+		Callback_EngageRaiseMove();
+		Callback_RaisePlatform();
+		break;
+	default:
+
+		break;
+	}
 }
 
-//===============
-// FuncPlat::PlatformBlocked
-//===============
-void FuncPlat::PlatformBlocked( GameEntity* other ) {
+
+/**
+*
+*
+*	Callbacks
+*
+*
+**/
+/**
+*	@brief	'Use' callback: Will try to engage 'lower' or 'raise' movement depending on
+*			the current residing state of the platform. If a Think method is already
+*			set it'll do nothing but print a developer warning.
+**/
+void FuncPlat::Callback_Use( IClientGameEntity* other, IClientGameEntity* activator ) {
+    if (HasThinkCallback()) {
+        CLG_Print( PrintType::DeveloperWarning, fmt::format( "func_plat(#{}): Already has a 'Think' callback set. Can't 'Use'.\n", GetNumber() ) );
+        return;
+    }
+
+	// Engage LowerMove.
+    Callback_EngageLowerMove();
+}
+
+/**
+*	@brief	'Blocked' callback:
+**/
+void FuncPlat::Callback_Blocked( IClientGameEntity* other ) {
     if (!other) {
         return;
     }
 
-	// TODO: It's cool if depending on what kind of entity we could predict this.
-    //if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
-    //    // Give it a chance to go away on its own terms (like gibs)
-    //    GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
-    //    // If it's still there, nuke it
-    //    if ( other->GetHealth() > 0 || other->GetSolid() != Solid::Not ) {
-    //        CLG_BecomeExplosion1( other );
-    //    }
-    //}
+	// We don't need this here.
+	//// Get GameWorld.
+	//ClientGameWorld *gameWorld = GetGameWorld();
+	//// Get GameMode.
+	//IGameMode *gameMode = gameWorld->GetGameMode();
 
-    //GetGameMode()->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
+ //   if ( !(other->GetServerFlags() & EntityServerFlags::Monster) && !(other->GetClient()) ) {
+ //       // Give it a chance to go away on its own terms (like gibs)
+ //       gameMode->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), 10000, 1, 0, MeansOfDeath::Crush );
+ //       // If it's still there, nuke it
+ //       if ( other->GetHealth() > 0 || other->GetSolid() != Solid::Not ) {
+ //           SVG_BecomeExplosion1( other );
+ //       }
+ //   }
+
+ //   gameMode->InflictDamage( other, this, this, vec3_zero(), other->GetOrigin(), vec3_zero(), GetDamage(), 1, 0, MeansOfDeath::Crush );
 
     if (moveInfo.state == MoverState::Down) {
-	    PlatformGoUp( );
+	    Callback_EngageRaiseMove( );
     } else {
-	    PlatformGoDown();
+	    Callback_EngageLowerMove();
     }
 }
 
-//===============
-// FuncPlat::PlatformGoUp
-//===============
-void FuncPlat::PlatformGoUp(  ) {
-    if (!(GetFlags() & EntityFlags::TeamSlave)) {
-	    if (moveInfo.startSoundIndex) {
-	        CLG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0.0f);
-	    }
-	    SetSound(moveInfo.startSoundIndex);
-    }
+/**
+*	@brief	'EngageRaiseMove' callback: Engages the 'raise' movement process to return to
+*			its lowered state by playing the 'startSoundIndex' and calling on the 'LowerPlatform'
+*			callback. The 'LowerPlatform' callback will take control and continue setting itself
+*			as the 'Think' callback until it has reached a passive state at the 'startPosition'.
+**/
+void FuncPlat::Callback_EngageRaiseMove(  ) {
+	// Only the platform 'master' plays audio, not its team slaves.
+    //if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+	    // Play sound.
+		//if ( moveInfo.startSoundIndex ) {
+	    //    SVG_Sound( this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0.0f );
+	    //}
 
-    DoGoUp();
+		// Set the entity sound.
+	    //SetSound( moveInfo.startSoundIndex );
+    //}
+
+	// Begin raising the platform, the callback will continue setting itself as 'think'
+	// callback until it has reached a passive state position again.
+    Callback_RaisePlatform();
 }
 
-//===============
-// FuncPlat::PlatformGoDown
-//===============
-void FuncPlat::PlatformGoDown() {
-    if (!(GetFlags() & EntityFlags::TeamSlave)) {
-	    if (moveInfo.startSoundIndex) {
-	        CLG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0.0f);
-	    }
-	    SetSound(moveInfo.startSoundIndex);
-    }
-    
-    DoGoDown();
+/**
+*	@brief	'EngageLowerMove' callback: Engages the 'lower' movement process to return to
+*			its raised state by playing the 'startSoundIndex' and calling on the 'LowerPlatform'
+*			callback. The 'LowerPlatform' callback will take control and continue setting itself
+*			as the 'Think' callback until it has reached a passive state at the 'endPosition'.
+**/
+void FuncPlat::Callback_EngageLowerMove() {
+	// Only the platform 'master' plays audio, not its team slaves.
+    //if (!(GetFlags() & EntityFlags::TeamSlave)) {
+		// Play sound if we got one set.
+	    //if ( moveInfo.startSoundIndex ) {
+	        //SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.startSoundIndex, 1, Attenuation::Static, 0.0f);
+	    //}
+
+		// Set the entity sound.
+	    //SetSound(moveInfo.startSoundIndex);
+    //}
+
+	// Begin lowering the platform, the callback will continue setting itself as 'think'
+	// callback until it has reached a passive state position again.
+    Callback_LowerPlatform();
 }
 
-//===============
-// FuncPlat::DoGoUp
-//===============
-void FuncPlat::DoGoUp() {
-    if (!(GetFlags() & EntityFlags::TeamSlave)) {
-	    if (moveInfo.middleSoundIndex) {
-	        CLG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.middleSoundIndex, 1, Attenuation::Static, 0.0f);
-	    }
-	    SetSound(moveInfo.middleSoundIndex);
-    }
+/**
+*	@brief	Performs the platform 'raise' movement for the current 'think' frame.
+**/
+void FuncPlat::Callback_RaisePlatform() {
+    //if (!(GetFlags() & EntityFlags::TeamSlave)) {
+	   // if (moveInfo.middleSoundIndex) {
+	   //     SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.middleSoundIndex, 1, Attenuation::Static, 0.0f);
+	   // }
+	   // SetSound(moveInfo.middleSoundIndex);
+    //}
     moveInfo.state = MoverState::Up;
     BrushMoveCalc( moveInfo.startOrigin, OnPlatformHitTop );
 }
 
-//===============
-// FuncPlat::DoGoDown
-//===============
-void FuncPlat::DoGoDown() {
-    if (!(GetFlags() & EntityFlags::TeamSlave)) {
-	    if (moveInfo.middleSoundIndex) {
-	        CLG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.middleSoundIndex, 1, Attenuation::Static, 0.0f);
-	    }
-	    SetSound(moveInfo.middleSoundIndex);
-    }
+/**
+*	@brief	Performs the platform 'lower' movement for the current 'think' frame.
+**/
+void FuncPlat::Callback_LowerPlatform() {
+    //if (!(GetFlags() & EntityFlags::TeamSlave)) {
+	   // if (moveInfo.middleSoundIndex) {
+	   //     SVG_Sound(this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.middleSoundIndex, 1, Attenuation::Static, 0.0f);
+	   // }
+	   // SetSound(moveInfo.middleSoundIndex);
+    //}
 
     moveInfo.state = MoverState::Down;
     BrushMoveCalc( moveInfo.endOrigin, OnPlatformHitBottom );
 }
 
-//===============
-// FuncPlat::HitTop
-//===============
-void FuncPlat::HitTop() {
-    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
-        if ( moveInfo.endSoundIndex ) {
-            CLG_Sound( this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
-        }
-        SetSound( 0 );
-    }
+/**
+*	@brief	'ReachedRaisedPosition' callback: Will set movestate to 'Raised', play 'endSoundIndex' and set the needed
+*			'Think' callback based on the SpawnFlags that were set.
+**/
+void FuncPlat::Callback_ReachedRaisedPosition() {
+    //if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+    //    if ( moveInfo.endSoundIndex ) {
+    //        SVG_Sound( this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
+    //    }
+    //    SetSound( 0 );
+    //}
 
     moveInfo.state = MoverState::Top;
 
-    SetThinkCallback( &FuncPlat::PlatformGoDown );
-    SetNextThinkTime( level.time + 3s);
-}
-
-//===============
-// FuncPlat::HitBottom
-//===============
-void FuncPlat::HitBottom() {
-    if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
-        if ( moveInfo.endSoundIndex ) {
-            CLG_Sound( this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
-        }
-        SetSound( 0 );
-    }
-    SetThinkCallback( &CLGBasePacketEntity::CLGBasePacketEntityThinkNull );
-    moveInfo.state = MoverState::Bottom;
-}
-
-//===============
-// FuncPlat::OnPlatformHitTop
-//===============
-void FuncPlat::OnPlatformHitTop( GameEntity* self ) {
-    if (!self->IsSubclassOf<FuncPlat>()) {
-	    CLG_Print( PrintType::Developer, fmt::format("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber() ));
-        return;
-    }
-    
-    // Cast.
-    FuncPlat* platEntity = static_cast<FuncPlat*>(self);
-	platEntity->HitTop();
-}
-
-//===============
-// FuncPlat::OnPlatformHitBottom
-//===============
-void FuncPlat::OnPlatformHitBottom( GameEntity* self ) {
-    if (!self->IsSubclassOf<FuncPlat>()) {
-		CLG_Print( PrintType::Developer, fmt::format( "Warning: In function {} entity #{} is not a subclass of func_plat\n", __func__, self->GetNumber() ) );
-        return;
-    }
-    
-    // Cast.
-    FuncPlat* platEntity = static_cast<FuncPlat*>(self);
-	platEntity->HitBottom();
-}
-
-//===============
-// FuncPlat::CalculateMoveSpeed
-//===============
-void FuncPlat::CalculateMoveSpeed() {
-    //if ( GetFlags() & EntityFlags::TeamSlave ) {
-    //    return; // Only the team master does this
-    //}
-
-    //FuncPlat* ent = nullptr;
-    float min = 0.f;
-    float time = 0.f;
-    float newSpeed = 0.f;
-    float ratio = 0.f;
-    float distance = 0.f;
-    FuncPlat *ent = nullptr;
-
-    // Find the smallest distance any member of the team will be moving
-    min = fabsf( moveInfo.distance );
-    for (ent = dynamic_cast<FuncPlat*>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseMover>()); ent = dynamic_cast<FuncPlat*>(ent->GetTeamChainEntity())) {
-        distance = fabsf( ent->moveInfo.distance );
-        if ( distance < min ) {
-            min = distance;
-        }
-    }
-
-    time = min / GetSpeed();
-
-    // Adjust speeds so they will all complete at the same time
-    for (ent = dynamic_cast<FuncPlat*>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseMover>()); ent = dynamic_cast<FuncPlat*>(ent->GetTeamChainEntity())) {
-        newSpeed = fabsf( ent->moveInfo.distance ) / time;
-        ratio = newSpeed / ent->moveInfo.speed;
-
-        if ( ent->moveInfo.acceleration == ent->moveInfo.speed ) {
-            ent->moveInfo.acceleration = newSpeed;
-        } else {
-            ent->moveInfo.acceleration *= ratio;
-        }
-
-        if ( ent->moveInfo.deceleration == ent->moveInfo.speed ) {
-            ent->moveInfo.deceleration = newSpeed;
-        } else {
-            ent->moveInfo.deceleration *= ratio;
-        }
-
-        // Update moveInfo variables and class member variables
-        ent->SetAcceleration( ent->moveInfo.acceleration );
-        ent->SetDeceleration( ent->moveInfo.deceleration );
-        ent->moveInfo.speed = newSpeed;
-        ent->SetSpeed( newSpeed );
-    }
-}
-
-//===============
-// FuncPlat::SpawnPlatformTrigger
-// 
-// Platforms have an invisible bounding box on them, which
-// is slightly smaller than the platform's bounding box.
-// 
-// This bad boy spawns it, so keep that in mind if you're running out of edict slots.
-//===============
-void FuncPlat::SpawnPlatformTrigger() {
-    // Get mins and max.
-    const vec3_t mins = GetMins();
-    const vec3_t maxs = GetMaxs();
-
-    // Start calculation of the new trigger mins/maxs.
-    vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
-    vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
-
-    const vec3_t startPosition = GetStartPosition();
-    const vec3_t endPosition = GetEndPosition();
-    const float& lip = GetLip();
-
-    // Calculate a slightly larger box.
-    triggerMins.x = mins.x + 25.f;
-    triggerMins.y = mins.y + 25.f;
-    triggerMins.z = mins.z;
-
-    triggerMaxs.x = maxs.x - 25.f;
-    triggerMaxs.y = maxs.y - 25.f;
-    triggerMaxs.z = maxs.z + 8;
-
-    // Adjust height.
-
-
-    // For PlatLowTriggered state we need a different mins and maxs.
-    if (GetSpawnFlags() & SF_PlatLowTriggered) {
-
-		triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z) + lip;
-		triggerMaxs.z = triggerMins.z + 8;
+	// When SF_PlatformToggle is set we..
+	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
+		// If the bottom trigger is disabled, we want it to go back up automatically instead of wait for a trigger.
+		if (GetSpawnFlags() & SF_Platform_DisableTopTouchTrigger) {
+			SetThinkCallback( &FuncPlat::Callback_EngageLowerMove );
+			SetNextThinkTime( level.time + GetWaitTime() );
+		} else {
+			SetThinkCallback( nullptr );
+		}
 	} else {
-	    triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z + lip);
+		SetThinkCallback( &FuncPlat::Callback_EngageLowerMove );
+		SetNextThinkTime( level.time + GetWaitTime() );
+	}
+}
+
+/**
+*	@brief	'ReachedLoweredPosition' callback: Will set movestate to 'Raised', play 'endSoundIndex' and set the needed
+*			'Think' callback based on the SpawnFlags that were set.
+**/
+void FuncPlat::Callback_ReachedLoweredPosition() {
+    //if ( !(GetFlags() & EntityFlags::TeamSlave) ) {
+    //    if ( moveInfo.endSoundIndex ) {
+    //        SVG_Sound( this, SoundChannel::IgnorePHS + SoundChannel::Voice, moveInfo.endSoundIndex, 1.0f, Attenuation::Static, 0.0f );
+    //    }
+    //    SetSound( 0 );
+    //}
+	
+    moveInfo.state = MoverState::Bottom;
+
+	// When SF_PlatformToggle is set we..
+	if ( ( GetSpawnFlags() & SF_PlatformToggle) ) {
+		//SetThinkCallback( &SVGBaseEntity::SVGBaseEntityThinkNull );
+
+		// If the bottom trigger is disabled, we want it to go back up automatically instead of wait for a trigger.
+		if (GetSpawnFlags() & SF_Platform_DisableBottomTouchTrigger) {
+			SetThinkCallback( &FuncPlat::Callback_EngageRaiseMove );
+			SetNextThinkTime( level.time + GetWaitTime() );
+		} else {
+			SetThinkCallback( nullptr );
+		}
+	} else {
+		SetThinkCallback( &CLGBasePacketEntity::CLGBasePacketEntityThinkNull );
 	}
 
-    // Scale it.
-    if (triggerMaxs.x - triggerMins.x <= 0.f) {
-        triggerMins.x = (mins.x + maxs.x) * 0.5f;
-        triggerMaxs.x = triggerMins.x + 1;
-    }
-    if (triggerMaxs.y - triggerMins.y <= 0.f) {
-        triggerMins.y = (mins.y + maxs.y) * 0.5f;
-        triggerMaxs.y = triggerMins.y + 1;
-    }
+}
 
-    // Add points to the generated bounding box for the trigger.
-    for (GameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
-	    // Check it is a derivate of base mover, if not, break out of this loop.
-	    if (!teamMember->IsSubclassOf<CLGBaseMover>()) {
-	        CLG_Print( PrintType::DeveloperWarning, fmt::format("Warning: In function {} entity(#{}) has a non basemover enitity in its teamchain(#{})\n", __func__, GetNumber(), teamMember->GetNumber() ));
-	        break;
-	    }
 
-        AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
-	    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+
+/**
+*
+*
+*	BaseMover Callbacks: TODO: Remnant of old days. Improve base mover class by
+*	changing it to set and fire callbacks like we do anywhere else around. 
+*
+*
+**/
+void FuncPlat::OnPlatformHitTop( IClientGameEntity* self ) {
+    if (!self->IsSubclassOf<FuncPlat>()) {
+//	    CLG_Print( PrintType::DeveloperWarning, "Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
+        return;
     }
     
-    // At last, create platform trigger entity.
-    //CLGBasePacketEntity *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
+    // Cast.
+    FuncPlat* platEntity = static_cast<FuncPlat*>(self);
+	platEntity->Callback_ReachedRaisedPosition();
+}
+void FuncPlat::OnPlatformHitBottom(IClientGameEntity *self) {
+	if (!self->IsSubclassOf<FuncPlat>()) {
+	//	gi.DPrintf("Warning: In function %s entity #%i is not a subclass of func_plat\n", __func__, self->GetNumber());
+		return;
+	}
+
+	// Cast.
+	FuncPlat *platEntity = static_cast<FuncPlat *>(self);
+	platEntity->Callback_ReachedLoweredPosition();
+}
+
+/**
+*
+*
+*	FuncPlat
+*
+*
+**/
+/**
+*	@brief	Calculates the move speed for this platform.
+**/
+void FuncPlat::CalculateMoveSpeed() {
+	//if ( GetFlags() & EntityFlags::TeamSlave ) {
+	//    return; // Only the team master does this
+	//}
+
+	//FuncPlat* ent = nullptr;
+	float min = 0.f;
+	float time = 0.f;
+	float newSpeed = 0.f;
+	float ratio = 0.f;
+	float distance = 0.f;
+	FuncPlat *ent = nullptr;
+
+	// Find the smallest distance any member of the team will be moving
+	min = fabsf(moveInfo.distance);
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+		distance = fabsf(ent->moveInfo.distance);
+		if (distance < min) {
+			min = distance;
+		}
+	}
+
+	time = min / GetSpeed();
+
+	// Adjust speeds so they will all complete at the same time
+	for (ent = dynamic_cast<FuncPlat *>(GetTeamChainEntity()); (ent != nullptr && ent->IsSubclassOf<CLGBaseMover>()); ent = dynamic_cast<FuncPlat *>(ent->GetTeamChainEntity())) {
+		newSpeed = fabsf(ent->moveInfo.distance) / time;
+		ratio = newSpeed / ent->moveInfo.speed;
+
+		if (ent->moveInfo.acceleration == ent->moveInfo.speed) {
+			ent->moveInfo.acceleration = newSpeed;
+		} else {
+			ent->moveInfo.acceleration *= ratio;
+		}
+
+		if (ent->moveInfo.deceleration == ent->moveInfo.speed) {
+			ent->moveInfo.deceleration = newSpeed;
+		} else {
+			ent->moveInfo.deceleration *= ratio;
+		}
+
+		// Update moveInfo variables and class member variables
+		ent->SetAcceleration(ent->moveInfo.acceleration);
+		ent->SetDeceleration(ent->moveInfo.deceleration);
+		ent->moveInfo.speed = newSpeed;
+		ent->SetSpeed(newSpeed);
+	}
+}
+
+/**
+*	@brief	Spawns the invisible 'top' touch trigger box.
+**/
+void FuncPlat::SpawnTopTouchTrigger() {
+	//// Get mins and max.
+	//const vec3_t mins = GetMins();
+	//const vec3_t maxs = GetMaxs();
+
+	//// We'll need these to calculate the trigger mins/maxs with.
+ //   const vec3_t startPosition = GetStartPosition();
+ //   const vec3_t endPosition = GetEndPosition();
+ //   const float& lip = GetLip();
+
+	//// Start calculation of the new trigger mins/maxs.
+ //   vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
+ //   vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
+
+ //   // Calculate a slightly larger box.
+ //   triggerMins.x = mins.x + 25.f;
+ //   triggerMins.y = mins.y + 25.f;
+ //   triggerMins.z = mins.z + GetHeight();
+
+ //   triggerMaxs.x = maxs.x - 25.f;
+ //   triggerMaxs.y = maxs.y - 25.f;
+ //   triggerMaxs.z = maxs.z + GetHeight() + 8;
+
+ //   // Adjust height.
+	////triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z + lip);
+	//
+ //   // Ensure it is properly scaled on X and Y Axis. 
+ //   if (triggerMaxs.x - triggerMins.x <= 0.f) {
+ //       triggerMins.x = (mins.x + maxs.x) * 0.5f;
+ //       triggerMaxs.x = triggerMins.x + 1;
+ //   }
+ //   if (triggerMaxs.y - triggerMins.y <= 0.f) {
+ //       triggerMins.y = (mins.y + maxs.y) * 0.5f;
+ //       triggerMaxs.y = triggerMins.y + 1;
+ //   }
+
+ //   // Add points to the generated bounding box for the trigger.
+ //   for (IClientGameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+	//    // Check it is a derivate of base mover, if not, break out of this loop.
+	//    if (!teamMember->IsSubclassOf<CLGBaseMover>()) {
+	//        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+	//        break;
+	//    }
+
+ //       AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
+	//    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+ //   }
+ //   
+ //   // At last, create platform trigger entity.
+ //   TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
+}
+
+/**
+*	@brief	Spawns the invisible 'bottom' touch trigger box.
+**/
+void FuncPlat::SpawnBottomTouchTrigger() {
+	//// Get mins and max.
+	//const vec3_t mins = GetMins();
+	//const vec3_t maxs = GetMaxs();
+
+	//// We'll need these to calculate the trigger mins/maxs with.
+ //   const vec3_t startPosition = GetStartPosition();
+ //   const vec3_t endPosition = GetEndPosition();
+ //   const float& lip = GetLip();
+
+	//// Start calculation of the new trigger mins/maxs.
+ //   vec3_t triggerMins = mins + vec3_t{ 25.0f, 25.0f, 0.f };
+ //   vec3_t triggerMaxs = maxs + vec3_t{ -25.f, -25.f, 8.f };
+
+	//gi.DPrintf("%s", "SpawnBottomTouchTrigger BRUH\n");
+ //   // Calculate a slightly larger box.
+ //   triggerMins.x = mins.x + 25.f;
+ //   triggerMins.y = mins.y + 25.f;
+ //   triggerMins.z = mins.z;
+
+ //   triggerMaxs.x = maxs.x - 25.f;
+ //   triggerMaxs.y = maxs.y - 25.f;
+ //   triggerMaxs.z = maxs.z + 8;
+
+ //   // Adjust height.
+	//triggerMins.z = triggerMaxs.z - (startPosition.z - endPosition.z) + lip;
+	//triggerMaxs.z = triggerMins.z + 8;
+
+ //   // Ensure it is properly scaled on X and Y Axis. 
+ //   if (triggerMaxs.x - triggerMins.x <= 0.f) {
+ //       triggerMins.x = (mins.x + maxs.x) * 0.5f;
+ //       triggerMaxs.x = triggerMins.x + 1;
+ //   }
+ //   if (triggerMaxs.y - triggerMins.y <= 0.f) {
+ //       triggerMins.y = (mins.y + maxs.y) * 0.5f;
+ //       triggerMaxs.y = triggerMins.y + 1;
+ //   }
+
+ //   // Add points to the generated bounding box for the trigger.
+ //   for (IClientGameEntity* teamMember = GetTeamChainEntity(); teamMember != nullptr; teamMember = teamMember->GetTeamChainEntity()) {
+	//    // Check it is a derivate of base mover, if not, break out of this loop.
+	//    if (!teamMember->IsSubclassOf<CLGBaseMover>()) {
+	//        gi.DPrintf("Warning: In function %s entity #%i has a non basemover enitity in its teamchain(#%i)\n", __func__, GetNumber(), teamMember->GetNumber());
+	//        break;
+	//    }
+
+ //       AddPointToBounds(teamMember->GetAbsoluteMin(), triggerMins, triggerMaxs);
+	//    AddPointToBounds(teamMember->GetAbsoluteMax(), triggerMins, triggerMaxs);
+ //   }
+ //   
+ //   // At last, create platform trigger entity.
+ //   TriggerAutoPlatform *trigger = TriggerAutoPlatform::Create( this, triggerMins, triggerMaxs );
 }
 
 //===============

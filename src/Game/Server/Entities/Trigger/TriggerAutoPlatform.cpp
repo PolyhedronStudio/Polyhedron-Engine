@@ -96,7 +96,7 @@ void TriggerAutoPlatform::AutoPlatformTouch( IServerGameEntity* self, IServerGam
 	
 	// Action is determined by move state.
 	if (moveInfo->state == MoverState::Bottom) {
-		platformEntity->PlatformGoUp();
+		platformEntity->Callback_EngageRaiseMove();
 	} else if (moveInfo->state == MoverState::Top) {
 		platformEntity->SetNextThinkTime(level.time + 1 * FRAMETIME_S);
 	}

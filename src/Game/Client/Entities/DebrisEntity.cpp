@@ -26,9 +26,9 @@
 
 
 //! Constructor/Deconstructor.
-DebrisEntity::DebrisEntity(PODEntity *svEntity)
-    : CLGBaseLocalEntity(svEntity) {
-
+DebrisEntity::DebrisEntity(PODEntity *podEntity)
+    : CLGBaseLocalEntity(podEntity) {
+	
 }
 
 /**
@@ -61,11 +61,15 @@ static inline const vec3_t CalculateDamageVelocity(int32_t damage) {
 *   @brief  Used by game modes to spawn server side gibs.
 *   @param  debrisser The entity that is about to spawn debris.
 **/
+void DebrisEntity::DebrisEntityThink() {
+	SetThinkCallback(&DebrisEntity::DebrisEntityThink);
+	SetNextThinkTime(level.time + FRAMERATE_MS);
+}
 DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& debrisModel, const vec3_t& origin, float speed) {
-	PODEntity *localDebrisEntity = GetGameWorld()->GetUnusedPODEntity(false);
+	//PODEntity *localDebrisEntity = GetGameWorld()->GetUnusedPODEntity(false);
 
 	// Create a gib entity.
-    DebrisEntity *debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>(localDebrisEntity, false, false);
+    DebrisEntity *debrisEntity = GetGameWorld()->CreateGameEntity<DebrisEntity>(nullptr, true, false);
 
 
 	// Set actual size of 
@@ -74,7 +78,7 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
 
     // Set the origin.
     debrisEntity->SetOrigin(origin);
-
+	debrisEntity->SetInUse(true);
     // Set the model.
     debrisEntity->SetModel(debrisModel);
 	//const float velocityScale = 1.f;
@@ -108,14 +112,16 @@ DebrisEntity* DebrisEntity::Create(GameEntity* debrisser, const std::string& deb
 	debrisEntity->SetAngularVelocity(angularVelocity);
 
     // Set up the thinking machine.
-    debrisEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
-    debrisEntity->SetNextThinkTime(level.time + 5s + random() * 5s);
+    //debrisEntity->SetThinkCallback(&CLGBaseLocalEntity::CLGBaseLocalEntityThinkFree);
+	debrisEntity->SetThinkCallback(&DebrisEntity::DebrisEntityThink);
+	debrisEntity->SetNextThinkTime(level.time + FRAMERATE_MS);
+    //debrisEntity->SetNextThinkTime(level.time + 5s + random() * 5s);
 
     // Setup the other properties.
     debrisEntity->SetAnimationFrame(0);
 	debrisEntity->SetFlags(0);
-    debrisEntity->SetTakeDamage(1);
-    debrisEntity->SetDieCallback(&DebrisEntity::DebrisEntityDie);
+    debrisEntity->SetTakeDamage( TakeDamage::No );
+    //debrisEntity->SetDieCallback(&DebrisEntity::DebrisEntityDie);
 
     // Link it up.
     debrisEntity->LinkEntity();

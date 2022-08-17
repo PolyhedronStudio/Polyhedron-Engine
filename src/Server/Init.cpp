@@ -226,8 +226,10 @@ void SV_SpawnServer(MapCommand *cmd)
 	SV_Model_EndRegistrationSequence();
 
     // Run 2 frames times to allow everything to settle.
-	ge->RunFrame(); sv.frameNumber++;
-    ge->RunFrame(); sv.frameNumber++;
+	for( int32_t i = 0; i < SERVER_RATE_MULTIPLIER; i++) {
+		ge->RunFrame(); sv.frameNumber++;
+		ge->RunFrame(); sv.frameNumber++;
+	}
 
 
     // make sure maximumclients string is correct

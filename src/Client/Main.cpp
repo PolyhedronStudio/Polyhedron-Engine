@@ -103,9 +103,6 @@ extern cvar_t *gl_brightness;
 #endif
 
 
-extern cvar_t *cl_renderdemo;
-extern cvar_t *cl_renderdemo_fps;
-
 ClientStatic cls;
 ClientState  cl;
 
@@ -2419,7 +2416,7 @@ static void exec_server_string(cmdbuf_t *buf, const char *text)
     Cmd_ExecuteCommand(buf);
 }
 
-static inline int fps_to_msec(int fps) {
+static inline int64_t fps_to_msec(int64_t fps) {
 #if 0
     return (1000 + fps / 2) / fps;
 #else
@@ -2688,7 +2685,7 @@ static void CL_SetClientTime(void)
         return;
     }
 
-    uint64_t prevtime = cl.serverTime - CL_FRAMETIME;
+    int64_t prevtime = cl.serverTime - CL_FRAMETIME_UI64;
     if (cl.time > cl.serverTime) {
         SHOWCLAMP(1, "high clamp %i\n", cl.time - cl.serverTime);
         cl.time = cl.serverTime;
@@ -2850,8 +2847,8 @@ static const char* const sync_names[] = {
 };
 #endif
 
-static int ref_msec, phys_msec, main_msec;
-static int ref_extra, phys_extra, main_extra;
+static int64_t ref_msec, phys_msec, main_msec;
+static int64_t ref_extra, phys_extra, main_extra;
 static sync_mode_t sync_mode;
 
 #define MIN_PHYS_HZ 20
@@ -2859,7 +2856,7 @@ static sync_mode_t sync_mode;
 #define MIN_REF_HZ MIN_PHYS_HZ
 #define MAX_REF_HZ 1000
 
-static int fps_to_clamped_msec(cvar_t* cvar, int min, int max) {
+static int64_t fps_to_clamped_msec(cvar_t* cvar, int64_t min, int64_t max) {
     if (cvar->integer == 0)
         return fps_to_msec(max);
     else
@@ -2873,7 +2870,6 @@ CL_UpdateFrameTimes
 Called whenever async/fps cvars change, but not every frame
 ==================
 */
-extern cvar_t *cl_renderdemo;
 void CL_UpdateFrameTimes(void)
 {
     if (!cls.connectionState) {
@@ -2918,69 +2914,70 @@ void CL_UpdateFrameTimes(void)
 *	@brief	"Runs"/"Moves Forward" the Server Game Module for another frame.
 **/
 
-static uint64_t clFrameResidual = 0;
-uint64_t CL_RunGameFrame(uint64_t msec) {
-    if (cls.connectionState < ClientConnectionState::Active) {
+static int64_t clFrameResidual = 0;
+int64_t CL_RunGameFrame(uint64_t msec) {
+    if ( cls.connectionState == ClientConnectionState::Active && !sv_paused->integer ) {
 		return 0;	
 	}
-#if USE_CLIENT
-    if (host_speeds->integer)
+	#if USE_CLIENT
+    if (host_speeds->integer) {
         timeBeforeClientGame = Sys_Milliseconds();
-#endif
-	////// move autonomous things around if enough time has passed
-    //clFrameResidual += msec;
-    //if (clFrameResidual < CL_FRAMETIME) {
-    //    return CL_FRAMETIME - clFrameResidual;
-    //}
+	}
+	#endif
+	// move autonomous things around if enough time has passed
+    clFrameResidual += msec;
+    if (clFrameResidual < CL_FRAMETIME_UI64) {
+		return CL_FRAMETIME_UI64 - clFrameResidual;
+    }
 		
 	// The local entities start indexed from MAX_WIRED_POD_ENTITIES up to MAX_CLIENT_POD_ENTITIES.
 	// We'll be processing them here.
 	cl.numSolidLocalEntities = 0;
-	
+
 	// Run the received packet entities for a frame so we can "predict".
 	//CL_GM_ClientPacketEntityDeltaFrame();
-    // Check for prediction errors.
-    //CL_CheckPredictionError();
 
-	if ( sv_paused->integer == 0 ) {
-		for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
-			// Get entity pointer.
-			PODEntity *podEntity = &cs.entities[i];
+	// Check for prediction errors.
+	//CL_CheckPredictionError();
 
-			if (!podEntity->inUse) {
-				continue;
-			}
+	// Give the client game module a chance to run its local entities for a frame.
+	CL_GM_ClientLocalEntitiesFrame();
 
-			// Update local entity.
-			LocalEntity_Update(&podEntity->currentState);
+	// Iterate over all entity states to see if we need to take care of preventing any lerp issues from coming up.
+	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
+		// Get entity pointer.
+		PODEntity *podEntity = &cs.entities[i];
 
-			// Run the Client Game entity for a frame.		
-			LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
-
-			// Fire local entity events.
-			LocalEntity_FireEvent(&podEntity->currentState);
+		if (!podEntity->inUse) {
+		//if (podEntity->currentState.number > 1124) {
+			continue;
 		}
 
-		// Give the client game module a chance to run its local entities for a frame.
-		CL_GM_ClientLocalEntitiesFrame();
+		// Update local entity.
+		LocalEntity_Update(&podEntity->currentState);
+
+		// Run the Client Game entity for a frame.		
+		LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
+
+		// Fire local entity events.
+		LocalEntity_FireEvent(&podEntity->currentState);
 	}
 
-
-#if USE_CLIENT
-    if (host_speeds->integer)
+	#if USE_CLIENT
+    if (host_speeds->integer) {
         timeAfterClientGame = Sys_Milliseconds();
-#endif
-	////// decide how long to sleep next frame
- //   clFrameResidual -= CL_FRAMETIME;
- //   if (clFrameResidual < CL_FRAMETIME) {
- //       return CL_FRAMETIME - clFrameResidual;
- //   }
+	}
+	#endif
+	// Decide how long to sleep next frame
+    clFrameResidual -= CL_FRAMETIME_UI64;
+    if (clFrameResidual < CL_FRAMETIME_UI64) {
+        return CL_FRAMETIME_UI64 - clFrameResidual;
+    }
 
-	//// don't accumulate bogus residual
-	//if (clFrameResidual > 250) {
-	//	Com_DDDPrintf("Reset residual %u\n", clFrameResidual);
-	//	clFrameResidual = 100;
-	//}
+	// Don't accumulate bogus residual
+	if (clFrameResidual > 250) {
+		clFrameResidual = 100;
+	}
 
 	return 0;
 }
@@ -2991,11 +2988,9 @@ CL_Frame
 
 ==================
 */
-unsigned int totaltime = 0;
-unsigned int lasttime = 0;
 uint64_t CL_Frame(uint64_t msec)
 {
-    qboolean phys_frame = true, ref_frame = true;
+    bool phys_frame = true, ref_frame = true;
 
     timeAfterRefresh = timeBeforeRefresh = 0;
 	timeAfterClientGame = timeBeforeClientGame = 0;
@@ -3061,10 +3056,6 @@ uint64_t CL_Frame(uint64_t msec)
         break;
     }
 
-	if (cls.demo.playback && cl_renderdemo->integer && cl_paused->integer != 2) {
-		main_extra = main_msec;
-    }
-
     Com_DDDDPrintf("main_extra=%d ref_frame=%d ref_extra=%d "
                    "phys_frame=%d phys_extra=%d\n",
                    main_extra, ref_frame, ref_extra,
@@ -3073,11 +3064,11 @@ uint64_t CL_Frame(uint64_t msec)
     // Decide the simulation time
     cls.frameTime = main_extra * 0.001f;
 
-    if (cls.frameTime > 1.0 / 25) {
-        cls.frameTime = 1.0 / 25;
+    if (cls.frameTime > 1.0 / 5) {
+        cls.frameTime = 1.0 / 5;
     }
 
-	if (!sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
+	if (!sv_paused->integer) {
         cl.time += main_extra;
     }
 
@@ -3086,11 +3077,16 @@ uint64_t CL_Frame(uint64_t msec)
         CL_DemoFrame(main_extra);
     }
 
-    // Calculate local time
-	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer && !(cls.demo.playback && cl_renderdemo->integer && cl_paused->integer == 2)) {
+	// Calculate local time
+	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer) {
         CL_SetClientTime();
     }
 
+	// Let client side entities do their thing.
+	if (phys_frame) {
+		// Run the actual local game.
+		CL_RunGameFrame(phys_msec);
+	}
 
 #if USE_AUTOREPLY
     // Check for version reply
@@ -3103,12 +3099,6 @@ uint64_t CL_Frame(uint64_t msec)
     // Read user intentions
     CL_UpdateCmd(main_extra);
 			
-	// Let client side entities do their thing.
-	if (phys_frame) {
-		// Run the actual local game.
-		main_extra -= CL_RunGameFrame(main_msec);
-	}
-
     // Finalize pending cmd
     phys_frame |= cl.sendPacketNow;
 
@@ -3125,18 +3115,14 @@ uint64_t CL_Frame(uint64_t msec)
         }
     }
 
-	if (cls.demo.playback && cl_renderdemo->integer && cl_paused->integer != 2)
-	{
-		Cvar_Set("cl_paused", "2");
-		CL_CheckForPause();
-	}
-
     // Send pending clientUserCommands
     CL_SendCmd();
 
 	// Predict all unacknowledged movements
     // UNCOMMENT IF IT BROKE ? Predict all unacknowledged movements
     CL_PredictMovement();
+	// Check for prediction errors.
+    CL_CheckPredictionError();
 
     Con_RunConsole();
 
@@ -3162,13 +3148,7 @@ uint64_t CL_Frame(uint64_t msec)
 
 run_fx:
         // Advance local game effects for next frame
-        if (host_speeds->integer) {
-            timeBeforeClientGame = Sys_Milliseconds();
-        }
         CL_GM_ClientFrame();
-        if (host_speeds->integer) {
-            timeAfterClientGame = Sys_Milliseconds();
-        }
         
 		// Update audio after the 3D view was drawn
         S_Update();

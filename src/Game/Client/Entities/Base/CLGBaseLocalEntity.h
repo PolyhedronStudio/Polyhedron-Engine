@@ -1206,4 +1206,9 @@ public:
     *   @brief  Callback for assigning when "no thinking" behavior is wished for.
     **/
     void CLGBaseLocalEntityThinkNull() { }
+
+	/**
+	*	@brief	Used by default in order to process entity state data such as animations.
+	**/
+	void CLGBaseLocalEntityThinkStandard(void);
 };

@@ -329,8 +329,16 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
 #ifdef SHAREDGAME_CLIENTGAME
-	const auto nextFrameTime = level.time;
+	const auto nextFrameTime = level.time + FRAMERATE_MS;
+	int64_t zeroGameTime = GameTime::zero().count();
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > nextFrameTime ) { //nextThinkTime > level.nextServerTime) {
+		SG_Print( PrintType::Developer, fmt::format("Entity(#{}) if (nextThinkTime({}) <= GameTime::zero()({}) || nextThinkTime({}) > nextFrameTime({}) )",
+				 ( geThinker->GetPODEntity() ? geThinker->GetPODEntity()->clientEntityNumber : 0),
+				 nextThinkTime.count(),
+				 zeroGameTime,
+				 nextThinkTime.count(),
+				 nextFrameTime.count())
+		);
 #endif
 #ifdef SHAREDGAME_SERVERGAME
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {
@@ -339,17 +347,18 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     }
 
     // Reset think time before thinking.
-    geThinker->SetNextThinkTime(GameTime::zero());
+    geThinker->SetNextThinkTime( GameTime::zero() );
 
 #if _DEBUG
     if ( !geThinker->HasThinkCallback() ) {
 		SG_Print( PrintType::DeveloperWarning, fmt::format( "{}({}): GameEntity(#{})[{}]: can't perform 'Think' because there is no callback set.\n", __func__, sharedModuleName, geThinker->GetNumber(), geThinker->GetTypeInfo()->mapClass ) );
-        return true;
-    }
+    } else 
 #endif
-    // Still call upon think, it does a check for a set callback on itself, but since Think
-	// is a virtual method we want to make sure we call it regardless of.
-    geThinker->Think();
+	{
+		// Still call upon think, it does a check for a set callback on itself, but since Think
+		// is a virtual method we want to make sure we call it regardless of.
+		geThinker->Think();
+	}
 
     return false;
 }
@@ -409,7 +418,7 @@ void SG_RunEntity(SGEntityHandle &entityHandle) {
 	        SG_Physics_Toss(entityHandle);
         break;
 	default:
-			//Error( "SV_Physics: bad movetype %i", (int)ent->movetype );
+			SG_Error( ErrorType::Drop, fmt::format( "SG_RunEntity: Bad MoveType {}", moveType ) );//Error( "SV_Physics: bad movetype %i", (int)ent->movetype );
 		break;
 	}
 }

@@ -24,9 +24,6 @@
 static const double MAX_DELTA_ORIGIN = (2400.0 * (1.00 / BASE_FRAMERATE));
 
 
-//--------------------------------------------------------
-// Test code.
-void UTIL_TouchTriggers(IClientGameEntity *ent);
 // GameWorld.
 #include "../World/ClientGameWorld.h"
 
@@ -106,6 +103,8 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
 #endif
 	
     // Run frames in order.
+	// First run the player move prediction process in order on all previously backed up acknowledged
+	// user input command frames.
     while (++acknowledgedCommandIndex <= currentCommandIndex) {
         // Fetch the command.
         ClientMoveCommand* cmd = &cl->clientUserCommands[acknowledgedCommandIndex & CMD_MASK];
@@ -120,31 +119,20 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
             pm.moveCommand = *cmd;
 						
             // Simulate the move command.
-            PMove(&pm);
+            PMove( &pm );
 
             // Update player move client side audio effects.
-            UpdateClientSoundSpecialEffects(&pm);
+            UpdateClientSoundSpecialEffects( &pm );
 			
 			// Execute touch callbacks and "predict" against other entities.
-			DispatchPredictedTouchCallbacks(&pm);
-
-			//// What if we try and set it here?
-			//GameEntity *playerEntity = GetGameWorld()->GetGameEntityByIndex(cl->frame.clientNumber + 1);
-			//playerEntity->SetOrigin(pm.state.origin);
-			//playerEntity->SetAngles(pm.state.viewAngles);
+			DispatchPredictedTouchCallbacks( &pm );
         }
 
         // Save for error detection
         cmd->prediction.origin = pm.state.origin;
-
-		// Get Game World.
-		//ClientGameWorld *gameWorld = GetGameWorld();
-		//auto *playerEntity = gameWorld->GetClientGameEntity();
-		//playerEntity->SetOrigin(pm.state.origin);
-		//playerEntity->SetAngles(pm.state.viewAngles);
     }
 
-    // Run pending cmd
+	// Run the player move prediction process using the current pending frame user input.
     if (cl->moveCommand.input.msec) {
         // Saved for prediction error checking.
         cl->moveCommand.prediction.simulationTime = clgi.GetRealTime();
@@ -164,13 +152,6 @@ void ClientGamePrediction::PredictMovement(uint32_t acknowledgedCommandIndex, ui
 
         // Save for error detection
         cl->moveCommand.prediction.origin = pm.state.origin;
-
-		// What if we try and set it here?
-		// Get Game World.
-		//ClientGameWorld *gameWorld = GetGameWorld();
-		//auto *playerEntity = gameWorld->GetClientGameEntity();
-		//playerEntity->SetOrigin(pm.state.origin);
-		//playerEntity->SetAngles(pm.state.viewAngles);
     }
 
     // Copy results out for rendering
@@ -223,6 +204,39 @@ void ClientGamePrediction::UpdateClientSoundSpecialEffects(PlayerMove* pm)
 }
 
 /**
+*	@brief	Called by DispatchPredictTouchCallbacks to apply the current player move results
+*			to the actual player entity itself.
+**/
+void ClientGamePrediction::PlayerMoveToClientEntity( PlayerMove *pm ) {
+	// Get Game World.
+	ClientGameWorld *gameWorld = GetGameWorld();
+	auto *gePlayer = gameWorld->GetClientGameEntity();
+    gePlayer->SetOrigin( pm->state.origin );
+    gePlayer->SetVelocity( pm->state.velocity );
+    gePlayer->SetMins( pm->mins );
+    gePlayer->SetMaxs( pm->maxs );
+    gePlayer->SetViewHeight( pm->state.viewOffset[2] );
+    gePlayer->SetWaterLevel( pm->waterLevel );
+    gePlayer->SetWaterType( pm->waterType );
+	// Resolve the perhaps new Ground Entity.
+
+	if ( gameWorld ) {
+		GameEntity *geGround = gameWorld->GetGameEntityByIndex( pm->groundEntityNumber );
+
+		if ( geGround ) {
+			gePlayer->SetGroundEntity( geGround );
+			gePlayer->SetGroundEntityLinkCount( geGround->GetLinkCount() );
+		}
+		else {
+			gePlayer->SetGroundEntity( SGEntityHandle() );
+			gePlayer->SetGroundEntityLinkCount(0);
+		}
+	} else {
+		gePlayer->SetGroundEntity( SGEntityHandle() );
+	}
+};
+
+/**
 *	@brief	Dispatch touch callbacks for all predicted touched entities.
 **/
 void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
@@ -239,38 +253,11 @@ void ClientGamePrediction::DispatchPredictedTouchCallbacks(PlayerMove *pm) {
 		//player->SetMins(pm->mins);
 		//player->SetMaxs(pm->maxs);
 	// Update entity properties based on results of the player move simulation.
-        gePlayer->SetOrigin(pm->state.origin);
-        gePlayer->SetVelocity(pm->state.velocity);
-        gePlayer->SetMins(pm->mins);
-        gePlayer->SetMaxs(pm->maxs);
-        gePlayer->SetViewHeight(pm->state.viewOffset[2]);
-        gePlayer->SetWaterLevel(pm->waterLevel);
-        gePlayer->SetWaterType(pm->waterType);
+		// What if we try and set it here?
+		PlayerMoveToClientEntity( pm );
 
 		// Let the world know about the current entity we're running.
 		level.currentEntity = gePlayer;
-        
-        // Use an entity handle to validate and store the new ground entity after pmove.
-        // Get the ground POD Entity that matches the groundEntityNumber. 
-        // Get the ground POD Entity that matches the groundEntityNumber. 
-		// Resolve the perhaps new Ground Entity.
-		ClientGameWorld *gameWorld = GetGameWorld();
-		if (gameWorld) {
-			//Com_DPrint("(%s): GroundEntity(#%i)\n", __func__, pm->groundEntityNumber);
-			GameEntity *geGround = gameWorld->GetGameEntityByIndex(pm->groundEntityNumber);
-
-			if (geGround) {
-				gePlayer->SetGroundEntity(geGround);
-				gePlayer->SetGroundEntityLinkCount(geGround->GetLinkCount());
-			}
-			else {
-				gePlayer->SetGroundEntity(SGEntityHandle() );
-				gePlayer->SetGroundEntityLinkCount(0);
-			}
-		} else {
-			gePlayer->SetGroundEntity( SGEntityHandle() );
-			gePlayer->SetGroundEntityLinkCount(0);
-		}
 
 		// Dispatch touch trigger callbacks on the player entity for each touched entity.
 		SG_TouchTriggers( gePlayer );

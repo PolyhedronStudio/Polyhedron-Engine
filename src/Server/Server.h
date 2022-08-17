@@ -121,10 +121,10 @@ static constexpr uint32_t SV_BASELINES_MASK = (SV_BASELINES_PER_CHUNK - 1);
 static constexpr uint32_t SV_BASELINES_CHUNKS = (MAX_WIRED_POD_ENTITIES >> SV_BASELINES_SHIFT);
 
 // Server FPS
-constexpr uint32_t SV_FRAMERATE = BASE_FRAMERATE;
-constexpr uint32_t SV_FRAMETIME = BASE_FRAMETIME;
-constexpr uint32_t SV_FRAMEDIV = 1;
-constexpr uint32_t SV_FRAMESYNC = 1;
+constexpr uint64_t SV_FRAMERATE = BASE_FRAMERATE;
+constexpr uint64_t SV_FRAMETIME = BASE_FRAMETIME;
+constexpr uint64_t SV_FRAMEDIV = 1;
+constexpr uint64_t SV_FRAMESYNC = 1;
 //#define SV_CLIENTSYNC(cl)   1
 
 // Entity leaf settings.

@@ -789,7 +789,7 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	const vec3_t vNavigateDirection = { 
 		vOriginalDirection.x, 
 		vOriginalDirection.y,
-		( traverseZAxis == false ? vOriginalDirection.z : 0.0f )
+		( traverseZAxis == true ? vOriginalDirection.z : 0.0f )
 	};
 
 	// Prepare ideal yaw angle to rotate to.

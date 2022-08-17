@@ -573,7 +573,9 @@ void CLGBasePacketEntity::CLGBasePacketEntityThinkFree(void) {
 *	@brief	Used by default in order to process entity state data such as animations.
 **/
 void CLGBasePacketEntity::CLGBasePacketEntityThinkStandard(void) {
-	CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
+//	CLG_Print( PrintType::Developer, fmt::format( "PacketEntity: level.time=({}), level.serverTime({})\n", level.time.count ) );
+	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "{}(#{}): {}", __func__, GetNumber(), "Thinking!" ) );
+
 	//// Setup same think for the next frame.
 	SetNextThinkTime(GameTime( cl->serverTime ) + 16ms);
 	SetThinkCallback(&CLGBasePacketEntity::CLGBasePacketEntityThinkStandard);
@@ -662,6 +664,22 @@ bool CLGBasePacketEntity::SwitchAnimation(int32_t animationIndex, const GameTime
 		// we have to set the startTime to whichever our level.time was at the moment this animation started switching.
 		refreshAnimation.startTime		= level.time.count();
 		refreshAnimation.loopCount		= skmAction->loopingFrames;
+
+		//// Get pointer to dominating blend action.
+		//SkeletalAnimationBlendAction *dominatingBlendAction = GetBlendAction( animation, 0 );
+		//// Get the dominating blend action state.
+		//EntitySkeletonBlendActionState *dominatingBlendActionState = GetBlendActionState( currentAnimation->animationIndex, 0 );
+
+		//// Ensure that it is in bounds. (Should be.)
+		//if ( !dominatingBlendAction || !dominatingBlendActionState ) {
+		//	refreshEntity.currentBonePoses = nullptr;
+		//	return;
+		//}
+
+		//// Get the dominating action.
+		//SkeletalAnimationAction *dominatingAction = GetAction( dominatingBlendAction->actionIndex );
+		//// Store old frame.
+		//dominatingBlendActionState->oldFrame = dominatingBlendActionState->currentFrame;
 		
 		// Update animation states for this frame's current entity state.
 		*previousAnimationState = *currentAnimationState;
@@ -1638,7 +1656,7 @@ void CLGBasePacketEntity::PrepareRefreshEntity(const int32_t refreshEntityID, En
             refreshEntity.angles = cl->playerEntityAngles;
         } else {
             // Otherwise, lerp angles by default.
-            refreshEntity.angles = vec3_mix(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
+            refreshEntity.angles = vec3_mix_euler(podEntity->previousState.angles, podEntity->currentState.angles, cl->lerpFraction);
 
             // Mimic original ref_gl "leaning" bug (uuugly!)
             if (currentState->modelIndex == 255 && cl_rollhack->integer) {

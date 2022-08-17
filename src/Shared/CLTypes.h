@@ -223,8 +223,8 @@ struct ClientUserCommandHistory {
 struct ServerFrame {
     qboolean valid = false; // False if delta parsing failed.
 
-    int32_t number = 0; // Sequential identifier, used for delta.
-    int32_t delta = 0;  // Delta between frames.
+    int64_t number = 0; // Sequential identifier, used for delta.
+    int64_t delta = 0;  // Delta between frames.
 
     byte    areaBits[MAX_MAP_AREA_BYTES];   // Area bits of this frame.
     int32_t areaBytes;                      // Area bytes.
@@ -287,7 +287,7 @@ struct ClientState {
     //! The ACTUAL last transmitted number which wasn't stalled by not being ready to send yet.
     uint64_t    lastTransmitCmdNumberReal = 0;
     //! Determines whether to send the user command packet asap, and preferably, NOW.
-    qboolean    sendPacketNow = 0;
+    bool    sendPacketNow = 0;
 
     //! Actual current client move command.
     ClientMoveCommand    moveCommand = {};
@@ -318,15 +318,19 @@ struct ClientState {
     PODEntity *solidLocalEntities[3072];// = {};
     int32_t numSolidLocalEntities = 0;
 
-    //! Entity Baseline States. These are where to start working from.
+    //! Stores the so called entity state 'baselines' which are transmitted during connecting.
     EntityState entityBaselines[MAX_WIRED_POD_ENTITIES];//= {};
 
-    //! The actual current Entity States.
+    //! Stores all received packet entity states. MAX_PARSE_ENTITIES is based on how many frames we want to backup.
+	//! These frames are used to 
     EntityState entityStates[MAX_PARSE_ENTITIES]; // DO NOT initialize this using {} or VS2022 will stall your machine and give a nasty stack error.
     int32_t numEntityStates  = 0;
 
+	//! Stores all local entity states also from previous and current frame. (Client frames).
+	EntityState localEntityStates[MAX_PARSE_ENTITIES];
+
     //! The current client entity state messaging flags.
-    uint32_t    entityStateFlags = 0;
+    uint32_t entityStateFlags = 0;
 
 
     /**
@@ -342,8 +346,8 @@ struct ClientState {
     ServerFrame frame = {}; 
     //! The previous frame received, right before the current frame.
     ServerFrame oldframe = {};
-    uint64_t serverTime = 0;
-    uint64_t serverDelta = 0;
+    int64_t serverTime = 0;
+    int64_t serverDelta = 0;
 
     byte            dcs[CS_BITMAP_BYTES] = {};
 
@@ -361,7 +365,7 @@ struct ClientState {
     vec2_t      mouseMove = vec2_zero();
     //! This is the 'current moment in time' value of the client's game state at.  
     //! Always <= cl.serverTime
-    uint64_t	time = 0;
+    int64_t	time = 0;
     //! between oldframe and frame
     double		lerpFraction = 0.f;
 

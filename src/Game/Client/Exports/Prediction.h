@@ -40,6 +40,12 @@ public:
 
 private:
 	/**
+	*	@brief	Called by DispatchPredictTouchCallbacks to apply the current player move results
+	*			to the actual player entity itself.
+	**/
+	void PlayerMoveToClientEntity( PlayerMove *pm );
+
+	/**
 	*	@brief	Dispatch touch callbacks for all predicted touched entities.
 	**/
 	void DispatchPredictedTouchCallbacks(PlayerMove *pm);
