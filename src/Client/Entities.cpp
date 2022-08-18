@@ -189,6 +189,9 @@ void CL_DeltaFrame(void)
     if (cls.connectionState == ClientConnectionState::Precached) {
         // Set the client to an active connection state.
         CL_SetActiveState();
+		
+		// This is where the ClientGame gets to 'begin'.
+		CL_GM_ClientBegin();
     }
 
     // Set server time

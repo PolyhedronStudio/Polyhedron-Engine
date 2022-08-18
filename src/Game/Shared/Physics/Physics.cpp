@@ -331,14 +331,14 @@ qboolean SG_RunThink(GameEntity *geThinker) {
 #ifdef SHAREDGAME_CLIENTGAME
 	const auto nextFrameTime = level.time + FRAMERATE_MS;
 	int64_t zeroGameTime = GameTime::zero().count();
-	if (nextThinkTime <= GameTime::zero() || nextThinkTime > nextFrameTime ) { //nextThinkTime > level.nextServerTime) {
-		SG_Print( PrintType::Developer, fmt::format("Entity(#{}) if (nextThinkTime({}) <= GameTime::zero()({}) || nextThinkTime({}) > nextFrameTime({}) )",
-				 ( geThinker->GetPODEntity() ? geThinker->GetPODEntity()->clientEntityNumber : 0),
-				 nextThinkTime.count(),
-				 zeroGameTime,
-				 nextThinkTime.count(),
-				 nextFrameTime.count())
-		);
+	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time ) { //nextThinkTime > level.nextServerTime) {
+		//SG_Print( PrintType::Developer, fmt::format("Entity(#{}) if (nextThinkTime({}) <= GameTime::zero()({}) || nextThinkTime({}) > nextFrameTime({}) )",
+		//		 ( geThinker->GetPODEntity() ? geThinker->GetPODEntity()->clientEntityNumber : 0),
+		//		 nextThinkTime.count(),
+		//		 zeroGameTime,
+		//		 nextThinkTime.count(),
+		//		 nextFrameTime.count())
+		//);
 #endif
 #ifdef SHAREDGAME_SERVERGAME
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time) {

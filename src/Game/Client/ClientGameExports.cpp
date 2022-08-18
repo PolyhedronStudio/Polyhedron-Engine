@@ -132,7 +132,7 @@ void ClientGameExports::ClientConnect() {
 
     // Reset level locals.
     level = LevelLocals{};
-    level.time = GameTime(cl->serverTime);
+    level.time = GameTime::zero(); //GameTime(cl->serverTime);
 }
 
 /**
@@ -146,7 +146,7 @@ void ClientGameExports::ClientBegin() {
 
  //   // Reset level locals.
     level = LevelLocals{};
-    level.time = GameTime(cl->time);
+    level.time = GameTime::zero(); //GameTime(cl->time);
 }
 
 /**

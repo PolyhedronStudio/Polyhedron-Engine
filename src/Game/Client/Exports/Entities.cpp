@@ -186,22 +186,22 @@ qboolean CLG_RunThink(IClientGameEntity *ent) {
 *   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 **/
 void ClientGameEntities::RunPacketEntitiesDeltaFrame() {
-	// Unlike for the server game, the level's framenumber, time and timeStamp
-	    GameTime svTime = GameTime(cl->serverTime);
-    GameTime clTime = GameTime(cl->time);
-
-	if (clTime > svTime) {
-		level.time = svTime;
-	} else {
-		level.time =  clTime;
-	}
-
 	// Get GameWorld.
 	ClientGameWorld *gameWorld = GetGameWorld();
 
 	// This needs to be set of course.
 	if (!gameWorld) {
 		return;
+	}
+
+	// Unlike for the server game, the level's framenumber, time and timeStamp
+	GameTime svTime = GameTime(cl->serverTime);
+    GameTime clTime = GameTime(cl->time);
+
+	if (clTime > svTime) {
+		level.time = svTime;
+	} else {
+		level.time = clTime;
 	}
 
     // Iterate up till the amount of entities active in the current frame.

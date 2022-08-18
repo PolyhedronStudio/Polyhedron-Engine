@@ -1646,9 +1646,6 @@ void CL_Begin(void)
     CL_LoadState(LOAD_NONE);
     cls.connectionState = ClientConnectionState::Precached;
     CL_ClientCommand(va("begin %i\n", precache_spawncount));
-
-    // Inform CG Module.
-    CL_GM_ClientBegin();
 }
 
 /*
@@ -2916,7 +2913,7 @@ void CL_UpdateFrameTimes(void)
 
 static int64_t clFrameResidual = 0;
 int64_t CL_RunGameFrame(uint64_t msec) {
-    if ( cls.connectionState == ClientConnectionState::Active && !sv_paused->integer ) {
+    if ( cls.connectionState == ClientConnectionState::Active && sv_paused->integer ) {
 		return 0;	
 	}
 	#if USE_CLIENT
@@ -3080,12 +3077,12 @@ uint64_t CL_Frame(uint64_t msec)
 	// Calculate local time
 	if (cls.connectionState == ClientConnectionState::Active && !sv_paused->integer) {
         CL_SetClientTime();
-    }
 
-	// Let client side entities do their thing.
-	if (phys_frame) {
-		// Run the actual local game.
-		CL_RunGameFrame(phys_msec);
+		// Let client side entities do their thing.
+		if (phys_frame) {
+			// Run the actual local game.
+			CL_RunGameFrame(phys_msec);
+		}
 	}
 
 #if USE_AUTOREPLY

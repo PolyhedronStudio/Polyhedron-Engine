@@ -205,7 +205,7 @@ static void CL_ParseFrame(int extrabits) {
     cl.frameFlags = 0;
 
 	// Read frame number, and delta frame value.
-	uint64_t currentFrame = MSG_ReadUintBase128();
+	int64_t currentFrame = MSG_ReadIntBase128();
 	int32_t delta = MSG_ReadUint8();
 
 	// Defaults to -1, and we only calculate it if delta isn't 31, in other words, a valid delta frame.
