@@ -184,7 +184,7 @@ void SV_WriteFrameToClient(client_t *client) {
 
 	// Write out command, frame number, and frame delta value byte.
 	MSG_WriteUint8( ServerCommand::Frame );
-	MSG_WriteInt32( client->frameNumber );
+	MSG_WriteUintBase128( client->frameNumber );
 	MSG_WriteUint8( delta ); // I suppose that a byte is enough, is it?
 
     // Bytes to patch when further down the road of this function.

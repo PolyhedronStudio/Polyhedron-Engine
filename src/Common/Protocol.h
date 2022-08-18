@@ -57,13 +57,6 @@ constexpr int32_t CMD_MASK = (CMD_BACKUP - 1);
 constexpr int32_t SVCMD_BITS = 5;
 constexpr int32_t SVCMD_MASK = ((1 << SVCMD_BITS) - 1);
 
-//! Number of bits reserved for Frame Number.
-constexpr int32_t FRAMENUM_BITS = 27;
-constexpr int32_t FRAMENUM_MASK = ((1 << FRAMENUM_BITS) - 1);
-
-constexpr int32_t SUPPRESSCOUNT_BITS = 4;
-constexpr int32_t SUPPRESSCOUNT_MASK = ((1 << SUPPRESSCOUNT_BITS) - 1);
-
 constexpr int32_t MAX_PACKET_ENTITIES = 2048;
 constexpr int32_t MAX_PARSE_ENTITIES = (MAX_PACKET_ENTITIES * UPDATE_BACKUP);
 constexpr int32_t PARSE_ENTITIES_MASK = (MAX_PARSE_ENTITIES - 1);
