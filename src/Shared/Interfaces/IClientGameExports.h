@@ -116,6 +116,11 @@ public:
     *           other scenarios where a depth hack is required.
     **/
     virtual void AddViewEntities() = 0;
+
+	/**
+	*	@brief	Returns a pointer to the actual client game POD Entities array residing in the ClientGame's world.
+	**/
+	virtual PODEntity *GetClientPODEntities() = 0;
 };
 
 

@@ -899,6 +899,17 @@ void CL_GM_ClientLocalEntitiesFrame(void) {
 }
 
 /**
+*	@brief	Returns a pointer to the actual client game entities array residing in the ClientGame's world.
+**/
+PODEntity *CL_GM_GetClientPODEntities() {
+	if ( cge && cge->GetEntityInterface() ) {
+		return cge->GetEntityInterface()->GetClientPODEntities();
+	}
+
+	return nullptr;
+}
+
+/**
 *	@return	The current actual hashed classname of the PODEntity's game object. 
 *			If it has no object, 0 will be returned instead.
 **/

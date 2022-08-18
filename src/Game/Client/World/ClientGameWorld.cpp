@@ -1080,7 +1080,7 @@ void ClientGameWorld::ThrowGib(const vec3_t &origin, const vec3_t &velocity, con
 
 
 /**
-*	@return	A pointer to the server entities array.
+*	@return	A pointer to the client entities array.
 **/
 PODEntity* ClientGameWorld::GetPODEntities() {
 	return &podEntities[0]; 

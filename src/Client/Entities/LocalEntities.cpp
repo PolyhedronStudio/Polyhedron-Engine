@@ -110,18 +110,13 @@ static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
 
 	// Wasn't in last local frame.
     if ( clEntity->serverFrame != cl.frame.number ) {
-		const std::string wStr = fmt::format( "NEW Local entity(#{}) clEntity->serverFrame={}, cl.frame.number={}", clEntity->clientEntityNumber, clEntity->serverFrame, cl.oldframe.number );
-		Com_LPrintf( PrintType::DeveloperWarning,  "%s\n", wStr.c_str() );
         return true;
     }
 
 	// Hashname changed.
-	if ( clEntity->currentState.hashedClassname != clEntity->previousState.hashedClassname ) {
-		const std::string wStr = fmt::format( "Local entity(#{}) classname mismatch: {} != {}", clEntity->clientEntityNumber, clEntity->currentState.hashedClassname, clEntity->previousState.hashedClassname );
-		Com_LPrintf( PrintType::DeveloperWarning,  "%s\n", wStr.c_str() );
-		return true;
-	}
-
+	//if ( clEntity->currentState.hashedClassname != clEntity->previousState.hashedClassname ) {
+	//	return true;
+	//}
 
 	// Developer option, always new.
     if ( cl_nolerp->integer == 2 ) {
@@ -132,9 +127,6 @@ static inline qboolean LocalEntity_IsNew(const PODEntity *clEntity)
     if ( cl_nolerp->integer == 3 ) {
         return false;
     }
-
-	const std::string wStr = fmt::format( "Local entity(#{}) no conditiosn met", clEntity->clientEntityNumber );
-	Com_LPrintf( PrintType::DeveloperWarning,  "%s\n", wStr.c_str() );
 
     // No conditions met, so it wasn't in our previous frame.
     return false;
@@ -152,8 +144,15 @@ void LocalEntity_Update(const EntityState *state)
 		return;
 	}
 
+	// Make sure to have a valid pointer to the actual array. (It is the IGameWorld who manages it.)
+	PODEntity *podEntities = CL_GM_GetClientPODEntities();
+
+	if ( !podEntities ) {
+		return;
+	}
+
     // Acquire a pointer to the client side entity that belongs to the state->number server entity.
-    PODEntity *clEntity = &cs.entities[state->number];
+    PODEntity *clEntity = &podEntities[state->number];
 	
 	// Ensure client entity number matches the state.
 	if (clEntity->clientEntityNumber != state->number) {

@@ -76,6 +76,11 @@ public:
     void AddViewEntities() final;
 
 	/**
+	*	@brief	Returns a pointer to the actual client game POD Entities array residing in the ClientGame's world.
+	**/
+	PODEntity *GetClientPODEntities() final;
+
+	/**
 	*   @brief  Called each VALID client frame. Handle per VALID frame basis things here.
 	**/
     void RunPacketEntitiesDeltaFrame();

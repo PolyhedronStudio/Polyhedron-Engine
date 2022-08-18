@@ -73,6 +73,7 @@ void CLGBaseLocalEntity::Precache() {
 *   @brief  Called when it is time to spawn this entity.
 **/
 void CLGBaseLocalEntity::Spawn() {
+	SetInUse( true );
 	//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::Spawn({}) Execute: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );
 }
 /**
@@ -93,6 +94,7 @@ void CLGBaseLocalEntity::PostSpawn() {
 *   @brief  General entity thinking routine.
 **/
 void CLGBaseLocalEntity::Think() {
+	SetInUse( true );
 	// Safety check.
     if (thinkFunction == nullptr) {
 		//CLG_Print( PrintType::DeveloperWarning, fmt::format( "CLGBaseLocalEntity::Think({}) Return: inUse({}), serverFrame({}), cl.frame.number({})\n", GetNumber(), ( podEntity->inUse == true ? "true" : "false" ), podEntity->serverFrame, cl->frame.number ) );

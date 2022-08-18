@@ -2844,14 +2844,15 @@ static const char* const sync_names[] = {
 };
 #endif
 
-static int64_t ref_msec, phys_msec, main_msec;
-static int64_t ref_extra, phys_extra, main_extra;
+static int64_t clientgame_msec = 0, clientgame_extra = 0;
+static int64_t ref_msec = 0, phys_msec = 0, main_msec = 0;
+static int64_t ref_extra = 0, phys_extra = 0, main_extra = 0;
 static sync_mode_t sync_mode;
 
-#define MIN_PHYS_HZ 20
-#define MAX_PHYS_HZ 125
-#define MIN_REF_HZ MIN_PHYS_HZ
-#define MAX_REF_HZ 1000
+static constexpr int64_t MIN_PHYS_HZ = 20;
+static constexpr int64_t MAX_PHYS_HZ = 125;
+static constexpr int64_t MIN_REF_HZ = MIN_PHYS_HZ;
+static constexpr int64_t MAX_REF_HZ = 1000;
 
 static int64_t fps_to_clamped_msec(cvar_t* cvar, int64_t min, int64_t max) {
     if (cvar->integer == 0)
@@ -2873,6 +2874,9 @@ void CL_UpdateFrameTimes(void)
         return; // not yet fully initialized
     }
 
+	clientgame_msec = 0;
+	clientgame_extra = 0;
+
     phys_msec = ref_msec = main_msec = 0;
     ref_extra = phys_extra = main_extra = 0;
 
@@ -2882,28 +2886,29 @@ void CL_UpdateFrameTimes(void)
     }
     else if (cls.active == ACT_MINIMIZED) {
         // run at 20 fps if minimized
-        main_msec = fps_to_msec(20);
+        clientgame_msec = main_msec = fps_to_msec( 20 );
         sync_mode = SYNC_SLEEP_20;
     }
     else if (cls.active == ACT_RESTORED || cls.connectionState != ClientConnectionState::Active) {
         // run at 60 fps if the client connection state isn't active
-        main_msec = fps_to_msec(60);
+        clientgame_msec = main_msec = fps_to_msec( 60 );
         sync_mode = SYNC_SLEEP_60;
-    }
-    else if (cl_async->integer > 0) {
-        // run physics and refresh separately
-        phys_msec = fps_to_clamped_msec(cl_maxfps, MIN_PHYS_HZ, MAX_PHYS_HZ);
-        ref_msec = fps_to_clamped_msec(r_maxfps, MIN_REF_HZ, MAX_REF_HZ);
+    } else if (cl_async->integer > 0) {
+        // run clientgame, physics, and refresh separately.
+		clientgame_msec = fps_to_msec( BASE_HZ );
+        phys_msec = fps_to_clamped_msec( cl_maxfps, MIN_PHYS_HZ, MAX_PHYS_HZ );
+		ref_msec = fps_to_clamped_msec( r_maxfps, MIN_REF_HZ, MAX_REF_HZ );
         sync_mode = ASYNC_FULL;
-    }
-    else {
-        // everything ticks in sync with refresh
-        main_msec = fps_to_clamped_msec(cl_maxfps, MIN_PHYS_HZ, MAX_PHYS_HZ);
+    } else {
+		// everything ticks in sync with refresh
+		// the client game does not hwoever.
+		clientgame_msec = fps_to_msec( BASE_HZ );
+        main_msec = fps_to_clamped_msec( cl_maxfps, MIN_PHYS_HZ, MAX_PHYS_HZ );
         sync_mode = SYNC_MAXFPS;
     }
 
-    Com_DDPrintf("%s: mode=%s main_msec=%d ref_msec=%d, phys_msec=%d\n",
-        __func__, sync_names[sync_mode], main_msec, ref_msec, phys_msec);
+    Com_DDPrintf("%s: mode=%s main_msec=%d ref_msec=%d, phys_msec=%d, clientgame_msec=%d\n",
+        __func__, sync_names[sync_mode], main_msec, ref_msec, phys_msec, clientgame_msec);
 
 }
 
@@ -2921,6 +2926,7 @@ int64_t CL_RunGameFrame(uint64_t msec) {
         timeBeforeClientGame = Sys_Milliseconds();
 	}
 	#endif
+
 	// move autonomous things around if enough time has passed
     clFrameResidual += msec;
     if (clFrameResidual < CL_FRAMETIME_UI64) {
@@ -2937,27 +2943,32 @@ int64_t CL_RunGameFrame(uint64_t msec) {
 	// Check for prediction errors.
 	//CL_CheckPredictionError();
 
-	// Give the client game module a chance to run its local entities for a frame.
-	CL_GM_ClientLocalEntitiesFrame();
+	// Make sure to have a valid pointer to the actual array. (It is the IGameWorld who manages it.)
+	PODEntity *podEntities = CL_GM_GetClientPODEntities();
 
-	// Iterate over all entity states to see if we need to take care of preventing any lerp issues from coming up.
-	for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
-		// Get entity pointer.
-		PODEntity *podEntity = &cs.entities[i];
+	if ( podEntities ) {
+		// Give the client game module a chance to run its local entities for a frame.
+		CL_GM_ClientLocalEntitiesFrame();
 
-		if (!podEntity->inUse) {
-		//if (podEntity->currentState.number > 1124) {
-			continue;
+		// Iterate over all entity states to see if we need to take care of preventing any lerp issues from coming up.
+		for (int32_t i = MAX_WIRED_POD_ENTITIES; i < MAX_CLIENT_POD_ENTITIES; i++) {
+			// Get entity pointer.
+			PODEntity *podEntity = &podEntities[i];
+
+			if (!podEntity->inUse) {
+			//if (podEntity->currentState.number > 1124) {
+				continue;
+			}
+
+			// Update local entity.
+			LocalEntity_Update(&podEntity->currentState);
+
+			// Run the Client Game entity for a frame.		
+			LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
+
+			// Fire local entity events.
+			LocalEntity_FireEvent(&podEntity->currentState);
 		}
-
-		// Update local entity.
-		LocalEntity_Update(&podEntity->currentState);
-
-		// Run the Client Game entity for a frame.		
-		LocalEntity_SetHashedClassname(podEntity, &podEntity->currentState);
-
-		// Fire local entity events.
-		LocalEntity_FireEvent(&podEntity->currentState);
 	}
 
 	#if USE_CLIENT
@@ -2988,6 +2999,7 @@ CL_Frame
 uint64_t CL_Frame(uint64_t msec)
 {
     bool phys_frame = true, ref_frame = true;
+	bool clientgame_frame = true;
 
     timeAfterRefresh = timeBeforeRefresh = 0;
 	timeAfterClientGame = timeBeforeClientGame = 0;
@@ -3021,8 +3033,15 @@ uint64_t CL_Frame(uint64_t msec)
         break;
     case ASYNC_FULL:
         // run physics and refresh separately
-        phys_extra += msec;
+		clientgame_extra += msec;
+		phys_extra += msec;
         ref_extra += msec;
+
+		if (clientgame_extra < clientgame_msec) {
+			clientgame_frame = false;
+		} else if (clientgame_extra > clientgame_msec * 4) {
+			clientgame_extra = clientgame_msec;
+		}
 
         if (phys_extra < phys_msec) {
             phys_frame = false;
@@ -3038,7 +3057,7 @@ uint64_t CL_Frame(uint64_t msec)
             ref_extra = ref_msec;
         }
         // Return immediately if neither physics or refresh are scheduled
-        if (!phys_frame && !ref_frame) {
+        if (!phys_frame && !ref_frame && !clientgame_frame) {
             return min(phys_msec - phys_extra, ref_msec - ref_extra);
         }
         break;
@@ -3079,9 +3098,12 @@ uint64_t CL_Frame(uint64_t msec)
         CL_SetClientTime();
 
 		// Let client side entities do their thing.
-		if (phys_frame) {
+		//if (phys_frame) {
 			// Run the actual local game.
-			CL_RunGameFrame(phys_msec);
+		//}
+		if (clientgame_frame) {
+			CL_RunGameFrame( clientgame_msec );
+			clientgame_extra -= clientgame_msec;
 		}
 	}
 

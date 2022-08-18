@@ -43,6 +43,10 @@ void		CL_GM_ClientPacketEntityDeltaFrame(void);
 **/
 uint32_t	CL_GM_GetHashedGameEntityClassname(PODEntity *podEntity);
 void		CL_GM_ClientLocalEntitiesFrame(void);
+/**
+*	@brief	Returns a pointer to the actual client game entities array residing in the ClientGame's world.
+**/
+PODEntity *CL_GM_GetClientPODEntities();
 void		CL_GM_ClientFrame(void);
 void		CL_GM_ClientDisconnect(void);
 void		CL_GM_ClientClearState(void);

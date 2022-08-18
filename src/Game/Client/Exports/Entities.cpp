@@ -258,23 +258,14 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		return;
 	}
 
-	CLG_Print( PrintType::DeveloperWarning, fmt::format( "RunLocalEntitiesFrame: level.time({}), cl.time({}), cl.serverTime({}), cl.serverDelta({}), cl.serverFrame({})\n",
-			  level.time.count(), 
-			  cl->time, 
-			  cl->serverTime, 
-			  cl->serverDelta, 
-			  cl->frame.number ) 
-	);
-
 	// Iterate through our local client side entities.
     for ( int32_t localEntityNumber = MAX_WIRED_POD_ENTITIES; localEntityNumber < MAX_CLIENT_POD_ENTITIES; localEntityNumber++ ) {
 		const int32_t entityIndex = localEntityNumber;
 		PODEntity *podEntity = gameWorld->GetPODEntityByIndex( entityIndex );
 		GameEntity *gameEntity = ClientGameWorld::ValidateEntity( podEntity );
-		
+
 		// If invalid for whichever reason, warn and continue to next iteration.
         if ( !podEntity || !gameEntity || !podEntity->inUse ) {
-            //Com_DPrint("ClientGameEntites::RunFrame: Entity #%i is nullptr\n", entityNumber);
             continue;
         }
 
@@ -315,8 +306,8 @@ void ClientGameEntities::RunLocalEntitiesFrame() {
 		}
 
 		// Run it for a frame.
-		SGEntityHandle handle = gameEntity;
-		SG_RunEntity( handle );
+		SGEntityHandle geHandle = gameEntity;
+		SG_RunEntity( geHandle );
     }
 }
 
@@ -659,6 +650,21 @@ void ClientGameEntities::AddViewEntities() {
         clge->view->AddRenderEntity(gunRenderEntity);
     }
 }
+
+/**
+*	@brief	Returns a pointer to the actual client game POD Entities array residing in the ClientGame's world.
+**/
+PODEntity *ClientGameEntities::GetClientPODEntities() {
+	// Acquire gameworld.
+	ClientGameWorld *gameWorld = GetGameWorld();
+
+	if (gameWorld) {
+		return gameWorld->GetPODEntities();
+	} else {
+		return nullptr;
+	}
+}
+
 
 //---------------
 // ClientGameEntities::ApplyRenderEffects
