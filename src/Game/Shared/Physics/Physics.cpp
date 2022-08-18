@@ -328,8 +328,8 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     // Should we think at all? 
     // Condition A: Below 0, aka -(1+) means no thinking.
     // Condition B: > level.time, means we're still waiting before we can think.
+	const auto nextFrameTime = level.time;
 #ifdef SHAREDGAME_CLIENTGAME
-	const auto nextFrameTime = level.time + FRAMERATE_MS;
 	int64_t zeroGameTime = GameTime::zero().count();
 	if (nextThinkTime <= GameTime::zero() || nextThinkTime > level.time ) { //nextThinkTime > level.nextServerTime) {
 		//SG_Print( PrintType::Developer, fmt::format("Entity(#{}) if (nextThinkTime({}) <= GameTime::zero()({}) || nextThinkTime({}) > nextFrameTime({}) )",
@@ -355,6 +355,14 @@ qboolean SG_RunThink(GameEntity *geThinker) {
     } else 
 #endif
 	{
+#ifdef SHAREDGAME_CLIENTGAME
+		SG_Print( PrintType::Developer, fmt::format("Entity(#{}) Thinks: nextThinkTime({}) nextFrameTime({})\n",
+				 ( geThinker->GetPODEntity() ? geThinker->GetPODEntity()->clientEntityNumber : 0),
+				 nextThinkTime.count(),
+				 nextFrameTime.count()
+		));
+#endif
+
 		// Still call upon think, it does a check for a set callback on itself, but since Think
 		// is a virtual method we want to make sure we call it regardless of.
 		geThinker->Think();
