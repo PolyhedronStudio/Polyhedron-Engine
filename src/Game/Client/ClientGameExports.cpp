@@ -245,9 +245,9 @@ void ClientGameExports::ClientUpdateOrigin() {
     const double lerpFraction = cl->lerpFraction;
 
 
-    //
-    // Origin
-    //
+    /*
+    *	View Origin.
+    **/
     if (!clgi.IsDemoPlayback() && cl_predict->integer && !(currentPlayerState->pmove.flags & PMF_NO_PREDICTION)) {
         // Set the view camera's origin to that of the predicted state's view origin + view offset.
         ClientPredictedState* predictedState = &cl->predictedState;
@@ -270,29 +270,23 @@ void ClientGameExports::ClientUpdateOrigin() {
         newViewOrigin = vec3_mix(oldViewOrigin, newViewOrigin, lerpFraction);
     }
 
-    //
-    // View Angles.
-    //
-    // If not running a demo or on a locked frame, add the local angle movement.
+    /*
+    *	View Angles.
+    **/
+    // Interpolate between previous and current player state.
     if ( clgi.IsDemoPlayback() ) {
         // Interpolate view angles.
         newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
-
-		//CLG_Print( PrintType::Developer, "ViewAngles: clgi.isdemoplayback();\n" );
-    } else if ( currentPlayerState->pmove.type < EnginePlayerMoveType::Dead ) {
-        // Use predicted state view angles.
+	// Use predicted state view angles.
+	} else if ( currentPlayerState->pmove.type < EnginePlayerMoveType::Dead ) {
         newViewAngles = cl->predictedState.viewAngles;
-		//CLG_Print( PrintType::Developer, "ViewAngles: else if ( currentPlayerState->pmove.type < EnginePlayerMoveType::Dead ) {\n" );
-	} else if ( previousPlayerState->pmove.type < EnginePlayerMoveType::Dead ) { // { else if (ops->pmove.pm_type < PM_DEAD && cls.serverProtocol > PROTOCOL_VERSION_DEFAULT) {
-        // Interpolate from our predicted angles.
+    // Interpolate from our predicted angles.
+	} else if ( previousPlayerState->pmove.type < EnginePlayerMoveType::Dead ) {
 		newViewAngles = vec3_mix_euler( cl->predictedState.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction );
-		//CLG_Print( PrintType::Developer, "ViewAngles: } else if ( previousPlayerState->pmove.type < EnginePlayerMoveType::Dead ) { \n" );
+	// Interpolate between previous and current player state.
 	} else {
-		//CLG_Print( PrintType::Developer, "ViewAngles: } else { \n" );
-		//	// lerp from predicted angles, since enhanced servers
-    //  // do not send viewangles each frame
 		newViewAngles = vec3_mix_euler(previousPlayerState->pmove.viewAngles, currentPlayerState->pmove.viewAngles, lerpFraction);
-	 }
+	}
     
     //// if not running a demo or on a locked frame, add the local angle movement
     //if (cls.demo.playback) {
@@ -309,6 +303,9 @@ void ClientGameExports::ClientUpdateOrigin() {
     //    LerpAngles(ops->viewangles, ps->viewangles, lerp, cl.refdef.viewangles);
     //}
 
+    /*
+    *	Delta Angles, Blend, and FOV.
+    **/
     // Lerp between previous and current frame delta angles.
     const vec3_t newDeltaAngles = vec3_mix_euler(previousPlayerState->pmove.deltaAngles, currentPlayerState->pmove.deltaAngles, lerpFraction);
 
@@ -319,6 +316,9 @@ void ClientGameExports::ClientUpdateOrigin() {
     cl->fov_x = LerpFieldOfView(previousPlayerState->fov, currentPlayerState->fov, lerpFraction);
     cl->fov_y = ClientCalculateFieldOfView(cl->fov_x, 4, 3);
 
+    /*
+    *	Properly update our view camera and final player entity origin and angles.
+    **/
     // Acquire the view camera.
     ViewCamera *viewCamera = clge->view->GetViewCamera();
 

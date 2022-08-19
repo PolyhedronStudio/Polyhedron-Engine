@@ -3080,8 +3080,11 @@ uint64_t CL_Frame(uint64_t msec)
     // Decide the simulation time
     cls.frameTime = main_extra * 0.001f;
 
-    if (cls.frameTime > 1.0 / 5) {
-        cls.frameTime = 1.0 / 5;
+	// This should prevent frameTime overload,when the application has been unresponsive for more
+	// than 2 frames.
+	// Used to be: 1.0 / 5 giving us 0.2 meaning to us, 2 frames at 10hz.
+	if (cls.frameTime > (BASE_1_FRAMETIME * 2)) {
+        cls.frameTime = (BASE_1_FRAMETIME * 2);
     }
 
 	if (!sv_paused->integer) {
@@ -3138,16 +3141,17 @@ uint64_t CL_Frame(uint64_t msec)
     CL_SendCmd();
 
 	// Predict all unacknowledged movements
-    // UNCOMMENT IF IT BROKE ? Predict all unacknowledged movements
     CL_PredictMovement();
 	// Check for prediction errors.
     CL_CheckPredictionError();
 
+	// Run any console commands right now.
     Con_RunConsole();
 
     // Update RMLUI
     RMLUI_UpdateFrame();
 
+	// Update the UI.
     UI_Frame(main_extra);
 
     if (ref_frame) {

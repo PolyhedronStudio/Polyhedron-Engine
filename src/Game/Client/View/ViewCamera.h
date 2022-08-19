@@ -56,7 +56,7 @@ public:
     /**
     *   @brief  Sets the camera's view origin.
     **/
-    void SetViewOrigin(const vec3_t& viewOrigin) {
+    void SetViewOrigin( const vec3_t& viewOrigin ) {
         this->viewOrigin = viewOrigin;
     }
     /**
@@ -66,7 +66,7 @@ public:
     /**
     *   @brief  Sets the camera's view angles.
     **/
-    void SetViewAngles(const vec3_t& viewAngles) {
+    void SetViewAngles( const vec3_t& viewAngles ) {
         this->viewAngles = viewAngles;
     }
     /**
@@ -76,7 +76,7 @@ public:
     /**
     *   @brief  Sets the camera's view delta angles.
     **/
-    void SetViewDeltaAngles(const vec3_t& viewAngles) {
+    void SetViewDeltaAngles( const vec3_t& viewAngles ) {
         this->viewDeltaAngles = viewAngles;
     }
 
@@ -94,11 +94,7 @@ public:
     inline const vec3_t &GetUpViewVector() { return viewUp; }
 
 private:
-    /**
-    *   @brief  Periodically calculates the player's horizontal speed, and interpolates it
-    *           over a small interval to smooth out rapid changes in velocity.
-    **/
-    float CalculateBobSpeedModulus(const PlayerState *playerState);
+	//! For maintaining view bob client side.
 
 
 private:

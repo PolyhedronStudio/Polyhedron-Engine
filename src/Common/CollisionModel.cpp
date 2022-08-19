@@ -927,7 +927,7 @@ recheck:
             offset = 0;
             traceWork.extents = vec3_zero();
         } else {
-           offset = 2048.f;
+           //offset = 2048.f;
            offset = fabs(traceWork.extents[0] * plane->normal[0]) +
                      fabs(traceWork.extents[1] * plane->normal[1]) +
                      fabs(traceWork.extents[2] * plane->normal[2]);
