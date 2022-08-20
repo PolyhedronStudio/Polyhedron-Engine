@@ -137,7 +137,7 @@ struct SkeletalAnimationAction {
 	double frametime		= BASE_FRAMETIME;
 	//! Number of times the animation has to loop before it ends.
 	//! When set to '0', it'll play continuously until stopped by code.
-	uint32_t loopingFrames	= 0;
+	int32_t loopingFrames	= 0;
 	//! When 'true', force looping the animation. (It'll never trigger a stop event after each loop.)
 	bool forceLoop			= false;
 

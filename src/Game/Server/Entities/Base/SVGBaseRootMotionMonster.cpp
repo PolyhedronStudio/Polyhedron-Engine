@@ -761,13 +761,17 @@ const int32_t SVGBaseRootMotionMonster::NavigateToOrigin( const vec3_t &navigati
 	// Get pointers to our animation, actions, and finally the dominating blend action.
 	SkeletalAnimation *animation = GetAnimation( animationIndex );
 	SkeletalAnimationBlendAction *blendAction = GetBlendAction( animation, 0 );
-	SkeletalAnimationAction *action = GetAction( blendAction->actionIndex );
+
 
 	// If we are missing either of the pointers, fail out.
-	if ( !animation || !blendAction || !action ) {
+	if ( !animation || !blendAction ) {
 		return 0;
 	}
-
+	SkeletalAnimationAction *action = GetAction( blendAction->actionIndex );
+	if ( !action ) {
+		return 0;
+	}
+	
 	// Get action index.
 	const int32_t actionIndex = action->index;
 

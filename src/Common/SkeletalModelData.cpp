@@ -10,6 +10,8 @@
 #include "Shared/Shared.h"
 #include "Common/Files.h"
 #include "Common/SkeletalModelData.h"
+#include <numeric>
+#include "Shared/GeneralPurposeParser.h"
 
 /**
 *
@@ -123,142 +125,6 @@ void SKM_GenerateModelData(model_t* model) {
 #if DEBUG_MODEL_DATA == 2
 	Com_DPrintf("Animations:\n");
 #endif
-//	// Get our animation data sorted out nicely.
-//	for (uint32_t animationIndex = 0; animationIndex < model->iqmData->num_animations; animationIndex++) {
-//		// Raw Animation Data.
-//		iqm_anim_t* animationData = &model->iqmData->animations[animationIndex];
-//
-//		// Game Friendly Animation Data.
-//		// TODO: Do proper error checking for existing keys and warn.
-//		SkeletalAnimationAction *animation = &(skm->actionMap[animationData->name] = {
-//			.index = animationIndex,
-//			.name = animationData->name,
-//			.startFrame = animationData->first_frame,
-//			.endFrame = animationData->first_frame + animationData->num_frames,
-//			.numFrames = animationData->num_frames,
-//			.frametime = BASE_FRAMETIME,
-//			.loopingFrames = 0,
-//			.forceLoop = true, //(animationData->loop == 1 ? true : false)
-//		 });
-//		// Resize our vec if needed.
-//		if (skm->actions.size() <= animationIndex) {
-//			skm->actions.resize(animationIndex + 1);
-//		}
-//		skm->actions[animationIndex] = animation;
-//
-//		// Calculate distances.
-//		if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
-//			// Start and end pose pointers.
-//			const iqm_transform_t *startPose = &model->iqmData->poses[ skm->rootJointIndex + ( animation->startFrame * model->iqmData->num_poses ) ];
-//			const iqm_transform_t *endPose = (animation->startFrame == 0 ? startPose : &model->iqmData->poses[skm->rootJointIndex + ( (animation->endFrame - 1) * model->iqmData->num_poses)] );
-//
-//			// Get the start and end pose translations.
-//			const vec3_t startFrameTranslate	= startPose->translate;
-//			const vec3_t endFrameTranslate		= endPose->translate;
-//
-//			// Used to store the total translation distance from startFrame to end Frame,
-//			// We use this in order to calculate the appropriate distance between start and end frame.
-//			// (Ie, assuming an animation loops, we need that.)
-//			vec3_t totalTranslateDistance = vec3_zero();
-//
-//			// The offset between the previous processed and the current processing frame.
-//			vec3_t offsetFrom = vec3_zero();
-//
-//			for (int32_t i = animation->startFrame; i < animation->endFrame; i++) {
-//				// Get the Frame Pose.
-//				const iqm_transform_t *framePose = &model->iqmData->poses[skm->rootJointIndex + (i * model->iqmData->num_poses)];
-//
-//				// Special Case: First frame has no offset really.
-//				if (i == animation->startFrame) {
-//					//const vec3_t totalStartTranslation = endFrameTranslate - startFrameTranslate;
-//					// Push the total traversed frame distance.
-//					const vec3_t frameTranslate = offsetFrom - framePose->translate;
-//
-//					animation->frameDistances.push_back( vec3_length( frameTranslate ) );
-//
-//					// Push the total translation between each frame.					
-//					animation->frameTranslates.push_back( frameTranslate );
-//
-//					// Prepare offsetFrom with the current pose's translate for calculating next frame.
-//					offsetFrom = framePose->translate;
-//
-//					//totalTranslationSum += totalStartTranslation;
-//				// Special Case: Take the total offset, subtract it from the end frame, and THEN
-//				
-//				//} else if (i == animation->endFrame) {
-//				//	// 
-//				//	const vec3_t frameTranslate = startFrameTranslate - endFrameTranslate; //*offsetFrom -*/ framePose->translate;
-//				//	const double frameDistance = vec3_distance_squared( startFrameTranslate, endFrameTranslate ); 
-//
-//				//	const vec3_t totalBackTranslation = frameTranslate - offsetFrom; //startFrameTranslate - endFrameTranslate;
-//				//	//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
-//
-//				//	// Push the total traversed frame distance.
-//				//	animation->frameDistances.push_back( frameDistance );//vec3_dlength( totalBackTranslation ) );
-//
-//				//	// Push the total translation between each frame.					
-//				//	animation->frameTranslates.push_back( totalBackTranslation );
-//
-//					// Calculate the full animation distance.
-//					//animation->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate ); 
-//
-//					//totalTranslationSum += totalBackTranslation;	
-//				// General Case: Set the offset we'll be coming from next frame.
-//				} else {
-//						
-//					// Calculate translation between the two frames.
-//					const vec3_t translate = offsetFrom - framePose->translate;
-//					//const vec3_t translate = offsetFrom - framePose->translate;
-//
-//					// Calculate the distance between the two frame translations.
-//					const double frameDistance = vec3_distance_squared( offsetFrom, framePose->translate ); //vec3_dlength( translate );
-//
-//					// Push the total traversed frame distance.
-//					animation->frameDistances.push_back( frameDistance );
-//
-//					// Push the total translation between each frame.					
-//					animation->frameTranslates.push_back( translate );
-//
-//					// Increment our total translation sum.
-//					//totalTranslationSum += translate; // or offsetfrom?
-//
-//					// Prepare offsetFrom with the current pose's translate for calculating next frame.
-//					offsetFrom = framePose->translate;
-//				}
-//			}
-//
-//			// Sum up all frame distances into one single value.
-//			//vec3_dlength(totalTranslationSum); //0.0;
-//			animation->animationDistance = 0.0;
-//			for (auto& distance : animation->frameDistances) {
-//				animation->animationDistance += distance;
-//			}
-//		}
-//
-//#if DEBUG_MODEL_DATA == 1
-//		Com_DPrintf("Action(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
-//			animationIndex,
-//			animationData->name, //animation.name, Since, temp var and .c_str()
-//			animation->startFrame,
-//			animation->endFrame,
-//			animation->numFrames,
-//			animation->forceLoop == true ? "true" : "false",
-//			animation->loopingFrames,
-//			animation->animationDistance);
-//
-//		for (int i = 0; i < animation->frameDistances.size(); i++) {
-//			// Debug OutPut:
-//			int32_t frameIndex = i;
-//			Com_DPrintf("	Frame(#%i): Translate=(%f,%f,%f), Distance=%f\n", 
-//				frameIndex,
-//				animation->frameTranslates[frameIndex].x,
-//				animation->frameTranslates[frameIndex].y,
-//				animation->frameTranslates[frameIndex].z,
-//				animation->frameDistances[frameIndex]						
-//			);
-//		}
-//#endif
-//	}
 
 	/**
 	*	Model Bounds:
@@ -399,8 +265,8 @@ struct SKMParseState {
 	std::vector<SKMParsedLine> parsedLines;
 };
 
-//! String list of all our existing commands.
-static std::vector< std::string > skmCommandList = {
+//! String list containing our allowed Command Identifiers.
+static std::vector< std::string > skmCommandIdentifiers = {
 	"rootbone",
 	"headbone",
 	"torsobone",
@@ -410,242 +276,107 @@ static std::vector< std::string > skmCommandList = {
 };
 
 
-///*********
-//*	Temporary: TODO: Move to string header? Maybe make more utilities, look into the tokenizing process and C++-ify that.
-//**/
-#include <regex>
-// This regex splitter does not seem to work, unsure if it is our fault or MS.
-static inline std::vector<std::string> RegExSplitter(std::string input) {
-    std::regex output("(? : ^|s *)(S + )");
-	//"^[ |\t|\n|\r|\v|\f]*|[ |\t|\n|\r|\v|\f]*$" 
-    return { std::sregex_token_iterator(std::cbegin(input), std::cend(input), output, 1), std::sregex_token_iterator() };
-}
-static inline const std::string StringRegex( const std::string &str, const std::string &regularExpression = "" ) {
-	return std::regex_replace(str, std::regex(regularExpression), "");
-}
-static inline const std::string StringRegexTrim( const std::string &str, const std::string &regularExpression = "^[ |\t|\n|\r|\v|\f]*|[ |\t|\n|\r|\v|\f]*$" ) {
-	return StringRegex( str, regularExpression );
-}
+// skeletal model config parse state.
+class GPPSkeletalModelConfiguration : public GPPState {
+public:
+	GPPSkeletalModelConfiguration(const std::string &buffer) : GPPState(buffer) {};
+
+	int32_t currentAnimationIndex = 0;
+	int32_t currentActionIndex = 0;
+	int32_t currentBlendActionIndex = 0;
+};
 
 /**
-*	@brief	Checks if the string has a quote at the start, and at the end, if so, removes them.
-*	@return	False in case the string was oddly sized.
+*	@brief	Returns a pointer to the token if found.
 **/
-static inline const bool SKM_SanitizeQuotedString( std::string &identifier ) {
-	// Return false if empty.
-	if ( identifier.empty() ) {
-		return false;
-	}
-
-	// Check size.
-	if ( identifier.size() < 2 ) {
-		return false;
-	}
-
-	// Remove beginning " if found.
-	auto firstQuote = identifier.begin();
-	if ( *firstQuote == '"' ) {
-		identifier.erase( firstQuote );
-	}
-	auto secondQuote = (identifier.end() - 1);
-	if ( *secondQuote == '"') {
-		identifier.erase( secondQuote );
+static GPPSourceToken *SKC_GetToken( GPPSkeletalModelConfiguration &gppState, uint32_t index ) {
+	if ( index < gppState.parsedTokens.size() ) {
+		return &gppState.parsedTokens[index];
 	}
 	
-	return true;
-}
-//
-///**
-//*	End of Temporary.
-//*********/
-
-
-
-
-/**
-*	@return	The flag(s) categorizing(describing the intent) of this token's string content.
-**/
-static int32_t SKM_CategorizeTokenValue( const std::string &tokenValue ) {
-	// Flags that tell us what the actual content of this token is.
-	int32_t flagsMask = 0;
-
-	/**
-	*	#0: Test whether this token is any of our accepted commands, if it is, skip any other tests.
-	**/
-	// Test whether it is in our commands list.
-	const bool isCommand = std::any_of(skmCommandList.begin(), skmCommandList.begin() + skmCommandList.size(), [&tokenValue](const std::string &cmd) {
-			return cmd == tokenValue; 
-		} 
-	);
-
-	/**
-	*	#1: Proceed with other tests if not a command, otherwise apply CommandIdentifier flag.
-	**/
-	// If it is a command, set command identifier flag and skip other tests.
-	if ( isCommand ) {
-		flagsMask |= SKMParsedToken::Flags::CommandIdentifier;
-	// It was no command, proceed for further testing.
-	} else {
-		// Test for strictly integral number.
-		if ( tokenValue.find_first_not_of("-0123456789") == std::string::npos ) {		
-			flagsMask |= SKMParsedToken::Flags::IntegralNumber;
-		// Test for the '.', if it is there, we expect a floating point number.
-		} else if ( tokenValue.find_first_not_of(".-0123456789") == std::string::npos ) {
-			flagsMask |= SKMParsedToken::Flags::FloatNumber;
-		// It's none of the above, so we assume it is an unnamed identifier.
-		} else {
-			flagsMask |= SKMParsedToken::Flags::Identifier;
-		}
-	}
-
-	// Return flagsMask.
-	return flagsMask;
+	return nullptr;
 }
 
 /**
-*	@brief	Tokenizes the SKMParsedLine its value and 
+*	@brief	Processes the tokens for the CommandIdentifier: 'rootbone'.
 **/
-static bool SKM_TokenizeParsedLine( SKMParsedLine &parsedLine, SKMParseState &parseState, std::string &errorString ) {
-	/**
-	*	
-	**/
-    std::size_t previousPosition = 0;
-    std::size_t currentPosition = 0;
- 
-	while ((currentPosition = parsedLine.value.find_first_of(" \t", previousPosition)) != std::string::npos) {
-        if ( currentPosition > previousPosition ) {
-			// Calculate offset.
-			const int32_t tokenOffset = previousPosition;
-			// Calculate width.
-			const int32_t tokenWidth = currentPosition - previousPosition;
-			// Take token value.
-			const std::string tokenValue = parsedLine.value.substr( tokenOffset, tokenWidth );
-			// Determine special token flags for this token.
-			const int32_t tokenFlags = SKM_CategorizeTokenValue( tokenValue );
-
-			parsedLine.tokens.emplace_back( SKMParsedToken{
-				.line = parsedLine.number,
-				.offset = tokenOffset,
-				.width = tokenWidth,
-				.value = tokenValue,
-				.flags = tokenFlags
-			});
-        }
-        previousPosition = currentPosition + 1;
-    }
-
-	// Take care of the last but of string value.
-	if ( previousPosition < parsedLine.value.length() ) {
-		// Calculate offset.
-		const int32_t tokenOffset = previousPosition;
-		// Calculate width.
-		const int32_t tokenWidth = parsedLine.value.length() - tokenOffset;
-		// Take token value.
-		const std::string tokenValue = parsedLine.value.substr( tokenOffset );
-		// Determine special token flags for this token.
-		const int32_t tokenFlags = SKM_CategorizeTokenValue( tokenValue );
-
-        parsedLine.tokens.emplace_back( SKMParsedToken{
-			.line = parsedLine.number,
-			.offset = tokenOffset,
-			.width = tokenWidth,
-			.value = tokenValue,
-			.flags = tokenFlags
-		});
-    }
-
-	return true;
+static const uint32_t SKC_Command_RootBone( model_t *model, GPPSkeletalModelConfiguration &gppState, uint32_t tokenIndex ) {
+	
+	return 2;
 }
 
 /**
-*	@brief	Splits the buffer into separate distinct lines. Feeding them to 'parsedLines'.
-*	@param	buffer The buffer to scan and split up into separate distinct lines.
-*	@param	&lineTokens	A vector reference to push back all parsed lines on to.
-*	@return	The total amount of lines found in 'buffer'.
+*	@brief	Processes the tokens for the CommandIdentifier: 'action'.
 **/
-static int32_t SKM_SplitLines( const std::string &buffer, SKMParseState &parseState ) {
-	//! Keeps track of total lines found.
-	int32_t totalLineCount = 0;
-
-    std::size_t previousPosition = 0;
-    std::size_t currentPosition = 0;
- 
-	while ((currentPosition = buffer.find_first_of( "\r\n", previousPosition)) != std::string::npos) {
-        if ( currentPosition > previousPosition ) {
-			// Actual size of line to be pushed.
-			const int32_t lineSize = currentPosition - previousPosition;
-
-			// Emplace our parsed line data.
-			parseState.parsedLines.emplace_back(SKMParsedLine{
-				.number = totalLineCount,
-				.width = lineSize,
-				// Trim the substring from all things that cause white spaces, on both left and right sides.
-				.value = StringRegexTrim(
-					buffer.substr( previousPosition, currentPosition - previousPosition )
-				)
-			});
-
-			// Increment line count.
-			totalLineCount++;
-        }
-        previousPosition = currentPosition + 1;
-    }
-
-    if ( previousPosition < buffer.length() ) {
-		// Actual size of line to be pushed.
-		const int32_t lineSize = previousPosition;
-
-		// Emplace our parsed line data.
-		parseState.parsedLines.emplace_back(SKMParsedLine{
-			.number = totalLineCount,
-			.width = lineSize,
-			// Trim the substring from all things that cause white spaces, on both left and right sides.
-			.value = StringRegexTrim(
-				buffer.substr( previousPosition )
-			)
-		});
-
-
-		// Increment line count.
-		totalLineCount++;
-    }
-
-	// Return total lines found.
-	return totalLineCount;
-}
-
-/**
-*--------------------------- START OF SKM COMMAND FUNCTIONS -------------------------------
-**/
-/**
-*	@brief	Creates an action indexed by actionName assigning all the other properties to it.
-*			If a skeletal model 'root bone' has been set, it'll also pre-calculate the traversed
-*			distance of the action for later use in the root motion system.
-**/
-static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionName, const uint32_t actionIndex, const uint32_t start, const uint32_t end, int32_t loopCount, const float frameTime, std::string &errorString  ) {
-	// Get skeletal model data pointer.
+static const uint32_t SKC_Command_Action( model_t *model, GPPSkeletalModelConfiguration &gppState, uint32_t tokenIndex ) {
+	//.SKM Pointer.
 	SkeletalModelData *skm = model->skeletalModelData;
-	
-	// TODO: I know, this is ugly and all not efficient, but we're not here right now to write proper
-	// parsing code like a bawss, we want skeletal animation going and it's been taking a while now.
-	std::string sanitizedActionname = actionName; 
-	SKM_SanitizeQuotedString( sanitizedActionname );
 
-	// First see if this specific action already exists.
-	if ( skm->actionMap.contains( sanitizedActionname ) ) {
-		errorString = "An action named: '" + sanitizedActionname + "' already exists!\n";
-		return false;
+	// Keeps score of the next commandidentifier token position we'll be returning.
+	uint32_t offsetNextToken = 5;
+
+	// Now inspect and acquire our token values.
+	// Required 'QuotedString' Token: actionName
+	const GPPSourceToken *actionNameToken		= SKC_GetToken( gppState, tokenIndex + 1 );
+	if ( !actionNameToken || actionNameToken->type != GPPSourceToken::Type::QuotedString || actionNameToken->value.str.empty() ) {
+		// TODO: Error, it is out of bounds, bad type, or empty string value.
+		return 0;
 	}
+	// Required 'IntegralNumber' Token: actionStart
+	const GPPSourceToken *actionStartToken		= SKC_GetToken( gppState, tokenIndex + 2 );
+	if ( !actionStartToken || actionStartToken->type != GPPSourceToken::Type::IntegralNumber ) {
+		// TODO: Error, it is out of bounds, bad type.
+		return 0;
+	}
+	// Required 'IntegralNumber' Token: actionEnd
+	const GPPSourceToken *actionEndToken		= SKC_GetToken( gppState, tokenIndex + 3 );
+	if ( !actionEndToken || actionEndToken->type != GPPSourceToken::Type::IntegralNumber ) {
+		// TODO: Error, it is out of bounds, bad type.
+		return 0;
+	}
+	// Required 'IntegralNumber' Token: actionLoopCount
+	const GPPSourceToken *actionLoopCountToken	= SKC_GetToken( gppState, tokenIndex + 4 );
+	if ( !actionLoopCountToken || actionLoopCountToken->type != GPPSourceToken::Type::IntegralNumber ) {
+		// TODO: Error, it is out of bounds, bad type.
+		return 0;
+	}
+	// Optional 'FloatNumber' Token: actionLoopCount
+	const GPPSourceToken *actionFrametimeToken	= SKC_GetToken( gppState, tokenIndex + 5 );
+	if ( !actionFrametimeToken || actionFrametimeToken->type != GPPSourceToken::Type::FloatNumber ) {
+		// Be sure to nullptr it for its later condition check.
+		actionFrametimeToken = nullptr;			
+	// If it exists and is valid, decrement 1 token from our expected next offset.
+	} else {
+				offsetNextToken += 1;
+	}
+
+	// Now we can get our values to work with.
+	const std::string actionName = actionNameToken->value.str;
+	const uint32_t actionStart = actionStartToken->value.integralNumber;
+	const uint32_t actionEnd = actionEndToken->value.integralNumber;
+	const int32_t actionLoopCount = actionLoopCountToken->value.integralNumber;
+	// Default to frametime if nullptr.
+	const float actionFrametime = (actionFrametimeToken != nullptr ? actionFrametimeToken->value.floatNumber : BASE_FRAMETIME );
+
+	// Do NOT re-add action if our map already contains one sharing the same name.
+	if ( skm->actionMap.contains( actionName ) ) {
+		// TODO: Error text.
+	//	return false;
+	}
+
+	// Acquire our action index, we base it on the actions size for now.
+	size_t actionIndex = gppState.currentActionIndex = skm->actions.size();
 
 	// Emplace the action data.
-	SkeletalAnimationAction *action = &( skm->actionMap[ sanitizedActionname ] = (SkeletalAnimationAction{
-		.index = actionIndex,
-		.startFrame = start,
-		.endFrame = end,
-		.numFrames = end - start,
-		.frametime = frameTime,
-		.loopingFrames = (uint32_t)(loopCount < 0 ? 0 : loopCount),
-		.forceLoop = (loopCount < 0 ? true : false)
+	SkeletalAnimationAction *action = &( skm->actionMap[ actionName ] = (SkeletalAnimationAction{
+		.index = static_cast< uint32_t >( actionIndex ),
+		.name = actionName,
+		.startFrame = actionStart,
+		.endFrame = actionEnd,
+		.numFrames = actionEnd - actionStart,
+		.frametime = actionFrametime,
+		.loopingFrames = static_cast< int32_t >( actionLoopCount < 0 ? 0 : actionLoopCount ),
+		.forceLoop = (actionLoopCount < 0 ? true : false)
 	}) );
 
 	// Add a pointer to it into our linear access actions list.
@@ -653,6 +384,7 @@ static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionN
 		skm->actions.resize( actionIndex + 1 );
 	}
 	skm->actions[ actionIndex ] = action;
+	//skm->actions[ actionIndex ] = (*(skm->actions.end() - 1));
 
 	// Calculate distances.
 	if (skm->rootJointIndex != -1 && model->iqmData && model->iqmData->poses) {
@@ -689,28 +421,6 @@ static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionN
 
 				// Prepare offsetFrom with the current pose's translate for calculating next frame.
 				offsetFrom = framePose->translate;
-
-				//totalTranslationSum += totalStartTranslation;
-			// Special Case: Take the total offset, subtract it from the end frame, and THEN
-				
-			//} else if (i == animation->endFrame) {
-			//	// 
-			//	const vec3_t frameTranslate = startFrameTranslate - endFrameTranslate; //*offsetFrom -*/ framePose->translate;
-			//	const double frameDistance = vec3_distance_squared( startFrameTranslate, endFrameTranslate ); 
-
-			//	const vec3_t totalBackTranslation = frameTranslate - offsetFrom; //startFrameTranslate - endFrameTranslate;
-			//	//const vec3_t totalBackTranslation = startFrameTranslate - endFrameTranslate;
-
-			//	// Push the total traversed frame distance.
-			//	animation->frameDistances.push_back( frameDistance );//vec3_dlength( totalBackTranslation ) );
-
-			//	// Push the total translation between each frame.					
-			//	animation->frameTranslates.push_back( totalBackTranslation );
-
-				// Calculate the full animation distance.
-				//animation->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate ); 
-
-				//totalTranslationSum += totalBackTranslation;	
 			// General Case: Set the offset we'll be coming from next frame.
 			} else {
 						
@@ -727,9 +437,6 @@ static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionN
 				// Push the total translation between each frame.					
 				action->frameTranslates.push_back( translate );
 
-				// Increment our total translation sum.
-				//totalTranslationSum += translate; // or offsetfrom?
-
 				// Prepare offsetFrom with the current pose's translate for calculating next frame.
 				offsetFrom = framePose->translate;
 			}
@@ -741,274 +448,243 @@ static bool SKM_ProcessActionCommand( model_t *model, const std::string &actionN
 		for (auto& distance : action->frameDistances) {
 			action->animationDistance += distance;
 		}
-		//action->animationDistance = vec3_distance_squared( endFrameTranslate, startFrameTranslate );
 	}
-		//SkeletalAnimationAction *animation = &(skm->actionMap[animationData->name] = {
-		//	.index = animationIndex,
-		//	.name = animationData->name,
-		//	.startFrame = animationData->first_frame,
-		//	.endFrame = animationData->first_frame + animationData->num_frames,
-		//	.numFrames = animationData->num_frames,
-		//	.frametime = BASE_FRAMETIME,
-		//	.loopingFrames = 0,
-		//	.forceLoop = true, //(animationData->loop == 1 ? true : false)
-		// });
-		//// Resize our vec if needed.
-		//if (skm->actions.size() <= animationIndex) {
-		//	skm->actions.resize(animationIndex + 1);
-		//}
-		//skm->actions[animationIndex] = animation;
 
-	return true;
+	return offsetNextToken;
 }
 
 /**
-*	@brief	Creates an action indexed by actionName assigning all the other properties to it.
-*			If a skeletal model 'root bone' has been set, it'll also pre-calculate the traversed
-*			distance of the action for later use in the root motion system.
+*	@brief	Processes the tokens for the CommandIdentifier: 'animation'.
 **/
-static bool SKM_ProcessAnimationCommand( model_t *model, SKMParseState &parseState, const std::string &animationName, std::string &errorString  ) {
-	// Get skeletal model data pointer.
+static const uint32_t SKC_Command_Animation( model_t *model, GPPSkeletalModelConfiguration &gppState, uint32_t tokenIndex ) {
+	//.SKM Pointer.
 	SkeletalModelData *skm = model->skeletalModelData;
-	
-	// Sanitize the name, and set our animation state.
-	parseState.animationName = animationName;
-	SKM_SanitizeQuotedString( parseState.animationName );
+
+	// Keeps score of the next commandidentifier token position we'll be returning.
+	uint32_t offsetNextToken = 2;
+
+	// Now inspect and acquire our token values.
+	// Required 'QuotedString' Token: actionName
+	const GPPSourceToken *animationNameToken		= SKC_GetToken( gppState, tokenIndex + 1 );
+	if ( !animationNameToken || animationNameToken->type != GPPSourceToken::Type::QuotedString || animationNameToken->value.str.empty() ) {
+		// TODO: Error, it is out of bounds, bad type, or empty string value.
+		return 0;
+	}
+
+	// Now we can get our values to work with.
+	const std::string animationName = animationNameToken->value.str;
+
+	// Make sure it is not already existent.
+	if ( skm->animationMap.contains( animationName ) ) {
+		// TODO: Error.
+		//return 0;
+	}
+
+	gppState.currentAnimationIndex = skm->animations.size();
 
 	// Actually emplace the animation if nonexistent.
-	skm->animationMap[parseState.animationName] = { 
-		.index = parseState.animationCount,
-		.name = parseState.animationName
+	skm->animationMap[ animationName ] = SkeletalAnimation{ 
+		.index = gppState.currentAnimationIndex,
+		.name = animationName
 	};
-	skm->animations.push_back(&skm->animationMap[parseState.animationName]);
+		
+	// Add a pointer to it into our linear access actions list.
+	if ( skm->animations.size() <= gppState.currentAnimationIndex ) {
+		skm->animations.resize( gppState.currentAnimationIndex + 1 );
+	}
+	skm->animations[ gppState.currentAnimationIndex ] = &skm->animationMap[ animationName ];
 
-	return true;
+	// Done.
+	return offsetNextToken;
 }
 
 /**
-*	@brief	
+*	@brief	Processes the tokens for the CommandIdentifier: 'rootbone'.
 **/
-static bool SKM_ProcessBlendActionCommand( model_t *model, SKMParseState &parseState, const std::string &actionName, float fraction, const std::string &boneName, std::string &errorString ) {
-	// Get skeletal model data pointer.
+static const uint32_t SKC_Command_BlendAction( model_t *model, GPPSkeletalModelConfiguration &gppState, uint32_t tokenIndex ) {
+	//.SKM Pointer.
 	SkeletalModelData *skm = model->skeletalModelData;
-	
-	// Make sure that our parsing state has an animation index set, if not, we can't supply it a blend action.
-	if ( parseState.animationName.empty() ) {
-		errorString = "Can't perform a blend action without being assigned an animation to blend in to.";
-		return false;
+
+	// Keeps score of the next commandidentifier token position we'll be returning.
+	uint32_t offsetNextToken =4;
+
+	// Now inspect and acquire our token values.
+	// Required 'QuotedString' Token: actionName
+	const GPPSourceToken *actionNameToken		= SKC_GetToken( gppState, tokenIndex + 1 );
+	if ( !actionNameToken || actionNameToken->type != GPPSourceToken::Type::QuotedString || actionNameToken->value.str.empty() ) {
+		// TODO: Error, it is out of bounds, bad type, or empty string value.
+		return 0;
+	}
+	// Required 'FloatNumber' Token: blendaction fraction.
+	const GPPSourceToken *blendActionFractionToken = SKC_GetToken( gppState, tokenIndex + 2 );
+	if ( !blendActionFractionToken || blendActionFractionToken->type != GPPSourceToken::Type::FloatNumber ) {
+		// TODO: Error, it is out of bounds, bad type.
+		return 0;
+	}
+	// Optional 'QuotedString' Token: actionLoopCount
+	const GPPSourceToken *blendActionBonenameToken = SKC_GetToken( gppState, tokenIndex + 3 );
+	if ( !blendActionBonenameToken || blendActionBonenameToken->type != GPPSourceToken::Type::QuotedString || blendActionBonenameToken->value.str.empty()) {
+		// Do nothing, optional token.
+	// If it exists and is valid, decrement 1 token from our expected next offset.
+		offsetNextToken -= 1;
+
+		// Be sure to nullptr it for its later condition check.
+		blendActionBonenameToken = nullptr;
+	} else {
+
 	}
 
-	// TODO: I know, this is ugly and all not efficient, but we're not here right now to write proper
-	// parsing code like a bawss, we want skeletal animation going and it's been taking a while now.
-	std::string sanitizedActionname = actionName; 
-	SKM_SanitizeQuotedString( sanitizedActionname );
-	std::string sanitizedBoneName = boneName; 
-	SKM_SanitizeQuotedString( sanitizedBoneName );
-
-	// See if the animation exists in the animation map.
-	if ( !skm->animationMap.contains( parseState.animationName ) ) {
-		errorString = "Tried to perform blend action for '" + parseState.animationName + "', but it is nonexistent.";
-		return false;
-	}
+	// Now we can get our values to work with.
+	const std::string actionName = actionNameToken->value.str;
+	const float blendActionFraction = blendActionFractionToken->value.floatNumber;
+	// Default to nothing if nullptr.
+	const std::string blendActionBonename = (blendActionBonenameToken != nullptr ? blendActionBonenameToken->value.str : "" );
 
 	// Animation is existent, now find the action.
-	if ( skm->actionMap.contains(sanitizedActionname) ) {
+	if ( skm->actionMap.contains( actionName ) ) {
 		// Get action index.
-		const uint16_t actionIndex = skm->actionMap[sanitizedActionname].index;
+		const uint16_t actionIndex = skm->actionMap[ actionName ].index;
 		
+		// Get the animation name to index with, it's the last in the vector list.
+		const std::string animationName = skm->animations[ gppState.currentAnimationIndex ]->name;
+
 		// If the bone name is empty, we assume it is a dominating animator.
-		if ( boneName.empty() ) { 
+		if ( blendActionBonename.empty() ) { 
 				// We're ready, time to push back our blend action.
-				skm->animationMap[parseState.animationName].blendActions.push_front({
+				skm->animationMap[ animationName ].blendActions.push_front({
 					.actionIndex = actionIndex,
-					.fraction = fraction,
+					.fraction = blendActionFraction,
 					.boneNumber = 0
 				});
 		} else {
 			// Ensure the bone is existent.
-			if ( skm->jointMap.contains( sanitizedBoneName ) ) {
+			if ( skm->jointMap.contains( blendActionBonename ) ) {
 				// Bone index.
-				const uint16_t boneIndex = skm->jointMap[ sanitizedBoneName ].index;
+				const uint16_t boneIndex = skm->jointMap[ blendActionBonename ].index;
 
 				// We're ready, time to push back our blend action.
-				skm->animationMap[parseState.animationName].blendActions.push_back({
+				skm->animationMap[ animationName ].blendActions.push_back({
 					.actionIndex = actionIndex,
-					.fraction = fraction,
+					.fraction = blendActionFraction,
 					.boneNumber = boneIndex
 				});
 			} else {
-				errorString = "Couldn't find bone: '" + sanitizedBoneName + "'";
+				//errorString = "Couldn't find bone: '" + blendActionBonename + "'";
 				return false;
 			}
 		}
 
 
 	} else {
-		errorString = "Error finding '" + sanitizedActionname + "' for blendaction.";
+		//errorString = "Error finding '" + blendActionBonename + "' for blendaction.";
 		return false;
 	}
 
 
-	return true;
+	return offsetNextToken;
 }
+
 /**
-*------------------------------ EOF SKM COMMAND FUNCTIONS ---------------------------------
+*	@brief	Processes all parsed GPPSourceTokens in-order, executing each command identifier
+*			resulting in our final skeletal model data.
 **/
-/**
-*	@brief	Processes the parsed line its tokens, executing the specific command.
-**/
-static bool SKM_ProcessLineTokens( model_t *model, const SKMParsedLine &parsedLine, SKMParseState &parseState, std::string &errorString ) {
-	// Get token count.
-	const size_t tokenCount = parsedLine.tokens.size();
-	
-	// If this line has no tokens, scram.
-	if (!tokenCount) {
+static const bool SKC_ProcessTokens( model_t *model, GPPSkeletalModelConfiguration &gppState ) {
+	// Ensure we got tokens to process.
+	if ( !gppState.parsedTokens.size() ) {
+		//Com_Error( ErrorType::Drop, fmt::format("{}: No tokens to process, &tokens has size 0.\n", __func__ ).c_str() );
 		return false;
 	}
 
-	/**
-	*	#0:	See what the actual first token is, it 
-	**/
-	// We got ourselves a command identifier, good.
-	if ( parsedLine.tokens[0].flags == SKMParsedToken::Flags::CommandIdentifier ) {
-		// See if it is the action command.
-		/**
-		*	Action
-		**/
-		if ( parsedLine.tokens[0].value == "action" ) {
-			// We must ensure we got 4 tokens left.
-			if ( parsedLine.tokens.size() >= 5 ) {
-				// Ok, we got 4 minimal left, let's extract them.
-				const std::string actionName = parsedLine.tokens[1].value;
-				int32_t startFrame = std::stoi(parsedLine.tokens[2].value);
-				int32_t endFrame = std::stoi(parsedLine.tokens[3].value);
-				int32_t loopCount = std::stoi(parsedLine.tokens[4].value);
-				// Frame time token is optional, last argument.
-				float frameTime = ( parsedLine.tokens.size() >= 6 ? std::stof(parsedLine.tokens[5].value) : BASE_FRAMETIME );
+	uint32_t offsetNextToken = 0;
+	uint32_t tokenIndex = 0;
 
-				// Process the Action command.
-				if ( SKM_ProcessActionCommand( model, actionName, parseState.actionCount, startFrame, endFrame, loopCount, frameTime, errorString) ) {
-					parseState.actionCount++;
-				} else {
-					return false;
-				}
-			} else {
-				// We got an error.
-				errorString = "Unexpected arguments found, expecting: \"actionName\" startFrame endFrame loopCount [frameTime:optionable]";
-				return false;
-			}
-		/**
-		*	Animation.
-		**/
-		} else if ( parsedLine.tokens[0].value == "animation" ) {
-			// We must ensure we got 4 tokens left.
-			if ( parsedLine.tokens.size() >= 2 ) {
-				const std::string animationName = parsedLine.tokens[1].value;
+	GPPSourceToken *token = SKC_GetToken( gppState, 0 );
 
-				// Process the Animation command.
-				if ( SKM_ProcessAnimationCommand( model, parseState, animationName, errorString) ) {
-					parseState.animationCount++;
-				} else {
-					return false;
-				}
-			} else {
-				// We got an error.
-				errorString = "Unexpected arguments found, expecting: \"actionName\" startFrame endFrame loopCount [frameTime:optionable]";
-				return false;
-			}
-		/**
-		*	Blend Action
-		**/
-		} else if ( parsedLine.tokens[0].value == "blendaction" ) {
-			// We must ensure we got 4 tokens left.
-			if ( parsedLine.tokens.size() >= 3 ) {
-				// Ok, we got 3 minimal left, let's extract them.
-				const std::string blendActionName = parsedLine.tokens[1].value;
-				float fraction = std::stof( parsedLine.tokens[2].value );
-				const std::string boneName = (parsedLine.tokens.size() >= 4 ? parsedLine.tokens[3].value : "" );
+	// We go over all tokens, however, additioning the token count that was processed for each action.
+	while ( tokenIndex < gppState.parsedTokens.size() && token != nullptr ) {
 
-				// Process the Action command.
-				if ( SKM_ProcessBlendActionCommand( model, parseState, blendActionName, fraction, boneName, errorString) ) {
-					parseState.blendActionCount++;
-				} else {
-					return false;
-				}
-			} else {
-				// We got an error.
-				errorString = "Unexpected arguments found, expecting: \"actionName\" startFrame endFrame loopCount [frameTime:optionable]";
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-/**
-*	@brief	Processes the tokens for each parsed line of the configuration buffer.
-**/
-static bool SKM_ProcessParsedLines( model_t *model, SKMParseState &parseState, std::string &errorString ) {
-	/**
-	*	#0: Start iterating over each line.
-	**/
-	for ( auto &parsedLine : parseState.parsedLines ) {
-		// Process line tokens, return false in case of error. (In which case, errorstring is filled)
-		if ( !SKM_ProcessLineTokens( model, parsedLine, parseState, errorString ) ) {
+		// It MUST be type CommandIdentifier.
+		if ( !(token->type == GPPSourceToken::Type::CommandIdentifier ) ) {
+		//	Com_Error( ErrorType::Drop, fmt::format("{}: Bad token data, expected CommandIdentifier, didn't get it....\n", __func__ ).c_str() );
 			return false;
 		}
 
+		/*
+		*	CommandIdentifier: 'rootbone'
+		*/
+		if ( token->value.str == "rootbone" ) { 
+			// Process command tokens and break out in case of errors.
+			offsetNextToken = SKC_Command_RootBone( model, gppState, tokenIndex );
+		}
+		/*
+		*	CommandIdentifier: 'action'
+		*/
+		else if ( token->value.str == "action" ) { 
+			// Process command tokens and break out in case of errors.
+			offsetNextToken = SKC_Command_Action( model, gppState, tokenIndex );
+		}
+		/*
+		*	CommandIdentifier: 'animation'
+		*/
+		else if ( token->value.str == "animation" ) { 
+			// Process command tokens and break out in case of errors.
+			offsetNextToken = SKC_Command_Animation( model, gppState, tokenIndex );
+		}
+		/*
+		*	CommandIdentifier: 'blendaction'
+		*/
+		else if ( token->value.str == "blendaction" ) { 
+			// Process command tokens and break out in case of errors.
+			offsetNextToken = SKC_Command_BlendAction( model, gppState, tokenIndex );
+	
+			if (offsetNextToken) {
+				gppState.currentBlendActionIndex++;
+			}
+			//continue;
+		} else {
+			offsetNextToken = 1;
+		}
+
+
+		if (!offsetNextToken) {
+			// Some error output.
+			return false;
+		}
+
+		// Otherwise, add our next token offset to our current index.
+		tokenIndex += offsetNextToken;
+
+		// Get proper next token.
+		token = SKC_GetToken( gppState, tokenIndex );
 	}
 
 	return true;
 }
+
 
 /**
 *	@brief	Parsed a Skeletal Model Configuration file for animation actions, tag and blend data.
 **/
-static bool SKM_ParseConfiguration( model_t *model, const std::string &cfgBuffer ) {
-	// Our parsed line container which we first parse all lines, then
-	// tokenize each line and store its tokens.
-	//std::vector<SKMParsedLine> parsedLines;
-
-	// Our parser state.
-	SKMParseState parseState;
-
-	/**
-	*	#0:	First split by '\r\n' feeds.
-	**/
-	int32_t totalLinesParsed = SKM_SplitLines( cfgBuffer, parseState );
-
-	/**
-	*	#1: Now actually tokenize each line, storing the tokens in the parsed line.
-	**/
-	for (auto &parsedLine : parseState.parsedLines ) {
-		// This string is set in case of any errors.
-		std::string errorString = "";
-
-		// Tokenize the current line.
-		if ( !SKM_TokenizeParsedLine( parsedLine, parseState, errorString ) ) {
-			// Something went wrong, output error.
-			Com_DPrintf("%s:%s\n", __FUNCTION__, errorString.c_str());
-
-			// Return false.
-			return false;
-		}
-	}
-
-	/**
-	*	#2: Start processing each line, generate skeletal model data based on the
-	*		command arguments of that line.
-	**/
-	// This string is set in case of any errors.
-	std::string errorString = "";
-	if ( !SKM_ProcessParsedLines(model, parseState, errorString) ) {
-		// Something went wrong, output error.
-		Com_DPrintf("%s:%s\n", __FUNCTION__, errorString.c_str());
-
-		// Return false.
+static const bool SKM_ParseConfiguration( model_t *model, const std::string &cfgBuffer ) {
+	// Ensure model is valid.
+	if ( !model ) {
+		//Com_Error( ErrorType::Drop, fmt::format( "{}: Can't parse configuration for a model_t(nullptr).\n", __func__ ).c_str() );
 		return false;
 	}
+	/**
+	*	Our SKC GPP State.
+	**/
+	GPPSkeletalModelConfiguration gppSKC( cfgBuffer );
 
+	/**
+	*	First parse using our General Purpose Parser(GPP).
+	**/
+	const bool tokenized = GPP_ParseTokens( gppSKC, skmCommandIdentifiers, false );
+
+	/**
+	*	Every time we reach around, 
+	**/	
+	return (tokenized ? SKC_ProcessTokens( model, gppSKC ) : false);
 	/**
 	*	#3: Debug Output of our tokenization process.
 	**/
@@ -1080,60 +756,60 @@ bool SKM_LoadAndParseConfiguration(model_t *model, const std::string &filePath) 
 
 	//////////////////////////
 	// Debug Output.
-	//SkeletalModelData *skm = model->skeletalModelData;
+	SkeletalModelData *skm = model->skeletalModelData;
 
-	//Com_DPrintf("------------------------------------------------------\n");
-	//Com_DPrintf("Configuration resulted in the following action data:\n");
-	//Com_DPrintf("Actions:\n");
-	//int32_t index = 0;
-	//for (auto &iterator : skm->actionMap) {
-	//	const std::string name = iterator.first;
-	//	auto *action = &iterator.second;
+	Com_DPrintf("------------------------------------------------------\n");
+	Com_DPrintf("Configuration resulted in the following action data:\n");
+	Com_DPrintf("Actions:\n");
+	int32_t index = 0;
+	for (auto &iterator : skm->actionMap) {
+		const std::string name = iterator.first;
+		auto *action = &iterator.second;
 
-	//	Com_DPrintf("Action(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
-	//		action->index,
-	//		name.c_str(), //animation.name, Since, temp var and .c_str()
-	//		action->startFrame,
-	//		action->endFrame,
-	//		action->numFrames,
-	//		action->forceLoop == true ? "true" : "false",
-	//		action->loopingFrames,
-	//		action->animationDistance);
-	//}
-	//Com_DPrintf("---:\n");
-	//Com_DPrintf("Animations:\n");
+		Com_DPrintf("Action(#%i, %s): (startFrame=%i, endFrame=%i, numFrames=%i), (loop=%s, loopFrames=%i), (animationDistance=%f):\n",
+			action->index,
+			name.c_str(), //animation.name, Since, temp var and .c_str()
+			action->startFrame,
+			action->endFrame,
+			action->numFrames,
+			action->forceLoop == true ? "true" : "false",
+			action->loopingFrames,
+			action->animationDistance);
+	}
+	Com_DPrintf("---:\n");
+	Com_DPrintf("Animations:\n");
 
-	//int32_t i = 0;
-	//for (auto &iterator : skm->animationMap) {
-	//	const std::string name = iterator.first;
-	//	auto *blendAction = &iterator.second;
+	int32_t i = 0;
+	for (auto &iterator : skm->animationMap) {
+		const std::string name = iterator.first;
+		auto *blendAction = &iterator.second;
 
-	//	Com_DPrintf("    Animation(#%i, %s):\n", i, name.c_str() );
-	//	int32_t j = 0;
-	//	for (auto &blendAction : blendAction->blendActions) {
-	//		const uint16_t actionIndex = blendAction.actionIndex;
-	//		const float fraction = blendAction.fraction;
+		Com_DPrintf("    Animation(#%i, %s):\n", i, name.c_str() );
+		int32_t j = 0;
+		for (auto &blendAction : blendAction->blendActions) {
+			const uint16_t actionIndex = blendAction.actionIndex;
+			const float fraction = blendAction.fraction;
 
-	//		SkeletalAnimationAction *action = skm->actions[ actionIndex ];
-	//		if (j == 0) {
-	//			// Get the actual action belonging to this
-	//			Com_DPrintf("        blendAction(#%i, %s, %f, [Animation Dominator]):\n", j, action->name.c_str(), fraction );
-	//		} else {
-	//			// Get bone index.
-	//			const int32_t boneIndex = blendAction.boneNumber;
+			SkeletalAnimationAction *action = skm->actions[ actionIndex ];
+			if (j == 0) {
+				// Get the actual action belonging to this
+				Com_DPrintf("        blendAction(#%i, %s, %f, [Animation Dominator]):\n", j, action->name.c_str(), fraction );
+			} else {
+				// Get bone index.
+				const int32_t boneIndex = blendAction.boneNumber;
 
-	//			// Get bone name.
-	//			const std::string boneName = skm->jointArray[boneIndex].name;
+				// Get bone name.
+				const std::string boneName = skm->jointArray[boneIndex].name;
 
-	//			Com_DPrintf("        blendAction(#%i, %s, %f, From Bone: %s):\n", j, action->name.c_str(), fraction, boneName.c_str() );
+				Com_DPrintf("        blendAction(#%i, %s, %f, From Bone: %s):\n", j, action->name.c_str(), fraction, boneName.c_str() );
 
-	//		}
-	//		j++;
-	//	}
-	//	i++;
-	//}
-	//Com_DPrintf("------------------------------------------------------\n");
-	////////////////////
+			}
+			j++;
+		}
+		i++;
+	}
+	Com_DPrintf("------------------------------------------------------\n");
+	//////////////////
 
 	// We're done working with this file, free it from memory.
 	FS_FreeFile( fileBuffer );

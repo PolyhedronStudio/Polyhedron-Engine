@@ -399,25 +399,27 @@ done:
 	// Calculate the index.
 	index = (model - sv_models) + 1;
 
-	// Assign the skeletal model data struct as a pointer to this model_t
-	model->skeletalModelData = &sv_skeletalModels[index - 1];
+	if (!model->skeletalModelData) {
+		// Assign the skeletal model data struct as a pointer to this model_t
+		model->skeletalModelData = &sv_skeletalModels[index - 1];
 
-	// Generate Skeletal Model Data.
-	SKM_GenerateModelData(model);
+		// Generate Skeletal Model Data.
+		SKM_GenerateModelData(model);
 
-		// This function needs rewriting but who am I... got 2 hands, so little time, right?
-	memcpy(extension, ".skc", 4);
+			// This function needs rewriting but who am I... got 2 hands, so little time, right?
+		memcpy(extension, ".skc", 4);
 
-	// Now, load up our SKM config file.
-	if (SKM_LoadAndParseConfiguration( model, normalized )) {
-		Com_DPrintf("Loaded up SKM Config file: %s\n", normalized );
+		// Now, load up our SKM config file.
+		if (SKM_LoadAndParseConfiguration( model, normalized )) {
+			Com_DPrintf("Loaded up SKM Config file: %s\n", normalized );
 
-	} else {
-		Com_DPrintf("Couldn't find/load SKM Config file: %s\n", normalized );
+		} else {
+			Com_DPrintf("Couldn't find/load SKM Config file: %s\n", normalized );
+		}
+
+		// Stuff back in iqm for sake.
+		memcpy(extension, ".iqm", 4);
 	}
-
-	// Stuff back in iqm for sake.
-	memcpy(extension, ".iqm", 4);
 
 	return index;
 fail2:

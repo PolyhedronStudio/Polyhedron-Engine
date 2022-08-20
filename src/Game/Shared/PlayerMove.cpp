@@ -319,8 +319,6 @@ static qboolean PM_SlideMove(void)
         numPlanes++;
     }
 
-    vec3_t primal_velocity = pm->state.velocity;
-
     // or our original velocity
     planes[numPlanes] = vec3_normalize(pm->state.velocity);
     numPlanes++;

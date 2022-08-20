@@ -7,6 +7,8 @@ list( APPEND SRC_SHARED
 
 	"${SRC_SHARED_DIR}/Math.cpp"
 	"${SRC_SHARED_DIR}/Shared.cpp"
+
+	"${SRC_SHARED_DIR}/GeneralPurposeParser.cpp" 
 )
 list( APPEND HEADERS_SHARED
 	# Formats.
@@ -48,6 +50,7 @@ list( APPEND HEADERS_SHARED
 	"${SRC_SHARED_DIR}/Endian.h" 
 	"${SRC_SHARED_DIR}/Entities.h" 
 	"${SRC_SHARED_DIR}/EntitySkeleton.h" 
+	"${SRC_SHARED_DIR}/GeneralPurposeParser.h" 
 	"${SRC_SHARED_DIR}/Keys.h" 
 	"${SRC_SHARED_DIR}/KeyValue.h" 
 	"${SRC_SHARED_DIR}/List.h" 
